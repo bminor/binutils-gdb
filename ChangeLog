@@ -712,7 +712,6 @@ Sat Nov 23 19:26:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.sub: Handle d10v-unknown.
 
-start-sanitize-v850
 Sat Nov 23 14:23:01 1996  Gavin Koch  <gavin@cygnus.com>
 
 	* gcc/depragmaize.c: Handle MSDOS's (non-unix) text files.
@@ -721,7 +720,6 @@ Sat Nov 23 10:23:01 1996  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Handle v850-unknown.
 
-end-sanitize-v850
 Thu Nov 21 16:19:44 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: add findutils
@@ -942,12 +940,10 @@ Mon Sep 30 14:24:01 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* mpw-build.in: Don't always depend on byacc and flex.
 	(install-only-top): New action.
 
-start-sanitize-v850
 Fri Sep 27 17:39:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure.in:  You can now configure GDB for the v850.
 
-end-sanitize-v850
 Tue Sep 24 19:05:12 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in (noconfigdirs): Don't configure any C++ dirs
@@ -991,25 +987,21 @@ Mon Aug 26 18:34:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (noconfigdirs): Removed gdb for D10V.
 
-start-sanitize-v850
 Thu Aug 22 17:13:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Remove ld, target-libio, target-libg++, and
 	target-libstdc++ from noconfigdirs.
 
-end-sanitize-v850
 Wed Aug 21 18:56:38 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure: Fix three locations where shell scripts were
 	being run directly rather than with config_shell.
 
-start-sanitize-v850
 Tue Aug 20 13:08:47 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* configure.in (v850-*-*): Set up initial $noconfigdirs.
 	* config.sub (basic_machine): Recognize v850.
 
-end-sanitize-v850
 Thu Aug 15 12:19:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Handle multiple enable/disable options and
