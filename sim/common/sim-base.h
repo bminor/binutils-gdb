@@ -131,6 +131,10 @@ typedef struct {
   struct host_callback_struct *callback;
 #define STATE_CALLBACK(sd) ((sd)->base.callback)
 
+  /* The type of simulation environment (user/operating).  */
+  enum sim_environment environment;
+#define STATE_ENVIRONMENT(sd) ((sd)->base.environment)
+
 #if 0 /* FIXME: Not ready yet.  */
   /* Stuff defined in sim-config.h.  */
   struct sim_config config;

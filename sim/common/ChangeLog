@@ -1,3 +1,16 @@
+Mon Mar  9 12:50:59 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-base.h (sim_state_base): New member environment.
+	(STATE_ENVIRONMENT): New macro.
+	* sim-config.c (current_environment): Delete.
+	(sim_config_default): New function.
+	(sim_config): Set STATE_ENVIRONMENT, not current_environment.
+	* sim-config.h (current_environment,CURRENT_ENVIRONMENT): Delete.
+	(sim_config_default): Add prototype.
+	* sim-module.c (sim_pre_argv_init): Call sim_config_default.
+	* sim-options.c (standard_option_handler, case OPTION_ENVIRONMENT):
+	Set STATE_ENVIRONMENT, not current_environment.
+
 Mon Mar  9 11:59:03 1998  Jim Wilson  <wilson@cygnus.com>
 
 	* sim-fpu.c (NR_GUARDS64): Change NR_PAD32 to NR_PAD64.
