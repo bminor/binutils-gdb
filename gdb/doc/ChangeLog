@@ -1,3 +1,7 @@
+Mon Nov  9 23:57:02 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Add how to declare the result of make_cleanup.
+
 Mon Oct 26 11:09:47 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdb.texinfo:  Fix typo, reported by Karl Berry.
