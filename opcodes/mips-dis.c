@@ -369,26 +369,23 @@ mips_isa_type (mach, isa, cputype)
       *cputype = CPU_MIPS16;
       *isa = ISA_MIPS3;
       break;
-    case bfd_mach_mips32:
-      *cputype = CPU_MIPS32;
-      *isa = ISA_MIPS32;
-      break;
-    case bfd_mach_mips32_4k:
-      *cputype = CPU_MIPS32_4K;
-      *isa = ISA_MIPS32;
-      break;
     case bfd_mach_mips5:
       *cputype = CPU_MIPS5;
       *isa = ISA_MIPS5;
-      break;
-    case bfd_mach_mips64:
-      *cputype = CPU_MIPS64;
-      *isa = ISA_MIPS64;
       break;
     case bfd_mach_mips_sb1:
       *cputype = CPU_SB1;
       *isa = ISA_MIPS64;
       break;
+    case bfd_mach_mipsisa32:
+      * cputype = CPU_MIPS32;
+      * isa = ISA_MIPS32;
+      break;
+    case bfd_mach_mipsisa64:
+      * cputype = CPU_MIPS64;
+      * isa = ISA_MIPS64;
+      break;
+
     default:
       *cputype = CPU_R3000;
       *isa = ISA_MIPS3;

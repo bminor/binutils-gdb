@@ -1639,7 +1639,6 @@ get_machine_flags (e_flags, e_machine)
 	    case E_MIPS_MACH_4100: strcat (buf, ", 4100"); break;
 	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_4111: strcat (buf, ", 4111"); break;
-	    case E_MIPS_MACH_MIPS32_4K: strcat (buf, ", mips32-4k"); break;
 	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
 	    default: strcat (buf, " UNKNOWN"); break;
 	    }
@@ -6384,7 +6383,7 @@ display_debug_macinfo (section, start, file)
 
   return 1;
 }
-  
+
 
 static int
 display_debug_abbrev (section, start, file)
@@ -7109,7 +7108,7 @@ display_debug_info (section, start, file)
 		  != (bfd_vma) ((unsigned char *) &external->cu_abbrev_offset
 				- section_begin))
 		continue;
-	      
+
 	      if (is_32bit_elf)
 		{
 		  sym = symtab + ELF32_R_SYM (rp->r_info);
@@ -7180,7 +7179,7 @@ display_debug_info (section, start, file)
 	  }
 
 	begin = ((unsigned char *)
-		 get_data (NULL, file, sec->sh_offset, sec->sh_size, 
+		 get_data (NULL, file, sec->sh_offset, sec->sh_size,
 			   _("debug_abbrev section data")));
 	if (!begin)
 	  return 0;
@@ -8061,7 +8060,7 @@ display_debug_section (section, file)
       return 0;
     }
 
-  start = (unsigned char *) get_data (NULL, file, section->sh_offset, length, 
+  start = (unsigned char *) get_data (NULL, file, section->sh_offset, length,
 				      _("debug section data"));
   if (!start)
     return 0;
@@ -8124,7 +8123,7 @@ process_section_contents (file)
 
 		length = section->sh_size;
 		start = ((unsigned char *)
-			 get_data (NULL, file, section->sh_offset, length, 
+			 get_data (NULL, file, section->sh_offset, length,
 				   _("debug section data")));
 		if (!start)
 		  return 0;

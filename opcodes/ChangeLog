@@ -1,3 +1,10 @@
+2001-08-31  Eric Christopher  <echristo@redhat.com>
+	    Jason Eckhardt    <jle@redhat.com>
+
+	* mips-dis.c: Add support for bfd_mach_mipsisa32 and
+	bfd_mach_mipsisa64. Remove bfd_mach_mips32, bfd_mach_mips32_4k,
+	bfd_mach_mips64.
+
 2001-08-31  Andreas Jaeger  <aj@suse.de>
 
 	* tic54x-opc.c: Add default initializers to avoid warnings.
