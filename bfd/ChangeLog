@@ -1,3 +1,9 @@
+2002-02-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-sh64.c (sh_elf64_relocate_section): Fix a typo from my
+	last patch.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+
 2002-02-21  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c: Major rework that introduces all recent changes

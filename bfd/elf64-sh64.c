@@ -1754,7 +1754,7 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (outrel.r_offset == (bfd_vma) -1)
 		skip = true;
-	      else if (outrel.r_offset == (bfd_vma) -1)
+	      else if (outrel.r_offset == (bfd_vma) -2)
 		skip = true, relocate = true;
 	      
 	      outrel.r_offset += (input_section->output_section->vma
