@@ -95,7 +95,7 @@ Disassembly of section .text:
  181:	66 0f 16 2e[ 	]+movhpd \(%esi\),%xmm5
  185:	66 0f 13 07[ 	]+movlpd %xmm0,\(%edi\)
  189:	66 0f 12 00[ 	]+movlpd \(%eax\),%xmm0
- 18d:	66 0f 50 ca[ 	]+movmskpd %xmm2,%cx
+ 18d:	66 0f 50 ca[ 	]+movmskpd %xmm2,%ecx
  191:	66 0f 10 d3[ 	]+movupd %xmm3,%xmm2
  195:	66 0f 11 22[ 	]+movupd %xmm4,\(%edx\)
  199:	66 0f 10 65 00[ 	]+movupd 0x0\(%ebp\),%xmm4

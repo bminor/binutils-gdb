@@ -1,3 +1,17 @@
+2001-05-04  Alan Modra  <amodra@one.net.au>
+
+	* i386-dis.c (Ev, Ed): Remove duplicate define.
+	(Gd): Define.
+	(XS): Define.
+	(OP_XS): New function.
+	(dis386_twobyte_att): Correct pinsrw, pextrw, pmovmskb, and
+	movmskp operands.
+	(dis386_twobyte_intel): Likewise.
+	(prefix_user_table): Use MS for maskmovq operand.
+
+	Merge mainline:  2001-04-06  Andreas Jaeger  <aj@suse.de>
+	* i386-dis.c: Add ffreep instruction.
+
 2001-03-30  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ppc-opc.c (insert_mbe): Shift mask initializer as long.
