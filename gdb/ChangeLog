@@ -1,5 +1,10 @@
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* d10v-tdep.c (d10v_frame_saved_pc, d10v_frame_chain): Restore
+	code handling dummy frames.
+
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame-unwind.h (frame_unwind_pop_ftype): Declare.
 	(struct frame_unwind): Add field pop.
 	* frame.h (frame_pop): Declare.

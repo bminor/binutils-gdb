@@ -521,7 +521,12 @@ d10v_extract_struct_value_address (struct regcache *regcache)
 static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
-  return (get_frame_extra_info (frame)->return_pc);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    return d10v_make_iaddr (deprecated_read_register_dummy (frame->pc, 
+							    frame->frame, 
+							    PC_REGNUM));
+  else
+    return ((frame)->extra_info->return_pc);
 }
 
 /* Immediately after a function call, return the saved pc.  We can't
@@ -692,8 +697,10 @@ d10v_frame_chain (struct frame_info *fi)
   CORE_ADDR addr;
 
   /* A generic call dummy's frame is the same as caller's.  */
-  d10v_frame_init_saved_regs (fi);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+    return fi->frame;
 
+  d10v_frame_init_saved_regs (fi);
   
   if (get_frame_extra_info (fi)->return_pc == IMEM_START
       || inside_entry_file (get_frame_extra_info (fi)->return_pc))
