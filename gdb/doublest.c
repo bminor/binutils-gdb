@@ -811,3 +811,26 @@ convert_typed_floating (const void *from, const struct type *from_type,
       floatformat_from_doublest (to_fmt, &d, to);
     }
 }
+
+const struct floatformat *floatformat_ieee_single[BFD_ENDIAN_UNKNOWN];
+const struct floatformat *floatformat_ieee_double[BFD_ENDIAN_UNKNOWN];
+const struct floatformat *floatformat_arm_ext[BFD_ENDIAN_UNKNOWN];
+const struct floatformat *floatformat_ia64_spill[BFD_ENDIAN_UNKNOWN];
+const struct floatformat *floatformat_ia64_quad[BFD_ENDIAN_UNKNOWN];
+
+extern void _initialize_doublest (void);
+
+extern void
+_initialize_doublest (void)
+{
+  floatformat_ieee_single[BFD_ENDIAN_LITTLE] = &floatformat_ieee_single_little;
+  floatformat_ieee_single[BFD_ENDIAN_BIG] = &floatformat_ieee_single_big;
+  floatformat_ieee_double[BFD_ENDIAN_LITTLE] = &floatformat_ieee_double_little;
+  floatformat_ieee_double[BFD_ENDIAN_BIG] = &floatformat_ieee_double_big;
+  floatformat_arm_ext[BFD_ENDIAN_LITTLE] = &floatformat_arm_ext_littlebyte_bigword;
+  floatformat_arm_ext[BFD_ENDIAN_BIG] = &floatformat_arm_ext_big;
+  floatformat_ia64_spill[BFD_ENDIAN_LITTLE] = &floatformat_ia64_spill_little;
+  floatformat_ia64_spill[BFD_ENDIAN_BIG] = &floatformat_ia64_spill_big;
+  floatformat_ia64_quad[BFD_ENDIAN_LITTLE] = &floatformat_ia64_quad_little;
+  floatformat_ia64_quad[BFD_ENDIAN_BIG] = &floatformat_ia64_quad_big;
+}

@@ -1,3 +1,20 @@
+2004-08-08  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbtypes.c (builtin_type_arm_ext, builtin_type_ieee_single)
+	(builtin_type_ieee_double, builtin_type_ia64_quad)
+	(builtin_type_ia64_spill, _initialize_gdbtypes): Add tables of
+	BE/LE floating-point types.
+	* gdbtypes.h (builtin_type_arm_ext, builtin_type_ieee_single)
+	(builtin_type_ieee_double, builtin_type_ia64_quad)
+	(builtin_type_ia64_spill): Declare.
+	* doublest.c (_initialize_doublest, floatformat_ieee_single)
+	(floatformat_ieee_double, floatformat_arm_ext)
+	(floatformat_ia64_spill, floatformat_ia64_quad): Add tables
+	of LE/BE floatformats.	
+	* doublest.h: (struct floatformat, floatformat_ieee_single)
+	(floatformat_ieee_double, floatformat_arm_ext)
+	(floatformat_ia64_spill, floatformat_ia64_quad): Declare.
+
 2004-08-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386gnu-nat.c (gnu_store_registers): Fix typo.

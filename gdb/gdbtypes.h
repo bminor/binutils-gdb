@@ -1050,8 +1050,10 @@ extern struct type *builtin_type_vec128;
 extern struct type *builtin_type_vec128i;
 
 /* Explicit floating-point formats.  See "floatformat.h".  */
+extern struct type *builtin_type_ieee_single[BFD_ENDIAN_UNKNOWN];
 extern struct type *builtin_type_ieee_single_big;
 extern struct type *builtin_type_ieee_single_little;
+extern struct type *builtin_type_ieee_double[BFD_ENDIAN_UNKNOWN];
 extern struct type *builtin_type_ieee_double_big;
 extern struct type *builtin_type_ieee_double_little;
 extern struct type *builtin_type_ieee_double_littlebyte_bigword;
@@ -1060,10 +1062,13 @@ extern struct type *builtin_type_m68881_ext;
 extern struct type *builtin_type_i960_ext;
 extern struct type *builtin_type_m88110_ext;
 extern struct type *builtin_type_m88110_harris_ext;
+extern struct type *builtin_type_arm_ext[BFD_ENDIAN_UNKNOWN];
 extern struct type *builtin_type_arm_ext_big;
 extern struct type *builtin_type_arm_ext_littlebyte_bigword;
+extern struct type *builtin_type_ia64_spill[BFD_ENDIAN_UNKNOWN];
 extern struct type *builtin_type_ia64_spill_big;
 extern struct type *builtin_type_ia64_spill_little;
+extern struct type *builtin_type_ia64_quad[BFD_ENDIAN_UNKNOWN];
 extern struct type *builtin_type_ia64_quad_big;
 extern struct type *builtin_type_ia64_quad_little;
 
