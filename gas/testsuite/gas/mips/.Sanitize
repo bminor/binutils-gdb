@@ -43,6 +43,8 @@ bltu.s
 div-ilocks.d
 div.d
 div.s
+dli.d
+dli.s
 jal-empic.d
 jal-svr4pic.d
 jal-svr4pic.s

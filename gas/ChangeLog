@@ -1,3 +1,15 @@
+Wed Sep  4 11:24:29 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-mips.c (load_register): Remove unnecessary code that
+ 	was causing the high 32bits of 64bit constants to be lost.
+	
+start-sanitize-d10v
+Tue Sep  3 13:52:56 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Added changes to support function
+	pointers and "@word" syntax.
+
+end-sanitize-d10v	
 start-sanitize-v850
 Tue Sep  3 11:57:18 1996  Jeffrey A Law  (law@cygnus.com)
 

@@ -1921,19 +1921,6 @@ load_register (counter, reg, ep, dbl)
 			 (int) BFD_RELOC_LO16);
 	  return;
 	}
-      else
-	{
-	  /* 32 bit value with high bit set being loaded into a 64 bit
-             register.  We can't use lui, because that would
-             incorrectly set the 32 high bits.  */
-	  generic_bignum[3] = 0;
-	  generic_bignum[2] = 0;
-	  generic_bignum[1] = (ep->X_add_number >> 16) & 0xffff;
-	  generic_bignum[0] = ep->X_add_number & 0xffff;
-	  tmp.X_op = O_big;
-	  tmp.X_add_number = 4;
-	  ep = &tmp;
-	}
     }
 
   /* The value is larger than 32 bits.  */

@@ -1,5 +1,16 @@
+Wed Sep  4 11:47:29 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* gas/mips/mips.exp: Add check for dli macro instruction.
+	* gas/mips/dli.{s,d}: Added.
+
 start-sanitize-v850
 Sat Aug 31 01:25:03 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/v850/basic.exp (do_mem): Check bit patterns for short
+	load/store instructions.  Remove xfails for short load/store
+	instructions.
+	* gas/v850/mem.s: Offsets for short load/store operands
+	are unsigned.
 
 	* gas/v850/basic.exp (do_branch): Check offsets in branch insns.
 	(do_jumps): Likewise.
