@@ -42,39 +42,17 @@ proc gdb_version {} {
 }
 
 #
-# gdb_load -- load a file into the GDB. 
-#             Returns a 0 if there was an error,
-#                       1 if it load successfully.
+# gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
 #
 proc gdb_load { arg } {
     global verbose
     global loadpath
     global loadfile
-    global prompt
-    global spawn_id
     global GDB
-    global expect_out
+    global prompt
 
-    send "load $arg\n"
-    verbose "Loading $arg into $GDB"
-    expect {
-	-re "Loading.*\.text.*\.data.*\.bss.*Reading symbols from $arg.+done.*$prompt $" {
-	    verbose "Loaded $arg into $GDB"
-	    return 1
-	}
-	-re "$prompt $" {
-	    error "Couldn't load $arg into $GDB."
-	    return 0
-	}
-	timeout {
-		error "Timed out trying to load $arg."
-	    return 0
-	}
-    }
-    if [info exists expect_out(buffer)] then {
-	send_log $expect_out(buffer)
-    }
-    return 0
+    return [gdb_file_cmd $arg]
 }
 
 #
