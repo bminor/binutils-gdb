@@ -1,5 +1,11 @@
 2000-03-20  Kevin Buettner  <kevinb@redhat.com>
 
+	* ia64-linux-nat.c, ia64-tdep.c, config/ia64/linux.mh,
+	config/ia64/linux.mt, config/ia64/nm-linux.h, config/ia64/tm-ia64.h,
+	config/ia64/tm-linux.h, config/ia64/xm-linux.h: New files.
+
+2000-03-20  Kevin Buettner  <kevinb@redhat.com>
+
 	* utils.c (floatformat_from_doublest): Don't assume that a long
 	will be exactly 32 bits in length.  Also...  make sure space
 	that we're writing the float to is completely initialized to
