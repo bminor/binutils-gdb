@@ -7,6 +7,10 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* coffcode.h (coff_mkobject_hook): Set timestamp field in
+	coff_data_type to f_timdat.
+	* peicode.h (pe_mkobject_hook): Likewise.
+
 	* peicode.h (coff_swap_filehdr_in): Check the NT executable magic
 	number if COFF_IMAGE_WITH_PE.
 

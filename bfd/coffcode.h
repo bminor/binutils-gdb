@@ -1594,6 +1594,8 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
   coff->local_auxesz = AUXESZ;
   coff->local_linesz = LINESZ;
 
+  coff->timestamp = internal_f->f_timdat;
+
   obj_raw_syment_count (abfd) =
     obj_conv_table_size (abfd) =
       internal_f->f_nsyms;

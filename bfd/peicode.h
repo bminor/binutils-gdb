@@ -2112,6 +2112,8 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
   pe->coff.local_auxesz = AUXESZ;
   pe->coff.local_linesz = LINESZ;
 
+  pe->coff.timestamp = internal_f->f_timdat;
+
   obj_raw_syment_count (abfd) =
     obj_conv_table_size (abfd) =
       internal_f->f_nsyms;
