@@ -1,3 +1,10 @@
+2004-02-13  Andrew Cagney  <cagney@redhat.com>
+
+	* elf.c	(vma_page_aligned_bias): New function.
+	(assign_file_positions_except_relocs)
+	(assign_file_positions_for_segments): Replace broken modulo
+	arithmetic with call to vma_page_aligned_bias.
+
 2004-02-11  Andrew Cagney  <cagney@redhat.com>
 
 	* bfd-in.h: Update copyright.
