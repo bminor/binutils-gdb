@@ -5,6 +5,10 @@ Mon Jan  3 13:05:08 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd-in.h, hash.c: Change bfd_hash_allocate argument from size_t
+	to unsigned int, because size_t may not be defined in bfd.h.
+	* bfd-in2.h: Rebuilt.
+
 	* bfd-in.h (bfd_get{b,l}[_signed_]{16,32,64}): Declare argument to
 	be a const pointer.
 	* bfd-in2.h: Rebuilt.
