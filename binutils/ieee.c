@@ -39,6 +39,8 @@ struct ieee_block
   int kind;
   /* The source file name, for a BB5 block.  */
   const char *filename;
+  /* The index of the function type, for a BB4 or BB6 block.  */
+  unsigned int fnindx;
 };
 
 /* This structure is the block stack.  */
@@ -63,6 +65,10 @@ struct ieee_var
   unsigned long namlen;
   /* Type.  */
   debug_type type;
+  /* Slot if we make an indirect type.  */
+  debug_type *pslot;
+  /* Kind of variable (DEBUG_VAR_ILLEGAL if not a variable).  */
+  enum debug_var_kind variable;
 };
 
 /* This structure holds all the variables.  */
@@ -84,6 +90,8 @@ struct ieee_type
   debug_type type;
   /* Slot if this is type is referenced before it is defined.  */
   debug_type *pslot;
+  /* Slots for arguments if we make indirect types for them.  */
+  debug_type *arg_slots;
   /* If this is a bitfield, this is the size in bits.  If this is not
      a bitfield, this is zero.  */
   unsigned long bitsize;
@@ -115,19 +123,10 @@ struct ieee_tag
   debug_type type;
   /* The tagged type is an indirect type pointing at this slot.  */
   debug_type slot;
-};
-
-/* This structure holds a linked list of functions with their argument
-   types, so that we can convert them to C++ methods if necessary.  */
-
-struct ieee_function
-{
-  /* Next function.  */
-  struct ieee_function *next;
-  /* This function name.  */
-  const char *name;
-  /* The function type.  */
-  debug_type type;
+  /* This is an array of slots used when a field type is converted
+     into a indirect type, in case it needs to be later converted into
+     a reference type.  */
+  debug_type *fslots;
 };
 
 /* This structure holds the information we pass around to the parsing
@@ -151,8 +150,6 @@ struct ieee_info
   struct ieee_types types;
   /* The list of tagged structs.  */
   struct ieee_tag *tags;
-  /* The list of functions.  */
-  struct ieee_function *functions;
 };
 
 /* Basic builtin types, not including the pointers.  */
@@ -268,6 +265,10 @@ static boolean ieee_read_cxx_misc
   PARAMS ((struct ieee_info *, const bfd_byte **, unsigned long));
 static boolean ieee_read_cxx_class
   PARAMS ((struct ieee_info *, const bfd_byte **, unsigned long));
+static boolean ieee_read_cxx_defaults
+  PARAMS ((struct ieee_info *, const bfd_byte **, unsigned long));
+static boolean ieee_read_reference
+  PARAMS ((struct ieee_info *, const bfd_byte **));
 static boolean ieee_require_asn
   PARAMS ((struct ieee_info *, const bfd_byte **, bfd_vma *));
 static boolean ieee_require_atn65
@@ -885,7 +886,6 @@ parse_ieee (dhandle, abfd, bytes, len)
   info.types.alloc = 0;
   info.types.types = NULL;
   info.tags = NULL;
-  info.functions = NULL;
   for (i = 0; i < BUILTIN_TYPE_COUNT; i++)
     info.types.builtins[i] = DEBUG_TYPE_NULL;
 
@@ -965,7 +965,8 @@ parse_ieee_bb (info, pp)
   const char *name;
   unsigned long namlen;
   char *namcopy;
-	    
+  unsigned int fnindx;
+
   block_start = *pp;
 
   b = **pp;
@@ -974,6 +975,8 @@ parse_ieee_bb (info, pp)
   if (! ieee_read_number (info, pp, &size)
       || ! ieee_read_id (info, pp, &name, &namlen))
     return false;
+
+  fnindx = (unsigned int) -1;
 
   switch (b)
     {
@@ -1003,8 +1006,7 @@ parse_ieee_bb (info, pp)
       /* BB4: Global function.  */
       {
 	bfd_vma stackspace, typindx, offset;
-	debug_type type, return_type;
-	struct ieee_function *func;
+	debug_type return_type;
 
 	if (! ieee_read_number (info, pp, &stackspace)
 	    || ! ieee_read_number (info, pp, &typindx)
@@ -1015,22 +1017,21 @@ parse_ieee_bb (info, pp)
 
 	if (typindx < 256)
 	  {
-	    type = ieee_builtin_type (info, block_start, typindx);
-	    if (type == NULL)
+	    return_type = ieee_builtin_type (info, block_start, typindx);
+	    if (return_type == DEBUG_TYPE_NULL)
 	      return false;
-	    return_type = type;
 	  }
 	else
 	  {
 	    typindx -= 256;
 	    if (! ieee_alloc_type (info, typindx, true))
 	      return false;
-	    type = info->types.types[typindx].type;
-	    if (debug_get_type_kind (info->dhandle, type)
-		!= DEBUG_KIND_FUNCTION)
-	      return_type = type;
-	    else
-	      return_type = debug_get_return_type (info->dhandle, type);
+	    fnindx = typindx;
+	    return_type = info->types.types[typindx].type;
+	    if (debug_get_type_kind (info->dhandle, return_type)
+		== DEBUG_KIND_FUNCTION)
+	      return_type = debug_get_return_type (info->dhandle,
+						   return_type);
 	  }
 
 	namcopy = savestring (name, namlen);
@@ -1039,13 +1040,6 @@ parse_ieee_bb (info, pp)
 	if (! debug_record_function (info->dhandle, namcopy, return_type,
 				     true, offset))
 	  return false;
-
-	func = (struct ieee_function *) xmalloc (sizeof *func);
-	memset (func, 0, sizeof *func);
-	func->next = info->functions;
-	info->functions = func;
-	func->name = namcopy;
-	func->type = type;
       }
       break;
 
@@ -1109,6 +1103,7 @@ parse_ieee_bb (info, pp)
 		typindx -= 256;
 		if (! ieee_alloc_type (info, typindx, true))
 		  return false;
+		fnindx = typindx;
 		return_type = info->types.types[typindx].type;
 		if (debug_get_type_kind (info->dhandle, return_type)
 		    == DEBUG_KIND_FUNCTION)
@@ -1184,6 +1179,7 @@ parse_ieee_bb (info, pp)
   info->blockstack.bsp->kind = b;
   if (b == 5)
     info->blockstack.bsp->filename = namcopy;
+  info->blockstack.bsp->fnindx = fnindx;
   ++info->blockstack.bsp;
 
   return true;
@@ -1319,6 +1315,7 @@ parse_ieee_ty (info, pp)
   bfd_vma typeindx, varindx, tc;
   PTR dhandle;
   boolean tag, typdef;
+  debug_type *arg_slots;
   unsigned long type_bitsize;
   debug_type type;
 
@@ -1371,6 +1368,7 @@ parse_ieee_ty (info, pp)
 
   tag = false;
   typdef = false;
+  arg_slots = NULL;
   type_bitsize = 0;
   switch (tc)
     {
@@ -1691,6 +1689,7 @@ parse_ieee_ty (info, pp)
 	debug_type rtype;
 	bfd_vma nargs;
 	boolean present;
+	struct ieee_var *pv;
 
 	/* FIXME: We ignore the attribute and the argument names.  */
 
@@ -1707,6 +1706,19 @@ parse_ieee_ty (info, pp)
 	      return false;
 	  }
 	while (present);
+
+	pv = info->vars.vars + varindx;
+	if (pv->namlen > 0
+	    && debug_get_type_kind (dhandle, rtype) == DEBUG_KIND_POINTER)
+	  {
+	    /* Set up the return type as an indirect type pointing to
+               the variable slot, so that we can change it to a
+               reference later if appropriate.  */
+	    pv->pslot = (debug_type *) xmalloc (sizeof *pv->pslot);
+	    *pv->pslot = rtype;
+	    rtype = debug_make_indirect_type (dhandle, pv->pslot,
+					      (const char *) NULL);
+	  }
 
 	type = debug_make_function_type (dhandle, rtype, (debug_type *) NULL,
 					 false);
@@ -1815,6 +1827,7 @@ parse_ieee_ty (info, pp)
       /* Procedure with compiler dependencies.  FIXME: This is an
          extern declaration, which we have no way of representing.  */
       {
+	struct ieee_var *pv;
 	bfd_vma attr, frame_type, push_mask, nargs, level, father;
 	debug_type rtype;
 	debug_type *arg_types;
@@ -1822,6 +1835,8 @@ parse_ieee_ty (info, pp)
 	boolean present;
 
 	/* FIXME: We ignore almost all this information.  */
+
+	pv = info->vars.vars + varindx;
 
 	if (! ieee_read_number (info, pp, &attr)
 	    || ! ieee_read_number (info, pp, &frame_type)
@@ -1863,11 +1878,45 @@ parse_ieee_ty (info, pp)
 		  }
 	      }
 
+	    /* If there are any pointer arguments, turn them into
+               indirect types in case we later need to convert them to
+               reference types.  */
+	    for (i = 0; i < nargs; i++)
+	      {
+		if (debug_get_type_kind (dhandle, arg_types[i])
+		    == DEBUG_KIND_POINTER)
+		  {
+		    if (arg_slots == NULL)
+		      {
+			arg_slots = ((debug_type *)
+				     xmalloc (nargs * sizeof *arg_slots));
+			memset (arg_slots, 0, nargs * sizeof *arg_slots);
+		      }
+		    arg_slots[i] = arg_types[i];
+		    arg_types[i] =
+		      debug_make_indirect_type (dhandle,
+						arg_slots + i,
+						(const char *) NULL);
+		  }
+	      }
+
 	    arg_types[nargs] = DEBUG_TYPE_NULL;
 	  }
 	if (! ieee_read_number (info, pp, &level)
 	    || ! ieee_read_optional_number (info, pp, &father, &present))
 	  return false;
+
+	if (pv->namlen > 0
+	    && debug_get_type_kind (dhandle, rtype) == DEBUG_KIND_POINTER)
+	  {
+	    /* Set up the return type as an indirect type pointing to
+               the variable slot, so that we can change it to a
+               reference later if appropriate.  */
+	    pv->pslot = (debug_type *) xmalloc (sizeof *pv->pslot);
+	    *pv->pslot = rtype;
+	    rtype = debug_make_indirect_type (dhandle, pv->pslot,
+					      (const char *) NULL);
+	  }
 
 	type = debug_make_function_type (dhandle, rtype, arg_types, varargs);
       }
@@ -1877,8 +1926,10 @@ parse_ieee_ty (info, pp)
   /* Record the type in the table.  If the corresponding NN record has
      a name, name it.  FIXME: Is this always correct?  */
 
-  if (type == NULL)
+  if (type == DEBUG_TYPE_NULL)
     return false;
+
+  info->vars.vars[varindx].type = type;
 
   if ((tag || typdef)
       && info->vars.vars[varindx].namlen > 0)
@@ -1916,6 +1967,7 @@ parse_ieee_ty (info, pp)
     }
 
   info->types.types[typeindx].type = type;
+  info->types.types[typeindx].arg_slots = arg_slots;
   info->types.types[typeindx].bitsize = type_bitsize;
 
   /* We may have already allocated type as an indirect type pointing
@@ -1937,7 +1989,7 @@ parse_ieee_atn (info, pp)
 {
   const bfd_byte *atn_start, *atn_code_start;
   bfd_vma varindx;
-  boolean zeroindx;
+  struct ieee_var *pvar;
   debug_type type;
   bfd_vma atn_code;
   PTR dhandle;
@@ -1961,7 +2013,7 @@ parse_ieee_atn (info, pp)
 
   if (varindx == 0)
     {
-      zeroindx = true;
+      pvar = NULL;
       name = "";
       namlen = 0;
     }
@@ -1973,7 +2025,6 @@ parse_ieee_atn (info, pp)
   else
     {
       varindx -= 32;
-      zeroindx = false;
       if (varindx >= info->vars.alloc
 	  || info->vars.vars[varindx].name == NULL)
 	{
@@ -1981,13 +2032,39 @@ parse_ieee_atn (info, pp)
 	  return false;
 	}
 
-      info->vars.vars[varindx].type = type;
+      pvar = info->vars.vars + varindx;
 
-      name = info->vars.vars[varindx].name;
-      namlen = info->vars.vars[varindx].namlen;
+      pvar->type = type;
+
+      name = pvar->name;
+      namlen = pvar->namlen;
     }
 
   dhandle = info->dhandle;
+
+  /* If we are going to call debug_record_variable with a pointer
+     type, change the type to an indirect type so that we can later
+     change it to a reference type if we encounter a C++ pmisc 'R'
+     record.  */
+  if (pvar != NULL
+      && type != DEBUG_TYPE_NULL
+      && debug_get_type_kind (dhandle, type) == DEBUG_KIND_POINTER)
+    {
+      switch (atn_code)
+	{
+	case 1:
+	case 2:
+	case 3:
+	case 8:
+	case 10:
+	  pvar->pslot = (debug_type *) xmalloc (sizeof *pvar->pslot);
+	  *pvar->pslot = type;
+	  type = debug_make_indirect_type (dhandle, pvar->pslot,
+					   (const char *) NULL);
+	  pvar->type = type;
+	  break;
+	}
+    }
 
   switch (atn_code)
     {
@@ -2002,6 +2079,8 @@ parse_ieee_atn (info, pp)
       namcopy = savestring (name, namlen);
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
+      if (pvar != NULL)
+	pvar->variable = DEBUG_LOCAL;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_LOCAL, v);
 
     case 2:
@@ -2011,6 +2090,8 @@ parse_ieee_atn (info, pp)
       namcopy = savestring (name, namlen);
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
+      if (pvar != NULL)
+	pvar->variable = DEBUG_REGISTER;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_REGISTER,
 				    ieee_regno_to_genreg (info->abfd, v));
 
@@ -2025,6 +2106,13 @@ parse_ieee_atn (info, pp)
 	blocktype = 0;
       else
 	blocktype = info->blockstack.bsp[-1].kind;
+      if (pvar != NULL)
+	{
+	  if (blocktype == 4 || blocktype == 6)
+	    pvar->variable = DEBUG_LOCAL_STATIC;
+	  else
+	    pvar->variable = DEBUG_STATIC;
+	}
       return debug_record_variable (dhandle, namcopy, type,
 				    (blocktype == 4 || blocktype == 6
 				     ? DEBUG_LOCAL_STATIC
@@ -2067,6 +2155,8 @@ parse_ieee_atn (info, pp)
       namcopy = savestring (name, namlen);
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
+      if (pvar != NULL)
+	pvar->variable = DEBUG_GLOBAL;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_GLOBAL, v);
 
     case 9:
@@ -2089,6 +2179,8 @@ parse_ieee_atn (info, pp)
       namcopy = savestring (name, namlen);
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
+      if (pvar != NULL)
+	pvar->variable = DEBUG_REGISTER;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_REGISTER, v);
 
     case 11:
@@ -2271,52 +2363,8 @@ ieee_read_cxx_misc (info, pp, count)
       break;
 
     case 'B':
-      {
-	const char *fnname, *strval;
-	unsigned long fnlen, strvallen;
-	bfd_vma count, type, val;
-
-	/* Specify default argument values.  We have no way to store
-           these, so we just ignore them.  FIXME.  */
-
-	/* Giving the function name before the argument count is an
-           addendum to the spec.  */
-	if (! ieee_require_atn65 (info, pp, &fnname, &fnlen)
-	    || ! ieee_require_asn (info, pp, &count)
-	    || ! ieee_require_asn (info, pp, &type))
-	  return false;
-
-	switch (type)
-	  {
-	  case 0:
-	  case 4:
-	    break;
-
-	  case 1:
-	  case 2:
-	    if (! ieee_require_asn (info, pp, &val))
-	      return false;
-	    break;
-
-	  case 3:
-	  case 7:
-	    if (! ieee_require_atn65 (info, pp, &strval, &strvallen))
-	      return false;
-	    break;
-
-	  default:
-	    ieee_error (info, start, "unrecognized C++ B type");
-	    return false;
-	  }
-
-	while (count-- > 0)
-	  {
-	    bfd_vma pos;
-
-	    if (! ieee_require_asn (info, pp, &pos))
-	      return false;
-	  }
-      }
+      if (! ieee_read_cxx_defaults (info, pp, count))
+	return false;
       break;
 
     case 'z':
@@ -2338,31 +2386,8 @@ ieee_read_cxx_misc (info, pp, count)
       break;
 
     case 'R':
-      {
-	bfd_vma flags;
-	const char *class, *name;
-	unsigned long classlen, namlen;
-
-	/* Indicates that an object actually has reference type.  */
-
-	if (! ieee_require_asn (info, pp, &flags))
-	  return false;
-
-	/* Giving the class name before the member name is in an
-           addendum to the spec.  */
-	if (flags == 3)
-	  {
-	    if (! ieee_require_atn65 (info, pp, &class, &classlen))
-	      return false;
-	  }
-
-	if (! ieee_require_atn65 (info, pp, &name, &namlen))
-	  return false;
-
-	/* FIXME: Now we are supposed to track down the variable or
-           function or class member and convert the type into a
-           reference type.  */
-      }
+      if (! ieee_read_reference (info, pp))
+	return false;
       break;
     }
 
@@ -2603,13 +2628,17 @@ ieee_read_cxx_class (info, pp, count)
 	      }
 	    else
 	      {
+		unsigned int findx;
+
 		if (structfields == NULL)
 		  {
 		    ieee_error (info, start, "C++ object has no fields");
 		    return false;
 		  }
 
-		for (pf = structfields; *pf != DEBUG_FIELD_NULL; pf++)
+		for (pf = structfields, findx = 0;
+		     *pf != DEBUG_FIELD_NULL;
+		     pf++, findx++)
 		  {
 		    const char *fname;
 
@@ -2629,6 +2658,35 @@ ieee_read_cxx_class (info, pp, count)
 		  }
 
 		ftype = debug_get_field_type (dhandle, *pf);
+
+		if (debug_get_type_kind (dhandle, ftype) == DEBUG_KIND_POINTER)
+		  {
+		    /* We might need to convert this field into a
+                       reference type later on, so make it an indirect
+                       type.  */
+		    if (it->fslots == NULL)
+		      {
+			unsigned int fcnt;
+			const debug_field *pfcnt;
+
+			fcnt = 0;
+			for (pfcnt = structfields;
+			     *pfcnt != DEBUG_FIELD_NULL;
+			     pfcnt++)
+			  ++fcnt;
+			it->fslots = ((debug_type *)
+				      xmalloc (fcnt * sizeof *it->fslots));
+			memset (it->fslots, 0,
+				fcnt * sizeof *it->fslots);
+		      }
+
+		    if (ftype == DEBUG_TYPE_NULL)
+		      return false;
+		    it->fslots[findx] = ftype;
+		    ftype = debug_make_indirect_type (dhandle,
+						      it->fslots + findx,
+						      (const char *) NULL);
+		  }
 	      }
 	    if (ftype == DEBUG_TYPE_NULL)
 	      return false;
@@ -2699,7 +2757,7 @@ ieee_read_cxx_class (info, pp, count)
 	    bfd_vma flags, virtindex, control;
 	    const char *name, *mangled;
 	    unsigned long namlen, mangledlen;
-	    struct ieee_function *func;
+	    struct ieee_var *pv, *pvend;
 	    debug_type type;
 	    enum debug_visibility visibility;
 	    boolean constp, volatilep;
@@ -2730,15 +2788,15 @@ ieee_read_cxx_class (info, pp, count)
 	    if ((flags & CXXFLAGS_FRIEND) != 0)
 	      break;
 
-	    /* We should already have seen debugging information for
-               the function itself, which will include type
-               information.  */
-	    for (func = info->functions; func != NULL; func = func->next)
-	      if (func->name[0] == mangled[0]
-		  && strncmp (func->name, mangled, mangledlen)
-		  && strlen (func->name) == mangledlen)
+	    /* We should already have seen a type for the function.  */
+	    pv = info->vars.vars;
+	    pvend = pv + info->vars.alloc;
+	    for (; pv < pvend; pv++)
+	      if (pv->namlen == mangledlen
+		  && strncmp (pv->name, mangled, mangledlen) == 0)
 		break;
-	    if (func == NULL)
+
+	    if (pv >= pvend)
 	      {
 		/* We won't have type information for this function if
 		   it is not included in this file.  We don't try to
@@ -2756,7 +2814,7 @@ ieee_read_cxx_class (info, pp, count)
 		const debug_type *arg_types;
 		boolean varargs;
 
-		if (debug_get_type_kind (dhandle, func->type)
+		if (debug_get_type_kind (dhandle, pv->type)
 		    != DEBUG_KIND_FUNCTION)
 		  {
 		    ieee_error (info, start,
@@ -2764,8 +2822,8 @@ ieee_read_cxx_class (info, pp, count)
 		    return false;
 		  }
 
-		return_type = debug_get_return_type (dhandle, func->type);
-		arg_types = debug_get_parameter_types (dhandle, func->type,
+		return_type = debug_get_return_type (dhandle, pv->type);
+		arg_types = debug_get_parameter_types (dhandle, pv->type,
 						       &varargs);
 		if (return_type == DEBUG_TYPE_NULL || arg_types == NULL)
 		  {
@@ -2980,6 +3038,7 @@ ieee_read_cxx_class (info, pp, count)
 	  if (dmethods[i] == DEBUG_METHOD_NULL)
 	    return false;
 	}
+      dmethods[i] = DEBUG_METHOD_NULL;
       free (methods);
     }
 
@@ -2993,6 +3052,274 @@ ieee_read_cxx_class (info, pp, count)
 				     fields, baseclasses, dmethods,
 				     vptrbase, ownvptr);
   if (it->slot == DEBUG_TYPE_NULL)
+    return false;
+
+  return true;
+}
+
+/* Read C++ default argument value and reference type information.  */
+
+static boolean
+ieee_read_cxx_defaults (info, pp, count)
+     struct ieee_info *info;
+     const bfd_byte **pp;
+     unsigned long count;
+{
+  const bfd_byte *start;
+  const char *fnname;
+  unsigned long fnlen;
+  bfd_vma defcount;
+
+  start = *pp;
+
+  /* Giving the function name before the argument count is an addendum
+     to the spec.  The function name is demangled, though, so this
+     record must always refer to the current function.  */
+
+  if (info->blockstack.bsp <= info->blockstack.stack
+      || info->blockstack.bsp[-1].fnindx == (unsigned int) -1)
+    {
+      ieee_error (info, start, "C++ default values not in a function");
+      return false;
+    }
+
+  if (! ieee_require_atn65 (info, pp, &fnname, &fnlen)
+      || ! ieee_require_asn (info, pp, &defcount))
+    return false;
+  count -= 2;
+
+  while (defcount-- > 0)
+    {
+      bfd_vma type, val;
+      const char *strval;
+      unsigned long strvallen;
+
+      if (! ieee_require_asn (info, pp, &type))
+	return false;
+      --count;
+
+      switch (type)
+	{
+	case 0:
+	case 4:
+	  break;
+
+	case 1:
+	case 2:
+	  if (! ieee_require_asn (info, pp, &val))
+	    return false;
+	  --count;
+	  break;
+
+	case 3:
+	case 7:
+	  if (! ieee_require_atn65 (info, pp, &strval, &strvallen))
+	    return false;
+	  --count;
+	  break;
+
+	default:
+	  ieee_error (info, start, "unrecognized C++ default type");
+	  return false;
+	}
+
+      /* We have no way to record the default argument values, so we
+         just ignore them.  FIXME.  */
+    }
+
+  /* Any remaining arguments are indices of parameters that are really
+     reference type.  */
+  if (count > 0)
+    {
+      PTR dhandle;
+      debug_type *arg_slots;
+
+      dhandle = info->dhandle;
+      arg_slots = info->types.types[info->blockstack.bsp[-1].fnindx].arg_slots;
+      while (count-- > 0)
+	{
+	  bfd_vma indx;
+	  debug_type target;
+
+	  if (! ieee_require_asn (info, pp, &indx))
+	    return false;
+	  /* The index is 1 based.  */
+	  --indx;
+	  if (arg_slots == NULL
+	      || arg_slots[indx] == DEBUG_TYPE_NULL
+	      || (debug_get_type_kind (dhandle, arg_slots[indx])
+		  != DEBUG_KIND_POINTER))
+	    {
+	      ieee_error (info, start, "reference parameter is not a pointer");
+	      return false;
+	    }
+
+	  target = debug_get_target_type (dhandle, arg_slots[indx]);
+	  arg_slots[indx] = debug_make_reference_type (dhandle, target);
+	  if (arg_slots[indx] == DEBUG_TYPE_NULL)
+	    return false;
+	}
+    }
+
+  return true;
+}
+
+/* Read a C++ reference definition.  */
+
+static boolean
+ieee_read_reference (info, pp)
+     struct ieee_info *info;
+     const bfd_byte **pp;
+{
+  const bfd_byte *start;
+  bfd_vma flags;
+  const char *class, *name;
+  unsigned long classlen, namlen;
+  debug_type *pslot;
+  debug_type target;
+
+  start = *pp;
+
+  if (! ieee_require_asn (info, pp, &flags))
+    return false;
+
+  /* Giving the class name before the member name is in an addendum to
+     the spec.  */
+  if (flags == 3)
+    {
+      if (! ieee_require_atn65 (info, pp, &class, &classlen))
+	return false;
+    }
+
+  if (! ieee_require_atn65 (info, pp, &name, &namlen))
+    return false;
+
+  pslot = NULL;
+  if (flags != 3)
+    {
+      int i;
+      struct ieee_var *pv = NULL;
+
+      /* We search from the last variable indices to the first in
+	 hopes of finding local variables correctly.  FIXME: This
+	 probably won't work in all cases.  On the other hand, I don't
+	 know what will.  */
+      for (i = (int) info->vars.alloc - 1; i >= 0; i--)
+	{
+	  boolean found;
+
+	  pv = info->vars.vars + i;
+
+	  if (pv->pslot == NULL
+	      || pv->namlen != namlen
+	      || strncmp (pv->name, name, namlen) != 0)
+	    continue;
+
+	  found = false;
+	  switch (flags)
+	    {
+	    default:
+	      ieee_error (info, start,
+			  "unrecognized C++ reference type");
+	      return false;
+
+	    case 0:
+	      /* Global variable or function.  */
+	      if (pv->variable == DEBUG_GLOBAL)
+		found = true;
+	      else if (pv->type != DEBUG_TYPE_NULL
+		       && (debug_get_type_kind (info->dhandle, pv->type)
+			   == DEBUG_KIND_FUNCTION))
+		found = true;
+	      break;
+
+	    case 1:
+	      /* Global static variable or function.  */
+	      if (pv->variable == DEBUG_STATIC)
+		found = true;
+	      else if (pv->type != DEBUG_TYPE_NULL
+		       && (debug_get_type_kind (info->dhandle, pv->type)
+			   == DEBUG_KIND_FUNCTION))
+		found = true;
+	      break;
+
+	    case 2:
+	      /* Local variable.  */
+	      if (pv->variable == DEBUG_LOCAL_STATIC
+		  || pv->variable == DEBUG_LOCAL
+		  || pv->variable == DEBUG_REGISTER)
+		found = true;
+	      break;
+	    }
+
+	  if (found)
+	    break;
+	}
+
+      if (i >= 0)
+	pslot = pv->pslot;
+    }
+  else
+    {
+      struct ieee_tag *it;
+
+      for (it = info->tags; it != NULL; it = it->next)
+	{
+	  if (it->name[0] == class[0]
+	      && strncmp (it->name, class, classlen) == 0
+	      && strlen (it->name) == classlen)
+	    {
+	      if (it->fslots != NULL)
+		{
+		  const debug_field *pf;
+		  unsigned int findx;
+
+		  pf = debug_get_fields (info->dhandle, it->type);
+		  if (pf == NULL)
+		    {
+		      ieee_error (info, start,
+				  "C++ reference in class with no fields");
+		      return false;
+		    }
+
+		  for (findx = 0; *pf != DEBUG_FIELD_NULL; pf++, findx++)
+		    {
+		      const char *fname;
+
+		      fname = debug_get_field_name (info->dhandle, *pf);
+		      if (fname == NULL)
+			return false;
+		      if (strncmp (fname, name, namlen) == 0
+			  && strlen (fname) == namlen)
+			{
+			  pslot = it->fslots + findx;
+			  break;
+			}
+		    }
+		}
+
+	      break;
+	    }
+	}
+    }
+
+  if (pslot == NULL)
+    {
+      ieee_error (info, start, "C++ reference not found");
+      return false;
+    }
+
+  /* We allocated the type of the object as an indirect type pointing
+     to *pslot, which we can now update to be a reference type.  */
+  if (debug_get_type_kind (info->dhandle, *pslot) != DEBUG_KIND_POINTER)
+    {
+      ieee_error (info, start, "C++ reference is not pointer");
+      return false;
+    }
+
+  target = debug_get_target_type (info->dhandle, *pslot);
+  *pslot = debug_make_reference_type (info->dhandle, target);
+  if (*pslot == DEBUG_TYPE_NULL)
     return false;
 
   return true;
