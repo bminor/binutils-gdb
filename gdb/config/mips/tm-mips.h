@@ -177,21 +177,6 @@ extern void mips_register_convert_from_type (int regnum,
 /**/
 
 /* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  XXX floats */
-
-#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  mips_extract_return_value(TYPE, REGBUF, VALBUF)
-extern void mips_extract_return_value (struct type *, char[], char *);
-
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
-
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  mips_store_return_value(TYPE, VALBUF)
-extern void mips_store_return_value (struct type *, char *);
-
-/* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 /* The address is passed in a0 upon entry to the function, but when

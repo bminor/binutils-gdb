@@ -1,3 +1,24 @@
+2002-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/mips/tm-mips.h (STORE_RETURN_VALUE): Delete macro.
+	(DEPRECATED_EXTRACT_RETURN_VALUE): Delete macro.
+	* mips-tdep.c (mips_gdbarch_init): Set store_return_value and
+	deprecated_extract_return_value.
+	(mips_o32_push_arguments, mips_o64_push_arguments): Clone and
+	rename mips_o32o64_push_arguments.
+	(mips_gdbarch_init): Update.
+	(mips_extract_return_value): Delete.
+	(mips_o32_extract_return_value): Clone mips_extract_return_value.
+	(mips_o64_extract_return_value): Clone mips_extract_return_value.
+	(mips_eabi_extract_return_value): Clone mips_extract_return_value.
+	(mips_n32n64_extract_return_value): Clone
+	mips_extract_return_value.
+	(mips_store_return_value): Delete.
+	(mips_o32_store_return_value): Clone mips_store_return_value.
+	(mips_o64_store_return_value): Clone mips_store_return_value.
+	(mips_eabi_store_return_value): Clone mips_store_return_value.
+	(mips_n32n64_store_return_value): Clone mips_store_return_value.
+
 2002-08-18  Aidan Skinner <aidan@velvet.net>
 
 	* ada-lang.c: Use gdb_string.h instead of <string.h>.

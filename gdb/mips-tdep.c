@@ -2960,14 +2960,14 @@ mips_n32n64_push_arguments (int nargs,
   return sp;
 }
 
-/* O32/O64 version of push_arguments.  */
+/* O32 version of push_arguments.  */
 
-CORE_ADDR
-mips_o32o64_push_arguments (int nargs,
-			    struct value **args,
-			    CORE_ADDR sp,
-			    int struct_return,
-			    CORE_ADDR struct_addr)
+static CORE_ADDR
+mips_o32_push_arguments (int nargs,
+			 struct value **args,
+			 CORE_ADDR sp,
+			 int struct_return,
+			 CORE_ADDR struct_addr)
 {
   int argreg;
   int float_argreg;
@@ -2992,7 +2992,7 @@ mips_o32o64_push_arguments (int nargs,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o32o64_push_arguments: sp=0x%s allocated %d\n",
+			"mips_o32_push_arguments: sp=0x%s allocated %d\n",
 			paddr_nz (sp), ROUND_UP (len, 16));
 
   /* Initialize the integer and float register pointers.  */
@@ -3004,7 +3004,7 @@ mips_o32o64_push_arguments (int nargs,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o32o64_push_arguments: struct_return reg=%d 0x%s\n",
+			    "mips_o32_push_arguments: struct_return reg=%d 0x%s\n",
 			    argreg, paddr_nz (struct_addr));
       write_register (argreg++, struct_addr);
       stack_offset += MIPS_STACK_ARGSIZE;
@@ -3024,7 +3024,306 @@ mips_o32o64_push_arguments (int nargs,
 
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o32o64_push_arguments: %d len=%d type=%d",
+			    "mips_o32_push_arguments: %d len=%d type=%d",
+			    argnum + 1, len, (int) typecode);
+
+      val = (char *) VALUE_CONTENTS (arg);
+
+      /* 32-bit ABIs always start floating point arguments in an
+         even-numbered floating point register.  Round the FP register
+         up before the check to see if there are any FP registers
+         left.  O32/O64 targets also pass the FP in the integer
+         registers so also round up normal registers.  */
+      if (!FP_REGISTER_DOUBLE
+	  && fp_register_arg_p (typecode, arg_type))
+	{
+	  if ((float_argreg & 1))
+	    float_argreg++;
+	}
+
+      /* Floating point arguments passed in registers have to be
+         treated specially.  On 32-bit architectures, doubles
+         are passed in register pairs; the even register gets
+         the low word, and the odd register gets the high word.
+         On O32/O64, the first two floating point arguments are
+         also copied to general registers, because MIPS16 functions
+         don't use float registers for arguments.  This duplication of
+         arguments in general registers can't hurt non-MIPS16 functions
+         because those registers are normally skipped.  */
+
+      if (fp_register_arg_p (typecode, arg_type)
+	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
+	{
+	  if (!FP_REGISTER_DOUBLE && len == 8)
+	    {
+	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
+	      unsigned long regval;
+
+	      /* Write the low word of the double to the even register(s).  */
+	      regval = extract_unsigned_integer (val + low_offset, 4);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+				    float_argreg, phex (regval, 4));
+	      write_register (float_argreg++, regval);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
+				    argreg, phex (regval, 4));
+	      write_register (argreg++, regval);
+
+	      /* Write the high word of the double to the odd register(s).  */
+	      regval = extract_unsigned_integer (val + 4 - low_offset, 4);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+				    float_argreg, phex (regval, 4));
+	      write_register (float_argreg++, regval);
+
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
+				    argreg, phex (regval, 4));
+	      write_register (argreg++, regval);
+	    }
+	  else
+	    {
+	      /* This is a floating point value that fits entirely
+	         in a single register.  */
+	      /* On 32 bit ABI's the float_argreg is further adjusted
+                 above to ensure that it is even register aligned.  */
+	      LONGEST regval = extract_unsigned_integer (val, len);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+				    float_argreg, phex (regval, len));
+	      write_register (float_argreg++, regval);
+	      /* CAGNEY: 32 bit MIPS ABI's always reserve two FP
+		 registers for each argument.  The below is (my
+		 guess) to ensure that the corresponding integer
+		 register has reserved the same space.  */
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
+				    argreg, phex (regval, len));
+	      write_register (argreg, regval);
+	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
+	    }
+	  /* Reserve space for the FP register.  */
+	  stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
+	}
+      else
+	{
+	  /* Copy the argument to general registers or the stack in
+	     register-sized pieces.  Large arguments are split between
+	     registers and stack.  */
+	  /* Note: structs whose size is not a multiple of MIPS_REGSIZE
+	     are treated specially: Irix cc passes them in registers
+	     where gcc sometimes puts them on the stack.  For maximum
+	     compatibility, we will put them in both places.  */
+	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
+				  (len % MIPS_SAVED_REGSIZE != 0));
+	  /* Structures should be aligned to eight bytes (even arg registers)
+	     on MIPS_ABI_O32, if their first member has double precision.  */
+	  if (MIPS_SAVED_REGSIZE < 8
+	      && mips_type_needs_double_align (arg_type))
+	    {
+	      if ((argreg & 1))
+	        argreg++;
+	    }
+	  /* Note: Floating-point values that didn't fit into an FP
+             register are only written to memory.  */
+	  while (len > 0)
+	    {
+	      /* Remember if the argument was written to the stack.  */
+	      int stack_used_p = 0;
+	      int partial_len = 
+		len < MIPS_SAVED_REGSIZE ? len : MIPS_SAVED_REGSIZE;
+
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
+				    partial_len);
+
+	      /* Write this portion of the argument to the stack.  */
+	      if (argreg > MIPS_LAST_ARG_REGNUM
+		  || odd_sized_struct
+		  || fp_register_arg_p (typecode, arg_type))
+		{
+		  /* Should shorter than int integer values be
+		     promoted to int before being stored? */
+		  int longword_offset = 0;
+		  CORE_ADDR addr;
+		  stack_used_p = 1;
+		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+		    {
+		      if (MIPS_STACK_ARGSIZE == 8 &&
+			  (typecode == TYPE_CODE_INT ||
+			   typecode == TYPE_CODE_PTR ||
+			   typecode == TYPE_CODE_FLT) && len <= 4)
+			longword_offset = MIPS_STACK_ARGSIZE - len;
+		    }
+
+		  if (mips_debug)
+		    {
+		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=0x%s",
+					  paddr_nz (stack_offset));
+		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%s",
+					  paddr_nz (longword_offset));
+		    }
+
+		  addr = sp + stack_offset + longword_offset;
+
+		  if (mips_debug)
+		    {
+		      int i;
+		      fprintf_unfiltered (gdb_stdlog, " @0x%s ", 
+					  paddr_nz (addr));
+		      for (i = 0; i < partial_len; i++)
+			{
+			  fprintf_unfiltered (gdb_stdlog, "%02x", 
+					      val[i] & 0xff);
+			}
+		    }
+		  write_memory (addr, val, partial_len);
+		}
+
+	      /* Note!!! This is NOT an else clause.  Odd sized
+	         structs may go thru BOTH paths.  Floating point
+	         arguments will not.  */
+	      /* Write this portion of the argument to a general
+                 purpose register.  */
+	      if (argreg <= MIPS_LAST_ARG_REGNUM
+		  && !fp_register_arg_p (typecode, arg_type))
+		{
+		  LONGEST regval = extract_signed_integer (val, partial_len);
+		  /* Value may need to be sign extended, because 
+		     MIPS_REGSIZE != MIPS_SAVED_REGSIZE.  */
+
+		  /* A non-floating-point argument being passed in a
+		     general register.  If a struct or union, and if
+		     the remaining length is smaller than the register
+		     size, we have to adjust the register value on
+		     big endian targets.
+
+		     It does not seem to be necessary to do the
+		     same for integral types.
+
+		     Also don't do this adjustment on O64 binaries.
+
+		     cagney/2001-07-23: gdb/179: Also, GCC, when
+		     outputting LE O32 with sizeof (struct) <
+		     MIPS_SAVED_REGSIZE, generates a left shift as
+		     part of storing the argument in a register a
+		     register (the left shift isn't generated when
+		     sizeof (struct) >= MIPS_SAVED_REGSIZE).  Since it
+		     is quite possible that this is GCC contradicting
+		     the LE/O32 ABI, GDB has not been adjusted to
+		     accommodate this.  Either someone needs to
+		     demonstrate that the LE/O32 ABI specifies such a
+		     left shift OR this new ABI gets identified as
+		     such and GDB gets tweaked accordingly.  */
+
+		  if (MIPS_SAVED_REGSIZE < 8
+		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		      && partial_len < MIPS_SAVED_REGSIZE
+		      && (typecode == TYPE_CODE_STRUCT ||
+			  typecode == TYPE_CODE_UNION))
+		    regval <<= ((MIPS_SAVED_REGSIZE - partial_len) *
+				TARGET_CHAR_BIT);
+
+		  if (mips_debug)
+		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
+				      argreg,
+				      phex (regval, MIPS_SAVED_REGSIZE));
+		  write_register (argreg, regval);
+		  argreg++;
+
+		  /* Prevent subsequent floating point arguments from
+		     being passed in floating point registers.  */
+		  float_argreg = MIPS_LAST_FP_ARG_REGNUM + 1;
+		}
+
+	      len -= partial_len;
+	      val += partial_len;
+
+	      /* Compute the the offset into the stack at which we
+		 will copy the next parameter.
+
+		 In older ABIs, the caller reserved space for
+		 registers that contained arguments.  This was loosely
+		 refered to as their "home".  Consequently, space is
+		 always allocated.  */
+
+	      stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+	    }
+	}
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stdlog, "\n");
+    }
+
+  /* Return adjusted stack pointer.  */
+  return sp;
+}
+
+/* O64 version of push_arguments.  */
+
+static CORE_ADDR
+mips_o64_push_arguments (int nargs,
+			 struct value **args,
+			 CORE_ADDR sp,
+			 int struct_return,
+			 CORE_ADDR struct_addr)
+{
+  int argreg;
+  int float_argreg;
+  int argnum;
+  int len = 0;
+  int stack_offset = 0;
+
+  /* First ensure that the stack and structure return address (if any)
+     are properly aligned.  The stack has to be at least 64-bit
+     aligned even on 32-bit machines, because doubles must be 64-bit
+     aligned.  For n32 and n64, stack frames need to be 128-bit
+     aligned, so we round to this widest known alignment.  */
+
+  sp = ROUND_DOWN (sp, 16);
+  struct_addr = ROUND_DOWN (struct_addr, 16);
+
+  /* Now make space on the stack for the args.  */
+  for (argnum = 0; argnum < nargs; argnum++)
+    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+		     MIPS_STACK_ARGSIZE);
+  sp -= ROUND_UP (len, 16);
+
+  if (mips_debug)
+    fprintf_unfiltered (gdb_stdlog, 
+			"mips_o64_push_arguments: sp=0x%s allocated %d\n",
+			paddr_nz (sp), ROUND_UP (len, 16));
+
+  /* Initialize the integer and float register pointers.  */
+  argreg = A0_REGNUM;
+  float_argreg = FPA0_REGNUM;
+
+  /* The struct_return pointer occupies the first parameter-passing reg.  */
+  if (struct_return)
+    {
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "mips_o64_push_arguments: struct_return reg=%d 0x%s\n",
+			    argreg, paddr_nz (struct_addr));
+      write_register (argreg++, struct_addr);
+      stack_offset += MIPS_STACK_ARGSIZE;
+    }
+
+  /* Now load as many as possible of the first arguments into
+     registers, and push the rest onto the stack.  Loop thru args
+     from first to last.  */
+  for (argnum = 0; argnum < nargs; argnum++)
+    {
+      char *val;
+      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      struct value *arg = args[argnum];
+      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      int len = TYPE_LENGTH (arg_type);
+      enum type_code typecode = TYPE_CODE (arg_type);
+
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "mips_o64_push_arguments: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
       val = (char *) VALUE_CONTENTS (arg);
@@ -4170,10 +4469,67 @@ return_value_location (struct type *valtype,
 /* Given a return value in `regbuf' with a type `valtype', extract and
    copy its value into `valbuf'. */
 
-void
-mips_extract_return_value (struct type *valtype,
-			   char regbuf[REGISTER_BYTES],
-			   char *valbuf)
+static void
+mips_eabi_extract_return_value (struct type *valtype,
+				char regbuf[REGISTER_BYTES],
+				char *valbuf)
+{
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &hi, &lo);
+
+  memcpy (valbuf + lo.buf_offset,
+	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  lo.len);
+
+  if (hi.len > 0)
+    memcpy (valbuf + hi.buf_offset,
+	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    hi.len);
+}
+
+static void
+mips_o32_extract_return_value (struct type *valtype,
+				char regbuf[REGISTER_BYTES],
+				char *valbuf)
+{
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &hi, &lo);
+
+  memcpy (valbuf + lo.buf_offset,
+	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  lo.len);
+
+  if (hi.len > 0)
+    memcpy (valbuf + hi.buf_offset,
+	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    hi.len);
+}
+
+static void
+mips_o64_extract_return_value (struct type *valtype,
+			       char regbuf[REGISTER_BYTES],
+			       char *valbuf)
+{
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &hi, &lo);
+
+  memcpy (valbuf + lo.buf_offset,
+	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  lo.len);
+
+  if (hi.len > 0)
+    memcpy (valbuf + hi.buf_offset,
+	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    hi.len);
+}
+
+static void
+mips_n32n64_extract_return_value (struct type *valtype,
+				  char regbuf[REGISTER_BYTES],
+				  char *valbuf)
 {
   struct return_value_word lo;
   struct return_value_word hi;
@@ -4192,8 +4548,80 @@ mips_extract_return_value (struct type *valtype,
 /* Given a return value in `valbuf' with a type `valtype', write it's
    value into the appropriate register. */
 
-void
-mips_store_return_value (struct type *valtype, char *valbuf)
+static void
+mips_eabi_store_return_value (struct type *valtype, char *valbuf)
+{
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &hi, &lo);
+
+  memset (raw_buffer, 0, sizeof (raw_buffer));
+  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
+  write_register_bytes (REGISTER_BYTE (lo.reg),
+			raw_buffer,
+			REGISTER_RAW_SIZE (lo.reg));
+
+  if (hi.len > 0)
+    {
+      memset (raw_buffer, 0, sizeof (raw_buffer));
+      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
+      write_register_bytes (REGISTER_BYTE (hi.reg),
+			    raw_buffer,
+			    REGISTER_RAW_SIZE (hi.reg));
+    }
+}
+
+static void
+mips_o32_store_return_value (struct type *valtype, char *valbuf)
+{
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &hi, &lo);
+
+  memset (raw_buffer, 0, sizeof (raw_buffer));
+  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
+  write_register_bytes (REGISTER_BYTE (lo.reg),
+			raw_buffer,
+			REGISTER_RAW_SIZE (lo.reg));
+
+  if (hi.len > 0)
+    {
+      memset (raw_buffer, 0, sizeof (raw_buffer));
+      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
+      write_register_bytes (REGISTER_BYTE (hi.reg),
+			    raw_buffer,
+			    REGISTER_RAW_SIZE (hi.reg));
+    }
+}
+
+static void
+mips_o64_store_return_value (struct type *valtype, char *valbuf)
+{
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  struct return_value_word lo;
+  struct return_value_word hi;
+  return_value_location (valtype, &hi, &lo);
+
+  memset (raw_buffer, 0, sizeof (raw_buffer));
+  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
+  write_register_bytes (REGISTER_BYTE (lo.reg),
+			raw_buffer,
+			REGISTER_RAW_SIZE (lo.reg));
+
+  if (hi.len > 0)
+    {
+      memset (raw_buffer, 0, sizeof (raw_buffer));
+      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
+      write_register_bytes (REGISTER_BYTE (hi.reg),
+			    raw_buffer,
+			    REGISTER_RAW_SIZE (hi.reg));
+    }
+}
+
+static void
+mips_n32n64_store_return_value (struct type *valtype, char *valbuf)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
   struct return_value_word lo;
@@ -5029,7 +5457,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
-      set_gdbarch_push_arguments (gdbarch, mips_o32o64_push_arguments);
+      set_gdbarch_push_arguments (gdbarch, mips_o32_push_arguments);
+      set_gdbarch_store_return_value (gdbarch, mips_o32_store_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_o32_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -5046,7 +5476,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_O64:
-      set_gdbarch_push_arguments (gdbarch, mips_o32o64_push_arguments);
+      set_gdbarch_push_arguments (gdbarch, mips_o64_push_arguments);
+      set_gdbarch_store_return_value (gdbarch, mips_o64_store_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_o64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -5064,6 +5496,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_EABI32:
       set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
+      set_gdbarch_store_return_value (gdbarch, mips_eabi_store_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -5081,6 +5515,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_EABI64:
       set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
+      set_gdbarch_store_return_value (gdbarch, mips_eabi_store_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -5098,6 +5534,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_N32:
       set_gdbarch_push_arguments (gdbarch, mips_n32n64_push_arguments);
+      set_gdbarch_store_return_value (gdbarch, mips_n32n64_store_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -5127,6 +5565,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_arguments (gdbarch, mips_n32n64_push_arguments);
+      set_gdbarch_store_return_value (gdbarch, mips_n32n64_store_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
