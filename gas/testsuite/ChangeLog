@@ -1,5 +1,7 @@
 Fri Apr  4 13:19:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/all/float.s: Put a tab before .text, to keep the PA happy.
+
 	* gas/arm/arm.exp: Only run inst and arm7t on targets which can
 	handle -EL.  Add setup_xfail for thumb.
 
