@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-11-02 15:30-0500\n"
+"POT-Creation-Date: 1998-11-09 11:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgstr ""
 msgid "unrecognized keyword/register name"
 msgstr ""
 
-#: cgen-asm.c:336 fr30-asm.c:312 m32r-asm.c:611
+#: cgen-asm.c:336 m32r-asm.c:635
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr ""
@@ -54,77 +54,6 @@ msgstr ""
 #: dis-buf.c:55
 #, c-format
 msgid "Address 0x%x is out of bounds.\n"
-msgstr ""
-
-#: fr30-asm.c:91 m32r-asm.c:303
-#, c-format
-msgid "Unrecognized field %d while parsing.\n"
-msgstr ""
-
-#: fr30-asm.c:134 m32r-asm.c:433
-#, c-format
-msgid "Unrecognized field %d while building insn.\n"
-msgstr ""
-
-#: fr30-asm.c:299 m32r-asm.c:598
-#, c-format
-msgid "operand out of range (%lu not between 0 and %lu)"
-msgstr ""
-
-#. We couldn't parse it.
-#: fr30-asm.c:512 fr30-asm.c:581 m32r-asm.c:811 m32r-asm.c:880
-msgid "unrecognized instruction"
-msgstr ""
-
-#. Syntax char didn't match.  Can't be this insn.
-#. FIXME: would like to return something like
-#. "expected char `c'"
-#: fr30-asm.c:549 m32r-asm.c:848
-msgid "syntax error"
-msgstr ""
-
-#: fr30-asm.c:575 m32r-asm.c:874
-msgid "junk at end of line"
-msgstr ""
-
-#: fr30-asm.c:719 m32r-asm.c:1018
-#, c-format
-msgid "bad instruction `%.50s...'"
-msgstr ""
-
-#: fr30-asm.c:722 m32r-asm.c:1021
-#, c-format
-msgid "bad instruction `%.50s'"
-msgstr ""
-
-#: fr30-dis.c:101 m32r-dis.c:271
-#, c-format
-msgid "Unrecognized field %d while decoding insn.\n"
-msgstr ""
-
-#: fr30-dis.c:144 m32r-dis.c:385
-#, c-format
-msgid "Unrecognized field %d while printing insn.\n"
-msgstr ""
-
-#: fr30-opc.c:576 m32r-opc.c:2922
-#, c-format
-msgid "Unrecognized field %d while getting int operand.\n"
-msgstr ""
-
-#: fr30-opc.c:602 m32r-opc.c:3019
-#, c-format
-msgid "Unrecognized field %d while getting vma operand.\n"
-msgstr ""
-
-#: fr30-opc.c:632 m32r-opc.c:3120
-#, c-format
-msgid "Unrecognized field %d while setting int operand.\n"
-msgstr ""
-
-#: fr30-opc.c:655 m32r-opc.c:3214
-#, c-format
-msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
 #: h8300-dis.c:404
@@ -161,6 +90,77 @@ msgstr ""
 #: m10300-dis.c:706
 #, c-format
 msgid "unknown\t0x%04x"
+msgstr ""
+
+#: m32r-asm.c:327
+#, c-format
+msgid "Unrecognized field %d while parsing.\n"
+msgstr ""
+
+#: m32r-asm.c:457
+#, c-format
+msgid "Unrecognized field %d while building insn.\n"
+msgstr ""
+
+#: m32r-asm.c:622
+#, c-format
+msgid "operand out of range (%lu not between 0 and %lu)"
+msgstr ""
+
+#. We couldn't parse it.
+#: m32r-asm.c:835 m32r-asm.c:904
+msgid "unrecognized instruction"
+msgstr ""
+
+#. Syntax char didn't match.  Can't be this insn.
+#. FIXME: would like to return something like
+#. "expected char `c'"
+#: m32r-asm.c:872
+msgid "syntax error"
+msgstr ""
+
+#: m32r-asm.c:898
+msgid "junk at end of line"
+msgstr ""
+
+#: m32r-asm.c:1042
+#, c-format
+msgid "bad instruction `%.50s...'"
+msgstr ""
+
+#: m32r-asm.c:1045
+#, c-format
+msgid "bad instruction `%.50s'"
+msgstr ""
+
+#: m32r-dis.c:271
+#, c-format
+msgid "Unrecognized field %d while decoding insn.\n"
+msgstr ""
+
+#: m32r-dis.c:385
+#, c-format
+msgid "Unrecognized field %d while printing insn.\n"
+msgstr ""
+
+#: m32r-opc.c:2922
+#, c-format
+msgid "Unrecognized field %d while getting int operand.\n"
+msgstr ""
+
+#: m32r-opc.c:3019
+#, c-format
+msgid "Unrecognized field %d while getting vma operand.\n"
+msgstr ""
+
+#: m32r-opc.c:3120
+#, c-format
+msgid "Unrecognized field %d while setting int operand.\n"
+msgstr ""
+
+#: m32r-opc.c:3214
+#, c-format
+msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
 #: m68k-dis.c:410
