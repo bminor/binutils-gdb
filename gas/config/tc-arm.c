@@ -56,6 +56,7 @@
 #define ARM_EXT_V5	0x00000080	/* Allow CLZ, etc.         */
 #define ARM_EXT_V5E	0x00000100	/* "El Segundo". 	   */
 #define ARM_EXT_XSCALE	0x00000200	/* Allow MIA etc.  	   */
+#define ARM_EXT_MAVERIK 0x00000400      /* Use Cirrus/DSP coprocessor.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define ARM_ARCH_V3M     ARM_EXT_LONGMUL
@@ -579,6 +580,17 @@ static CONST struct asm_psr psrs[] =
   {"SPSR_cxsf",	false, PSR_c | PSR_x | PSR_s | PSR_f},
 };
 
+enum cirrus_regtype
+  {
+    CIRRUS_REGTYPE_MVF   = 1,
+    CIRRUS_REGTYPE_MVFX  = 2,
+    CIRRUS_REGTYPE_MVD   = 3,
+    CIRRUS_REGTYPE_MVDX  = 4,
+    CIRRUS_REGTYPE_MVAX  = 5,
+    CIRRUS_REGTYPE_DSPSC = 6,
+    CIRRUS_REGTYPE_ANY   = 7
+  };
+
 /* Functions called by parser.  */
 /* ARM instructions.  */
 static void do_arit		PARAMS ((char *, unsigned long));
@@ -642,6 +654,31 @@ static void do_fp_cmp		PARAMS ((char *, unsigned long));
 static void do_fp_from_reg	PARAMS ((char *, unsigned long));
 static void do_fp_to_reg	PARAMS ((char *, unsigned long));
 
+/* ARM_EXT_MAVERIK.  */
+static void do_c_binops		PARAMS ((char *, unsigned long, int));
+static void do_c_binops_1	PARAMS ((char *, unsigned long));
+static void do_c_binops_2	PARAMS ((char *, unsigned long));
+static void do_c_binops_3	PARAMS ((char *, unsigned long));
+static void do_c_triple		PARAMS ((char *, unsigned long, int));
+static void do_c_triple_4	PARAMS ((char *, unsigned long));
+static void do_c_triple_5	PARAMS ((char *, unsigned long));
+static void do_c_quad		PARAMS ((char *, unsigned long, int));
+static void do_c_quad_6		PARAMS ((char *, unsigned long));
+static void do_c_dspsc		PARAMS ((char *, unsigned long, int));
+static void do_c_dspsc_1	PARAMS ((char *, unsigned long));
+static void do_c_dspsc_2	PARAMS ((char *, unsigned long));
+static void do_c_shift		PARAMS ((char *, unsigned long, int));
+static void do_c_shift_1	PARAMS ((char *, unsigned long));
+static void do_c_shift_2	PARAMS ((char *, unsigned long));
+static void do_c_ldst		PARAMS ((char *, unsigned long, int));
+static void do_c_ldst_1		PARAMS ((char *, unsigned long));
+static void do_c_ldst_2		PARAMS ((char *, unsigned long));
+static void do_c_ldst_3		PARAMS ((char *, unsigned long));
+static void do_c_ldst_4		PARAMS ((char *, unsigned long));
+static int cirrus_reg_required_here	PARAMS ((char **, int, enum cirrus_regtype));
+static int cirrus_valid_reg	PARAMS ((int, enum cirrus_regtype));
+static int cirrus_parse_offset	PARAMS ((char **, int *));
+
 static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *, int, int));
 static int arm_reg_parse	PARAMS ((char **));
 static CONST struct asm_psr * arm_psr_parse PARAMS ((char **));
@@ -693,7 +730,25 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 /* LONGEST_INST is the longest basic instruction name without
    conditions or flags.  ARM7M has 4 of length 5.  El Segundo
    has one basic instruction name of length 7 (SMLALxy).  */
-#define LONGEST_INST 7
+#define LONGEST_INST 10
+
+/* "INSN<cond> X,Y" where X:bit12, Y:bit16.  */
+#define CIRRUS_MODE1	0x100c
+
+/* "INSN<cond> X,Y" where X:bit16, Y:bit12.  */
+#define CIRRUS_MODE2	0x0c10
+
+/* "INSN<cond> X,Y" where X:0, Y:bit16.  */
+#define CIRRUS_MODE3	0x1000
+
+/* "INSN<cond> X,Y,Z" where X:16, Y:0, Z:12.  */
+#define CIRRUS_MODE4	0x0c0010
+
+/* "INSN<cond> X,Y,Z" where X:12, Y:16, Z:0.  */
+#define CIRRUS_MODE5	0x00100c
+
+/* "INSN<cond> W,X,Y,Z" where W:5, X:12, Y:16, Z:0.  */
+#define CIRRUS_MODE6	0x00100c05
 
 struct asm_opcode
 {
@@ -885,6 +940,84 @@ static CONST struct asm_opcode insns[] =
 
   {"mcrr",  0x0c400000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
   {"mrrc",  0x0c500000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
+
+  /* Cirrus DSP instructions.  */
+  {"cfldrs",	0x0c100400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_1},
+  {"cfldrd",	0x0c500400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_2},
+  {"cfldr32",	0x0c100500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_3},
+  {"cfldr64",	0x0c500500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_4},
+  {"cfstrs",	0x0c000400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_1},
+  {"cfstrd",	0x0c400400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_2},
+  {"cfstr32",	0x0c000500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_3},
+  {"cfstr64",	0x0c400500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_4},
+  {"cfmvsr",	0x0e000450,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
+  {"cfmvrs",	0x0e100450,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfmvdlr",	0x0e000410,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
+  {"cfmvrdl",	0x0e100410,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfmvdhr",	0x0e000430,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
+  {"cfmvrdh",	0x0e100430,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfmv64lr",	0x0e000510,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
+  {"cfmvr64l",	0x0e100510,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfmv64hr",	0x0e000530,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
+  {"cfmvr64h",	0x0e100530,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfmval32",	0x0e100610,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmv32al",	0x0e000610,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmvam32",	0x0e100630,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmv32am",	0x0e000630,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmvah32",	0x0e100650,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmv32ah",	0x0e000650,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmv32a",	0x0e000670,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmva32",	0x0e100670,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmv64a",	0x0e000690,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmva64",	0x0e100690,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
+  {"cfmvsc32",	0x0e1006b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_dspsc_1},
+  {"cfmv32sc",	0x0e0006b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_dspsc_2},
+  {"cfcpys",	0x0e000400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcpyd",	0x0e000420,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvtsd",	0x0e000460,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvtds",	0x0e000440,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvt32s",	0x0e000480,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvt32d",	0x0e0004a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvt64s",	0x0e0004c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvt64d",	0x0e0004e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvts32",	0x0e100580,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfcvtd32",	0x0e1005a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cftruncs32",0x0e1005c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cftruncd32",0x0e1005e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfrshl32",	0x0e000550,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_4},
+  {"cfrshl64",	0x0e000570,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_4},
+  {"cfsh32",	0x0e000500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_shift_1},
+  {"cfsh64",	0x0e200500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_shift_2},
+  {"cfcmps",	0x0e100490,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfcmpd",	0x0e1004b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfcmp32",	0x0e100590,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfcmp64",	0x0e1005b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfabss",	0x0e300400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfabsd",	0x0e300420,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfnegs",	0x0e300440,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfnegd",	0x0e300460,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfadds",	0x0e300480,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfaddd",	0x0e3004a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfsubs",	0x0e3004c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfsubd",	0x0e3004e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmuls",	0x0e100400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmuld",	0x0e100420,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfabs32",	0x0e300500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfabs64",	0x0e300520,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfneg32",	0x0e300540,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfneg64",	0x0e300560,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
+  {"cfadd32",	0x0e300580,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfadd64",	0x0e3005a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfsub32",	0x0e3005c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfsub64",	0x0e3005e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmul32",	0x0e100500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmul64",	0x0e100520,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmac32",	0x0e100540,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmsc32",	0x0e100560,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
+  {"cfmadd32",	0x0e000600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
+  {"cfmsub32",	0x0e100600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
+  {"cfmadda32",	0x0e200600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
+  {"cfmsuba32",	0x0e300600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -1115,6 +1248,16 @@ struct reg_entry
 #define cp_register(reg) ((reg) >= 32 && (reg) <= 47)
 #define fp_register(reg) ((reg) >= 16 && (reg) <= 23)
 
+#define ARM_EXT_MAVERIKSC_REG	134
+
+#define cirrus_register(reg)		((reg) >= 50 && (reg) <= 134)
+#define cirrus_mvf_register(reg)	((reg) >= 50 && (reg) <= 65)
+#define cirrus_mvd_register(reg)	((reg) >= 70 && (reg) <= 85)
+#define cirrus_mvfx_register(reg)	((reg) >= 90 && (reg) <= 105)
+#define cirrus_mvdx_register(reg)	((reg) >= 110 && (reg) <= 125)
+#define cirrus_mvax_register(reg)	((reg) >= 130 && (reg) <= 133)
+#define ARM_EXT_MAVERIKsc_register(reg) 	((reg) == ARM_EXT_MAVERIKSC_REG)
+
 #define REG_PC	15
 #define REG_LR  14
 #define REG_SP  13
@@ -1150,6 +1293,25 @@ static CONST struct reg_entry reg_table[] =
   {"s4",20},	{"s5",21},	{"s6",22},	{"s7",23},
   {"d0",16},	{"d1",17},	{"d2",18},	{"d3",19},
   {"d4",20},	{"d5",21},	{"d6",22},	{"d7",23},
+  /* Cirrus DSP coprocessor registers.  */
+  {"mvf0", 50},	{"mvf1", 51},	{"mvf2", 52},	{"mvf3", 53},
+  {"mvf4", 54},	{"mvf5", 55},	{"mvf6", 56},	{"mvf7", 57},
+  {"mvf8", 58},	{"mvf9", 59},	{"mvf10", 60},	{"mvf11", 61},
+  {"mvf12", 62},{"mvf13", 63},	{"mvf14", 64},	{"mvf15", 65},
+  {"mvd0", 70},	{"mvd1", 71},	{"mvd2", 72},	{"mvd3", 73},
+  {"mvd4", 74},	{"mvd5", 75},	{"mvd6", 76},	{"mvd7", 77},
+  {"mvd8", 78},	{"mvd9", 79},	{"mvd10", 80},	{"mvd11", 81},
+  {"mvd12", 82},{"mvd13", 83},	{"mvd14", 84},	{"mvd15", 85},
+  {"mvfx0", 90},{"mvfx1", 91},	{"mvfx2", 92},	{"mvfx3", 93},
+  {"mvfx4", 94},{"mvfx5", 95},	{"mvfx6", 96},	{"mvfx7", 97},
+  {"mvfx8", 98},{"mvfx9", 99},	{"mvfx10", 100},{"mvfx11", 101},
+  {"mvfx12", 102},{"mvfx13", 103},{"mvfx14", 104},{"mvfx15", 105},
+  {"mvdx0", 110}, {"mvdx1", 111}, {"mvdx2", 112}, {"mvdx3", 113},
+  {"mvdx4", 114}, {"mvdx5", 115}, {"mvdx6", 116}, {"mvdx7", 117},
+  {"mvdx8", 118}, {"mvdx9", 119}, {"mvdx10", 120},{"mvdx11", 121},
+  {"mvdx12", 122},{"mvdx13", 123},{"mvdx14", 124},{"mvdx15", 125},
+  {"mvax0", 130}, {"mvax1", 131}, {"mvax2", 132}, {"mvax3", 133},
+  {"dspsc", ARM_EXT_MAVERIKSC_REG},
   /* FIXME: At some point we need to add VFP register names.  */
   /* Array terminator.  */
   {NULL, 0}
@@ -5982,6 +6144,581 @@ thumb_load_store (str, load_store, size)
   end_of_line (str);
 }
 
+/* Given a register and a register type, return 1 if
+   the register is of the given type, else return 0.  */
+
+static int
+cirrus_valid_reg (reg, regtype)
+     int reg;
+     enum cirrus_regtype regtype;
+{
+  switch (regtype)
+    {
+    case CIRRUS_REGTYPE_ANY:
+      return 1;
+
+    case CIRRUS_REGTYPE_MVF:
+      return cirrus_mvf_register (reg);
+
+    case CIRRUS_REGTYPE_MVFX:
+      return cirrus_mvfx_register (reg);
+
+    case CIRRUS_REGTYPE_MVD:
+      return cirrus_mvd_register (reg);
+
+    case CIRRUS_REGTYPE_MVDX:
+      return cirrus_mvdx_register (reg);
+
+    case CIRRUS_REGTYPE_MVAX:
+      return cirrus_mvax_register (reg);
+
+    case CIRRUS_REGTYPE_DSPSC:
+      return ARM_EXT_MAVERIKsc_register (reg);
+    }
+
+  return 0;
+}
+
+/* A register must be given at this point.
+
+   If the register is a Cirrus register, convert it's reg# appropriately.
+
+   Shift is the place to put it in inst.instruction.
+
+   regtype is type register type expected, and is:
+   	CIRRUS_REGTYPE_MVF
+   	CIRRUS_REGTYPE_MVFX
+   	CIRRUS_REGTYPE_MVD
+   	CIRRUS_REGTYPE_MVDX
+   	CIRRUS_REGTYPE_MVAX
+   	CIRRUS_REGTYPE_DSPSC
+
+   Restores input start point on err.
+   Returns the reg#, or FAIL.  */
+
+static int
+cirrus_reg_required_here (str, shift, regtype)
+     char ** str;
+     int shift;
+     enum cirrus_regtype regtype;
+{
+  static char buff [135]; /* XXX */
+  int         reg;
+  char *      start = * str;
+
+  if ((reg = arm_reg_parse (str)) != FAIL
+      && (int_register (reg)
+	  || cirrus_register (reg)))
+    {
+      int orig_reg = reg;
+
+      /* Calculate actual register # for opcode.  */
+      if (cirrus_register (reg)
+	  && !ARM_EXT_MAVERIKsc_register (reg)) /* Leave this one as is.  */
+	{
+	  if (reg >= 130)
+	    reg -= 130;
+	  else if (reg >= 110)
+	    reg -= 110;
+	  else if (reg >= 90)
+	    reg -= 90;
+	  else if (reg >= 70)
+	    reg -= 70;
+	  else if (reg >= 50)
+	    reg -= 50;
+	}
+
+      if (!cirrus_valid_reg (orig_reg, regtype))
+	{
+	  sprintf (buff, _("invalid register type at '%.100s'"), start);
+	  inst.error = buff;
+	  return FAIL;
+	}
+
+      if (shift >= 0)
+	inst.instruction |= reg << shift;
+
+      return orig_reg;
+    }
+
+  /* Restore the start point, we may have got a reg of the wrong class.  */
+  *str = start;
+  
+  /* In the few cases where we might be able to accept something else
+     this error can be overridden.  */
+  sprintf (buff, _("Cirrus register expected, not '%.100s'"), start);
+  inst.error = buff;
+  
+  return FAIL;
+}
+
+/* Cirrus Instructions.  */
+
+/* Wrapper functions.  */
+
+static void
+do_c_binops_1 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_binops (str, flags, CIRRUS_MODE1);
+}
+
+static void
+do_c_binops_2 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_binops (str, flags, CIRRUS_MODE2);
+}
+
+static void
+do_c_binops_3 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_binops (str, flags, CIRRUS_MODE3);
+}
+
+static void
+do_c_triple_4 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_triple (str, flags, CIRRUS_MODE4);
+}
+
+static void
+do_c_triple_5 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_triple (str, flags, CIRRUS_MODE5);
+}
+
+static void
+do_c_quad_6 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_quad (str, flags, CIRRUS_MODE6);
+}
+
+static void
+do_c_dspsc_1 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_dspsc (str, flags, CIRRUS_MODE1);
+}
+
+static void
+do_c_dspsc_2 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_dspsc (str, flags, CIRRUS_MODE2);
+}
+
+static void
+do_c_shift_1 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_shift (str, flags, CIRRUS_MODE1);
+}
+
+static void
+do_c_shift_2 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_shift (str, flags, CIRRUS_MODE2);
+}
+
+static void
+do_c_ldst_1 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_ldst (str, flags, CIRRUS_MODE1);
+}
+
+static void
+do_c_ldst_2 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_ldst (str, flags, CIRRUS_MODE2);
+}
+
+static void
+do_c_ldst_3 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_ldst (str, flags, CIRRUS_MODE3);
+}
+
+static void
+do_c_ldst_4 (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  do_c_ldst (str, flags, CIRRUS_MODE4);
+}
+
+/* Isnsn like "foo X,Y".  */
+
+static void
+do_c_binops (str, flags, mode)
+     char * str;
+     unsigned long flags;
+     int mode;
+{
+  int shift1, shift2;
+
+  shift1 = mode & 0xff;
+  shift2 = (mode >> 8) & 0xff;
+
+  skip_whitespace (str);
+
+  if (cirrus_reg_required_here (&str, shift1, CIRRUS_REGTYPE_ANY) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, shift2, CIRRUS_REGTYPE_ANY) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else
+    end_of_line (str);
+  
+  inst.instruction |= flags;
+  return;
+}
+
+/* Isnsn like "foo X,Y,Z".  */
+
+static void
+do_c_triple (str, flags, mode)
+     char * str;
+     unsigned long flags;
+     int mode;
+{
+  int shift1, shift2, shift3;
+
+  shift1 = mode & 0xff;
+  shift2 = (mode >> 8) & 0xff;
+  shift3 = (mode >> 16) & 0xff;
+
+  skip_whitespace (str);
+
+  if (cirrus_reg_required_here (&str, shift1, CIRRUS_REGTYPE_ANY) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, shift2, CIRRUS_REGTYPE_ANY) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, shift3, CIRRUS_REGTYPE_ANY) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else
+    end_of_line (str);
+  
+  inst.instruction |= flags;
+  return;
+}
+
+/* Isnsn like "foo W,X,Y,Z".
+    where W=MVAX[0:3] and X,Y,Z=MVFX[0:15].  */
+
+static void
+do_c_quad (str, flags, mode)
+     char * str;
+     unsigned long flags;
+     int mode;
+{
+  int shift1, shift2, shift3, shift4;
+  enum cirrus_regtype rt;
+
+  rt = (inst.instruction << 4 == 0xe2006000
+	|| inst.instruction << 4 == 0xe3006000) ? CIRRUS_REGTYPE_MVAX
+    : CIRRUS_REGTYPE_MVFX;
+
+  shift1 = mode & 0xff;
+  shift2 = (mode >> 8) & 0xff;
+  shift3 = (mode >> 16) & 0xff;
+  shift4 = (mode >> 24) & 0xff;
+
+  skip_whitespace (str);
+
+  if (cirrus_reg_required_here (&str, shift1, CIRRUS_REGTYPE_MVAX) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, shift2, rt) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, shift3, CIRRUS_REGTYPE_MVFX) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, shift4, CIRRUS_REGTYPE_MVFX) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else
+    end_of_line (str);
+  
+  inst.instruction |= flags;
+  return;
+}
+
+/* cfmvsc32<cond> DSPSC,MVFX[15:0].
+   cfmv32sc<cond> MVFX[15:0],DSPSC.  */
+
+static void
+do_c_dspsc (str, flags, mode)
+     char * str;
+     unsigned long flags;
+     int mode;
+{
+  int error;
+
+  skip_whitespace (str);
+
+  error = 0;
+
+  if (mode == CIRRUS_MODE1)
+    {
+      /* cfmvsc32.  */
+      if (cirrus_reg_required_here (&str, -1, CIRRUS_REGTYPE_DSPSC) == FAIL
+	  || skip_past_comma (&str) == FAIL
+	  || cirrus_reg_required_here (&str, 16, CIRRUS_REGTYPE_MVFX) == FAIL)
+	error = 1;
+    }
+  else
+    {
+      /* cfmv32sc.  */
+      if (cirrus_reg_required_here (&str, 0, CIRRUS_REGTYPE_MVFX) == FAIL
+	  || skip_past_comma (&str) == FAIL
+	  || cirrus_reg_required_here (&str, -1, CIRRUS_REGTYPE_DSPSC) == FAIL)
+	error = 1;
+    }
+
+  if (error)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else
+    {
+      inst.instruction |= flags;
+      end_of_line (str);
+    }
+
+  return;
+}
+
+/* Cirrus shift immediate instructions.
+   cfsh32<cond> MVFX[15:0],MVFX[15:0],Shift[6:0].
+   cfsh64<cond> MVDX[15:0],MVDX[15:0],Shift[6:0].  */
+
+static void
+do_c_shift (str, flags, mode)
+     char * str;
+     unsigned long flags;
+     int mode;
+{
+  int error;
+  int imm, neg = 0;
+
+  skip_whitespace (str);
+
+  error = 0;
+
+  if (cirrus_reg_required_here (&str, 12,
+				(mode == CIRRUS_MODE1)
+				? CIRRUS_REGTYPE_MVFX
+				: CIRRUS_REGTYPE_MVDX) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, 16,
+				   (mode == CIRRUS_MODE1)
+				   ? CIRRUS_REGTYPE_MVFX
+				   : CIRRUS_REGTYPE_MVDX) == FAIL
+      || skip_past_comma  (&str) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Calculate the immediate operand.
+     The operand is a 7bit signed number.  */
+  skip_whitespace (str);
+
+  if (*str == '#')
+    ++str;
+
+  if (!isdigit (*str) && *str != '-')
+    {
+      inst.error = _("expecting immediate, 7bit operand");
+      return;
+    }
+
+  if (*str == '-')
+    {
+      neg = 1;
+      ++str;
+    }
+
+  for (imm = 0; *str && isdigit (*str); ++str)
+    imm = imm * 10 + *str - '0';
+
+  if (imm > 64)
+    {
+      inst.error = _("immediate out of range");
+      return;
+    }
+
+  /* Make negative imm's into 7bit signed numbers.  */
+  if (neg)
+    {
+      imm = -imm;
+      imm &= 0x0000007f;
+    }
+
+  /* Bits 0-3 of the insn should have bits 0-3 of the immediate.
+     Bits 5-7 of the insn should have bits 4-6 of the immediate.
+     Bit 4 should be 0.  */
+  imm = (imm & 0xf) | ((imm & 0x70) << 1);
+
+  inst.instruction |= imm;
+  inst.instruction |= flags;
+
+  end_of_line (str);
+
+  return;
+}
+
+static int
+cirrus_parse_offset (str, negative)
+     char ** str;
+     int *negative;
+{
+  char * p = *str;
+  int offset;
+
+  *negative = 0;
+
+  skip_whitespace (p);
+
+  if (*p == '#')
+    ++p;
+
+  if (*p == '-')
+    {
+      *negative = 1;
+      ++p;
+    }
+
+  if (!isdigit (*p))
+    {
+      inst.error = _("offset expected");
+      return 0;
+    }
+
+  for (offset = 0; *p && isdigit (*p); ++p)
+    offset = offset * 10 + *p - '0';
+
+  if (offset > 0xff)
+    {
+      inst.error = _("offset out of range");
+      return 0;
+    }
+
+  *str = p;
+
+  return *negative ? -offset : offset;
+}
+
+/* Cirrus load/store instructions.
+  <insn><cond> CRd,[Rn,<offset>]{!}.
+  <insn><cond> CRd,[Rn],<offset>.  */
+
+static void
+do_c_ldst (str, flags, mode)
+     char * str;
+     unsigned long flags;
+     int mode;
+{
+  int offset, negative;
+  enum cirrus_regtype rt;
+
+  rt = mode == CIRRUS_MODE1 ? CIRRUS_REGTYPE_MVF
+    : mode == CIRRUS_MODE2 ? CIRRUS_REGTYPE_MVD
+    : mode == CIRRUS_MODE3 ? CIRRUS_REGTYPE_MVFX
+    : mode == CIRRUS_MODE4 ? CIRRUS_REGTYPE_MVDX : CIRRUS_REGTYPE_MVF;
+
+  skip_whitespace (str);
+
+  if (cirrus_reg_required_here (& str, 12, rt) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || *str++ != '['
+      || reg_required_here (& str, 16) == FAIL)
+    goto fail_ldst;
+
+  if (skip_past_comma (& str) == SUCCESS)
+    {
+      /* You are here: "<offset>]{!}".  */
+      inst.instruction |= PRE_INDEX;
+
+      offset = cirrus_parse_offset (&str, &negative);
+
+      if (inst.error)
+	return;
+
+      if (*str++ != ']')
+	{
+	  inst.error = _("missing ]");
+	  return;
+	}
+
+      if (*str == '!')
+	{
+	  inst.instruction |= WRITE_BACK;
+	  ++str;
+	}
+    }
+  else
+    {
+      /* You are here: "], <offset>".  */
+      if (*str++ != ']')
+	{
+	  inst.error = _("missing ]");
+	  return;
+	}
+
+      if (skip_past_comma (&str) == FAIL
+	  || (offset = cirrus_parse_offset (&str, &negative), inst.error))
+	goto fail_ldst;
+
+      inst.instruction |= CP_T_WB; /* Post indexed, set bit W.  */
+    }
+
+  if (negative)
+    offset = -offset;
+  else
+    inst.instruction |= CP_T_UD; /* Postive, so set bit U.  */
+
+  inst.instruction |= offset >> 2;
+  inst.instruction |= flags;
+
+  end_of_line (str);
+  return;
+
+fail_ldst:
+  if (!inst.error)
+     inst.error = BAD_ARGS;
+  return;
+}
+
 static void
 do_t_nop (str)
      char * str;
@@ -7907,6 +8644,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
               -m[arm]7[xx][t][[d]m]   Arm 7 processors
               -m[arm]8[10]            Arm 8 processors
               -m[arm]9[20][tdmi]      Arm 9 processors
+              -marm9e                 Allow Cirrus/DSP instructions
               -mstrongarm[110[0]]     StrongARM processors
               -mxscale                XScale processors
               -m[arm]v[2345[t[e]]]    Arm architectures
@@ -8189,6 +8927,9 @@ md_parse_option (c, arg)
 	      else if (streq (str, "9tdmi"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
 		  | ARM_9 | ARM_ARCH_V4T;
+	      else if (streq (str, "9e"))
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_9 | ARM_ARCH_V4T | ARM_EXT_MAVERIK;
 	      else
 		goto bad;
 	      break;
@@ -8304,6 +9045,7 @@ md_show_usage (fp)
  ARM Specific Assembler Options:\n\
   -m[arm][<processor name>] select processor variant\n\
   -m[arm]v[2|2a|3|3m|4|4t|5[t][e]] select architecture variant\n\
+  -marm9e                   allow Cirrus/DSP instructions\n\
   -mthumb                   only allow Thumb instructions\n\
   -mthumb-interwork         mark the assembled code as supporting interworking\n\
   -mall                     allow any instruction\n\

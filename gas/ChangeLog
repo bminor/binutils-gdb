@@ -2,6 +2,51 @@
 
 	* doc/arm/c-arm.texi (ARM Options): Add arm9e documentation.
 
+	* config/tc-arm.c (ARM_EXT_MAVERIK): New macro.
+	(cirrus_regtype): New enum.
+	(LONGEST_INST): Change to 10.
+	(CIRRUS_MODE1): New.
+	(CIRRUS_MODE2): New.
+	(CIRRUS_MODE3): New.
+	(CIRRUS_MODE4): New.
+	(CIRRUS_MODE5): New.
+	(CIRRUS_MODE6): New.
+	(insns): Add cirrus dsp instructions.
+	(ARM_EXT_MAVERIKSC_REG): New.
+	(cirrus_register): New.
+	(cirrus_mvf_register): New.
+	(cirrus_mvd_register): New.
+	(cirrus_mvfx_register): New.
+	(cirrus_mvdx_register): New.
+	(cirrus_mvax_register): New.
+	(ARM_EXT_MAVERIKsc_register): New.
+	(reg_table): Add cirrus registers.
+	(cirrus_valid_reg): New.
+	(cirrus_reg_required_here): New.
+	(do_c_binops_1): New.
+	(do_c_binops_2): New.
+	(do_c_binops_3): New.
+	(do_c_triple_4): New.
+	(do_c_triple_5): New.
+	(do_c_quad_6): New.
+	(do_c_dspsc_1): New.
+	(do_c_dspsc_2): New.
+	(do_c_shift_1): New.
+	(do_c_shift_2): New.
+	(do_c_ldst_1): New.
+	(do_c_ldst_2): New.
+	(do_c_ldst_3): New.
+	(do_c_ldst_4): New.
+	(do_c_binops): New.
+	(do_c_triple): New.
+	(do_c_quad): New.
+	(do_c_dspsc): New.
+	(do_c_shift): New.
+	(cirrus_parse_offset): New.
+	(do_c_ldst): New.
+	(md_parse_option): Add arm9e.
+	(md_show_usage): Same.
+
 2001-10-08  Tom Rix <trix@redhat.com>
 
 	* config/tc-ppc (ppc_bf, ppc_biei) : Set first .bi lineno value to 
