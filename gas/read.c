@@ -3163,6 +3163,8 @@ pseudo_set (symbolP)
       if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section
 	  || exp.X_add_number != 0)
 	symbol_set_value_expression (symbolP, &exp);
+      else if (symbol_section_p (symbolP))
+	as_bad ("invalid attempt to set value of section symbol");
       else
 	{
 	  symbolS *s = exp.X_add_symbol;

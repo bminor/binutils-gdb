@@ -1,5 +1,8 @@
 1999-11-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* read.c (pseudo_set): Reject attempts to set the value of a
+	section symbol.
+
 	* config/obj-elf.c (obj_elf_ident): Call md_flush_pending_output
 	if it is defined.
 
