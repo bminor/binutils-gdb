@@ -20,7 +20,8 @@
  * Symbol-entry.  For each external in the specified file we gather
  * its address, the number of calls and compute its share of cpu time.
  */
-typedef struct sym {
+typedef struct sym
+  {
     /*
      * Common information:
      *
@@ -28,61 +29,72 @@ typedef struct sym {
      * to contain valid information.  FILE may be 0, if unknown and
      * LINE_NUM maybe 0 if unknown.
      */
-    bfd_vma		addr;		/* address of entry point */
-    bfd_vma		end_addr;	/* end-address */
-    const char		*name;		/* name of function this sym is from */
-    Source_File		*file;		/* source file symbol comes from */
-    int			line_num;	/* source line number */
-    unsigned int	is_func	   : 1,	/* is this a function entry point? */
-			is_static  : 1,	/* is this a local (static) symbol? */
-			is_bb_head : 1;	/* is this the head of a basic-blk? */
-    int			ncalls;		/* how many times executed */
-    struct sym		*next;		/* for building chains of syms */
+    bfd_vma addr;		/* address of entry point */
+    bfd_vma end_addr;		/* end-address */
+    const char *name;		/* name of function this sym is from */
+    Source_File *file;		/* source file symbol comes from */
+    int line_num;		/* source line number */
+    unsigned int is_func:1,	/* is this a function entry point? */
+      is_static:1,		/* is this a local (static) symbol? */
+      is_bb_head:1;		/* is this the head of a basic-blk? */
+    int ncalls;			/* how many times executed */
+    struct sym *next;		/* for building chains of syms */
 
     /* profile-specific information: */
 
     /* histogram specific info: */
-    struct {
-	double		time;		/* (weighted) ticks in this routine */
-	bfd_vma	scaled_addr;	/* scaled entry point */
-    } hist;
+    struct
+      {
+	double time;		/* (weighted) ticks in this routine */
+	bfd_vma scaled_addr;	/* scaled entry point */
+      }
+    hist;
 
     /* call-graph specific info: */
-    struct {
-	int		self_calls;	/* how many calls to self */
-	double		child_time;	/* cumulative ticks in children */
-	int		index;		/* index in the graph list */
-	int		top_order;	/* graph call chain top-sort order */
-	bool		print_flag;	/* should this be printed? */
-	struct {
-	    double	fract;		/* what % of time propagates */
-	    double	self;		/* how much self time propagates */
-	    double	child;		/* how much child time propagates */
-	} prop;
-	struct {
-	    int		num;		/* internal number of cycle on */
-	    struct sym	*head;		/* head of cycle */
-	    struct sym	*next;		/* next member of cycle */
-	} cyc;
-	struct arc	*parents;	/* list of caller arcs */
-	struct arc	*children;	/* list of callee arcs */
-    } cg;
-} Sym;
+    struct
+      {
+	int self_calls;		/* how many calls to self */
+	double child_time;	/* cumulative ticks in children */
+	int index;		/* index in the graph list */
+	int top_order;		/* graph call chain top-sort order */
+	bool print_flag;	/* should this be printed? */
+	struct
+	  {
+	    double fract;	/* what % of time propagates */
+	    double self;	/* how much self time propagates */
+	    double child;	/* how much child time propagates */
+	  }
+	prop;
+	struct
+	  {
+	    int num;		/* internal number of cycle on */
+	    struct sym *head;	/* head of cycle */
+	    struct sym *next;	/* next member of cycle */
+	  }
+	cyc;
+	struct arc *parents;	/* list of caller arcs */
+	struct arc *children;	/* list of callee arcs */
+      }
+    cg;
+  }
+Sym;
 
 /*
  * Symbol-tables are always assumed to be sorted in increasing order
  * of addresses:
  */
-typedef struct {
-    int len;	/* # of symbols in this table */
-    Sym *base;	/* first element in symbol table */
-    Sym *limit;	/* limit = base + len */
-} Sym_Table;
+typedef struct
+  {
+    int len;			/* # of symbols in this table */
+    Sym *base;			/* first element in symbol table */
+    Sym *limit;			/* limit = base + len */
+  }
+Sym_Table;
 
-extern Sym_Table symtab;		/* the symbol table */
+extern Sym_Table symtab;	/* the symbol table */
 
-extern void sym_init PARAMS((Sym *sym));
-extern void symtab_finalize PARAMS((Sym_Table *symtab));
-extern Sym *sym_lookup PARAMS((Sym_Table *symtab, bfd_vma address));
+extern void sym_init PARAMS ((Sym * sym));
+extern void symtab_finalize PARAMS ((Sym_Table * symtab));
+extern Sym *sym_lookup PARAMS ((Sym_Table * symtab, bfd_vma address));
 
 #endif /* symtab_h */

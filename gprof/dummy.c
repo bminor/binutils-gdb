@@ -8,11 +8,11 @@
  */
 
 void
-DEFUN(find_call, (parent, p_lowpc, p_highpc),
-      Sym *parent AND bfd_vma p_lowpc AND bfd_vma p_highpc)
+DEFUN (find_call, (parent, p_lowpc, p_highpc),
+       Sym * parent AND bfd_vma p_lowpc AND bfd_vma p_highpc)
 {
-    fprintf(stderr, "%s: -c supported on this machine architecture\n",
-	    whoami);
-} /* find_call */
+  fprintf (stderr, "%s: -c supported on this machine architecture\n",
+	   whoami);
+}				/* find_call */
 
-			/*** end of dummy.c ***/
+/*** end of dummy.c ***/

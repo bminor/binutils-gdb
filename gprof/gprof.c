@@ -58,76 +58,77 @@ char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
 
-static char *gmon_name = GMONNAME;		/* profile filename */
+static char *gmon_name = GMONNAME;	/* profile filename */
 
-bfd	*abfd;
+bfd *abfd;
 
 /*
  * Functions that get excluded by default:
  */
-static char *default_excluded_list[] = {
-    "_gprof_mcount", "mcount", "_mcount", "__mcleanup",
-    "<locore>", "<hicore>",
-    0
+static char *default_excluded_list[] =
+{
+  "_gprof_mcount", "mcount", "_mcount", "__mcleanup",
+  "<locore>", "<hicore>",
+  0
 };
 
 static struct option long_options[] =
 {
-    {"line", no_argument, 0, 'l'},
-    {"no-static", no_argument, 0, 'a'},
+  {"line", no_argument, 0, 'l'},
+  {"no-static", no_argument, 0, 'a'},
 
     /* output styles: */
 
-    {"annotated-source", optional_argument, 0, 'A'},
-    {"no-annotated-source", optional_argument, 0, 'J'},
-    {"flat-profile", optional_argument, 0, 'p'},
-    {"no-flat-profile", optional_argument, 0, 'P'},
-    {"graph", optional_argument, 0, 'q'},
-    {"no-graph", optional_argument, 0, 'Q'},
-    {"exec-counts", optional_argument, 0, 'C'},
-    {"no-exec-counts", optional_argument, 0, 'Z'},
-    {"file-info", no_argument, 0, 'i'},
-    {"sum", no_argument, 0, 's'},
+  {"annotated-source", optional_argument, 0, 'A'},
+  {"no-annotated-source", optional_argument, 0, 'J'},
+  {"flat-profile", optional_argument, 0, 'p'},
+  {"no-flat-profile", optional_argument, 0, 'P'},
+  {"graph", optional_argument, 0, 'q'},
+  {"no-graph", optional_argument, 0, 'Q'},
+  {"exec-counts", optional_argument, 0, 'C'},
+  {"no-exec-counts", optional_argument, 0, 'Z'},
+  {"file-info", no_argument, 0, 'i'},
+  {"sum", no_argument, 0, 's'},
 
     /* various options to affect output: */
 
-    {"all-lines", no_argument, 0, 'x'},
-    {"directory-path", required_argument, 0, 'I'},
-    {"display-unused-functions", no_argument, 0, 'z'},
-    {"min-count", required_argument, 0, 'm'},
-    {"print-path", no_argument, 0, 'L'},
-    {"separate-files", no_argument, 0, 'y'},
-    {"static-call-graph", no_argument, 0, 'c'},
-    {"table-length", required_argument, 0, 't'},
-    {"time", required_argument, 0, 'n'},
-    {"no-time", required_argument, 0, 'N'},
-    {"width", required_argument, 0, 'w'},
+  {"all-lines", no_argument, 0, 'x'},
+  {"directory-path", required_argument, 0, 'I'},
+  {"display-unused-functions", no_argument, 0, 'z'},
+  {"min-count", required_argument, 0, 'm'},
+  {"print-path", no_argument, 0, 'L'},
+  {"separate-files", no_argument, 0, 'y'},
+  {"static-call-graph", no_argument, 0, 'c'},
+  {"table-length", required_argument, 0, 't'},
+  {"time", required_argument, 0, 'n'},
+  {"no-time", required_argument, 0, 'N'},
+  {"width", required_argument, 0, 'w'},
     /*
      * These are for backwards-compatibility only.  Their functionality
      * is provided by the output style options already:
      */
-    {"", required_argument, 0, 'e'},
-    {"", required_argument, 0, 'E'},
-    {"", required_argument, 0, 'f'},
-    {"", required_argument, 0, 'F'},
-    {"", required_argument, 0, 'k'},
+  {"", required_argument, 0, 'e'},
+  {"", required_argument, 0, 'E'},
+  {"", required_argument, 0, 'f'},
+  {"", required_argument, 0, 'F'},
+  {"", required_argument, 0, 'k'},
 
     /* miscellaneous: */
 
-    {"brief", no_argument, 0, 'b'},
-    {"debug", optional_argument, 0, 'd'},
-    {"help", no_argument, 0, 'h'},
-    {"file-format", required_argument, 0, 'O'},
-    {"traditional", no_argument, 0, 'T'},
-    {"version", no_argument, 0, 'v'},
-    {0, no_argument, 0, 0}
+  {"brief", no_argument, 0, 'b'},
+  {"debug", optional_argument, 0, 'd'},
+  {"help", no_argument, 0, 'h'},
+  {"file-format", required_argument, 0, 'O'},
+  {"traditional", no_argument, 0, 'T'},
+  {"version", no_argument, 0, 'v'},
+  {0, no_argument, 0, 0}
 };
 
 
 static void
-DEFUN(usage, (stream, status), FILE *stream AND int status)
+DEFUN (usage, (stream, status), FILE * stream AND int status)
 {
-    fprintf(stream, "\
+  fprintf (stream, "\
 Usage: %s [-[abchilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[-d[num]] [-k from/to] [-m min-count] [-t table-length]\n\
 	[--[no-]annotated-source[=name]] [--[no-]exec-counts[=name]]\n\
@@ -139,337 +140,448 @@ Usage: %s [-[abchilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n\
 	[--version] [--width=n]\n\
 	[image-file] [profile-file...]\n",
-	    whoami);
-    done(status);
-} /* usage */
+	   whoami);
+  done (status);
+}				/* usage */
 
 
 int
-DEFUN(main, (argc, argv), int argc AND char **argv)
+DEFUN (main, (argc, argv), int argc AND char **argv)
 {
-    char **sp, *str;
-    Sym **cg = 0;
-    int ch, user_specified = 0;
+  char **sp, *str;
+  Sym **cg = 0;
+  int ch, user_specified = 0;
 
-    whoami = argv[0];
-    xmalloc_set_program_name(whoami);
+  whoami = argv[0];
+  xmalloc_set_program_name (whoami);
 
-    while ((ch = getopt_long(argc, argv,
-	   "aA::bBcCd::e:E:f:F:hiI:J::k:lLm:n::N::O:p::P::q::Q::st:Tvw:xyzZ::",
-			     long_options, 0))
-	   != EOF)
+  while ((ch = getopt_long (argc, argv,
+	"aA::bBcCd::e:E:f:F:hiI:J::k:lLm:n::N::O:p::P::q::Q::st:Tvw:xyzZ::",
+			    long_options, 0))
+	 != EOF)
     {
-	switch (ch) {
-	  case 'a': ignore_static_funcs = TRUE; break;
-	  case 'A':
-	    if (optarg) {
-		sym_id_add(optarg, INCL_ANNO);
-	    } /* if */
-	    output_style |= STYLE_ANNOTATED_SOURCE;
-	    user_specified |= STYLE_ANNOTATED_SOURCE;
-	    break;
-	  case 'b': print_descriptions = FALSE; break;
-	  case 'B':
-	    output_style |= STYLE_CALL_GRAPH;
-	    user_specified |= STYLE_CALL_GRAPH;
-	    break;
-	  case 'c': ignore_direct_calls = TRUE; break;
-	  case 'C':
-	    if (optarg) {
-		sym_id_add(optarg, INCL_EXEC);
-	    } /* if */
-	    output_style |= STYLE_EXEC_COUNTS;
-	    user_specified |= STYLE_EXEC_COUNTS;
-	    break;
-	  case 'd':
-	    if (optarg) {
-		debug_level |= atoi(optarg);
-		debug_level |= ANYDEBUG;
-	    } else {
-		debug_level = ~0;
-	    } /* if */
-	    DBG(ANYDEBUG, printf("[main] debug-level=0x%x\n", debug_level));
+      switch (ch)
+	{
+	case 'a':
+	  ignore_static_funcs = TRUE;
+	  break;
+	case 'A':
+	  if (optarg)
+	    {
+	      sym_id_add (optarg, INCL_ANNO);
+	    }			/* if */
+	  output_style |= STYLE_ANNOTATED_SOURCE;
+	  user_specified |= STYLE_ANNOTATED_SOURCE;
+	  break;
+	case 'b':
+	  print_descriptions = FALSE;
+	  break;
+	case 'B':
+	  output_style |= STYLE_CALL_GRAPH;
+	  user_specified |= STYLE_CALL_GRAPH;
+	  break;
+	case 'c':
+	  ignore_direct_calls = TRUE;
+	  break;
+	case 'C':
+	  if (optarg)
+	    {
+	      sym_id_add (optarg, INCL_EXEC);
+	    }			/* if */
+	  output_style |= STYLE_EXEC_COUNTS;
+	  user_specified |= STYLE_EXEC_COUNTS;
+	  break;
+	case 'd':
+	  if (optarg)
+	    {
+	      debug_level |= atoi (optarg);
+	      debug_level |= ANYDEBUG;
+	    }
+	  else
+	    {
+	      debug_level = ~0;
+	    }			/* if */
+	  DBG (ANYDEBUG, printf ("[main] debug-level=0x%x\n", debug_level));
 #ifndef DEBUG
-	    printf("%s: debugging not supported; -d ignored\n", whoami);
-#endif DEBUG
-	    break;
-	  case 'E': sym_id_add(optarg, EXCL_TIME);
-	  case 'e': sym_id_add(optarg, EXCL_GRAPH); break;
-	  case 'F': sym_id_add(optarg, INCL_TIME);
-	  case 'f': sym_id_add(optarg, INCL_GRAPH); break;
-	  case 'g': sym_id_add(optarg, EXCL_FLAT); break;
-	  case 'G': sym_id_add(optarg, INCL_FLAT); break;
-	  case 'h': usage(stdout, 0);
-	  case 'i':
-	    output_style |= STYLE_GMON_INFO;
-	    user_specified |= STYLE_GMON_INFO;
-	    break;
-	  case 'I': search_list_append(&src_search_list, optarg); break;
-	  case 'J':
-	    if (optarg) {
-		sym_id_add(optarg, EXCL_ANNO);
-		output_style |= STYLE_ANNOTATED_SOURCE;
-	    } else {
-		output_style &= ~STYLE_ANNOTATED_SOURCE;
-	    } /* if */
-	    user_specified |= STYLE_ANNOTATED_SOURCE;
-	    break;
-	  case 'k': sym_id_add(optarg, EXCL_ARCS); break;
-	  case 'l': line_granularity = TRUE; break;
-	  case 'L': print_path = TRUE; break;
-	  case 'm': bb_min_calls = atoi(optarg); break;
-	  case 'n': sym_id_add(optarg, INCL_TIME); break;
-	  case 'N': sym_id_add(optarg, EXCL_TIME); break;
-	  case 'O':
-	    switch (optarg[0]) {
-	      case 'a': file_format = FF_AUTO; break;
-	      case 'm': file_format = FF_MAGIC; break;
-	      case 'b': file_format = FF_BSD; break;
-	      case 'p': file_format = FF_PROF; break;
-	      default:
-		fprintf(stderr, "%s: unknown file format %s\n",
-			optarg, whoami);
-		done(1);
-	    } /* switch */
-	    break;
-	  case 'p':
-	    if (optarg) {
-		sym_id_add(optarg, INCL_FLAT);
-	    } /* if */
-	    output_style |= STYLE_FLAT_PROFILE;
-	    user_specified |= STYLE_FLAT_PROFILE;
-	    break;
-	  case 'P':
-	    if (optarg) {
-		sym_id_add(optarg, EXCL_FLAT);
-		output_style |= STYLE_FLAT_PROFILE;
-	    } else {
-		output_style &= ~STYLE_FLAT_PROFILE;
-	    } /* if */
-	    user_specified |= STYLE_FLAT_PROFILE;
-	    break;
-	  case 'q':
-	    if (optarg) {
-		if (strchr(optarg, '/')) {
-		    sym_id_add(optarg, INCL_ARCS);
-		} else {
-		    sym_id_add(optarg, INCL_GRAPH);
-		} /* if */
-	    } /* if */
-	    output_style |= STYLE_CALL_GRAPH;
-	    user_specified |= STYLE_CALL_GRAPH;
-	    break;
-	  case 'Q':
-	    if (optarg) {
-		if (strchr(optarg, '/')) {
-		    sym_id_add(optarg, EXCL_ARCS);
-		} else {
-		    sym_id_add(optarg, EXCL_GRAPH);
-		} /* if */
-		output_style |= STYLE_CALL_GRAPH;
-	    } else {
-		output_style &= ~STYLE_CALL_GRAPH;
-	    } /* if */
-	    user_specified |= STYLE_CALL_GRAPH;
-	    break;
-	  case 's':
-	    output_style |= STYLE_SUMMARY_FILE;
-	    user_specified |= STYLE_SUMMARY_FILE;
-	    break;
-	  case 't':
-	    bb_table_length = atoi(optarg);
-	    if (bb_table_length < 0) {
-		bb_table_length = 0;
-	    } /* if */
-	    break;
-	  case 'T': bsd_style_output = TRUE; break;
-	  case 'v': printf ("%s version %s\n", whoami, VERSION); done(0);
-	  case 'w':
-	    output_width = atoi(optarg);
-	    if (output_width < 1) {
-		output_width = 1;
-	    } /* if */
-	    break;
-	  case 'x': bb_annotate_all_lines = TRUE; break;
-	  case 'y': create_annotation_files = TRUE; break;
-	  case 'z': ignore_zeros = FALSE; break;
-	  case 'Z':
-	    if (optarg) {
-		sym_id_add(optarg, EXCL_EXEC);
-		output_style |= STYLE_EXEC_COUNTS;
-	    } else {
-		output_style &= ~STYLE_EXEC_COUNTS;
-	    } /* if */
-	    user_specified |= STYLE_ANNOTATED_SOURCE;
-	    break;
-	  default: usage(stderr, 1);
-	} /* switch */
-    } /* while */
+	  printf ("%s: debugging not supported; -d ignored\n", whoami);
+#endif	/* DEBUG */
+	  break;
+	case 'E':
+	  sym_id_add (optarg, EXCL_TIME);
+	case 'e':
+	  sym_id_add (optarg, EXCL_GRAPH);
+	  break;
+	case 'F':
+	  sym_id_add (optarg, INCL_TIME);
+	case 'f':
+	  sym_id_add (optarg, INCL_GRAPH);
+	  break;
+	case 'g':
+	  sym_id_add (optarg, EXCL_FLAT);
+	  break;
+	case 'G':
+	  sym_id_add (optarg, INCL_FLAT);
+	  break;
+	case 'h':
+	  usage (stdout, 0);
+	case 'i':
+	  output_style |= STYLE_GMON_INFO;
+	  user_specified |= STYLE_GMON_INFO;
+	  break;
+	case 'I':
+	  search_list_append (&src_search_list, optarg);
+	  break;
+	case 'J':
+	  if (optarg)
+	    {
+	      sym_id_add (optarg, EXCL_ANNO);
+	      output_style |= STYLE_ANNOTATED_SOURCE;
+	    }
+	  else
+	    {
+	      output_style &= ~STYLE_ANNOTATED_SOURCE;
+	    }			/* if */
+	  user_specified |= STYLE_ANNOTATED_SOURCE;
+	  break;
+	case 'k':
+	  sym_id_add (optarg, EXCL_ARCS);
+	  break;
+	case 'l':
+	  line_granularity = TRUE;
+	  break;
+	case 'L':
+	  print_path = TRUE;
+	  break;
+	case 'm':
+	  bb_min_calls = atoi (optarg);
+	  break;
+	case 'n':
+	  sym_id_add (optarg, INCL_TIME);
+	  break;
+	case 'N':
+	  sym_id_add (optarg, EXCL_TIME);
+	  break;
+	case 'O':
+	  switch (optarg[0])
+	    {
+	    case 'a':
+	      file_format = FF_AUTO;
+	      break;
+	    case 'm':
+	      file_format = FF_MAGIC;
+	      break;
+	    case 'b':
+	      file_format = FF_BSD;
+	      break;
+	    case 'p':
+	      file_format = FF_PROF;
+	      break;
+	    default:
+	      fprintf (stderr, "%s: unknown file format %s\n",
+		       optarg, whoami);
+	      done (1);
+	    }			/* switch */
+	  break;
+	case 'p':
+	  if (optarg)
+	    {
+	      sym_id_add (optarg, INCL_FLAT);
+	    }			/* if */
+	  output_style |= STYLE_FLAT_PROFILE;
+	  user_specified |= STYLE_FLAT_PROFILE;
+	  break;
+	case 'P':
+	  if (optarg)
+	    {
+	      sym_id_add (optarg, EXCL_FLAT);
+	      output_style |= STYLE_FLAT_PROFILE;
+	    }
+	  else
+	    {
+	      output_style &= ~STYLE_FLAT_PROFILE;
+	    }			/* if */
+	  user_specified |= STYLE_FLAT_PROFILE;
+	  break;
+	case 'q':
+	  if (optarg)
+	    {
+	      if (strchr (optarg, '/'))
+		{
+		  sym_id_add (optarg, INCL_ARCS);
+		}
+	      else
+		{
+		  sym_id_add (optarg, INCL_GRAPH);
+		}		/* if */
+	    }			/* if */
+	  output_style |= STYLE_CALL_GRAPH;
+	  user_specified |= STYLE_CALL_GRAPH;
+	  break;
+	case 'Q':
+	  if (optarg)
+	    {
+	      if (strchr (optarg, '/'))
+		{
+		  sym_id_add (optarg, EXCL_ARCS);
+		}
+	      else
+		{
+		  sym_id_add (optarg, EXCL_GRAPH);
+		}		/* if */
+	      output_style |= STYLE_CALL_GRAPH;
+	    }
+	  else
+	    {
+	      output_style &= ~STYLE_CALL_GRAPH;
+	    }			/* if */
+	  user_specified |= STYLE_CALL_GRAPH;
+	  break;
+	case 's':
+	  output_style |= STYLE_SUMMARY_FILE;
+	  user_specified |= STYLE_SUMMARY_FILE;
+	  break;
+	case 't':
+	  bb_table_length = atoi (optarg);
+	  if (bb_table_length < 0)
+	    {
+	      bb_table_length = 0;
+	    }			/* if */
+	  break;
+	case 'T':
+	  bsd_style_output = TRUE;
+	  break;
+	case 'v':
+	  printf ("%s version %s\n", whoami, VERSION);
+	  done (0);
+	case 'w':
+	  output_width = atoi (optarg);
+	  if (output_width < 1)
+	    {
+	      output_width = 1;
+	    }			/* if */
+	  break;
+	case 'x':
+	  bb_annotate_all_lines = TRUE;
+	  break;
+	case 'y':
+	  create_annotation_files = TRUE;
+	  break;
+	case 'z':
+	  ignore_zeros = FALSE;
+	  break;
+	case 'Z':
+	  if (optarg)
+	    {
+	      sym_id_add (optarg, EXCL_EXEC);
+	      output_style |= STYLE_EXEC_COUNTS;
+	    }
+	  else
+	    {
+	      output_style &= ~STYLE_EXEC_COUNTS;
+	    }			/* if */
+	  user_specified |= STYLE_ANNOTATED_SOURCE;
+	  break;
+	default:
+	  usage (stderr, 1);
+	}			/* switch */
+    }				/* while */
 
-    /* append value of GPROF_PATH to source search list if set: */
-    str = getenv("GPROF_PATH");
-    if (str) {
-	search_list_append(&src_search_list, str);
-    } /* if */
+  /* append value of GPROF_PATH to source search list if set: */
+  str = getenv ("GPROF_PATH");
+  if (str)
+    {
+      search_list_append (&src_search_list, str);
+    }				/* if */
 
-    if (optind < argc) {
-	a_out_name = argv[optind++];
-    } /* if */
-    if (optind < argc) {
-	gmon_name = argv[optind++];
-    } /* if */
+  if (optind < argc)
+    {
+      a_out_name = argv[optind++];
+    }				/* if */
+  if (optind < argc)
+    {
+      gmon_name = argv[optind++];
+    }				/* if */
 
-    /*
-     * Turn off default functions:
-     */
-    for (sp = &default_excluded_list[0]; *sp; sp++) {
-	sym_id_add(*sp, EXCL_TIME);
-	sym_id_add(*sp, EXCL_GRAPH);
+  /*
+   * Turn off default functions:
+   */
+  for (sp = &default_excluded_list[0]; *sp; sp++)
+    {
+      sym_id_add (*sp, EXCL_TIME);
+      sym_id_add (*sp, EXCL_GRAPH);
 #ifdef __osf__
-	sym_id_add(*sp, EXCL_FLAT);
+      sym_id_add (*sp, EXCL_FLAT);
 #endif
-    } /* for */
+    }				/* for */
 
-    /*
-     * For line-by-line profiling, also want to keep those
-     * functions off the flat profile:
-     */
-    if (line_granularity) {
-	for (sp = &default_excluded_list[0]; *sp; sp++) {
-	    sym_id_add(*sp, EXCL_FLAT);
-	} /* for */
-    } /* if */
+  /*
+   * For line-by-line profiling, also want to keep those
+   * functions off the flat profile:
+   */
+  if (line_granularity)
+    {
+      for (sp = &default_excluded_list[0]; *sp; sp++)
+	{
+	  sym_id_add (*sp, EXCL_FLAT);
+	}			/* for */
+    }				/* if */
 
-    /*
-     * Read symbol table from core file:
-     */
-    core_init(a_out_name);
+  /*
+   * Read symbol table from core file:
+   */
+  core_init (a_out_name);
 
-    /*
-     * If we should ignore direct function calls, we need to load
-     * to core's text-space:
-     */
-    if (ignore_direct_calls) {
-	core_get_text_space(core_bfd);
-    } /* if */
+  /*
+   * If we should ignore direct function calls, we need to load
+   * to core's text-space:
+   */
+  if (ignore_direct_calls)
+    {
+      core_get_text_space (core_bfd);
+    }				/* if */
 
-    /*
-     * Create symbols from core image:
-     */
-    if (line_granularity) {
-	core_create_line_syms(core_bfd);
-    } else {
-	core_create_function_syms(core_bfd);
-    } /* if */
+  /*
+   * Create symbols from core image:
+   */
+  if (line_granularity)
+    {
+      core_create_line_syms (core_bfd);
+    }
+  else
+    {
+      core_create_function_syms (core_bfd);
+    }				/* if */
 
-    /*
-     * Translate sym specs into syms:
-     */
-    sym_id_parse();
+  /*
+   * Translate sym specs into syms:
+   */
+  sym_id_parse ();
 
-    if (file_format == FF_PROF) {
+  if (file_format == FF_PROF)
+    {
 #ifdef PROF_SUPPORT_IMPLEMENTED
-	/*
-	 * Get information about mon.out file(s):
-	 */
-	do {
-	    mon_out_read(gmon_name);
-	    if (optind < argc) {
-		gmon_name = argv[optind];
-	    } /* if */
-	} while (optind++ < argc);
+      /*
+       * Get information about mon.out file(s):
+       */
+      do
+	{
+	  mon_out_read (gmon_name);
+	  if (optind < argc)
+	    {
+	      gmon_name = argv[optind];
+	    }			/* if */
+	}
+      while (optind++ < argc);
 #else
-	fprintf(stderr,
-		"%s: sorry, file format `prof' is not yet supported\n",
-		whoami);
-	done(1);
+      fprintf (stderr,
+	       "%s: sorry, file format `prof' is not yet supported\n",
+	       whoami);
+      done (1);
 #endif
-    } else {
-	/*
-	 * Get information about gmon.out file(s):
-	 */
-	do {
-	    gmon_out_read(gmon_name);
-	    if (optind < argc) {
-		gmon_name = argv[optind];
-	    } /* if */
-	} while (optind++ < argc);
-    } /* if */
-
-    /*
-     * If user did not specify output style, try to guess something
-     * reasonable:
-     */
-    if (output_style == 0) {
-	if (gmon_input & (INPUT_HISTOGRAM | INPUT_CALL_GRAPH)) {
-	    output_style = STYLE_FLAT_PROFILE | STYLE_CALL_GRAPH;
-	} else {
-	    output_style = STYLE_EXEC_COUNTS;
-	} /* if */
-	output_style &= ~user_specified;
-    } /* if */
-
-    /*
-     * Dump a gmon.sum file if requested (before any other processing!):
-     */
-    if (output_style & STYLE_SUMMARY_FILE) {
-	gmon_out_write(GMONSUM);
-    } /* if */
-
-    if (gmon_input & INPUT_HISTOGRAM) {
-	hist_assign_samples();
-    } /* if */
-
-    if (gmon_input & INPUT_CALL_GRAPH) {
-	cg = cg_assemble();
-    } /* if */
-
-    /* do some simple sanity checks: */
-
-    if ((output_style & STYLE_FLAT_PROFILE)
-	&& !(gmon_input & INPUT_HISTOGRAM))
+    }
+  else
     {
-	fprintf(stderr, "%s: gmon.out file is missing histogram\n", whoami);
-	done(1);
-    } /* if */
+      /*
+       * Get information about gmon.out file(s):
+       */
+      do
+	{
+	  gmon_out_read (gmon_name);
+	  if (optind < argc)
+	    {
+	      gmon_name = argv[optind];
+	    }			/* if */
+	}
+      while (optind++ < argc);
+    }				/* if */
 
-    if ((output_style & STYLE_CALL_GRAPH) && !(gmon_input & INPUT_CALL_GRAPH))
+  /*
+   * If user did not specify output style, try to guess something
+   * reasonable:
+   */
+  if (output_style == 0)
     {
-	fprintf(stderr,
-		"%s: gmon.out file is missing call-graph data\n", whoami);
-	done(1);
-    } /* if */
+      if (gmon_input & (INPUT_HISTOGRAM | INPUT_CALL_GRAPH))
+	{
+	  output_style = STYLE_FLAT_PROFILE | STYLE_CALL_GRAPH;
+	}
+      else
+	{
+	  output_style = STYLE_EXEC_COUNTS;
+	}			/* if */
+      output_style &= ~user_specified;
+    }				/* if */
 
-    /* output whatever user whishes to see: */
+  /*
+   * Dump a gmon.sum file if requested (before any other processing!):
+   */
+  if (output_style & STYLE_SUMMARY_FILE)
+    {
+      gmon_out_write (GMONSUM);
+    }				/* if */
 
-    if (cg && (output_style & STYLE_CALL_GRAPH) && bsd_style_output) {
-	cg_print(cg);			/* print the dynamic profile */
-    } /* if */
+  if (gmon_input & INPUT_HISTOGRAM)
+    {
+      hist_assign_samples ();
+    }				/* if */
 
-    if (output_style & STYLE_FLAT_PROFILE) {
-	hist_print();			/* print the flat profile */
-    } /* if */
+  if (gmon_input & INPUT_CALL_GRAPH)
+    {
+      cg = cg_assemble ();
+    }				/* if */
 
-    if (cg && (output_style & STYLE_CALL_GRAPH)) {
-	if (!bsd_style_output) {
-	    cg_print(cg);		/* print the dynamic profile */
-	} /* if */
-	cg_print_index();
-    } /* if */
+  /* do some simple sanity checks: */
 
-    if (output_style & STYLE_EXEC_COUNTS) {
-	print_exec_counts();
-    } /* if */
+  if ((output_style & STYLE_FLAT_PROFILE)
+      && !(gmon_input & INPUT_HISTOGRAM))
+    {
+      fprintf (stderr, "%s: gmon.out file is missing histogram\n", whoami);
+      done (1);
+    }				/* if */
 
-    if (output_style & STYLE_ANNOTATED_SOURCE) {
-	print_annotated_source();
-    } /* if */
-    return 0;
+  if ((output_style & STYLE_CALL_GRAPH) && !(gmon_input & INPUT_CALL_GRAPH))
+    {
+      fprintf (stderr,
+	       "%s: gmon.out file is missing call-graph data\n", whoami);
+      done (1);
+    }				/* if */
+
+  /* output whatever user whishes to see: */
+
+  if (cg && (output_style & STYLE_CALL_GRAPH) && bsd_style_output)
+    {
+      cg_print (cg);		/* print the dynamic profile */
+    }				/* if */
+
+  if (output_style & STYLE_FLAT_PROFILE)
+    {
+      hist_print ();		/* print the flat profile */
+    }				/* if */
+
+  if (cg && (output_style & STYLE_CALL_GRAPH))
+    {
+      if (!bsd_style_output)
+	{
+	  cg_print (cg);	/* print the dynamic profile */
+	}			/* if */
+      cg_print_index ();
+    }				/* if */
+
+  if (output_style & STYLE_EXEC_COUNTS)
+    {
+      print_exec_counts ();
+    }				/* if */
+
+  if (output_style & STYLE_ANNOTATED_SOURCE)
+    {
+      print_annotated_source ();
+    }				/* if */
+  return 0;
 }
 
 void
 done (status)
      int status;
 {
-    exit(status);
+  exit (status);
 }

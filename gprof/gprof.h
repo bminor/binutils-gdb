@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- *	@(#)gprof.h	5.9 (Berkeley) 6/1/90
+ *      @(#)gprof.h     5.9 (Berkeley) 6/1/90
  */
 #ifndef gprof_h
 #define gprof_h
@@ -25,41 +25,41 @@
 #include "sysdep.h"
 
 #ifndef MIN
-# define MIN(a,b)	((a) < (b) ? (a) : (b))
+#define MIN(a,b)	((a) < (b) ? (a) : (b))
 #endif
 #ifndef MAX
-# define MAX(a,b)	((a) > (b) ? (a) : (b))
+#define MAX(a,b)	((a) > (b) ? (a) : (b))
 #endif
 
 /* AIX defines hz as a macro.  */
 #undef hz
 
 #ifdef MACHINE_H
-# include MACHINE_H
+#include MACHINE_H
 #else
-# if vax
-#  include "vax.h"
-# endif
-# if sun
-#  include "sun.h"
-# endif
-# if tahoe
-#  include "tahoe.h"
-# endif
+#if vax
+#include "vax.h"
+#endif
+#if sun
+#include "sun.h"
+#endif
+#if tahoe
+#include "tahoe.h"
+#endif
 #endif
 
 #ifndef FOPEN_RB
-# define FOPEN_RB "r"
+#define FOPEN_RB "r"
 #endif
 #ifndef FOPEN_WB
-# define FOPEN_WB "w"
+#define FOPEN_WB "w"
 #endif
 
 #ifndef PATH_MAX
-# define PATH_MAX	1024
+#define PATH_MAX	1024
 #endif
 
-#define	A_OUTNAME	"a.out"		/* default core filename */
+#define	A_OUTNAME	"a.out"	/* default core filename */
 #define	GMONNAME	"gmon.out"	/* default profile filename */
 #define	GMONSUM		"gmon.sum"	/* profile summary filename */
 
@@ -80,56 +80,58 @@
 #define STYLE_ANNOTATED_SOURCE	(1<<4)
 #define STYLE_GMON_INFO		(1<<5)
 
-#define	ANYDEBUG	(1<<0)		/*    1 */
-#define	DFNDEBUG	(1<<1)		/*    2 */
-#define	CYCLEDEBUG	(1<<2)		/*    4 */
-#define	ARCDEBUG	(1<<3)		/*    8 */
-#define	TALLYDEBUG	(1<<4)		/*   16 */
-#define	TIMEDEBUG	(1<<5)		/*   32 */
-#define	SAMPLEDEBUG	(1<<6)		/*   64 */
-#define	AOUTDEBUG	(1<<7)		/*  128 */
-#define	CALLDEBUG	(1<<8)		/*  256 */
-#define	LOOKUPDEBUG	(1<<9)		/*  512 */
-#define	PROPDEBUG	(1<<10)		/* 1024 */
-#define BBDEBUG		(1<<11)		/* 2048 */
-#define IDDEBUG		(1<<12)		/* 4096 */
-#define SRCDEBUG	(1<<13)		/* 8192 */
+#define	ANYDEBUG	(1<<0)	/*    1 */
+#define	DFNDEBUG	(1<<1)	/*    2 */
+#define	CYCLEDEBUG	(1<<2)	/*    4 */
+#define	ARCDEBUG	(1<<3)	/*    8 */
+#define	TALLYDEBUG	(1<<4)	/*   16 */
+#define	TIMEDEBUG	(1<<5)	/*   32 */
+#define	SAMPLEDEBUG	(1<<6)	/*   64 */
+#define	AOUTDEBUG	(1<<7)	/*  128 */
+#define	CALLDEBUG	(1<<8)	/*  256 */
+#define	LOOKUPDEBUG	(1<<9)	/*  512 */
+#define	PROPDEBUG	(1<<10)	/* 1024 */
+#define BBDEBUG		(1<<11)	/* 2048 */
+#define IDDEBUG		(1<<12)	/* 4096 */
+#define SRCDEBUG	(1<<13)	/* 8192 */
 
 #ifdef DEBUG
-# define DBG(l,s)	if (debug_level & (l)) {s;}
+#define DBG(l,s)	if (debug_level & (l)) {s;}
 #else
-# define DBG(l,s)
+#define DBG(l,s)
 #endif
 
-typedef enum {
+typedef enum
+  {
     FF_AUTO = 0, FF_MAGIC, FF_BSD, FF_PROF
-} File_Format;
+  }
+File_Format;
 
 typedef int bool;
-typedef	unsigned char UNIT[2];		/* unit of profiling */
+typedef unsigned char UNIT[2];	/* unit of profiling */
 
-extern const char *whoami;		/* command-name, for error messages */
-extern const char *a_out_name;		/* core filename */
-extern long hz;				/* ticks per second */
+extern const char *whoami;	/* command-name, for error messages */
+extern const char *a_out_name;	/* core filename */
+extern long hz;			/* ticks per second */
 
 /*
  * Command-line options:
  */
-extern int debug_level;			/* debug level */
+extern int debug_level;		/* debug level */
 extern int output_style;
-extern int output_width;		/* controls column width in index */
-extern bool bsd_style_output;		/* as opposed to FSF style output */
+extern int output_width;	/* controls column width in index */
+extern bool bsd_style_output;	/* as opposed to FSF style output */
 extern bool discard_underscores;	/* discard leading underscores? */
 extern bool ignore_direct_calls;	/* don't count direct calls */
 extern bool ignore_static_funcs;	/* suppress static functions */
-extern bool ignore_zeros;		/* ignore unused symbols/files */
-extern bool line_granularity;		/* function or line granularity? */
-extern bool print_descriptions;		/* output profile description */
-extern bool print_path;			/* print path or just filename? */
-extern File_Format file_format;		/* requested file format */
+extern bool ignore_zeros;	/* ignore unused symbols/files */
+extern bool line_granularity;	/* function or line granularity? */
+extern bool print_descriptions;	/* output profile description */
+extern bool print_path;		/* print path or just filename? */
+extern File_Format file_format;	/* requested file format */
 
-extern bool first_output;		/* no output so far? */
+extern bool first_output;	/* no output so far? */
 
-extern void done PARAMS((int status));
+extern void done PARAMS ((int status));
 
 #endif /* gprof_h */

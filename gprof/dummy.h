@@ -46,7 +46,10 @@
 #define OFFSET_TO_CODE	0
 #define	UNITS_TO_CODE	(OFFSET_TO_CODE / sizeof(UNIT))
 
-enum opermodes { dummy };
+enum opermodes
+  {
+    dummy
+  };
 typedef enum opermodes operandenum;
 
 #endif /* dummy_h */

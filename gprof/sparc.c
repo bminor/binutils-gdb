@@ -24,56 +24,62 @@
 
 
 void
-find_call(parent, p_lowpc, p_highpc)
+find_call (parent, p_lowpc, p_highpc)
      Sym *parent;
      bfd_vma p_lowpc;
      bfd_vma p_highpc;
 {
-    bfd_vma dest_pc, delta;
-    unsigned int *instr;
-    Sym *child;
-    
-    delta = (bfd_vma) core_text_space - core_text_sect->vma;
-    
-    if (core_text_space == 0) {
-	return;
-    } /* if */
-    if (p_lowpc < s_lowpc) {
-	p_lowpc = s_lowpc;
-    } /* if */
-    if (p_highpc > s_highpc) {
-	p_highpc = s_highpc;
-    } /* if */
-    DBG(CALLDEBUG, printf("[find_call] %s: 0x%lx to 0x%lx\n",
-			  parent->name, p_lowpc, p_highpc));
-    for (instr = (unsigned int*)(p_lowpc + delta);
-	 instr < (unsigned int*)(p_highpc + delta);
-	 ++instr)
+  bfd_vma dest_pc, delta;
+  unsigned int *instr;
+  Sym *child;
+
+  delta = (bfd_vma) core_text_space - core_text_sect->vma;
+
+  if (core_text_space == 0)
     {
-	if ((*instr & CALL)) {
-	    DBG(CALLDEBUG,
-		printf("[find_call] 0x%lx: callf", (bfd_vma) instr - delta));
-	    /*
-	     * Regular pc relative addressing check that this is the
-	     * address of a function.
-	     */
-	    dest_pc = ((bfd_vma) (instr + (*instr & ~CALL))) - delta;
-	    if (dest_pc >= s_lowpc && dest_pc <= s_highpc) {
-		child = sym_lookup(&symtab, dest_pc);
-		DBG(CALLDEBUG,
-		    printf("\tdest_pc=0x%lx, (name=%s, addr=0x%lx)\n",
+      return;
+    }				/* if */
+  if (p_lowpc < s_lowpc)
+    {
+      p_lowpc = s_lowpc;
+    }				/* if */
+  if (p_highpc > s_highpc)
+    {
+      p_highpc = s_highpc;
+    }				/* if */
+  DBG (CALLDEBUG, printf ("[find_call] %s: 0x%lx to 0x%lx\n",
+			  parent->name, p_lowpc, p_highpc));
+  for (instr = (unsigned int *) (p_lowpc + delta);
+       instr < (unsigned int *) (p_highpc + delta);
+       ++instr)
+    {
+      if ((*instr & CALL))
+	{
+	  DBG (CALLDEBUG,
+	       printf ("[find_call] 0x%lx: callf", (bfd_vma) instr - delta));
+	  /*
+	   * Regular pc relative addressing check that this is the
+	   * address of a function.
+	   */
+	  dest_pc = ((bfd_vma) (instr + (*instr & ~CALL))) - delta;
+	  if (dest_pc >= s_lowpc && dest_pc <= s_highpc)
+	    {
+	      child = sym_lookup (&symtab, dest_pc);
+	      DBG (CALLDEBUG,
+		   printf ("\tdest_pc=0x%lx, (name=%s, addr=0x%lx)\n",
 			   dest_pc, child->name, child->addr));
-		if (child->addr == dest_pc) {
-		    /* a hit:  */
-		    arc_add(parent, child, 0);
-		    continue;
-		} /* if */
-	    } /* if */
-	    /*
-	     * Something funny going on.
-	     */
-	    DBG(CALLDEBUG, printf("\tbut it's a botch\n"));
-	} /* if */
-    } /* for */
-} /* find_call */
-			/*** end of sparc.c ***/
+	      if (child->addr == dest_pc)
+		{
+		  /* a hit:  */
+		  arc_add (parent, child, 0);
+		  continue;
+		}		/* if */
+	    }			/* if */
+	  /*
+	   * Something funny going on.
+	   */
+	  DBG (CALLDEBUG, printf ("\tbut it's a botch\n"));
+	}			/* if */
+    }				/* for */
+}				/* find_call */
+/*** end of sparc.c ***/

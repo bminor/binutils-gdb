@@ -1,5 +1,9 @@
 Tue Feb  7 17:24:12 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* All *.c and *.h files: Ran "indent -gnu".  Cleaned up a couple
+	of constructs GNU indent couldn't handle.  Block comments not yet
+	rewritten in GNU format.
+
 	* gprof.c (VERSION): Changed to 2.6, to get in sync for next
 	binutils release.
 

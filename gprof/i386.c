@@ -24,80 +24,87 @@
 
 
 int
-DEFUN(iscall, (ip), unsigned char *ip)
+DEFUN (iscall, (ip), unsigned char *ip)
 {
-  if (*ip == 0xeb || *ip == 0x9a) 
+  if (*ip == 0xeb || *ip == 0x9a)
     return 1;
   return 0;
 }
 
 
 void
-find_call(parent, p_lowpc, p_highpc)
-    Sym *parent;
-    bfd_vma p_lowpc;
-    bfd_vma p_highpc;
+find_call (parent, p_lowpc, p_highpc)
+     Sym *parent;
+     bfd_vma p_lowpc;
+     bfd_vma p_highpc;
 {
-    unsigned char *instructp;
-    long length;
-    Sym *child;
-    bfd_vma destpc;
+  unsigned char *instructp;
+  long length;
+  Sym *child;
+  bfd_vma destpc;
 
-    if (core_text_space == 0) {
-	return;
+  if (core_text_space == 0)
+    {
+      return;
     }
-    if (p_lowpc < s_lowpc) {
-	p_lowpc = s_lowpc;
+  if (p_lowpc < s_lowpc)
+    {
+      p_lowpc = s_lowpc;
     }
-    if (p_highpc > s_highpc) {
-	p_highpc = s_highpc;
+  if (p_highpc > s_highpc)
+    {
+      p_highpc = s_highpc;
     }
-    DBG(CALLDEBUG, printf("[findcall] %s: 0x%lx to 0x%lx\n",
+  DBG (CALLDEBUG, printf ("[findcall] %s: 0x%lx to 0x%lx\n",
 			  parent->name, p_lowpc, p_highpc));
-    for (  instructp = (unsigned char*) core_text_space + p_lowpc ;
-	    instructp < (unsigned char*) core_text_space + p_highpc ;
-	    instructp += length) {
-	length = 1;
-	if (iscall (instructp)) {
-	    DBG(CALLDEBUG,
-		printf("[findcall]\t0x%x:callf",
-		       instructp - (unsigned char*) core_text_space));
+  for (instructp = (unsigned char *) core_text_space + p_lowpc;
+       instructp < (unsigned char *) core_text_space + p_highpc;
+       instructp += length)
+    {
+      length = 1;
+      if (iscall (instructp))
+	{
+	  DBG (CALLDEBUG,
+	       printf ("[findcall]\t0x%x:callf",
+		       instructp - (unsigned char *) core_text_space));
 	  length = 4;
 	  /*
-	   *	regular pc relative addressing
-	   *	check that this is the address of 
-	   *	a function.
+	   *  regular pc relative addressing
+	   *    check that this is the address of 
+	   *    a function.
 	   */
-	  destpc = ((bfd_vma)instructp + 5 - (bfd_vma) core_text_space);
-	  if (destpc >= s_lowpc && destpc <= s_highpc) {
-	    child = sym_lookup(&symtab, destpc);
-	    DBG(CALLDEBUG,
-		printf("[findcall]\tdestpc 0x%lx", destpc);
-		printf(" child->name %s", child->name);
-		printf(" child->addr 0x%lx\n", child->addr);
+	  destpc = ((bfd_vma) instructp + 5 - (bfd_vma) core_text_space);
+	  if (destpc >= s_lowpc && destpc <= s_highpc)
+	    {
+	      child = sym_lookup (&symtab, destpc);
+	      DBG (CALLDEBUG,
+		   printf ("[findcall]\tdestpc 0x%lx", destpc);
+		   printf (" child->name %s", child->name);
+		   printf (" child->addr 0x%lx\n", child->addr);
 		);
-	    if (child->addr == destpc) {
-	      /*
-	       *	a hit
-	       */
-	      arc_add(parent, child, (long) 0);
-	      length += 4;	/* constant lengths */
-	      continue;
+	      if (child->addr == destpc)
+		{
+		  /*
+		   *      a hit
+		   */
+		  arc_add (parent, child, (long) 0);
+		  length += 4;	/* constant lengths */
+		  continue;
+		}
+	      goto botched;
 	    }
-	    goto botched;
-	  }
 	  /*
-	   *	else:
-	   *	it looked like a callf,
-	   *	but it wasn't to anywhere.
+	   *  else:
+	   *    it looked like a callf,
+	   *    but it wasn't to anywhere.
 	   */
 	botched:
 	  /*
-	   *	something funny going on.
+	   *  something funny going on.
 	   */
-	    DBG(CALLDEBUG, printf("[findcall]\tbut it's a botch\n"));
-	    length = 1;
-	    continue;
+	  DBG (CALLDEBUG, printf ("[findcall]\tbut it's a botch\n"));
+	  length = 1;
+	  continue;
 	}
-      }
-  }
+    }
+}

@@ -16,17 +16,16 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- *	@(#)tahoe.h	1.4 (Berkeley) 6/1/90
+ *      @(#)tahoe.h     1.4 (Berkeley) 6/1/90
  */
 
     /*
-     *	opcode of the `callf' instruction
+     *        opcode of the `callf' instruction
      */
 #define	CALL	(0xc0000000)
     /*
-     *	offset (in bytes) of the code from the entry address of a routine.
-     *	(see asgnsamples for use and explanation.)
+     *        offset (in bytes) of the code from the entry address of a routine.
+     *  (see asgnsamples for use and explanation.)
      */
 #define OFFSET_TO_CODE	0
 #define	UNITS_TO_CODE	(OFFSET_TO_CODE / sizeof(UNIT))
-

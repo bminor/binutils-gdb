@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- *	@(#)alpha.h	1.4 (Berkeley) 6/1/90
+ *      @(#)alpha.h     1.4 (Berkeley) 6/1/90
  */
 #ifndef alpha_h
 #define alpha_h

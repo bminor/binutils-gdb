@@ -17,30 +17,35 @@
 /*
  * Raw header as it appears on file (without padding):
  */
-struct gmon_hdr {
-    char	cookie[4];
-    char	version[4];
-    char	spare[3*4];
-};
+struct gmon_hdr
+  {
+    char cookie[4];
+    char version[4];
+    char spare[3 * 4];
+  };
 
 /* types of records in this file: */
-typedef enum {
+typedef enum
+  {
     GMON_TAG_TIME_HIST, GMON_TAG_CG_ARC, GMON_TAG_BB_COUNT
-} GMON_Record_Tag;
+  }
+GMON_Record_Tag;
 
-struct gmon_hist_hdr {
-    char low_pc[sizeof(bfd_vma)];	/* base pc address of sample buffer */
-    char high_pc[sizeof(bfd_vma)];	/* max pc address of sampled buffer */
-    char hist_size[4];			/* size of sample buffer */
-    char prof_rate[4];			/* profiling clock rate */
-    char dimen[15];			/* phys. dim., usually "seconds" */
-    char dimen_abbrev;			/* usually 's' for "seconds" */
-};
+struct gmon_hist_hdr
+  {
+    char low_pc[sizeof (bfd_vma)];	/* base pc address of sample buffer */
+    char high_pc[sizeof (bfd_vma)];	/* max pc address of sampled buffer */
+    char hist_size[4];		/* size of sample buffer */
+    char prof_rate[4];		/* profiling clock rate */
+    char dimen[15];		/* phys. dim., usually "seconds" */
+    char dimen_abbrev;		/* usually 's' for "seconds" */
+  };
 
-struct gmon_cg_arc_record {
-    char from_pc[sizeof(bfd_vma)];	/* address within caller's body */
-    char self_pc[sizeof(bfd_vma)];	/* address within callee's body */
-    char count[4];			/* number of arc traversals */
-};
+struct gmon_cg_arc_record
+  {
+    char from_pc[sizeof (bfd_vma)];	/* address within caller's body */
+    char self_pc[sizeof (bfd_vma)];	/* address within callee's body */
+    char count[4];		/* number of arc traversals */
+  };
 
 #endif /* gmon_out_h */

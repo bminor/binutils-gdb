@@ -5,9 +5,9 @@
  * It does nothing, but prevents findcall() from being unresolved.
  */
 
-findcall( parentp , p_lowpc , p_highpc )
-    nltype		*parentp;
-    unsigned long	p_lowpc;
-    unsigned long	p_highpc;
+findcall (parentp, p_lowpc, p_highpc)
+     nltype *parentp;
+     unsigned long p_lowpc;
+     unsigned long p_highpc;
 {
 }

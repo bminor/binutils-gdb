@@ -21,26 +21,27 @@
 
 
 #ifdef __MSDOS__
-# define HERTZ 18
+#define HERTZ 18
 #endif
 
 int
-hertz()
+hertz ()
 {
 #ifdef HERTZ
-    return HERTZ;
+  return HERTZ;
 #else
-    struct itimerval tim;
+  struct itimerval tim;
 
-    tim.it_interval.tv_sec = 0;
-    tim.it_interval.tv_usec = 1;
-    tim.it_value.tv_sec = 0;
-    tim.it_value.tv_usec = 0;
-    setitimer(ITIMER_REAL, &tim, 0);
-    setitimer(ITIMER_REAL, 0, &tim);
-    if (tim.it_interval.tv_usec < 2) {
-	return HZ_WRONG;
-    } /* if */
-    return 1000000 / tim.it_interval.tv_usec;
+  tim.it_interval.tv_sec = 0;
+  tim.it_interval.tv_usec = 1;
+  tim.it_value.tv_sec = 0;
+  tim.it_value.tv_usec = 0;
+  setitimer (ITIMER_REAL, &tim, 0);
+  setitimer (ITIMER_REAL, 0, &tim);
+  if (tim.it_interval.tv_usec < 2)
+    {
+      return HZ_WRONG;
+    }				/* if */
+  return 1000000 / tim.it_interval.tv_usec;
 #endif
-} /* hertz */
+}				/* hertz */

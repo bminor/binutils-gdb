@@ -5,14 +5,16 @@
 #include "gprof.h"
 #include "search_list.h"
 
-typedef struct source_file {
-    struct source_file	*next;
-    const char		*name;		/* name of source file */
-    int			ncalls;		/* # of "calls" to this file */
-    int			num_lines;	/* # of lines in file */
-    int			nalloced;	/* number of lines allocated */
-    void		**line;		/* usage-dependent per-line data */
-} Source_File;
+typedef struct source_file
+  {
+    struct source_file *next;
+    const char *name;		/* name of source file */
+    int ncalls;			/* # of "calls" to this file */
+    int num_lines;		/* # of lines in file */
+    int nalloced;		/* number of lines allocated */
+    void **line;		/* usage-dependent per-line data */
+  }
+Source_File;
 
 /*
  * Options:
@@ -32,8 +34,8 @@ extern Source_File *first_src_file;
 /*
  * Returns pointer to source file descriptor for PATH/FILENAME.
  */
-extern Source_File *source_file_lookup_path PARAMS((const char *path));
-extern Source_File *source_file_lookup_name PARAMS((const char *filename));
+extern Source_File *source_file_lookup_path PARAMS ((const char *path));
+extern Source_File *source_file_lookup_name PARAMS ((const char *filename));
 
 /*
  * Read source file SF output annotated source.  The annotation is at
@@ -45,9 +47,9 @@ extern Source_File *source_file_lookup_name PARAMS((const char *filename));
  * that summary statistics can be printed.  If the returned file
  * is not stdout, it should be closed when done with it.
  */
-extern FILE *annotate_source PARAMS((Source_File *sf, int max_width,
-				     void (*annote) (char *b, int w, int l,
-						     void *arg),
-				     void *arg));
+extern FILE *annotate_source PARAMS ((Source_File * sf, int max_width,
+				      void (*annote) (char *b, int w, int l,
+						      void *arg),
+				      void *arg));
 
 #endif /* source_h */

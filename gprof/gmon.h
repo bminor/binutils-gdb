@@ -35,9 +35,10 @@
 #ifndef gmon_h
 #define gmon_h
 
-struct raw_phdr {
-    char low_pc[sizeof(bfd_vma)];	/* base pc address of sample buffer */
-    char high_pc[sizeof(bfd_vma)];	/* max pc address of sampled buffer */
+struct raw_phdr
+  {
+    char low_pc[sizeof (bfd_vma)];	/* base pc address of sample buffer */
+    char high_pc[sizeof (bfd_vma)];	/* max pc address of sampled buffer */
     char ncnt[4];		/* size of sample buffer (plus this header) */
 #ifdef __osf__
     /*
@@ -46,7 +47,7 @@ struct raw_phdr {
      */
     char pad[4];
 #endif
-};
+  };
 
 /*
  * Histogram counters are unsigned shorts:
@@ -65,17 +66,17 @@ struct raw_phdr {
  * Given MIN_SUBR_SEPARATION bytes of separation the value of
  * HASHFRACTION is calculated as:
  *
- *	HASHFRACTION = MIN_SUBR_SEPARATION / (2 * sizeof(short) - 1);
+ *      HASHFRACTION = MIN_SUBR_SEPARATION / (2 * sizeof(short) - 1);
  *
  * For the VAX, the shortest two call sequence is:
  *
- *	calls	$0,(r0)
- *	calls	$0,(r0)
+ *      calls   $0,(r0)
+ *      calls   $0,(r0)
  *
  * which is separated by only three bytes, thus HASHFRACTION is 
  * calculated as:
  *
- *	HASHFRACTION = 3 / (2 * 2 - 1) = 1
+ *      HASHFRACTION = 3 / (2 * 2 - 1) = 1
  *
  * Note that the division above rounds down, thus if MIN_SUBR_FRACTION
  * is less than three, this algorithm will not work!
@@ -88,11 +89,12 @@ struct raw_phdr {
 #define ARCDENSITY	2
 #define MINARCS		50
 
-struct tostruct {
-    char		*selfpc;
-    int			count;
-    unsigned short	link;
-};
+struct tostruct
+  {
+    char *selfpc;
+    int count;
+    unsigned short link;
+  };
 
 /*
  * A raw arc, with pointers to the calling site and the called site
@@ -100,11 +102,12 @@ struct tostruct {
  * as to get a packed representation (otherwise, different compilers
  * might introduce different padding):
  */
-struct raw_arc {
-    char from_pc[sizeof(bfd_vma)];
-    char self_pc[sizeof(bfd_vma)];
-    char count[sizeof(long)];
-};
+struct raw_arc
+  {
+    char from_pc[sizeof (bfd_vma)];
+    char self_pc[sizeof (bfd_vma)];
+    char count[sizeof (long)];
+  };
 
 /*
  * General rounding functions:
