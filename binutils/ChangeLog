@@ -1,3 +1,7 @@
+Mon Oct 20 15:31:43 1997  Klaus K"ampf  <kkaempf@progis.de>
+
+	* configure.com (HAVE_SBRK): Undefine.
+
 Tue Oct 14 16:14:35 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* objdump.c (objdump_symbol_at_address): New function.  Returns
