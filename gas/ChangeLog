@@ -1,3 +1,9 @@
+1998-12-19  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (mips_eabi64): New.
+	(md_begin): Set mips_eabi64.
+	(mips_elf_final_processing): Use it.
+
 1998-12-18  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (mips_elf_final_processing): 

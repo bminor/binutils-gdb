@@ -201,6 +201,9 @@ static int mips_cpu = -1;
 /* The argument of the -mabi= flag. */
 static char* mips_abi_string = 0;
 
+/* Wether we should mark the file EABI64 or EABI32. */
+static int mips_eabi64 = 0;
+
 /* Whether the 4650 instructions (mad/madu) are permitted.  */
 static int mips_4650 = -1;
 
@@ -1012,6 +1015,7 @@ md_begin ()
       else if (mips_cpu == 4000
                || mips_cpu == 4100
 	       /* start-sanitize-vr4xxx */
+               || mips_cpu == 4111
                || mips_cpu == 4121
 	       /* end-sanitize-vr4xxx */
                || mips_cpu == 4400
@@ -1056,7 +1060,11 @@ md_begin ()
     mips_4010 = (mips_cpu == 4010);
 
   if (mips_4100 < 0)
-    mips_4100 = (mips_cpu == 4100);
+    mips_4100 = (mips_cpu == 4100
+		 /* start-sanitize-vr4xxx */
+		 || mips_cpu == 4111
+		 /* end-sanitize-vr4xxx */
+		 );
 
   /* start-sanitize-vr4xxx */
   if (mips_4121 < 0)
@@ -1098,6 +1106,12 @@ md_begin ()
 
   if (mips_opts.isa < 2 && mips_trap)
     as_bad (_("trap exception not supported at ISA 1"));
+
+  /* Set the EABI kind based on the ISA before the user gets
+     to change the ISA with directives.  This isn't really
+     the best, but then neither is basing the abi on the isa. */     
+  if (mips_opts.isa > 2 && strcmp (mips_abi_string,"eabi"))
+    mips_eabi64 = 1;
 
   if (mips_cpu != 0 && mips_cpu != -1)
     {
@@ -9603,7 +9617,7 @@ md_parse_option (c, arg)
                     mips_cpu = 4100;
 		/* start-sanitize-vr4xxx */
 		else if (strcmp (p, "4111") == 0)
-                    mips_cpu = 4100;
+                    mips_cpu = 4111;
 		else if (strcmp (p, "4121") == 0)
                     mips_cpu = 4121;
 		/* end-sanitize-vr4xxx */
@@ -9917,6 +9931,8 @@ MIPS options:\n\
 -m4100                  permit VR4100 instructions\n\
 -no-m4100		do not permit VR4100 instructions\n"));
   /* start-sanitize-vr4xxx */
+  fprintf(stream, _("\
+-mcpu=vr4111		generate code for vr4111\n"));
   fprintf(stream, _("\
 -mcpu=vr4121		generate code for vr4121\n\
 -m4121                  permit VR4121 instructions\n\
@@ -12092,10 +12108,10 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
   else if (strcmp (mips_abi_string,"eabi") == 0)
     {
-      if (mips_opts.isa > 2)
-	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
-      else
+      if (mips_eabi64)
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
+      else
+	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
 }
 
