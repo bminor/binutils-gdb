@@ -1,3 +1,8 @@
+2003-05-19  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config/tc-tic4x.c (md_assemble): Added support for one-line parallel insns.
+	* config/tc-tic4x.h: Added DOUBLEBAR_PARALLEL definition
+
 2003-05-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
