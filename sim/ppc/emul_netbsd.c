@@ -83,6 +83,7 @@ int getrusage();
 #endif
 
 #ifdef HAVE_UNISTD_H
+#undef MAXPATHLEN		/* sys/param.h might define this also */
 #include <unistd.h>
 #endif
 

@@ -9,6 +9,8 @@ Fri May 24 10:08:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* emul_netbsd.c: Add support for missing system calls, and/or
 	missing stat fields.
+	(MAXPATHLEN): Undefine if including unistd.h, since sys/param.h
+	might define it.
 
 	* hw_pal.c (WITH_STDIO): Redefine if O_NDELAY, F_GETFL, or F_SETFL
 	are not defined.
