@@ -953,7 +953,7 @@ udr.o: 29k-share/udi/udr.c $(udiheaders)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udr.c
 
 a29k-pinsn.o: a29k-pinsn.c $(bfd_h) $(dis-asm_h)
-a29k-tdep.o: a29k-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h)
+a29k-tdep.o: a29k-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h)
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 arm-pinsn.o: arm-pinsn.c $(OP_INCLUDE)/arm.h $(defs_h) $(symtab_h)

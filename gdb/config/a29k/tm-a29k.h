@@ -52,7 +52,9 @@ CORE_ADDR skip_prologue ();
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) (read_register (LR0_REGNUM))
+#define SAVED_PC_AFTER_CALL(frame) ((frame->flags & TRANSPARENT) \
+				    ? read_register (TPC_REGNUM) \
+				    : read_register (LR0_REGNUM))
 
 /* I'm not sure about the exact value of this, but based on looking
    at the stack pointer when we get to main this seems to be right.
@@ -175,6 +177,7 @@ CORE_ADDR skip_prologue ();
    : (x) == 164 ? EXO_REGNUM                                     \
    : (error ("Internal error in SR_REGNUM"), 0))
 #define GR96_REGNUM 0
+
 /* Define the return register separately, so it can be overridden for
    kernel procedure calling conventions. */
 #define	RETURN_REGNUM	GR96_REGNUM
@@ -183,16 +186,25 @@ CORE_ADDR skip_prologue ();
    to make call_function work right.  */
 #define SP_REGNUM MSP_REGNUM
 #define FP_REGNUM 33 /* lr1 */
+
+/* Return register for transparent calling convention (gr122).  */
+#define TPC_REGNUM (122 - 96 + GR96_REGNUM)
+
 /* Large Return Pointer (gr123).  */
 #define LRP_REGNUM (123 - 96 + GR96_REGNUM)
+
 /* Static link pointer (gr124).  */
 #define SLP_REGNUM (124 - 96 + GR96_REGNUM)
+
 /* Memory Stack Pointer (gr125).  */
 #define MSP_REGNUM (125 - 96 + GR96_REGNUM)
+
 /* Register allocate bound (gr126).  */
 #define RAB_REGNUM (126 - 96 + GR96_REGNUM)
+
 /* Register Free Bound (gr127).  */
 #define RFB_REGNUM (127 - 96 + GR96_REGNUM)
+
 /* Register Stack Pointer.  */
 #define RSP_REGNUM GR1_REGNUM
 #define LR0_REGNUM 32
