@@ -344,6 +344,7 @@ TARG_ENV_HFILES = \
 	config/te-hp300.h \
 	config/te-hppa.h \
 	config/te-i386aix.h \
+	config/te-ia64aix.h \
 	config/te-ic960.h \
 	config/te-linux.h \
 	config/te-lnews.h \

@@ -6049,6 +6049,7 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
+
   switch (c)
     {
     /* Switches from the Intel assembler.  */
@@ -6468,16 +6469,32 @@ ia64_target_format ()
       if (md.flags & EF_IA_64_BE)
 	{
 	  if (md.flags & EF_IA_64_ABI64)
+#ifdef TE_AIX50
+	    return "elf64-ia64-aix-big";
+#else
 	    return "elf64-ia64-big";
+#endif
 	  else
+#ifdef TE_AIX50
+	    return "elf32-ia64-aix-big";
+#else
 	    return "elf32-ia64-big";
+#endif
 	}
       else
 	{
 	  if (md.flags & EF_IA_64_ABI64)
+#ifdef TE_AIX50
+	    return "elf64-ia64-aix-little";
+#else
 	    return "elf64-ia64-little";
+#endif
 	  else
+#ifdef TE_AIX50
+	    return "elf32-ia64-aix-little";
+#else
 	    return "elf32-ia64-little";
+#endif
 	}
     }
   else

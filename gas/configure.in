@@ -291,6 +291,7 @@ changequote([,])dnl
       i960-*-elf*)	    fmt=elf ;;
 
       ia64-*-elf*)	    fmt=elf ;;
+      ia64-*-aix*)	    fmt=elf em=ia64aix ;;
       ia64-*-linux-gnu*)    fmt=elf em=linux ;;
       ia64-*-hpux*)	    fmt=elf em=hpux ;;
 

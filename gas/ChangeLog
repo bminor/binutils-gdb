@@ -1,3 +1,13 @@
+2001-02-22  Timothy Wall  <twall@cygnus.com>
+
+	* config/tc-ia64.c (ia64_target_format): Return ia64-aix-specific
+	target formats if applicable.
+	* config/te-ia64aix.h: New.  Configuration for AIX5 on IA-64.
+	* Makefile.am (TARG_ENV_HFILES): Added config/te-ia64aix.h.
+	* Makefile.in: Regenerated.
+	* configure.in: Added configuration for ia64-*-aix*.
+	* configure: Regenerated.
+	
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (enum operand_match_result): New type.
