@@ -6,14 +6,24 @@ SECTIONS {
   .text ${RELOCATING+${TEXT_START_ADDR}} : 
     {
 	*(.text);
+	*(.text1);
+	*(.text2);
 	${RELOCATING+_etext = .};
     }
-  data . :
+  .lit . :
+   {
+	*(.lit);
+	${RELOCATING+_elit = .};
+   }
+  .data . :
     {
 	*(.data);
+	*(.data1);
+	*(.data2);
 	${RELOCATING+_edata = .};
 	${CONSTRUCTING+CONSTRUCTORS}
     }
+
   .bss  . :
     { 
 	*(COMMON) 	

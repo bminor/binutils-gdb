@@ -68,3 +68,4 @@ PROTO(boolean, ldsym_undefined, (CONST char *));
 	for (x = symbol_head; x != (ldsym_type *)NULL; x = x->next) 	
 
 
+void EXFUN(ldsym_init,(void));

@@ -27,9 +27,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 
 #include "ldver.h"
+#include "ldemul.h"
 
 void
-ldversion()
+DEFUN(ldversion,(noisy),
+      int noisy)
+
 {
-  fprintf(stdout,"gld version BFD 0.18\n");
+  fprintf(stdout,"ld version 1.96 (with BFD %s)\n", BFD_VERSION);
+
+  if (noisy) 
+  {
+    extern ld_emulation_xfer_type *ld_emulations[];
+    ld_emulation_xfer_type **ptr = ld_emulations;
+    
+    printf("  Supported emulations:\n");
+    while (*ptr) 
+    {
+      printf("   %s \n", (*ptr)->emulation_name);
+      ptr++;
+    }
+  }
 }

@@ -1,17 +1,80 @@
-load -I. ld__a29k.c
-load -I. ld__h8300hms.c
-load -I. ld__lnk960.c
-load -I. ld__sun3.c
-load -I. ldlex.c
-load -I. ld__ebmon29k.c
-load -I. ld__h8300xray.c
-load -I. ld__m88kbcs.c
-load -I. ld__sun4.c
-load -I. ld__gld960.c
-load -I. ld__hp300bsd.c
-load -I. ld__news.c
-load -I. ld__vanilla.c
-load -I. ld__go32.c
-load -I. ld__i386aout.c
-load -I. ld__st2000.c
-load -I. ldgram.c
+suppress 652
+load -I../bfd -I../../devo/bfd -I../../devo/include -DMINIMIZE=1 -DDEFAULT_VECTOR='hp300bsd_vec' -DSELECT_VECS='&hp300bsd_vec' ../../devo/bfd/targets.c
+load -I. -I../../devo/ld -I../../devo/include ld__a29k.c
+load -I. -I../../devo/ld -I../../devo/include ld__h8300hms.c
+load -I. -I../../devo/ld -I../../devo/include ld__lnk960.c
+load -I. -I../../devo/ld -I../../devo/include ld__sun3.c
+load -I. -I../../devo/ld -I../../devo/include ldlex.c
+load -I. -I../../devo/ld -I../../devo/include ld__ebmon29k.c
+load -I. -I../../devo/ld -I../../devo/include ld__h8300xray.c
+load -I. -I../../devo/ld -I../../devo/include ld__m88kbcs.c
+load -I. -I../../devo/ld -I../../devo/include ld__sun4.c
+load -I. -I../../devo/ld -I../../devo/include ld__gld960.c
+load -I. -I../../devo/ld -I../../devo/include ld__hp300bsd.c
+load -I. -I../../devo/ld -I../../devo/include ld__news.c
+load -I. -I../../devo/ld -I../../devo/include ld__vanilla.c
+load -I. -I../../devo/ld -I../../devo/include ld__go32.c
+load -I. -I../../devo/ld -I../../devo/include ld__i386aout.c
+load -I. -I../../devo/ld -I../../devo/include ld__st2000.c
+load -I. -I../../devo/ld -I../../devo/include ld__sa29200.c
+load -I. -I../../devo/ld -I../../devo/include ldgram.c
+
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/cplus-dem.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldexp.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldlang.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldver.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldctor.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldfile.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldmain.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldwarn.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/mri.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldemul.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldmisc.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldwrite.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/relax.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/lderror.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldindr.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/ldsym.c
+load -I. -I../../devo/ld -I../../devo/include ../../devo/ld/lexsup.c
+
+
+
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/bfd.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/stab-sym.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/archures.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/bout.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cache.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/core.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/aout32.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/demo64.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/opncls.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/reloc.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/seclet.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/init.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/section.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/coff-a29k.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/hp300bsd.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/syms.c
+
+
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/archive.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/libbfd.c
+
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-a29k.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/format.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-i386.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-m68k.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-mips.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-sparc.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-h8300.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-i960.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-m88k.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-rs6000.c
+load -I../bfd -I../../devo/bfd -I../../devo/include ../../devo/bfd/cpu-vax.c
+
+load -I../libiberty -I../../devo/libiberty -I../../devo/include ../../devo/libiberty/obstack.c
+load -I../libiberty -I../../devo/libiberty -I../../devo/include ../../devo/libiberty/strtoul.c
+load -I../libiberty -I../../devo/libiberty -I../../devo/include ../../devo/libiberty/strerror.c
+
+
+

@@ -157,7 +157,7 @@ etree_type *
 DEFUN(exp_intop,(value),
       bfd_vma value)
 {
-  etree_type *new = (etree_type *)ldmalloc((bfd_size_type)(sizeof(new->value)));
+  etree_type *new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->value)));
   new->type.node_code = INT;
   new->value.value = value;
   new->type.node_class = etree_value;
@@ -520,7 +520,7 @@ DEFUN(exp_fold_tree,(tree, current_section, allocation_done,
 	      }
 	      else 
 	      {
-		def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
+		def_ptr = (asymbol **)stat_alloc((bfd_size_type)(sizeof(asymbol **)));
 		def = (asymbol   *)bfd_make_empty_symbol(script_file->the_bfd);
 
 		  
@@ -589,7 +589,7 @@ DEFUN(exp_binop,(code, lhs, rhs),
     {
       return exp_intop(r.value);
     }
-  new = (etree_type *)ldmalloc((bfd_size_type)(sizeof(new->binary)));
+  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->binary)));
   memcpy((char *)new, (char *)&value, sizeof(new->binary));
   return new;
 }
@@ -613,7 +613,7 @@ DEFUN(exp_trinop,(code, cond, lhs, rhs),
   if (r.valid) {
     return exp_intop(r.value);
   }
-  new = (etree_type *)ldmalloc((bfd_size_type)(sizeof(new->trinary)));
+  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->trinary)));
   memcpy((char *)new,(char *) &value, sizeof(new->trinary));
   return new;
 }
@@ -635,7 +635,7 @@ DEFUN(exp_unop,(code, child),
   if (r.valid) {
     return exp_intop(r.value);
   }
-  new = (etree_type *)ldmalloc((bfd_size_type)(sizeof(new->unary)));
+  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->unary)));
   memcpy((char *)new, (char *)&value, sizeof(new->unary));
   return new;
 }
@@ -648,7 +648,6 @@ DEFUN(exp_nameop,(code, name),
 {
 
   etree_type value, *new;
-
   etree_value_type r;
   value.name.type.node_code = code;
   value.name.name = name;
@@ -661,7 +660,7 @@ DEFUN(exp_nameop,(code, name),
   if (r.valid) {
     return exp_intop(r.value);
   }
-  new = (etree_type *)ldmalloc((bfd_size_type)(sizeof(new->name)));
+  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->name)));
   memcpy((char *)new, (char *)&value, sizeof(new->name));
   return new;
 
@@ -690,7 +689,7 @@ DEFUN(exp_assop,(code, dst, src),
     return exp_intop(result);
   }
 #endif
-  new = (etree_type*)ldmalloc((bfd_size_type)(sizeof(new->assign)));
+  new = (etree_type*)stat_alloc((bfd_size_type)(sizeof(new->assign)));
   memcpy((char *)new, (char *)&value, sizeof(new->assign));
   return new;
 }
@@ -719,9 +718,11 @@ DEFUN(exp_print_tree,(tree),
     exp_print_tree(tree->assign.src);
     break;
   case etree_binary:
+    fprintf(config.map_file,"(");
     exp_print_tree(tree->binary.lhs);
     exp_print_token(tree->type.node_code);
     exp_print_tree(tree->binary.rhs);
+    fprintf(config.map_file,")");
     break;
   case etree_trinary:
     exp_print_tree(tree->trinary.cond);
@@ -732,9 +733,14 @@ DEFUN(exp_print_tree,(tree),
     break;
   case etree_unary:
     exp_print_token(tree->unary.type.node_code);
+    if (tree->unary.child) 
+    {
+      
     fprintf(config.map_file,"(");
     exp_print_tree(tree->unary.child);
     fprintf(config.map_file,")");
+  }
+    
     break;
   case etree_undef:
     fprintf(config.map_file,"????????");
@@ -745,6 +751,7 @@ DEFUN(exp_print_tree,(tree),
     }
     else {
       exp_print_token(tree->type.node_code);
+      if (tree->name.name)
       fprintf(config.map_file,"(%s)", tree->name.name);
     }
     break;
@@ -768,7 +775,7 @@ DEFUN(exp_get_vma,(tree, def, name, allocation_done),
 
   if (tree != (etree_type *)NULL) {
     r = exp_fold_tree_no_dot(tree,
-		      (lang_output_section_statement_type *)NULL,
+		 abs_output_section,
 		      allocation_done);
     if (r.valid == false && name) {
       einfo("%F%S Nonconstant expression for %s\n",name);

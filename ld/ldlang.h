@@ -120,6 +120,8 @@ typedef struct {
 typedef struct {
   lang_statement_header_type header;
   fill_type fill;
+  int size;
+  asection *output_section;
 } lang_fill_statement_type;
 
 typedef struct {
@@ -339,3 +341,4 @@ void EXFUN(lang_add_data,(int type, union etree_union *));
 
 void EXFUN(lang_for_each_statement,(void (*func)()));
 
+PTR EXFUN(stat_alloc,(size_t size));

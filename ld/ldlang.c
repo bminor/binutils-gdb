@@ -42,6 +42,9 @@ PROTO(static void, print_statement,(lang_statement_union_type *,
 
 
 /* LOCALS */
+static struct obstack stat_obstack;
+#define obstack_chunk_alloc ldmalloc
+#define obstack_chunk_free free
 static CONST  char *startup_file;
 static lang_statement_list_type input_file_chain;
 
@@ -109,6 +112,13 @@ extern boolean write_map;
 
 void EXFUN(lang_add_data,( int type ,   union etree_union *exp));
 
+
+PTR
+DEFUN(stat_alloc,(size),
+      size_t size)
+{
+  return  obstack_alloc(&stat_obstack, size);
+}
 static void 
 DEFUN(print_size,(value),
       size_t value)
@@ -212,7 +222,7 @@ DEFUN(new_statement,(type, size, list),
       lang_statement_list_type *list)
 {
   lang_statement_union_type *new = (lang_statement_union_type *)
-    ldmalloc(size);
+    stat_alloc(size);
   new->header.type = type;
   new->header.next = (lang_statement_union_type *)NULL;
   lang_statement_append(list, new, &new->header.next);
@@ -330,8 +340,10 @@ DEFUN(lang_add_input_file,(name, file_type, target),
 void
 DEFUN_VOID(lang_init)
 {
+  obstack_begin(&stat_obstack, 1000);
 
   stat_ptr= &statement_list;
+
   lang_list_init(stat_ptr);
 
   lang_list_init(&input_file_chain);
@@ -340,9 +352,9 @@ DEFUN_VOID(lang_init)
   first_file = lang_add_input_file((char *)NULL, 
 				   lang_input_file_is_marker_enum,
 				   (char *)NULL);
-abs_output_section = lang_output_section_statement_lookup(BFD_ABS_SECTION_NAME);
+  abs_output_section = lang_output_section_statement_lookup(BFD_ABS_SECTION_NAME);
 
-abs_output_section->bfd_section = &bfd_abs_section;
+  abs_output_section->bfd_section = &bfd_abs_section;
 
 }
 
@@ -382,7 +394,7 @@ DEFUN(lang_memory_region_lookup,(name),
   }
     {
       lang_memory_region_type *new =
-	(lang_memory_region_type *)ldmalloc((bfd_size_type)(sizeof(lang_memory_region_type)));
+	(lang_memory_region_type *)stat_alloc((bfd_size_type)(sizeof(lang_memory_region_type)));
       new->name = buystring(name);
       new->next = (lang_memory_region_type *)NULL;
 
@@ -503,7 +515,7 @@ DEFUN(init_os,(s),
 /*  asection *section = bfd_get_section_by_name(output_bfd, s->name);*/
   section_userdata_type *new =
    (section_userdata_type *)
-    ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
+    stat_alloc((bfd_size_type)(sizeof(section_userdata_type)));
 
   s->bfd_section = bfd_get_section_by_name(output_bfd, s->name);
   if (s->bfd_section == (asection *)NULL)
@@ -799,7 +811,7 @@ DEFUN(ldlang_add_undef,(name),
 {
   ldlang_undef_chain_list_type *new =
     (ldlang_undef_chain_list_type
-     *)ldmalloc((bfd_size_type)(sizeof(ldlang_undef_chain_list_type)));
+     *)stat_alloc((bfd_size_type)(sizeof(ldlang_undef_chain_list_type)));
 
   new->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new;
@@ -816,7 +828,7 @@ DEFUN_VOID(lang_place_undefineds)
   ldlang_undef_chain_list_type *ptr = ldlang_undef_chain_list_head;
   while (ptr != (ldlang_undef_chain_list_type*)NULL) {
     asymbol *def;
-    asymbol **def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
+    asymbol **def_ptr = (asymbol **)stat_alloc((bfd_size_type)(sizeof(asymbol **)));
     def = (asymbol *)bfd_make_empty_symbol(script_file->the_bfd);
     *def_ptr= def;
     def->name = ptr->name;
@@ -1272,7 +1284,7 @@ DEFUN(insert_pad,(this_ptr, fill, power, output_section_statement, dot),
     {
       lang_statement_union_type *new = 
 	(lang_statement_union_type *)
-	  ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
+	  stat_alloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
       /* Link into existing chain */
       new->header.next = *this_ptr;
       *this_ptr = new;
@@ -1525,7 +1537,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
 	{
 	  lang_statement_union_type *new = 
 	   (lang_statement_union_type *)
-	    ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
+	    stat_alloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
 	  /* Link into existing chain */
 	  new->header.next = *prev;
 	  *prev = new;
@@ -2102,7 +2114,7 @@ DEFUN(create_symbol,(name, flags, section),
       asection *section)
 {
   extern lang_input_statement_type *script_file;
-  asymbol **def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
+  asymbol **def_ptr = (asymbol **)stat_alloc((bfd_size_type)(sizeof(asymbol **)));
   /* Add this definition to script file */
   asymbol *def =  (asymbol  *)bfd_make_empty_symbol(script_file->the_bfd);
   def->name = buystring(name);

@@ -1,3 +1,15 @@
+Mon May  4 16:10:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldver.c: Bumped version to 1.96 - new release, resync with the
+	bfd too #.
+	* ldexp.c, ldlang.c: now build memory shape tree in obstacks
+	rather than with raw malloc, makes it easier to track where memory
+	is going.
+	* ldsym.h, ldsym.c: create obstack for all global symbols too.
+	* ldwrite.c (ldwrite): moved malloc so only used when needed.
+	* sa29200-sc.sh: added support for .lit, data1 and data2 sections.
+
+
 Fri May  1 18:17:52 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* config/sparc.mh: use ../gcc/libgcc.a on check if it exists.

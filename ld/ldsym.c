@@ -72,6 +72,10 @@ ldsym_type **symbol_tail_ptr = &symbol_head;
 
 extern ld_config_type config;
 
+struct obstack global_sym_obstack;
+#define obstack_chunk_alloc ldmalloc
+#define obstack_chunk_free  free
+
 /*
   incremented for each symbol in the ldsym_type table
   no matter what flavour it is 
@@ -150,11 +154,11 @@ DEFUN(ldsym_get,(key),
 
   /* Nothing was found; create a new symbol table entry.  */
 
-  bp = (ldsym_type *) ldmalloc ((bfd_size_type)(sizeof (ldsym_type)));
+  bp = (ldsym_type *) obstack_alloc (&global_sym_obstack, (bfd_size_type)(sizeof (ldsym_type)));
   bp->srefs_chain = (asymbol **)NULL;
   bp->sdefs_chain = (asymbol **)NULL;
   bp->scoms_chain = (asymbol **)NULL;
-  bp->name = buystring(key);
+  bp->name = obstack_copy(&global_sym_obstack,  key, strlen(key)+1);
   bp->flags = 0;
   /* Add the entry to the bucket.  */
 
@@ -223,38 +227,36 @@ DEFUN(print_file_stuff,(f),
   {
     asection *s;
     if (true || option_longmap) {
-	for (s = f->the_bfd->sections;
-	     s != (asection *)NULL;
-	     s = s->next) {
-	    print_address(s->output_offset);
-	    if (s->reloc_done)
-	    {
-	      fprintf (config.map_file, " %08x 2**%2ud %s\n",
-		      (unsigned)bfd_get_section_size_after_reloc(s),
-		      s->alignment_power, s->name);
-	    }
+      for (s = f->the_bfd->sections;
+	   s != (asection *)NULL;
+	   s = s->next) {
+	print_address(s->output_offset);
+	if (s->reloc_done)
+	{
+	  fprintf (config.map_file, " %08x 2**%2ud %s\n",
+		   (unsigned)bfd_get_section_size_after_reloc(s),
+		   s->alignment_power, s->name);
+	}
 	    
-	    else 
-	    {
-	      fprintf (config.map_file, " %08x 2**%2ud %s\n",
-		      (unsigned)bfd_get_section_size_before_reloc(s),
-		      s->alignment_power, s->name);
-	    }
-	    
-
-	      
-	  }
+	else 
+	{
+	  fprintf (config.map_file, " %08x 2**%2ud %s\n",
+		   (unsigned)bfd_get_section_size_before_reloc(s),
+		   s->alignment_power, s->name);
+	}
       }
-    else {	      
-	for (s = f->the_bfd->sections;
-	     s != (asection *)NULL;
-	     s = s->next) {
-	    fprintf(config.map_file, "%s ", s->name);
-	    print_address(s->output_offset);
-	    fprintf(config.map_file, "(%x)", (unsigned)bfd_get_section_size_after_reloc(s));
-	  }
-	fprintf(config.map_file, "hex \n");
+    }
+    else
+    {	      
+      for (s = f->the_bfd->sections;
+	   s != (asection *)NULL;
+	   s = s->next) {
+	fprintf(config.map_file, "%s ", s->name);
+	print_address(s->output_offset);
+	fprintf(config.map_file, "(%x)", (unsigned)bfd_get_section_size_after_reloc(s));
       }
+      fprintf(config.map_file, "hex \n");
+    }
   }
   fprintf (config.map_file, "\n");
 }
@@ -329,90 +331,90 @@ static asymbol **
 write_file_locals(output_buffer)
 asymbol **output_buffer;
 {
-LANG_FOR_EACH_INPUT_STATEMENT(entry)
-    {
-      /* Run trough the symbols and work out what to do with them */
-      unsigned int i;
+  LANG_FOR_EACH_INPUT_STATEMENT(entry)
+  {
+    /* Run trough the symbols and work out what to do with them */
+    unsigned int i;
 
-      /* Add one for the filename symbol if needed */
-      if (create_object_symbols 
-	  != (lang_output_section_statement_type *)NULL) {
-	asection *s;
-	for (s = entry->the_bfd->sections;
-	     s != (asection *)NULL;
-	     s = s->next) {
-	  if (s->output_section == create_object_symbols->bfd_section) {
-	    /* Add symbol to this section */
-	    asymbol * newsym  =
-	      (asymbol *)bfd_make_empty_symbol(entry->the_bfd);
-	    newsym->name = entry->local_sym_name;
-	    /* The symbol belongs to the output file's text section */
+    /* Add one for the filename symbol if needed */
+    if (create_object_symbols 
+	!= (lang_output_section_statement_type *)NULL) {
+      asection *s;
+      for (s = entry->the_bfd->sections;
+	   s != (asection *)NULL;
+	   s = s->next) {
+	if (s->output_section == create_object_symbols->bfd_section) {
+	  /* Add symbol to this section */
+	  asymbol * newsym  =
+	   (asymbol *)bfd_make_empty_symbol(entry->the_bfd);
+	  newsym->name = entry->local_sym_name;
+	  /* The symbol belongs to the output file's text section */
 
-	    /* The value is the start of this section in the output file*/
-	    newsym->value  = 0;
-	    newsym->flags = BSF_LOCAL;
-	    newsym->section = s;
-	    *output_buffer++ = newsym;
-	    break;
-	  }
+	  /* The value is the start of this section in the output file*/
+	  newsym->value  = 0;
+	  newsym->flags = BSF_LOCAL;
+	  newsym->section = s;
+	  *output_buffer++ = newsym;
+	  break;
 	}
       }
-      for (i = 0; i < entry->symbol_count; i++) 
-	{
-	  asymbol *p = entry->asymbols[i];
-	  /* FIXME, temporary hack, since not all of ld knows about the new abs section convention */
+    }
+    for (i = 0; i < entry->symbol_count; i++) 
+    {
+      asymbol *p = entry->asymbols[i];
+      /* FIXME, temporary hack, since not all of ld knows about the new abs section convention */
 
-	  if (p->section == 0)
-	    p->section = &bfd_abs_section;
-	  if (flag_is_global(p->flags) )
-	    {
-	      /* We are only interested in outputting 
-		 globals at this stage in special circumstances */
-	      if (p->the_bfd == entry->the_bfd 
-		  && flag_is_not_at_end(p->flags)) {
-		/* And this is one of them */
-		*(output_buffer++) = p;
-		p->flags |= BSF_KEEP;
-	      }
-	    }
-	  else {
-	    if (flag_is_ordinary_local(p->flags)) 
-	      {
-		if (discard_locals == DISCARD_ALL)
-		  {  }
-		else if (discard_locals == DISCARD_L &&
-			 (p->name[0] == lprefix)) 
-		  {  }
-		else if (p->flags ==  BSF_WARNING) 
-		  {  }
-		else 
-		  { *output_buffer++ = p; }
-	      }
-	    else if (flag_is_debugger(p->flags)) 
-	      {
-		/* Only keep the debugger symbols if no stripping required */
-		if (strip_symbols == STRIP_NONE) {
-		  *output_buffer++ = p;
-		}
-	      }
-	    else if (p->section == &bfd_und_section)
-	      { /* This must be global */
-	      }
-	    else if (p->section == &bfd_com_section) {
-	   /* And so must this */
-	    } 
-	    else if (p->flags & BSF_CTOR) {
-	      /* Throw it away */
-	    }
-else
-	      {
-		FAIL();
-	      }
+      if (p->section == 0)
+       p->section = &bfd_abs_section;
+      if (flag_is_global(p->flags) )
+      {
+	/* We are only interested in outputting 
+	   globals at this stage in special circumstances */
+	if (p->the_bfd == entry->the_bfd 
+	    && flag_is_not_at_end(p->flags)) {
+	  /* And this is one of them */
+	  *(output_buffer++) = p;
+	  p->flags |= BSF_KEEP;
+	}
+      }
+      else {
+	if (flag_is_ordinary_local(p->flags)) 
+	{
+	  if (discard_locals == DISCARD_ALL)
+	  {  }
+	  else if (discard_locals == DISCARD_L &&
+		   (p->name[0] == lprefix)) 
+	  {  }
+	  else if (p->flags ==  BSF_WARNING) 
+	  {  }
+	  else 
+	  { *output_buffer++ = p; }
+	}
+	else if (flag_is_debugger(p->flags)) 
+	{
+	  /* Only keep the debugger symbols if no stripping required */
+	  if (strip_symbols == STRIP_NONE) {
+	    *output_buffer++ = p;
 	  }
 	}
-
-
+	else if (p->section == &bfd_und_section)
+	{			/* This must be global */
+	}
+	else if (p->section == &bfd_com_section) {
+	  /* And so must this */
+	} 
+	else if (p->flags & BSF_CTOR) {
+	  /* Throw it away */
+	}
+	else
+	{
+	  FAIL();
+	}
+      }
     }
+
+
+  }
   return output_buffer;
 }
 
@@ -502,8 +504,15 @@ DEFUN(ldsym_undefined,(sym),
       CONST char *sym)
 {
   ldsym_type *from_table = ldsym_get_soft(sym);
-  if (from_table != (ldsym_type *)NULL) {
+  if (from_table != (ldsym_type *)NULL) 
+  {
     if (from_table->sdefs_chain != (asymbol **)NULL) return false;
   }
   return true;
+}
+
+void
+DEFUN_VOID(ldsym_init)
+{
+  obstack_begin(&global_sym_obstack, 20000);
 }

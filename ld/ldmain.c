@@ -130,6 +130,7 @@ main (argc, argv)
   output_filename = "a.out";
 
   bfd_init();
+
 #ifdef GNU960
 {
   int i;
@@ -158,7 +159,7 @@ main (argc, argv)
   command_line.force_common_definition = false;
 
   init_bfd_error_vector();
-  
+ldsym_init();  
   ldfile_add_arch("");
   ldfile_add_library_path("./");
   config.make_executable = true;
@@ -221,14 +222,14 @@ main (argc, argv)
      symbols, and possibly multiple definitions */
 
 
-  if (config.text_read_only) {
-      /* Look for a text section and mark the readonly attribute in it */
-      asection *found = bfd_get_section_by_name(output_bfd, ".text");
-      if (found == (asection *)NULL) {
-	  einfo("%P%F: text marked read only, but no text section present");
-	}
+  if (config.text_read_only) 
+  {
+    /* Look for a text section and mark the readonly attribute in it */
+    asection *found = bfd_get_section_by_name(output_bfd, ".text");
+    if (found != (asection *)NULL) {
       found->flags |= SEC_READONLY;
     }
+  }
 
   if (config.relocateable_output) {
       output_bfd->flags &= ~EXEC_P;
