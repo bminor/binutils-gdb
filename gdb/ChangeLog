@@ -162,8 +162,6 @@
 
 2004-05-24  Mark Kettenis  <kettenis@gnu.org>
 
-	* MAINTAINERS: Undelete m88k.  Add myself as maintainer.
-
 	Add OpenBSD/m88k support.
 	* NEWS (New native configurations): Mention OpenBSD/m88k.
 	* m88k-tdep.c, m88k-tdep.h, m88kbsd-nat.c, config/m88k/nm-obsd.h,
