@@ -1,3 +1,21 @@
+Fri Apr 14 12:10:24 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* xcoffread.c (xcoff_sym_fns): Revise comment about merging this
+	with coffread.c.
+
+	* breakpoint.c (fixup_breakpoints): Removed.
+	* rs6000-nat.c (vmap_symtab): Don't call fixup_breakpoints.
+	(vmap_ldinfo, xcoff_relocate_core): Call breakpoint_re_set.
+
+	* coffread.c (coff_symfile_offsets): Allocate SECT_OFF_MAX
+	sections, not just SECT_OFF_MAX-1.
+
+	* rs6000-nat.c (vmap_symtab), xcoffread.c: Re-do section offsets
+	to be indexed by SECT_OFF_* instead of xcoff section numbers.
+	* objfiles.c, remote.c: Remove comments regarding SECT_OFF_*.
+	* symtab.h: Revise comment about block_line_section.
+	* rs6000-nat.c (vmap_symtab): Don't relocate objfile->sections.
+
 Sat Apr 15 14:15:14 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.in (init.c): Don't try to do symbolic {o} in sed

@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "libbfd.h"  /* For bfd_cache_lookup (FIXME) */
 #include "bfd.h"
+#include "gdb-stabs.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -285,9 +286,6 @@ vmap_symtab (vp)
      register struct vmap *vp;
 {
   register struct objfile *objfile;
-  asection *textsec;
-  asection *datasec;
-  asection *bsssec;
   CORE_ADDR text_delta;
   CORE_ADDR data_delta;
   CORE_ADDR bss_delta;
@@ -312,48 +310,19 @@ vmap_symtab (vp)
   for (i = 0; i < objfile->num_sections; ++i)
     ANOFFSET (new_offsets, i) = ANOFFSET (objfile->section_offsets, i);
   
-  textsec = bfd_get_section_by_name (vp->bfd, ".text");
   text_delta =
-    vp->tstart - ANOFFSET (objfile->section_offsets, textsec->target_index);
-  ANOFFSET (new_offsets, textsec->target_index) = vp->tstart;
+    vp->tstart - ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+  ANOFFSET (new_offsets, SECT_OFF_TEXT) = vp->tstart;
 
-  datasec = bfd_get_section_by_name (vp->bfd, ".data");
   data_delta =
-    vp->dstart - ANOFFSET (objfile->section_offsets, datasec->target_index);
-  ANOFFSET (new_offsets, datasec->target_index) = vp->dstart;
+    vp->dstart - ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+  ANOFFSET (new_offsets, SECT_OFF_DATA) = vp->dstart;
   
-  bsssec = bfd_get_section_by_name (vp->bfd, ".bss");
   bss_delta =
-    vp->dstart - ANOFFSET (objfile->section_offsets, bsssec->target_index);
-  ANOFFSET (new_offsets, bsssec->target_index) = vp->dstart;
+    vp->dstart - ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+  ANOFFSET (new_offsets, SECT_OFF_BSS) = vp->dstart;
 
   objfile_relocate (objfile, new_offsets);
-
-  {
-    struct obj_section *s;
-    for (s = objfile->sections; s < objfile->sections_end; ++s)
-      {
-	if (s->the_bfd_section->target_index == textsec->target_index)
-	  {
-	    s->addr += text_delta;
-	    s->endaddr += text_delta;
-	  }
-	else if (s->the_bfd_section->target_index == datasec->target_index)
-	  {
-	    s->addr += data_delta;
-	    s->endaddr += data_delta;
-	  }
-	else if (s->the_bfd_section->target_index == bsssec->target_index)
-	  {
-	    s->addr += bss_delta;
-	    s->endaddr += bss_delta;
-	  }
-      }
-  }
-  
-  if (text_delta != 0)
-    /* breakpoints need to be relocated as well. */
-    fixup_breakpoints (0, TEXT_SEGMENT_BASE, text_delta);
 }
 
 /* Add symbols for an objfile.  */
@@ -568,6 +537,7 @@ symbols to the proper address).\n", gdb_stderr);
       free_objfile (symfile_objfile);
       symfile_objfile = NULL;
     }
+  breakpoint_re_set ();
 }
 
 /* As well as symbol tables, exec_sections need relocation. After
@@ -786,5 +756,6 @@ xcoff_relocate_core (target)
 			    (CORE_ADDR)ldip->ldinfo_dataorg);
     } while (ldip->ldinfo_next != 0);
   vmap_exec ();
+  breakpoint_re_set ();
   do_cleanups (old);
 }

@@ -214,7 +214,6 @@ static void
 add_stab_to_list PARAMS ((char *, struct pending_stabs **));
 
 
-#ifdef STATIC_NODEBUG_VARS
 /* Return the section_offsets* that CS points to.  */
 static int cs_to_section PARAMS ((struct coff_symbol *, struct objfile *));
 
@@ -256,7 +255,6 @@ cs_to_section (cs, objfile)
   bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
   return off;
 }
-#endif /* STATIC_NODEBUG_VARS */
 
 /* add a given stab string into given stab vector. */
 
@@ -1252,8 +1250,7 @@ read_xcoff_symtab (objfile, nsyms)
 	{
 	  if (last_source_file)
 	    {
-	      end_symtab (cur_src_end_addr, 1, 0, objfile,
-			  textsec->target_index);
+	      end_symtab (cur_src_end_addr, 1, 0, objfile, SECT_OFF_TEXT);
 	      end_stabs ();
 	    }
 
@@ -1333,7 +1330,7 @@ read_xcoff_symtab (objfile, nsyms)
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
 			  end_symtab (file_end_addr, 1, 0, objfile,
-				      textsec->target_index);
+				      SECT_OFF_TEXT);
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
@@ -1357,7 +1354,7 @@ read_xcoff_symtab (objfile, nsyms)
 			{
 			  last_csect_name = cs->c_name;
 			  last_csect_val = cs->c_value;
-			  last_csect_sec = cs->c_secnum;
+			  last_csect_sec = cs_to_section (cs, objfile);
 			}
 		    }
 		    misc_func_recorded = 0;
@@ -1400,9 +1397,10 @@ read_xcoff_symtab (objfile, nsyms)
 		case XMC_PR:
 		  /* a function entry point. */
 		function_entry_point:
-		  RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
-					 symname_alloced, cs->c_secnum,
-					 objfile);
+		  RECORD_MINIMAL_SYMBOL
+		    (cs->c_name, cs->c_value, mst_text, 
+		     symname_alloced, cs_to_section (cs, objfile),
+		     objfile);
 
 		  fcn_line_offset = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		  fcn_start_addr = cs->c_value;
@@ -1518,7 +1516,7 @@ read_xcoff_symtab (objfile, nsyms)
 		  RECORD_MINIMAL_SYMBOL
 		    (cs->c_name, cs->c_value,
 		     mst_solib_trampoline,
-		     symname_alloced, cs->c_secnum, objfile);
+		     symname_alloced, cs_to_section (cs, objfile), objfile);
 		  continue;
 
 		case XMC_DS:
@@ -1575,7 +1573,7 @@ read_xcoff_symtab (objfile, nsyms)
 
 	  complete_symtab (filestring, file_start_addr);
 	  cur_src_end_addr = file_end_addr;
-	  end_symtab (file_end_addr, 1, 0, objfile, textsec->target_index);
+	  end_symtab (file_end_addr, 1, 0, objfile, SECT_OFF_TEXT);
 	  end_stabs ();
 
 	  /* XCOFF, according to the AIX 3.2 documentation, puts the filename
@@ -1621,7 +1619,7 @@ read_xcoff_symtab (objfile, nsyms)
 	      new->name = define_symbol 
 		(fcn_cs_saved.c_value, fcn_stab_saved.c_name, 0, 0, objfile);
 	      if (new->name != NULL)
-		SYMBOL_SECTION (new->name) = cs->c_secnum;
+		SYMBOL_SECTION (new->name) = cs_to_section (cs, objfile);
 	    }
 	  else if (STREQ (cs->c_name, ".ef"))
 	    {
@@ -1656,10 +1654,12 @@ read_xcoff_symtab (objfile, nsyms)
 	  /* Begin static block.  */
 	  {
 	    struct internal_syment symbol;
+	    struct coff_symbol csymbol;
 
 	    read_symbol (&symbol, cs->c_value);
 	    static_block_base = symbol.n_value;
-	    static_block_section = symbol.n_scnum;
+	    csymbol.c_secnum = symbol.n_scnum;
+	    static_block_section = cs_to_section (&csymbol, objfile);
 	  }
 	  break;
 
@@ -1721,7 +1721,7 @@ read_xcoff_symtab (objfile, nsyms)
 		break;
 	      }
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, ms_type,
-				   symname_alloced, cs->c_secnum, objfile);
+				   symname_alloced, sec, objfile);
 	  }
 #endif /* STATIC_NODEBUG_VARS */
 	  break;
@@ -1774,7 +1774,7 @@ read_xcoff_symtab (objfile, nsyms)
 
   if (last_source_file)
     {
-      end_symtab (cur_src_end_addr, 1, 0, objfile, textsec->target_index);
+      end_symtab (cur_src_end_addr, 1, 0, objfile, SECT_OFF_TEXT);
       end_stabs ();
     }
 
@@ -1827,7 +1827,7 @@ process_xcoff_symbol (cs, objfile)
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
   SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-  SYMBOL_SECTION (sym) = cs->c_secnum;
+  SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 
   if (ISFCN (cs->c_type))
     {
@@ -1886,7 +1886,7 @@ process_xcoff_symbol (cs, objfile)
 	  sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
 	  if (sym != NULL)
 	    {
-	      SYMBOL_SECTION (sym) = cs->c_secnum;
+	      SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 	    }
 	  return sym;
 
@@ -1917,14 +1917,14 @@ process_xcoff_symbol (cs, objfile)
 	  sym = define_symbol (cs->c_value, cs->c_name, 0, N_LSYM, objfile);
 	  if (sym != NULL)
 	    {
-	      SYMBOL_SECTION (sym) = cs->c_secnum;
+	      SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 	    }
 	  return sym;
 
 	case C_AUTO:
 	  SYMBOL_CLASS (sym) = LOC_LOCAL;
 	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = cs->c_secnum;
+	  SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 	  SYMBOL_DUP (sym, sym2);
 	  add_symbol_to_list (sym2, &local_symbols);
 	  break;
@@ -1932,7 +1932,7 @@ process_xcoff_symbol (cs, objfile)
 	case C_EXT:
 	  SYMBOL_CLASS (sym) = LOC_STATIC;
 	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = cs->c_secnum;
+	  SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 	  SYMBOL_DUP (sym, sym2);
 	  add_symbol_to_list (sym2, &global_symbols);
 	  break;
@@ -1940,7 +1940,7 @@ process_xcoff_symbol (cs, objfile)
 	case C_STAT:
 	  SYMBOL_CLASS (sym) = LOC_STATIC;
 	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = cs->c_secnum;
+	  SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 	  SYMBOL_DUP (sym, sym2);
 	  add_symbol_to_list 
 	    (sym2, within_function ? &local_symbols : &file_symbols);
@@ -1952,7 +1952,7 @@ process_xcoff_symbol (cs, objfile)
 	    {
 	      sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
 	      if (sym != NULL)
-		SYMBOL_SECTION (sym) = cs->c_secnum;
+		SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 	      return sym;
 	    }
 	  else
@@ -2372,22 +2372,7 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   do_cleanups (back_to);
 }
 
-/* XCOFF-specific parsing routine for section offsets.  */
-
-static int largest_section;
-
-static void
-note_one_section (abfd, asect, ptr)
-     bfd *abfd;
-     asection *asect;
-     PTR ptr;
-{
-  if (asect->target_index > largest_section)
-    largest_section = asect->target_index;
-}
-
-static
-struct section_offsets *
+static struct section_offsets *
 xcoff_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
@@ -2395,14 +2380,12 @@ xcoff_symfile_offsets (objfile, addr)
   struct section_offsets *section_offsets;
   int i;
 
-  largest_section = 0;
-  bfd_map_over_sections (objfile->obfd, note_one_section, NULL);
-  objfile->num_sections = largest_section + 1;
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc
       (&objfile -> psymbol_obstack,
        sizeof (struct section_offsets)
-       + sizeof (section_offsets->offsets) * (objfile->num_sections));
+       + sizeof (section_offsets->offsets) * objfile->num_sections);
 
   /* syms_from_objfile kindly subtracts from addr the bfd_section_vma
      of the .text section.  This strikes me as wrong--whether the
@@ -2412,9 +2395,9 @@ xcoff_symfile_offsets (objfile, addr)
      handle any section but .text sensibly), so just ignore the addr
      parameter and use 0.  That matches the fact that xcoff_symfile_read
      ignores the section_offsets).  */
-  for (i = 0; i < objfile->num_sections; i++)
+  for (i = 0; i < objfile->num_sections; ++i)
     ANOFFSET (section_offsets, i) = 0;
-  
+
   return section_offsets;
 }
 
@@ -2424,10 +2407,14 @@ static struct sym_fns xcoff_sym_fns =
 {
 
   /* Because the bfd uses coff_flavour, we need to specially kludge
-     the flavour.  FIXME: coff and xcoff and fundamentally similar
-     except for debug format, and we should see if we can merge this
-     file with coffread.c.  For example, the extra storage classes
-     used for stabs could presumably be recognized in any COFF file.  */
+     the flavour.  It is possible that coff and xcoff should be merged as
+     they do have fundamental similarities (for example, the extra storage
+     classes used for stabs could presumably be recognized in any COFF file).
+     However, in addition to obvious things like all the csect hair, there are
+     some subtler differences between xcoffread.c and coffread.c, notably
+     the fact that coffread.c has no need to read in all the symbols, but
+     xcoffread.c reads all the symbols and does in fact randomly access them
+     (in C_BSTAT and B_BINCL processing).  */
 
   (enum bfd_flavour)-1,
 

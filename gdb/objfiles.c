@@ -545,10 +545,6 @@ objfile_relocate (objfile, new_offsets)
 
     ALL_OBJFILE_PSYMTABS (objfile, p)
       {
-	/* FIXME: specific to symbol readers which use gdb-stabs.h.
-	   We can only get away with it since objfile_relocate is only
-	   used on XCOFF, which lacks psymtabs, and for gdb-stabs.h
-	   targets.  */
 	p->textlow += ANOFFSET (delta, SECT_OFF_TEXT);
 	p->texthigh += ANOFFSET (delta, SECT_OFF_TEXT);
       }
