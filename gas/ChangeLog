@@ -1,5 +1,11 @@
 Fri Feb 21 11:55:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (LEX_IS_TWOCHAR_COMMENT_2ND): Don't define.
+	(do_scrub_begin): Don't set lex['*'].
+	(do_scrub_chars): When handling LEX_IS_TWOCHAR_COMMENT_1ST, don't
+ 	check for LEX_IS_TWOCHAR_COMMENT_2ND.  Instead, just check for
+	a literal '*'.
+
 	* configure.in: Set em=svr4 for m68k-*-sysv4*.
 	* configure: Rebuild.
 	* config/te-svr4.h: New file.
