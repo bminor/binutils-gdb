@@ -1,3 +1,8 @@
+Sat Feb 29 13:59:10 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* Makefile.in (strerror.o): Add rule so that broken Sun make can
+	work in subdirs.
+
 Wed Feb 26 19:26:28 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
 	* read.c, obj-coffbfd.c : fix h8300 specific bit rot
