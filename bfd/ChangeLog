@@ -1,3 +1,8 @@
+2004-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf32-i386.c (elf_i386_grok_prstatus): Add support for FreeBSD.
+	(elf_i386_grok_psinfo): Likewise.
+
 2004-01-02  Bernardo Innocenti  <bernie@develer.com>
 
 	* config.bfd: Add m68k-uClinux target.
