@@ -1,3 +1,17 @@
+2003-11-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_install_value): Delete.
+	(shared_stub_entry, stub_entry): Make them arrays of ints.
+	Remove initial branch.
+	(ppc_elf_relax_section): Write one branch around all trampolines
+	instead.  Correct bogus R_PPC_PLTREL24 handling.  Correct
+	branch range check.  Only use shared_stub_entry when shared.
+	Test that branches can reach stubs.  Write trampolines out at
+	end so that just one realloc is used.  Handle little-endian
+	mode.  Move relevant code from ppc_elf_install_value to here.
+	(ppc_elf_relocate_section): Move code handling RELAX32 from
+	ppc_elf_install_value to here.
+
 2003-11-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_howto_raw); Add entry for R_PPC_RELAX32PC.
