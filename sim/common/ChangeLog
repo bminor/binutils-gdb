@@ -2,12 +2,12 @@ Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-options.c, sim-options.h: New files.
 	* sim-config.h (WITH_DEBUG): Provide default value of zero.
-	* Make-common.in (nrun.o): Add rule for.
+	* Make-common.in (nrun.o): Add rules for.
 	* nrun.c: New file.
 
 	* run.c (main): Check return value of sim_open.
 
-	* Make-common.in (sim-options.o, sim-load.o): Add rules for.
+	* Make-common.in (sim-options.o, sim-load.o, sim-trace.o): Add rules.
 	(sim_main_headers): Add sim-trace.h.
 	* run.c (exec_bfd, target_byte_order): Delete.
 	(main): Pass -E <endian> to sim_open.  Delete code to load sections,
@@ -18,6 +18,7 @@ Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 	mem_size, memory [+ corresponding access macros].
 	(sim_cpu_base): New typedef.
 	* sim-trace.h: New file.
+	* sim-trace.c: New file.
 	* sim-basics.h: #include it.
 	* sim-load.c: New file.
 

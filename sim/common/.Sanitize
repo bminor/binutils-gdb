@@ -60,6 +60,7 @@ sim-n-core.h
 sim-n-endian.h
 sim-options.c
 sim-options.h
+sim-trace.c
 sim-trace.h
 sim-types.h
 sim-utils.c
