@@ -1,5 +1,10 @@
 2002-07-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h: Formatting fixes, tidy prototypes.
+	(elf_link_assign_sym_version): Move common code out of loop.
+
+2002-07-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.h (elf_link_input_bfd): Don't call reloc_emitter when
 	reloc section size is zero.  Correct reloc output location.
 
