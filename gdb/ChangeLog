@@ -1,5 +1,15 @@
 2001-04-03  Andrew Cagney  <ac131313@redhat.com>
 
+	Obsolete w65-*-* target.
+	* configure.tgt (w65-*-*): Obsolete.
+	* config/w65/w65.mt: Obsolete.
+	* config/w65/tm-w65.h: Obsolete.
+	* w65-tdep.c: Obsolete.
+	* NEWS: Update.  Fix TiC80 description.
+	* TODO: Update.
+
+2001-04-03  Andrew Cagney  <ac131313@redhat.com>
+
 	Obsolete tic80-*-* target.
 	* configure.tgt (tic80-*-*): Obsolete.
 	* config/tic80/tic80.mt: Obsolete.
