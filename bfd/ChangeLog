@@ -1,3 +1,24 @@
+Thu Oct  3 07:49:21 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* elf.c: took the abort out of set_arch_mach so that objdump -i will
+	still work. Now allows any architecture/machine to be set.
+
+Wed Oct  2 13:50:35 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* howto.c deleted and moved code to reloc.c
+
+	* libbfd.h, libbfd-in.h removed $id stuff for real
+
+	* cpu-h8300.c Made it match various different spellings of h8300.
+
+	* archures.c: Took out the first char filter which made it only
+	look for a cpu/arch match when the first chars of supplied and
+	tested names were the same.
+	
+	* targets.c removed oasys stuff, pending someone to fix the bugs
+	in it.
+
+
 Tue Oct  1 12:29:44 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in, configure.in, targets.c, elf.c:  Add preliminary
