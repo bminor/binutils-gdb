@@ -1119,8 +1119,7 @@ proc gdb_wrapper_init { args } {
     if { $gdb_wrapper_initialized == 1 } { return; }
 
     if {[target_info exists needs_status_wrapper] && \
-	    [target_info needs_status_wrapper] != "0" && \
-	    ![info exists gdb_wrapper_file]} {
+	    [target_info needs_status_wrapper] != "0"} {
 	set result [build_wrapper "testglue.o"];
 	if { $result != "" } {
 	    set gdb_wrapper_file [lindex $result 0];
@@ -1390,8 +1389,14 @@ proc gdb_continue { function } {
 }
 
 proc default_gdb_init { args } {
+    global gdb_wrapper_initialized
+    
     gdb_clear_suppressed;
 
+    # Make sure that the wrapper is rebuilt
+    # with the appropriate multilib option.
+    set gdb_wrapper_initialized 0
+    
     # Uh, this is lame. Really, really, really lame. But there's this *one*
     # testcase that will fail in random places if we don't increase this.
     match_max -d 20000

@@ -1,3 +1,11 @@
+2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* lib/gdb.exp (gdb_wrapper_init): Just because
+	gdb_wrapper_file exists, this does not mean that the file
+	should not be rebuilt.  That is what gdb_wrapper_initialized
+	is for.
+	(default_gdb_init): Reset gdb_wrapper_initialized.
+
 2002-05-23  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/all-bin.exp: Revise previous patch by just reducing 
