@@ -4,6 +4,11 @@ Mon Oct 16 14:43:59 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 Mon Oct 16 10:52:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd-in.h (struct bfd_link_needed_list): Rename from
+	bfd_elf_link_needed_list.
+	* bfd-in2.h: Rebuild.
+	* elf.c, elflink.h, libelf.h: Corresponding changes.
+
 	Add start at AIX linker support; no shared libraries yet.
 	* xcofflink.c: New file.
 	* configure.in (rs600coff_vec): Use xcofflink.o.

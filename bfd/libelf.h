@@ -146,7 +146,7 @@ struct elf_link_hash_table
   size_t bucketcount;
   /* A linked list of DT_NEEDED names found in dynamic objects
      included in the link.  */
-  struct bfd_elf_link_needed_list *needed;
+  struct bfd_link_needed_list *needed;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

@@ -563,17 +563,18 @@ extern boolean bfd_mips_ecoff_create_embedded_relocs
 
 /* Externally visible ELF routines.  */
 
+struct bfd_link_needed_list
+{
+  struct bfd_link_needed_list *next;
+  bfd *by;
+  const char *name;
+};
+
 extern boolean bfd_elf32_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
-struct bfd_elf_link_needed_list
-{
-  struct bfd_elf_link_needed_list *next;
-  bfd *by;
-  const char *name;
-};
-extern struct bfd_elf_link_needed_list *bfd_elf_get_needed_list
+extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean,
@@ -1872,6 +1873,7 @@ struct _bfd
       struct _oasys_ar_data *oasys_ar_data;
       struct coff_tdata *coff_obj_data;
       struct pe_tdata *pe_obj_data;
+      struct xcoff_tdata *xcoff_obj_data;
       struct ecoff_tdata *ecoff_obj_data;
       struct ieee_data_struct *ieee_data;
       struct ieee_ar_data_struct *ieee_ar_data;

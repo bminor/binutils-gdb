@@ -88,6 +88,11 @@ typedef struct _bfd bfd;
 #if defined (__GNUG__) && (__GNUC_MINOR__ > 5)
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
+#ifdef MPW
+/* Pre-emptive strike - get the file with the enum. */
+#include <Types.h>
+#define TRUE_FALSE_ALREADY_DEFINED
+#endif /* MPW */
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
@@ -558,17 +563,18 @@ extern boolean bfd_mips_ecoff_create_embedded_relocs
 
 /* Externally visible ELF routines.  */
 
+struct bfd_link_needed_list
+{
+  struct bfd_link_needed_list *next;
+  bfd *by;
+  const char *name;
+};
+
 extern boolean bfd_elf32_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
-struct bfd_elf_link_needed_list
-{
-  struct bfd_elf_link_needed_list *next;
-  bfd *by;
-  const char *name;
-};
-extern struct bfd_elf_link_needed_list *bfd_elf_get_needed_list
+extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean,
