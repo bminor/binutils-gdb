@@ -1,5 +1,7 @@
 Fri Sep  8 11:47:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elfcode.h (align_file_position): Remove; not used.
+
 	* configure.in: Only check for <sys/procfs.h> on a native system,
 	and make sure it defines prstatus_t.
 	* configure: Rebuild.

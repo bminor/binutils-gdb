@@ -94,6 +94,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_swap_reloca_out		NAME(bfd_elf,swap_reloca_out)
 #define elf_swap_symbol_in		NAME(bfd_elf,swap_symbol_in)
 #define elf_swap_symbol_out		NAME(bfd_elf,swap_symbol_out)
+#define elf_swap_phdr_in		NAME(bfd_elf,swap_phdr_in)
+#define elf_swap_phdr_out		NAME(bfd_elf,swap_phdr_out)
 #define elf_swap_dyn_in			NAME(bfd_elf,swap_dyn_in)
 #define elf_swap_dyn_out		NAME(bfd_elf,swap_dyn_out)
 #define elf_get_reloc_upper_bound	NAME(bfd_elf,get_reloc_upper_bound)
@@ -154,7 +156,6 @@ static boolean elf_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
 					     struct symbol_cache_entry **));
 
 static void write_relocs PARAMS ((bfd *, asection *, PTR));
-static file_ptr align_file_position PARAMS ((file_ptr));
 
  boolean bfd_section_from_shdr PARAMS ((bfd *, unsigned int shindex));
 
@@ -314,7 +315,7 @@ elf_swap_shdr_out (abfd, src, dst)
 /* Translate an ELF program header table entry in external format into an
    ELF program header table entry in internal format. */
 
-static void
+void
 elf_swap_phdr_in (abfd, src, dst)
      bfd *abfd;
      Elf_External_Phdr *src;
@@ -330,7 +331,7 @@ elf_swap_phdr_in (abfd, src, dst)
   dst->p_align = get_word (abfd, (bfd_byte *) src->p_align);
 }
 
-static void
+void
 elf_swap_phdr_out (abfd, src, dst)
      bfd *abfd;
      Elf_Internal_Phdr *src;
@@ -752,16 +753,6 @@ write_relocs (abfd, sec, data)
     }
 }
 
-/* Align to the maximum file alignment that could be required for any
-   ELF data structure.  */
-
-static INLINE file_ptr
-align_file_position (off)
-     file_ptr off;
-{
-  return (off + FILE_ALIGN - 1) & ~(FILE_ALIGN - 1);
-}
-
 static int
 write_out_phdrs (abfd, phdr, count)
      bfd *abfd;
@@ -1044,7 +1035,7 @@ elf_slurp_reloc_table (abfd, asect, symbols)
 	      && (asect->reloc_count
 		  == d->rel_hdr.sh_size / d->rel_hdr.sh_entsize));
 
-  allocated = (PTR) malloc (d->rel_hdr.sh_size);
+  allocated = (PTR) malloc ((size_t) d->rel_hdr.sh_size);
   if (allocated == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
