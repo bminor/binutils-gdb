@@ -1,5 +1,12 @@
 Mon Oct 19 14:13:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
+	* sim-main.h: #include cpu-opc.h.
+	* arch.c,arch.h,decode.c,extract.c,model.c,sem.c: Regenerate
+	to get #include cleanup.
+start-sanitize-m32rx
+	* decodex.c,extractx.c,modelx.c: Ditto.
+end-sanitize-m32rx
+
 	* Makefile.in (SIM_EXTRA_DEPS): Replace cgen headers with
 	CGEN_INCLUDE_DEPS.
 	(M32RBF_INCLUDE_DEPS): Define.
@@ -15,6 +22,10 @@ start-sanitize-m32rx
 	(mloopx.c): Update call to genmloop.sh.
 	* cpux.h: Regenerate.
 end-sanitize-m32rx
+
+Fri Oct 16 09:15:29 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* sim-if.c (sim_do_command): Handle "sim info reg {bbpsw,bbpc}".
 
 Wed Oct 14 14:49:50 1998  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -1,4 +1,4 @@
-/* Main simulator entry points for the M32R.
+/* Main simulator entry points specific to the M32R.
    Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -51,6 +51,7 @@ sim_open (kind, callback, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
+  char c;
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
@@ -83,21 +84,6 @@ sim_open (kind, callback, abfd, argv)
     sim_add_option_table (sd, extra_options);
 #endif
 
-  /* Allocate core managed memory */
-  sim_do_commandf (sd, "memory region 0,0x%lx", M32R_DEFAULT_MEM_SIZE);
-
-  /* Allocate a handler for the control registers and other devices.
-     All are allocated in one chunk to keep things from being
-     unnecessarily complicated.  */
-  sim_core_attach (sd, NULL,
-		   0 /*level*/,
-		   access_read_write,
-		   0 /*space ???*/,
-		   M32R_DEVICE_ADDR, M32R_DEVICE_LEN /*nr_bytes*/,
-		   0 /*modulo*/,
-		   &m32r_devices,
-		   NULL /*buffer*/);
-
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */
@@ -106,6 +92,25 @@ sim_open (kind, callback, abfd, argv)
       free_state (sd);
       return 0;
     }
+
+  /* Allocate a handler for the control registers and other devices
+     if no memory for that range has been allocated by the user.
+     All are allocated in one chunk to keep things from being
+     unnecessarily complicated.  */
+  if (sim_core_read_buffer (sd, NULL, read_map, &c, M32R_DEVICE_ADDR, 1) == 0)
+    sim_core_attach (sd, NULL,
+		     0 /*level*/,
+		     access_read_write,
+		     0 /*space ???*/,
+		     M32R_DEVICE_ADDR, M32R_DEVICE_LEN /*nr_bytes*/,
+		     0 /*modulo*/,
+		     &m32r_devices,
+		     NULL /*buffer*/);
+
+  /* Allocate core managed memory if none specified by user.
+     Use address 4 here in case the user wanted address 0 unmapped.  */
+  if (sim_core_read_buffer (sd, NULL, read_map, &c, 4, 1) == 0)
+    sim_do_commandf (sd, "memory region 0,0x%lx", M32R_DEFAULT_MEM_SIZE);
 
   /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
@@ -186,8 +191,8 @@ sim_open (kind, callback, abfd, argv)
     for (c = 0; c < MAX_NR_PROCESSORS; ++c)
       {
 	/* Only needed for profiling, but the structure member is small.  */
-	memset (& CPU_M32R_MISC_PROFILE (STATE_CPU (sd, c)), 0,
-		sizeof (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, c))));
+	memset (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, c)), 0,
+		sizeof (* CPU_M32R_MISC_PROFILE (STATE_CPU (sd, c))));
 	/* Hook in callback for reporting these stats */
 	PROFILE_INFO_CPU_CALLBACK (CPU_PROFILE_DATA (STATE_CPU (sd, c)))
 	  = print_m32r_misc_cpu;
@@ -234,73 +239,6 @@ sim_create_inferior (sd, abfd, argv, envp)
   return SIM_RC_OK;
 }
 
-int
-sim_stop (SIM_DESC sd)
-{
-  switch (STATE_ARCHITECTURE (sd)->mach)
-    {
-    case bfd_mach_m32r :
-      return m32r_engine_stop (sd, NULL, NULL_CIA, sim_stopped, SIM_SIGINT);
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      return m32rx_engine_stop (sd, NULL, NULL_CIA, sim_stopped, SIM_SIGINT);
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-}
-
-/* This isn't part of the official interface.
-   This is just a good place to put this for now.  */
-
-void
-sim_sync_stop (SIM_DESC sd, SIM_CPU *cpu, PCADDR pc, enum sim_stop reason, int sigrc)
-{
-  switch (STATE_ARCHITECTURE (sd)->mach)
-    {
-    case bfd_mach_m32r :
-      (void) m32r_engine_stop (sd, cpu, pc, reason, sigrc);
-      break;
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      (void) m32rx_engine_stop (sd, cpu, pc, reason, sigrc);
-      break;
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-}
-
-void
-sim_resume (sd, step, siggnal)
-     SIM_DESC sd;
-     int step, siggnal;
-{
-  sim_module_resume (sd);
-
-  switch (STATE_ARCHITECTURE (sd)->mach)
-    {
-    case bfd_mach_m32r :
-      m32r_engine_run (sd, step, siggnal);
-      break;
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      m32rx_engine_run (sd, step, siggnal);
-      break;
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-
-  sim_module_suspend (sd);
-}
-
 /* PROFILE_CPU_CALLBACK */
 
 static void
@@ -315,41 +253,13 @@ print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
       sim_io_printf (sd, "  %-*s %s\n\n",
 		     PROFILE_LABEL_WIDTH, "Fill nops:",
 		     sim_add_commas (buf, sizeof (buf),
-				     CPU_M32R_MISC_PROFILE (cpu).fillnop_count));
+				     CPU_M32R_MISC_PROFILE (cpu)->fillnop_count));
       if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_m32rx)
 	sim_io_printf (sd, "  %-*s %s\n\n",
 		       PROFILE_LABEL_WIDTH, "Parallel insns:",
 		       sim_add_commas (buf, sizeof (buf),
-				       CPU_M32R_MISC_PROFILE (cpu).parallel_count));
+				       CPU_M32R_MISC_PROFILE (cpu)->parallel_count));
     }
-}
-
-/* The contents of BUF are in target byte order.  */
-
-int
-sim_fetch_register (sd, rn, buf, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *buf;
-     int length;
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-
-  return (* CPU_REG_FETCH (cpu)) (cpu, rn, buf, length);
-}
- 
-/* The contents of BUF are in target byte order.  */
-
-int
-sim_store_register (sd, rn, buf, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *buf;
-     int length;
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-
-  return (* CPU_REG_STORE (cpu)) (cpu, rn, buf, length);
 }
 
 void
@@ -357,46 +267,45 @@ sim_do_command (sd, cmd)
      SIM_DESC sd;
      char *cmd;
 { 
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
-}
-
-/* Utility fns to access registers, without knowing the current mach.  */
+  char **argv;
 
-SI
-h_gr_get (SIM_CPU *current_cpu, UINT regno)
-{
-  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
-    {
-    case bfd_mach_m32r :
-      return m32r_h_gr_get (current_cpu, regno);
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      return m32rx_h_gr_get (current_cpu, regno);
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-}
+  if (cmd == NULL)
+    return;
 
-void
-h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
-{
-  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
+  argv = buildargv (cmd);
+
+  if (argv[0] != NULL
+      && strcasecmp (argv[0], "info") == 0
+      && argv[1] != NULL
+      && strncasecmp (argv[1], "reg", 3) == 0)
     {
-    case bfd_mach_m32r :
-      m32r_h_gr_set (current_cpu, regno, newval);
-      break;
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      m32rx_h_gr_set (current_cpu, regno, newval);
-      break;
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
+      SI val;
+
+      /* We only support printing bbpsw,bbpc here as there is no equivalent
+	 functionality in gdb.  */
+      if (argv[2] == NULL)
+	sim_io_eprintf (sd, "Missing register in `%s'\n", cmd);
+      else if (argv[3] != NULL)
+	sim_io_eprintf (sd, "Too many arguments in `%s'\n", cmd);
+      else if (strcasecmp (argv[2], "bbpsw") == 0)
+	{
+	  val = a_m32r_h_cr_get (STATE_CPU (sd, 0), H_CR_BBPSW);
+	  sim_io_printf (sd, "bbpsw 0x%x %d\n", val, val);
+	}
+      else if (strcasecmp (argv[2], "bbpc") == 0)
+	{
+	  val = a_m32r_h_cr_get (STATE_CPU (sd, 0), H_CR_BBPC);
+	  sim_io_printf (sd, "bbpc 0x%x %d\n", val, val);
+	}
+      else
+	sim_io_eprintf (sd, "Printing of register `%s' not supported with `sim info'\n",
+			argv[2]);
     }
+  else
+    {
+      if (sim_args_command (sd, cmd) != SIM_RC_OK)
+	sim_io_eprintf (sd, "Unknown sim command `%s'\n", cmd);
+    }
+
+  freeargv (argv);
 }
