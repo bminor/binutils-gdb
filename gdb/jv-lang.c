@@ -68,6 +68,12 @@ static struct objfile *dynamics_objfile = NULL;
 
 static struct type *java_link_class_type (struct type *, struct value *);
 
+/* FIXME: carlton/2003-02-04: This is the main or only caller of
+   allocate_objfile with first argument NULL; as a result, this code
+   breaks every so often.  Somebody should write a test case that
+   exercises GDB in various ways (e.g. something involving loading a
+   dynamic library) after this code has been called.  */
+
 static struct objfile *
 get_dynamics_objfile (void)
 {

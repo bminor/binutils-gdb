@@ -150,6 +150,15 @@ build_objfile_section_table (struct objfile *objfile)
    OBJF_SHARED are simply copied through to the new objfile flags
    member. */
 
+/* NOTE: carlton/2003-02-04: This function is called with args NULL, 0
+   by jv-lang.c, to create an artificial objfile used to hold
+   information about dynamically-loaded Java classes.  Unfortunately,
+   that branch of this function doesn't get tested very frequently, so
+   it's prone to breakage.  (E.g. at one time the name was set to NULL
+   in that situation, which broke a loop over all names in the dynamic
+   library loader.)  If you change this function, please try to leave
+   things in a consistent state even if abfd is NULL.  */
+
 struct objfile *
 allocate_objfile (bfd *abfd, int flags)
 {
@@ -312,6 +321,10 @@ allocate_objfile (bfd *abfd, int flags)
 	  error ("Can't find the file sections in `%s': %s",
 		 objfile->name, bfd_errmsg (bfd_get_error ()));
 	}
+    }
+  else
+    {
+      objfile->name = "<<anonymous objfile>>";
     }
 
   /* Initialize the section indexes for this objfile, so that we can
