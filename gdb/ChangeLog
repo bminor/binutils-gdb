@@ -1,3 +1,9 @@
+2001-06-28  Joel Brobecker  <brobecker@act-europe.fr>
+
+        * solib-osf.c (osf_in_dynsym_resolve_code): Add a comment
+        explaining the consequences of always returning zero. No code
+        change.
+
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2001-06-08 Daniel Jacobowitz <djacobowitz@mvista.com>:
