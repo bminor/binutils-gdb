@@ -7,6 +7,13 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config.bfd (i[3456]86-*-interix*): Set targ_cflags to
+	-DSTRICT_PE_FORMAT.
+	* coffcode.h (styp_to_sec_flags): Check STRICT_PE_FORMAT rather
+	than __INTERIX.
+	(coff_classify_symbol): Re-revert 1999-08-08 patch if
+	STRICT_PE_FORMAT.
+
 	* libpei.h: New file, broken out of peicode.h.
 	* peigen.c: New file, broken out of peicode.h.
 	* peicode.h: A bunch of code moved out to libpei.h and peigen.c.

@@ -827,8 +827,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 		      switch (aux.x_scn.x_comdat)
 			{
 			case IMAGE_COMDAT_SELECT_NODUPLICATES:
-/* FIXME: This is bogus.  It breaks cross-compilers.  */
-#ifdef __INTERIX
+#ifdef STRICT_PE_FORMAT
 			  sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
 #else
 			  sec_flags &= ~SEC_LINK_ONCE;
@@ -849,8 +848,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 			  break;
 
 			case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
-/* FIXME: This is bogus.  It breaks cross-compilers.  */
-#ifdef __INTERIX
+#ifdef STRICT_PE_FORMAT
 			  /* FIXME: This is not currently implemented.  */
 			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 #else
@@ -4265,7 +4263,7 @@ coff_classify_symbol (abfd, syment)
 	  return COFF_SYMBOL_LOCAL;
 	}
 
-#if 0
+#ifdef STRICT_PE_FORMAT
       /* This is correct for Microsoft generated objects, but it
          breaks gas generated objects.  */
 

@@ -311,6 +311,8 @@ case "${targ}" in
   i[3456]86-*-interix*)
     targ_defvec=i386pei_vec
     targ_selvecs="i386pe_vec"
+    # FIXME: This should eventually be checked at runtime.
+    targ_cflags=-DSTRICT_PE_FORMAT
     ;;
   i[3456]86-*-mingw32* | i[3456]86-*-cygwin* | i[3456]86-*-winnt | i[3456]86-*-pe)
     targ_defvec=i386pe_vec
