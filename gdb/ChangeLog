@@ -1,3 +1,8 @@
+2003-03-25  Corinna Vinschen  <vinschen@redhat.com>
+
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Add call to
+	set_gdbarch_char_signed.
+
 2003-03-25  Richard Earnshaw  <rearnsha@arm.com>
 
 	PR cli/548
