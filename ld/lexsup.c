@@ -139,8 +139,8 @@ static const struct ld_option ld_options[] =
       'e', "ADDRESS", "Set start address", TWO_DASHES },
   { {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
       'E', NULL, "Export all dynamic symbols", TWO_DASHES },
-  { {NULL, no_argument, NULL, '\0'},
-      'F', NULL, "Ignored", ONE_DASH },
+  { {NULL, optional_argument, NULL, '\0'},
+      'F', "[FORMAT]", "Ignored", ONE_DASH },
   { {"gpsize", required_argument, NULL, 'G'},
       'G', "SIZE", "Small data size (if no size, same as --shared)",
       TWO_DASHES },
@@ -308,7 +308,7 @@ parse_args (argc, argv)
   int i, is, il;
   int ingroup = 0;
   char *default_dirlist = NULL;
-  char shortopts[OPTION_COUNT * 2 + 2];
+  char shortopts[OPTION_COUNT * 3 + 2];
   struct option longopts[OPTION_COUNT + 1];
 
   /* Starting the short option string with '-' is for programs that
@@ -324,10 +324,16 @@ parse_args (argc, argv)
 	{
 	  shortopts[is] = ld_options[i].shortopt;
 	  ++is;
-	  if (ld_options[i].opt.has_arg == required_argument)
+	  if (ld_options[i].opt.has_arg == required_argument
+	      || ld_options[i].opt.has_arg == optional_argument)
 	    {
 	      shortopts[is] = ':';
 	      ++is;
+	      if (ld_options[i].opt.has_arg == optional_argument)
+		{
+		  shortopts[is] = ':';
+		  ++is;
+		}
 	    }
 	}
       if (ld_options[i].opt.name != NULL)
@@ -798,8 +804,13 @@ help ()
 		  len += (comma ? 2 : 0) + 2;
 		  if (ld_options[j].arg != NULL)
 		    {
-		      printf (" %s", ld_options[j].arg);
-		      len += 1 + strlen (ld_options[j].arg);
+		      if (ld_options[j].opt.has_arg != optional_argument)
+			{
+			  printf (" ");
+			  ++len;
+			}
+		      printf ("%s", ld_options[j].arg);
+		      len += strlen (ld_options[j].arg);
 		    }
 		  comma = true;
 		}
