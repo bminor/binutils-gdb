@@ -1,3 +1,11 @@
+2004-12-10  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-tdep.c: New file.  This is a re-implementation of
+	the mn10300 target back-end using the new frame api etc.
+	* mn10300-tdep.h: New file.
+	* config/mn10300/mn10300.mt: New file (or replace old file).
+	* configure.tgt: Add mn10300 target.
+
 2004-12-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.host (hppa*-*-hpux11*): Remove.

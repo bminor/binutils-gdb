@@ -134,6 +134,8 @@ mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 mips64*-*-openbsd*)	gdb_target=obsd64 ;;
 mips*-*-*)		gdb_target=embed ;;
 
+mn10300-*-*)		gdb_target=mn10300 ;;
+
 powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 powerpc-*-openbsd*)	gdb_target=obsd ;;
