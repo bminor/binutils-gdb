@@ -129,9 +129,11 @@ case ${generic_target} in
   a29k-amd-ebmon)	obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmonold)	obj_format=coff gas_target=ebmon29k ;;
 
+  alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
 
-  hppa-*-osf)		obj_format=elf emulation=hppa ;;
+  hppa-*-*elf*)		obj_format=elf emulation=hppa ;;
+  hppa-*-osf*)		obj_format=som emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
   hppa-*-bsd*)		obj_format=som emulation=hppa ;;
   hppa-*-hiux*)		obj_format=som emulation=hppa ;;
@@ -156,9 +158,13 @@ case ${generic_target} in
   i386-*-vsta)		obj_format=aout ;;
   i386-*-go32)		obj_format=aout ;;
 
-  i960-wrs-vxworks | i960-*-nindy*)
-			obj_format=bout ;;
+  i960-*-bout)		obj_format=bout ;;
   i960-*-coff)		obj_format=coff emulation=ic960 ;;
+  i960-*-nindy*)	obj_format=bout ;;
+  i960-*-vxworks4*)	obj_format=bout ;;
+  i960-*-vxworks5.0)	obj_format=bout ;;
+  i960-*-vxworks5.*)	obj_format=coff emulation=ic960 ;;
+  i960-*-vxworks*)	obj_format=bout ;;
 
   m68k-wrs-vxworks | m68k-ericsson-ose | m68k-*-sunos*)
 			obj_format=aout emulation=sun3 ;;
