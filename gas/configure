@@ -824,6 +824,8 @@ for this_target in $target $canon_targets ; do
       m68k-*-coff | m68k-*-sysv*)
 			    fmt=coff targ=m68kcoff ;;
       m68k-*-hpux*)         fmt=hp300 em=hp300 ;;
+      m68k-*-linux*aout*)   fmt=aout em=linux ;;
+      m68k-*-linux*)	    fmt=elf em=linux ;;
       m68k-*-lynxos*)       fmt=coff targ=m68kcoff
 			     em=lynx ;;
       m68k-*-netbsd*)       fmt=aout em=nbsd bfd_gas=yes ;;
@@ -1465,7 +1467,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1469 "configure"
+#line 1471 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1479,7 +1481,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1483 "configure"
+#line 1485 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1512,7 +1514,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1516 "configure"
+#line 1518 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1564,7 +1566,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1568 "configure"
+#line 1570 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1588,7 +1590,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1592 "configure"
+#line 1594 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1620,7 +1622,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1624 "configure"
+#line 1626 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1679,7 +1681,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1683 "configure"
+#line 1685 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1708,7 +1710,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1712 "configure"
+#line 1714 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1762,7 +1764,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1766 "configure"
+#line 1768 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1805,7 +1807,7 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat > conftest.$ac_ext <<EOF
-#line 1809 "configure"
+#line 1811 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1845,7 +1847,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1849 "configure"
+#line 1851 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1898,7 +1900,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1902 "configure"
+#line 1904 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1951,7 +1953,7 @@ if eval "test \"`echo '$''{'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1955 "configure"
+#line 1957 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -2008,7 +2010,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2012 "configure"
+#line 2014 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2044,7 +2046,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2048 "configure"
+#line 2050 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2083,7 +2085,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2087 "configure"
+#line 2089 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H
