@@ -1,5 +1,12 @@
 Wed Dec 28 12:21:39 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (push_dummy_frame): Refine code to determine what
+	space ID to place in the stack & inf_status structure.
+	(hppa_pop_frame): Don't walk through trampoline code if popping a
+	call dummy frame.
+	(hppa_fix_call_dummy): Call the stack dummy directly if the
+	current PC is in a shared library.
+
 	* hppa-tdep.c (push_dummy_frame): Return type is void.  Clear
 	in_syscall bit in flags.  Don't depend on the PC queue registers
 	when in_syscall is set, they're not valid.

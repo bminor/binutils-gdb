@@ -1101,13 +1101,18 @@ push_dummy_frame (inf_status)
   int_buffer = read_register (FLAGS_REGNUM);
   if (int_buffer & 0x2)
     {
+      unsigned int sid;
       int_buffer &= ~0x2;
       memcpy (inf_status->registers, &int_buffer, 4);
       memcpy (inf_status->registers + REGISTER_BYTE (PCOQ_HEAD_REGNUM), &pc, 4);
       pc += 4;
       memcpy (inf_status->registers + REGISTER_BYTE (PCOQ_TAIL_REGNUM), &pc, 4);
       pc -= 4;
-      pcspace = read_register (SR4_REGNUM);
+      sid = (pc >> 30) & 0x3;
+      if (sid == 0)
+	pcspace = read_register (SR4_REGNUM);
+      else
+	pcspace = read_register (SR4_REGNUM + 4 + sid);
       memcpy (inf_status->registers + REGISTER_BYTE (PCSQ_HEAD_REGNUM),
 	      &pcspace, 4);
       memcpy (inf_status->registers + REGISTER_BYTE (PCSQ_TAIL_REGNUM),
@@ -1241,9 +1246,11 @@ hppa_pop_frame ()
      we want to restart the inferior and run it through the trampoline.
 
      Do this by setting a momentary breakpoint at the location the
-     trampoline returns to.  */
+     trampoline returns to. 
+
+     Don't skip through the trampoline if we're popping a dummy frame.  */
   target_pc = SKIP_TRAMPOLINE_CODE (npc & ~0x3) & ~0x3;
-  if (target_pc)
+  if (target_pc && !fsr.regs[IPSW_REGNUM])
     {
       struct symtab_and_line sal;
       struct breakpoint *breakpoint;
@@ -1491,9 +1498,17 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      directly.  $$dyncall is not needed as the kernel sets up the
      space id registers properly based on the value in %r31.  In
      fact calling $$dyncall will not work because the value in %r22
-     will be clobbered on the syscall exit path.  */
+     will be clobbered on the syscall exit path. 
+
+     Similarly if the current PC is in a shared library.  Note however,
+     this scheme won't work if the shared library isn't mapped into
+     the same space as the stack.  */
   if (flags & 2)
     return pc;
+#ifndef GDB_TARGET_IS_PA_ELF
+  else if (som_solib_get_got_by_pc (target_read_pc (inferior_pid)))
+    return pc;
+#endif
   else
     return dyncall_addr;
 
