@@ -1,3 +1,9 @@
+Tue Feb  7 13:34:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add powerpc-*-eabi support, which is the same as
+	powerpc-*-elf.
+	(configure): Rebuild with autoconf.
+
 Mon Feb  6 03:37:00 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Changes from Bryan Ford <baford@schirf.cs.utah.edu> for i386

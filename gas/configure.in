@@ -41,6 +41,7 @@ changequote([,])dnl
   m8*)		cpu_type=m88k ;;
   mips*el)	cpu_type=mips endian=little;;
   mips*)	cpu_type=mips endian=big ;;
+  powerpc*eabi*) cpu_type=ppc obj_format=elf;;
   powerpc*)	cpu_type=ppc ;;
   rs6000*)	cpu_type=ppc ;;
   sparc64)	cpu_type=sparc obj_format=elf
