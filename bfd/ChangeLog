@@ -1,5 +1,10 @@
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (is_ppc_elf_target): Move to linker part of file.
+	(ppc_elf_merge_private_bfd_data): Likewise.
+
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (struct elf_linker_section): Remove rel_section.
 	(ppc_elf_create_linker_section): Don't create rel_section.
 	(elf_create_pointer_linker_section): Don't size relocs.
@@ -62,7 +67,7 @@
 
 2005-03-18  C Jaiprakash  <cjaiprakash@noida.hcltech.com>
 
-	* elf32-m68k.c (elf_cfv4e_plt0_entry): plt entry for coldfire v4e. 
+	* elf32-m68k.c (elf_cfv4e_plt0_entry): plt entry for coldfire v4e.
 	(elf_m68k_adjust_dynamic_symbol,elf_m68k_finish_dynamic_symbol,
 	 elf_m68k_finish_dynamic_sections): Use it.
 

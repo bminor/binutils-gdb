@@ -1592,109 +1592,6 @@ ppc_elf_set_private_flags (bfd *abfd, flagword flags)
   return TRUE;
 }
 
-/* Return 1 if target is one of ours.  */
-
-static bfd_boolean
-is_ppc_elf_target (const struct bfd_target *targ)
-{
-  extern const bfd_target bfd_elf32_powerpc_vec;
-  extern const bfd_target bfd_elf32_powerpcle_vec;
-
-  return targ == &bfd_elf32_powerpc_vec || targ == &bfd_elf32_powerpcle_vec;
-}
-
-/* Merge backend specific data from an object file to the output
-   object file when linking.  */
-
-static bfd_boolean
-ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  flagword old_flags;
-  flagword new_flags;
-  bfd_boolean error;
-
-  if (!is_ppc_elf_target (ibfd->xvec)
-      || !is_ppc_elf_target (obfd->xvec))
-    return TRUE;
-
-  /* Check if we have the same endianess.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    return FALSE;
-
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  old_flags = elf_elfheader (obfd)->e_flags;
-  if (!elf_flags_init (obfd))
-    {
-      /* First call, no flags set.  */
-      elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = new_flags;
-    }
-
-  /* Compatible flags are ok.  */
-  else if (new_flags == old_flags)
-    ;
-
-  /* Incompatible flags.  */
-  else
-    {
-      /* Warn about -mrelocatable mismatch.  Allow -mrelocatable-lib
-	 to be linked with either.  */
-      error = FALSE;
-      if ((new_flags & EF_PPC_RELOCATABLE) != 0
-	  && (old_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0)
-	{
-	  error = TRUE;
-	  (*_bfd_error_handler)
-	    (_("%B: compiled with -mrelocatable and linked with "
-	       "modules compiled normally"), ibfd);
-	}
-      else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
-	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
-	{
-	  error = TRUE;
-	  (*_bfd_error_handler)
-	    (_("%B: compiled normally and linked with "
-	       "modules compiled with -mrelocatable"), ibfd);
-	}
-
-      /* The output is -mrelocatable-lib iff both the input files are.  */
-      if (! (new_flags & EF_PPC_RELOCATABLE_LIB))
-	elf_elfheader (obfd)->e_flags &= ~EF_PPC_RELOCATABLE_LIB;
-
-      /* The output is -mrelocatable iff it can't be -mrelocatable-lib,
-	 but each input file is either -mrelocatable or -mrelocatable-lib.  */
-      if (! (elf_elfheader (obfd)->e_flags & EF_PPC_RELOCATABLE_LIB)
-	  && (new_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE))
-	  && (old_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE)))
-	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE;
-
-      /* Do not warn about eabi vs. V.4 mismatch, just or in the bit if
-	 any module uses it.  */
-      elf_elfheader (obfd)->e_flags |= (new_flags & EF_PPC_EMB);
-
-      new_flags &= ~(EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
-      old_flags &= ~(EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
-
-      /* Warn about any other mismatches.  */
-      if (new_flags != old_flags)
-	{
-	  error = TRUE;
-	  (*_bfd_error_handler)
-	    (_("%B: uses different e_flags (0x%lx) fields "
-	       "than previous modules (0x%lx)"),
-	     ibfd, (long) new_flags, (long) old_flags);
-	}
-
-      if (error)
-	{
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-    }
-
-  return TRUE;
-}
-
 /* Support for core dump NOTE sections.  */
 
 static bfd_boolean
@@ -2436,6 +2333,17 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
     }
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+}
+
+/* Return 1 if target is one of ours.  */
+
+static bfd_boolean
+is_ppc_elf_target (const struct bfd_target *targ)
+{
+  extern const bfd_target bfd_elf32_powerpc_vec;
+  extern const bfd_target bfd_elf32_powerpcle_vec;
+
+  return targ == &bfd_elf32_powerpc_vec || targ == &bfd_elf32_powerpcle_vec;
 }
 
 /* Hook called by the linker routine which adds symbols from an object
@@ -3180,6 +3088,98 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 
 	  break;
+	}
+    }
+
+  return TRUE;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static bfd_boolean
+ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  flagword old_flags;
+  flagword new_flags;
+  bfd_boolean error;
+
+  if (!is_ppc_elf_target (ibfd->xvec)
+      || !is_ppc_elf_target (obfd->xvec))
+    return TRUE;
+
+  /* Check if we have the same endianess.  */
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+  if (!elf_flags_init (obfd))
+    {
+      /* First call, no flags set.  */
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = new_flags;
+    }
+
+  /* Compatible flags are ok.  */
+  else if (new_flags == old_flags)
+    ;
+
+  /* Incompatible flags.  */
+  else
+    {
+      /* Warn about -mrelocatable mismatch.  Allow -mrelocatable-lib
+	 to be linked with either.  */
+      error = FALSE;
+      if ((new_flags & EF_PPC_RELOCATABLE) != 0
+	  && (old_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0)
+	{
+	  error = TRUE;
+	  (*_bfd_error_handler)
+	    (_("%B: compiled with -mrelocatable and linked with "
+	       "modules compiled normally"), ibfd);
+	}
+      else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
+	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
+	{
+	  error = TRUE;
+	  (*_bfd_error_handler)
+	    (_("%B: compiled normally and linked with "
+	       "modules compiled with -mrelocatable"), ibfd);
+	}
+
+      /* The output is -mrelocatable-lib iff both the input files are.  */
+      if (! (new_flags & EF_PPC_RELOCATABLE_LIB))
+	elf_elfheader (obfd)->e_flags &= ~EF_PPC_RELOCATABLE_LIB;
+
+      /* The output is -mrelocatable iff it can't be -mrelocatable-lib,
+	 but each input file is either -mrelocatable or -mrelocatable-lib.  */
+      if (! (elf_elfheader (obfd)->e_flags & EF_PPC_RELOCATABLE_LIB)
+	  && (new_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE))
+	  && (old_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE)))
+	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE;
+
+      /* Do not warn about eabi vs. V.4 mismatch, just or in the bit if
+	 any module uses it.  */
+      elf_elfheader (obfd)->e_flags |= (new_flags & EF_PPC_EMB);
+
+      new_flags &= ~(EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
+      old_flags &= ~(EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
+
+      /* Warn about any other mismatches.  */
+      if (new_flags != old_flags)
+	{
+	  error = TRUE;
+	  (*_bfd_error_handler)
+	    (_("%B: uses different e_flags (0x%lx) fields "
+	       "than previous modules (0x%lx)"),
+	     ibfd, (long) new_flags, (long) old_flags);
+	}
+
+      if (error)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
     }
 
