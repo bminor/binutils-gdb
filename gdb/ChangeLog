@@ -1,3 +1,15 @@
+2004-06-08  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* ada-lang.c (lookup_symbol_in_language): New function to allow
+	re-use of another language's symbol lookup code.  (Placed here
+	temporarily while Ada support is being integrated into the public
+	tree).  
+	(restore_language): New auxiliary function for 
+	lookup_symbol_in_language.
+	* ada-lang.h (lookup_symbol_in_language): Declare (Placed here
+	temporarily while Ada support is being integrated into the public
+	tree).
+	
 2004-06-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* Makefile.in (check//%): New.

@@ -393,4 +393,15 @@ extern void ada_find_printable_frame (struct frame_info *fi);
 
 extern void ada_reset_thread_registers (void);
 
+/* Look up a symbol by name using the search conventions of 
+   a specific language (optional block, optional symtab). 
+   FIXME: Should be symtab.h. */
+
+extern struct symbol *lookup_symbol_in_language (const char *, 
+						 const struct block *,
+						 domain_enum, 
+						 enum language,
+						 int *,
+						 struct symtab **);
+
 #endif

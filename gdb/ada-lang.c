@@ -4444,6 +4444,30 @@ add_symbols_from_enclosing_procs (struct obstack *obstackp,
 #endif
 }
 
+/* FIXME: The next two routines belong in symtab.c */
+
+static void restore_language (void* lang)
+{
+  set_language ((enum language) lang);
+}
+
+/* As for lookup_symbol, but performed as if the current language 
+   were LANG. */
+
+struct symbol *
+lookup_symbol_in_language (const char *name, const struct block *block,
+			   domain_enum domain, enum language lang,
+			   int *is_a_field_of_this, struct symtab **symtab)
+{
+  struct cleanup *old_chain 
+    = make_cleanup (restore_language, (void*) current_language->la_language);
+  struct symbol *result;
+  set_language (lang);
+  result = lookup_symbol (name, block, domain, is_a_field_of_this, symtab);
+  do_cleanups (old_chain);
+  return result;
+}
+
 /* True if TYPE is definitely an artificial type supplied to a symbol
    for which no debugging information was given in the symbol file.  */
 
