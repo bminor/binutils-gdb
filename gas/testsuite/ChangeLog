@@ -1,6 +1,9 @@
 start-sanitize-r5900
 Tue Dec 16 12:54:30 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/mips/r5900.s: Add more r5900 tests.
+	* gas/mips/r5900.d: Corresponding changes.
+
 	* gas/mips/r5900.s: New testcase for r5900 insns.
 	* gas/mips/r5900.d: Support file for r5900 tests.
 	* gas/mips/mips.exp: Run r5900 tests too.
