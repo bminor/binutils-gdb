@@ -1,3 +1,8 @@
+2004-08-25  Andrew Cagney  <cagney@gnu.org>
+
+	* infrun.c: Re-indent.  Move expression operators to the beginning
+	of the line.  Remove long disabled #if 0 code.
+
 2004-08-24  Andrew Cagney  <cagney@gnu.org>
 
 	* doublest.h (floatformat_ieee_quad): Rename
