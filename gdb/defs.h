@@ -160,9 +160,6 @@ typedef bfd_vma CORE_ADDR;
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
 
-/* use tui interface if non-zero */
-extern int tui_version;
-
 /* enable xdb commands if set */
 extern int xdb_commands;
 

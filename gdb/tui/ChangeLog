@@ -1,3 +1,16 @@
+2003-02-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* tui.c (tui_enable, tui_disable): Don't modify tui_version.
+	(tui_is_window_visible, tui_get_command_dimension): Test
+	tui_active instead of tui_version.
+	* tuiData.h (tui_version): Delete declaration.
+	* tui-hooks.c (tui_init_hook, tui_event_loop): Delete function,
+	moved to "tui-interp.c".
+	(tui_exit, tui_command_loop): Ditto.
+	(_initialize_tui): Don't initialize init_ui_hook.  Initialize
+	target_new_objfile_hook.
+	* tui-interp.c: New file.
+
 2003-02-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiIO.c (tui_prep_terminal): Add one notused parameter.

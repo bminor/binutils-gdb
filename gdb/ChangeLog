@@ -1,3 +1,17 @@
+2003-02-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* main.c (tui_version): Delete variable.
+	(captured_main): When --tui, set interpreter_p to "tui" instead of
+	enabling tui_version.
+	* printcmd.c (display_command) [TUI]: Test tui_active instead of
+	tui_version.
+	* cli/cli-decode.c (lookup_cmd_composition): Ditto.
+	* cli/cli-cmds.c (disassemble_command): Ditto.
+	* defs.h (tui_version): Delete declaration.
+	* Makefile.in (SUBDIR_TUI_SRCS): Add "tui/tui-interp.c".
+	(tui-interp.o): Add rules.
+	(SUBDIR_TUI_OBS): Add "tui-interp.o".
+
 2003-02-14  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.cc (register_loaded_dll): Correctly set address range for

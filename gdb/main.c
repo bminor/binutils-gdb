@@ -60,9 +60,6 @@ int event_loop_p = 1;
    do_setshow_command will free it. */
 char *interpreter_p;
 
-/* Whether this is the command line version or not */
-int tui_version = 0;
-
 /* Whether xdb commands will be handled */
 int xdb_commands = 0;
 
@@ -245,7 +242,7 @@ captured_main (void *data)
       {"async", no_argument, &event_loop_p, 1},
       {"noasync", no_argument, &event_loop_p, 0},
 #if defined(TUI)
-      {"tui", no_argument, &tui_version, 1},
+      {"tui", no_argument, 0, 14},
 #endif
       {"xdb", no_argument, &xdb_commands, 1},
       {"dbx", no_argument, &dbx_commands, 1},
@@ -338,6 +335,11 @@ captured_main (void *data)
 	    /* Enable the display of both time and space usage.  */
 	    display_time = 1;
 	    display_space = 1;
+	    break;
+	  case 14:
+	    /* --tui is equivalent to -i=tui.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup ("tui");
 	    break;
 	  case 'f':
 	    annotation_level = 1;
@@ -455,18 +457,7 @@ extern int gdbtk_test (char *);
     if (print_help || print_version)
       {
 	use_windows = 0;
-#ifdef TUI
-	/* Disable the TUI as well.  */
-	tui_version = 0;
-#endif
       }
-
-#ifdef TUI
-    /* An explicit --tui flag overrides the default UI, which is the
-       window system.  */
-    if (tui_version)
-      use_windows = 0;
-#endif
 
     if (set_args)
       {

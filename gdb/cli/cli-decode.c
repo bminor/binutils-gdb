@@ -923,9 +923,11 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
   /* Treating underscores as part of command words is important
      so that "set args_foo()" doesn't get interpreted as
      "set args _foo()".  */
+  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+     `tui_version'.  */
   for (p = *text;
        *p && (isalnum (*p) || *p == '-' || *p == '_' ||
-	      (tui_version &&
+	      (tui_active &&
 	       (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
 	      (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
        p++)
@@ -1293,9 +1295,11 @@ lookup_cmd_composition (char *text,
       /* Treating underscores as part of command words is important
        so that "set args_foo()" doesn't get interpreted as
        "set args _foo()".  */
+      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+	 `tui_version'.  */
       for (p = text;
          *p && (isalnum (*p) || *p == '-' || *p == '_' ||
-                (tui_version &&
+                (tui_active &&
                  (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
                 (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
          p++)

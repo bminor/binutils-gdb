@@ -852,7 +852,9 @@ disassemble_command (char *arg, int from_tty)
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error ("No function contains program counter for selected frame.\n");
 #if defined(TUI)
-      else if (tui_version)
+      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+	 `tui_version'.  */
+      else if (tui_active)
 	low = tuiGetLowDisassemblyAddress (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;
@@ -864,7 +866,9 @@ disassemble_command (char *arg, int from_tty)
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error ("No function contains specified address.\n");
 #if defined(TUI)
-      else if (tui_version)
+      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+	 `tui_version'.  */
+      else if (tui_active)
 	low = tuiGetLowDisassemblyAddress (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;

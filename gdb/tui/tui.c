@@ -393,7 +393,6 @@ tui_enable (void)
   
   tui_setup_io (1);
 
-  tui_version = 1;
   tui_active = 1;
   if (deprecated_selected_frame)
      tuiShowFrameInfo (deprecated_selected_frame);
@@ -435,7 +434,6 @@ tui_disable (void)
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();
 
-  tui_version = 0;
   tui_active = 0;
   tui_update_gdb_sizes ();
 }
@@ -563,7 +561,7 @@ tui_show_assembly (CORE_ADDR addr)
 int
 tui_is_window_visible (TuiWinType type)
 {
-  if (tui_version == 0)
+  if (tui_active == 0)
     return 0;
 
   if (winList[type] == 0)
@@ -575,7 +573,7 @@ tui_is_window_visible (TuiWinType type)
 int
 tui_get_command_dimension (int *width, int *height)
 {
-  if (!tui_version || !m_winPtrNotNull (cmdWin))
+  if (!tui_active || !m_winPtrNotNull (cmdWin))
     {
       return 0;
     }

@@ -194,11 +194,13 @@ SUBDIR_MI_UNINSTALL=
 #
 SUBDIR_TUI_OBS = \
 	tui-file.o tui.o tuiData.o tuiSource.o tuiStack.o tuiIO.o \
+	tui-interp.o \
 	tuiGeneralWin.o tuiLayout.o tuiWin.o tuiCommand.o \
 	tuiDisassem.o tuiSourceWin.o tuiRegs.o tuiDataWin.o \
 	tui-out.o tui-hooks.o
 SUBDIR_TUI_SRCS = \
 	tui/tui-file.c tui/tui.c tui/tuiData.c tui/tuiSource.c \
+	tui/tui-interp.c \
 	tui/tuiStack.c tui/tuiIO.c \
 	tui/tuiGeneralWin.c tui/tuiLayout.c \
 	tui/tuiWin.c tui/tuiCommand.c \
@@ -2573,6 +2575,10 @@ tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(config_h) $(defs_h) $(symtab_h) \
 	$(tuiRegs_h) $(tuiWin_h) $(tuiStack_h) $(tuiDataWin_h) \
 	$(tuiSourceWin_h) $(readline_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-hooks.c
+tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
+	$(event_top_h) $(event_loop_h) $(ui_out_h) $(tui_tuiData_h) \
+	$(readline_h) $(tui_tuiWin_h) $(tui_h) $(tui_tuiIO_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-interp.c
 tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-out.c
