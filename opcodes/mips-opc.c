@@ -83,7 +83,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define I32	INSN_ISA32
 #define I64     INSN_ISA64
 
-/* MIPS-3D support. */
+/* MIPS64 MIPS-3D ASE support.  */
 #define M3D     INSN_MIPS3D
 
 #define P3	INSN_4650
@@ -109,6 +109,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
    immediate operands must apear after the same instruction with
    registers.
 
+   Because of the lookup algorithm used, entries with the same opcode
+   name must be contiguous.
+ 
    Many instructions are short hand for other instructions (i.e., The
    jal <register> instruction is short for jalr <register>).  */
 
@@ -715,14 +718,14 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"puu.ps",  "D,V,T",	0x46c0002f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5	},
 
 {"recip.d", "D,S",	0x46200015, 0xffff003f, WR_D|RD_S|FP_D,		I4	},
-{"recip.s", "D,S",	0x46000015, 0xffff003f, WR_D|RD_S|FP_S,		I4	},
 {"recip.ps","D,S",	0x46c00015, 0xffff003f, WR_D|RD_S|FP_D,		SB1	},
+{"recip.s", "D,S",	0x46000015, 0xffff003f, WR_D|RD_S|FP_S,		I4	},
 {"recip1.d",  "D,S",	0x4620001d, 0xffff003f,	WR_D|RD_S|FP_D,		M3D	},
-{"recip1.s",  "D,S",	0x4600001d, 0xffff003f,	WR_D|RD_S|FP_S,		M3D	},
 {"recip1.ps", "D,S",	0x46c0001d, 0xffff003f,	WR_D|RD_S|FP_S,		M3D	},
+{"recip1.s",  "D,S",	0x4600001d, 0xffff003f,	WR_D|RD_S|FP_S,		M3D	},
 {"recip2.d",  "D,S,T",	0x4620001c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	M3D	},
-{"recip2.s",  "D,S,T",	0x4600001c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	M3D	},
 {"recip2.ps", "D,S,T",	0x46c0001c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	M3D	},
+{"recip2.s",  "D,S,T",	0x4600001c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	M3D	},
 {"rem",     "z,s,t",    0x0000001a, 0xfc00ffff, RD_s|RD_t|WR_HILO,      I1	},
 {"rem",     "d,v,t",	0,    (int) M_REM_3,	INSN_MACRO,		I1	},
 {"rem",     "d,v,I",	0,    (int) M_REM_3I,	INSN_MACRO,		I1	},
@@ -739,14 +742,14 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"round.w.d", "D,S",	0x4620000c, 0xffff003f, WR_D|RD_S|FP_D,		I2	},
 {"round.w.s", "D,S",	0x4600000c, 0xffff003f, WR_D|RD_S|FP_S,		I2	},
 {"rsqrt.d", "D,S",	0x46200016, 0xffff003f, WR_D|RD_S|FP_D,		I4	},
-{"rsqrt.s", "D,S",	0x46000016, 0xffff003f, WR_D|RD_S|FP_S,		I4	},
 {"rsqrt.ps","D,S",	0x46c00016, 0xffff003f, WR_D|RD_S|FP_D,		SB1	},
-{"rsqrt1.d",  "D,S",  	0x4620001e, 0xffff003f,	WR_D|RD_S|FP_D,		M3D	},
-{"rsqrt1.s",  "D,S",	0x4600001e, 0xffff003f,	WR_D|RD_S|FP_S,		M3D	},
+{"rsqrt.s", "D,S",	0x46000016, 0xffff003f, WR_D|RD_S|FP_S,		I4	},
+{"rsqrt1.d",  "D,S",	0x4620001e, 0xffff003f,	WR_D|RD_S|FP_D,		M3D	},
 {"rsqrt1.ps", "D,S",	0x46c0001e, 0xffff003f,	WR_D|RD_S|FP_S,		M3D	},
+{"rsqrt1.s",  "D,S",	0x4600001e, 0xffff003f,	WR_D|RD_S|FP_S,		M3D	},
 {"rsqrt2.d",  "D,S,T",	0x4620001f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	M3D	},
-{"rsqrt2.s",  "D,S,T",	0x4600001f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	M3D	},
 {"rsqrt2.ps", "D,S,T",	0x46c0001f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	M3D	},
+{"rsqrt2.s",  "D,S,T",	0x4600001f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	M3D	},
 {"sb",      "t,o(b)",	0xa0000000, 0xfc000000,	SM|RD_t|RD_b,		I1	},
 {"sb",      "t,A(b)",	0,    (int) M_SB_AB,	INSN_MACRO,		I1	},
 {"sc",	    "t,o(b)",	0xe0000000, 0xfc000000, SM|RD_t|WR_t|RD_b,	I2	},
