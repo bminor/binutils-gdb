@@ -1207,9 +1207,12 @@ reloc (size, pcrel, sign, other)
 
 int
 tc_i386_fix_adjustable (fixP)
-     fixS *fixP;
+     fixS *fixP ATTRIBUTE_UNUSED;
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    return 1;
+
   /* Prevent all adjustments to global symbols, or else dynamic
      linking will not work correctly.  */
   if (S_IS_EXTERNAL (fixP->fx_addsy)
@@ -1220,7 +1223,7 @@ tc_i386_fix_adjustable (fixP)
 	  && (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0
 	  && fixP->fx_pcrel))
     return 0;
-#endif
+
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
@@ -1237,6 +1240,7 @@ tc_i386_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
+#endif
   return 1;
 }
 #else
@@ -3668,6 +3672,7 @@ i386_immediate (imm_start)
 #ifdef BFD_ASSEMBLER
 	   && OUTPUT_FLAVOR == bfd_target_aout_flavour
 #endif
+	   && exp_seg != absolute_section
 	   && exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
@@ -3882,10 +3887,15 @@ i386_displacement (disp_start, disp_end)
 #ifdef BFD_ASSEMBLER
       && OUTPUT_FLAVOR == bfd_target_aout_flavour
 #endif
+      && exp_seg != absolute_section
       && exp_seg != text_section
       && exp_seg != data_section
       && exp_seg != bss_section
-      && exp_seg != undefined_section)
+      && exp_seg != undefined_section
+#ifdef BFD_ASSEMBLER
+      && !bfd_is_com_section (exp_seg)
+#endif
+      )
     {
 #ifdef BFD_ASSEMBLER
       as_bad (_("unimplemented segment %s in operand"), exp_seg->name);
@@ -4311,8 +4321,9 @@ md_estimate_size_before_relax (fragP, segment)
      shared library.  */
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      || S_IS_EXTERNAL (fragP->fr_symbol)
-      || S_IS_WEAK (fragP->fr_symbol)
+      || (OUTPUT_FLAVOR == bfd_target_elf_flavour
+	  && (S_IS_EXTERNAL (fragP->fr_symbol)
+	      || S_IS_WEAK (fragP->fr_symbol)))
 #endif
       )
     {
@@ -4586,15 +4597,16 @@ md_apply_fix3 (fixP, valP, seg)
 	}
     }
 
-  /* This is a hack.  There should be a better way to handle this.
-     This covers for the fact that bfd_install_relocation will
-     subtract the current location (for partial_inplace, PC relative
-     relocations); see more below.  */
-  if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
-       || fixP->fx_r_type == BFD_RELOC_16_PCREL
-       || fixP->fx_r_type == BFD_RELOC_8_PCREL)
-      && fixP->fx_addsy && !use_rela_relocations)
+  if (fixP->fx_pcrel
+      && (fixP->fx_r_type == BFD_RELOC_32_PCREL
+	  || fixP->fx_r_type == BFD_RELOC_16_PCREL
+	  || fixP->fx_r_type == BFD_RELOC_8_PCREL)
+      && !use_rela_relocations)
     {
+      /* This is a hack.  There should be a better way to handle this.
+	 This covers for the fact that bfd_install_relocation will
+	 subtract the current location (for partial_inplace, PC relative
+	 relocations); see more below.  */
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 #ifdef TE_PE
@@ -4645,6 +4657,7 @@ md_apply_fix3 (fixP, valP, seg)
 	   runtime we merely add the offset to the actual PLT entry.  */
 	value = -4;
 	break;
+
       case BFD_RELOC_386_GOT32:
       case BFD_RELOC_386_TLS_GD:
       case BFD_RELOC_386_TLS_LDM:
@@ -4654,9 +4667,6 @@ md_apply_fix3 (fixP, valP, seg)
       case BFD_RELOC_386_TLS_LE:
       case BFD_RELOC_X86_64_GOT32:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
-	break;
-      case BFD_RELOC_386_GOTOFF:
-      case BFD_RELOC_X86_64_GOTPCREL:
 	break;
 
       case BFD_RELOC_VTABLE_INHERIT:
