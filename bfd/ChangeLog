@@ -1,3 +1,27 @@
+2005-04-03  Fred Fish  <fnf@specifixinc.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add dwarf_ranges_buffer and
+	dwarf_ranges_size members.
+	(struct comp_unit): Add base_address member.
+	(struct funcinfo): Replace low/high members with an arange.
+	(arange_add): Replace incoming "unit" parameter with "abfd" and
+	"first_arange" pointers.  Reorganize/rewrite function body.
+	(decode_line_info): Change arange_add call to pass bfd and arange
+	pointers.
+	(lookup_address_in_line_info_table): Use arange list instead of
+	individual low/high members.  Walk function's arange list to find
+	lowest PC in list, to test for overlapping functions.
+	(read_debug_ranges): New function, reads the debug_ranges section.
+	(lookup_address_in_function_table): Use arange list instead of
+	individual low/high members.  Rewrite to find smallest range that
+	matches.
+	(read_rangelist): Read a given rangelist from debug_ranges.
+	(scan_unit_for_functions): Use arange list instead of individual
+	low/high members.  Handle a DW_AT_ranges attribute.
+	(parse_comp_unit): Use arange list instead of individual low/high
+	members.  Save comp unit base address.  Handle a DW_AT_ranges
+	attribute.
+
 2005-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (assign_section_numbers): Really use the kept section.
