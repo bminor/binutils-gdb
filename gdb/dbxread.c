@@ -2741,6 +2741,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	{
 	  /* This N_FUN marks the end of a function.  This closes off the
 	     current block.  */
+	  record_line (current_subfile, 0, function_start_offset + valu);
 	  within_function = 0;
 	  new = pop_context ();
 

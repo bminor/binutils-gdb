@@ -1,3 +1,15 @@
+2002-02-21  Fred Fish  <fnf@redhat.com>
+
+	* dbxread.c (process_one_symbol): When finding an N_FUN symbol
+	that marks the end of the range of a function, enter a line number
+	entry that has a line number of zero and a PC offset that matches
+	the end of the function.  This starts a range of PC's for which no
+	line number information is known.
+	* symtab.c (find_pc_sect_line): If our best fit is in a range of
+	PC's for which no line number info is found (line number is zero)
+	then we didn't find any valid line information.
+	* symtab.h: Document use of zero line number entry.
+
 2002-02-21  Elena Zannoni  <ezannoni@redhat.com>
 
 	* ppc-linux-nat.c (PTRACE_GETVRREGS, PTRACE_SETVRREGS): Define.

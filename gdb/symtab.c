@@ -1823,6 +1823,13 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 	  val.end = alt->pc;
 	}
     }
+  else if (best->line == 0)
+    {
+      /* If our best fit is in a range of PC's for which no line
+	 number info is available (line number is zero) then we didn't
+	 find any valid line information. */
+      val.pc = pc;
+    }
   else
     {
       val.symtab = best_symtab;

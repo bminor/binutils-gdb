@@ -801,7 +801,10 @@ struct linetable_entry
    30   0x300
    10   0x400   - for the increment part of a for stmt.
 
- */
+   If an entry has a line number of zero, it marks the start of a PC
+   range for which no line number information is available.  It is
+   acceptable, though wasteful of table space, for such a range to be
+   zero length.  */
 
 struct linetable
   {
