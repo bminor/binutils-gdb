@@ -919,7 +919,9 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 	     and because we are going to look through the list again
 	     if we search any more libraries.  We can't remove the
 	     entry if it is the tail, because that would lose any
-	     entries we add to the list later on.  */
+	     entries we add to the list later on (it would also cause
+	     us to lose track of whether the symbol has been
+	     referenced).  */
 	  if (*pundef != info->hash->undefs_tail)
 	    *pundef = (*pundef)->next;
 	  else
@@ -1254,16 +1256,20 @@ enum link_action
   WEAK,		/* Mark symbol weak undefined.  */
   DEF,		/* Mark symbol defined.  */
   COM,		/* Mark symbol common.  */
+  REF,		/* Mark defined symbol referenced.  */
   CREF,		/* Possibly warn about common reference to defined symbol.  */
   CDEF,		/* Define existing common symbol.  */
   NOACT,	/* No action.  */
   BIG,		/* Mark symbol common using largest size.  */
   MDEF,		/* Multiple definition error.  */
+  MIND,		/* Multiple indirect symbols.  */
   IND,		/* Make indirect symbol.  */
   SET,		/* Add value to set.  */
   MWARN,	/* Make warning symbol.  */
   WARN,		/* Issue warning.  */
+  CWARN,	/* Warn if referenced, else MWARN.  */
   CYCLE,	/* Repeat with symbol pointed to.  */
+  REFC,		/* Mark indirect symbol referenced and then CYCLE.  */
   WARNC		/* Issue warning and then CYCLE.  */
 };
 
@@ -1273,15 +1279,38 @@ enum link_action
 static const enum link_action link_action[8][7] =
 {
   /* current\prev    new    undef  weak   def    com    indr   warn  */
-  /* UNDEF_ROW 	*/  {UND,   NOACT, NOACT, NOACT, NOACT, CYCLE, WARNC },
-  /* UNDEFW_ROW	*/  {WEAK,  WEAK,  NOACT, NOACT, NOACT, CYCLE, WARNC },
-  /* DEF_ROW 	*/  {DEF,   DEF,   DEF,   MDEF,  CDEF,  CYCLE, CYCLE },
-  /* DEFW_ROW 	*/  {DEF,   DEF,   DEF,   NOACT, NOACT, CYCLE, CYCLE },
-  /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  BIG,   CYCLE, WARNC },
-  /* INDR_ROW	*/  {IND,   IND,   IND,   MDEF,  MDEF,  MDEF,  WARNC },
-  /* WARN_ROW   */  {MWARN, WARN,  WARN,  MWARN, MWARN, MWARN, NOACT },
-  /* SET_ROW	*/  {SET,   SET,   SET,   SET,   SET,   CYCLE, WARNC }
+  /* UNDEF_ROW 	*/  {UND,   NOACT, NOACT, REF,   NOACT, REFC,  WARNC },
+  /* UNDEFW_ROW	*/  {WEAK,  WEAK,  NOACT, REF,   NOACT, REFC,  WARNC },
+  /* DEF_ROW 	*/  {DEF,   DEF,   DEF,   MDEF,  CDEF,  MDEF,  CYCLE },
+  /* DEFW_ROW 	*/  {DEF,   DEF,   DEF,   NOACT, NOACT, NOACT, CYCLE },
+  /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  BIG,   MDEF,  WARNC },
+  /* INDR_ROW	*/  {IND,   IND,   IND,   MDEF,  MDEF,  MIND,  CYCLE },
+  /* WARN_ROW   */  {MWARN, WARN,  WARN,  CWARN, WARN,  CWARN, CYCLE },
+  /* SET_ROW	*/  {SET,   SET,   SET,   SET,   SET,   CYCLE, CYCLE }
 };
+
+/* Most of the entries in the LINK_ACTION table are straightforward,
+   but a few are somewhat subtle.
+
+   A reference to an indirect symbol (UNDEF_ROW/indr or
+   UNDEFW_ROW/indr) is counted as a reference both to the indirect
+   symbol and to the symbol the indirect symbol points to.
+
+   A reference to a warning symbol (UNDEF_ROW/warn or UNDEFW_ROW/warn)
+   causes the warning to be issued.
+
+   A common definition of an indirect symbol (COMMON_ROW/indr) is
+   treated as a multiple definition error.  Likewise for an indirect
+   definition of a common symbol (INDR_ROW/com).
+
+   An indirect definition of a warning (INDR_ROW/warn) does not cause
+   the warning to be issued.
+
+   If a warning is created for an indirect symbol (WARN_ROW/indr) no
+   warning is created for the symbol the indirect symbol points to.
+
+   Adding an entry to a set does not count as a reference to a set,
+   and no warning is issued (SET_ROW/warn).  */
 
 /* Add a symbol to the global hash table.
    ABFD is the BFD the symbol comes from.
@@ -1377,16 +1406,27 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	{
 	case FAIL:
 	  abort ();
+
+	case NOACT:
+	  /* Do nothing.  */
+	  break;
+
 	case UND:
+	  /* Make a new undefined symbol.  */
 	  h->type = bfd_link_hash_undefined;
 	  h->u.undef.abfd = abfd;
 	  bfd_link_add_undef (info->hash, h);
 	  break;
+
 	case WEAK:
+	  /* Make a new weak undefined symbol.  */
 	  h->type = bfd_link_hash_weak;
 	  h->u.undef.abfd = abfd;
 	  break;
+
 	case CDEF:
+	  /* We have found a definition for a symbol which was
+	     previously common.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, name,
@@ -1395,6 +1435,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    return false;
 	  /* Fall through.  */
 	case DEF:
+	  /* Define a symbol.  */
 	  h->type = bfd_link_hash_defined;
 	  h->u.def.section = section;
 	  h->u.def.value = value;
@@ -1440,7 +1481,9 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    }
 
 	  break;
+
 	case COM:
+	  /* We have found a common definition for a symbol.  */
 	  if (h->type == bfd_link_hash_new)
 	    bfd_link_add_undef (info->hash, h);
 	  h->type = bfd_link_hash_common;
@@ -1458,9 +1501,17 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  else
 	    h->u.c.section = section;
 	  break;
-	case NOACT:
+
+	case REF:
+	  /* A reference to a defined symbol.  */
+	  if (h->next == NULL && info->hash->undefs_tail != h)
+	    h->next = h;
 	  break;
+
 	case BIG:
+	  /* We have found a common definition for a symbol which
+	     already had a common definition.  Use the maximum of the
+	     two sizes.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, name,
@@ -1470,7 +1521,10 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  if (value > h->u.c.size)
 	    h->u.c.size = value;
 	  break;
+
 	case CREF:
+	  /* We have found a common definition for a symbol which was
+	     already defined.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_defined);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, name,
@@ -1478,7 +1532,15 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 		  abfd, bfd_link_hash_common, value)))
 	    return false;
 	  break;
+
+	case MIND:
+	  /* Multiple indirect symbols.  This is OK if they both point
+	     to the same symbol.  */
+	  if (strcmp (h->u.i.link->root.string, string) == 0)
+	    break;
+	  /* Fall through.  */
 	case MDEF:
+	  /* Handle a multiple definition.  */
 	  {
 	    asection *msec;
 	    bfd_vma mval;
@@ -1507,7 +1569,9 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      return false;
 	  }
 	  break;
+
 	case IND:
+	  /* Create an indirect symbol.  */
 	  {
 	    struct bfd_link_hash_entry *inh;
 
@@ -1523,17 +1587,30 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 		inh->u.undef.abfd = abfd;
 		bfd_link_add_undef (info->hash, inh);
 	      }
+
+	    /* If the indirect symbol has been referenced, we need to
+	       push the reference down to the symbol we are
+	       referencing.  */
+	    if (h->type != bfd_link_hash_new)
+	      {
+		row = UNDEF_ROW;
+		cycle = true;
+	      }
+
 	    h->type = bfd_link_hash_indirect;
 	    h->u.i.link = inh;
 	  }
 	  break;
+
 	case SET:
+	  /* Add an entry to a set.  */
 	  if (! (*info->callbacks->add_to_set) (info, h, BFD_RELOC_CTOR,
 						abfd, section, value))
 	    return false;
 	  break;
-	case WARN:
+
 	case WARNC:
+	  /* Issue a warning and cycle.  */
 	  if (h->u.i.warning != NULL)
 	    {
 	      if (! (*info->callbacks->warning) (info, h->u.i.warning))
@@ -1541,14 +1618,42 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      /* Only issue a warning once.  */
 	      h->u.i.warning = NULL;
 	    }
-	  if (action == WARN)
-	    break;
 	  /* Fall through.  */
 	case CYCLE:
+	  /* Try again with the referenced symbol.  */
 	  h = h->u.i.link;
 	  cycle = true;
 	  break;
+
+	case REFC:
+	  /* A reference to an indirect symbol.  */
+	  if (h->next == NULL && info->hash->undefs_tail != h)
+	    h->next = h;
+	  h = h->u.i.link;
+	  cycle = true;
+	  break;
+
+	case WARN:
+	  /* Issue a warning.  */
+	  if (! (*info->callbacks->warning) (info, string))
+	    return false;
+	  break;
+
+	case CWARN:
+	  /* Warn if this symbol has been referenced already,
+	     otherwise either add a warning or cycle.  A symbol has
+	     been referenced if the next field is not NULL, or it is
+	     the tail of the undefined symbol list.  The REF case
+	     above helps to ensure this.  */
+	  if (h->next != NULL || info->hash->undefs_tail == h)
+	    {
+	      if (! (*info->callbacks->warning) (info, string))
+		return false;
+	      break;
+	    }
+	  /* Fall through.  */
 	case MWARN:
+	  /* Make a warning symbol.  */
 	  {
 	    struct bfd_link_hash_entry *sub;
 
@@ -1994,7 +2099,9 @@ _bfd_generic_link_write_global_symbol (h, data)
       break;
     case bfd_link_hash_common:
       sym->value = h->root.u.c.size;
-      if (! bfd_is_com_section (sym->section))
+      if (sym->section == NULL)
+	sym->section = &bfd_com_section;
+      else if (! bfd_is_com_section (sym->section))
 	{
 	  BFD_ASSERT (sym->section == &bfd_und_section);
 	  sym->section = &bfd_com_section;

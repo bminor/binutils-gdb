@@ -1,3 +1,13 @@
+Fri Jun 10 13:25:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-i960.c (coff_i960_reloc_type_lookup): Add BFD_RELOC_CTOR.
+	* linker.c (_bfd_generic_link_write_global_symbol): Don't assume
+	the section of a common symbol is not NULL.
+
+Wed Jun  8 23:15:53 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* nlmcode.h (nlm_object_p):  Set EXEC_P and start address for GDB.
+
 Wed Jun  8 23:57:34 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (aout_get_external_symbols): Don't try to read the
