@@ -1,5 +1,8 @@
 Wed Jul 27 14:34:42 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* nlm/gdbserve.c: merge in command line argument parsing changes
+	  and bug fixes made to i386-nlmstub.c.
+
 	* i386-nlmstub.c: The returnLength field must be initialized
 	  before portConfig is passed to AIOGetPortConfiguration.
 	  Compare command line arguments with strnicmp(); args are
