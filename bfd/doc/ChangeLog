@@ -1,3 +1,8 @@
+2004-12-20  Ian Lance Taylor  <ian@c2microsystems.com>
+
+	* Makefile.am: Use $(SHELL) whenever we run move-if-change.
+	* Makefile.in: Rebuild.
+
 2004-09-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Require 1.9.
