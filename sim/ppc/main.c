@@ -38,6 +38,7 @@ printf_filtered(const char *msg, ...)
   va_list ap;
   va_start(ap, msg);
   vprintf(msg, ap);
+  va_end(ap);
 }
 
 void
@@ -46,6 +47,7 @@ error (char *msg, ...)
   va_list ap;
   va_start(ap, msg);
   vprintf(msg, ap);
+  va_end(ap);
   exit (1);
 }
 
@@ -68,7 +70,7 @@ zfree(void *chunk)
 static void
 usage(void)
 {
-  error ("Usage: psim [ -a -p -c -C -s -i -I -t ] <image> [ <image-args> ... ]\n");
+  error ("Usage: psim [ -a -p -c -C -s -i -I -t -g ] <image> [ <image-args> ... ]\n");
 }
 
 int
@@ -85,39 +87,41 @@ main(int argc, char **argv)
 
   /* check for arguments -- note sim_calls.c also contains argument processing
      code for the simulator linked within gdb.  */
-  while ((letter = getopt (argc, argv, "acCiIpst")) != EOF)
+  while ((letter = getopt (argc, argv, "acCiIpstg")) != EOF)
     {
       switch (letter) {
       case 'a':
 	for (i = 0; i < nr_trace; i++)
-	  trace[i] = 1;
+	  ppc_trace[i] = 1;
 	break;
       case 'p':
-	trace[trace_cpu] = trace[trace_semantics] = 1;
+	ppc_trace[trace_cpu] = ppc_trace[trace_semantics] = 1;
 	break;
       case 'c':
-	trace[trace_core] = 1;
+	ppc_trace[trace_core] = 1;
 	break;
       case 'C':
-	trace[trace_console_device] = 1;
+	ppc_trace[trace_console_device] = 1;
 	break;
       case 's':
-	trace[trace_create_stack] = 1;
+	ppc_trace[trace_create_stack] = 1;
 	break;
       case 'i':
-	trace[trace_icu_device] = 1;
+	ppc_trace[trace_icu_device] = 1;
 	break;
       case 'I':
 	print_info = 1;
 	break;
       case 't':
-	trace[trace_device_tree] = 1;
+	ppc_trace[trace_device_tree] = 1;
+	break;
+      case 'g':
+	ppc_trace[trace_gdb] = 1;
 	break;
       default:
 	usage();
       }
     }
-
   if (optind >= argc)
     usage();
   name_of_file = argv[optind];
@@ -132,11 +136,12 @@ main(int argc, char **argv)
   putenv(arg_);
 
   /* initialize it */
-  psim_load(system);
+  psim_init(system);
   psim_stack(system, &argv[optind], environ);
 
   psim_run(system);
 
+  /* any final clean up */
   if (print_info)
     psim_print_info (system, 1);
 
@@ -152,6 +157,9 @@ main(int argc, char **argv)
   case was_exited:
     return status.signal;
   case was_signalled:
+    printf ("%s: Caught signal %d at address 0x%lx\n",
+	    name_of_file, (int)status.signal,
+	    (long)status.program_counter);
     return status.signal;
   default:
     error("unknown halt condition\n");

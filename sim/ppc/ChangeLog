@@ -1,3 +1,14 @@
+Thu Oct 26 10:42:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-endian.c (SWAP_n): Add SET argument to allow use of SWAP
+	macros for either assignment or return.  Fix SWAP_8 to use a
+	union, and two SWAP_4's.  Delete SWAP_N, since nobody uses it now.
+	(ENDIAN_N): Add SET argument to SWAP_n calls.  Delete macro defs
+	that hardwired swapping on/off, let optimizer delete dead code.
+
+	* main.c (main): Add printf that we caught a signal and print out
+	the failing address.
+
 Thu Oct 19 21:43:39 1995  Fred Fish  <fnf@fishfood.amigalib.com>
 
 	* Makefile.in:  Remove tabs from otherwise empty line.

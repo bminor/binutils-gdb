@@ -33,78 +33,41 @@
 #include "ppc-endian.h"
 #include "sim_callbacks.h"
 
-
-typedef union {
-  unsigned_1 val_1[8];
-  unsigned_2 val_2[4];
-  unsigned_4 val_4[2];
-  unsigned_8 val_8[1];
-} endian_map;
-
-#define SWAP_N(RAW,BYTE_SIZE) \
-    endian_map in; \
-    endian_map out; \
-    int byte_nr; \
-    in.val_##BYTE_SIZE[0] = RAW; \
-    for (byte_nr = 0; byte_nr < BYTE_SIZE; byte_nr++) { \
-      out.val_1[BYTE_SIZE-1-byte_nr] = in.val_1[byte_nr]; \
-    } \
-    return out.val_##BYTE_SIZE[0]; \
-
 #if (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && WITH_NTOH
-#define SWAP_2(RAW) return htons (RAW)
+#define SWAP_2(SET,RAW) SET htons (RAW)
 #endif
 
 #ifndef	SWAP_2
-#define SWAP_2(RAW) return (((RAW) >> 8) | ((RAW) << 8))
+#define SWAP_2(SET,RAW) SET (((RAW) >> 8) | ((RAW) << 8))
 #endif
 
 #if !defined(SWAP_4) && (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && WITH_NTOH
-#define SWAP_4(RAW) return htonl (RAW)
+#define SWAP_4(SET,RAW) SET htonl (RAW)
 #endif
 
 #ifndef SWAP_4
-#define	SWAP_4(RAW) return (((RAW) << 24) | (((RAW) & 0xff00) << 8) | (((RAW) & 0xff0000) >> 8) | ((RAW) >> 24))
+#define	SWAP_4(SET,RAW) SET (((RAW) << 24) | (((RAW) & 0xff00) << 8) | (((RAW) & 0xff0000) >> 8) | ((RAW) >> 24))
 #endif
 
 #ifndef SWAP_8
-#define	SWAP_8(RAW) SWAP_N(RAW,4)
-#endif
-
-/* no need to swap */
-#if (WITH_HOST_BYTE_ORDER \
-     && WITH_TARGET_BYTE_ORDER \
-     && WITH_HOST_BYTE_ORDER == WITH_TARGET_BYTE_ORDER )
-#define ENDIAN_N(NAME,BYTE_SIZE) \
-unsigned_##BYTE_SIZE \
-endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
-{ \
-  return raw_in; \
-}
-#endif
-
-/* always need to swap */
-#if (WITH_HOST_BYTE_ORDER \
-     && WITH_TARGET_BYTE_ORDER \
-     && WITH_HOST_BYTE_ORDER != WITH_TARGET_BYTE_ORDER )
-#define ENDIAN_N(NAME,BYTE_SIZE) \
-unsigned_##BYTE_SIZE \
-endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
-{ \
-  SWAP_##BYTE_SIZE(raw_in); \
-}
+#define SWAP_8(SET,RAW)							\
+  union { unsigned_8 dword; unsigned_4 words[2]; } in, out;		\
+  in.dword = RAW;							\
+  SWAP_4 (out.words[0] =, in.words[1]);					\
+  SWAP_4 (out.words[1] =, in.words[0]);					\
+  SET out.dword;
 #endif
 
 #ifndef ENDIAN_N
 #define ENDIAN_N(NAME,BYTE_SIZE) \
-unsigned_##BYTE_SIZE \
+INLINE unsigned_##BYTE_SIZE \
 endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
 { \
   if (CURRENT_TARGET_BYTE_ORDER == CURRENT_HOST_BYTE_ORDER) { \
     return raw_in; \
   } \
   else { \
-    SWAP_##BYTE_SIZE(raw_in); \
+    SWAP_##BYTE_SIZE(return, raw_in); \
   } \
 }
 #endif
