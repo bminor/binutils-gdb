@@ -1,3 +1,8 @@
+2002-11-19  Richard Henderson  <rth@redhat.com>
+
+	* config/obj-elf.c (obj_elf_visibility): Overwrite only the
+	visibility portion of st_other.
+
 2002-11-19  Klee Dienes  <kdienes@apple.com>
 
 	* config/tc-h8300.c (struct h8_instruction): New type, used to
