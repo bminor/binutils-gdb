@@ -67,7 +67,6 @@ acconfig.h
 config.in
 configure
 configure.in
-gencode.c
 interp.c
 sim-main.c
 sim-main.h
@@ -81,8 +80,6 @@ tx.igen
 vr.igen
 
 Things-to-lose:
-
-README.Cygnus
 
 Do-last:
 
