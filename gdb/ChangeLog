@@ -1,3 +1,13 @@
+2000-06-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c: Include "gregset.h".
+	(CANNOT_STORE_REGISTER): Define to cannot_fetch_register instead
+	of CANNOT_FETCH_REGISTER, if not already defined.
+	(supply_gregset): Call supply_register with NULL as its second
+	argument instead of supplying our own zeroed out buffer.
+	(fill_gregset): Copy contents of correct registers instead of the
+	contents of register REGNO.
+
 2000-05-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* gnu-regex.c (re_match_2_internal): Revert 2000-05-27
