@@ -1316,7 +1316,8 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_BASE22,
 
-   /* start-sanitize-v9 */
+   /* some relocations we're using for sparc v9
+     -- subject to change */
   BFD_RELOC_SPARC_10,
   BFD_RELOC_SPARC_11,
 #define  BFD_RELOC_SPARC_64 BFD_RELOC_64
@@ -1331,7 +1332,6 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_WDISP19,
   BFD_RELOC_SPARC_GLOB_JMP,
   BFD_RELOC_SPARC_LO7,
-   /* end-sanitize-v9 */
 
    /* Alpha ECOFF relocations.  Some of these treat the symbol or "addend"
      in some special way.  */
