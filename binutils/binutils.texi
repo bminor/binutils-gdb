@@ -1278,7 +1278,7 @@ strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
 
 For each @var{file} given, GNU @code{strings} prints the printable
 character sequences that are at least 4 characters long (or the number
-given with the options below) and are followed by a NUL or newline
+given with the options below) and are followed by an unprintable
 character.  By default, it only prints the strings from the initialized
 and loaded sections of object files; for other types of files, it prints
 the strings from the whole file.
