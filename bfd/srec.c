@@ -1,5 +1,5 @@
 /* BFD back-end for s-record objects.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -109,6 +109,8 @@ DESCRIPTION
 #include "libiberty.h"
 #include <ctype.h>
 
+static void srec_print_symbol
+ PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type));
 static void srec_init PARAMS ((void));
 static boolean srec_mkobject PARAMS ((bfd *));
 static int srec_get_byte PARAMS ((bfd *, boolean *));
@@ -123,6 +125,20 @@ static boolean srec_write_record PARAMS ((bfd *, int, bfd_vma,
 					  const bfd_byte *));
 static boolean srec_write_header PARAMS ((bfd *));
 static boolean srec_write_symbols PARAMS ((bfd *));
+static boolean srec_new_symbol PARAMS ((bfd *, const char *, bfd_vma));
+static boolean srec_get_section_contents
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+static boolean srec_set_arch_mach
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+static boolean srec_set_section_contents
+  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+static boolean internal_srec_write_object_contents PARAMS ((bfd *, int));
+static boolean srec_write_object_contents PARAMS ((bfd *));
+static boolean symbolsrec_write_object_contents PARAMS ((bfd *));
+static int srec_sizeof_headers PARAMS ((bfd *, boolean));
+static asymbol *srec_make_empty_symbol PARAMS ((bfd *));
+static long srec_get_symtab_upper_bound PARAMS ((bfd *));
+static long srec_get_symtab PARAMS ((bfd *, asymbol **));
 
 /* Macros for converting between hex and binary. */
 
@@ -317,6 +333,7 @@ srec_scan (abfd)
   bfd_byte *buf = NULL;
   size_t bufsize = 0;
   asection *sec = NULL;
+  char *symbuf = NULL;
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     goto error_return;
@@ -357,78 +374,107 @@ srec_scan (abfd)
 	  break;
 
 	case ' ':
-	  {
-	    char *symname;
-	    bfd_vma symval;
+	  do
+	    {
+	      unsigned int alc;
+	      char *p, *symname;
+	      bfd_vma symval;
 
-	    /* Starting a symbol definition.  */
-	    while ((c = srec_get_byte (abfd, &error)) != EOF
-		   && (c == ' ' || c == '\t'))
-	      ;
-	    if (c == EOF)
-	      {
-		srec_bad_byte (abfd, lineno, c, error);
+	      /* Starting a symbol definition.  */
+	      while ((c = srec_get_byte (abfd, &error)) != EOF
+		     && (c == ' ' || c == '\t'))
+		;
+
+	      if (c == '\n')
+		break;
+
+	      if (c == EOF)
+		{
+		  srec_bad_byte (abfd, lineno, c, error);
+		  goto error_return;
+		}
+
+	      alc = 10;
+	      symbuf = (char *) bfd_malloc (alc + 1);
+	      if (symbuf == NULL)
 		goto error_return;
-	      }
 
-	    obstack_1grow (&abfd->memory, c);
-	    while ((c = srec_get_byte (abfd, &error)) != EOF
-		   && ! isspace (c))
-	      obstack_1grow (&abfd->memory, c);
-	    if (c == EOF)
-	      {
-		srec_bad_byte (abfd, lineno, c, error);
+	      p = symbuf;
+
+	      *p++ = c;
+	      while ((c = srec_get_byte (abfd, &error)) != EOF
+		     && ! isspace (c))
+		{
+		  if (p - symbuf >= alc)
+		    {
+		      char *n;
+
+		      alc *= 2;
+		      n = (char *) bfd_realloc (symbuf, alc + 1);
+		      if (n == NULL)
+			goto error_return;
+		      p = n + (p - symbuf);
+		      symbuf = n;
+		    }
+
+		  *p++ = c;
+		}
+
+	      if (c == EOF)
+		{
+		  srec_bad_byte (abfd, lineno, c, error);
+		  goto error_return;
+		}
+
+	      *p++ = '\0';
+	      symname = bfd_alloc (abfd, p - symbuf);
+	      if (symname == NULL)
 		goto error_return;
-	      }
+	      strcpy (symname, symbuf);
+	      free (symbuf);
+	      symbuf = NULL;
 
-	    symname = obstack_finish (&abfd->memory);
-	    if (symname == NULL)
-	      {
-		bfd_set_error (bfd_error_no_memory);
+	      while ((c = srec_get_byte (abfd, &error)) != EOF
+		     && (c == ' ' || c == '\t'))
+		;
+	      if (c == EOF)
+		{
+		  srec_bad_byte (abfd, lineno, c, error);
+		  goto error_return;
+		}
+
+	      /* Skip a dollar sign before the hex value.  */
+	      if (c == '$')
+		{
+		  c = srec_get_byte (abfd, &error);
+		  if (c == EOF)
+		    {
+		      srec_bad_byte (abfd, lineno, c, error);
+		      goto error_return;
+		    }
+		}
+
+	      symval = 0;
+	      while (ISHEX (c))
+		{
+		  symval <<= 4;
+		  symval += NIBBLE (c);
+		  c = srec_get_byte (abfd, &error);
+		}
+
+	      if (! srec_new_symbol (abfd, symname, symval))
 		goto error_return;
-	      }
-      
-	    while ((c = srec_get_byte (abfd, &error)) != EOF
-		   && (c == ' ' || c == '\t'))
-	      ;
-	    if (c == EOF)
-	      {
-		srec_bad_byte (abfd, lineno, c, error);
-		goto error_return;
-	      }
+	    }
+	  while (c == ' ' || c == '\t');
 
-	    /* Skip a dollar sign before the hex value.  */
-	    if (c == '$')
-	      {
-		c = srec_get_byte (abfd, &error);
-		if (c == EOF)
-		  {
-		    srec_bad_byte (abfd, lineno, c, error);
-		    goto error_return;
-		  }
-	      }
-
-	    symval = 0;
-	    while (ISHEX (c))
-	      {
-		symval <<= 4;
-		symval += NIBBLE (c);
-		c = srec_get_byte (abfd, &error);
-	      }
-
-	    if (c == EOF || ! isspace (c))
-	      {
-		srec_bad_byte (abfd, lineno, c, error);
-		goto error_return;
-	      }
-
-	    if (! srec_new_symbol (abfd, symname, symval))
+	  if (c != '\n')
+	    {
+	      srec_bad_byte (abfd, lineno, c, error);
 	      goto error_return;
+	    }
 
-	    if (c == '\n')
-	      ++lineno;
+	  ++lineno;
 
-	  }
 	  break;
     
 	case 'S':
@@ -564,6 +610,8 @@ srec_scan (abfd)
   return true;
 
  error_return:
+  if (symbuf != NULL)
+    free (symbuf);
   if (buf != NULL)
     free (buf);
   return false;
@@ -765,6 +813,22 @@ srec_get_section_contents (abfd, section, location, offset, count)
 	  (size_t) count);
 
   return true;
+}
+
+/* Set the architecture.  We accept an unknown architecture here.  */
+
+static boolean
+srec_set_arch_mach (abfd, arch, mach)
+     bfd *abfd;
+     enum bfd_architecture arch;
+     unsigned long mach;
+{
+  if (arch == bfd_arch_unknown)
+    {
+      abfd->arch_info = &bfd_default_arch_struct;
+      return true;
+    }
+  return bfd_default_set_arch_mach (abfd, arch, mach);
 }
 
 /* we have to save up all the Srecords for a splurge before output */
@@ -1163,7 +1227,7 @@ srec_get_symbol_info (ignore_abfd, symbol, ret)
 }
 
 /*ARGSUSED*/
-void
+static void
 srec_print_symbol (ignore_abfd, afile, symbol, how)
      bfd *ignore_abfd;
      PTR afile;
@@ -1189,7 +1253,7 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define srec_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
 #define srec_new_section_hook _bfd_generic_new_section_hook
 
-#define srec_bfd_is_local_label bfd_generic_is_local_label
+#define srec_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define srec_get_lineno _bfd_nosymbols_get_lineno
 #define srec_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define srec_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
@@ -1205,8 +1269,6 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define srec_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window
 
-#define srec_set_arch_mach bfd_default_set_arch_mach
-
 #define srec_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define srec_bfd_relax_section bfd_generic_relax_section
@@ -1219,8 +1281,8 @@ const bfd_target srec_vec =
 {
   "srec",			/* name */
   bfd_target_srec_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
@@ -1274,8 +1336,8 @@ const bfd_target symbolsrec_vec =
 {
   "symbolsrec",			/* name */
   bfd_target_srec_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),

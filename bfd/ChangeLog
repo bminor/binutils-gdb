@@ -5,6 +5,7 @@ Mon Mar 17 11:32:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* libbfd.h: Rebuild.
 	* ieee.c (ieee_archive_p): Rewrite to not use bfd_alloc_grow.
 	* sunos.c (sunos_add_dynamic_symbols): Likewise.
+	* srec.c (srec_scan): Rewrite to not use obstack_1grow.
 
 	* opncls.c (bfd_alloc): Rename from bfd_alloc_by_size_t.  Remove
 	old version of bfd_alloc.
