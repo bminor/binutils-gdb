@@ -43,6 +43,7 @@ coff-i960.c
 cofflink.c
 coff-m68k.c
 coff-m88k.c
+coff-maxq.c
 coff-mips.c
 coff-or32.c
 coff-rs6000.c
@@ -90,6 +91,7 @@ cpu-m68hc11.c
 cpu-m68hc12.c
 cpu-m68k.c
 cpu-m88k.c
+cpu-maxq.c
 cpu-mcore.c
 cpu-mips.c
 cpu-mmix.c
@@ -125,7 +127,7 @@ efi-app-ia32.c
 efi-app-ia64.c
 elf32-am33lin.c
 elf32-arc.c
-elf32-arm.h
+elf32-arm.c
 elf32-avr.c
 elf32.c
 elf32-cr16c.c
@@ -181,8 +183,6 @@ elf64-s390.c
 elf64-sh64.c
 elf64-sparc.c
 elf64-x86-64.c
-elfarm-nabi.c
-elfarm-oabi.c
 elf-bfd.h
 elf.c
 elfcode.h

@@ -141,7 +141,7 @@ ALL_MACHINES_CFILES = \
 	cpu-m88k.c \
 	cpu-m10200.c \
 	cpu-m10300.c \
-	cpu-mawq.c \
+	cpu-maxq.c \
 	cpu-mcore.c \
 	cpu-mips.c \
 	cpu-mmix.c \
@@ -612,7 +612,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
-	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h \
+	elf-bfd.h elf-hppa.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \

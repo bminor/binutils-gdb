@@ -1,22 +1,29 @@
+2004-11-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (SOURCE_HFILES): Remove elf32-arm.h.
+	(ALL_MACHINES_CFILES): Fix typo.
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2004-11-08  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): When generating an
 	R_ARM_RELATIVE relocation for Symbian OS, mention the section
 	symbol in the relocation.
 
-2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
-	    Vineet Sharma      <vineets@noida.hcltech.com>
+2004-11-08  Inderpreet Singh  <inderpreetb@nioda.hcltech.com>
+	    Vineet Sharma  <vineets@noida.hcltech.com>
 
 	* coff-maxq.c: New File.
-        * cpu-maxq.c: New File.
-        * coffcode.h: Likewise.
-        * config.bfd: Likewise.
-        * configure.in (maxqcoff_vec): New target vector.
+	* cpu-maxq.c: New File.
+	* coffcode.h: Likewise.
+	* config.bfd: Likewise.
+	* configure.in (maxqcoff_vec): New target vector.
 	* Makefile.am: Add support for maxq target.
 	* configure.in: Likewise.
-        * archures.c:. Likewise.
-        * targets.c: Likewise.
-        * bfd_in2.h : Regenerated.
+	* archures.c:. Likewise.
+	* targets.c: Likewise.
+	* bfd_in2.h : Regenerated.
 	* Makefile.in: Regenerated.
 	* configure: Regenerated.
 	* doc/Makefile.in: Regenerated.
@@ -38,7 +45,7 @@
 2004-11-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_symbian_begin_write_processing): Clear
-	D_PAGED. 
+	D_PAGED.
 	(elf32_arm_symbian_modify_segment_map): Don't
 	reset includes_filehdr and includes_phdrs here.
 
@@ -2928,7 +2935,7 @@
 
 2004-05-11  Jakub Jelinek  <jakub@redhat.com>
 
-	* elflink.c (elf_bfd_final_link): Don't output STT_SECTION symbol
+	* elflink.c (bfd_elf_final_link): Don't output STT_SECTION symbol
 	into .dynsym if elf_section_data (sec)->dynindx <= 0.
 	Adjust counting of last_local.
 	(_bfd_elf_link_renumber_dynsyms): Don't assign dynindx to sections
