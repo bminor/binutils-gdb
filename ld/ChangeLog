@@ -1,3 +1,8 @@
+Wed Sep 14 12:49:12 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ldlang.c (lang_do_assignments): Make sure output statement
+	has an attached bfd_section before trying to dereference it.
+
 Wed Sep 14 12:48:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldmisc.c (vfinfo): Handle %D as %C, but never print the function

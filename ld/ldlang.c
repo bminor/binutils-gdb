@@ -1987,8 +1987,13 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	      }
 	    if (os->load_base) 
 	      {
-		os->bfd_section->lma 
-		  = exp_get_abs_int(os->load_base, 0,"load base", lang_final_phase_enum);
+		/* If nothing has been placed into the output section then
+		   it won't have a bfd_section. */
+		if (os->bfd_section) 
+		  {
+		    os->bfd_section->lma 
+		      = exp_get_abs_int(os->load_base, 0,"load base", lang_final_phase_enum);
+		  }
 	      }
 	  }
 	  break;
