@@ -1,3 +1,10 @@
+2000-04-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Add ia64-linux-tdep.c.
+	(ia64-linux-tdep.o): Add dependencies.
+	(ia64-tdep.o): Add dependency for arch-utils.h.
+	* ia64-linux-tdep.c, ia64-tdep.c (arch-utils.h): Include.
+
 2000-04-25  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* blockframe.c: Fix a minor typo in a comment.

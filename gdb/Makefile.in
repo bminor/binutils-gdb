@@ -1070,7 +1070,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	i387-tdep.c \
 	i386-linux-tdep.c \
 	i960-tdep.c \
-	ia64-linux-nat.c ia64-tdep.c \
+	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c isi-xdep.c \
 	lynx-nat.c m3-nat.c \
 	m68k-tdep.c \
@@ -1434,8 +1434,10 @@ i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 ia64-linux-nat.o: ia64-linux-nat.c  $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h)
 
+ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(arch_utils_h)
+
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) symfile.h $(gdbcore_h) \
-	$(floatformat_h) objfiles.h $(INCLUDE_DIR)/elf/common.h
+	$(arch_utils_h) $(floatformat_h) objfiles.h $(INCLUDE_DIR)/elf/common.h
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h gdb_string.h
