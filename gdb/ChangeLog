@@ -1,3 +1,17 @@
+Sat Jul 16 14:43:17 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* breakpoint.c (ignore, condition): Add usage notes to help strings.
+	* symfile.c (add-symbol-file): Add usage note to help string.
+	(add_shared_symbol_files_command): New command.
+
+	gcc -Wall lint.
+	* inferior.h (read_pc_pid): Declare.
+	* breakpoint.c (watchpoint_check): Cache breakpoint in local
+	variable b, remove unused variable other_type_used.
+	* main.c (inferior.h, call-cmds.h): Include.
+	(gdb_init): Declare.
+	* remote.c (remote_wait): Return 0 by default.
+
 Fri Jul 15 16:43:33 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Stop printing at null char option, from Oliver Meyer
