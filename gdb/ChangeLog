@@ -1,3 +1,15 @@
+Fri Dec 27 14:53:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* v850-tdep.c (struct pifsr): Add cur_frameoffset field.
+	(v850_scan_prologue): Add debug code #ifdef'ed DEBUG.  Support new
+	compiler prologues using register save functions and short store
+	instructions.
+
+	* config/v850/tm-vm850.h ({R1,EP}_REGNUMS): New register number
+	defintiions for r1, ep.
+	(SAVE{1,2,3}_{START,END}_REGNUM): Register number definitions for
+	the 3 sets of saved registers.
+
 Thu Dec 26 19:56:55 1996  Mark Alexander  <marka@cygnus.com>
 
 	* valprint.c (print_longest): Don't lose upper bits

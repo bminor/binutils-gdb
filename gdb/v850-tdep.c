@@ -34,6 +34,7 @@ struct pifsr			/* Info about one saved reg */
 {
   int framereg;			/* Frame reg (SP or FP) */
   int offset;			/* Offset from framereg */
+  int cur_frameoffset;		/* Current frameoffset */
   int reg;			/* Saved register number */
 };
 
@@ -63,9 +64,13 @@ v850_scan_prologue (pc, pi)
      struct prologue_info *pi;
 {
   CORE_ADDR func_addr, prologue_end, current_pc;
-  struct pifsr *pifsr;
+  struct pifsr *pifsr, *pifsr_tmp;
   int fp_used;
   int ep_used;
+  int reg;
+  CORE_ADDR save_pc, save_end;
+  int regsave_func_p;
+  int current_sp_size;
 
   /* First, figure out the bounds of the prologue so that we can limit the
      search to something reasonable.  */
@@ -107,57 +112,142 @@ v850_scan_prologue (pc, pi)
   fp_used = 0;
   ep_used = 0;
   pifsr = pi->pifsrs;
+  regsave_func_p = 0;
+  save_pc = 0;
+  save_end = 0;
+
+#ifdef DEBUG
+  printf_filtered ("Current_pc = 0x%.8lx, prologue_end = 0x%.8lx\n",
+		   (long)func_addr, (long)prologue_end);
+#endif
 
   for (current_pc = func_addr; current_pc < prologue_end; current_pc += 2)
     {
       int insn;
 
+#ifdef DEBUG
+      printf_filtered ("0x%.8lx ", (long)current_pc);
+      (*tm_print_insn) (current_pc, &tm_print_insn_info);
+#endif
+
       insn = read_memory_unsigned_integer (current_pc, 2);
 
-      if ((insn & 0x07c0) == 0x0780 /* jarl or jr */
-	  || (insn & 0xffe0) == 0x0060 /* jmp */
-	  || (insn & 0x0780) == 0x0580)	/* branch */
-	break;			/* Ran into end of prologue */
-      if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240)) /* add <imm>,sp */
-	pi->frameoffset = ((insn & 0x1f) ^ 0x10) - 0x10;
-      else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM)) /* addi <imm>,sp,sp */
-	pi->frameoffset = read_memory_integer (current_pc + 2, 2);
-      else if (insn == ((FP_REGNUM << 11) | 0x0000 | 12)) /* mov r12,fp */
+      if ((insn & 0xffc0) == ((10 << 11) | 0x0780) && !regsave_func_p)
+	{			/* jarl <func>,10 */
+	  long low_disp = read_memory_unsigned_integer (current_pc + 2, 2) & ~ (long) 1;
+	  long disp = (((((insn & 0x3f) << 16) + low_disp)
+			& ~ (long) 1) ^ 0x00200000) - 0x00200000;
+
+	  save_pc = current_pc;
+	  save_end = prologue_end;
+	  regsave_func_p = 1;
+	  current_pc += disp - 2;
+	  prologue_end = (current_pc
+			  + (2 * 3)	/* moves to/from ep */
+			  + 4		/* addi <const>,sp,sp */
+			  + 2		/* jmp [r10] */
+			  + (2 * 12)	/* sst.w to save r2, r20-r29, r31 */
+			  + 20);	/* slop area */
+
+#ifdef DEBUG
+	  printf_filtered ("\tfound jarl <func>,r10, disp = %ld, low_disp = %ld, new pc = 0x%.8lx\n",
+			   disp, low_disp, (long)current_pc + 2);
+#endif
+	  continue;
+	}
+      else if ((insn & 0xffe0) == 0x0060 && regsave_func_p)
+	{			/* jmp after processing register save function */
+	  current_pc = save_pc + 2;
+	  prologue_end = save_end;
+	  regsave_func_p = 0;
+#ifdef DEBUG
+	  printf_filtered ("\tfound jmp after regsave func");
+#endif
+	}
+      else if ((insn & 0x07c0) == 0x0780	/* jarl or jr */
+	       || (insn & 0xffe0) == 0x0060	/* jmp */
+	       || (insn & 0x0780) == 0x0580)	/* branch */
+	{
+#ifdef DEBUG
+	  printf_filtered ("\n");
+#endif
+	  break;				/* Ran into end of prologue */
+	}
+
+      else if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240))		/* add <imm>,sp */
+	pi->frameoffset += ((insn & 0x1f) ^ 0x10) - 0x10;
+      else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM))	/* addi <imm>,sp,sp */
+	pi->frameoffset += read_memory_integer (current_pc + 2, 2);
+      else if (insn == ((FP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
 	{
 	  fp_used = 1;
 	  pi->framereg = FP_REGNUM;
 	}
-      else if (insn == 0xf003)	/* mov sp,ep */
+
+      else if (insn == ((EP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,ep */
 	ep_used = 1;
-      else if (insn == 0xf001)	/* mov r1,ep */
+      else if (insn == ((EP_REGNUM << 11) | 0x0000 | R1_REGNUM))	/* mov r1,ep */
 	ep_used = 0;
       else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)		 /* st.w <reg>,<offset>[sp] */
 		|| (fp_used
 		    && (insn & 0x07ff) == (0x0760 | FP_REGNUM))) /* st.w <reg>,<offset>[fp] */
-	       && pifsr)
+	       && pifsr
+	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
+		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
+		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
 	{
-	  pifsr->framereg = insn & 0x1f;
-	  pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
+	  pifsr->reg = reg;
 	  pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
+	  pifsr->cur_frameoffset = pi->frameoffset;
+#ifdef DEBUG
+	  printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
+#endif
 	  pifsr++;
 	}
 
-      else if (ep_used			/* sst.w <reg>,<offset>[ep] */
+      else if (ep_used						/* sst.w <reg>,<offset>[ep] */
 	       && ((insn & 0x0781) == 0x0501)
-	       && pifsr)
+	       && pifsr
+	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
+		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
+		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
 	{
-	  pifsr->framereg = 3;
-	  pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
-	  pifsr->offset = (insn & 0x007e) << 2;
+	  pifsr->reg = reg;
+	  pifsr->offset = (insn & 0x007e) << 1;
+	  pifsr->cur_frameoffset = pi->frameoffset;
+#ifdef DEBUG
+	  printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
+#endif
 	  pifsr++;
 	}
 
       if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
 	current_pc += 2;
+
+#ifdef DEBUG
+      printf_filtered ("\n");
+#endif
     }
 
   if (pifsr)
     pifsr->framereg = 0;	/* Tie off last entry */
+
+  /* Fix up any offsets to the final offset.  If a frame pointer was created, use it
+     instead of the stack pointer.  */
+  for (pifsr_tmp = pi->pifsrs; pifsr_tmp && pifsr_tmp != pifsr; pifsr_tmp++)
+    {
+      pifsr_tmp->offset -= pi->frameoffset - pifsr_tmp->cur_frameoffset;
+      pifsr_tmp->framereg = pi->framereg;
+
+#ifdef DEBUG
+      printf_filtered ("Saved register r%d, offset = %d, framereg = r%d\n",
+		       pifsr_tmp->reg, pifsr_tmp->offset, pifsr_tmp->framereg);
+#endif
+    }
+
+#ifdef DEBUG
+  printf_filtered ("Framereg = r%d, frameoffset = %d\n", pi->framereg, pi->frameoffset);
+#endif
 
   return current_pc;
 }
