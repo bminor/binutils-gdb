@@ -1,3 +1,8 @@
+Sun Jan  8 16:14:19 1995  Ian Lance Taylor  <ian@tweedledumb.cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Fix handling of floating point
+	values when GPOPT is not defined.
+
 Fri Jan  6 16:59:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* gasp.c: Include string.h.  Put config.h before other includes.

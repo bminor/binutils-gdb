@@ -4598,11 +4598,11 @@ mips_ip (str, ip)
 
 		if (*args == 'f'
 		    || (*args == 'l'
-			&& (mips_pic == EMBEDDED_PIC
 #ifdef GPOPT
-			    || g_switch_value < 4
+			&& (mips_pic == EMBEDDED_PIC
+			    || g_switch_value < 4)
 #endif
-			    )))
+			))
 		  {
 		    imm_expr.X_op = O_constant;
 		    if (byte_order == LITTLE_ENDIAN)
@@ -4630,10 +4630,10 @@ mips_ip (str, ip)
 		      {
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
-			newname = ".lit8";
+			newname = RDATA_SECTION_NAME;
 #ifdef GPOPT
-			if (g_switch_value < 8)
-			  newname = RDATA_SECTION_NAME;
+			if (g_switch_value >= 8)
+			  newname = ".lit8";
 #endif
 			break;
 		      case 'F':
