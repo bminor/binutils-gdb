@@ -1,3 +1,15 @@
+Sun Sep 26 23:45:29 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (relax_segment): Localize "aim" variable.  If
+	DIFF_EXPR_OK, don't impose checks on symbol segment types.  
+	(fixup_segment) [DIFF_EXPR_OK]: If sub_symbolP is in the current
+	segment, convert to a PC-relative fixup and discard the symbol.
+
+	* config/tc-m68k.c (flag_want_pic): New variable, mostly ignored.
+	(md_parse_option) [TE_SUN3]: Set it for "-k".
+	(m68k_ip): Generate proper fixup for mode 7.3.
+	* config/tc-m68k.h (DIFF_EXPR_OK): Define.
+
 Sat Sep 25 05:08:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-m68k.c (struct m68k_incant, getone, gettwo): Moved
