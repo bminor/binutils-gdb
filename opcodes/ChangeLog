@@ -1,3 +1,13 @@
+2004-04-22  Peter Barada <peter@the-baradas.com>
+
+	* m68k-dis.c(print_insn_m68k): Set mfcmac/mcfemac on
+	appropriate ColdFire architectures.
+	(print_insn_m68k): Handle EMAC, MAC/EMAC scalefactor, and MAC/EMAC
+	mask addressing.
+	Add EMAC instructions, fix MAC instructions. Remove
+	macmw/macml/msacmw/msacml instructions since mask addressing now
+	supported.
+
 2004-04-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* sparc-opc.c (fmoviccx, fmovfccx, fmovccx): Define.

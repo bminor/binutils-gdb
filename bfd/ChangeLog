@@ -1,3 +1,9 @@
+2004-04-22  Peter Barada <peter@the-baradas.com>
+
+	* archures.c: Add bfd_mach_mcfv4e to bfd_architecture.
+	* bfd2-in.h: Regenerate.
+	* cpu-m68k.c: Add 'm68k:mcfv4e' to arch_info_struct[].
+
 2004-04-21  Chris Demetriou  <cgd@broadcom.com>
 
 	* coff-mips.c (bfd_mips_ecoff_create_embedded_relocs): Remove.

@@ -1491,6 +1491,7 @@ enum bfd_architecture
 #define bfd_mach_mcf5307  11
 #define bfd_mach_mcf5407  12
 #define bfd_mach_mcf528x  13
+#define bfd_mach_mcfv4e   14
   bfd_arch_vax,       /* DEC Vax */
   bfd_arch_i960,      /* Intel 960 */
     /* The order of the following is important.

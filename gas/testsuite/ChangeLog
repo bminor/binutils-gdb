@@ -1,3 +1,11 @@
+2004-04-22  Peter Barada <peter@the-baradas.com>
+
+	* gas/m68k/mcf-mac.s: New test: Check ColdFire MAC instructions.
+	* gas/m68k/mcf-emac.s: New test: Similar checks.
+	* gas/m68k/mcf-mac.d: New test: Expected output.
+	* gas/m68k/mcf-emac.d: New test: Likewise.
+	* gas/m68k/all.exp: Run new tests.
+
 2004-04-21  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/elempic.d: File removed as part of -membedded-pic removal.

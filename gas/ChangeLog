@@ -1,3 +1,23 @@
+2004-04-22  Peter Barada <peter@the-baradas.com>
+
+	* NEWS: Added support for EMAC instructions and MAC/EMAC
+	Motorola syntax.
+	* config/m68k-parse.h: Add ACC[123], ACCEXT{01,23}, MAC/EMAC
+	scale factor tokens, trailing_ampersand to mark mask addressing
+	for MAC/EMAC instructions.
+	* config/m68k-parse.y: Add options_ampersand clause, '<<',
+	'>>'.
+	(yylex): Handle '>', '<', and '&' following '+'.
+	* config/tc-m68k.c: Set mcfmac/mcfemac on appropriate ColdFire
+	architectures in archs[].  
+	(m68k-ip): Add '4', 'e', 'g', 'i', cases to handle mask addressing
+	for MAC/EMAC instructions, ACC[0123], ACCEXT{01,23}, and '<<'/'>>'
+	respectively.
+	(m68k_ip): Handle trailing '&' on MAC/EMAC insns.
+	(install_operand): Fix 'n' case, Add 'F', 'f', 'G', 'H', 'I', ']'
+	cases.
+	Add EMAC operands to init_table[].
+
 2004-04-22  Bruno De Bus <bdebus@elis.ugent.be>
 
 	* config/tc-arm.h (enum mstate): Move here, add MAP_UNDEFINED

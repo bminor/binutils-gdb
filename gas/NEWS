@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for ColdFire EMAC instructions added and Motorola syntax for MAC/EMAC
+  instrucitons.
+
 * The MIPS -membedded-pic option (Embedded-PIC code generation) is
   deprecated and will be removed in a future release.
 
