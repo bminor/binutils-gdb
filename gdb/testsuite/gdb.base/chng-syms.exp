@@ -108,6 +108,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 	-re "Error in re-setting .*No symbol .var1..*Program exited normally.*" {
 	    pass "running with invalidated bpt condition after executable changes" 
 	}
+	-re "$gdb_prompt $" { 
+	    fail "running with invalidated bpt condition after executable changes" 
+	}
 	timeout {
 	    fail "(timeout) running with invalidated bpt condition after executable changes" 
 	}
