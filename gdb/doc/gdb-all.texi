@@ -5,9 +5,8 @@
 @setfilename gdb.info
 @settitle Using GDB (v4)
 @setchapternewpage odd
-@input smpklug.texi
-@smallbook
-@cropmarks
+@c @smallbook
+@c @cropmarks
 @c %**end of header
 
 @finalout
