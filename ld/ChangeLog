@@ -1,3 +1,9 @@
+Mon May 12 11:11:06 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* scripttempl/elf.sc: Don't align the data segment on the next 8
+	byte boundary, instead let the linker use whatever the individual
+	sections require.
+
 Fri May  9 17:45:46 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (i[3456]86-*-gnu*): Don't include Mach support.
