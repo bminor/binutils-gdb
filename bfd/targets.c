@@ -147,7 +147,8 @@ DESCRIPTION
 .  bfd_target_srec_flavour,
 .  bfd_target_som_flavour,
 .  bfd_target_os9k_flavour,
-.  bfd_target_versados_flavour
+.  bfd_target_versados_flavour,
+.  bfd_target_msdos_flavour
 .};
 .
 .{* Forward declaration.  *}
