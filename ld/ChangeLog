@@ -1,5 +1,11 @@
 2001-05-25  H.J. Lu  <hjl@gnu.org>
 
+	* emultempl/beos.em (gld${EMULATION_NAME}_before_parse): Move
+	setting of output_filename after bfd_scan_arch.
+	* emultempl/pe.em: Likewise.
+
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
 	* emulparams/aixrs6.sh: Add SYSCALL_MASK and SYMBOL_MODE_MASK
 	like emulparams/aixppc.sh.
 

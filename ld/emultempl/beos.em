@@ -76,7 +76,6 @@ extern const char *output_filename;
 static void
 gld_${EMULATION_NAME}_before_parse()
 {
-  output_filename = "a.exe";
   const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
   if (arch)
     {
@@ -86,6 +85,7 @@ gld_${EMULATION_NAME}_before_parse()
     }
   else
     ldfile_output_architecture = bfd_arch_${ARCH};
+  output_filename = "a.exe";
 }
 
 /* PE format extra command line options.  */
