@@ -1,5 +1,11 @@
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Move code determining the MIPS
+	FPU to the start, check the MIPS FPU when looking for an old
+	architecture.
+	(set_mipsfpu_single_command): Update the architecture.
+	(set_mipsfpu_double_command, set_mipsfpu_none_command): Ditto.
+
 	* mips-tdep.c (MIPS_DEFAULT_MASK_ADDRESS_P): Delete macro.
 	(mips_mask_address_p): Add "tdep" parameter.
 	(show_mask_address, mips_addr_bits_remove): Update.

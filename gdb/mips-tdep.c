@@ -5119,25 +5119,43 @@ set_mipsfpu_command (char *args, int from_tty)
 static void
 set_mipsfpu_single_command (char *args, int from_tty)
 {
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
   mips_fpu_type = MIPS_FPU_SINGLE;
   mips_fpu_type_auto = 0;
-  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
+  /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
+     instead of relying on globals.  Doing that would let generic code
+     handle the search for this specific architecture.  */
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "set mipsfpu failed");
 }
 
 static void
 set_mipsfpu_double_command (char *args, int from_tty)
 {
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
   mips_fpu_type = MIPS_FPU_DOUBLE;
   mips_fpu_type_auto = 0;
-  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
+  /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
+     instead of relying on globals.  Doing that would let generic code
+     handle the search for this specific architecture.  */
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "set mipsfpu failed");
 }
 
 static void
 set_mipsfpu_none_command (char *args, int from_tty)
 {
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
   mips_fpu_type = MIPS_FPU_NONE;
   mips_fpu_type_auto = 0;
-  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
+  /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
+     instead of relying on globals.  Doing that would let generic code
+     handle the search for this specific architecture.  */
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "set mipsfpu failed");
 }
 
 static void
@@ -5665,6 +5683,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   int elf_flags;
   enum mips_abi mips_abi, found_abi, wanted_abi;
   int num_regs;
+  enum mips_fpu_type fpu_type;
 
   /* First of all, extract the elf_flags, if available.  */
   if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
@@ -5764,6 +5783,34 @@ mips_gdbarch_init (struct gdbarch_info info,
 			"mips_gdbarch_init: mips64_transfers_32bit_regs_p = %d\n",
 			mips64_transfers_32bit_regs_p);
 
+  /* Determine the MIPS FPU type.  */
+  if (!mips_fpu_type_auto)
+    fpu_type = mips_fpu_type;
+  else if (info.bfd_arch_info != NULL
+	   && info.bfd_arch_info->arch == bfd_arch_mips)
+    switch (info.bfd_arch_info->mach)
+      {
+      case bfd_mach_mips3900:
+      case bfd_mach_mips4100:
+      case bfd_mach_mips4111:
+	fpu_type = MIPS_FPU_NONE;
+	break;
+      case bfd_mach_mips4650:
+	fpu_type = MIPS_FPU_SINGLE;
+	break;
+      default:
+	fpu_type = MIPS_FPU_DOUBLE;
+	break;
+      }
+  else if (arches != NULL)
+    fpu_type = gdbarch_tdep (arches->gdbarch)->mips_fpu_type;
+  else
+    fpu_type = MIPS_FPU_DOUBLE;
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"mips_gdbarch_init: fpu_type = %d\n",
+			fpu_type);
+
   /* try to find a pre-existing architecture */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
@@ -5780,6 +5827,9 @@ mips_gdbarch_init (struct gdbarch_info info,
       if (gdbarch_tdep (arches->gdbarch)->mips64_transfers_32bit_regs_p
 	  != mips64_transfers_32bit_regs_p)
 	continue;
+      /* Be pedantic about which FPU is selected.  */
+      if (gdbarch_tdep (arches->gdbarch)->mips_fpu_type != fpu_type)
+	continue;
       return arches->gdbarch;
     }
 
@@ -5790,6 +5840,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   tdep->mips64_transfers_32bit_regs_p = mips64_transfers_32bit_regs_p;
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
+  tdep->mips_fpu_type = fpu_type;
 
   /* Initially set everything according to the default ABI/ISA.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -5975,28 +6026,6 @@ mips_gdbarch_init (struct gdbarch_info info,
      this flag to detect 32-bit mode would do the wrong thing given
      the current gcc - it would make GDB treat these 64-bit programs
      as 32-bit programs by default.  */
-
-  /* enable/disable the MIPS FPU */
-  if (!mips_fpu_type_auto)
-    tdep->mips_fpu_type = mips_fpu_type;
-  else if (info.bfd_arch_info != NULL
-	   && info.bfd_arch_info->arch == bfd_arch_mips)
-    switch (info.bfd_arch_info->mach)
-      {
-      case bfd_mach_mips3900:
-      case bfd_mach_mips4100:
-      case bfd_mach_mips4111:
-	tdep->mips_fpu_type = MIPS_FPU_NONE;
-	break;
-      case bfd_mach_mips4650:
-	tdep->mips_fpu_type = MIPS_FPU_SINGLE;
-	break;
-      default:
-	tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
-	break;
-      }
-  else
-    tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
 
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
