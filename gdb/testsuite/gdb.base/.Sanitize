@@ -159,6 +159,7 @@ solib_implicitly_loaded.c
 solib_indirect_call.c
 sparc-aout.u
 sparc-elf.u
+ss.h
 step-test.c
 structs2.c
 structs2.exp

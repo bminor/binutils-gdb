@@ -1,3 +1,26 @@
+Wed Jan  6 18:41:15 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	The following files are part of the HP merge; some had longer
+	names at HP, but have been renamed to be no more than 14
+	characters in length.
+
+	* gdb.base/ss.h: new file.
+	* gdb.base/call-ar-st.c: new file.
+	* gdb.base/call-ar-st.exp: new file.
+	* gdb.base/call-rt-st.c: new file.
+	* gdb.base/call-rt-st-exp: new file.
+	* gdb.base/call-strs.exp: new file.
+	* gdb.base/ena-dis-br.exp: new file.
+	* gdb.base/environment.exp: new file.
+	* gdb.base/sect-cmd.exp: new file.
+	* gdb.base/shlib-cl2.exp: new file.
+	* gdb.base/so-impl-ld.c: new file.
+	* gdb.base/so-impl-ld.exp: new file.
+	* gdb.base/so-indr-cl.c: new file.
+	* gdb.base/so-indr-cl.exp: new file.
+	* gdb.base/volatile.exp: new file.
+	* gdb.base/whatis-exp.exp: new file.
+	
 Wed Jan  6 13:50:57 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/default.exp: Reflect wording change in remote.c.
