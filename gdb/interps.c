@@ -318,7 +318,7 @@ interp_exec (struct interp *interp, const char *command_str)
    common command hooks.  Use it when removing your interpreter in its 
    suspend proc. */
 void
-clear_interpreter_hooks ()
+clear_interpreter_hooks (void)
 {
   init_ui_hook = 0;
   print_frame_info_listing_hook = 0;

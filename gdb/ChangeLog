@@ -1,3 +1,8 @@
+2003-02-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* interps.c (clear_interpreter_hooks): Convert function definition
+	to ISO C.
+
 2003-02-07  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb_mbuild.sh: Delete extra shift after parsing '-f'.

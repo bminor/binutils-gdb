@@ -1,3 +1,8 @@
+2003-02-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-interp.c (mi_remove_notify_hooks): Convert function
+	definition to ISO C.
+
 2003-02-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-cmd-env.c: Include "gdb_stat.h" instead of <sys/stat.h>.

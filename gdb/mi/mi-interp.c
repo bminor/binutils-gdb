@@ -285,7 +285,7 @@ mi_insert_notify_hooks (void)
 }
 
 static void
-mi_remove_notify_hooks ()
+mi_remove_notify_hooks (void)
 {
   query_hook = NULL;
 }
