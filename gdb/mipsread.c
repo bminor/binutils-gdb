@@ -4,19 +4,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "param.h"
@@ -38,11 +38,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (re)define here what I really need in this module.  I only assume the
    three standard COFF structure definitions: filehdr, aouthdr, scnhdr */
 #define MIPS		/* Kludge to get MIPS version of coff */
-#include "intel-coff.h"
+#undef _ETEXT		/* Avoid duplicated define from <syms.h> */
+#include "ecoff.h"
 
 struct coff_exec {
-	struct filehdr f;
-	struct aouthdr a;
+	struct external_filehdr f;
+	struct external_aouthdr a;
 };
 #undef a_magic
 #undef a_text
@@ -99,11 +100,6 @@ struct complaint unknown_ext_complaint =
 /* GDB symtable for the current compilation unit */
 
 static struct symtab *cur_stab;
-
-/* Header for executable/object file we read symbols from */
-
-static struct coff_exec filhdr;
-#define END_OF_TEXT_SEGMENT(f) ((f).a.text_start + (f).a.tsize)
 
 /* Pointer to current file decriptor record, and its index */
 
@@ -287,6 +283,7 @@ mipscoff_symfile_read(sf, addr, mainline)
     }
   make_cleanup (free_stringtab, 0);
 #endif
+
   /* Position to read the symbol table.  Do not read it all at once. */
   val = lseek (desc, (long)symtab_offset, 0);
   if (val < 0)
@@ -298,7 +295,7 @@ mipscoff_symfile_read(sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_mips_symtab(desc, 0);
+  read_mips_symtab(abfd, desc, 0);
 
 /*  patch_opaque_types ();*/
 
@@ -366,8 +363,10 @@ mipscoff_psymtab_to_symtab(pst)
 
 /* Exported procedure: Is PC in the signal trampoline code */
 
-int in_sigtramp(pc,name)
+int
+in_sigtramp(pc, name)
 	CORE_ADDR pc;
+	char *name;
 {
 	if (sigtramp_address == 0)
 		fixup_sigtramp();
@@ -376,22 +375,40 @@ int in_sigtramp(pc,name)
 
 /* File-level interface functions */
 
-/* Read the symtab information from file FSYM into memory */
+/* Read the symtab information from file FSYM into memory.  Also,
+   return address just past end of our text segment in *END_OF_TEXT_SEGP.  */
 
 static
-read_the_mips_symtab(fsym)
+read_the_mips_symtab(abfd, fsym, end_of_text_segp)
+	bfd 		*abfd;
+	int		fsym;
+	CORE_ADDR	*end_of_text_segp;
 {
 	int             stsize, st_hdrsize;
 	unsigned        st_filptr;
 	HDRR            st_hdr;
+	/* Header for executable/object file we read symbols from */
+	struct coff_exec filhdr;
+
+	/* We get here with DESC pointing to the symtab header. But we need
+	 * other info from the initial headers */
+	lseek(fsym, 0L, 0);
+	myread(fsym, &filhdr, sizeof filhdr);
+
+	if (end_of_text_segp)
+		*end_of_text_segp =
+			bfd_h_get_32 (abfd, filhdr.a.text_start) +
+			bfd_h_get_32 (abfd, filhdr.a.tsize);
 
 	/* Find and read the symbol table header */
-	st_hdrsize = filhdr.f.f_nsyms;
-	st_filptr = filhdr.f.f_symptr;
+	st_hdrsize = bfd_h_get_32 (abfd, filhdr.f.f_nsyms);
+	st_filptr  = bfd_h_get_32 (abfd, filhdr.f.f_symptr);
 	if (st_filptr == 0)
 		return 0;
 
 	lseek(fsym, st_filptr, L_SET);
+	if (st_hdrsize > sizeof (st_hdr))	/* Profanity check */
+		abort();
 	if (read(fsym, &st_hdr, st_hdrsize) != st_hdrsize)
 		goto readerr;
 
@@ -573,21 +590,20 @@ char *fdr_name(name)
 
 
 /* Read in and parse the symtab of the file DESC. INCREMENTAL says
-   whether we are adding to the general symtab or not */
+   whether we are adding to the general symtab or not. 
+   FIXME:  INCREMENTAL is currently always zero, though it should not be. */
 
 static
-read_mips_symtab( desc, incremental)
+read_mips_symtab (abfd, desc, incremental)
+	bfd *abfd;
+	int desc;
+	int incremental;
 {
-	/*
-	 * We get here with DESC pointing to the symtab header. But we need
-	 * other info from the initial headers 
-	 */
-	lseek(desc, 0L, 0);
-	myread(desc, &filhdr, sizeof filhdr);
+	CORE_ADDR end_of_text_seg;
 
-	read_the_mips_symtab(desc);
+	read_the_mips_symtab(abfd, desc, &end_of_text_seg);
 
-	parse_partial_symbols(cur_hdr, incremental);
+	parse_partial_symbols(cur_hdr, incremental, end_of_text_seg);
 	cur_hdr = 0;
 
 	/*
@@ -1528,9 +1544,11 @@ parse_one_file(fh, f_idx, bound)
 
 /* Master parsing procedure. Parses the symtab described by the
    symbolic header HDR.  If INCREMENTAL is true we are called
-   by add-file and must preserve the old symtabs */
+   by add-file and must preserve the old symtabs.  END_OF_TEXT_SEG
+   gives the address just after the text segment for the symtab
+   we are reading.  */
 static
-parse_partial_symbols(hdr, incremental)
+parse_partial_symbols(hdr, incremental, end_of_text_seg)
 	HDRR *hdr;
 {
 	int             f_idx, s_idx, h_max;
@@ -1659,8 +1677,8 @@ parse_partial_symbols(hdr, incremental)
 	}
 
 	/* Mark the last code address, and remember it for later */
-	*prevhigh = END_OF_TEXT_SEGMENT(filhdr);
-	hdr->cbDnOffset = END_OF_TEXT_SEGMENT(filhdr);
+	*prevhigh = end_of_text_seg;
+	hdr->cbDnOffset = end_of_text_seg;
 
 	reorder_psymtabs();
 	free(&fdr_to_pst[-1]);

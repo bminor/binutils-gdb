@@ -78,7 +78,7 @@ print_insn_arg (d, l, stream, pc)
       break;
 
     case 'd':
-      fprintf (stream, "%s", reg_names[((struct op_r_fmt *) l)->rd]);
+      fprintf (stream, "$%s", reg_names[((struct op_r_fmt *) l)->rd]);
       break;
 
     case 'h':

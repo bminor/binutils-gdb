@@ -1,6 +1,18 @@
+Mon Jul  8 19:02:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* core.c (memory_error):  Reword error msg to mislead less.
+
+	* mips-pinsn.c (print_insn_arg 'd'):  Print $ with reg name.
+
+	* mipsread.c (read_mips_symtab, read_the_mips_symtab,
+	parse_partial_symbols): Use newer BFD internals (external_filehdr
+	and external_aouthdr), byte-swap the fields that we care about
+	before using them, and make the file header data local to
+	read_the_mips_symtab rather than global.
+
 Sat Jul  6 01:34:15 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
-	* ns32k-opcode.h (movmw, movmd):  FIx opcodes.  Bug fix
+	* ns32k-opcode.h (movmw, movmd):  Fix opcodes.  Bug fix
 	from Rune Nerg}rd <runene@ifi.uio.no> on 5 Jul 1991.
 
 	* main.c (command_line_input):  Flush stdout and stderr

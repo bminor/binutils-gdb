@@ -275,7 +275,7 @@ memory_error (status, memaddr)
     {
       /* Actually, address between memaddr and memaddr + len
 	 was out of bounds. */
-      error ("Cannot access memory: address 0x%x out of bounds.", memaddr);
+      error ("Cannot access memory at address 0x%x.", memaddr);
     }
   else
     {
