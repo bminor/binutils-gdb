@@ -160,6 +160,8 @@ static unsigned long som_compute_checksum PARAMS ((bfd *));
 static boolean som_prep_headers PARAMS ((bfd *));
 static int som_sizeof_headers PARAMS ((bfd *, boolean));
 static boolean som_write_headers PARAMS ((bfd *));
+static boolean som_build_and_write_symbol_table PARAMS ((bfd *));
+
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1630,6 +1632,159 @@ som_compute_checksum (abfd)
     checksum ^= *(buffer + i);
 
   return checksum;
+}
+
+/* Build and write, in one big chunk, the entire symbol table for
+   this BFD.  */
+
+static boolean
+som_build_and_write_symbol_table (abfd)
+     bfd *abfd;
+{
+  unsigned int num_syms = bfd_get_symcount (abfd);
+  file_ptr symtab_location = obj_som_file_hdr (abfd)->symbol_location;
+  asymbol **bfd_syms = bfd_get_outsymbols (abfd);
+  struct symbol_dictionary_record *som_symtab;
+  int i, symtab_size;
+
+  /* Compute total symbol table size and allocate a chunk of memory
+     to hold the symbol table as we build it.  */
+  symtab_size = num_syms * sizeof (struct symbol_dictionary_record);
+  som_symtab = (struct symbol_dictionary_record *) alloca (symtab_size);
+  bzero (som_symtab, symtab_size);
+
+  /* Walk over each symbol.  */
+  for (i = 0; i < num_syms; i++)
+    {
+      /* This is really an index into the symbol strings table.  
+	 By the time we get here, the index has already been 
+	 computed and stored into the name field in the BFD symbol.  */
+      som_symtab[i].name.n_strx = (int) bfd_syms[i]->name;
+
+      /* The HP SOM linker requires detailed type information about
+	 all symbols (including undefined symbols!).  Unfortunately,
+	 the type specified in an import/export statement does not
+	 always match what the linker wants.  Severe braindamage.  */
+	 
+      /* Section symbols will not have a SOM symbol type assigned to
+	 them yet.  Assign all section symbols type ST_DATA.  */
+      if (bfd_syms[i]->flags & BSF_SECTION_SYM)
+	som_symtab[i].symbol_type = ST_DATA;
+      else
+	{
+	  /* Common symbols must have scope SS_UNSAT and type
+	     ST_STORAGE or the linker will choke.  */
+	  if (bfd_syms[i]->section == &bfd_com_section)
+	    {
+	      som_symtab[i].symbol_scope = SS_UNSAT;
+	      som_symtab[i].symbol_type = ST_STORAGE;
+	    }
+
+	  /* It is possible to have a symbol without an associated
+	     type.  This happens if the user imported the symbol
+	     without a type and the symbol was never defined
+	     locally.  If BSF_FUNCTION is set for this symbol, then
+	     assign it type ST_CODE (the HP linker requires undefined
+	     external functions to have type ST_CODE rather than ST_ENTRY.  */
+	  else if (((*som_symbol_data (bfd_syms[i]))->som_type
+		    == SYMBOL_TYPE_UNKNOWN)
+		   && (bfd_syms[i]->section == &bfd_und_section)
+		   && (bfd_syms[i]->flags & BSF_FUNCTION))
+	    som_symtab[i].symbol_type = ST_CODE;
+
+	  /* Handle function symbols which were defined in this file.
+	     They should have type ST_ENTRY.  Also retrieve the argument
+	     relocation bits from the SOM backend information.  */
+	  else if (((*som_symbol_data (bfd_syms[i]))->som_type
+		    == SYMBOL_TYPE_ENTRY)
+		   || (((*som_symbol_data (bfd_syms[i]))->som_type
+			== SYMBOL_TYPE_CODE)
+		       && (bfd_syms[i]->flags & BSF_FUNCTION))
+		   || (((*som_symbol_data (bfd_syms[i]))->som_type
+			== SYMBOL_TYPE_UNKNOWN)
+		       && (bfd_syms[i]->flags & BSF_FUNCTION)))
+	    {
+	      som_symtab[i].symbol_type = ST_ENTRY;
+	      som_symtab[i].arg_reloc
+		= (*som_symbol_data (bfd_syms[i]))->tc_data.hppa_arg_reloc;
+	    }
+
+	  /* If the type is unknown at this point, it should be
+	     ST_DATA (functions were handled as special cases above).  */
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_UNKNOWN)
+	    som_symtab[i].symbol_type = ST_DATA;
+
+	  /* From now on it's a very simple mapping.  */
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_ABSOLUTE)
+	    som_symtab[i].symbol_type = ST_ABSOLUTE;
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_CODE)
+	    som_symtab[i].symbol_type = ST_CODE;
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_DATA)
+	    som_symtab[i].symbol_type = ST_DATA;
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_MILLICODE)
+	    som_symtab[i].symbol_type = ST_MILLICODE;
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_PLABEL)
+	    som_symtab[i].symbol_type = ST_PLABEL;
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_PRI_PROG)
+	    som_symtab[i].symbol_type = ST_PRI_PROG;
+	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+		   == SYMBOL_TYPE_SEC_PROG)
+	    som_symtab[i].symbol_type = ST_SEC_PROG;
+	}
+	
+      /* Now handle the symbol's scope.  Exported data which is not
+	 in the common section has scope SS_UNIVERSAL.  Note scope
+	 of common symbols was handled earlier */
+      if (bfd_syms[i]->flags & BSF_EXPORT
+	  && bfd_syms[i]->section != &bfd_com_section)
+	som_symtab[i].symbol_scope = SS_UNIVERSAL;
+      /* Any undefined symbol at this point has a scope SS_UNSAT.  */
+      else if (bfd_syms[i]->section == &bfd_und_section)
+	som_symtab[i].symbol_scope = SS_UNSAT;
+      /* Anything else which is not in the common section has scope
+	 SS_LOCAL.  */
+      else if (bfd_syms[i]->section != &bfd_com_section)
+	som_symtab[i].symbol_scope = SS_LOCAL;
+
+      /* Now set the symbol_info field.  It has no real meaning
+	 for undefined or common symbols, but the HP linker will
+	 choke if it's not set to some "reasonable" value.  We
+	 use zero as a reasonable value.  */
+      if (bfd_syms[i]->section == &bfd_com_section
+	  || bfd_syms[i]->section == &bfd_und_section)
+	som_symtab[i].symbol_info = 0;
+      /* For all other symbols, the symbol_info field contains the 
+	 subspace index of the space this symbol is contained in.  */
+      else
+	som_symtab[i].symbol_info
+	  = som_section_data (bfd_syms[i]->section)->subspace_index;
+
+      /* Set the symbol's value.  */
+      som_symtab[i].symbol_value
+	= bfd_syms[i]->value + bfd_syms[i]->section->vma;
+    }
+
+  /* Egad.  Everything is ready, seek to the right location and
+     scribble out the symbol table.  */
+  if (bfd_seek (abfd, symtab_location, SEEK_SET) != 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  if (bfd_write ((PTR) som_symtab, symtab_size, 1, abfd) != symtab_size)
+    {
+      bfd_error  = system_call_error;
+      return false;
+    }
+  return true; 
 }
 
 boolean

@@ -2,6 +2,7 @@ Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_write_headers): New function.
 	(som_prep_headers): New function.
+	(som_build_and_write_symbol_table): New function.
 
 	* som.c (som_sizeof_headers): Add missing prototype.
 	(som_set_arch_mach): Do not abort.
