@@ -1,3 +1,10 @@
+2000-09-15  Kenneth Block  <Kenneth.Block@compaq.com>
+
+	* bfd/elf64-alpha.c (elf64_alpha_relax_with_lituse): ld performs
+	LITUSE relocations incorrectly if -relax is specified on the ld
+	command line and the displacement field of the load or store
+	instruction is non-zero. (Patch by paul.winalski@compaq.com)
+
 2000-09-15  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (hppa_add_stub): Dont set first_init_sec and

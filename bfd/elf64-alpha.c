@@ -1127,12 +1127,13 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 
   /* A little preparation for the loop... */
   disp = symval - info->gp;
-  fits16 = (disp >= -(bfd_signed_vma)0x8000 && disp < 0x8000);
-  fits32 = (disp >= -(bfd_signed_vma)0x80000000 && disp < 0x7fff8000);
 
   for (urel = irel+1, i = 0; i < count; ++i, ++urel)
     {
       unsigned int insn;
+      int insn_disp;
+      bfd_signed_vma xdisp;
+
       insn = bfd_get_32 (info->abfd, info->contents + urel->r_offset);
 
       switch (urel->r_addend)
@@ -1145,14 +1146,23 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 
 	case 1: /* MEM FORMAT */
 	  /* We can always optimize 16-bit displacements.  */
+
+	  /* Extract the displacement from the instruction, sign-extending
+	     it if necessary, then test whether it is within 16 or 32 bits
+	     displacement from GP.  */
+	  insn_disp = insn & 0x0000ffff;
+	  if (insn_disp & 0x00008000)
+	    insn_disp |= 0xffff0000;  /* Negative: sign-extend.  */
+
+	  xdisp = disp + insn_disp;
+	  fits16 = (xdisp >= - (bfd_signed_vma) 0x00008000 && xdisp < 0x00008000);
+	  fits32 = (xdisp >= - (bfd_signed_vma) 0x80000000 && xdisp < 0x7fff8000);
+
 	  if (fits16)
 	    {
-	      /* FIXME: sanity check the insn for mem format with
-		 zero addend.  */
-
-	      /* Take the op code and dest from this insn, take the base 
-		 register from the literal insn.  Leave the offset alone.  */
-	      insn = (insn & 0xffe00000) | (lit_insn & 0x001f0000);
+	      /* Take the op code and dest from this insn, take the base
+		 register from the literal insn.  Leave the offset alone. */
+	      insn = (insn & 0xffe0ffff) | (lit_insn & 0x001f0000);
 	      urel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
 					   R_ALPHA_GPRELLOW);
 	      urel->r_addend = irel->r_addend;
@@ -1165,8 +1175,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 	  /* If all mem+byte, we can optimize 32-bit mem displacements.  */
 	  else if (fits32 && !(flags & ~6))
 	    {
-	      /* FIXME: sanity check that lit insn Ra is mem insn Rb, and
-		 that mem_insn disp is zero.  */
+	      /* FIXME: sanity check that lit insn Ra is mem insn Rb.  */
 
 	      irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
 					   R_ALPHA_GPRELHIGH);
