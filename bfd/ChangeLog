@@ -1,3 +1,11 @@
+Thu May  9 11:00:45 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* ieee.c (do_one, ieee_slurp_section_data): now supports the load
+	multiple reloc command.
+
+	* sunos.c (sunos4_set_section_contents): Made it so that sections
+	are always padded to their alignment size.
+
 Sat May  4 15:49:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* archive.c, bfd.c, coff-code.h, opncls.c, sunos.c, trad-core.c:
