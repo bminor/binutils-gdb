@@ -1,7 +1,24 @@
 
-			Known problems in GDB 5.2
+			Known problems in GDB 5.3
 
 		See also: http://www.gnu.org/software/gdb/bugs/
+
+
+*-*-freebsd*
+---------------
+
+Due to a kernel bug (kern/35175), detaching from an attached process
+will very likely cause the process to be stop or die with a Trace/BPT
+trap.
+
+
+i386-*-freebsd[34]*
+-------------------
+
+There is a bug (bin/41671) in FreeBSD's gcc that causes it to emit bad
+debug information when using the stabs format (which is the default).
+In earlier versions of GDB the effects were rather limited, but
+starting with GDB 5.3 the influence is much more prominent.
 
 
 hppa2.0-hp-hpux10.20
