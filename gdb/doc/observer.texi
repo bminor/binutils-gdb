@@ -82,3 +82,11 @@ The inferior has stopped for real.
 @deftypefun void target_changed (struct target_ops *@var{target})
 The target's register contents have changed.
 @end deftypefun
+
+@deftypefun void inferior_created (struct target_ops *@var{objfile}, int @var{from_tty})
+@value{GDBN} has just connected to an inferior.  For @samp{run},
+@value{GDBN} calls this observer while the inferior is still stopped
+at the entry-point instruction.  For @samp{attach} and @samp{core},
+@value{GDBN} calls this observer immediately after connecting to the
+inferior, and before any information on the inferior has been printed.
+@end deftypefun
