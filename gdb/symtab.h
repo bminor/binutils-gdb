@@ -219,16 +219,6 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    "foo :: bar (int, long)".
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
-/* FIXME: carlton/2003-02-27: This is an unholy mixture of linkage
-   names and natural names.  If you want to test the linkage names
-   with strcmp, do that.  If you want to test the natural names with
-   strcmp_iw, use SYMBOL_MATCHES_NATURAL_NAME.  */
-
-#define DEPRECATED_SYMBOL_MATCHES_NAME(symbol, name)			\
-  (STREQ (DEPRECATED_SYMBOL_NAME (symbol), (name))			\
-   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
-       && strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
-
 /* Macro that tests a symbol for a match against a specified name
    string.  It tests against SYMBOL_NATURAL_NAME, and it ignores
    whitespace and trailing parentheses.  (See strcmp_iw for details

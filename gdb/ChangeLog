@@ -1,5 +1,9 @@
 2003-05-15  Andrew Cagney  <cagney@redhat.com>
 
+	* symtab.h (DEPRECATED_SYMBOL_MATCHES_NAME): Delete macro.
+	* minsyms.c (lookup_minimal_symbol): Inline
+	DEPRECATED_SYMBOL_MATCHES_NAME.  Replace STREQ with strcmp.
+
 	* c-lang.c (c_printstr): Delete "extern inspect_it" declaration.
 	* p-valprint.c (pascal_object_print_value_fields): Ditto.
 	* p-lang.c (pascal_printstr): Ditto.
