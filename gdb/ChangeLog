@@ -1,5 +1,9 @@
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Linux -> GNU/Linux.
+
+2002-02-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh: For for level one methods, disallow a definition
 	when partially multi-arched.  Add comments explaining rationale.
 	* gdbarch.h: Re-generate.

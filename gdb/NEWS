@@ -14,11 +14,10 @@ This can be a significant performance improvement on some
 
 * New command "generate-core-file" (or "gcore").
 
-This new gdb command allows the user to drop a core file of the
-child process state at any time.  So far it's been implemented 
-only for Linux and Solaris, but should be relatively easily 
-ported to other hosts.  Argument is core file name (defaults 
-to core.<pid>).
+This new gdb command allows the user to drop a core file of the child
+process state at any time.  So far it's been implemented only for
+GNU/Linux and Solaris, but should be relatively easily ported to other
+hosts.  Argument is core file name (defaults to core.<pid>).
 
 * New command line option
 
@@ -40,7 +39,7 @@ is found, will then attempt to open it as a corefile.
 * New native configurations
 
 x86 OpenBSD					i[3456]86-*-openbsd*
-AMD x86-64 running Linux			x86_64-*-linux-*
+AMD x86-64 running GNU/Linux			x86_64-*-linux-*
 
 * New targets
 
@@ -105,16 +104,16 @@ Numerous testsuite fixes.
 
 Alpha FreeBSD					alpha*-*-freebsd*
 x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
-MIPS Linux					mips*-*-linux*
+MIPS GNU/Linux					mips*-*-linux*
 MIPS SGI Irix 6.x				mips*-sgi-irix6*
 ia64 AIX					ia64-*-aix*
-s390 and s390x Linux				{s390,s390x}-*-linux*
+s390 and s390x GNU/Linux			{s390,s390x}-*-linux*
 
 * New targets
 
 Motorola 68HC11 and 68HC12			m68hc11-elf
 CRIS						cris-axis
-UltraSparc running Linux			sparc64-*-linux*
+UltraSparc running GNU/Linux			sparc64-*-linux*
 
 * OBSOLETE configurations and files
 
@@ -437,7 +436,7 @@ enabled by configuring with:
 
 HP-UX 10.20					hppa*-*-hpux10.20
 HP-UX 11.x					hppa*-*-hpux11.0*
-M68K Linux					m68*-*-linux*
+M68K GNU/Linux					m68*-*-linux*
 
 * New targets
 
@@ -998,7 +997,7 @@ breakpoints in shared libraries before the executable is run.
 There is a new hardware breakpoint for the watch command for sparclite
 targets.  See gdb/sparclite/hw_breakpoint.note.
 
-Hardware watchpoints are also now supported under Linux.
+Hardware watchpoints are also now supported under GNU/Linux.
  
 * Annotations
 
@@ -1502,7 +1501,7 @@ read after argv processing.
 
 Solaris-2.0 !!!				sparc-sun-solaris2  or  sun4sol2
 
-Linux support				i386-unknown-linux  or  linux
+GNU/Linux support			i386-unknown-linux  or  linux
 
 We are also including code to support the HP/PA running BSD and HPUX.  This
 is almost guaranteed not to work, as we didn't have time to test or build it
