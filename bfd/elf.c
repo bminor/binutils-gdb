@@ -3518,6 +3518,7 @@ elf_sort_sections (arg1, arg2)
 {
   const asection *sec1 = *(const asection **) arg1;
   const asection *sec2 = *(const asection **) arg2;
+  bfd_size_type size1, size2;
 
   /* Sort by LMA first, since this is the address used to
      place the section into a segment.  */
@@ -3535,7 +3536,7 @@ elf_sort_sections (arg1, arg2)
 
   /* Put !SEC_LOAD sections after SEC_LOAD ones.  */
 
-#define TOEND(x) (((x)->flags & SEC_LOAD) == 0)
+#define TOEND(x) (((x)->flags & (SEC_LOAD|SEC_THREAD_LOCAL)) == 0)
 
   if (TOEND (sec1))
     {
@@ -3557,9 +3558,12 @@ elf_sort_sections (arg1, arg2)
   /* Sort by size, to put zero sized sections
      before others at the same address.  */
 
-  if (sec1->_raw_size < sec2->_raw_size)
+  size1 = (sec1->flags & SEC_LOAD) ? sec1->_raw_size : 0;
+  size2 = (sec2->flags & SEC_LOAD) ? sec2->_raw_size : 0;
+
+  if (size1 < size2)
     return -1;
-  if (sec1->_raw_size > sec2->_raw_size)
+  if (size1 > size2)
     return 1;
 
   return sec1->target_index - sec2->target_index;
@@ -3840,9 +3844,15 @@ assign_file_positions_for_segments (abfd)
 	      bfd_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
 
 	      p->p_memsz += adjust;
-	      off += adjust;
-	      voff += adjust;
-	      if ((flags & SEC_LOAD) != 0)
+	      if (p->p_type == PT_LOAD
+		  || (p->p_type == PT_NOTE
+		      && bfd_get_format (abfd) == bfd_core))
+		{
+		  off += adjust;
+		  voff += adjust;
+		}
+	      if ((flags & SEC_LOAD) != 0
+		  || (flags & SEC_THREAD_LOCAL) != 0)
 		p->p_filesz += adjust;
 	    }
 
@@ -3899,7 +3909,9 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
 		  || (flags & SEC_HAS_CONTENTS) != 0)
 		off += sec->_raw_size;
 
-	      if ((flags & SEC_ALLOC) != 0)
+	      if ((flags & SEC_ALLOC) != 0
+		  && ((flags & SEC_LOAD) != 0
+		      || (flags & SEC_THREAD_LOCAL) == 0))
 		voff += sec->_raw_size;
 	    }
 
@@ -3926,6 +3938,9 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
 	    }
 	  else
 	    {
+	      if ((sec->flags & SEC_LOAD) != 0
+		  || (sec->flags & SEC_THREAD_LOCAL) == 0
+		  || p->p_type == PT_TLS)
 	      p->p_memsz += sec->_raw_size;
 
 	      if ((flags & SEC_LOAD) != 0)
@@ -4569,18 +4584,23 @@ copy_private_bfd_data (ibfd, obfd)
   (start + (segment->p_memsz > segment->p_filesz			\
 	    ? segment->p_memsz : segment->p_filesz))
 
+#define SECTION_SIZE(section, segment)					\
+  (((section->flags & (SEC_HAS_CONTENTS | SEC_THREAD_LOCAL))		\
+    != SEC_THREAD_LOCAL || segment->p_type == PT_TLS)			\
+   ? section->_raw_size : 0)
+
   /* Returns TRUE if the given section is contained within
      the given segment.  VMA addresses are compared.  */
 #define IS_CONTAINED_BY_VMA(section, segment)				\
   (section->vma >= segment->p_vaddr					\
-   && (section->vma + section->_raw_size				\
+   && (section->vma + SECTION_SIZE (section, segment)			\
        <= (SEGMENT_END (segment, segment->p_vaddr))))
 
   /* Returns TRUE if the given section is contained within
      the given segment.  LMA addresses are compared.  */
 #define IS_CONTAINED_BY_LMA(section, segment, base)			\
   (section->lma >= base							\
-   && (section->lma + section->_raw_size				\
+   && (section->lma + SECTION_SIZE (section, segment)			\
        <= SEGMENT_END (segment, base)))
 
   /* Special case: corefile "NOTE" section containing regs, prpsinfo etc.  */
@@ -4612,7 +4632,9 @@ copy_private_bfd_data (ibfd, obfd)
           if that is set for the segment and the VMA otherwise,
        2. It is an allocated segment,
        3. There is an output section associated with it,
-       4. The section has not already been allocated to a previous segment.  */
+       4. The section has not already been allocated to a previous segment.
+       5. PT_TLS segment includes only SHF_TLS sections.
+       6. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.  */
 #define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
   ((((segment->p_paddr							\
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
@@ -4620,6 +4642,11 @@ copy_private_bfd_data (ibfd, obfd)
      && (section->flags & SEC_ALLOC) != 0)				\
     || IS_COREFILE_NOTE (segment, section))				\
    && section->output_section != NULL					\
+   && (segment->p_type != PT_TLS					\
+       || (section->flags & SEC_THREAD_LOCAL))				\
+   && (segment->p_type == PT_LOAD					\
+       || segment->p_type == PT_TLS					\
+       || (section->flags & SEC_THREAD_LOCAL) == 0)			\
    && ! section->segment_mark)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
@@ -5097,6 +5124,7 @@ copy_private_bfd_data (ibfd, obfd)
 #endif
 
 #undef SEGMENT_END
+#undef SECTION_SIZE
 #undef IS_CONTAINED_BY_VMA
 #undef IS_CONTAINED_BY_LMA
 #undef IS_COREFILE_NOTE

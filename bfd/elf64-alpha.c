@@ -5137,8 +5137,7 @@ elf64_alpha_finish_dynamic_sections (output_bfd, info)
 	  bfd_put_64 (output_bfd, (bfd_vma) 0, splt->contents + 16);
 	  bfd_put_64 (output_bfd, (bfd_vma) 0, splt->contents + 24);
 
-	  elf_section_data (splt->output_section)->this_hdr.sh_entsize =
-	    PLT_HEADER_SIZE;
+	  elf_section_data (splt->output_section)->this_hdr.sh_entsize = 0;
 	}
     }
 

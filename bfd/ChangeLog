@@ -1,3 +1,19 @@
+2002-12-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (elf_sort_sections): Don't reorder .tbss.
+	(assign_file_positions_for_segments): Only adjust off/voff
+	for increased alignment in PT_LOAD or PT_NOTE segment,
+	but adjust p_filesz for .tbss too.  in PT_LOAD consider
+	.tbss to have zero memory size.
+	(copy_private_bfd_data) [SECTION_SIZE]: Define.
+	[IS_CONTAINED_BY_VMA, IS_CONTAINED_BY_LMA]: Use it.
+	[INCLUDE_SECTION_IN_SEGMENT]: Only put SHF_TLS sections
+	into PT_TLS segment.  Never put SHF_TLS sections in
+	segments other than PT_TLS or PT_LOAD.
+
+	* elf64-alpha.c (elf64_alpha_finish_dynamic_sections): Clear .plt
+	sh_entsize.
+
 2002-12-23  DJ Delorie  <dj@redhat.com>
 
 	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Fix logic reversal.
