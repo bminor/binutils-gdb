@@ -222,5 +222,13 @@ elf_core_file_p (abfd)
   /* Save the entry point from the ELF header. */
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
+  /* Let the backend double check the format and override global
+     information.  */
+  if (ebd->elf_backend_object_p)
+    {
+      if ((*ebd->elf_backend_object_p) (abfd) == false)
+	goto wrong;
+    }
+
   return abfd->xvec;
 }

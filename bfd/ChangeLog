@@ -1,3 +1,8 @@
+2000-04-06  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* elfcore.h (elf_core_file_p): call backend_object_p which
+	thereby gets an opportunity to update the arch/machine type.
+
 2000-04-06  Timothy Wall  <twall@cygnus.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Handle C_STATLAB storage
