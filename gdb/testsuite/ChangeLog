@@ -1,3 +1,10 @@
+Mon Aug  2 12:30:14 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  and Jim Kingdon (kingdon@cygnus.com)
+
+	* gdb.t06/signals.exp: Change xfail from "*-*-*" to be only for
+	NO_SINGLE_STEP machines.  Fix comment about its cause.  Uncomment
+	the `continue' test right after it (also xfailed if NO_SINGLE_STEP).
+
 Fri Jul 30 19:46:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t17/interrupt.exp: Add xfail for hppa.
