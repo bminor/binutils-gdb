@@ -1,3 +1,8 @@
+2003-03-03  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-ia64.c (USE_BRL): Removed.
+	(oor_ip): Removed.
+
 Mon Mar  3 20:48:23 2003  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* elf32-sh.c (sh_elf_howto_tab): Make R_SH_IND12W into an ordinary
