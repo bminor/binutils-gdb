@@ -1,3 +1,11 @@
+Tue Sep  1 15:36:52 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim-config.h: Remove reference to linux kernel header.
+
+Tue Aug 25 12:45:27 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-sockser.c (sockser_addr): Make variable non-static.
+
 Mon Aug 24 11:47:37 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* sim-hw.{c,h} (sim_hw_parse): Return struct hw pointer.

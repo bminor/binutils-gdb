@@ -1,8 +1,43 @@
+start-sanitize-tx3904
+Tue Sep  1 15:39:18 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904sio.c: Include sim-assert.h.
+
+Tue Aug 25 12:49:46 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904sio.c: New file: tx3904 serial I/O module.
+	* configure.in: Add dv-tx3904sio, dv-sockser for tx39 target.
+	Reorganize target-specific sim-hardware checks.
+	* configure: rebuilt.
+	* interp.c (sim_open): For tx39 target boards, set
+	OPERATING_ENVIRONMENT, add tx3904sio devices.
+	* tconfig.in: For tx39 target, set SIM_HANDLES_LMA for loading
+	ROM executables.  Install dv-sockser into sim-modules list.
+	
+	* dv-tx3904irc.c: Compiler warning clean-up.
+	* dv-tx3904tmr.c: Compiler warning clean-up.  Remove particularly
+	frequent hw-trace messages.
+
+end-sanitize-tx3904
+Fri Jul 31 18:14:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr.igen (MulAcc): Identify as a vr4100 specific function.
+
 Sat Jul 25 16:03:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (IGEN_INCLUDE): Add vr.igen.
 
 	* vr.igen: New file.
 	(MAC/MADD16, DMAC/DMADD16): Implement using code from gencode.c.
 	* mips.igen: Define vr4100 model. Include vr.igen.
+start-sanitize-cygnus
+	* vr5400.igen: Move instructions to vr.igen
+	* Makefile.in (IGEN_INCLUDE): Remove vr5400.igen.
+end-sanitize-cygnus
+start-sanitize-vr4320
+	* vr4320.igen: Move instructions to vr.igen.
+	* Makefile.in (IGEN_INCLUDE): Remove vr5320.igen.
+end-sanitize-vr4320
 	
 start-sanitize-r5900
 Tue Jul 14 16:10:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
@@ -730,12 +765,12 @@ Tue Mar 10 10:32:22 1998  Gavin Koch  <gavin@cygnus.com>
 	(dmac): Replaced 99, with LO.
 
 end-sanitize-vr4320
-start-sanitize-vr5400
+start-sanitize-cygnus
 Fri Mar  6 08:30:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mdmx.igen (SHFL.REPA.fmt, SHFL.REPB.fmt): Fix bit fields.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 start-sanitize-vr4320
 Tue Mar  3 11:56:29 1998  Gavin Koch  <gavin@cygnus.com>
 
@@ -821,13 +856,13 @@ Fri Feb 20 17:43:21 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (BC1): Add tracing.
 	
-start-sanitize-vr5400
+start-sanitize-cygnus
 Fri Feb 20 16:27:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mdmx.igen: Tag all functions as requiring either with mdmx or
  	vr5400 processor.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 start-sanitize-r5900
 Fri Feb 20 15:55:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -924,10 +959,10 @@ Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 	* mdmx.igen: Mark all instructions as 64bit/fp specific.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Tue Feb  3 00:10:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (ColdReset): Call PENDING_INVALIDATE.
@@ -986,12 +1021,12 @@ Sun Feb  1 11:15:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	address_translation): Ditto
 	(decode_coproc, cop_lw, cop_ld, cop_sw, cop_sd): Ditto.
 	
-start-sanitize-vr5400
+start-sanitize-cygnus
 	* mdmx.igen (get_scale): Pass CPU_ to semantic_illegal instead of
  	`sd'.
 	(ByteAlign): Use StoreFPR, pass args in correct order.
 	
-end-sanitize-vr5400
+end-sanitize-cygnus
 start-sanitize-r5900
 Sun Feb  1 10:59:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1048,32 +1083,30 @@ Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 	* config.in: Ditto.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Sat Dec 13 15:18:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* vr5400.igen (Low32Bits, High32Bits): Sign extend extracted 32
  	bit values.
 
-end-sanitize-vr5400
-start-sanitize-vr5400
 Fri Dec 12 12:26:07 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in (sim_igen_filter): Multi-sim vr5000 - vr5000 or
 	vr5400 with the vr5000 as the default.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Wed Dec 10 17:10:45 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mips.igen (MSUB): Fix to work like MADD.
 	* gencode.c (MSUB): Similarly.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Tue Dec  9 12:02:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (sim_igen_filter): Multi-sim vr5400 - vr5000 or
  	vr5400.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -1082,7 +1115,7 @@ Wed Nov 26 11:00:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (LWC1): Correct assembler - lwc1 not swc1.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 	* mdmx.igen (value_vr): Correct sim_io_eprintf format argument.
 	(value_cc, store_cc): Implement.
 
@@ -1093,7 +1126,7 @@ start-sanitize-vr5400
 	* mips.igen: Include mdmx.igen.
 	* Makefile.in (IGEN_INCLUDE): Add mdmx.igen.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Sun Nov 23 01:45:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (sim-fpu.h): Include.
@@ -1180,10 +1213,10 @@ Thu Nov  6 16:36:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (IPC): Delete.
 
-	start-sanitize-vr5400
+	start-sanitize-cygnus
 	* vr5400.igen (vr): Add missing cia argument to value_fpr.
 	(do_select): Rename function select.
-	end-sanitize-vr5400
+	end-sanitize-cygnus
 
 	* interp.c (signal_exception, store_word, load_word,
  	address_translation, load_memory, store_memory, cache_op,
@@ -1319,21 +1352,21 @@ Mon Oct 27 17:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	start-sanitize-r5900
 	* r5900.igen: New file. Copy r5900 insns here.
 	end-sanitize-r5900
-	start-sanitize-vr5400
+	start-sanitize-cygnus
 	* vr5400.igen: New file. 
-	end-sanitize-vr5400
+	end-sanitize-cygnus
 	* m16.igen: New file.  Copy mips16 insns here.
 	* mips.igen: From here.
 
 Mon Oct 27 13:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	start-sanitize-vr5400
+	start-sanitize-cygnus
 	* mips.igen: Tag all mipsIV instructions with vr5400 model.
 
 	* configure.in: Add mips64vr5400 target.
 	* configure: Re-generate.
 
-	end-sanitize-vr5400
+	end-sanitize-cygnus
 	* Makefile.in (SIM_NO_OBJ): Define, move SIM_M16_OBJ, SIM_IGEN_OBJ
  	to top.
 	(tmp-igen, tmp-m16): Pass -I srcdir to igen.
