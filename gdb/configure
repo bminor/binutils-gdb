@@ -3066,11 +3066,36 @@ files="${files} config/nm-empty.h"
 links="${links} nm.h"
 fi
 # start-sanitize-gdbtk
+echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
+echo "configure:3071: checking whether ln -s works" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  rm -f conftestdata
+if ln -s X conftestdata 2>/dev/null
+then
+  rm -f conftestdata
+  ac_cv_prog_LN_S="ln -s"
+else
+  ac_cv_prog_LN_S=ln
+fi
+fi
+LN_S="$ac_cv_prog_LN_S"
+if test "$ac_cv_prog_LN_S" = "ln -s"; then
+  echo "$ac_t""yes" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
 
 # Make it possible to use the GUI without doing a full install
-if test "${enable_gdbtk}" = "yes" -a ! -f gdbtk.tcl ; then
-files="${files} gdbtk.tcl"
-links="${links} gdbtk.tcl"
+if test "${enable_gdbtk}" = "yes" -a ! -d gdbtcl ; then
+  if test "$LN_S" = "ln -s" -a ! -f gdbtcl ; then
+  echo linking $srcdir/gdbtcl to gdbtcl
+  $LN_S $srcdir/gdbtcl gdbtcl
+  else
+  echo Warning: Unable to link $srcdir/gdbtcl to gdbtcl.  You will need to do a
+  echo "         " make install before you are able to run the GUI.
+  fi
 fi
 # end-sanitize-gdbtk
 
@@ -3272,6 +3297,7 @@ s%@host_makefile_frag@%%g
 /@target_makefile_frag@/r $target_makefile_frag
 s%@target_makefile_frag@%%g
 s%@frags@%$frags%g
+s%@LN_S@%$LN_S%g
 s%@subdirs@%$subdirs%g
 
 CEOF

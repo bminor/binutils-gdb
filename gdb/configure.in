@@ -449,11 +449,16 @@ files="${files} config/nm-empty.h"
 links="${links} nm.h"
 fi
 # start-sanitize-gdbtk
-
+AC_PROG_LN_S
 # Make it possible to use the GUI without doing a full install
-if test "${enable_gdbtk}" = "yes" -a ! -f gdbtk.tcl ; then
-files="${files} gdbtk.tcl"
-links="${links} gdbtk.tcl"
+if test "${enable_gdbtk}" = "yes" -a ! -d gdbtcl ; then
+  if test "$LN_S" = "ln -s" -a ! -f gdbtcl ; then
+  echo linking $srcdir/gdbtcl to gdbtcl
+  $LN_S $srcdir/gdbtcl gdbtcl
+  else
+  echo Warning: Unable to link $srcdir/gdbtcl to gdbtcl.  You will need to do a
+  echo "         " make install before you are able to run the GUI.
+  fi
 fi
 # end-sanitize-gdbtk
 
