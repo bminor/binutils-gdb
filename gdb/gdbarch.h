@@ -20,6 +20,177 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+/* start-sanitize-carp start-sanitize-vr4xxx */
+
+#ifndef GDB_MULTI_ARCH
+#define GDB_MULTI_ARCH 0
+#endif
+
+extern struct gdbarch *current_gdbarch;
+
+
+/* When GDB_MULTI_ARCH override any earlier definitions of the
+   below. */
+
+extern const struct bfd_arch_info *gdbarch_bfd_arch_info PARAMS ((struct gdbarch*));
+#if GDB_MULTI_ARCH
+#undef TARGET_ARCHITECTURE
+#define TARGET_ARCHITECTURE (gdbarch_bfd_arch_info (current_gdbarch))
+#endif
+
+extern int gdbarch_byte_order PARAMS ((struct gdbarch*));
+#if GDB_MULTI_ARCH
+#undef TARGET_BYTE_ORDER
+#define TARGET_BYTE_ORDER (gdbarch_byte_order (current_gdbarch))
+#endif
+
+extern int gdbarch_long_bit  PARAMS ((struct gdbarch*));
+extern void set_gdbarch_long_bit PARAMS ((struct gdbarch*, int));
+#if GDB_MULTI_ARCH
+#undef TARGET_LONG_BIT
+#define TARGET_LONG_BIT (gdbarch_long_bit (current_gdbarch))
+#endif
+
+extern int gdbarch_long_long_bit  PARAMS ((struct gdbarch*));
+extern void set_gdbarch_long_long_bit PARAMS ((struct gdbarch*, int));
+#if GDB_MULTI_ARCH
+#undef TARGET_LONG_LONG_BIT
+#define TARGET_LONG_LONG_BIT (gdbarch_long_long_bit (current_gdbarch))
+#endif
+
+extern int gdbarch_ptr_bit  PARAMS ((struct gdbarch*));
+extern void set_gdbarch_ptr_bit PARAMS ((struct gdbarch*, int));
+#if GDB_MULTI_ARCH
+#undef TARGET_PTR_BIT
+#define TARGET_PTR_BIT (gdbarch_ptr_bit (current_gdbarch))
+#endif
+
+extern struct gdbarch_tdep *gdbarch_tdep PARAMS ((struct gdbarch*));
+
+
+/* Mechanism for co-ordinating the selection of a specific
+   architecture.
+
+   GDB targets (*-tdep.c) can register an interest in a specific
+   architecture.  Other GDB components can register a need to maintain
+   per-architecture data.
+
+   The mechanisms below ensures that only a loose connection between
+   the set-architecture command and the various GDB components exists.
+   Each component can independantly register their need to maintain
+   architecture specific data with gdbarch.
+
+   Pragmatics:
+
+   Previously, a single TARGET_ARCHITECTURE_HOOK was provided.  It
+   didn't scale.
+
+   The more traditional mega-struct containing architecture specific
+   data for all the various GDB components was also considered.  Since
+   GDB is built from a variable number of (fairly independant)
+   components this global aproach was considered non-applicable. */
+
+
+/* Register a new architectural family with GDB.
+
+   Register support for the specified architecture with GDB.  When
+   ever gdbarch determines that this architecture has been selected,
+   the specifed INIT function is called.
+
+   INIT takes two parameters: INFO which contains the information
+   available to gdbarch about the (possibly new) architecture; ARCHES
+   which is a list of the previously created ``struct gdbarch'' for
+   this architecture.  Fields within the structure INFO which have no
+   previous value are set to defaults: BFD_ARCHITECTURE -
+   bfd_arch_unknown; BFD_ARCH_INFO - NULL; BYTE_ORDER - 0; ABFD -
+   NULL;
+
+   The INIT function shall return any of: NULL indicating that it
+   doesn't reconize the selected architecture; an existing ``struct
+   gdbarch'' from the ARCHES list (indicating that the new
+   architecture is just a synonym for an earlier architecture); create
+   and then return a new ``struct gdbarch'' for this new architecture
+   (using gdbarch_alloc()).  */
+
+struct gdbarch_list
+{
+  struct gdbarch *gdbarch;
+  struct gdbarch_list *next;
+};
+
+struct gdbarch_info
+{
+  enum bfd_architecture bfd_architecture;
+  const struct bfd_arch_info *bfd_arch_info;
+  int byte_order;
+  bfd *abfd;
+};
+
+typedef struct gdbarch *(gdbarch_init_ftype) PARAMS ((const struct gdbarch_info *info, struct gdbarch_list *arches));
+
+extern void register_gdbarch_init PARAMS ((enum bfd_architecture, gdbarch_init_ftype *));
+
+/* Helper function.  Search ARCHES for a gdbarch that matches
+   information provided by INFO. */
+
+extern struct gdbarch_list *gdbarch_list_lookup_by_info PARAMS ((struct gdbarch_list *arches,  const struct gdbarch_info *info));
+
+/* Helper function.  Create a preliminary ``struct gdbarch''.  Perform
+   basic initialization using values from the INFO structure. */
+
+extern struct gdbarch *gdbarch_alloc PARAMS ((const struct gdbarch_info *, struct gdbarch_tdep *));
+
+/* Helper function. Force the updating of the current architecture.
+   Used by targets that have added their own target specific
+   architecture manipulation commands. */
+
+extern int gdbarch_update PARAMS ((struct gdbarch_info));
+
+
+
+/* Register per-architecture data-pointer.
+
+   Reserve space for a per-architecture data-pointer.  An identifier
+   for the reserved data-pointer is returned.  That identifer should
+   be saved in a local static.
+
+   When a new architecture is selected, INIT() is called.  When a
+   previous architecture is re-selected, the per-architecture
+   data-pointer for that previous architecture is restored (INIT() is
+   not called).
+
+   INIT() shall return the initial value for the per-architecture
+   data-pointer for the current architecture.
+
+   Multiple registrarants for any architecture are allowed (and
+   strongly encouraged).  */
+
+typedef void *(gdbarch_data_ftype) PARAMS ((void));
+extern struct gdbarch_data *register_gdbarch_data PARAMS ((gdbarch_data_ftype *init));
+
+
+/* Return the value of the per-architecture data-pointer for the
+   current architecture. */
+
+extern void *gdbarch_data PARAMS ((struct gdbarch_data*));
+
+
+/* Register per-architecture memory region.
+
+   For legacy code, provide a memory-region swap mechanism.
+   Per-architecture memory blocks are created, these being swapped
+   whenever the architecture is changed.  For a new architecture, the
+   memory region is initialized with zero (0) and the INIT function is
+   called.
+
+   Memory regions are swapped / initialized in the order that they are
+   registered.  NULL DATA and/or INIT values can be specified. */
+
+typedef void (gdbarch_swap_ftype) PARAMS ((void));
+extern void register_gdbarch_swap PARAMS ((void *data, unsigned long size, gdbarch_swap_ftype *init));
+
+
+/* end-sanitize-carp end-sanitize-vr4xxx */
 
 /* The target-system-dependant byte order is dynamic */
 

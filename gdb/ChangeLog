@@ -1,3 +1,41 @@
+start-sanitize-carp start-sanitize-vr4xxx
+Thu Dec 17 01:58:16 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbarch.h (GDB_MULTI_ARCH): New macro, default to zero.
+	(current_gdbarch): Current architecture pointer.
+	* gdbarch.c (struct gdbarch): Define.
+
+	* gdbarch.h (TARGET_ARCHITECTURE, TARGET_BYTE_ORDER,
+ 	TARGET_LONG_BIT, TARGET_LONG_LONG_BIT, TARGET_PTR_BIT): When
+ 	multi-arch force definition.
+	* gdbarch.h, gdbarch.c (gdbarch_tdep, gdbarch_bfd_arch_info,
+ 	gdbarch_byte_order, {set,}gdbarch_long_bit,
+ 	{set,}gdbarch_long_long_bit, {set,}gdbarch_ptr_bit): Corresponding
+ 	functions.
+
+	* gdbarch.h (struct gdbarch_list, struct gdbarch_info,
+ 	gdbarch_init_ftype), gdbarch.c (register_gdbarch_init): Mechanism
+ 	for registering an architecture with GDB.
+	(gdbarch_list_lookup_by_info, gdbarch_alloc, gdbarch_update,
+ 	verify_gdbarch): Support functions.
+
+	* gdbarch.h (gdbarch_data_ftype), gdbarch.c
+ 	(register_gdbarch_data, gdbarch_data): Mechanism for maintaining
+ 	per-architecture pointers.
+	(init_gdbarch_data): Support functions.
+	
+	* gdbarch.h (gdbarch_swap_ftype), gdbarch.c
+ 	(register_gdbarch_swap): Ditto for swapped memory regions.
+	(init_gdbarch_swap, swapout_gdbarch_swap, swapin_gdbarch_swap):
+ 	Support functions.
+	
+	* gdbarch.c (set_endian_big, set_endian_little, set_architecture,
+ 	info_architecture, set_gdbarch_from_file): Hook in multi-arch
+ 	code by calling gdbarch_update.
+	(default_gdbarch): Default multi-arch vector.  Use host's type
+ 	system for values.
+	
+end-sanitize-carp end-sanitize-vr4xxx
 Thu Dec 17 01:34:36 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbtypes.c (build_gdbtypes): New function.
