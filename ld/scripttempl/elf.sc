@@ -187,6 +187,7 @@ SECTIONS
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
+  ${OTHER_PLT_RELOC_SECTIONS}
 
   .init        ${RELOCATING-0} : 
   { 

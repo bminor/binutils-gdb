@@ -1,3 +1,7 @@
+2000-02-16  Richard Henderson  <rth@cygnus.com>
+
+	* scripttempl/elf.sc: Place OTHER_PLT_RELOC_SECTION.
+
 2000-02-16  Timothy Wall  <twall@cygnus.com>
 
 	* mri.c (mri_draw_tree): Add default LMA region argument to call
