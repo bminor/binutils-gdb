@@ -550,7 +550,7 @@ parse_args (argc, argv)
 	  --optind;
 	  optc = getopt_long (argc, argv, shortopts, really_longopts, &longind);
 	}
-  
+
       if (optc == -1)
 	break;
 

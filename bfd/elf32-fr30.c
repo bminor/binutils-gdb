@@ -236,7 +236,6 @@ static reloc_howto_type fr30_elf_howto_table [] =
          0,                     /* src_mask */
          0,                     /* dst_mask */
          false),                /* pcrel_offset */
-
 };
 
 /* Utility to actually perform an R_FR30_20 reloc.  */

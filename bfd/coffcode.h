@@ -4926,7 +4926,6 @@ coff_canonicalize_reloc (abfd, section, relptr, symbols)
 
       for (; count++ < section->reloc_count;)
 	*relptr++ = tblptr++;
-
     }
   *relptr = 0;
   return section->reloc_count;

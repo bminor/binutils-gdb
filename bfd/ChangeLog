@@ -1,5 +1,8 @@
 2001-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-fr30.c (fr30_elf_howto_table): Remove spurious blank
+	line.
+
 	* coffcode.h (coff_canonicalize_reloc): Remove spurious blank
 	line.
 
