@@ -198,7 +198,7 @@ h8300_coff_link_hash_table_create (abfd)
    the code in reloc.c assumes that we can manipulate the targets of
    the pcrel branches.  This isn't so, since the H8/300 can do relaxing, 
    which means that the gap after the instruction may not be enough to
-   contain the offset required for the branch, so we have to use the only
+   contain the offset required for the branch, so we have to use only
    the addend until the final link.  */
 
 static bfd_reloc_status_type
@@ -215,6 +215,8 @@ special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
 
+  /* Adjust the reloc address to that in the output section.  */
+  reloc_entry->address += input_section->output_offset;
   return bfd_reloc_ok;
 }
 
@@ -888,6 +890,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  /* Write it.  */
 	  bfd_put_8 (abfd, tmp, data + dst_address - 2);
 	  break;
+
 	case 0x5c:
 	  /* bsr:16 -> bsr:8 */
 	  bfd_put_8 (abfd, 0x55, data + dst_address - 2);

@@ -1,3 +1,7 @@
+2000-11-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* coff-h8300.c (special): Adjust reloc address.
+
 2000-11-06  Steve Ellcey <sje@cup.hp.com>
 
 	* archures.c (bfd_mach_ia64_elf64, bfd_mach_ia64_elf32): Add defines
