@@ -126,12 +126,10 @@ count   .ASSIGNA  \&count + 1
         .AENDW
         .ENDM
 
-        saveregs from=9
-        saveregs 1,5
+        saveregs from=12
 
-        .RADIX  Q
-bar:    mov     #H'dead+12,r0
-foo     .SDATAC "hello"<12>
+bar:    mov     #H'dead+10,r0
+foo     .SDATAC "hello"<10>
         .END
 @end example
 @end cartouche
@@ -141,19 +139,10 @@ generates this assembly program:
 
 @cartouche
 @example
-        ; save r9..r14
-        mov     r9,@@-sp
-        mov     r10,@@-sp
-        mov     r11,@@-sp
+        ; save r12..r14
         mov     r12,@@-sp
         mov     r13,@@-sp
         mov     r14,@@-sp
-        ; save r1..r5
-        mov     r1,@@-sp
-        mov     r2,@@-sp
-        mov     r3,@@-sp
-        mov     r4,@@-sp
-        mov     r5,@@-sp
 
 bar:    mov     #57005+10,r0
 foo:    .byte   6,104,101,108,108,111,10
@@ -169,7 +158,7 @@ its output.  In Unix and its ilk, you can do this, for example:
 
 @c FIXME! GASP filename suffix convention?
 @example
-$ gasp prog.sp | as -o prog.o
+$ gasp prog.asm | as -o prog.o
 @end example
 
 Naturally, there are also a few command-line options to allow you to
@@ -177,7 +166,8 @@ request variations on this basic theme.  Here is the full set of
 possibilities for the @sc{gasp} command line.
 
 @example
-gasp  [ -c ]  [ -o @var{outfile} ]  [ -p ]  [ -s ]  [ -u ]  @var{infile} @dots{}
+gasp  [ -c ]  [ -o @var{outfile} ]  [ -p ]  [ -s ]  [ -u ]  
+      @var{infile} @dots{}
 @end example
 
 @c FIXME!! Aren't all GNU programs supposed to have a -V or --version
@@ -340,7 +330,7 @@ same block of assembly code.
 @itemx .AENDR
 If you simply need to repeat the same block of assembly over and over a
 fixed number of times, sandwich one instance of the repeated block
-between these @code{.AREPEAT} and @code{.AENDR}.  Specify the number of
+between @code{.AREPEAT} and @code{.AENDR}.  Specify the number of
 copies as @var{aexp} (which must be an absolute expression).  For
 example, this repeats two assembly statements three times in succession:
 
@@ -964,4 +954,6 @@ extending for @var{len} bytes.
 @unnumbered Index
 
 @printindex cp
+
+@contents
 @bye
