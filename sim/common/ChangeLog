@@ -1,4 +1,31 @@
+Tue Oct 21 10:42:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-profile.h (PROFILE_PC_BUCKET_SIZE): Treat a shift of zero as
+ 	a bucket size of zero.
+
+	* sim-profile.c (OPTION_PROFILE_PC_GRANULARITY,
+ 	OPTION_PROFILE_PC): Define.
+	(profile_option_handler): Add support for --profile-pc and
+ 	--profile-pc-granularity options.
+	(profile_pc_init): When possible, compute nr buckets from bucket
+ 	size.
+
+	* sim-profile.c (profile_pc_init): Align the profile-pc end
+ 	address with the profile-pc bucket size.
+
+	* sim-profile.h (PROFILE_PC_NR_BUCKETS): Rename PROFILE_PC_SIZE to
+ 	something less ambiguous.
+	(PROFILE_PC_BUCKET_SIZE): Ditto for PROFILE_PC_SAMPLE_SIZE.
+
+	* sim-profile.c (profile_pc_cleanup): New function. Move
+ 	profile_pc_uninstall code to here.
+	(profile_pc_uninstall): Call.
+	(profile_pc_init): Call.
+
 Mon Oct 20 17:23:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-profile.c (profile_print_pc): Dump pc profile to dmon.out
+ 	file using BSD gprof format.
 
 	* sim-bits.h (LSBIT, MSBIT, BIT): Force result to type
  	unsigned_word.

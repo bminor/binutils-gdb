@@ -30,7 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 /* hobble some common features for moment */
-#define WITH_PROFILE 0
 #define WITH_TRACE 0
 #define WITH_WATCHPOINTS 1
 
@@ -324,7 +323,6 @@ struct _sim_cpu {
 #define simHALTEX       (1 << 2)  /* 0 = run; 1 = halt on exception */
 #define simHALTIN       (1 << 3)  /* 0 = run; 1 = halt on interrupt */
 #define simTRACE        (1 << 8)  /* 0 = do nothing; 1 = trace address activity */
-#define simPROFILE      (1 << 9)  /* 0 = do nothing; 1 = gather profiling samples */
 #define simPCOC0        (1 << 17) /* COC[1] from current */
 #define simPCOC1        (1 << 18) /* COC[1] from previous */
 #define simDELAYSLOT    (1 << 24) /* 0 = do nothing; 1 = delay slot entry exists */

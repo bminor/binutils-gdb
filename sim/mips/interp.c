@@ -31,13 +31,11 @@ code on the hardware.
 
 */
 
-/* The TRACE and PROFILE manifests enable the provision of extra
-   features. If they are not defined then a simpler (quicker)
-   simulator is constructed without the required run-time checks,
-   etc. */
+/* The TRACE manifests enable the provision of extra features. If they
+   are not defined then a simpler (quicker) simulator is constructed
+   without the required run-time checks, etc. */
 #if 1 /* 0 to allow user build selection, 1 to force inclusion */
 #define TRACE (1)
-#define PROFILE (1)
 #endif
 
 #include "bfd.h"
@@ -114,22 +112,10 @@ static void dotrace PARAMS((SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,
 static void ColdReset PARAMS((SIM_DESC sd));
 static long getnum PARAMS((SIM_DESC sd, char *value));
 static unsigned int power2 PARAMS((unsigned int value));
-static void mips_set_profile PARAMS((SIM_DESC sd, int n));
-static void mips_set_profile_size PARAMS((SIM_DESC sd, int n));
 static void mips_size PARAMS((SIM_DESC sd, int n));
 
 /*---------------------------------------------------------------------------*/
 
-
-
-#if !defined(FASTSIM) || defined(PROFILE)
-/* At the moment these values will be the same, since we do not have
-   access to the pipeline cycle count information from the simulator
-   engine. */
-/* FIXME: These will be replaced by ../common/sim-profile.h */
-static unsigned int instruction_fetches = 0;
-static unsigned int instruction_fetch_overflow = 0;
-#endif
 
 
 #define DELAYSLOT()     {\
@@ -174,16 +160,6 @@ static char *tracefile = "trace.din"; /* default filename for trace log */
 static FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
-
-#if defined(PROFILE)
-static unsigned profile_frequency = 256;
-static unsigned profile_nsamples = (128 << 10);
-static unsigned short *profile_hist = NULL;
-static ut_reg profile_minpc;
-static ut_reg profile_maxpc;
-static int profile_shift = 0; /* address shift amount */
-#endif /* PROFILE */
-
 
 static SIM_RC
 mips_option_handler (sd, opt, arg)
@@ -254,29 +230,6 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 #endif /* TRACE */
       return SIM_RC_OK;
 
-    case 'p':
-#if defined(PROFILE)
-      STATE |= simPROFILE;
-      return SIM_RC_OK;
-#else /* !PROFILE */
-      fprintf(stderr,"\
-Simulator constructed without profiling support (for performance).\n\
-Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
-      return SIM_RC_FAIL;
-#endif /* !PROFILE */
-
-    case 'x':
-#if defined(PROFILE)
-      profile_nsamples = (unsigned)getnum(sd, optarg);
-#endif /* PROFILE */
-      return SIM_RC_OK;
-
-    case 'y':
-#if defined(PROFILE)
-      mips_set_profile(sd, (int)getnum(sd, optarg));
-#endif /* PROFILE */
-      return SIM_RC_OK;
-
     }
 
   return SIM_RC_OK;
@@ -290,20 +243,11 @@ static const OPTION mips_options[] =
   { {"name",     required_argument, NULL,'n'},
       'n', "MODEL", "Select arch model",
       mips_option_handler },
-  { {"profile",  optional_argument, NULL,'p'},
-      'p', "on|off", "Enable profiling",
-      mips_option_handler },
   { {"trace",    optional_argument, NULL,'t'},
       't', "on|off", "Enable tracing",
       mips_option_handler },
   { {"tracefile",required_argument, NULL,'z'},
       'z', "FILE", "Write trace to file",
-      mips_option_handler },
-  { {"frequency",required_argument, NULL,'y'},
-      'y', "FREQ", "Profile frequency",
-      mips_option_handler },
-  { {"samples",  required_argument, NULL,'x'},
-      'x', "SIZE", "Profile sample size",
       mips_option_handler },
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
@@ -580,61 +524,6 @@ open_trace(sd)
 }
 #endif /* TRACE */
 
-/* For the profile writing, we write the data in the host
-   endianness. This unfortunately means we are assuming that the
-   profile file we create is processed on the same host executing the
-   simulator. The gmon.out file format should either have an explicit
-   endianness, or a method of encoding the endianness in the file
-   header. */
-static int
-writeout32(sd,fh,val)
-     SIM_DESC sd;
-     FILE *fh;
-     unsigned int val;
-{
-  char buff[4];
-  int res = 1;
-
-  if (CURRENT_HOST_BYTE_ORDER == BIG_ENDIAN) {
-    buff[3] = ((val >>  0) & 0xFF);
-    buff[2] = ((val >>  8) & 0xFF);
-    buff[1] = ((val >> 16) & 0xFF);
-    buff[0] = ((val >> 24) & 0xFF);
-  } else {
-    buff[0] = ((val >>  0) & 0xFF);
-    buff[1] = ((val >>  8) & 0xFF);
-    buff[2] = ((val >> 16) & 0xFF);
-    buff[3] = ((val >> 24) & 0xFF);
-  }
-  if (fwrite(buff,4,1,fh) != 1) {
-    sim_io_eprintf(sd,"Failed to write 4bytes to the profile file\n");
-    res = 0;
-  }
-  return(res);
-}
-
-static int
-writeout16(sd,fh,val)
-     SIM_DESC sd;
-     FILE *fh;
-     unsigned short val;
-{
-  char buff[2];
-  int res = 1;
-  if (CURRENT_HOST_BYTE_ORDER == BIG_ENDIAN) {
-    buff[1] = ((val >>  0) & 0xFF);
-    buff[0] = ((val >>  8) & 0xFF);
-  } else {
-    buff[0] = ((val >>  0) & 0xFF);
-    buff[1] = ((val >>  8) & 0xFF);
-  }
-  if (fwrite(buff,2,1,fh) != 1) {
-    sim_io_eprintf(sd,"Failed to write 2bytes to the profile file\n");
-    res = 0;
-  }
-  return(res);
-}
-
 void
 sim_close (sd, quitting)
      SIM_DESC sd;
@@ -649,42 +538,6 @@ sim_close (sd, quitting)
   /* Ensure that any resources allocated through the callback
      mechanism are released: */
   sim_io_shutdown (sd);
-
-#if defined(PROFILE)
-  if ((STATE & simPROFILE) && (profile_hist != NULL)) {
-    FILE *pf = fopen("gmon.out","wb");
-    unsigned loop;
-
-    if (pf == NULL)
-     sim_io_eprintf(sd,"Failed to open \"gmon.out\" profile file\n");
-    else {
-      int ok;
-#ifdef DEBUG
-      printf("DBG: minpc = 0x%s\n",pr_addr(profile_minpc));
-      printf("DBG: maxpc = 0x%s\n",pr_addr(profile_maxpc));
-#endif /* DEBUG */
-      ok = writeout32(pf,(unsigned int)profile_minpc);
-      if (ok)
-       ok = writeout32(pf,(unsigned int)profile_maxpc);
-      if (ok)
-       ok = writeout32(pf,(profile_nsamples * 2) + 12); /* size of sample buffer (+ header) */
-#ifdef DEBUG
-      printf("DBG: nsamples = %d (size = 0x%08X)\n",profile_nsamples,((profile_nsamples * 2) + 12));
-#endif /* DEBUG */
-      for (loop = 0; (ok && (loop < profile_nsamples)); loop++) {
-        ok = writeout16(pf,profile_hist[loop]);
-        if (!ok)
-         break;
-      }
-
-      fclose(pf);
-    }
-
-    free(profile_hist);
-    profile_hist = NULL;
-    STATE &= ~simPROFILE;
-  }
-#endif /* PROFILE */
 
 #if defined(TRACE)
   if (tracefh != NULL && tracefh != stderr)
@@ -1085,56 +938,6 @@ sim_do_command (sd,cmd)
    world. */
 
 
-/* The profiling format is described in the "gmon_out.h" header file */
-static void
-mips_set_profile (sd,n)
-     SIM_DESC sd;
-     int n;
-{
-#if defined(PROFILE)
-  profile_frequency = n;
-  STATE |= simPROFILE;
-#endif /* PROFILE */
-  return;
-}
-
-static void
-mips_set_profile_size (sd,n)
-     SIM_DESC sd;
-     int n;
-{
-#if defined(PROFILE)
-  if (STATE & simPROFILE) {
-    int bsize;
-
-    /* Since we KNOW that the memory banks are a power-of-2 in size: */
-    profile_nsamples = power2(n);
-    profile_minpc = STATE_MEM_BASE (sd);
-    profile_maxpc = (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd));
-
-    /* Just in-case we are sampling every address: NOTE: The shift
-       right of 2 is because we only have word-aligned PC addresses. */
-    if (profile_nsamples > (STATE_MEM_SIZE (sd) >> 2))
-     profile_nsamples = (STATE_MEM_SIZE (sd) >> 2);
-
-    /* Since we are dealing with power-of-2 values: */
-    profile_shift = (((STATE_MEM_SIZE (sd) >> 2) / profile_nsamples) - 1);
-
-    bsize = (profile_nsamples * sizeof(unsigned short));
-    if (profile_hist == NULL)
-     profile_hist = (unsigned short *)calloc(64,(bsize / 64));
-    else
-     profile_hist = (unsigned short *)realloc(profile_hist,bsize);
-    if (profile_hist == NULL) {
-      sim_io_eprintf(sd,"Failed to allocate VM for profiling buffer (0x%08X bytes)\n",bsize);
-      STATE &= ~simPROFILE;
-    }
-  }
-#endif /* PROFILE */
-
-  return;
-}
-
 static void
 mips_size(sd, newsize)
      SIM_DESC sd;
@@ -1159,12 +962,7 @@ mips_size(sd, newsize)
   } else {
     STATE_MEM_SIZE (sd) = (unsigned)newsize;
     STATE_MEMORY (sd) = new;
-#if defined(PROFILE)
-    /* Ensure that we sample across the new memory range */
-    mips_set_profile_size(sd, profile_nsamples);
-#endif /* PROFILE */
   }
-
   return;
 }
 
@@ -3843,24 +3641,6 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 #ifdef DEBUG
     sim_io_printf(sd,"DBG: fetched 0x%08X from PC = 0x%s\n",instruction,pr_addr(PC));
 #endif /* DEBUG */
-
-#if !defined(FASTSIM) || defined(PROFILE)
-    instruction_fetches++;
-    /* Since we increment above, the value should only ever be zero if
-       we have just overflowed: */
-    if (instruction_fetches == 0)
-      instruction_fetch_overflow++;
-#if defined(PROFILE)
-    if ((STATE & simPROFILE) && ((instruction_fetches % profile_frequency) == 0) && profile_hist) {
-      unsigned n = ((unsigned int)(PC - profile_minpc) >> (profile_shift + 2));
-      if (n < profile_nsamples) {
-        /* NOTE: The counts for the profiling bins are only 16bits wide */
-        if (profile_hist[n] != USHRT_MAX)
-         (profile_hist[n])++;
-      }
-    }
-#endif /* PROFILE */
-#endif /* !FASTSIM && PROFILE */
 
     IPC = PC; /* copy PC for this instruction */
     /* This is required by exception processing, to ensure that we can

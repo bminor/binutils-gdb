@@ -1,5 +1,20 @@
 Mon Oct 20 13:31:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* Makefile.in (SIM_OBJS): Add sim-profile.o module.
+
+	* sim-main.h (WITH_PROFILE): Do not define, defined in
+ 	common/sim-config.h.  Use sim-profile module.
+	(simPROFILE): Delete defintion.
+
+	* interp.c (PROFILE): Delete definition.
+	(mips_option_handler): Delete 'p', 'y' and 'x' profile options.
+	(sim_close): Delete code writing profile histogram.
+	(mips_set_profile, mips_set_profile_size, writeout16, writeout32):
+ 	Delete.
+	(sim_engine_run): Delete code profiling the PC.
+
+Mon Oct 20 13:31:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* sim-main.h (SIGNEXTEND): Force type of result to unsigned_word.
 
 	* interp.c (sim_monitor): Make register pointers of type

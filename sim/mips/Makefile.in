@@ -21,6 +21,7 @@ SIM_OBJS = interp.o \
 	sim-module.o \
 	sim-trace.o \
 	sim-options.o \
+	sim-profile.o \
 	sim-core.o \
 	sim-watch.o
 
