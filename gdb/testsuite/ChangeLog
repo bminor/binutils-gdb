@@ -1,3 +1,8 @@
+Thu Oct 21 08:26:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t09/corefile.exp: At end of test, use "core" command with
+	no arguments.
+
 Wed Oct 20 08:56:02 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* gdb.t{01 02 03 04 05 06 07 08 09 10 11 12 13 15 16
