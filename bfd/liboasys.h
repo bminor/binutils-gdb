@@ -1,6 +1,7 @@
 
 
-typedef struct {
+typedef struct 
+{
   asymbol symbol;
 } oasys_symbol_type;
 
@@ -13,16 +14,17 @@ typedef struct oasys_reloc_struct {
 
 #define oasys_symbol(x) ((oasys_symbol_type *)(x))
 #define oasys_per_section(x) ((oasys_per_section_type *)(x->used_by_bfd))
+
 typedef struct oasys_per_section_struct
 {
   asection *section;
   bfd_byte *data;
   bfd_vma offset;
-
+  boolean had_vma;
   oasys_reloc_type **reloc_tail_ptr;
   bfd_vma pc;
-  /* For output */
-  struct obstack reloc_obstack;
+
+
   file_ptr current_pos;
   unsigned int current_byte;
   boolean initialized;
@@ -55,7 +57,7 @@ typedef struct {
 } oasys_ar_data_type;
 
 typedef struct {
-
+  struct obstack oasys_obstack;
   char *strings;
   asymbol *symbols;
   unsigned int symbol_string_length;
@@ -65,6 +67,8 @@ typedef struct {
 
 #define oasys_data(abfd) ((oasys_data_type *)((abfd)->tdata))
 #define oasys_ar_data(abfd) ((oasys_ar_data_type *)((abfd)->tdata))
+
+  
 
 
 
