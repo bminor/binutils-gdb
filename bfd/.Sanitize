@@ -62,6 +62,7 @@ aout-adobe.c
 aout-arm.c
 aout-encap.c
 aout-ns32k.c
+aout-sparcle.c
 aout-target.h
 aout0.c
 aout32.c

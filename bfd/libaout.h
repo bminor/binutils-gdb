@@ -222,11 +222,9 @@ enum machine_type {
   M_532_NETBSD = 137,	/* NetBSD/ns32k binary */
   M_SPARC_NETBSD = 138,	/* NetBSD/sparc binary */
   M_SPARCLET = 142,	/* SPARClet */
+  M_SPARCLET_LE = 143,	/* SPARClet little endian */
   M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
   M_MIPS2 = 152,        /* MIPS R4000/R6000 binary */
-/* start-sanitize-rce */
-  M_RCE = 155,		/* Motorola RCE binary */
-/* end-sanitize-rce */
   M_HP200 = 200,	/* HP 200 (68010) BSD binary */
   M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
   M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
@@ -586,26 +584,22 @@ NAME(aout,bfd_free_cached_info) PARAMS ((bfd *));
   									      \
 	if (bfd_get_outsymbols (abfd) != (asymbol **) NULL		      \
 	    && bfd_get_symcount (abfd) != 0) 				      \
-	    {								      \
-	      if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET)     \
-		  != 0)							      \
-	        return false;						      \
+	  {								      \
+	    if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET) != 0) \
+	      return false;						      \
 									      \
-	      if (! NAME(aout,write_syms)(abfd)) return false;		      \
+	    if (! NAME(aout,write_syms)(abfd)) return false;		      \
+	  }								      \
 									      \
-	      if (bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET)    \
-		  != 0)							      \
-	        return false;						      \
+	if (bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET) != 0)    \
+	  return false;						      	      \
+	if (!NAME(aout,squirt_out_relocs) (abfd, obj_textsec (abfd)))         \
+	  return false;						      	      \
 									      \
-	      if (!NAME(aout,squirt_out_relocs) (abfd, obj_textsec (abfd)))   \
-		return false;						      \
-	      if (bfd_seek (abfd, (file_ptr)(N_DRELOFF(*execp)), SEEK_SET)    \
-		  != 0)							      \
-	        return false;						      \
-									      \
-	      if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd)))    \
-		return false;						      \
-	    }								      \
+	if (bfd_seek (abfd, (file_ptr)(N_DRELOFF(*execp)), SEEK_SET) != 0)    \
+	  return false;						      	      \
+	if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd)))          \
+	  return false;						      	      \
       }									      
 #endif
 

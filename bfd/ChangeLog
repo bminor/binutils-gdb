@@ -1,3 +1,15 @@
+Tue Sep  3 12:16:20 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (aout-sparcle.o): New target.
+	* aoutf1.h (TARGET_IS_BIG_ENDIAN_P): Don't define if little endian.
+	* config.bfd (sparclet-*-aout*): Add case.
+	* configure.in (sparcle_aout_vec): Add case.
+	* configure: Regenerated.
+	* libaout.h (machine_type): Add M_SPARCLET_LE.
+	* targets.c (sparcle_aout_vec): Declare.
+	(bfd_target_vector): Add sparcle_aout_vec.
+	* aout-sparcle.c: New file.
+
 start-sanitize-v850
 Tue Sep  3 00:57:02 1996  Jeffrey A Law  (law@cygnus.com)
 
