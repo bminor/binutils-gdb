@@ -809,15 +809,16 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
     DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
 
-  /* Write the stack pointer.  This is here because the statements above
-     might fool with it.  On SPARC, this write also stores the register
-     window into the right place in the new stack frame, which otherwise
-     wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
-  /* NOTE: cagney/2003-03-23: Disable this code when there is a
-     push_dummy_call() method.  Since that method will have already
-     stored the stack pointer (as part of creating the fake call
-     frame), and none of the code following that code adjusts the
-     stack-pointer value, the below call is entirely redundant.  */
+  /* Write the stack pointer.  This is here because the statements
+     above might fool with it.  On SPARC, this write also stores the
+     register window into the right place in the new stack frame,
+     which otherwise wouldn't happen (see store_inferior_registers in
+     sparc-nat.c).  */
+  /* NOTE: cagney/2003-03-23: Since the architecture method
+     push_dummy_call() should have already stored the stack pointer
+     (as part of creating the fake call frame), and none of the code
+     following that call adjusts the stack-pointer value, the below
+     call is entirely redundant.  */
   if (DEPRECATED_DUMMY_WRITE_SP_P ())
     DEPRECATED_DUMMY_WRITE_SP (sp);
 
