@@ -1324,7 +1324,8 @@ function_entry_point:
 	    /* Recording this entry is necessary. Single stepping relies on
 	       this vector to get an idea about function address boundaries. */
 
-	    prim_record_minimal_symbol (0, cs->c_value, mst_unknown);
+	    prim_record_minimal_symbol ("<trampoline>", cs->c_value,
+					mst_unknown);
 #else
 
 	    /* record trampoline code entries as mst_unknown symbol. When we

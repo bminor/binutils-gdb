@@ -1,5 +1,5 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -111,6 +111,9 @@ remote_fetch_registers PARAMS ((int));
 static void
 remote_resume PARAMS ((int, int));
 
+static int
+remote_start_remote PARAMS ((char *));
+
 static void
 remote_open PARAMS ((char *, int));
 
@@ -121,7 +124,7 @@ static void
 remote_store_registers PARAMS ((int));
 
 static void
-getpkt PARAMS ((char *));
+getpkt PARAMS ((char *, int));
 
 static void
 putpkt PARAMS ((char *));
@@ -239,6 +242,20 @@ damn_b (rate)
   return B38400;	/* Random */
 }
 
+/* Stub for catch_errors.  */
+
+static int
+remote_start_remote (dummy)
+     char *dummy;
+{
+  /* Ack any packet which the remote side has already sent.  */
+  write (remote_desc, "+\r", 2);
+  putpkt ("?");			/* initiate a query from remote machine */
+
+  start_remote ();		/* Initialize gdb process mechanisms */
+  return 1;
+}
+
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
@@ -298,7 +315,11 @@ device is attached to the remote system (e.g. /dev/ttya).");
   ioctl (remote_desc, TIOCSETP, &sg);
 
   if (from_tty)
-    printf ("Remote debugging using %s\n", name);
+    {
+      puts_filtered ("Remote debugging using ");
+      puts_filtered (name);
+      puts_filtered ("\n");
+    }
   push_target (&remote_ops);	/* Switch to using remote target now */
 
 #ifndef HAVE_TERMIO
@@ -313,11 +334,11 @@ device is attached to the remote system (e.g. /dev/ttya).");
     perror ("remote_open: error in signal");
 #endif
 
-  /* Ack any packet which the remote side has already sent.  */
-  write (remote_desc, "+\r", 2);
-  putpkt ("?");			/* initiate a query from remote machine */
-
-  start_remote ();		/* Initialize gdb process mechanisms */
+  /* Start the remote connection; if error (0), discard this target. */
+  immediate_quit++;		/* Allow user to interrupt it */
+  if (!catch_errors (remote_start_remote, (char *)0, 
+	"Couldn't establish connection to remote target\n"))
+    pop_target();
 }
 
 /* remote_detach()
@@ -338,7 +359,7 @@ remote_detach (args, from_tty)
   
   pop_target ();
   if (from_tty)
-    printf ("Ending remote debugging.\n");
+    puts_filtered ("Ending remote debugging.\n");
 }
 
 /* Convert hex digit A to a number.  */
@@ -422,7 +443,7 @@ remote_wait (status)
   WSETEXIT ((*status), 0);
 
   ofunc = (void (*)()) signal (SIGINT, remote_interrupt);
-  getpkt ((char *) buf);
+  getpkt ((char *) buf, 1);
   signal (SIGINT, ofunc);
 
   if (buf[0] == 'E')
@@ -678,7 +699,7 @@ static void
 remote_files_info (ignore)
 struct target_ops *ignore;
 {
-  printf ("Debugging a target over a serial line.\n");
+  puts_filtered ("Debugging a target over a serial line.\n");
 }
 
 /*
@@ -703,7 +724,8 @@ Receiver responds with:
 */
 
 /* Read a single character from the remote end.
-   (If supported, we actually read many characters and buffer them up.)  */
+   (If supported, we actually read many characters and buffer them up.)
+   Timeouts cause a zero (nul) to be returned.  */
 
 static int
 readchar ()
@@ -711,6 +733,7 @@ readchar ()
   static int inbuf_index, inbuf_count;
 #define	INBUFSIZE	PBUFSIZ
   static char inbuf[INBUFSIZE];
+  struct cleanup *old_chain;
 
   if (inbuf_index >= inbuf_count)
     {
@@ -722,13 +745,16 @@ readchar ()
       /* termio does the timeout for us.  */
       inbuf_count = read (remote_desc, inbuf, INBUFSIZE);
 #else
+      /* Cancel alarm on error.  */
+      old_chain = make_cleanup (alarm, (char *)0);
       alarm (timeout);
       inbuf_count = read (remote_desc, inbuf, INBUFSIZE);
-      alarm (0);
+      do_cleanups (old_chain);		/* Cancel the alarm now.  */
 #endif
     }
 
-  /* Just return the next character from the buffer.  */
+  /* Just return the next character from the buffer (or a zero if we
+     got an error and no chars were stored in inbuf).  */
   return inbuf[inbuf_index++] & 0x7f;
 }
 
@@ -742,7 +768,7 @@ remote_send (buf)
 {
 
   putpkt (buf);
-  getpkt (buf);
+  getpkt (buf, 0);
 
   if (buf[0] == 'E')
     error ("Remote failure reply: %s", buf);
@@ -804,15 +830,17 @@ putpkt (buf)
 }
 
 /* Read a packet from the remote machine, with error checking,
-   and store it in BUF.  BUF is expected to be of size PBUFSIZ.  */
+   and store it in BUF.  BUF is expected to be of size PBUFSIZ.
+   If FOREVER, wait forever rather than timing out; this is used
+   while the target is executing user code.  */
 
 static void
-getpkt (buf)
+getpkt (buf, forever)
      char *buf;
 {
   char *bp;
   unsigned char csum;
-  int c;
+  int c = 0;
   unsigned char c1, c2;
   int retries = 0;
 #define MAX_RETRIES	10
@@ -834,21 +862,45 @@ getpkt (buf)
 
   while (1)
     {
+      /* This can loop forever if the remote side sends us characters
+	 continuously, but if it pauses, we'll get a zero from readchar
+	 because of timeout.  Then we'll count that as a retry.  */
+      while (c != '$')
+        if (0 == (c  = readchar()))
+	  if (!forever) 
+	    {
+	      if (++retries >= MAX_RETRIES)
+		if (kiodebug) puts_filtered ("Timed out.\n");
+		goto out;
+	    }
+
       /* Force csum to be zero here because of possible error retry.  */
       csum = 0;
-      
-      while ((c = readchar()) != '$');
-
       bp = buf;
+
       while (1)
 	{
 	  c = readchar ();
+	  if (c == '\0')
+	    {
+	      if (kiodebug)
+		puts_filtered ("Timeout in mid-packet, retrying\n");
+	      goto whole;		/* Start a new packet, count retries */
+	    } 
+	  if (c == '$')
+	    {
+	      if (kiodebug)
+		puts_filtered ("Saw new packet start in middle of old one\n");
+	      goto whole;		/* Start a new packet, count retries */
+	    }
 	  if (c == '#')
 	    break;
 	  if (bp >= buf+PBUFSIZ-1)
 	  {
 	    *bp = '\0';
-	    printf_filtered ("Remote packet too long: %s\n", buf);
+	    puts_filtered ("Remote packet too long: ");
+	    puts_filtered (buf);
+	    puts_filtered ("\n");
 	    goto whole;
 	  }
 	  *bp++ = c;
@@ -860,8 +912,10 @@ getpkt (buf)
       c2 = fromhex (readchar ());
       if ((csum & 0xff) == (c1 << 4) + c2)
 	break;
-      printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
-	      (c1 << 4) + c2, csum & 0xff, buf);
+      printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
+	      (c1 << 4) + c2, csum & 0xff);
+      puts_filtered (buf);
+      puts_filtered ("\n");
 
       /* Try the whole thing again.  */
 whole:
@@ -875,6 +929,8 @@ whole:
 	  break;
 	}
     }
+
+out:
 
 #if 0
   immediate_quit--;
@@ -1070,6 +1126,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* to_create_inferior */
   NULL,				/* to_mourn_inferior */
   0,				/* to_can_run */
+  0,				/* to_notice_signals */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,				/* to_has_all_memory */

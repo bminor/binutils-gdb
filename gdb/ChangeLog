@@ -1,3 +1,15 @@
+Mon Feb 15 20:48:09 1993  John Gilmore  (gnu@cygnus.com)
+
+	* remote.c:  Improve error recovery.  Allow user to break out
+	of initial connection attempt with INTERRUPT.  Treat a timeout
+	while waiting for remote packet like a retry, unless the remote
+	side is actively running user code.  Fix a few long printf_filtered's.
+
+	* xcoffread.c (read_xcoff_symtab):  Don't use null symbol name for
+	trampoline symbols.
+
+	* buildsym.c (start_subfile):  Allow null file name.
+
 Fri Feb 12 15:46:49 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* xcoffread.c (process_xcoff_symbol, read_symbol_lineno): complain

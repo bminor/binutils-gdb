@@ -389,7 +389,7 @@ start_subfile (name, dirname)
   current_subfile = subfile;
 
   /* Save its name and compilation directory name */
-  subfile->name = strdup (name);
+  subfile->name = (name == NULL)? NULL : strdup (name);
   subfile->dirname = (dirname == NULL) ? NULL : strdup (dirname);
   
   /* Initialize line-number recording for this subfile.  */
