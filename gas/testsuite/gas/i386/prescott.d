@@ -22,7 +22,7 @@ Disassembly of section .text:
   3f:	66 0f 7d c1 [ 	]*hsubpd %xmm1,%xmm0
   43:	66 0f 7d 0a [ 	]*hsubpd \(%edx\),%xmm1
   47:	f2 0f 7d d2 [ 	]*hsubps %xmm2,%xmm2
-  4b:	f2 0f 7d 1c 24 [ 	]*hsubps \(%esp,1\),%xmm3
+  4b:	f2 0f 7d 1c 24 [ 	]*hsubps \(%esp\),%xmm3
   50:	f2 0f f0 2e [ 	]*lddqu  \(%esi\),%xmm5
   54:	0f 01 c8 [ 	]*monitor %eax,%ecx,%edx 
   57:	0f 01 c8 [ 	]*monitor %eax,%ecx,%edx 

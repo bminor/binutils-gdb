@@ -1,3 +1,10 @@
+2004-01-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/katmai.d: Adjust for changed sib printing.
+	* gas/i386/prescott.d: Likewise.
+	* gas/i386/sse2.d: Likewise.
+	* gas/i386/ssemmx2.d: Likewise.
+
 2004-01-16  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mn10300/mov5.s: New.
