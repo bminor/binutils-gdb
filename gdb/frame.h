@@ -47,28 +47,42 @@ struct frame_id
 
 /* For every stopped thread, GDB tracks two frames: current and
    selected.  Current frame is the inner most frame of the selected
-   thread.  Selected frame is the frame currently being examined via
-   the GDB CLI (selected using `up', `down', ...).  The frames are
-   created on-demand (via get_prev_frame()) and then held in a frame
-   cache.  Provide mechanims for controlling these frames.  */
+   thread.  Selected frame is the one being examined by the the GDB
+   CLI (selected using `up', `down', ...).  The frames are created
+   on-demand (via get_prev_frame()) and then held in a frame cache.  */
+/* FIXME: cagney/2002-11-28: Er, there is a lie here.  If you do the
+   sequence: `thread 1; up; thread 2; thread 1' you loose thread 1's
+   selected frame.  At present GDB only tracks the selected frame of
+   the current thread.  But be warned, that might change.  */
 /* FIXME: cagney/2002-11-14: At any time, only one thread's selected
    and current frame can be active.  Switching threads causes gdb to
    discard all that cached frame information.  Ulgh!  Instead, current
    and selected frame should be bound to a thread.  */
 
-extern struct frame_info *selected_frame;
-extern void select_frame (struct frame_info *);
-extern void set_current_frame (struct frame_info *);
+/* On demand, create the inner most frame using information found in
+   the inferior.  If the inner most frame can't be created, throw an
+   error.  */
 extern struct frame_info *get_current_frame (void);
 
-/* Invalidates the frame cache.  */
-extern void flush_cached_frames (void);
+/* Invalidates the frame cache (this function should have been called
+   invalidate_cached_frames).
 
-/* Flushes the frame cache and then selects the inner most (aka
-   current) frame - it changes selected frame.  */
-/* FIXME: cagney/2002-11-14: Should this re-select the selected frame
-   from before the flush?  */
+   FIXME: cagney/2002-11-28: The only difference between
+   flush_cached_frames() and reinit_frame_cache() is that the latter
+   explicitly sets the selected frame back to the current frame there
+   isn't any real difference (except that one delays the selection of
+   a new frame).  There should instead be a get_selected_frame()
+   method that reinit's the frame cache on-demand.  As for
+   invalidating the cache, there should be two methods one that
+   reverts the thread's selected frame back to current frame (for when
+   the inferior resumes) and one that does not (for when the user
+   modifies the target invalidating the frame cache).  */
+extern void flush_cached_frames (void);
 extern void reinit_frame_cache (void);
+
+/* Select a specific frame.  NULL, apparently implies re-select the
+   inner most frame.  */
+extern void select_frame (struct frame_info *);
 
 /* Given a FRAME, return the next (more inner, younger) or previous
    (more outer, older) frame.  */
@@ -393,7 +407,6 @@ extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
-extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 
 
 #ifdef FRAME_FIND_SAVED_REGS
@@ -492,5 +505,51 @@ extern void locals_info (char *, int);
 extern void (*selected_frame_level_changed_hook) (int);
 
 extern void return_command (char *, int);
+
+
+/* NOTE: cagney/2002-11-27:
+
+   You might think that the below global can simply be replaced by a
+   call to either get_selected_frame() or select_frame().
+
+   Unfortunatly, it isn't that easy.
+
+   The relevant code needs to be audited to determine if it is
+   possible (or pratical) to instead pass the applicable frame in as a
+   parameter.  For instance, DEPRECATED_DO_REGISTERS_INFO() relied on
+   the selected_frame global, but its replacement,
+   PRINT_REGISTERS_INFO(), is parameterized with the selected frame.
+   The only real exceptions occure at the edge (in the CLI code) where
+   user commands need to pick up the selected frame before proceeding.
+
+   This is important.  GDB is trying to stamp out the hack:
+
+   saved_frame = selected_frame;
+   selected_frame = ...;
+   hack_using_global_selected_frame ();
+   selected_frame = saved_frame;
+
+   Take care!  */
+
+extern struct frame_info *selected_frame;
+
+
+/* NOTE: cagney/2002-11-28:
+
+   These functions are used to explicitly create and set the inner
+   most (current) frame vis:
+
+   set_current_frame (create_new_frame (read_fp(), stop_pc)));
+
+   Such code should be removed.  Instead that task can be left to
+   get_current_frame() which will update things on-demand.
+
+   The only vague exception is found in "infcmd.c" (and a few
+   architectures specific files) as part of the code implementing the
+   command ``(gdb) frame FRAME PC''.  There, the frame should be
+   created/selected in a single shot.  */
+
+extern void set_current_frame (struct frame_info *);
+extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 
 #endif /* !defined (FRAME_H)  */

@@ -1,3 +1,9 @@
+2002-11-28  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h: Update comments on set_current_frame, create_new_frame,
+	flush_cached_frames, reinit_frame_cache, select_frame and
+	selected_frame.
+	
 2002-11-27  Andrew Cagney  <cagney@redhat.com>
 
 	* config/z8k/tm-z8k.h (PC_IN_CALL_DUMMY): Update definition to use
