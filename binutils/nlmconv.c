@@ -377,7 +377,8 @@ main (argc, argv)
 
   assert (bfd_get_flavour (outbfd) == bfd_target_nlm_flavour);
 
-  if (bfd_arch_get_compatible (inbfd, outbfd) == NULL)
+  /* XXX: Should we accept the unknown bfd format here ?  */
+  if (bfd_arch_get_compatible (inbfd, outbfd, TRUE) == NULL)
     non_fatal (_("warning: input and output formats are not compatible"));
 
   /* Move the values read from the command file into outbfd.  */

@@ -220,6 +220,7 @@ main (argc, argv)
   command_line.rpath = NULL;
   command_line.warn_mismatch = TRUE;
   command_line.check_section_addresses = TRUE;
+  command_line.accept_unknown_input_arch = FALSE;
 
   /* We initialize DEMANGLING based on the environment variable
      COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the

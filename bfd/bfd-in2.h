@@ -1752,7 +1752,8 @@ bfd_arch_list PARAMS ((void));
 const bfd_arch_info_type *
 bfd_arch_get_compatible PARAMS ((
     const bfd *abfd,
-    const bfd *bbfd));
+    const bfd *bbfd,
+    bfd_boolean accept_unknowns));
 
 void
 bfd_set_arch_info PARAMS ((bfd *abfd, const bfd_arch_info_type *arg));

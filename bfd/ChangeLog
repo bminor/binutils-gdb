@@ -1,3 +1,10 @@
+2002-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c (bfd_arch_get_compatible): Add third parameter
+	'accept_unknowns'.  Only accept unknown format BFDs if
+	accept_unknowns is true, or if the format is "binary".
+        * bfd-in2.h: Regenerate.
+
 2002-12-21  Nick Clifton  <nickc@redhat.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Disable WINCE workaround

@@ -3699,7 +3699,8 @@ lang_check ()
        file = file->input_statement.next)
     {
       input_bfd = file->input_statement.the_bfd;
-      compatible = bfd_arch_get_compatible (input_bfd, output_bfd);
+      compatible = bfd_arch_get_compatible (input_bfd, output_bfd,
+					    command_line.accept_unknown_input_arch);
 
       /* In general it is not possible to perform a relocatable
 	 link between differing object formats when the input

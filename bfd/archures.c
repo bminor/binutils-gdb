@@ -547,27 +547,39 @@ FUNCTION
 SYNOPSIS
 	const bfd_arch_info_type *bfd_arch_get_compatible(
 		const bfd *abfd,
-	        const bfd *bbfd);
+	        const bfd *bbfd,
+		bfd_boolean accept_unknowns);
 
 DESCRIPTION
-	Determine whether two BFDs'
-	architectures and machine types are compatible.  Calculates
-	the lowest common denominator between the two architectures
-	and machine types implied by the BFDs and returns a pointer to
-	an <<arch_info>> structure describing the compatible machine.
+	Determine whether two BFDs' architectures and machine types
+	are compatible.  Calculates the lowest common denominator
+	between the two architectures and machine types implied by
+	the BFDs and returns a pointer to an <<arch_info>> structure
+	describing the compatible machine.
 */
 
 const bfd_arch_info_type *
-bfd_arch_get_compatible (abfd, bbfd)
+bfd_arch_get_compatible (abfd, bbfd, accept_unknowns)
      const bfd *abfd;
      const bfd *bbfd;
+     bfd_boolean accept_unknowns;
 {
-  /* If either architecture is unknown, then all we can do is assume
-     the user knows what he's doing.  */
-  if (abfd->arch_info->arch == bfd_arch_unknown)
-    return bbfd->arch_info;
-  if (bbfd->arch_info->arch == bfd_arch_unknown)
-    return abfd->arch_info;
+  const bfd * ubfd = NULL;
+
+  /* Look for an unknown architecture.  */
+  if (((ubfd = abfd) && ubfd->arch_info->arch == bfd_arch_unknown)
+      || ((ubfd = bbfd) && ubfd->arch_info->arch == bfd_arch_unknown))
+    {
+      /* We can allow an unknown architecture if accept_unknowns
+	 is true, or if the target is the "binary" format, which
+	 has an unknown architecture.  Since the binary format can
+	 only be set by explicit request from the user, it is safe
+	 to assume that they know what they are doing.  */
+      if (accept_unknowns
+	  || strcmp (bfd_get_target (ubfd), "binary") == 0)
+	return ubfd->arch_info;
+      return NULL;
+    }
 
   /* Otherwise architecture-specific code has to decide.  */
   return abfd->arch_info->compatible (abfd->arch_info, bbfd->arch_info);

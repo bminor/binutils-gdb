@@ -225,8 +225,9 @@ ldfile_try_open_bfd (attempt, entry)
 	      return TRUE;
 	    }
 
-	  if ((bfd_arch_get_compatible (check, output_bfd) == NULL)
-	      /* XCOFF archives can have 32 and 64 bit objects */
+	  if ((bfd_arch_get_compatible (check, output_bfd,
+					command_line.accept_unknown_input_arch) == NULL)
+	      /* XCOFF archives can have 32 and 64 bit objects.  */
 	      && ! (bfd_get_flavour (check) == bfd_target_xcoff_flavour
 		    && bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour
 		    && bfd_check_format (entry->the_bfd, bfd_archive)))

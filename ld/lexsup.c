@@ -133,6 +133,8 @@ int parsing_defsym = 0;
 #define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
 #define OPTION_NOSTDLIB			(OPTION_NO_DEFINE_COMMON + 1)
 #define OPTION_NO_OMAGIC		(OPTION_NOSTDLIB + 1)
+#define OPTION_ACCEPT_UNKNOWN_INPUT_ARCH    (OPTION_NO_OMAGIC + 1)
+#define OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH (OPTION_ACCEPT_UNKNOWN_INPUT_ARCH + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -267,6 +269,10 @@ static const struct ld_option ld_options[] =
       '(', NULL, N_("Start a group"), TWO_DASHES },
   { {"end-group", no_argument, NULL, ')'},
       ')', NULL, N_("End a group"), TWO_DASHES },
+  { {"accept-unknown-input-arch", no_argument, NULL, OPTION_ACCEPT_UNKNOWN_INPUT_ARCH},
+    '\0', NULL, N_("Accept input files whose architecture cannot be determined"), TWO_DASHES },
+  { {"no-accept-unknown-input-arch", no_argument, NULL, OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH},
+    '\0', NULL, N_("Reject input files whose architecture is unknown"), TWO_DASHES },
   { {"assert", required_argument, NULL, OPTION_ASSERT},
       '\0', N_("KEYWORD"), N_("Ignored for SunOS compatibility"), ONE_DASH },
   { {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
@@ -1106,6 +1112,12 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_NO_CHECK_SECTIONS:
 	  command_line.check_section_addresses = FALSE;
+	  break;
+	case OPTION_ACCEPT_UNKNOWN_INPUT_ARCH:
+	  command_line.accept_unknown_input_arch = TRUE;
+	  break;
+	case OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH:
+	  command_line.accept_unknown_input_arch = FALSE;
 	  break;
 	case '(':
 	  if (ingroup)

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Added --accept-unknown-linker-format to restore old linker behaviour (pre
+  2.14) of silently accepting and linking in any files in an unknown binary
+  file format.
+
 * Added --no-omagic to undo the effects of the -N option.
 
 * Support for Texas Instruments TMS320C4x and TMS320C3x series of

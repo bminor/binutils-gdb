@@ -1244,7 +1244,7 @@ bfd_find_target (target_name, abfd)
   else
     targname = getenv ("GNUTARGET");
 
-  /* This is safe; the vector cannot be null */
+  /* This is safe; the vector cannot be null.  */
   if (targname == NULL || strcmp (targname, "default") == 0)
     {
       abfd->target_defaulted = TRUE;

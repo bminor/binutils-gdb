@@ -148,6 +148,12 @@ typedef struct {
      fpor overlaps.  */
   bfd_boolean check_section_addresses;
 
+  /* If TRUE allow the linking of input files in an unknown architecture
+     assuming that the user knows what they are doing.  This was the old
+     behaviour of the linker.  The new default behaviour is to reject such
+     input files.  */
+  bfd_boolean accept_unknown_input_arch;
+
 } args_type;
 
 extern args_type command_line;

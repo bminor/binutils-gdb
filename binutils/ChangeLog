@@ -1,5 +1,10 @@
 2002-12-23  Nick Clifton  <nickc@redhat.com>
 
+	* nlmconv.c (main): Pass TRUE as third argument to
+	bfd_arch_get_compatible.
+
+2002-12-23  Nick Clifton  <nickc@redhat.com>
+
 	* strings.c (isgraphic): Replace definition with STRING_ISGRAPHIC
 	macro.  Handle 'S' encoding, accepting 8-bit characters.
 	(main): Parse 'S' encoding.
