@@ -1,3 +1,8 @@
+2001-05-03  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvers/vers19.ver: Expect vers17.so instead of
+	*tmpdir/vers17.so.
+
 2001-05-01  Andreas Jaeger  <aj@suse.de>, Andreas Schwab <schwab@suse.de>
 
 	* ld-scripts/phdrs.exp: Fix regexp, s390x is 64 bit platform.
