@@ -1,8 +1,8 @@
-.* \.test0[ 	]+PROGBITS[ 	]+([[:xdigit:]]+[ 	]+){4}[ 	]+[[:digit:]]+.*
-.* \.test1[ 	]+PROGBITS[ 	]+([[:xdigit:]]+[ 	]+){4}[ 	]+[[:digit:]]+.*
+.* \.test0[ 	]+PROGBITS[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[ 	]+[0-9]+.*
+.* \.test1[ 	]+PROGBITS[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[ 	]+[0-9]+.*
 .* \.rela?\.test1[ 	]+RELA?[ 	]+.*
-.* \.test2[ 	]+PROGBITS[ 	]+([[:xdigit:]]+[ 	]+){4}[ 	]+[[:digit:]]+.*
+.* \.test2[ 	]+PROGBITS[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[ 	]+[0-9]+.*
 .* \.rela?\.test2[ 	]+RELA?[ 	]+.*
-.* \.test3[ 	]+PROGBITS[ 	]+([[:xdigit:]]+[ 	]+){4}WA[ 	]+[[:digit:]]+.*
+.* \.test3[ 	]+PROGBITS[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+WA[ 	]+[0-9]+.*
 .* \.rela?\.test3[ 	]+RELA?[ 	]+.*
-.* \.test4[ 	]+NOBITS[ 	]+([[:xdigit:]]+[ 	]+){4}WA[ 	]+[[:digit:]]+.*
+.* \.test4[ 	]+NOBITS[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+[0-9a-fA-F]+[ 	]+WA[ 	]+[0-9]+.*

@@ -1,3 +1,9 @@
+2004-12-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/elf/section5.e, gas/elf/section5.l: Replace [:digit:],
+	[:xdigit:] and {N} in regexps with [0-9], [0-9a-fA-F] and N
+	copies, to cater to tcl versions before Tcl 8.2.3.
+
 2004-12-20  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/section5.[ls]: Use % instead of @ in .section

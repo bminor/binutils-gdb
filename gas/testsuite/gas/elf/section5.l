@@ -11,27 +11,27 @@
 .*GAS.*
 
 
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test0[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test1,[ 	]*"",[ 	]*%progbits[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test2[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test3,[ 	]*"aw"[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test4,[ 	]*"aw",[ 	]*%nobits[ 	]*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test1,[ 	]*"aw",[ 	]*%nobits[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test2,[ 	]*"w"[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test3,[ 	]*"aw",[ 	]*%progbits[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test4,[ 	]*"aw"[ 	]*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.data,[ 	]*"a"[ 	]*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.bss,[ 	]*"a"[ 	]*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.data,[ 	]*"aw",[ 	]*%nobits[ 	]*
-[ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.bss,[ 	]*"aw",[ 	]*%progbits[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test0[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test1,[ 	]*"",[ 	]*%progbits[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test2[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test3,[ 	]*"aw"[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test4,[ 	]*"aw",[ 	]*%nobits[ 	]*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test1,[ 	]*"aw",[ 	]*%nobits[ 	]*
+[ 	]+[0-9]+[ 	]+.*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test2,[ 	]*"w"[ 	]*
+[ 	]+[0-9]+[ 	]+.*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test3,[ 	]*"aw",[ 	]*%progbits[ 	]*
+[ 	]+[0-9]+[ 	]+.*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.test4,[ 	]*"aw"[ 	]*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.data,[ 	]*"a"[ 	]*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.bss,[ 	]*"a"[ 	]*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.data,[ 	]*"aw",[ 	]*%nobits[ 	]*
+[ 	]+[0-9]+[ 	]*
+[ 	]+[0-9]+[ 	]+.section[ 	]+.bss,[ 	]*"aw",[ 	]*%progbits[ 	]*
