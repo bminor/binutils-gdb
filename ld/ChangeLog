@@ -1,3 +1,7 @@
+2002-07-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (print_wild_statement): Fix output formatting.
+
 2002-07-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c: (strip_excluded_output_sections): New function.
