@@ -1,3 +1,11 @@
+2003-10-17  Paul Dale  <pauli@snapgear.com>
+	    Bernardo Innocenti  <bernie@develer.com>
+
+	* config/tc-m68k.c (make_pcrel_absolute): Enforce
+	PC-relative jumps with --pcrel.
+	(md_convert_frag_1): Likewise.
+	(md_create_long_jump): Likewise.
+
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
 
 	* config/tc-h8300.c (PSIZE): Correct for Normal mode.
