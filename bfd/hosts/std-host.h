@@ -106,7 +106,7 @@ extern int unlink();
 #ifndef uint64e_type
 #ifdef __GNUC__
 #define uint64e_type unsigned long long
-#define int64e_type struct long long
+#define int64e_type long long
 #define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
 #define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
 #else
