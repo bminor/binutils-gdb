@@ -485,7 +485,7 @@ frameless_function_invocation (frame)
   u = find_unwind_entry (frame->pc);
 
   if (u == 0)
-    return frameless_look_for_prologue (frame);
+    return 0;
 
   return (u->Total_frame_size == 0 && u->stub_type == 0);
 }
@@ -506,6 +506,7 @@ frame_saved_pc (frame)
      FRAME frame;
 {
   CORE_ADDR pc = get_frame_pc (frame);
+  struct unwind_table_entry *u;
 
   /* BSD, HPUX & OSF1 all lay out the hardware state in the same manner
      at the base of the frame in an interrupt handler.  Registers within
@@ -522,6 +523,7 @@ frame_saved_pc (frame)
       return rp;
     }
 
+restart:
   if (frameless_function_invocation (frame))
     {
       int ret_regnum;
@@ -542,12 +544,12 @@ frame_saved_pc (frame)
 	  fi = get_frame_info (frame->next);
 	  get_frame_saved_regs (fi, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM] & 0x2, 4))
-	    return read_memory_integer (saved_regs.regs[31], 4);
+	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
 	  else
-	    return read_memory_integer (saved_regs.regs[RP_REGNUM], 4);
+	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
 	}
       else
-	return read_register (ret_regnum) & ~0x3;
+	pc = read_register (ret_regnum) & ~0x3;
     }
   else
     {
@@ -567,15 +569,23 @@ frame_saved_pc (frame)
 	  fi = get_frame_info (frame->next);
 	  get_frame_saved_regs (fi, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM] & 0x2, 4))
-	    return read_memory_integer (saved_regs.regs[31], 4);
+	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
 	  else
-	    return read_memory_integer (saved_regs.regs[RP_REGNUM], 4);
+	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
 	}
       else if (rp_offset == 0)
-	return read_register (RP_REGNUM) & ~0x3;
+	pc = read_register (RP_REGNUM) & ~0x3;
       else
-	return read_memory_integer (frame->frame + rp_offset, 4) & ~0x3;
+	pc = read_memory_integer (frame->frame + rp_offset, 4) & ~0x3;
     }
+
+  /* If PC is inside a linker stub, then dig out the address the stub
+     will return to.  */
+  u = find_unwind_entry (pc);
+  if (u && u->stub_type != 0)
+    goto restart;
+
+  return pc;
 }
 
 /* We need to correct the PC and the FP for the outermost frame when we are

@@ -1,5 +1,11 @@
 Tue Apr  5 15:29:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (frameless_function_invocation): If no unwind
+	descriptor was found, then assume this was not a frameless
+	function invocation.
+	(frame_saved_pc): If the saved PC is in a linker stub, then
+	return the return address which the linker stub will return to.
+
         * xm-hppab.h: Never define USG.
         * xm-hppah.h: Always define USG.
 
