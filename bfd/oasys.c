@@ -208,7 +208,7 @@ DEFUN(oasys_get_symtab,(abfd, location),
 /***********************************************************************
 *  archive stuff 
 */
-#define swap(x) x = bfd_h_get_x(abfd, &x);
+
 static bfd_target *
 DEFUN(oasys_archive_p,(abfd),
       bfd *abfd)
