@@ -15,9 +15,18 @@ proc run_errors_test { name opts tname} {
 }
 
 if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
-    run_dump_test "inst"
 
-    run_dump_test "ldconst"
+    if {[istarget *-wince-*]} then {
+	run_dump_test "wince_inst"
+	run_dump_test "wince_ldconst"
+	run_dump_test "wince_arm7t"
+	run_dump_test "wince_copro"
+    } else {
+	run_dump_test "inst"
+	run_dump_test "ldconst"
+	run_dump_test "arm7t"
+	run_dump_test "copro"
+    }
 
     run_dump_test "armv1"
 
@@ -29,8 +38,6 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     gas_test "arm7dm.s" "-mcpu=arm7dm" $stdoptlist "Arm 7DM instructions"
 
-    run_dump_test "arm7t"
-
     if {! [istarget arm*-*-aout] && ![istarget arm-*-pe]} then {
 	# The arm-aout port does not support Thumb mode.
 	gas_test "thumb.s" "-mcpu=arm7t" $stdoptlist "Thumb instructions"
@@ -39,8 +46,6 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     gas_test "arch4t.s" "-march=armv4t" $stdoptlist "Arm architecture 4t instructions"
 
     run_dump_test "arch5tej"
-
-    run_dump_test "copro"
 
     gas_test "immed.s" "" $stdoptlist "immediate expressions"
 

@@ -1,3 +1,14 @@
+2003-12-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm.exp: Run special versions of the inst, ldconst,
+	arm7t and copro tests for the arm-wince-pe target.
+	* gas/arm/wince_inst.d: New file.  Like inst.d but for the
+	arm-wince-pe target where the -8 bias is not applied to
+	PC-relative load instructions.
+	* gas/arm/wince_ldconst.d: New file.  Similar reasons.
+	* gas/arm/wince_arm7t.d: New file.  Similar reasons.
+	* gas/arm/wince_copro.d: New file.  Similar reasons.
+	
 2003-12-15  Christian Groessler  <chris@groessler.org>
 
 	* gas/z8k/eidi.s: Add uppercase forms.  Add forms with comma

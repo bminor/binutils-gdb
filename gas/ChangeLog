@@ -1,3 +1,9 @@
+2003-12-16  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+
+	* tc-arm.c (do_adr): Do not adjust pc by -8 if TE_WINCE is
+	defined.
+	(do_adrl): Likewise.
+
 2003-12-15  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (struct z8k_exp): Remove, not used anywhere.

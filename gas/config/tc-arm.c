@@ -7299,7 +7299,9 @@ do_adr (str)
   /* Frag hacking will turn this into a sub instruction if the offset turns
      out to be negative.  */
   inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
+#ifndef TE_WINCE
   inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
+#endif
   inst.reloc.pc_rel = 1;
 
   end_of_line (str);
@@ -7330,7 +7332,9 @@ do_adrl (str)
   /* Frag hacking will turn this into a sub instruction if the offset turns
      out to be negative.  */
   inst.reloc.type              = BFD_RELOC_ARM_ADRL_IMMEDIATE;
+#ifndef TE_WINCE  
   inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
+#endif
   inst.reloc.pc_rel            = 1;
   inst.size                    = INSN_SIZE * 2;
 }
