@@ -1,3 +1,11 @@
+2004-05-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-interix-nat.c, i386-interix-tdep.c,
+	config/i386/nm-interix.h, config/i386/interix.mh,
+	config/i386/interix.mt: Remove files.
+	* Makefile.in (i386-interix-nat.o, i386-interix-tdep.o): Remove
+	dependencies.
+
 2004-05-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68k-tdep.h (struct gdbarch_tdep): Add member

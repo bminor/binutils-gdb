@@ -1859,12 +1859,6 @@ i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 	$(regcache_h) $(gdb_assert_h) $(i386_tdep_h) $(gnu_nat_h) \
 	$(i387_tdep_h) $(gregset_h)
 i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(osabi_h) $(i386_tdep_h)
-i386-interix-nat.o: i386-interix-nat.c $(defs_h) $(gdb_string_h) \
-	$(gdbcore_h) $(gregset_h) $(regcache_h)
-i386-interix-tdep.o: i386-interix-tdep.c $(defs_h) $(arch_utils_h) \
-	$(frame_h) $(gdb_string_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
-	$(i386_tdep_h) $(inferior_h) $(libbfd_h) $(objfiles_h) $(osabi_h) \
-	$(regcache_h)
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gregset_h) $(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h) \
