@@ -203,6 +203,9 @@ struct complaint repeated_header_complaint =
 
 struct complaint unclaimed_bincl_complaint =
 {"N_BINCL %s not in entries for any file, at symtab pos %d", 0, 0};
+
+struct complaint discarding_local_symbols_complaint =
+{"misplaced N_LBRAC entry; discarding local symbols which have no enclosing block", 0, 0};
 
 /* find_text_range --- find start and end of loadable code sections
 
@@ -2881,7 +2884,21 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       /* Can only use new->locals as local symbols here if we're in
          gcc or on a machine that puts them before the lbrack.  */
       if (!VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
-	local_symbols = new->locals;
+	{
+	  if (local_symbols != NULL)
+	    {
+	      /* GCC development snapshots from March to December of
+		 2000 would output N_LSYM entries after N_LBRAC
+		 entries.  As a consequence, these symbols are simply
+		 discarded.  Complain if this is the case.  Note that
+		 there are some compilers which legitimately put local
+		 symbols within an LBRAC/RBRAC block; this complaint
+		 might also help sort out problems in which
+		 VARIABLES_INSIDE_BLOCK is incorrectly defined.  */
+	      complain (&discarding_local_symbols_complaint);
+	    }
+	  local_symbols = new->locals;
+	}
 
       if (context_stack_depth
 	  > !VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
