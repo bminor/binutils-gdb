@@ -413,9 +413,9 @@ struct coff_symbol *cs;
       /* In xcoff, we assume include files cannot be nested (not in .c files
 	 of course, but in corresponding .s files.).  */
 
-      /* 14 Apr 93: A user said he got this message, but said he'd deleted
-	 the test case.  I changed it from a fatal() to a complain()
-	 and changed the wording.  */
+      /* This can happen with old versions of GCC.
+	 GCC 2.3.3-930426 does not exhibit this on a test case which
+	 a user said produced the message for him.  */
       struct complaint msg = {"Nested C_BINCL symbols", 0, 0};
       complain (&msg);
     }
