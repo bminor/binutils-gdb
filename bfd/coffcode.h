@@ -368,6 +368,16 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_DATA;
     }
 #endif
+#ifdef RS6000COFF_C
+  else if (!strcmp (sec_name, _PAD))
+    {
+      styp_flags = STYP_PAD;
+    }
+  else if (!strcmp (sec_name, _LOADER))
+    {
+      styp_flags = STYP_LOADER;
+    }
+#endif
   /* Try and figure out what it should be */
   else if (sec_flags & SEC_CODE)
     {
@@ -858,6 +868,15 @@ coff_new_section_hook (abfd, section)
 {
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
 
+#ifdef RS6000COFF_C
+  if (xcoff_data (abfd)->text_align_power != 0
+      && strcmp (bfd_get_section_name (abfd, section), ".text") == 0)
+    section->alignment_power = xcoff_data (abfd)->text_align_power;
+  if (xcoff_data (abfd)->data_align_power != 0
+      && strcmp (bfd_get_section_name (abfd, section), ".data") == 0)
+    section->alignment_power = xcoff_data (abfd)->data_align_power;
+#endif
+
   /* Allocate aux records for section symbols, to store size and
      related info.
 
@@ -963,6 +982,25 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
   obj_raw_syment_count (abfd) =
     obj_conv_table_size (abfd) =
       internal_f->f_nsyms;
+
+#ifdef RS6000COFF_C
+  if ((internal_f->f_flags & F_SHROBJ) != 0)
+    abfd->flags |= DYNAMIC;
+  if (aouthdr != NULL && internal_f->f_opthdr >= AOUTSZ)
+    {
+      struct internal_aouthdr *internal_a =
+	(struct internal_aouthdr *) aouthdr;
+      struct xcoff_tdata *xcoff;
+
+      xcoff = xcoff_data (abfd);
+      xcoff->toc = internal_a->o_toc;
+      xcoff->text_align_power = internal_a->o_algntext;
+      xcoff->data_align_power = internal_a->o_algndata;
+      xcoff->modtype = internal_a->o_modtype;
+      xcoff->maxdata = internal_a->o_maxdata;
+      xcoff->maxstack = internal_a->o_maxstack;
+    }
+#endif
 
   return (PTR) coff;
 }
@@ -2036,6 +2074,13 @@ coff_write_object_contents (abfd)
      architectures.
      */
 
+#ifdef RS6000COFF_C
+  if ((abfd->flags & DYNAMIC) != 0)
+    internal_f.f_flags |= F_SHROBJ;
+  if (bfd_get_section_by_name (abfd, _LOADER) != NULL)
+    internal_f.f_flags |= F_DYNLOAD;
+#endif
+
   memset (&internal_a, 0, sizeof internal_a);
 
   /* Set up architecture-dependent stuff */
@@ -2179,6 +2224,72 @@ coff_write_object_contents (abfd)
 
   internal_a.entry = bfd_get_start_address (abfd);
   internal_f.f_nsyms = obj_raw_syment_count (abfd);
+
+#ifdef RS6000COFF_C
+  if ((abfd->flags & EXEC_P) != 0)
+    {
+      bfd_vma entry, toc;
+      asection *loader_sec;
+
+      entry = bfd_get_start_address (abfd);
+      if (text_sec != NULL
+	  && entry >= text_sec->vma
+	  && entry < text_sec->vma + bfd_section_size (abfd, text_sec))
+	internal_a.o_snentry = text_sec->target_index;
+      else if (data_sec != NULL
+	       && entry >= data_sec->vma
+	       && entry < data_sec->vma + bfd_section_size (abfd, data_sec))
+	internal_a.o_snentry = data_sec->target_index;
+      else
+	internal_a.o_snentry = 0;
+      if (text_sec != NULL)
+	{
+	  internal_a.o_sntext = text_sec->target_index;
+	  internal_a.o_algntext = bfd_get_section_alignment (abfd, text_sec);
+	}
+      else
+	{
+	  internal_a.o_sntext = 0;
+	  internal_a.o_algntext = 0;
+	}
+      if (data_sec != NULL)
+	{
+	  internal_a.o_sndata = data_sec->target_index;
+	  internal_a.o_algndata = bfd_get_section_alignment (abfd, data_sec);
+	}
+      else
+	{
+	  internal_a.o_sndata = 0;
+	  internal_a.o_algndata = 0;
+	}
+      loader_sec = bfd_get_section_by_name (abfd, ".loader");
+      if (loader_sec != NULL)
+	internal_a.o_snloader = loader_sec->target_index;
+      else
+	internal_a.o_snloader = 0;
+      if (bss_sec != NULL)
+	internal_a.o_snbss = bss_sec->target_index;
+      else
+	internal_a.o_snbss = 0;
+
+      toc = xcoff_data (abfd)->toc;
+      internal_a.o_toc = toc;
+      if (text_sec != NULL
+	  && toc >= text_sec->vma
+	  && toc < text_sec->vma + bfd_section_size (abfd, text_sec))
+	internal_a.o_sntoc = text_sec->target_index;
+      else if (data_sec != NULL
+	       && toc >= data_sec->vma
+	       && toc < data_sec->vma + bfd_section_size (abfd, data_sec))
+	internal_a.o_sntoc = data_sec->target_index;
+      else
+	internal_a.o_sntoc = 0;
+
+      internal_a.o_modtype = xcoff_data (abfd)->modtype;
+      internal_a.o_maxstack = xcoff_data (abfd)->maxstack;
+      internal_a.o_maxdata = xcoff_data (abfd)->maxdata;
+    }
+#endif
 
   /* now write them */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
@@ -2476,15 +2587,9 @@ coff_slurp_symbol_table (abfd)
 	      /* A C_HIDEXT symbol is not global.  */
 	      if (src->u.syment.n_sclass == C_HIDEXT)
 		dst->symbol.flags = BSF_LOCAL;
-	      /* A XTY_LD symbol should not go at the end.  */
+	      /* A symbol with a csect entry should not go at the end.  */
 	      if (src->u.syment.n_numaux > 0)
-		{
-		  combined_entry_type *auxp;
-
-		  auxp = src + src->u.syment.n_numaux;
-		  if (SMTYP_SMTYP (auxp->u.auxent.x_csect.x_smtyp) == XTY_LD)
-		    dst->symbol.flags |= BSF_NOT_AT_END;
-		}
+		dst->symbol.flags |= BSF_NOT_AT_END;
 #endif
 
 	      break;

@@ -487,11 +487,10 @@ coff_renumber_symbols (bfd_ptr, first_undef)
       }
     bfd_ptr->outsymbols = newsyms;
     for (i = 0; i < symbol_count; i++)
-      if (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
-	  && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL
-					   | BSF_NOT_AT_END
-					   | BSF_FUNCTION))
-	      != BSF_GLOBAL))
+      if ((symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) != 0
+	  || (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
+	      && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL | BSF_FUNCTION))
+		  != BSF_GLOBAL)))
 	*newsyms++ = symbol_ptr_ptr[i];
 
     for (i = 0; i < symbol_count; i++)
@@ -505,7 +504,8 @@ coff_renumber_symbols (bfd_ptr, first_undef)
     *first_undef = newsyms - bfd_ptr->outsymbols;
 
     for (i = 0; i < symbol_count; i++)
-      if (bfd_is_und_section (symbol_ptr_ptr[i]->section))
+      if ((symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) == 0
+	  && bfd_is_und_section (symbol_ptr_ptr[i]->section))
 	*newsyms++ = symbol_ptr_ptr[i];
     *newsyms = (asymbol *) NULL;
     symbol_ptr_ptr = bfd_ptr->outsymbols;

@@ -1,7 +1,32 @@
 Mon Oct  9 11:24:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* coffcode.h (coff_slurp_symbol_table): Set BSF_NOT_AT_END for an
-	XCOFF XTY_LD symbol.
+	* libcoff-in.h (struct xcoff_tdata): Define.
+	(xcoff_data): Define.
+	* bfd.c (struct _bfd): Add xcoff_obj_data field to tdata union.
+	* bfd-in2.h, libcoff.h: Rebuild.
+	* coff-rs6000.c (xcoff_mkobject): New static function.
+	(coff_mkobject): Define.
+	(xcoff_copy_private_bfd_data): New static function.
+	(coff_bfd_copy_private_bfd_data): Define.
+	(rs6000coff_howto_table): Change R_TOC complain_on_overflow from
+	signed to bitfield.
+	(rs6000coff_vec): Add DYNAMIC to object_flags.
+	* coffcode.h (sec_to_styp_flags): If RS6000COFF_C, handle .pad and
+	.loader sections specially.
+	(coff_new_section_hook): If RS6000COFF_C, get the .text and .data
+	section alignment from the XCOFF tdata information.
+	(coff_mkobject_hook): If RS6000COFF_C, set DYNAMIC based on
+	F_SHROBJ, and copy the extra a.out header information into the
+	XCOFF tdata structure.
+	(coff_write_object_contents): If RS6000COFF_C, set F_SHROBJ,
+	F_DYNLOAD and the extra a.out header information.
+	(coff_slurp_symbol_table): Set BSF_NOT_AT_END for a C_EXT or
+	C_HIDEXT symbol with attached csect information.
+	* coffswap.h (coff_swap_aouthdr_in): If RS6000COFF_C, swap
+	in the o_maxdata field.
+	(coff_swap_aouthdr_out): If RS6000COFF_C, swap extra XCOFF fields.
+	* coffgen.c (coff_renumber_symbols): Don't move any symbol to the
+	end if BSF_NOT_AT_END is set.
 
 	* targets.c (bfd_target): Rename _bfd_read_ar_hdr field to
 	_bfd_read_ar_hdr_fn.

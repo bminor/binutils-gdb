@@ -97,6 +97,33 @@ typedef struct pe_tdata
 
 #define pe_data(bfd)		((bfd)->tdata.pe_obj_data)
 
+/* Tdata for XCOFF files.  */
+
+struct xcoff_tdata
+{
+  /* Basic COFF information.  */
+  coff_data_type coff;
+
+  /* TOC value.  */
+  bfd_vma toc;
+
+  /* .text alignment from optional header.  */
+  int text_align_power;
+
+  /* .data alignment from optional header.  */
+  int data_align_power;
+
+  /* modtype from optional header.  */
+  short modtype;
+
+  /* maxdata from optional header.  */
+  bfd_size_type maxdata;
+
+  /* maxstack from optional header.  */
+  bfd_size_type maxstack;
+};
+
+#define xcoff_data(abfd) ((abfd)->tdata.xcoff_obj_data)
 
 /* We take the address of the first element of a asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */
