@@ -1,4 +1,4 @@
-/* Mips simulator watchpoint support.
+/* Generic simulator watchpoint support.
    Copyright (C) 1997 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -23,6 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-assert.h"
 
+#include <ctype.h>
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -37,76 +39,175 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <signal.h>
 
-static DECLARE_OPTION_HANDLER (watch_option_handler);
 
 enum {
   OPTION_WATCH_DELETE                      = OPTION_START,
 
-  OPTION_WATCH_PC,
+  OPTION_WATCH_INFO,
   OPTION_WATCH_CLOCK,
   OPTION_WATCH_CYCLES,
+  OPTION_WATCH_PC,
 
-  OPTION_ACTION_PC,
-  OPTION_ACTION_CLOCK,
-  OPTION_ACTION_CYCLES,
+  OPTION_WATCH_OP,
 };
 
 
-static void
-delete_watchpoint (SIM_DESC sd, watchpoint_type type)
+/* Break an option number into its op/int-nr */
+static watchpoint_type
+option_to_type (SIM_DESC sd,
+		int option)
 {
-  sim_watch_point *point = &STATE_WATCHPOINTS (sd)->points[type];
-  if (point->event != NULL)
-    sim_events_deschedule (sd, point->event);
-  point->action = invalid_watchpoint_action;
-  point->event = NULL;
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+  watchpoint_type type = ((option - OPTION_WATCH_OP)
+			  / (watch->nr_interrupts + 1));
+  SIM_ASSERT (type >= 0 && type < nr_watchpoint_types);
+  return type;
 }
+
+static int
+option_to_interrupt_nr (SIM_DESC sd,
+			int option)
+{
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+  int interrupt_nr = ((option - OPTION_WATCH_OP)
+		      % (watch->nr_interrupts + 1));
+  return interrupt_nr;
+}
+
+static int
+type_to_option (SIM_DESC sd,
+		watchpoint_type type,
+		int interrupt_nr)
+{
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+  return ((type * (watch->nr_interrupts + 1))
+	  + interrupt_nr
+	  + OPTION_WATCH_OP);
+}
+
+
+/* Delete one or more watchpoints.  Fail if no watchpoints were found */
+
+static SIM_RC
+do_watchpoint_delete (SIM_DESC sd,
+		      int ident,
+		      watchpoint_type type)
+{
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+  sim_watch_point **entry = &watch->points;
+  SIM_RC status = SIM_RC_FAIL;
+  while ((*entry) != NULL)
+    {
+      if ((*entry)->ident == ident
+	  || (*entry)->type == type)
+	{
+	  sim_watch_point *dead = (*entry);
+	  (*entry) = (*entry)->next;
+	  sim_events_deschedule (sd, dead->event);
+	  zfree (dead);
+	  status = SIM_RC_OK;
+	}
+      else
+	entry = &(*entry)->next;
+    }
+  return status;
+}
+
+static char *
+watchpoint_type_to_str (SIM_DESC sd,
+			watchpoint_type type)
+{
+  switch (type)
+    {
+    case  pc_watchpoint:
+      return "pc";
+    case clock_watchpoint:
+      return "clock";
+    case cycles_watchpoint:
+      return "cycles";
+    case invalid_watchpoint:
+    case nr_watchpoint_types:
+      return "(invalid-type)";
+    }
+  return NULL;
+}
+
+static char *
+interrupt_nr_to_str (SIM_DESC sd,
+		     int interrupt_nr)
+{
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+  if (interrupt_nr < 0)
+    return "(invalid-interrupt)";
+  else if (interrupt_nr >= watch->nr_interrupts)
+    return "breakpoint";
+  else
+    return watch->interrupt_names[interrupt_nr];
+}
+
+
+static void
+do_watchpoint_info (SIM_DESC sd)
+{
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
+  sim_watch_point *point;
+  sim_io_printf (sd, "Watchpoints:\n");
+  for (point = watch->points; point != NULL; point = point->next)
+    {
+      sim_io_printf (sd, "%3d: watch %s %s ",
+		     point->ident,
+		     watchpoint_type_to_str (sd, point->type),
+		     interrupt_nr_to_str (sd, point->interrupt_nr));
+      if (point->is_periodic)
+	sim_io_printf (sd, "+");
+      if (!point->is_within)
+	sim_io_printf (sd, "!");
+      sim_io_printf (sd, "0x%lx", point->arg0);
+      if (point->arg1 != point->arg0)
+	sim_io_printf (sd, ",0x%lx", point->arg1);
+      sim_io_printf (sd, "\n");
+    }
+}
+		    
 
 
 static sim_event_handler handle_watchpoint;
 
 static SIM_RC
 schedule_watchpoint (SIM_DESC sd,
-		     watchpoint_type type,
-		     unsigned long arg,
-		     int is_within,
-		     int is_command)
+		     sim_watch_point *point)
 {
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
-  sim_watch_point *point = &watch->points[type];
-  if (point->event != NULL)
-    sim_events_deschedule (sd, point->event);
-  point->arg = arg;
-  point->is_within = is_within;
-  if (point->action == invalid_watchpoint_action)
-    point->action = break_watchpoint_action;
-  if (is_command)
-    switch (type)
-      {
-      case pc_watchpoint:
-	point->event = sim_events_watch_sim (sd, watch->pc, watch->sizeof_pc,
-					     0/* host-endian */,
-					     point->is_within,
-					     point->arg, point->arg, /* PC == arg? */
+  switch (point->type)
+    {
+    case pc_watchpoint:
+      point->event = sim_events_watch_sim (sd,
+					   watch->pc,
+					   watch->sizeof_pc,
+					   0/* host-endian */,
+					   point->is_within,
+					   point->arg0, point->arg1,
+					   /* PC in arg0..arg1 */
+					   handle_watchpoint,
+					   point);
+      return SIM_RC_OK;
+    case clock_watchpoint:
+      point->event = sim_events_watch_clock (sd,
+					     point->arg0, /* ms time */
 					     handle_watchpoint,
 					     point);
-	return SIM_RC_OK;
-      case clock_watchpoint:
-	point->event = sim_events_watch_clock (sd,
-					       point->arg, /* ms time */
-					       handle_watchpoint,
-					       point);
-	return SIM_RC_OK;
-      case cycles_watchpoint:
-	point->event = sim_events_schedule (sd, point->arg, /* time */
-					    handle_watchpoint,
-					    point);
-	return SIM_RC_OK;
-      default:
-	sim_engine_abort (sd, NULL, NULL_CIA,
-			  "handle_watchpoint - internal error - bad switch");
-	return SIM_RC_FAIL;
-      }
+      return SIM_RC_OK;
+    case cycles_watchpoint:
+      point->event = sim_events_schedule (sd,
+					  point->arg0, /* time */
+					  handle_watchpoint,
+					  point);
+      return SIM_RC_OK;
+    default:
+      sim_engine_abort (sd, NULL, NULL_CIA,
+			"handle_watchpoint - internal error - bad switch");
+      return SIM_RC_FAIL;
+    }
   return SIM_RC_OK;
 }
 
@@ -115,195 +216,223 @@ static void
 handle_watchpoint (SIM_DESC sd, void *data)
 {
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
-  sim_watch_point *point = data;
-  watchpoint_type type = point - watch->points;
+  sim_watch_point *point = (sim_watch_point *) data;
+  int interrupt_nr = point->interrupt_nr;
 
-  switch (point->action)
-    {
-
-    case break_watchpoint_action:
-      point->event = NULL; /* gone */
-      sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIGINT);
-      break;
-
-    case n_interrupt_watchpoint_action:
-      /* First reschedule this event */
-      schedule_watchpoint (sd, type, point->arg, point->is_within, 1/*is-command*/);
-      /* FALL-THROUGH */
-
-    case interrupt_watchpoint_action:
-      watch->interrupt_handler (sd, NULL);
-      break;
-
-    default:
-      sim_engine_abort (sd, NULL, NULL_CIA,
-			"handle_watchpoint - internal error - bad switch");
-
-    }
+  if (point->is_periodic)
+    /* reschedule this event before processing it */
+    schedule_watchpoint (sd, point);
+  else
+    do_watchpoint_delete (sd, point->ident, invalid_watchpoint);
+    
+  if (point->interrupt_nr == watch->nr_interrupts)
+    sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIGINT);
+  else
+    watch->interrupt_handler (sd, &interrupt_nr);
 }
 
 
 static SIM_RC
-action_watchpoint (SIM_DESC sd, watchpoint_type type, const char *arg)
+do_watchpoint_create (SIM_DESC sd,
+		      watchpoint_type type,
+		      int opt,
+		      char *arg)
 {
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
-  sim_watch_point *point = &watch->points[type];
-  if (strcmp (arg, "break") == 0)
+  sim_watch_point **point;
+
+  /* create the watchpoint */
+  point = &watch->points;
+  while ((*point) != NULL)
+    point = &(*point)->next;
+  (*point) = ZALLOC (sim_watch_point);
+
+  /* fill in the details */
+  (*point)->ident = ++(watch->last_point_nr);
+  (*point)->type = option_to_type (sd, opt);
+  (*point)->interrupt_nr = option_to_interrupt_nr (sd, opt);
+  /* prefixes to arg - +== periodic, !==not or outside */
+  (*point)->is_within = 1;
+  while (1)
     {
-      point->action = break_watchpoint_action;
+      if (arg[0] == '+')
+	(*point)->is_periodic = 1;
+      else if (arg[0] == '!')
+	(*point)->is_within = 0;
+      else
+	break;
+      arg++;
     }
-  else if (strcmp (arg, "int") == 0)
-    {
-      if (watch->interrupt_handler == NULL)
-	{
-	  sim_io_eprintf (sd, "This simulator does not support int watchpoints\n");
-	  return SIM_RC_FAIL;
-	}
-      point->action = interrupt_watchpoint_action;
-    }
-  else if (strcmp (arg, "+int") == 0)
-    {
-      if (watch->interrupt_handler == NULL)
-	{
-	  sim_io_eprintf (sd, "This simulator does not support int watchpoints\n");
-	  return SIM_RC_FAIL;
-	}
-      point->action = n_interrupt_watchpoint_action;
-    }
+	
+  (*point)->arg0 = strtoul (arg, &arg, 0);
+  if (arg[0] == ',')
+    (*point)->arg0 = strtoul (arg, NULL, 0);
   else
-    {
-      sim_io_eprintf (sd, "Interrupts other than `int' currently unsuported\n");
-      return SIM_RC_FAIL;
-    }
+    (*point)->arg1 = (*point)->arg0;
+
+  /* schedule it */
+  schedule_watchpoint (sd, (*point));
+
   return SIM_RC_OK;
 }
 
 
-static const OPTION watch_options[] =
-{
-  { {"watch-delete", required_argument, NULL, OPTION_WATCH_DELETE },
-      '\0', "all|pc|cycles|clock", "Delete a watchpoint",
-      watch_option_handler },
-  { {"delete-watch", required_argument, NULL, OPTION_WATCH_DELETE },
-      '\0', "all|pc|cycles|clock", NULL,
-      watch_option_handler },
-
-  { {"watch-pc", required_argument, NULL, OPTION_WATCH_PC },
-      '\0', "[!] VALUE", "Watch the PC (break)",
-      watch_option_handler },
-  { {"watch-clock", required_argument, NULL, OPTION_WATCH_CLOCK },
-      '\0', "TIME-IN-MS", "Watch the clock (break)",
-      watch_option_handler },
-  { {"watch-cycles", required_argument, NULL, OPTION_WATCH_CYCLES },
-      '\0', "CYCLES", "Watch the cycles (break)",
-      watch_option_handler },
-
-  { {"action-pc", required_argument, NULL, OPTION_ACTION_PC },
-      '\0', "break|int|+int", "Action taken by PC watchpoint",
-      watch_option_handler },
-  { {"action-clock", required_argument, NULL, OPTION_ACTION_CLOCK },
-      '\0', "break|int|+int", "Action taken by CLOCK watchpoint",
-      watch_option_handler },
-  { {"action-cycles", required_argument, NULL, OPTION_ACTION_CYCLES },
-      '\0', "break|int|+int", "Action taken by CYCLES watchpoint",
-      watch_option_handler },
-
-  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
-};
-
-
 static SIM_RC
-watch_option_handler (sd, opt, arg, is_command)
+watchpoint_option_handler (sd, opt, arg, is_command)
      SIM_DESC sd;
      int opt;
      char *arg;
      int is_command;
 {
-  switch (opt)
-    {
-
-    case OPTION_WATCH_DELETE:
-      if (strcmp (arg, "all") == 0
-	  || strcmp (arg, "pc") == 0)
+  if (opt >= OPTION_WATCH_OP)
+    return do_watchpoint_create (sd, clock_watchpoint, opt, arg);
+  else
+    switch (opt)
+      {
+	
+      case OPTION_WATCH_DELETE:
+	if (isdigit ((int) arg[0]))
+	  {
+	    int ident = strtol (arg, NULL, 0);
+	    if (do_watchpoint_delete (sd, ident, invalid_watchpoint)
+		!= SIM_RC_OK)
+	      {
+		sim_io_eprintf (sd, "Watchpoint %d not found\n", ident);
+		return SIM_RC_FAIL;
+	      }
+	    return SIM_RC_OK;
+	  }
+	else if (strcasecmp (arg, "all") == 0)
+	  {
+	    watchpoint_type type;
+	    for (type = invalid_watchpoint + 1;
+		 type < nr_watchpoint_types;
+		 type++)
+	      {
+		do_watchpoint_delete (sd, 0, type);
+	      }
+	    return SIM_RC_OK;
+	  }
+	else if (strcasecmp (arg, "pc") == 0)
+	  {
+	    if (do_watchpoint_delete (sd, 0, pc_watchpoint)
+		!= SIM_RC_OK)
+	      {
+		sim_io_eprintf (sd, "No PC watchpoints found\n");
+		return SIM_RC_FAIL;
+	      }
+	    return SIM_RC_OK;
+	  }
+	else if (strcasecmp (arg, "clock") == 0)
+	  {
+	    if (do_watchpoint_delete (sd, 0, clock_watchpoint) != SIM_RC_OK)
+	      {
+		sim_io_eprintf (sd, "No CLOCK watchpoints found\n");
+		return SIM_RC_FAIL;
+	      }
+	    return SIM_RC_OK;
+	  }
+	else if (strcasecmp (arg, "cycles") == 0)
+	  {
+	    if (do_watchpoint_delete (sd, 0, cycles_watchpoint) != SIM_RC_OK)
+	      {
+		sim_io_eprintf (sd, "No CYCLES watchpoints found\n");
+		return SIM_RC_FAIL;
+	      }
+	    return SIM_RC_OK;
+	  }
+	sim_io_eprintf (sd, "Unknown watchpoint type `%s'\n", arg);
+	return SIM_RC_FAIL;
+	
+      case OPTION_WATCH_INFO:
 	{
-	  delete_watchpoint (sd, pc_watchpoint);
+	  do_watchpoint_info (sd);
 	  return SIM_RC_OK;
 	}
-      if (strcmp (arg, "all") == 0
-	  || strcmp (arg, "clock") == 0)
-	{
-	  delete_watchpoint (sd, clock_watchpoint);
-	  return SIM_RC_OK;
-	}
-      if (strcmp (arg, "all") == 0
-	  || strcmp (arg, "cycles") == 0)
-	{
-	  delete_watchpoint (sd, cycles_watchpoint);
-	  return SIM_RC_OK;
-	}
-      sim_io_eprintf (sd, "Unknown watchpoint type `%s'\n", arg);
-      return SIM_RC_FAIL;
-
-    case OPTION_WATCH_PC:
-      if (STATE_WATCHPOINTS (sd)->pc == NULL)
-	{
-	  sim_io_eprintf (sd, "PC watchpoints are not supported for this simulator\n");
-	  return SIM_RC_FAIL;
-	}
-      if (arg[0] == '!')
-	return schedule_watchpoint (sd, pc_watchpoint, strtoul (arg + 1, NULL, 0),
-				    0 /* !is_within */, is_command);
-      else
-	return schedule_watchpoint (sd, pc_watchpoint, strtoul (arg, NULL, 0),
-				    1 /* is_within */, is_command);
-
-    case OPTION_WATCH_CLOCK:
-      return schedule_watchpoint (sd, clock_watchpoint, strtoul (arg, NULL, 0), 0, is_command);
-
-    case OPTION_WATCH_CYCLES:
-      return schedule_watchpoint (sd, cycles_watchpoint, strtoul (arg, NULL, 0), 0, is_command);
-
-    case OPTION_ACTION_PC:
-      return action_watchpoint (sd, pc_watchpoint, arg);
-
-    case OPTION_ACTION_CLOCK:
-      return action_watchpoint (sd, clock_watchpoint, arg);
-
-    case OPTION_ACTION_CYCLES:
-      return action_watchpoint (sd, cycles_watchpoint, arg);
-
-
-    default:
-      sim_io_eprintf (sd, "Unknown watch option %d\n", opt);
-      return SIM_RC_FAIL;
-
-    }
-
+      
+      default:
+	sim_io_eprintf (sd, "Unknown watch option %d\n", opt);
+	return SIM_RC_FAIL;
+	
+      }
+  
 }
+
 
 static SIM_RC
 sim_watchpoint_init (SIM_DESC sd)
 {
-  /* schedule any watchpoints enabled by command line options */
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
-  watchpoint_type type;
-  for (type = 0; type < nr_watchpoint_types; type++)
+  sim_watch_point *point;
+  /* NOTE: Do not need to de-schedule any previous watchpoints as
+     sim-events has already done this */
+  /* schedule any watchpoints enabled by command line options */
+  for (point = watch->points; point != NULL; point = point->next)
     {
-      if (watch->points[type].action != invalid_watchpoint_action)
-	schedule_watchpoint (sd, type,
-			     watch->points[type].arg,
-			     watch->points[type].is_within,
-			     1 /*is-command*/);
+      schedule_watchpoint (sd, point);
     }
   return SIM_RC_OK;
 }
 
 
+static const OPTION watchpoint_options[] =
+{
+  { {"watch-delete", required_argument, NULL, OPTION_WATCH_DELETE },
+      '\0', "IDENT|all|pc|cycles|clock", "Delete a watchpoint",
+      watchpoint_option_handler },
+
+  { {"watch-info", no_argument, NULL, OPTION_WATCH_INFO },
+      '\0', NULL, "List scheduled watchpoints",
+      watchpoint_option_handler },
+
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+};
+
+static const OPTION template_int_option = {
+  { NULL, required_argument, NULL, 0 },
+  '\0', "VALUE", "Create the specified watchpoint",
+  watchpoint_option_handler,
+};
+
+static char *default_interrupt_names[] = { "int", 0, };
+
+
+
 SIM_RC
 sim_watchpoint_install (SIM_DESC sd)
 {
+  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  sim_add_option_table (sd, watch_options);
+  /* the basic command set */
   sim_module_add_init_fn (sd, sim_watchpoint_init);
+  sim_add_option_table (sd, watchpoint_options);
+  /* fill in some details */
+  if (watch->interrupt_names == NULL)
+    watch->interrupt_names = default_interrupt_names;
+  watch->nr_interrupts = 0;
+  while (watch->interrupt_names[watch->nr_interrupts] != NULL)
+    watch->nr_interrupts++;
+  /* generate more advansed commands */
+  {
+    OPTION *int_options = NZALLOC (OPTION, 1 + (watch->nr_interrupts + 1) * nr_watchpoint_types);
+    int interrupt_nr;
+    for (interrupt_nr = 0; interrupt_nr <= watch->nr_interrupts; interrupt_nr++)
+      {
+	watchpoint_type type;
+	for (type = 0; type < nr_watchpoint_types; type++)
+	  {
+	    int nr = interrupt_nr * nr_watchpoint_types + type;
+	    OPTION *option = &int_options[nr];
+	    char *name;
+	    *option = template_int_option;
+	    asprintf (&name, "watch-%s-%s",
+		      watchpoint_type_to_str (sd, type),
+		      interrupt_nr_to_str (sd, interrupt_nr));
+	    option->opt.name = name;
+	    option->opt.val = type_to_option (sd, type, interrupt_nr);
+	  }
+      }
+    sim_add_option_table (sd, int_options);
+  }
   return SIM_RC_OK;
 }

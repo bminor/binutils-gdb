@@ -297,8 +297,12 @@ sim_core_attach (SIM_DESC sd,
 	  if (mask < 7) /* 8 is minimum modulo */
 	    mask = 0;
 	  while (mask > 1) /* no zero bits */
-	    if ((mask & 1) == 0)
-	      mask = 0;
+	    {
+	      if ((mask & 1) == 0)
+		mask = 0;
+	      else
+		mask >>= 1;
+	    }
 	  if (mask == 0)
 	    {
 #if (WITH_DEVICES)
@@ -308,7 +312,7 @@ sim_core_attach (SIM_DESC sd,
 #endif
 	    }
 	}
-      else if (WITH_MODULO_MEMORY && modulo != 0)
+      else if (!WITH_MODULO_MEMORY && modulo != 0)
 	{
 #if (WITH_DEVICES)
 	  device_error (client, "sim_core_attach - internal error - modulo memory disabled");

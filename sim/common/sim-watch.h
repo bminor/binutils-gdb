@@ -23,25 +23,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SIM_WATCH_H
 
 typedef enum {
+  invalid_watchpoint = -1,
   pc_watchpoint,
   clock_watchpoint,
   cycles_watchpoint,
   nr_watchpoint_types,
 } watchpoint_type;
 
-typedef enum {
-  invalid_watchpoint_action,
-  n_interrupt_watchpoint_action,
-  interrupt_watchpoint_action,
-  break_watchpoint_action,
-} watchpoint_action;
-
-typedef struct _sim_watch_point {
-  watchpoint_action action;
+typedef struct _sim_watch_point sim_watch_point;
+struct _sim_watch_point {
+  int ident;
+  watchpoint_type type;
+  int interrupt_nr; /* == nr_interrupts -> breakpoint */
+  int is_periodic;
   int is_within;
-  long arg;
+  unsigned long arg0;
+  unsigned long arg1;
   sim_event *event;
-} sim_watch_point;
+  sim_watch_point *next;
+};
 
 
 typedef struct _sim_watchpoints {
@@ -55,10 +55,18 @@ typedef struct _sim_watchpoints {
 
   /* Pointer to the handler for interrupt watchpoints */
   /* FIXME: can this be done better? */
+  /* NOTE, interrupt is passed in as the target of the pointer! */
   sim_event_handler *interrupt_handler;
 
-  /* suported watchpoints */
-  sim_watch_point points[nr_watchpoint_types];
+  /* Pointer to a null terminated list of interrupt names */
+  /* FIXME: can this be done better?  Look at the PPC's interrupt
+     mechanism and table for a rough idea of where it will go next */
+  int nr_interrupts;
+  char **interrupt_names;
+
+  /* active watchpoints */
+  int last_point_nr;
+  sim_watch_point *points;
 
 } sim_watchpoints;
 
