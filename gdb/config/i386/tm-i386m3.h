@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Include common definitions for Mach3 systems */
-#include "os-mach3.h"
+#include "nm-m3.h"
 
 /* Define offsets to access CPROC stack when it does not have
  * a kernel thread.
@@ -57,14 +57,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NAMES_HAVE_UNDERSCORE
 
 /* Sigh. There should be a file for i386 but no sysv stuff in it */
-#include "tm-i386v.h"
+#include "i386/tm-i386v.h"
 
 /* I want to test this float info code. See comment in tm-i386v.h */
 #undef FLOAT_INFO
 #define FLOAT_INFO { i386_mach3_float_info (); }
-
-/* We use a.out format */
-#undef COFF_NO_LONG_FILE_NAMES
 
 /* Address of end of stack space.
  * for MACH, see <machine/vmparam.h>

@@ -251,10 +251,6 @@ st2000_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-#ifdef CREATE_INFERIOR_HOOK
-  CREATE_INFERIOR_HOOK (0);		/* No process-ID */
-#endif  
-
 /* The "process" (board) is already stopped awaiting our commands, and
    the program is already downloaded.  We just set its PC and go.  */
 

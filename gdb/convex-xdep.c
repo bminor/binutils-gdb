@@ -306,6 +306,9 @@ write_inferior_memory (memaddr, myaddr, len)
    and started up.  We must do a pattach to grab it for debugging.
 
    Also, intercept the CONT command by altering its dispatch address.  */
+/* FIXME: This used to be called from a macro CREATE_INFERIOR_HOOK.
+   But now init_trace_fun is in the same place.  So re-write this to
+   use the init_trace_fun (making convex a debugging target).  */
 
 create_inferior_hook (pid)
     int pid;

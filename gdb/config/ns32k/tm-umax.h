@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* This is also included by tm-ns32km3.h, as well as being used by umax.  */
+
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
 /* Need to get function ends by adding this to epilogue address from .bf
@@ -50,7 +52,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Address of end of stack space.  */
 
+#ifndef STACK_END_ADDR
 #define STACK_END_ADDR (0xfffff000)
+#endif
 
 /* Stack grows downward.  */
 
@@ -70,6 +74,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0x12)
 
+#ifndef INVALID_FLOAT
 #ifndef NaN
 #include <nan.h>
 #endif NaN
@@ -80,6 +85,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	 ((s == sizeof (float))?	\
 		NaF (*(float *) p) :	\
 		NaD (*(double *) p))
+#endif /* INVALID_FLOAT */
 
 /* Say how long (ordinary) registers are.  */
 

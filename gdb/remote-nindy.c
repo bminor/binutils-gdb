@@ -609,12 +609,8 @@ nindy_create_inferior (execfile, args, env)
 
   pid = 42;
 
-#ifdef CREATE_INFERIOR_HOOK
-  CREATE_INFERIOR_HOOK (pid);
-#endif  
-
-/* The "process" (board) is already stopped awaiting our commands, and
-   the program is already downloaded.  We just set its PC and go.  */
+  /* The "process" (board) is already stopped awaiting our commands, and
+     the program is already downloaded.  We just set its PC and go.  */
 
   inferior_pid = pid;		/* Needed for wait_for_inferior below */
 

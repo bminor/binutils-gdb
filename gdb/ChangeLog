@@ -1,3 +1,22 @@
+Thu Oct 14 20:34:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* fork-child.c (fork_inferior), remote-eb.c (eb_create_inferior),
+	remote-mon.c (monitor_create_inferior), remote-nindy.c
+	(nindy_create_inferior), remote-st.c (st2000_create_inferior),
+	remote-vx.c (vx_create_inferior): Remove CREATE_INFERIOR_HOOK; it
+	is replaced by init_trace_fun.
+	* config/convex/xm-convex.h, convex-xdep.c: Add comments explaining
+	how to do without CREATE_INFERIOR_HOOK for whoever fixes the Convex
+	port.
+
+	* Makefile.in: Add Mach files to ALLDEPFILES, etc.
+	* m3-nat.c: Clean up more hair--message(), cprocs.
+	* configure.in: Recognize Mach targets and hosts.
+	* config/ns32k/tm-umax.h: Add some #ifndef's so tm-ns32km3.h can
+	include this file.
+	* Mach headers in config/*/tm-*.h: Fix includes to match correct
+	locations of files.
+
 Thu Oct 14 21:35:55 1993  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* remote-mon.c (general_open): Set dev_name. Minor tweaking to get

@@ -22,4 +22,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 #define MK67 1
 
-#include "tm-i386mach3.h"
+#include "i386/tm-i386m3.h"

@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 /* Include common definitions for Mach3 systems */
-#include "os-mach3.h"
+#include "nm-m3.h"
 
 /* Define offsets to access CPROC stack when it does not have
  * a kernel thread.
@@ -54,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Mach supports attach/detach */
 #define ATTACH_DETACH 1
 
-#include "tm-mips.h"
+#include "mips/tm-mips.h"
 
 /*
  * On Mach 3.0 this is the number of exec() system calls before

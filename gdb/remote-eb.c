@@ -252,10 +252,6 @@ eb_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-#ifdef CREATE_INFERIOR_HOOK
-  CREATE_INFERIOR_HOOK (0);		/* No process-ID */
-#endif  
-
   {
     /* OK, now read in the file.  Y=read, C=COFF, D=no symbols
        0=start address, %s=filename.  */

@@ -373,7 +373,7 @@ HFILES = buildsym.h call-cmds.h defs.h environ.h $(gdbcmd_h) \
 	config/m68k/tm-m68k.h config/pa/tm-hppa.h config/i960/tm-i960.h \
 	config/sparc/tm-sparc.h config/tm-sunos.h config/tm-sysv4.h \
 	config/m68k/xm-m68k.h config/sparc/xm-sparc.h config/xm-sysv4.h \
-	config/vax/xm-vax.h config/nm-trash.h $(udiheaders) \
+	config/vax/xm-vax.h config/nm-m3.h config/nm-trash.h $(udiheaders) \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
 	nindy-share/env.h nindy-share/stop.h \
@@ -561,7 +561,6 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.
-# The xyzzy stuff below deals with empty DEPFILES
 TAGS:	
 	etags `find $(srcdir)/config \( -name $(TM_FILE) \
 		-o -name $(XM_FILE) \
@@ -812,22 +811,27 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
-	i386aix-nat.c i386v4-nat.c i386lynx-nat.c i386ly-tdep.c i387-tdep.c \
+	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386lynx-nat.c i386ly-tdep.c \
+	i387-tdep.c \
 	i960-pinsn.c i960-tdep.c \
-	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m68k-pinsn.c m68k-tdep.c \
+	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m3-nat.c \
+	m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
-	mips-tdep.c news-xdep.c nindy-share/Onindy.c nindy-share/nindy.c \
+	mips-tdep.c mipsm3-nat.c news-xdep.c \
+	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
-	ns32k-pinsn.c osfsolib.c \
+	ns32k-pinsn.c ns32km3-nat.c osfsolib.c \
 	paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
-	remote-adapt.c remote-bug.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
+	remote-adapt.c remote-bug.c remote-eb.c remote-es.c \
+	remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-pinsn.c sparc-tdep.c sun3-nat.c sun386-nat.c symm-tdep.c \
 	symm-nat.c tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
-	vax-pinsn.c vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
+	vax-pinsn.c \
+	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	xcoffexec.c xcoffread.c xcoffsolib.c z8k-tdep.c
 
 ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
@@ -844,13 +848,15 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/i386/nm-i386v4.h config/i386/nm-linux.h \
 	config/i386/nm-sun386.h config/i386/nm-symmetry.h \
 	config/i386/tm-i386aix.h config/i386/tm-i386bsd.h \
-	config/i386/tm-i386lynx.h config/i386/tm-i386nw.h \
+	config/i386/tm-i386lynx.h config/i386/tm-i386m3.h \
+	config/i386/tm-i386mk.hconfig/i386/tm-i386nw.h \
 	config/i386/tm-i386v.h \
 	config/i386/tm-i386v4.h config/i386/tm-linux.h \
 	config/i386/tm-sun386.h \
 	config/i386/tm-symmetry.h config/i386/xm-go32.h \
 	config/i386/xm-i386aix.h config/i386/xm-i386bsd.h \
 	config/i386/xm-i386lynx.h config/i386/xm-i386mach.h \
+	config/i386/xm-i386m3.h config/i386/xm-i386mk.h \
 	config/i386/xm-i386sco.h config/i386/xm-i386v.h \
 	config/i386/xm-i386v32.h config/i386/xm-i386v4.h \
 	config/i386/xm-linux.h config/i386/xm-sun386.h \
@@ -879,13 +885,18 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m88k/xm-delta88.h config/m88k/xm-m88k.h config/mips/nm-irix3.h \
 	config/mips/nm-irix4.h config/mips/nm-mips.h config/mips/nm-riscos.h \
 	config/mips/nm-news-mips.h config/mips/tm-bigmips.h \
-	config/mips/tm-irix3.h config/mips/tm-mips.h config/mips/xm-irix3.h \
+	config/mips/tm-irix3.h config/mips/tm-mips.h config/mips/tm-mipsm3.h \
+	config/mips/xm-irix3.h \
 	config/mips/xm-irix4.h config/mips/xm-makeva.h config/mips/xm-mips.h \
+	config/mips/xm-mipsm3.h \
 	config/mips/xm-riscos.h config/mips/xm-news-mips.h config/nm-sysv4.h \
 	config/none/nm-none.h config/none/tm-none.h config/none/xm-none.h \
-	config/ns32k/nm-umax.h config/ns32k/tm-merlin.h \
-	config/ns32k/tm-umax.h \
-	config/ns32k/xm-merlin.h config/ns32k/xm-umax.h config/pa/nm-hppab.h \
+	config/ns32k/nm-umax.h \
+	config/ns32k/tm-ns32km3.h \
+	config/ns32k/tm-merlin.h config/ns32k/tm-umax.h \
+	config/ns32k/xm-ns32km3.h \
+	config/ns32k/xm-merlin.h config/ns32k/xm-umax.h \
+	config/pa/nm-hppab.h \
 	config/pa/nm-hppah.h config/pa/tm-hppab.h config/pa/tm-hppah.h \
 	config/pa/xm-hppab.h config/pa/xm-hppah.h config/pa/xm-pa.h \
 	config/pyr/tm-pyr.h \

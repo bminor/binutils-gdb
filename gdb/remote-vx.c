@@ -215,10 +215,6 @@ vx_create_inferior (exec_file, args, env)
   vx_running = savestring (passArgs.arg_array_val[0],
 			   strlen (passArgs.arg_array_val[0]));
 
-#ifdef CREATE_INFERIOR_HOOK
-  CREATE_INFERIOR_HOOK (pid);
-#endif  
-
   push_target (&vx_run_ops);
   inferior_pid = taskStart.pid;
 

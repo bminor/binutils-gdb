@@ -67,14 +67,44 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <cthreads.h>
 
-/*
- * Mis-use the struct cproc busy field in the copy of
- * the cproc in gdb's address space.
- *
- * This *can* be done otherwise, but I'm too lazy.
- * (Don't tell anyone :-)
- */
-#define CPROC_REVERSE_MAP(x) ((x)->busy)
+/* This is what a cproc looks like.  This is here partly because
+   cthread_internals.h is not a header we can just #include, partly with
+   an eye towards perhaps getting this to work with cross-debugging
+   someday.  Best solution is if CMU publishes a real interface to this
+   stuff.  */
+#define CPROC_NEXT_OFFSET 0
+#define CPROC_NEXT_SIZE (TARGET_PTR_BIT / HOST_CHAR_BIT)
+#define CPROC_INCARNATION_OFFSET (CPROC_NEXT_OFFSET + CPROC_NEXT_SIZE)
+#define CPROC_INCARNATION_SIZE (sizeof (cthread_t))
+#define CPROC_LIST_OFFSET (CPROC_INCARNATION_OFFSET + CPROC_INCARNATION_SIZE)
+#define CPROC_LIST_SIZE (TARGET_PTR_BIT / HOST_CHAR_BIT)
+#define CPROC_WAIT_OFFSET (CPROC_LIST_OFFSET + CPROC_LIST_SIZE)
+#define CPROC_WAIT_SIZE (TARGET_PTR_BIT / HOST_CHAR_BIT)
+#define CPROC_REPLY_OFFSET (CPROC_WAIT_OFFSET + CPROC_WAIT_SIZE)
+#define CPROC_REPLY_SIZE (sizeof (mach_port_t))
+#define CPROC_CONTEXT_OFFSET (CPROC_REPLY_OFFSET + CPROC_REPLY_SIZE)
+#define CPROC_CONTEXT_SIZE (TARGET_INT_BIT / HOST_CHAR_BIT)
+#define CPROC_LOCK_OFFSET (CPROC_CONTEXT_OFFSET + CPROC_CONTEXT_SIZE)
+#define CPROC_LOCK_SIZE (sizeof (spin_lock_t))
+#define CPROC_STATE_OFFSET (CPROC_LOCK_OFFSET + CPROC_LOCK_SIZE)
+#define CPROC_STATE_SIZE (TARGET_INT_BIT / HOST_CHAR_BIT)
+#define CPROC_WIRED_OFFSET (CPROC_STATE_OFFSET + CPROC_STATE_SIZE)
+#define CPROC_WIRED_SIZE (sizeof (mach_port_t))
+#define CPROC_BUSY_OFFSET (CPROC_WIRED_OFFSET + CPROC_WIRED_SIZE)
+#define CPROC_BUSY_SIZE (TARGET_INT_BIT / HOST_CHAR_BIT)
+#define CPROC_MSG_OFFSET (CPROC_BUSY_OFFSET + CPROC_BUSY_SIZE)
+#define CPROC_MSG_SIZE (sizeof (mach_msg_header_t))
+#define CPROC_BASE_OFFSET (CPROC_MSG_OFFSET + CPROC_MSG_SIZE)
+#define CPROC_BASE_SIZE (TARGET_INT_BIT / HOST_CHAR_BIT)
+#define CPROC_SIZE_OFFSET (CPROC_BASE_OFFSET + CPROC_BASE_SIZE)
+#define CPROC_SIZE_SIZE (TARGET_INT_BIT / HOST_CHAR_BIT)
+#define CPROC_SIZE (CPROC_SIZE_OFFSET + CPROC_SIZE_SIZE)
+
+/* Values for the state field in the cproc.  */
+#define CPROC_RUNNING	0
+#define CPROC_SWITCHING 1
+#define CPROC_BLOCKED	2
+#define CPROC_CONDWAIT	4
 
 /* For cproc and kernel thread mapping */
 typedef struct gdb_thread {
@@ -82,9 +112,23 @@ typedef struct gdb_thread {
   CORE_ADDR	sp;
   CORE_ADDR	pc;
   CORE_ADDR	fp;
-  cproc_t	cproc;
   boolean_t     in_emulator;
   int		slotid;
+
+  /* This is for the mthreads list.  It points to the cproc list.
+     Perhaps the two lists should be merged (or perhaps it was a mistake
+     to make them both use a struct gdb_thread).  */
+  struct gdb_thread *cproc;
+
+  /* These are for the cproc list, which is linked through the next field
+     of the struct gdb_thread.  */
+  char raw_cproc[CPROC_SIZE];
+  /* The cthread which is pointed to by the incarnation field from the
+     cproc.  This points to the copy we've read into GDB.  */
+  cthread_t cthread;
+  /* Point back to the mthreads list.  */
+  int reverse_map;
+  struct gdb_thread *next;
 } *gdb_thread_t;
 
 /* 
@@ -136,7 +180,7 @@ char *fmt;
 int a,b,c;
 {
   if (debug_level)
-    message (fmt, a, b, c);
+    warning (fmt, a, b, c);
 }
 
 /* This is in libmach.a */
@@ -253,7 +297,7 @@ port_chain_insert (list, name, type)
     {
       if (! MACH_PORT_VALID (mid_server))
 	{
-	  message ("Machid server port invalid, can not map port 0x%x to MID",
+	  warning ("Machid server port invalid, can not map port 0x%x to MID",
 		   name);
 	  mid = name;
 	}
@@ -263,7 +307,7 @@ port_chain_insert (list, name, type)
 	  
 	  if (ret != KERN_SUCCESS)
 	    {
-	      message ("Can not map name (0x%x) to MID with machid", name);
+	      warning ("Can not map name (0x%x) to MID with machid", name);
 	      mid = name;
 	    }
 	}
@@ -342,7 +386,7 @@ int         type;
   
   if (! MACH_PORT_VALID (mid_server))
     {
-      message ("Machid server port invalid, can not map port 0x%x to mid",
+      warning ("Machid server port invalid, can not map port 0x%x to mid",
 	       name);
       return -1;
     }
@@ -355,7 +399,7 @@ int         type;
       
       if (ret != KERN_SUCCESS)
 	{
-	  message ("Can not map name (0x%x) to mid with machid", name);
+	  warning ("Can not map name (0x%x) to mid with machid", name);
 	  return -1;
 	}
       return mid;
@@ -394,7 +438,7 @@ setup_single_step (thread, start_step)
 	{
 	  if (MACH_PORT_VALID (singlestepped_thread_port))
 	    {
-	      message ("Singlestepped_thread_port (0x%x) is still valid?",
+	      warning ("Singlestepped_thread_port (0x%x) is still valid?",
 		       singlestepped_thread_port);
 	      singlestepped_thread_port = MACH_PORT_NULL;
 	    }
@@ -941,7 +985,7 @@ select_thread (task, thread_id, flag)
   ret = task_threads (task, &thread_list, &thread_count);
   if (ret != KERN_SUCCESS)
     {
-      message ("Can not select a thread from a dead task");
+      warning ("Can not select a thread from a dead task");
       kill_inferior ();
       return KERN_FAILURE;
     }
@@ -952,7 +996,7 @@ select_thread (task, thread_id, flag)
        * exists as a container for memory and ports.
        */
       registers_changed ();
-      message ("Task %d has no threads",
+      warning ("Task %d has no threads",
 	       map_port_name_to_mid (task, MACH_TYPE_TASK));
       current_thread = MACH_PORT_NULL;
       (void) vm_deallocate(mach_task_self(),
@@ -1055,7 +1099,7 @@ switch_to_thread (new_thread)
   mid = map_port_name_to_mid (new_thread,
 			      MACH_TYPE_THREAD);
   if (mid == -1)
-    message ("Can't map thread name 0x%x to mid", new_thread);
+    warning ("Can't map thread name 0x%x to mid", new_thread);
   else if (select_thread (inferior_task, mid, 1) != KERN_SUCCESS)
     {
       if (current_thread)
@@ -1224,7 +1268,7 @@ mach_really_wait (w)
 		  (WIFEXITED(*w)  && WEXITSTATUS(*w) > 0377))
 		{
 		  WSETEXIT(*w, 0);
-		  message ("Using exit value 0 for terminated task");
+		  warning ("Using exit value 0 for terminated task");
 		}
 	      else if (!WIFEXITED(*w))
 		{
@@ -1232,11 +1276,11 @@ mach_really_wait (w)
 
 		  /* Signals cause problems. Warn the user. */
 		  if (sig != SIGKILL) /* Bad luck if garbage matches this */
-		    message ("The terminating signal stuff may be nonsense");
+		    warning ("The terminating signal stuff may be nonsense");
 		  else if (sig > NSIG)
 		    {
 		      WSETEXIT(*w, 0);
-		      message ("Using exit value 0 for terminated task");
+		      warning ("Using exit value 0 for terminated task");
 		    }
 		}
 	      return inferior_pid;
@@ -1293,7 +1337,7 @@ mach3_quit ()
       
       if (ret != KERN_SUCCESS)
 	{
-	  message ("Could not suspend task for interrupt: %s",
+	  warning ("Could not suspend task for interrupt: %s",
 		   mach_error_string (ret));
 	  mach_really_waiting = 0;
 	  return;
@@ -1306,7 +1350,7 @@ mach3_quit ()
   mid = map_port_name_to_mid (current_thread, MACH_TYPE_THREAD);
   if (mid == -1)
     {
-      message ("Selecting first existing kernel thread");
+      warning ("Selecting first existing kernel thread");
       mid = 0;
     }
 
@@ -1349,7 +1393,7 @@ gdb_message_server (InP)
       case GDB_MESSAGE_ID_STOP:
 	ret = task_suspend (inferior_task);
 	if (ret != KERN_SUCCESS)
-	  message ("Could not suspend task for stop message: %s",
+	  warning ("Could not suspend task for stop message: %s",
 		   mach_error_string (ret));
 
 	/* QUIT in mach_really_wait() loop. */
@@ -1357,7 +1401,7 @@ gdb_message_server (InP)
 	break;
 
       default:
-	message ("Invalid message id %d received, ignored.",
+	warning ("Invalid message id %d received, ignored.",
 		 InP->msgh_id);
 	break;
       }
@@ -1646,7 +1690,7 @@ catch_exception_raise (port, thread, task, exception, code, subcode)
       if (select_thread (inferior_task, mid, 0) != KERN_SUCCESS)
 	error ("Could not select thread %d causing exception", mid);
       else
-	message ("Gdb selected thread %d", mid);
+	warning ("Gdb selected thread %d", mid);
     }
 
   /* If we receive an exception that is not breakpoint
@@ -1656,7 +1700,7 @@ catch_exception_raise (port, thread, task, exception, code, subcode)
   if (MACH_PORT_VALID (singlestepped_thread_port))
     {
       if (stop_exception != EXC_BREAKPOINT)
-	message ("Single step interrupted by exception");
+	warning ("Single step interrupted by exception");
       else if (port == singlestepped_thread_port)
 	{
 	  /* Single step exception occurred, remove trace bit
@@ -1669,7 +1713,7 @@ catch_exception_raise (port, thread, task, exception, code, subcode)
 	  resume_all_threads (0);
 	}
       else
-	message ("Breakpoint while single stepping?");
+	warning ("Breakpoint while single stepping?");
 
       discard_single_step (current_thread);
     }
@@ -1746,7 +1790,7 @@ mach3_read_inferior (addr, myaddr, length)
 	     screw it. Eamonn seems to like this, so I enable
 	     it if OSF is defined...
 	   */
-	  message ("[read inferior %x failed: %s]",
+	  warning ("[read inferior %x failed: %s]",
 		   addr, mach_error_string (ret));
 	  errno = 0;
 #endif
@@ -1852,7 +1896,7 @@ mach3_write_inferior (addr, myaddr, length)
 	/* Check for holes in memory */
 	if (old_address != region_address)
 	  {
-	    message ("No memory at 0x%x. Nothing written",
+	    warning ("No memory at 0x%x. Nothing written",
 		     old_address);
 	    ret = KERN_SUCCESS;
 	    length = 0;
@@ -1861,7 +1905,7 @@ mach3_write_inferior (addr, myaddr, length)
 
 	if (!(max_protection & VM_PROT_WRITE))
 	  {
-	    message ("Memory at address 0x%x is unwritable. Nothing written",
+	    warning ("Memory at address 0x%x is unwritable. Nothing written",
 		     old_address);
 	    ret = KERN_SUCCESS;
 	    length = 0;
@@ -1940,7 +1984,7 @@ mach3_write_inferior (addr, myaddr, length)
 
   if (ret != KERN_SUCCESS)
     {
-      message ("%s %s", errstr, mach_error_string (ret));
+      warning ("%s %s", errstr, mach_error_string (ret));
       return 0;
     }
 
@@ -1982,22 +2026,21 @@ int	state;
 }
 
 static char *
-translate_cstate(state)
-int	state;
+translate_cstate (state)
+     int state;
 {
-  switch (state) {
-  case CPROC_RUNNING:	return "R";
-  case CPROC_SWITCHING: return "S";
-  case CPROC_BLOCKED:   return "B";
-  case CPROC_CONDWAIT:  return "C";
-  case CPROC_CONDWAIT|CPROC_SWITCHING:
-    			return "CS";
-  default:		return "?";
-  }
+  switch (state)
+    {
+    case CPROC_RUNNING:	return "R";
+    case CPROC_SWITCHING: return "S";
+    case CPROC_BLOCKED: return "B";
+    case CPROC_CONDWAIT: return "C";
+    case CPROC_CONDWAIT|CPROC_SWITCHING: return "CS";
+    default: return "?";
+    }
 }
 
-/* type == MACH_MSG_TYPE_COPY_SEND || type == MACH_MSG_TYPE_MAKE_SEND
- */
+/* type == MACH_MSG_TYPE_COPY_SEND || type == MACH_MSG_TYPE_MAKE_SEND */
 
 mach_port_t           /* no mach_port_name_t found in include files. */
 map_inferior_port_name (inferior_name, type)
@@ -2041,26 +2084,26 @@ static char buf[7];
 
 static char *
 get_thread_name (one_cproc, id)
-     cproc_t one_cproc;
+     gdb_thread_t one_cproc;
      int id;
 {
   if (one_cproc)
-    if (one_cproc->incarnation == NULL)
+    if (one_cproc->cthread == NULL)
       {
 	/* cproc not mapped to any cthread */
 	sprintf(buf, "_C%d", id);
       }
-    else if (! one_cproc->incarnation->name)
+    else if (! one_cproc->cthread->name)
       {
 	/* cproc and cthread, but no name */
 	sprintf(buf, "_t%d", id);
       }
     else
-      return (one_cproc->incarnation->name);
+      return (one_cproc->cthread->name);
   else
     {
       if (id < 0)
-	message ("Inconsistency in thread name id %d", id);
+	warning ("Inconsistency in thread name id %d", id);
 
       /* Kernel thread without cproc */
       sprintf(buf, "_K%d", id);
@@ -2083,7 +2126,7 @@ fetch_thread_info (task, mthreads_out)
   ret = task_threads (task, &th_table, &th_count);
   if (ret != KERN_SUCCESS)
     {
-      message ("Error getting inferior's thread list:%s",
+      warning ("Error getting inferior's thread list:%s",
 	       mach_error_string(ret));
       kill_inferior ();
       return -1;
@@ -2130,7 +2173,7 @@ fetch_thread_info (task, mthreads_out)
 		       (th_count * sizeof(mach_port_t)));
   if (ret != KERN_SUCCESS)
     {
-      message ("Error trying to deallocate thread list : %s",
+      warning ("Error trying to deallocate thread list : %s",
 	       mach_error_string (ret));
     }
 
@@ -2157,7 +2200,7 @@ fetch_usp_from_emulator_stack (sp)
 			   &stack_pointer,
 			   sizeof (CORE_ADDR)) != sizeof (CORE_ADDR))
     {
-      message ("Can't read user sp from emulator stack address 0x%x", sp);
+      warning ("Can't read user sp from emulator stack address 0x%x", sp);
       return 0;
     }
 
@@ -2211,7 +2254,7 @@ have_emulator_p (task)
 	  static boolean_t informed = FALSE;
 	  if (!informed)
 	    {
-	      message("Emulation vector address 0x08%x outside emulator space",
+	      warning("Emulation vector address 0x08%x outside emulator space",
 		      entry);
 	      informed = TRUE;
 	    }
@@ -2220,41 +2263,41 @@ have_emulator_p (task)
   return FALSE;
 }
 
-/*
- * Map cprocs to kernel threads and vice versa.
- *
- * For reverse mapping the code mis-uses one struct cproc field,
- * see "os-mach3.h" and code here.
- *
- */
+/* Map cprocs to kernel threads and vice versa.  */
 
 void
 map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
-     cproc_t	        cprocs;
-     gdb_thread_t       mthreads;
+     gdb_thread_t cprocs;
+     gdb_thread_t mthreads;
      int thread_count;
 {
   int index;
-  cproc_t scan;
-  boolean_t   all_mapped = TRUE;
+  gdb_thread_t scan;
+  boolean_t all_mapped = TRUE;
 
-  for (scan = cprocs; scan; scan = scan->list)
+  for (scan = cprocs; scan; scan = scan->next)
     {
       /* Default to: no kernel thread for this cproc */
-      CPROC_REVERSE_MAP (scan) = -1;
+      scan->reverse_map = -1;
 
       /* Check if the cproc is found by its stack */
       for (index = 0; index < thread_count; index++)
 	{
-	  if ((mthreads + index)->sp > scan->stack_base &&
-	      (mthreads + index)->sp <= scan->stack_base + scan->stack_size)
+	  LONGEST stack_base =
+	    extract_signed_integer (scan.raw_cproc + CPROC_BASE_OFFSET,
+				    CPROC_BASE_SIZE);
+	  LONGEST stack_size = 
+	    extract_signed_integer (scan.raw_cproc + CPROC_SIZE_OFFSET,
+				    CPROC_SIZE_SIZE);
+	  if ((mthreads + index)->sp > stack_base &&
+	      (mthreads + index)->sp <= stack_base + stack_size)
 	    {
 	      (mthreads + index)->cproc = scan;
-	      CPROC_REVERSE_MAP (scan) = index;
+	      scan->reverse_map = index;
 	      break;
 	    }
 	}
-      all_mapped &= (CPROC_REVERSE_MAP(scan) != -1);
+      all_mapped &= (scan->reverse_map != -1);
     }
 
   /* Check for threads that are currently in the emulator.
@@ -2282,7 +2325,7 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
 	  gdb_thread_t mthread = (mthreads+index);
 	  emul_sp = mthread->sp;
 
-	  if (! mthread->cproc &&
+	  if (mthread->cproc == NULL &&
 	      EMULATOR_BASE <= emul_sp && emul_sp <= EMULATOR_END)
 	    {
 	      mthread->in_emulator = emulator_present;
@@ -2298,19 +2341,19 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
 		  /* Try to match this stack pointer to the cprocs that
 		   * don't yet have a kernel thread.
 		   */
-		  for (scan = cprocs; scan; scan = scan->list)
+		  for (scan = cprocs; scan; scan = scan->next)
 		    {
 		      
 		      /* Check is this unmapped CPROC stack contains
 		       * the user stack pointer saved in the
 		       * emulator.
 		       */
-		      if (CPROC_REVERSE_MAP (scan) == -1 &&
+		      if (scan->reverse_map == -1 &&
 			  usp > scan->stack_base &&
 			  usp <= scan->stack_base + scan->stack_size)
 			{
 			  mthread->cproc = scan;
-			  CPROC_REVERSE_MAP (scan) = index;
+			  scan->reverse_map = index;
 			  break;
 			}
 		    }
@@ -2380,10 +2423,13 @@ lookup_address_of_variable (name)
   return symaddr;
 }
 
-static cproc_t
+static gdb_thread_t
 get_cprocs()
 {
-  cproc_t their_cprocs, cproc_head, cproc_copy;
+  gdb_thread_t cproc_head;
+  gdb_thread_t cproc_copy;
+  CORE_ADDR their_cprocs;
+  char *buf[TARGET_PTR_BIT / HOST_CHAR_BIT];
   char *name;
   cthread_t cthread;
   CORE_ADDR symaddr;
@@ -2391,65 +2437,77 @@ get_cprocs()
   symaddr = lookup_address_of_variable ("cproc_list");
 
   if (! symaddr)
-    { /* cproc_list is not in a file compiled with debugging
+    {
+      /* cproc_list is not in a file compiled with debugging
 	 symbols, but don't give up yet */
-      
+
       symaddr = lookup_address_of_variable ("cprocs");
 
       if (symaddr)
 	{
 	  static int informed = 0;
-	  if (!informed) {
-	    informed++;
-	    message ("Your program is loaded with an old threads library.");
-	    message ("GDB does not know the old form of threads");
-	    message ("so things may not work.");
-	  }
+	  if (!informed)
+	    {
+	      informed++;
+	      warning ("Your program is loaded with an old threads library.");
+	      warning ("GDB does not know the old form of threads");
+	      warning ("so things may not work.");
+	    }
 	}
     }
 
   /* Stripped or no -lthreads loaded or "cproc_list" is in wrong segment. */
   if (! symaddr)
-    return NO_CPROC;
+    return NULL;
 
   /* Get the address of the first cproc in the task */
-  if (!mach3_read_inferior(symaddr,
-			   &their_cprocs,
-			   sizeof(cproc_t)))
-    error("Can't read cproc master list at address (0x%x).", symaddr);
+  if (!mach3_read_inferior (symaddr,
+			    buf,
+			    TARGET_PTR_BIT / HOST_CHAR_BIT))
+    error ("Can't read cproc master list at address (0x%x).", symaddr);
+  their_cprocs = extract_address (buf, TARGET_PTR_BIT / HOST_CHAR_BIT);
 
   /* Scan the CPROCs in the task.
      CPROCs are chained with LIST field, not NEXT field, which
      chains mutexes, condition variables and queues */
-  
-  cproc_head = NO_CPROC;
 
-  while (their_cprocs != NO_CPROC)
+  cproc_head = NULL;
+
+  while (their_cprocs != (CORE_ADDR)0)
     {
-      cproc_copy = (cproc_t) obstack_alloc(cproc_obstack,
-					   sizeof(struct cproc));
-      
-      if (!mach3_read_inferior(their_cprocs,
-				cproc_copy,
-				sizeof(struct cproc)))
+      CORE_ADDR cproc_copy_incarnation;
+      cproc_copy = (gdb_thread_t) obstack_alloc (cproc_obstack,
+						 sizeof (struct gdb_thread));
+
+      if (!mach3_read_inferior (their_cprocs,
+				&cproc_copy.raw_cproc[0],
+				CPROC_SIZE))
 	error("Can't read next cproc at 0x%x.", their_cprocs);
-      
-      their_cprocs = cproc_copy->list;
-      
-      if (cproc_copy->incarnation != NULL)
+      cproc_copy = extract_address (buf, TARGET_PTR_BIT / HOST_CHAR_BIT);
+
+      their_cprocs =
+	extract_address (cproc_copy.raw_cproc + CPROC_LIST_OFFSET,
+			 CPROC_LIST_SIZE);
+      cproc_copy_incarnation =
+	extract_address (cproc_copy.raw_cproc + CPROC_INCARNATION_OFFSET,
+			 CPROC_INCARNATION_SIZE);
+
+      if (cproc_copy_incarnation == (CORE_ADDR)0)
+	cproc_copy->cthread = NULL;
+      else
 	{
 	  /* This CPROC has an attached CTHREAD. Get its name */
 	  cthread = (cthread_t)obstack_alloc (cproc_obstack,
 					      sizeof(struct cthread));
-	  
-	  if (!mach3_read_inferior(cproc_copy->incarnation,
+
+	  if (!mach3_read_inferior (cproc_copy_incarnation,
 				    cthread,
 				    sizeof(struct cthread)))
 	    error("Can't read next thread at 0x%x.",
-		  cproc_copy->incarnation);
-	  
-	  cproc_copy->incarnation = cthread;
-	  
+		  cproc_copy_incarnation);
+
+	  cproc_copy->cthread = cthread;
+
 	  if (cthread->name)
 	    {
 	      name = (char *) obstack_alloc (cproc_obstack, MAX_NAME_LEN);
@@ -2460,12 +2518,12 @@ get_cprocs()
 	      cthread->name = name;
 	    }
 	}
-      
+
       /* insert in front */
-      cproc_copy->list = cproc_head;
-      cproc_head       = cproc_copy;
+      cproc_copy->next = cproc_head;
+      cproc_head = cproc_copy;
     }
-  return(cproc_head);
+  return cproc_head;
 }
 
 #ifndef FETCH_CPROC_STATE
@@ -2489,7 +2547,9 @@ mach3_cproc_state (mthread)
   if (! mthread || !mthread->cproc || !mthread->cproc->context)
     return -1;
 
-  context = mthread->cproc->context;
+  context = extract_signed_integer
+    (mthread->cproc->raw_cproc + CPROC_CONTEXT_OFFSET,
+     CPROC_CONTEXT_SIZE);
 
   mthread->sp = context + MACHINE_CPROC_SP_OFFSET;
 
@@ -2497,7 +2557,7 @@ mach3_cproc_state (mthread)
 			   &mthread->pc,
 			   sizeof (CORE_ADDR)) != sizeof (CORE_ADDR))
     {
-      message ("Can't read cproc pc from inferior");
+      warning ("Can't read cproc pc from inferior");
       return -1;
     }
 
@@ -2505,7 +2565,7 @@ mach3_cproc_state (mthread)
 			   &mthread->fp,
 			   sizeof (CORE_ADDR)) != sizeof (CORE_ADDR))
     {
-      message ("Can't read cproc fp from inferior");
+      warning ("Can't read cproc fp from inferior");
       return -1;
     }
 
@@ -2519,8 +2579,8 @@ thread_list_command()
 {
   thread_basic_info_data_t ths;
   int     thread_count;
-  cproc_t cprocs;
-  cproc_t scan;
+  gdb_thread_t cprocs;
+  gdb_thread_t scan;
   int     index;
   char   *name;
   char    selected;
@@ -2555,7 +2615,7 @@ thread_list_command()
   
   map_cprocs_to_kernel_threads (cprocs, their_threads, thread_count);
   
-  for (scan = cprocs; scan; scan = scan->list)
+  for (scan = cprocs; scan; scan = scan->next)
     {
       int mid;
       char buf[10];
@@ -2564,10 +2624,12 @@ thread_list_command()
       selected = ' ';
       
       /* a wired cproc? */
-      wired    = scan->wired ? "wired" : "";
-      
-      if (CPROC_REVERSE_MAP(scan) != -1)
-	kthread  = (their_threads + CPROC_REVERSE_MAP(scan));
+      wired = (extract_address (scan->raw_cproc + CPROC_WIRED_OFFSET,
+				CPROC_WIRED_SIZE)
+	       ? "wired" : "");
+
+      if (scan->reverse_map != -1)
+	kthread  = (their_threads + scan->reverse_map);
       else
 	kthread  = NULL;
 
@@ -2586,7 +2648,7 @@ thread_list_command()
 	  
 	  if (ret != KERN_SUCCESS)
 	    {
-	      message ("Unable to get basic info on thread %d : %s",
+	      warning ("Unable to get basic info on thread %d : %s",
 		       mid,
 		       mach_error_string (ret));
 	      continue;
@@ -2611,6 +2673,7 @@ thread_list_command()
 	  if (ths.flags & TH_FLAGS_IDLE)
 	    strcat (buf, "I");
 
+	  /* FIXME: May run afloul of arbitrary limit in printf_filtered.  */
 	  printf_filtered (TL_FORMAT,
 			   slot,
 			   mid,
@@ -2638,6 +2701,7 @@ thread_list_command()
 	    continue; /* EMcM */
 #endif
 
+	  /* FIXME: May run afloul of arbitrary limit in printf_filtered.  */
 	  printf_filtered (TL_FORMAT,
 			   "-",
 			   -neworder,	/* Pseudo MID */
@@ -2683,7 +2747,7 @@ thread_list_command()
 	    
 	  if (ret != KERN_SUCCESS)
 	    {
-	      message ("Unable to get basic info on thread %d : %s",
+	      warning ("Unable to get basic info on thread %d : %s",
 		       mid,
 		       mach_error_string (ret));
 	      continue;
@@ -2709,6 +2773,7 @@ thread_list_command()
 	  if (ths.flags & TH_FLAGS_IDLE)
 	    strcat (buf, "I");
 
+	  /* FIXME: May run afloul of arbitrary limit in printf_filtered.  */
 	  printf_filtered (TL_FORMAT,
 			   slot,
 			   mid,
@@ -2779,7 +2844,7 @@ boolean_t   set;
 
   if (! MACH_PORT_VALID (thread))
     {
-      message ("thread_trace: invalid thread");
+      warning ("thread_trace: invalid thread");
       return;
     }
 
@@ -2828,7 +2893,7 @@ flush_inferior_icache(pc, amount)
 			      MATTR_CACHE,
 			      &flush);
   if (ret != KERN_SUCCESS)
-    message ("Error flushing inferior's cache : %s",
+    warning ("Error flushing inferior's cache : %s",
 	     mach_error_string (ret));
 }
 #endif	FLUSH_INFERIOR_CACHE
@@ -2848,7 +2913,7 @@ suspend_all_threads (from_tty)
   ret = task_threads (inferior_task, &thread_list, &thread_count);
   if (ret != KERN_SUCCESS)
     {
-      message ("Could not suspend inferior threads.");
+      warning ("Could not suspend inferior threads.");
       kill_inferior ();
       return_to_top_level ();
     }
@@ -2863,7 +2928,7 @@ suspend_all_threads (from_tty)
       ret = thread_suspend(thread_list[ index ]);
 
       if (ret != KERN_SUCCESS)
-	message ("Error trying to suspend thread %d : %s",
+	warning ("Error trying to suspend thread %d : %s",
 		 mid, mach_error_string (ret));
 
       if (from_tty)
@@ -2875,7 +2940,7 @@ suspend_all_threads (from_tty)
 			     &infoCnt);
 	  CHK ("suspend can't get thread info", ret);
 	  
-	  message ("Thread %d suspend count is %d",
+	  warning ("Thread %d suspend count is %d",
 		   mid, th_info.suspend_count);
 	}
     }
@@ -2924,7 +2989,7 @@ thread_suspend_command (args, from_tty)
 
   ret = thread_suspend (current_thread);
   if (ret != KERN_SUCCESS)
-    message ("thread_suspend failed : %s",
+    warning ("thread_suspend failed : %s",
 	     mach_error_string (ret));
 
   infoCnt = THREAD_BASIC_INFO_COUNT;
@@ -2934,7 +2999,7 @@ thread_suspend_command (args, from_tty)
 		     &infoCnt);
   CHK ("suspend can't get thread info", ret);
   
-  message ("Thread %d suspend count is %d", mid, th_info.suspend_count);
+  warning ("Thread %d suspend count is %d", mid, th_info.suspend_count);
   
   current_thread = saved_thread;
 }
@@ -2971,17 +3036,17 @@ resume_all_threads (from_tty)
 	if (! th_info.suspend_count)
 	  {
 	    if (mid != -1 && from_tty)
-	      message ("Thread %d is not suspended", mid);
+	      warning ("Thread %d is not suspended", mid);
 	    continue;
 	  }
 
 	ret = thread_resume (thread_list[ index ]);
 
 	if (ret != KERN_SUCCESS)
-	  message ("Error trying to resume thread %d : %s",
+	  warning ("Error trying to resume thread %d : %s",
 		   mid, mach_error_string (ret));
 	else if (mid != -1 && from_tty)
-	  message ("Thread %d suspend count is %d",
+	  warning ("Thread %d suspend count is %d",
 		   mid, --th_info.suspend_count);
       }
 
@@ -3035,18 +3100,18 @@ thread_resume_command (args, from_tty)
   
   if (! th_info.suspend_count)
     {
-      message ("Thread %d is not suspended", mid);
+      warning ("Thread %d is not suspended", mid);
       goto out;
     }
 
   ret = thread_resume (current_thread);
   if (ret != KERN_SUCCESS)
-    message ("thread_resume failed : %s",
+    warning ("thread_resume failed : %s",
 	     mach_error_string (ret));
   else
     {
       th_info.suspend_count--;
-      message ("Thread %d suspend count is %d", mid, th_info.suspend_count);
+      warning ("Thread %d suspend count is %d", mid, th_info.suspend_count);
     }
       
  out:
@@ -3094,7 +3159,7 @@ thread_kill_command (args, from_tty)
       CHK ("Thread could not be terminated", ret);
 
       if (select_thread (inferior_task, 0, 1) != KERN_SUCCESS)
-	message ("Last thread was killed, use \"kill\" command to kill task");
+	warning ("Last thread was killed, use \"kill\" command to kill task");
     }
   else
     for (index = 0; index < thread_count; index++)
@@ -3111,7 +3176,7 @@ thread_kill_command (args, from_tty)
 		       (thread_count * sizeof(mach_port_t)));
   CHK ("Error trying to deallocate thread list", ret);
   
-  message ("Thread %d killed", mid);
+  warning ("Thread %d killed", mid);
 }
 
 
@@ -3151,14 +3216,14 @@ task_resume_command (args, from_tty)
 
   if (ta_info.suspend_count == 1)
     {
-      message ("Inferior task %d is no longer suspended", mid);
+      warning ("Inferior task %d is no longer suspended", mid);
       must_suspend_thread = 1;
       /* @@ This is not complete: Registers change all the time when not
 	 suspended! */
       registers_changed ();
     }
   else
-    message ("Inferior task %d suspend count is now %d",
+    warning ("Inferior task %d suspend count is now %d",
 	     mid, ta_info.suspend_count-1);
 }
 
@@ -3190,7 +3255,7 @@ task_suspend_command (args, from_tty)
 		   &infoCnt);
   CHK ("task_suspend_command: task_info failed", ret);
   
-  message ("Inferior task %d suspend count is now %d",
+  warning ("Inferior task %d suspend count is now %d",
 	   mid, ta_info.suspend_count);
 }
 
@@ -3507,7 +3572,7 @@ gdb_register_port (name, port)
 
   if (! MACH_PORT_VALID (port) || !name || !*name)
     {
-      message ("Invalid registration request");
+      warning ("Invalid registration request");
       return;
     }
 
@@ -3665,29 +3730,31 @@ do_mach_notify_dead_name (notify, name)
   switch (element->type) {
 
   case MACH_TYPE_THREAD:
+    target_terminal_ours_for_output ();
     if (name == current_thread)
       {
-	message ("\nCurrent thread %d died", element->mid);
+	printf_filtered ("\nCurrent thread %d died", element->mid);
 	current_thread = MACH_PORT_NULL;
       }
     else
-      message ("\nThread %d died", element->mid);
+      printf_filtered ("\nThread %d died", element->mid);
 
     break;
 
   case MACH_TYPE_TASK:
+    target_terminal_ours_for_output ();
     if (name != inferior_task)
-      message ("Task %d died, but it was not the selected task",
+      printf_filtered ("Task %d died, but it was not the selected task",
 	       element->mid);
     else	       
       {
-	message ("Current task %d died", element->mid);
+	printf_filtered ("Current task %d died", element->mid);
 	
 	mach_port_destroy (mach_task_self(), name);
 	inferior_task = MACH_PORT_NULL;
 	
 	if (notify_chain)
-	  message("There were still unreceived dead_name_notifications???");
+	  warning ("There were still unreceived dead_name_notifications???");
 	
 	/* Destroy the old notifications */
 	setup_notify_port (0);
@@ -3709,7 +3776,7 @@ do_mach_notify_msg_accepted (notify, name)
      mach_port_t notify;
      mach_port_t name;
 {
-  message ("do_mach_notify_msg_accepted : notify %x, name %x",
+  warning ("do_mach_notify_msg_accepted : notify %x, name %x",
 	   notify, name);
   return KERN_SUCCESS;
 }
@@ -3719,7 +3786,7 @@ do_mach_notify_no_senders (notify, mscount)
      mach_port_t notify;
      mach_port_mscount_t mscount;
 {
-  message ("do_mach_notify_no_senders : notify %x, mscount %x",
+  warning ("do_mach_notify_no_senders : notify %x, mscount %x",
 	   notify, mscount);
   return KERN_SUCCESS;
 }
@@ -3729,7 +3796,7 @@ do_mach_notify_port_deleted (notify, name)
      mach_port_t notify;
      mach_port_t name;
 {
-  message ("do_mach_notify_port_deleted : notify %x, name %x",
+  warning ("do_mach_notify_port_deleted : notify %x, name %x",
 	   notify, name);
   return KERN_SUCCESS;
 }
@@ -3739,7 +3806,7 @@ do_mach_notify_port_destroyed (notify, rights)
      mach_port_t notify;
      mach_port_t rights;
 {
-  message ("do_mach_notify_port_destroyed : notify %x, rights %x",
+  warning ("do_mach_notify_port_destroyed : notify %x, rights %x",
 	   notify, rights);
   return KERN_SUCCESS;
 }
@@ -3750,7 +3817,7 @@ do_mach_notify_send_once (notify)
 {
 #ifdef DUMP_SYSCALL
   /* MANY of these are generated. */
-  message ("do_mach_notify_send_once : notify %x",
+  warning ("do_mach_notify_send_once : notify %x",
 	   notify);
 #endif
   return KERN_SUCCESS;
@@ -3882,7 +3949,7 @@ m3_resume (pid, step, signal)
   
   ret = task_resume (inferior_task);
   if (ret == KERN_FAILURE)
-    message ("Task was not suspended");
+    warning ("Task was not suspended");
   else
     CHK ("Resuming task", ret);
   
@@ -4037,7 +4104,7 @@ deallocate_inferior_ports ()
   ret = task_threads (inferior_task, &thread_list, &thread_count);
   if (ret != KERN_SUCCESS)
     {
-      message ("deallocate_inferior_ports: task_threads",
+      warning ("deallocate_inferior_ports: task_threads",
 	       mach_error_string(ret));
       return;
     }
@@ -4107,7 +4174,7 @@ m3_do_detach (signal)
   setup_notify_port (0);
 
   if (remove_breakpoints ())
-    message ("Could not remove breakpoints when detaching");
+    warning ("Could not remove breakpoints when detaching");
   
   if (signal && inferior_pid > 0)
     kill (inferior_pid, signal);
@@ -4435,9 +4502,9 @@ _initialize_m3_nat ()
     {
       mid_server = MACH_PORT_NULL;
       
-      message ("initialize machid: netname_lookup_up(MachID) : %s",
+      warning ("initialize machid: netname_lookup_up(MachID) : %s",
 	       mach_error_string(ret));
-      message ("Some (most?) features disabled...");
+      warning ("Some (most?) features disabled...");
     }
   
   mid_auth = mach_privileged_host_port();
@@ -4462,7 +4529,7 @@ _initialize_m3_nat ()
 			    MACH_PORT_RIGHT_RECEIVE,
 			    &our_message_port);
   if (ret != KERN_SUCCESS)
-    message ("Creating message port %s", mach_error_string (ret));
+    warning ("Creating message port %s", mach_error_string (ret));
   else
     {
       char buf[ MAX_NAME_LEN ];
@@ -4470,7 +4537,7 @@ _initialize_m3_nat ()
 				  our_message_port,
 				  inferior_wait_port_set);
       if (ret != KERN_SUCCESS)
-	message ("message move member %s", mach_error_string (ret));
+	warning ("message move member %s", mach_error_string (ret));
 
 
       /* @@@@ No way to change message port name currently */

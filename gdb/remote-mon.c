@@ -76,6 +76,7 @@ static int sr_get_debug();			/* flag set by "set remotedebug" */
 #endif
 static int hashmark;				/* flag set by "set hash" */
 
+/* FIXME: Replace with sr_get_debug ().  */
 #define LOG_FILE "monitor.log"
 #if defined (LOG_FILE)
 FILE *log_file;
@@ -288,9 +289,6 @@ monitor_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-#ifdef CREATE_INFERIOR_HOOK
-  CREATE_INFERIOR_HOOK (0);		/* No process-ID */
-#endif  
 #ifdef LOG_FILE
   fputs ("\nIn Create_inferior()", log_file);
 #endif

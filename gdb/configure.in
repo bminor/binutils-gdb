@@ -45,7 +45,10 @@ i[34]86-*-netbsd*)	gdb_host=i386bsd ;;
 i[34]86-*-go32)		gdb_host=go32 ;;
 i[34]86-*-linux)	gdb_host=linux ;;
 i[34]86-*-lynx*)	gdb_host=i386lynx ;;
-i[34]86-*-mach)		gdb_host=i386mach ;;
+# Obsolete I suspect
+# i[34]86-*-mach)		gdb_host=i386mach ;;
+i[34]86-*-mach*)	gdb_host=i386m3 ;;
+i[34]86-*-osf1mk*)	gdb_host=i386mk ;;
 i[34]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[34]86-*-sco*)		gdb_host=i386sco ;;
 i[34]86-*-solaris*)	gdb_host=i386sol2 ;;
@@ -86,6 +89,7 @@ mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sony-*)		gdb_host=news-mips ;;
 mips-*-sysv*)		gdb_host=riscos ;;
 mips-*-riscos*)		gdb_host=riscos ;;
+mips-*-mach*)		gdb_host=mipsm3 ;;
 
 none-*-*)		gdb_host=none ;;
 
@@ -198,7 +202,9 @@ i[34]86-*-sco*)		gdb_target=i386v ;;
 i[34]86-*-sysv*)	gdb_target=i386v ;;
 i[34]86-*-linux*)	gdb_target=linux ;;
 i[34]86-*-isc*)		gdb_target=i386v ;;
+i[34]86-*-mach*)	gdb_target=i386m3 ;;
 i[34]86-*-netware*)	gdb_target=i386nw ;;
+i[34]86-*-osf1mk*)	gdb_target=i386mk ;;
 
 i960-*-bout)		gdb_target=vxworks960 ;;
 i960-*-coff)		gdb_target=nindy960 ;;
@@ -249,6 +255,7 @@ mips-sgi-*)		gdb_target=irix3 ;;
 mips-sony-*)		gdb_target=bigmips ;;
 mips-*-sysv*)		gdb_target=bigmips ;;
 mips-*-riscos*)		gdb_target=bigmips ;;
+mips-*-mach*)		gdb_target=mipsm3 ;;
 
 none-*-*)		gdb_target=none ;;
 
