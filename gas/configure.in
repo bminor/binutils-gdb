@@ -45,6 +45,7 @@ case "${host}" in
   hppa*-hp-hpux*)		gas_host=hpux		;;
   hppa*-hp-bsd*)		gas_host=hppabsd	;;
   hppa*-hp-osf*)		gas_host=hppaosf	;;
+  hppa*-*-hiux*)		gas_host=hpux		;;
 
   i[34]86-ibm-aix*)		gas_host=i386aix	;;
   i[34]86-*-isc*)		gas_host=sysv		;;
@@ -133,6 +134,7 @@ case ${generic_target} in
   hppa-*-osf)		obj_format=elf emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
   hppa-*-bsd*)		obj_format=som emulation=hppa ;;
+  hppa-*-hiux*)		obj_format=som emulation=hppa ;;
 
   h8300-*-coff)		obj_format=coffbfd ;;
 

@@ -1,5 +1,7 @@
 Sun Feb  6 16:13:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* configure.in (hiux): Fixes from m-kasahr@sramhc.sra.co.JP.
+
 	* config/obj-som.c (obj_som_init_stab_section): Same change
 	as coffbfd and elf below.  Zero the initial stab symbol after
 	allocating it.
