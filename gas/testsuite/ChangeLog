@@ -1,3 +1,8 @@
+Mon Apr 11 07:54:10 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/funcrelocbug.s: Place the trampoline in the
+	$DATA$ rather than $LIT$ subspace.
+
 Sun Mar 27 14:05:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/funcrelocbug.s: New test.
