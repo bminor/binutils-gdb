@@ -3128,6 +3128,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  ret = false;
 	  continue;
 
+	case (int) R_PPC_NONE:
+	  continue;
+
 	/* Relocations that need no special processing.  */
 	case (int) R_PPC_LOCAL24PC:
 	  /* It makes no sense to point a local relocation
@@ -3163,7 +3166,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	/* Relocations that always need to be propagated if this is a shared
            object.  */
-	case (int) R_PPC_NONE:
 	case (int) R_PPC_ADDR32:
 	case (int) R_PPC_ADDR24:
 	case (int) R_PPC_ADDR16:

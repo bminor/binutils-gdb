@@ -1432,6 +1432,9 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  ret = false;
 	  continue;
 
+	case (int)R_I370_NONE:
+	  continue;
+
 	/* Relocations that may need to be propagated if this is a shared
            object.  */
 	case (int)R_I370_REL31:
@@ -1444,7 +1447,6 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	/* Relocations that always need to be propagated if this is a shared
            object.  */
-	case (int)R_I370_NONE:
 	case (int)R_I370_ADDR31:
 	case (int)R_I370_ADDR16:
 	  if (info->shared)
