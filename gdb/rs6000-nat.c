@@ -1,5 +1,5 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995, 1996
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995, 1996, 1997
 	     Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -316,9 +316,6 @@ vmap_symtab (vp)
      register struct vmap *vp;
 {
   register struct objfile *objfile;
-  CORE_ADDR text_delta;
-  CORE_ADDR data_delta;
-  CORE_ADDR bss_delta;
   struct section_offsets *new_offsets;
   int i;
   
@@ -340,17 +337,11 @@ vmap_symtab (vp)
   for (i = 0; i < objfile->num_sections; ++i)
     ANOFFSET (new_offsets, i) = ANOFFSET (objfile->section_offsets, i);
   
-  text_delta =
-    vp->tstart - ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
-  ANOFFSET (new_offsets, SECT_OFF_TEXT) = vp->tstart;
-
-  data_delta =
-    vp->dstart - ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
-  ANOFFSET (new_offsets, SECT_OFF_DATA) = vp->dstart;
-  
-  bss_delta =
-    vp->dstart - ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
-  ANOFFSET (new_offsets, SECT_OFF_BSS) = vp->dstart;
+  /* The symbols in the object file are linked to the VMA of the section,
+     relocate them VMA relative.  */
+  ANOFFSET (new_offsets, SECT_OFF_TEXT) = vp->tstart - vp->tvma;
+  ANOFFSET (new_offsets, SECT_OFF_DATA) = vp->dstart - vp->dvma;
+  ANOFFSET (new_offsets, SECT_OFF_BSS) = vp->dstart - vp->dvma;
 
   objfile_relocate (objfile, new_offsets);
 }
@@ -520,25 +511,15 @@ vmap_ldinfo (ldi)
 	vp->dstart = (CORE_ADDR) ldi->ldinfo_dataorg;
 	vp->dend   = vp->dstart + ldi->ldinfo_datasize;
 
-	if (vp->tadj)
-	  {
-	    vp->tstart += vp->tadj;
-	    vp->tend   += vp->tadj;
-	  }
+	/* The run time loader maps the file header in addition to the text
+	   section and returns a pointer to the header in ldinfo_textorg.
+	   Adjust the text start address to point to the real start address
+	   of the text section.  */
+	vp->tstart += vp->toffs;
 
 	/* The objfile is only NULL for the exec file.  */
 	if (vp->objfile == NULL)
 	  got_exec_file = 1;
-
-#ifdef DONT_RELOCATE_SYMFILE_OBJFILE
-	if (vp->objfile == symfile_objfile
-	    || vp->objfile == NULL)
-	  {
-	    ldi->ldinfo_dataorg = 0;
-	    vp->dstart = (CORE_ADDR) 0;
-	    vp->dend = ldi->ldinfo_datasize;
-	  }
-#endif
 
 	/* relocate symbol table(s). */
 	vmap_symtab (vp);
@@ -604,13 +585,18 @@ vmap_exec ()
     {
       if (STREQ(".text", exec_ops.to_sections[i].the_bfd_section->name))
 	{
-	  exec_ops.to_sections[i].addr += vmap->tstart;
-	  exec_ops.to_sections[i].endaddr += vmap->tstart;
+	  exec_ops.to_sections[i].addr += vmap->tstart - vmap->tvma;
+	  exec_ops.to_sections[i].endaddr += vmap->tstart - vmap->tvma;
 	}
       else if (STREQ(".data", exec_ops.to_sections[i].the_bfd_section->name))
 	{
-	  exec_ops.to_sections[i].addr += vmap->dstart;
-	  exec_ops.to_sections[i].endaddr += vmap->dstart;
+	  exec_ops.to_sections[i].addr += vmap->dstart - vmap->dvma;
+	  exec_ops.to_sections[i].endaddr += vmap->dstart - vmap->dvma;
+	}
+      else if (STREQ(".bss", exec_ops.to_sections[i].the_bfd_section->name))
+	{
+	  exec_ops.to_sections[i].addr += vmap->dstart - vmap->dvma;
+	  exec_ops.to_sections[i].endaddr += vmap->dstart - vmap->dvma;
 	}
     }
 }
@@ -747,19 +733,11 @@ xcoff_relocate_core (target)
       vp->dstart = (CORE_ADDR) ldip->ldinfo_dataorg;
       vp->dend = vp->dstart + ldip->ldinfo_datasize;
 
-#ifdef DONT_RELOCATE_SYMFILE_OBJFILE
-      if (vp == vmap)
-	{
-	  vp->dstart = (CORE_ADDR) 0;
-	  vp->dend = ldip->ldinfo_datasize;
-	}
-#endif
-
-      if (vp->tadj != 0)
-	{
-	  vp->tstart += vp->tadj;
-	  vp->tend += vp->tadj;
-	}
+      /* The run time loader maps the file header in addition to the text
+	 section and returns a pointer to the header in ldinfo_textorg.
+	 Adjust the text start address to point to the real start address
+	 of the text section.  */
+      vp->tstart += vp->toffs;
 
       /* Unless this is the exec file,
 	 add our sections to the section table for the core target.  */
@@ -789,22 +767,16 @@ xcoff_relocate_core (target)
 	    }
 	  stp = target->to_sections_end - 2;
 
-	  /* "Why do we add bfd_section_vma?", I hear you cry.
-	     Well, the start of the section in the file is actually
-	     that far into the section as the struct vmap understands it.
-	     So for text sections, bfd_section_vma tends to be 0x200,
-	     and if vp->tstart is 0xd0002000, then the first byte of
-	     the text section on disk corresponds to address 0xd0002200.  */
 	  stp->bfd = vp->bfd;
 	  stp->the_bfd_section = bfd_get_section_by_name (stp->bfd, ".text");
-	  stp->addr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->tstart;
-	  stp->endaddr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->tend;
+	  stp->addr = vp->tstart;
+	  stp->endaddr = vp->tend;
 	  stp++;
 	  
 	  stp->bfd = vp->bfd;
 	  stp->the_bfd_section = bfd_get_section_by_name (stp->bfd, ".data");
-	  stp->addr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->dstart;
-	  stp->endaddr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->dend;
+	  stp->addr = vp->dstart;
+	  stp->endaddr = vp->dend;
 	}
 
       vmap_symtab (vp);

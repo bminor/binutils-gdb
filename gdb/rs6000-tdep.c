@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1228,7 +1228,8 @@ static CORE_ADDR
 find_toc_address (pc)
      CORE_ADDR pc;
 {
-  int ii, toc_entry, tocbase = 0;
+  int ii, toc_entry;
+  CORE_ADDR tocbase = 0;
 
   toc_entry = -1;
   for (ii=0; ii < loadinfotextindex; ++ii)

@@ -1,3 +1,27 @@
+Sat Apr 19 01:49:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/powerpc/tm-ppc-aix4.h, config/rs6000/tm-rs6000-aix4.h
+	(DONT_RELOCATE_SYMFILE_OBJFILE):  Removed.
+	* xcoffsolib.h (struct vmap):  Add new members tvma, toffs and dvma,
+	remove tadj.
+	* exec.c (bfdsec_to_vmap):  Initialize new vmap members, initialize
+	tstart and dstart with section VMA.
+	* rs6000-nat.c (vmap_symtab):  Relocate relative to the VMA in the
+	object file.
+	(vmap_ldinfo, xcoff_relocate_core):  Adjust tstart by section offset
+	of the text section, remove DONT_RELOCATE_SYMFILE_OBJFILE hack.
+	(vmap_exec):  Relocate relative to the VMA in the object file,
+	relocate .bss section as well.
+	(xcoff_relocate_core):  No longer adjust section addresses by VMA.
+	* rs6000-tdep.c (find_toc_address):  Change type of tocbase
+	to CORE_ADDR.
+	* xcoffread.c (secnum_to_bfd_section):  New routine to get
+	BFD section from CS section number.
+	(scan_xcoff_symtab):  Make toc_offset section relative.
+
+	* symtab.c (total_number_of_methods):  Avoid core dump if
+	baseclass type is still undefined.
+
 Fri Apr 18 17:25:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (SUBDIRS):  Add mswin so that make cleanup cleans up

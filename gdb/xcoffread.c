@@ -1,5 +1,5 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
    	     Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -272,10 +272,12 @@ process_linenos PARAMS ((CORE_ADDR, CORE_ADDR));
 /* Translate from a COFF section number (target_index) to a SECT_OFF_*
    code.  */
 static int secnum_to_section PARAMS ((int, struct objfile *));
+static asection * secnum_to_bfd_section PARAMS ((int, struct objfile *));
 
 struct find_targ_sec_arg {
   int targ_index;
   int *resultp;
+  asection **bfd_sect;
 };
 
 static void find_targ_sec PARAMS ((bfd *, asection *, void *));
@@ -295,6 +297,7 @@ static void find_targ_sec (abfd, sect, obj)
 	*args->resultp = SECT_OFF_DATA;
       else
 	*args->resultp = SECT_OFF_BSS;
+      *args->bfd_sect = sect;
     }
 }
 
@@ -305,11 +308,29 @@ secnum_to_section (secnum, objfile)
      struct objfile *objfile;
 {
   int off = SECT_OFF_TEXT;
+  asection *sect = NULL;
   struct find_targ_sec_arg args;
   args.targ_index = secnum;
   args.resultp = &off;
+  args.bfd_sect = &sect;
   bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
   return off;
+}
+
+/* Return the BFD section that CS points to.  */
+static asection *
+secnum_to_bfd_section (secnum, objfile)
+     int secnum;
+     struct objfile *objfile;
+{
+  int off = SECT_OFF_TEXT;
+  asection *sect = NULL;
+  struct find_targ_sec_arg args;
+  args.targ_index = secnum;
+  args.resultp = &off;
+  args.bfd_sect = &sect;
+  bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
+  return sect;
 }
 
 /* add a given stab string into given stab vector. */
@@ -2195,12 +2216,13 @@ scan_xcoff_symtab (section_offsets, objfile)
      struct section_offsets *section_offsets;
      struct objfile *objfile;
 {
-  int toc_offset = 0;		/* toc offset value in data section. */
+  CORE_ADDR toc_offset = 0;		/* toc offset value in data section. */
   char *filestring = NULL;
 
   char *namestring;
   int past_first_source_file = 0;
   bfd *abfd;
+  asection *bfd_sect;
   unsigned int nsyms;
 
   /* Current partial symtab */
@@ -2363,6 +2385,11 @@ scan_xcoff_symtab (section_offsets, objfile)
 		    if (toc_offset)
 		      warning ("More than one XMC_TC0 symbol found.");
 		    toc_offset = symbol.n_value;
+
+		    /* Make TOC offset relative to start address of section.  */
+		    bfd_sect = secnum_to_bfd_section (symbol.n_scnum, objfile);
+		    if (bfd_sect)
+		      toc_offset -= bfd_section_vma (objfile->obfd, bfd_sect);
 		    break;
 
 		  case XMC_TC:
