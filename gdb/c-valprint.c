@@ -1,5 +1,5 @@
 /* Support for printing C values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -286,9 +286,10 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
           /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if NOT using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_PTR.) */
-	  print_address_demangle(*((int *) (valaddr +	/* FIXME bytesex */
-	      TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8)),
-	      stream, demangle);
+          print_address_demangle (extract_address (
+	        valaddr + TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8,
+	        TYPE_LENGTH (TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET))),
+              stream, demangle);
 	}
       else
 	cp_print_value_fields (type, valaddr, address, stream, format,
