@@ -31,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int memory_insert_breakpoint(), memory_remove_breakpoint();
 extern void host_convert_to_virtual(), host_convert_from_virtual();
+extern void add_syms_addr_command();
 
 static void cleanup_target ();
 
@@ -53,7 +54,8 @@ struct target_ops dummy_target = {"None", "None",
     0, 0, 		/* memory */
     0, 0, 		/* bkpts */
     0, 0, 0, 0, 0, 	/* terminal */
-    0, 0, 0,		/* kill, load, add_syms */
+    0, 0, 		/* kill, load */
+    add_syms_addr_command,	/* add_syms */
     0, 0, 		/* call_function, lookup_symbol */
     0, 0,		/* create_inferior, mourn_inferior */
     dummy_stratum, 0,	/* stratum, next */
@@ -491,8 +493,9 @@ target_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  int i;
+  int i, possible;
   char *rest;
+  char *argend;
 
   dont_repeat();
 
@@ -510,11 +513,11 @@ target_command (args, from_tty)
         
   /* Skip to first space, or end of args */
   for (rest = args; *rest && !isspace(*rest); rest++) ;
+  argend = rest;
   if (*rest == '\0')
     rest = 0;		/* Only one word in args */
   else
     {
-      *rest = '\0';	/* Terminate first word, scan for next */
       for (rest++; isspace (*rest); rest++) ;
       if (*rest == '\0')	/* Only one word w/trailing blanks */
 	rest = 0;
@@ -522,15 +525,24 @@ target_command (args, from_tty)
 
   /* Search target list for a match */
 
+  possible = -1;
   for (i = 0; i < target_struct_size; i++)
     {
-      if (!strcmp (args, target_structs[i]->to_shortname))
-	goto gotit;
+      if (!strncmp (args, target_structs[i]->to_shortname, argend - args)) {
+	/* If we have an exact match, it's time to quit.  */
+	if (target_structs[i]->to_shortname[args-argend] == '\0') {
+	  possible = i;
+	  break;
+	}
+	if (possible > 0)
+	  error ("Ambiguous target.  `info targets' will list all targets");
+	possible = i;
+      }
     }
-  error ("No such target.  `info targets' will list all targets");
+  if (possible < 0)
+    error ("No such target.  `info targets' will list all targets");
 
-gotit:
-  (*target_structs[i]->to_open) (rest, from_tty);
+  (*target_structs[possible]->to_open) (rest, from_tty);
 }
 
 static char targ_desc[] = 
