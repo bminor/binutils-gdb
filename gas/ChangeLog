@@ -1,6 +1,6 @@
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
-	* config/tc-sparc.c (U0x80000000l, U0xffffffffl): New constants.
+	* config/tc-sparc.c (U0x80000000, U0xffffffff): New constants.
 	Use all over.
 
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
