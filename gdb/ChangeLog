@@ -1,3 +1,10 @@
+start-sanitize-tic80
+Sun Mar 30 12:28:24 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tic80/tic80.mt: Disable using the simulator
+	until it is ready.
+
+end-sanitize-tic80
 Sat Mar 29 13:57:20 1997  Fred Fish  <fnf@cygnus.com>
 
 	* COPYING: Install new version of file from FSF.
