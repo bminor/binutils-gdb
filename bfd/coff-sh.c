@@ -147,8 +147,8 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   switch (r_type) 
     {
     case R_SH_IMM32:
-      /* We ignore the previous contents ! */
       insn = sym_value + reloc_entry->addend;  
+      insn += bfd_get_32 (abfd, hit_data);
       bfd_put_32(abfd, insn, hit_data);
       break;
     default:
@@ -308,12 +308,6 @@ const bfd_target shcoff_vec =
     COFF_SWAP_TABLE,
 };
 
-
-static int no_archive()
-{
-  bfd_set_error (bfd_error_wrong_format);
-  return 0;
-}
 const bfd_target shlcoff_vec =
 {
   "coff-shl",			/* name */
@@ -341,7 +335,7 @@ const bfd_target shlcoff_vec =
    This is so that we only use one archive format for both
    object file types */
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     no_archive, _bfd_dummy_target},   
+     _bfd_dummy_target, _bfd_dummy_target},   
   {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
      bfd_false},
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
