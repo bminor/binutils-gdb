@@ -87,12 +87,16 @@ typedef struct
    nonbool: values of non-boolean attributes
    There is a maximum of 32 attributes total.  */
 #define CGEN_ATTR_TYPE(n) \
-const struct { unsigned char num_nonbools; \
-	       unsigned int bool; \
-	       unsigned int nonbool[(n) ? (n) : 1]; }
+struct { unsigned char num_nonbools; \
+	   unsigned int bool; \
+	   unsigned int nonbool[(n) ? (n) : 1]; }
 
 /* Given an attribute number, return its mask.  */
 #define CGEN_ATTR_MASK(attr) (1 << (attr))
+
+/* Return the value of boolean attribute ATTR in ATTRS.  */
+#define CGEN_BOOL_ATTR(attrs, attr) \
+((CGEN_ATTR_MASK (attr) & (attrs)) != 0)
 
 /* Return value of attribute ATTR in ATTR_TABLE for OBJ.
    OBJ is a pointer to the entity that has the attributes.
@@ -108,14 +112,14 @@ const struct { unsigned char num_nonbools; \
 typedef struct
 {
   const char * name;
-  int          value;
+  int value;
 } CGEN_ATTR_ENTRY;
 
 /* For each domain (fld,operand,insn), list of attributes.  */
 
 typedef struct
 {
-  const char *            name;
+  const char * name;
   /* NULL for boolean attributes.  */
   const CGEN_ATTR_ENTRY * vals;
 } CGEN_ATTR_TABLE;
@@ -231,7 +235,9 @@ struct cgen_base
   /* Indices into the handler tables.
      We could use pointers here instead, but in the case of the insn table,
      90% of them would be identical and that's a lot of redundant data.
-     0 means use the default (what the default is is up to the code).  */
+     0 means use the default (what the default is is up to the code).
+     Using indices also keeps assembler code out of the disassembler and
+     vice versa.  */
   unsigned char parse, insert, extract, print;
 };
 
@@ -284,7 +290,7 @@ extern const char * (*cgen_parse_operand_fn)
 #endif
 
 /* Called before trying to match a table entry with the insn.  */
-void cgen_init_parse_operand PARAMS ((void));
+extern void cgen_init_parse_operand PARAMS ((void));
 
 /* Called from <cpu>-asm.c to initialize operand parsing.  */
 
@@ -292,33 +298,34 @@ void cgen_init_parse_operand PARAMS ((void));
    but rather that we need to put them somewhere.  */
 
 /* Call this from md_assemble to initialize the assembler callback.  */
-void cgen_asm_init_parse PARAMS ((void));
+extern void cgen_asm_init_parse PARAMS ((void));
 
 /* Don't require bfd.h unnecessarily.  */
 #ifdef BFD_VERSION
 /* The result is an error message or NULL for success.
    The parsed value is stored in the bfd_vma *.  */
-const char * cgen_parse_operand PARAMS ((enum cgen_parse_operand_type,
-					 const char **, int, int,
-					 enum cgen_parse_operand_result *,
-					 bfd_vma *));
+extern const char * cgen_parse_operand
+     PARAMS ((enum cgen_parse_operand_type,
+	      const char **, int, int,
+	      enum cgen_parse_operand_result *,
+	      bfd_vma *));
 #endif
 
-void cgen_save_fixups PARAMS ((void));
-void cgen_restore_fixups PARAMS ((void));
-void cgen_swap_fixups PARAMS ((void));
+extern void cgen_save_fixups PARAMS ((void));
+extern void cgen_restore_fixups PARAMS ((void));
+extern void cgen_swap_fixups PARAMS ((void));
      
 /* Add a register to the assembler's hash table.
    This makes lets GAS parse registers for us.
    ??? This isn't currently used, but it could be in the future.  */
-void cgen_asm_record_register PARAMS ((char *, int));
+extern void cgen_asm_record_register PARAMS ((char *, int));
 
 /* After CGEN_SYM (assemble_insn) is done, this is called to
    output the insn and record any fixups.  The address of the
    assembled instruction is returned in case it is needed by
    the caller.  */
-char * cgen_asm_finish_insn PARAMS ((const struct cgen_insn *, cgen_insn_t *,
-				   unsigned int));
+extern char * cgen_asm_finish_insn PARAMS ((const struct cgen_insn *,
+					    cgen_insn_t *, unsigned int, int));
 
 /* Operand values (keywords, integers, symbols, etc.)  */
 
@@ -335,14 +342,14 @@ typedef struct cgen_hw_entry
 {
   /* The type of this entry, one of `enum hw_type'.
      This is an int and not the enum as the latter may not be declared yet.  */
-  int                          type;
+  int type;
   const struct cgen_hw_entry * next;
-  char *                       name;
-  enum cgen_asm_type           asm_type;
-  PTR                          asm_data;
+  char * name;
+  enum cgen_asm_type asm_type;
+  PTR asm_data;
 } CGEN_HW_ENTRY;
 
-const CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
+extern const CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
 
 /* This struct is used to describe things like register names, etc.  */
 
@@ -367,7 +374,7 @@ typedef struct cgen_keyword_entry
 #ifndef CGEN_KEYWORD_NBOOL_ATTRS
 #define CGEN_KEYWORD_NBOOL_ATTRS 1
 #endif
-  CGEN_ATTR_TYPE (CGEN_KEYWORD_NBOOL_ATTRS) attrs;
+  const CGEN_ATTR_TYPE (CGEN_KEYWORD_NBOOL_ATTRS) attrs;
 
   /* Next name hash table entry.  */
   struct cgen_keyword_entry *next_name;
@@ -436,19 +443,20 @@ const CGEN_KEYWORD_ENTRY *cgen_keyword_search_next
 /* Operand value support routines.  */
 /* FIXME: some of the long's here will need to be bfd_vma or some such.  */
 
-const char * cgen_parse_keyword PARAMS ((const char **,
-					 CGEN_KEYWORD *,
-					 long *));
-const char * cgen_parse_signed_integer PARAMS ((const char **, int, long *));
-const char * cgen_parse_unsigned_integer PARAMS ((const char **, int,
-						  unsigned long *));
-const char * cgen_parse_address PARAMS ((const char **, int, int,
-					 enum cgen_parse_operand_result *,
-					 long *));
-const char * cgen_validate_signed_integer PARAMS ((long, long, long));
-const char * cgen_validate_unsigned_integer PARAMS ((unsigned long,
-						     unsigned long,
-						     unsigned long));
+extern const char * cgen_parse_keyword PARAMS ((const char **,
+						CGEN_KEYWORD *,
+						long *));
+extern const char * cgen_parse_signed_integer PARAMS ((const char **, int,
+						       long *));
+extern const char * cgen_parse_unsigned_integer PARAMS ((const char **, int,
+							 unsigned long *));
+extern const char * cgen_parse_address PARAMS ((const char **, int, int,
+						enum cgen_parse_operand_result *,
+						long *));
+extern const char * cgen_validate_signed_integer PARAMS ((long, long, long));
+extern const char * cgen_validate_unsigned_integer PARAMS ((unsigned long,
+							    unsigned long,
+							    unsigned long));
 
 /* Operand modes.  */
 
@@ -510,7 +518,7 @@ typedef struct cgen_operand
 #ifndef CGEN_OPERAND_NBOOL_ATTRS
 #define CGEN_OPERAND_NBOOL_ATTRS 1
 #endif
-  CGEN_ATTR_TYPE (CGEN_OPERAND_NBOOL_ATTRS) attrs;
+  const CGEN_ATTR_TYPE (CGEN_OPERAND_NBOOL_ATTRS) attrs;
 #define CGEN_OPERAND_ATTRS(operand) (&(operand)->attrs)
 } CGEN_OPERAND;
 
@@ -639,13 +647,16 @@ typedef struct
 
 struct cgen_insn
 {
-  /* ??? Further table size reductions can be had by moving this element
-     either to the format table or to a separate table of its own.  Not
-     sure this is desirable yet.  */
+  /* This field is an array of functions that operand on this entry.  */
   struct cgen_base base;
-  
-/* Given a pointer to a cgen_insn struct, return a pointer to `base'.  */
 #define CGEN_INSN_BASE(insn) (&(insn)->base)
+
+  /* Each real instruction is enumerated.  This is used, for example, to do
+     insn profiling in the simulator.
+     Macro-insns are not enumerated.  The simulator doesn't use them and there
+     is currently no other need for it.  */
+  int num;
+#define CGEN_INSN_NUM(insn) ((insn)->num)
 
   /* Name of entry (that distinguishes it from all other entries).
      This is used, for example, in simulator profiling results.  */
@@ -674,10 +685,16 @@ struct cgen_insn
 #define CGEN_INSN_VALUE(insn) ((insn)->value)
 #define CGEN_INSN_MASK(insn) ((insn)->format.mask)
 
-  /* Pointer to NULL entry terminated table of operands used,
-     or NULL if none.  */
-  const CGEN_OPERAND_INSTANCE *operands;
-#define CGEN_INSN_OPERANDS(insn) ((insn)->operands)
+  /* Opaque pointer to "subclass" specific data.
+     In the case of real insns this points to a NULL entry terminated
+     table of operands used, or NULL if none.
+     In the case of macro insns this points to data to control the expansion.
+     ??? I'd rather not get carried away and lay things out with pedantic
+     purity right now.  Sure, other fields might better be tucked away in
+     `data'.  Not now.  */
+  PTR data;
+#define CGEN_INSN_DATA(insn) ((insn)->data)
+#define CGEN_INSN_OPERANDS(insn) ((CGEN_OPERAND_INSTANCE *) (insn)->data)
 
   /* Attributes.
      This must appear last.  It is a variable sized array in that one
@@ -687,7 +704,7 @@ struct cgen_insn
 #ifndef CGEN_INSN_NBOOL_ATTRS
 #define CGEN_INSN_NBOOL_ATTRS 1
 #endif
-  CGEN_ATTR_TYPE (CGEN_INSN_NBOOL_ATTRS) attrs;
+  const CGEN_ATTR_TYPE (CGEN_INSN_NBOOL_ATTRS) attrs;
 #define CGEN_INSN_ATTRS(insn) (&(insn)->attrs)
 /* Return value of attribute ATTR in INSN.  */
 #define CGEN_INSN_ATTR(insn, attr) \
@@ -718,82 +735,147 @@ typedef struct
   
   /* Values added at runtime.  */
   CGEN_INSN_LIST * new_entries;
-  
-  /* Assembler hash function.  */
-  unsigned int (* asm_hash) PARAMS ((const char *));
-  
-  /* Number of entries in assembler hash table.  */
-  unsigned int asm_hash_table_size;
-  
-  /* Disassembler hash function.  */
-  unsigned int (* dis_hash) PARAMS ((const char *, unsigned long));
-  
-  /* Number of entries in disassembler hash table.  */
-  unsigned int dis_hash_table_size;
 } CGEN_INSN_TABLE;
 
-/* ??? This is currently used by the simulator.
-   We want this to be fast and the simulator currently doesn't handle
-   runtime added instructions so this is ok.  An alternative would be to
-   store the index in the table.  */
+/* ??? This is currently used by the simulator.  */
 extern const CGEN_INSN CGEN_SYM (insn_table_entries)[];
-#define CGEN_INSN_INDEX(insn) ((int) ((insn) - CGEN_SYM (insn_table_entries)))
-#define CGEN_INSN_ENTRY(n) (& CGEN_SYM (insn_table_entries) [n])
 
 /* Return number of instructions.  This includes any added at runtime.  */
 
-int cgen_insn_count PARAMS ((void));
+extern int cgen_insn_count PARAMS ((void));
+
+/* Macro instructions.
+   Macro insns aren't real insns, they map to one or more real insns.
+   E.g. An architecture's "nop" insn may actually be an "mv r0,r0" or
+   some such.
 
+   Macro insns can expand to nothing (e.g. a nop that is optimized away).
+   This is useful in multi-insn macros that build a constant in a register.
+   Of course this isn't the default behaviour and must be explicitly enabled.
+
+   Assembly of macro-insns is relatively straightforward.  Disassembly isn't.
+   However, disassembly of at least some kinds of macro insns is important
+   in order that the disassembled code preserve the readability of the original
+   insn.  What is attempted here is to disassemble all "simple" macro-insns,
+   where "simple" is currently defined to mean "expands to one real insn".
+
+   Simple macro-insns are handled specially.  They are emitted as ALIAS's
+   of real insns.  This simplifies their handling since there's usually more
+   of them than any other kind of macro-insn, and proper disassembly of them
+   falls out for free.  */
+
+/* For each macro-insn there may be multiple expansion possibilities,
+   depending on the arguments.  This structure is accessed via the `data'
+   member of CGEN_INSN.  */
+
+typedef struct cgen_minsn_expansion {
+  /* Function to do the expansion.
+     If the expansion fails (e.g. "no match") NULL is returned.
+     Space for the expansion is obtained with malloc.
+     It is up to the caller to free it.  */
+  const char * (* fn) PARAMS ((const struct cgen_minsn_expansion *,
+			       const char *, const char **, int *, CGEN_OPERAND **));
+#define CGEN_MIEXPN_FN(ex) ((ex)->fn)
+
+  /* Instruction(s) the macro expands to.
+     The format of STR is defined by FN.
+     It is typically the assembly code of the real insn, but it could also be
+     the original Scheme expression or a tokenized form of it (with FN being
+     an appropriate interpreter).  */
+  const char * str;
+#define CGEN_MIEXPN_STR(ex) ((ex)->str)
+} CGEN_MINSN_EXPANSION;
+
+/* Normal expander.
+   When supported, this function will convert the input string to another
+   string and the parser will be invoked recursively.  The output string
+   may contain further macro invocations.  */
+
+extern const char * cgen_expand_macro_insn
+     PARAMS ((const struct cgen_minsn_expansion *,
+	      const char *, const char **, int *, CGEN_OPERAND **));
+
 /* The assembler insn table is hashed based on some function of the mnemonic
    (the actually hashing done is up to the target, but we provide a few
-   examples like the first letter or a function of the entire mnemonic).
-   The index of each entry is the index of the corresponding table entry.
-   The value of each entry is the index of the next entry, with a 0
-   terminating (thus the first entry is reserved).  */
+   examples like the first letter or a function of the entire mnemonic).  */
 
+#ifndef CGEN_ASM_HASH_P
+#define CGEN_ASM_HASH_P(insn) 1
+#endif
+
+/* INSN is the CGEN_INSN entry when building the hash table and NULL
+   when looking up the insn during assembly.  */
 #ifndef CGEN_ASM_HASH
-#ifdef CGEN_MNEMONIC_OPERANDS
 #define CGEN_ASM_HASH_SIZE 127
-#define CGEN_ASM_HASH(string) (*(unsigned char *) (string) % CGEN_ASM_HASH_SIZE)
+#ifdef CGEN_MNEMONIC_OPERANDS
+#define CGEN_ASM_HASH(mnem) (*(unsigned char *) (mnem) % CGEN_ASM_HASH_SIZE)
 #else
-#define CGEN_ASM_HASH_SIZE 128
-#define CGEN_ASM_HASH(string) (*(unsigned char *) (string) % CGEN_ASM_HASH_SIZE) /*FIXME*/
+#define CGEN_ASM_HASH(mnem) (*(unsigned char *) (mnem) % CGEN_ASM_HASH_SIZE) /*FIXME*/
 #endif
 #endif
 
-unsigned int CGEN_SYM (asm_hash_insn) PARAMS ((const char *));
-CGEN_INSN_LIST * cgen_asm_lookup_insn PARAMS ((const char *));
-#define CGEN_ASM_LOOKUP_INSN(insn) cgen_asm_lookup_insn (insn)
+extern CGEN_INSN_LIST * cgen_asm_lookup_insn PARAMS ((const char *));
+#define CGEN_ASM_LOOKUP_INSN(string) cgen_asm_lookup_insn (string)
 #define CGEN_ASM_NEXT_INSN(insn) ((insn)->next)
 
 /* The disassembler insn table is hashed based on some function of machine
    instruction (the actually hashing done is up to the target).  */
 
-/* It doesn't make much sense to provide a default here,
-   but while this is under development we do.
-   BUFFER is a pointer to the bytes of the insn.
-   INSN is the first CGEN_BASE_INSN_SIZE bytes as an int in host order.  */
-#ifndef CGEN_DIS_HASH
-#define CGEN_DIS_HASH_SIZE 256
-#define CGEN_DIS_HASH(buffer, insn) (*(unsigned char *) (buffer))
+#ifndef CGEN_DIS_HASH_P
+#define CGEN_DIS_HASH_P(insn) 1
 #endif
 
-unsigned int CGEN_SYM (dis_hash_insn) PARAMS ((const char *, unsigned long));
-CGEN_INSN_LIST * cgen_dis_lookup_insn PARAMS ((const char *, unsigned long));
-#define CGEN_DIS_LOOKUP_INSN(buf, insn) cgen_dis_lookup_insn (buf, insn)
+/* It doesn't make much sense to provide a default here,
+   but while this is under development we do.
+   INSN is the CGEN_INSN entry when building the hash table and NULL
+   when looking up the insn during assembly.
+   BUFFER is a pointer to the bytes of the insn.
+   VALUE is the first CGEN_BASE_INSN_SIZE bytes as an int in host order.  */
+#ifndef CGEN_DIS_HASH
+#define CGEN_DIS_HASH_SIZE 256
+#define CGEN_DIS_HASH(buffer, value) (*(unsigned char *) (buffer))
+#endif
+
+extern CGEN_INSN_LIST * cgen_dis_lookup_insn PARAMS ((const char *,
+						      unsigned long));
+#define CGEN_DIS_LOOKUP_INSN(buf, value) cgen_dis_lookup_insn ((buf), (value))
 #define CGEN_DIS_NEXT_INSN(insn) ((insn)->next)
 
 /* Top level structures and functions.  */
 
 typedef struct
 {
-  const CGEN_HW_ENTRY *  hw_list;
+  const CGEN_HW_ENTRY * hw_list;
+
   /*CGEN_OPERAND_TABLE * operand_table; - FIXME:wip */
-  CGEN_INSN_TABLE *      insn_table;
-} CGEN_OPCODE_DATA;
+
+  CGEN_INSN_TABLE * insn_table;
+
+  /* Macro instructions are defined separately and are combined with real
+     insns during hash table computation.  */
+  CGEN_INSN_TABLE * macro_insn_table;
+
+  /* Return non-zero if insn should be added to hash table.  */
+  int (* asm_hash_p) PARAMS ((const CGEN_INSN *));
+
+  /* Assembler hash function.  */
+  unsigned int (* asm_hash) PARAMS ((const char *));
+
+  /* Number of entries in assembler hash table.  */
+  unsigned int asm_hash_table_size;
+
+  /* Return non-zero if insn should be added to hash table.  */
+  int (* dis_hash_p) PARAMS ((const CGEN_INSN *));
+
+  /* Disassembler hash function.  */
+  unsigned int (* dis_hash) PARAMS ((const char *, unsigned long));
+
+  /* Number of entries in disassembler hash table.  */
+  unsigned int dis_hash_table_size;
+} CGEN_OPCODE_TABLE;
 
 /* Each CPU has one of these.  */
-extern CGEN_OPCODE_DATA CGEN_SYM (opcode_data);
+extern const CGEN_OPCODE_TABLE CGEN_SYM (opcode_table);
 
 /* Global state access macros.
    Some of these are tucked away and accessed with cover fns.
@@ -808,42 +890,42 @@ extern enum cgen_endian cgen_current_endian;
 /* Prototypes of major functions.  */
 
 /* Set the current cpu (+ mach number, endian, etc.).  */
-void cgen_set_cpu PARAMS ((CGEN_OPCODE_DATA *, int, enum cgen_endian));
+extern void cgen_set_cpu PARAMS ((const CGEN_OPCODE_TABLE *, int,
+				  enum cgen_endian));
 
 /* Initialize the assembler, disassembler.  */
-void cgen_asm_init PARAMS ((void));
-void cgen_dis_init PARAMS ((void));
+extern void cgen_asm_init PARAMS ((void));
+extern void cgen_dis_init PARAMS ((void));
 
 /* `init_tables' must be called before `xxx_supported'.  */
-void CGEN_SYM (init_tables) PARAMS ((int));
-void CGEN_SYM (init_asm) PARAMS ((int, enum cgen_endian));
-void CGEN_SYM (init_dis) PARAMS ((int, enum cgen_endian));
-void CGEN_SYM (init_parse) PARAMS ((void));
-void CGEN_SYM (init_print) PARAMS ((void));
-void CGEN_SYM (init_insert) PARAMS ((void));
-void CGEN_SYM (init_extract) PARAMS ((void));
+extern void CGEN_SYM (init_tables) PARAMS ((int));
+extern void CGEN_SYM (init_asm) PARAMS ((int, enum cgen_endian));
+extern void CGEN_SYM (init_dis) PARAMS ((int, enum cgen_endian));
 
 /* FIXME: This prototype is wrong ifndef CGEN_INT_INSN.
    Furthermore, ifdef CGEN_INT_INSN, the insn is created in
    target byte order (in which case why use int's at all).
    Perhaps replace cgen_insn_t * with char *?  */
-const struct cgen_insn *
+extern const struct cgen_insn *
 CGEN_SYM (assemble_insn) PARAMS ((const char *, CGEN_FIELDS *,
 				  cgen_insn_t *, char **));
 #if 0 /* old */
-int CGEN_SYM (insn_supported) PARAMS ((const struct cgen_insn *));
-int CGEN_SYM (opval_supported) PARAMS ((const struct cgen_opval *));
+extern int CGEN_SYM (insn_supported) PARAMS ((const struct cgen_insn *));
+extern int CGEN_SYM (opval_supported) PARAMS ((const struct cgen_opval *));
 #endif
 
 extern const CGEN_KEYWORD  CGEN_SYM (operand_mach);
-int CGEN_SYM (get_mach) PARAMS ((const char *));
+extern int CGEN_SYM (get_mach) PARAMS ((const char *));
 
-const CGEN_INSN *
-CGEN_SYM (get_insn_operands) PARAMS ((const CGEN_INSN *, cgen_insn_t,
-				      int, int *));
-const CGEN_INSN *
+extern const CGEN_INSN *
 CGEN_SYM (lookup_insn) PARAMS ((const CGEN_INSN *, cgen_insn_t,
 				int, CGEN_FIELDS *, int));
+extern void
+CGEN_SYM (get_insn_operands) PARAMS ((const CGEN_INSN *, const CGEN_FIELDS *,
+				      int *));
+extern const CGEN_INSN *
+CGEN_SYM (lookup_get_insn_operands) PARAMS ((const CGEN_INSN *, cgen_insn_t,
+					     int, int *));
 
 CGEN_INLINE void
 CGEN_SYM (put_operand) PARAMS ((int, const long *,
@@ -851,10 +933,10 @@ CGEN_SYM (put_operand) PARAMS ((int, const long *,
 CGEN_INLINE long
 CGEN_SYM (get_operand) PARAMS ((int, const CGEN_FIELDS *));
 
-const char *
+extern const char *
 CGEN_SYM (parse_operand) PARAMS ((int, const char **, CGEN_FIELDS *));
 
-const char *
+extern const char *
 CGEN_SYM (insert_operand) PARAMS ((int, CGEN_FIELDS *, char *));
 
 /* Default insn parser, printer.  */
@@ -864,6 +946,6 @@ extern cgen_extract_fn CGEN_SYM (extract_insn);
 extern cgen_print_fn CGEN_SYM (print_insn);
 
 /* Read in a cpu description file.  */
-const char * cgen_read_cpu_file PARAMS ((const char *));
+extern const char * cgen_read_cpu_file PARAMS ((const char *));
 
 #endif /* CGEN_H */

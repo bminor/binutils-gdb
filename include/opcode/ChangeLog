@@ -1,3 +1,18 @@
+Mon Apr 27 10:13:11 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (CGEN_ATTR_TYPE): Delete `const', moved to uses.
+	(cgen_asm_finish_insn): Update prototype.
+	(cgen_insn): New members num, data.
+	(CGEN_INSN_TABLE): Members asm_hash, asm_hash_table_size,
+	dis_hash, dis_hash_table_size moved to ...
+	(CGEN_OPCODE_TABLE).  Here.  Renamed from CGEN_OPCODE_DATA.
+	All uses updated.  New members asm_hash_p, dis_hash_p.
+	(CGEN_MINSN_EXPANSION): New struct.
+	(cgen_expand_macro_insn): Declare.
+	(cgen_macro_insn_count): Declare.
+	(get_insn_operands): Update prototype.
+	(lookup_get_insn_operands): Declare.
+
 Tue Apr 21 17:11:32 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h (i386_optab): Change iclrKludge and imulKludge to
