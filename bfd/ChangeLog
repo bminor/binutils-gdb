@@ -1,3 +1,10 @@
+Tue Sep  2 18:29:37 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10200.c (mn10200_elf_final_link_relocate): PC relative
+	instructions are relative to the next instruction, not the
+	current instruction.
+	(mn10200_elf_relax_section): Similarly.
+
 Tue Sep  2 15:45:45 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-v850.c: Use a macro to construct bfd_arch_info_type
