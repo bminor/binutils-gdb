@@ -1,3 +1,9 @@
+Fri Feb 11 13:13:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (macro): Do unaligned loads and stores
+	correctly when big endian, and give errors on overflow rather than
+	generating incorrect code.
+
 Thu Feb 10 11:24:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* as.c: Include libiberty.h.
