@@ -262,7 +262,7 @@ do_captured_list_thread_ids (struct ui_out *uiout,
   struct thread_info *tp;
   int num = 0;
 
-  ui_out_tuple_begin (uiout, "thread-ids");
+  ui_out_list_begin (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)
     {
@@ -270,7 +270,7 @@ do_captured_list_thread_ids (struct ui_out *uiout,
       ui_out_field_int (uiout, "thread-id", tp->num);
     }
 
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   ui_out_field_int (uiout, "number-of-threads", num);
   return GDB_RC_OK;
 }
@@ -690,10 +690,12 @@ do_captured_thread_select (struct ui_out *uiout,
 			   void *tidstr)
 {
   int num;
+  ptid_t old_ptid;
   struct thread_info *tp;
 
   num = value_as_long (parse_and_eval (tidstr));
 
+  old_ptid = inferior_ptid;
   tp = find_thread_id (num);
 
   if (!tp)
@@ -715,6 +717,10 @@ do_captured_thread_select (struct ui_out *uiout,
   ui_out_text (uiout, ")]");
 
   print_stack_frame (selected_frame, frame_relative_level (selected_frame), 1);
+
+  if (!ptid_equal (old_ptid, inferior_ptid))
+    context_changed_event (pid_to_thread_id (inferior_ptid));
+
   return GDB_RC_OK;
 }
 
