@@ -894,11 +894,6 @@ m68hc11_frame_this_id (struct frame_info *next_frame,
   /* The FUNC is easy.  */
   func = frame_func_unwind (next_frame);
 
-  /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
-  if (deprecated_inside_entry_file (func))
-    return;
-
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set
      that base to "NULL".  */

@@ -994,7 +994,7 @@ arm_prologue_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (func <= LOWEST_PC || deprecated_inside_entry_file (func))
+  if (func <= LOWEST_PC)
     return;
 
   /* If we've hit a wall, stop.  */

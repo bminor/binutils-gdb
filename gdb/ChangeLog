@@ -1,3 +1,13 @@
+2003-10-31  Andrew Cagney  <cagney@redhat.com>
+
+	* avr-tdep.c (avr_frame_this_id): Do not call
+	deprecated_inside_entry_file.
+	* m68hc11-tdep.c (m68hc11_frame_this_id): Ditto.
+	* m32r-tdep.c (m32r_frame_this_id): Ditto.
+	* d10v-tdep.c (d10v_frame_this_id): Ditto.
+	* arm-tdep.c (arm_prologue_this_id): Ditto.
+	* alpha-tdep.c (alpha_heuristic_frame_this_id): Ditto.
+
 2003-10-31  Jim Blandy  <jimb@redhat.com>
 
 	* elfread.c (elf_symtab_read): Allocate correct number of tail
