@@ -390,7 +390,7 @@ tui_enable (void)
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
-  refresh ();
+  tuiRefreshAll ();
 
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();
