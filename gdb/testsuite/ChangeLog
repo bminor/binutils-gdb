@@ -1,3 +1,7 @@
+Fri Nov 12 15:26:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t06/signals.exp: Remove one sun3 XFAIL which has been fixed.
+
 Mon Nov  8 16:55:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t20/gdbme.cc: Add comment about pmi being optimized out.
