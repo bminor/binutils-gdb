@@ -1,3 +1,12 @@
+Mon Jul 26 02:08:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/vaxbsd.h: Include std-host.h.  Don't include <machine/param.h>.
+
+Sat Jul 24 16:13:01 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Handle case of rightshift !=
+	bitpos when overflow checking.
+
 Fri Jul 23 10:20:27 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* bfd.c (bfd_nonrepresentable_section, bfd_undefined_symbol,
