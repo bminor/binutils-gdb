@@ -1,5 +1,5 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -395,19 +395,14 @@ _initialize_i386bsd_nat (void)
      information.  */
 
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
-  extern int i386fbsd4_sc_reg_offset[];
 #define SC_REG_OFFSET i386fbsd4_sc_reg_offset
 #elif defined (__FreeBSD_version) && __FreeBSD_version >= 300005
-  extern int i386fbsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386fbsd_sc_reg_offset
 #elif defined (NetBSD) || defined (__NetBSD_Version__)
-  extern int i386nbsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
-  extern int i386obsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #else
-  extern int i386bsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386bsd_sc_reg_offset
 #endif
 

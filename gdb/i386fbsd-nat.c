@@ -1,5 +1,5 @@
 /* Native-dependent code for FreeBSD/i386.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -92,9 +92,6 @@ _initialize_i386fbsd_nat (void)
     int mib[2];
     int ps_strings;
     size_t len;
-
-    extern CORE_ADDR i386fbsd_sigtramp_start;
-    extern CORE_ADDR i386fbsd_sigtramp_end;
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_PS_STRINGS;

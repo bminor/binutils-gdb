@@ -1,5 +1,17 @@
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (i386fbsd_sigtramp_start, i386fbsd_sigtramp_end,
+	i386obsd_sigtramp_start, i386obsd_sigtramp_end,
+	i386fbsd4_sc_reg_offset, i386fbsd_sc_reg_offset,
+	i386nbsd_sc_reg_offset, i386obsd_sc_reg_offset,
+	i386bsd_sc_reg_offset): Add extern declarations.
+	* i386obsd-nat.c: Include "i386-tdep.h"
+	(_initialize_i386obsd_nat): Remove extern declarations.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Remove extern
+	declarations.
+	* i386bsd-nat.c (_initialize_i386bsd_nat): Remove extern
+	declarations.
+
 	* i386-tdep.c (i386_register_to_value): Use get_frame_register
 	instead of frame_read_register.
 	(i386_fetch_pointer_argument): Use get_frame_register_unsigned
