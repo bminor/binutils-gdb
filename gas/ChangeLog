@@ -1,5 +1,16 @@
 start-sanitize-v850
-Wed Oct 16 00:19:00 1996  Jeffrey A Law  (law@cygnus.com)
+Wed Oct 16 11:28:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* write.c (fixup_segment): Don't add symbol value to addend if
+	TC_V850 and OBJ_ELF.
+	* config/tc-v850.h (tc_fix_adjustable): Don't adjust any
+	pc-relative fixups.
+
+	* config/tc-v850.c (md_pcrel_from): Undo yesterday's changes.
+	(md_pcrel_from_section): Likewise.
+	* config/tc-v850.h (MD_PCREL_FROM_SECTION): Likewise.
+
+Tue Oct 15 23:19:00 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_pcrel_from): Delete unused function.
 	(md_pcrel_from_section): New function.

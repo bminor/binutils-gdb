@@ -814,14 +814,12 @@ md_estimate_size_before_relax (fragp, seg)
 } 
 
 long
-md_pcrel_from_section (fixp, sec)
+md_pcrel_from (fixp)
      fixS *fixp;
-     segT sec;
 {
   /* If the symbol is undefined, or in a section other than our own,
      then let the linker figure it out.  */
-  if ((fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
-      || (fixp->fx_addsy && S_GET_SEGMENT (fixp->fx_addsy) != sec))
+  if (fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
     {
       /* The symbol is undefined.  Let the linker figure it out.  */
       return 0;

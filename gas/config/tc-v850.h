@@ -47,5 +47,4 @@
 
 #define md_number_to_chars number_to_chars_littleendian
 
-/* call md_pcrel_from_section, not md_pcrel_from */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
+#define tc_fix_adjustable(FIX) (!(FIX)->fx_pcrel)
