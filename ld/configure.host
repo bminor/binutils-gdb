@@ -124,7 +124,7 @@ i[3456]86-pc-interix*)
   ;;
 
 i[3456]86-*-cygwin*)
-  HOSTING_LIBS="$HOSTING_LIBS"' -lcygwin -luser32 -lkernel32 -ladvapi32 -lshell32 `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
+  HOSTING_LIBS="$HOSTING_LIBS"' -lcygwin -L/usr/lib/w32api -luser32 -lkernel32 -ladvapi32 -lshell32 `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
   ;;
 
 ia64-*-linux-gnu*)

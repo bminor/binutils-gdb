@@ -3,6 +3,8 @@
 	* ld.texinfo: Add win32 machine depending section.
 	* gen-doc.texi: Enable win32 machine depending section.
 
+	* configure.host: Add win32 library search path.
+
 2002-12-17  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	* ld/emultempl/pe.em (pe_find_data_imports): Don't search for data
