@@ -1,5 +1,10 @@
 1998-09-24  Jason Molenda  (jsm@bugshack.cygnus.com)
 
+	* configure.in (WARN_CFLAGS): Add -Wmissing-prototypes.
+	* configure: Regenerated.
+
+1998-09-24  Jason Molenda  (jsm@bugshack.cygnus.com)
+
 	* configure.in: Add --enable-warnings.
 	Adjust whitespace of other --with and --enable options so that
 	configure --help lines up correctly.

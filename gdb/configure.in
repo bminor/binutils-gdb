@@ -78,7 +78,8 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk select poll sigaction isascii bzero bcopy memcpy btowc)
+AC_CHECK_FUNCS(setpgid sbrk select poll sigaction isascii bzero bcopy \
+               memcpy btowc)
 AC_FUNC_ALLOCA
 
 # If we are configured native on GNU/Linux, work around problems with sys/procfs.h
@@ -287,7 +288,7 @@ esac])
 
 if test "x$enable_warnings" = xyes -a "x$GCC" = xyes
 then
-   WARN_CFLAGS="-Wall -Wstrict-prototypes"
+   WARN_CFLAGS="-Wall -Wstrict-prototypes -Wmissing-prototypes"
 else
    WARN_CFLAGS=""
 fi
