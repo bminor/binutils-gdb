@@ -1,3 +1,8 @@
+2002-12-17  Roger Sayle  <roger@eyesopen.com>
+
+	* configure.host (ia64-*-hpux*): Support 64 bit targets using
+	the HP compiler's "long long".
+
 2002-12-15  Kazu Hirata  <kazu@cs.umass.edu>
 
 	Merge from mainline:
