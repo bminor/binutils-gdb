@@ -19,6 +19,12 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
+# Set a default timeout to be used for the tests under UNIX, rather than
+# accepting whatever default dejagnu gives us (apparently 10 seconds).
+# When running the tests over NFS, under somewhat heavy load, 10 seconds
+# does not seem to be enough.  Try starting with 30.
+set timeout 30
+
 load_lib gdb.exp
 
 # variables that need to set up

@@ -1,6 +1,15 @@
-Sun Feb 11 11:30:45 1996  Fred Fish  <fnf@cygnus.com>
+Thu Feb 15 08:12:55 1996  Fred Fish  <fnf@cygnus.com>
 
-	* gdb.base/a2-run.exp: Replace $binfile with $testfile in test result reports.
+	* config/unix-gdb.exp: Default timeout in UNIX case to 30 seconds, up
+	from dejagnu's apparent default of 10 seconds, which gives random results
+	when running the tests over NFS on moderately loaded systems.
+	* lib/gdb.exp (gdb_run_cmd): Add "(timeout)" in timeout case.
+
+Mon Feb 12 16:50:28 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/callfuncs.exp: Remove setup_xfail for PR 5318.  Now fixed.
+	* gdb.base/a2-run.exp: Replace $binfile with $testfile in test
+ 	result reports.
 
 Fri Feb  9 15:56:51 1996  Fred Fish  <fnf@cygnus.com>
 
