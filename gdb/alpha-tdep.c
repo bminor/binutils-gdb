@@ -283,7 +283,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = 0, m_arg = alpha_args; i < nargs; i++, m_arg++)
     {
       struct value *arg = args[i];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      struct type *arg_type = check_typedef (value_type (arg));
 
       /* Cast argument to long if necessary as the compiler does it too.  */
       switch (TYPE_CODE (arg_type))

@@ -548,7 +548,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      struct type *type = VALUE_TYPE (args[i]);
+      struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
       enum amd64_reg_class class[2];
       int needed_integer_regs = 0;
@@ -629,7 +629,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
   /* Write out the arguments to the stack.  */
   for (i = 0; i < num_stack_args; i++)
     {
-      struct type *type = VALUE_TYPE (stack_args[i]);
+      struct type *type = value_type (stack_args[i]);
       char *valbuf = VALUE_CONTENTS (stack_args[i]);
       int len = TYPE_LENGTH (type);
 

@@ -890,7 +890,7 @@ sh_stack_allocsize (int nargs, struct value **args)
 {
   int stack_alloc = 0;
   while (nargs-- > 0)
-    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[nargs])) + 3) & ~3);
+    stack_alloc += ((TYPE_LENGTH (value_type (args[nargs])) + 3) & ~3);
   return stack_alloc;
 }
 
@@ -1045,7 +1045,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
      in four registers available.  Loop thru args from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      type = VALUE_TYPE (args[argnum]);
+      type = value_type (args[argnum]);
       len = TYPE_LENGTH (type);
       val = sh_justify_value_in_reg (args[argnum], len);
 
@@ -1151,7 +1151,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
      in four registers available.  Loop thru args from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      type = VALUE_TYPE (args[argnum]);
+      type = value_type (args[argnum]);
       len = TYPE_LENGTH (type);
       val = sh_justify_value_in_reg (args[argnum], len);
 

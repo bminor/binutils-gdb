@@ -2401,7 +2401,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])),
+    len += align_up (TYPE_LENGTH (value_type (args[argnum])),
 		     mips_stack_argsize (gdbarch));
   sp -= align_up (len, 16);
 
@@ -2432,7 +2432,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       char *val;
       char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
 
@@ -2684,7 +2684,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])),
+    len += align_up (TYPE_LENGTH (value_type (args[argnum])),
 		     mips_stack_argsize (gdbarch));
   sp -= align_up (len, 16);
 
@@ -2714,7 +2714,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       char *val;
       struct value *arg = args[argnum];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
 
@@ -3023,7 +3023,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])),
+    len += align_up (TYPE_LENGTH (value_type (args[argnum])),
 		     mips_stack_argsize (gdbarch));
   sp -= align_up (len, 16);
 
@@ -3054,7 +3054,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       char *val;
       struct value *arg = args[argnum];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
 
@@ -3477,7 +3477,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])),
+    len += align_up (TYPE_LENGTH (value_type (args[argnum])),
 		     mips_stack_argsize (gdbarch));
   sp -= align_up (len, 16);
 
@@ -3508,7 +3508,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       char *val;
       struct value *arg = args[argnum];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
 

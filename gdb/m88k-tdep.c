@@ -266,13 +266,13 @@ m88k_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      struct type *type = VALUE_TYPE (args[i]);
+      struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 
       if (m88k_integral_or_pointer_p (type) && len < 4)
 	{
 	  args[i] = value_cast (builtin_type_int32, args[i]);
-	  type = VALUE_TYPE (args[i]);
+	  type = value_type (args[i]);
 	  len = TYPE_LENGTH (type);
 	}
 
@@ -307,7 +307,7 @@ m88k_store_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < nargs; i++)
     {
       char *valbuf = VALUE_CONTENTS (args[i]);
-      struct type *type = VALUE_TYPE (args[i]);
+      struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
       int stack_word = num_stack_words;
 

@@ -3043,7 +3043,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argno = 0; argno < nargs; argno++)
     {
       arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
+      type = check_typedef (value_type (arg));
       len = TYPE_LENGTH (type);
 
       if ((nslots & 1) && slot_alignment_is_next_even (type))
@@ -3098,7 +3098,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *float_elt_type;
 
       arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
+      type = check_typedef (value_type (arg));
       len = TYPE_LENGTH (type);
 
       /* Special handling for function parameters.  */

@@ -823,8 +823,8 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val = (char *) VALUE_CONTENTS (args[argnum]);
-      int len = TYPE_LENGTH (VALUE_TYPE (args[argnum]));
-      struct type *type = VALUE_TYPE (args[argnum]);
+      int len = TYPE_LENGTH (value_type (args[argnum]));
+      struct type *type = value_type (args[argnum]);
       int olen;
 
       mcore_insn_debug (("MCORE PUSH: argreg=%d; len=%d; %s\n",
@@ -866,7 +866,7 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
 	  /* Any remainder for the stack is noted below... */
 	}
-      else if (TYPE_CODE (VALUE_TYPE (args[argnum])) != TYPE_CODE_STRUCT
+      else if (TYPE_CODE (value_type (args[argnum])) != TYPE_CODE_STRUCT
 	       && len > DEPRECATED_REGISTER_SIZE)
 	{
 	  /* All subsequent args go onto the stack. */

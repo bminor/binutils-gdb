@@ -1,5 +1,13 @@
 2004-11-12  Andrew Cagney  <cagney@gnu.org>
 
+	* sparc-tdep.c: Replace VALUE_TYPE with value_type.
+	* v850-tdep.c, sparc64-tdep.c, sh-tdep.c: Ditto.
+	* sh64-tdep.c, s390-tdep.c, mcore-tdep.c: Ditto.
+	* h8300-tdep.c, arm-linux-tdep.c, amd64-tdep.c: Ditto.
+	* hppa-tdep.c, mips-tdep.c, m88k-tdep.c: Ditto.
+	* m68hc11-tdep.c, m32r-tdep.c, ia64-tdep.c: Ditto.
+	* frv-tdep.c, cris-tdep.c, avr-tdep.c, alpha-tdep.c: Ditto.
+
 	Merge VALUE_REGNO and VALUE_FRAME_REGNUM into VALUE_REGNUM.
 	* value.h (VALUE_REGNO, VALUE_FRAME_REGNUM): Delete.
 	(VALUE_REGNUM): Define.

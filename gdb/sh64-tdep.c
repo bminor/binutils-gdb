@@ -1494,7 +1494,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   /* Now make sure there's space on the stack */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 7) & ~7);
+    stack_alloc += ((TYPE_LENGTH (value_type (args[argnum])) + 7) & ~7);
   sp -= stack_alloc;		/* make room on stack for args */
 
   /* Now load as many as possible of the first arguments into
@@ -1507,7 +1507,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
-      type = VALUE_TYPE (args[argnum]);
+      type = value_type (args[argnum]);
       len = TYPE_LENGTH (type);
       memset (valbuf, 0, sizeof (valbuf));
       

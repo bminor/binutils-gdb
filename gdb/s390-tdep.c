@@ -2428,7 +2428,7 @@ s390_function_arg_integer (struct type *type)
 static LONGEST
 extend_simple_arg (struct value *arg)
 {
-  struct type *type = VALUE_TYPE (arg);
+  struct type *type = value_type (arg);
 
   /* Even structs get passed in the least significant bits of the
      register / memory word.  It's not really right to extract them as
@@ -2511,7 +2511,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = 0; i < nargs; i++)
     {
       struct value *arg = args[i];
-      struct type *type = VALUE_TYPE (arg);
+      struct type *type = value_type (arg);
       unsigned length = TYPE_LENGTH (type);
 
       if (s390_function_arg_pass_by_reference (type))
@@ -2552,7 +2552,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     for (i = 0; i < nargs; i++)
       {
         struct value *arg = args[i];
-        struct type *type = VALUE_TYPE (arg);
+        struct type *type = value_type (arg);
         unsigned length = TYPE_LENGTH (type);
 
 	if (s390_function_arg_pass_by_reference (type))

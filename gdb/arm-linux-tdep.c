@@ -110,7 +110,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       int len;
       struct type *arg_type;
 
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
+      arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
 
       /* ANSI C code passes float arguments as integers, K&R code
@@ -149,7 +149,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       enum type_code typecode;
       struct type *arg_type, *target_type;
 
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
+      arg_type = check_typedef (value_type (args[argnum]));
       target_type = TYPE_TARGET_TYPE (arg_type);
       len = TYPE_LENGTH (arg_type);
       typecode = TYPE_CODE (arg_type);

@@ -929,7 +929,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   /* Now make space on the stack for the args. */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
+    len += ((TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3);
   sp -= len + stack_offset;	/* possibly over-allocating, but it works... */
   /* (you might think we could allocate 16 bytes */
   /* less, but the ABI seems to use it all! )  */
@@ -948,8 +948,8 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       char *val;
       char valbuf[v850_register_raw_size (E_ARG0_REGNUM)];
 
-      if (!v850_type_is_scalar (VALUE_TYPE (*args))
-	  && TYPE_LENGTH (VALUE_TYPE (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
+      if (!v850_type_is_scalar (value_type (*args))
+	  && TYPE_LENGTH (value_type (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
 	  store_unsigned_integer (valbuf, 4, VALUE_ADDRESS (*args));
 	  len = 4;
@@ -957,7 +957,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	}
       else
 	{
-	  len = TYPE_LENGTH (VALUE_TYPE (*args));
+	  len = TYPE_LENGTH (value_type (*args));
 	  val = (char *) VALUE_CONTENTS (*args);
 	}
 
