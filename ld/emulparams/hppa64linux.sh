@@ -3,6 +3,7 @@
 
 SCRIPT_NAME=elf
 ELFSIZE=64
+# FIXME: this output format is for hpux.
 OUTPUT_FORMAT="elf64-hppa-linux"
 TEXT_START_ADDR=0x10000
 TARGET_PAGE_SIZE=0x10000
@@ -42,7 +43,9 @@ OTHER_BSS_END_SYMBOLS='
   PROVIDE (__TLS_PREALLOC_DTV_A = 0);'
 
 # HPs use .dlt where systems use .got.  Sigh.
-OTHER_GOT_RELOC_SECTIONS='.rela.dlt : { *(.rela.dlt) }'
+OTHER_GOT_RELOC_SECTIONS="
+  .rela.dlt     ${RELOCATING-0} : { *(.rela.dlt) }
+  .rela.opd     ${RELOCATING-0} : { *(.rela.opd) }"
 
 # We're not actually providing a symbol anymore (due to the inability to be
 # safe in regards to shared libraries). So we just allocate the hunk of space
