@@ -1,3 +1,8 @@
+2002-05-11  Bruno Haible  <bruno@clisp.org>
+
+	* dwarf2dbg.c (dwarf2_emit_insn): Use the 'current' struct filled
+	by dwarf2_directive_loc, instead of calling dwarf2_where.
+
 2002-05-11  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* config/obj-coff.h: Fix formatting.
