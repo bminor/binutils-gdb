@@ -1,5 +1,9 @@
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
+        * sh-tdep.c: Include correct file.
+
+2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
         New support for sh64-elf (sh5) target.
 
         * configure.tgt: For sh64-elf target, default to sh-elf.

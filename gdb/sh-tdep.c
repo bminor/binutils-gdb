@@ -49,7 +49,7 @@
 /* sh64 flags */
 #include "elf/sh.h"
 /* registers numbers shared with the simulator */
-#include "gdb/sim-sh64.h"
+#include "gdb/sim-sh.h"
 
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
