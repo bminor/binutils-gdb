@@ -721,7 +721,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
       return bfd_reloc_notsupported;
       
     case R_V850_22_PCREL:
-      if (relocation > 0x1ffff || relocation < -0x200000)
+      if (relocation > 0x1fffff || relocation < -0x200000)
 	return bfd_reloc_overflow;
       
       if ((relocation % 2) != 0)
@@ -953,7 +953,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 		+ input_section->output_offset);
       value -= offset;
     
-      if ((long)value > 0x1ffff || (long)value < -0x200000)
+      if ((long)value > 0x1fffff || (long)value < -0x200000)
 	return bfd_reloc_overflow;
 
       if ((value % 2) != 0)
@@ -970,7 +970,11 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       value = (value >> 16) + ((value & 0x8000) != 0);
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
-	return bfd_reloc_overflow;
+	{
+	  /* This relocation cannot overflow. */
+	  
+	  value = 0;
+	}
 
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
@@ -978,9 +982,6 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
     case R_V850_HI16:
       value += (short)bfd_get_16 (input_bfd, hit_data);
       value >>= 16;
-
-      if ((long)value > 0x7fff || (long)value < -0x8000)
-	return bfd_reloc_overflow;
 
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
@@ -1128,7 +1129,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	      + h->u.def.section->output_offset);
 
 	value -= ep;
-	value += ((insn & 0x7e) << 2);
+	value += ((insn & 0x7e) << 1);
 	
 	if ((long) value > 0xfc || (long) value < 0)
 	  return bfd_reloc_overflow;
@@ -1352,7 +1353,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ctbp", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  return bfd_reloc_continue;  /* Actually this indicates that __ctbp could not be found. */
+	  return (bfd_reloc_dangerous + 1);  /* Actually this indicates that __ctbp could not be found. */
 
 	ctbp = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1384,7 +1385,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ctbp", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  return bfd_reloc_other;
+	  return (bfd_reloc_dangerous + 1);
 
 	ctbp = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1505,15 +1506,28 @@ fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x re
 	      relocation = (h->root.u.def.value
 			    + sec->output_section->vma
 			    + sec->output_offset);
+#if 0
+fprintf (stderr, "defined: sec: %s, name: %s, value: %x + %x + %x gives: %x\n",
+	 sec->name, h->root.root.string, h->root.u.def.value, sec->output_section->vma, sec->output_offset, relocation);
+#endif
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
+	    {
+#if 0
+fprintf (stderr, "undefined: sec: %s, name: %s\n",
+	 sec->name, h->root.root.string);
+#endif
+	      relocation = 0;
+	    }
 	  else
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset)))
 		return false;
+#if 0
+fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
+#endif
 	      relocation = 0;
 	    }
 	}
@@ -1551,7 +1565,6 @@ fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x re
 	      break;
 
 	    case bfd_reloc_undefined:
-	      fprintf (stderr, "undef2 %s\n", name );
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, name, input_bfd, input_section,
 		      rel->r_offset)))
@@ -1578,6 +1591,10 @@ fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x re
 	      msg = "could not locate special linker symbol __ep";
 	      goto common_error;
 
+	    case (bfd_reloc_dangerous + 1):
+	      msg = "could not locate special linker symbol __ctbp";
+	      goto common_error;
+	      
 	    default:
 	      msg = "internal error: unknown error";
 	      /* fall through */

@@ -1,3 +1,10 @@
+Fri Oct 10 16:01:30 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_reloc, v850_elf_final_link_relocate):
+	Correct value for maximum positive 22 bit PC relative relocation.
+	(v850_elf_final_link_relocate):  Prevent overflow from HI16_S and
+	HI_16 relocations.  Correct bit adjustment in TDA offsets. 
+
 Thu Oct  9 16:43:39 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* elf64-sparc.c (sparc_elf_{hix22,lox10}_reloc): New functions.
