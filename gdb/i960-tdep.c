@@ -331,8 +331,7 @@ examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
    prologue.  */
 
 CORE_ADDR
-i960_skip_prologue (ip)
-CORE_ADDR (ip);
+i960_skip_prologue (CORE_ADDR ip)
 {
   struct frame_saved_regs saved_regs_dummy;
   struct symtab_and_line sal;
@@ -479,9 +478,11 @@ frame_struct_result_address (struct frame_info *fi)
 }
 
 /* Return address to which the currently executing leafproc will return,
-   or 0 if ip is not in a leafproc (or if we can't tell if it is).
+   or 0 if IP, the value of the instruction pointer from the currently
+   executing function, is not in a leafproc (or if we can't tell if it
+   is).
 
-   Do this by finding the starting address of the routine in which ip lies.
+   Do this by finding the starting address of the routine in which IP lies.
    If the instruction there is "mov g14, gx" (where x is in [0,7]), this
    is a leafproc and the return address is in register gx.  Well, this is
    true unless the return address points at a RET instruction in the current
@@ -489,8 +490,7 @@ frame_struct_result_address (struct frame_info *fi)
    has been entered through the CALL entry point.  */
 
 CORE_ADDR
-leafproc_return (ip)
-     CORE_ADDR ip;		/* ip from currently executing function */
+leafproc_return (CORE_ADDR ip)
 {
   register struct minimal_symbol *msymbol;
   char *p;
@@ -684,12 +684,13 @@ struct tabent
   char numops;
 };
 
-static int			/* returns instruction length: 4 or 8 */
-mem (memaddr, word1, word2, noprint)
-     unsigned long memaddr;
-     unsigned long word1, word2;
-     int noprint;		/* If TRUE, return instruction length, but
-				   don't output any text.  */
+/* Return instruction length, either 4 or 8.  When NOPRINT is non-zero
+   (TRUE), don't output any text.  (Actually, as implemented, if NOPRINT
+   is 0, abort() is called.) */
+
+static int
+mem (unsigned long memaddr, unsigned long word1, unsigned long word2,
+     int noprint)
 {
   int i, j;
   int len;

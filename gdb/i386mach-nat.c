@@ -40,8 +40,7 @@
 static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 void
-fetch_inferior_registers (regno)
-     int regno;			/* Original value discarded */
+fetch_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
@@ -109,14 +108,21 @@ store_inferior_registers (int regno)
 
 
 
-/* Work with core files, for GDB. */
+/* Provide registers to GDB from a core file.
+
+   CORE_REG_SECT points to an array of bytes, which were obtained from
+   a core file which BFD thinks might contain register contents. 
+   CORE_REG_SIZE is its size.
+
+   WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set
+     2 --- the floating-point register set
+
+   REG_ADDR isn't used.  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR reg_addr)
 {
   int val;
 
