@@ -1056,6 +1056,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   CORE_ADDR dyncall_addr, sr4export_addr;
   struct minimal_symbol *msymbol;
   int flags = read_register (FLAGS_REGNUM);
+  struct unwind_table_entry *u;
 
   msymbol = lookup_minimal_symbol ("$$dyncall", (struct objfile *) NULL);
   if (msymbol == NULL)
@@ -1063,6 +1064,35 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
   dyncall_addr = SYMBOL_VALUE_ADDRESS (msymbol);
 
+  /* If we are calling an import stub (eg calling into a dynamic library)
+     then have sr4export call the magic __d_plt_call routine which is linked
+     in from end.o.  (You can't use _sr4export to call the import stub as
+     the value in sp-24 will get fried and you end up returning to the
+     wrong location.  You can't call the import stub directly as the code
+     to bind the PLT entry to a function can't return to a stack address.)  */
+  u = find_unwind_entry (fun);
+  if (u && u->stub_type == IMPORT)
+    {
+      CORE_ADDR new_fun;
+      msymbol = lookup_minimal_symbol ("__d_plt_call", (struct objfile *) NULL);
+      if (msymbol == NULL)
+	error ("Can't find an address for __d_plt_call trampoline");
+
+      /* This is where sr4export will jump to.  */
+      new_fun = SYMBOL_VALUE_ADDRESS (msymbol);
+
+      /* We have to store the address of the stub in __shlib_funcptr.  */
+      msymbol = lookup_minimal_symbol ("__shlib_funcptr",
+				       (struct objfile *)NULL);
+      if (msymbol == NULL)
+	error ("Can't find an address for __shlib_funcptr");
+
+      target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol), (char *)&fun, 4);
+      fun = new_fun;
+
+    }
+
+  /* We still need sr4export's address too.  */
   msymbol = lookup_minimal_symbol ("_sr4export", (struct objfile *) NULL);
   if (msymbol == NULL)
     error ("Can't find an address for _sr4export trampoline");
