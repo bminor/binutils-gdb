@@ -1,3 +1,13 @@
+2004-01-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* objcopy.c: Include elf-bfd.h.
+	(is_strip_section): Don't strip debugging sections if
+	STRIP_NONDEBUG.
+	(setup_section): If STRIP_NONDEBUG make SEC_ALLOC sections
+	~(SEC_LOAD | SEC_HAS_CONTENTS) and on ELF targets also SHT_NOBITS.
+
+	* objcopy.c (copy_section): Free relpp if relcount == 0.
+
 2004-01-12  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* stabs.c (parse_stab_argtypes): Handle g++ ABI version 3 names.

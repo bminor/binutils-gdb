@@ -28,6 +28,7 @@
 #include "budbg.h"
 #include "filenames.h"
 #include "fnmatch.h"
+#include "elf-bfd.h"
 #include <sys/stat.h>
 
 /* A list of symbols to explicitly strip out, or to keep.  A linked
@@ -776,7 +777,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return FALSE;
     }
 
-  return strip_symbols == STRIP_NONDEBUG ? TRUE : FALSE;
+  return FALSE;
 }
 
 /* Choose which symbol entries to copy; put the result in OSYMS.
@@ -1909,6 +1910,13 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   if (p != NULL && p->set_flags)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
+  else if (strip_symbols == STRIP_NONDEBUG && (flags & SEC_ALLOC) != 0)
+    {
+      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+      if (obfd->xvec->flavour == bfd_target_elf_flavour)
+	elf_section_type (osection) = SHT_NOBITS;
+    }
+
   if (!bfd_set_section_flags (obfd, osection, flags))
     {
       err = _("flags");
@@ -2029,6 +2037,8 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	}
 
       bfd_set_reloc (obfd, osection, relcount == 0 ? NULL : relpp, relcount);
+      if (relcount == 0)
+	free (relpp);
     }
 
   isection->_cooked_size = isection->_raw_size;
