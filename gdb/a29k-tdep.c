@@ -355,9 +355,9 @@ examine_tag (p, is_trans, argcount, msize, mfp_used)
     return 0;
   if (tag1 & (1<<23)) 			/* A two word tag */
     {
-       tag2 = read_memory_integer (p+4, 4);
+       tag2 = read_memory_integer (p-4, 4);
        if (msize)
-	 *msize = tag2;
+	 *msize = tag2 * 2;
     }
   else					/* A one word tag */
     {
