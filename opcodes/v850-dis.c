@@ -36,8 +36,7 @@ static const char *const v850_sreg_names[] =
 
 static const char *const v850_cc_names[] =
 { "v", "c/l", "z", "nh", "s/n", "t", "lt", "le", 
-  "nv", "nc/nl", "nz", "h", "ns/p", "sa", "lt", "ge", 
-  "le", "gt" };
+  "nv", "nc/nl", "nz", "h", "ns/p", "sa", "ge", "gt" };
 
 int 
 print_insn_v850 (memaddr, info)

@@ -1,6 +1,8 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-dis.c (v850_cc_names): Fix stupid thinkos.
+
 	* v850-dis.c (v850_reg_names): Define.
 	(v850_sreg_names, v850_cc_names): Likewise.
 	(disassemble): Very rough cut at printing operands (unformatted).
