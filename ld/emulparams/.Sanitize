@@ -32,6 +32,7 @@ elf64_sparc.sh
 gld960.sh
 go32.sh
 h8300.sh
+h8300h.sh
 h8500.sh
 hp300bsd.sh
 hp3hpux.sh
