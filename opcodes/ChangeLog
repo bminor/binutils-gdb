@@ -1,5 +1,6 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* pj-dis.c (print_insn_pj): Adjust for pj_opc_info_t change.
 	* z8kgen.c: Include "libiberty.h".
 	(opt, args, toks): Fix initializer warnings.
 	(chewname): Make "name" a char **.  Return mnemonic trimmed of

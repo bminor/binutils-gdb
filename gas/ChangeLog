@@ -1,5 +1,13 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-pj.c (little, big, parse_exp_save_ilp): Prototype.
+	(c_to_r, ipush_code, fake_opcode, alias): Likewise.
+	(fake_opcode): Adjust for pj_opc_int_t change.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	(ipush_code): Correct parse_exp_save_ilp call.  Test pending_reloc
+	instead of non-existent third arg of parse_exp_save_ilp.
+	(md_parse_option): Correct "little" and "big" calls.
 	* config/tc-sparc.c (s_register): Only declare #ifdef OBJ_ELF.
 	(md_apply_fix3 <segment>): Add ATTRIBUTE_UNUSED.
 	(tc_gen_reloc <section>): Likewise.

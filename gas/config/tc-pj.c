@@ -34,6 +34,21 @@ const char line_comment_chars[] = "/!#";
 static int pending_reloc;
 static struct hash_control *opcode_hash_control;
 
+static void little
+  PARAMS ((int));
+static void big
+  PARAMS ((int));
+static char *parse_exp_save_ilp
+  PARAMS ((char *, expressionS *));
+static int c_to_r
+  PARAMS ((char));
+static void ipush_code
+  PARAMS ((pj_opc_info_t *, char *));
+static void fake_opcode
+  PARAMS ((const char *, void (*) (struct pj_opc_info_t *, char *)));
+static void alias
+  PARAMS ((const char *, const char *));
+
 static void
 little (ignore)
      int ignore ATTRIBUTE_UNUSED;
@@ -155,15 +170,17 @@ ipush_code (opcode, str)
      pj_opc_info_t *opcode ATTRIBUTE_UNUSED;
      char *str;
 {
-  int mod = 0;
   char *b = frag_more (6);
   expressionS arg;
 
   b[0] = 0x11;
   b[3] = 0xed;
-  parse_exp_save_ilp (str + 1, &arg, &mod);
-  if (mod)
-    as_bad (_("can't have relocation for ipush"));
+  parse_exp_save_ilp (str + 1, &arg);
+  if (pending_reloc)
+    {
+      as_bad (_("can't have relocation for ipush"));
+      pending_reloc = 0;
+    }
 
   fix_new_exp (frag_now, b - frag_now->fr_literal + 1, 2,
 	       &arg, 0, BFD_RELOC_PJ_CODE_DIR16);
@@ -177,13 +194,13 @@ ipush_code (opcode, str)
 static void
 fake_opcode (name, func)
      const char *name;
-     void (*func) ();
+     void (*func) PARAMS ((struct pj_opc_info_t *, char *));
 {
   pj_opc_info_t *fake = (pj_opc_info_t *) xmalloc (sizeof (pj_opc_info_t));
 
   fake->opcode = -1;
   fake->opcode_next = -1;
-  fake->name = (const char *) func;
+  fake->u.func = func;
   hash_insert (opcode_hash_control, name, (char *) fake);
 }
 
@@ -210,8 +227,8 @@ md_begin ()
   opcode_hash_control = hash_new ();
 
   /* Insert names into hash table.  */
-  for (opcode = pj_opc_info; opcode->name; opcode++)
-    hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+  for (opcode = pj_opc_info; opcode->u.name; opcode++)
+    hash_insert (opcode_hash_control, opcode->u.name, (char *) opcode);
 
   /* Insert the only fake opcode.  */
   fake_opcode ("ipush", ipush_code);
@@ -278,7 +295,7 @@ md_assemble (str)
     {
       /* It's a fake opcode.  Dig out the args and pretend that was
          what we were passed.  */
-      ((void (*) ()) opcode->name) (opcode, op_end);
+      (*opcode->u.func) (opcode, op_end);
     }
   else
     {
@@ -404,10 +421,10 @@ md_parse_option (c, arg)
   switch (c)
     {
     case OPTION_LITTLE:
-      little ();
+      little (0);
       break;
     case OPTION_BIG:
-      big ();
+      big (0);
       break;
     default:
       return 0;
