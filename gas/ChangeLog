@@ -1,5 +1,9 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m88k.c (md_pseudo_table): Add ".set" so that the
+	explicit pseudo-op works, while continuing to treat "set" as an
+	instruction.
+
 	* ecoff.c (ecoff_debugging_seen): New global variable.
 	(ecoff_directive_def): Set ecoff_debugging_seen.
 	(ecoff_stab): Likewise.

@@ -175,6 +175,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"word", cons, 4},
   /* Force set to be treated as an instruction.  */
   {"set", NULL, 0},
+  {".set", s_set, 0},
   {0}
 };
 
