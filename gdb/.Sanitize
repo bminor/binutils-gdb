@@ -145,6 +145,11 @@ eval.c
 exec.c
 expprint.c
 expression.h
+f-exp.y
+f-lang.c
+f-lang.h
+f-typeprint.c
+f-valprint.c
 findvar.c
 fork-child.c
 frame.h
