@@ -1,3 +1,7 @@
+2000-05-15  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/arch4t.s: Add tests of new fields to msr instruction.
+
 2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* gas/mips/mips.exp: Include *-*-linux* in svr4pic.
