@@ -1,3 +1,9 @@
+Mon Feb 13 23:25:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,swap_ext_reloc_in)): Don't return a pointer
+	to garbage if the symbol index is out of range.
+	(NAME(aout,swap_std_reloc_in)): Likewise.
+
 start-sanitize-arc
 Mon Feb 13 09:35:30 1995  Doug Evans  <dje@canuck.cygnus.com>
 
