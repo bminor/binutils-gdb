@@ -60,7 +60,6 @@ a29k.sh
 aixppc.sh
 aixrs6.sh
 alpha.sh
-alphabsd.sh
 armaoutb.sh
 armaoutl.sh
 armcoff.sh
