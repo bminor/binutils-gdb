@@ -1,3 +1,10 @@
+2001-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-coff.c (obj_coff_section): Formatting fix.
+
+	* config/tc-i386.c (md_assemble): Accept branch hints as ",pt" and
+	",pn".
+
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
 	* config/tc-mips.c (warn_nops): New variable. Set to 0 to
@@ -149,9 +156,9 @@
 
 2000-05-24  Tom Rix <trix@redhat.com>
 
-	* config/obj-coff.c : (add_lineno) xcoff allows negative line
+	* config/obj-coff.c (add_lineno): xcoff allows negative line
 	numbers
-	* config/tc-ppc.c (ppc_stabx) : fix generated symbol
+	* config/tc-ppc.c (ppc_stabx): fix generated symbol
 
 2001-05-24  Alan Modra  <amodra@one.net.au>
 
@@ -932,7 +939,7 @@
 
 2001-02-16  matthew green  <mrg@redhat.com>
 
-	* gas/cgen.c (gas_cgen_md_apply_fix3): Support BFD_RELOC_64.
+	* cgen.c (gas_cgen_md_apply_fix3): Support BFD_RELOC_64.
 
 2001-02-13  Jim Wilson  <wilson@redhat.com>
 

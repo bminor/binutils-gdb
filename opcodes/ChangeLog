@@ -1,3 +1,16 @@
+2001-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Sort 'ta' case statement.
+	* configure: Regenerate.
+
+	* i386-dis.c (dis386_att): Add 'H' to conditional branch and
+	loop,jcxz insns.
+	(disx86_64_att): Likewise.
+	(dis386_twobyte_att): Likewise.
+	(print_insn_i386): Don't print branch hints as a prefix.
+	(putop): 'H' macro prints branch hints.
+	(get64): Kill compile warnings.
+
 2001-06-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* sh-opc.h (sh_table): Don't use empty initializers.
@@ -11,8 +24,8 @@
 
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
-	* opcodes/m68k-dis.c (print_insn_m68k): Fix typo.
-	* opcodes/m68k-opc.c (m68k_opcodes): Correct allowed operands for
+	* m68k-dis.c (print_insn_m68k): Fix typo.
+	* m68k-opc.c (m68k_opcodes): Correct allowed operands for
 	mcf (ColdFire) div, rem and moveb instructions.
 
 2001-06-06  Alan Modra  <amodra@bigpond.net.au>

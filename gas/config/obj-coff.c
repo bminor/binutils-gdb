@@ -1493,8 +1493,8 @@ obj_coff_section (ignore)
     {
       /* This section's attributes have already been set. Warn if the
          attributes don't match.  */
-      flagword matchflags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	                  | SEC_DATA | SEC_SHARED | SEC_NEVER_LOAD;
+      flagword matchflags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+			     | SEC_DATA | SEC_SHARED | SEC_NEVER_LOAD);
       if ((flags ^ oldflags) & matchflags)
 	as_warn (_("Ignoring changed section attributes for %s"), name);
     }

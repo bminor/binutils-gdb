@@ -1269,7 +1269,8 @@ md_assemble (line)
 	  }
 	if (!is_space_char (*l)
 	    && *l != END_OF_INSN
-	    && *l != PREFIX_SEPARATOR)
+	    && *l != PREFIX_SEPARATOR
+	    && *l != ',')
 	  {
 	    as_bad (_("invalid character %s in mnemonic"),
 		    output_invalid (*l));
@@ -1358,6 +1359,38 @@ md_assemble (line)
 	    as_bad (_("no such instruction: `%s'"), token_start);
 	    return;
 	  }
+      }
+
+    if (current_templates->start->opcode_modifier & (Jump | JumpByte))
+      {
+	/* Check for a branch hint.  We allow ",pt" and ",pn" for
+	   predict taken and predict not taken respectively.
+	   I'm not sure that branch hints actually do anything on loop
+	   and jcxz insns (JumpByte) for current Pentium4 chips.  They
+	   may work in the future and it doesn't hurt to accept them
+	   now.  */
+	if (l[0] == ',' && l[1] == 'p')
+	  {
+	    if (l[2] == 't')
+	      {
+		if (! add_prefix (DS_PREFIX_OPCODE))
+		  return;
+		l += 3;
+	      }
+	    else if (l[2] == 'n')
+	      {
+		if (! add_prefix (CS_PREFIX_OPCODE))
+		  return;
+		l += 3;
+	      }
+	  }
+      }
+    /* Any other comma loses.  */
+    if (*l == ',')
+      {
+	as_bad (_("invalid character %s in mnemonic"),
+		output_invalid (*l));
+	return;
       }
 
     /* Check if instruction is supported on specified architecture.  */

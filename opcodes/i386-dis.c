@@ -436,6 +436,7 @@ struct dis386 {
    'B' => print 'b' if suffix_always is true
    'E' => print 'e' if 32-bit form of jcxz
    'F' => print 'w' or 'l' depending on address size prefix (loop insns)
+   'H' => print ",pt" or ",pn" branch hint
    'L' => print 'l' if suffix_always is true
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd', or 'o'
@@ -580,23 +581,23 @@ static const struct dis386 dis386_att[] = {
   { "outsb",	indirDX, Xb, XX },
   { "outsR",	indirDX, Xv, XX },
   /* 70 */
-  { "jo",	Jb, cond_jump_flag, XX },
-  { "jno",	Jb, cond_jump_flag, XX },
-  { "jb",	Jb, cond_jump_flag, XX },
-  { "jae",	Jb, cond_jump_flag, XX },
-  { "je",	Jb, cond_jump_flag, XX },
-  { "jne",	Jb, cond_jump_flag, XX },
-  { "jbe",	Jb, cond_jump_flag, XX },
-  { "ja",	Jb, cond_jump_flag, XX },
+  { "joH",	Jb, cond_jump_flag, XX },
+  { "jnoH",	Jb, cond_jump_flag, XX },
+  { "jbH",	Jb, cond_jump_flag, XX },
+  { "jaeH",	Jb, cond_jump_flag, XX },
+  { "jeH",	Jb, cond_jump_flag, XX },
+  { "jneH",	Jb, cond_jump_flag, XX },
+  { "jbeH",	Jb, cond_jump_flag, XX },
+  { "jaH",	Jb, cond_jump_flag, XX },
   /* 78 */
-  { "js",	Jb, cond_jump_flag, XX },
-  { "jns",	Jb, cond_jump_flag, XX },
-  { "jp",	Jb, cond_jump_flag, XX },
-  { "jnp",	Jb, cond_jump_flag, XX },
-  { "jl",	Jb, cond_jump_flag, XX },
-  { "jge",	Jb, cond_jump_flag, XX },
-  { "jle",	Jb, cond_jump_flag, XX },
-  { "jg",	Jb, cond_jump_flag, XX },
+  { "jsH",	Jb, cond_jump_flag, XX },
+  { "jnsH",	Jb, cond_jump_flag, XX },
+  { "jpH",	Jb, cond_jump_flag, XX },
+  { "jnpH",	Jb, cond_jump_flag, XX },
+  { "jlH",	Jb, cond_jump_flag, XX },
+  { "jgeH",	Jb, cond_jump_flag, XX },
+  { "jleH",	Jb, cond_jump_flag, XX },
+  { "jgH",	Jb, cond_jump_flag, XX },
   /* 80 */
   { GRP1b },
   { GRP1S },
@@ -707,10 +708,10 @@ static const struct dis386 dis386_att[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopneF",	Jb, loop_jcxz_flag, XX },
-  { "loopeF",	Jb, loop_jcxz_flag, XX },
-  { "loopF",	Jb, loop_jcxz_flag, XX },
-  { "jEcxz",	Jb, loop_jcxz_flag, XX },
+  { "loopneFH",	Jb, loop_jcxz_flag, XX },
+  { "loopeFH",	Jb, loop_jcxz_flag, XX },
+  { "loopFH",	Jb, loop_jcxz_flag, XX },
+  { "jEcxzH",	Jb, loop_jcxz_flag, XX },
   { "inB",	AL, Ib, XX },
   { "inS",	eAX, Ib, XX },
   { "outB",	Ib, AL, XX },
@@ -1166,23 +1167,23 @@ static const struct dis386 disx86_64_att[] = {
   { "outsb",	indirDX, Xb, XX },
   { "outsR",	indirDX, Xv, XX },
   /* 70 */
-  { "jo",	Jb, cond_jump_flag, XX },
-  { "jno",	Jb, cond_jump_flag, XX },
-  { "jb",	Jb, cond_jump_flag, XX },
-  { "jae",	Jb, cond_jump_flag, XX },
-  { "je",	Jb, cond_jump_flag, XX },
-  { "jne",	Jb, cond_jump_flag, XX },
-  { "jbe",	Jb, cond_jump_flag, XX },
-  { "ja",	Jb, cond_jump_flag, XX },
+  { "joH",	Jb, cond_jump_flag, XX },
+  { "jnoH",	Jb, cond_jump_flag, XX },
+  { "jbH",	Jb, cond_jump_flag, XX },
+  { "jaeH",	Jb, cond_jump_flag, XX },
+  { "jeH",	Jb, cond_jump_flag, XX },
+  { "jneH",	Jb, cond_jump_flag, XX },
+  { "jbeH",	Jb, cond_jump_flag, XX },
+  { "jaH",	Jb, cond_jump_flag, XX },
   /* 78 */
-  { "js",	Jb, cond_jump_flag, XX },
-  { "jns",	Jb, cond_jump_flag, XX },
-  { "jp",	Jb, cond_jump_flag, XX },
-  { "jnp",	Jb, cond_jump_flag, XX },
-  { "jl",	Jb, cond_jump_flag, XX },
-  { "jge",	Jb, cond_jump_flag, XX },
-  { "jle",	Jb, cond_jump_flag, XX },
-  { "jg",	Jb, cond_jump_flag, XX },
+  { "jsH",	Jb, cond_jump_flag, XX },
+  { "jnsH",	Jb, cond_jump_flag, XX },
+  { "jpH",	Jb, cond_jump_flag, XX },
+  { "jnpH",	Jb, cond_jump_flag, XX },
+  { "jlH",	Jb, cond_jump_flag, XX },
+  { "jgeH",	Jb, cond_jump_flag, XX },
+  { "jleH",	Jb, cond_jump_flag, XX },
+  { "jgH",	Jb, cond_jump_flag, XX },
   /* 80 */
   { GRP1b },
   { GRP1S },
@@ -1293,10 +1294,10 @@ static const struct dis386 disx86_64_att[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopneF",	Jb, loop_jcxz_flag, XX },
-  { "loopeF",	Jb, loop_jcxz_flag, XX },
-  { "loopF",	Jb, loop_jcxz_flag, XX },
-  { "jEcxz",	Jb, loop_jcxz_flag, XX },
+  { "loopneFH",	Jb, loop_jcxz_flag, XX },
+  { "loopeFH",	Jb, loop_jcxz_flag, XX },
+  { "loopFH",	Jb, loop_jcxz_flag, XX },
+  { "jEcxzH",	Jb, loop_jcxz_flag, XX },
   { "inB",	AL, Ib, XX },
   { "inS",	eAX, Ib, XX },
   { "outB",	Ib, AL, XX },
@@ -1769,23 +1770,23 @@ static const struct dis386 dis386_twobyte_att[] = {
   { PREGRP23 },
   { PREGRP20 },
   /* 80 */
-  { "jo",  Jv, cond_jump_flag, XX },
-  { "jno", Jv, cond_jump_flag, XX },
-  { "jb",  Jv, cond_jump_flag, XX },
-  { "jae", Jv, cond_jump_flag, XX },
-  { "je",  Jv, cond_jump_flag, XX },
-  { "jne", Jv, cond_jump_flag, XX },
-  { "jbe", Jv, cond_jump_flag, XX },
-  { "ja",  Jv, cond_jump_flag, XX },
+  { "joH",  Jv, cond_jump_flag, XX },
+  { "jnoH", Jv, cond_jump_flag, XX },
+  { "jbH",  Jv, cond_jump_flag, XX },
+  { "jaeH", Jv, cond_jump_flag, XX },
+  { "jeH",  Jv, cond_jump_flag, XX },
+  { "jneH", Jv, cond_jump_flag, XX },
+  { "jbeH", Jv, cond_jump_flag, XX },
+  { "jaH",  Jv, cond_jump_flag, XX },
   /* 88 */
-  { "js",  Jv, cond_jump_flag, XX },
-  { "jns", Jv, cond_jump_flag, XX },
-  { "jp",  Jv, cond_jump_flag, XX },
-  { "jnp", Jv, cond_jump_flag, XX },
-  { "jl",  Jv, cond_jump_flag, XX },
-  { "jge", Jv, cond_jump_flag, XX },
-  { "jle", Jv, cond_jump_flag, XX },
-  { "jg",  Jv, cond_jump_flag, XX },
+  { "jsH",  Jv, cond_jump_flag, XX },
+  { "jnsH", Jv, cond_jump_flag, XX },
+  { "jpH",  Jv, cond_jump_flag, XX },
+  { "jnpH", Jv, cond_jump_flag, XX },
+  { "jlH",  Jv, cond_jump_flag, XX },
+  { "jgeH", Jv, cond_jump_flag, XX },
+  { "jleH", Jv, cond_jump_flag, XX },
+  { "jgH",  Jv, cond_jump_flag, XX },
   /* 90 */
   { "seto", Eb, XX, XX },
   { "setno", Eb, XX, XX },
@@ -3158,20 +3159,6 @@ print_insn_i386 (pc, info)
 	}
     }
 
-  if (dp->bytemode2 == cond_jump_mode || dp->bytemode2 == loop_jcxz_mode)
-    {
-      if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS)
-	{
-	  oappend ("cs ");
-	  used_prefixes |= PREFIX_CS;
-	}
-      if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
-	{
-	  oappend ("ds ");
-	  used_prefixes |= PREFIX_DS;
-	}
-    }
-
   if (need_modrm)
     {
       FETCH_DATA (info, codep + 1);
@@ -3764,6 +3751,19 @@ putop (template, sizeflag)
 	      else
 		*obufp++ = 'w';
 	      used_prefixes |= (prefixes & PREFIX_ADDR);
+	    }
+	  break;
+	case 'H':
+	  if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS
+	      || (prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
+	    {
+	      used_prefixes |= prefixes & (PREFIX_CS | PREFIX_DS);
+	      *obufp++ = ',';
+	      *obufp++ = 'p';
+	      if (prefixes & PREFIX_DS)
+		*obufp++ = 't';
+	      else
+		*obufp++ = 'n';
 	    }
 	  break;
 	case 'I':
@@ -4405,23 +4405,24 @@ OP_G (bytemode, sizeflag)
 static bfd_vma
 get64 ()
 {
-  unsigned int a = 0;
-  unsigned int b = 0;
-  bfd_vma x = 0;
-
+  bfd_vma x;
 #ifdef BFD64
+  unsigned int a;
+  unsigned int b;
+
   FETCH_DATA (the_info, codep + 8);
   a = *codep++ & 0xff;
   a |= (*codep++ & 0xff) << 8;
   a |= (*codep++ & 0xff) << 16;
   a |= (*codep++ & 0xff) << 24;
-  b |= (*codep++ & 0xff);
+  b = *codep++ & 0xff;
   b |= (*codep++ & 0xff) << 8;
   b |= (*codep++ & 0xff) << 16;
   b |= (*codep++ & 0xff) << 24;
   x = a + ((bfd_vma) b << 32);
 #else
   abort();
+  x = 0;
 #endif
   return x;
 }
