@@ -140,6 +140,7 @@ if ![gdb_skip_stdio_test "Step to return"] {
 
 set old_timeout $timeout
 set timeout 50
+set program_exited 0
 send_gdb "next\n"
 gdb_expect {
     -re "33.*$gdb_prompt $" {
@@ -158,6 +159,11 @@ gdb_expect {
 	    }
 	    -re ".*in.*init.*$gdb_prompt $" { 
 		# This is what happens on sparc64-elf ultra.
+		pass "step out of main"
+	    }
+	    -re ".*Program exited normally.*$gdb_prompt $" {
+		# This is what happens on Linux i86 (and I would expect others)
+		set program_exited 1
 		pass "step out of main"
 	    }
 	    -re ".*in .nope ().*$gdb_prompt $" {
@@ -185,6 +191,11 @@ gdb_expect {
     -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $"  {
         pass "step out of main 2"
     }
+    -re ".*Program exited normally.*$gdb_prompt $" {
+	# This is what happens on Linux i86 (and I would expect others)
+	set program_exited 1
+	pass "step out of main"
+    }
     -re ".*in.*currently asm.*$gdb_prompt $" { 
         pass "step out of main into assembler"
     }
@@ -196,41 +207,48 @@ gdb_expect {
 }
 
 if {![target_info exists use_cygmon] || ![target_info use_cygmon]} {
-    send_gdb "n\n"
-    gdb_expect {
-	-re "Program exited normally.*$gdb_prompt $" {
-	    # If we actually have debug info for the start function,
-	    # then we won't get the "Single-stepping until function
-	    # exit" message.
-	    pass "step to end of run 1"
-	}
-	-re ".*Single.*Program exited.*$gdb_prompt $" {
-	    pass "step to end of run 1"
-	}
-	-re ".*Single.*in exit.*from.*dld.sl.*$gdb_prompt $" {
-	    pass "step to end of run 2" 
-	    gdb_test "c" ".*" "continue after exit"
-	}
-	timeout { fail "(timeout) step to end of run" }
+    global program_exited;
+    if {[eval expr $program_exited == 0]} {
+	send_gdb "n\n"
+	gdb_expect {
+	    -re "Program exited normally.*$gdb_prompt $" {
+		# If we actually have debug info for the start function,
+		# then we won't get the "Single-stepping until function
+		# exit" message.
+		pass "step to end of run 1"
+	    }
+	    -re ".*Single.*Program exited.*$gdb_prompt $" {
+		pass "step to end of run 1"
+	    }
+	    -re ".*Single.*in exit.*from.*dld.sl.*$gdb_prompt $" {
+		pass "step to end of run 2" 
+		gdb_test "c" ".*" "continue after exit"
+	    }
+	    -re ".*$gdb_prompt $" {
+		fail "step to end of run"
+	    }
+	    timeout { 
+		fail "(timeout) step to end of run" 
+	    }
+	}   
     }
 
-  set timeout $old_timeout
-  
-  gdb_test "n" ".*The program is not being run.*" "don't step after run"
-  
-  set exec_output [remote_exec host "ls core"]
-  
-  
-  if [ regexp "core not found" $exec_output]  {
-    pass "No core dumped on quit"
-  } else {
-    if [ regexp "No such file or directory" $exec_output] {
-      pass "ls: core: No core dumped on quit"
+    set timeout $old_timeout
+
+    gdb_test "n" ".*The program is not being run.*" "don't step after run"
+
+    set exec_output [remote_exec host "ls core"]
+
+    if [ regexp "core not found" $exec_output]  {
+	pass "No core dumped on quit"
     } else {
-      remote_exec build "rm -f core"
-      fail "Core dumped on quit"
+	if [ regexp "No such file or directory" $exec_output] {
+	    pass "ls: core: No core dumped on quit"
+	} else {
+	    remote_exec build "rm -f core"
+	    fail "Core dumped on quit"
+	}
     }
-  }
 }
 
 #remote_exec build "rm -f ${binfile}"

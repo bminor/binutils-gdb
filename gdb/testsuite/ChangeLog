@@ -1,3 +1,8 @@
+2001-07-25  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/ending-run.exp: Accept "Program exited normally" as
+	legitimate output from stepping out of main.
+
 2001-07-22  Keith Seitz  <keiths@redhat.com>
 
 	* lib/gdb.exp (_gdbtk_xvfb_init): If GDB_DISPLAY is
