@@ -551,6 +551,7 @@ parse_insn_normal (insn, strp, fields)
 #endif
 
   CGEN_INIT_PARSE ();
+  cgen_init_parse_operand ();
 #ifdef CGEN_MNEMONIC_OPERANDS
   past_opcode_p = 0;
 #endif

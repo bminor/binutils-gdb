@@ -32,8 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "opcode/cgen.h"
 
 /* Operand parsing callback.  */
-const char * (*cgen_asm_parse_operand_fn)
-     PARAMS ((const char **, int, int, enum cgen_asm_result *, bfd_vma *));
+const char * (*cgen_parse_operand_fn)
+     PARAMS ((enum cgen_parse_operand_type, const char **, int, int,
+	      enum cgen_parse_operand_result *, bfd_vma *));
 
 /* This is not published as part of the public interface so we don't
    declare this in cgen.h.  */
@@ -41,6 +42,8 @@ extern CGEN_OPCODE_DATA *cgen_current_opcode_data;
 
 /* Assembler instruction hash table.  */
 static CGEN_INSN_LIST **asm_hash_table;
+
+/* Called once at startup and whenever machine/endian change.  */
 
 void
 cgen_asm_init ()
@@ -50,6 +53,16 @@ cgen_asm_init ()
       free (asm_hash_table);
       asm_hash_table = NULL;
     }
+}
+
+/* Called whenever starting to parse an insn.  */
+
+void
+cgen_init_parse_operand ()
+{
+  /* This tells the callback to re-initialize.  */
+  (void) (*cgen_parse_operand_fn) (CGEN_PARSE_OPERAND_INIT, NULL, 0, 0,
+				   NULL, NULL);
 }
 
 /* Build the assembler instruction hash table.  */
@@ -177,11 +190,12 @@ cgen_parse_signed_integer (strp, opindex, min, max, valuep)
      long *valuep;
 {
   long value;
-  enum cgen_asm_result result;
+  enum cgen_parse_operand_result result;
   const char *errmsg;
 
-  errmsg = (*cgen_asm_parse_operand_fn) (strp, opindex, BFD_RELOC_NONE,
-					 &result, &value);
+  errmsg = (*cgen_parse_operand_fn) (CGEN_PARSE_OPERAND_INTEGER, strp,
+				     opindex, BFD_RELOC_NONE,
+				     &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {
@@ -202,11 +216,12 @@ cgen_parse_unsigned_integer (strp, opindex, min, max, valuep)
      unsigned long *valuep;
 {
   unsigned long value;
-  enum cgen_asm_result result;
+  enum cgen_parse_operand_result result;
   const char *errmsg;
 
-  errmsg = (*cgen_asm_parse_operand_fn) (strp, opindex, BFD_RELOC_NONE,
-					 &result, &value);
+  errmsg = (*cgen_parse_operand_fn) (CGEN_PARSE_OPERAND_INTEGER, strp,
+				     opindex, BFD_RELOC_NONE,
+				     &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {
@@ -227,11 +242,12 @@ cgen_parse_address (strp, opindex, opinfo, valuep)
      long *valuep;
 {
   long value;
-  enum cgen_asm_result result;
+  enum cgen_parse_operand_result result;
   const char *errmsg;
 
-  errmsg = (*cgen_asm_parse_operand_fn) (strp, opindex, opinfo,
-					 &result, &value);
+  errmsg = (*cgen_parse_operand_fn) (CGEN_PARSE_OPERAND_ADDRESS, strp,
+				     opindex, opinfo,
+				     &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {

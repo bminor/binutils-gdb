@@ -1,9 +1,11 @@
 Thu Apr 10 14:44:56 1997  Doug Evans  <dje@canuck.cygnus.com>
 
-	* cgen-asm.c (cgen_asm_parse_operand_fn): New global.
+	* cgen-asm.c (cgen_parse_operand_fn): New global.
 	(cgen_parse_{{,un}signed_integer,address}): Update call to
-	cgen_asm_parse_operand_fn.
-	* m32r-asm.c (parse_insn_normal): Delete call to cgen_asm_init_parse.
+	cgen_parse_operand_fn.
+	(cgen_init_parse_operand): New function.
+	* m32r-asm.c (parse_insn_normal): cgen_init_parse_operand renamed
+	from cgen_asm_init_parse.
 	(m32r_cgen_assemble_insn): New operand `errmsg'.
 	Delete call to as_bad, return error message to caller.
 	(m32r_cgen_asm_hash_keywords): #if 0 out.
