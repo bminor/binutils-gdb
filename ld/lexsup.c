@@ -53,13 +53,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #define	S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
-#ifndef HAVE_STDLIB_H
-/* If we have <stdlib.h>, assume it defines strtoul.  */
-/* Omit args to avoid the possibility of clashing with a system header
-   that might disagree about consts.  */
-unsigned long strtoul ();
-#endif
-
 static int is_num PARAMS ((const char *, int, int, int));
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));

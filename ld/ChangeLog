@@ -1,3 +1,7 @@
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lexsup.c: Remove strtoul declaration.
+
 2002-02-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (entry_section): New initialised variable.
