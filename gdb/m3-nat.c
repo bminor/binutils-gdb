@@ -1575,6 +1575,9 @@ mach_thread_output_id (int mid)
  *
  * Note that this implementation is potentially redundant now that
  * default_prepare_to_proceed() has been added.  
+ *
+ * FIXME This may not support switching threads after Ctrl-C
+ * correctly. The default implementation does support this.
  */
 
 mach3_prepare_to_proceed (int select_it)

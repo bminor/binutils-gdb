@@ -263,7 +263,10 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
    layer.
 
    Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.  */
+   default_prepare_to_proceed() has been added.
+
+   FIXME This may not support switching threads after Ctrl-C
+   correctly. The default implementation does support this. */
 
 int
 lin_lwp_prepare_to_proceed (void)

@@ -4594,7 +4594,10 @@ unwind_command (char *exp, int from_tty)
    putting the BPT instruction in and taking it out.
 
    Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.  */
+   default_prepare_to_proceed() has been added.
+
+   FIXME This may not support switching threads after Ctrl-C
+   correctly. The default implementation does support this. */
 int
 hppa_prepare_to_proceed (void)
 {

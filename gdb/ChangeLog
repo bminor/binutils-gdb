@@ -1,3 +1,14 @@
+2001-06-06  Jonathan Larmour  <jlarmour@redhat.com>
+
+	* arch-utils.c (generic_prepare_to_proceed): Allow for having
+	stopped due to a Ctrl-C as well as breakpoints.
+
+	* hppa-tdep.c (hppa_prepare_to_proceed): Add FIXME as this may not
+	support thread switches after Ctrl-C.
+	* lin-lwp.c (lin_lwp_prepare_to_proceed): Ditto.
+	* linux-thread.c (linuxthreads_prepare_to_proceed): Ditto.
+	* m3-nat.c (mach3_prepare_to_proceed): Ditto.
+
 2001-06-06  Jim Blandy  <jimb@redhat.com>
 
 	* gdbarch.sh, gdbarch.c: Revert change of 2001-06-01; all

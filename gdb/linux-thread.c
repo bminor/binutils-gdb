@@ -1040,7 +1040,10 @@ quit:
    return 1 otherwise 0.
 
    Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.  */
+   default_prepare_to_proceed() has been added.
+
+   FIXME This may not support switching threads after Ctrl-C
+   correctly. The default implementation does support this. */
 
 int
 linuxthreads_prepare_to_proceed (int step)

@@ -258,9 +258,11 @@ generic_prepare_to_proceed (int select_it)
   /* Get the last target status returned by target_wait().  */
   get_last_target_status (&wait_ptid, &wait_status);
 
-  /* Make sure we were stopped at a breakpoint.  */
+  /* Make sure we were stopped either at a breakpoint, or because
+     of a Ctrl-C.  */
   if (wait_status.kind != TARGET_WAITKIND_STOPPED
-      || wait_status.value.sig != TARGET_SIGNAL_TRAP)
+      || (wait_status.value.sig != TARGET_SIGNAL_TRAP &&
+          wait_status.value.sig != TARGET_SIGNAL_INT))
     {
       return 0;
     }
@@ -271,14 +273,11 @@ generic_prepare_to_proceed (int select_it)
       /* Switched over from WAIT_PID.  */
       CORE_ADDR wait_pc = read_pc_pid (wait_ptid);
 
-      /* Avoid switching where it wouldn't do any good, i.e. if both
-         threads are at the same breakpoint.  */
-      if (wait_pc != read_pc () && breakpoint_here_p (wait_pc))
+      if (wait_pc != read_pc ())
 	{
 	  if (select_it)
 	    {
-	      /* User hasn't deleted the breakpoint.  Switch back to
-		 WAIT_PID and return non-zero.  */
+	      /* Switch back to WAIT_PID thread.  */
 	      inferior_ptid = wait_ptid;
 
 	      /* FIXME: This stuff came from switch_to_thread() in
@@ -288,8 +287,13 @@ generic_prepare_to_proceed (int select_it)
 	      stop_pc = wait_pc;
 	      select_frame (get_current_frame (), 0);
 	    }
-
-	  return 1;
+          /* We return 1 to indicate that there is a breakpoint here,
+             so we need to step over it before continuing to avoid
+             hitting it straight away. */
+          if (breakpoint_here_p (wait_pc))
+            {
+	      return 1;
+            }
 	}
     }
   return 0;
