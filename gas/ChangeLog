@@ -1,5 +1,8 @@
 Tue Aug  9 11:12:13 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ecoff.c (ecoff_build_procs): Don't force adr of first fdr to be
+	zero.  Undoes change of June 4, 1993.
+
 	* config/tc-mips.c (md_parse_option): Accept -mcpu=4400, 4600, and
 	orion.
 
