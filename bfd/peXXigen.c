@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -985,13 +985,21 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
     pe_required_section_flags * p;
     int flags = scnhdr_int->s_flags;
 
+    /* We have defaulted to adding the IMAGE_SCN_MEM_WRITE flag, but now
+       we know exactly what this specific section wants so we remove it
+       and then allow the must_have field to add it back in if necessary.
+       However, we don't remove IMAGE_SCN_MEM_WRITE flag from .text if the
+       default WP_TEXT file flag has been cleared.  WP_TEXT may be cleared
+       by ld --enable-auto-import (if auto-import is actually needed),
+       by ld --omagic, or by obcopy --writable-text.  */
+  
+    if (strcmp (scnhdr_int->s_name, ".text") 
+	|| (bfd_get_file_flags (abfd) & WP_TEXT))
+      flags &= ~IMAGE_SCN_MEM_WRITE;
+
     for (p = known_sections; p->section_name; p++)
       if (strcmp (scnhdr_int->s_name, p->section_name) == 0)
 	{
-	  /* We have defaulted to adding the IMAGE_SCN_MEM_WRITE flag, but now
-	     we know exactly what this specific section wants so we remove it
-	     and then allow the must_have field to add it back in if necessary.  */
-	  flags &= ~IMAGE_SCN_MEM_WRITE;
 	  flags |= p->must_have;
 	  break;
 	}
