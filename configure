@@ -158,7 +158,7 @@ do
 			clib=clib
 			;;
 		-datadir=* | --datadir=* | --datadi=* | --datad=* | --data=* | --dat=* | --da=* | --d=*)
-			datadir=`echo ${arg} | sed 's/-\{1,2\}d[a-z]*=//'`
+			datadir=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			datadiroption=${arg}
 			;;
 		-datadir | --datadir | --datadi | --datad | --data | --dat | --da | --d)
@@ -176,7 +176,7 @@ do
 #			fi
 
 			if [ -z "${hosts}" ] ; then
-				newhosts="${hosts} `echo ${arg} | sed 's/-\{1,2\}h[a-z]*=//'`"
+				newhosts="${hosts} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 				hosts="${newhosts}"
 			else
 				echo '***' Can only configure for one host at a time.
@@ -186,13 +186,13 @@ do
 		-languages=* | --languages=* | --language=* | --languag=* \
 			| --langua=* | --langu=* | --lang=* | --lan=* | --la=* \
 			| --l=*)
-			languages="${languages} `echo ${arg} | sed 's/-\{1,2\}l[a-z]*=//'`"
+			languages="${languages} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 			;;
 #		-namesubdir | --namesubdir | --namesubdi | --namesubd | --namesub | --namesu | --names | --name | --nam | --na)
 #			next_namesubdir=yes
 #			;;
 #		-namesubdir=* | --namesubdir=* | --namesubdi=* | --namesubd=* | --namesub=* | --namesu=* | --names=* | --name=* | --nam=* | --na=*)
-#			namesubdir=`echo ${arg} | sed 's/-\{1,2\}na[a-z]*=//'`
+#			namesubdir=`echo ${arg} | sed 's/^[-a-z]*=//'`
 #			namesubdiroption=${arg}
 #			;;
 		-nfp | --nf*)
@@ -203,13 +203,13 @@ do
 			;;
 #		-objdir=* | --objdir=* | --objdi=* | --objd=* | --obj=* | --ob=* | --o=*)
 #			objdiroption=${arg}
-#			objdir=`echo ${arg} | sed 's/-\{1,2\}o[a-z]*=//'`
+#			objdir=`echo ${arg} | sed 's/^[-a-z]*=//'`
 #			;;
 #		-objdir | --objdir | --objdi | --objd | --obj | --ob | --o)
 #			next_objdir=yes
 #			;;
 		-prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
-			prefix=`echo ${arg} | sed 's/-\{1,2\}p[a-z]*=//'`
+			prefix=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			prefixoption=${arg}
 			;;
 		-prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
@@ -223,13 +223,13 @@ do
 			removing=${arg}
 			;;
 		-site=* | --site=* | --sit=* | --si=*)
-			site=`echo ${arg} | sed 's/-\{1,2\}s[a-z]*=//'`
+			site=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			;;
 		-site | --site | --sit | --si)
 			next_site=yes
 			;;
 		-srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-			srcdir=`echo ${arg} | sed 's/-\{1,2\}s[a-z]*=//'`
+			srcdir=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			;;
 		-srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
 			next_srcdir=yes
@@ -243,7 +243,7 @@ do
 #			fi
 
 			if [ -z "${targets}" ] ; then
-				newtargets="${targets} `echo ${arg} | sed 's/-\{1,2\}t[a-z]*=//'`"
+				newtargets="${targets} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 				targets="${newtargets}"
 			else
 				echo '***' Can only configure for one target at a time.
@@ -255,7 +255,7 @@ do
 			;;
 		-tmpdir=* | --tmpdir=* | --tmpdi=* | --tmpd=* | --tmp=* | --tm=*)
 			tmpdiroption=${arg}
-			TMPDIR=`echo ${arg} | sed 's/-\{1,2\}t[a-z]*=//'`
+			TMPDIR=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			;;
 		-tmpdir | --tmpdir | --tmpdi | --tmpd | --tmp | --tm)
 			next_tmpdir=yes
