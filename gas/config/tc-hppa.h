@@ -1,5 +1,5 @@
 /* tc-hppa.h -- Header file for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1989, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -48,10 +48,18 @@
 #ifdef OBJ_ELF
 #if TARGET_ARCH_SIZE == 64
 #include "bfd/elf64-hppa.h"
-#define TARGET_FORMAT "elf64-hppa"
+#ifdef TE_LINUX
+#define TARGET_FORMAT "elf64-hppa-linux"
 #else
+#define TARGET_FORMAT "elf64-hppa"
+#endif
+#else /* TARGET_ARCH_SIZE == 32 */
 #include "bfd/elf32-hppa.h"
+#ifdef TE_LINUX
+#define TARGET_FORMAT "elf32-hppa-linux"
+#else
 #define TARGET_FORMAT "elf32-hppa"
+#endif
 #endif
 #endif
 
