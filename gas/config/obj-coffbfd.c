@@ -1353,12 +1353,12 @@ stack *block_stack;
 symbolS *last_functionP = NULL;
 symbolS *last_tagP;
 
-
 static unsigned int
 DEFUN_VOID (yank_symbols)
 {
   symbolS *symbolP;
   unsigned int symbol_number = 0;
+  unsigned int last_file_symno = 0;
 
   for (symbolP = symbol_rootP;
        symbolP;
@@ -1456,10 +1456,9 @@ DEFUN_VOID (yank_symbols)
 			 sizeof (symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
 #endif
 		}
-	      /* The C_FCN doesn't need any additional information.
-	       I don't even know if this is needed for sdb. But the
-	       standard assembler generates it, so...
-	       */
+	      /* The C_FCN doesn't need any additional information.  I
+		 don't even know if this is needed for sdb. But the
+		 standard assembler generates it, so...  */
 	      if (S_GET_STORAGE_CLASS (symbolP) == C_EFCN)
 		{
 		  if (last_functionP == (symbolS *) 0)
@@ -1488,8 +1487,8 @@ DEFUN_VOID (yank_symbols)
 	{
 	  if (S_GET_VALUE (symbolP))
 	    {
-	      S_SET_VALUE ((symbolS *) S_GET_VALUE (symbolP), symbol_number);
-	      S_SET_VALUE (symbolP, 0);
+	      S_SET_VALUE (symbolP, last_file_symno);
+	      last_file_symno = symbol_number;
 	    }			/* no one points at the first .file symbol */
 	}			/* if debug or tag or eos or file */
 
