@@ -1,6 +1,21 @@
+Mon Oct  2 12:10:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* strings.c (main): Exit with zero status if no files are given
+	and standard input is read.
+
+Thu Sep 28 20:03:07 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Calculate underscore and put into makefile
+	fragment, generate config.h.
+	* mpw-make.sed: New file, sed commands to edit Unix makefile
+	into MPW syntax.
+	* mpw-make.in: Remove.
+	* mac-binutils.r: New file, Mac resources.
+
 Thu Sep 28 15:49:00 1995  steve chamberlain  <sac@slash.cygnus.com>
 
-	* dlltool.c: (gen_exp_file): Always emit a .reloc section if relocatable.
+	* dlltool.c: (gen_exp_file): Always emit a .reloc section if
+	relocatable.
 	(imp_name_lab): New.
 	(gen_def_file): New.
 	(gen_lib_file): Use imp_name_lab.
