@@ -1,3 +1,14 @@
+Fri Jul 30 12:54:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t02/whatis.exp, gdb.t03/ptype.exp, gdb.t08/opaque.exp,
+	gdb.t09/corefile.exp:  Cleanup xfails for fixed mips bugs.
+	* gdb.t13/bitfields.exp, gdbme.c:  Examine a variable in the inferior
+	to determine signed-ness of bitfields and use the result to setup
+	the xfail.
+	* gdb.t13/gdbme.c:  Add comment to the two indirect call0a lines.
+	* gdb.t13/funcargs.exp:  Use it to step until the second indirect call
+	line is reached if necessary.
+
 Thu Jul 29 20:33:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.stabs/wierd.exp: New test, for nameless baseclasses.
