@@ -1,3 +1,7 @@
+Tue Mar 15 23:55:47 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* cf-m68klynx.c (CALC_ADDEND): Use _bfd_m68klynx_howto_table.
+
 Tue Mar 15 04:41:13 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* Most files:
