@@ -4793,8 +4793,12 @@ procfs_stopped_by_watchpoint (int pid)
 {
   procinfo *pi;
 
-  pi = find_procinfo_or_die (pid == -1 ? 
-			     PIDGET (inferior_pid) : PIDGET (pid), 0);
+  pi = find_procinfo (pid == -1 ? 
+		      PIDGET (inferior_pid) : PIDGET (pid), 0);
+
+  if (!pi)	/* If no process, then not stopped by watchpoint!  */
+    return 0;
+
   if (proc_flags (pi) & (PR_STOPPED | PR_ISTOP))
     {
       if (proc_why (pi) == PR_FAULTED)

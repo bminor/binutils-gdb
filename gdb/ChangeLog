@@ -1,5 +1,7 @@
 2001-01-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* procfs.c (procfs_stopped_by_watchpoint): Don't die if process
+	goes away -- just return false (ie. not stopped by watchpoint).
 	* source.c (openp): Fix typo in comment.
 
 2001-01-12  Nicholas Duffek  <nsd@redhat.com>
