@@ -60,6 +60,7 @@ irix3.h
 irix4.h
 lynx.h
 m68klynx.h
+m68knbsd.h
 m68kv4.h
 m88kmach3.h
 miniframe.h

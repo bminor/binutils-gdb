@@ -49,7 +49,7 @@ all_targets=false
 
 for targ in $target $canon_targets
 do
-    bfd_target=`$srcdir/config.bfd $targ`
+    bfd_target=`${config_shell} $srcdir/config.bfd $targ`
 
     if [ "x$bfd_target" = "xall" ]; then
         all_targets=true
@@ -189,6 +189,7 @@ do
     m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o cofflink.o" ;;
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
     m68klynx_coff_vec)		tb="$tb cf-m68klynx.o coff-m68k.o cofflink.o lynx-core.o stab-syms.o" ;;
+    m68knetbsd_vec)		tb="$tb m68knetbsd.o aout32.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
@@ -200,7 +201,7 @@ do
     ns32knetbsd_vec)		tb="$tb ns32knetbsd.o aout-ns32k.o stab-syms.o" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
-    shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
+    shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o stab-syms.o" ;;

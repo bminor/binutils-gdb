@@ -168,6 +168,7 @@ liboasys.h
 linker.c
 lynx-core.c
 m68klynx.c
+m68knetbsd.c
 m88kmach3.c
 makefile.dos
 mipsbsd.c

@@ -1,3 +1,20 @@
+Fri Oct 28 10:08:41 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+        NetBSD/m68k support, based on work by mikeb@snow.datametrics.com: 
+	* config.bfd (m68*-*-netbsd*): Use m68k-nbsd as bfd_name.
+	* configure.in (m68knetbsd_vec): Added.
+	* targets.c (bfd_m68knetbsd_vec): Added.
+	* hosts/m68knbsd.h, config/m68k-nbsd.mt, m68knetbsd.c: New files.
+	* Makefile.in (BFD32_BACKENDS, CFILES): Add m68knetbsd.c.
+
+	miscellaneous cleanup required by all netbsd targets, based on work 
+	by Andrew Cagney <cagney@highland.com.au>:
+	* netbsd.h (N_MAGIC, N_SET_MAGIC, N_GETMAGIC, N_GETMAGIC2, N_TXTADDR,
+	  N_TXTOFF, N_ALIGN, N_DATADDR, N_DATOFF): Removed.  Generic a.out
+	  definitions work.
+	* i386nbsd.c, ns32knbsd.c, sparcnbsd.c (__LDPGSZ): Removed.
+	  (MY(write_object_contents)): Use NetBSD's magic numbers
+
 Thu Oct 27 16:59:52 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* libelf.h (struct bfd_elf_section_data): Add field dynindx.
