@@ -62,8 +62,20 @@
 #endif
 
 static struct link_map_offsets *default_svr4_fetch_link_map_offsets (void);
+
+/* fetch_link_map_offsets is the pointer to the architecture specific
+   link map offsets fetching function.  It uses the gdbarch_swap
+   mechanism to change its value when the architecture changes.  */
 static struct link_map_offsets *(*fetch_link_map_offsets)(void) = 
   default_svr4_fetch_link_map_offsets;
+
+/* fetch_link_map_offsets_init is like the above, but obtains its
+   value from a call to set_solib_svr4_fetch_link_map_offsets().
+   This latter function is intended to be called from a *_gdbarch_init()
+   function.  The value of ``fetch_link_map_offsets_init'' is used
+   to actually set ``fetch_link_map_offsets'' when the architecture
+   is installed.  */
+static struct link_map_offsets *(*fetch_link_map_offsets_init)(void) = 0;
 
 /* legacy_svr4_fetch_link_map_offsets_hook is a pointer to a function
    which is used to fetch link map offsets.  It will only be set
@@ -1642,16 +1654,35 @@ svr4_relocate_section_addresses (struct so_list *so,
   sec->endaddr += LM_ADDR (so);
 }
 
+/* set_solib_svr4_fetch_link_map_offsets() is intended to be called by
+   a <arch>_gdbarch_init() function.  It uses ``fetch_link_map_offsets_init''
+   to temporarily hold a pointer to the link map offsets fetcher for
+   a particular architecture.  Once the architecture is actually installed,
+   init_fetch_link_map_offsets(), below, will be called to install this
+   value in ``fetch_link_map_offsets''.  After that, the gdbarch_swap
+   machinery will manage the contents of this variable whenever the
+   architecture changes.  */
+
 void
 set_solib_svr4_fetch_link_map_offsets (struct link_map_offsets *(*flmo) (void))
 {
-  fetch_link_map_offsets = flmo;
+  fetch_link_map_offsets_init = flmo;
 }
+
+/* Initialize the value of ``fetch_link_map_offsets'' when a new
+   architecture is created.  set_solib_svr4_fetch_link_map_offsets()
+   is used to set the value that ``fetch_link_map_offsets'' should
+   be initialized to.  */
 
 static void
 init_fetch_link_map_offsets (void)
 {
-  set_solib_svr4_fetch_link_map_offsets (default_svr4_fetch_link_map_offsets);
+  if (fetch_link_map_offsets_init != NULL)
+    fetch_link_map_offsets = fetch_link_map_offsets_init;
+  else
+    fetch_link_map_offsets = default_svr4_fetch_link_map_offsets;
+
+  fetch_link_map_offsets_init = NULL;
 }
 
 static struct target_so_ops svr4_so_ops;

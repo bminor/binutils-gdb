@@ -1,3 +1,11 @@
+2001-09-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-svr4.c (fetch_link_map_offsets): Add comment.
+	(fetch_link_map_offsets_init): New static global.
+	(set_solib_svr4_fetch_link_map_offsets, init_fetch_link_map_offsets):
+	Revise implementation to use ``fetch_link_map_offsets_init''
+	instead of ``fetch_link_map_offsets''.
+
 2001-09-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* coffread.c: Replace all occurrences of bfd_read with bfd_bread.
