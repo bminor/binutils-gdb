@@ -1,3 +1,11 @@
+2004-02-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* libaout.h (enum machine_type): Add M_SPARC64_NETBSD and
+	M_X86_64_NETBSD.
+	* netbsd-core.c (M_SPARC64_OPENBSD): Define.
+	(netbsd_core_file_p): Set architecture from machine ID for
+	selected machines.
+
 2004-02-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (size_dynamic_sections): If not adding DT_FLAGS and
