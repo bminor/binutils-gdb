@@ -83,19 +83,3 @@ Things-to-lose:
 # done.
 
 Do-last:
-
-if ( echo $* | grep keep-v9 > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping `pwd`/elf64_sparc.sh.
-	fi
-else
-	if [ -n "${verbose}" ] ; then
-		echo Removing `pwd`/elf64_sparc.sh.
-	fi
-	if [ -n "${safe}" ] ; then
-		mv elf64_sparc.sh .Recover
-	else
-		rm elf64_sparc.sh
-	fi
-fi
-

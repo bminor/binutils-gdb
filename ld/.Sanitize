@@ -94,31 +94,6 @@ Things-to-lose:
 
 Do-last:
 
-echo Looking for signs of \"v9\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
-			echo Keeping v9 stuff in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
-			echo Cleaning the \"v9\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 echo Looking for traces of \"mpw\"...
 
 # Don't try to clean directories here, as the 'mv' command will fail.
