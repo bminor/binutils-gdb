@@ -420,7 +420,7 @@ case "${target}" in
     ;;
 # start-sanitize-d10v
   d10v-*-*)
-    noconfigdirs="$noconfigdirs ld gdb target-libgloss"
+    noconfigdirs="$noconfigdirs gdb target-libgloss"
     ;;
 # end-sanitize-d10v
   h8300*-*-* | \
