@@ -1,9 +1,17 @@
+Thu Jul 29 20:33:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.stabs/wierd.exp: New test, for nameless baseclasses.
+
+Mon Jul 26 00:15:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t06/break.exp: Also test `clear' command.
+
 Wed Jul 21 18:03:38 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t00/teststrategy.exp: Remove extra quote.
 
 	* gdb.t07/watchpoint.exp: Change xfail for calling function with
-	watchpoint enabled to "*-*-*".
+	watchpoint enabled to be for all non-68k machines.
 
 	* gdb.t15/{mips_pro.{c,exp},Makefile.in}: New test.
 

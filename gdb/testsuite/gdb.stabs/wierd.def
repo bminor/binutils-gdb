@@ -502,3 +502,63 @@ VAR(var2)
 /* Packed type.  */
 STAB("var3:G303=@P;1",N_GSYM, 0)
 VAR(var3)
+
+/* Manually hacked version of the following.  The manual hacking is to
+   remove the extra names (which GDB 4.9 bogusly relies on).
+
+   Virtual base classes in which there are no variables of the base
+   class types.
+
+class only_one_instance {
+ public:
+  int x;
+};
+
+class inherit_path_a : public virtual only_one_instance {
+  int a;
+};
+
+class inherit_path_b : public virtual only_one_instance {
+  int b;
+};
+
+class combine_paths : public inherit_path_a, public inherit_path_b {
+  int comb;
+};
+
+combine_paths v_comb;
+*/
+
+#if 0
+
+/* These are the unhacked stabs I started with (only change has been to
+   convert them to wierd.def format, and change the numbers to the 400
+   range.  */
+
+STAB ("only_one_instance:Tt444=s4x:1,0,32;;", N_LSYM, 0)
+STAB ("inherit_path_a:Tt445=s12!1,120,444;$vb444:446=*444,0;a:/01,32,32;;",
+      N_LSYM, 0)
+STAB ("inherit_path_b:Tt447=s12!1,120,444;$vb444:446,0;b:/01,32,32;;", N_LSYM, 0)
+STAB ("combine_paths:Tt448=s24!2,020,445;0264,447;comb:/01,128,32;;", N_LSYM, 0)
+STAB ("v_comb:G448", N_GSYM, 0)
+
+#else
+
+/* Hacked version, without class names.  Using backslash newline to
+   continue these lines doesn't work because pcc (I tested it with
+   SunOS4 /bin/cc) doesn't deal with that inside a macro argument.  */
+
+STAB ("v_comb:G448=s24!2,020,445=s12!1,120,444=s4x:1,0,32;;;$vb444:446=*444,0;a:/01,32,32;;;0264,447=s12!1,120,444;$vb444:446,0;b:/01,32,32;;;comb:/01,128,32;;", N_GSYM, 0)
+
+#endif
+
+	.globl v_comb
+	.align 1
+v_comb:
+	.long v_comb_shared /* virtual base class pointer for inherit_path_a */
+	.long 43 /* a */
+	.long v_comb_shared /* virtual base class pointer for inherit_path_b */
+	.long 44 /* b */
+	.long 45 /* comb */
+v_comb_shared:
+	.long 42 /* x */
