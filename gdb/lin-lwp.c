@@ -82,6 +82,14 @@ struct lwp_info
   /* Non-zero if this LWP is stopped.  */
   int stopped;
 
+  /* Non-zero if this LWP will be/has been resumed.  Note that an LWP
+     can be marked both as stopped and resumed at the same time.  This
+     happens if we try to resume an LWP that has a wait status
+     pending.  We shouldn't let the LWP run until that wait status has
+     been processed, but we should not report that wait status if GDB
+     didn't try to let the LWP run.  */
+  int resumed;
+
   /* If non-zero, a pending wait status.  */
   int status;
 
@@ -249,11 +257,14 @@ find_lwp_pid (ptid_t ptid)
 struct lwp_info *
 iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
 {
-  struct lwp_info *lp;
+  struct lwp_info *lp, *lpnext;
 
-  for (lp = lwp_list; lp; lp = lp->next)
-    if ((*callback) (lp, data))
-      return lp;
+  for (lp = lwp_list; lp; lp = lpnext)
+    {
+      lpnext = lp->next;
+      if ((*callback) (lp, data))
+	return lp;
+    }
 
   return NULL;
 }
@@ -357,6 +368,7 @@ lin_lwp_attach (char *args, int from_tty)
 
   /* Fake the SIGSTOP that core GDB expects.  */
   lp->status = W_STOPCODE (SIGSTOP);
+  lp->resumed = 1;
 }
 
 static int
@@ -475,6 +487,20 @@ resume_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
+static int
+resume_clear_callback (struct lwp_info *lp, void *data)
+{
+  lp->resumed = 0;
+  return 0;
+}
+
+static int
+resume_set_callback (struct lwp_info *lp, void *data)
+{
+  lp->resumed = 1;
+  return 0;
+}
+
 static void
 lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
 {
@@ -486,6 +512,11 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
      id'.  But if STEP is zero, then PID means `continue *all*
      processes, but give the signal only to this one'.  */
   resume_all = (PIDGET (ptid) == -1) || !step;
+
+  if (resume_all)
+    iterate_over_lwps (resume_set_callback, NULL);
+  else
+    iterate_over_lwps (resume_clear_callback, NULL);
 
   /* If PID is -1, it's the current inferior that should be
      handled specially.  */
@@ -499,6 +530,9 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
 
       /* Remember if we're stepping.  */
       lp->step = step;
+
+      /* Mark this LWP as resumed.  */
+      lp->resumed = 1;
 
       /* If we have a pending wait status for this thread, there is no
          point in resuming the process.  */
@@ -663,7 +697,9 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 static int
 status_callback (struct lwp_info *lp, void *data)
 {
-  return (lp->status != 0);
+  /* Only report a pending wait status if we pretend that this has
+     indeed been resumed.  */
+  return (lp->status != 0 && lp->resumed);
 }
 
 /* Return non-zero if LP isn't stopped.  */
@@ -672,6 +708,14 @@ static int
 running_callback (struct lwp_info *lp, void *data)
 {
   return (lp->stopped == 0);
+}
+
+/* Return non-zero if LP has been resumed.  */
+
+static int
+resumed_callback (struct lwp_info *lp, void *data)
+{
+  return lp->resumed;
 }
 
 static ptid_t
@@ -690,6 +734,9 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     }
 
  retry:
+
+  /* Make sure there is at least one thread that has been resumed.  */
+  gdb_assert (iterate_over_lwps (resumed_callback, NULL));
 
   /* First check if there is a LWP with a wait status pending.  */
   if (pid == -1)
@@ -754,6 +801,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step,
                     TARGET_SIGNAL_0);
       lp->stopped = 0;
+      gdb_assert (lp->resumed);
 
       /* This should catch the pending SIGSTOP.  */
       stop_wait_callback (lp, NULL);
@@ -840,6 +888,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	      child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step,
 	                    TARGET_SIGNAL_0);
 	      lp->stopped = 0;
+	      gdb_assert (lp->resumed);
 
 	      /* Discard the event.  */
 	      status = 0;
@@ -883,14 +932,13 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)
 	{
-	  /* First mark this LWP as "not stopped", so that
-	     resume_callback will not resume it. */
-	  lp->stopped = 0;
-	  /* Resume all threads except this one
-	     (mainly to get the newly attached ones). */
-	  iterate_over_lwps (resume_callback, NULL);
-	  /* Now resume this thread, forwarding the signal to it. */
+	  /* FIMXE: kettenis/2001-06-06: Should we resume all threads
+             here?  It is not clear we should.  GDB may not expect
+             other threads to run.  On the other hand, not resuming
+             newly attached threads may cause an unwanted delay in
+             getting them running.  */
 	  child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step, signo);
+	  lp->stopped = 0;
 	  status = 0;
 	  goto retry;
 	}

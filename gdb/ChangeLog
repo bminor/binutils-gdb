@@ -1,3 +1,22 @@
+2001-06-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* lin-lwp.c (struct lwp_info): Add member `resumed'.
+	(iterate_over_lwps): Make sure we can handle CALLBACK deleting the
+	LWP it's called for.
+	(lin_lwp_attach): Mark LWP as resumed to make sure the fake
+	SIGSTOP is reported.
+	(resume_clear_callback): New function.
+	(resume_set_callback): New function.
+	(lin_lwp_resume): Mark all LWP's that we're going to resume as
+	resumed, and unmark all others.
+	(status_callback): Only report a pending wait status if we pretend
+	that LP has been resumed.
+	(resumed_callback): New function.
+	(lin_lwp_wait): Add assertions to check that LWP's are properly
+	marked as resumed.  Partially revert 2001-05-25 patch by Michael
+	Snyder: do not resume all threads.  Add comment explaining the
+	problems associated with this bit of code.
+
 2001-06-07  Keith Seitz  <keiths@redhat.com>
 
 	* MAINTAINTERS: Syd Polk is stepping down from
