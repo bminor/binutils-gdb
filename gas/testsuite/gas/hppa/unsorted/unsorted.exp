@@ -24,7 +24,7 @@ proc do_subspace_align_test {} {
     set testname "ss_align.s: Test subspace alignment (part 2)"
     set x 0
 
-    if { [istarget hppa*-*-*elf*] || [istarget hppa*w-*-*] } then {
+    if { [istarget hppa*-*-*elf*] || [istarget hppa*-*-linux*] || [istarget hppa*w-*-*] } then {
       return 
     }
 
@@ -107,7 +107,7 @@ proc do_align3_test {} {
     set testname "align3.s: Test for alignment bug when switching subspaces (part2)"
     set x 0
 
-    if { [istarget hppa*-*-*elf*] || [istarget hppa*w-*-*] } then {
+    if { [istarget hppa*-*-*elf*] || [istarget hppa*-*-linux*] || [istarget hppa*w-*-*] } then {
       return 
     }
 
@@ -138,7 +138,7 @@ proc do_align4_test {} {
     set testname "align4.s: More subspace alignment tests (part2)"
     set x 0
 
-    if { [istarget hppa*-*-*elf*] || [istarget hppa*w-*-*] } then {
+    if { [istarget hppa*-*-*elf*] || [istarget hppa*-*-linux*] || [istarget hppa*w-*-*] } then {
 	return
     }
 

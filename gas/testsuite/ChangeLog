@@ -1,3 +1,20 @@
+2000-05-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/hppa/unsorted/unsorted.exp: Duplicate hppa*-*-*elf*
+	behaviour for hppa*-*-linux* throughout file.
+	* gas/hppa/reloc/reloc.exp: Ditto.
+	(reduce2.s): Disable test for elf targets.
+
+	* gas/hppa/parse/parse.exp (ssbug.s): setup_xfail hppa*-*-linux*.
+
+	* gas/elf/section0.s: Don't start pseudos on first column so
+	targets that define LABELS_WITHOUT_COLONS work.
+	* gas/elf/section1.s: Ditto.
+	* gas/vtable/inherit0.s: Ditto.
+	* gas/vtable/inherit1.s: Ditto.
+	* gas/vtable/entry0.s: Ditto.
+	* gas/vtable/entry1.s: Ditto.
+
 2000-05-01  Nick Clifton  <nickc@cygnus.com>
 
 	* gasp/macro.out: Fix label numbers to remove leading zeroes. 

@@ -1,16 +1,16 @@
-.data
+ .data
 	.byte 0
-.section A
+ .section A
 	.byte 1
-.pushsection B
+ .pushsection B
 	.byte 2
-.pushsection C
+ .pushsection C
 	.byte 3
-.popsection
+ .popsection
 	.byte 2
-.popsection
+ .popsection
 	.byte 1
-.previous
+ .previous
 	.byte 0
-.previous
+ .previous
 	.byte 1
