@@ -1,5 +1,14 @@
 Mon Sep 18 15:22:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (parse_mri_control_operand): Change leftstart
+	and rightstart to not be const.
+	(parse_mri_control_expression): Likewise.
+	(build_mri_control_operand): Likewise.  If the left side of the
+	comparison is a register, and the right side is not, swap the two
+	sides.
+	* config/m68k-parse.y (m68k_reg_parse): Make globally visible.
+	* config/m68k-parse.h (m68k_reg_parse): Declare.
+
 	* read.c (mri_comment_field): New function.
 	(mri_comment_end): New function.
 	(s_align_bytes): Use mri_comment_field.

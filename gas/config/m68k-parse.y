@@ -81,7 +81,6 @@
 
 /* Internal functions.  */
 
-static enum m68k_register m68k_reg_parse PARAMS ((char **));
 static int yylex PARAMS (());
 static void yyerror PARAMS ((const char *));
 
@@ -210,12 +209,17 @@ motorola_operand:
 		  else
 		    op->mode = DISP;
 		}
+	| '(' LPC ')'
+		{
+		  op->mode = DISP;
+		  op->reg = $2;
+		}
 	| '(' ZAR ')'
 		{
 		  op->mode = BASE;
 		  op->reg = $2;
 		}
-	| '(' zpc ')'
+	| '(' LZPC ')'
 		{
 		  op->mode = BASE;
 		  op->reg = $2;
@@ -633,7 +637,7 @@ static char *strorig;
 /* If *CCP could be a register, return the register number and advance
    *CCP.  Otherwise don't change *CCP, and return 0.  */
 
-static enum m68k_register
+enum m68k_register
 m68k_reg_parse (ccp)
      register char **ccp;
 {

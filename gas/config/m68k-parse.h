@@ -205,20 +205,6 @@ struct m68k_exp
   expressionS exp;
 };
 
-/* See whether an expression is a signed eight bit value.  */
-
-#define expr8(ex)				\
-  ((ex)->exp.X_op == O_constant			\
-   && (ex)->exp.X_add_number >= -0x80		\
-   && (ex)->exp.X_add_number < 0x80)
-
-/* See whether an expression is a signed sixteen bit value.  */
-
-#define expr16(ex)				\
-  ((ex)->exp.X_op == O_constant			\
-   && (ex)->exp.X_add_number >= -0x8000		\
-   && (ex)->exp.X_add_number < 0x8000)
-
 /* The operand modes.  */
 
 enum m68k_operand_type
@@ -266,6 +252,10 @@ struct m68k_op
 };
 
 #endif /* ! defined (M68K_PARSE_H) */
+
+/* Parse a register.  */
+
+extern enum m68k_register m68k_reg_parse PARAMS ((char **));
 
 /* The parsing function.  */
 

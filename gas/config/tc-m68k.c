@@ -4708,11 +4708,11 @@ static struct mri_control_info *push_mri_control
 static void pop_mri_control PARAMS ((void));
 static int parse_mri_condition PARAMS ((int *));
 static int parse_mri_control_operand
-  PARAMS ((int *, const char **, const char **, const char **, const char **));
+  PARAMS ((int *, char **, const char **, char **, const char **));
 static int swap_mri_condition PARAMS ((int));
 static int reverse_mri_condition PARAMS ((int));
 static void build_mri_control_operand
-  PARAMS ((int, int, const char *, const char *, const char *, const char *,
+  PARAMS ((int, int, char *, const char *, char *, const char *,
 	   const char *, const char *, int));
 static void parse_mri_control_expression
   PARAMS ((char *, int, const char *, const char *, int));
@@ -4809,9 +4809,9 @@ parse_mri_condition (pcc)
 static int
 parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
      int *pcc;
-     const char **leftstart;
+     char **leftstart;
      const char **leftstop;
-     const char **rightstart;
+     char **rightstart;
      const char **rightstop;
 {
   char *s;
@@ -4936,30 +4936,53 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
 			   rightstop, truelab, falselab, extent)
      int qual;
      int cc;
-     const char *leftstart;
+     char *leftstart;
      const char *leftstop;
-     const char *rightstart;
+     char *rightstart;
      const char *rightstop;
      const char *truelab;
      const char *falselab;
      int extent;
 {
+  int leftreg, rightreg;
   char *buf;
   char *s;
 
-  /* The 68k can't do a general comparision with an immediate operand
-     on the right hand side.  */
-  if (rightstart != NULL && *rightstart == '#')
+  /* See which sides of the comparison are plain registers.  */
+  if (leftstart == NULL)
+    leftreg = 0;
+  else
     {
-      const char *temp;
+      char *l;
+
+      l = leftstart;
+      leftreg = m68k_reg_parse (&l) != 0;
+    }
+  if (rightstart == NULL)
+    rightreg = 0;
+  else
+    {
+      char *l;
+
+      l = rightstart;
+      rightreg = m68k_reg_parse (&l) != 0;
+    }
+
+  /* Swap the compare operands, if necessary, to produce a legal m68k
+     compare instruction.  */
+  if ((leftreg && ! rightreg)
+      || (rightstart != NULL && *rightstart == '#'))
+    {
+      char *temp;
+      const char *tempc;
 
       cc = swap_mri_condition (cc);
       temp = leftstart;
       leftstart = rightstart;
       rightstart = temp;
-      temp = leftstop;
+      tempc = leftstop;
       leftstop = rightstop;
-      rightstop = temp;
+      rightstop = tempc;
     }
 
   if (truelab == NULL)
@@ -5020,9 +5043,9 @@ parse_mri_control_expression (stop, qual, truelab, falselab, extent)
 {
   int c;
   int cc;
-  const char *leftstart;
+  char *leftstart;
   const char *leftstop;
-  const char *rightstart;
+  char *rightstart;
   const char *rightstop;
 
   c = *stop;
