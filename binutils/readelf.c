@@ -5225,7 +5225,14 @@ display_debug_pubnames (section, start, file)
 
       if (pubnames.pn_version != 2)
 	{
-	  warn (_("Only DWARF 2 pubnames are currently supported"));
+	  static int warned = 0;
+
+	  if (! warned)
+	    {
+	      warn (_("Only DWARF 2 pubnames are currently supported\n"));
+	      warned = 1;
+	    }
+	  
 	  continue;
 	}
 
@@ -6396,6 +6403,12 @@ display_debug_aranges (section, start, file)
       arange.ar_info_offset  = BYTE_GET (external->ar_info_offset);
       arange.ar_pointer_size = BYTE_GET (external->ar_pointer_size);
       arange.ar_segment_size = BYTE_GET (external->ar_segment_size);
+
+      if (arange.ar_version != 2)
+	{
+	  warn (_("Only DWARF 2 aranges are currently supported.\n"));
+	  break;
+	}
 
       printf (_("  Length:                   %ld\n"), arange.ar_length);
       printf (_("  Version:                  %d\n"), arange.ar_version);

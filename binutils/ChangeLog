@@ -1,3 +1,9 @@
+2000-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_debug_pubnames): Only issue warning
+	message once.  Terminate message with a new line.
+	(display_debug_aranges): Only display version 2 debug info.
+
 2000-08-14  Todd Vierling <tv@wasabisystems.com>
 
 	* objcopy.c (strip_main): Silently accept -d as an alias for -g
