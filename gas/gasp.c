@@ -1,5 +1,5 @@
 /* gasp.c - Gnu assembler preprocessor main program.
-   Copyright (C) 1994 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -17,8 +17,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GASP; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GASP; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 /*
 
@@ -62,6 +63,7 @@ suitable for gas to consume.
 extern char *malloc ();
 #endif
 
+#include "ansidecl.h"
 #include "libiberty.h"
 
 char *program_version = "1.2";
@@ -77,6 +79,7 @@ int warnings;			/* Number of WARNINGs generated so far. */
 int errors;			/* Number of ERRORs generated so far. */
 int fatals;			/* Number of fatal ERRORs generated so far (either 0 or 1). */
 int alternate = 0;              /* -a on command line */
+int mri = 0;			/* -M on command line */
 char comment_char = '!';
 int radix = 10;			/* Default radix */
 
@@ -85,20 +88,6 @@ int had_end; /* Seen .END */
 /* The output stream */
 FILE *outfile;
 
-
-/* Forward declarations. */
-static int condass_lookup_name();
-static int condass_on();
-static int get();
-static int get_and_process();
-static int get_token();
-static int getstring();
-static int include_next_index();
-static int macro_op();
-static int linecount();
-static int process_pseudo_op();
-static void include_pop();
-static void include_print_where_line();
 /* string blocks
 
    I had a couple of choices when deciding upon this data structure.
@@ -325,8 +314,115 @@ include_path *paths_head;
 include_path *paths_tail;
 
 
-void include_print_where_line ();
-
+static void quit PARAMS ((void));
+static void sb_build PARAMS ((sb *, int));
+static void sb_new PARAMS ((sb *));
+static void sb_kill PARAMS ((sb *));
+static void sb_add_sb PARAMS ((sb *, sb *));
+static void sb_check PARAMS ((sb *, int));
+static void sb_reset PARAMS ((sb *));
+static void sb_add_char PARAMS ((sb *, int));
+static void sb_add_string PARAMS ((sb *, const char *));
+static void sb_add_buffer PARAMS ((sb *, const char *, int));
+static void sb_print PARAMS ((sb *));
+static void sb_print_at PARAMS ((int, sb *));
+static char *sb_name PARAMS ((sb *));
+static int sb_skip_white PARAMS ((int, sb *));
+static int sb_skip_comma PARAMS ((int, sb *));
+static void hash_new_table PARAMS ((int, hash_table *));
+static int hash PARAMS ((sb *));
+static hash_entry *hash_create PARAMS ((hash_table *, sb *));
+static void hash_add_to_string_table PARAMS ((hash_table *, sb *, sb *, int));
+static void hash_add_to_int_table PARAMS ((hash_table *, sb *, int));
+static hash_entry *hash_lookup PARAMS ((hash_table *, sb *));
+static void checkconst PARAMS ((int, exp_t *));
+static int sb_strtol PARAMS ((int, sb *, int, int *));
+static int level_0 PARAMS ((int, sb *, exp_t *));
+static int level_1 PARAMS ((int, sb *, exp_t *));
+static int level_2 PARAMS ((int, sb *, exp_t *));
+static int level_3 PARAMS ((int, sb *, exp_t *));
+static int level_4 PARAMS ((int, sb *, exp_t *));
+static int level_5 PARAMS ((int, sb *, exp_t *));
+static int exp_parse PARAMS ((int, sb *, exp_t *));
+static void exp_string PARAMS ((exp_t *, sb *));
+static int exp_get_abs PARAMS ((const char *, int, sb *, int *));
+static void strip_comments PARAMS ((sb *));
+static void unget PARAMS ((int));
+static void include_buf PARAMS ((sb *, sb *, include_type, int));
+static void include_print_where_line PARAMS ((FILE *));
+static void include_print_line PARAMS ((FILE *));
+static int get_line PARAMS ((sb *));
+static int grab_label PARAMS ((sb *, sb *));
+static void change_base PARAMS ((int, sb *, sb *));
+static void do_end PARAMS ((void));
+static void do_assign PARAMS ((int, int, sb *));
+static void do_radix PARAMS ((sb *));
+static int get_opsize PARAMS ((int, sb *, int *));
+static int eol PARAMS ((int, sb *));
+static void do_data PARAMS ((int, sb *, int));
+static void do_datab PARAMS ((int, sb *));
+static void do_align PARAMS ((int, sb *));
+static void do_res PARAMS ((int, sb *, int));
+static void do_export PARAMS ((sb *));
+static void do_print PARAMS ((int, sb *));
+static void do_heading PARAMS ((int, sb *));
+static void do_page PARAMS ((void));
+static void do_form PARAMS ((int, sb *));
+static int get_any_string PARAMS ((int, sb *, sb *, int, int));
+static int skip_openp PARAMS ((int, sb *));
+static int skip_closep PARAMS ((int, sb *));
+static int dolen PARAMS ((int, sb *, sb *));
+static int doinstr PARAMS ((int, sb *, sb *));
+static int dosubstr PARAMS ((int, sb *, sb *));
+static void process_assigns PARAMS ((int, sb *, sb *));
+static int get_and_process PARAMS ((int, sb *, sb *));
+static void process_file PARAMS ((void));
+static void free_old_entry PARAMS ((hash_entry *));
+static void do_assigna PARAMS ((int, sb *));
+static void do_assignc PARAMS ((int, sb *));
+static void do_reg PARAMS ((int, sb *));
+static int condass_lookup_name PARAMS ((sb *, int, sb *, int));
+static int whatcond PARAMS ((int, sb *, int *));
+static int istrue PARAMS ((int, sb *));
+static void do_aif PARAMS ((int, sb *));
+static void do_aelse PARAMS ((void));
+static void do_aendi PARAMS ((void));
+static int condass_on PARAMS ((void));
+static void do_if PARAMS ((int, sb *, int));
+static int get_mri_string PARAMS ((int, sb *, sb *, int));
+static void do_ifc PARAMS ((int, sb *, int));
+static void buffer_and_nest PARAMS ((const char *, const char *, sb *));
+static void do_aendr PARAMS ((void));
+static void do_awhile PARAMS ((int, sb *));
+static void do_aendw PARAMS ((void));
+static void do_exitm PARAMS ((void));
+static void do_arepeat PARAMS ((int, sb *));
+static void do_endm PARAMS ((void));
+static int do_formals PARAMS ((macro_entry *, int, sb *));
+static void do_local PARAMS ((int, sb *));
+static void do_macro PARAMS ((int, sb *));
+static int get_token PARAMS ((int, sb *, sb *));
+static int get_apost_token PARAMS ((int, sb *, sb *, int));
+static int sub_actual
+  PARAMS ((int, sb *, sb *, macro_entry *, int, sb *, int));
+static void macro_expand PARAMS ((sb *, int, sb *, macro_entry *));
+static int macro_op PARAMS ((int, sb *));
+static int getstring PARAMS ((int, sb *, sb *));
+static void do_sdata PARAMS ((int, sb *, int));
+static void do_sdatab PARAMS ((int, sb *));
+static int new_file PARAMS ((const char *));
+static void do_include PARAMS ((int, sb *));
+static void include_pop PARAMS ((void));
+static int get PARAMS ((void));
+static int linecount PARAMS ((void));
+static int include_next_index PARAMS ((void));
+static void chartype_init PARAMS ((void));
+static int process_pseudo_op PARAMS ((int, sb *, sb *));
+static void add_keyword PARAMS ((const char *, int));
+static void process_init PARAMS ((void));
+static void do_define PARAMS ((const char *));
+static void show_usage PARAMS ((FILE *, int));
+static void show_help PARAMS ((void));
 
 #define FATAL(x) \
   do { include_print_where_line (stderr); fprintf x ; fatals++; quit(); } while(0) 
@@ -338,7 +434,7 @@ void include_print_where_line ();
 
 
 /* exit the program and return the right ERROR code. */
-void
+static void
 quit ()
 {
   int exitcode;
@@ -376,7 +472,7 @@ quit ()
 
 /* initializes an sb. */
 
-void
+static void
 sb_build (ptr, size)
      sb *ptr;
      int size;
@@ -478,10 +574,10 @@ sb_reset (ptr)
 
 /* add character c to the end of the sb at ptr. */
 
-void
+static void
 sb_add_char (ptr, c)
      sb *ptr;
-     char c;
+     int c;
 {
   sb_check (ptr, 1);
   ptr->ptr[ptr->len++] = c;
@@ -492,7 +588,7 @@ sb_add_char (ptr, c)
 static void
 sb_add_string (ptr, s)
      sb *ptr;
-     char *s;
+     const char *s;
 {
   int len = strlen (s);
   sb_check (ptr, len);
@@ -505,7 +601,7 @@ sb_add_string (ptr, s)
 static void
 sb_add_buffer (ptr, s, len)
      sb *ptr;
-     char *s;
+     const char *s;
      int len;
 {
   sb_check (ptr, len);
@@ -535,11 +631,10 @@ sb_print (ptr)
     }
 }
 
-static 
-void 
+static void 
 sb_print_at (idx, ptr)
-int idx;
-sb *ptr;
+     int idx;
+     sb *ptr;
 {
   int i;
   for (i = idx; i < ptr->len; i++)
@@ -750,7 +845,7 @@ hash_lookup (tab, key)
 static
 void
 checkconst (op, term)
-     char op;
+     int op;
      exp_t *term;
 {
   if (term->add_symbol.len
@@ -798,9 +893,7 @@ sb_strtol (idx, string, base, ptr)
   return idx;
 }
 
-static int level_5 ();
-
-int
+static int
 level_0 (idx, string, lhs)
      int idx;
      sb *string;
@@ -1088,7 +1181,7 @@ exp_string (exp, string)
 
 static int
 exp_get_abs (emsg, idx, in, val)
-     char *emsg;
+     const char *emsg;
      int idx;
      sb *in;
      int *val;
@@ -1110,7 +1203,7 @@ hash_table vars;  /* hash table for  eq variables */
 #define in_comment ';'
 
 #if 1
-void
+static void
 strip_comments (out)
      sb *out;
 {
@@ -1129,7 +1222,7 @@ strip_comments (out)
 
 /* push back character ch so that it can be read again. */
 
-void
+static void
 unget (ch)
      int ch;
 {
@@ -1317,7 +1410,7 @@ change_base (idx, in, out)
 
   while (idx < in->len)
     {
-      if (idx < in->len - 1 && in->ptr[idx + 1] == '\'')
+      if (idx < in->len - 1 && in->ptr[idx + 1] == '\'' && ! mri)
 	{
 	  int base;
 	  int value;
@@ -1461,9 +1554,9 @@ do_radix (ptr)
 
 static int
 get_opsize (idx, in, size)
-int idx;
-sb *in;
-int *size;
+     int idx;
+     sb *in;
+     int *size;
 {
   *size = 4;
   if (in->ptr[idx] == '.')
@@ -1498,8 +1591,8 @@ int *size;
 
 static 
 int eol(idx, line)
-int idx;
-sb *line;
+     int idx;
+     sb *line;
 {
   idx = sb_skip_white (idx, line);
   if (idx < line->len 
@@ -1623,11 +1716,11 @@ do_align (idx, in)
 
 /* .res[.b|.w|.l] <size> */
 
-void
+static void
 do_res (idx, in, type)
      int idx;
      sb *in;
-     char type;
+     int type;
 {
   int size = 4;
   int count = 0;
@@ -1650,7 +1743,7 @@ do_res (idx, in, type)
 
 /* .export */
 
-void
+static void
 do_export (in)
      sb *in;
 {
@@ -1659,7 +1752,7 @@ do_export (in)
 
 /* .print [list] [nolist] */
 
-void
+static void
 do_print (idx, in)
      int idx;
      sb *in;
@@ -1682,7 +1775,7 @@ do_print (idx, in)
 }
 
 /* .head */
-void
+static void
 do_heading (idx, in)
      int idx;
      sb *in;
@@ -1696,14 +1789,14 @@ do_heading (idx, in)
 
 /* .page */
 
-void
+static void
 do_page ()
 {
   fprintf (outfile, ".eject\n");
 }
 
 /* .form [lin=<value>] [col=<value>] */
-void
+static void
 do_form (idx, in)
      int idx;
      sb *in;
@@ -1780,10 +1873,10 @@ get_any_string (idx, in, out, expand, pretend_quoted)
 	  if (alternate && expand)
 	    {
 	      /* Keep the quotes */
-	            sb_add_char (out,  '\"');
+	      sb_add_char (out,  '\"');
 		    
 	      idx =  getstring (idx, in, out);
-	    	      sb_add_char (out,  '\"');
+	      sb_add_char (out,  '\"');
 
 	    }
 	  else {
@@ -1821,7 +1914,7 @@ get_any_string (idx, in, out, expand, pretend_quoted)
 /* skip along sb in starting at idx, suck off whitespace a ( and more
    whitespace.  return the idx of the next char */
 
-int
+static int
 skip_openp (idx, in)
      int idx;
      sb *in;
@@ -1836,7 +1929,7 @@ skip_openp (idx, in)
 /* skip along sb in starting at idx, suck off whitespace a ) and more
    whitespace.  return the idx of the next char */
 
-int
+static int
 skip_closep (idx, in)
      int idx;
      sb *in;
@@ -1850,7 +1943,7 @@ skip_closep (idx, in)
 
 /* .len */
 
-int
+static int
 dolen (idx, in, out)
      int idx;
      sb *in;
@@ -1962,7 +2055,7 @@ dosubstr (idx, in, out)
 }
 
 /* scan line, change tokens in the hash table to their replacements */
-void
+static void
 process_assigns (idx, in, buf)
      int idx;
      sb *in;
@@ -2141,7 +2234,7 @@ process_file ()
       more = get_line (&line);
     }
 
-  if (!had_end)
+  if (!had_end && !mri)
     WARNING ((stderr, "END missing from end of file.\n"));
 }
 
@@ -2294,7 +2387,7 @@ condass_lookup_name (inbuf, idx, out, warn)
 #define GT 6
 #define NEVER 7
 
-int
+static int
 whatcond (idx, in, val)
      int idx;
      sb *in;
@@ -2335,7 +2428,7 @@ whatcond (idx, in, val)
   return idx;
 }
 
-int
+static int
 istrue (idx, in)
      int idx;
      sb *in;
@@ -2469,6 +2562,125 @@ condass_on ()
   return ifstack[ifi].on;
 }
 
+/* MRI IFEQ, IFNE, IFLT, IFLE, IFGE, IFGT.  */
+
+static void
+do_if (idx, in, cond)
+     int idx;
+     sb *in;
+     int cond;
+{
+  int val;
+  int res;
+
+  if (ifi >= IFNESTING)
+    {
+      FATAL ((stderr, "IF nesting unreasonable.\n"));
+    }
+
+  idx = exp_get_abs ("Conditional operator must have absolute operands.\n",
+		     idx, in, &val);
+  switch (cond)
+    {
+    default:
+    case EQ: res = val == 0; break;
+    case NE: res = val != 0; break;
+    case LT: res = val <  0; break;
+    case LE: res = val <= 0; break;
+    case GE: res = val >= 0; break;
+    case GT: res = val >  0; break;
+    }
+
+  ifi++;
+  ifstack[ifi].on = ifstack[ifi-1].on ? res: 0;
+  ifstack[ifi].hadelse = 0;
+}
+
+/* Get a string for the MRI IFC or IFNC pseudo-ops.  */
+
+static int
+get_mri_string (idx, in, val, terminator)
+     int idx;
+     sb *in;
+     sb *val;
+     int terminator;
+{
+  idx = sb_skip_white (idx, in);
+
+  if (idx < in->len
+      && in->ptr[idx] == '\'')
+    {
+      sb_add_char (val, '\'');
+      for (++idx; idx < in->len; ++idx)
+	{
+	  sb_add_char (val, in->ptr[idx]);
+	  if (in->ptr[idx] == '\'')
+	    {
+	      ++idx;
+	      if (idx >= in->len
+		  || in->ptr[idx] != '\'')
+		break;
+	    }
+	}
+      idx = sb_skip_white (idx, in);
+    }
+  else
+    {
+      int i;
+
+      while (idx < in->len
+	     && in->ptr[idx] != terminator)
+	{
+	  sb_add_char (val, in->ptr[idx]);
+	  ++idx;
+	}
+      i = val->len - 1;
+      while (i >= 0 && ISWHITE (val->ptr[i]))
+	--i;
+      val->len = i + 1;
+    }
+
+  return idx;
+}
+
+/* MRI IFC, IFNC.  */
+
+static void
+do_ifc (idx, in, ifnc)
+     int idx;
+     sb *in;
+     int ifnc;
+{
+  sb first;
+  sb second;
+  int res;
+
+  if (ifi >= IFNESTING)
+    {
+      FATAL ((stderr, "IF nesting unreasonable.\n"));
+    }
+
+  sb_new (&first);
+  sb_new (&second);
+
+  idx = get_mri_string (idx, in, &first, ',');
+
+  if (idx >= in->len || in->ptr[idx] != ',')
+    {
+      ERROR ((stderr, "Bad format for IF or IFNC.\n"));
+      return;
+    }
+
+  idx = get_mri_string (idx + 1, in, &second, ';');
+
+  res = (first.len == second.len
+	 && strncmp (first.ptr, second.ptr, first.len) == 0);
+  res ^= ifnc;
+
+  ifi++;
+  ifstack[ifi].on = ifstack[ifi-1].on ? res : 0;
+  ifstack[ifi].hadelse = 0;
+}
 
 /* Read input lines till we get to a TO string.
    Increase nesting depth if we geta FROM string.
@@ -2476,8 +2688,8 @@ condass_on ()
 
 static void
 buffer_and_nest (from, to, ptr)
-     char *from;
-     char *to;
+     const char *from;
+     const char *to;
      sb *ptr;
 {
   int from_len = strlen (from);
@@ -2493,35 +2705,37 @@ buffer_and_nest (from, to, ptr)
       /* Try and find the first pseudo op on the line */
       int i = line_start;
 
-      if (!alternate) 
+      if (!alternate && !mri)
 	{
-	  /* With normal syntax we can suck what we want till we get to the dot.
-	     With the alternate, labels have to start in the first column, since
-	     we cant tell what's a label and whats a pseudoop */
+	  /* With normal syntax we can suck what we want till we get
+	     to the dot.  With the alternate, labels have to start in
+	     the first column, since we cant tell what's a label and
+	     whats a pseudoop */
 
-      /* Skip leading whitespace */
-      while (i < ptr->len
-	     && ISWHITE (ptr->ptr[i]))
-	i++;
+	  /* Skip leading whitespace */
+	  while (i < ptr->len
+		 && ISWHITE (ptr->ptr[i]))
+	    i++;
 
-      /* Skip over a label */
-      while (i < ptr->len
-	     && ISNEXTCHAR (ptr->ptr[i]))
-	i++;
+	  /* Skip over a label */
+	  while (i < ptr->len
+		 && ISNEXTCHAR (ptr->ptr[i]))
+	    i++;
 
-      /* And a colon */
-      if (i < ptr->len
-	  && ptr->ptr[i] == ':')
-	i++;
+	  /* And a colon */
+	  if (i < ptr->len
+	      && ptr->ptr[i] == ':')
+	    i++;
 
-    }
+	}
       /* Skip trailing whitespace */
       while (i < ptr->len
 	     && ISWHITE (ptr->ptr[i]))
 	i++;
 
       if (i < ptr->len && (ptr->ptr[i] == '.' 
-			   || alternate))
+			   || alternate
+			   || mri))
 	{
 	  if (ptr->ptr[i] == '.')
 	      i++;
@@ -2552,10 +2766,13 @@ buffer_and_nest (from, to, ptr)
 
 
 /* .ENDR */
-void
+static void
 do_aendr ()
 {
-  ERROR ((stderr, "AENDR without a AREPEAT.\n"));
+  if (!mri)
+    ERROR ((stderr, "AENDR without a AREPEAT.\n"));
+  else
+    ERROR ((stderr, "ENDR without a REPT.\n"));
 }
 
 /* .AWHILE */
@@ -2658,7 +2875,10 @@ do_arepeat (idx, in)
   sb_new (&sub);
   process_assigns (idx, in, &exp);
   idx = exp_get_abs ("AREPEAT must have absolute operand.\n", 0, &exp, &rc);
-  buffer_and_nest ("AREPEAT", "AENDR", &sub);
+  if (!mri)
+    buffer_and_nest ("AREPEAT", "AENDR", &sub);
+  else
+    buffer_and_nest ("REPT", "ENDR", &sub);
   if (rc > 0)
     {
       /* Push back the text following the repeat, and another repeat block
@@ -2676,10 +2896,16 @@ do_arepeat (idx, in)
       sb_add_sb (&copy, &sub);
       if (rc > 1)
 	{
-	  sprintf (buffer, "\t.AREPEAT	%d\n", rc - 1);
+	  if (!mri)
+	    sprintf (buffer, "\t.AREPEAT	%d\n", rc - 1);
+	  else
+	    sprintf (buffer, "\tREPT	%d\n", rc - 1);
 	  sb_add_string (&copy, buffer);
 	  sb_add_sb (&copy, &sub);
-	  sb_add_string (&copy, "	.AENDR\n");
+	  if (!mri)
+	    sb_add_string (&copy, "	.AENDR\n");
+	  else
+	    sb_add_string (&copy, "	ENDR\n");
 	}
 
       include_buf (&exp, &copy, include_repeat, index);
@@ -2757,7 +2983,36 @@ do_formals (macro, idx, in)
       macro->formal_count++;
       *p = formal;
       p = &formal->next;
+      *p = NULL;
     }
+
+  if (mri)
+    {
+      formal_entry *formal;
+
+      /* Add a special NARG formal, which macro_expand will set to the
+         number of arguments.  */
+      formal = (formal_entry *) xmalloc (sizeof (formal_entry));
+
+      sb_new (&formal->name);
+      sb_new (&formal->def);
+      sb_new (&formal->actual);
+
+      sb_add_string (&formal->name, "NARG");
+
+      {
+	/* Add to macro's hash table */
+
+	hash_entry *p = hash_create (&macro->formal_hash, &formal->name);
+	p->type = hash_formal;
+	p->value.f = formal;
+      }
+
+      formal->index = -2;
+      *p = formal;
+      formal->next = NULL;
+    }
+
   return idx;
 }
 
@@ -2924,6 +3179,7 @@ macro_expand (name, idx, in, m)
   formal_entry *f;
   int is_positional = 0;
   int is_keyword = 0;
+  int narg = 0;
 
   sb_new (&t);
   sb_new (&out);
@@ -2932,6 +3188,28 @@ macro_expand (name, idx, in, m)
   for (f = m->formals; f; f = f->next)
       sb_reset (&f->actual);
   f = m->formals;
+
+  if (mri)
+    {
+      /* The macro may be called with an optional qualifier, which may
+         be referred to in the macro body as \0.  */
+      if (idx < in->len && in->ptr[idx] == '.')
+	{
+	  formal_entry *n;
+
+	  n = (formal_entry *) xmalloc (sizeof (formal_entry));
+	  sb_new (&n->name);
+	  sb_new (&n->def);
+	  sb_new (&n->actual);
+	  n->index = -1;
+
+	  n->next = m->formals;
+	  m->formals = n;
+
+	  idx = get_any_string (idx + 1, in, &n->actual, 1, 0);
+	}
+    }
+
   /* Peel off the actuals and store them away in the hash tables' actuals */
   while (!eol(idx, in))
     {
@@ -2970,6 +3248,8 @@ macro_expand (name, idx, in, m)
 	      /* Insert this value into the right place */
 	      sb_reset (&ptr->value.f->actual);
 	      idx = get_any_string (idx + 1, in, &ptr->value.f->actual, 0, 0);
+	      if (ptr->value.f->actual.len > 0)
+		++narg;
 	    }
 	}
       else
@@ -2983,15 +3263,52 @@ macro_expand (name, idx, in, m)
 	    }
 	  if (!f)
 	    {
-	      ERROR ((stderr, "Too many positional arguments.\n"));
-	      return;
+	      formal_entry **pf;
+	      int c;
+
+	      if (!mri)
+		{
+		  ERROR ((stderr, "Too many positional arguments.\n"));
+		  return;
+		}
+	      f = (formal_entry *) xmalloc (sizeof (formal_entry));
+	      sb_new (&f->name);
+	      sb_new (&f->def);
+	      sb_new (&f->actual);
+	      f->next = NULL;
+
+	      c = -1;
+	      for (pf = &m->formals; *pf != NULL; pf = &(*pf)->next)
+		if ((*pf)->index >= c)
+		  c = (*pf)->index + 1;
+	      *pf = f;
+	      f->index = c;
 	    }
 
 	  sb_reset (&f->actual);
 	  idx = get_any_string (idx, in, &f->actual, 1, 0);
-	  f = f->next;
+	  if (f->actual.len > 0)
+	    ++narg;
+	  do
+	    {
+	      f = f->next;
+	    }
+	  while (f != NULL && f->index < 0);
 	}
+
       idx = sb_skip_comma (idx, in);
+    }
+
+  if (mri)
+    {
+      char buffer[20];
+
+      sb_reset (&t);
+      sb_add_string (&t, "NARG");
+      ptr = hash_lookup (&m->formal_hash, &t);
+      sb_reset (&ptr->value.f->actual);
+      sprintf (buffer, "%d", narg);
+      sb_add_string (&ptr->value.f->actual, buffer);
     }
 
   /* Copy the stuff from the macro buffer into a safe place and substitute any args */
@@ -3007,7 +3324,14 @@ macro_expand (name, idx, in, m)
 	if (in->ptr[src] == '&')
 	  {
 	    sb_reset (&t);
-	    src = sub_actual (src + 1, in, &t, m, '&', &out, 0);
+	    if (mri && src + 1 < in->len && in->ptr[src + 1] == '&')
+	      {
+		src = sub_actual (src + 2, in, &t, m, '\'', &out, 1);
+	      }
+	    else
+	      {
+		src = sub_actual (src + 1, in, &t, m, '&', &out, 0);
+	      }
 	  }
 	else if (in->ptr[src] == '\\')
 	  {
@@ -3050,13 +3374,37 @@ macro_expand (name, idx, in, m)
 		sb_add_char (&out, '&');
 		src++;
 	      }
+	    else if (mri
+		     && isalnum ((unsigned char) in->ptr[src]))
+	      {
+		int ind;
+
+		if (isdigit ((unsigned char) in->ptr[src]))
+		  ind = in->ptr[src] - '0';
+		else if (isupper ((unsigned char) in->ptr[src]))
+		  ind = in->ptr[src] - 'A' + 10;
+		else
+		  ind = in->ptr[src] - 'a' + 10;
+		++src;
+		for (f = m->formals; f != NULL; f = f->next)
+		  {
+		    if (f->index == ind - 1)
+		      {
+			if (f->actual.len != 0)
+			  sb_add_sb (&out, &f->actual);
+			else
+			  sb_add_sb (&out, &f->def);
+			break;
+		      }
+		  }
+	      }
 	    else
 	      {
 		sb_reset (&t);
 		src = sub_actual (src, in, &t, m, '\'', &out, 0);
 	      }
 	  }
-	else if (ISFIRSTCHAR (in->ptr[src]) && alternate)
+	else if (ISFIRSTCHAR (in->ptr[src]) && (alternate || mri))
 	  {
 		sb_reset (&t);
 		src = sub_actual (src, in, &t, m, '\'', &out, 1);
@@ -3075,6 +3423,31 @@ macro_expand (name, idx, in, m)
 	    inquote = !inquote;
 	    sb_add_char (&out, in->ptr[src++]);
 	  }
+	else if (mri
+		 && in->ptr[src] == '='
+		 && src + 1 < in->len
+		 && in->ptr[src + 1] == '=')
+	  {
+	    sb_reset (&t);
+	    src = get_token (src + 2, in, &t);
+	    ptr = hash_lookup (&m->formal_hash, &t);
+	    if (ptr == NULL)
+	      {
+		ERROR ((stderr, "MACRO formal argument %s does not exist.\n",
+			sb_name (&t)));
+	      }
+	    else
+	      {
+		if (ptr->value.f->actual.len)
+		  {
+		    sb_add_string (&out, "-1");
+		  }
+		else
+		  {
+		    sb_add_char (&out, '0');
+		  }
+	      }
+	  }
 	else
 	  {
 	    sb_add_char (&out, in->ptr[src++]);
@@ -3082,6 +3455,29 @@ macro_expand (name, idx, in, m)
       }
     include_buf (name, &out, include_macro, include_next_index ());
   }
+
+  if (mri)
+    {
+      formal_entry **pf;
+
+      /* Discard any unnamed formal arguments.  */
+      pf = &m->formals;
+      while (*pf != NULL)
+	{
+	  if ((*pf)->name.len != 0)
+	    pf = &(*pf)->next;
+	  else
+	    {
+	      sb_kill (&(*pf)->name);
+	      sb_kill (&(*pf)->def);
+	      sb_kill (&(*pf)->actual);
+	      f = (*pf)->next;
+	      free (*pf);
+	      *pf = f;
+	    }
+	}
+    }
+
   sb_kill (&t);
   sb_kill (&out);
   number++;
@@ -3139,7 +3535,7 @@ getstring (idx, in, acc)
     {
       if (in->ptr[idx] == '<')
 	{
-	  if (alternate)
+	  if (alternate || mri)
 	    {
 	      int nest = 0;
 	      idx++;
@@ -3208,7 +3604,7 @@ void
 do_sdata (idx, in, type)
      int idx;
      sb *in;
-     char type;
+     int type;
 {
   int nc = 0;
   int pidx = -1;
@@ -3301,7 +3697,7 @@ do_sdatab (idx, in)
 
 int
 new_file (name)
-     char *name;
+     const char *name;
 {
   FILE *newone = fopen (name, "r");
   if (!newone)
@@ -3512,15 +3908,24 @@ chartype_init ()
 #define K_DW		LAB|PROCESS|43
 #define K_DL		LAB|PROCESS|44
 #define K_LOCAL		45
+#define K_IFEQ		PROCESS|46
+#define K_IFNE		PROCESS|47
+#define K_IFLT		PROCESS|48
+#define K_IFLE		PROCESS|49
+#define K_IFGE		PROCESS|50
+#define K_IFGT		PROCESS|51
+#define K_IFC		PROCESS|52
+#define K_IFNC		PROCESS|53
 
 
-static struct
+struct keyword
 {
   char *name;
   int code;
   int extra;
-}
-kinfo[] =
+};
+
+static struct keyword kinfo[] =
 {
   { "EQU", K_EQU, 0 },
   { "ALTERNATE", K_ALTERNATE, 0 },
@@ -3568,6 +3973,29 @@ kinfo[] =
   { NULL, 0, 0 }
 };
 
+/* Although the conditional operators are handled by gas, we need to
+   handle them here as well, in case they are used in a recursive
+   macro to end the recursion.  */
+
+static struct keyword mrikinfo[] =
+{
+  { "IF", K_IFNE, 0 },
+  { "IFEQ", K_IFEQ, 0 },
+  { "IFNE", K_IFNE, 0 },
+  { "IFLT", K_IFLT, 0 },
+  { "IFLE", K_IFLE, 0 },
+  { "IFGE", K_IFGE, 0 },
+  { "IFGT", K_IFGT, 0 },
+  { "IFC", K_IFC, 0 },
+  { "IFNC", K_IFNC, 0 },
+  { "ELSEC", K_AELSE, 0 },
+  { "ENDC", K_AENDI, 0 },
+  { "MEXIT", K_EXITM, 0 },
+  { "REPT", K_AREPEAT, 0 },
+  { "ENDR", K_AENDR, 0 },
+  { NULL, 0, 0 }
+};
+
 /* Look for a pseudo op on the line. If one's there then call
    its handler. */
 
@@ -3579,7 +4007,7 @@ process_pseudo_op (idx, line, acc)
 {
 
 
-  if (line->ptr[idx] == '.' || alternate)
+  if (line->ptr[idx] == '.' || alternate || mri)
     {
       /* Scan forward and find pseudo name */
       char *in;
@@ -3779,6 +4207,30 @@ process_pseudo_op (idx, line, acc)
 	    case K_REG:
 	      do_reg (idx, line);
 	      return 1;
+	    case K_IFEQ:
+	      do_if (idx, line, EQ);
+	      return 1;
+	    case K_IFNE:
+	      do_if (idx, line, NE);
+	      return 1;
+	    case K_IFLT:
+	      do_if (idx, line, LT);
+	      return 1;
+	    case K_IFLE:
+	      do_if (idx, line, LE);
+	      return 1;
+	    case K_IFGE:
+	      do_if (idx, line, GE);
+	      return 1;
+	    case K_IFGT:
+	      do_if (idx, line, GT);
+	      return 1;
+	    case K_IFC:
+	      do_ifc (idx, line, 0);
+	      return 1;
+	    case K_IFNC:
+	      do_ifc (idx, line, 1);
+	      return 1;
 	    }
 	}
     }
@@ -3786,6 +4238,29 @@ process_pseudo_op (idx, line, acc)
 }
 
 
+
+/* Add a keyword to the hash table.  */
+
+static void
+add_keyword (name, code)
+     const char *name;
+     int code;
+{
+  sb label;
+  int j;
+
+  sb_new (&label);
+  sb_add_string (&label, name);
+
+  hash_add_to_int_table (&keyword_hash_table, &label, code);
+
+  sb_reset (&label);
+  for (j = 0; name[j]; j++)
+    sb_add_char (&label, name[j] - 'A' + 'a');
+  hash_add_to_int_table (&keyword_hash_table, &label, code);
+
+  sb_kill (&label);
+}  
 
 /* Build the keyword hash table - put each keyword in the table twice,
    once upper and once lower case.*/
@@ -3796,27 +4271,19 @@ process_init ()
   int i;
 
   for (i = 0; kinfo[i].name; i++)
+    add_keyword (kinfo[i].name, kinfo[i].code);
+
+  if (mri)
     {
-      sb label;
-      int j;
-      sb_new (&label);
-      sb_add_string (&label, kinfo[i].name);
-
-      hash_add_to_int_table (&keyword_hash_table, &label, kinfo[i].code);
-
-      sb_reset (&label);
-      for (j = 0; kinfo[i].name[j]; j++)
-	sb_add_char (&label, kinfo[i].name[j] - 'A' + 'a');
-      hash_add_to_int_table (&keyword_hash_table, &label, kinfo[i].code);
-
-      sb_kill (&label);
+      for (i = 0; mrikinfo[i].name; i++)
+	add_keyword (mrikinfo[i].name, mrikinfo[i].code);
     }
 }
 
 
 static void
 do_define (string)
-char *string;
+     const char *string;
 {
   sb label;
   int res = 1;
@@ -3862,6 +4329,7 @@ static struct option long_options[] =
   { "copysource", no_argument, 0, 's' },
   { "debug", no_argument, 0, 'd' },
   { "help", no_argument, 0, 'h' },
+  { "mri", no_argument, 0, 'M' },
   { "output", required_argument, 0, 'o' },
   { "print", no_argument, 0, 'p' },
   { "unreasonable", no_argument, 0, 'u' },
@@ -3882,6 +4350,7 @@ Usage: %s \n\
   [-c char] [--commentchar char]  change the comment character from !\n\
   [-d]      [--debug]             print some debugging info\n\
   [-h]      [--help]              print this message\n\
+  [-M]      [--mri]               enter MRI compatibility mode\n\
   [-o out]  [--output out]        set the output file\n\
   [-p]      [--print]             print line numbers\n\
   [-s]      [--copysource]        copy source through as comments \n\
@@ -3925,9 +4394,8 @@ main (argc, argv)
   hash_new_table (101, &vars);
 
   sb_new (&label);
-  process_init ();
 
-  while ((opt = getopt_long (argc, argv, "I:sdhavc:upo:D:", long_options,
+  while ((opt = getopt_long (argc, argv, "I:sdhavc:upo:D:M", long_options,
 			     (int *) NULL))
 	 != EOF)
     {
@@ -3969,6 +4437,9 @@ main (argc, argv)
 	case 'D':
 	  do_define (optarg);
 	  break;
+	case 'M':
+	  mri = 1;
+	  break;
 	case 'h':
 	  show_help ();
 	  /*NOTREACHED*/
@@ -3984,6 +4455,7 @@ main (argc, argv)
 	}
     }
 
+  process_init ();
 
   if (out_name) {
     outfile = fopen (out_name, "w");

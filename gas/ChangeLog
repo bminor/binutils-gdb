@@ -1,3 +1,51 @@
+Fri Aug 11 19:16:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (change_base): Don't treat ' specially in MRI mode.
+	(process_file): Don't warn about missing END in MRI mode.
+	(do_if): New static function.
+	(get_mri_string, do_ifc): New static functions.
+	(buffer_and_nest): Treat MRI mode like alternate syntax mode.
+	(do_aendr): Change error message in MRI mode.
+	(do_arepeat): Use REPT/ENDR in MRI mode.
+	(do_formals): In MRI mode, add special NARG formal.
+	(macro_expand): Various changes for MRI mode: permit a qualifier
+	on the macro name; set special NARG formal; permit unnamed
+	positional arguments; use && to concatenate named parameters;
+	permit \d to specify an unnamed parameter; permit named parameters
+	to not start with \; use == to see if a parameter exists.
+	(getstring): In MRI mode, allow <> to quote a string.
+	(K_IFEQ, K_IFNE, K_IFLT, K_IFLE, K_IFGE, K_IFGT): Define.
+	(K_IFC, K_IFNC): Define.
+	(struct keyword): Name structure used in kinfo array.
+	(mrikinfo): New static array.
+	(process_pseudo_op): Don't require leading '.' in MRI mode.
+	Handle new MRI pseudo-op definitions.
+	(add_keyword): New static function, broken out of process_init.
+	(process_init): Use add_keyword.  In MRI mode, add mrikinfo table.
+	(long_options): Add "mri".
+	(show_usage): Mention -M/--mri.
+	(main): Call process_init after processing arguments.  Handle -M.
+	* doc/gasp.texi: Document -M/--mri.
+
+	* gasp.c: Include ansidecl.h.  Make all local functions static.
+        Add prototypes for all static functions.
+	(mri): New global variable.
+	(sb_add_char): Change parameter c from char to int.
+	(sb_add_string): Make parameter s into a const pointer.
+	(sb_add_buffer): Likewise.
+	(checkconst): Change parameter op from char to int.
+	(exp_get_abs): Make parameter emsg into a const pointer.
+	(do_res): Change parameter type from char to int.
+	(buffer_and_nest): Make parameters from and to into const
+	pointers.
+	(do_sdata): Change parameter type from char to int.
+	(new_file): Make parameter name into a const pointer.
+	(do_define): Make parameter string into a const pointer.
+
+	* config/tc-h8300.c (md_pcrel_from): Don't do it here, call
+	number_to_chars_bigendian.
+	* config/tc-h8300.h (TARGET_BYTES_BIG_ENDIAN): Define.
+
 Fri Aug 11 13:23:56 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* write.h (struct fix): Add new field fx_no_overflow.

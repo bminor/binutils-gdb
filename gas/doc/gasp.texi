@@ -167,7 +167,7 @@ possibilities for the @sc{gasp} command line.
 @example
 gasp  [ -a | --alternate ]
       [ -c @var{char} | --commentchar @var{char} ]
-      [ -d | --debug ]  [ -h | --help ]
+      [ -d | --debug ]  [ -h | --help ] [ -M | --mri ]
       [ -o @var{outfile} | --output @var{outfile} ]
       [ -p | --print ]  [ -s | --copysource ]
       [ -u | --unreasonable ]  [ -v | --version ]
@@ -227,6 +227,12 @@ done preprocessing.
 @item -h
 @itemx --help
 Display a summary of the @sc{gasp} command line options.
+
+@item -M
+@itemx --mri
+Use MRI compatibility mode.  Using this option causes @sc{gasp} to
+accept the syntax and pseudo-ops used by the Microtec Research
+@code{ASM68K} assembler.
 
 @item -o @var{outfile}
 @itemx --output @var{outfile}
