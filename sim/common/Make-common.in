@@ -302,8 +302,7 @@ cgen-trace.o: $(srcdir)/../common/cgen-trace.c $(sim_main_headers) \
 	$(CC) -c $(srcdir)/../common/cgen-trace.c $(ALL_CFLAGS)
 
 cgen-utils.o: $(srcdir)/../common/cgen-utils.c $(sim_main_headers) \
-	  $(SIM_EXTRA_DEPS) $(srcdir)/../common/cgen-mem.h \
-	  $(srcdir)/../common/cgen-sem.h
+	  $(SIM_EXTRA_DEPS) cgen-mem.h cgen-sem.h
 	$(CC) -c $(srcdir)/../common/cgen-utils.c $(ALL_CFLAGS)
 
 # Support targets.
