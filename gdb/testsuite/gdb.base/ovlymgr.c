@@ -185,11 +185,6 @@ D10VTranslate (unsigned long logical,
 static void
 ovly_copy (unsigned long dst, unsigned long src, long size)
 {
-#ifdef  __M32R__
-  memcpy ((void *) dst, (void *) src, size);
-  return;
-#endif /* M32R */
-
 #ifdef  __D10V__
   unsigned long *s, *d, tmp;
   short dmap_src, dmap_dst;
@@ -220,6 +215,9 @@ ovly_copy (unsigned long dst, unsigned long src, long size)
 	D10VTranslate (dst, &dmap_dst, &d);
     }
   DMAP = dmap_save;
+#else
+  memcpy ((void *) dst, (void *) src, size);
 #endif /* D10V */
+  return;
 }
 

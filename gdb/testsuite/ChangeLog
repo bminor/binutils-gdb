@@ -1,3 +1,8 @@
+2002-02-04  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/ovlymgr.c  (ovly_copy): Generalize for targets
+	  other than d10v and m32r.
+
 2002-02-02  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gdb.base/default.exp: Rewrite test patterns to reduce time
@@ -77,6 +82,10 @@
 
 	* gdb.base/maint.exp: Update ``maint internal-error'' to match
 	continue/quit query.  Update copyright.
+
+2002-01-14  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/gcore.exp: Remove extra debugging output.
 
 2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
