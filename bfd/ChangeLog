@@ -1,5 +1,10 @@
 Mon Mar 13 13:48:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Only write
+	out PLTRELSZ, PLTREL and JMPREL relocs if there is a .rela.plt
+	section.  Solaris 2.4 apparently does not handle empty reloc
+	information correctly.
+
 	* archive.c (bsd_write_armap): Cast getuid and getgid results to
 	long, and print with %ld.
 

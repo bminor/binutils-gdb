@@ -1,5 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 #include "libelf.h"
 
-static CONST struct reloc_howto_struct *bfd_elf32_bfd_reloc_type_lookup
+static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
@@ -147,7 +147,7 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
 /*{ BFD_RELOC_SPARC_UA32, R_SPARC_UA32 }, not used?? */
 };
 
-static CONST struct reloc_howto_struct *
+static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -581,7 +581,8 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 			  & ELF_LINK_HASH_REF_REGULAR) != 0
 		      && (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0
-		      && h->root.type == bfd_link_hash_defined
+		      && (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak)
 		      && (bfd_get_flavour (h->root.u.def.section->owner)
 			  == bfd_target_elf_flavour)
 		      && (elf_elfheader (h->root.u.def.section->owner)->e_type
@@ -650,7 +651,8 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
      real definition first, and we can just use the same value.  */
   if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined);
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
       return true;
@@ -731,6 +733,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
   bfd *dynobj;
   asection *s;
   boolean reltext;
+  boolean relplt;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -768,6 +771,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
   reltext = false;
+  relplt = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
@@ -807,6 +811,9 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	      if (target != NULL
 		  && (target->flags & SEC_READONLY) != 0)
 		reltext = true;
+
+	      if (strcmp (name, ".rela.plt") == 0)
+		relplt = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -856,11 +863,18 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	  || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	  || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	  || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0)
-	  || ! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
+      if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0))
+	return false;
+
+      if (relplt)
+	{
+	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
+	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	    return false;
+	}
+
+      if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
 	  || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
 	  || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
 					    sizeof (Elf32_External_Rela)))
@@ -1004,7 +1018,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  if (h->root.type == bfd_link_hash_defined)
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
 	      if ((r_type == R_SPARC_WPLT30
@@ -1043,7 +1058,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			      + sec->output_section->vma
 			      + sec->output_offset);
 	    }
-	  else if (h->root.type == bfd_link_hash_weak)
+	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared)
 	    relocation = 0;
