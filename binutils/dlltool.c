@@ -596,7 +596,7 @@ mtable[] =
     arm_jtab, sizeof (arm_jtab), 8
   }
   ,
-  { 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
 typedef struct dlist
@@ -868,7 +868,7 @@ static int d_is_exe;
 
 int
 yyerror (err)
-     const char *err;
+     const char * err ATTRIBUTE_UNUSED;
 {
   /* xgettext:c-format */
   warn (_("Syntax error in def file %s:%d\n"), def_file, linenumber);
@@ -2066,15 +2066,16 @@ typedef struct
 
 #define NSECS 7
 
+#define INIT_SEC_DATA(id, name, flags, align) { id, name, flags, align, NULL, NULL, NULL, 0, NULL }
 static sinfo secdata[NSECS] =
 {
-  { TEXT,   ".text",    SEC_CODE | SEC_HAS_CONTENTS, 2},
-  { DATA,   ".data",    SEC_DATA,                    2},
-  { BSS,    ".bss",     0,                           2},
-  { IDATA7, ".idata$7", SEC_HAS_CONTENTS,            2},
-  { IDATA5, ".idata$5", SEC_HAS_CONTENTS,            2},
-  { IDATA4, ".idata$4", SEC_HAS_CONTENTS,            2},
-  { IDATA6, ".idata$6", SEC_HAS_CONTENTS,            1}
+  INIT_SEC_DATA (TEXT,   ".text",    SEC_CODE | SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (DATA,   ".data",    SEC_DATA,                    2),
+  INIT_SEC_DATA (BSS,    ".bss",     0,                           2),
+  INIT_SEC_DATA (IDATA7, ".idata$7", SEC_HAS_CONTENTS,            2),
+  INIT_SEC_DATA (IDATA5, ".idata$5", SEC_HAS_CONTENTS,            2),
+  INIT_SEC_DATA (IDATA4, ".idata$4", SEC_HAS_CONTENTS,            2),
+  INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS,            1)
 };
 
 #else
@@ -2876,7 +2877,11 @@ remove_null_names (ptr)
 
 static void
 dtab (ptr)
-     export_type **ptr;
+     export_type ** ptr
+#ifndef SACDEBUG
+ATTRIBUTE_UNUSED
+#endif
+     ;
 {
 #ifdef SACDEBUG
   int i;
@@ -3170,7 +3175,7 @@ static const struct option long_options[] =
   {"as", required_argument, NULL, 'S'},
   {"as-flags", required_argument, NULL, 'f'},
   {"mcore-elf", required_argument, NULL, 'M'},
-  {0}
+  {NULL,0,NULL,0}
 };
 
 int
