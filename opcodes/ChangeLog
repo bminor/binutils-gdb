@@ -1,3 +1,8 @@
+2002-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* arc-opc.c: Include bfd.h.
+	(arc_get_opcode_mach): Subtract off base bfd_mach value.
+
 2002-08-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* v850-dis.c (disassemble): Remove bfd_mach_v850ea case.
