@@ -138,7 +138,6 @@ static int parse_opt_untyped_expr ();
 static void parse_if_expression_body PARAMS((void));
 static void write_lower_upper_value PARAMS ((enum exp_opcode, struct type *));
 static enum ch_terminal ch_lex ();
-static void calculate_array_length PARAMS ((struct type *));
 
 #define MAX_LOOK_AHEAD 2
 static enum ch_terminal terminal_buffer[MAX_LOOK_AHEAD+1] = {
@@ -674,20 +673,11 @@ parse_primval ()
       break;
     case GENERAL_PROCEDURE_NAME:
     case LOCATION_NAME:
-      {
-	struct type *type;
-
-	/* FIXME: look at calculate_array_length */
-	type = PEEK_LVAL().ssym.sym->type;
-	if (type && TYPE_CODE (type) == TYPE_CODE_ARRAY &&
-	    TYPE_LENGTH (type) == 0)
-	  calculate_array_length (type);
-	write_exp_elt_opcode (OP_VAR_VALUE);
-	write_exp_elt_block (NULL);
-	write_exp_elt_sym (PEEK_LVAL ().ssym.sym);
-	write_exp_elt_opcode (OP_VAR_VALUE);
-	FORWARD_TOKEN ();
-      }
+      write_exp_elt_opcode (OP_VAR_VALUE);
+      write_exp_elt_block (NULL);
+      write_exp_elt_sym (PEEK_LVAL ().ssym.sym);
+      write_exp_elt_opcode (OP_VAR_VALUE);
+      FORWARD_TOKEN ();
       break;
     case GDB_VARIABLE:	/* gdb specific */
       FORWARD_TOKEN ();
@@ -2035,7 +2025,6 @@ ch_lex ()
 		break;
 	      case LOC_TYPEDEF:
 		yylval.tsym.type = SYMBOL_TYPE (sym);
-		calculate_array_length (yylval.tsym.type);
 		return TYPENAME;
 	      case LOC_UNDEF:
 	      case LOC_CONST_BYTES:
@@ -2091,49 +2080,6 @@ write_lower_upper_value (opcode, type)
       write_exp_elt_longcst (val);
       write_exp_elt_opcode (OP_LONG);
     }
-}
-
-/* In certain cases it could happen, that an array type doesn't
-   have a length (this have to do with seizing). The reason is
-   shown in the following stabs:
-
-   .stabs "m_x:Tt81=s36i:1,0,32;ar:82=ar80;0;1;83=xsm_struct:,32,256;;",128,0,25,0
-  
-   .stabs "m_struct:Tt83=s16f1:9,0,16;f2:85=*84,32,32;f3:84,64,64;;",128,0,10,0
-
-   When processing t81, the array ar80 doesn't have a length, cause
-   struct m_struct is specified extern at thse moment. Afterwards m_struct
-   gets specified and updated, but not the surrounding type.
-
-   So we walk through array's till we find a type with a length and
-   calculate the array length.
-
-   FIXME: Where may this happen too ?
-   */
-
-static void
-calculate_array_length (type)
-     struct type *type;
-{
-  struct type *target_type;
-  struct type *range_type;
-  LONGEST lower_bound, upper_bound;
-
-  if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
-    /* not an array, stop processing */
-    return;
-
-  target_type = TYPE_TARGET_TYPE (type);
-  range_type = TYPE_FIELD_TYPE (type, 0);
-  lower_bound = TYPE_FIELD_BITPOS (range_type, 0);
-  upper_bound = TYPE_FIELD_BITPOS (range_type, 1);
-
-  if (TYPE_LENGTH (target_type) == 0 &&
-      TYPE_CODE (target_type) == TYPE_CODE_ARRAY)
-    /* we've got another array */
-    calculate_array_length (target_type);
-
-  TYPE_LENGTH (type) = (upper_bound - lower_bound + 1) * TYPE_LENGTH (target_type);
 }
 
 void

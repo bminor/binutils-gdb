@@ -437,6 +437,10 @@ create_array_type (result_type, element_type, range_type)
   TYPE_FIELD_TYPE (result_type, 0) = range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
 
+  /* TYPE_FLAG_TARGET_STUB will take care of zero length arrays */
+  if (TYPE_LENGTH (result_type) == 0)
+    TYPE_FLAGS (result_type) |= TYPE_FLAG_TARGET_STUB;
+
   return (result_type);
 }
 

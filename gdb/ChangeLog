@@ -1,3 +1,10 @@
+Wed Jun 26 06:05:39 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* gdbtypes.c (create_array_type): If TYPE_LENGTH (result_type)
+	is zero, set TYPE_FLAG_TARGET_STUB to force reevaluation of the type.
+
+	* ch-exp.c (calculate_array_length): Function removed.
+
 Tue Jun 25 17:41:06 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* remote-e7000.c (e7000_read_inferior_memory_large): New function.
