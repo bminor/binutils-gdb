@@ -664,7 +664,7 @@ else
 	done
 fi
 
-java_files="ChangeLog"
+java_files="ChangeLog Makefile.in configure.in"
 if ( echo $* | grep keep\-java > /dev/null ) ; then
 	for i in $java_files ; do
 		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
