@@ -1,3 +1,11 @@
+Mon Dec 22 12:37:06 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add FP_D to s.d instruction flags.
+
+Wed Dec 17 11:38:29 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-opc.c (halt, pulse): Enable them on the 68060.
+
 start-sanitize-tic80
 Tue Dec 16 15:22:53 1997  Fred Fish  <fnf@cygnus.com>
 
