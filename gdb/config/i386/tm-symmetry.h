@@ -31,10 +31,7 @@
    a copy of the right include file.  */
 #include <machine/reg.h>
 
-#include "i386/tm-i386v.h"
-
-#undef START_INFERIOR_TRAPS_EXPECTED
-#define START_INFERIOR_TRAPS_EXPECTED 2
+#include "i386/tm-i386.h"
 
 /* Amount PC must be decremented by after a breakpoint.  This is often the
    number of bytes in BREAKPOINT but not always (such as now). */

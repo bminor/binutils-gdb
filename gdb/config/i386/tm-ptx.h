@@ -32,16 +32,8 @@
 #ifdef SEQUENT_PTX4
 #include "i386/tm-i386v4.h"
 #else /* !SEQUENT_PTX4 */
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 #endif
-
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior, and when we finally get to the inferior code.  This is 2
-   on most implementations. Here we have to undo what tm-i386v.h gave
-   us and restore the default. */
-
-#undef START_INFERIOR_TRAPS_EXPECTED
-#define START_INFERIOR_TRAPS_EXPECTED 2
 
 /* Amount PC must be decremented by after a breakpoint.  This is often the
    number of bytes in BREAKPOINT but not always (such as now). */

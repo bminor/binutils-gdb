@@ -1,3 +1,18 @@
+2002-08-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/i386aout.mt (TDEPFILES): Add i387-tdep.o
+	(TM_FILE): Set to tm-i386.h.
+	* config/i386/i386v.mt (TM_FILE): Set to tm-i386.h.
+	* config/i386/tm-i386v.h: Remove file.
+	* config/i386/tm-ptx.h [!SEQUENT_PTX4]: Include "i386/tm-i386.h"
+	instead of "i386/tm-i386v.h".
+	(START_INFERIOR_TRAPS_EXPECTED): Remove define.
+	* config/i386/tm-symmetry: Include "i386/tm-i386.h" instead of
+	"i386/tm-i386v.h".
+	(START_INFERIOR_TRAPS_EXPECTED): Remove define.
+	* config/i386/tm-vxworks.h: Include "i386/tm-i386.h" instead of
+	"i386/tm-i386.h".
+
 2002-08-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-i386v.h: Add protection against
