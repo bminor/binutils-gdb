@@ -1,3 +1,8 @@
+Fri Aug 25 16:57:05 2000  David Taylor  <taylor@texas.cygnus.com>
+
+	* regcache.c (register_changed): New function.
+	* value.h: Declare it.
+	
 Fri Aug 25 12:11:21 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* symtab.c (search_symbols): Fix off by one error in index for

@@ -68,6 +68,15 @@ register_cached (int regnum)
   return register_valid[regnum];
 }
 
+/* REGISTER_CHANGED
+
+   invalidate a single register REGNUM in the cache */
+void
+register_changed (int regnum)
+{
+  register_valid[regnum] = 0;
+}
+
 /* FIND_SAVED_REGISTER ()
 
    Return the address in which frame FRAME's value of register REGNUM
