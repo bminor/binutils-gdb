@@ -76,14 +76,48 @@ trad_unix_core_file_p (abfd)
 
   val = bfd_read ((void *)&u, 1, sizeof u, abfd);
   if (val != sizeof u)
-    return 0;			/* Too small to be a core file */
+    {
+      /* Too small to be a core file */
+      bfd_error = wrong_format;
+      return 0;
+    }
 
   /* Sanity check perhaps??? */
   if (u.u_dsize > 0x1000000)	/* Remember, it's in pages... */
-    return 0;
+    {
+      bfd_error = wrong_format;
+      return 0;
+    }
   if (u.u_ssize > 0x1000000)
-    return 0;
-  /* Check that the size claimed is no greater than the file size. FIXME. */
+    {
+      bfd_error = wrong_format;
+      return 0;
+    }
+
+  /* Check that the size claimed is no greater than the file size.  */
+  {
+    FILE *stream = bfd_cache_lookup (abfd);
+    struct stat statbuf;
+    if (stream == NULL)
+      return 0;
+    if (fstat (fileno (stream), &statbuf) < 0)
+      {
+	bfd_error = system_call_error;
+	return 0;
+      }
+    if (NBPG * (UPAGES + u.u_dsize + u.u_ssize) > statbuf.st_size)
+      {
+	bfd_error = file_truncated;
+	return 0;
+      }
+    if (NBPG * (UPAGES + u.u_dsize + u.u_ssize) < statbuf.st_size)
+      {
+	/* The file is too big.  Maybe it's not a core file
+	   or we otherwise have bad values for u_dsize and u_ssize).  */
+	bfd_error = wrong_format;
+	return 0;
+      }
+  }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
 
@@ -193,7 +227,11 @@ int
 trad_unix_core_file_failing_signal (ignore_abfd)
      bfd *ignore_abfd;
 {
+#ifdef TRAD_UNIX_CORE_FILE_FAILING_SIGNAL
+  return TRAD_UNIX_CORE_FILE_FAILING_SIGNAL(ignore_abfd);
+#else
   return -1;		/* FIXME, where is it? */
+#endif
 }
 
 /* ARGSUSED */
@@ -230,7 +268,7 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	trad_unix_canonicalize_reloc		(unsigned int (*) PARAMS \
 	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
 #define	trad_unix_make_empty_symbol		(struct symbol_cache_entry * \
-	(*) (bfd *)) bfd_false
+	(*) PARAMS ((bfd *))) bfd_false
 #define	trad_unix_print_symbol			(void (*) PARAMS	\
 	((bfd *, PTR, struct symbol_cache_entry  *,			\
 	bfd_print_symbol_type))) bfd_false
@@ -253,6 +291,10 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define trad_unix_bfd_relax_section		bfd_generic_relax_section
 #define trad_unix_bfd_seclet_link \
   ((boolean (*) PARAMS ((bfd *, PTR, boolean))) bfd_false)
+#define trad_unix_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define trad_unix_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
@@ -277,15 +319,28 @@ bfd_target trad_core_vec =
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
     3,							   /* minimum alignment power */
-    NO_GET, NO_PUT, NO_GET, NO_PUT, NO_GET, NO_PUT, /* data */
-    NO_GET, NO_PUT, NO_GET, NO_PUT, NO_GET, NO_PUT, /* hdrs */
+    NO_GET, NO_GET, NO_PUT,	/* 64 bit data */
+    NO_GET, NO_GET, NO_PUT,	/* 32 bit data */
+    NO_GET, NO_GET, NO_PUT,	/* 16 bit data */
+    NO_GET, NO_GET, NO_PUT,	/* 64 bit hdrs */
+    NO_GET, NO_GET, NO_PUT,	/* 32 bit hdrs */
+    NO_GET, NO_GET, NO_PUT,	/* 16 bit hdrs */
 
-    {_bfd_dummy_target, _bfd_dummy_target,
-     _bfd_dummy_target, trad_unix_core_file_p},
-    {bfd_false, bfd_false,	/* bfd_create_object */
-     bfd_false, bfd_false},
-    {bfd_false, bfd_false,	/* bfd_write_contents */
-     bfd_false, bfd_false},
+    {				/* bfd_check_format */
+     _bfd_dummy_target,		/* unknown format */
+     _bfd_dummy_target,		/* object file */
+     _bfd_dummy_target,		/* archive */
+     trad_unix_core_file_p	/* a core file */
+    },
+    {				/* bfd_set_format */
+     bfd_false, bfd_false,
+     bfd_false, bfd_false
+    },
+    {				/* bfd_write_contents */
+     bfd_false, bfd_false,
+     bfd_false, bfd_false
+    },
     
-    JUMP_TABLE(trad_unix)
+    JUMP_TABLE(trad_unix),
+    (PTR) 0			/* backend_data */
 };

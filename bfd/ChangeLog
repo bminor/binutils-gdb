@@ -1,3 +1,11 @@
+Mon Apr 26 13:55:42 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* trad-core.c (trad_unix_core_file_p): Check the file size.
+
+Mon Apr 26 13:24:43 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-alpha.c: Remove duplicate function and add warnings.
+
 Mon Apr 26 11:25:58 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* sco-core.c (sco_core_vec): Add initializers for new target
