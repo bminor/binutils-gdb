@@ -1,5 +1,9 @@
 2004-11-08  Andrew Cagney  <cagney@gnu.org>
 
+	* README: Refer to 6.3, not 6.2, update directory listing droppng
+	references to intl/ and mmalloc/.
+	* PROBLEMS: Refer to 6.3 not 6.2.
+
 	* PROBLEMS: Delete no-longer applicable problems.
 
 2004-11-05  Andrew Cagney  <cagney@gnu.org>
