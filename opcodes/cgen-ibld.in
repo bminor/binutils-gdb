@@ -78,7 +78,7 @@ insert_1 (cd, value, start, length, word_length, bufp)
   int shift;
   int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
 
-  x = bfd_get_bits (bufp, word_length, big_p);
+  x = cgen_get_insn_value (cd, bufp, word_length);
 
   /* Written this way to avoid undefined behaviour.  */
   mask = (((1L << (length - 1)) - 1) << 1) | 1;
@@ -88,7 +88,7 @@ insert_1 (cd, value, start, length, word_length, bufp)
     shift = (word_length - (start + length));
   x = (x & ~(mask << shift)) | ((value & mask) << shift);
 
-  bfd_put_bits ((bfd_vma) x, bufp, word_length, big_p);
+  cgen_put_insn_value (cd, bufp, word_length, (bfd_vma) x);
 }
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -365,7 +365,7 @@ extract_1 (cd, ex_info, start, length, word_length, bufp, pc)
   int shift;
   int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
 
-  x = bfd_get_bits (bufp, word_length, big_p);
+  x = cgen_get_insn_value (cd, bufp, word_length);
 
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;

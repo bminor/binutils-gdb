@@ -1,3 +1,9 @@
+2001-09-30  John Healy  <jhealy@redhat.com>
+
+        * cgen-ibld.in (insert_1): Switched bfd_get_bits and bfd_set_bits
+        calls to cgen_get_insn_value and cgen_put_insn_value calls.
+        (extract_1): Switched bfd_get_bits call to cgen_get_insn_value call.
+
 2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* Makefile.am: Update dependencies with "make dep-am".
