@@ -1,3 +1,20 @@
+Sun Oct  9 07:44:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/corefile.exp: Add (xfail'd) test for reinit_frame_cache
+	bug involving using inferior_pid to figure out whether to select a
+	frame.
+
+Wed Sep 28 23:12:02 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.exp: Change arg[0..3] to r[26..23] to
+	match the current disassembler output.
+
+Fri Sep 16 11:42:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* gdb.fortran/exprs.exp: Expect VOID instead of void.
+	* gdb.fortran/types.exp: Escape the expected '*'s in Fortran
+	types, expect "int" as type of integer values (for now).
+
 Wed Sep  7 23:33:51 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/commands.exp: New tests for if/while commands.

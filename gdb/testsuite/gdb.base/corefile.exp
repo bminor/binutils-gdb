@@ -52,9 +52,9 @@ if ![file exists $objdir/$subdir/corefile] then {
     catch "system \"cd $objdir/$subdir; ./$binfile\""
     if [file exists $objdir/$subdir/core] then {
 	catch "exec mv $objdir/$subdir/core $objdir/$subdir/corefile"
-    } else if [file exists $objdir/$subdir/core.$binfile] {
+    } elseif [file exists $objdir/$subdir/core.$binfile] {
 	catch "exec mv $objdir/$subdir/core.$binfile $objdir/$subdir/corefile"
-    } else if [file exists $objdir/$subdir/$binfile.core] {
+    } elseif [file exists $objdir/$subdir/$binfile.core] {
 	catch "exec mv $objdir/$subdir/$binfile.core $objdir/$subdir/corefile"
     }
 }
@@ -135,5 +135,16 @@ $prompt $"			{ pass "core-file command" }
 	-re ".*$prompt $"	{ fail "core-file command" }
 	timeout 		{ fail "(timeout) core-file command" }
 }
+
+# test reinit_frame_cache
+
+gdb_load $objdir/$subdir/$binfile
+setup_xfail "*-*-*"
+gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\)"
+
+# another good test of roughly the same thing would be to select a frame,
+# print a local variable in that frame, then do the "file" and
+# (without selecting the frame again explicitly) print the variable
+# again.
 
 gdb_test "core" "No core file now."
