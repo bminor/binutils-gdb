@@ -606,7 +606,8 @@ process_linenos (start, end)
 	  enter_line_range (tmpSubfile, inclTable[ii].begin, 
 			    inclTable[ii].end, start, 0, firstLine);
 
-	  offset = inclTable[ii].end + LINESZ;
+	  if (offset < = inclTable[ii].end)
+	    offset = inclTable[ii].end + LINESZ;
 	}
 
       /* All the include files' line have been processed at this point.  Now,
@@ -3033,7 +3034,7 @@ xcoff_symfile_offsets (objfile, addr)
      parameter and use 0.  rs6000-nat.c will set the correct section
      offsets via objfile_relocate.  */
   for (i = 0; i < objfile->num_sections; ++i)
-    ANOFFSET (section_offsets, i) = 0;
+    ANOFFSET (section_offsets, i) = addr;
 
   return section_offsets;
 }
