@@ -1,3 +1,16 @@
+Fri Nov  6 03:00:39 1992  John Gilmore  (gnu@cygnus.com)
+
+	Fix problems noticed by Allan Steel, <allan@maths.su.oz.au>,
+	when debugging a program with 100 shared libraries.
+
+	* solib.c (solib_map_sections):  Always close the BFD we open.
+	Free all malloc'd storage we allocate, too, including error cases.
+	(struct so_list):  Remove unused so_bfd member.
+	(clear_solib):  Don't bother closing so_bfd.
+
+	* symfile.c (symfile_bfd_open):  Mark newly opened BFD as
+	cacheable.  `So many symbol files, so little file descriptors.'
+	
 Fri Nov  6 00:14:38 1992  John Gilmore  (gnu@cygnus.com)
 
 	* m68k-stub.c:  Remove ansidecl.h and the few uses of it.
