@@ -1625,6 +1625,7 @@ watch_command (arg, from_tty)
   b->val = val;
   b->cond = 0;
   b->cond_string = NULL;
+  b->exp_string = savestring (arg, strlen (arg));
   mention (b);
 }
 
@@ -2143,6 +2144,8 @@ delete_breakpoint (bpt)
     free ((PTR)bpt->cond_string);
   if (bpt->addr_string != NULL)
     free ((PTR)bpt->addr_string);
+  if (bpt->exp_string != NULL)
+    free ((PTR)bpt->exp_string);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
     printf ("breakpoint #%d deleted\n", bpt->number);
@@ -2235,11 +2238,20 @@ breakpoint_re_set_one (bint)
       break;
 
     case bp_watchpoint:
+      innermost_block = NULL;
+      b->exp = parse_expression (b->exp_string);
+      b->exp_valid_block = innermost_block;
+      b->val = evaluate_expression (b->exp);
+      release_value (b->val);
+      if (VALUE_LAZY (b->val))
+	value_fetch_lazy (b->val);
+
       if (b->cond_string != NULL)
 	{
 	  s = b->cond_string;
 	  b->cond = parse_exp_1 (&s, (struct block *)0, 0);
 	}
+      mention (b);
       break;
 
     default:

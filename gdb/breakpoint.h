@@ -1,4 +1,5 @@
-/* Copyright (C) 1992 Free Software Foundation, Inc.
+/* Data structures associated with breakpoints in GDB.
+   Copyright (C) 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -26,78 +27,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Feel free to increase it.  It's just used in a few places to size
    arrays that should be independent of the target architecture.  */
 
-#define	BREAKPOINT_MAX	10
-
-typedef struct bpstat__struct *bpstat;
-
-#ifdef __STDC__		/* Forward declarations for prototypes */
-struct frame_info;
-#endif
-
-extern int
-breakpoint_here_p PARAMS ((CORE_ADDR));
-
-extern void
-until_break_command PARAMS ((char *, int));
-
-extern void
-breakpoint_re_set PARAMS ((void));
-
-extern void
-clear_momentary_breakpoints PARAMS ((void));
-
-/* FIXME:  Prototype uses equivalence of "struct frame_info *" and FRAME */
-extern struct breakpoint *
-set_momentary_breakpoint PARAMS ((struct symtab_and_line,
-				  struct frame_info *,
-				  enum bptype));
-
-extern void
-set_ignore_count PARAMS ((int, int, int));
-
-extern void
-set_default_breakpoint PARAMS ((int, CORE_ADDR, struct symtab *, int));
-
-extern void
-mark_breakpoints_out PARAMS ((void));
-
-extern void
-delete_breakpoint PARAMS ((struct breakpoint *));
-
-extern void
-breakpoint_auto_delete PARAMS ((bpstat));
-
-extern void
-breakpoint_clear_ignore_counts PARAMS ((void));
-
-extern void
-break_command PARAMS ((char *, int));
-
-extern int
-insert_breakpoints PARAMS ((void));
-
-extern int
-remove_breakpoints PARAMS ((void));
-
-/* The following are for displays, which aren't really breakpoints, but
-   here is as good a place as any for them.  */
-
-extern void
-disable_current_display PARAMS ((void));
-
-extern void
-do_displays PARAMS ((void));
-
-extern void
-disable_display PARAMS ((int));
-
-extern void
-clear_displays PARAMS ((void));
-
+#define	BREAKPOINT_MAX	16
 
 /* The follow stuff is an abstract data type "bpstat" ("breakpoint status").
    This provides the ability to determine whether we have stopped at a
    breakpoint, and what we should do about it.  */
+
+typedef struct bpstat *bpstat;
 
 /* Interface:  */
 /* Clear a bpstat so that it says we are not at any breakpoint.
@@ -155,7 +91,7 @@ extern void bpstat_do_actions PARAMS ((bpstat *));
 extern void bpstat_clear_actions PARAMS ((bpstat));
 
 /* Implementation:  */
-struct bpstat__struct
+struct bpstat
 {
   /* Linked list because there can be two breakpoints at the
      same place, and a bpstat reflects the fact that both have been hit.  */
@@ -193,7 +129,7 @@ enum bptype {
   bp_finish,			/* used by finish command */
   bp_watchpoint,		/* Watchpoint */
   bp_longjmp,			/* secret breakpoint to find longjmp() */
-  bp_longjmp_resume,		/* secret breakpoint to escape longjmp() */
+  bp_longjmp_resume		/* secret breakpoint to escape longjmp() */
 };
 
 /* States of enablement of breakpoint. */
@@ -205,7 +141,7 @@ enum enable { disabled, enabled};
 enum bpdisp {
   delete,			/* Delete it */
   disable,			/* Disable it */
-  donttouch,			/* Leave it alone */
+  donttouch			/* Leave it alone */
 };
 
 /* Note that the ->silent field is not currently used by any commands
@@ -266,6 +202,8 @@ struct breakpoint
   /* String form of the breakpoint condition (malloc'd), or NULL if there
      is no condition.  */
   char *cond_string;
+  /* String form of exp (malloc'd), or NULL if none.  */
+  char *exp_string;
 
   /* The expression we are watching, or NULL if not a watchpoint.  */
   struct expression *exp;
@@ -275,5 +213,80 @@ struct breakpoint
   /* Value of the watchpoint the last time we checked it.  */
   value val;
 };
+
+/* Prototypes for breakpoint-related functions.  */
+
+#ifdef __STDC__		/* Forward declarations for prototypes */
+struct frame_info;
+#endif
+
+extern int
+breakpoint_here_p PARAMS ((CORE_ADDR));
+
+extern void
+until_break_command PARAMS ((char *, int));
+
+extern void
+breakpoint_re_set PARAMS ((void));
+
+extern void
+clear_momentary_breakpoints PARAMS ((void));
+
+/* FIXME:  Prototype uses equivalence of "struct frame_info *" and FRAME */
+extern struct breakpoint *
+set_momentary_breakpoint PARAMS ((struct symtab_and_line,
+				  struct frame_info *,
+				  enum bptype));
+
+extern void
+set_ignore_count PARAMS ((int, int, int));
+
+extern void
+set_default_breakpoint PARAMS ((int, CORE_ADDR, struct symtab *, int));
+
+extern void
+mark_breakpoints_out PARAMS ((void));
+
+extern void
+delete_breakpoint PARAMS ((struct breakpoint *));
+
+extern void
+breakpoint_auto_delete PARAMS ((bpstat));
+
+extern void
+breakpoint_clear_ignore_counts PARAMS ((void));
+
+extern void
+break_command PARAMS ((char *, int));
+
+extern int
+insert_breakpoints PARAMS ((void));
+
+extern int
+remove_breakpoints PARAMS ((void));
+
+extern void
+enable_longjmp_breakpoint PARAMS ((void));
+
+extern void
+disable_longjmp_breakpoint PARAMS ((void));
+
+extern void
+set_longjmp_resume_breakpoint PARAMS ((CORE_ADDR, FRAME));
+ 
+/* The following are for displays, which aren't really breakpoints, but
+   here is as good a place as any for them.  */
+
+extern void
+disable_current_display PARAMS ((void));
+
+extern void
+do_displays PARAMS ((void));
+
+extern void
+disable_display PARAMS ((int));
+
+extern void
+clear_displays PARAMS ((void));
 
 #endif /* !defined (BREAKPOINT_H) */

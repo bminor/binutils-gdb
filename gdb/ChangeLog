@@ -1,3 +1,9 @@
+<<<<<<< ChangeLog
+Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* breakpoint.{c,h}: Add exp_string to struct breakpoint and use
+	it in breakpoint_re_set.
+=======
 Sun Mar 28 11:24:37 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c (breakpoint_re_set_one): Fix storage leak.
@@ -19,6 +25,7 @@ Fri Mar 26 15:25:05 1993  John Gilmore  (gnu@cygnus.com)
 	* Makefile.in (TARFILES):  Avoid trailing backslash.
 
 Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+>>>>>>> 1.1087
 
 	* breakpoint.c (watch_command, enable_breakpoint): Fetch lazy values.
 
