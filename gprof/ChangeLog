@@ -1,3 +1,10 @@
+1999-09-29  Mark Kettenis  <kettenis@gnu.org>
+
+        * hertz.h [MACH] (hertz): Remove macro.  The
+        <machine/mach_param.h> include doesn't exist on al Mach based
+        systems, and the definition of hertz breaks compilation of hertz.c
+        anyway.
+
 2000-02-22  Ian Lance Taylor  <ian@zembu.com>
 
 	From Brad Lucier <lucier@math.purdue.edu>:
