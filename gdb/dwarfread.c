@@ -1330,6 +1330,16 @@ DESCRIPTION
 	Given a pointer to a die information structure for the die which
 	starts an enumeration, process all the dies that define the members
 	of the enumeration and return a type pointer for the enumeration.
+
+	Note that the DWARF specification explicitly mandates that enum
+	constants occur in reverse order from the source program order,
+	for "consistency" and because this ordering is easier for many
+	compilers to generate. (Draft 5, sec 3.9.5, Enumeration type
+	Entries)
+
+	Because gdb wants to see the enum members in program source
+	order, we have to ensure that the order gets reversed while
+	we are processing them.
  */
 
 static struct type *
@@ -1406,14 +1416,16 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
 	  nfields++;
 	}
     }
-  /* Now create the vector of fields, and record how big it is.  */
+  /* Now create the vector of fields, and record how big it is. This is where
+     we reverse the order, by pulling the members of the list in reverse order
+     from how they were inserted. */
   TYPE_NFIELDS (type) = nfields;
   TYPE_FIELDS (type) = (struct field *)
     obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
   /* Copy the saved-up fields into the field vector.  */
-  for (n = nfields; list; list = list -> next)
+  for (n = 0; (n < nfields) && (list != NULL); list = list -> next)
     {
-      TYPE_FIELD (type, --n) = list -> field;
+      TYPE_FIELD (type, n++) = list -> field;
     }	
   return (type);
 }

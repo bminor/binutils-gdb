@@ -1,3 +1,9 @@
+Wed Dec  4 21:05:30 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread (enum_type):  Arrange for the order of enumeration
+	members to match the source code order; not the order in the
+	Dwarf information, which is explicitly reverse order.
+
 Wed Dec  4 18:24:39 1991  John Gilmore  (gnu at cygnus.com)
 
 	* main.c (input_from_terminal_p):  Check whether GDB has a
