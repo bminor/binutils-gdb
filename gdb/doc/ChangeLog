@@ -1,3 +1,7 @@
+Fri Jun 11 15:15:55 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (GDBvn.texi): Update atomically.
+
 Wed Jun  9 10:58:16 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdbinv-s.texi (Debug Session): Document exceptionHook.
