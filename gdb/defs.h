@@ -651,7 +651,7 @@ free PARAMS ((void *));					/* 4.10.3.2 */
 
 #endif	/* MALLOC_INCOMPATIBLE */
 
-extern void *
+extern PTR
 qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 	       size_t size,
 	       int (*comp)(const void *, const void *)));
