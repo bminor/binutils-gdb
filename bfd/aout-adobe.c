@@ -1,5 +1,5 @@
 /* BFD back-end for a.out.adobe binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Based on bout.c.
 
@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/adobe.h"
 
 #include "aout/stab_gnu.h"
-#include "libaout.h"		/* BFD a.out internal data structures */
+#include "libaout.h"		/* BFD a.out internal data structures.  */
 
 /* Forward decl.  */
 extern const bfd_target a_out_adobe_vec;
@@ -35,7 +35,13 @@ static const bfd_target *aout_adobe_callback PARAMS ((bfd *));
 
 extern boolean aout_32_slurp_symbol_table PARAMS ((bfd *abfd));
 extern boolean aout_32_write_syms PARAMS ((bfd *));
-static void aout_adobe_write_section PARAMS ((bfd *abfd, sec_ptr sect));
+static void    aout_adobe_write_section PARAMS ((bfd *abfd, sec_ptr sect));
+static const bfd_target * aout_adobe_object_p PARAMS ((bfd *));
+static boolean aout_adobe_mkobject PARAMS ((bfd *));
+static boolean aout_adobe_write_object_contents PARAMS ((bfd *));
+static boolean aout_adobe_set_section_contents PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+static boolean aout_adobe_set_arch_mach PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+static int     aout_adobe_sizeof_headers PARAMS ((bfd *, boolean));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
@@ -142,7 +148,7 @@ aout_adobe_callback (abfd)
   asection *sect;
   struct external_segdesc ext[1];
   char *section_name;
-  char try_again[30];	/* name and number */
+  char try_again[30];	/* Name and number.  */
   char *newname;
   int trynum;
   flagword flags;
@@ -155,13 +161,13 @@ aout_adobe_callback (abfd)
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
 
   /* Suck up the section information from the file, one section at a time.  */
-
   for (;;)
     {
       if (bfd_read ((PTR) ext, 1, sizeof (*ext), abfd) != sizeof (*ext))
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
+
 	  return 0;
 	}
       switch (ext->e_type[0])
@@ -193,10 +199,10 @@ aout_adobe_callback (abfd)
 
       /* First one is called ".text" or whatever; subsequent ones are
 	 ".text1", ".text2", ...  */
-
       bfd_set_error (bfd_error_no_error);
       sect = bfd_make_section (abfd, section_name);
       trynum = 0;
+
       while (!sect)
 	{
 	  if (bfd_get_error () != bfd_error_no_error)
@@ -240,6 +246,9 @@ aout_adobe_callback (abfd)
 	    sect->rel_filepos = N_DRELOFF (*execp);
 	    sect->reloc_count = execp->a_drsize;
 	    break;
+
+	  default:
+	    break;
 	  }
     }
  no_more_sections:
@@ -253,10 +262,11 @@ aout_adobe_callback (abfd)
   return abfd->xvec;
 }
 
-struct bout_data_struct {
-  struct aoutdata a;
-  struct internal_exec e;
-};
+struct bout_data_struct
+  {
+    struct aoutdata a;
+    struct internal_exec e;
+  };
 
 static boolean
 aout_adobe_mkobject (abfd)
@@ -333,26 +343,16 @@ aout_adobe_write_object_contents (abfd)
      afterward.  */
 
   for (sect = abfd->sections; sect; sect = sect->next)
-    {
-      if (sect->flags & SEC_CODE)
-	{
-	  aout_adobe_write_section (abfd, sect);
-	}
-    }
+    if (sect->flags & SEC_CODE)
+      aout_adobe_write_section (abfd, sect);
+
   for (sect = abfd->sections; sect; sect = sect->next)
-    {
-      if (sect->flags & SEC_DATA)
-	{
-	  aout_adobe_write_section (abfd, sect);
-	}
-    }
+    if (sect->flags & SEC_DATA)
+      aout_adobe_write_section (abfd, sect);
+
   for (sect = abfd->sections; sect; sect = sect->next)
-    {
-      if (!(sect->flags & (SEC_CODE | SEC_DATA)))
-	{
-	  aout_adobe_write_section (abfd, sect);
-	}
-    }
+    if (!(sect->flags & (SEC_CODE | SEC_DATA)))
+      aout_adobe_write_section (abfd, sect);
 
   /* Write final `sentinel` section header (with type of 0).  */
   if (bfd_write ((PTR) sentinel, 1, sizeof (*sentinel), abfd)
@@ -374,27 +374,20 @@ aout_adobe_write_object_contents (abfd)
 	return false;
 
       for (sect = abfd->sections; sect; sect = sect->next)
-	{
-	  if (sect->flags & SEC_CODE)
-	    {
-	      if (!aout_32_squirt_out_relocs (abfd, sect))
-		return false;
-	    }
-	}
+	if (sect->flags & SEC_CODE)
+	  if (!aout_32_squirt_out_relocs (abfd, sect))
+	    return false;
 
       if (bfd_seek (abfd, (file_ptr) (N_DRELOFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
 	return false;
 
       for (sect = abfd->sections; sect; sect = sect->next)
-	{
-	  if (sect->flags & SEC_DATA)
-	    {
-	      if (!aout_32_squirt_out_relocs (abfd, sect))
-		return false;
-	    }
-	}
+	if (sect->flags & SEC_DATA)
+	  if (!aout_32_squirt_out_relocs (abfd, sect))
+	    return false;
     }
+
   return true;
 }
 
@@ -422,7 +415,6 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
     {
       /* Assign file offsets to sections.  Text sections are first, and
 	 are contiguous.  Then data sections.  Everything else at the end.  */
-
       section_start = N_TXTOFF (ignore<-->me);
 
       for (sect = abfd->sections; sect; sect = sect->next)
@@ -463,9 +455,8 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
     return false;
 
   if (count != 0)
-    {
-      return (bfd_write ((PTR) location, 1, count, abfd) == count) ? true : false;
-    }
+    return (bfd_write ((PTR) location, 1, count, abfd) == count) ? true : false;
+
   return true;
 }
 
@@ -520,44 +511,45 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 #define aout_32_bfd_final_link		_bfd_generic_final_link
 #define aout_32_bfd_link_split_section	_bfd_generic_link_split_section
 
-const bfd_target a_out_adobe_vec = {
-  "a.out.adobe",		/* name */
-  bfd_target_aout_flavour,
-  BFD_ENDIAN_BIG,		/* data byte order is unknown (big assumed) */
-  BFD_ENDIAN_BIG,		/* hdr byte order is big */
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
-  /* section flags */
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_DATA | SEC_RELOC),
-  '_',				/*  symbol leading char */
-  ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
+const bfd_target a_out_adobe_vec =
+  {
+    "a.out.adobe",		/* name */
+    bfd_target_aout_flavour,
+    BFD_ENDIAN_BIG,		/* data byte order is unknown (big assumed) */
+    BFD_ENDIAN_BIG,		/* hdr byte order is big */
+    (HAS_RELOC | EXEC_P |	/* object flags */
+     HAS_LINENO | HAS_DEBUG |
+     HAS_SYMS | HAS_LOCALS | WP_TEXT ),
+    /* section flags */
+    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_DATA | SEC_RELOC),
+    '_',				/*  symbol leading char */
+    ' ',				/* ar_pad_char */
+    16,					/* ar_max_namelen */
 
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
-  {_bfd_dummy_target, aout_adobe_object_p,	/* bfd_check_format */
-   bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, aout_adobe_mkobject,	/* bfd_set_format */
-   _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, aout_adobe_write_object_contents,	/* bfd_write_contents */
-   _bfd_write_archive_contents, bfd_false},
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
+    {_bfd_dummy_target, aout_adobe_object_p,	/* bfd_check_format */
+     bfd_generic_archive_p, _bfd_dummy_target},
+    {bfd_false, aout_adobe_mkobject,		/* bfd_set_format */
+     _bfd_generic_mkarchive, bfd_false},
+    {bfd_false, aout_adobe_write_object_contents,/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
 
-  BFD_JUMP_TABLE_GENERIC (aout_32),
-  BFD_JUMP_TABLE_COPY (_bfd_generic),
-  BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
-  BFD_JUMP_TABLE_SYMBOLS (aout_32),
-  BFD_JUMP_TABLE_RELOCS (aout_32),
-  BFD_JUMP_TABLE_WRITE (aout_32),
-  BFD_JUMP_TABLE_LINK (aout_32),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    BFD_JUMP_TABLE_GENERIC (aout_32),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (_bfd_nocore),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+    BFD_JUMP_TABLE_SYMBOLS (aout_32),
+    BFD_JUMP_TABLE_RELOCS (aout_32),
+    BFD_JUMP_TABLE_WRITE (aout_32),
+    BFD_JUMP_TABLE_LINK (aout_32),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  NULL,
+    NULL,
 
-  (PTR) 0
-};
+    (PTR) 0
+  };

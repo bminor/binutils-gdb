@@ -1,7 +1,15 @@
+2001-08-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* aout-tic30.c: Add missing prototypes.  Fix formatting.
+	* aout-ns32k.c: Add missing prototypes.  Fix formatting.
+	* peXXigen.c: Add missining prototypes.  Fix formatting.
+	* aout-adobe.c: Add missining prototypes.  Fix formatting.
+
 2001-08-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-v850.c: Add missing function prototypes.
 	Fix some formatting.
+
 	* cpu-v850.c: Add missing function prototype.
 	Fix some formatting.
 

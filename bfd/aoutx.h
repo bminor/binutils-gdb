@@ -139,6 +139,7 @@ static boolean translate_to_native_sym_flags
 static void adjust_o_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_z_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_n_magic PARAMS ((bfd *, struct internal_exec *));
+reloc_howto_type * NAME(aout,reloc_type_lookup) PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 /*
 SUBSECTION
@@ -2553,7 +2554,7 @@ NAME(aout,get_symtab_upper_bound) (abfd)
   return (bfd_get_symcount (abfd)+1) * (sizeof (aout_symbol_type *));
 }
 
- alent *
+alent *
 NAME(aout,get_lineno) (ignore_abfd, ignore_symbol)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *ignore_symbol ATTRIBUTE_UNUSED;
