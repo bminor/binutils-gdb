@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # As a special exception to the GNU General Public License, if you
 # distribute this file as part of a program that contains a
@@ -154,6 +154,9 @@ case $basic_machine in
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
+	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith
+		basic_machine=$basic_machine-unknown
+		;;
 	# Object if more than one company name word.
 	*-*-*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
@@ -170,6 +173,8 @@ case $basic_machine in
 	      | mips64el-* | mips64orion-* | mips64orionel-*)
 		;;
 	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-*) # CYGNUS LOCAL
+		;;
+	mips64vr4300-* | mips64vr4300el-*) # CYGNUS LOCAL jsmith
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -225,7 +230,7 @@ case $basic_machine in
 		os=-bsd
 		;;
 	arm | armel | armeb)
-		basic_machine = arm-arm
+		basic_machine=arm-arm
 		os=-aout
 		;;
 # start-sanitize-arc
@@ -427,6 +432,13 @@ case $basic_machine in
 		basic_machine=m68k-isi
 		os=-sysv
 		;;
+# start-sanitize-jaguar
+	jaguar)
+		basic_machine=jaguar-unknown
+		;;
+	jaguar-*)
+		;;
+# end-sanitize-jaguar
 	m88k-omron*)
 		basic_machine=m88k-omron
 		;;
@@ -716,7 +728,7 @@ case $basic_machine in
         xps | xps100)
 		basic_machine=xps100-honeywell
 		;;
-	z8ksim)						# CYGNUS LOCAL
+	z8k-*-coff)					# CYGNUS LOCAL
 		basic_machine=z8k-unknown
 		os=-sim
 		;;
@@ -766,11 +778,11 @@ case $basic_machine in
 	orion105)
 		basic_machine=clipper-highlevel
 		;;
-	mac)						# CYGNUS LOCAL
+	mac | mpw | mac-mpw)				# CYGNUS LOCAL
 		basic_machine=m68k-apple
 		;;
-	mpw)						# CYGNUS LOCAL
-		basic_machine=m68k-apple
+	pmac | pmac-mpw)				# CYGNUS LOCAL
+		basic_machine=powerpc-apple
 		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
@@ -812,7 +824,7 @@ case $os in
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
 	# -sysv* is not here because it comes later, after sysvr4.
-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
+	-gnu* | -bsd* | -mach* | -lites* | -minix* | -genix* | -ultrix* | -irix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[345]* \
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigados* | -msdos* | -moss* | -newsos* | -unicos* | -aos* \
@@ -820,22 +832,16 @@ case $os in
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -freebsd* | -riscix*  | -lites* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
-	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta | -udi | -eabi)
+	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta | -udi \
+	      | -eabi* | -ieee*)
 		;;
 	# CYGNUS LOCAL
 	-go32 | -sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
-	      | -windows* | -osx | -abug |  -netware* | -proelf | -os9*)
-		;;
-	-macos*)					# CYGNUS LOCAL
+	      | -windows* | -osx | -abug |  -netware* | -proelf | -os9* \
+	      | -macos* | -mpw* | -magic* | -pe* | -win32)
 		;;
 	-mac*)						# CYGNUS LOCAL
 		os=`echo $os | sed -e 's|mac|macos|'`
-		;;
-	-mpw*)						# CYGNUS LOCAL
-		;;
-	-pe*)
-		;;
-	-win32)
 		;;
 	-sunos5*)
 		os=`echo $os | sed -e 's|sunos5|solaris2|'`
@@ -1029,7 +1035,7 @@ case $basic_machine in
 		os=-coff
 		;;
 	*-apple)					# CYGNUS LOCAL
-		os=-macos7
+		os=-macos
 		;;
 	*)
 		os=-none

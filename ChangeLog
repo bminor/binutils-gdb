@@ -1,3 +1,7 @@
+Wed Dec 13 16:43:51 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Accept *-*-ieee*.
+
 Tue Dec 12 11:52:57 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (local-distclean): Remove $(TARGET_SUBDIR).  From
