@@ -1641,6 +1641,8 @@ DEFUN(coff_write_object_contents,(abfd),
     architectures.
     */
 
+  memset (&internal_a, 0, sizeof internal_a);
+
   /* Set up architecture-dependent stuff */
 
 { unsigned int   magic = 0;
@@ -1844,59 +1846,65 @@ SUBSUBSECTION
 
 static boolean
 coff_slurp_line_table(abfd, asect)
-bfd            *abfd;
-asection       *asect;
-  {
-    LINENO  *native_lineno;
-    alent          *lineno_cache;
+     bfd *abfd;
+     asection *asect;
+{
+  LINENO  *native_lineno;
+  alent *lineno_cache;
 
-    BFD_ASSERT(asect->lineno == (alent *) NULL);
+  BFD_ASSERT(asect->lineno == (alent *) NULL);
 
-    native_lineno = (LINENO *) buy_and_read(abfd,
-					    asect->line_filepos,
-					    SEEK_SET,
-					    (size_t) (LINESZ *
-						      asect->lineno_count));
-    lineno_cache =
-      (alent *) bfd_alloc(abfd, (size_t) ((asect->lineno_count + 1) * sizeof(alent)));
-    if (lineno_cache == NULL) {
+  native_lineno = (LINENO *) buy_and_read(abfd,
+					  asect->line_filepos,
+					  SEEK_SET,
+					  (size_t) (LINESZ *
+						    asect->lineno_count));
+  lineno_cache =
+    (alent *) bfd_alloc(abfd, (size_t) ((asect->lineno_count + 1) * sizeof(alent)));
+  if (lineno_cache == NULL)
+    {
       bfd_error = no_memory;
       return false;
-    } else {
+    }
+  else
+    {
       unsigned int    counter = 0;
       alent          *cache_ptr = lineno_cache;
       LINENO  *src = native_lineno;
 
-      while (counter < asect->lineno_count) {
-	struct internal_lineno dst;
-	coff_swap_lineno_in(abfd, src, &dst);
-	cache_ptr->line_number = dst.l_lnno;
+      while (counter < asect->lineno_count)
+	{
+	  struct internal_lineno dst;
+	  coff_swap_lineno_in(abfd, src, &dst);
+	  cache_ptr->line_number = dst.l_lnno;
 
-	if (cache_ptr->line_number == 0) {
-	  coff_symbol_type *sym =
-	    (coff_symbol_type *) (dst.l_addr.l_symndx
-				  + obj_raw_syments(abfd))->u.syment._n._n_n._n_zeroes;
-	  cache_ptr->u.sym = (asymbol *) sym;
-	  sym->lineno = cache_ptr;
+	  if (cache_ptr->line_number == 0)
+	    {
+	      coff_symbol_type *sym =
+		(coff_symbol_type *) (dst.l_addr.l_symndx
+				      + obj_raw_syments(abfd))->u.syment._n._n_n._n_zeroes;
+	      cache_ptr->u.sym = (asymbol *) sym;
+	      sym->lineno = cache_ptr;
+	    }
+	  else
+	    {
+	      cache_ptr->u.offset = dst.l_addr.l_paddr
+		- bfd_section_vma(abfd, asect);
+	    } /* If no linenumber expect a symbol index */
+
+	  cache_ptr++;
+	  src++;
+	  counter++;
 	}
-	else {
-	  cache_ptr->u.offset = dst.l_addr.l_paddr
-	    - bfd_section_vma(abfd, asect);
-	}				/* If no linenumber expect a symbol index */
-
-	cache_ptr++;
-	src++;
-	counter++;
-      }
       cache_ptr->line_number = 0;
 
     }
-    asect->lineno = lineno_cache;
-    /* FIXME, free native_lineno here, or use alloca or something. */
-    return true;
-  }				/* coff_slurp_line_table() */
+  asect->lineno = lineno_cache;
+  /* FIXME, free native_lineno here, or use alloca or something. */
+  return true;
+}
 
-static          boolean
+static boolean
 DEFUN(coff_slurp_symbol_table,(abfd),
       bfd            *abfd)
 {
@@ -2380,5 +2388,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
 #define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define coff_bfd_relax_section		bfd_generic_relax_section
 #define coff_bfd_seclet_link		bfd_generic_seclet_link
+#ifndef coff_bfd_reloc_type_lookup
 #define coff_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#endif
