@@ -1,3 +1,8 @@
+Tue Feb 24 01:42:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-engine.c (print_run_body): Always wrap generated idecode
+ 	body in ENGINE_ISSUE_PREFIX_HOOK / ENGINE_ISSUE_POSTFIX_HOOK.
+
 Fri Feb 20 16:22:10 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ld-insn.c (parse_function_record): When -Wnodiscard, suppress
