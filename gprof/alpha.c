@@ -43,14 +43,14 @@ typedef union
     a;				/* any format */
     struct
       {
-	signed disp:21;
+	int disp:21;
 	unsigned ra:5;
 	unsigned op_code:6;
       }
     b;				/* branch format */
     struct
       {
-	signed hint:14;
+	int hint:14;
 	unsigned func:2;
 	unsigned rb:5;
 	unsigned ra:5;
