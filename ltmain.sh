@@ -743,6 +743,11 @@ if test -z "$show_help"; then
             if test "$hardcode_direct" = no; then
               compile_command="$compile_command $dir/$linklib"
             elif test "$hardcode_minus_L" = no; then
+	      case "$host" in
+	      *-*-sunos*)
+                compile_shlibpath="$compile_shlibpath$dir:"
+		;;
+	      esac
               compile_command="$compile_command -L$dir -l$name"
             elif test "$hardcode_shlibpath_var" = no; then
               compile_shlibpath="$compile_shlibpath$dir:"
@@ -1055,8 +1060,8 @@ if test -z "$show_help"; then
 	  major=
 	  versuffix=
 	  verstring="0.0"
-	  case "$version_type" in
-	  sunos)
+	  case "$host" in
+	  *-*-sunos*)
 	    versuffix=".0.0"
 	    ;;
 	  esac
@@ -1757,7 +1762,7 @@ libdir='$install_libdir'\
 
     # There may be an optional sh(1) argument at the beginning of
     # install_prog (especially on Windows NT).
-    if test "$nonopt" = "$SHELL"; then
+    if test "$nonopt" = "$SHELL" || test "$nonopt" = "/bin/sh"; then
       # Aesthetically quote it.
       arg=`$echo "X$nonopt" | $Xsed -e "$sed_quote_subst"`
       case "$arg" in
