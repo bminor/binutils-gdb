@@ -1,5 +1,14 @@
 Fri Feb 18 14:16:32 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* configure.in (i386-*-mach3*): New target; uses BFD.
+	* config/te-mach.h: New file.
+	* config/obj-aout.c (obj_aout_frob_file): New function.
+	* config/obj-aout.h (obj_aout_frob_file): Declare it.
+	(frob_file): New macro.
+	* config/tc-i386.c (md_apply_fix_1) [TE_Mach]: Don't adjust
+	pcrel32 relocations.
+	* config/tc-i386.h (TARGET_FORMAT) [TE_Mach]: Use a.out-mach3.
+
 	* write.c (write_object_file): Removed register declarations.
 
 Thu Feb 17 16:25:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
