@@ -1,3 +1,57 @@
+Thu Mar 18 14:12:37 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* mips-dis.c, z8k-dis.c:  Converted to use interface defined in
+	../include/dis-asm.h.
+	* m68k-dis.c:  New file (merge of ../binutils/m68k-pinsn.c
+	and ../gdb/m68k-pinsn.c).
+	* i386-dis.c:  New file (merge of ../binutils/i386-pinsn.c
+	and ../gdb/i386-pinsn.c).
+	* m68881-ext.c:  New file.  Moved definition of
+	ext_format ext_format_68881 from ../gdb/m68k-tdep.c.
+	* Makefile.in:  Adjust for new files.
+	* i386-dis.c:  Patches from John Hassey (hassey@dg-rtp.dg.com).
+	* m68k-dis.c:  Recognize '9' placement code, so (say) pflush
+	can be dis-assembled.
+
+Wed Feb 17 09:19:47 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* mips-dis.c (print_insn_arg): Now returns void.
+
+Mon Jan 11 16:09:16 1993  Fred Fish  (fnf@cygnus.com)
+
+	* mips-dis.c (ansidecl.h):  Include for benefit of sysdep.h
+	files that use the macros.
+
+Thu Jan  7 13:15:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-dis.c: New file, from gdb/mips-pinsn.c.
+	* Makefile.in (DIS_LIBS): Added mips-dis.o.
+	(CFILES): Added mips-dis.c.
+
+Thu Jan  7 07:36:33 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+    	* z8k-dis.c (print_insn_z8001, print_insn_z8002): new routines
+	* z8kgen.c, z8k-opc.h: fix sizes of some shifts.
+
+Tue Dec 22 15:42:44 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Improve *clean rules.
+	* configure.in:  Allow a default host.
+
+Tue Nov 17 19:53:54 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: also use -I$(srcdir)/../bfd, since some sysdep
+	files include other sysdep files
+
+Thu Nov 12 16:10:37 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* z8k-dis.c z8k-opc.h z8kgen.c: checkpoint
+
+Fri Oct  9 04:56:05 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in:  For host support, use ../bfd/configure.host
+	so it stays in sync with the ../bfd/hosts database.
+
 Thu Oct  1 23:38:54 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: use cpu-vendor-os triple instead of nested cases
