@@ -1,5 +1,5 @@
-# Intel 386 running System V release 2
-# Copyright (C) 1990 Free Software Foundation, Inc.
+# Intel 386 running System V release 3.2
+# Copyright (C) 1991 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 

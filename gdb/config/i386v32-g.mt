@@ -1,4 +1,4 @@
-# Intel 386 running System V release 2, using COFF encapsulation
+# Intel 386 running System V release 3.2, using COFF encapsulation
 # Copyright (C) 1990-1991 Free Software Foundation, Inc.
 
 # This file is part of GDB.
