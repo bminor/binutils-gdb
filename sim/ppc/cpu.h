@@ -38,8 +38,10 @@
 #include "itable.h"
 #include "mon.h"
 #include "model.h"
-#include "function_unit.h"
 
+#ifndef CONST_ATTRIBUTE
+#define CONST_ATTRIBUTE __attribute__((__const__))
+#endif
 
 /* typedef struct _cpu cpu;
 
@@ -62,13 +64,13 @@ INLINE_CPU void cpu_init
 /* Find our way home */
 
 INLINE_CPU psim *cpu_system
-(cpu *processor);
+(cpu *processor) CONST_ATTRIBUTE;
 
 INLINE_CPU cpu_mon *cpu_monitor
-(cpu *processor);
+(cpu *processor) CONST_ATTRIBUTE;
 
 INLINE_CPU int cpu_nr
-(cpu *processor);
+(cpu *processor) CONST_ATTRIBUTE;
 
 INLINE_CPU event_queue *cpu_event_queue
 (cpu *processor);
@@ -173,16 +175,13 @@ INLINE_CPU void cpu_print_info
    below to when ever a synchronization point is reached */
 
 INLINE_CPU registers *cpu_registers
-(cpu *processor);
+(cpu *processor) CONST_ATTRIBUTE;
 
 INLINE_CPU void cpu_synchronize_context
 (cpu *processor);
 
-INLINE_CPU function_unit *cpu_function_unit
-(cpu *processor);
-
 INLINE_CPU model_data *cpu_model
-(cpu *processor);
+(cpu *processor) CONST_ATTRIBUTE;
 
 #define IS_PROBLEM_STATE(PROCESSOR) \
 (CURRENT_ENVIRONMENT == OPERATING_ENVIRONMENT \

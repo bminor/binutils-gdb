@@ -262,43 +262,6 @@ extern int current_floating_point;
 					 | MONITOR_INSTRUCTION_ISSUE)
 #endif
 
-
-/* Include code that simulates function units to model particular
-   machines more closely and provide more detailed information about
-   optimization potential.  */
-
-#ifndef WITH_FUNCTION_UNIT
-#define	WITH_FUNCTION_UNIT		1
-#endif
-
-/* Which specific processor to model */
-typedef enum _ppc_model {
-  PPC_MODEL_UNKNOWN,
-  PPC_MODEL_601,
-  PPC_MODEL_602,
-  PPC_MODEL_603,
-  PPC_MODEL_603e,
-  PPC_MODEL_604,
-  PPC_MODEL_403,
-  PPC_MODEL_505,
-  PPC_MODEL_821,
-  PPC_MODEL_860
-} ppc_model;
-
-#ifndef WITH_DEFAULT_PPC_MODEL
-#define	WITH_DEFAULT_PPC_MODEL PPC_MODEL_603e
-#endif
-
-extern ppc_model current_ppc_model;
-
-#ifndef WITH_PPC_MODEL
-#define	WITH_PPC_MODEL			0
-#endif
-
-#define CURRENT_PPC_MODEL (WITH_PPC_MODEL	\
-			   ? WITH_PPC_MODEL	\
-			   : current_ppc_model)
-
 /* Current CPU model (models are in the generated models.h include file)  */
 #ifndef WITH_MODEL
 #define WITH_MODEL			0
@@ -310,6 +273,10 @@ extern ppc_model current_ppc_model;
 
 #ifndef WITH_DEFAULT_MODEL
 #define WITH_DEFAULT_MODEL		DEFAULT_MODEL
+#endif
+
+#ifndef WITH_MODEL_ISSUE
+#define WITH_MODEL_ISSUE		1
 #endif
 
 /* INLINE CODE SELECTION:
@@ -357,8 +324,7 @@ extern ppc_model current_ppc_model;
 #if defined(__GNUC__) && defined(__OPTIMIZE__) && \
   (DEFAULT_INLINE || SIM_ENDIAN_INLINE || BITS_INLINE || CPU_INLINE || VM_INLINE || CORE_INLINE \
    || EVENTS_INLINE || MON_INLINE || INTERRUPTS_INLINE || REGISTERS_INLINE || DEVICE_TREE_INLINE \
-   || DEVICES_INLINE || SPREG_INLINE || SEMANTICS_INLINE || IDECODE_INLINE || MODEL_INLINE \
-   || FUNCTION_UNIT_INLINE)
+   || DEVICES_INLINE || SPREG_INLINE || SEMANTICS_INLINE || IDECODE_INLINE || MODEL_INLINE)
 #define INLINE __inline__
 #else
 #define INLINE /*inline*/
@@ -488,16 +454,13 @@ extern ppc_model current_ppc_model;
 #define IDECODE_INLINE			DEFAULT_INLINE
 #endif
 
-/* Model specific code used in simulating functional units */
+/* Model specific code used in simulating functional units.  Note, it actaully
+   pays NOT to inline the PowerPC model functions (at least on the x86).  This
+   is because if it is inlined, each PowerPC instruction gets a separate copy
+   of the code, which is not friendly to the cache.  */
 
 #ifndef MODEL_INLINE
-#define	MODEL_INLINE			DEFAULT_INLINE
-#endif
-
-/* Code to simulate functional units of real machines */
-
-#ifndef FUNCTION_UNIT_INLINE
-#define FUNCTION_UNIT_INLINE		DEFAULT_INLINE
+#define	MODEL_INLINE			(DEFAULT_INLINE ? 1 : 0)
 #endif
 
 /* Code to print out what options we were compiled with.  Because this

@@ -1,3 +1,23 @@
+Mon Nov 27 17:46:33 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* mon.c: Check for whether to include sys/types.h and sys/time.h.
+
+	* configure.in: Check for include files sys/types.h and
+	sys/time.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* cpu.h (CONST_ATTRIBUTE): Define as __attribute__((__const__)) if
+	not already defined.
+	(cpu_system): Use CONST_ATTRIBUTE, so that when we're not inlining
+	the world, the optimizer has a fair chance of CSE'ing function
+	calls.
+	(cpu_{monitor,nr,registers,model}): Ditto.
+
+	* std-config.h (MODEL_INLINE): If not defined, define as 1 if
+	DEFAULT_INLINE is non-zero, 0 otherwise, rather than just the
+	value of DEFAULT_INLINE.
+
 Fri Nov 24 11:24:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* lf.h (__attribute__): If not GCC and at least 2.7.0, define as

@@ -414,7 +414,7 @@ else
 fi
 AC_SUBST(CC_FOR_BUILD)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h time.h sys/times.h unistd.h sys/resource.h)
+AC_CHECK_HEADERS(string.h strings.h stdlib.h time.h sys/types.h sys/time.h sys/times.h unistd.h sys/resource.h)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

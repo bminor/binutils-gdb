@@ -1319,7 +1319,7 @@ else
 fi
 echo "$ac_t""$CPP" 1>&6
 
-for ac_hdr in string.h strings.h stdlib.h time.h sys/times.h unistd.h sys/resource.h
+for ac_hdr in string.h strings.h stdlib.h time.h sys/types.h sys/time.h sys/times.h unistd.h sys/resource.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
