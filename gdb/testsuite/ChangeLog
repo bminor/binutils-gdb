@@ -1,3 +1,15 @@
+Wed Feb 24 08:03:38 1993  Fred Fish  (fnf@cygnus.com)
+
+	**** start-sanitize-chill ****
+	* gdb.t31/chillvars.exp (test_structs):  New proc to test printing
+	of Chill STRUCT types and STRUCT values.
+	* gdb.t31/chillvars.exp (test_strings):  Expect "CHAR" now, rather
+	than "char".
+	* gdb.t31/in-gdbme.ch (simple_struct, nested_struct, struct1,
+	struct2):  New struct definitions and initializations to test 
+	simple Chill STRUCT types.
+	**** end-sanitize-chill ****
+
 Tue Feb 23 11:55:06 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t00/teststrategy.exp:  Track reversion in gdb to not print
