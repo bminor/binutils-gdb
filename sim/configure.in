@@ -67,6 +67,9 @@ case "${target}" in
 	sim_target=mn10300
 	only_if_gcc=yes
 	;;
+  mn10200*-*-*)
+	sim_target=mn10200
+	;;
   sh*-*-*)		sim_target=sh ;;
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* | powerpc*-*-linux* )
 	# The PowerPC simulator uses the GCC extension long long as well as
