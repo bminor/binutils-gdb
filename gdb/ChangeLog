@@ -1,3 +1,9 @@
+Mon Jun  7 20:07:30 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (depend):  More sed gubbish to deal with
+	../bfd/bfd.h being generated during the build.
+	* depend:  Re-done with corrected makefile.
+
 Mon Jun  7 16:32:05 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (BFD_SRC_DIR):  Renamed def and usages from BFD_DIR.
