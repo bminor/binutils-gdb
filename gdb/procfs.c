@@ -2039,8 +2039,18 @@ child_resume (step, signo)
      int signo;
 {
   errno = 0;
-  pi.prrun.pr_flags = PRSVADDR | PRSTRACE | PRSFAULT | PRCFAULT;
+  pi.prrun.pr_flags = PRSTRACE | PRSFAULT | PRCFAULT;
+
+#if !defined(sun) && !defined(sparc)
+/* Can't do this under Solaris running on a Sparc, as there seems to be no
+   place to put nPC.  In fact, if you use this, nPC seems to be set to some
+   random garbage.  We have to rely on the fact that PC and nPC have been
+   written previously via PIOCSREG during a register flush. */
+
   pi.prrun.pr_vaddr = (caddr_t) *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
+  pi.prrun.pr_flags != PRSVADDR;
+#endif
+
   if (signo && !(signo == SIGSTOP && pi.nopass_next_sigstop))
     {
       set_proc_siginfo (&pi, signo);
