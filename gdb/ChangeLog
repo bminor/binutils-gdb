@@ -1,5 +1,12 @@
 2000-12-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* sh-tdep.c (sh_generic_show_regs, sh3_show_regs, sh3e_show_regs,
+ 	sh3_dsp_show_regs, sh4_show_regs, sh_dsp_show_regs): SR_REGNUM is
+ 	now part of gdbarch_tdep structure.
+	(sh_gdbarch_init): Initialize SR_REGNUM.
+
+	* config/sh/tm-sh.h (struct gdbarch_tdep): Add field SR_REGNUM.
+
 	* sh-tdep.c (sh_do_pseudo_register): Indent properly. Call
  	do_dr_register_info() only for DR registers.
 	(sh_sh4_register_name): Add comments with numbers.

@@ -27,6 +27,7 @@ struct gdbarch_tdep
   {
     int FPUL_REGNUM;  /*                       sh3e, sh4 */
     int FPSCR_REGNUM; /*                       sh3e, sh4 */
+    int SR_REGNUM;    /* sh-dsp, sh3, sh3-dsp, sh3e, sh4 */
     int DSR_REGNUM;   /* sh-dsp,      sh3-dsp            */
     int FP_LAST_REGNUM; /*                     sh3e, sh4 */
     int A0G_REGNUM;   /* sh-dsp,      sh3-dsp            */
@@ -61,8 +62,7 @@ enum
     GBR_REGNUM = 18,
     VBR_REGNUM = 19,
     MACH_REGNUM = 20,
-    MACL_REGNUM = 21,
-    SR_REGNUM = 22
+    MACL_REGNUM = 21
   };
 
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting

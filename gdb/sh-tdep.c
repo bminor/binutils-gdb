@@ -1096,7 +1096,7 @@ sh_generic_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
-		   (long) read_register (SR_REGNUM),
+		   (long) read_register (gdbarch_tdep (current_gdbarch)->SR_REGNUM),
 		   (long) read_register (PR_REGNUM),
 		   (long) read_register (MACH_REGNUM),
 		   (long) read_register (MACL_REGNUM));
@@ -1130,7 +1130,7 @@ sh3_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
-		   (long) read_register (SR_REGNUM),
+		   (long) read_register (gdbarch_tdep (current_gdbarch)->SR_REGNUM),
 		   (long) read_register (PR_REGNUM),
 		   (long) read_register (MACH_REGNUM),
 		   (long) read_register (MACL_REGNUM));
@@ -1168,7 +1168,7 @@ sh3e_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
-		   (long) read_register (SR_REGNUM),
+		   (long) read_register (gdbarch_tdep (current_gdbarch)->SR_REGNUM),
 		   (long) read_register (PR_REGNUM),
 		   (long) read_register (MACH_REGNUM),
 		   (long) read_register (MACL_REGNUM));
@@ -1227,7 +1227,7 @@ sh3_dsp_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
-		   (long) read_register (SR_REGNUM),
+		   (long) read_register (gdbarch_tdep (current_gdbarch)->SR_REGNUM),
 		   (long) read_register (PR_REGNUM),
 		   (long) read_register (MACH_REGNUM),
 		   (long) read_register (MACL_REGNUM));
@@ -1285,7 +1285,7 @@ sh4_show_regs (void)
   int pr = read_register (gdbarch_tdep (current_gdbarch)->FPSCR_REGNUM) & 0x80000;
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
-		   (long) read_register (SR_REGNUM),
+		   (long) read_register (gdbarch_tdep (current_gdbarch)->SR_REGNUM),
 		   (long) read_register (PR_REGNUM),
 		   (long) read_register (MACH_REGNUM),
 		   (long) read_register (MACL_REGNUM));
@@ -1348,7 +1348,7 @@ sh_dsp_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
-		   (long) read_register (SR_REGNUM),
+		   (long) read_register (gdbarch_tdep (current_gdbarch)->SR_REGNUM),
 		   (long) read_register (PR_REGNUM),
 		   (long) read_register (MACH_REGNUM),
 		   (long) read_register (MACL_REGNUM));
@@ -1881,6 +1881,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      statement below. */
   tdep->FPUL_REGNUM = -1;
   tdep->FPSCR_REGNUM = -1;
+  tdep->SR_REGNUM = 22;
   tdep->DSR_REGNUM = -1;
   tdep->FP_LAST_REGNUM = -1;
   tdep->A0G_REGNUM = -1;
