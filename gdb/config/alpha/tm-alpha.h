@@ -31,21 +31,12 @@
 #include "coff/symconst.h"
 
 struct frame_info;
-struct type;
-struct value;
 struct symbol;
 
 /* Number of traps that happen between exec'ing the shell
    to run an inferior, and when we finally get to
    the inferior code.  This is 2 on most implementations.  */
 #define START_INFERIOR_TRAPS_EXPECTED 3
-
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#define FUNCTION_START_OFFSET 0
-
-#define BREAKPOINT {0x80, 0, 0, 0}	/* call_pal bpt */
 
 /* Special symbol found in blocks associated with routines.  We can hang
    alpha_extra_func_info_t's off of this.  */

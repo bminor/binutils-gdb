@@ -1,5 +1,16 @@
 2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.c (alpha_breakpoint_from_pc): New function.
+	(alpha_gdbarch_init): Set gdbarch_breakpoint_from_pc to
+	alpha_breakpoint_from_pc.  Set gdbarch_function_start_offset
+	to 0.
+	* config/alpha/tm-alpha.h: Remove forward decls of struct type
+	and struct value.
+	(FUNCTION_START_OFFSET): Remove.
+	(BREAKPOINT): Ditto.
+
+2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* MAINTAINERS: Reflect that multi-arch is enabled for VAX.
 	* NEWS: Ditto.
 

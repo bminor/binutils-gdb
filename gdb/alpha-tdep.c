@@ -59,6 +59,8 @@ static gdbarch_extract_struct_value_address_ftype
     alpha_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype alpha_use_struct_convention;
 
+static gdbarch_breakpoint_from_pc_ftype alpha_breakpoint_from_pc;
+
 static gdbarch_frame_args_address_ftype alpha_frame_args_address;
 static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 
@@ -1496,6 +1498,16 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
     error ("Cannot store value in floating point register");
 }
 
+static const unsigned char *
+alpha_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+{
+  static const unsigned char alpha_breakpoint[] =
+    { 0x80, 0, 0, 0 };	/* call_pal bpt */
+
+  *lenptr = sizeof(alpha_breakpoint);
+  return (alpha_breakpoint);
+}
+
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */
 
@@ -2061,7 +2073,10 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_coerce_float_to_double (gdbarch,
                                       standard_coerce_float_to_double);
 
+  set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
+
+  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
