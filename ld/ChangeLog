@@ -1,3 +1,9 @@
+2001-03-07  Michael Meissner  <meissner@redhat.com>
+
+	* scripttempl/elfd10v.sc (.rodata,.rodata1,.data1,.sdata): Deal
+	with sections created by -fdata-sections.
+	(.dynbss,.bss): Ditto.
+
 2001-03-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/m68kelf.em (m68k_elf_after_allocation): Call

@@ -77,7 +77,9 @@ SECTIONS
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     KEEP (*(.init))
+    KEEP (*(.init.*))
     KEEP (*(.fini))
+    KEEP (*(.fini.*))
     *(.text)
     *(.text.*)
     /* .gnu.warning sections are handled specially by elf32.em.  */
@@ -88,9 +90,15 @@ SECTIONS
   } ${RELOCATING+ >INSN} =${NOP-0}
 
   .rodata  ${RELOCATING-0} : {
-    *(.rodata) *(.gnu.linkonce.r*)
+    *(.rodata)
+    *(.gnu.linkonce.r*)
+    *(.rodata.*)
   } ${RELOCATING+ >DATA}
-  .rodata1 ${RELOCATING-0} : { *(.rodata1) } ${RELOCATING+ >DATA}
+
+  .rodata1 ${RELOCATING-0} : {
+    *(.rodata1)
+    *(.rodata1.*)
+   } ${RELOCATING+ >DATA}
 
   .data  ${RELOCATING-0} :
   {
@@ -107,7 +115,11 @@ SECTIONS
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata   ${RELOCATING-0} : { *(.sdata) } ${RELOCATING+ >DATA}
+  .sdata   ${RELOCATING-0} : {
+    *(.sdata)
+    *(.sdata.*)
+  } ${RELOCATING+ >DATA}
+
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
@@ -115,9 +127,12 @@ SECTIONS
   .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
+   *(.dynbss.*)
    *(.bss)
+   *(.bss.*)
    *(COMMON)
   } ${RELOCATING+ >DATA}
+
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
 
