@@ -1096,7 +1096,7 @@ remove_breakpoints ()
 }
 
 int
-remove_hw_watchpoints ()
+remove_hw_watchpoints (void)
 {
   register struct breakpoint *b;
   int val;

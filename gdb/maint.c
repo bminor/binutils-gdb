@@ -425,10 +425,12 @@ maintenance_do_deprecate (char *text, int deprecate)
   if (deprecate)
     {
       /* look for a replacement command */
-      if (start_ptr = strchr (text, '\"'))
+      start_ptr = strchr (text, '\"');
+      if (start_ptr != NULL)
 	{
 	  start_ptr++;
-	  if (end_ptr = strrchr (start_ptr, '\"'))
+	  end_ptr = strrchr (start_ptr, '\"');
+	  if (end_ptr != NULL)
 	    {
 	      len = end_ptr - start_ptr;
 	      start_ptr[len] = '\0';
