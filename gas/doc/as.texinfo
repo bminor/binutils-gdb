@@ -43,6 +43,7 @@
 @set I860
 @set I960
 @set IA-64
+@set IP2K
 @set M32R
 @set M68HC11
 @set M680X0
@@ -341,6 +342,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-milp32}|@b{-milp64}|@b{-mlp64}|@b{-mp64}]
    [@b{-mle}|@b{mbe}]
    [@b{-x}|@b{-xexplicit}] [@b{-xauto}] [@b{-xdebug}]
+@end ifset
+@ifset IP2K
+
+@emph{Target IP2K options:}
+   [@b{-mip2022}|@b{-mip2022ext}]
 @end ifset
 @ifset M32R
 
@@ -666,6 +672,22 @@ Add code to collect statistics about branches taken.
 @item -no-relax
 Do not alter compare-and-branch instructions for long displacements;
 error if necessary.
+
+@end table
+@end ifset
+
+@ifset IP2K
+The following options are available when @value{AS} is configured for the
+Scenix IP2K series.
+
+@table @gcctabopt
+
+@item -mip2022ext
+Specifies that the extended IP2022 instructions are allowed.
+
+@item -mip2022
+Restores the default behaviour, which restricts the permited instructions to
+just the basic IP2022 ones.
 
 @end table
 @end ifset
@@ -1997,6 +2019,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset SPARC
 @samp{!} on the SPARC;
+@end ifset
+@ifset IP2K
+@samp{#} on the ip2k;
 @end ifset
 @ifset M32R
 @samp{#} on the m32r;
@@ -5690,6 +5715,9 @@ subject, see the hardware manufacturer's manual.
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
 @end ifset
+@ifset IP2K
+* IP2K-Dependent::              IP2K Dependent Features
+@end ifset
 @ifset M32R
 * M32R-Dependent::              M32R Dependent Features
 @end ifset
@@ -5826,6 +5854,10 @@ family.
 
 @ifset IA64
 @include c-ia64.texi
+@end ifset
+
+@ifset IP2K
+@include c-ip2k.texi
 @end ifset
 
 @ifset M32R

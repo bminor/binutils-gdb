@@ -40,6 +40,7 @@
 @set I80386
 @set I860
 @set I960
+@set IP2K
 @set M32R
 @set M68HC11
 @set M680X0

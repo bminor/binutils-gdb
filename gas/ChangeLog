@@ -1,4 +1,29 @@
-Wed Jul 17 00:30:13 CEST 2002  Jan Hubicka  <jh@suse.cz>
+2002-07-18  Denis Chertykov  <denisc@overta.ru>
+	    Frank Ch. Eigler  <fche@redhat.com>
+	    Alan Lehotsky  <alehotsky@cygnus.com>
+	    John Healy  <jhealy@redhat.com>
+	    Jeff Johnston  <jjohnstn@redhat.com>
+
+	* configure.in: Add ip2k configuraton.
+	* configure: Regenerate.
+	* Makefile.am: Add ip2k configuraton.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* config/tc-ip2k.c: New file.
+	* config/tc-ip2k.h: New files.
+	* NEWS: Mention new support.
+	* doc/Makefile.am (CPU_DOCS): Add c-ip2k.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Set IP2K
+	* doc/as.texinfo: Add IP2K description.
+	* doc/c-ip2k.texi: New file.
+	
+2002-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* NEWS: Reformat to match style of other NEWS files.
+	
+2002-07-17  Jan Hubicka  <jh@suse.cz>
 
 	* tc-i386.c (i386_align_code): Implement x86_64 neutral code fillers.
 

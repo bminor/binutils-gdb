@@ -1,3 +1,21 @@
+2002-07-18  Denis Chertykov  <denisc@overta.ru>
+	    Frank Ch. Eigler  <fche@redhat.com>
+	    Alan Lehotsky <alehotsky@cygnus.com>
+	    matthew green  <mrg@redhat.com>
+
+	* configure.in: Add support for ip2k.
+	* configure: Regenerate.
+	* Makefile.am: Add support for ip2k.
+	* Makefile.in: Regenerate.
+	* disassemble.c: Add support for ip2k.
+	* ip2k-asm.c: New generated file.
+	* ip2k-desc.c: New generated file.
+	* ip2k-desc.h: New generated file.
+	* ip2k-dis.c: New generated file.
+	* ip2k-ibld.c: New generated file.
+	* ip2k-opc.c: New generated file.
+	* ip2k-opc.h: New generated file.
+
 2002-07-17  David Mosberger  <davidm@hpl.hp.com>
 
 	* ia64-opc-b.c (bWhc): New macro.

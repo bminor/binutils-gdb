@@ -128,6 +128,7 @@ changequote(,)dnl
       i[3456]86)	cpu_type=i386 arch=i386;;
       x86_64)		cpu_type=i386 arch=x86_64;;
       ia64)		cpu_type=ia64 ;;
+      ip2k)             cpu_type=ip2k endian=big ;; 
       m6811|m6812|m68hc12) cpu_type=m68hc11 ;;
       m680[012346]0)	cpu_type=m68k ;;
 changequote([,])dnl
@@ -326,6 +327,8 @@ changequote([,])dnl
       ia64-*-linux-gnu*)    fmt=elf em=linux ;;
       ia64-*-hpux*)	    fmt=elf em=hpux ;;
       ia64-*-netbsd*)       fmt=elf em=nbsd ;;
+
+      ip2k-*-*)		    fmt=elf bfd_gas=yes ;;
 
       m32r-*-*)		    fmt=elf bfd_gas=yes ;;
 
@@ -577,7 +580,7 @@ changequote([,])dnl
 
     # Any other special object files needed ?
     case ${cpu_type} in
-      fr30 | m32r | openrisc)
+      fr30 | ip2k | m32r | openrisc)
 	using_cgen=yes
 	;;
 
