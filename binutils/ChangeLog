@@ -1,5 +1,13 @@
 Thu May 14 14:00:56 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* dlltool.c: Add support for Thumb DLLs.  Add support for
+	interworking between ARM and Thumb programs and DLLs.  Tidy the
+	code. 
+
+	* binutils.texi: Document dlltool.
+
+	* configure: Build dlltool for thumb-pe targets.
+
 	* version.c (print_version): Include 1998 in copyright strings.
 
 	* stabs.c (parse_stab): Support Win32 style directory separators.

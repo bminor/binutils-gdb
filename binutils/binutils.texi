@@ -7,7 +7,7 @@
 START-INFO-DIR-ENTRY
 * Binutils: (binutils).         The GNU binary utilities "ar", "objcopy",
 				"objdump", "nm", "nlmconv", "size", 
-                                "strings", "strip", and "ranlib".
+                                "strings", "strip", "ranlib" and "dlltool".
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -125,6 +125,9 @@ Convert object code into a Netware Loadable Module
 
 @item windres
 Manipulate Windows resources
+
+@item dlltool
+Create the files needed to build and use Dynamic Link Libraries
 @end table
 @end iftex
 
@@ -141,6 +144,7 @@ Manipulate Windows resources
 * addr2line::			Convert addresses to file and line
 * nlmconv::                     Converts object code into an NLM
 * windres::			Manipulate Windows resources
+* dlltool::			Create files needed to build and use DLLs
 * Selecting The Target System:: How these utilities determine the target.
 * Reporting Bugs::              Reporting Bugs
 * Index::                       Index
@@ -494,7 +498,7 @@ Add each named @var{member} as a module in the current archive.
 Requires prior use of @code{OPEN} or @code{CREATE}.
 
 @item CLEAR
-Discard the contents of the current archive, cancelling the effect of
+Discard the contents of the current archive, canceling the effect of
 any operations since the last @code{SAVE}.  May be executed (with no
 effect) even if  no current archive is specified.
 
@@ -1236,7 +1240,7 @@ Only useful with @samp{-d}, @samp{-D}, or @samp{-r}.
 @cindex architecture
 @cindex disassembly architecture
 Specify the architecture to use when disassembling object files.  This
-can be useful when disasembling object files which do not describe
+can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @samp{-i} option.
 
@@ -1867,7 +1871,7 @@ Displays (on standard error) the linker command line used by @code{nlmconv}.
 
 @item -l @var{linker}
 @itemx --linker=@var{linker}
-Use @var{linker} for any linking.  @var{linker} can be an abosolute or a
+Use @var{linker} for any linking.  @var{linker} can be an absolute or a
 relative pathname.
 
 @item -h
@@ -2003,6 +2007,216 @@ Prints the version number for @code{windres}.
 If @code{windres} is compiled with @code{YYDEBUG} defined as @code{1},
 this will turn on parser debugging.
 @end table
+
+
+@node dlltool
+@chapter Create files needed to build and use DLLs
+@cindex DLL
+@kindex dlltool
+
+@code{dlltool} may be used to create the files needed to build and use
+dynamic link libraries (DLLs).
+
+@quotation
+@emph{Warning:} @code{dlltool} is not always built as part of the binary
+utilities, since it is only useful for those targets which support DLLs.
+@end quotation
+
+@smallexample
+dlltool [-d|--input-def <def-file-name>]
+        [-b|--base-file <base-file-name>]
+        [-e|--output-exp <exports-file-name>]
+        [-z|--output-def <def-file-name>]
+        [-l|--output-lib <library-file-name>]        
+        [-S|--as <path-to-assembler>] [-f|--as-flags <options>]
+        [-D|--dllname <name>] [-m|--machine <machine>]
+        [-a|--add-indirect] [-U|--add-underscore] [-k|--kill-at]
+        [-x|--no-idata4] [-c|--no-idata5] [-i|--interwork]
+        [-n|--nodelete] [-v|--verbose] [-h|--help] [-V|--version]
+        [object-file @dots{}]
+@end smallexample
+
+@code{dlltool} reads its inputs, which can come from the @samp{-d} and
+@samp{-b} options as well as object files specified on the command
+line.  It then processes these inputs and if the @samp{-e} option has
+been specified it creates a exports file.  If the @samp{-l} option
+has been specified it creates a library file and if the @samp{-z} option
+has been specified it creates a def file.  Any or all of the -e, -l
+and -z options can be present in one invocation of dlltool.
+
+When creating a DLL, along with the source for the DLL, it is necessary
+to have three other files.  @code{dlltool} can help with the creation of
+these files.
+
+The first file is a @samp{.def} file which specifies which functions are
+exported from the DLL, which functions the DLL imports, and so on.  This
+is a text file and can be created by hand, or @code{dlltool} can be used
+to create it using the @samp{-z} option.  In this case @code{dlltool}
+will scan the object files specified on its command line looking for
+those functions which have been specially marked as being exported and
+put entries for them in the .def file it creates.
+
+In order to mark a function as being exported from a DLL, it needs to
+have an @samp{-export:<name_of_function>} entry in the @samp{.drective}
+section of the object file.  This can be done in C by using the
+asm() operator:
+
+@smallexample
+  asm (".section .drective");  
+  asm (".ascii \"-export:my_func\"");
+
+  int my_func (void) @{ @dots{} @}
+@end smallexample
+
+The second file needed for DLL creation is an exports file.  This file
+is linked with the object files that make up the body of the DLL and it
+handles the interface between the DLL and the outside world.  This is a
+binary file and it can be created by giving the @samp{-e} option to
+@code{dlltool} when it is creating or reading in a .def file. 
+
+The third file needed for DLL creation is the library file that programs
+will link with in order to access the functions in the DLL.  This file
+can be created by giving the @samp{-l} option to dlltool when it
+is creating or reading in a .def file.
+
+@code{dlltool} builds the library file by hand, but it builds the
+exports file by creating temporary files containing assembler statements
+and then assembling these.  The @samp{-S} command line option can be
+used to specify the path to the assembler that dlltool will use,
+and the @samp{-f} option can be used to pass specific flags to that
+assembler.  The @samp{-n} can be used to prevent dlltool from deleting
+these temporary assembler files when it is done, and if @samp{-n} is
+specified twice then this will prevent dlltool from deleting the
+temporary object files it used to build the library.
+
+Here is an example of creating a DLL from a source file @samp{dll.c} and
+also creating a program (from an object file called @samp{program.o})
+that uses that DLL:
+
+@smallexample
+  gcc -c dll.c
+  dlltool -e exports.o -l dll.lib dll.o
+  gcc dll.o exports.o -o dll.dll
+  gcc program.o dll.lib -o program
+@end smallexample
+
+The command line options have the following meanings:
+
+@table @code
+
+@item -d FILENAME
+@itemx --input-def FILENAME
+@cindex input .def file
+Specifies the name of a .def file to be read in and processed.
+
+@item -b FILENAME
+@itemx --base-file FILENAME
+@cindex base files
+Specifies the name of a base file to be read in and processed.  The
+contents of this file will be added to the relocation section in the
+exports file generated by dlltool.
+
+@item -e FILENAME
+@itemx --output-exp FILENAME
+Specifies the name of the export file to be created by dlltool.
+
+@item -z FILENAME
+@itemx --output-def FILENAME
+Specifies the name of the .def file to be created by dlltool.
+
+@item -l FILENAME
+@itemx --output-lib FILENAME
+Specifies the name of the library file to be created by dlltool.
+
+@item -S PATH
+@itemx --as PATH
+Specifies the path, including the filename, of the assembler to be used
+to create the exports file.
+
+@item -f SWITCHES
+@itemx --as-flags SWITCHES
+Specifies any specific command line switches to be passed to the
+assembler when building the exports file.  This option will work even if
+the @samp{-S} option is not used.  This option only takes one argument,
+and if it occurs more than once on the command line, then later
+occurrences will override earlier occurrences.  So if it is necessary to
+pass multiple switches to the assembler they should be enclosed in
+double quotes.
+
+@item -D NAME
+@itemx --dll-name NAME
+Specifies the name to be stored in the .def file as the name of the DLL
+when the @samp{-e} option is used.  If this option is not present, then
+the filename given to the @samp{-e} option will be used as the name of
+the DLL.
+
+@item -m MACHINE
+@itemx -machine MACHINE
+Specifies the type of machine for which the library file should be
+built.  @code{dlltool} has a built in default type, depending upon how
+it was created, but this option can be used to override that.  This is
+normally only useful when creating DLLs for an ARM processor, when the
+contents of the DLL are actually encode using THUMB instructions.
+
+@item -a
+@itemx --add-indirect
+Specifies that when @code{dlltool} is creating the exports file it
+should add a section which allows the exported functions to be
+referenced without using the import library.  Whatever the hell that
+means! 
+
+@item -U
+@itemx --add-underscore
+Specifies that when @code{dlltool} is creating the exports file it
+should prepend an underscore to the names of the exported functions. 
+
+@item -k
+@itemx --kill-at
+Specifies that when @code{dlltool} is creating the exports file it
+should not append the string @samp{@@ <number>}.  These numbers are
+called ordinal numbers and they represent another way of accessing the
+function in a DLL, other than by name.
+
+@item -x
+@itemx --no-idata4
+Specifies that when @code{dlltool} is creating the exports and library
+files it should omit the .idata4 section.  This is for compatibility
+with certain operating systems.
+
+@item -c
+@itemx --no-idata5
+Specifies that when @code{dlltool} is creating the exports and library
+files it should omit the .idata5 section.  This is for compatibility
+with certain operating systems.
+
+@item -i
+@itemx --interwork
+Specifies that @code{dlltool} should mark the objects in the library
+file and exports file that it produces as supporting interworking
+between ARM and THUMB code.
+
+@item -n
+@itemx --nodelete
+Makes @code{dlltool} preserve the temporary assembler files it used to
+create the exports file.  If this option is repeated then dlltool will
+also preserve the temporary object files it uses to create the library
+file. 
+
+@item -v
+@itemx --verbose
+Make dlltool describe what it is doing.
+
+@item -h
+@itemx --help
+Displays a list of command line options and then exits.
+
+@item -V
+@itemx --version
+Displays dlltool's version number and then exits.
+
+@end table
+
+
 
 @node Selecting The Target System
 @chapter Selecting the target system
