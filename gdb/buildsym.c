@@ -179,23 +179,26 @@ static void
 scan_for_anonymous_namespaces (struct symbol *symbol)
 {
   const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  const char *beginning, *end;
+  const char *beginning = name;
+  const char *end = cp_find_first_component (beginning);
 
-  for (beginning = name, end = cp_find_first_component (name);
-       *end == ':';
-       /* The "+ 2" is for the "::"-.  */
-       beginning = end + 2, end = cp_find_first_component (beginning))
+  while (*end == ':')
     {
       if ((end - beginning) == ANONYMOUS_NAMESPACE_LEN
 	  && strncmp (beginning, "(anonymous namespace)",
 		      ANONYMOUS_NAMESPACE_LEN) == 0)
-	/* We've found a component of the name that's an anonymous
-	   namespace.  So add symbols in it to the namespace given by
-	   the previous component if there is one, or to the global
-	   namespace if there isn't.  */
-	add_using_directive (name,
-			     beginning == name ? 0 : beginning - name - 2,
-			     end - name);
+	{
+	  /* We've found a component of the name that's an anonymous
+	     namespace.  So add symbols in it to the namespace given
+	     by the previous component if there is one, or to the
+	     global namespace if there isn't.  */
+	  add_using_directive (name,
+			       beginning == name ? 0 : beginning - name - 2,
+			       end - name);
+	}
+      /* The "+ 2" is for the "::".  */
+       beginning = end + 2;
+       end = cp_find_first_component (beginning);
     }
 }
 
@@ -458,13 +461,15 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      /* FIXME: carlton/2002-11-14: For members of classes,
 		 with this include the class name as well?  I don't
 		 think that's a problem yet, but it will be.  */
-	      
-	      for (current = name, next = cp_find_first_component (current);
-		   *next == ':';
-		   /* The '+ 2' is to skip the '::'.  */
-		   current = next,
-		     next = cp_find_first_component (current + 2))
-		;
+
+	      current = name;
+	      next = cp_find_first_component (current);
+	      while (*next == ':')
+		{
+		  current = next;
+		  /* The '+ 2' is to skip the '::'.  */
+		  next = cp_find_first_component (current + 2);
+		}
 	      if (current == name)
 		block_set_scope (block, "", &objfile->symbol_obstack);
 	      else

@@ -1,7 +1,8 @@
 /* Helper routines for C++ support in GDB.
    Copyright 2002 Free Software Foundation, Inc.
 
-   Contributed by MontaVista Software.
+   Contributed by MontaVista Software and by David Carlton, Stanford
+   University.
 
    This file is part of GDB.
 

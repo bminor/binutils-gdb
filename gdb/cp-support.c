@@ -1,7 +1,8 @@
 /* Helper routines for C++ support in GDB.
    Copyright 2002 Free Software Foundation, Inc.
 
-   Contributed by MontaVista Software.
+   Contributed by MontaVista Software and by David Carlton, Stanford
+   University.
 
    This file is part of GDB.
 
@@ -440,6 +441,7 @@ get_namespace_objfile (void)
   if (namespace_objfile == NULL)
     {
       namespace_objfile = allocate_objfile (NULL, 0);
+      namespace_objfile->name = "<C++-namespaces>";
     }
 
   return namespace_objfile;

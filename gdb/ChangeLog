@@ -1,3 +1,22 @@
+2002-11-21  David Carlton  <carlton@math.stanford.edu>
+
+	* cp-support.c (get_namespace_objfile): Set
+	namespace_objfile->name.
+	* dwarf2read.c (scan_partial_symbols): Allow empty pdi.name if
+	we're reading a namespace.
+	* Makefile.in (dwarf2read.o): Depend on cp_support_h.
+	* dwarf2read.c (scan_partial_symbols): Add 'namespace' arg.
+	(dwarf2_build_psymtabs_hard): Update call to
+	scan_partial_symbols.
+	(add_partial_namespace): New function.
+	(scan_partial_symbols): Call add_partial_namespace.
+	#include "cp-support.h"
+	* cp-support.c: Add me to contributors.
+	* cp-support.h: Ditto.
+	* buildsym.c (scan_for_anonymous_namespaces): Convert for loop
+	into a clearer while loop.
+	(finish_block): Ditto.
+
 2002-11-20  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (scan_partial_symbols): Move lowpc, highpc initial
