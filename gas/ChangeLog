@@ -1,3 +1,7 @@
+Wed May  6 15:26:34 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+        * makefile.vms (OBJS): Add ehopt.obj
+
 Wed May  6 15:11:12 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* doc/c-vax.texi: Correct and extend vax/vms documentation.
