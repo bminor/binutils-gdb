@@ -5484,6 +5484,9 @@ rl_read_init_file (filename)
 
   openname = tilde_expand (filename);
 
+  if (!openname || *openname == '\000')
+    return ENOENT;
+
   if ((stat (openname, &finfo) < 0) ||
       (file = open (openname, O_RDONLY, 0666)) < 0)
     {

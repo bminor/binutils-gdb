@@ -1,3 +1,9 @@
+Thu Feb 20 23:23:16 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* readline.c (rl_read_init_file):  Make sure that null filename is
+	not passed to open() or else we end up opening the directory, and
+	read a bunch of garbage into keymap[].
+
 Mon Feb 17 17:15:09 1992  Fred Fish  (fnf at cygnus.com)
 
 	* readline.c (readline_default_bindings):  Only make use of VLNEXT
