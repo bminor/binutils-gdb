@@ -265,36 +265,6 @@ else
 fi
 
 
-vrXXXX_files="vr.igen"
-
-if ( echo $* | grep keep\-vr > /dev/null ) || ( echo $* | grep keep\-cygnus > /dev/null ) ; then
-	for i in $vrXXXX_files ; do
-		if test ! -d $i && (grep sanitize-vrXXXX $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping vrXXXX stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-vrXXXX $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"vrXXXX\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-vrXXXX/,/end-\sanitize\-vrXXXX/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-
 tx3904_files="ChangeLog configure configure.in interp.c"
 
 if ( echo $* | grep keep\-tx3904 > /dev/null ) ; then
