@@ -704,6 +704,7 @@ call_function_by_hand (function, nargs, args)
   struct cleanup *old_chain;
   CORE_ADDR funaddr;
   int using_gcc;
+  CORE_ADDR real_pc;
 
   if (!target_has_execution)
     noprocess();
@@ -745,8 +746,15 @@ call_function_by_hand (function, nargs, args)
   memcpy (dummy1, dummy, sizeof dummy);
   for (i = 0; i < sizeof dummy / sizeof (REGISTER_TYPE); i++)
     SWAP_TARGET_AND_HOST (&dummy1[i], sizeof (REGISTER_TYPE));
+
+#ifdef GDB_TARGET_IS_HPPA
+  FIX_CALL_DUMMY (dummy1, start_sp, real_pc, funaddr, nargs, args,
+		  value_type, using_gcc);
+#else
   FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
 		  value_type, using_gcc);
+  real_pc = start_sp;
+#endif
 
 #if CALL_DUMMY_LOCATION == ON_STACK
   write_memory (start_sp, (char *)dummy1, sizeof dummy);
@@ -891,7 +899,7 @@ call_function_by_hand (function, nargs, args)
     /* Execute the stack dummy routine, calling FUNCTION.
        When it is done, discard the empty frame
        after storing the contents of all regs into retbuf.  */
-    run_stack_dummy (start_sp + CALL_DUMMY_START_OFFSET, retbuf);
+    run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf);
 
     do_cleanups (old_chain);
 
@@ -1086,8 +1094,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  base_offset =
-	      baseclass_offset (type, i, *arg1p, offset);
+	  base_offset = baseclass_offset (type, i, *arg1p, offset);
 	  if (base_offset == -1)
 	    error ("virtual baseclass botch");
 	}

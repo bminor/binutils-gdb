@@ -186,6 +186,16 @@ hook_stop_stub PARAMS ((char *));
 #define IN_SOLIB_TRAMPOLINE(pc,name)	0
 #endif
 
+/* On some systems, the PC may be left pointing at an instruction that  won't
+   actually be executed.  This is usually indicated by a bit in the PSW.  If
+   we find ourselves in such a state, then we step the target beyond the
+   nullified instruction before returning control to the user so as to avoid
+   confusion. */
+
+#ifndef INSTRUCTION_NULLIFIED
+#define INSTRUCTION_NULLIFIED 0
+#endif
+
 #ifdef TDESC
 #include "tdesc.h"
 int safe_to_init_tdesc_context = 0;
@@ -576,6 +586,15 @@ wait_for_inferior ()
 	single_step (0);	/* This actually cleans up the ss */
 #endif /* NO_SINGLE_STEP */
       
+/* If PC is pointing at a nullified instruction, then step beyond it so that
+   the user won't be confused when GDB appears to be ready to execute it. */
+
+      if (INSTRUCTION_NULLIFIED)
+	{
+	  resume (1, 0);
+	  continue;
+	}
+
       stop_pc = read_pc ();
       set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					    read_pc ()));
@@ -973,7 +992,7 @@ wait_for_inferior ()
 	      if (tmp != 0)
 		stop_func_start = tmp;
 
-	      symtab = find_pc_symtab (stop_pc);
+	      symtab = find_pc_symtab (stop_func_start);
 	      if (symtab && LINETABLE (symtab))
 		goto step_into_function;
 

@@ -76,7 +76,6 @@ int ansi_conformant;
 #define  BTDEBUG  if (btdebug) btdebug_message
 
 extern int errno;
-extern int attach_flag;
 extern char registers[];
 CORE_ADDR get_saved_basereg();
 

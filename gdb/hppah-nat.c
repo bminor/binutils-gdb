@@ -27,6 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "target.h"
 #include <sys/ptrace.h>
+#include <sys/param.h>
+#include <sys/user.h>
+
+extern CORE_ADDR text_end;
 
 static void fetch_register ();
 
@@ -105,42 +109,70 @@ store_inferior_registers (regno)
   char buf[80];
   extern char registers[];
   register int i;
-
   unsigned int offset = U_REGS_OFFSET;
+  int scratch;
 
   if (regno >= 0)
     {
       regaddr = register_addr (regno, offset);
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
-	{
-	  errno = 0;
-	  ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
-	  if (errno != 0)
-	    {
-	      sprintf (buf, "writing register number %d(%d)", regno, i);
-	      perror_with_name (buf);
-	    }
-	  regaddr += sizeof(int);
-	}
+      errno = 0;
+      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+        {
+          scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+          ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+                  scratch, 0);
+          if (errno != 0)
+            {
+              sprintf (buf, "writing register number %d(%d)", regno, i);
+              perror_with_name (buf);
+            }
+        }
+      else
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	  {
+	    errno = 0;
+	    ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		    *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
+	    if (errno != 0)
+	      {
+		sprintf (buf, "writing register number %d(%d)", regno, i);
+		perror_with_name (buf);
+	      }
+	    regaddr += sizeof(int);
+	  }
     }
   else
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	{
+	  if (CANNOT_STORE_REGISTER (regno))
+	    continue;
 	  regaddr = register_addr (regno, offset);
-	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
-	    {
-	      errno = 0;
-	      ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		      *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
-	      if (errno != 0)
-		{
-		  sprintf (buf, "writing register number %d(%d)", regno, i);
-		  perror_with_name (buf);
-		}
-	      regaddr += sizeof(int);
-	    }
+          errno = 0;
+          if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+            {
+              scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+              ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+                      scratch, 0);
+              if (errno != 0)
+                {
+                  sprintf (buf, "writing register number %d(%d)", regno, i);
+                  perror_with_name (buf);
+                }
+            }
+          else
+	    for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	      {
+		errno = 0;
+		ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+			*(int *) &registers[REGISTER_BYTE (regno) + i], 0);
+		if (errno != 0)
+		  {
+		    sprintf (buf, "writing register number %d(%d)", regno, i);
+		    perror_with_name (buf);
+		  }
+		regaddr += sizeof(int);
+	      }
 	}
     }
   return;
@@ -165,9 +197,7 @@ static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
 /* read the value of the u area from the hp-ux kernel */
 void _initialize_kernel_u_addr ()
 {
-#if 0
     struct user u;
-#endif
     nlist ("/hp-ux", &nl);
     kernel_u_addr = nl[0].n_value;
 }
@@ -213,6 +243,8 @@ fetch_register (regno)
 	  perror_with_name (mess);
 	}
     }
+  if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+    buf[3] &= ~0x3;
   supply_register (regno, buf);
 }
 
@@ -280,14 +312,14 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       if (addr != memaddr || len < (int)sizeof (int)) {
 	/* Need part of initial word -- fetch it.  */
-        buffer[0] = ptrace (PT_RIUSER, inferior_pid,
-			    (PTRACE_ARG3_TYPE) addr, 0, 0);
+        buffer[0] = ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+			    inferior_pid, (PTRACE_ARG3_TYPE) addr, 0, 0);
       }
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
-	    = ptrace (PT_RIUSER, inferior_pid,
+	    = ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, inferior_pid,
 		      (PTRACE_ARG3_TYPE) (addr + (count - 1) * sizeof (int)),
 		      0, 0);
 	}
@@ -300,23 +332,14 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
-#if 0
 /* The HP-UX kernel crashes if you use PT_WDUSER to write into the text
    segment.  FIXME -- does it work to write into the data segment using
    WIUSER, or do these idiots really expect us to figure out which segment
    the address is in, so we can use a separate system call for it??!  */
 	  errno = 0;
-	  ptrace (PT_WDUSER, inferior_pid, (PTRACE_ARG3_TYPE) addr,
+	  ptrace (addr < text_end ? PT_WIUSER : PT_WDUSER, inferior_pid, 
+		  (PTRACE_ARG3_TYPE) addr,
 		  buffer[i], 0);
-	  if (errno)
-#endif
-	    {
-	      /* Using the appropriate one (I or D) is necessary for
-		 Gould NP1, at least.  */
-	      errno = 0;
-	      ptrace (PT_WIUSER, inferior_pid, (PTRACE_ARG3_TYPE) addr,
-		      buffer[i], 0);
-	    }
 	  if (errno)
 	    return 0;
 	}
@@ -327,8 +350,8 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  buffer[i] = ptrace (PT_RIUSER, inferior_pid,
-			      (PTRACE_ARG3_TYPE) addr, 0, 0);
+	  buffer[i] = ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+			      inferior_pid, (PTRACE_ARG3_TYPE) addr, 0, 0);
 	  if (errno)
 	    return 0;
 	  QUIT;
@@ -339,4 +362,3 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
     }
   return len;
 }
-

@@ -1,3 +1,56 @@
+Mon Dec 21 18:02:35 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* hppa-pinsn.c (print_insn):  Improve handling of be and ble
+	branch targets to compute target address using const from previous
+	instruction if necessary.
+	* Add `Q' operator to print out bit position field various
+	instructions.
+	* hppah-nat.c:  #include sys/param.h, and sys/user.h.  General
+	cleanups, use new code from Utah.
+	* (store_inferior_registers):  Update to new code from Utah.
+	* (initialize_kernel_u_addr):  Re-enable decl of struct user u.
+	* (fetch_register):  Clear out priv level when reading PCs.
+	* hppah-tdep.c:  Get rid of gobs of KERNELDEBUG stuff.
+	* Remove decl of errno, #include wait.h and target.h.
+	* (frame_saved_pc):  Check `flags' pseudo-register to see if we
+	were inside of a kernel call.  If so, then PC is in a different
+	register.  Also, mask out bottom two bits of all PCs so as not to
+	confuse higher level code.
+	* (push_dummy_frame):  Create from #define in tm-hppa.h.
+	* (find_dummy_frame_regs):  Update from Utah.
+	* (hp_pop_frame):  Create from #define in tm-hppa.h.
+	* (hp_restore_pc_queue):  New, from Utah.
+	* (hp_push_arguments):  Big fixes from Utah.
+	* (pa_do_registers_info, pa_print_registers):  Only print out fp
+	regs upon request.
+	* (skip_trampoline_code):  New routine to deal with stubs that
+	live in nowhereland between callers and callees.
+	* i860-tdep.c:  Remove decl of attach_flag.
+	* infrun.c (wait_for_inferior):  Add new macro
+	INSTRUCTION_NULLIFIED, which can tell if the instruction pointed
+	at by PC will be nullified.  If so, then step the target once more
+	so as to avoid confusing the user.
+	* (just before step_over_function:):  Use stop_func_start, not
+	stop_pc when checking for the existance of line number info.
+	stop_func_start will reflect the proper address of the target
+	routine, not of the stub that we may be traversing to get there.
+	* tm-hppa.h:  define SKIP_TRAMPOLINE_CODE and IN_SOLIB_TRAMPOLINE
+	to deal with the stubs that PA compilers sometimes stick between
+	callers and callees.  Also, define FLAGS_REGNUM for access to the
+	`flags' pseudo-reg.
+	* (REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW):  Use
+	memcpy, not bcopy.
+	* (CANNOT_STORE_REGISTER):  New from Utah.  Says that we can't
+	write gr0, PC regs, and PSW!
+	* (FRAME_FIND_SAVED_REGS):  Bug fixes from Utah.
+	* (PUSH_DUMMY_FRAME, POP_FRAME):  Make into real routines in
+	hppah-nat.c.
+	* (CALL_DUMMY, FIX_CALL_DUMMY):  Fixes from Utah.
+	* Define struct unwind_table_entry.
+	* valops.c (call_function_by_hand):  Add another arg to
+	FIX_CALL_DUMMY (under #ifdef GDB_TARGET_IS_HPPA).  Why is this
+	necessary?
+
 Mon Dec 21 02:17:57 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* remote-vx.c: remove include of "symfile.h", replace it with "complaints.h"

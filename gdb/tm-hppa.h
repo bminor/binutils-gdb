@@ -1,4 +1,5 @@
-/* Parameters for execution on a Hewlett-Packard PA-RISC machine.
+/* Parameters for execution on a Hewlett-Packard PA-RISC machine, running
+   HPUX or BSD.
    Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc. 
 
    Contributed by the Center for Software Science at the
@@ -70,6 +71,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     (pc) += 12;								\
   else if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68810000)	\
     (pc) += 4;}
+
+/* If PC is in some function-call trampoline code, return the PC
+   where the function itself actually starts.  If not, return NULL.  */
+
+#define	SKIP_TRAMPOLINE_CODE(pc) skip_trampoline_code (pc)
+
+/* Return non-zero if we are in some sort of a trampoline. */
+
+#define IN_SOLIB_TRAMPOLINE(pc,name) skip_trampoline_code (pc)
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -150,6 +160,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define FLAGS_REGNUM 0		/* Various status flags */
 #define RP_REGNUM 2		/* return pointer */
 #define FP_REGNUM 4		/* Contains address of executing stack */
 				/* frame */
@@ -222,14 +233,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ bcopy ((FROM), (TO), (REGNUM) < FP4_REGNUM ? 4 : 8); }
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM, FROM, TO) \
+{ memcpy ((TO), (FROM), (REGNUM) < FP4_REGNUM ? 4 : 8); }
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ bcopy ((FROM), (TO), (REGNUM) < FP4_REGNUM ? 4 : 8); }
+#define REGISTER_CONVERT_TO_RAW(REGNUM, FROM, TO) \
+{ memcpy ((TO), (FROM), (REGNUM) < FP4_REGNUM ? 4 : 8); }
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -262,6 +273,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)((REGBUF) + 28))
+
+/*
+ * This macro defines the register numbers (from REGISTER_NAMES) that
+ * are effectively unavailable to the user through ptrace().  It allows
+ * us to include the whole register set in REGISTER_NAMES (inorder to
+ * better support remote debugging).  If it is used in
+ * fetch/store_inferior_registers() gdb will not complain about I/O errors
+ * on fetching these registers.  If all registers in REGISTER_NAMES
+ * are available, then return false (0).
+ */
+
+#define CANNOT_STORE_REGISTER(regno)            \
+                   ((regno) == 0) ||     \
+                   ((regno) == PCSQ_HEAD_REGNUM) || \
+                   ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
+                   ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
 /* This is a piece of magic that is given a register number REGNO
    and as BLOCKEND the address in the system of the end of the user structure
@@ -332,7 +359,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ADDIL_P(INSN) (((INSN) & 0xfc000000) == 0x28000000)
 #define LDO_P(INSN) (((INSN) & 0xfc00c000) == 0x34000000)
 
-
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)		\
 { register int regnum;							\
   register CORE_ADDR next_addr;						\
@@ -341,9 +367,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   unsigned address;							\
 									\
   bzero (&frame_saved_regs, sizeof frame_saved_regs);			\
-  if ((frame_info)->pc <= ((frame_info)->frame - CALL_DUMMY_LENGTH -	\
-			   FP_REGNUM * 4 - 16 * 8)			\
-      && (frame_info)->pc > (frame_info)->frame)			\
+  if ((frame_info->pc >= (frame_info)->frame                            \
+       && (frame_info)->pc <= ((frame_info)->frame + CALL_DUMMY_LENGTH  \
+			       + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8   \
+			       + 6 * 4)))                               \
     find_dummy_frame_regs ((frame_info), &(frame_saved_regs));		\
   else									\
     { pc = get_pc_function_start ((frame_info)->pc);			\
@@ -402,6 +429,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    { regnum = GET_FIELD (this_insn, 27, 31);			\
 	      (frame_saved_regs).regs[regnum + FP0_REGNUM] = next_addr;	\
 	      next_addr += 8;						\
+              pc += 4;                                                  \
 	    }								\
 	  else								\
 	    break;							\
@@ -415,67 +443,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Push an empty stack frame, to record the current PC, etc. */
 
-#define PUSH_DUMMY_FRAME \
-{ register CORE_ADDR sp = read_register (SP_REGNUM);			\
-  register int regnum;							\
-  int int_buffer;							\
-  char freg_buffer[8];							\
-  /* Space for "arguments"; the RP goes in here. */			\
-  sp += 48;								\
-  int_buffer = read_register (RP_REGNUM) | 0x3;				\
-  write_memory (sp - 20, (char *)&int_buffer, 4);			\
-  int_buffer = read_register (FP_REGNUM);				\
-  write_memory (sp, (char *)&int_buffer, 4);				\
-  write_register (FP_REGNUM, sp);					\
-  sp += 4;								\
-  for (regnum = 1; regnum < 31; regnum++)				\
-    if (regnum != RP_REGNUM && regnum != FP_REGNUM)			\
-      sp = push_word (sp, read_register (regnum));			\
-  for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)		\
-    { read_register_bytes (REGISTER_BYTE (regnum), freg_buffer, 8);	\
-      sp = push_bytes (sp, freg_buffer, 8);}				\
-  sp = push_word (sp, read_register (IPSW_REGNUM));			\
-  sp = push_word (sp, read_register (SAR_REGNUM));			\
-  sp = push_word (sp, read_register (PCOQ_TAIL_REGNUM));		\
-  sp = push_word (sp, read_register (PCSQ_TAIL_REGNUM));		\
-  write_register (SP_REGNUM, sp);}
+#define PUSH_DUMMY_FRAME push_dummy_frame ()
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
-#define POP_FRAME  \
-{ register FRAME frame = get_current_frame ();				\
-  register CORE_ADDR fp;						\
-  register int regnum;						 	\
-  struct frame_saved_regs fsr;					 	\
-  struct frame_info *fi;					 	\
-  char freg_buffer[8];						 	\
-  fi = get_frame_info (frame);					 	\
-  fp = fi->frame;						 	\
-  get_frame_saved_regs (fi, &fsr);				 	\
-  for (regnum = 31; regnum > 0; regnum--)			 	\
-    if (fsr.regs[regnum])					 	\
-      write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
-  for (regnum = NUM_REGS - 1; regnum >= FP0_REGNUM ; regnum--) 	 	\
-    if (fsr.regs[regnum])					 	\
-      { read_memory (fsr.regs[regnum], freg_buffer, 8);	 	\
-        write_register_bytes (REGISTER_BYTE (regnum), freg_buffer, 8); }\
-  if (fsr.regs[IPSW_REGNUM])					 	\
-    write_register (IPSW_REGNUM,				 	\
-		    read_memory_integer (fsr.regs[IPSW_REGNUM], 4)); 	\
-  if (fsr.regs[SAR_REGNUM])					 	\
-    write_register (SAR_REGNUM,						\
-		    read_memory_integer (fsr.regs[SAR_REGNUM], 4));	\
-  if (fsr.regs[PCOQ_TAIL_REGNUM])					\
-    write_register (PCOQ_TAIL_REGNUM,					\
-		    read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM], 4));\
-  if (fsr.regs[PCSQ_TAIL_REGNUM])					\
-    write_register (PCSQ_TAIL_REGNUM,					\
-		    read_memory_integer (fsr.regs[PCSQ_TAIL_REGNUM], 4));\
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));	 \
-  write_register (SP_REGNUM, fp + 8);				 \
-  flush_cached_frames ();					 \
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
-					read_pc ())); }
+#define POP_FRAME  hp_pop_frame ()
 
 /* This sequence of words is the instructions
 
@@ -498,15 +470,19 @@ call_dummy
 	ldsid (0,r22), r3
 	ldil 0, r1			; _sr4export will be placed here.
 	ldo 0(r1), r1
-	ldsid (0,r1), r4
-	combt,=,n r3, r4, text_space	; If target is in data space, do a
+	ldsid (0,r1), r19
+	combt,=,n r3, r19, text_space	; If target is in data space, do a
 	ble 0(sr5, r22)			; "normal" procedure call
 	copy r31, r2
 	break 4, 8 
+	mtsp r21, sr0
+	ble,n 0(sr0, r22)
 text_space				; Otherwise, go through _sr4export,
 	ble (sr4, r1)			; which will return back here.
 	stw 31,-24(r30)
 	break 4, 8
+	mtsp r21, sr0
+	ble,n 0(sr0, r22)
 
    The dummy decides if the target is in text space or data space. If
    it's in data space, there's no problem because the target can
@@ -517,56 +493,57 @@ text_space				; Otherwise, go through _sr4export,
    know that the frame is associated with the call dummy and treat it
    specially. */ 
 
-#define CALL_DUMMY { 0x4bda3fb9, 0x4bd93fb1, 0x4bd83fa9, 0x4bd73fa1,	\
-		     0x37c13fb9, 0x24201004, 0x2c391005, 0x24311006,	\
-		     0x2c291007, 0x22c00000, 0x36d60000, 0x02c010a3,	\
-		     0x20200000, 0x34210000, 0x002010a4, 0x80832012,	\
-		     0xe6c06000, 0x081f0242, 0x00010004, 0xe4202000,	\
-		     0x6bdf3fd1, 0x00010004}
+#define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
+                    0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
+                    0x2C291007, 0x22C00000, 0x36D60000, 0x02C010A3,\
+                    0x20200000, 0x34210000, 0x002010b3, 0x82632022,\
+                    0xe6c06000, 0x081f0242, 0x00010004, 0x00151820,\
+                    0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
+                    0x00151820, 0xe6c00002}
 
-#define CALL_DUMMY_LENGTH 88
+#define CALL_DUMMY_LENGTH 104
 #define CALL_DUMMY_START_OFFSET 0
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
-{ static CORE_ADDR sr4export_address = 0;				\
-  									\
-  if (!sr4export_address)						\
-    {									\
-      struct minimal_symbol *msymbol;                                   \
-      msymbol = lookup_minimal_symbol ("_sr4export", (struct objfile *) NULL);\
-      if (msymbol = NULL)                                               \
-	error ("Can't find an address for _sr4export trampoline");	\
-      else								\
-	sr4export_address = msymbol -> address;                 	\
-    }									\
-  dummyname[9] = deposit_21 (fun >> 11, dummyname[9]);			\
-  dummyname[10] = deposit_14 (fun & MASK_11, dummyname[10]);		\
-  dummyname[12] = deposit_21 (sr4export_address >> 11, dummyname[12]);	\
-  dummyname[13] = deposit_14 (sr4export_address & MASK_11, dummyname[13]);\
-}
 
+/*
+ * Insert the specified number of args and function address
+ * into a call sequence of the above form stored at DUMMYNAME.
+ *
+ * On the hppa we need to call the stack dummy through $$dyncall.
+ * Therefore our version of FIX_CALL_DUMMY takes an extra argument,
+ * real_pc, which is the location where gdb should start up the
+ * inferior to do the function call.
+ */
+
+#define FIX_CALL_DUMMY(dummyname, pc, real_pc, fun, nargs, args, type, gcc_p) \
+{                                                                       \
+  CORE_ADDR dyncall_addr = 0, sr4export_addr = 0;                       \
+                                                                        \
+  if (!dyncall_addr)                                                    \
+    {                                                                   \
+      struct minimal_symbol *msymbol;                                   \
+      msymbol = lookup_minimal_symbol ("$$dyncall", (struct objfile *) NULL);\
+      if (msymbol == NULL)                                               \
+        error ("Can't find an address for $$dyncall trampoline");      \
+      else                                                              \
+        dyncall_addr = msymbol -> address;                         \
+      msymbol = lookup_minimal_symbol ("_sr4export", (struct objfile *) NULL);\
+      if (msymbol == NULL)                                               \
+        error ("Can't find an address for _sr4export trampoline");      \
+      else                                                              \
+        sr4export_addr = msymbol -> address;                         \
+    }                                                                   \
+  dummyname[9] = deposit_21 (fun >> 11, dummyname[9]);                  \
+  dummyname[10] = deposit_14 (fun & MASK_11, dummyname[10]);            \
+  dummyname[12] = deposit_21 (sr4export_addr >> 11,                     \
+                              dummyname[12]);                           \
+  dummyname[13] = deposit_14 (sr4export_addr & MASK_11,                 \
+                              dummyname[13]);                           \
+  write_register (22, pc);                                              \
+  real_pc = dyncall_addr;                                               \
+}
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = hp_push_arguments(nargs, args, sp, struct_return, struct_addr)
-
-/* Write the PC to a random value.
-   On PA-RISC, we need to be sure that the PC space queue is correct. */
-
-#define WRITE_PC(addr) \
-{ int space_reg, space = ((addr) >> 30);		\
-  int space_val;					\
-  if (space == 0)					\
-    space_reg = 43;		/* Space reg sr4 */	\
-  else if (space == 1)					\
-    space_reg = 48;		/* Space reg sr5*/	\
-  else							\
-    error ("pc = %x is in illegal space.", addr);	\
-  space_val = read_register (space_reg);		\
-  write_register (PCOQ_HEAD_REGNUM, addr);		\
-  write_register (PCSQ_HEAD_REGNUM, space_val);		\
-  write_register (PCOQ_TAIL_REGNUM, addr);		\
-  write_register (PCSQ_TAIL_REGNUM, space_val);}
 
 /* Symbol files have two symbol tables.  Rather than do this right,
    like the ELF symbol reading code, massive hackery was added
@@ -574,3 +551,40 @@ text_space				; Otherwise, go through _sr4export,
    hackery, which should all go away FIXME FIXME FIXME FIXME now.  */
 
 #define	GDB_TARGET_IS_HPPA
+
+/*
+ * Unwind table and descriptor.
+ */
+
+struct unwind_table_entry {
+  unsigned int region_start;
+  unsigned int region_end;
+
+  unsigned int Cannot_unwind         :  1;
+  unsigned int Millicode             :  1;
+  unsigned int Millicode_save_sr0    :  1;
+  unsigned int Region_description    :  2;
+  unsigned int reserverd1            :  1;
+  unsigned int Entry_SR              :  1;
+  unsigned int Entry_FR              :  4; /* number saved */
+  unsigned int Entry_GR              :  5; /* number saved */
+  unsigned int Args_stored           :  1;
+  unsigned int Variable_Frame	     :  1;
+  unsigned int Separate_Package_Body :  1;
+  unsigned int Frame_Extension_Millicode:1;
+  unsigned int Stack_Overflow_Check  :  1;
+  unsigned int Two_Instruction_SP_Increment:1;
+  unsigned int Ada_Region	     :  1;
+  unsigned int reserved2	     :  4;
+  unsigned int Save_SP               :  1;
+  unsigned int Save_RP               :  1;
+  unsigned int Save_MRP_in_frame     :  1;
+  unsigned int extn_ptr_defined      :  1;
+  unsigned int Cleanup_defined       :  1;
+
+  unsigned int MPE_XL_interrupt_marker: 1;
+  unsigned int HP_UX_interrupt_marker:  1;
+  unsigned int Large_frame	     :  1;
+  unsigned int reserved4             :  2;
+  unsigned int Total_frame_size      : 27;
+};

@@ -233,13 +233,13 @@ print_insn (memaddr, stream)
 		  print_address (memaddr + 8 + extract_12 (insn), stream);
 		  break;
 		case 'W':
-		  /* don't interpret an address if it's an external branch
-		     instruction. */
 		  op = GET_FIELD (insn, 0, 5);
-		  if (op != 0x38 /* be */ && op != 0x39 /* ble */)
-		    print_address (memaddr + 8 + extract_17 (insn), stream);
-		  else
+
+		  if (op == 0x38 /* be */ || op == 0x39 /* ble */)
 		    fput_const (extract_17 (insn), stream);
+		  else
+		    print_address (memaddr + 8 + extract_17 (insn), stream);
+
 		  break;
 		case 'B':
 		  {
@@ -256,6 +256,10 @@ print_insn (memaddr, stream)
 		case 'P':
 		  fprintf_filtered (stream, "%d",
 				    GET_FIELD (insn, 22, 26));
+		  break;
+		case 'Q':
+		  fprintf_filtered (stream, "%d",
+				    GET_FIELD (insn, 11, 15));
 		  break;
 		case 'T':
 		  fprintf_filtered (stream, "%d",
@@ -340,6 +344,34 @@ print_insn (memaddr, stream)
 		  break;
 		}
 	    }
+
+/* If this is an external branch, examine the previous instruction and see if
+   it was an ldil that loaded something into the same base reg.  If so, then
+   calculate the branch target from the constants in both instructions, and
+   print it out. */
+
+	  op = GET_FIELD (insn, 0, 5);
+	  if (op == 0x38 /* be */ || op == 0x39 /* ble */)
+	    {
+	      CORE_ADDR target_address;
+	      unsigned int prev_insn;
+	      int basereg, basereg_prev;
+
+	      target_address = extract_17 (insn);
+	      basereg = GET_FIELD (insn, 6, 10);
+	      if (basereg != 0)
+		{
+		  read_memory (memaddr - 4, &prev_insn, sizeof(prev_insn));
+		  basereg_prev = GET_FIELD (prev_insn, 6, 10);
+
+		  if ((prev_insn & 0xfc000000) == 0x20000000 /* ldil */
+		      && basereg == basereg_prev)
+		    target_address += extract_21 (prev_insn);
+		}
+	      fprintf_filtered (stream, "\t! ");
+	      print_address (target_address, stream);
+	    }
+
 	  return sizeof(insn);
 	}
     }
