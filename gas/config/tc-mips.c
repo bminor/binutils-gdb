@@ -11657,7 +11657,8 @@ s_change_section (ignore)
 
   section_name = input_line_pointer;
   c = get_symbol_end ();
-  next_c = *(input_line_pointer + 1);
+  if (c)
+    next_c = *(input_line_pointer + 1);
 
   /* Do we have .section Name<,"flags">?  */
   if (c != ',' || (c == ',' && next_c == '"'))
@@ -11688,8 +11689,13 @@ s_change_section (ignore)
   else
     section_alignment = 0;
 
+  section_name = xstrdup (section_name);
+
   obj_elf_change_section (section_name, section_type, section_flag,
 			  section_entry_size, 0, 0, 0);
+
+  if (now_seg->name != section_name)
+    free (section_name);
 #endif /* OBJ_ELF */
 }
 
