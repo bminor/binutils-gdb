@@ -1,3 +1,8 @@
+Mon Jul 25 12:58:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* objdump.c (objdump_print_address): Correct handling of end of
+	symbols when looking for next symbol with a different value.
+
 Fri Jul 22 16:48:34 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* nm.c (numeric_forward): Treat undefined symbols as "less than"
