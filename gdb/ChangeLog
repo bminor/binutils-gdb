@@ -1,3 +1,7 @@
+2003-11-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/x86-64linux.mt (TDEPFILES): Add glibc-tdep.o.
+
 2003-11-13  David Carlton  <carlton@kealia.com>
 
 	* cp-namespace.c (lookup_namespace_scope): Fix typo in comment.
