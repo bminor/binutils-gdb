@@ -435,6 +435,7 @@ struct _sim_cpu {
   address_word dspc;  /* delay-slot PC */
 #define DSPC ((CPU)->dspc)
 
+#if !WITH_IGEN
   /* Issue a delay slot instruction immediatly by re-calling
      idecode_issue */
 #define DELAY_SLOT(TARGET) \
@@ -455,6 +456,11 @@ struct _sim_cpu {
     dotrace (SD, CPU, tracefh, 2, NIA, 4, "load instruction"); \
     NIA = CIA + 8; \
   } while (0)
+#else
+#define DELAY_SLOT(TARGET) NIA = delayslot32 (SD_, (TARGET))
+#define NULLIFY_NEXT_INSTRUCTION() NIA = nullify_next_insn32 (SD_)
+#endif
+
 
   /* State of the simulator */
   unsigned int state;
@@ -866,7 +872,7 @@ prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 
 INLINE_SIM_MAIN (unsigned32) ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
-unsigned16 ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
+INLINE_SIM_MAIN (unsigned16) ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM16(CIA) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1))
 #define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
 

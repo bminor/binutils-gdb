@@ -1551,29 +1551,6 @@ ColdReset (SIM_DESC sd)
     }
 }
 
-unsigned16
-ifetch16 (SIM_DESC sd,
-	  sim_cpu *cpu,
-	  address_word cia,
-	  address_word vaddr)
-{
-  /* Copy the action of the LW instruction */
-  address_word reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
-  address_word bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
-  unsigned64 value;
-  address_word paddr;
-  unsigned16 instruction;
-  unsigned byte;
-  int cca;
-  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &cca, isTARGET, isREAL);
-  paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
-  LoadMemory (&value, NULL, cca, AccessLength_WORD, paddr, vaddr, isINSTRUCTION, isREAL);
-  byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
-  instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
-  return instruction;
-}
-
-
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Signal an exception condition. This will result in an exception
    that aborts the instruction. The instruction operation pseudocode
@@ -1677,7 +1654,7 @@ signal_exception (SIM_DESC sd,
 	   sim_engine_restart (sd, NULL, NULL, NULL_CIA);
 	 }
        /* else fall through to normal exception processing */
-       sim_io_eprintf(sd,"ReservedInstruction 0x%08X at PC = 0x%s\n",instruction,pr_addr(cia));
+       sim_io_eprintf(sd,"ReservedInstruction at PC = 0x%s\n", pr_addr (cia));
      }
 
     case BreakPoint:

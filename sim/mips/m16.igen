@@ -17,6 +17,14 @@
 :compute:::int:TRZ:RZ:((RZ < 2) ? (16 + RZ) \: RZ)
 :compute:::int:SHIFT:SHAMT:((SHAMT == 0) ? 8 \: SHAMT)
 
+:compute:::int:SHAMT:SHAMT_4_0,S5:(LSINSERTED (S5, 5, 5) | SHAMT_4_0)
+
+:compute:::address_word:IMMEDIATE:IMM_25_21,IMM_20_16,IMMED_15_0:(LSINSERTED (IMM_25_21, 25, 21) | LSINSERTED (IMM_20_16, 20, 16) | LSINSERTED (IMMED_15_0, 15, 0))
+:compute:::int:R32:R32L,R32H:((R32H << 3) | R32L)
+
+:compute:::address_word:IMMEDIATE:IMM_10_5,IMM_15_11,IMM_4_0:(LSINSERTED (IMM_10_5, 10, 5) | LSINSERTED (IMM_15_11, 15, 11) | LSINSERTED (IMM_4_0, 4, 0))
+
+:compute:::address_word:IMMEDIATE:IMM_10_4,IMM_14_11,IMM_3_0:(LSINSERTED (IMM_10_4, 10, 4) | LSINSERTED (IMM_14_11, 14, 11) | LSINSERTED (IMM_3_0, 3, 0))
 
 // FIXME:
 //
@@ -27,19 +35,11 @@
 // has not been resolved.
 
 
-011101,26.INSTR_INDEX:NORMAL:32::JALX
-*r3900:
-// start-sanitize-tx19
-*tx19:
-// end-sanitize-tx19
-/// {
-/// }
-
-
 // Load and Store Instructions
 
 
 10000,3.RX,3.RY,5.IMMED:RRI:16::LB
+"lb r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -48,8 +48,20 @@
   GPR[TRY] = EXTEND8 (do_load (SD_, AccessLength_BYTE, GPR[TRX], IMMED));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10000,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::LB
+"lb r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = EXTEND8 (do_load (SD_, AccessLength_BYTE, GPR[TRX], EXTEND16 (IMMEDIATE)));
+}
+
+
 
 10100,3.RX,3.RY,5.IMMED:RRI:16::LBU
+"lbu r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -58,8 +70,20 @@
   GPR[TRY] = do_load (SD_, AccessLength_BYTE, GPR[TRX], IMMED);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10100,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::LBU
+"lbu r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = do_load (SD_, AccessLength_BYTE, GPR[TRX], EXTEND16 (IMMEDIATE));
+}
+
+
 
 10001,3.RX,3.RY,5.IMMED:RRI:16::LH
+"lh r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -68,8 +92,20 @@
   GPR[TRY] = EXTEND16 (do_load (SD_, AccessLength_HALFWORD, GPR[TRX], IMMED << 1));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10001,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::LH
+"lh r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = EXTEND16 (do_load (SD_, AccessLength_HALFWORD, GPR[TRX], EXTEND16 (IMMEDIATE)));
+}
+
+
 
 10101,3.RX,3.RY,5.IMMED:RRI:16::LHU
+"lhu r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -78,8 +114,20 @@
   GPR[TRY] = do_load (SD_, AccessLength_HALFWORD, GPR[TRX], IMMED << 1);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10101,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::LHU
+"lhu r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = do_load (SD_, AccessLength_HALFWORD, GPR[TRX], EXTEND16 (IMMEDIATE));
+}
+
+
 
 10011,3.RX,3.RY,5.IMMED:RRI:16::LW
+"lw r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -88,8 +136,20 @@
   GPR[TRY] = EXTEND32 (do_load (SD_, AccessLength_WORD, GPR[TRX], IMMED << 2));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10011,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::LW
+"lw r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = EXTEND32 (do_load (SD_, AccessLength_WORD, GPR[TRX], EXTEND16 (IMMEDIATE)));
+}
+
+
 
 10110,3.RX,8.IMMED:RI:16::LWPC
+"lw r<TRX>, <IMMED> (PC)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -99,8 +159,20 @@
 				basepc (SD_) & ~3, IMMED << 2));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10110,3.RX,000,5.IMM_4_0:EXT-RI:16::LWPC
+"lw r<TRX>, <IMMEDIATE> (PC)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRX] = EXTEND32 (do_load (SD_, AccessLength_WORD, basepc (SD_) & ~3, EXTEND16 (IMMEDIATE)));
+}
+
+
 
 10010,3.RX,8.IMMED:RI:16::LWSP
+"lw r<TRX>, <IMMED> (SP)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -109,8 +181,20 @@
   GPR[TRX] = EXTEND32 (do_load (SD_, AccessLength_WORD, SP, IMMED << 2));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10010,3.RX,000,5.IMM_4_0:EXT-RI:16::LWSP
+"lw r<TRX>, <IMMEDIATE> (SP)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRX] = EXTEND32 (do_load (SD_, AccessLength_WORD, SP, EXTEND16 (IMMEDIATE)));
+}
+
+
 
 10111,3.RX,3.RY,5.IMMED:RRI:16::LWU
+"lwu r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -119,8 +203,20 @@
   GPR[TRY] = do_load (SD_, AccessLength_WORD, GPR[TRX], IMMED << 2);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 10111,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::LWU
+"lwu r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = do_load (SD_, AccessLength_WORD, GPR[TRX], EXTEND16 (IMMEDIATE));
+}
+
+
 
 00111,3.RX,3.RY,5.IMMED:RRI:16,64::LD
+"ld r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -129,8 +225,20 @@
   GPR[TRY] = do_load (SD_, AccessLength_DOUBLEWORD, GPR[TRX], IMMED << 3);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 00111,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16,64::LD
+"ld r<TRY>, <IMMED> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = do_load (SD_, AccessLength_DOUBLEWORD, GPR[TRX], EXTEND16 (IMMEDIATE));
+}
+
+
 
 11111,100,3.RY,5.IMMED:RI64:16::LDPC
+"ld r<TRY>, <IMMED> (PC)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -140,8 +248,20 @@
 		      basepc (SD_) & ~7, IMMED << 3);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,100,3.RY,5.IMM_4_0:EXT-RI64:16::LDPC
+"ld r<TRY>, <IMMEDIATE> (PC)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = do_load (SD_, AccessLength_DOUBLEWORD, basepc (SD_) & ~7, EXTEND16 (IMMEDIATE));
+}
+
+
 
 11111,000,3.RY,5.IMMED:RI64:16::LDSP
+"ld r<TRY>, <IMMED> (SP)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -150,8 +270,20 @@
   GPR[TRY] = do_load (SD_, AccessLength_DOUBLEWORD, SP, IMMED << 3);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,000,3.RY,5.IMM_4_0:EXT-RI64:16::LDSP
+"ld r<TRY>, <IMMEDIATE> (SP)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = do_load (SD_, AccessLength_DOUBLEWORD, SP, EXTEND16 (IMMEDIATE));
+}
+
+
 
 11000,3.RX,3.RY,5.IMMED:RRI:16::SB
+"sb r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -160,8 +292,20 @@
   do_store (SD_, AccessLength_BYTE, GPR[TRX], IMMED, GPR[TRY]);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11000,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::SB
+"sb r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_BYTE, GPR[TRX], EXTEND16 (IMMEDIATE), GPR[TRY]);
+}
+
+
 
 11001,3.RX,3.RY,5.IMMED:RRI:16::SH
+"sh r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -170,8 +314,20 @@
   do_store (SD_, AccessLength_HALFWORD, GPR[TRX], IMMED << 1, GPR[TRY]);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11001,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::SH
+"sh r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_HALFWORD, GPR[TRX], EXTEND16 (IMMEDIATE), GPR[TRY]);
+}
+
+
 
 11011,3.RX,3.RY,5.IMMED:RRI:16::SW
+"sw r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -180,8 +336,20 @@
   do_store (SD_, AccessLength_WORD, GPR[TRX], IMMED << 2, GPR[TRY]);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11011,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::SW
+"sw r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_WORD, GPR[TRX], EXTEND16 (IMMEDIATE), GPR[TRY]);
+}
+
+
 
 11010,3.RX,8.IMMED:RI:16::SWSP
+"sw r<TRX>, <IMMED> (SP)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -190,8 +358,20 @@
   do_store (SD_, AccessLength_WORD, SP, IMMED << 2, GPR[TRX]);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11010,3.RX,000,5.IMM_4_0:EXT-RI:16::SWSP
+"sw r<TRX>, <IMMEDIATE> (SP)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_WORD, SP, EXTEND16 (IMMEDIATE), GPR[TRX]);
+}
+
+
 
 01100,010,8.IMMED:I8:16::SWRASP
+"sw r<RAIDX>, <IMMED> (SP)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -200,8 +380,20 @@
   do_store (SD_, AccessLength_WORD, SP, IMMED << 2, RA);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01100,010,000,5.IMM_4_0:EXT-I8:16::SWRASP
+"sw r<RAIDX>, <IMMEDIATE> (SP)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_WORD, SP, EXTEND16 (IMMEDIATE), RA);
+}
+
+
 
 01111,3.RX,3.RY,5.IMMED:RRI:16::SD
+"sd r<TRY>, <IMMED> (r<TRX>)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -210,8 +402,20 @@
   do_store (SD_, AccessLength_DOUBLEWORD, GPR[TRX], IMMED << 3, GPR[TRY]);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01111,3.RX,3.RY,5.IMM_4_0:EXT-RRI:16::SD
+"sd r<TRY>, <IMMEDIATE> (r<TRX>)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_DOUBLEWORD, GPR[TRX], EXTEND16 (IMMEDIATE), GPR[TRY]);
+}
+
+
 
 11111,001,3.RY,5.IMMED:RI64:16::SDSP
+"sd r<TRY>, <IMMED> (SP)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -220,8 +424,20 @@
   do_store (SD_, AccessLength_DOUBLEWORD, SP, IMMED << 3, GPR[TRY]);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,001,3.RY,5.IMM_4_0:EXT-RI64:16::SDSP
+"sd r<TRY>, <IMMEDIATE> (SP)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_DOUBLEWORD, SP, EXTEND16 (IMMEDIATE), GPR[TRY]);
+}
+
+
 
 11111,010,8.IMMED:I64:16::SDRASP
+"sd r<RAIDX>, <IMMED> (SP)"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -230,11 +446,23 @@
   do_store (SD_, AccessLength_DOUBLEWORD, SP, IMMED << 3, RA);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,010,000,5.IMM_4_0:EXT-I64:16::SDRASP
+"sd r<RAIDX>, <IMMEDIATE> (SP)"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_store (SD_, AccessLength_DOUBLEWORD, SP, EXTEND16 (IMMEDIATE), RA);
+}
+
+
 
 // ALU Immediate Instructions
 
 
-01101,3.RX,8.IMMED::RI:16::LI
+01101,3.RX,8.IMMED:RI:16::LI
+"li r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -243,8 +471,20 @@
   do_ori (SD_, 0, TRX, IMMED);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01101,3.RX,000,5.IMM_4_0:EXT-RI:16::LI
+"li r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_ori (SD_, 0, TRX, IMMEDIATE);
+}
 
-01000,3.RX,3.RY,0,4.IMMED:RRI_A:16::ADDIU
+
+
+01000,3.RX,3.RY,0,4.IMMED:RRI-A:16::ADDIU
+"addiu r<TRY>, r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -253,8 +493,20 @@
   do_addiu (SD_, TRX, TRY, EXTEND4 (IMMED));
 }
 
+11110,7.IMM_10_4,4.IMM_14_11 + 01000,3.RX,3.RY,0,4.IMM_3_0:EXT-RRI-A:16::ADDIU
+"addiu r<TRY>, r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_addiu (SD_, TRX, TRY, EXTEND15 (IMMEDIATE));
+}
+
+
 
 01001,3.RX,8.IMMED:RI:16::ADDIU8
+"addiu r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -263,8 +515,20 @@
   do_addiu (SD_, TRX, TRX, EXTEND8 (IMMED));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01001,3.RX,000,5.IMM_4_0:EXT-RI:16::ADDIU8
+"addiu r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_addiu (SD_, TRX, TRX, EXTEND16 (IMMEDIATE));
+}
+
+
 
 01100,011,8.IMMED:I8:16::ADJSP
+"addiu SP, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -273,8 +537,20 @@
   do_addiu (SD_, SPIDX, SPIDX, EXTEND8 (IMMED) << 3);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01100,011,000,5.IMM_4_0:EXT-I8:16::ADJSP
+"addiu SP, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_addiu (SD_, SPIDX, SPIDX, EXTEND16 (IMMEDIATE));
+}
+
+
 
 00001,3.RX,8.IMMED:RI:16::ADDIUPC
+"addiu r<TRX>, PC, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -284,8 +560,21 @@
   GPR[TRX] = EXTEND32 (temp);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 00001,3.RX,000,5.IMM_4_0:EXT-RI:16::ADDIUPC
+"addiu r<TRX>, PC, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  unsigned32 temp = (basepc (SD_) & ~3) + EXTEND16 (IMMEDIATE);
+  GPR[TRX] = EXTEND32 (temp);
+}
+
+
 
 00000,3.RX,8.IMMED:RI:16::ADDIUSP
+"addiu r<TRX>, SP, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -294,8 +583,20 @@
   do_addiu (SD_, SPIDX, TRX, EXTEND8 (IMMED) << 2);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 00000,3.RX,000,5.IMM_4_0:EXT-RI:16::ADDIUSP
+"addiu r<TRX>, SP, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_addiu (SD_, SPIDX, TRX, EXTEND16 (IMMEDIATE));
+}
 
-01000,3.RX,3.RY,1,4.IMMED:RRI_A:16,64::DADDIU
+
+
+01000,3.RX,3.RY,1,4.IMMED:RRI-A:16,64::DADDIU
+"daddiu r<TRY>, r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -304,8 +605,20 @@
   do_daddiu (SD_, TRX, TRY, EXTEND4 (IMMED));
 }
 
+11110,7.IMM_10_4,4.IMM_14_11 + 01000,3.RX,3.RY,1,4.IMM_3_0:EXT-RRI-A:16,64::DADDIU
+"daddiu r<TRY>, r<TRX>, <IMMED>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_daddiu (SD_, TRX, TRY, EXTEND15 (IMMEDIATE));
+}
+
+
 
 11111,101,3.RY,5.IMMED:RI64:16,64::DADDIU5
+"daddiu r<TRY>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -314,8 +627,20 @@
   do_daddiu (SD_, TRY, TRY, EXTEND5 (IMMED));
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,101,3.RY,5.IMM_4_0:EXT-RI64:16,64::DADDIU5
+"daddiu r<TRY>, <IMMED>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_daddiu (SD_, TRY, TRY, EXTEND5 (IMMEDIATE));
+}
+
+
 
 11111,011,8.IMMED:I64:16,64::DADJSP
+"daddiu SP, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -324,8 +649,20 @@
   do_daddiu (SD_, SPIDX, SPIDX, EXTEND8 (IMMED) << 3);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,011,000,5.IMM_4_0:EXT-I64:16,64::DADJSP
+"daddiu SP, <IMMED>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_daddiu (SD_, SPIDX, SPIDX, EXTEND16 (IMMEDIATE));
+}
+
+
 
 11111,110,3.RY,5.IMMED:RI64:16,64::DADDIUPC
+"daddiu r<TRY>, PC, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -334,8 +671,20 @@
   GPR[TRY] = (basepc (SD_) & ~3) + (EXTEND5 (IMMED) << 2);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,110,3.RY,5.IMM_4_0:EXT-RI64:16,64::DADDIUPC
+"daddiu r<TRY>, PC, <IMMED>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  GPR[TRY] = (basepc (SD_) & ~3) + EXTEND5 (IMMED);
+}
+
+
 
 11111,111,3.RY,5.IMMED:RI64:16,64::DADDIUSP
+"daddiu r<TRY>, SP, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -344,8 +693,20 @@
   do_daddiu (SD_, SPIDX, TRY, EXTEND5 (IMMED) << 2);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 11111,111,3.RY,5.IMM_4_0:EXT-RI64:16,64::DADDIUSP
+"daddiu r<TRY>, SP, <IMMED>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_daddiu (SD_, SPIDX, TRY, EXTEND5 (IMMED));
+}
+
+
 
 01010,3.RX,8.IMMED:RI:16::SLTI
+"slti r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -354,8 +715,20 @@
   do_slti (SD_, TRX, T8IDX, IMMED);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01010,3.RX,000,5.IMM_4_0:EXT-RI:16::SLTI
+"slti r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_slti (SD_, TRX, T8IDX, IMMEDIATE);
+}
+
+
 
 01011,3.RX,8.IMMED:RI:16::SLTIU
+"sltiu r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -364,8 +737,20 @@
   do_sltiu (SD_, TRX, T8IDX, IMMED);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01011,3.RX,000,5.IMM_4_0:EXT-RI:16::SLTIU
+"sltiu r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_sltiu (SD_, TRX, T8IDX, IMMEDIATE);
+}
+
+
 
 11101,3.RX,3.RY,01010:RR:16::CMP
+"sltiu r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -376,6 +761,7 @@
 
 
 01110,3.RX,8.IMMED:RI:16::CMPI
+"sltiu r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -384,11 +770,24 @@
   do_xori (SD_, TRX, T8IDX, IMMED);
 }
 
+11110,6.IMM_10_5,5.IMM_15_11 + 01110,3.RX,000,5.IMM_4_0:EXT-RI:16::CMPI
+"sltiu r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_xori (SD_, TRX, T8IDX, IMMEDIATE);
+}
+
+
 
 // Two/Three Operand, Register-Type
 
 
+
 11100,3.RX,3.RY,3.RZ,01:RRR:16::ADDU
+"addu r<TRZ>, r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -398,7 +797,9 @@
 }
 
 
+
 11100,3.RX,3.RY,3.RZ,11:RRR:16::SUBU
+"subu r<TRZ>, r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -408,7 +809,9 @@
 }
 
 
+
 11100,3.RX,3.RY,3.RZ,00:RRR:16,64::DADDU
+"daddu r<TRZ>, r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -418,7 +821,9 @@
 }
 
 
+
 11100,3.RX,3.RY,3.RZ,10:RRR:16,64::DSUBU
+"dsubu r<TRZ>, r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -428,7 +833,9 @@
 }
 
 
+
 11101,3.RX,3.RY,00010:RR:16::SLT
+"slt r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -438,7 +845,9 @@
 }
 
 
+
 11101,3.RX,3.RY,00011:RR:16::SLTU
+"sltu r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -448,7 +857,9 @@
 }
 
 
+
 11101,3.RX,3.RY,01011:RR:16::NEG
+"neg r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -458,7 +869,9 @@
 }
 
 
+
 11101,3.RX,3.RY,01100:RR:16::AND
+"and r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -468,7 +881,9 @@
 }
 
 
+
 11101,3.RX,3.RY,01101:RR:16::OR
+"or r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -478,7 +893,9 @@
 }
 
 
+
 11101,3.RX,3.RY,01110:RR:16::XOR
+"xor r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -488,7 +905,9 @@
 }
 
 
+
 11101,3.RX,3.RY,01111:RR:16::NOT
+"not r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -498,7 +917,9 @@
 }
 
 
+
 01100,111,3.RY,5.R32:I8_MOVR32:16::MOVR32
+"move r<TRY>, r<R32>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -508,17 +929,21 @@
 }
 
 
+
 01100,101,3.R32L,2.R32H,3.RZ:I8_MOV32R:16::MOV32R
+"move r<R32>, r<TRZ>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  do_or (SD_, TRZ, 0, (R32H << 3) | R32L);
+  do_or (SD_, TRZ, 0, R32);
 }
 
 
-00110,3.RX,3.RY,3.SHAMT,00:ISHIFT:16::SLL
+
+00110,3.RX,3.RY,3.SHAMT,00:SHIFT:16::SLL
+"sll r<TRX>, r<TRY>, <SHIFT>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -527,8 +952,20 @@
   do_sll (SD_, TRY, TRX, SHIFT);
 }
 
+11110,5.SHAMT,0,00000 + 00110,3.RX,3.RY,000,00:EXT-SHIFT:16::SLL
+"sll r<TRX>, r<TRY>, <SHIFT>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_sll (SD_, TRY, TRX, SHAMT);
+}
 
-00110,3.RX,3.RY,3.SHAMT,10:ISHIFT:16::SRL
+
+
+00110,3.RX,3.RY,3.SHAMT,10:SHIFT:16::SRL
+"srl r<TRX>, r<TRY>, <SHIFT>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -537,8 +974,20 @@
   do_srl (SD_, TRY, TRX, SHIFT);
 }
 
+11110,5.SHAMT,0,00000 + 00110,3.RX,3.RY,000,10:EXT-SHIFT:16::SRL
+"srl r<TRX>, r<TRY>, <SHIFT>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_srl (SD_, TRY, TRX, SHAMT);
+}
 
-00110,3.RX,3.RY,3.SHAMT,11:ISHIFT:16::SRA
+
+
+00110,3.RX,3.RY,3.SHAMT,11:SHIFT:16::SRA
+"sra r<TRX>, r<TRY>, <SHIFT>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -547,8 +996,20 @@
   do_sra (SD_, TRY, TRX, SHIFT);
 }
 
+11110,5.SHAMT,0,00000 + 00110,3.RX,3.RY,000,11:EXT-SHIFT:16::SRA
+"sra r<TRX>, r<TRY>, <SHIFT>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_sra (SD_, TRY, TRX, SHAMT);
+}
+
+
 
 11101,3.RX,3.RY,00100:RR:16::SLLV
+"sllv r<TRY>, r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -559,6 +1020,7 @@
 
 
 11101,3.RX,3.RY,00110:RR:16::SRLV
+"srlv r<TRY>, r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -569,6 +1031,7 @@
 
 
 11101,3.RX,3.RY,00111:RR:16::SRAV
+"srav r<TRY>, r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -578,7 +1041,8 @@
 }
 
 
-00110,3.RX,3.RY,3.SHAMT,01:ISHIFT:16,64::DSLL
+00110,3.RX,3.RY,3.SHAMT,01:SHIFT:16,64::DSLL
+"dsll r<TRY>, r<TRX>, <SHIFT>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -587,8 +1051,30 @@
   do_dsll (SD_, 0, TRY, TRX, SHIFT);
 }
   
+11110,5.SHAMT_4_0,1.S5,00000 + 00110,3.RX,3.RY,000,01:EXT-SHIFT:16,64::DSLL
+"dsll r<TRY>, r<TRX>, <SHAMT>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_dsll (SD_, 0, TRY, TRX, SHAMT);
+}
   
-11101,3.SHAMT,3.RY,01000:RR:16,64::DSRL
+  
+  
+11101,3.SHAMT,3.RY,01000:SHIFT64:16,64::DSRL
+"dsrl r<TRY>, <SHIFT>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_dsrl (SD_, 0, TRY, TRY, SHIFT);
+}
+
+11110,5.SHAMT_4_0,1.S5,00000 + 11101,000,3.RY,01000:EXT-SHIFT64:16,64::DSRL
+"dsrl r<TRY>, <SHIFT>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -598,7 +1084,19 @@
 }
 
 
-11101,3.SHAMT,3.RY,10011:RR:16,64::DSRA
+
+11101,3.SHAMT,3.RY,10011:SHIFT64:16,64::DSRA
+"dsra r<TRY>, <SHIFT>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  do_dsra (SD_, 0, TRY, TRY, SHIFT);
+}
+
+11110,5.SHAMT_4_0,1.S5,00000 + 11101,000,3.RY,10011:EXT-SHIFT64:16,64::DSRA
+"dsra r<TRY>, <SHIFT>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -608,7 +1106,9 @@
 }
 
 
+
 11101,3.RX,3.RY,10100:RR:16,64::DSLLV
+"dsra r<TRY>, r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -619,6 +1119,7 @@
 
 
 11101,3.RX,3.RY,10110:RR:16,64::DSRLV
+"dsrlv r<TRY>, r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -629,6 +1130,7 @@
 
 
 11101,3.RX,3.RY,10111:RR:16,64::DSRAV
+"dsrav r<TRY>, r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -642,6 +1144,7 @@
 
 
 11101,3.RX,3.RY,11000:RR:16::MULT
+"mult r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -652,6 +1155,7 @@
 
 
 11101,3.RX,3.RY,11001:RR:16::MULTU
+"multu r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -662,6 +1166,7 @@
 
 
 11101,3.RX,3.RY,11010:RR:16::DIV
+"div r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -672,6 +1177,7 @@
 
 
 11101,3.RX,3.RY,11011:RR:16::DIVU
+"divu r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -682,6 +1188,7 @@
 
 
 11101,3.RX,000,10000:RR:16::MFHI
+"mfhi r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -692,6 +1199,7 @@
 
 
 11101,3.RX,000,10010:RR:16::MFLO
+"mflo r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -702,6 +1210,7 @@
 
 
 11101,3.RX,3.RY,11100:RR:16,64::DMULT
+"dmult r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -712,6 +1221,7 @@
 
 
 11101,3.RX,3.RY,11101:RR:16,64::DMULTU
+"dmultu r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -722,6 +1232,7 @@
 
 
 11101,3.RX,3.RY,11110:RR:16,64::DDIV
+"ddiv r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -732,6 +1243,7 @@
 
 
 11101,3.RX,3.RY,11111:RR:16,64::DDIVU
+"ddivu r<TRX>, r<TRY>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
@@ -746,15 +1258,14 @@
 
 
 // Issue instruction in delay slot of branch
-:function:::address_word:delayslot16:address_word target
+:function:::address_word:delayslot16:address_word nia, address_word target
 {
   instruction_word delay_insn;
   sim_events_slip (SD, 1);
   DSPC = CIA; /* save current PC somewhere */
-  CIA = CIA + 2; /* NOTE: mips16 */
   STATE |= simDELAYSLOT;
-  delay_insn = IMEM16 (CIA); /* NOTE: mips16 */
-  idecode_issue (CPU_, delay_insn, (CIA));
+  delay_insn = IMEM16 (nia); /* NOTE: mips16 */
+  idecode_issue (CPU_, delay_insn, (nia));
   STATE &= ~simDELAYSLOT;
   return target;
 }
@@ -774,119 +1285,200 @@
 
 
 // JAL
-00011,0,5.IMM_20_16,5.IMM_25_21 + 16.IMMED_15_0:I:16::JAL
+00011,0,5.IMM_20_16,5.IMM_25_21 + 16.IMMED_15_0:JAL:16::JAL
+"jal <IMMEDIATE>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  NIA = delayslot16 (SD_,
-		     (LSMASKED (NIA, 31, 26)
-		      | LSINSERTED (IMM_25_21, 25, 21)
-		      | LSINSERTED (IMM_20_16, 20, 16)
-		      | LSINSERTED (IMMED_15_0, 15, 0)));
+  address_word region = (NIA & MASK (63, 28));
+  RA = NIA + 2; /* skip 16 bit delayslot insn */
+  NIA = delayslot16 (SD_, NIA, (region | (IMMEDIATE << 2))) | 1;
 }
 
 
-// JALX
-00011,1,5.IMM_20_16,5.IMM_25_21 + 16.IMMED_15_0:I:16::JALX
+
+// JALX - 32 and 16 bit versions.
+
+011101,26.IMMED:JALX:32::JALX32
+"jalx <IMMED>"
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  address_word region = (NIA & MASK (63, 28));
+  RA = NIA + 4; /* skip 32 bit delayslot insn */
+  NIA = delayslot32 (SD_, (region | (IMMED << 2)) | 1);
+}
+
+00011,1,5.IMM_20_16,5.IMM_25_21 + 16.IMMED_15_0:JALX:16::JALX16
+"jalx <IMMEDIATE>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  NIA = delayslot16 (SD_,
-		     (LSMASKED (NIA, 31, 26)
-		      | LSINSERTED (IMM_25_21, 25, 21)
-		      | LSINSERTED (IMM_20_16, 20, 16)
-		      | LSINSERTED (IMMED_15_0, 15, 0)));
-  NIA = NIA ^ 1;
+  address_word region = (NIA & MASK (63, 28));
+  RA = NIA + 2; /* 16 bit INSN */
+  NIA = delayslot16 (SD_, NIA, (region | (IMMEDIATE << 2)) & ~1);
 }
+
 
 
 11101,3.RX,000,00000:RR:16::JR
+"jr r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  NIA = delayslot16 (SD_, GPR[TRX]);
+  NIA = delayslot16 (SD_, NIA, GPR[TRX]);
 }
 
 
 11101,000,001,00000:RR:16::JRRA
+"jrra"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  NIA = delayslot16 (SD_, RA);
+  NIA = delayslot16 (SD_, NIA, RA);
 }
 
 
+
 11101,3.RX,010,00000:RR:16::JALR
+"jalr r<TRX>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
   RA = NIA + 2;
-  NIA = delayslot16 (SD_, GPR[TRX]);
+  NIA = delayslot16 (SD_, NIA, GPR[TRX]);
 }
 
 
+
 00100,3.RX,8.IMMED:RI:16::BEQZ
+"beqz r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
   if (GPR[RX] == 0)
-    NIA = (NIA + (EXTEND8 (IMMED) << 2));
+    NIA = (NIA + (EXTEND8 (IMMED) << 1));
+}
+
+11110,6.IMM_10_5,5.IMM_15_11 + 00100,3.RX,000,5.IMM_4_0:EXT-RI:16::BEQZ
+"beqz r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  if (GPR[RX] == 0)
+    NIA = (NIA + EXTEND16 (IMMEDIATE));
 }
 
 
+
 00101,3.RX,8.IMMED:RI:16::BNEZ
+"bnez r<TRX>, <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
   if (GPR[RX] != 0)
-    NIA = (NIA + (EXTEND8 (IMMED) << 2));
+    NIA = (NIA + (EXTEND8 (IMMED) << 1));
+}
+
+11110,6.IMM_10_5,5.IMM_15_11 + 00101,3.RX,000,5.IMM_4_0:EXT-RI:16::BNEZ
+"bnez r<TRX>, <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  if (GPR[RX] != 0)
+    NIA = (NIA + EXTEND16 (IMMEDIATE));
 }
 
 
+
 01100,000,8.IMMED:I8:16::BTEQZ
+"bteqz <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
   if (T8 == 0)
-    NIA = (NIA + (EXTEND8 (IMMED) << 2));
+    NIA = (NIA + (EXTEND8 (IMMED) << 1));
+}
+
+11110,6.IMM_10_5,5.IMM_15_11 + 01100,000,000,5.IMM_4_0:EXT-I8:16::BTEQZ
+"bteqz <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  if (T8 == 0)
+    NIA = (NIA + EXTEND16 (IMMEDIATE));
 }
 
 
+
 01100,001,8.IMMED:I8:16::BTNEZ
+"btnez <IMMED>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
   if (T8 != 0)
-    NIA = (NIA + (EXTEND8 (IMMED) << 2));
+    NIA = (NIA + (EXTEND8 (IMMED) << 1));
 }
 
-
-00010,11.IMMED:I:16::B
+11110,6.IMM_10_5,5.IMM_15_11 + 01100,001,000,5.IMM_4_0:EXT-I8:16::BTNEZ
+"btnez <IMMEDIATE>"
 *mips16:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  NIA = (NIA + (EXTEND8 (IMMED) << 2));
+  if (T8 != 0)
+    NIA = (NIA + EXTEND16 (IMMEDIATE));
 }
+
+
+
+00010,11.IMMED:I:16::B
+"b <IMMED>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  NIA = (NIA + (EXTEND8 (IMMED) << 1));
+}
+
+11110,6.IMM_10_5,5.IMM_15_11 + 00010,6.0,5.IMM_4_0:EXT-I:16::B
+"b <IMMEDIATE>"
+*mips16:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  NIA = (NIA + EXTEND16 (IMMEDIATE));
+}
+
 
 
 // Special Instructions
@@ -894,11 +1486,11 @@
 
 // See the front of the mips16 doc
 //     -> FIXME need this for most instructions
-// 11110,eeeeeeeeeee:I:16::EXTEND
-// *mips16:
-// // start-sanitize-tx19
-// *tx19:
-// // end-sanitize-tx19
+//// 11110,eeeeeeeeeee:I:16::EXTEND
+//// *mips16:
+//// // start-sanitize-tx19
+//// *tx19:
+//// // end-sanitize-tx19
 
 
 // 11101,3.RX,3.RY,00101:RR:16::BREAK

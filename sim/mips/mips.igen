@@ -71,6 +71,33 @@
 
 
 
+// Helper:
+//
+// Simulate a 32 bit delayslot instruction
+//
+
+:function:::address_word:delayslot32:address_word target
+{
+  instruction_word delay_insn;
+  sim_events_slip (SD, 1);
+  DSPC = CIA;
+  CIA = CIA + 4; /* NOTE not mips16 */
+  STATE |= simDELAYSLOT;
+  delay_insn = IMEM32 (CIA); /* NOTE not mips16 */
+  idecode_issue (CPU_, delay_insn, (CIA));
+  STATE &= ~simDELAYSLOT;
+  return target;
+}
+
+:function:::address_word:nullify_next_insn32:
+{
+  sim_events_slip (SD, 1);
+  dotrace (SD, CPU, tracefh, 2, CIA + 4, 4, "load instruction");
+  return CIA + 8;
+}
+
+
+
 //
 // Mips Architecture:
 //
@@ -131,12 +158,13 @@
 
 :function:::void:do_addiu:int rs, int rt, unsigned16 immediate
 {
-  signed32 temp = GPR[rs] + EXTEND16 (immediate);
-  GPR[rt] = EXTEND32 (temp);
+  TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
+  GPR[rt] = EXTEND32 (GPR[rs] + EXTEND16 (immediate));
+  TRACE_ALU_RESULT (GPR[rt]);
 }
 
 001001,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDIU
-"addu r<RT>, r<RS>, <IMMEDIATE>"
+"addiu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
 // start-sanitize-vr4320
@@ -160,8 +188,9 @@
 
 :function:::void:do_addu:int rs, int rt, int rd
 {
-  signed32 temp = GPR[rs] + GPR[rt];
-  GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
+  GPR[rd] = EXTEND32 (GPR[rs] + GPR[rt]);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,100001:SPECIAL:32::ADDU
@@ -189,7 +218,9 @@
 
 :function:::void:do_and:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = GPR[rs] & GPR[rt];
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,100100:SPECIAL:32::AND
@@ -776,7 +807,9 @@
 
 :function:64::void:do_daddiu:int rs, int rt, unsigned16 immediate
 {
+  TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = GPR[rs] + EXTEND16 (immediate);
+  TRACE_ALU_RESULT (GPR[rt]);
 }
 
 011001,5.RS,5.RT,16.IMMEDIATE:NORMAL:64::DADDIU
@@ -804,7 +837,9 @@
 
 :function:::void:do_daddu:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = GPR[rs] + GPR[rt];
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,101101:SPECIAL:64::DADDU
@@ -832,6 +867,7 @@
 
 :function:64::void:do_ddiv:int rs, int rt
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO ("Division");
   {
     signed64 n = GPR[rs];
@@ -852,6 +888,7 @@
 	HI = (n % d);
       }
   }
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 000000,5.RS,5.RT,0000000000011110:SPECIAL:64::DDIV
@@ -879,6 +916,7 @@
 
 :function:64::void:do_ddivu:int rs, int rt
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO ("Division");
   {
     unsigned64 n = GPR[rs];
@@ -894,6 +932,7 @@
 	HI = (n % d);
       }
   }
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 000000,5.RS,5.RT,0000000000,011111:SPECIAL:64::DDIVU
@@ -918,6 +957,7 @@
 
 :function:::void:do_div:int rs, int rt
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO("Division");
   {
     signed32 n = GPR[rs];
@@ -938,6 +978,7 @@
 	HI = EXTEND32 (n % d);
       }
   }
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 000000,5.RS,5.RT,0000000000011010:SPECIAL:32::DIV
@@ -965,6 +1006,7 @@
 
 :function:::void:do_divu:int rs, int rt
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO ("Division");
   {
     unsigned32 n = GPR[rs];
@@ -980,6 +1022,7 @@
        HI = EXTEND32 (n % d);
      }
   }
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 000000,5.RS,5.RT,0000000000011011:SPECIAL:32::DIVU
@@ -1017,6 +1060,7 @@
   int sign;
   unsigned64 op1 = GPR[rs];
   unsigned64 op2 = GPR[rt];
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO ("Multiplication");
   /* make signed multiply unsigned */ 
   sign = 0;
@@ -1061,6 +1105,7 @@
   HI = hi;
   if (rd != 0)
     GPR[rd] = lo;
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 :function:::void:do_dmult:int rs, int rt, int rd
@@ -1245,7 +1290,9 @@
 :function:::void:do_srav:int rs, int rt, int rd
 {
   int s = MASKED64 (GPR[rs], 5, 0);
+  TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = ((signed64) GPR[rt]) >> s;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000010111:SPECIAL:64::DSRAV
@@ -1365,7 +1412,9 @@
 
 :function:::void:do_dsubu:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = GPR[rs] - GPR[rt];
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000101111:SPECIAL:64::DSUBU
@@ -1983,7 +2032,9 @@
 
 :function:::void:do_mfhi:int rd
 {
+  TRACE_ALU_INPUT1 (HI);
   GPR[rd] = HI;
+  TRACE_ALU_RESULT (GPR[rd]);
 #if 0
   HIACCESS = 3;
 #endif
@@ -2014,7 +2065,9 @@
 
 :function:::void:do_mflo:int rd
 {
+  TRACE_ALU_INPUT1 (LO);
   GPR[rd] = LO;
+  TRACE_ALU_RESULT (GPR[rd]);
 #if 0
   LOACCESS = 3; /* 3rd instruction will be safe */
 #endif
@@ -2146,6 +2199,7 @@
 :function:::void:do_mult:int rs, int rt, int rd
 {
   signed64 prod;
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO ("Multiplication");
   prod = (((signed64)(signed32) GPR[rs])
 	  * ((signed64)(signed32) GPR[rt]));
@@ -2153,6 +2207,7 @@
   HI = EXTEND32 (VH4_8 (prod));
   if (rd != 0)
     GPR[rd] = LO;
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 000000,5.RS,5.RT,00000,00000011000:SPECIAL:32::MULT
@@ -2187,6 +2242,7 @@
 :function:::void:do_multu:int rs, int rt, int rd
 {
   unsigned64 prod;
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   CHECKHILO ("Multiplication");
   prod = (((unsigned64)(unsigned32) GPR[rs])
 	  * ((unsigned64)(unsigned32) GPR[rt]));
@@ -2194,6 +2250,7 @@
   HI = EXTEND32 (VH4_8 (prod));
   if (rd != 0)
     GPR[rd] = LO;
+  TRACE_ALU_RESULT2 (HI, LO);
 }
 
 000000,5.RS,5.RT,00000,00000011001:SPECIAL:32::MULTU
@@ -2226,7 +2283,9 @@
 
 :function:::void:do_nor:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = ~ (GPR[rs] | GPR[rt]);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,100111:SPECIAL:32::NOR
@@ -2253,7 +2312,9 @@
 
 :function:::void:do_or:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = (GPR[rs] | GPR[rt]);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,100101:SPECIAL:32::OR
@@ -2278,6 +2339,14 @@
 }
 
 
+
+:function:::void:do_ori:int rs, int rt, unsigned immediate
+{
+  TRACE_ALU_INPUT2 (GPR[rs], immediate);
+  GPR[rt] = (GPR[rs] | immediate);
+  TRACE_ALU_RESULT (GPR[rt]);
+}
+
 001101,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ORI
 "ori r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2296,7 +2365,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RT] = (GPR[RS] | IMMEDIATE);
+  do_ori (SD_, RS, RT, IMMEDIATE);
 }
 
 
@@ -2583,7 +2652,9 @@
 :function:::void:do_sll:int rt, int rd, int shift
 {
   unsigned32 temp = (GPR[rt] << shift);
+  TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 00000000000,5.RT,5.RD,5.SHIFT,000000:SPECIAL:32::SLL
@@ -2612,7 +2683,9 @@
 {
   int s = MASKED (GPR[rs], 4, 0);
   unsigned32 temp = (GPR[rt] << s);
+  TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000000100:SPECIAL:32::SLLV
@@ -2639,7 +2712,9 @@
 
 :function:::void:do_slt:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = ((signed_word) GPR[rs] < (signed_word) GPR[rt]);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000101010:SPECIAL:32::SLT
@@ -2666,7 +2741,9 @@
 
 :function:::void:do_slti:int rs, int rt, unsigned16 immediate
 {
+  TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = ((signed_word) GPR[rs] < (signed_word) EXTEND16 (immediate));
+  TRACE_ALU_RESULT (GPR[rt]);
 }
 
 001010,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTI
@@ -2693,7 +2770,9 @@
 
 :function:::void:do_sltiu:int rs, int rt, unsigned16 immediate
 {
+  TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = ((unsigned_word) GPR[rs] < (unsigned_word) EXTEND16 (immediate));
+  TRACE_ALU_RESULT (GPR[rt]);
 }
 
 001011,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTIU
@@ -2721,7 +2800,9 @@
 
 :function:::void:do_sltu:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = ((unsigned_word) GPR[rs] < (unsigned_word) GPR[rt]);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000101011:SPECIAL:32::SLTU
@@ -2742,14 +2823,16 @@
 *tx19:
 // end-sanitize-tx19
 {
-  do_sltiu (SD_, RS, RT, RD);
+  do_sltu (SD_, RS, RT, RD);
 }
 
 
 :function:::void:do_sra:int rt, int rd, int shift
 {
   signed32 temp = (signed32) GPR[rt] >> shift;
+  TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,00000,5.RT,5.RD,5.SHIFT,000011:SPECIAL:32::SRA
@@ -2801,7 +2884,9 @@
 :function:::void:do_srl:int rt, int rd, int shift
 {
   unsigned32 temp = (unsigned32) GPR[rt] >> shift;
+  TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,00000,5.RT,5.RD,5.SHIFT,000010:SPECIAL:32::SRL
@@ -2830,7 +2915,9 @@
 {
   int s = MASKED (GPR[rs], 4, 0);
   unsigned32 temp = (unsigned32) GPR[rt] >> s;
+  TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000000110:SPECIAL:32::SRLV
@@ -2881,8 +2968,9 @@
 
 :function:::void:do_subu:int rs, int rt, int rd
 {
-  signed32 temp = GPR[rs] - GPR[rt];
-  GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
+  GPR[rd] = EXTEND32 (GPR[rs] - GPR[rt]);
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000100011:SPECIAL:32::SUBU
@@ -3376,7 +3464,9 @@
 
 :function:::void:do_xor:int rs, int rt, int rd
 {
+  TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = GPR[rs] ^ GPR[rt];
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000100110:SPECIAL:32::XOR
@@ -3403,7 +3493,9 @@
 
 :function:::void:do_xori:int rs, int rt, unsigned16 immediate
 {
+  TRACE_ALU_INPUT2 (GPR[rs], immediate);
   GPR[rt] = GPR[rs] ^ immediate;
+  TRACE_ALU_RESULT (GPR[rt]);
 }
 
 001110,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::XORI
@@ -5143,6 +5235,9 @@
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0
 "mtc0 r<RT>, r<RD> # <REGX>"
 *mipsI,mipsII,mipsIII,mipsIV:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
 *r3900:
 // start-sanitize-vr4320
 *vr4320:
@@ -5219,7 +5314,7 @@
 // end-sanitize-r5900
 
 
-:include:16::m16.igen
+:include:::m16.igen
 // start-sanitize-vr4320
 :include::vr4320:vr4320.igen
 // end-sanitize-vr4320

@@ -1,3 +1,29 @@
+Wed Apr 15 10:32:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m16run.c (sim_engine_run): Restore CIA after handling an event.
+
+start-sanitize-tx19
+	* mips.igen (mtc0): Valid tx19 instruction.
+
+end-sanitize-tx19
+	* sim-main.h (DELAY_SLOT, NULLIFY_NEXT_INSTRUCTION): For IGEN, use
+ 	functions.
+
+	* mips.igen (delayslot32, nullify_next_insn): New functions.
+	(m16.igen): Always include.
+	(do_*): Add more tracing.
+
+	* m16.igen (delayslot16): Add NIA argument, could be called by a
+ 	32 bit MIPS16 instruction.
+	
+	* interp.c (ifetch16): Move function from here.
+	* sim-main.c (ifetch16): To here.
+	
+	* sim-main.c (ifetch16, ifetch32): Update to match current
+ 	implementations of LH, LW.
+	(signal_exception): Don't print out incorrect hex value of illegal
+ 	instruction.
+
 Wed Apr 15 00:17:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* m16run.c (sim_engine_run): Use IMEM16 and IMEM32 to fetch an
