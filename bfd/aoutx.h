@@ -450,7 +450,8 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
       abfd->flags |= WP_TEXT;
       adata (abfd).magic = n_magic;
     }
-  else if (N_MAGIC (*execp) == OMAGIC)
+  else if (N_MAGIC (*execp) == OMAGIC
+	   || N_MAGIC (*execp) == BMAGIC)
     adata (abfd).magic = o_magic;
   else
     {
