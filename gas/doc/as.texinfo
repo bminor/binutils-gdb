@@ -1,20 +1,24 @@
-\input texinfo
-@c $Id$
+_dnl__                                          -*-Texinfo-*-
+_dnl__ Copyright (c) 1991 1992 Free Software Foundation, Inc.
+_dnl__ $Id$
+\input texinfo @c                               -*-Texinfo-*-
+@c  Copyright (c) 1991 1992 Free Software Foundation, Inc.
+@c %**start of header 
+@setfilename _AS__.info
 _if__(_GENERIC__)
-@setfilename as.info
+@settitle Using _AS__
 _fi__(_GENERIC__)
-_if__(_A29K__ && !_GENERIC__)
-@setfilename as-29k.info
-_fi__(_A29K__ && !_GENERIC__)
-_if__(_H8__ && !_GENERIC__)
-@setfilename h8-300.info
-_fi__(_H8__ && !_GENERIC__)
-_if__(_I960__ && !_GENERIC__)
-@setfilename as-960.info
-_fi__(_I960__ && !_GENERIC__)
-_if__(_M680X0__ && !_GENERIC__)
-@setfilename as-m680x0.info
-_fi__(_M680X0__ && !_GENERIC__)
+_if__(!_GENERIC__)
+@settitle Using _AS__ (_HOST__)
+_fi__(!_GENERIC__)
+@setchapternewpage odd
+@c @smallbook
+@c @cropmarks
+@c %**end of header
+
+@finalout
+@syncodeindex ky cp
+
 _if__(0)
 
 NOTE: this manual is marked up for preprocessing with a collection
@@ -24,12 +28,12 @@ THIS IS THE FULL SOURCE.  The full source needs to be run through m4
 before either tex- or info- formatting: for example,
     m4 pretex.m4 none.m4 m680x0.m4 as.texinfo >as-680x0.texinfo
 will produce (assuming your path finds either GNU or SysV m4; Berkeley
-won't do) a file suitable for formatting.  See the text in "pretex.m4"
-for a fuller explanation (and the macro definitions).
+won't do) a file, configured for the M680x0 version of GAS, suitable for
+formatting.  See the text in "pretex.m4" for a fuller explanation (and
+the macro definitions).
 
 _fi__(0)
 @c
-@synindex ky cp
 @ifinfo
 This file documents the GNU Assembler "_AS__".
 
@@ -59,17 +63,7 @@ except that the section entitled ``GNU General Public License'' may be
 included in a translation approved by the Free Software Foundation
 instead of in the original English.
 @end ifinfo
-@iftex
-@finalout
-@c @smallbook
-@end iftex
-@setchapternewpage odd
-_if__(_GENERIC__)
-@settitle Using _AS__
-_fi__(_GENERIC__)
-_if__(!_GENERIC__)
-@settitle Using _AS__ (_HOST__)
-_fi__(!_GENERIC__)
+
 @titlepage
 @title Using _AS__
 @subtitle The GNU Assembler
@@ -77,7 +71,7 @@ _if__(!_GENERIC__)
 @subtitle for the _HOST__ family
 _fi__(!_GENERIC__)
 @sp 1
-@subtitle March 1991
+@subtitle January 1992
 @sp 1
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
@@ -144,8 +138,9 @@ _fi__(!_GENERIC__)
 * Symbols::			Symbols
 * Expressions::			Expressions
 * Pseudo Ops::			Assembler Directives
-* Machine Dependent::		Machine Dependent Features
+* _MACH_DEP__:: 	Machine Dependent Features
 * Copying::			GNU GENERAL PUBLIC LICENSE
+* Index::                       Index
 @end menu
 
 @node Overview, Invoking, Top, Top
@@ -158,15 +153,17 @@ code for _HOST__ architectures.
 _fi__(!_GENERIC__)
 @end iftex
 
-@heading Invoking @code{_AS__}
-
+@cindex invocation summary
+@cindex option summary
+@cindex summary of options
 Here is a brief summary of how to invoke @code{_AS__}.  For details,
 @pxref{Invoking,,Comand-Line Options}.
 
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-  _AS__ [ -D ] [ -f ] [ -I @var{path} ] [ -k ] [ -L ]
+  _AS__ [ -a | -al | -as ] [ -D ] [ -f ] 
+   [ -I @var{path} ] [ -k ] [ -L ]
    [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
 _if__(_A29K__)
 @c am29k has no machine-dependent assembler options
@@ -186,6 +183,9 @@ _fi__(_M680X0__)
 @end smallexample
 
 @table @code
+@item -a | -al | -as
+Turn on assembly listings; @samp{-al}, listing only, @samp{-as}, symbols
+only, @samp{-a}, everything.
 
 @item -D
 This option is accepted only for script compatibility with calls to
@@ -198,12 +198,12 @@ other assemblers; it has no effect on @code{_AS__}.
 Add @var{path} to the search list for @code{.include} directives
 
 @item -k
-_if__((!_GENERIC__) && _DIFFTABKLUG__)
+_if__((!_GENERIC__) && !_DIFFTABKLUG__)
 This option is accepted but has no effect on the _HOST__ family.
-_fi__((!_GENERIC__) && _DIFFTABKLUG__)
-_if__(_GENERIC__)
+_fi__((!_GENERIC__) && !_DIFFTABKLUG__)
+_if__(_GENERIC__ || _DIFFTABKLUG__)
 Issue warnings when difference tables altered for long displacements.
-_fi__(_GENERIC__)
+_fi__(_GENERIC__ || _DIFFTABKLUG__)
 
 @item -L
 Keep (in symbol table) local symbols, starting with @samp{L}
@@ -222,13 +222,22 @@ Suppress warning messages
 
 _if__(_I960__)
 @item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
+_if__(_GENERIC__)
+(When configured for Intel 960). 
+_fi__(_GENERIC__) 
 Specify which variant of the 960 architecture is the target.
 
 @item -b
+_if__(_GENERIC__)
+(When configured for Intel 960). 
+_fi__(_GENERIC__) 
 Add code to collect statistics about branches taken.
 
 @item -norelax
-Do not alter compare-and-branch instructions for long displaements;
+_if__(_GENERIC__)
+(When configured for Intel 960). 
+_fi__(_GENERIC__) 
+Do not alter compare-and-branch instructions for long displacements;
 error if necessary.
 _fi__(_I960__)
 
@@ -247,7 +256,7 @@ Specify what processor in the 68000 family is the target (default 68020)
 _fi__(_M680X0__)
 
 @item -- | @var{files} @dots{}
-Source files to assemble, or standard input
+Standard input, or source files to assemble
 @end table
 
 @menu
@@ -262,8 +271,10 @@ Source files to assemble, or standard input
 
 @node Manual, GNU Assembler, Overview, Overview
 @section Structure of this Manual
-This document is intended to describe what you need to know to use
-@code{_AS__}.  We cover the syntax expected in source files, including
+
+@cindex manual, structure and purpose
+This manual is intended to describe what you need to know to use
+@sc{gnu} @code{_AS__}.  We cover the syntax expected in source files, including
 notation for symbols, constants, and expressions; the directives that
 @code{_AS__} understands; and of course how to invoke @code{_AS__}.
 
@@ -272,28 +283,36 @@ We also cover special features in the _HOST__
 configuration of @code{_AS__}, including assembler directives.
 _fi__(!_GENERIC__)
 _if__(_GENERIC__)
-This document also describes some of the machine-dependent features of
+This manual also describes some of the machine-dependent features of
 various flavors of the assembler.
 _fi__(_GENERIC__)
 _if__(_INTERNALS__)
-This document also describes how the assembler works internally, and
+This manual also describes how the assembler works internally, and
 provides some information that may be useful to people attempting to
 port the assembler to another machine.
 _fi__(_INTERNALS__)
 @refill
 
+@cindex machine instructions (not covered)
 On the other hand, this manual is @emph{not} intended as an introduction
 to programming in assembly language---let alone programming in general!
 In a similar vein, we make no attempt to introduce the machine
 architecture; we do @emph{not} describe the instruction set, standard
 mnemonics, registers or addressing modes that are standard to a
-particular architecture.  You may want to consult the manufacturer's
+particular architecture.  
+_if__(_GENERIC__)
+You may want to consult the manufacturer's
 machine architecture manual for this information.
+_fi__(_GENERIC__)
+_if__(_H8__&&!_GENERIC__)
+For information on the H8/300 machine instruction set, see @cite{H8/300
+Series Programming Manual} (Hitachi ADE--602--025).
+_fi__(_H8__&&!_GENERIC__)
 
 
 @c I think this is premature---pesch@cygnus.com, 17jan1991
 @ignore
-Throughout this document, we assume that you are running @dfn{GNU},
+Throughout this manual, we assume that you are running @dfn{GNU},
 the portable operating system from the @dfn{Free Software
 Foundation, Inc.}.  This restricts our attention to certain kinds of
 computer (in particular, the kinds of computers that GNU can run on);
@@ -317,9 +336,10 @@ computer-readable series of instructions.  Different versions of
 
 @node GNU Assembler, Object Formats, Manual, Overview
 @section _AS__, the GNU Assembler
+
 GNU @code{as} is really a family of assemblers.  
 _if__(!_GENERIC__)
-This manual describes @samp{_AS__}, a member of that family which is
+This manual describes @code{_AS__}, a member of that family which is
 configured for the _HOST__ architectures.
 _fi__(!_GENERIC__)
 If you use (or have used) the GNU assembler on one architecture, you
@@ -328,10 +348,13 @@ architecture.  Each version has much in common with the others,
 including object file formats, most assembler directives (often called
 @dfn{pseudo-ops)} and assembler syntax.@refill
 
+_if__(_GENERIC__||!_H8__)
+@cindex purpose of @sc{gnu} @code{_AS__}
 @code{_AS__} is primarily intended to assemble the output of the GNU C
 compiler @code{_GCC__} for use by the linker @code{_LD__}.  Nevertheless,
 we've tried to make @code{_AS__} assemble correctly everything that the native
 assembler would.
+_fi__(_GENERIC__||!_H8__)
 _if__(_VAX__)
 Any exceptions are documented explicitly (@pxref{_MACH_DEP__}).
 _fi__(_VAX__)
@@ -347,6 +370,8 @@ program in one pass of the source file.  This has a subtle impact on the
 
 @node Object Formats, Command Line, GNU Assembler, Overview
 @section Object File Formats
+
+@cindex object file format
 The GNU assembler can be configured to produce several alternative
 object file formats.  For the most part, this does not affect how you
 write assembly language programs; but directives for debugging symbols
@@ -376,14 +401,18 @@ _fi__(!_GENERIC__)
 @node Command Line, Input Files, Object Formats, Overview
 @section Command Line
 
+@cindex command line conventions
 After the program name @code{_AS__}, the command line may contain
-options and file names.  Options may be in any order, and may be
+options and file names.  Options may appear in any order, and may be
 before, after, or between file names.  The order of file names is
 significant.
 
+@cindex standard input, as input file
+@kindex --
 @file{--} (two hyphens) by itself names the standard input file
 explicitly, as one of the files for @code{_AS__} to assemble.
 
+@cindex options, command line
 Except for @samp{--} any command line argument that begins with a
 hyphen (@samp{-}) is an option.  Each option changes the behavior of
 @code{_AS__}.  No option changes the way another option works.  An
@@ -403,6 +432,9 @@ _AS__ -omy-object-file.o mumble.s
 @node Input Files, Object, Command Line, Overview
 @section Input Files
 
+@cindex input
+@cindex source program
+@cindex files, input
 We use the phrase @dfn{source program}, abbreviated @dfn{source}, to
 describe the program input to one run of @code{_AS__}.  The program may
 be in one or more files; how the source is partitioned into files
@@ -422,7 +454,7 @@ names.  The input files are read (from left file name to right).  A
 command line argument (in any position) that has no special meaning
 is taken to be an input file name.
 
-If @code{_AS__} is given no file names it attempts to read one input file
+If you give @code{_AS__} no file names it attempts to read one input file
 from the @code{_AS__} standard input, which is normally your terminal.  You
 may have to type @key{ctl-D} to tell @code{_AS__} there is no more program
 to assemble.
@@ -434,10 +466,13 @@ If the source is empty, @code{_AS__} will produce a small, empty object
 file.
 
 @subheading Filenames and Line-numbers
-There are two ways of locating a line in the input file (or files) and both
-are used in reporting error messages.  One way refers to a line
+
+@cindex input file linenumbers
+@cindex line numbers, in input files
+There are two ways of locating a line in the input file (or files) and
+either may be used in reporting error messages.  One way refers to a line
 number in a physical file; the other refers to a line number in a
-``logical'' file.
+``logical'' file.  @xref{Errors, ,Error and Warning Messages}.
 
 @dfn{Physical files} are those files named in the command line given
 to @code{_AS__}.
@@ -450,6 +485,11 @@ source is itself synthesized from other files.
 
 @node Object, Errors, Input Files, Overview
 @section Output (Object) File
+
+@cindex object file
+@cindex output file
+@kindex a.out
+@kindex .o
 Every time you run @code{_AS__} it produces an output file, which is
 your assembly language program translated into numbers.  This file
 is the object file, named @code{a.out} unless you tell @code{_AS__} to
@@ -460,28 +500,37 @@ capable of assembling self-contained programs directly into a
 runnable program.
 @c This may still work, but hasn't been tested.
 
+@cindex linker
+@kindex ld
 The object file is meant for input to the linker @code{_LD__}.  It contains
 assembled program code, information to help @code{_LD__} integrate
 the assembled program into a runnable file, and (optionally) symbolic
 information for the debugger.
 
-@comment link above to some info file(s) like the description of a.out.
-@comment don't forget to describe GNU info as well as Unix lossage.
+@c link above to some info file(s) like the description of a.out.
+@c don't forget to describe GNU info as well as Unix lossage.
 
 @node Errors,  , Object, Overview
 @section Error and Warning Messages
 
+@cindex error messsages
+@cindex warning messages
+@cindex messages from @code{_AS__}
 @code{_AS__} may write warnings and error messages to the standard error
-file (usually your terminal).  This should not happen when @code{_AS__} is
-run automatically by a compiler.  Warnings report an assumption made so
+file (usually your terminal).  This should not happen when  a compiler
+runs @code{_AS__} automatically.  Warnings report an assumption made so
 that @code{_AS__} could keep assembling a flawed program; errors report a
 grave problem that stops the assembly.
 
+@cindex format of warning messages
 Warning messages have the format
+
 @smallexample
 file_name:@b{NNN}:Warning Message Text
 @end smallexample
+
 @noindent
+@cindex line numbers, in warnings/errors
 (where @b{NNN} is a line number).  If a logical file name has
 been given (@pxref{App-File,,@code{.app-file}}) it is used for the filename, otherwise the
 name of the current input file is used.  If a logical line number was
@@ -497,6 +546,7 @@ otherwise the actual line in the current source file is printed.  The
 message text is intended to be self explanatory (in the grand Unix
 tradition). @refill
 
+@cindex format of error messages
 Error messages have the format
 @smallexample
 file_name:@b{NNN}:FATAL:Error Message Text
@@ -507,7 +557,9 @@ because many of them aren't supposed to happen.
 
 @node Invoking, Syntax, Overview, Top
 @chapter Command-Line Options
-This section describes command-line options available in @emph{all}
+
+@cindex options, all versions of @code{_AS__}
+This chapter describes command-line options available in @emph{all}
 versions of the GNU assembler; @pxref{_MACH_DEP__}, for options specific
 _if__(!_GENERIC__)
 to the _HOST__.
@@ -516,22 +568,55 @@ _if__(_GENERIC__)
 to particular machine architectures.
 _fi__(_GENERIC__)
 
-@subsection @code{-D}
+@section @code{-a}, @code{-al}, @code{-as}
+
+@kindex -a
+@kindex -al
+@kindex -as
+@cindex listings, enabling
+@cindex assembly listings, enabling
+These options enable listing output from the assembler.  @samp{-a} by
+itself requests all listing output; @samp{-al} requests only the
+output-program listing, and @samp{-as} requests only a symbol table
+listing.  
+
+Once you have specified one of these options, you can further control
+listing output and its appearance using the directives @code{.list},
+@code{.nolist}, @code{.psize}, @code{.eject}, @code{.title}, and
+@code{.sbttl}.
+
+If you do not request listing output with one of the @samp{-a} options, the
+listing-control directives have no effect.
+
+@section @code{-D}
+
+@kindex -D
 This option has no effect whatsoever, but it is accepted to make it more
 likely that scripts written for other assemblers will also work with
 @code{_AS__}.
 
-@subsection Work Faster: @code{-f}
+@section Work Faster: @code{-f}
+
+@kindex -f
+@cindex trusted compiler
+@cindex faster processing (@code{-f})
 @samp{-f} should only be used when assembling programs written by a
 (trusted) compiler.  @samp{-f} stops the assembler from pre-processing
-the input file(s) before assembling them.
+the input file(s) before assembling them.  @xref{Pre-processing,
+,Pre-processing}. 
+
 @quotation
 @emph{Warning:} if the files actually need to be pre-processed (if they
 contain comments, for example), @code{_AS__} will not work correctly if
 @samp{-f} is used.
 @end quotation
 
-@subsection @code{.include} search path: @code{-I} @var{path}
+@section @code{.include} search path: @code{-I} @var{path}
+
+@kindex -I @var{path}
+@cindex paths for @code{.include}
+@cindex search path for @code{.include}
+@cindex @code{include} directive search path
 Use this option to add a @var{path} to the list of directories
 @code{_AS__} will search for files specified in @code{.include}
 directives (@pxref{Include,,@code{.include}}).  You may use @code{-I} as
@@ -540,7 +625,9 @@ working directory is always searched first; after that, @code{_AS__}
 searches any @samp{-I} directories in the same order as they were
 specified (left to right) on the command line.
 
-@subsection Difference Tables: @code{-k}
+@section Difference Tables: @code{-k}
+
+@kindex -k
 _if__((!_GENERIC__) && (!_DIFFTABKLUG__))
 On the _HOST__ family, this option is allowed, but has no effect.  It is
 permitted for compatibility with the GNU assembler on other platforms,
@@ -551,13 +638,18 @@ alteration on other platforms.
 _fi__((!_GENERIC__) && (!_DIFFTABKLUG__))
 
 _if__(_GENERIC__ || _DIFFTABKLUG__ )
+@cindex difference tables, warning
+@cindex warning for altered difference tables
 @code{_AS__} sometimes alters the code emitted for directives of the form
 @samp{.word @var{sym1}-@var{sym2}}; @pxref{Word,,@code{.word}}.
 You can use the @samp{-k} option if you want a warning issued when this
 is done.
 _fi__(_GENERIC__ || _DIFFTABKLUG__ )
 
-@subsection Include Local Labels: @code{-L}
+@section Include Local Labels: @code{-L}
+
+@kindex -L
+@cindex local labels, retaining in output
 Labels beginning with @samp{L} (upper case only) are called @dfn{local
 labels}. @xref{Symbol Names}.  Normally you don't see such labels when
 debugging, because they are intended for the use of programs (like
@@ -569,7 +661,11 @@ This option tells @code{_AS__} to retain those @samp{L@dots{}} symbols
 in the object file.  Usually if you do this you also tell the linker
 @code{_LD__} to preserve symbols whose names begin with @samp{L}.
 
-@subsection Name the Object File: @code{-o}
+@section Name the Object File: @code{-o}
+
+@kindex -o
+@cindex naming object file
+@cindex object file name
 There is always one object file output when you run @code{_AS__}.  By
 default it has the name @file{a.out}.  You use this option (which
 takes exactly one filename) to give the object file a different name.
@@ -577,11 +673,13 @@ takes exactly one filename) to give the object file a different name.
 Whatever the object file is called, @code{_AS__} will overwrite any
 existing file of the same name.
 
-@subsection Join Data and Text Sections: @code{-R}
-_if__(_COFF__)
-This option is only useful if you use sections named @samp{.text} and
-@samp{.data}.  
-_fi__(_COFF__)
+@section Join Data and Text Sections: @code{-R}
+
+@kindex -R
+@cindex data and text sections, joining
+@cindex text and data sections, joining
+@cindex joining text and data sections
+@cindex merging text and data sections
 @code{-R} tells @code{_AS__} to write the object file as if all
 data-section data lives in the text section.  This is only done at
 the very last moment:  your binary data are the same, but data
@@ -594,12 +692,27 @@ address displacements (because we don't have to cross between text and
 data section).  We refrain from doing this simply for compatibility with
 older versions of @code{_AS__}.  In future, @code{-R} may work this way.
 
-@subsection Announce Version: @code{-v}
+_if__(_COFF__)
+When @code{_AS__} is configured for COFF output, 
+this option is only useful if you use sections named @samp{.text} and
+@samp{.data}.  
+_fi__(_COFF__)
+
+@section Announce Version: @code{-v}
+
+@kindex -v
+@kindex -version
+@cindex @code{_AS__} version
+@cindex version of @code{_AS__}
 You can find out what version of as is running by including the
 option @samp{-v} (which you can also spell as @samp{-version}) on the
 command line.
 
-@subsection Suppress Warnings: @code{-W}
+@section Suppress Warnings: @code{-W}
+
+@kindex -W
+@cindex suppressing warnings
+@cindex warnings, suppressing
 @code{_AS__} should never give a warning or error message when
 assembling compiler output.  But programs written by people often
 cause @code{_AS__} to give a warning that a particular assumption was
@@ -611,6 +724,9 @@ still reported.
 
 @node Syntax, Sections, Invoking, Top
 @chapter Syntax
+
+@cindex machine-independent syntax
+@cindex syntax, machine-independent
 This chapter describes the machine-independent syntax allowed in a
 source file.  @code{_AS__} syntax is similar to what many other assemblers
 use; it is inspired in BSD 4.2
@@ -631,19 +747,23 @@ _fi__(_VAX__)
 @end menu
 
 @node Pre-processing, Whitespace, Syntax, Syntax
-@section Pre-processing
+@section Pre-Processing
 
+@cindex preprocessing
 The pre-processor:
 @itemize @bullet
+@cindex whitespace, removed by preprocessor
 @item
 adjusts and removes extra whitespace.  It leaves one space or tab before
 the keywords on a line, and turns any other whitespace on the line into
 a single space.
 
+@cindex comments, removed by preprocessor
 @item
 removes all comments, replacing them with a single space, or an
 appropriate number of newlines.
 
+@cindex constants, converted by preprocessor
 @item
 converts character constants into the appropriate numeric values.
 @end itemize
@@ -652,6 +772,10 @@ Excess whitespace, comments, and character constants
 cannot be used in the portions of the input text that are not
 pre-processed.
 
+@cindex turning preprocessing on and off
+@cindex preprocessing, turning on and off
+@kindex #NO_APP
+@kindex #APP
 If the first line of an input file is @code{#NO_APP} or the @samp{-f}
 option is given, the input file will not be pre-processed.  Within such
 an input file, parts of the file can be pre-processed by putting a line
@@ -662,6 +786,8 @@ normally does not need to be pre-processed.
 
 @node Whitespace, Comments, Pre-processing, Syntax
 @section Whitespace
+
+@cindex whitespace
 @dfn{Whitespace} is one or more blanks or tabs, in any order.
 Whitespace is used to separate symbols, and to make programs neater for
 people to read.  Unless within character constants
@@ -670,6 +796,8 @@ as exactly one space.
 
 @node Comments, Symbol Intro, Whitespace, Syntax
 @section Comments
+
+@cindex comments
 There are two ways of rendering comments to @code{_AS__}.  In both
 cases the comment is equivalent to one space.
 
@@ -685,6 +813,7 @@ This means you may not nest these comments.
 /* This sort of comment does not nest. */
 @end smallexample
 
+@cindex line comment character
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
 _if__(_VAX__)
@@ -711,7 +840,10 @@ will only begin a comment if it is the first non-whitespace character on
 a line, while the other will always begin a comment.
 _fi__(_GENERIC__)
 
-To be compatible with past assemblers a special interpretation is
+@kindex #
+@cindex lines starting with @code{#}
+@cindex logical line numbers
+To be compatible with past assemblers, a special interpretation is
 given to lines that begin with @samp{#}.  Following the @samp{#} an
 absolute expression (@pxref{Expressions}) is expected:  this will be
 the logical line number of the @b{next} line.  Then a string
@@ -730,6 +862,9 @@ of @code{_AS__}.
 
 @node Symbol Intro, Statements, Comments, Syntax
 @section Symbols
+
+@cindex symbols
+@cindex characters used in symbols
 A @dfn{symbol} is one or more characters chosen from the set of all
 letters (both upper and lower case), digits and 
 _if__(!_H8__)
@@ -747,9 +882,14 @@ There is no length limit: all characters are significant.  Symbols are
 delimited by characters not in that set, or by the beginning of a file
 (since the source program must end with a newline, the end of a file is
 not a possible symbol delimiter).  @xref{Symbols}.
+@cindex length of symbols
 
 @node Statements, Constants, Symbol Intro, Syntax
 @section Statements
+
+@cindex statements, structure of
+@cindex line separator character
+@cindex statement separator character
 _if__(!_GENERIC__)
 _if__(!(_A29K__||_H8__))
 A @dfn{statement} ends at a newline character (@samp{\n}) or at a
@@ -779,9 +919,14 @@ statement.  Newlines and separators within character constants are an
 exception: they don't end statements.
 _fi__(_GENERIC__)
 
+@cindex newline, required at file end
+@cindex EOF, newline must precede
 It is an error to end any statement with end-of-file:  the last
 character of any input file should be a newline.@refill
 
+@cindex continuing statements
+@cindex multi-line statements
+@cindex statement on multiple lines
 You may write a statement on more than one line if you put a
 backslash (@kbd{\}) immediately in front of any newlines within the
 statement.  When @code{_AS__} reads a backslashed newline both
@@ -791,6 +936,8 @@ source program.
 
 An empty statement is allowed, and may include whitespace.  It is ignored.
 
+@cindex instructions and directives
+@cindex directives and instructions
 @c "key symbol" is not used elsewhere in the document; seems pedantic to
 @c @defn{} it in that case, as was done previously...  pesch@cygnus.com,
 @c 13feb91.
@@ -808,6 +955,8 @@ represent a different instruction in a different computer's assembly
 language.@refill
 _fi__(_GENERIC__)
 
+@cindex @code{:} (label)
+@cindex label (@code{:})
 A label is a symbol immediately followed by a colon (@code{:}).
 Whitespace before a label or after a colon is permitted, but you may not
 have whitespace between a label's symbol and its colon. @xref{Labels}.
@@ -820,6 +969,8 @@ another_label:           # This is an empty statement.
 
 @node Constants,  , Statements, Syntax
 @section Constants
+
+@cindex constants
 A constant is a number, written so that its value is known by
 inspection, without knowing any context.  Like this:
 @smallexample
@@ -837,6 +988,9 @@ inspection, without knowing any context.  Like this:
 
 @node Characters, Numbers, Constants, Constants
 @subsection Character Constants
+
+@cindex character constants
+@cindex constants, character
 There are two kinds of character constants.  A @dfn{character} stands
 for one character in one byte and its value may be used in
 numeric expressions.  String constants (properly called string
@@ -850,6 +1004,9 @@ used in arithmetic expressions.
 
 @node Strings, Chars, Characters, Characters
 @subsubsection Strings
+
+@cindex string constants
+@cindex constants, string
 A @dfn{string} is written between double-quotes.  It may contain
 double-quotes or null characters.  The way to get special characters
 into a string is to @dfn{escape} these characters: precede them with
@@ -859,44 +1016,76 @@ one backslash:  the first @code{\} is an escape which tells
 (which prevents @code{_AS__} from recognizing the second @code{\} as an
 escape character).  The complete list of escapes follows.
 
+@cindex escape codes, character
+@cindex character escape codes
 @table @kbd
 @c	@item \a
 @c	Mnemonic for ACKnowledge; for ASCII this is octal code 007.
+@c
 @item \b
+@cindex @code{\b} (backspace character)
+@cindex backspace (@code{\b})
 Mnemonic for backspace; for ASCII this is octal code 010.
+
 @c	@item \e
 @c	Mnemonic for EOText; for ASCII this is octal code 004.
+@c
 @item \f
+@cindex @code{\f} (formfeed character)
+@cindex formfeed (@code{\f})
 Mnemonic for FormFeed; for ASCII this is octal code 014.
+
 @item \n
+@cindex @code{\n} (newline character)
+@cindex newline (@code{\n})
 Mnemonic for newline; for ASCII this is octal code 012.
+
 @c	@item \p
 @c	Mnemonic for prefix; for ASCII this is octal code 033, usually known as @code{escape}.
+@c
 @item \r
+@cindex @code{\r} (carriage return character)
+@cindex carriage return (@code{\r})
 Mnemonic for carriage-Return; for ASCII this is octal code 015.
+
 @c	@item \s
 @c	Mnemonic for space; for ASCII this is octal code 040.  Included for compliance with
 @c	other assemblers.
+@c
 @item \t
+@cindex @code{\t} (tab)
+@cindex tab (@code{\t})
 Mnemonic for horizontal Tab; for ASCII this is octal code 011.
+
 @c	@item \v
 @c	Mnemonic for Vertical tab; for ASCII this is octal code 013.
 @c	@item \x @var{digit} @var{digit} @var{digit}
 @c	A hexadecimal character code.  The numeric code is 3 hexadecimal digits.
+@c
 @item \ @var{digit} @var{digit} @var{digit}
+@cindex @code{\@var{ddd}} (octal character code)
+@cindex octal character code (@code{\@var{ddd}})
 An octal character code.  The numeric code is 3 octal digits.
 For compatibility with other Unix systems, 8 and 9 are accepted as digits:
 for example, @code{\008} has the value 010, and @code{\009} the value 011.
+
 @item \\
+@cindex @code{\\} (@samp{\} character)
+@cindex backslash (@code{\\})
 Represents one @samp{\} character.
+
 @c	@item \'
 @c	Represents one @samp{'} (accent acute) character.
 @c	This is needed in single character literals
 @c      (@xref{Characters,,Character Constants}.) to represent
 @c	a @samp{'}.
+@c
 @item \"
+@cindex @code{\"} (doublequote character)
+@cindex doublequote (@code{\"})
 Represents one @samp{"} character.  Needed in strings to represent
 this character, because an unescaped @samp{"} would end the string.
+
 @item \ @var{anything-else}
 Any other character when escaped by @kbd{\} will give a warning, but
 assemble as if the @samp{\} was not present.  The idea is that if
@@ -914,6 +1103,10 @@ sequence.
 
 @node Chars,  , Strings, Characters
 @subsubsection Characters
+
+@cindex single character constant
+@cindex character, single
+@cindex constant, single character
 A single character may be written as a single quote immediately
 followed by that character.  The same escapes apply to characters as
 to strings.  So if you want to write the character backslash, you
@@ -939,6 +1132,9 @@ that character.  @code{_AS__} assumes your character code is ASCII:
 
 @node Numbers,  , Characters, Constants
 @subsection Number Constants
+
+@cindex constants, number
+@cindex number constants
 @code{_AS__} distinguishes three kinds of numbers according to how they
 are stored in the target machine.  @emph{Integers} are numbers that
 would fit into an @code{int} in the C language.  @emph{Bignums} are
@@ -956,16 +1152,26 @@ _fi__(_I960__&&!_GENERIC__)
 
 @node Integers, Bignums, Numbers, Numbers
 @subsubsection Integers
-@c FIXME: are binary integers in vintage as?
+@cindex integers
+@cindex constants, integer
+
+@cindex binary integers
+@cindex integers, binary
 A binary integer is @samp{0b} or @samp{0B} followed by zero or more of
 the binary digits @samp{01}.
 
+@cindex octal integers
+@cindex integers, octal
 An octal integer is @samp{0} followed by zero or more of the octal
 digits (@samp{01234567}).
 
+@cindex decimal integers
+@cindex integers, decimal
 A decimal integer starts with a non-zero digit followed by zero or
 more digits (@samp{0123456789}).
 
+@cindex hexadecimal integers
+@cindex integers, hexadecimal
 A hexadecimal integer is @samp{0x} or @samp{0X} followed by one or
 more hexadecimal digits chosen from @samp{0123456789abcdefABCDEF}.
 
@@ -975,6 +1181,9 @@ the prefix operator @samp{-} discussed under expressions
 
 @node Bignums, Flonums, Integers, Numbers
 @subsubsection Bignums
+
+@cindex bignums
+@cindex constants, bignum
 A @dfn{bignum} has the same syntax and semantics as an integer
 except that the number (or its negative) takes more than 32 bits to
 represent in binary.  The distinction is made because in some places
@@ -987,8 +1196,13 @@ _if__(_GENERIC__||!_I960__)
 @node Flonums,  , Bignums, Numbers
 _fi__(_GENERIC__||!_I960__)
 @subsubsection Flonums
+@cindex flonums
+@cindex floating point numbers
+@cindex constants, floating point
+
+@cindex precision, floating point
 A @dfn{flonum} represents a floating point number.  The translation is
-complex: a decimal floating point number from the text is converted by
+indirect: a decimal floating point number from the text is converted by
 @code{_AS__} to a generic binary floating point number of more than
 sufficient precision.  This generic floating point number is converted
 to a particular computer's floating point format (or formats) by a
@@ -999,9 +1213,9 @@ A flonum is written by writing (in order)
 @item
 The digit @samp{0}.
 @item
+A letter, to tell @code{_AS__} the rest of the number is a flonum.  
 _if__(_GENERIC__)
-A letter, to tell @code{_AS__} the rest of the number is a flonum.  @kbd{e}
-is recommended.  Case is not important.
+@kbd{e} is recommended.  Case is not important.
 @ignore
 @c FIXME: verify if flonum syntax really this vague for most cases
   (Any otherwise illegal letter
@@ -1013,22 +1227,20 @@ _if__(_A29K__||_H8__)
 _if__(_GENERIC__)
 On the AMD 29K and H8/300 architectures, the letter must be:
 _fi__(_GENERIC__)
-One of the letters @samp{DFPRSX} (in upper or lower case), to tell
-@code{_AS__} the rest of the number is a flonum.
+One of the letters @samp{DFPRSX} (in upper or lower case).
 _fi__(_A29K__||_H8__)
 _if__(_I960__)
 _if__(_GENERIC__)
 On the Intel 960 architecture, the letter must be:
 _fi__(_GENERIC__)
-One of the letters @samp{DFT} (in upper or lower case), to tell
-@code{_AS__} the rest of the number is a flonum.
+One of the letters @samp{DFT} (in upper or lower case).
 _fi__(_I960__)
 @item
 An optional sign: either @samp{+} or @samp{-}.
 @item
 An optional @dfn{integer part}: zero or more decimal digits.
 @item
-An optional @dfn{fraction part}: @samp{.} followed by zero
+An optional @dfn{fractional part}: @samp{.} followed by zero
 or more decimal digits.
 @item
 An optional exponent, consisting of:
@@ -1044,7 +1256,7 @@ One or more decimal digits.
 @end itemize
 @end itemize
 
-At least one of @var{integer part} or @var{fraction part} must be
+At least one of the integer part or the fractional part must be
 present.  The floating point number has the usual base-10 value.
 
 @code{_AS__} does all processing using integers.  Flonums are computed
@@ -1057,6 +1269,9 @@ _if__(_I960__&&!_GENERIC__)
 @c turned on only by the i960 config of GAS.
 @node Bit Fields,  , Flonums, Numbers
 @subsubsection Bit Fields
+
+@cindex bit fields
+@cindex constants, bit field
 You can also define numeric constants as @dfn{bit fields}.
 specify two numbers separated by a colon---
 @example
@@ -1083,23 +1298,26 @@ _fi__(_I960__&&!_GENERIC__)
 
 @node Sections, Symbols, Syntax, Top
 @chapter Sections and Relocation
+@cindex sections
+@cindex relocation
 
 @menu
 * Secs Background::		Background
 * _LD__ Sections::		_LD__ Sections
 * _AS__ Sections::		_AS__ Internal Sections
-_if__(!_H8__)
 * Sub-Sections::		Sub-Sections
-_fi__(!_H8__)
 * bss::				bss Section
 @end menu
 
 @node Secs Background, _LD__ Sections, Sections, Sections
 @section Background
+
 Roughly, a section is a range of addresses, with no gaps; all data
 ``in'' those addresses is treated the same for some particular purpose.
 For example there may be a ``read only'' section.
 
+@cindex linker, and assembler
+@cindex assembler, and linker
 The linker @code{_LD__} reads many object files (partial programs) and
 combines their contents to form a runnable program.  When @code{_AS__}
 emits an object file, the partial program is assumed to start at address
@@ -1115,7 +1333,12 @@ within them.  Such a rigid unit is called a @emph{section}.  Assigning
 run-time addresses to sections is called @dfn{relocation}.  It includes
 the task of adjusting mentions of object-file addresses so they refer to
 the proper run-time addresses.
+_if__(_H8__)
+For the H8/300, @code{_AS__} pads sections if needed to ensure they end
+on a word (sixteen bit) boundary.
+_fi__(_H8__)
 
+@cindex standard @code{_AS__} sections
 An object file written by @code{_AS__} has at least three sections, any
 of which may be empty.  These are named @dfn{text}, @dfn{data} and
 @dfn{bss} sections.  
@@ -1153,6 +1376,8 @@ Which section does the address refer to?  What is the numeric value of
 Is the reference to an address ``Program-Counter relative''?
 @end itemize
 
+@cindex addresses, format of
+@cindex section-relative addressing
 In fact, every address @code{_AS__} ever uses is expressed as
 @display
 (@var{section}) + (@var{offset into section})
@@ -1167,7 +1392,7 @@ Internal Sections}).  In this manual we use the notation @{@var{secname}
 
 Apart from text, data and bss sections you need to know about the
 @dfn{absolute} section.  When @code{_LD__} mixes partial programs,
-addresses in the absolute section remain unchanged.  That is, address
+addresses in the absolute section remain unchanged.  For example, address
 @code{@{absolute 0@}} is ``relocated'' to run-time address 0 by @code{_LD__}.
 Although two partial programs' data sections will not overlap addresses
 after linking, @emph{by definition} their absolute sections will overlap.
@@ -1200,9 +1425,13 @@ use of @code{_AS__} and have no meaning except during assembly.
 @table @strong
 
 _if__(_GENERIC__||_COFF__)
+@cindex named sections
+@cindex sections, named
 @item named sections
 _fi__(_GENERIC__||_COFF__)
 _if__(_AOUT__||_BOUT__)
+@cindex text section
+@cindex data section
 @item text section
 @itemx data section
 _fi__(_AOUT__||_BOUT__)
@@ -1218,6 +1447,7 @@ program is usually alterable: for example, C variables would be stored
 in the data section.
 _fi__(_AOUT__||_BOUT__)
 
+@cindex bss section
 @item bss section
 This section contains zeroed bytes when your program begins running.  It
 is used to hold unitialized variables or common storage.  The length of
@@ -1226,23 +1456,24 @@ out containing zeroed bytes there is no need to store explicit zero
 bytes in the object file.  The bss section was invented to eliminate
 those explicit zeros from object files.
 
+@cindex absolute section
 @item absolute section
 Address 0 of this section is always ``relocated'' to runtime address 0.
 This is useful if you want to refer to an address that @code{_LD__} must
 not change when relocating.  In this sense we speak of absolute
 addresses being ``unrelocatable'': they don't change during relocation.
 
+@cindex undefined section
 @item undefined section
 This ``section'' is a catch-all for address references to objects not in
 the preceding sections.
 @c FIXME: ref to some other doc on obj-file formats could go here.
-
 @end table
 
+@cindex relocation example
 An idealized example of three relocatable sections follows.  
 _if__(_COFF__) 
-The example uses the traditional names @samp{.text} and @samp{.data} for
-two named sections.
+The example uses the traditional section names @samp{.text} and @samp{.data}.
 _fi__(_COFF__) 
 Memory addresses are on the horizontal axis.
 
@@ -1272,37 +1503,31 @@ linked program:       |  |TTT|ttttt|  |dddd|DDD|00000|
 @c FIXME make sure no page breaks inside figure!!
 @tex
 
-{\it Partial program \#1: }
-
+\line{\it Partial program \#1: \hfil}
 \line{\ibox{2.5cm}{\tt text}\ibox{2cm}{\tt data}\ibox{1cm}{\tt bss}\hfil}
 \line{\boxit{2.5cm}{\tt ttttt}\boxit{2cm}{\tt dddd}\boxit{1cm}{\tt 00}\hfil}
 
-{\it Partial program \#2:}
-
+\line{\it Partial program \#2: \hfil}
 \line{\ibox{1cm}{\tt text}\ibox{1.5cm}{\tt data}\ibox{1cm}{\tt bss}\hfil}
 \line{\boxit{1cm}{\tt TTT}\boxit{1.5cm}{\tt DDDD}\boxit{1cm}{\tt 000}\hfil}
 
-{\it linked program: }
-
+\line{\it linked program: \hfil}
 \line{\ibox{.5cm}{}\ibox{1cm}{\tt text}\ibox{2.5cm}{}\ibox{.75cm}{}\ibox{2cm}{\tt data}\ibox{1.5cm}{}\ibox{2cm}{\tt bss}\hfil}
 \line{\boxit{.5cm}{}\boxit{1cm}{\tt TTT}\boxit{2.5cm}{\tt
 ttttt}\boxit{.75cm}{}\boxit{2cm}{\tt dddd}\boxit{1.5cm}{\tt
 DDDD}\boxit{2cm}{\tt 00000}\ \dots\hfil}
 
-{\it addresses:}
-
+\line{\it addresses: \hfil}
 \line{0\dots\hfil}
 
 @end tex
 @c END TEXI2ROFF-KILL
 
-_if__(!_H8__)
 @node _AS__ Sections, Sub-Sections, _LD__ Sections, Sections
-_fi__(!_H8__)
-_if__(_H8__)
-@node _AS__ Sections, bss, _LD__ Sections, Sections
-_fi__(_H8__)
 @section _AS__ Internal Sections
+
+@cindex internal @code{_AS__} sections
+@cindex sections in messages, internal
 These sections are meant only for the internal use of @code{_AS__}.  They
 have no meaning at run-time.  You don't really need to know about these
 sections for most purposes; but they can be mentioned in @code{_AS__}
@@ -1313,13 +1538,16 @@ section-relative address.
 
 @table @b
 @item absent
+@cindex absent (internal section)
 An expression was expected and none was found.
 
 @item ASSEMBLER-INTERNAL-LOGIC-ERROR!
+@cindex assembler internal logic error
 An internal assembler logic error has been found.  This means there is a
 bug in the assembler.
 
 @item bignum/flonum
+@cindex bignum/flonum (internal section)
 If a number can't be written as a C @code{int} constant (a bignum or a
 flonum, but not an integer), it is recorded as belonging to this
 ``section''.  @code{_AS__} has to remember that a flonum or a bignum
@@ -1330,6 +1558,7 @@ convenience; bignum/flonum section behaves similarly to absolute
 section.
 
 @item pass1 section
+@cindex pass1 (internal section)
 The expression was impossible to evaluate in the first pass.  The
 assembler will attempt a second pass (second reading of the source) to
 evaluate the expression.  Your expression mentioned an undefined symbol
@@ -1342,12 +1571,14 @@ will abort with an error message if one is required.
 @end quotation
 
 @item difference section
+@cindex difference (internal section)
 As an assist to the C compiler, expressions of the forms
 @display
    (@var{undefined symbol}) @minus{} (@var{expression})
    @var{something} @minus{} (@var{undefined symbol})
    (@var{undefined symbol}) @minus{} (@var{undefined symbol})
 @end display
+
 are permitted, and belong to the difference section.  @code{_AS__}
 re-evaluates such expressions after the source file has been read and
 the symbol table built.  If by that time there are no undefined symbols
@@ -1366,14 +1597,27 @@ statements and the like.
 
 @node Sub-Sections, bss, _AS__ Sections, Sections
 @section Sub-Sections
+
+@cindex numbered subsections
+@cindex grouping data
+_if__(_AOUT__||_BOUT__)
 Assembled bytes
 _if__(_COFF__)
 conventionally
 _fi__(_COFF__)
-fall into two sections: text and data.  Because you may have groups of
-text or data that you want to end up near to each other in the object
-file, @code{_AS__} allows you to use @dfn{subsections} of these two
-sections.  Within each section, there can be numbered subsections with
+fall into two sections: text and data.  
+_fi__(_AOUT__||_BOUT__)
+You may have separate groups of
+_if__(_COFF__||_GENERIC__)
+data in named sections
+_fi__(_COFF__||_GENERIC__)
+_if__((_AOUT__||_BOUT__)&&!_GENERIC__)
+text or data 
+_fi__((_AOUT__||_BOUT__)&&!_GENERIC__)
+that you want to end up near to each other in the object
+file, even though they are not contiguous in the assembler source.
+@code{_AS__} allows you to use @dfn{subsections} for this purpose.
+Within each section, there can be numbered subsections with
 values from 0 to 8192.  Objects assembled into the same subsection will
 be grouped with other objects in the same subsection when they are all
 put into the object file.  For example, a compiler might want to store
@@ -1390,6 +1634,11 @@ Each subsection is zero-padded up to a multiple of four bytes.
 (Subsections may be padded a different amount on different flavors
 of @code{_AS__}.)
 _fi__(_GENERIC__)
+_if__(!_GENERIC__)
+_if__(_H8__)
+On the H8/300 platform, each subsection is zero-padded to a word
+boundary (two bytes).
+_fi__(_H8__)
 _if__(_I960__)
 @c FIXME section padding (alignment)?
 @c Rich Pixley says padding here depends on target obj code format; that
@@ -1399,9 +1648,11 @@ _if__(_I960__)
 @c discussed in BFD chapter of binutils (or some such).
 _fi__(_I960__)
 _if__(_A29K__)
-On the AMD 29K family, no particular padding is added to section sizes;
-_AS__ forces no alignment on this platform.
+On the AMD 29K family, no particular padding is added to section or
+subsection sizes; _AS__ forces no alignment on this platform.
 _fi__(_A29K__)
+_fi__(!_GENERIC__)
+
 Subsections appear in your object file in numeric order, lowest numbered
 to highest.  (All this to be compatible with other people's assemblers.)
 The object file contains no representation of subsections; @code{_LD__} and
@@ -1410,12 +1661,23 @@ They just see all your text subsections as a text section, and all your
 data subsections as a data section.
 
 To specify which subsection you want subsequent statements assembled
-into, use a @samp{.text @var{expression}} or a @samp{.data
-@var{expression}} statement.  @var{Expression} should be an absolute
-expression.  (@xref{Expressions}.)  If you just say @samp{.text}
-then @samp{.text 0} is assumed.  Likewise @samp{.data} means
-@samp{.data 0}.  Assembly begins in @code{text 0}.
-For instance:
+into, use a numeric argument to specify it, in a @samp{.text
+@var{expression}} or a @samp{.data @var{expression}} statement.
+_if__(_COFF__)
+_if__(_GENERIC__)
+When generating COFF output, you 
+_fi__(_GENERIC__)
+_if__(!_GENERIC__)
+You
+_fi__(!_GENERIC__)
+can also use an extra subsection
+argument with arbitrary named sections: @samp{.section @var{name},
+@var{expression}}.
+_fi__(_COFF__)
+@var{Expression} should be an absolute expression.
+(@xref{Expressions}.)  If you just say @samp{.text} then @samp{.text 0}
+is assumed.  Likewise @samp{.data} means @samp{.data 0}.  Assembly
+begins in @code{text 0}.  For instance:
 @smallexample
 .text 0     # The default subsection is text 0 anyway.
 .ascii "This lives in the first text subsection. *"
@@ -1438,13 +1700,11 @@ definition will capture its current value.  The location counter of the
 section that statements are being assembled into is said to be the
 @dfn{active} location counter.
 
-_if__(!_H8__)
 @node bss,  , Sub-Sections, Sections
-_fi__(!_H8__)
-_if__(_H8__)
-@node bss,  , _AS__ Sections, Sections
-_fi__(_H8__)
 @section bss Section
+
+@cindex bss section
+@cindex common variable storage
 The bss section is used for local common variable storage.
 You may allocate address space in the bss section, but you may
 not dictate data to load into it before your program executes.  When
@@ -1458,11 +1718,14 @@ are no bss subsections. @xref{Comm,,@code{.comm}},
 
 @node Symbols, Expressions, Sections, Top
 @chapter Symbols
+
+@cindex symbols
 Symbols are a central concept: the programmer uses symbols to name
 things, the linker uses symbols to link, and the debugger uses symbols
 to debug.
 
 @quotation
+@cindex debuggers, and symbol order
 @emph{Warning:} @code{_AS__} does not place symbols in the object file in
 the same order they were declared.  This may break some debuggers.
 @end quotation
@@ -1477,6 +1740,8 @@ the same order they were declared.  This may break some debuggers.
 
 @node Labels, Setting Symbols, Symbols, Symbols
 @section Labels
+
+@cindex labels
 A @dfn{label} is written as a symbol immediately followed by a colon
 @samp{:}.  The symbol then represents the current value of the
 active location counter, and is, for example, a suitable instruction
@@ -1486,6 +1751,9 @@ definitions.
 
 @node Setting Symbols, Symbol Names, Labels, Symbols
 @section Giving Symbols Other Values
+
+@cindex assigning values to symbols
+@cindex symbol values, assigning
 A symbol can be given an arbitrary value by writing a symbol, followed
 by an equals sign @samp{=}, followed by an expression
 (@pxref{Expressions}).  This is equivalent to using the @code{.set}
@@ -1493,6 +1761,9 @@ directive.  @xref{Set,,@code{.set}}.
 
 @node Symbol Names, Dot, Setting Symbols, Symbols
 @section Symbol Names
+
+@cindex symbol names
+@cindex names, symbol
 Symbol names begin with a letter or with one of 
 _if__(!_H8__)
 @samp{_.$}
@@ -1510,7 +1781,7 @@ underscores and dollar signs.
 _fi__(!_H8__)
 _if__(_H8__)
 _if__(_GENERIC__)
-dollar signs (unless otherwise noted in @ref{_MACH_DEP}), 
+dollar signs (unless otherwise noted in @ref{_MACH_DEP__}), 
 _fi__(_GENERIC__)
 and underscores.
 _fi__(_H8__)
@@ -1528,6 +1799,10 @@ number of times in a program.
 
 @subheading Local Symbol Names
 
+@cindex local symbol names
+@cindex symbol names, local
+@cindex temporary symbol names
+@cindex symbol names, temporary
 Local symbols help compilers and programmers use names temporarily.
 There are ten local symbol names, which are re-used throughout the
 program.  You may refer to them using the names @samp{0} @samp{1}
@@ -1583,6 +1858,10 @@ For instance, the first @code{1:} is named @code{L1@ctrl{A}1}, the 44th
 @node Dot, Symbol Attributes, Symbol Names, Symbols
 @section The Special Dot Symbol
 
+@cindex dot (symbol)
+@cindex @code{.} (symbol)
+@cindex current address
+@cindex location counter
 The special symbol @samp{.} refers to the current address that
 @code{_AS__} is assembling into.  Thus, the expression @samp{melvin:
 .long .} will cause @code{melvin} to contain its own address.
@@ -1597,8 +1876,12 @@ _fi__(_A29K__)
 
 @node Symbol Attributes,  , Dot, Symbols
 @section Symbol Attributes
+
+@cindex symbol attributes
+@cindex attributes, symbol
 Every symbol has, as well as its name, the attributes ``Value'' and
-``Type''.  Depending on output format, symbols also have auxiliary attributes.
+``Type''.  Depending on output format, symbols can also have auxiliary
+attributes. 
 _if__(_INTERNALS__)
 The detailed definitions are in _0__<a.out.h>_1__.
 _fi__(_INTERNALS__)
@@ -1611,12 +1894,14 @@ would want.
 @menu
 * Symbol Value::		Value
 * Symbol Type::			Type
+_if__(_AOUT__||_BOUT__)
 _if__(_GENERIC__||!_BOUT__)
 * a.out Symbols::		Symbol Attributes: @code{a.out}
 _fi__(_GENERIC__||!_BOUT__)
 _if__(_BOUT__&&!_GENERIC__)
 * a.out Symbols::		Symbol Attributes: @code{a.out}, @code{b.out}
 _fi__(_BOUT__&&!_GENERIC__)
+_fi__(_AOUT__||_BOUT__)
 _if__(_COFF__)
 * COFF Symbols::		Symbol Attributes for COFF
 _fi__(_COFF__)
@@ -1624,6 +1909,9 @@ _fi__(_COFF__)
 
 @node Symbol Value, Symbol Type, Symbol Attributes, Symbol Attributes
 @subsection Value
+
+@cindex value of a symbol
+@cindex symbol value
 The value of a symbol is (usually) 32 bits.  For a symbol which labels a
 location in the text, data, bss or absolute sections the value is the
 number of addresses from the start of that section to the label.
@@ -1641,19 +1929,22 @@ common declaration.  The value is how much common storage to reserve, in
 bytes (addresses).  The symbol refers to the first address of the
 allocated storage.
 
+_if__(!(_AOUT__||_BOUT__))
+@node Symbol Type, COFF Symbols, Symbol Value, Symbol Attributes
+_fi__(!(_AOUT__||_BOUT__))
+_if__((_AOUT__||_BOUT__))
 @node Symbol Type, a.out Symbols, Symbol Value, Symbol Attributes
+_fi__((_AOUT__||_BOUT__))
 @subsection Type
+
+@cindex type of a symbol
+@cindex symbol type
 The type attribute of a symbol contains relocation (section)
 information, any flag settings indicating that a symbol is external, and
 (optionally), other information for linkers and debuggers.  The exact
 format depends on the object-code output format in use.
 
 _if__(_AOUT__||_BOUT__)
-@menu
-* Symbol Desc::			Descriptor
-* Symbol Other::		Other
-@end menu
-
 _if__(_COFF__)
 @node a.out Symbols, COFF Symbols, Symbol Type, Symbol Attributes
 _fi__(_COFF__)
@@ -1662,12 +1953,18 @@ _if__(!_COFF__)
 _fi__(!_COFF__)
 _if__(_BOUT__&&!_GENERIC__)
 @subsection Symbol Attributes: @code{a.out}, @code{b.out}
+
+@cindex @code{b.out} symbol attributes
+@cindex symbol attributes, @code{b.out}
 These symbol attributes appear only when @code{_AS__} is configured for
 one of the Berkeley-descended object output formats.
 _fi__(_BOUT__&&!_GENERIC__)
 _if__(_GENERIC__||!_BOUT__)
 @subsection Symbol Attributes: @code{a.out}
 _fi__(_GENERIC__||!_BOUT__)
+
+@cindex @code{a.out} symbol attributes
+@cindex symbol attributes, @code{a.out}
 
 @menu
 * Symbol Desc::			Descriptor
@@ -1676,6 +1973,8 @@ _fi__(_GENERIC__||!_BOUT__)
 
 @node Symbol Desc, Symbol Other, a.out Symbols, a.out Symbols
 @subsubsection Descriptor
+
+@cindex descriptor, of @code{a.out} symbol
 This is an arbitrary 16-bit value.  You may establish a symbol's
 descriptor value by using a @code{.desc} statement
 (@pxref{Desc,,@code{.desc}}).  A descriptor value means nothing to
@@ -1683,21 +1982,36 @@ descriptor value by using a @code{.desc} statement
 
 @node Symbol Other,  , Symbol Desc, a.out Symbols
 @subsubsection Other
+
+@cindex other attribute, of @code{a.out} symbol
 This is an arbitrary 8-bit value.  It means nothing to @code{_AS__}.
 _fi__(_AOUT__||_BOUT__)
 
 _if__(_COFF__)
+_if__(!(_AOUT__||_BOUT__))
+@node COFF Symbols,  , Symbol Type, Symbol Attributes
+_fi__(!(_AOUT__||_BOUT__))
+_if__(_AOUT__||_BOUT__)
 @node COFF Symbols,  , a.out Symbols, Symbol Attributes
+_fi__(_AOUT__||_BOUT__)
 @subsection Symbol Attributes for COFF
+
+@cindex COFF symbol attributes
+@cindex symbol attributes, COFF
+
 The COFF format supports a multitude of auxiliary symbol attributes;
 like the primary symbol attributes, they are set between @code{.def} and
 @code{.endef} directives.  
 
 @subsubsection Primary Attributes
+
+@cindex primary attributes, COFF symbols
 The symbol name is set with @code{.def}; the value and type,
 respectively, with @code{.val} and @code{.type}.
 
 @subsubsection Auxiliary Attributes
+
+@cindex auxiliary attributes, COFF symbols
 The @code{_AS__} directives @code{.dim}, @code{.line}, @code{.scl},
 @code{.size}, and @code{.tag} can generate auxiliary symbol table
 information for COFF.
@@ -1705,6 +2019,10 @@ _fi__(_COFF__)
 
 @node Expressions, Pseudo Ops, Symbols, Top
 @chapter Expressions
+
+@cindex expressions
+@cindex addresses
+@cindex numeric values
 An @dfn{expression} specifies an address or numeric value.
 Whitespace may precede and/or follow an expression.
 
@@ -1715,6 +2033,9 @@ Whitespace may precede and/or follow an expression.
 
 @node Empty Exprs, Integer Exprs, Expressions, Expressions
 @section Empty Expressions
+
+@cindex empty expressions
+@cindex expressions, empty
 An empty expression has no value: it is just whitespace or null.
 Wherever an absolute expression is required, you may omit the
 expression and @code{_AS__} will assume a value of (absolute) 0.  This
@@ -1722,6 +2043,9 @@ is compatible with other assemblers.
 
 @node Integer Exprs,  , Empty Exprs, Expressions
 @section Integer Expressions
+
+@cindex integer expressions
+@cindex expressions, integer
 An @dfn{integer expression} is one or more @emph{arguments} delimited
 by @emph{operators}.
 
@@ -1735,6 +2059,10 @@ by @emph{operators}.
 @node Arguments, Operators, Integer Exprs, Integer Exprs
 @subsection Arguments
 
+@cindex expression arguments
+@cindex arguments in expressions
+@cindex operands in expressions
+@cindex arithmetic operands
 @dfn{Arguments} are symbols, numbers or subexpressions.  In other
 contexts arguments are sometimes called ``arithmetic operands''.  In
 this manual, to avoid confusing them with the ``instruction operands'' of
@@ -1755,19 +2083,26 @@ these 32 bits are an integer.  You may write integer-manipulating
 instructions that act on exotic constants, compatible with other
 assemblers.
 
+@cindex subexpressions
 Subexpressions are a left parenthesis @samp{(} followed by an integer
 expression, followed by a right parenthesis @samp{)}; or a prefix
 operator followed by an argument.
 
 @node Operators, Prefix Ops, Arguments, Integer Exprs
 @subsection Operators
+
+@cindex operators, in expressions
+@cindex arithmetic functions
+@cindex functions, in expressions
 @dfn{Operators} are arithmetic functions, like @code{+} or @code{%}.  Prefix
 operators are followed by an argument.  Infix operators appear
 between their arguments.  Operators may be preceded and/or followed by
 whitespace.
 
 @node Prefix Ops, Infix Ops, Operators, Integer Exprs
-@subsection Prefix Operators
+@subsection Prefix Operator
+
+@cindex prefix operators
 @code{_AS__} has the following @dfn{prefix operators}.  They each take
 one argument, which must be absolute.
 
@@ -1792,25 +2127,34 @@ one argument, which must be absolute.
 @node Infix Ops,  , Prefix Ops, Integer Exprs
 @subsection Infix Operators
 
+@cindex infix operators
+@cindex operators, permitted arguments
 @dfn{Infix operators} take two arguments, one on either side.  Operators
 have precedence, but operations with equal precedence are performed left
 to right.  Apart from @code{+} or @code{-}, both arguments must be
 absolute, and the result is absolute.
 
 @enumerate
+@cindex operator precedence
+@cindex precedence of operators
 
 @item
 Highest Precedence
+
 @table @code
 @item *
 @dfn{Multiplication}.
+
 @item /
 @dfn{Division}.  Truncation is the same as the C operator @samp{/}
+
 @item %
 @dfn{Remainder}.
+
 @item _0__<_1__
 @itemx _0__<<_1__
 @dfn{Shift Left}.  Same as the C operator @samp{_0__<<_1__}
+
 @item _0__>_1__
 @itemx _0__>>_1__
 @dfn{Shift Right}.  Same as the C operator @samp{_0__>>_1__}
@@ -1818,26 +2162,39 @@ Highest Precedence
 
 @item
 Intermediate precedence
+
 @table @code
 @item |
+
 @dfn{Bitwise Inclusive Or}.
+
 @item &
 @dfn{Bitwise And}.
+
 @item ^
 @dfn{Bitwise Exclusive Or}.
+
 @item !
 @dfn{Bitwise Or Not}.
 @end table
 
 @item
 Lowest Precedence
+
 @table @code
 @item +
+@cindex addition, permitted arguments
+@cindex plus, permitted arguments
+@cindex arguments for addition
 @dfn{Addition}.  If either argument is absolute, the result
 has the section of the other argument.
 If either argument is pass1 or undefined, the result is pass1.
 Otherwise @code{+} is illegal.
+
 @item -
+@cindex subtraction, permitted arguments
+@cindex minus, permitted arguments
+@cindex arguments for subtraction
 @dfn{Subtraction}.  If the right argument is absolute, the
 result has the section of the left argument.
 If either argument is pass1 the result is pass1.
@@ -1857,12 +2214,17 @@ Similarly, you can't subtract quantities from two different sections.
 @node Pseudo Ops, _MACH_DEP__, Expressions, Top
 @chapter Assembler Directives
 
+@cindex directives, machine independent
+@cindex pseudo-ops, machine independent
+@cindex machine independent directives
 All assembler directives have names that begin with a period (@samp{.}).
-The rest of the name is letters: their case does not matter.
+The rest of the name is letters, usually in lower case.
 
 This chapter discusses directives present regardless of the target
-machine configuration for the GNU assembler; @pxref{_MACH_DEP__} for
-additional directives.
+machine configuration for the GNU assembler.  
+_if__(!_H8__)
+@xref{_MACH_DEP__} for additional directives.
+_fi__(!_H8__)
 
 @menu
 * Abort::			@code{.abort}
@@ -1882,11 +2244,14 @@ _fi__(_BOUT__&&!_COFF__)
 _if__(_COFF__||_BOUT__)
 * Def::				@code{.def @var{name}}
 _fi__(_COFF__||_BOUT__)
+_if__(_AOUT__||_BOUT__)
 * Desc::			@code{.desc @var{symbol}, @var{abs-expression}}
+_fi__(_AOUT__||_BOUT__)
 _if__(_COFF__||_BOUT__)
 * Dim::				@code{.dim}
 _fi__(_COFF__||_BOUT__)
 * Double::			@code{.double @var{flonums}}
+* Eject::			@code{.eject}
 * Else::			@code{.else}
 _if__(_COFF__||_BOUT__)
 * Endef::			@code{.endef}
@@ -1906,21 +2271,25 @@ _fi__(_GENERIC__||!_A29K__)
 * Include::			@code{.include "@var{file}"}
 * Int::				@code{.int @var{expressions}}
 * Lcomm::			@code{.lcomm @var{symbol} , @var{length}}
+* Lflags::                      @code{.lflags}
 _if__(_GENERIC__||!_A29K__)
 * Line::			@code{.line @var{line-number}}
 _fi__(_GENERIC__||!_A29K__)
 * Ln::				@code{.ln @var{line-number}}
-* List::			@code{.list} and related directives
+* List::			@code{.list}
 * Long::			@code{.long @var{expressions}}
 * Lsym::			@code{.lsym @var{symbol}, @var{expression}}
+* Nolist::			@code{.nolist}
 * Octa::			@code{.octa @var{bignums}}
 * Org::				@code{.org @var{new-lc} , @var{fill}}
+* Psize::                       @code{.psize @var{lines}, @var{columns}}
 * Quad::			@code{.quad @var{bignums}}
+* Sbttl::			@code{.sbttl "@var{subheading}"}
 _if__(_COFF__||_BOUT__)
 * Scl::				@code{.scl @var{class}}
 _fi__(_COFF__||_BOUT__)
 _if__(_COFF__)
-* Section::                     @code{.section @var{name}}
+* Section::                     @code{.section @var{name}, @var{subsection}}
 _fi__(_COFF__)
 * Set::				@code{.set @var{symbol}, @var{expression}}
 * Short::			@code{.short @var{expressions}}
@@ -1936,6 +2305,7 @@ _if__(_COFF__||_BOUT__)
 * Tag::				@code{.tag @var{structname}}
 _fi__(_COFF__||_BOUT__)
 * Text::			@code{.text @var{subsection}}
+* Title::			@code{.title "@var{heading}"}
 _if__(_COFF__||_BOUT__)
 * Type::			@code{.type @var{int}}
 * Val::				@code{.val @var{addr}}
@@ -1954,6 +2324,9 @@ _if__(! (_BOUT__ || _COFF__) )
 @node Abort, Align, Pseudo Ops, Pseudo Ops
 _fi__(! (_BOUT__ || _COFF__) )
 @section @code{.abort}
+
+@cindex @code{abort} directive
+@cindex stopping the assembly
 This directive stops the assembly immediately.  It is for
 compatibility with other assemblers.  The original idea was that the
 assembly language source would be piped into the assembler.  If the sender
@@ -1963,6 +2336,8 @@ quit also.  One day @code{.abort} will not be supported.
 _if__(_COFF__)
 @node coff-ABORT, Align, Abort, Pseudo Ops
 @section @code{.ABORT}
+
+@cindex @code{ABORT} directive
 When producing COFF output, @code{_AS__} accepts this directive as a
 synonym for @samp{.abort}.
 _fi__(_COFF__)
@@ -1971,6 +2346,8 @@ _if__(_BOUT__)
 _if__(!_COFF__)
 @node bout-ABORT, Align, Abort, Pseudo Ops
 @section @code{.ABORT}
+
+@cindex @code{ABORT} directive
 _fi__(!_COFF__)
 
 When producing @code{b.out} output, @code{_AS__} accepts this directive,
@@ -1987,6 +2364,11 @@ _if__( _BOUT__ && (! _COFF__))
 @node Align, App-File, bout-ABORT, Pseudo Ops
 _fi__( _BOUT__ && (! _COFF__))
 @section @code{.align @var{abs-expr} , @var{abs-expr}}
+
+@cindex padding the location counter
+@cindex advancing location counter
+@cindex location counter, advancing
+@cindex @code{align} directive
 Pad the location counter (in the current subsection) to a particular
 storage boundary.  The first expression (which must be absolute) is the
 number of low-order zero bits the location counter will have after
@@ -2000,6 +2382,10 @@ omitted, the padding bytes are zero.
 
 @node App-File, Ascii, Align, Pseudo Ops
 @section @code{.app-file @var{string}}
+
+@cindex logical file name
+@cindex file name, logical
+@cindex @code{app-file} directive
 @code{.app-file}
 _if__(!_A29K__)
 (which may also be spelled @samp{.file})
@@ -2014,23 +2400,35 @@ programs.@refill
 
 @node Ascii, Asciz, App-File, Pseudo Ops
 @section @code{.ascii "@var{string}"}@dots{}
+
+@cindex @code{ascii} directive
+@cindex string literals
 @code{.ascii} expects zero or more string literals (@pxref{Strings})
 separated by commas.  It assembles each string (with no automatic
 trailing zero byte) into consecutive addresses.
 
 @node Asciz, Byte, Ascii, Pseudo Ops
 @section @code{.asciz "@var{string}"}@dots{}
+
+@cindex @code{asciz} directive
+@cindex zero-terminated strings
+@cindex null-terminated strings
 @code{.asciz} is just like @code{.ascii}, but each string is followed by
 a zero byte.  The ``z'' in @samp{.asciz} stands for ``zero''.
 
 @node Byte, Comm, Asciz, Pseudo Ops
 @section @code{.byte @var{expressions}}
 
+@cindex @code{byte} directive
+@cindex integers, one byte
 @code{.byte} expects zero or more expressions, separated by commas.
 Each expression is assembled into the next byte.
 
 @node Comm, Data, Byte, Pseudo Ops
 @section @code{.comm @var{symbol} , @var{length} }
+
+@cindex @code{comm} directive
+@cindex symbol, common
 @code{.comm} declares a named common area in the bss section.  Normally
 @code{_LD__} reserves memory addresses for it during linking, so no partial
 program defines the location of the symbol.  Use @code{.comm} to tell
@@ -2050,6 +2448,8 @@ _if__(! (_COFF__ || _BOUT__ || _AOUT__) )
 @node Data, Double, Comm, Pseudo Ops
 _fi__(! (_COFF__ || _BOUT__ || _AOUT__) )
 @section @code{.data @var{subsection}}
+
+@cindex @code{data} directive
 @code{.data} tells @code{_AS__} to assemble the following statements onto the
 end of the data subsection numbered @var{subsection} (which is an
 absolute expression).  If @var{subsection} is omitted, it defaults
@@ -2063,6 +2463,10 @@ _if__(!(_AOUT__ || _BOUT__))
 @node Def, Dim, Data, Pseudo Ops
 _fi__(!(_AOUT__ || _BOUT__))
 @section @code{.def @var{name}}
+
+@cindex @code{def} directive
+@cindex COFF symbols, debugging
+@cindex debugging COFF symbols
 Begin defining debugging information for a symbol @var{name}; the
 definition extends until the @code{.endef} directive is encountered.
 _if__(_BOUT__)
@@ -2081,6 +2485,10 @@ _if__(!(_COFF__||_BOUT__))
 @node Desc, Double, Data, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.desc @var{symbol}, @var{abs-expression}}
+
+@cindex @code{desc} directive
+@cindex COFF symbol descriptor
+@cindex symbol descriptor, COFF
 This directive sets the descriptor of the symbol (@pxref{Symbol Attributes})
 to the low 16 bits of an absolute expression.
 
@@ -2100,6 +2508,10 @@ _if__(!(_AOUT__ || _BOUT__))
 @node Dim, Double, Def, Pseudo Ops
 _fi__(!(_AOUT__ || _BOUT__))
 @section @code{.dim}
+
+@cindex @code{dim} directive
+@cindex COFF auxiliary symbol information
+@cindex auxiliary symbol information, COFF
 This directive is generated by compilers to include auxiliary debugging
 information in the symbol table.  It is only permitted inside
 @code{.def}/@code{.endef} pairs.
@@ -2112,12 +2524,15 @@ _fi__(_BOUT__)
 _fi__(_COFF__ || _BOUT__)
 
 _if__(_COFF__||_BOUT__)
-@node Double, Else, Dim, Pseudo Ops
+@node Double, Eject, Dim, Pseudo Ops
 _fi__(_COFF__||_BOUT__)
 _if__(!(_COFF__||_BOUT__))
-@node Double, Else, Desc, Pseudo Ops
+@node Double, Eject, Desc, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.double @var{flonums}}
+
+@cindex @code{double} directive
+@cindex floating point numbers (double)
 @code{.double} expects zero or more flonums, separated by commas.  It
 assembles floating point numbers.
 _if__(_GENERIC__)
@@ -2126,16 +2541,27 @@ The exact kind of floating point numbers emitted depends on how
 _fi__(_GENERIC__)
 _if__((!_GENERIC__) && _IEEEFLOAT__)
 On the _HOST__ family @samp{.double} emits 64-bit floating-point numbers
-in IEEE format.
+in @sc{ieee} format.
 _fi__((!_GENERIC__) && _IEEEFLOAT__)
 
+@node Eject, Else, Double, Pseudo Ops
+@section @code{.eject}
+
+@cindex @code{eject} directive
+@cindex new page, in listings
+@cindex page, in listings
+@cindex listing control: new page
+Force a page break at this point, when generating assembly listings.
+
 _if__(_COFF__||_BOUT__)
-@node Else, Endef, Double, Pseudo Ops
+@node Else, Endef, Eject, Pseudo Ops
 _fi__(_COFF__||_BOUT__)
 _if__(!(_COFF__||_BOUT__))
-@node Else, Endif, Double, Pseudo Ops
+@node Else, Endif, Eject, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.else}
+
+@cindex @code{else} directive
 @code{.else} is part of the @code{_AS__} support for conditional
 assembly; @pxref{If,,@code{.if}}.  It marks the beginning of a section
 of code to be assembled if the condition for the preceding @code{.if}
@@ -2144,6 +2570,8 @@ was false.
 _if__(0)
 @node End, Endef, Else, Pseudo Ops
 @section @code{.end}
+
+@cindex @code{end} directive
 This doesn't do anything---but isn't an s_ignore, so I suspect it's
 meant to do something eventually (which is why it isn't documented here
 as "for compatibility with blah").
@@ -2152,6 +2580,8 @@ _fi__(0)
 _if__(_COFF__||_BOUT__)
 @node Endef, Endif, Else, Pseudo Ops
 @section @code{.endef}
+
+@cindex @code{endef} directive
 This directive flags the end of a symbol definition begun with
 @code{.def}. 
 _if__(_BOUT__)
@@ -2169,6 +2599,8 @@ _if__(!(_COFF__||_BOUT__))
 @node Endif, Equ, Else, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.endif}
+
+@cindex @code{endif} directive
 @code{.endif} is part of the @code{_AS__} support for conditional assembly;
 it marks the end of a block of code that is only assembled
 conditionally.  @xref{If,,@code{.if}}.
@@ -2176,6 +2608,9 @@ conditionally.  @xref{If,,@code{.if}}.
 @node Equ, Extern, Endif, Pseudo Ops
 @section @code{.equ @var{symbol}, @var{expression}}
 
+@cindex @code{equ} directive
+@cindex assigning values to symbols
+@cindex symbols, assigning values to
 This directive sets the value of @var{symbol} to @var{expression}.
 It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
 
@@ -2186,13 +2621,19 @@ _if__(_A29K__&&!_GENERIC__)
 @node Extern, Fill, Equ, Pseudo Ops
 _fi__(_A29K__&&!_GENERIC__)
 @section @code{.extern}
+
+@cindex @code{extern} directive
 @code{.extern} is accepted in the source program---for compatibility
 with other assemblers---but it is ignored.  @code{_AS__} treats
 all undefined symbols as external.
 
 _if__(_GENERIC__||!_A29K__)
 @node File, Fill, Extern, Pseudo Ops
-@section @code{.app-file @var{string}}
+@section @code{.file @var{string}}
+
+@cindex @code{file} directive
+@cindex logical file name
+@cindex file name, logical
 @code{.file} (which may also be spelled @samp{.app-file}) tells
 @code{_AS__} that we are about to start a new logical file.
 @var{string} is the new file name.  In general, the filename is
@@ -2213,6 +2654,10 @@ _if__(_A29K__&&!_GENERIC__)
 @node Fill, Float, Extern, Pseudo Ops
 _fi__(_A29K__&&!_GENERIC__)
 @section @code{.fill @var{repeat} , @var{size} , @var{value}}
+
+@cindex @code{fill} directive
+@cindex writing patterns in memory
+@cindex patterns, writing in memory
 @var{result}, @var{size} and @var{value} are absolute expressions.
 This emits @var{repeat} copies of @var{size} bytes.  @var{Repeat}
 may be zero or more.  @var{Size} may be zero or more, but if it is
@@ -2232,6 +2677,9 @@ assumed zero.  If the first comma and following tokens are absent,
 
 @node Float, Global, Fill, Pseudo Ops
 @section @code{.float @var{flonums}}
+
+@cindex floating point numbers (single)
+@cindex @code{float} directive
 This directive assembles zero or more flonums, separated by commas.  It
 has the same effect as @code{.single}.
 _if__(_GENERIC__)
@@ -2241,22 +2689,19 @@ The exact kind of floating point numbers emitted depends on how
 _fi__(_GENERIC__)
 _if__((!_GENERIC__) && _IEEEFLOAT__)
 On the _HOST__ family, @code{.float} emits 32-bit floating point numbers
-in IEEE format.
+in @sc{ieee} format.
 _fi__((!_GENERIC__) && _IEEEFLOAT__)
 
 @node Global, hword, Float, Pseudo Ops
 @section @code{.global @var{symbol}}, @code{.globl @var{symbol}}
+
+@cindex @code{global} directive
+@cindex symbol, making visible to linker
 @code{.global} makes the symbol visible to @code{_LD__}.  If you define
 @var{symbol} in your partial program, its value is made available to
 other partial programs that are linked with it.  Otherwise,
 @var{symbol} will take its attributes from a symbol of the same name
 from another partial program it is linked with.
-
-_if__(!_I960__)
-@c FIXME BFD implications; this is different in COFF.
-This is done by setting the @code{N_EXT} bit of that symbol's type byte
-to 1. @xref{Symbol Attributes}.
-_fi__(!_I960__)
 
 Both spellings (@samp{.globl} and @samp{.global}) are accepted, for
 compatibility with other assemblers.
@@ -2268,6 +2713,11 @@ _if__(!(_AOUT__||_BOUT__||_COFF__))
 @node hword, If, Global, Pseudo Ops
 _fi__(!(_AOUT__||_BOUT__||_COFF__))
 @section @code{.hword @var{expressions}}
+
+@cindex @code{hword} directive
+@cindex integers, 16-bit
+@cindex numbers, 16-bit
+@cindex sixteen bit integers
 This expects zero or more @var{expressions}, and emits
 a 16 bit number for each.
 
@@ -2285,6 +2735,8 @@ _fi__(_W16__ && !_GENERIC__ )
 _if__(_AOUT__||_BOUT__||_COFF__)
 @node Ident, If, hword, Pseudo Ops
 @section @code{.ident}
+
+@cindex @code{ident} directive
 This directive is used by some assemblers to place tags in object files.
 @code{_AS__} simply accepts the directive for source-file
 compatibility with such assemblers, but does not actually emit anything
@@ -2298,6 +2750,9 @@ _if__(!(_AOUT__||_BOUT__||_COFF__))
 @node If, Include, hword, Pseudo Ops
 _fi__(!(_AOUT__||_BOUT__||_COFF__))
 @section @code{.if @var{absolute expression}}
+
+@cindex conditional assembly
+@cindex @code{if} directive
 @code{.if} marks the beginning of a section of code which is only
 considered part of the source program being assembled if the argument
 (which must be an @var{absolute expression}) is non-zero.  The end of
@@ -2307,17 +2762,21 @@ alternative condition, flagged by @code{.else} (@pxref{Else,,@code{.else}}.
 
 The following variants of @code{.if} are also supported:
 @table @code
-@item ifdef @var{symbol}
+@item .ifdef @var{symbol}
+@cindex @code{ifdef} directive
 Assembles the following section of code if the specified @var{symbol}
 has been defined.
 
 _if__(0)
-@item ifeqs
+@item .ifeqs
+@cindex @code{ifeqs} directive
 Not yet implemented.
 _fi__(0)
 
-@item ifndef @var{symbol}
+@item .ifndef @var{symbol}
 @itemx ifnotdef @var{symbol}
+@cindex @code{ifndef} directive
+@cindex @code{ifnotdef} directive
 Assembles the following section of code if the specified @var{symbol}
 has not been defined.  Both spelling variants are equivalent.
 
@@ -2329,6 +2788,10 @@ _fi__(0)
 
 @node Include, Int, If, Pseudo Ops
 @section @code{.include "@var{file}"}
+
+@cindex @code{include} directive
+@cindex supporting files, including
+@cindex files, including
 This directive provides a way to include supporting files at specified
 points in your source program.  The code from @var{file} is assembled as
 if it followed the point of the @code{.include}; when the end of the
@@ -2339,25 +2802,29 @@ around @var{file}.
 
 @node Int, Lcomm, Include, Pseudo Ops
 @section @code{.int @var{expressions}}
+
+@cindex @code{int} directive
+_if__(_GENERIC__||!_H8__)
+@cindex integers, 32-bit
+_fi__(_GENERIC__||!_H8__)
 Expect zero or more @var{expressions}, of any section, separated by
 commas.  For each expression, emit a
-_if__(!_H8__)
+_if__(_GENERIC__||!_H8__)
 32-bit 
-_fi__(!_H8__)
-_if__(_H8__)
+_fi__(_GENERIC__||!_H8__)
+_if__(_H8__&&!_GENERIC__)
 16-bit
-_fi__(_H8__)
+_fi__(_H8__&&!_GENERIC__)
 number that will, at run
 time, be the value of that expression.  The byte order of the
 expression depends on what kind of computer will run the program.
 
-_if__(_GENERIC__||(!_A29K__))
-@node Lcomm, Line, Int, Pseudo Ops
-_fi__(_GENERIC__||(!_A29K__))
-_if__((!_GENERIC__)&& _A29K__)
-@node Lcomm, Ln, Int, Pseudo Ops
-_fi__((!_GENERIC__)&& _A29K__)
+@node Lcomm, Lflags, Int, Pseudo Ops
 @section @code{.lcomm @var{symbol} , @var{length}}
+
+@cindex @code{lcomm} directive
+@cindex local common symbols
+@cindex symbols, local common
 Reserve @var{length} (an absolute expression) bytes for a local common
 denoted by @var{symbol}.  The section and value of @var{symbol} are
 those of the new local common.  The addresses are allocated in the bss
@@ -2365,14 +2832,31 @@ section, so at run-time the bytes will start off zeroed.  @var{Symbol}
 is not declared global (@pxref{Global,,@code{.global}}), so is normally
 not visible to @code{_LD__}.
 
+_if__(_GENERIC__||(!_A29K__))
+@node Lflags, Line, Lcomm, Pseudo Ops
+_fi__(_GENERIC__||(!_A29K__))
+_if__((!_GENERIC__)&& _A29K__)
+@node Lflags, Ln, Lcomm, Pseudo Ops
+_fi__((!_GENERIC__)&& _A29K__)
+@section @code{.lflags}
+
+@cindex @code{lflags} directive (ignored)
+@code{_AS__} accepts this directive, for compatibility with other
+assemblers, but ignores it.
+
 _if__(_GENERIC__ || !_A29K__)
-@node Line, Ln, Lcomm, Pseudo Ops
+@node Line, Ln, Lflags, Pseudo Ops
 @section @code{.line @var{line-number}}
+
+@cindex @code{line} directive
 _fi__(_GENERIC__ || (!_A29K__))
 _if__(_A29K__ && (!_GENERIC__))
-@node Ln, List, Lcomm, Pseudo Ops
+@node Ln, List, Lflags, Pseudo Ops
 @section @code{.ln @var{line-number}}
+
+@cindex @code{ln} directive
 _fi__(_A29K__ && (!_GENERIC__))
+@cindex logical line number
 _if__(_AOUT__||_BOUT__)
 Tell @code{_AS__} to change the logical line number.  @var{line-number} must be
 an absolute expression.  The next line will have that logical line
@@ -2419,11 +2903,15 @@ _fi__(_COFF__)
 _if__(_AOUT__&&(_GENERIC__||!_A29K__))
 @node Ln, List, Line, Pseudo Ops
 @section @code{.ln @var{line-number}}
+
+@cindex @code{ln} directive
 @samp{.ln} is a synonym for @samp{.line}.
 _fi__(_AOUT__&&(_GENERIC__||!_A29K__))
 _if__(_COFF__&&!_AOUT__)
 @node Ln, List, Line, Pseudo Ops
 @section @code{.ln @var{line-number}}
+
+@cindex @code{ln} directive
 Tell @code{_AS__} to change the logical line number.  @var{line-number}
 must be an absolute expression.  The next line will have that logical
 line number, so any other statements on the current line (after a
@@ -2437,17 +2925,31 @@ _fi__(_BOUT__)
 _fi__(_COFF__&&!_AOUT__)
 
 @node List, Long, Ln, Pseudo Ops
-@section @code{.list} and related directives
-@code{_AS__} ignores the directives @code{.list}, @code{.nolist},
-@code{.eject}, @code{.lflags}, @code{.title}, @code{.sbttl}; however,
-they're accepted for compatibility with assemblers that use them.
+@section @code{.list}
+
+@cindex @code{list} directive
+@cindex listing control, turning on
+Control (in conjunction with the @code{.nolist} directive) whether or
+not assembly listings are generated.  These two directives maintain an
+internal counter (which is zero initially).   @code{.list} increments the
+counter, and @code{.nolist} decrements it.  Assembly listings are
+generated whenever the counter is greater than zero.
+
+By default, listings are disabled.  When you enable them (with the
+@samp{-a} command line option; @pxref{Invoking,,Command-Line Options}),
+the initial value of the listing counter is one.
 
 @node Long, Lsym, List, Pseudo Ops
 @section @code{.long @var{expressions}}
+
+@cindex @code{long} directive
 @code{.long} is the same as @samp{.int}, @pxref{Int,,@code{.int}}.
 
-@node Lsym, Octa, Long, Pseudo Ops
+@node Lsym, Nolist, Long, Pseudo Ops
 @section @code{.lsym @var{symbol}, @var{expression}}
+
+@cindex @code{lsym} directive
+@cindex symbol, not referenced in assembly
 @code{.lsym} creates a new symbol named @var{symbol}, but does not put it in
 the hash table, ensuring it cannot be referenced by name during the
 rest of the assembly.  This sets the attributes of the symbol to be
@@ -2460,18 +2962,37 @@ the same as the expression value:
 @noindent
 The new symbol is not flagged as external.
 
-@c FIXME: double size emitted for "octa" on i960, others?  Or warn?
-@node Octa, Org, Lsym, Pseudo Ops
+@node Nolist, Octa, Lsym, Pseudo Ops
+@section @code{.nolist}
+
+@cindex @code{nolist} directive
+@cindex listing control, turning off
+Control (in conjunction with the @code{.list} directive) whether or
+not assembly listings are generated.  These two directives maintain an
+internal counter (which is zero initially).   @code{.list} increments the
+counter, and @code{.nolist} decrements it.  Assembly listings are
+generated whenever the counter is greater than zero.
+
+@node Octa, Org, Nolist, Pseudo Ops
 @section @code{.octa @var{bignums}}
+
+@c FIXME: double size emitted for "octa" on i960, others?  Or warn?
+@cindex @code{octa} directive
+@cindex integer, 16-byte
+@cindex sixteen byte integer
 This directive expects zero or more bignums, separated by commas.  For each
 bignum, it emits a 16-byte integer.
 
 The term ``octa'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{octa}-word for 16 bytes.
 
-@node Org, Quad, Octa, Pseudo Ops
+@node Org, Psize, Octa, Pseudo Ops
 @section @code{.org @var{new-lc} , @var{fill}}
 
+@cindex @code{org} directive
+@cindex location counter, advancing
+@cindex advancing location counter
+@cindex current address, advancing
 @code{.org} will advance the location counter of the current section to
 @var{new-lc}.  @var{new-lc} is either an absolute expression or an
 expression with the same section as the current subsection.  That is,
@@ -2501,19 +3022,38 @@ intervening bytes are filled with @var{fill} which should be an
 absolute expression.  If the comma and @var{fill} are omitted,
 @var{fill} defaults to zero.
 
-_if__(_COFF__||_BOUT__)
-@node Quad, Scl, Org, Pseudo Ops
-_fi__(_COFF__||_BOUT__)
-_if__(!(_COFF__||_BOUT__))
-@node Quad, Set, Org, Pseudo Ops
-_fi__(!(_COFF__||_BOUT__))
+@node Psize, Quad, Org, Pseudo Ops
+@section @code{.psize @var{lines} , @var{columns}}
+
+@cindex @code{psize} directive
+@cindex listing control: paper size
+@cindex paper size, for listings
+Use this directive to declare the number of lines---and, optionally, the
+number of columns---to use for each page, when generating listings.  
+
+If you don't use @code{.psize}, listings will use a default line-count
+of 60.  You may omit the comma and @var{columns} specification; the
+default width is 200 columns.
+
+@code{_AS__} will generate formfeeds whenever the specified number of
+lines is exceeded (or whenever you explicitly request one, using
+@code{.eject}).  
+
+If you specify @var{lines} as @code{0}, no formfeeds are generated save
+those explicitly specified with @code{.eject}.
+
+@node Quad, Sbttl, Psize, Pseudo Ops
 @section @code{.quad @var{bignums}}
+
+@cindex @code{quad} directive
 @code{.quad} expects zero or more bignums, separated by commas.  For
 each bignum, it emits
 _if__(_GENERIC__||(!_I960__))
 an 8-byte integer.  If the bignum won't fit in 8
 bytes, it prints a warning message; and just takes the lowest order 8
 bytes of the bignum.@refill
+@cindex eight-byte integer
+@cindex integer, 8-byte
 
 The term ``quad'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{quad}-word for 8 bytes.
@@ -2522,16 +3062,39 @@ _if__(_I960__&&(!_GENERIC__))
 a 16-byte integer.  If the bignum won't fit in 16 bytes, it prints a
 warning message; and just takes the lowest order 16 bytes of the
 bignum.@refill 
+@cindex sixteen-byte integer
+@cindex integer, 16-byte
 _fi__(_I960__&&(!_GENERIC__))
 
 _if__(_COFF__||_BOUT__)
+@node Sbttl, Scl, Quad, Pseudo Ops
+_fi__(_COFF__||_BOUT__)
+_if__(!(_COFF__||_BOUT__))
+@node Sbttl, Set, Quad, Pseudo Ops
+_fi__(!(_COFF__||_BOUT__))
+@section @code{.sbttl "@var{subheading}"}
+
+@cindex @code{sbttl} directive
+@cindex subtitles for listings
+@cindex listing control: subtitle
+Use @var{subheading} as the title (third line, immediately after the
+title line) when generating assembly listings. 
+
+This directive affects subsequent pages, as well as the current page if
+it appears within ten lines of the top of a page.
+
+_if__(_COFF__||_BOUT__)
 _if__(!_COFF__)
-@node Scl, Set, Quad, Pseudo Ops
+@node Scl, Set, Sbttl, Pseudo Ops
 _fi__(!_COFF__)
 _if__(_COFF__)
-@node Scl, Section, Quad, Pseudo Ops
+@node Scl, Section, Sbttl, Pseudo Ops
 _fi__(_COFF__)
 @section @code{.scl @var{class}}
+
+@cindex @code{scl} directive
+@cindex symbol storage class (COFF)
+@cindex COFF symbol storage class
 Set the storage-class value for a symbol.  This directive may only be
 used inside a @code{.def}/@code{.endef} pair.  Storage class may flag
 whether a symbol is static or external, or it may record further
@@ -2546,8 +3109,14 @@ _fi__(_COFF__||_BOUT__)
 
 _if__(_COFF__)
 @node Section, Set, Scl, Pseudo Ops
-@section @code{.section} @var{name}
-Assemble the following code into the COFF section @var{name}.
+@section @code{.section @var{name}, @var{subsection}}
+
+@cindex @code{section} directive
+@cindex named section (COFF)
+@cindex COFF named section
+Assemble the following code into end of subsection numbered
+@var{subsection} in the COFF named section @var{name}.  If you omit
+@var{subsection}, @code{_AS__} uses subsection number zero.
 @samp{.section .text} is equivalent to the @code{.text} directive;
 @samp{.section .data} is equivalent to the @code{.data} directive.
 
@@ -2561,6 +3130,8 @@ _if__(!(_COFF__||_BOUT__))
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.set @var{symbol}, @var{expression}}
 
+@cindex @code{set} directive
+@cindex symbol value, setting
 This directive sets the value of @var{symbol} to @var{expression}.  This
 will change @var{symbol}'s value and type to conform to
 @var{expression}.  If @var{symbol} was flagged as external, it remains
@@ -2577,6 +3148,8 @@ file is the last value stored into it.
 
 @node Short, Single, Set, Pseudo Ops
 @section @code{.short @var{expressions}}
+
+@cindex @code{short} directive
 _if__(_GENERIC__ || _W16__)
 @code{.short} is the same as @samp{.word}.  @xref{Word,,@code{.word}}.
 _if__(_W32__)
@@ -2595,6 +3168,9 @@ _if__(!(_COFF__||_BOUT__))
 @node Single, Space, Short, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.single @var{flonums}}
+
+@cindex @code{single} directive
+@cindex floating point numbers (single)
 This directive assembles zero or more flonums, separated by commas.  It
 has the same effect as @code{.float}.
 _if__(_GENERIC__)
@@ -2603,12 +3179,14 @@ The exact kind of floating point numbers emitted depends on how
 _fi__(_GENERIC__)
 _if__((!_GENERIC__) && _IEEEFLOAT__)
 On the _HOST__ family, @code{.single} emits 32-bit floating point
-numbers in IEEE format.
+numbers in @sc{ieee} format.
 _fi__((!_GENERIC__) && _IEEEFLOAT__)
 
 _if__(_COFF__||_BOUT__)
 @node Size, Space, Single, Pseudo Ops
 @section @code{.size}
+
+@cindex @code{size} directive
 This directive is generated by compilers to include auxiliary debugging
 information in the symbol table.  It is only permitted inside
 @code{.def}/@code{.endef} pairs.
@@ -2633,6 +3211,9 @@ _fi__(!(_COFF__||_BOUT__))
 _fi__(!_H8__)
 _if__(_GENERIC__ || !_A29K__)
 @section @code{.space @var{size} , @var{fill}}
+
+@cindex @code{space} directive
+@cindex filling memory
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
@@ -2640,6 +3221,8 @@ _fi__(_GENERIC__ || !_A29K__)
 
 _if__(_A29K__) 
 @section @code{.space}
+
+@cindex @code{space} directive
 On the AMD 29K, this directive is ignored; it is accepted for
 compatibility with other AMD 29K assemblers.
 
@@ -2658,6 +3241,9 @@ _if__(!(_COFF__||_BOUT__))
 @node Stab, Text, Space, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.stabd, .stabn, .stabs}
+
+@cindex symbolic debuggers, information for
+@cindex @code{stab@var{x}} directives
 There are three directives that begin @samp{.stab}.
 All emit symbols (@pxref{Symbols}), for use by symbolic debuggers.
 The symbols are not entered in the @code{_AS__} hash table: they
@@ -2689,6 +3275,7 @@ and you will get a half-formed symbol in your object file.  This is
 compatible with earlier assemblers!
 
 @table @code
+@cindex @code{stabd} directive
 @item .stabd @var{type} , @var{other} , @var{desc}
 
 The ``name'' of the symbol generated is not even an empty string.
@@ -2702,11 +3289,11 @@ will be where the location counter was when the @code{.stabd} was
 assembled.
 
 @item .stabn @var{type} , @var{other} , @var{desc} , @var{value}
-
+@cindex @code{stabn} directive
 The name of the symbol is set to the empty string @code{""}.
 
 @item .stabs @var{string} ,  @var{type} , @var{other} , @var{desc} , @var{value}
-
+@cindex @code{stabs} directive
 All five fields are specified.
 @end table
 _fi__(_AOUT__||_BOUT__||_COFF__)
@@ -2720,6 +3307,10 @@ _if__(_H8__)
 @node Tag, Text, Space, Pseudo Ops
 _fi__(_H8__)
 @section @code{.tag @var{structname}}
+
+@cindex COFF structure debugging
+@cindex structure debugging, COFF
+@cindex @code{tag} directive
 This directive is generated by compilers to include auxiliary debugging
 information in the symbol table.  It is only permitted inside
 @code{.def}/@code{.endef} pairs.  Tags are used to link structure
@@ -2733,20 +3324,42 @@ _fi__(_BOUT__)
 _fi__(_COFF__||_BOUT__)
 
 _if__(_COFF__||_BOUT__)
-@node Text, Type, Tag, Pseudo Ops
+@node Text, Title, Tag, Pseudo Ops
 _fi__(_COFF__||_BOUT__)
 _if__(!(_COFF__||_BOUT__))
-@node Text, Word, Stab, Pseudo Ops
+@node Text, Title, Stab, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.text @var{subsection}}
+
+@cindex @code{text} directive
 Tells @code{_AS__} to assemble the following statements onto the end of
 the text subsection numbered @var{subsection}, which is an absolute
 expression.  If @var{subsection} is omitted, subsection number zero
 is used.
 
 _if__(_COFF__||_BOUT__)
-@node Type, Val, Text, Pseudo Ops
+@node Title, Type, Text, Pseudo Ops
+_fi__(_COFF__||_BOUT__)
+_if__(!(_COFF__||_BOUT__))
+@node Title, Word, Text, Pseudo Ops
+_fi__(!(_COFF__||_BOUT__))
+@section @code{.title "@var{heading}"}
+
+@cindex @code{title} directive
+@cindex listing control: title line
+Use @var{heading} as the title (second line, immediately after the
+source file name and pagenumber) when generating assembly listings. 
+
+This directive affects subsequent pages, as well as the current page if
+it appears within ten lines of the top of a page.
+
+_if__(_COFF__||_BOUT__)
+@node Type, Val, Title, Pseudo Ops
 @section @code{.type @var{int}}
+
+@cindex COFF symbol type
+@cindex symbol type, COFF
+@cindex @code{type} directive
 This directive, permitted only within @code{.def}/@code{.endef} pairs,
 records the integer @var{int} as the type attribute of a symbol table entry.
 _if__(_BOUT__)
@@ -2760,6 +3373,10 @@ _fi__(_COFF__||_BOUT__)
 _if__(_COFF__||_BOUT__)
 @node Val, Word, Type, Pseudo Ops
 @section @code{.val @var{addr}}
+
+@cindex @code{val} directive
+@cindex COFF value attribute
+@cindex value attribute, COFF
 This directive, permitted only within @code{.def}/@code{.endef} pairs,
 records the address @var{addr} as the value attribute of a symbol table
 entry.
@@ -2777,6 +3394,8 @@ _if__(!(_COFF__||_BOUT__))
 @node Word, Deprecated, Text, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
 @section @code{.word @var{expressions}}
+
+@cindex @code{word} directive
 This directive expects zero or more @var{expressions}, of any section,
 separated by commas.
 _if__((!_GENERIC__) && _W32__)
@@ -2794,6 +3413,8 @@ _fi__(_GENERIC__)
 @c on amd29k, i960, sparc the "special treatment to support compilers" doesn't
 @c happen---32-bit addressability, period; no long/short jumps.
 _if__(_GENERIC__ || _DIFFTABKLUG__)
+@cindex difference tables altered
+@cindex altered difference tables
 @quotation
 @emph{Warning: Special Treatment to support Compilers}
 @end quotation
@@ -2836,6 +3457,9 @@ _fi__(_GENERIC__ || _DIFFTABKLUG__)
 
 @node Deprecated,  , Word, Pseudo Ops
 @section Deprecated Directives
+
+@cindex deprecated directives
+@cindex obsolescent directives
 One day these directives won't work.
 They are included for compatibility with older assemblers.
 @table @t
@@ -2847,6 +3471,20 @@ They are included for compatibility with older assemblers.
 @node _MACH_DEP__, Copying, Pseudo Ops, Top
 _if__(_GENERIC__)
 @chapter Machine Dependent Features
+
+@cindex machine dependencies
+The machine instruction sets are (almost by definition) different on
+each machine where @code{_AS__} runs.  Floating point representations
+vary as well, and @code{_AS__} often supports a few additional
+directives or command-line options for compatibility with other
+assemblers on a particular platform.  Finally, some versions of
+@code{_AS__} support special pseudo-instructions for branch
+optimization.
+
+This chapter discusses most of these differences, though it does not
+include details on any machine's instruction set.  For details on that
+subject, see the hardware manufacturer's manual.
+
 @menu
 _if__(_VAX__)
 * Vax-Dependent::		VAX Dependent Features
@@ -2855,7 +3493,7 @@ _if__(_A29K__)
 * AMD29K-Dependent::		AMD 29K Dependent Features
 _fi__(_A29K__)
 _if__(_H8__)
-* H8-300-Dependent::		AMD 29K Dependent Features
+* H8/300-Dependent::		AMD 29K Dependent Features
 _fi__(_H8__)
 _if__(_I960__)
 * i960-Dependent::		Intel 80960 Dependent Features
@@ -2877,6 +3515,8 @@ _if__(_GENERIC__)
 @node Vax-Dependent, AMD29K-Dependent, Machine Dependent, Machine Dependent
 _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) VAX Dependent Features
+
+@cindex VAX support
 @menu
 * Vax-Opts::			VAX Command-Line Options
 * VAX-float::			VAX Floating Point
@@ -2890,6 +3530,8 @@ _CHAPSEC__(0+_GENERIC__) VAX Dependent Features
 @node Vax-Opts, VAX-float, Vax-Dependent, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) VAX Command-Line Options
 
+@cindex command-line options ignored, VAX
+@cindex VAX command-line options ignored
 The Vax version of @code{_AS__} accepts any of the following options,
 gives a warning message that the option was ignored and proceeds.
 These options are for compatibility with scripts designed for other
@@ -2899,21 +3541,27 @@ people's assemblers.
 @item @kbd{-D} (Debug)
 @itemx @kbd{-S} (Symbol Table)
 @itemx @kbd{-T} (Token Trace)
+@cindex @code{-D}, ignored on VAX
+@cindex @code{-S}, ignored on VAX
+@cindex @code{-T}, ignored on VAX
 These are obsolete options used to debug old assemblers.
 
 @item @kbd{-d} (Displacement size for JUMPs)
+@cindex @code{-d}, VAX option
 This option expects a number following the @kbd{-d}.  Like options
 that expect filenames, the number may immediately follow the
 @kbd{-d} (old standard) or constitute the whole of the command line
 argument that follows @kbd{-d} (GNU standard).
 
 @item @kbd{-V} (Virtualize Interpass Temporary File)
+@cindex @code{-V}, redundant on VAX
 Some other assemblers use a temporary file.  This option
 commanded them to keep the information in active memory rather
 than in a disk file.  @code{_AS__} always does this, so this
 option is redundant.
 
 @item @kbd{-J} (JUMPify Longer Branches)
+@cindex @code{-J}, ignored on VAX
 Many 32-bit computers permit a variety of branch instructions
 to do the same job.  Some of these instructions are short (and
 fast) but have a limited range; others are long (and slow) but
@@ -2923,6 +3571,7 @@ assemblers would emit short and medium branches, unless told by
 this option to emit short and long branches.
 
 @item @kbd{-t} (Temporary File Directory)
+@cindex @code{-t}, ignored on VAX
 Some other assemblers may use a temporary file, and this option
 takes a filename being the directory to site the temporary
 file.  @code{_AS__} does not use a temporary disk file, so this
@@ -2930,6 +3579,14 @@ option makes no difference.  @kbd{-t} needs exactly one
 filename.
 @end table
 
+@cindex VMS (VAX) options
+@cindex options for VAX/VMS
+@cindex VAX/VMS options
+@cindex @code{-h} option, VAX/VMS
+@cindex @code{-+} option, VAX/VMS
+@cindex Vax-11 C compatibility
+@cindex symbols with lowercase, VAX/VMS
+@c FIXME!  look into "I think" below, correct if needed, delete.
 The Vax version of the assembler accepts two options when
 compiled for VMS.  They are @kbd{-h}, and @kbd{-+}.  The
 @kbd{-h} option prevents @code{_AS__} from modifying the
@@ -2943,6 +3600,9 @@ symbol so that the object file will be compatible with Vax-11
 
 @node VAX-float, VAX-directives, Vax-Opts, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) VAX Floating Point
+
+@cindex VAX floating point
+@cindex floating point, VAX
 Conversion of flonums to floating point is correct, and
 compatible with previous assemblers.  Rounding is
 towards zero if the remainder is exactly half the least significant bit.
@@ -2954,29 +3614,39 @@ Immediate floating literals (@emph{e.g.} @samp{S`$6.9})
 are rendered correctly.  Again, rounding is towards zero in the
 boundary case.
 
+@cindex @code{float} directive, VAX
+@cindex @code{double} directive, VAX
 The @code{.float} directive produces @code{f} format numbers.
 The @code{.double} directive produces @code{d} format numbers.
 
 @node VAX-directives, VAX-opcodes, VAX-float, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) Vax Machine Directives
+
+@cindex machine directives, VAX
+@cindex VAX machine directives
 The Vax version of the assembler supports four directives for
 generating Vax floating point constants.  They are described in the
 table below.
 
+@cindex wide floating point directives, VAX
 @table @code
 @item .dfloat
+@cindex @code{dfloat} directive, VAX
 This expects zero or more flonums, separated by commas, and
 assembles Vax @code{d} format 64-bit floating point constants.
 
 @item .ffloat
+@cindex @code{ffloat} directive, VAX
 This expects zero or more flonums, separated by commas, and
 assembles Vax @code{f} format 32-bit floating point constants.
 
 @item .gfloat
+@cindex @code{gfloat} directive, VAX
 This expects zero or more flonums, separated by commas, and
 assembles Vax @code{g} format 64-bit floating point constants.
 
 @item .hfloat
+@cindex @code{hfloat} directive, VAX
 This expects zero or more flonums, separated by commas, and
 assembles Vax @code{h} format 128-bit floating point constants.
 
@@ -2984,6 +3654,10 @@ assembles Vax @code{h} format 128-bit floating point constants.
 
 @node VAX-opcodes, VAX-branch, VAX-directives, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) VAX Opcodes
+
+@cindex VAX opcode mnemonics
+@cindex opcode mnemonics, VAX
+@cindex mnemonics for opcodes, VAX
 All DEC mnemonics are supported.  Beware that @code{case@dots{}}
 instructions have exactly 3 operands.  The dispatch table that
 follows the @code{case@dots{}} instruction should be made with
@@ -2992,6 +3666,10 @@ assemblers we know of.
 
 @node VAX-branch, VAX-operands, VAX-opcodes, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) VAX Branch Improvement
+
+@cindex VAX branch improvement
+@cindex branch improvement, VAX
+@cindex pseudo-ops for branch, VAX
 Certain pseudo opcodes are permitted.  They are for branch
 instructions.  They expand to the shortest branch instruction that
 will reach the target.  Generally these mnemonics are made by
@@ -3097,17 +3775,28 @@ bar:
 
 @node VAX-operands, VAX-no, VAX-branch, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) VAX Operands
+
+@cindex VAX operand notation
+@cindex operand notation, VAX
+@cindex immediate character, VAX
+@cindex VAX immediate character
 The immediate character is @samp{$} for Unix compatibility, not
 @samp{#} as DEC writes it.
 
+@cindex indirect character, VAX
+@cindex VAX indirect character
 The indirect character is @samp{*} for Unix compatibility, not
 @samp{@@} as DEC writes it.
 
+@cindex displacement sizing character, VAX
+@cindex VAX displacement sizing character
 The displacement sizing character is @samp{`} (an accent grave) for
 Unix compatibility, not @samp{^} as DEC writes it.  The letter
 preceding @samp{`} may have either case.  @samp{G} is not
 understood, but all other letters (@code{b i l s w}) are understood.
 
+@cindex register names, VAX
+@cindex VAX register names
 Register names understood are @code{r0 r1 r2 @dots{} r15 ap fp sp
 pc}.  Any case of letters will do.
 
@@ -3126,15 +3815,21 @@ separated.
 
 @node VAX-no,  , VAX-operands, Vax-Dependent
 _CHAPSEC__(1+_GENERIC__) Not Supported on VAX
+
+@cindex VAX bitfields not supported
+@cindex bitfields, not supported on VAX
 Vax bit fields can not be assembled with @code{_AS__}.  Someone
 can add the required code if they really need it.
 
 _fi__(_VAX__)
 _if__(_A29K__)
 _if__(_GENERIC__)
-@node AMD29K-Dependent, H8-300-Dependent, Vax-Dependent, Machine Dependent
+@node AMD29K-Dependent, H8/300-Dependent, Vax-Dependent, Machine Dependent
 _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) AMD 29K Dependent Features
+
+@cindex AMD 29K support
+@cindex 29K support
 @menu
 * AMD29K Options::		Options
 * AMD29K Syntax::		Syntax
@@ -3145,6 +3840,8 @@ _CHAPSEC__(0+_GENERIC__) AMD 29K Dependent Features
 
 @node AMD29K Options, AMD29K Syntax, AMD29K-Dependent, AMD29K-Dependent
 _CHAPSEC__(1+_GENERIC__) Options
+@cindex AMD 29K options (none)
+@cindex options for AMD29K (none)
 @code{_AS__} has no additional command-line options for the AMD
 29K family.
 
@@ -3157,15 +3854,27 @@ _CHAPSEC__(1+_GENERIC__) Syntax
 
 @node AMD29K-Chars, AMD29K-Regs, AMD29K Syntax, AMD29K Syntax
 _CHAPSEC__(2+_GENERIC__) Special Characters
+
+@cindex line comment character, AMD 29K
+@cindex AMD 29K line comment character
 @samp{;} is the line comment character.
 
+@cindex line separator, AMD 29K
+@cindex AMD 29K line separator 
+@cindex statement separator, AMD 29K
+@cindex AMD 29K statement separator
 @samp{@@} can be used instead of a newline to separate statements.
 
+@cindex identifiers, AMD 29K
+@cindex AMD 29K identifiers
 The character @samp{?} is permitted in identifiers (but may not begin
 an identifier).
 
 @node AMD29K-Regs,  , AMD29K-Chars, AMD29K Syntax
 _CHAPSEC__(2+_GENERIC__) Register Names
+
+@cindex AMD 29K register names
+@cindex register names, AMD 29K
 General-purpose registers are represented by predefined symbols of the
 form @samp{GR@var{nnn}} (for global registers) or @samp{LR@var{nnn}}
 (for local registers), where @var{nnn} represents a number between
@@ -3184,6 +3893,10 @@ to flag the expression as a register number):
 number between @code{0} and @code{255}.  The range [0, 127] refers to
 global registers, and the range [128, 255] to local registers.
 
+@cindex special purpose registers, AMD 29K
+@cindex AMD 29K special purpose registers
+@cindex protected registers, AMD 29K
+@cindex AMD 29K protected registers
 In addition, @code{_AS__} understands the following protected
 special-purpose register names for the AMD 29K family:
 
@@ -3205,13 +3918,19 @@ These unprotected special-purpose register names are also recognized:
 
 @node AMD29K Floating Point, AMD29K Directives, AMD29K Syntax, AMD29K-Dependent
 _CHAPSEC__(1+_GENERIC__) Floating Point
-The AMD 29K family uses IEEE floating-point numbers.
+
+@cindex floating point, AMD 29K (@sc{ieee})
+@cindex AMD 29K floating point (@sc{ieee})
+The AMD 29K family uses @sc{ieee} floating-point numbers.
 
 @node AMD29K Directives, AMD29K Opcodes, AMD29K Floating Point, AMD29K-Dependent
 _CHAPSEC__(1+_GENERIC__) AMD 29K Machine Directives
 
+@cindex machine directives, AMD 29K
+@cindex AMD 29K machine directives
 @table @code
 @item .block @var{size} , @var{fill}
+@cindex @code{block} directive, AMD 29K
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
@@ -3222,10 +3941,12 @@ In other versions of the GNU assembler, this directive is called
 
 @table @code
 @item .cputype
+@cindex @code{cputype} directive, AMD 29K
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @item .file
+@cindex @code{file} directive, AMD 29K
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
@@ -3235,17 +3956,21 @@ used for the directive called @code{.app-file} in the AMD 29K support.
 @end quotation
 
 @item .line
+@cindex @code{line} directive, AMD 29K
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @item .reg @var{symbol}, @var{expression}
+@cindex @code{reg} directive, AMD 29K
 @code{.reg} has the same effect as @code{.lsym}; @pxref{Lsym,,@code{.lsym}}.
 
 @item .sect
+@cindex @code{sect} directive, AMD 29K
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @item .use @var{section name}
+@cindex @code{use} directive, AMD 29K
 Establishes the section and subsection for the following code;
 @var{section name} may be one of @code{.text}, @code{.data},
 @code{.data1}, or @code{.lit}.  With one of the first three @var{section
@@ -3256,6 +3981,9 @@ name} options, @samp{.use} is equivalent to the machine directive
 
 @node AMD29K Opcodes,  , AMD29K Directives, AMD29K-Dependent
 _CHAPSEC__(1+_GENERIC__) Opcodes
+
+@cindex AMD 29K opcodes
+@cindex opcodes for AMD 29K
 @code{_AS__} implements all the standard AMD 29K opcodes.  No
 additional pseudo-instructions are needed on this family.
 
@@ -3265,39 +3993,53 @@ User's Manual}, Advanced Micro Devices, Inc.
 _fi__(_A29K__)
 _if__(_H8__)
 _if__(_GENERIC__)
-@node H8-300-Dependent, i960-Dependent, H8-300-Dependent, Machine Dependent
+@node H8/300-Dependent, i960-Dependent, AMD29K-Dependent, Machine Dependent
 _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) H8/300 Dependent Features
+
+@cindex H8/300 support
 @menu
-* H8-300 Options::		Options
-* H8-300 Syntax::		Syntax
-* H8-300 Floating Point::	Floating Point
-* H8-300 Directives::		H8/300 Machine Directives
-* H8-300 Opcodes::		Opcodes
+* H8/300 Options::		Options
+* H8/300 Syntax::		Syntax
+* H8/300 Floating Point::	Floating Point
+* H8/300 Directives::		H8/300 Machine Directives
+* H8/300 Opcodes::		Opcodes
 @end menu
 
-@node H8-300 Options, H8-300 Syntax, H8-300-Dependent, H8-300-Dependent
+@node H8/300 Options, H8/300 Syntax, H8/300-Dependent, H8/300-Dependent
 _CHAPSEC__(1+_GENERIC__) Options
+
+@cindex H8/300 options (none)
+@cindex options, H8/300 (none)
 @code{_AS__} has no additional command-line options for the Hitachi 
 H8/300 family.
 
-@node H8-300 Syntax, H8-300 Floating Point, H8-300 Options, H8-300-Dependent
+@node H8/300 Syntax, H8/300 Floating Point, H8/300 Options, H8/300-Dependent
 _CHAPSEC__(1+_GENERIC__) Syntax
 @menu
-* H8-300-Chars::		Special Characters
-* H8-300-Regs::			Register Names
-* H8-300-Addressing::           Addressing Modes
+* H8/300-Chars::		Special Characters
+* H8/300-Regs::			Register Names
+* H8/300-Addressing::           Addressing Modes
 @end menu
 
-@node H8-300-Chars, H8-300-Regs, H8-300 Syntax, H8-300 Syntax
+@node H8/300-Chars, H8/300-Regs, H8/300 Syntax, H8/300 Syntax
 _CHAPSEC__(2+_GENERIC__) Special Characters
+
+@cindex line comment character, H8/300
+@cindex H8/300 line comment character
 @samp{;} is the line comment character.
 
+@cindex line separator, H8/300
+@cindex statement separator, H8/300
+@cindex H8/300 line separator
 @samp{$} can be used instead of a newline to separate statements.
 Therefore @emph{you may not use @samp{$} in symbol names} on the H8/300. 
 
-@node H8-300-Regs, H8-300-Addressing, H8-300-Chars, H8-300 Syntax
+@node H8/300-Regs, H8/300-Addressing, H8/300-Chars, H8/300 Syntax
 _CHAPSEC__(2+_GENERIC__) Register Names
+
+@cindex H8/300 registers
+@cindex registers, H8/300
 You can use predefined symbols of the form @samp{r@var{n}h} and
 @samp{r@var{n}l} to refer to the H8/300 registers as sixteen 8-bit
 general-purpose registers.  @var{n} is a digit from @samp{0} to
@@ -3313,80 +4055,202 @@ The two control registers are called @code{pc} (program counter; a
 register).   @code{r7} is used as the stack pointer, and can also be
 called @code{sp}.
 
-@node H8-300-Addressing,  , H8-300-Regs, H8-300 Syntax
+@node H8/300-Addressing,  , H8/300-Regs, H8/300 Syntax
+_CHAPSEC__(2+_GENERIC__) Addressing Modes
+
+@cindex addressing modes, H8/300
+@cindex H8/300 addressing modes
 _AS__ understands the following addressing modes for the H8/300:
 @table @code
-@c FIXME!  verify metavars, descriptions in H8/300 addressing table
-
 @item r@var{n}
 Register direct
 
 @item @@r@var{n}
-@c MISSING METAVAR ABOVE??
 Register indirect
 
-@item @@(@var{d}:16, r@var{n})
+@item @@(@var{d}, r@var{n})
+@itemx @@(@var{d}:16, r@var{n})
 Register indirect: 16-bit displacement @var{d} from register @var{n}.
-@code{_AS__} understands this notation but does not require it; if you don't
-specify the displacement size, @code{_AS__} supplies it from context.
+(You may specify the @samp{:16} for clarity if you wish, but it is not
+required and has no effect.)
 
 @item @@r@var{n}+
-@c MISSING METAVAR ABOVE??
 Register indirect with post-increment
 
 @item @@-r@var{n}
-@c MISSING METAVAR ABOVE??
 Register indirect with pre-decrement
 
 @item @code{@@}@var{aa}
 @itemx @code{@@}@var{aa}:8
 @itemx @code{@@}@var{aa}:16
-Absolute address @code{aa}.  @code{_AS__} understands the @samp{:8} or
-@samp{:16} notation (specifying 8-bit or 16-bit addresses) but does not
-require it; if you don't specify the address size, @code{_AS__}
-supplies it from context.
+Absolute address @code{aa}.  You may specify the @samp{:8} or @samp{:16}
+for clarity, if you wish; but @code{_AS__} neither requires this nor
+uses it---the address size required is taken from context.
 
 @item #@var{xx}
 @itemx #@var{xx}:8
 @itemx #@var{xx}:16
-Immediate data @var{xx}.  @code{_AS__} understands the @samp{:8} or
-@samp{:16} notation (specifying 8-bit or 16-bit data) but does not
-require it; if you don't specify the data size, @code{_AS__}
-supplies it from context.
+Immediate data @var{xx}.  You may specify the @samp{:8} or @samp{:16}
+for clarity, if you wish; but @code{_AS__} neither requires this nor
+uses it---the data size required is taken from context.
 
 @item @code{@@}@code{@@}@var{aa}
 @itemx @code{@@}@code{@@}@var{aa}:8
-Memory indirect.
-
-@c FIXME are these just examples of an H8/300 addressing language?
-@c ...what about: 
-@c @(d:8,Rn)   8-bit reg indirect?
-@c @(d:16, PC) 16-bit pc-rel?
-@c @#xx:8 immediate indirect?
+Memory indirect.  You may specify the @samp{:8} for clarity, if you
+wish; but @code{_AS__} neither requires this nor uses it.
 @end table
 
-@node H8-300 Floating Point, H8-300 Directives, H8-300 Syntax, H8-300-Dependent
+@node H8/300 Floating Point, H8/300 Directives, H8/300 Syntax, H8/300-Dependent
 _CHAPSEC__(1+_GENERIC__) Floating Point
-The H8/300 family uses IEEE floating-point numbers.
 
-@node H8-300 Directives, H8-300 Opcodes, H8-300 Floating Point, H8-300-Dependent
+@cindex floating point, H8/300 (@sc{ieee})
+@cindex H8/300 floating point (@sc{ieee})
+The H8/300 family uses @sc{ieee} floating-point numbers.
+
+@node H8/300 Directives, H8/300 Opcodes, H8/300 Floating Point, H8/300-Dependent
 _CHAPSEC__(1+_GENERIC__) H8/300 Machine Directives
+
+@cindex H8/300 machine directives (none)
+@cindex machine directives, H8/300 (none)
+@cindex @code{word} directive, H8/300
+@cindex @code{int} directive, H8/300
 @code{_AS__} has no machine-dependent directives for the H8/300.
+However, on this platform the @samp{.int} and @samp{.word} directives
+generate 16-bit numbers.
 
-@node H8-300 Opcodes,  , H8-300 Directives, H8-300-Dependent
+@node H8/300 Opcodes,  , H8/300 Directives, H8/300-Dependent
 _CHAPSEC__(1+_GENERIC__) Opcodes
-@code{_AS__} implements all the standard H8/300 opcodes.  No
-additional pseudo-instructions are needed on this family.
 
-For information on the H8/300 machine instruction set, see @cite{H8/300
-Series Programming Manual} (Hitachi ADE--602--025).
+@cindex H8/300 opcode summary
+@cindex opcode summary, H8/300
+@cindex mnemonics, H8/300
+@cindex instruction summary, H8/300
+For detailed information on the H8/300 machine instruction set, see
+@cite{H8/300 Series Programming Manual} (Hitachi ADE--602--025).
+
+@code{_AS__} implements all the standard H8/300 opcodes.  No additional
+pseudo-instructions are needed on this family.  
+
+The following table summarizes the opcodes and their arguments:
+@c kluge due to lack of group outside example
+@page
+@smallexample
+@group
+            Rs   @r{source register}     
+            Rd   @r{destination register}
+            imm  @r{immediate data}      
+            x:3  @r{a bit (as a number between 0 and 7)}
+            d:8  @r{eight bit displacement from @code{pc}}
+            d:16 @r{sixteen bit displacement from @code{Rs}}
+
+add.b   Rs,Rd                  biand   #x:3,Rd        
+add.b   #imm:8,Rd              biand   #x:3,@@Rd      
+add.w   Rs,Rd                  biand   #x:3,@@aa:8    
+adds    #1,Rd                  bild    #x:3,Rd        
+adds    #2,Rd                  bild    #x:3,@@Rd      
+addx    #imm:8,Rd              bild    #x:3,@@aa:8    
+addx    Rs,Rd                  bior    #x:3,Rd        
+and     #imm:8,Rd              bior    #x:3,@@Rd      
+and     Rs,Rd                  bior    #x:3,@@aa:8    
+andc    #imm:8,ccr             bist    #x:3,Rd        
+band    #x:3,Rd                bist    #x:3,@@Rd      
+band    #x:3,@@Rd               bist    #x:3,@@aa:8   
+bra     d:8                    bixor   #x:3,Rd        
+bt      d:8                    bixor   #x:3,@@Rd      
+brn     d:8                    bixor   #x:3,@@aa:8    
+bf      d:8                    bld     #x:3,Rd        
+bhi     d:8                    bld     #x:3,@@Rd      
+bls     d:8                    bld     #x:3,@@aa:8    
+bcc     d:8                    bnot    #x:3,Rd        
+bhs     d:8                    bnot    #x:3,@@Rd      
+bcs     d:8                    bnot    #x:3,@@aa:8    
+blo     d:8                    bnot    Rs,Rd          
+bne     d:8                    bnot    Rs,@@Rd        
+beq     d:8                    bnot    Rs,@@aa:8      
+bvc     d:8                    bor     #x:3,Rd        
+bvs     d:8                    bor     #x:3,@@Rd      
+bpl     d:8                    bor     #x:3,@@aa:8    
+bmi     d:8                    bset    #x:3,@@Rd      
+bge     d:8                    bset    #x:3,@@aa:8    
+blt     d:8                    bset    Rs,Rd          
+bgt     d:8                    bset    Rs,@@Rd        
+ble     d:8                    bset    Rs,@@aa:8      
+bclr    #x:3,Rd                bsr     d:8            
+bclr    #x:3,@@Rd               bst     #x:3,Rd       
+bclr    #x:3,@@aa:8             bst     #x:3,@@Rd     
+bclr    Rs,Rd                  bst     #x:3,@@aa:8    
+bclr    Rs,@@Rd                 btst    #x:3,Rd       
+@end group
+@group
+btst    #x:3,@@Rd               mov.w   @@(d:16, Rs),Rd       
+btst    #x:3,@@aa:8             mov.w   @@Rs+,Rd              
+btst    Rs,Rd                  mov.w   @@aa:16,Rd             
+btst    Rs,@@Rd                 mov.w   Rs,@@Rd               
+btst    Rs,@@aa:8               mov.w   Rs,@@(d:16, Rd)       
+bxor    #x:3,Rd                mov.w   Rs,@@-Rd               
+bxor    #x:3,@@Rd               mov.w   Rs,@@aa:16            
+bxor    #x:3,@@aa:8             movfpe  @@aa:16,Rd            
+cmp.b   #imm:8,Rd              movtpe  Rs,@@aa:16             
+cmp.b   Rs,Rd                  mulxu   Rs,Rd                  
+cmp.w   Rs,Rd                  neg     Rs                     
+daa     Rs                     nop                            
+das     Rs                     not     Rs                     
+dec     Rs                     or      #imm:8,Rd              
+divxu   Rs,Rd                  or      Rs,Rd                  
+eepmov                         orc     #imm:8,ccr             
+inc     Rs                     pop     Rs                     
+jmp     @@Rs                    push    Rs                    
+jmp     @@aa:16                 rotl    Rs                    
+jmp     @@@@aa                   rotr    Rs                   
+jsr     @@Rs                    rotxl   Rs                    
+jsr     @@aa:16                 rotxr   Rs                    
+jsr     @@@@aa:8                 rte                          
+ldc     #imm:8,ccr             rts                            
+ldc     Rs,ccr                 shal    Rs                     
+mov.b   Rs,Rd                  shar    Rs                     
+mov.b   #imm:8,Rd              shll    Rs                     
+mov.b   @@Rs,Rd                 shlr    Rs                    
+mov.b   @@(d:16, Rs),Rd         sleep                         
+mov.b   @@Rs+,Rd                stc     ccr,Rd                
+mov.b   @@aa:16,Rd              sub.b   Rs,Rd                 
+mov.b   @@aa:8,Rd               sub.w   Rs,Rd                 
+mov.b   Rs,@@Rd                 subs    #1,Rd                 
+mov.b   Rs,@@(d:16, Rd)         subs    #2,Rd                 
+mov.b   Rs,@@-Rd                subx    #imm:8,Rd             
+mov.b   Rs,@@aa:16              subx    Rs,Rd                 
+mov.b   Rs,@@aa:8               xor     #imm:8,Rd             
+mov.w   Rs,Rd                  xor     Rs,Rd                  
+mov.w   #imm:16,Rd             xorc    #imm:8,ccr             
+mov.w   @@Rs,Rd
+@end group
+@end smallexample
+
+@cindex size suffixes, H8/300
+@cindex H8/300 size suffixes
+Four H8/300 instructions (@code{add}, @code{cmp}, @code{mov},
+@code{sub}) are defined with variants using the suffixes @samp{.b} and
+@samp{.w} to specify the size of a memory operand.  @code{_AS__}
+supports these suffixes, but does not require them; since one of the
+operands is always a register, @code{_AS__} can deduce the correct size.
+
+For example, since @code{r0} refers to a 16-bit register, 
+@example
+mov    r0,@@foo
+@exdent is equivalent to
+mov.w  r0,@@foo
+@end example
+
+If you use the size suffixes, @code{_AS__} will issue a warning if
+there's a mismatch between the suffix and the register size.
 
 _fi__(_H8__)
 _if__(_I960__)
 _if__(_GENERIC__)
-@node i960-Dependent, M68K-Dependent, H8-300-Dependent, Machine Dependent
+@node i960-Dependent, M68K-Dependent, H8/300-Dependent, Machine Dependent
 _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) Intel 80960 Dependent Features
+
+@cindex i960 support
 @menu
 * Options-i960::		i960 Command-line Options
 * Floating Point-i960::		Floating Point
@@ -3397,10 +4261,17 @@ _CHAPSEC__(0+_GENERIC__) Intel 80960 Dependent Features
 @c FIXME! Add Syntax sec with discussion of bitfields here, at least so
 @c long as they're not turned on for other machines than 960.
 @node Options-i960, Floating Point-i960, i960-Dependent, i960-Dependent
+
 _CHAPSEC__(1+_GENERIC__) i960 Command-line Options
+
+@cindex i960 options
+@cindex options, i960
 @table @code
 
 @item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
+@cindex i960 architecture options
+@cindex architecture options, i960
+@cindex @code{-A} options, i960
 Select the 80960 architecture.  Instructions or features not supported
 by the selected architecture cause fatal errors.
 
@@ -3416,8 +4287,10 @@ processor type may be recorded in the object file.  If it is critical
 that the @code{_AS__} output match a specific architecture, specify that
 architecture explicitly.
 
-
 @item -b
+@cindex @code{-b} option, i960
+@cindex branch recording, i960
+@cindex i960 branch recording
 Add code to collect information about conditional branches taken, for
 later optimization using branch prediction bits.  (The conditional branch
 instructions have branch prediction bits in the CA, CB, and CC
@@ -3437,8 +4310,10 @@ The counter following a branch records the number of times that branch
 was @emph{not} taken; the differenc between the two counters is the
 number of times the branch @emph{was} taken.
 
-A table of all such @code{Label}s is also generated, so that the
-external postprocessor @samp{gbr960} (supplied by Intel) can locate all
+@cindex @code{gbr960}, i960 postprocessor
+@cindex branch statistics table, i960
+A table of every such @code{Label} is also generated, so that the
+external postprocessor @code{gbr960} (supplied by Intel) can locate all
 the counters.  This table is always labelled @samp{__BRANCH_TABLE__};
 this is a local symbol to permit collecting statistics for many separate
 object files.  The table is word aligned, and begins with a two-word
@@ -3478,6 +4353,7 @@ generate these calls automatically when you give it a @samp{-b} option.
 For further details, see the documentation of @samp{gbr960}.
 
 @item -norelax
+@cindex @code{-norelax} option, i960
 Normally, Compare-and-Branch instructions with targets that require
 displacements greater than 13 bits (or that have external targets) are
 replaced with the corresponding compare (or @samp{chkbit}) and branch
@@ -3492,13 +4368,20 @@ displacement size), regardless of whether you use @samp{-norelax}.
 
 @node Floating Point-i960, Directives-i960, Options-i960, i960-Dependent
 _CHAPSEC__(1+_GENERIC__) Floating Point
-@code{_AS__} generates IEEE floating-point numbers for the directives
-@samp{.float}, @samp{.double}, @samp{extended}, and @samp{.single}.
+
+@cindex floating point, i960 (@sc{ieee})
+@cindex i960 floating point (@sc{ieee})
+@code{_AS__} generates @sc{ieee} floating-point numbers for the directives
+@samp{.float}, @samp{.double}, @samp{.extended}, and @samp{.single}.
 
 @node Directives-i960, Opcodes for i960, Floating Point-i960, i960-Dependent
 _CHAPSEC__(1+_GENERIC__) i960 Machine Directives
 
+@cindex machine directives, i960
+@cindex i960 machine directives
+
 @table @code
+@cindex @code{bss} directive, i960
 @item .bss @var{symbol}, @var{length}, @var{align}
 Reserve @var{length} bytes in the bss section for a local @var{symbol},
 aligned to the power of two specified by @var{align}.  @var{length} and
@@ -3509,11 +4392,13 @@ an alignment.  @xref{Lcomm,,@code{.lcomm}}.
 
 @table @code
 @item .extended @var{flonums}
+@cindex @code{extended} directive, i960
 @code{.extended} expects zero or more flonums, separated by commas; for
-each flonum, @samp{.extended} emits an IEEE extended-format (80-bit)
+each flonum, @samp{.extended} emits an @sc{ieee} extended-format (80-bit)
 floating-point number.
 
 @item .leafproc @var{call-lab}, @var{bal-lab}
+@cindex @code{leafproc} directive, i960
 You can use the @samp{.leafproc} directive in conjunction with the
 optimized @code{callj} instruction to enable faster calls of leaf
 procedures.  If a procedure is known to call no other procedures, you
@@ -3533,6 +4418,7 @@ two arguments are identical, the single argument is assumed to be the
 @code{bal} entry point.
 
 @item .sysproc @var{name}, @var{index}
+@cindex @code{sysproc} directive, i960
 The @samp{.sysproc} directive defines a name for a system procedure.
 After you define it using @samp{.sysproc}, you can use @var{name} to
 refer to the system procedure identified by @var{index} when calling
@@ -3544,6 +4430,9 @@ Both arguments are required; @var{index} must be between 0 and 31
 
 @node Opcodes for i960,  , Directives-i960, i960-Dependent
 _CHAPSEC__(1+_GENERIC__) i960 Opcodes
+
+@cindex opcodes, i960
+@cindex i960 opcodes
 All Intel 960 machine instructions are supported;
 @pxref{Options-i960,,i960 Command-line Options} for a discussion of
 selecting the instruction subset for a particular 960
@@ -3560,6 +4449,9 @@ instructions with target displacements larger than 13 bits.
 
 @node callj-i960, Compare-and-branch-i960, Opcodes for i960, Opcodes for i960
 _CHAPSEC__(2+_GENERIC__) @code{callj}
+
+@cindex @code{callj}, i960 pseudo-opcode
+@cindex i960 @code{callj} pseudo-opcode
 You can write @code{callj} to have the assembler or the linker determine
 the most appropriate form of subroutine call: @samp{call},
 @samp{bal}, or @samp{calls}.  If the assembly source contains
@@ -3571,6 +4463,8 @@ for the linker to resolve.
 @node Compare-and-branch-i960,  , callj-i960, Opcodes for i960
 _CHAPSEC__(2+_GENERIC__) Compare-and-Branch
 
+@cindex i960 compare and branch instructions
+@cindex compare and branch instructions, i960
 The 960 architectures provide combined Compare-and-Branch instructions
 that permit you to store the branch target in the lower 13 bits of the
 instruction word itself.  However, if you specify a branch target far
@@ -3578,6 +4472,8 @@ enough away that its address won't fit in 13 bits, the assembler can
 either issue an error, or convert your Compare-and-Branch instruction
 into separate instructions to do the compare and the branch.
 
+@cindex compare and jump expansions, i960
+@cindex i960 compare and jump expansions
 Whether @code{_AS__} gives an error or expands the instruction depends
 on two choices you can make: whether you use the @samp{-norelax} option,
 and whether you use a ``Compare and Branch'' instruction or a ``Compare
@@ -3649,8 +4545,10 @@ _fi__(_I960__)
 _if__(!_I960__)
 @node M68K-Dependent, Sparc-Dependent, Machine Dependent, Machine Dependent
 _fi__(!_I960__)
-_CHAPSEC__(0+_GENERIC__) M680x0 Dependent Features
 _fi__(_GENERIC__)
+_CHAPSEC__(0+_GENERIC__) M680x0 Dependent Features
+
+@cindex M680x0 support
 @menu
 * M68K-Opts::			M680x0 Options
 * M68K-Syntax::			Syntax
@@ -3661,11 +4559,15 @@ _fi__(_GENERIC__)
 
 @node M68K-Opts, M68K-Syntax, M68K-Dependent, M68K-Dependent
 _CHAPSEC__(1+_GENERIC__) M680x0 Options
+
+@cindex options, M680x0
+@cindex M680x0 options
 The Motorola 680x0 version of @code{_AS__} has two machine dependent options.
 One shortens undefined references from 32 to 16 bits, while the
 other is used to tell @code{_AS__} what kind of machine it is
 assembling for.
 
+@cindex @code{-l} option, M680x0
 You can use the @kbd{-l} option to shorten the size of references to
 undefined symbols.  If the @kbd{-l} option is not given, references to
 undefined symbols will be a full long (32 bits) wide.  (Since @code{_AS__}
@@ -3677,6 +4579,9 @@ bits).  This may be useful if you want the object file to be as small as
 possible, and you know that the relevant symbols will be less than 17
 bits away.
 
+@cindex @code{-m68000} and related options, M680x0
+@cindex architecture options, M680x0
+@cindex M680x0 architecture options
 The 680x0 version of @code{_AS__} is most frequently used to assemble
 programs for the Motorola MC68020 microprocessor.  Occasionally it is
 used to assemble programs for the mostly similar, but slightly different
@@ -3688,6 +4593,10 @@ target.
 @node M68K-Syntax, M68K-Float, M68K-Opts, M68K-Dependent
 _CHAPSEC__(1+_GENERIC__) Syntax
 
+@cindex M680x0 syntax
+@cindex syntax, M680x0
+@cindex M680x0 size modifiers
+@cindex size modifiers, M680x0
 The 680x0 version of @code{_AS__} uses syntax similar to the Sun assembler.
 Size modifiers are appended directly to the end of the opcode without an
 intervening period.  For example, write @samp{movl} rather than
@@ -3703,6 +4612,8 @@ registers (@samp{a0} through @samp{a7}), nothing, (@samp{}), the
 Program Counter (@samp{pc}), or the zero-address relative to the
 program counter (@samp{zpc}).
 
+@cindex M680x0 addressing modes
+@cindex addressing modes, M680x0
 The following addressing modes are understood:
 @table @dfn
 @item Immediate
@@ -3756,6 +4667,10 @@ by @samp{:b}, @samp{:w}, or @samp{:l}.
 
 @node M68K-Float, M68K-Directives, M68K-Syntax, M68K-Dependent
 _CHAPSEC__(1+_GENERIC__) Floating Point
+
+@cindex floating point, M680x0
+@cindex M680x0 floating point
+@c FIXME is this "not too well tested" crud STILL true?
 The floating point code is not too well tested, and may have
 subtle bugs in it.
 
@@ -3763,10 +4678,14 @@ Packed decimal (P) format floating literals are not supported.
 Feel free to add the code!
 
 The floating point formats generated by directives are these.
+
 @table @code
 @item .float
+@cindex @code{float} directive, M680x0
 @code{Single} precision floating point constants.
+
 @item .double
+@cindex @code{double} directive, M680x0
 @code{Double} precision floating point constants.
 @end table
 
@@ -3778,22 +4697,37 @@ hard, but it has not yet seemed necessary.
 
 @node M68K-Directives, M68K-opcodes, M68K-Float, M68K-Dependent
 _CHAPSEC__(1+_GENERIC__) 680x0 Machine Directives
+
+@cindex M680x0 directives
+@cindex directives, M680x0
 In order to be compatible with the Sun assembler the 680x0 assembler
 understands the following directives.
+
 @table @code
 @item .data1
+@cindex @code{data1} directive, M680x0
 This directive is identical to a @code{.data 1} directive.
+
 @item .data2
+@cindex @code{data2} directive, M680x0
 This directive is identical to a @code{.data 2} directive.
+
 @item .even
+@cindex @code{even} directive, M680x0
 This directive is identical to a @code{.align 1} directive.
 @c Is this true?  does it work???
+
 @item .skip
+@cindex @code{skip} directive, M680x0
 This directive is identical to a @code{.space} directive.
 @end table
 
 @node M68K-opcodes,  , M68K-Directives, M68K-Dependent
 _CHAPSEC__(1+_GENERIC__) Opcodes
+
+@cindex M680x0 opcodes
+@cindex opcodes, M680x0
+@cindex instruction set, M680x0
 @c pesch@cygnus.com: I don't see any point in the following
 @c                   paragraph.  Bugs are bugs; how does saying this
 @c                   help anyone?
@@ -3811,6 +4745,10 @@ instructions.
 @node M68K-Branch, M68K-Chars, M68K-opcodes, M68K-opcodes
 _CHAPSEC__(2+_GENERIC__) Branch Improvement
 
+@cindex pseudo-opcodes, M680x0
+@cindex M680x0 pseudo-opcodes
+@cindex branch improvement, M680x0
+@cindex M680x0 branch improvement
 Certain pseudo opcodes are permitted for branch instructions.
 They expand to the shortest branch instruction that will reach the
 target.  Generally these mnemonics are made by substituting @samp{j} for
@@ -3905,6 +4843,13 @@ when it encounters @samp{fj@var{XX} foo}.
 
 @node M68K-Chars,  , M68K-Branch, M68K-opcodes
 _CHAPSEC__(2+_GENERIC__) Special Characters
+
+@cindex special characters, M680x0
+@cindex M680x0 immediate character
+@cindex immediate character, M680x0
+@cindex M680x0 line comment character
+@cindex line comment character, M680x0
+@cindex comments, M680x0
 The immediate character is @samp{#} for Sun compatibility.  The
 line-comment character is @samp{|}.  If a @samp{#} appears at the
 beginning of a line, it is treated as a comment unless it looks like
@@ -3927,7 +4872,7 @@ I don't know anything about the 32x32 syntax assembled by
 one) and the possible syntaxes should write this section.
 
 @subsection Floating Point
-The 32x32 uses IEEE floating point numbers, but @code{_AS__} will only
+The 32x32 uses @sc{ieee} floating point numbers, but @code{_AS__} will only
 create single or double precision values.  I don't know if the 32x32
 understands extended precision numbers.
 
@@ -3969,6 +4914,8 @@ _if__((!_I80386__)&&(!_VAX__)&&(!_A29K__)&&(!_I960__)&&!_M680X0__)
 _fi__((!_I80386__)&&(!_VAX__)&&(!_A29K__)&&(!_I960__)&&!_M680X0__)
 _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) SPARC Dependent Features
+
+@cindex SPARC support
 @menu
 * Sparc-Opts::			Options
 * Sparc-Float::			Floating Point
@@ -3977,6 +4924,9 @@ _CHAPSEC__(0+_GENERIC__) SPARC Dependent Features
 
 @node Sparc-Opts, Sparc-Float, Sparc-Dependent, Sparc-Dependent
 _CHAPSEC__(1+_GENERIC__) Options
+
+@cindex options for SPARC (none)
+@cindex SPARC options (none)
 The Sparc has no machine dependent options.
 
 @ignore
@@ -3988,47 +4938,55 @@ will have to write this section.
 
 @node Sparc-Float, Sparc-Directives, Sparc-Opts, Sparc-Dependent
 _CHAPSEC__(1+_GENERIC__) Floating Point
+
+@cindex floating point, SPARC (@sc{ieee})
+@cindex SPARC floating point (@sc{ieee})
 The Sparc uses @sc{ieee} floating-point numbers.
 
 @node Sparc-Directives,  , Sparc-Float, Sparc-Dependent
 _CHAPSEC__(1+_GENERIC__) Sparc Machine Directives
+
+@cindex SPARC machine directives
+@cindex machine directives, SPARC
 The Sparc version of @code{_AS__} supports the following additional
 machine directives:
 
 @table @code
 @item .common
+@cindex @code{common} directive, SPARC
 This must be followed by a symbol name, a positive number, and
 @code{"bss"}.  This behaves somewhat like @code{.comm}, but the
 syntax is different.
 
-@item .global
-This is functionally identical to @code{.globl}.
-@c FIXME: is this still really SPARC specific? (vintage/devo)
-
 @item .half
+@cindex @code{half} directive, SPARC
 This is functionally identical to @code{.short}.
 
 @item .proc
+@cindex @code{proc} directive, SPARC
 This directive is ignored.  Any text following it on the same
 line is also ignored.
 
 @item .reserve
+@cindex @code{reserve} directive, SPARC
 This must be followed by a symbol name, a positive number, and
 @code{"bss"}.  This behaves somewhat like @code{.lcomm}, but the
 syntax is different.
 
 @item .seg
+@cindex @code{seg} directive, SPARC
 This must be followed by @code{"text"}, @code{"data"}, or
 @code{"data1"}.  It behaves like @code{.text}, @code{.data}, or
 @code{.data 1}.
 
 @item .skip
+@cindex @code{skip} directive, SPARC
 This is functionally identical to the @code{.space} directive.
 
 @item .word
+@cindex @code{word} directive, SPARC
 On the Sparc, the .word directive produces 32 bit values,
 instead of the 16 bit values it produces on many other machines.
-
 @end table
 
 _fi__(_SPARC__)
@@ -4039,6 +4997,8 @@ _if__(_GENERIC__)
 _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) 80386 Dependent Features
 
+@cindex i386 support
+@cindex i80306 support
 @menu
 * i386-Options::		Options
 * i386-Syntax::			AT&T Syntax versus Intel Syntax
@@ -4053,17 +5013,31 @@ _CHAPSEC__(0+_GENERIC__) 80386 Dependent Features
 
 @node i386-Options, i386-Syntax, i386-Dependent, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Options
+
+@cindex options for i386 (none)
+@cindex i386 options (none)
 The 80386 has no machine dependent options.
 
 @node i386-Syntax, i386-Opcodes, i386-Options, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) AT&T Syntax versus Intel Syntax
+
+@cindex i386 syntax compatibility
+@cindex syntax compatibility, i386
 In order to maintain compatibility with the output of @code{_GCC__},
 @code{_AS__} supports AT&T System V/386 assembler syntax.  This is quite
 different from Intel syntax.  We mention these differences because
 almost all 80386 documents used only Intel syntax.  Notable differences
 between the two syntaxes are:
+
 @itemize @bullet
 @item
+@cindex immediate operands, i386
+@cindex i386 immediate operands
+@cindex register operands, i386
+@cindex i386 register operands
+@cindex jump/call operands, i386
+@cindex i386 jump/call operands
+@cindex operand delimiters, i386
 AT&T immediate operands are preceded by @samp{$}; Intel immediate
 operands are undelimited (Intel @samp{push 4} is AT&T @samp{pushl $4}).
 AT&T register operands are preceded by @samp{%}; Intel register operands
@@ -4071,12 +5045,17 @@ are undelimited.  AT&T absolute (as opposed to PC relative) jump/call
 operands are prefixed by @samp{*}; they are undelimited in Intel syntax.
 
 @item
+@cindex i386 source, destination operands
+@cindex source, destination operands; i386
 AT&T and Intel syntax use the opposite order for source and destination
 operands.  Intel @samp{add eax, 4} is @samp{addl $4, %eax}.  The
 @samp{source, dest} convention is maintained for compatibility with
 previous Unix assemblers.
 
 @item
+@cindex opcode suffixes, i386
+@cindex sizes operands, i386
+@cindex i386 size suffixes
 In AT&T syntax the size of memory operands is determined from the last
 character of the opcode name.  Opcode suffixes of @samp{b}, @samp{w},
 and @samp{l} specify byte (8-bit), word (16-bit), and long (32-bit)
@@ -4086,6 +5065,8 @@ operands (@emph{not} the opcodes themselves) with @samp{byte ptr},
 ptr @var{foo}} is @samp{movb @var{foo}, %al} in AT&T syntax.
 
 @item
+@cindex return instructions, i386
+@cindex i386 jump, call, return
 Immediate form long jumps and calls are
 @samp{lcall/ljmp $@var{section}, $@var{offset}} in AT&T syntax; the
 Intel syntax is
@@ -4095,12 +5076,17 @@ is @samp{lret $@var{stack-adjust}} in AT&T syntax; Intel syntax is
 @samp{ret far @var{stack-adjust}}.
 
 @item
+@cindex sections, i386
+@cindex i386 sections
 The AT&T assembler does not provide support for multiple section
 programs.  Unix style systems expect all programs to be single sections.
 @end itemize
 
 @node i386-Opcodes, i386-Regs, i386-Syntax, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Opcode Naming
+
+@cindex i386 opcode naming
+@cindex opcode naming, i386
 Opcode names are suffixed with one character modifiers which specify the
 size of operands.  The letters @samp{b}, @samp{w}, and @samp{l} specify
 byte, word, and long operands.  If no suffix is specified by an
@@ -4126,28 +5112,42 @@ the @emph{to} suffix.  Thus, @samp{movsbl %al, %edx} is AT&T syntax for
 thus, are @samp{bl} (from byte to long), @samp{bw} (from byte to word),
 and @samp{wl} (from word to long).
 
-The Intel syntax conversion instructions
+@cindex conversion instructions, i386
+@cindex i386 conversion instructions
+The Intel-syntax conversion instructions
+
 @itemize @bullet
 @item
 @samp{cbw} --- sign-extend byte in @samp{%al} to word in @samp{%ax},
+
 @item
 @samp{cwde} --- sign-extend word in @samp{%ax} to long in @samp{%eax},
+
 @item
 @samp{cwd} --- sign-extend word in @samp{%ax} to long in @samp{%dx:%ax},
+
 @item
 @samp{cdq} --- sign-extend dword in @samp{%eax} to quad in @samp{%edx:%eax},
 @end itemize
+
+@noindent
 are called @samp{cbtw}, @samp{cwtl}, @samp{cwtd}, and @samp{cltd} in
 AT&T naming.  @code{_AS__} accepts either naming for these instructions.
 
+@cindex jump instructions, i386
+@cindex call instructions, i386
 Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
 AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
 convention.
 
 @node i386-Regs, i386-prefixes, i386-Opcodes, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Register Naming
+
+@cindex i386 registers
+@cindex registers, i386
 Register operands are always prefixes with @samp{%}.  The 80386 registers
 consist of
+
 @itemize @bullet
 @item
 the 8 32-bit registers @samp{%eax} (the accumulator), @samp{%ebx},
@@ -4188,6 +5188,10 @@ the 8 floating point register stack @samp{%st} or equivalently
 
 @node i386-prefixes, i386-Memory, i386-Regs, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Opcode Prefixes
+
+@cindex i386 opcode prefixes
+@cindex opcode prefixes, i386
+@cindex prefixes, i386
 Opcode prefixes are used to modify the following opcode.  They are used
 to repeat string instructions, to provide section overrides, to perform
 bus lock operations, and to give operand and address size (16-bit
@@ -4202,43 +5206,59 @@ example, the @samp{scas} (scan string) instruction is repeated with:
 @end smallexample
 
 Here is a list of opcode prefixes:
+
 @itemize @bullet
 @item
+@cindex section override prefixes, i386
 Section override prefixes @samp{cs}, @samp{ds}, @samp{ss}, @samp{es},
 @samp{fs}, @samp{gs}.  These are automatically added by specifying
 using the @var{section}:@var{memory-operand} form for memory references.
 
 @item
+@cindex size prefixes, i386
 Operand/Address size prefixes @samp{data16} and @samp{addr16}
 change 32-bit operands/addresses into 16-bit operands/addresses.  Note
 that 16-bit addressing modes (i.e. 8086 and 80286 addressing modes)
 are not supported (yet).
 
 @item
+@cindex bus lock prefixes, i386
+@cindex inhibiting interrupts, i386
 The bus lock prefix @samp{lock} inhibits interrupts during
 execution of the instruction it precedes.  (This is only valid with
 certain instructions; see a 80386 manual for details).
 
 @item
+@cindex coprocessor wait, i386
 The wait for coprocessor prefix @samp{wait} waits for the
 coprocessor to complete the current instruction.  This should never be
 needed for the 80386/80387 combination.
 
 @item
+@cindex repeat prefixes, i386
 The @samp{rep}, @samp{repe}, and @samp{repne} prefixes are added
 to string instructions to make them repeat @samp{%ecx} times.
 @end itemize
 
 @node i386-Memory, i386-jumps, i386-prefixes, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Memory References
+
+@cindex i386 memory references
+@cindex memory references, i386
 An Intel syntax indirect memory reference of the form
+
 @smallexample
 @var{section}:[@var{base} + @var{index}*@var{scale} + @var{disp}]
 @end smallexample
+
+@noindent
 is translated into the AT&T syntax
+
 @smallexample
 @var{section}:@var{disp}(@var{base}, @var{index}, @var{scale})
 @end smallexample
+
+@noindent
 where @var{base} and @var{index} are the optional 32-bit base and
 index registers, @var{disp} is the optional displacement, and
 @var{scale}, taking the values 1, 2, 4, and 8, multiplies @var{index}
@@ -4254,8 +5274,8 @@ instruction.  Thus, section overrides can be specified to emphasize which
 section register is used for a given memory operand.
 
 Here are some examples of Intel and AT&T style memory references:
-@table @asis
 
+@table @asis
 @item AT&T: @samp{-4(%ebp)}, Intel:  @samp{[ebp - 4]}
 @var{base} is @samp{%ebp}; @var{disp} is @samp{-4}. @var{section} is
 missing, and the default section is used (@samp{%ss} for addressing with
@@ -4274,7 +5294,6 @@ Note that @var{base} and @var{index} are both missing, but there is only
 @item AT&T: @samp{%gs:foo}; Intel @samp{gs:foo}
 This selects the contents of the variable @samp{foo} with section
 register @var{section} being @samp{%gs}.
-
 @end table
 
 Absolute (as opposed to PC relative) call and jump operands must be
@@ -4287,6 +5306,9 @@ respectively).
 
 @node i386-jumps, i386-Float, i386-Memory, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Handling of Jump Instructions
+
+@cindex jump optimization, i386
+@cindex i386 jump optimization
 Jump instructions are always optimized to use the smallest possible
 displacements.  This is accomplished by using byte (8-bit) displacement
 jumps whenever the target is sufficiently close.  If a byte displacement
@@ -4310,6 +5332,9 @@ cx_nonzero:
 
 @node i386-Float, i386-Notes, i386-jumps, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Floating Point
+
+@cindex i386 floating point
+@cindex floating point, i386
 All 80387 floating point types except packed BCD are supported.
 (BCD support may be added without much difficulty).  These data
 types are 16-, 32-, and 64- bit integers, and single (32-bit),
@@ -4320,6 +5345,10 @@ types.  Constructors build these data types into memory.
 
 @itemize @bullet
 @item
+@cindex @code{float} directive, i386
+@cindex @code{single} directive, i386
+@cindex @code{double} directive, i386
+@cindex @code{tfloat} directive, i386
 Floating point constructors are @samp{.float} or @samp{.single},
 @samp{.double}, and @samp{.tfloat} for 32-, 64-, and 80-bit formats.
 These correspond to opcode suffixes @samp{s}, @samp{l}, and @samp{t}.
@@ -4328,6 +5357,10 @@ this format via the @samp{fldt} (load temporary real to stack top) and
 @samp{fstpt} (store temporary real and pop stack) instructions.
 
 @item
+@cindex @code{word} directive, i386
+@cindex @code{long} directive, i386
+@cindex @code{int} directive, i386
+@cindex @code{quad} directive, i386
 Integer constructors are @samp{.word}, @samp{.long} or @samp{.int}, and
 @samp{.quad} for the 16-, 32-, and 64-bit integer formats.  The corresponding
 opcode suffixes are @samp{s} (single), @samp{l} (long), and @samp{q}
@@ -4339,6 +5372,8 @@ only present in the @samp{fildq} (load quad integer to stack top) and
 Register to register operations do not require opcode suffixes,
 so that @samp{fst %st, %st(1)} is equivalent to @samp{fstl %st, %st(1)}.
 
+@cindex i386 @code{fwait} instruction
+@cindex @code{fwait instruction}, i386
 Since the 80387 automatically synchronizes with the 80386 @samp{fwait}
 instructions are almost never needed (this is not the case for the
 80286/80287 and 8086/8087 combinations).  Therefore, @code{_AS__} suppresses
@@ -4350,6 +5385,10 @@ instructions are made equivalent to @samp{f@dots{}} instructions.  If
 
 @node i386-Notes,  , i386-Float, i386-Dependent
 _CHAPSEC__(1+_GENERIC__) Notes
+
+@cindex i386 @code{mul}, @code{imul} instructions
+@cindex @code{mul} instruction, i386
+@cindex @code{imul} instruction, i386
 There is some trickery concerning the @samp{mul} and @samp{imul}
 instructions that deserves mention.  The 16-, 32-, and 64-bit expanding
 multiplies (base opcode @samp{0xf6}; extension 4 for @samp{mul} and 5
@@ -5283,8 +6322,12 @@ usually only needed by the machine-independent part of
 @end table
 _fi__(0)
 
-@node Copying,  , Machine Dependent, Top
+@node Copying, Index, _MACH_DEP__, Top
 @unnumbered GNU GENERAL PUBLIC LICENSE
+
+@cindex license
+@cindex GPL
+@cindex copying @code{_AS__}
 @center Version 2, June 1991
 
 @display
@@ -5389,7 +6432,7 @@ of it, thus forming a work based on the Program, and copy and
 distribute such modifications or work under the terms of Section 1
 above, provided that you also meet all of these conditions:
 
-@alphaenumerate
+@enumerate a
 @item
 You must cause the modified files to carry prominent notices
 stating that you changed the files and the date of any change.
@@ -5411,7 +6454,7 @@ these conditions, and telling the user how to view a copy of this
 License.  (Exception: if the Program itself is interactive but
 does not normally print such an announcement, your work based on
 the Program is not required to print an announcement.)
-@end alphaenumerate
+@end enumerate
 
 These requirements apply to the modified work as a whole.  If
 identifiable sections of that work are not derived from the Program,
@@ -5438,7 +6481,7 @@ You may copy and distribute the Program (or a work based on it,
 under Section 2) in object code or executable form under the terms of
 Sections 1 and 2 above provided that you also do one of the following:
 
-@alphaenumerate
+@enumerate a
 @item
 Accompany it with the complete corresponding machine-readable
 source code, which must be distributed under the terms of Sections
@@ -5458,7 +6501,7 @@ to distribute corresponding source code.  (This alternative is
 allowed only for noncommercial distribution and only if you
 received the program in object code or executable form with such
 an offer, in accord with Subsection b above.)
-@end alphaenumerate
+@end enumerate
 
 The source code for a work means the preferred form of the work for
 making modifications to it.  For an executable work, complete source
@@ -5676,6 +6719,11 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.
+
+@node Index,  , Copying, Top
+@unnumbered Index
+
+@printindex cp
 
 @summarycontents
 @contents
