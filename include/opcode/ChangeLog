@@ -1,3 +1,8 @@
+Thu Mar 31 19:34:08 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i386.h (IS_JUMP_ON_ECX_ZERO, "jcxz" pattern): Operand size
+	prefix is 0x66, not 0x67.  Patch from H.J. Lu (hlu@nynexst.com).
+
 Thu Mar  3 15:51:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* i386.h: Reverse last change.  It'll be handled in gas instead.
@@ -509,7 +514,7 @@ Sat Nov 30 20:40:51 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 	m88k.h, mips.h , np1.h, ns32k.h, pn.h, pyr.h, sparc.h, tahoe.h,
 	vax.h, ChangeLog: renamed from ../<foo>-opcode.h
 
-
-	
-
-
+
+Local Variables:
+version-control: never
+End:
