@@ -1,3 +1,12 @@
+Thu Jul 27 14:06:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
+	* configure.tgt: Recognize the 68hc11.
+	* m68hc11-tdep.c: New file for 68hc11 target.
+	* config/m68hc11/m68hc11.mt: New file for 68hc11 port.
+	
+	* configure.tgt: When 68hc11, set gdb_multi_arch.
+
 Wed Jul 26 17:22:53 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (GDB_MULTI_ARCH): Define from configure.tgt

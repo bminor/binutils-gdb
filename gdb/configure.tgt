@@ -17,6 +17,7 @@ arm*)			gdb_target_cpu=arm ;;
 # OBSOLETE c[12])		gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
+m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
 m68*)			gdb_target_cpu=m68k ;;
 m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
@@ -132,6 +133,8 @@ i960-*-vxworks*)	gdb_target=vxworks960 ;;
 ia64-*-linux*)		gdb_target=linux ;;
 
 m32r-*-elf*)		gdb_target=m32r ;;
+
+m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
@@ -299,3 +302,9 @@ z8k-*-coff*)		gdb_target=z8k ;;
 
 esac
 
+
+# map GDB target onto multi-arch support
+
+case "${gdb_target}" in
+m68hc11)	gdb_multi_arch=yes ;;
+esac
