@@ -1,3 +1,8 @@
+2002-02-20  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* osf-core.c (osf_core_vec):  OSF/1 (Digital Unix) core files are
+	little endian.
+
 2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* archures.c (bfd_mach_s390_esa): Rename to bfd_mach_s390_31.
