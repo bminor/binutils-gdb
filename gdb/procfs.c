@@ -1238,8 +1238,12 @@ open_proc_file (pid, pip)
   sprintf (pip -> pathname, PROC_NAME_FMT, pid);
   if ((pip -> fd = open (pip -> pathname, O_RDWR)) >= 0)
     {
+      long pr_flags;
+
       pip -> valid = 1;
       pip -> pid = pid;
+      pr_flags = PR_FORK;
+      (void) ioctl (pip -> fd, PIOCRESET, &pr_flags);
     }
   return (pip -> valid);
 }
