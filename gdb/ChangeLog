@@ -1,3 +1,7 @@
+Fri Apr 16 17:38:33 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* munch:  Don't use head command.  It doesn't exist everywhere.
+
 Fri Apr 16 15:07:57 1993  Fred Fish  (fnf@cygnus.com)
 
 	* inflow.c (new_tty):  Remove spurious 'o' character at end

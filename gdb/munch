@@ -23,7 +23,7 @@ if test "`$MUNCH_NM main.o | egrep main | egrep FUNC | egrep GLOB`" != "" ; then
         's/^.*\(_initialize_[a-zA-Z0-9_]*\).*$/  {extern void \1 (); \1 ();}/'\
       | sort -u
 elif test "`$MUNCH_NM main.o | egrep '[TD] *_?main$'`" = "" ; then
-     if test "`$MUNCH_NM main.o | head -6 | egrep 'Subspace$'`" != "" ; then
+     if test "`$MUNCH_NM main.o | egrep 'Type    Subspace'`" != "" ; then
 	# HP PA RISC compilers don't prepend underscores
 	shift;
 	$MUNCH_NM $* | egrep '_initialize_.*' | \
