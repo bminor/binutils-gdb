@@ -72,10 +72,10 @@ extern struct simops Simops[];
 #define PC	(State.regs[9])
 
 #define PSW (State.regs[11])
-#define PSW_V 0x1
-#define PSW_C 0x2
-#define PSW_N 0x4
-#define PSW_Z 0x8
+#define PSW_Z 0x1
+#define PSW_N 0x2
+#define PSW_C 0x4
+#define PSW_V 0x8
 
 #define REG_D0 0
 #define REG_A0 4
