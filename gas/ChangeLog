@@ -1,3 +1,21 @@
+Tue Jul 11 14:30:19 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/c-mips.texi: Document -m4010 and -mno-4010.
+
+Tue Jul 11 14:28:55 1995  Jeff Spiegel  <jeffs@lsil.com>
+
+	* config/tc-mips.c (mips_4010): New static variable.
+	(interlocks): New static variable.
+	(md_begin): Check for a cpu of "r4010".  Set mips_4010 correctly.
+	If mips_4650 or mips_4010, set interlocks.
+	(append_insn): Check interlocks, not mips_4650.
+	(mips_emit_delays): Likewise.
+	(mips_ip): Only permit INSN_4010 instructions if mips_4010.
+	(md_longopts): Add "m4010" and "no-m4010".
+	(md_parse_option): Accept -mcpu=r4010.  Handle -m4010 and
+	-no-m4010.
+	(md_show_usage): Document -m4010 and -no-m4010.
+
 Tue Jul 11 13:22:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (struct efdr): Add new field fake.
