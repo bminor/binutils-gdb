@@ -2608,7 +2608,7 @@ build_instruction (doisa, features, mips16, insn)
      printf("    SignalException(ReservedInstruction,instruction);\n") ;
      printf("   else {\n");
      if (doisa < 4) {
-       printf("    if ((cmpflags & (1 << 3)) || (condition_code != 0))\n");
+       printf("    if (condition_code != 0)\n");
        printf("     SignalException(ReservedInstruction,instruction);\n") ;
        printf("    else\n");
      }
