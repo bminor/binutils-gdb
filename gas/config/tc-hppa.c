@@ -5077,7 +5077,7 @@ pa_parse_space_stmt (space_name, create_flag)
 {
   char *name, *ptemp, c;
   char loadable, defined, private, sort;
-  int spnum;
+  int spnum, temp;
   asection *seg = NULL;
   sd_chain_struct *space;
 
@@ -5090,12 +5090,18 @@ pa_parse_space_stmt (space_name, create_flag)
   if (strcmp (space_name, "$TEXT$") == 0)
     {
       seg = pa_def_spaces[0].segment;
+      defined = pa_def_spaces[0].defined;
+      private = pa_def_spaces[0].private;
       sort = pa_def_spaces[0].sort;
+      spnum = pa_def_spaces[0].spnum;
     }
   else if (strcmp (space_name, "$PRIVATE$") == 0)
     {
       seg = pa_def_spaces[1].segment;
+      defined = pa_def_spaces[1].defined;
+      private = pa_def_spaces[1].private;
       sort = pa_def_spaces[1].sort;
+      spnum = pa_def_spaces[1].spnum;
     }
 
   if (!is_end_of_statement ())
@@ -5105,8 +5111,12 @@ pa_parse_space_stmt (space_name, create_flag)
       /* First see if the space was specified as a number rather than
          as a name.  According to the PA assembly manual the rest of 
          the line should be ignored.  */
-      if ((spnum = pa_parse_number (&ptemp, 0)) >= 0)
-	input_line_pointer = ptemp;
+      temp = pa_parse_number (&ptemp, 0);
+      if (temp >= 0)
+	{
+	  spnum = temp;
+	  input_line_pointer = ptemp;
+	}
       else
 	{
 	  while (!is_end_of_statement ())
@@ -5169,7 +5179,6 @@ pa_parse_space_stmt (space_name, create_flag)
       SPACE_SPNUM (space) = spnum;
       SPACE_DEFINED (space) = defined & 1;
       SPACE_USER_DEFINED (space) = 1;
-      space->sd_seg = seg;
     }
 
 #ifdef obj_set_section_attributes
@@ -5624,12 +5633,13 @@ pa_spaces_begin ()
 
 
       /* For SOM we want to replace the standard .text, .data, and .bss
-         sections with our own.  */
+         sections with our own.   We also want to set BFD flags for
+	 all the built-in subspaces.  */
       if (!strcmp (pa_def_subspaces[i].name, "$CODE$") && !USE_ALIASES)
 	{
 	  text_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, text_section,
+	  bfd_set_section_flags (stdoutput, segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC | SEC_CODE
 					       | SEC_READONLY
@@ -5639,7 +5649,7 @@ pa_spaces_begin ()
 	{
 	  data_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, data_section,
+	  bfd_set_section_flags (stdoutput, segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_HAS_CONTENTS));
@@ -5650,8 +5660,26 @@ pa_spaces_begin ()
 	{
 	  bss_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, bss_section,
+	  bfd_set_section_flags (stdoutput, segment,
 				 applicable & SEC_ALLOC);
+	}
+      else if (!strcmp (pa_def_subspaces[i].name, "$LIT$") && !USE_ALIASES)
+	{
+	  applicable = bfd_applicable_section_flags (stdoutput);
+	  bfd_set_section_flags (stdoutput, segment,
+				 applicable & (SEC_ALLOC | SEC_LOAD
+					       | SEC_RELOC
+					       | SEC_READONLY
+					       | SEC_HAS_CONTENTS));
+	}
+      else if (!strcmp (pa_def_subspaces[i].name, "$UNWIND$") && !USE_ALIASES)
+	{
+	  applicable = bfd_applicable_section_flags (stdoutput);
+	  bfd_set_section_flags (stdoutput, segment,
+				 applicable & (SEC_ALLOC | SEC_LOAD
+					       | SEC_RELOC
+					       | SEC_READONLY
+					       | SEC_HAS_CONTENTS));
 	}
 
       /* Find the space associated with this subspace.  */

@@ -1,3 +1,12 @@
+Mon Apr 18 14:28:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_parse_space_stmt): Use the built-in
+	defaults for defined, private, and spnum fields for the
+	$TEXT$ and $PRIVATE$ spaces.  Do not clobber spnum.  Do
+	not reset the segment if just updating a space.
+	(pa_spaces_begin): Set BFD section flags for all built-in
+	subspaces.
+
 Fri Apr 15 10:51:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (first_proc_ptr): New static variable.
