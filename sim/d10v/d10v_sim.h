@@ -1,7 +1,16 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "ansidecl.h"
+#include "callback.h"
 #include "opcode/d10v.h"
+
+#define DEBUG_TRACE	0x00000001
+#define DEBUG_VALUES	0x00000002
+#define DEBUG_MEMSIZE	0x00000004
+
+#ifndef DEBUG
+#define DEBUG 0
+#endif
 
 /* FIXME: host defines */
 typedef unsigned char uint8;
@@ -28,6 +37,16 @@ struct simops
   int operands[9];
 };
 
+enum _ins_type
+{
+  INS_UNKNOWN,
+  INS_LEFT,
+  INS_RIGHT,
+  INS_LEFT_PARALLEL,
+  INS_RIGHT_PARALLEL,
+  INS_LONG
+};
+
 struct _state
 {
   reg_t regs[16];		/* general-purpose registers */
@@ -48,8 +67,10 @@ struct _state
   uint8 *imem;
   uint8 *dmem;
   int   exception;
+  enum _ins_type ins_type;
 } State;
 
+extern host_callback *d10v_callback;
 extern uint16 OP[4];
 extern struct simops Simops[];
 
@@ -102,6 +123,7 @@ extern struct simops Simops[];
 #define RW(x)			(*((uint16 *)((x)+State.imem)))
 #define RLW(x)			(*((uint32 *)((x)+State.imem)))
 #define SW(addr,data)		RW(addr)=data
+#define SLW(addr,data)		RLW(addr)=data
 #define READ_16(x)		(*((int16 *)(x)))
 #define WRITE_16(addr,data)	(*(int16 *)(addr)=data)	
 #define READ_64(x)		(*((int64 *)(x)))
@@ -113,10 +135,12 @@ uint32 get_longword PARAMS ((uint8 *));
 uint16 get_word PARAMS ((uint8 *));
 int64 get_longlong PARAMS ((uint8 *));
 void write_word PARAMS ((uint8 *addr, uint16 data));
+void write_longword PARAMS ((uint8 *addr, uint32 data));
 void write_longlong PARAMS ((uint8 *addr, int64 data));
 
 #define SW(addr,data)		write_word((long)(addr)+State.imem,data)
 #define RW(x)			get_word((long)(x)+State.imem)
+#define SLW(addr,data)  	write_longword((long)(addr)+State.imem,data)
 #define RLW(x)			get_longword((long)(x)+State.imem)
 #define READ_16(x)		get_word(x)
 #define WRITE_16(addr,data)	write_word(addr,data)

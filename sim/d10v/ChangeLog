@@ -1,3 +1,22 @@
+Wed Sep  4 11:35:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* d10v_sim.h (DEBUG_*): Add bit flags for controlling debug
+	output.
+	(_ins_type): New enumeration to specify which container an
+	instruction is in, and whether it is part of a parallel operation.
+	(_state): Add ins_type field.
+	
+	* simops.c: Change all #ifdef DEBUG code so that the input and
+	output values can be traced, along with the instruction type.
+
+	* interp.c (_leftright): New enumeration to say whether 2 short
+	instructions are done left first or right first.
+	(do_{long,2_short,parallel}): Indicate in the machine state which
+	type of instruction this is.
+	(sim_size): Only print the memory sizes if DEBUG_MEMSIZE debug
+	flag is set.
+	(sim_resume): Pass left/right indication to do_2_short.
+
 Wed Sep 04 04:45:34 1996  Mark Alexander  <marka@cygnus.com>
 
 	* simops.c: Include correct syscall.h for d10v, not host's.

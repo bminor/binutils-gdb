@@ -8,15 +8,334 @@
 #include "simops.h"
 #include "sys/syscall.h"
 
-/* #define DEBUG 1 */
+enum op_types {
+  OP_VOID,
+  OP_REG,
+  OP_REG_OUTPUT,
+  OP_DREG,
+  OP_DREG_OUTPUT,
+  OP_ACCUM,
+  OP_ACCUM_OUTPUT,
+  OP_ACCUM_REVERSE,
+  OP_CR,
+  OP_CR_OUTPUT,
+  OP_CR_REVERSE,
+  OP_FLAG,
+  OP_CONSTANT16,
+  OP_CONSTANT3,
+  OP_CONSTANT4,
+  OP_MEMREF,
+  OP_MEMREF2,
+  OP_POSTDEC,
+  OP_POSTINC,
+  OP_PREDEC
+};
+
+#if (DEBUG & DEBUG_TRACE) != 0
+static void trace_input PARAMS ((char *name,
+				 enum op_types in1,
+				 enum op_types in2,
+				 enum op_types in3));
+
+static void trace_output PARAMS ((enum op_types result));
+
+#ifndef SIZE_INSTRUCTION
+#define SIZE_INSTRUCTION 10
+#endif
+
+#ifndef SIZE_OPERANDS
+#define SIZE_OPERANDS 24
+#endif
+
+#ifndef SIZE_VALUES
+#define SIZE_VALUES 13
+#endif
+
+static void
+trace_input (name, in1, in2, in3)
+     char *name;
+     enum op_types in1;
+     enum op_types in2;
+     enum op_types in3;
+{
+  char *comma;
+  enum op_types in[3];
+  int i;
+  char buf[80];
+  char *p;
+  long tmp;
+  char *type;
+
+  switch (State.ins_type)
+    {
+    default:
+    case INS_UNKNOWN:		type = " ?"; break;
+    case INS_LEFT:		type = " L"; break;
+    case INS_RIGHT:		type = " R"; break;
+    case INS_LEFT_PARALLEL:	type = "*L"; break;
+    case INS_RIGHT_PARALLEL:	type = "*R"; break;
+    case INS_LONG:		type = " B"; break;
+    }
+
+  printf ("0x%.6x %s:  %-*s", (unsigned)PC, type, SIZE_INSTRUCTION, name);
+
+  in[0] = in1;
+  in[1] = in2;
+  in[2] = in3;
+  comma = "";
+  p = buf;
+  for (i = 0; i < 3; i++)
+    {
+      switch (in[i])
+	{
+	case OP_VOID:
+	  break;
+
+	case OP_REG:
+	case OP_REG_OUTPUT:
+	case OP_DREG:
+	case OP_DREG_OUTPUT:
+	  sprintf (p, "%sr%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_CR:
+	case OP_CR_OUTPUT:
+	case OP_CR_REVERSE:
+	  sprintf (p, "%scr%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_ACCUM:
+	case OP_ACCUM_OUTPUT:
+	case OP_ACCUM_REVERSE:
+	  sprintf (p, "%sa%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_CONSTANT16:
+	  sprintf (p, "%s%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_CONSTANT4:
+	  sprintf (p, "%s%d", comma, SEXT4(OP[i]));
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_CONSTANT3:
+	  sprintf (p, "%s%d", comma, SEXT3(OP[i]));
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_MEMREF:
+	  sprintf (p, "%s@r%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_MEMREF2:
+	  sprintf (p, "%s@(%d,r%d)", comma, (int16)OP[i], OP[i+1]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_POSTINC:
+	  sprintf (p, "%s@r%d+", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_POSTDEC:
+	  sprintf (p, "%s@r%d-", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_PREDEC:
+	  sprintf (p, "%s@-r%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_FLAG:
+	  if (OP[i] == 0)
+	    sprintf (p, "%sf0", comma);
+
+	  else if (OP[i] == 1)
+	    sprintf (p, "%sf1", comma);
+
+	  else
+	    sprintf (p, "%scarry", comma);
+
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+	}
+    }
+
+#if (DEBUG & DEBUG_VALUES) == 0
+  *p++ = '\n';
+  *p = '\0';
+  fputs (buf, stdout);
+
+#else	/* DEBUG_VALUES */
+  *p = '\0';
+  printf ("%-*s", SIZE_OPERANDS, buf);
+
+  p = buf;
+  for (i = 0; i < 3; i++)
+    {
+      buf[0] = '\0';
+      switch (in[i])
+	{
+	case OP_VOID:
+	  printf ("%*s", SIZE_VALUES, "");
+	  break;
+
+	case OP_REG_OUTPUT:
+	case OP_DREG_OUTPUT:
+	case OP_CR_OUTPUT:
+	case OP_ACCUM_OUTPUT:
+	  printf ("%*s", SIZE_VALUES, "---");
+	  break;
+
+	case OP_REG:
+	case OP_MEMREF:
+	case OP_POSTDEC:
+	case OP_POSTINC:
+	case OP_PREDEC:
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)State.regs[OP[i]]);
+	  break;
+
+	case OP_DREG:
+	  tmp = (long)((((uint32) State.regs[OP[i]]) << 16) | ((uint32) State.regs[OP[i]+1]));
+	  printf ("%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
+	  break;
+
+	case OP_CR:
+	case OP_CR_REVERSE:
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)State.cregs[OP[i]]);
+	  break;
+
+	case OP_ACCUM:
+	case OP_ACCUM_REVERSE:
+	  printf ("%*s0x%.2x%.8lx", SIZE_VALUES-12, "",
+		  ((int)(State.a[OP[i]] >> 32) & 0xff),
+		  ((unsigned long)State.a[OP[i]]) & 0xffffffff);
+	  break;
+
+	case OP_CONSTANT16:
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)OP[i]);
+	  break;
+
+	case OP_CONSTANT4:
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)SEXT4(OP[i]));
+	  break;
+
+	case OP_CONSTANT3:
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)SEXT3(OP[i]));
+	  break;
+
+	case OP_FLAG:
+	  if (OP[i] == 0)
+	    printf ("%*sF0 = %d", SIZE_VALUES-6, "", State.F0 != 0);
+
+	  else if (OP[i] == 1)
+	    printf ("%*sF1 = %d", SIZE_VALUES-6, "", State.F1 != 0);
+
+	  else
+	    printf ("%*sC = %d", SIZE_VALUES-5, "", State.C != 0);
+
+	  break;
+
+	case OP_MEMREF2:
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)OP[i]);
+	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)State.regs[OP[++i]]);
+	  break;
+	}
+    }
+#endif
+}
+
+static void
+trace_output (result)
+     enum op_types result;
+{
+#if (DEBUG & DEBUG_VALUES) != 0
+  long tmp;
+
+  switch (result)
+    {
+    default:
+      putchar ('\n');
+      break;
+
+    case OP_REG:
+    case OP_REG_OUTPUT:
+      printf (" :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "", (uint16)State.regs[OP[0]],
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+
+    case OP_DREG:
+    case OP_DREG_OUTPUT:
+      tmp = (long)((((uint32) State.regs[OP[0]]) << 16) | ((uint32) State.regs[OP[0]+1]));
+      printf (" :: %*s0x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "", tmp,
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+
+    case OP_CR:
+    case OP_CR_OUTPUT:
+      printf (" :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "", (uint16)State.cregs[OP[0]],
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+
+    case OP_CR_REVERSE:
+      printf (" :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "", (uint16)State.cregs[OP[1]],
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+
+    case OP_ACCUM:
+    case OP_ACCUM_OUTPUT:
+      printf (" :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
+	      ((int)(State.a[OP[0]] >> 32) & 0xff),
+	      ((unsigned long)State.a[OP[0]]) & 0xffffffff,
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+
+    case OP_ACCUM_REVERSE:
+      printf (" :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
+	      ((int)(State.a[OP[1]] >> 32) & 0xff),
+	      ((unsigned long)State.a[OP[1]]) & 0xffffffff,
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+
+    case OP_FLAG:
+      printf (" :: %*s F0=%d F1=%d C=%d\n", SIZE_VALUES, "",
+	      State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+    }
+
+  fflush (stdout);
+#endif
+}
+
+#else
+#define trace_input(NAME, IN1, IN2, IN3)
+#define trace_output(RESULT)
+#endif
 
 /* abs */
 void
 OP_4607 ()
 {
-#ifdef DEBUG
-  printf("   abs\tr%d\n",OP[0]);
-#endif
+  trace_input ("abs", OP_REG, OP_VOID, OP_VOID);
   State.F1 = State.F0;
   if ((int16)(State.regs[OP[0]]) < 0)
     {
@@ -25,6 +344,7 @@ OP_4607 ()
     }
   else
     State.F0 = 0;
+  trace_output (OP_REG);
 }
 
 /* abs */
@@ -33,9 +353,7 @@ OP_5607 ()
 {
   int64 tmp;
 
-#ifdef DEBUG
-  printf("   abs\ta%d\n",OP[0]);
-#endif
+  trace_input ("abs", OP_ACCUM, OP_VOID, OP_VOID);
   State.F1 = State.F0;
   State.a[OP[0]] = SEXT40(State.a[OP[0]]);
 
@@ -57,6 +375,7 @@ OP_5607 ()
     }
   else
     State.F0 = 0;
+  trace_output (OP_ACCUM);
 }
 
 /* add */
@@ -64,14 +383,13 @@ void
 OP_200 ()
 {
   uint16 tmp = State.regs[OP[0]];
-#ifdef DEBUG 
-  printf("   add\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("add", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] += State.regs[OP[1]];
   if ( tmp > State.regs[OP[0]])
     State.C = 1;
   else
     State.C = 0;
+  trace_output (OP_REG);
 }
 
 /* add */
@@ -79,10 +397,9 @@ void
 OP_1201 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   add\ta%d,r%d\n",OP[0],OP[1]);
-#endif
   tmp = SEXT40(State.a[OP[0]]) + (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
+
+  trace_input ("add", OP_ACCUM, OP_REG, OP_VOID);
   if (State.ST)
     {
       if ( tmp > MAX32)
@@ -94,6 +411,7 @@ OP_1201 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* add */
@@ -101,10 +419,9 @@ void
 OP_1203 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   add\ta%d,a%d\n",OP[0],OP[1]);
-#endif
   tmp = SEXT40(State.a[OP[0]]) + SEXT40(State.a[OP[1]]);
+
+  trace_input ("add", OP_ACCUM, OP_ACCUM, OP_VOID);
   if (State.ST)
     {
       if (tmp > MAX32)
@@ -116,6 +433,7 @@ OP_1203 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* add2w */
@@ -125,9 +443,8 @@ OP_1200 ()
   uint32 tmp;
   uint32 tmp1 = (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1];
   uint32 tmp2 = (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
-#ifdef DEBUG 
-  printf("   add2w\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("add2w", OP_DREG, OP_DREG, OP_VOID);
   tmp = tmp1 + tmp2;
   if ( (tmp < tmp1) || (tmp < tmp2) )
     State.C = 1;
@@ -135,6 +452,7 @@ OP_1200 ()
     State.C = 0;
   State.regs[OP[0]] = tmp >> 16;
   State.regs[OP[0]+1] = tmp & 0xFFFF;
+  trace_output (OP_DREG);
 }
 
 /* add3 */
@@ -142,14 +460,14 @@ void
 OP_1000000 ()
 {
   uint16 tmp = State.regs[OP[0]];
-#ifdef DEBUG
-  printf("   add3\tr%d,r%d,0x%x\n",OP[0],OP[1],OP[2]);
-#endif
   State.regs[OP[0]] = State.regs[OP[1]] + OP[2];
+
+  trace_input ("add3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   if ( tmp > State.regs[OP[0]])
     State.C = 1;
   else
     State.C = 0;
+  trace_output (OP_REG);
 }
 
 /* addac3 */
@@ -157,12 +475,12 @@ void
 OP_17000200 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   addac3\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
   tmp = SEXT40(State.a[OP[2]]) + SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
+
+  trace_input ("addac3", OP_DREG_OUTPUT, OP_DREG, OP_ACCUM);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
+  trace_output (OP_DREG);
 }
 
 /* addac3 */
@@ -170,12 +488,12 @@ void
 OP_17000202 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   addac3\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
   tmp = SEXT40(State.a[OP[1]]) + SEXT40(State.a[OP[2]]);
+
+  trace_input ("addac3", OP_DREG_OUTPUT, OP_ACCUM, OP_ACCUM);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
+  trace_output (OP_DREG);
 }
 
 /* addac3s */
@@ -183,10 +501,9 @@ void
 OP_17001200 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   addac3s\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
   State.F1 = State.F0;
+
+  trace_input ("addac3s", OP_DREG_OUTPUT, OP_DREG, OP_ACCUM);
   tmp = SEXT40(State.a[OP[2]]) + SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
   if ( tmp > MAX32)
     {
@@ -206,6 +523,7 @@ OP_17001200 ()
       State.regs[OP[0]+1] = tmp & 0xffff;
       State.F0 = 0;
     }      
+  trace_output (OP_DREG);
 }
 
 /* addac3s */
@@ -213,10 +531,9 @@ void
 OP_17001202 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   addac3s\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
   State.F1 = State.F0;
+
+  trace_input ("addac3s", OP_DREG_OUTPUT, OP_ACCUM, OP_ACCUM);
   tmp = SEXT40(State.a[OP[1]]) + SEXT40(State.a[OP[2]]);
   if ( tmp > MAX32)
     {
@@ -236,6 +553,7 @@ OP_17001202 ()
       State.regs[OP[0]+1] = tmp & 0xffff;
       State.F0 = 0;
     }      
+  trace_output (OP_DREG);
 }
 
 /* addi */
@@ -244,277 +562,251 @@ OP_201 ()
 {
   if (OP[1] == 0)
     OP[1] = 16;
-#ifdef DEBUG
-  printf("   addi\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("addi", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] += OP[1];
+  trace_output (OP_REG);
 }
 
 /* and */
 void
 OP_C00 ()
 {
-#ifdef DEBUG
-  printf("   and\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("and", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] &= State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* and3 */
 void
 OP_6000000 ()
 {
-#ifdef DEBUG
-  printf("   and3\tr%d,r%d,0x%x\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("and3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   State.regs[OP[0]] = State.regs[OP[1]] & OP[2];
+  trace_output (OP_REG);
 }
 
 /* bclri */
 void
 OP_C01 ()
 {
-#ifdef DEBUG
-  printf("   bclri\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("bclri", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] &= ~(0x8000 >> OP[1]);
+  trace_output (OP_REG);
 }
 
 /* bl.s */
 void
 OP_4900 ()
 {
-#ifdef DEBUG
-  printf("   bl.s\t0x%x\n",OP[0]);
-#endif
+  trace_input ("bl.s", OP_CONSTANT16, OP_VOID, OP_VOID);
   State.regs[13] = PC+1;
   PC += SEXT8 (OP[0]);
+  trace_output (OP_VOID);
 }
 
 /* bl.l */
 void
 OP_24800000 ()
 {
-#ifdef DEBUG
-  printf("   bl.l\t0x%x\n",OP[0]);
-#endif
+  trace_input ("bl.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   State.regs[13] = PC+1;
   PC += OP[0];
+  trace_output (OP_VOID);
 }
 
 /* bnoti */
 void
 OP_A01 ()
 {
-#ifdef DEBUG
-  printf("   bnoti\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("bnoti", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] ^= 0x8000 >> OP[1];
+  trace_output (OP_REG);
 }
 
 /* bra.s */
 void
 OP_4800 ()
 {
-#ifdef DEBUG
-  printf("   bra.s\t0x%x\n",OP[0]);
-#endif
+  trace_input ("bra.s", OP_CONSTANT16, OP_VOID, OP_VOID);
   PC += SEXT8 (OP[0]);
+  trace_output (OP_VOID);
 }
 
 /* bra.l */
 void
 OP_24000000 ()
 {
-#ifdef DEBUG
-  printf("   bra.l\t0x%x\n",OP[0]);
-#endif
+  trace_input ("bra.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   PC += OP[0];
+  trace_output (OP_VOID);
 }
 
 /* brf0f.s */
 void
 OP_4A00 ()
 {
-#ifdef DEBUG
-  printf("   brf0f.s\t0x%x\n",OP[0]);
-#endif
+  trace_input ("brf0f.s", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (State.F0 == 0)
     PC += SEXT8 (OP[0]);
+  trace_output (OP_FLAG);
 }
 
 /* brf0f.l */
 void
 OP_25000000 ()
 {
-#ifdef DEBUG
-  printf("   brf0f.l\t0x%x\n",OP[0]);
-#endif
+  trace_input ("brf0f.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (State.F0 == 0)
     PC += OP[0];
+  trace_output (OP_FLAG);
 }
 
 /* brf0t.s */
 void
 OP_4B00 ()
 {
-#ifdef DEBUG
-  printf("   brf0t.s\t0x%x\n",OP[0]);
-#endif
+  trace_input ("brf0t.s", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (State.F0)
     PC += SEXT8 (OP[0]);
+  trace_output (OP_FLAG);
 }
 
 /* brf0t.l */
 void
 OP_25800000 ()
 {
-#ifdef DEBUG
-  printf("   brf0t.l\t0x%x\n",OP[0]);
-#endif
+  trace_input ("brf0t.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (State.F0)
     PC += OP[0];
+  trace_output (OP_FLAG);
 }
 
 /* bseti */
 void
 OP_801 ()
 {
-#ifdef DEBUG
-  printf("   bseti\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("bseti", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] |= 0x8000 >> OP[1];
+  trace_output (OP_REG);
 }
 
 /* btsti */
 void
 OP_E01 ()
 {
-#ifdef DEBUG
-  printf("   btsti\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("btsti", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] & (0x8000 >> OP[1])) ? 1 : 0;
+  trace_output (OP_FLAG);
 }
 
 /* clrac */
 void
 OP_5601 ()
 {
-#ifdef DEBUG
-  printf("   clrac\ta%d\n",OP[0]);
-#endif
+  trace_input ("clrac", OP_ACCUM_OUTPUT, OP_VOID, OP_VOID);
   State.a[OP[0]] = 0;
+  trace_output (OP_ACCUM);
 }
 
 /* cmp */
 void
 OP_600 ()
 {
-#ifdef DEBUG
-  printf("   cmp\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmp", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
   State.F0 = ((int16)(State.regs[OP[0]]) < (int16)(State.regs[OP[1]])) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmp */
 void
 OP_1603 ()
 {
-#ifdef DEBUG
-  printf("   cmp\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmp", OP_ACCUM, OP_ACCUM, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (SEXT40(State.a[OP[0]]) < SEXT40(State.a[OP[1]])) ? 1 : 0;
+  trace_output (OP_FLAG);
 }
 
 /* cmpeq */
 void
 OP_400 ()
 {
-#ifdef DEBUG
-  printf("   cmpeq\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpeq", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] == State.regs[OP[1]]) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmpeq */
 void
 OP_1403 ()
 {
-#ifdef DEBUG
-  printf("   cmpeq\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpeq", OP_ACCUM, OP_ACCUM, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.a[OP[0]] == State.a[OP[1]]) ? 1 : 0;
+  trace_output (OP_FLAG);
 }
 
 /* cmpeqi.s */
 void
 OP_401 ()
 {
-#ifdef DEBUG
-  printf("   cmpeqi.s\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpeqi.s", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] == SEXT4(OP[1])) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmpeqi.l */
 void
 OP_2000000 ()
 {
-#ifdef DEBUG
-  printf("   cmpeqi.l\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpeqi.l", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] == OP[1]) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmpi.s */
 void
 OP_601 ()
 {
-#ifdef DEBUG
-  printf("   cmpi.s\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpi.s", OP_REG, OP_CONSTANT4, OP_VOID);
   State.F1 = State.F0;
   State.F0 = ((int16)(State.regs[OP[0]]) < SEXT4(OP[1])) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmpi.l */
 void
 OP_3000000 ()
 {
-#ifdef DEBUG
-  printf("   cmpi.l\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpi.l", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = ((int16)(State.regs[OP[0]]) < (int16)(OP[1])) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmpu */
 void
 OP_4600 ()
 {
-#ifdef DEBUG
-  printf("   cmpu\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpu", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] < State.regs[OP[1]]) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cmpui */
 void
 OP_23000000 ()
 {
-#ifdef DEBUG
-  printf("   cmpui\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("cmpui", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] < OP[1]) ? 1 : 0;  
+  trace_output (OP_FLAG);
 }
 
 /* cpfg */
@@ -522,10 +814,8 @@ void
 OP_4E09 ()
 {
   uint8 *src, *dst;
-#ifdef DEBUG
-  printf("   cpfg\t%x,%x\n",OP[0],OP[1]);
-#endif
   
+  trace_input ("cpfg", OP_FLAG, OP_VOID, OP_VOID);
   if (OP[0] == 0)
     dst = &State.F0;
   else
@@ -539,6 +829,7 @@ OP_4E09 ()
     src = &State.C;
 
   *dst = *src;
+  trace_output (OP_FLAG);
 }
 
 /* dbt */
@@ -554,94 +845,86 @@ void
 OP_14002800 ()
 {
   uint16 foo, tmp, tmpf;
-#ifdef DEBUG
-  printf("   divs\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("divs", OP_DREG, OP_REG, OP_VOID);
   foo = (State.regs[OP[0]] << 1) | (State.regs[OP[0]+1] >> 15);
   tmp = (int16)foo - (int16)(State.regs[OP[1]]);
   tmpf = (foo >= State.regs[OP[1]]) ? 1 : 0;
   State.regs[OP[0]] = (tmpf == 1) ? tmp : foo;
   State.regs[OP[0]+1] = (State.regs[OP[0]+1] << 1) | tmpf;
+  trace_output (OP_DREG);
 }
 
 /* exef0f */
 void
 OP_4E04 ()
 {
-#ifdef DEBUG
-  printf("   exef0f\n");
-#endif
+  trace_input ("exef0f", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (State.F0) ? 0 : 1;
+  trace_output (OP_FLAG);
 }
 
 /* exef0t */
 void
 OP_4E24 ()
 {
-#ifdef DEBUG
-  printf("   exef0t\n");
-#endif
+  trace_input ("exef0t", OP_VOID, OP_VOID, OP_VOID);
   State.exe = State.F0;
+  trace_output (OP_FLAG);
 }
 
 /* exef1f */
 void
 OP_4E40 ()
 {
-#ifdef DEBUG
-  printf("   exef1f\n");
-#endif
+  trace_input ("exef1f", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (State.F1) ? 0 : 1;
+  trace_output (OP_FLAG);
 }
 
 /* exef1t */
 void
 OP_4E42 ()
 {
-#ifdef DEBUG
-  printf("   exef1t\n");
-#endif
+  trace_input ("exef1t", OP_VOID, OP_VOID, OP_VOID);
   State.exe = State.F1;
+  trace_output (OP_FLAG);
 }
 
 /* exefaf */
 void
 OP_4E00 ()
 {
-#ifdef DEBUG
-  printf("   exefaf\n");
-#endif
+  trace_input ("exefaf", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (State.F0 | State.F1) ? 0 : 1;
+  trace_output (OP_FLAG);
 }
 
 /* exefat */
 void
 OP_4E02 ()
 {
-#ifdef DEBUG
-  printf("   exefat\n");
-#endif
+  trace_input ("exefat", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (State.F0) ? 0 : (State.F1); 
+  trace_output (OP_FLAG);
 }
 
 /* exetaf */
 void
 OP_4E20 ()
 {
-#ifdef DEBUG
-  printf("   exetaf\n");
-#endif
+  trace_input ("exetaf", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (State.F1) ? 0 : (State.F0);
+  trace_output (OP_FLAG);
 }
 
 /* exetat */
 void
 OP_4E22 ()
 {
-#ifdef DEBUG
-  printf("   exetat\n");
-#endif
+  trace_input ("exetat", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (State.F0) ? (State.F1) : 0;
+  trace_output (OP_FLAG);
 }
 
 /* exp */
@@ -651,9 +934,7 @@ OP_15002A00 ()
   uint32 tmp, foo;
   int i;
 
-#ifdef DEBUG
-  printf("   exp\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("exp", OP_REG_OUTPUT, OP_DREG, OP_VOID);
   if (((int16)State.regs[OP[1]]) >= 0)
     tmp = (State.regs[OP[1]] << 16) | State.regs[OP[1]+1];
   else
@@ -665,11 +946,13 @@ OP_15002A00 ()
       if (tmp & foo)
 	{
 	  State.regs[OP[0]] = i-1;
+	  trace_output (OP_REG);
 	  return;
 	}
       foo >>= 1;
     }
   State.regs[OP[0]] = 16;
+  trace_output (OP_REG);
 }
 
 /* exp */
@@ -678,9 +961,8 @@ OP_15002A02 ()
 {
   int64 tmp, foo;
   int i;
-#ifdef DEBUG
-  printf("   exp\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("exp", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   if (SEXT40(State.a[OP[1]]) >= 0)
     tmp = State.a[OP[1]];
   else
@@ -692,182 +974,168 @@ OP_15002A02 ()
       if (tmp & foo)
 	{
 	  State.regs[OP[0]] = i-9;
+	  trace_output (OP_REG);
 	  return;
 	}
       foo >>= 1;
     }
   State.regs[OP[0]] = 16;
+  trace_output (OP_REG);
 }
 
 /* jl */
 void
 OP_4D00 ()
 {
-#ifdef DEBUG
-  printf("   jl\t%x\n",OP[0]);
-#endif
+  trace_input ("jl", OP_REG, OP_VOID, OP_VOID);
   State.regs[13] = PC+1;
   PC = State.regs[OP[0]]; 
+  trace_output (OP_VOID);
 }
 
 /* jmp */
 void
 OP_4C00 ()
 {
-#ifdef DEBUG
-  printf("   jmp\tr%d\n",OP[0]);
-#endif
+  trace_input ("jmp", OP_REG, OP_VOID, OP_VOID);
   PC = State.regs[OP[0]]; 
+  trace_output (OP_VOID);
 }
 
 /* ld */
 void
 OP_30000000 ()
 {
-#ifdef DEBUG
-  printf("   ld\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   State.regs[OP[0]] = RW (OP[1] + State.regs[OP[2]]);
+  trace_output (OP_REG);
 }
 
 /* ld */
 void
 OP_6401 ()
 {
-#ifdef DEBUG
-  printf("   ld\tr%d,@r%d-\n",OP[0],OP[1]);
-#endif
+  trace_input ("ld", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   INC_ADDR(State.regs[OP[1]],-2);
+  trace_output (OP_REG);
 }
 
 /* ld */
 void
 OP_6001 ()
 {
-#ifdef DEBUG
-  printf("   ld\tr%d,@r%d+\n",OP[0],OP[1]);
-#endif
+  trace_input ("ld", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   INC_ADDR(State.regs[OP[1]],2);
+  trace_output (OP_REG);
 }
 
 /* ld */
 void
 OP_6000 ()
 {
-#ifdef DEBUG
-  printf("   ld\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
+  trace_output (OP_REG);
 }
 
 /* ld2w */
 void
 OP_31000000 ()
 {
-#ifdef DEBUG
-  printf("   ld2w\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   State.regs[OP[0]] = RW (OP[1] + State.regs[OP[2]]);
   State.regs[OP[0]+1] = RW (OP[1] + State.regs[OP[2]] + 2);
+  trace_output (OP_DREG);
 }
 
 /* ld2w */
 void
 OP_6601 ()
 {
-#ifdef DEBUG
-  printf("   ld2w\tr%d,@r%d-\n",OP[0],OP[1]);
-#endif
+  trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   State.regs[OP[0]+1] = RW (State.regs[OP[1]]+2);
   INC_ADDR(State.regs[OP[1]],-4);
+  trace_output (OP_DREG);
 }
 
 /* ld2w */
 void
 OP_6201 ()
 {
-#ifdef DEBUG
-  printf("   ld2w\tr%d,@r%d+\n",OP[0],OP[1]);
-#endif
+  trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   State.regs[OP[0]+1] = RW (State.regs[OP[1]]+2);
   INC_ADDR(State.regs[OP[1]],4);
+  trace_output (OP_REG);
 }
 
 /* ld2w */
 void
 OP_6200 ()
 {
-#ifdef DEBUG
-  printf("   ld2w\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   State.regs[OP[0]+1] = RW (State.regs[OP[1]]+2);
+  trace_output (OP_REG);
 }
 
 /* ldb */
 void
 OP_38000000 ()
 {
-#ifdef DEBUG
-  printf("   ldb\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("ldb", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   State.regs[OP[0]] = RB (OP[1] + State.regs[OP[2]]);
   SEXT8 (State.regs[OP[0]]);
+  trace_output (OP_REG);
 }
 
 /* ldb */
 void
 OP_7000 ()
 {
-#ifdef DEBUG
-  printf("   ldb\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("ldb", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   State.regs[OP[0]] = RB (State.regs[OP[1]]);
   SEXT8 (State.regs[OP[0]]);
+  trace_output (OP_REG);
 }
 
 /* ldi.s */
 void
 OP_4001 ()
 {
-#ifdef DEBUG
-  printf("   ldi.s\tr%d,%x\n",OP[0],SEXT4(OP[1]));
-#endif
+  trace_input ("ldi.s", OP_REG_OUTPUT, OP_CONSTANT4, OP_VOID);
   State.regs[OP[0]] = SEXT4(OP[1]);
+  trace_output (OP_REG);
 }
 
 /* ldi.l */
 void
 OP_20000000 ()
 {
-#ifdef DEBUG
-  printf("   ldi.l\tr%d,%d\t;0x%x\n",OP[0],OP[1],OP[1]);
-#endif
+  trace_input ("ldi.s", OP_REG_OUTPUT, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] = OP[1];
+  trace_output (OP_REG);
 }
 
 /* ldub */
 void
 OP_39000000 ()
 {
-#ifdef DEBUG
-  printf("   ldub\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("ldub", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   State.regs[OP[0]] = RB (OP[1] + State.regs[OP[2]]);
+  trace_output (OP_REG);
 }
 
 /* ldub */
 void
 OP_7200 ()
 {
-#ifdef DEBUG
-  printf("   ldub\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("ldub", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   State.regs[OP[0]] = RB (State.regs[OP[1]]);
+  trace_output (OP_REG);
 }
 
 /* mac */
@@ -875,9 +1143,8 @@ void
 OP_2A00 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   mac\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("mac", OP_ACCUM, OP_REG, OP_REG);
   tmp = SEXT40 ((int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]));
 
   if (State.FX)
@@ -898,6 +1165,7 @@ OP_2A00 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* macsu */
@@ -905,14 +1173,14 @@ void
 OP_1A00 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   macsu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("macsu", OP_ACCUM, OP_REG, OP_REG);
   tmp = SEXT40 ((int16)State.regs[OP[1]] * State.regs[OP[2]]);
   if (State.FX)
     tmp = SEXT40( (tmp << 1) & MASK40);
 
   State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) + tmp) & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* macu */
@@ -920,22 +1188,20 @@ void
 OP_3A00 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   macu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("macu", OP_ACCUM, OP_REG, OP_REG);
   tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
   if (State.FX)
     tmp = SEXT40( (tmp << 1) & MASK40);
   State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) + tmp) & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* max */
 void
 OP_2600 ()
 {
-#ifdef DEBUG
-  printf("   max\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("max", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
   if (State.regs[OP[1]] > State.regs[OP[0]])
     {
@@ -944,6 +1210,7 @@ OP_2600 ()
     }
   else
     State.F0 = 0;    
+  trace_output (OP_REG);
 }
 
 /* max */
@@ -951,9 +1218,8 @@ void
 OP_3600 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   max\ta%d,r%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("max", OP_ACCUM, OP_DREG, OP_VOID);
   State.F1 = State.F0;
   tmp = SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
   if (tmp > SEXT40(State.a[OP[0]]))
@@ -963,15 +1229,14 @@ OP_3600 ()
     }
   else
     State.F0 = 0;
+  trace_output (OP_ACCUM);
 }
 
 /* max */
 void
 OP_3602 ()
 {
-#ifdef DEBUG
-  printf("   max\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("max", OP_ACCUM, OP_ACCUM, OP_VOID);
   State.F1 = State.F0;
   if (SEXT40(State.a[OP[1]]) > SEXT40(State.a[OP[0]]))
     {
@@ -980,6 +1245,7 @@ OP_3602 ()
     }
   else
     State.F0 = 0;
+  trace_output (OP_ACCUM);
 }
 
 
@@ -987,9 +1253,7 @@ OP_3602 ()
 void
 OP_2601 ()
 {
-#ifdef DEBUG
-  printf("   min\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("min", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
   if (State.regs[OP[1]] < State.regs[OP[0]])
     {
@@ -998,6 +1262,7 @@ OP_2601 ()
     }
   else
     State.F0 = 0;    
+  trace_output (OP_REG);
 }
 
 /* min */
@@ -1005,9 +1270,8 @@ void
 OP_3601 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   min\ta%d,r%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("min", OP_ACCUM, OP_DREG, OP_VOID);
   State.F1 = State.F0;
   tmp = SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
   if (tmp < SEXT40(State.a[OP[0]]))
@@ -1017,15 +1281,14 @@ OP_3601 ()
     }
   else
     State.F0 = 0;
+  trace_output (OP_ACCUM);
 }
 
 /* min */
 void
 OP_3603 ()
 {
-#ifdef DEBUG
-  printf("   min\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("min", OP_ACCUM, OP_ACCUM, OP_VOID);
   State.F1 = State.F0;
   if (SEXT40(State.a[OP[1]]) < SEXT40(State.a[OP[0]]))
     {
@@ -1034,6 +1297,7 @@ OP_3603 ()
     }
   else
     State.F0 = 0;
+  trace_output (OP_ACCUM);
 }
 
 /* msb */
@@ -1041,9 +1305,8 @@ void
 OP_2800 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   msb\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("msb", OP_ACCUM, OP_REG, OP_REG);
   tmp = SEXT40 ((int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]));
 
   if (State.FX)
@@ -1064,6 +1327,7 @@ OP_2800 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* msbsu */
@@ -1071,14 +1335,14 @@ void
 OP_1800 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   msbsu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("msbsu", OP_ACCUM, OP_REG, OP_REG);
   tmp = SEXT40 ((int16)State.regs[OP[1]] * State.regs[OP[2]]);
   if (State.FX)
     tmp = SEXT40( (tmp << 1) & MASK40);
 
   State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) - tmp) & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* msbu */
@@ -1086,24 +1350,23 @@ void
 OP_3800 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   msbu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("msbu", OP_ACCUM, OP_REG, OP_REG);
   tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
   if (State.FX)
     tmp = SEXT40( (tmp << 1) & MASK40);
 
   State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) - tmp) & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* mul */
 void
 OP_2E00 ()
 {
-#ifdef DEBUG
-  printf("   mul\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mul", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] *= State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* mulx */
@@ -1111,9 +1374,8 @@ void
 OP_2C00 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   mulx\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("mulx", OP_ACCUM_OUTPUT, OP_REG, OP_REG);
   tmp = SEXT40 ((int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]));
 
   if (State.FX)
@@ -1123,6 +1385,7 @@ OP_2C00 ()
     State.a[OP[0]] = MAX32;
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* mulxsu */
@@ -1130,15 +1393,15 @@ void
 OP_1C00 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   mulxsu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("mulxsu", OP_ACCUM_OUTPUT, OP_REG, OP_REG);
   tmp = SEXT40 ((int16)(State.regs[OP[1]]) * State.regs[OP[2]]);
 
   if (State.FX)
     tmp <<= 1;
 
   State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* mulxu */
@@ -1146,138 +1409,125 @@ void
 OP_3C00 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   mulxu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("mulxu", OP_ACCUM_OUTPUT, OP_REG, OP_REG);
   tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
 
   if (State.FX)
     tmp <<= 1;
 
   State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* mv */
 void
 OP_4000 ()
 {
-#ifdef DEBUG
-  printf("   mv\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mv", OP_REG_OUTPUT, OP_REG, OP_VOID);
   State.regs[OP[0]] = State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* mv2w */
 void
 OP_5000 ()
 {
-#ifdef DEBUG
-  printf("   mv2w\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mv2w", OP_DREG_OUTPUT, OP_DREG, OP_VOID);
   State.regs[OP[0]] = State.regs[OP[1]];
   State.regs[OP[0]+1] = State.regs[OP[1]+1];
+  trace_output (OP_DREG);
 }
 
 /* mv2wfac */
 void
 OP_3E00 ()
 {
-#ifdef DEBUG
-  printf("   mv2wfac\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mv2wfac", OP_DREG_OUTPUT, OP_ACCUM, OP_VOID);
   State.regs[OP[0]] = (State.a[OP[1]] >> 16) & 0xffff;
   State.regs[OP[0]+1] = State.a[OP[1]] & 0xffff;
+  trace_output (OP_DREG);
 }
 
 /* mv2wtac */
 void
 OP_3E01 ()
 {
-#ifdef DEBUG
-  printf("   mv2wtac\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mv2wtac", OP_ACCUM_OUTPUT, OP_DREG, OP_VOID);
   State.a[OP[1]] = (SEXT16 (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1]) & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* mvac */
 void
 OP_3E03 ()
 {
-#ifdef DEBUG
-  printf("   mvac\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvac", OP_ACCUM_OUTPUT, OP_ACCUM, OP_VOID);
   State.a[OP[0]] = State.a[OP[1]];
+  trace_output (OP_ACCUM);
 }
 
 /* mvb */
 void
 OP_5400 ()
 {
-#ifdef DEBUG
-  printf("   mvb\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvb", OP_REG_OUTPUT, OP_REG, OP_VOID);
   State.regs[OP[0]] = SEXT8 (State.regs[OP[1]] & 0xff);
+  trace_output (OP_REG);
 }
 
 /* mvf0f */
 void
 OP_4400 ()
 {
-#ifdef DEBUG
-  printf("   mvf0f\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mf0f", OP_REG_OUTPUT, OP_REG, OP_VOID);
   if (State.F0 == 0)
     State.regs[OP[0]] = State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* mvf0t */
 void
 OP_4401 ()
 {
-#ifdef DEBUG
-  printf("   mvf0t\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mf0t", OP_REG_OUTPUT, OP_REG, OP_VOID);
   if (State.F0)
     State.regs[OP[0]] = State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* mvfacg */
 void
 OP_1E04 ()
 {
-#ifdef DEBUG
-  printf("   mvfacg\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvfacg", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   State.regs[OP[0]] = (State.a[OP[1]] >> 32) & 0xff;
+  trace_output (OP_ACCUM);
 }
 
 /* mvfachi */
 void
 OP_1E00 ()
 {
-#ifdef DEBUG
-  printf("   mvfachi\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvfachi", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   State.regs[OP[0]] = (State.a[OP[1]] >> 16) & 0xffff;  
+  trace_output (OP_REG);
 }
 
 /* mvfaclo */
 void
 OP_1E02 ()
 {
-#ifdef DEBUG
-  printf("   mvfaclo\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvfaclo", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   State.regs[OP[0]] = State.a[OP[1]] & 0xffff;
+  trace_output (OP_REG);
 }
 
 /* mvfc */
 void
 OP_5200 ()
 {
-#ifdef DEBUG
-  printf("   mvfc\tr%d,cr%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvfc", OP_REG_OUTPUT, OP_CR, OP_VOID);
   if (OP[1] == 0)
     {
       /* PSW is treated specially */
@@ -1295,17 +1545,17 @@ OP_5200 ()
       if (State.C) PSW |= 1;
     }
   State.regs[OP[0]] = State.cregs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* mvtacg */
 void
 OP_1E41 ()
 {
-#ifdef DEBUG
-  printf("   mvtacg\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvtacg", OP_REG, OP_ACCUM, OP_VOID);
   State.a[OP[1]] &= MASK32;
   State.a[OP[1]] |= (int64)(State.regs[OP[0]] & 0xff) << 32;
+  trace_output (OP_ACCUM_REVERSE);
 }
 
 /* mvtachi */
@@ -1313,30 +1563,27 @@ void
 OP_1E01 ()
 {
   uint16 tmp;
-#ifdef DEBUG
-  printf("   mvtachi\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("mvtachi", OP_REG, OP_ACCUM, OP_VOID);
   tmp = State.a[OP[1]] & 0xffff;
   State.a[OP[1]] = (SEXT16 (State.regs[OP[0]]) << 16 | tmp) & MASK40;
+  trace_output (OP_ACCUM_REVERSE);
 }
 
 /* mvtaclo */
 void
 OP_1E21 ()
 {
-#ifdef DEBUG
-  printf("   mvtaclo\tr%d,a%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvtaclo", OP_REG, OP_ACCUM, OP_VOID);
   State.a[OP[1]] = (SEXT16 (State.regs[OP[0]])) & MASK40;
+  trace_output (OP_ACCUM_REVERSE);
 }
 
 /* mvtc */
 void
 OP_5600 ()
 {
-#ifdef DEBUG
-  printf("   mvtc\tr%d,cr%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvtc", OP_REG, OP_CR_OUTPUT, OP_VOID);
   State.cregs[OP[1]] =  State.regs[OP[0]];
   if (OP[1] == 0)
     {
@@ -1358,26 +1605,25 @@ OP_5600 ()
 	  State.exception = SIGILL;
 	}
     }
+  trace_output (OP_CR_REVERSE);
 }
 
 /* mvub */
 void
 OP_5401 ()
 {
-#ifdef DEBUG
-  printf("   mvub\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("mvub", OP_REG_OUTPUT, OP_REG, OP_VOID);
   State.regs[OP[0]] = State.regs[OP[1]] & 0xff;
+  trace_output (OP_REG);
 }
 
 /* neg */
 void
 OP_4605 ()
 {
-#ifdef DEBUG
-  printf("   neg\tr%d\n",OP[0]);
-#endif
+  trace_input ("neg", OP_REG, OP_VOID, OP_VOID);
   State.regs[OP[0]] = 0 - State.regs[OP[0]];
+  trace_output (OP_REG);
 }
 
 /* neg */
@@ -1385,9 +1631,8 @@ void
 OP_5605 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   neg\ta%d\n",OP[0]);
-#endif
+
+  trace_input ("neg", OP_ACCUM, OP_VOID, OP_VOID);
   tmp = -SEXT40(State.a[OP[0]]);
   if (State.ST)
     {
@@ -1400,6 +1645,7 @@ OP_5605 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 
@@ -1407,36 +1653,35 @@ OP_5605 ()
 void
 OP_5E00 ()
 {
+  trace_input ("nop", OP_VOID, OP_VOID, OP_VOID);
+  trace_output (OP_VOID);
 }
 
 /* not */
 void
 OP_4603 ()
 {
-#ifdef DEBUG
-  printf("   not\tr%d\n",OP[0]);
-#endif
+  trace_input ("not", OP_REG, OP_VOID, OP_VOID);
   State.regs[OP[0]] = ~(State.regs[OP[0]]);  
+  trace_output (OP_REG);
 }
 
 /* or */
 void
 OP_800 ()
 {
-#ifdef DEBUG
-  printf("   or\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("or", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] |= State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* or3 */
 void
 OP_4000000 ()
 {
-#ifdef DEBUG
-  printf("   or3\tr%d,r%d,0x%x\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("or3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   State.regs[OP[0]] = State.regs[OP[1]] | OP[2];
+  trace_output (OP_REG);
 }
 
 /* rac */
@@ -1445,9 +1690,8 @@ OP_5201 ()
 {
   int64 tmp;
   int shift = SEXT3 (OP[2]);
-#ifdef DEBUG
-  printf("   rac\tr%d,a%d,%d\n",OP[0],OP[1],shift);
-#endif
+
+  trace_input ("rac", OP_DREG_OUTPUT, OP_ACCUM, OP_CONSTANT3);
   if (OP[1] != 0)
     {
       fprintf (stderr,"ERROR at PC 0x%x: instruction only valid for A0\n",PC<<2);
@@ -1478,6 +1722,7 @@ OP_5201 ()
       State.regs[OP[0]+1] = tmp & 0xffff;
       State.F0 = 0;
     }
+  trace_output (OP_DREG);
 }
 
 /* rachi */
@@ -1486,9 +1731,8 @@ OP_4201 ()
 {
   int64 tmp;
   int shift = SEXT3 (OP[2]);
-#ifdef DEBUG
-  printf("   rachi\tr%d,a%d,%d\n",OP[0],OP[1],shift);
-#endif
+
+  trace_input ("rachi", OP_REG_OUTPUT, OP_ACCUM, OP_CONSTANT3);
   State.F1 = State.F0;
   if (shift >=0)
     tmp = SEXT44 (State.a[1]) << shift;
@@ -1511,15 +1755,14 @@ OP_4201 ()
       State.regs[OP[0]] = (tmp >> 16) & 0xffff;
       State.F0 = 0;
     }
+  trace_output (OP_REG);
 }
 
 /* rep */
 void
 OP_27000000 ()
 {
-#ifdef DEBUG
-  printf("   rep\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("rep", OP_REG, OP_CONSTANT16, OP_VOID);
   RPT_S = PC + 1;
   RPT_E = PC + OP[1];
   RPT_C = State.regs[OP[0]];
@@ -1534,15 +1777,14 @@ OP_27000000 ()
       fprintf (stderr, "ERROR: rep must include at least 4 instructions.\n");
       State.exception = SIGILL;
     }
+  trace_output (OP_VOID);
 }
 
 /* repi */
 void
 OP_2F000000 ()
 {
-#ifdef DEBUG
-  printf("   repi\t%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("repi", OP_CONSTANT16, OP_CONSTANT16, OP_VOID);
   RPT_S = PC + 1;
   RPT_E = PC + OP[1];
   RPT_C = OP[0];
@@ -1557,24 +1799,25 @@ OP_2F000000 ()
       fprintf (stderr, "ERROR: repi must include at least 4 instructions.\n");
       State.exception = SIGILL;
     }
+  trace_output (OP_VOID);
 }
 
 /* rtd */
 void
 OP_5F60 ()
 {
-  printf("   rtd - NOT IMPLEMENTED\n");
+  fprintf(stderr, "ERROR: rtd - NOT IMPLEMENTED\n");
+  State.exception = SIGILL;
 }
 
 /* rte */
 void
 OP_5F40 ()
 {
-#ifdef DEBUG
-  printf("   rte\n");
-#endif
+  trace_input ("rte", OP_VOID, OP_VOID, OP_VOID);
   PC = BPC;
   PSW = BPSW;
+  trace_output (OP_VOID);
 }
 
 /* sadd */
@@ -1582,9 +1825,8 @@ void
 OP_1223 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   sadd\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("sadd", OP_ACCUM, OP_ACCUM, OP_VOID);
   tmp = SEXT40(State.a[OP[0]]) + (SEXT40(State.a[OP[1]]) >> 16);
   if (State.ST)
     {
@@ -1597,46 +1839,43 @@ OP_1223 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* setf0f */
 void
 OP_4611 ()
 {
-#ifdef DEBUG
-  printf("   setf0f\tr%d\n",OP[0]);
-#endif
+  trace_input ("setf0f", OP_REG_OUTPUT, OP_VOID, OP_VOID);
   State.regs[OP[0]] = (State.F0 == 0) ? 1 : 0;
+  trace_output (OP_REG);
 }
 
 /* setf0t */
 void
 OP_4613 ()
 {
-#ifdef DEBUG
-  printf("   setf0t\tr%d\n",OP[0]);
-#endif
+  trace_input ("setf0t", OP_REG_OUTPUT, OP_VOID, OP_VOID);
   State.regs[OP[0]] = (State.F0 == 1) ? 1 : 0;
+  trace_output (OP_REG);
 }
 
 /* sleep */
 void
 OP_5FC0 ()
 {
-#ifdef DEBUG
-  printf("   sleep\n");
-#endif
+  trace_input ("sleep", OP_VOID, OP_VOID, OP_VOID);
   State.IE = 1;
+  trace_output (OP_VOID);
 }
 
 /* sll */
 void
 OP_2200 ()
 {
-#ifdef DEBUG
-  printf("   sll\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("sll", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] <<= (State.regs[OP[1]] & 0xf);
+  trace_output (OP_REG);
 }
 
 /* sll */
@@ -1644,9 +1883,7 @@ void
 OP_3200 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   sll\ta%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("sll", OP_ACCUM, OP_REG, OP_VOID);
   if (State.regs[OP[1]] & 31 <= 16)
     tmp = SEXT40 (State.a[OP[0]]) << (State.regs[OP[1]] & 31);
 
@@ -1661,16 +1898,16 @@ OP_3200 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* slli */
 void
 OP_2201 ()
 {
-#ifdef DEBUG
-  printf("   slli\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("slli", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] <<= OP[1];
+  trace_output (OP_REG);
 }
 
 /* slli */
@@ -1681,10 +1918,8 @@ OP_3201 ()
 
   if (OP[1] == 0)
     OP[1] = 16;
-#ifdef DEBUG
-  printf("   slli\ta%d,%d\n",OP[0],OP[1]);
-#endif
 
+  trace_input ("slli", OP_ACCUM, OP_CONSTANT16, OP_VOID);
   tmp = SEXT40(State.a[OP[0]]) << OP[1];
 
   if (State.ST)
@@ -1698,6 +1933,7 @@ OP_3201 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+  trace_output (OP_ACCUM);
 }
 
 /* slx */
@@ -1705,41 +1941,38 @@ void
 OP_460B ()
 {
   uint16 tmp;
-#ifdef DEBUG
-  printf("   slx\tr%d\n",OP[0]);
-#endif
+
+  trace_input ("slx", OP_REG, OP_FLAG, OP_VOID);
   State.regs[OP[0]] = (State.regs[OP[0]] << 1) | State.F0;
+  trace_output (OP_REG);
 }
 
 /* sra */
 void
 OP_2400 ()
 {
-#ifdef DEBUG
-  printf("   sra\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("sra", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] = ((int16)(State.regs[OP[0]])) >> (State.regs[OP[1]] & 0xf);
+  trace_output (OP_REG);
 }
 
 /* sra */
 void
 OP_3400 ()
 {
-#ifdef DEBUG
-  printf("   sra\ta%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("sra", OP_ACCUM, OP_REG, OP_VOID);
   if (State.regs[OP[1]] & 31 <= 16)
     State.a[OP[0]] >>= (State.regs[OP[1]] & 31);
+  trace_output (OP_ACCUM);
 }
 
 /* srai */
 void
 OP_2401 ()
 {
-#ifdef DEBUG
-  printf("   srai\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("srai", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] = ((int16)(State.regs[OP[0]])) >> OP[1];
+  trace_output (OP_REG);
 }
 
 /* srai */
@@ -1748,41 +1981,38 @@ OP_3401 ()
 {
   if (OP[1] == 0)
     OP[1] = 16;
-#ifdef DEBUG
-  printf("   srai\ta%d,%d\n",OP[0],OP[1]);
-#endif
-    State.a[OP[0]] >>= OP[1];
+
+  trace_input ("srai", OP_ACCUM, OP_CONSTANT16, OP_VOID);
+  State.a[OP[0]] >>= OP[1];
+  trace_output (OP_ACCUM);
 }
 
 /* srl */
 void
 OP_2000 ()
 {
-#ifdef DEBUG
-  printf("   srl\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("srl", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] >>=  (State.regs[OP[1]] & 0xf);
+  trace_output (OP_REG);
 }
 
 /* srl */
 void
 OP_3000 ()
 {
-#ifdef DEBUG
-  printf("   srl\ta%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("srl", OP_ACCUM, OP_REG, OP_VOID);
   if (State.regs[OP[1]] & 31 <= 16)
     State.a[OP[0]] >>= (State.regs[OP[1]] & 31);
+  trace_output (OP_ACCUM);
 }
 
 /* srli */
 void
 OP_2001 ()
 {
-#ifdef DEBUG
-printf("   srli\tr%d,%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("srli", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] >>= OP[1];
+  trace_output (OP_REG);
 }
 
 /* srli */
@@ -1791,10 +2021,10 @@ OP_3001 ()
 {
   if (OP[1] == 0)
     OP[1] = 16;
-#ifdef DEBUG
-  printf("   srli\ta%d,%d\n",OP[0],OP[1]);
-#endif
-    State.a[OP[0]] >>= OP[1];
+
+  trace_input ("srli", OP_ACCUM, OP_CONSTANT16, OP_VOID);
+  State.a[OP[0]] >>= OP[1];
+  trace_output (OP_ACCUM);
 }
 
 /* srx */
@@ -1802,40 +2032,36 @@ void
 OP_4609 ()
 {
   uint16 tmp;
-#ifdef DEBUG
-  printf("   srx\tr%d\n",OP[0]);
-#endif
+
+  trace_input ("srx", OP_REG, OP_FLAG, OP_VOID);
   tmp = State.F0 << 15;
   State.regs[OP[0]] = (State.regs[OP[0]] >> 1) | tmp;
+  trace_output (OP_REG);
 }
 
 /* st */
 void
 OP_34000000 ()
 {
-#ifdef DEBUG
-  printf("   st\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("st", OP_REG, OP_MEMREF2, OP_VOID);
   SW (OP[1] + State.regs[OP[2]], State.regs[OP[0]]);
+  trace_output (OP_VOID);
 }
 
 /* st */
 void
 OP_6800 ()
 {
-#ifdef DEBUG
-  printf("   st\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("st", OP_REG, OP_MEMREF, OP_VOID);
   SW (State.regs[OP[1]], State.regs[OP[0]]);
+  trace_output (OP_VOID);
 }
 
 /* st */
 void
 OP_6C1F ()
 {
-#ifdef DEBUG
-  printf("   st\tr%d,@-r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("st", OP_REG, OP_PREDEC, OP_VOID);
   if ( OP[1] != 15 )
     {
       fprintf (stderr,"ERROR: cannot pre-decrement any registers but r15 (SP).\n");
@@ -1844,59 +2070,54 @@ OP_6C1F ()
     }
   State.regs[OP[1]] -= 2;
   SW (State.regs[OP[1]], State.regs[OP[0]]);
+  trace_output (OP_VOID);
 }
 
 /* st */
 void
 OP_6801 ()
 {
-#ifdef DEBUG
-  printf("   st\tr%d,@r%d+\n",OP[0],OP[1]);
-#endif
+  trace_input ("st", OP_REG, OP_POSTINC, OP_VOID);
   SW (State.regs[OP[1]], State.regs[OP[0]]);
   INC_ADDR (State.regs[OP[1]],2);
+  trace_output (OP_VOID);
 }
 
 /* st */
 void
 OP_6C01 ()
 {
-#ifdef DEBUG
-  printf("   st\tr%d,@r%d-\n",OP[0],OP[1]);
-#endif
+  trace_input ("st", OP_REG, OP_POSTDEC, OP_VOID);
   SW (State.regs[OP[1]], State.regs[OP[0]]);
   INC_ADDR (State.regs[OP[1]],-2);
+  trace_output (OP_VOID);
 }
 
 /* st2w */
 void
 OP_35000000 ()
 {
-#ifdef DEBUG
-  printf("   st2w\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("st2w", OP_DREG, OP_MEMREF2, OP_VOID);
   SW (State.regs[OP[2]]+OP[1], State.regs[OP[0]]);
   SW (State.regs[OP[2]]+OP[1]+2, State.regs[OP[0]+1]);
+  trace_output (OP_VOID);
 }
 
 /* st2w */
 void
 OP_6A00 ()
 {
-#ifdef DEBUG
-  printf("   st2w\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("st2w", OP_REG, OP_MEMREF, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
+  trace_output (OP_VOID);
 }
 
 /* st2w */
 void
 OP_6E1F ()
 {
-#ifdef DEBUG
-  printf("   st2w\tr%d,@-r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("st2w", OP_REG, OP_PREDEC, OP_VOID);
   if ( OP[1] != 15 )
     {
       fprintf (stderr,"ERROR: cannot pre-decrement any registers but r15 (SP).\n");
@@ -1906,60 +2127,56 @@ OP_6E1F ()
   State.regs[OP[1]] -= 4;
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
+  trace_output (OP_VOID);
 }
 
 /* st2w */
 void
 OP_6A01 ()
 {
-#ifdef DEBUG
-  printf("   st2w\tr%d,r%d+\n",OP[0],OP[1]);
-#endif
+  trace_input ("st2w", OP_REG, OP_POSTDEC, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],4);
+  trace_output (OP_VOID);
 }
 
 /* st2w */
 void
 OP_6E01 ()
 {
-#ifdef DEBUG
-  printf("   st2w\tr%d,r%d-\n",OP[0],OP[1]);
-#endif
+  trace_input ("st2w", OP_REG, OP_POSTINC, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],-4);
+  trace_output (OP_VOID);
 }
 
 /* stb */
 void
 OP_3C000000 ()
 {
-#ifdef DEBUG
-  printf("   stb\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("stb", OP_REG, OP_MEMREF2, OP_VOID);
   SB (State.regs[OP[2]]+OP[1], State.regs[OP[0]]);
+  trace_output (OP_VOID);
 }
 
 /* stb */
 void
 OP_7800 ()
 {
-#ifdef DEBUG
-  printf("   stb\tr%d,@r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("stb", OP_REG, OP_MEMREF, OP_VOID);
   SB (State.regs[OP[1]], State.regs[OP[0]]);
+  trace_output (OP_VOID);
 }
 
 /* stop */
 void
 OP_5FE0 ()
 {
-#ifdef DEBUG
-  printf("   stop\n");
-#endif
+  trace_input ("stop", OP_VOID, OP_VOID, OP_VOID);
   State.exception = SIGQUIT;
+  trace_output (OP_VOID);
 }
 
 /* sub */
@@ -1967,12 +2184,12 @@ void
 OP_0 ()
 {
   int32 tmp;
-#ifdef DEBUG
-  printf("   sub\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("sub", OP_REG, OP_REG, OP_VOID);
   tmp = (int16)State.regs[OP[0]]- (int16)State.regs[OP[1]];
   State.C = (tmp & 0xffff0000) ? 1 : 0;
   State.regs[OP[0]] = tmp & 0xffff;
+  trace_output (OP_REG);
 }
 
 /* sub */
@@ -1980,9 +2197,8 @@ void
 OP_1001 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   sub\ta%d,r%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("sub", OP_ACCUM, OP_DREG, OP_VOID);
   tmp = SEXT40(State.a[OP[0]]) - (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
   if (State.ST)
     {
@@ -1995,6 +2211,8 @@ OP_1001 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+
+  trace_output (OP_ACCUM);
 }
 
 /* sub */
@@ -2003,9 +2221,8 @@ void
 OP_1003 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   sub\ta%d,a%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("sub", OP_ACCUM, OP_ACCUM, OP_VOID);
   tmp = SEXT40(State.a[OP[0]]) - SEXT40(State.a[OP[1]]);
   if (State.ST)
     {
@@ -2018,6 +2235,8 @@ OP_1003 ()
     }
   else
     State.a[OP[0]] = tmp & MASK40;
+
+  trace_output (OP_ACCUM);
 }
 
 /* sub2w */
@@ -2026,16 +2245,15 @@ OP_1000 ()
 {
   int64 tmp;
   int32 a,b;
-#ifdef DEBUG
-  printf("   sub2w\tr%d,r%d\n",OP[0],OP[1]);
-#endif
 
+  trace_input ("sub2w", OP_DREG, OP_DREG, OP_VOID);
   a = (int32)((State.regs[OP[0]] << 16) | State.regs[OP[0]+1]);
   b = (int32)((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
   tmp = a-b;
   State.C = (tmp & 0xffffffff00000000LL) ? 1 : 0;  
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
+  trace_output (OP_DREG);
 }
 
 /* subac3 */
@@ -2043,12 +2261,12 @@ void
 OP_17000000 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   subac3\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("subac3", OP_DREG_OUTPUT, OP_DREG, OP_ACCUM);
   tmp =  SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]) - SEXT40 (State.a[OP[2]]);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
+  trace_output (OP_DREG);
 }
 
 /* subac3 */
@@ -2056,12 +2274,12 @@ void
 OP_17000002 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   subac3\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("subac3", OP_DREG_OUTPUT, OP_ACCUM, OP_ACCUM);
   tmp = SEXT40(State.a[OP[1]]) - SEXT40(State.a[OP[2]]);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
+  trace_output (OP_DREG);
 }
 
 /* subac3s */
@@ -2069,9 +2287,8 @@ void
 OP_17001000 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   subac3s\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("subac3s", OP_DREG_OUTPUT, OP_DREG, OP_ACCUM);
   State.F1 = State.F0;
   tmp = SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]) - SEXT40(State.a[OP[2]]);
   if ( tmp > MAX32)
@@ -2092,6 +2309,7 @@ OP_17001000 ()
       State.regs[OP[0]+1] = tmp & 0xffff;
       State.F0 = 0;
     }      
+  trace_output (OP_DREG);
 }
 
 /* subac3s */
@@ -2099,9 +2317,8 @@ void
 OP_17001002 ()
 {
   int64 tmp;
-#ifdef DEBUG
-  printf("   subac3s\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
-#endif
+
+  trace_input ("subac3s", OP_DREG_OUTPUT, OP_ACCUM, OP_ACCUM);
   State.F1 = State.F0;
   tmp = SEXT40(State.a[OP[1]]) - SEXT40(State.a[OP[2]]);
   if ( tmp > MAX32)
@@ -2122,6 +2339,7 @@ OP_17001002 ()
       State.regs[OP[0]+1] = tmp & 0xffff;
       State.F0 = 0;
     }      
+  trace_output (OP_DREG);
 }
 
 /* subi */
@@ -2131,21 +2349,20 @@ OP_1 ()
   int32 tmp;
   if (OP[1] == 0)
     OP[1] = 16;
-#ifdef DEBUG
-  printf("   subi\tr%d,%d\n",OP[0],OP[1]);
-#endif
+
+  trace_input ("subi", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (int16)State.regs[OP[0]] - OP[1];
   State.C = (tmp & 0xffff0000) ? 1 : 0;
   State.regs[OP[0]] = tmp & 0xffff;  
+  trace_output (OP_REG);
 }
 
 /* trap */
 void
 OP_5F00 ()
 {
-#ifdef DEBUG
-  printf("   trap\t%d\n",OP[0]);
-#endif
+  trace_input ("trap", OP_CONSTANT16, OP_REG, OP_VOID);
+  trace_output (OP_VOID);
   
   switch (OP[0])
     {
@@ -2325,7 +2542,7 @@ OP_5F00 ()
       /* Trap 2 calls printf */
       {
 	char *fstr = State.regs[2] + State.imem;
-	printf (fstr, (short)State.regs[3], (short)State.regs[4], (short)State.regs[5]);
+	printf (fstr, (int16)State.regs[3], (int16)State.regs[4], (int16)State.regs[5]);
 	break;
       }
 
@@ -2340,51 +2557,46 @@ OP_5F00 ()
 void
 OP_7000000 ()
 {
-#ifdef DEBUG
-  printf("   tst0i\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("tst0i", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (State.regs[OP[0]] & OP[1]) ? 1 : 0;
+  trace_output (OP_FLAG);
 }
 
 /* tst1i */
 void
 OP_F000000 ()
 {
-#ifdef DEBUG
-  printf("   tst1i\tr%d,0x%x\n",OP[0],OP[1]);
-#endif
+  trace_input ("tst1i", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
   State.F0 = (~(State.regs[OP[0]]) & OP[1]) ? 1 : 0;
+  trace_output (OP_FLAG);
 }
 
 /* wait */
 void
 OP_5F80 ()
 {
-#ifdef DEBUG
-  printf("   wait\n");
-#endif
+  trace_input ("wait", OP_VOID, OP_VOID, OP_VOID);
   State.IE = 1;
+  trace_output (OP_VOID);
 }
 
 /* xor */
 void
 OP_A00 ()
 {
-#ifdef DEBUG
-  printf("   xor\tr%d,r%d\n",OP[0],OP[1]);
-#endif
+  trace_input ("xor", OP_REG, OP_REG, OP_VOID);
   State.regs[OP[0]] ^= State.regs[OP[1]];
+  trace_output (OP_REG);
 }
 
 /* xor3 */
 void
 OP_5000000 ()
 {
-#ifdef DEBUG
-  printf("   xor3\tr%d,r%d,0x%x\n",OP[0],OP[1],OP[2]);
-#endif
+  trace_input ("xor3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   State.regs[OP[0]] = State.regs[OP[1]] ^ OP[2];
+  trace_output (OP_REG);
 }
 

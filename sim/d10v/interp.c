@@ -2,12 +2,15 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "remote-sim.h"
-#include "callback.h"
 
 #include "d10v_sim.h"
 
 #define IMEM_SIZE 18	/* D10V instruction memory size is 18 bits */
 #define DMEM_SIZE 16	/* Data memory */
+
+enum _leftright { LEFT_FIRST, RIGHT_FIRST };
+
+host_callback *d10v_callback;
 
 uint16 OP[4];
 
@@ -51,7 +54,7 @@ lookup_hash (ins, size)
     {
       if (h->next == NULL)
 	{
-	  printf ("ERROR looking up hash for %x\n",ins);
+	  printf ("ERROR looking up hash for %x at PC %x\n",ins, PC);
 	  exit(1);
 	}
       h = h->next;
@@ -84,6 +87,7 @@ get_word (x)
   return ((uint16)a[0]<<8) + a[1];
 }
 
+
 void
 write_word (addr, data)
      uint8 *addr;
@@ -92,6 +96,17 @@ write_word (addr, data)
   uint8 *a = addr;
   a[0] = data >> 8;
   a[1] = data & 0xff;
+}
+
+void
+write_longword (addr, data)
+     uint8 *addr;
+     uint32 data;
+{
+  addr[0] = (data >> 24) & 0xff;
+  addr[1] = (data >> 16) & 0xff;
+  addr[2] = (data >> 8) & 0xff;
+  addr[3] = data & 0xff;
 }
 
 void
@@ -109,7 +124,6 @@ write_longlong (addr, data)
   a[6] = (data >> 8) & 0xff;
   a[7] = data & 0xff;
 }
-
 
 static void
 get_operands (struct simops *s, uint32 ins)
@@ -134,19 +148,23 @@ do_long (ins)
   /*  printf ("do_long %x\n",ins); */
   h = lookup_hash (ins, 1);
   get_operands (h->ops, ins);
+  State.ins_type = INS_LONG;
   (h->ops->func)();
 }
 static void
-do_2_short (ins1, ins2)
+do_2_short (ins1, ins2, leftright)
      uint16 ins1, ins2;
+     enum _leftright leftright;
 {
   struct hash_entry *h;
   /*  printf ("do_2_short %x -> %x\n",ins1,ins2); */
   h = lookup_hash (ins1, 0);
   get_operands (h->ops, ins1);
+  State.ins_type = (leftright == LEFT_FIRST) ? INS_LEFT : INS_RIGHT;
   (h->ops->func)();
   h = lookup_hash (ins2, 0);
   get_operands (h->ops, ins2);
+  State.ins_type = (leftright == LEFT_FIRST) ? INS_RIGHT : INS_LEFT;
   (h->ops->func)();
 }
 static void
@@ -161,28 +179,34 @@ do_parallel (ins1, ins2)
   if (h1->ops->exec_type == PARONLY)
     {
       get_operands (h1->ops, ins1);
+      State.ins_type = INS_LEFT;
       (h1->ops->func)();
       if (State.exe)
 	{
 	  get_operands (h2->ops, ins2);
+	  State.ins_type = INS_RIGHT;
 	  (h2->ops->func)();
 	}
     }
   else if (h2->ops->exec_type == PARONLY)
     {
       get_operands (h2->ops, ins2);
+      State.ins_type = INS_RIGHT;
       (h2->ops->func)();
       if (State.exe)
 	{
 	  get_operands (h1->ops, ins1);
+	  State.ins_type = INS_LEFT;
 	  (h1->ops->func)();
 	}
     }
   else
     {
       get_operands (h1->ops, ins1);
+      State.ins_type = INS_LEFT_PARALLEL;
       (h1->ops->func)();
       get_operands (h2->ops, ins2);
+      State.ins_type = INS_RIGHT_PARALLEL;
       (h2->ops->func)();
     }
 }
@@ -206,8 +230,10 @@ sim_size (power)
       fprintf (stderr,"Memory allocation failed.\n");
       exit(1);
     }
+#if (DEBUG & DEBUG_MEMSIZE) != 0
   printf ("Allocated %d bytes instruction memory and\n",1<<IMEM_SIZE);
   printf ("          %d bytes data memory.\n",1<<DMEM_SIZE);
+#endif
 }
 
 static void
@@ -312,11 +338,11 @@ sim_resume (step, siggnal)
 	 break;
        case 0x80000000:
 	 /* R -> L */
-	 do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15);
+	 do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
 	 break;
        case 0x40000000:
 	 /* L -> R */
-	 do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
+	 do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
 	 break;
        case 0:
 	 do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
@@ -374,8 +400,8 @@ void
 sim_set_callbacks(p)
      host_callback *p;
 {
-  printf ("sim_set_callbacks\n");
-  /* callback = p; */
+/*  printf ("sim_set_callbacks\n"); */
+  d10v_callback = p;
 }
 
 void
