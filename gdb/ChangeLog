@@ -1,3 +1,8 @@
+Mon May 25 13:31:27 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* remote.c (remote_open_1): If an error occurs starting the remote, pop the
+	target AND return.
+
 Sat May 23 02:23:09 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* dwarf2read.c (read_subroutine_type):  Set TYPE_FLAG_PROTOTYPED
