@@ -1,7 +1,10 @@
+Thu May 19 00:32:11 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* mh-hpux (CC): Add -Wp,-H256000 to avoid "too much defining"
+	errors from the HPUX 8 compilers.
+
 Wed May  4 20:14:47 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
-	* m68k-ericsson.mt: special configuration for OSE.
-	
 	* mh-lynxrs6k: set SHELL to /bin/bash
 
 Tue Apr 12 12:38:17 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
