@@ -1,3 +1,10 @@
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (i386_immediate): Don't assume a constant
+	immediate is necessarily 16 bits when in 16 bit code mode.
+	(md_assemble): Instead set guess_suffix here after we have checked
+	registers.
+
 2000-04-02  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (check_range): Allow signed or unsigned 32-bit
