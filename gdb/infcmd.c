@@ -1023,7 +1023,7 @@ until_command (char *arg, int from_tty)
 static void
 print_return_value (int structure_return, struct type *value_type)
 {
-  register value_ptr value;
+  struct value *value;
 #ifdef UI_OUT
   static struct ui_stream *stb = NULL;
 #endif /* UI_OUT */

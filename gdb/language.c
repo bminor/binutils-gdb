@@ -96,7 +96,7 @@ static int unk_lang_val_print (struct type *, char *, int, CORE_ADDR,
 			       struct ui_file *, int, int, int,
 			       enum val_prettyprint);
 
-static int unk_lang_value_print (value_ptr, struct ui_file *, int, enum val_prettyprint);
+static int unk_lang_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
 
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
@@ -537,7 +537,7 @@ language_info (int quietly)
 #if 0				/* Currently unused */
 
 struct type *
-binop_result_type (value_ptr v1, value_ptr v2)
+binop_result_type (struct value *v1, struct value *v2)
 {
   int size, uns;
   struct type *t1 = check_typedef (VALUE_TYPE (v1));
@@ -1049,7 +1049,7 @@ lang_bool_type (void)
 
 /* Returns non-zero if the value VAL represents a true value. */
 int
-value_true (value_ptr val)
+value_true (struct value *val)
 {
   /* It is possible that we should have some sort of error if a non-boolean
      value is used in this context.  Possibly dependent on some kind of
@@ -1066,7 +1066,7 @@ value_true (value_ptr val)
 #if 0				/* Currently unused */
 
 void
-binop_type_check (value_ptr arg1, value_ptr arg2, int op)
+binop_type_check (struct value *arg1, struct value *arg2, int op)
 {
   struct type *t1, *t2;
 
@@ -1457,7 +1457,7 @@ unk_lang_val_print (struct type *type, char *valaddr, int embedded_offset,
 }
 
 static int
-unk_lang_value_print (value_ptr val, struct ui_file *stream, int format,
+unk_lang_value_print (struct value *val, struct ui_file *stream, int format,
 		      enum val_prettyprint pretty)
 {
   error ("internal error - unimplemented function unk_lang_value_print called.");

@@ -1082,7 +1082,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   if (*copy == '$')
     {
-      value_ptr valx;
+      struct value *valx;
       int index = 0;
       int need_canonical = 0;
 

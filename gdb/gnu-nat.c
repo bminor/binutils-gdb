@@ -1,5 +1,5 @@
 /* Interface GDB to the GNU Hurd.
-   Copyright 1992, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1992, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2957,14 +2957,14 @@ static void
 info_port_rights (char *args, mach_port_type_t only)
 {
   struct inf *inf = active_inf ();
-  value_ptr vmark = value_mark ();
+  struct value *vmark = value_mark ();
 
   if (args)
     /* Explicit list of port rights.  */
     {
       while (*args)
 	{
-	  value_ptr val = parse_to_comma_and_eval (&args);
+	  struct value *val = parse_to_comma_and_eval (&args);
 	  long right = value_as_long (val);
 	  error_t err =
 	  print_port_info (right, 0, inf->task->port, PORTINFO_DETAILS,

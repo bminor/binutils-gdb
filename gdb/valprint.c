@@ -159,7 +159,7 @@ val_print (struct type *type, char *valaddr, int embedded_offset,
    the number of string bytes printed.  */
 
 int
-value_print (value_ptr val, struct ui_file *stream, int format,
+value_print (struct value *val, struct ui_file *stream, int format,
 	     enum val_prettyprint pretty)
 {
   if (val == 0)

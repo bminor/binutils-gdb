@@ -1339,7 +1339,7 @@ get_prompt_1 (void *data)
     /* formatted prompt */
     {
       char fmt[40], *promptp, *outp, *tmp;
-      value_ptr arg_val;
+      struct value *arg_val;
       DOUBLEST doubleval;
       LONGEST longval;
       CORE_ADDR addrval;
@@ -1621,7 +1621,7 @@ quit_force (char *args, int from_tty)
      value of that expression. */
   if (args)
     {
-      value_ptr val = parse_and_eval (args);
+      struct value *val = parse_and_eval (args);
 
       exit_code = (int) value_as_long (val);
     }

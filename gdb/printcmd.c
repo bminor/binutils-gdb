@@ -75,7 +75,7 @@ static CORE_ADDR last_examine_address;
 /* Contents of last address examined.
    This is not valid past the end of the `x' command!  */
 
-static value_ptr last_examine_value;
+static struct value *last_examine_value;
 
 /* Largest offset between a symbolic value and an address, that will be
    printed as `0x1234 <symbol+offset>'.  */
@@ -172,7 +172,7 @@ static void validate_format (struct format_data, char *);
 static void do_examine (struct format_data, CORE_ADDR addr,
 			asection * section);
 
-static void print_formatted (value_ptr, int, int, struct ui_file *);
+static void print_formatted (struct value *, int, int, struct ui_file *);
 
 static struct format_data decode_format (char **, int, int);
 
@@ -280,7 +280,7 @@ decode_format (char **string_ptr, int oformat, int osize)
    This is used to pad hex numbers so they line up.  */
 
 static void
-print_formatted (register value_ptr val, register int format, int size,
+print_formatted (struct value *val, register int format, int size,
 		 struct ui_file *stream)
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
@@ -894,7 +894,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
   struct expression *expr;
   register struct cleanup *old_chain = 0;
   register char format = 0;
-  register value_ptr val;
+  struct value *val;
   struct format_data fmt;
   int cleanup = 0;
 
@@ -932,7 +932,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_UNION))
 	{
-	  value_ptr v;
+	  struct value *v;
 
 	  v = value_from_vtable_info (val, TYPE_TARGET_TYPE (type));
 	  if (v != 0)
@@ -1012,7 +1012,7 @@ output_command (char *exp, int from_tty)
   struct expression *expr;
   register struct cleanup *old_chain;
   register char format = 0;
-  register value_ptr val;
+  struct value *val;
   struct format_data fmt;
 
   if (exp && *exp == '/')
@@ -1563,7 +1563,7 @@ do_one_display (struct display *d)
   if (d->format.size)
     {
       CORE_ADDR addr;
-      value_ptr val;
+      struct value *val;
 
       annotate_display_format ();
 
@@ -1765,7 +1765,7 @@ void
 print_variable_value (struct symbol *var, struct frame_info *frame,
 		      struct ui_file *stream)
 {
-  value_ptr val = read_var_value (var, frame);
+  struct value *val = read_var_value (var, frame);
 
   value_print (val, stream, 0, Val_pretty_default);
 }
@@ -1786,7 +1786,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   int first = 1;
   register int i;
   register struct symbol *sym;
-  register value_ptr val;
+  struct value *val;
   /* Offset of next stack argument beyond the one we have seen that is
      at the highest offset.
      -1 if we haven't come to a stack argument yet.  */
@@ -2036,7 +2036,7 @@ printf_command (char *arg, int from_tty)
   register char *f = NULL;
   register char *s = arg;
   char *string = NULL;
-  value_ptr *val_args;
+  struct value **val_args;
   char *substrings;
   char *current_substring;
   int nargs = 0;

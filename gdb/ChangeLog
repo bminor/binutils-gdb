@@ -1,5 +1,11 @@
 2001-11-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* printcmd.c, valprint.c, language.c, linespec.c, infcmd.c,
+	gnu-nat.c, findvar.c, expprint.c, typeprint.c, stack.c, top.c:
+	Replace value_ptr with struct value.
+
+2001-11-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* c-valprint.c, ch-lang.c, ch-valprint.c, cp-valprint.c,
 	p-valprint.c, scm-exp.c, scm-lang.c, scm-valprint.c: Replace
 	value_ptr with struct value.

@@ -695,7 +695,7 @@ parse_frame_specification (char *frame_exp)
 	  addr_string = savestring (frame_exp, p - frame_exp);
 
 	  {
-	    value_ptr vp;
+	    struct value *vp;
 
 	    tmp_cleanup = make_cleanup (xfree, addr_string);
 
@@ -1757,7 +1757,7 @@ return_command (char *retval_exp, int from_tty)
   CORE_ADDR selected_frame_addr;
   CORE_ADDR selected_frame_pc;
   struct frame_info *frame;
-  value_ptr return_value = NULL;
+  struct value *return_value = NULL;
 
   if (selected_frame == NULL)
     error ("No selected frame.");

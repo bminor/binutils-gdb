@@ -62,7 +62,7 @@ print_subexp (register struct expression *exp, register int *pos,
   enum precedence myprec = PREC_NULL;
   /* Set to 1 for a right-associative operator.  */
   int assoc = 0;
-  value_ptr val;
+  struct value *val;
   char *tempstr = NULL;
 
   op_print_tab = exp->language_defn->la_op_print_tab;

@@ -295,12 +295,12 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
    NOTE: returns NULL if register value is not available.
    Caller will check return value or die!  */
 
-value_ptr
+struct value *
 value_of_register (int regnum)
 {
   CORE_ADDR addr;
   int optim;
-  register value_ptr reg_val;
+  struct value *reg_val;
   char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   enum lval_type lval;
 
@@ -412,10 +412,10 @@ symbol_read_needs_frame (struct symbol *sym)
    If the variable cannot be found, return a zero pointer.
    If FRAME is NULL, use the selected_frame.  */
 
-value_ptr
+struct value *
 read_var_value (register struct symbol *var, struct frame_info *frame)
 {
-  register value_ptr v;
+  register struct value *v;
   struct type *type = SYMBOL_TYPE (var);
   CORE_ADDR addr;
   register int len;
@@ -523,7 +523,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_BASEREG_ARG:
     case LOC_THREAD_LOCAL_STATIC:
       {
-	value_ptr regval;
+	struct value *regval;
 
 	regval = value_from_register (lookup_pointer_type (type),
 				      SYMBOL_BASEREG (var), frame);
@@ -552,7 +552,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
       {
 	struct block *b;
 	int regno = SYMBOL_VALUE (var);
-	value_ptr regval;
+	struct value *regval;
 
 	if (frame == NULL)
 	  return 0;
@@ -617,13 +617,13 @@ addresses have not been bound by the dynamic loader. Try again when executable i
    NOTE: returns NULL if register value is not available.
    Caller will check return value or die!  */
 
-value_ptr
+struct value *
 value_from_register (struct type *type, int regnum, struct frame_info *frame)
 {
   char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   CORE_ADDR addr;
   int optim;
-  value_ptr v = allocate_value (type);
+  struct value *v = allocate_value (type);
   char *value_bytes = 0;
   int value_bytes_copied = 0;
   int num_storage_locs;
@@ -840,12 +840,12 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
    return a (pointer to a) struct value containing the properly typed
    address.  */
 
-value_ptr
+struct value *
 locate_var_value (register struct symbol *var, struct frame_info *frame)
 {
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);
-  value_ptr lazy_value;
+  struct value *lazy_value;
 
   /* Evaluate it first; if the result is a memory address, we're fine.
      Lazy evaluation pays off here. */
@@ -857,7 +857,7 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
   if (VALUE_LAZY (lazy_value)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
-      value_ptr val;
+      struct value *val;
 
       addr = VALUE_ADDRESS (lazy_value);
       val = value_from_pointer (lookup_pointer_type (type), addr);
