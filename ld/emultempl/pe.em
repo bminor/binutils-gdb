@@ -1115,6 +1115,7 @@ gld_${EMULATION_NAME}_after_open (void)
     int is_ms_arch = 0;
     bfd *cur_arch = 0;
     lang_input_statement_type *is2;
+    lang_input_statement_type *is3;
 
     /* Careful - this is a shell script.  Watch those dollar signs! */
     /* Microsoft import libraries have every member named the same,
@@ -1129,21 +1130,59 @@ gld_${EMULATION_NAME}_after_open (void)
       {
 	if (is->the_bfd->my_archive)
 	  {
+	    char *pnt;
 	    bfd *arch = is->the_bfd->my_archive;
+
 	    if (cur_arch != arch)
 	      {
 		cur_arch = arch;
 		is_ms_arch = 1;
-		for (is2 = is;
-		     is2 && is2->the_bfd->my_archive == arch;
-		     is2 = (lang_input_statement_type *)is2->next)
+
+		for (is3 = is;
+		     is3 && is3->the_bfd->my_archive == arch;
+		     is3 = (lang_input_statement_type *) is3->next)
 		  {
-		    if (strcmp (is->the_bfd->filename, is2->the_bfd->filename))
-		      is_ms_arch = 0;
+                    /* A MS dynamic import library can also contain static
+		       members, so look for the first element with a .dll
+		       extension, and use that for the remainder of the
+		       comparisons.  */
+		    pnt = strrchr (is3->the_bfd->filename, '.');
+		    if (pnt != NULL && strcmp (pnt, ".dll") != 0)
+		      continue;
+		  }
+
+		if (is3 == NULL)
+		  is_ms_arch = 0;
+		else
+		  {
+		    /* OK, found one.  Now look to see if the remaining
+		       (dynamic import) members use the same name.  */
+		    for (is2 = is;
+			 is2 && is2->the_bfd->my_archive == arch;
+			 is2 = (lang_input_statement_type *) is2->next)
+		      {
+			/* Skip static members, ie anything with a .obj
+			   extension.  */
+			pnt = strrchr (is2->the_bfd->filename, '.');
+			if (pnt != NULL && strcmp (pnt, ".obj") == 0)
+			  continue;
+
+			if (strcmp (is3->the_bfd->filename,
+				    is2->the_bfd->filename))
+			  {
+			    is_ms_arch = 0;
+			    break;
+			  }
+		      }
 		  }
 	      }
 
-	    if (is_ms_arch)
+	    /* This fragment might have come from an .obj file in a Microsoft
+	       import, and not an actual import record. If this is the case,
+	       then leave the filename alone.  */
+	    pnt = strrchr (is->the_bfd->filename, '.');
+
+	    if (is_ms_arch && (strcmp (pnt, ".dll") == 0))
 	      {
 		int idata2 = 0, reloc_count=0;
 		asection *sec;

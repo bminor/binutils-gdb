@@ -1,3 +1,9 @@
+2003-12-18  Eric Youngdale  <eric@mkssoftware.com>
+            Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (_after_open): When scanning MS import
+	libraries allow for the possible presence of static objects.
+          
 2003-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_vers_match): Pass "DMGL_PARAMS | DMGL_ANSI" to
