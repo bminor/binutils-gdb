@@ -1,3 +1,15 @@
+start-sanitize-v850
+Mon Jan 13 19:36:25 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-v850.c (v850_elf_howto_table): Set the special_function
+	table to v850_elf_reloc for all non-standard relocations.
+	(v850_elf_check_relocs): Add check for h being non-null.
+	(v850_elf_reloc): Add  R_V850_ZDA_OFFSET support.  Use switch
+	statement instead of multiple ifs.
+	(v850_elf_relocate_section): Fix up error message, don't just call
+	abort.
+
+end-sanitize-v850
 Mon Jan  6 13:28:35 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10200.c (elf_mn10200_howto): Don't ever set partial-inplace.
