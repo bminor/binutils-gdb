@@ -12,9 +12,14 @@
 =	be distributed with CLib.NLM and its headers.
 ==============================================================================
 */
-#include <nwpre.h>
-/*#include "libhooks.h"*/
+
 #include <stddef.h>
+#if defined(__netware__) && defined(__i386__)
+#define TERMINATE_BY_UNLOAD	5
+#else
+#include <nwpre.h>
+#endif
+/*#include "libhooks.h"*/
 
 extern int main (int, char **);
 

@@ -66,18 +66,29 @@
  *
  ****************************************************************************/
 
-#include <nwdfs.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <errno.h>
+
+#if defined(__netware__) && defined(__i386__)
+#include <dfs.h>
+#include <conio.h>
+#include <advanced.h>
+#include <debugapi.h>
+#include <process.h>
+#else
+#include <nwdfs.h>
 #include <nwconio.h>
 #include <nwadv.h>
 #include <nwdbgapi.h>
-#include <errno.h>
 #include <nwthread.h>
+#endif
 #include <aio.h>
+
 #include "cpu.h"
+
 
 /****************************************************/
 /* This information is from Novell.  It is not in any of the standard

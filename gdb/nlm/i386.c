@@ -1,3 +1,14 @@
+#include <dfs.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <time.h>
+#include <conio.h>
+#include <advanced.h>
+#include <debugapi.h>
+#include <process.h>
+#include <errno.h>
 #include "i386.h"
 
 /* Get the registers out of the frame information.  */
