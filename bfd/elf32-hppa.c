@@ -857,7 +857,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		    (info, h->root.root.string, input_bfd,
 		     input_section, rel->r_offset)))
 		return false;
-	      relocation = 0;
+	      break;
 	    }
 	}
 
@@ -1300,7 +1300,7 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
        section.  If it's a code section, then "data pointer relative" makes
        no sense.  In that case we don't adjust the "value", and for 21 bit
        addil instructions, we change the source addend register from %dp to
-       %r0.  
+       %r0.  */
     case R_PARISC_DPREL21L:
       r_field = e_lrsel;
       if (sym_sec->flags & SEC_CODE)

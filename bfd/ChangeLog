@@ -1,3 +1,14 @@
+Mon Jun 26 13:53:49 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hpa.c (elf32_hppa_relocate_section): Close comment before
+	R_PARISC_DPREL21L handling.
+
+Thu Jun 22 19:28:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Sun May  7 11:53:41 MDT 1995  Bryan Ford  <baford@cs.utah.edu>
+
+	* config/i386-moss.mt: created.
+
 Thu Jun 22 08:56:10 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* reloc.c (bfd_perform_relocation): Add case for -ve words.
