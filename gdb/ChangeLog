@@ -1,5 +1,9 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/nm-bsd.h (PTRACE_ARG3_TYPE): Remove define.
+	* config/nm-nbsd.h: Update copyright year.
+	(PTRACE_ARG3_TYPE): Remove define.
+
 	* sparc-nat.c (fetch_inferior_registers)
 	(store_inferior_registers, sparc_xfer_wcookie): 
 	Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
