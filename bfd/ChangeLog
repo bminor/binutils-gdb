@@ -1,3 +1,8 @@
+2003-07-22  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_dynamic_symbol_p): Don't return TRUE for
+	weak symbols.
+
 2003-07-22  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Add C_TCSYM and C_ECOML to

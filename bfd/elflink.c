@@ -2519,10 +2519,6 @@ _bfd_elf_dynamic_symbol_p (h, info, ignore_protected)
       break;
 
     default:
-      /* With STV_DEFAULT, weak symbols do not bind locally.  */
-      if (h->root.type == bfd_link_hash_undefweak
-          || h->root.type == bfd_link_hash_defweak)
-	return TRUE;
       break;
     }
 
