@@ -1,3 +1,13 @@
+Sun Dec 27 17:45:05 1992  Fred Fish  (fnf@cygnus.com)
+
+	* bfd.c (bfd_get_size):  New function that gets an upper bound
+	on the possible size of any object in a bfd.
+	* elf.c (bfd_elf_find_section, elf_get_str_section,
+	elf_get_symtab_upper_bound):  Rewrite to avoid NULL pointer
+	dereferences.
+	* elf.c (elf_big_vec, elf_little_vec):  Document last three
+	members initialized to NULL.
+
 Thu Dec 24 17:49:09 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* hppa.c: change a 'const' to 'CONST', or else HP C compiler dies

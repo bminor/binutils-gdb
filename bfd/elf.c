@@ -345,7 +345,7 @@ INTERNAL_FUNCTION
 	bfd_elf_find_section
 
 SYNOPSIS
-	struct elf_internal_shdr *bfd_elf_find_section (bfd *abfd, char *name);
+	Elf_Internal_Shdr *bfd_elf_find_section (bfd *abfd, char *name);
 
 DESCRIPTION
 	Helper functions for GDB to locate the string tables.
@@ -355,20 +355,34 @@ DESCRIPTION
 	mechanisms wouldn't work to find it, even if we had some.
 */
 
-struct elf_internal_shdr *
+Elf_Internal_Shdr *
 DEFUN(bfd_elf_find_section, (abfd, name),
       bfd		*abfd AND
       char		*name)
 {
-  Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
-  char *shstrtab = elf_get_str_section (abfd, elf_elfheader (abfd)->e_shstrndx);
-  unsigned int max = elf_elfheader (abfd)->e_shnum;
+  Elf_Internal_Shdr *i_shdrp;
+  Elf_Internal_Shdr *gotit = NULL;
+  char *shstrtab;
+  unsigned int max;
   unsigned int i;
 
-  for (i = 1; i < max; i++)
-    if (!strcmp (&shstrtab[i_shdrp[i].sh_name], name))
-      return &i_shdrp[i];
-  return 0;
+  i_shdrp = elf_elfsections (abfd);
+  if (i_shdrp != NULL)
+    {
+      shstrtab = elf_get_str_section (abfd, elf_elfheader (abfd)->e_shstrndx);
+      if (shstrtab != NULL)
+	{
+	  max = elf_elfheader (abfd)->e_shnum;
+	  for (i = 1; i < max; i++)
+	    {
+	      if (!strcmp (&shstrtab[i_shdrp[i].sh_name], name))
+		{
+		  gotit = &i_shdrp[i];
+		}
+	    }
+	}
+    }
+  return (gotit);
 }
 
 /* End of GDB support.  */
@@ -378,20 +392,25 @@ DEFUN(elf_get_str_section, (abfd, shindex),
       bfd		*abfd AND
       unsigned int	shindex)
 {
-  Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
-  unsigned int shstrtabsize = i_shdrp[shindex].sh_size;
-  unsigned int offset = i_shdrp[shindex].sh_offset;
-  char *shstrtab = i_shdrp[shindex].rawdata;
+  Elf_Internal_Shdr *i_shdrp;
+  char *shstrtab = NULL;
+  unsigned int offset;
+  unsigned int shstrtabsize;
 
-  if (shstrtab)
-    return shstrtab;
-
-  if ((shstrtab = elf_read (abfd, offset, shstrtabsize)) == NULL)
+  i_shdrp = elf_elfsections (abfd);
+  if (i_shdrp != NULL)
     {
-      return (NULL);
+      shstrtab = i_shdrp[shindex].rawdata;
+      if (shstrtab == NULL)
+	{
+	  /* No cached one, attempt to read, and cache what we read. */
+	  offset = i_shdrp[shindex].sh_offset;
+	  shstrtabsize = i_shdrp[shindex].sh_size;
+	  shstrtab = elf_read (abfd, offset, shstrtabsize);
+	  i_shdrp[shindex].rawdata = (void*) shstrtab;
+	}
     }
-  i_shdrp[shindex].rawdata = (void*)shstrtab;
-  return shstrtab;
+  return (shstrtab);
 }
 
 static char *
@@ -2059,12 +2078,17 @@ static unsigned int
 DEFUN (elf_get_symtab_upper_bound, (abfd), bfd *abfd)
 {
   unsigned int symcount;
-  unsigned int symtab_size;
-  Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
-  Elf_Internal_Shdr *hdr = i_shdrp + elf_onesymtab (abfd);
+  unsigned int symtab_size = 0;
+  Elf_Internal_Shdr *i_shdrp;
+  Elf_Internal_Shdr *hdr;
 
-  symcount = hdr->sh_size / sizeof (Elf_External_Sym);
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol));
+  i_shdrp = elf_elfsections (abfd);
+  if (i_shdrp != NULL)
+    {
+      hdr = i_shdrp + elf_onesymtab (abfd);
+      symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+      symtab_size = (symcount - 1 + 1) * (sizeof (asymbol));
+    }
   return (symtab_size);
 }
 
@@ -2488,7 +2512,6 @@ bfd_target elf_big_vec =
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
    SEC_CODE | SEC_DATA), 
 
-
    /* leading_symbol_char: is the first char of a user symbol
       predictable, and if so what is it */
    0,
@@ -2535,12 +2558,20 @@ bfd_target elf_big_vec =
     bfd_false
   },
 
-  /* Initialize a jump table with the standard macro.  All names start
-     with "elf" */
+  /* Initialize a jump table with the standard macro.  All names start with
+     "elf" */
   JUMP_TABLE(elf),
 
-  /* SWAP_TABLE */
-  NULL, NULL, NULL
+  /* reloc_type_lookup: How applications can find out about amiga relocation
+     types (see documentation on reloc types).  */
+  NULL,
+
+  /* _bfd_make_debug_symbol:  Back-door to allow format aware applications to
+     create debug symbols while using BFD for everything else. */
+  NULL,
+
+  /* backend_data: */
+  NULL
 };
 
 bfd_target elf_little_vec =
@@ -2611,10 +2642,18 @@ bfd_target elf_little_vec =
     bfd_false
   },
 
-  /* Initialize a jump table with the standard macro.  All names start
-     with "elf" */
+  /* Initialize a jump table with the standard macro.  All names start with
+     "elf" */
   JUMP_TABLE(elf),
 
-  /* SWAP_TABLE */
-  NULL, NULL, NULL
+  /* reloc_type_lookup: How applications can find out about amiga relocation
+     types (see documentation on reloc types).  */
+  NULL,
+
+  /* _bfd_make_debug_symbol:  Back-door to allow format aware applications to
+     create debug symbols while using BFD for everything else. */
+  NULL,
+
+  /* backend_data: */
+  NULL
 };
