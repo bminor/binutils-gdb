@@ -676,54 +676,150 @@ sim_watch_valid (SIM_DESC sd,
     {
 
 #define WATCH_CORE(N,OP,EXT) \
-      { \
-	unsigned_##N word = 0; \
-	int nr_read = sim_core_read_buffer (sd, NULL, to_do->core_map, &word, to_do->core_addr, sizeof (word)); \
-	OP (word); \
-	return (nr_read == sizeof (unsigned_##N) \
-		&& (to_do->is_within \
-		    == (word >= to_do->lb##EXT \
-			&& word <= to_do->ub##EXT))); \
+      int ok; \
+      unsigned_##N word = 0; \
+      int nr_read = sim_core_read_buffer (sd, NULL, to_do->core_map, &word, \
+					  to_do->core_addr, sizeof (word)); \
+      OP (word); \
+      ok = (nr_read == sizeof (unsigned_##N) \
+	    && (to_do->is_within \
+		== (word >= to_do->lb##EXT \
+		    && word <= to_do->ub##EXT)));
+
+    case watch_core_targ_1:
+      {
+	WATCH_CORE (1, T2H,);
+	return ok;
       }
-    case watch_core_targ_1: WATCH_CORE (1, T2H,);
-    case watch_core_targ_2: WATCH_CORE (2, T2H,);
-    case watch_core_targ_4: WATCH_CORE (4, T2H,);
-    case watch_core_targ_8: WATCH_CORE (8, T2H,64);
+    case watch_core_targ_2:
+      {
+        WATCH_CORE (2, T2H,);
+	return ok;
+      }
+    case watch_core_targ_4:
+      {
+        WATCH_CORE (4, T2H,);
+	return ok;
+      }
+    case watch_core_targ_8:
+      {
+        WATCH_CORE (8, T2H,64);
+	return ok;
+      }
 
-    case watch_core_be_1: WATCH_CORE (1, BE2H,);
-    case watch_core_be_2: WATCH_CORE (2, BE2H,);
-    case watch_core_be_4: WATCH_CORE (4, BE2H,);
-    case watch_core_be_8: WATCH_CORE (8, BE2H,64);
+    case watch_core_be_1:
+      {
+        WATCH_CORE (1, BE2H,);
+	return ok;
+      }
+    case watch_core_be_2:
+      {
+        WATCH_CORE (2, BE2H,);
+	return ok;
+      }
+    case watch_core_be_4:
+      {
+        WATCH_CORE (4, BE2H,);
+	return ok;
+      }
+    case watch_core_be_8:
+      {
+        WATCH_CORE (8, BE2H,64);
+	return ok;
+      }
 
-    case watch_core_le_1: WATCH_CORE (1, LE2H,);
-    case watch_core_le_2: WATCH_CORE (2, LE2H,);
-    case watch_core_le_4: WATCH_CORE (4, LE2H,);
-    case watch_core_le_8: WATCH_CORE (8, LE2H,64);
+    case watch_core_le_1:
+      {
+        WATCH_CORE (1, LE2H,);
+	return ok;
+      }
+    case watch_core_le_2:
+      {
+        WATCH_CORE (2, LE2H,);
+	return ok;
+      }
+    case watch_core_le_4:
+      {
+        WATCH_CORE (4, LE2H,);
+	return ok;
+      }
+    case watch_core_le_8:
+      {
+        WATCH_CORE (8, LE2H,64);
+	return ok;
+      }
 #undef WATCH_CORE
 
 #define WATCH_SIM(N,OP,EXT) \
-      { \
-	unsigned_##N word = *(unsigned_##N*)to_do->host_addr; \
-        OP (word); \
-	return (to_do->is_within \
-		== (word >= to_do->lb##EXT \
-		    && word <= to_do->ub##EXT)); \
+      int ok; \
+      unsigned_##N word = *(unsigned_##N*)to_do->host_addr; \
+      OP (word); \
+      ok = (to_do->is_within \
+	    == (word >= to_do->lb##EXT \
+		&& word <= to_do->ub##EXT));
+
+    case watch_sim_host_1:
+      {
+        WATCH_SIM (1, word = ,);
+	return ok;
+      }
+    case watch_sim_host_2:
+      {
+        WATCH_SIM (2, word = ,);
+	return ok;
+      }
+    case watch_sim_host_4:
+      {
+        WATCH_SIM (4, word = ,);
+	return ok;
+      }
+    case watch_sim_host_8:
+      {
+        WATCH_SIM (8, word = ,64);
+	return ok;
       }
 
-    case watch_sim_host_1: WATCH_SIM (1, word = ,);
-    case watch_sim_host_2: WATCH_SIM (2, word = ,);
-    case watch_sim_host_4: WATCH_SIM (4, word = ,);
-    case watch_sim_host_8: WATCH_SIM (8, word = ,64);
+    case watch_sim_be_1:
+      {
+        WATCH_SIM (1, BE2H,);
+	return ok;
+      }
+    case watch_sim_be_2:
+      {
+        WATCH_SIM (2, BE2H,);
+	return ok;
+      }
+    case watch_sim_be_4:
+      {
+        WATCH_SIM (4, BE2H,);
+	return ok;
+      }
+    case watch_sim_be_8:
+      {
+        WATCH_SIM (8, BE2H,64);
+	return ok;
+      }
 
-    case watch_sim_be_1: WATCH_SIM (1, BE2H,);
-    case watch_sim_be_2: WATCH_SIM (2, BE2H,);
-    case watch_sim_be_4: WATCH_SIM (4, BE2H,);
-    case watch_sim_be_8: WATCH_SIM (8, BE2H,64);
-
-    case watch_sim_le_1: WATCH_SIM (1, LE2H,);
-    case watch_sim_le_2: WATCH_SIM (1, LE2H,);
-    case watch_sim_le_4: WATCH_SIM (1, LE2H,);
-    case watch_sim_le_8: WATCH_SIM (1, LE2H,64);
+    case watch_sim_le_1:
+      {
+        WATCH_SIM (1, LE2H,);
+	return ok;
+      }
+    case watch_sim_le_2:
+      {
+        WATCH_SIM (1, LE2H,);
+	return ok;
+      }
+    case watch_sim_le_4:
+      {
+        WATCH_SIM (1, LE2H,);
+	return ok;
+      }
+    case watch_sim_le_8:
+      {
+        WATCH_SIM (1, LE2H,64);
+	return ok;
+      }
 #undef WATCH_SIM
 
     case watch_clock: /* wallclock */
@@ -868,7 +964,6 @@ sim_events_process (SIM_DESC sd)
 	{
 	  sim_event_handler *handler = to_do->handler;
 	  void *data = to_do->data;
-	  events->queue = to_do->next;
 	  ETRACE((_ETRACE,
 		  "event issued at %ld - tag 0x%lx - handler 0x%lx, data 0x%lx\n",
 		  (long) event_time,

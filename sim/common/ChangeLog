@@ -1,5 +1,14 @@
 Tue May 27 14:32:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-events.c (sim_events_process): Don't blat the event queue
+ 	when processing watchpoints.
+
+	* sim-watch.h: Make arg unsigned long - stop sign extension.
+
+	* sim-events.c (sim_watch_valid): rewrite so debugable.
+
+	* sim-config.h (WITH_XOR_ENDIAN): Default to zero.
+
 	* sim-watch.c (schedule_watchpoint): Add is_within option so that
  	inequality test is possible.
 	(handle_watchpoint): Re-pass is_within arg.
