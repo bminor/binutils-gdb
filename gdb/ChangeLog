@@ -1,3 +1,8 @@
+Tue Mar 28 12:23:37 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* gnu-regex.c (regerror): Function renamed from `__regerror'.
+	(Change also approved in the mainline glibc sources)
+
 Tue Mar 28 18:19:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-03-20 Jonathan Larmour <jlarmour@redhat.co.uk>:
