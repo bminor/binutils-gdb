@@ -1,3 +1,8 @@
+2002-07-02  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (tc_s390_fix_adjustable): Prevent any adjustment
+	to symbols in merge sections, even non pc-relative ones.
+
 2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* config/tc-m68hc11.h (m68hc11_listing_header): Fix warning.

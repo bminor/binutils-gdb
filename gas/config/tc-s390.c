@@ -1633,9 +1633,8 @@ tc_s390_fix_adjustable (fixP)
     return 0;
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
-  /* Don't adjust pc-relative references to merge sections.  */
-  if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0
-      && fixP->fx_pcrel)
+  /* Don't adjust references to merge sections.  */
+  if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
     return 0;
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (   fixP->fx_r_type == BFD_RELOC_32_GOTOFF
