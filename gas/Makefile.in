@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -2499,7 +2499,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS)
@@ -2835,7 +2835,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "itbl-lex.cconfig/m68k-parse.hconfig/m68k-parse.citbl-parse.hitbl-parse.c" || rm -f itbl-lex.c config/m68k-parse.h config/m68k-parse.c itbl-parse.h itbl-parse.c
+	-test -z "itbl-lexlconfig/m68k-parsehconfig/m68k-parsecitbl-parsehitbl-parsec" || rm -f itbl-lexl config/m68k-parseh config/m68k-parsec itbl-parseh itbl-parsec
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-tags mostlyclean-generic

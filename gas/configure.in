@@ -117,6 +117,7 @@ changequote([,])dnl
       alpha*)		cpu_type=alpha ;;
       arm*b|xscale*b|strongarm*b) cpu_type=arm endian=big ;;
       arm*|xscale*|strongarm*)    cpu_type=arm endian=little ;;
+      c4x*)		cpu_type=tic4x ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
       i[3-7]86)		cpu_type=i386 arch=i386;;
