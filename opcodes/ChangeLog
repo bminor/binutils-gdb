@@ -1,3 +1,8 @@
+Mon Mar  3 07:45:20 1997  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Added entries for the tst insns on
+ 	the mc68000.
+ 	
 Thu Feb 27 14:04:32 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* m68k-opc.c (m68k_opcodes): Added swbegl pseudo-instruction.
