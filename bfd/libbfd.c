@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
 SECTION
-	libbfd
+	Internal functions
 
 DESCRIPTION
 	These routines are used within BFD.
@@ -135,7 +135,7 @@ INTERNAL_FUNCTION
 	bfd_xmalloc
 
 SYNOPSIS
-	PTR  bfd_xmalloc( bfd_size_type size);
+	PTR  bfd_xmalloc (bfd_size_type size);
 
 DESCRIPTION
 	Like <<malloc>>, but exit if no more memory.
@@ -167,7 +167,7 @@ INTERNAL_FUNCTION
 	bfd_xmalloc_by_size_t
 
 SYNOPSIS
-	PTR bfd_xmalloc_by_size_t ( size_t size);
+	PTR bfd_xmalloc_by_size_t (size_t size);
 
 DESCRIPTION
 	Like <<malloc>>, but exit if no more memory.
@@ -446,16 +446,16 @@ DESCRIPTION
 	mangling performs any necessary endian translations and
 	removes alignment restrictions.  Note that types accepted and
 	returned by these macros are identical so they can be swapped
-	around in macros--for example libaout.h defines GET_WORD to
-	either bfd_get_32 or bfd_get_64.
+	around in macros---for example, @file{libaout.h} defines <<GET_WORD>>
+	to either <<bfd_get_32>> or <<bfd_get_64>>.
 
-	In the put routines, val must be a bfd_vma.  If we are on a
+	In the put routines, @var{val} must be a <<bfd_vma>>.  If we are on a
 	system without prototypes, the caller is responsible for making
 	sure that is true, with a cast if necessary.  We don't cast
-	them in the macro definitions because that would prevent lint
-	or gcc -Wall from detecting sins such as passing a pointer.
-	To detect calling these with less than a bfd_vma, use gcc
-	-Wconversion on a host with 64 bit bfd_vma's.
+	them in the macro definitions because that would prevent <<lint>>
+	or <<gcc -Wall>> from detecting sins such as passing a pointer.
+	To detect calling these with less than a <<bfd_vma>>, use
+	<<gcc -Wconversion>> on a host with 64 bit <<bfd_vma>>'s.
 
 .
 .{* Byte swapping macros for user section data.  *}
@@ -848,12 +848,12 @@ bfd_generic_set_section_contents (abfd, section, location, offset, count)
 INTERNAL_FUNCTION
 	bfd_log2
 
+SYNOPSIS
+	unsigned int bfd_log2(bfd_vma x);
+
 DESCRIPTION
 	Return the log base 2 of the value supplied, rounded up.  E.g., an
 	@var{x} of 1025 returns 11.
-
-SYNOPSIS
-	unsigned int bfd_log2(bfd_vma x);
 */
 
 unsigned
