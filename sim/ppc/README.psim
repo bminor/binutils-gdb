@@ -1,0 +1,253 @@
+
+			PSIM
+
+Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+
+This directory contains the program PSIM that models the PowerPC
+architecture.  It can either be run stand alone (psim) or linked with
+GDB.
+
+
+CONTENTS:
+
+    psim-*.tar:	
+
+	psim-sim-*.tar.gz	simulator source code
+
+	psim-test-*.tar.gz	test directory for simulator
+
+	psim-gdb-*.diff.gz	patches to integrated psim
+				into gdb
+
+    gnu-*.tar:
+
+	gnu-gdb-*.diff.gz	patches to gdb that may have
+				already been merged into the
+				GDB source tree.
+
+	gnu-*-*.diff.gz		Other noise
+
+
+BUILDING:
+
+	o Install flex, bison, gnu-make, native gcc and probably also byacc.
+
+
+	o First you will need a fairly current copy of GDB (try the ftp site
+	  ftp.cygnus.com:pub).  I've built it with a beta version of gdb-4.15.
+
+	  Unpack gdb vis:
+
+		$ gunzip < gdb-4.15.tar.gz | tar xf -
+
+
+	o Apply any patches that haven't yet been merged into the GDB source
+	  tree.
+
+		$ cd gdb-4.15
+		$ gunzip < ../psim-gdb-*.diff.gz | patch -p1
+		$ gunzip < ../gnu-gdb-*.diff.gz | patch -p1
+
+
+	o Unpack the psim source code (and optionally the test directory)
+
+		$ cd gdb-4.15
+		$ gunzip < ../psim-sim-*.tar.gz | tar xvf -
+		$ gunzip < ../psim-test-*.tar.gz | tar xvf -
+
+
+	o Configure gdb as per normal.  I use something along the lines of:
+
+		$ cd gdb-4.15
+		$ CC=gcc ./configure --target=powerpcle-unknown-eabi
+
+
+	o Build your entire gdb tree as per normal.  Something along the
+	  lines of:
+
+		$ cd gdb-4.15
+		$ make CC=gcc
+		.
+		.
+		.
+
+
+
+	o Install it it all as per normal.  Something along the lines of:
+
+		$ cd gdb-4.15
+		$ make CC=gcc install
+
+	  The program sim/ppc/psim is not installed.
+
+
+RUNNING:
+
+	PSIM can either be run as a stand alone program or as part
+	of gdb.  The psim-test archive contains pre-compiled and
+	linked programs that can be run on PSIM.  The notes below
+	assume that you have unpacked that tar archive.
+
+	To rebuild the archive you will need to obtain a working
+	version of an ELF compiler/linker for the PowerPC.
+	
+	Example of running PSIM:
+
+		Print out the users environment:
+
+			$ sim/ppc/psim sim/ppc/test/envp
+
+		Print out the arguments:
+
+			$ sim/ppc/psim sim/ppc/test/argv a b c
+
+		Check the OEA model:
+
+			$ sim/ppc/psim sim/ppc/test/interrupt
+
+		Check that sbrk works
+
+			$ sim/ppc/psim sim/ppc/test/break
+
+		Try for speed.  The program count contains a loop
+		of two instructions which is looped <arg> times.
+		See later for how to make PSIM run 10-100 times
+		faster.
+
+			$ time sim/ppc/sim sim/ppc/test/count 5000000
+			$ expr 10 \* 1000 \* 1000 / <seconds>
+
+
+	Example of running GDB:	
+
+		The most important thing to be aware of is the fact
+		that before the simulator is used, the user must attach
+		to it (target sim) and than load the executable (load count).
+
+			$ cd sim/ppc/test
+			$ powerpc-unknown-eabi-gdb count
+			(gdb) target sim
+			(gdb) load count
+			(gdb) break main
+			(gdb) run
+			.
+			.
+			.
+
+
+CONFIGURATION: Making it go faster
+
+	See the file sim/ppc/config.h (a.k.a. sim/ppc/data/ppc-config)
+	for notes.
+
+
+KNOWN FEATURES
+
+	SMP, dual-endian, VEA and OEA models, hardware devices
+	(console, icu, reset) ...
+
+
+KNOWN PROBLEMS:
+
+	Configuration could be better.
+
+	HTAB (page) code for OEA model untested.  Some of the vm code
+	instructions unimplemented.
+
+	Doesn't detect/handle changing endian bits.  In fact they are
+	ignored.
+
+	Return from interrupt instruction unimplemented.
+
+	Flush instruction cache instructions do nothing.  Perhaphs they
+	should (if there is an instruction cache) flush it.
+
+	PowerOpen VEA model (a.k.a XCOFF a.k.a AIX) broken.  It was
+	working but that is before I changed the create stack frame
+	code into an ELF version.
+
+	OpenBoot and PR*P interfaces missing.  Open boot could be
+	implemented by putting special instructions at the address
+	of the OpenBoot callback functions.  Those instructions
+	could than emulate OpenBoot behavour.
+
+	VEA memory read/write performance could be improved by merging
+	the data sections.
+
+	When reading in a VEA executable, the binaries text and data
+	sections are not made page aligned.
+
+	Missing or commented out instructions.
+
+	Lack of floating point support.
+	[workaround: build everything using -msoft-float]
+
+	64bit untested.
+
+	Event code for pending events from signal handlers not
+	finished/tested.
+
+	Better and more devices.
+
+	Only two device trees VEA and OEA (clayton) and those hard coded.
+	Should be possible to specify a file containing a device tree
+	description as the program to run.  At present it a device tree
+	file is detected causing psim to abort.
+
+	I wonder if I've got my ppc.instructions copyright
+	notice correct.
+
+
+THANKS:
+
+	Thanks go to the following who each helped in some way.
+
+		Allen Briggs, Bett Koch, David Edelsohn,
+		Michael Meissner, Bob Mercier, Richard Perini,
+		Richard Stallman, Mitchele Walker
+
+
+----------------------------------------------------------------
+
+
+Random notes on performance:
+
+
+$ cd test
+time ../psim count `expr 10000000 / 2`
+time ../psim volatile-count `expr 10000000 / 7`
+
+Where 2 and 7 are the number of instructions in the main loop.
+
+
+	611/729 - baseline
+
+Tests:
+
+	CFLAGS= -c -O2 -m486 -fomit-frame-pointer
+
+	o	different first/second level table/switch combinations
+
+		0 - use a table
+		1 - use a simple switch
+		2 - use an expanded switch
+
+i486DX4/100 - AMD
+
+	1/108/140 - switch=0/0/0,expand=2,inline=2,nia=1,cache=1
+	1/114/140 - switch=0/0/0,expand=2,inline=2,nia=1,cache=1
+	1/137/149 - switch=0/0,expand=2,inline=1,nia=1,cache=1
+	1/144/155 - switch=2/1,expand=2,inline=1,nia=1,cache=1
+	1/153/159 - switch=2/1,expand=0,inline=1,nia=1,cache=1
+	1/185/189 - switch=0/0,expand=0,inline=1,nia=1
+
+i486DX2/66
+
+	1/572/695 - switch=1/1,expand=0,inline=0
+	1/579/729 - switch=0/0,expand=0,inline=0
+	1/570/682 - switch=2/2,expand=0,inline=0
+	1/431/492 - switch=0/0,expand=0,inline=1,nia=0
+	1/271/292 - switch=2/1,expand=0,inline=1,nia=0
+	1/270/316 - switch=2/2,expand=0,inline=1,nia=0
+	1/271/281 - switch=1/1,expand=0,inline=1,nia=1
+	1/267/274 - switch=2/1,expand=0,inline=1,nia=1

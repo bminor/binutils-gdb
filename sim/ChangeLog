@@ -1,4 +1,28 @@
+Mon Aug 21 17:53:48 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpc{,le}-*-*): Add psim from Andrew Cagney
+	<cagney@highland.com.au>.
+	* configure: Regnerate from configure.in.
+
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
+Thu Jul 20 15:17:29 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (CC_FOR_BUILD):  Define default and arrange to pass
+	submakes either default or passed in value.
+
 Wed Jul  5 14:32:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (all, clean, distclean, mostlyclean, realclean,
+	  install): Changed targets so that they descend all
+	  subdirectories in $(SUBDIRS).
+	  (*-all, *-clean, *-install): Removed targets.
+
+	* configure.in: Don't bother with target makefile fragments, they
+	  are no longer needed.
+	* configure: regenerated.
 
 	* Makefile.in, configure.in: converted to autoconf.
 	* configure: New file, generated with autconf 2.4.

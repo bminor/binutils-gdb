@@ -1,4 +1,4 @@
-# .Sanitize for devo/sim.
+# .Sanitize for devo/sim/ppc.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -23,17 +23,59 @@ Do-first:
 
 Things-to-keep:
 
+COPYING
+COPYING.LIB
 ChangeLog
 Makefile.in
-arm
+README.psim
+basics.h
+bits.c
+bits.h
 configure
 configure.in
-h8300
-h8500
-ppc
-sh
-w65
-z8k
+core.c
+core.h
+cpu.c
+cpu.h
+debug.c
+debug.h
+device_tree.c
+device_tree.h
+devices.c
+devices.h
+double.c
+dp-bit.c
+events.c
+events.h
+gen.c
+idecode_branch.h
+idecode_expression.h
+idecode_fields.h
+idecode_insn.h
+inline.c
+inline.h
+interrupts.c
+interrupts.h
+main.c
+memory_map.c
+memory_map.h
+ppc-endian.c
+ppc-endian.h
+ppc-instructions
+ppc-spr-table
+ppc.mt
+psim.c
+psim.h
+registers.c
+registers.h
+sim_callbacks.h
+sim_calls.c
+std-config.h
+system.c
+system.h
+vm.c
+vm.h
+words.h
 
 Things-to-lose:
 

@@ -16,6 +16,8 @@ case "${target}" in
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   sh*-*-*)		sim_target=sh ;; 
+  powerpc-*-*)		sim_target=ppc ;;
+  powerpcle-*-*)	sim_target=ppc ;;
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
   *)			sim_target=none ;;

@@ -1,0 +1,81 @@
+Tue Aug 22 09:31:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* system.c (system_call): Add read support.
+
+	* main.c (main): -t sets trace_device_tree.  Correct usage message
+	to current reality.
+
+	* device_tree.c (update_memory_node_for_section): Make tracing
+	output line up.  If not code or readonly, assume that the section
+	is a data section and has read/write permissions.  Add readonly
+	support.
+
+	* core.c (create_core_from_addresses): Print end address in traces
+	and make tracing output line up.
+
+	* Makefile.in: Rewrite from Makefile to work with the Cygnus
+	environment, and support compiling in a different directory than
+	the sources reside in.
+
+	* ppc-endian.h: Rename from endian.h so that it doesn't get
+	confused with /usr/include/sys/endian.h on Linux.  Add Linux
+	endian support.
+
+	* ppc-endian.c: Rename to be consistant with ppc-endian.h.
+	Include ppc-endian.h, not endian.h.
+
+	* basics.h (sysdep.h): Include sysdep.h that configure makes.
+	Include ppc-endian.h, not endian.h.
+
+	* std-config.h: Rename from ppc-config.  Put #ifndefs around most
+	configuration macros, so they can be overridden via CFLAGS.  By
+	default, turn off tracing.
+
+	* configure.in: Clone from other simulator targets.
+	* configure: Generate via autoconf from configure.in.
+
+Sat Aug 19 09:05:32 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+
+	* ppc-instructions: fix srawi (was geting XER[CA] real wrong).
+
+	* interrupts.c (data_storage_interrupt): allow stack to grow by
+        upto one MB per increment.
+
+	* ppc-instructions: divw was computing rA / rA not rA / rB
+
+	* main.c (main): really stupid. Wasn't exiting with correct status
+
+Fri Aug 18 00:38:01 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+
+	* system.c (system_call): add system calls kill(2) and getpid(2).
+
+	* main.c (main): Check/return exit status when simulation
+        finishes.
+
+Thu Aug 17 14:29:18 1995  Andrew Cagney  <cagney@kremvax>
+
+	* device_tree.c (create_option_device_node): Alignment rules (at
+ 	least for the moment) now are for strict alignment only for LE OEA
+ 	mode.  (Because of compiler problems).
+
+	* system.c (system_call) SYS_exit: Wasn't exiting with correct status.
+
+Thu Aug 17 01:16:38 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+
+	* vm.c (DEFINE_VM_DATA_MAP_WRITE_N): For miss aligned transfer
+        forgot to return.
+
+	* system.c (system_call): didn't page align break argument before
+        determining increment break increment.
+
+	* psim/ppc: Re-arange entire directory structure so that
+        everything lives in the one directory.  While a pain for cleaning,
+        makes building across multiple architectures much simpler.
+
+	* devices.c, device_tree.c: Added code that provides a simple
+        illustration of how an interrupt control device could be
+        implemented.
+
+	* devices.c: Added code so that the dumb console device can read
+        (from stdin) as well as write to stdout.
+

@@ -1,0 +1,297 @@
+#
+#   This file is part of the program psim.
+#
+#   Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+
+VPATH = @srcdir@
+srcdir = @srcdir@
+srcroot = $(srcdir)/../..
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+tooldir = $(libdir)/$(target_alias)
+
+datadir = $(prefix)/lib
+mandir = $(prefix)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
+
+SHELL = /bin/sh
+
+# FIXME: use autoconf's AC_PROG_INSTALL
+INSTALL = $(srcroot)/install.sh -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
+
+AR = ar
+AR_FLAGS = rc
+CFLAGS = -g
+BISON = bison
+MAKEINFO = makeinfo
+RANLIB = ranlib
+
+.NOEXPORT:
+MAKEOVERRIDES=
+
+LIB_INCLUDES	= -I$(srcdir)/../../include
+BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
+GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config -I$(srcdir)/../../mmalloc
+INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
+
+CONFIG_FILE	= std-config.h
+
+LIBIBERTY_LIB	= ../../libiberty/libiberty.a
+BFD_LIB		= ../../bfd/libbfd.a
+
+#### Makefile fragments come in here.
+# @host_makefile_frag@
+###
+
+TARGETLIB = libsim.a
+
+all:	run libsim.a $(GDB_OBJ)
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+
+
+
+BASICS_H = \
+	sysdep.h \
+	config.h \
+	words.h \
+	ppc-endian.h \
+	debug.h \
+	bits.h \
+	sim_callbacks.h
+
+PSIM_H = \
+	psim.h \
+	$(BASICS_H)
+
+IDECODE_H = \
+	idecode.h \
+	idecode_insn.h \
+	idecode_expression.h \
+	idecode_branch.h \
+	idecode_fields.h \
+	icache.h
+
+REGISTERS_H = \
+	registers.h \
+	spreg.h
+
+CPU_H = \
+	cpu.h \
+	$(BASICS_H) \
+	$(REGISTERS_H) \
+	device_tree.h \
+	memory_map.h \
+	core.h \
+	vm.h \
+	events.h \
+	interrupts.h \
+	psim.h \
+	icache.h
+
+
+INLINE = \
+	inline.h \
+	inline.c
+
+BUILT_SRC = \
+	icache.h \
+	idecode.h idecode.c \
+	semantics.h semantics.c \
+	spreg.h spreg.c \
+	config.h
+
+LIB_SRC = \
+	psim.c \
+	bits.c \
+	ppc-endian.c \
+	debug.c \
+	memory_map.c \
+	vm.c \
+	core.c \
+	events.c \
+	system.c \
+	registers.c \
+	cpu.c \
+	interrupts.c \
+	devices.c \
+	device_tree.c
+
+MAIN_SRC = \
+	main.c \
+	sim_calls.c
+
+
+LIB_OBJ = \
+	debug.o \
+	bits.o \
+	ppc-endian.o \
+	system.o \
+	registers.o \
+	memory_map.o \
+	vm.o \
+	core.o \
+	spreg.o \
+	cpu.o \
+	interrupts.o \
+	events.o \
+	devices.o \
+	device_tree.o \
+	semantics.o \
+	idecode.o \
+	psim.o
+
+
+GDB_OBJ = sim_calls.o 
+
+
+psim: libsim.a main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o psim main.o libsim.a $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
+
+run: psim
+	rm -f run
+	ln psim run
+
+libsim.a: $(BUILT_SRC) $(LIB_OBJ) $(GDB_OBJ)
+	rm -f $(TARGETLIB)
+	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
+	$(RANLIB) $(TARGETLIB)
+
+psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE)
+
+bits.o: bits.c bits.h
+
+debug.o: debug.c $(BASICS_H)
+
+ppc-endian.o: ppc-endian.c ppc-endian.h \
+	config.h words.h sim_callbacks.h
+
+system.o: system.c system.h $(CPU_H) $(IDECODE_H)
+
+registers.o: registers.c $(REGISTERS_H) $(BASICS_H) 
+
+cpu.o: cpu.c $(CPU_H) $(IDECODE_H)
+
+interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) system.h
+
+idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
+
+memory_map.o: memory_map.c memory_map.h $(BASICS_H) device_tree.h interrupts.h
+
+# double.o: double.c dp-bit.c
+
+vm.o: vm.c vm.h $(BASICS_H) $(REGISTERS_H) \
+	device_tree.h memory_map.h core.h interrupts.h
+
+core.o: core.c core.h $(BASICS_H) \
+	device_tree.h memory_map.h
+
+events.o: events.c events.h $(BASICS_H) 
+
+sim_calls.o: sim_calls.c $(PSIM_H) ../../gdb/tm.h devices.h
+
+spreg.o: spreg.h spreg.c words.h
+
+main.o: main.c $(PSIM_H)
+
+devices.o: devices.c devices.h $(BASICS_H) \
+	device_tree.h events.h
+
+device_tree.o: device_tree.c device_tree.h devices.h $(BASICS_H)
+
+semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
+
+
+#
+# Rules to create the built c source code files
+#
+
+config.h: $(CONFIG_FILE)
+	cp $(srcdir)/$(CONFIG_FILE) config.h
+
+
+tmp-gencode: gen ppc-instructions ppc-spr-table $(srcdir)/../../move-if-change
+	./gen	-r $(srcdir)/ppc-spr-table \
+		-P tmp-spreg.h \
+		-p tmp-spreg.c \
+		-i $(srcdir)/ppc-instructions \
+		-C tmp-icache.h \
+		-S tmp-semantics.h \
+		-s tmp-semantics.c \
+		-D tmp-idecode.h \
+		-d tmp-idecode.c
+	$(srcdir)/../../move-if-change tmp-icache.h icache.h
+	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
+	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
+	$(srcdir)/../../move-if-change tmp-semantics.h semantics.h
+	$(srcdir)/../../move-if-change tmp-semantics.c semantics.c
+	$(srcdir)/../../move-if-change tmp-spreg.h spreg.h
+	$(srcdir)/../../move-if-change tmp-spreg.c spreg.c
+	touch tmp-gencode
+
+icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c: tmp-gencode
+
+gen.o: gen.c config.h
+
+gen: gen.o config.h $(LIBIBERTY_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o gen gen.o $(LIBIBERTY_LIB) $(LIBS)
+		
+#
+
+tags etags: TAGS
+
+TAGS: tmp-gencode config.h
+	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
+
+clean:
+	rm -f tmp-* *.[oas] core psim run gen
+
+distclean mostlyclean realclean: clean
+	rm -f TAGS $(BUILT_SRC) Makefile config.cache config.log config.status
+
+Makefile: Makefile.in config.status @frags@
+	$(SHELL) ./config.status
+
+config.status: configure
+	$(SHELL) ./config.status --recheck
+
+install:
+	echo Install psim ...
