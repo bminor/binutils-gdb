@@ -1,5 +1,8 @@
 Wed Oct 13 11:47:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* inflow.c (terminal_ours_1): Don't print warning on failure to
+	set process group.
+
 	* printcmd.c (printf_command): Instead of using makeva* and
 	calling vprintf, just make the appropriate calls to printf.
 	* printcmd.c, config/pa/xm-pa.h, config/mips/xm-makeva.h,

@@ -325,16 +325,19 @@ terminal_ours_1 (output_only)
 	{
 #ifdef HAVE_TERMIOS
 	  result = tcsetpgrp (0, our_process_group);
+#if 0
+	  /* This fails on Ultrix with EINVAL if you run the testsuite
+	     in the background with nohup, and then log out.  GDB never
+	     used to check for an error here, so perhaps there are other
+	     such situations as well.  */
 	  if (result == -1)
 	    fprintf (stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
 		     strerror (errno));
 #endif
+#endif /* termios */
 
 #ifdef HAVE_SGTTY
 	  result = ioctl (0, TIOCSPGRP, our_process_group);
-	  if (result == -1)
-	    fprintf (stderr, "[TIOCSPGRP failed in terminal_ours: %s]\n",
-		     strerror (errno));
 #endif
 	}
 
