@@ -30,11 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    entry point to the dispatcher exit site, or from the exit site to the
    first instruction of the dispatched-to method.  */
 
-#define SKIP_TRAMPOLINE_CODE(pc) \
+#define DYNAMIC_TRAMPOLINE_NEXTPC(pc) \
 	magic_skip_dispatcher(pc)
 
+#if 0
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
 	magic_in_dispatcher(pc, name)
 
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
 	magic_in_dispatcher(pc, name)
+#endif
