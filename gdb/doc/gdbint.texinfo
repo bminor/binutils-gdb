@@ -4395,6 +4395,8 @@ However, use functions with moderation.  A thousand one-line functions
 are just as hard to understand as a single thousand-line function.
 
 @emph{Macros are bad, M'kay.}
+(But if you have to use a macro, make sure that the macro arguments are
+protected with parentheses.)
 
 @cindex types
 

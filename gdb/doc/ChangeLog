@@ -1,3 +1,7 @@
+Wed Aug 15 10:47:28 2001  Christopher Faylor <cgf@cygnus.com>
+
+	* gdbint.texinfo: Add a cautionary note about macro use.
+
 2001-08-02  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.texinfo: Explain omitting the hostname in the
