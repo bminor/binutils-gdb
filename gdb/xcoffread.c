@@ -226,7 +226,7 @@ static void read_symbol (struct internal_syment *, int);
 
 static int read_symbol_lineno (int);
 
-static int read_symbol_nvalue (int);
+static CORE_ADDR read_symbol_nvalue (int);
 
 static struct symbol *process_xcoff_symbol (struct coff_symbol *,
 					    struct objfile *);
@@ -1673,7 +1673,7 @@ read_symbol (symbol, symno)
 
 /* Get value corresponding to symbol number symno in symtbl.  */
 
-static int
+static CORE_ADDR
 read_symbol_nvalue (symno)
      int symno;
 {

@@ -1,3 +1,8 @@
+2000-07-07  David Edelsohn  <edelsohn@gnu.org>
+
+	* xcoffread.c (read_symbol_nvalue): Return CORE_ADDR.
+	* rs6000-tdep.c (rs6000_pop_frame): Make addr CORE_ADDR type.
+
 Fri Jul  7 18:29:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/mips/tm-mips.h (IEEE_FLOAT, SKIP_PROLOGUE,

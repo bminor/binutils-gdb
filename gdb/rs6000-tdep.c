@@ -687,10 +687,10 @@ extern int stop_stack_dummy;
 static void
 rs6000_pop_frame (void)
 {
-  CORE_ADDR pc, lr, sp, prev_sp;	/* %pc, %lr, %sp */
+  CORE_ADDR pc, lr, sp, prev_sp, addr;	/* %pc, %lr, %sp */
   struct rs6000_framedata fdata;
   struct frame_info *frame = get_current_frame ();
-  int addr, ii, wordsize;
+  int ii, wordsize;
 
   pc = read_pc ();
   sp = FRAME_FP (frame);
