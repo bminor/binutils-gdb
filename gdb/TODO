@@ -59,10 +59,6 @@ GDB 5.0 doesn't work on Linux/SPARC
 
 --
 
-parse.c:build_parse() has a buffer overrun.
-
---
-
 Thread support.  Right now, as soon as a thread finishes and exits,
 you're hosed.  This problem is reported once a week or so.
 

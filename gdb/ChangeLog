@@ -1,3 +1,7 @@
+Mon Aug  7 23:21:22 2000  David Taylor  <taylor@texas.cygnus.com>
+
+	* TODO: remove build_parse entry.
+
 2000-08-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* command.c (add_cmd, add_abbrev_cmd, add_prefix_cmd, 
