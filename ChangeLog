@@ -1,3 +1,8 @@
+Mon Aug 15 16:51:45 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* Makefile.in:  Update various rules to reflect that librx
+	is now needed for libg++.
+
 Fri Aug 12 18:07:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config.sub: Accept mips64orion and mips64orionel as a CPU name.

@@ -73,8 +73,8 @@ CHILL_LIB = -lchill
 # end-sanitize-chill
 CXX = gcc
 
-# Use -O to stress test the compiler.
-CXXFLAGS = -g -O -fexternal-templates
+# Use -O2 to stress test the compiler.
+CXXFLAGS = -g -O2 -fexternal-templates
 
 RANLIB = ranlib
 NM = nm
@@ -510,6 +510,7 @@ ALL_TARGET_MODULES = \
 	all-chillrt \
 	$(end-sanitize-chill) \
 	all-libio \
+	all-librx \
 	all-libg++ \
 	all-newlib \
 	all-xiberty
@@ -538,9 +539,9 @@ INSTALL_TARGET_MODULES = \
 
 # This is a shell case of all modules which are compiled using
 # $(TARGET_FLAGS_TO_PASS), used in the do-X rule.
-TARGET_LIBS = libio | libg++ | newlib | xiberty
+TARGET_LIBS = libio | librx | libg++ | newlib | xiberty
 # start-sanitize-chill
-TARGET_LIBS = chillrt | libio | libg++ | newlib | xiberty
+TARGET_LIBS = chillrt | libio | librx | libg++ | newlib | xiberty
 # end-sanitize-chill
 
 # The first rule in the file had better be this one.  Don't put any above it.
@@ -900,7 +901,7 @@ all-cvs:
 all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty
 all-emacs:
-all-emacs19:
+all-emacs19: all-byacc
 all-etc:
 all-expect: all-tcl all-tk
 all-fileutils: all-libiberty
@@ -920,7 +921,8 @@ all-hello: all-libiberty
 all-indent:
 all-ispell: all-emacs # all-emacs19 ??? is this needed?
 all-ld: all-libiberty all-bfd all-byacc all-flex
-all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib all-libio
+all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib \
+	all-libio all-librx
 all-libio: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib 
 all-libiberty:
 all-m4: all-libiberty
@@ -1016,89 +1018,6 @@ DEVO_SUPPORT= README Makefile.in configure configure.in \
 ETC_SUPPORT= Makefile.in cfg-paper.texi configure.in configure.man \
 	configure.texi standards.texi make-stds.texi
 
-GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob sim
-GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
-
-.PHONY: setup-dirs-gdb gdb.tar.gz make-gdb.tar.gz
-setup-dirs-gdb:
-	$(start-sanitize-Sanitize)
-	@if [ -f .Sanitize ] ; then echo "RUN Sanitize FIRST!" ; false ; fi ;
-	$(end-sanitize-Sanitize)
-	./configure sun4
-	$(MAKE) clean
-	./configure -rm sun4
-	chmod og=u `find etc $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
-
-gdb.tar.gz: setup-dirs-gdb
-	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir BISON="byacc")
-	(cd gdb; $(MAKE) -f Makefile.in make-proto-testsuite.dir)
-	$(MAKE) $(MFLAGS) -f Makefile.in make-gdb.tar.gz
-
-make-gdb.tar.gz: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
-	rm -rf proto-toplev; mkdir proto-toplev
-	ln -s ../gdb/proto-gdb.dir proto-toplev/gdb
-	(cd proto-toplev; for i in $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS); do \
-		ln -s ../$$i . ; \
-	done)
-	mkdir proto-toplev/etc
-	(cd proto-toplev/etc; for i in $(ETC_SUPPORT); do \
-		ln -s ../../etc/$$i . ; \
-	done)
-	# Put only one copy (four hard links) of COPYING in the tar file.
-	rm                          proto-toplev/bfd/COPYING
-	ln proto-toplev/gdb/COPYING proto-toplev/bfd/COPYING
-	rm                          proto-toplev/include/COPYING
-	ln proto-toplev/gdb/COPYING proto-toplev/include/COPYING
-	rm                          proto-toplev/readline/COPYING
-	ln proto-toplev/gdb/COPYING proto-toplev/readline/COPYING
-
-	# Change the bug reporting address in configure to bug-gdb
-	rm proto-toplev/configure
-	sed -e 's/configure@cygnus.com/bug-gdb@prep.ai.mit.edu/' \
-	    <configure >proto-toplev/configure
-	chmod a+x proto-toplev/configure
-
-	# Take out texinfo and glob from configurable dirs
-	rm proto-toplev/configure.in
-	sed -e '/^host_tools=/s/texinfo //' \
-	    -e '/^host_libs=/s/glob //' \
-	    <configure.in >proto-toplev/configure.in
-
-	# Take out texinfo from a few places; make simple BISON=bison line.
-	rm proto-toplev/Makefile.in
-	sed -e '/^all\.normal: /s/\all-texinfo //' \
-	    -e '/^	install-texinfo /d' \
-	    -e '/^BISON = /,/^$$/d' \
-	    -e '/^# BISON:/s/.*/BISON = bison -y/' \
-	<Makefile.in >proto-toplev/Makefile.in
-
-	mkdir proto-toplev/texinfo
-	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
-	ln -s ../../texinfo/gpl.texinfo proto-toplev/texinfo/
-	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
-	chmod og=u `find proto-toplev -print`
-	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
-		echo "==> Making gdb-$$VER.tar.gz"; \
-		rm -f gdb-$$VER; ln -s proto-toplev gdb-$$VER; \
-		tar cfh - gdb-$$VER \
-		| $(GZIPPROG) -v -9 >gdb-$$VER.tar.gz)
-
-	# Make the testsuite archive separately.
-	ln -s ../../gdb/proto-testsuite.dir/testsuite proto-toplev/gdb/testsuite
-	# Blow away the Chill test that requires a Chill compiled executable,
-	# since GNU Chill is not yet publically available.
-	rm -rf proto-toplev/gdb/testsuite/gdb.t31
-
-	# Put a copy of COPYING in the tar file.
-	ln proto-toplev/gdb/COPYING proto-toplev/gdb/testsuite/COPYING
-	chmod og=u `find proto-toplev/gdb/testsuite -print`
-	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
-		echo "==> Making gdb-$$VER-testsuite.tar.gz"; \
-		tar cfh - gdb-$$VER/configure gdb-$$VER/config.guess \
-			gdb-$$VER/config.sub gdb-$$VER/move-if-change \
-			gdb-$$VER/gdb/testsuite \
-			| $(GZIPPROG) -v -9 >gdb-$$VER-testsuite.tar.gz)
-
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
@@ -1128,6 +1047,9 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	<Makefile.in >tmp
 	mv -f tmp Makefile.in
 	#
+	$(start-sanitize-Sanitize)
+	@if [ -f .Sanitize ] ; then echo "RUN Sanitize FIRST!" ; false ; fi ;
+	$(end-sanitize-Sanitize)
 	./configure sun4
 	# Doc files don't change; include them in distribution.
 	for f in $(DISTDOCDIRS) ; do \
@@ -1204,7 +1126,7 @@ gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 		SUPPORT_FILES="$(GASB_SUPPORT_DIRS)"
 
 .PHONY: libg++.tar.gz
-LIBGXX_SUPPORT_DIRS=include libio libiberty xiberty
+LIBGXX_SUPPORT_DIRS=include libio librx libiberty xiberty
 libg++.tar.gz: $(DIST_SUPPORT) libg++
 	$(MAKE) -f Makefile.in taz TOOL=libg++ \
 		SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)"
@@ -1213,6 +1135,12 @@ GNATS_SUPPORT_DIRS=include libiberty send-pr
 gnats.tar.gz: $(DIST_SUPPORT) $(GNATS_SUPPORT_DIRS) gnats
 	$(MAKE) -f  Makefile.in taz TOOL=gnats \
 		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
+
+.PHONY: gdb.tar.gz
+GDB_SUPPORT_DIRS= bfd glob include libiberty mmalloc opcodes readline sim
+gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
+	$(MAKE) -f Makefile.in taz TOOL=gdb \
+		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"
 
 .NOEXPORT:
 MAKEOVERRIDES=
