@@ -2,7 +2,11 @@
 
 #ifndef TUI_H
 #define TUI_H
+#if defined (HAVE_NCURSES_H)
+#include <ncurses.h>
+#elif defined (HAVE_CURSES_H)
 #include <curses.h>
+#endif
 
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <malloc.h>
-#include <curses.h>
 #ifdef HAVE_TERM_H
 #include <term.h>
 #endif

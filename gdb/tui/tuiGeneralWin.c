@@ -3,7 +3,6 @@
    ** This module supports general window behavior
  */
 
-#include <curses.h>
 #include "defs.h"
 #include "tui.h"
 #include "tuiData.h"
