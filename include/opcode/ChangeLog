@@ -1,3 +1,12 @@
+Tue Oct 14 13:22:29 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h: Bit ops with absolute addresses not in the 8 bit
+	area are not available in the base model (H8/300).
+
+Thu Sep 25 13:03:41 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k.h: Remove documentation of ` operand specifier.
+
 Wed Sep 24 19:00:34 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k.h: Document q and v operand specifiers.
