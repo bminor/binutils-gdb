@@ -626,6 +626,20 @@ extern boolean bfd_elf64_size_dynamic_sections
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
+/* Return an upper bound on the number of bytes required to store a
+   copy of ABFD's program header table entries.  Return -1 if an error
+   occurs; bfd_get_error will return an appropriate code.  */
+extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
+
+/* Copy ABFD's program header table entries to *PHDRS.  The entries
+   will be stored as an array of Elf_Internal_Phdr structures, as
+   defined in include/elf/internal.h.  To find out how large the
+   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
+
+   Return the number of program header table entries read, or -1 if an
+   error occurs; bfd_get_error will return an appropriate code.  */
+extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list

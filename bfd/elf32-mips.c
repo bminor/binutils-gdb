@@ -7920,7 +7920,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (s);
+	  _bfd_strip_section_from_output (info, s);
 	  continue;
 	}
 

@@ -626,6 +626,20 @@ extern boolean bfd_elf64_size_dynamic_sections
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
+/* Return an upper bound on the number of bytes required to store a
+   copy of ABFD's program header table entries.  Return -1 if an error
+   occurs; bfd_get_error will return an appropriate code.  */
+extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
+
+/* Copy ABFD's program header table entries to *PHDRS.  The entries
+   will be stored as an array of Elf_Internal_Phdr structures, as
+   defined in include/elf/internal.h.  To find out how large the
+   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
+
+   Return the number of program header table entries read, or -1 if an
+   error occurs; bfd_get_error will return an appropriate code.  */
+extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -1084,7 +1098,7 @@ typedef struct sec
            target).  In most cases, if this was going to start at the
            100th octet (8-bit quantity) in the output section, this value
            would be 100.  However, if the target byte size is 16 bits
-           (bfd_octets_per_byte is "2"), this value would be 50. */ 
+           (bfd_octets_per_byte is "2"), this value would be 50. */
 
    bfd_vma output_offset;
 
@@ -1254,7 +1268,7 @@ bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec, bfd *obfd, ase
                (ibfd, isection, obfd, osection))
 void 
 _bfd_strip_section_from_output
- PARAMS ((asection *section));
+ PARAMS ((struct bfd_link_info *info, asection *section));
 
 enum bfd_architecture 
 {
@@ -1379,7 +1393,7 @@ enum bfd_architecture
   bfd_arch_mn10200,    /* Matsushita MN10200 */
   bfd_arch_mn10300,    /* Matsushita MN10300 */
 #define bfd_mach_mn10300               300
-#define bfd_mach_am33               330
+#define bfd_mach_am33          330
   bfd_arch_fr30,
 #define bfd_mach_fr30          0x46523330
   bfd_arch_mcore,
@@ -1454,7 +1468,7 @@ bfd_octets_per_byte PARAMS ((bfd *abfd));
 
 int 
 bfd_arch_mach_octets_per_byte PARAMS ((enum bfd_architecture arch,
-                                       unsigned long machine));
+    unsigned long machine));
 
 typedef enum bfd_reloc_status
 {
@@ -2433,8 +2447,8 @@ bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
 int 
 bfd_decode_symclass PARAMS ((asymbol *symbol));
 
-boolean
-bfd_is_undefined_symclass PARAMS ((int symclass));
+boolean 
+bfd_is_undefined_symclass  PARAMS ((int symclass));
 
 void 
 bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
@@ -3104,22 +3118,6 @@ bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
 CONST char *
 bfd_format_string PARAMS ((bfd_format format));
-
-
-/* Return an upper bound on the number of bytes required to store a
-   copy of ABFD's program header table entries.  Return -1 if an error
-   occurs; bfd_get_error will return an appropriate code.  */
-extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
-
-/* Copy ABFD's program header table entries to *PHDRS.  The entries
-   will be stored as an array of Elf_Internal_Phdr structures, as
-   defined in include/elf/internal.h.  To find out how large the
-   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
-
-   Return the number of program header table entries read, or -1 if an
-   error occurs; bfd_get_error will return an appropriate code.  */
-extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
-
 
 #ifdef __cplusplus
 }

@@ -3263,7 +3263,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	}
 
       if (strip)
-	_bfd_strip_section_from_output (s);
+	_bfd_strip_section_from_output (info, s);
       else
 	{
 	  /* Allocate memory for the section contents.  */

@@ -2981,7 +2981,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       verdefs = asvinfo.verdefs;
 
       if (verdefs == NULL)
-	_bfd_strip_section_from_output (s);
+	_bfd_strip_section_from_output (info, s);
       else
 	{
 	  unsigned int cdefs;
@@ -3157,7 +3157,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				(PTR) &sinfo);
 
 	if (elf_tdata (output_bfd)->verref == NULL)
-	  _bfd_strip_section_from_output (s);
+	  _bfd_strip_section_from_output (info, s);
 	else
 	  {
 	    Elf_Internal_Verneed *t;
@@ -3261,7 +3261,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (dynsymcount == 0
 	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
 	{
-	  _bfd_strip_section_from_output (s);
+	  _bfd_strip_section_from_output (info, s);
 	  /* The DYNSYMCOUNT might have changed if we were going to
 	     output a dynamic symbol table entry for S.  */
 	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);

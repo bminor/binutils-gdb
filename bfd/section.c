@@ -1100,20 +1100,28 @@ FUNCTION
 
 SYNOPSIS
 	void _bfd_strip_section_from_output
-	(asection *section);
+	(struct bfd_link_info *info, asection *section);
 
 DESCRIPTION
-	Remove @var{section} from the output.  If the output section becomes
-	empty, remove it from the output bfd.
+	Remove @var{section} from the output.  If the output section
+	becomes empty, remove it from the output bfd.  @var{info} may
+	be NULL; if it is not, it is used to decide whether the output
+	section is empty.
 */
 void
-_bfd_strip_section_from_output (s)
+_bfd_strip_section_from_output (info, s)
+     struct bfd_link_info *info;
      asection *s;
 {
   asection **spp, *os;
   struct bfd_link_order *p, *pp;
+  boolean keep_os;
 
-  /* Excise the input section from the link order.  */
+  /* Excise the input section from the link order.
+
+     FIXME: For all calls that I can see to this function, the link
+     orders have not yet been set up.  So why are we checking them? --
+     Ian */
   os = s->output_section;
   for (p = os->link_order_head, pp = NULL; p != NULL; pp = p, p = p->next)
     if (p->type == bfd_indirect_link_order
@@ -1128,10 +1136,30 @@ _bfd_strip_section_from_output (s)
 	break;
       }
 
+  keep_os = os->link_order_head != NULL;
+
+  if (! keep_os && info != NULL)
+    {
+      bfd *abfd;
+      for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
+	{
+	  asection *is;
+	  for (is = abfd->sections; is != NULL; is = is->next)
+	    {
+	      if (is != s && is->output_section == os)
+		break;
+	    }
+	  if (is != NULL)
+	    break;
+	}
+      if (abfd != NULL)
+	keep_os = true;
+    }
+
   /* If the output section is empty, remove it too.  Careful about sections
      that have been discarded in the link script -- they are mapped to 
      bfd_abs_section, which has no owner.  */
-  if (!os->link_order_head && os->owner)
+  if (!keep_os && os->owner != NULL)
     {
       for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
 	if (*spp == os)

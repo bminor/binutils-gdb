@@ -1,3 +1,16 @@
+2000-02-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* section.c (_bfd_strip_section_from_output): Add info parameter.
+	If it passed as non-NULL, use it to check whether any input BFD
+	has an input section which uses this output section.  Change all
+	callers.
+	* bfd-in2.h: Rebuild.
+
+	* bfd-in.h: Move declarations of bfd_get_elf_phdr_upper_bound and
+	bfd_get_elf_phdrs in from bfd-in2.h, correcting patch of
+	1999-11-29.
+	* bfd-in2.h: Rebuild.
+
 2000-02-10  Timothy Wall  <twall@cygnus.com>
 
 	* coffswap.h (coff_swap_sym_in): Add hook SWAP_SYM_IN_POST to
