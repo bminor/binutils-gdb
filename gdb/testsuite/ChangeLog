@@ -1,5 +1,8 @@
 Fri Feb  7 09:31:21 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.fortran/types.exp: If the target doesn't support "double"
+	data types, then expect "real" types to only be 4 bytes.
+
 	* gdb.c++/virtfunc.exp: Expect failure for virtual function
 	call tests if the target doesn't support inferior function calls.
 
