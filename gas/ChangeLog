@@ -1,4 +1,4 @@
-2004-07-21  Jan Beulich <jbeulich@novell.com>
+2004-07-21  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (optimize_imm): Adjust immediates to only those
 	permissible for the selected instruction suffix.
@@ -16,6 +16,9 @@
 	registers.
 	(parse_register): Disallow Reg64 registers in 32-bit mode.
 
+	* config/tc-i386.c: For DefaultSize instructions, don't guess a 'q'
+	suffix if the instruction doesn't support it.
+	
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (append_insn): Handle constant expressions with

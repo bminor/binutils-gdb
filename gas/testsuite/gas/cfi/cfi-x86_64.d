@@ -21,13 +21,13 @@ The section .eh_frame contains:
   DW_CFA_advance_loc: 12 to 00000033
   DW_CFA_def_cfa_offset: 8
 
-00000030 0000001c 00000034 FDE cie=00000000 pc=00000038..00000047
+00000030 0000001c 00000034 FDE cie=00000000 pc=00000038..00000046
   DW_CFA_advance_loc: 1 to 00000039
   DW_CFA_def_cfa_offset: 16
   DW_CFA_offset: r6 at cfa-16
   DW_CFA_advance_loc: 3 to 0000003c
   DW_CFA_def_cfa_reg: r6
-  DW_CFA_advance_loc: 10 to 00000046
+  DW_CFA_advance_loc: 9 to 00000045
   DW_CFA_def_cfa: r7 ofs 8
   DW_CFA_nop
   DW_CFA_nop

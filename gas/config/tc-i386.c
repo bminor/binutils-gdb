@@ -2194,7 +2194,7 @@ check_string ()
 }
 
 static int
-process_suffix ()
+process_suffix (void)
 {
   /* If matched instruction specifies an explicit instruction mnemonic
      suffix, use it.  */
@@ -2217,6 +2217,7 @@ process_suffix ()
 	     Destination register type is more significant than source
 	     register type.  */
 	  int op;
+
 	  for (op = i.operands; --op >= 0;)
 	    if ((i.types[op] & Reg)
 		&& !(i.tm.operand_types[op] & InOutPortReg))
@@ -2257,11 +2258,13 @@ process_suffix ()
   else if ((i.tm.opcode_modifier & DefaultSize) && !i.suffix)
     {
       i.suffix = stackop_size;
+      if (i.suffix == QWORD_MNEM_SUFFIX
+	  && (i.tm.opcode_modifier & No_qSuf))
+	i.suffix = LONG_MNEM_SUFFIX;
     }
 
   /* Change the opcode based on the operand size given by i.suffix;
      We need not change things for byte insns.  */
-
   if (!i.suffix && (i.tm.opcode_modifier & W))
     {
       as_bad (_("no instruction mnemonic suffix given and no register operands; can't size instruction"));
@@ -2289,6 +2292,7 @@ process_suffix ()
 		  && (i.tm.opcode_modifier & JumpByte))))
 	{
 	  unsigned int prefix = DATA_PREFIX_OPCODE;
+
 	  if (i.tm.opcode_modifier & JumpByte) /* jcxz, loop */
 	    prefix = ADDR_PREFIX_OPCODE;
 
@@ -2304,19 +2308,18 @@ process_suffix ()
 
       /* Size floating point instruction.  */
       if (i.suffix == LONG_MNEM_SUFFIX)
-	{
-	  if (i.tm.opcode_modifier & FloatMF)
-	    i.tm.base_opcode ^= 4;
-	}
+	if (i.tm.opcode_modifier & FloatMF)
+	  i.tm.base_opcode ^= 4;
     }
 
   return 1;
 }
 
 static int
-check_byte_reg ()
+check_byte_reg (void)
 {
   int op;
+
   for (op = i.operands; --op >= 0;)
     {
       /* If this is an eight bit register, it's OK.  If it's the 16 or

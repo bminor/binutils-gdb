@@ -1,11 +1,16 @@
 2004-07-21  Jan Beulich <jbeulich@novell.com>
 
-	* testsuite/gas/i386/x86-64-addr32.[ds]: New test for x86-64
-	32-bit addressing in 64-bit mode.
-	* testsuite/gas/i386/x86-64-rip.[ds]: New test for x86-64
-	rip-relative addressing.
-	* testsuite/gas/i386/i386.exp: Run the two new tests.
+	* gas/i386/x86-64-addr32.[ds]: New test for x86-64 32-bit
+	addressing in 64-bit mode.
+	* gas/i386/x86-64-rip.[ds]: New test for x86-64 rip-relative
+	addressing.
+	* gas/i386/i386.exp: Run the two new tests.
 
+	* gas/cfi/cfi-x86_64.d: Adjust expectation for leave to	not have a
+	rex prefix.
+	* gas/i386/x86-64-inval.[ls]: Add a bunch of instructions illegal
+	in 64-bit mode.
+	
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/elf-rel19.d: Pass -march=mips1 to gas as the test
