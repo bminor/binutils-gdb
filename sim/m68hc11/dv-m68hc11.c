@@ -1,6 +1,6 @@
 /*  dv-m68hc11.c -- CPU 68HC11&68HC12 as a device.
     Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-    Written by Stephane Carrez (stcarrez@worldnet.fr)
+    Written by Stephane Carrez (stcarrez@nerim.fr)
     (From a driver model Contributed by Cygnus Solutions.)
     
     This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "sim-hw.h"
 #include "hw-main.h"
 #include "sim-options.h"
+#include "hw-base.h"
 #include <limits.h>
 
 /* DEVICE
@@ -159,6 +160,7 @@ enum {
   SET_PORT_A,
   SET_PORT_C,
   SET_PORT_D,
+  CPU_WRITE_PORT,
   PORT_A,
   PORT_B,
   PORT_C,
@@ -177,6 +179,8 @@ static const struct hw_port_descriptor m68hc11cpu_ports[] = {
   { "set-port-a", SET_PORT_A,    0, input_port, },
   { "set-port-c", SET_PORT_C,    0, input_port, },
   { "set-port-d", SET_PORT_D,    0, input_port, },
+
+  { "cpu-write-port", CPU_WRITE_PORT,    0, input_port, },
 
   /* Events generated for connection to other devices.  */
   { "cpu-reset", CPU_RESET_PORT, 0, output_port, },
@@ -530,6 +534,9 @@ m68hc11cpu_port_event (struct hw *me,
 
     case SET_PORT_D:
       m68hc11cpu_set_port (me, cpu, M6811_PORTD, level);
+      break;
+
+    case CPU_WRITE_PORT:
       break;
 
     default:

@@ -1,3 +1,9 @@
+2002-08-13  Stephane Carrez  <Stephane.Carrez@nerim.fr>
+
+	* interp.c (sim_hw_configure): Connect port-X to cpu-write-port.
+	* dv-m68hc11.c (m68hc11cpu_ports): Add cpu-write-port input.
+	(m68hc11cpu_port_event): Handle CPU_WRITE_PORT event.
+
 2002-08-13  Marko Kohtala  <marko.kohtala@luukku.com>
 
 	* dv-m68hc11.c (m68hc11cpu_io_write): Fix to update IO mapping
