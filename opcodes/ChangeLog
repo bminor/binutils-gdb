@@ -1,4 +1,29 @@
+Thu Aug  5 17:11:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sparc-dis.c: Include ansidecl.h before opcodes/sparc.h.
+
+Fri Jul 30 18:48:15 1993  John Gilmore  (gnu@cygnus.com)
+
+	* sparc-opc.c:  Add F_JSR, F_UNBR, or F_CONDBR flags to each branch
+	instruction, for use by the disassembler.
+
+	* sparc-dis.c (SEX):  Add sign extension macro.  Replace many
+	hand-coded sign extensions that depended on 32-bit host ints.
+	FIXME, we still depend on big-endian host bitfield ordering.
+	(sparc_print_insn):  Set the insn_info_valid field, and the
+	other fields that describe the instruction being printed.
+
+Tue Jul 27 17:04:58 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* sparc-opc.c (call): Accept all 6 addressing modes valid for
+	`jmp' instead of just one of them.
+
 Wed Jul 21 11:43:32 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* hppa-dis.c: Move floating registers from reg_names to fp_reg_names.
+	(fput_fp_reg_r): Renamed from fput_reg_r.
+	(fput_fp_reg): New function.
+	(print_insn_hppa): Use fput_fp_reg{,_r} where appropriate.
 
 	* hppa-dis.c (print_insn_hppa, cases 'a', 'd'): Print space afterwards.
 
