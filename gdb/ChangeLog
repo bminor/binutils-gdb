@@ -1,3 +1,7 @@
+2002-06-25  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (delete_command): Don't repeat `delete' commands.
+
 2002-06-25  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (stop_registers): Change variable's type to ``struct
