@@ -1,3 +1,7 @@
+2002-01-09  Michael Snyder  <msnyder@redhat.com>
+
+	* exec.c (exec_make_note_section): Don't call elfcore_write_prpsinfo.
+
 2002-01-09  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/arm/arm-tdep.h (arm_software_single_step): Remove PARAMS.

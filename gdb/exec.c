@@ -771,30 +771,5 @@ file itself are wrong.  Each section must be changed separately.  The\n\
 static char *
 exec_make_note_section (bfd *obfd, int *note_size)
 {
-  struct cleanup *old_chain;
-  char fname[16] = {'\0'};
-  char psargs[80] = {'\0'};
-  char *note_data = NULL;
-
-  if (get_exec_file (0))
-    {
-      strncpy (fname, strrchr (get_exec_file (0), '/') + 1, sizeof (fname));
-      strncpy (psargs, get_exec_file (0), 
-	       sizeof (psargs));
-      if (get_inferior_args ())
-	{
-	  strncat (psargs, " ", 
-		   sizeof (psargs) - strlen (psargs));
-	  strncat (psargs, get_inferior_args (), 
-		   sizeof (psargs) - strlen (psargs));
-	}
-
-      note_data = (char *) elfcore_write_prpsinfo (obfd, 
-						   note_data, 
-						   note_size, 
-						   fname, 
-						   psargs);
-      make_cleanup (xfree, note_data);
-    }
-  return note_data;
+  error ("Can't create a corefile");
 }
