@@ -48,8 +48,12 @@
 #define SCALE1_WHEN_NO_INDEX 1
 #endif
 
+#ifndef true
 #define true 1
+#endif
+#ifndef false
 #define false 0
+#endif
 
 static unsigned int mode_from_disp_size PARAMS ((unsigned int));
 static int fits_in_signed_byte PARAMS ((offsetT));

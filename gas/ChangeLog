@@ -1,3 +1,8 @@
+2002-01-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-i386.c: Protect definitions of true and false
+	from redefinition.
+
 2002-01-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/obj-elf.c (elf_frob_file_before_adjust): Remove symbols
