@@ -565,9 +565,10 @@ aout0.o: aout0.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
 ecoff.o: ecoff.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/ar.h \
-  $(INCDIR)/aout/ranlib.h libaout.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
-  $(INCDIR)/coff/ecoff.h libcoff.h libecoff.h
+  $(INCDIR)/aout/ranlib.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  libaout.h $(INCDIR)/aout/aout64.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
+  libcoff.h libecoff.h
 ecofflink.o: ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h
 coff-m68k.o: coff-m68k.c $(INCDIR)/coff/m68k.h $(INCDIR)/coff/internal.h \
@@ -617,7 +618,7 @@ i386linux.o: i386linux.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
 i386mach3.o: i386mach3.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h
-i386netbsd.o: i386netbsd.c libaout.h $(INCDIR)/bfdlink.h \
+i386netbsd.o: i386netbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 i386os9k.o: i386os9k.c $(INCDIR)/bfdlink.h libaout.h \
