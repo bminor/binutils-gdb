@@ -1,5 +1,5 @@
 /* Simulator tracing/debugging support.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -75,7 +75,7 @@ static const OPTION trace_options[] =
 {
   /* This table is organized to group related instructions together.  */
   { {"trace", optional_argument, NULL, 't'},
-      't', "on|off", "Trace everything",
+      't', "on|off", "Trace useful things",
       trace_option_handler },
   { {"trace-insn", optional_argument, NULL, OPTION_TRACE_INSN},
       '\0', "on|off", "Perform instruction tracing",
@@ -122,16 +122,13 @@ static const OPTION trace_options[] =
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
-
-/* Set FIRST_TRACE .. LAST_TRACE according to arg.  At least
-   FIRST_TRACE is always set */
+/* Set/reset the trace options indicated in MASK.  */
 
 static SIM_RC
-set_trace_options (sd, name, first_trace, last_trace, arg)
+set_trace_option_mask (sd, name, mask, arg)
      SIM_DESC sd;
      const char *name;
-     int first_trace;
-     int last_trace;
+     int mask;
      const char *arg;
 {
   int trace_nr;
@@ -155,9 +152,11 @@ set_trace_options (sd, name, first_trace, last_trace, arg)
 	}
     }
 
-  trace_nr = first_trace;
-  do
+  for (trace_nr = 0; trace_nr < MAX_TRACE_VALUES; ++trace_nr)
     {
+      if ((mask & (1 << trace_nr)) == 0)
+	continue;
+
       /* Set non-cpu specific values.  */
       switch (trace_nr)
 	{
@@ -175,9 +174,20 @@ set_trace_options (sd, name, first_trace, last_trace, arg)
 	  CPU_TRACE_FLAGS (STATE_CPU (sd, cpu_nr))[trace_nr] = trace_val;
 	}
     }
-  while (++trace_nr < last_trace);
 
   return SIM_RC_OK;
+}
+
+/* Set one trace option based on its IDX value.  */
+
+static SIM_RC
+set_trace_option (sd, name, idx, arg)
+     SIM_DESC sd;
+     const char *name;
+     int idx;
+     const char *arg;
+{
+  return set_trace_option_mask (sd, name, 1 << idx, arg);
 }
 
 
@@ -196,26 +206,26 @@ trace_option_handler (sd, opt, arg, is_command)
       if (! WITH_TRACE)
 	sim_io_eprintf (sd, "Tracing not compiled in, `-t' ignored\n");
       else
-	return set_trace_options (sd, "trace", 0, MAX_TRACE_VALUES, arg);
+	return set_trace_option_mask (sd, "trace", TRACE_USEFUL_MASK, arg);
       break;
 
     case OPTION_TRACE_INSN :
       if (WITH_TRACE_INSN_P)
-	return set_trace_options (sd, "-insn", TRACE_INSN_IDX, -1, arg);
+	return set_trace_option (sd, "-insn", TRACE_INSN_IDX, arg);
       else
 	sim_io_eprintf (sd, "Instruction tracing not compiled in, `--trace-insn' ignored\n");
       break;
 
     case OPTION_TRACE_DECODE :
       if (WITH_TRACE_DECODE_P)
-	return set_trace_options (sd, "-decode", TRACE_DECODE_IDX, -1, arg);
+	return set_trace_option (sd, "-decode", TRACE_DECODE_IDX, arg);
       else
 	sim_io_eprintf (sd, "Decode tracing not compiled in, `--trace-decode' ignored\n");
       break;
 
     case OPTION_TRACE_EXTRACT :
       if (WITH_TRACE_EXTRACT_P)
-	return set_trace_options (sd, "-extract", TRACE_EXTRACT_IDX, -1, arg);
+	return set_trace_option (sd, "-extract", TRACE_EXTRACT_IDX, arg);
       else
 	sim_io_eprintf (sd, "Extract tracing not compiled in, `--trace-extract' ignored\n");
       break;
@@ -223,8 +233,8 @@ trace_option_handler (sd, opt, arg, is_command)
     case OPTION_TRACE_LINENUM :
       if (WITH_TRACE_LINENUM_P && WITH_TRACE_INSN_P)
 	{
-	  if (set_trace_options (sd, "-linenum", TRACE_LINENUM_IDX, -1, arg) != SIM_RC_OK
-	      || set_trace_options (sd, "-linenum", TRACE_INSN_IDX, -1, arg) != SIM_RC_OK)
+	  if (set_trace_option (sd, "-linenum", TRACE_LINENUM_IDX, arg) != SIM_RC_OK
+	      || set_trace_option (sd, "-linenum", TRACE_INSN_IDX, arg) != SIM_RC_OK)
 	    return SIM_RC_FAIL;
 	}
       else
@@ -233,49 +243,49 @@ trace_option_handler (sd, opt, arg, is_command)
 
     case OPTION_TRACE_MEMORY :
       if (WITH_TRACE_MEMORY_P)
-	return set_trace_options (sd, "-memory", TRACE_MEMORY_IDX, -1, arg);
+	return set_trace_option (sd, "-memory", TRACE_MEMORY_IDX, arg);
       else
 	sim_io_eprintf (sd, "Memory tracing not compiled in, `--trace-memory' ignored\n");
       break;
 
     case OPTION_TRACE_MODEL :
       if (WITH_TRACE_MODEL_P)
-	return set_trace_options (sd, "-model", TRACE_MODEL_IDX, -1, arg);
+	return set_trace_option (sd, "-model", TRACE_MODEL_IDX, arg);
       else
 	sim_io_eprintf (sd, "Model tracing not compiled in, `--trace-model' ignored\n");
       break;
 
     case OPTION_TRACE_ALU :
       if (WITH_TRACE_ALU_P)
-	return set_trace_options (sd, "-alu", TRACE_ALU_IDX, -1, arg);
+	return set_trace_option (sd, "-alu", TRACE_ALU_IDX, arg);
       else
 	sim_io_eprintf (sd, "ALU tracing not compiled in, `--trace-alu' ignored\n");
       break;
 
     case OPTION_TRACE_CORE :
       if (WITH_TRACE_CORE_P)
-	return set_trace_options (sd, "-core", TRACE_CORE_IDX, -1, arg);
+	return set_trace_option (sd, "-core", TRACE_CORE_IDX, arg);
       else
 	sim_io_eprintf (sd, "CORE tracing not compiled in, `--trace-core' ignored\n");
       break;
 
     case OPTION_TRACE_EVENTS :
       if (WITH_TRACE_EVENTS_P)
-	return set_trace_options (sd, "-events", TRACE_EVENTS_IDX, -1, arg);
+	return set_trace_option (sd, "-events", TRACE_EVENTS_IDX, arg);
       else
 	sim_io_eprintf (sd, "EVENTS tracing not compiled in, `--trace-events' ignored\n");
       break;
 
     case OPTION_TRACE_FPU :
       if (WITH_TRACE_FPU_P)
-	return set_trace_options (sd, "-fpu", TRACE_FPU_IDX, -1, arg);
+	return set_trace_option (sd, "-fpu", TRACE_FPU_IDX, arg);
       else
 	sim_io_eprintf (sd, "FPU tracing not compiled in, `--trace-fpu' ignored\n");
       break;
 
     case OPTION_TRACE_BRANCH :
       if (WITH_TRACE_BRANCH_P)
-	return set_trace_options (sd, "-branch", TRACE_BRANCH_IDX, -1, arg);
+	return set_trace_option (sd, "-branch", TRACE_BRANCH_IDX, arg);
       else
 	sim_io_eprintf (sd, "Branch tracing not compiled in, `--trace-branch' ignored\n");
       break;
@@ -286,10 +296,10 @@ trace_option_handler (sd, opt, arg, is_command)
 	  && WITH_TRACE_MEMORY_P
 	  && WITH_TRACE_BRANCH_P)
 	{
-	  if (set_trace_options (sd, "-semantics", TRACE_ALU_IDX, -1, arg) != SIM_RC_OK
-	      || set_trace_options (sd, "-semantics", TRACE_FPU_IDX, -1, arg) != SIM_RC_OK
-	      || set_trace_options (sd, "-semantics", TRACE_MEMORY_IDX, -1, arg) != SIM_RC_OK
-	      || set_trace_options (sd, "-semantics", TRACE_BRANCH_IDX, -1, arg) != SIM_RC_OK)
+	  if (set_trace_option (sd, "-semantics", TRACE_ALU_IDX, arg) != SIM_RC_OK
+	      || set_trace_option (sd, "-semantics", TRACE_FPU_IDX, arg) != SIM_RC_OK
+	      || set_trace_option (sd, "-semantics", TRACE_MEMORY_IDX, arg) != SIM_RC_OK
+	      || set_trace_option (sd, "-semantics", TRACE_BRANCH_IDX, arg) != SIM_RC_OK)
 	    return SIM_RC_FAIL;
 	}
       else
@@ -298,7 +308,7 @@ trace_option_handler (sd, opt, arg, is_command)
 
     case OPTION_TRACE_DEBUG :
       if (WITH_TRACE_DEBUG_P)
-	return set_trace_options (sd, "-debug", TRACE_DEBUG_IDX, -1, arg);
+	return set_trace_option (sd, "-debug", TRACE_DEBUG_IDX, arg);
       else
 	sim_io_eprintf (sd, "Tracing debug support not compiled in, `--trace-debug' ignored\n");
       break;
@@ -527,7 +537,7 @@ trace_prefix (SIM_DESC sd,
   char *prefix = TRACE_PREFIX (data);
   char *chp;
 
-  /* if the previous trace data wasn't flused, flush it now with a
+  /* if the previous trace data wasn't flushed, flush it now with a
      note indicating that this occured. */
   if (TRACE_IDX (data) != 0)
     {
