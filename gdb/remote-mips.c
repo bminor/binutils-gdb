@@ -1260,7 +1260,7 @@ mips_request (cmd, addr, data, perr, timeout, buff)
   int rpid;
   char rcmd;
   int rerrflg;
-  int rresponse;
+  unsigned long rresponse;
 
   if (buff == (char *) NULL)
     buff = myBuff;
@@ -1285,7 +1285,7 @@ mips_request (cmd, addr, data, perr, timeout, buff)
   len = mips_receive_packet (buff, 1, timeout);
   buff[len] = '\0';
 
-  if (sscanf (buff, "0x%x %c 0x%x 0x%x",
+  if (sscanf (buff, "0x%x %c 0x%x 0x%lx",
 	      &rpid, &rcmd, &rerrflg, &rresponse) != 4
       || (cmd != '\0' && rcmd != cmd))
     mips_error ("Bad response from remote board");
