@@ -1,3 +1,7 @@
+Fri Dec  9 19:54:04 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/arm/gas.exp: The arm6 test should report errors, for now.
+
 Thu Dec  8 20:19:09 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* lib/gas-defs.exp: Use -i in expect_after command.

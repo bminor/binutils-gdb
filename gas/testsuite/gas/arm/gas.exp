@@ -6,7 +6,9 @@ if [istarget arm-*-riscix*] then {
 
     gas_test "arm3.s" "" $stdoptlist "Arm 3 instructions"
 
-    gas_test "arm6.s" "" $stdoptlist "Arm 6 instructions"
+    # These instructions aren't supported, and I'm told some are
+    # actually invalid.
+    gas_test_error "arm6.s" "" "Arm 6 instructions"
 
     gas_test "copro.s" "" $stdoptlist "Co processor instructions"
 
