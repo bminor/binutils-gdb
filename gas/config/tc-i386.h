@@ -516,9 +516,14 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
+extern int optimize_align_code;
+
 #define md_do_align(n, fill, len, max, around)				\
-if ((n) && !need_pass_2							\
-    && (!(fill) || ((char)*(fill) == (char)0x90 && (len) == 1))		\
+if ((n)									\
+    && !need_pass_2							\
+    && optimize_align_code						\
+    && (!(fill)								\
+	|| ((char)*(fill) == (char)0x90 && (len) == 1))			\
     && subseg_text_p (now_seg))						\
   {									\
     frag_align_code ((n), (max));					\

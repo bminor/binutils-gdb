@@ -1,3 +1,20 @@
+2003-06-09  H.J. Lu <hongjiu.lu@intel.com>
+
+	* NEWS: Updated for the new -n option for the i386 assembler.
+
+	* config/tc-i386.c (optimize_align_code): New.
+	(md_shortopts): Add 'n'.
+	(md_parse_option): Handle 'n'.
+	(md_show_usage): Add '-n'.
+
+	* config/tc-i386.h (optimize_align_code): Declared.
+	(md_do_align): Optimize code alignment only if optimize_align_code
+	is not 0.
+
+	* doc/as.texinfo: Add the new -n option.
+
+	* doc/c-i386.texi: Document the new -n option.
+
 2003-06-07  Richard Henderson  <rth@redhat.com>
 
 	* doc/as.texinfo: Document .cfi_rel_offset.

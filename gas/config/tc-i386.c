@@ -303,6 +303,9 @@ static int allow_naked_reg = 0;
    frame as in 32 bit mode.  */
 static char stackop_size = '\0';
 
+/* Non-zero to optimize code alignment.  */
+int optimize_align_code = 1;
+
 /* Non-zero to quieten some warnings.  */
 static int quiet_warnings = 0;
 
@@ -4889,9 +4892,9 @@ parse_register (reg_string, end_op)
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-const char *md_shortopts = "kVQ:sq";
+const char *md_shortopts = "kVQ:sqn";
 #else
-const char *md_shortopts = "q";
+const char *md_shortopts = "qn";
 #endif
 
 struct option md_longopts[] = {
@@ -4912,6 +4915,10 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
+    case 'n':
+      optimize_align_code = 0;
+      break;
+
     case 'q':
       quiet_warnings = 1;
       break;
@@ -4973,10 +4980,12 @@ md_show_usage (stream)
   -Q                      ignored\n\
   -V                      print assembler version number\n\
   -k                      ignored\n\
+  -n                      Do not optimize code alignment\n\
   -q                      quieten some warnings\n\
   -s                      ignored\n"));
 #else
   fprintf (stream, _("\
+  -n                      Do not optimize code alignment\n\
   -q                      quieten some warnings\n"));
 #endif
 }

@@ -332,7 +332,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset I80386
 
 @emph{Target i386 options:}
-   [@b{--32}|@b{--64}]
+   [@b{--32}|@b{--64}] [@b{-n}]
 @end ifset
 @ifset I960
 

@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Added -n switch for x86 assembler.  By default, x86 GAS replaces
+  multiple nop instructions used for alignment within code sections
+  with multi-byte nop instructions such as leal 0(%esi,1),%esi.  This
+  switch disables the optimization.
+
 * Added support for MIPS32 Release 2.
 
 * Added support for Xtensa architecture.
