@@ -545,9 +545,9 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
  *
  *   call_function then writes CALL_DUMMY, pushes the args onto the
  * stack, and adjusts the stack pointer.
- *
- *   run_stack_dummy then starts execution (in the middle of
- * CALL_DUMMY, as directed by call_function).  */
+ 
+   call_function_by_hand then starts execution (in the middle of
+   CALL_DUMMY, as directed by call_function).  */
 
 #ifndef CALL_DUMMY
 /* This sequence of words is the instructions

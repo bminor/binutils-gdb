@@ -2379,10 +2379,11 @@ sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
      Adjust the call_dummy_breakpoint_offset for the bp_call_dummy breakpoint
      to the proper address in the call dummy, so that `finish' after a stop
      in a call dummy works.
-     Tweeking current_gdbarch is not an optimal solution, but the call to
-     sparc_fix_call_dummy is immediately followed by a call to run_stack_dummy,
-     which is the only function where dummy_breakpoint_offset is actually
-     used, if it is non-zero.  */
+
+     Tweeking current_gdbarch is not an optimal solution, but the call
+     to sparc_fix_call_dummy is immediately followed by a call to
+     call_function_by_hand, which is the only function where
+     dummy_breakpoint_offset is actually used, if it is non-zero.  */
   if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
        || TYPE_CODE (value_type) == TYPE_CODE_UNION)
     {

@@ -36,6 +36,7 @@
 #include "infttrace.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
+#include "infcall.h"
 
 #ifdef USG
 #include <sys/types.h>

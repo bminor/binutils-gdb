@@ -1155,9 +1155,10 @@ v850_frame_init_saved_regs (struct frame_info *fi)
    be valid only if this routine uses FP.  For previous frames, fi-frame will
    always be correct (since that is derived from v850_frame_chain ()).
 
-   We can be called with the PC in the call dummy under two circumstances.
-   First, during normal backtracing, second, while figuring out the frame
-   pointer just prior to calling the target function (see run_stack_dummy).  */
+   We can be called with the PC in the call dummy under two
+   circumstances.  First, during normal backtracing, second, while
+   figuring out the frame pointer just prior to calling the target
+   function (see call_function_by_hand).  */
 
 static void
 v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)

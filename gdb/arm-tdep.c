@@ -1257,8 +1257,8 @@ static LONGEST arm_call_dummy_words[] =
 
    FIXME rearnsha 2002-02018: Tweeking current_gdbarch is not an
    optimal solution, but the call to arm_fix_call_dummy is immediately
-   followed by a call to run_stack_dummy, which is the only function
-   where call_dummy_breakpoint_offset is actually used.  */
+   followed by a call to call_function_by_hand, which is the only
+   function where call_dummy_breakpoint_offset is actually used.  */
 
 
 static void

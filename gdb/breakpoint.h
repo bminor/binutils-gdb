@@ -623,7 +623,7 @@ extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_id);
    enabled watchpoints.  When disabled, the watchpoints are marked
    call_disabled.  When reenabled, they are marked enabled.
 
-   The intended client of these functions is infcmd.c\run_stack_dummy.
+   The intended client of these functions is call_function_by_hand.
 
    The inferior must be stopped, and all breakpoints removed, when
    these functions are used.

@@ -42,6 +42,7 @@
 #include "gdb_regex.h"
 #include "regcache.h"
 #include "block.h"
+#include "infcall.h"
 
 #include <ctype.h>
 

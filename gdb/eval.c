@@ -32,6 +32,7 @@
 #include "language.h"		/* For CAST_IS_CONVERSION */
 #include "f-lang.h"		/* for array bound stuff */
 #include "cp-abi.h"
+#include "infcall.h"
 
 /* Defined in symtab.c */
 extern int hp_som_som_object_present;

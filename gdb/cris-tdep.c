@@ -1216,8 +1216,8 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 				   get_frame_base (fi),
 				   get_frame_base (fi)))
     {    
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
+      /* We need to setup fi->frame here because call_function_by_hand
+         gets it wrong by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
       get_frame_extra_info (fi)->return_pc = 
         deprecated_read_register_dummy (get_frame_pc (fi),

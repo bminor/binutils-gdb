@@ -1,3 +1,37 @@
+2003-04-21  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c: New file.
+	* infcall.h: New file.
+	* valarith.c: Include "infcall.h".
+	* scm-lang.c, objc-lang.cm, hppa-tdep.c, gcore.c: Ditto.
+	* eval.c, ada-valprint.c, ada-lang.c: Ditto.
+	* Makefile.in (valarith.o, scm-lang.o): Update dependencies.
+	(objc-lang.o, hppa-tdep.o, gcore.o): Update dependencies.
+	(eval.o, ada-valprint.o, ada-lang.o): Update dependencies.
+	(SFILES): Add "infcall.c"
+	(COMMON_OBS): Add "infcall.o".
+	(infcall.o): Specify dependencies.
+	* value.h (call_function_by_hand): Delete declaration.
+	* inferior.h (run_stack_dummy): Delete declaration.
+	* infcmd.c (breakpoint_auto_delete_contents): Move to "infcall.c".
+	(run_stack_dummy): Move to "infcall.c", merged into
+	call_function_by_hand.
+	* valops.c (call_function_by_hand): Moved to "infcall.c".
+	(find_function_addr, value_arg_coerce): Ditto.
+	(unwindonsignal_p, coerce_float_to_double): Ditto.
+	(_initialize_valops): Move "set/show coerce-float-to-double", and
+	"set/show unwindonsignal" commands to "infcall.c".
+	* v850-tdep.c, target.h: Update comments.
+	* sparc-tdep.c (sparc_fix_call_dummy): Update comments.
+	* sh-tdep.c (sh_init_extra_frame_info): Update comments.
+	(sh64_init_extra_frame_info): Update comments.
+	* mn10300-tdep.c: Update comments.
+	* mcore-tdep.c (mcore_init_extra_frame_info): Update comments.
+	* config/sparc/tm-sparc.h: Update comments.
+	* breakpoint.h: Update comments.
+	* avr-tdep.c (avr_init_extra_frame_info): Update comments.
+	* arm-tdep.c: Update comment.
+
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_num_register_names): New variable.
