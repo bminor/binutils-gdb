@@ -1,3 +1,9 @@
+start-sanitize-gdbtk
+Mon Jul 21 22:24:07 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* aclocal.m4: Search for the correct tix library. 
+end-sanitize-gdbtk
+	
 Thu Jul 17 11:38:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* partial-stab.h (case N_BINCL): detect missing partial symtab.
