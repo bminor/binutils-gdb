@@ -1,3 +1,7 @@
+2000-06-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define.
+
 2000-06-01  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* sol-thread.c (rw_common): Circumstances (eg. a bug in Sun's 

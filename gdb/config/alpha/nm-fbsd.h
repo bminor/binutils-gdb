@@ -29,6 +29,9 @@
 
 /* We can attach and detach.  */
 #define ATTACH_DETACH
+
+/* The Alpha does not step over a breakpoint.  */
+#define CANNOT_STEP_BREAKPOINT
 
 
 /* Shared library support.  */
