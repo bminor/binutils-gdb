@@ -1,3 +1,18 @@
+Tue Apr 14 16:52:59 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sparc-tdep.c (sparc_extract_struct_value_address): Make it
+	work correctly on little-endian hosts.
+	(sparc_push_arguments): New function.
+	(gdb_print_insn_sparc): New function.
+	(_initialize_sparc_tdep): Make gdb_print_insn_sparc the default
+	disassembler, so that SPARClite-specific instructions will
+	be recognized.
+	* sparcl-tdep.c (readchar): Print debugging information.
+	(debug_serial_write): New function, a replacement for SERIAL_WRITE
+	that prints debugging information.
+	* config/sparc/tm-sparc.h (PUSH_ARGUMENTS): Define.
+	(sparc_push_arguments): Declare.
+
 Tue Apr 14 15:43:49 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* gdbcfgxref (xref_menu): Call new regex and wild card searches
@@ -95,7 +110,6 @@ Wed Apr  8 16:47:33 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 	* breakpoint.c (breakpoint_re_set_one): Remove Ulrich Drepper's
 	patch of March 23 1998.
 
->>>>>>> 1.4385
 Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* mdebugread.c (parse_partial_symbols): If this is an .mdebug 

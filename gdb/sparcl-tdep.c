@@ -302,6 +302,7 @@ readchar (desc, timeout)
      int timeout;
 {
   int ch;
+  char s[10];
 
   ch = SERIAL_READCHAR (desc, timeout);
 
@@ -314,16 +315,42 @@ readchar (desc, timeout)
     case SERIAL_TIMEOUT:
       error ("SPARClite remote timeout");
     default:
+      if (remote_debug > 0)
+	{
+	  sprintf (s, "[%02x]", ch & 0xff);
+	  puts_debug ("read -->", s, "<--");
+	}
       return ch;
     }
 }
+
+static void
+debug_serial_write (desc, buf, len)
+     serial_t desc;
+     char *buf;
+     int len;
+{
+  char s[10];
+
+  SERIAL_WRITE (desc, buf, len);
+  if (remote_debug > 0)
+    {
+      while (len-- > 0)
+	{
+	  sprintf (s, "[%02x]", *buf & 0xff);
+	  puts_debug ("Sent -->", s, "<--");
+	  buf++;
+	}
+    }
+}
+
 
 static int
 send_resp (desc, c)
      serial_t desc;
      char c;
 {
-  SERIAL_WRITE (desc, &c, 1);
+  debug_serial_write (desc, &c, 1);
   return readchar (desc, 2);
 }
 
@@ -659,7 +686,7 @@ sparclite_serial_start (entry)
   buffer[0] = 0x03;
   store_unsigned_integer (buffer + 1, 4, entry);
 
-  SERIAL_WRITE (remote_desc, buffer, 1 + 4);
+  debug_serial_write (remote_desc, buffer, 1 + 4);
   i = readchar (remote_desc, 2);
   if (i != 0x55)
     error ("Can't start SparcLite.  Error code %d\n", i);
@@ -691,7 +718,7 @@ sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
   if (i != 0x5a)
     error ("Bad response from load command (0x%x)", i);
 
-  SERIAL_WRITE (remote_desc, buffer, 4 + 4 + len);
+  debug_serial_write (remote_desc, buffer, 4 + 4 + len);
   i = readchar (remote_desc, 2);
 
   if (i != checksum)

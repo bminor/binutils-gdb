@@ -245,7 +245,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
 
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
+   subroutine will return.  This is called from call_function_by_hand. */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { char val[4]; \
@@ -648,3 +648,15 @@ extern int deferred_stores;
 /* Select the sparc disassembler */
 
 #define TM_PRINT_INSN_MACH bfd_mach_sparc
+
+/* Arguments smaller than an int must promoted to ints when synthesizing
+   function calls.  */
+
+#ifdef __STDC__
+struct value;
+#endif
+
+#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+    sp = sparc_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+extern CORE_ADDR
+sparc_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
