@@ -52,8 +52,11 @@
 
 /* AIX requires this to be the first thing in the file.  */
 #ifdef __GNUC__
-# undef alloca
-# define alloca __builtin_alloca
+#ifdef __STDC__
+extern void *alloca ();
+#else
+extern char *alloca ();
+#endif
 #else
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
@@ -63,9 +66,9 @@
 #  else
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
 #    if !defined (__STDC__) && !defined (__hpux)
-char *alloca ();
+extern char *alloca ();
 #    else
-void *alloca ();
+extern void *alloca ();
 #    endif /* __STDC__, __hpux */
 #   endif /* alloca */
 #  endif /* _AIX */
@@ -372,7 +375,11 @@ enum _relax_state
        later.  Similar to rs_org, but different.
        fr_symbol: operand
        1 variable char: fill character  */
-    rs_space
+    rs_space,
+
+    /* A DWARF leb128 value; only ELF uses this.  The subtype is 0 for
+       unsigned, 1 for signed.  */
+    rs_leb128
   };
 
 typedef enum _relax_state relax_stateT;
@@ -429,14 +436,22 @@ struct frag
   relax_stateT fr_type;
   relax_substateT fr_subtype;
 
-  /* These are needed only on the NS32K machines.  But since we don't
-     include targ-cpu.h until after this structure has been defined,
-     we can't really conditionalize it.  This code should be
-     rearranged a bit to make that possible.
-
-     In the meantime, if we get stuck like this with any other target,
-     create a union here.  */
-  char fr_pcrel_adjust, fr_bsr;
+  union {
+    /* These are needed only on the NS32K machines.  But since we don't
+       include targ-cpu.h until after this structure has been defined,
+       we can't really conditionalize it.  This code should be
+       rearranged a bit to make that possible.  */
+    struct {
+      char pcrel_adjust, bsr;
+    } ns32k;
+#ifdef USING_CGEN
+    /* Don't include this unless using CGEN to keep frag size down.  */
+    struct {
+      const struct cgen_insn *insn;
+      unsigned char opindex, opinfo;
+    } cgen;
+#endif
+  } fr_targ;
 
   /* Where the frag was created, or where it became a variant frag.  */
   char *fr_file;
@@ -456,7 +471,7 @@ typedef struct frag fragS;
    included in frchain_now.  The fr_fix field is bogus; instead, use:
    obstack_next_free(&frags)-frag_now->fr_literal.  */
 COMMON fragS *frag_now;
-extern int frag_now_fix ();
+extern int frag_now_fix PARAMS ((void));
 
 /* For foreign-segment symbol fixups. */
 COMMON fragS zero_address_frag;
@@ -511,6 +526,13 @@ COMMON int linkrelax;
 
 /* TRUE if we should produce a listing.  */
 extern int listing;
+
+/* Type of debugging information we should generate.  We currently
+   only support stabs and ECOFF.  */
+
+enum debug_info_type { DEBUG_NONE, DEBUG_STABS, DEBUG_ECOFF };
+
+extern enum debug_info_type debug_type;
 
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;
@@ -589,6 +611,8 @@ int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
 			  long exponent_bits));
 int had_err PARAMS ((void));
 int ignore_input PARAMS ((void));
+void cond_finish_check PARAMS ((int));
+void cond_exit_macro PARAMS ((int));
 int seen_at_least_1_file PARAMS ((void));
 void app_pop PARAMS ((char *arg));
 void as_howmuch PARAMS ((FILE * stream));
@@ -608,6 +632,10 @@ void subseg_set PARAMS ((segT seg, subsegT subseg));
 #ifdef BFD_ASSEMBLER
 segT subseg_get PARAMS ((const char *, int));
 #endif
+
+void start_dependencies PARAMS ((char *));
+void register_dependency PARAMS ((char *));
+void print_dependencies PARAMS ((void));
 
 struct expressionS;
 struct fix;

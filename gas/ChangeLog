@@ -7,6 +7,9 @@ Tue Aug 26 09:46:22 1997  Nick Clifton  <nickc@cygnus.com>
 end-sanitize-v850
 Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.h: Don't define alloca if __GNUC__.  Just declare it.
+	* macro.c: Copy alloca handling from as.h.
+
 	* config/tc-i386.c (i386_align_code): Correct 16 bit noops.  From
 	Gabriel Paubert <paubert@iram.es>.
 

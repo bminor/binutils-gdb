@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas and gasp
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 1997 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -22,6 +22,32 @@
    02111-1307, USA. */
 
 #include "config.h"
+
+/* AIX requires this to be the first thing in the file.  */
+#ifdef __GNUC__
+#ifdef __STDC__
+extern void *alloca ();
+#else
+extern char *alloca ();
+#endif
+#else
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  else
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
+#    if !defined (__STDC__) && !defined (__hpux)
+extern char *alloca ();
+#    else
+extern void *alloca ();
+#    endif /* __STDC__, __hpux */
+#   endif /* alloca */
+#  endif /* _AIX */
+# endif /* HAVE_ALLOCA_H */
+#endif
+
 #include <stdio.h>
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -513,17 +539,20 @@ do_formals (macro, idx, in)
 }
 
 /* Define a new macro.  Returns NULL on success, otherwise returns an
-   error message.  */
+   error message.  If NAMEP is not NULL, *NAMEP is set to the name of
+   the macro which was defined.  */
 
 const char *
-define_macro (idx, in, label, get_line)
+define_macro (idx, in, label, get_line, namep)
      int idx;
      sb *in;
      sb *label;
      int (*get_line) PARAMS ((sb *));
+     const char **namep;
 {
   macro_entry *macro;
   sb name;
+  const char *namestr;
 
   macro = (macro_entry *) xmalloc (sizeof (macro_entry));
   sb_new (&macro->sub);
@@ -538,7 +567,7 @@ define_macro (idx, in, label, get_line)
   if (label != NULL && label->len != 0)
     {
       sb_add_sb (&name, label);
-      if (in->ptr[idx] == '(')
+      if (idx < in->len && in->ptr[idx] == '(')
 	{
 	  /* It's the label: MACRO (formals,...)  sort */
 	  idx = do_formals (macro, idx + 1, in);
@@ -562,9 +591,13 @@ define_macro (idx, in, label, get_line)
   for (idx = 0; idx < name.len; idx++)
     if (isupper (name.ptr[idx]))
       name.ptr[idx] = tolower (name.ptr[idx]);
-  hash_jam (macro_hash, sb_terminate (&name), (PTR) macro);
+  namestr = sb_terminate (&name);
+  hash_jam (macro_hash, namestr, (PTR) macro);
 
   macro_defined = 1;
+
+  if (namep != NULL)
+    *namep = namestr;
 
   return NULL;
 }
@@ -657,12 +690,17 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
       if (in->ptr[src] == '&')
 	{
 	  sb_reset (&t);
-	  if (macro_mri && src + 1 < in->len && in->ptr[src + 1] == '&')
+	  if (macro_mri)
 	    {
-	      src = sub_actual (src + 2, in, &t, formal_hash, '\'', out, 1);
+	      if (src + 1 < in->len && in->ptr[src + 1] == '&')
+		src = sub_actual (src + 2, in, &t, formal_hash, '\'', out, 1);
+	      else
+		sb_add_char (out, in->ptr[src++]);
 	    }
 	  else
 	    {
+	      /* FIXME: Why do we do this?  It prevents people from
+                 using the & operator in a macro.  */
 	      src = sub_actual (src + 1, in, &t, formal_hash, '&', out, 0);
 	    }
 	}
@@ -825,7 +863,19 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 	  src = get_token (src + 2, in, &t);
 	  ptr = (formal_entry *) hash_find (formal_hash, sb_terminate (&t));
 	  if (ptr == NULL)
-	    return "macro formal argument does not exist";
+	    {
+	      /* FIXME: We should really return a warning string here,
+                 but we can't, because the == might be in the MRI
+                 comment field, and, since the nature of the MRI
+                 comment field depends upon the exact instruction
+                 being used, we don't have enough information here to
+                 figure out whether it is or not.  Instead, we leave
+                 the == in place, which should cause a syntax error if
+                 it is not in a comment.  */
+	      sb_add_char (out, '=');
+	      sb_add_char (out, '=');
+	      sb_add_sb (out, &t);
+	    }
 	  else
 	    {
 	      if (ptr->actual.len)
@@ -921,6 +971,7 @@ macro_expand (idx, in, m, out, comment_char)
       scan = idx;
       while (scan < in->len
 	     && !ISSEP (in->ptr[scan])
+	     && !(macro_mri && in->ptr[scan] == '\'')
 	     && (!macro_alternate && in->ptr[scan] != '='))
 	scan++;
       if (scan < in->len && !macro_alternate && in->ptr[scan] == '=')
@@ -1075,7 +1126,7 @@ check_macro (line, expand, comment_char, error)
 	 || *s == '$')
     ++s;
 
-  copy = (char *) xmalloc (s - line + 1);
+  copy = (char *) alloca (s - line + 1);
   memcpy (copy, line, s - line);
   copy[s - line] = '\0';
   for (cs = copy; *cs != '\0'; cs++)
