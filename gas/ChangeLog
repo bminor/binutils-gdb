@@ -1,3 +1,8 @@
+Mon Dec  7 09:48:34 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-arm.c (elf32_arm_force_relocation):  Check for
+        BFD_RELOC_ARM_PCREL_BRANCH.
+
 Sun Dec  6 12:46:36 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Define TARGET_BYTES_{BIG,LITTLE}_ENDIAN after
