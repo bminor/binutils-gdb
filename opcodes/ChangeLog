@@ -1,3 +1,43 @@
+2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	Generally, handle CRISv32.
+	* cris-dis.c (TRACE_CASE): Define as (disdata->trace_case).
+	(struct cris_disasm_data): New type.
+	(format_reg, format_hex, cris_constraint, print_flags)
+	(get_opcode_entry): Add struct cris_disasm_data * parameter.  All
+	callers changed.
+	(format_sup_reg, print_insn_crisv32_with_register_prefix)
+	(print_insn_crisv32_without_register_prefix)
+	(print_insn_crisv10_v32_with_register_prefix)
+	(print_insn_crisv10_v32_without_register_prefix)
+	(cris_parse_disassembler_options): New functions.
+	(bytes_to_skip, cris_spec_reg): Add enum cris_disass_family
+	parameter.  All callers changed.
+	(get_opcode_entry): Call malloc, not xmalloc.  Return NULL on
+	failure.
+	(cris_constraint) <case 'Y', 'U'>: New cases.
+	(bytes_to_skip): Handle 'Y' and 'N' as 's'.  Skip size is 4 bytes
+	for constraint 'n'.
+	(print_with_operands) <case 'Y'>: New case.
+	(print_with_operands) <case 'T', 'A', '[', ']', 'd', 'n', 'u'>
+	<case 'N', 'Y', 'Q'>: New cases.
+	(print_insn_cris_generic): Emit "bcc ." for zero and CRISv32.
+	(print_insn_cris_with_register_prefix)
+	(print_insn_cris_without_register_prefix): Call
+	cris_parse_disassembler_options.
+	* cris-opc.c (cris_spec_regs): Mention that this table isn't used
+	for CRISv32 and the size of immediate operands.  New v32-only
+	entries for bz, pid, srs, wz, exs, eda, dz, ebp, erp, nrp, ccs and
+	spc.  Add v32-only 4-byte entries for p2, p3, p5 and p6.  Change
+	ccr, ibr, irp to be v0..v10.  Change bar, dccr to be v8..v10.
+	Change brp to be v3..v10.
+	(cris_support_regs): New vector.
+	(cris_opcodes): Update head comment.  New format characters '[',
+	']', space, 'A', 'd', 'N', 'n', 'Q', 'T', 'u', 'U', 'Y'.
+	Add new opcodes for v32 and adjust existing opcodes to accommodate
+	differences to earlier variants.
+	(cris_cond15s): New vector.
+
 2004-11-04 Jan Beulich <jbeulich@novell.com>
 
 	* i386-dis.c (Eq, Edqw, indirEp, Gdq, I1): Define.
