@@ -230,6 +230,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
       sinfo->strings = _bfd_stringtab_init ();
       if (sinfo->strings == NULL)
 	goto error_return;
+      /* Make sure the first byte is zero.  */
+      (void) _bfd_stringtab_add (sinfo->strings, "", true, true);
       if (! bfd_hash_table_init_n (&sinfo->includes.root,
 				   stab_link_includes_newfunc,
 				   251))
