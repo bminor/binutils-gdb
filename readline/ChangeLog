@@ -5,6 +5,8 @@ Thu Nov 21 18:48:08 1991  John Gilmore  (gnu at cygnus.com)
 
 Thu Nov 21 14:40:29 1991  Stu Grossman  (grossman at cygnus.com)
 
+	* configure.in, config/mh-svr4:  Make SVR4 work.
+
 	* readline.c:  Move config stuff to sysdep.h, use typedef dirent
 	consistently, remove refs to d_namlen (& D_NAMLEN) to improve
 	portability.  Also, update copyright notice.
