@@ -331,10 +331,8 @@ bfd *EXFUN(bfd_fdopenr, (CONST char *filename, CONST char *target, int fd));
 bfd *EXFUN(bfd_openw, (CONST char *filename, CONST char *target));
 boolean EXFUN(bfd_close, (bfd *));
 boolean EXFUN(bfd_close_all_done, (bfd *));
-bfd *EXFUN(bfd_create, (CONST char *filename, bfd *template));
 bfd_size_type EXFUN(bfd_alloc_size, (bfd *abfd));
-PTR  EXFUN(bfd_xmalloc, ( bfd_size_type size));
-void EXFUN(bfd_write_bigendian_4byte_int, (bfd *abfd,  int i));
+bfd *EXFUN(bfd_create, (CONST char *filename, bfd *template));
 #define bfd_put_8(abfd, val, ptr) \
                 (*((char *)ptr) = (char)val)
 #define bfd_get_8(abfd, ptr) \
@@ -367,46 +365,190 @@ void EXFUN(bfd_write_bigendian_4byte_int, (bfd *abfd,  int i));
                 BFD_SEND(abfd, bfd_h_putx64,(val, ptr))
 #define bfd_h_get_64(abfd, ptr) \
                 BFD_SEND(abfd, bfd_h_getx64,(ptr))
-typedef struct sec {
+typedef struct sec 
+{
+         /* The name of the section, the name isn't a copy, the pointer is
+        the same as that passed to bfd_make_section. */
+
     CONST char *name;
+
+         /* The next section in the list belonging to the BFD, or NULL. */
+
     struct sec *next;
+
+         /* The field flags contains attributes of the section. Some of
+           flags are read in from the object file, and some are
+           synthesized from other information.  */         
+
     flagword flags;
+
 #define SEC_NO_FLAGS   0x000
+
+         /* Tells the OS to allocate space for this section when loaded.
+           This would clear for a section containing debug information
+           only. */
+          
+
 #define SEC_ALLOC      0x001
+         /* Tells the OS to load the section from the file when loading.
+           This would be clear for a .bss section */
+
 #define SEC_LOAD       0x002
+         /* The section contains data still to be relocated, so there will
+           be some relocation information too. */
+
 #define SEC_RELOC      0x004
+
+         /* Obsolete ? */
+
 #define SEC_BALIGN     0x008
+
+         /* A signal to the OS that the section contains read only
+          data. */
 #define SEC_READONLY   0x010
+
+         /* The section contains code only. */
+
 #define SEC_CODE       0x020
+
+         /* The section contains data only. */
+
 #define SEC_DATA        0x040
+
+         /* The section will reside in ROM. */
+
 #define SEC_ROM        0x080
+
+         /* The section contains constructor information. This section
+           type is used by the linker to create lists of constructors and
+           destructors used by <<g++>>. When a back end sees a symbol
+           which should be used in a constructor list, it creates a new
+           section for the type of name (eg <<__CTOR_LIST__>>), attaches
+           the symbol to it and builds a relocation. To build the lists
+           of constructors, all the linker has to to is catenate all the
+           sections called <<__CTOR_LIST__>> and relocte the data
+           contained within - exactly the operations it would peform on
+           standard data. */
+
 #define SEC_CONSTRUCTOR 0x100
+
+         /* The section is a constuctor, and should be placed at the
+          end of the . */
+
+
 #define SEC_CONSTRUCTOR_TEXT 0x1100
+
 #define SEC_CONSTRUCTOR_DATA 0x2100
+
 #define SEC_CONSTRUCTOR_BSS  0x3100
+
+
+         /* The section has contents - a bss section could be
+           <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>, a debug section could be
+           <<SEC_HAS_CONTENTS>> */
+
 #define SEC_HAS_CONTENTS 0x200
+
+         /* An instruction to the linker not to output sections
+          containing this flag even if they have information which
+          would normally be written. */
+
 #define SEC_NEVER_LOAD 0x400
+
+         /* The base address of the section in the address space of the
+          target. */
+       
    bfd_vma vma;
+
+         /* The size of the section in bytes of the loaded section. This
+           contains a value even if the section has no contents (eg, the
+           size of <<.bss>>). */
+
    bfd_size_type size;    
+
+         /* If this section is going to be output, then this value is the
+           offset into the output section of the first byte in the input
+           section. Eg, if this was going to start at the 100th byte in
+           the output section, this value would be 100. */
+
    bfd_vma output_offset;
+
+         /* The output section through which to map on output. */
+
    struct sec *output_section;
+
+         /* The alignment requirement of the section, as an exponent - eg
+           3 aligns to 2^3 (or 8) */
+
    unsigned int alignment_power;
+
+         /* If an input section, a pointer to a vector of relocation
+           records for the data in this section. */
+
    struct reloc_cache_entry *relocation;
+
+         /* If an output section, a pointer to a vector of pointers to
+           relocation records for the data in this section. */
+
    struct reloc_cache_entry **orelocation;
+
+         /* The number of relocation records in one of the above  */
+
    unsigned reloc_count;
+
+         /* Which section is it 0.nth      */
+
    int index;                      
+
+         /* Information below is back end specific - and not always used
+           or updated 
+
+           File position of section data    */
+
    file_ptr filepos;      
+        
+         /* File position of relocation info */
+
    file_ptr rel_filepos;
+
+         /* File position of line data       */
+
    file_ptr line_filepos;
+
+         /* Pointer to data for applications */
+
    PTR userdata;
+
    struct lang_output_section *otheruserdata;
+
+         /* Attached line number information */
+
    alent *lineno;
+        
+         /* Number of line number records   */
+
    unsigned int lineno_count;
+
+         /* When a section is being output, this value changes as more
+           linenumbers are written out */
+
    file_ptr moving_line_filepos;
+
+         /* what the section number is in the target world  */
+
    unsigned int target_index;
+
    PTR used_by_bfd;
+
+         /* If this is a constructor section then here is a list of the
+           relocations created to relocate items within it. */
+
    struct relent_chain *constructor_chain;
+
+         /* The BFD which owns the section. */
+
    bfd *owner;
+
 } asection ;
 asection *EXFUN(bfd_get_section_by_name, (bfd *abfd, CONST char *name));
 asection *EXFUN(bfd_make_section_old_way, (bfd *, CONST char *name));
@@ -415,14 +557,14 @@ boolean EXFUN(bfd_set_section_flags, (bfd *, asection *, flagword));
 void EXFUN(bfd_map_over_sections, (bfd *abfd, void (*func)(), PTR obj));
 boolean EXFUN(bfd_set_section_size, (bfd *, asection *, bfd_size_type val));
 boolean EXFUN(bfd_set_section_contents
-, (bfd *abfd,        
-asection *section,
-PTR data,
-file_ptr offset,
-bfd_size_type count));
+    , (bfd *abfd,        
+    asection *section,
+    PTR data,
+    file_ptr offset,
+    bfd_size_type count));
 boolean EXFUN(bfd_get_section_contents 
-, (bfd *abfd, asection *section, PTR location,
-file_ptr offset, bfd_size_type count));
+    , (bfd *abfd, asection *section, PTR location,
+    file_ptr offset, bfd_size_type count));
 enum bfd_architecture 
 {
   bfd_arch_unknown,    /* File arch not known */
@@ -492,9 +634,8 @@ typedef struct bfd_arch_info
 CONST char *EXFUN(bfd_printable_name, (bfd *abfd));
 bfd_arch_info_type *EXFUN(bfd_scan_arch, (CONST char *));
 CONST bfd_arch_info_type *EXFUN(bfd_arch_get_compatible, (
-CONST bfd *abfd,
-CONST bfd *bbfd));
-extern bfd_arch_info_type bfd_default_arch_struct;
+    CONST bfd *abfd,
+    CONST bfd *bbfd));
 void EXFUN(bfd_set_arch_info, (bfd *, bfd_arch_info_type *));
 enum bfd_architecture EXFUN(bfd_get_arch, (bfd *abfd));
 unsigned long EXFUN(bfd_get_mach, (bfd *abfd));
@@ -502,66 +643,153 @@ unsigned int EXFUN(bfd_arch_bits_per_byte, (bfd *abfd));
 unsigned int EXFUN(bfd_arch_bits_per_address, (bfd *abfd));
 bfd_arch_info_type * EXFUN(bfd_get_arch_info, (bfd *));
 bfd_arch_info_type *EXFUN(bfd_lookup_arch
-, (enum bfd_architecture
-arch,
-long machine));
+    , (enum bfd_architecture
+    arch,
+    long machine));
 CONST char * EXFUN(bfd_printable_arch_mach
-, (enum bfd_architecture arch, unsigned long machine));
-typedef enum bfd_reloc_status {
+    , (enum bfd_architecture arch, unsigned long machine));
+typedef enum bfd_reloc_status 
+{
+        /* No errors detected */
   bfd_reloc_ok,
+
+        /* The relocation was performed, but there was an overflow. */
   bfd_reloc_overflow,
+
+        /* The address to relocate was not within the section supplied*/
   bfd_reloc_outofrange,
+
+        /* Used by special functions */
   bfd_reloc_continue,
+
+        /* Unused */
   bfd_reloc_notsupported,
+
+        /* Unsupported relocation size requested.  */
   bfd_reloc_other,
+
+        /* The symbol to relocate against was undefined.*/
   bfd_reloc_undefined,
+
+        /* The relocation was performed, but may not be ok - presently
+          generated only when linking i960 coff files with i960 b.out
+          symbols. */
   bfd_reloc_dangerous
-   }
+ }
  bfd_reloc_status_type;
+
+
 typedef struct reloc_cache_entry 
 {
+        /* A pointer into the canonical table of pointers  */
   struct symbol_cache_entry **sym_ptr_ptr;
+
+        /* offset in section */
   rawdata_offset address;
+
+        /* addend for relocation value */
   bfd_vma addend;    
+
+        /* if sym is null this is the section */
   struct sec *section;
+
+        /* Pointer to how to perform the required relocation */
   CONST struct reloc_howto_struct *howto;
+
 } arelent;
 typedef CONST struct reloc_howto_struct 
 { 
+        /*  The type field has mainly a documetary use - the back end can
+           to what it wants with it, though the normally the back end's
+           external idea of what a reloc number would be would be stored
+           in this field. For example, the a PC relative word relocation
+           in a coff environment would have the type 023 - because that's
+           what the outside world calls a R_PCRWORD reloc. */
   unsigned int type;
+
+        /*  The value the final relocation is shifted right by. This drops
+           unwanted data from the relocation.  */
   unsigned int rightshift;
+
+        /*  The size of the item to be relocated - 0, is one byte, 1 is 2
+           bytes, 3 is four bytes. */
   unsigned int size;
+
+        /*  Now obsolete */
   unsigned int bitsize;
+
+        /*  Notes that the relocation is relative to the location in the
+           data section of the addend. The relocation function will
+           subtract from the relocation value the address of the location
+           being relocated. */
   boolean pc_relative;
+
+        /*  Now obsolete */
   unsigned int bitpos;
+
+        /*  Now obsolete */
   boolean absolute;
+
+        /* Causes the relocation routine to return an error if overflow
+          is detected when relocating. */
   boolean complain_on_overflow;
+
+        /* If this field is non null, then the supplied function is
+          called rather than the normal function. This allows really
+          strange relocation methods to be accomodated (eg, i960 callj
+          instructions). */
   bfd_reloc_status_type (*special_function)();
+
+        /* The textual name of the relocation type. */
   char *name;
+
+        /* When performing a partial link, some formats must modify the
+          relocations rather than the data - this flag signals this.*/
   boolean partial_inplace;
+
+        /* The src_mask is used to select what parts of the read in data
+          are to be used in the relocation sum. Eg, if this was an 8 bit
+          bit of data which we read and relocated, this would be
+          0x000000ff. When we have relocs which have an addend, such as
+          sun4 extended relocs, the value in the offset part of a
+          relocating field is garbage so we never use it. In this case
+          the mask would be 0x00000000. */
   bfd_word src_mask;
+
+        /* The dst_mask is what parts of the instruction are replaced
+          into the instruction. In most cases src_mask == dst_mask,
+          except in the above special case, where dst_mask would be
+          0x000000ff, and src_mask would be 0x00000000.   */
   bfd_word dst_mask;           
+
+        /* When some formats create PC relative instructions, they leave
+          the value of the pc of the place being relocated in the offset
+          slot of the instruction, so that a PC relative relocation can
+          be made just by adding in an ordinary offset (eg sun3 a.out).
+          Some formats leave the displacement part of an instruction
+          empty (eg m88k bcs), this flag signals the fact.*/
   boolean pcrel_offset;
+
 } reloc_howto_type;
 #define HOWTO(C, R,S,B, P, BI, ABS, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
   {(unsigned)C,R,S,B, P, BI, ABS,O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 #define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,IN)
 
-#define HOWTO_PREPARE(relocation, symbol) 	\
-  {						\
-  if (symbol != (asymbol *)NULL) {		\
-    if (symbol->flags & BSF_FORT_COMM) {	\
-      relocation = 0;				\
-    }						\
-    else {					\
-      relocation = symbol->value;		\
-    }						\
-  }						\
-  if (symbol->section != (asection *)NULL) {	\
-    relocation += symbol->section->output_section->vma +	\
-      symbol->section->output_offset;		\
-  }						\
-}			
+#define HOWTO_PREPARE(relocation, symbol)      \
+  {                                            \
+  if (symbol != (asymbol *)NULL) {             \
+    if (symbol->flags & BSF_FORT_COMM) {       \
+      relocation = 0;                          \
+    }                                          \
+    else {                                     \
+      relocation = symbol->value;              \
+    }                                          \
+  }                                            \
+  if (symbol->section != (asection *)NULL) {   \
+    relocation += symbol->section->output_section->vma +       \
+      symbol->section->output_offset;          \
+  }                                            \
+}                      
 typedef unsigned char bfd_byte;
 
 typedef struct relent_chain {
@@ -570,49 +798,140 @@ typedef struct relent_chain {
 } arelent_chain;
 bfd_reloc_status_type
 EXFUN(bfd_perform_relocation
-, (bfd * abfd,
-arelent *reloc_entry,
-PTR data,
-asection *input_section,
-bfd *output_bfd));
-typedef enum bfd_reloc_code_real {
-  BFD_RELOC_16,	
+    , (bfd * abfd,
+    arelent *reloc_entry,
+    PTR data,
+    asection *input_section,
+    bfd *output_bfd));
+typedef enum bfd_reloc_code_real 
+{
+        /* 16 bits wide, simple reloc */
+  BFD_RELOC_16,        
+
+        /* 8 bits wide, but used to form an address like 0xffnn */
   BFD_RELOC_8_FFnn,
+
+        /* 8 bits wide, simple */
   BFD_RELOC_8,
+
+        /* 8 bits wide, pc relative */
   BFD_RELOC_8_PCREL,
+
+        /* The type of reloc used to build a contructor table - at the
+          moment probably a 32 bit wide abs address, but the cpu can
+          choose. */
+
   BFD_RELOC_CTOR
  } bfd_reloc_code_real_type;
 CONST struct reloc_howto_struct *
 EXFUN(bfd_reloc_type_lookup
-, (CONST bfd_arch_info_type *arch, bfd_reloc_code_type code));
+    , (CONST bfd_arch_info_type *arch, bfd_reloc_code_type code));
 typedef struct symbol_cache_entry 
 {
+	 /* A pointer to the BFD which owns the symbol. This information
+	   is necessary so that a back end can work out what additional
+   	   (invisible to the application writer) information is carried
+	   with the symbol.  */
+
   struct _bfd *the_bfd;
-   CONST char *name;
-   symvalue value;
+
+	 /* The text of the symbol. The name is left alone, and not copied - the
+	   application may not alter it. */
+  CONST char *name;
+
+	 /* The value of the symbol.*/
+  symvalue value;
+
+	 /* Attributes of a symbol: */
+
 #define BSF_NO_FLAGS    0x00
+
+	 /* The symbol has local scope; <<static>> in <<C>>. The value
+ 	   is the offset into the section of the data. */
 #define BSF_LOCAL	0x01
+
+	 /* The symbol has global scope; initialized data in <<C>>. The
+	   value is the offset into the section of the data. */
 #define BSF_GLOBAL	0x02
+
+	 /* Obsolete */
 #define BSF_IMPORT	0x04
+
+	 /* The symbol has global scope, and is exported. The value is
+	   the offset into the section of the data. */
 #define BSF_EXPORT	0x08
+
+	 /* The symbol is undefined. <<extern>> in <<C>>. The value has
+	   no meaning. */
 #define BSF_UNDEFINED	0x10	
+
+	 /* The symbol is common, initialized to zero; default in
+	   <<C>>. The value is the size of the object in bytes. */
 #define BSF_FORT_COMM	0x20	
+
+	 /* A normal C symbol would be one of:
+	   <<BSF_LOCAL>>, <<BSF_FORT_COMM>>,  <<BSF_UNDEFINED>> or
+	   <<BSF_EXPORT|BSD_GLOBAL>> */
+
+	 /* The symbol is a debugging record. The value has an arbitary
+	   meaning. */
 #define BSF_DEBUGGING	0x40
+
+	 /* The symbol has no section attached, any value is the actual
+	   value and is not a relative offset to a section. */
 #define BSF_ABSOLUTE	0x80
+
+	 /* Used by the linker */
 #define BSF_KEEP        0x10000
 #define BSF_KEEP_G      0x80000
+
+	 /* Unused */
 #define BSF_WEAK        0x100000
 #define BSF_CTOR        0x200000 
 #define BSF_FAKE        0x400000 
+
+	 /* The symbol used to be a common symbol, but now it is
+	   allocated. */
 #define BSF_OLD_COMMON  0x800000  
+
+	 /* The default value for common data. */
 #define BFD_FORT_COMM_DEFAULT_VALUE 0
+
+	 /* In some files the type of a symbol sometimes alters its
+	   location in an output file - ie in coff a <<ISFCN>> symbol
+	   which is also <<C_EXT>> symbol appears where it was
+	   declared and not at the end of a section.  This bit is set
+  	   by the target BFD part to convey this information. */
+
 #define BSF_NOT_AT_END    0x40000
+
+	 /* Signal that the symbol is the label of constructor section. */
 #define BSF_CONSTRUCTOR   0x1000000
+
+	 /* Signal that the symbol is a warning symbol. If the symbol
+	   is a warning symbol, then the value field (I know this is
+	   tacky) will point to the asymbol which when referenced will
+	   cause the warning. */
 #define BSF_WARNING       0x2000000
+
+	 /* Signal that the symbol is indirect. The value of the symbol
+	   is a pointer to an undefined asymbol which contains the
+	   name to use instead. */
 #define BSF_INDIRECT     0x4000000
+
   flagword flags;
+
+	 /* A pointer to the section to which this symbol is relative,
+	   or 0 if the symbol is absolute or undefined. Note that it
+	   is not sufficient to set this location to 0 to mark a
+	   symbol as absolute - the flag <<BSF_ABSOLUTE>> must be set
+	   also. */
   struct sec *section;
+
+	 /* Back end special data. This is being phased out in favour
+	   of making this a union. */
   PTR udata;	
+
 } asymbol;
 #define get_symtab_upper_bound(abfd) \
      BFD_SEND (abfd, _get_symtab_upper_bound, (abfd))
@@ -626,47 +945,136 @@ void EXFUN(bfd_print_symbol_vandf, (PTR file, asymbol *symbol));
 int EXFUN(bfd_decode_symclass, (asymbol *symbol));
 struct _bfd 
 {
-  CONST char *filename;                
-  struct bfd_target *xvec;
-  char *iostream;
-  boolean cacheable;
-  boolean target_defaulted;
-  struct _bfd *lru_prev, *lru_next;
-  file_ptr where;              
-  boolean opened_once;
-  boolean mtime_set;
-  long mtime;          
-  int ifd;
-  bfd_format format;
-  enum bfd_direction {no_direction = 0,
-                       read_direction = 1,
-                       write_direction = 2,
-                       both_direction = 3} direction;
-  flagword flags;              
-  file_ptr origin;             
-  boolean output_has_begun;
-  struct sec  *sections;
-  unsigned int section_count;
-  bfd_vma start_address;
-  unsigned int symcount;
-  struct symbol_cache_entry  **outsymbols;             
-  struct bfd_arch_info *arch_info;
-  PTR arelt_data;              
-  struct _bfd *my_archive;     
-  struct _bfd *next;           
-  struct _bfd *archive_head;   
-  boolean has_armap;           
-  PTR tdata;
-  PTR usrdata;
-  struct obstack memory;
+     /* The filename the application opened the BFD with.  */
+    CONST char *filename;                
+
+     /* A pointer to the target jump table.             */
+    struct bfd_target *xvec;
+
+     /* To avoid dragging too many header files into every file that
+       includes @file{bfd.h}, IOSTREAM has been declared as a "char
+       *", and MTIME as a "long".  Their correct types, to which they
+       are cast when used, are "FILE *" and "time_t".    The iostream
+       is the result of an fopen on the filename. */
+    char *iostream;
+
+     /* Is the file being cached */
+
+    boolean cacheable;
+
+     /* Marks whether there was a default target specified when the
+       BFD was opened. This is used to select what matching algorithm
+       to use to chose the back end. */
+
+    boolean target_defaulted;
+
+     /* The caching routines use these to maintain a
+       least-recently-used list of BFDs */
+
+    struct _bfd *lru_prev, *lru_next;
+
+     /* When a file is closed by the caching routines, BFD retains
+       state information on the file here: 
+     */
+
+    file_ptr where;              
+
+     /* and here:*/
+
+    boolean opened_once;
+
+     /* Set if we have a locally maintained mtime value, rather than
+       getting it from the file each time: */
+
+    boolean mtime_set;
+
+     /* File modified time, if mtime_set is true: */
+
+    long mtime;          
+
+     /* Reserved for an unimplemented file locking extension.*/
+
+    int ifd;
+
+     /* The format which belongs to the BFD.*/
+
+    bfd_format format;
+
+     /* The direction the BFD was opened with*/
+
+    enum bfd_direction {no_direction = 0,
+                        read_direction = 1,
+                        write_direction = 2,
+                        both_direction = 3} direction;
+
+     /* Format_specific flags*/
+
+    flagword flags;              
+
+     /* Currently my_archive is tested before adding origin to
+       anything. I believe that this can become always an add of
+       origin, with origin set to 0 for non archive files.   */
+
+    file_ptr origin;             
+
+     /* Remember when output has begun, to stop strange things
+       happening. */
+    boolean output_has_begun;
+
+     /* Pointer to linked list of sections*/
+    struct sec  *sections;
+
+     /* The number of sections */
+    unsigned int section_count;
+
+     /* Stuff only useful for object files: 
+       The start address. */
+    bfd_vma start_address;
+
+     /* Used for input and output*/
+    unsigned int symcount;
+
+     /* Symbol table for output BFD*/
+    struct symbol_cache_entry  **outsymbols;             
+
+     /* Pointer to structure which contains architecture information*/
+    struct bfd_arch_info *arch_info;
+
+     /* Stuff only useful for archives:*/
+    PTR arelt_data;              
+    struct _bfd *my_archive;     
+    struct _bfd *next;           
+    struct _bfd *archive_head;   
+    boolean has_armap;           
+
+     /* Used by the back end to hold private data. */
+    PTR tdata;
+
+     /* Used by the application to hold private data*/
+    PTR usrdata;
+
+     /* Where all the allocated stuff under this BFD goes */
+    struct obstack memory;
 };
+
+unsigned int EXFUN(bfd_get_reloc_upper_bound, (bfd *abfd, asection *sect));
+unsigned int EXFUN(bfd_canonicalize_reloc
+    , (bfd *abfd,
+    asection *sec,
+    arelent **loc,
+    asymbol	**syms));
+boolean EXFUN(bfd_set_file_flags, (bfd *abfd, flagword flags));
+void EXFUN(bfd_set_reloc
+    , (bfd *abfd, asection *sec, arelent **rel, unsigned int count)
+    
+    );
 boolean EXFUN(bfd_set_start_address, (bfd *, bfd_vma));
 long EXFUN(bfd_get_mtime, (bfd *));
 #define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
-#define bfd_find_nearest_line(abfd, section, symbols, offset, filename_ptr, func, line_ptr) \
-     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, section, symbols, offset, filename_ptr, func, line_ptr))
+#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
+     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
 
 #define bfd_debug_info_start(abfd) \
         BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
@@ -720,7 +1128,7 @@ bfd* EXFUN(bfd_openr_next_archived_file, (bfd *archive, bfd *previous));
 CONST char *EXFUN(bfd_core_file_failing_command, (bfd *));
 int EXFUN(bfd_core_file_failing_signal, (bfd *));
 boolean EXFUN(core_file_matches_executable_p
-, (bfd *core_bfd, bfd *exec_bfd));
+    , (bfd *core_bfd, bfd *exec_bfd));
 #define SDEF(ret, name, arglist) \
                 PROTO(ret,(*name),arglist)
 #define SDEF_FMT(ret, name, arglist) \
