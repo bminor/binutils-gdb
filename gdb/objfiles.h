@@ -470,15 +470,6 @@ struct objfile
 
 /* Defines for the objfile flag word. */
 
-/* Gdb can arrange to allocate storage for all objects related to a
-   particular objfile in a designated section of its address space,
-   managed at a low level by mmap() and using a special version of
-   malloc that handles malloc/free/realloc on top of the mmap() interface.
-   This allows the "internal gdb state" for a particular objfile to be
-   dumped to a gdb state file and subsequently reloaded at a later time. */
-
-#define OBJF_MAPPED	(1 << 0)	/* Objfile data is mmap'd */
-
 /* When using mapped/remapped predigested gdb symbol information, we need
    a flag that indicates that we have previously done an initial symbol
    table read from this particular objfile.  We can't just look for the

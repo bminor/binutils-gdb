@@ -264,8 +264,6 @@ captured_main (void *data)
       {"dbx", no_argument, &dbx_commands, 1},
       {"readnow", no_argument, &readnow_symbol_files, 1},
       {"r", no_argument, &readnow_symbol_files, 1},
-      {"mapped", no_argument, &mapped_symbol_files, 1},
-      {"m", no_argument, &mapped_symbol_files, 1},
       {"quiet", no_argument, &quiet, 1},
       {"q", no_argument, &quiet, 1},
       {"silent", no_argument, &quiet, 1},

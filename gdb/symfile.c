@@ -847,43 +847,22 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
 	orig_addrs->other[i] = addrs->other[i];
     }
 
-  /* If the objfile uses a mapped symbol file, and we have a psymtab for
-     it, then skip reading any symbols at this time. */
-
-  if ((objfile->flags & OBJF_MAPPED) && (objfile->flags & OBJF_SYMS))
+  /* We either created a new mapped symbol table, mapped an existing
+     symbol table file which has not had initial symbol reading
+     performed, or need to read an unmapped symbol table. */
+  if (from_tty || info_verbose)
     {
-      /* We mapped in an existing symbol table file that already has had
-         initial symbol reading performed, so we can skip that part.  Notify
-         the user that instead of reading the symbols, they have been mapped.
-       */
-      if (from_tty || info_verbose)
+      if (pre_add_symbol_hook)
+	pre_add_symbol_hook (name);
+      else
 	{
-	  printf_unfiltered ("Mapped symbols for %s...", name);
+	  printf_unfiltered ("Reading symbols from %s...", name);
 	  wrap_here ("");
 	  gdb_flush (gdb_stdout);
 	}
-      init_entry_point_info (objfile);
-      find_sym_fns (objfile);
     }
-  else
-    {
-      /* We either created a new mapped symbol table, mapped an existing
-         symbol table file which has not had initial symbol reading
-         performed, or need to read an unmapped symbol table. */
-      if (from_tty || info_verbose)
-	{
-	  if (pre_add_symbol_hook)
-	    pre_add_symbol_hook (name);
-	  else
-	    {
-	      printf_unfiltered ("Reading symbols from %s...", name);
-	      wrap_here ("");
-	      gdb_flush (gdb_stdout);
-	    }
-	}
-      syms_from_objfile (objfile, addrs, offsets, num_offsets,
-                         mainline, from_tty);
-    }
+  syms_from_objfile (objfile, addrs, offsets, num_offsets,
+		     mainline, from_tty);
 
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
@@ -1209,20 +1188,16 @@ symbol_file_command (char *args, int from_tty)
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
 	{
-	  if (strcmp (*argv, "-mapped") == 0)
-	    flags |= OBJF_MAPPED;
-	  else 
-	    if (strcmp (*argv, "-readnow") == 0)
-	      flags |= OBJF_READNOW;
-	    else 
-	      if (**argv == '-')
-		error ("unknown option `%s'", *argv);
-	      else
-		{
-                  name = *argv;
-
-		  symbol_file_add_main_1 (name, from_tty, flags);
-		}
+	  if (strcmp (*argv, "-readnow") == 0)
+	    flags |= OBJF_READNOW;
+	  else if (**argv == '-')
+	    error ("unknown option `%s'", *argv);
+	  else
+	    {
+	      name = *argv;
+	      
+	      symbol_file_add_main_1 (name, from_tty, flags);
+	    }
 	  argv++;
 	}
 
@@ -1737,17 +1712,13 @@ add_symbol_file_command (char *args, int from_tty)
 
 	    if (*arg == '-')
 	      {
-		if (strcmp (arg, "-mapped") == 0)
-		  flags |= OBJF_MAPPED;
-		else 
-		  if (strcmp (arg, "-readnow") == 0)
-		    flags |= OBJF_READNOW;
-		  else 
-		    if (strcmp (arg, "-s") == 0)
-		      {
-			expecting_sec_name = 1;
-			expecting_sec_addr = 1;
-		      }
+		if (strcmp (arg, "-readnow") == 0)
+		  flags |= OBJF_READNOW;
+		else if (strcmp (arg, "-s") == 0)
+		  {
+		    expecting_sec_name = 1;
+		    expecting_sec_addr = 1;
+		  }
 	      }
 	    else
 	      {
@@ -2096,8 +2067,7 @@ reread_separate_symbols (struct objfile *objfile)
             0, /* No addr table.  */
             objfile->section_offsets, objfile->num_sections,
             0, /* Not mainline.  See comments about this above.  */
-            objfile->flags & (OBJF_MAPPED | OBJF_REORDERED
-                              | OBJF_SHARED | OBJF_READNOW
+            objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
                               | OBJF_USERLOADED)));
       objfile->separate_debug_objfile->separate_debug_objfile_backlink
         = objfile;
