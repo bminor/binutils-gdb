@@ -1,5 +1,9 @@
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
+	* blockframe.c (find_pc_partial_function): Delete use of
+	DEPRECATED_PC_IN_SIGTRAMP, DEPRECATED_SIGTRAMP_START and
+	DEPRECATED_SIGTRAMP_END.
+
 	* config/mips/tm-linux.h (DEPRECATED_IN_SIGTRAMP): Delete.
 	* config/mips/tm-irix6.h (DEPRECATED_IN_SIGTRAMP): Delete.
 	* config/mips/tm-nbsd.h: Delete undef DEPRECATED_IN_SIGTRAMP.
