@@ -35,6 +35,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     \
   "pc", "fp" }
 
+/* Initializer for an array of names of registers.
+   Entries beyond the first NUM_REGS are ignored.  */
+
+extern char **v850_register_names;
+#define REGISTER_NAME(i) v850_register_names[i]
+
+
 #define REGISTER_BYTES (NUM_REGS * 4)
 
 #define REGISTER_SIZE 4
@@ -56,7 +63,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SAVE3_START_REGNUM 31
 #define SAVE3_END_REGNUM 31
 #define RP_REGNUM 31
-#define PS_REGNUM 37
+#define SR0_REGNUM 32
+#define PS_REGNUM (SR0_REGNUM+5)
+#define CTBP_REGNUM (SR0_REGNUM+20)
 #define PC_REGNUM 64
 #define FP_REGNUM 65
 #define FP_RAW_REGNUM 29

@@ -1,3 +1,22 @@
+Tue Jan 26 16:02:47 1999  Mark Alexander  <marka@cygnus.com>
+
+	* v850-tdep.c (v850_generic_reg_names, v850e_reg_names,
+	v850_register_names, v850_processor_type_table): Declare tables
+	and structures for handling differences in register names for
+	v850 and v850e.
+	(struct reg_list): Define new structure for creating tables
+	of register bit masks in v850e instrutions.
+	(handle_prepare, handle_pushm): New helpers for v850_scan_prologue.
+	(v850_scan_prologue): Recognize v850e instructions: callt, prepare,
+	and pushm.
+	(v850_target_architecture_hook): New function to set register
+	names based on current machine.
+	(_initialize_v850_tdep): Set up target_architecture_hook.
+	* config/v850/tm-v850.h (v850_register_names): Declare.
+	(REGISTER_NAME): Define to refer to v850_register_names.
+	(SR0_REGNUM, CTBP_REGNUM): Define.
+	(PS_REGNUM): Redefine in terms of SR0_REGNUM.
+
 Tue Jan 26 18:27:26 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* Makefile.in (c-exp.tab.c): use BISON instead of YACC, to pick

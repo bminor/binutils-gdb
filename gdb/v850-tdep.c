@@ -28,6 +28,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
+
+static char *v850_generic_reg_names[] = REGISTER_NAMES;
+
+static char *v850e_reg_names[] =
+{
+  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+  "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
+  "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
+  "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "sr6", "sr7",
+  "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15",
+  "ctpc", "ctpsw", "dbpc", "dbpsw", "ctbp", "sr21", "sr22", "sr23",
+  "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
+  "pc", "fp"
+};
+
+char **v850_register_names = v850_generic_reg_names;
+
+struct
+{
+  char **regnames;
+  int mach;
+} v850_processor_type_table[] =
+{
+  { v850_generic_reg_names, bfd_mach_v850 },
+  { v850e_reg_names, bfd_mach_v850e },
+  { v850e_reg_names, bfd_mach_v850ea },
+  { NULL, 0 }
+};
+
 /* Info gleaned from scanning a function's prologue.  */
 
 struct pifsr			/* Info about one saved reg */
@@ -60,6 +90,189 @@ v850_use_struct_convention (gcc_p, type)
 }
 
 
+
+/* Structure for mapping bits in register lists to register numbers. */
+struct reg_list 
+{
+  long mask;
+  int regno;
+};
+
+/* Helper function for v850_scan_prologue to handle prepare instruction. */
+
+static void
+handle_prepare (int insn, int insn2, CORE_ADDR *current_pc_ptr,
+		struct prologue_info *pi, struct pifsr **pifsr_ptr)
+
+{
+  CORE_ADDR current_pc = *current_pc_ptr;
+  struct pifsr *pifsr = *pifsr_ptr;
+  long next = insn2 & 0xffff;
+  long list12 = ((insn & 1) << 16) + (next & 0xffe0);
+  long offset = (insn & 0x3e) << 1;
+  static struct reg_list reg_table [] =
+  {
+    { 0x00800, 20 },	/* r20 */
+    { 0x00400, 21 },	/* r21 */
+    { 0x00200, 22 },	/* r22 */
+    { 0x00100, 23 },	/* r23 */
+    { 0x08000, 24 },	/* r24 */
+    { 0x04000, 25 },	/* r25 */
+    { 0x02000, 26 },	/* r26 */
+    { 0x01000, 27 },	/* r27 */
+    { 0x00080, 28 },	/* r28 */
+    { 0x00040, 29 },	/* r29 */
+    { 0x10000, 30 },	/* ep */
+    { 0x00020, 31 },	/* lp */
+    { 0, 0 }		/* end of table */
+  };
+  int i;
+
+  if ((next & 0x1f) == 0x0b)		/* skip imm16 argument */
+    current_pc += 2;
+  else if ((next & 0x1f) == 0x13)	/* skip imm16 argument */
+    current_pc += 2;
+  else if ((next & 0x1f) == 0x1b)	/* skip imm32 argument */
+    current_pc += 4;
+
+  /* Calculate the total size of the saved registers, and add it
+     it to the immediate value used to adjust SP. */
+  for (i = 0; reg_table[i].mask != 0; i++)
+    if (list12 & reg_table[i].mask)
+      offset += REGISTER_RAW_SIZE (regtable[i].regno);
+  pi->frameoffset -= offset;
+
+  /* Calculate the offsets of the registers relative to the value
+     the SP will have after the registers have been pushed and the
+     imm5 value has been subtracted from it. */
+  if (pifsr)
+    {
+      for (i = 0; reg_table[i].mask != 0; i++)
+	{
+	  if (list12 & reg_table[i].mask)
+	    {
+	      int reg = reg_table[i].regno;
+	      offset -= REGISTER_RAW_SIZE (reg);
+	      pifsr->reg = reg;
+	      pifsr->offset = offset;
+	      pifsr->cur_frameoffset = pi->frameoffset;
+    #ifdef DEBUG
+	      printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
+    #endif
+	      pifsr++;
+	    }
+	}
+    }
+#ifdef DEBUG
+  printf_filtered ("\tfound ctret after regsave func");
+#endif
+
+  /* Set result parameters. */
+  *current_pc_ptr = current_pc;
+  *pifsr_ptr = pifsr;
+}
+
+
+/* Helper function for v850_scan_prologue to handle pushm/pushl instructions.
+   FIXME: the SR bit of the register list is not supported; must check
+   that the compiler does not ever generate this bit. */
+
+static void
+handle_pushm (int insn, int insn2, struct prologue_info *pi,
+	     struct pifsr **pifsr_ptr)
+
+{
+  struct pifsr *pifsr = *pifsr_ptr;
+  long list12 = ((insn & 0x0f) << 16) + (insn2 & 0xfff0);
+  long offset = 0;
+  static struct reg_list pushml_reg_table [] =
+  {
+    { 0x80000, PS_REGNUM },	/* PSW */
+    { 0x40000, 1 },		/* r1 */
+    { 0x20000, 2 },		/* r2 */
+    { 0x10000, 3 },		/* r3 */
+    { 0x00800, 4 },		/* r4 */
+    { 0x00400, 5 },		/* r5 */
+    { 0x00200, 6 },		/* r6 */
+    { 0x00100, 7 },		/* r7 */
+    { 0x08000, 8 },		/* r8 */
+    { 0x04000, 9 },		/* r9 */
+    { 0x02000, 10 },		/* r10 */
+    { 0x01000, 11 },		/* r11 */
+    { 0x00080, 12 },		/* r12 */
+    { 0x00040, 13 },		/* r13 */
+    { 0x00020, 14 },		/* r14 */
+    { 0x00010, 15 },		/* r15 */
+    { 0, 0 }		/* end of table */
+  };
+  static struct reg_list pushmh_reg_table [] =
+  {
+    { 0x80000, 16 },		/* r16 */
+    { 0x40000, 17 },		/* r17 */
+    { 0x20000, 18 },		/* r18 */
+    { 0x10000, 19 },		/* r19 */
+    { 0x00800, 20 },		/* r20 */
+    { 0x00400, 21 },		/* r21 */
+    { 0x00200, 22 },		/* r22 */
+    { 0x00100, 23 },		/* r23 */
+    { 0x08000, 24 },		/* r24 */
+    { 0x04000, 25 },		/* r25 */
+    { 0x02000, 26 },		/* r26 */
+    { 0x01000, 27 },		/* r27 */
+    { 0x00080, 28 },		/* r28 */
+    { 0x00040, 29 },		/* r29 */
+    { 0x00010, 30 },		/* r30 */
+    { 0x00020, 31 },		/* r31 */
+    { 0, 0 }		/* end of table */
+  };
+  struct reg_list *reg_table;
+  int i;
+
+  /* Is this a pushml or a pushmh? */
+  if ((insn2 & 7) == 1)
+    reg_table = pushml_reg_table;
+  else
+    reg_table = pushmh_reg_table;
+
+  /* Calculate the total size of the saved registers, and add it
+     it to the immediate value used to adjust SP. */
+  for (i = 0; reg_table[i].mask != 0; i++)
+    if (list12 & reg_table[i].mask)
+      offset += REGISTER_RAW_SIZE (regtable[i].regno);
+  pi->frameoffset -= offset;
+
+  /* Calculate the offsets of the registers relative to the value
+     the SP will have after the registers have been pushed and the
+     imm5 value is subtracted from it. */
+  if (pifsr)
+    {
+      for (i = 0; reg_table[i].mask != 0; i++)
+	{
+	  if (list12 & reg_table[i].mask)
+	    {
+	      int reg = reg_table[i].regno;
+	      offset -= REGISTER_RAW_SIZE (reg);
+	      pifsr->reg = reg;
+	      pifsr->offset = offset;
+	      pifsr->cur_frameoffset = pi->frameoffset;
+    #ifdef DEBUG
+	      printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
+    #endif
+	      pifsr++;
+	    }
+	}
+    }
+#ifdef DEBUG
+  printf_filtered ("\tfound ctret after regsave func");
+#endif
+
+  /* Set result parameters. */
+  *pifsr_ptr = pifsr;
+}
+
+
+
+
 /* Function: scan_prologue
    Scan the prologue of the function that contains PC, and record what
    we find in PI.  PI->fsr must be zeroed by the called.  Returns the
@@ -81,7 +294,6 @@ v850_scan_prologue (pc, pi)
   int reg;
   CORE_ADDR save_pc, save_end;
   int regsave_func_p;
-  int current_sp_size;
   int r12_tmp;
 
   /* First, figure out the bounds of the prologue so that we can limit the
@@ -134,9 +346,9 @@ v850_scan_prologue (pc, pi)
 		   (long)func_addr, (long)prologue_end);
 #endif
 
-  for (current_pc = func_addr; current_pc < prologue_end; current_pc += 2)
+  for (current_pc = func_addr; current_pc < prologue_end; )
     {
-      int insn;
+      int insn, insn2;
 
 #ifdef DEBUG
       printf_filtered ("0x%.8lx ", (long)current_pc);
@@ -144,17 +356,23 @@ v850_scan_prologue (pc, pi)
 #endif
 
       insn = read_memory_unsigned_integer (current_pc, 2);
+      current_pc += 2;
+      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
+	{
+	  insn2 = read_memory_unsigned_integer (current_pc, 2);
+	  current_pc += 2;
+	}
 
       if ((insn & 0xffc0) == ((10 << 11) | 0x0780) && !regsave_func_p)
 	{			/* jarl <func>,10 */
-	  long low_disp = read_memory_unsigned_integer (current_pc + 2, 2) & ~ (long) 1;
+	  long low_disp = insn2 & ~ (long) 1;
 	  long disp = (((((insn & 0x3f) << 16) + low_disp)
 			& ~ (long) 1) ^ 0x00200000) - 0x00200000;
 
 	  save_pc = current_pc;
 	  save_end = prologue_end;
 	  regsave_func_p = 1;
-	  current_pc += disp - 2;
+	  current_pc += disp - 4;
 	  prologue_end = (current_pc
 			  + (2 * 3)	/* moves to/from ep */
 			  + 4		/* addi <const>,sp,sp */
@@ -168,14 +386,55 @@ v850_scan_prologue (pc, pi)
 #endif
 	  continue;
 	}
+      else if ((insn & 0xffc0) == 0x0200 && !regsave_func_p)
+	{			/* callt <imm6> */
+	  long ctbp = read_register (CTBP_REGNUM);
+	  long adr = ctbp + ((insn & 0x3f) << 1);
+
+	  save_pc = current_pc;
+	  save_end = prologue_end;
+	  regsave_func_p = 1;
+	  current_pc = ctbp + (read_memory_unsigned_integer (adr, 2) & 0xffff);
+	  prologue_end = (current_pc
+			  + (2 * 3)	/* prepare list2,imm5,sp/imm */
+			  + 4		/* ctret */
+			  + 20);	/* slop area */
+
+#ifdef DEBUG
+	  printf_filtered ("\tfound callt,  ctbp = 0x%.8lx, adr = %.8lx, new pc = 0x%.8lx\n",
+			   ctbp, adr, (long)current_pc);
+#endif
+	  continue;
+	}
+      else if ((insn & 0xffc0) == 0x0780)	/* prepare list2,imm5 */
+	{
+	  handle_prepare (insn, insn2, &current_pc, pi, &pifsr);
+	  continue;
+	}
+      else if (insn == 0x07e0 && regsave_func_p && insn2 == 0x0144)
+	{			/* ctret after processing register save function */
+	  current_pc = save_pc;
+	  prologue_end = save_end;
+	  regsave_func_p = 0;
+#ifdef DEBUG
+	  printf_filtered ("\tfound ctret after regsave func");
+#endif
+	  continue;
+	}
+      else if ((insn & 0xfff0) == 0x07e0 && (insn2 & 5) == 1)
+	{			/* pushml, pushmh */
+	  handle_pushm (insn, insn2, pi, &pifsr);
+	  continue;
+	}
       else if ((insn & 0xffe0) == 0x0060 && regsave_func_p)
 	{			/* jmp after processing register save function */
-	  current_pc = save_pc + 2;
+	  current_pc = save_pc;
 	  prologue_end = save_end;
 	  regsave_func_p = 0;
 #ifdef DEBUG
 	  printf_filtered ("\tfound jmp after regsave func");
 #endif
+	  continue;
 	}
       else if ((insn & 0x07c0) == 0x0780	/* jarl or jr */
 	       || (insn & 0xffe0) == 0x0060	/* jmp */
@@ -190,7 +449,7 @@ v850_scan_prologue (pc, pi)
       else if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240))		/* add <imm>,sp */
 	pi->frameoffset += ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM))	/* addi <imm>,sp,sp */
-	pi->frameoffset += read_memory_integer (current_pc + 2, 2);
+	pi->frameoffset += insn2;
       else if (insn == ((FP_RAW_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
 	{
 	  fp_used = 1;
@@ -198,9 +457,9 @@ v850_scan_prologue (pc, pi)
 	}
 
       else if (insn == ((R12_REGNUM << 11) | 0x0640 | R0_REGNUM))	/* movhi hi(const),r0,r12 */
-	r12_tmp = read_memory_integer (current_pc + 2, 2) << 16;
+	r12_tmp = insn2 << 16;
       else if (insn == ((R12_REGNUM << 11) | 0x0620 | R12_REGNUM))	/* movea lo(const),r12,r12 */
-	r12_tmp += read_memory_integer (current_pc + 2, 2);
+	r12_tmp += insn2;
       else if (insn == ((SP_REGNUM << 11) | 0x01c0 | R12_REGNUM) && r12_tmp) /* add r12,sp */
 	pi->frameoffset = r12_tmp;
       else if (insn == ((EP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,ep */
@@ -216,7 +475,7 @@ v850_scan_prologue (pc, pi)
 		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
 	{
 	  pifsr->reg = reg;
-	  pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
+	  pifsr->offset = insn2 & ~1;
 	  pifsr->cur_frameoffset = pi->frameoffset;
 #ifdef DEBUG
 	  printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
@@ -239,9 +498,6 @@ v850_scan_prologue (pc, pi)
 #endif
 	  pifsr++;
 	}
-
-      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
-	current_pc += 2;
 
 #ifdef DEBUG
       printf_filtered ("\n");
@@ -290,7 +546,6 @@ v850_init_extra_frame_info (fi)
 {
   struct prologue_info pi;
   struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
-  int reg;
 
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
@@ -598,8 +853,32 @@ v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
   return 0;
 }
 
+/* Change the register names based on the current machine type. */
+
+static int
+v850_target_architecture_hook (ap)
+     const bfd_arch_info_type *ap;
+{
+  int i, j;
+
+  if (ap->arch != bfd_arch_v850)
+    return 0;
+
+  for (i = 0; v850_processor_type_table[i].regnames != NULL; i++)
+    {
+      if (v850_processor_type_table[i].mach == ap->mach)
+	{
+	  v850_register_names = v850_processor_type_table[i].regnames;
+	  return 1;
+	}
+    }
+
+  fatal ("Architecture `%s' unreconized", ap->printable_name);
+}
+
 void
 _initialize_v850_tdep ()
 {
   tm_print_insn = print_insn_v850;
+  target_architecture_hook = v850_target_architecture_hook;
 }
