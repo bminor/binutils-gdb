@@ -1,3 +1,7 @@
+Thu Feb 16 16:06:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* dcache.c (insque, remque): Rewrite Linux support.
+
 Wed Feb 15 12:33:20 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/tm-ppc-eabi.h (TEXT_SEGMENT_BASE): Define as 1.

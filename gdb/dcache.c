@@ -23,19 +23,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dcache.h"
 #include "gdbcmd.h"
 
-#if defined(__STDC__) && defined(__linux__)
+int remote_dcache = 0;
+
+#if defined(__linux__)
 /* In case the system header files define a prototype for insque and
    remque that uses a pointer to a struct qelem, silence the warnings */
 struct qelem;
-#define insque(a,b)	(insque)((struct qelem *)(a), (struct qelem *)(b))
-#define remque(a)	(remque)((struct qelem *)(a))
+#define Insque(a,b)	insque((struct qelem *)(a), (struct qelem *)(b))
+#define Remque(a)	remque((struct qelem *)(a))
+
 #else
-
-extern int insque();
-extern int remque();
+#define Insque(a,b)	insque(a, b)
+#define Remque(a)	remque(a)
 #endif
-
-int remote_dcache = 0;
 
 /* The data cache records all the data read from the remote machine
    since the last time it stopped.
@@ -56,8 +56,8 @@ dcache_flush (dcache)
   if (remote_dcache > 0)
     while ((db = dcache->dcache_valid.next) != &dcache->dcache_valid)
       {
-	remque (db);
-	insque (db, &dcache->dcache_free);
+	Remque (db);
+	Insque (db, &dcache->dcache_free);
       }
 
   return;
@@ -126,12 +126,12 @@ dcache_alloc (dcache)
       /* If we can't get one from the free list, take last valid and put
 	 it on the free list.  */
       db = dcache->dcache_valid.last;
-      remque (db);
-      insque (db, &dcache->dcache_free);
+      Remque (db);
+      Insque (db, &dcache->dcache_free);
     }
 
-  remque (db);
-  insque (db, &dcache->dcache_valid);
+  Remque (db);
+  Insque (db, &dcache->dcache_valid);
   return (db);
 }
 
@@ -160,8 +160,8 @@ dcache_fetch (dcache, addr)
       (*dcache->read_memory) (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
       immediate_quit--;
       db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db);		/* Off the free list */
-      insque (db, &dcache->dcache_valid);	/* On the valid list */
+      Remque (db);		/* Off the free list */
+      Insque (db, &dcache->dcache_valid);	/* On the valid list */
     }
   return (dcache_value (db, addr));
 }
@@ -190,8 +190,8 @@ dcache_poke (dcache, addr, data)
       (*dcache->write_memory) (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
       immediate_quit--;
       db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db); /* Off the free list */
-      insque (db, &dcache->dcache_valid); /* On the valid list */
+      Remque (db); /* Off the free list */
+      Insque (db, &dcache->dcache_valid); /* On the valid list */
     }
 
   /* Modify the word in the cache.  */
@@ -222,7 +222,7 @@ dcache_init (reading, writing)
   dcache->dcache_free.next = dcache->dcache_free.last = &dcache->dcache_free;
   dcache->dcache_valid.next = dcache->dcache_valid.last = &dcache->dcache_valid;
   for (db = dcache->the_cache, i = 0; i < DCACHE_SIZE; i++, db++)
-    insque (db, &dcache->dcache_free);
+    Insque (db, &dcache->dcache_free);
 
   return(dcache);
 }
