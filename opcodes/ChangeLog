@@ -1,4 +1,10 @@
 start-sanitize-r5900
+Tue Dec 16 13:24:22 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c: Add many missing r5900 instructions.
+
+end-sanitize-r5900
+start-sanitize-r5900
 Tue Dec 16 15:22:51 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_table): Set new flags bits
