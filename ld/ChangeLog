@@ -2,6 +2,7 @@
 
 	* ld.texinfo: Add GNU Free Documentation License.
 	* ldint.texinfo: Add GNU Free Documentation License.
+	* ld.1: Add GNU Free Documentation License.
 
 2000-11-05  Alan Modra  <alan@linuxcare.com.au>
 

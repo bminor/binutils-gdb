@@ -1,3 +1,9 @@
+2000-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo: Add GNU Free Documentation License.
+	* doc/gasp.texi:  Add GNU Free Documentation License.
+	* doc/as.1:  Add GNU Free Documentation License.
+
 2000-11-05  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c: Add include of "dwarf2dbg.h"

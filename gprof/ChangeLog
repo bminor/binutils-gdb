@@ -1,3 +1,7 @@
+2000-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.texi: Add GNU Free Documentation License.
+
 2000-09-07  H.J. Lu  <hjl@gnu.org>
 
 	* configure.in (AC_ISC_POSIX): Put after AC_CANONICAL_SYSTEM.

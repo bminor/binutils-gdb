@@ -1,3 +1,17 @@
+2000-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* binutils.texi: Add GNU Free Documentation License.
+	* objcopy.1: Add GNU Free Documentation License.
+	* objdump.1: Add GNU Free Documentation License.
+	* addr2line.1: Add GNU Free Documentation License.
+	* ar.1: Add GNU Free Documentation License.
+	* nlmconv.1: Add GNU Free Documentation License.
+	* nm.1: Add GNU Free Documentation License.
+	* ranlib.1: Add GNU Free Documentation License.
+	* size.1: Add GNU Free Documentation License.
+	* strings.1: Add GNU Free Documentation License.
+	* strip.1: Add GNU Free Documentation License.
+
 2000-10-06  Luciano Gemme <ishitawa@yahoo.com>
 
 	* objcopy.c (--srec-len=nn): New parameter to set the

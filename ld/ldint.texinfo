@@ -73,6 +73,10 @@ collection of miscellaneous information with little form at this point.
 Mostly, it is a repository into which you can put information about
 GNU @code{ld} as you discover it (or as you design changes to @code{ld}).
 
+This document is distributed under the terms of the GNU Free
+Documentation License.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
+
 @menu
 * README::			The README File
 * Emulations::			How linker emulations are generated

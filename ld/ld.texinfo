@@ -20,14 +20,15 @@ This file documents the @sc{gnu} linker LD version @value{VERSION}.
 
 Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
-      Permission is granted to copy, distribute and/or modify this document
-      under the terms of the GNU Free Documentation License, Version 1.1
-      or any later version published by the Free Software Foundation;
-      with no Invariant Sections, with no Front-Cover Texts, and with no
-      Back-Cover Texts.  A copy of the license is included in the
-      section entitled "GNU Free Documentation License".
-
 @ignore
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
+
 Permission is granted to process this file through Tex and print the
 results, provided the printed document carries copying permission
 notice identical to this one except for the removal of this paragraph
@@ -60,7 +61,7 @@ notice identical to this one except for the removal of this paragraph
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -77,6 +78,10 @@ Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foun
 @node Top
 @top Using ld
 This file documents the @sc{gnu} linker ld version @value{VERSION}.
+
+This document is distributed under the terms of the GNU Free
+Documentation License.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
 
 @menu
 * Overview::                    Overview
@@ -4476,7 +4481,6 @@ specify the start address (@var{expression}) for section @var{secname}.
 If you have more than one @code{SECT} statement for the same
 @var{secname}, only the @emph{first} sets the start address.
 @end table
-
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
