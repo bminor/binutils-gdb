@@ -1,5 +1,7 @@
 Sun Jun 27 08:58:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/mips/riscos.mh (CC): Use -systype sysv.
+
 	* ser-unix.c: Move #include of <sys/time.h> to HAVE_SGTTY section.
 
 	* Makefile.in (ALLPARAM): Add config/mips/{x,n}-{news-mips,riscos}.h.
