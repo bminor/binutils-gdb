@@ -42,6 +42,7 @@ configure.texi
 cvs
 diff
 emacs
+flex
 gas
 gcc
 gdb
