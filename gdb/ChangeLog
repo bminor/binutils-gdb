@@ -1,3 +1,8 @@
+2004-06-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* PROBLEMS: Add more specific information, and a work-around,
+	for PR gdb/1458.
+
 2004-06-18  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh (DEPRECATED_FUNCTION_START_OFFSET): Deprecated.

@@ -6,11 +6,29 @@
 
 *** Build problems
 
-build/1458: comple failed on hpux11
+build/1458: compile failed on hpux11
 
-GDB 6.1 is known to have build problems on HP/UX 11.00 using the
-vendor supplied compilers (GDB does build on HP/UX 11.11, and using
-GCC).
+GDB has build problems on HP/UX 11 with some versions of the HP
+Ansi C compiler.  (GCC works fine).
+
+The problem happens when compiling intl/bindtextdom.c.
+The error is:
+
+  cc: "gettextP.h", line 50: error 1000: Unexpected symbol: "SWAP".
+  cc: panic 2017: Cannot recover from earlier errors, terminating.
+  *** Error exit code 1
+
+This is a problem with the 'inline' keyword in gettextP.h.
+The workaround is to disable 'inline' before building gdb:
+
+  export ac_cv_c_inline=no
+
+This problem happens only with some versions of the HP Ansi C compiler.
+Versions A.11.01.25171.GP and B.11.11.28706.GP have both been observed
+to work; version B.11.11.04 gets the build error and needs the
+workaround.
+
+This problem might also happen with other C compilers.
 
 *** Misc
 
