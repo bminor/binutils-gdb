@@ -175,6 +175,8 @@ struct bfd_link_info
   boolean shared;
   /* true if BFD should pre-bind symbols in a shared object.  */
   boolean symbolic;
+  /* true if shared objects should be linked directly, not shared.  */
+  boolean static_link;
   /* Which symbols to strip.  */
   enum bfd_link_strip strip;
   /* Which local symbols to discard.  */
@@ -276,10 +278,17 @@ struct bfd_link_callbacks
 				  boolean constructor,
 				  const char *name, bfd *abfd, asection *sec,
 				  bfd_vma value));
-  /* A function which is called when there is a reference to a warning
-     symbol.  WARNING is the warning to be issued.  */
+  /* A function which is called to issue a linker warning.  For
+     example, this is called when there is a reference to a warning
+     symbol.  WARNING is the warning to be issued.  SYMBOL is the name
+     of the symbol which triggered the warning; it may be NULL if
+     there is none.  ABFD, SECTION and ADDRESS identify the location
+     which trigerred the warning; either ABFD or SECTION or both may
+     be NULL if the location is not known.  */
   boolean (*warning) PARAMS ((struct bfd_link_info *,
-			      const char *warning));
+			      const char *warning, const char *symbol,
+			      bfd *abfd, asection *section,
+			      bfd_vma address));
   /* A function which is called when a relocation is attempted against
      an undefined symbol.  NAME is the symbol which is undefined.
      ABFD, SECTION and ADDRESS identify the location from which the
