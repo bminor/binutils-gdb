@@ -1,3 +1,9 @@
+2000-05-22  Igor Shevlyakov  <igor@windriver.com>
+
+	* ldmain.c (main): When deciding if ".text" section should be
+        read-only, don't forget to reset SEC_READONLY because it
+        could be already set.
+
 2000-05-22  Thomas de Lellis  <tdel@windriver.com>
 
         * ld.1: Add documentation for new command line option:
