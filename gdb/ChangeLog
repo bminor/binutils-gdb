@@ -1,3 +1,19 @@
+Fri Jul 10 10:19:52 1992  Fred Fish  (fnf@cygnus.com)
+
+	* command.c (lookup_cmd_1):  Clarify descriptive comments.
+	* gdbcmd.h (maintenanceprintlist):  Add declaration.
+	* main.c (maintenanceprintlist):  Add definition.
+	* main.c (gdb_completer_command_word_break_characters):  Add.
+	* main.c (symbol_completion_function):  Switch completer word
+	break character sets dynamically, based on whether completion is
+	being done on commands or on something else.
+	* main.c (initialize_cmd_lists):  Init maintenanceprintlist.
+	* maint.c:  Include demangle.h.
+	* maint.c (maintenance_demangle):  New function.
+	* maint.c (maintenance_print_command):  New function.
+	* maint.c (_initialize_maint_cmds):  Reorganize some commands
+	under new maintenance print subcommand.
+
 Thu Jul  9 19:05:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* gdbtypes.c (lookup_struct_elt_type):  If the input type is
