@@ -434,6 +434,18 @@ rp_saved (pc)
 
   if (u->Save_RP)
     return -20;
+  else if (u->stub_type != 0)
+    {
+      switch (u->stub_type)
+	{
+	case EXPORT:
+	  return -24;
+	case PARAMETER_RELOCATION:
+	  return -8;
+	default:
+	  return 0;
+	}
+    }
   else
     return 0;
 }
@@ -449,7 +461,7 @@ frameless_function_invocation (frame)
   if (u == 0)
     return frameless_look_for_prologue (frame);
 
-  return (u->Total_frame_size == 0);
+  return (u->Total_frame_size == 0 && u->stub_type == 0);
 }
 
 CORE_ADDR
@@ -671,7 +683,7 @@ frame_chain_valid (chain, thisframe)
   if (u == NULL)
     return 1;
 
-  if (u->Save_SP || u->Total_frame_size)
+  if (u->Save_SP || u->Total_frame_size || u->stub_type != 0)
     return 1;
 
   if (pc_in_linker_stub (thisframe->pc))

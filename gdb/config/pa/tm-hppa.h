@@ -156,7 +156,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FLAGS_REGNUM 0		/* Various status flags */
 #define RP_REGNUM 2		/* return pointer */
-#define FP_REGNUM 4		/* Contains address of executing stack */
+#define FP_REGNUM 3		/* Contains address of executing stack */
 				/* frame */
 #define SP_REGNUM 30		/* Contains address of top of stack */
 #define SAR_REGNUM 32		/* shift amount register */
@@ -319,97 +319,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FRAME_ARGS_SKIP 0
 
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
+#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
+  hppa_frame_find_saved_regs (frame_info, &frame_saved_regs)
 
-/* Deal with dummy functions later. */
-
-#define STW_P(INSN) (((INSN) & 0xfc000000) == 0x68000000)
-#define ADDIL_P(INSN) (((INSN) & 0xfc000000) == 0x28000000)
-#define LDO_P(INSN) (((INSN) & 0xfc00c000) == 0x34000000)
-
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)		\
-{ register int regnum;							\
-  register CORE_ADDR next_addr;						\
-  register CORE_ADDR pc;						\
-  unsigned this_insn;							\
-  unsigned address;							\
-									\
-  memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);			\
-  if ((frame_info->pc >= (frame_info)->frame                            \
-       && (frame_info)->pc <= ((frame_info)->frame + CALL_DUMMY_LENGTH  \
-			       + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8   \
-			       + 6 * 4)))                               \
-    find_dummy_frame_regs ((frame_info), &(frame_saved_regs));		\
-  else									\
-    { pc = get_pc_function_start ((frame_info)->pc);			\
-      if (read_memory_integer (pc, 4) == 0x6BC23FD9)			\
-	{ (frame_saved_regs).regs[RP_REGNUM] = (frame_info)->frame - 20;\
-	  pc = pc + 4;							\
-	}								\
-      if (read_memory_integer (pc, 4) != 0x8040241) goto lose;		\
-      pc += 8;			/* skip "copy 4,1; copy 30, 4" */	\
-      /* skip either "stw 1,0(4);addil L'fsize,30;ldo R'fsize(1),30"	\
-	 or "stwm 1,fsize(30)" */					\
-      if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68810000)	\
-	pc += 12;							\
-      else								\
-	pc += 4;							\
-      while (1)								\
-	{ this_insn = read_memory_integer(pc, 4);			\
-	  if (STW_P (this_insn)) /* stw */				\
-	    { regnum = GET_FIELD (this_insn, 11, 15);			\
-	      if (!regnum) goto lose;					\
-	      (frame_saved_regs).regs[regnum] = (frame_info)->frame +	\
-		extract_14 (this_insn);					\
-	      pc += 4;							\
-	    }								\
-	  else if (ADDIL_P (this_insn)) /* addil */			\
-	    { int next_insn;						\
-	      next_insn = read_memory_integer(pc + 4, 4);		\
-	      if (STW_P (next_insn)) /* stw */				\
-		{ regnum = GET_FIELD (this_insn, 6, 10);		\
-		  if (!regnum) goto lose;				\
-		  (frame_saved_regs).regs[regnum] = (frame_info)->frame +\
-		    (extract_21 (this_insn) << 11) + extract_14 (next_insn);\
-		  pc += 8;						\
-		}							\
-	      else							\
-		break;							\
-	    }								\
-	  else								\
-	    { pc += 4;							\
-	      break;							\
-	    }								\
-	}								\
-      this_insn = read_memory_integer (pc, 4);				\
-      if (LDO_P (this_insn))						\
-	{ next_addr = (frame_info)->frame + extract_14 (this_insn);	\
-	  pc += 4;							\
-	}								\
-      else if (ADDIL_P (this_insn))					\
-	{ next_addr = (frame_info)->frame + (extract_21 (this_insn) << 11)\
-	    + extract_14 (read_memory_integer (pc + 4, 4));		\
-	    pc += 8;							\
-	  }								\
-      while (1)								\
-	{ this_insn = read_memory_integer (pc, 4);			\
-	  if ((this_insn & 0xfc001fe0) == 0x2c001220) /* fstds,ma */	\
-	    { regnum = GET_FIELD (this_insn, 27, 31);			\
-	      (frame_saved_regs).regs[regnum + FP0_REGNUM] = next_addr;	\
-	      next_addr += 8;						\
-              pc += 4;                                                  \
-	    }								\
-	  else								\
-	    break;							\
-	}								\
-    lose:								\
-      (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame;		\
-      (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame -4;	\
-    }}
 
 /* Things needed for making the inferior call functions.  */
 
@@ -439,7 +351,7 @@ call_dummy
 	fldds -12(0, r1), fr7
 	ldil 0, r22			; target will be placed here.
 	ldo 0(r22), r22
-	ldsid (0,r22), r3
+	ldsid (0,r22), r4
 	ldil 0, r1			; _sr4export will be placed here.
 	ldo 0(r1), r1
 	ldsid (0,r1), r19
@@ -467,8 +379,8 @@ text_space				; Otherwise, go through _sr4export,
 
 #define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
                     0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
-                    0x2C291007, 0x22C00000, 0x36D60000, 0x02C010A3,\
-                    0x20200000, 0x34210000, 0x002010b3, 0x82632022,\
+                    0x2C291007, 0x22C00000, 0x36D60000, 0x02C010A4,\
+                    0x20200000, 0x34210000, 0x002010b3, 0x82642022,\
                     0xe6c06000, 0x081f0242, 0x00010004, 0x00151820,\
                     0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
                     0x00151820, 0xe6c00002}
@@ -514,7 +426,7 @@ struct unwind_table_entry {
   unsigned int Millicode             :  1;
   unsigned int Millicode_save_sr0    :  1;
   unsigned int Region_description    :  2;
-  unsigned int reserverd1            :  1;
+  unsigned int reserved1             :  1;
   unsigned int Entry_SR              :  1;
   unsigned int Entry_FR              :  4; /* number saved */
   unsigned int Entry_GR              :  5; /* number saved */
@@ -525,6 +437,8 @@ struct unwind_table_entry {
   unsigned int Stack_Overflow_Check  :  1;
   unsigned int Two_Instruction_SP_Increment:1;
   unsigned int Ada_Region	     :  1;
+/* Use this field to store a stub unwind type.  */
+#define stub_type reserved2
   unsigned int reserved2	     :  4;
   unsigned int Save_SP               :  1;
   unsigned int Save_RP               :  1;
@@ -539,6 +453,41 @@ struct unwind_table_entry {
   unsigned int Total_frame_size      : 27;
 };
 
+/* HP linkers also generate unwinds for various linker-generated stubs.
+   GDB reads in the stubs from the $UNWIND_END$ subspace, then 
+   "converts" them into normal unwind entries using some of the reserved
+   fields to store the stub type.  */
+
+struct stub_unwind_entry
+{
+  /* The offset within the executable for the associated stub.  */
+  unsigned stub_offset;
+
+  /* The type of stub this unwind entry describes.  */
+  char type;
+
+  /* Unknown.  Not needed by GDB at this time.  */
+  char prs_info;
+
+  /* Length (in instructions) of the associated stub.  */
+  short stub_length;
+};
+
+/* Sizes (in bytes) of the native unwind entries.  */
+#define UNWIND_ENTRY_SIZE 16
+#define STUB_UNWIND_ENTRY_SIZE 8
+
+/* The gaps represent linker stubs used in MPE and space for future
+   expansion.  */
+enum unwind_stub_types
+{
+  LONG_BRANCH = 1,
+  PARAMETER_RELOCATION = 2,
+  EXPORT = 10,
+  IMPORT = 11,
+};
+
+	
 /* Info about the unwind table associated with an object file.  This is hung
    off of the objfile->obj_private pointer, and is allocated in the objfile's
    psymbol obstack.  This allows us to have unique unwind info for each

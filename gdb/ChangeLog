@@ -1,5 +1,21 @@
 Mon Jan 17 20:00:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/pa/tm-hppa.h (unwind_table_entry): Use one of the
+	reserved fields to hold a stub unwind entry type.  Fix typo.
+	(stub_unwind_entry): New structure for raw stub unwind entries.
+	(stub_unwind_types): The types of stubs we may encounter.
+	(UNWIND_ENTRY_SIZE, STUB_UNWIND_ENTRY_SIZE): New defines.
+	* hppa-tdep.c (rp_saved): Use additional information provided
+	by linker stub unwind descriptors.
+	(frameless_function_invocation): Likewise.
+	(frame_chain_valid): Likewise.
+	* paread.c (compare_unwind_entries): New function for sorting
+	unwind table entries.
+	(read_unwind_info): Rewrite to remove dependency on host endianness.
+	Read in data from the $UNWIND_END$ subspace which contains linker
+	stub unwind descriptors.  Merge that data into the basic unwind
+	table.
+
 	* hppab-nat.c (_initialize_kernel_u_addr): Delete unwanted functions.
 
 Mon Jan 17 22:00:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
