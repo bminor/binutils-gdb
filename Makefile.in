@@ -54,10 +54,10 @@ AR = ar
 AR_FLAGS = rc
 CC = cc
 CFLAGS = -g
-$(start-sanitize-chill)
+# start-sanitize-chill
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
-$(end-sanitize-chill)
+# end-sanitize-chill
 CXX = gcc
 CXXFLAGS = -g -O
 RANLIB = ranlib
@@ -106,7 +106,7 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-$(start-sanitize-chill)
+# start-sanitize-chill
 CHILL_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
     echo $${rootme}/gcc/xgcc -B$${rootme}/gcc/ -L$${rootme}/chillrt/; \
@@ -118,7 +118,7 @@ CHILL_FOR_TARGET = ` \
     fi; \
   fi`
 
-$(end-sanitize-chill)
+# end-sanitize-chill
 
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
@@ -202,11 +202,11 @@ BASE_FLAGS_TO_PASS = \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
-$(start-sanitize-chill)\
+	$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
-$(end-sanitize-chill)\
+	$(end-sanitize-chill)\
 	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
@@ -249,9 +249,9 @@ X11_FLAGS_TO_PASS = \
 
 # Shell case of subdirectories which are built with the target environment.
 TARGET_LIBS=libg++ | xiberty | newlib
-$(start-sanitize-chill)
+# start-sanitize-chill
 TARGET_LIBS=libg++ | xiberty | newlib | chillrt
-$(end-sanitize-chill)
+# end-sanitize-chill
 
 # Flags to pass down to makes which are built with the target environment.
 # The double $ decreases the length of the command line; the variables
@@ -292,12 +292,12 @@ all:	$(ALL)
 .NOEXPORT:
 MAKEOVERRIDES=
 
-$(start-sanitize-chill)
+# start-sanitize-chill
 ## This is ugly, but I don't want GNU make to put these variables in
 ## the environment.  Older makes will see this as a set of targets
 ## with no dependencies and no actions.
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-$(end-sanitize-chill)
+# end-sanitize-chill
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
 # ``make X'' in all subdirectories (because, in general, there is a
