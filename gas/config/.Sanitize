@@ -19,14 +19,6 @@ if [ -d vms ]; then
 	lose_these_too="vms ${lose_these_too}"
 fi
 
-d30v_files="tc-d30v.c tc-d30v.h"
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="${d30v_files} ${keep_these_too}"
-else
-	lose_these_too="${d30v_files} ${lose_these_too}"
-fi
-
 tic80_files="tc-tic80.c tc-tic80.h"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -98,6 +90,8 @@ tc-arm.c
 tc-arm.h
 tc-d10v.c
 tc-d10v.h
+tc-d30v.c
+tc-d30v.h
 tc-generic.c
 tc-generic.h
 tc-h8300.c

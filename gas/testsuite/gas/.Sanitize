@@ -33,12 +33,6 @@ else
 	lose_these_too="dvp ${lose_these_too}"
 fi
 
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="d30v ${keep_these_too}"
-else
-	lose_these_too="d30v ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -51,6 +45,7 @@ all
 alpha
 arc
 arm
+d30v
 h8300
 hppa
 i386

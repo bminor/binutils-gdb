@@ -76,11 +76,10 @@ Mon Jun 22 11:08:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	references.
 
 end-sanitize-r5900
-start-sanitize-d30v
 Sun Jun 21 12:44:43 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/reloc.d: Updated to match latest assembler output.
-end-sanitize-d30v
+
 start-sanitize-am33
 Fri Jun 19 16:48:14 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -94,6 +93,7 @@ Fri Jun 19 09:45:17 1998  Jeffrey A Law  (law@cygnus.com)
 	* gas/mn10300/am33_3.s: New test.
 	* gas/mn10300/basic.exp: Run them.
 
+end-sanitize-am33
 start-sanitize-sky
 Thu Jun 18 23:56:24 1998  Doug Evans  <devans@seba.cygnus.com>
 
@@ -101,6 +101,7 @@ Thu Jun 18 23:56:24 1998  Doug Evans  <devans@seba.cygnus.com>
 	* gas/dvp/dvp.exp: Run it.
 
 end-sanitize-sky
+start-sanitize-am33
 Wed Jun 17 18:14:33 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33.s: New test.
@@ -121,7 +122,6 @@ Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	original `ld.d' had.  Find `ld.s'.
 	* gas/mips/mul-ilocks.d: Nearly ditto.
 	
-start-sanitize-d30v
 Thu Jun 11 16:50:46 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/inst.d: Expect repeati instrucitons to be combined.
@@ -134,7 +134,7 @@ Mon Jun  8 18:47:11 1998  Nick Clifton  <nickc@cygnus.com>
 	* gas/d30v/array.d: Updated to match latest assembler results.
 	* gas/d30v/reloc.d: Partially updated to match latest assembler
 	results. 
-end-sanitize-d30v
+
 start-sanitize-sky
 Mon Jun  8 15:40:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -182,7 +182,6 @@ Fri May 29 12:07:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 	the instruction.
 	* gas/sh/basic.exp: Adjust accordingly.
 
-start-sanitize-d30v
 Wed May 27 15:26:51 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/align.d: Updated to match latest assembler output.
@@ -190,7 +189,6 @@ Wed May 27 15:26:51 1998  Nick Clifton  <nickc@cygnus.com>
 	* gas/d30v/inst.s: Updated to match latest assembler rules.
 	* gas/d30v/opt.d: Updated to match latest assembler output.
 
-end-sanitize-d30v
 Fri May 22 15:56:51 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/allinsn.d: Handle 64 bit bfd_vma.
@@ -259,13 +257,11 @@ Thu May  7 13:05:25 1998  Frank Ch. Eigler  <fche@cygnus.com>
  	instructions. 
 	* gas/mips/mips.exp: Run them.
 
-start-sanitize-d30v
 Thu Apr 30 11:55:01 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/d30v/{inst,array,opt,reloc}.d: Accept <symbol+offset> labels
  	in disassembly, where the offset is in hex and has a "0x" prefix.
 	
-end-sanitize-d30v
 Tue Apr 28 16:38:34 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/lineno.[sd]: Assembly source line number test.
@@ -718,7 +714,6 @@ Thu Sep 18 11:17:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* gas/sparc/splet-2.[ds]: New testcase.
 	* gas/sparc/sparc.exp: Run them.
 
-start-sanitize-d30v
 Tue Sep 16 15:27:08 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge changes from Martin Hunt:
@@ -748,7 +743,6 @@ Tue Sep 16 15:27:08 1997  Ken Raeburn  <raeburn@cygnus.com>
 	* gas/d30v/reloc.s: Fix a test case.	
 	* gas/d30v/{opt,reloc}.d: Regenerate.
 
-end-sanitize-d30v
 start-sanitize-tx19
 Mon Sep 15 17:29:08 1997  Gavin Koch  <gavin@cygnus.com>
 
@@ -845,14 +839,12 @@ Sat Apr 19 23:16:35 1997  Niklas Hallqvist  <niklas@petra.appli.se>
 
 	* gas/mips/mips.exp: Handle OpenBSD like NetBSD.
 
-start-sanitize-d30v
 Wed Apr 16 12:20:24 1997  Martin Hunt  <hunt@cygnus.com>
 
 	* gas/d30v/d30.exp: Add optimizer test case.
 	* gas/d30v/opt.s: Add conditional compilation tests.
 	* gas/d30v/opt.d: Rebuild.
 
-end-sanitize-d30v	
 Tue Apr 15 18:10:01 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/{delay.d,nodelay.d}: added.
@@ -874,13 +866,11 @@ Thu Apr  3 18:26:56 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/m32r/allinsn.{exp,s.d}: New testcases.
 
-start-sanitize-d30v
 Thu Mar 27 00:42:28 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* gas/d30v/d30.exp: Add test case reloc.
 	* gas/d30v/reloc.[sd]: New files to test relocations.
 
-end-sanitize-d30v	
 Sat Mar 15 17:21:46 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/arm/inst.d: Update for disassembler changes.
@@ -983,13 +973,11 @@ Sat Feb 22 20:24:23 1997  Fred Fish  <fnf@cygnus.com>
 	* gas/tic80/tic80.exp: Add relocs1 test.
 
 end-sanitize-tic80
-start-sanitize-d30v
 Fri Feb 21 14:23:14 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* gas/d30v/{align.d, align.s, d30.exp, guard.d, guard.s,
 	inst.d, inst.s, opt.d, opt.s}: Test files for D30V.
 
-end-sanitize-d30v	
 Wed Feb 19 00:55:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/macros/semi.s, gas/macros/semi.d: New test.

@@ -222,11 +222,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset D10V
  [ -O ]
 @end ifset
-@c start-sanitize-d30v
 @ifset D30V
  [ -O | -n | -N ]
 @end ifset
-@c end-sanitize-d30v
 @ifset H8
 @c Hitachi family chips have no machine-dependent assembler options
 @end ifset
@@ -423,7 +421,6 @@ Optimize output by parallelizing instructions.
 @end table
 @end ifset
 
-@c start-sanitize-d30v
 @ifset D30V
 The following options are available when @value{AS} is configured for a D30V
 processor.
@@ -442,7 +439,6 @@ Warn when nops are generated.
 Warn when a nop after a 32-bit multiply instruction is generated.
 @end table
 @end ifset
-@c end-sanitize-d30v
 
 @ifset I960
 The following options are available when @value{AS} is configured for the
@@ -4802,11 +4798,9 @@ subject, see the hardware manufacturer's manual.
 @ifset D10V
 * D10V-Dependent::              D10V Dependent Features
 @end ifset
-@c start-sanitize-d30v
 @ifset D30V
 * D30V-Dependent::              D30V Dependent Features
 @end ifset
-@c end-sanitize-d30v
 @ifset H8/300
 * H8/300-Dependent::            Hitachi H8/300 Dependent Features
 @end ifset
@@ -4969,11 +4963,9 @@ family.
 @include c-d10v.texi
 @end ifset
 
-@c start-sanitize-d30v
 @ifset D30V
 @include c-d30v.texi
 @end ifset
-@c end-sanitize-d30v
 
 @ifset H8/300
 @include c-h8300.texi

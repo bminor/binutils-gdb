@@ -15,14 +15,6 @@
 
 Do-first:
 
-d30v_files="c-d30v.texi"
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="${d30v_files} ${keep_these_too}"
-else
-	lose_these_too="${d30v_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -39,6 +31,7 @@ as.texinfo
 c-a29k.texi
 c-arm.texi
 c-d10v.texi
+c-d30v.texi
 c-h8300.texi
 c-h8500.texi
 c-hppa.texi
@@ -84,34 +77,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-d30v_files="as.texinfo all.texi"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	for i in $d30v_files ; do
-		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping d30v stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $d30v_files ; do
-		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"d30v\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

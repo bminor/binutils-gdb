@@ -946,13 +946,11 @@ Thu May  7 12:50:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	for previously inaccessible bitfields in some INSN_TRAP
 	instructions.
 
-start-sanitize-d30v
 Thu May  7 11:13:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/tc-d30v.c (do_assemble): Abort with error message
 	if opcode operands do not match.
 	
-end-sanitize-d30v
 Thu May  7 09:36:06 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/tc-mips.c (macro_build, validate_mips_insn): Implement
@@ -1001,13 +999,11 @@ Wed May  6 15:11:12 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* doc/c-vax.texi: Correct and extend vax/vms documentation.
 
-start-sanitize-d30v
 Wed May  6 11:51:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (do_assemble): Accept a new parameter requesting
 	a short format insn.
 	(md_assemble): Set it for explicitly packed insns.
-end-sanitize-d30v
 	
 Tue May  5 13:23:13 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -1066,12 +1062,10 @@ Tue Apr 28 19:16:26 1998  Tom Tromey  <tromey@cygnus.com>
 	* asintl.h: Include <locale.h> if HAVE_LOCALE_H.
 	(LC_MESSAGES): Now can be defined even when ENABLE_NLS.
 
-start-sanitize-d30v
 Tue Apr 28 18:33:23 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/tc-d30v.c (md_show_usage): Correct gettext typo.
 	
-end-sanitize-d30v
 Tue Apr 28 12:16:30 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-hppa.c: Change all calls to bzero to use memset.
@@ -1778,13 +1772,11 @@ Sat Feb 28 17:06:22 1998  Richard Henderson  <rth@cygnus.com>
 	* config/obj-elf.c [TC_ALPHA]: Include <elf/alpha.h>.
 	* config/tc-alpha.h (ELF_TC_SPECIAL_SECTIONS): New.
 
-start-sanitize-d30v
 Thu Feb 26 15:49:04 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Delayed jsr instructions don't
 	require padding to the next long word boundary.
 
-end-sanitize-d30v
 start-sanitize-sky
 Fri Feb 27 10:06:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -1887,14 +1879,12 @@ Thu Feb 19 22:25:42 1998  Richard Henderson  <rth@cygnus.com>
 	* tc-ppc.c (ppc_biei): Cache the last symbol we inserted
 	so we don't have to scan the entire list.
 
-start-sanitize-d30v
 Tue Feb 17 17:02:15 1998  Fred Fish  <fnf@cygnus.com>
 
 	* config/tc-d30v.c (parallel_ok): For the explicitly parallel
  	case, allow the parallel instructions to modify the same flag
  	bits.
 
-end-sanitize-d30v
 Thu Feb 19 16:08:15 1998  Richard Henderson  <rth@cygnus.com>
 
 	* listing.c (list_symbol_table): Categorize symbols by
@@ -2276,13 +2266,11 @@ Thu Jan 29 14:42:44 1998  Pat Rankin  <rankin@eql.caltech.edu>
 	* config/vms-conf.h: Synchronize with current config.in.
 	* Makefile.in: Rebuild.
 
-start-sanitize-d30v
 Thu Jan 29 18:48:19 1998  Bill Moyer  <billm@cygnus.com>
 
 	* config/tc-d30v.c (do_assemble): Added flag_explicitly_parallel.
 	(parallel_ok): Relaxed parallel subinstruction dependency check.
 
-end-sanitize-d30v
 start-sanitize-m32rx
 Wed Jan 28 16:27:27 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -2464,7 +2452,6 @@ Wed Jan 14 15:41:41 1998  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-mips.c (macro): Rework division code to avoid unfilled
 	delay slot.
 
-start-sanitize-d30v
 Wed Jan 14 18:04:20 1998  Michael Meissner  <meissner@cygnus.com>
 
 	Based on a patch from Jim Wilson
@@ -2472,7 +2459,6 @@ Wed Jan 14 18:04:20 1998  Michael Meissner  <meissner@cygnus.com>
 	(tc_gen_reloc): Handle cross section PC relative relocs
 	correctly.
 
-end-sanitize-d30v
 Wed Jan 14 15:02:19 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Don't test pinfo flags if INSN_MACRO.
