@@ -93,15 +93,19 @@ NM = nm
 # Not plain GZIP, since gzip looks there for extra command-line options.
 GZIPPROG = gzip
 
+# These values are substituted by configure.
+DEFAULT_YACC = yacc
+DEFAULT_LEX = lex
+
 # BISON: This line sed'ed to BISON = bison -y for FSF releases, don't remove.
 BISON = `if [ -f $$r/byacc/byacc ] ; \
 	    then echo $$r/byacc/byacc ; \
-	    else echo byacc ; \
+	    else echo ${DEFAULT_YACC} ; \
 	fi`
 
 LEX = `if [ -f $$r/flex/flex ] ; \
 	then echo $$r/flex/flex ; \
-	else echo flex ; fi`
+	else echo ${DEFAULT_LEX} ; fi`
 
 M4 = `if [ -f $$r/m4/m4 ] ; \
 	then echo $$r/m4/m4 ; \
@@ -1276,7 +1280,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	./configure sun4
 	[ -z "$(CONFIGURE_TARGET_MODULES)" ] \
 	  || $(MAKE) $(CONFIGURE_TARGET_MODULES) ALL_GCC="" \
-	    CC_FOR_TARGET="$(CC) CXX_FOR_TARGET="$(CXX)"
+	    CC_FOR_TARGET="$(CC)" CXX_FOR_TARGET="$(CXX)"
 	# Make links, and run "make diststuff" or "make info" when needed.
 	rm -rf proto-toplev ; mkdir proto-toplev
 	set -e ; dirs="$(TOOL) $(DEVO_SUPPORT) $(SUPPORT_FILES)" ; \

@@ -1,3 +1,7 @@
+Wed Feb 28 12:25:46 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in (taz): Fix quoting.
+
 Tue Feb 27 11:33:57 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* configure.in (sparclet-*-*): Build everything now.
