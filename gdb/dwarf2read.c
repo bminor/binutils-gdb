@@ -312,8 +312,12 @@ struct dwarf2_cu
   /* Storage for the abbrev table.  */
   struct obstack abbrev_obstack;
 
+  /* Hash table holding all the loaded partial DIEs.  */
   htab_t partial_dies;
-  struct obstack partial_die_obstack;
+
+  /* Storage for things with the same lifetime as this read-in compilation
+     unit, including partial DIEs.  */
+  struct obstack comp_unit_obstack;
 
   /* When multiple dwarf2_cu structures are living in memory, this field
      chains them all together, so that they can be released efficiently.
@@ -415,6 +419,63 @@ struct line_header
   char *statement_program_start, *statement_program_end;
 };
 
+/* When we construct a partial symbol table entry we only
+   need this much information. */
+struct partial_die_info
+  {
+    /* Offset of this DIE.  */
+    unsigned int offset;
+
+    /* DWARF-2 tag for this DIE.  */
+    ENUM_BITFIELD(dwarf_tag) tag : 16;
+
+    /* Language code associated with this DIE.  This is only used
+       for the compilation unit DIE.  */
+    unsigned int language : 8;
+
+    /* Assorted flags describing the data found in this DIE.  */
+    unsigned int has_children : 1;
+    unsigned int is_external : 1;
+    unsigned int is_declaration : 1;
+    unsigned int has_type : 1;
+    unsigned int has_specification : 1;
+    unsigned int has_pc_info : 1;
+
+    /* Flag set if the SCOPE field of this structure has been
+       computed.  */
+    unsigned int scope_set : 1;
+
+    /* The name of this DIE.  Normally the value of DW_AT_name, but
+       sometimes DW_TAG_MIPS_linkage_name or a string computed in some
+       other fashion.  */
+    char *name;
+
+    /* The scope to prepend to our children.  This is generally
+       allocated on the comp_unit_obstack, so will disappear
+       when this compilation unit leaves the cache.  */
+    char *scope;
+
+    /* The location description associated with this DIE, if any.  */
+    struct dwarf_block *locdesc;
+
+    /* If HAS_PC_INFO, the PC range associated with this DIE.  */
+    CORE_ADDR lowpc;
+    CORE_ADDR highpc;
+
+    /* Pointer into the info_buffer pointing at the target of
+       DW_AT_sibling, if any.  */
+    char *sibling;
+
+    /* If HAS_SPECIFICATION, the offset of the DIE referred to by
+       DW_AT_specification (or DW_AT_abstract_origin or
+       DW_AT_extension).  */
+    unsigned int spec_offset;
+
+    /* Pointers to this DIE's parent, first child, and next sibling,
+       if any.  */
+    struct partial_die_info *die_parent, *die_child, *die_sibling;
+  };
+
 /* This data structure holds the information of an abbrev. */
 struct abbrev_info
   {
@@ -493,41 +554,9 @@ struct dwarf_block
     char *data;
   };
 
-/* When we construct a partial symbol table entry we only
-   need this much information. */
-struct partial_die_info
-  {
-    unsigned int offset;
-    unsigned int tag : 16;
-    unsigned int language : 8;
-    unsigned int has_children : 1;
-    unsigned int is_external : 1;
-    unsigned int is_declaration : 1;
-    unsigned int has_type : 1;
-    unsigned int has_specification : 1;
-    unsigned int has_pc_info : 1;
-    unsigned int scope_set : 1;
-    char *name;
-
-    /* The scope to prepend to our children.  This is generally
-       allocated on the partial_die_obstack, so will disappear
-       when this compilation unit leaves the cache.  */
-    char *scope;
-
-    struct dwarf_block *locdesc;
-    CORE_ADDR lowpc;
-    CORE_ADDR highpc;
-    char *sibling;
-    unsigned int spec_offset;
-    struct partial_die_info *die_parent, *die_child, *die_sibling;
-  };
-
 #ifndef ATTR_ALLOC_CHUNK
 #define ATTR_ALLOC_CHUNK 4
 #endif
-
-/* Obstack for allocating temporary storage used during symbol reading.  */
-static struct obstack dwarf2_tmp_obstack;
 
 /* Allocate fields for structs, unions and enums in this size.  */
 #ifndef DW_FIELD_ALLOC_CHUNK
@@ -958,8 +987,6 @@ static struct type *dwarf2_fundamental_type (struct objfile *, int,
 
 /* memory allocation interface */
 
-static void dwarf2_free_tmp_obstack (void *);
-
 static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
 
 static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
@@ -1020,42 +1047,19 @@ static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
 static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 			   struct dwarf2_cu *cu);
 
+static void *hashtab_obstack_allocate (void *data, size_t size, size_t count);
+
+static void dummy_obstack_deallocate (void *object, void *data);
+
+static hashval_t partial_die_hash (const void *item);
+
+static int partial_die_eq (const void *item_lhs, const void *item_rhs);
+
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
 splay_tree_obstack_allocate (int size, void *data)
 {
   return obstack_alloc ((struct obstack *) data, size);
-}
-
-/* Trivial deallocation function for the libiberty splay tree.  */
-static void
-splay_tree_obstack_deallocate (void *object, void *data)
-{
-  return;
-}
-
-static void *
-hash_obstack_allocate (void *data, size_t size, size_t count)
-{
-  unsigned int total = size * count;
-  void *ptr = obstack_alloc ((struct obstack *) data, total);
-  memset (ptr, 0, total);
-  return ptr;
-}
-
-static hashval_t
-partial_die_hash (const void *item)
-{
-  const struct partial_die_info *part_die = item;
-  return part_die->offset;
-}
-
-static int
-partial_die_eq (const void *item_lhs, const void *item_rhs)
-{
-  const struct partial_die_info *part_die_lhs = item_lhs;
-  const struct partial_die_info *part_die_rhs = item_rhs;
-  return part_die_lhs->offset == part_die_rhs->offset;
 }
 
 /* Try to locate the sections we need for DWARF 2 debugging
@@ -1328,40 +1332,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
   info_ptr = dwarf2_per_objfile->info_buffer;
 
-  /* We use dwarf2_tmp_obstack for objects that don't need to survive
-     the partial symbol scan, like attribute values.
-
-     We could reduce our peak memory consumption during partial symbol
-     table construction by freeing stuff from this obstack more often
-     --- say, after processing each compilation unit, or each die ---
-     but it turns out that this saves almost nothing.  For an
-     executable with 11Mb of Dwarf 2 data, I found about 64k allocated
-     on dwarf2_tmp_obstack.  Some investigation showed:
-
-     1) 69% of the attributes used forms DW_FORM_addr, DW_FORM_data*,
-        DW_FORM_flag, DW_FORM_[su]data, and DW_FORM_ref*.  These are
-        all fixed-length values not requiring dynamic allocation.
-
-     2) 30% of the attributes used the form DW_FORM_string.  For
-        DW_FORM_string, read_attribute simply hands back a pointer to
-        the null-terminated string in info_buffer, so no dynamic
-        allocation is needed there either.
-
-     3) The remaining 1% of the attributes all used DW_FORM_block1.
-        75% of those were DW_AT_frame_base location lists for
-        functions; the rest were DW_AT_location attributes, probably
-        for the global variables.
-
-     Anyway, what this all means is that the memory the dwarf2
-     reader uses as temporary space reading partial symbols is about
-     0.5% as much as we use for dwarf_*_buffer.  That's noise.  */
-
-  obstack_init (&dwarf2_tmp_obstack);
-  back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
-
   /* Any cached compilation units will be linked by the per-objfile
      read_in_chain.  Make sure to free them when we're done.  */
-  make_cleanup (free_cached_comp_units, NULL);
+  back_to = make_cleanup (free_cached_comp_units, NULL);
 
   /* Since the objects we're extracting from .debug_info vary in
      length, only the individual functions to extract them (like
@@ -1474,15 +1447,15 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	  lowpc = ((CORE_ADDR) -1);
 	  highpc = ((CORE_ADDR) 0);
 
-	  obstack_init (&cu.partial_die_obstack);
+	  obstack_init (&cu.comp_unit_obstack);
 	  cu.partial_dies
 	    = htab_create_alloc_ex (cu.header.length / 12,
 				    partial_die_hash,
 				    partial_die_eq,
 				    NULL,
-				    &cu.partial_die_obstack,
-				    hash_obstack_allocate,
-				    splay_tree_obstack_deallocate);
+				    &cu.comp_unit_obstack,
+				    hashtab_obstack_allocate,
+				    dummy_obstack_deallocate);
 
 	  first_die = load_partial_dies (abfd, info_ptr, 1, &cu);
 
@@ -1574,15 +1547,15 @@ load_comp_unit (struct dwarf2_per_cu_data *this_cu, struct objfile *objfile)
     {
       struct partial_die_info *first_die;
 
-      obstack_init (&cu->partial_die_obstack);
+      obstack_init (&cu->comp_unit_obstack);
       cu->partial_dies
 	= htab_create_alloc_ex (cu->header.length / 12,
 				partial_die_hash,
 				partial_die_eq,
 				NULL,
-				&cu->partial_die_obstack,
-				hash_obstack_allocate,
-				splay_tree_obstack_deallocate);
+				&cu->comp_unit_obstack,
+				hashtab_obstack_allocate,
+				dummy_obstack_deallocate);
 
       first_die = load_partial_dies (abfd, info_ptr, 0, cu);
     }
@@ -1605,7 +1578,7 @@ create_comp_unit_tree (struct objfile *objfile)
   cu_tree = splay_tree_new_with_allocator (splay_tree_compare_ints,
 					   NULL, NULL,
 					   splay_tree_obstack_allocate,
-					   splay_tree_obstack_deallocate,
+					   dummy_obstack_deallocate,
 					   &objfile->objfile_obstack);
   dwarf2_per_objfile->cu_tree = cu_tree;
 
@@ -1750,7 +1723,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 
 /* Compute the scope prefix associated with PDI's parent, in
    compilation unit CU.  The result will be allocated on CU's
-   partial_die_obstack, or a copy of the already allocated PDI->NAME
+   comp_unit_obstack, or a copy of the already allocated PDI->NAME
    field.  NULL is returned if no prefix is necessary.  */
 static char *
 partial_die_parent_scope (struct partial_die_info *pdi,
@@ -1787,7 +1760,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       if (grandparent_scope == NULL)
 	parent->scope = parent->name;
       else
-	parent->scope = obconcat (&cu->partial_die_obstack, grandparent_scope,
+	parent->scope = obconcat (&cu->comp_unit_obstack, grandparent_scope,
 				  "::", parent->name);
     }
   else if (parent->tag == DW_TAG_enumeration_type)
@@ -2079,7 +2052,7 @@ guess_structure_name (struct partial_die_info *struct_pdi,
 		  struct_pdi->name
 		    = obsavestring (actual_class_name,
 				    strlen (actual_class_name),
-				    &cu->partial_die_obstack);
+				    &cu->comp_unit_obstack);
 		  xfree (actual_class_name);
 		}
 	      break;
@@ -2429,10 +2402,7 @@ dwarf2_release_queue (void *dummy)
 static void
 psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
-  struct cleanup *back_to;
-
-  obstack_init (&dwarf2_tmp_obstack);
-  back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   if (dwarf2_per_objfile->cu_tree == NULL)
     {
@@ -2509,7 +2479,7 @@ load_full_comp_unit (struct partial_symtab *pst,
     per_cu->cu = cu;
 
   /* We use this obstack for block values in dwarf_alloc_block.  */
-  obstack_init (&cu->partial_die_obstack);
+  obstack_init (&cu->comp_unit_obstack);
 
   cu->dies = read_comp_unit (info_ptr, abfd, cu);
 
@@ -2825,7 +2795,7 @@ add_to_cu_func_list (const char *name, CORE_ADDR lowpc, CORE_ADDR highpc,
   struct function_range *thisfn;
 
   thisfn = (struct function_range *)
-    obstack_alloc (&dwarf2_tmp_obstack, sizeof (struct function_range));
+    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct function_range));
   thisfn->name = name;
   thisfn->lowpc = lowpc;
   thisfn->highpc = highpc;
@@ -5078,7 +5048,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, int building_psymtab,
   parent_die = NULL;
   last_die = NULL;
 
-  part_die = obstack_alloc (&cu->partial_die_obstack,
+  part_die = obstack_alloc (&cu->comp_unit_obstack,
 			    sizeof (struct partial_die_info));
 
   while (1)
@@ -5090,7 +5060,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, int building_psymtab,
 	  if (--nesting_level == 0)
 	    {
 	      /* This was the last thing allocated.  */
-	      obstack_free (&cu->partial_die_obstack, part_die);
+	      obstack_free (&cu->comp_unit_obstack, part_die);
 	      return first_die;
 	    }
 	  info_ptr += bytes_read;
@@ -5221,7 +5191,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, int building_psymtab,
 	  *slot = part_die;
 	}
 
-      part_die = obstack_alloc (&cu->partial_die_obstack,
+      part_die = obstack_alloc (&cu->comp_unit_obstack,
 				sizeof (struct partial_die_info));
 
       /* For some DIEs we want to follow their children (if any).  For C
@@ -8654,21 +8624,13 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
   return (stack[stacki]);
 }
 
-/* memory allocation interface */
-
-static void
-dwarf2_free_tmp_obstack (void *ignore)
-{
-  obstack_free (&dwarf2_tmp_obstack, NULL);
-}
-
 static struct dwarf_block *
 dwarf_alloc_block (struct dwarf2_cu *cu)
 {
   struct dwarf_block *blk;
 
   blk = (struct dwarf_block *)
-    obstack_alloc (&cu->partial_die_obstack, sizeof (struct dwarf_block));
+    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct dwarf_block));
   return (blk);
 }
 
@@ -9197,7 +9159,7 @@ free_one_comp_unit (void *data)
     cu->per_cu->cu = NULL;
   cu->per_cu = NULL;
 
-  obstack_free (&cu->partial_die_obstack, NULL);
+  obstack_free (&cu->comp_unit_obstack, NULL);
   if (cu->dies)
     free_die_list (cu->dies);
 
@@ -9267,7 +9229,7 @@ clear_per_cu_pointer (void *data)
 
   if (cu->per_cu != NULL)
     {
-      obstack_free (&cu->partial_die_obstack, NULL);
+      obstack_free (&cu->comp_unit_obstack, NULL);
       cu->partial_dies = NULL;
 
       /* This compilation unit is on the stack in our caller, so we
@@ -9340,8 +9302,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 					offset_and_type_eq,
 					NULL,
 					&cu->objfile->objfile_obstack,
-					hash_obstack_allocate,
-					splay_tree_obstack_deallocate);
+					hashtab_obstack_allocate,
+					dummy_obstack_deallocate);
       PST_PRIVATE (cu->per_cu->psymtab)->type_hash = type_hash;
     }
   ofs.offset = die->offset;
@@ -9394,8 +9356,8 @@ dwarf2_add_dependence (struct dwarf2_cu *cu,
       = splay_tree_new_with_allocator (splay_tree_compare_ints,
 				       NULL, NULL,
 				       splay_tree_obstack_allocate,
-				       splay_tree_obstack_deallocate,
-				       &cu->partial_die_obstack);
+				       dummy_obstack_deallocate,
+				       &cu->comp_unit_obstack);
 
   if (splay_tree_lookup (cu->dependencies, ref_per_cu->offset) == NULL)
     splay_tree_insert (cu->dependencies, ref_per_cu->offset, 
@@ -9439,6 +9401,49 @@ dwarf2_clear_marks (struct dwarf2_per_cu_data *per_cu)
       per_cu->cu->mark = 0;
       per_cu = per_cu->cu->read_in_chain;
     }
+}
+
+/* Allocation function for the libiberty hash table which uses an
+   obstack.  */
+
+static void *
+hashtab_obstack_allocate (void *data, size_t size, size_t count)
+{
+  unsigned int total = size * count;
+  void *ptr = obstack_alloc ((struct obstack *) data, total);
+  memset (ptr, 0, total);
+  return ptr;
+}
+
+/* Trivial deallocation function for the libiberty splay tree and hash
+   table - don't deallocate anything.  Rely on later deletion of the
+   obstack.  */
+
+static void
+dummy_obstack_deallocate (void *object, void *data)
+{
+  return;
+}
+
+/* Trivial hash function for partial_die_info: the hash value of a DIE
+   is its offset in .debug_info for this objfile.  */
+
+static hashval_t
+partial_die_hash (const void *item)
+{
+  const struct partial_die_info *part_die = item;
+  return part_die->offset;
+}
+
+/* Trivial comparison function for partial_die_info structures: two DIEs
+   are equal if they have the same offset.  */
+
+static int
+partial_die_eq (const void *item_lhs, const void *item_rhs)
+{
+  const struct partial_die_info *part_die_lhs = item_lhs;
+  const struct partial_die_info *part_die_rhs = item_rhs;
+  return part_die_lhs->offset == part_die_rhs->offset;
 }
 
 void _initialize_dwarf2_read (void);

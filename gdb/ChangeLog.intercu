@@ -1,3 +1,23 @@
+2004-04-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Add comments.  Rename
+	partial_die_obstack to comp_unit_obstack.
+	(struct partial_die_info): Move higher in file.  Add comments.
+	Use ENUM_BITFIELD.
+	(dwarf2_tmp_obstack, dwarf2_free_tmp_obstack): Remove.
+	(partial_die_hash, partial_die_eq): Move lower in file.
+	(hashtab_obstack_allocate): Likewise.  Renamed from
+	hash_obstack_allocate.
+	(dummy_obstack_deallocate): Likewise.  Renamed from
+	splay_tree_obstack_deallocate.
+	(dwarf2_build_psymtabs_hard): Remove references to
+	dwarf2_tmp_obstack.  Update names of changed variables/functions.
+	(load_comp_unit, create_comp_unit_tree, partial_die_parent_scope)
+	(guess_structure_name, psymtab_to_symtab_1, load_full_comp_unit)
+	(add_to_cu_func_list, load_partial_dies, dwarf_alloc_block)
+	(free_one_comp_unit, clear_per_cu_pointer, set_die_type)
+	(dwarf2_add_dependence): Likewise.
+
 2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (struct partial_die_info): Replace full_name and
