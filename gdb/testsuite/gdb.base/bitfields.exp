@@ -52,15 +52,12 @@ proc bitfield_uniqueness {} {
 	return
     }
 
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.*y or n. $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re "Starting.*Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
 	timeout { fail "running to break1" ; return }
     }
+    gdb_run_cmd 
+    expect_after;
 
     if [gdb_test "print flags" ".*uc = 1 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0" ""] {
 	fail "bitfield uniqueness (uc)"
@@ -166,15 +163,12 @@ proc bitfield_containment {} {
 	return
     }
 
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.*y or n. $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re "Starting.*Break.*break2 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
 	timeout { fail "running to break2" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     if [gdb_test "print/x flags" ".*uc = 0xff, s1 = 0x0, u1 = 0x1, s2 = 0x0, u2 = 0x3, s3 = 0x0, u3 = 0x7, s9 = 0x0, u9 = 0x1ff, sc = 0x0" ""] {
 	fail "bitfield containment"
@@ -218,15 +212,12 @@ proc bitfield_unsignedness {} {
 	return
     }
 
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.*y or n. $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re "Starting.*Break.*break3 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
 	timeout { fail "running to break3" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     if [gdb_test "print flags" ".*uc = 0 .*, s1 = 0, u1 = 1, s2 = 0, u2 = 3, s3 = 0, u3 = 7, s9 = 0, u9 = 511, sc = 0" "" ] {
 	fail "unsigned bitfield ranges"
@@ -257,15 +248,12 @@ proc bitfield_signedness {} {
 	return
     }
 
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.*y or n. $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re "Starting.*Break.*break4 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
 	timeout { fail "running to break4" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     if [gdb_test "print flags" ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 1, u2 = 0, s3 = 3, u3 = 0, s9 = 255, u9 = 0, sc = 0" ""] {
 	fail "signed bitfields, max positive values"
