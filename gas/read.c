@@ -5000,13 +5000,13 @@ s_incbin (int x ATTRIBUTE_UNUSED)
 	}
       file_len = ftell (binfile);
 
-      /* If a count was not specified use the size of the file.  */
+      /* If a count was not specified use the remainder of the file.  */
       if (count == 0)
-	count = file_len;
+	count = file_len - skip;
 
-      if (skip + count > file_len)
+      if (skip < 0 || count < 0 || file_len < 0 || skip + count > file_len)
 	{
-	  as_bad (_("skip (%ld) + count (%ld) larger than file size (%ld)"),
+	  as_bad (_("skip (%ld) or count (%ld) invalid for file size (%ld)"),
 		  skip, count, file_len);
 	  goto done;
 	}

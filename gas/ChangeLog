@@ -1,3 +1,9 @@
+2005-01-20  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/684
+	* read.c (s_incbin): Adjust default count for skip.  Check validity
+	of count and skip rigorously.
+
 2005-01-19  Fred Fish  <fnf@specifixinc.com>
 
 	* config/tc-mips.c (dummy_opcode): Add init for new struct member.
