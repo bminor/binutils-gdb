@@ -1,3 +1,23 @@
+Sun Apr  9 23:42:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-04-07 Jonathan Larmour <jlarmour@redhat.co.uk>:
+	* mips-tdep.c (saved_gpreg_size_enums): Define enum command for
+	new "set mips saved-gpreg-size" command
+	(MIPS_SAVED_REGSIZE): Now a function mips_saved_regsize()
+	(MIPS_DEFAULT_SAVED_REGSIZE): Define for default MIPS_SAVED_REGSIZE,
+	either from target, or gdb multi-arch
+	(show_mips_command): New. For "show mips" prefix command
+	(set_mips_command): New. For "show mips" prefix command
+	(_initialize_mips_tdep): Add top-level mips prefix command
+	Add "set mips saved-gpreg-size" command
+
+	* mips-tdep.c (struct gdbarch_tdep): Rename mips_saved_regsize to
+ 	mips_default_saved_regsize.
+	(mips_gdbarch_init): Update.
+	(MIPS_DEFAULT_SAVED_REGSIZE): Update.
+	(mips_gdbarch_init): Use MIPS_REGSIZE as the default value for
+ 	mips_default_saved_regsize.
+
 Sun Apr  9 23:27:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-04-07 J.T. Conklin <jtc@redback.com>:
