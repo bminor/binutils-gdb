@@ -1,5 +1,5 @@
 /* gasp.c - Gnu assembler preprocessor main program.
-   Copyright (C) 1994, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 1997 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -470,7 +470,7 @@ hash_add_to_string_table (tab, key, name, again)
   if (ptr->value.s.len)
     {
       if (!again)
-	ERROR ((stderr, "redefintion not allowed"));
+	ERROR ((stderr, "redefinition not allowed\n"));
     }
 
   ptr->type = hash_string;
@@ -1917,18 +1917,42 @@ process_file ()
 	{
 	  l = grab_label (&line, &label_in);
 	  sb_reset (&label);	  	  
-	  if (label_in.len)
-	    {
-	      /* Munge any label */
-
-	      
-	      process_assigns (0, &label_in, &label);
-	    }
 
 	  if (line.ptr[l] == ':')
 	    l++;
 	  while (ISWHITE (line.ptr[l]) && l < line.len)
 	    l++;
+
+	  if (label_in.len)
+	    {
+	      int do_assigns;
+
+	      /* Munge the label, unless this is EQU or ASSIGN.  */
+	      do_assigns = 1;
+	      if (l < line.len
+		  && (line.ptr[l] == '.' || alternate || mri))
+		{
+		  int lx = l;
+
+		  if (line.ptr[lx] == '.')
+		    ++lx;
+		  if (lx + 3 <= line.len
+		      && strncasecmp ("EQU", line.ptr + lx, 3) == 0
+		      && (lx + 3 == line.len
+			  || ! ISFIRSTCHAR (line.ptr[lx + 3])))
+		    do_assigns = 0;
+		  else if (lx + 6 <= line.len
+			   && strncasecmp ("ASSIGN", line.ptr + lx, 6) == 0
+			   && (lx + 6 == line.len
+			       || ! ISFIRSTCHAR (line.ptr[lx + 6])))
+		    do_assigns = 0;
+		}
+
+	      if (do_assigns)
+		process_assigns (0, &label_in, &label);
+	      else
+		sb_add_sb (&label, &label_in);
+	    }
 
 	  if (l < line.len)
 	    {
@@ -3308,7 +3332,7 @@ process_pseudo_op (idx, line, acc)
 	      do_sdata (idx, line, 'z');
 	      return 1;
 	    case K_ASSIGN:
-	      do_assign (1, 0, line);
+	      do_assign (0, 0, line);
 	      return 1;
 	    case K_AIF:
 	      do_aif (idx, line);
@@ -3326,7 +3350,7 @@ process_pseudo_op (idx, line, acc)
 	      do_aendr ();
 	      return 1;
 	    case K_EQU:
-	      do_assign (0, idx, line);
+	      do_assign (1, idx, line);
 	      return 1;
 	    case K_ALIGN:
 	      do_align (idx, line);

@@ -1,3 +1,12 @@
+Thu Feb 27 13:29:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (hash_add_to_string_table): Correct misspelling in error
+	message, and add newline.
+	(process_file): Don't process assignments in the label if this is
+	a equ or assign pseudo-op.
+	(process_pseudo_op): Swap first argument to do_assign for K_ASSIGN
+	and K_EQU, to match documentation.
+
 Thu Feb 27 12:00:03 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* config/obj-coff.c (obj_coff_section): Add 'r' section attribute
