@@ -147,27 +147,6 @@ static bfd_boolean ppc_elf_grok_psinfo
 #define TP_OFFSET	0x7000
 #define DTP_OFFSET	0x8000
 
-/* Will references to this symbol always reference the symbol
-   in this object?  STV_PROTECTED is excluded from the visibility test
-   here so that function pointer comparisons work properly.  Since
-   function symbols not defined in an app are set to their .plt entry,
-   it's necessary for shared libs to also reference the .plt even
-   though the symbol is really local to the shared lib.  */
-#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
-  ((! INFO->shared							\
-    || INFO->symbolic							\
-    || H->dynindx == -1							\
-    || ELF_ST_VISIBILITY (H->other) == STV_INTERNAL			\
-    || ELF_ST_VISIBILITY (H->other) == STV_HIDDEN)			\
-   && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
-
-/* Will _calls_ to this symbol always call the version in this object?  */
-#define SYMBOL_CALLS_LOCAL(INFO, H)					\
-  ((! INFO->shared							\
-    || INFO->symbolic							\
-    || H->dynindx == -1							\
-    || ELF_ST_VISIBILITY (H->other) != STV_DEFAULT)			\
-   && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
 
 /* The PPC linker needs to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
@@ -2817,11 +2796,10 @@ allocate_dynrelocs (h, inf)
      defined in regular objects.  For the normal shared case, discard
      space for relocs that have become local due to symbol visibility
      changes.  */
+
   if (info->shared)
     {
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      if (SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  struct ppc_elf_dyn_relocs **pp;
 
@@ -5013,10 +4991,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
-		       && h->dynindx != -1
-		       && (!info->symbolic
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && (input_section->flags & SEC_ALLOC) != 0

@@ -4513,7 +4513,6 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 	  h->plt.plist = NULL;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	}
-      return TRUE;
     }
   else
     h->plt.plist = NULL;
@@ -5622,9 +5621,7 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      if (SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  struct ppc_dyn_relocs **pp;
 
@@ -7604,12 +7601,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    bfd_boolean dyn = htab->elf.dynamic_sections_created;
 		    if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 			|| (info->shared
-			    && (info->symbolic
-				|| h->dynindx == -1
-				|| (h->elf_link_hash_flags
-				    & ELF_LINK_FORCED_LOCAL))
-			    && (h->elf_link_hash_flags
-				& ELF_LINK_HASH_DEF_REGULAR)))
+			    && SYMBOL_REFERENCES_LOCAL (info, h)))
 		      /* This is actually a static link, or it is a
 			 -Bsymbolic link and the symbol is defined
 			 locally, or the symbol was forced to be local
@@ -7882,10 +7874,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
-		       && h->dynindx != -1
-		       && (! info->symbolic
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
@@ -7920,13 +7909,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
 	      else if (h != NULL
-		       && h->dynindx != -1
-		       && !is_opd
-		       && (!MUST_BE_DYN_RELOC (r_type)
-			   || !info->shared
-			   || !info->symbolic
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
+		       && !SYMBOL_REFERENCES_LOCAL (info, h)
+		       && !is_opd)
 		outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
 	      else
 		{
