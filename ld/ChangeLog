@@ -1,3 +1,15 @@
+Wed Apr  2 11:55:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_process): Call lang_check immediately after
+	opening the input files, rather than at the end of the link.
+
+Mon Mar 31 23:44:00 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/pe.em (init): Fully bracket initializer.
+	(set_pe_stack_heap): Remove locals begin_commit and end.
+	(gld_${EMULATION_NAME}_after_open): Remove unused local i.
+	(gld${EMULATION_NAME}_place_orphan): Remove unused local ptr.
+
 Mon Mar 31 16:35:51 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * configure.tgt (hppa*-*-rtems*): New target, like hppa-*-*elf*.
