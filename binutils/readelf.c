@@ -7727,7 +7727,8 @@ decode_location_expression (data, pointer_size, length)
 	}
 
       /* Separate the ops.  */
-      printf ("; ");
+      if (data < end)
+	printf ("; ");
     }
 }
 

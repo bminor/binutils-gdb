@@ -1,3 +1,7 @@
+2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* readelf.c (decode_location_expression): Don't add a trailing ';'.
+
 2003-04-23  Dimitrie O. Paun <dpaun@rogers.com>
             Nick Clifton  <nickc@redhat.com>
 

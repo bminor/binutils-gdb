@@ -164,6 +164,12 @@ proc readelf_find_size { binary_file } {
     pass $testname
 }
 
+# Simple proc to skip certain expected warning messages.
+proc prune_readelf_warnings { text } {
+    regsub -all "(^|\n)(.*Skipping unexpected symbol type.*)" $text "\\1" text
+    return $text
+}
+
 # Run an individual readelf test.
 # Basically readelf is run on the binary_file with the given options.
 # Readelf's output is captured and then compared against the contents
@@ -183,10 +189,13 @@ proc readelf_test { options binary_file regexp_file xfails } {
     foreach xfail $xfails {
 	setup_xfail $xfail
     }
+
+    set got [prune_readelf_warnings $got]
     
     if ![string match "" $got] then {
+	fail "readelf $options (reason: unexpected output)"
 	send_log $got
-	fail "readelf $options"
+	send_log "\n"
 	return
     }
 
@@ -288,4 +297,4 @@ if [is_remote host] {
 # The xfail targets here do not default to DWARF2 format debug information
 # The symptom is that the output of 'readelf -wi' is empty.
 
-readelf_test -wi $tempfile readelf.wi {v850*-*-* cris-*-* mips*-*-elf* *-*-linux* h8300*-*-*}
+readelf_test -wi $tempfile readelf.wi {v850*-*-* cris-*-* mips*-*-elf* avr-*-* d30v-*-* h8300*-*-* i960-*-* m32r-*-* sparc-*-*}

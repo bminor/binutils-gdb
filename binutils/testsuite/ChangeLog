@@ -1,3 +1,16 @@
+2003-04-23  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.exp (proc prune_readelf_warnings): New function.
+	(proc readelf_test): Prune warning messages.
+	(readelf_test -wi): Add more expected failures.
+	* readelf.wi: Severly reduce expected output.
+	* testprog.c (string): Explicitly use unsigned chars.
+	(stdio.h, string.h): Remove inclusion.
+
+2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* readelf.wi: Update.
+
 2003-04-22  Dimitrie O. Paun  <dpaun@rogers.com>
 
 	* binutils-all/windres/windres.exp: Add test for the new -J
