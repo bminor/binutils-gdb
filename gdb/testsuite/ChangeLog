@@ -1,3 +1,7 @@
+Sat Sep 18 09:43:21 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
+
+	* gdb.t17/callfuncs.exp: Add "return 0" to end.
+
 Fri Sep 17 04:41:17 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
         * gdb.stabs/ecoff.mt:  Remove STABSCC hack.
