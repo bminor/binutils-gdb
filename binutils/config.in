@@ -151,6 +151,9 @@
 /* Define as 1 if you have gettext and don't want to use GNU gettext. */
 #undef HAVE_GETTEXT
 
+/* Suffix used for executables, if any. */
+#undef EXECUTABLE_SUFFIX
+
 /* Is the type time_t defined in <time.h>? */
 #undef HAVE_TIME_T_IN_TIME_H
 

@@ -221,11 +221,14 @@
 #include "bucomm.h"
 #include "getopt.h"
 #include "demangle.h"
+#include "dyn-string.h"
 #include "dlltool.h"
 
 #include <ctype.h>
 #include <time.h>
-#ifdef __STDC__
+#include <sys/stat.h>
+
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -236,9 +239,9 @@
 #include "coff/internal.h"
 #endif
 
-
 /* Forward references.  */
-static char * deduce_name (char *);
+static char *look_for_prog PARAMS ((const char *, const char *, int));
+static char *deduce_name PARAMS ((const char *));
 
 #ifdef DLLTOOL_MCORE_ELF
 static void mcore_elf_cache_filename (char *);
@@ -455,12 +458,6 @@ static const unsigned char ppc_jtab[] =
 /* the above code: "lwz r2,4(r1)"                         */
 static bfd_vma ppc_glue_insn = 0x80410004;
 #endif
-
-/* The outfile array must be big enough to contain a fully
-   qualified path name, plus an arbitary series of command
-   line switches.  We hope that PATH_MAX times two will be
-   enough.  */
-static char outfile [PATHMAX * 2];
 
 struct mac
   {
@@ -1686,6 +1683,7 @@ gen_exp_file ()
   int i;
   export_type *exp;
   dlist_type *dl;
+  char *cmd;
 
   /* xgettext:c-format */
   inform (_("Generating export file: %s\n"), exp_name);
@@ -1903,15 +1901,17 @@ gen_exp_file ()
   fclose (f);
 
   /* assemble the file */
-  sprintf (outfile, "%s -o %s %s", as_flags, exp_name, TMP_ASM);
+  cmd = (char *) alloca (strlen (as_flags) + strlen (exp_name)
+			 + sizeof TMP_ASM + 50);
+  sprintf (cmd, "%s -o %s %s", as_flags, exp_name, TMP_ASM);
 
 #ifdef DLLTOOL_ARM
   if (machine == MARM_INTERWORK || machine == MTHUMB)
-    strcat (outfile, " -mthumb-interwork");
+    strcat (cmd, " -mthumb-interwork");
 #endif
-  
-  run (as_name, outfile);
-  
+
+  run (as_name, cmd);
+
   if (dontdeltemps == 0)
     unlink (TMP_ASM);
   
@@ -2091,10 +2091,14 @@ make_one_lib_file (exp, i)
 {
 #if 0
     {
+      char *name;
       FILE *f;
-      char *prefix="d";
-      sprintf (outfile, "%ss%05d.s", prefix, i);
-      f = fopen (outfile, FOPEN_WT);
+      const char *prefix = "d";
+      char *cmd;
+
+      name = (char *) alloca (strlen (prefix) + 10);
+      sprintf (name, "%ss%05d.s", prefix, i);
+      f = fopen (name, FOPEN_WT);
       fprintf (f, "\t.text\n");
       fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX, exp->name);
       fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
@@ -2129,15 +2133,16 @@ make_one_lib_file (exp, i)
 
       fclose (f);
 
-      sprintf (outfile, "%s -o %ss%05d.o %ss%d.s",
+      cmd = (char *) alloca (strlen (as_flags) + 2 * strlen (prefix) + 50);
+      sprintf (cmd, "%s -o %ss%05d.o %ss%d.s",
 	       as_flags, prefix, i, prefix, i);
 
 #ifdef DLLTOOL_ARM
       if (machine == MARM_INTERWORK || machine == MTHUMB)
-	strcat (outfile, " -mthumb-interwork");
+	strcat (cmd, " -mthumb-interwork");
 #endif
   
-      run (as_name, outfile);
+      run (as_name, cmd);
     }
 #else /* if 0 */
     {
@@ -2550,7 +2555,8 @@ make_one_lib_file (exp, i)
 static bfd *
 make_head ()
 {
-  FILE *  f = fopen (TMP_HEAD_S, FOPEN_WT);
+  FILE *f = fopen (TMP_HEAD_S, FOPEN_WT);
+  char *cmd;
 
   if (f == NULL)
     {
@@ -2601,22 +2607,25 @@ make_head ()
   
   fclose (f);
 
-  sprintf (outfile, "%s -o %s %s", as_flags, TMP_HEAD_O, TMP_HEAD_S);
+  cmd = (char *) alloca (strlen (as_flags) + sizeof TMP_HEAD_O
+			 + sizeof TMP_HEAD_S + 50);
+  sprintf (cmd, "%s -o %s %s", as_flags, TMP_HEAD_O, TMP_HEAD_S);
   
 #ifdef DLLTOOL_ARM
   if (machine == MARM_INTERWORK || machine == MTHUMB)
-    strcat (outfile, " -mthumb-interwork");
+    strcat (cmd, " -mthumb-interwork");
 #endif
   
-  run (as_name, outfile);
+  run (as_name, cmd);
 
-  return  bfd_openr (TMP_HEAD_O, HOW_BFD_TARGET);
+  return bfd_openr (TMP_HEAD_O, HOW_BFD_TARGET);
 }
 
 static bfd *
 make_tail ()
 {
-  FILE *  f = fopen (TMP_TAIL_S, FOPEN_WT);
+  FILE *f = fopen (TMP_TAIL_S, FOPEN_WT);
+  char *cmd;
 
   if (f == NULL)
     {
@@ -2667,14 +2676,16 @@ make_tail ()
 
   fclose (f);
 
-  sprintf (outfile, "%s -o %s %s", as_flags, TMP_TAIL_O, TMP_TAIL_S);
+  cmd = (char *) alloca (strlen (as_flags) + sizeof TMP_TAIL_O
+			 + sizeof TMP_TAIL_S + 50);
+  sprintf (cmd, "%s -o %s %s", as_flags, TMP_TAIL_O, TMP_TAIL_S);
   
 #ifdef DLLTOOL_ARM
   if (machine == MARM_INTERWORK || MTHUMB)
-    strcat (outfile, " -mthumb-interwork");
+    strcat (cmd, " -mthumb-interwork");
 #endif
   
-  run (as_name, outfile);
+  run (as_name, cmd);
   
   return  bfd_openr (TMP_TAIL_O, HOW_BFD_TARGET);
 }
@@ -2749,12 +2760,15 @@ gen_lib_file ()
 
   if (dontdeltemps < 2)
     {
+      char *name;
+
+      name = (char *) alloca (sizeof TMP_STUB + 10);
       for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
 	{
-	  sprintf (outfile, "%s%05d.o", TMP_STUB, i);
-	  if (unlink (outfile) < 0)
+	  sprintf (name, "%s%05d.o", TMP_STUB, i);
+	  if (unlink (name) < 0)
 	    /* xgettext:c-format */
-	    warn (_("cannot delete %s: %s\n"), outfile, strerror (errno));
+	    warn (_("cannot delete %s: %s\n"), name, strerror (errno));
 	}
     }
   
@@ -3305,36 +3319,127 @@ main (ac, av)
   return 0;
 }
 
+/* Look for the program formed by concatenating PROG_NAME and the
+   string running from PREFIX to END_PREFIX.  If the concatenated
+   string contains a '/', try appending EXECUTABLE_SUFFIX if it is
+   defined.  */
+
+static char *
+look_for_prog (prog_name, prefix, end_prefix)
+     const char *prog_name;
+     const char *prefix;
+     int end_prefix;
+{
+  struct stat s;
+  char *cmd;
+
+  cmd = xmalloc (strlen (prefix) 
+                 + strlen (prog_name) 
+#ifdef EXECUTABLE_SUFFIX
+                 + strlen (EXECUTABLE_SUFFIX) 
+#endif
+		 + 10);
+  strcpy (cmd, prefix);
+
+  sprintf (cmd + end_prefix, "%s", prog_name);
+
+  if (strchr (cmd, '/') != NULL)
+    {
+      int found;
+
+      found = (stat (cmd, &s) == 0
+#ifdef EXECUTABLE_SUFFIX
+               || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
+#endif
+	       );
+
+      if (! found)
+        {
+	  /* xgettext:c-format */
+	  inform (_("Tried file: %s"), cmd);
+	  free (cmd);
+	  return NULL;
+	}
+    }
+
+  /* xgettext:c-format */
+  inform (_("Using file: %s"), cmd);
+
+  return cmd;
+}
+
 /* Deduce the name of the program we are want to invoke.
    PROG_NAME is the basic name of the program we want to run,
    eg "as" or "ld".  The catch is that we might want actually
-   run "i386-pe-as" or "ppc-pe-ld".  We detect this case by
-   examining the name used to invoke dlltool itself.  If
-   dlltool is actually called <foo>-<bar>-dlltool then we
-   prepend <foo>-<bar> to the default name.  */
+   run "i386-pe-as" or "ppc-pe-ld".  
+
+   If argv[0] contains the full path, then try to find the program
+   in the same place, with and then without a target-like prefix.
+
+   Given, argv[0] = /usr/local/bin/i586-cygwin32-dlltool,
+   deduce_name("as") uses the following search order: 
+
+     /usr/local/bin/i586-cygwin32-as
+     /usr/local/bin/as
+     as
+   
+   If there's an EXECUTABLE_SUFFIX, it'll use that as well; for each
+   name, it'll try without and then with EXECUTABLE_SUFFIX.
+
+   Given, argv[0] = i586-cygwin32-dlltool, it will not even try "as"
+   as the fallback, but rather return i586-cygwin32-as.
+     
+   Oh, and given, argv[0] = dlltool, it'll return "as".
+
+   Returns a dynamically allocated string.  */
+
 static char *
-deduce_name (char * prog_name)
+deduce_name (prog_name)
+     const char *prog_name;
 {
-  /* Use our own static array to hold the constructed name
-     rather than the outfile[] array, as that array may
-     already be in use.  */
-  static char new_name[32];
-  char * p;
+  char *cmd;
+  char *dash, *slash, *cp;
 
-  p = strrchr (program_name, '-');
-  
-  if (p == NULL)
-    return prog_name;
+  dash = NULL;
+  slash = NULL;
+  for (cp = program_name; *cp != '\0'; ++cp)
+    {
+      if (*cp == '-')
+	dash = cp;
+      if (
+#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__)
+	  *cp == ':' || *cp == '\\' ||
+#endif
+	  *cp == '/')
+	{
+	  slash = cp;
+	  dash = NULL;
+	}
+    }
 
-  /* assert (strlen (program_name) < 32); */
-  
-  strcpy (new_name, program_name);
-  
-  new_name [(p - program_name) + 1] = 0;
+  cmd = NULL;
 
-  strcat (new_name, prog_name);
+  if (dash != NULL)
+    {
+      /* First, try looking for a prefixed PROG_NAME in the
+         PROGRAM_NAME directory, with the same prefix as PROGRAM_NAME.  */
+      cmd = look_for_prog (prog_name, program_name, dash - program_name + 1);
+    }
 
-  return new_name;
+  if (slash != NULL && cmd == NULL)
+    {
+      /* Next, try looking for a PROG_NAME in the same directory as
+         that of this program.  */
+      cmd = look_for_prog (prog_name, program_name, slash - program_name + 1);
+    }
+
+  if (cmd == NULL)
+    {
+      /* Just return PROG_NAME as is.  */
+      cmd = xstrdup (prog_name);
+    }
+
+  return cmd;
 }
 
 #ifdef DLLTOOL_MCORE_ELF
@@ -3371,79 +3476,85 @@ static void
 mcore_elf_gen_out_file (void)
 {
   fname_cache * ptr;
+  dyn_string_t ds;
 
   /* Step one.  Run 'ld -r' on the input object files in order to resolve
      any internal references and to generate a single .exports section.  */
   ptr = & fnames;
 
-  strcpy (outfile, "-r ");
+  ds = dyn_string_new (100);
+  dyn_string_append (ds, "-r ");
 
   if (mcore_elf_linker_flags != NULL)
-    strcat (outfile, mcore_elf_linker_flags);
+    dyn_string_append (ds, mcore_elf_linker_flags);
   
   while (ptr->next != NULL)
     {
-      /* Check for overrun: what the hell, it's only cpu cycles... */
-      if (strlen (outfile) + strlen (ptr->filename) + 2 >= sizeof (outfile))
-	{
-	  fatal (_("buffer overflow\n"));
-	  return;
-	}
-      
-      strcat (outfile, ptr->filename);
-      strcat (outfile, " ");
+      dyn_string_append (ds, ptr->filename);
+      dyn_string_append (ds, " ");
 
       ptr = ptr->next;
     }
 
-  strcat (outfile, "-o ");
-  strcat (outfile, MCORE_ELF_TMP_OBJ);
+  dyn_string_append (ds, "-o ");
+  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
 
   if (mcore_elf_linker == NULL)
     mcore_elf_linker = deduce_name ("ld");
   
-  run (mcore_elf_linker, outfile);
+  run (mcore_elf_linker, ds->s);
+
+  dyn_string_delete (ds);
 
   /* Step two. Create a .exp file and a .lib file from the temporary file. 
      Do this by recursively invoking dlltool....*/
-  sprintf (outfile, "-S %s", as_name);
+  ds = dyn_string_new (100);
+
+  dyn_string_append (ds, "-S ");
+  dyn_string_append (ds, as_name);
   
-  strcat (outfile, " -e ");
-  strcat (outfile, MCORE_ELF_TMP_EXP);
-  strcat (outfile, " -l ");
-  strcat (outfile, MCORE_ELF_TMP_LIB);
-  strcat (outfile, " " );
-  strcat (outfile, MCORE_ELF_TMP_OBJ);
+  dyn_string_append (ds, " -e ");
+  dyn_string_append (ds, MCORE_ELF_TMP_EXP);
+  dyn_string_append (ds, " -l ");
+  dyn_string_append (ds, MCORE_ELF_TMP_LIB);
+  dyn_string_append (ds, " " );
+  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
 
   if (verbose)
-    strcat (outfile, " -v");
+    dyn_string_append (ds, " -v");
   
   if (dontdeltemps)
     {
-      strcat (outfile, " -n");
+      dyn_string_append (ds, " -n");
   
       if (dontdeltemps > 1)
-	strcat (outfile, " -n");
+	dyn_string_append (ds, " -n");
     }
 
   /* XXX - FIME: ought to check/copy other command line options as well.  */
   
-  run (program_name, outfile);
+  run (program_name, ds->s);
+
+  dyn_string_delete (ds);
 
   /* Step four. Feed the .exp and object files to ld -shared to create the dll.  */
-  strcpy (outfile, "-shared ");
+  ds = dyn_string_new (100);
+
+  dyn_string_append (ds, "-shared ");
 
   if (mcore_elf_linker_flags)
-    strcat (outfile, mcore_elf_linker_flags);
+    dyn_string_append (ds, mcore_elf_linker_flags);
 
-  strcat (outfile, " ");
-  strcat (outfile, MCORE_ELF_TMP_EXP);
-  strcat (outfile, " ");
-  strcat (outfile, MCORE_ELF_TMP_OBJ);
-  strcat (outfile, " -o ");
-  strcat (outfile, mcore_elf_out_file);
+  dyn_string_append (ds, " ");
+  dyn_string_append (ds, MCORE_ELF_TMP_EXP);
+  dyn_string_append (ds, " ");
+  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
+  dyn_string_append (ds, " -o ");
+  dyn_string_append (ds, mcore_elf_out_file);
 
-  run (mcore_elf_linker, outfile);
+  run (mcore_elf_linker, ds->s);
+
+  dyn_string_delete (ds);
 
   if (dontdeltemps == 0)
     unlink (MCORE_ELF_TMP_EXP);

@@ -26,19 +26,8 @@
 #endif
 #endif
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 
 #include "bfd.h"
@@ -49,6 +38,13 @@
 
 #include <ctype.h>
 #include <time.h>
+#include <sys/stat.h>
+
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -83,7 +79,7 @@
 #endif /* ! HAVE_SYS_WAIT_H */
 
 static char *program_version = "0.2.4";
-static char *driver_name = "gcc";
+static char *driver_name = NULL;
 static char *cygwin_driver_flags = 
   "-Wl,--dll -nostartfiles";
 static char *mingw32_driver_flags = "-mdll";
@@ -91,7 +87,7 @@ static char *generic_driver_flags = "-Wl,--dll";
 
 static char *entry_point;
 
-static char *dlltool_name = "dlltool";
+static char *dlltool_name = NULL;
 
 static char *target = TARGET;
 
@@ -122,10 +118,185 @@ static int delete_def_file = 1;
 
 static int run PARAMS ((const char *, char *));
 static void usage PARAMS ((FILE *, int));
+static void display PARAMS ((const char *, va_list));
+static void inform PARAMS ((const char *, ...));
+static char *look_for_prog PARAMS ((const char *, const char *, int));
+static char *deduce_name PARAMS ((const char *));
 static void delete_temp_files PARAMS ((void));
 static void cleanup_and_exit PARAMS ((int status));
 
 /**********************************************************************/
+
+/* Please keep the following 4 routines in sync with dlltool.c:
+     display ()
+     inform ()
+     look_for_prog ()
+     deduce_name ()
+   It's not worth the hassle to break these out since dllwrap will
+   (hopefully) soon be retired in favor of `ld --shared.  */
+
+static void
+display (message, args)
+     const char * message;
+     va_list      args;
+{
+  if (program_name != NULL)
+    fprintf (stderr, "%s: ", program_name);
+
+  vfprintf (stderr, message, args);
+
+  if (message [strlen (message) - 1] != '\n')
+    fputc ('\n', stderr);
+}  
+
+
+static void
+#ifdef __STDC__
+inform (const char * message, ...)
+#else
+inform (message, va_alist)
+     const char * message;
+     va_dcl
+#endif
+{
+  va_list args;
+  
+  if (!verbose)
+    return;
+
+#ifdef __STDC__
+  va_start (args, message);
+#else
+  va_start (args);
+#endif
+
+  display (message, args);
+  
+  va_end (args);
+}
+
+/* Look for the program formed by concatenating PROG_NAME and the
+   string running from PREFIX to END_PREFIX.  If the concatenated
+   string contains a '/', try appending EXECUTABLE_SUFFIX if it is
+   defined.  */
+
+static char *
+look_for_prog (prog_name, prefix, end_prefix)
+     const char *prog_name;
+     const char *prefix;
+     int end_prefix;
+{
+  struct stat s;
+  char *cmd;
+
+  cmd = xmalloc (strlen (prefix) 
+                 + strlen (prog_name) 
+#ifdef EXECUTABLE_SUFFIX
+                 + strlen (EXECUTABLE_SUFFIX) 
+#endif
+		 + 10);
+  strcpy (cmd, prefix);
+
+  sprintf (cmd + end_prefix, "%s", prog_name);
+
+  if (strchr (cmd, '/') != NULL)
+    {
+      int found;
+
+      found = (stat (cmd, &s) == 0
+#ifdef EXECUTABLE_SUFFIX
+               || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
+#endif
+	       );
+
+      if (! found)
+        {
+	  /* xgettext:c-format */
+	  inform (_("Tried file: %s"), cmd);
+	  free (cmd);
+	  return NULL;
+	}
+    }
+
+  /* xgettext:c-format */
+  inform (_("Using file: %s"), cmd);
+
+  return cmd;
+}
+
+/* Deduce the name of the program we are want to invoke.
+   PROG_NAME is the basic name of the program we want to run,
+   eg "as" or "ld".  The catch is that we might want actually
+   run "i386-pe-as" or "ppc-pe-ld".  
+
+   If argv[0] contains the full path, then try to find the program
+   in the same place, with and then without a target-like prefix.
+
+   Given, argv[0] = /usr/local/bin/i586-cygwin32-dlltool,
+   deduce_name("as") uses the following search order: 
+
+     /usr/local/bin/i586-cygwin32-as
+     /usr/local/bin/as
+     as
+   
+   If there's an EXECUTABLE_SUFFIX, it'll use that as well; for each
+   name, it'll try without and then with EXECUTABLE_SUFFIX.
+
+   Given, argv[0] = i586-cygwin32-dlltool, it will not even try "as"
+   as the fallback, but rather return i586-cygwin32-as.
+     
+   Oh, and given, argv[0] = dlltool, it'll return "as".
+
+   Returns a dynamically allocated string.  */
+
+static char *
+deduce_name (prog_name)
+     const char *prog_name;
+{
+  char *cmd;
+  char *dash, *slash, *cp;
+
+  dash = NULL;
+  slash = NULL;
+  for (cp = program_name; *cp != '\0'; ++cp)
+    {
+      if (*cp == '-')
+	dash = cp;
+      if (
+#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__)
+	  *cp == ':' || *cp == '\\' ||
+#endif
+	  *cp == '/')
+	{
+	  slash = cp;
+	  dash = NULL;
+	}
+    }
+
+  cmd = NULL;
+
+  if (dash != NULL)
+    {
+      /* First, try looking for a prefixed PROG_NAME in the
+         PROGRAM_NAME directory, with the same prefix as PROGRAM_NAME.  */
+      cmd = look_for_prog (prog_name, program_name, dash - program_name + 1);
+    }
+
+  if (slash != NULL && cmd == NULL)
+    {
+      /* Next, try looking for a PROG_NAME in the same directory as
+         that of this program.  */
+      cmd = look_for_prog (prog_name, program_name, slash - program_name + 1);
+    }
+
+  if (cmd == NULL)
+    {
+      /* Just return PROG_NAME as is.  */
+      cmd = xstrdup (prog_name);
+    }
+
+  return cmd;
+}
 
 static void
 delete_temp_files ()
@@ -341,6 +512,7 @@ usage (file, status)
   fprintf (file, "   --image-base <base>    Specify image base address\n");
   fprintf (file, "   --target <machine>     i386-cygwin32 or i386-mingw32\n");
   fprintf (file, "   --dry-run              Show what needs to be run\n");
+  fprintf (file, "   --mno-cygwin           Create Mingw DLL\n");
   fprintf (file, "  Options passed to DLLTOOL:\n");
   fprintf (file, "   --machine <machine>\n");
   fprintf (file, "   --output-exp <outname> Generate export file.\n");
@@ -381,9 +553,10 @@ usage (file, status)
 #define OPTION_ENTRY		(OPTION_DLLTOOL_NAME + 1)
 #define OPTION_IMAGE_BASE	(OPTION_ENTRY + 1)
 #define OPTION_TARGET		(OPTION_IMAGE_BASE + 1)
+#define OPTION_MNO_CYGWIN	(OPTION_TARGET + 1)
 
 /* DLLTOOL options. */
-#define OPTION_NODELETE		(OPTION_TARGET + 1)
+#define OPTION_NODELETE		(OPTION_MNO_CYGWIN + 1)
 #define OPTION_DLLNAME		(OPTION_NODELETE + 1)
 #define OPTION_NO_IDATA4 	(OPTION_DLLNAME + 1)
 #define OPTION_NO_IDATA5	(OPTION_NO_IDATA4 + 1)
@@ -568,6 +741,9 @@ main (argc, argv)
 	case OPTION_TARGET:
 	  target = optarg;
 	  break;
+	case OPTION_MNO_CYGWIN:
+	  target = "i386-mingw32";
+	  break;
 	case OPTION_BASE_FILE:
 	  base_file_name = optarg;
 	  delete_base_file = 0;
@@ -614,7 +790,7 @@ main (argc, argv)
 	    } 
 	}
     }
-  
+
   /* sanity checks. */
   if (! dll_name && ! dll_file_name)
     {
@@ -631,7 +807,14 @@ main (argc, argv)
     {
       dll_file_name = xstrdup (dll_name);
     }
-  
+
+  /* Deduce driver-name and dlltool-name from our own. */
+  if (driver_name == NULL)
+    driver_name = deduce_name ("gcc");
+
+  if (dlltool_name == NULL)
+    dlltool_name = deduce_name ("dlltool");
+
   if (! def_file_seen)
     {
       char *fileprefix = choose_temp_base ();

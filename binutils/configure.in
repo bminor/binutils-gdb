@@ -44,6 +44,8 @@ CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
 AC_EXEEXT
+AC_DEFINE_UNQUOTED(EXECUTABLE_SUFFIX, "${EXEEXT}",
+		   [Suffix used for executables, if any.])
 
 # host-specific stuff:
 

@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -112,6 +112,8 @@ static int icons;
 
 /* Local functions.  */
 
+static FILE *look_for_default PARAMS ((char *, const char *, int,
+				       const char *, const char *));
 static void close_pipe PARAMS ((void));
 static void unexpected_eof PARAMS ((const char *));
 static int get_word PARAMS ((FILE *, const char *));
@@ -122,41 +124,44 @@ static void define_fontdirs PARAMS ((void));
 
 /* look for the preprocessor program */
 
-FILE *
+static FILE *
 look_for_default (cmd, prefix, end_prefix, preprocargs, filename)
      char *cmd;
-     char *prefix;
+     const char *prefix;
      int end_prefix;
-     char *preprocargs;
-     char *filename;
+     const char *preprocargs;
+     const char *filename;
 {
-  char *path = getenv ("PATH");
   char *space;
   int found;
   struct stat s;
 
   strcpy (cmd, prefix);
 
-  sprintf (cmd+end_prefix, "%s", DEFAULT_PREPROCESSOR);
-  space = strchr (cmd+end_prefix, ' ');
+  sprintf (cmd + end_prefix, "%s", DEFAULT_PREPROCESSOR);
+  space = strchr (cmd + end_prefix, ' ');
   if (space)
     *space = 0;
 
   if (strchr (cmd, '/'))
     {
-      found = stat (cmd, &s);
+      found = (stat (cmd, &s) == 0
+#ifdef EXECUTABLE_SUFFIX
+	       || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
+#endif
+	       );
 
-      if (found < 0)
+      if (! found)
 	{
 	  if (verbose)
 	    fprintf (stderr, "Tried `%s'\n", cmd);
-	  return 0;
+	  return NULL;
 	}
     }
 
   strcpy (cmd, prefix);
 
-  sprintf (cmd+end_prefix, "%s %s %s",
+  sprintf (cmd + end_prefix, "%s %s %s",
 	   DEFAULT_PREPROCESSOR, preprocargs, filename);
 
   if (verbose)
@@ -202,11 +207,14 @@ read_rc_file (filename, preprocessor, preprocargs, language)
 		     + strlen (preprocessor)
 		     + strlen (preprocargs)
 		     + strlen (filename)
+#ifdef EXECUTABLE_SUFFIX
+		     + strlen (EXECUTABLE_SUFFIX)
+#endif
 		     + 10);
 
 
       dash = slash = 0;
-      for (cp=program_name; *cp; cp++)
+      for (cp = program_name; *cp; cp++)
 	{
 	  if (*cp == '-')
 	    dash = cp;

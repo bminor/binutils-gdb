@@ -1,3 +1,33 @@
+1999-06-22  Ian Lance Taylor  <ian@zembu.com>
+
+	Based on patches from Mumit Khan <khan@xraylith.wisc.EDU>:
+	* configure.in: Define EXECUTABLE_SUFFIX.
+	* dlltool.c: Include "dyn-string.h".  Include <stdarg.h> based on
+	ANSI_PROTOTYPES, not __STDC__.
+	(outfile): Remove.
+	(gen_exp_file): Change uses of outfile to use alloca.
+	(make_one_lib_file, make_head, make_tail): Likewise.
+	(gen_lib_file): Likewise.
+	(look_for_prog): New static function.
+	(deduce_name): Rewrite to use look_for_prog.
+	(mcore_elf_gen_out_file): Use dyn_string_t rather than outfile.
+	* dllwrap.c: Don't include <stdio.h>, <errno.h>, <string.h>,
+	<stdlib.h>, or <unistd.h>.  Include <sys/stat.h> and either
+	<stdarg.h> or <varargs.h>.
+	(driver_name): Initialize to NULL, not "gcc".
+	(dlltool_name): Initialize to NULL, not "dlltool".
+	(display, inform, look_for_prog, deduce_name): New static
+	functions.
+	(usage): Mention -mno-cygwin.
+	(OPTION_MNO_CYGWIN): Define.
+	(main): Handle -mno-cygwin.  Deduce driver_name and dlltool_name.
+	* resrc.c (look_for_default): Make static.  Remove unused local
+	path.  Check using EXECUTABLE_SUFFIX.
+	(read_rc_file): Allocate enough space to hold EXECUTABLE_SUFFIX.
+	* Makefile.am: Rebuild dependencies.
+	(dllwrap_LDADD): Add $(INTLLIBS).
+	* configure, Makefile.in, config.in: Rebuild.
+
 Mon Jun 21 16:49:11 1999  Jeffrey A Law  (law@cygnus.com)
 
         * readelf.c (dump_relocations): Use elf_hppa_reloc_type instead of
