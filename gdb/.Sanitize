@@ -334,6 +334,7 @@ serial.h
 sh-tdep.c
 sh3-rom.c
 signals.h
+sol-thread.c
 solib.c
 solib.h
 somread.c

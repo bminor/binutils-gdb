@@ -187,7 +187,7 @@ run_command (args, from_tty)
 
   dont_repeat ();
 
-  if (inferior_pid && target_has_execution)
+  if (inferior_pid != 0 && target_has_execution)
     {
       if (
 	  !query ("The program being debugged has been started already.\n\

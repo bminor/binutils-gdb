@@ -61,6 +61,11 @@ regardless of whether or not the actual target has floating point hardware.
 
 extern struct target_ops procfs_ops;		/* Forward declaration */
 
+int procfs_suppress_run = 0;	/* Non-zero if procfs should pretend not to
+				   be a runnable target.  Used by targets
+				   that can sit atop procfs, such as solaris
+				   thread support.  */
+
 #if 1	/* FIXME: Gross and ugly hack to resolve coredep.c global */
 CORE_ADDR kernel_u_addr;
 #endif
@@ -102,6 +107,9 @@ struct procinfo {
   sigset_t saved_sighold;	/* Saved held signal set */
   sysset_t saved_exitset;	/* Saved traced system call exit set */
   sysset_t saved_entryset;	/* Saved traced system call entry set */
+  int num_syscall_handlers;	/* Number of syscall handlers currently installed */
+  struct procfs_syscall_handler *syscall_handlers; /* Pointer to list of syscall trap handlers */
+  int new_child;		/* Non-zero if it's a new thread */
 };
 
 /* List of inferior process information */
@@ -412,6 +420,47 @@ static void procfs_notice_signals PARAMS ((int pid));
 
 static struct procinfo *find_procinfo PARAMS ((pid_t pid, int okfail));
 
+typedef int syscall_func_t PARAMS ((struct procinfo *pi, int syscall_num,
+				    int why, int *rtnval, int *statval));
+
+static void procfs_set_syscall_trap PARAMS ((struct procinfo *pi,
+					     int syscall_num, int flags,
+					     syscall_func_t *func));
+
+static void procfs_clear_syscall_trap PARAMS ((struct procinfo *pi,
+					       int syscall_num, int errok));
+
+#define PROCFS_SYSCALL_ENTRY 0x1 /* Trap on entry to sys call */
+#define PROCFS_SYSCALL_EXIT 0x2	/* Trap on exit from sys call */
+
+static syscall_func_t procfs_exit_handler;
+
+static syscall_func_t procfs_exec_handler;
+
+#ifdef SYS_sproc
+static syscall_func_t procfs_sproc_handler;
+static syscall_func_t procfs_fork_handler;
+#endif
+
+#ifdef SYS_lwp_create
+static syscall_func_t procfs_lwp_creation_handler;
+#endif
+
+static void modify_inherit_on_fork_flag PARAMS ((int fd, int flag));
+static void modify_run_on_last_close_flag PARAMS ((int fd, int flag));
+
+/* */
+
+struct procfs_syscall_handler
+{
+  int syscall_num;		/* The number of the system call being handled */
+				/* The function to be called */
+  syscall_func_t *func;
+};
+
+static void procfs_resume PARAMS ((int pid, int step,
+				   enum target_signal signo));
+
 /* External function prototypes that can't be easily included in any
    header file because the args are typedefs in system include files. */
 
@@ -518,7 +567,7 @@ remove_fd (pi)
       if (poll_list[i].fd == pi->fd)
 	{
 	  if (i != num_poll_list - 1)
-	    memcpy (poll_list, poll_list + i + 1,
+	    memcpy (poll_list + i, poll_list + i + 1,
 		    (num_poll_list - i - 1) * sizeof (struct pollfd));
 
 	  num_poll_list--;
@@ -533,8 +582,6 @@ remove_fd (pi)
 	}
     }
 }
-
-#define LOSING_POLL unixware_sux
 
 static struct procinfo *
 wait_fd ()
@@ -599,7 +646,7 @@ wait_fd ()
 	    }
 	}
       if (!pi)
-	error ("procfs_wait: Couldn't find procinfo for fd %d\n",
+	error ("wait_fd: Couldn't find procinfo for fd %d\n",
 	       poll_list[i].fd);
     }
 #endif /* LOSING_POLL */
@@ -776,18 +823,15 @@ syscallname (syscallnum)
      int syscallnum;
 {
   static char locbuf[32];
-  char *rtnval;
   
-  if (syscallnum >= 0 && syscallnum < MAX_SYSCALLS)
-    {
-      rtnval = syscall_table[syscallnum];
-    }
+  if (syscallnum >= 0 && syscallnum < MAX_SYSCALLS
+      && syscall_table[syscallnum] != NULL)
+    return syscall_table[syscallnum];
   else
     {
       sprintf (locbuf, "syscall %u", syscallnum);
-      rtnval = locbuf;
+      return locbuf;
     }
-  return (rtnval);
 }
 
 /*
@@ -1453,6 +1497,10 @@ create_procinfo (pid)
   if (!open_proc_file (pid, pi, O_RDWR))
     proc_init_failed (pi, "can't open process file");
 
+  /* open_proc_file may modify pid.  */
+
+  pid = pi -> pid;
+
   /* Add new process to process info list */
 
   pi->next = procinfo_list;
@@ -1460,6 +1508,8 @@ create_procinfo (pid)
 
   add_fd (pi);			/* Add to list for poll/select */
 
+  pi->num_syscall_handlers = 0;
+  pi->syscall_handlers = NULL;
   memset ((char *) &pi->prrun, 0, sizeof (pi->prrun));
   prfillset (&pi->prrun.pr_trace);
   procfs_notice_signals (pid);
@@ -1470,8 +1520,15 @@ create_procinfo (pid)
   premptyset (&pi->prrun.pr_fault);
 #endif
 
-  if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
-    proc_init_failed (pi, "PIOCWSTOP failed");
+  if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
+    proc_init_failed (pi, "PIOCSTATUS failed");
+
+/* A bug in Solaris (2.5 at least) causes PIOCWSTOP to hang on LWPs that are
+   already stopped, even if they all have PR_ASYNC set.  */
+
+  if (!(pi->prstatus.pr_flags & PR_STOPPED))
+    if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
+      proc_init_failed (pi, "PIOCWSTOP failed");
 
   if (ioctl (pi->fd, PIOCSFAULT, &pi->prrun.pr_fault) < 0)
     proc_init_failed (pi, "PIOCSFAULT failed");
@@ -1483,12 +1540,213 @@ create_procinfo (pid)
 
 LOCAL FUNCTION
 
+	procfs_exit_handler - handle entry into the _exit syscall
+
+SYNOPSIS
+
+	int procfs_exit_handler (pi, syscall_num, why, rtnvalp, statvalp)
+
+DESCRIPTION
+
+	This routine is called when an inferior process enters the _exit()
+	system call.  It continues the process, and then collects the exit
+	status and pid which are returned in *statvalp and *rtnvalp.  After
+	that it returns non-zero to indicate that procfs_wait should wake up.
+
+NOTES
+	There is probably a better way to do this.
+
+ */
+
+static int
+procfs_exit_handler (pi, syscall_num, why, rtnvalp, statvalp)
+     struct procinfo *pi;
+     int syscall_num;
+     int why;
+     int *rtnvalp;
+     int *statvalp;
+{
+  pi->prrun.pr_flags = PRCFAULT;
+
+  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+    perror_with_name (pi->pathname);
+
+  *rtnvalp = wait (statvalp);
+  if (*rtnvalp >= 0)
+    *rtnvalp = pi->pid;
+
+  return 1;
+}
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_exec_handler - handle exit from the exec family of syscalls
+
+SYNOPSIS
+
+	int procfs_exec_handler (pi, syscall_num, why, rtnvalp, statvalp)
+
+DESCRIPTION
+
+	This routine is called when an inferior process is about to finish any
+	of the exec() family of	system calls.  It pretends that we got a
+	SIGTRAP (for compatibility with ptrace behavior), and returns non-zero
+	to tell procfs_wait to wake up.
+
+NOTES
+	This need for compatibility with ptrace is questionable.  In the
+	future, it shouldn't be necessary.
+
+ */
+
+static int
+procfs_exec_handler (pi, syscall_num, why, rtnvalp, statvalp)
+     struct procinfo *pi;
+     int syscall_num;
+     int why;
+     int *rtnvalp;
+     int *statvalp;
+{
+  *statvalp = (SIGTRAP << 8) | 0177;
+
+  return 1;
+}
+
+#ifdef SYS_sproc		/* IRIX lwp creation system call */
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_sproc_handler - handle exit from the sproc syscall
+
+SYNOPSIS
+
+	int procfs_sproc_handler (pi, syscall_num, why, rtnvalp, statvalp)
+
+DESCRIPTION
+
+	This routine is called when an inferior process is about to finish an
+	sproc() system call.  This is the system call that IRIX uses to create
+	a lightweight process.  When the target process gets this event, we can
+	look at rval1 to find the new child processes ID, and create a new
+	procinfo struct from that.
+
+	After that, it pretends that we got a SIGTRAP, and returns non-zero
+	to tell procfs_wait to wake up.  Subsequently, wait_for_inferior gets
+	woken up, sees the new process and continues it.
+
+NOTES
+	We actually never see the child exiting from sproc because we will
+	shortly stop the child with PIOCSTOP, which is then registered as the
+	event of interest.
+ */
+
+static int
+procfs_sproc_handler (pi, syscall_num, why, rtnvalp, statvalp)
+     struct procinfo *pi;
+     int syscall_num;
+     int why;
+     int *rtnvalp;
+     int *statvalp;
+{
+/* We've just detected the completion of an sproc system call.  Now we need to
+   setup a procinfo struct for this thread, and notify the thread system of the
+   new arrival.  */
+
+/* If sproc failed, then nothing interesting happened.  Continue the process
+   and go back to sleep. */
+
+  if (pi->prstatus.pr_errno != 0)
+    {
+      pi->prrun.pr_flags &= PRSTEP;
+      pi->prrun.pr_flags |= PRCFAULT;
+
+      if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+	perror_with_name (pi->pathname);
+
+      return 0;
+    }
+
+  /* At this point, the new thread is stopped at it's first instruction, and
+     the parent is stopped at the exit from sproc.  */
+
+  /* Notify the caller of the arrival of a new thread. */
+  create_procinfo (pi->prstatus.pr_rval1);
+
+  *rtnvalp = pi->prstatus.pr_rval1;
+  *statvalp = (SIGTRAP << 8) | 0177;
+
+  return 1;
+}
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_fork_handler - handle exit from the fork syscall
+
+SYNOPSIS
+
+	int procfs_fork_handler (pi, syscall_num, why, rtnvalp, statvalp)
+
+DESCRIPTION
+
+	This routine is called when an inferior process is about to finish a
+	fork() system call.  We will open up the new process, and then close
+	it, which releases it from the clutches of the debugger.
+
+	After that, we continue the target process as though nothing had
+	happened.
+
+NOTES
+	This is necessary for IRIX because we have to set PR_FORK in order
+	to catch the creation of lwps (via sproc()).  When an actual fork
+	occurs, it becomes necessary to reset the forks debugger flags and
+	continue it because we can't hack multiple processes yet.
+ */
+
+static int
+procfs_fork_handler (pi, syscall_num, why, rtnvalp, statvalp)
+     struct procinfo *pi;
+     int syscall_num;
+     int why;
+     int *rtnvalp;
+     int *statvalp;
+{
+  struct procinfo *pitemp;
+
+/* At this point, we've detected the completion of a fork (or vfork) call in
+   our child.  The grandchild is also stopped because we set inherit-on-fork
+   earlier.  (Note that nobody has the grandchilds' /proc file open at this
+   point.)  We will release the grandchild from the debugger by opening it's
+   /proc file and then closing it.  Since run-on-last-close is set, the
+   grandchild continues on its' merry way.  */
+
+
+  pitemp = create_procinfo (pi->prstatus.pr_rval1);
+  if (pitemp)
+    close_proc_file (pitemp);
+
+  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+    perror_with_name (pi->pathname);
+
+  return 0;
+}
+#endif /* SYS_sproc */
+
+/*
+
+LOCAL FUNCTION
+
 	procfs_init_inferior - initialize target vector and access to a
 	/proc entry
 
 SYNOPSIS
 
-	void procfs_init_inferior (int pid)
+	int procfs_init_inferior (int pid)
 
 DESCRIPTION
 
@@ -1496,7 +1754,8 @@ DESCRIPTION
 	process immediately after the fork.  It waits for the child to stop
 	on the return from the exec system call (the child itself takes care
 	of ensuring that this is set up), then sets up the set of signals
-	and faults that are to be traced.
+	and faults that are to be traced.  Returns the pid, which may have had
+	the thread-id added to it.
 
 NOTES
 
@@ -1505,14 +1764,65 @@ NOTES
 
  */
 
-static void
+static int
 procfs_init_inferior (pid)
      int pid;
 {
+  struct procinfo *pip;
+
   push_target (&procfs_ops);
 
-  create_procinfo (pid);
-  add_thread (pid);		/* Setup initial thread */
+  pip = create_procinfo (pid);
+
+  procfs_set_syscall_trap (pip, SYS_exit, PROCFS_SYSCALL_ENTRY,
+			   procfs_exit_handler);
+
+#ifndef PRFS_STOPEXEC
+#ifdef SYS_exec
+  procfs_set_syscall_trap (pip, SYS_exec, PROCFS_SYSCALL_EXIT,
+			   procfs_exec_handler);
+#endif
+#ifdef SYS_execv
+  procfs_set_syscall_trap (pip, SYS_execv, PROCFS_SYSCALL_EXIT,
+			   procfs_exec_handler);
+#endif
+#ifdef SYS_execve
+  procfs_set_syscall_trap (pip, SYS_execve, PROCFS_SYSCALL_EXIT,
+			   procfs_exec_handler);
+#endif
+#endif  /* PRFS_STOPEXEC */
+
+  /* Setup traps on exit from sproc() */
+
+#ifdef SYS_sproc
+  procfs_set_syscall_trap (pip, SYS_sproc, PROCFS_SYSCALL_EXIT,
+			   procfs_sproc_handler);
+  procfs_set_syscall_trap (pip, SYS_fork, PROCFS_SYSCALL_EXIT,
+			   procfs_fork_handler);
+#ifdef SYS_vfork
+  procfs_set_syscall_trap (pip, SYS_vfork, PROCFS_SYSCALL_EXIT,
+			   procfs_fork_handler);
+#endif
+/* Turn on inherit-on-fork flag so that all children of the target process
+   start with tracing flags set.  This allows us to trap lwp creation.  Note
+   that we also have to trap on fork and vfork in order to disable all tracing
+   in the targets child processes.  */
+
+  modify_inherit_on_fork_flag (pip->fd, 1);
+#endif
+
+#ifdef SYS_lwp_create
+  procfs_set_syscall_trap (pip, SYS_lwp_create, PROCFS_SYSCALL_EXIT,
+			   procfs_lwp_creation_handler);
+#endif
+
+  /* create_procinfo may change the pid, so we have to update inferior_pid
+     here before calling other gdb routines that need the right pid.  */
+
+  pid = pip -> pid;
+  inferior_pid = pid;
+
+  add_thread (pip -> pid);	/* Setup initial thread */
 
 #ifdef START_INFERIOR_TRAPS_EXPECTED
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
@@ -1520,6 +1830,8 @@ procfs_init_inferior (pid)
   /* One trap to exec the shell, one to exec the program being debugged.  */
   startup_inferior (2);
 #endif
+
+  return pid;
 }
 
 /*
@@ -1680,32 +1992,26 @@ proc_set_exec_trap ()
   /* Turn off inherit-on-fork flag so that all grand-children of gdb
      start with tracing flags cleared. */
 
-#if defined (PIOCRESET)	/* New method */
-  {
-      long pr_flags;
-      pr_flags = PR_FORK;
-      ioctl (fd, PIOCRESET, &pr_flags);
-  }
-#else
-#if defined (PIOCRFORK)	/* Original method */
-  ioctl (fd, PIOCRFORK, NULL);
-#endif
-#endif
+  modify_inherit_on_fork_flag (fd, 0);
 
   /* Turn on run-on-last-close flag so that this process will not hang
      if GDB goes away for some reason.  */
 
-#if defined (PIOCSET)	/* New method */
+  modify_run_on_last_close_flag (fd, 1);
+
+#ifdef PR_ASYNC
   {
-      long pr_flags;
-      pr_flags = PR_RLC;
-      (void) ioctl (fd, PIOCSET, &pr_flags);
+    long pr_flags;
+
+/* Solaris needs this to make procfs treat all threads seperately.  Without
+   this, all threads halt whenever something happens to any thread.  Since
+   GDB wants to control all this itself, it needs to set PR_ASYNC.  */
+
+    pr_flags = PR_ASYNC;
+
+    ioctl (fd, PIOCSET, &pr_flags);
   }
-#else
-#if defined (PIOCSRLC)	/* Original method */
-  (void) ioctl (fd, PIOCSRLC, 0);
-#endif
-#endif
+#endif	/* PR_ASYNC */
 }
 
 /*
@@ -1882,8 +2188,7 @@ procfs_attach (args, from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  do_attach (pid);
-  inferior_pid = pid;
+  inferior_pid = pid = do_attach (pid);
   push_target (&procfs_ops);
 }
 
@@ -1994,6 +2299,8 @@ do_attach (pid)
       /* NOTREACHED */
     }
   
+  pid = pi -> pid;
+
   /* Add new process to process info list */
 
   pi->next = procinfo_list;
@@ -2021,23 +2328,9 @@ do_attach (pid)
       if (1 || query ("Process is currently running, stop it? "))
 	{
 	  /* Make it run again when we close it.  */
-#if defined (PIOCSET)	/* New method */
-	  {
-	      long pr_flags;
-	      pr_flags = PR_RLC;
-	      result = ioctl (pi->fd, PIOCSET, &pr_flags);
-	  }
-#else
-#if defined (PIOCSRLC)	/* Original method */
-	  result = ioctl (pi->fd, PIOCSRLC, 0);
-#endif
-#endif
-	  if (result < 0)
-	    {
-	      print_sys_errmsg (pi->pathname, errno);
-	      close_proc_file (pi);
-	      error ("PIOCSRLC or PIOCSET failed");
-	    }
+
+	  modify_run_on_last_close_flag (pi->fd, 1);
+
 	  if (ioctl (pi->fd, PIOCSTOP, &pi->prstatus) < 0)
 	    {
 	      print_sys_errmsg (pi->pathname, errno);
@@ -2177,22 +2470,8 @@ do_detach (signal)
 		}
 
 	      /* Make it run again when we close it.  */
-#if defined (PIOCSET)		/* New method */
-	      {
-		long pr_flags;
-		pr_flags = PR_RLC;
-		result = ioctl (pi->fd, PIOCSET, &pr_flags);
-	      }
-#else
-#if defined (PIOCSRLC)		/* Original method */
-	      result = ioctl (pi->fd, PIOCSRLC, 0);
-#endif
-#endif
-	      if (result)
-		{
-		  print_sys_errmsg (pi->pathname, errno);
-		  printf_unfiltered ("PIOCSRLC or PIOCSET failed.\n");
-		}
+
+	      modify_run_on_last_close_flag (pi->fd, 1);
 	    }
 	}
     }
@@ -2248,6 +2527,9 @@ procfs_wait (pid, ourstatus)
     {
     wait_again:
 
+      if (pi)
+	pi->had_event = 0;
+
       pi = wait_fd ();
     }
 
@@ -2287,7 +2569,7 @@ procfs_wait (pid, ourstatus)
     }
   else if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
     {
-      rtnval = pi->prstatus.pr_pid;
+      rtnval = pi->pid;
       why = pi->prstatus.pr_why;
       what = pi->prstatus.pr_what;
 
@@ -2297,88 +2579,28 @@ procfs_wait (pid, ourstatus)
 	  statval = (what << 8) | 0177;
 	  break;
 	case PR_SYSENTRY:
-	  if (what != SYS_exit)
-	    error ("PR_SYSENTRY, unknown system call %d", what);
-
-	  pi->prrun.pr_flags = PRCFAULT;
-
-	  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
-	    perror_with_name (pi->pathname);
-
-	  rtnval = wait (&statval);
-
-	  break;
 	case PR_SYSEXIT:
-	  switch (what)
-	    {
-#ifdef SYS_exec
-	    case SYS_exec:
-#endif
-#ifdef SYS_execve
-	    case SYS_execve:
-#endif
-#ifdef SYS_execv
-	    case SYS_execv:
-#endif
-	      statval = (SIGTRAP << 8) | 0177;
-	      break;
-#ifdef SYS_sproc
-	    case SYS_sproc:
-/* We've just detected the completion of an sproc system call.  Now we need to
-   setup a procinfo struct for this thread, and notify the thread system of the
-   new arrival.  */
+	  {
+	    int i;
+	    int found_handler = 0;
 
-/* If sproc failed, then nothing interesting happened.  Continue the process and
-   go back to sleep. */
-
-	      if (pi->prstatus.pr_errno != 0)
+	    for (i = 0; i < pi->num_syscall_handlers; i++)
+	      if (pi->syscall_handlers[i].syscall_num == what)
 		{
-		  pi->prrun.pr_flags &= PRSTEP;
-		  pi->prrun.pr_flags |= PRCFAULT;
+		  found_handler = 1;
+		  if (!pi->syscall_handlers[i].func (pi, what, why,
+						     &rtnval, &statval))
+		    goto wait_again;
 
-		  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
-		    perror_with_name (pi->pathname);
-
-		  goto wait_again;
+		  break;
 		}
 
-/* At this point, the new thread is stopped at it's first instruction, and
-   the parent is stopped at the exit from sproc.  */
-
-/* Notify the caller of the arrival of a new thread. */
-	      create_procinfo (pi->prstatus.pr_rval1);
-
-	      rtnval = pi->prstatus.pr_rval1;
-	      statval = (SIGTRAP << 8) | 0177;
-
-	      break;
-	    case SYS_fork:
-#ifdef SYS_vfork
-	    case SYS_vfork:
-#endif
-/* At this point, we've detected the completion of a fork (or vfork) call in
-   our child.  The grandchild is also stopped because we set inherit-on-fork
-   earlier.  (Note that nobody has the grandchilds' /proc file open at this
-   point.)  We will release the grandchild from the debugger by opening it's
-   /proc file and then closing it.  Since run-on-last-close is set, the
-   grandchild continues on its' merry way.  */
-
-	      {
-		struct procinfo *pitemp;
-
-		pitemp = create_procinfo (pi->prstatus.pr_rval1);
-		if (pitemp)
-		  close_proc_file (pitemp);
-
-		if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
-		  perror_with_name (pi->pathname);
-	      }
-	      goto wait_again;
-#endif /* SYS_sproc */
-
-	    default:
-	      error ("PIOCSTATUS (PR_SYSEXIT):  Unknown system call %d", what); 
-	    }
+	    if (!found_handler)
+	      if (why == PR_SYSENTRY)
+		error ("PR_SYSENTRY, unhandled system call %d", what);
+	      else
+		error ("PR_SYSEXIT, unhandled system call %d", what);
+	  }
 	  break;
 	case PR_REQUESTED:
 	  statval = (SIGSTOP << 8) | 0177;
@@ -2441,11 +2663,22 @@ procfs_wait (pid, ourstatus)
 	for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
 	  {
 	    if (!procinfo->had_event)
-	      if (ioctl (procinfo->fd, PIOCSTOP, &procinfo->prstatus) < 0)
-		{
-		  print_sys_errmsg (procinfo->pathname, errno);
-		  error ("PIOCSTOP failed");
-		}
+	      {
+		/* A bug in Solaris (2.5) causes us to hang when trying to
+		   stop a stopped process.  So, we have to check first in
+		   order to avoid the hang. */
+		if (ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus) < 0)
+		  {
+		    print_sys_errmsg (procinfo->pathname, errno);
+		    error ("PIOCSTATUS failed");
+		  }
+		if (!(procinfo->prstatus.pr_flags & PR_STOPPED))
+		  if (ioctl (procinfo->fd, PIOCSTOP, &procinfo->prstatus) < 0)
+		    {
+		      print_sys_errmsg (procinfo->pathname, errno);
+		      error ("PIOCSTOP failed");
+		    }
+	      }
 	  }
       }
     }
@@ -2630,7 +2863,12 @@ procfs_resume (pid, step, signo)
     {
       pi->prrun.pr_flags |= PRSTEP;
     }
-  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+
+  /* Don't try to start a process unless it's stopped on an
+     `event of interest'.  Doing so will cause errors.  */
+
+  if ((pi->prstatus.pr_flags & PR_ISTOP)
+       && ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
     {
       perror_with_name (pi->pathname);
       /* NOTREACHED */
@@ -2649,7 +2887,12 @@ procfs_resume (pid, step, signo)
 	    procinfo->prrun.pr_flags &= PRSTEP;
 	    procinfo->prrun.pr_flags |= PRCFAULT | PRCSIG;
 	    ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus);
-	    if (ioctl (procinfo->fd, PIOCRUN, &procinfo->prrun) < 0)
+
+	    /* Don't try to start a process unless it's stopped on an
+	       `event of interest'.  Doing so will cause errors.  */
+
+	    if ((procinfo->prstatus.pr_flags & PR_ISTOP)
+		&& ioctl (procinfo->fd, PIOCRUN, &procinfo->prrun) < 0)
 	      {
 		if (ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus) < 0)
 		  {
@@ -2797,6 +3040,11 @@ DESCRIPTION
 	Note that the pathname is left intact, even when the open fails,
 	so that callers can use it to construct meaningful error messages
 	rather than just "file open failed".
+
+	Note that for Solaris, the process-id also includes an LWP-id, so we
+	actually attempt to open that.  If we are handed a pid with a 0 LWP-id,
+	then we will ask the kernel what it is and add it to the pid.  Hence,
+	the pid can be changed by us.
  */
 
 static int
@@ -2805,14 +3053,57 @@ open_proc_file (pid, pip, mode)
      struct procinfo *pip;
      int mode;
 {
+  int tmp, tmpfd;
+
   pip -> next = NULL;
   pip -> had_event = 0;
   pip -> pathname = xmalloc (32);
   pip -> pid = pid;
 
-  sprintf (pip -> pathname, PROC_NAME_FMT, pid);
-  if ((pip -> fd = open (pip -> pathname, mode)) < 0)
+#ifndef PIOCOPENLWP
+  tmp = pid;
+#else
+  tmp = pid & 0xffff;
+#endif
+
+  sprintf (pip -> pathname, PROC_NAME_FMT, tmp);
+  if ((tmpfd = open (pip -> pathname, mode)) < 0)
     return 0;
+
+#ifndef PIOCOPENLWP
+  pip -> fd = tmpfd;
+#else
+  tmp = (pid >> 16) & 0xffff;	/* Extract thread id */
+
+  if (tmp == 0)
+    {				/* Don't know thread id yet */
+      if (ioctl (tmpfd, PIOCSTATUS, &pip -> prstatus) < 0)
+	{
+	  print_sys_errmsg (pip -> pathname, errno);
+	  close (tmpfd);
+	  error ("open_proc_file: PIOCSTATUS failed");
+	}
+
+      tmp = pip -> prstatus.pr_who; /* Get thread id from prstatus_t */
+      pip -> pid = (tmp << 16) | pid; /* Update pip */
+    }
+
+  if ((pip -> fd = ioctl (tmpfd, PIOCOPENLWP, &tmp)) < 0)
+    {
+      close (tmpfd);
+      return 0;
+    }
+
+#ifdef PIOCSET			/* New method */
+  {
+      long pr_flags;
+      pr_flags = PR_ASYNC;
+      ioctl (pip -> fd, PIOCSET, &pr_flags);
+  }
+#endif
+
+  close (tmpfd);		/* All done with main pid */
+#endif	/* PIOCOPENLWP */
 
   return 1;
 }
@@ -3113,17 +3404,18 @@ info_proc_syscalls (pip, summary)
 	{
 	  QUIT;
 	  if (syscall_table[syscallnum] != NULL)
-	    {
-	      printf_filtered ("\t%-12s ", syscall_table[syscallnum]);
-	      printf_filtered ("%-8s ",
-			       prismember (&pip -> entryset, syscallnum)
-			       ? "on" : "off");
-	      printf_filtered ("%-8s ",
-			       prismember (&pip -> exitset, syscallnum)
-			       ? "on" : "off");
-	      printf_filtered ("\n");
-	    }
-	  }
+	    printf_filtered ("\t%-12s ", syscall_table[syscallnum]);
+	  else
+	    printf_filtered ("\t%-12d ", syscallnum);
+
+	  printf_filtered ("%-8s ",
+			   prismember (&pip -> entryset, syscallnum)
+			   ? "on" : "off");
+	  printf_filtered ("%-8s ",
+			   prismember (&pip -> exitset, syscallnum)
+			   ? "on" : "off");
+	  printf_filtered ("\n");
+	}
       printf_filtered ("\n");
     }
 }
@@ -3325,7 +3617,7 @@ info_proc (args, from_tty)
      char *args;
      int from_tty;
 {
-  int pid;
+  int pid = inferior_pid;
   struct procinfo *pip;
   struct cleanup *old_chain;
   char **argv;
@@ -3340,6 +3632,8 @@ info_proc (args, from_tty)
   int id = 0;
   int status = 0;
   int all = 0;
+  int nlwp;
+  id_t *lwps;
 
   old_chain = make_cleanup (null_cleanup, 0);
 
@@ -3415,6 +3709,7 @@ info_proc (args, from_tty)
 		  perror_with_name (pip -> pathname);
 		  /* NOTREACHED */
 		}
+	      pid = pip->pid;
 	      make_cleanup (close_proc_file, pip);
 	    }
 	  else if (**argv != '\000')
@@ -3439,114 +3734,477 @@ No process.  Start debugging a program or specify an explicit process ID.");
       error ("PIOCSTATUS failed");
     }
 
-  /* Print verbose information of the requested type(s), or just a summary
-     of the information for all types. */
+#ifdef PIOCLWPIDS
+  nlwp = pip->prstatus.pr_nlwp;
+  lwps = alloca ((2 * nlwp + 2) * sizeof (id_t));
 
-  printf_filtered ("\nInformation for %s:\n\n", pip -> pathname);
-  if (summary || all || flags)
+  if (ioctl (pip->fd, PIOCLWPIDS, lwps))
     {
-      info_proc_flags (pip, summary);
+      print_sys_errmsg (pip -> pathname, errno);
+      error ("PIOCSTATUS failed");      
     }
-  if (summary || all)
-    {
-      info_proc_stop (pip, summary);
-    }
-  if (summary || all || signals || faults)
-    {
-      info_proc_siginfo (pip, summary);
-    }
-  if (summary || all || syscalls)
-    {
-      info_proc_syscalls (pip, summary);
-    }
-  if (summary || all || mappings)
-    {
-      info_proc_mappings (pip, summary);
-    }
-  if (summary || all || signals)
-    {
-      info_proc_signals (pip, summary);
-    }
-  if (summary || all || faults)
-    {
-      info_proc_faults (pip, summary);
-    }
-  printf_filtered ("\n");
+#else /* PIOCLWPIDS */
+  nlwp = 1;
+  lwps = alloca ((2 * nlwp + 2) * sizeof (id_t));
+  lwps[0] = 0;
+#endif /* PIOCLWPIDS */
 
-  /* All done, deal with closing any temporary process info structure,
-     freeing temporary memory , etc. */
+  for (; nlwp > 0; nlwp--, lwps++)
+    {
+      pip = find_procinfo ((*lwps << 16) | pid, 1);
 
-  do_cleanups (old_chain);
+      if (!pip)
+	{
+	  pip = (struct procinfo *) xmalloc (sizeof (struct procinfo));
+	  memset (pip, 0, sizeof (*pip));
+	  if (!open_proc_file ((*lwps << 16) | pid, pip, O_RDONLY))
+	    continue;
+
+	  make_cleanup (close_proc_file, pip);
+
+	  if (ioctl (pip -> fd, PIOCSTATUS, &(pip -> prstatus)) < 0)
+	    {
+	      print_sys_errmsg (pip -> pathname, errno);
+	      error ("PIOCSTATUS failed");
+	    }
+	}
+
+      /* Print verbose information of the requested type(s), or just a summary
+	 of the information for all types. */
+
+      printf_filtered ("\nInformation for %s.%d:\n\n", pip -> pathname, *lwps);
+      if (summary || all || flags)
+	{
+	  info_proc_flags (pip, summary);
+	}
+      if (summary || all)
+	{
+	  info_proc_stop (pip, summary);
+	}
+      if (summary || all || signals || faults)
+	{
+	  info_proc_siginfo (pip, summary);
+	}
+      if (summary || all || syscalls)
+	{
+	  info_proc_syscalls (pip, summary);
+	}
+      if (summary || all || mappings)
+	{
+	  info_proc_mappings (pip, summary);
+	}
+      if (summary || all || signals)
+	{
+	  info_proc_signals (pip, summary);
+	}
+      if (summary || all || faults)
+	{
+	  info_proc_faults (pip, summary);
+	}
+      printf_filtered ("\n");
+
+      /* All done, deal with closing any temporary process info structure,
+	 freeing temporary memory , etc. */
+
+      do_cleanups (old_chain);
+    }
 }
 
 /*
 
 LOCAL FUNCTION
 
-	procfs_set_sproc_trap -- arrange for child to stop on sproc().
+	modify_inherit_on_fork_flag - Change the inherit-on-fork flag
 
 SYNOPSIS
 
-	void procfs_set_sproc_trap (struct procinfo *)
+	void modify_inherit_on_fork_flag (fd, flag)
 
 DESCRIPTION
 
-	This function sets up a trap on sproc system call exits so that we can
-	detect the arrival of a new thread.  We are called with the new thread
-	stopped prior to it's first instruction.
+	Call this routine to modify the inherit-on-fork flag.  This routine is
+	just a nice wrapper to hide the #ifdefs needed by various systems to
+	control this flag.
 
-	Also note that we turn on the inherit-on-fork flag in the child process
-	so that any grand-children start with all tracing flags set.
  */
 
-#ifdef SYS_sproc
+static void
+modify_inherit_on_fork_flag (fd, flag)
+     int fd;
+     int flag;
+{
+  long pr_flags;
+  int retval;
+
+#ifdef PIOCSET			/* New method */
+  pr_flags = PR_FORK;
+  if (flag)
+    retval = ioctl (fd, PIOCSET, &pr_flags);
+  else
+    retval = ioctl (fd, PIOCRESET, &pr_flags);
+
+#else
+#ifdef PIOCSFORK		/* Original method */
+  if (flag)
+    retval = ioctl (fd, PIOCSFORK, NULL);
+  else
+    retval = ioctl (fd, PIOCRFORK, NULL);
+#else
+  Neither PR_FORK nor PIOCSFORK exist!!!
+#endif
+#endif
+
+  if (!retval)
+    return;
+
+  print_sys_errmsg ("modify_inherit_on_fork_flag", errno);
+  error ("PIOCSFORK or PR_FORK modification failed");
+}
+
+/*
+
+LOCAL FUNCTION
+
+	modify_run_on_last_close_flag - Change the run-on-last-close flag
+
+SYNOPSIS
+
+	void modify_run_on_last_close_flag (fd, flag)
+
+DESCRIPTION
+
+	Call this routine to modify the run-on-last-close flag.  This routine
+	is just a nice wrapper to hide the #ifdefs needed by various systems to
+	control this flag.
+
+ */
 
 static void
-procfs_set_sproc_trap (pi)
-     struct procinfo *pi;
+modify_run_on_last_close_flag (fd, flag)
+     int fd;
+     int flag;
 {
-  sysset_t exitset;
+  long pr_flags;
+  int retval;
+
+#ifdef PIOCSET			/* New method */
+  pr_flags = PR_RLC;
+  if (flag)
+    retval = ioctl (fd, PIOCSET, &pr_flags);
+  else
+    retval = ioctl (fd, PIOCRESET, &pr_flags);
+
+#else
+#ifdef PIOCSRLC			/* Original method */
+  if (flag)
+    retval = ioctl (fd, PIOCSRLC, NULL);
+  else
+    retval = ioctl (fd, PIOCRRLC, NULL);
+#else
+  Neither PR_RLC nor PIOCSRLC exist!!!
+#endif
+#endif
+
+  if (!retval)
+    return;
+
+  print_sys_errmsg ("modify_run_on_last_close_flag", errno);
+  error ("PIOCSRLC or PR_RLC modification failed");
+}
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_clear_syscall_trap -- Deletes the trap for the specified system call.
+
+SYNOPSIS
+
+	void procfs_clear_syscall_trap (struct procinfo *, int syscall_num, int errok)
+
+DESCRIPTION
+
+	This function function disables traps for the specified system call.
+	errok is non-zero if errors should be ignored.
+ */
+
+static void
+procfs_clear_syscall_trap (pi, syscall_num, errok)
+     struct procinfo *pi;
+     int syscall_num;
+     int errok;
+{
+  sysset_t sysset;
+  int goterr, i;
   
-  if (ioctl (pi->fd, PIOCGEXIT, &exitset) < 0)
+  goterr = ioctl (pi->fd, PIOCGENTRY, &sysset) < 0;
+
+  if (goterr && !errok)
     {
+      print_sys_errmsg (pi->pathname, errno);
+      error ("PIOCGENTRY failed");
+    }
+
+  if (!goterr)
+    {
+      prdelset (&sysset, syscall_num);
+
+      if ((ioctl (pi->fd, PIOCSENTRY, &sysset) < 0) && !errok)
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCSENTRY failed");
+	}
+    }
+
+  goterr = ioctl (pi->fd, PIOCGEXIT, &sysset) < 0;
+
+  if (goterr && !errok)
+    {
+      procfs_clear_syscall_trap (pi, syscall_num, 1);
       print_sys_errmsg (pi->pathname, errno);
       error ("PIOCGEXIT failed");
     }
 
-  praddset (&exitset, SYS_sproc);
-
-  /* We trap on fork() and vfork() in order to disable debugging in our grand-
-     children and descendant processes.  At this time, GDB can only handle
-     threads (multiple processes, one address space).  forks (and execs) result
-     in the creation of multiple address spaces, which GDB can't handle yet.  */
-
-  praddset (&exitset, SYS_fork);
-#ifdef SYS_vfork
-  praddset (&exitset, SYS_vfork);
-#endif
-
-  if (ioctl (pi->fd, PIOCSEXIT, &exitset) < 0)
+  if (!goterr)
     {
-      print_sys_errmsg (pi->pathname, errno);
-      error ("PIOCSEXIT failed");
+      praddset (&sysset, syscall_num);
+
+      if ((ioctl (pi->fd, PIOCSEXIT, &sysset) < 0) && !errok)
+	{
+	  procfs_clear_syscall_trap (pi, syscall_num, 1);
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCSEXIT failed");
+	}
     }
 
-  /* Turn on inherit-on-fork flag so that all grand-children of gdb start with
-     tracing flags set. */
+  if (!pi->syscall_handlers)
+    {
+      if (!errok)
+	error ("procfs_clear_syscall_trap:  syscall_handlers is empty");
+      return;
+    }
 
-#ifdef PIOCSET			/* New method */
-  {
-      long pr_flags;
-      pr_flags = PR_FORK;
-      ioctl (pi->fd, PIOCSET, &pr_flags);
-  }
-#else
-#ifdef PIOCSFORK		/* Original method */
-  ioctl (pi->fd, PIOCSFORK, NULL);
-#endif
-#endif
+  /* Remove handler func from the handler list */
+
+  for (i = 0; i < pi->num_syscall_handlers; i++)
+    if (pi->syscall_handlers[i].syscall_num == syscall_num)
+      {
+	if (i + 1 != pi->num_syscall_handlers)
+	  {			/* Not the last entry.
+				   Move subsequent entries fwd. */
+	    memcpy (&pi->syscall_handlers[i], &pi->syscall_handlers[i + 1],
+		    (pi->num_syscall_handlers - i - 1)
+		    * sizeof (struct procfs_syscall_handler));
+	  }
+
+	pi->syscall_handlers = xrealloc (pi->syscall_handlers,
+					 (pi->num_syscall_handlers - 1)
+					 * sizeof (struct procfs_syscall_handler));
+	pi->num_syscall_handlers--;
+	return;
+      }
+
+  if (!errok)
+    error ("procfs_clear_syscall_trap:  Couldn't find handler for sys call %d",
+	   syscall_num);
 }
-#endif	/* SYS_sproc */
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_set_syscall_trap -- arrange for a function to be called when the
+				   child executes the specified system call.
+
+SYNOPSIS
+
+	void procfs_set_syscall_trap (struct procinfo *, int syscall_num, int flags,
+				      syscall_func_t *function)
+
+DESCRIPTION
+
+	This function sets up an entry and/or exit trap for the specified system
+	call.  When the child executes the specified system call, your function
+	will be	called with the call #, a flag that indicates entry or exit, and
+	pointers to rtnval and statval (which are used by procfs_wait).  The
+	function should return non-zero if something interesting happened, zero
+	otherwise.
+ */
+
+static void
+procfs_set_syscall_trap (pi, syscall_num, flags, func)
+     struct procinfo *pi;
+     int syscall_num;
+     int flags;
+     syscall_func_t *func;
+{
+  sysset_t sysset;
+  
+  if (flags & PROCFS_SYSCALL_ENTRY)
+    {
+      if (ioctl (pi->fd, PIOCGENTRY, &sysset) < 0)
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCGENTRY failed");
+	}
+
+      praddset (&sysset, syscall_num);
+
+      if (ioctl (pi->fd, PIOCSENTRY, &sysset) < 0)
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCSENTRY failed");
+	}
+    }
+
+  if (flags & PROCFS_SYSCALL_EXIT)
+    {
+      if (ioctl (pi->fd, PIOCGEXIT, &sysset) < 0)
+	{
+	  procfs_clear_syscall_trap (pi, syscall_num, 1);
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCGEXIT failed");
+	}
+
+      praddset (&sysset, syscall_num);
+
+      if (ioctl (pi->fd, PIOCSEXIT, &sysset) < 0)
+	{
+	  procfs_clear_syscall_trap (pi, syscall_num, 1);
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCSEXIT failed");
+	}
+    }
+
+  if (!pi->syscall_handlers)
+    {
+      pi->syscall_handlers = xmalloc (sizeof (struct procfs_syscall_handler));
+      pi->syscall_handlers[0].syscall_num = syscall_num;
+      pi->syscall_handlers[0].func = func;
+      pi->num_syscall_handlers = 1;
+    }
+  else
+    {
+      int i;
+
+      for (i = 0; i < pi->num_syscall_handlers; i++)
+	if (pi->syscall_handlers[i].syscall_num == syscall_num)
+	  {
+	    pi->syscall_handlers[i].func = func;
+	    return;
+	  }
+
+      pi->syscall_handlers = xrealloc (pi->syscall_handlers, (i + 1)
+				       * sizeof (struct procfs_syscall_handler));
+      pi->syscall_handlers[i].syscall_num = syscall_num;
+      pi->syscall_handlers[i].func = func;
+      pi->num_syscall_handlers++;
+    }
+}
+
+#ifdef SYS_lwp_create
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_lwp_creation_handler - handle exit from the _lwp_create syscall
+
+SYNOPSIS
+
+	int procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
+
+DESCRIPTION
+
+	This routine is called both when an inferior process and it's new lwp
+	are about to finish a _lwp_create() system call.  This is the system
+	call that Solaris uses to create a lightweight process.  When the
+	target process gets this event, we can look at sysarg[2] to find the
+	new childs lwp ID, and create a procinfo struct from that.  After that,
+	we pretend that we got a SIGTRAP, and return non-zero to tell
+	procfs_wait to wake up.  Subsequently, wait_for_inferior gets woken up,
+	sees the new process and continues it.
+
+	When we see the child exiting from lwp_create, we just contine it,
+	since everything was handled when the parent trapped.
+
+NOTES
+	In effect, we are only paying attention to the parent's completion of
+	the lwp_create syscall.  If we only paid attention to the child
+	instead, then we wouldn't detect the creation of a suspended thread.
+ */
+
+static int
+procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
+     struct procinfo *pi;
+     int syscall_num;
+     int why;
+     int *rtnvalp;
+     int *statvalp;
+{
+  int lwp_id;
+  struct procinfo *childpi;
+
+  /* We've just detected the completion of an lwp_create system call.  Now we
+     need to setup a procinfo struct for this thread, and notify the thread
+     system of the new arrival.  */
+
+  /* If lwp_create failed, then nothing interesting happened.  Continue the
+     process and go back to sleep. */
+
+  if (pi->prstatus.pr_reg[R_PSR] & PS_FLAG_CARRY)
+    {				/* _lwp_create failed */
+      pi->prrun.pr_flags &= PRSTEP;
+      pi->prrun.pr_flags |= PRCFAULT;
+
+      if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+	perror_with_name (pi->pathname);
+
+      return 0;
+    }
+
+  /* At this point, the new thread is stopped at it's first instruction, and
+     the parent is stopped at the exit from lwp_create.  */
+
+  if (pi->new_child)		/* Child? */
+    {				/* Yes, just continue it */
+      pi->prrun.pr_flags &= PRSTEP;
+      pi->prrun.pr_flags |= PRCFAULT;
+
+      if ((pi->prstatus.pr_flags & PR_ISTOP)
+	  && ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+	perror_with_name (pi->pathname);
+
+      pi->new_child = 0;	/* No longer new */
+
+      return 0;
+    }
+
+  /* We're the proud parent of a new thread.  Setup an exit trap for lwp_create
+     in the child and continue the parent.  */
+  
+  /* Third arg is pointer to new thread id. */
+  lwp_id = read_memory_integer (pi->prstatus.pr_sysarg[2], sizeof (int));
+
+  lwp_id = (lwp_id << 16) | PIDGET (pi->pid);
+
+  childpi = create_procinfo (lwp_id);
+
+  /* The new process has actually inherited the lwp_create syscall trap from
+     it's parent, but we still have to call this to register a handler for
+     that child.  */
+
+  procfs_set_syscall_trap (childpi, SYS_lwp_create, PROCFS_SYSCALL_EXIT,
+			   procfs_lwp_creation_handler);
+
+  childpi->new_child = 1;	/* Flag this as an unseen child process */
+
+  *rtnvalp = lwp_id;	/* the new arrival. */
+  *statvalp = (SIGTRAP << 8) | 0177;
+
+  return 1;
+}
+#endif /* SYS_lwp_create */
 
 /* Fork an inferior process, and start debugging it with /proc.  */
 
@@ -3631,12 +4289,6 @@ procfs_create_inferior (exec_file, allargs, env)
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
 
-  /* Setup traps on exit from sproc() */
-
-#ifdef SYS_sproc
-  procfs_set_sproc_trap (current_procinfo);
-#endif
-
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
@@ -3663,7 +4315,11 @@ procfs_mourn_inferior ()
 static int
 procfs_can_run ()
 {
-  return(1);
+  /* This variable is controlled by modules that sit atop procfs that may layer
+     their own process structure atop that provided here.  sol-thread.c does
+     this because of the Solaris two-level thread model.  */
+
+  return !procfs_suppress_run;
 }
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
 
@@ -3727,6 +4383,16 @@ procfs_stopped_by_watchpoint(pid)
 }
 #endif
 
+/* Why is this necessary?  Shouldn't dead threads just be removed from the
+   thread database?  */
+
+int
+procfs_thread_alive (pid)
+     int pid;
+{
+  return 1;
+}
+
 /* Send a SIGINT to the process group.  This acts just like the user typed a
    ^C on the controlling terminal.
 
@@ -3771,7 +4437,7 @@ struct target_ops procfs_ops = {
   procfs_mourn_inferior,	/* to_mourn_inferior */
   procfs_can_run,		/* to_can_run */
   procfs_notice_signals,	/* to_notice_signals */
-  0,				/* to_thread_alive */
+  procfs_thread_alive,		/* to_thread_alive */
   procfs_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */

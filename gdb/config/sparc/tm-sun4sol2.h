@@ -71,3 +71,10 @@ extern char *sunpro_static_transform_name PARAMS ((char *));
 
 /* Enable handling of shared libraries for a.out executables.  */
 #define HANDLE_SVR4_EXEC_EMULATORS
+
+/* Macros to extract process id and thread id from a composite pid/tid */
+#define PIDGET(pid) ((pid) & 0xffff)
+#define TIDGET(pid) (((pid) >> 16) & 0xffff)
+
+extern char *solaris_pid_to_str PARAMS ((int pid));
+#define target_pid_to_str(PID) solaris_pid_to_str (PID)

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <errno.h>
@@ -445,7 +445,8 @@ push_target (t)
     while (t->to_stratum == cur->target_ops->to_stratum)
       {
 	/* There's already something on this stratum.  Close it off.  */
-	(cur->target_ops->to_close) (0);
+	if (cur->target_ops->to_close)
+	  (cur->target_ops->to_close) (0);
 	if (prev)
 	  prev->next = cur->next; /* Unchain old target_ops */
 	else

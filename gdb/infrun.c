@@ -614,31 +614,38 @@ wait_for_inferior ()
 	 another thread.  If so, then step that thread past the breakpoint,
 	 and continue it.  */
 
-      if (stop_signal == TARGET_SIGNAL_TRAP
-	  && breakpoints_inserted
-	  && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+      if (stop_signal == TARGET_SIGNAL_TRAP)
 	{
-	  random_signal = 0;
-	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
-	    {
-	      /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
-	      write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, pid);
+#ifdef NO_SINGLE_STEP
+	  if (one_stepped)
+	    random_signal = 0;
+	  else
+#endif
+	    if (breakpoints_inserted
+		&& breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+	      {
+		random_signal = 0;
+		if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
+		  {
+		    /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
+		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, pid);
 
-	      remove_breakpoints ();
-	      target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
-	      /* FIXME: What if a signal arrives instead of the single-step
-		 happening?  */
+		    remove_breakpoints ();
+		    target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
+		    /* FIXME: What if a signal arrives instead of the single-step
+		       happening?  */
 
-	      if (target_wait_hook)
-		target_wait_hook (pid, &w);
-	      else
-		target_wait (pid, &w);
-	      insert_breakpoints ();
+		    if (target_wait_hook)
+		      target_wait_hook (pid, &w);
+		    else
+		      target_wait (pid, &w);
+		    insert_breakpoints ();
 
-	      /* We need to restart all the threads now.  */
-	      target_resume (-1, 0, TARGET_SIGNAL_0);
-	      continue;
-	    }
+		    /* We need to restart all the threads now.  */
+		    target_resume (-1, 0, TARGET_SIGNAL_0);
+		    continue;
+		  }
+	      }
 	}
       else
 	random_signal = 1;

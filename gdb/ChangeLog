@@ -1,3 +1,42 @@
+Mon May  6 13:52:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* fork-child.c (fork_inferior), inferior.h:  init_trace_fun now
+	returns a possibly modified pid.
+	* inftarg.c (ptrace_him):  Now returns pid;
+	* m3-nat.c (m3_trace_him):  Now returns pid;
+	* infcmd.c (run_command):  Minor cleanup.
+	* infrun.c (wait_for_inferior):  Add another check for one_stepped
+	near where we read the pc to avoid erroneously setting
+	random_signal for multi-threaded support.
+	* procfs.c:  Add support for Solaris LWPs.  Remove def of
+	LOSING_POLL.  Many cleanups...  Several workarounds for Solaris
+	lossage.  System call entry and exit are now handled by
+	dynamically registered handlers.
+	* (syscallname):  Don't barf when handed an unknown syscall
+	number.
+	* (info_proc_syscalls):  Ditto.
+	* sol-thread.c:  New file.  Implements Solaris thread support.
+	* symfile.c (symbol_file_add):  Add call to target_new_objfile to
+	notify target-dependent code about new symbol tables.
+	* (clear_symtab_users):  Call target_new_objfile to notify it of
+	the removal of all symbol tables.
+	* target.c (push_target):  Make sure that to_close is non-zero
+	before calling it.
+	* target.h (target_new_objfile):  Provide default.	
+	* config/alpha/nm-osf2.h:  Define LOSING_POLL because this version
+	of OSF can't hack using poll with /proc.
+	* config/sparc/nm-sun4sol2.h (target_new_objfile):  Define to be
+	sol-thread-new-objfile.
+	* config/sparc/sun4sol2.mh:  Add sol-thread.o to NATDEFFILES, and
+	add libthread_db.so.1 to NAT_CLIBS.
+	* config/sparc/tm-sun4sol2.h:  Define PIDGET, TIDGET, and
+	target_pid_to_str.
+
+Sat May  4 02:13:34 1996  N Srin Kumar  <nsrin@wipinfo.soft.net>
+
+	* procfs.c (remove_fd):  Fix copy of fds to fill hole left after
+	removal of the requested fd.
+
 Mon May  6 07:52:48 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* rs6000-tdep.c (_initialize_rs6000_tdep): Don't do XCOFF specific
