@@ -1,3 +1,7 @@
+2001-07-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (gencode): Provide explicit path to gencode.c.
+
 2001-05-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* Makefile.in (M68HC11_OBJS): Add m68hc12int.o.
