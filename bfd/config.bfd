@@ -542,26 +542,25 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 #endif
-
 # start-sanitize-tic80
+
   tic80*-*-*)
     targ_defvec=tic80coff_vec
     targ_underscore=yes
     ;;
 
 # end-sanitize-tic80
-
 # start-sanitize-sky
+
   txvu-*-*)
     targ_defvec=bfd_elf32_txvu_vec
     ;;
 
-# end-sanitize-tic80
+# end-sanitize-sky
 
   v850-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-
 # start-sanitize-v850e
   v850e-*-*)
     targ_defvec=bfd_elf32_v850_vec
