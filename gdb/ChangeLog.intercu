@@ -1,3 +1,8 @@
+2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-setshow.c (cmd_show_list): Check for "show" in the middle
+	of prefixes.  Don't print the prefix twice in the CLI.
+
 2004-04-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (add_partial_structure): Remove.

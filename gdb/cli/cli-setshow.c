@@ -364,8 +364,10 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 	{
 	  struct cleanup *optionlist_chain
 	    = make_cleanup_ui_out_tuple_begin_end (uiout, "optionlist");
-	  ui_out_field_string (uiout, "prefix", list->prefixname + 5);
-	  cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
+	  char *new_prefix = strstr (list->prefixname, "show ") + 5;
+	  if (ui_out_is_mi_like_p (uiout))
+	    ui_out_field_string (uiout, "prefix", new_prefix);
+	  cmd_show_list (*list->prefixlist, from_tty, new_prefix);
 	  /* Close the tuple.  */
 	  do_cleanups (optionlist_chain);
 	}
