@@ -1,5 +1,5 @@
 /* bfdlink.h -- header file for BFD link routines
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -35,7 +35,7 @@ enum bfd_link_strip
 enum bfd_link_discard
 {
   discard_none,		/* Don't discard any locals.  */
-  discard_l,		/* Discard locals with a certain prefix.  */
+  discard_l,		/* Discard local temporary symbols.  */
   discard_all		/* Discard all locals.  */
 };
 
@@ -152,6 +152,14 @@ extern struct bfd_link_hash_entry *bfd_link_hash_lookup
   PARAMS ((struct bfd_link_hash_table *, const char *, boolean create,
 	   boolean copy, boolean follow));
 
+/* Look up an entry in the main linker hash table if the symbol might
+   be wrapped.  This should only be used for references to an
+   undefined symbol, not for definitions of a symbol.  */
+
+extern struct bfd_link_hash_entry *bfd_wrapped_link_hash_lookup
+  PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean, boolean,
+	   boolean));
+
 /* Traverse a link hash table.  */
 extern void bfd_link_hash_traverse
   PARAMS ((struct bfd_link_hash_table *,
@@ -171,19 +179,27 @@ struct bfd_link_info
   const struct bfd_link_callbacks *callbacks;
   /* true if BFD should generate a relocateable object file.  */
   boolean relocateable;
+  /* true if BFD should generate a "task linked" object file,
+     similar to relocatable but also with globals converted to statics. */
+  boolean task_link;
   /* true if BFD should generate a shared object.  */
   boolean shared;
   /* true if BFD should pre-bind symbols in a shared object.  */
   boolean symbolic;
   /* true if shared objects should be linked directly, not shared.  */
   boolean static_link;
+  /* true if the output file should be in a traditional format.  This
+     is equivalent to the setting of the BFD_TRADITIONAL_FORMAT flag
+     on the output file, but may be checked when reading the input
+     files.  */
+  boolean traditional_format;
+  /* true if we want to produced optimized output files.  This might
+     need much more time and therefore must be explicitly selected.  */
+  boolean optimize;
   /* Which symbols to strip.  */
   enum bfd_link_strip strip;
   /* Which local symbols to discard.  */
   enum bfd_link_discard discard;
-  /* The local symbol prefix to discard if using discard_l.  */
-  unsigned int lprefix_len;
-  const char *lprefix;
   /* true if symbols should be retained in memory, false if they
      should be freed and reread.  */
   boolean keep_memory;
@@ -201,10 +217,16 @@ struct bfd_link_info
   /* Hash table of symbols to keep.  This is NULL unless strip is
      strip_some.  */
   struct bfd_hash_table *keep_hash;
-  /* Hash table of symbols to report back via notice_callback.  If
-     this is NULL no symbols are reported back.  */
+  /* true if every symbol should be reported back via the notice
+     callback.  */
+  boolean notice_all;
+  /* Hash table of symbols to report back via the notice callback.  If
+     this is NULL, and notice_all is false, then no symbols are
+     reported back.  */
   struct bfd_hash_table *notice_hash;
-
+  /* Hash table of symbols which are being wrapped (the --wrap linker
+     option).  If this is NULL, no symbols are being wrapped.  */
+  struct bfd_hash_table *wrap_hash;
   /* If a base output file is wanted, then this points to it */
   PTR base_file;
 };
@@ -437,5 +459,52 @@ struct bfd_link_order_reloc
 
 /* Allocate a new link_order for a section.  */
 extern struct bfd_link_order *bfd_new_link_order PARAMS ((bfd *, asection *));
+
+/* These structures are used to describe version information for the
+   ELF linker.  These structures could be manipulated entirely inside
+   BFD, but it would be a pain.  Instead, the regular linker sets up
+   these structures, and then passes them into BFD.  */
+
+/* Regular expressions for a version.  */
+
+struct bfd_elf_version_expr
+{
+  /* Next regular expression for this version.  */
+  struct bfd_elf_version_expr *next;
+  /* Regular expression.  */
+  const char *match;
+};
+
+/* Version dependencies.  */
+
+struct bfd_elf_version_deps
+{
+  /* Next dependency for this version.  */
+  struct bfd_elf_version_deps *next;
+  /* The version which this version depends upon.  */
+  struct bfd_elf_version_tree *version_needed;
+};
+
+/* A node in the version tree.  */
+
+struct bfd_elf_version_tree
+{
+  /* Next version.  */
+  struct bfd_elf_version_tree *next;
+  /* Name of this version.  */
+  const char *name;
+  /* Version number.  */
+  unsigned int vernum;
+  /* Regular expressions for global symbols in this version.  */
+  struct bfd_elf_version_expr *globals;
+  /* Regular expressions for local symbols in this version.  */
+  struct bfd_elf_version_expr *locals;
+  /* List of versions which this version depends upon.  */
+  struct bfd_elf_version_deps *deps;
+  /* Index of the version name.  This is used within BFD.  */
+  unsigned int name_indx;
+  /* Whether this version tree was used.  This is used within BFD.  */
+  int used;
+};
 
 #endif
