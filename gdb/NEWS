@@ -3,6 +3,10 @@
 
 *** Changes since GDB 5.2:
 
+* Multi-arched targets.
+
+NEC V850					v850-*-*
+
 * New targets.
 
 Atmel AVR					avr*-*-*
