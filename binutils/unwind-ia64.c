@@ -25,7 +25,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
    as this will allow us to read in and parse 64bit and 32bit ELF files.
-   Only do this if we belive that the compiler can support a 64 bit
+   Only do this if we believe that the compiler can support a 64 bit
    data type.  For now we only rely on GCC being able to do this.  */
 #define BFD64
 #endif

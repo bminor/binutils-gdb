@@ -136,7 +136,7 @@ mode_string (unsigned long mode, char *str)
    'd' for directories
    'b' for block special files
    'c' for character special files
-   'm' for multiplexor files
+   'm' for multiplexer files
    'l' for symbolic links
    's' for sockets
    'p' for fifos

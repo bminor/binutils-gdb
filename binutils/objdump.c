@@ -41,7 +41,7 @@
 
    4. dump_bfd() in turn calls separate functions to display the requested
       item(s) of information(s).  For example disassemble_data() is called if
-      a disassmebly has been requested.
+      a disassembly has been requested.
 
    When disassembling the code loops through blocks of instructions bounded
    by symbols, calling disassemble_bytes() on each block.  The actual

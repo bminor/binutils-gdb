@@ -181,7 +181,7 @@ static bfd_boolean change_leading_char = FALSE;
 /* Whether to remove the leading character from global symbol names.  */
 static bfd_boolean remove_leading_char = FALSE;
 
-/* Whether to permit wildcard in symbol comparasion.  */
+/* Whether to permit wildcard in symbol comparison.  */
 static bfd_boolean wildcard = FALSE;
 
 /* List of symbols to strip, keep, localize, keep-global, weaken,

@@ -2055,7 +2055,7 @@ tg_struct_field (void *p, const char *name, bfd_vma bitpos ATTRIBUTE_UNUSED,
   if (! tg_fix_visibility (info, visibility))
     return FALSE;
 
-  /* It happends, a bug? */
+  /* It happens, a bug? */
   if (! name[0])
     return TRUE;
 

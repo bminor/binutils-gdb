@@ -370,7 +370,7 @@ do_type (int i)
 	{
 	  if (aux->x_sym.x_tagndx.p)
 	    {
-	      /* Referring to a struct defined elsewhere */
+	      /* Refe0rring to a struct defined elsewhere */
 	      res->type = coff_structref_type;
 	      res->u.astructref.ref = tindex[INDEXOF (aux->x_sym.x_tagndx.p)];
 	      res->size = res->u.astructref.ref ?
@@ -398,7 +398,7 @@ do_type (int i)
     case T_ENUM:
       if (aux->x_sym.x_tagndx.p)
 	{
-	  /* Refering to a enum defined elsewhere */
+	  /* Referring to a enum defined elsewhere */
 	  res->type = coff_enumref_type;
 	  res->u.aenumref.ref = tindex[INDEXOF (aux->x_sym.x_tagndx.p)];
 	  res->size = res->u.aenumref.ref->type->size;

@@ -2526,7 +2526,7 @@ parse_stab_members (void *dhandle, struct stab_handle *info,
 	}
       else
 	{
-	  /* This is a completely wierd case.  In order to stuff in the
+	  /* This is a completely weird case.  In order to stuff in the
 	     names that might contain colons (the usual name delimiter),
 	     Mike Tiemann defined a different name format which is
 	     signalled if the identifier is "op$".  In that case, the

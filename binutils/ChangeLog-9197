@@ -5200,7 +5200,7 @@ Thu May 16 16:06:55 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	consistent with gdb and as: Add 0x when printing hex.
 	Don't print extra leading zeros.
 	Attempt to not print "filename.o".
-	* objdump.c: Add some enum-to-int casts to accomodate old compilers.
+	* objdump.c: Add some enum-to-int casts to accommodate old compilers.
 
 
 Fri May  3 22:21:44 1991  John Gilmore  (gnu at cygint.cygnus.com)
