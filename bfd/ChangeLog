@@ -19,8 +19,7 @@
 	* libbfd.h: Rebuild.
 	* libaout.h (enum machine_type): Add M_CRIS.
 	* reloc.c: Add CRIS relocations.
-	* targets.c (bfd_target bfd_elf32_cris_vec, cris_aout_vec):
-	Declare.
+	* targets.c (bfd_elf32_cris_vec, cris_aout_vec): Declare.
 	(bfd_target_vect): Add bfd_elf32_cris_vec and cris_aout_vec.
 	* cpu-cris.c, aout-cris.c, elf32-cris.c: New files.
 	* po/POTFILES.in, po/bfd.pot: Regenerate.
