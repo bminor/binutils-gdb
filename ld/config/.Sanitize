@@ -33,6 +33,10 @@ Things-to-keep:
 h-rtbsd
 h-dgux
 h-sun3
+h-i386v
+h-m68kv
+t-i386v
+t-m68kv
 h-sun4
 h-dec3100
 t-sun4
@@ -45,7 +49,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/09/03 21:04:24  steve
+# Revision 1.6  1991/09/19 21:03:09  steve
+# Support for 386 and 68k machines
+#
+# Revision 1.5  1991/09/03  21:04:24  steve
 # *** empty log message ***
 #
 # Revision 1.4  1991/07/15  23:41:06  steve
