@@ -60,6 +60,7 @@ next_prefix=
 next_site=
 next_srcdir=
 next_target=
+moveifchange=
 next_tmpdir=
 norecursion=
 removing=
@@ -323,6 +324,7 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 fi
 
 configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
+moveifchange=`echo ${progname} | sed 's/configure$/move-if-change/'`
 
 # this is a hack.  sun4 must always be a valid host alias or this will fail.
 if ${configsub} sun4 >/dev/null 2>&1 ; then
@@ -331,6 +333,15 @@ else
 	echo '***' cannot find config.sub.  1>&2
 	exit 1
 fi
+
+touch config.junk
+if ${moveifchange} config.junk config.trash ; then
+	true
+else
+	echo '***' cannot find move-if-change.  1>&2
+	exit 1
+fi
+rm -f config.junk config.trash
 
 case "${srcdir}" in
 "")
@@ -495,6 +506,7 @@ for subdir in . ${subdirs} ; do
 
 	# Make the links.
 	configlinks="${links}"
+	mv -f config.status config.back
 	while [ -n "${files}" ] ; do
 		# set file to car of files, files to cdr of files
 		set ${files}; file=$1; shift; files=$*
@@ -507,7 +519,6 @@ for subdir in . ${subdirs} ; do
 		fi
 
 		${remove} -f ${link}
-		rm -f config.status
 		# Make a symlink if possible, otherwise try a hard link
 		${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
 
@@ -697,16 +708,18 @@ EOF
 # ${NO_EDIT}
 # ${PWD} was configured as follows:
 ${progname}" ${arguments}  "
-# ${using}" > ${subdir}/config.status
+# ${using}" > ${subdir}/config.new
 	else
 	    echo "#!/bin/sh
 # ${NO_EDIT}
 # ${PWD}/${subdir} was configured as follows:
 cd ${invsubdir}
 ${progname}" ${arguments}  "
-# ${using}" > ${subdir}/config.status
+# ${using}" > ${subdir}/config.new
 	fi
-	chmod a+x ${subdir}/config.status
+	chmod a+x ${subdir}/config.new
+	mv -f config.back config.status
+	${moveifchange} config.new config.back
 	;;
 
     *)	rm -f ${Makefile} ${subdir}/config.status ${links} ;;

@@ -1,5 +1,11 @@
 Tue Apr 21 12:31:33 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* configure: use move-if-change from gcc to create config.status.
+	  Some makefiles depend on config.status to tell if a directory
+	  has been reconfigured for a different host.  This change
+	  prevents those directories from remaking everything in the case
+	  where the reconfig was only intended to rebuild a Makefile.
+
 	* configure: test for config.sub with "config.sub sun4" rather
 	  than "config.sub ${host_alias}".  Otherwise we can't tell a bad
 	  host alias from a missing config.sub.
