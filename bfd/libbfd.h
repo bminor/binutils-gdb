@@ -348,6 +348,11 @@ extern boolean _bfd_stab_section_find_nearest_line
   PARAMS ((bfd *, asymbol **, asection *, bfd_vma, boolean *, const char **,
 	   const char **, unsigned int *, PTR *));
 
+/* Find the nearest line using DWARF 2 debugging information.  */
+extern boolean _bfd_dwarf2_find_nearest_line
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
+	   const char **, unsigned int *));
+
 /* A routine to create entries for a bfd_link_hash_table.  */
 extern struct bfd_hash_entry *_bfd_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *entry,
@@ -629,6 +634,13 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SPARC_7",
   "BFD_RELOC_SPARC_6",
   "BFD_RELOC_SPARC_5",
+  "BFD_RELOC_SPARC_PLT64",
+  "BFD_RELOC_SPARC_HIX22",
+  "BFD_RELOC_SPARC_LOX10",
+  "BFD_RELOC_SPARC_H44",
+  "BFD_RELOC_SPARC_M44",
+  "BFD_RELOC_SPARC_L44",
+  "BFD_RELOC_SPARC_REGISTER",
   "BFD_RELOC_ALPHA_GPDISP_HI16",
   "BFD_RELOC_ALPHA_GPDISP_LO16",
   "BFD_RELOC_ALPHA_GPDISP",
