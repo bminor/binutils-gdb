@@ -159,10 +159,11 @@ regmap (int regno, int *isfloat)
   if (tdep->ppc_gp0_regnum <= regno
       && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
     return regno;
-  else if (FP0_REGNUM <= regno && regno < FP0_REGNUM + ppc_num_fprs)
+  else if (tdep->ppc_fp0_regnum <= regno
+           && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
     {
       *isfloat = 1;
-      return regno - FP0_REGNUM + FPR0;
+      return regno - tdep->ppc_fp0_regnum + FPR0;
     }
   else if (regno == PC_REGNUM)
     return IAR;
@@ -358,8 +359,8 @@ fetch_inferior_registers (int regno)
 	}
 
       /* Read general purpose floating point registers.  */
-      for (regno = FP0_REGNUM; regno < FP0_REGNUM + ppc_num_fprs; regno++)
-	fetch_register (regno);
+      for (regno = 0; regno < ppc_num_fprs; regno++)
+        fetch_register (tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
       fetch_register (PC_REGNUM);
@@ -397,8 +398,8 @@ store_inferior_registers (int regno)
 	}
 
       /* Write floating point registers.  */
-      for (regno = FP0_REGNUM; regno < FP0_REGNUM + ppc_num_fprs; regno ++)
-	store_register (regno);
+      for (regno = 0; regno < ppc_num_fprs; regno++)
+        store_register (tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
       store_register (PC_REGNUM);
@@ -583,7 +584,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
         supply_register (regi, (char *) &regs->r64.gpr[regi]);
 
       for (regi = 0; regi < 32; regi++)
-	supply_register (FP0_REGNUM + regi, (char *) &regs->r64.fpr[regi]);
+	supply_register (tdep->ppc_fp0_regnum + regi,
+                         (char *) &regs->r64.fpr[regi]);
 
       supply_register (PC_REGNUM, (char *) &regs->r64.iar);
       supply_register (tdep->ppc_ps_regnum, (char *) &regs->r64.msr);
@@ -599,7 +601,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
         supply_register (regi, (char *) &regs->r32.gpr[regi]);
 
       for (regi = 0; regi < 32; regi++)
-	supply_register (FP0_REGNUM + regi, (char *) &regs->r32.fpr[regi]);
+	supply_register (tdep->ppc_fp0_regnum + regi,
+                         (char *) &regs->r32.fpr[regi]);
 
       supply_register (PC_REGNUM, (char *) &regs->r32.iar);
       supply_register (tdep->ppc_ps_regnum, (char *) &regs->r32.msr);

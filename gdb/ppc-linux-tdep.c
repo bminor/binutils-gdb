@@ -946,7 +946,7 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame, void **this_cache)
   /* Floating point registers.  */
   for (i = 0; i < 32; i++)
     {
-      int regnum = i + FP0_REGNUM;
+      int regnum = i + tdep->ppc_fp0_regnum;
       cache->saved_regs[regnum].addr = fpregs + i * tdep->wordsize;
     }
   cache->saved_regs[tdep->ppc_fpscr_regnum].addr = fpregs + 32 * tdep->wordsize;
@@ -1019,7 +1019,9 @@ ppc_linux_supply_fpregset (const struct regset *regset,
   const bfd_byte *buf = fpset;
 
   for (regi = 0; regi < 32; regi++)
-    regcache_raw_supply (regcache, FP0_REGNUM + regi, buf + 8 * regi);
+    regcache_raw_supply (regcache, 
+                         regcache_tdep->ppc_fp0_regnum + regi,
+                         buf + 8 * regi);
 
   /* The FPSCR is stored in the low order word of the last doubleword in the
      fpregset.  */

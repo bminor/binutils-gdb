@@ -1020,10 +1020,11 @@ supply_reg32 (int regno, uint32_t val)
 static void
 supply_fprs (double *vals)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
   for (regno = 0; regno < 32; regno++)
-    supply_register (regno + FP0_REGNUM, (char *) (vals + regno));
+    supply_register (regno + tdep->ppc_fp0_regnum, (char *) (vals + regno));
 }
 
 /* Predicate to test whether given register number is a "special" register.  */
@@ -1142,6 +1143,7 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
 static void
 fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   uint64_t gprs64[32];
   uint32_t gprs32[32];
   double fprs[32];
@@ -1155,7 +1157,7 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	(long) tid, regno, arch64);
 
   /* General-purpose registers.  */
-  if (regno == -1 || regno < FP0_REGNUM)
+  if (regno == -1 || regno < tdep->ppc_fp0_regnum)
     {
       if (arch64)
 	{
@@ -1176,8 +1178,8 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
   /* Floating-point registers.  */
 
   if (regno == -1
-      || (regno >= FP0_REGNUM
-          && regno < FP0_REGNUM + ppc_num_fprs))
+      || (regno >= tdep->ppc_fp0_regnum
+          && regno < tdep->ppc_fp0_regnum + ppc_num_fprs))
     {
       if (!ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
@@ -1241,9 +1243,10 @@ aix_thread_fetch_registers (int regno)
 static void
 fill_gprs64 (uint64_t *vals)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
-  for (regno = 0; regno < FP0_REGNUM; regno++)
+  for (regno = 0; regno < tdep->ppc_fp0_regnum; regno++)
     if (register_cached (regno))
       regcache_collect (regno, vals + regno);
 }
@@ -1251,9 +1254,10 @@ fill_gprs64 (uint64_t *vals)
 static void 
 fill_gprs32 (uint32_t *vals)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
-  for (regno = 0; regno < FP0_REGNUM; regno++)
+  for (regno = 0; regno < tdep->ppc_fp0_regnum; regno++)
     if (register_cached (regno))
       regcache_collect (regno, vals + regno);
 }
@@ -1262,9 +1266,12 @@ fill_gprs32 (uint32_t *vals)
 static void
 fill_fprs (double *vals)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
-  for (regno = FP0_REGNUM; regno < FP0_REGNUM + ppc_num_fprs; regno++)
+  for (regno = tdep->ppc_fp0_regnum;
+       regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
+       regno++)
     if (register_cached (regno))
       regcache_collect (regno, vals + regno);
 }
@@ -1434,6 +1441,7 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 static void
 store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   uint64_t gprs64[32];
   uint32_t gprs32[32];
   double fprs[32];
@@ -1448,7 +1456,7 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
                         (long) tid, regno);
 
   /* General-purpose registers.  */
-  if (regno == -1 || regno < FP0_REGNUM)
+  if (regno == -1 || regno < tdep->ppc_fp0_regnum)
     {
       if (arch64)
 	{
@@ -1469,8 +1477,8 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
   /* Floating-point registers.  */
 
   if (regno == -1
-      || (regno >= FP0_REGNUM
-          && regno < FP0_REGNUM + ppc_num_fprs))
+      || (regno >= tdep->ppc_fp0_regnum
+          && regno < tdep->ppc_fp0_regnum + ppc_num_fprs))
     {
       /* Pre-fetch: some regs may not be in the cache.  */
       ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL);

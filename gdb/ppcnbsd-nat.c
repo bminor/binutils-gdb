@@ -49,7 +49,8 @@ getfpregs_supplies (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  return ((regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31)
+  return ((regno >= tdep->ppc_fp0_regnum
+           && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
 	  || regno == tdep->ppc_fpscr_regnum);
 }
 

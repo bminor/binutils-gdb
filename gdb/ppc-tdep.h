@@ -150,6 +150,7 @@ struct gdbarch_tdep
     int ppc_lr_regnum;		/* Link register */
     int ppc_ctr_regnum;		/* Count register */
     int ppc_xer_regnum;		/* Integer exception register */
+    int ppc_fp0_regnum;         /* floating-point register 0 */
     int ppc_fpscr_regnum;	/* Floating point status and condition
     				   register */
     int ppc_mq_regnum;		/* Multiply/Divide extension register */

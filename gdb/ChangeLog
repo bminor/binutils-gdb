@@ -1,3 +1,34 @@
+2004-05-04  Jim Blandy  <jimb@redhat.com>
+
+	* config/rs6000/tm-rs6000.h (FP0_REGNUM): Document that this
+	should no longer be used in code specific to the RS6000 and its
+	derivatives.
+	* ppc-tdep.h (struct gdbarch_tdep): Add 'ppc_fp0_regnum' member.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize
+	tdep->ppc_fp0_regnum.
+	(ppc_supply_fpregset, ppc_collect_fpregset)
+	(rs6000_push_dummy_call, rs6000_extract_return_value)
+	(rs6000_dwarf2_stab_reg_to_regnum, rs6000_store_return_value)
+	(rs6000_frame_cache): Use tdep->ppc_fp0_regnum instead of
+	FP0_REGNUM. 
+	* aix-thread.c (supply_fprs, fetch_regs_kernel_thread)
+	(fill_gprs64, fill_gprs32, fill_fprs, store_regs_kernel_thread):
+	Same.
+	* ppc-bdm.c (bdm_ppc_fetch_registers, bdm_ppc_fetch_registers,
+	bdm_ppc_store_registers): Same.
+	* ppc-linux-nat.c (ppc_register_u_addr, fetch_register) 
+	(store_register, fill_fpregset): Same.
+	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache) 
+	(ppc_linux_supply_fpregset): Same.
+	* ppcnbsd-nat.c (getfpregs_supplies): Same.
+	* ppcnbsd-tdep.c (ppcnbsd_supply_fpreg, ppcnbsd_fill_fpreg):
+	Same.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call,
+	do_ppc_sysv_return_value, ppc64_sysv_abi_push_dummy_call,
+	ppc64_sysv_abi_return_value): Same.
+	* rs6000-nat.c (regmap, fetch_inferior_registers) 
+	(store_inferior_registers, fetch_core_registers): Same.
+
 2004-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68knbsd-nat.c: Remove file.

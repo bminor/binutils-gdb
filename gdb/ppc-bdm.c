@@ -153,6 +153,7 @@ static int bdm_regmap[] =
 static void
 bdm_ppc_fetch_registers (int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
   unsigned char *regs, *beginregs, *endregs, *almostregs;
   unsigned char midregs[32];
@@ -202,8 +203,8 @@ bdm_ppc_fetch_registers (int regno)
       /* if asking for an invalid register */
       if ((first_regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
           || (first_regno == gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum)
-	  || ((first_regno >= FP0_REGNUM)
-              && (first_regno < FP0_REGNUM + ppc_num_fprs)))
+	  || ((first_regno >= tdep->ppc_fp0_regnum)
+              && (first_regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
 	{
 /*          printf("invalid reg request!\n"); */
 	  supply_register (first_regno, NULL);
@@ -220,10 +221,12 @@ bdm_ppc_fetch_registers (int regno)
     {
 /*      printf("Asking for registers %d to %d\n", first_regno, last_regno); */
       beginregs = ocd_read_bdm_registers (first_bdm_regno,
-					  FP0_REGNUM - 1, &beginreglen);
-      endregs = (strcat (midregs,
-			 ocd_read_bdm_registers (FP0_REGNUM + ppc_num_fprs,
-					  last_bdm_regno - 1, &endreglen)));
+					  tdep->ppc_fp0_regnum - 1,
+                                          &beginreglen);
+      endregs
+        = (strcat (midregs,
+                   ocd_read_bdm_registers (tdep->ppc_fp0_regnum + ppc_num_fprs,
+                                           last_bdm_regno - 1, &endreglen)));
       almostregs = (strcat (beginregs, endregs));
       regs = (strcat (almostregs, mqreg));
       reglen = beginreglen + 32 + endreglen + 1;
@@ -259,6 +262,7 @@ bdm_ppc_fetch_registers (int regno)
 static void
 bdm_ppc_store_registers (int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
   int first_regno, last_regno;
   int first_bdm_regno, last_bdm_regno;
@@ -293,7 +297,8 @@ bdm_ppc_store_registers (int regno)
       /* (need to avoid FP regs and MQ reg) */
       if ((i != gdbarch_tdep (current_gdbarch)->ppc_mq_regnum) 
           && (i != gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum) 
-          && ((i < FP0_REGNUM) || (i >= FP0_REGNUM + ppc_num_fprs)))
+          && ((i < tdep->ppc_fp0_regnum)
+              || (i >= tdep->ppc_fp0_regnum + ppc_num_fprs)))
 	{
 /*          printf("write valid reg %d\n", bdm_regno); */
 	  ocd_write_bdm_registers (bdm_regno, deprecated_registers + DEPRECATED_REGISTER_BYTE (i), 4);

@@ -139,8 +139,9 @@ ppc_register_u_addr (int regno)
   /* Floating point regs: eight bytes each in both 32- and 64-bit
      ptrace interfaces.  Thus, two slots each in 32-bit interface, one
      slot each in 64-bit interface.  */
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + ppc_num_fprs)
-    u_addr = (PT_FPR0 * wordsize) + ((regno - FP0_REGNUM) * 8);
+  if (regno >= tdep->ppc_fp0_regnum
+      && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
+    u_addr = (PT_FPR0 * wordsize) + ((regno - tdep->ppc_fp0_regnum) * 8);
 
   /* UISA special purpose registers: 1 slot each */
   if (regno == PC_REGNUM)
@@ -202,6 +203,7 @@ fetch_altivec_register (int tid, int regno)
 static void
 fetch_register (int tid, int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   char mess[128];              /* For messages */
   int i;
@@ -251,7 +253,8 @@ fetch_register (int tid, int regno)
 
   /* Now supply the register.  Be careful to map between ptrace's and
      the current_regcache's idea of the current wordsize.  */
-  if ((regno >= FP0_REGNUM && regno < FP0_REGNUM +32)
+  if ((regno >= tdep->ppc_fp0_regnum
+       && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
       || gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
     /* FPs are always 64 bits.  Little endian values are always found
        at the left-hand end of the register.  */
@@ -376,6 +379,7 @@ store_altivec_register (int tid, int regno)
 static void
 store_register (int tid, int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   char mess[128];              /* For messages */
@@ -395,7 +399,8 @@ store_register (int tid, int regno)
   /* First collect the register value from the regcache.  Be careful
      to to convert the regcache's wordsize into ptrace's wordsize.  */
   memset (buf, 0, sizeof buf);
-  if ((regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
+  if ((regno >= tdep->ppc_fp0_regnum
+       && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
       || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     /* Floats are always 64-bit.  Little endian registers are always
        at the left-hand end of the register cache.  */
@@ -585,8 +590,8 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
   
   for (regi = 0; regi < 32; regi++)
     {
-      if ((regno == -1) || (regno == FP0_REGNUM + regi))
-	regcache_collect (FP0_REGNUM + regi, fpp + 8 * regi);
+      if ((regno == -1) || (regno == tdep->ppc_fp0_regnum + regi))
+	regcache_collect (tdep->ppc_fp0_regnum + regi, fpp + 8 * regi);
     }
   if ((regno == -1) || regno == tdep->ppc_fpscr_regnum)
     right_fill_reg (tdep->ppc_fpscr_regnum, (fpp + 8 * 32));

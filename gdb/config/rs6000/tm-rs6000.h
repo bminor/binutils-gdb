@@ -71,6 +71,10 @@ extern void aix_process_linenos (void);
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+/* Don't use this in code specific to the RS6000 and its descendants;
+   use tdep->ppc_fp0_regnum instead.  FP0_REGNUM will be deprecated
+   soon, but we still need to define it here for the uses in
+   architecture-independent code.  */
 #define FP0_REGNUM 32		/* Floating point register 0 */
 
 /* Notice when a new child process is started. */

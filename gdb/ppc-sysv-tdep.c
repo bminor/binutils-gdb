@@ -114,9 +114,10 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		         the register's floating-point format.  */
 		      char regval[MAX_REGISTER_SIZE];
 		      struct type *regtype
-			= register_type (gdbarch, FP0_REGNUM + freg);
+			= register_type (gdbarch, tdep->ppc_fp0_regnum + freg);
 		      convert_typed_floating (val, type, regval, regtype);
-		      regcache_cooked_write (regcache, FP0_REGNUM + freg,
+		      regcache_cooked_write (regcache,
+                                             tdep->ppc_fp0_regnum + freg,
 					     regval);
 		    }
 		  freg++;
@@ -338,8 +339,9 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the required type.  */
 	  char regval[MAX_REGISTER_SIZE];
-	  struct type *regtype = register_type (gdbarch, FP0_REGNUM + 1);
-	  regcache_cooked_read (regcache, FP0_REGNUM + 1, regval);
+	  struct type *regtype = register_type (gdbarch,
+                                                tdep->ppc_fp0_regnum + 1);
+	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	  convert_typed_floating (regval, regtype, readbuf, type);
 	}
       if (writebuf)
@@ -347,9 +349,9 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the register's "double" type.  */
 	  char regval[MAX_REGISTER_SIZE];
-	  struct type *regtype = register_type (gdbarch, FP0_REGNUM);
+	  struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
 	  convert_typed_floating (writebuf, type, regval, regtype);
-	  regcache_cooked_write (regcache, FP0_REGNUM + 1, regval);
+	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -643,10 +645,11 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		      && freg <= 13)
 		    {
 		      char regval[MAX_REGISTER_SIZE];
-		      struct type *regtype = register_type (gdbarch,
-							    FP0_REGNUM);
+		      struct type *regtype
+                        = register_type (gdbarch, tdep->ppc_fp0_regnum);
 		      convert_typed_floating (val, type, regval, regtype);
-		      regcache_cooked_write (regcache, FP0_REGNUM + freg,
+		      regcache_cooked_write (regcache,
+                                             tdep->ppc_fp0_regnum + freg,
 					     regval);
 		    }
 		  if (greg <= 10)
@@ -851,15 +854,15 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT && TYPE_LENGTH (valtype) <= 8)
     {
       char regval[MAX_REGISTER_SIZE];
-      struct type *regtype = register_type (gdbarch, FP0_REGNUM);
+      struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
       if (writebuf != NULL)
 	{
 	  convert_typed_floating (writebuf, valtype, regval, regtype);
-	  regcache_cooked_write (regcache, FP0_REGNUM + 1, regval);
+	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	}
       if (readbuf != NULL)
 	{
-	  regcache_cooked_read (regcache, FP0_REGNUM + 1, regval);
+	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
 	  convert_typed_floating (regval, regtype, readbuf, valtype);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -921,10 +924,10 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	  for (i = 0; i < TYPE_LENGTH (valtype) / 8; i++)
 	    {
 	      if (writebuf != NULL)
-		regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
+		regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1 + i,
 				       (const bfd_byte *) writebuf + i * 8);
 	      if (readbuf != NULL)
-		regcache_cooked_read (regcache, FP0_REGNUM + 1 + i,
+		regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1 + i,
 				      (bfd_byte *) readbuf + i * 8);
 	    }
 	}
@@ -941,18 +944,21 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	    {
 	      char regval[MAX_REGISTER_SIZE];
 	      struct type *regtype =
-		register_type (current_gdbarch, FP0_REGNUM);
+		register_type (current_gdbarch, tdep->ppc_fp0_regnum);
 	      if (writebuf != NULL)
 		{
 		  convert_typed_floating ((const bfd_byte *) writebuf +
 					  i * (TYPE_LENGTH (valtype) / 2),
 					  valtype, regval, regtype);
-		  regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
+		  regcache_cooked_write (regcache,
+                                         tdep->ppc_fp0_regnum + 1 + i,
 					 regval);
 		}
 	      if (readbuf != NULL)
 		{
-		  regcache_cooked_read (regcache, FP0_REGNUM + 1 + i, regval);
+		  regcache_cooked_read (regcache,
+                                        tdep->ppc_fp0_regnum + 1 + i,
+                                        regval);
 		  convert_typed_floating (regval, regtype,
 					  (bfd_byte *) readbuf +
 					  i * (TYPE_LENGTH (valtype) / 2),
@@ -971,10 +977,10 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	  for (i = 0; i < 4; i++)
 	    {
 	      if (writebuf != NULL)
-		regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
+		regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1 + i,
 				       (const bfd_byte *) writebuf + i * 8);
 	      if (readbuf != NULL)
-		regcache_cooked_read (regcache, FP0_REGNUM + 1 + i,
+		regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1 + i,
 				      (bfd_byte *) readbuf + i * 8);
 	    }
 	}

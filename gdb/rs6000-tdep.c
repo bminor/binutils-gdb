@@ -227,7 +227,9 @@ ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   int i;
 
   offset = offsets->f0_offset;
-  for (i = FP0_REGNUM; i < FP0_REGNUM + 32; i++, offset += 4)
+  for (i = tdep->ppc_fp0_regnum;
+       i < tdep->ppc_fp0_regnum + ppc_num_fprs;
+       i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
 	ppc_supply_reg (regcache, i, fpregs, offset);
@@ -300,7 +302,9 @@ ppc_collect_fpregset (const struct regset *regset,
   int i;
 
   offset = offsets->f0_offset;
-  for (i = FP0_REGNUM; i <= FP0_REGNUM + 32; i++, offset += 4)
+  for (i = tdep->ppc_fp0_regnum;
+       i <= tdep->ppc_fp0_regnum + ppc_num_fprs;
+       i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
 	ppc_collect_reg (regcache, regnum, fpregs, offset);
@@ -1239,7 +1243,8 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	    printf_unfiltered (
 				"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE
+                                        (tdep->ppc_fp0_regnum + 1 + f_argno)],
 		  VALUE_CONTENTS (arg),
 		  len);
 	  ++f_argno;
@@ -1352,7 +1357,9 @@ ran_out_of_registers_for_arguments:
 		printf_unfiltered (
 				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	      memcpy (&(deprecated_registers
+                        [DEPRECATED_REGISTER_BYTE
+                         (tdep->ppc_fp0_regnum + 1 + f_argno)]),
 		      VALUE_CONTENTS (arg),
 		      len);
 	      ++f_argno;
@@ -1417,7 +1424,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
          necessary.  */
 
       convert_typed_floating (&regbuf[DEPRECATED_REGISTER_BYTE
-                                      (FP0_REGNUM + 1)],
+                                      (tdep->ppc_fp0_regnum + 1)],
                               builtin_type_double,
                               valbuf,
                               valtype);
@@ -1720,7 +1727,7 @@ rs6000_dwarf2_stab_reg_to_regnum (int num)
   if (0 <= num && num <= 31)
     return tdep->ppc_gp0_regnum + num;
   else if (32 <= num && num <= 63)
-    return FP0_REGNUM + (num - 32);
+    return tdep->ppc_fp0_regnum + (num - 32);
   else if (1200 <= num && num < 1200 + 32)
     return tdep->ppc_ev0_regnum + (num - 1200);
   else
@@ -1764,8 +1771,10 @@ rs6000_store_return_value (struct type *type, char *valbuf)
        Say a double_double_double type could be returned in
        FPR1/FPR2/FPR3 triple.  */
 
-    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
-				     TYPE_LENGTH (type));
+    deprecated_write_register_bytes
+      (DEPRECATED_REGISTER_BYTE (tdep->ppc_fp0_regnum + 1),
+       valbuf,
+       TYPE_LENGTH (type));
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       if (TYPE_LENGTH (type) == 16
@@ -2438,7 +2447,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
       CORE_ADDR fpr_addr = cache->base + fdata.fpr_offset;
       for (i = fdata.saved_fpr; i < 32; i++)
 	{
-	  cache->saved_regs[FP0_REGNUM + i].addr = fpr_addr;
+	  cache->saved_regs[tdep->ppc_fp0_regnum + i].addr = fpr_addr;
 	  fpr_addr += 8;
 	}
     }
@@ -2713,6 +2722,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->ppc_mq_regnum = 70;
   else
     tdep->ppc_mq_regnum = -1;
+  tdep->ppc_fp0_regnum = 32;
   tdep->ppc_fpscr_regnum = power ? 71 : 70;
 
   set_gdbarch_pc_regnum (gdbarch, 64);

@@ -111,10 +111,11 @@ ppcnbsd_supply_fpreg (char *fpregs, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
 
-  for (i = FP0_REGNUM; i <= FP0_REGNUM + 31; i++)
+  for (i = 0; i < ppc_num_fprs; i++)
     {
-      if (regno == i || regno == -1)
-	supply_register (i, fpregs + FPREG_FPR_OFFSET (i - FP0_REGNUM));
+      if (regno == tdep->ppc_fp0_regnum + i || regno == -1)
+	supply_register (tdep->ppc_fp0_regnum + i,
+                         fpregs + FPREG_FPR_OFFSET (i));
     }
 
   if (regno == tdep->ppc_fpscr_regnum || regno == -1)
@@ -127,10 +128,11 @@ ppcnbsd_fill_fpreg (char *fpregs, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
 
-  for (i = FP0_REGNUM; i <= FP0_REGNUM + 31; i++)
+  for (i = 0; i < ppc_num_fprs; i++)
     {
-      if (regno == i || regno == -1)
-	regcache_collect (i, fpregs + FPREG_FPR_OFFSET (i - FP0_REGNUM));
+      if (regno == tdep->ppc_fp0_regnum + i || regno == -1)
+	regcache_collect (tdep->ppc_fp0_regnum + i,
+                          fpregs + FPREG_FPR_OFFSET (i));
     }
 
   if (regno == tdep->ppc_fpscr_regnum || regno == -1)
