@@ -1,3 +1,8 @@
+2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* config/tc-mips.c (md_estimate_size_before_relax): Use the
+	external version of the relocation for weak symbols.
+
 2000-05-08  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (output_P7_format, case mem_stack_f): Output fixed

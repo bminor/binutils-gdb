@@ -11021,7 +11021,12 @@ md_estimate_size_before_relax (fragp, segtype)
       /* This must duplicate the test in adjust_reloc_syms.  */
       change = (symsec != &bfd_und_section
 		&& symsec != &bfd_abs_section
-		&& ! bfd_is_com_section (symsec));
+		&& ! bfd_is_com_section (symsec)
+#ifdef OBJ_ELF
+		/* A weak symbol is treated as external.  */
+		&& ! S_IS_WEAK (sym)
+#endif
+		);
     }
   else
     abort ();
