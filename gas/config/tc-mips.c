@@ -698,11 +698,13 @@ static void s_insn PARAMS ((int));
 static void md_obj_begin PARAMS ((void));
 static void md_obj_end PARAMS ((void));
 static long get_number PARAMS ((void));
-static void s_ent PARAMS ((int));
-static void s_mipsend PARAMS ((int));
-static void s_file PARAMS ((int));
+static void s_mips_ent PARAMS ((int));
+static void s_mips_end PARAMS ((int));
+static void s_mips_frame PARAMS ((int));
+static void s_mips_mask PARAMS ((int));
 static void s_mips_stab PARAMS ((int));
 static void s_mips_weakext PARAMS ((int));
+static void s_file PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
 
 
@@ -775,16 +777,16 @@ static const pseudo_typeS mips_pseudo_table[] =
 static const pseudo_typeS mips_nonecoff_pseudo_table[] = {
  /* These pseudo-ops should be defined by the object file format.
     However, a.out doesn't support them, so we have versions here.  */
-  {"aent", s_ent, 1},
+  {"aent", s_mips_ent, 1},
   {"bgnb", s_ignore, 0},
-  {"end", s_mipsend, 0},
+  {"end", s_mips_end, 0},
   {"endb", s_ignore, 0},
-  {"ent", s_ent, 0},
+  {"ent", s_mips_ent, 0},
   {"file", s_file, 0},
-  {"fmask", s_ignore, 'F'},
-  {"frame", s_ignore, 0},
+  {"fmask", s_mips_mask, 'F'},
+  {"frame", s_mips_frame, 0},
   {"loc", s_ignore, 0},
-  {"mask", s_ignore, 'R'},
+  {"mask", s_mips_mask, 'R'},
   {"verstamp", s_ignore, 0},
   { 0 },
 };
@@ -843,6 +845,12 @@ static boolean imm_unmatched_hi;
 /* These are set by mips16_ip if an explicit extension is used.  */
 
 static boolean mips16_small, mips16_ext;
+
+#ifdef MIPS_STABS_ELF
+/* The pdr segment for per procedure frame/regmask info */
+
+static segT pdr_seg;
+#endif
 
 /*
  * This function is called once, at assembler startup time.  It should
@@ -1261,6 +1269,13 @@ md_begin ()
 					  SEC_HAS_CONTENTS | SEC_READONLY);
 	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
 	  }
+
+#ifdef MIPS_STABS_ELF
+	pdr_seg = subseg_new (".pdr", (subsegT) 0);
+	(void) bfd_set_section_flags (stdoutput, pdr_seg,
+			     SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
+	(void) bfd_set_section_alignment (stdoutput, pdr_seg, 2);
+#endif
 
 	subseg_set (seg, subseg);
       }
@@ -11975,72 +11990,33 @@ mips_elf_final_processing ()
 
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */
 
-/* These functions should really be defined by the object file format,
-   since they are related to debugging information.  However, this
-   code has to work for the a.out format, which does not define them,
-   so we provide simple versions here.  These don't actually generate
-   any debugging information, but they do simple checking and someday
-   somebody may make them useful.  */
-
-typedef struct loc
-{
-  struct loc *loc_next;
-  unsigned long loc_fileno;
-  unsigned long loc_lineno;
-  unsigned long loc_offset;
-  unsigned short loc_delta;
-  unsigned short loc_count;
-#if 0
-  fragS *loc_frag;
-#endif
-}
-locS;
-
 typedef struct proc
   {
-    struct proc *proc_next;
-    struct symbol *proc_isym;
-    struct symbol *proc_end;
-    unsigned long proc_reg_mask;
-    unsigned long proc_reg_offset;
-    unsigned long proc_fpreg_mask;
-    unsigned long proc_fpreg_offset;
-    unsigned long proc_frameoffset;
-    unsigned long proc_framereg;
-    unsigned long proc_pcreg;
-    locS *proc_iline;
-    struct file *proc_file;
-    int proc_index;
+    struct symbol *isym;
+    unsigned long reg_mask;
+    unsigned long reg_offset;
+    unsigned long fpreg_mask;
+    unsigned long fpreg_offset;
+    unsigned long frame_offset;
+    unsigned long frame_reg;
+    unsigned long pc_reg;
   }
 procS;
 
-typedef struct file
-  {
-    struct file *file_next;
-    unsigned long file_fileno;
-    struct symbol *file_symbol;
-    struct symbol *file_end;
-    struct proc *file_proc;
-    int file_numprocs;
-  }
-fileS;
-
-static struct obstack proc_frags;
-static procS *proc_lastP;
-static procS *proc_rootP;
+static procS cur_proc;
+static procS *cur_proc_ptr;
 static int numprocs;
 
 static void
 md_obj_begin ()
 {
-  obstack_begin (&proc_frags, 0x2000);
 }
 
 static void
 md_obj_end ()
 {
   /* check for premature end, nesting errors, etc */
-  if (proc_lastP && proc_lastP->proc_end == NULL)
+  if (cur_proc_ptr)
     as_warn (_("missing `.end' at end of assembly"));
 }
 
@@ -12112,10 +12088,11 @@ s_file (x)
 /* The .end directive.  */
 
 static void
-s_mipsend (x)
+s_mips_end (x)
      int x;
 {
   symbolS *p;
+  int maybe_text;
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -12124,33 +12101,89 @@ s_mipsend (x)
     }
   else
     p = NULL;
-  if (now_seg != text_section)
+
+#ifdef BFD_ASSEMBLER
+  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+    maybe_text = 1;
+  else
+    maybe_text = 0;
+#else
+  if (now_seg != data_section && now_seg != bss_section)
+    maybe_text = 1;
+  else
+    maybe_text = 0;
+#endif
+
+  if (!maybe_text)
     as_warn (_(".end not in text section"));
-  if (!proc_lastP)
+
+  if (!cur_proc_ptr)
     {
-      as_warn (_(".end and no .ent seen yet."));
+      as_warn (_(".end directive without a preceding .ent directive."));
+      demand_empty_rest_of_line ();
       return;
     }
 
   if (p != NULL)
     {
       assert (S_GET_NAME (p));
-      if (strcmp (S_GET_NAME (p), S_GET_NAME (proc_lastP->proc_isym)))
+      if (strcmp (S_GET_NAME (p), S_GET_NAME (cur_proc_ptr->isym)))
 	as_warn (_(".end symbol does not match .ent symbol."));
     }
+  else
+    as_warn (_(".end directive missing or unknown symbol"));
 
-  proc_lastP->proc_end = (symbolS *) 1;
+#ifdef MIPS_STABS_ELF
+  {
+    segT saved_seg = now_seg;
+    subsegT saved_subseg = now_subseg;
+    fragS *saved_frag = frag_now;
+    valueT dot;
+    segT seg;
+    expressionS exp;
+    char *fragp;
+
+    dot = frag_now_fix ();
+
+#ifdef md_flush_pending_output
+    md_flush_pending_output ();
+#endif
+
+    assert (pdr_seg);
+    subseg_set (pdr_seg, 0);
+
+    /* Write the symbol */
+    exp.X_op = O_symbol;
+    exp.X_add_symbol = p;
+    exp.X_add_number = 0;
+    emit_expr (&exp, 4);
+
+    fragp = frag_more (7*4);
+
+    md_number_to_chars (fragp,     (valueT) cur_proc_ptr->reg_mask, 4);
+    md_number_to_chars (fragp + 4, (valueT) cur_proc_ptr->reg_offset, 4);
+    md_number_to_chars (fragp + 8, (valueT) cur_proc_ptr->fpreg_mask, 4);
+    md_number_to_chars (fragp +12, (valueT) cur_proc_ptr->fpreg_offset, 4);
+    md_number_to_chars (fragp +16, (valueT) cur_proc_ptr->frame_offset, 4);
+    md_number_to_chars (fragp +20, (valueT) cur_proc_ptr->frame_reg, 4);
+    md_number_to_chars (fragp +24, (valueT) cur_proc_ptr->pc_reg, 4);
+
+    subseg_set (saved_seg, saved_subseg);
+  }
+#endif
+
+  cur_proc_ptr = NULL;
 }
 
 /* The .aent and .ent directives.  */
 
 static void
-s_ent (aent)
+s_mips_ent (aent)
      int aent;
 {
   int number = 0;
-  procS *procP;
   symbolS *symbolP;
+  int maybe_text;
 
   symbolP = get_symbol ();
   if (*input_line_pointer == ',')
@@ -12158,141 +12191,128 @@ s_ent (aent)
   SKIP_WHITESPACE ();
   if (isdigit (*input_line_pointer) || *input_line_pointer == '-')
     number = get_number ();
-  if (now_seg != text_section)
+
+#ifdef BFD_ASSEMBLER
+  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+    maybe_text = 1;
+  else
+    maybe_text = 0;
+#else
+  if (now_seg != data_section && now_seg != bss_section)
+    maybe_text = 1;
+  else
+    maybe_text = 0;
+#endif
+
+  if (!maybe_text)
     as_warn (_(".ent or .aent not in text section."));
 
-  if (!aent && proc_lastP && proc_lastP->proc_end == NULL)
+  if (!aent && cur_proc_ptr)
     as_warn (_("missing `.end'"));
 
   if (!aent)
     {
-      procP = (procS *) obstack_alloc (&proc_frags, sizeof (*procP));
-      procP->proc_isym = symbolP;
-      procP->proc_reg_mask = 0;
-      procP->proc_reg_offset = 0;
-      procP->proc_fpreg_mask = 0;
-      procP->proc_fpreg_offset = 0;
-      procP->proc_frameoffset = 0;
-      procP->proc_framereg = 0;
-      procP->proc_pcreg = 0;
-      procP->proc_end = NULL;
-      procP->proc_next = NULL;
-      if (proc_lastP)
-	proc_lastP->proc_next = procP;
-      else
-	proc_rootP = procP;
-      proc_lastP = procP;
+      cur_proc_ptr = &cur_proc;
+      memset (cur_proc_ptr, '\0', sizeof (procS));
+
+      cur_proc_ptr->isym = symbolP;
 
       symbolP->bsym->flags |= BSF_FUNCTION;
 
       numprocs++;
     }
+
   demand_empty_rest_of_line ();
 }
 
-/* The .frame directive.  */
+/* The .frame directive. If the mdebug section is present (IRIX 5 native)
+   then ecoff.c (ecoff_directive_frame) is used. For embedded targets, 
+   s_mips_frame is used so that we can set the PDR information correctly.
+   We can't use the ecoff routines because they make reference to the ecoff 
+   symbol table (in the mdebug section).  */
 
-#if 0
 static void
-s_frame (x)
-     int x;
+s_mips_frame (ignore)
+     int ignore;
 {
-  char str[100];
-  symbolS *symP;
-  int frame_reg;
-  int frame_off;
-  int pcreg;
+#ifdef MIPS_STABS_ELF
 
-  frame_reg = tc_get_register (1);
-  if (*input_line_pointer == ',')
-    input_line_pointer++;
-  frame_off = get_absolute_expression ();
-  if (*input_line_pointer == ',')
-    input_line_pointer++;
-  pcreg = tc_get_register (0);
+  long val;
 
-  /* bob third eye */
-  assert (proc_rootP);
-  proc_rootP->proc_framereg = frame_reg;
-  proc_rootP->proc_frameoffset = frame_off;
-  proc_rootP->proc_pcreg = pcreg;
-  /* bob macho .frame */
-
-  /* We don't have to write out a frame stab for unoptimized code. */
-  if (!(frame_reg == FP && frame_off == 0))
+  if (cur_proc_ptr ==  (procS *) NULL)
     {
-      if (!proc_lastP)
-	as_warn (_("No .ent for .frame to use."));
-      (void) sprintf (str, "R%d;%d", frame_reg, frame_off);
-      symP = symbol_new (str, N_VFP, 0, frag_now);
-      S_SET_TYPE (symP, N_RMASK);
-      S_SET_OTHER (symP, 0);
-      S_SET_DESC (symP, 0);
-      symP->sy_forward = proc_lastP->proc_isym;
-      /* bob perhaps I should have used pseudo set */
+      as_warn (_(".frame outside of .ent"));
+      demand_empty_rest_of_line ();
+      return;
     }
+
+  cur_proc_ptr->frame_reg = tc_get_register (1);
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer++ != ','
+      || get_absolute_expression_and_terminator (&val) != ',')
+    {
+      as_warn (_("Bad .frame directive"));
+      --input_line_pointer;
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  cur_proc_ptr->frame_offset = val;
+  cur_proc_ptr->pc_reg = tc_get_register (0);
+
   demand_empty_rest_of_line ();
+#else
+  s_ignore (ignore);
+#endif /* MIPS_STABS_ELF */
 }
-#endif
 
-/* The .fmask and .mask directives.  */
+/* The .fmask and .mask directives. If the mdebug section is present 
+   (IRIX 5 native) then ecoff.c (ecoff_directive_mask) is used. For 
+   embedded targets, s_mips_mask is used so that we can set the PDR
+   information correctly. We can't use the ecoff routines because they 
+   make reference to the ecoff symbol table (in the mdebug section).  */
 
-#if 0
 static void
-s_mask (reg_type)
+s_mips_mask (reg_type)
      char reg_type;
 {
-  char str[100], *strP;
-  symbolS *symP;
-  int i;
-  unsigned int mask;
-  int off;
+#ifdef MIPS_STABS_ELF
+  long mask, off;
+  
+  if (cur_proc_ptr == (procS *) NULL)
+    {
+      as_warn (_(".mask/.fmask outside of .ent"));
+      demand_empty_rest_of_line ();
+      return;
+    }
 
-  mask = get_number ();
-  if (*input_line_pointer == ',')
-    input_line_pointer++;
+  if (get_absolute_expression_and_terminator (&mask) != ',')
+    {
+      as_warn (_("Bad .mask/.fmask directive"));
+      --input_line_pointer;
+      demand_empty_rest_of_line ();
+      return;
+    }
+
   off = get_absolute_expression ();
 
-  /* bob only for coff */
-  assert (proc_rootP);
   if (reg_type == 'F')
     {
-      proc_rootP->proc_fpreg_mask = mask;
-      proc_rootP->proc_fpreg_offset = off;
+      cur_proc_ptr->fpreg_mask = mask;
+      cur_proc_ptr->fpreg_offset = off;
     }
   else
     {
-      proc_rootP->proc_reg_mask = mask;
-      proc_rootP->proc_reg_offset = off;
+      cur_proc_ptr->reg_mask = mask;
+      cur_proc_ptr->reg_offset = off;
     }
 
-  /* bob macho .mask + .fmask */
-
-  /* We don't have to write out a mask stab if no saved regs. */
-  if (!(mask == 0))
-    {
-      if (!proc_lastP)
-	as_warn (_("No .ent for .mask to use."));
-      strP = str;
-      for (i = 0; i < 32; i++)
-	{
-	  if (mask % 2)
-	    {
-	      sprintf (strP, "%c%d,", reg_type, i);
-	      strP += strlen (strP);
-	    }
-	  mask /= 2;
-	}
-      sprintf (strP, ";%d,", off);
-      symP = symbol_new (str, N_RMASK, 0, frag_now);
-      S_SET_TYPE (symP, N_RMASK);
-      S_SET_OTHER (symP, 0);
-      S_SET_DESC (symP, 0);
-      symP->sy_forward = proc_lastP->proc_isym;
-      /* bob perhaps I should have used pseudo set */
-    }
+  demand_empty_rest_of_line ();
+#else
+  s_ignore (reg_type);
+#endif /* MIPS_STABS_ELF */
 }
-#endif
 
 /* The .loc directive.  */
 
@@ -12317,3 +12337,6 @@ s_loc (x)
   symbolP->sy_segment = now_seg;
 }
 #endif
+
+
+  

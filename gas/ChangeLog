@@ -1,3 +1,14 @@
+Thu Oct 22 10:03:15 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* config/tc-mips.c : support frame and regmask/fregmask when
+	  MIPS_STABS_ELF is specified.
+
+Wed Oct 21 11;34:51 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-sh.c (sh_fix_adjustable):  Only include if OBJ_ELF.
+        (md_apply_fix):  Don't return 1 for VTABLE relocs.
+        * config/tc-sh.h (obj_fix_adjustable):  Define only if OBJ_ELF.
+
 Tue Oct 20 11:18:28 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* doc/c-i386.texi: Replace occurences of "opcode" with
