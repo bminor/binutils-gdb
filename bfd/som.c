@@ -1362,10 +1362,7 @@ hppa_som_reloc (abfd, reloc_entry, symbol_in, data,
 }
 
 /* Given a generic HPPA relocation type, the instruction format,
-   and a field selector, return an appropriate SOM reloation.
-
-   FIXME.  Need to handle %RR, %LR and the like as field selectors.
-   These will need to generate multiple SOM relocations.  */ 
+   and a field selector, return one or more appropriate SOM relocations.  */
 
 int **
 hppa_som_gen_reloc_type (abfd, base_type, format, field)
@@ -1938,8 +1935,6 @@ som_prep_headers (abfd)
       file_hdr->entry_offset = 0;
     }
   
-  /* FIXME.  I do not know if we ever need to put anything other
-     than zero in this field.  */
   file_hdr->presumed_dp = 0;
 
   /* Now iterate over the sections translating information from
@@ -2248,9 +2243,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		 then dump the current buffer contents now.  Also reinitialize
 		 the relocation queue. 
 
-		 FIXME.  We assume here that no BFD relocation will expand
-		 to more than 100 bytes of SOM relocations.  This should (?!?)
-		 be quite safe.  */
+		 No single BFD relocation could ever translate into more
+		 than 100 bytes of SOM relocations (20bytes is probably the
+		 upper limit, but leave lots of space for growth).  */
 	      if (p - tmp_space + 100 > SOM_TMP_BUFSIZE)
 		{
 		  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)

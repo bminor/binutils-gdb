@@ -1,3 +1,7 @@
+Tue Feb 15 22:27:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c: Remove FIXMEs for things which have been dealt with.
+
 Tue Feb 15 19:39:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* section.c (bfd_get_section_contents): Since this function reads
