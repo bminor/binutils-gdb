@@ -6282,7 +6282,7 @@ elfcore_grok_win32pstatus (abfd, note)
   if (note->descsz < sizeof (pstatus))
     return true;
 
-  memcpy (&pstatus, note->descdata, note->descsz);
+  memcpy (&pstatus, note->descdata, sizeof (pstatus));
 
   switch (pstatus.data_type)
     {
