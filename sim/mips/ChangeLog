@@ -1,3 +1,7 @@
+Thu Oct 16 10:31:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (build_instruction): Use FPR_STATE not fpr_state.
+	
 Thu Oct 16 10:31:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gencode.c (build_instruction): For "FPSQRT", output correct

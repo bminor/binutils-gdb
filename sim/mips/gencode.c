@@ -3323,7 +3323,7 @@ build_instruction (doisa, features, mips16, insn)
 	   printf("      FGR[fs] = (SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft]));\n");
 	   printf("     else\n");
 	   printf("      FGR[fs] = WORD64LO(GPR[ft]);\n");
-	   printf("     fpr_state[fs] = fmt_uninterpreted;\n");
+	   printf("     FPR_STATE[fs] = fmt_uninterpreted;\n");
 	 }
        } else if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
 	 if (doisa < 4) {
@@ -3342,14 +3342,14 @@ build_instruction (doisa, features, mips16, insn)
 	 } else {
 	   printf("     if (SizeFGR() == 64) {\n");
 	   printf("      FGR[fs] = GPR[ft];\n");
-	   printf("      fpr_state[fs] = fmt_uninterpreted;\n");
+	   printf("      FPR_STATE[fs] = fmt_uninterpreted;\n");
 	   printf("     } else\n");
 	   printf("      if ((fs & 0x1) == 0)\n");
 	   printf("       {\n");
 	   printf("        FGR[fs + 1] = WORD64HI(GPR[ft]);\n");
 	   printf("        FGR[fs] = WORD64LO(GPR[ft]);\n");
-	   printf("        fpr_state[fs + 1] = fmt_uninterpreted;\n");
-	   printf("        fpr_state[fs] = fmt_uninterpreted;\n");
+	   printf("        FPR_STATE[fs + 1] = fmt_uninterpreted;\n");
+	   printf("        FPR_STATE[fs] = fmt_uninterpreted;\n");
 	   printf("       }\n");
 	   if (features & FEATURE_WARN_RESULT) {
 	     printf("      else\n");
@@ -3457,8 +3457,8 @@ build_instruction (doisa, features, mips16, insn)
      printf("   SignalException(ReservedInstruction,instruction);\n");
      printf("  else\n");
      printf("   StoreFPR(destreg,format,%s(SquareRoot(ValueFPR(fs,format),format)%s));\n",
-          ((insn->flags & RECIP) ? "Recip" : ""),
-          ((insn->flags & RECIP) ? ",format" : ""));
+	    ((insn->flags & RECIP) ? "Recip" : ""),
+	    ((insn->flags & RECIP) ? ",format" : ""));
      break ;
 
     case FPCEIL:
