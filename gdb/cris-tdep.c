@@ -4126,7 +4126,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   tdep->cris_version = cris_version;
   tdep->cris_mode = cris_mode;

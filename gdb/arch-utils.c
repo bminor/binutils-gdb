@@ -228,7 +228,7 @@ no_op_reg_to_regnum (int reg)
 }
 
 CORE_ADDR
-init_frame_pc_default (int fromleaf, struct frame_info *prev)
+deprecated_init_frame_pc_default (int fromleaf, struct frame_info *prev)
 {
   if (fromleaf && DEPRECATED_SAVED_PC_AFTER_CALL_P ())
     return DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev));
