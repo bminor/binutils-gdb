@@ -1,3 +1,8 @@
+2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+
+	* i386-dis.c (GRPPLOCK): Delete.
+	(grps): Detele GRPPLOCK entry.
+
 2004-03-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (OP_M, OP_0f0e, OP_0fae, NOP_Fixup): New functions.

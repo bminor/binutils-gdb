@@ -393,8 +393,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0
 #define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
 #define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0
-#define GRPPLOCK  NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
-#define GRPPADLCK NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0
+#define GRPPADLCK NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
 
 #define PREGRP0   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  0, NULL, 0
 #define PREGRP1   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  1, NULL, 0
@@ -1453,17 +1452,6 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
-    { "(bad)",	XX, XX, XX },
-    { "(bad)",	XX, XX, XX },
-  },
-  /* GRPPLOCK */
-  {
-    { "xstore", XX, XX, XX },
-    { "xcryptecb", XX, XX, XX },
-    { "xcryptcbc", XX, XX, XX },
-    { "(bad)",	XX, XX, XX },
-    { "xcryptcfb", XX, XX, XX },
-    { "xcryptofb", XX, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
   },
