@@ -1,5 +1,7 @@
 2003-11-10  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.h, arch-utils.c: Fix typo in comment.
+
 	* arch-utils.c (deprecated_select_gdbarch_hack): Delete function.
 	(gdbarch_from_bfd): Call gdbarch_find_by_info.
 	(set_gdbarch_from_file): Call

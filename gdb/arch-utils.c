@@ -686,7 +686,7 @@ gdbarch_info_init (struct gdbarch_info *info)
   info->osabi = GDB_OSABI_UNINITIALIZED;
 }
 
-/* Similar it init, but this time fill in the blanks.  Information is
+/* Similar to init, but this time fill in the blanks.  Information is
    obtained from the specified architecture, global "set ..." options,
    and explicitly initialized INFO fields.  */
 
