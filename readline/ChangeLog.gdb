@@ -1,3 +1,8 @@
+2004-02-19  Andrew Cagney  <cagney@redhat.com>
+
+	* config.guess: Update from version 2003-06-12 to 2004-02-16.
+	* config.sub: Update from version 2003-06-13 to 2004-02-16.
+
 2004-01-27  Elena Zannoni  <ezannoni@redhat.com>
 
         Merge in official patches to readline-4.3 from
