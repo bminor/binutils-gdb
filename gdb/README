@@ -445,6 +445,12 @@ Due to a problem with ltconfig and long argument lines, GDB does not
 configure on HP/UX 11.00.
 
 
+alpha-dec-osf5.1
+
+Due to a problem in GDB's symbol table reader, GDB builds but does not
+run on this platform.  See gdb/237.
+
+
 Remote debugging
 =================
 
