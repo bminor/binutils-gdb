@@ -1704,7 +1704,7 @@ map_program_segments (abfd)
   char *done;
   int i, n_left = 0;
   file_ptr lowest_offset = 0;
-  struct seg_info *seg = 0;
+  struct seg_info *seg = NULL;
 
   done = (char *) alloca (i_ehdrp->e_shnum);
   memset (done, 0, i_ehdrp->e_shnum);
@@ -1739,6 +1739,8 @@ map_program_segments (abfd)
       int low_sec = 0;
       int mem_size;
       int file_size = 0;
+      struct seg_info *snew;
+      struct seg_info **s_ptr;
 
       for (i = 1; i < i_ehdrp->e_shnum; i++)
 	{
@@ -1753,21 +1755,21 @@ map_program_segments (abfd)
 	abort ();
       /* So now we know the lowest vma of any unassigned sections; start
 	 a segment there.  */
-      {
-	struct seg_info *s;
-	s = (struct seg_info *) bfd_alloc (abfd, sizeof (struct seg_info));
-	if (!s)
-	  {
-	    bfd_set_error (bfd_error_no_memory);
-	    return false;
-	  }
-	s->next = seg;
-	seg = s;
-      }
-      seg->low = lowest_vma;
+      snew = (struct seg_info *) bfd_alloc (abfd, sizeof (struct seg_info));
+      if (!snew)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      s_ptr = &seg;
+      while (*s_ptr != (struct seg_info *) NULL)
+	s_ptr = &(*s_ptr)->next;
+      *s_ptr = snew;
+      snew->next = NULL;
+      snew->low = lowest_vma;
       i_shdrp = i_shdrpp[low_sec];
-      seg->start_pos = i_shdrp->sh_offset;
-      seg->sh_flags = i_shdrp->sh_flags;
+      snew->start_pos = i_shdrp->sh_offset;
+      snew->sh_flags = i_shdrp->sh_flags;
       done[low_sec] = 1, n_left--;
       mem_size = i_shdrp->sh_size;
       high = lowest_vma + i_shdrp->sh_size;
@@ -1783,7 +1785,7 @@ map_program_segments (abfd)
 	    continue;
 	  i_shdrp = i_shdrpp[i];
 	  /* position of next byte on disk */
-	  f1 = seg->start_pos + file_size;
+	  f1 = snew->start_pos + file_size;
 	  if (i_shdrp->sh_type == SHT_PROGBITS)
 	    {
 	      if (i_shdrp->sh_offset - f1 != i_shdrp->sh_addr - high)
@@ -1800,7 +1802,7 @@ map_program_segments (abfd)
 	      bfd_vma page1, page2;
 	      bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
 
-	      /* page number in address space of current end of seg */
+	      /* page number in address space of current end of snew */
 	      page1 = (high - 1 + maxpagesize - 1) / maxpagesize;
 	      /* page number in address space of start of this section */
 	      page2 = (i_shdrp->sh_addr + maxpagesize - 1) / maxpagesize;
@@ -1810,13 +1812,13 @@ map_program_segments (abfd)
 	    }
 	  done[i] = 1, n_left--;
 	  if (i_shdrp->sh_type == SHT_PROGBITS)
-	    file_size = i_shdrp->sh_offset + i_shdrp->sh_size - seg->start_pos;
-	  mem_size = i_shdrp->sh_addr + i_shdrp->sh_size - seg->low;
+	    file_size = i_shdrp->sh_offset + i_shdrp->sh_size - snew->start_pos;
+	  mem_size = i_shdrp->sh_addr + i_shdrp->sh_size - snew->low;
 	  high = i_shdrp->sh_addr + i_shdrp->sh_size;
 	  i = 0;
 	}
-      seg->file_size = file_size;
-      seg->mem_size = mem_size;
+      snew->file_size = file_size;
+      snew->mem_size = mem_size;
     }
   /* Now do something with the list of segments we've built up.  */
   {
