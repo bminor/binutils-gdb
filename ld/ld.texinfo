@@ -2930,7 +2930,7 @@ You may use the @code{FILL} command to set the fill pattern for the
 current section.  It is followed by an expression in parentheses.  Any
 otherwise unspecified regions of memory within the section (for example,
 gaps left due to the required alignment of input sections) are filled
-with the four least significant bytes of the expression, repeated as
+with the value of the expression, repeated as
 necessary.  A @code{FILL} statement covers memory locations after the
 point at which it occurs in the section definition; by including more
 than one @code{FILL} statement, you can have different fill patterns in
@@ -2946,7 +2946,8 @@ The @code{FILL} command is similar to the @samp{=@var{fillexp}} output
 section attribute (@pxref{Output Section Fill}), but it only affects the
 part of the section following the @code{FILL} command, rather than the
 entire section.  If both are used, the @code{FILL} command takes
-precedence.
+precedence.  See (@pxref{Output Section Fill}) for details on the fill
+expression.
 
 @node Output Section Keywords
 @subsection Output section keywords
@@ -3225,8 +3226,14 @@ You can set the fill pattern for an entire section by using
 @samp{=@var{fillexp}}.  @var{fillexp} is an expression
 (@pxref{Expressions}).  Any otherwise unspecified regions of memory
 within the output section (for example, gaps left due to the required
-alignment of input sections) will be filled with the four least
-significant bytes of the value, repeated as necessary.
+alignment of input sections) will be filled with the value, repeated as
+necessary.  If the fill expression is a simple hex number, ie. a string
+of hex digit starting with "0x" and without a trailing "k" or "M", then
+an arbitrarily long sequence of hex digits can be used to specify the
+fill pattern;  Leading zeros become part of the pattern too.  For all
+other cases, including extra parentheses or a unary '+', the fill
+pattern is the four least significant bytes of the value of the
+expression.  In all cases, the number is big-endian.
 
 You can also change the fill value with a @code{FILL} command in the
 output section commands; see @ref{Output Section Data}.

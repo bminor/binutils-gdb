@@ -1,6 +1,8 @@
 2002-02-15  Alan Modra  <amodra@bigpond.net.au>
 
 	Support arbitrary length fill patterns.
+	* ld.texinfo (Output Section Fill): Describe fill expressions.
+	(FILL): Refer to the above.
 	* ldexp.h (etree_value_type): Add "str" field.
 	(union etree_union): Add "str" to "value" struct.
 	(exp_bigintop): Declare.
@@ -59,7 +61,7 @@
 
 2002-02-14  Phil Edwards  <pme@gcc.gnu.org>
 
-	* ld.texinfo (VERSION scripts):  Symbol names are globbing patterns.   
+	* ld.texinfo (VERSION scripts):  Symbol names are globbing patterns.
 	* ldgram.y (lang_new_vers_regex):  Rename to lang_new_vers_pattern;
 	the pattern in question is not a regexp.
 	* ldlang.c:  Likewise.
