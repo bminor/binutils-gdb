@@ -1,3 +1,9 @@
+2004-06-07  Daniel Jacobowitz  <dan@debian.org>
+
+	From:  Albert Chin-A-Young  <china@thewrittenword.com>
+	* bfd/elf-bfd.h (struct eh_cie_fde): Convert unsigned char bitfields
+	to unsigned int.
+
 2004-05-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Undo the last
