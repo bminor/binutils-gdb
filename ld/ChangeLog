@@ -1,3 +1,10 @@
+2002-09-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (DATA_ADDR): Define.
+	* emulparams/elf64_aix.sh (DATA_ADDR): Don't use a fixed address
+	for start of .data, instead align up to 256M boundary.
+	* scripttempl/aix.sc: Likewise.
+
 2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:

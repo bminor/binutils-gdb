@@ -24,7 +24,7 @@ SECTIONS
     *(.tb)
     ${RELOCATING+PROVIDE (_etext = .);}
   }
-  . = 0x20000000;
+  . = ALIGN (0x10000000);
   .data . : {
     ${RELOCATING+PROVIDE (_data = .);}
     *(.data)
