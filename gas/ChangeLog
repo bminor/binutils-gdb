@@ -1,3 +1,9 @@
+2003-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* input-file.c (input_file_open): Remove call to stat().
+	Add a check for getc() failing, and catch the case where the
+	failure is due to an attempt to read a directory.
+
 2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (mips_need_elf_addend_fixup): Delete.

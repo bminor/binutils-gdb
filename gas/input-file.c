@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
+#include <errno.h>
 #include "as.h"
 #include "input-file.h"
 #include "safe-ctype.h"
@@ -135,19 +135,6 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
   assert (filename != 0);	/* Filename may not be NULL.  */
   if (filename[0])
     {
-      struct stat statbuf;
-
-      if (stat (filename, &statbuf) < 0)
-	{
-	  as_bad (_("%s: No such file"), filename);
-	  return;
-	}
-      else if (! S_ISREG (statbuf.st_mode))
-	{
-	  as_bad (_("'%s' is not an ordinary file"), filename);
-	  return;
-	}
-
       f_in = fopen (filename, FOPEN_RT);
       file_name = filename;
     }
@@ -159,14 +146,32 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
       file_name = _("{standard input}");
     }
 
-  if (f_in == (FILE *) 0)
+  if (f_in)
+    c = getc (f_in);
+
+  if (f_in == NULL || ferror (f_in))
     {
-      as_bad (_("can't open %s for reading"), file_name);
-      as_perror ("%s", file_name);
+      switch (errno)
+	{
+	case ENOENT:
+	  as_bad (_("%s: no such file"), filename);
+	  break;
+	case EISDIR:
+	  as_bad (_("%s: is a directory"), filename);
+	  break;
+	default:
+          as_bad (_("can't open %s for reading"), file_name);
+          as_perror ("%s", file_name);
+        }
+
+      if (f_in)
+	{
+	  fclose (f_in);
+	  f_in = NULL;
+	}
       return;
     }
 
-  c = getc (f_in);
   if (c == '#')
     {
       /* Begins with comment, may not want to preprocess.  */
