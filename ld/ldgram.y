@@ -88,10 +88,10 @@ boolean ldgram_had_equals = false;
   
 }
 
-%type <etree> exp  opt_exp  exp_head
+%type <etree> exp  opt_exp  
 %type <integer> fill_opt opt_block
 %type <name> memspec_opt
-%token <integer> INT CHAR 
+%token <integer> INT  
 %token <name> NAME
 %type  <integer> length
 
@@ -105,30 +105,32 @@ boolean ldgram_had_equals = false;
 %left <token>  EQ NE
 %left  <token> '<' '>' LE GE
 %left  <token> LSHIFT RSHIFT
+
 %left  <token> '+' '-'
 %left  <token> '*' '/' '%'
+
+/*%token <token> '+' '-' '*' '/' '%'*/
 %right UNARY
 %left <token> '('
 %token <token> ALIGN_K BLOCK LONG SHORT BYTE
 %token SECTIONS  
 %token '{' '}'
-%token ALIGNMENT SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
-%token NEXT SIZEOF ADDR  SCRIPT ENDSCRIPT SIZEOF_HEADERS
+%token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
+%token SIZEOF_HEADERS
 %token MEMORY 
-%token DSECT NOLOAD COPY INFO OVERLAY 
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
 %token OPTION_format  OPTION_F OPTION_u
-
+%token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
 %token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT 
-%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_A OPTION_R
+%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
-%token LENGTH  BIND SUBSECTION_ALIGN   CREATE_OBJECT_SYMBOLS INPUT OUTPUT
-%type <token> assign_op SIZEOF NEXT ADDR 
-%type <etree> assignment
+%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  
+%type <token> assign_op 
+
 %type <name>  filename
 
 %{
@@ -284,7 +286,7 @@ command_line_option:
 			{
 			}
 		NAME 	 '='
-		exp_head 
+		exp 
 			{
 			lang_add_assignment(exp_assop($4,$3,$5));
 			}	
@@ -405,12 +407,12 @@ statement:
  		  lang_add_attribute(lang_object_symbols_statement_enum); }
 
 	|	statement input_section_spec
-        |       statement length '(' exp_head ')'
+        |       statement length '(' exp ')'
         	        {
 			lang_add_data($2,$4);
 			}
   
-	|	statement FILL '(' exp_head ')'
+	|	statement FILL '(' exp ')'
 			{
 			  lang_add_fill
 			    (exp_get_value_int($4,
@@ -431,7 +433,7 @@ length:
 	;
 
 fill_opt:
-          '=' exp_head
+          '=' exp
 		{
 		  $$ =	 exp_get_value_int($2,
 					   0,
@@ -468,12 +470,11 @@ end:	';' | ','
 
 
 assignment:
-	
-		NAME '=' exp_head 
+		NAME '=' exp 
 		{
 		  lang_add_assignment(exp_assop($2,$1,$3));
 		}
-	|	NAME assign_op exp_head 
+	|	NAME assign_op exp 
 		{
 		  lang_add_assignment(exp_assop('=',$1,exp_binop($2,exp_nameop(NAME,$1),$3)));
 		}
@@ -657,18 +658,18 @@ opt_things:
 	}
 	;
 
-exp_head:
-	exp { $$ = $1; }
-	;
+
+
+
 
 opt_exp:
-		exp_head
+		exp
 			{ $$ = $1; }
 	|		{ $$= (etree_type *)NULL; }
 	;
 
 opt_block:
-		BLOCK '(' exp_head ')'
+		BLOCK '(' exp ')'
 		{ $$ = exp_get_value_int($3,
 					 1L,
 					 "block",

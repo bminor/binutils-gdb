@@ -65,7 +65,6 @@ token_code_type code;
   } table[] =
     {
       INT,	"int",
-      CHAR,"char",
       NAME,"NAME",
       PLUSEQ,"+=",
       MINUSEQ,"-=",
@@ -86,17 +85,16 @@ token_code_type code;
       ALIGN_K,"ALIGN",
       BLOCK,"BLOCK",
       SECTIONS,"SECTIONS",
-      ALIGNMENT,"ALIGNMENT",
       SIZEOF_HEADERS,"SIZEOF_HEADERS",
       NEXT,"NEXT",
       SIZEOF,"SIZEOF",
       ADDR,"ADDR",
       MEMORY,"MEMORY",
-      DSECT,"DSECT",
-      NOLOAD,"NOLOAD",
-      COPY,"COPY",
-      INFO,"INFO",
-      OVERLAY,"OVERLAY",
+
+
+
+
+
       DEFINED,"DEFINED",
       TARGET_K,"TARGET",
       SEARCH_DIR,"SEARCH_DIR",
