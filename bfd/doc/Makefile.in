@@ -127,7 +127,8 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(srcdir)/../reloc.c		\
 	$(srcdir)/../cpu-h8300.c	\
 	$(srcdir)/../cpu-i960.c		\
-	$(srcdir)/../archures.c		
+	$(srcdir)/../archures.c		\
+	$(srcdir)/chew
 	cat $(srcdir)/../libbfd-in.h >libbfd.h 
 	$(MKDOC) -i < $(srcdir)/../init.c >>libbfd.h
 	$(MKDOC) -i < $(srcdir)/../libbfd.c >>libbfd.h
