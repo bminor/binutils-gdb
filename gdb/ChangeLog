@@ -1,3 +1,12 @@
+Tue May 25 00:42:39 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* hppa-pinsn.c: Define OLD_TABLE before including opcode/hppa.h.
+
+Mon May 24 13:55:14 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* config/i386/{i386lynx.mh i386lynx.mt nm-i386lynx.h tm-i386lynx.h
+	xm-i386lynx.h}:  New configuration for Lynx.
+
 Mon May 24 10:01:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mipsread.c (parse_symbol): Deal with scVar and scVarRegister.

@@ -1,3 +1,20 @@
+Tue May 25 00:39:40 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* hppa.h: Use new version from Utah if OLD_TABLE isn't defined;
+	gdb will define it for now.
+
+Mon May 24 15:20:06 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* sparc.h: Don't end enumerator list with comma.
+
+Fri May 14 15:15:50 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Based on patches from davidj@ICSI.Berkeley.EDU (David Johnson):
+	* mips.h (OP_MASK_COPZ, OP_SH_COPZ): Define.
+	("bc2t"): Correct typo.
+	("[ls]wc[023]"): Use T rather than t.
+	("c[0123]"): Define general coprocessor instructions.
+
 Mon May 10 06:02:25 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* m68k.h: Move split point for gcc compilation more towards

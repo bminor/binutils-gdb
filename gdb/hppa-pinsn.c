@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
+#define OLD_TABLE
 #include "opcode/hppa.h"
 
 static char *control_reg[] =
