@@ -42,32 +42,30 @@ struct sgi_core_struct
 #define core_command(bfd) (core_hdr(bfd)->cmd)
 
 static asection *make_bfd_asection
-  PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr));
+  (bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr);
 static const bfd_target *irix_core_core_file_p
-  PARAMS ((bfd *));
+  (bfd *);
 static char *irix_core_core_file_failing_command
-  PARAMS ((bfd *));
+  (bfd *);
 static int irix_core_core_file_failing_signal
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean irix_core_core_file_matches_executable_p
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static void swap_abort
-  PARAMS ((void));
+  (void);
 #ifdef CORE_MAGIC64
 static int do_sections64
-  PARAMS ((bfd *, struct coreout *));
+  (bfd *, struct coreout *);
 #endif
 static int do_sections
-  PARAMS ((bfd *, struct coreout *));
+  (bfd *, struct coreout *);
 
 /* Helper function for irix_core_core_file_p:
    32-bit and 64-bit versions.  */
 
 #ifdef CORE_MAGIC64
 static int
-do_sections64 (abfd, coreout)
-     bfd * abfd;
-     struct coreout * coreout;
+do_sections64 (bfd *abfd, struct coreout *coreout)
 {
   struct vmap64 vmap;
   char *secname;
@@ -115,9 +113,7 @@ do_sections64 (abfd, coreout)
 /* 32-bit version.  */
 
 static int
-do_sections (abfd, coreout)
-     bfd * abfd;
-     struct coreout *coreout;
+do_sections (bfd *abfd, struct coreout *coreout)
 {
   struct vmap vmap;
   char *secname;
@@ -161,13 +157,12 @@ do_sections (abfd, coreout)
 }
 
 static asection *
-make_bfd_asection (abfd, name, flags, size, vma, filepos)
-     bfd *abfd;
-     const char *name;
-     flagword flags;
-     bfd_size_type size;
-     bfd_vma vma;
-     file_ptr filepos;
+make_bfd_asection (bfd *abfd,
+                   const char *name,
+                   flagword flags,
+                   bfd_size_type size,
+                   bfd_vma vma,
+                   file_ptr filepos)
 {
   asection *asect;
 
@@ -185,8 +180,7 @@ make_bfd_asection (abfd, name, flags, size, vma, filepos)
 }
 
 static const bfd_target *
-irix_core_core_file_p (abfd)
-     bfd *abfd;
+irix_core_core_file_p (bfd *abfd)
 {
   int val;
   struct coreout coreout;
@@ -273,30 +267,27 @@ irix_core_core_file_p (abfd)
 }
 
 static char *
-irix_core_core_file_failing_command (abfd)
-     bfd *abfd;
+irix_core_core_file_failing_command (bfd *abfd)
 {
   return core_command (abfd);
 }
 
 static int
-irix_core_core_file_failing_signal (abfd)
-     bfd *abfd;
+irix_core_core_file_failing_signal (bfd *abfd)
 {
   return core_signal (abfd);
 }
 
 static bfd_boolean
-irix_core_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd ATTRIBUTE_UNUSED;
-     bfd *exec_bfd ATTRIBUTE_UNUSED;
+irix_core_core_file_matches_executable_p (bfd *core_bfd ATTRIBUTE_UNUSED,
+                                          bfd *exec_bfd ATTRIBUTE_UNUSED)
 {
   return TRUE;			/* XXX - FIXME */
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
-swap_abort()
+swap_abort(void)
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }
