@@ -56,22 +56,25 @@ struct regcache_descr
   long sizeof_raw_registers;
   long sizeof_raw_register_valid_p;
 
-  /* Offset, in bytes, of reach register in the raw register cache.
-     Pseudo registers have an offset even though they don't
-     (shouldn't) have a correspoinding space in the register cache.
-     It is to keep existing code, that relies on
-     write/write_register_bytes working.  */
+  /* The cooked register space.  Each cooked register in the range
+     [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
+     register.  The remaining [NR_RAW_REGISTERS
+     .. NR_COOKED_REGISTERS) (a.k.a. pseudo regiters) are mapped onto
+     both raw registers and memory by the architecture methods
+     gdbarch_register_read and gdbarch_register_write.  */
+  int nr_cooked_registers;
+
+  /* Offset and size (in 8 bit bytes), of reach register in the
+     register cache.  All registers (including those in the range
+     [NR_RAW_REGISTERS .. NR_COOKED_REGISTERS) are given an offset.
+     Assigning all registers an offset makes it possible to keep
+     legacy code, such as that found in read_register_bytes() and
+     write_register_bytes() working.  */
   long *register_offset;
-
-  /* The cooked / frame / virtual register space.  The registers in
-     the range [0..NR_RAW_REGISTERS) should be mapped directly onto
-     the corresponding raw register.  The next [NR_RAW_REGISTERS
-     .. NR_REGISTERS) should have been mapped, via
-     gdbarch_register_read/write onto either raw registers or memory.  */
-  int nr_registers;
   long *sizeof_register;
-  long max_register_size;
 
+  /* Useful constant.  Largest of all the registers.  */
+  long max_register_size;
 };
 
 static void *
@@ -89,19 +92,19 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch)
 
   /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
      in the register buffer.  Unfortunatly some architectures do.  */
-  descr->nr_registers = NUM_REGS + NUM_PSEUDO_REGS;
-  descr->nr_raw_registers = descr->nr_registers;
-  descr->sizeof_raw_register_valid_p = descr->nr_registers;
+  descr->nr_cooked_registers = NUM_REGS + NUM_PSEUDO_REGS;
+  descr->nr_raw_registers = descr->nr_cooked_registers;
+  descr->sizeof_raw_register_valid_p = descr->nr_cooked_registers;
 
   /* FIXME: cagney/2002-05-11: Instead of using REGISTER_BYTE() this
      code should compute the offets et.al. at runtime.  This currently
      isn't possible because some targets overlap register locations -
      see the mess in read_register_bytes() and write_register_bytes()
      registers.  */
-  descr->sizeof_register = XCALLOC (descr->nr_registers, long);
-  descr->register_offset = XCALLOC (descr->nr_registers, long);
+  descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
+  descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
   descr->max_register_size = 0;
-  for (i = 0; i < descr->nr_registers; i++)
+  for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       descr->register_offset[i] = REGISTER_BYTE (i);
       descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
@@ -111,7 +114,7 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch)
 
   /* Come up with the real size of the registers buffer.  */
   descr->sizeof_raw_registers = REGISTER_BYTES; /* OK use.  */
-  for (i = 0; i < descr->nr_registers; i++)
+  for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       long regend;
       /* Keep extending the buffer so that there is always enough
@@ -148,10 +151,10 @@ init_regcache_descr (struct gdbarch *gdbarch)
   descr->gdbarch = gdbarch;
   descr->legacy_p = 0;
 
-  /* Total size of the register space.  The raw registers should
-     directly map onto the raw register cache while the pseudo's are
+  /* Total size of the register space.  The raw registers are mapped
+     directly onto the raw register cache while the pseudo's are
      either mapped onto raw-registers or memory.  */
-  descr->nr_registers = NUM_REGS + NUM_PSEUDO_REGS;
+  descr->nr_cooked_registers = NUM_REGS + NUM_PSEUDO_REGS;
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
@@ -170,10 +173,10 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   {
     long offset = 0;
-    descr->sizeof_register = XCALLOC (descr->nr_registers, long);
-    descr->register_offset = XCALLOC (descr->nr_registers, long);
+    descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
+    descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
     descr->max_register_size = 0;
-    for (i = 0; i < descr->nr_registers; i++)
+    for (i = 0; i < descr->nr_cooked_registers; i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
 	descr->register_offset[i] = offset;
@@ -198,7 +201,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
      don't go into infinite recursion trying to, again, create the
      regcache.  */
   set_gdbarch_data (gdbarch, regcache_descr_handle, descr);
-  for (i = 0; i < descr->nr_registers; i++)
+  for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       gdb_assert (descr->sizeof_register[i] == REGISTER_RAW_SIZE (i));
       gdb_assert (descr->sizeof_register[i] == REGISTER_VIRTUAL_SIZE (i));
@@ -716,7 +719,12 @@ read_register_gen (int regnum, char *buf)
       legacy_read_register_gen (regnum, buf);
       return;
     }
-  gdbarch_register_read (current_gdbarch, regnum, buf);
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < current_regcache->descr->nr_cooked_registers);
+  if (regnum < current_regcache->descr->nr_raw_registers)
+    regcache_raw_read (current_regcache, regnum, buf);
+  else
+    gdbarch_register_read (current_gdbarch, regnum, buf);
 }
 
 
@@ -825,7 +833,12 @@ write_register_gen (int regnum, char *buf)
       legacy_write_register_gen (regnum, buf);
       return;
     }
-  gdbarch_register_write (current_gdbarch, regnum, buf);
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < current_regcache->descr->nr_cooked_registers);
+  if (regnum < current_regcache->descr->nr_raw_registers)
+    regcache_raw_write (current_regcache, regnum, buf);
+  else
+    gdbarch_register_write (current_gdbarch, regnum, buf);
 }
 
 /* Copy INLEN bytes of consecutive data from memory at MYADDR

@@ -1,3 +1,14 @@
+2002-07-29  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (struct regcache_descr): Rename nr_registers to
+	nr_cooked_registers.  Revise comments describing the structure
+	member fields.
+	(init_regcache_descr): Update.
+	(init_legacy_regcache_descr): Update.
+	(read_register_gen, write_register_gen): When a cooked register in
+	the raw register range, directly access the value from the raw
+	register cache.
+
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* z8k-tdep.c: Do not include "obstack.h".
