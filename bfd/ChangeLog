@@ -1,3 +1,9 @@
+2003-06-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_size_dynamic_sections): Create .interp section
+	and DT_DEBUG dynamic tag even for position independent executables.
+	* elf64-sh64.c (sh64_elf64_size_dynamic_sections): Likewize.
+
 2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config.bfd: Move obsolete entries out of the range of the
