@@ -1,3 +1,8 @@
+2001-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf-strtab.c (_bfd_elf_strtab_finalize): Make first variable i
+	size_t.  Rename second i to j.
+
 Sat Nov 10 08:56:02 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* binary.c: Include safe-ctype.h after bfd.h and sysdep.h.

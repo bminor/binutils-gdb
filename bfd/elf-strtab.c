@@ -349,7 +349,13 @@ _bfd_elf_strtab_finalize (tab)
 {
   struct elf_strtab_hash_entry **array, **a, **end, *e;
   htab_t lasttab = NULL, last4tab = NULL;
-  bfd_size_type size, amt, i;
+  bfd_size_type size, amt;
+
+  /* GCC 2.91.66 (egcs-1.1.2) on i386 miscompiles this function when i is
+     a 64-bit bfd_size_type: a 64-bit target or --enable-64-bit-bfd.
+     Besides, indexing with a long long wouldn't give anything but extra
+     cycles.  */
+  size_t i;
 
   /* Now sort the strings by length, longest first.  */
   array = NULL;
@@ -380,7 +386,7 @@ _bfd_elf_strtab_finalize (tab)
     {
       register hashval_t hash;
       unsigned int c;
-      unsigned int i;
+      unsigned int j;
       const unsigned char *s;
       PTR *p;
 
@@ -389,7 +395,7 @@ _bfd_elf_strtab_finalize (tab)
 	{
 	  s = e->root.string + e->len - 1;
 	  hash = 0;
-	  for (i = 0; i < 4; i++)
+	  for (j = 0; j < 4; j++)
 	    {
 	      c = *--s;
 	      hash += c + (c << 17);
