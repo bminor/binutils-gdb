@@ -1,3 +1,8 @@
+2000-11-07  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-dis.in (print_insn): All insns which can fit into insn_value
+	must be loaded there in their entirety.
+
 2000-10-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* sparc-dis.c (v9a_asr_reg_names): Add v9b ASRs.

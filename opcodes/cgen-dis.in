@@ -281,9 +281,10 @@ print_insn (cd, pc, info, buf, buflen)
 	     machine insn and extracts the fields.  The second pass prints
 	     them.  */
 
-#if CGEN_INT_INSN_P
-	  /* Make sure the entire insn is loaded into insn_value.  */
-	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize)
+	  /* Make sure the entire insn is loaded into insn_value, if it
+	     can fit.  */
+	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
+	      (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	    {
 	      unsigned long full_insn_value;
 	      int rc = read_insn (cd, pc, info, buf,
@@ -295,10 +296,9 @@ print_insn (cd, pc, info, buf, buflen)
 		(cd, insn, &ex_info, full_insn_value, &fields, pc);
 	    }
 	  else
-#endif
+	    length = CGEN_EXTRACT_FN (cd, insn)
+	      (cd, insn, &ex_info, insn_value, &fields, pc);
 
-	  length = CGEN_EXTRACT_FN (cd, insn)
-	    (cd, insn, &ex_info, insn_value, &fields, pc);
 	  /* length < 0 -> error */
 	  if (length < 0)
 	    return length;
