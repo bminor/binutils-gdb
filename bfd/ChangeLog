@@ -1,3 +1,8 @@
+Mon Jan 10 09:06:21 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (hppa_som_gen_reloc_type): Fix handling of LT and RT
+	field selectors.
+
 Sun Jan  9 04:32:25 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* config/i386-netbsd.mt (SELECT_VECS): Include i386bsd_vec.
