@@ -38,10 +38,12 @@ config
 config.sub
 configure
 configure.in
+diff
 gas
 gcc
 gdb
 gnulib
+grep
 include
 ld
 libiberty
@@ -56,7 +58,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/08/23 07:15:55  gnu
+# Revision 1.9  1991/08/25 21:48:37  rich
+# Adding diff to the fray.
+#
+# Revision 1.8  1991/08/23  07:15:55  gnu
 # Make README stick...
 #
 # Revision 1.7  1991/08/22  07:30:50  gnu

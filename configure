@@ -184,7 +184,7 @@ fi
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb make grep prms "
+configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb make grep diff prms "
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -604,7 +604,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.32  1991/08/25 20:18:20  rich
+# Revision 1.33  1991/08/25 21:48:38  rich
+# Adding diff to the fray.
+#
+# Revision 1.32  1991/08/25  20:18:20  rich
 # Adding grep to the fray.
 #
 # Revision 1.31  1991/08/23  04:50:57  rich
