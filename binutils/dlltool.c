@@ -350,10 +350,6 @@ static int verbose;
 static FILE *output_def;
 static FILE *base_file;
 
-#ifdef DLLTOOL_BEOS
-static const char *mname = "beos";
-#endif
-
 #ifdef DLLTOOL_ARM
 static const char *mname = "arm";
 #endif
@@ -1874,8 +1870,6 @@ gen_exp_file ()
 	  int src;
 	  int dst = 0;
 	  int last = -1;
-	  int totsize = 0;
-
 	  qsort (copy, num_entries, sizeof (long), sfunc);
 	  /* Delete duplcates */
 	  for (src = 0; src < num_entries; src++)
@@ -1889,31 +1883,18 @@ gen_exp_file ()
 	  on_page = 0;
 	  for (j = 0; j < num_entries; j++)
 	    {
-	      totsize += 2;
 	      addr = copy[j];
 	      if ((addr & PAGE_MASK) != page_addr)
 		{
-		  totsize += 8 + (on_page & 1)*2;
 		  flush_page (f, need, page_addr, on_page);
 		  on_page = 0;
 		  page_addr = addr & PAGE_MASK;
 		}
 	      need[on_page++] = addr;
 	    }
-
-	  /* Pad the section to an even 32-byte boundary.  This will make
-	     the BeOS loader much happier, and shouldn't matter for other
-	     OSes. */
-	  while ((totsize + 8 + (on_page & 1)*2) % 32 != 0)
-	    {
-	      /* 0x0000 is an absolute relocation that should be ignored.  */
-	      need[on_page++] = 0x0000;
-	      totsize += 2;
-	    }
-
 	  flush_page (f, need, page_addr, on_page);
 
-	  /* fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);*/
+/*	  fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);*/
 	}
     }
 

@@ -1,3 +1,7 @@
+Wed Jun  2 12:34:36 1999  Richard Henderson  <rth@cygnus.com>
+
+	* dlltool.c (gen_exp_file): Revert 19990411 change.
+
 Mon May 31 09:56:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* readelf.c (process_relocs): Determine type of reloc from
