@@ -1,3 +1,11 @@
+2000-12-06  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	From  Ralf Baechle  <ralf@gnu.org>
+
+	* elf32-mips.c (elf32_mips_merge_private_bfd_data): Always permit
+	BFDs containing no sections or empty .text, .data or .bss sections
+	to be merged, regardless of their flags.
+
 2000-12-06  Kazu Hirata  <kazu@hxi.com>
 
 	* elf32-m32r.c: Fix formatting.
