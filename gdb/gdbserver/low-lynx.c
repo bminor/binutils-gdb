@@ -121,8 +121,6 @@ mywait (status)
 
       thread_from_wait = w.w_tid;
       inferior_pid = BUILDPID (inferior_pid, w.w_tid);
-      printf ("mywait: pid=0x%x, thread=0x%x, inferior_pid=0x%x\n",
-	      pid, w.w_tid, inferior_pid);
 
       if (WIFSTOPPED(w)
 	  && WSTOPSIG(w) == SIGTRAP)
