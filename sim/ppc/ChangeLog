@@ -1,4 +1,12 @@
+Sat Sep 30 20:47:05 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* sim_callbacks.h (printf_filtered): Correct prototype.
+
 Thu Sep 21 16:26:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* device_tree.c (OEA_MEMORY_SIZE): Define if not defined to
+	0x100000.
+	(clayton_memory_size): Define as OEA_MEMORY_SIZE.
 
 	* std-config.h (WITH_TRACE): Default to 1 now.
 
@@ -6,7 +14,8 @@ Thu Sep 21 16:26:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	if OEA.
 
 	* main.c (main): Switch to using getopt.  Make -p also set
-	trace_semantics.
+	trace_semantics.  Make -a turn on all trace flags.  Make -C turn
+	on console tracing.
 
 	* device_tree.c (create_option_device_node): Assume a program is
 	OEA if the start address is < 4096, not just == 0.
