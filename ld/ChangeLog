@@ -1,3 +1,10 @@
+Tue Oct 17 12:22:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (eelf32ppc.c): Depend upon elf32.em, not generic.em.
+	(eelf32lppc.c): Likewise.
+	* emulparams/elf32lppc.sh (TEMPLATE_NAME): Define as elf32.
+	(GENERATE_SHLIB_SCRIPT): Define as yes.
+
 Mon Oct 16 19:11:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em: Struct bfd_elf_link_needed_list is now named
