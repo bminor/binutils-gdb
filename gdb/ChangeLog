@@ -1,3 +1,13 @@
+Mon Dec 12 13:06:59 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* f-lang.c: Remove duplicate declaration of
+	builtin_type_f_integer, and only include it in the f_builtin_types
+	once.
+
+	* somread.c (som_symfile_read): Just assign to objfile->obj_private,
+	not OBJ_UNWIND_INFO.  Assigning to a cast is a GCC-ism which
+	the HP compiler doesn't like.
+
 Mon Dec 12 12:22:21 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.c:  New tcl commands:  gdb_fetch_registers,

@@ -373,10 +373,10 @@ static const struct op_print f_op_print_tab[] = {
   { NULL,    0, 0, 0 }
 };
 
-/* The built-in types of F77.  */
+/* The built-in types of F77.  FIXME: integer*4 is missing, plain
+   logical is missing (builtin_type_logical is logical*4).  */
 
 struct type *builtin_type_f_character;
-struct type *builtin_type_f_integer;
 struct type *builtin_type_f_logical;
 struct type *builtin_type_f_logical_s1;
 struct type *builtin_type_f_logical_s2;
@@ -393,7 +393,6 @@ struct type *builtin_type_f_void;
 struct type ** const (f_builtin_types[]) = 
 {
   &builtin_type_f_character,
-  &builtin_type_f_integer,
   &builtin_type_f_logical,
   &builtin_type_f_logical_s1,
   &builtin_type_f_logical_s2,

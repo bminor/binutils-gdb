@@ -349,7 +349,7 @@ som_symfile_read (objfile, section_offsets, mainline)
   install_minimal_symbols (objfile);
 
   /* Force hppa-tdep.c to re-read the unwind descriptors.  */
-  OBJ_UNWIND_INFO (objfile) = NULL;
+  objfile->obj_private = NULL;
   do_cleanups (back_to);
 }
 
