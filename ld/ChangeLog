@@ -1,3 +1,8 @@
+Tue Feb 11 15:34:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/elfmips.sc: When relocating, put .mips16.fn.* and
+	.mips16.call.* in .text.
+
 start-sanitize-r5900
 Fri Feb  7 13:16:53 1997  Gavin Koch  <gavin@cygnus.com>
         

@@ -104,7 +104,9 @@ SECTIONS
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
-    *(.gnu.linkonce.t*)
+    ${RELOCATING+*(.gnu.linkonce.t*)}
+    ${RELOCATING+*(.mips16.fn.*)}
+    ${RELOCATING+*(.mips16.call.*)}
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
