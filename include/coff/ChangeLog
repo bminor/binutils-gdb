@@ -1,4 +1,11 @@
+Thu Aug 27 13:00:01 1992  Brendan Kehoe  (brendan@cygnus.com)
+
+	* symconst.h: comment out cruft at the end of #endif
+
 Tue Aug 25 15:06:49 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* internal.h: added #define for STYP_LIT, removed from a29k and
+	h8300.
 
 	* z8k.h: added z8000 support
 

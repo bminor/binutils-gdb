@@ -649,6 +649,7 @@ enum bfd_architecture
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
   bfd_arch_z8k,        /* Zilog Z8000 */
+  bfd_arch_we32k,      /* AT&T we32000 family (3b2) */
 #define bfd_mach_z8001		1
 #define bfd_mach_z8002		2
   bfd_arch_last

@@ -1,3 +1,15 @@
+Thu Aug 27 12:59:29 1992  Brendan Kehoe  (brendan@cygnus.com)
+
+	* bfd.h: add we32k
+
+Tue Aug 25 15:07:47 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd.h: new after Z8000 stuff
+
+Mon Aug 17 09:01:23 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* bfd.h: Regenerated after page/segment size changes.
+
 Sat Aug  1 13:46:31 1992  Fred Fish  (fnf@cygnus.com)
 
 	* obstack.h: Merge changes from current FSF version.

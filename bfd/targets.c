@@ -18,8 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -76,7 +74,7 @@ DESCRIPTION
 
 INODE
 	bfd_target,  , Targets, Targets
-
+DOCDD
 SUBSECTION
 	bfd_target
 
@@ -389,10 +387,13 @@ extern bfd_target m88kbcs_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target i386aout_vec;
+extern bfd_target i386linux_vec;
 extern bfd_target a29kcoff_big_vec;
 extern bfd_target trad_core_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target h8300coff_vec;
+extern bfd_target z8kcoff_vec;
+extern bfd_target we32kcoff_vec;
 #ifdef hp9000s800
 extern bfd_target hppa_vec;
 #endif
@@ -432,6 +433,7 @@ bfd_target *target_vector[] = {
 	&demo_64_vec,	/* Only compiled if host has long-long support */
 #endif
 	&h8300coff_vec,
+	&z8kcoff_vec,
 	&m88kbcs_vec,
 	&srec_vec,
 /*	&tekhex_vec,*/
@@ -447,6 +449,7 @@ bfd_target *target_vector[] = {
 #ifdef hp9000s800
         &hppa_vec,
 #endif
+	&we32kcoff_vec,
 
 #ifdef	TRAD_CORE
 	&trad_core_vec,
