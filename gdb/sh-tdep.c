@@ -481,7 +481,7 @@ sh_find_callers_reg (struct frame_info *fi, int regnum)
 static void
 sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 {
-  int *where = (int *) alloca (NUM_REGS + NUM_PSEUDO_REGS);
+  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof(int));
   int rn;
   int have_fp = 0;
   int depth;
@@ -623,7 +623,7 @@ dr_reg_base_num (int dr_regnum)
 static void
 sh_fp_frame_init_saved_regs (struct frame_info *fi)
 {
-  int *where = (int *) alloca (NUM_REGS + NUM_PSEUDO_REGS);
+  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof(int));
   int rn;
   int have_fp = 0;
   int depth;

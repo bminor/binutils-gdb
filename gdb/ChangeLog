@@ -1,3 +1,9 @@
+2002-05-07  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Fix error in
+	size computation for alloca.
+	(sh_fp_frame_init_saved_regs): Likewise.
+
 2002-05-07  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.h (ARM_MAX_REGISTER_RAW_SIZE): Define.
