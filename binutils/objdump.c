@@ -1328,7 +1328,10 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 	  done_dot = false;
 
 	  if (with_line_numbers || with_source_code)
-	    show_line (aux->abfd, section, addr_offset);
+	    /* The line number tables will refer to unadjusted
+	       section VMAs, so we must undo any VMA modifications
+	       when calling show_line.  */
+	    show_line (aux->abfd, section, addr_offset - adjust_section_vma);
 
 	  if (! prefix_addresses)
 	    {
