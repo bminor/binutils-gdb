@@ -2936,6 +2936,7 @@ assign_section_numbers (bfd *abfd)
 				   bfd_set_error (bfd_error_bad_value);
 				   return FALSE;
 				 }
+			       s = kept;
 			    }
 			  s = s->output_section;
 			  BFD_ASSERT (s != NULL);

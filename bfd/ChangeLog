@@ -1,3 +1,7 @@
+2005-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (assign_section_numbers): Really use the kept section.
+
 2005-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (_bfd_elf_check_kept_section): New.
