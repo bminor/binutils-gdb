@@ -1,3 +1,14 @@
+2003-05-23  Andrew Cagney  <cagney@redhat.com>
+
+	* objc-lang.c: Include "gdb_assert.h".
+	(objc_op_print_tab): Use OP_NULL and PREC_NULL instead of 0.
+	(CHECK, CHECK_FATAL, __CHECK_FUNCTION): Delete macros.
+	(gdb_check, gdb_check_fatal): Delete functions.
+	(read_objc_methlist_method): Replace CHECK and CHECK_FATAL with
+	gdb_assert.
+	(parse_selector, parse_method, find_methods, find_imps): Ditto.
+	* Makefile.in (objc-lang.o): Update dependencies.
+
 2003-05-22  Ian Lance Taylor  <ian@airs.com>
 
 	* disasm.c (gdb_disassemble_info): Initialize disassemble_info
