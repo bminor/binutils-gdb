@@ -1,3 +1,10 @@
+Thu Dec  8 15:07:29 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* frame.h: Restore pre-Nov 3 comments about FRAME_FP with minor
+	changes.  They are correct, unlike the post-Nov 3 comment
+	(FRAME_FP doesn't have any machine-independent relationship with
+	FP_REGNUM or any other such notion of a "frame pointer").
+
 Wed Dec  7 14:50:54 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* gdbserver/remote-utils.c (write_ok): Write "OK", not "Ok", to
