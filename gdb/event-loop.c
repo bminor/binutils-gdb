@@ -697,12 +697,12 @@ handle_file_event (int event_file_desc)
 	    {
 	      /* Work in progress. We may need to tell somebody what
 	         kind of error we had. */
-	      /*if (error_mask_returned & POLLHUP)
-	         printf_unfiltered ("Hangup detected on fd %d\n", file_ptr->fd);
-	         if (error_mask_returned & POLLERR)
-	         printf_unfiltered ("Error detected on fd %d\n", file_ptr->fd);
-	         if (error_mask_returned & POLLNVAL)
-	         printf_unfiltered ("Invalid fd %d\n", file_ptr->fd); */
+	      if (error_mask_returned & POLLHUP)
+		printf_unfiltered ("Hangup detected on fd %d\n", file_ptr->fd);
+	      if (error_mask_returned & POLLERR)
+		printf_unfiltered ("Error detected on fd %d\n", file_ptr->fd);
+	      if (error_mask_returned & POLLNVAL)
+		printf_unfiltered ("Invalid or non-`poll'able fd %d\n", file_ptr->fd);
 	      file_ptr->error = 1;
 	    }
 	  else

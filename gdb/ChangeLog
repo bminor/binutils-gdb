@@ -1,3 +1,11 @@
+2000-02-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Philippe De Muyter  <phdm@macqel.be>
+
+	* event-loop.c (handle_file_event): In case of poll, enable
+ 	printing of informational message if an error/exception is
+ 	detected on the file descriptor.
+
 2000-02-21  Jim Kingdon  <kingdon@redhat.com>
 
 	* MAINTAINERS (Misc): Clarify that yes, anyone can edit web pages.
