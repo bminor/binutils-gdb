@@ -1,3 +1,8 @@
+2002-06-06  Michal Ludvig  <mludvig@suse.cz>
+
+	* gdb.asm/asm-source.exp: Add x86-64 target.
+	* gdb.asm/x86_64.inc: New.
+	
 2002-05-30  Michael Chastain  <mec@shout.net>
 
 	From Benjamin Kosnik <bkoz@redhat.com>:
