@@ -1,3 +1,17 @@
+2001-03-16  Frank Ch. Eigler  <fche@redhat.com>
+
+	Add support for mmap-based memory regions.
+	* sim-memopt.c (mmap_next_fd): New global.
+	(sim_memory_init): Reinitialize it.
+	(OPTION_MEMORY_MAPFILE, memory_option_handler): Support new
+	"--memory-mapfile FILE" option.  Check for some errors.
+	(do_memopt_add): Conditionally do mmap instead of malloc for
+	backing store of simulated memory.  Check for more errors.
+	(do_simopt_delete, sim_memory_uninstall): Corresponding cleanup.
+	* sim-memopt.h (munmap_length): New member of _sim_memopt.
+	* configure.in: Look for mmap/fstat related functions and headers.
+	* config.in, configure: Regenerated.
+
 2001-03-15  Frank Ch. Eigler  <fche@redhat.com>
 
 	* sim-core.c (sim_core_map_attach): Correct overlap-related

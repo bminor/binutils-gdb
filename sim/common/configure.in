@@ -34,7 +34,8 @@ fi
 AC_SUBST(TARGET_SUBDIR)
 
 # These aren't all needed yet, but will be eventually.
-AC_CHECK_HEADERS(stdlib.h string.h strings.h time.h sys/times.h)
+AC_CHECK_HEADERS(stdlib.h string.h strings.h time.h sys/times.h sys/stat.h sys/mman.h)
+AC_CHECK_FUNCS(mmap munmap)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xcconfig.h:config.in) echo > stamp-h ;; esac])

@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "cconfig.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-options.h"
@@ -32,10 +34,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
-/* Memory fill byte */
+/* Memory fill byte. */
 static unsigned8 fill_byte_value;
 static int fill_byte_flag = 0;
+
+/* Memory mapping; see OPTION_MEMORY_MAPFILE. */
+static int mmap_next_fd = -1;
 
 /* Memory command line options. */
 
@@ -46,7 +63,8 @@ enum {
   OPTION_MEMORY_INFO,
   OPTION_MEMORY_ALIAS,
   OPTION_MEMORY_CLEAR,
-  OPTION_MEMORY_FILL
+  OPTION_MEMORY_FILL,
+  OPTION_MEMORY_MAPFILE
 };
 
 static DECLARE_OPTION_HANDLER (memory_option_handler);
@@ -80,6 +98,12 @@ static const OPTION memory_options[] =
       '\0', NULL, "Clear subsequently added memory regions",
       memory_option_handler },
 
+#if defined(HAVE_MMAP) && defined(HAVE_MUNMAP)
+  { {"memory-mapfile", required_argument, NULL, OPTION_MEMORY_MAPFILE },
+      '\0', "FILE", "Memory-map next memory region from file",
+      memory_option_handler },
+#endif
+
   { {"memory-info", no_argument, NULL, OPTION_MEMORY_INFO },
       '\0', NULL, "List configurable memory regions",
       memory_option_handler },
@@ -104,6 +128,7 @@ do_memopt_add (SIM_DESC sd,
   void *fill_buffer;
   unsigned fill_length;
   void *free_buffer;
+  unsigned long free_length;
 
   if (buffer != NULL)
     {
@@ -113,6 +138,7 @@ do_memopt_add (SIM_DESC sd,
 		       addr, nr_bytes, modulo, NULL, buffer);
 
       free_buffer = buffer;
+      free_length = 0;
       fill_buffer = buffer;
       fill_length = (modulo == 0) ? nr_bytes : modulo;
     }
@@ -123,12 +149,45 @@ do_memopt_add (SIM_DESC sd,
       int padding = (addr % sizeof (unsigned64));
       unsigned long bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
 
-      /* If filling with non-zero value, do not use clearing allocator. */
+      free_buffer = NULL;
+      free_length = bytes;
 
-      if (fill_byte_flag && fill_byte_value != 0)
-        free_buffer = xmalloc (bytes); /* don't clear */
-      else
-        free_buffer = zalloc (bytes); /* clear */
+#ifdef HAVE_MMAP
+      /* Memory map or malloc(). */
+      if (mmap_next_fd >= 0)
+	{
+	  /* Check that given file is big enough. */
+	  struct stat s;
+	  int rc;
+
+	  /* Some kernels will SIGBUS the application if mmap'd file
+	     is not large enough.  */ 
+	  rc = fstat (mmap_next_fd, &s);
+	  if (rc < 0 || s.st_size < bytes)
+	    {
+	      sim_io_error (sd,
+			    "Error, cannot confirm that mmap file is large enough "
+			    "(>= %d bytes)\n", bytes);
+	    }
+
+	  free_buffer = mmap (0, bytes, PROT_READ|PROT_WRITE, MAP_SHARED, mmap_next_fd, 0);
+	  if (free_buffer == 0 || free_buffer == (char*)-1) /* MAP_FAILED */
+	    {
+	      sim_io_error (sd, "Error, cannot mmap file (%s).\n",
+			    strerror(errno));
+	    }
+	}
+#endif 
+
+      /* Need heap allocation? */ 
+      if (free_buffer == NULL)
+	{
+	  /* If filling with non-zero value, do not use clearing allocator. */
+	  if (fill_byte_flag && fill_byte_value != 0)
+	    free_buffer = xmalloc (bytes); /* don't clear */
+	  else
+	    free_buffer = zalloc (bytes); /* clear */
+	}
 
       aligned_buffer = (char*) free_buffer + padding;
 
@@ -162,6 +221,16 @@ do_memopt_add (SIM_DESC sd,
   (*entry)->modulo = modulo;
   (*entry)->buffer = free_buffer;
 
+  /* Record memory unmapping info.  */
+  if (mmap_next_fd >= 0)
+    {
+      (*entry)->munmap_length = free_length;
+      close (mmap_next_fd);
+      mmap_next_fd = -1;
+    }
+  else
+    (*entry)->munmap_length = 0;
+
   return (*entry);
 }
 
@@ -186,7 +255,15 @@ do_memopt_delete (SIM_DESC sd,
     }
   /* delete any buffer */
   if ((*entry)->buffer != NULL)
-    zfree ((*entry)->buffer);
+    {
+#ifdef HAVE_MUNMAP
+      if ((*entry)->munmap_length > 0)
+	munmap ((*entry)->buffer, (*entry)->munmap_length);
+      else
+#endif
+	zfree ((*entry)->buffer);
+    }
+
   /* delete it and its aliases */
   alias = *entry;
   *entry = (*entry)->next;
@@ -367,6 +444,25 @@ memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	break;
       }
 
+    case OPTION_MEMORY_MAPFILE:
+      {
+	if (mmap_next_fd >= 0)
+	  {
+	    sim_io_eprintf (sd, "Duplicate memory-mapfile option\n");
+	    return SIM_RC_FAIL;
+	  }
+
+	mmap_next_fd = open (arg, O_RDWR);
+	if (mmap_next_fd < 0)
+	  {
+	    sim_io_eprintf (sd, "Cannot open file `%s': %s\n",
+			    arg, strerror(errno));
+	    return SIM_RC_FAIL;
+	  }
+
+	return SIM_RC_OK;
+      }
+
     case OPTION_MEMORY_INFO:
       {
 	sim_memopt *entry;
@@ -445,7 +541,14 @@ sim_memory_uninstall (SIM_DESC sd)
     {
       /* delete any buffer */
       if ((*entry)->buffer != NULL)
-	zfree ((*entry)->buffer);
+	{
+#ifdef HAVE_MUNMAP
+	  if ((*entry)->munmap_length > 0)
+	    munmap ((*entry)->buffer, (*entry)->munmap_length);
+	  else
+#endif
+	    zfree ((*entry)->buffer);
+	}
 
       /* delete it and its aliases */
       alias = *entry;
@@ -467,6 +570,10 @@ sim_memory_uninstall (SIM_DESC sd)
 static SIM_RC
 sim_memory_init (SIM_DESC sd)
 {
-  /* FIXME: anything needed? */
+  /* Reinitialize option modifier flags, in case they were left
+     over from a previous sim startup event.  */
+  fill_byte_flag = 0;
+  mmap_next_fd = -1;
+
   return SIM_RC_OK;
 }

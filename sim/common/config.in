@@ -82,6 +82,9 @@
 /* Define if you have the getrusage function.  */
 #undef HAVE_GETRUSAGE
 
+/* Define if you have the mmap function.  */
+#undef HAVE_MMAP
+
 /* Define if you have the munmap function.  */
 #undef HAVE_MUNMAP
 
@@ -145,11 +148,17 @@
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
+/* Define if you have the <sys/mman.h> header file.  */
+#undef HAVE_SYS_MMAN_H
+
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
 
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
+
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
@@ -165,3 +174,9 @@
 
 /* Define if you have the <values.h> header file.  */
 #undef HAVE_VALUES_H
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET

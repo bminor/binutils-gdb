@@ -31,6 +31,7 @@ struct _sim_memopt {
   unsigned_word nr_bytes;
   unsigned modulo;
   void *buffer;
+  unsigned long munmap_length;
   sim_memopt *alias; /* linked list */
   sim_memopt *next;
 };
