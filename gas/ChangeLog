@@ -1,3 +1,11 @@
+Mon Jun 30 12:27:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Jason Merrill <jason@cygnus.com>:
+	* read.c (do_align): If BFD_ASSEMBLER, only use NOP_OPCODE if
+	SEC_CODE is set.
+	* config/tc-i386.h (md_maybe_text): Define.
+	(md_do_align): Use md_maybe_text.
+
 Fri Jun 27 19:15:27 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-ppc.h (tc_fix_adjustable): Only check for GOT type
