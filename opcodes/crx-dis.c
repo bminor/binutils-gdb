@@ -112,8 +112,8 @@ static unsigned long build_mask (void);
 static int powerof2	      (int);
 static int match_opcode	      (void);
 static void make_instruction  (void);
-static void print_arguments   (ins *, struct disassemble_info *);
-static void print_arg	      (argument *, struct disassemble_info *);
+static void print_arguments   (ins *, bfd_vma, struct disassemble_info *);
+static void print_arg	      (argument *, bfd_vma, struct disassemble_info *);
 
 /* Retrieve the number of operands for the current assembled instruction.  */
 
@@ -496,10 +496,12 @@ make_argument (argument * a, int start_bits)
 /*  Print a single argument.  */
 
 static void
-print_arg (argument *a, struct disassemble_info *info)
+print_arg (argument *a, bfd_vma memaddr, struct disassemble_info *info)
 {
   LONGLONG longdisp, mask;
-  char sign_flag;
+  int sign_flag = 0;
+  int relative = 0;
+  bfd_vma number;
   int op_index = 0;
   char string[200];
   PTR stream = info->stream;
@@ -581,10 +583,9 @@ print_arg (argument *a, struct disassemble_info *info)
 	  || IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (DCR_BRANCH_INS)
 	  || IS_INSN_TYPE (COP_BRANCH_INS))
         {
-          func (stream, "%c", '*');
+	  relative = 1;
           longdisp = a->constant;
           longdisp <<= 1;
-          sign_flag = '+';
 
           switch (a->size)
             {
@@ -595,7 +596,7 @@ print_arg (argument *a, struct disassemble_info *info)
 	      mask = ((LONGLONG)1 << a->size) - 1;
               if (longdisp & ((LONGLONG)1 << a->size))
                 {
-                  sign_flag = '-';
+                  sign_flag = 1;
                   longdisp = ~(longdisp) + 1;
                 }
               a->constant = (unsigned long int) (longdisp & mask);
@@ -606,12 +607,11 @@ print_arg (argument *a, struct disassemble_info *info)
               break;
             }
 
-	  func (stream, "%c", sign_flag);
         }
       /* For branch Neq instruction it is 2*offset + 2.  */
-      if (IS_INSN_TYPE (BRANCH_NEQ_INS))
+      else if (IS_INSN_TYPE (BRANCH_NEQ_INS))
 	a->constant = 2 * a->constant + 2;
-      if (IS_INSN_TYPE (LD_STOR_INS_INC)
+      else if (IS_INSN_TYPE (LD_STOR_INS_INC)
 	  || IS_INSN_TYPE (LD_STOR_INS)
 	  || IS_INSN_TYPE (STOR_IMM_INS)
 	  || IS_INSN_TYPE (CSTBIT_INS))
@@ -620,7 +620,10 @@ print_arg (argument *a, struct disassemble_info *info)
           if (instruction->operands[op_index].op_type == abs16)
 	    a->constant |= 0xFFFF0000;
         }
-      func (stream, "0x%x", a->constant);
+      func (stream, "%s", "0x");
+      number = (relative ? memaddr : 0)
+	       + (sign_flag ? -a->constant : a->constant);
+      (*info->print_address_func) (number, info);
       break;
     default:
       break;
@@ -630,7 +633,7 @@ print_arg (argument *a, struct disassemble_info *info)
 /* Print all the arguments of CURRINSN instruction.  */
 
 static void
-print_arguments (ins *currInsn, struct disassemble_info *info)
+print_arguments (ins *currInsn, bfd_vma memaddr, struct disassemble_info *info)
 {
   int i;
 
@@ -638,7 +641,7 @@ print_arguments (ins *currInsn, struct disassemble_info *info)
     {
       processing_argument_number = i;
 
-      print_arg (&currInsn->arg[i], info);
+      print_arg (&currInsn->arg[i], memaddr, info);
 
       if (i != currInsn->nargs - 1)
 	info->fprintf_func (info->stream, ", ");
@@ -729,7 +732,7 @@ print_insn_crx (memaddr, info)
       if ((currInsn.nargs = get_number_of_operands ()) != 0)
 	info->fprintf_func (info->stream, "\t");
       make_instruction ();
-      print_arguments (&currInsn, info);
+      print_arguments (&currInsn, memaddr, info);
       return currInsn.size;
     }
 
