@@ -1,5 +1,16 @@
 Thu Jan  9 09:08:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (struct label_line): Define.
+	(labels, current_label): New static variables.
+	(md_assemble): Mark current_label as text, and clear it.
+	(m68k_frob_label): New function.
+	(m68k_flush_pending_output): New function.
+	(m68k_frob_symbol): New function.
+	* config/tc-m68k.h (tc_frob_label): Define.
+	(md_flush_pending_output): Define.
+	(tc_frob_symbol): Don't warn, just call m68k_frob_symbol.
+	(tc_frob_coff_symbol): Likewise.
+
 	* read.c (read_a_source_file): When defining a macro in MRI mode,
 	don't add the symbol to the symbol table.
 

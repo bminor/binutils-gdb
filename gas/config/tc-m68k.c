@@ -103,6 +103,27 @@ static int m68k_rel32_from_cmdline;
    displacement.  */
 static enum m68k_size m68k_index_width_default = SIZE_LONG;
 
+/* We want to warn if any text labels are misaligned.  In order to get
+   the right line number, we need to record the line number for each
+   label.  */
+
+struct label_line
+{
+  struct label_line *next;
+  symbolS *label;
+  char *file;
+  unsigned int line;
+  int text;
+};
+
+/* The list of labels.  */
+
+static struct label_line *labels;
+
+/* The current label.  */
+
+static struct label_line *current_label;
+
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
 static struct obstack robyn;
@@ -3310,6 +3331,13 @@ md_assemble (str)
       return;
     }
 
+  /* If there is a current label, record that it marks an instruction.  */
+  if (current_label != NULL)
+    {
+      current_label->text = 1;
+      current_label = NULL;
+    }
+
   if (the_ins.nfrag == 0)
     {
       /* No frag hacking involved; just put it out */
@@ -3729,7 +3757,57 @@ m68k_init_after_args ()
   if (cpu_of_arch (current_architecture) < m68020)
     md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
 }
+
+/* This is called when a label is defined.  */
 
+void
+m68k_frob_label (sym)
+     symbolS *sym;
+{
+  struct label_line *n;
+
+  n = (struct label_line *) xmalloc (sizeof *n);
+  n->next = labels;
+  n->label = sym;
+  as_where (&n->file, &n->line);
+  labels = n;
+  current_label = n;
+}
+
+/* This is called when a value that is not an instruction is emitted.  */
+
+void
+m68k_flush_pending_output ()
+{
+  current_label = NULL;
+}
+
+/* This is called at the end of the assembly, when the final value of
+   the label is known.  We warn if this is a text symbol aligned at an
+   odd location.  */
+
+void
+m68k_frob_symbol (sym)
+     symbolS *sym;
+{
+  if ((S_GET_VALUE (sym) & 1) != 0)
+    {
+      struct label_line *l;
+
+      for (l = labels; l != NULL; l = l->next)
+	{
+	  if (l->label == sym)
+	    {
+	      if (l->text)
+		as_warn_where (l->file, l->line,
+			       "text label `%s' aligned to odd boundary",
+			       S_GET_NAME (sym));
+	      break;
+	    }
+	}
+    }
+}
+
 /* This is called if we go in or out of MRI mode because of the .mri
    pseudo-op.  */
 
