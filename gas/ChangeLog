@@ -1,3 +1,9 @@
+2004-08-24  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (std_shortopts): Allow -g to take an optional argument.
+	(parse_args): Pass any switch starting with -g on to the backend
+	for parsing.
+
 2004-08-18  Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.in (arm*-*-symbianelf*): New target.

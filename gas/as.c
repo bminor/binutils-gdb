@@ -385,7 +385,7 @@ parse_args (int * pargc, char *** pargv)
     /* -K is not meaningful if .word is not being hacked.  */
     'K',
 #endif
-    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'f', 'g', 'I', ':', 'o', ':',
+    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'f', 'g', ':',':', 'I', ':', 'o', ':',
 #ifndef VMS
     /* -v takes an argument on VMS, so we don't make it a generic
        option.  */
@@ -671,11 +671,10 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 
 	case 'g':
-	  /* Some backends, eg Alpha, use the -g switch for their own
-	     purposes.  So we check here for an explicit -g and allow
+	  /* Some backends, eg Alpha and Mips, use the -g switch for their
+	     own purposes.  So we check here for an explicit -g and allow
 	     the backend to decide if it wants to process it.  */
 	  if (   old_argv[optind - 1][1] == 'g'
-	      && old_argv[optind - 1][2] == 0
 	      && md_parse_option (optc, optarg))
 	    continue;
 
