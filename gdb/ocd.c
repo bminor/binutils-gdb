@@ -1156,11 +1156,12 @@ _initialize_remote_ocd (void)
   extern struct cmd_list_element *cmdlist;
   static struct cmd_list_element *ocd_cmd_list = NULL;
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotetimeout", no_class,
-		  var_integer, (char *) &remote_timeout,
-		  "Set timeout value for remote read.\n", &setlist),
-     &showlist);
+  add_setshow_integer_cmd ("remotetimeout", no_class, &remote_timeout, _("\
+Set timeout value for remote read."), _("\
+Show timeout value for remote read."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   /* FIXME: i18n: What documentation?  */
   add_prefix_cmd ("ocd", class_obscure, bdm_command, (""), &ocd_cmd_list,

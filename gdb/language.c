@@ -48,22 +48,6 @@
 
 extern void _initialize_language (void);
 
-static void show_language_command (char *, int);
-
-static void set_language_command (char *, int);
-
-static void show_type_command (char *, int);
-
-static void set_type_command (char *, int);
-
-static void show_range_command (char *, int);
-
-static void set_range_command (char *, int);
-
-static void show_case_command (char *, int);
-
-static void set_case_command (char *, int);
-
 static void set_case_str (void);
 
 static void set_range_str (void);
@@ -149,10 +133,12 @@ char lang_frame_mismatch_warn[] =
 /* Show command.  Display a warning if the language set
    does not match the frame. */
 static void
-show_language_command (char *ignore, int from_tty)
+show_language_command (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
 {
   enum language flang;		/* The language of the current frame */
 
+  deprecated_show_value_hack (file, from_tty, c, value);
   flang = get_frame_language ();
   if (flang != language_unknown &&
       language_mode == language_mode_manual &&
@@ -162,7 +148,7 @@ show_language_command (char *ignore, int from_tty)
 
 /* Set command.  Change the current working language. */
 static void
-set_language_command (char *ignore, int from_tty)
+set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   int i;
   enum language flang;
@@ -235,8 +221,10 @@ local or auto    Automatic setting based on source file\n"));
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
 static void
-show_type_command (char *ignore, int from_tty)
+show_type_command (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   if (type_check != current_language->la_type_check)
     printf_unfiltered (
 			"Warning: the current type check setting does not match the language.\n");
@@ -244,7 +232,7 @@ show_type_command (char *ignore, int from_tty)
 
 /* Set command.  Change the setting for type checking. */
 static void
-set_type_command (char *ignore, int from_tty)
+set_type_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   if (strcmp (type, "on") == 0)
     {
@@ -274,15 +262,16 @@ set_type_command (char *ignore, int from_tty)
       warning (_("Unrecognized type check setting: \"%s\""), type);
     }
   set_type_str ();
-  show_type_command ((char *) NULL, from_tty);
+  show_type_command (NULL, from_tty, NULL, NULL);
 }
 
 /* Show command.  Display a warning if the range setting does
    not match the current language. */
 static void
-show_range_command (char *ignore, int from_tty)
+show_range_command (struct ui_file *file, int from_tty,
+		    struct cmd_list_element *c, const char *value)
 {
-
+  deprecated_show_value_hack (file, from_tty, c, value);
   if (range_check != current_language->la_range_check)
     printf_unfiltered (
 			"Warning: the current range check setting does not match the language.\n");
@@ -290,7 +279,7 @@ show_range_command (char *ignore, int from_tty)
 
 /* Set command.  Change the setting for range checking. */
 static void
-set_range_command (char *ignore, int from_tty)
+set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   if (strcmp (range, "on") == 0)
     {
@@ -320,22 +309,24 @@ set_range_command (char *ignore, int from_tty)
       warning (_("Unrecognized range check setting: \"%s\""), range);
     }
   set_range_str ();
-  show_range_command ((char *) 0, from_tty);
+  show_range_command (NULL, from_tty, NULL, NULL);
 }
 
 /* Show command.  Display a warning if the case sensitivity setting does
    not match the current language. */
 static void
-show_case_command (char *ignore, int from_tty)
+show_case_command (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
 {
-   if (case_sensitivity != current_language->la_case_sensitivity)
-      printf_unfiltered(
+  deprecated_show_value_hack (file, from_tty, c, value);
+  if (case_sensitivity != current_language->la_case_sensitivity)
+    printf_unfiltered(
 "Warning: the current case sensitivity setting does not match the language.\n");
 }
 
 /* Set command.  Change the setting for case sensitivity. */
 static void
-set_case_command (char *ignore, int from_tty)
+set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
    if (DEPRECATED_STREQ (case_sensitive, "on"))
    {
@@ -360,7 +351,7 @@ set_case_command (char *ignore, int from_tty)
       warning (_("Unrecognized case-sensitive setting: \"%s\""), case_sensitive);
    }
    set_case_str();
-   show_case_command ((char *) NULL, from_tty);
+   show_case_command (NULL, from_tty, NULL, NULL);
 }
 
 /* Set the status of range and type checking and case sensitivity based on
@@ -515,16 +506,16 @@ language_info (int quietly)
 
   expected_language = current_language;
   printf_unfiltered (_("Current language:  %s\n"), language);
-  show_language_command ((char *) 0, 1);
+  show_language_command (NULL, 1, NULL, NULL);
 
   if (!quietly)
     {
       printf_unfiltered (_("Type checking:     %s\n"), type);
-      show_type_command ((char *) 0, 1);
+      show_type_command (NULL, 1, NULL, NULL);
       printf_unfiltered (_("Range checking:    %s\n"), range);
-      show_range_command ((char *) 0, 1);
+      show_range_command (NULL, 1, NULL, NULL);
       printf_unfiltered (_("Case sensitivity:  %s\n"), case_sensitive);
-      show_case_command ((char *) 0, 1);
+      show_case_command (NULL, 1, NULL, NULL);
     }
 }
 
@@ -1344,13 +1335,14 @@ _initialize_language (void)
 
   /* GDB commands for language specific stuff */
 
-  set = add_set_cmd ("language", class_support, var_string_noescape,
-		     (char *) &language,
-		     "Set the current source language.",
-		     &setlist);
-  show = deprecated_add_show_from_set (set, &showlist);
-  set_cmd_cfunc (set, set_language_command);
-  set_cmd_cfunc (show, show_language_command);
+  /* FIXME: cagney/2005-02-20: This should be implemented using an
+     enum.  */
+  add_setshow_string_noescape_cmd ("language", class_support, &language, _("\
+Set the current source language."), _("\
+Show the current source language."), NULL,
+				   set_language_command,
+				   show_language_command,
+				   &setlist, &showlist);
 
   add_prefix_cmd ("check", no_class, set_check,
 		  _("Set the status of the type/range checker."),
@@ -1364,30 +1356,34 @@ _initialize_language (void)
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 
-  set = add_set_cmd ("type", class_support, var_string_noescape,
-		     (char *) &type,
-		     "Set type checking.  (on/warn/off/auto)",
-		     &setchecklist);
-  show = deprecated_add_show_from_set (set, &showchecklist);
-  set_cmd_cfunc (set, set_type_command);
-  set_cmd_cfunc (show, show_type_command);
+  /* FIXME: cagney/2005-02-20: This should be implemented using an
+     enum.  */
+  add_setshow_string_noescape_cmd ("type", class_support, &type, _("\
+Set type checking.  (on/warn/off/auto)"), _("\
+Show type checking.  (on/warn/off/auto)"), NULL,
+				   set_type_command,
+				   show_type_command,
+				   &setchecklist, &showchecklist);
 
-  set = add_set_cmd ("range", class_support, var_string_noescape,
-		     (char *) &range,
-		     "Set range checking.  (on/warn/off/auto)",
-		     &setchecklist);
-  show = deprecated_add_show_from_set (set, &showchecklist);
-  set_cmd_cfunc (set, set_range_command);
-  set_cmd_cfunc (show, show_range_command);
+  /* FIXME: cagney/2005-02-20: This should be implemented using an
+     enum.  */
+  add_setshow_string_noescape_cmd ("range", class_support, &range, _("\
+Set range checking.  (on/warn/off/auto)"), _("\
+Show range checking.  (on/warn/off/auto)"), NULL,
+				   set_range_command,
+				   show_range_command,
+				   &setchecklist, &showchecklist);
 
-  set = add_set_cmd ("case-sensitive", class_support, var_string_noescape,
-                     (char *) &case_sensitive,
-                     "Set case sensitivity in name search.  (on/off/auto)\n\
-For Fortran the default is off; for other languages the default is on.",
-                     &setlist);
-  show = deprecated_add_show_from_set (set, &showlist);
-  set_cmd_cfunc (set, set_case_command);
-  set_cmd_cfunc (show, show_case_command);
+  /* FIXME: cagney/2005-02-20: This should be implemented using an
+     enum.  */
+  add_setshow_string_noescape_cmd ("case-sensitive", class_support,
+				   &case_sensitive, _("\
+Set case sensitivity in name search.  (on/off/auto)"), _("\
+Show case sensitivity in name search.  (on/off/auto)"), _("\
+For Fortran the default is off; for other languages the default is on."),
+				   set_case_command,
+				   show_case_command,
+				   &setlist, &showlist);
 
   add_language (&unknown_language_defn);
   add_language (&local_language_defn);

@@ -3607,17 +3607,18 @@ Usage: set extension-language .foo bar"),
   add_info ("extensions", info_ext_lang_command,
 	    _("All filename extensions associated with a source language."));
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("download-write-size", class_obscure,
-		  var_integer, (char *) &download_write_size,
-		  "Set the write size used when downloading a program.\n"
-		  "Only used when downloading a program onto a remote\n"
-		  "target. Specify zero, or a negative value, to disable\n"
-		  "blocked writes. The actual size of each transfer is also\n"
-		  "limited by the size of the target packet and the memory\n"
-		  "cache.\n",
-		  &setlist),
-     &showlist);
+  add_setshow_integer_cmd ("download-write-size", class_obscure,
+			   &download_write_size, _("\
+Set the write size used when downloading a program."), _("\
+Show the write size used when downloading a program."), _("\
+Only used when downloading a program onto a remote\n\
+target. Specify zero, or a negative value, to disable\n\
+blocked writes. The actual size of each transfer is also\n\
+limited by the size of the target packet and the memory\n\
+cache."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   debug_file_directory = xstrdup (DEBUGDIR);
   c = (add_set_cmd

@@ -233,10 +233,10 @@ _initialize_kod (void)
 {
   struct cmd_list_element *c;
 
-  c = add_set_cmd ("os", no_class, var_string,
-		   (char *) &operating_system,
-		   "Set operating system",
-		   &setlist);
-  set_cmd_sfunc (c, kod_set_os);
-  deprecated_add_show_from_set (c, &showlist);
+  add_setshow_string_cmd ("os", no_class, &operating_system, _("\
+Set operating system"), _("\
+Show operating system"), NULL,
+			  kod_set_os,
+			  NULL, /* FIXME: i18n: */
+			  &setlist, &showlist);
 }

@@ -1,3 +1,12 @@
+2005-02-21  Andrew Cagney  <cagney@gnu.org>
+
+	Add more uses of add_setshow_string_cmd, add_setshow_integer_cmd,
+	and add_setshow_string_noescape_cmd.
+	* cli/cli-setshow.c (deprecated_show_value_hack): Do not print a
+	NULL command's value.
+	* kod.c, language.c, ocd.c, remote-e7000.c, remote-mips.c: Update.
+	* remote-sds.c, remote.c, symfile.c, top.c: Update.
+
 2005-02-20  Andrew Cagney  <cagney@gnu.org>
 
 	Use add_setshow_enum_cmd through out.

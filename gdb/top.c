@@ -1374,11 +1374,13 @@ init_main (void)
      15 is Control-o, the same binding this function has in Bash.  */
   rl_add_defun ("operate-and-get-next", gdb_rl_operate_and_get_next, 15);
 
-  c = add_set_cmd ("prompt", class_support, var_string,
-		   (char *) &new_async_prompt, "Set gdb's prompt",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_async_prompt);
+  add_setshow_string_cmd ("prompt", class_support,
+			  &new_async_prompt, _("\
+Set gdb's prompt"), _("\
+Show gdb's prompt"), NULL,
+			  set_async_prompt,
+			  NULL, /* FIXME: i18n: */
+			  &setlist, &showlist);
 
   add_com ("dont-repeat", class_support, dont_repeat_command, _("\
 Don't repeat this command.\n\
@@ -1405,18 +1407,21 @@ Without an argument, saving is enabled."),
 			   NULL, /* FIXME: i18n: */
 			   &sethistlist, &showhistlist);
 
-  c = add_set_cmd ("size", no_class, var_integer, (char *) &history_size,
-		   "Set the size of the command history,\n\
-ie. the number of previous commands to keep a record of.", &sethistlist);
-  deprecated_add_show_from_set (c, &showhistlist);
-  set_cmd_sfunc (c, set_history_size_command);
+  add_setshow_integer_cmd ("size", no_class, &history_size, _("\
+Set the size of the command history,"), _("\
+Show the size of the command history,"), _("\
+ie. the number of previous commands to keep a record of."),
+			   set_history_size_command,
+			   NULL, /* FIXME: i18n: */
+			   &sethistlist, &showhistlist);
 
-  c = add_set_cmd ("filename", no_class, var_filename,
-		   (char *) &history_filename,
-		   "Set the filename in which to record the command history\n\
-(the list of previous commands of which a record is kept).", &sethistlist);
-  set_cmd_completer (c, filename_completer);
-  deprecated_add_show_from_set (c, &showhistlist);
+  add_setshow_filename_cmd ("filename", no_class, &history_filename, _("\
+Set the filename in which to record the command history"), _("\
+Show the filename in which to record the command history"), _("\
+(the list of previous commands of which a record is kept)."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &sethistlist, &showhistlist);
 
   add_setshow_boolean_cmd ("confirm", class_support, &caution, _("\
 Set whether to confirm potentially dangerous operations."), _("\

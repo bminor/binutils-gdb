@@ -3399,12 +3399,13 @@ ignored.)"),
 			    NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("monitor-prompt", class_obscure, var_string,
-		  (char *) &mips_monitor_prompt,
-		  "Set the prompt that GDB expects from the monitor.",
-		  &setlist),
-     &showlist);
+  add_setshow_string_cmd ("monitor-prompt", class_obscure,
+			  &mips_monitor_prompt, _("\
+Set the prompt that GDB expects from the monitor."), _("\
+Show the prompt that GDB expects from the monitor."), NULL,
+			  NULL,
+			  NULL, /* FIXME: i18n: */
+			  &setlist, &showlist);
 
   add_setshow_zinteger_cmd ("monitor-warnings", class_obscure,
 			    &monitor_warnings, _("\

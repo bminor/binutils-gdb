@@ -96,6 +96,9 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
 			    struct cmd_list_element *c,
 			    const char *value)
 {
+  /* If there's no command or value, don't try to print it out.  */
+  if (c == NULL || value == NULL)
+    return;
   /* Print doc minus "show" at start.  */
   print_doc_line (gdb_stdout, c->doc + 5);
   switch (c->var_type)
