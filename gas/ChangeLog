@@ -1,3 +1,7 @@
+Tue Apr 21 13:35:30 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: do not print recursion lines.
+
 Wed Apr 15 21:19:31 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: the tooldir copy of gas goes directly in tooldir.
