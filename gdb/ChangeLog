@@ -1,3 +1,11 @@
+2004-11-23  Joel Brobecker  <brobecker@gnat.com>
+
+	* sparc-tdep.c (sparc_is_unimp_insn): New function.
+	(sparc32_frame_cache): For functions where there is no debugging
+	information to help us determine whether it's a struct-return
+	function or not, fallback on checking whether the instruction
+	at the return address is an "unimp" instruction or not.
+
 2004-11-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* MAINTAINERS: Add myself to write after approval section.

@@ -106,6 +106,17 @@ sparc_fetch_instruction (CORE_ADDR pc)
 }
 
 
+/* Return non-zero if the instruction corresponding to PC is an "unimp"
+   instruction.  */
+
+static int
+sparc_is_unimp_insn (CORE_ADDR pc)
+{
+  const unsigned long insn = sparc_fetch_instruction (pc);
+  
+  return ((insn & 0xc1c00000) == 0);
+}
+
 /* OpenBSD/sparc includes StackGhost, which according to the author's
    website http://stackghost.cerias.purdue.edu "... transparently and
    automatically protects applications' stack frames; more
@@ -664,6 +675,21 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
 	      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
 	    cache->struct_return_p = 1;
 	}
+    }
+  else
+    {
+      /* There is no debugging information for this function to
+         help us determine whether this function returns a struct
+         or not.  So we rely on another heuristic which is to check
+         the instruction at the return address and see if this is
+         an "unimp" instruction.  If it is, then it is a struct-return
+         function.  */
+      CORE_ADDR pc;
+      int regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
+
+      pc = frame_unwind_register_unsigned (next_frame, regnum) + 8;
+      if (sparc_is_unimp_insn (pc))
+        cache->struct_return_p = 1;
     }
 
   return cache;
