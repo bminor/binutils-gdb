@@ -34,30 +34,13 @@ h8.texi
 
 Do-last:
 
-shdirty="as.texinfo h8.texi all.texi"
-
-if ( echo $* | grep keep\-sh > /dev/null ) ; then
-	echo Keeping Hitachi SH in ${shdirty}
-else
-	for i in ${shdirty} ; do
-		echo Sanitizing Hitachi SH in $i
-		rm -f new
-		sed '/start\-sanitize\-Hitachi\-SH/,/^end\-sanitize\-Hitachi\-SH/d' < $i > new
-		if grep -s "[- ]SH" new ; then
-			echo *****SANITIZING HITACHI SH IN $i FAILED*****
-		fi
-		if [ -n "${safe}" ] ; then
-			mv $i .Recover
-		else
-			rm $i
-		fi
-		mv new $i
-	done
-fi
 #
 #
 # $Log$
-# Revision 1.12  1993/04/21 01:00:59  pesch
+# Revision 1.13  1993/05/17 20:10:15  raeburn
+# Steve sez SH stuff is public now
+#
+# Revision 1.12  1993/04/21  01:00:59  pesch
 # adhere to "start-sanitize-FOO" and "end-sanitize-FOO" convention
 #
 # Revision 1.11  1993/04/15  23:55:45  pesch
