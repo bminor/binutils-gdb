@@ -7,8 +7,14 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+/* Define if you have the getpid function.  */
+#undef HAVE_GETPID
+
 /* Define if you have the getrusage function.  */
 #undef HAVE_GETRUSAGE
+
+/* Define if you have the kill function.  */
+#undef HAVE_KILL
 
 /* Define if you have the time function.  */
 #undef HAVE_TIME

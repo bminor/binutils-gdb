@@ -15,6 +15,6 @@ SIM_AC_OPTION_RESERVED_BITS(1)
 
 dnl For UNIX emulation
 AC_CHECK_HEADERS(stdlib.h unistd.h string.h strings.h)
-
+AC_CHECK_FUNCS(getpid kill)
 
 SIM_AC_OUTPUT

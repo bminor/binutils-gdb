@@ -26,6 +26,7 @@
 #include "sim-basics.h"
 
 #include <signal.h>
+#include <errno.h>
 
 /* These are generated files.  */
 #include "itable.h"
@@ -69,4 +70,11 @@ extern void engine_init
 (SIM_DESC sd);
 
 
+#ifndef HAVE_GETPID
+#define getpid() 42
+#endif
+
+#ifndef HAVE_KILL
+#define kill() (errno = EINVAL, -1)
+#endif
 #endif

@@ -1,3 +1,13 @@
+Mon May 19 18:59:33 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* configure.in: Check for getpid, kill functions.
+	* config{.in,ure}: Regenerate.
+
+	* insns (do_trap): Add support for kill, getpid system calls.
+
+	* sim-main.h (errno.h): Include.
+	(getpid,kill): Define as NOPs if the host doesn't have them.
+
 Mon May 19 14:58:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_open): Set the simulator base magic number.

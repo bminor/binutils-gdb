@@ -1063,6 +1063,25 @@ void::function::do_trap:unsigned32 trap_number
 	          GPR(2) = GPR(6);
 	          break;
 	        }
+	      case 20: /* GETPID */
+		{
+		  GPR(2) = getpid ();
+		  break;
+		}
+	      case 37: /* KILL */
+		if (GPR (2) != getpid ())
+		  {
+		    int ret = kill (GPR(2), GPR(4));
+		    if (ret < 0)
+		      ret = -errno;
+		    GPR (2) = ret;
+		    break;
+		  }
+		else
+		  {
+		    sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, GPR(4));
+		    break;
+		  }
 	      default:
 		/* For system calls which are defined, just return EINVAL instead of trapping */
 		if (GPR(15) <= 204)
