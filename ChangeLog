@@ -1,3 +1,7 @@
+Sat Apr  9 15:10:45 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure: Unknown options are fatal again.
+
 Fri Apr  8 12:01:41 1994  David J. Mackenzie  (djm@cygnus.com)
 
 	* configure: Ignore --x-includes and --x-libraries, for Autoconf
