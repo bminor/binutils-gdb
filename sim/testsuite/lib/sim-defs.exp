@@ -165,6 +165,9 @@ proc run_sim_test { name requested_machs } {
     global SIMFLAGS
     global opts
     global cpu_option
+    global global_as_options
+    global global_ld_options
+    global global_sim_options
 
     if [string match "*/*" $name] {
 	set file $name
@@ -186,6 +189,16 @@ proc run_sim_test { name requested_machs } {
     set opts(mach) ""
     set opts(timeout) ""
     set opts(xerror) "no"
+
+    if ![info exists global_as_options] {
+        set global_as_options ""
+    }
+    if ![info exists global_ld_options] {
+        set global_ld_options ""
+    }
+    if ![info exists global_sim_options] {
+        set global_sim_options ""
+    }
 
     # Clear any machine specific options specified in a previous test case
     foreach m $requested_machs {
@@ -250,7 +263,7 @@ proc run_sim_test { name requested_machs } {
 	if [info exists cpu_option] {
 	    set as_options "$as_options $cpu_option=$mach"
 	}
-	set comp_output [target_assemble $sourcefile ${name}.o "$as_options"]
+	set comp_output [target_assemble $sourcefile ${name}.o "$as_options $global_as_options"]
 
 	if ![string match "" $comp_output] {
 	    verbose -log "$comp_output" 3
@@ -262,7 +275,7 @@ proc run_sim_test { name requested_machs } {
 	    set opts(ld,$mach) $opts(ld)
 	}
 
-	set comp_output [target_link ${name}.o ${name}.x "$opts(ld,$mach)"]
+	set comp_output [target_link ${name}.o ${name}.x "$opts(ld,$mach) $global_ld_options"]
 
 	if ![string match "" $comp_output] {
 	    verbose -log "$comp_output" 3
@@ -281,7 +294,7 @@ proc run_sim_test { name requested_machs } {
 	    set options "$options timeout=$opts(timeout)"
 	}
 
-	set result [sim_run ${name}.x "$opts(sim,$mach)" "" "" "$options"]
+	set result [sim_run ${name}.x "$opts(sim,$mach) $global_sim_options" "" "" "$options"]
 	set status [lindex $result 0]
 	set output [lindex $result 1]
 
