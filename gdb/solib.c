@@ -1198,12 +1198,17 @@ FIXME
 void 
 solib_create_inferior_hook()
 {
-  
+  /* If we are using the BKPT_AT_SYMBOL code, then we don't need the base
+     yet.  In fact, in the case of a SunOS4 executable being run on
+     Solaris, we can't get it yet.  find_solib will get it when it needs
+     it.  */
+#if !(defined (SVR4_SHARED_LIBS) && defined (BKPT_AT_SYMBOL))
   if ((debug_base = locate_base ()) == 0)
     {
       /* Can't find the symbol or the executable is statically linked. */
       return;
     }
+#endif
 
   if (!enable_break ())
     {

@@ -1,5 +1,8 @@
 Sat Jun 12 14:40:54 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* solib.c (solib_create_inferior_hook) [SVR4_SHARED_LIBS]:
+	Don't try to get the debug base yet.
+
 	* dbxread.c (process_one_symbol): Set n_opt_found based on whether
 	a non-gcc N_OPT symbol is found.  Make SUN_FIXED_LBRAC_BUG a macro
 	which returns 0 or 1 to say whether to do it.
