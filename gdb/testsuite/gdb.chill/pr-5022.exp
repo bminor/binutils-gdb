@@ -46,15 +46,15 @@ proc do_tests {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
-    gdb_test "set language chill ""
+    gdb_test "set language chill" ""
 
     # This is needed (at least on SunOS4) to make sure the
     # the symbol table is read.
-    gdb_test "break gdbme.ch:3 ""
-    gdb_test "delete 1 ""
+    gdb_test "break gdbme.ch:3" ""
+    gdb_test "delete 1" ""
 
-    gdb_test "set width 0 ""
-    gdb_test "set print sevenbit-strings ""
+    gdb_test "set width 0" ""
+    gdb_test "set print sevenbit-strings" ""
 
     test_pr_5022
 }
@@ -63,7 +63,7 @@ proc test_pr_5022 {} {
     global gdb_prompt
     runto dummy_pr_5022
     gdb_test "p p" " = NULL" "print NULL pointer"
-    gdb_test "continue ""
+    gdb_test "continue" ""
     gdb_test "p p" {= PTR\(H'[0-9a-fA-F]+\)} "print non-NULL pointer"
 }
 

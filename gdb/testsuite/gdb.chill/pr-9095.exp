@@ -35,7 +35,7 @@ proc do_tests {} {
     gdb_start
     gdb_load $binfile
 
-    gdb_test "set language chill ""
+    gdb_test "set language chill" ""
     runto pr-9095.ch:12
     gdb_test {p v_arr2(5)->.p(5)} "reference value used as function" \
 	"bad call using pointer"

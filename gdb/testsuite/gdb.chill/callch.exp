@@ -48,7 +48,7 @@ proc do_tests {} {
 
     send_gdb "set language chill\n" ; 
 
-    gdb_test "break callch.ch:48 ""
+    gdb_test "break callch.ch:48" ""
     send_gdb "run\n"; gdb_expect -re "Breakpoint .*callch.ch:48.*$gdb_prompt $"
     gdb_test {set fred(10, i)} {a is '10'; b is '12'.}
     gdb_test_exact "call klaus()" {here's klaus calling.}
