@@ -396,11 +396,35 @@ parse_args (argc, argv)
 	    || ! isdigit ((unsigned char) argv[i + 1][0])))
       argv[i] = (char *) "--shared";
 
+  /* Because we permit long options to start with a single dash, and
+     we have a --library option, and the -l option is conventionally
+     used with an immediately following argument, we can have bad
+     results of somebody tries to use -l with a library whose name
+     happens to start with "ibrary", as in -li.  We avoid problems by
+     simply turning -l into --library.  This means that users will
+     have to use two dashes in order to use --library, which is OK
+     since that's how it is documented.
+
+     FIXME: It's possible that this problem can arise for other short
+     options as well, although the user does always have the recourse
+     of adding a space between the option and the argument.  */
+  for (i = 1; i < argc; i++)
+    {
+      if (argv[i][0] == '-'
+	  && argv[i][1] == 'l'
+	  && argv[i][2] != '\0')
+	{
+	  char *n;
+
+	  n = (char *) xmalloc (strlen (argv[i]) + 20);
+	  sprintf (n, "--library=%s", argv[i] + 2);
+	  argv[i] = n;
+	}
+    }
+
   last_optind = -1;
   while (1)
     {
-      /* getopt_long_only is like getopt_long, but '-' as well as '--' can
-	 indicate a long option.  */
       int longind;
       int optc;
 
@@ -417,6 +441,8 @@ parse_args (argc, argv)
 	  last_optind = optind;
 	}
 
+      /* getopt_long_only is like getopt_long, but '-' as well as '--'
+	 can indicate a long option.  */
       optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
 
       if (optc == -1)
