@@ -1,3 +1,14 @@
+Sat Nov 27 22:50:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/all/p2425.s: Insert a tab before assembler directives so
+	that the directives are not interpreted as labels.
+
+	* gas/hppa/basic/weird.s: Sync with GDB version.
+
+	* gas/hppa/more.parse/labelbug.s: New test.
+
+	* gas/hppa/more.parse/parse.exp: Run it.
+
 Wed Nov 24 01:25:03 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/fixupbug.s: New test.
