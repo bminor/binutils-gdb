@@ -750,7 +750,13 @@ i386_skip_prologue (CORE_ADDR start_pc)
 	}
     }
 
-  return i386_follow_jump (pc);
+  /* If the function starts with a branch (to startup code at the end)
+     the last instruction should bring us back to the first
+     instruction of the real code.  */
+  if (i386_follow_jump (start_pc) != start_pc)
+    pc = i386_follow_jump (pc);
+
+  return pc;
 }
 
 /* This function is 64-bit safe.  */

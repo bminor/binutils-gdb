@@ -1,3 +1,9 @@
+2004-04-19  Jerome Guitton  <guitton@gnat.com>
+	    Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_skip_prologue): follow the last jump only if
+	the function begins with a branch instruction.
+
 2004-04-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c: Fix spelling mistakes.
