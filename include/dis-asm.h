@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "ansidecl.h"
 #include "bfd.h"
 
 typedef int (*fprintf_ftype) PARAMS((FILE*, const char*, ...));
@@ -28,6 +27,10 @@ typedef struct disassemble_info {
   void (*memory_error_func)
     PARAMS ((int status, bfd_vma memaddr, struct disassemble_info *info));
 
+  /* Function called to print ADDR.  */
+  void (*print_address_func)
+    PARAMS ((bfd_vma addr, struct disassemble_info *info));
+
   /* These are for buffer_read_memory.  */
   bfd_byte *buffer;
   bfd_vma buffer_vma;
@@ -43,6 +46,12 @@ extern int buffer_read_memory
    It prints a message using info->fprintf_func and info->stream.  */
 extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
 
+/* Just print the address is hex.  This is included for completeness even
+   though both GDB and objdump provide their own (to print symbolic
+   addresses).  */
+extern void generic_print_address
+  PARAMS ((bfd_vma, struct disassemble_info *));
+
 #define INIT_DISASSEMBLE_INFO(INFO, STREAM) \
   (INFO).fprintf_func = (fprintf_ftype)fprintf, \
   (INFO).stream = (STREAM), \
@@ -50,7 +59,8 @@ extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
   (INFO).buffer_vma = 0, \
   (INFO).buffer_length = 0, \
   (INFO).read_memory_func = buffer_read_memory, \
-  (INFO).memory_error_func = perror_memory
+  (INFO).memory_error_func = perror_memory, \
+  (INFO).print_address_func = generic_print_address
 
 /* GDB--Like target_read_memory, but slightly different parameters.  */
 extern int
@@ -62,12 +72,16 @@ extern void
 dis_asm_memory_error
   PARAMS ((int status, bfd_vma memaddr, disassemble_info *info));
 
+/* GDB--Like print_address with slightly different parameters.  */
+extern void
+dis_asm_print_address PARAMS ((bfd_vma addr, disassemble_info *info));
+
 #define GDB_INIT_DISASSEMBLE_INFO(INFO, STREAM) \
   (INFO).fprintf_func = (fprintf_ftype)fprintf_filtered, \
   (INFO).stream = (STREAM), \
   (INFO).read_memory_func = dis_asm_read_memory, \
-  (INFO).memory_error_func = dis_asm_memory_error
-
+  (INFO).memory_error_func = dis_asm_memory_error, \
+  (INFO).print_address_func = dis_asm_print_address
 
 /* Standard disassemblers.  Disassemble one instruction at the given
    target address.  Return number of bytes processed.  */
@@ -80,5 +94,14 @@ extern int print_insn_i386 PARAMS ((bfd_vma,disassemble_info*));
 extern int print_insn_m68k PARAMS ((bfd_vma,disassemble_info*));
 extern int print_insn_z8001 PARAMS ((bfd_vma,disassemble_info*));
 extern int print_insn_z8002 PARAMS ((bfd_vma,disassemble_info*));
+extern int print_insn_h8300 PARAMS ((bfd_vma,disassemble_info*));
+extern int print_insn_h8300h PARAMS ((bfd_vma,disassemble_info*));
 extern int print_insn_h8500 PARAMS ((bfd_vma,disassemble_info*));
+extern int print_insn_alpha PARAMS ((bfd_vma,disassemble_info*));
 extern int print_insn_sparc PARAMS ((bfd_vma,disassemble_info*));
+extern int print_insn_big_a29k PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_little_a29k PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_i960 PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_sh PARAMS ((bfd_vma,disassemble_info*));
+extern int print_insn_hppa PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_m88k PARAMS ((bfd_vma, disassemble_info*));
