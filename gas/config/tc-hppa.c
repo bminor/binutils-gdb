@@ -2191,7 +2191,7 @@ pa_ip (str)
 		}
 	      else
 		{
-		  the_insn.reloc = R_HPPA;
+		  the_insn.reloc = R_HPPA_ABS_CALL;
 		  the_insn.format = 17;
 		  continue;
 		}
