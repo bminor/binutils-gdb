@@ -1,5 +1,10 @@
 2004-08-23  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/whatis.c: Remove conditional disabling of "signed".
+	* gdb.base/whatis.exp: Remove signed_keyword_not_used.
+
+2004-08-23  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/whatis.c: Add copyright notice.
 
 2004-08-20  Mark Kettenis  <kettenis@gnu.org>

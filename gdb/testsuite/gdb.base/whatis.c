@@ -1,6 +1,6 @@
 /* This test program is part of GDB, the GNU debugger.
 
-   Copyright 1992, 1993, 1994, 1997, 1999
+   Copyright 1992, 1993, 1994, 1997, 1999, 2004
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -26,10 +26,6 @@
 /*
  *	First the basic C types.
  */
-
-#if !(defined (__STDC__) || defined (_AIX))
-#define signed  /**/
-#endif
 
 char		v_char;
 signed char	v_signed_char;
