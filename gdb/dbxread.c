@@ -1380,6 +1380,8 @@ read_dbx_symtab (struct objfile *objfile)
   data_sect_index = objfile->sect_index_data;
   if (data_sect_index == -1)
     data_sect_index = SECT_OFF_BSS (objfile);
+  if (data_sect_index == -1)
+    data_sect_index = SECT_OFF_RODATA (objfile);
   gdb_assert (data_sect_index != -1);
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)

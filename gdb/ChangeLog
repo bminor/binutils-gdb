@@ -1,5 +1,9 @@
 2003-09-12  Jim Blandy  <jimb@redhat.com>
 
+	* dbxread.c (read_dbx_symtab): If we have no .data section and no
+	.bss section, presume that any variables we find live in the
+	.rodata section.
+
 	* dbxread.c (read_dbx_symtab): Add FIXME about finding section
 	offsets for global and static variables.
 
