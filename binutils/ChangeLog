@@ -1,3 +1,11 @@
+Thu May 14 14:00:56 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* stabs.c (parse_stab): Support Win32 style directory separators.
+
+Sun May 10 22:34:44 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* po/Make-in (install-info): New target.
+
 Fri May  8 10:33:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ar.c (usage): Extend information provided about command line
