@@ -362,7 +362,7 @@ sigchld_handler(signo)
 	sigmask(SIGCONT) | sigmask(SIGWINCH) | sigmask(SIGPWR) | \
 	sigmask(SIGURG) | sigmask(SIGPOLL)
 
-
+#ifdef ATTACH_DETACH
 /*
  * Thanks to XPT_MPDEBUGGER, we have to mange child_wait().
  */
@@ -514,6 +514,38 @@ child_wait(pid, status)
 
   return pid;
 }
+#else /* !ATTACH_DETACH */
+/*
+ * Simple child_wait() based on inftarg.c child_wait() for use until
+ * the MPDEBUGGER child_wait() works properly.  This will go away when
+ * that is fixed.
+ */
+child_wait (pid, ourstatus)
+     int pid;
+     struct target_waitstatus *ourstatus;
+{
+  int save_errno;
+  int status;
+
+  do {
+    pid = wait (&status);
+    save_errno = errno;
+
+    if (pid == -1)
+      {
+	if (save_errno == EINTR)
+	  continue;
+	fprintf (stderr, "Child process unexpectedly missing: %s.\n",
+		 safe_strerror (save_errno));
+	ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+        return -1;
+      }
+  } while (pid != inferior_pid); /* Some other child died or stopped */
+  store_waitstatus (ourstatus, status);
+  return pid;
+}
+#endif /* ATTACH_DETACH */
 
 
 
@@ -550,12 +582,18 @@ kill_inferior ()
 {
   if (inferior_pid == 0)
     return;
-  /*
-   * Don't use PT_KILL, since the child will stop again with a PTS_EXIT.
-   * Just hit him with SIGKILL (so he stops) and detach.
-   */
+
+  /* For MPDEBUGGER, don't use PT_KILL, since the child will stop
+     again with a PTS_EXIT.  Just hit him with SIGKILL (so he stops)
+     and detach. */
+
   kill (inferior_pid, SIGKILL);
+#ifdef ATTACH_DETACH
   detach(SIGKILL);
+#else /* ATTACH_DETACH */
+  ptrace(PT_KILL, inferior_pid, 0, 0);
+  wait((int *)NULL);
+#endif /* ATTACH_DETACH */
   target_mourn_inferior ();
 }
 
@@ -737,6 +775,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 void
 _initialize_symm_nat ()
 {
+#ifdef ATTACH_DETACH
 /*
  * the MPDEBUGGER is necessary for process tree debugging and attach
  * to work, but it alters the behavior of debugged processes, so other
@@ -786,4 +825,5 @@ _initialize_symm_nat ()
 		fatal("_initialize_symm_nat(): sigaction(SIGCHLD): %s",
 		      safe_strerror(errno));
 	}
+#endif
 }

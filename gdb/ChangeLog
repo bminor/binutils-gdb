@@ -1,3 +1,15 @@
+Fri Mar 25 12:40:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* valprint.c (val_print): Remove inaccurate comment about what
+	types can be stub types.
+
+	* config/i386/ptx.mh (XDEPFILES): Add coredep.o.  Delete infptrace.o.
+	* symm-nat.c (child_wait, _initialize_symm_nat, kill_inferior):
+	Supply alternate version if ATTACH_DETACH is not defined.
+	* ptx4-nat.c, config/i386/{nm-ptx4.h, ptx4.mh, ptx.mt, ptx4.mt,
+	tm-ptx.h, tm-ptx4.h, xm-ptx.h, xm-ptx4.h}: New files.
+	* configure.in: Recognize i[34]86-sequent-sysv4* host.
+
 Fri Mar 25 10:14:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (skip_prologue): Return "pc" not zero

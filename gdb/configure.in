@@ -38,6 +38,7 @@ hppa*-*-osf*)		gdb_host=hppabsd ;;
 
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
 i[34]86-sequent-bsd*)	gdb_host=symmetry ;; #dynix
+i[34]86-sequent-sysv4*)	gdb_host=ptx4 ;;
 i[34]86-sequent-sysv*)	gdb_host=ptx ;;
 
 i[34]86-*-aix*)		gdb_host=i386aix ;;
@@ -191,7 +192,9 @@ hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
 hppa*-*-osf*)		gdb_target=hppaosf ;;
 
-i[34]86-sequent-*)	gdb_target=symmetry ;;
+i[34]86-sequent-bsd*)	gdb_target=symmetry ;;
+i[34]86-sequent-sysv4*)	gdb_target=ptx4 ;;
+i[34]86-sequent-sysv*)	gdb_target=ptx ;;
 i[34]86-ncr-*)		gdb_target=ncr3000 ;;
 
 i[34]86-*-aout*)	gdb_target=i386aout ;;

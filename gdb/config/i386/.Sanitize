@@ -58,9 +58,13 @@ nm-i386sco4.h
 nm-i386v.h
 nm-i386v4.h
 nm-linux.h
+nm-ptx4.h
 nm-sun386.h
 nm-symmetry.h
 ptx.mh
+ptx.mt
+ptx4.mh
+ptx4.mt
 sun386.mh
 sun386.mt
 symmetry.mh
@@ -75,6 +79,8 @@ tm-i386os9k.h
 tm-i386v.h
 tm-i386v4.h
 tm-linux.h
+tm-ptx.h
+tm-ptx4.h
 tm-sun386.h
 tm-symmetry.h
 xm-go32.h
@@ -89,6 +95,8 @@ xm-i386v.h
 xm-i386v32.h
 xm-i386v4.h
 xm-linux.h
+xm-ptx.h
+xm-ptx4.h
 xm-sun386.h
 xm-symmetry.h
 
