@@ -455,10 +455,13 @@ print_insn_hppa (memaddr, info)
 				  info);
 		  break;
 		case 'a':
-		  (*info->fprintf_func) (info->stream, "%s",
-				    compare_cond_names[GET_COND (insn)]);
+		  (*info->fprintf_func) (info->stream, "%s ",
+					 compare_cond_names[GET_COND (insn)]);
 		  break;
 		case 'd':
+		  (*info->fprintf_func) (info->stream, "%s ",
+					 add_cond_names[GET_COND (insn)]);
+		  break;
 		case '!':
 		  (*info->fprintf_func) (info->stream, "%s",
 				    add_cond_names[GET_FIELD (insn, 16, 18)]);
