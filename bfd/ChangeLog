@@ -1,3 +1,10 @@
+2001-01-19  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_check_relocs): Report files with bad
+	relocation section names.
+	(elf_i386_relocate_section): Report files with bad relocation
+	section names and return false.
+
 2001-01-17  Bo Thorsen  <bo@suse.de>
 
 	* targets.c: Alphabetize list of xvecs.

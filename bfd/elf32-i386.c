@@ -670,9 +670,20 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		  if (name == NULL)
 		    return false;
 
-		  BFD_ASSERT (strncmp (name, ".rel", 4) == 0
-			      && strcmp (bfd_get_section_name (abfd, sec),
-					 name + 4) == 0);
+		  if (strncmp (name, ".rel", 4) != 0
+		      || strcmp (bfd_get_section_name (abfd, sec),
+				 name + 4) != 0)
+		    {
+		      if (abfd->my_archive)
+			(*_bfd_error_handler) (_("%s(%s): bad relocation section name `%s\'"),
+					       bfd_get_filename (abfd->my_archive),
+					       bfd_get_filename (abfd),
+					       name);
+		      else
+			(*_bfd_error_handler) (_("%s: bad relocation section name `%s\'"),
+					       bfd_get_filename (abfd),
+					       name);
+		  }
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)
@@ -1626,10 +1637,22 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (name == NULL)
 		    return false;
 
-		  BFD_ASSERT (strncmp (name, ".rel", 4) == 0
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 4) == 0);
+		  if (strncmp (name, ".rel", 4) != 0
+		      || strcmp (bfd_get_section_name (input_bfd,
+						       input_section),
+				 name + 4) != 0)
+		    {
+		      if (input_bfd->my_archive)
+			(*_bfd_error_handler) (_("%s(%s): bad relocation section name `%s\'"),
+					       bfd_get_filename (input_bfd->my_archive),
+					       bfd_get_filename (input_bfd),
+					       name);
+		      else
+			(*_bfd_error_handler) (_("%s: bad relocation section name `%s\'"),
+					       bfd_get_filename (input_bfd),
+					       name);
+		      return false;
+		    }
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  BFD_ASSERT (sreloc != NULL);
