@@ -1,3 +1,8 @@
+Tue Jan 19 08:26:07 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (gcc-no-fixedincludes): Made to work with current
+	gcc Makefile.
+
 Fri Jan 15 16:40:54 1993  Mike Werner  (mtw@rtl.cygnus.com)
 
         **** start-sanitize-chill ****
