@@ -1,5 +1,9 @@
 2005-03-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* po/bfd.pot: Regenerate.
+
+2005-03-05  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (update_plt_info): Don't mark new ABI call syms
 	with is_func.
 	(func_desc_adjust): Force dot-syms local in executables as well

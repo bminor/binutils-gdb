@@ -1,3 +1,7 @@
+2005-03-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/ld.pot: Regenerate.
+
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
 	* ldmain.c (remove_output): Use unlink_if_ordinary instead of unlink.

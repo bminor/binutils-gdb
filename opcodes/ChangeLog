@@ -1,8 +1,12 @@
+2005-03-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/opcodes.pot: Regenerate.
+
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
-	* opcodes/arc-dis.c:Add enum a4_decoding_class. 
-	  (dsmOneArcInst): Use the enum values for the decoding class
-	  Remove redundant case in the switch for decodingClass value 11
+	* opcodes/arc-dis.c: Add enum a4_decoding_class.
+	(dsmOneArcInst): Use the enum values for the decoding class.
+	Remove redundant case in the switch for decodingClass value 11.
 
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
@@ -20,9 +24,9 @@
 
 	* cgen-dis.in: Use bfd_byte for buffers that are passed to
 	read_memory.
-	
+
 	* ia64-opc.c (locate_opcode_ent): Initialise opval array.
-	
+
 	* crx-dis.c (make_instruction): Move argument structure into inner
 	scope and ensure that all of its fields are initialised before
 	they are used.

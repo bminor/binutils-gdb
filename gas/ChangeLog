@@ -1,3 +1,7 @@
+2005-03-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/gas.pot: Regenerate.
+
 2005-03-04  David Daney  <ddaney@avtrex.com>
 
 	* config/tc-mips.c (macro_build_lui): Use '__gnu_local_gp'
