@@ -37,8 +37,13 @@ extern void  bcopy ();
 extern int   bcmp ();
 extern void  bzero ();
 extern PTR   memset ();
-extern void  puts ();
-extern void  fputs ();
+
+/* These used to be declared to return void.  As far as I know that is just
+   wrong; are there any systems for which they actually don't return a
+   value (EOF for error, something else for success).  */
+extern int  puts ();
+extern int  fputs ();
+
 extern int   rmdir ();
 extern int   getuid ();
 extern int   getgid ();
