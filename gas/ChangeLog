@@ -1,3 +1,11 @@
+Wed Sep  1 15:56:42 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (write_relocs) [RELOC_EXPANSION_POSSIBLE]: Declare
+	tc_gen_reloc correctly.
+
+	* configure.in: Use "case" instead of "if" when possible.  Rewrote
+	Makefile editing to reduce work done.  Treat "hppa*" as "hppa".
+
 Wed Sep  1 12:19:07 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/obj-coffbfd.c (obj_coff_section): add 'd' as an alias for
