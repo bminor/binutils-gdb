@@ -1,3 +1,9 @@
+Sun Feb 16 13:01:49 1992  Per Bothner  (bothner at cygnus.com)
+
+	* aout-target.h (MY(write_object_contents):
+	Set obj_reloc_entry_size (abfd).
+	* gen-aout.c:  Change to emit a .c files, not a .h file.
+
 Thu Feb 13 20:11:47 1992  Fred Fish  (fnf at cygnus.com)
 
 	* elf.c (elf_slurp_symbol_table):  Remove obsolete use of
