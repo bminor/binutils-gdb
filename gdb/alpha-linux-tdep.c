@@ -96,7 +96,7 @@ alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 static CORE_ADDR
 alpha_linux_sigcontext_addr (struct frame_info *frame)
 {
-  return (frame->frame - 0x298); /* sizeof(struct sigcontext) */
+  return (get_frame_base (frame) - 0x298); /* sizeof(struct sigcontext) */
 }
 
 static void

@@ -1,3 +1,8 @@
+2003-01-08  Andrew Cagney  <cagney@redhat.com>
+
+	* alpha-linux-tdep.c (alpha_linux_sigcontext_addr): Use
+	get_frame_base.
+
 2003-01-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb_mbuild.sh: Edit the output of `maint print architecture'
