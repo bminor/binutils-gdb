@@ -1,3 +1,9 @@
+Mon Dec 29 17:13:28 1997  H.J. Lu  (hjl@gnu.org)
+
+	* elflink.h (elf_link_assign_sym_version): Change error message
+	from "undefined version name" to "undefined versioned symbol
+	name".
+
 Mon Dec 29 11:41:16 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Fix typo from previous

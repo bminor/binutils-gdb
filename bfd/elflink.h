@@ -3217,7 +3217,7 @@ elf_link_assign_sym_version (h, data)
 	  /* We could not find the version for a symbol when
              generating a shared archive.  Return an error.  */
 	  (*_bfd_error_handler)
-	    ("%s: undefined version name %s",
+	    ("%s: undefined versioned symbol name %s",
 	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  sinfo->failed = true;
