@@ -692,7 +692,7 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	cum = (cum + alignment) & -alignment;
       offset[i] = -cum;
     }
-  sp += min ((cum + 7) & -8, 16);
+  sp += max ((cum + 7) & -8, 16);
 
   for (i = 0; i < nargs; i++)
     write_memory (sp + offset[i], VALUE_CONTENTS (args[i]),
