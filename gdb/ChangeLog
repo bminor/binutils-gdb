@@ -1,3 +1,8 @@
+Tue Nov  9 17:42:25 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* valarith.c (value_x_binop): fix search operator in class bug
+	* valarith.c (value_x_unop): fix search operator in class bug
+
 Tue Nov  9 19:20:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (init.c): Add udi2go32.o to list of files that we
