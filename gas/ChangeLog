@@ -1,3 +1,10 @@
+2001-12-17  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cgen.c: Add prototype for queue_fixup.
+	(gas_cgen_parse_operand): Move initilisastion of errmsg to avoid
+	possible longjmp corruption.
+	* cgen.h: Add prototype for gas_cgen_md_operand.
+
 2001-12-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_init_stab_section): References are

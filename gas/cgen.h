@@ -96,4 +96,6 @@ md_cgen_record_fixup_exp PARAMS ((fragS *, int, const CGEN_INSN *, int,
 				  const CGEN_OPERAND *, int,
 				  expressionS *));
 
+extern void gas_cgen_md_operand PARAMS ((expressionS *));
+
 #endif /* GAS_CGEN_H */

@@ -29,6 +29,8 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "cgen.h"
 #include "dwarf2dbg.h"
 
+static void queue_fixup PARAMS ((int, int, expressionS *));
+
 /* Opcode table descriptor, must be set by md_begin.  */
 
 CGEN_CPU_DESC gas_cgen_cpu_desc;
@@ -322,7 +324,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
   static char *hold;
   static enum cgen_parse_operand_result *resultP_1;
 #endif
-  const char *errmsg = NULL;
+  const char *errmsg;
   expressionS exp;
 
   if (want == CGEN_PARSE_OPERAND_INIT)
@@ -348,6 +350,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
   expr_jmp_buf_p = 1;
   expression (&exp);
   expr_jmp_buf_p = 0;
+  errmsg = NULL;
 
   *strP = input_line_pointer;
   input_line_pointer = hold;
