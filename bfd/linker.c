@@ -2858,8 +2858,19 @@ DESCRIPTION
 static struct bfd_hash_table _bfd_section_already_linked_table;
 
 /* Support routines for the hash table used by section_already_linked,
-   initialize the table, lookup, fill in an entry and remove the
-   table.  */
+   initialize the table, traverse, lookup, fill in an entry and remove
+   the table.  */
+
+void
+bfd_section_already_linked_table_traverse
+  (bfd_boolean (*func) (struct bfd_section_already_linked_hash_entry *,
+			void *), void *info)
+{
+  bfd_hash_traverse (&_bfd_section_already_linked_table,
+		     (bfd_boolean (*) (struct bfd_hash_entry *,
+				       void *)) func,
+		     info);
+}
 
 struct bfd_section_already_linked_hash_entry *
 bfd_section_already_linked_table_lookup (const char *name)

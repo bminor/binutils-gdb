@@ -742,6 +742,10 @@ elf_object_p (bfd *abfd)
 	  if (shindex == SHN_LORESERVE - 1)
 	    shindex += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}
+
+      /* Set up group pointers.  */
+      if (! _bfd_elf_setup_group_pointers (abfd))
+	goto got_wrong_format_error;
     }
 
   /* Let the backend double check the format and override global

@@ -1065,6 +1065,10 @@ struct bfd_elf_section_data
     struct bfd_symbol *id;
   } group;
 
+  /* Optional information about section group; NULL if it doesn't
+     belongs to any section group. */
+  asection *sec_group;
+
   /* A linked list of sections in the group.  Circular when used by
      the linker.  */
   asection *next_in_group;
@@ -1080,6 +1084,7 @@ struct bfd_elf_section_data
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
+#define elf_sec_group(sec)	(elf_section_data(sec)->sec_group)
 
 /* Return TRUE if section has been discarded.  */
 #define elf_discarded_section(sec)				\
@@ -1582,6 +1587,12 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
+
+extern bfd_boolean bfd_elf_match_symbols_in_sections
+  (asection *sec1, asection *sec2);
+
+extern bfd_boolean _bfd_elf_setup_group_pointers
+  (bfd *);
 
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);

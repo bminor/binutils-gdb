@@ -613,14 +613,58 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 }
 
 bfd_boolean
+_bfd_elf_setup_group_pointers (bfd *abfd)
+{
+  unsigned int i;
+  unsigned int num_group = elf_tdata (abfd)->num_group;
+  bfd_boolean result = TRUE;
+
+  if (num_group == (unsigned) -1)
+    return result;
+
+  for (i = 0; i < num_group; i++)
+    {
+      Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
+      Elf_Internal_Group *idx = (Elf_Internal_Group *) shdr->contents;
+      unsigned int n_elt = shdr->sh_size / 4;
+
+      while (--n_elt != 0)
+	if ((++idx)->shdr->bfd_section)
+	  elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
+	else if (idx->shdr->sh_type == SHT_RELA
+		 || idx->shdr->sh_type == SHT_REL)
+	  /* We won't include relocation sections in section groups in
+	     output object files. We adjust the group section size here
+	     so that relocatable link will work correctly when
+	     relocation sections are in section group in input object
+	     files.  */
+	  shdr->bfd_section->size -= 4;
+	else
+	  {
+	    /* There are some unknown sections in the group.  */
+	    (*_bfd_error_handler)
+	      (_("%s: unknown [%d] section `%s' in group [%s]"),
+	       bfd_archive_filename (abfd),
+	       (unsigned int) idx->shdr->sh_type,
+	       elf_string_from_elf_strtab (abfd, idx->shdr->sh_name),
+	       shdr->bfd_section->name);
+	    result = FALSE;
+	  }
+    }
+  return result;
+}
+
+bfd_boolean
 bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
 {
   return elf_next_in_group (sec) != NULL;
 }
 
 bfd_boolean
-bfd_elf_discard_group (bfd *abfd ATTRIBUTE_UNUSED, asection *group)
+bfd_elf_discard_group (bfd *abfd ATTRIBUTE_UNUSED,
+		       asection *group ATTRIBUTE_UNUSED)
 {
+#if 0
   asection *first = elf_next_in_group (group);
   asection *s = first;
 
@@ -632,6 +676,10 @@ bfd_elf_discard_group (bfd *abfd ATTRIBUTE_UNUSED, asection *group)
       if (s == first)
 	break;
     }
+#else
+  /* FIXME: Never used. Remove it!  */
+  abort ();
+#endif
   return TRUE;
 }
 
@@ -2666,13 +2714,7 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	}
       while (elt != elf_next_in_group (l->u.indirect.section));
 
-  /* With ld -r, merging SHT_GROUP sections results in wasted space
-     due to allowing for the flag word on each input.  We may well
-     duplicate entries too.  */
-  while ((loc -= 4) > sec->contents)
-    H_PUT_32 (abfd, 0, loc);
-
-  if (loc != sec->contents)
+  if ((loc -= 4) != sec->contents)
     abort ();
 
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
@@ -7760,4 +7802,213 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **dynsyms, asymbol **ret)
     }
 
   return n;
+}
+
+/* Sort symbol by binding and section. We want to put definitions
+   sorted by section at the beginning.  */
+
+static int
+elf_sort_elf_symbol (const void *arg1, const void *arg2)
+{
+  const Elf_Internal_Sym *s1;
+  const Elf_Internal_Sym *s2;
+  int shndx;
+
+  /* Make sure that undefined symbols are at the end.  */
+  s1 = (const Elf_Internal_Sym *) arg1;
+  if (s1->st_shndx == SHN_UNDEF)
+    return 1;
+  s2 = (const Elf_Internal_Sym *) arg2;
+  if (s2->st_shndx == SHN_UNDEF)
+    return -1;
+
+  /* Sorted by section index.  */
+  shndx = s1->st_shndx - s2->st_shndx;
+  if (shndx != 0)
+    return shndx;
+
+  /* Sorted by binding.  */
+  return ELF_ST_BIND (s1->st_info)  - ELF_ST_BIND (s2->st_info);
+}
+
+struct elf_symbol
+{
+  Elf_Internal_Sym *sym;
+  const char *name;
+};
+
+static int
+elf_sym_name_compare (const void *arg1, const void *arg2)
+{
+  const struct elf_symbol *s1 = (const struct elf_symbol *) arg1;
+  const struct elf_symbol *s2 = (const struct elf_symbol *) arg2;
+  return strcmp (s1->name, s2->name);
+}
+
+/* Check if 2 sections define the same set of local and global
+   symbols.  */
+
+bfd_boolean
+bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2)
+{
+  bfd *bfd1, *bfd2;
+  const struct elf_backend_data *bed1, *bed2;
+  Elf_Internal_Shdr *hdr1, *hdr2;
+  bfd_size_type symcount1, symcount2;
+  Elf_Internal_Sym *isymbuf1, *isymbuf2;
+  Elf_Internal_Sym *isymstart1 = NULL, *isymstart2 = NULL, *isym;
+  Elf_Internal_Sym *isymend;
+  struct elf_symbol *symp, *symtable1 = NULL, *symtable2 = NULL;
+  bfd_size_type count1, count2, i;
+  int shndx1, shndx2;
+  bfd_boolean result;
+
+  bfd1 = sec1->owner;
+  bfd2 = sec2->owner;
+
+  /* If both are .gnu.linkonce sections, they have to have the same
+     section name.  */
+  if (strncmp (sec1->name, ".gnu.linkonce",
+	       sizeof ".gnu.linkonce" - 1) == 0
+      && strncmp (sec2->name, ".gnu.linkonce",
+		  sizeof ".gnu.linkonce" - 1) == 0)
+    return strcmp (sec1->name + sizeof ".gnu.linkonce",
+		   sec2->name + sizeof ".gnu.linkonce") == 0;
+
+  /* Both sections have to be in ELF.  */
+  if (bfd_get_flavour (bfd1) != bfd_target_elf_flavour
+      || bfd_get_flavour (bfd2) != bfd_target_elf_flavour)
+    return FALSE;
+
+  if (elf_section_type (sec1) != elf_section_type (sec2))
+    return FALSE;
+
+  if ((elf_section_flags (sec1) & SHF_GROUP) != 0
+      && (elf_section_flags (sec2) & SHF_GROUP) != 0)
+    {
+      /* If both are members of section groups, they have to have the
+	 same group name.  */
+      if (strcmp (elf_group_name (sec1), elf_group_name (sec2)) != 0)
+	return FALSE;
+    }
+
+  shndx1 = _bfd_elf_section_from_bfd_section (bfd1, sec1);
+  shndx2 = _bfd_elf_section_from_bfd_section (bfd2, sec2);
+  if (shndx1 == -1 || shndx2 == -1)
+    return FALSE;
+
+  bed1 = get_elf_backend_data (bfd1);
+  bed2 = get_elf_backend_data (bfd2);
+  hdr1 = &elf_tdata (bfd1)->symtab_hdr;
+  symcount1 = hdr1->sh_size / bed1->s->sizeof_sym;
+  hdr2 = &elf_tdata (bfd2)->symtab_hdr;
+  symcount2 = hdr2->sh_size / bed2->s->sizeof_sym;
+
+  if (symcount1 == 0 || symcount2 == 0)
+    return FALSE;
+
+  isymbuf1 = bfd_elf_get_elf_syms (bfd1, hdr1, symcount1, 0,
+				   NULL, NULL, NULL);
+  isymbuf2 = bfd_elf_get_elf_syms (bfd2, hdr2, symcount2, 0,
+				   NULL, NULL, NULL);
+
+  result = FALSE;
+  if (isymbuf1 == NULL || isymbuf2 == NULL)
+    goto done;
+
+  /* Sort symbols by binding and section. Global definitions are at
+     the beginning.  */
+  qsort (isymbuf1, symcount1, sizeof (Elf_Internal_Sym),
+	 elf_sort_elf_symbol);
+  qsort (isymbuf2, symcount2, sizeof (Elf_Internal_Sym),
+	 elf_sort_elf_symbol);
+
+  /* Count definitions in the section.  */
+  count1 = 0;
+  for (isym = isymbuf1, isymend = isym + symcount1;
+       isym < isymend; isym++)
+    {
+      if (isym->st_shndx == (unsigned int) shndx1)
+	{
+	  if (count1 == 0)
+	    isymstart1 = isym;
+	  count1++;
+	}
+
+      if (count1 && isym->st_shndx != (unsigned int) shndx1)
+	break;
+    }
+
+  count2 = 0;
+  for (isym = isymbuf2, isymend = isym + symcount2;
+       isym < isymend; isym++)
+    {
+      if (isym->st_shndx == (unsigned int) shndx2)
+	{
+	  if (count2 == 0)
+	    isymstart2 = isym;
+	  count2++;
+	}
+
+      if (count2 && isym->st_shndx != (unsigned int) shndx2)
+	break;
+    }
+
+  if (count1 == 0 || count2 == 0 || count1 != count2)
+    goto done;
+
+  symtable1 = bfd_malloc (count1 * sizeof (struct elf_symbol));
+  symtable2 = bfd_malloc (count1 * sizeof (struct elf_symbol));
+
+  if (symtable1 == NULL || symtable2 == NULL)
+    goto done;
+
+  symp = symtable1;
+  for (isym = isymstart1, isymend = isym + count1;
+       isym < isymend; isym++)
+    {
+      symp->sym = isym;
+      symp->name = bfd_elf_string_from_elf_section (bfd1,
+						    hdr1->sh_link,
+						    isym->st_name);
+      symp++;
+    }
+ 
+  symp = symtable2;
+  for (isym = isymstart2, isymend = isym + count1;
+       isym < isymend; isym++)
+    {
+      symp->sym = isym;
+      symp->name = bfd_elf_string_from_elf_section (bfd2,
+						    hdr2->sh_link,
+						    isym->st_name);
+      symp++;
+    }
+  
+  /* Sort symbol by name.  */
+  qsort (symtable1, count1, sizeof (struct elf_symbol),
+	 elf_sym_name_compare);
+  qsort (symtable2, count1, sizeof (struct elf_symbol),
+	 elf_sym_name_compare);
+
+  for (i = 0; i < count1; i++)
+    /* Two symbols must have the same binding, type and name.  */
+    if (symtable1 [i].sym->st_info != symtable2 [i].sym->st_info
+	|| symtable1 [i].sym->st_other != symtable2 [i].sym->st_other
+	|| strcmp (symtable1 [i].name, symtable2 [i].name) != 0)
+      goto done;
+
+  result = TRUE;
+
+done:
+  if (symtable1)
+    free (symtable1);
+  if (symtable2)
+    free (symtable2);
+  if (isymbuf1)
+    free (isymbuf1);
+  if (isymbuf2)
+    free (isymbuf2);
+
+  return result;
 }

@@ -1,3 +1,33 @@
+2004-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 161/251
+	* elf-bfd.h (bfd_elf_section_data): Add sec_group.
+	(elf_sec_group): Defined.
+	(bfd_elf_match_symbols_in_sections): New prototype.
+	(_bfd_elf_setup_group_pointers): Likewise.
+
+	* elf.c (bfd_elf_discard_group): Abort.
+	(bfd_elf_set_group_contents): Also include relocation sections.
+	Remove zero-fill for ld -r.
+	(_bfd_elf_setup_group_pointers): New function.
+	(elf_sort_elf_symbol): Likewise.
+	(elf_sym_name_compare): Likewise.
+	(bfd_elf_match_symbols_in_sections): Likewise.
+
+	* elfcode.h (elf_object_p): Call _bfd_elf_setup_group_pointers.
+
+	* elflink.c (match_group_member): New.
+	(elf_link_input_bfd): Check group member for discarded section.
+	(try_match_symbols_in_sections): New function.
+	(already_linked): Likewise.
+	(_bfd_elf_section_already_linked): Support mixing comdat group
+	and linkonce section.
+
+	* libbfd-in.h (bfd_section_already_linked_table_traverse): New.
+	* linker.c (bfd_section_already_linked_table_traverse): New.
+
+	* libbfd.h: Regenerated.
+
 2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* reloc.c: Add BFD_RELOC_CRX_SWITCH8, BFD_RELOC_CRX_SWITCH16,
