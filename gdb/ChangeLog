@@ -1,3 +1,9 @@
+Tue Jan 30 15:41:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	From Jon Reeves <reeves@zk3.dec.com>:
+	* i386-stub.c (getpacket): Change fprintf stream from "gdb" to stderr.
+	(mem_fault_routine): Fix misplaced volatile type qualifier in decl.
+
 Mon Jan 29 19:05:58 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (diststuff): Make all-doc; diststuff target does not
