@@ -1,3 +1,7 @@
+Wed Dec 18 17:17:59 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* bfd-in.h, libaout.h:  ANSIfy enums.
+
 Wed Dec 18 16:12:25 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* archive.c (normalize): created version for VMS which removes the
