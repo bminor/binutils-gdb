@@ -1,3 +1,8 @@
+2000-11-22  Philip Blundell  <pb@futuretv.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Don't object to 
+	weak undefined symbols.
+
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c (bfd_mach_arm_5TE): Define.

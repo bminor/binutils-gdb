@@ -2937,6 +2937,9 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 		     + sec->output_offset);
 	      }
 
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    val = 0;
+
 	  else if (! info->relocateable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
