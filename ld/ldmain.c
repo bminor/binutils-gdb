@@ -1,4 +1,4 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -20,10 +20,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include <stdio.h>
+#include "bfdlink.h"
 
 #include "config.h"
 #include "ld.h"
-#include "ldsym.h"
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldwrite.h"
@@ -33,10 +34,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldemul.h"
 #include "ldlex.h"
 #include "ldfile.h"
-#include "ldindr.h"
-#include "ldwarn.h"
 #include "ldctor.h"
-#include "lderror.h"
 
 /* Somewhere above, sys/stat.h got included . . . . */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
@@ -59,34 +57,8 @@ char *program_name;
 /* The file that we're creating */
 bfd *output_bfd = 0;
 
-/* set if -y on the command line */
-int had_y;
-
-/* The local symbol prefix */
-char lprefix = 'L';
-
 /* Set by -G argument, for MIPS ECOFF target.  */
 int g_switch_value = 8;
-
-/* Count the number of global symbols multiply defined.  */
-int multiple_def_count;
-
-/* Count the number of symbols defined through common declarations.
-   This count is referenced in symdef_library, linear_library, and
-   modified by enter_global_ref.
-
-   It is incremented when a symbol is created as a common, and
-   decremented when the common declaration is overridden
-
-   Another way of thinking of it is that this is a count of
-   all ldsym_types with a ->scoms field */
-
-unsigned int commons_pending;
-
-/* Count the number of global symbols referenced and not defined.
-   common symbols are not included in this count.   */
-
-unsigned int undefined_global_sym_count;
 
 /* Nonzero means print names of input files as processed.  */
 boolean trace_files;
@@ -97,39 +69,62 @@ boolean trace_file_tries;
 /* 1 => write load map.  */
 boolean write_map;
 
-#ifdef GNU960
-/* Indicates whether output file will be b.out (default) or coff */
-enum target_flavour output_flavor = BFD_BOUT_FORMAT;
-#endif
-
-/* A count of the total number of local symbols ever seen - by adding
- the symbol_count field of each newly read afile.*/
-
-unsigned int total_symbols_seen;
-
-/* A count of the number of read files - the same as the number of elements
- in file_chain
- */
-unsigned int total_files_seen;
-
 args_type command_line;
 
 ld_config_type config;
 
 static boolean check_for_scripts_dir PARAMS ((char *dir));
-static void read_entry_symbols
-  PARAMS ((bfd *desc, struct lang_input_statement_struct *entry));
-static void enter_file_symbols PARAMS ((lang_input_statement_type *entry));
-static void search_library PARAMS ((struct lang_input_statement_struct *));
-static lang_input_statement_type *decode_library_subfile
-  PARAMS ((struct lang_input_statement_struct *library_entry,
-	   bfd *subfile_offset));
-static void linear_library PARAMS ((struct lang_input_statement_struct *));
-static void symdef_library PARAMS ((struct lang_input_statement_struct *));
-static void clear_syms PARAMS ((struct lang_input_statement_struct *entry,
-				file_ptr offset));
-static boolean subfile_wanted_p
-  PARAMS ((struct lang_input_statement_struct *));
+static boolean add_archive_element PARAMS ((struct bfd_link_info *, bfd *,
+					    const char *));
+static boolean multiple_definition PARAMS ((struct bfd_link_info *,
+					    const char *,
+					    bfd *, asection *, bfd_vma,
+					    bfd *, asection *, bfd_vma));
+static boolean multiple_common PARAMS ((struct bfd_link_info *,
+					const char *, bfd *,
+					enum bfd_link_hash_type, bfd_vma,
+					bfd *, enum bfd_link_hash_type,
+					bfd_vma));
+static boolean add_to_set PARAMS ((struct bfd_link_info *,
+				   struct bfd_link_hash_entry *,
+				   unsigned int bitsize,
+				   bfd *, asection *, bfd_vma));
+static boolean constructor_callback PARAMS ((struct bfd_link_info *,
+					     boolean constructor,
+					     unsigned int bitsize,
+					     const char *name,
+					     bfd *, asection *, bfd_vma));
+static boolean warning_callback PARAMS ((struct bfd_link_info *,
+					 const char *));
+static boolean undefined_symbol PARAMS ((struct bfd_link_info *,
+					 const char *, bfd *,
+					 asection *, bfd_vma));
+static boolean reloc_overflow PARAMS ((struct bfd_link_info *, bfd *,
+				       asection *, bfd_vma));
+static boolean reloc_dangerous PARAMS ((struct bfd_link_info *, const char *,
+					bfd *, asection *, bfd_vma));
+static boolean unattached_reloc PARAMS ((struct bfd_link_info *,
+					 const char *, bfd *, asection *,
+					 bfd_vma));
+static boolean notice_ysym PARAMS ((struct bfd_link_info *, const char *,
+				    bfd *, asection *, bfd_vma));
+
+static struct bfd_link_callbacks link_callbacks =
+{
+  add_archive_element,
+  multiple_definition,
+  multiple_common,
+  add_to_set,
+  constructor_callback,
+  warning_callback,
+  undefined_symbol,
+  reloc_overflow,
+  reloc_dangerous,
+  unattached_reloc,
+  notice_ysym
+};
+
+struct bfd_link_info link_info;
 
 extern int main PARAMS ((int, char **));
 
@@ -145,25 +140,28 @@ main (argc, argv)
   bfd_init ();
 
   /* Initialize the data about options.  */
-
-
   trace_files = trace_file_tries = false;
   write_map = false;
-  config.relocateable_output = false;
+  config.build_constructors = true;
   command_line.force_common_definition = false;
 
-  init_bfd_error_vector ();
-  ldsym_init ();
+  link_info.callbacks = &link_callbacks;
+  link_info.relocateable = false;
+  link_info.strip = strip_none;
+  link_info.discard = discard_none;
+  link_info.lprefix_len = 1;
+  link_info.lprefix = "L";
+  link_info.keep_memory = true;
+  link_info.input_bfds = NULL;
+  link_info.create_object_symbols_section = NULL;
+  link_info.hash = NULL;
+  link_info.keep_hash = NULL;
+  link_info.notice_hash = NULL;
+
   ldfile_add_arch ("");
 
   config.make_executable = true;
   force_make_executable = false;
-
-  /* Initialize the cumulative counts of symbols.  */
-  undefined_global_sym_count = 0;
-  multiple_def_count = 0;
-  commons_pending = 0;
-
   config.magic_demand_paged = true;
   config.text_read_only = true;
   config.make_executable = true;
@@ -199,7 +197,7 @@ main (argc, argv)
 	parse_line (s, 1);
     }
 
-  if (config.relocateable_output && command_line.relax)
+  if (link_info.relocateable && command_line.relax)
     {
       einfo ("%P%F: -relax and -r may not be used together\n");
     }
@@ -253,7 +251,7 @@ main (argc, argv)
 	}
     }
 
-  if (config.relocateable_output)
+  if (link_info.relocateable)
     output_bfd->flags &= ~EXEC_P;
   else
     output_bfd->flags |= EXEC_P;
@@ -283,6 +281,15 @@ main (argc, argv)
       bfd_close (output_bfd);
     }
 
+  if (config.stats)
+    {
+      extern char **environ;
+      char *lim = (char *) sbrk (0);
+
+      fprintf (stderr, "%s: data size %ld\n", program_name,
+	       (long) (lim - (char *) &environ));
+    }
+
   exit (0);
   return 0;
 }
@@ -298,23 +305,9 @@ get_emulation (argc, argv)
   char *emulation;
   int i;
 
-#ifdef GNU960
-  check_v960 (argc, argv);
-  emulation = "gld960";
-  for (i = 1; i < argc; i++)
-    {
-      if (!strcmp (argv[i], "-Fcoff"))
-	{
-	  emulation = "lnk960";
-	  output_flavor = BFD_COFF_FORMAT;
-	  break;
-	}
-    }
-#else
   emulation = (char *) getenv (EMULATION_ENVIRON);
   if (emulation == NULL)
     emulation = DEFAULT_EMULATION;
-#endif
 
   for (i = 1; i < argc; i++)
     {
@@ -427,845 +420,396 @@ set_scripts_dir ()
   free (dir);			/* Well, we tried.  */
 }
 
-static void
-read_entry_symbols (desc, entry)
-     bfd *desc;
-     struct lang_input_statement_struct *entry;
-{
-  if (entry->asymbols == (asymbol **) NULL)
-    {
-      bfd_size_type table_size = get_symtab_upper_bound (desc);
-
-      entry->asymbols = (asymbol **) ldmalloc (table_size);
-      entry->symbol_count = bfd_canonicalize_symtab (desc, entry->asymbols);
-    }
-}
-
-/*
- * turn this item into a reference
- */
 void
-refize (sp, nlist_p)
-     ldsym_type *sp;
-     asymbol **nlist_p;
+add_ysym (name)
+     const char *name;
 {
-  asymbol *sym = *nlist_p;
+  if (link_info.notice_hash == (struct bfd_hash_table *) NULL)
+    {
+      link_info.notice_hash = ((struct bfd_hash_table *)
+			       ldmalloc (sizeof (struct bfd_hash_table)));
+      if (! bfd_hash_table_init_n (link_info.notice_hash,
+				   bfd_hash_newfunc,
+				   61))
+	einfo ("%P%F: bfd_hash_table_init failed: %E\n");
+    }      
 
-  sym->value = 0;
-
-  /* FIXME: Why do we clear the flags here?  This used to set the
-     flags to zero, but we must not clear BSF_WEAK.  */
-  sym->flags &= BSF_WEAK;
-
-  sym->section = &bfd_und_section;
-  sym->udata = (PTR) (sp->srefs_chain);
-  sp->srefs_chain = nlist_p;
+  if (bfd_hash_lookup (link_info.notice_hash, name, true, true)
+      == (struct bfd_hash_entry *) NULL)
+    einfo ("%P%F: bfd_hash_lookup failed: %E\n");
 }
 
-/*
-This function is called for each name which is seen which has a global
-scope. It enters the name into the global symbol table in the correct
-symbol on the correct chain. Remember that each ldsym_type has three
-chains attatched, one of all definitions of a symbol, one of all
-references of a symbol and one of all common definitions of a symbol.
-
-When the function is over, the supplied is left connected to the bfd
-to which is was born, with its udata field pointing to the next member
-on the chain in which it has been inserted.
-
-A certain amount of jigery pokery is necessary since commons come
-along and upset things, we only keep one item in the common chain; the
-one with the biggest size seen sofar. When another common comes along
-it either bumps the previous definition into the ref chain, since it
-is bigger, or gets turned into a ref on the spot since the one on the
-common chain is already bigger. If a real definition comes along then
-the common gets bumped off anyway.
-
-Whilst all this is going on we keep a count of the number of multiple
-definitions seen, undefined global symbols and pending commons.
-*/
+/* Handle the -retain-symbols-file option.  */
 
 void
-enter_global_ref (nlist_p, name)
-     asymbol ** nlist_p;	/* pointer into symbol table from incoming bfd */
-     CONST char *name; /* name of symbol in linker table */
+add_keepsyms_file (filename)
+     const char *filename;
 {
-  asymbol *sym = *nlist_p;
-  ldsym_type *sp;
+  FILE *file;
+  char *buf;
+  size_t bufsize;
+  int c;
 
-  /* Lookup the name from the incoming bfd's symbol table in the
-     linker's global symbol table */
+  if (link_info.strip == strip_some)
+    einfo ("%X%P: error: duplicate retain-symbols-file\n");
 
-
-  flagword this_symbol_flags = sym->flags;
-
-  sp = ldsym_get (name);
-
-
-  /* If this symbol already has udata, it means that something strange
-     has happened.
-
-     The strange thing is that we've had an undefined symbol resolved by
-     an alias, but the thing the alias defined wasn't in the file. So
-     the symbol got a udata entry, but the file wasn't loaded.  Then
-     later on the file was loaded, but we don't need to do this
-     processing again */
-
-
-  if (sym->udata)
-    return;
-
-
-  if (this_symbol_flags & BSF_CONSTRUCTOR)
+  file = fopen (filename, "r");
+  if (file == (FILE *) NULL)
     {
-      /* Add this constructor to the list we keep */
-      ldlang_add_constructor (sp);
-      /* Turn any commons into refs */
-      if (sp->scoms_chain != (asymbol **) NULL)
-	{
-	  refize (sp, sp->scoms_chain);
-	  sp->scoms_chain = 0;
-	}
+      bfd_error = system_call_error;
+      einfo ("%X%P: %s: %E", filename);
+      return;
     }
-  else if ((sym->flags & BSF_WEAK) != 0
-	   && (sp->sdefs_chain != NULL || sp->scoms_chain != NULL))
+
+  link_info.keep_hash = ((struct bfd_hash_table *)
+			 ldmalloc (sizeof (struct bfd_hash_table)));
+  if (! bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc))
+    einfo ("%P%F: bfd_hash_table_init failed: %E\n");
+
+  bufsize = 100;
+  buf = (char *) ldmalloc (bufsize);
+
+  c = getc (file);
+  while (c != EOF)
     {
-      /* SYM is a weak symbol for which we already have a definition.
-	 Just ignore it.  The UnixWare linker is order dependent: if a
-	 global symbol follows a weak symbol it gives an error; if a
-	 weak symbol follows a global symbol it does not.  We are
-	 compatible.  */
-    }
-  else
-    {
-      if (bfd_is_com_section (sym->section))
-	{
-	  /* If we have a definition of this symbol already then
-	     this common turns into a reference. Also we only
-	     ever point to the largest common, so if we
-	     have a common, but it's bigger that the new symbol
-	     the turn this into a reference too. */
-	  if (sp->sdefs_chain)
-	    {
-	      /* This is a common symbol, but we already have a definition
-		 for it, so just link it into the ref chain as if
-		 it were a reference  */
-	      if (config.warn_common)
-		multiple_warn("%C: warning: common of `%s' overridden by definition\n",
-			      sym,
-			      "%C: warning: defined here\n",
-			      *(sp->sdefs_chain));
-	      refize (sp, nlist_p);
-	    }
-	  else if (sp->scoms_chain)
-	    {
-	      /* If we have a previous common, keep only the biggest */
-	      if ((*(sp->scoms_chain))->value > sym->value)
-		{
-		  /* other common is bigger, throw this one away */
-		  if (config.warn_common)
-		    multiple_warn("%C: warning: common of `%s' overridden by larger common\n",
-				  sym,
-				  "%C: warning: larger common is here\n",
-				  *(sp->scoms_chain));
-		  refize (sp, nlist_p);
-		}
-	      else if (sp->scoms_chain != nlist_p)
-		{
-		  /* other common is smaller, throw that away */
-		  if (config.warn_common)
-		    {
-		      if ((*(sp->scoms_chain))->value < sym->value)
-			multiple_warn("%C: warning: common of `%s' overriding smaller common\n",
-				      sym,
-				      "%C: warning: smaller common is here\n",
-				      *(sp->scoms_chain));
-		      else
-			multiple_warn("%C: warning: multiple common of `%s'\n",
-				      sym,
-				      "%C: warning: previous common is here\n",
-				      *(sp->scoms_chain));
-		    }
-		  refize (sp, sp->scoms_chain);
-		  sp->scoms_chain = nlist_p;
-		}
-	    }
-	  else
-	    {
-	      /* This is the first time we've seen a common, so remember it
-		 - if it was undefined before, we know it's defined now. If
-		 the symbol has been marked as really being a constructor,
-		 then treat this as a ref.  */
-	      if (sp->flags & SYM_CONSTRUCTOR)
-		{
-		  /* Turn this into a ref */
-		  refize (sp, nlist_p);
-		}
-	      else
-		{
-		  /* treat like a common */
-		  if (sp->srefs_chain)
-		    undefined_global_sym_count--;
+      while (isspace (c))
+	c = getc (file);
 
-		  commons_pending++;
-		  sp->scoms_chain = nlist_p;
-		}
-	    }
-	}
-      else if (sym->section != &bfd_und_section)
+      if (c != EOF)
 	{
-	  /* This is the definition of a symbol, add to def chain */
-	  if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
+	  size_t len = 0;
+
+	  while (! isspace (c) && c != EOF)
 	    {
-	      multiple_warn("%X%C: multiple definition of `%s'\n",
-			    sym,
-			    "%X%C: first defined here\n",
-			    *(sp->sdefs_chain));
-	      multiple_def_count++;
-	    }
-	  else
-	    {
-	      sym->udata = (PTR) (sp->sdefs_chain);
-	      sp->sdefs_chain = nlist_p;
+	      buf[len] = c;
+	      ++len;
+	      if (len >= bufsize)
+		{
+		  bufsize *= 2;
+		  buf = ldrealloc (buf, bufsize);
+		}
+	      c = getc (file);
 	    }
 
-	  /* A definition overrides a common symbol */
-	  if (sp->scoms_chain != NULL)
-	    {
-	      if (config.warn_common)
-		multiple_warn("%C: warning: definition of `%s' overriding common\n",
-			      sym,
-			      "%C: warning: common is here\n",
-			      *(sp->scoms_chain));
-	      refize (sp, sp->scoms_chain);
-	      sp->scoms_chain = 0;
-	      commons_pending--;
-	    }
-	  else if (sp->srefs_chain && relaxing == false)
-	    {
-	      /* If previously was undefined, then remember as defined */
-	      undefined_global_sym_count--;
-	    }
-	}
-      else
-	{
-	  if (sp->scoms_chain == (asymbol **) NULL
-	      && sp->srefs_chain == (asymbol **) NULL
-	      && sp->sdefs_chain == (asymbol **) NULL)
-	    {
-	      /* And it's the first time we've seen it */
-	      undefined_global_sym_count++;
-	    }
+	  buf[len] = '\0';
 
-	  refize (sp, nlist_p);
+	  if (bfd_hash_lookup (link_info.keep_hash, buf, true, true)
+	      == (struct bfd_hash_entry *) NULL)
+	    einfo ("%P%F: bfd_hash_lookup for insertion failed: %E");
 	}
     }
 
-  ASSERT (sp->sdefs_chain == 0 || sp->scoms_chain == 0);
-  ASSERT (sp->scoms_chain == 0 || (*(sp->scoms_chain))->udata == 0);
+  if (link_info.strip != strip_none)
+    einfo ("%P: `-retain-symbols-file' overrides `-s' and `-S'\n");
+
+  link_info.strip = strip_some;
 }
+
+/* Callbacks from the BFD linker routines.  */
 
-static void
-enter_file_symbols (entry)
-     lang_input_statement_type *entry;
-{
-  asymbol **q;
+/* This is called when BFD has decided to include an archive member in
+   a link.  */
 
-  entry->common_section =
-    bfd_make_section_old_way (entry->the_bfd, "COMMON");
-  entry->common_section->flags = SEC_NEVER_LOAD;
-  ldlang_add_file (entry);
-
-
-  if (trace_files || trace_file_tries)
-    {
-      info_msg ("%I\n", entry);
-    }
-
-  total_symbols_seen += entry->symbol_count;
-  total_files_seen++;
-  if (entry->symbol_count)
-    {
-      for (q = entry->asymbols; *q; q++)
-	{
-	  asymbol *p = *q;
-
-	  if (had_y && p->name)
-	    {
-	      /* look up the symbol anyway to see if the trace bit was
-		 set */
-	      ldsym_type *s = ldsym_get (p->name);
-	      if (s->flags & SYM_Y)
-		{
-		  einfo ("%B: %s %T\n", entry->the_bfd,
-			 p->section == &bfd_und_section ? "reference to" : "definition of ",
-			 p);
-		}
-	    }
-
-	  if (p->section == &bfd_ind_section
-	      || (p->flags & BSF_INDIRECT) != 0)
-	    {
-	      add_indirect (q);
-	    }
-	  else if (p->flags & BSF_WARNING)
-	    {
-	      add_warning (p);
-	    }
-	  else if (bfd_is_com_section (p->section))
-	    {
-	      enter_global_ref (q, p->name);
-
-	      /* If this is not bfd_com_section, make sure we have a
-		 section of this name in the bfd.  We need this
-		 because some targets that use multiple common
-		 sections do not actually put the common section in
-		 the BFD, but we need it there so that a wildcard
-		 specification in the linker script (e.g.,
-		 *(.scommon)) will find the section and attach it to
-		 the right output section.  When an section is chosed
-		 for the common symbols (in lang_common) that section
-		 must have been correctly given an output section.
-		 For normal common symbols we just use
-		 entry->common_section, initialized above.  */
-	      if (p->section != &bfd_com_section
-		  && p->section->owner != entry->the_bfd)
-		bfd_make_section (entry->the_bfd,
-				  bfd_get_section_name (p->section->owner,
-							p->section));
-	    }
-	  else if (p->section == &bfd_und_section
-		   || (p->flags & BSF_GLOBAL)
-		   || (p->flags & BSF_CONSTRUCTOR)
-		   || (p->flags & BSF_WEAK))
-	    {
-	      enter_global_ref (q, p->name);
-	    }
-	}
-    }
-}
-
-
-/* Searching libraries */
-
-/* Search the library ENTRY, already open on descriptor DESC.
-   This means deciding which library members to load,
-   making a chain of `struct lang_input_statement_struct' for those members,
-   and entering their global symbols in the hash table.  */
-
-static void
-search_library (entry)
-     struct lang_input_statement_struct *entry;
-{
-
-  /* No need to load a library if no undefined symbols */
-  if (!undefined_global_sym_count)
-    return;
-
-  if (bfd_has_map (entry->the_bfd))
-    symdef_library (entry);
-  else
-    linear_library (entry);
-
-}
-
-#ifdef GNU960
-static
-  boolean
-gnu960_check_format (abfd, format)
+/*ARGSUSED*/
+static boolean
+add_archive_element (info, abfd, name)
+     struct bfd_link_info *info;
      bfd *abfd;
-     bfd_format format;
+     const char *name;
 {
-  boolean retval;
+  lang_input_statement_type *input;
 
-  if ((bfd_check_format (abfd, format) == true)
-      && (abfd->xvec->flavour == output_flavor))
-    {
-      return true;
-    }
+  input = ((lang_input_statement_type *)
+	   ldmalloc ((bfd_size_type) sizeof (lang_input_statement_type)));
+  input->filename = abfd->filename;
+  input->local_sym_name = abfd->filename;
+  input->the_bfd = abfd;
+  input->asymbols = NULL;
+  input->subfiles = NULL;
+  input->next = NULL;
+  input->just_syms_flag = false;
+  input->loaded = false;
+  input->chain = NULL;
 
+  /* FIXME: This is wrong.  It should point to an entry for the
+     archive itself.  However, it doesn't seem to matter.  */
+  input->superfile = NULL;
 
-  return false;
+  /* FIXME: The following fields are not set: header.next,
+     header.type, closed, passive_position, symbol_count, total_size,
+     next_real_file, is_archive, search_dirs_flag, target, real,
+     common_section, common_output_section, complained.  This bit of
+     code is from the old decode_library_subfile function.  I don't
+     know whether any of those fields matters.  */
+
+  ldlang_add_file (input);
+
+  if (write_map)
+    info_msg ("%s needed due to %T\n", abfd->filename, name);
+
+  return true;
 }
 
-#endif
+/* This is called when BFD has discovered a symbol which is defined
+   multiple times.  */
 
-void
-ldmain_open_file_read_symbol (entry)
-     struct lang_input_statement_struct *entry;
+/*ARGSUSED*/
+static boolean
+multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
+     struct bfd_link_info *info;
+     const char *name;
+     bfd *obfd;
+     asection *osec;
+     bfd_vma oval;
+     bfd *nbfd;
+     asection *nsec;
+     bfd_vma nval;
 {
-  if (entry->asymbols == (asymbol **) NULL
-      && entry->real == true
-      && entry->filename != (char *) NULL)
-    {
-      ldfile_open_file (entry);
-
-
-#ifdef GNU960
-      if (gnu960_check_format (entry->the_bfd, bfd_object))
-#else
-      if (bfd_check_format (entry->the_bfd, bfd_object))
-#endif
-	{
-	  entry->the_bfd->usrdata = (PTR) entry;
-
-
-	  read_entry_symbols (entry->the_bfd, entry);
-
-	  /* look through the sections in the file and see if any of them
-	     are constructors */
-	  ldlang_check_for_constructors (entry);
-
-	  enter_file_symbols (entry);
-	}
-#ifdef GNU960
-      else if (gnu960_check_format (entry->the_bfd, bfd_archive))
-#else
-      else if (bfd_check_format (entry->the_bfd, bfd_archive))
-#endif
-	{
-	  entry->the_bfd->usrdata = (PTR) entry;
-
-	  entry->subfiles = (lang_input_statement_type *) NULL;
-	  search_library (entry);
-	}
-      else
-	{
-	  einfo ("%F%B: malformed input file (not rel or archive) \n",
-		 entry->the_bfd);
-	}
-    }
-
+  einfo ("%X%C: multiple definition of `%T'\n",
+	 nbfd, nsec, nval, name);
+  if (obfd != (bfd *) NULL)
+    einfo ("%C: first defined here\n", obfd, osec, oval);
+  return true;
 }
 
-/* Construct and return a lang_input_statement_struct for a library member.
-   The library's lang_input_statement_struct is library_entry,
-   and the library is open on DESC.
-   SUBFILE_OFFSET is the byte index in the library of this member's header.
-   We store the length of the member into *LENGTH_LOC.  */
+/* This is called when there is a definition of a common symbol, or
+   when a common symbol is found for a symbol that is already defined,
+   or when two common symbols are found.  We only do something if
+   -warn-common was used.  */
 
-static lang_input_statement_type *
-decode_library_subfile (library_entry, subfile_offset)
-     struct lang_input_statement_struct *library_entry;
-     bfd *subfile_offset;
+/*ARGSUSED*/
+static boolean
+multiple_common (info, name, obfd, otype, osize, nbfd, ntype, nsize)
+     struct bfd_link_info *info;
+     const char *name;
+     bfd *obfd;
+     enum bfd_link_hash_type otype;
+     bfd_vma osize;
+     bfd *nbfd;
+     enum bfd_link_hash_type ntype;
+     bfd_vma nsize;
 {
-  register struct lang_input_statement_struct *subentry;
+  if (! config.warn_common)
+    return true;
 
-
-  /* First, check if we already have a loaded
-     lang_input_statement_struct  for this library subfile.  If so,
-     just return it.  Otherwise, allocate some space and build a new one. */
-
-  if (subfile_offset->usrdata
-      && ((struct lang_input_statement_struct *) subfile_offset->usrdata)->
-      loaded == true)
+  if (ntype == bfd_link_hash_defined)
     {
-      subentry = (struct lang_input_statement_struct *) subfile_offset->usrdata;
+      ASSERT (otype == bfd_link_hash_common);
+      einfo ("%B: warning: definition of `%T' overriding common\n",
+	     nbfd, name);
+      einfo ("%B: warning: common is here\n", obfd);
+    }
+  else if (otype == bfd_link_hash_defined)
+    {
+      ASSERT (ntype == bfd_link_hash_common);
+      einfo ("%B: warning: common of `%T' overridden by definition\n",
+	     nbfd, name);
+      einfo ("%B: warning: defined here\n", obfd);
     }
   else
     {
-      subentry =
-	(struct lang_input_statement_struct *)
-	ldmalloc ((bfd_size_type) (sizeof (struct lang_input_statement_struct)));
-
-      subentry->filename = subfile_offset->filename;
-      subentry->local_sym_name = subfile_offset->filename;
-      subentry->asymbols = 0;
-      subentry->the_bfd = subfile_offset;
-      subentry->subfiles = 0;
-      subentry->next = 0;
-      subentry->superfile = library_entry;
-      subentry->is_archive = false;
-
-      subentry->just_syms_flag = false;
-      subentry->loaded = false;
-      subentry->chain = 0;
+      ASSERT (otype == bfd_link_hash_common && ntype == bfd_link_hash_common);
+      if (osize > nsize)
+	{
+	  einfo ("%B: warning: common of `%T' overridden by larger common\n",
+		 nbfd, name);
+	  einfo ("%B: warning: larger common is here\n", obfd);
+	}
+      else if (nsize > osize)
+	{
+	  einfo ("%B: warning: common of `%T' overriding smaller common\n",
+		 nbfd, name);
+	  einfo ("%B: warning: smaller common is here\n", obfd);
+	}
+      else
+	{
+	  einfo ("%B: warning: multiple common of `%T'\n", nbfd, name);
+	  einfo ("%B: warning: previous common is here\n", obfd);
+	}
     }
-  return subentry;
+
+  return true;
 }
 
-static void
-clear_syms (entry, offset)
-     struct lang_input_statement_struct *entry;
-     file_ptr offset;
+/* This is called when BFD has discovered a set element.  H is the
+   entry in the linker hash table for the set.  SECTION and VALUE
+   represent a value which should be added to the set.  */
+
+/*ARGSUSED*/
+static boolean
+add_to_set (info, h, bitsize, abfd, section, value)
+     struct bfd_link_info *info;
+     struct bfd_link_hash_entry *h;
+     unsigned int bitsize;
+     bfd *abfd;
+     asection *section;
+     bfd_vma value;
 {
-  carsym *car;
-  symindex indx = bfd_get_next_mapent (entry->the_bfd,
-				       BFD_NO_MORE_SYMBOLS,
-				       &car);
-
-  while (indx != BFD_NO_MORE_SYMBOLS)
-    {
-      if (car->file_offset == offset)
-	{
-	  car->name = 0;
-	}
-      indx = bfd_get_next_mapent (entry->the_bfd, indx, &car);
-    }
-
+  ldctor_add_set_entry (h, bitsize, section, value);
+  return true;
 }
 
-/* Search a library that has a map
- */
-static void
-symdef_library (entry)
-     struct lang_input_statement_struct *entry;
-
-{
-  register struct lang_input_statement_struct *prev = 0;
-
-  boolean not_finished = true;
-
-  while (not_finished == true)
-    {
-      carsym *exported_library_name;
-      bfd *prev_archive_member_bfd = 0;
-
-      symindex idx = bfd_get_next_mapent (entry->the_bfd,
-					  BFD_NO_MORE_SYMBOLS,
-					  &exported_library_name);
-
-      not_finished = false;
-
-      while (idx != BFD_NO_MORE_SYMBOLS && undefined_global_sym_count)
-	{
-	  if (exported_library_name->name)
-	    {
-	      ldsym_type *sp = ldsym_get_soft (exported_library_name->name);
-
-	      /* If we find a symbol that appears to be needed, think carefully
-		 about the archive member that the symbol is in.  */
-	      /* So - if it exists, and is referenced somewhere and is
-		 undefined or */
-	      if (sp && sp->srefs_chain && !sp->sdefs_chain)
-		{
-		  bfd *archive_member_bfd =
-		    bfd_get_elt_at_index (entry->the_bfd, (int) idx);
-		  struct lang_input_statement_struct *archive_member_lang_input_statement_struct;
-
-#ifdef GNU960
-		  if (archive_member_bfd
-		      && gnu960_check_format (archive_member_bfd, bfd_object))
-#else
-		  if (archive_member_bfd
-		      && bfd_check_format (archive_member_bfd, bfd_object))
-#endif
-		    {
-		      /* Don't think carefully about any archive member
-			 more than once in a given pass.  */
-		      if (prev_archive_member_bfd != archive_member_bfd)
-			{
-
-			  prev_archive_member_bfd = archive_member_bfd;
-
-			  /* Read the symbol table of the archive member.  */
-
-			  if (archive_member_bfd->usrdata != (PTR) NULL)
-			    {
-
-			      archive_member_lang_input_statement_struct =
-				((lang_input_statement_type *)
-				 archive_member_bfd->usrdata);
-			    }
-			  else
-			    {
-			      archive_member_lang_input_statement_struct =
-				decode_library_subfile (entry,
-							archive_member_bfd);
-			      archive_member_bfd->usrdata =
-				(PTR) archive_member_lang_input_statement_struct;
-			    }
-
-			  if (archive_member_lang_input_statement_struct == 0)
-			    {
-			      einfo ("%F%I contains invalid archive member %s\n",
-				     entry, sp->name);
-			    }
-
-			  if (archive_member_lang_input_statement_struct->loaded == false)
-			    {
-			      read_entry_symbols (archive_member_bfd,
-						  archive_member_lang_input_statement_struct);
-
-			      /* Now scan the symbol table and decide
-				 whether to load.  */
-			      if (subfile_wanted_p (archive_member_lang_input_statement_struct)
-				  == true)
-
-				{
-				  /* This member is needed; load it.
-				     Since we are loading something on
-				     this pass, we must make another
-				     pass through the symdef data.  */
-				  not_finished = true;
-
-				  enter_file_symbols (archive_member_lang_input_statement_struct);
-
-				  if (prev)
-				    prev->chain = archive_member_lang_input_statement_struct;
-				  else
-				    entry->subfiles = archive_member_lang_input_statement_struct;
-
-
-				  prev = archive_member_lang_input_statement_struct;
-
-
-				  /* Clear out this member's symbols
-				     from the symdef data so that
-				     following passes won't waste time
-				     on them.  */
-				  clear_syms (entry,
-					      exported_library_name->file_offset);
-				  archive_member_lang_input_statement_struct->loaded = true;
-				}
-			    }
-			}
-		    }
-		}
-	    }
-	  idx = bfd_get_next_mapent (entry->the_bfd, idx,
-				     &exported_library_name);
-	}
-    }
-}
-
-static void
-linear_library (entry)
-     struct lang_input_statement_struct *entry;
-{
-  boolean more_to_do = true;
-  register struct lang_input_statement_struct *prev = 0;
-
-  if (entry->complained == false)
-    {
-      if (entry->the_bfd->xvec->flavour != bfd_target_ieee_flavour)
-
-	{
-	  /* IEEE can use table of contents, so this message is bogus */
-	  einfo ("%P: library %s has bad table of contents, rerun ranlib\n",
-		 entry->the_bfd->filename);
-	}
-      entry->complained = true;
-
-    }
-  while (more_to_do)
-    {
-
-      bfd *archive = bfd_openr_next_archived_file (entry->the_bfd, 0);
-
-      more_to_do = false;
-      while (archive)
-	{
-	  /* Don't check this file if it's already been read in
-	     once */
-
-	  if (!archive->usrdata ||
-	      !((lang_input_statement_type *) (archive->usrdata))->loaded)
-	    {
-#ifdef GNU960
-	      if (gnu960_check_format (archive, bfd_object))
-#else
-	      if (bfd_check_format (archive, bfd_object))
-#endif
-		{
-		  register struct lang_input_statement_struct *subentry;
-
-		  subentry = decode_library_subfile (entry,
-						     archive);
-
-		  archive->usrdata = (PTR) subentry;
-		  if (!subentry)
-		    return;
-		  if (subentry->loaded == false)
-		    {
-		      read_entry_symbols (archive, subentry);
-
-		      if (subfile_wanted_p (subentry) == true)
-			{
-			  enter_file_symbols (subentry);
-
-			  if (prev)
-			    prev->chain = subentry;
-			  else
-			    entry->subfiles = subentry;
-			  prev = subentry;
-
-			  more_to_do = true;
-			  subentry->loaded = true;
-			}
-		    }
-		}
-	    }
-	  archive = bfd_openr_next_archived_file (entry->the_bfd, archive);
-
-	}
-
-    }
-}
-
-/* ENTRY is an entry for a file inside an archive
-    Its symbols have been read into core, but not entered into the
-    linker ymbol table
-    Return nonzero if we ought to load this file */
+/* This is called when BFD has discovered a constructor.  This is only
+   called for some object file formats--those which do not handle
+   constructors in some more clever fashion.  This is similar to
+   adding an element to a set, but less general.  */
 
 static boolean
-subfile_wanted_p (entry)
-     struct lang_input_statement_struct *entry;
+constructor_callback (info, constructor, bitsize, name, abfd, section, value)
+     struct bfd_link_info *info;
+     boolean constructor;
+     unsigned int bitsize;
+     const char *name;
+     bfd *abfd;
+     asection *section;
+     bfd_vma value;
 {
-  asymbol **q;
+  char *set_name;
+  char *s;
+  struct bfd_link_hash_entry *h;
 
-  if (entry->symbol_count == 0)
-    return false;
+  if (! config.build_constructors)
+    return true;
 
-  for (q = entry->asymbols; *q; q++)
+  set_name = (char *) alloca (1 + sizeof "__CTOR_LIST__");
+  s = set_name;
+  if (bfd_get_symbol_leading_char (abfd) != '\0')
+    *s++ = bfd_get_symbol_leading_char (abfd);
+  if (constructor)
+    strcpy (s, "__CTOR_LIST__");
+  else
+    strcpy (s, "__DTOR_LIST__");
+
+  if (write_map)
+    info_msg ("Adding %s to constructor/destructor set %s\n", name, set_name);
+
+  h = bfd_link_hash_lookup (info->hash, set_name, true, true, true);
+  if (h == (struct bfd_link_hash_entry *) NULL)
+    einfo ("%P%F: bfd_link_hash_lookup failed: %E");
+  if (h->type == bfd_link_hash_new)
     {
-      asymbol *p = *q;
-
-      /* If the symbol has an interesting definition, we could
-	 potentially want it.  */
-
-      if (p->flags & BSF_INDIRECT)
-	{
-	  /**	add_indirect(q);*/
-	}
-
-      if (bfd_is_com_section (p->section)
-	  || (p->flags & BSF_GLOBAL)
-	  || (p->flags & BSF_INDIRECT)
-	  || (p->flags & BSF_WEAK))
-	{
-	  register ldsym_type *sp = ldsym_get_soft (p->name);
-
-	  /* If this symbol has not been hashed,
-	     we can't be looking for it. */
-	  if (sp != (ldsym_type *) NULL
-	      && sp->sdefs_chain == (asymbol **) NULL)
-	    {
-	      int check;
-
-	      /* A weak symbol is not considered to be a reference
-		 when pulling files out of an archive.  An unresolved
-		 weak symbol winds up with a value of zero.  See the
-		 SVR4 ABI, p. 4-27.  */
-	      if (sp->scoms_chain != (asymbol **) NULL)
-		check = 1;
-	      else if (sp->srefs_chain == (asymbol **) NULL)
-		check = 0;
-	      else
-		{
-		  asymbol **ptr;
-
-		  check = 0;
-		  for (ptr = sp->srefs_chain;
-		       ptr != (asymbol **) NULL;
-		       ptr = (asymbol **) ((*ptr)->udata))
-		    {
-		      if (((*ptr)->flags & BSF_WEAK) == 0)
-			{
-			  check = 1;
-			  break;
-			}
-		    }
-		}
-
-	      if (check)
-		{
-		  /* This is a symbol we are looking for.  It is
-		     either common or not yet defined.  If this is a
-		     common symbol, then if the symbol in the object
-		     file is common, we need to combine sizes.  But if
-		     we already have a common symbol, and the symbol
-		     in the object file is not common, we don't want
-		     the object file: it is providing a definition for
-		     a symbol that we already have a definition for
-		     (this is the else condition below).  */
-		  if (bfd_is_com_section (p->section))
-		    {
-
-		      /* If the symbol in the table is a constructor, we won't to
-		         anything fancy with it */
-		      if ((sp->flags & SYM_CONSTRUCTOR) == 0)
-			{
-			  /* This libary member has something to
-		             say about this element. We should
-		             remember if its a new size  */
-			  /* Move something from the ref list to the com list */
-			  if (sp->scoms_chain)
-			    {
-			      /* Already a common symbol, maybe update it */
-			      if (p->value > (*(sp->scoms_chain))->value)
-				{
-				  (*(sp->scoms_chain))->value = p->value;
-				}
-			    }
-			  else
-			    {
-			      /* Take a value from the ref chain
-				 Here we are moving a symbol from the owning bfd
-				 to another bfd. We must set up the
-				 common_section portion of the bfd thing */
-
-
-
-			      sp->scoms_chain = sp->srefs_chain;
-			      sp->srefs_chain =
-				(asymbol **) ((*(sp->srefs_chain))->udata);
-			      (*(sp->scoms_chain))->udata = (PTR) NULL;
-
-			      (*(sp->scoms_chain))->section = p->section;
-			      (*(sp->scoms_chain))->flags = 0;
-			      /* Remember the size of this item */
-			      sp->scoms_chain[0]->value = p->value;
-			      commons_pending++;
-			      undefined_global_sym_count--;
-			    }
-			  {
-			    asymbol *com = *(sp->scoms_chain);
-
-			    if (((lang_input_statement_type *)
-				 (bfd_asymbol_bfd (com)->usrdata))->common_section ==
-				(asection *) NULL)
-			      {
-				((lang_input_statement_type *)
-				 (bfd_asymbol_bfd (com)->usrdata))->common_section =
-				  bfd_make_section_old_way (bfd_asymbol_bfd (com), "COMMON");
-			      }
-
-			    /* If the symbol is not in the generic
-			       common section, we must make sure the
-			       BFD has a section to hang it on to.  */
-			    if (com->section != &bfd_com_section
-				&& (com->section->owner
-				    != bfd_asymbol_bfd (com)))
-			      bfd_make_section
-				(bfd_asymbol_bfd (com),
-				 bfd_get_section_name (bfd_asymbol_bfd (com),
-						       com->section));
-			  }
-			}
-		      ASSERT (p->udata == 0);
-		    }
-		  else if (sp->scoms_chain == (asymbol **) NULL)
-		    {
-		      if (write_map)
-			{
-			  info_msg ("%I needed due to %s\n", entry, sp->name);
-			}
-		      return true;
-		    }
-		}
-	    }
-	}
+      h->type = bfd_link_hash_undefined;
+      h->u.undef.abfd = abfd;
+      /* We don't call bfd_link_add_undef to add this to the list of
+	 undefined symbols because we are going to define it
+	 ourselves.  */
     }
 
-  return false;
+  ldctor_add_set_entry (h, bitsize, section, value);
+  return true;
 }
 
-void
-add_ysym (text)
-     char *text;
+/* This is called when there is a reference to a warning symbol.  */
+
+/*ARGSUSED*/
+static boolean
+warning_callback (info, warning)
+     struct bfd_link_info *info;
+     const char *warning;
 {
-  ldsym_type *lookup = ldsym_get (text);
-  lookup->flags |= SYM_Y;
-  had_y = 1;
+  einfo ("%P: %s\n", warning);
+  return true;
+}
+
+/* This is called when an undefined symbol is found.  */
+
+/*ARGSUSED*/
+static boolean
+undefined_symbol (info, name, abfd, section, address)
+     struct bfd_link_info *info;
+     const char *name;
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
+{
+  static char *error_name;
+  static unsigned int error_count;
+
+#define MAX_ERRORS_IN_A_ROW 5
+
+  /* We never print more than a reasonable number of errors in a row
+     for a single symbol.  */
+  if (error_name != (char *) NULL
+      && strcmp (name, error_name) == 0)
+    ++error_count;
+  else
+    {
+      error_count = 0;
+      if (error_name != (char *) NULL)
+	free (error_name);
+      error_name = buystring (name);
+    }
+
+  if (error_count < MAX_ERRORS_IN_A_ROW)
+    einfo ("%X%C: undefined reference to `%T'\n",
+	   abfd, section, address, name);
+  else if (error_count == MAX_ERRORS_IN_A_ROW)
+    einfo ("%C: more undefined references to `%T' follow\n",
+	   abfd, section, address, name);
+
+  return true;
+}
+
+/* This is called when a reloc overflows.  */
+
+/*ARGSUSED*/
+static boolean
+reloc_overflow (info, abfd, section, address)
+     struct bfd_link_info *info;
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
+{
+  einfo ("%X%C: relocation truncated to fit\n", abfd, section, address);
+  return true;
+}
+
+/* This is called when a dangerous relocation is made.  */
+
+/*ARGSUSED*/
+static boolean
+reloc_dangerous (info, message, abfd, section, address)
+     struct bfd_link_info *info;
+     const char *message;
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
+{
+  einfo ("%X%C: dangerous relocation: %s\n", abfd, section, address, message);
+  return true;
+}
+
+/* This is called when a reloc is being generated attached to a symbol
+   that is not being output.  */
+
+/*ARGSUSED*/
+static boolean
+unattached_reloc (info, name, abfd, section, address)
+     struct bfd_link_info *info;
+     const char *name;
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
+{
+  einfo ("%X%C: reloc refers to symbol `%T' which is not being output\n",
+	 abfd, section, address, name);
+  return true;
+}
+
+/* This is called when a symbol in notice_hash is found.  Symbols are
+   put in notice_hash using the -y option.  */
+
+/*ARGSUSED*/
+static boolean
+notice_ysym (info, name, abfd, section, value)
+     struct bfd_link_info *info;
+     const char *name;
+     bfd *abfd;
+     asection *section;
+     bfd_vma value;
+{
+  einfo ("%B: %s %s\n", abfd,
+	 section != &bfd_und_section ? "definition of" : "reference to",
+	 name);
+  return true;
 }
