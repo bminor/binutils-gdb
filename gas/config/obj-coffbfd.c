@@ -89,6 +89,7 @@ int text_lineno_number = 0;
 */
 static symbolS *previous_file_symbol = NULL;
 void c_symbol_merge();
+static int line_base;
 
 symbolS *c_section_symbol();
 bfd *abfd;
@@ -679,21 +680,34 @@ stack* st;
  * Handle .ln directives.
  */
 
-static void obj_coff_ln() {
-	if (def_symbol_in_progress != NULL) {
-		as_warn(".ln pseudo-op inside .def/.endef: ignored.");
-		demand_empty_rest_of_line();
-		return;
-	} /* wrong context */
+static void obj_coff_ln() 
+{
+  int l;
+    
+  if (def_symbol_in_progress != NULL) {
+      as_warn(".ln pseudo-op inside .def/.endef: ignored.");
+      demand_empty_rest_of_line();
+      return;
+    }				/* wrong context */
 
-	c_line_new(0,
-		   obstack_next_free(&frags) - frag_now->fr_literal,
-		   get_absolute_expression(),
-		   frag_now);
-
-	demand_empty_rest_of_line();
-	return;
-} /* obj_coff_line() */
+  c_line_new(0,
+	     obstack_next_free(&frags) - frag_now->fr_literal,
+	     l = get_absolute_expression(),
+	     frag_now);
+#ifndef NO_LISTING
+{
+  extern int listing;
+    
+  if (listing) 
+  {
+    listing_source_line(l + line_base - 1);
+  }
+    
+}
+#endif
+  demand_empty_rest_of_line();
+  return;
+}				/* obj_coff_line() */
 
 /*
  *			def()
@@ -962,18 +976,36 @@ DEFUN_VOID(obj_coff_dim)
     return;
 }				/* obj_coff_dim() */
 
-static void obj_coff_line() {
-	if (def_symbol_in_progress == NULL) {
-		obj_coff_ln();
-		return;
-	} /* if it looks like a stabs style line */
+static void obj_coff_line() 
+{
+  int this_base;
+  
+  if (def_symbol_in_progress == NULL) {
+      obj_coff_ln();
+      return;
+    }				/* if it looks like a stabs style line */
 
-	S_SET_NUMBER_AUXILIARY(def_symbol_in_progress, 1);
-	SA_SET_SYM_LNNO(def_symbol_in_progress, get_absolute_expression());
+  this_base = get_absolute_expression();
+  if (this_base > line_base) 
+  {
+    line_base = this_base;
+  }
+  
+    
+#ifndef NO_LISTING 
+{
+  extern int listing;
+  if (listing && 0) {
+      listing_source_line(line_base);
+    }
+}  
+#endif
+  S_SET_NUMBER_AUXILIARY(def_symbol_in_progress, 1);
+  SA_SET_SYM_LNNO(def_symbol_in_progress, line_base);
 
-	demand_empty_rest_of_line();
-	return;
-} /* obj_coff_line() */
+  demand_empty_rest_of_line();
+  return;
+}				/* obj_coff_line() */
 
 static void obj_coff_size() {
 	if (def_symbol_in_progress == NULL) {
@@ -1816,6 +1848,17 @@ char *filename;
     S_SET_STORAGE_CLASS(symbolP, C_FILE);
     S_SET_NUMBER_AUXILIARY(symbolP, 1);
     SA_SET_FILE_FNAME(symbolP, filename);
+#ifndef NO_LISTING
+  {
+    extern int listing;
+    if (listing) 
+    {
+      listing_source_file(filename);
+    }
+    
+  }
+    
+#endif    
     SF_SET_DEBUG(symbolP);
     S_SET_VALUE(symbolP, (long) previous_file_symbol);
 

@@ -1,3 +1,5 @@
+#ifndef OBJ_FORMAT_H
+#define OBJ_FORMAT_H
 /* coff object file format
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
 
@@ -511,3 +513,4 @@ extern SCNHDR text_section_header;
  */
 
 /* end of obj-coff.h */
+#endif
