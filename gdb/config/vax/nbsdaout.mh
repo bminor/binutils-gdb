@@ -2,6 +2,5 @@
 NATDEPFILES= fork-child.o inf-ptrace.o \
 	vaxbsd-nat.o bsd-kvm.o \
 	solib.o solib-sunos.o
-NAT_FILE= nm-nbsdaout.h
 
 LOADLIBES= -lkvm

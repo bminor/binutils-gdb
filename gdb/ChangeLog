@@ -1,3 +1,8 @@
+2005-01-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/vax/nbsdaout.mh (NAT_FILE): Remove.
+	* config/vax/nm-nbsdaout.h: Remove file.
+
 2005-01-10  Elena Zannoni  <ezannoni@redhat.com>
 
 	* MAINTAINERS: Remove self from sh/sh64 maintainership.
