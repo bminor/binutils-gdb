@@ -3,46 +3,38 @@ tmpdir/linked:     file format elf32-sh64
 
 Disassembly of section .init:
 
-0000000000001000 <start>:
+00001000 <start>:
     1000:	6ff0fff0 	nop	
 Disassembly of section .text:
 
-0000000000001004 <diversion>:
-    1004:	e1 0f       	mov	#15,r1
-    1006:	00 09       	nop	
-    1008:	00 09       	nop	
-    100a:	00 09       	nop	
-    100c:	00 09       	nop	
-    100e:	00 09       	nop	
-    1010:	00 09       	nop	
-    1012:	00 09       	nop	
-    1014:	00 09       	nop	
-    1016:	00 09       	nop	
-    1018:	00 09       	nop	
-    101a:	e1 0e       	mov	#14,r1
-
-000000000000101c <sec4>:
-    101c:	6ff0fff0 	nop	
+00001004 <sec4>:
+    1004:	6ff0fff0 	nop	
+    1008:	6ff0fff0 	nop	
+    100c:	6ff0fff0 	nop	
+    1010:	6ff0fff0 	nop	
+    1014:	6ff0fff0 	nop	
+    1018:	6ff0fff0 	nop	
+    101c:	cc00bd40 	movi	47,r20
     1020:	6ff0fff0 	nop	
     1024:	6ff0fff0 	nop	
     1028:	6ff0fff0 	nop	
     102c:	6ff0fff0 	nop	
     1030:	6ff0fff0 	nop	
-    1034:	cc00bd40 	movi	47,r20
+    1034:	6ff0fff0 	nop	
     1038:	6ff0fff0 	nop	
     103c:	6ff0fff0 	nop	
     1040:	6ff0fff0 	nop	
     1044:	6ff0fff0 	nop	
     1048:	6ff0fff0 	nop	
     104c:	6ff0fff0 	nop	
-    1050:	6ff0fff0 	nop	
-    1054:	6ff0fff0 	nop	
+    1050:	cc00bd50 	movi	47,r21
+    1054:	cc0084c0 	movi	33,r12
     1058:	6ff0fff0 	nop	
     105c:	6ff0fff0 	nop	
     1060:	6ff0fff0 	nop	
     1064:	6ff0fff0 	nop	
-    1068:	cc00bd50 	movi	47,r21
-    106c:	cc0084c0 	movi	33,r12
+    1068:	6ff0fff0 	nop	
+    106c:	6ff0fff0 	nop	
     1070:	6ff0fff0 	nop	
     1074:	6ff0fff0 	nop	
     1078:	6ff0fff0 	nop	
@@ -55,24 +47,34 @@ Disassembly of section .text:
     1094:	6ff0fff0 	nop	
     1098:	6ff0fff0 	nop	
     109c:	6ff0fff0 	nop	
-    10a0:	6ff0fff0 	nop	
+    10a0:	cc0084d0 	movi	33,r13
+
+000010a4 <diversion2>:
     10a4:	6ff0fff0 	nop	
     10a8:	6ff0fff0 	nop	
     10ac:	6ff0fff0 	nop	
-    10b0:	6ff0fff0 	nop	
-    10b4:	6ff0fff0 	nop	
-    10b8:	cc0084d0 	movi	33,r13
+    10b0:	00 00 00 2a 	\.long 0x0000002a
+    10b4:	00 00 00 2b 	\.long 0x0000002b
+    10b8:	00 09       	nop	
+    10ba:	00 09       	nop	
 
-00000000000010bc <diversion2>:
-    10bc:	6ff0fff0 	nop	
-    10c0:	6ff0fff0 	nop	
-    10c4:	6ff0fff0 	nop	
-    10c8:	00 00 00 2a 	.long 0x0000002a
-    10cc:	00 00 00 2b 	.long 0x0000002b
+000010bc <sec3>:
+    10bc:	00 09       	nop	
+    10be:	00 09       	nop	
+    10c0:	00 09       	nop	
+	\.\.\.
+
+000010c4 <diversion>:
+    10c4:	e1 0f       	mov	#15,r1
+    10c6:	00 09       	nop	
+    10c8:	00 09       	nop	
+    10ca:	00 09       	nop	
+    10cc:	00 09       	nop	
+    10ce:	00 09       	nop	
     10d0:	00 09       	nop	
     10d2:	00 09       	nop	
-
-00000000000010d4 <sec3>:
     10d4:	00 09       	nop	
     10d6:	00 09       	nop	
     10d8:	00 09       	nop	
+    10da:	e1 0e       	mov	#14,r1
+
