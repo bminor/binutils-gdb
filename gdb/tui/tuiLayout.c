@@ -20,18 +20,13 @@
 ** Static Local Decls
 ********************************/
 
-static void _initGenWinInfo PARAMS
-  ((TuiGenWinInfoPtr, TuiWinType, int, int, int, int));
-static void _initAndMakeWin PARAMS
-  ((Opaque *, TuiWinType, int, int, int, int, int));
-static void _showSourceOrDisassemAndCommand PARAMS
-  ((TuiLayoutType));
-static void _makeSourceOrDisassemWindow PARAMS
-  ((TuiWinInfoPtr *, TuiWinType, int, int));
+static void _initGenWinInfo (TuiGenWinInfoPtr, TuiWinType, int, int, int, int);
+static void _initAndMakeWin (Opaque *, TuiWinType, int, int, int, int, int);
+static void _showSourceOrDisassemAndCommand (TuiLayoutType);
+static void _makeSourceOrDisassemWindow (TuiWinInfoPtr *, TuiWinType, int, int);
 static void _makeCommandWindow (TuiWinInfoPtr *, int, int);
 static void _makeSourceWindow (TuiWinInfoPtr *, int, int);
-static void _makeDisassemWindow PARAMS
-  ((TuiWinInfoPtr *, int, int));
+static void _makeDisassemWindow (TuiWinInfoPtr *, int, int);
 static void _makeDataWindow (TuiWinInfoPtr *, int, int);
 static void _showSourceCommand (void);
 static void _showDisassemCommand (void);
