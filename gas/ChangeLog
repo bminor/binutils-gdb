@@ -1,3 +1,9 @@
+Sun Feb  6 16:13:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/obj-som.c (obj_som_init_stab_section): Same change
+	as coffbfd and elf below.  Zero the initial stab symbol after
+	allocating it.
+
 Sat Feb  5 12:30:32 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/obj-coffbfd.c (obj_coff_init_stab_section): Zero the
