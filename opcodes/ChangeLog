@@ -1,3 +1,13 @@
+Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (bfd_arc_arch): Add.
+	* configure: Rebuild.
+	* Makefile.am (ALL_MACHINES): Add arc-dis.lo, arc-opc.lo.
+	* Makefile.in: Rebuild.
+	* arc-dis.c, arc-opc.c: New files.
+	* disassemble.c (ARCH_all): Define ARCH_arc.
+	(disassembler): Add ARC support.
+
 start-sanitize-v850
 Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -2342,12 +2352,6 @@ Tue Jul 11 11:49:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 	shifted by 18, without any insertion or extraction function.
 	(insert_cr, extract_cr): Remove.
 
-start-sanitize-arc
-Mon Jul  3 11:54:31 1995  Ian Lance Taylor  <ian@cygnus.com>
-
-	* Makefile.in (ALL_MACHINES): Add arc-dis.o and arc-opc.o.
-
-end-sanitize-arc
 Wed Jun 21 20:05:39 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* m68k-dis.c (print_insn_arg, print_indexed): Print "%" before
@@ -2383,13 +2387,6 @@ Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
 	* disassemble.c (disassembler, case bfd_arch_arm): Disassemble for
 	the correct endianness.
 
-start-sanitize-arc
-Sat Apr 29 23:20:05 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc-opc.c (arc_opcodes): Add ARC_OPCODE_CONDITIONAL_BRANCH flag.
-	(arc_suffixes): Use ARC_DELAY_{NONE,NORMAL,JUMP}.
-end-sanitize-arc
-
 Mon Apr 24 14:18:05 1995  Jason Molenda   (crash@phydeaux.cygnus.com>
 
 	* sh-opc.h (sh_nibble_type, sh_arg_type): remove trailing , from
@@ -2415,28 +2412,6 @@ Mon Apr 17 12:23:28 1995  Kung Hsu  <kung@rtl.cygnus.com>
 	* m68k-dis.c: Take out #define BREAK_UP_BIG_DECL kludge, because
 	gcc memory hog problem with initializer is fixed.
 
-start-sanitize-arc
-Wed Apr 12 09:04:12 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc-opc.c (NULL): Define.
-	(arc_operands, insn fields u,s): Delete.
-	(arc_operands, insn fields a,b,c): Mark as signed.
-	(arc_opcodes): No longer const, links computed at run-time.
-	(arc_opcodes, mac/mul insns): Breakout suffixes as we don't handle
-	suffixes that affect the insn code.
-	(arc_opcodes): Resort table to macros are first.
-	(arc_opcodes, ld [b,c] entry): Add %Q to prevent shimms.
-	(arc_opcodes, st [b] entry): Likewise.
-	(arc_opcodes, st [b,d] entry): Fix mask, value.
-	(arc_reg_names): Add entries for r29, r30, r31, r60.
-	(opcode_map, icode_map): New static globals.
-	(arc_opcode_init_tables): Initialize them.
-	(arc_opcode_lookup_asm, arc_opcode_lookup_dis): New functions.
-	(insert_shimmoffset): Signal error if register present.
-	Validate constant.
-	* arc-dis.c (print_insn): Call arc_opcode_lookup_dis.
-end-sanitize-arc
-
 Mon Apr 10 15:55:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Merge in support for Mac MPW as a host.
@@ -2461,15 +2436,6 @@ Mon Apr 10 15:55:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: New file, MPW version of configure.in.
 	* mpw-make.in: New file, MPW version of Makefile.in.
-
-start-sanitize-arc
-Thu Apr  6 20:36:08 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc-dis.c (print_insn): New parameter `big_p'.  Callers updated.
-	Call arc_get_opcode_mach to map bfd mach number to opcode value.
-	(print_insn_*): Pass bfd mach number, not opcode version.
-	* arc-opc.c (arc_get_opcode_mach): New function.
-end-sanitize-arc
 
 Fri Mar 31 14:23:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -2519,21 +2485,6 @@ Wed Mar  8 02:54:05 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(print_insn_arg): Arrays cacheFieldName and names now const.
 	(print_indexed): Array scales now const.
 
-start-sanitize-arc
-Tue Mar  7 21:14:14 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc-dis.c (print_insn_arc_base): Split into big and little fns.
-	(print_insn_arc_{host,graphics,audio}): Likewise.
-	(print_insn): Add prototype.
-	(arc_get_disassembler): New arg `big_p'.  Return little or big
-	print fn accordingly.
-	* arc-opc.c (arc_opcode_init_tables): Init arc_operand_map once.
-	(arc_opcode_supported): Use ARC_OPCODE_CPU to ignore byte order.
-	(arc_opval_supported): Likewise.
-	* disassemble.c (disassembler): Pass big endian flag to
-	arc_get_disassembler.
-end-sanitize-arc
-
 Tue Mar  7 16:41:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c: Sort recently added instructions by minor opcode
@@ -2551,13 +2502,6 @@ Mon Feb 20 23:54:38 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* Makefile.in (ALL_MACHINES):  Add w65-dis.o.
 
-start-sanitize-arc
-Fri Feb 17 12:42:25 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc-dis.c (arc_get_disassembler): Change argument to int,
-	one of bfd_mach_arc_xxx.  All callers updated.
-end-sanitize-arc
-
 Thu Feb 16 17:34:41 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add r4650 mul instruction.
@@ -2571,37 +2515,6 @@ Tue Feb 14 13:17:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-opc.c (powerpc_opcodes): Add 403GA opcodes rfci, dccci,
 	mfdcr, mtdcr, icbt, iccci.
-
-start-sanitize-arc
-Mon Feb 13 11:09:17 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc-dis.c (print_insn): Handle ARC_OPERAND_ADDRESS.
-	* arc-opc.c (arc_operands): New operand 'J' for jump addresses.
-	('L' operand): Mark as ARC_OPERAND_ADDRESS.
-	(arc_opcodes, j insn): Use 'J' operand type, not 'L'.
-	(arc_opcodes, ld/st insns): Fix address writeback operand letter.
-	(insert_absaddr): New function.
-
-Thu Feb  9 19:19:23 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc-dis.c (print_insn_arc): Rename to print_insn and make static.
-	New argument `cpu', pass it to arc_opcode_init_tables.
-	Document byte order dependencies.  Ignore unsupported insns.
-	(arc_get_disassembler): New function.
-	(print_insn_arc_base, print_insn_arc_host, print_insn_arc_graphics,
-	print_insn_arc_audio): New functions.
-	* arc-opc.c (MULTSHIFT operand): Delete.
-	(UNSIGNED, SATURATION): New operands.
-	(mac, mul, mul64, mulu64): New insns.
-	(ext. asl, asr, lsr, ror): Only available on host and graphics cpus.
-	(padc, padd, pmov, pand, psbc, psub, swap): New insns.
-	(host,graphics,audio extended and auxiliary regs): Define.
-	(ss, sc, mh, ml): New suffixes.
-	(arc_opcode_supported, arc_opval_supported): New functions.
-	(insert_multshift, extract_multshift): Deleted.
-	* disassemble.c (disassembler, case bfd_arch_arc): Call
-	arc_get_disassembler to get disassembler routine.
-end-sanitize-arc
 
 Thu Feb  9 12:28:13 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -2655,44 +2568,9 @@ Wed Dec 28 22:15:33 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 	* h8300-dis.c (bfd_h8_disassemble): Add support for 2 bit
 	immediates.
 
-start-sanitize-arc
-Tue Dec 20 10:36:55 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc-dis.c (print_insn_arc): Branch offsets are relative to delay
-	slot.
-	* arc-opc.c (extract_reladdr): New function.
-	(insert_reladdr): Store address right-shifted by 2.
-end-sanitize-arc
-
 Tue Dec 20 11:25:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips-opc.c: Add dli as a synonym for li.
-
-start-sanitize-arc
-Mon Dec 19 12:35:51 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc-opc.c (insertion fns): Pass pointer to value's table entry.
-	All uses changed.
-	(extraction fns): Insn argument now array of two words.  Return pointer
-	to value's table entry.  All uses changed.
-	(arc_opcode_lookup_suffix): Exported for arc-dis.c.
-	(insert_multshift, extract_multshift): New fns.
-	(arc_operands): Add support for cache bypass suffix.  Add support for
-	predefined aux regs.  Modifier bits moved to flags field.
-	(arc_opcodes): Likewise.
-	Add mul/mulu/shift insns.  Syntax of zero/sign extension insns changed.
-	New insn rlc.  Update to syntax in programmer's manual.
-	(arc_reg_names): Fix typo in lp_count.  Add predefined aux regs.
-	(arc_suffixes): New synonyms lo,hs for cs,cc.  New suffix for cache
-	bypass.
-	(arc_opcode_init_tables): New argument to indicate cpu type.
-	(insert_reg): Handle predefined aux regs.
-	(extract_reg): Likewise.
-	(lookup_register): New fn.
-	* arc-dis.c (arc_condition_codes): Deleted.
-	(print_insn_arc): Handle insns with 32 bit immediate constants better.
-	Clean up modifier handling.  Handle predefined aux regs.
-end-sanitize-arc
 
 Thu Dec  8 18:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -2705,14 +2583,6 @@ Thu Dec  8 18:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* m68k-dis.c (print_insn_arg, case 'J'): Handle buscr and pcr
 	control registers.
-
-start-sanitize-arc
-Tue Nov 29 18:02:43 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* configure.in: Add ARC support.
-	* disassemble.c: Likewise.
-	* arc-dis.c, arc-opc.c: New files.
-end-sanitize-arc
 
 Wed Nov 23 22:34:51 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 

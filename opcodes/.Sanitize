@@ -15,14 +15,6 @@
 
 Do-first:
 
-arc_files="arc-dis.c arc-opc.c"
-
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="${arc_files} ${keep_these_too}"
-else
-	lose_these_too="${arc_files} ${lose_these_too}"
-fi
-
 d30v_files="d30v-dis.c d30v-opc.c"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -72,6 +64,8 @@ acinclude.m4
 aclocal.m4
 alpha-dis.c
 alpha-opc.c
+arc-dis.c
+arc-opc.c
 arm-dis.c
 arm-opc.h
 a29k-dis.c
