@@ -1,3 +1,7 @@
+Mon May  4 10:37:12 1998  Brian Youmans (3diff@gnu.org)
+
+	* refcard.tex:  Copyright, address updates.
+
 Tue Apr 21 18:09:56 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo (EDITION, DATE): Update and change to use ordinals
