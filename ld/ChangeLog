@@ -1,4 +1,12 @@
+Wed Jul 19 16:21:43 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* emulparams/armpe.sh (OUTPUT_FORMAT): Change to pei-arm-little.
+	(LITTLE_OUTPUT_FORMAT, BIG_OUTPUT_FORMAT): Define.
+
 Mon Jul 17 13:57:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldwrite.c (clone_section): Set the alignment of the clone
+	section to that of the section being cloned.
 
 	* ldwrite.c (split_sections): Don't split the first input section
 	into a new output section.
