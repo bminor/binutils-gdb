@@ -705,14 +705,10 @@ gcc-no-fixedincludes:
 .PHONY: $(ALL_MODULES) all-glob all-gui all-libproc
 $(ALL_MODULES) all-glob all-gui all-libproc:
 	@dir=`echo $@ | sed -e 's/all-//'`; \
-	if [ -d ./$${dir} ] ; then \
-	  if [ -f ./$${dir}/Makefile ] ; then \
-	    r=`pwd`; export r; \
-	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	    (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
-	  else \
-	    true ; \
-	  fi; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
 	else \
 	  true; \
 	fi
@@ -724,14 +720,12 @@ $(ALL_MODULES) all-glob all-gui all-libproc:
 $(NATIVE_CHECK_MODULES):
 	@if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
 	  dir=`echo $@ | sed -e 's/check-//'`; \
-	  if [ -d ./$${dir} ] ; then \
-	    if [ -f ./$${dir}/Makefile ] ; then \
-	      r=`pwd`; export r; \
-	      srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	      (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
-	    else \
-	      true; \
-	    fi ; \
+	  if [ -f ./$${dir}/Makefile ] ; then \
+	    r=`pwd`; export r; \
+	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	    (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
+	  else \
+	    true; \
 	  fi; \
 	fi
 
@@ -911,7 +905,7 @@ all-gas: all-libiberty all-opcodes all-bfd
 all-gash: all-tcl
 all-gawk:
 all-gcc: all-libiberty all-byacc all-binutils all-gas all-pagas
-all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc all-sim
+all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc all-sim all-gcc all-ld
 all-glob:
 all-gprof: all-libiberty all-bfd
 all-grep: all-libiberty
