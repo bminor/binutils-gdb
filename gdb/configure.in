@@ -211,7 +211,7 @@ AC_CHECK_FUNCS(canonicalize_file_name realpath)
 AC_CHECK_FUNCS(poll)
 AC_CHECK_FUNCS(sbrk)
 AC_CHECK_FUNCS(setpgid setpgrp)
-AC_CHECK_FUNCS(sigaction sigprocmask, sigsetmask)
+AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
 AC_CHECK_FUNCS(socketpair)
 
 dnl AC_FUNC_SETPGRP does not work when cross compiling
