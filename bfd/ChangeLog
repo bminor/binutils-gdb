@@ -1,3 +1,8 @@
+2002-01-27  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* elfcore.h (elf_core_file_p): Set the machine architecture
+	before processing the program headers.
+
 2002-01-26  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* configure.in <64-bit configuration>: If using gcc, check and
