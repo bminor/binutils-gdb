@@ -1,3 +1,9 @@
+2002-07-12  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/nodyn4.d, ld-cris/expdyn4.d, ld-cris/comref1.s,
+	ld-cris/euwref1.s, ld-cris/expdyn3.d, ld-cris/expdyn2.d,
+	ld-cris/expdref1.s: New tests.
+
 2002-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
         * ld-scripts/dynamic-sections*: New test.
