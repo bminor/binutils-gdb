@@ -1,3 +1,12 @@
+2004-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* infttrace.h (ttrace_write_reg_64): Add prototype.
+	* hppah-nat.c (store_inferior_registers): Fix warning from ambiguous
+	expression.  
+	(store_inferior_registers): Correct formatting.  Replace uses of
+	deprecated_registers with calls to regcache_raw_read,
+	regcache_raw_write_part and regcache_raw_read_part.
+
 2004-11-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/pa/hppahpux.mh: Remove file.

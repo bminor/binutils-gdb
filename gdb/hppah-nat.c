@@ -141,11 +141,11 @@ store_inferior_registers (int regno)
 	 layering will not allow us to perform a 64bit register store.
 
 	 What a crock.  */
-      if (regno == HPPA_PCOQ_HEAD_REGNUM || regno == HPPA_PCOQ_TAIL_REGNUM && len == 8)
+      if ((regno == HPPA_PCOQ_HEAD_REGNUM || regno == HPPA_PCOQ_TAIL_REGNUM) && len == 8)
 	{
 	  CORE_ADDR temp;
 
-	  temp = *(CORE_ADDR *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
+	  regcache_raw_read (current_regcache, regno, &temp);
 
 	  /* Set the priv level (stored in the low two bits of the PC.  */
 	  temp |= 0x3;
@@ -155,7 +155,7 @@ store_inferior_registers (int regno)
 
 	  /* If we fail to write the PC, give a true error instead of
 	     just a warning.  */
-	  if (errno != 0)
+          if (errno != 0)
 	    {
 	      char *err = safe_strerror (errno);
 	      char *msg = alloca (strlen (err) + 128);
@@ -170,15 +170,24 @@ store_inferior_registers (int regno)
 	 the high part of IPSW.  What will it take for HP to catch a
 	 clue about building sensible interfaces?  */
      if (regno == HPPA_IPSW_REGNUM && len == 8)
-	*(int *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)] = 0;
+	{
+	  int temp = 0;
+
+	  regcache_raw_write_part (current_regcache, regno, 0,
+				   sizeof (int), &temp);
+	}
 #endif
 
       for (i = 0; i < len; i += sizeof (int))
 	{
+	  int temp;
+
 	  errno = 0;
+	  regcache_raw_read_part (current_regcache, regno, i,
+				  sizeof (int), &temp);
 	  call_ptrace (PT_WUREGS, PIDGET (inferior_ptid),
 	               (PTRACE_ARG3_TYPE) addr + i,
-		       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno) + i]);
+		       temp);
 	  if (errno != 0)
 	    {
 	      /* Warning, not error, in case we are attached; sometimes

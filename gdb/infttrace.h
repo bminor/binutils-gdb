@@ -31,5 +31,6 @@ extern int hpux_has_vforked (int pid, int *childpid);
 extern int hpux_has_execd (int pid, char **execd_pathname);
 extern int hpux_has_syscall_event (int pid, enum target_waitkind *kind,
 				   int *syscall_id);
+extern int ttrace_write_reg_64 (int, CORE_ADDR, CORE_ADDR);
 
 #endif
