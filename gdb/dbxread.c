@@ -121,7 +121,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
-#include "liba.out.h"	 	/* FIXME Secret internal BFD stuff for a.out */
+#include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
 #include "symfile.h"
 
 struct dbx_symfile_info {
@@ -4986,6 +4986,7 @@ read_huge_number (pp, end, valu, bits)
   char overflow = 0;
   int nbits = 0;
   int c;
+  long upper_limit;
   
   if (*p == '-')
     {
@@ -5001,9 +5002,10 @@ read_huge_number (pp, end, valu, bits)
       p++;
     }
 
+  upper_limit = LONG_MAX / radix;
   while ((c = *p++) >= '0' && c <= ('0' + radix))
     {
-      if (n <= LONG_MAX / radix)
+      if (n <= upper_limit)
 	{
 	  n *= radix;
 	  n += c - '0';		/* FIXME this overflows anyway */

@@ -58,7 +58,8 @@ extern char *realloc();
 /* Can't #define it since printcmd.c needs it */
 void
 vprintf (format, ap)
-     char *format; void *ap;
+     char *format;
+     va_alist ap;
 {
   vfprintf (stdout, format, ap);
 }
@@ -380,6 +381,7 @@ void
 quit ()
 {
   target_terminal_ours ();
+  wrap_here ((char *)0);		/* Force out any pending output */
 #ifdef HAVE_TERMIO
   ioctl (fileno (stdout), TCFLSH, 1);
 #else /* not HAVE_TERMIO */
@@ -873,7 +875,7 @@ fputs_filtered (linebuffer, stream)
       if (*lineptr == '\n')
 	{
 	  chars_printed = 0;
-	  wrap_here ("");	/* Spit out chars, cancel further wraps */
+	  wrap_here ((char *)0);  /* Spit out chars, cancel further wraps */
 	  lines_printed++;
 	  putc ('\n', stream);
 	  lineptr++;

@@ -106,19 +106,16 @@ child_resume (step, signal)
      int signal;
 {
   errno = 0;
-  /* An address of (int *)1 tells it to continue from where it was. 
+
+  /* An address of (int *)1 tells ptrace to continue from where it was. 
      (If GDB wanted it to start some other way, we have already written
      a new PC value to the child.)  */
+
   if (step)
-    {
-#if defined (NO_SINGLE_STEP)
-      single_step (signal);
-#else /* Have single step.  */
-      ptrace (PT_STEP, inferior_pid, (int *)1, signal);
-#endif /* Have single step.  */
-    }
+    ptrace (PT_STEP, inferior_pid, (int *)1, signal);
   else
     ptrace (PT_CONTINUE, inferior_pid, (int *)1, signal);
+
   if (errno)
     perror_with_name ("ptrace");
 }
@@ -245,7 +242,6 @@ fetch_inferior_registers (regno)
       fetch_register (regno);
   else
     fetch_register (regno);
-  return 0;
 }
 
 /* Registers we shouldn't try to store.  */

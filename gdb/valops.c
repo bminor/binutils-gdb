@@ -92,6 +92,10 @@ value_cast (type, arg2)
     {
       return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2));
     }
+  else if (code1 == TYPE_CODE_VOID)
+    {
+      return value_zero (builtin_type_void, not_lval);
+    }
   else
     {
       error ("Invalid cast.");
@@ -495,7 +499,7 @@ value_ind (arg1)
 		     (CORE_ADDR) value_as_long (arg1));
   else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
     return value_at_lazy (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
-		     (CORE_ADDR) value_as_long (arg1));
+			  value_as_pointer (arg1));
   error ("Attempt to take contents of a non-pointer value.");
   return 0;  /* For lint -- never reached */
 }
@@ -620,7 +624,7 @@ find_function_addr (function, retval_type)
     }
   else if (code == TYPE_CODE_PTR)
     {
-      funaddr = value_as_long (function);
+      funaddr = value_as_pointer (function);
       if (TYPE_CODE (TYPE_TARGET_TYPE (ftype)) == TYPE_CODE_FUNC
 	  || TYPE_CODE (TYPE_TARGET_TYPE (ftype)) == TYPE_CODE_METHOD)
 	value_type = TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (ftype));
@@ -632,10 +636,10 @@ find_function_addr (function, retval_type)
       /* Handle the case of functions lacking debugging info.
 	 Their values are characters since their addresses are char */
       if (TYPE_LENGTH (ftype) == 1)
-	funaddr = value_as_long (value_addr (function));
+	funaddr = value_as_pointer (value_addr (function));
       else
 	/* Handle integer used as address of a function.  */
-	funaddr = value_as_long (function);
+	funaddr = (CORE_ADDR) value_as_long (function);
 
       value_type = builtin_type_int;
     }
@@ -950,7 +954,7 @@ value_string (ptr, len)
   val = target_call_function (val, 1, &blocklen);
   if (value_zerop (val))
     error ("No memory available for string constant.");
-  write_memory ((CORE_ADDR) value_as_long (val), copy, len + 1);
+  write_memory (value_as_pointer (val), copy, len + 1);
   VALUE_TYPE (val) = lookup_pointer_type (builtin_type_char);
   return val;
 }
@@ -1002,7 +1006,8 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  value v2;
-	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset, &v2);
+	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset,
+			  &v2, (int *)NULL);
 	  if (v2 == 0)
 	    error ("virtual baseclass botch");
 	  if (found_baseclass)
@@ -1074,7 +1079,8 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  value v2;
-	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset, &v2);
+	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset,
+			  &v2, (int *)NULL);
 	  if (v2 == 0)
 	    error ("virtual baseclass botch");
 	  v = search_struct_method (name, v2, args, 0,

@@ -29,18 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "ieee-float.h"
 
-#include <sys/param.h>
-#include <sys/dir.h>
-#include <sys/user.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
 #include <sys/ptrace.h>
-
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/core.h>
 
 #include "gdbcore.h"
 
@@ -69,9 +58,16 @@ static binsn_quantum break_mem[3];
 
 int one_stepped;
 
+/* single_step() is called just before we want to resume the inferior,
+   if we want to single-step it but there is no hardware or kernel single-step
+   support (as on all SPARCs).  We find all the possible targets of the
+   coming instruction and breakpoint them.
+
+   single_step is also called just after the inferior stops.  If we had
+   set up a simulated single-step, we undo our damage.  */
+
 void
-single_step (signal)
-     int signal;
+single_step ()
 {
   branch_type br, isannulled();
   CORE_ADDR pc;
@@ -107,8 +103,7 @@ single_step (signal)
 	  target_insert_breakpoint (target, break_mem[2]);
 	}
 
-      /* Let it go */
-      ptrace (7, inferior_pid, 1, signal);
+      /* We are ready to let it go */
       one_stepped = 1;
       return;
     }
@@ -127,6 +122,28 @@ single_step (signal)
     }
 }
 
+CORE_ADDR
+sparc_frame_chain (thisframe)
+     FRAME thisframe;
+{
+  CORE_ADDR retval;
+  read_memory ((CORE_ADDR)&(((struct rwindow *)(thisframe->frame))->rw_in[6]),
+	       &retval,
+	       sizeof (CORE_ADDR));
+  return retval;
+}
+
+CORE_ADDR
+sparc_extract_struct_value_address (regbuf)
+     char regbuf[REGISTER_BYTES];
+{
+  CORE_ADDR retval;
+  read_memory (((int *)(regbuf))[SP_REGNUM]+(16*4),
+	       &retval,
+	       sizeof (CORE_ADDR));
+  return retval;
+}
+
 /*
  * Find the pc saved in frame FRAME.  
  */
@@ -138,11 +155,14 @@ frame_saved_pc (frame)
 
   /* If it's at the bottom, the return value's stored in i7/rp */
   if (get_current_frame () == frame)
-    prev_pc = GET_RWINDOW_REG (read_register (SP_REGNUM), rw_in[7]);
+    read_memory ((CORE_ADDR)&((struct rwindow *)
+			      (read_register (SP_REGNUM)))->rw_in[7],
+		 &prev_pc, sizeof (CORE_ADDR));
   else
-    /* Wouldn't this always work?  This would allow this routine to
-       be completely a macro.  */
-    prev_pc = GET_RWINDOW_REG (frame->bottom, rw_in[7]);
+    /* Wouldn't this always work?  */
+    read_memory ((CORE_ADDR)&((struct rwindow *)(frame->bottom))->rw_in[7],
+		 &prev_pc,
+		 sizeof (CORE_ADDR));
   
   return PC_ADJUST (prev_pc);
 }

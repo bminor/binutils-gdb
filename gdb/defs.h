@@ -36,15 +36,25 @@ typedef unsigned int CORE_ADDR;
  * If non-ansi, non-gcc, then eliminate "const" entirely, making those
  * objects be read-write rather than read-only.
  */
+#ifndef const
 #ifndef __STDC__
 # ifdef __GNUC__
 #  define const __const__
-#  define volatile __volatile__
 # else
 #  define const /*nothing*/
+# endif /* GNUC */
+#endif /* STDC */
+#endif /* const */
+
+#ifndef volatile
+#ifndef __STDC__
+# ifdef __GNUC__
+#  define volatile __volatile__
+# else
 #  define volatile /*nothing*/
 # endif /* GNUC */
 #endif /* STDC */
+#endif /* volatile */
 
 extern char *savestring ();
 extern char *strsave ();
@@ -61,14 +71,16 @@ extern char *reg_names[];
 extern volatile void error(), fatal();
 
 /* Various possibilities for alloca.  */
-#ifdef __GNUC__
-# define alloca __builtin_alloca
-#else
-# ifdef sparc
-#  include <alloca.h>
+#ifndef alloca
+# ifdef __GNUC__
+#  define alloca __builtin_alloca
+# else
+#  ifdef sparc
+#   include <alloca.h>
+#  endif
+   extern char *alloca ();
 # endif
-  extern char *alloca ();
-# endif
+#endif
 
 extern int errno;			/* System call error return status */
 

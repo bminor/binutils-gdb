@@ -94,7 +94,7 @@ extern char *cplus_demangle ();
    as long as we're including defs.h.  */
 extern void *xmalloc (int);
 extern void *xrealloc (char *, int);
-extern void free (char *);
+extern void free (void *);
 #else
 extern char *xmalloc ();
 extern char *xrealloc ();

@@ -172,6 +172,12 @@ extern char *inferior_thisrun_terminal;
   name && !strcmp ("_sigtramp", name)
 #endif
 
+#ifdef TDESC
+#include "tdesc.h"
+int safe_to_init_tdesc_context = 0;
+extern dc_dcontext_t current_context;
+#endif
+
 /* Tables of how to react to signals; the user sets them.  */
 
 static char signal_stop[NSIG];
@@ -283,6 +289,14 @@ resume (step, sig)
 {
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
+
+#ifdef NO_SINGLE_STEP
+  if (step) {
+    single_step();	/* Do it the hard way, w/temp breakpoints */
+    step = 0;		/* ...and don't ask hardware to do it.  */
+  }
+#endif
+
   target_resume (step, sig);
   discard_cleanups (old_cleanups);
 }
@@ -717,6 +731,9 @@ wait_for_inferior ()
   int stop_step_resume_break;
   struct symtab_and_line sal;
   int remove_breakpoints_on_following_step = 0;
+#ifdef TDESC
+  extern dc_handle_t tdesc_handle;
+#endif
 
 #if 0
   /* This no longer works now that read_register is lazy;
@@ -741,6 +758,9 @@ wait_for_inferior ()
       if (WIFEXITED (w))
 	{
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
+#ifdef TDESC 
+          safe_to_init_tdesc_context = 0;
+#endif
 	  if (WEXITSTATUS (w))
 	    printf ("\nProgram exited with code 0%o.\n", 
 		     (unsigned int)WEXITSTATUS (w));
@@ -761,6 +781,9 @@ wait_for_inferior ()
 	  stop_signal = WTERMSIG (w);
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
 	  target_kill ((char *)0, 0);	/* kill mourns as well */
+#ifdef TDESC
+          safe_to_init_tdesc_context = 0;
+#endif
 #ifdef PRINT_RANDOM_SIGNAL
 	  printf ("\nProgram terminated: ");
 	  PRINT_RANDOM_SIGNAL (stop_signal);
@@ -785,6 +808,14 @@ wait_for_inferior ()
 #endif /* NO_SINGLE_STEP */
       
       stop_pc = read_pc ();
+#ifdef TDESC
+      if (safe_to_init_tdesc_context)   
+        {
+	  current_context = init_dcontext();
+          set_current_frame ( create_new_frame (get_frame_base (read_pc()),read_pc()));
+        }
+      else
+#endif /* TDESC */
       set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					    read_pc ()));
       
@@ -1225,6 +1256,14 @@ wait_for_inferior ()
 	     to one-proceed past a breakpoint.  */
 	  /* If we've just finished a special step resume and we don't
 	     want to hit a breakpoint, pull em out.  */
+#ifdef TDESC
+          if (!tdesc_handle)
+            {
+	      init_tdesc();
+              safe_to_init_tdesc_context = 1;
+            }
+#endif
+
 	  if (!step_resume_break_address &&
 	      remove_breakpoints_on_following_step)
 	    {
@@ -1252,7 +1291,8 @@ wait_for_inferior ()
 	     that we shouldn't rewrite the regs when we were stopped by a
 	     random signal from the inferior process.  */
 
-          if (!stop_breakpoint && (stop_signal != SIGCLD) 
+          if (!bpstat_explains_signal (stop_bpstat)
+	      && (stop_signal != SIGCLD) 
               && !stopped_by_random_signal)
             {
             CORE_ADDR pc_contents = read_register (PC_REGNUM);

@@ -993,27 +993,30 @@ ptype_command (typename, from_tty)
 	      whatis_exp (typename, 1);
 	      return;
 	    }
-	  printf_filtered ("No type named %s, but there is a ",
-		  typename);
+	  printf_filtered ("No type named %s, ", typename);
+	  wrap_here ("");
+	  printf_filtered ("but there is ");
 	  switch (TYPE_CODE (SYMBOL_TYPE (sym)))
 	    {
 	    case TYPE_CODE_STRUCT:
-	      printf_filtered ("struct");
+	      printf_filtered ("a struct");
 	      break;
 
 	    case TYPE_CODE_UNION:
-	      printf_filtered ("union");
+	      printf_filtered ("a union");
 	      break;
 
 	    case TYPE_CODE_ENUM:
-	      printf_filtered ("enum");
+	      printf_filtered ("an enum");
 	      break;
 
 	    default:
 	      printf_filtered ("(Internal error in gdb)");
 	      break;
 	    }
-	  printf_filtered (" %s.  Type \"help ptype\".\n", typename);
+	  printf_filtered (" %s.  ", typename);
+	  wrap_here ("");
+	  printf_filtered ("(Type \"help ptype\".)\n");
 	  type = SYMBOL_TYPE (sym);
 	}
     }
@@ -1531,11 +1534,13 @@ print_frame_args (func, fi, num, stream)
 
       /* Avoid value_print because it will deref ref parameters.  We just
 	 want to print their addresses.  Print ??? for args whose address
-	 we do not know.  */
+	 we do not know.  We pass 2 as "recurse" to val_print because our
+	 standard indentation here is 4 spaces, and val_print indents
+	 2 for each recurse.  */
       val = read_var_value (sym, FRAME_INFO_ID (fi));
       if (val)
         val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
-		   stream, 0, 0, 0, Val_no_prettyprint);
+		   stream, 0, 0, 2, Val_no_prettyprint);
       else
 	fputs_filtered ("???", stream);
       first = 0;

@@ -37,8 +37,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <sys/stat.h>
 
-extern int close ();
-extern void qsort ();
 extern char *getenv ();
 
 extern char *cplus_demangle ();
@@ -2234,7 +2232,6 @@ decode_line_2 (sym_arr, nelts, funfirstline)
      int nelts;
      int funfirstline;
 {
-  char *getenv();
   struct symtabs_and_lines values, return_values;
   register CORE_ADDR pc;
   char *args, *arg1, *command_line_input ();
@@ -2466,7 +2463,7 @@ list_symbols (regexp, class, bpt)
   int found_in_file = 0;
 
   if (regexp)
-    if (0 != (val = (char *) re_comp (regexp)))
+    if (0 != (val = re_comp (regexp)))
       error ("Invalid regexp (%s): %s", val, regexp);
 
   /* Search through the partial_symtab_list *first* for all symbols

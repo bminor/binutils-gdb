@@ -40,7 +40,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int info_verbose;
 
-extern int close ();
 extern void qsort ();
 extern char *getenv ();
 
@@ -864,6 +863,10 @@ free_named_symtabs (name)
   register struct partial_symtab *ps;
   struct blockvector *bv;
   int blewit = 0;
+
+  /* Some symbol formats have trouble providing file names... */
+  if (name == 0 || *name == '\0')
+    return 0;
 
   /* Look for a psymtab with the specified name.  */
 

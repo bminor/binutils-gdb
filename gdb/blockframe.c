@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
@@ -575,7 +576,7 @@ find_pc_partial_function (pc, name, address)
       cache_pc_function_low = pc - FUNCTION_START_OFFSET;
   }
   cache_pc_function_name = misc_function_vector[miscfunc].name;
-  if (miscfunc < misc_function_count && 1 /* FIXME mf_text again? */ )
+  if (miscfunc < misc_function_count /* && FIXME mf_text again? */ )
     cache_pc_function_high = misc_function_vector[miscfunc+1].address;
   else
     cache_pc_function_high = cache_pc_function_low + 1;
