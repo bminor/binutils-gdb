@@ -103,6 +103,7 @@ INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
 LDFLAGS = @LDFLAGS@
+INTERNAL_LDFLAGS = $(LDFLAGS) @RDYNAMIC@
 
 # Perhaps should come from parent Makefile
 VERSION = gdbserver-4.12.3
@@ -171,12 +172,12 @@ clean-info:
 
 gdbserver: $(OBS) ${ADD_DEPS} ${CDEPS}
 	rm -f gdbserver
-	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdbserver $(OBS) \
+	${CC-LD} $(GLOBAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver $(OBS) \
 	  $(GDBSERVER_LIBS) $(XM_CLIBS)
 
 gdbreplay: gdbreplay.o
 	rm -f gdbreplay
-	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdbreplay gdbreplay.o \
+	${CC-LD} $(GLOBAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay gdbreplay.o \
 	  $(XM_CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine
