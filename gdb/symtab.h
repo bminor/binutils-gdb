@@ -1441,5 +1441,6 @@ struct symbol_search
 extern void search_symbols (char *, namespace_enum, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
+extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search *);
 
 #endif /* !defined(SYMTAB_H) */

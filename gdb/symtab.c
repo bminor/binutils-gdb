@@ -3564,6 +3564,19 @@ free_search_symbols (symbols)
     }
 }
 
+static void
+do_free_search_symbols_cleanup (void *symbols)
+{
+  free_search_symbols (symbols);
+}
+
+struct cleanup *
+make_cleanup_free_search_symbols (struct symbol_search *symbols)
+{
+  return make_cleanup (do_free_search_symbols_cleanup, symbols);
+}
+
+
 /* Search the symbol table for matches to the regular expression REGEXP,
    returning the results in *MATCHES.
 
@@ -3796,8 +3809,7 @@ search_symbols (regexp, kind, nfiles, files, matches)
 		  if (tail == NULL)
 		    {
 		      sr = psr;
-		      old_chain = make_cleanup ((make_cleanup_func)
-						free_search_symbols, sr);
+		      old_chain = make_cleanup_free_search_symbols (sr);
 		    }
 		  else
 		    tail->next = psr;
@@ -3841,8 +3853,7 @@ search_symbols (regexp, kind, nfiles, files, matches)
 			if (tail == NULL)
 			  {
 			    sr = psr;
-			    old_chain = make_cleanup ((make_cleanup_func)
-						  free_search_symbols, &sr);
+			    old_chain = make_cleanup_free_search_symbols (sr);
 			  }
 			else
 			  tail->next = psr;
@@ -3957,7 +3968,7 @@ symtab_symbol_info (regexp, kind, from_tty)
 
   /* must make sure that if we're interrupted, symbols gets freed */
   search_symbols (regexp, kind, 0, (char **) NULL, &symbols);
-  old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, symbols);
+  old_chain = make_cleanup_free_search_symbols (symbols);
 
   printf_filtered (regexp
 		   ? "All %ss matching regular expression \"%s\":\n"
@@ -4045,7 +4056,7 @@ rbreak_command (regexp, from_tty)
   struct cleanup *old_chain;
 
   search_symbols (regexp, FUNCTIONS_NAMESPACE, 0, (char **) NULL, &ss);
-  old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, ss);
+  old_chain = make_cleanup_free_search_symbols (ss);
 
   for (p = ss; p != NULL; p = p->next)
     {
