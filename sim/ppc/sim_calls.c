@@ -59,22 +59,28 @@ static psim *simulator;
 static device *root_device;
 static host_callback *callbacks;
 
-/* We use GDB's reg_names array to map GDB register numbers onto
-   names, which we can then look up in the register table.
+/* We use GDB's gdbarch_register_name function to map GDB register
+   numbers onto names, which we can then look up in the register
+   table.  Since the `set architecture' command can select a new
+   processor variant at run-time, the meanings of the register numbers
+   can change, so we need to make sure the sim uses the same
+   name/number mapping that GDB uses.
 
-   We used to just use the REGISTER_NAMES macro, from GDB's
-   target-dependent header files.  That was kind of nice, because it
-   meant that libsim.a had only a compile-time dependency on GDB;
-   using reg_names directly means that there are now link-time and
-   run-time dependencies too.
+   (We don't use the REGISTER_NAME macro, which is a wrapper for
+   gdbarch_register_name.  We #include GDB's "defs.h", which tries to
+   #include GDB's "config.h", but gets ours instead, and REGISTER_NAME
+   ends up not getting defined.  Simpler to just use
+   gdbarch_register_name directly.)
 
-   However, the GDB PPC back-end now modifies the reg_names array when
-   the user runs the `set processor' command, which affects the
-   meanings of the register numbers.  So the sim needs to see the
-   register names GDB is actually using.
+   We used to just use the REGISTER_NAMES macro from GDB's
+   target-dependent header files, which expanded into an initializer
+   for an array of strings.  That was kind of nice, because it meant
+   that libsim.a had only a compile-time dependency on GDB; using
+   gdbarch_register_name directly means that there are now link-time
+   and run-time dependencies too.
 
-   Perhaps the host_callback structure could contain a pointer to the
-   register name table; that would be cleaner.  */
+   Perhaps the host_callback structure could provide a function for
+   retrieving register names; that would be cleaner.  */
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
@@ -181,13 +187,13 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
   }
 
   /* GDB will sometimes ask for the contents of a register named "";
-     we ignore such requests, and leave garbage in *BUF.  In
-     REG_NAMES, the empty string means "the register with this
-     number is not present in the currently selected architecture
-     variant."  That's following the kludge we're using for the MIPS
-     processors.  But there are loops that just walk through the
-     entire list of names and try to get everything.  */
-  regname = REGISTER_NAME (regno);
+     we ignore such requests, and leave garbage in *BUF.  In GDB
+     terms, the empty string means "the register with this number is
+     not present in the currently selected architecture variant."
+     That's following the kludge we're using for the MIPS processors.
+     But there are loops that just walk through the entire list of
+     names and try to get everything.  */
+  regname = gdbarch_register_name (current_gdbarch, regno);
   if (! regname || regname[0] == '\0')
     return -1;
 
@@ -208,7 +214,7 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
     return 0;
 
   /* See comments in sim_fetch_register, above.  */
-  regname = REGISTER_NAME (regno);
+  regname = gdbarch_register_name (current_gdbarch, regno);
   if (! regname || regname[0] == '\0')
     return -1;
 

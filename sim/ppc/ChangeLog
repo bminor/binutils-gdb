@@ -1,3 +1,10 @@
+2000-11-15  Jim Blandy  <jimb@redhat.com>
+
+	* sim_calls.c: Doc fix.
+	(sim_fetch_register, sim_store_register): Call
+	gdbarch_register_name directly, instead of going through
+	REGISTER_NAME macro.
+
 2000-10-24  Geoff Keating  <geoffk@cygnus.com>
 
 	* ppc-instructions (lfsux): Correct XO field of lfsux instruction.
