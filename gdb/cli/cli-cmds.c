@@ -664,18 +664,10 @@ End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
 Commands defined in this way may have up to ten arguments.");
 
-#ifdef __STDC__
   c = add_cmd ("source", class_support, source_command,
 	       "Read commands from a file named FILE.\n\
 Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
 when gdb is started.", &cmdlist);
-#else
-  /* Punt file name, we can't help it easily.  */
-  c = add_cmd ("source", class_support, source_command,
-	       "Read commands from a file named FILE.\n\
-Note that the file \".gdbinit\" is read automatically in this way\n\
-when gdb is started.", &cmdlist);
-#endif
   c->completer = filename_completer;
 
   add_com ("quit", class_support, quit_command, "Exit gdb.");

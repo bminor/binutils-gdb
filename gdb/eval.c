@@ -61,9 +61,6 @@ static LONGEST
 init_array_element (value_ptr, value_ptr, struct expression *,
 		    int *, enum noside, LONGEST, LONGEST);
 
-#if defined (__GNUC__) && !__STDC__
-inline
-#endif
 static value_ptr
 evaluate_subexp (struct type *expect_type, register struct expression *exp,
 		 register int *pos, enum noside noside)

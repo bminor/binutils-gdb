@@ -36,7 +36,7 @@
 #endif
 #endif
 
-#if ! defined (__STDC__) && ! defined (offsetof)
+#if ! defined (__GNUC__) && ! defined (offsetof)
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
 

@@ -1,5 +1,11 @@
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* eval.c (evaluate_subexp): Remove #ifdef __STDC__ and ``inline''.
+	* config/mips/xm-mips.h (offsetof): Define when !GNUC not !STDC.
+	* cli/cli-cmds.c (init_cli_cmds): Remove #ifdef __STDC__
+
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* TODO: List known problems with TUI.
 
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>

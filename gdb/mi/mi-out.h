@@ -22,10 +22,8 @@
 #ifndef MI_OUT_H
 #define MI_OUT_H 1
 
-#if __STDC__
 struct ui_out;
 struct ui_file;
-#endif
 
 extern struct ui_out *mi_out_new (void);
 extern void mi_out_put (struct ui_out *uiout, struct ui_file *stream);
