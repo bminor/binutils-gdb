@@ -28,6 +28,7 @@ Things-to-keep:
 
 align3.s
 align4.s
+common.s
 fragbug.s
 globalbug.s
 importbug.s
