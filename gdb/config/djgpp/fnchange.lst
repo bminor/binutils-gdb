@@ -251,6 +251,8 @@
 @V@/gdb/testsuite/gdb.c++/ovldbreak.exp @V@/gdb/testsuite/gdb.cxx/ovldbreak.exp
 @V@/gdb/testsuite/gdb.c++/pr-1023.cc @V@/gdb/testsuite/gdb.cxx/pr-1023.cc
 @V@/gdb/testsuite/gdb.c++/pr-1023.exp @V@/gdb/testsuite/gdb.cxx/pr-1023.exp
+@V@/gdb/testsuite/gdb.c++/pr-1210.cc @V@/gdb/testsuite/gdb.cxx/pr-1210.cc
+@V@/gdb/testsuite/gdb.c++/pr-1210.exp @V@/gdb/testsuite/gdb.cxx/pr-1210.exp
 @V@/gdb/testsuite/gdb.c++/pr-574.cc @V@/gdb/testsuite/gdb.cxx/pr-574.cc
 @V@/gdb/testsuite/gdb.c++/pr-574.exp @V@/gdb/testsuite/gdb.cxx/pr-574.exp
 @V@/gdb/testsuite/gdb.c++/printmethod.cc @V@/gdb/testsuite/gdb.cxx/printmethod.cc
