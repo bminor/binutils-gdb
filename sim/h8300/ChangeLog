@@ -1,3 +1,7 @@
+2004-06-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* compile.c (sim_load): Update sd->memory_size.
+
 2004-06-10  Michael Snyder  <msnyder@redhat.com>
 
 	Patch submitted by Nitin Yewale <NitinY@KPITCummins.com>.

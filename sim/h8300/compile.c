@@ -5096,6 +5096,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 		     calloc (sizeof (char), memory_size));
   h8_set_cache_idx_buf (sd, (unsigned short *) 
 			calloc (sizeof (short), memory_size));
+  sd->memory_size = memory_size;
   h8_set_eightbit_buf (sd, (unsigned char *) calloc (sizeof (char), 256));
 
   /* `msize' must be a power of two.  */
