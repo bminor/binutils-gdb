@@ -69,8 +69,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_NONE",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -83,8 +83,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_DIR32",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -97,8 +97,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_DIR16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -111,9 +111,9 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 8,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
-	 "R_H8_DIR16",		/* name */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
+	 "R_H8_DIR8",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x000000ff,		/* dst_mask */
@@ -126,7 +126,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR16A8",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -140,7 +140,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR16R8",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -154,7 +154,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR24A8",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0xff000000,		/* src_mask */
@@ -168,7 +168,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR24R8",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0xff000000,		/* src_mask */
@@ -181,8 +181,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_DIR32",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -195,8 +195,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_PCREL16",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -209,8 +209,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 8,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_PCREL8",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xff,			/* src_mask */
@@ -579,6 +579,9 @@ elf32_h8_mach (flags)
 
     case E_H8_MACH_H8300SN:
       return bfd_mach_h8300sn;
+
+    case E_H8_MACH_H8300SX:
+      return bfd_mach_h8300sx;
     }
 }
 
@@ -614,6 +617,10 @@ elf32_h8_final_write_processing (abfd, linker)
 
     case bfd_mach_h8300sn:
       val = E_H8_MACH_H8300SN;
+      break;
+
+    case bfd_mach_h8300sx:
+      val = E_H8_MACH_H8300SX;
       break;
     }
 
@@ -709,7 +716,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Get a copy of the native relocations.  */
-  internal_relocs = (_bfd_elf32_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -1023,7 +1030,10 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		 && value >= 0xff00
 		 && value <= 0xffff)
 		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
-		     || bfd_get_mach (abfd) == bfd_mach_h8300s)
+		     /* FIXME: h8300hn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300s
+		     /* FIXME: h8300sn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300sx)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
@@ -1081,7 +1091,10 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		 && value >= 0xff00
 		 && value <= 0xffff)
 		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
-		     || bfd_get_mach (abfd) == bfd_mach_h8300s)
+		     /* FIXME: h8300hn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300s
+		     /* FIXME: h8300sn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300sx)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
@@ -1394,7 +1407,7 @@ elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isym, *isymend;
       bfd_size_type amt;
 
-      internal_relocs = (_bfd_elf32_link_read_relocs
+      internal_relocs = (_bfd_elf_link_read_relocs
 			 (input_bfd, input_section, (PTR) NULL,
 			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)

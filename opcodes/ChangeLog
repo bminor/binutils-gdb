@@ -1,3 +1,24 @@
+2003-05-17  Andreas Jaeger  <aj@suse.de>
+
+        * Makefile.am (libopcodes_la_LIBADD): Add libbfd.la.
+        (libopcodes_la_DEPENDENCIES): Add libbfd.la.
+        * Makefile.in: Regenerated.
+
+2003-05-16  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add Romanian translation.
+	* configure: Regenerate.
+	* po/ro.po: New file: Romanian translation.
+
+2003-05-12  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
+	* disassemble.c (disassembler): Add support for h8300hn and h8300sn.
+
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (print_insn): Test intel_syntax against (char) -1 in
+	case char is unsigned.
+
 2003-05-01  Christian Groessler <chris@groessler.org>
 
 	* z8k-dis.c (z8k_lookup_instr): Optimize FETCH_DATA calls.

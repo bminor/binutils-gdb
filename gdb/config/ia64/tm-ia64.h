@@ -31,7 +31,7 @@
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
-#define REGISTER_SIZE 8
+#define DEPRECATED_REGISTER_SIZE 8
 
 #undef  NUM_REGS
 #define NUM_REGS 590
@@ -50,7 +50,7 @@
    need 8 bytes for each register, plus an additional 8 bytes for each
    of the 128 floating point registers. */
 
-#define REGISTER_BYTES (NUM_REGS*8+128*8)
+#define DEPRECATED_REGISTER_BYTES (NUM_REGS*8+128*8)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

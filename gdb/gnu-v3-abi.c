@@ -255,7 +255,7 @@ gnuv3_rtti_type (struct value *value,
   class_name = vtable_symbol_name + 11;
 
   /* Try to look up the class name as a type name.  */
-  class_symbol = lookup_symbol (class_name, 0, STRUCT_NAMESPACE, 0, 0);
+  class_symbol = lookup_symbol (class_name, 0, STRUCT_DOMAIN, 0, 0);
   if (! class_symbol)
     {
       warning ("can't find class named `%s', as given by C++ RTTI", class_name);

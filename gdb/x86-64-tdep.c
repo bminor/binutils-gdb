@@ -128,9 +128,6 @@ static struct x86_64_register_info x86_64_register_info[] =
 #define X86_64_NUM_REGS \
   (sizeof (x86_64_register_info) / sizeof (x86_64_register_info[0]))
 
-/* Size of the register buffer.  */
-static int x86_64_register_bytes;
-
 /* Return the name of register REGNUM.  */
 
 static const char *
@@ -770,17 +767,17 @@ x86_64_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
   /* Pass "hidden" argument".  */
   if (struct_return)
     {
-      store_address (buf, 8, struct_addr);
+      store_unsigned_integer (buf, 8, struct_addr);
       regcache_cooked_write (regcache, X86_64_RDI_REGNUM, buf);
     }
 
   /* Store return address.  */
   sp -= 8;
-  store_address (buf, 8, dummy_addr);
+  store_unsigned_integer (buf, 8, dummy_addr);
   write_memory (sp, buf, 8);
 
   /* Finally, update the stack pointer...  */
-  store_address (buf, 8, sp);
+  store_unsigned_integer (buf, 8, sp);
   regcache_cooked_write (regcache, X86_64_RSP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
@@ -991,7 +988,7 @@ x86_64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       if (valuep)
 	{
 	  /* Store the value.  */
-	  store_address (valuep, 8, cache->saved_sp);
+	  store_unsigned_integer (valuep, 8, cache->saved_sp);
 	}
       return;
     }
@@ -1158,9 +1155,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 128);
 
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
-  set_gdbarch_register_bytes (gdbarch, x86_64_register_bytes);
   set_gdbarch_register_name (gdbarch, x86_64_register_name);
-  set_gdbarch_register_size (gdbarch, 8);
   set_gdbarch_register_type (gdbarch, x86_64_register_type);
 
   /* Register numbers of various important registers.  */
@@ -1207,17 +1202,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_predicate (gdbarch, x86_64_sigtramp_frame_p);
   frame_unwind_append_predicate (gdbarch, x86_64_frame_p);
   frame_base_set_default (gdbarch, &x86_64_frame_base);
-}
-
-void
-_initialize_x86_64_tdep (void)
-{
-  int i;
-
-  /* Total amount of space needed to store our copies of the machine's
-     registers.  */
-  for (i = 0; i < X86_64_NUM_REGS; i++)
-    x86_64_register_bytes += TYPE_LENGTH (*x86_64_register_info[i].type);
 }
 
 

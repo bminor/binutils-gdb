@@ -44,7 +44,6 @@ struct thread_info
   int num;			/* Convenient handle (GDB thread id) */
   /* State from wait_for_inferior */
   CORE_ADDR prev_pc;
-  char *prev_func_name;
   struct breakpoint *step_resume_breakpoint;
   struct breakpoint *through_sigtramp_breakpoint;
   CORE_ADDR step_range_start;
@@ -117,7 +116,6 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 /* infrun context switch: save the debugger state for the given thread.  */
 extern void save_infrun_state (ptid_t ptid,
 			       CORE_ADDR prev_pc,
-			       char     *prev_func_name,
 			       int       trap_expected,
 			       struct breakpoint *step_resume_breakpoint,
 			       struct breakpoint *through_sigtramp_breakpoint,
@@ -137,7 +135,6 @@ extern void save_infrun_state (ptid_t ptid,
    for the given thread.  */
 extern void load_infrun_state (ptid_t ptid,
 			       CORE_ADDR *prev_pc,
-			       char     **prev_func_name,
 			       int       *trap_expected,
 			       struct breakpoint **step_resume_breakpoint,
 			       struct breakpoint **through_sigtramp_breakpoint,

@@ -1115,7 +1115,7 @@ memrange_sortmerge (struct collection_list *memranges)
 	{
 	  if (memranges->list[a].type == memranges->list[b].type &&
 	      memranges->list[b].start - memranges->list[a].end <=
-	      MAX_REGISTER_VIRTUAL_SIZE)
+	      MAX_REGISTER_SIZE)
 	    {
 	      /* memrange b starts before memrange a ends; merge them.  */
 	      if (memranges->list[b].end > memranges->list[a].end)

@@ -658,9 +658,7 @@ struct bfd_link_needed_list
   const char *name;
 };
 
-extern bfd_boolean bfd_elf32_record_link_assignment
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, bfd_boolean));
-extern bfd_boolean bfd_elf64_record_link_assignment
+extern bfd_boolean bfd_elf_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, bfd_boolean));
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -1637,6 +1635,7 @@ enum bfd_architecture
 #define bfd_mach_h8300s   3
 #define bfd_mach_h8300hn  4
 #define bfd_mach_h8300sn  5
+#define bfd_mach_h8300sx  6
   bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           32

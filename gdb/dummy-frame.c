@@ -29,6 +29,8 @@
 #include "inferior.h"
 #include "gdb_assert.h"
 #include "frame-unwind.h"
+#include "command.h"
+#include "gdbcmd.h"
 
 static void dummy_frame_this_id (struct frame_info *next_frame,
 				 void **this_prologue_cache,
@@ -109,7 +111,7 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 }
 
 struct regcache *
-generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+deprecated_find_dummy_frame_regcache (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummy = find_dummy_frame (pc, fp);
   if (dummy != NULL)
@@ -121,7 +123,7 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 char *
 deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
-  struct regcache *regcache = generic_find_dummy_frame (pc, fp);
+  struct regcache *regcache = deprecated_find_dummy_frame_regcache (pc, fp);
   if (regcache == NULL)
     return NULL;
   return deprecated_grub_regcache_for_registers (regcache);
@@ -149,8 +151,9 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
    figure out what the real PC (as in the resume address) is BEFORE
    calling this function (Oh, and I'm not even sure that this function
    is called with an decremented PC, the call to pc_in_call_dummy() in
-   that file is conditional on !CALL_DUMMY_BREAKPOINT_OFFSET_P yet
-   generic dummy targets set CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
+   that file is conditional on
+   !DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET_P yet generic dummy
+   targets set DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
 
 int
 pc_in_dummy_frame (CORE_ADDR pc)
@@ -173,7 +176,7 @@ pc_in_dummy_frame (CORE_ADDR pc)
 CORE_ADDR
 deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 {
-  struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
+  struct regcache *dummy_regs = deprecated_find_dummy_frame_regcache (pc, fp);
 
   if (dummy_regs)
     {
@@ -417,4 +420,50 @@ dummy_frame_p (CORE_ADDR pc)
     return &dummy_frame_unwind;
   else
     return NULL;
+}
+
+static void
+fprint_dummy_frames (struct ui_file *file)
+{
+  struct dummy_frame *s;
+  for (s = dummy_frame_stack; s != NULL; s = s->next)
+    {
+      gdb_print_host_address (s, file);
+      fprintf_unfiltered (file, ":");
+      fprintf_unfiltered (file, " pc=0x%s", paddr (s->pc));
+      fprintf_unfiltered (file, " fp=0x%s", paddr (s->fp));
+      fprintf_unfiltered (file, " sp=0x%s", paddr (s->sp));
+      fprintf_unfiltered (file, " top=0x%s", paddr (s->top));
+      fprintf_unfiltered (file, " id=");
+      fprint_frame_id (file, s->id);
+      fprintf_unfiltered (file, " call_lo=0x%s", paddr (s->call_lo));
+      fprintf_unfiltered (file, " call_hi=0x%s", paddr (s->call_hi));
+      fprintf_unfiltered (file, "\n");
+    }
+}
+
+static void
+maintenance_print_dummy_frames (char *args, int from_tty)
+{
+  if (args == NULL)
+    fprint_dummy_frames (gdb_stdout);
+  else
+    {
+      struct ui_file *file = gdb_fopen (args, "w");
+      if (file == NULL)
+	perror_with_name ("maintenance print dummy-frames");
+      fprint_dummy_frames (file);    
+      ui_file_delete (file);
+    }
+}
+
+extern void _initialize_dummy_frame (void);
+
+void
+_initialize_dummy_frame (void)
+{
+  add_cmd ("dummy-frames", class_maintenance, maintenance_print_dummy_frames,
+	   "Print the contents of the internal dummy-frame stack.",
+	   &maintenanceprintlist);
+
 }

@@ -139,7 +139,7 @@ static int frame_debug;
 
 static int backtrace_below_main;
 
-static void
+void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
   fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",
@@ -618,7 +618,7 @@ void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {
-  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }
@@ -627,7 +627,7 @@ void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {
-  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }
@@ -983,8 +983,10 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	  *addrp = 0;
 	  *realnump = -1;
 	  if (bufferp != NULL)
-	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
-			   get_frame_saved_regs (frame)[regnum]);
+	    /* NOTE: cagney/2003-05-09: In-lined store_address with
+               it's body - store_unsigned_integer.  */
+	    store_unsigned_integer (bufferp, REGISTER_RAW_SIZE (regnum),
+				    get_frame_saved_regs (frame)[regnum]);
 	}
       else
 	{
@@ -1110,8 +1112,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 		   fly, constructs either a raw or pseudo register
 		   from the raw register cache.  */
 		regcache_raw_read
-		  (generic_find_dummy_frame (get_frame_pc (frame),
-					     get_frame_base (frame)),
+		  (deprecated_find_dummy_frame_regcache (get_frame_pc (frame),
+							 get_frame_base (frame)),
 		   regnum, raw_buffer);
 	      return;
 	    }
@@ -1125,8 +1127,11 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 	      if (regnum == SP_REGNUM)
 		{
 		  if (raw_buffer)	/* SP register treated specially */
-		    store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-				   get_frame_saved_regs (frame)[regnum]);
+		    /* NOTE: cagney/2003-05-09: In-line store_address
+                       with it's body - store_unsigned_integer.  */
+		    store_unsigned_integer (raw_buffer,
+					    REGISTER_RAW_SIZE (regnum),
+					    get_frame_saved_regs (frame)[regnum]);
 		}
 	      else
 		{
@@ -2069,7 +2074,12 @@ get_frame_type (struct frame_info *frame)
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
-  if (frame->unwind == NULL)
+
+  /* Some legacy code, e.g, mips_init_extra_frame_info() wants
+     to determine the frame's type prior to it being completely
+     initialized.  Don't attempt to lazily initialize ->unwind for
+     legacy code.  It will be initialized in legacy_get_prev_frame().  */
+  if (frame->unwind == NULL && !legacy_frame_p (current_gdbarch))
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */

@@ -164,9 +164,8 @@ extern int sparc_intreg_size (void);
 
 #define FUNCTION_START_OFFSET 0
 
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
+/* Amount PC must be decremented by after a breakpoint.  This is often
+   the number of bytes returned by BREAKPOINT_FROM_PC but not always.  */
 
 #define DECR_PC_AFTER_BREAK 0
 
@@ -174,7 +173,7 @@ extern int sparc_intreg_size (void);
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
-#define REGISTER_SIZE 4
+#define DEPRECATED_REGISTER_SIZE 4
 
 /* Number of machine registers */
 
@@ -205,7 +204,7 @@ extern int sparc_intreg_size (void);
    other hand, that is likely to be confusing or worse for flat
    frames.  */
 
-#define REGISTER_BYTES (32*4+32*4+8*4)
+#define DEPRECATED_REGISTER_BYTES (32*4+32*4+8*4)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -361,7 +360,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 
 /* Sequence of bytes for breakpoint instruction (ta 1). */
 
-#define BREAKPOINT {0x91, 0xd0, 0x20, 0x01}
+extern const unsigned char *sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len);
+#define BREAKPOINT_FROM_PC(PC,LEN) sparc_breakpoint_from_pc ((PC), (LEN))
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -589,19 +589,19 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
 /* Size of the call dummy in bytes. */
 
-#define CALL_DUMMY_LENGTH 0x38
+#define DEPRECATED_CALL_DUMMY_LENGTH 0x38
 
 /* Offset within call dummy of first instruction to execute. */
 
-#define CALL_DUMMY_START_OFFSET 0
+#define DEPRECATED_CALL_DUMMY_START_OFFSET 0
 
 /* Offset within CALL_DUMMY of the 'call' instruction. */
 
-#define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + 0x24)
+#define CALL_DUMMY_CALL_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + 0x24)
 
 /* Offset within CALL_DUMMY of the 'ta 1' trap instruction. */
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 0x30)
+#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + 0x30)
 
 #define DEPRECATED_CALL_DUMMY_STACK_ADJUST 68
 
@@ -626,7 +626,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) \
+#define DEPRECATED_FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) \
      sparc_fix_call_dummy (DUMMYNAME, PC, FUN, TYPE, GCC_P)
 void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 			   struct type *value_type, int using_gcc);

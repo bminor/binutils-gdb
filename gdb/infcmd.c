@@ -1500,8 +1500,8 @@ default_print_registers_info (struct gdbarch *gdbarch,
 {
   int i;
   const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
+  char virtual_buffer[MAX_REGISTER_SIZE];
 
   if (DEPRECATED_DO_REGISTERS_INFO_P ())
     {

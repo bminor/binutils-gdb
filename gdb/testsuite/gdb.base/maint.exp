@@ -35,6 +35,7 @@
 #maintenance info -- Commands for showing internal info about the program being debugged
 #maintenance internal-error -- Give GDB an internal error.
 #
+#maintenance print dummy-frames -- Print the dummy frame stack
 #maintenance print statistics -- Print statistics about internal gdb state
 #maintenance print objfiles -- Print dump of current object file definitions
 #maintenance print psymbols -- Print dump of current partial symbol definitions
@@ -185,6 +186,9 @@ gdb_expect  {
         -re ".*$gdb_prompt $"       { fail "maint print statistics" }
         timeout         { fail "(timeout) maint print statistics" }
         }
+
+# There aren't any ...
+gdb_test "maint print dummy-frames" ""
 
 send_gdb "maint print objfiles\n"
 
@@ -523,6 +527,9 @@ gdb_expect  {
         -re ".*$gdb_prompt $"       { fail "help maint print statistics" }
         timeout         { fail "(timeout) help maint print statistics" }
         }
+
+gdb_test "help maint print dummy-frames" \
+	"Print the contents of the internal dummy-frame stack."
 
 send_gdb "help maint print objfiles\n"
 gdb_expect  {

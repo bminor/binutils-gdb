@@ -1,3 +1,343 @@
+2003-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL
+	to trim plt entries.  Move undefweak non-default visibility test..
+	(allocate_dynrelocs): ..from here.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't test
+	dynamic_sections_created here.  Update comment.  Move undefweak
+	non-default visibility test..
+	(allocate_dynrelocs): ..from here.  Fix comment.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL
+	to trim plt entries.  Move undefweak non-default visibility test..
+	(allocate_dynrelocs): ..from here.  Fix comment.
+	* elflink.h (elf_link_output_extsym): Compare ELF_ST_VISIBILITY with
+	STV_DEFAULT rather than comparing with zero.
+	* elflink.c (_bfd_elf_merge_symbol): Likewise.
+	(_bfd_elf_fix_symbol_flags): Likewise.  Format comment.
+
+2003-05-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* bfd.c (_bfd_get_gp_value): Prevent illegal access for abfd null
+	pointers.
+	(_bfd_set_gp_value): Likewise.
+
+2003-05-16  Michael Snyder  <msnyder@redhat.com>
+	From Bernd Schmidt  <bernds@redhat.com>
+	* archures.c (bfd_mach_h8300sx): New.
+	* bfd-in2.h: Regenerate.
+	* cpu-h8300.c (h8300_scan)): Add support for h8300sx.
+	(h8300sx_info_struct): New.
+	(h8300s_info_struct): Link to it.
+	* elf32-h8300.c (elf32_h8_mach): Add support for h8300sx.
+	(elf32_h8_final_write_processing): Likewise.
+	(elf32_h8_relax_section): Likewise.
+
+2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
+
+	* config.bfd: Accept i[3-7]86 variants.
+	* configure.host: Likewise.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
+2003-05-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_fix_symbol_flags): Also hide protected
+	symbol.
+
+2003-05-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.h (elf_link_check_versioned_symbol): Also allow
+	the base version.
+
+2003-05-15  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (allocate_dynrelocs): Use SYMBOL_CALLS_LOCAL.
+	(elf_i386_relocate_section): Likewise.
+	* elf32-ppc.c (allocate_dynrelocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2003-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (gprel32_with_gp): Remove useless N64 ABI case.
+
+2003-05-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc1x.c (_bfd_m68hc11_elf_merge_private_bfd_data): Check for
+	processor capability, allow merge of HC12 and HCS12 in some cases.
+	(m68hc11_elf_hash_table_create): Use bfd_malloc instead of bfd_zalloc.
+	* cpu-m68hc12.c (bfd_m68hc12s_arch): New struct.
+	(bfd_m68hc12_arch): Link it.
+	(scan_mach): New function.
+
+2003-05-13  Andrew Haley  <aph@redhat.com>
+
+	* elf.c (bfd_elf_hash): Mask lower 32 bits of hash.
+
+2003-05-13  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL): Move from
+	elf32-ppc.c.  Add ELF_LINK_FORCED_LOCAL check.
+	* elf32-ppc.c: (SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL): Delete.
+	(allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL for dynreloc check.
+	(ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.  Use for .got relocs too.
+	(ppc64_elf_adjust_dynamic_symbol): Don't assume symbols with .plt
+	relocs need no other types.
+	* elf32-i386.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL for
+	dynreloc check.
+	(elf_i386_relocate_section): Likewise.  Use for .got relocs too.
+	(elf_i386_finish_dynamic_symbol): Use SYMBOL_REFERENCES_LOCAL for
+	.got relocs.
+
+2003-05-13  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): For weak symbols,
+	copy ELF_LINK_NON_GOT_REF from weakdef.
+	(allocate_dynrelocs):  For undef weak syms with non-default
+	visibility, a) don't allocate plt entries, b) don't allocate
+	.got relocs, c) discard dyn rel space
+        (sh_elf_relocate_section): d) don't generate .got relocs, e)
+        don't generate dynamic relocs.
+	(sh_elf_copy_indirect_symbol): Don't copy ELF_LINK_NON_GOT_REF
+	for weakdefs when symbol already adjusted.
+
+2003-05-12  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): use 'bitfield'
+	overflow detection for R_XSTORMY16_16 reloc.
+
+2003-05-12  Paul Clarke  <paulc@senet.com.au>
+
+	* elf32-h8300.c: Fix typo in name of R_H8_DIR8 reloc.
+
+2003-05-11  Jason Eckhardt  <jle@rice.edu>
+
+	* elf32-i860.c (elf32_i860_relocate_highadj): Properly
+	adjust upper bits.
+	(elf32_i860_relocate_splitn): Obtain upper 5 bits from the
+	proper place.
+	(elf32_i860_relocate_pc16): Obtain upper 5 bits from the
+	proper place.
+
+2003-05-11  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_relocate_section): Replace ugly
+	complicated tests for unresolvable relocs with a simple direct
+	scheme using "unresolved_reloc" var.  Report some detail on
+	bfd_reloc_outofrange and similar errors.
+
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (allocate_dynrelocs, elf_s390_relocate_section):
+	Fix WILL_CALL_FINISH_DYNAMIC_SYMBOL call.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+	* elf64-s390.c: Likewise.
+
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (ELIMINATE_COPY_RELOCS): Define as one.
+	(elf_s390_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+	(elf_s390_copy_indirect_symbol): Test whether the weakdef sym has
+	already been adjusted before treating it specially.
+	* el64-s390.c: Likwise.
+
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (allocate_dynrelocs): For undef weak syms with
+	non-default visibility, a) don't make them dynamic, b) discard
+	space for dynamic relocs.
+	(elf_s390_relocate_section): Initialize the GOT entries and skip
+	R_390_{8,16,32}/R_390_PC{16,16DBL,32DBL,32} for weak undefined
+	symbols with non-default visibility.
+	* elf64-s390.c: Likewise.
+
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* cpu-arm.c (arm_check_note): Warning fix.
+	* elf32-iq2000.c (iq2000_elf_check_relocs): Warning fixes.  Arrange
+	to keep relocs if edited.
+	(iq2000_elf_print_private_bfd_data): Return TRUE.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Use ELFNN_R_SYM, not
+	ELF64_R_SYM.
+	(elfNN_ia64_relax_ldxmov): Warning fix.
+	* xtensa-isa.c (xtensa_add_isa): Warning fix.
+	* xtensa-modules.c (get_num_opcodes): Warning fix.
+
+2003-05-09  Andrey Petrov <petrov@netbsd.org>
+
+	* elf.c (elf_fake_sections): Use correct cast for sh_name.
+
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Move from
+	elflink.h.  Replace LOG_FILE_ALIGN with bed->s->log_file_align.
+	(_bfd_elf_create_dynamic_sections): Use bed->s->log_file_align.
+	(bfd_elf_record_link_assignment): Move from elflink.h.
+	(_bfd_elf_merge_symbol): Likewise.
+	(_bfd_elf_add_default_symbol): Likewise.
+	(_bfd_elf_export_symbol): Likewise.
+	(_bfd_elf_link_find_version_dependencies): Likewise.
+	(_bfd_elf_link_assign_sym_version): Likewise.
+	(_bfd_elf_link_read_relocs): Likewise.
+	(_bfd_elf_link_size_reloc_section): Likewise.
+	(_bfd_elf_fix_symbol_flags): Likewise.
+	(_bfd_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_elf_link_sec_merge_syms): Likewise.
+	(elf_link_read_relocs_from_section): Likewise.  Use bed->s->sizeof_rel
+	and bed->s->sizeof_rela.
+	(_bfd_elf_link_output_relocs): Likewise.
+	* elf-bfd.h (struct elf_size_info): Rename file_align to
+	log_file_align.
+	(struct elf_info_failed): Move from elflink.h.
+	(struct elf_assign_sym_version_info): Likewise.
+	(struct elf_find_verdep_info): Likewise.
+	(_bfd_elf_create_dynamic_sections): Delete duplicate declaration.
+	(_bfd_elf_merge_symbol, _bfd_elf_add_default_symbol,
+	_bfd_elf_export_symbol, _bfd_elf_link_find_version_dependencies,
+	_bfd_elf_link_assign_sym_version,
+	_bfd_elf_link_create_dynamic_sections, _bfd_elf_link_read_relocs,
+	_bfd_elf_link_size_reloc_section, _bfd_elf_link_output_relocs,
+	_bfd_elf_fix_symbol_flags, _bfd_elf_adjust_dynamic_symbol,
+	_bfd_elf_link_sec_merge_syms): Declare.
+	(bfd_elf32_link_create_dynamic_sections): Don't declare.
+	(_bfd_elf32_link_read_relocs): Likewise.
+	(bfd_elf64_link_create_dynamic_sections): Likewise.
+	(_bfd_elf64_link_read_relocs): Likewise.
+	* elflink.h: Move lots o' stuff elsewhere.
+	* bfd-in.h (bfd_elf32_record_link_assignment): Don't declare.
+	(bfd_elf64_record_link_assignment): Likewise.
+	(bfd_elf_record_link_assignment): Declare.
+	* bfd-in2.h: Regenerate.
+	* elfcode.h (elf_link_create_dynamic_sections): Don't declare.
+	(NAME(_bfd_elf,size_info)): Adjust for log_file_align.
+	* elf.c (_bfd_elf_init_reloc_shdr): Adjust for bed->s->log_file_align.
+	(assign_file_positions_for_segments): Likewise.
+	(assign_file_positions_except_relocs): Likewise.
+	(swap_out_syms, elfcore_write_note): Likewise.
+	* elf-m10200.c: Adjust for changed function names.
+	* elf-m10300.c: Likewise.
+	* elf32-arm.h: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	(MIPS_ELF_LOG_FILE_ALIGN): Use log_file_align.
+	* elf64-alpha.c (alpha_elf_size_info): Adjust for log_file_align.
+	* elf64-hppa.c (hppa64_elf_size_info): Likewise.
+	* elf64-mips.c (mips_elf64_size_info): Likewise.
+	* elf64-s390.c (s390_elf64_size_info): Likewise.
+	* elf64-sparc.c (sparc64_elf_size_info): Likewise.
+
+2003-05-08  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.h (elf_add_default_symbol): After skipping the
+	unversioned symbol, go to non-default one.
+
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (_bfd_elf_link_hash_hide_symbol): Also clear the
+	want_plt field.
+	(elfNN_ia64_relocate_section): Don't do dynamic symbol lookup
+	for symbols with non-default visibility.
+
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.h (elf_link_check_versioned_symbol): Also handle the
+	case that a DSO references a hidden symbol which may be
+	satisfied by a versioned symbol in another DSO.
+	(elf_link_output_extsym): Check versioned definition for hidden
+	symbol referenced by a DSO.
+
+2003-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): Reset
+	R_XSTORMY16_16 reloc to ignore overflows.
+
+2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Improve
+	error message for mixing different-endian files.  Check for ABI
+	compatibility of input files with the selected emulation.
+
+2003-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (allocate_dynrelocs): For undef weak syms with
+	non-default visibility, a) don't make them dynamic, b) discard
+	space for dynamic relocs.
+	* elf64-x86-64.c (allocate_dynrelocs): Likewise.
+
+	* elf32-ppc.c (allocate_dynrelocs): For undef weak syms with
+	non-default visibility, a) don't allocate plt entries, b) don't
+	allocate .got relocs, c) discard dyn rel space,
+	(ppc_elf_relocate_section): d) don't generate .got relocs, e)
+	don't generate dynamic relocs.
+	* elf64-ppc.c (allocate_dynrelocs): As above.
+	(ppc64_elf_relocate_section): As above.
+
+2003-05-05  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (allocate_dynrelocs): Don't allocate dynamic
+	relocation entries for weak undefined symbols with non-default
+	visibility.
+	(elf64_x86_64_relocate_section): Initialize the GOT entries and
+	skip R_386_32/R_386_PC32 for weak undefined symbols with
+	non-default visibility.
+
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
+	* elf32-i386.c (allocate_dynrelocs): Don't allocate dynamic
+	relocation entries for weak undefined symbols with non-default
+	visibility.
+	(elf_i386_relocate_section): Initialize the GOT entries and
+	skip R_386_32/R_386_PC32 for weak undefined symbols with
+	non-default visibility.
+ 
+	* elfxx-ia64.c (allocate_fptr): Don't allocate function
+	descriptors for weak undefined symbols with non-default
+	visibility.
+	(allocate_dynrel_entries): Don't allocate relocation entries
+	for symbols resolved to 0.
+	(set_got_entry): Don't install dynamic relocation for weak
+	undefined symbols with non-default visibility.
+	(set_pltoff_entry): Likewise.
+
+	* elflink.h (elf_fix_symbol_flags): Hide weak undefined symbols
+	with non-default visibility.
+	(elf_link_output_extsym): Don't make weak undefined symbols
+	with non-default visibility dynamic.
+
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_merge_symbol): Correctly handle weak definiton.
+
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_merge_symbol): Don't record a hidden/internal
+	symbol dynamic. Check indirection when removing the old
+	definition for symbols with non-default visibility.
+	(elf_add_default_symbol): Skip when told by elf_merge_symbol.
+
 2003-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_elf_howto_table): Make the

@@ -211,7 +211,8 @@ enum language
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
     language_scm,    		/* Scheme / Guile */
-    language_pascal		/* Pascal */
+    language_pascal,		/* Pascal */
+    language_minimal		/* All other languages, minimal support only */
   };
 
 enum precision_type
@@ -1085,28 +1086,10 @@ extern void *alloca ();
 #include "arch-utils.h"
 #endif
 
-/* FIXME: cagney/2003-03-01: Hack to prop up old targets while they
-   migrate to the overhauled register cache.
+/* Maximum size of a register.  Something small, but large enough for
+   all known ISAs.  If it turns out to be too small, make it bigger.  */
 
-   The problem is that some architectures specify different sized raw
-   and cooked (nee virtual) register sizes.  They shouldn't.  Instead,
-   all architectures should just implement a gdbarch_register_type().
-   That can be used to compute all needed register attributes.  While
-   waiting for the conversion, provide compatibility macros that keep
-   old code working.  */
-
-#ifdef MAX_REGISTER_RAW_SIZE
-#error MAX_REGISTER_RAW_SIZE defined
-#endif
-extern int legacy_max_register_raw_size (void);
-#define MAX_REGISTER_RAW_SIZE legacy_max_register_raw_size ()
-
-#ifdef MAX_REGISTER_VIRTUAL_SIZE
-#error MAX_REGISTER_VIRTUAL_SIZE defined
-#endif
-extern int legacy_max_register_virtual_size (void);
-#define MAX_REGISTER_VIRTUAL_SIZE legacy_max_register_virtual_size ()
-
+enum { MAX_REGISTER_SIZE = 16 };
 
 /* Static target-system-dependent parameters for GDB. */
 
@@ -1150,8 +1133,6 @@ extern CORE_ADDR extract_typed_address (const void *buf, struct type *type);
 extern void store_signed_integer (void *, int, LONGEST);
 
 extern void store_unsigned_integer (void *, int, ULONGEST);
-
-extern void store_address (void *, int, LONGEST);
 
 extern void store_typed_address (void *buf, struct type *type, CORE_ADDR addr);
 

@@ -159,7 +159,7 @@ configuration.\n"
 static int
 xtensa_add_isa (xtensa_isa_internal *isa, libisa_module_specifier libisa)
 {
-  const int (*get_num_opcodes_fn) (void);
+  int (*get_num_opcodes_fn) (void);
   struct config_struct *(*get_config_table_fn) (void);
   xtensa_opcode_internal **(*get_opcodes_fn) (void);
   int (*decode_insn_fn) (const xtensa_insnbuf);

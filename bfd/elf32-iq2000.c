@@ -454,8 +454,9 @@ iq2000_elf_check_relocs (abfd, info, sec, relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
-  Elf_Internal_Rela *rel;
-  Elf_Internal_Rela *rel_end;
+  const Elf_Internal_Rela *rel;
+  const Elf_Internal_Rela *rel_end;
+  bfd_boolean changed = FALSE;
   
   if (info->relocateable)
     return TRUE;
@@ -499,10 +500,20 @@ iq2000_elf_check_relocs (abfd, info, sec, relocs)
 	  if (memcmp (sec->name, ".debug", 6) == 0
 	      || memcmp (sec->name, ".stab", 5) == 0
 	      || memcmp (sec->name, ".eh_frame", 9) == 0)
-	    rel->r_info = ELF32_R_INFO (ELF32_R_SYM (rel->r_info), R_IQ2000_32_DEBUG);
+	    {
+	      ((Elf_Internal_Rela *) rel)->r_info
+		= ELF32_R_INFO (ELF32_R_SYM (rel->r_info), R_IQ2000_32_DEBUG);
+	      changed = TRUE;
+	    }
 	  break;
 	}
     }
+
+  if (changed)
+    /* Note that we've changed relocs, otherwise if !info->keep_memory
+       we'll free the relocs and lose our changes.  */
+    (const Elf_Internal_Rela *) (elf_section_data (sec)->relocs) = relocs;
+
   return TRUE;
 }
 
@@ -929,6 +940,7 @@ iq2000_elf_print_private_bfd_data (abfd, ptr)
     }
 
   fputc ('\n', file);
+  return TRUE;
 }
 
 static

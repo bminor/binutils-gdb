@@ -667,7 +667,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	      fixup_symbol_section (sym, objfile);
 
 	      /* The RS6000 code from which this was taken skipped
-	         any symbols in STRUCT_NAMESPACE or UNDEF_NAMESPACE.
+	         any symbols in STRUCT_DOMAIN or UNDEF_DOMAIN.
 	         But I'm leaving out that test, on the theory that
 	         they can't possibly pass the tests below.  */
 	      if ((SYMBOL_CLASS (sym) == LOC_LABEL
@@ -682,7 +682,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	      /* Relocate Extra Function Info for ecoff.  */
 
 	      else if (SYMBOL_CLASS (sym) == LOC_CONST
-		       && SYMBOL_NAMESPACE (sym) == LABEL_NAMESPACE
+		       && SYMBOL_DOMAIN (sym) == LABEL_DOMAIN
 		       && strcmp (DEPRECATED_SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
 		ecoff_relocate_efi (sym, ANOFFSET (delta,
 						   s->block_line_section));

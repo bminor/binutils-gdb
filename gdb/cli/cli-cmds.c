@@ -171,10 +171,6 @@ struct cmd_list_element *maintenanceinfolist;
 
 struct cmd_list_element *maintenanceprintlist;
 
-/* Chain containing all defined "maintenance list" subcommands. */
-
-struct cmd_list_element *maintenancelistlist;
-
 struct cmd_list_element *setprintlist;
 
 struct cmd_list_element *showprintlist;
@@ -1036,7 +1032,6 @@ init_cmd_lists (void)
   maintenancelist = NULL;
   maintenanceinfolist = NULL;
   maintenanceprintlist = NULL;
-  maintenancelistlist = NULL;
   setprintlist = NULL;
   showprintlist = NULL;
   setchecklist = NULL;

@@ -81,6 +81,9 @@ h8300_scan (info, string)
       if (*string == 'n' || *string == 'N')
 	return (info->mach == bfd_mach_h8300sn);
 
+      if (*string == 'x' || *string == 'X')
+	return (info->mach == bfd_mach_h8300sx);
+      
       return (info->mach == bfd_mach_h8300s);
     }
   else
@@ -103,6 +106,22 @@ compatible (in, out)
     return in;
 }
 
+static const bfd_arch_info_type h8300sx_info_struct =
+{
+  32,				/* 32 bits in a word */
+  32,				/* 32 bits in an address */
+  8,				/* 8 bits in a byte */
+  bfd_arch_h8300,
+  bfd_mach_h8300sx,
+  "h8300sx",			/* arch_name  */
+  "h8300sx",			/* printable name */
+  1,
+  FALSE,			/* the default machine */
+  compatible,
+  h8300_scan,
+  0
+};
+
 static const bfd_arch_info_type h8300sn_info_struct =
 {
   32,				/* 32 bits in a word.  */
@@ -116,7 +135,7 @@ static const bfd_arch_info_type h8300sn_info_struct =
   FALSE,			/* The default machine.  */
   compatible,
   h8300_scan,
-  0
+  &h8300sx_info_struct
 };
 
 

@@ -222,22 +222,26 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
 			struct type *value_type,
 			CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
 {
-  /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word is
-     in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap
-     it and remove any extra bytes which might exist because ULONGEST
-     is bigger than REGISTER_SIZE.  */
+  /* CALL_DUMMY is an array of words (DEPRECATED_REGISTER_SIZE), but
+     each word is in host byte order.  Before calling
+     DEPRECATED_FIX_CALL_DUMMY, we byteswap it and remove any extra
+     bytes which might exist because ULONGEST is bigger than
+     DEPRECATED_REGISTER_SIZE.  */
   /* NOTE: This is pretty wierd, as the call dummy is actually a
      sequence of instructions.  But CISC machines will have to pack
-     the instructions into REGISTER_SIZE units (and so will RISC
-     machines for which INSTRUCTION_SIZE is not REGISTER_SIZE).  */
+     the instructions into DEPRECATED_REGISTER_SIZE units (and so will
+     RISC machines for which INSTRUCTION_SIZE is not
+     DEPRECATED_REGISTER_SIZE).  */
   /* NOTE: This is pretty stupid.  CALL_DUMMY should be in strict
      target byte order. */
   CORE_ADDR start_sp;
-  ULONGEST *dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
-  int sizeof_dummy1 = (REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS
+  ULONGEST *dummy = alloca (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
+  int sizeof_dummy1 = (DEPRECATED_REGISTER_SIZE
+		       * DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
 		       / sizeof (ULONGEST));
   char *dummy1 = alloca (sizeof_dummy1);
-  memcpy (dummy, CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS);
+  memcpy (dummy, DEPRECATED_CALL_DUMMY_WORDS,
+	  DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
   if (INNER_THAN (1, 2))
     {
       /* Stack grows down */
@@ -252,40 +256,40 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
     }
   /* NOTE: cagney/2002-09-10: Don't bother re-adjusting the stack
      after allocating space for the call dummy.  A target can specify
-     a SIZEOF_DUMMY1 (via SIZEOF_CALL_DUMMY_WORDS) such that all local
-     alignment requirements are met.  */
+     a SIZEOF_DUMMY1 (via DEPRECATED_SIZEOF_CALL_DUMMY_WORDS) such
+     that all local alignment requirements are met.  */
   /* Create a call sequence customized for this function and the
      number of arguments for it.  */
   {
     int i;
-    for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0]));
+    for (i = 0; i < (int) (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0]));
 	 i++)
-      store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
-			      REGISTER_SIZE,
+      store_unsigned_integer (&dummy1[i * DEPRECATED_REGISTER_SIZE],
+			      DEPRECATED_REGISTER_SIZE,
 			      (ULONGEST) dummy[i]);
   }
   /* NOTE: cagney/2003-04-22: This computation of REAL_PC, BP_ADDR and
      DUMMY_ADDR is pretty messed up.  It comes from constant tinkering
-     with the values.  Instead a FIX_CALL_DUMMY replacement
+     with the values.  Instead a DEPRECATED_FIX_CALL_DUMMY replacement
      (PUSH_DUMMY_BREAKPOINT?) should just do everything.  */
 #ifdef GDB_TARGET_IS_HPPA
-  real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-			    value_type, using_gcc);
+  real_pc = DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
+				       value_type, using_gcc);
 #else
-  if (FIX_CALL_DUMMY_P ())
+  if (DEPRECATED_FIX_CALL_DUMMY_P ())
     {
       /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
-      FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
-		      using_gcc);
+      DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
+				 value_type, using_gcc);
     }
   (*real_pc) = start_sp;
 #endif
   /* Yes, the offset is applied to the real_pc and not the dummy addr.
      Ulgh!  Blame the HP/UX target.  */
-  (*bp_addr) = (*real_pc) + CALL_DUMMY_BREAKPOINT_OFFSET;
+  (*bp_addr) = (*real_pc) + DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET;
   /* Yes, the offset is applied to the real_pc and not the
      dummy_addr.  Ulgh!  Blame the HP/UX target.  */
-  (*real_pc) += CALL_DUMMY_START_OFFSET;
+  (*real_pc) += DEPRECATED_CALL_DUMMY_START_OFFSET;
   write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
     generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
@@ -328,8 +332,8 @@ generic_push_dummy_code (struct gdbarch *gdbarch,
   return sp;
 }
 
-/* Provide backward compatibility.  Once FIX_CALL_DUMMY is eliminated,
-   this can be simplified.  */
+/* Provide backward compatibility.  Once DEPRECATED_FIX_CALL_DUMMY is
+   eliminated, this can be simplified.  */
 
 static CORE_ADDR
 push_dummy_code (struct gdbarch *gdbarch,
@@ -341,7 +345,7 @@ push_dummy_code (struct gdbarch *gdbarch,
   if (gdbarch_push_dummy_code_p (gdbarch))
     return gdbarch_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
 				    args, nargs, value_type, real_pc, bp_addr);
-  else if (FIX_CALL_DUMMY_P ())
+  else if (DEPRECATED_FIX_CALL_DUMMY_P ())
     return legacy_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
 				   args, nargs, value_type, real_pc, bp_addr);
   else    

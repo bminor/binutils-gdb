@@ -679,8 +679,8 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 
       /* Load the relocs.  */
       internal_relocs
-	= _bfd_elf32_link_read_relocs (abfd, sec, (PTR) NULL,
-				       (Elf_Internal_Rela *) NULL, FALSE);
+	= _bfd_elf_link_read_relocs (abfd, sec, (PTR) NULL,
+				     (Elf_Internal_Rela *) NULL, FALSE);
 
       if (internal_relocs == NULL)
 	goto error_return;

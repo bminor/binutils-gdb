@@ -70,10 +70,10 @@ void
 fetch_inferior_registers (int regno)
 {
   register unsigned int regaddr;
-  char *buf = alloca (max_register_size (current_gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   register int i;
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   deprecated_registers_fetched ();
 
@@ -174,8 +174,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   int bad_reg = -1;
   register reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
 
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
 
   /* If u.u_ar0 was an absolute address in the core file, relativize it now,

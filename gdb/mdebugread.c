@@ -295,7 +295,7 @@ static struct blockvector *new_bvect (int);
 static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 				int, char *);
 
-static struct symbol *mylookup_symbol (char *, struct block *, namespace_enum,
+static struct symbol *mylookup_symbol (char *, struct block *, domain_enum,
 				       enum address_class);
 
 static struct block *shrink_block (struct block *, struct symtab *);
@@ -691,7 +691,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_VALUE (s) = svalue;
 
     data:			/* Common code for symbols describing data */
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = class;
       add_symbol (s, b);
 
@@ -714,7 +714,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	name = "this";		/* FIXME, not alloc'd in obstack */
       s = new_symbol (name);
 
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       switch (sh->sc)
 	{
 	case scRegister:
@@ -743,7 +743,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stLabel:		/* label, goes into current block */
       s = new_symbol (name);
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;	/* so that it can be used */
+      SYMBOL_DOMAIN (s) = VAR_DOMAIN;	/* so that it can be used */
       SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
       SYMBOL_TYPE (s) = mdebug_type_int;
@@ -785,7 +785,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
           break;
         }
       s = new_symbol (name);
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
@@ -1111,7 +1111,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 				&current_objfile->symbol_obstack);
 		SYMBOL_CLASS (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
-		SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
+		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
 		SYMBOL_VALUE (enum_sym) = tsym.value;
 		if (SYMBOL_VALUE (enum_sym) < 0)
 		  unsigned_enum = 0;
@@ -1141,7 +1141,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  }
 
 	s = new_symbol (name);
-	SYMBOL_NAMESPACE (s) = STRUCT_NAMESPACE;
+	SYMBOL_DOMAIN (s) = STRUCT_DOMAIN;
 	SYMBOL_CLASS (s) = LOC_TYPEDEF;
 	SYMBOL_VALUE (s) = 0;
 	SYMBOL_TYPE (s) = t;
@@ -1197,7 +1197,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	  /* Make up special symbol to contain procedure specific info */
 	  s = new_symbol (MIPS_EFI_SYMBOL_NAME);
-	  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
+	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 	  SYMBOL_CLASS (s) = LOC_CONST;
 	  SYMBOL_TYPE (s) = mdebug_type_void;
 	  e = ((struct mips_extra_func_info *)
@@ -1342,7 +1342,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       if (has_opaque_xref (cur_fdr, sh))
 	break;
       s = new_symbol (name);
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = LOC_TYPEDEF;
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
       SYMBOL_TYPE (s) = t;
@@ -1925,19 +1925,19 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
          the same name exists, lookup_symbol will eventually read in the symtab
          for the global function and clobber cur_fdr.  */
       FDR *save_cur_fdr = cur_fdr;
-      s = lookup_symbol (sh_name, NULL, VAR_NAMESPACE, 0, NULL);
+      s = lookup_symbol (sh_name, NULL, VAR_DOMAIN, 0, NULL);
       cur_fdr = save_cur_fdr;
 #else
       s = mylookup_symbol
 	(sh_name,
 	 BLOCKVECTOR_BLOCK (BLOCKVECTOR (search_symtab), STATIC_BLOCK),
-	 VAR_NAMESPACE,
+	 VAR_DOMAIN,
 	 LOC_BLOCK);
 #endif
     }
   else
     s = mylookup_symbol (sh_name, top_stack->cur_block,
-			 VAR_NAMESPACE, LOC_BLOCK);
+			 VAR_DOMAIN, LOC_BLOCK);
 
   if (s != 0)
     {
@@ -1951,7 +1951,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 #else
 /* FIXME -- delete.  We can't do symbol allocation now; it's all done.  */
       s = new_symbol (sh_name);
-      SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Donno its type, hope int is ok */
       SYMBOL_TYPE (s) = lookup_function_type (mdebug_type_int);
@@ -1969,7 +1969,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 #endif
     }
 
-  i = mylookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, LOC_CONST);
+  i = mylookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, LOC_CONST);
 
   if (i)
     {
@@ -3001,7 +3001,7 @@ parse_partial_symbols (struct objfile *objfile)
 			namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
 			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_STATIC,
+					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->static_psymbols,
 					     0, sh.value,
 					     psymtab_language, objfile);
@@ -3011,7 +3011,7 @@ parse_partial_symbols (struct objfile *objfile)
 			/* The addresses in these entries are reported to be
 			   wrong.  See the code that reads 'G's for symtabs. */
 			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_STATIC,
+					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->global_psymbols,
 					     0, sh.value,
 					     psymtab_language, objfile);
@@ -3029,7 +3029,7 @@ parse_partial_symbols (struct objfile *objfile)
 				&& namestring[0] != ' '))
 			  {
 			    add_psymbol_to_list (namestring, p - namestring,
-						 STRUCT_NAMESPACE, LOC_TYPEDEF,
+						 STRUCT_DOMAIN, LOC_TYPEDEF,
 						 &objfile->static_psymbols,
 						 sh.value, 0,
 						 psymtab_language, objfile);
@@ -3037,7 +3037,7 @@ parse_partial_symbols (struct objfile *objfile)
 			      {
 				/* Also a typedef with the same name.  */
 				add_psymbol_to_list (namestring, p - namestring,
-						     VAR_NAMESPACE, LOC_TYPEDEF,
+						     VAR_DOMAIN, LOC_TYPEDEF,
 						     &objfile->static_psymbols,
 						     sh.value, 0,
 						     psymtab_language, objfile);
@@ -3053,7 +3053,7 @@ parse_partial_symbols (struct objfile *objfile)
 // OBSOLETE  			      {
 // OBSOLETE  				/* Also a typedef with the same name.  */
 // OBSOLETE  				add_psymbol_to_list (namestring, p - namestring,
-// OBSOLETE  						     VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE  						     VAR_DOMAIN, LOC_TYPEDEF,
 // OBSOLETE  						     &objfile->static_psymbols,
 // OBSOLETE  						     sh.value, 0,
 // OBSOLETE  						     psymtab_language, objfile);
@@ -3065,7 +3065,7 @@ parse_partial_symbols (struct objfile *objfile)
 			if (p != namestring)	/* a name is there, not just :T... */
 			  {
 			    add_psymbol_to_list (namestring, p - namestring,
-						 VAR_NAMESPACE, LOC_TYPEDEF,
+						 VAR_DOMAIN, LOC_TYPEDEF,
 						 &objfile->static_psymbols,
 						 sh.value, 0,
 						 psymtab_language, objfile);
@@ -3127,7 +3127,7 @@ parse_partial_symbols (struct objfile *objfile)
 				/* Note that the value doesn't matter for
 				   enum constants in psymtabs, just in symtabs.  */
 				add_psymbol_to_list (p, q - p,
-						     VAR_NAMESPACE, LOC_CONST,
+						     VAR_DOMAIN, LOC_CONST,
 						     &objfile->static_psymbols, 0,
 						     0, psymtab_language, objfile);
 				/* Point past the name.  */
@@ -3144,7 +3144,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      case 'c':
 			/* Constant, e.g. from "const" in Pascal.  */
 			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_CONST,
+					     VAR_DOMAIN, LOC_CONST,
 					     &objfile->static_psymbols, sh.value,
 					     0, psymtab_language, objfile);
 			continue;
@@ -3161,7 +3161,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  }
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_BLOCK,
+					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->static_psymbols,
 					     0, sh.value,
 					     psymtab_language, objfile);
@@ -3182,7 +3182,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  }
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_BLOCK,
+					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->global_psymbols,
 					     0, sh.value,
 					     psymtab_language, objfile);
@@ -3417,12 +3417,12 @@ parse_partial_symbols (struct objfile *objfile)
 		     symbol table.  */
 		  if (sh.st == stProc)
 		    add_psymbol_to_list (name, strlen (name),
-					 VAR_NAMESPACE, LOC_BLOCK,
+					 VAR_DOMAIN, LOC_BLOCK,
 					 &objfile->global_psymbols,
 				    0, sh.value, psymtab_language, objfile);
 		  else
 		    add_psymbol_to_list (name, strlen (name),
-					 VAR_NAMESPACE, LOC_BLOCK,
+					 VAR_DOMAIN, LOC_BLOCK,
 					 &objfile->static_psymbols,
 				    0, sh.value, psymtab_language, objfile);
 
@@ -3491,7 +3491,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      && sh.index != cur_sdx + 2)
 		    {
 		      add_psymbol_to_list (name, strlen (name),
-					   STRUCT_NAMESPACE, LOC_TYPEDEF,
+					   STRUCT_DOMAIN, LOC_TYPEDEF,
 					   &objfile->static_psymbols,
 					   0, (CORE_ADDR) 0,
 					   psymtab_language, objfile);
@@ -3532,7 +3532,7 @@ parse_partial_symbols (struct objfile *objfile)
 		}
 	      /* Use this gdb symbol */
 	      add_psymbol_to_list (name, strlen (name),
-				   VAR_NAMESPACE, class,
+				   VAR_DOMAIN, class,
 				   &objfile->static_psymbols,
 				   0, sh.value, psymtab_language, objfile);
 	    skip:
@@ -3608,7 +3608,7 @@ parse_partial_symbols (struct objfile *objfile)
 		}
 	      name = debug_info->ssext + psh->iss;
 	      add_psymbol_to_list (name, strlen (name),
-				   VAR_NAMESPACE, class,
+				   VAR_DOMAIN, class,
 				   &objfile->global_psymbols,
 				   0, svalue,
 				   psymtab_language, objfile);
@@ -3778,7 +3778,7 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
       /* Note that the value doesn't matter for enum constants
          in psymtabs, just in symtabs.  */
       add_psymbol_to_list (name, strlen (name),
-			   VAR_NAMESPACE, LOC_CONST,
+			   VAR_DOMAIN, LOC_CONST,
 			   &objfile->static_psymbols, 0,
 			   (CORE_ADDR) 0, psymtab_language, objfile);
       ext_sym += external_sym_size;
@@ -3971,7 +3971,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		  struct symbol *s = new_symbol (MIPS_EFI_SYMBOL_NAME);
 
 		  memset (e, 0, sizeof (struct mips_extra_func_info));
-		  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
+		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 		  SYMBOL_CLASS (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = mdebug_type_void;
 		  SYMBOL_VALUE (s) = (long) e;
@@ -4455,7 +4455,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
 
 static struct symbol *
 mylookup_symbol (char *name, register struct block *block,
-		 namespace_enum namespace, enum address_class class)
+		 domain_enum domain, enum address_class class)
 {
   int i, inc;
   struct symbol *sym;
@@ -4464,7 +4464,7 @@ mylookup_symbol (char *name, register struct block *block,
   ALL_BLOCK_SYMBOLS (block, i, sym)
     {
       if (DEPRECATED_SYMBOL_NAME (sym)[0] == inc
-	  && SYMBOL_NAMESPACE (sym) == namespace
+	  && SYMBOL_DOMAIN (sym) == domain
 	  && SYMBOL_CLASS (sym) == class
 	  && strcmp (DEPRECATED_SYMBOL_NAME (sym), name) == 0)
 	return sym;
@@ -4472,7 +4472,7 @@ mylookup_symbol (char *name, register struct block *block,
 
   block = BLOCK_SUPERBLOCK (block);
   if (block)
-    return mylookup_symbol (name, block, namespace, class);
+    return mylookup_symbol (name, block, domain, class);
   return 0;
 }
 
@@ -4866,16 +4866,16 @@ fixup_sigtramp (void)
   /* We have to handle the following cases here:
      a) The Mips library has a sigtramp label within sigvec.
      b) Irix has a _sigtramp which we want to use, but it also has sigvec.  */
-  s = lookup_symbol ("sigvec", 0, VAR_NAMESPACE, 0, NULL);
+  s = lookup_symbol ("sigvec", 0, VAR_DOMAIN, 0, NULL);
   if (s != 0)
     {
       b0 = SYMBOL_BLOCK_VALUE (s);
-      s = lookup_symbol ("sigtramp", b0, VAR_NAMESPACE, 0, NULL);
+      s = lookup_symbol ("sigtramp", b0, VAR_DOMAIN, 0, NULL);
     }
   if (s == 0)
     {
       /* No sigvec or no sigtramp inside sigvec, try _sigtramp.  */
-      s = lookup_symbol ("_sigtramp", 0, VAR_NAMESPACE, 0, NULL);
+      s = lookup_symbol ("_sigtramp", 0, VAR_DOMAIN, 0, NULL);
     }
 
   /* But maybe this program uses its own version of sigvec */
@@ -4901,7 +4901,7 @@ fixup_sigtramp (void)
    * needed info.  Note we make it a nested procedure of sigvec,
    * which is the way the (assembly) code is actually written.
    */
-  SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+  SYMBOL_DOMAIN (s) = VAR_DOMAIN;
   SYMBOL_CLASS (s) = LOC_BLOCK;
   SYMBOL_TYPE (s) = init_type (TYPE_CODE_FUNC, 4, 0, (char *) NULL,
 			       st->objfile);
@@ -4945,7 +4945,7 @@ fixup_sigtramp (void)
     current_objfile = st->objfile;	/* Keep new_symbol happy */
     s = new_symbol (MIPS_EFI_SYMBOL_NAME);
     SYMBOL_VALUE (s) = (long) e;
-    SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
+    SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
     SYMBOL_CLASS (s) = LOC_CONST;
     SYMBOL_TYPE (s) = mdebug_type_void;
     current_objfile = NULL;

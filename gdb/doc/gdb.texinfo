@@ -5861,62 +5861,53 @@ Disable @value{GDBN} from caching target memory.  This is the default.
 @cindex append data to a file
 @cindex dump data to a file
 @cindex restore data from a file
-@kindex dump
-@kindex append
-@kindex restore
 
-The commands @code{dump}, @code{append}, and @code{restore} are used
-for copying data between target memory and a file.  Data is written
-into a file using @code{dump} or @code{append}, and restored from a 
-file into memory by using @code{restore}.  Files may be binary, srec,
-intel hex, or tekhex (but only binary files can be appended).
+You can use the commands @code{dump}, @code{append}, and
+@code{restore} to copy data between target memory and a file.  The
+@code{dump} and @code{append} commands write data to a file, and the
+@code{restore} command reads data from a file back into the inferior's
+memory.  Files may be in binary, Motorola S-record, Intel hex, or
+Tektronix Hex format; however, @value{GDBN} can only append to binary
+files.
 
 @table @code
-@kindex dump binary 
-@kindex append binary 
-@item dump binary memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-raw binary format file @var{filename}.
 
-@item append binary memory @var{filename} @var{start_addr} @var{end_addr}
-Append contents of memory from @var{start_addr} to @var{end_addr} to
-raw binary format file @var{filename}.
+@kindex dump
+@item dump @r{[}@var{format}@r{]} memory @var{filename} @var{start_addr} @var{end_addr}
+@itemx dump @r{[}@var{format}@r{]} value @var{filename} @var{expr}
+Dump the contents of memory from @var{start_addr} to @var{end_addr},
+or the value of @var{expr}, to @var{filename} in the given format.
 
-@item dump binary value @var{filename} @var{expression}
-Dump value of @var{expression} into raw binary format file @var{filename}.
+The @var{format} parameter may be any one of:
+@table @code
+@item binary
+Raw binary form.
+@item ihex
+Intel hex format.
+@item srec
+Motorola S-record format.
+@item tekhex
+Tektronix Hex format.
+@end table
 
-@item append binary memory @var{filename} @var{expression}
-Append value of @var{expression} to raw binary format file @var{filename}.
+@value{GDBN} uses the same definitions of these formats as the
+@sc{gnu} binary utilities, like @samp{objdump} and @samp{objcopy}.  If
+@var{format} is omitted, @value{GDBN} dumps the data in raw binary
+form.
 
-@kindex dump ihex 
-@item dump ihex memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-intel hex format file @var{filename}.
+@kindex append
+@item append @r{[}binary@r{]} memory @var{filename} @var{start_addr} @var{end_addr}
+@itemx append @r{[}binary@r{]} value @var{filename} @var{expr}
+Append the contents of memory from @var{start_addr} to @var{end_addr},
+or the value of @var{expr}, to @var{filename}, in raw binary form.
+(@value{GDBN} can only append data to files in raw binary form.)
 
-@item dump ihex value @var{filename} @var{expression}
-Dump value of @var{expression} into intel hex format file @var{filename}.
-
-@kindex dump srec 
-@item dump srec memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-srec format file @var{filename}.
-
-@item dump srec value @var{filename} @var{expression}
-Dump value of @var{expression} into srec format file @var{filename}.
-
-@kindex dump tekhex 
-@item dump tekhex memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-tekhex format file @var{filename}.
-
-@item dump tekhex value @var{filename} @var{expression}
-Dump value of @var{expression} into tekhex format file @var{filename}.
-
-@item restore @var{filename} [@var{binary}] @var{bias} @var{start} @var{end}
-Restore the contents of file @var{filename} into memory.  The @code{restore}
-command can automatically recognize any known bfd file format, except for
-raw binary.  To restore a raw binary file you must use the optional argument
-@var{binary} after the filename.
+@kindex restore
+@item restore @var{filename} @r{[}binary@r{]} @var{bias} @var{start} @var{end}
+Restore the contents of file @var{filename} into memory.  The
+@code{restore} command can automatically recognize any known @sc{bfd}
+file format, except for raw binary.  To restore a raw binary file you
+must specify the optional keyword @code{binary} after the filename.
 
 If @var{bias} is non-zero, its value will be added to the addresses 
 contained in the file.  Binary files always start at address zero, so
@@ -9031,14 +9022,14 @@ required for each object file from which @value{GDBN} has read some symbols.
 @xref{Files, ,Commands to specify files}, for a discussion of how
 @value{GDBN} reads symbols (in the description of @code{symbol-file}).
 
-@kindex maint list symtabs
-@kindex maint list psymtabs
+@kindex maint info symtabs
+@kindex maint info psymtabs
 @cindex listing @value{GDBN}'s internal symbol tables
 @cindex symbol tables, listing @value{GDBN}'s internal
 @cindex full symbol tables, listing @value{GDBN}'s internal
 @cindex partial symbol tables, listing @value{GDBN}'s internal
-@item maint list symtabs @r{[} @var{regexp} @r{]}
-@itemx maint list psymtabs @r{[} @var{regexp} @r{]}
+@item maint info symtabs @r{[} @var{regexp} @r{]}
+@itemx maint info psymtabs @r{[} @var{regexp} @r{]}
 
 List the @code{struct symtab} or @code{struct partial_symtab}
 structures whose names match @var{regexp}.  If @var{regexp} is not
@@ -9047,7 +9038,7 @@ copy into a @value{GDBN} debugging this one to examine a particular
 structure in more detail.  For example:
 
 @smallexample
-(@value{GDBP}) maint list psymtabs dwarf2read
+(@value{GDBP}) maint info psymtabs dwarf2read
 @{ objfile /home/gnu/build/gdb/gdb
   ((struct objfile *) 0x82e69d0)
   @{ psymtab /home/gnu/src/gdb/dwarf2read.c 
@@ -9060,7 +9051,7 @@ structure in more detail.  For example:
     dependencies (none)
   @}
 @}
-(@value{GDBP}) maint list symtabs
+(@value{GDBP}) maint info symtabs
 (@value{GDBP})
 @end smallexample
 @noindent
@@ -9074,7 +9065,7 @@ read the symtab for the compilation unit containing that function:
 (@value{GDBP}) break dwarf2_psymtab_to_symtab
 Breakpoint 1 at 0x814e5da: file /home/gnu/src/gdb/dwarf2read.c,
 line 1574.
-(@value{GDBP}) maint list symtabs
+(@value{GDBP}) maint info symtabs
 @{ objfile /home/gnu/build/gdb/gdb 
   ((struct objfile *) 0x82e69d0)
   @{ symtab /home/gnu/src/gdb/dwarf2read.c 
@@ -17135,7 +17126,7 @@ There is no corresponding @value{GDBN} command.
 @smallexample
 (@value{GDBP})
 -symbol-list-lines basics.c
-^done,lines=[{pc="0x08048554",line="7"},{pc="0x0804855a",line="8"}]
+^done,lines=[@{pc="0x08048554",line="7"@},@{pc="0x0804855a",line="8"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -19372,6 +19363,28 @@ Create a core file? (y or n) @kbd{n}
 
 Takes an optional parameter that is used as the text of the error or
 warning message.
+
+@kindex maint print dummy-frames
+@item maint print dummy-frames
+
+Prints the contents of @value{GDBN}'s internal dummy-frame stack.
+
+@smallexample
+(gdb) @kbd{b add}
+@dots{}
+(gdb) @kbd{print add(2,3)}
+Breakpoint 2, add (a=2, b=3) at @dots{}
+58	  return (a + b);
+The program being debugged stopped while in a function called from GDB.
+@dots{}
+(gdb) @kbd{maint print dummy-frames}
+0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
+ top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
+ call_lo=0x01014000 call_hi=0x01014001
+(gdb) 
+@end smallexample
+
+Takes an optional file parameter.
 
 @kindex maint print registers
 @kindex maint print raw-registers

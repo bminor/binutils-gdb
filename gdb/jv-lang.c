@@ -170,7 +170,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
   SYMBOL_CLASS (sym) = LOC_TYPEDEF;
   /*  SYMBOL_VALUE (sym) = valu; */
   SYMBOL_TYPE (sym) = type;
-  SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
   SYMBOL_VALUE_ADDRESS (sym) = addr;
   return sym;
 }
@@ -180,7 +180,7 @@ struct type *
 java_lookup_class (char *name)
 {
   struct symbol *sym;
-  sym = lookup_symbol (name, expression_context_block, STRUCT_NAMESPACE,
+  sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN,
 		       (int *) 0, (struct symtab **) NULL);
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
@@ -588,7 +588,7 @@ get_java_object_type (void)
   if (java_object_type == NULL)
     {
       struct symbol *sym;
-      sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_NAMESPACE,
+      sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN,
 			   (int *) 0, (struct symtab **) NULL);
       if (sym == NULL)
 	error ("cannot find java.lang.Object");

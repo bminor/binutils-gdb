@@ -894,6 +894,8 @@ bfd_vma
 _bfd_get_gp_value (abfd)
      bfd *abfd;
 {
+  if (! abfd)
+    return 0;
   if (abfd->format != bfd_object)
     return 0;
 
@@ -912,6 +914,8 @@ _bfd_set_gp_value (abfd, v)
      bfd *abfd;
      bfd_vma v;
 {
+  if (! abfd)
+    BFD_FAIL ();
   if (abfd->format != bfd_object)
     return;
 

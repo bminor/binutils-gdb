@@ -1,3 +1,8 @@
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiRegs.c: Use MAX_REGISTER_SIZE instead of
+	MAX_REGISTER_RAW_SIZE.
+
 2003-05-03  Andrew Cagney  <cagney@redhat.com>
 
 	* tuiDisassem.c (tui_disassemble): Call gdb_print_insn, instead of

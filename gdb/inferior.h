@@ -485,13 +485,14 @@ extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
 
    Note that this macro is intended for targets (like HP-UX) which
    require more than a single breakpoint in their call dummies, and
-   therefore cannot use the CALL_DUMMY_BREAKPOINT_OFFSET mechanism.
+   therefore cannot use the DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
+   mechanism.
 
-   If a target does define CALL_DUMMY_BREAKPOINT_OFFSET, then this
-   default implementation of CALL_DUMMY_HAS_COMPLETED is sufficient.
-   Else, a target may wish to supply an implementation that works in
-   the presense of multiple breakpoints in its call dummy.
- */
+   If a target does define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET,
+   then this default implementation of CALL_DUMMY_HAS_COMPLETED is
+   sufficient.  Else, a target may wish to supply an implementation
+   that works in the presense of multiple breakpoints in its call
+   dummy.  */
 #if !defined(CALL_DUMMY_HAS_COMPLETED)
 #define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
   DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address))

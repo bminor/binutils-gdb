@@ -5121,50 +5121,50 @@ if test "${target}" = "${host}"; then
 	TRAD_HEADER='"hosts/i370linux.h"'
 	;;
 
-  i[3456]86-sequent-bsd*)
+  i[3-7]86-sequent-bsd*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/symmetry.h"'
 	;;
-  i[3456]86-sequent-sysv4*) ;;
-  i[3456]86-sequent-sysv*)
+  i[3-7]86-sequent-sysv4*) ;;
+  i[3-7]86-sequent-sysv*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/symmetry.h"'
 	;;
-  i[3456]86-*-bsdi)
+  i[3-7]86-*-bsdi)
 	COREFILE=
 	;;
-  i[3456]86-*-bsd* | i[34567]86-*-freebsd[123] | i[34567]86-*-freebsd[123]\.* | i[34567]86-*-freebsd4\.[01234]* | i[34567]86-*-freebsd*aout*)
+  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234]* | i[3-7]86-*-freebsd*aout*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
-  i[3456]86-*-freebsd*)
+  i[3-7]86-*-freebsd*)
 	COREFILE=''
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
-  i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
+  i[3-7]86-*-netbsd* | i[3-7]86-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  i[3456]86-esix-sysv3*)
+  i[3-7]86-esix-sysv3*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/esix.h"'
 	;;
-  i[3456]86-*-sco3.2v5*)
+  i[3-7]86-*-sco3.2v5*)
 	COREFILE=sco5-core.lo
 	;;
-  i[3456]86-*-sco* | i[3456]86-*-isc*)
+  i[3-7]86-*-sco* | i[3-7]86-*-isc*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386sco.h"'
 	;;
-  i[3456]86-*-mach3*)
+  i[3-7]86-*-mach3*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386mach3.h"'
 	;;
-  i[3456]86-*-linux-gnu*)
+  i[3-7]86-*-linux-gnu*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386linux.h"'
 	;;
-  i[3456]86-*-isc*)	COREFILE=trad-core.lo ;;
-  i[3456]86-*-aix*)	COREFILE=aix386-core.lo ;;
+  i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
+  i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
   i860-*-mach3* | i860-*-osf1*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i860mach3.h"'

@@ -1,3 +1,29 @@
+2003-05-15  Jim Blandy  <jimb@redhat.com>
+
+	* hex.c (_hex_value): Make this unsigned.
+	(hex_value): Update documentation for new return type.  hex_value
+	now expands to an unsigned int expression, to avoid unexpected
+	sign extension when we store it in a bfd_vma, which is larger than
+	int on some platforms.
+	* functions.texi: Regenerated.
+
+2003-05-07  Josef Zlomek  <zlomekj@suse.cz>
+
+	* splay-tree.c (splay_tree_predecessor): Fix comment.
+	(splay_tree_successor): Fix comment.
+
+2003-05-07  Jason Merrill  <jason@redhat.com>
+
+	* hashtab.c (iterative_hash): New fn.
+	* configure.in: Add AC_C_BIGENDIAN_CROSS.
+	* aclocal.m4: Include accross.m4.
+	* configure, config.in: Regenerate.
+
+2003-05-04  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* configure.in (AC_CHECK_FUNCS): Don't make multiple calls.
+	* configure: Regenerate.
+
 2003-05-03  Carlo Wood  <carlo@alinoe.com>
 
 	* cp-demangle.c: Fix typo in "char_traints" string-literal.

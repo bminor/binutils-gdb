@@ -116,7 +116,6 @@ m2_printstr (struct ui_file *stream, char *string, unsigned int length,
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  extern int inspect_it;
 
   if (length == 0)
     {

@@ -150,6 +150,36 @@ static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
 
+/* Return the contents of register REGNUM as a signed integer.  */
+
+static LONGEST
+read_signed_register (int regnum)
+{
+  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  deprecated_read_register_gen (regnum, buf);
+  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
+}
+
+static LONGEST
+read_signed_register_pid (int regnum, ptid_t ptid)
+{
+  ptid_t save_ptid;
+  LONGEST retval;
+
+  if (ptid_equal (ptid, inferior_ptid))
+    return read_signed_register (regnum);
+
+  save_ptid = inferior_ptid;
+
+  inferior_ptid = ptid;
+
+  retval = read_signed_register (regnum);
+
+  inferior_ptid = save_ptid;
+
+  return retval;
+}
+
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi
 mips_abi (struct gdbarch *gdbarch)
@@ -215,7 +245,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
 		    enum bfd_endian endian, bfd_byte *in, const bfd_byte *out,
 		    int buf_offset)
 {
-  bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+  bfd_byte reg[MAX_REGISTER_SIZE];
   int reg_offset = 0;
   /* Need to transfer the left or right part of the register, based on
      the targets byte order.  */
@@ -1612,7 +1642,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
   CORE_ADDR addr;
   int realnum;
   enum lval_type lval;
-  void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   if (fi == NULL)
     {
@@ -2359,7 +2389,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
       return NULL;
     }
 
-  sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0, NULL);
 
   /* If we never found a PDR for this function in symbol reading, then
      examine prologues to find the information.  */
@@ -2721,7 +2751,7 @@ mips_eabi_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -2737,7 +2767,7 @@ mips_eabi_push_arguments (int nargs,
       if (len > MIPS_SAVED_REGSIZE
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_address (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
+	  store_unsigned_integer (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = MIPS_SAVED_REGSIZE;
 	  val = valbuf;
@@ -2972,7 +3002,7 @@ mips_n32n64_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3195,7 +3225,7 @@ mips_o32_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3494,7 +3524,7 @@ mips_o64_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4014,7 +4044,7 @@ mips_print_fp_register (int regnum)
 static void
 mips_print_register (int regnum, int all)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int offset;
 
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
@@ -4070,7 +4100,7 @@ static int
 do_gp_register_row (int regnum)
 {
   /* do values for GP (int) regs */
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int ncols = (MIPS_REGSIZE == 8 ? 4 : 8);	/* display cols per row */
   int col, byte;
   int start_regnum = regnum;
@@ -4531,7 +4561,7 @@ return_value_location (struct type *valtype,
 
 static void
 mips_eabi_extract_return_value (struct type *valtype,
-				char regbuf[REGISTER_BYTES],
+				char regbuf[],
 				char *valbuf)
 {
   struct return_value_word lo;
@@ -4550,7 +4580,7 @@ mips_eabi_extract_return_value (struct type *valtype,
 
 static void
 mips_o64_extract_return_value (struct type *valtype,
-			       char regbuf[REGISTER_BYTES],
+			       char regbuf[],
 			       char *valbuf)
 {
   struct return_value_word lo;
@@ -4573,7 +4603,7 @@ mips_o64_extract_return_value (struct type *valtype,
 static void
 mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
   return_value_location (valtype, &hi, &lo);
@@ -4595,7 +4625,7 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 static void
 mips_o64_store_return_value (struct type *valtype, char *valbuf)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
   return_value_location (valtype, &hi, &lo);
@@ -4677,7 +4707,7 @@ mips_o32_xfer_return_value (struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = FP0_REGNUM;
@@ -4789,7 +4819,7 @@ mips_n32n64_xfer_return_value (struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = FP0_REGNUM;
@@ -5089,19 +5119,6 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
     return print_insn_little_mips (memaddr, info);
 }
 
-/* Old-style breakpoint macros.
-   The IDT board uses an unusual breakpoint value, and sometimes gets
-   confused when it sees the usual MIPS breakpoint instruction.  */
-
-#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
-#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
-#define PMON_BIG_BREAKPOINT {0, 0, 0, 0xd}
-#define PMON_LITTLE_BREAKPOINT {0xd, 0, 0, 0}
-#define IDT_BIG_BREAKPOINT {0, 0, 0x0a, 0xd}
-#define IDT_LITTLE_BREAKPOINT {0xd, 0x0a, 0, 0}
-#define MIPS16_BIG_BREAKPOINT {0xe8, 0xa5}
-#define MIPS16_LITTLE_BREAKPOINT {0xa5, 0xe8}
-
 /* This function implements the BREAKPOINT_FROM_PC macro.  It uses the program
    counter value to determine whether a 16- or 32-bit breakpoint should be
    used.  It returns a pointer to a string of bytes that encode a breakpoint
@@ -5116,17 +5133,19 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     {
       if (pc_is_mips16 (*pcptr))
 	{
-	  static unsigned char mips16_big_breakpoint[] =
-	    MIPS16_BIG_BREAKPOINT;
+	  static unsigned char mips16_big_breakpoint[] = {0xe8, 0xa5};
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof (mips16_big_breakpoint);
 	  return mips16_big_breakpoint;
 	}
       else
 	{
-	  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-	  static unsigned char pmon_big_breakpoint[] = PMON_BIG_BREAKPOINT;
-	  static unsigned char idt_big_breakpoint[] = IDT_BIG_BREAKPOINT;
+	  /* The IDT board uses an unusual breakpoint value, and
+	     sometimes gets confused when it sees the usual MIPS
+	     breakpoint instruction.  */
+	  static unsigned char big_breakpoint[] = {0, 0x5, 0, 0xd};
+	  static unsigned char pmon_big_breakpoint[] = {0, 0, 0, 0xd};
+	  static unsigned char idt_big_breakpoint[] = {0, 0, 0x0a, 0xd};
 
 	  *lenptr = sizeof (big_breakpoint);
 
@@ -5144,19 +5163,16 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     {
       if (pc_is_mips16 (*pcptr))
 	{
-	  static unsigned char mips16_little_breakpoint[] =
-	    MIPS16_LITTLE_BREAKPOINT;
+	  static unsigned char mips16_little_breakpoint[] = {0xa5, 0xe8};
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof (mips16_little_breakpoint);
 	  return mips16_little_breakpoint;
 	}
       else
 	{
-	  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
-	  static unsigned char pmon_little_breakpoint[] =
-	    PMON_LITTLE_BREAKPOINT;
-	  static unsigned char idt_little_breakpoint[] =
-	    IDT_LITTLE_BREAKPOINT;
+	  static unsigned char little_breakpoint[] = {0xd, 0, 0x5, 0};
+	  static unsigned char pmon_little_breakpoint[] = {0xd, 0, 0, 0};
+	  static unsigned char idt_little_breakpoint[] = {0xd, 0x0a, 0, 0};
 
 	  *lenptr = sizeof (little_breakpoint);
 
@@ -5412,7 +5428,7 @@ mips_get_saved_register (char *raw_buffer,
 	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
 		 saved. */
 	      LONGEST val = read_memory_integer ((*addrp), MIPS_SAVED_REGSIZE);
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
 	    }
 	}
     }
@@ -5908,9 +5924,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
-  set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
-  set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, mips_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, mips_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
@@ -6108,8 +6124,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: BADVADDR_REGNUM = %d\n",
 		      BADVADDR_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: CAUSE_REGNUM = %d\n",
 		      CAUSE_REGNUM);
   fprintf_unfiltered (file,
@@ -6140,10 +6154,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep:  HI_REGNUM = %d\n",
 		      HI_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: IDT_BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: IDT_LITTLE_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: IGNORE_HELPER_CALL # %s\n",
 		      XSTRING (IGNORE_HELPER_CALL (PC)));
   fprintf_unfiltered (file,
@@ -6157,8 +6167,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: LAST_EMBED_REGNUM = %d\n",
 		      LAST_EMBED_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: LITTLE_BREAKPOINT = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: LO_REGNUM = %d\n",
 		      LO_REGNUM);
@@ -6180,12 +6188,8 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MAKE_MIPS16_ADDR = FIXME!\n");
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS16_BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS16_INSTLEN = %d\n",
 		      MIPS16_INSTLEN);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS16_LITTLE_BREAKPOINT = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_DEFAULT_ABI = FIXME!\n");
   fprintf_unfiltered (file,
@@ -6209,10 +6213,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: OP_LDFPR = used?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: OP_LDGPR = used?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PMON_BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PMON_LITTLE_BREAKPOINT = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PRID_REGNUM = %d\n",
 		      PRID_REGNUM);

@@ -832,7 +832,7 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       if (valuep)
 	{
 	  /* Store the value.  */
-	  store_address (valuep, 4, cache->saved_sp);
+	  store_unsigned_integer (valuep, 4, cache->saved_sp);
 	}
       return;
     }
@@ -1037,17 +1037,17 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
   if (struct_return)
     {
       sp -= 4;
-      store_address (buf, 4, struct_addr);
+      store_unsigned_integer (buf, 4, struct_addr);
       write_memory (sp, buf, 4);
     }
 
   /* Store return address.  */
   sp -= 4;
-  store_address (buf, 4, dummy_addr);
+  store_unsigned_integer (buf, 4, dummy_addr);
   write_memory (sp, buf, 4);
 
   /* Finally, update the stack pointer...  */
-  store_address (buf, 4, sp);
+  store_unsigned_integer (buf, 4, sp);
   regcache_cooked_write (regcache, I386_ESP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
@@ -1283,7 +1283,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   if (i386_mmx_regnum_p (regnum))
     {
-      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      char mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Extract (always little endian).  */
@@ -1300,7 +1300,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   if (i386_mmx_regnum_p (regnum))
     {
-      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      char mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Read ...  */
@@ -1642,9 +1642,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The default ABI includes general-purpose registers and
      floating-point registers.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
-  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_name (gdbarch, i386_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_type (gdbarch, i386_register_type);
 
   /* Register numbers of various important registers.  */
@@ -1669,8 +1667,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_words (gdbarch, NULL);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_push_dummy_call (gdbarch, i386_push_dummy_call);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);

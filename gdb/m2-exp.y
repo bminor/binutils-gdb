@@ -541,7 +541,7 @@ block	:	fblock
 fblock	:	BLOCKNAME
 			{ struct symbol *sym
 			    = lookup_symbol (copy_name ($1), expression_context_block,
-					     VAR_NAMESPACE, 0, NULL);
+					     VAR_DOMAIN, 0, NULL);
 			  $$ = sym;}
 	;
 			     
@@ -550,7 +550,7 @@ fblock	:	BLOCKNAME
 fblock	:	block COLONCOLON BLOCKNAME
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_NAMESPACE, 0, NULL);
+					     VAR_DOMAIN, 0, NULL);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error ("No function \"%s\" in specified context.",
 				   copy_name ($3));
@@ -574,7 +574,7 @@ variable:	INTERNAL_VAR
 variable:	block COLONCOLON NAME
 			{ struct symbol *sym;
 			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_NAMESPACE, 0, NULL);
+					       VAR_DOMAIN, 0, NULL);
 			  if (sym == 0)
 			    error ("No symbol \"%s\" in specified context.",
 				   copy_name ($3));
@@ -593,7 +593,7 @@ variable:	NAME
 
  			  sym = lookup_symbol (copy_name ($1),
 					       expression_context_block,
-					       VAR_NAMESPACE,
+					       VAR_DOMAIN,
 					       &is_a_field_of_this,
 					       NULL);
 			  if (sym)
@@ -1018,7 +1018,7 @@ yylex ()
     if (lookup_partial_symtab (tmp))
       return BLOCKNAME;
     sym = lookup_symbol (tmp, expression_context_block,
-			 VAR_NAMESPACE, 0, NULL);
+			 VAR_DOMAIN, 0, NULL);
     if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
       return BLOCKNAME;
     if (lookup_typename (copy_name (yylval.sval), expression_context_block, 1))

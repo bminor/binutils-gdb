@@ -90,7 +90,7 @@ static struct value *make_array_descriptor (struct type *, struct value *,
 					    CORE_ADDR *);
 
 static void ada_add_block_symbols (struct block *, const char *,
-				   namespace_enum, struct objfile *, int);
+				   domain_enum, struct objfile *, int);
 
 static void fill_in_ada_prototype (struct symbol *);
 
@@ -100,7 +100,7 @@ static void add_defn_to_vec (struct symbol *, struct block *);
 
 static struct partial_symbol *ada_lookup_partial_symbol (struct partial_symtab
 							 *, const char *, int,
-							 namespace_enum, int);
+							 domain_enum, int);
 
 static struct symtab *symtab_for_sym (struct symbol *);
 
@@ -189,7 +189,7 @@ static struct value *value_pos_atr (struct value *);
 
 static struct value *value_val_atr (struct type *, struct value *);
 
-static struct symbol *standard_lookup (const char *, namespace_enum);
+static struct symbol *standard_lookup (const char *, domain_enum);
 
 extern void markTimeStart (int index);
 extern void markTimeStop (int index);
@@ -705,7 +705,7 @@ ada_match_name (const char *sym_name, const char *name, int wild)
 int
 ada_suppress_symbol_printing (struct symbol *sym)
 {
-  if (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
+  if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN)
     return 1;
   else
     return is_suppressed_name (DEPRECATED_SYMBOL_NAME (sym));
@@ -1232,7 +1232,7 @@ decode_packed_array_type (struct type *type)
   /* NOTE: Use ada_lookup_symbol_list because of bug in some versions
    * of gcc (Solaris, e.g.). FIXME when compiler is fixed. */
   n = ada_lookup_symbol_list (name, get_selected_block (NULL),
-			      VAR_NAMESPACE, &syms, &blocks);
+			      VAR_DOMAIN, &syms, &blocks);
   for (i = 0; i < n; i += 1)
     if (syms[i] != NULL && SYMBOL_CLASS (syms[i]) == LOC_TYPEDEF
 	&& STREQ (name, ada_type_name (SYMBOL_TYPE (syms[i]))))
@@ -2151,7 +2151,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
          n_candidates = ada_lookup_symbol_list (exp->elts[pc + 2].name,
          exp->elts[pc + 1].block,
-         VAR_NAMESPACE,
+         VAR_DOMAIN,
          &candidate_syms,
          &candidate_blocks);
 
@@ -2253,7 +2253,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
 	   n_candidates = ada_lookup_symbol_list (exp->elts[pc + 5].name,
 	   exp->elts[pc + 4].block,
-	   VAR_NAMESPACE,
+	   VAR_DOMAIN,
 	   &candidate_syms,
 	   &candidate_blocks);
 	   if (n_candidates == 1)
@@ -2307,7 +2307,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
 	  n_candidates =
 	    ada_lookup_symbol_list (ada_mangle (ada_op_name (op)),
-				    (struct block *) NULL, VAR_NAMESPACE,
+				    (struct block *) NULL, VAR_DOMAIN,
 				    &candidate_syms, &candidate_blocks);
 	  i =
 	    ada_resolve_function (candidate_syms, candidate_blocks,
@@ -3175,14 +3175,14 @@ static struct symbol **defn_symbols = NULL;
 static struct block **defn_blocks = NULL;
 
 /* Return the result of a standard (literal, C-like) lookup of NAME in 
- * given NAMESPACE. */
+ * given DOMAIN. */
 
 static struct symbol *
-standard_lookup (const char *name, namespace_enum namespace)
+standard_lookup (const char *name, domain_enum domain)
 {
   struct symbol *sym;
   struct symtab *symtab;
-  sym = lookup_symbol (name, (struct block *) NULL, namespace, 0, &symtab);
+  sym = lookup_symbol (name, (struct block *) NULL, domain, 0, &symtab);
   return sym;
 }
 
@@ -3231,7 +3231,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 {
   if (sym0 == sym1)
     return 1;
-  if (SYMBOL_NAMESPACE (sym0) != SYMBOL_NAMESPACE (sym1)
+  if (SYMBOL_DOMAIN (sym0) != SYMBOL_DOMAIN (sym1)
       || SYMBOL_CLASS (sym0) != SYMBOL_CLASS (sym1))
     return 0;
 
@@ -3293,13 +3293,13 @@ add_defn_to_vec (struct symbol *sym, struct block *block)
   ndefns += 1;
 }
 
-/* Look, in partial_symtab PST, for symbol NAME in given namespace.
+/* Look, in partial_symtab PST, for symbol NAME in given domain.
    Check the global symbols if GLOBAL, the static symbols if not.  Do
    wild-card match if WILD. */
 
 static struct partial_symbol *
 ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
-			   int global, namespace_enum namespace, int wild)
+			   int global, domain_enum domain, int wild)
 {
   struct partial_symbol **start;
   int name_len = strlen (name);
@@ -3321,7 +3321,7 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  struct partial_symbol *psym = start[i];
 
-	  if (SYMBOL_NAMESPACE (psym) == namespace &&
+	  if (SYMBOL_DOMAIN (psym) == domain &&
 	      wild_match (name, name_len, DEPRECATED_SYMBOL_NAME (psym)))
 	    return psym;
 	}
@@ -3355,7 +3355,7 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  struct partial_symbol *psym = start[i];
 
-	  if (SYMBOL_NAMESPACE (psym) == namespace)
+	  if (SYMBOL_DOMAIN (psym) == domain)
 	    {
 	      int cmp = strncmp (name, DEPRECATED_SYMBOL_NAME (psym), name_len);
 
@@ -3397,7 +3397,7 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  struct partial_symbol *psym = start[i];
 
-	  if (SYMBOL_NAMESPACE (psym) == namespace)
+	  if (SYMBOL_DOMAIN (psym) == domain)
 	    {
 	      int cmp;
 
@@ -3507,7 +3507,7 @@ ada_lookup_minimal_symbol (const char *name)
 }
 
 /* For all subprograms that statically enclose the subprogram of the
- * selected frame, add symbols matching identifier NAME in NAMESPACE
+ * selected frame, add symbols matching identifier NAME in DOMAIN
  * and their blocks to vectors *defn_symbols and *defn_blocks, as for
  * ada_add_block_symbols (q.v.).   If WILD, treat as NAME with a
  * wildcard prefix.  At the moment, this function uses a heuristic to
@@ -3516,7 +3516,7 @@ ada_lookup_minimal_symbol (const char *name)
  * frame as a static link, and then searches up the call stack for a
  * frame with that same local-variable base. */
 static void
-add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
+add_symbols_from_enclosing_procs (const char *name, domain_enum domain,
 				  int wild_match)
 {
 #ifdef i386
@@ -3535,7 +3535,7 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
       DEPRECATED_SYMBOL_NAME (static_link) = "";
       SYMBOL_LANGUAGE (static_link) = language_unknown;
       SYMBOL_CLASS (static_link) = LOC_LOCAL;
-      SYMBOL_NAMESPACE (static_link) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (static_link) = VAR_DOMAIN;
       SYMBOL_TYPE (static_link) = lookup_pointer_type (builtin_type_void);
       SYMBOL_VALUE (static_link) =
 	-(long) TYPE_LENGTH (SYMBOL_TYPE (static_link));
@@ -3566,7 +3566,7 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
       block = get_frame_block (frame, 0);
       while (block != NULL && block_function (block) != NULL && ndefns == 0)
 	{
-	  ada_add_block_symbols (block, name, namespace, NULL, wild_match);
+	  ada_add_block_symbols (block, name, domain, NULL, wild_match);
 
 	  block = BLOCK_SUPERBLOCK (block);
 	}
@@ -3632,7 +3632,7 @@ remove_extra_symbols (struct symbol **syms, struct block **blocks, int nsyms)
   return nsyms;
 }
 
-/* Find symbols in NAMESPACE matching NAME, in BLOCK0 and enclosing 
+/* Find symbols in DOMAIN matching NAME, in BLOCK0 and enclosing 
    scope and in global scopes, returning the number of matches.  Sets 
    *SYMS to point to a vector of matching symbols, with *BLOCKS
    pointing to the vector of corresponding blocks in which those
@@ -3645,7 +3645,7 @@ remove_extra_symbols (struct symbol **syms, struct block **blocks, int nsyms)
 
 int
 ada_lookup_symbol_list (const char *name, struct block *block0,
-			namespace_enum namespace, struct symbol ***syms,
+			domain_enum domain, struct symbol ***syms,
 			struct block ***blocks)
 {
   struct symbol *sym;
@@ -3671,7 +3671,7 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
   block = block0;
   while (block != NULL)
     {
-      ada_add_block_symbols (block, name, namespace, NULL, wild_match);
+      ada_add_block_symbols (block, name, domain, NULL, wild_match);
 
       /* If we found a non-function match, assume that's the one. */
       if (is_nonfunction (defn_symbols, ndefns))
@@ -3697,10 +3697,10 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
       continue;
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    ada_add_block_symbols (block, name, namespace, objfile, wild_match);
+    ada_add_block_symbols (block, name, domain, objfile, wild_match);
   }
 
-  if (namespace == VAR_NAMESPACE)
+  if (domain == VAR_DOMAIN)
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
@@ -3720,13 +3720,13 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
 		    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 		    ada_add_block_symbols (block,
 					   DEPRECATED_SYMBOL_NAME (msymbol),
-					   namespace, objfile, wild_match);
+					   domain, objfile, wild_match);
 		    if (ndefns == old_ndefns)
 		      {
 			block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 			ada_add_block_symbols (block,
 					       DEPRECATED_SYMBOL_NAME (msymbol),
-					       namespace, objfile,
+					       domain, objfile,
 					       wild_match);
 		      }
 		  }
@@ -3739,14 +3739,14 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
   {
     QUIT;
     if (!ps->readin
-	&& ada_lookup_partial_symbol (ps, name, 1, namespace, wild_match))
+	&& ada_lookup_partial_symbol (ps, name, 1, domain, wild_match))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	if (!s->primary)
 	  continue;
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	ada_add_block_symbols (block, name, namespace, objfile, wild_match);
+	ada_add_block_symbols (block, name, domain, objfile, wild_match);
       }
   }
 
@@ -3764,21 +3764,21 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
 	  continue;
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	ada_add_block_symbols (block, name, namespace, objfile, wild_match);
+	ada_add_block_symbols (block, name, domain, objfile, wild_match);
       }
 
       ALL_PSYMTABS (objfile, ps)
       {
 	QUIT;
 	if (!ps->readin
-	    && ada_lookup_partial_symbol (ps, name, 0, namespace, wild_match))
+	    && ada_lookup_partial_symbol (ps, name, 0, domain, wild_match))
 	  {
 	    s = PSYMTAB_TO_SYMTAB (ps);
 	    bv = BLOCKVECTOR (s);
 	    if (!s->primary)
 	      continue;
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    ada_add_block_symbols (block, name, namespace,
+	    ada_add_block_symbols (block, name, domain,
 				   objfile, wild_match);
 	  }
       }
@@ -3789,7 +3789,7 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
      rare. */
   if (ndefns == 0)
     {
-      add_symbols_from_enclosing_procs (name, namespace, wild_match);
+      add_symbols_from_enclosing_procs (name, domain, wild_match);
       if (ndefns > 0)
 	goto done;
     }
@@ -3806,7 +3806,7 @@ done:
   return ndefns;
 }
 
-/* Return a symbol in NAMESPACE matching NAME, in BLOCK0 and enclosing 
+/* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing 
  * scope and in global scopes, or NULL if none.  NAME is folded to
  * lower case first, unless it is surrounded in single quotes. 
  * Otherwise, the result is as for ada_lookup_symbol_list, but is 
@@ -3814,14 +3814,14 @@ done:
 
 struct symbol *
 ada_lookup_symbol (const char *name, struct block *block0,
-		   namespace_enum namespace)
+		   domain_enum domain)
 {
   struct symbol **candidate_syms;
   struct block **candidate_blocks;
   int n_candidates;
 
   n_candidates = ada_lookup_symbol_list (name,
-					 block0, namespace,
+					 block0, domain,
 					 &candidate_syms, &candidate_blocks);
 
   if (n_candidates == 0)
@@ -3937,7 +3937,7 @@ wild_match (const char *patn, int patn_len, const char *name)
 }
 
 
-/* Add symbols from BLOCK matching identifier NAME in NAMESPACE to 
+/* Add symbols from BLOCK matching identifier NAME in DOMAIN to 
    vector *defn_symbols, updating *defn_symbols (if necessary), *SZ (the size of
    the vector *defn_symbols), and *ndefns (the number of symbols
    currently stored in *defn_symbols).  If WILD, treat as NAME with a
@@ -3945,7 +3945,7 @@ wild_match (const char *patn, int patn_len, const char *name)
 
 static void
 ada_add_block_symbols (struct block *block, const char *name,
-		       namespace_enum namespace, struct objfile *objfile,
+		       domain_enum domain, struct objfile *objfile,
 		       int wild)
 {
   int i;
@@ -3964,7 +3964,7 @@ ada_add_block_symbols (struct block *block, const char *name,
       struct symbol *sym;
       ALL_BLOCK_SYMBOLS (block, i, sym)
       {
-	if (SYMBOL_NAMESPACE (sym) == namespace &&
+	if (SYMBOL_DOMAIN (sym) == domain &&
 	    wild_match (name, name_len, DEPRECATED_SYMBOL_NAME (sym)))
 	  {
 	    switch (SYMBOL_CLASS (sym))
@@ -4016,7 +4016,7 @@ ada_add_block_symbols (struct block *block, const char *name,
       for (; i < BLOCK_BUCKETS (block); i += 1)
 	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
 	  {
-	    if (SYMBOL_NAMESPACE (sym) == namespace)
+	    if (SYMBOL_DOMAIN (sym) == domain)
 	      {
 		int cmp = strncmp (name, DEPRECATED_SYMBOL_NAME (sym), name_len);
 
@@ -4093,7 +4093,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 	  {
 	    struct symbol *sym = BLOCK_SYM (block, i);
 
-	    if (SYMBOL_NAMESPACE (sym) == namespace)
+	    if (SYMBOL_DOMAIN (sym) == domain)
 	      {
 		int cmp;
 
@@ -4388,10 +4388,10 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
   n_matches = 0;
   if (lower_name != NULL)
     n_matches = ada_lookup_symbol_list (ada_mangle (lower_name), block,
-					VAR_NAMESPACE, &symbols, &blocks);
+					VAR_DOMAIN, &symbols, &blocks);
   if (n_matches == 0)
     n_matches = ada_lookup_symbol_list (unquoted_name, block,
-					VAR_NAMESPACE, &symbols, &blocks);
+					VAR_DOMAIN, &symbols, &blocks);
   if (n_matches == 0 && line_num >= 0)
     error ("No line number information found for %s.", unquoted_name);
   else if (n_matches == 0)
@@ -4637,7 +4637,7 @@ nearest_line_number_in_linetable (struct linetable *linetable, int line_num)
 	      else
 		{
 		  struct symbol *sym =
-		    standard_lookup (func_name, VAR_NAMESPACE);
+		    standard_lookup (func_name, VAR_DOMAIN);
 		  if (is_plausible_func_for_line (sym, line_num))
 		    best = item->line;
 		  else
@@ -4711,7 +4711,7 @@ find_next_line_in_linetable (struct linetable *linetable, int line_num,
 	      if (item->line == line_num)
 		{
 		  struct symbol *sym =
-		    standard_lookup (func_name, VAR_NAMESPACE);
+		    standard_lookup (func_name, VAR_DOMAIN);
 		  if (is_plausible_func_for_line (sym, starting_line))
 		    return i;
 		  else
@@ -5855,11 +5855,11 @@ ada_find_any_type (const char *name)
 {
   struct symbol *sym;
 
-  sym = standard_lookup (name, VAR_NAMESPACE);
+  sym = standard_lookup (name, VAR_DOMAIN);
   if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     return SYMBOL_TYPE (sym);
 
-  sym = standard_lookup (name, STRUCT_NAMESPACE);
+  sym = standard_lookup (name, STRUCT_DOMAIN);
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
 
@@ -7821,7 +7821,7 @@ get_var_value (char *name, char *err_msg)
   int nsyms;
 
   nsyms =
-    ada_lookup_symbol_list (name, get_selected_block (NULL), VAR_NAMESPACE,
+    ada_lookup_symbol_list (name, get_selected_block (NULL), VAR_DOMAIN,
 			    &syms, &blocks);
 
   if (nsyms != 1)

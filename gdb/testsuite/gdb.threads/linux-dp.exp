@@ -64,11 +64,23 @@ gdb_test "info threads" "" "info threads 1"
 
 # Try stepping over the thread creation function.
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: create philosopher"]
+set expect_manager -1
 for {set i 0} {$i < 5} {incr i} {
     gdb_continue_to_breakpoint "about to create philosopher: $i"
     send_gdb "next\n"
     gdb_expect {
+	-re "\\\[New .*\\\].*\\\[New .*\\\].*$gdb_prompt $" {
+	    # Two threads are created the first time in LinuxThreads,
+	    # where the second is the manager thread.  In NPTL, there is none.
+	    if {$i == 0} {
+		set expect_manager 1
+	    }
+	    pass "create philosopher: $i"
+	}
 	-re "\\\[New .*\\\].*$gdb_prompt $" {
+	    if {$i == 0} {
+		set expect_manager 0
+	    }
 	    pass "create philosopher: $i"
 	}
 	-re "Program received signal.*(Unknown signal|SIGUSR|Real-time event).*$gdb_prompt $" {
@@ -87,15 +99,25 @@ for {set i 0} {$i < 5} {incr i} {
     }
 }
 
+if {$expect_manager} {
+    set nthreads 7
+} else {
+    set nthreads 6
+}
+
 # Run until there are some threads.
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: info threads 2"]
 gdb_continue_to_breakpoint "main thread's sleep"
-gdb_test "info threads" "7 Thread .*6 Thread .*5 Thread .*4 Thread .*3 Thread .*2 Thread .*1 Thread .*" "info threads 2"
+set info_threads_ptn ""
+for {set i $nthreads} {$i > 0} {incr i -1} {
+    append info_threads_ptn "$i Thread .*"
+}
+gdb_test "info threads" $info_threads_ptn "info threads 2"
 
 # Try setting a thread-specific breakpoint.
 gdb_breakpoint "print_philosopher thread 5"
 gdb_continue_to_breakpoint "thread 5's print"
-gdb_test "where" "print_philosopher.*philosopher.*pthread_start_thread.*" \
+gdb_test "where" "print_philosopher.*philosopher.* from .*libpthread.*" \
 	"first thread-specific breakpoint hit"
 
 # Make sure it's catching the right thread.  Try hitting the
@@ -154,7 +176,7 @@ proc check_philosopher_stack {thread seen_name} {
     global gdb_prompt
     upvar $seen_name seen
     global main_seen
-    global manager_seen
+    global expect_manager manager_seen
 
     set name "philosopher is distinct: $thread"
     set interesting 0
@@ -216,7 +238,7 @@ proc check_philosopher_stack {thread seen_name} {
 set any_interesting 0
 array set seen {}
 unset seen
-for {set i 1} {$i <= 7} {incr i} {
+for {set i 1} {$i <= $nthreads} {incr i} {
     if [check_philosopher_stack $i seen] {
 	set any_interesting 1
     }
@@ -226,4 +248,10 @@ if {$any_interesting} {
     pass "found an interesting thread"
 } else {
     fail "found an interesting thread"
+}
+
+if {$manager_seen == $expect_manager} {
+    pass "manager thread found (not found) when expected"
+} else {
+    fail "manager thread found (not found) when expected"
 }

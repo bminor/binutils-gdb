@@ -32,7 +32,7 @@ alphafbsd_use_struct_convention (int gcc_p, struct type *type)
 
   /* All aggregate types that won't fit in a register must be returned
      in memory.  */
-  if (TYPE_LENGTH (type) > REGISTER_SIZE)
+  if (TYPE_LENGTH (type) > DEPRECATED_REGISTER_SIZE)
     return 1;
 
   /* The only aggregate types that can be returned in a register are

@@ -46,9 +46,6 @@ struct ada_val_print_args
   enum val_prettyprint pretty;
 };
 
-extern int inspect_it;
-extern unsigned int repeat_count_threshold;
-
 static void print_record (struct type *, char *, struct ui_file *, int,
 			  int, enum val_prettyprint);
 

@@ -1,6 +1,8 @@
 #    Makefile template for Configure for the MIPS simulator.
 #    Written by Cygnus Support.
 
+SHELL = @SHELL@
+
 ## COMMON_PRE_CONFIG_FRAG
 
 srcdir=@srcdir@
@@ -155,21 +157,21 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n engine.h    -he tmp-engine.h \
 		-n engine.c    -e  tmp-engine.c \
 		-n irun.c      -r  tmp-irun.c
-	$(srcdir)/../../move-if-change tmp-icache.h icache.h
-	$(srcdir)/../../move-if-change tmp-icache.c icache.c
-	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
-	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
-	$(srcdir)/../../move-if-change tmp-semantics.h semantics.h
-	$(srcdir)/../../move-if-change tmp-semantics.c semantics.c
-	$(srcdir)/../../move-if-change tmp-model.h model.h
-	$(srcdir)/../../move-if-change tmp-model.c model.c
-	$(srcdir)/../../move-if-change tmp-support.h support.h
-	$(srcdir)/../../move-if-change tmp-support.c support.c
-	$(srcdir)/../../move-if-change tmp-itable.h itable.h
-	$(srcdir)/../../move-if-change tmp-itable.c itable.c
-	$(srcdir)/../../move-if-change tmp-engine.h engine.h
-	$(srcdir)/../../move-if-change tmp-engine.c engine.c
-	$(srcdir)/../../move-if-change tmp-irun.c irun.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.h icache.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.c icache.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h idecode.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c idecode.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h semantics.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c semantics.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.h model.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c model.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h support.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c support.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.c itable.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-engine.h engine.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-engine.c engine.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-irun.c irun.c
 	touch tmp-igen
 
 semantics.o: sim-main.h semantics.c $(SIM_EXTRA_DEPS)
@@ -233,16 +235,16 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n m16_support.h   -hf tmp-support.h \
 		-n m16_support.c   -f  tmp-support.c \
 		#
-	$(srcdir)/../../move-if-change tmp-icache.h m16_icache.h
-	$(srcdir)/../../move-if-change tmp-icache.c m16_icache.c
-	$(srcdir)/../../move-if-change tmp-idecode.h m16_idecode.h
-	$(srcdir)/../../move-if-change tmp-idecode.c m16_idecode.c
-	$(srcdir)/../../move-if-change tmp-semantics.h m16_semantics.h
-	$(srcdir)/../../move-if-change tmp-semantics.c m16_semantics.c
-	$(srcdir)/../../move-if-change tmp-model.h m16_model.h
-	$(srcdir)/../../move-if-change tmp-model.c m16_model.c
-	$(srcdir)/../../move-if-change tmp-support.h m16_support.h
-	$(srcdir)/../../move-if-change tmp-support.c m16_support.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.h m16_icache.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.c m16_icache.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h m16_idecode.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c m16_idecode.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h m16_semantics.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c m16_semantics.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.h m16_model.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c m16_model.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h m16_support.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c m16_support.c
 	../igen/igen \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -268,16 +270,16 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n m32_support.h   -hf tmp-support.h \
 		-n m32_support.c   -f  tmp-support.c \
 		#
-	$(srcdir)/../../move-if-change tmp-icache.h m32_icache.h
-	$(srcdir)/../../move-if-change tmp-icache.c m32_icache.c
-	$(srcdir)/../../move-if-change tmp-idecode.h m32_idecode.h
-	$(srcdir)/../../move-if-change tmp-idecode.c m32_idecode.c
-	$(srcdir)/../../move-if-change tmp-semantics.h m32_semantics.h
-	$(srcdir)/../../move-if-change tmp-semantics.c m32_semantics.c
-	$(srcdir)/../../move-if-change tmp-model.h m32_model.h
-	$(srcdir)/../../move-if-change tmp-model.c m32_model.c
-	$(srcdir)/../../move-if-change tmp-support.h m32_support.h
-	$(srcdir)/../../move-if-change tmp-support.c m32_support.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.h m32_icache.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.c m32_icache.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h m32_idecode.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c m32_idecode.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h m32_semantics.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c m32_semantics.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.h m32_model.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c m32_model.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h m32_support.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c m32_support.c
 	../igen/igen \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -291,8 +293,8 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n itable.h    -ht tmp-itable.h \
 		-n itable.c    -t  tmp-itable.c \
 		#
-	$(srcdir)/../../move-if-change tmp-itable.h itable.h
-	$(srcdir)/../../move-if-change tmp-itable.c itable.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.c itable.c
 	touch tmp-m16
 
 
@@ -336,18 +338,18 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n $${p}_engine.h    -he tmp-engine.h \
 		-n $${p}_engine.c    -e  tmp-engine.c \
 		; \
-	  $(srcdir)/../../move-if-change tmp-icache.h $${p}_icache.h ; \
-	  $(srcdir)/../../move-if-change tmp-icache.c $${p}_icache.c ; \
-	  $(srcdir)/../../move-if-change tmp-idecode.h $${p}_idecode.h ; \
-	  $(srcdir)/../../move-if-change tmp-idecode.c $${p}_idecode.c ; \
-	  $(srcdir)/../../move-if-change tmp-semantics.h $${p}_semantics.h ; \
-	  $(srcdir)/../../move-if-change tmp-semantics.c $${p}_semantics.c ; \
-	  $(srcdir)/../../move-if-change tmp-model.h $${p}_model.h ; \
-	  $(srcdir)/../../move-if-change tmp-model.c $${p}_model.c ; \
-	  $(srcdir)/../../move-if-change tmp-support.h $${p}_support.h ; \
-	  $(srcdir)/../../move-if-change tmp-support.c $${p}_support.c ; \
-	  $(srcdir)/../../move-if-change tmp-engine.h $${p}_engine.h ; \
-	  $(srcdir)/../../move-if-change tmp-engine.c $${p}_engine.c ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-icache.h $${p}_icache.h ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-icache.c $${p}_icache.c ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h $${p}_idecode.h ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c $${p}_idecode.c ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h $${p}_semantics.h ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c $${p}_semantics.c ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-model.h $${p}_model.h ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-model.c $${p}_model.c ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-support.h $${p}_support.h ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-support.c $${p}_support.c ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-engine.h $${p}_engine.h ; \
+	  $(SHELL) $(srcdir)/../../move-if-change tmp-engine.c $${p}_engine.c ; \
 	done
 	touch tmp-mach-multi
 tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
@@ -365,8 +367,8 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 		-n itable.h    -ht tmp-itable.h \
 		-n itable.c    -t  tmp-itable.c \
 		#
-	$(srcdir)/../../move-if-change tmp-itable.h itable.h
-	$(srcdir)/../../move-if-change tmp-itable.c itable.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.c itable.c
 	touch tmp-itable-multi
 tmp-run-multi: $(srcdir)/m16run.c
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
@@ -377,7 +379,7 @@ tmp-run-multi: $(srcdir)/m16run.c
 		    -e "s/^sim_/m16$${m}_/" \
 		    -e "s/m16_/m16$${m}_/" \
 		    -e "s/m32_/m32$${m}_/" ; \
-	      $(srcdir)/../../move-if-change tmp-run m16$${m}_run.c ; \
+	      $(SHELL) $(srcdir)/../../move-if-change tmp-run m16$${m}_run.c ; \
 	  esac \
 	done
 	touch tmp-run-multi

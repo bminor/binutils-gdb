@@ -359,7 +359,7 @@ fetch_register (int regno)
   char mess[128];		/* For messages */
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   int tid;
 
   if (CANNOT_FETCH_REGISTER (regno))
@@ -424,7 +424,7 @@ store_register (int regno)
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
 
   if (CANNOT_STORE_REGISTER (regno))
     {

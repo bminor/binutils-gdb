@@ -78,9 +78,6 @@ struct regcache_descr
   long *register_offset;
   long *sizeof_register;
 
-  /* Useful constant.  Largest of all the registers.  */
-  long max_register_size;
-
   /* Cached table containing the type of each register.  */
   struct type **register_type;
 };
@@ -109,7 +106,6 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
      read_register_bytes() and write_register_bytes() registers.  */
   descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
   descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
-  descr->max_register_size = 0;
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       /* FIXME: cagney/2001-12-04: This code shouldn't need to use
@@ -119,19 +115,18 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
          entirely avoid this uglyness.  */
       descr->register_offset[i] = REGISTER_BYTE (i);
       descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
-      if (descr->max_register_size < REGISTER_RAW_SIZE (i))
-	descr->max_register_size = REGISTER_RAW_SIZE (i);
-      if (descr->max_register_size < REGISTER_VIRTUAL_SIZE (i))
-	descr->max_register_size = REGISTER_VIRTUAL_SIZE (i);
+      gdb_assert (MAX_REGISTER_SIZE >= REGISTER_RAW_SIZE (i));
+      gdb_assert (MAX_REGISTER_SIZE >= REGISTER_VIRTUAL_SIZE (i));
     }
 
   /* Compute the real size of the register buffer.  Start out by
-     trusting REGISTER_BYTES, but then adjust it upwards should that
-     be found to not be sufficient.  */
-  /* FIXME: cagney/2002-11-05: Instead of using REGISTER_BYTES, this
-     code should, as is done in init_regcache_descr(), compute the
-     total number of register bytes using the accumulated offsets.  */
-  descr->sizeof_cooked_registers = REGISTER_BYTES; /* OK use.  */
+     trusting DEPRECATED_REGISTER_BYTES, but then adjust it upwards
+     should that be found to not be sufficient.  */
+  /* FIXME: cagney/2002-11-05: Instead of using the macro
+     DEPRECATED_REGISTER_BYTES, this code should, as is done in
+     init_regcache_descr(), compute the total number of register bytes
+     using the accumulated offsets.  */
+  descr->sizeof_cooked_registers = DEPRECATED_REGISTER_BYTES; /* OK */
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       long regend;
@@ -187,6 +182,12 @@ init_regcache_descr (struct gdbarch *gdbarch)
       && !gdbarch_pseudo_register_write_p (gdbarch)
       && !gdbarch_register_type_p (gdbarch))
     {
+      /* NOTE: cagney/2003-05-02: Don't add a test for REGISTER_BYTE_P
+	 to the above.  Doing that would cause all the existing
+	 architectures to revert back to the legacy regcache
+	 mechanisms, and that is not a good thing.  Instead just,
+	 later, check that the register cache's layout is consistent
+	 with REGISTER_BYTE.  */
       descr->legacy_p = 1;
       init_legacy_regcache_descr (gdbarch, descr);
       return descr;
@@ -213,14 +214,12 @@ init_regcache_descr (struct gdbarch *gdbarch)
     long offset = 0;
     descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
     descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
-    descr->max_register_size = 0;
     for (i = 0; i < descr->nr_cooked_registers; i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
-	if (descr->max_register_size < descr->sizeof_register[i])
-	  descr->max_register_size = descr->sizeof_register[i];
+	gdb_assert (MAX_REGISTER_SIZE >= descr->sizeof_register[i]);
       }
     /* Set the real size of the register cache buffer.  */
     descr->sizeof_cooked_registers = offset;
@@ -233,21 +232,19 @@ init_regcache_descr (struct gdbarch *gdbarch)
      buffer.  Ulgh!  */
   descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 
-#if 0
-  /* Sanity check.  Confirm that the assumptions about gdbarch are
-     true.  The REGCACHE_DESCR_HANDLE is set before doing the checks
-     so that targets using the generic methods supplied by regcache
-     don't go into infinite recursion trying to, again, create the
-     regcache.  */
-  set_gdbarch_data (gdbarch, regcache_descr_handle, descr);
+  /* Sanity check.  Confirm that there is agreement between the
+     regcache and the target's redundant REGISTER_BYTE (new targets
+     should not even be defining it).  */
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
+      if (REGISTER_BYTE_P ())
+	gdb_assert (descr->register_offset[i] == REGISTER_BYTE (i));
+#if 0
       gdb_assert (descr->sizeof_register[i] == REGISTER_RAW_SIZE (i));
       gdb_assert (descr->sizeof_register[i] == REGISTER_VIRTUAL_SIZE (i));
-      gdb_assert (descr->register_offset[i] == REGISTER_BYTE (i));
-    }
-  /* gdb_assert (descr->sizeof_raw_registers == REGISTER_BYTES (i));  */
 #endif
+    }
+  /* gdb_assert (descr->sizeof_raw_registers == DEPRECATED_REGISTER_BYTES (i));  */
 
   return descr;
 }
@@ -284,31 +281,6 @@ register_type (struct gdbarch *gdbarch, int regnum)
 
 /* Utility functions returning useful register attributes stored in
    the regcache descr.  */
-
-int
-max_register_size (struct gdbarch *gdbarch)
-{
-  struct regcache_descr *descr = regcache_descr (gdbarch);
-  return descr->max_register_size;
-}
-
-int
-legacy_max_register_raw_size (void)
-{
-  if (DEPRECATED_MAX_REGISTER_RAW_SIZE_P ())
-    return DEPRECATED_MAX_REGISTER_RAW_SIZE;
-  else
-    return max_register_size (current_gdbarch);
-}
-
-int
-legacy_max_register_virtual_size (void)
-{
-  if (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ())
-    return DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE;
-  else
-    return max_register_size (current_gdbarch);
-}
 
 int
 register_size (struct gdbarch *gdbarch, int regnum)
@@ -393,7 +365,7 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
 	       void *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
-  void *buf = alloca (max_register_size (gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   int regnum;
   /* The DST should be `read-only', if it wasn't then the save would
      end up trying to write the register values back out to the
@@ -427,7 +399,7 @@ regcache_restore (struct regcache *dst,
 		  void *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
-  void *buf = alloca (max_register_size (gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   int regnum;
   /* The dst had better not be read-only.  If it is, the `restore'
      doesn't make much sense.  */
@@ -526,12 +498,6 @@ char *
 deprecated_grub_regcache_for_registers (struct regcache *regcache)
 {
   return regcache->registers;
-}
-
-char *
-deprecated_grub_regcache_for_register_valid (struct regcache *regcache)
-{
-  return regcache->register_valid_p;
 }
 
 /* Global structure containing the current regcache.  */
@@ -681,7 +647,7 @@ deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
 {
   int in_end = in_start + in_len;
   int regnum;
-  char *reg_buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char reg_buf[MAX_REGISTER_SIZE];
 
   /* See if we are trying to read bytes from out-of-date registers.  If so,
      update just those registers.  */
@@ -1071,7 +1037,7 @@ deprecated_write_register_bytes (int myregstart, char *myaddr, int inlen)
       /* The register partially overlaps the range being written.  */
       else
 	{
-	  char *regbuf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	  char regbuf[MAX_REGISTER_SIZE];
 	  /* What's the overlap between this register's bytes and
              those the caller wants to write?  */
 	  int overlapstart = max (regstart, myregstart);
@@ -1104,7 +1070,7 @@ regcache_xfer_part (struct regcache *regcache, int regnum,
 		    regcache_read_ftype *read, regcache_write_ftype *write)
 {
   struct regcache_descr *descr = regcache->descr;
-  bfd_byte *reg = alloca (descr->max_register_size);
+  bfd_byte reg[MAX_REGISTER_SIZE];
   gdb_assert (offset >= 0 && offset <= descr->sizeof_register[regnum]);
   gdb_assert (len >= 0 && offset + len <= descr->sizeof_register[regnum]);
   /* Something to do?  */
@@ -1207,36 +1173,6 @@ read_register_pid (int regnum, ptid_t ptid)
   inferior_ptid = ptid;
 
   retval = read_register (regnum);
-
-  inferior_ptid = save_ptid;
-
-  return retval;
-}
-
-/* Return the contents of register REGNUM as a signed integer.  */
-
-LONGEST
-read_signed_register (int regnum)
-{
-  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
-  deprecated_read_register_gen (regnum, buf);
-  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
-}
-
-LONGEST
-read_signed_register_pid (int regnum, ptid_t ptid)
-{
-  ptid_t save_ptid;
-  LONGEST retval;
-
-  if (ptid_equal (ptid, inferior_ptid))
-    return read_signed_register (regnum);
-
-  save_ptid = inferior_ptid;
-
-  inferior_ptid = ptid;
-
-  retval = read_signed_register (regnum);
 
   inferior_ptid = save_ptid;
 
@@ -1483,7 +1419,7 @@ build_regcache (void)
   current_regcache = regcache_xmalloc (current_gdbarch);
   current_regcache->readonly_p = 0;
   deprecated_registers = deprecated_grub_regcache_for_registers (current_regcache);
-  deprecated_register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
+  deprecated_register_valid = current_regcache->register_valid_p;
 }
 
 static void
@@ -1524,7 +1460,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
   int footnote_register_offset = 0;
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
-  unsigned char *buf = alloca (regcache->descr->max_register_size);
+  unsigned char buf[MAX_REGISTER_SIZE];
 
 #if 0
   fprintf_unfiltered (file, "legacy_p %d\n", regcache->descr->legacy_p);
@@ -1536,8 +1472,6 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		      regcache->descr->sizeof_raw_registers);
   fprintf_unfiltered (file, "sizeof_raw_register_valid_p %ld\n",
 		      regcache->descr->sizeof_raw_register_valid_p);
-  fprintf_unfiltered (file, "max_register_size %ld\n",
-		      regcache->descr->max_register_size);
   fprintf_unfiltered (file, "NUM_REGS %d\n", NUM_REGS);
   fprintf_unfiltered (file, "NUM_PSEUDO_REGS %d\n", NUM_PSEUDO_REGS);
 #endif

@@ -227,7 +227,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 
 		  if (msymbol != NULL)
 		    wsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol), block,
-					  VAR_NAMESPACE, &is_this_fld, &s);
+					  VAR_DOMAIN, &is_this_fld, &s);
 
 		  if (wsym)
 		    {
@@ -755,7 +755,6 @@ pascal_object_print_value_fields (struct type *type, char *valaddr,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      extern int inspect_it;
       int fields_seen = 0;
 
       if (dont_print_statmem == 0)

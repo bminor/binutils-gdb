@@ -1,5 +1,17 @@
 2003-05-18  Mark Kettenis  <kettenis@gnu.org>
 
+	Merge from mainline.
+	* i386-tdep.h (I386_SIZEOF_GREGS, I386_SIZEOF_FREGS,
+	I386_SIZEOF_XREGS): Remove defenitions.
+	(IS_FP_REGNUM, IS_SSE_REGNUM): Remove definitions.
+	* i386-tdep.c (i386_gdbarch_init): Don't set register_bytes,
+	register_size, call_dummy_words and sizeof_call_dummy.
+	* i386-linux-tdep.c (i386_linux_init_abi): Don't set register_bytes.
+	* x86-64-tdep.c (x86_64_init_abi): Don't set register_bytes and
+	register_size.
+	(x86_64_register_bytes): Remove variable.
+	(_initialize_x86_64_tdep): Remove function.
+
 	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Call read_memory
 	with correct arguments.
 	* config/i386/x86-64linux.mt (TDEPFILES): Add i386-linux-tdep.o.

@@ -285,7 +285,7 @@ hpux_thread_fetch_registers (int regno)
 	child_ops.to_fetch_registers (regno);
       else
 	{
-	  unsigned char *buf = alloca (max_register_size (current_gdbarch));
+	  unsigned char buf[MAX_REGISTER_SIZE];
 	  CORE_ADDR sp;
 
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
@@ -294,7 +294,7 @@ hpux_thread_fetch_registers (int regno)
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
 	    memset (buf, '\000', REGISTER_RAW_SIZE (regno));
 	  else if (regno == SP_REGNUM)
-	    store_address (buf, sizeof sp, sp);
+	    store_unsigned_integer (buf, sizeof sp, sp);
 	  else if (regno == PC_REGNUM)
 	    read_memory (sp - 20, buf, REGISTER_RAW_SIZE (regno));
 	  else
@@ -347,7 +347,7 @@ hpux_thread_store_registers (int regno)
 	child_ops.to_store_registers (regno);
       else
 	{
-	  unsigned char *buf = alloca (max_register_size (current_gdbarch));
+	  unsigned char buf[MAX_REGISTER_SIZE];
 	  CORE_ADDR sp;
 
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;

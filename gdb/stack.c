@@ -814,7 +814,7 @@ frame_info (char *addr_exp, int from_tty)
 			       &realnum, NULL);
 	if (!optimized && lval == not_lval)
 	  {
-	    void *value = alloca (MAX_REGISTER_RAW_SIZE);
+	    char value[MAX_REGISTER_SIZE];
 	    CORE_ADDR sp;
 	    frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
 				   &realnum, value);
@@ -1332,7 +1332,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	     are not combined in symbol-reading.  */
 
 	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-		   b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+		   b, VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
 	  print_variable_value (sym2, fi, stream);
 	  fprintf_filtered (stream, "\n");
 	  break;

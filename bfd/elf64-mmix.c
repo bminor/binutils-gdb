@@ -1854,9 +1854,9 @@ _bfd_mmix_check_all_relocs (abfd, info)
 	continue;
 
       internal_relocs
-	= _bfd_elf64_link_read_relocs (abfd, o, (PTR) NULL,
-				       (Elf_Internal_Rela *) NULL,
-				       info->keep_memory);
+	= _bfd_elf_link_read_relocs (abfd, o, (PTR) NULL,
+				     (Elf_Internal_Rela *) NULL,
+				     info->keep_memory);
       if (internal_relocs == NULL)
 	return FALSE;
 
@@ -2374,9 +2374,9 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 
   /* Get a copy of the native relocations.  */
   internal_relocs
-    = _bfd_elf64_link_read_relocs (abfd, sec, (PTR) NULL,
-				   (Elf_Internal_Rela *) NULL,
-				   link_info->keep_memory);
+    = _bfd_elf_link_read_relocs (abfd, sec, (PTR) NULL,
+				 (Elf_Internal_Rela *) NULL,
+				 link_info->keep_memory);
   if (internal_relocs == NULL)
     goto error_return;
 
