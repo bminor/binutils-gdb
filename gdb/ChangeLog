@@ -1,3 +1,9 @@
+Tue Sep 29 10:19:00 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* xm-hp300hpux.h: define MEM_FNS_DECLARED; include <sys/ptrace.h>
+	for infptrace.c.
+	config/hp300hpux.mh: ALLOCA1 was not defined.
+
 Mon Sep 28 22:03:41 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* breakpoint.c, exec.c, language.c, main.c, printcmd.c, symfile.c,

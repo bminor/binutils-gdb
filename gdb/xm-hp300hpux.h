@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* HP/UX is USG, but it does have <ptrace.h>  */
+#include <sys/ptrace.h>
+
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
 /* Define this to indicate problems with traps after continuing.  */
@@ -40,6 +43,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* define USG if you are using sys5 /usr/include's */
 #undef USG	/* In case it was defined in the Makefile for cplus-dem.c */
 #define USG
+
+/* The mem functions are in <string.h>.  */
+#undef MEM_FNS_DECLARED
+#define MEM_FNS_DECLARED 1
 
 #define HAVE_TERMIO
 
