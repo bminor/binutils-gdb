@@ -81,7 +81,7 @@ const struct alpha_operand alpha_operands[] =
   /* The fields are bits, shift, insert, extract, flags */
   /* The zero index is used to indicate end-of-list */
 #define UNUSED		0
-  { 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, 0, 0 },
 
   /* The plain integer register fields */
 #define RA		(UNUSED + 1)
@@ -207,7 +207,7 @@ const struct alpha_operand alpha_operands[] =
     insert_ev6hwjhint, extract_ev6hwjhint }
 };
 
-const int alpha_num_operands = sizeof(alpha_operands)/sizeof(*alpha_operands);
+const unsigned alpha_num_operands = sizeof(alpha_operands)/sizeof(*alpha_operands);
 
 /* The RB field when it is the same as the RA field in the same insn.
    This operand is marked fake.  The insertion function just copies
@@ -218,8 +218,8 @@ const int alpha_num_operands = sizeof(alpha_operands)/sizeof(*alpha_operands);
 static unsigned
 insert_rba(insn, value, errmsg)
      unsigned insn;
-     int value;
-     const char **errmsg;
+     int value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 21) & 0x1f) << 16);
 }
@@ -242,8 +242,8 @@ extract_rba(insn, invalid)
 static unsigned
 insert_rca(insn, value, errmsg)
      unsigned insn;
-     int value;
-     const char **errmsg;
+     int value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((insn >> 21) & 0x1f);
 }
@@ -266,8 +266,8 @@ extract_rca(insn, invalid)
 static unsigned
 insert_za(insn, value, errmsg)
      unsigned insn;
-     int value;
-     const char **errmsg;
+     int value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (31 << 21);
 }
@@ -286,8 +286,8 @@ extract_za(insn, invalid)
 static unsigned
 insert_zb(insn, value, errmsg)
      unsigned insn;
-     int value;
-     const char **errmsg;
+     int value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (31 << 16);
 }
@@ -306,8 +306,8 @@ extract_zb(insn, invalid)
 static unsigned
 insert_zc(insn, value, errmsg)
      unsigned insn;
-     int value;
-     const char **errmsg;
+     int value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | 31;
 }
@@ -340,7 +340,7 @@ insert_bdisp(insn, value, errmsg)
 static int
 extract_bdisp(insn, invalid)
      unsigned insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   return 4 * (((insn & 0x1FFFFF) ^ 0x100000) - 0x100000);
 }
@@ -363,7 +363,7 @@ insert_jhint(insn, value, errmsg)
 static int
 extract_jhint(insn, invalid)
      unsigned insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   return 4 * (((insn & 0x3FFF) ^ 0x2000) - 0x2000);
 }
@@ -385,7 +385,7 @@ insert_ev6hwjhint(insn, value, errmsg)
 static int
 extract_ev6hwjhint(insn, invalid)
      unsigned insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   return 4 * (((insn & 0x1FFF) ^ 0x1000) - 0x1000);
 }
@@ -1543,4 +1543,4 @@ const struct alpha_opcode alpha_opcodes[] = {
   { "bgt",		BRA(0x3F), BASE, ARG_BRA },
 };
 
-const int alpha_num_opcodes = sizeof(alpha_opcodes)/sizeof(*alpha_opcodes);
+const unsigned alpha_num_opcodes = sizeof(alpha_opcodes)/sizeof(*alpha_opcodes);

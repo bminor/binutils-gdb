@@ -1,3 +1,47 @@
+1999-10-18  Michael Meissner  <meissner@cygnus.com>
+
+	* expr.h (operatorT): Add machine dependent operators md1..md8.
+	(expressionS): Make X_op 8 bits instead of 7.  Add a X_md field
+	for the machine dependent operators to use.
+
+	* expr.c (op_rank): Add machine dependent operators.
+
+	* config/tc-alpha.c (O_pregister): Define as a machine dependent
+	operator.
+	(O_cpregister): Ditto.
+	(md_begin): Change X_op test that field is wide enough to use
+	O_max instead of O_alpha_max.
+	(cpu_types): Fill in missing initializer.
+	(alpha_num_macros): Make unsigned.
+	(md_assemble): Make opnamelen be size_t.
+	(md_apply_fix): Cast alpha_num_operands to int before testing.
+	(alpha_force_relocation): Ditto.
+	(alpha_fix_adjustable): Ditto.
+	(alpha_fix_adjustable): Mark unused arguments ATTRIBUTE_UNUSED.
+	(tc_gen_reloc): Ditto.
+	(tc_get_register): Ditto.
+	(emit_ldgp): Ditto.
+	(emit_lda): Ditto.
+	(emit_ldah): Ditto.
+	(emit_ldil): Ditto.
+	(s_alpha_ent): Ditto.
+	(s_alpha_end): Ditto.
+	(s_alpha_frame): Ditto.
+	(s_alpha_prologue): Ditto.
+	(s_alpha_file): Ditto.
+	(s_alpha_gprel32): Ditto.
+	(s_alpha_proc): Ditto.
+	(s_alpha_set): Ditto.
+	(s_alpha_base): Ditto.
+	(s_alpha_align): Ditto.
+	(s_alpha_arch): Ditto.
+	(alpha_align): Ditto.
+	(assemble_insn): Suppress unused variable warning.
+	(emit_insn): Ditto.
+	(assemble_insn): Don't assume X_op and X_unsigned are in a given
+	order in the structure.
+	(s_alpha_coff_wrapper): Avoid int/unsigned comparison.
+
 Sun Oct 17 17:15:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (md_apply_fix): Make "fmt" an int.

@@ -93,12 +93,10 @@ struct alpha_macro
   enum alpha_macro_arg argsets[16];
 };
 
-/* Two extra symbols we want to see in our input.  This is a blatent
-   misuse of the expressionS.X_op field.  */
+/* Extra expression types. */
 
-#define O_pregister  ((operatorT) (O_max+1)) /* O_register, in parentheses */
-#define O_cpregister ((operatorT) (O_pregister+1)) /* + a leading comma */
-#define O_alpha_max  ((operatorT) (O_cpregister+1))
+#define O_pregister	O_md1	/* O_register, in parentheses */
+#define O_cpregister	O_md2	/* + a leading comma */
 
 /* Macros for extracting the type and number of encoded register tokens */
 
@@ -467,7 +465,7 @@ static const struct cpu_type
   { "ev6", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX|AXP_OPCODE_CIX },
 
   { "all", AXP_OPCODE_BASE },
-  { 0 }
+  { 0, 0 }
 };
 
 /* The macro table */
@@ -696,7 +694,7 @@ static const struct alpha_macro alpha_macros[] = {
       MACRO_EOA } },
 };
 
-static const int alpha_num_macros
+static const unsigned int alpha_num_macros
   = sizeof(alpha_macros) / sizeof(*alpha_macros);
 
 /* Public interface functions */
@@ -713,8 +711,8 @@ md_begin ()
   /* Verify that X_op field is wide enough.  */
   {
     expressionS e;
-    e.X_op = O_alpha_max;
-    assert (e.X_op == O_alpha_max);
+    e.X_op = O_max;
+    assert (e.X_op == O_max);
   }
 
   /* Create the opcode hash table */
@@ -824,7 +822,8 @@ md_assemble (str)
 {
   char opname[32];			/* current maximum is 13 */
   expressionS tok[MAX_INSN_ARGS];
-  int ntok, opnamelen, trunclen;
+  int ntok, trunclen;
+  size_t opnamelen;
 
   /* split off the opcode */
   opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_/468");
@@ -1173,7 +1172,7 @@ md_apply_fix (fixP, valueP)
 	  as_fatal (_("unhandled relocation type %s"),
 		    bfd_get_reloc_code_name (fixP->fx_r_type));
 
-	assert (-(int)fixP->fx_r_type < alpha_num_operands);
+	assert (-(int)fixP->fx_r_type < (int)alpha_num_operands);
 	operand = &alpha_operands[-(int)fixP->fx_r_type];
 
 	/* The rest of these fixups only exist internally during symbol
@@ -1334,7 +1333,7 @@ alpha_force_relocation (f)
       return 0;
 
     default:
-      assert((int)f->fx_r_type < 0 && -(int)f->fx_r_type < alpha_num_operands);
+      assert((int)f->fx_r_type < 0 && -(int)f->fx_r_type < (int)alpha_num_operands);
       return 0;
     }
 }
@@ -1384,7 +1383,7 @@ alpha_fix_adjustable (f)
 
     default:
       assert ((int)f->fx_r_type < 0
-	      && - (int)f->fx_r_type < alpha_num_operands);
+	      && - (int)f->fx_r_type < (int)alpha_num_operands);
       return 1;
     }
   /*NOTREACHED*/
@@ -1395,7 +1394,7 @@ alpha_fix_adjustable (f)
 
 arelent *
 tc_gen_reloc (sec, fixp)
-     asection *sec;
+     asection *sec ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -1459,7 +1458,7 @@ tc_gen_reloc (sec, fixp)
 
 int
 tc_get_register (frame)
-     int frame;
+     int frame ATTRIBUTE_UNUSED;
 {
   int framereg = AXP_REG_SP;
 
@@ -1846,7 +1845,7 @@ assemble_insn(opcode, tok, ntok, insn)
   for (argidx = opcode->operands; *argidx; ++argidx)
     {
       const struct alpha_operand *operand = &alpha_operands[*argidx];
-      const expressionS *t;
+      const expressionS *t = (const expressionS *)0;
 
       if (operand->flags & AXP_OPERAND_FAKE)
 	{
@@ -1867,8 +1866,10 @@ assemble_insn(opcode, tok, ntok, insn)
 	      break;
 	    case AXP_OPERAND_DEFAULT_ZERO:
 	      {
-		static const expressionS zero_exp = { 0, 0, 0, O_constant, 1 };
+		static expressionS zero_exp;
 		t = &zero_exp;
+		zero_exp.X_op = O_constant;
+		zero_exp.X_unsigned = 1;
 	      }
 	      break;
 	    default:
@@ -1935,7 +1936,7 @@ emit_insn (insn)
   /* Apply the fixups in order */
   for (i = 0; i < insn->nfixups; ++i)
     {
-      const struct alpha_operand *operand;
+      const struct alpha_operand *operand = (const struct alpha_operand *)0;
       struct alpha_fixup *fixup = &insn->fixups[i];
       int size, pcrel;
       fixS *fixP;
@@ -2105,8 +2106,8 @@ static const char * const ldXu_op[] = { "ldbu", "ldwu", NULL, NULL };
 static void
 emit_ldgp (tok, ntok, unused)
      const expressionS *tok;
-     int ntok;
-     const PTR unused;
+     int ntok ATTRIBUTE_UNUSED;
+     const PTR unused ATTRIBUTE_UNUSED;
 {
 #ifdef OBJ_AOUT
 FIXME
@@ -2589,7 +2590,7 @@ static void
 emit_lda (tok, ntok, unused)
      const expressionS *tok;
      int ntok;
-     const PTR unused;
+     const PTR unused ATTRIBUTE_UNUSED;
 {
   int basereg;
 
@@ -2607,8 +2608,8 @@ emit_lda (tok, ntok, unused)
 static void
 emit_ldah (tok, ntok, unused)
      const expressionS *tok;
-     int ntok;
-     const PTR unused;
+     int ntok ATTRIBUTE_UNUSED;
+     const PTR unused ATTRIBUTE_UNUSED;
 {
   expressionS newtok[3];
 
@@ -2843,7 +2844,7 @@ static void
 emit_ldil (tok, ntok, unused)
      const expressionS *tok;
      int ntok;
-     const PTR unused;
+     const PTR unused ATTRIBUTE_UNUSED;
 {
   expressionS newtok[2];
 
@@ -3544,7 +3545,7 @@ s_alpha_section (ignore)
 
 static void
 s_alpha_ent (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   if (ECOFF_DEBUGGING)
     ecoff_directive_ent (0);
@@ -3588,7 +3589,7 @@ s_alpha_ent (dummy)
 
 static void
 s_alpha_end (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   if (ECOFF_DEBUGGING)
     ecoff_directive_end (0);
@@ -3648,7 +3649,7 @@ s_alpha_mask (fp)
 
 static void
 s_alpha_frame (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   if (ECOFF_DEBUGGING)
     ecoff_directive_frame (0);
@@ -3658,7 +3659,7 @@ s_alpha_frame (dummy)
 
 static void
 s_alpha_prologue (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
   int arg;
@@ -3706,7 +3707,7 @@ s_alpha_coff_wrapper (which)
     ecoff_directive_loc,
   };
 
-  assert (which >= 0 && which < sizeof(fns)/sizeof(*fns));
+  assert (which >= 0 && which < (int)(sizeof(fns)/sizeof(*fns)));
 
   if (ECOFF_DEBUGGING)
     (*fns[which])(0);
@@ -4171,7 +4172,7 @@ s_alpha_file (ignore)
 
 static void
 s_alpha_gprel32 (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   expressionS e;
   char *p;
@@ -4266,7 +4267,7 @@ s_alpha_float_cons (type)
 
 static void
 s_alpha_proc (is_static)
-     int is_static;
+     int is_static ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
@@ -4305,7 +4306,7 @@ s_alpha_proc (is_static)
 
 static void
 s_alpha_set (x)
-     int x;
+     int x ATTRIBUTE_UNUSED;
 {
   char *name, ch, *s;
   int yesno = 1;
@@ -4342,7 +4343,7 @@ s_alpha_set (x)
 
 static void
 s_alpha_base (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
 #if 0
   if (first_32bit_quadrant)
@@ -4377,7 +4378,7 @@ s_alpha_base (ignore)
 
 static void
 s_alpha_align (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int align;
   char fill, *pfill;
@@ -4475,7 +4476,7 @@ s_alpha_ucons (bytes)
 
 static void
 s_alpha_arch (ignored)
-     int ignored;
+     int ignored ATTRIBUTE_UNUSED;
 {
   char *name, ch;
   const struct cpu_type *p;
@@ -4719,7 +4720,7 @@ alpha_align (n, pfill, label, force)
      int n;
      char *pfill;
      symbolS *label;
-     int force;
+     int force ATTRIBUTE_UNUSED;
 {
   if (alpha_current_align >= n)
     return;

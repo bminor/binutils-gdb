@@ -1,3 +1,17 @@
+1999-10-18  Michael Meissner  <meissner@cygnus.com>
+
+	* alpha-opc.c (alpha_operands): Fill in missing initializer.
+	(alpha_num_operands): Convert to unsigned.
+	(alpha_num_opcodes): Ditto.
+	(insert_rba): Declare unused arguments ATTRIBUTE_UNUSED.
+	(insert_rca): Ditto.
+	(insert_za): Ditto.
+	(insert_zb): Ditto.
+	(insert_zc): Ditto.
+	(extract_bdisp): Ditto.
+	(extract_jhint): Ditto.
+	(extract_ev6hwjhint): Ditto.
+
 Sun Oct 10 01:48:01 1999  Jerry Quinn <jerry.quinn.adv91@alum.dartmouth.org>
 
 	* hppa-dis.c (print_insn_hppa):  Add new codes 'cc', 'cd', 'cC',

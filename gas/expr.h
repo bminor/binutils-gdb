@@ -104,6 +104,22 @@ typedef enum
   O_logical_or,
   /* X_op_symbol [ X_add_symbol ] */
   O_index,
+  /* machine dependent #1 */
+  O_md1,
+  /* machine dependent #2 */
+  O_md2,
+  /* machine dependent #3 */
+  O_md3,
+  /* machine dependent #4 */
+  O_md4,
+  /* machine dependent #5 */
+  O_md5,
+  /* machine dependent #6 */
+  O_md6,
+  /* machine dependent #7 */
+  O_md7,
+  /* machine dependent #8 */
+  O_md8,
   /* this must be the largest value */
   O_max
 } operatorT;
@@ -116,20 +132,27 @@ typedef struct expressionS
   symbolS *X_op_symbol;
   /* A number to add.  */
   offsetT X_add_number;
+
   /* The type of the expression.  We can't assume that an arbitrary
      compiler can handle a bitfield of enum type.  FIXME: We could
      check this using autoconf.  */
 #ifdef __GNUC__
-  operatorT X_op : 7;
+  operatorT X_op : 8;
 #else
-  unsigned X_op : 7;
+  unsigned char X_op;
 #endif
+
   /* Non-zero if X_add_number should be regarded as unsigned.  This is
      only valid for O_constant expressions.  It is only used when an
      O_constant must be extended into a bignum (i.e., it is not used
      when performing arithmetic on these values).
      FIXME: This field is not set very reliably.  */
   unsigned int X_unsigned : 1;
+
+  /* 7 additional bits can be defined if needed.  */
+
+  /* Machine dependent field */
+  unsigned short X_md;
 } expressionS;
 
 /* "result" should be type (expressionS *). */

@@ -1484,6 +1484,14 @@ static operator_rankT op_rank[] =
   3,	/* O_logical_and */
   2,	/* O_logical_or */
   1,	/* O_index */
+  0,	/* O_md1 */
+  0,	/* O_md2 */
+  0,	/* O_md3 */
+  0,	/* O_md4 */
+  0,	/* O_md5 */
+  0,	/* O_md6 */
+  0,	/* O_md7 */
+  0,	/* O_md8 */
 };
 
 /* Unfortunately, in MRI mode for the m68k, multiplication and
