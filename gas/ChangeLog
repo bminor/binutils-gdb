@@ -1,3 +1,8 @@
+Wed Feb 24 10:32:42 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* app.c (do_scrub_next_char): In LEX_IS_LINE_COMMENT_START case:
+	Don't unget ch2 if we didn't get it.
+
 Wed Feb 24 04:14:07 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* doc/Makefile.in (TEXIDIR): Updated for new layout.
