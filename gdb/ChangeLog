@@ -1,5 +1,10 @@
 2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (sh_pseudo_register_read): Add PSEUDO_BANK_REGNUM handling. 
+	(sh_pseudo_register_write): Ditto.
+
+2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
+
 	* sh-tdep.c (IS_MACL_STS): New define.
 	(IS_MOVI20): Ditto.
 	(IS_MACL_LDS): Ditto.

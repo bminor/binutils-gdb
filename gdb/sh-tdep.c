@@ -1866,6 +1866,9 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum, portion;
   char temp_buffer[MAX_REGISTER_SIZE];
 
+  if (reg_nr == PSEUDO_BANK_REGNUM)
+    regcache_raw_read (regcache, BANK_REGNUM, buffer);
+  else
   if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
       base_regnum = dr_reg_base_num (reg_nr);
@@ -1902,7 +1905,19 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum, portion;
   char temp_buffer[MAX_REGISTER_SIZE];
 
-  if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
+  if (reg_nr == PSEUDO_BANK_REGNUM)
+    {
+      /* When the bank register is written to, the whole register bank
+         is switched and all values in the bank registers must be read
+	 from the target/sim again. We're just invalidating the regcache
+	 so that a re-read happens next time it's necessary.  */
+      int bregnum;
+
+      regcache_raw_write (regcache, BANK_REGNUM, buffer);
+      for (bregnum = R0_BANK0_REGNUM; bregnum < MACLB_REGNUM; ++bregnum)
+        set_register_cached (bregnum, 0);
+    }
+  else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
       base_regnum = dr_reg_base_num (reg_nr);
 
