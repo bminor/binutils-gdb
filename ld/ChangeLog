@@ -1,3 +1,20 @@
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* scripttempl/pe.sc: Specify the output arch, which Ian says is
+	the Right Thing to do.
+
+	* emultempl/pe.em: various changes to parameterize the
+	target-specific information.
+	(gld_i386pe_after_open): Detect and fix MS import libraries
+	by renaming the member objects (which are all named the same).
+
+	* pe-dll.c: various changes to parameterize the target-specific
+	information.
+	(generate_reloc): support relocs more generically to allow for
+	expansion.
+	(pe_exe_build_sections): new; used to add .relocs to .exes
+	(pe_exe_fill_sections): ditto
+
 1999-05-10  Catherine Moore  <clm@cygnus.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):
