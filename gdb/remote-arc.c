@@ -101,7 +101,7 @@ interrupt_query PARAMS ((void));
 
 extern struct target_ops arc_ops;	/* Forward decl */
 
-static int aux_reg_map[3][30] = AUX_REG_MAP;
+static int aux_reg_map[3][31] = AUX_REG_MAP;
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -450,6 +450,8 @@ arc_wait (pid, status)
 {
   unsigned char buf[PBUFSIZ];
   int thread_num = -1;
+  unsigned char cmd;
+  int proc;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -465,8 +467,33 @@ arc_wait (pid, status)
 	break;
       status->kind = TARGET_WAITKIND_STOPPED;
     }
-  arc_xfer_reg (curr_processor, 1, 1, 0, &status_reg);
 
+  if ((curr_processor != HOST_PROCESSOR) && 
+      !(cntl_reg & cntl_reg_halt_bit[HOST_PROCESSOR]))
+    {
+      cmd = cntl_reg | cntl_reg_halt_bit[HOST_PROCESSOR];
+      arc_xfer_cntlreg (0, &cmd);
+      while (1)
+	{
+	  unsigned char *p;
+	  
+	  ofunc = (void (*)()) signal (SIGINT, arc_interrupt);
+	  arc_xfer_cntlreg (1, &cntl_reg);
+	  signal (SIGINT, ofunc);
+	  if (cntl_reg & cntl_reg_halt_bit[HOST_PROCESSOR])
+	    break;
+	}
+    }
+
+  for (proc = AUDIO_PROCESSOR ; proc <= GRAPHIC_PROCESSOR; proc++)
+    {
+      if ((cntl_reg & cntl_reg_halt_bit[proc]))
+	continue;
+      cmd = cntl_reg | cntl_reg_halt_bit[proc];
+      arc_xfer_cntlreg (0, &cmd);
+    }
+
+  arc_xfer_reg (curr_processor, 1, 1, 0, &status_reg);
   return inferior_pid;
 }
 
@@ -919,9 +946,8 @@ switch_command (args, fromtty)
      char *args;
      int fromtty;
 {
-  unsigned char cmd;
-  int proc;
   struct target_waitstatus status;
+  int proc;
 
   if (strncmp (args, "audio", 3) == 0)
     proc = 0;
@@ -930,28 +956,22 @@ switch_command (args, fromtty)
   else if (strncmp (args, "host", 4) == 0)
     proc = 2;
 
-  if (cntl_reg & cntl_reg_halt_bit[proc])
+  curr_processor = proc;
+  
+  switch (proc)
     {
-      curr_processor = proc;
-      return;
+    case 0:
+      tm_print_insn = arc_get_disassembler (bfd_mach_arc_audio);
+      break;
+    case 1:
+      tm_print_insn = arc_get_disassembler (bfd_mach_arc_graphics);
+      break;
+    case 2:
+      tm_print_insn = arc_get_disassembler (bfd_mach_arc_host);
+      break;
     }
 
-  if ((proc != HOST_PROCESSOR) && 
-      !(cntl_reg & cntl_reg_halt_bit[HOST_PROCESSOR]))
-    {
-      cmd = cntl_reg | cntl_reg_halt_bit[HOST_PROCESSOR];
-      arc_xfer_cntlreg (0, &cmd);
-      curr_processor = HOST_PROCESSOR;
-      arc_wait (inferior_pid, &status);
-    }
-  if (!(cntl_reg & cntl_reg_halt_bit[proc]))
-    {
-      cmd = cntl_reg | cntl_reg_halt_bit[proc];
-      arc_xfer_cntlreg (0, &cmd);
-      curr_processor = proc;
-      arc_wait (inferior_pid, &status);
-      arc_fetch_registers (-1);
-    }
+  return;
 }
 
 

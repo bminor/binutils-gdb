@@ -358,5 +358,5 @@ get_longjmp_target(pc)
 void
 _initialize_arc_tdep ()
 {
-  tm_print_insn = print_insn_arc;
+  tm_print_insn = arc_get_disassembler (bfd_mach_arc_host);
 }
