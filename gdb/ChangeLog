@@ -1,5 +1,10 @@
 2002-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	* x86-64-linux-nat.c (i386_sse_regnum_p): New function.  Copy from
+	i386-tdep.c.
+
+2002-11-15  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.h (sigtramp_saved_pc): Delete declaration.
 	* blockframe.c (sigtramp_saved_pc): Delete function.
 	* ns32k-tdep.c (ns32k_sigtramp_saved_pc): New function.
