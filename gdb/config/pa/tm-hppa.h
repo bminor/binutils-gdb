@@ -255,10 +255,10 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
       (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \
   } while (0)
 
-/* Define DEPRECATED_REGISTERS_INFO() to do machine-specific formatting
-   of register dumps. */
+/* Define DEPRECATED_DO_REGISTERS_INFO() to do machine-specific
+   formatting of register dumps. */
 
-#define DEPRECATED_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
+#define DEPRECATED_DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
 extern void pa_do_registers_info (int, int);
 
 #if 0

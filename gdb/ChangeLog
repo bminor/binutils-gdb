@@ -1,5 +1,10 @@
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/pa/tm-hppa.h (DEPRECATED_DO_REGISTERS_INFO): Rename
+	DEPRECATED_REGISTERS_INFO.
+
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Replace `Blanket Write Privs' with `Global
 	Maintainers'.  Update `Various Maintainers'.
 
