@@ -1,8 +1,12 @@
+Fri Feb 16 13:25:31 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/unix-gdb.exp: Remove extraneous newlines from end of file.
+
 Thu Feb 15 08:12:55 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/unix-gdb.exp: Default timeout in UNIX case to 30 seconds, up
-	from dejagnu's apparent default of 10 seconds, which gives random results
-	when running the tests over NFS on moderately loaded systems.
+	from dejagnu's apparent default of 10 seconds, which gives random
+	results when running the tests over NFS on moderately loaded systems.
 	* lib/gdb.exp (gdb_run_cmd): Add "(timeout)" in timeout case.
 
 Mon Feb 12 16:50:28 1996  Fred Fish  <fnf@cygnus.com>

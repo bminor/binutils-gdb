@@ -80,10 +80,3 @@ global GDB
 set bin $GDB
 
 gdb_start
-
-
-
-
-
-
-
