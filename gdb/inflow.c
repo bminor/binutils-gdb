@@ -470,6 +470,11 @@ inferior_died ()
     set_current_frame (0);
 }
 
+#if 0 
+/* This function is just for testing, and on some systems (Sony NewsOS
+   3.2) <sys/user.h> also includes <sys/time.h> which leads to errors
+   (since on this system at least sys/time.h is not protected against
+   multiple inclusion).  */
 static void
 try_writing_regs_command ()
 {
@@ -480,7 +485,12 @@ try_writing_regs_command ()
   if (inferior_pid == 0)
     error ("There is no inferior process now.");
 
-  for (i = 0; ; i += 2)
+  /* A Sun 3/50 or 3/60 (at least) running SunOS 4.0.3 will have a
+     kernel panic if we try to write past the end of the user area.
+     Presumably Sun will fix this bug (it has been reported), but it
+     is tacky to crash the system, so at least on SunOS4 we need to
+     stop writing when we hit the end of the user area.  */
+  for (i = 0; i < sizeof (struct user); i += 2)
     {
       QUIT;
       errno = 0;
@@ -495,6 +505,7 @@ try_writing_regs_command ()
 	printf (" Failed at 0x%x.\n", i);
     }
 }
+#endif
 
 void
 _initialize_inflow ()
@@ -502,9 +513,11 @@ _initialize_inflow ()
   add_com ("term-status", class_obscure, term_status_command,
 	   "Print info on inferior's saved terminal status.");
 
+#if 0
   add_com ("try-writing-regs", class_obscure, try_writing_regs_command,
 	   "Try writing all locations in inferior's system block.\n\
 Report which ones can be written.");
+#endif
 
   add_com ("kill", class_run, kill_command,
 	   "Kill execution of program being debugged.");

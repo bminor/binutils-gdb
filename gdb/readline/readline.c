@@ -139,6 +139,14 @@ static SigHandler *old_sigwinch = (SigHandler *)NULL;
 #endif
 #endif
 
+/* Stupid comparison routine for qsort () ing strings. */
+static int
+compare_strings (s1, s2)
+  char **s1, **s2;
+{
+  return (strcmp (*s1, *s2));
+}
+
 
 /* **************************************************************** */
 /*								    */
@@ -391,6 +399,40 @@ readline_internal ()
 }
 
 
+/* Variables for keyboard macros.  */
+
+/* The currently executing macro string.  If this is non-zero,
+   then it is a malloc ()'ed string where input is coming from. */
+static char *executing_macro = (char *)NULL;
+
+/* The offset in the above string to the next character to be read. */
+static int executing_macro_index = 0;
+
+/* Non-zero means to save keys that we dispatch on in a kbd macro. */
+static int defining_kbd_macro = 0;
+
+/* The current macro string being built.  Characters get stuffed
+   in here by add_macro_char (). */
+static char *current_macro = (char *)NULL;
+
+/* The size of the buffer allocated to current_macro. */
+static int current_macro_size = 0;
+
+/* The index at which characters are being added to current_macro. */
+static int current_macro_index = 0;
+
+/* A structure used to save nested macro strings.
+   It is a linked list of string/index for each saved macro. */
+struct saved_macro {
+  struct saved_macro *next;
+  char *string;
+  int index;
+};
+
+/* The list of saved macros. */
+struct saved_macro *macro_list = (struct saved_macro *)NULL;
+
+
 /* **************************************************************** */
 /*					        		    */
 /*			   Signal Handling                          */
@@ -472,9 +514,8 @@ rl_signal_handler (sig, code, scp)
 
 rl_set_signals ()
 {
-  static int rl_signal_handler ();
-
   old_int = (SigHandler *)signal (SIGINT, rl_signal_handler);
+
   if (old_int == (SigHandler *)SIG_IGN)
     signal (SIGINT, SIG_IGN);
 
@@ -685,10 +726,12 @@ rl_dispatch (key, map)
      register int key;
      Keymap map;
 {
-  static int defining_kbd_macro;
-
   if (defining_kbd_macro)
-    add_macro_char (key);
+    {
+      static add_macro_char ();
+
+      add_macro_char (key);
+    }
 
   if (key > 127 && key < 256)
     {
@@ -769,43 +812,14 @@ rl_dispatch (key, map)
 /*								    */
 /* **************************************************************** */
 
-/* The currently executing macro string.  If this is non-zero,
-   then it is a malloc ()'ed string where input is coming from. */
-static char *executing_macro = (char *)NULL;
-
-/* The offset in the above string to the next character to be read. */
-static int executing_macro_index = 0;
-
-/* Non-zero means to save keys that we dispatch on in a kbd macro. */
-static int defining_kbd_macro = 0;
-
-/* The current macro string being built.  Characters get stuffed
-   in here by add_macro_char (). */
-static char *current_macro = (char *)NULL;
-
-/* The size of the buffer allocated to current_macro. */
-static int current_macro_size = 0;
-
-/* The index at which characters are being added to current_macro. */
-static int current_macro_index = 0;
-
-/* A structure used to save nested macro strings.
-   It is a linked list of string/index for each saved macro. */
-struct saved_macro {
-  struct saved_macro *next;
-  char *string;
-  int index;
-};
-
-/* The list of saved macros. */
-struct saved_macro *macro_list = (struct saved_macro *)NULL;
-
 /* Set up to read subsequent input from STRING.
    STRING is free ()'ed when we are done with it. */
 static
 with_macro_input (string)
      char *string;
 {
+  static push_executing_macro ();
+
   push_executing_macro ();
   executing_macro = string;
   executing_macro_index = 0;
@@ -821,6 +835,8 @@ next_macro_key ()
 
   if (!executing_macro[executing_macro_index])
     {
+      static pop_executing_macro ();
+
       pop_executing_macro ();
       return (next_macro_key ());
     }
@@ -934,6 +950,10 @@ rl_call_last_kbd_macro (count, ignore)
 }
 
 
+/* Non-zero means do not parse any lines other than comments and
+   parser directives. */
+static unsigned char parsing_conditionalized_out = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Initializations 			    */
@@ -980,7 +1000,6 @@ rl_initialize ()
 
   /* Parsing of key-bindings begins in an enabled state. */
   {
-    static unsigned char parsing_conditionalized_out;
     parsing_conditionalized_out = 0;
   }
 }
@@ -2571,6 +2590,11 @@ rl_tab_insert (count)
   rl_insert (count, '\t');
 }
 
+#ifdef VI_MODE
+/* Non-zero means enter insertion mode. */
+static vi_doing_insert = 0;
+#endif
+
 /* What to do when a NEWLINE is pressed.  We accept the whole line.
    KEY is the key that invoked this command.  I guess it could have
    meaning in the future. */
@@ -2582,7 +2606,6 @@ rl_newline (count, key)
 
 #ifdef VI_MODE
   {
-    static int vi_doing_insert;
     if (vi_doing_insert)
       {
 	rl_end_undo_group ();
@@ -3097,7 +3120,7 @@ rl_complete_internal (what_to_do)
       if (rl_ignore_completion_duplicates)
 	{
 	  char *lowest_common;
-	  int compare_strings (), j, newlen = 0;
+	  int j, newlen = 0;
 
 	  /* Sort the items. */
 	  /* It is safe to sort this array, because the lowest common
@@ -3308,7 +3331,6 @@ rl_complete_internal (what_to_do)
 	    /* Sort the items if they are not already sorted. */
 	    if (!rl_ignore_completion_duplicates)
 	      {
-		int compare_strings ();
 		qsort (matches, len, sizeof (char *), compare_strings);
 	      }
 
@@ -3360,14 +3382,6 @@ rl_complete_internal (what_to_do)
 	free (matches[i]);
       free (matches);
     }
-}
-
-/* Stupid comparison routine for qsort () ing strings. */
-static int
-compare_strings (s1, s2)
-  char **s1, **s2;
-{
-  return (strcmp (*s1, *s2));
 }
 
 /* A completion function for usernames.
@@ -4910,6 +4924,7 @@ rl_named_function (string)
      char *string;
 {
   register int i;
+  static int stricmp ();
 
   for (i = 0; funmap[i]; i++)
     if (stricmp (funmap[i]->name, string) == 0)
@@ -5006,10 +5021,6 @@ function_exit:
 /* Calling programs set this to have their argv[0]. */
 char *rl_readline_name = "other";
 
-/* Non-zero means do not parse any lines other than comments and
-   parser directives. */
-static unsigned char parsing_conditionalized_out = 0;
-
 /* Stack of previous values of parsing_conditionalized_out. */
 static unsigned char *if_stack = (unsigned char *)NULL;
 static int if_stack_depth = 0;
@@ -5020,6 +5031,7 @@ parser_if (args)
      char *args;
 {
   register int i;
+  static int stricmp ();
 
   /* Push parser state. */
   if (if_stack_depth + 1 >= if_stack_size)
@@ -5090,6 +5102,7 @@ handle_parser_directive (statement)
 {
   register int i;
   char *directive, *args;
+  static int stricmp ();
 
   /* Isolate the actual directive. */
 
@@ -5128,7 +5141,7 @@ rl_parse_and_bind (string)
 {
   extern char *possible_control_prefixes[], *possible_meta_prefixes[];
   char *rindex (), *funname, *kname;
-  static int substring_member_of_array ();
+  static int substring_member_of_array (), stricmp ();
   register int c;
   int key, i;
 
@@ -5280,7 +5293,7 @@ rl_parse_and_bind (string)
 rl_variable_bind (name, value)
      char *name, *value;
 {
-  static int strnicmp ();
+  static int strnicmp (), stricmp ();
 
   if (stricmp (name, "editing-mode") == 0)
     {
@@ -5335,6 +5348,7 @@ glean_key_from_name (name)
      char *name;
 {
   register int i;
+  static int stricmp ();
 
   for (i = 0; name_key_alist[i].name; i++)
     if (stricmp (name, name_key_alist[i].name) == 0)

@@ -392,9 +392,12 @@ value_ind (arg1)
   if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_MEMBER)
     error ("not implemented: member types in value_ind");
 
-  /* Allow * on an integer so we can cast it to whatever we want.  */
+  /* Allow * on an integer so we can cast it to whatever we want.
+     This returns an int, which seems like the most C-like thing
+     to do.  "long long" variables are rare enough that
+     BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
   if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
-    return value_at (BUILTIN_TYPE_LONGEST,
+    return value_at (builtin_type_int,
 		     (CORE_ADDR) value_as_long (arg1));
   else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
     return value_at (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),

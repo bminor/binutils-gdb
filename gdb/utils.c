@@ -287,7 +287,9 @@ fatal_dump_core (string, arg)
      char *string;
      int arg;
 {
-  fprintf (stderr, "gdb: ");
+  /* "internal error" is always correct, since GDB should never dump
+     core, no matter what the input.  */
+  fprintf (stderr, "gdb internal error: ");
   fprintf (stderr, string, arg);
   fprintf (stderr, "\n");
   signal (SIGQUIT, SIG_DFL);
@@ -698,7 +700,7 @@ fprintf_filtered (stream, format, arg1, arg2, arg3, arg4, arg5, arg6)
 
   /* This won't blow up if the restrictions described above are
      followed.   */
-  (void) sprintf (linebuffer, format, arg1, arg2, arg3);
+  (void) sprintf (linebuffer, format, arg1, arg2, arg3, arg4, arg5, arg6);
 
   fputs_filtered (linebuffer, stream);
 }

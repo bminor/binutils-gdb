@@ -739,7 +739,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 			       lval_memory);
 	  else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
-	    return value_zero (BUILTIN_TYPE_LONGEST, lval_memory);
+	    return value_zero (builtin_type_int, lval_memory);
 	  else
 	    error ("Attempt to take contents of a non-pointer value.");
 	}

@@ -773,6 +773,10 @@ print_base (regno, disp, stream)
     fprintf_filtered (stream, "%d(%s)", disp, reg_names[regno]);
 }
 
+/* Nonzero if the host system has a 68881 (or compatible)
+   floating-point unit.  This does *not* indicate whether the target
+   system has a co-processor, just whether the host system does.
+   There might be a difference in the case of remote debugging.  */
 static int have_fpu = 1;
 
 /* This is not part of insn printing, but it is machine-specific,

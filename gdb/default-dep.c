@@ -189,16 +189,16 @@ read_inferior_memory (memaddr, myaddr, len)
     {
       errno = 0;
 #if 0
-This is now done by read_memory, because when this function did it,
-  reading a byte or short int hardware port read whole longs, causing
-  serious side effects
-  such as bus errors and unexpected hardware operation.  This would
-  also be a problem with ptrace if the inferior process could read
-  or write hardware registers, but that's not usually the case.
+  /* This is now done by read_memory, because when this function did it,
+     reading a byte or short int hardware port read whole longs, causing
+     serious side effects
+     such as bus errors and unexpected hardware operation.  This would
+     also be a problem with ptrace if the inferior process could read
+     or write hardware registers, but that's not usually the case.  */
       if (remote_debugging)
 	buffer[i] = remote_fetch_word (addr);
-#endif
       else
+#endif
 	buffer[i] = ptrace (1, inferior_pid, addr, 0);
       if (errno)
 	return errno;
@@ -413,6 +413,11 @@ core_file_command (filename, from_tty)
 	  perror_with_name ("Not a core file: reading upage");
 	if (val != sizeof u)
 	  error ("Not a core file: could only read %d bytes", val);
+
+	/* We are depending on exec_file_command having been called
+	   previously to set exec_data_start.  Since the executable
+	   and the core file share the same text segment, the address
+	   of the data segment will be the same in both.  */
 	data_start = exec_data_start;
 
 	data_end = data_start + NBPG * u.u_dsize;

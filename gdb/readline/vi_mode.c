@@ -13,9 +13,6 @@
 static char *vi_last_search = (char *)NULL;
 static int vi_histpos;
 
-/* Non-zero means enter insertion mode. */
-static vi_doing_insert = 0;
-
 /* *** UNCLEAN *** */
 /* Command keys which do movement for xxx_to commands. */
 static char *vi_motion = " hl^$0ftFt;,%wbeWBE|";

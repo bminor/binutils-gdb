@@ -287,34 +287,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-/* on the 386, the instruction following the call could be:
- *  popl %ecx        -  one arg
- *  addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
- *  anything else    -  zero args
- */
-#define FRAME_NUM_ARGS(numargs, fi)  { \
-  int retpc;						\
-  unsigned char op;					\
-  struct frame_info *pfi;				\
-  pfi = get_prev_frame_info ((fi));			\
-  retpc = pfi->pc;					\
-  numargs = 0;						\
-  op = read_memory_integer (retpc, 1);			\
-  if (op == 0x59)					\
-	  /* pop %ecx */				\
-	  (numargs) = 1;				\
-  else if (op == 0x83) {				\
-	  op = read_memory_integer (retpc+1, 1);	\
-	  if (op == 0xc4)				\
-		  /* addl $<signed imm 8 bits>, %esp */	\
-		  (numargs) = (read_memory_integer (retpc+2,1)&0xff)/4;\
-  } else if (op == 0x81) { /* add with 32 bit immediate */\
-	  op = read_memory_integer (retpc+1, 1);	\
-	  if (op == 0xc4)				\
-		  /* addl $<imm 32>, %esp */		\
-		  (numargs) = read_memory_integer (retpc+2, 4) / 4;\
-  }							\
-}
+#define FRAME_NUM_ARGS(numargs, fi) (numargs) = i386_frame_num_args(fi)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

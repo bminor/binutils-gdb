@@ -40,9 +40,9 @@ original English.
 @sp 1
 @center The GNU Source-Level Debugger
 @sp 4
-@center Third Edition, GDB version 3.2
+@center Third Edition, GDB version 3.4
 @sp 1
-@center April 1989
+@center October 1989
 @sp 5
 @center Richard M. Stallman
 @page
@@ -669,6 +669,9 @@ correct, but there's no sense in pushing your luck.
 GDB no longer supports the debugging information produced by giving the
 GNU C compiler the @samp{-gg} option, so do not use this option.
 
+@ignore
+@comment As far as I know, there are no cases in which GDB will
+@comment produce strange output in this case.  (but no promises).
 If your program includes archives made with the @code{ar} program, and
 if the object files used as input to @code{ar} were compiled without the
 @samp{-g} option and have names longer than 15 characters, GDB will get
@@ -680,6 +683,7 @@ names longer than 15 characters.
 To avoid this problem, compile the archive members with the @samp{-g}
 option or use shorter file names.  Alternatively, use a version of GNU
 @code{ar} dated more recently than August 1989.
+@end ignore
 
 @node Running, Stopping, Compilation, Top
 @chapter Running Your Program Under GDB
@@ -3341,13 +3345,19 @@ to correspond properly to the code.
 @node Remote, Commands, Emacs, Top
 @chapter Remote Kernel Debugging
 
-GDB has a special facility for debugging a remote machine via a serial
-connection.  This can be used for kernel debugging.
+If you are trying to debug a program running on a machine that can't run
+GDB in the usual way, it is often useful to use remote debugging.  For
+example, you might be debugging an operating system kernel, or debugging
+a small system which does not have a general purpose operating system
+powerful enough to run a full-featured debugger.  Currently GDB supports
+remote debugging over a serial connection.
 
 The program to be debugged on the remote machine needs to contain a
 debugging device driver which talks to GDB over the serial line using the
 protocol described below.  The same version of GDB that is used ordinarily
-can be used for this.
+can be used for this.  Several sample remote debugging drivers are
+distributed with GDB; see the @file{README} file in the GDB distribution for
+more information.
 
 @menu
 * Remote Commands::       Commands used to start and finish remote debugging.

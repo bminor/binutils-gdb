@@ -101,6 +101,18 @@ fix to bug-gdb@prep.ai.mit.edu.  */
 
 #define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))
 
+/* Same as offsetof macro from stddef.h (which 4.3BSD doesn't have).  */
+#define my_offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+
+/* On the VAX, sigtramp is in the u area.  Note that this definition
+   includes both the subroutine at u_pcb.pcb_sigc[3], and the
+   routine at u_pcb.pcb_sigc[0] (which does a calls to u_pcb.pcb_sigc[3]).
+   I think this is what we want.  */
+#define IN_SIGTRAMP(pc, name) \
+  ((pc) >= KERNEL_U_ADDR + my_offsetof (struct user, u_pcb.pcb_sigc[0])   \
+   && (pc) < KERNEL_U_ADDR + my_offsetof (struct user, u_pcb.pcb_sigc[5]) \
+   )
+
 /* Address of end of stack space.  */
 
 #define STACK_END_ADDR (0x80000000 - (UPAGES * NBPG))
@@ -285,13 +297,27 @@ fix to bug-gdb@prep.ai.mit.edu.  */
 
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 16, 4))
 
-/* Cannot find the AP register value directly from the FP value.
-   Must find it saved in the frame called by this one, or in the AP register
-   for the innermost frame.  */
+/* Cannot find the AP register value directly from the FP value.  Must
+   find it saved in the frame called by this one, or in the AP
+   register for the innermost frame.  However, there is no way to tell
+   the difference between the innermost frame and a frame for which we
+   just don't know the frame that it called (e.g. "info frame
+   0x7ffec789").  For the sake of argument suppose that the stack is
+   somewhat trashed (which is one reason that "info frame" exists).
+   So return Frame_unknown (indicating we don't know the address of
+   the arglist) if we don't know what frame this frame calls.  */
+#define FRAME_ARGS_ADDRESS_CORRECT(fi) \
+ (((fi)->next_frame                                  \
+   ? read_memory_integer ((fi)->next_frame + 8, 4)   \
+   : /* read_register (AP_REGNUM) */ Frame_unknown))
+
+/* In most of GDB, getting the args address is too important to
+   just say "I don't know".  This is sometimes wrong, but c'est
+   la vie.  */
 #define FRAME_ARGS_ADDRESS(fi) \
  (((fi)->next_frame                                  \
    ? read_memory_integer ((fi)->next_frame + 8, 4)   \
-   : read_register (AP_REGNUM)))
+   : read_register (AP_REGNUM) /* Frame_unknown */))
 
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 

@@ -747,9 +747,7 @@ symbol_file_command (name)
   if (num_symbols == 0)
     {
       free_all_symtabs ();
-      printf ("%s does not have a symbol-table.\n", name);
-      fflush (stdout);
-      return;
+      error ("%s does not have a symbol-table.\n", name);
     }
 
   printf ("Reading symbol data from %s...", name);
@@ -814,7 +812,7 @@ symbol_file_command (name)
 
   /* Make a default for file to list.  */
 
-  select_source_symtab (symtab_list);
+  select_source_symtab (0);
 
   symfile = savestring (name, strlen (name));
 

@@ -34,6 +34,11 @@ static char *xmalloc (), *xrealloc ();
 
 FUNMAP **funmap = (FUNMAP **)NULL;
 static int funmap_size = 0;
+
+static int just_testing_ar_tmp = 0;
+static int just_testing_ar_tmp_2 = 5;
+int foo_testing_ar;
+
 static int funmap_entry = 0;
 
 static FUNMAP default_funmap[] = {

@@ -51,34 +51,39 @@ news)
 sun2)
 	case $os in
 	os4|sunos4)
-		$machine=sun2os4
-		$os=""
+		machine=sun2os4
+		os=""
 	;;
 	os2|sunos2)
-		$machine=sun2os2
-		$os=""
+		machine=sun2os2
+		os=""
 		;;
 	esac
 	;;
 sun3)
 	case $os in
 	os4|sunos4)
-		$machine=sun3os4
-		$os=""
+		machine=sun3os4
+		os=""
 		;;
 	os3|sunos3)
-		$machine=sun3os3
-		$os=""
+		machine=sun3os3
+		os=""
 		;;
 	esac
 	;;
 sparc|sun4)
 	case $os in
 	os4|sunos4)
-		$machine=sun4os4
-		$os=""
+		machine=sun4os4
+		os=""
 		;;
 	esac
+	;;
+# GCC accepts sequent-i386 or symmetry, so be consistent.
+sequent-i386)
+	machine=symmetry
+	os=""
 	;;
 esac
 
@@ -117,7 +122,10 @@ altosgas)
 	;;
 vax)
 	echo
-	echo "/bin/cc has been known to fail on readline.c on VAXen running BSD4.3"
+# The following types of /bin/cc failures have been observed:
+# 1.  Something in readline.c which I have never seen
+# 2.  ``"values.c", line 816: compiler error: schain botch''
+	echo "/bin/cc has been known to fail on VAXen running BSD4.3"
 	echo "If this occurs, use gcc "
 	echo " (but see comments in Makefile.dist about compiling with gcc)."
 	echo
@@ -166,13 +174,17 @@ i386gas)
 # of this file about unneeded files.
 	opcodefile=m-i386.h
 	;;
-i386-sysv3.2)
+# These names are short and cryptic due to the @#$#!@#$@! System V
+# 14 character file name limit.
+i386-sv32)
 	makedefine="-DM_CLIBS=-lPW -DM_SYSV -DM_REGEX=regex.o"
 	pinsnfile=i386-pinsn.c
 	depfile=i386-dep.c
-	opcodefile=/dev/null
+# The following is a lie, but a necessary one.  See comment at beginning
+# of this file about unneeded files.
+	opcodefile=m-i386.h
 	;;
-i386gas-sysv3.2)
+i386g-sv32)
 	makedefine="-DM_CLIBS=-lPW -DM_SYSV -DM_REGEX=regex.o"
 	echo
 	echo "Use of the coff encapsulation features requires the GNU binary utilities"
@@ -180,7 +192,9 @@ i386gas-sysv3.2)
 	echo
 	pinsnfile=i386-pinsn.c
 	depfile=i386-dep.c
-	opcodefile=/dev/null
+# The following is a lie, but a necessary one.  See comment at beginning
+# of this file about unneeded files.
+	opcodefile=m-i386.h
 	;;
 merlin)
 	pinsnfile=ns32k-pinsn.c
@@ -256,9 +270,12 @@ sun4os4|sun4-os4)
 	depfile=sparc-dep.c
 	;;	
 symmetry)
+	paramfile=m-symmetry.h
+	depfile=symmetry-dep.c
 	pinsnfile=i386-pinsn.c
-# Need *some* opcode file to keep make from trying to make opcode.h
-	opcodefile=/dev/null
+# The following is a lie, but a necessary one.  See comment at beginning
+# of this file about unneeded files.
+	opcodefile=m-i386.h
 	;;
 umax)
 	pinsnfile=ns32k-pinsn.c

@@ -57,8 +57,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Symbol types to ignore.  */
 
+#if defined (N_MONPT)
 #define IGNORE_SYMBOL(TYPE) \
-    (((TYPE) & ~N_EXT) == N_TBSS || ((TYPE) & ~N_EXT) == N_TDATA)
+    (((TYPE) & ~N_EXT) == N_TBSS       \
+     || ((TYPE) & ~N_EXT) == N_TDATA   \
+     || ((TYPE) & ~N_EXT) == N_MONPT)
+#else /* no N_MONPT */
+#define IGNORE_SYMBOL(TYPE) \
+    (((TYPE) & ~N_EXT) == N_TBSS       \
+     || ((TYPE) & ~N_EXT) == N_TDATA)
+#endif /* no N_MONPT */
 
 /* Use SIGCONT rather than SIGTSTP because convex Unix occasionally
    turkeys SIGTSTP.  I think.  */
@@ -119,7 +127,7 @@ extern unsigned text_end;
 #define SAVED_PC_AFTER_CALL(frame) \
     read_memory_integer (read_register (SP_REGNUM), 4)
 
-/* Address of end of stack space.  
+/* Address of end of stack space.
    This is ((USRSTACK + 0xfff) & -0x1000)) from <convex/vmparam.h> but
    that expression depends on the kernel version; instead, fetch a
    page-zero pointer and get it from that.  This will be invalid if
@@ -149,7 +157,7 @@ extern unsigned text_end;
 #define BREAKPOINT {0x7d,0x50}
 
 /* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT but not always.  
+   This is often the number of bytes in BREAKPOINT but not always.
    (The break PC needs to be decremented by 2, but we do it when the
    break frame is recognized and popped.  That way gdb can tell breaks
    from trace traps with certainty.) */
@@ -228,7 +236,7 @@ extern unsigned text_end;
 #define REGISTER_BYTES (4*10 + 8*8)
 
 /* Index within `registers' of the first byte of the space for
-   register N. 
+   register N.
    NB: must match structure of struct syscall_context for correct operation */
 
 #define REGISTER_BYTE(N) ((N) < s7_REGNUM ? 4*(N) : \
@@ -370,7 +378,7 @@ extern struct value *value_of_trapped_internalvar ();
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  
+   does not, FRAMELESS is set to 1, else 0.
    On convex, check at the return address for `callq' -- if so, frameless,
    otherwise, not.  */
 

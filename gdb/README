@@ -19,14 +19,17 @@ emacs 18.55 or later.
 
 About languages other than C...
 
-C++ support has been integrated into gdb.  GDB should work with Pascal
-and FORTRAN programs, but I am not aware of anyone who is working on
-getting it to use the syntax of any language other than C or C++.
+C++ support has been integrated into gdb.  GDB should work with
+FORTRAN programs (if you have problem, please send a bug report), but
+I am not aware of anyone who is working on getting it to use the
+syntax of any language other than C or C++.  Pascal programs which use
+sets, subranges, file variables, or nested functions will not
+currently work.
 
 About -gg format...
 
 Currently GDB version 3.x does *not* support GCC's -gg format.  This
-is because it is (in theory) has fast enough startup on dbx debugging
+is because it (in theory) has fast enough startup on dbx debugging
 format object files that -gg format is unnecessary (and hence
 undesirable, since it wastes space and processing power in gcc).  I
 would like to hear people's opinions on the amount of time currently
@@ -97,30 +100,31 @@ operating system-dependent).  If this is unavoidable, put a hook in
 the machine-independent file which calls a (possibly)
 machine-dependent macro (for example, the IGNORE_SYMBOL macro can be
 used for any symbols which need to be ignored on a specific machine.
-Calling IGNORE_SYMBOL in dbxread.c is a lot cleaner than a maze of
-#if defined's).  The machine-independent code should do whatever "most"
-machines want if the macro is not defined in param.h.  Using #if defined
-can sometimes be OK (e.g.  SET_STACK_LIMIT_HUGE) but should usually be
+Calling IGNORE_SYMBOL in dbxread.c is a lot cleaner than a maze of #if
+defined's).  The machine-independent code should do whatever "most"
+machines want if the macro is not defined in param.h.  Using #if
+defined can sometimes be OK (e.g.  SET_STACK_LIMIT_HUGE) but should be
 conditionalized on a specific feature of an operating system (set in
-param.h) rather than something like #if defined(vax) or #if defined(SYSV).
+param.h) rather than something like #if defined(vax) or #if
+defined(SYSV).
 
 It is better to replace entire routines which may be system-specific,
 rather than put in a whole bunch of hooks which are probably not going
 to be helpful for any purpose other than your changes.  For example,
 if you want to modify dbxread.c to deal with DBX debugging symbols
-which are in COFF files rather than a.out files, do something
+which are in COFF files rather than BSD a.out files, do something
 along the lines of a macro GET_NEXT_SYMBOL, which could have
 different definitions for COFF and a.out, rather than trying to put
 the necessary changes throughout all the code in dbxread.c that
-currently assumes a.out format.
+currently assumes BSD format.
 
 Please avoid duplicating code.  For example, if something needs to be
 changed in read_inferior_memory, it is very painful because there is a
-copy in every dep.c file.  The correct way to do this is to put the
-standard ptrace interfaces in a separate file ptrace.c, which is used
-by all systems which have ptrace.  ptrace.c would deal with variations
-between systems the same way any system-independent file would (hooks,
-#if defined, etc.).
+copy in every dep.c file.  The correct way to do this is to put (in
+this case) the standard ptrace interfaces in a separate file ptrace.c,
+which is used by all systems which have ptrace.  ptrace.c would deal
+with variations between systems the same way any system-independent
+file would (hooks, #if defined, etc.).
 
 About debugging gdb with itself...
 
@@ -128,11 +132,9 @@ You probably want to do a "make TAGS" after you configure your
 distribution; this will put the machine dependent routines for your
 local machine where they will be accessed first by a M-period .
 
-Also, you want to make sure that gdb is not compiled with shared
-libraries on the Sun 4.  And you want to make sure that you've
-compiled gdb with your local cc or taken appropriate precautions
-regarding ansification of include files.  See the Makefile for more
-information. 
+Also, make sure that you've compiled gdb with your local cc or taken
+appropriate precautions regarding ansification of include files.  See
+the Makefile for more information.
 
 The "info" command, when executed without a subcommand in a gdb being
 debugged by gdb, will pop you back up to the top level gdb.  See

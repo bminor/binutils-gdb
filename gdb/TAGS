@@ -2,48 +2,48 @@
 dbxread.c,2354
 #define IGNORE_SYMBOL(164,4914
 #define IGNORE_SYMBOL(169,5028
-#define	MAX_OF_TYPE(4957,136182
-#define MIN_OF_TYPE(4958,136235
+#define	MAX_OF_TYPE(5113,141022
+#define MIN_OF_TYPE(5114,141075
 #define READ_FILE_HEADERS(211,6321
 #define READ_FILE_HEADERS(218,6571
 #define READ_STRING_TABLE_SIZE(197,5872
 #define	SET_ELEMENT_P(85,2728
 #define STAB_REG_TO_REGNUM(264,8007
 #define TYPE_OF_SET_ELEMENT(86,2788
-_initialize_dbxread 5237,144381
+_initialize_dbxread 5393,149221
 add_bincl_to_list 1824,50638
-add_file_command 3525,97352
+add_file_command 3616,99938
 add_new_header_file 686,20412
 add_old_header_file 657,19394
 add_symbol_to_list 867,25287
 add_this_object_header_file 637,18767
-add_undefined_type 3904,108372
-cleanup_undefined_types 3920,108815
+add_undefined_type 4073,113549
+cleanup_undefined_types 4089,113992
 compare_misc_functions 1399,39494
-compare_psymbols 2571,70005
+compare_psymbols 2662,72591
 compare_symbols 1487,41458
-condense_addl_misc_bunches 3322,91797
+condense_addl_misc_bunches 3413,94383
 condense_misc_bunches 1428,40167
-copy_pending 5201,143523
+copy_pending 5357,148363
 dbx_alloc_type 814,24174
 dbx_create_type 797,23649
 dbx_lookup_type 746,22223
-define_symbol 3661,100810
+define_symbol 3778,104025
 discard_misc_bunches 1412,39806
-end_psymtab 2595,70719
+end_psymtab 2686,73305
 end_symtab 1207,34565
 explicit_lookup_type 846,24755
-fill_in_vptr_fieldno 5189,143190
+fill_in_vptr_fieldno 5345,148030
 fill_symbuf 1764,48931
 find_corresponding_bincl_psymtab 1849,51331
 finish_block 932,26830
-fix_common_block 5223,144077
-    for 2521,68680
+fix_common_block 5379,148917
+    for 2612,71266
 free_bincl_list 1867,51719
 free_header_files 612,18133
 get_sym_file 1740,48273
-hash_symsegs 3059,84015
-hashname 3032,83492
+hash_symsegs 3150,86601
+hashname 3123,86078
 init_bincl_list 1812,50383
 init_header_files 599,17782
 init_misc_functions 1361,38562
@@ -54,28 +54,28 @@ next_symbol_text 1780,49407
 obconcat 508,14582
 obsavestring 486,14075
 pop_subfile 1319,37721
-process_one_symbol 3090,84833
-psymtab_to_symtab(2736,74790
-psymtab_to_symtab_1 2673,73083
+process_one_symbol 3181,87419
+psymtab_to_symtab(2827,77376
+psymtab_to_symtab_1 2764,75669
 push_subfile 1305,37370
-read_addl_syms 3365,92819
-read_args 5147,142033
-read_array_type 4797,131732
+read_addl_syms 3456,95405
+read_args 5303,146873
+read_array_type 4953,136572
 read_dbx_symtab 1891,52496
-read_enum_type 4874,133737
-read_number 5108,141320
-read_ofile_symtab 2918,79777
-read_range_type 4961,136307
-read_struct_type 4300,118149
-read_type 3997,110898
-read_type_number 3970,110243
+read_enum_type 5030,138577
+read_number 5264,146160
+read_ofile_symtab 3009,82363
+read_range_type 5117,141147
+read_struct_type 4445,122700
+read_type 4142,115449
+read_type_number 3758,103693
 really_free_pendings 896,26045
 record_line 1065,30528
 record_misc_function 1369,38676
-scan_file_globals 2845,77745
+scan_file_globals 2936,80331
 sort_syms 1508,42042
 sort_symtab_syms 1517,42168
-start_psymtab 2540,69215
+start_psymtab 2631,71801
 start_subfile 1149,32781
 start_symtab 1096,31315
 symbol_file_command 1557,43492
@@ -83,13 +83,13 @@ xxmalloc 470,13738
 
 blockframe.c,647
 #define FRAMELESS_LOOK_FOR_PROLOGUE(163,4369
-_initialize_blockframe 587,15557
+_initialize_blockframe 595,15906
 block_for_pc 351,9907
-block_innermost_frame 566,15144
+block_innermost_frame 574,15493
 create_new_frame 80,2165
 find_pc_function 422,11439
-find_pc_misc_function 521,13741
-find_pc_partial_function 437,11845
+find_pc_misc_function 529,14090
+find_pc_partial_function 445,12194
 flush_cached_frames 132,3234
 get_current_block 311,9005
 get_current_frame 64,1933
@@ -154,48 +154,48 @@ until_break_command 803,20231
 dbxread.c,2354
 #define IGNORE_SYMBOL(164,4914
 #define IGNORE_SYMBOL(169,5028
-#define	MAX_OF_TYPE(4957,136182
-#define MIN_OF_TYPE(4958,136235
+#define	MAX_OF_TYPE(5113,141022
+#define MIN_OF_TYPE(5114,141075
 #define READ_FILE_HEADERS(211,6321
 #define READ_FILE_HEADERS(218,6571
 #define READ_STRING_TABLE_SIZE(197,5872
 #define	SET_ELEMENT_P(85,2728
 #define STAB_REG_TO_REGNUM(264,8007
 #define TYPE_OF_SET_ELEMENT(86,2788
-_initialize_dbxread 5237,144381
+_initialize_dbxread 5393,149221
 add_bincl_to_list 1824,50638
-add_file_command 3525,97352
+add_file_command 3616,99938
 add_new_header_file 686,20412
 add_old_header_file 657,19394
 add_symbol_to_list 867,25287
 add_this_object_header_file 637,18767
-add_undefined_type 3904,108372
-cleanup_undefined_types 3920,108815
+add_undefined_type 4073,113549
+cleanup_undefined_types 4089,113992
 compare_misc_functions 1399,39494
-compare_psymbols 2571,70005
+compare_psymbols 2662,72591
 compare_symbols 1487,41458
-condense_addl_misc_bunches 3322,91797
+condense_addl_misc_bunches 3413,94383
 condense_misc_bunches 1428,40167
-copy_pending 5201,143523
+copy_pending 5357,148363
 dbx_alloc_type 814,24174
 dbx_create_type 797,23649
 dbx_lookup_type 746,22223
-define_symbol 3661,100810
+define_symbol 3778,104025
 discard_misc_bunches 1412,39806
-end_psymtab 2595,70719
+end_psymtab 2686,73305
 end_symtab 1207,34565
 explicit_lookup_type 846,24755
-fill_in_vptr_fieldno 5189,143190
+fill_in_vptr_fieldno 5345,148030
 fill_symbuf 1764,48931
 find_corresponding_bincl_psymtab 1849,51331
 finish_block 932,26830
-fix_common_block 5223,144077
-    for 2521,68680
+fix_common_block 5379,148917
+    for 2612,71266
 free_bincl_list 1867,51719
 free_header_files 612,18133
 get_sym_file 1740,48273
-hash_symsegs 3059,84015
-hashname 3032,83492
+hash_symsegs 3150,86601
+hashname 3123,86078
 init_bincl_list 1812,50383
 init_header_files 599,17782
 init_misc_functions 1361,38562
@@ -206,35 +206,35 @@ next_symbol_text 1780,49407
 obconcat 508,14582
 obsavestring 486,14075
 pop_subfile 1319,37721
-process_one_symbol 3090,84833
-psymtab_to_symtab(2736,74790
-psymtab_to_symtab_1 2673,73083
+process_one_symbol 3181,87419
+psymtab_to_symtab(2827,77376
+psymtab_to_symtab_1 2764,75669
 push_subfile 1305,37370
-read_addl_syms 3365,92819
-read_args 5147,142033
-read_array_type 4797,131732
+read_addl_syms 3456,95405
+read_args 5303,146873
+read_array_type 4953,136572
 read_dbx_symtab 1891,52496
-read_enum_type 4874,133737
-read_number 5108,141320
-read_ofile_symtab 2918,79777
-read_range_type 4961,136307
-read_struct_type 4300,118149
-read_type 3997,110898
-read_type_number 3970,110243
+read_enum_type 5030,138577
+read_number 5264,146160
+read_ofile_symtab 3009,82363
+read_range_type 5117,141147
+read_struct_type 4445,122700
+read_type 4142,115449
+read_type_number 3758,103693
 really_free_pendings 896,26045
 record_line 1065,30528
 record_misc_function 1369,38676
-scan_file_globals 2845,77745
+scan_file_globals 2936,80331
 sort_syms 1508,42042
 sort_symtab_syms 1517,42168
-start_psymtab 2540,69215
+start_psymtab 2631,71801
 start_subfile 1149,32781
 start_symtab 1096,31315
 symbol_file_command 1557,43492
 xxmalloc 470,13738
 
 coffread.c,1153
-_initialize_coff 1997,51184
+_initialize_coff 1995,51136
 add_symbol_to_list 239,6659
 coff_alloc_type 216,6044
 coff_lookup_type 191,5303
@@ -242,34 +242,34 @@ compare_misc_functions 574,15824
 compare_symbols 643,17250
 complete_symtab 420,11661
 condense_misc_bunches 600,16328
-decode_base_type 1695,43602
-decode_function_type 1680,43270
-decode_type 1611,41633
+decode_base_type 1693,43554
+decode_function_type 1678,43222
+decode_type 1609,41585
 discard_misc_bunches 587,16136
 end_symtab 443,12339
-enter_linenos 1325,33811
-fill_in_vptr_fieldno 1976,50629
+enter_linenos 1323,33763
+fill_in_vptr_fieldno 1974,50581
 finish_block 255,7053
-free_stringtab 1244,32313
-get_sym_file 830,22060
-getfilename 1272,32775
-getsymname 1252,32409
-hashname 1349,34504
-init_lineno 1301,33409
+free_stringtab 1242,32265
+get_sym_file 828,22012
+getfilename 1270,32727
+getsymname 1250,32361
+hashname 1347,34456
+init_lineno 1299,33361
 init_misc_functions 530,14772
-init_stringtab 1207,31526
+init_stringtab 1205,31478
 make_blockvector 334,9209
-patch_opaque_types 1397,35664
-patch_type 1370,34784
-process_coff_symbol 1458,37365
-psymtab_to_symtab 1989,50997
-read_aout_hdr 1143,30011
-read_coff_symtab 853,22645
-read_enum_type 1894,48302
-read_file_hdr 1106,29439
-read_one_sym 1177,30725
-read_section_hdr 1156,30264
-read_struct_type 1799,45905
+patch_opaque_types 1395,35616
+patch_type 1368,34736
+process_coff_symbol 1456,37317
+psymtab_to_symtab 1987,50949
+read_aout_hdr 1141,29963
+read_coff_symtab 851,22597
+read_enum_type 1892,48254
+read_file_hdr 1104,29391
+read_one_sym 1175,30677
+read_section_hdr 1154,30216
+read_struct_type 1797,45857
 record_line 372,10317
 record_misc_function 538,14886
 sort_syms 655,17641
@@ -299,19 +299,19 @@ core.c,428
 #define N_MAGIC(37,1073
 #define N_MAGIC(39,1116
 #define N_TXTADDR(56,1392
-_initialize_core(501,11926
-close_exec_file 161,3640
-files_info 222,4960
-get_exec_file 206,4709
-have_core_file_p 216,4899
-myread 457,11172
-read_memory 274,6239
-register_addr 484,11657
-reopen_exec_file 169,3729
-specify_exec_file_hook 150,3406
-validate_files 185,4128
-write_memory 298,6798
-xfer_core_file 324,7539
+_initialize_core(501,11938
+close_exec_file 161,3652
+files_info 222,4972
+get_exec_file 206,4721
+have_core_file_p 216,4911
+myread 457,11184
+read_memory 274,6251
+register_addr 484,11669
+reopen_exec_file 169,3741
+specify_exec_file_hook 150,3418
+validate_files 185,4140
+write_memory 298,6810
+xfer_core_file 324,7551
 
 environ.c,205
 environ_vector 87,2273
@@ -327,9 +327,9 @@ unset_in_environ 155,3497
 eval.c,320
 evaluate_expression 119,3366
 evaluate_subexp 138,3760
-evaluate_subexp_for_address 888,25910
-evaluate_subexp_for_sizeof 983,28436
-evaluate_subexp_with_coercion 951,27623
+evaluate_subexp_for_address 888,25906
+evaluate_subexp_for_sizeof 983,28432
+evaluate_subexp_with_coercion 951,27619
 evaluate_type 130,3614
 parse_and_eval 62,1782
 parse_and_eval_address 31,978
@@ -384,7 +384,7 @@ until_next_command 445,10390
 write_pc 757,17808
 
 inflow.c,335
-_initialize_inflow 500,11655
+_initialize_inflow 511,12264
 create_inferior 365,8512
 inferior_died 459,10830
 kill_command 447,10602
@@ -395,116 +395,117 @@ terminal_init_inferior 109,2609
 terminal_ours 193,4436
 terminal_ours_1 202,4530
 terminal_ours_for_output 180,4199
-try_writing_regs_command 474,11137
+try_writing_regs_command 479,11383
 
-infrun.c,422
-_initialize_infrun 1340,40505
-attach_program 423,12649
-clear_proceed_status 238,7822
-handle_command 1135,33944
-insert_step_breakpoint 1113,33367
-normal_stop 1005,30118
-proceed 266,8680
-remove_step_breakpoint 1125,33669
-restore_inferior_status 1294,39027
-save_inferior_status 1263,37798
-signals_info 1222,36546
-start_inferior 358,11034
-start_remote 405,12289
-wait_for_inferior 447,13290
-writing_pc 345,10713
+infrun.c,452
+#define IN_SIGTRAMP(166,5961
+_initialize_infrun 1366,41425
+attach_program 448,13556
+clear_proceed_status 263,8729
+handle_command 1161,34864
+insert_step_breakpoint 1139,34287
+normal_stop 1031,31038
+proceed 291,9587
+remove_step_breakpoint 1151,34589
+restore_inferior_status 1320,39947
+save_inferior_status 1289,38718
+signals_info 1248,37466
+start_inferior 383,11941
+start_remote 430,13196
+wait_for_inferior 472,14197
+writing_pc 370,11620
 
 kdb-start.c,14
 start 29,911
 
 main.c,1395
 #define ISATTY(47,1291
-add_com 1066,26905
-add_com_alias 1078,27132
-add_info 1034,26190
-add_info_alias 1045,26383
+add_com 1096,28194
+add_com_alias 1108,28421
+add_info 1064,27479
+add_info_alias 1075,27672
 catch_errors 177,4170
-catch_termination 763,19120
-cd_command 1318,32114
-command_line_input 818,20970
-command_loop 495,12271
-define_command 1124,27925
+catch_termination 793,20409
+cd_command 1348,33403
+command_line_input 848,22259
+command_loop 525,13560
+define_command 1154,29214
 disconnect 207,4712
-do_nothing 488,12171
-document_command 1164,28926
-dont_repeat 519,12935
-dump_me_command 1433,34141
-echo_command 1407,33757
-editing_info 1482,35163
-error_no_arg 1088,27330
-execute_command 445,11096
-float_handler 1665,39616
-free_command_lines 1016,25881
-gdb_readline 536,13456
-help_command 1095,27424
-info_command 1057,26711
-initialize_cmd_lists 1672,39713
-initialize_main 1686,40170
-initialize_signals 778,19567
-input_from_terminal_p 1297,31668
+do_nothing 518,13460
+document_command 1194,30215
+dont_repeat 549,14224
+dump_me_command 1463,35430
+echo_command 1437,35046
+editing_info 1512,36452
+error_no_arg 1118,28619
+execute_command 475,12385
+float_handler 1695,40905
+free_command_lines 1046,27170
+gdb_readline 566,14745
+help_command 1125,28713
+info_command 1087,28000
+initialize_cmd_lists 1702,41002
+initialize_main 1716,41459
+initialize_signals 808,20856
+input_from_terminal_p 1327,32957
 main 231,5192
-parse_binary_operation 1443,34288
-print_gdb_version 1209,29850
-print_prompt 1229,30348
-pwd_command 1303,31739
-quit_command 1276,31154
-read_command_lines 965,24579
+parse_binary_operation 1473,35577
+print_gdb_version 1239,31139
+print_prompt 1259,31637
+pwd_command 1333,33028
+quit_command 1306,32443
+read_command_lines 995,25868
 return_to_top_level 160,3706
-set_editing 1472,34921
-set_history 1596,38350
-set_history_expansion 1580,38024
-set_history_filename 1616,38738
-set_history_size 1605,38571
-set_history_write 1588,38193
-set_prompt_command 1238,30489
-set_verbose_command 1645,39221
+set_editing 1502,36210
+set_history 1626,39639
+set_history_expansion 1610,39313
+set_history_filename 1646,40027
+set_history_size 1635,39860
+set_history_write 1618,39482
+set_prompt_command 1268,31778
+set_verbose_command 1675,40510
 source_cleanup 220,5004
-source_command 1378,33251
-stop_sig 711,17950
-symbol_completion_function 603,15200
-validate_comname 1103,27558
-verbose_info 1653,39371
-version_info 1219,30200
+source_command 1408,34540
+stop_sig 741,19239
+symbol_completion_function 633,16489
+validate_comname 1133,28847
+verbose_info 1683,40660
+version_info 1249,31489
 
 printcmd.c,943
-_initialize_printcmd 1623,38100
+_initialize_printcmd 1625,38235
 address_info 592,13980
-clear_displays 914,21618
-compare_ints 1208,27665
-containing_function_bounds 1537,35960
+clear_displays 916,21753
+compare_ints 1210,27800
+containing_function_bounds 1539,36095
 decode_format 80,2251
-delete_display 929,21829
-disable_current_display 1082,25057
-disable_display 1067,24819
-disable_display_command 1160,26792
-disassemble_command 1563,36620
-display_command 851,20435
-display_info 1094,25338
-do_displays 1055,24569
+delete_display 931,21964
+disable_current_display 1084,25192
+disable_display 1069,24954
+disable_display_command 1162,26927
+disassemble_command 1565,36755
+display_command 853,20570
+display_info 1096,25473
+do_displays 1057,24704
 do_examine 432,10303
-do_one_display 1000,23202
-enable_display 1121,26123
-free_display 902,21400
+do_one_display 1002,23337
+enable_display 1123,26258
+free_display 904,21535
 output_command 553,13174
 print_address 404,9676
 print_command 513,12305
 print_formatted 175,4422
-print_frame_args 1221,27981
-print_frame_nameless_args 1306,30230
+print_frame_args 1223,28116
+print_frame_nameless_args 1308,30365
 print_scalar_formatted 218,5618
-print_variable_value 1198,27446
-printf_command 1331,30817
-ptype_command 766,18216
+print_variable_value 1200,27581
+printf_command 1333,30952
+ptype_command 768,18351
 set_command 581,13730
 set_next_address 389,9302
-undisplay_command 962,22446
+undisplay_command 964,22581
 validate_format 498,11866
-whatis_command 738,17564
+whatis_command 740,17699
 x_command 678,15908
 
 remote.c,714
@@ -557,29 +558,29 @@ source_charpos_line 420,9931
 source_line_charpos 406,9635
 
 stack.c,657
-_initialize_stack 859,22042
-args_info 625,15676
-backtrace_command 432,11191
-backtrace_limit_info 418,10894
-down_command 792,20320
-find_relative_frame 682,17313
-frame_command 734,18898
-frame_info 308,8077
-get_selected_block 662,16609
-locals_info 569,14484
+_initialize_stack 879,22697
+args_info 645,16331
+backtrace_command 452,11846
+backtrace_limit_info 438,11549
+down_command 812,20975
+find_relative_frame 702,17968
+frame_command 754,19553
+frame_info 318,8503
+get_selected_block 682,17264
+locals_info 589,15139
 parse_frame_specification 216,6084
-print_block_frame_locals 494,12726
-print_frame_arg_vars 578,14659
+print_block_frame_locals 514,13381
+print_frame_arg_vars 598,15314
 print_frame_info 76,2220
-print_frame_local_vars 533,13684
+print_frame_local_vars 553,14339
 print_sel_frame 191,5582
 print_selected_frame 201,5792
 print_stack_frame 59,1892
-record_selected_frame 650,16289
-return_command 811,20839
-select_frame 636,15968
-set_backtrace_limit_command 405,10622
-up_command 767,19616
+record_selected_frame 670,16944
+return_command 831,21494
+select_frame 656,16623
+set_backtrace_limit_command 425,11277
+up_command 787,20271
 
 standalone.c,1177
 _exit 434,8321
@@ -670,15 +671,15 @@ relocate_type 290,8487
 relocate_typevector 270,7878
 
 symtab.c,1477
-_initialize_symtab 2382,65276
+_initialize_symtab 2388,65501
 block_function 1102,30299
-compare_symbols 2173,59132
-completion_list_add_symbol 2239,60743
-contained_in 2224,60473
+compare_symbols 2179,59357
+completion_list_add_symbol 2245,60968
+contained_in 2230,60698
 create_array_type 604,16947
 decode_line_1 1438,39022
-decode_line_2 1800,49861
-decode_line_spec 1785,49470
+decode_line_2 1806,50086
+decode_line_spec 1791,49695
 find_line_common 1354,36778
 find_line_pc 1289,34998
 find_line_pc_range 1311,35530
@@ -687,16 +688,16 @@ find_pc_line_pc_range 1399,37601
 find_pc_psymbol 765,21363
 find_pc_psymtab 750,20994
 find_pc_symtab 1114,30525
-functions_info 2150,58796
-init_type 2196,59740
-list_symbols 1974,53807
+functions_info 2156,59021
+init_type 2202,59965
+list_symbols 1980,54032
 lookup_basetype_type 507,14022
 lookup_block_symbol 1007,27715
 lookup_enum 268,7169
 lookup_function_type 569,15751
 lookup_member_type 383,10719
 lookup_method_type 437,12136
-lookup_misc_func 1897,52101
+lookup_misc_func 1903,52326
 lookup_partial_symbol 945,26144
 lookup_partial_symtab 165,4536
 lookup_pointer_type 323,8661
@@ -709,57 +710,57 @@ lookup_symtab_1 86,2715
 lookup_typename 183,4935
 lookup_union 250,6688
 lookup_unsigned_typename 214,5725
-make_symbol_completion_list 2264,61514
-methods_info 2164,58968
-output_source_filename 1912,52401
+make_symbol_completion_list 2270,61739
+methods_info 2170,59193
+output_source_filename 1918,52626
 smash_to_function_type 724,20334
 smash_to_member_type 658,18480
 smash_to_method_type 675,18938
 smash_to_pointer_type 631,17770
 smash_to_reference_type 695,19530
-sort_block_syms 2185,59523
-sources_info 1940,52854
-types_info 2157,58884
-variables_info 2143,58708
+sort_block_syms 2191,59748
+sources_info 1946,53079
+types_info 2163,59109
+variables_info 2149,58933
 
 utils.c,893
 #define ISATTY(34,1102
-_initialize_utils 837,18051
-bcmp 738,16766
-bcopy 732,16693
-bzero 743,16830
-concat 315,7156
+_initialize_utils 839,18194
+bcmp 740,16909
+bcopy 734,16836
+bzero 745,16973
+concat 317,7281
 discard_cleanups 96,2598
 do_cleanups 80,2219
 error 256,5801
 fatal 272,6217
 fatal_dump_core 286,6518
-fprintf_filtered 672,15357
-fputs_filtered 585,12889
+fprintf_filtered 674,15482
+fputs_filtered 587,13014
 free_current_contents 134,3355
-getwd 750,16893
-index 757,16956
-insque 807,17512
+getwd 752,17036
+index 759,17099
+insque 809,17655
 make_cleanup 60,1751
-parse_escape 384,8980
+parse_escape 386,9105
 perror_with_name 172,4138
-print_spaces 327,7398
-print_spaces_filtered 716,16465
+print_spaces 329,7523
+print_spaces_filtered 718,16608
 print_sys_errmsg 198,4697
-printchar 454,10140
-printf_filtered 707,16234
-prompt_for_continue 540,11786
-query 341,7762
+printchar 456,10265
+printf_filtered 709,16377
+prompt_for_continue 542,11911
+query 343,7887
 quit 221,5137
-reinitialize_more_filter 551,12021
-remque 818,17676
+reinitialize_more_filter 553,12146
+remque 820,17819
 request_quit 238,5472
 restore_cleanups 119,3077
-rindex 765,17038
+rindex 767,17181
 save_cleanups 109,2899
-savestring 304,6989
-screensize_info 558,12108
-set_screensize_command 500,11063
+savestring 306,7114
+screensize_info 560,12233
+set_screensize_command 502,11188
 xmalloc 145,3568
 xrealloc 157,3788
 
@@ -780,27 +781,27 @@ value_x_unop 294,8777
 value_zerop 555,14239
 
 valops.c,539
-call_function 511,14326
-check_field 991,27349
-destructor_name_p 964,26652
-push_bytes 433,12639
-push_word 413,12273
-typecmp 1186,32205
+call_function 514,14497
+check_field 994,27520
+destructor_name_p 967,26823
+push_bytes 436,12810
+push_word 416,12444
+typecmp 1189,32376
 value_addr 354,10374
-value_arg_coerce 473,13432
-value_arg_push 496,13879
+value_arg_coerce 476,13603
+value_arg_push 499,14050
 value_assign 113,3260
 value_at 87,2594
 value_cast 33,1132
 value_coerce_array 326,9567
 value_ind 381,11139
-value_of_this 1214,32888
+value_of_this 1217,33059
 value_of_variable 316,9365
-value_push 452,12980
+value_push 455,13151
 value_repeat 293,8780
-value_string 701,19888
-value_struct_elt 780,22216
-value_struct_elt_for_address 1072,29190
+value_string 704,20059
+value_struct_elt 783,22387
+value_struct_elt_for_address 1075,29361
 value_zero 72,2297
 
 valprint.c,462
@@ -931,19 +932,20 @@ resume 77,1915
 store_inferior_registers 120,2930
 write_inferior_memory 204,5370
 
-default-dep.c,331
-#define N_DATADDR(279,7305
+default-dep.c,363
+#define N_DATADDR(279,7329
 #define N_SET_MAGIC(42,1176
-#define N_TXTADDR(275,7235
+#define N_TXTADDR(275,7259
 call_ptrace 55,1511
-core_file_command 370,9358
-exec_file_command 475,12049
+core_file_command 370,9382
+exec_file_command 480,12313
 fetch_inferior_registers 105,2409
 kill_inferior 61,1634
 kill_inferior_fast 74,1867
 read_inferior_memory 172,4208
 resume 89,2153
 store_inferior_registers 132,3168
+write_inferior_memory 218,5717
 
 sun3-dep.c,402
 #define IS_OBJECT_FILE(313,8593
@@ -1004,14 +1006,20 @@ read_inferior_memory 256,6284
 store_inferior_registers 211,5018
 write_inferior_memory 294,7396
 
-hp300bsd-dep.c,200
-#define N_DATADDR(273,6789
-#define N_TXTADDR(269,6719
-core_file_command 362,8819
-exec_file_command 455,11105
-   On failure 165,3796
-read_inferior_memory 169,3919
-write_inferior_memory 207,5039
+hp300bsd-dep.c,363
+#define N_DATADDR(288,7455
+#define N_SET_MAGIC(43,1174
+#define N_TXTADDR(284,7385
+call_ptrace 55,1488
+core_file_command 377,9485
+exec_file_command 470,11771
+fetch_inferior_registers 105,2414
+kill_inferior 61,1611
+kill_inferior_fast 74,1850
+read_inferior_memory 184,4585
+resume 89,2142
+store_inferior_registers 132,3189
+write_inferior_memory 222,5705
 
 news-dep.c,352
 #define N_DATADDR(310,8075
@@ -1028,12 +1036,12 @@ resume 79,1972
 store_inferior_registers 126,3079
 write_inferior_memory 249,6463
 
-i386-dep.c,1058
+i386-dep.c,1091
 #define N_DATADDR(278,6990
 #define N_SET_MAGIC(45,1190
 #define N_SET_MAGIC(47,1250
 #define N_TXTADDR(274,6920
-#define U_FPSTATE(1141,28570
+#define U_FPSTATE(1200,29992
 call_ptrace 62,1570
 codestream_fill 578,14567
 #define codestream_get(574,14433
@@ -1042,23 +1050,24 @@ codestream_read 605,15129
 codestream_seek 595,14935
 #define codestream_tell(571,14263
 core_file_command 365,8994
-double_to_i387 980,24581
+double_to_i387 1039,26003
 exec_file_command 459,11340
 fetch_inferior_registers 112,2468
-i386_float_info 1144,28611
+i386_float_info 1203,30033
 i386_follow_jump 617,15344
-i386_frame_find_saved_regs 799,20070
+i386_frame_find_saved_regs 858,21492
+i386_frame_num_args 780,19198
 i386_get_frame_setup 666,16376
-i386_pop_frame 890,22067
-i386_push_dummy_frame 877,21711
-i386_register_u_addr 929,23064
-i386_skip_prologue 850,21208
-i387_to_double 950,23630
+i386_pop_frame 949,23489
+i386_push_dummy_frame 936,23133
+i386_register_u_addr 988,24486
+i386_skip_prologue 909,22630
+i387_to_double 1009,25052
 kill_inferior 68,1693
 kill_inferior_fast 81,1926
-print_387_control_word 1014,25288
-print_387_status 1077,27021
-print_387_status_word 1051,26316
+print_387_control_word 1073,26710
+print_387_status 1136,28443
+print_387_status_word 1110,27738
 read_inferior_memory 179,4266
 resume 96,2212
 static unsigned char codestream_buf[sizeof 567,14157
@@ -1168,6 +1177,23 @@ resume 97,2287
 store_inferior_registers 140,3304
 write_inferior_memory 218,5458
 
+isi-dep.c,399
+#define N_DATADDR(341,8528
+#define N_SET_MAGIC(44,1358
+#define N_TXTADDR(337,8458
+attach 78,2162
+call_ptrace 69,1961
+core_file_command 430,10558
+detach 94,2475
+exec_file_command 523,12844
+fetch_inferior_registers 170,3893
+kill_inferior 106,2674
+kill_inferior_fast 131,3166
+read_inferior_memory 237,5691
+resume 154,3621
+store_inferior_registers 197,4652
+write_inferior_memory 275,6803
+
 gld-pinsn.c,79
 findarg(193,4447
 findframe(223,5160
@@ -1221,15 +1247,15 @@ m68k-pinsn.c,408
 #define NEXTPACKED(63,1837
 #define NEXTSINGLE(53,1604
 #define NEXTWORD(47,1444
-_initialize_pinsn(860,19535
-convert_from_68881 785,18049
-convert_to_68881 821,18826
+_initialize_pinsn(864,19795
+convert_from_68881 789,18309
+convert_to_68881 825,19086
 fetch_arg 574,13657
 print_base 763,17494
 print_indexed 673,15446
 print_insn 73,2231
 print_insn_arg 167,4704
-sigemt(853,19470
+sigemt(857,19730
 
 ns32k-pinsn.c,300
 #define Adrmod_is_index(132,2910
@@ -1521,21 +1547,21 @@ m-hp300bsd.h,1067
 #define STORE_STRUCT_RETURN(212,6752
 #define vprintf(236,7634
 
-m-i386.h,1026
+m-i386.h,1025
 #define ABOUT_TO_RETURN(119,3253
 #define EXTRACT_RETURN_VALUE(234,6801
 #define EXTRACT_STRUCT_VALUE_ADDRESS(247,7308
-#define FIX_CALL_DUMMY(357,10929
+#define FIX_CALL_DUMMY(330,10061
 #define FRAMELESS_FUNCTION_INVOCATION(278,8412
 #define FRAME_ARGS_ADDRESS(283,8590
 #define FRAME_CHAIN(263,7867
 #define FRAME_CHAIN_COMBINE(271,8120
 #define FRAME_CHAIN_VALID(268,8003
-#define FRAME_FIND_SAVED_REGS(329,10148
+#define FRAME_FIND_SAVED_REGS(302,9280
 #define FRAME_LOCALS_ADDRESS(285,8636
-#define FRAME_NUM_ARGS(295,8965
+#define FRAME_NUM_ARGS(290,8775
 #define FRAME_SAVED_PC(281,8513
-#define INIT_STACK(388,11817
+#define INIT_STACK(361,10949
 #define INVALID_FLOAT(124,3443
 #define REGISTER_BYTE(183,5301
 #define REGISTER_CONVERTIBLE(206,5845
@@ -1553,10 +1579,10 @@ m-i386.h,1026
 
 m-i386gas.h,0
 
-m-i386-sysv3.2.h,26
+m-i386-sv32.h,26
 #define U_FPSTATE(24,901
 
-m-i386gas-sysv3.2.h,26
+m-i386g-sv32.h,26
 #define U_FPSTATE(24,904
 
 m-isi.h,1086
@@ -1755,37 +1781,37 @@ m-pn.h,1077
 #define STORE_STRUCT_RETURN(306,10794
 
 m-sparc.h,1162
-#define ABOUT_TO_RETURN(106,3444
-#define EXTRACT_RETURN_VALUE(241,8115
-#define EXTRACT_STRUCT_VALUE_ADDRESS(254,8706
-#define FIX_CALL_DUMMY(666,25193
-#define FRAMELESS_FUNCTION_INVOCATION(328,11300
-#define FRAME_ARGS_ADDRESS(336,11556
-#define FRAME_CHAIN(315,10807
-#define FRAME_CHAIN_COMBINE(321,11008
-#define FRAME_CHAIN_VALID(318,10891
-#define FRAME_FIND_SAVED_REGS(370,12938
-#define FRAME_LOCALS_ADDRESS(340,11655
-#define FRAME_NUM_ARGS(347,11913
-#define FRAME_SAVED_PC(333,11445
-#define FRAME_STRUCT_ARGS_ADDRESS(338,11602
-#define GET_RWINDOW_REG(274,9201
-#define INIT_EXTRA_FRAME_INFO(308,10593
-#define INVALID_FLOAT(111,3599
-#define PC_ADJUST(76,2571
-#define REGISTER_BYTE(170,5982
-#define REGISTER_CONVERTIBLE(210,7117
-#define REGISTER_CONVERT_TO_RAW(221,7436
-#define REGISTER_CONVERT_TO_VIRTUAL(215,7253
-#define REGISTER_IN_WINDOW_P(182,6443
-#define REGISTER_RAW_SIZE(190,6653
-#define REGISTER_VIRTUAL_SIZE(197,6817
-#define REGISTER_VIRTUAL_TYPE(227,7606
-#define SAVED_PC_AFTER_CALL(79,2674
-#define SKIP_PROLOGUE(64,2127
-#define STACK_ALIGN(90,2929
-#define STORE_RETURN_VALUE(247,8387
-#define STORE_STRUCT_RETURN(234,7864
+#define ABOUT_TO_RETURN(108,3543
+#define EXTRACT_RETURN_VALUE(243,8214
+#define EXTRACT_STRUCT_VALUE_ADDRESS(256,8805
+#define FIX_CALL_DUMMY(668,25292
+#define FRAMELESS_FUNCTION_INVOCATION(330,11399
+#define FRAME_ARGS_ADDRESS(338,11655
+#define FRAME_CHAIN(317,10906
+#define FRAME_CHAIN_COMBINE(323,11107
+#define FRAME_CHAIN_VALID(320,10990
+#define FRAME_FIND_SAVED_REGS(372,13037
+#define FRAME_LOCALS_ADDRESS(342,11754
+#define FRAME_NUM_ARGS(349,12012
+#define FRAME_SAVED_PC(335,11544
+#define FRAME_STRUCT_ARGS_ADDRESS(340,11701
+#define GET_RWINDOW_REG(276,9300
+#define INIT_EXTRA_FRAME_INFO(310,10692
+#define INVALID_FLOAT(113,3698
+#define PC_ADJUST(78,2670
+#define REGISTER_BYTE(172,6081
+#define REGISTER_CONVERTIBLE(212,7216
+#define REGISTER_CONVERT_TO_RAW(223,7535
+#define REGISTER_CONVERT_TO_VIRTUAL(217,7352
+#define REGISTER_IN_WINDOW_P(184,6542
+#define REGISTER_RAW_SIZE(192,6752
+#define REGISTER_VIRTUAL_SIZE(199,6916
+#define REGISTER_VIRTUAL_TYPE(229,7705
+#define SAVED_PC_AFTER_CALL(81,2773
+#define SKIP_PROLOGUE(66,2226
+#define STACK_ALIGN(92,3028
+#define STORE_RETURN_VALUE(249,8486
+#define STORE_STRUCT_RETURN(236,7963
 
 m-sun2.h,1033
 #define ABOUT_TO_RETURN(87,2526
@@ -1880,35 +1906,38 @@ m-umax.h,953
 #define STORE_STRUCT_RETURN(250,7722
 #define vprintf(401,13167
 
-m-vax.h,1031
-#define ABOUT_TO_RETURN(124,4067
-#define EXTRACT_RETURN_VALUE(230,7586
-#define EXTRACT_STRUCT_VALUE_ADDRESS(243,8093
-#define FIX_CALL_DUMMY(390,14084
-#define FRAMELESS_FUNCTION_INVOCATION(282,9558
-#define FRAME_ARGS_ADDRESS(291,9902
-#define FRAME_CHAIN(266,8961
-#define FRAME_CHAIN_COMBINE(274,9220
-#define FRAME_CHAIN_VALID(271,9103
-#define FRAME_FIND_SAVED_REGS(314,10763
-#define FRAME_LOCALS_ADDRESS(296,10079
-#define FRAME_NUM_ARGS(301,10218
-#define FRAME_SAVED_PC(286,9650
-#define INIT_STACK(413,14868
-#define INVALID_FLOAT(129,4255
-#define REGISTER_BYTE(178,6064
-#define REGISTER_CONVERTIBLE(201,6677
-#define REGISTER_CONVERT_TO_RAW(212,6992
-#define REGISTER_CONVERT_TO_VIRTUAL(206,6811
-#define REGISTER_RAW_SIZE(183,6226
-#define REGISTER_U_ADDR(163,5488
-#define REGISTER_VIRTUAL_SIZE(188,6379
-#define REGISTER_VIRTUAL_TYPE(218,7160
+m-vax.h,1140
+#define ABOUT_TO_RETURN(136,4647
+#define EXTRACT_RETURN_VALUE(242,8166
+#define EXTRACT_STRUCT_VALUE_ADDRESS(255,8673
+#define FIX_CALL_DUMMY(416,15467
+#define FRAMELESS_FUNCTION_INVOCATION(294,10138
+#define FRAME_ARGS_ADDRESS(317,11265
+#define FRAME_ARGS_ADDRESS_CORRECT(309,10917
+#define FRAME_CHAIN(278,9541
+#define FRAME_CHAIN_COMBINE(286,9800
+#define FRAME_CHAIN_VALID(283,9683
+#define FRAME_FIND_SAVED_REGS(340,12146
+#define FRAME_LOCALS_ADDRESS(322,11462
+#define FRAME_NUM_ARGS(327,11601
+#define FRAME_SAVED_PC(298,10230
+#define INIT_STACK(439,16251
+#define INVALID_FLOAT(141,4835
+#define IN_SIGTRAMP(111,4009
+#define REGISTER_BYTE(190,6644
+#define REGISTER_CONVERTIBLE(213,7257
+#define REGISTER_CONVERT_TO_RAW(224,7572
+#define REGISTER_CONVERT_TO_VIRTUAL(218,7391
+#define REGISTER_RAW_SIZE(195,6806
+#define REGISTER_U_ADDR(175,6068
+#define REGISTER_VIRTUAL_SIZE(200,6959
+#define REGISTER_VIRTUAL_TYPE(230,7740
 #define SAVED_PC_AFTER_CALL(97,3393
 #define SKIP_PROLOGUE(71,2233
-#define STORE_RETURN_VALUE(236,7790
-#define STORE_STRUCT_RETURN(223,7347
-#define vprintf(247,8229
+#define STORE_RETURN_VALUE(248,8370
+#define STORE_STRUCT_RETURN(235,7927
+#define my_offsetof(105,3692
+#define vprintf(259,8809
 
 m-symmetry.h,1043
 #define ABOUT_TO_RETURN(100,3009
@@ -1940,40 +1969,41 @@ m-symmetry.h,1043
 #define STORE_STRUCT_RETURN(340,10541
 #define vprintf(366,11512
 
-m-convex.h,1213
-#define ABOUT_TO_RETURN(161,5350
-#define EXTRACT_RETURN_VALUE(289,9422
-#define EXTRACT_STRUCT_VALUE_ADDRESS(304,10016
-#define FIX_CALL_DUMMY(558,20262
-#define FRAMELESS_FUNCTION_INVOCATION(377,12561
-#define FRAME_ARGS_ADDRESS(387,12923
-#define FRAME_CHAIN(362,11985
-#define FRAME_CHAIN_COMBINE(367,12172
-#define FRAME_CHAIN_VALID(364,12055
-#define FRAME_FIND_SAVED_REGS(416,14210
-#define FRAME_LOCALS_ADDRESS(389,12999
-#define FRAME_NUM_ARGS(394,13136
-#define FRAME_SAVED_PC(385,12856
-#define IGNORE_SYMBOL(60,1833
-#define INVALID_FLOAT(166,5500
-#define READ_FILE_HEADERS(579,20967
-#define READ_STRING_TABLE_SIZE(571,20792
-#define REGISTER_BYTE(234,7698
-#define REGISTER_CONVERTIBLE(259,8404
-#define REGISTER_CONVERT_TO_RAW(270,8745
-#define REGISTER_CONVERT_TO_VIRTUAL(264,8538
-#define REGISTER_RAW_SIZE(241,7944
-#define REGISTER_VIRTUAL_SIZE(246,8087
-#define REGISTER_VIRTUAL_TYPE(276,8938
-#define SAVED_PC_AFTER_CALL(119,3872
-#define SKIP_PROLOGUE(95,2894
-#define STAB_REG_TO_REGNUM(213,7014
-#define STORE_RETURN_VALUE(297,9704
-#define STORE_STRUCT_RETURN(282,9175
-#define is_arith_pc(134,4501
-#define is_break_pc(135,4575
-#define is_trace_pc(133,4427
-#define vprintf(309,10198
+m-convex.h,1245
+#define ABOUT_TO_RETURN(169,5578
+#define EXTRACT_RETURN_VALUE(297,9649
+#define EXTRACT_STRUCT_VALUE_ADDRESS(312,10243
+#define FIX_CALL_DUMMY(566,20487
+#define FRAMELESS_FUNCTION_INVOCATION(385,12786
+#define FRAME_ARGS_ADDRESS(395,13148
+#define FRAME_CHAIN(370,12212
+#define FRAME_CHAIN_COMBINE(375,12399
+#define FRAME_CHAIN_VALID(372,12282
+#define FRAME_FIND_SAVED_REGS(424,14435
+#define FRAME_LOCALS_ADDRESS(397,13224
+#define FRAME_NUM_ARGS(402,13361
+#define FRAME_SAVED_PC(393,13081
+#define IGNORE_SYMBOL(61,1855
+#define IGNORE_SYMBOL(66,2028
+#define INVALID_FLOAT(174,5728
+#define READ_FILE_HEADERS(587,21192
+#define READ_STRING_TABLE_SIZE(579,21017
+#define REGISTER_BYTE(242,7925
+#define REGISTER_CONVERTIBLE(267,8631
+#define REGISTER_CONVERT_TO_RAW(278,8972
+#define REGISTER_CONVERT_TO_VIRTUAL(272,8765
+#define REGISTER_RAW_SIZE(249,8171
+#define REGISTER_VIRTUAL_SIZE(254,8314
+#define REGISTER_VIRTUAL_TYPE(284,9165
+#define SAVED_PC_AFTER_CALL(127,4104
+#define SKIP_PROLOGUE(103,3126
+#define STAB_REG_TO_REGNUM(221,7242
+#define STORE_RETURN_VALUE(305,9931
+#define STORE_STRUCT_RETURN(290,9402
+#define is_arith_pc(142,4731
+#define is_break_pc(143,4805
+#define is_trace_pc(141,4657
+#define vprintf(317,10425
 
 obstack.h,1102
 #define __INT_TO_PTR(121,5178

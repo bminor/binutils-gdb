@@ -431,7 +431,15 @@ find_pc_function (pc)
 /* Finds the "function" (text symbol) that is smaller than PC
    but greatest of all of the potential text symbols.  Sets
    *NAME and/or *ADDRESS conditionally if that pointer is non-zero.
-   Returns 0 if it couldn't find anything, 1 if it did.  */
+   Returns 0 if it couldn't find anything, 1 if it did.
+
+   Note that there are several possible responses:
+   * Set *NAME and *ADDRESS to nonzero values and return 0
+   * Set *NAME and *ADDRESS to zero and return 0
+   * Don't set *NAME and *ADDRESS and return 1
+   (I don't know whether it *should* work this way, but I'd rather
+   document it than risk breaking code
+   which depends on this behavior).  */
 
 int
 find_pc_partial_function (pc, name, address)

@@ -347,6 +347,36 @@ main (argc, argv, envp)
 	      /* -t /def/ttyp1: use /dev/ttyp1 for inferior I/O.  */
 	      else if (!strcmp (arg, "-t") || !strcmp (arg, "-tty"))
 		tty_command (argv[i], 0);
+
+	      /* -help: print a summary of command line switches.  */
+	      else if (!strcmp (arg, "-help"))
+		{
+		  fputs ("\
+This is GDB, the GNU debugger.  Use the command\n\
+    gdb [options] [executable [core-file]]\n\
+to enter the debugger.\n\
+\n\
+Options available are:\n\
+  -help             Print this message.\n\
+  -quiet            Do not print version number on startup.\n\
+  -fullname         Output information used by emacs-GDB interface.\n\
+  -batch            Exit after processing options.\n\
+  -nx               Do not read .gdbinit file.\n\
+  -tty TTY          Use TTY for input/output by the program being debugged.\n\
+  -cd DIR           Change current directory to DIR.\n\
+  -directory DIR    Search for source files in DIR.\n\
+  -command FILE     Execute GDB commands from FILE.\n\
+  -symbols SYMFILE  Read symbols from SYMFILE.\n\
+  -exec EXECFILE    Use EXECFILE as the executable.\n\
+  -se FILE          Use FILE as symbol file and executable file.\n\
+  -core COREFILE    Analyze the core dump COREFILE.\n\
+\n\
+For more information, type \"help\" from within GDB, or consult the\n\
+GDB manual (available as on-line info or a printed manual).\n", stderr);
+		  /* Exiting after printing this message seems like
+		     the most useful thing to do.  */
+		  exit (0);
+		}
 	      else
 		error ("Unknown command-line switch: \"%s\"\n", arg);
 	    }

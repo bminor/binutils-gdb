@@ -767,6 +767,65 @@ i386_get_frame_setup (pc)
   return (-1);
 }
 
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+/* on the 386, the instruction following the call could be:
+ *  popl %ecx        -  one arg
+ *  addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
+ *  anything else    -  zero args
+ */
+
+int
+i386_frame_num_args (fi)
+     struct frame_info fi;
+{
+  int retpc;						
+  unsigned char op;					
+  struct frame_info *pfi;
+
+  pfi = get_prev_frame_info ((fi));			
+  if (pfi == 0)
+    {
+      /* Note:  this can happen if we are looking at the frame for
+	 main, because FRAME_CHAIN_VALID won't let us go into
+	 start.  If we have debugging symbols, that's not really
+	 a big deal; it just means it will only show as many arguments
+	 to main as are declared.  */
+      return -1;
+    }
+  else
+    {
+      retpc = pfi->pc;					
+      op = read_memory_integer (retpc, 1);			
+      if (op == 0x59)					
+	/* pop %ecx */			       
+	return 1;				
+      else if (op == 0x83)
+	{
+	  op = read_memory_integer (retpc+1, 1);	
+	  if (op == 0xc4)				
+	    /* addl $<signed imm 8 bits>, %esp */	
+	    return (read_memory_integer (retpc+2,1)&0xff)/4;
+	  else
+	    return 0;
+	}
+      else if (op == 0x81)
+	{ /* add with 32 bit immediate */
+	  op = read_memory_integer (retpc+1, 1);	
+	  if (op == 0xc4)				
+	    /* addl $<imm 32>, %esp */		
+	    return read_memory_integer (retpc+2, 4) / 4;
+	  else
+	    return 0;
+	}
+      else
+	{
+	  return 0;
+	}
+    }
+}
+
 /*
  * parse the first few instructions of the function to see
  * what registers were stored.

@@ -1567,7 +1567,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		     that depends on knowing the name of D.  */
 		  if (class_name)
 		    {
-		      while (*class_name++ != ' ');
+		      /* We just want the class name.  In the context
+			 of C++, stripping off "struct " is always
+			 sensible.  */
+		      if (strncmp("struct ", class_name, 7) == 0)
+			class_name += 7;
+		      if (strncmp("union ", class_name, 6) == 0)
+			class_name += 6;
 
 		      sym_class = lookup_symbol (class_name, 0, STRUCT_NAMESPACE, 0);
 		      for (method_counter = TYPE_NFN_FIELDS (SYMBOL_TYPE (sym_class)) - 1;

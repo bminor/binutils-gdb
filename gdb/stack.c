@@ -301,6 +301,16 @@ parse_frame_specification (frame_exp)
   /* NOTREACHED */
 }
 
+/* FRAME_ARGS_ADDRESS_CORRECT is just like FRAME_ARGS_ADDRESS except
+   that if it is unsure about the answer, it returns Frame_unknown
+   instead of guessing (this happens on the VAX, for example).
+
+   On most machines, we never have to guess about the args address,
+   so FRAME_ARGS_ADDRESS{,_CORRECT} are the same.  */
+#if !defined (FRAME_ARGS_ADDRESS_CORRECT)
+#define FRAME_ARGS_ADDRESS_CORRECT FRAME_ARGS_ADDRESS
+#endif
+
 /* Print verbosely the selected frame or the frame at address ADDR.
    This means absolutely all information in the frame is printed.  */
 
@@ -316,7 +326,6 @@ frame_info (addr_exp)
   FRAME calling_frame;
   int i, count;
   char *funname = 0;
-  int numargs;
 
   if (!(have_inferior_p () || have_core_file_p ()))
     error ("No inferior or core file.");
@@ -359,20 +368,31 @@ frame_info (addr_exp)
     printf (" caller of frame at 0x%x", fi->next_frame);
   if (fi->next_frame || calling_frame)
     printf ("\n");
-  printf (" Arglist at 0x%x,", FRAME_ARGS_ADDRESS (fi));
-  FRAME_NUM_ARGS (i, fi);
-  if (i < 0)
-    printf (" args: ");
-  else if (i == 0)
-    printf (" no args.");
-  else if (i == 1)
-    printf (" 1 arg: ");
-  else
-    printf (" %d args: ", i);
 
-  FRAME_NUM_ARGS (numargs, fi);
-  print_frame_args (func, fi, numargs, stdout);
-  printf ("\n");
+  {
+    /* Address of the argument list for this frame, or Frame_unknown.  */
+    CORE_ADDR arg_list = FRAME_ARGS_ADDRESS_CORRECT (fi);
+    /* Number of args for this frame, or -1 if unknown.  */
+    int numargs;
+
+    if (arg_list != Frame_unknown)
+      {
+	printf (" Arglist at 0x%x,", arg_list);
+
+	FRAME_NUM_ARGS (numargs, fi);
+	if (numargs < 0)
+	  printf (" args: ");
+	else if (numargs == 0)
+	  printf (" no args.");
+	else if (numargs == 1)
+	  printf (" 1 arg: ");
+	else
+	  printf (" %d args: ", numargs);
+	print_frame_args (func, fi, numargs, stdout);
+	printf ("\n");
+      }
+  }
+  
   /* The sp is special; what's returned isn't the save address, but
      actually the value of the previous frame's sp.  */
   printf (" Previous frame's sp is 0x%x\n", fsr.regs[SP_REGNUM]);

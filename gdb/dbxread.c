@@ -1936,6 +1936,8 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
     profile_types[i] = 0;
 #endif
 
+  stringtab_global = stringtab;
+  
   pst = (struct partial_symtab *) 0;
 
   includes_allocated = 30;
@@ -2270,9 +2272,7 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 
 	  p = (char *) index (namestring, ':');
 
-	  /* Skip if there is no : or if the thing following the : is
-	     not a letter (which indicates declaration of a local
-	     variable, which we aren't interested in).  */
+	  /* Skip if there is no :.  */
 	  if (!p) continue;
 
 	  switch (p[1])
@@ -2281,10 +2281,74 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   STRUCT_NAMESPACE, LOC_TYPEDEF,
 				   static_psymbols, bufp->n_value);
-	      continue;
+	      goto check_enum;
 	    case 't':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_TYPEDEF,
+				   static_psymbols, bufp->n_value);
+	    check_enum:
+	      /* If this is an enumerated type, we need to
+		 add all the enum constants to the partial symbol
+		 table.  This does not cover enums without names, e.g.
+		 "enum {a, b} c;" in C, but fortunately those are
+		 rare.  There is no way for GDB to find those from the
+		 enum type without spending too much time on it.  Thus
+		 to solve this problem, the compiler needs to put out separate
+		 constant symbols ('c' N_LSYMS) for enum constants in
+		 enums without names.  */
+
+	      /* We are looking for something of the form
+		 <name> ":" ("t" | "T") [<number> "="] "e"
+		 {<constant> ":" <value> ","} ";".  */
+
+	      /* Skip over the colon and the 't' or 'T'.  */
+	      p += 2;
+	      /* This type may be given a number.  Skip over it.  */
+	      while ((*p >= '0' && *p <= '9')
+		     || *p == '=')
+		p++;
+
+	      if (*p++ == 'e')
+		{
+		  /* We have found an enumerated type.  */
+		  /* According to comments in read_enum_type
+		     a comma could end it instead of a semicolon.
+		     I don't know where that happens.
+		     Accept either.  */
+		  while (*p && *p != ';' && *p != ',')
+		    {
+		      char *q;
+
+		      /* Check for and handle cretinous dbx symbol name
+			 continuation!  */
+		      if (*p == '\\')
+			p = next_symbol_text ();
+
+		      /* Point to the character after the name
+			 of the enum constant.  */
+		      for (q = p; *q && *q != ':'; q++)
+			;
+		      /* Note that the value doesn't matter for
+			 enum constants in psymtabs, just in symtabs.  */
+		      ADD_PSYMBOL_TO_LIST (p, q - p,
+					   VAR_NAMESPACE, LOC_CONST,
+					   static_psymbols, 0);
+		      /* Point past the name.  */
+		      p = q;
+		      /* Skip over the value.  */
+		      while (*p && *p != ',')
+			p++;
+		      /* Advance past the comma.  */
+		      if (*p)
+			p++;
+		    }
+		}
+
+	      continue;
+	    case 'c':
+	      /* Constant, e.g. from "const" in Pascal.  */
+	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_CONST,
 				   static_psymbols, bufp->n_value);
 	      continue;
 	    default:
@@ -2293,10 +2357,18 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 		  printf ("Funny...LSYM with a letter that isn't a type\n");
 	      autovars++;
 #endif
+	      /* Skip if the thing following the : is
+	         not a letter (which indicates declaration of a local
+	         variable, which we aren't interested in).  */
 	      continue;
 	    }
 
 	case N_FUN:
+#if 0
+	  /* This special-casing of N_FUN is just wrong; N_FUN
+	     does not mean "function"; it means "text segment".
+	     So N_FUN can go with 'V', etc. as well as 'f' or 'F'.  */
+
 	  SET_NAMESTRING();
 
 	  p = (char *) index (namestring, ':');
@@ -2314,7 +2386,7 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 			       static_psymbols, bufp->n_value);
 
 	  continue;
-
+#endif /* 0 */
 	case N_GSYM:		/* Global (extern) variable; can be
 				   data or bss (sigh).  */
 	case N_STSYM:		/* Data seg var -- static  */
@@ -2369,17 +2441,36 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 				   global_psymbols, bufp->n_value);
 	      continue;
 
-	      /* I don't think the default case should happen.  A breakpoint
-		 here to check would probably be good.  */
-	    default:
+	    case 'f':
+	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_BLOCK,
+				   static_psymbols, bufp->n_value);
+	      continue;
+
 	      /* Two things show up here (hopefully); static symbols of
 		 local scope (static used inside braces) or extensions
 		 of structure symbols.  We can ignore both.  */
-	      if (p[1] != 'V' && p[1] != '('
-		  && (p[1] < '0' || p[1] > '9'))
-		fatal ("Internal error: Unexpected debugging symbol type '%c' at symnum %d.\n",
-		       p[1], symnum);
+	    case 'V':
+	    case '(':
+	    case '0':
+	    case '1':
+	    case '2':
+	    case '3':
+	    case '4':
+	    case '5':
+	    case '6':
+	    case '7':
+	    case '8':
+	    case '9':
+	      /* Global functions are ignored here.  I'm not
+		 sure what psymtab they go into (or just the misc
+		 function vector).  */
+	    case 'F':
 	      continue;
+
+	    default:
+	      fatal ("Internal error: Unexpected debugging symbol type '%c' at symnum %d.\n",
+		     p[1], symnum);
 	    }
 
 #ifdef N_BINCL
@@ -3657,6 +3748,32 @@ add_file_command (arg_string)
   fflush (stdout);
 }
 
+/* Read a number by which a type is referred to in dbx data,
+   or perhaps read a pair (FILENUM, TYPENUM) in parentheses.
+   Just a single number N is equivalent to (0,N).
+   Return the two numbers by storing them in the vector TYPENUMS.
+   TYPENUMS will then be used as an argument to dbx_lookup_type.  */
+
+static void
+read_type_number (pp, typenums)
+     register char **pp;
+     register int *typenums;
+{
+  if (**pp == '(')
+    {
+      (*pp)++;
+      typenums[0] = read_number (pp, ',');
+      typenums[1] = read_number (pp, ')');
+    }
+  else
+    {
+      typenums[0] = 0;
+      typenums[1] = read_number (pp, 0);
+    }
+}
+
+
+
 static struct symbol *
 define_symbol (value, string, desc)
      int value;
@@ -3696,7 +3813,10 @@ define_symbol (value, string, desc)
 
   /* c is a special case, not followed by a type-number.
      SYMBOL:c=iVALUE for an integer constant symbol.
-     SYMBOL:c=rVALUE for a floating constant symbol.  */
+     SYMBOL:c=rVALUE for a floating constant symbol.
+     SYMBOL:c=eTYPE,INTVALUE for an enum constant symbol.
+        e.g. "b:c=e6,0" for "const b = blob1"
+	(where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
   if (deftype == 'c')
     {
       if (*p++ != '=')
@@ -3718,6 +3838,22 @@ define_symbol (value, string, desc)
 	case 'i':
 	  {
 	    SYMBOL_TYPE (sym) = builtin_type_int;
+	    SYMBOL_VALUE (sym) = atoi (p);
+	    SYMBOL_CLASS (sym) = LOC_CONST;
+	  }
+	  break;
+	case 'e':
+	  /* SYMBOL:c=eTYPE,INTVALUE for an enum constant symbol.
+	     e.g. "b:c=e6,0" for "const b = blob1"
+	     (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
+	  {
+	    int typenums[2];
+	    
+	    read_type_number (&p, typenums);
+	    if (*p++ != ',')
+	      error ("Invalid symbol data: no comma in enum const symbol");
+	    
+	    SYMBOL_TYPE (sym) = *dbx_lookup_type (typenums);
 	    SYMBOL_VALUE (sym) = atoi (p);
 	    SYMBOL_CLASS (sym) = LOC_CONST;
 	  }
@@ -3796,9 +3932,40 @@ define_symbol (value, string, desc)
       SYMBOL_VALUE (sym) = value;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &local_symbols);
+
       /* If it's compiled, if it says `short', believe it.  */
       if (processing_gcc_compilation || BELIEVE_PCC_PROMOTION)
 	break;
+
+#if defined(BELIEVE_PCC_PROMOTION_TYPE)
+      /* This macro is defined on machines (e.g. sparc) where
+	 we should believe the type of a PCC 'short' argument,
+	 but shouldn't believe the address (the address is
+	 the address of the corresponding int).  Note that
+	 this is only different from the BELIEVE_PCC_PROMOTION
+	 case on big-endian machines.
+
+	 My guess is that this correction, as opposed to changing
+	 the parameter to an 'int' (as done below, for PCC
+	 on most machines), is the right thing to do
+	 on all machines, but I don't want to risk breaking
+	 something that already works.  On most PCC machines,
+	 the sparc problem doesn't come up because the calling
+	 function has to zero the top bytes (not knowing whether
+	 the called function wants an int or a short), so there
+	 is no practical difference between an int and a short
+	 (except perhaps what happens when the GDB user types
+	 "print short_arg = 0x10000;").  */
+      if (SYMBOL_TYPE (sym) == builtin_type_char
+	  || SYMBOL_TYPE (sym) == builtin_type_unsigned_char)
+	SYMBOL_VALUE (sym) += 3;
+      if (SYMBOL_TYPE (sym) == builtin_type_short
+	  || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
+	SYMBOL_VALUE (sym) += 2;
+      break;
+
+#else /* no BELIEVE_PCC_PROMOTION_TYPE.  */
+
       /* If PCC says a parameter is a short or a char,
 	 it is really an int.  */
       if (SYMBOL_TYPE (sym) == builtin_type_char
@@ -3808,6 +3975,8 @@ define_symbol (value, string, desc)
 	       || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
 	SYMBOL_TYPE (sym) = builtin_type_unsigned_int;
       break;
+
+#endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
 
     case 'P':
       SYMBOL_CLASS (sym) = LOC_REGPARM;
@@ -3960,30 +4129,6 @@ cleanup_undefined_types ()
 
 
 
-/* Read a number by which a type is referred to in dbx data,
-   or perhaps read a pair (FILENUM, TYPENUM) in parentheses.
-   Just a single number N is equivalent to (0,N).
-   Return the two numbers by storing them in the vector TYPENUMS.
-   TYPENUMS will then be used as an argument to dbx_lookup_type.  */
-
-static void
-read_type_number (pp, typenums)
-     register char **pp;
-     register int *typenums;
-{
-  if (**pp == '(')
-    {
-      (*pp)++;
-      typenums[0] = read_number (pp, ',');
-      typenums[1] = read_number (pp, ')');
-    }
-  else
-    {
-      typenums[0] = 0;
-      typenums[1] = read_number (pp, 0);
-    }
-}
-
 /* Read a dbx type reference or definition;
    return the type that is meant.
    This can be just a number, in which case it references
@@ -4508,6 +4653,16 @@ read_struct_type (pp, type)
       list->field.bitpos = read_number (pp, ',');
       list->field.bitsize = read_number (pp, ';');
 
+#if 0
+      /* This is wrong because this is identical to the symbols
+	 produced for GCC 0-size arrays.  For example:
+         typedef union {
+	   int num;
+	   char str[0];
+	 } foo;
+	 The code which dumped core in such circumstances should be
+	 fixed not to dump core.  */
+
       /* g++ -g0 can put out bitpos & bitsize zero for a static
 	 field.  This does not give us any way of getting its
 	 class, so we can't know its name.  But we can just
@@ -4536,6 +4691,7 @@ Therefore GDB will not know about your class variables.\n\
 	  list = list->next;
 	}
       else
+#endif /* 0 */
 	{
 	  /* Detect an unpacked field and mark it as such.
 	     dbx gives a bit size for all fields.

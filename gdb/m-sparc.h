@@ -52,6 +52,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    argument is in the upper half of the word reserved on the stack,
    but puts it in the lower half.  */
 /* #define BELIEVE_PCC_PROMOTION 1 */
+/* OK, I've added code to dbxread.c to deal with this case.  */
+#define BELIEVE_PCC_PROMOTION_TYPE
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

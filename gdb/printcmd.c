@@ -708,8 +708,10 @@ x_command (exp, from_tty)
 	*exp = 0;
       old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
-      if (last_format == 'i'
-	  && TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_PTR
+      /* In rvalue contexts, such as this, functions are coerced into
+	 pointers to functions.  This makes "x/i main" work.  */
+      if (/* last_format == 'i'
+	  && */ TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC
 	  && VALUE_LVAL (val) == lval_memory)
 	next_address = VALUE_ADDRESS (val);
       else

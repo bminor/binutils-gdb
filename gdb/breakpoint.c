@@ -1297,6 +1297,7 @@ A disabled breakpoint is not forgotten, but has no effect until reenabled.\n\
 The \"display\" subcommand applies to auto-displays instead of breakpoints.",
 		  &disablelist, "disable ", 1, &cmdlist);
   add_com_alias ("dis", "disable", class_breakpoint, 1);
+  add_com_alias ("disa", "disable", class_breakpoint, 1);
 
   add_abbrev_cmd ("breakpoints", class_breakpoint, disable_command,
 	   "Disable some breakpoints or auto-display expressions.\n\

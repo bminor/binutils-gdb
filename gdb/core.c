@@ -107,19 +107,19 @@ CORE_ADDR text_end;
 CORE_ADDR exec_data_start;
 CORE_ADDR exec_data_end;
 
-/* Address in executable file of start of text area data.  */
+/* Offset within executable file of start of text area data.  */
 
 int text_offset;
 
-/* Address in executable file of start of data area data.  */
+/* Offset within executable file of start of data area data.  */
 
 int exec_data_offset;
 
-/* Address in core file of start of data area data.  */
+/* Offset within core file of start of data area data.  */
 
 int data_offset;
 
-/* Address in core file of start of stack area data.  */
+/* Offset within core file of start of stack area data.  */
 
 int stack_offset;
   

@@ -1,4 +1,128 @@
+Sun Nov  5 11:39:01 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* version.c: Change version to 3.4
+
+	* symtab.c (decode_line_1): Only skip past "struct" if it
+	is there.
+
+	* valops.c (value_ind), eval.c (evaluate_subexp, case UNOP_IND):
+	Have "*" <int-valued-exp> return an int, not a LONGEST.
+
+	* utils.c (fprintf_filtered): Pass arg{4,5,6} to sprintf.
+
+	* printcmd.c (x_command): Use variable itself rather
+	than treating it as a pointer only if it is a function.
+	(See comment "this makes x/i main work").
+
+	* coffread.c (symbol_file_command): Use error for
+	"%s does not have a symbol-table.\n".
+
+Wed Nov  1 19:56:18 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* dbxread.c [BELIEVE_PCC_PROMOTION_TYPE]: New code.
+	m-sparc.h: Define BELIEVE_PCC_PROMOTION_TYPE.
+
+Thu Oct 26 12:45:00 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* infrun.c: Include <sys/dir.h>.
+
+	* dbxread.c (read_dbx_symtab, case N_LSYM, case 'T'):
+	Check for enum types and put constants in psymtab.
+
+Mon Oct 23 15:02:25 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* dbxread.c (define_symbol, read_dbx_symtab): Handle enum
+	constants (e.g.	"b:c=e6,0").
+
+Thu Oct 19 14:57:26 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* stack.c (frame_info): Use FRAME_ARGS_ADDRESS_CORRECT
+	m-vax.h (FRAME_ARGS_ADDRESS_CORRECT): New macro.
+	(FRAME_ARGS_ADDRESS): Restore old meaning.
+
+	* frame.h (Frame_unknown): New macro.
+	stack.c (frame_info): Check for Frame_unknown return from
+	FRAME_ARGS_ADDRESS.
+	m-vax.h (FRAME_ARGS_ADDRESS): Sometimes return Frame_unknown.
+
+	* utils.c (fatal_dump_core): Add "internal error" to message.
+
+	* infrun.c (IN_SIGTRAMP): New macro.
+	(wait_for_inferior): Use IN_SIGTRAMP.
+	m-vax.h (IN_SIGTRAMP): New macro.
+
+Wed Oct 18 15:09:22 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* config.gdb, Makefile.dist: Shorten m-i386-sv32.h.
+
+	* coffread.c (symbol_file_command): Pass 0 to select_source_symtab.
+
+Tue Oct 17 12:24:41 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* i386-dep.c (i386_frame_num_args): Take function from m-i386.h
+	file.  Check for pfi null.
+	m-i386.h (FRAME_NUM_ARGS): Use i386_frame_num_args.
+
+	* infrun.c (wait_for_inferior): set stop_func_name to 0
+	before calling find_pc_partial_function.
+
+Thu Oct 12 01:08:50 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* breakpoint.c (_initialize_breakpoint): Add "disa".
+
+	* Makefile.dist: Add GLOBAL_CFLAGS and pass to readline.
+
+	* config.gdb (various): "$machine =" -> "machine =".
+
+Wed Oct 11 11:54:31 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* inflow.c (try_writing_regs): #if 0 out this function.
+
+	* main.c (main): Add "-help" option.
+
+	* dbxread.c (read_dbx_symtab): Merge code for N_FUN with
+	N_STSYM, etc.
+
+Mon Oct  9 14:21:55 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* inflow.c (try_writing_regs_command): Don't write past end
+	of struct user.
+
+	* dbxread.c (read_struct_type): #if 0 out code which checks for
+	bitpos and bitsize 0.
+
+	* config.gdb: Accept sequent-i386 (not seq386).
+	(symmetry): Set depfile and paramfile.
+
+	* m-convex.h (IGNORE_SYMBOL): Check for N_MONPT if defined.
+
+Thu Oct  5 10:14:26 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* default-dep.c (read_inferior_memory): Put #if 0'd out comment
+	within /* */.
+
+Wed Oct  4 18:44:41 1989  Jim Kingdon  (kingdon at apple-gunkies.ai.mit.edu)
+
+	* config.gdb: Change /dev/null to m-i386.h for various
+	386 machine "opcodefile" entries.
+
+	* config.gdb: Accept seq386 for sequent symmetry.
+
+Mon Oct  2 09:59:50 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* hp300bsd-dep.c:  Fix copyright notice.
+
+Sun Oct  1 16:25:30 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* Makefile.dist (DEPFILES): Add isi-dep.c.
+
+	* default-dep.c (read_inferior_memory): Move #endif after else.
+
 Sat Sep 30 12:50:16 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* version.c: Change version number to 3.3.xxx.
+
+	* GDB 3.3 released.
 
 	* version.c: Change version number to 3.3.
 

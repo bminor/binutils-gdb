@@ -40,8 +40,9 @@ CC-LD=${CC}
 #define M_CFLAGS
 #endif
 
-CFLAGS = -g -I. ${HAVE_VPRINTF_DEFINE} M_CFLAGS
-/* CFLAGS = -I. -g -pg ${HAVE_VPRINTF_DEFINE} */
+/* CFLAGS for both GDB and readline.  */
+GLOBAL_CFLAGS = -g M_CFLAGS
+CFLAGS = -I. ${HAVE_VPRINTF_DEFINE} ${GLOBAL_CFLAGS}
 /* None of the things in CFLAGS will do any harm, and on some systems
    (e.g. SunOS4) it is important to use the M_CFLAGS.  */
 LDFLAGS = $(CFLAGS)
@@ -122,7 +123,7 @@ SFILES = blockframe.c breakpoint.c dbxread.c coffread.c command.c core.c \
 
 DEPFILES = umax-dep.c gould-dep.c default-dep.c sun3-dep.c \
 	   sparc-dep.c hp9k320-dep.c hp300bsd-dep.c news-dep.c i386-dep.c \
-	   symmetry-dep.c convex-dep.c altos-dep.c
+	   symmetry-dep.c convex-dep.c altos-dep.c isi-dep.c
 
 PINSNS = gld-pinsn.c i386-pinsn.c sparc-pinsn.c vax-pinsn.c m68k-pinsn.c \
 	 ns32k-pinsn.c convex-pinsn.c
@@ -135,7 +136,7 @@ OPCODES = m68k-opcode.h pn-opcode.h sparc-opcode.h npl-opcode.h vax-opcode.h \
 	  ns32k-opcode.h convex-opcode.h
 
 MFILES = m-hp9k320.h m-hp300bsd.h m-i386.h m-i386gas.h \
-  m-i386-sysv3.2.h m-i386gas-sysv3.2.h m-isi.h m-merlin.h \
+  m-i386-sv32.h m-i386g-sv32.h m-isi.h m-merlin.h \
   m-altos.h m-news.h m-newsos3.h m-npl.h m-pn.h \
   m-sparc.h m-sun2.h m-sun3.h m-sun2os4.h \
   m-sun3os4.h m-sun4os4.h m-umax.h m-vax.h m-symmetry.h m-convex.h
@@ -286,7 +287,8 @@ expread.o : expread.tab.c defs.h param.h symtab.h frame.h expression.h
 	mv expread.tab.o expread.o
 
 readline/libreadline.a : force_update
-	cd readline ; ${MAKE} "SYSV=${SYSV_DEFINE}" "CC=${CC}" libreadline.a
+	cd readline ; ${MAKE} "SYSV=${SYSV_DEFINE}" \
+		"DEBUG_FLAGS=${GLOBAL_CFLAGS}" "CC=${CC}" libreadline.a
 
 force_update :
 

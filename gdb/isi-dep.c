@@ -1,21 +1,22 @@
-/* Machine-dependent code for a Hewlett-Packard 9000/300, running bsd.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+/* Low level interface to ptrace, for GDB when running under Unix.
+   Copyright (C) 1988 Free Software Foundation, Inc.
 
-This file is part of GDB.
+GDB is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY.  No author or distributor accepts responsibility to anyone
+for the consequences of using it or for whether it serves any
+particular purpose or works at all, unless he says so in writing.
+Refer to the GDB General Public License for full details.
 
-GDB is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+Everyone is granted permission to copy, modify and redistribute GDB,
+but only under the conditions described in the GDB General Public
+License.  A copy of this license is supposed to have been given to you
+along with GDB so you can know your rights and responsibilities.  It
+should be in a file named COPYING.  Among other things, the copyright
+notice and this notice must be preserved on all copies.
 
-GDB is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+In other words, go ahead and share GDB, but don't try to stop
+anyone else from sharing it farther.  Help stamp out software hoarding!
+*/
 
 #include "defs.h"
 #include "param.h"
@@ -44,7 +45,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #include <sys/file.h>
 #include <sys/stat.h>
+
 #include <sys/ptrace.h>
+#ifdef ATTACH_DETACH
+static int  oldParent;
+extern int  attach_flag;
+#endif /* ATTACH_DETACH */
+
+/*
+ * Mapping of register numbers to their position in the stack
+ */
+#include <machine/reg.h>
+int rloc[] = {
+    R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, FP, SP, PS, PC
+};
 
 extern int errno;
 
@@ -58,14 +72,57 @@ call_ptrace (request, pid, arg3, arg4)
   return ptrace (request, pid, arg3, arg4);
 }
 
+#ifdef ATTACH_DETACH
+/* Start debugging the process whose number is PID.  */
+
+attach (pid)
+     int pid;
+{
+  errno = 0;
+  oldParent = ptrace (PT_ATTACH, pid, 0, 0);
+  if (errno)
+    perror_with_name ("ptrace");
+  attach_flag = 1;
+  return pid;
+}
+
+/* Stop debugging the process whose number is PID
+   and continue it with signal number SIGNAL.
+   SIGNAL = 0 means just continue it.  */
+
+void
+detach (signal)
+     int signal;
+{
+  errno = 0;
+  ptrace (PT_DETACH, inferior_pid, signal, oldParent);
+  if (errno)
+    perror_with_name ("ptrace");
+  attach_flag = 0;
+}
+
+#endif /* ATTACH_DETACH */
+
 kill_inferior ()
 {
   if (remote_debugging)
     return;
   if (inferior_pid == 0)
     return;
-  ptrace (PT_KILL, inferior_pid, 0, 0);
-  wait (0);
+
+#ifdef ATTACH_DETACH
+  if (attach_flag) {
+      /*
+       * Need to detach so the old parent gets notified of the death.
+       */
+      detach(SIGKILL);
+  } else {
+#endif /* ATTACH_DETACH */
+      ptrace (PT_KILL, inferior_pid, 0, 0);
+      wait (0);
+#ifdef ATTACH_DETACH
+  }
+#endif /* ATTACH_DETACH */
   inferior_died ();
 }
 
@@ -77,8 +134,16 @@ kill_inferior_fast ()
     return;
   if (inferior_pid == 0)
     return;
-  ptrace (PT_KILL, inferior_pid, 0, 0);
-  wait (0);
+#ifdef ATTACH_DETACH
+  if (attach_flag) {
+      detach(SIGKILL);
+  } else {
+#endif /* ATTACH_DETACH */
+      ptrace (PT_KILL, inferior_pid, 0, 0);
+      wait (0);
+#ifdef ATTACH_DETACH
+  }
+#endif /* ATTACH_DETACH */
 }
 
 /* Resume execution of the inferior process.
@@ -111,14 +176,14 @@ fetch_inferior_registers ()
 
   struct user u;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
-  offset = ptrace (PT_READ_U, inferior_pid, offset, 0) - KERNEL_U_ADDR;
+  offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR;
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
       regaddr = register_addr (regno, offset);
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
  	{
- 	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid, regaddr, 0);
+ 	  *(int *) &buf[i] = ptrace (3, inferior_pid, regaddr, 0);
  	  regaddr += sizeof (int);
  	}
       supply_register (regno, buf);
@@ -134,43 +199,31 @@ store_inferior_registers (regno)
 {
   register unsigned int regaddr;
   char buf[80];
-  extern char registers[];
-  register int i;
 
   struct user u;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
-  offset = ptrace (PT_READ_U, inferior_pid, offset, 0) - KERNEL_U_ADDR;
+  offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR;
 
   if (regno >= 0)
     {
       regaddr = register_addr (regno, offset);
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+      errno = 0;
+      ptrace (6, inferior_pid, regaddr, read_register (regno));
+      if (errno != 0)
 	{
-	  errno = 0;
-	  ptrace (PT_WRITE_U, inferior_pid, regaddr,
-		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
-	  if (errno != 0)
-	    {
-	      sprintf (buf, "writing register number %d(%d)", regno, i);
-	      perror_with_name (buf);
-	    }
-	  regaddr += sizeof(int);
+	  sprintf (buf, "writing register number %d", regno);
+	  perror_with_name (buf);
 	}
     }
   else for (regno = 0; regno < NUM_REGS; regno++)
     {
       regaddr = register_addr (regno, offset);
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+      errno = 0;
+      ptrace (6, inferior_pid, regaddr, read_register (regno));
+      if (errno != 0)
 	{
-	  errno = 0;
-	  ptrace (PT_WRITE_U, inferior_pid, regaddr,
-		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
-	  if (errno != 0)
-	    {
-	      sprintf (buf, "writing register number %d(%d)", regno, i);
-	      perror_with_name (buf);
-	    }
-	  regaddr += sizeof(int);
+	  sprintf (buf, "writing register number %d", regno);
+	  perror_with_name (buf);
 	}
     }
 }
@@ -203,7 +256,7 @@ read_inferior_memory (memaddr, myaddr, len)
       if (remote_debugging)
 	buffer[i] = remote_fetch_word (addr);
       else
-	buffer[i] = ptrace (PT_READ_I, inferior_pid, addr, 0);
+	buffer[i] = ptrace (1, inferior_pid, addr, 0);
       if (errno)
 	return errno;
     }
@@ -239,7 +292,7 @@ write_inferior_memory (memaddr, myaddr, len)
   if (remote_debugging)
     buffer[0] = remote_fetch_word (addr);
   else
-    buffer[0] = ptrace (PT_READ_I, inferior_pid, addr, 0);
+    buffer[0] = ptrace (1, inferior_pid, addr, 0);
 
   if (count > 1)
     {
@@ -248,7 +301,7 @@ write_inferior_memory (memaddr, myaddr, len)
 	  = remote_fetch_word (addr + (count - 1) * sizeof (int));
       else
 	buffer[count - 1]
-	  = ptrace (PT_READ_I, inferior_pid,
+	  = ptrace (1, inferior_pid,
 		    addr + (count - 1) * sizeof (int), 0);
     }
 
@@ -264,7 +317,7 @@ write_inferior_memory (memaddr, myaddr, len)
       if (remote_debugging)
 	remote_store_word (addr, buffer[i]);
       else
-	ptrace (PT_WRITE_I, inferior_pid, addr, buffer[i]);
+	ptrace (4, inferior_pid, addr, buffer[i]);
       if (errno)
 	return errno;
     }

@@ -139,8 +139,33 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ptrace.h>
 #endif /* UMAX_PTRACE */
 
+/* Required by <sys/user.h>.  */
+#include <sys/types.h>
+/* Required by <sys/user.h>, at least on system V.  */
+#include <sys/dir.h>
+/* Needed by IN_SIGTRAMP on some machines (e.g. vax).  */
+#include <sys/param.h>
+/* Needed by IN_SIGTRAMP on some machines (e.g. vax).  */
+#include <sys/user.h>
+
 extern char *sys_siglist[];
 extern int errno;
+
+/* Sigtramp is a routine that the kernel calls (which then calls the
+   signal handler).  On most machines it is a library routine that
+   is linked into the executable.
+
+   This macro, given a program counter value and the name of the
+   function in which that PC resides (which can be null if the
+   name is not known), returns nonzero if the PC and name show
+   that we are in sigtramp.
+
+   On most machines just see if the name is sigtramp (and if we have
+   no name, assume we are not in sigtramp).  */
+#if !defined (IN_SIGTRAMP)
+#define IN_SIGTRAMP(pc, name) \
+  name && !strcmp ("_sigtramp", name)
+#endif
 
 /* Tables of how to react to signals; the user sets them.  */
 
@@ -534,8 +559,9 @@ wait_for_inferior ()
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_register (SP_REGNUM);
       stop_func_start = 0;
-      /* Don't care about return value; stop_func_start will be 0
-	 if it doesn't work.  */
+      stop_func_name = 0;
+      /* Don't care about return value; stop_func_start and stop_func_name
+	 will both be 0 if it doesn't work.  */
       (void) find_pc_partial_function (stop_pc, &stop_func_name,
 				       &stop_func_start);
       stop_func_start += FUNCTION_START_OFFSET;
@@ -813,8 +839,8 @@ wait_for_inferior ()
 	    }
 
 	  /* Did we just take a signal?  */
-	  if (stop_func_name && !strcmp ("_sigtramp", stop_func_name)
-	      && (!prev_func_name || strcmp ("_sigtramp", prev_func_name)))
+	  if (IN_SIGTRAMP (stop_pc, stop_func_name)
+	      && !IN_SIGTRAMP (prev_pc, prev_func_name))
 	    {
 	      /* We've just taken a signal; go until we are back to
 		 the point where we took it and one more.  */

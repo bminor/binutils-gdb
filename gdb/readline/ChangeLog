@@ -1,3 +1,18 @@
+Thu Oct 19 17:18:40 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* Move vi_doing_insert from vi_mode.c to readline.c
+
+	* readline.c: Move compare_strings before its use.
+	Remove definitions.
+
+	* readline.c: Move defining_kbd_macro above rl_dispatch.
+	(rl_dispatch): Remove "extern int defining_kbd_macro".
+
+Mon Oct 16 11:56:03 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* readline.c (rl_set_signals): Remove unnecessary "static int
+	rl_signal_handler()".
+
 Sat Sep 30 14:51:56 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
 
 	* readline.c (rl_initialize): Change parsing_conditionalized_out

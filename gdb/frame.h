@@ -111,3 +111,5 @@ extern struct symbol *get_pc_function ();
 /* In stack.c */
 extern FRAME find_relative_frame ();
 
+/* Generic pointer value indicating "I don't know."  */
+#define Frame_unknown (CORE_ADDR)-1
