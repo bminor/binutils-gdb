@@ -90,6 +90,9 @@ recently added stubs.
 @ifset GDBSERVER
 * Server::		Using the `gdbserver' program
 @end ifset
+@ifset GDBSERVE
+* NetWare::		Using the `gdbserve.nlm' program
+@end ifset
 @end menu
 
 @node Stub Contents
@@ -533,6 +536,64 @@ For TCP connections, you must start up @code{gdbserver} prior to using
 the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
 @samp{Connection refused}.
+@end table
+@end ifset
+
+@ifset GDBSERVE
+@node NetWare
+@subsubsection Using the @code{gdbserve.nlm} program
+
+@kindex gdbserve.nlm
+@code{gdbserve.nlm} is a control program for NetWare systems, which
+allows you to connect your program with a remote @value{GDBN} via
+@code{target remote}.
+
+@value{GDBN} and @code{gdbserve.nlm} communicate via a serial line,
+using the standard @value{GDBN} remote serial protocol.
+
+@table @emph
+@item On the target machine,
+you need to have a copy of the program you want to debug.
+@code{gdbserve.nlm} does not need your program's symbol table, so you
+can strip the program if necessary to save space.  @value{GDBN} on the
+host system does all the symbol handling.
+
+To use the server, you must tell it how to communicate with
+@value{GDBN}; the name of your program; and the arguments for your
+program.  The syntax is:
+
+@smallexample 
+load gdbserve [ PORT=@var{port} ] [ NODE=@var{node} ] [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
+@end smallexample
+
+@var{port} and @var{node} specify the serial line; @var{baud} specifies
+the baud rate used by the connection.  @var{port} and @var{node} default
+to 0, @var{baud} defaults to 9600 bps.
+
+For example, to debug Emacs with the argument @samp{foo.txt}and
+communicate with @value{GDBN} over the first serial port using a 19200
+bps connection:
+
+@smallexample
+load gdbserve BAUD=19200 emacs foo.txt
+@end smallexample
+
+@item On the @value{GDBN} host machine,
+you need an unstripped copy of your program, since @value{GDBN} needs
+symbols and debugging information.  Start up @value{GDBN} as usual,
+using the name of the local copy of your program as the first argument.
+(You may also need the @w{@samp{--baud}} option if the serial line is
+running at anything other than 9600 bps.  After that, use @code{target
+remote} to establish communications with @code{gdbserve.nlm}.  Its
+argument is a device name (usually a serial device, like
+@file{/dev/ttyb}).  For example:
+
+@smallexample
+(@value{GDBP}) target remote /dev/ttyb
+@end smallexample
+
+@noindent
+communications with the server via serial line @file{/dev/ttyb}.
 @end table
 @end ifset
 

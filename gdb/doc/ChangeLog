@@ -1,3 +1,9 @@
+Wed Feb 15 11:59:18 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* all-cfg.texi: New flag, GDBSERVE, for NetWare's gdbserve.nlm.
+	* remote.texi (NetWare): New node, how to use gdbserve.nlm on
+	  NetWare targets.  Mostly stolen from the Server node.
+
 Fri Feb 10 20:20:08 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Setting): Talk about the language of a source file
