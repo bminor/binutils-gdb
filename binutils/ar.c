@@ -1,5 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -52,9 +52,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
 
 struct ar_hdr *
-  bfd_special_undocumented_glue PARAMS ((bfd * abfd, char *filename));
+  bfd_special_undocumented_glue PARAMS ((bfd * abfd, const char *filename));
 
-/* Forward declarations */
+/* Static declarations */
+
+static void
+mri_emul PARAMS ((void));
 
 static const char *
 normalize PARAMS ((const char *, bfd *));
@@ -94,6 +97,9 @@ ranlib_only PARAMS ((const char *archname));
 
 static void
 ranlib_touch PARAMS ((const char *archname));
+
+static void
+usage PARAMS ((int));
 
 /** Globals and flags */
 
@@ -139,12 +145,15 @@ enum pos
     pos_default, pos_before, pos_after, pos_end
   } postype = pos_default;
 
+static bfd **
+get_pos_bfd PARAMS ((bfd **, enum pos, const char *));
+
 /* Whether to truncate names of files stored in the archive.  */
 static boolean ar_truncate = false;
 
 int interactive = 0;
 
-void
+static void
 mri_emul ()
 {
   interactive = isatty (fileno (stdin));
@@ -201,13 +210,13 @@ map_over_members (arch, function, files, count)
 	    }
 	}
       if (!found)
-	fprintf (stderr, "no entry %s in archive\n", *files);
+	fprintf (stderr, _("no entry %s in archive\n"), *files);
     }
 }
 
 boolean operation_alters_arch = false;
 
-void
+static void
 usage (help)
      int help;
 {
@@ -215,18 +224,18 @@ usage (help)
 
   s = help ? stdout : stderr;
   if (! is_ranlib)
-    fprintf (s, "\
-Usage: %s [-]{dmpqrtx}[abcilosuvV] [member-name] archive-file file...\n\
-       %s -M [<mri-script]\n",
+    fprintf (s, _("\
+Usage: %s [-]{dmpqrtx}[abcilosSuvV] [member-name] archive-file file...\n\
+       %s -M [<mri-script]\n"),
 	     program_name, program_name);
   else
-    fprintf (s, "\
-Usage: %s [-vV] archive\n", program_name);
+    fprintf (s, _("\
+Usage: %s [-vV] archive\n"), program_name);
 
   list_supported_targets (program_name, stderr);
 
   if (help)
-    fprintf (s, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    fprintf (s, _("Report bugs to bug-gnu-utils@gnu.org\n"));
 
   xexit (help ? 0 : 1);
 }
@@ -337,6 +346,8 @@ main (argc, argv)
   START_PROGRESS (program_name, 0);
 
   bfd_init ();
+  set_default_bfd_target ();
+
   show_version = 0;
 
   xatexit (remove_output);
@@ -346,7 +357,7 @@ main (argc, argv)
       boolean touch = false;
 
       if (argc < 2 || strcmp (argv[1], "--help") == 0)
-	usage ();
+	usage (0);
       if (strcmp (argv[1], "-V") == 0
 	  || strcmp (argv[1], "-v") == 0
 	  || strncmp (argv[1], "--v", 3) == 0)
@@ -375,7 +386,7 @@ main (argc, argv)
     }
 
   if (argc < 2)
-    usage ();
+    usage (0);
 
   arg_ptr = argv[1];
 
@@ -394,7 +405,7 @@ main (argc, argv)
 	case 't':
 	case 'x':
 	  if (operation != none)
-	    fatal ("two different operation options specified");
+	    fatal (_("two different operation options specified"));
 	  switch (c)
 	    {
 	    case 'd':
@@ -437,6 +448,9 @@ main (argc, argv)
 	case 's':
 	  write_armap = 1;
 	  break;
+	case 'S':
+	  write_armap = -1;
+	  break;
 	case 'u':
 	  newer_only = 1;
 	  break;
@@ -459,8 +473,8 @@ main (argc, argv)
 	  ar_truncate = true;
 	  break;
 	default:
-	  fprintf (stderr, "%s: illegal option -- %c\n", program_name, c);
-	  usage ();
+	  fprintf (stderr, _("%s: illegal option -- %c\n"), program_name, c);
+	  usage (0);
 	}
     }
 
@@ -468,7 +482,7 @@ main (argc, argv)
     print_version ("ar");
 
   if (argc < 3)
-    usage ();
+    usage (0);
 
   if (mri_mode)
     {
@@ -491,10 +505,10 @@ main (argc, argv)
 	}
 
       if (operation == none)
-	fatal ("no operation specified");
+	fatal (_("no operation specified"));
 
       if (newer_only && operation != replace)
-	fatal ("`u' is only meaningful with the `r' option.");
+	fatal (_("`u' is only meaningful with the `r' option."));
 
       arg_index = 2;
 
@@ -573,7 +587,7 @@ main (argc, argv)
 
 	  /* Shouldn't happen! */
 	default:
-	  fprintf (stderr, "%s: internal error -- this option not implemented\n",
+	  fprintf (stderr, _("%s: internal error -- this option not implemented\n"),
 		   program_name);
 	  xexit (1);
 	}
@@ -603,8 +617,6 @@ open_inarch (archive_filename, file)
 
   if (stat (archive_filename, &sbuf) != 0)
     {
-      bfd *obj;
-
 #ifndef __GO32__
 
 /* KLUDGE ALERT! Temporary fix until I figger why
@@ -625,12 +637,17 @@ open_inarch (archive_filename, file)
 
       /* Try to figure out the target to use for the archive from the
          first object on the list.  */
-      obj = bfd_openr (file, NULL);
-      if (obj != NULL)
+      if (file != NULL)
 	{
-	  if (bfd_check_format (obj, bfd_object))
-	    target = bfd_get_target (obj);
-	  (void) bfd_close (obj);
+	  bfd *obj;
+
+	  obj = bfd_openr (file, NULL);
+	  if (obj != NULL)
+	    {
+	      if (bfd_check_format (obj, bfd_object))
+		target = bfd_get_target (obj);
+	      (void) bfd_close (obj);
+	    }
 	}
 
       /* Create an empty archive.  */
@@ -684,10 +701,10 @@ print_contents (abfd)
   struct stat buf;
   long size;
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
-    fatal ("internal stat error on %s", bfd_get_filename (abfd));
+    fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
 
   if (verbose)
-    printf ("\n<member %s>\n\n", bfd_get_filename (abfd));
+    printf (_("\n<member %s>\n\n"), bfd_get_filename (abfd));
 
   bfd_seek (abfd, 0, SEEK_SET);
 
@@ -703,7 +720,7 @@ print_contents (abfd)
       nread = bfd_read (cbuf, 1, tocopy, abfd);	/* oops -- broke
 							   abstraction!  */
       if (nread != tocopy)
-	fatal ("%s is not a valid archive",
+	fatal (_("%s is not a valid archive"),
 	       bfd_get_filename (bfd_my_archive (abfd)));
       fwrite (cbuf, 1, nread, stdout);
       ncopied += tocopy;
@@ -732,7 +749,7 @@ extract_file (abfd)
   long size;
   struct stat buf;
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
-    fatal ("internal stat error on %s", bfd_get_filename (abfd));
+    fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
   size = buf.st_size;
 
   if (verbose)
@@ -764,7 +781,7 @@ extract_file (abfd)
 
 	nread = bfd_read (cbuf, 1, tocopy, abfd);
 	if (nread != tocopy)
-	  fatal ("%s is not a valid archive",
+	  fatal (_("%s is not a valid archive"),
 		 bfd_get_filename (bfd_my_archive (abfd)));
 
 	/* See comment above; this saves disk arm motion */
@@ -871,13 +888,13 @@ do_quick_append (archive_filename, files_to_append)
   if (newfile == false)
     {
       if (bfd_check_format (temp, bfd_archive) != true)
-	fatal ("%s is not an archive", archive_filename);
+	fatal (_("%s is not an archive"), archive_filename);
     }
   else
     {
       fwrite (ARMAG, 1, SARMAG, ofile);
       if (!silent_create)
-	fprintf (stderr, "%s: creating %s\n",
+	fprintf (stderr, _("%s: creating %s\n"),
 		 program_name, archive_filename);
     }
 
@@ -988,13 +1005,26 @@ write_archive (iarch)
    into when altering.  DEFAULT_POS should be how to interpret pos_default,
    and should be a pos value.  */
 
-bfd **
-get_pos_bfd (contents, default_pos)
+static bfd **
+get_pos_bfd (contents, default_pos, default_posname)
      bfd **contents;
      enum pos default_pos;
+     const char *default_posname;
 {
   bfd **after_bfd = contents;
-  enum pos realpos = (postype == pos_default ? default_pos : postype);
+  enum pos realpos;
+  const char *realposname;
+
+  if (postype == pos_default)
+    {
+      realpos = default_pos;
+      realposname = default_posname;
+    }
+  else
+    {
+      realpos = postype;
+      realposname = posname;
+    }
 
   if (realpos == pos_end)
     {
@@ -1004,7 +1034,7 @@ get_pos_bfd (contents, default_pos)
   else
     {
       for (; *after_bfd; after_bfd = &(*after_bfd)->next)
-	if (!strcmp ((*after_bfd)->filename, posname))
+	if (strcmp ((*after_bfd)->filename, realposname) == 0)
 	  {
 	    if (realpos == pos_after)
 	      after_bfd = &(*after_bfd)->next;
@@ -1059,7 +1089,7 @@ delete_members (arch, files_to_delete)
 
       if (verbose && found == false)
 	{
-	  printf ("No member named `%s'\n", *files_to_delete);
+	  printf (_("No member named `%s'\n"), *files_to_delete);
 	}
     next_file:
       ;
@@ -1097,7 +1127,7 @@ move_members (arch, files_to_move)
 	      *current_ptr_ptr = current_ptr->next;
 
 	      /* Now glue to end */
-	      after_bfd = get_pos_bfd (&arch->next, pos_end);
+	      after_bfd = get_pos_bfd (&arch->next, pos_end, NULL);
 	      link = *after_bfd;
 	      *after_bfd = current_ptr;
 	      current_ptr->next = link;
@@ -1110,7 +1140,7 @@ move_members (arch, files_to_move)
 
 	  current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
-      fprintf (stderr, "%s: no entry %s in archive %s!\n",
+      fprintf (stderr, _("%s: no entry %s in archive %s!\n"),
 	       program_name, *files_to_move, arch->filename);
       xexit (1);
     next_file:;
@@ -1159,23 +1189,25 @@ replace_members (arch, files_to_move, quick)
 			  goto next_file;
 			}
 		      if (bfd_stat_arch_elt (current, &asbuf) != 0)
-			fatal ("internal stat error on %s", current->filename);
+			fatal (_("internal stat error on %s"), current->filename);
 
 		      if (fsbuf.st_mtime <= asbuf.st_mtime)
 			goto next_file;
 		    }
 
-		  /* snip out this entry from the chain */
-		  *current_ptr = current->next;
-
-		  after_bfd = get_pos_bfd (&arch->next, pos_end);
+		  after_bfd = get_pos_bfd (&arch->next, pos_after,
+					   current->filename);
 		  temp = *after_bfd;
+
 		  *after_bfd = bfd_openr (*files_to_move, NULL);
 		  if (*after_bfd == (bfd *) NULL)
 		    {
 		      bfd_fatal (*files_to_move);
 		    }
 		  (*after_bfd)->next = temp;
+
+		  /* snip out this entry from the chain */
+		  *current_ptr = (*current_ptr)->next;
 
 		  if (verbose)
 		    {
@@ -1192,7 +1224,7 @@ replace_members (arch, files_to_move, quick)
 
       /* Add to the end of the archive.  */
 
-      after_bfd = get_pos_bfd (&arch->next, pos_end);
+      after_bfd = get_pos_bfd (&arch->next, pos_end, NULL);
       temp = *after_bfd;
       *after_bfd = bfd_openr (*files_to_move, NULL);
       if (*after_bfd == (bfd *) NULL)
@@ -1266,7 +1298,7 @@ ranlib_touch (archname)
     }
 
   if (! bfd_has_map (arch))
-    fatal ("%s: no archive map to update", archname);
+    fatal (_("%s: no archive map to update"), archname);
 
   bfd_update_armap_timestamp (arch);
 

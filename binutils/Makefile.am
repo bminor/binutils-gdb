@@ -2,6 +2,8 @@
 
 AUTOMAKE_OPTIONS = cygnus dejagnu
 
+SUBDIRS = po
+
 tooldir = $(exec_prefix)/$(target_alias)
 
 ## These aren't set by automake, because they appear in
@@ -92,6 +94,11 @@ OPCODES = ../opcodes/libopcodes.la
 
 LIBIBERTY = ../libiberty/libiberty.a
 
+POTFILES = $(CFILES) $(DEBUG_SRCS) $(HFILES)
+po/POTFILES.in: @MAINT@ Makefile
+	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
+
 EXPECT = `if [ -f $$r/../expect/expect ] ; then \
           echo $$r/../expect/expect ; \
           else echo expect ; fi`
@@ -135,7 +142,7 @@ installcheck:
 
 info_TEXINFOS = binutils.texi
 
-LDADD = $(BFDLIB) $(LIBIBERTY)
+LDADD = $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
 
 size_SOURCES = size.c $(BULIBS)
 
@@ -148,7 +155,7 @@ strip_new_SOURCES = objcopy.c is-strip.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c $(BULIBS)
 
 objdump_SOURCES = objdump.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
-objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY)
+objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
 
 underscore.c: stamp-under ; @true
 
@@ -162,13 +169,13 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(COMPILE) -c -DMAIN -DVERSION='"$(VERSION)"' $(BASEDIR)/libiberty/cplus-dem.c
 
 c__filt_SOURCES =
-c__filt_LDADD = cplus-dem.o underscore.o $(LIBIBERTY)
+c__filt_LDADD = cplus-dem.o underscore.o $(LIBIBERTY) $(INTLLIBS)
 
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c $(BULIBS)
-ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 ranlib_SOURCES = ar.c is-ranlib.c arparse.y arlex.l arsup.c $(BULIBS)
-ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 addr2line_SOURCES = addr2line.c $(BULIBS)
 
@@ -218,7 +225,7 @@ sysinfo.o: sysinfo.c
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
 dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
-dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dlltool.o:dlltool.c
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
@@ -237,10 +244,11 @@ nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	$(BULIBS)
-windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
-	syslex.c deflex.c
+	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
+
 diststuff: $(DISTSTUFF) info
 
 DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \

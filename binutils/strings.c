@@ -1,5 +1,5 @@
 /* strings -- print the strings of printable characters in files
-   Copyright (C) 1993, 94 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,7 +13,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* Usage: strings [options] file...
 
@@ -49,12 +50,13 @@
    Written by Richard Stallman <rms@gnu.ai.mit.edu>
    and David MacKenzie <djm@gnu.ai.mit.edu>.  */
 
+#include "bfd.h"
 #include <stdio.h>
 #include <getopt.h>
 #include <ctype.h>
 #include <errno.h>
-#include "bfd.h"
 #include "bucomm.h"
+#include "libiberty.h"
 
 #ifdef isascii
 #define isgraphic(c) (isascii (c) && isprint (c))
@@ -67,7 +69,7 @@ extern int errno;
 #endif
 
 /* The BFD section flags that identify an initialized data section.  */
-#define DATA_FLAGS (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS)
+#define DATA_FLAGS (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS)
 
 /* Radix for printing addresses (must be 8, 10 or 16).  */
 static int address_radix;
@@ -90,8 +92,6 @@ static boolean got_a_section;
 /* The BFD object file format.  */
 static char *target;
 
-extern char *program_version;
-
 static struct option long_options[] =
 {
   {"all", no_argument, NULL, 'a'},
@@ -104,14 +104,16 @@ static struct option long_options[] =
   {NULL, 0, NULL, 0}
 };
 
+static void strings_a_section PARAMS ((bfd *, asection *, PTR));
+static boolean strings_object_file PARAMS ((const char *));
 static boolean strings_file PARAMS ((char *file));
 static int integer_arg PARAMS ((char *s));
-static void print_strings PARAMS ((char *filename, FILE *stream,
+static void print_strings PARAMS ((const char *filename, FILE *stream,
 				  file_ptr address, int stop_point,
 				  int magiccount, char *magic));
 static void usage PARAMS ((FILE *stream, int status));
 
-void
+int
 main (argc, argv)
      int argc;
      char **argv;
@@ -121,6 +123,7 @@ main (argc, argv)
   boolean files_given = false;
 
   program_name = argv[0];
+  xmalloc_set_program_name (program_name);
   string_min = -1;
   print_addresses = false;
   print_filenames = false;
@@ -147,7 +150,7 @@ main (argc, argv)
 	  string_min = integer_arg (optarg);
 	  if (string_min < 1)
 	    {
-	      fprintf (stderr, "%s: invalid number %s\n",
+	      fprintf (stderr, _("%s: invalid number %s\n"),
 		       program_name, optarg);
 	      exit (1);
 	    }
@@ -186,8 +189,8 @@ main (argc, argv)
 	  break;
 
 	case 'v':
-	  printf ("GNU %s version %s\n", program_name, program_version);
-	  exit (0);
+	  print_version ("strings");
+	  break;
 
 	case '?':
 	  usage (stderr, 1);
@@ -205,22 +208,32 @@ main (argc, argv)
     string_min = 4;
 
   bfd_init ();
+  set_default_bfd_target ();
 
-  for (; optind < argc; ++optind)
+  if (optind >= argc)
     {
-      if (!strcmp (argv[optind], "-"))
-	datasection_only = false;
-      else
+      datasection_only = false;
+      print_strings ("{standard input}", stdin, 0, 0, 0, (char *) NULL);
+      files_given = true;
+    }
+  else
+    {
+      for (; optind < argc; ++optind)
 	{
-	  files_given = true;
-	  exit_status |= (strings_file (argv[optind]) == false);
+	  if (strcmp (argv[optind], "-") == 0)
+	    datasection_only = false;
+	  else
+	    {
+	      files_given = true;
+	      exit_status |= (strings_file (argv[optind]) == false);
+	    }
 	}
     }
 
   if (files_given == false)
     usage (stderr, 1);
 
-  exit (exit_status);
+  return (exit_status);
 }
 
 /* Scan section SECT of the file ABFD, whose printable name is FILE.
@@ -228,11 +241,13 @@ main (argc, argv)
    set `got_a_section' and print the strings in it.  */
 
 static void
-strings_a_section (abfd, sect, file)
+strings_a_section (abfd, sect, filearg)
      bfd *abfd;
      asection *sect;
-     PTR file;
+     PTR filearg;
 {
+  const char *file = (const char *) filearg;
+
   if ((sect->flags & DATA_FLAGS) == DATA_FLAGS)
     {
       bfd_size_type sz = bfd_get_section_size_before_reloc (sect);
@@ -254,7 +269,7 @@ strings_a_section (abfd, sect, file)
 
 static boolean
 strings_object_file (file)
-     char *file;
+     const char *file;
 {
   bfd *abfd = bfd_openr (file, target);
 
@@ -274,7 +289,7 @@ strings_object_file (file)
     }
 
   got_a_section = false;
-  bfd_map_over_sections (abfd, strings_a_section, file);
+  bfd_map_over_sections (abfd, strings_a_section, (PTR) file);
 
   if (!bfd_close (abfd))
     {
@@ -299,7 +314,10 @@ strings_file (file)
     {
       FILE *stream;
 
-      stream = fopen (file, "r");
+      stream = fopen (file, "rb");
+      /* Not all systems permit "rb", so try "r" if it failed.  */
+      if (stream == NULL)
+	stream = fopen (file, "r");
       if (stream == NULL)
 	{
 	  fprintf (stderr, "%s: ", program_name);
@@ -334,18 +352,18 @@ strings_file (file)
 
 static void
 print_strings (filename, stream, address, stop_point, magiccount, magic)
-     char *filename;
+     const char *filename;
      FILE *stream;
      file_ptr address;
      int stop_point;
      int magiccount;
      char *magic;
 {
-  int bufsize = 100;
-  char *buf = (char *) xmalloc (bufsize);
+  char *buf = (char *) xmalloc (string_min + 1);
 
   while (1)
     {
+      file_ptr start;
       int i;
       int c;
 
@@ -353,6 +371,7 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
     tryline:
       if (stop_point && address >= stop_point)
 	break;
+      start = address;
       for (i = 0; i < string_min; i++)
 	{
 	  if (magiccount)
@@ -365,7 +384,7 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	      if (stream == NULL)
 		return;
 	      c = getc (stream);
-	      if (c < 0)
+	      if (c == EOF)
 		return;
 	    }
 	  address++;
@@ -375,15 +394,32 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	  buf[i] = c;
 	}
 
-      /* We found a run of `string_min' graphic characters.
-	 Now see if it is terminated with a NUL byte or a newline.   */
+      /* We found a run of `string_min' graphic characters.  Print up
+         to the next non-graphic character.  */
+
+      if (print_filenames)
+	printf ("%s: ", filename);
+      if (print_addresses)
+	switch (address_radix)
+	  {
+	  case 8:
+	    printf ("%7lo ", (unsigned long) start);
+	    break;
+
+	  case 10:
+	    printf ("%7ld ", (long) start);
+	    break;
+
+	  case 16:
+	    printf ("%7lx ", (unsigned long) start);
+	    break;
+	  }
+
+      buf[i] = '\0';
+      fputs (buf, stdout);
+
       while (1)
 	{
-	  if (i == bufsize)
-	    {
-	      bufsize *= 2;
-	      buf = (char *) xrealloc (buf, bufsize);
-	    }
 	  if (magiccount)
 	    {
 	      magiccount--;
@@ -392,61 +428,17 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	  else
 	    {
 	      if (stream == NULL)
-		return;
+		break;
 	      c = getc (stream);
-	      if (c < 0)
-		return;
+	      if (c == EOF)
+		break;
 	    }
 	  address++;
-	  if (c == '\0' || c == '\n')
-	    break;		/* It is; print this string.  */
-	  if (!isgraphic (c))
-	    goto tryline;	/* It isn't; give up on this string.  */
-	  buf[i++] = c;		/* The string continues; store it all.  */
+	  if (! isgraphic (c))
+	    break;
+	  putchar (c);
 	}
 
-      /* If we get here, the string is all graphics and properly terminated,
-	 so print it.  It is all in `buf' and `i' is its length.  */
-      buf[i] = '\0';
-      if (print_filenames)
-	printf ("%s: ", filename);
-      if (print_addresses)
-	switch (address_radix)
-	  {
-	  case 8:
-	    printf ("%7lo ", (unsigned long) (address - i - 1));
-	    break;
-
-	  case 10:
-	    printf ("%7ld ", (long) (address - i - 1));
-	    break;
-
-	  case 16:
-	    printf ("%7lx ", (unsigned long) (address - i - 1));
-	    break;
-	  }
-
-      for (i = 0; (c = buf[i]) != '\0'; i++)
-	switch (c)
-	  {
-	  case '\n':
-	    printf ("\\n");
-	    break;
-	  case '\t':
-	    printf ("\\t");
-	    break;
-	  case '\f':
-	    printf ("\\f");
-	    break;
-	  case '\b':
-	    printf ("\\b");
-	    break;
-	  case '\r':
-	    printf ("\\r");
-	    break;
-	  default:
-	    putchar (c);
-	  }
       putchar ('\n');
     }
 }
@@ -493,7 +485,7 @@ integer_arg (s)
 
   if (*p)
     {
-      fprintf (stderr, "%s: invalid integer argument %s\n", program_name, s);
+      fprintf (stderr, _("%s: invalid integer argument %s\n"), program_name, s);
       exit (1);
     }
   return value;
@@ -504,10 +496,13 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-]\n\
        [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n\
-       [--target=bfdname] [--help] [--version] file...\n",
+       [--target=bfdname] [--help] [--version] file...\n"),
 	   program_name);
+  list_supported_targets (program_name, stream);
+  if (status == 0)
+    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   exit (status);
 }

@@ -291,14 +291,14 @@ copy_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--debugging] [--remove-section=section]\n",
+       [--discard-locals] [--debugging] [--remove-section=section]\n"),
 	   program_name);
-  fprintf (stream, "\
+  fprintf (stream, _("\
        [--gap-fill=val] [--pad-to=address] [--preserve-dates]\n\
        [--set-start=val] [--adjust-start=incr]\n\
        [--adjust-vma=incr] [--adjust-section-vma=section{=,+,-}val]\n\
@@ -307,10 +307,10 @@ Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [--keep-symbol symbol] [-K symbol] [--strip-symbol symbol] [-N symbol]\n\
        [--localize-symbol symbol] [-L symbol] [--weaken-symbol symbol]\n\
        [-W symbol] [--change-leading-char] [--remove-leading-char] [--weaken]\n\
-       [--verbose] [--version] [--help] in-file [out-file]\n");
+       [--verbose] [--version] [--help] in-file [out-file]\n"));
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@gnu.org\n");
+    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   exit (exit_status);
 }
 
@@ -319,17 +319,17 @@ strip_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Usage: %s [-vVsSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
        [--discard-locals] [--keep-symbol symbol] [-K symbol]\n\
        [--strip-symbol symbol] [-N symbol] [--remove-section=section]\n\
-       [-o file] [--preserve-dates] [--verbose] [--version] [--help] file...\n",
+       [-o file] [--preserve-dates] [--verbose] [--version] [--help] file...\n"),
 	   program_name);
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@gnu.org\n");
+    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   exit (exit_status);
 }
 
@@ -375,10 +375,10 @@ parse_flags (s)
 	  copy = xmalloc (len + 1);
 	  strncpy (copy, s, len);
 	  copy[len] = '\0';
-	  fprintf (stderr, "%s: unrecognized section flag `%s'\n",
+	  fprintf (stderr, _("%s: unrecognized section flag `%s'\n"),
 		   program_name, copy);
 	  fprintf (stderr,
-		   "%s: supported flags: alloc, load, readonly, code, data, rom, contents\n",
+		   _("%s: supported flags: alloc, load, readonly, code, data, rom, contents\n"),
 		   program_name);
 	  exit (1);
 	}
@@ -608,7 +608,7 @@ copy_object (ibfd, obfd)
     }
 
   if (verbose)
-    printf ("copy from %s(%s) to %s(%s)\n",
+    printf (_("copy from %s(%s) to %s(%s)\n"),
 	    bfd_get_filename(ibfd), bfd_get_target(ibfd),
 	    bfd_get_filename(obfd), bfd_get_target(obfd));
 
@@ -631,7 +631,7 @@ copy_object (ibfd, obfd)
 			  bfd_get_mach (ibfd)))
     {
       fprintf (stderr,
-	       "Warning: Output file cannot represent architecture %s\n",
+	       _("Warning: Output file cannot represent architecture %s\n"),
 	       bfd_printable_arch_mach (bfd_get_arch (ibfd),
 					bfd_get_mach (ibfd)));
     }
@@ -659,7 +659,7 @@ copy_object (ibfd, obfd)
 	  padd->section = bfd_make_section (obfd, padd->name);
 	  if (padd->section == NULL)
 	    {
-	      fprintf (stderr, "%s: can't create section `%s': %s\n",
+	      fprintf (stderr, _("%s: can't create section `%s': %s\n"),
 		       program_name, padd->name,
 		       bfd_errmsg (bfd_get_error ()));
 	      status = 1;
@@ -736,7 +736,7 @@ copy_object (ibfd, obfd)
 		  if (! bfd_set_section_size (obfd, osections[i],
 					      size + (gap_stop - gap_start)))
 		    {
-		      fprintf (stderr, "%s: Can't fill gap after %s: %s\n",
+		      fprintf (stderr, _("%s: Can't fill gap after %s: %s\n"),
 			       program_name,
 			       bfd_get_section_name (obfd, osections[i]),
 			       bfd_errmsg (bfd_get_error()));
@@ -762,7 +762,7 @@ copy_object (ibfd, obfd)
 	      if (! bfd_set_section_size (obfd, osections[c - 1],
 					  pad_to - lma))
 		{
-		  fprintf (stderr, "%s: Can't add padding to %s: %s\n",
+		  fprintf (stderr, _("%s: Can't add padding to %s: %s\n"),
 			   program_name,
 			   bfd_get_section_name (obfd, osections[c - 1]),
 			   bfd_errmsg (bfd_get_error ()));
@@ -911,7 +911,7 @@ copy_object (ibfd, obfd)
      important for the ECOFF code at least.  */
   if (!bfd_copy_private_bfd_data (ibfd, obfd))
     {
-      fprintf (stderr, "%s: %s: error copying private BFD data: %s\n",
+      fprintf (stderr, _("%s: %s: error copying private BFD data: %s\n"),
 	       program_name, bfd_get_filename (obfd),
 	       bfd_errmsg (bfd_get_error ()));
       status = 1;
@@ -945,7 +945,7 @@ copy_archive (ibfd, obfd, output_target)
   if (mkdir (dir, 0700) != 0)
 #endif
     {
-      fatal ("cannot mkdir %s for archive copying (error: %s)",
+      fatal (_("cannot mkdir %s for archive copying (error: %s)"),
 	     dir, strerror (errno));
     }
   obfd->has_armap = ibfd->has_armap;
@@ -1198,7 +1198,7 @@ setup_section (ibfd, isection, obfdarg)
   return;
 
 loser:
-  fprintf (stderr, "%s: %s: section `%s': error in %s: %s\n",
+  fprintf (stderr, _("%s: %s: section `%s': error in %s: %s\n"),
 	   program_name,
 	   bfd_get_filename (ibfd), bfd_section_name (ibfd, isection),
 	   err, bfd_errmsg (bfd_get_error ()));
@@ -1461,7 +1461,7 @@ write_debugging_info (obfd, dhandle, symcountp, symppp)
 				       | SEC_READONLY
 				       | SEC_DEBUGGING)))
 	{
-	  fprintf (stderr, "%s: can't create debugging section: %s\n",
+	  fprintf (stderr, _("%s: can't create debugging section: %s\n"),
 		   bfd_get_filename (obfd), bfd_errmsg (bfd_get_error ()));
 	  return false;
 	}
@@ -1475,7 +1475,7 @@ write_debugging_info (obfd, dhandle, symcountp, symppp)
 	  || ! bfd_set_section_contents (obfd, stabstrsec, strings,
 					 (file_ptr) 0, stringsize))
 	{
-	  fprintf (stderr, "%s: can't set debugging section contents: %s\n",
+	  fprintf (stderr, _("%s: can't set debugging section contents: %s\n"),
 		   bfd_get_filename (obfd), bfd_errmsg (bfd_get_error ()));
 	  return false;
 	}
@@ -1484,7 +1484,7 @@ write_debugging_info (obfd, dhandle, symcountp, symppp)
     }
 
   fprintf (stderr,
-	   "%s: don't know how to write debugging information for %s\n",
+	   _("%s: don't know how to write debugging information for %s\n"),
 	   bfd_get_filename (obfd), bfd_get_target (obfd));
   return false;
 }
@@ -1669,7 +1669,7 @@ set_times (destination, statbuf)
   if (result != 0)
     {
       fprintf (stderr, "%s: ", destination);
-      perror ("can not set time");
+      perror (_("can not set time"));
     }
 }
 
@@ -1774,7 +1774,7 @@ strip_main (argc, argv)
 	  if (stat (argv[i], &statbuf) < 0)
 	    {
 	      fprintf (stderr, "%s: ", argv[i]);
-	      perror ("cannot stat");
+	      perror (_("cannot stat"));
 	      continue;
 	    }
 	}
@@ -1825,7 +1825,7 @@ copy_main (argc, argv)
 	  copy_byte = atoi(optarg);
 	  if (copy_byte < 0)
 	    {
-	      fprintf (stderr, "%s: byte number must be non-negative\n",
+	      fprintf (stderr, _("%s: byte number must be non-negative\n"),
 		       program_name);
 	      exit (1);
 	    }
@@ -1834,7 +1834,7 @@ copy_main (argc, argv)
 	  interleave = atoi(optarg);
 	  if (interleave < 1)
 	    {
-	      fprintf(stderr, "%s: interleave must be positive\n",
+	      fprintf(stderr, _("%s: interleave must be positive\n"),
 		      program_name);
 	      exit (1);
 	    }
@@ -1907,7 +1907,7 @@ copy_main (argc, argv)
 	    if (s == NULL)
 	      {
 		fprintf (stderr,
-			 "%s: bad format for --add-section NAME=FILENAME\n",
+			 _("%s: bad format for --add-section NAME=FILENAME\n"),
 			 program_name);
 		exit (1);
 	      }
@@ -1942,7 +1942,7 @@ copy_main (argc, argv)
 	    if (fread (pa->contents, 1, pa->size, f) == 0
 		|| ferror (f))
 	      {
-		fprintf (stderr, "%s: %s: fread failed\n",
+		fprintf (stderr, _("%s: %s: fread failed\n"),
 			 program_name, pa->filename);
 		exit (1);
 	      }
@@ -1971,7 +1971,7 @@ copy_main (argc, argv)
 		    if (s == NULL)
 		      {
 			fprintf (stderr,
-				 "%s: bad format for --adjust-section-vma\n",
+				 _("%s: bad format for --adjust-section-vma\n"),
 				 program_name);
 			exit (1);
 		      }
@@ -2018,7 +2018,7 @@ copy_main (argc, argv)
 	    gap_fill = (bfd_byte) gap_fill_vma;
 	    if ((bfd_vma) gap_fill != gap_fill_vma)
 	      {
-		fprintf (stderr, "%s: warning: truncating gap-fill from 0x",
+		fprintf (stderr, _("%s: warning: truncating gap-fill from 0x"),
 			 program_name);
 		fprintf_vma (stderr, gap_fill_vma);
 		fprintf (stderr, "to 0x%x\n", (unsigned int) gap_fill);
@@ -2045,7 +2045,7 @@ copy_main (argc, argv)
 	    s = strchr (optarg, '=');
 	    if (s == NULL)
 	      {
-		fprintf (stderr, "%s: bad format for --set-section-flags\n",
+		fprintf (stderr, _("%s: bad format for --set-section-flags\n"),
 			 program_name);
 		exit (1);
 	      }
@@ -2079,7 +2079,7 @@ copy_main (argc, argv)
 
   if (copy_byte >= interleave)
     {
-      fprintf (stderr, "%s: byte number must be less than interleave\n",
+      fprintf (stderr, _("%s: byte number must be less than interleave\n"),
 	       program_name);
       exit (1);
     }
@@ -2103,7 +2103,7 @@ copy_main (argc, argv)
       if (stat (input_filename, &statbuf) < 0)
 	{
 	  fprintf (stderr, "%s: ", input_filename);
-	  perror ("cannot stat");
+	  perror (_("cannot stat"));
 	  exit (1);
 	}
     }
@@ -2138,11 +2138,11 @@ copy_main (argc, argv)
 	{
 	  if (! p->used && p->adjust != ignore_vma)
 	    {
-	      fprintf (stderr, "%s: warning: --adjust-section-vma %s%c0x",
+	      fprintf (stderr, _("%s: warning: --adjust-section-vma %s%c0x"),
 		       program_name, p->name,
 		       p->adjust == set_vma ? '=' : '+');
 	      fprintf_vma (stderr, p->val);
-	      fprintf (stderr, " never used\n");
+	      fprintf (stderr, _(" never used\n"));
 	    }
 	}
     }

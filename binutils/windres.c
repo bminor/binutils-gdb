@@ -1,5 +1,5 @@
 /* windres.c -- a program to manipulate Windows resources
-   Copyright 1997 Free Software Foundation, Inc.
+   Copyright 1997, 1998 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -44,6 +44,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <time.h>
 
 /* An enumeration of format types.  */
 
@@ -224,7 +225,7 @@ open_file_search (filename, mode, errmsg, real_filename)
 	}
     }
 
-  fatal ("can't open %s `%s': %s", errmsg, filename, strerror (errno));
+  fatal (_("can't open %s `%s': %s"), errmsg, filename, strerror (errno));
 
   /* Return a value to avoid a compiler warning.  */
   return NULL;
@@ -283,8 +284,50 @@ unicode_print (e, unicode, length)
 
       ++unicode;
 
-      if ((ch & 0x7f) == ch && isprint (ch))
-	putc (ch, e);
+      if ((ch & 0x7f) == ch)
+	{
+	  if (ch == '\\')
+	    fputs ("\\", e);
+	  else if (isprint (ch))
+	    putc (ch, e);
+	  else
+	    {
+	      switch (ch)
+		{
+		case ESCAPE_A:
+		  fputs ("\\a", e);
+		  break;
+
+		case ESCAPE_B:
+		  fputs ("\\b", e);
+		  break;
+
+		case ESCAPE_F:
+		  fputs ("\\f", e);
+		  break;
+
+		case ESCAPE_N:
+		  fputs ("\\n", e);
+		  break;
+
+		case ESCAPE_R:
+		  fputs ("\\r", e);
+		  break;
+
+		case ESCAPE_T:
+		  fputs ("\\t", e);
+		  break;
+
+		case ESCAPE_V:
+		  fputs ("\\v", e);
+		  break;
+
+		default:
+		  fprintf (e, "\\%03o", (unsigned int) ch);
+		  break;
+		}
+	    }
+	}
       else if ((ch & 0xff) == ch)
 	fprintf (e, "\\%03o", (unsigned int) ch);
       else
@@ -418,10 +461,17 @@ define_resource (resources, cids, ids, dupok)
 
       if (*resources == NULL)
 	{
+	  static unsigned long timeval;
+
+	  /* Use the same timestamp for every resource created in a
+             single run.  */
+	  if (timeval == 0)
+	    timeval = time (NULL);
+
 	  *resources = ((struct res_directory *)
 			res_alloc (sizeof **resources));
 	  (*resources)->characteristics = 0;
-	  (*resources)->time = 0;
+	  (*resources)->time = timeval;
 	  (*resources)->major = 0;
 	  (*resources)->minor = 0;
 	  (*resources)->entries = NULL;
@@ -458,7 +508,7 @@ define_resource (resources, cids, ids, dupok)
 	    {
 	      fprintf (stderr, "%s: ", program_name);
 	      res_ids_print (stderr, i, ids);
-	      fprintf (stderr, ": expected to be a directory\n");
+	      fprintf (stderr, _(": expected to be a directory\n"));
 	      xexit (1);
 	    }
 
@@ -470,7 +520,7 @@ define_resource (resources, cids, ids, dupok)
     {
       fprintf (stderr, "%s: ", program_name);
       res_ids_print (stderr, cids, ids);
-      fprintf (stderr, ": expected to be a leaf\n");
+      fprintf (stderr, _(": expected to be a leaf\n"));
       xexit (1);
     }
 
@@ -479,9 +529,9 @@ define_resource (resources, cids, ids, dupok)
       if (dupok)
 	return re->u.res;
 
-      fprintf (stderr, "%s: warning: ", program_name);
+      fprintf (stderr, _("%s: warning: "), program_name);
       res_ids_print (stderr, cids, ids);
-      fprintf (stderr, ": duplicate value\n");
+      fprintf (stderr, _(": duplicate value\n"));
     }
 
   re->u.res = ((struct res_resource *)
@@ -644,8 +694,8 @@ format_from_name (name)
 
   if (m->name == NULL)
     {
-      fprintf (stderr, "%s: unknown format type `%s'\n", program_name, name);
-      fprintf (stderr, "%s: supported formats:", program_name);
+      fprintf (stderr, _("%s: unknown format type `%s'\n"), program_name, name);
+      fprintf (stderr, _("%s: supported formats:"), program_name);
       for (m = format_names; m->name != NULL; m++)
 	fprintf (stderr, " %s", m->name);
       fprintf (stderr, "\n");
@@ -732,7 +782,7 @@ format_from_filename (filename, input)
     return RES_FORMAT_RC;
 
   /* Otherwise, we give up.  */
-  fatal ("can not determine type of file `%s'; use the -I option",
+  fatal (_("can not determine type of file `%s'; use the -I option"),
 	 filename);
 
   /* Return something to silence the compiler warning.  */
@@ -746,9 +796,9 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, "Usage: %s [options] [input-file] [output-file]\n",
+  fprintf (stream, _("Usage: %s [options] [input-file] [output-file]\n"),
 	   program_name);
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Options:\n\
   -i FILE, --input FILE       Name input file\n\
   -o FILE, --output FILE      Name output file\n\
@@ -760,21 +810,21 @@ Options:\n\
   --preprocessor PROGRAM      Program to use to preprocess rc file\n\
   --include-dir DIR           Include directory when preprocessing rc file\n\
   --define SYM[=VAL]          Define SYM when preprocessing rc file\n\
-  --language VAL              Set language when reading rc file\n");
+  --language VAL              Set language when reading rc file\n"));
 #ifdef YYDEBUG
-  fprintf (stream, "\
-  --yydebug                   Turn on parser debugging\n");
+  fprintf (stream, _("\
+  --yydebug                   Turn on parser debugging\n"));
 #endif
-  fprintf (stream, "\
+  fprintf (stream, _("\
   --help                      Print this help message\n\
-  --version                   Print version information\n");
-  fprintf (stream, "\
+  --version                   Print version information\n"));
+  fprintf (stream, _("\
 FORMAT is one of rc, res, or coff, and is deduced from the file name\n\
 extension if not specified.  A single file name is an input file.\n\
-No input-file is stdin, default rc.  No output-file is stdout, default rc.\n");
+No input-file is stdin, default rc.  No output-file is stdout, default rc.\n"));
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   exit (status);
 }
 
@@ -963,7 +1013,7 @@ main (argc, argv)
     }
 
   if (resources == NULL)
-    fatal ("no resources");
+    fatal (_("no resources"));
 
   /* Sort the resources.  This is required for COFF, convenient for
      rc, and unimportant for res.  */
@@ -997,7 +1047,7 @@ struct res_directory *
 read_res_file (filename)
      const char *filename;
 {
-  fatal ("read_res_file unimplemented");
+  fatal (_("read_res_file unimplemented"));
   return NULL;
 }
 
@@ -1006,5 +1056,5 @@ write_res_file (filename, resources)
      const char *filename;
      const struct res_directory *resources;
 {
-  fatal ("write_res_file unimplemented");
+  fatal (_("write_res_file unimplemented"));
 }

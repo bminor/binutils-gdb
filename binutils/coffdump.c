@@ -1,5 +1,5 @@
 /* Coff file dumper.
-   Copyright (C) 1994 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1998 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Written by Steve Chamberlain <sac@cygnus.com>
 
@@ -25,15 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <bfd.h>
 #include <getopt.h>
-#include <stdio.h>
 #include <libiberty.h>
-#include "bucomm.h"
 
 #include "coffgrok.h"
-
+#include "bucomm.h"
 
 #define PROGRAM_VERSION "1.0"
-
 
 char *xcalloc(a,b)
 int a;
@@ -103,7 +100,7 @@ dump_coff_lines (p)
   int i;
   int online = 0;
   tab(1);
-  printf("#lines %d ",p->nlines);
+  printf(_("#lines %d "),p->nlines);
   for (i = 0; i < p->nlines; i++) 
     {
       printf("(%d 0x%x)", p->lines[i], p->addresses[i]);
@@ -127,6 +124,12 @@ dump_coff_type (p)
   printf ("size %d ", p->size);
   switch (p->type)
     {
+    case coff_secdef_type:
+      printf ("section definition at %x size %x\n", 
+	      p->u.asecdef.address,
+	      p->u.asecdef.size);
+      nl();
+      break;
     case coff_pointer_type:
       printf ("pointer to");
       nl ();
@@ -459,7 +462,7 @@ show_usage (file, status)
 static void
 show_help ()
 {
-  printf ("%s: Print a human readable interpretation of a SYSROFF object file\n",
+  printf (_("%s: Print a human readable interpretation of a SYSROFF object file\n"),
 	  program_name);
   show_usage (stdout, 0);
 }
@@ -495,7 +498,7 @@ main (ac, av)
 	  show_help ();
 	  /*NOTREACHED*/
 	case 'V':
-	  printf ("GNU %s version %s\n", program_name, PROGRAM_VERSION);
+	  printf (_("GNU %s version %s\n"), program_name, PROGRAM_VERSION);
 	  exit (0);
 	  /*NOTREACHED*/
 	case 0:
@@ -513,7 +516,7 @@ main (ac, av)
 
   if (!input_file)
     {
-      fprintf (stderr,"%s: no input file specified\n",
+      fprintf (stderr,_("%s: no input file specified\n"),
 	       program_name);
       exit(1);
     }

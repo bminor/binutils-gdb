@@ -15,7 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 
 /*
@@ -223,7 +224,8 @@
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
-#else
+#else /* ! HAVE_SYS_WAIT_H */
+#if ! defined (_WIN32) || defined (__CYGWIN32__)
 #ifndef WIFEXITED
 #define WIFEXITED(w)	(((w)&0377) == 0)
 #endif
@@ -236,7 +238,21 @@
 #ifndef WEXITSTATUS
 #define WEXITSTATUS(w)	(((w) >> 8) & 0377)
 #endif
+#else /* defined (_WIN32) && ! defined (__CYGWIN32__) */
+#ifndef WIFEXITED
+#define WIFEXITED(w)	(((w) & 0xff) == 0)
 #endif
+#ifndef WIFSIGNALED
+#define WIFSIGNALED(w)	(((w) & 0xff) != 0 && ((w) & 0xff) != 0x7f)
+#endif
+#ifndef WTERMSIG
+#define WTERMSIG(w)	((w) & 0x7f)
+#endif
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(w)	(((w) & 0xff00) >> 8)
+#endif
+#endif /* defined (_WIN32) && ! defined (__CYGWIN32__) */
+#endif /* ! HAVE_SYS_WAIT_H */
 
 static char *as_name = "as";
 
@@ -483,7 +499,7 @@ process_def_file (name)
   FILE *f = fopen (name, FOPEN_RT);
   if (!f)
     {
-      fprintf (stderr, "%s: Can't open def file %s\n", program_name, name);
+      fprintf (stderr, _("%s: Can't open def file %s\n"), program_name, name);
       exit (1);
     }
 
@@ -513,7 +529,7 @@ int
 yyerror (err)
      const char *err;
 {
-  fprintf (stderr, "%s: Syntax error in def file %s:%d\n",
+  fprintf (stderr, _("%s: Syntax error in def file %s:%d\n"),
 	   program_name, def_file, linenumber);
   return 0;
 }
@@ -546,10 +562,10 @@ def_name (name, base)
      int base;
 {
   if (verbose)
-    fprintf (stderr, "%s NAME %s base %x\n", program_name, name, base);
+    fprintf (stderr, _("%s NAME %s base %x\n"), program_name, name, base);
   if (d_is_dll)
     {
-      fprintf (stderr, "Can't have LIBRARY and NAME\n");
+      fprintf (stderr, _("Can't have LIBRARY and NAME\n"));
     }
   d_name = name;
   d_is_exe = 1;
@@ -561,10 +577,10 @@ def_library (name, base)
      int base;
 {
   if (verbose)
-    printf ("%s: LIBRARY %s base %x\n", program_name, name, base);
+    printf (_("%s: LIBRARY %s base %x\n"), program_name, name, base);
   if (d_is_exe)
     {
-      fprintf (stderr, "%s: Can't have LIBRARY and NAME\n", program_name);
+      fprintf (stderr, _("%s: Can't have LIBRARY and NAME\n"), program_name);
     }
   d_name = name;
   d_is_dll = 1;
@@ -623,7 +639,7 @@ def_import (internal, module, entry)
      const char *entry;
 {
   if (verbose)
-    fprintf (stderr, "%s: IMPORTS are ignored", program_name);
+    fprintf (stderr, _("%s: IMPORTS are ignored"), program_name);
 }
 
 void
@@ -725,19 +741,19 @@ run (what, args)
   pid = pwait (pid, &wait_status, 0);
   if (pid == -1)
     {
-      fprintf (stderr, "%s: wait: %s\n", program_name, strerror (errno));
+      fprintf (stderr, _("%s: wait: %s\n"), program_name, strerror (errno));
       exit (1);
     }
   else if (WIFSIGNALED (wait_status))
     {
-      fprintf (stderr, "%s: subprocess got fatal signal %d\n",
+      fprintf (stderr, _("%s: subprocess got fatal signal %d\n"),
 	       program_name, WTERMSIG (wait_status));
       exit (1);
     }
   else if (WIFEXITED (wait_status))
     {
       if (WEXITSTATUS (wait_status) != 0)
-	fprintf (stderr, "%s: %s exited with status %d\n",
+	fprintf (stderr, _("%s: %s exited with status %d\n"),
 		 program_name, what, WEXITSTATUS (wait_status));
     }
   else
@@ -765,7 +781,7 @@ scan_open_obj_file (abfd)
       char *e;
       bfd_get_section_contents (abfd, s, buf, 0, size);
       if (verbose)
-	fprintf (stderr, "%s: Sucking in info from %s\n",
+	fprintf (stderr, _("%s: Sucking in info from %s\n"),
 		 program_name,
 		 bfd_get_filename (abfd));
 
@@ -800,7 +816,7 @@ scan_open_obj_file (abfd)
   basenames (abfd);
 
   if (verbose)
-    fprintf (stderr, "%s: Done readin\n",
+    fprintf (stderr, _("%s: Done readin\n"),
 	     program_name);
 }
 
@@ -812,7 +828,7 @@ scan_obj_file (filename)
 
   if (!f)
     {
-      fprintf (stderr, "%s: Unable to open object file %s\n",
+      fprintf (stderr, _("%s: Unable to open object file %s\n"),
 	       program_name,
 	       filename);
       exit (1);
@@ -937,18 +953,18 @@ gen_exp_file ()
   sprintf (outfile, "t%s", exp_name);
 
   if (verbose)
-    fprintf (stderr, "%s: Generate exp file %s\n",
+    fprintf (stderr, _("%s: Generate exp file %s\n"),
 	     program_name, exp_name);
 
   f = fopen (outfile, FOPEN_WT);
   if (!f)
     {
-      fprintf (stderr, "%s: Unable to open output file %s\n", program_name, outfile);
+      fprintf (stderr, _("%s: Unable to open output file %s\n"), program_name, outfile);
       exit (1);
     }
   if (verbose)
     {
-      fprintf (stderr, "%s: Opened file %s\n",
+      fprintf (stderr, _("%s: Opened file %s\n"),
 	       program_name, outfile);
     }
 
@@ -1081,8 +1097,13 @@ gen_exp_file ()
       for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
 	if (!exp->noname || show_allnames)
 	  {
+	    /* We use a single underscore for MS compatibility, and a
+               double underscore for backward compatibility with old
+               cygwin releases.  */
 	    fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+	    fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
 	    fprintf (f, "__imp_%s:\n", exp->name);
+	    fprintf (f, "_imp__%s:\n", exp->name);
 	    fprintf (f, "\t%s\t%s\n", ASM_LONG, exp->name);
 	  }
     }
@@ -1266,7 +1287,8 @@ static sinfo secdata[NSECS] =
 #endif
 
 /*
-This is what we're trying to make
+This is what we're trying to make.  We generate the imp symbols with
+both single and double underscores, for compatibility.
 
 	.text
 	.global	_GetFileVersionInfoSizeW@8
@@ -1330,6 +1352,7 @@ make_one_lib_file (exp, i)
       fprintf (f, "\t.text\n");
       fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX, exp->name);
       fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+      fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
       fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX,
 	       exp->name, ASM_JUMP, exp->name);
 
@@ -1341,6 +1364,7 @@ make_one_lib_file (exp, i)
 
       fprintf (f, "\t.section	.idata$5\n");
       fprintf (f, "__imp_%s:\n", exp->name);
+      fprintf (f, "_imp__%s:\n", exp->name);
 
       dump_iat (f, exp);
 
@@ -1371,7 +1395,7 @@ make_one_lib_file (exp, i)
       bfd *abfd;
 
       asymbol *exp_label;
-      asymbol *iname;
+      asymbol *iname, *iname2;
       asymbol *iname_lab;
       asymbol **iname_lab_pp;
       asymbol **iname_pp;
@@ -1388,8 +1412,7 @@ make_one_lib_file (exp, i)
       asymbol **toc_pp;
 #endif
 
-      /* one symbol for each section, 2 extra + a null */
-      asymbol *ptrs[NSECS+3+EXTRA+1];
+      asymbol *ptrs[NSECS + 4 + EXTRA + 1];
 
       char *outname = xmalloc (10);
       int oidx = 0;
@@ -1397,7 +1420,7 @@ make_one_lib_file (exp, i)
       abfd = bfd_openw (outname, HOW_BFD_TARGET);
       if (!abfd)
 	{
-	  fprintf (stderr, "%s: bfd_open failed open output file %s\n", 
+	  fprintf (stderr, _("%s: bfd_open failed open output file %s\n"), 
 		   program_name, outname);
 	  exit (1);
 	}
@@ -1454,12 +1477,20 @@ make_one_lib_file (exp, i)
 	  ptrs[oidx++] = exp_label;
 	}
 
+      /* Generate imp symbols with one underscore for Microsoft
+         compatibility, and with two underscores for backward
+         compatibility with old versions of cygwin.  */
       iname = bfd_make_empty_symbol(abfd);
       iname->name = make_label ("__imp_", exp->name);
       iname->section = secdata[IDATA5].sec;
       iname->flags = BSF_GLOBAL;
       iname->value = 0;
 
+      iname2 = bfd_make_empty_symbol(abfd);
+      iname2->name = make_label ("_imp__", exp->name);
+      iname2->section = secdata[IDATA5].sec;
+      iname2->flags = BSF_GLOBAL;
+      iname2->value = 0;
 
       iname_lab = bfd_make_empty_symbol(abfd);
 
@@ -1471,6 +1502,7 @@ make_one_lib_file (exp, i)
 
       iname_pp = ptrs + oidx;
       ptrs[oidx++] = iname;
+      ptrs[oidx++] = iname2;
 
       iname_lab_pp = ptrs + oidx;
       ptrs[oidx++] = iname_lab;
@@ -1581,7 +1613,10 @@ make_one_lib_file (exp, i)
 	    case IDATA6:
 	      if (!exp->noname) 
 		{
-		  int idx = exp->hint + 1;
+		  /* This used to add 1 to exp->hint.  I don't know
+                     why it did that, and it does not match what I see
+                     in programs compiled with the MS tools.  */
+		  int idx = exp->hint;
 		  si->size = strlen (xlate (exp->name)) + 3;
 		  si->data = xmalloc (si->size);
 		  si->data[0] = idx & 0xff;
@@ -1874,7 +1909,8 @@ gen_lib_file ()
 
   if (!outarch)
     {
-      fprintf (stderr, "%s: Can't open .lib file %s\n", program_name, imp_name);
+      fprintf (stderr, _("%s: Can't open .lib file %s\n"),
+	       program_name, imp_name);
       exit (1);
     }
   bfd_set_format (outarch, bfd_archive);
@@ -1928,13 +1964,17 @@ gen_lib_file ()
     }
 
   if (dontdeltemps < 2)
-    for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-      {
-	sprintf (outfile, "ds%d.o",i);
-	unlink (outfile);
-      }
-
+    {
+      for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+	{
+	  sprintf (outfile, "ds%d.o",i);
+	  if (unlink (outfile) < 0)
+	    fprintf (stderr, _("%s: cannot delete %s: %s\n"), program_name,
+		     outfile, strerror (errno));
+	}
+    }
 }
+
 /**********************************************************************/
 
 /* Run through the information gathered from the .o files and the
@@ -2032,7 +2072,7 @@ process_duplicates (d_export_vec)
 
 	      more = 1;
 	      if (verbose)
-		fprintf (stderr, "Warning, ignoring duplicate EXPORT %s %d,%d\n",
+		fprintf (stderr, _("Warning, ignoring duplicate EXPORT %s %d,%d\n"),
 			 a->name,
 			 a->ordinal,
 			 b->ordinal);
@@ -2040,7 +2080,7 @@ process_duplicates (d_export_vec)
 		  && b->ordinal != -1)
 		{
 
-		  fprintf (stderr, "Error, duplicate EXPORT with oridinals %s\n",
+		  fprintf (stderr, _("Error, duplicate EXPORT with oridinals %s\n"),
 			   a->name);
 		  exit (1);
 		}
@@ -2212,22 +2252,22 @@ usage (file, status)
      FILE *file;
      int status;
 {
-  fprintf (file, "Usage %s <options> <object-files>\n", program_name);
-  fprintf (file, "   --machine <machine>\n");
-  fprintf (file, "   --output-exp <outname> Generate export file.\n");
-  fprintf (file, "   --output-lib <outname> Generate input library.\n");
-  fprintf (file, "   --add-indirect         Add dll indirects to export file.\n");
-  fprintf (file, "   --dllname <name>       Name of input dll to put into output lib.\n");
-  fprintf (file, "   --def <deffile>        Name input .def file\n");
-  fprintf (file, "   --output-def <deffile> Name output .def file\n");
-  fprintf (file, "   --base-file <basefile> Read linker generated base file\n");
-  fprintf (file, "   --no-idata4           Don't generate idata$4 section\n");
-  fprintf (file, "   --no-idata5           Don't generate idata$5 section\n");
-  fprintf (file, "   -v                     Verbose\n");
-  fprintf (file, "   -U                     Add underscores to .lib\n");
-  fprintf (file, "   -k                     Kill @<n> from exported names\n");
-  fprintf (file, "   --as <name>            Use <name> for assembler\n");
-  fprintf (file, "   --nodelete             Keep temp files.\n");
+  fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
+  fprintf (file, _("   --machine <machine>\n"));
+  fprintf (file, _("   --output-exp <outname> Generate export file.\n"));
+  fprintf (file, _("   --output-lib <outname> Generate input library.\n"));
+  fprintf (file, _("   --add-indirect         Add dll indirects to export file.\n"));
+  fprintf (file, _("   --dllname <name>       Name of input dll to put into output lib.\n"));
+  fprintf (file, _("   --def <deffile>        Name input .def file\n"));
+  fprintf (file, _("   --output-def <deffile> Name output .def file\n"));
+  fprintf (file, _("   --base-file <basefile> Read linker generated base file\n"));
+  fprintf (file, _("   --no-idata4           Don't generate idata$4 section\n"));
+  fprintf (file, _("   --no-idata5           Don't generate idata$5 section\n"));
+  fprintf (file, _("   -v                     Verbose\n"));
+  fprintf (file, _("   -U                     Add underscores to .lib\n"));
+  fprintf (file, _("   -k                     Kill @<n> from exported names\n"));
+  fprintf (file, _("   --as <name>            Use <name> for assembler\n"));
+  fprintf (file, _("   --nodelete             Keep temp files.\n"));
   exit (status);
 }
 
@@ -2330,7 +2370,7 @@ main (ac, av)
 	  base_file = fopen (optarg, FOPEN_RB);
 	  if (!base_file)
 	    {
-	      fprintf (stderr, "%s: Unable to open base-file %s\n",
+	      fprintf (stderr, _("%s: Unable to open base-file %s\n"),
 		       av[0],
 		       optarg);
 	      exit (1);
@@ -2350,7 +2390,7 @@ main (ac, av)
 
   if (!mtable[i].type)
     {
-      fprintf (stderr, "Machine not supported\n");
+      fprintf (stderr, _("Machine not supported\n"));
       exit (1);
     }
   machine = i;

@@ -5,7 +5,7 @@ AC_INIT(ar.c)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(binutils, 2.8.2)
+AM_INIT_AUTOMAKE(binutils, 2.9.1)
 
 AM_PROG_LIBTOOL
 
@@ -37,8 +37,10 @@ fi
 AC_PROG_CC
 
 AC_PROG_YACC
-AC_PROG_LEX
-AC_DECL_YYTEXT
+AM_PROG_LEX
+
+ALL_LINGUAS=
+CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
 AM_CYGWIN32
@@ -62,13 +64,6 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(sbrk utimes)
-dnl Temporary workaround for bug in autoconf 2.12.  When the bug is
-dnl fixed, we can just call AC_FUNC_VFORK in all cases.
-if test "x$cross_compiling" = "xno"; then
-  AC_FUNC_VFORK
-else
-  AC_CHECK_FUNC(vfork, , AC_DEFINE(vfork, fork))
-fi
 
 AC_MSG_CHECKING(for time_t in time.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
@@ -173,7 +168,7 @@ changequote([,])dnl
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	 ;;
 changequote(,)dnl
-	i[3-6]86-*pe* | i[3-6]86-*-cygwin32)
+	i[3-6]86-*pe* | i[3-6]86-*-cygwin32* | i[3-6]86-*-mingw32*)
 changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
@@ -195,6 +190,8 @@ AC_SUBST(BUILD_DLLTOOL)
 AC_SUBST(DLLTOOL_DEFS)
 AC_SUBST(BUILD_WINDRES)
 
+AC_DEFINE_UNQUOTED(TARGET, "${target}")
+
 targ=$target
 . $srcdir/../bfd/config.bfd
 if test "x$targ_underscore" = "xyes"; then
@@ -204,4 +201,5 @@ else
 fi
 AC_SUBST(UNDERSCORE)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
+[sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

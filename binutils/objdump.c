@@ -1,5 +1,6 @@
 /* objdump.c -- dump information about an object file.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -215,24 +216,24 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
        [--disassemble-all] [--disassemble-zeroes] [--file-headers]\n\
        [--section-headers] [--headers]\n\
-       [--info] [--section=section-name] [--line-numbers] [--source]\n",
+       [--info] [--section=section-name] [--line-numbers] [--source]\n"),
 	   program_name);
-  fprintf (stream, "\
+  fprintf (stream, _("\
        [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
        [--wide] [--version] [--help] [--private-headers]\n\
        [--start-address=addr] [--stop-address=addr]\n\
        [--prefix-addresses] [--[no-]show-raw-insn] [--demangle]\n\
        [--adjust-vma=offset] [-EB|-EL] [--endian={big|little}] objfile...\n\
-at least one option besides -l (--line-numbers) must be given\n");
+at least one option besides -l (--line-numbers) must be given\n"));
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   exit (status);
 }
 
@@ -357,11 +358,11 @@ static void
 dump_headers (abfd)
      bfd *abfd;
 {
-  printf ("Sections:\n");
+  printf (_("Sections:\n"));
 #ifndef BFD64
-  printf ("Idx Name          Size      VMA       LMA       File off  Algn\n");
+  printf (_("Idx Name          Size      VMA       LMA       File off  Algn\n"));
 #else
-  printf ("Idx Name          Size      VMA               LMA               File off  Algn\n");
+  printf (_("Idx Name          Size      VMA               LMA               File off  Algn\n"));
 #endif
   bfd_map_over_sections (abfd, dump_section_header, (PTR) NULL);
 }
@@ -375,7 +376,7 @@ slurp_symtab (abfd)
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
-      printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
+      printf (_("No symbols in \"%s\".\n"), bfd_get_filename (abfd));
       symcount = 0;
       return NULL;
     }
@@ -392,7 +393,7 @@ slurp_symtab (abfd)
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (symcount == 0)
-    fprintf (stderr, "%s: %s: No symbols\n",
+    fprintf (stderr, _("%s: %s: No symbols\n"),
 	     program_name, bfd_get_filename (abfd));
   return sy;
 }
@@ -411,7 +412,7 @@ slurp_dynamic_symtab (abfd)
     {
       if (!(bfd_get_file_flags (abfd) & DYNAMIC))
 	{
-	  fprintf (stderr, "%s: %s: not a dynamic object\n",
+	  fprintf (stderr, _("%s: %s: not a dynamic object\n"),
 		   program_name, bfd_get_filename (abfd));
 	  dynsymcount = 0;
 	  return NULL;
@@ -428,7 +429,7 @@ slurp_dynamic_symtab (abfd)
   if (dynsymcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (dynsymcount == 0)
-    fprintf (stderr, "%s: %s: No dynamic symbols\n",
+    fprintf (stderr, _("%s: %s: No dynamic symbols\n"),
 	     program_name, bfd_get_filename (abfd));
   return sy;
 }
@@ -828,9 +829,6 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
 	  objdump_print_value (vma - bfd_asymbol_value (sym), info, true);
 	}
       (*info->fprintf_func) (info->stream, ">");
-      
-      /* Notify the disassembler of the symbol being used:  */
-      disasm_symaddr (sym, info);
     }
 }
 
@@ -1232,7 +1230,8 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	{
 	  char buf[1000];
 	  SFILE sfile;
-	  int bpc, pb = 0;
+	  int bpc = 0;
+	  int pb = 0;
 
 	  done_dot = false;
 
@@ -1265,6 +1264,11 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      info->stream = (FILE *) &sfile;
 	      info->bytes_per_line = 0;
 	      info->bytes_per_chunk = 0;
+	      if ((*relppp < relppend) && ((**relppp)->address >= (bfd_vma) i &&
+				       (**relppp)->address < (bfd_vma) i + bytes))
+		info->flags = INSN_HAS_RELOC;
+	      else
+		info->flags = 0;
 	      bytes = (*disassemble_fn) (section->vma + i, info);
 	      info->fprintf_func = (fprintf_ftype) fprintf;
 	      info->stream = stdout;
@@ -1489,7 +1493,7 @@ disassemble_data (abfd)
       const bfd_arch_info_type *info = bfd_scan_arch (machine);
       if (info == NULL)
 	{
-	  fprintf (stderr, "%s: Can't use supplied machine %s\n",
+	  fprintf (stderr, _("%s: Can't use supplied machine %s\n"),
 		   program_name,
 		   machine);
 	  exit (1);
@@ -1510,7 +1514,7 @@ disassemble_data (abfd)
   disassemble_fn = disassembler (abfd);
   if (!disassemble_fn)
     {
-      fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
+      fprintf (stderr, _("%s: Can't disassemble for architecture %s\n"),
 	       program_name,
 	       bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
       return;
@@ -1575,7 +1579,7 @@ disassemble_data (abfd)
 	    }
 	}
 
-      printf ("Disassembly of section %s:\n", section->name);
+      printf (_("Disassembly of section %s:\n"), section->name);
 
       datasize = bfd_get_section_size_before_reloc (section);
       if (datasize == 0)
@@ -1608,7 +1612,7 @@ disassemble_data (abfd)
 
       sym = find_symbol_for_address (abfd, section, section->vma + i,
 				     true, &place);
-      ++place;
+
       while (i < stop)
 	{
 	  asymbol *nextsym;
@@ -1616,10 +1620,20 @@ disassemble_data (abfd)
 	  boolean insns;
 	  
 	  if (sym != NULL && bfd_asymbol_value (sym) <= section->vma + i)
-	    disasm_info.symbol = sym;
+	    {
+	      int x;
+
+	      for (x = place;
+		   (x < sorted_symcount
+		    && bfd_asymbol_value (sorted_syms[x]) <= section->vma + i);
+		   ++x)
+		continue;
+	      disasm_info.symbols = & sorted_syms[place];
+	      disasm_info.num_symbols = x - place;
+	    }
 	  else
-	    disasm_info.symbol = NULL;
-	  
+	    disasm_info.symbols = NULL;
+
 	  if (! prefix_addresses)
 	    {
 	      printf ("\n");
@@ -1637,6 +1651,7 @@ disassemble_data (abfd)
 	  else
 	    {
 	      while (place < sorted_symcount
+		     /* ??? Why the test for != section?  */
 		     && (sorted_syms[place]->section != section
 			 || (bfd_asymbol_value (sorted_syms[place])
 			     <= bfd_asymbol_value (sym))))
@@ -1735,14 +1750,14 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   stabsect = bfd_get_section_by_name (abfd, stabsect_name);
   if (0 == stabsect)
     {
-      printf ("No %s section present\n\n", stabsect_name);
+      printf (_("No %s section present\n\n"), stabsect_name);
       return false;
     }
 
   stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
   if (0 == stabstrsect)
     {
-      fprintf (stderr, "%s: %s has no %s section\n", program_name,
+      fprintf (stderr, _("%s: %s has no %s section\n"), program_name,
 	       bfd_get_filename (abfd), strsect_name);
       return false;
     }
@@ -1755,7 +1770,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   
   if (! bfd_get_section_contents (abfd, stabsect, (PTR) stabs, 0, stab_size))
     {
-      fprintf (stderr, "%s: Reading %s section of %s failed: %s\n",
+      fprintf (stderr, _("%s: Reading %s section of %s failed: %s\n"),
 	       program_name, stabsect_name, bfd_get_filename (abfd),
 	       bfd_errmsg (bfd_get_error ()));
       free (stabs);
@@ -1766,7 +1781,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   if (! bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0,
 				  stabstr_size))
     {
-      fprintf (stderr, "%s: Reading %s section of %s failed: %s\n",
+      fprintf (stderr, _("%s: Reading %s section of %s failed: %s\n"),
 	       program_name, strsect_name, bfd_get_filename (abfd),
 	       bfd_errmsg (bfd_get_error ()));
       free (stabs);
@@ -1808,7 +1823,7 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
   stabp = stabs;
   stabs_end = stabp + stab_size;
 
-  printf ("Contents of %s section:\n\n", stabsect_name);
+  printf (_("Contents of %s section:\n\n"), stabsect_name);
   printf ("Symnum n_type n_othr n_desc n_value  n_strx String\n");
 
   /* Loop through all symbols and print them.
@@ -1885,11 +1900,12 @@ dump_section_stabs (abfd, stabsect_name, strsect_name)
 
       len = strlen (stabsect_name);
 
-/* If the prefix matches, and the files section name ends with a nul or a digit,
-   then we match.  Ie: we want either an exact match or a a section followed by 
-   a number.  */
+      /* If the prefix matches, and the files section name ends with a
+	 nul or a digit, then we match.  I.e., we want either an exact
+	 match or a section followed by a number.  */
       if (strncmp (stabsect_name, s->name, len) == 0
-	  && (s->name[len] == '\000' || isdigit (s->name[len])))
+	  && (s->name[len] == '\000'
+	      || isdigit ((unsigned char) s->name[len])))
 	{
 	  if (read_section_stabs (abfd, s->name, strsect_name))
 	    {
@@ -1907,10 +1923,10 @@ dump_bfd_header (abfd)
 {
   char *comma = "";
 
-  printf ("architecture: %s, ",
+  printf (_("architecture: %s, "),
 	  bfd_printable_arch_mach (bfd_get_arch (abfd),
 				   bfd_get_mach (abfd)));
-  printf ("flags 0x%08x:\n", abfd->flags);
+  printf (_("flags 0x%08x:\n"), abfd->flags);
 
 #define PF(x, y)    if (abfd->flags & x) {printf("%s%s", comma, y); comma=", ";}
   PF (HAS_RELOC, "HAS_RELOC");
@@ -1923,7 +1939,7 @@ dump_bfd_header (abfd)
   PF (WP_TEXT, "WP_TEXT");
   PF (D_PAGED, "D_PAGED");
   PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
-  printf ("\nstart address 0x");
+  printf (_("\nstart address 0x"));
   printf_vma (abfd->start_address);
   printf ("\n");
 }
@@ -1966,7 +1982,7 @@ display_bfd (abfd)
 	}
     }
 
-  printf ("\n%s:     file format %s\n", bfd_get_filename (abfd),
+  printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
 	  abfd->xvec->name);
   if (dump_ar_hdrs)
     print_arelt_descr (stdout, abfd, true);
@@ -2007,7 +2023,7 @@ display_bfd (abfd)
       if (dhandle != NULL)
 	{
 	  if (! print_debugging_info (stdout, dhandle))
-	    fprintf (stderr, "%s: printing debugging information failed\n",
+	    fprintf (stderr, _("%s: printing debugging information failed\n"),
 		     bfd_get_filename (abfd));
 	}
     }
@@ -2041,7 +2057,7 @@ display_file (filename, target)
     {
       bfd *last_arfile = NULL;
 
-      printf ("In archive %s:\n", bfd_get_filename (file));
+      printf (_("In archive %s:\n"), bfd_get_filename (file));
       for (;;)
 	{
 	  bfd_set_error (bfd_error_no_error);
@@ -2094,7 +2110,7 @@ dump_data (abfd)
 	{
 	  if (section->flags & SEC_HAS_CONTENTS)
 	    {
-	      printf ("Contents of section %s:\n", section->name);
+	      printf (_("Contents of section %s:\n"), section->name);
 
 	      if (bfd_section_size (abfd, section) == 0)
 		continue;
@@ -2597,7 +2613,7 @@ display_target_tables ()
 static void
 display_info ()
 {
-  printf ("BFD header file version %s\n", BFD_VERSION);
+  printf (_("BFD header file version %s\n"), BFD_VERSION);
   display_target_list ();
   display_target_tables ();
 }
@@ -2716,7 +2732,7 @@ main (argc, argv)
 	    endian = BFD_ENDIAN_LITTLE;
 	  else
 	    {
-	      fprintf (stderr, "%s: unrecognized -E option\n", program_name);
+	      fprintf (stderr, _("%s: unrecognized -E option\n"), program_name);
 	      usage (stderr, 1);
 	    }
 	  break;
@@ -2727,7 +2743,7 @@ main (argc, argv)
 	    endian = BFD_ENDIAN_LITTLE;
 	  else
 	    {
-	      fprintf (stderr, "%s: unrecognized --endian type `%s'\n",
+	      fprintf (stderr, _("%s: unrecognized --endian type `%s'\n"),
 		      program_name, optarg);
 	      usage (stderr, 1);
 	    }

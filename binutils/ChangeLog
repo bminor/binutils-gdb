@@ -1,3 +1,24 @@
+Tue Apr 21 22:13:08 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
+
+	* Many files: Added gettext invocations around user-visible
+	strings.
+	* bucomm.h: Added gettext-related includes and defines.
+	* acconfig.h (ENABLE_NLS, HAVE_CATGETS, HAVE_GETTEXT, HAVE_STPCPY,
+	HAVE_LC_MESSAGES): Define.
+	* configure.in: Call CY_GNU_GETTEXT.  Create po/Makefile.in and
+	po/Makefile.  Use AM_PROG_LEX.
+	* Makefile.am (SUBDIRS): New macro.
+	(POTFILES): Likewise.
+	(po/POTFILES.in): New target.
+	(LDADD): Added INTLLIBS.
+	(objdump_LDADD): Likewise.
+	(c__filt_LDADD): Likewise.
+	(ar_LDADD): Likewise.
+	(ranlib_LDADD): Likewise.
+	(dlltool_LDADD): Likewise.
+	(windres_LDADD): Likewise.
+	* po/Make-in, po/POTFILES.in, po/binutils.pot: New files.
+
 Tue Apr 21 16:07:18 1998  Stanislav Brabec  <utx@k332.feld.cvut.cz>
 
 	* objcopy.c (preserve_dates): New file static variable.
