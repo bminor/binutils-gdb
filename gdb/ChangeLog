@@ -1,3 +1,7 @@
+2004-09-19  Jim Blandy  <jimb@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol): Doc fix.
+
 2004-09-20  Andrew Cagney  <cagney@gnu.org>
 
 	* config/nm-lynx.h (DEPRECATED_CHILD_RESUME): Deprecate

@@ -145,7 +145,15 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
    Note:  One instance where there may be duplicate minimal symbols with
    the same name is when the symbol tables for a shared library and the
    symbol tables for an executable contain global symbols with the same
-   names (the dynamic linker deals with the duplication).  */
+   names (the dynamic linker deals with the duplication).
+
+   It's also possible to have minimal symbols with different mangled
+   names, but identical demangled names.  For example, the GNU C++ v3
+   ABI requires the generation of two (or perhaps three) copies of
+   constructor functions --- "in-charge", "not-in-charge", and
+   "allocate" copies; destructors may be duplicated as well.
+   Obviously, there must be distinct mangled names for each of these,
+   but the demangled names are all the same: S::S or S::~S.  */
 
 struct minimal_symbol *
 lookup_minimal_symbol (const char *name, const char *sfile,
