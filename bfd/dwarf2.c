@@ -1951,7 +1951,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
       else if (addr_size == 8)
 	{
 	  length = read_8_bytes (abfd, stash->info_ptr);
-	  stash->info_ptr = 8;
+	  stash->info_ptr += 8;
 	}
       else
 	stash->info_ptr += 4;
