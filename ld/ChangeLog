@@ -1,3 +1,12 @@
+2002-04-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (mpw): New maintainer mode rule to make mpw-*.c files.
+	* Makefile.in: Regenerate.
+	* mpw-elfmips.c: Delete.
+	* mpw-eppcmac.c: Delete.
+	* mpw-esh.c: Delete.
+	* mpw-idtmips.c: Delete.
+
 Wed Apr 17 19:23:14 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* emulparams/shelf32.sh (MACHINE): Now sh5.
