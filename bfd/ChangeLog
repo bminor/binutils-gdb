@@ -1,3 +1,13 @@
+Mon Oct 10 16:24:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* elf32-sparc.c (elf_sparc_howto_table): The PC10, PC22, and
+	WPLT30 relocations are PC-relative.
+
+Thu Oct  6 12:57:26 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* aoutx.h (adjust_o_magic): Correctly initialize vma if the vma of
+	the text section was user-defined.
+
 Wed Oct  5 14:42:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* archive.c (bfd_construct_extended_name_table): SVR4 uses slash
