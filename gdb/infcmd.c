@@ -478,7 +478,7 @@ step_1 (skip_subroutines, single_inst, count_string)
 	cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint,
 				 0);
       else
-	make_exec_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 0);
+        make_exec_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 0);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
@@ -593,10 +593,12 @@ step_1_continuation (arg)
    called in case of step n with n>1, after the first step operation has
    been completed.*/
 static void 
-step_once (int skip_subroutines, int single_inst, int count) 
+step_once (int skip_subroutines, int single_inst, int count)
 { 
-  struct continuation_arg *arg1; struct continuation_arg *arg2;
-  struct continuation_arg *arg3; struct frame_info *frame;
+  struct continuation_arg *arg1; 
+  struct continuation_arg *arg2;
+  struct continuation_arg *arg3; 
+  struct frame_info *frame;
 
   if (count > 0)
     {
@@ -1049,9 +1051,11 @@ finish_command_continuation (arg)
 {
   register struct symbol *function;
   struct breakpoint *breakpoint;
+  struct cleanup *cleanups;
 
   breakpoint = (struct breakpoint *) arg->data;
   function = (struct symbol *) (arg->next)->data;
+  cleanups = (struct cleanup *) (arg->next->next)->data;
 
   if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
       && function != 0)
@@ -1066,7 +1070,7 @@ finish_command_continuation (arg)
 
       if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	{
-	  do_exec_cleanups (ALL_CLEANUPS);
+	  do_exec_cleanups (cleanups);
 	  return;
 	}
 
@@ -1079,7 +1083,7 @@ finish_command_continuation (arg)
 
       print_return_value (struct_return, value_type); 
     }
-  do_exec_cleanups (ALL_CLEANUPS);
+  do_exec_cleanups (cleanups);
 }
 
 /* "finish": Set a temporary breakpoint at the place
@@ -1095,7 +1099,7 @@ finish_command (arg, from_tty)
   register struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
-  struct continuation_arg *arg1, *arg2;
+  struct continuation_arg *arg1, *arg2, *arg3;
 
   int async_exec = 0;
 
@@ -1137,7 +1141,7 @@ finish_command (arg, from_tty)
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
   else
-    make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -1161,10 +1165,14 @@ finish_command (arg, from_tty)
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg2 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg3 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
-      arg2->next = NULL;
+      arg2->next = arg3;
+      arg3->next = NULL;
       arg1->data = (PTR) breakpoint;
       arg2->data = (PTR) function;
+      arg3->data = (PTR) old_chain;
       add_continuation (finish_command_continuation, arg1);
     }
 

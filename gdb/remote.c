@@ -1921,7 +1921,8 @@ remote_open_1 (name, from_tty, target, extended_p)
 {
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what\n\
-serial device is attached to the remote system (e.g. /dev/ttya).");
+serial device is attached to the remote system\n\
+(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
 
   /* See FIXME above */
   wait_forever_enabled_p = 1;
@@ -2007,7 +2008,8 @@ remote_async_open_1 (name, from_tty, target, extended_p)
 {
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what\n\
-serial device is attached to the remote system (e.g. /dev/ttya).");
+serial device is attached to the remote system\n\
+(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
 
   target_preopen (from_tty);
 
@@ -4855,7 +4857,8 @@ init_remote_ops ()
   remote_ops.to_longname = "Remote serial target in gdb-specific protocol";
   remote_ops.to_doc =
     "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).";
+Specify the serial device it is connected to\n\
+(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).";
   remote_ops.to_open = remote_open;
   remote_ops.to_close = remote_close;
   remote_ops.to_detach = remote_detach;

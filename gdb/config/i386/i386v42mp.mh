@@ -9,5 +9,5 @@ XM_CLIBS= -lsocket -lnsl
 # appropriate for i386v42mp
 NAT_FILE= nm-i386v42mp.h
 NATDEPFILES= corelow.o core-regset.o solib.o fork-child.o i386v4-nat.o \
-	procfs.o proc_api.o proc_events.o proc_flags.o proc_why.o
+	procfs.o proc_api.o proc_events.o proc_flags.o proc_why.o uw-thread.o
 

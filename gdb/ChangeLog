@@ -1,3 +1,88 @@
+2000-01-09  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32nat.c (handle_exceptions): Handle various arithmetic exceptions.
+	* configure.in: Add an additional library to cygwin link.
+	* configure: Regenerate.
+
+	Patch from Egor Duda <deo@logos-m.ru>:
+	* coffread.c (coff_symfile_read): Reinstate ability to recognize "pe"
+	type.
+
+2000-01-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* uw-thread.c: New file to support UnixWare user-mode threads:
+	contributed by Nickolas Duffek  <nsd@cygnus.com>.  
+	* target.h (struct target_ops): New vector, to_extra_thread_info,
+	allows back-ends to give extra details in info thread display.
+	(target_extra_thread_info): define new macro.
+	(target_find_new_threads): simplify macro.  Cleanup comments.
+	* target.c (to_extra_thread_info): default and inherit new vector.
+	(cleanup_target): eliminate PARAMS, break up long lines,
+	provide default definition for to_extra_thread_info, and
+	to_find_new_threads.  Default to_thread_alive and to_query
+	to return_zero, not target_ignore (they each return int not void).
+	(debug_to_find_new_threads): new debug entry.
+	(setup_target_debug): add debug_to_find_new_threads.
+	* gdbthread.h: export struct thread_info, find_thread_pid, and
+	iterate_over_threads.  Add comments.  Eliminate PARAMS.  Update
+	copyright.  Add new private data pointer for use by target back-ends.
+	* thread.c (struct thread_info): move definition to gdbthread.h.
+	(find_thread_pid): new exported function for thread lookup.
+	(iterate_over_threads): new exported function for applying 
+	arbitrary operations to threads.  Update copyright to 2000.
+	(info_threads_command): use new target_extra_thread_info vector
+	to display extra information about each thread (if implemented).
+	* config/i386/tm-i386v42mp.h: remove obsolete #defines for procfs.
+	Add defines for PIDGET, etc.
+	* config/i386/tm-i386sol2.h: ditto.
+	* config/sparc/tm-sun4sol2.h: ditto.
+	* config/i386/i386v42mp.mh: add uw-thread.o to NATDEPFILES.
+	* testsuite/gdb.threads/pthreads.exp: Try to link with -lthread
+	if -lpthread and -lpthreads fail.
+
+	* procfs.c: (PIDGET, TIDGET, MERGEPID): change default to no-op.
+	(proc_flags): combine flags that UnixWare splits into two locations.
+	(proc_modify_flag): add support for PR_KLC (kill on last close).
+	(proc_[un]set_kill_on_last_close): new functions.
+	
+2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote.c (remote_open_1): Fix message so it does not imply a
+	specific syntax for serial ports, as it is OS dependent. 
+	(remote_async_open_1): Ibid.
+	(init_remote_ops): Ibid.
+
+2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/serdrv.c (SerialOpen): Use speed from "-b" argument or
+	"set remotebaud" command (if set) when no speed is specified on
+	the "target rdi" command.
+
+2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/serdrv.c (find_baud_rate): Add entries for 57600 and
+	115200.
+	(baud_options[]): Ibid.
+
+2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/unixcomm.c: Fix SERIAL_PREFIX so it matches the prefix
+	used by each operating system.
+
+2000-01-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.c (until_break_command): Add an argument for the
+ 	continuation, the beginning of the cleanups set up by this
+ 	command.
+	(until_break_command_continuation): Do cleanups until the one
+ 	passed in as argument instead of doing all of them.
+
+	* infcmd.c (finish_command_continuation): Expect a new argument,
+ 	which indicates up to where to do cleanups. Update calls to
+ 	do_exec_cleanups to use this marker, instead of ALL_CLEANUPS.
+	(finish_command): Add another argument for the continuation: the
+	starting cleanup for this command.
+
 2000-01-05  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	From Grant Edwards <grante@visi.com> (original patch from Thomas

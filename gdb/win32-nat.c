@@ -571,6 +571,15 @@ handle_exception (struct target_waitstatus *ourstatus)
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
       continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
+    case STATUS_FLOAT_UNDERFLOW:
+    case STATUS_FLOAT_DIVIDE_BY_ZERO:
+    case STATUS_FLOAT_OVERFLOW:
+    case STATUS_INTEGER_DIVIDE_BY_ZERO:
+      DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08x\n",
+	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_FPE;
+      continue_status = DBG_EXCEPTION_NOT_HANDLED;
+      break;
     case STATUS_STACK_OVERFLOW:
       DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));

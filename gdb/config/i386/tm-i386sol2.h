@@ -46,18 +46,4 @@ extern char *sunpro_static_transform_name PARAMS ((char *));
 #define PIDGET(pid) ((pid) & 0xffff)
 #define TIDGET(pid) (((pid) >> 16) & 0xffff)
 
-/* Macro to extract carry from given regset.  */
-#define PS_FLAG_CARRY 0x1	/* Carry bit in PS */
-#define PROCFS_GET_CARRY(regset) ((regset)[EFL] & PS_FLAG_CARRY)
-
-#ifdef HAVE_THREAD_DB_LIB
-
-extern char *solaris_pid_to_str PARAMS ((int pid));
-
-#else
-
-extern char *procfs_pid_to_str PARAMS ((int pid));
-
-#endif
-
 #endif /* ifndef TM_I386SOL2_H */

@@ -51,9 +51,29 @@ proc do_steps_and_nexts {} {
  
     gdb_reinitialize_dir $srcdir/..
 
-    for {set count 0} {$count < 20} {incr count} {
+    for {set count 0} {$count < 22} {incr count} {
 	send_gdb "list\n"
 	gdb_expect {
+	    -re ".*context = data.*$gdb_prompt $" {
+		set description "step over context initialization"
+		set command "step"
+	    }
+	    -re ".*argc = context->argc.*$gdb_prompt $" {
+		set description "step over argc initialization"
+		set command "step"
+	    }
+	    -re ".*argv = context->argv.*$gdb_prompt $" {
+		set description "step over argv initialization"
+		set command "step"
+	    }
+	    -re ".*quiet = 0.*$gdb_prompt $" {
+		set description "step over quiet initialization"
+		set command "step"
+	    }
+	    -re ".*batch = 0.*$gdb_prompt $" {
+		set description "step over batch initialization"
+		set command "step"
+	    }
 	    -re ".*symarg = NULL.*$gdb_prompt $" {
 		set description "step over symarg initialization"
 		set command "step"
@@ -72,10 +92,6 @@ proc do_steps_and_nexts {} {
 	    }
 	    -re ".*ttyarg = NULL.*$gdb_prompt $" {
 		set description "step over ttyarg initialization"
-		set command "step"
-	    }
-	    -re ".*interparg = NULL.*$gdb_prompt $" {
-		set description "step over interparg initialization"
 		set command "step"
 	    }
 	    -re ".*time_at_startup = get_run_time.*$gdb_prompt $" {
@@ -104,10 +120,6 @@ proc do_steps_and_nexts {} {
 	    }
 	    -re ".*alloca .i - 4.*$gdb_prompt $" {
 		set description "next over conditional stack alignment alloca"
-		set command "next"
-	    }
-	    -re ".*SET_TOP_LEVEL.*$gdb_prompt $" {
-		set description "next over SET_TOP_LEVEL call"
 		set command "next"
 	    }
 	    -re ".*cmdsize = 1.*$gdb_prompt $" {
@@ -199,9 +211,9 @@ proc test_with_self { executable } {
 	    "Disassemble main"
 
     # Set a breakpoint at main
-    gdb_test "break main" \
+    gdb_test "break captured_main" \
 	    "Breakpoint.*at.* file.*, line.*" \
-	    "breakpoint in main"
+	    "breakpoint in captured_main"
 
     # We'll need this when we send a ^C to GDB.  Need to do it before we
     # run the program and gdb starts saving and restoring tty states.
@@ -222,13 +234,13 @@ proc test_with_self { executable } {
     # so we bump it back up for the duration of this command.
     set timeout 600
 
-    set description "run until breakpoint at main"
+    set description "run until breakpoint at captured_main"
     send_gdb "run -nw\n"
     gdb_expect {
-	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.* at .*main.c:.*$gdb_prompt $" {
+	-re "Starting program.*Breakpoint \[0-9\]+,.*captured_main .data.* at .*main.c:.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.*$gdb_prompt $" {
+	-re "Starting program.*Breakpoint \[0-9\]+,.*captured_main .data.*$gdb_prompt $" {
 	    xfail "$description (line numbers scrambled?)"
 	}
 	-re "vfork: No more processes.*$gdb_prompt $" {

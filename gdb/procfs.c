@@ -170,11 +170,7 @@ init_procfs_ops ()
 #ifdef NEW_PROC_API
 extern  int   write_with_trace PARAMS ((int, void *, size_t, char *, int));
 extern  off_t lseek_with_trace PARAMS ((int, off_t,  int,    char *, int));
-
-#if 0
 #define write(X,Y,Z)   write_with_trace (X, Y, Z, __FILE__, __LINE__)
-#endif
-
 #define lseek(X,Y,Z)   lseek_with_trace (X, Y, Z, __FILE__, __LINE__)
 #else
 extern  int ioctl_with_trace PARAMS ((int, long, void *, char *, int));
@@ -183,25 +179,13 @@ extern  int ioctl_with_trace PARAMS ((int, long, void *, char *, int));
 #define open(X,Y)      open_with_trace  (X, Y,    __FILE__, __LINE__)
 #define close(X)       close_with_trace (X,       __FILE__, __LINE__)
 #define wait(X)        wait_with_trace  (X,       __FILE__, __LINE__)
-
-#if 0
 #define PROCFS_NOTE(X) procfs_note      (X,       __FILE__, __LINE__)
 #define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T) \
 proc_prettyfprint_status (X, Y, Z, T)
-#else 
-#define PROCFS_NOTE(X)
-#define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T)
-#endif
-
 #else
 #define PROCFS_NOTE(X)
 #define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T)
 #endif
-
-     /* temp: */
-#undef  PROCFS_NOTE
-#define PROCFS_NOTE(X)
-     /* suppress */
 
 
 /*
@@ -297,20 +281,13 @@ typedef prstatus_t gdb_lwpstatus_t;
   typedef fpregset_t gdb_fpregset_t;
 #endif
 
-/* The PIDs that we pass to and from GDB will be composed from
-   the actual PID plus the LWPID.  These macros will be used to
-   compose and decompose them.  */
+/* Provide default composite pid manipulation macros for systems that
+   don't have threads. */
 
 #ifndef PIDGET
-#define PIDGET(PID)		(((PID) & 0xffff))
-#endif
-
-#ifndef TIDGET
-#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#endif
-
-#ifndef MERGEPID
-#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
+#define PIDGET(PID)		(PID)
+#define TIDGET(PID)		(PID)
+#define MERGEPID(PID, TID)	(PID)
 #endif
 
 typedef struct procinfo {
@@ -611,7 +588,7 @@ create_procinfo (pid, tid)
 {
   procinfo *pi, *parent;
 
-  if (pi = find_procinfo (pid, tid))
+  if ((pi = find_procinfo (pid, tid)))
     return pi;			/* Already exists, nothing to do. */
 
   /* find parent before doing malloc, to save having to cleanup */
@@ -959,7 +936,14 @@ proc_flags (pi)
       return 0;	/* FIXME: not a good failure value (but what is?) */
 
 #ifdef NEW_PROC_API
+# ifdef UNIXWARE
+  /* UnixWare 7.1 puts process status flags, e.g. PR_ASYNC, in
+     pstatus_t and LWP status flags, e.g. PR_STOPPED, in lwpstatus_t.
+     The two sets of flags don't overlap. */
+  return pi->prstatus.pr_flags | pi->prstatus.pr_lwp.pr_flags;
+# else
   return pi->prstatus.pr_lwp.pr_flags;
+# endif
 #else
   return pi->prstatus.pr_flags;
 #endif
@@ -1093,7 +1077,7 @@ proc_cursig (struct procinfo *pi)
 }
 
 /*
- * Function: proc_modify_flags 
+ * Function: proc_modify_flag 
  *
  *  === I appologize for the messiness of this function. 
  *  === This is an area where the different versions of
@@ -1102,6 +1086,7 @@ proc_cursig (struct procinfo *pi)
  * Set or reset any of the following process flags:
  *    PR_FORK	-- forked child will inherit trace flags
  *    PR_RLC	-- traced process runs when last /proc file closed.
+ *    PR_KLC    -- traced process is killed when last /proc file closed.
  *    PR_ASYNC	-- LWP's get to run/stop independently.
  *
  * There are three methods for doing this function:
@@ -1113,7 +1098,8 @@ proc_cursig (struct procinfo *pi)
  *    [OSF, Sol5]
  *
  * Note: Irix does not define PR_ASYNC.
- * Note: OSF is the only one that can ONLY use the oldest method.
+ * Note: OSF  does not define PR_KLC.
+ * Note: OSF  is the only one that can ONLY use the oldest method.
  *
  * Arguments: 
  *    pi   -- the procinfo
@@ -1218,6 +1204,9 @@ proc_modify_flag (pi, flag, mode)
 #ifdef PR_ASYNC
 	     flag == PR_ASYNC ? "PR_ASYNC" :
 #endif
+#ifdef PR_KLC
+	     flag == PR_KLC   ? "PR_KLC"   :
+#endif
 	     "<unknown flag>",
 	     mode == FLAG_RESET ? "off" : "on");
 
@@ -1257,6 +1246,42 @@ proc_unset_run_on_last_close (pi)
 {
   return proc_modify_flag (pi, PR_RLC, FLAG_RESET);
 }
+
+#ifdef PR_KLC
+/*
+ * Function: proc_set_kill_on_last_close
+ *
+ * Set the kill_on_last_close flag.
+ * Process with all threads will be killed when debugger
+ * closes all /proc fds (or debugger exits or dies).
+ *
+ * Returns non-zero for success, zero for failure.
+ */
+
+int
+proc_set_kill_on_last_close (pi)
+     procinfo *pi;
+{
+  return proc_modify_flag (pi, PR_KLC, FLAG_SET);
+}
+
+/*
+ * Function: proc_unset_kill_on_last_close
+ *
+ * Reset the kill_on_last_close flag.
+ * Process will NOT be killed when debugger 
+ * closes its file handles (or exits or dies).
+ *
+ * Returns non-zero for success, zero for failure.
+ */
+
+int
+proc_unset_kill_on_last_close (pi)
+     procinfo *pi;
+{
+  return proc_modify_flag (pi, PR_KLC, FLAG_RESET);
+}
+#endif /* PR_KLC */
 
 /*
  * Function: proc_set_inherit_on_fork
@@ -2601,7 +2626,9 @@ proc_iterate_over_mappings (func)
 {
   struct prmap *map;
   procinfo *pi;
+#ifndef NEW_PROC_API	/* avoid compiler warning */
   int nmaps = 0, i;
+#endif
   int funcstat = 0;
   int fd, map_fd;
   char pathname[MAX_PROC_NAME_SIZE];
@@ -3390,7 +3417,6 @@ do_detach (signo)
      int signo;
 {
   procinfo *pi;
-  long      pflags;
 
   /* Find procinfo for the main process */
   pi = find_procinfo_or_die (PIDGET (inferior_pid), 0);	/* FIXME: threads */
@@ -3650,18 +3676,6 @@ wait_again:
 	  why   = proc_why (pi);
 	  what  = proc_what (pi);
 
-#if 0
-	  {
-	    int stopped_pc = read_pc ();
-	    if (stopped_pc != 0x10c68 &&
-		stopped_pc != 0x10c6c &&
-		stopped_pc != 0x10c70 &&
-		stopped_pc != 0x22768 &&
-		stopped_pc != 0x10c74)
-	      printf ("%x,%d,%d\n", stopped_pc, why, what);
-	  }
-#endif
-
 	  if (flags & (PR_STOPPED | PR_ISTOP))
 	    {
 #ifdef PR_ASYNC
@@ -3895,7 +3909,7 @@ wait_again:
 		    temp = MERGEPID (pi->pid, temp);
 		    if (!in_thread_list (temp))
 		      {
-			printf_filtered ("[*New %s]\n", 
+			printf_filtered ("[New %s]\n", 
 					 target_pid_to_str (temp));
 			add_thread (temp);
 		      }
@@ -4427,9 +4441,9 @@ unconditionally_kill_inferior (pi)
     /* FIXME: should we use waitpid to make sure we get the right event?  
        Should we check the returned event?  */
     {
+#if 0
       int status, ret;
 
-#if 0
       ret = waitpid (pi->pid, &status, 0);
 #else
       wait (NULL);
@@ -4547,6 +4561,10 @@ procfs_init_inferior (pid)
   if ((fail = procfs_debug_inferior (pi)) != 0)
     proc_error (pi, "init_inferior (procfs_debug_inferior)", fail);
 
+  /* FIXME: logically, we should really be turning OFF run-on-last-close,
+     and possibly even turning ON kill-on-last-close at this point.  But
+     I can't make that change without careful testing which I don't have
+     time to do right now...  */
   /* Turn on run-on-last-close flag so that the child
      will die if GDB goes away for some reason.  */
   if (!proc_set_run_on_last_close (pi))
@@ -4561,7 +4579,7 @@ procfs_init_inferior (pid)
 #else
   /* One trap to exec the shell, one to exec the program being debugged.  */
   startup_inferior (2);
-#endif
+#endif /* START_INFERIOR_TRAPS_EXPECTED */
 }
 
 /*

@@ -488,7 +488,7 @@ AC_SUBST(TERM_LIB)
 # libreadline needs libuser32.a in a cygwin environment
 WIN32LIBS=
 if test x$gdb_cv_os_cygwin = xyes; then
-    WIN32LIBS="-luser32"
+    WIN32LIBS="-luser32 -limagehlp"
 fi
 AC_SUBST(WIN32LIBS)
 

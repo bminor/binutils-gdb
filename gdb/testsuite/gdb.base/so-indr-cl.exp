@@ -33,8 +33,9 @@ if ![isnative] then {
 # that we use HP-UX-specific compiler & linker options to build
 # the testcase.
 #
-setup_xfail "*-*-*"
-clear_xfail "hppa*-*-*hpux*"
+if {! [istarget "hppa*-*-*hpux*"] } {
+    return
+}
 
 set libfile "solib"
 set testfile "so-indr-cl"

@@ -26,20 +26,39 @@
 
 #include "i386/tm-i386v4.h"
 
-/* procfs on this architecture has multiple fds (ctl, as, map, status)
-   including a control fd */
-
-#ifndef HAVE_MULTIPLE_PROC_FDS
-#define HAVE_MULTIPLE_PROC_FDS
-#endif
-
-/* procfs on this architecture communicates with read/write instead
-   of ioctl */
-
-#define PROCFS_USE_READ_WRITE
-
-/* define to select for other sysv4.2mp weirdness */
+/* define to select for other sysv4.2mp weirdness (see procfs.c) */
 
 #define UNIXWARE
+
+/* The following macros extract process and lwp/thread ids from a
+   composite id.
+
+   For consistency with UnixWare core files, allocate bits 0-15 for
+   process ids and bits 16 and up for lwp ids.  Reserve bit 31 for
+   negative return values to indicate exceptions, and use bit 30 as a
+   flag to indicate a user-mode thread, leaving 14 bits for lwp
+   ids. */
+
+/* Number of bits in composite id allocated to process number. */
+#define PIDBITS 16
+
+/* Return the process id stored in composite PID. */
+#define PIDGET(PID)             (((PID) & ((1 << PIDBITS) - 1)))
+
+/* Return the thread or lwp id stored in composite PID. */
+#define TIDGET(PID)             (((PID) & 0x3fffffff) >> PIDBITS)
+#define LIDGET(PID)             TIDGET(PID)
+
+/* Construct a composite id from lwp LID and the process portion of
+   composite PID. */
+#define MERGEPID(PID, LID)      (PIDGET(PID) | ((LID) << PIDBITS))
+#define MKLID(PID, LID)         MERGEPID(PID, LID)
+
+/* Construct a composite id from thread TID and the process portion of
+   composite PID. */
+#define MKTID(PID, TID)         (MERGEPID(PID, TID) | 0x40000000)
+
+/* Return whether PID contains a user-space thread id. */
+#define ISTID(PID)              ((PID) & 0x40000000)
 
 #endif /* ifndef TM_I386V42MP_H */

@@ -1,5 +1,5 @@
 /* Multi-process/thread control defs for GDB, the GNU debugger.
-   Copyright 1987, 88, 89, 90, 91, 92, 1993, 1998
+   Copyright 1987, 88, 89, 90, 91, 92, 1993, 1998, 1999, 2000
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    Free Software Foundation, Inc.
@@ -27,31 +27,114 @@
 /* For bpstat */
 #include "breakpoint.h"
 
-extern void init_thread_list PARAMS ((void));
+struct thread_info
+{
+  struct thread_info *next;
+  int pid;			/* "Actual process id";
+				    In fact, this may be overloaded with 
+				    kernel thread id, etc.  */
+  int num;			/* Convenient handle (GDB thread id) */
+  /* State from wait_for_inferior */
+  CORE_ADDR prev_pc;
+  CORE_ADDR prev_func_start;
+  char *prev_func_name;
+  struct breakpoint *step_resume_breakpoint;
+  struct breakpoint *through_sigtramp_breakpoint;
+  CORE_ADDR step_range_start;
+  CORE_ADDR step_range_end;
+  CORE_ADDR step_frame_address;
+  int trap_expected;
+  int handling_longjmp;
+  int another_trap;
 
-extern void add_thread PARAMS ((int pid));
+  /* This is set TRUE when a catchpoint of a shared library event
+     triggers.  Since we don't wish to leave the inferior in the
+     solib hook when we report the event, we step the inferior
+     back to user code before stopping and reporting the event.  */
+  int stepping_through_solib_after_catch;
 
-extern void delete_thread PARAMS ((int));
+  /* When stepping_through_solib_after_catch is TRUE, this is a
+     list of the catchpoints that should be reported as triggering
+     when we finally do stop stepping.  */
+  bpstat stepping_through_solib_catchpoints;
 
-extern int thread_id_to_pid PARAMS ((int));
+  /* This is set to TRUE when this thread is in a signal handler
+     trampoline and we're single-stepping through it.  */
+  int stepping_through_sigtramp;
 
-extern int in_thread_list PARAMS ((int pid));
+  /* Private data used by the target vector implementation.  */
+  struct private_thread_info *private;
+};
 
-extern int pid_to_thread_id PARAMS ((int pid));
+/* Create an empty thread list, or empty the existing one.  */
+extern void init_thread_list (void);
 
-extern int valid_thread_id PARAMS ((int thread));
+/* Add a thread to the thread list.
+   Note that add_thread now returns the handle of the new thread,
+   so that the caller may initialize the private thread data.  */
+extern struct thread_info *add_thread (int pid);
 
-extern void load_infrun_state PARAMS ((int, CORE_ADDR *, CORE_ADDR *, char **,
-				       int *, struct breakpoint **,
-				       struct breakpoint **, CORE_ADDR *,
-				     CORE_ADDR *, CORE_ADDR *, int *, int *,
-				       int *, bpstat *, int *));
+/* Delete an existing thread list entry.  */
+extern void delete_thread (int);
 
-extern void save_infrun_state PARAMS ((int, CORE_ADDR, CORE_ADDR, char *,
-				       int, struct breakpoint *,
-				       struct breakpoint *, CORE_ADDR,
-				       CORE_ADDR, CORE_ADDR, int, int,
-				       int, bpstat, int));
+/* Translate the integer thread id (GDB's homegrown id, not the system's)
+   into a "pid" (which may be overloaded with extra thread information).  */
+extern int thread_id_to_pid (int);
+
+/* Translate a 'pid' (which may be overloaded with extra thread information) 
+   into the integer thread id (GDB's homegrown id, not the system's).  */
+extern int pid_to_thread_id (int pid);
+
+/* Boolean test for an already-known pid (which may be overloaded with
+   extra thread information).  */
+extern int in_thread_list (int pid);
+
+/* Boolean test for an already-known thread id (GDB's homegrown id, 
+   not the system's).  */
+extern int valid_thread_id (int thread);
+
+/* Search function to lookup a thread by 'pid'.  */
+extern struct thread_info *find_thread_pid (int pid);
+
+/* Iterator function to call a user-provided callback function
+   once for each known thread.  */
+typedef int (*thread_callback_func) (struct thread_info *, void *);
+extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
+
+/* infrun context switch: save the debugger state for the given thread.  */
+extern void save_infrun_state (int       pid,
+			       CORE_ADDR prev_pc,
+			       CORE_ADDR prev_func_start,
+			       char     *prev_func_name,
+			       int       trap_expected,
+			       struct breakpoint *step_resume_breakpoint,
+			       struct breakpoint *through_sigtramp_breakpoint,
+			       CORE_ADDR step_range_start,
+			       CORE_ADDR step_range_end,
+			       CORE_ADDR step_frame_address,
+			       int       handling_longjmp,
+			       int       another_trap,
+			       int       stepping_through_solib_after_catch,
+			       bpstat    stepping_through_solib_catchpoints,
+			       int       stepping_through_sigtramp);
+
+/* infrun context switch: load the debugger state previously saved
+   for the given thread.  */
+extern void load_infrun_state (int        pid,
+			       CORE_ADDR *prev_pc,
+			       CORE_ADDR *prev_func_start,
+			       char     **prev_func_name,
+			       int       *trap_expected,
+			       struct breakpoint **step_resume_breakpoint,
+			       struct breakpoint **through_sigtramp_breakpoint,
+			       CORE_ADDR *step_range_start,
+			       CORE_ADDR *step_range_end,
+			       CORE_ADDR *step_frame_address,
+			       int       *handling_longjmp,
+			       int       *another_trap,
+			       int       *stepping_through_solib_affter_catch,
+			       bpstat    *stepping_through_solib_catchpoints,
+			       int       *stepping_through_sigtramp);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;

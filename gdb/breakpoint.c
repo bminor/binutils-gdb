@@ -5215,10 +5215,10 @@ awatch_command (arg, from_tty)
 static void
 until_break_command_continuation (struct continuation_arg *arg)
 {
-  /* Do all the exec cleanups, which at this point should only be the
-     one set up in the first part of the until_break_command
-     function. */
-  do_exec_cleanups (ALL_CLEANUPS);
+  struct cleanup *cleanups;
+
+  cleanups = (struct cleanup *) arg->data;
+  do_exec_cleanups (cleanups);
 }
 
 /* ARGSUSED */
@@ -5232,6 +5232,8 @@ until_break_command (arg, from_tty)
   struct frame_info *prev_frame = get_prev_frame (selected_frame);
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
+  struct continuation_arg *arg1;
+
 
   clear_proceed_status ();
 
@@ -5262,7 +5264,7 @@ until_break_command (arg, from_tty)
     old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, 
 			      breakpoint);
   else
-    make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
 
   /* If we are running asynchronously, and the target supports async
      execution, we are not waiting for the target to stop, in the call
@@ -5273,11 +5275,16 @@ until_break_command (arg, from_tty)
 
   if (event_loop_p && target_can_async_p ())
     {
-      /* In this case we don't need args for the continuation, because
-         all it needs to do is do the cleanups in the
-         exec_cleanup_chain, which will be only those inserted by this
-         function. We can get away by using ALL_CLEANUPS. */
-      add_continuation (until_break_command_continuation, NULL);
+      /* In this case the arg for the continuation is just the point
+         in the exec_cleanups chain from where to start doing
+         cleanups, because all the continuation does is the cleanups in
+         the exec_cleanup_chain. */
+      arg1 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next = NULL;
+      arg1->data = (PTR) old_chain;
+
+      add_continuation (until_break_command_continuation, arg1);
     }
 
   /* Keep within the current frame */

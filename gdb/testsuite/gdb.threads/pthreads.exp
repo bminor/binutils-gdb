@@ -46,7 +46,7 @@ if [istarget "*-*-linux"] then {
     set target_cflags ""
 }
 set why_msg "unrecognized error"
-foreach lib {-lpthreads -lpthread} {
+foreach lib {-lpthreads -lpthread -lthread} {
     set options "debug"
     lappend options "incdir=${objdir}/${subdir}"
     lappend options "libs=$lib"

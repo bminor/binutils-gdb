@@ -32,9 +32,13 @@ if ![isnative] then {
 # This test is presently only valid on HP-UX, since it requires
 # that we use HP-UX-specific compiler & linker options to build
 # the testcase.
-#
-setup_xfail "*-*-*"
-clear_xfail "hppa*-*-*hpux*"
+# Actually this test works on solaris, and linux too.
+ 
+if {! ([istarget "hppa*-*-*hpux*"]
+       || [istarget "sparc-sun-solaris*"]
+       || [istarget " *-*-linux-gnu"]) } {
+	 return
+}
 
 set libfile "solib"
 set testfile "so-impl-ld"
@@ -160,3 +164,9 @@ gdb_expect {
 
 gdb_exit
 return 0
+
+
+
+
+
+

@@ -1,5 +1,5 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1993, 1998
+   Copyright 1986, 1987, 1988, 1993, 1998, 1999, 2000
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    Free Software Foundation, Inc.
@@ -38,41 +38,7 @@
 
 /*#include "lynxos-core.h" */
 
-struct thread_info
-  {
-    struct thread_info *next;
-    int pid;			/* Actual process id */
-    int num;			/* Convenient handle */
-    CORE_ADDR prev_pc;		/* State from wait_for_inferior */
-    CORE_ADDR prev_func_start;
-    char *prev_func_name;
-    struct breakpoint *step_resume_breakpoint;
-    struct breakpoint *through_sigtramp_breakpoint;
-    CORE_ADDR step_range_start;
-    CORE_ADDR step_range_end;
-    CORE_ADDR step_frame_address;
-    int trap_expected;
-    int handling_longjmp;
-    int another_trap;
-
-    /* This is set TRUE when a catchpoint of a shared library event
-       triggers.  Since we don't wish to leave the inferior in the
-       solib hook when we report the event, we step the inferior
-       back to user code before stopping and reporting the event.
-     */
-    int stepping_through_solib_after_catch;
-
-    /* When stepping_through_solib_after_catch is TRUE, this is a
-       list of the catchpoints that should be reported as triggering
-       when we finally do stop stepping.
-     */
-    bpstat stepping_through_solib_catchpoints;
-
-    /* This is set to TRUE when this thread is in a signal handler
-       trampoline and we're single-stepping through it */
-    int stepping_through_sigtramp;
-
-  };
+/* Definition of struct thread_info exported to gdbthread.h */
 
 /* Prototypes for exported functions. */
 
@@ -112,7 +78,10 @@ init_thread_list ()
   highest_thread_num = 0;
 }
 
-void
+/* add_thread now returns a pointer to the new thread_info, 
+   so that back_ends can initialize their private data.  */
+
+struct thread_info *
 add_thread (pid)
      int pid;
 {
@@ -138,6 +107,7 @@ add_thread (pid)
   tp->stepping_through_sigtramp = 0;
   tp->next = thread_list;
   thread_list = tp;
+  return tp;
 }
 
 void
@@ -165,6 +135,11 @@ delete_thread (pid)
   if (tp->step_resume_breakpoint)
     delete_breakpoint (tp->step_resume_breakpoint);
 
+  /* FIXME: do I ever need to call the back-end to give it a
+     chance at this private data before deleting the thread?  */
+  if (tp->private)
+    free (tp->private);
+
   free (tp);
 
   return;
@@ -178,6 +153,48 @@ find_thread_id (num)
 
   for (tp = thread_list; tp; tp = tp->next)
     if (tp->num == num)
+      return tp;
+
+  return NULL;
+}
+
+/* Find a thread_info by matching 'pid'.  */
+struct thread_info *
+find_thread_pid (pid)
+     int pid;
+{
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (tp->pid == pid)
+      return tp;
+
+  return NULL;
+}
+
+/*
+ * Thread iterator function.
+ *
+ * Calls a callback function once for each thread, so long as
+ * the callback function returns false.  If the callback function
+ * returns true, the iteration will end and the current thread
+ * will be returned.  This can be useful for implementing a 
+ * search for a thread with arbitrary attributes, or for applying
+ * some operation to every thread.
+ *
+ * FIXME: some of the existing functionality, such as 
+ * "Thread apply all", might be rewritten using this functionality.
+ */
+
+struct thread_info *
+iterate_over_threads (callback, data)
+     int (*callback) ();
+     void *data;
+{
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if ((*callback) (tp, data))
       return tp;
 
   return NULL;
@@ -380,6 +397,7 @@ info_threads_command (arg, from_tty)
   struct frame_info *cur_frame;
   int saved_frame_level = selected_frame_level;
   int counter;
+  char *extra_info;
 
   /* Avoid coredumps which would happen if we tried to access a NULL
      selected_frame.  */
@@ -397,10 +415,16 @@ info_threads_command (arg, from_tty)
 	printf_filtered ("  ");
 
 #ifdef HPUXHPPA
-      printf_filtered ("%d %s  ", tp->num, target_tid_to_str (tp->pid));
+      printf_filtered ("%d %s", tp->num, target_tid_to_str (tp->pid));
 #else
-      printf_filtered ("%d %s  ", tp->num, target_pid_to_str (tp->pid));
+      printf_filtered ("%d %s", tp->num, target_pid_to_str (tp->pid));
 #endif
+
+      extra_info = target_extra_thread_info (tp);
+      if (extra_info)
+	printf_filtered (" (%s)", extra_info);
+      puts_filtered ("  ");
+
       switch_to_thread (tp->pid);
       if (selected_frame)
 	print_only_stack_frame (selected_frame, -1, 0);

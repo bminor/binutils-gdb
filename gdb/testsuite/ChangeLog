@@ -1,3 +1,24 @@
+2000-01-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/so-indr-cl.exp: Don't execute the test if not on HPUX.
+  	Don't use xfail's because that affects only the following test.
+	
+	* gdb.base/so-impl-ld.exp: Don't execute the tests if not on hpux,
+ 	solaris or linux.
+
+	* gdb.base/selftest.exp: Update to reflect changes to main.c.
+
+2000-01-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/display.exp: Some yacc parsers like to say 
+	"A syntax error" rather than "A parse error".  Accept both.
+
+2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/default.exp: Remove OS dependent string from "target
+	remote" test.
+	* gdb.base/help.exp: Same for "help target remote" test.
+
 2000-01-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Jim Kingdon <kingdon@redhat.com>:

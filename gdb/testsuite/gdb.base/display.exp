@@ -191,7 +191,7 @@ gdb_test "p/a &sum" ".*= $hex.*<sum>.*"
 # this test will (incorrectly) fail.  So use a small number.
 gdb_test "p/a main+4" ".*= $hex.*<.*>.*"
 gdb_test "p/a \$pc" ".*= $hex.*<do_vars+.*>.*"
-gdb_test "p/a &&j" ".*A parse error.*"
+gdb_test "p/a &&j" ".*A .* error in expression.*"
 
 # Done!
 #

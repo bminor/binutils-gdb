@@ -397,69 +397,181 @@ cleanup_target (t)
 {
 
 #define de_fault(field, value) \
-  if (!t->field)	t->field = value
+  if (!t->field)               \
+    t->field = value
 
-  /*        FIELD                       DEFAULT VALUE        */
-
-  de_fault (to_open, (void (*)PARAMS ((char *, int))) tcomplain);
-  de_fault (to_close, (void (*)PARAMS ((int))) target_ignore);
-  de_fault (to_attach, maybe_kill_then_attach);
-  de_fault (to_post_attach, (void (*)PARAMS ((int))) target_ignore);
-  de_fault (to_require_attach, maybe_kill_then_attach);
-  de_fault (to_detach, (void (*)PARAMS ((char *, int))) target_ignore);
-  de_fault (to_require_detach, (void (*)PARAMS ((int, char *, int))) target_ignore);
-  de_fault (to_resume, (void (*)PARAMS ((int, int, enum target_signal))) noprocess);
-  de_fault (to_wait, (int (*)PARAMS ((int, struct target_waitstatus *))) noprocess);
-  de_fault (to_post_wait, (void (*)PARAMS ((int, int))) target_ignore);
-  de_fault (to_fetch_registers, (void (*)PARAMS ((int))) target_ignore);
-  de_fault (to_store_registers, (void (*)PARAMS ((int))) noprocess);
-  de_fault (to_prepare_to_store, (void (*)PARAMS ((void))) noprocess);
-  de_fault (to_xfer_memory, (int (*)PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *))) nomemory);
-  de_fault (to_files_info, (void (*)PARAMS ((struct target_ops *))) target_ignore);
-  de_fault (to_insert_breakpoint, memory_insert_breakpoint);
-  de_fault (to_remove_breakpoint, memory_remove_breakpoint);
-  de_fault (to_terminal_init, (void (*)PARAMS ((void))) target_ignore);
-  de_fault (to_terminal_inferior, (void (*)PARAMS ((void))) target_ignore);
-  de_fault (to_terminal_ours_for_output, (void (*)PARAMS ((void))) target_ignore);
-  de_fault (to_terminal_ours, (void (*)PARAMS ((void))) target_ignore);
-  de_fault (to_terminal_info, default_terminal_info);
-  de_fault (to_kill, (void (*)PARAMS ((void))) noprocess);
-  de_fault (to_load, (void (*)PARAMS ((char *, int))) tcomplain);
-  de_fault (to_lookup_symbol, (int (*)PARAMS ((char *, CORE_ADDR *))) nosymbol);
-  de_fault (to_create_inferior, maybe_kill_then_create_inferior);
-  de_fault (to_post_startup_inferior, (void (*)PARAMS ((int))) target_ignore);
-  de_fault (to_acknowledge_created_inferior, (void (*)PARAMS ((int))) target_ignore);
-  de_fault (to_clone_and_follow_inferior, default_clone_and_follow_inferior);
-  de_fault (to_post_follow_inferior_by_clone, (void (*)PARAMS ((void))) target_ignore);
-  de_fault (to_insert_fork_catchpoint, (int (*)PARAMS ((int))) tcomplain);
-  de_fault (to_remove_fork_catchpoint, (int (*)PARAMS ((int))) tcomplain);
-  de_fault (to_insert_vfork_catchpoint, (int (*)PARAMS ((int))) tcomplain);
-  de_fault (to_remove_vfork_catchpoint, (int (*)PARAMS ((int))) tcomplain);
-  de_fault (to_has_forked, (int (*)PARAMS ((int, int *))) return_zero);
-  de_fault (to_has_vforked, (int (*)PARAMS ((int, int *))) return_zero);
-  de_fault (to_can_follow_vfork_prior_to_exec, (int (*)PARAMS ((void))) return_zero);
-  de_fault (to_post_follow_vfork, (void (*)PARAMS ((int, int, int, int))) target_ignore);
-  de_fault (to_insert_exec_catchpoint, (int (*)PARAMS ((int))) tcomplain);
-  de_fault (to_remove_exec_catchpoint, (int (*)PARAMS ((int))) tcomplain);
-  de_fault (to_has_execd, (int (*)PARAMS ((int, char **))) return_zero);
-  de_fault (to_reported_exec_events_per_exec_call, (int (*)PARAMS ((void))) return_one);
-  de_fault (to_has_syscall_event, (int (*)PARAMS ((int, enum target_waitkind *, int *))) return_zero);
-  de_fault (to_has_exited, (int (*)PARAMS ((int, int, int *))) return_zero);
-  de_fault (to_mourn_inferior, (void (*)PARAMS ((void))) noprocess);
-  de_fault (to_can_run, return_zero);
-  de_fault (to_notice_signals, (void (*)PARAMS ((int))) target_ignore);
-  de_fault (to_thread_alive, (int (*)PARAMS ((int))) target_ignore);
-  de_fault (to_stop, (void (*)PARAMS ((void))) target_ignore);
-  de_fault (to_query, (int (*)PARAMS ((int /*char */ , char *, char *, int *))) target_ignore);
-  de_fault (to_rcmd, (void (*) (char *, struct gdb_file *)) tcomplain);
-  de_fault (to_enable_exception_callback, (struct symtab_and_line * (*)PARAMS ((enum exception_event_kind, int))) nosupport_runtime);
-  de_fault (to_get_current_exception_event, (struct exception_event_record * (*)PARAMS ((void))) nosupport_runtime);
-
-  de_fault (to_pid_to_exec_file, (char *(*)PARAMS ((int))) return_zero);
-  de_fault (to_core_file_to_sym_file, (char *(*)PARAMS ((char *))) return_zero);
-  de_fault (to_can_async_p, (int (*) (void)) return_zero);
-  de_fault (to_is_async_p, (int (*) (void)) return_zero);
-  de_fault (to_async, (void (*) (void (*) (enum inferior_event_type, void*), void*)) tcomplain);
+  de_fault (to_open, 
+	    (void (*) (char *, int)) 
+	    tcomplain);
+  de_fault (to_close, 
+	    (void (*) (int)) 
+	    target_ignore);
+  de_fault (to_attach, 
+	    maybe_kill_then_attach);
+  de_fault (to_post_attach, 
+	    (void (*) (int)) 
+	    target_ignore);
+  de_fault (to_require_attach, 
+	    maybe_kill_then_attach);
+  de_fault (to_detach, 
+	    (void (*) (char *, int)) 
+	    target_ignore);
+  de_fault (to_require_detach, 
+	    (void (*) (int, char *, int)) 
+	    target_ignore);
+  de_fault (to_resume, 
+	    (void (*) (int, int, enum target_signal)) 
+	    noprocess);
+  de_fault (to_wait, 
+	    (int (*) (int, struct target_waitstatus *)) 
+	    noprocess);
+  de_fault (to_post_wait, 
+	    (void (*) (int, int)) 
+	    target_ignore);
+  de_fault (to_fetch_registers, 
+	    (void (*) (int)) 
+	    target_ignore);
+  de_fault (to_store_registers, 
+	    (void (*) (int)) 
+	    noprocess);
+  de_fault (to_prepare_to_store, 
+	    (void (*) (void)) 
+	    noprocess);
+  de_fault (to_xfer_memory, 
+	    (int (*) (CORE_ADDR, char *, int, int, struct target_ops *)) 
+	    nomemory);
+  de_fault (to_files_info, 
+	    (void (*) (struct target_ops *)) 
+	    target_ignore);
+  de_fault (to_insert_breakpoint, 
+	    memory_insert_breakpoint);
+  de_fault (to_remove_breakpoint, 
+	    memory_remove_breakpoint);
+  de_fault (to_terminal_init, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_terminal_inferior, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_terminal_ours_for_output, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_terminal_ours, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_terminal_info, 
+	    default_terminal_info);
+  de_fault (to_kill, 
+	    (void (*) (void)) 
+	    noprocess);
+  de_fault (to_load, 
+	    (void (*) (char *, int)) 
+	    tcomplain);
+  de_fault (to_lookup_symbol, 
+	    (int (*) (char *, CORE_ADDR *)) 
+	    nosymbol);
+  de_fault (to_create_inferior, 
+	    maybe_kill_then_create_inferior);
+  de_fault (to_post_startup_inferior, 
+	    (void (*) (int)) 
+	    target_ignore);
+  de_fault (to_acknowledge_created_inferior, 
+	    (void (*) (int)) 
+	    target_ignore);
+  de_fault (to_clone_and_follow_inferior, 
+	    default_clone_and_follow_inferior);
+  de_fault (to_post_follow_inferior_by_clone, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_insert_fork_catchpoint, 
+	    (int (*) (int)) 
+	    tcomplain);
+  de_fault (to_remove_fork_catchpoint, 
+	    (int (*) (int)) 
+	    tcomplain);
+  de_fault (to_insert_vfork_catchpoint, 
+	    (int (*) (int)) 
+	    tcomplain);
+  de_fault (to_remove_vfork_catchpoint, 
+	    (int (*) (int)) 
+	    tcomplain);
+  de_fault (to_has_forked, 
+	    (int (*) (int, int *)) 
+	    return_zero);
+  de_fault (to_has_vforked, 
+	    (int (*) (int, int *)) 
+	    return_zero);
+  de_fault (to_can_follow_vfork_prior_to_exec, 
+	    (int (*) (void)) 
+	    return_zero);
+  de_fault (to_post_follow_vfork, 
+	    (void (*) (int, int, int, int)) 
+	    target_ignore);
+  de_fault (to_insert_exec_catchpoint, 
+	    (int (*) (int)) 
+	    tcomplain);
+  de_fault (to_remove_exec_catchpoint, 
+	    (int (*) (int)) 
+	    tcomplain);
+  de_fault (to_has_execd, 
+	    (int (*) (int, char **)) 
+	    return_zero);
+  de_fault (to_reported_exec_events_per_exec_call, 
+	    (int (*) (void)) 
+	    return_one);
+  de_fault (to_has_syscall_event, 
+	    (int (*) (int, enum target_waitkind *, int *)) 
+	    return_zero);
+  de_fault (to_has_exited, 
+	    (int (*) (int, int, int *)) 
+	    return_zero);
+  de_fault (to_mourn_inferior, 
+	    (void (*) (void)) 
+	    noprocess);
+  de_fault (to_can_run, 
+	    return_zero);
+  de_fault (to_notice_signals, 
+	    (void (*) (int)) 
+	    target_ignore);
+  de_fault (to_thread_alive, 
+	    (int (*) (int)) 
+	    return_zero);
+  de_fault (to_find_new_threads, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_extra_thread_info, 
+	    (char *(*) (struct thread_info *)) 
+	    return_zero);
+  de_fault (to_stop, 
+	    (void (*) (void)) 
+	    target_ignore);
+  de_fault (to_query, 
+	    (int (*) (int, char *, char *, int *)) 
+	    return_zero);
+  de_fault (to_rcmd, 
+	    (void (*) (char *, struct gdb_file *)) 
+	    tcomplain);
+  de_fault (to_enable_exception_callback, 
+	    (struct symtab_and_line * (*) (enum exception_event_kind, int)) 
+	    nosupport_runtime);
+  de_fault (to_get_current_exception_event, 
+	    (struct exception_event_record * (*) (void)) 
+	    nosupport_runtime);
+  de_fault (to_pid_to_exec_file, 
+	    (char *(*) (int)) 
+	    return_zero);
+  de_fault (to_core_file_to_sym_file, 
+	    (char *(*) (char *)) 
+	    return_zero);
+  de_fault (to_can_async_p, 
+	    (int (*) (void)) 
+	    return_zero);
+  de_fault (to_is_async_p, 
+	    (int (*) (void)) 
+	    return_zero);
+  de_fault (to_async, 
+	    (void (*) (void (*) (enum inferior_event_type, void*), void*)) 
+	    tcomplain);
 #undef de_fault
 }
 
@@ -537,6 +649,7 @@ update_current_target ()
       INHERIT (to_thread_alive, t);
       INHERIT (to_find_new_threads, t);
       INHERIT (to_pid_to_str, t);
+      INHERIT (to_extra_thread_info, t);
       INHERIT (to_stop, t);
       INHERIT (to_query, t);
       INHERIT (to_rcmd, t);
@@ -2746,6 +2859,14 @@ debug_to_thread_alive (pid)
 }
 
 static void
+debug_to_find_new_threads ()
+{
+  debug_target.to_find_new_threads ();
+
+  fputs_unfiltered ("target_find_new_threads ()\n", gdb_stdlog);
+}
+
+static void
 debug_to_stop ()
 {
   debug_target.to_stop ();
@@ -2880,6 +3001,7 @@ setup_target_debug ()
   current_target.to_can_run = debug_to_can_run;
   current_target.to_notice_signals = debug_to_notice_signals;
   current_target.to_thread_alive = debug_to_thread_alive;
+  current_target.to_find_new_threads = debug_to_find_new_threads;
   current_target.to_stop = debug_to_stop;
   current_target.to_query = debug_to_query;
   current_target.to_rcmd = debug_to_rcmd;

@@ -68,6 +68,7 @@
 #define PP_TIMEOUT      1              /* seconds */
 
 #ifdef sun
+#define SERIAL_PREFIX "/dev/tty"
 #define SERPORT1   "/dev/ttya"
 #define SERPORT2   "/dev/ttyb"
 #define PARPORT1   "/dev/bpp0"
@@ -75,6 +76,7 @@
 #endif
 
 #ifdef __hpux
+#define SERIAL_PREFIX "/dev/tty"
 #define SERPORT1   "/dev/tty00"
 #define SERPORT2   "/dev/tty01"
 #define PARPORT1   "/dev/ptr_parallel"
@@ -82,6 +84,7 @@
 #endif
 
 #ifdef __linux__
+#define SERIAL_PREFIX "/dev/ttyS"
 #define SERPORT1   "/dev/ttyS0"
 #define SERPORT2   "/dev/ttyS1"
 #define PARPORT1   "/dev/par0"
@@ -89,6 +92,7 @@
 #endif
 
 #if defined (__FreeBSD__) || defined (__NetBSD__) || defined (__OpenBSD__) || defined (bsdi)
+#define SERIAL_PREFIX "/dev/cuaa"
 #define SERPORT1   "/dev/cuaa0"
 #define SERPORT2   "/dev/cuaa1"
 #define PARPORT1   "/dev/lpt0"
@@ -96,14 +100,12 @@
 #endif
 
 
-#define SERIAL_PREFIX "/dev/tty"
 #if defined(_WIN32) || defined (__CYGWIN32__) 
+#define SERIAL_PREFIX "com"
 #define SERPORT1   "com1"
 #define SERPORT2   "com2"
 #define PARPORT1   "lpt1"
 #define PARPORT2   "lpt2"
-#undef SERIAL_PREFIX
-#define SERIAL_PREFIX "com"
 #endif
 
 
