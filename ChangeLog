@@ -1,3 +1,7 @@
+Thu Jul 16 18:33:09 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in, configure.in: add tgas
+
 Thu Jul 16 16:05:28 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: a number of changes merged in from progressive.

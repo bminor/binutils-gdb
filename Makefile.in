@@ -69,7 +69,7 @@ MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils ld gas gcc libg++ libgcc clib newlib libm
+SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils ld gas tgas gcc libg++ libgcc clib newlib libm 
 OTHERS = 
 
 ALL = all.normal
@@ -147,13 +147,13 @@ install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
-	all-bison all-byacc all-flex all-bfd all-ld all-gas all-gcc \
+	all-bison all-byacc all-flex all-bfd all-ld all-gas all-tgas all-gcc \
 	all-binutils all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell \
 	all-newlib all-gprof all-send_pr all-libm
 
-all.cross: all-libiberty all-mmalloc all-gas all-byacc all-ld \
+all.cross: all-libiberty all-mmalloc all-gas all-tgas all-byacc all-ld \
 	all-bfd all-libgcc all-readline all-gdb all-newlib
 #	$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
@@ -619,6 +619,17 @@ install-gas: force
 	else \
 		true ; \
 	fi
+
+### gas
+all-tgas: all-libiberty all-bfd
+	@if [ -f ./tgas/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./tgas; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
 
 ### ld
 all-ld: all-libiberty all-bfd all-byacc all-flex
