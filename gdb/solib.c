@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <a.out.h>
 
 #include "defs.h"
 #include "symtab.h"
@@ -55,7 +56,7 @@ extern char *re_comp ();
 
 /* local data declarations */
 
-#ifdef sun
+#ifndef SVR4_SHARED_LIBS
 
 #define DEBUG_BASE "_DYNAMIC"
 #define LM_ADDR(so) ((so) -> lm.lm_addr)
@@ -67,19 +68,18 @@ static struct ld_debug debug_copy;
 static CORE_ADDR debug_addr;
 static CORE_ADDR flag_addr;
 
-#else	/* !sun */
+#else	/* SVR4_SHARED_LIBS */
 
 #define DEBUG_BASE "_r_debug"
 #define LM_ADDR(so) ((so) -> lm.l_addr)
 #define LM_NEXT(so) ((so) -> lm.l_next)
 #define LM_NAME(so) ((so) -> lm.l_name)
 static struct r_debug debug_copy;
-static CORE_ADDR shlib_base;		/* Base address of shared library */
 char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
 extern CORE_ADDR proc_base_address ();
 extern int proc_address_to_fd ();
 
-#endif	/* sun */
+#endif	/* !SVR4_SHARED_LIBS */
 
 struct so_list {
   struct so_list *next;			/* next structure in linked list */
@@ -178,6 +178,57 @@ solib_map_sections (so)
     }
 }
 
+/* Read all dynamically loaded common symbol definitions from the inferior
+   and add them to the misc_function_vector.  */
+
+static void
+solib_add_common_symbols (rtc_symp)
+    struct rtc_symb *rtc_symp;
+{
+  struct rtc_symb inferior_rtc_symb;
+  struct nlist inferior_rtc_nlist;
+  extern void discard_misc_bunches();
+
+  init_misc_bunches ();
+  make_cleanup (discard_misc_bunches, 0);
+
+  while (rtc_symp)
+    {
+    read_memory((CORE_ADDR)rtc_symp,
+		&inferior_rtc_symb,
+		sizeof(inferior_rtc_symb));
+    read_memory((CORE_ADDR)inferior_rtc_symb.rtc_sp,
+		&inferior_rtc_nlist,
+		sizeof(inferior_rtc_nlist));
+    if (inferior_rtc_nlist.n_type == N_COMM)
+      {
+	/* FIXME: The length of the symbol name is not available, but in the
+	   current implementation the common symbol is allocated immediately
+	   behind the name of the symbol. */
+	int len = inferior_rtc_nlist.n_value - inferior_rtc_nlist.n_un.n_strx;
+	char *name, *origname;
+
+	origname = name = xmalloc (len);
+    	read_memory((CORE_ADDR)inferior_rtc_nlist.n_un.n_name, name, len);
+
+	/* Don't enter the symbol twice if the target is re-run. */
+
+#ifdef NAMES_HAVE_UNDERSCORE
+	if (*name == '_')
+	  name++;
+#endif
+  	if (lookup_misc_func (name) < 0)
+  	  prim_record_misc_function (obsavestring (name, strlen (name)),
+				     inferior_rtc_nlist.n_value,
+				     mf_bss);
+	free (origname);
+      }
+    rtc_symp = inferior_rtc_symb.rtc_next;
+    }
+
+  condense_misc_bunches (1);
+}
+
 /*
 
 LOCAL FUNCTION
@@ -243,6 +294,89 @@ DEFUN (bfd_lookup_symbol, (abfd, symname),
 
 LOCAL FUNCTION
 
+	look_for_base -- examine file for each mapped address segment
+
+SYNOPSYS
+
+	static int look_for_base (int fd, CORE_ADDR baseaddr)
+
+DESCRIPTION
+
+	This function is passed to proc_iterate_over_mappings, which
+	causes it to get called once for each mapped address space, with
+	an open file descriptor for the file mapped to that space, and the
+	base address of that mapped space.
+
+	Our job is to find the symbol DEBUG_BASE in the file that this
+	fd is open on, if it exists, and if so, initialize the dynamic
+	linker structure base address debug_base.
+
+	Note that this is a computationally expensive proposition, since
+	we basically have to open a bfd on every call, so we specifically
+	avoid opening the exec file.
+ */
+
+static int
+DEFUN (look_for_base, (fd, baseaddr),
+       int fd AND
+       CORE_ADDR baseaddr)
+{
+  bfd *interp_bfd;
+  CORE_ADDR address;
+
+  /* If the fd is -1, then there is no file that corresponds to this
+     mapped memory segment, so skip it.  Also, if the fd corresponds
+     to the exec file, skip it as well. */
+
+  if ((fd == -1) || fdmatch (fileno ((FILE *)(exec_bfd -> iostream)), fd))
+    {
+      return (0);
+    }
+
+  /* Try to open whatever random file this fd corresponds to.  Note that
+     we have no way currently to find the filename.  Don't gripe about
+     any problems we might have, just fail. */
+
+  if ((interp_bfd = bfd_fdopenr ("unnamed", NULL, fd)) == NULL)
+    {
+      return (0);
+    }
+  if (!bfd_check_format (interp_bfd, bfd_object))
+    {
+      bfd_close (interp_bfd);
+      return (0);
+    }
+
+  /* Now try to find our DEBUG_BASE symbol in this file, which we at
+     least know to be a valid ELF executable or shared library. */
+
+  if ((address = bfd_lookup_symbol (interp_bfd, DEBUG_BASE)) == 0)
+    {
+      bfd_close (interp_bfd);
+      return (0);
+    }
+
+  /* Eureka!  We found the symbol.  But now we may need to relocate it
+     by the base address.  If the symbol's value is less than the base
+     address of the shared library, then it hasn't yet been relocated
+     by the dynamic linker, and we have to do it ourself.  FIXME: Note
+     that we make the assumption that the first segment that corresponds
+     to the shared library has the base address to which the library
+     was relocated. */
+
+  if (address < baseaddr)
+    {
+      address += baseaddr;
+    }
+  debug_base = address;
+  bfd_close (interp_bfd);
+  return (1);
+}
+
+/*
+
+LOCAL FUNCTION
+
 	locate_base -- locate the base address of dynamic linker structs
 
 SYNOPSIS
@@ -254,7 +388,7 @@ DESCRIPTION
 	For both the SunOS and SVR4 shared library implementations, if the
 	inferior executable has been linked dynamically, there is a single
 	address somewhere in the inferior's data space which is the key to
-	locating all of the dynamic linker's runtime structures, and this
+	locating all of the dynamic linker's runtime structures.  This
 	address is the value of the symbol defined by the macro DEBUG_BASE.
 	The job of this function is to find and return that address, or to
 	return 0 if there is no such address (the executable is statically
@@ -264,152 +398,55 @@ DESCRIPTION
 	all of it's structures are statically linked to the executable at
 	link time.  Thus the symbol for the address we are looking for has
 	already been added to the misc function vector at the time the symbol
-	file's symbols were read.
+	file's symbols were read, and all we have to do is look it up there.
 
 	The SVR4 version is much more complicated because the dynamic linker
-	and it's structures are located in the shared library itself, which
-	gets run as the executable's "interpreter" by the kernel.  Because
+	and it's structures are located in the shared C library, which gets
+	run as the executable's "interpreter" by the kernel.  We have to go
+	to a lot more work to discover the address of DEBUG_BASE.  Because
 	of this complexity, we cache the value we find and return that value
-	on subsequent invocations, if it is non-zero.
+	on subsequent invocations.
 
-	First we must decide if we are stopped at the entry point of the
-	shared C library, which is set to be the entry point of the dynamic
-	linker code (the function _rt_boot() to be precise), or at the entry
-	point given in the inferior's exec file (for statically linked 
-	executables).
-
-	If we are not stopped at the inferior's exec file entry point then
-	we are either stopped at the interpreter's entry point or somewhere
-	else (I.E. totally lost).  Use the /proc interface to get an open
-	file descriptor on the file that is mapped at the current stop_pc
-	value and try to open a bfd for it.
-
-FIXME
-
-	The SVR4 strategy does NOT work when gdb is attaching to an existing
-	process because the stop_pc is not in the library code, so we can't
-	use the /proc interface to get an open fd for the library.  So we
-	need to rethink the method for finding the debugger interface struct.
-
-	For SunOS we could look around in the executable code to find
-	DEBUG_BASE, if it isn't in the symbol table.  It's not that hard to
-	find.  Then we can debug stripped executables using shared library
-	symbols.  
+	Note that we can assume nothing about the process state at the time
+	we need to find this address.  We may be stopped on the first instruc-
+	tion of the interpreter (C shared library), the first instruction of
+	the executable itself, or somewhere else entirely (if we attached
+	to the process for example).
 
  */
 
 static CORE_ADDR
 locate_base ()
 {
-  CORE_ADDR address = 0;
 
-#ifdef sun
+#ifndef SVR4_SHARED_LIBS
 
   int i;
+  CORE_ADDR address = 0;
 
   i = lookup_misc_func (DEBUG_BASE);
   if (i >= 0 && misc_function_vector[i].address != 0)
     {
       address = misc_function_vector[i].address;
     }
-
-#else	/* !sun */
-
-  int stop_pc_fd;			/* File descriptor for mapped file */
-  int interp_fd;			/* File descriptor for interpreter */
-  char *interp_name;			/* Name of interpreter */
-  char *full_interp_name;		/* Full pathname of interpreter */
-  bfd *interp_bfd;
-  CORE_ADDR interp_base;
-
-  if (debug_base > 0)
-    {
-      /* We have a currently valid address, so avoid doing all the work
-	 again. */
-      return (debug_base);
-    }
-  if (bfd_get_start_address (exec_bfd) == stop_pc)
-    {
-      /* We are stopped at the entry point to the exec file, so there
-	 are no shared libs to deal with. */
-      return (0);
-    }
-  if ((stop_pc_fd = proc_address_to_fd (stop_pc)) < 0)
-    {
-      /* We are stopped at an address for which we can't seem to get an open
-	 file descriptor from the /proc interface.  We should already have
-	 printed a suitable warning message. */
-      return (0);
-    }
-  if ((interp_name = elf_interpreter (exec_bfd)) == NULL)
-    {
-      /* There is no interpreter specified in the exec file, thus this is
-	 not a normal dynamically linked file. */
-      return (0);
-    }
-  if ((interp_fd = openp (getenv ("PATH"), 1, interp_name, O_RDONLY, 0,
-			  &full_interp_name)) < 0)
-    {
-      /* We can't find and open the interpreter.  This is a problem. */
-      return (0);
-    }
-  if (!fdmatch (stop_pc_fd, interp_fd))
-    {
-      /* The file for the mapped region is not the interpreter, something
-	 is strange... */
-      close (stop_pc_fd);
-      close (interp_fd);
-      free (full_interp_name);
-      return (0);
-    }
-  interp_bfd = bfd_fdopenr (full_interp_name, NULL, interp_fd);
-  if (!interp_bfd)
-    {
-      warning ("Could not open `%s' as an executable file: %s",
-	     full_interp_name, bfd_errmsg (bfd_error));
-      return (0);
-    }
-  if (!bfd_check_format (interp_bfd, bfd_object))
-    {
-      warning ("\"%s\": not in executable format: %s.",
-	     full_interp_name, bfd_errmsg (bfd_error));
-      return (0);
-    }
-
-  /* Lookup the unrelocated value of the symbol that defines the location
-     of the debugger interface structure for the dynamic linker in the shared
-     library.  Then find the base address of the text segment in the
-     inferior's mapped in dynamic library, which gives the relocation to
-     apply to find the actual mapped address of the debugger interface
-     structure. */
-
-  if ((address = bfd_lookup_symbol (interp_bfd, DEBUG_BASE)) == 0)
-    {
-      warning ("can't find symbol %s in shared library", DEBUG_BASE);
-      return (0);
-    }
-  if ((interp_base = proc_base_address (stop_pc)) == 0)
-    {
-      warning ("can't find base address for shared library text segment");
-      return (0);
-    }
-  shlib_base = interp_base;
-  address += interp_base;
-
-  if ((interp_base + bfd_get_start_address (interp_bfd)) != stop_pc)
-    {
-      /* We are not stopped at the entry point to the dynamic linker,
-	 so grumble and skip startup shared library processing. */
-      warning ("not stopped at entry point of dynamic linker");
-      warning ("shared library processing suppressed");
-      return (0);
-    }
-
-  bfd_close (interp_bfd);
-
-#endif	/* sun */
-
   return (address);
+
+#else	/* SVR4_SHARED_LIBS */
+
+  /* Check to see if we have a currently valid address, and if so, avoid
+     doing all this work again and just return the cached address.  If
+     we have no cached address, ask the /proc support interface to iterate
+     over the list of mapped address segments, calling look_for_base() for
+     each segment.  When we are done, we will have either found the base
+     address or not. */
+
+  if (debug_base == 0)
+    {
+      proc_iterate_over_mappings (look_for_base);
+    }
+  return (debug_base);
+
+#endif	/* !SVR4_SHARED_LIBS */
 
 }
 
@@ -418,7 +455,7 @@ first_link_map_member ()
 {
   struct link_map *lm = NULL;
 
-#ifdef sun
+#ifndef SVR4_SHARED_LIBS
 
   read_memory (debug_base, &dynamic_copy, sizeof (dynamic_copy));
   if (dynamic_copy.ld_version >= 2)
@@ -430,12 +467,12 @@ first_link_map_member ()
       lm = ld_2_copy.ld_loaded;
     }
 
-#else
+#else	/* SVR4_SHARED_LIBS */
 
   read_memory (debug_base, &debug_copy, sizeof (struct r_debug));
   lm = debug_copy.r_map;
 
-#endif
+#endif	/* !SVR4_SHARED_LIBS */
 
   return (lm);
 }
@@ -532,7 +569,7 @@ find_solib (so_list_ptr)
 	 (for the inferior executable) since it is not a shared object. */
       if (LM_NAME (new) != 0)
 	{
-	  read_memory((CORE_ADDR) LM_NAME (new), new -> so_name,
+	  (void) target_read_string((CORE_ADDR) LM_NAME (new), new -> so_name,
 		      MAX_PATH_SIZE - 1);
 	  new -> so_name[MAX_PATH_SIZE - 1] = 0;
 	  solib_map_sections (new);
@@ -797,28 +834,30 @@ disable_break ()
 {
   int status = 1;
 
-#ifdef sun
-
-  /* FIXME: maybe we should add the common symbols from the ldd_cp chain
-     to the misc_function_vector ? */
+#ifndef SVR4_SHARED_LIBS
 
   int in_debugger = 0;
   
-  /* Set `in_debugger' to zero now. */
-
-  write_memory (flag_addr, &in_debugger, sizeof (in_debugger));
-
   /* Read the debugger structure from the inferior to retrieve the
      address of the breakpoint and the original contents of the
      breakpoint address.  Remove the breakpoint by writing the original
      contents back. */
 
   read_memory (debug_addr, &debug_copy, sizeof (debug_copy));
+
+  /* Get common symbol definitions for the loaded object. */
+  if (debug_copy.ldd_cp)
+    solib_add_common_symbols (debug_copy.ldd_cp);
+
+  /* Set `in_debugger' to zero now. */
+
+  write_memory (flag_addr, &in_debugger, sizeof (in_debugger));
+
   breakpoint_addr = (CORE_ADDR) debug_copy.ldd_bp_addr;
   write_memory (breakpoint_addr, &debug_copy.ldd_bp_inst,
 		sizeof (debug_copy.ldd_bp_inst));
 
-#else	/* !sun */
+#else	/* SVR4_SHARED_LIBS */
 
   /* Note that breakpoint address and original contents are in our address
      space, so we just need to write the original contents back. */
@@ -828,7 +867,7 @@ disable_break ()
       status = 0;
     }
 
-#endif	/* sun */
+#endif	/* !SVR4_SHARED_LIBS */
 
   /* For the SVR4 version, we always know the breakpoint address.  For the
      SunOS version we don't know it until the above code is executed.
@@ -891,7 +930,7 @@ enable_break ()
 
   int j;
 
-#ifdef sun
+#ifndef SVR4_SHARED_LIBS
 
   int in_debugger;
   
@@ -920,7 +959,7 @@ enable_break ()
 
   write_memory (flag_addr, &in_debugger, sizeof (in_debugger));
 
-#else	/* !sun */
+#else	/* SVR4_SHARED_LIBS */
 
 #ifdef BKPT_AT_MAIN
 
@@ -958,7 +997,7 @@ enable_break ()
 
 #endif	/* BKPT_AT_MAIN */
 
-#endif	/* sun */
+#endif	/* !SVR4_SHARED_LIBS */
 
   return (1);
 }

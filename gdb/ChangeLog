@@ -1,5 +1,11 @@
 Tue Jan 14 12:28:52 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* target.c (target_read_string):  Create this routine to read null
+	terminated strings from the target.  It deals with running off the
+	end of memory elegantly as well.  solib.c (find_solib):  Use
+	target_read_string() to avoid problems with running off the end of
+	memory.
+
 	* inflow.c (child_terminal_info):  #ifdef TIOCPGRP around lines
 	that reference pgrp_inferior.
 
