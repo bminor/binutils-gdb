@@ -9,6 +9,7 @@
 	indexing is_end_of_line[].
 	(md_assemble): Initialize size to 0.
 	(md_section_align): Mark parameter seg as unused.
+	(parse_reg): Parse names case-insensitively.
 
 2000-11-28  Kazu Hirata  <kazu@hxi.com>
 
