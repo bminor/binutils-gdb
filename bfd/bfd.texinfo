@@ -198,7 +198,7 @@ bfd *abfd;
 @end lisp
 
 The metaphor used within @code{bfd} is that an object file has a header,
-a numbber of sections containing raw data, a set of relocations and some
+a number of sections containing raw data, a set of relocations, and some
 symbol information. Also, @code{bfd}s opened upon archives have the
 additional attribute of an index and contained sub bfds. This approach is
 find for a.out and coff, but looses efficiency when applied to formats
