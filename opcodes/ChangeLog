@@ -1,3 +1,8 @@
+2001-06-22  Stacey Sheldon <ssheldon@Catena.com>
+
+	* arc-opc.c (insert_st_syntax): Fix over-optimisation of ST
+	instruction.
+
 2001-06-22  Pauli <pauli@moreton.com.au>
 
 	* m68k-opc.c: Add wdebug instruction.

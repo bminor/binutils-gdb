@@ -1149,14 +1149,6 @@ insert_st_syntax (insn, operand, mods, reg, value, errmsg)
     {
       limm += arc_limm_fixup_adjust(insn);
     }
-  if (ST_SYNTAX(OP_LIMM,OP_SHIMM,OP_SHIMM) && (shimm * 2 == limm))
-    {
-      insn &= ~C(-1);
-      limm_p = 0;
-      limm = 0;
-      insn |= C(ARC_REG_SHIMM);
-      ls_operand[LS_VALUE] = OP_SHIMM;
-    }
   if (!(ST_SYNTAX(OP_REG,OP_REG,OP_NONE)
 	|| ST_SYNTAX(OP_REG,OP_LIMM,OP_NONE)
 	|| ST_SYNTAX(OP_REG,OP_REG,OP_SHIMM)
