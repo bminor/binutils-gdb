@@ -128,6 +128,7 @@ ALL_EMULATIONS = \
 	earmnto.o \
 	earmnbsd.o \
 	earmpe.o \
+	earmsymbian.o \
 	eavr2.o \
 	eavr1.o \
 	eavr3.o \
@@ -536,6 +537,11 @@ earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
 earmpe.c: $(srcdir)/emulparams/armpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armpe "$(tdir_armpe)"
+earmsymbian.c: $(srcdir)/emulparams/armsymbian.sh \
+  $(srcdir)/emulparams/armelf.sh $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} armsymbian "$(tdir_armelf)"
 eavr2.c: $(srcdir)/emulparams/avr2.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}

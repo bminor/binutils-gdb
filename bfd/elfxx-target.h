@@ -279,6 +279,13 @@
 #define ELF_MAXPAGESIZE 1
 #endif
 
+#ifndef ELF_DYNAMIC_SEC_FLAGS
+/* Note that we set the SEC_IN_MEMORY flag for these sections.  */
+#define ELF_DYNAMIC_SEC_FLAGS			\
+  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS	\
+   | SEC_IN_MEMORY | SEC_LINKER_CREATED)
+#endif
+
 #ifndef elf_backend_collect
 #define elf_backend_collect FALSE
 #endif
@@ -508,6 +515,7 @@ static const struct elf_backend_data elfNN_bed =
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
+  ELF_DYNAMIC_SEC_FLAGS,        /* dynamic_sec_flags */
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,

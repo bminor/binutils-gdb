@@ -1,3 +1,13 @@
+2004-09-02  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (TARG_ENV_HFILES): Add te-symbian.h.
+	* Makefile.in: Regenerated.
+	* configure.in: Set em for arm*-*-symbianelf*.
+	* configure: Regenerated.
+	* config/tc-arm.c (elf32_arm_target_format): Use Symbian target
+	vectors when appropriate.
+	* config/te-symbian.h: New file.
+
 2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c (gettrap): Exception vector can be case

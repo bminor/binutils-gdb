@@ -1,3 +1,36 @@
+2004-09-03  Mark Mitchell  <mark@codesourcery.com>
+
+	* config.bfd (arm*-*-symbianelf*): Use OS-specific target vectors.
+	* configure.in (bfd_elf32_bigarm_symbian_vec): Add it.
+	(bfd_elf32_littlearm_symbian_vec): Likewise.
+	* configure: Regenerated.
+	* elf-bfd.h (elf_backend_data): Add dynamic_sec_flags.
+	* elf32-arm.h (PLT_HEADER_SIZE): Do not define.
+	(PLT_ENTRY_SIZE): Likewise.
+	(bfd_vma_elf32_arm_symbian_plt_entry): New
+	variable.
+	(elf32_arm_link_hash_table): Add plt_header_size, plt_entry_size,
+	and symbian_p.
+	(create_got_section): Don't create sections when generating BPABI
+	objects.
+	(elf32_arm_create_dynamic_sections): Tidy.
+	(elf32_arm_link_hash_table_create): Set plt_header_size,
+	plt_entry_size, and symbian_p.
+	(elf32_arm_check_relocs): Do not mark .rel.dyn as loadable when
+	generating BPABI objects.
+	(allocate_dynrelocs): Use htab->plt_header_size, not
+	PLT_HEADER_SIZE.  Do not add to .got.plt when
+	generating BPABI objects.
+	(elf32_arm_finish_dynamic_symbol): Generate Symbian OS PLTs.
+	* elfarm-nabi.c: Add SymbianOS target vectors.
+	* elflink.c (_bfd_elf_create_got_section): Use dynamic_sec_flags.
+	(_bfd_elf_link_create_dynamic_sections): Likewise.
+	* elfxx-target.h (ELF_DYNAMIC_SEC_FLAGS): New macro.
+	(elfNN_bed): Use it.
+	* targets.c (bfd_elf32_bigarm_symbian_vec): New variable.
+	(bfd_elf32_littlearm_symbian_vec): Likewise.
+	(_bfd_target_vector): Add them.
+
 2004-09-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 360

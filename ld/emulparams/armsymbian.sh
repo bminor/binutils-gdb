@@ -1,0 +1,9 @@
+. ${srcdir}/emulparams/armelf.sh
+OUTPUT_FORMAT="elf32-littlearm-symbian"
+BIG_OUTPUT_FORMAT="elf32-bigarm-symbian"
+LITTLE_OUTPUT_FORMAT="$OUTPUT_FORMAT"
+
+# This value should match ELF_MAXPAGESIZE in BFD.  Otherwise, elf.c
+# will not place read-write sections in a separate ELF segment from
+# the read-only sections.
+MAXPAGESIZE=0x8000

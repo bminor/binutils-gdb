@@ -1,3 +1,13 @@
+2004-09-02  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add earmsymbian.o.
+	(earmsymbian.c): New target.
+	* configure.tgt: Use armsymbian emulation for arm*-*-symbianelf*.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+	* emulparams/armsymbian.sh: New file.
+
 2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* scripttempl/elf32crx.sc: Edit file with comments.

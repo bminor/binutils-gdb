@@ -29,11 +29,6 @@
 
 #define USE_REL	1
 
-#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vec
-#define TARGET_LITTLE_NAME              "elf32-littlearm"
-#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vec
-#define TARGET_BIG_NAME                 "elf32-bigarm"
-
 #define elf_info_to_howto               0
 #define elf_info_to_howto_rel           elf32_arm_info_to_howto
 
@@ -874,7 +869,106 @@ elf32_arm_nabi_grok_psinfo (abfd, note)
   return TRUE;
 }
 
+#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vec
+#define TARGET_LITTLE_NAME              "elf32-littlearm"
+#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vec
+#define TARGET_BIG_NAME                 "elf32-bigarm"
+
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_arm_nabi_grok_psinfo
 
 #include "elf32-arm.h"
+
+/* Symbian OS Targets */
+
+#undef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_symbian_vec
+#undef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME              "elf32-littlearm-symbian"
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM                  bfd_elf32_bigarm_symbian_vec
+#undef TARGET_BIG_NAME
+#define TARGET_BIG_NAME                 "elf32-bigarm-symbian"
+
+/* Like elf32_arm_link_hash_table_create -- but overrides
+   appropriately for Symbian OS.  */
+static struct bfd_link_hash_table *
+elf32_arm_symbian_link_hash_table_create (bfd *abfd)
+{
+  struct bfd_link_hash_table *ret;
+
+  ret = elf32_arm_link_hash_table_create (abfd);
+  if (ret)
+    {
+      struct elf32_arm_link_hash_table *htab
+	= (struct elf32_arm_link_hash_table *)ret;
+      /* There is no PLT header for Symbian OS.  */
+      htab->plt_header_size = 0;
+      /* The PLT entries are each three instructions.  */
+      htab->plt_entry_size = 4 * NUM_ELEM (elf32_arm_symbian_plt_entry);
+      htab->symbian_p = 1;
+    }
+  return ret;
+}     
+
+/* In a BPABI executable, the dynamic linking sections do not go in
+   the loadable read-only segment.  The post-linker may wish to refer
+   to these sections, but they are not part of the final program
+   image.  */
+static struct bfd_elf_special_section const 
+  elf32_arm_symbian_special_sections[]=
+{
+  { ".dynamic",        8,  0, SHT_DYNAMIC,  0 },
+  { ".dynstr",         7,  0, SHT_STRTAB,   0 },
+  { ".dynsym",         7,  0, SHT_DYNSYM,   0 },
+  { ".got",            4,  0, SHT_PROGBITS, 0 },
+  { ".hash",           5,  0, SHT_HASH,     0 },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static bfd_boolean
+elf32_arm_symbian_modify_segment_map
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static bfd_boolean
+elf32_arm_symbian_modify_segment_map (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+{
+  struct elf_segment_map *m;
+
+  /* The first PT_LOAD segment will have the program headers and file
+     headers in it by default -- but BPABI object files should not
+     include these headers in any loadable segment.  */
+  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+    if (m->p_type == PT_LOAD)
+      {
+	m->includes_filehdr = 0;
+	m->includes_phdrs = 0;
+      }
+  return TRUE;
+}
+
+#undef elf32_bed
+#define elf32_bed elf32_arm_symbian_bed
+
+#undef ELF_DYNAMIC_SEC_FLAGS
+#define ELF_DYNAMIC_SEC_FLAGS \
+  (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED)
+
+#undef bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create \
+  elf32_arm_symbian_link_hash_table_create
+
+#undef elf_backend_special_sections
+#define elf_backend_special_sections elf32_arm_symbian_special_sections
+
+#undef elf_backend_modify_segment_map
+#define elf_backend_modify_segment_map elf32_arm_symbian_modify_segment_map
+
+/* There is no .got section for BPABI objects, and hence no header.  */
+#undef elf_backend_got_header_size
+#define elf_backend_got_header_size 0
+
+#include "elf32-target.h"
+

@@ -14099,6 +14099,11 @@ arm_fix_adjustable (fixP)
 const char *
 elf32_arm_target_format ()
 {
+#ifdef TE_SYMBIAN
+  return (target_big_endian
+	  ? "elf32-bigarm-symbian"
+	  : "elf32-littlearm-symbian");
+#else 
   if (target_big_endian)
     {
       if (target_oabi)
@@ -14113,6 +14118,7 @@ elf32_arm_target_format ()
       else
 	return "elf32-littlearm";
     }
+#endif
 }
 
 void

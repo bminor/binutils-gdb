@@ -538,6 +538,9 @@ struct elf_backend_data
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
 
+  /* The BFD flags applied to sections created for dynamic linking.  */
+  flagword dynamic_sec_flags;
+
   /* A function to translate an ELF RELA relocation to a BFD arelent
      structure.  */
   void (*elf_info_to_howto)

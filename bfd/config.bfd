@@ -226,9 +226,13 @@ case "${targ}" in
     ;;
   arm-*-elf | arm-*-freebsd* | arm*-*-linux-gnu* | arm*-*-conix* | \
   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | arm-*-vxworks | \
-  arm*-*-symbianelf* | arm*-*-eabi* )
+  arm*-*-eabi* )
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
+    ;;
+  arm*-*-symbianelf*)
+    targ_defvec=bfd_elf32_littlearm_symbian_vec
+    targ_selvecs=bfd_elf32_bigarm_symbian_vec
     ;;
   arm9e-*-elf)
     targ_defvec=bfd_elf32_littlearm_vec

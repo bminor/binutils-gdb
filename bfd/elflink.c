@@ -57,8 +57,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
       return FALSE;
     }
 
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED);
+  flags = bed->dynamic_sec_flags;
 
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
@@ -131,10 +130,9 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   else
     abfd = elf_hash_table (info)->dynobj;
 
-  /* Note that we set the SEC_IN_MEMORY flag for all of these
-     sections.  */
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-	   | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+  bed = get_elf_backend_data (abfd);
+
+  flags = bed->dynamic_sec_flags;
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
@@ -155,8 +153,6 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
       elf_hash_table (info)->eh_info.hdr_sec = s;
     }
-
-  bed = get_elf_backend_data (abfd);
 
   /* Create sections to hold version informations.  These are removed
      if they are not needed.  */
@@ -253,9 +249,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
      .rel[a].bss sections.  */
-
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED);
+  flags = bed->dynamic_sec_flags;
 
   pltflags = flags;
   pltflags |= SEC_CODE;
