@@ -320,7 +320,7 @@ d30v_frame_chain (frame)
   if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4))
     return (CORE_ADDR)0;
 
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4)| DMEM_START;
+  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4);
 }  
 
 static int next_addr, uses_frame;
@@ -440,16 +440,16 @@ prologue_find_regs (op, fsr, addr)
   if ((op & OP_MASK_ALL_BUT_IMM) == OP_SUB_SP_IMM)
     {
       offset = EXTRACT_IMM6(op);
-      next_addr -= offset;
+      frame_size += -offset;
       return 1;
     }
 
-  /* st  rn, @(sp,0) */
+  /* st  rn, @(sp,0) -- observed */
   if (((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_R0) ||
       ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_IMM0))
     {
       n = EXTRACT_RA(op);
-      fsr->regs[n] = next_addr;
+      fsr->regs[n] = (- frame_size);
       return 1;
     }
 
@@ -458,8 +458,8 @@ prologue_find_regs (op, fsr, addr)
       ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_IMM0))
     {
       n = EXTRACT_RA(op);
-      fsr->regs[n] = next_addr;
-      fsr->regs[n+1] = next_addr+4;
+      fsr->regs[n] = (- frame_size);
+      fsr->regs[n+1] = (- frame_size) + 4;
       return 1;
     }
 
@@ -490,7 +490,7 @@ d30v_frame_find_saved_regs (fi, fsr)
   pc = get_pc_function_start (fi->pc);
 
   uses_frame = 0;
-  while (1)
+  while (pc < fi->pc)
     {
       opl = (unsigned long)read_memory_integer (pc, 4);
       opr = (unsigned long)read_memory_integer (pc+4, 4);
@@ -554,7 +554,7 @@ d30v_frame_find_saved_regs (fi, fsr)
     }
   
   fi->size = frame_size;
-  if (!fp)
+  if (!fp || !uses_frame)
 #if 0
     fp = read_register(SP_REGNUM) | DMEM_START;
 #else
@@ -571,7 +571,7 @@ d30v_frame_find_saved_regs (fi, fsr)
   else
     fi->return_pc = read_register(LR_REGNUM);
   
-  /* th SP is not normally (ever?) saved, but check anyway */
+  /* the SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
@@ -861,27 +861,37 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS(arg);
-      val = extract_signed_integer (contents, len);
       if (len > 4)
 	{
 	  /* we need multiple registers */
 	  int ndx;
 
-	  for (ndx = 0; ndx < len; ndx += 4, len -= 4)
+	  for (ndx = 0; len > 0; ndx += 8, len -= 8)
 	    {
+	      if (regnum & 1)
+		regnum++;	/* all args > 4 bytes start in even register */
+
 	      if (regnum < 18)
 		{
-		  if (len > 4)
-		    val = extract_signed_integer (&contents[ndx], 4);
-		  else
-		    val = extract_signed_integer (&contents[ndx], len);
+		  val = extract_signed_integer (&contents[ndx], 4);
+		  write_register (regnum++, val);
 
+		  if (len >= 8)
+		    val = extract_signed_integer (&contents[ndx+4], 4);
+		  else
+		    val = extract_signed_integer (&contents[ndx+4], len-4);
 		  write_register (regnum++, val);
 		}
 	      else
 		{
 		  /* no more registers available.  put it on the stack */
-		  sp -= len;
+
+		  /* all args > 4 bytes are padded to a multiple of 8 bytes
+		   and start on an 8 byte boundary */
+		  if (sp & 7)
+		    sp -= (sp & 7); /* align it */
+
+		  sp -= ((len + 7) & ~7); /* allocate space */
 		  write_memory (sp, &contents[ndx], len);
 		  break;
 		}
@@ -891,16 +901,20 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	{
 	  if (regnum < 18 )
 	    {
+	      val = extract_signed_integer (contents, len);
 	      write_register (regnum++, val);
 	    }
 	  else
 	    {
-	      sp -= len;
-	      store_address (buffer, len, val);
-	      write_memory (sp, buffer, len);
+	      /* all args are padded to a multiple of 4 bytes (at least) */
+	      sp -= ((len + 3) & ~3);
+	      write_memory (sp, contents, len);
 	    }
 	}
     }
+  if (sp & 7)
+    /* stack pointer is not on an 8 byte boundary -- align it */
+    sp -= (sp & 7);
   return sp;
 }
 

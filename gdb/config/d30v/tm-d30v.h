@@ -191,8 +191,7 @@ void d30v_do_registers_info PARAMS ((int regnum, int fpregs));
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (((CORE_ADDR *)(REGBUF))[2])
 
 
 /* Define other aspects of the stack frame. 
@@ -222,8 +221,13 @@ extern void d30v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
 #define FRAME_CHAIN_VALID(chain,frame)	\
       ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START)
 #else
+#if 0
 #define FRAME_CHAIN_VALID(chain,fi)	\
       ((chain) != 0 && (fi) != 0 && (fi)->frame <= STACK_START)
+#else
+#define FRAME_CHAIN_VALID(chain,fi)	\
+      ((chain) != 0 && (fi) != 0 && (fi)->return_pc != 0)
+#endif
 #endif
 #define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)   
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
@@ -311,7 +315,7 @@ extern void d30v_pop_frame PARAMS((void));
 #define REGISTER_SIZE 4
 
 /* Need to handle SP special, as we need to select between spu and spi.  */
-
+#if 0				/* XXX until the simulator is fixed */
 #define TARGET_READ_SP() ((read_register (PSW_REGNUM) & PSW_SM) \
 			  ? read_register (SPU_REGNUM) \
 			  : read_register (SPI_REGNUM))
@@ -319,6 +323,9 @@ extern void d30v_pop_frame PARAMS((void));
 #define TARGET_WRITE_SP(val) ((read_register (PSW_REGNUM) & PSW_SM) \
 			  ? write_register (SPU_REGNUM, (val)) \
 			  : write_register (SPI_REGNUM, (val)))
+#endif
+
+#define STACK_ALIGN(len)	(((len) + 7 ) & ~7)
 
 /* Turn this on to cause remote-sim.c to use sim_set/clear_breakpoint. */
 

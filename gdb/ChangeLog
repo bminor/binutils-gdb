@@ -1,3 +1,18 @@
+Tue Dec 16 10:29:16 1997  David Taylor  <taylor@texas.cygnus.com>
+
+	* d30v-tdep.c (d30v_frame_chain): don't or in DMEM_START to
+	FP_REGNUM value before return; (prologue_find_regs): two sets
+	of offsets -- frame pointer and stack pointer, not just one that
+	tries to do double duty; (d30v_frame_find_saved_regs): stop once
+	we hit pc (in case we're stopped in the middle of the prologue)
+	and improve handling of frameless prologues; (d30v_push_arguments):
+	*ALL* arguments go on the stack until we run out of args registers,
+	force sp to be 8 byte aligned.
+
+	* config/tm-d30v.h (EXTRACT_STRUCT_VALUE_ADDRESS): fix, it's r2,
+	not r0; (FRAME_CHAIN_VALID): handle use of external memory;
+	(STACK_ALIGN): define.
+
 Mon Dec 15 15:13:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_wait): When HAVE_SIGACTION and SA_RESTART
