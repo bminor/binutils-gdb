@@ -57,7 +57,8 @@ parse_args (argc, argv)
 
 #define OPTION_CALL_SHARED		150
 #define OPTION_DEFSYM			(OPTION_CALL_SHARED + 1)
-#define OPTION_EB			(OPTION_DEFSYM + 1)
+#define OPTION_DYNAMIC_LINKER		(OPTION_DEFSYM + 1)
+#define OPTION_EB			(OPTION_DYNAMIC_LINKER + 1)
 #define OPTION_EL			(OPTION_EB + 1)
 #define OPTION_HELP			(OPTION_EL + 1)
 #define OPTION_IGNORE			(OPTION_HELP + 1)
@@ -85,6 +86,7 @@ parse_args (argc, argv)
     {"dn", no_argument, NULL, OPTION_NON_SHARED},
     {"dp", no_argument, NULL, 'd'},
     {"dy", no_argument, NULL, OPTION_CALL_SHARED},
+    {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
     {"EB", no_argument, NULL, OPTION_EB},
     {"EL", no_argument, NULL, OPTION_EL},
     {"format", required_argument, NULL, 'b'},
@@ -159,6 +161,9 @@ parse_args (argc, argv)
 	  lex_redirect (optarg);
 	  parser_input = input_defsym;
 	  yyparse ();
+	  break;
+	case OPTION_DYNAMIC_LINKER:
+	  command_line.interpreter = optarg;
 	  break;
 	case OPTION_EB:
 	  /* FIXME: This is currently ignored.  It means

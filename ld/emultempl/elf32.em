@@ -59,6 +59,8 @@ gld${EMULATION_NAME}_before_parse()
 static void
 gld${EMULATION_NAME}_before_allocation ()
 {
+  asection *sinterp;
+
   /* If we are going to make any variable assignments, we need to let
      the ELF backend know about them in case the variables are
      referred to by dynamic objects.  */
@@ -66,8 +68,17 @@ gld${EMULATION_NAME}_before_allocation ()
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */
-  if (! bfd_elf32_size_dynamic_sections (output_bfd, &link_info))
+  if (! bfd_elf32_size_dynamic_sections (output_bfd, &link_info,
+					 &sinterp))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+
+  /* Let the user override the dynamic linker we are using.  */
+  if (command_line.interpreter != NULL
+      && sinterp != NULL)
+    {
+      sinterp->contents = (bfd_byte *) command_line.interpreter;
+      sinterp->_raw_size = strlen (command_line.interpreter) + 1;
+    }
 }
 
 /* This is called by the before_allocation routine via

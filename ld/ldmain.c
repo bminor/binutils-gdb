@@ -162,6 +162,7 @@ main (argc, argv)
   config.build_constructors = true;
   config.dynamic_link = false;
   command_line.force_common_definition = false;
+  command_line.interpreter = NULL;
 
   link_info.callbacks = &link_callbacks;
   link_info.relocateable = false;
