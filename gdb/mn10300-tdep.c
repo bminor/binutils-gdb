@@ -92,7 +92,7 @@ mn10300_saved_pc_after_call (struct frame_info *fi)
   return read_memory_integer (read_register (SP_REGNUM), 4);
 }
 
-void
+static void
 mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
