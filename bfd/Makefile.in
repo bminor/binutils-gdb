@@ -225,10 +225,16 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
 	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
 	 elf64.c elf64-gen.c \
-	 nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
+	 nlm.c nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
 	 hp300bsd.c hp300hpux.c \
 	 i386lynx.c i386lynx-cf.c m68klynx.c m68klynx-cf.c
+
+HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
+	 coffswap.h ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
+	 elfcode.h hppa_stubs.h libaout.h libbfd.h \
+	 libcoff.h libecoff.h libelf.h libhppa.h libieee.h libnlm.h \
+	 liboasys.h nlm-target.h nlmcode.h seclet.h som.h
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -401,21 +407,24 @@ install:
 Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) config.status
 
+# Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
+.dep: dep.sed $(CFILES) $(HFILES) bfd.h
+	rm -f .dep1
+	$(MAKE) DEP=$(DEP) .dep1
+	sed -f dep.sed <.dep1 >.dep
+
 # This rule really wants a mkdep that runs "gcc -MM".
 .dep1: $(CFILES)
-	rm -f .dep1 .dep2
+	rm -f .dep2
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
 	$(DEP) -f .dep2 $(ALL_CFLAGS) $?
 	$(srcdir)/../move-if-change .dep2 .dep1
 
-dep.sed: dep-in.sed Makefile
+dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
 		-e 's!@BFD_H@!$(BFD_H)!'	\
 		-e 's!@INCDIR@!$(INCDIR)!'	\
 		-e 's!@srcdir@!$(srcdir)!'
-
-.dep: .dep1 dep.sed
-	sed -f dep.sed <.dep1 >.dep
 
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
@@ -638,10 +647,9 @@ mipsbsd.o : mipsbsd.c \
  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 cpu-sh.o : cpu-sh.c
-elf.o : elf.c elfcode.h \
- libelf.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
- $(INCDIR)/elf/external.h
+elf.o : elf.c \
+ libelf.h $(INCDIR)/elf/common.h \
+ $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 elf32.o : elf32.c elfcode.h \
  libelf.h \
  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
@@ -688,6 +696,9 @@ elf64-gen.o : elf64-gen.c \
  libelf.h \
  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
  $(INCDIR)/elf/external.h elf64-target.h
+nlm.o : nlm.c \
+ libnlm.h $(INCDIR)/nlm/common.h \
+ $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h
 nlm32.o : nlm32.c nlmcode.h \
  libnlm.h \
  $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
