@@ -1,3 +1,8 @@
+Wed Jun  3 12:18:24 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Give an
+	error if previous object endianness doesn't match current object.
+
 Tue Jun  2 17:50:59 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_print_private_bfd_data): Call
