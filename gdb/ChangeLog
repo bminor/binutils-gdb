@@ -1,3 +1,7 @@
+Thu Jan 28 19:09:02 1993  John Gilmore  (gnu@cygnus.com)
+
+	* README:  Fix typo (reported by karl@hq.ileaf.com).
+
 Wed Jan 27 21:34:21 1993  Fred Fish  (fnf@cygnus.com)
 
 	* expression.h (BINOP_CONCAT): Document use for self concatenation
@@ -880,6 +884,8 @@ Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
 	NAMES_HAVE_UNDERSCORE, SOME_NAMES_HAVE_DOT, document
 	MEM_FNS_DECLARED.
 	(Target Conditionals):  Remove all of the above.
+
+	* xm-rs6000.h (MEM_FNS_DECLARED):  Update comments.
 
 Tue Dec 15 10:05:56 1992  Ian Lance Taylor  (ian@cygnus.com)
 
