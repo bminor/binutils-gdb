@@ -308,7 +308,7 @@ bfd_elf_string_from_elf_section (abfd, shindex, strindex)
   if (strindex >= hdr->sh_size)
     {
       (*_bfd_error_handler)
-	("%s: invalid string offset %u >= %lu for section `%s'",
+	(_("%s: invalid string offset %u >= %lu for section `%s'"),
 	 bfd_get_filename (abfd), strindex, (unsigned long) hdr->sh_size,
 	 ((shindex == elf_elfheader(abfd)->e_shstrndx
 	   && strindex == hdr->sh_name)
@@ -519,7 +519,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
     {
       unsigned int i, c;
 
-      fprintf (f, "\nProgram Header:\n");
+      fprintf (f, _("\nProgram Header:\n"));
       c = elf_elfheader (abfd)->e_phnum;
       for (i = 0; i < c; i++, p++)
 	{
@@ -567,7 +567,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
       size_t extdynsize;
       void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 
-      fprintf (f, "\nDynamic Section:\n");
+      fprintf (f, _("\nDynamic Section:\n"));
 
       dynbuf = (bfd_byte *) bfd_malloc (s->_raw_size);
       if (dynbuf == NULL)
@@ -669,7 +669,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
     {
       Elf_Internal_Verdef *t;
 
-      fprintf (f, "\nVersion definitions:\n");
+      fprintf (f, _("\nVersion definitions:\n"));
       for (t = elf_tdata (abfd)->verdef; t != NULL; t = t->vd_nextdef)
 	{
 	  fprintf (f, "%d 0x%2.2x 0x%8.8lx %s\n", t->vd_ndx,
@@ -692,12 +692,12 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
     {
       Elf_Internal_Verneed *t;
 
-      fprintf (f, "\nVersion References:\n");
+      fprintf (f, _("\nVersion References:\n"));
       for (t = elf_tdata (abfd)->verref; t != NULL; t = t->vn_nextref)
 	{
 	  Elf_Internal_Vernaux *a;
 
-	  fprintf (f, "  required from %s:\n", t->vn_filename);
+	  fprintf (f, _("  required from %s:\n"), t->vn_filename);
 	  for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
 	    fprintf (f, "    0x%8.8lx 0x%2.2x %2.2d %s\n", a->vna_hash,
 		     a->vna_flags, a->vna_other, a->vna_nodename);
@@ -1754,7 +1754,7 @@ elf_map_symbols (abfd)
       num_sections++;
 #ifdef DEBUG
       fprintf (stderr,
-	       "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n",
+	       _("creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"),
 	       asect->name, (long) asect->vma, asect->index, (long) asect);
 #endif
     }
@@ -2347,7 +2347,7 @@ assign_file_positions_for_segments (abfd)
   if (alloc != 0 && count > alloc)
     {
       ((*_bfd_error_handler)
-       ("%s: Not enough room for program headers (allocated %u, need %u)",
+       (_("%s: Not enough room for program headers (allocated %u, need %u)"),
 	bfd_get_filename (abfd), alloc, count));
       bfd_set_error (bfd_error_bad_value);
       return false;
@@ -2436,7 +2436,7 @@ assign_file_positions_for_segments (abfd)
 
 	      if (p->p_vaddr < (bfd_vma) off)
 		{
-		  _bfd_error_handler ("%s: Not enough room for program headers, try linking with -N",
+		  _bfd_error_handler (_("%s: Not enough room for program headers, try linking with -N"),
 				      bfd_get_filename (abfd));
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
@@ -2776,7 +2776,7 @@ assign_file_positions_except_relocs (abfd)
 	  else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	    {
 	      ((*_bfd_error_handler)
-	       ("%s: warning: allocated section `%s' not in segment",
+	       (_("%s: warning: allocated section `%s' not in segment"),
 		bfd_get_filename (abfd),
 		(hdr->bfd_section == NULL
 		 ? "*unknown*"
@@ -3124,7 +3124,7 @@ _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
       /* This case can occur when using --strip-symbol on a symbol
          which is used in a relocation entry.  */
       (*_bfd_error_handler)
-	("%s: symbol `%s' required but not present",
+	(_("%s: symbol `%s' required but not present"),
 	 bfd_get_filename (abfd), bfd_asymbol_name (asym_ptr));
       bfd_set_error (bfd_error_no_symbols);
       return -1;
@@ -3133,7 +3133,7 @@ _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
 #if DEBUG & 4
   {
     fprintf (stderr,
-	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n",
+	     _("elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n"),
 	     (long) asym_ptr, asym_ptr->name, idx, flags,
 	     elf_symbol_flags (flags));
     fflush (stderr);
@@ -3153,6 +3153,7 @@ copy_private_bfd_data (ibfd, obfd)
   Elf_Internal_Ehdr *iehdr;
   struct elf_segment_map *mfirst;
   struct elf_segment_map **pm;
+  struct elf_segment_map *m;
   Elf_Internal_Phdr *p;
   unsigned int i, c;
 
@@ -3173,7 +3174,6 @@ copy_private_bfd_data (ibfd, obfd)
     {
       unsigned int csecs;
       asection *s;
-      struct elf_segment_map *m;
       unsigned int isec;
 
       csecs = 0;
@@ -3241,6 +3241,19 @@ copy_private_bfd_data (ibfd, obfd)
 
       *pm = m;
       pm = &m->next;
+    }
+
+  /* The Solaris linker creates program headers in which all the
+     p_paddr fields are zero.  When we try to objcopy or strip such a
+     file, we get confused.  Check for this case, and if we find it
+     reset the p_paddr_valid fields.  */
+  for (m = mfirst; m != NULL; m = m->next)
+    if (m->p_paddr != 0)
+      break;
+  if (m == NULL)
+    {
+      for (m = mfirst; m != NULL; m = m->next)
+	m->p_paddr_valid = 0;
     }
 
   elf_tdata (obfd)->segment_map = mfirst;
@@ -4227,7 +4240,7 @@ _bfd_elf_validate_reloc (abfd, areloc)
 
  fail:
   (*_bfd_error_handler)
-    ("%s: unsupported relocation type %s",
+    (_("%s: unsupported relocation type %s"),
      bfd_get_filename (abfd), areloc->howto->name);
   bfd_set_error (bfd_error_bad_value);
   return false;

@@ -1699,7 +1699,7 @@ _bfd_write_archive_contents (arch)
 	  if (bfd_update_armap_timestamp (arch))
 	    break;
 	  (*_bfd_error_handler)
-	    ("Warning: writing archive was slow: rewriting timestamp\n");
+	    (_("Warning: writing archive was slow: rewriting timestamp\n"));
 	}
       while (++tries < 6);
     }
@@ -1970,7 +1970,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
   bfd_flush (arch);
   if (bfd_stat (arch, &archstat) == -1)
     {
-      perror ("Reading archive file mod timestamp");
+      perror (_("Reading archive file mod timestamp"));
       return true;		/* Can't read mod time for some reason */
     }
   if (archstat.st_mtime <= bfd_ardata (arch)->armap_timestamp)
@@ -1994,7 +1994,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
 	  != sizeof (hdr.ar_date)))
     {
       /* FIXME: bfd can't call perror.  */
-      perror ("Writing updated armap timestamp");
+      perror (_("Writing updated armap timestamp"));
       return true;		/* Some error while writing */
     }
 

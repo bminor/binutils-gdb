@@ -1,3 +1,19 @@
+Tue Apr 21 21:19:36 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
+
+	* Many files: Added gettext invocations around user-visible
+	strings.
+	* libbfd-in.h: Added gettext includes and defines.
+	* acconfig.h (ENABLE_NLS, HAVE_CATGETS, HAVE_GETTEXT, HAVE_STPCPY,
+	HAVE_LC_MESSAGES): Define.
+	* configure.in: Call CY_GNU_GETTEXT.  Create po/Makefile.in and
+	po/Makefile.
+	* Makefile.am (SUBDIRS): Added po.
+	(POTFILES): New macro.
+	(po/POTFILES.in): New target.
+	(SOURCE_HFILES): New macro.
+	(HFILES): Use it.
+	* po/Make-in, po/POTFILES.in, po/bfd.pot: New files.
+
 Tue Apr 21 13:38:18 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elfcore.h (bfd_prstatus):  Copy core_prstatus from the first

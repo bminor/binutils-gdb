@@ -300,7 +300,7 @@ etir_sta (abfd, cmd, ptr)
 	  psect = bfd_getl32 (ptr);
 	  if (psect >= PRIV(egsd_sec_count))
 	    {
-	      (*_bfd_error_handler) ("Bad section index in ETIR_S_C_STA_PQ");
+	      (*_bfd_error_handler) (_("Bad section index in ETIR_S_C_STA_PQ"));
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
 	    }
@@ -315,12 +315,12 @@ etir_sta (abfd, cmd, ptr)
       case ETIR_S_C_STA_MOD:
       case ETIR_S_C_STA_CKARG:
 
-	(*_bfd_error_handler) ("Unsupported STA cmd %d", cmd);
+	(*_bfd_error_handler) (_("Unsupported STA cmd %d"), cmd);
 	return false;
       break;
 
       default:
-	(*_bfd_error_handler) ("Reserved STA cmd %d", cmd);
+	(*_bfd_error_handler) (_("Reserved STA cmd %d"), cmd);
 	return false;
       break;
   }
@@ -431,7 +431,7 @@ etir_sto (abfd, cmd, ptr)
 	entry = (evax_symbol_entry *)bfd_hash_lookup (PRIV(evax_symbol_table), name, false, false);
 	if (entry == (evax_symbol_entry *)NULL)
 	  {
-	    (*_bfd_error_handler) ("ETIR_S_C_STO_GBL: no symbol \"%s\"",
+	    (*_bfd_error_handler) (_("ETIR_S_C_STO_GBL: no symbol \"%s\""),
 				   name);
 	    return false;
 	  }
@@ -452,7 +452,7 @@ etir_sto (abfd, cmd, ptr)
 	entry = (evax_symbol_entry *) bfd_hash_lookup (PRIV(evax_symbol_table), name, false, false);
 	if (entry == (evax_symbol_entry *)NULL)
 	  {
-	    (*_bfd_error_handler) ("ETIR_S_C_STO_CA: no symbol \"%s\"",
+	    (*_bfd_error_handler) (_("ETIR_S_C_STO_CA: no symbol \"%s\""),
 				   name);
 	    return false;
 	  }
@@ -465,7 +465,7 @@ etir_sto (abfd, cmd, ptr)
 
     case ETIR_S_C_STO_RB:
     case ETIR_S_C_STO_AB:
-      (*_bfd_error_handler) ("ETIR_S_C_STO_RB/AB: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_STO_RB/AB: Not supported"));
       break;
 
     /* store offset to psect: pop stack, add low 32 bits to base of psect
@@ -523,23 +523,23 @@ etir_sto (abfd, cmd, ptr)
       /* not supported  */
 
     case ETIR_S_C_STO_LP_PSB:
-      (*_bfd_error_handler) ("ETIR_S_C_STO_LP_PSB: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_STO_LP_PSB: Not supported"));
       break;
 
     /* */
 
     case ETIR_S_C_STO_HINT_GBL:
-      (*_bfd_error_handler) ("ETIR_S_C_STO_HINT_GBL: not implemented");
+      (*_bfd_error_handler) (_("ETIR_S_C_STO_HINT_GBL: not implemented"));
       break;
 
     /* */
 
     case ETIR_S_C_STO_HINT_PS:
-      (*_bfd_error_handler) ("ETIR_S_C_STO_HINT_PS: not implemented");
+      (*_bfd_error_handler) (_("ETIR_S_C_STO_HINT_PS: not implemented"));
       break;
 
     default:
-      (*_bfd_error_handler) ("Reserved STO cmd %d", cmd);
+      (*_bfd_error_handler) (_("Reserved STO cmd %d"), cmd);
       break;
     }
 
@@ -647,7 +647,7 @@ etir_opr (abfd, cmd, ptr)
 
     case ETIR_S_C_OPR_INSV:
       (void)_bfd_evax_pop (abfd, NULL);
-      (*_bfd_error_handler) ("ETIR_S_C_OPR_INSV: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_OPR_INSV: Not supported"));
       break;
 
     /* arithmetic shift  */
@@ -665,13 +665,13 @@ etir_opr (abfd, cmd, ptr)
       /* unsigned shift  */
 
     case ETIR_S_C_OPR_USH:
-      (*_bfd_error_handler) ("ETIR_S_C_OPR_USH: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_OPR_USH: Not supported"));
       break;
 
       /* rotate  */
 
     case ETIR_S_C_OPR_ROT:
-      (*_bfd_error_handler) ("ETIR_S_C_OPR_ROT: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_OPR_ROT: Not supported"));
       break;
 
       /* select  */
@@ -690,17 +690,17 @@ etir_opr (abfd, cmd, ptr)
       /* redefine symbol to current location  */
 
     case ETIR_S_C_OPR_REDEF:
-      (*_bfd_error_handler) ("ETIR_S_C_OPR_REDEF: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_OPR_REDEF: Not supported"));
       break;
 
       /* define a literal  */
 
     case ETIR_S_C_OPR_DFLIT:
-      (*_bfd_error_handler) ("ETIR_S_C_OPR_DFLIT: Not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_OPR_DFLIT: Not supported"));
       break;
 
     default:
-      (*_bfd_error_handler) ("Reserved OPR cmd %d", cmd);
+      (*_bfd_error_handler) (_("Reserved OPR cmd %d"), cmd);
       break;
     }
 
@@ -764,7 +764,7 @@ etir_ctl (abfd, cmd, ptr)
       break;
 
     default:
-      (*_bfd_error_handler) ("Reserved CTL cmd %d", cmd);
+      (*_bfd_error_handler) (_("Reserved CTL cmd %d"), cmd);
       break;
     }
   return true;
@@ -788,7 +788,7 @@ etir_stc (abfd, cmd, ptr)
 	 arg:  */
 
     case ETIR_S_C_STC_LP:
-      (*_bfd_error_handler) ("ETIR_S_C_STC_LP: not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_STC_LP: not supported"));
       break;
 
       /* 201 Store-conditional Linkage Pair with Procedure Signature
@@ -806,7 +806,7 @@ etir_stc (abfd, cmd, ptr)
 	 cs	global name  */
 
     case ETIR_S_C_STC_GBL:
-      (*_bfd_error_handler) ("ETIR_S_C_STC_GBL: not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_STC_GBL: not supported"));
       break;
 
       /* 203 Store-conditional Code Address at global address
@@ -814,7 +814,7 @@ etir_stc (abfd, cmd, ptr)
 	 cs	procedure name  */
 
     case ETIR_S_C_STC_GCA:
-      (*_bfd_error_handler) ("ETIR_S_C_STC_GCA: not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_STC_GCA: not supported"));
       break;
 
       /* 204 Store-conditional Address at psect + offset
@@ -823,7 +823,7 @@ etir_stc (abfd, cmd, ptr)
 	 qw	offset  */
 
     case ETIR_S_C_STC_PS:
-      (*_bfd_error_handler) ("ETIR_S_C_STC_PS: not supported");
+      (*_bfd_error_handler) (_("ETIR_S_C_STC_PS: not supported"));
       break;
 
       /* 205 Store-conditional NOP at address of global
@@ -1148,7 +1148,7 @@ _bfd_evax_write_etir (abfd)
 
 	  if ((i = section->reloc_count) <= 0)
 	    {
-	      (*_bfd_error_handler) ("SEC_RELOC with no relocs in section %s",
+	      (*_bfd_error_handler) (_("SEC_RELOC with no relocs in section %s"),
 				     section->name);
 	    }
 #if EVAX_DEBUG
@@ -1422,7 +1422,7 @@ _bfd_evax_write_etir (abfd)
 			      break;
 
 			    default:
-			      (*_bfd_error_handler) ("Unhandled relocation %s",
+			      (*_bfd_error_handler) (_("Unhandled relocation %s"),
 						     (*rptr)->howto->name);
 			      break;
 			    }

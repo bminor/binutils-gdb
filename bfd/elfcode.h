@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -142,7 +142,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define LOG_FILE_ALIGN	2
 #endif
 
-/* Forward declarations of static functions */
+/* Static functions */
 
 static void elf_swap_ehdr_in
   PARAMS ((bfd *, const Elf_External_Ehdr *, Elf_Internal_Ehdr *));
@@ -162,6 +162,8 @@ static boolean elf_slurp_reloc_table
 
 static void write_relocs PARAMS ((bfd *, asection *, PTR));
 
+static boolean elf_file_p PARAMS ((Elf_External_Ehdr *));
+
 #ifdef DEBUG
 static void elf_debug_section PARAMS ((int, Elf_Internal_Shdr *));
 static void elf_debug_file PARAMS ((Elf_Internal_Ehdr *));
@@ -174,11 +176,15 @@ static char *elf_symbol_flags PARAMS ((flagword));
    can be handled by explicitly specifying 32 bits or "the long type".  */
 #if ARCH_SIZE == 64
 #define put_word	bfd_h_put_64
+#define put_signed_word	bfd_h_put_signed_64
 #define get_word	bfd_h_get_64
+#define get_signed_word	bfd_h_get_signed_64
 #endif
 #if ARCH_SIZE == 32
 #define put_word	bfd_h_put_32
+#define put_signed_word	bfd_h_put_signed_32
 #define get_word	bfd_h_get_32
+#define get_signed_word	bfd_h_get_signed_32
 #endif
 
 /* Translate an ELF symbol in external format into an ELF symbol in internal
@@ -370,7 +376,7 @@ elf_swap_reloca_in (abfd, src, dst)
 {
   dst->r_offset = get_word (abfd, (bfd_byte *) src->r_offset);
   dst->r_info = get_word (abfd, (bfd_byte *) src->r_info);
-  dst->r_addend = get_word (abfd, (bfd_byte *) src->r_addend);
+  dst->r_addend = get_signed_word (abfd, (bfd_byte *) src->r_addend);
 }
 
 /* Translate an ELF reloc from internal format to external format. */
@@ -392,7 +398,7 @@ elf_swap_reloca_out (abfd, src, dst)
 {
   put_word (abfd, src->r_offset, dst->r_offset);
   put_word (abfd, src->r_info, dst->r_info);
-  put_word (abfd, src->r_addend, dst->r_addend);
+  put_signed_word (abfd, src->r_addend, dst->r_addend);
 }
 
 INLINE void
@@ -924,7 +930,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 {
   Elf_Internal_Shdr *hdr;
   Elf_Internal_Shdr *verhdr;
-  long symcount;		/* Number of external ELF symbols */
+  unsigned long symcount;	/* Number of external ELF symbols */
   elf_symbol_type *sym;		/* Pointer to current bfd symbol */
   elf_symbol_type *symbase;	/* Buffer for generated bfd symbols */
   Elf_Internal_Sym i_sym;
@@ -972,7 +978,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
     sym = symbase = NULL;
   else
     {
-      long i;
+      unsigned long i;
 
       if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
 	return -1;
@@ -999,7 +1005,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  && verhdr->sh_size / sizeof (Elf_External_Versym) != symcount)
 	{
 	  (*_bfd_error_handler)
-	    ("%s: version count (%ld) does not match symbol count (%ld)",
+	    (_("%s: version count (%ld) does not match symbol count (%ld)"),
 	     abfd->filename,
 	     (long) (verhdr->sh_size / sizeof (Elf_External_Versym)),
 	     symcount);
@@ -1071,7 +1077,10 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  else
 	    sym->symbol.section = bfd_abs_section_ptr;
 
-	  sym->symbol.value -= sym->symbol.section->vma;
+	  /* If this is a relocateable file, then the symbol value is
+             already section relative.  */
+	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+	    sym->symbol.value -= sym->symbol.section->vma;
 
 	  switch (ELF_ST_BIND (i_sym.st_info))
 	    {

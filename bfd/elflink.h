@@ -1123,7 +1123,7 @@ elf_link_add_object_symbols (abfd, info)
 		      if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
 			{
 			  (*_bfd_error_handler)
-			    ("%s: %s: invalid version %u (max %d)",
+			    (_("%s: %s: invalid version %u (max %d)"),
 			     abfd->filename, name, vernum,
 			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
 			  bfd_set_error (bfd_error_bad_value);
@@ -1164,7 +1164,7 @@ elf_link_add_object_symbols (abfd, info)
 		      if (verstr == NULL)
 			{
 			  (*_bfd_error_handler)
-			    ("%s: %s: invalid needed version %d",
+			    (_("%s: %s: invalid needed version %d"),
 			     abfd->filename, name, vernum);
 			  bfd_set_error (bfd_error_bad_value);
 			  goto error_return;
@@ -1277,7 +1277,7 @@ elf_link_add_object_symbols (abfd, info)
 	    {
 	      if (h->size != 0 && h->size != sym.st_size && ! size_change_ok)
 		(*_bfd_error_handler)
-		  ("Warning: size of symbol `%s' changed from %lu to %lu in %s",
+		  (_("Warning: size of symbol `%s' changed from %lu to %lu in %s"),
 		   name, (unsigned long) h->size, (unsigned long) sym.st_size,
 		   bfd_get_filename (abfd));
 
@@ -1299,7 +1299,7 @@ elf_link_add_object_symbols (abfd, info)
 		  && h->type != ELF_ST_TYPE (sym.st_info)
 		  && ! type_change_ok)
 		(*_bfd_error_handler)
-		  ("Warning: type of symbol `%s' changed from %d to %d in %s",
+		  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
 		   name, h->type, ELF_ST_TYPE (sym.st_info),
 		   bfd_get_filename (abfd));
 
@@ -1521,7 +1521,7 @@ elf_link_add_object_symbols (abfd, info)
                          don't expect to see the type of override we
                          do in the case above.  */
 		      (*_bfd_error_handler)
-			("%s: warning: unexpected redefinition of `%s'",
+			(_("%s: warning: unexpected redefinition of `%s'"),
 			 bfd_get_filename (abfd), shortname);
 		    }
 		  else
@@ -3217,7 +3217,7 @@ elf_link_assign_sym_version (h, data)
 	  /* We could not find the version for a symbol when
              generating a shared archive.  Return an error.  */
 	  (*_bfd_error_handler)
-	    ("%s: undefined versioned symbol name %s",
+	    (_("%s: undefined versioned symbol name %s"),
 	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  sinfo->failed = true;

@@ -118,7 +118,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   if ((part1_consth_active) && (r_type != R_IHCONST)) 
   {
     part1_consth_active = false;
-    *error_message = (char *) "Missing IHCONST";
+    *error_message = (char *) _("Missing IHCONST");
     return(bfd_reloc_dangerous);
   }
 
@@ -178,7 +178,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     /* consth, part 2 
        Now relocate the reference */
     if (part1_consth_active == false) {
-      *error_message = (char *) "Missing IHIHALF";
+      *error_message = (char *) _("Missing IHIHALF");
       return(bfd_reloc_dangerous);
     }
     /* sym_ptr_ptr = r_symndx, in coff_slurp_reloc_table() */
@@ -210,7 +210,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     bfd_put_32(abfd, insn, hit_data);
     break;
    default:
-    *error_message = "Unrecognized reloc";
+    *error_message = _("Unrecognized reloc");
     return (bfd_reloc_dangerous);
   }
 
@@ -403,7 +403,7 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (hihalf)
 	    {
 	      if (! ((*info->callbacks->reloc_dangerous)
-		     (info, "missing IHCONST reloc", input_bfd,
+		     (info, _("missing IHCONST reloc"), input_bfd,
 		      input_section, rel->r_vaddr - input_section->vma)))
 		return false;
 	      hihalf = false;
@@ -494,7 +494,7 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (! hihalf)
 	    {
 	      if (! ((*info->callbacks->reloc_dangerous)
-		     (info, "missing IHIHALF reloc", input_bfd,
+		     (info, _("missing IHIHALF reloc"), input_bfd,
 		      input_section, rel->r_vaddr - input_section->vma)))
 		return false;
 	      hihalf_val = 0;

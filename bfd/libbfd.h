@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 ** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
@@ -23,13 +23,38 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifdef ENABLE_NLS
+#include <libintl.h>
+/*  FIXME: We might want to use dgettext instead, in some cases.
+    This is still under investigation.  */
+#define _(String) gettext (String)
+#ifdef gettext_noop
+#define N_(String) gettext_noop (String)
+#else
+#define N_(String) (String)
+#endif
+#else
+/* Stubs that do something close enough.  */
+#define textdomain(String) (String)
+#define gettext(String) (String)
+#define dgettext(Domain,Message) (Message)
+#define dcgettext(Domain,Message,Type) (Message)
+#define bindtextdomain(Domain,Directory) (Domain)
+#define _(String) (String)
+#define N_(String) (String)
+/* In this case we don't care about the value.  */
+#ifndef LC_MESSAGES
+#define LC_MESSAGES 0
+#endif
+#endif
+
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  Take care never
    to wrap around if the address is within boundary-1 of the end of the
    address space.  */
 #define BFD_ALIGN(this, boundary)					\
-  ((((this) + (boundary) - 1) >= (this))				\
-   ? (((this) + ((boundary) - 1)) & (~((boundary)-1)))			\
+  ((((bfd_vma) (this) + (boundary) - 1) >= (bfd_vma) (this))		\
+   ? (((bfd_vma) (this) + ((boundary) - 1)) & (~((boundary)-1)))	\
    : ~ (bfd_vma) 0)
 
 /* If you want to read and write large blocks, you might want to do it
@@ -669,8 +694,12 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MIPS_GOT_LO16",
   "BFD_RELOC_MIPS_CALL_HI16",
   "BFD_RELOC_MIPS_CALL_LO16",
+/* start-sanitize-r5900 */
+  "BFD_RELOC_MIPS15_S3",
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
   "BFD_RELOC_MIPS_DVP_11_PCREL",
+  "BFD_RELOC_MIPS_DVP_27_S4",
 /* end-sanitize-sky */
 
   "BFD_RELOC_386_GOT32",

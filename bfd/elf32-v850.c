@@ -603,28 +603,28 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 		  && (h->other & V850_OTHER_ERROR) == 0)
 		{
 		  const char * msg;
-		  static char  buff[100]; /* XXX */
-		  
+		  static char  buff[200]; /* XXX */
+
 		  switch (h->other & V850_OTHER_MASK)
 		    {
 		    default:
-		      msg = "cannot occupy in multiple small data regions";
+		      msg = _("Variable `%s' cannot occupy in multiple small data regions");
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_ZDA | V850_OTHER_TDA:
-		      msg = "can only be in one of the small, zero, and tiny data regions";
+		      msg = _("Variable `%s' can only be in one of the small, zero, and tiny data regions");
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_ZDA:
-		      msg = "cannot be in both small and zero data regions simultaneously";
+		      msg = _("Variable `%s' cannot be in both small and zero data regions simultaneously");
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_TDA:
-		      msg = "cannot be in both small and tiny data regions simultaneously";
+		      msg = _("Variable `%s' cannot be in both small and tiny data regions simultaneously");
 		      break;
 		    case V850_OTHER_ZDA | V850_OTHER_TDA:
-		      msg = "cannot be in both zero and tiny data regions simultaneously";
+		      msg = _("Variable `%s' cannot be in both zero and tiny data regions simultaneously");
 		      break;
 		    }
 
-		  sprintf (buff, "Variable '%s' %s", h->root.root.string, msg );
+		  sprintf (buff, msg, h->root.root.string);
 		  info->callbacks->warning (info, buff, h->root.root.string,
 					    abfd, h->root.u.def.section, 0);
 
@@ -979,7 +979,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 	      }
 	    else
 	      {
-		fprintf (stderr, "FAILED to find previous HI16 reloc\n");
+		fprintf (stderr, _("FAILED to find previous HI16 reloc\n"));
 		return bfd_reloc_overflow;
 	      }
 	  }
@@ -1383,7 +1383,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
     }
 
   /* Perform the relocation.  */
-  return v850_elf_perform_relocation (input_bfd, r_type, value+addend, hit_data); 
+  return v850_elf_perform_relocation (input_bfd, r_type, value + addend, hit_data); 
 
 }
 
@@ -1548,31 +1548,31 @@ fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
 	      break;
 
 	    case bfd_reloc_outofrange:
-	      msg = "internal error: out of range error";
+	      msg = _("internal error: out of range error");
 	      goto common_error;
 
 	    case bfd_reloc_notsupported:
-	      msg = "internal error: unsupported relocation error";
+	      msg = _("internal error: unsupported relocation error");
 	      goto common_error;
 
 	    case bfd_reloc_dangerous:
-	      msg = "internal error: dangerous relocation";
+	      msg = _("internal error: dangerous relocation");
 	      goto common_error;
 
 	    case bfd_reloc_other:
-	      msg = "could not locate special linker symbol __gp";
+	      msg = _("could not locate special linker symbol __gp");
 	      goto common_error;
 
 	    case bfd_reloc_continue:
-	      msg = "could not locate special linker symbol __ep";
+	      msg = _("could not locate special linker symbol __ep");
 	      goto common_error;
 
 	    case (bfd_reloc_dangerous + 1):
-	      msg = "could not locate special linker symbol __ctbp";
+	      msg = _("could not locate special linker symbol __ctbp");
 	      goto common_error;
 	      
 	    default:
-	      msg = "internal error: unknown error";
+	      msg = _("internal error: unknown error");
 	      /* fall through */
 
 	    common_error:
@@ -1707,7 +1707,7 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
 
   if ((in_flags & EF_V850_ARCH) != (out_flags & EF_V850_ARCH)
       && (in_flags & EF_V850_ARCH) != E_V850_ARCH)
-    _bfd_error_handler ("%s: Architecture mismatch with previous modules",
+    _bfd_error_handler (_("%s: Architecture mismatch with previous modules"),
 			bfd_get_filename (ibfd));
 
   return true;

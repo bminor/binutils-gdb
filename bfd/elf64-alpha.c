@@ -946,7 +946,7 @@ elf64_alpha_reloc_gpdisp (abfd, reloc_entry, sym, data, input_section,
 
   /* Complain if the instructions are not correct.  */
   if (ret == bfd_reloc_dangerous)
-    *err_msg = "GPDISP relocation did not find ldah and lda instructions";
+    *err_msg = _("GPDISP relocation did not find ldah and lda instructions");
 
   return ret;
 }
@@ -2944,7 +2944,7 @@ elf64_alpha_size_got_sections (output_bfd, info)
 	{
 	  /* Yikes! A single object file has too many entries.  */
 	  (*_bfd_error_handler)
-	    ("%s: .got subsegment exceeds 64K (size %d)",
+	    (_("%s: .got subsegment exceeds 64K (size %d)"),
 	     bfd_get_filename(i),
 	     alpha_elf_tdata(this_got)->total_got_entries * 8);
 	  return false;
@@ -2964,7 +2964,7 @@ elf64_alpha_size_got_sections (output_bfd, info)
 	      if (++ngots == 2)
 		{
 		  (*info->callbacks->warning)
-		    (info, "using multiple gp values", (char *) NULL,
+		    (info, _("using multiple gp values"), (char *) NULL,
 		     output_bfd, (asection *) NULL, (bfd_vma) 0);
 		}
 	      *cur_got_tail = NULL;
@@ -4368,7 +4368,7 @@ elf64_alpha_final_link (abfd, info)
 	  else
 	    {
 	      (*_bfd_error_handler)
-		("%s: illegal section name `%s'",
+		(_("%s: illegal section name `%s'"),
 		 bfd_get_filename (abfd), o->name);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return false;

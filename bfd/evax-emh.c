@@ -319,7 +319,7 @@ _bfd_evax_slurp_eeom (abfd)
   PRIV(eeom_data).eeom_b_comcod = *(evax_rec + 8);
   if (PRIV(eeom_data).eeom_b_comcod > 1)
     {
-      (*_bfd_error_handler) ("Object module NOT error-free !\n");
+      (*_bfd_error_handler) (_("Object module NOT error-free !\n"));
       bfd_set_error (bfd_error_bad_value);
       return -1;
     }

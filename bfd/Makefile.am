@@ -6,7 +6,7 @@ INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
-SUBDIRS = doc
+SUBDIRS = doc po
 
 docdir = doc
 
@@ -391,13 +391,23 @@ CFILES = \
 	$(BFD64_BACKENDS_CFILES) \
 	$(OPTIONAL_BACKENDS_CFILES)
 
-HFILES = \
+## This is a list of all .h files which are in the source tree.
+SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h \
-	ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
+	ecoffswap.h elf32-hppa.h \
 	elfcode.h evax.h genlink.h go32stub.h hppa_stubs.h libaout.h \
 	libbfd.h libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h \
-	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h ns32k.h som.h \
-	targmatch.h
+	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h ns32k.h som.h
+
+HFILES = \
+	elf32-target.h elf64-target.h targmatch.h \
+	$(SOURCE_HFILES)
+
+POTFILES = $(CFILES) $(SOURCE_HFILES)
+
+po/POTFILES.in: @MAINT@ Makefile
+	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
 
 diststuff: info
 
@@ -424,8 +434,8 @@ ofiles: stamp-ofiles ; @true
 
 libbfd_la_SOURCES = $(BFD_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
-libbfd_la_LIBADD = `cat ofiles`
-libbfd_la_LDFLAGS = -release $(VERSION)
+libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
+libbfd_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
 # directory so that we don't have to convert all the programs that use

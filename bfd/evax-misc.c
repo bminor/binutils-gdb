@@ -898,12 +898,12 @@ int len;
   len = strlen (value);
   if (len == 0)
     {
-      (*_bfd_error_handler) ("_bfd_evax_output_counted called with zero bytes");
+      (*_bfd_error_handler) (_("_bfd_evax_output_counted called with zero bytes"));
       return;
     }
   if (len > 255)
     {
-      (*_bfd_error_handler) ("_bfd_evax_output_counted called with too many bytes");
+      (*_bfd_error_handler) (_("_bfd_evax_output_counted called with too many bytes"));
       return;
     }
   _bfd_evax_output_byte (abfd, len & 0xff);
@@ -1038,7 +1038,7 @@ _bfd_evax_length_hash_symbol (abfd, in, maxlen)
   if (in_len > maxlen
 	&& PRIV(flag_hash_long_names)
 	&& PRIV(flag_show_after_trunc))
-    printf ("Symbol %s replaced by %s\n", old_name, new_name);
+    printf (_("Symbol %s replaced by %s\n"), old_name, new_name);
 
   return outbuf;
 }

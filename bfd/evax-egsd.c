@@ -369,7 +369,7 @@ _bfd_evax_slurp_egsd (abfd)
 	  break;
 
 	default:
-	  (*_bfd_error_handler) ("unknown egsd subtype %d", gsd_type);
+	  (*_bfd_error_handler) (_("unknown egsd subtype %d"), gsd_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return -1;
 
