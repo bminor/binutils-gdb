@@ -203,38 +203,36 @@ bfd *obfd;
 }
 
 static
-boolean
+void
 copy_file(input_filename, output_filename)
     char           *input_filename;
     char           *output_filename;
 {
-    bfd            *ibfd;
+  bfd            *ibfd;
 
+  ibfd = bfd_openr(input_filename, input_target);
+  if (ibfd == NULL)
+    bfd_fatal(input_filename);
 
-    ibfd = bfd_openr(input_filename, input_target);
-    if (ibfd == NULL)
-	bfd_fatal(input_filename);
+  if (bfd_check_format(ibfd, bfd_object)) {
+    bfd * obfd = bfd_openw(output_filename, output_target);
+    if (obfd == NULL)
+      bfd_fatal(output_filename);
 
-    if (bfd_check_format(ibfd, bfd_object)) {
-	bfd * obfd = bfd_openw(output_filename, output_target);
-	if (obfd == NULL)
-	    bfd_fatal(output_filename);
+    copy_object(ibfd, obfd);
 
-	copy_object(ibfd, obfd);
+    if (!bfd_close(obfd))
+      bfd_fatal(output_filename);
 
-	if (!bfd_close(obfd))
-	    bfd_fatal(output_filename);
-
-	if (!bfd_close(ibfd))
-	    bfd_fatal(input_filename);
-    }
-    else     if (bfd_check_format(ibfd, bfd_archive)) {
-	bfd * obfd = bfd_openw(output_filename, output_target);
-	if (obfd == NULL)
-	    bfd_fatal(output_filename);
-
-	copy_archive(ibfd, obfd);
-    }
+    if (!bfd_close(ibfd))
+      bfd_fatal(input_filename);
+  }
+  else if (bfd_check_format(ibfd, bfd_archive)) {
+    bfd * obfd = bfd_openw(output_filename, output_target);
+    if (obfd == NULL)
+      bfd_fatal(output_filename);
+    copy_archive(ibfd, obfd);
+  }
 }
 
 
@@ -313,13 +311,17 @@ copy_sections(ibfd, isection, obfd)
     if (size == 0)
 	return;
 
-    if (get_reloc_upper_bound(ibfd, isection) != 0) {
+    if (strip == false && get_reloc_upper_bound(ibfd, isection) != 0) {
 	relpp = (arelent **) xmalloc(get_reloc_upper_bound(ibfd, isection));
 
 	relcount = bfd_canonicalize_reloc(ibfd, isection, relpp, sympp);
 
 	bfd_set_reloc(obfd, osection, relpp, relcount);
     }
+    else {
+	bfd_set_reloc(obfd, osection, (arelent **)NULL, 0);
+      }
+      
 
     if (bfd_get_section_flags(ibfd, isection) & SEC_HAS_CONTENTS) {
 	memhunk = (unsigned char *) xmalloc(size);
@@ -338,73 +340,67 @@ main(argc, argv)
     int             argc;
     char           *argv[];
 {
-    int             i;
+  int             i;
 
+  program_name = argv[0];
 
-    program_name = argv[0];
+  if (strcmp(program_name,"strip") == 0) {
+    strip = true;
+  }
 
-    if (strcmp(program_name,"strip") == 0) {
-	strip = true;
+  for (i = 1; i < argc; i++) 
+    {
+      if (argv[i][0] == '-') {
+	switch (argv[i][1]) {
+	case 'v':
+	  verbose = true;
+	  break;
+	case 'b':
+	  i++;
+	  input_target = output_target = argv[i];
+	  break;
+	case 'S':
+	  strip = true;
+	  break;
+	case 's':
+	  i++;
+	  input_target = argv[i];
+	  break;
+	case 'd':
+	  i++;
+	  output_target = argv[i];
+	  break;
+	default:
+	  usage();
+	}
+      }
+      else {
+	if (input_filename) {
+	  output_filename = argv[i];
+	}
+	else {
+	  input_filename = argv[i];
+	}
+      }
     }
 
-    for (i = 1; i < argc; i++) 
-	{
-	    if (argv[i][0] == '-') {
-		switch (argv[i][1]) {
-	    case 'v':
-		    verbose = true;
-		    break;
-	    case 'b':
-		    i++;
-		    input_target = output_target = argv[i];
-		    break;
-	    case 'S':
-		    strip = true;
-		    break;
-	    case 's':
-		    i++;
-		    input_target = argv[i];
-		    break;
-	    case 'd':
-		    i++;
-		    output_target = argv[i];
-		    break;
-	    default:
-		    usage();
-		}
-	    }
-	    else {
-		if (input_filename) {
-		    output_filename = argv[i];
-		}
-		else {
-		    input_filename = argv[i];
-		}
-	    }
-	}
+  if (input_filename == (char *) NULL)
+    usage();
 
-    if (input_filename == (char *) NULL)
-	usage();
+  if (output_target == (char *) NULL)
+    output_target = input_target;
 
-    if (output_target == (char *) NULL)
-	output_target = input_target;
+  /* If there is no  destination file then create a temp and rename
+     the result into the input */
 
-    /* If there is no  destination file then create a temp and rename
-       the result into the input */
-
-    if (output_filename == (char *)NULL) {
-	char *	tmpname = make_tempname(input_filename);
-	if (copy_file(input_filename, tmpname)) {
-	    output_filename = input_filename;
-	    rename(tmpname, input_filename);
-	    return 0;
-	}
-    }
-    else if (copy_file(input_filename, output_filename)) 
-	{
-	    return 0;
-	}
-
-
+  if (output_filename == (char *)NULL) {
+    char *	tmpname = make_tempname(input_filename);
+    copy_file(input_filename, tmpname);
+    output_filename = input_filename;
+    rename(tmpname, input_filename);
+  }
+  else {
+    copy_file(input_filename, output_filename);
+  }
     return 1;
 }
