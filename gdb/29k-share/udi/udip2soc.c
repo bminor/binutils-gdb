@@ -27,7 +27,12 @@ static  char udip2soc_c_AMD[]="@(#)udip2soc.c	2.8, AMD";
 #include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
-#include <sys/fcntl.h>
+
+/* This used to say sys/fcntl.h, but the only systems I know of that
+   require that are old (pre-4.3, at least) BSD systems, which we
+   probably don't need to worry about.  */
+#include <fcntl.h>
+
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
