@@ -141,6 +141,7 @@ ALL_EMULATIONS = \
 	eavr3.o \
 	eavr4.o \
 	eavr5.o \
+	ecoff_i860.o \
 	ecoff_sparc.o \
 	ecrisaout.o \
 	ecriself.o \
@@ -570,6 +571,9 @@ eavr5.c: $(srcdir)/emulparams/avr5.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} avr5 "$(tdir_avr85xx)"
+ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i860coff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} coff_i860 "$(tdir_coff_i860)"
 ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc "$(tdir_coff_sparc)"

@@ -1,3 +1,13 @@
+2003-08-05  Christian Groessler  <chris@groessler.org>
+            Jason Eckhardt  <jle@rice.edu>
+
+        * configure.tgt: Recognize new target i860-*-coff.
+        * Makefile.am (ALL_EMULATIONS): Add ecoff_i860.o.
+        (ecoff_i860.c): New rule.
+        * emulparams/coff_i860.sh: New file.
+        * scripttempl/i860coff.sc: New file.
+        * Makefile.in: Regenerate.
+
 2003-08-04  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/elf32.em (before_allocation): Prepend "warning: "
