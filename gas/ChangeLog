@@ -1,3 +1,14 @@
+Wed Sep 13 12:33:03 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (relax_and_size_seg): Change to the segment we are
+	relaxing, in case md_convert_frag, called by cvt_frag_to_fill,
+	wants to call fix_new.
+	* config/tc-m68k.c (m68k_ip): Permit PC relative code if the
+	segment of the symbol is the current segment, not just in
+	text_section.
+	(md_convert_frag_1): Don't call subseg_change.
+	(md_estimate_size_before_relax): Likewise.
+
 Tue Sep 12 10:36:40 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-arm.c (md_atof): Fix debugging printf, and leave it

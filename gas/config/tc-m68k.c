@@ -1832,8 +1832,7 @@ m68k_ip (instring)
 		  if (isvar (&opP->disp)
 		      && !subs (&opP->disp)
 		      && adds (&opP->disp)
-		      && (S_GET_SEGMENT (adds (&opP->disp)) == text_section)
-		      && now_seg == text_section
+		      && S_GET_SEGMENT (adds (&opP->disp)) == now_seg
 		      && cpu_of_arch (current_architecture) >= m68020
 		      && !flag_long_jumps
 		      && !strchr ("~%&$?", s[0]))
@@ -3453,7 +3452,6 @@ md_convert_frag_1 (fragP)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
 	      fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
-	      subseg_change (text_section, 0); /* @@ */
 
 	      fix_new (fragP,
 		       fragP->fr_fix,
@@ -3471,7 +3469,6 @@ md_convert_frag_1 (fragP)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
 	      fragP->fr_opcode[1] = (char) 0xF9; /* JMP  with ABSL LONG offset */
-	      subseg_change (text_section, 0); /* @@ */
 	      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 		       fragP->fr_offset, 0, NO_RELOC);
 	      fragP->fr_fix += 4;
@@ -3500,7 +3497,6 @@ md_convert_frag_1 (fragP)
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
       *buffer_address++ = (char) 0xf9;
       fragP->fr_fix += 2;	/* account for jmp instruction */
-      subseg_change (text_section, 0);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 0, NO_RELOC);
       fragP->fr_fix += 4;
@@ -3518,7 +3514,6 @@ md_convert_frag_1 (fragP)
       *buffer_address++ = (char) 0xf9;
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
-      subseg_change (text_section, 0);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 0, NO_RELOC);
       fragP->fr_fix += 4;
@@ -3539,7 +3534,6 @@ md_convert_frag_1 (fragP)
       /* The thing to do here is force it to ABSOLUTE LONG, since
 	PCREL is really trying to shorten an ABSOLUTE address anyway */
       /* JF FOO This code has not been tested */
-      subseg_change (text_section, 0);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
 	       0, NO_RELOC);
       if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
@@ -3552,7 +3546,6 @@ md_convert_frag_1 (fragP)
       ext = 0;
       break;
     case TAB (PCLEA, SHORT):
-      subseg_change (text_section, 0);
       fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
 	       fragP->fr_offset, 1, NO_RELOC);
       fragP->fr_opcode[1] &= ~0x3F;
@@ -3560,7 +3553,6 @@ md_convert_frag_1 (fragP)
       ext = 2;
       break;
     case TAB (PCLEA, LONG):
-      subseg_change (text_section, 0);
       fixP = fix_new (fragP, (int) (fragP->fr_fix) + 2, 4, fragP->fr_symbol,
 		      fragP->fr_offset, 1, NO_RELOC);
       fixP->fx_pcrel_adjust = 2;
@@ -3585,7 +3577,6 @@ md_convert_frag_1 (fragP)
       ext = 0;
       break;
     case TAB (PCINDEX, SHORT):
-      subseg_change (text_section, 0);
       disp += 2;
       assert (issword (disp));
       assert (fragP->fr_fix >= 2);
@@ -3598,7 +3589,6 @@ md_convert_frag_1 (fragP)
       ext = 2;
       break;
     case TAB (PCINDEX, LONG):
-      subseg_change (text_section, 0);
       disp += 2;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
 		      fragP->fr_offset, (fragP->fr_opcode[1] & 077) == 073,
@@ -3674,7 +3664,6 @@ md_estimate_size_before_relax (fragP, segment)
 	      {
 		fragP->fr_opcode[0] = 0x4E;
 		fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
-		subseg_change (text_section, 0);
 		fix_new (fragP, fragP->fr_fix, 4,
 			 fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC);
 		fragP->fr_fix += 4;
@@ -3684,7 +3673,6 @@ md_estimate_size_before_relax (fragP, segment)
 	      {
 		fragP->fr_opcode[0] = 0x4E;
 		fragP->fr_opcode[1] = (char) 0xF9; /* JMP  with ABSL LONG offset */
-		subseg_change (text_section, 0);
 		fix_new (fragP, fragP->fr_fix, 4,
 			 fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC);
 		fragP->fr_fix += 4;
@@ -3761,7 +3749,6 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
 	    buffer_address[1] = (char) 0xf8;
 	    fragP->fr_fix += 2;	/* account for jmp instruction */
-	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 2;
@@ -3773,7 +3760,6 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
 	    buffer_address[1] = (char) 0xf9;
 	    fragP->fr_fix += 2;	/* account for jmp instruction */
-	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 4;
@@ -3804,7 +3790,6 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[4] = 0x4e;	/* Put in Jump Word */
 	    buffer_address[5] = (char) 0xf8;
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
-	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 2;
@@ -3816,7 +3801,6 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[4] = 0x4e;	/* put in jmp long (0x4ef9) */
 	    buffer_address[5] = (char) 0xf9;
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
-	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 4;

@@ -130,6 +130,12 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_frag = frag;
   fixP->fx_where = where;
   fixP->fx_size = size;
+  /* We've made fx_size a narrow field; check that it's wide enough.  */
+  if (fixP->fx_size != size)
+    {
+      as_bad ("field fx_size too small to hold %d", size);
+      abort ();
+    }
   fixP->fx_addsy = add_symbol;
   fixP->fx_subsy = sub_symbol;
   fixP->fx_offset = offset;
@@ -142,12 +148,11 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_pcrel_adjust = 0;
   fixP->fx_bit_fixP = 0;
   fixP->fx_addnumber = 0;
-  fixP->tc_fix_data = NULL;
   fixP->fx_tcbit = 0;
   fixP->fx_done = 0;
 
-#if defined (TC_I960) || defined (TC_NS32K)
-  fixP->fx_bsr = 0;
+#ifdef TC_FIX_TYPE
+  TC_INIT_FIX_DATA(fixP);
 #endif
 
   as_where (&fixP->fx_file, &fixP->fx_line);
@@ -501,6 +506,8 @@ relax_and_size_seg (abfd, sec, xxx)
   segment_info_type *seginfo;
   int x;
   valueT size, newsize;
+
+  subseg_change (sec, 0);
 
   flags = bfd_get_section_flags (abfd, sec);
 
@@ -2323,7 +2330,7 @@ fixup_segment (fixP, this_segment_type)
 		     as to whether or not a relocation will be needed to
 		     handle this fixup.  */
 		  
-		  if (TC_FORCE_RELOCATION (fixP))
+		  if (!TC_FORCE_RELOCATION (fixP))
 		    {
 		      fixP->fx_addsy = NULL;
 		      add_symbolP = NULL;
