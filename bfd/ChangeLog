@@ -1,3 +1,17 @@
+Wed Jun  9 15:00:01 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_mkobject_hook): Mark ZMAGIC files as D_PAGED.
+	(ecoff_write_object_contents): If not D_PAGED, don't add the
+	section headers to text_size.  If not D_PAGED, set the magic
+	number to OMAGIC rather than ZMAGIC.  If creating a D_PAGED
+	executable, the executable must fully occupy an even number of
+	pages.
+	(ecoff_set_symbol_info, make_bfd_asection, ecoff_little_vec,
+	ecoff_big_vec): Consistently set section alignment power to 4,
+	since ECOFF sections should be multiples of 16 bytes.
+	(ecoff_little_vec, ecoff_big_vec): Added D_PAGED to object_flags.
+	Made ar_pad_char and ar_max_namelen agree for both.
+
 Tue Jun  8 20:28:02 1993  Mark Eichin  (eichin at tweedledumber)
 
 	* elfcode.h (elf_slurp_symbol_table): subtract section vma from
@@ -10,8 +24,7 @@ Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 Tue Jun  8 14:27:56 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
-
-	* news.h, config/news.mh: New files.
+	* hosts/news.h, config/news.mh: New files.
 
 Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 

@@ -25,6 +25,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "seclet.h"
 #include "aout/ar.h"
 #include "aout/ranlib.h"
+
+/* FIXME: We need the definitions of N_SET[ADTB], but aout64.h defines
+   some other stuff which we don't want and which conflicts with stuff
+   we do want.  */
+#include "libaout.h"
+#include "aout/aout64.h"
+#undef OMAGIC
+#undef ZMAGIC
+#undef N_ABS
+#undef exec_hdr
+#undef obj_sym_filepos
+
 #include "coff/mips.h"
 #include "coff/internal.h"
 #include "coff/sym.h"
@@ -87,7 +99,8 @@ static long ecoff_sec_to_styp_flags PARAMS ((CONST char *name,
 static flagword ecoff_styp_to_sec_flags PARAMS ((bfd *abfd, PTR hdr));
 static asymbol *ecoff_make_empty_symbol PARAMS ((bfd *abfd));
 static void ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
-					   asymbol *asym, int ext));
+					   asymbol *asym, int ext,
+					   asymbol **indirect_ptr_ptr));
 static boolean ecoff_slurp_symbol_table PARAMS ((bfd *abfd));
 static unsigned int ecoff_get_symtab_upper_bound PARAMS ((bfd *abfd));
 static unsigned int ecoff_get_symtab PARAMS ((bfd *abfd,
@@ -100,6 +113,9 @@ static char *ecoff_type_to_string PARAMS ((bfd *abfd, union aux_ext *aux_ptr,
 static void ecoff_print_symbol PARAMS ((bfd *abfd, PTR filep,
 					asymbol *symbol,
 					bfd_print_symbol_type how));
+static void ecoff_get_symbol_info PARAMS ((bfd *abfd,
+					   asymbol *symbol,
+					   symbol_info *ret));
 static void ecoff_swap_reloc_in PARAMS ((bfd *abfd, RELOC *ext,
 					 struct internal_reloc *intern));
 static unsigned int ecoff_swap_reloc_out PARAMS ((bfd *abfd, PTR src,
@@ -193,6 +209,147 @@ static bfd_target *ecoff_archive_p PARAMS ((bfd *abfd));
 #define coff_swap_scnhdr_in ecoff_swap_scnhdr_in
 #define coff_swap_scnhdr_out ecoff_swap_scnhdr_out
 #include "coffswap.h"
+
+/* How to process the various relocs types.  */
+
+static reloc_howto_type ecoff_howto_table[] =
+{
+  /* Reloc type 0 is ignored.  The reloc reading code ensures that
+     this is a reference to the .abs section, which will cause
+     bfd_perform_relocation to do nothing.  */
+  HOWTO (ECOFF_R_IGNORE,	/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 false,			/* complain_on_overflow */
+	 0,			/* special_function */
+	 "IGNORE",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A 16 bit reference to a symbol, normally from a data section.  */
+  HOWTO (ECOFF_R_REFHALF,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_generic_reloc,	/* special_function */
+	 "REFHALF",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A 32 bit reference to a symbol, normally from a data section.  */
+  HOWTO (ECOFF_R_REFWORD,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_generic_reloc,	/* special_function */
+	 "REFWORD",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A 26 bit absolute jump address.  */
+  HOWTO (ECOFF_R_JMPADDR,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_generic_reloc,	/* special_function */
+	 "JMPADDR",		/* name */
+	 true,			/* partial_inplace */
+	 0x3ffffff,		/* src_mask */
+	 0x3ffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The high 16 bits of a symbol value.  Handled by the function
+     ecoff_refhi_reloc.  */
+  HOWTO (ECOFF_R_REFHI,		/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_refhi_reloc,	/* special_function */
+	 "REFHI",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The low 16 bits of a symbol value.  */
+  HOWTO (ECOFF_R_REFLO,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_reflo_reloc,	/* special_function */
+	 "REFLO",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A reference to an offset from the gp register.  Handled by the
+     function ecoff_gprel_reloc.  */
+  HOWTO (ECOFF_R_GPREL,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_gprel_reloc,	/* special_function */
+	 "GPREL",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A reference to a literal using an offset from the gp register.
+     Handled by the function ecoff_gprel_reloc.  */
+  HOWTO (ECOFF_R_LITERAL,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize (obsolete) */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 false,			/* absolute (obsolete) */
+	 true,			/* complain_on_overflow */
+	 ecoff_gprel_reloc,	/* special_function */
+	 "LITERAL",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false)			/* pcrel_offset */
+};
+
+#define ECOFF_HOWTO_COUNT \
+  (sizeof ecoff_howto_table / sizeof ecoff_howto_table[0])
 
 /* This stuff is somewhat copied from coffcode.h.  */
 
@@ -307,6 +464,8 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
       ecoff->gprmask = internal_a->gprmask;
       for (i = 0; i < 4; i++)
 	ecoff->cprmask[i] = internal_a->cprmask[i];
+      if (internal_a->magic == ZMAGIC)
+	abfd->flags |= D_PAGED;
     }
 
   return (PTR) ecoff;
@@ -631,16 +790,38 @@ ecoff_make_empty_symbol (abfd)
 /* Set the BFD flags and section for an ECOFF symbol.  */
 
 static void
-ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
+ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
      bfd *abfd;
      SYMR *ecoff_sym;
      asymbol *asym;
      int ext;
+     asymbol **indirect_ptr_ptr;
 {
   asym->the_bfd = abfd;
   asym->value = ecoff_sym->value;
   asym->section = &bfd_debug_section;
   asym->udata = NULL;
+
+  /* An indirect symbol requires two consecutive stabs symbols.  */
+  if (*indirect_ptr_ptr != (asymbol *) NULL)
+    {
+      BFD_ASSERT (MIPS_IS_STAB (ecoff_sym));
+      (*indirect_ptr_ptr)->value = (bfd_vma) asym;
+      asym->flags = BSF_DEBUGGING;
+      asym->section = &bfd_und_section;
+      *indirect_ptr_ptr = NULL;
+      return;
+    }
+
+  if (MIPS_IS_STAB (ecoff_sym)
+      && (MIPS_UNMARK_STAB (ecoff_sym->index) | N_EXT) == (N_INDR | N_EXT))
+    {
+      asym->flags = BSF_DEBUGGING | BSF_INDIRECT;
+      asym->section = &bfd_ind_section;
+      /* Pass this symbol on to the next call to this function.  */
+      *indirect_ptr_ptr = asym;
+      return;
+    }
 
   /* Most symbol types are just for debugging.  */
   switch (ecoff_sym->st)
@@ -781,6 +962,76 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
     default:
       break;
     }
+
+  /* Look for special constructors symbols and make relocation entries
+     in a special construction section.  These are produced by the
+     -fgnu-linker argument to g++.  */
+  if (MIPS_IS_STAB (ecoff_sym))
+    {
+      switch (MIPS_UNMARK_STAB (ecoff_sym->index))
+	{
+	default:
+	  break;
+
+	case N_SETA:
+	case N_SETT:
+	case N_SETD:
+	case N_SETB:
+	  {
+	    const char *name;
+	    asection *section;
+	    arelent_chain *reloc_chain;
+
+	    /* Get a section with the same name as the symbol (usually
+	       __CTOR_LIST__ or __DTOR_LIST__).  FIXME: gcc uses the
+	       name ___CTOR_LIST (three underscores).  We need
+	       __CTOR_LIST (two underscores), since ECOFF doesn't use
+	       a leading underscore.  This should be handled by gcc,
+	       but instead we do it here.  Actually, this should all
+	       be done differently anyhow.  */
+	    name = bfd_asymbol_name (asym);
+	    if (name[0] == '_' && name[1] == '_' && name[2] == '_')
+	      {
+		++name;
+		asym->name = name;
+	      }
+	    section = bfd_get_section_by_name (abfd, name);
+	    if (section == (asection *) NULL)
+	      {
+		char *copy;
+
+		copy = (char *) bfd_alloc (abfd, strlen (name) + 1);
+		strcpy (copy, name);
+		section = bfd_make_section (abfd, copy);
+	      }
+
+	    /* Build a reloc pointing to this constructor.  */
+	    reloc_chain = (arelent_chain *) bfd_alloc (abfd,
+						       sizeof (arelent_chain));
+	    reloc_chain->relent.sym_ptr_ptr =
+	      bfd_get_section (asym)->symbol_ptr_ptr;
+	    reloc_chain->relent.address = section->_raw_size;
+	    reloc_chain->relent.addend = asym->value;
+
+	    /* FIXME: Assumes 32 bit __CTOR_LIST__ entries.  */
+	    reloc_chain->relent.howto = ecoff_howto_table + ECOFF_R_REFWORD;
+
+	    /* Set up the constructor section to hold the reloc.  */
+	    section->flags = SEC_CONSTRUCTOR;
+	    ++section->reloc_count;
+	    section->alignment_power = 4;
+	    reloc_chain->next = section->constructor_chain;
+	    section->constructor_chain = reloc_chain;
+	    
+	    /* FIXME: Assumes 32 bit __CTOR_LIST__ entries.  */
+	    section->_raw_size += 4;
+
+	    /* Mark the symbol as a constructor.  */
+	    asym->flags |= BSF_CONSTRUCTOR;
+	  }
+	  break;
+	}
+    }
 }
 
 /* Read an ECOFF symbol table.  */
@@ -792,6 +1043,7 @@ ecoff_slurp_symbol_table (abfd)
   bfd_size_type internal_size;
   ecoff_symbol_type *internal;
   ecoff_symbol_type *internal_ptr;
+  asymbol *indirect_ptr;
   struct ext_ext *eraw_src;
   struct ext_ext *eraw_end;
   FDR *fdr_ptr;
@@ -816,6 +1068,7 @@ ecoff_slurp_symbol_table (abfd)
     }
 
   internal_ptr = internal;
+  indirect_ptr = NULL;
   eraw_src = ecoff_data (abfd)->external_ext;
   eraw_end = eraw_src + ecoff_data (abfd)->symbolic_header.iextMax;
   for (; eraw_src < eraw_end; eraw_src++, internal_ptr++)
@@ -826,11 +1079,12 @@ ecoff_slurp_symbol_table (abfd)
       internal_ptr->symbol.name = (ecoff_data (abfd)->ssext
 				   + internal_esym.asym.iss);
       ecoff_set_symbol_info (abfd, &internal_esym.asym,
-			     &internal_ptr->symbol, 1);
+			     &internal_ptr->symbol, 1, &indirect_ptr);
       internal_ptr->fdr = ecoff_data (abfd)->fdr + internal_esym.ifd;
       internal_ptr->local = false;
       internal_ptr->native.enative = eraw_src;
     }
+  BFD_ASSERT (indirect_ptr == (asymbol *) NULL);
 
   /* The local symbols must be accessed via the fdr's, because the
      string and aux indices are relative to the fdr information.  */
@@ -852,12 +1106,13 @@ ecoff_slurp_symbol_table (abfd)
 				       + fdr_ptr->issBase
 				       + internal_sym.iss);
 	  ecoff_set_symbol_info (abfd, &internal_sym,
-				 &internal_ptr->symbol, 0);
+				 &internal_ptr->symbol, 0, &indirect_ptr);
 	  internal_ptr->fdr = fdr_ptr;
 	  internal_ptr->local = true;
 	  internal_ptr->native.lnative = lraw_src;
 	}
     }
+  BFD_ASSERT (indirect_ptr == (asymbol *) NULL);
 
   ecoff_data (abfd)->canonical_symbols = internal;
 
@@ -1248,6 +1503,17 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
   return buffer2;
 }
 
+/* Return information about ECOFF symbol SYMBOL in RET.  */
+
+static void
+ecoff_get_symbol_info (abfd, symbol, ret)
+     bfd *abfd;			/* Ignored.  */
+     asymbol *symbol;
+     symbol_info *ret;
+{
+  bfd_symbol_info (symbol, ret);
+}
+
 /* Print information about an ECOFF symbol.  */
 
 static void
@@ -1286,17 +1552,6 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 		   (unsigned) ecoff_ext.asym.st,
 		   (unsigned) ecoff_ext.asym.sc);
 	}
-      break;
-    case bfd_print_symbol_nm:
-      {
-	CONST char *section_name = symbol->section->name;
-
-	bfd_print_symbol_vandf ((PTR) file, symbol);
-	fprintf (file, " %-5s %s %s",
-		 section_name,
-		 ecoffsymbol (symbol)->local ? "l" : "e",
-		 symbol->name);
-      }
       break;
     case bfd_print_symbol_all:
       /* Print out the symbols in a reasonable way */
@@ -1384,9 +1639,9 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 		  printf ("\n      First symbol: %ld", indx + sym_base);
 		else
 		  printf ("\n      First symbol: %ld", 
-			  (AUX_GET_ISYM (bigendian,
-					 &aux_base[ecoff_ext.asym.index])
-			   + sym_base));
+			  (long) (AUX_GET_ISYM (bigendian,
+						&aux_base[ecoff_ext.asym.index])
+				  + sym_base));
 		break;
 
 	      case stProc:
@@ -1395,9 +1650,9 @@ ecoff_print_symbol (abfd, filep, symbol, how)
 		  ;
 		else if (ecoffsymbol (symbol)->local)
 		  printf ("\n      End+1 symbol: %-7ld   Type:  %s",
-			  (AUX_GET_ISYM (bigendian,
-					 &aux_base[ecoff_ext.asym.index])
-			   + sym_base),
+			  (long) (AUX_GET_ISYM (bigendian,
+						&aux_base[ecoff_ext.asym.index])
+				  + sym_base),
 			  ecoff_type_to_string (abfd, aux_base, indx + 1,
 						bigendian));
 		else
@@ -1778,147 +2033,6 @@ ecoff_gprel_reloc (abfd,
 
   return bfd_reloc_ok;
 }
-
-/* How to process the various relocs types.  */
-
-static reloc_howto_type ecoff_howto_table[] =
-{
-  /* Reloc type 0 is ignored.  The reloc reading code ensures that
-     this is a reference to the .abs section, which will cause
-     bfd_perform_relocation to do nothing.  */
-  HOWTO (ECOFF_R_IGNORE,	/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 false,			/* complain_on_overflow */
-	 0,			/* special_function */
-	 "IGNORE",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A 16 bit reference to a symbol, normally from a data section.  */
-  HOWTO (ECOFF_R_REFHALF,	/* type */
-	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_generic_reloc,	/* special_function */
-	 "REFHALF",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A 32 bit reference to a symbol, normally from a data section.  */
-  HOWTO (ECOFF_R_REFWORD,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_generic_reloc,	/* special_function */
-	 "REFWORD",		/* name */
-	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A 26 bit absolute jump address.  */
-  HOWTO (ECOFF_R_JMPADDR,	/* type */
-	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_generic_reloc,	/* special_function */
-	 "JMPADDR",		/* name */
-	 true,			/* partial_inplace */
-	 0x3ffffff,		/* src_mask */
-	 0x3ffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The high 16 bits of a symbol value.  Handled by the function
-     ecoff_refhi_reloc.  */
-  HOWTO (ECOFF_R_REFHI,		/* type */
-	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_refhi_reloc,	/* special_function */
-	 "REFHI",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The low 16 bits of a symbol value.  */
-  HOWTO (ECOFF_R_REFLO,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_reflo_reloc,	/* special_function */
-	 "REFLO",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A reference to an offset from the gp register.  Handled by the
-     function ecoff_gprel_reloc.  */
-  HOWTO (ECOFF_R_GPREL,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_gprel_reloc,	/* special_function */
-	 "GPREL",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A reference to a literal using an offset from the gp register.
-     Handled by the function ecoff_gprel_reloc.  */
-  HOWTO (ECOFF_R_LITERAL,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize (obsolete) */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 false,			/* absolute (obsolete) */
-	 true,			/* complain_on_overflow */
-	 ecoff_gprel_reloc,	/* special_function */
-	 "LITERAL",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false)			/* pcrel_offset */
-};
-
-#define ECOFF_HOWTO_COUNT \
-  (sizeof ecoff_howto_table / sizeof ecoff_howto_table[0])
 
 /* Read in the relocs for a section.  */
 
@@ -2517,7 +2631,6 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
   struct sym_ext *sym_out;
   ecoff_symbol_type *esym_ptr;
   ecoff_symbol_type *esym_end;
-  unsigned long pdr_off;
   FDR *fdr_ptr;
   FDR *fdr_end;
   struct fdr_ext *fdr_out;
@@ -2684,15 +2797,6 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       memcpy (output_ecoff->external_pdr + output_symhdr->ipdMax,
 	      input_ecoff->external_pdr,
 	      input_symhdr->ipdMax * sizeof (struct pdr_ext));
-      if (input_symhdr->ipdMax == 0)
-	pdr_off = 0;
-      else
-	{
-	  PDR pdr;
-
-	  ecoff_swap_pdr_in (input_bfd, input_ecoff->external_pdr, &pdr);
-	  pdr_off = pdr.adr;
-	}
       memcpy (output_ecoff->external_opt + output_symhdr->ioptMax,
 	      input_ecoff->external_opt,
 	      input_symhdr->ioptMax * sizeof (struct opt_ext));
@@ -2705,7 +2809,6 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       struct pdr_ext *pdr_in;
       struct pdr_ext *pdr_end;
       struct pdr_ext *pdr_out;
-      int first_pdr;
       struct opt_ext *opt_in;
       struct opt_ext *opt_end;
       struct opt_ext *opt_out;
@@ -2726,19 +2829,12 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       pdr_in = input_ecoff->external_pdr;
       pdr_end = pdr_in + input_symhdr->ipdMax;
       pdr_out = output_ecoff->external_pdr + output_symhdr->ipdMax;
-      first_pdr = 1;
-      pdr_off = 0;
       for (; pdr_in < pdr_end; pdr_in++, pdr_out++)
 	{
 	  PDR pdr;
 
 	  ecoff_swap_pdr_in (input_bfd, pdr_in, &pdr);
 	  ecoff_swap_pdr_out (output_bfd, &pdr, pdr_out);
-	  if (first_pdr)
-	    {
-	      pdr_off = pdr.adr;
-	      first_pdr = 0;
-	    }
 	}
       opt_in = input_ecoff->external_opt;
       opt_end = opt_in + input_symhdr->ioptMax;
@@ -2762,6 +2858,7 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
   for (; fdr_ptr < fdr_end; fdr_ptr++, fdr_out++)
     {
       FDR fdr;
+      unsigned long pdr_off;
 
       fdr = *fdr_ptr;
 
@@ -2769,6 +2866,17 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
 	 plus the offset to this fdr within input_bfd.  For some
 	 reason the offset of the first procedure pointer is also
 	 added in.  */
+      if (fdr.cpd == 0)
+	pdr_off = 0;
+      else
+	{
+	  PDR pdr;
+
+	  ecoff_swap_pdr_in (input_bfd,
+			     input_ecoff->external_pdr + fdr.ipdFirst,
+			     &pdr);
+	  pdr_off = pdr.adr;
+	}
       fdr.adr = (bfd_get_section_vma (output_bfd, section)
 		 + seclet->offset
 		 + (fdr_ptr->adr - input_ecoff->fdr->adr)
@@ -3188,6 +3296,7 @@ ecoff_compute_section_file_positions (abfd)
 	 affect the section size, though.  FIXME: Does this work for
 	 other platforms?  */
       if ((abfd->flags & EXEC_P) != 0
+	  && (abfd->flags & D_PAGED) != 0
 	  && first_data != false
 	  && (current->flags & SEC_CODE) == 0)
 	{
@@ -3294,12 +3403,16 @@ ecoff_write_object_contents (abfd)
   /* At least on Ultrix, the symbol table of an executable file must
      be aligned to a page boundary.  FIXME: Is this true on other
      platforms?  */
-  if ((abfd->flags & EXEC_P) != 0)
+  if ((abfd->flags & EXEC_P) != 0
+      && (abfd->flags & D_PAGED) != 0)
     sym_base = (sym_base + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
 
   ecoff_data (abfd)->sym_filepos = sym_base;
 
-  text_size = ecoff_sizeof_headers (abfd, false);
+  if ((abfd->flags & D_PAGED) != 0)
+    text_size = ecoff_sizeof_headers (abfd, false);
+  else
+    text_size = 0;
   text_start = 0;
   data_size = 0;
   data_start = 0;
@@ -3435,7 +3548,10 @@ ecoff_write_object_contents (abfd)
     internal_f.f_flags |= F_AR32W;
 
   /* Set up the ``optional'' header.  */
-  internal_a.magic = ZMAGIC;
+  if ((abfd->flags & D_PAGED) != 0)
+    internal_a.magic = ZMAGIC;
+  else
+    internal_a.magic = OMAGIC;
 
   /* FIXME: This is what Ultrix puts in, and it makes the Ultrix
      linker happy.  But, is it right?  */
@@ -3443,10 +3559,20 @@ ecoff_write_object_contents (abfd)
 
   /* At least on Ultrix, these have to be rounded to page boundaries.
      FIXME: Is this true on other platforms?  */
-  internal_a.tsize = (text_size + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
-  internal_a.text_start = text_start &~ (ROUND_SIZE - 1);
-  internal_a.dsize = (data_size + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
-  internal_a.data_start = data_start &~ (ROUND_SIZE - 1);
+  if ((abfd->flags & D_PAGED) != 0)
+    {
+      internal_a.tsize = (text_size + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
+      internal_a.text_start = text_start &~ (ROUND_SIZE - 1);
+      internal_a.dsize = (data_size + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
+      internal_a.data_start = data_start &~ (ROUND_SIZE - 1);
+    }
+  else
+    {
+      internal_a.tsize = text_size;
+      internal_a.text_start = text_start;
+      internal_a.dsize = data_size;
+      internal_a.data_start = data_start;
+    }
 
   /* On Ultrix, the initial portions of the .sbss and .bss segments
      are at the end of the data section.  The bsize field in the
@@ -3627,6 +3753,24 @@ ecoff_write_object_contents (abfd)
 		     ecoff_data (abfd)->raw_size, abfd)
 	  != ecoff_data (abfd)->raw_size)
 	return false;
+    }
+  else if ((abfd->flags & EXEC_P) != 0
+	   && (abfd->flags & D_PAGED) != 0)
+    {
+      char c;
+
+      /* A demand paged executable must occupy an even number of
+	 pages.  */
+      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
+		    SEEK_SET) != 0)
+	return false;
+      if (bfd_read (&c, 1, 1, abfd) == 0)
+	c = 0;
+      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
+		    SEEK_SET) != 0)
+	return false;
+      if (bfd_write (&c, 1, 1, abfd) != 1)
+	return false;      
     }
 
   return true;
@@ -4061,6 +4205,151 @@ ecoff_archive_p (abfd)
   return abfd->xvec;
 }
 
+#ifdef HOST_IRIX4
+
+#include <core.out.h>
+
+struct sgi_core_struct 
+{
+  int sig;
+  char cmd[CORE_NAMESIZE];
+};
+
+#define core_hdr(bfd) ((bfd)->tdata.sgi_core_data)
+#define core_signal(bfd) (core_hdr(bfd)->sig)
+#define core_command(bfd) (core_hdr(bfd)->cmd)
+
+static asection *
+make_bfd_asection (abfd, name, flags, _raw_size, vma, filepos)
+     bfd *abfd;
+     CONST char *name;
+     flagword flags;
+     bfd_size_type _raw_size;
+     bfd_vma vma;
+     file_ptr filepos;
+{
+  asection *asect;
+
+  asect = bfd_make_section (abfd, name);
+  if (!asect)
+    return NULL;
+
+  asect->flags = flags;
+  asect->_raw_size = _raw_size;
+  asect->vma = vma;
+  asect->filepos = filepos;
+  asect->alignment_power = 4;
+
+  return asect;
+}
+
+static bfd_target *
+ecoff_core_file_p (abfd)
+     bfd *abfd;
+{
+  int val;
+  int i;
+  char *secname;
+  struct coreout coreout;
+  struct idesc *idg, *idf, *ids;
+
+  val = bfd_read ((PTR)&coreout, 1, sizeof coreout, abfd);
+  if (val != sizeof coreout)
+    return 0;
+
+  if (coreout.c_magic != CORE_MAGIC
+      || coreout.c_version != CORE_VERSION1)
+    return 0;
+
+  core_hdr (abfd) = (struct sgi_core_struct *) bfd_zalloc (abfd, sizeof (struct sgi_core_struct));
+  if (!core_hdr (abfd))
+    return NULL;
+
+  strncpy (core_command (abfd), coreout.c_name, CORE_NAMESIZE);
+  core_signal (abfd) = coreout.c_sigcause;
+
+  bfd_seek (abfd, coreout.c_vmapoffset, SEEK_SET);
+
+  for (i = 0; i < coreout.c_nvmap; i++)
+    {
+      struct vmap vmap;
+
+      val = bfd_read ((PTR)&vmap, 1, sizeof vmap, abfd);
+      if (val != sizeof vmap)
+	break;
+
+      switch (vmap.v_type)
+	{
+	case VDATA:
+	  secname = ".data";
+	  break;
+	case VSTACK:
+	  secname = ".stack";
+	  break;
+	default:
+	  continue;
+	}
+
+      if (!make_bfd_asection (abfd, secname,
+			      SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS,
+			      vmap.v_len,
+			      vmap.v_vaddr,
+			      vmap.v_offset,
+			      2))
+	return NULL;
+    }
+
+  /* Make sure that the regs are contiguous within the core file. */
+
+  idg = &coreout.c_idesc[I_GPREGS];
+  idf = &coreout.c_idesc[I_FPREGS];
+  ids = &coreout.c_idesc[I_SPECREGS];
+
+  if (idg->i_offset + idg->i_len != idf->i_offset
+      || idf->i_offset + idf->i_len != ids->i_offset)
+    return 0;			/* Can't deal with non-contig regs */
+
+  bfd_seek (abfd, idg->i_offset, SEEK_SET);
+
+  make_bfd_asection (abfd, ".reg",
+		     SEC_ALLOC+SEC_HAS_CONTENTS,
+		     idg->i_len + idf->i_len + ids->i_len,
+		     0,
+		     idg->i_offset);
+
+  /* OK, we believe you.  You're a core file (sure, sure).  */
+
+  return abfd->xvec;
+}
+
+static char *
+ecoff_core_file_failing_command (abfd)
+     bfd *abfd;
+{
+  return core_command (abfd);
+}
+
+static int
+ecoff_core_file_failing_signal (abfd)
+     bfd *abfd;
+{
+  return core_signal (abfd);
+}
+
+static boolean
+ecoff_core_file_matches_executable_p (core_bfd, exec_bfd)
+     bfd *core_bfd, *exec_bfd;
+{
+  return true;			/* XXX - FIXME */
+}
+#else /* not def HOST_IRIX4 */
+#define ecoff_core_file_p _bfd_dummy_target
+#define ecoff_core_file_failing_command	_bfd_dummy_core_file_failing_command
+#define ecoff_core_file_failing_signal _bfd_dummy_core_file_failing_signal
+#define ecoff_core_file_matches_executable_p \
+  _bfd_dummy_core_file_matches_executable_p
+#endif
+
 /* This is the COFF backend structure.  The backend_data field of the
    bfd_target structure is set to this.  The section reading code in
    coffgen.c uses this structure.  */
@@ -4089,10 +4378,6 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
 
 /* These bfd_target functions are defined in other files.  */
 
-#define ecoff_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define ecoff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define ecoff_core_file_matches_executable_p \
-  _bfd_dummy_core_file_matches_executable_p
 #define ecoff_truncate_arname		bfd_dont_truncate_arname
 #define ecoff_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define ecoff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
@@ -4118,14 +4403,14 @@ bfd_target ecoff_little_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect
 							    flags */
   0,				/* leading underscore */
-  '/',				/* ar_pad_char */
+  ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  3,				/* minimum alignment power */
+  4,				/* minimum alignment power */
   _do_getl64, _do_getl_signed_64, _do_putl64,
      _do_getl32, _do_getl_signed_32, _do_putl32,
      _do_getl16, _do_getl_signed_16, _do_putl16, /* data */
@@ -4152,13 +4437,13 @@ bfd_target ecoff_big_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
-  3,				/* minimum alignment power */
+  15,				/* ar_max_namelen */
+  4,				/* minimum alignment power */
   _do_getb64, _do_getb_signed_64, _do_putb64,
      _do_getb32, _do_getb_signed_32, _do_putb32,
      _do_getb16, _do_getb_signed_16, _do_putb16,
@@ -4166,7 +4451,7 @@ bfd_target ecoff_big_vec =
      _do_getb32, _do_getb_signed_32, _do_putb32,
      _do_getb16, _do_getb_signed_16, _do_putb16,
  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-    ecoff_archive_p, _bfd_dummy_target},
+    ecoff_archive_p, ecoff_core_file_p},
  {bfd_false, ecoff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
     bfd_false},
  {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
