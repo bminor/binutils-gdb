@@ -28,6 +28,8 @@ void free();
 #define HOST_DATA_START_ADDR		UDATASEG
 #define	HOST_STACK_END_ADDR		KSTAKSEG
 
+#define HOST_BIG_ENDIAN_P
+
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;

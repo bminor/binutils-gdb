@@ -12,21 +12,19 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-extern PROTO(int, abort,(void));
-extern PROTO(int, close,(int));
-extern PROTO(int, fcntl,(int des, int cmd, int e));
-extern PROTO(int, fprintf,(FILE *,char *,...));
-extern PROTO(int, printf,(char *,...));
-extern PROTO(int, qsort,(void *data,int els, int siz, int func()));
-extern PROTO(int, exit,(int));
-extern PROTO(int, fseek,(FILE*, int, int));
-extern PROTO(int, fclose,(FILE*));
-extern PROTO(void, bcopy,(char*,char*,int));
-extern PROTO(int, bcmp,(char *, char *, int));
-extern PROTO(void, bzero,(char *, int));
-extern char * strchr();
-extern PROTO(void, perror,(CONST char *));
+extern int  EXFUN(close,(int));
+extern int  EXFUN(fcntl,(int des, int cmd, int e));
+extern int  EXFUN(fprintf,(FILE *,char *,...));
+extern int  EXFUN(printf,(char *,...));
+extern int  EXFUN(qsort,(void *data,int els, int siz, int func()));
+extern int  EXFUN(fseek,(FILE*, int, int));
+extern int  EXFUN(fclose,(FILE*));
+extern void EXFUN(bcopy,(char*,char*,int));
+extern int  EXFUN(bcmp,(char *, char *, int));
+extern void EXFUN(bzero,(char *, int));
+extern void EXFUN(perror,(CONST char *));
 extern char *getenv();
+extern char * strchr();
 extern char *memchr();
 extern char *strrchr();
 extern int chmod();
@@ -51,6 +49,7 @@ extern char *getenv();
 extern int fputc();
 extern int unlink();
 
+#define HOST_BIG_ENDIAN_P
 
 /* EXACT TYPES */
 typedef char int8e_type;
@@ -67,18 +66,4 @@ typedef short int16_type;
 typedef unsigned short uint16_type;
 typedef int int32_type;
 typedef unsigned int uint32_type;
-/* Macros for the 'type' part of an fopen, freopen or fdopen. 
-	<Read|Write>[Update]<Binary file><text file>
- */
-#define FOPEN_RB	"r"
-#define FOPEN_WB 	"w"
-#define FOPEN_AB 	"a"
-#define FOPEN_RUB 	"r+"
-#define FOPEN_WUB 	"w+"
-#define FOPEN_AUB 	"a+"
-#define FOPEN_RT	"r"
-#define FOPEN_WT 	"w"
-#define FOPEN_AT 	"a"
-#define FOPEN_RUT 	"r+"
-#define FOPEN_WUT 	"w+"
-#define FOPEN_AUT 	"a+"
+#include "fopen-same.h"

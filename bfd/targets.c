@@ -401,10 +401,27 @@ extern bfd_target hppa_vec;
 #ifdef DEFAULT_VECTOR
 extern bfd_target DEFAULT_VECTOR;
 #endif
+#ifdef HOST_BIG_ENDIAN_DEFAULT_VECTOR
+extern bfd_target HOST_BIG_ENDIAN_DEFAULT_VECTOR;
+#endif
+#ifdef HOST_LITTLE_ENDIAN_DEFAULT_VECTOR
+extern bfd_target HOST_LITTLE_ENDIAN_DEFAULT_VECTOR;
+#endif
 
 #ifdef SELECT_VECS
 
 bfd_target *target_vector[] = {
+
+  /* 960 bout format depends on the host, so let targets choose a
+     default vector even if the provide SELECT_VECS.  */
+#ifdef HOST_BIG_ENDIAN_DEFAULT_VECTOR
+#ifdef HOST_BIG_ENDIAN_P
+	&HOST_BIG_ENDIAN_DEFAULT_VECTOR,
+#else /* ! defined (HOST_BIG_ENDIAN_P) */
+	&HOST_LITTLE_ENDIAN_DEFAULT_VECTOR,
+#endif /* ! defined (HOST_BIG_ENDIAN_P) */
+#endif /* defined (HOST_BIG_ENDIAN_DEFAULT_VECTOR) */
+
 	SELECT_VECS,
 	0
 };
@@ -415,7 +432,15 @@ bfd_target *target_vector[] = {
 
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
-#endif
+#else /* ! defined (DEFAULT_VECTOR) */
+#ifdef HOST_BIG_ENDIAN_DEFAULT_VECTOR
+#ifdef HOST_BIG_ENDIAN_P
+	&HOST_BIG_ENDIAN_DEFAULT_VECTOR,
+#else /* ! defined (HOST_BIG_ENDIAN_P) */
+	&HOST_LITTLE_ENDIAN_DEFAULT_VECTOR,
+#endif /* ! defined (HOST_BIG_ENDIAN_P) */
+#endif /* defined (HOST_BIG_ENDIAN_DEFAULT_VECTOR) */
+#endif /* ! defined (DEFAULT_VECTOR) */
 
 	&i386coff_vec,
 	&i386aout_vec,
@@ -465,7 +490,15 @@ bfd_target *target_vector[] = {
 bfd_target *default_vector[] = {
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
-#endif
+#else /* ! defined (DEFAULT_VECTOR) */
+#ifdef HOST_BIG_ENDIAN_DEFAULT_VECTOR
+#ifdef HOST_BIG_ENDIAN_P
+	&HOST_BIG_ENDIAN_DEFAULT_VECTOR,
+#else /* ! defined (HOST_BIG_ENDIAN_P) */
+	&HOST_LITTLE_ENDIAN_DEFAULT_VECTOR,
+#endif /* ! defined (HOST_BIG_ENDIAN_P) */
+#endif /* defined (HOST_BIG_ENDIAN_DEFAULT_VECTOR) */
+#endif /* ! defined (DEFAULT_VECTOR) */
 	0,
 };
 

@@ -50,6 +50,8 @@
 # endif
  */
 
+#undef HOST_BIG_ENDIAN_P
+
 #ifndef DONTDECLARE_MALLOC
 extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));
