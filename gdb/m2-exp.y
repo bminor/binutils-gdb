@@ -103,10 +103,6 @@ int number_sign = 1;
 struct block *modblock=0;
 
 /* #define	YYDEBUG	1 */
-
-/* !@&%ing AIX defines these!  Prevent cpp complaints by undeffing them */
-#undef TRUE
-#undef FALSE
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -137,7 +133,7 @@ struct block *modblock=0;
 %type <sym> fblock 
 
 %token <lval> INT HEX ERROR
-%token <ulval> UINT TRUE FALSE CHAR
+%token <ulval> UINT M2_TRUE M2_FALSE CHAR
 %token <dval> FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
@@ -180,7 +176,6 @@ struct block *modblock=0;
 /* This is not an actual token ; it is used for precedence. 
 %right QID
 */
-%%
 
 %{
 /* Ensure that if the generated parser contains any calls to malloc/realloc,
@@ -193,6 +188,8 @@ struct block *modblock=0;
 #define malloc	xmalloc
 #define realloc	xrealloc
 %}
+
+%%
 
 start   :	exp
 	|	type_exp
@@ -468,13 +465,13 @@ exp	:	exp ASSIGN exp
 
 /* Constants */
 
-exp	:	TRUE
+exp	:	M2_TRUE
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
-exp	:	FALSE
+exp	:	M2_FALSE
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_BOOL); }
@@ -1143,12 +1140,12 @@ yylex ()
        if(!strncmp(tokstart,"TRUE",4))
        {
 	  yylval.ulval = 1;
-	  return TRUE;
+	  return M2_TRUE;
        }
        else if(!strncmp(tokstart,"FALSE",5))
        {
 	  yylval.ulval = 0;
-	  return FALSE;
+	  return M2_FALSE;
        }
     }
 

@@ -193,9 +193,6 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %type <bval> block
 %left COLONCOLON
 
-
-%%
-
 %{
 /* Ensure that if the generated parser contains any calls to malloc/realloc,
    that they get mapped to xmalloc/xrealloc.  We have to do this here
@@ -207,6 +204,9 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 #define malloc	xmalloc
 #define realloc	xrealloc
 %}
+
+
+%%
 
 start   :	exp1
 	|	type_exp
