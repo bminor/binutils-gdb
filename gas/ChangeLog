@@ -1,3 +1,7 @@
+Tue Jun 30 20:25:54 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* Makefile.in: Add program_suffix (parallel to program_prefix)
+
 Wed Jun 24 10:57:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* app.c (process_escape): new function to handle escapes the right
