@@ -1,3 +1,11 @@
+2003-08-27  Christian Groessler  <chris@groessler.org>
+
+	* elf32-i860.c (i860_howto_pc26_reloc, i860_howto_pc16_reloc,
+	i860_howto_splitn_reloc, i860_howto_highadj_reloc): New
+	functions.
+	(elf32_i860_howto_table): Insert the new functions as
+	'special_function's in the proper reloc type entries.
+
 2003-08-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf32-frv.c (elf32_frv_relocate_section): Use
