@@ -175,7 +175,13 @@ clean-info:
 install-info: force
 	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
-# HDEPFILES comes from the host config; TDEPFILES from the target config.
+# Various kinds of .o files to put in libbfd.a:
+# BFD_LIBS	Generic routines, always needed.
+# BFD_BACKENDS	Routines the target needs if it is the configured target.
+# BFD_MACHINES	Architecture-specific routines in cpu-*.o.
+#		Always set to ALL_MACHINES for now.
+# HDEPFILES	Routines the host needs, regardless of target.
+# TDEPFILES	Routines the target needs, regardless of host.
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
 
 ofiles : Makefile

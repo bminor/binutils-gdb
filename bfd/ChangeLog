@@ -1,5 +1,22 @@
 Fri Aug  6 12:00:03 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	Fix incorrect or useless makefile variable definitions:
+	* config/news.mt, config/u68k-coff.mt (TDEFAULTS): Use this to
+	define DEFAULT_VECTOR, instead of TDEFINES.
+	* config/i386aix.mh (MINIMIZE): Don't define.
+	* config/hppaosf.mh (MINIMIZE): Don't conditionalize.
+	* config/rs6000.mh (ALLOCA),
+	* config/i386v.mh (ALLOCA),
+	* config/i386linux.mh (ALLOCA),
+	* config/i386isc.mh (ALLOCA),
+	* config/go32.mh (EXTRALIBS): Don't define; not used.
+	* config/solaris2.mh (HDEFINES): Renamed from H_DEFINES.
+	* config/alphaosf.mt (TDEFINES): alphaosf.mt: Set it, not HDEFINES.
+	* config/z8k-coff.mt (CC): Don't define.  It's a target, not a host.
+
+	* config/.Sanitize (Things-to-keep): Add README.
+	* config/README: New file, explaining the variables.
+
 	* targets.c (target_vector): Add hp300_bsd_vec.
 	* Makefile.in (BFD32_BACKENDS, CFILES): Add hp300bsd.
 	(hp300bsd.o): New rule.
