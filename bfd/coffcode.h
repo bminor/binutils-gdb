@@ -1415,7 +1415,7 @@ DEFUN(coff_count_linenumbers,(abfd),
 
   for (p = abfd->outsymbols, i = 0; i < limit; i++, p++) {
     asymbol        *q_maybe = *p;
-    if (q_maybe->the_bfd->xvec->flavour == bfd_target_coff_flavour) {
+    if (bfd_asymbol_flavour(q_maybe) == bfd_target_coff_flavour) {
       coff_symbol_type *q = coffsymbol(q_maybe);
       if (q->lineno) {
 	/*
@@ -1447,10 +1447,10 @@ DEFUN(coff_symbol_from,(ignore_abfd, symbol),
       bfd            *ignore_abfd AND
       asymbol        *symbol)
 {
-  if (symbol->the_bfd->xvec->flavour != bfd_target_coff_flavour)
+  if (bfd_asymbol_flavour(symbol) != bfd_target_coff_flavour)
     return (coff_symbol_type *)NULL;
 
-  if (symbol->the_bfd->tdata.coff_obj_data == (coff_data_type*)NULL)
+  if (bfd_asymbol_bfd(symbol)->tdata.coff_obj_data == (coff_data_type*)NULL)
     return (coff_symbol_type *)NULL;
 
   return  (coff_symbol_type *) symbol;
@@ -1769,7 +1769,7 @@ DEFUN(coff_write_alien_symbol,(abfd, symbol, written),
     {
       coff_symbol_type *c = coff_symbol_from(abfd, symbol);
       if (c != (coff_symbol_type *)NULL) {
-	  native->u.syment.n_flags =   c->symbol.the_bfd->flags;
+	  native->u.syment.n_flags =   bfd_asymbol_bfd(&c->symbol)->flags;
 	}
     }
 #endif
@@ -2015,7 +2015,8 @@ DEFUN(coff_write_linenumbers,(abfd),
       /* Find all the linenumbers in this section */
       while (*q) {
 	asymbol        *p = *q;
-	alent          *l = BFD_SEND(p->the_bfd, _get_lineno, (p->the_bfd, p));
+	alent          *l =
+	  BFD_SEND(bfd_asymbol_bfd(p), _get_lineno, (bfd_asymbol_bfd(p), p));
 	if (l) {
 	  /* Found a linenumber entry, output */
 	  struct internal_lineno  out;
@@ -3658,7 +3659,7 @@ SUBSUBSECTION
 
 #ifndef CALC_ADDEND
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) 	\
-	    if (ptr && ptr->the_bfd == abfd		\
+	    if (ptr && bfd_asymbol_bfd(ptr) == abfd		\
 		&& ((ptr->flags & BSF_OLD_COMMON)== 0))	\
 	    {						\
 		cache_ptr->addend = -(ptr->section->vma + ptr->value);	\

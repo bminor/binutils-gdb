@@ -174,17 +174,19 @@ do_mostlyclean:
 do_clean: do_mostlyclean
 	rm -f libbfd.a TAGS
 do_distclean: do_clean
-	rm -f Makefile config.status
+	rm -f Makefile config.status sysdep.h
 do_realclean: do_distclean
 
 mostlyclean: do_mostlyclean
 	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 clean: do_clean
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-distclean: do_distclean
+distclean:
 	$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-clobber realclean: do_readlclean
+	make do_distclean
+clobber realclean:
 	$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	make do_realclean
 
 # Mark everything as depending on config.status, since the timestamp on
 # sysdep.h might actually move backwards if we reconfig and relink it

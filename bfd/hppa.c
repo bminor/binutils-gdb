@@ -62,7 +62,7 @@ fill_spaces(abfd, file_hdr, dbx_subspace, dbx_strings_subspace)
   struct subspace_dictionary_record subspace;
   int index;
   /* indices of subspace entries for $TEXT$ and $GDB_DEBUG$ */
-  int text_index = 0, gdb_debug_index = 0;
+  long text_index = 0, gdb_debug_index = -1;
 
   /* initialize in case we don't find any dbx symbols. */
   dbx_subspace->subspace_length = dbx_strings_subspace->subspace_length = 0;
@@ -110,6 +110,10 @@ fill_spaces(abfd, file_hdr, dbx_subspace, dbx_strings_subspace)
 #endif
 	}
     }
+
+  if (gdb_debug_index == -1)
+    return;
+
   /* read symbols subspace and strings subspace in possibly arbitrary
      order. */
   bfd_seek (abfd, gdb_debug_index, SEEK_SET);

@@ -1,3 +1,19 @@
+Mon Dec 21 16:33:34 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* hosts/std-host.h:  New file.  Attempt at a generic/default
+	set of definitions, to discourage porting to new hosts by copying.
+	* hosts/news.h:  Removed.
+	* hosts/sparc.h:  Use std-host.h.
+	* bfd-in.h:  New macros bfd_asymbol_bfd and bfd_asymbol_flavour;
+	perhaps we can later remove the the_bfd field from each symbol.
+	* syms.c (struct symbol_cache_entry):  Remove unused field
+	app_data.  Add comment noting that the_bfd is almost redundant,
+	but not quite.
+	* aoutx.h, coff-a29k.c, coff-i386.c, coff-i960.c, coffcode.h:
+	Use new macros bfd_asymbol_bfd and bfd_asymbol_flavour.
+	* hppa.c (fill_spaces):  Make slightly more rebust.
+	* configure.in:  Allow std-host as the "default" host.
+
 Mon Dec 21 17:24:13 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* bfd.c:  Add struct hppa_core_data to tdata union.

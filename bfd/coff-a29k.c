@@ -272,7 +272,7 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
       ptr = *(relent->sym_ptr_ptr);
 
       if (ptr 
-	  && ptr->the_bfd == abfd		
+	  && bfd_asymbol_bfd(ptr) == abfd		
 
 	  && ((ptr->flags & BSF_OLD_COMMON)== 0))	
       {						
