@@ -1,3 +1,10 @@
+2002-12-02  J. Brobecker  <brobecker@gnat.com>
+
+	* osabi.h (gdb_osabi): Add two new enum values for HPUX ELF and SOM.
+	* osabi.c (gdb_osabi_name): Add strings images for the two new
+	enum values.
+	(generic_elf_osabi_sniffer): Handle HPUX objfiles.
+
 2002-12-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (Java): Global maintainers are responible for Java.

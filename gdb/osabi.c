@@ -46,6 +46,8 @@ static const char * const gdb_osabi_names[] =
   "Irix",
   "LynxOS",
   "Interix",
+  "HP/UX ELF",
+  "HP/UX SOM",
 
   "ARM EABI v1",
   "ARM EABI v2",
@@ -403,6 +405,10 @@ generic_elf_osabi_sniffer (bfd *abfd)
 
     case ELFOSABI_SOLARIS:
       osabi = GDB_OSABI_SOLARIS;
+      break;
+
+    case ELFOSABI_HPUX:
+      osabi = GDB_OSABI_HPUX_ELF;
       break;
     }
 
