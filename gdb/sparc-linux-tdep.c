@@ -163,12 +163,28 @@ sparc32_linux_sigtramp_frame_cache (struct frame_info *next_frame,
   cache = sparc32_frame_cache (next_frame, this_cache);
   gdb_assert (cache == *this_cache);
 
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  /* ??? What about signal trampolines that aren't frameless?  */
+  regnum = SPARC_SP_REGNUM;
+  cache->base = frame_unwind_register_unsigned (next_frame, regnum);
 
   regnum = SPARC_O1_REGNUM;
   sigcontext_addr = frame_unwind_register_unsigned (next_frame, regnum);
-  if (sparc32_linux_rt_sigtramp_start (cache->pc) != 0)
-    sigcontext_addr += 128;
+
+  cache->pc = frame_pc_unwind (next_frame);
+  addr = sparc32_linux_sigtramp_start (cache->pc);
+  if (addr == 0)
+    {
+      /* If this is a RT signal trampoline, adjust SIGCONTEXT_ADDR
+         accordingly.  */
+      addr = sparc32_linux_rt_sigtramp_start (cache->pc);
+      if (addr)
+	sigcontext_addr += 128;
+      else
+	addr = frame_func_unwind (next_frame);
+    }
+  cache->pc = addr;
+
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   cache->saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 0;
   cache->saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 4;
@@ -176,7 +192,7 @@ sparc32_linux_sigtramp_frame_cache (struct frame_info *next_frame,
   cache->saved_regs[SPARC32_Y_REGNUM].addr = sigcontext_addr + 12;
 
   /* Since %g0 is always zero, keep the identity encoding.  */
-  for (regnum = SPARC_G1_REGNUM, addr = sigcontext_addr + 16;
+  for (regnum = SPARC_G1_REGNUM, addr = sigcontext_addr + 20;
        regnum <= SPARC_O7_REGNUM; regnum++, addr += 4)
     cache->saved_regs[regnum].addr = addr;
 

@@ -1,3 +1,7 @@
+2003-11-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-linux-tdep.c (sparc32_linux_sigtramp_frame_cache): Fix.
+
 2003-11-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-linux-tdep.c: Include "frame.h", "frame-base.h",
