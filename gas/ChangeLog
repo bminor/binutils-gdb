@@ -13,6 +13,8 @@ Wed Jan 31 14:03:17 1996  Richard Henderson  <rth@tamu.edu>
 
 Wed Jan 31 12:24:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.h (S_IS_LOCAL): Check for \001 as well as \002.
+
 	* config/tc-mips.c (s_mips_globl): Set BSF_OBJECT if it is not
 	BSF_FUNCTION.
 	(s_cpload): Set BSF_OBJECT for _gp_disp symbol.
