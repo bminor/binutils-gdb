@@ -1,3 +1,7 @@
+2002-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2002-08-09  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (mips_elf_global_got_index): Avoid segfault if
