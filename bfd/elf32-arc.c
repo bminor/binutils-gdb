@@ -1,5 +1,5 @@
 /* ARC-specific support for 32-bit ELF
-   Copyright (C) 1994 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -22,13 +22,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "libelf.h"
+#include "elf/arc.h"
 
 static bfd_reloc_status_type arc_elf_unsupported_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static const struct reloc_howto_struct *bfd_elf32_bfd_reloc_type_lookup
+static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-static void arc_info_to_howto
-  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf32_Internal_Rela *dst));
+static void arc_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static boolean arc_elf_object_p PARAMS ((bfd *));
+static void arc_elf_final_write_processing PARAMS ((bfd *, boolean));
+
+/* Try to minimize the amount of space occupied by relocation tables
+   on the ROM.  */
+#define USE_REL
 
 enum reloc_type
 {
@@ -103,7 +110,7 @@ arc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
   abort ();
 }
 
-/* Map BFD reloc types to PowerPC ELF reloc types.  */
+/* Map BFD reloc types to ARC ELF reloc types.  */
 
 struct arc_reloc_map
 {
@@ -119,7 +126,7 @@ static const struct arc_reloc_map arc_reloc_map[] =
   { BFD_RELOC_ARC_B22_PCREL, R_ARC_B22_PCREL },
 };
 
-static const struct reloc_howto_struct *
+static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -140,20 +147,93 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 /* Set the howto pointer for an ARC ELF reloc.  */
 
 static void
-arc_info_to_howto (abfd, cache_ptr, dst)
+arc_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd;
      arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
+     Elf32_Internal_Rel *dst;
 {
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_ARC_max);
-  cache_ptr->howto = &elf_arc_howto_table[ELF32_R_TYPE (dst->r_info)];
+  unsigned int r_type;
+
+  r_type = ELF32_R_TYPE (dst->r_info);
+  BFD_ASSERT (r_type < (unsigned int) R_ARC_max);
+  cache_ptr->howto = &elf_arc_howto_table[r_type];
 }
 
-#define TARGET_BIG_SYM		bfd_elf32_arc_vec
-#define TARGET_BIG_NAME		"elf32-arc"
+/* Set the right machine number for an ARC ELF file.  */
+
+static boolean
+arc_elf_object_p (abfd)
+     bfd *abfd;
+{
+  int mach;
+  unsigned long arch = elf_elfheader (abfd)->e_flags & EF_ARC_CPU;
+
+  switch (arch)
+    {
+    case E_ARC_CPU_BASE:
+      mach = bfd_mach_arc_base;
+      break;
+    case E_ARC_CPU_HOST:
+      mach = bfd_mach_arc_host;
+      break;
+    case E_ARC_CPU_GRAPHICS:
+      mach = bfd_mach_arc_graphics;
+      break;
+    case E_ARC_CPU_AUDIO:
+      mach = bfd_mach_arc_audio;
+      break;
+    default:
+      /* Unknown cpu type.  ??? What to do?  */
+      return false;
+    }
+
+  (void) bfd_default_set_arch_mach (abfd, bfd_arch_arc, mach);
+  return true;
+}
+
+/* The final processing done just before writing out an ARC ELF object file.
+   This gets the ARC architecture right based on the machine number.  */
+
+static void
+arc_elf_final_write_processing (abfd, linker)
+     bfd *abfd;
+     boolean linker;
+{
+  int mach;
+  unsigned long val;
+
+  switch (mach = bfd_get_mach (abfd))
+    {
+    case bfd_mach_arc_base:
+      val = E_ARC_CPU_BASE;
+      break;
+    case bfd_mach_arc_host:
+      val = E_ARC_CPU_HOST;
+      break;
+    case bfd_mach_arc_graphics:
+      val = E_ARC_CPU_GRAPHICS;
+      break;
+    case bfd_mach_arc_audio:
+      val = E_ARC_CPU_AUDIO;
+      break;
+    default:
+      return;
+    }
+
+  elf_elfheader (abfd)->e_flags &=~ EF_ARC_CPU;
+  elf_elfheader (abfd)->e_flags |= val;
+}
+
+#define TARGET_LITTLE_SYM	bfd_elf32_arc_vec
+#define TARGET_LITTLE_NAME	"elf32-arc"
 #define ELF_ARCH		bfd_arch_arc
 #define ELF_MACHINE_CODE	EM_CYGNUS_ARC
-#define ELF_MAXPAGESIZE		0x10000
-#define elf_info_to_howto	arc_info_to_howto
+#define ELF_MAXPAGESIZE		0x1000
+
+#define elf_info_to_howto	0
+#define elf_info_to_howto_rel	arc_info_to_howto_rel
+#define elf_backend_object_p	arc_elf_object_p
+#define elf_backend_final_write_processing \
+				arc_elf_final_write_processing
 
 #include "elf32-target.h"
