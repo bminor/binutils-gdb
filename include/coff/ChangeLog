@@ -1,3 +1,12 @@
+Sun Jul 11 18:00:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* m68k.h: Define MC68KBCSMAGIC.
+
+Thu Jun 10 11:46:28 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h (_INIT, STYP_MIPS_INIT): Define (used on Irix4).
+	(STYP_OTHER_LOAD): Define as STYP_MIPS_INIT.
+
 Wed Jun  9 15:09:09 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips.h (OMAGIC): Define.
