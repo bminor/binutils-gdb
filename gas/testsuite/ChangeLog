@@ -19,8 +19,6 @@
 	trailing empty lines.
 	* gas/cris/continue.s: Ditto, tweak comment.
 
-2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
-
 	* lib/gas-defs.exp (run_dump_test): Support using readelf.
 	* config/default.exp: Default READELF and READELFFLAGS.
 
