@@ -2,7 +2,8 @@ start-sanitize-sky
 Mon Apr  6 17:08:01 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/dvp/vif-3.[sd]: New testcase.
-	* gas/dvp/dvp.exp: Run it.
+	* gas/dvp/vif-4.[sd]: New testcase.
+	* gas/dvp/dvp.exp: Run them
 
 Fri Apr  3 12:19:33 1998  Doug Evans  <devans@canuck.cygnus.com>
 
