@@ -34,13 +34,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for static functions.  */
 
 static boolean mips_ecoff_bad_format_hook PARAMS ((bfd *abfd, PTR filehdr));
-static PTR mips_ecoff_mkobject_hook PARAMS ((bfd *abfd, PTR filehdr,
-					     PTR aouthdr));
 static void mips_ecoff_swap_reloc_in PARAMS ((bfd *, PTR,
 					      struct internal_reloc *));
 static void mips_ecoff_swap_reloc_out PARAMS ((bfd *,
 					       const struct internal_reloc *,
 					       PTR));
+static void mips_adjust_reloc_in PARAMS ((bfd *,
+					  const struct internal_reloc *,
+					  arelent *));
+static void mips_adjust_reloc_out PARAMS ((bfd *, const arelent *,
+					   struct internal_reloc *));
 static bfd_reloc_status_type mips_generic_reloc PARAMS ((bfd *abfd,
 							 arelent *reloc,
 							 asymbol *symbol,
@@ -148,7 +151,10 @@ static reloc_howto_type mips_howto_table[] =
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 			/* This needs complex overflow
+				   detection, because the upper four
+				   bits must match the PC.  */
 	 mips_generic_reloc,	/* special_function */
 	 "JMPADDR",		/* name */
 	 true,			/* partial_inplace */
@@ -232,46 +238,25 @@ mips_ecoff_bad_format_hook (abfd, filehdr)
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
-  if (MIPS_ECOFF_BADMAG (*internal_f))
-    return false;
-
-  return true;
-}
-
-/* Create the MIPS ECOFF backend specific information.  */
-
-static PTR
-mips_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
-     bfd *abfd;
-     PTR filehdr;
-     PTR aouthdr;
-{
-  struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
-  struct internal_aouthdr *internal_a = (struct internal_aouthdr *) aouthdr;
-  ecoff_data_type *ecoff;
-
-  if (ecoff_mkobject (abfd) == false)
-    return NULL;
-
-  ecoff = ecoff_data (abfd);
-  ecoff->gp_size = 8;
-  ecoff->sym_filepos = internal_f->f_symptr;
-
-  if (internal_a != (struct internal_aouthdr *) NULL)
+  switch (internal_f->f_magic)
     {
-      int i;
+    case MIPS_MAGIC_1:
+      /* I don't know what endianness this implies.  */
+      return true;
 
-      ecoff->text_start = internal_a->text_start;
-      ecoff->text_end = internal_a->text_start + internal_a->tsize;
-      ecoff->gp = internal_a->gp_value;
-      ecoff->gprmask = internal_a->gprmask;
-      for (i = 0; i < 4; i++)
-	ecoff->cprmask[i] = internal_a->cprmask[i];
-      if (internal_a->magic == ECOFF_AOUT_ZMAGIC)
-	abfd->flags |= D_PAGED;
+    case MIPS_MAGIC_BIG:
+    case MIPS_MAGIC_BIG2:
+    case MIPS_MAGIC_BIG3:
+      return abfd->xvec->byteorder_big_p;
+
+    case MIPS_MAGIC_LITTLE:
+    case MIPS_MAGIC_LITTLE2:
+    case MIPS_MAGIC_LITTLE3:
+      return abfd->xvec->byteorder_big_p == false;
+
+    default:
+      return false;
     }
-
-  return (PTR) ecoff;
 }
 
 /* Reloc handling.  MIPS ECOFF relocs are packed into 8 bytes in
@@ -325,6 +310,9 @@ mips_ecoff_swap_reloc_out (abfd, intern, dst)
 {
   RELOC *ext = (RELOC *) dst;
 
+  BFD_ASSERT (intern->r_extern
+	      || (intern->r_symndx >= 0 && intern->r_symndx <= 12));
+
   bfd_h_put_32 (abfd, intern->r_vaddr, (bfd_byte *) ext->r_vaddr);
   if (abfd->xvec->header_byteorder_big_p != false)
     {
@@ -351,9 +339,9 @@ mips_ecoff_swap_reloc_out (abfd, intern, dst)
    this backend routine.  It must fill in the howto field.  */
 
 static void
-mips_finish_reloc (abfd, intern, rptr)
+mips_adjust_reloc_in (abfd, intern, rptr)
      bfd *abfd;
-     struct internal_reloc *intern;
+     const struct internal_reloc *intern;
      arelent *rptr;
 {
   if (intern->r_type > MIPS_R_LITERAL)
@@ -370,6 +358,17 @@ mips_finish_reloc (abfd, intern, rptr)
     rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
 
   rptr->howto = &mips_howto_table[intern->r_type];
+}
+
+/* Make any adjustments needed to a reloc before writing it out.  None
+   are needed for MIPS.  */
+
+static void
+mips_adjust_reloc_in (abfd, rel, intern)
+     bfd *abfd;
+     const arelent *rel;
+     struct internal_reloc *intern;
+{
 }
 
 /* ECOFF relocs are either against external symbols, or against
@@ -863,16 +862,12 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, true,
     mips_ecoff_swap_filehdr_in, mips_ecoff_swap_aouthdr_in,
     mips_ecoff_swap_scnhdr_in, mips_ecoff_bad_format_hook,
-    ecoff_set_arch_mach_hook, mips_ecoff_mkobject_hook,
+    ecoff_set_arch_mach_hook, ecoff_mkobject_hook,
     ecoff_styp_to_sec_flags, ecoff_make_section_hook, ecoff_set_alignment_hook,
     ecoff_slurp_symbol_table, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,
-  /* Big endian magic number.  */
-  MIPS_MAGIC_BIG,
-  /* Little endian magic number.  */
-  MIPS_MAGIC_LITTLE,
   /* Symbol table magic number.  */
   magicSym,
   /* Initial portion of armap string.  */
@@ -882,6 +877,10 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
   /* The page boundary used to align sections in a demand-paged
      executable file.  E.g., 0x1000.  */
   0x1000,
+  /* True if the .rdata section is part of the text segment, as on the
+     Alpha.  False if .rdata is part of the data segment, as on the
+     MIPS.  */
+  false,
   /* Bitsize of constructor entries.  */
   32,
   /* Reloc to use for constructor entries.  */
@@ -919,11 +918,16 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
   mips_ecoff_swap_reloc_in,
   mips_ecoff_swap_reloc_out,
   /* Backend reloc tweaking.  */
-  mips_finish_reloc
+  mips_adjust_reloc_in,
+  mips_adjust_reloc_out
 };
 
 /* Looking up a reloc type is MIPS specific.  */
 #define ecoff_bfd_reloc_type_lookup mips_bfd_reloc_type_lookup
+
+/* Getting relocated section contents is generic.  */
+#define ecoff_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
 
 bfd_target ecoff_little_vec =
 {

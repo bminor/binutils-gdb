@@ -1,4 +1,39 @@
+Tue Oct 19 15:26:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-alpha.c: Implemented reloc handling for the linker, made
+	various other related changes.
+	* libecoff.h (ecoff_backend_data): Added rdata_in_text field.
+	Renamed finish_reloc to adjust_reloc_in.  Added adjust_reloc_out
+	field.
+	(ecoff_bfd_get_relocated_section_contents): Don't define.
+	* ecoff.c (ecoff_sec_to_styp_flags, ecoff_styp_to_sec_flags):
+	Handle .lita section.
+	(ecoff_slurp_reloc_table): Handle RELOC_SECTION_FINI.
+	finish_reloc backend field renamed to adjust_reloc_in.
+	(ecoff_bfd_seclet_link): Adjust number of aux entries to
+	debug_align boundary.
+	(ecoff_compute_section_file_positions): If rdata_in_text put
+	.rdata section in text segment, not data segment.  Put .pdata
+	section in text segment.
+	(ecoff_write_object_contents): Likewise.  Also, call
+	adjust_reloc_out, and handle .lita, .xdata, .pdata, .fini and
+	absolute sections when writing out relocs.
+	* coffswap.h (coff_swap_aouthdr_out): For ALPHAECOFF, output 2 for
+	bldrev field, as on Alpha OSF/1.  Padding field is now 2 bytes.
+	* coff-mips.c (mips_ecoff_swap_reloc_out): Added assertion.
+	(mips_adjust_reloc_in): Renamed from mips_finish_reloc.
+	(mips_adjust_reloc_out): New function (does nothing).
+	(mips_ecoff_backend_data): Initialize new fields.
+	(ecoff_bfd_get_relocation_section_contents): Define to be
+	bfd_generic_get_relocated_section_contents.
+
+	* reloc.c (bfd_perform_relocation): Added casts to avoid Alpha
+	OSF/1 cc bug.
+
 Thu Oct 14 01:10:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Add comments attempting to
+	explain PC relative relocations.
 
 	* coffcode.h (styp_to_sec_flags): Don't set SEC_DEBUGGING until it
 	is made to work.
