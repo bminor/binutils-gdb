@@ -1,3 +1,9 @@
+2004-10-21  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c (assemble_insn): Check unsigned immediate
+	operands validity.
+	Update coprocessor id to be unsigned immediate.
+
 2004-10-18  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* config/tc-i386.c (O_secrel): Delete.
