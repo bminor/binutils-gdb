@@ -1,3 +1,8 @@
+1999-08-06  Ian Lance Taylor  <ian@zembu.com>
+
+	From Brad Lucier <lucier@math.purdue.edu>:
+	* corefile.c (core_create_line_syms): Add cast for printf.
+
 1999-07-21  Ian Lance Taylor  <ian@zembu.com>
 
 	From Mark Elbrecht:

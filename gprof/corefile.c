@@ -723,8 +723,9 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	  discard_underscores = 0;
 	}
 
-      DBG (AOUTDEBUG, printf ("[core_create_line_syms] %d %s 0x%lx\n",
-			      ltab.limit - ltab.base, ltab.limit->name,
+      DBG (AOUTDEBUG, printf ("[core_create_line_syms] %lu %s 0x%lx\n",
+			      (unsigned long) (ltab.limit - ltab.base),
+			      ltab.limit->name,
 			      (unsigned long) ltab.limit->addr));
       ++ltab.limit;
     }
