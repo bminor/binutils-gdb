@@ -617,7 +617,8 @@ gld${EMULATION_NAME}_before_allocation ()
 	  if (h->type == bfd_link_hash_undefined
 	      && h->u.undef.abfd != NULL
 	      && (h->u.undef.abfd->flags & DYNAMIC) == 0
-	      && strcmp (h->root.string, "__DYNAMIC") != 0)
+	      && strcmp (h->root.string, "__DYNAMIC") != 0
+	      && strcmp (h->root.string, "__GLOBAL_OFFSET_TABLE_") != 0)
 	    {
 	      find_assign = h->root.string;
 	      found_assign = false;
@@ -800,7 +801,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
       break;
 
     case etree_trinary:
-      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.cond);
       gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
       gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.rhs);
       break;

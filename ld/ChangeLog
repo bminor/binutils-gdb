@@ -1,5 +1,9 @@
 Mon Jan 15 15:07:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation):
+	Don't make a shared library because of an undefined reference to
+	__GLOBAL_OFFSET_TABLE_.
+
 	Add some Irix 5 support, mostly from Kazumoto Kojima
         <kkojima@info.kanagawa-u.ac.jp>:
 	* emulparams/elf32bmip.sh (SCRIPT_NAME): Change to elfmips.
