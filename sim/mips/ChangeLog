@@ -1,5 +1,10 @@
 2002-03-05  Chris Demetriou  <cgd@broadcom.com>
 
+	* sim-main.h (UndefinedResult, Unpredictable): New macros
+	which currently do nothing.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
 	* sim-main.h (status_UX, status_SX, status_KX, status_TS)
 	(status_PX, status_MX, status_CU0, status_CU1, status_CU2)
 	(status_CU3): New definitions.
