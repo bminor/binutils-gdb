@@ -2631,11 +2631,11 @@ md_assemble (char *str)
       int found = 0;
 
       /* identify opcode in string */
-      while (isspace (*name))
+      while (ISSPACE (*name))
 	{
 	  name++;
 	}
-      while (!isspace (name[name_length]))
+      while (!ISSPACE (name[name_length]))
 	{
 	  name_length++;
 	}
@@ -2945,15 +2945,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_ISA:
-      if (strcasecmp (arg, "sh4") == 0)
-	preset_target_arch = arch_sh4;
-      else if (strcasecmp (arg, "sh4-nofpu") == 0)
-	preset_target_arch = arch_sh4_nofpu;
-      else if (strcasecmp (arg, "sh4-nommu-nofpu") == 0)
-	preset_target_arch = arch_sh4_nommu_nofpu;
-      else if (strcasecmp (arg, "sh4a") == 0)
-	preset_target_arch = arch_sh4a;
-      else if (strcasecmp (arg, "dsp") == 0)
+      if (strcasecmp (arg, "dsp") == 0)
 	preset_target_arch = arch_sh1_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
       else if (strcasecmp (arg, "fp") == 0)
 	preset_target_arch = arch_sh1_up & ~arch_sh_has_dsp;
@@ -2978,8 +2970,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       else
 	{
 	  extern const bfd_arch_info_type bfd_sh_arch;
-	  extern unsigned int sh_ef_archset_table[];
-	  bfd_arch_info_type *bfd_arch = &bfd_sh_arch;
+	  bfd_arch_info_type const *bfd_arch = &bfd_sh_arch;
 	  preset_target_arch = 0;
 	  for (; bfd_arch; bfd_arch=bfd_arch->next)
 	    {
@@ -3068,7 +3059,7 @@ SH options:\n\
     | fp"));
   {
     extern const bfd_arch_info_type bfd_sh_arch;
-    bfd_arch_info_type *bfd_arch = &bfd_sh_arch;
+    bfd_arch_info_type const *bfd_arch = &bfd_sh_arch;
     for (; bfd_arch; bfd_arch=bfd_arch->next)
       if (bfd_arch->mach != bfd_mach_sh5)
 	{

@@ -1,3 +1,9 @@
+2004-07-05  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* elf32-sh.c: Include ../opcodes/sh-opc.h .
+	* Makefile.am: Ran make dep-am .
+	* Makefile.in: Ran make dep-in .
+
 2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Resolve PE weak

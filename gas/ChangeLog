@@ -1,3 +1,11 @@
+2004-07-05  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	gas:
+	* config/tc-sh.c (md_assemble): Change isspace to ISSPACE.
+	(md_parse_option): Remove redundant -isa testing.
+	Make bfd_arch variable const.
+	(md_show_usage): Make bfd_arch variable const.
+
 2004-07-03  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Check and set insn_addr.

@@ -26,6 +26,7 @@
 #include "elf-bfd.h"
 #include "elf/sh.h"
 #include "libiberty.h"
+#include "../opcodes/sh-opc.h"
 
 static bfd_reloc_status_type sh_elf_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);

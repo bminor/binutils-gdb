@@ -908,7 +908,8 @@ syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 targets.lo: targets.c $(INCDIR)/filenames.h $(INCDIR)/fnmatch.h \
   targmatch.h
-hash.lo: hash.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h $(INCDIR)/libiberty.h
+hash.lo: hash.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h \
+  $(INCDIR)/libiberty.h
 linker.lo: linker.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   genlink.h
 srec.lo: srec.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
@@ -1294,7 +1295,8 @@ elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \
   elf32-sh64.h elf32-sh.c $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/libiberty.h elf32-target.h
+  $(INCDIR)/libiberty.h $(srcdir)/../opcodes/sh-opc.h \
+  elf32-target.h
 elf32-sh64-com.lo: elf32-sh64-com.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/sh.h \
@@ -1306,7 +1308,8 @@ elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/libiberty.h elf32-target.h
+  $(INCDIR)/libiberty.h $(srcdir)/../opcodes/sh-opc.h \
+  elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \
