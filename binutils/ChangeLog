@@ -1,3 +1,13 @@
+Tue Jul  5 15:56:01 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* objcopy.c: Include libiberty.h.
+	(copy_file): If output_target is NULL, set it to the target of the
+	input file.
+
+Wed Jun 29 17:17:14 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* nlmconv.c (link_inputs): Fixed memory allocation bug.
+
 Thu Jun 23 12:52:46 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure.in: Change --with-targets to --enable-targets.
