@@ -1,3 +1,9 @@
+2000-08-14  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (md_longopts): Add -mconstant-gp and -mauto-pic.
+	(md_parse_option):  Add OPTION_MCONSTANT_GP and OPTION_MAUTO_PIC.
+	(md_begin): Change assignment to md.flag to OR in the new bit.
+
 2000-08-14  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/obj-coff.c (obj_coff_endef) [BFD_ASSEMBLER]: Set the debug

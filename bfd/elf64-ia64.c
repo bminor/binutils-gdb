@@ -3974,6 +3974,10 @@ elf64_ia64_merge_private_bfd_data (ibfd, obfd)
   if (in_flags == out_flags)
     return true;
 
+  /* Output has EF_IA_64_REDUCEDFP set only if all inputs have it set.  */
+  if (!(in_flags & EF_IA_64_REDUCEDFP) && (out_flags & EF_IA_64_REDUCEDFP))
+    elf_elfheader (obfd)->e_flags &= ~EF_IA_64_REDUCEDFP;
+
   if ((in_flags & EF_IA_64_TRAPNIL) != (out_flags & EF_IA_64_TRAPNIL))
     {
       (*_bfd_error_handler)
@@ -4001,6 +4005,25 @@ elf64_ia64_merge_private_bfd_data (ibfd, obfd)
       bfd_set_error (bfd_error_bad_value);
       ok = false;
     }
+  if ((in_flags & EF_IA_64_CONS_GP) != (out_flags & EF_IA_64_CONS_GP))
+    {
+      (*_bfd_error_handler)
+	(_("%s: linking constant-gp files with non-constant-gp files"),
+	 bfd_get_filename (ibfd));
+
+      bfd_set_error (bfd_error_bad_value);
+      ok = false;
+    }
+  if ((in_flags & EF_IA_64_NOFUNCDESC_CONS_GP)
+      != (out_flags & EF_IA_64_NOFUNCDESC_CONS_GP))
+    {
+      (*_bfd_error_handler)
+	(_("%s: linking auto-pic files with non-auto-pic files"),
+	 bfd_get_filename (ibfd));
+
+      bfd_set_error (bfd_error_bad_value);
+      ok = false;
+    }
 
   return ok;
 }
@@ -4015,11 +4038,16 @@ elf64_ia64_print_private_bfd_data (abfd, ptr)
 
   BFD_ASSERT (abfd != NULL && ptr != NULL);
 
-  fprintf (file, "private flags = %s%s%s%s\n",
+  fprintf (file, "private flags = %s%s%s%s%s%s%s%s\n",
 	   (flags & EF_IA_64_TRAPNIL) ? "TRAPNIL, " : "",
 	   (flags & EF_IA_64_EXT) ? "EXT, " : "",
 	   (flags & EF_IA_64_BE) ? "BE, " : "LE, ",
+	   (flags & EF_IA_64_REDUCEDFP) ? "REDUCEDFP, " : "",
+	   (flags & EF_IA_64_CONS_GP) ? "CONS_GP, " : "",
+	   (flags & EF_IA_64_NOFUNCDESC_CONS_GP) ? "NOFUNCDESC_CONS_GP, " : "",
+	   (flags & EF_IA_64_ABSOLUTE) ? "ABSOLUTE, " : "",
 	   (flags & EF_IA_64_ABI64) ? "ABI64" : "ABI32");
+  
   _bfd_elf_print_private_bfd_data (abfd, ptr);
   return true;
 }

@@ -160,7 +160,10 @@ const char *md_shortopts = "M:N:x::";
 
 struct option md_longopts[] =
   {
-    { NULL, no_argument, NULL, 0}
+#define OPTION_MCONSTANT_GP (OPTION_MD_BASE + 1)
+    {"mconstant-gp", no_argument, NULL, OPTION_MCONSTANT_GP},
+#define OPTION_MAUTO_PIC (OPTION_MD_BASE + 2)
+    {"mauto-pic", no_argument, NULL, OPTION_MAUTO_PIC}
   };
 
 size_t md_longopts_size = sizeof (md_longopts);
@@ -5534,9 +5537,9 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  /* Switches from the Intel assembler.  */
   switch (c)
     {
+    /* Switches from the Intel assembler.  */
     case 'M':
       if (strcmp (arg, "ilp64") == 0
 	  || strcmp (arg, "lp64") == 0
@@ -5627,6 +5630,15 @@ md_parse_option (c, arg)
 
     case 'S':
       /* nops		Print nops statistics.  */
+      break;
+
+    /* GNU specific switches for gcc.  */
+    case OPTION_MCONSTANT_GP:
+      md.flags |= EF_IA_64_CONS_GP;
+      break;
+
+    case OPTION_MAUTO_PIC:
+      md.flags |= EF_IA_64_NOFUNCDESC_CONS_GP;
       break;
 
     default:
@@ -5880,7 +5892,8 @@ md_begin ()
     }
 
   /* Default to 64-bit mode.  */
-  md.flags = EF_IA_64_ABI64;
+  /* ??? This overrides the -M options, but they aren't working anyways.  */
+  md.flags |= EF_IA_64_ABI64;
 
   md.mem_offset.hint = 0;
   md.path = 0;
