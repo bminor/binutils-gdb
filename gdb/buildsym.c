@@ -95,6 +95,11 @@ add_symbol_to_list (symbol, listhead)
      struct pending **listhead;
 {
   register struct pending *link;
+
+  /* If this is a reference to/live alias for another symbol, don't add it.
+     We don't want to be able to look up the live references directly. */
+  if (symbol->ginfo.name && symbol->ginfo.name[0] == '#')
+    return;
       
   /* We keep PENDINGSIZE symbols in each link of the list.
      If we don't have a link with room in it, add a new link.  */

@@ -1,3 +1,10 @@
+Sun Sep  7 17:26:30 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* dbxread.c, buildsym.c, symtab.c, stabsread.c: Add support for 
+	reading stabs extensions for live range information.
+	* stabsread.h, partial-stab.h: Add prototypes for new functions.
+	* symtab.h: Add structure for storing live range information.
+
 Wed Sep  3 16:39:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.c (set_arch): New function, update target_architecture.

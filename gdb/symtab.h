@@ -84,7 +84,7 @@ struct general_symbol_info
 
   union
     {
-      struct cplus_specific      /* For C++ */
+      struct cplus_specific      /* For C++ and Java */
 	{
 	  char *demangled_name;
 	} cplus_specific;
@@ -135,7 +135,8 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
 #define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language)			\
   do {									\
     SYMBOL_LANGUAGE (symbol) = language;				\
-    if (SYMBOL_LANGUAGE (symbol) == language_cplus)			\
+    if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
+	|| SYMBOL_LANGUAGE (symbol) == language_java)			\
       {									\
 	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
       }									\
@@ -179,6 +180,23 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
       }									\
+    if (SYMBOL_LANGUAGE (symbol) == language_java)			\
+      {									\
+	demangled =							\
+	  cplus_demangle (SYMBOL_NAME (symbol),				\
+			  DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);		\
+	if (demangled != NULL)						\
+	  {								\
+	    SYMBOL_LANGUAGE (symbol) = language_java;			\
+	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = 			\
+	      obsavestring (demangled, strlen (demangled), (obstack));	\
+	    free (demangled);						\
+	  }								\
+	else								\
+	  {								\
+	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
+	  }								\
+      }									\
     if (demangled == NULL						\
 	&& (SYMBOL_LANGUAGE (symbol) == language_chill			\
 	    || SYMBOL_LANGUAGE (symbol) == language_auto))		\
@@ -208,6 +226,7 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
 
 #define SYMBOL_DEMANGLED_NAME(symbol)					\
   (SYMBOL_LANGUAGE (symbol) == language_cplus				\
+   || SYMBOL_LANGUAGE (symbol) == language_java				\
    ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
    : (SYMBOL_LANGUAGE (symbol) == language_chill			\
       ? SYMBOL_CHILL_DEMANGLED_NAME (symbol)				\
@@ -584,6 +603,15 @@ enum address_class
   LOC_OPTIMIZED_OUT
 };
 
+/* Linked list of symbol's live ranges. */
+
+struct live_range		
+{
+  CORE_ADDR start;
+  CORE_ADDR end;
+  struct live_range *next;	
+};
+
 struct symbol
 {
 
@@ -623,6 +651,23 @@ struct symbol
       short basereg;
     }
   aux_value;
+
+  /* Live range information (if present) for debugging of optimized code.  
+     Gcc extensions were added to stabs to encode live range information.
+     The syntax for referencing (defining) symbol aliases is "#n" ("#n=")
+     where n is a number.  The syntax for specifying a range is "l(#<m>,#<n>)",
+     where m and n are numbers. 
+     aliases - list of other symbols which are lexically the same symbol, 
+         but were optimized into different storage classes (eg. for the
+         local symbol "x", one symbol contains range information where x 
+         is on the stack, while an alias contains the live ranges where x 
+         is in a register).
+     range - list of instruction ranges where the symbol is live. */
+  struct live_range_info 		
+    {
+      struct symbol *aliases;	/* Link to other aliases for this symbol. */
+      struct live_range	*range; /* Linked list of live ranges. */
+    } live;
 };
 
 #define SYMBOL_NAMESPACE(symbol)	(symbol)->namespace
@@ -630,6 +675,11 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
+#define SYMBOL_ALIASES(symbol)		(symbol)->live.aliases
+#define SYMBOL_RANGE(symbol)		(symbol)->live.range 
+#define SYMBOL_RANGE_START(symbol)	(symbol)->live.range->start
+#define SYMBOL_RANGE_END(symbol)	(symbol)->live.range->end
+#define SYMBOL_RANGE_NEXT(symbol)	(symbol)->live.range->next
 
 /* A partial_symbol records the name, namespace, and address class of
    symbols whose types we have not parsed yet.  For functions, it also

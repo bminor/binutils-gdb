@@ -169,8 +169,23 @@ read_cfront_static_fields PARAMS ((struct field_info *, char**,
 static int
 read_cfront_member_functions PARAMS ((struct field_info *, char **, 
 			struct type *, struct objfile *));
-
 /* end new functions added for cfront support */
+
+static void 
+add_live_range PARAMS ((struct objfile *, struct symbol *, 
+			CORE_ADDR, CORE_ADDR));
+
+static int 
+resolve_live_range PARAMS ((struct objfile *, struct symbol *, char *));
+
+static int 
+process_reference PARAMS ((char **string));
+
+static CORE_ADDR 
+ref_search_value PARAMS ((int refnum));
+
+struct symbol * 
+ref_search PARAMS ((int refnum));
 
 
 
@@ -576,7 +591,7 @@ get_cfront_method_physname (fname)
   /* search ahead to find the start of the mangled suffix */
   if (*p == '_' && *(p+1)=='_') /* compiler generated; probably a ctor/dtor */
     p += 2;  		
-  while (p && ((p+1) - fname) < strlen (fname) && *(p+1) != '_')
+  while (p && (unsigned) ((p+1) - fname) < strlen (fname) && *(p+1) != '_')
     p = strchr (p, '_');
   if (!(p && *p == '_' && *(p+1) == '_')) 
     error ("Invalid mangled function name %s",fname);
@@ -710,12 +725,12 @@ read_cfront_baseclasses (fip, pp, type, objfile)
   	    char * bname;		/* base class name */
   	    struct symbol * bsym;	/* base class */
 	    char * p1, * p2;
-	    p1 = strchr(*pp,' ');
-	    p2 = strchr(*pp,';');
+	    p1 = strchr (*pp,' ');
+	    p2 = strchr (*pp,';');
 	    if (p1<p2)
-              bname = get_substring(pp,' ');
+              bname = get_substring (pp,' ');
 	    else
-              bname = get_substring(pp,';');
+              bname = get_substring (pp,';');
             if (!bname || !*bname)
 	      {
 	        complain (&msg_unknown, *pp);
@@ -752,12 +767,12 @@ read_cfront_baseclasses (fip, pp, type, objfile)
 */
 
 static int
-read_cfront_member_functions(fip, pp, type, objfile)
+read_cfront_member_functions (fip, pp, type, objfile)
      struct field_info *fip;
      char **pp;
      struct type *type;
      struct objfile *objfile;
-  {
+{
   /* This code extracted from read_member_functions 
      so as to do the similar thing for our funcs */
 
@@ -778,25 +793,25 @@ read_cfront_member_functions(fip, pp, type, objfile)
   struct next_fnfield *new_sublist;
   char *main_fn_name;
   char * fname;
-  struct symbol * ref_func=0;
+  struct symbol * ref_func = 0;
       
-  /* Process each list until we find something that is not a member function
-     or find the end of the functions. */
+  /* Process each list until we find the end of the member functions.
+     eg: p = "__ct__1AFv foo__1AFv ;;;" */
 
-  /* eg: p = "__ct__1AFv foo__1AFv ;;;" */
   STABS_CONTINUE (pp, objfile); 		/* handle \\ */
-  while (**pp!=';' && (fname = get_substring(pp,' '),fname)) 
+
+  while (**pp != ';' && (fname = get_substring (pp, ' '), fname)) 
     {
-      int is_static=0;
-      int sublist_count=0;
+      int is_static = 0;
+      int sublist_count = 0;
       char * pname;
-      if (fname[0]=='*')      /* static member */
+      if (fname[0] == '*')      /* static member */
         {
           is_static=1;
           sublist_count++;
           fname++;
         }
-      ref_func = lookup_symbol (fname, 0, VAR_NAMESPACE, 0, 0); /*demangled_name*/
+      ref_func = lookup_symbol (fname, 0, VAR_NAMESPACE, 0, 0); /* demangled name */
       if (!ref_func) 
         {
           static struct complaint msg = {"\
@@ -824,129 +839,132 @@ read_cfront_member_functions(fip, pp, type, objfile)
         if (dem != NULL)
           {
             dem_p = strrchr (dem, ':');
-            if (dem_p != 0 && *(dem_p-1)==':')
+            if (dem_p != 0 && *(dem_p-1) == ':')
               dem_p++;
 	    /* get rid of args */
             dem_args = strchr (dem_p, '(');
 	    if (dem_args == NULL)
-	      dem_len = strlen(dem_p);
-	   else
-	      dem_len = dem_args - dem_p;
-           main_fn_name =
+	      dem_len = strlen (dem_p);
+	    else
+      	      dem_len = dem_args - dem_p;
+            main_fn_name =
                    obsavestring (dem_p, dem_len, &objfile -> type_obstack);
-         }
-       else
-         {
-           main_fn_name =
-                   obsavestring (fname, strlen(fname), &objfile -> type_obstack);
-         }
-       } /* end of code for cfront work around */
+          }
+        else
+          {
+            main_fn_name =
+                   obsavestring (fname, strlen (fname), &objfile -> type_obstack);
+          }
+      } /* end of code for cfront work around */
 
-     new_fnlist -> fn_fieldlist.name = main_fn_name;
+    new_fnlist -> fn_fieldlist.name = main_fn_name;
       
-     /*-------------------------------------------------*/
-     /* Set up the sublists
-        Sublists are stuff like args, static, visibility, etc.
-        so in ARM, we have to set that info some other way.
-        Multiple sublists happen if overloading
-        eg: foo::26=##1;:;2A.;
-        In g++, we'd loop here thru all the sublists...  */
-     new_sublist =
+    /*-------------------------------------------------*/
+    /* Set up the sublists
+       Sublists are stuff like args, static, visibility, etc.
+       so in ARM, we have to set that info some other way.
+       Multiple sublists happen if overloading
+       eg: foo::26=##1;:;2A.;
+       In g++, we'd loop here thru all the sublists...  */
+
+    new_sublist =
     	(struct next_fnfield *) xmalloc (sizeof (struct next_fnfield));
-     make_cleanup (free, new_sublist);
-     memset (new_sublist, 0, sizeof (struct next_fnfield));
+    make_cleanup (free, new_sublist);
+    memset (new_sublist, 0, sizeof (struct next_fnfield));
 	  
-     /* eat 1; from :;2A.; */
-     new_sublist -> fn_field.type = SYMBOL_TYPE(ref_func); /* normally takes a read_type */
-     /* make this type look like a method stub for gdb */
-     TYPE_FLAGS (new_sublist -> fn_field.type) |= TYPE_FLAG_STUB;
-     TYPE_CODE (new_sublist -> fn_field.type) = TYPE_CODE_METHOD;
+    /* eat 1; from :;2A.; */
+    new_sublist -> fn_field.type = SYMBOL_TYPE(ref_func); /* normally takes a read_type */
+    /* Make this type look like a method stub for gdb */
+    TYPE_FLAGS (new_sublist -> fn_field.type) |= TYPE_FLAG_STUB;
+    TYPE_CODE (new_sublist -> fn_field.type) = TYPE_CODE_METHOD;
 
-     /* If this is just a stub, then we don't have the real name here. */
-     if (TYPE_FLAGS (new_sublist -> fn_field.type) & TYPE_FLAG_STUB)
-       {
-         if (!TYPE_DOMAIN_TYPE (new_sublist -> fn_field.type))
-         TYPE_DOMAIN_TYPE (new_sublist -> fn_field.type) = type;
-         new_sublist -> fn_field.is_stub = 1;
-       }
-     /* physname used later in mangling; eg PFs_i,5 for foo__1aFPFs_i 
-        physname gets strcat'd in order to recreate the onto mangled name */
-     pname = get_cfront_method_physname(fname);
-        new_sublist -> fn_field.physname = savestring (pname, strlen(pname));
-       
-
-     /* Set this member function's visibility fields. 
-        Unable to distinguish access from stabs definition!
-          Assuming public for now.  FIXME!
-	  (for private, set new_sublist->fn_field.is_private = 1,
-	  for public, set new_sublist->fn_field.is_protected = 1) */
-       
-     /* Unable to distinguish const/volatile from stabs definition!
-        Assuming normal for now.  FIXME! */
-
-     new_sublist -> fn_field.is_const = 0;
-     new_sublist -> fn_field.is_volatile = 0;	/* volatile not implemented in cfront */
-	  
-     /* set virtual/static function info
-        How to get vtable offsets ? 
-        Assuming normal for now FIXME!! 
-          For vtables, figure out from whence this virtual function came.
-	    It may belong to virtual function table of
-	    one of its baseclasses.
-	  set:
-	    new_sublist -> fn_field.voffset = vtable offset,
-	    new_sublist -> fn_field.fcontext = look_ahead_type;
-	    where look_ahead_type is type of baseclass */
-      if (is_static)
-        new_sublist -> fn_field.voffset = VOFFSET_STATIC;
-      else /* normal member function.  */
-        new_sublist -> fn_field.voffset = 0;
-      new_sublist -> fn_field.fcontext = 0;
- 
-
-      /* prepare new sublist */
-	new_sublist -> next = sublist;
-	sublist = new_sublist;
-	length++;
-        /* In g++, we loop thu sublists - now we set from function */
-
-        new_fnlist -> fn_fieldlist.fn_fields = (struct fn_field *)
-	    obstack_alloc (&objfile -> type_obstack, 
-		       sizeof (struct fn_field) * length);
-        memset (new_fnlist -> fn_fieldlist.fn_fields, 0,
-	      sizeof (struct fn_field) * length);
-        for (i = length; (i--, sublist); sublist = sublist -> next)
-	  {
-	    new_fnlist -> fn_fieldlist.fn_fields[i] = sublist -> fn_field;
-	  }
-      
-        new_fnlist -> fn_fieldlist.length = length;
-        new_fnlist -> next = fip -> fnlist;
-        fip -> fnlist = new_fnlist;
-        nfn_fields++;
-        total_length += length;
-        STABS_CONTINUE (pp, objfile); /* handle \\ */
-      } /* end of loop */
-
-    if (nfn_fields)
+    /* If this is just a stub, then we don't have the real name here. */
+    if (TYPE_FLAGS (new_sublist -> fn_field.type) & TYPE_FLAG_STUB)
       {
-        /* type should already have space */
-        TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-        TYPE_ALLOC (type, sizeof (struct fn_fieldlist) * nfn_fields);
-        memset (TYPE_FN_FIELDLISTS (type), 0,
-     		sizeof (struct fn_fieldlist) * nfn_fields);
-        TYPE_NFN_FIELDS (type) = nfn_fields;
-        TYPE_NFN_FIELDS_TOTAL (type) = total_length;
+        if (!TYPE_DOMAIN_TYPE (new_sublist -> fn_field.type))
+        TYPE_DOMAIN_TYPE (new_sublist -> fn_field.type) = type;
+        new_sublist -> fn_field.is_stub = 1;
       }
 
-      /* end of scope for reading member func */
+    /* physname used later in mangling; eg PFs_i,5 for foo__1aFPFs_i 
+       physname gets strcat'd in order to recreate the onto mangled name */
+    pname = get_cfront_method_physname (fname);
+    new_sublist -> fn_field.physname = savestring (pname, strlen (pname));
+      
 
-    /* eg: ";;" */
-    /* skip trailing ';' and bump count of number of fields seen */
-    if (**pp == ';')
-      (*pp)++;
-    else
-      return 0;
+    /* Set this member function's visibility fields. 
+       Unable to distinguish access from stabs definition!
+         Assuming public for now.  FIXME!
+	 (for private, set new_sublist->fn_field.is_private = 1,
+	 for public, set new_sublist->fn_field.is_protected = 1) */
+       
+    /* Unable to distinguish const/volatile from stabs definition!
+       Assuming normal for now.  FIXME! */
+
+    new_sublist -> fn_field.is_const = 0;
+    new_sublist -> fn_field.is_volatile = 0;	/* volatile not implemented in cfront */
+	  
+    /* Set virtual/static function info
+       How to get vtable offsets ? 
+       Assuming normal for now FIXME!! 
+       For vtables, figure out from whence this virtual function came.
+       It may belong to virtual function table of
+       one of its baseclasses.
+	 set:
+	   new_sublist -> fn_field.voffset = vtable offset,
+	   new_sublist -> fn_field.fcontext = look_ahead_type;
+	   where look_ahead_type is type of baseclass */
+    if (is_static)
+      new_sublist -> fn_field.voffset = VOFFSET_STATIC;
+    else 				/* normal member function.  */
+      new_sublist -> fn_field.voffset = 0;
+    new_sublist -> fn_field.fcontext = 0;
+ 
+
+    /* Prepare new sublist */
+    new_sublist -> next = sublist;
+    sublist = new_sublist;
+    length++;
+
+    /* In g++, we loop thu sublists - now we set from functions. */
+    new_fnlist -> fn_fieldlist.fn_fields = (struct fn_field *)
+         obstack_alloc (&objfile -> type_obstack, 
+     	       sizeof (struct fn_field) * length);
+    memset (new_fnlist -> fn_fieldlist.fn_fields, 0,
+           sizeof (struct fn_field) * length);
+    for (i = length; (i--, sublist); sublist = sublist -> next)
+      {
+        new_fnlist -> fn_fieldlist.fn_fields[i] = sublist -> fn_field;
+      }
+      
+    new_fnlist -> fn_fieldlist.length = length;
+    new_fnlist -> next = fip -> fnlist;
+    fip -> fnlist = new_fnlist;
+    nfn_fields++;
+    total_length += length;
+    STABS_CONTINUE (pp, objfile); /* handle \\ */
+  } /* end of loop */
+
+  if (nfn_fields)
+    {
+      /* type should already have space */
+      TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
+      TYPE_ALLOC (type, sizeof (struct fn_fieldlist) * nfn_fields);
+      memset (TYPE_FN_FIELDLISTS (type), 0,
+         	sizeof (struct fn_fieldlist) * nfn_fields);
+      TYPE_NFN_FIELDS (type) = nfn_fields;
+      TYPE_NFN_FIELDS_TOTAL (type) = total_length;
+    }
+
+  /* end of scope for reading member func */
+
+  /* eg: ";;" */
+
+  /* Skip trailing ';' and bump count of number of fields seen */
+  if (**pp == ';')
+    (*pp)++;
+  else
+    return 0;
   return 1;
 }
 
@@ -954,8 +972,8 @@ read_cfront_member_functions(fip, pp, type, objfile)
    while parsing the stabs.  The main need for this function is
    to add information such as methods to classes.
    Examples of "p": "sA;;__ct__1AFv foo__1AFv ;;;" */
-void 
-resolve_cfront_continuation(objfile, sym, p)
+int
+resolve_cfront_continuation (objfile, sym, p)
   struct objfile * objfile;
   struct symbol * sym;
   char * p;
@@ -967,13 +985,13 @@ resolve_cfront_continuation(objfile, sym, p)
   struct type *type;
   struct cleanup *back_to;
 
-  /* need to make sure that fi isn't gunna conflict with struct 
+  /* Need to make sure that fi isn't gunna conflict with struct 
      in case struct already had some fnfs */
   fi.list = NULL;
   fi.fnlist = NULL;       
   back_to = make_cleanup (null_cleanup, 0);
 
-  /* we only accept structs, classes and unions at the moment. 
+  /* We only accept structs, classes and unions at the moment. 
      Other continuation types include t (typedef), r (long dbl), ... 
      We may want to add support for them as well; 
      right now they are handled by duplicating the symbol information 
@@ -981,20 +999,19 @@ resolve_cfront_continuation(objfile, sym, p)
   if (*p != 's'       /* structs */
     && *p != 'c'      /* class */
     && *p != 'u')     /* union */
-    return;  /* only handle C++ types */
+    return 0;  /* only handle C++ types */
   p++;  
 
-  /* get symbol typs name and validate 
+  /* Get symbol typs name and validate 
      eg: p = "A;;__ct__1AFv foo__1AFv ;;;" */
-  sname = get_substring(&p,';');
-  if (!sname || strcmp(sname,SYMBOL_NAME(sym)))
-    error("Internal error: base symbol type name does not match\n");
+  sname = get_substring (&p, ';');
+  if (!sname || strcmp (sname, SYMBOL_NAME(sym)))
+    error ("Internal error: base symbol type name does not match\n");
 
-  /* find symbol's internal gdb reference */
-  ref_sym = lookup_symbol (SYMBOL_NAME(sym), 0, STRUCT_NAMESPACE, 0, 0); /*demangled_name*/
-  /* This is the real sym that we want; 
+  /* Find symbol's internal gdb reference using demangled_name.
+     This is the real sym that we want; 
      sym was a temp hack to make debugger happy */
-  /* ref_sym should already have space */
+  ref_sym = lookup_symbol (SYMBOL_NAME(sym), 0, STRUCT_NAMESPACE, 0, 0); 
   type = SYMBOL_TYPE(ref_sym);
 
 
@@ -1008,7 +1025,7 @@ resolve_cfront_continuation(objfile, sym, p)
 	    || !read_struct_fields (&fi, &p, type, objfile) */
       || !copy_cfront_struct_fields (&fi, type, objfile)
       || !read_cfront_member_functions (&fi, &p, type, objfile)
-      || !read_cfront_static_fields(&fi, &p, type, objfile)
+      || !read_cfront_static_fields (&fi, &p, type, objfile)
       || !attach_fields_to_type (&fi, type, objfile)
       || !attach_fn_fields_to_type (&fi, type)
       /* g++ does this next, but cfront doesn't seem to have this: 
@@ -1019,9 +1036,238 @@ resolve_cfront_continuation(objfile, sym, p)
     }
 
   do_cleanups (back_to);
+  return 0;  
 }
 /* End of code added to support parsing of ARM/Cfront stabs strings */
 
+
+/* This routine fixes up symbol references to point to the original
+   symbol definition.
+   The main need for this function is to add information for supporting 
+   live range splitting.
+   eg: p : "#7=", "#2=z:r(0,1)" "#2:r(0,1);l(#5,#6),l(#7,#4)" */
+int
+resolve_symbol_reference (objfile, sym, p)
+  struct objfile * objfile;
+  struct symbol * sym;
+  char * p;
+{
+  int refnum;
+  struct symbol * ref_sym=0;
+  struct cleanup *back_to;
+
+  back_to = make_cleanup (null_cleanup, 0);
+
+  if (*p != '#')       /* symbol ref id */
+    return 0;  
+
+  /* Use "#<num>" as the name; we'll fix the name later.
+     We stored the original symbol name as "#<id>=<name>"
+     so we can now search for "#<id>" to resolving the reference.
+     We'll fix the names later by removing the "#<id>" or "#<id>=" */
+
+  /*---------------------------------------------------------*/
+  /* Get the reference id number, and 
+     advance p past the names so we can parse the rest. 
+       eg: id=2 for p : "2=", "2=z:r(0,1)" "2:r(0,1);l(#5,#6),l(#7,#4)" */
+  /*---------------------------------------------------------*/
+
+  /* This gets reference name from string.  sym may not have a name. */
+  refnum = process_reference (&p);
+  ref_sym = ref_search (refnum);
+  if (!ref_sym)
+    error ("error: symbol for reference not found.\n");
+
+  /* Parse the stab of the referencing symbol
+     now that we have the referenced symbol.
+     Add it as a new symbol and a link back to the referenced symbol.
+     eg: p : "=", "=z:r(0,1)" ":r(0,1);l(#5,#6),l(#7,#4)" */
+
+
+  /* If the stab symbol table and string contain:
+         RSYM   0      5      00000000 868    #15=z:r(0,1)
+         LBRAC  0      0      00000000 899    #5=
+         SLINE  0      16     00000003 923    #6=
+     Then the same symbols can be later referenced by:
+         RSYM   0      5      00000000 927    #15:r(0,1);l(#5,#6)
+     This is used in live range splitting to:
+     1) specify that a symbol (#15) is actually just a new storage 
+        class for a symbol (#15=z) which was previously defined.
+     2) specify that the beginning and ending ranges for a symbol 
+        (#15) are the values of the beginning (#5) and ending (#6) 
+        symbols. */
+       
+   /* Read number as reference id.
+      eg: p : "=", "=z:r(0,1)" ":r(0,1);l(#5,#6),l(#7,#4)" */
+   /* FIXME! Might I want to use SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
+      in case of "l(0,0)"? */
+
+   /*--------------------------------------------------*/
+   /* Add this symbol to the reference list.           */
+   /*--------------------------------------------------*/
+   SYMBOL_ALIASES (sym) = SYMBOL_ALIASES (ref_sym);
+   SYMBOL_ALIASES (ref_sym) = sym;
+
+   /* Want to fix up name so that other functions (eg. valops)
+      will correctly print the name.
+      Don't add_symbol_to_list so that lookup_symbol won't find it.
+      nope... needed for fixups. */
+   SYMBOL_NAME (sym) = SYMBOL_NAME (ref_sym);
+
+  /* Done!  */
+
+  do_cleanups (back_to);
+  return 0;  
+}
+
+/* Get range symbol reference. eg. "#2),l(#3,#5)"   
+   postpone resolve_reference until after we're done reading symbols. */
+struct symbol *
+resolve_reference (char *p)
+{
+    char sym_refid[32];
+    struct symbol *sym = 0;
+    char *s = p;
+    int len;
+
+    if (!s || *s != '#')
+      return 0;
+    p = strchr (s, ')');
+    if (!p || p == s)
+      return 0;
+    len = p - s + 1;
+    strncpy (sym_refid, s, len);
+    sym_refid[len] = '\0';
+    sym = lookup_symbol (sym_refid, 0, VAR_NAMESPACE, 0, 0); 
+    return sym;
+}
+
+/* Structure for storing pointers to reference definitions for fast lookup 
+   during "process_later". */
+#define MAX_REFS 100	/* FIXME!  Change to use heap. */
+static struct ref_map_s
+{
+  char *stabs;
+  CORE_ADDR value;
+  struct symbol *sym;
+} ref_map[MAX_REFS];	
+
+/* Initialize our list of references.
+   This should be called before any symbol table is read.
+   FIXME: Will reference numbers be unique only to objects?  If so, we may 
+   need to add something to disambiguate the refids.  Or, it might be OK to 
+   leave as is, as long as we read and process an object's symbol table all 
+   at once.  */
+static int ref_count = 0;	/* Ptr to free cell in linked list. */
+static void ref_init ()
+{
+  ref_count = 0;
+  memset (ref_map, 0, MAX_REFS * sizeof (struct ref_map_s));
+}
+
+/* Create array of pointers mapping refids to symbols and stab strings.
+   Add pointers to reference definition symbols and/or their values as we 
+   find them, using their reference numbers as our index. 
+   These will be used later when we resolve references. */
+void ref_add (int refnum, struct symbol *sym, char *stabs, CORE_ADDR value)
+{
+  if (ref_count == 0)
+    ref_init ();
+  if (refnum >= ref_count)
+    ref_count = refnum + 1;
+  if (ref_count > MAX_REFS)
+    error ("no more free slots in chain\n");
+  ref_map[refnum].stabs = stabs;
+  ref_map[refnum].sym = sym;
+  ref_map[refnum].value = value;
+}
+
+/* Remove reference at refnum. 
+   This should be called before a new symbol table is read to clear out the 
+   previous symbol's reference information. */
+/* FIXME!  not used at the moment. */
+static void ref_rmv (int refnum)
+{
+  if (ref_count < 0)
+    error ("slots are empty\n");
+  if (refnum < 0 || refnum > ref_count)
+    error ("No reference for refnum.\n");
+  /* Copy last element over the removed element and reduce count. */
+  ref_map[refnum].stabs = ref_map[ref_count].stabs;
+  ref_map[refnum].sym = ref_map[ref_count].sym;
+  --ref_count;
+}
+
+/* Return defined sym for the reference "refnum" */
+struct symbol *
+ref_search (int refnum)
+{
+  if (refnum < 0 || refnum > ref_count)
+    return 0;
+  return ref_map[refnum].sym;
+}
+
+/* Return value for the reference "refnum" */
+CORE_ADDR
+ref_search_value (int refnum)
+{
+  if (refnum < 0 || refnum > ref_count)
+    return 0;
+  return ref_map[refnum].value;
+}
+   
+/* Parse reference id and advance string to the next character following
+   the string. 
+   Return the reference number. */
+
+static int 
+process_reference (char **string)
+{
+  char *p;
+  int refnum = 0;
+
+  if (**string != '#') 
+    return 0;	
+     
+  /* Read number as reference id. */
+  p = *string + 1;	/* Advance beyond '#' */
+  while (*p && isdigit (*p))
+    {
+      refnum = refnum * 10 + *p - '0';
+      p++;
+    }
+  *string = p;
+  return refnum;
+}
+
+/* If string defines a reference, store away a pointer to the reference 
+   definition for fast lookup when we "process_later",
+   and return the reference number. */
+int
+symbol_reference_defined (char **string)
+{
+  char *p = *string;
+  int refnum = 0;
+
+  refnum = process_reference (&p);
+
+  /* Defining symbols end in '=' */
+  if (*p == '=') 
+    {
+      /* Symbol is being defined here. */ 
+
+      *string = p + 1;
+      return refnum;
+    }
+  else
+    {
+      /* Must be a reference.   Either the symbol has already been defined,
+         or this is a forward reference to it.  */
+
+      *string = p;
+      return 0;        /* Not defined here */
+    }
+}
 
 /* ARGSUSED */
 struct symbol *
@@ -1056,7 +1302,7 @@ define_symbol (valu, string, desc, type, objfile)
   while (p[1] == ':')
     {
        p += 2;
-       p = strchr(p, ':');
+       p = strchr (p, ':');
     }
 
   /* If a nameless stab entry, all we need is the type, not the symbol.
@@ -1124,6 +1370,45 @@ define_symbol (valu, string, desc, type, objfile)
 	    complain (&unrecognized_cplus_name_complaint, string);
 	    goto normal;		/* Do *something* with it */
 	}
+    }
+  else if (string[0] == '#')
+    {
+      /* Special GNU C extension for referencing symbols.  */
+      char *s;
+      int refnum, nlen;
+
+      /* Initialize symbol references and determine if this is 
+         a definition.  If symbol reference is being defined, go 
+         ahead and add it.  Otherwise, just return sym. */
+      s = string;
+      if (refnum = symbol_reference_defined (&s), refnum)
+        ref_add (refnum, sym, string, SYMBOL_VALUE (sym));
+      else
+        process_later (sym, string, resolve_symbol_reference);
+
+      /* s is after refid... advance string there
+         so that the symbol name will not include the refid. */
+      nlen = p - s;
+      if (nlen > 0)
+        {
+          SYMBOL_NAME (sym) = (char *)
+    	    obstack_alloc (&objfile -> symbol_obstack, nlen);
+          strncpy (SYMBOL_NAME (sym), s, nlen);
+          SYMBOL_NAME (sym)[nlen] = '\0';
+          SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+        }
+      else
+        /* FIXME! Want SYMBOL_NAME (sym) = 0;
+	   Get error if leave name 0.  So give it something. */
+        {
+          nlen = p - string;
+          SYMBOL_NAME (sym)	= (char *)
+    	    obstack_alloc (&objfile -> symbol_obstack, nlen);
+          strncpy (SYMBOL_NAME (sym), string, nlen);
+          SYMBOL_NAME (sym)[nlen] = '\0';
+          SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+        }
+      string = s;
     }
   else
     {
@@ -1332,11 +1617,18 @@ define_symbol (valu, string, desc, type, objfile)
 	 corresponding linker definition to find the value.
 	 These definitions appear at the end of the namelist.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
-      i = hashname (SYMBOL_NAME (sym));
-      SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
-      global_sym_chain[i] = sym;
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      /* Don't add symbol references to global_sym_chain.
+	 Symbol references don't have valid names and wont't match up with
+	 minimal symbols when the global_sym_chain is relocated.
+	 We'll fixup symbol references when we fixup the defining symbol.  */
+      if (SYMBOL_NAME (sym) && SYMBOL_NAME (sym)[0] != '#')
+	{
+          i = hashname (SYMBOL_NAME (sym));
+          SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
+          global_sym_chain[i] = sym;
+	}
       add_symbol_to_list (sym, &global_symbols);
       break;
 
@@ -1741,29 +2033,30 @@ define_symbol (valu, string, desc, type, objfile)
       add_symbol_to_list (sym, &local_symbols);
       break;
 
-    /* New code added to support cfront stabs strings */
-    /* Note: case 'P' already handled above */
+    /* New code added to support cfront stabs strings.
+       Note: case 'P' already handled above */
     case 'Z':
       /* Cfront type continuation coming up!
-	find the original definition and add to it.
-	We'll have to do this for the typedef too,
-	since we clloned the symbol to define a type in read_type.
-	Stabs info examples:
-	__1C :Ztl 
-	foo__1CFv :ZtF (first def foo__1CFv:F(0,3);(0,24))
-	C:ZsC;;__ct__1CFv func1__1CFv func2__1CFv ... ;;;
-	where C is the name of the class. */
-	/* can't lookup symbol yet 'cuz symbols not read yet
-	   so we save it for processing later */
-	process_later(sym,p);
+	 Find the original definition and add to it.
+	 We'll have to do this for the typedef too,
+	 since we cloned the symbol to define a type in read_type.
+	 Stabs info examples:
+		 __1C :Ztl 
+		 foo__1CFv :ZtF (first def foo__1CFv:F(0,3);(0,24))
+		 C:ZsC;;__ct__1CFv func1__1CFv func2__1CFv ... ;;;
+		 where C is the name of the class.
+	 Unfortunately, we can't lookup the original symbol yet 'cuz 
+	 we haven't finished reading all the symbols.
+	 Instead, we save it for processing later */
+      process_later (sym, p, resolve_cfront_continuation);
       SYMBOL_TYPE (sym) = error_type (&p, objfile); /* FIXME! change later */ 
-	SYMBOL_CLASS (sym) = LOC_CONST; 
-	SYMBOL_VALUE (sym) = 0; 
-	SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-	/* don't add to list - we'll delete it later when 
-           we add the continuation to the real sym */
-	return sym;
-    /* End of new code added to support cfront stabs strings */
+      SYMBOL_CLASS (sym) = LOC_CONST; 
+      SYMBOL_VALUE (sym) = 0; 
+      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      /* Don't add to list - we'll delete it later when 
+         we add the continuation to the real sym */
+      return sym;
+      /* End of new code added to support cfront stabs strings */
 
     default:
       SYMBOL_TYPE (sym) = error_type (&p, objfile);
@@ -1798,7 +2091,127 @@ define_symbol (valu, string, desc, type, objfile)
 	}
     }
 
+  /* Is there more to parse?  eg. ";l(#1,#2);l(#3,#5)" */
+  while (*p && (*p == ';' || *p == ','))
+    {
+      p++;
+      if (*p && *p == 'l')
+        {
+          /* GNU extensions for live range splitting may be appended to 
+             the end of the stab string.  eg. "l(#1,#2);l(#3,#5)" */
+
+          /* Fix up ranges later. */
+          process_later (sym, p, resolve_live_range);
+
+	  /* Find end of live range info. */
+	  p = strchr (p, ')');
+          if (!*p || *p != ')')
+            error ("Internal error: live range format not recognized.\n");
+          p++;
+       }
+    }
   return sym;
+}
+
+
+/* Add live range information to symbol. (eg. p is l(#1,#2)...) */
+static int 
+resolve_live_range (objfile, sym, p)
+  struct objfile * objfile;
+  struct symbol *sym;
+  char *p;
+{
+  char *s=p;
+  int refnum;
+  CORE_ADDR start, end;
+  
+  if (!*p || *p != 'l')
+    error ("Internal error: live range string.\n");
+  p++;
+
+  if (!*p || *p != '(')
+    error ("Internal error: live range string.\n");
+  p++;
+	
+  /* Get starting value of range symbol reference. eg. "#1,#2),l(#3,#5)"
+     and advance p past the refid. */
+  refnum = process_reference (&p);
+  start = ref_search_value (refnum);
+  if (!start)
+    error ("Internal error: live range symbol not found.\n");
+
+  if (!*p || *p != ',')
+    error ("Internal error: live range string.\n");
+  p++;
+
+  /* Get ending value of range symbol reference. eg. "#2),l(#3,#5)" */
+  refnum = process_reference (&p);
+  end = ref_search_value (refnum);
+  if (!end)
+    error ("Internal error: live range symbol not found.\n");
+
+  add_live_range (objfile, sym, start, end);
+
+  if (!*p || *p != ')')
+    error ("Internal error: live range string.\n");
+  p++;
+  return 0; 
+}
+
+void
+add_live_range (objfile, sym, start, end)
+  struct objfile *objfile;
+  struct symbol *sym;
+  CORE_ADDR start, end;
+{
+  struct live_range *r, *rs;
+
+  if (start >= end)
+    error ("Internal error: end of live range follows start.\n");
+
+  /* Alloc new live range structure. */
+  r = (struct live_range *)
+		obstack_alloc (&objfile->type_obstack, 
+				sizeof (struct live_range));
+  r->start = start;
+  r->end = end;
+  r->next = 0;
+
+  /* Append this range to the symbol's range list. */
+  if (!SYMBOL_RANGE (sym))
+    {
+      SYMBOL_RANGE (sym) = r;
+    }
+  else
+    {
+      /* Get the last range for the symbol. */
+      for (rs = SYMBOL_RANGE (sym); rs->next; rs = rs->next)
+	;
+      rs->next = r;
+    }
+}
+
+/* Given addr, Search thu alias list to find the one active. */
+struct symbol *
+ref_search_val (sym, addr)
+  struct symbol *sym;
+  CORE_ADDR addr;
+{
+  struct live_range *r;
+
+  while (sym)
+    {
+      if (!SYMBOL_RANGE (sym))
+        return sym;
+      for (r = SYMBOL_RANGE (sym); r; r = r->next)
+	{
+	  if (r->start <= addr
+		    && r->end > addr)
+	    return sym;
+	}
+      sym = SYMBOL_ALIASES (sym);
+    }
+  return 0;
 }
 
 
@@ -1953,8 +2366,8 @@ read_type (pp, objfile)
 	      }
 	    }
 	   
-	  q1 = strchr(*pp, '<');
-	  p = strchr(*pp, ':');
+	  q1 = strchr (*pp, '<');
+	  p = strchr (*pp, ':');
 	  if (p == NULL)
 	    return error_type (pp, objfile);
 	  if (q1 && p > q1 && p[1] == ':')
@@ -2094,7 +2507,7 @@ read_type (pp, objfile)
 	  ++*pp;
 	  while (**pp != ')')
             {
-              t = read_type(pp, objfile);
+              t = read_type (pp, objfile);
               if (**pp == ',') ++*pp;
             }
 	}
@@ -2876,7 +3289,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
           if (dem_p != 0 && *(dem_p-1)==':')
             dem_p++;
           FIELD_NAME (fip->list->field) =
-            obsavestring (dem_p, strlen(dem_p), &objfile -> type_obstack);
+            obsavestring (dem_p, strlen (dem_p), &objfile -> type_obstack);
         }
       else
         {
@@ -3350,7 +3763,7 @@ attach_fn_fields_to_type (fip, type)
    */
 
 static int
-read_cfront_static_fields(fip, pp, type, objfile)
+read_cfront_static_fields (fip, pp, type, objfile)
      struct field_info *fip;
      char **pp;
      struct type *type;
@@ -3371,7 +3784,7 @@ read_cfront_static_fields(fip, pp, type, objfile)
 
   /* eg: p = "as__1A ;;;" */
   STABS_CONTINUE (pp, objfile); 		/* handle \\ */
-  while (**pp!=';' && (sname = get_substring(pp,' '),sname)) 
+  while (**pp!=';' && (sname = get_substring (pp, ' '), sname)) 
     {
       ref_static = lookup_symbol (sname, 0, VAR_NAMESPACE, 0, 0); /*demangled_name*/
       if (!ref_static) 
@@ -3399,7 +3812,7 @@ read_cfront_static_fields(fip, pp, type, objfile)
       fip -> list -> field.type = stype; 
 
       /* set bitpos & bitsize */
-      SET_FIELD_PHYSNAME (fip->list->field, savestring (sname, strlen(sname)));
+      SET_FIELD_PHYSNAME (fip->list->field, savestring (sname, strlen (sname)));
 
       /* set name field */
       /* The following is code to work around cfront generated stabs.
@@ -3416,12 +3829,12 @@ read_cfront_static_fields(fip, pp, type, objfile)
               if (dem_p != 0 && *(dem_p-1)==':')
                 dem_p++;
               fip->list->field.name =
-                obsavestring (dem_p, strlen(dem_p), &objfile -> type_obstack);
+                obsavestring (dem_p, strlen (dem_p), &objfile -> type_obstack);
             }
           else
             {
               fip->list->field.name =
-                obsavestring (sname, strlen(sname), &objfile -> type_obstack); 
+                obsavestring (sname, strlen (sname), &objfile -> type_obstack); 
 	    }
         } /* end of code for cfront work around */ 
     } /* loop again for next static field */
@@ -3435,7 +3848,7 @@ read_cfront_static_fields(fip, pp, type, objfile)
    once we have collected all the class members. */
 
 static int
-copy_cfront_struct_fields(fip, type, objfile)
+copy_cfront_struct_fields (fip, type, objfile)
      struct field_info *fip;
      struct type *type;
      struct objfile *objfile;
@@ -4489,7 +4902,7 @@ scan_file_globals (objfile)
 {
   int hash;
   struct minimal_symbol *msymbol;
-  struct symbol *sym, *prev;
+  struct symbol *sym, *prev, *rsym;
   struct objfile *resolve_objfile;
 
   /* SVR4 based linkers copy referenced global symbols from shared
@@ -4558,17 +4971,25 @@ scan_file_globals (objfile)
 		  /* Note: this code might be executed several times for
 		     the same symbol if there are multiple references.  */
 
-		  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+		  /* If symbol has aliases, do minimal symbol fixups for each.
+		     These live aliases/references weren't added to 
+		     global_sym_chain hash but may also need to be fixed up. */
+		  /* FIXME: Maybe should have added aliases to the global chain,		     resolved symbol name, then treated aliases as normal 
+		     symbols?  Still, we wouldn't want to add_to_list. */
+		  /* Now do the same for each alias of this symbol */
+		  for (rsym = sym; rsym; rsym = SYMBOL_ALIASES (rsym))
 		    {
-		      fix_common_block (sym, SYMBOL_VALUE_ADDRESS (msymbol));
+		      if (SYMBOL_CLASS (rsym) == LOC_BLOCK)
+		        {
+		          fix_common_block (rsym, SYMBOL_VALUE_ADDRESS (msymbol));
+		        }
+		      else
+		        {
+		          SYMBOL_VALUE_ADDRESS (rsym)
+			    = SYMBOL_VALUE_ADDRESS (msymbol);
+		        }
+		      SYMBOL_SECTION (rsym) = SYMBOL_SECTION (msymbol);
 		    }
-		  else
-		    {
-		      SYMBOL_VALUE_ADDRESS (sym)
-			= SYMBOL_VALUE_ADDRESS (msymbol);
-		    }
-
-		  SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
 		  
 		  if (prev)
 		    {

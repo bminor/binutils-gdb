@@ -168,7 +168,7 @@ end_stabs PARAMS ((void));
 extern void
 finish_global_stabs PARAMS ((struct objfile *objfile));
 
-extern void 
+extern int
 resolve_cfront_continuation PARAMS((struct objfile * objfile, 
 		struct symbol * sym, char * p));
 
@@ -236,6 +236,7 @@ extern void stabsect_build_psymtabs
 extern void elfstab_offset_sections PARAMS ((struct objfile *,
 					     struct partial_symtab *));
 
-extern void process_later PARAMS ((struct symbol *, char *));
+extern void process_later PARAMS ((struct symbol *, char *, 
+		int (*f) (struct objfile *, struct symbol *, char *)));
 
 #undef EXTERN

@@ -182,6 +182,9 @@ struct complaint lbrac_mismatch_complaint =
 
 struct complaint repeated_header_complaint =
   {"\"repeated\" header file %s not previously seen, at symtab pos %d", 0, 0};
+
+struct complaint unclaimed_bincl_complaint =
+  {"N_BINCL %s not in entries for any file, at symtab pos %d", 0, 0};
 
 /* During initial symbol readin, we need to have a structure to keep
    track of which psymtabs have which bincls in them.  This structure
@@ -770,6 +773,7 @@ struct cont_elem
     int sym_idx;
     int sym_end;
     int symnum;
+    int (*func) (struct objfile *, struct symbol *, char *);
     /* other state dependancies include:
        (assumption is that these will not change since process_now FIXME!!)
         stringtab_global
@@ -777,25 +781,37 @@ struct cont_elem
         objfile
         symfile_bfd */
 };
-static struct cont_elem cont_list[100];
+
+static struct cont_elem *cont_list = 0;
+static int cont_limit = 0;
 static int cont_count = 0;
 
 void 
-process_later(sym,p)
+process_later (sym, p, f)
   struct symbol * sym;
   char * p;
+  int (*f) (struct objfile *, struct symbol *, char *);
 {
+  if (cont_count >= cont_limit - 1)
+    {
+      cont_limit += 32;	/* chunk size */
+      cont_list = (struct cont_elem *) realloc (cont_list, 
+					cont_limit * sizeof (struct cont_elem));
+      if (!cont_list)
+        error ("Virtual memory exhausted\n");
+    }
   /* save state so we can process these stabs later */
   cont_list[cont_count].sym_idx = symbuf_idx;
   cont_list[cont_count].sym_end = symbuf_end;
   cont_list[cont_count].symnum = symnum;
   cont_list[cont_count].sym = sym;
   cont_list[cont_count].stabs = p;
+  cont_list[cont_count].func = f;
   cont_count++;
 }
 
 static void 
-process_now(objfile) 
+process_now (objfile) 
   struct objfile * objfile;
 {
   int i;
@@ -803,14 +819,25 @@ process_now(objfile)
   int save_symbuf_idx = symbuf_idx;
   int save_symbuf_end = symbuf_end;
   int save_symnum = symnum;
+  struct symbol *sym;
+  char *stabs;
+  int err;
+  int (*func) (struct objfile *, struct symbol *, char *);
+
   for (i=0; i<cont_count; i++) 
     {
-      /* set state as if we were parsing stabs strings 
+      /* Set state as if we were parsing stabs strings 
          for this symbol */
       symbuf_idx = cont_list[i].sym_idx;   /* statics used by gdb */
       symbuf_end = cont_list[i].sym_end;  
       symnum = cont_list[i].symnum;  
-      resolve_cfront_continuation(objfile,cont_list[i].sym,cont_list[i].stabs);
+      sym = cont_list[i].sym;
+      stabs = cont_list[i].stabs;
+      func = cont_list[i].func;
+
+      err = (*func) (objfile, sym, stabs);
+      if (err)
+	error ("Internal error: unable to resolve stab.\n");
     }
   /* restore original state */
   symbuf_idx = save_symbuf_idx;
@@ -956,8 +983,6 @@ add_bincl_to_list (pst, name, instance)
       bincl_list = (struct header_file_location *)
 	xmrealloc (pst->objfile->md, (char *)bincl_list,
 		  bincls_allocated * sizeof (struct header_file_location));
-      if (bincl_list == NULL)
-	fatal ("virtual memory exhausted in add_bincl_to_list ();");
       next_bincl = bincl_list + offset;
     }
   next_bincl->pst = pst;
@@ -1782,8 +1807,9 @@ read_ofile_symtab (pst)
 
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT);
 
-  if (ARM_DEMANGLING)	/* process incomplete C++ types now */
-    process_now(objfile);
+  /* Process items which we had to "process_later" due to dependancies 
+     on other stabs. */
+  process_now (objfile);	
 
   end_stabs ();
 }
@@ -2336,6 +2362,29 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_MAIN:		/* Name of main routine.  */
       break;
     }
+
+  /* Special GNU C extension for referencing names.  */
+  if (name[0] == '#')
+    {
+      /* Initialize symbol reference names and determine if this is 
+         a definition.  If symbol reference is being defined, go 
+         ahead and add it.  Otherwise, just return sym. */
+      char *s;
+      int refnum;
+      extern int symbol_reference_defined (char **);
+      extern void ref_add (int, struct symbol *, char *, CORE_ADDR);
+      extern struct symbol * ref_search (int);
+
+      /* If defined, store away a pointer to the symbol;
+	 we'll use it later when we resolve references in
+	 "resolve_symbol_reference". */
+      s = name;
+      if (refnum = symbol_reference_defined (&s), refnum)
+	if (!ref_search (refnum))
+	  ref_add (refnum, 0, name, valu);
+      name = s;		/* Advance past refid. */
+    }
+
 
   previous_stab_code = type;
 }

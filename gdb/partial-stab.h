@@ -666,6 +666,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	    case '8':
 	    case '9':
 	    case '-':
+	    case '#':   /* for symbol identification (used in live ranges) */
 	   /* added to support cfront stabs strings */
 	    case 'Z':	/* for definition continuations */
 	    case 'P':	/* for prototypes */

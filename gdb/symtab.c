@@ -912,6 +912,7 @@ lookup_block_symbol (block, name, namespace)
      const char *name;
      const namespace_enum namespace;
 {
+  extern struct symbol *ref_search_val (struct symbol *sym, CORE_ADDR addr);
   register int bot, top, inc;
   register struct symbol *sym;
   register struct symbol *sym_found = NULL;
@@ -1017,6 +1018,10 @@ lookup_block_symbol (block, name, namespace)
 	  if (SYMBOL_NAMESPACE (sym) == namespace &&
 	      SYMBOL_MATCHES_NAME (sym, name))
 	    {
+	      /* Given pc, search thu alias list to find the active symbol. */
+              if (SYMBOL_ALIASES (sym))
+                sym = ref_search_val (sym, read_pc ());
+
 	      sym_found = sym;
 	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
@@ -2080,15 +2085,25 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	}
       if (p[0] == ':' || p[0] == ' ' || p[0] == '\t')
 	break;
+      if (p[0] == '.' && strchr (p, ':') == NULL) /* Java qualified method. */
+	{
+	  /* Find the *last* '.', since the others are package qualifiers. */
+	  for (p1 = p;  *p1;  p1++)
+	    {
+	      if (*p1 == '.')
+		p = p1;
+	    }
+	  break;
+	}
     }
   while (p[0] == ' ' || p[0] == '\t') p++;
 
-  if ((p[0] == ':') && !has_parens)
+  if ((p[0] == ':' || p[0] == '.') && !has_parens)
     {
 
-      /*  C++  */
+      /*  C++ or Java */
       if (is_quoted) *argptr = *argptr+1;
-      if (p[1] ==':')
+      if (p[0] == '.' || p[1] ==':')
 	{
 	  /* Extract the class name.  */
 	  p1 = p;
@@ -2098,7 +2113,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	  copy[p - *argptr] = 0;
 
 	  /* Discard the class name from the arg.  */
-	  p = p1 + 2;
+	  p = p1 + (p1[0] == ':' ? 2 : 1);
 	  while (*p == ' ' || *p == '\t') p++;
 	  *argptr = p;
 
