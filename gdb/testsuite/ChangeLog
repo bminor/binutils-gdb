@@ -1,3 +1,45 @@
+start-sanitize-gdbtk
+Wed Dec 30 08:52:58 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.gdbtk/{console.exp, browser.exp}: If no DISPLAY is set,
+	skip the tests.
+
+end-sanitize-gdbtk
+Mon Dec 21 14:08:38 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following change was made by Edith Epstein
+ 	<eepstein@cygnus.com> as part of a project to merge in changes
+ 	originally made by HP; HP did not create ChangeLog entries.
+
+	* gdb.c++/demangle.exp: changed the expected output for some
+	ARM-style mangling -- removed second reference to datatype.
+ 	For example, maint demangle __dt__11T1__pt__2_cFv
+                     T1<char>::~T1<char>(void)
+	becomes,
+	             maint demangle __dt__11T1__pt__2_cFv
+                     T1<char>::~T1(void)
+
+ 	(test_hp_style_demangling): new hp specific demangling test cases.
+	
+Mon Dec 14 15:07:03 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.trace/actions.exp: Ignore compiler warnings compiling actions.c
+	* gdb.trace/backtrace.exp: Likewise.
+	* gdb.trace/circ.exp: Likewise.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/deltrace.exp: Likewise.
+	* gdb.trace/infotrace.exp: Likewise.
+	* gdb.trace/limits.exp: Likewise.
+	* gdb.trace/packetlen.exp: Likewise.
+	* gdb.trace/passc-dyn.exp: Likewise.
+	* gdb.trace/passcount.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/save-trace.exp: Likewise.
+	* gdb.trace/tfind.exp: Likewise.
+	* gdb.trace/tracecmd.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+	* gdb.trace/while-stepping.exp: Likewise.
+
 1998-12-07  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdb.base/restore.exp, gdb.base/restore.c: New tests.
@@ -108,12 +150,12 @@ Thu Jul 16 18:20:46 1998  Jeffrey A Law  (law@cygnus.com)
 	* gdb.disasm/am33.exp: Corresponding changes.
 
 end-sanitize-am33
-start-sanitize-gdbtk
+start-sanitize-cygnus-never
 Tue Jul 14 16:11:11 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* configure.in: Fix sanitization start/end error.
 	* configure: Regenerate.
-end-sanitize-gdbtk
+end-sanitize-cygnus-never
 1998-07-11  Felix Lee  <flee@cygnus.com>
 
 	* gdb.base/callfuncs.exp: add cmp10 test.
