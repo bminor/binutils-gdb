@@ -44,7 +44,6 @@ hppabsd.h
 hppahpux.h
 i386aix.h
 i386bsd.h
-i386isc.h
 i386linux.h
 i386lynx.h
 i386mach3.h
