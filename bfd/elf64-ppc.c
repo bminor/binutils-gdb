@@ -2583,8 +2583,11 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
-  edir->is_func |= eind->is_func;
-  edir->is_func_descriptor |= eind->is_func_descriptor;
+  /* We don't need to copy is_func and is_func_descriptor;  They're
+     never set when copy_indirect_symbol is called for indirect
+     symbols at the add_symbols stage of linking, and they're not
+     relevant when copy_indirect_symbol is called for weakdefs.
+     weakdefs are only held for non-function syms.  */
 
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 }
@@ -3236,8 +3239,14 @@ func_desc_adjust (h, inf)
 	 been imported from another library.  Function code syms that
 	 are really in the library we must leave global to prevent the
 	 linker dragging in a definition from a static library.  */
-      force_local = ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
-		     && info->shared);
+      force_local = (info->shared
+		     && ((h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0
+			 || fdh == NULL
+			 || (fdh->elf_link_hash_flags
+			     & ELF_LINK_HASH_DEF_REGULAR) == 0
+			 || (fdh->elf_link_hash_flags
+			     & ELF_LINK_FORCED_LOCAL) != 0));
       _bfd_elf_link_hash_hide_symbol (info, h, force_local);
     }
 

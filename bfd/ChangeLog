@@ -1,3 +1,10 @@
+2002-05-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't copy is_func
+	and is_func_descriptor.
+	(func_desc_adjust): Hide function code sym in shared libs unless
+	there is a matching exported function descriptor sym.
+
 2002-05-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Set SEC_THREAD_LOCAL
@@ -151,9 +158,9 @@
 2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* aix5ppc-core.c (xcoff64_core_p): Replace bfd_read with
-        bfd_bread.
-        (xcoff64_core_file_matches_executable_p): Replace bfd_read
-        with bfd_bread.
+	bfd_bread.
+	(xcoff64_core_file_matches_executable_p): Replace bfd_read
+	with bfd_bread.
 
 2002-05-15  Alan Modra  <amodra@bigpond.net.au>
 
@@ -261,7 +268,7 @@
 
 2002-05-10  Tom Rix  <trix@redhat.com>
 
-	* coff64-rs6000.c (xcoff64_reloc_type_br): New function for 
+	* coff64-rs6000.c (xcoff64_reloc_type_br): New function for
 	xcoff64_ppc_relocate_section.
 	* coff-rs6000.c : Extern common xcoff_reloc_type functions.
 	* libxcoff.h: Common xcoff_reloc_type function declaration.
@@ -288,7 +295,7 @@
 
 	* elf32-ppc.c (ppc_elf_create_got): New function.
 	(ppc_elf_create_dynamic_sections): Call ppc_elf_create_got before
-	_bfd_elf_create_dynamic_sections.  Correct .plt flags. 
+	_bfd_elf_create_dynamic_sections.  Correct .plt flags.
 	(ppc_elf_check_relocs): Use ppc_elf_create_got in place of
 	_bfd_elf_create_got_section.
 
@@ -371,16 +378,16 @@
 	(xcoff_rtype2howto): Renamed from _bfd_xcoff_rtype2howto. Special
 	case some 16 bit relocs. Add reloc value to output.
 	(xcoff_howto_table): Remove 64 bit R_POS, add 16 bit
-	R_RBR. Improve names. 
+	R_RBR. Improve names.
 	(_bfd_xcoff_reloc_type_lookup): Adjust for removal of 64 bit R_POS.
 	(bfd_xcoff_backend_data): Update with new reloc swap names.
 	(bfd_pmac_xcoff_backend_data) : Same.
 	* coff64-rs6000.c: (xcoff64_swap_reloc_in): Moved from coffswap.h.
 	(xcoff64_swap_reloc_out): Same.
-	(xcoff64_rtype2howto): Special case some 16 bit relocs and 32 bit 
+	(xcoff64_rtype2howto): Special case some 16 bit relocs and 32 bit
 	R_POS. Add reloc value to output.
-	(xcoff64_howto_table): Move 64 bit R_POS to first entry.  Add 16 
-	bit R_RBR. Improve names, masks. 
+	(xcoff64_howto_table): Move 64 bit R_POS to first entry.  Add 16
+	bit R_RBR. Improve names, masks.
 	(xcoff64_reloc_type_lookup): Adjust for move of 64 bit R_POS.
 	(bfd_xcoff_backend_data): Update with new reloc swap names.
 	(bfd_xcoff_aix5_backend_data) : Same.
@@ -413,7 +420,7 @@
 	(mips_elf_record_global_got_symbol): Call _bfd_mips_elf_hide_symbol
 	to hide a global symbol.
 	(_bfd_mips_elf_hide_symbol): Return if forced_local is true. Set
-	forced_local to true. 
+	forced_local to true.
 
 2002-05-02  Richard Henderson  <rth@redhat.com>
 
@@ -460,7 +467,7 @@
 	* elf64-ppc.h (ppc64_elf_set_toc): Delete.
 	(ppc64_elf_toc): Declare.
 	(ppc64_elf_next_input_section): Update.
-	
+
 2002-05-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Don't bomb on NULL
@@ -536,11 +543,11 @@
 2002-04-28  Tom Rix  <trix@redhat.com>
 
 	* coff-rs6000.c (xcoff_calculate_relocation) : Function table for
-	calulating relocations. 
+	calulating relocations.
 	(xcoff_complain_overflow) : Function table for relocation errors.
-	(xcoff_ppc_relocate_section): Use relocation and complain function 
-	tables. 
-	(xcoff_complain_overflow_unsigned_func): New complain function. 
+	(xcoff_ppc_relocate_section): Use relocation and complain function
+	tables.
+	(xcoff_complain_overflow_unsigned_func): New complain function.
 	(xcoff_complain_overflow_signed_func): Same.
 	(xcoff_complain_overflow_bitfield_func): Same.
 	(xcoff_complain_overflow_dont_func): Same.
@@ -555,7 +562,7 @@
 	(xcoff_reloc_type_noop): Same.
 	* libxcoff.h : Declare common parts for xcoff64.
 	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Use relocation
-	and complain function tables. 
+	and complain function tables.
 
 2002-04-28  Alan Modra  <amodra@bigpond.net.au>
 
@@ -637,12 +644,12 @@
 	insert_thumb_branch, record_thumb_to_arm_glue): Suppress
 	definition of these functions for ARM_WINCE builds as they are
 	not used.
-        (SWAP_IN_RELOC_OFFSET, SWAP_OUT_RELOC_OFFSET): Do not define
+	(SWAP_IN_RELOC_OFFSET, SWAP_OUT_RELOC_OFFSET): Do not define
 	for ARM_WINCE builds.
 
 2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* coff-arm.c (bfd_arm_process_before_allocation): 
+	* coff-arm.c (bfd_arm_process_before_allocation):
 
 2002-04-17  J"orn Rennecke <joern.rennecke@superh.com>
 
@@ -1038,13 +1045,13 @@
 
 2002-03-20  Tom Rix  <trix@redhat.com>
 
-	* coff-rs6000.c (_bfd_xcoff_stat_arch_elt): Renamed from 
+	* coff-rs6000.c (_bfd_xcoff_stat_arch_elt): Renamed from
 	_bfd_xcoff_generic_stat_arch_elt.  Fix format check.
-	* coff64-rs6000.c :  Use _bfd_xcoff_stat_arch_elt. 
+	* coff64-rs6000.c :  Use _bfd_xcoff_stat_arch_elt.
 
 2002-03-19  Tom Rix  <trix@redhat.com>
 
-	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Look through all 
+	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Look through all
 	dynamic objects in archives.
 
 2002-03-19  Hans-Peter Nilsson  <hp@bitrange.com>
@@ -1069,14 +1076,14 @@
 	(xcoff_write_archive_contents_big) : Use do_shared_object_padding,
 	do_copy and do_pad.
 	* coff64-rs6000.c (xcoff64_write_ojbect_contents) : Use
-	bfd_xcoff_magic_number. 
+	bfd_xcoff_magic_number.
 	(xcoff64_bad_format_hook) : New function for _bfd_bad_format_hook
 	fop.
 	(xcoff_backend_data_r) : Use xcoff64_bad_format_hook.
 	(bfd_xcoff_aix5_backend_data) : New Aix 5 backend data.
 	(aix5coff64_vec) : New Aix 5 target aix5coff64-rs6000.
 	* rs6000-core.c : Update copyright date.
-	* xcofflink.c (bfd_xcoff_size_dynamic_sections): Check for NULL 
+	* xcofflink.c (bfd_xcoff_size_dynamic_sections): Check for NULL
 	csectpp.
 	* coffcode.h (coff_new_section_hook) : Use new accessor macros.
 	(coff_set_arch_mach_hook) : Add Aix 5 U64_TOCMAGIC magic #.
