@@ -681,6 +681,7 @@ store_floating (void *addr, int len, DOUBLEST val)
     {
       warning ("Can't store a floating-point number of %d bytes.", len);
       memset (addr, 0, len);
+      return;
     }
 
   floatformat_from_doublest (fmt, &val, addr);
