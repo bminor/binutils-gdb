@@ -74,6 +74,7 @@ i[3456]86-*-sco*)	targ_emul=i386coff ;;
 i[3456]86-*-isc*)	targ_emul=i386coff ;;
 i[3456]86-*-lynxos*)	targ_emul=i386lynx ;;
 i[3456]86-*-coff)	targ_emul=i386coff ;;
+i[3456]86-*-rtemself*)  targ_emul=elf_i386 ;;
 i[3456]86-*-rtems*)	targ_emul=i386coff ;;
 i[3456]86-*-bsd)	targ_emul=i386bsd ;;
 i[3456]86-*-bsd386)	targ_emul=i386bsd ;;
@@ -140,7 +141,8 @@ h8500-*-hms* | h8500-*-coff*)
 			targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
-sh-*-elf*)		targ_emul=shelf
+sh-*-elf* | sh-*-rtemself*)
+			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
 sh-*-*|sh-*-rtems*)	targ_emul=sh; targ_extra_emuls=shl ;;
@@ -186,6 +188,7 @@ mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
+mips*el-*-rtems*)	targ_emul=elf32elmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
 mips*-*-vxworks*)	targ_emul=elf32ebmip ;;
 mips*el-*-linux-gnu*)	targ_emul=elf32lsmip
@@ -216,6 +219,7 @@ powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-linux-gnu* | powerpc-*-sysv* \
 powerpcle-*-elf* | powerpcle-*-eabi* | powerpcle-*-solaris* \
   | powerpcle-*-sysv* | powerpcle-*-vxworks*)
 	targ_emul=elf32lppc ;;
+powerpcle-*-rtems*)	targ_emul=elf32leppc ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;

@@ -1,3 +1,8 @@
+Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* configure.tgt (i386-*-rtemself*, sh-*-rtemself*): New targets.
+	(mips*el-*-rtems*, powerpcle-*-rtems*): New targets.
+
 1999-05-10  DJ Delorie  <dj@cygnus.com>
 
 	* scripttempl/pe.sc: Specify the output arch, which Ian says is
