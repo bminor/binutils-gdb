@@ -36,7 +36,7 @@
 #include "complaints.h"
 #include "gdb_string.h"
 #include "expression.h"		/* For "enum exp_opcode" used by... */
-#include "language.h"		/* For "longest_local_hex_string_custom" */
+#include "language.h"		/* For "local_hex_string" */
 #include "bcache.h"
 #include "filenames.h"		/* For DOSish file names */
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
@@ -509,7 +509,7 @@ make_blockvector (struct objfile *objfile)
 		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
 
 	      complain (&blockvector_complaint,
-			longest_local_hex_string ((LONGEST) start));
+			local_hex_string ((LONGEST) start));
 	    }
 	}
     }

@@ -595,34 +595,12 @@ local_hex_format_custom (char *pre)
   return form;
 }
 
-/* Converts a number to hexadecimal and stores it in a static
+/* Converts a LONGEST to custom hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-local_hex_string (unsigned long num)
+local_hex_string (LONGEST num)
 {
-  static char res[50];
-
-  sprintf (res, local_hex_format (), num);
-  return res;
-}
-
-/* Converts a LONGEST number to hexadecimal and stores it in a static
-   string.  Returns a pointer to this string. */
-char *
-longest_local_hex_string (LONGEST num)
-{
-  return longest_local_hex_string_custom (num, "l");
-}
-
-/* Converts a number to custom hexadecimal and stores it in a static
-   string.  Returns a pointer to this string. */
-char *
-local_hex_string_custom (unsigned long num, char *pre)
-{
-  static char res[50];
-
-  sprintf (res, local_hex_format_custom (pre), num);
-  return res;
+  return local_hex_string_custom (num, "l");
 }
 
 /* Converts a LONGEST number to custom hexadecimal and stores it in a static
@@ -630,12 +608,11 @@ local_hex_string_custom (unsigned long num, char *pre)
    should end with "l", e.g. "08l" as with calls to local_hex_string_custom */
 
 char *
-longest_local_hex_string_custom (LONGEST num, char *width)
+local_hex_string_custom (LONGEST num, char *width)
 {
 #define RESULT_BUF_LEN 50
   static char res2[RESULT_BUF_LEN];
   char format[RESULT_BUF_LEN];
-#if !defined (PRINTF_HAS_LONG_LONG)
   int field_width;
   int num_len;
   int num_pad_chars;
@@ -643,24 +620,7 @@ longest_local_hex_string_custom (LONGEST num, char *width)
   int pad_on_left;
   char *parse_ptr;
   char temp_nbr_buf[RESULT_BUF_LEN];
-#endif
 
-#ifndef CC_HAS_LONG_LONG
-  /* If there is no long long, then LONGEST should be just long and we
-     can use local_hex_string_custom 
-   */
-  return local_hex_string_custom ((unsigned long) num, width);
-#elif defined (PRINTF_HAS_LONG_LONG)
-  /* Just use printf.  */
-  strcpy (format, local_hex_format_prefix ());	/* 0x */
-  strcat (format, "%");
-  strcat (format, width);	/* e.g. "08l" */
-  strcat (format, "l");		/* need "ll" for long long */
-  strcat (format, local_hex_format_specifier ());	/* "x" */
-  strcat (format, local_hex_format_suffix ());	/* "" */
-  sprintf (res2, format, num);
-  return res2;
-#else /* !defined (PRINTF_HAS_LONG_LONG) */
   /* Use phex_nz to print the number into a string, then
      build the result string from local_hex_format_prefix, padding and 
      the hex representation as indicated by "width".  */
@@ -687,7 +647,7 @@ longest_local_hex_string_custom (LONGEST num, char *width)
   if (strlen (local_hex_format_prefix ()) + num_len + num_pad_chars
       >= RESULT_BUF_LEN)		/* paranoia */
     internal_error (__FILE__, __LINE__,
-		    "longest_local_hex_string_custom: insufficient space to store result");
+		    "local_hex_string_custom: insufficient space to store result");
 
   strcpy (res2, local_hex_format_prefix ());
   if (pad_on_left)
@@ -708,9 +668,8 @@ longest_local_hex_string_custom (LONGEST num, char *width)
 	}
     }
   return res2;
-#endif
 
-}				/* longest_local_hex_string_custom */
+}				/* local_hex_string_custom */
 
 /* Returns the appropriate printf format for octal
    numbers. */

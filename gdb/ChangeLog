@@ -1,5 +1,30 @@
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* language.c (local_hex_string_custom): Simplify.  Do not depend
+	on PRINTF_HAS_LONG_LONG or CC_HAS_LONG_LONG.
+
+	* memattr.c (mem_info_command): Replace calls to
+	longest_local_hex_string and longest_local_hex_string_custom.
+	* buildsym.c (make_blockvector): Ditto.
+	* solib.c (info_sharedlibrary_command): Ditto.
+	* tracepoint.c (tracepoints_info): Ditto.
+	* symtab.c (print_msymbol_info): Ditto.
+
+	* language.c (local_hex_string): Delete.
+	(local_hex_string_custom): Delete.
+	(longest_local_hex_string): Rename to local_hex_string.
+	(longest_local_hex_string_custom): Rename to
+	local_hex_string_custom.
+	* language.h (local_hex_string): Change parameter type to LONGEST.
+	(local_hex_string_custom): Ditto.
+	(longest_local_hex_string): Delete declaration.
+	(longest_local_hex_string_custom): Ditto.
+
+	* solib.c: Update copyright.
+	* memattr.c: Update copyright.
+	
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* arch-utils.h (legacy_register_to_value): Declare.
 	(legacy_value_to_register): Declare.
 	(legacy_convert_register_p): Declare.
