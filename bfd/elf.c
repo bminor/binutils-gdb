@@ -47,6 +47,12 @@ static boolean assign_file_positions_except_relocs PARAMS ((bfd *));
 static boolean prep_headers PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **));
 static boolean copy_private_bfd_data PARAMS ((bfd *, bfd *));
+static char *elf_read PARAMS ((bfd *, long, unsigned int));
+static void elf_fake_sections PARAMS ((bfd *, asection *, PTR));
+static boolean assign_section_numbers PARAMS ((bfd *));
+static INLINE int sym_is_global PARAMS ((bfd *, asymbol *));
+static boolean elf_map_symbols PARAMS ((bfd *));
+static bfd_size_type get_program_header_size PARAMS ((bfd *));
 
 /* Standard ELF hash function.  Do not change this function; you will
    cause invalid hash tables to be generated.  (Well, you would if this

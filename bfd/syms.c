@@ -307,6 +307,8 @@ CODE_FRAGMENT
 #include "bfdlink.h"
 #include "aout/stab_gnu.h"
 
+static char coff_section_type PARAMS ((const char *));
+
 /*
 DOCDD
 INODE
@@ -483,13 +485,16 @@ static CONST struct section_to_type stt[] =
 {
   {"*DEBUG*", 'N'},
   {".bss", 'b'},
+  {"zerovars", 'b'},		/* MRI .bss */
   {".data", 'd'},
+  {"vars", 'd'},		/* MRI .data */
   {".rdata", 'r'},		/* Read only data.  */
   {".rodata", 'r'},		/* Read only data.  */
   {".sbss", 's'},		/* Small BSS (uninitialized data).  */
   {".scommon", 'c'},		/* Small common.  */
   {".sdata", 'g'},		/* Small initialized data.  */
   {".text", 't'},
+  {"code", 't'},		/* MRI .text */
   {0, 0}
 };
 
@@ -501,7 +506,7 @@ static CONST struct section_to_type stt[] =
 
 static char
 coff_section_type (s)
-     char *s;
+     const char *s;
 {
   CONST struct section_to_type *t;
 
@@ -768,7 +773,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	{
 	  /* No stabs debugging information.  Set *pinfo so that we
              can return quickly in the info != NULL case above.  */
-	  *pinfo = info;
+	  *pinfo = (PTR) info;
 	  return true;
 	}
 
@@ -841,7 +846,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
       if (reloc_vector != NULL)
 	free (reloc_vector);
 
-      *pinfo = info;
+      *pinfo = (PTR) info;
     }
 
   /* We are passed a section relative offset.  The offsets in the
@@ -930,7 +935,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	      break;
 	    }
 
-	  name = str + bfd_get_32 (abfd, stab + STRDXOFF);
+	  name = (char *) str + bfd_get_32 (abfd, stab + STRDXOFF);
 
 	  /* An empty string indicates the end of the compilation
              unit.  */
@@ -963,7 +968,8 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	    {
 	      stab += STABSIZE;
 	      directory_name = current_file_name;
-	      current_file_name = str + bfd_get_32 (abfd, stab + STRDXOFF);
+	      current_file_name = ((char *) str
+				   + bfd_get_32 (abfd, stab + STRDXOFF));
 	    }
 
 	  main_file_name = current_file_name;
@@ -972,7 +978,8 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 
 	case N_SOL:
 	  /* The name of an include file.  */
-	  current_file_name = str + bfd_get_32 (abfd, stab + STRDXOFF);
+	  current_file_name = ((char *) str
+			       + bfd_get_32 (abfd, stab + STRDXOFF));
 	  break;
 
 	case N_SLINE:
@@ -992,7 +999,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	case N_FUN:
 	  /* A function name.  */
 	  val = bfd_get_32 (abfd, stab + VALOFF);
-	  name = str + bfd_get_32 (abfd, stab + STRDXOFF);
+	  name = (char *) str + bfd_get_32 (abfd, stab + STRDXOFF);
 
 	  /* An empty string here indicates the end of a function, and
 	     the value is relative to fnaddr.  */

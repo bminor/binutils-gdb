@@ -1,3 +1,86 @@
+Tue Sep 10 16:18:30 1996  Fred Fish  <fnf@cygnus.com>
+
+	* syms.c (coff_section_type): Make arg const.
+	* irix-core.c (irix_core_core_file_p): Remove extraneous extra arg
+	to make_bfd_asection().
+	* elf-bfd.h (bfd_section_from_phdr): Add prototype.
+	* elfcode.h (bfd_section_from_phdr): Remove prototype.
+	(_bfd_elf_stringtab_init): Remove prototype.
+
+	* netbsd-core.c (swap_abort): Add prototype.
+	* aix386-core.c (swap_abort): Ditto & make static
+	* hpux-core.c (swap_abort): Ditto & make static.
+	* irix-core.c (swap_abort): Ditto & make static.
+	* ptrace-core.c (swap_abort): Ditto & make static.
+	* trad-core.c (swap_abort): Ditto & make static.
+	* coffswap.h (coff_swap_reloc_in): Ditto.
+	(coff_swap_reloc_out): Ditto.
+	(coff_swap_filehdr_in): Ditto.
+	(coff_swap_filehdr_out): Ditto.
+	(coff_swap_sym_in): Ditto.
+	(coff_swap_sym_out): Ditto.
+	(coff_swap_aux_in): Ditto.
+	(coff_swap_aux_out): Ditto.
+	(coff_swap_lineno_in): Ditto.
+	(coff_swap_lineno_out): Ditto.
+	(coff_swap_aouthdr_in): Ditto.
+	(coff_swap_aouthdr_out): Ditto.
+	(coff_swap_scnhdr_in): Ditto.
+	(coff_swap_scnhdr_out): Ditto.
+	* ihex.c (ihex_sizeof_headers): Ditto.
+	* tekhex.c (getsym): Ditto.
+	(find_chunk): Ditto & make static.
+	(insert_byte): Ditto.
+	(first_phase): Ditto.
+	(pass_over): Ditto.
+	(tekhex_get_symtab): Ditto & make static.
+	(tekhex_get_symtab_upper_bound): Ditto & make static.
+	(tekhex_mkobject): Ditto.
+	(tekhex_object_p): Ditto.
+	(move_section_contents): Ditto.
+	(tekhex_get_section_contents): Ditto.
+	(tekhex_set_arch_mach): Ditto & make static.
+	(tekhex_set_section_contents): Ditto.
+	(writevalue): Ditto.
+	(writesym): Ditto.
+	(out): Ditto.
+	(tekhex_write_object_contents): Ditto.
+	(tekhex_sizeof_headers): Ditto.
+	(tekhex_make_empty_symbol): Ditto.
+	(tekhex_get_symbol_info): Ditto.
+	(tekhex_print_symbol): Ditto.
+	* irix-core.c (make_bfd_asection): Ditto.
+	(irix_core_core_file_p): Ditto.
+	(irix_core_core_file_failing_command): Ditto.
+	(irix_core_core_file_failing_signal): Ditto.
+	(irix_core_core_file_matches_executable_p): Ditto.
+	(irix_core_make_empty_symbol): Ditto.
+	* coff-mips.c (mips_bfd_reloc_type_lookup): Ditto.
+	* srec.c (srec_new_symbol): Ditto.
+	(srec_get_section_contents): Ditto.
+	(srec_set_arch_mach): Ditto.
+	(srec_set_section_contents): Ditto.
+	(internal_srec_write_object_contents): Ditto.
+	(srec_write_object_contents): Ditto.
+	(symbolsrec_write_object_contents): Ditto.
+	(srec_sizeof_headers): Ditto.
+	(srec_make_empty_symbol): Ditto.
+	(srec_get_symtab_upper_bound): Ditto.
+	(srec_get_symtab): Ditto.
+	(srec_print_symbol): Ditto and make static.
+	* elf.c (elf_read): Ditto
+	(assign_section_numbers): Ditto.
+	(elf_fake_sections): Ditto.
+	(sym_is_global): Ditto.
+	(elf_map_symbols): Ditto.
+	(get_program_header_size): Ditto.
+	* coffgen.c (make_a_section_from_file): Ditto.
+	(coff_real_object_p): Ditto.
+	(fixup_symbol_value): Ditto.
+	(build_debug_section): Ditto.
+	(copy_name): Ditto.
+	* syms.c (coff_section_type): Ditto.
+	
 start-sanitize-m324
 Mon Sep  9 22:36:01 1996  Jeffrey A Law  (law@cygnus.com)
 
