@@ -1000,20 +1000,39 @@ output_rel_find ()
 {
   lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
+  lang_output_section_statement_type *last = NULL;
+  lang_output_section_statement_type *last_rel = NULL;
+  lang_output_section_statement_type *last_rel_alloc = NULL;
 
-  for (u = lang_output_section_statement.head;
-       u != (lang_statement_union_type *) NULL;
-       u = lookup->next)
+  for (u = lang_output_section_statement.head; u; u = lookup->next)
     {
       lookup = &u->output_section_statement;
-      if (strncmp (".rel", lookup->name, 4) == 0
-	  && lookup->bfd_section != NULL
-	  && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
+      if (strncmp (".rel", lookup->name, 4) == 0)
 	{
-	  return lookup;
+	  /* Don't place after .rel.plt as doing so results in wrong
+	     dynamic tags.  Also, place allocated reloc sections before
+	     non-allocated.  */
+	  int rela = lookup->name[4] == 'a';
+
+	  if (strcmp (".plt", lookup->name + 4 + rela) == 0
+	      || (lookup->bfd_section != NULL
+		  && (lookup->bfd_section->flags & SEC_ALLOC) == 0))
+	    break;
+	  last_rel = lookup;
+	  if (lookup->bfd_section != NULL
+	      && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
+	    last_rel_alloc = lookup;
 	}
+      last = lookup;
     }
-  return (lang_output_section_statement_type *) NULL;
+
+  if (last_rel_alloc)
+    return last_rel_alloc;
+
+  if (last_rel)
+    return last_rel;
+
+  return last;
 }
 
 /* Find the last output section before given output statement.
@@ -1138,27 +1157,10 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	   && HAVE_SECTION (hold_data, ".data"))
     place = &hold_data;
   else if (strncmp (secname, ".rel", 4) == 0
+	   && (s->flags & SEC_LOAD) != 0
 	   && (hold_rel.os != NULL
 	       || (hold_rel.os = output_rel_find ()) != NULL))
-    {
-      if (! link_info.relocateable && link_info.combreloc)
-	{
-	  if (strncmp (secname, ".rela", 5) == 0)
-	    os = lang_output_section_find (".rela.dyn");
-	  else
-	    os = lang_output_section_find (".rel.dyn");
-
-	  if (os != NULL
-	      && os->bfd_section != NULL
-	      && ((s->flags ^ os->bfd_section->flags)
-		  & (SEC_LOAD | SEC_ALLOC)) == 0)
-	    {
-	      lang_add_section (&os->children, s, os, file);
-	      return true;
-	    }
-	}
-      place = &hold_rel;
-    }
+    place = &hold_rel;
   else if ((s->flags & (SEC_CODE | SEC_READONLY)) == SEC_READONLY
 	   && HAVE_SECTION (hold_rodata, ".rodata"))
     place = &hold_rodata;

@@ -1,3 +1,10 @@
+2002-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (output_rel_find): Always place orphan loadable
+	reloc sections just before .rel.plt/.rela.plt.
+	(gld${EMULATION_NAME}_place_orphan <.rel>): Remove combreloc code.
+	Only put loadable reloc sections in hold_rel.
+
 2002-09-29  H.J. Lu <hjl@gnu.org>
 
 	* ld/emulparams/elf32ppc.sh (OTHER_GOT_RELOC_SECTIONS): New.
