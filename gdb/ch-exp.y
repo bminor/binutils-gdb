@@ -1014,6 +1014,11 @@ match_character_literal ()
 	  return (0);
 	}
     }
+  else
+    {
+      /* Not a character literal. */
+      return (0);
+    }
   yylval.typed_val.val = ival;
   yylval.typed_val.type = builtin_type_chill_char;
   lexptr = tokptr;
@@ -1452,44 +1457,34 @@ chill_create_fundamental_type (objfile, typeid)
         warning ("internal error: no chill fundamental type %d", typeid);
 	break;
       case FT_BOOLEAN:
-	type = init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_UNSIGNED, "BOOL", objfile);
+	type = init_type (TYPE_CODE_BOOL, 1, TYPE_FLAG_UNSIGNED, "BOOL", objfile);
 	break;
       case FT_CHAR:
-	type = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_UNSIGNED, "CHAR", objfile);
+	type = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED, "CHAR", objfile);
 	break;
-      case FT_BYTE:
-	type = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_SIGNED, "BYTE", objfile);
+      case FT_SIGNED_CHAR:
+	type = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_SIGNED, "BYTE", objfile);
 	break;
-      case FT_UNSIGNED_BYTE:
-	type = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_UNSIGNED, "UBYTE", objfile);
+      case FT_UNSIGNED_CHAR:
+	type = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED, "UBYTE", objfile);
 	break;
-      case FT_INTEGER:
-	type = init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_SIGNED, "INT", objfile);
+      case FT_SHORT:			/* Chill ints are 2 bytes */
+	type = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_SIGNED, "INT", objfile);
 	break;
-      case FT_UNSIGNED_INTEGER:
-	type = init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_UNSIGNED, "UINT", objfile);
+      case FT_UNSIGNED_SHORT:		/* Chill ints are 2 bytes */
+	type = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED, "UINT", objfile);
 	break;
-      case FT_LONG:
-	type = init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_SIGNED, "LONG", objfile);
+      case FT_INTEGER:			/* Chill longs are 4 bytes */
+	type = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_SIGNED, "LONG", objfile);
 	break;
-      case FT_UNSIGNED_LONG:
-	type = init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-			  TYPE_FLAG_UNSIGNED, "ULONG", objfile);
+      case FT_UNSIGNED_INTEGER:		/* Chill longs are 4 bytes */
+	type = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED, "ULONG", objfile);
 	break;
       case FT_FLOAT:
-	type = init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-			  0, "REAL", objfile);
+	type = init_type (TYPE_CODE_FLT, 4, 0, "REAL", objfile);
 	break;
       case FT_DBL_PREC_FLOAT:
-	type = init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-			  0, "LONG REAL", objfile);
+	type = init_type (TYPE_CODE_FLT, 8, 0, "LONG_REAL", objfile);
 	break;
       }
   return (type);
