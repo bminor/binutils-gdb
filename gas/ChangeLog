@@ -1,5 +1,8 @@
 2005-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* expr.c (integer_constant): Remove TARGET_WORD_SIZE hack.
+	* config/tc-m68k.h (TARGET_WORD_SIZE): Delete.
+
 	* symbols.c (fb_label_name): Allow an augend of 2 for mmix.
 
 2005-03-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
