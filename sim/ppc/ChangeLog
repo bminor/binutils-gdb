@@ -1,5 +1,7 @@
 Fri Mar 29 12:17:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* options.c (print_options): Print out WITH_STDIO.
+
 	* Makefile.in (STDIO_CFLAGS): Pass on result of @sim_stdio@
 	configuration variable.
 	(CONFIG_CFLAGS): Include STDIO_CFLAGS.
