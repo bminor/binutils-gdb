@@ -1,3 +1,8 @@
+2001-01-07  Philip Blundell  <philb@gnu.org>
+
+	* README: Replace `bug-gnu-utils@gnu.org' with
+	`bug-binutils@gnu.org'.
+
 2001-01-04  Kazu Hirata  <kazu@hxi.com>
 
 	* som.c: Fix formatting.
