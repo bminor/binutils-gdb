@@ -1,3 +1,17 @@
+2002-10-14  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-m68hc11/m68hc11.exp: Specific tests for 68HC11/68HC12.
+	* ld-m68hc11/adj-jump.d: New test for linker relaxation.
+	* ld-m68hc11/adj-jump.s: Likewise.
+	* ld-m68hc11/adj-brset.s: Likewise.
+	* ld-m68hc11/adj-brset.d: Likewise.
+	* ld-m68hc11/relax-direct.s: Likewise.
+	* ld-m68hc11/relax-direct.d: Likewise.
+	* ld-m68hc11/relax-group.s: Likewise.
+	* ld-m68hc11/relax-group.d: Likewise.
+	* ld-m68hc11/bug-1403.d: Likewise.
+	* ld-m68hc11/bug-1403.s: Likewise.
+
 2002-10-14  Stephen Clarke <stephen.clarke@superh.com>
 	* ld-sh/ld-r-1.d: Disable for sh64*-*-linux*.
 	* ld-sh/sh64/sh64.exp: Likewise.
