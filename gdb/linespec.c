@@ -931,20 +931,12 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if ((*p == '"') && is_quote_enclosed)
 	--p;
       copy = (char *) alloca (p - *argptr + 1);
-      if ((**argptr == '"') && is_quote_enclosed)
-	{
-	  memcpy (copy, *argptr + 1, p - *argptr - 1);
-	  /* It may have the ending quote right after the file name */
-	  if (copy[p - *argptr - 2] == '"')
-	    copy[p - *argptr - 2] = 0;
-	  else
-	    copy[p - *argptr - 1] = 0;
-	}
+      memcpy (copy, *argptr, p - *argptr);
+      /* It may have the ending quote right after the file name */
+      if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
+	copy[p - *argptr - 1] = 0;
       else
-	{
-	  memcpy (copy, *argptr, p - *argptr);
-	  copy[p - *argptr] = 0;
-	}
+	copy[p - *argptr] = 0;
 
       /* Find that file's data.  */
       s = lookup_symtab (copy);

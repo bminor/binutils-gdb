@@ -1,3 +1,8 @@
+2002-05-10 Daniel Jacobowitz  <drow@mvista.com>
+
+	* linespec.c (decode_line_1): Check for a double quote after
+	a filename correctly.
+
 2002-05-10  Jim Blandy  <jimb@redhat.com>
 
 	Properly track the size of the current objfile's .debug_line section.
