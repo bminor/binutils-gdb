@@ -227,7 +227,7 @@ The Intel-syntax conversion instructions
 (x86-64 only),
 
 @item
-@samp{cdo} --- sign-extend quad in @samp{%rax} to octuple in
+@samp{cqo} --- sign-extend quad in @samp{%rax} to octuple in
 @samp{%rdx:%rax} (x86-64 only),
 @end itemize
 

@@ -1,3 +1,7 @@
+2004-09-29  Marc Bevand  <m.bevand@gmail.com>
+
+	* doc/c-i386.texi (i386-Mnemonics): Fix typo.
+
 2004-09-21  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (ENCODED_PSP_OFFSET): New.
