@@ -30,6 +30,10 @@
 # want to pass parameters to configure, you have to pass as the first
 # argument the srcdir, even when it is `.' !!!!!
 #
+# First, undo any CDPATH settings; they will get in our way when we
+# chdir to directories.
+unset CDPATH
+
 # Where are the sources? If you are used to having the sources
 # in a separate directory and the objects in another, then set
 # here the full path to the source directory and run this script
