@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1983, 1998, 2001 Regents of the University of California.
+ * Copyright (c) 1983, 1998, 2001, 2002 Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms are permitted
