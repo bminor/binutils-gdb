@@ -162,7 +162,9 @@ main (argc, argv)
   char *emulation;
   long start_time = get_run_time ();
 
+#ifdef HAVE_SETLOCALE
   setlocale (LC_MESSAGES, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
@@ -192,6 +194,7 @@ main (argc, argv)
   whole_archive = false;
   config.build_constructors = true;
   config.dynamic_link = false;
+  config.has_shared = false;
   command_line.force_common_definition = false;
   command_line.interpreter = NULL;
   command_line.rpath = NULL;
@@ -203,6 +206,7 @@ main (argc, argv)
   link_info.symbolic = false;
   link_info.static_link = false;
   link_info.traditional_format = false;
+  link_info.optimize = false;
   link_info.strip = strip_none;
   link_info.discard = discard_none;
   link_info.keep_memory = true;
@@ -234,11 +238,16 @@ main (argc, argv)
 
   if (link_info.relocateable)
     {
+      if (command_line.gc_sections)
+	einfo ("%P%F: --gc-sections and -r may not be used together\n");
       if (command_line.relax)
-	einfo (_("%P%F: -relax and -r may not be used together\n"));
+	einfo (_("%P%F: --relax and -r may not be used together\n"));
       if (link_info.shared)
 	einfo (_("%P%F: -r and -shared may not be used together\n"));
     }
+
+  if (command_line.gc_sections && config.dynamic_link)
+    einfo("%P%F: --gc-sections may only be performed for static links\n");
 
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
      don't see how else this can be handled, since in this case we
