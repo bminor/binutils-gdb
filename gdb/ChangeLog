@@ -1,3 +1,27 @@
+Thu Sep 23 00:13:06 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/mips/tm-mips.h (STORE_STRUCT_RETURN):  Define as noop as
+	the pushing of the struct return address is already handled in
+	mips_push_arguments.
+	* mips-tdep.c (reinit_frame_cache_sfunc):  Fix typo in prototype
+	declaration.
+	* mipsread.c (parse_symbol, parse_type, upgrade_type):  Add more
+	sanity checks for corrupt symbol entries to avoid core dumps
+	reported by benson@odi.com. Obviously Ultrix 4.3A cc now has
+	the same problems as the OSF/1 alpha cc.
+	* mipsread.c (parse_lines):  Iterate over the range of the compressed
+	line number entries, the old iteration sometimes failed to stop
+	and wrote past the end of the LINETABLE. Add sanity check to avoid
+	the same problem in case the line number info is corrupt.
+	* mipsread.c (parse_procedure):  Adjust pdr for alpha __sigtramp.
+	* mipsread.c (parse_external, parse_partial_symbols):  Ignore stNil
+	symbols that are produced for statics in .o files and stLocal symbols
+	that are produced for every section in OSF/1 dynamically linked
+	 executables.
+	* mipsread.c (psymtab_to_symtab_1):  Put out `undefined symbols'
+	warning only under `verbose on' as there are many undefined symbols
+	in a dynamically linked executable.
+
 Wed Sep 22 10:28:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/i960/nindy960.mt: Don't define REMOTE_O; REMOTE_O was

@@ -921,7 +921,7 @@ mips_store_return_value (valtype, valbuf)
   write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
 }
 
-static void reinit_frame_cache_sfunc PARAMS ((char *, int
+static void reinit_frame_cache_sfunc PARAMS ((char *, int,
 					      struct cmd_list_element *));
 
 /* Just like reinit_frame_cache, but with the right arguments to be
