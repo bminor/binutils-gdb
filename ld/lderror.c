@@ -1,4 +1,23 @@
-#include "bfd.h"
+/* Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+   Written by Steve Chamberlain steve@cygnus.com
+
+This file is part of GLD, the Gnu Linker.
+
+GLD is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+GLD is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GLD; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include <bfd.h>
 #include "sysdep.h"
 #include "../bfd/seclet.h"
 #include "ld.h"
@@ -6,10 +25,7 @@
 
 #define MAX_ERRORS_IN_A_ROW 5
 
-extern ld_config_type config;
-
 extern bfd_error_vector_type bfd_error_vector;
-
 
 /* BFD has failed to link something, give a better error message */
 
@@ -64,15 +80,12 @@ ld_reloc_truncated (relent, seclet)
      CONST arelent *relent;
      bfd_seclet_type *seclet;
 {
-  asymbol *s = *(relent->sym_ptr_ptr);
   asection *section = seclet->u.indirect.section;
   bfd *abfd = section->owner;
   
   einfo("%X%C: relocation truncated to fit %R\n",
 	abfd, section, seclet->u.indirect.symbols, relent->address, relent);
-
 }
-  
 
 void
 init_bfd_error_vector ()

@@ -26,22 +26,21 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-
+#include "ld.h"
 #include "ldmisc.h"
+#include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "ldsym.h"
+#include "ldmain.h"
+#include "ldlex.h"
+
 #include <ctype.h>
-/* EXPORT */
+
 char *ldfile_input_filename;
 CONST char * ldfile_output_machine_name ="";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
-
-/* IMPORT */
-
-extern boolean had_script;
-extern boolean trace_file_tries;
-
 
 #ifdef VMS
 char *slash = "";
@@ -93,7 +92,7 @@ lang_input_statement_type  *entry;
 {
   entry->the_bfd = bfd_openr(attempt, entry->target);
   if (trace_file_tries == true ) {
-    info("attempt to open %s %s\n", attempt,
+    info_msg ("attempt to open %s %s\n", attempt,
 		(entry->the_bfd == (bfd *)NULL) ? "failed" : "succeeded" );
   }
   return entry->the_bfd;
@@ -197,9 +196,9 @@ char *exten;
   result = fopen(name, "r");
   if (trace_file_tries == true) {
     if (result == (FILE *)NULL) {
-      info("can't find ");
+      info_msg ("cannot find ");
     }
-    info("%s\n",name);
+    info_msg ("%s\n",name);
   }
   if (result != (FILE *)NULL) {
     return result;
@@ -210,9 +209,9 @@ char *exten;
     result = fopen(buff, "r");
     if (trace_file_tries == true) {
       if (result == (FILE *)NULL) {
-	info("can't find ");
+	info_msg ("cannot find ");
       }
-      info("%s\n", buff);
+      info_msg ("%s\n", buff);
     }
   }
   return result;
@@ -221,8 +220,8 @@ char *exten;
 /* Try to open NAME; if that fails, look for it in any directories
    specified with -L, without and with EXTEND apppended.  */
 
-static FILE *
-find_a_name(name, extend)
+FILE *
+ldfile_find_command_file(name, extend)
 char *name;
 char *extend;
 {
@@ -250,10 +249,10 @@ ldfile_open_command_file(name)
 char *name;
 {
   FILE *ldlex_input_stack;
-  ldlex_input_stack = find_a_name(name, "");
+  ldlex_input_stack = ldfile_find_command_file(name, "");
 
   if (ldlex_input_stack == (FILE *)NULL) {
-    einfo("%P%F: cannot open load script file %s: %E\n",name);
+    einfo("%P%F: cannot open linker script file %s: %E\n",name);
   }
   lex_push_file(ldlex_input_stack, name);
   
@@ -361,6 +360,6 @@ ldfile_set_output_arch (string)
     ldfile_output_machine_name = arch->printable_name;
   }
   else {
-    einfo("%P%F: Can't represent machine `%s'\n", string);
+    einfo("%P%F: cannot represent machine `%s'\n", string);
   }
 }

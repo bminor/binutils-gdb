@@ -32,22 +32,12 @@ contains a value, a section to which it is relative and a valid bit.
 #include "sysdep.h"
 
 #include "ld.h"
+#include "ldsym.h"
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldgram.h"
-#include "ldsym.h"
 #include "ldlang.h"
-
-extern bfd *output_bfd;
-extern bfd_size_type largest_section;
-extern lang_statement_list_type file_chain;
-extern ld_config_type config;
-
-extern lang_input_statement_type *script_file;
-  extern lang_output_section_statement_type *abs_output_section;
-extern bfd_vma print_dot;
-
 
 static void
 exp_print_token (code)
@@ -139,10 +129,10 @@ check (os, name, op)
      CONST char *op;
 {
   if (os == (lang_output_section_statement_type *)NULL) {
-    einfo("%F%P %s uses undefined section %s\n", op, name);
+    einfo("%F%P: %s uses undefined section %s\n", op, name);
   }
   if (os->processed == false) {
-    einfo("%F%P %s forward reference of section %s\n",op, name);
+    einfo("%F%P: %s forward reference of section %s\n",op, name);
   }
 }
 
@@ -219,7 +209,7 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	  /* Mod,  both absolule*/
 
 	  if (other.value == 0) {
-	    einfo("%F%S % by zero\n");
+	    einfo("%F%S %% by zero\n");
 	  }
 	  result.value = (int)result.value % (int)other.value;
 	  break;
@@ -338,7 +328,7 @@ fold_name (tree, current_section, allocation_done, dot)
 	      }
 	    }
 	    if (result.valid == false) {
-	      einfo("%F%S: undefined symbol `%s' referenced in expression.\n",
+	      einfo("%F%S: undefined symbol `%s' referenced in expression\n",
 		   tree->name.name);
 	    }
 
@@ -566,7 +556,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
       result = fold_name(tree, current_section, allocation_done, dot);
       break;
      default:
-      einfo("%F%S Need more of these %d\n",tree->type.node_class );
+      einfo("%F%S need more of these %d\n",tree->type.node_class );
 
     }
   }
@@ -793,7 +783,7 @@ exp_get_vma (tree, def, name, allocation_done)
 		 abs_output_section,
 		      allocation_done);
     if (r.valid == false && name) {
-      einfo("%F%S Nonconstant expression for %s\n",name);
+      einfo("%F%S nonconstant expression for %s\n",name);
     }
     return r.value;
   }

@@ -61,6 +61,8 @@ typedef struct user_symbol_struct
   int flags;
 } ldsym_type;
 
+extern ldsym_type *symbol_head;
+
 extern CONST char *keepsyms_file;
 extern int kept_syms;
 
@@ -71,7 +73,6 @@ void ldsym_write PARAMS ((void));
 boolean ldsym_undefined PARAMS ((CONST char *));
 
 #define FOR_EACH_LDSYM(x)						\
-	extern ldsym_type *symbol_head;					\
 	ldsym_type *x;							\
 	for (x = symbol_head; x != (ldsym_type *)NULL; x = x->next) 	
 

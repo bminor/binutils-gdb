@@ -1,6 +1,5 @@
 /* ldlex.h -
-
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -18,9 +17,31 @@
    along with GLD; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-PROTO(int, lex_input, (void));
-PROTO(void, lex_unput, (int));
-PROTO(int ,yywrap,(void));
-PROTO(void, parse_args,(int, char **));
-PROTO(void, parse_line,(char*));
+#ifndef LDLEX_H
+#define LDLEX_H
 
+#include <stdio.h>
+
+extern int hex_mode;
+extern unsigned int lineno;
+
+/* In ldlex.l.  */
+extern int yylex PARAMS ((void));
+extern void lex_push_file PARAMS ((FILE *, char *));
+extern void lex_redirect PARAMS ((const char *));
+extern void ldlex_script PARAMS ((void));
+extern void ldlex_mri_script PARAMS ((void));
+extern void ldlex_defsym PARAMS ((void));
+extern void ldlex_expression PARAMS ((void));
+extern void ldlex_both PARAMS ((void));
+extern void ldlex_command PARAMS ((void));
+extern void ldlex_popstate PARAMS ((void));
+
+/* In lexsup.c.  */
+extern int lex_input PARAMS ((void));
+extern void lex_unput PARAMS ((int));
+extern int yywrap PARAMS ((void));
+extern void parse_args PARAMS ((int, char **));
+extern void parse_line PARAMS ((char*, int));
+
+#endif

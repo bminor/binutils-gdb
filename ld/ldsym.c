@@ -55,20 +55,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ld.h"
 #include "ldsym.h"
 #include "ldmisc.h"
+#include "ldexp.h"
 #include "ldlang.h"
-/* IMPORT */
-extern int symbol_truncate;
-extern bfd *output_bfd;
-extern strip_symbols_type strip_symbols;
-extern discard_locals_type discard_locals;
+#include "mri.h"
+#include "ldmain.h"
+
 /* Head and tail of global symbol table chronological list */
 
 ldsym_type *symbol_head = (ldsym_type *) NULL;
 ldsym_type **symbol_tail_ptr = &symbol_head;
 CONST char *keepsyms_file;
 int kept_syms;
-
-extern ld_config_type config;
 
 struct obstack global_sym_obstack;
 #define obstack_chunk_alloc ldmalloc
@@ -79,8 +76,6 @@ struct obstack global_sym_obstack;
   no matter what flavour it is
 */
 unsigned int global_symbol_count;
-
-/* IMPORTS */
 
 /* LOCALS */
 #define	TABSIZE	1009
@@ -288,6 +283,10 @@ egress:
   return out;
 }
 
+#if 0
+
+/* This function is not used.  */
+
 static void
 list_file_locals (entry)
      lang_input_statement_type *entry;
@@ -309,6 +308,7 @@ list_file_locals (entry)
     }
 }
 
+#endif
 
 static void
 print_file_stuff (f)
@@ -426,8 +426,6 @@ ldsym_print_symbol_table ()
   }
 }
 
-extern lang_output_section_statement_type *create_object_symbols;
-extern char lprefix;
 static asymbol **
 write_file_locals (output_buffer)
      asymbol **output_buffer;
@@ -632,13 +630,13 @@ ldsym_write ()
        the number of files (for the per file symbols)
        +1 (for the null at the end)
        */
-      extern unsigned int total_files_seen;
-      extern unsigned int total_symbols_seen;
-
-      asymbol **symbol_table = (asymbol **)
-      ldmalloc ((bfd_size_type) (global_symbol_count +
-				 total_files_seen +
-			      total_symbols_seen + 1) * sizeof (asymbol *));
+      asymbol **symbol_table =
+	((asymbol **)
+	 ldmalloc ((bfd_size_type) ((global_symbol_count
+				     + total_files_seen
+				     + total_symbols_seen
+				     + 1)
+				    * sizeof (asymbol *))));
       asymbol **tablep = write_file_locals (symbol_table);
 
       tablep = write_file_globals (tablep);

@@ -26,27 +26,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "ld.h"
 #include "ldmisc.h"
+#include "ldexp.h"
 #include "ldlang.h"
 #include "ldlex.h"
-/* IMPORTS */
-
-extern char *program_name;
-
-extern FILE *ldlex_input_stack;
-extern char *ldfile_input_filename;
-extern ld_config_type config;
-
-
-extern int errno;
-extern   int  sys_nerr;
-extern char *sys_errlist[];
+#include "ldsym.h"
+#include "ldmain.h"
+#include "ldfile.h"
 
 /* VARARGS*/
 static void finfo ();
 
 /*
+ %% literal %
  %F error is fatal
- %P print progam name
+ %P print program name
  %S print script file and linenumber
  %E current bfd error or errno
  %I filename from a lang_input_statement_type
@@ -57,9 +50,9 @@ static void finfo ();
  %v hex bfd_vma, no leading zeros
  %C Clever filename:linenumber 
  %R info about a relent
- %
+ %s arbitrary string, like printf
+ %d integer, like printf
 */
-extern bfd *output_bfd;
 
 static char *
 demangle(string, remove_underscore)
@@ -101,11 +94,22 @@ vfinfo(fp, fmt, arg)
       fmt ++;
       switch (*fmt++) 
       {
+      default:
+	fprintf(fp,"%%%c", fmt[-1]);
+	break;
+
+      case '%':
+	/* literal % */
+	putc('%', fp);
+	break;
+
        case 'X':
+	/* no object output, fail return */
 	config.make_executable = false;
 	break;
 
        case 'V':
+	/* hex bfd_vma */
 	{
 	  bfd_vma value = va_arg(arg, bfd_vma);
 	  fprintf_vma(fp, value);
@@ -113,6 +117,7 @@ vfinfo(fp, fmt, arg)
 	break;
 
       case 'v':
+	/* hex bfd_vma, no leading zeros */
 	{
 	  char buf[100];
 	  char *p = buf;
@@ -127,6 +132,7 @@ vfinfo(fp, fmt, arg)
 	break;
 
        case 'T':
+	/* symbol table entry */
        {
 	 asymbol *symbol = va_arg(arg, asymbol *);
 	 if (symbol) 
@@ -151,6 +157,7 @@ vfinfo(fp, fmt, arg)
 	break;
 
        case 'B':
+	/* filename from a bfd */
        { 
 	 bfd *abfd = va_arg(arg, bfd *);
 	 if (abfd->my_archive) {
@@ -164,19 +171,22 @@ vfinfo(fp, fmt, arg)
 	break;
 
        case 'F':
+	/* error is fatal */
 	fatal = true;
 	break;
 
        case 'P':
+	/* print program name */
 	fprintf(fp,"%s", program_name);
 	break;
 
        case 'E':
-	/* Replace with the most recent errno explanation */
+	/* current bfd error or errno */
 	fprintf(fp, bfd_errmsg(bfd_error));
 	break;
 
        case 'I':
+	/* filename from a lang_input_statement_type */
        {
 	 lang_input_statement_type *i =
 	  va_arg(arg,lang_input_statement_type *);
@@ -186,9 +196,8 @@ vfinfo(fp, fmt, arg)
 	break;
 
        case 'S':
-	/* Print source script file and line number */
+	/* print script file and linenumber */
        {
-	 extern unsigned int lineno;
 	 if (ldfile_input_filename == (char *)NULL) {
 	   fprintf(fp,"command line");
 	 }
@@ -211,6 +220,8 @@ vfinfo(fp, fmt, arg)
 	break;
 	
        case 'C':
+	/* Clever filename:linenumber with function name if possible,
+	   or section name as a last resort */
        {
 	 CONST char *filename;
 	 CONST char *functionname;
@@ -235,7 +246,7 @@ vfinfo(fp, fmt, arg)
 	   if (functionname != (char *)NULL) 
 	   {
 	     cplus_name = demangle(functionname, 1);
-	     fprintf(fp,"%s:%u: (%s)", filename, linenumber, cplus_name);
+	     fprintf(fp,"%s:%u: %s", filename, linenumber, cplus_name);
 	   }
 		
 	   else if (linenumber != 0) 
@@ -250,15 +261,13 @@ vfinfo(fp, fmt, arg)
 	break;
 		
        case 's':
+	/* arbitrary string, like printf */
 	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
 
        case 'd':
+	/* integer, like printf */
 	fprintf(fp,"%d", va_arg(arg, int));
-	break;
-
-       default:
-	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
       }
     }
@@ -266,16 +275,12 @@ vfinfo(fp, fmt, arg)
 
   if (fatal == true) 
   {
-    extern char *output_filename;
     if (output_filename) 
     {
-      char *new = malloc(strlen(output_filename)+2);
-      extern bfd *output_bfd;
-      
-      strcpy(new, output_filename);
       if (output_bfd && output_bfd->iostream)
        fclose((FILE *)(output_bfd->iostream));
-      unlink(new);
+      if (delete_output_file_on_failure)
+	unlink (output_filename);
     }
     exit(1);
   }
@@ -283,7 +288,10 @@ vfinfo(fp, fmt, arg)
 
 /* Format info message and print on stdout. */
 
-void info(va_alist)
+/* (You would think this should be called just "info", but then you would
+   hosed by LynxOS, which defines that name in its libc.) */
+
+void info_msg(va_alist)
 va_dcl
 {
   char *fmt;
@@ -341,7 +349,7 @@ info_assert(file, line)
      char *file;
      unsigned int line;
 {
-  einfo("%F%P internal error %s %d\n", file,line);
+  einfo("%F%P: internal error %s %d\n", file,line);
 }
 
 /* Return a newly-allocated string
@@ -377,7 +385,7 @@ ldmalloc (size)
   PTR result =  malloc ((int)size);
 
   if (result == (char *)NULL && size != 0)
-    einfo("%F%P virtual memory exhausted\n");
+    einfo("%F%P: virtual memory exhausted\n");
 
   return result;
 } 
@@ -398,7 +406,7 @@ ldrealloc (ptr, size)
   PTR result =  realloc (ptr, (int)size);
 
   if (result == (char *)NULL && size != 0)
-    einfo("%F%P virtual memory exhausted\n");
+    einfo("%F%P: virtual memory exhausted\n");
 
   return result;
 } 

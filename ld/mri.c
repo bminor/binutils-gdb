@@ -28,10 +28,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h" 
 #include "ld.h"
+#include "ldexp.h"
 #include "ldlang.h"
+#include "ldmisc.h"
 #include "mri.h"
 #include "ldgram.h"
-#include "ldexp.h"
 
 
 struct section_name_struct {
@@ -116,8 +117,6 @@ mri_only_load (name)
   mri_add_to_list(&only_load, name, 0, 0,0,0);
 }
 
-
-etree_type *base;
 
 void
 mri_base (exp)
@@ -242,10 +241,10 @@ mri_draw_tree ()
       if (base == 0) {
 	base = p->vma ? p->vma :exp_nameop(NAME, ".");
       }
-      lang_enter_output_section_statement(p->name, base,
-					  p->ok_to_load ? 0 :
-					  SEC_NEVER_LOAD, 1,
-					  align, subalign);
+      lang_enter_output_section_statement (p->name, base,
+					   p->ok_to_load ? 0 : SEC_NEVER_LOAD,
+					   1, align, subalign,
+					   (etree_type *) NULL);
       base = 0;
       lang_add_wild(p->name, (char *)NULL);
       /* If there is an alias for this section, add it too */
@@ -306,7 +305,7 @@ void
 mri_name (name)
      CONST char *name;
 {
-  lang_add_output(name);
+  lang_add_output(name, 1);
 
 }
 
@@ -317,15 +316,15 @@ mri_format (name)
 {
   if (strcmp(name, "S") == 0)
   {
-    lang_add_output_format("srec");
+    lang_add_output_format("srec", 1);
   }
   else if (strcmp(name, "IEEE") == 0)
   {
-    lang_add_output_format("ieee");
+    lang_add_output_format("ieee", 1);
   }
   else if (strcmp(name, "COFF") == 0)
   {
-    lang_add_output_format("coff-m68k");
+    lang_add_output_format("coff-m68k", 1);
   }
   else {
     einfo("%P%F: unknown format type %s\n", name);

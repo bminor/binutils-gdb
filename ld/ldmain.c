@@ -23,11 +23,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "config.h"
 #include "ld.h"
+#include "ldsym.h"
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldwrite.h"
 #include "ldgram.h"
-#include "ldsym.h"
+#include "ldexp.h"
 #include "ldlang.h"
 #include "ldemul.h"
 #include "ldlex.h"
@@ -44,19 +45,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <string.h>
 
-static char *get_emulation ();
-static void set_scripts_dir ();
-
-/* IMPORTS */
-extern boolean lang_has_input_file;
-extern boolean force_make_executable;
-extern boolean relaxing;
-extern boolean had_script;
+static char *get_emulation PARAMS ((int, char **));
+static void set_scripts_dir PARAMS ((void));
 
 /* EXPORTS */
 
 char *default_target;
-char *output_filename = "a.out";
+const char *output_filename = "a.out";
 
 /* Name this program was invoked by.  */
 char *program_name;
@@ -1214,6 +1209,17 @@ subfile_wanted_p (entry)
 				 (bfd_asymbol_bfd (com)->usrdata))->common_section =
 				  bfd_make_section_old_way (bfd_asymbol_bfd (com), "COMMON");
 			      }
+
+			    /* If the symbol is not in the generic
+			       common section, we must make sure the
+			       BFD has a section to hang it on to.  */
+			    if (com->section != &bfd_com_section
+				&& (com->section->owner
+				    != bfd_asymbol_bfd (com)))
+			      bfd_make_section
+				(bfd_asymbol_bfd (com),
+				 bfd_get_section_name (bfd_asymbol_bfd (com),
+						       com->section));
 			  }
 			}
 		      ASSERT (p->udata == 0);

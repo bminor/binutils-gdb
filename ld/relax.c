@@ -31,8 +31,9 @@ Tie together all the interseting blocks
 #include "coff/internal.h"
 #include "sysdep.h"
 
-#include "ldlang.h"
 #include "ld.h"
+#include "ldexp.h"
+#include "ldlang.h"
 #include "ldwrite.h"
 #include "ldmisc.h"
 #include "ldsym.h"
@@ -200,7 +201,6 @@ boolean
 relax_section (this_ptr)
      lang_statement_union_type ** this_ptr;
 {
-  extern lang_input_statement_type *script_file;
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
   if (!(i->owner->flags & BFD_IS_RELAXABLE))

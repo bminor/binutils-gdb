@@ -25,35 +25,37 @@ This was written by steve chamberlain
 
 
 #include <ansidecl.h>
+#include <stdio.h>
 #include "bfd.h"
+#include "ld.h"
 #include "ldgram.h"
+#include "ldmisc.h"
+#include "ldexp.h"
+#include "ldlang.h"
+#include "ldfile.h"
 
 int ldgram_in_defsym;
-extern int ldgram_had_equals;
-extern int ldgram_in_script;
 
 int hex_mode;
-extern int fgetc();
-extern int yyparse();
-
-
 
 char *buystring();
 
 unsigned int lineno = 1;
 int old;
 
-static comment();
-
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) yy_input(buf, &result, max_size)
 #undef YY_FATAL_ERROR
-#define YY_FATAL_ERROR ;
+#define YY_FATAL_ERROR(s)
 #define MAX_INCLUDE_DEPTH 10
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 char *file_name_stack[MAX_INCLUDE_DEPTH];
 unsigned int include_stack_ptr = 0;
 
+static YY_BUFFER_STATE yy_create_string_buffer PARAMS ((const char *string,
+							int size));
+static void yy_input PARAMS ((char *, int *result, int max_size));
+static void comment PARAMS ((void));
 
 /* STATES 
 	COMMAND	 	on command line
@@ -159,6 +161,10 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				 yylval.name = ".bss";
 				 return OPTION_Texp;
 			       }
+<COMMAND>"-O"([0-9])+		{
+					yylval.integer = atoi (yytext + 2);
+					return OPTION_Oval;
+				}
 <COMMAND>"-O"{FILENAME} 	{
 				yylval.name = buystring(yytext+2);
 				return OPTION_Texp;
@@ -399,7 +405,6 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <MRI,COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
 
 <<EOF>> {
-  extern char *ldfile_input_filename;
   include_stack_ptr--;
     
   if (include_stack_ptr == 0) 
@@ -445,7 +450,7 @@ lex_push_file (file, name)
   BEGIN(SCRIPT);
 }
 
-YY_BUFFER_STATE 
+static YY_BUFFER_STATE 
 yy_create_string_buffer (string,  size)
      CONST char *string;
      int size;
@@ -557,6 +562,7 @@ ldlex_popstate ()
   yy_start = *(--state_stack_p);
 }
 
+static void
 yy_input(buf, result, max_size)
 char *buf;
 int *result;
@@ -571,8 +577,8 @@ int max_size;
   }
 }
 
-static
-comment()
+static void
+comment ()
 {
   int c;
   while (1)

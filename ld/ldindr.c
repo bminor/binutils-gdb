@@ -43,9 +43,8 @@
 #include "sysdep.h"
 #include "ld.h"
 #include "ldsym.h"
+#include "ldmain.h"
 #include "ldmisc.h"
-
-
 
 static asymbol **
 move_it (a_list, b_list)
@@ -90,7 +89,6 @@ void
 add_indirect (ptr)
      asymbol **ptr;
 {
-  asymbol **p;
   ldsym_type *lgs = ldsym_get((*ptr)->name);
   ldsym_type *new = ldsym_get(((asymbol *)((*ptr)->value))->name);
 

@@ -34,16 +34,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldemul.h"
 #include "ldfile.h"
 #include "ldmisc.h"
+#include "ldsym.h"
+#include "ldmain.h"
 #include "mri.h"
+#include "ldlex.h"
 
 #define YYDEBUG 1
 
-extern unsigned int lineno;
-extern boolean trace_file_tries;
-extern boolean trace_files;
-extern boolean write_map;
-extern int g_switch_value;
-extern int hex_mode;
 static int typebits;
 strip_symbols_type strip_symbols=STRIP_NONE;
 discard_locals_type discard_locals=DISCARD_NONE;
@@ -53,22 +50,6 @@ static char *dirlist_ptr;
 lang_memory_region_type *region;
 
 
-lang_memory_region_type *lang_memory_region_lookup();
-lang_output_section_statement_type *lang_output_section_statement_lookup();
-etree_type *lang_atin();
-#ifdef __STDC__
-
-void lang_add_data(int type, union etree_union *exp);
-void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, int flags, bfd_vma block_value,etree_type*,etree_type*, etree_type*);
-
-#else
-
-void lang_add_data();
-void lang_enter_output_section_statement();
-
-#endif /* __STDC__ */
-
-extern args_type command_line;
 char *current_file;
 boolean ldgram_want_filename = true;
 boolean had_script = false;
@@ -76,7 +57,6 @@ boolean force_make_executable = false;
 
 boolean ldgram_in_script = false;
 boolean ldgram_had_equals = false;
-/* LOCALS */
 
 
 #define ERROR_NAME_MAX 20
@@ -153,6 +133,7 @@ static int error_index;
 %token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
 %token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD AT
 %token OPTION_Qy OPTION_Y OPTION_dn OPTION_call_shared OPTION_non_shared
+%token OPTION_Oval
 %token <name> OPTION_YP
 
 %type <token> assign_op 
@@ -162,10 +143,6 @@ static int error_index;
 
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE
-
-%{
-extern ld_config_type config;
-%}
 
 %%
 
@@ -391,6 +368,7 @@ command_line_option:
 	|	OPTION_dn
 	|	OPTION_non_shared
 	|	OPTION_call_shared
+	|	OPTION_Oval
 	|	OPTION_YP
 		{
 		  dirlist_ptr = $1;

@@ -21,17 +21,19 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 
 #include "ld.h"
-#include "ldmain.h"
 #include "ldsym.h"
+#include "ldmain.h"
 #include "ldgram.h"
 #include "ldwarn.h"
-#include "ldlang.h"
 #include "ldexp.h"
+#include "ldlang.h"
 #include "ldemul.h"
 #include "ldlex.h"
 #include "ldmisc.h"
 #include "ldindr.h"
 #include "ldctor.h"
+#include "ldfile.h"
+#include "relax.h"
 
 /* FORWARDS */
 static void print_statements PARAMS ((void));
@@ -54,9 +56,6 @@ static lang_statement_list_type input_file_chain;
    stuff to the data section without pain */
 static lang_statement_list_type end_of_data_section_statement_list;
 
-/* List of statements needed to handle constructors */
-extern lang_statement_list_type constructor_list;
-
 static boolean placed_commons = false;
 static lang_output_section_statement_type *default_common_section;
 static boolean map_option_f;
@@ -65,8 +64,7 @@ static lang_input_statement_type *first_file;
 static lang_statement_list_type lang_output_section_statement;
 static CONST char *current_target;
 static CONST char *output_target;
-static size_t longest_section_name = 8;
-static section_userdata_type common_section_userdata;
+static int longest_section_name = 8;
 static lang_statement_list_type statement_list;
 
 /* EXPORTS */
@@ -83,23 +81,6 @@ lang_output_section_statement_type *create_object_symbols = 0;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
 boolean delete_output_file_on_failure = false;
-
-/* IMPORTS */
-extern char *default_target;
-
-extern CONST char *output_filename;
-extern char *current_file;
-extern bfd *output_bfd;
-extern enum bfd_architecture ldfile_output_architecture;
-extern unsigned long ldfile_output_machine;
-extern char *ldfile_output_machine_name;
-extern ldsym_type *symbol_head;
-extern unsigned int commons_pending;
-extern args_type command_line;
-extern ld_config_type config;
-extern boolean write_map;
-extern int g_switch_value;
-
 
 etree_type *base; /* Relocation base - or null */
 
@@ -350,7 +331,6 @@ void
 lang_add_keepsyms_file (filename)
      CONST char *filename;
 {
-  extern strip_symbols_type strip_symbols;
   if (keepsyms_file != 0)
     info_msg ("%X%P: error: duplicated keep-symbols-file value\n");
   keepsyms_file = filename;
@@ -541,7 +521,8 @@ lang_map ()
       print_address (m->current - m->origin);
       print_space();
       if (m->old_length)
-       fprintf(config.map_file," %2d%%  ", ( m->current - m->origin) * 100 / m->old_length);
+       fprintf (config.map_file, " %2d%%  ",
+		(int) ((m->current - m->origin) * 100 / m->old_length));
       print_flags (&m->flags);
       fprintf (config.map_file, "\n");
     }
@@ -783,9 +764,6 @@ static bfd *
 open_output (name)
      CONST char *CONST name;
 {
-  extern unsigned long ldfile_output_machine;
-  extern enum bfd_architecture ldfile_output_architecture;
-
   bfd *output;
 
   if (output_target == (char *) NULL)
@@ -2362,7 +2340,7 @@ void
 lang_enter_output_section_statement (output_section_statement_name,
 				     address_exp, flags, block_value,
 				     align, subalign, base)
-     char *output_section_statement_name;
+     const char *output_section_statement_name;
      etree_type * address_exp;
      int flags;
      bfd_vma block_value;
@@ -2441,7 +2419,6 @@ DEFUN (create_symbol, (name, flags, section),
      flagword flags AND
      asection * section)
 {
-  extern lang_input_statement_type *script_file;
   asymbol **def_ptr = (asymbol **) stat_alloc ((bfd_size_type) (sizeof (asymbol **)));
 
   /* Add this definition to script file */
