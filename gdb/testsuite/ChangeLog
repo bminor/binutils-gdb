@@ -1,3 +1,7 @@
+Tue Jun 25 23:16:58 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* gdb.threads/Makefile.in (docdir): Removed.
+
 Tue Jun 25 17:02:39 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* configure.in (AC_PREREQ): autoconf 2.5 or higher.
