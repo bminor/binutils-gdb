@@ -1,3 +1,10 @@
+Mon Jul 17 13:08:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* values.c (value_as_pointer): When VAL is an integer, explictly
+ 	cast to a pointer before converting to a CORE_ADDR.
+	* gdbtypes.c (build_gdbtypes): For builtin_type_ptr, construct a
+ 	real void pointer instead of an integer.
+
 2000-07-15  Daniel Berlin  <dberlin@redhat.com>
 
 	* valops.c (typecmp):  Seperate loop into two, add support for

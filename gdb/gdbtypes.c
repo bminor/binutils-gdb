@@ -179,7 +179,9 @@ make_pointer_type (type, typeptr)
   TYPE_LENGTH (ntype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
   TYPE_CODE (ntype) = TYPE_CODE_PTR;
 
-  /* pointers are unsigned */
+  /* Mark pointers as unsigned.  The target converts between pointers
+     and addresses (CORE_ADDRs) using POINTER_TO_ADDRESS() and
+     ADDRESS_TO_POINTER(). */
   TYPE_FLAGS (ntype) |= TYPE_FLAG_UNSIGNED;
 
   if (!TYPE_POINTER_TYPE (type))	/* Remember it, if don't have one.  */
@@ -3034,10 +3036,7 @@ build_gdbtypes ()
   /* NOTE: At present there is no way of differentiating between at
      target address and the target C language pointer type type even
      though the two can be different (cf d10v) */
-  builtin_type_ptr =
-    init_type (TYPE_CODE_INT, TARGET_PTR_BIT / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "__ptr", (struct objfile *) NULL);
+  builtin_type_ptr = make_pointer_type (builtin_type_void, NULL);
   builtin_type_CORE_ADDR =
     init_type (TYPE_CODE_INT, TARGET_PTR_BIT / 8,
 	       TYPE_FLAG_UNSIGNED,
