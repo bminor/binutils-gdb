@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright 1986, 1987, 1993, 1994, 1995, 1999, 2000
+   Copyright 1986, 1987, 1993, 1994, 1995, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.

@@ -1,15 +1,22 @@
 2002-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
-	* low-hppabsd.c (myattach): New function, returning -1.
-	* low-lynx.c (myattach): Likewise.
-	* low-nbsd.c (myattach): Likewise.
-	* low-sim.c (myattach): Likewise.
-	* low-sparc.c (myattach): Likewise.
-	* low-sun3.c (myattach): Likewise.
+	* gdbserver/low-hppabsd.c, gdbserver/low-lynx.c,
+	gdbserver/low-nbsd.c, gdbserver/low-sim.c,
+	gdbserver/low-sparc.c, gdbserver/low-sun3.c,
+	gdbserver/low-linux.c, gdbserver/server.c: Correct copyright notices.
 
-	* low-linux.c (myattach): New function.
+2002-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
-	* server.c (attach_inferior): New function.
+	* gdbserver/low-hppabsd.c (myattach): New function, returning -1.
+	* gdbserver/low-lynx.c (myattach): Likewise.
+	* gdbserver/low-nbsd.c (myattach): Likewise.
+	* gdbserver/low-sim.c (myattach): Likewise.
+	* gdbserver/low-sparc.c (myattach): Likewise.
+	* gdbserver/low-sun3.c (myattach): Likewise.
+
+	* gdbserver/low-linux.c (myattach): New function.
+
+	* gdbserver/server.c (attach_inferior): New function.
 	(main): Handle "--attach".
 
 2002-01-16  Andrew Cagney  <ac131313@redhat.com>
