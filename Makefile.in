@@ -52,9 +52,9 @@ AR_FLAGS = qc
 CFLAGS = -g
 RANLIB = ranlib
 
-BISON = `if [ -d $${rootme}/bison ] ; \
-	then echo $${rootme}/bison/bison -L $${rootme}/bison/ -y ; \
-	else echo bison -y ; fi`
+BISON = `if [ -d $${rootme}/byacc ] ; \
+	then echo $${rootme}/byacc/byacc ; \
+	else echo byacc ; fi`
 
 LEX = `if [ -d $${rootme}/flex ] ; \
 	then echo $${rootme}/flex/flex -S$${rootme}/flex/flex.skel ; \
@@ -148,7 +148,7 @@ all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-patch all-emacs all-ispell \
 	all-newlib all-gprof all-send_pr
 
-all.cross: all-libiberty all-mmalloc all-gas all-bison all-ld \
+all.cross: all-libiberty all-mmalloc all-gas all-byacc all-ld \
 	all-bfd all-libgcc all-readline all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
@@ -168,8 +168,8 @@ install: $(INSTALL_TARGET) $(srcdir)/configure.man
 	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
 
-install.all: install-dirs install-autoconf install-libiberty \
-	install-mmalloc install-texinfo install-bfd install-binutils \
+install.all: install-dirs install-autoconf install-texinfo \
+	install-mmalloc install-libiberty install-bfd install-binutils \
 	install-bison install-byacc install-flex install-ld \
 	install-gas install-gcc install-gprof install-libgcc \
 	install-readline install-glob install-gdb install-make \
@@ -382,6 +382,7 @@ install-newlib: force
 ### gprof
 all-gprof: all-libiberty all-bfd
 	@if [ -d ./gprof ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd ./gprof; \
 		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
@@ -389,16 +390,18 @@ all-gprof: all-libiberty all-bfd
 	fi
 
 clean-gprof: force
-	@if [ -d $(unsubdir)/gprof ] ; then \
-		(cd $(unsubdir)/gprof$(subdir); \
+	@if [ -d ./gprof ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gprof; \
 		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
 
 install-gprof: force
-	@if [ -d $(unsubdir)/gprof ] ; then \
-		(cd $(unsubdir)/gprof$(subdir); \
+	@if [ -d ./gprof ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gprof; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
@@ -488,7 +491,7 @@ install-flex: force
 		true ; \
 	fi
 ### gcc
-all-gcc: all-libiberty all-bison
+all-gcc: all-libiberty all-byacc
 	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
@@ -600,7 +603,7 @@ install-gas: force
 	fi
 
 ### ld
-all-ld: all-libiberty all-bfd all-bison all-flex
+all-ld: all-libiberty all-bfd all-byacc all-flex
 	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
@@ -678,7 +681,7 @@ install-libgcc: force
 	fi
 
 ### gdb
-all-gdb: all-bfd all-libiberty all-mmalloc all-readline all-glob all-bison
+all-gdb: all-bfd all-libiberty all-mmalloc all-readline all-glob all-byacc
 	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
@@ -1118,13 +1121,13 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	sed '/^configdirs=/s/texinfo //' <configure.in >proto-toplev/configure.in
 	# Take out glob from buildable dirs
 	rm proto-toplev/Makefile.in
-	sed '/^SUBDIRS =/s/glob //' <Makefile.in >proto-toplev/Makefile.in
-	# Take out texinfo from buildable dirs
-	cp proto-toplev/Makefile.in temp.$$
-	sed '/^all\.normal: /s/\all-texinfo //' <temp.$$ >temp1.$$
-	sed '/^clean: /s/clean-texinfo //' <temp1.$$ >temp.$$
-	sed '/^install\.all: /s/install-texinfo //' <temp.$$ >proto-toplev/Makefile.in
-	rm temp.$$ temp1.$$
+
+	sed -e '/^SUBDIRS =/s/glob //' \
+	    -e '/^all\.normal: /s/\all-texinfo //' \
+	    -e '/^clean: /s/clean-texinfo //' \
+	    -e '/^install\.all: /s/install-texinfo //' \
+	<Makefile.in >proto-toplev/Makefile.in
+
 	mkdir proto-toplev/texinfo
 	mkdir proto-toplev/texinfo/fsf
 	ln -s ../../../texinfo/fsf/texinfo.tex proto-toplev/texinfo/fsf/
