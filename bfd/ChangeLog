@@ -1,3 +1,8 @@
+Thu Jul  1 13:58:48 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Handle R_PCREL_CALL
+	with 22bit format.
+
 1999-06-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_got_info): Move declaration before
