@@ -1,5 +1,9 @@
 Wed Sep 22 10:28:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/i960/nindy960.mt: Don't define REMOTE_O; REMOTE_O was
+	intended only for VxWorks.  Remove dcache.o from TDEPFILES now
+	that we pick it up from the default REMOTE_O.
+
 	* breakpoint.c (bpstat_what): Initialize retval.call_dummy and
 	retval.step_resume.
 
