@@ -947,20 +947,29 @@ frameless_function_invocation (fi)
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
 
-  if (fi->next != NULL)
-    /* Don't even think about framelessness except on the innermost frame.  */
-    /* FIXME: Can also be frameless if fi->next->signal_handler_caller (if
-       a signal happens while executing in a frameless function).  */
+  /* Don't even think about framelessness except on the innermost frame
+     or if the function was interrupted by a signal.  */
+  if (fi->next != NULL && !fi->next->signal_handler_caller)
     return 0;
   
-  func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
+  func_start = get_pc_function_start (fi->pc);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions. */
 
   if (!func_start)
-    return 0;
+    {
+      /* A frame with a zero PC is usually created by dereferencing a NULL
+	 function pointer, normally causing an immediate core dump of the
+	 inferior. Mark function as frameless, as the inferior has no chance
+	 of setting up a stack frame.  */
+      if (fi->pc == 0)
+	return 1;
+      else
+	return 0;
+    }
 
+  func_start += FUNCTION_START_OFFSET;
   (void) skip_prologue (func_start, &fdata);
   return fdata.frameless;
 }
@@ -987,7 +996,13 @@ frame_saved_pc (fi)
   (void) skip_prologue (func_start, &fdata);
 
   if (fdata.lr_offset == 0 && fi->next != NULL)
-    return read_memory_integer (rs6000_frame_chain (fi) + DEFAULT_LR_SAVE, 4);
+    {
+      if (fi->next->signal_handler_caller)
+	return read_memory_integer (fi->next->frame + SIG_FRAME_LR_OFFSET, 4);
+      else
+	return read_memory_integer (rs6000_frame_chain (fi) + DEFAULT_LR_SAVE,
+				    4);
+    }
 
   if (fdata.lr_offset == 0)
     return read_register (LR_REGNUM);
@@ -1136,6 +1151,12 @@ rs6000_frame_chain (thisframe)
     return 0;
   if (thisframe->signal_handler_caller)
     fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
+  else if (thisframe->next != NULL
+	   && thisframe->next->signal_handler_caller
+	   && frameless_function_invocation (thisframe))
+    /* A frameless function interrupted by a signal did not change the
+       frame pointer.  */
+    fp = FRAME_FP (thisframe);
   else
     fp = read_memory_integer ((thisframe)->frame, 4);
 

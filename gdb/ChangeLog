@@ -1,3 +1,15 @@
+Thu May 15 07:56:50 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/rs6000/tm-rs6000.h (SIG_FRAME_LR_OFFSET):  Define.
+	* rs6000-tdep.c (frameless_function_invocation):  Mark frames
+	with a zero PC as frameless to improve backtraces from core dumps
+	caused by dereferencing a NULL function pointer.
+	(frameless_function_invocation, frame_saved_pc, rs6000_frame_chain):
+	Handle frameless functions interrupted by a signal.
+
+	* sparc-tdep.c (sparc_init_extra_frame_info, sparc_frame_saved_pc):
+	Handle frameless functions interrupted by a signal.
+
 Wed May 14 08:58:55 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-tdep.c (mn10200_analyze_prologue): Update prologue comments
