@@ -1,3 +1,9 @@
+2004-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Check for <machine/reg.h>.  Check for `struct reg'
+	in <machine/reg.h>.
+	* configure, config.in: Regenerate.
+
 2003-12-30  Eli Zaretskii  <eliz@elta.co.il>
 
 	* configure.in: Check for st_blocks member in struct stat and
