@@ -393,13 +393,13 @@ pop_prompt (void)
        in effect, until the user does another 'set prompt'. */
     if (strcmp (PROMPT (0), PROMPT (-1)))
       {
-	free (PROMPT (-1));
+	xfree (PROMPT (-1));
 	PROMPT (-1) = savestring (PROMPT (0), strlen (PROMPT (0)));
       }
 
-  free (PREFIX (0));
-  free (PROMPT (0));
-  free (SUFFIX (0));
+  xfree (PREFIX (0));
+  xfree (PROMPT (0));
+  xfree (SUFFIX (0));
   the_prompts.top--;
 }
 
@@ -643,7 +643,7 @@ command_line_handler (char *rl)
     {
       strcpy (linebuffer, readline_input_state.linebuffer);
       p = readline_input_state.linebuffer_ptr;
-      free (readline_input_state.linebuffer);
+      xfree (readline_input_state.linebuffer);
       more_to_come = 0;
       pop_prompt ();
     }
@@ -690,7 +690,7 @@ command_line_handler (char *rl)
   while (*p1)
     *p++ = *p1++;
 
-  free (rl);			/* Allocated in readline.  */
+  xfree (rl);			/* Allocated in readline.  */
 
   if (*(p - 1) == '\\')
     {
@@ -749,7 +749,7 @@ command_line_handler (char *rl)
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
 	    {
-	      free (history_value);
+	      xfree (history_value);
 	      return;
 	    }
 	  if (strlen (history_value) > linelength)
@@ -759,7 +759,7 @@ command_line_handler (char *rl)
 	    }
 	  strcpy (linebuffer, history_value);
 	  p = linebuffer + strlen (linebuffer);
-	  free (history_value);
+	  xfree (history_value);
 	}
     }
 
@@ -868,7 +868,7 @@ gdb_readline2 (gdb_client_data client_data)
 	       if we are called again fgetc will still return EOF and
 	       we'll return NULL then.  */
 	    break;
-	  free (result);
+	  xfree (result);
 	  (*input_handler) (0);
 	}
 

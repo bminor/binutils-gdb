@@ -164,7 +164,7 @@ init_lwp_list (void)
   for (lp = lwp_list; lp; lp = lpnext)
     {
       lpnext = lp->next;
-      free (lp);
+      xfree (lp);
     }
 
   lwp_list = NULL;
@@ -222,7 +222,7 @@ delete_lwp (int pid)
   else
     lwp_list = lp->next;
 
-  free (lp);
+  xfree (lp);
 }
 
 /* Return a pointer to the structure describing the LWP corresponding
@@ -268,7 +268,7 @@ restore_inferior_pid (void *arg)
 {
   int *saved_pid_ptr = arg;
   inferior_pid = *saved_pid_ptr;
-  free (arg);
+  xfree (arg);
 }
 
 static struct cleanup *

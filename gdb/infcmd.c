@@ -300,7 +300,7 @@ Start it from the beginning? "))
       if (args)
 	{
 	  cmd = concat ("set args ", args, NULL);
-	  make_cleanup (free, cmd);
+	  make_cleanup (xfree, cmd);
 	  execute_command (cmd, from_tty);
 	}
     }
@@ -696,7 +696,7 @@ jump_command (char *arg, int from_tty)
     }
 
   sal = sals.sals[0];
-  free ((PTR) sals.sals);
+  xfree (sals.sals);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
@@ -1375,7 +1375,7 @@ set_environment_command (char *arg, int from_tty)
     }
   else
     set_in_environ (inferior_environ, var, val);
-  free (var);
+  xfree (var);
 }
 
 static void
@@ -1423,7 +1423,7 @@ path_command (char *dirname, int from_tty)
   exec_path = strsave (env);
   mod_path (dirname, &exec_path);
   set_in_environ (inferior_environ, path_var_name, exec_path);
-  free (exec_path);
+  xfree (exec_path);
   if (from_tty)
     path_info ((char *) NULL, from_tty);
 }

@@ -141,7 +141,7 @@ maintenance_demangle (char *args, int from_tty)
       if (demangled != NULL)
 	{
 	  printf_unfiltered ("%s\n", demangled);
-	  free (demangled);
+	  xfree (demangled);
 	}
       else
 	{
@@ -444,7 +444,7 @@ maintenance_do_deprecate (char *text, int deprecate)
     {
 
       if (alias->flags & MALLOCED_REPLACEMENT)
-	free (alias->replacement);
+	xfree (alias->replacement);
 
       if (deprecate)
 	alias->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
@@ -457,7 +457,7 @@ maintenance_do_deprecate (char *text, int deprecate)
   else if (cmd)
     {
       if (cmd->flags & MALLOCED_REPLACEMENT)
-	free (cmd->replacement);
+	xfree (cmd->replacement);
 
       if (deprecate)
 	cmd->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);

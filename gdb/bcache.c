@@ -111,7 +111,7 @@ expand_hash_table (struct bcache *bcache)
 
   /* Plug in the new table.  */
   if (bcache->bucket)
-    free (bcache->bucket);
+    xfree (bcache->bucket);
   bcache->bucket = new_buckets;
   bcache->num_buckets = new_num_buckets;
 }
@@ -173,7 +173,7 @@ free_bcache (struct bcache *bcache)
 {
   obstack_free (&bcache->cache, 0);
   if (bcache->bucket)
-    free (bcache->bucket);
+    xfree (bcache->bucket);
 
   /* This isn't necessary, but at least the bcache is always in a
      consistent state.  */

@@ -1352,7 +1352,7 @@ cfront_mangle_name (struct type *type, int i, int j)
 	printf ("add_mangled_type: %s\n", extras.str);	/* FIXME */
       arm_mangled_name = malloc (strlen (mangled_name) + extras.len);
       sprintf (arm_mangled_name, "%s%s", mangled_name, extras.str);
-      free (mangled_name);
+      xfree (mangled_name);
       mangled_name = arm_mangled_name;
     }
 }
@@ -1484,7 +1484,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
       argtypes[argcount] = NULL;	/* Ellist terminator */
     }
 
-  free (demangled_name);
+  xfree (demangled_name);
 
   f = TYPE_FN_FIELDLIST1 (type, method_id);
 
@@ -1835,7 +1835,7 @@ virtual_base_list (struct type *dclass)
   while (tmp_vbase)
     {
       tmp_vbase = tmp_vbase->next;
-      free (tmp_vbase_2);
+      xfree (tmp_vbase_2);
       tmp_vbase_2 = tmp_vbase;
     }
 

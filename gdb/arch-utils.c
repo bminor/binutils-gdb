@@ -534,7 +534,7 @@ info_architecture (char *args, int from_tty)
 	{
 	  printf_filtered (" %s", *arch);
 	}
-      free (arches);
+      xfree (arches);
     }
   else
     {

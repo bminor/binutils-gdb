@@ -156,7 +156,7 @@ bug_load (char *args, int fromtty)
 	      gdb_flush (gdb_stdout);
 	    }
 	  printf_filtered ("\n");
-	  free (buffer);
+	  xfree (buffer);
 	}
       s = s->next;
     }

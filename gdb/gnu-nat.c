@@ -627,7 +627,7 @@ _proc_free (struct proc *proc)
       mach_port_deallocate (mach_task_self (), proc->port);
     }
 
-  free (proc);
+  xfree (proc);
   return next;
 }
 

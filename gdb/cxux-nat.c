@@ -386,7 +386,7 @@ add_shared_symbol_files (void)
 	      section_addrs.other[0].addr = lms.l_addr;
               section_addrs.other[0].name = ".text";
 	      symbol_file_add (path_name, 1, &section_addrs, 0, 0);
-	      free (path_name);
+	      xfree (path_name);
 	    }
 	}
       /* traverse links in reverse order so that we get the

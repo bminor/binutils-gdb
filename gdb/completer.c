@@ -139,7 +139,7 @@ extern char *filename_completion_function (char *, int);
 	    q = xmalloc (strlen (p) + 5);
 	    strcpy (q, p + (word - text));
 	    return_val[return_val_used++] = q;
-	    free (p);
+	    xfree (p);
 	  }
 	else
 	  {
@@ -149,7 +149,7 @@ extern char *filename_completion_function (char *, int);
 	    q[text - word] = '\0';
 	    strcat (q, p);
 	    return_val[return_val_used++] = q;
-	    free (p);
+	    xfree (p);
 	  }
       }
     }
@@ -228,7 +228,7 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 	{
 	  /* Free the storage used by LIST, but not by the strings inside.
 	     This is because rl_complete_internal () frees the strings. */
-	  free ((PTR) list);
+	  xfree (list);
 	}
       list = 0;
       index = 0;

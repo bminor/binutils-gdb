@@ -156,7 +156,7 @@ select_source_symtab (register struct symtab *s)
     {
       sals = decode_line_spec ("main", 1);
       sal = sals.sals[0];
-      free (sals.sals);
+      xfree (sals.sals);
       current_source_symtab = sal.symtab;
       current_source_line = max (sal.line - (lines_to_list - 1), 1);
       if (current_source_symtab)
@@ -270,7 +270,7 @@ directory_command (char *dirname, int from_tty)
     {
       if (from_tty && query ("Reinitialize source path to empty? "))
 	{
-	  free (source_path);
+	  xfree (source_path);
 	  init_source_path ();
 	}
     }
@@ -296,7 +296,7 @@ mod_path (char *dirname, char **which_path)
     return;
 
   dirname = strsave (dirname);
-  make_cleanup (free, dirname);
+  make_cleanup (xfree, dirname);
 
   do
     {
@@ -376,7 +376,7 @@ mod_path (char *dirname, char **which_path)
 	name = concat (current_directory, SLASH_STRING, name, NULL);
       else
 	name = savestring (name, p - name);
-      make_cleanup (free, name);
+      make_cleanup (xfree, name);
 
       /* Unless it's a variable, check existence.  */
       if (name[0] != '$')
@@ -449,14 +449,14 @@ mod_path (char *dirname, char **which_path)
 		old[prefix] = c;
 		*which_path = concat (temp, "", &old[prefix], NULL);
 		prefix = strlen (temp);
-		free (temp);
+		xfree (temp);
 	      }
 	    else
 	      {
 		*which_path = concat (name, (old[0] ? tinybuf : old), old, NULL);
 		prefix = strlen (name);
 	      }
-	    free (old);
+	    xfree (old);
 	    old = *which_path;
 	  }
       }
@@ -729,7 +729,7 @@ open_source_file (struct symtab *s)
     {
       fullname = s->fullname;
       s->fullname = mstrsave (s->objfile->md, s->fullname);
-      free (fullname);
+      xfree (fullname);
     }
   return result;
 }
@@ -830,7 +830,7 @@ find_source_lines (struct symtab *s, int desc)
     /* Use malloc, not alloca, because this may be pretty large, and we may
        run into various kinds of limits on stack size.  */
     data = (char *) xmalloc (size);
-    old_cleanups = make_cleanup (free, data);
+    old_cleanups = make_cleanup (xfree, data);
 
     /* Reassign `size' to result of read for systems where \r\n -> \n.  */
     size = myread (desc, data, size);
@@ -1233,12 +1233,12 @@ list_command (char *arg, int from_tty)
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
-	  free (sals.sals);
+	  xfree (sals.sals);
 	  return;
 	}
 
       sal = sals.sals[0];
-      free (sals.sals);
+      xfree (sals.sals);
     }
 
   /* Record whether the BEG arg is all digits.  */
@@ -1267,11 +1267,11 @@ list_command (char *arg, int from_tty)
 	  if (sals_end.nelts > 1)
 	    {
 	      ambiguous_line_spec (&sals_end);
-	      free (sals_end.sals);
+	      xfree (sals_end.sals);
 	      return;
 	    }
 	  sal_end = sals_end.sals[0];
-	  free (sals_end.sals);
+	  xfree (sals_end.sals);
 	}
     }
 
@@ -1442,7 +1442,7 @@ line_info (char *arg, int from_tty)
 	printf_filtered ("Line number %d is out of range for \"%s\".\n",
 			 sal.line, sal.symtab->filename);
     }
-  free (sals.sals);
+  xfree (sals.sals);
 }
 
 /* Commands to search the source file for a regexp.  */

@@ -510,7 +510,7 @@ h8500_value_of_trapped_internalvar (struct internalvar *var)
   get_saved_register (regbuf, NULL, NULL, selected_frame, regnum, NULL);
   regval |= regbuf[0] << 8 | regbuf[1];		/* XXX host/target byte order */
 
-  free (var->value);		/* Free up old value */
+  xfree (var->value);		/* Free up old value */
 
   var->value = value_from_longest (builtin_type_unsigned_long, regval);
   release_value (var->value);	/* Unchain new value */

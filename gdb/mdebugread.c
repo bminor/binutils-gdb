@@ -2286,7 +2286,7 @@ parse_partial_symbols (struct objfile *objfile)
      Minor hack: -O3 images might claim some global data belongs
      to FDR -1. We`ll go along with that */
   fdr_to_pst = (struct pst_map *) xzalloc ((hdr->ifdMax + 1) * sizeof *fdr_to_pst);
-  old_chain = make_cleanup (free, fdr_to_pst);
+  old_chain = make_cleanup (xfree, fdr_to_pst);
   fdr_to_pst++;
   {
     struct partial_symtab *pst = new_psymtab ("", objfile);
@@ -2304,7 +2304,7 @@ parse_partial_symbols (struct objfile *objfile)
 
   /* Pass 0 over external syms: swap them in.  */
   ext_block = (EXTR *) xmalloc (hdr->iextMax * sizeof (EXTR));
-  make_cleanup (free, ext_block);
+  make_cleanup (xfree, ext_block);
 
   ext_out = (char *) debug_info->external_ext;
   ext_out_end = ext_out + hdr->iextMax * external_ext_size;
@@ -2704,7 +2704,7 @@ parse_partial_symbols (struct objfile *objfile)
 
 		if (stabstring
 		    && stabstring != debug_info->ss + fh->issBase + sh.iss)
-		  free (stabstring);
+		  xfree (stabstring);
 	      }
 	      /* end - Handle continuation */
 	    }
@@ -3394,7 +3394,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 	  PDR *pdr_in_end;
 
 	  pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
-	  old_chain = make_cleanup (free, pr_block);
+	  old_chain = make_cleanup (xfree, pr_block);
 
 	  pdr_ptr = ((char *) debug_info->external_pdr
 		     + fh->ipdFirst * external_pdr_size);
@@ -3503,7 +3503,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 
 	      pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
 
-	      old_chain = make_cleanup (free, pr_block);
+	      old_chain = make_cleanup (xfree, pr_block);
 
 	      pdr_ptr = ((char *) debug_info->external_pdr
 			 + fh->ipdFirst * external_pdr_size);

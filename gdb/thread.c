@@ -74,9 +74,9 @@ free_thread (struct thread_info *tp)
   /* FIXME: do I ever need to call the back-end to give it a
      chance at this private data before deleting the thread?  */
   if (tp->private)
-    free (tp->private);
+    xfree (tp->private);
 
-  free (tp);
+  xfree (tp);
 }
 
 void
@@ -491,7 +491,7 @@ do_restore_current_thread_cleanup (void *arg)
 {
   struct current_thread_cleanup *old = arg;
   restore_current_thread (old->inferior_pid);
-  free (old);
+  xfree (old);
 }
 
 static struct cleanup *
@@ -532,7 +532,7 @@ thread_apply_all_command (char *cmd, int from_tty)
   /* Save a copy of the command in case it is clobbered by
      execute_command */
   saved_cmd = strdup (cmd);
-  saved_cmd_cleanup_chain = make_cleanup (free, (void *) saved_cmd);
+  saved_cmd_cleanup_chain = make_cleanup (xfree, (void *) saved_cmd);
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
@@ -575,7 +575,7 @@ thread_apply_command (char *tidlist, int from_tty)
   /* Save a copy of the command in case it is clobbered by
      execute_command */
   saved_cmd = strdup (cmd);
-  saved_cmd_cleanup_chain = make_cleanup (free, (void *) saved_cmd);
+  saved_cmd_cleanup_chain = make_cleanup (xfree, (void *) saved_cmd);
   while (tidlist < cmd)
     {
       struct thread_info *tp;

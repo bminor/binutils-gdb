@@ -700,7 +700,7 @@ vx_load_command (char *arg_string, int from_tty)
     error ("The load command takes a file name");
 
   arg_string = tilde_expand (arg_string);
-  make_cleanup (free, arg_string);
+  make_cleanup (xfree, arg_string);
 
   dont_repeat ();
 
@@ -1209,7 +1209,7 @@ vx_attach (char *args, int from_tty)
   push_target (&vx_run_ops);
 
   if (vx_running)
-    free (vx_running);
+    xfree (vx_running);
   vx_running = 0;
 }
 
@@ -1294,7 +1294,7 @@ vx_proc_close (int quitting)
 {
   inferior_pid = 0;		/* No longer have a process.  */
   if (vx_running)
-    free (vx_running);
+    xfree (vx_running);
   vx_running = 0;
 }
 
@@ -1325,7 +1325,7 @@ vx_close (int quitting)
   pClient = 0;
 
   if (vx_host)
-    free (vx_host);		/* The hostname */
+    xfree (vx_host);		/* The hostname */
   vx_host = 0;
 }
 

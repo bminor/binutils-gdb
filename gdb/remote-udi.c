@@ -131,7 +131,7 @@ udi_create_inferior (char *execfile, char *args, char **env)
   if (execfile)
     {
       if (prog_name != NULL)
-	free (prog_name);
+	xfree (prog_name);
       prog_name = savestring (execfile, strlen (execfile));
     }
   else if (entry.Offset)
@@ -229,7 +229,7 @@ udi_open (char *name, int from_tty)
     bkpt_table[cnt].Type = 0;
 
   if (udi_config_id)
-    free (udi_config_id);
+    xfree (udi_config_id);
 
   if (!name)
     error ("Usage: target udi config_id, where config_id appears in udi_soc file");
@@ -1081,7 +1081,7 @@ download (char *load_arg_string, int from_tty)
     error ("Must specify at least a file name with the load command");
 
   filename = tilde_expand (filename);
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
 
   while (token = strtok (NULL, " \t"))
     {

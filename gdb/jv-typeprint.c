@@ -122,7 +122,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 	{			/* array type */
 	  char *name = java_demangle_type_signature (TYPE_TAG_NAME (type));
 	  fputs_filtered (name, stream);
-	  free (name);
+	  xfree (name);
 	  break;
 	}
 
@@ -299,11 +299,11 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      }
 
 		    fputs_filtered (demangled_no_class, stream);
-		    free (demangled_name);
+		    xfree (demangled_name);
 		  }
 
 		  if (TYPE_FN_FIELD_STUB (f, j))
-		    free (mangled_name);
+		    xfree (mangled_name);
 
 		  fprintf_filtered (stream, ";\n");
 		}

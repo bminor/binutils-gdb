@@ -669,7 +669,7 @@ common:
       else
 	{
 	  fputs_filtered (demangled_name, stream);
-	  free (demangled_name);
+	  xfree (demangled_name);
 	}
     }
   else

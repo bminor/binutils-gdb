@@ -583,7 +583,7 @@ extern int gdbtk_test (char *);
 
   for (i = 0; i < ndir; i++)
     catch_command_errors (directory_command, dirarg[i], 0, RETURN_MASK_ALL);
-  free ((PTR) dirarg);
+  xfree (dirarg);
 
   if (execarg != NULL
       && symarg != NULL
@@ -665,7 +665,7 @@ extern int gdbtk_test (char *);
 #endif
       catch_command_errors (source_command, cmdarg[i], !batch, RETURN_MASK_ALL);
     }
-  free ((PTR) cmdarg);
+  xfree (cmdarg);
 
   /* Read in the old history after all the command files have been read. */
   init_history ();

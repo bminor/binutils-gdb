@@ -126,7 +126,7 @@ exec_close (int quitting)
          FIXME-as-well: free_objfile already free'd vp->name, so it isn't
          valid here.  */
       free_named_symtabs (vp->name);
-      free (vp);
+      xfree (vp);
     }
 
   vmap = NULL;
@@ -138,13 +138,13 @@ exec_close (int quitting)
       if (!bfd_close (exec_bfd))
 	warning ("cannot close \"%s\": %s",
 		 name, bfd_errmsg (bfd_get_error ()));
-      free (name);
+      xfree (name);
       exec_bfd = NULL;
     }
 
   if (exec_ops.to_sections)
     {
-      free ((PTR) exec_ops.to_sections);
+      xfree (exec_ops.to_sections);
       exec_ops.to_sections = NULL;
       exec_ops.to_sections_end = NULL;
     }
@@ -199,7 +199,7 @@ exec_file_attach (char *args, int from_tty)
 	error ("No executable file name was specified");
 
       filename = tilde_expand (*argv);
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
 
       scratch_chan = openp (getenv ("PATH"), 1, filename,
 		   write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY, 0,
@@ -226,7 +226,7 @@ exec_file_attach (char *args, int from_tty)
          via the exec_bfd->name pointer, so we need to make another copy and
          leave exec_bfd as the new owner of the original copy. */
       scratch_pathname = xstrdup (scratch_pathname);
-      make_cleanup (free, scratch_pathname);
+      make_cleanup (xfree, scratch_pathname);
 
       if (!bfd_check_format (exec_bfd, bfd_object))
 	{
@@ -364,7 +364,7 @@ build_section_table (bfd *some_bfd, struct section_table **start,
 
   count = bfd_count_sections (some_bfd);
   if (*start)
-    free ((PTR) * start);
+    xfree (* start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);

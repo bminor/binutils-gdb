@@ -524,7 +524,7 @@ Arguments missing: an output file name and an optional symbol file name");
     }
 
   filename = tilde_expand (filename);
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
 
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
@@ -758,7 +758,7 @@ maintenance_print_psymbols (char *args, int from_tty)
     }
 
   filename = tilde_expand (filename);
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
 
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
@@ -901,7 +901,7 @@ maintenance_print_msymbols (char *args, int from_tty)
     }
 
   filename = tilde_expand (filename);
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
 
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)

@@ -108,7 +108,7 @@ nlm_symtab_read (bfd *abfd, CORE_ADDR addr, struct objfile *objfile)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),

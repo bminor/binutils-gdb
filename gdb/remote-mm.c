@@ -333,7 +333,7 @@ mm_open (char *name, int from_tty)
     /*EMPTY */ ;
 
   if (prog_name != NULL)
-    free (prog_name);
+    xfree (prog_name);
   prog_name = savestring (p, strlen (p));
 
 
@@ -1086,7 +1086,7 @@ mm_load (char *arg_string, int from_tty)
     error ("The load command takes a file name");
 
   arg_string = tilde_expand (arg_string);
-  make_cleanup (free, arg_string);
+  make_cleanup (xfree, arg_string);
   QUIT;
   immediate_quit++;
   error ("File loading is not yet supported for MiniMon.");

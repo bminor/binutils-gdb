@@ -1137,8 +1137,8 @@ generic_push_dummy_frame (void)
     if (INNER_THAN (dummy_frame->fp, fp))	/* stale -- destroy! */
       {
 	dummy_frame_stack = dummy_frame->next;
-	free (dummy_frame->registers);
-	free (dummy_frame);
+	xfree (dummy_frame->registers);
+	xfree (dummy_frame);
 	dummy_frame = dummy_frame_stack;
       }
     else
@@ -1193,8 +1193,8 @@ generic_pop_dummy_frame (void)
   write_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
   flush_cached_frames ();
 
-  free (dummy_frame->registers);
-  free (dummy_frame);
+  xfree (dummy_frame->registers);
+  xfree (dummy_frame);
 }
 
 /* Function: frame_chain_valid 

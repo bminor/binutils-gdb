@@ -2788,7 +2788,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	  default:
 	    break;
 	  }
-      free (parm_types);
+      xfree (parm_types);
       if (overload_debug)
 	{
 	  if (method)
@@ -2860,7 +2860,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       *symp = oload_syms[oload_champ];
-      free (func_name);
+      xfree (func_name);
     }
 
   return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);

@@ -341,7 +341,7 @@ set_raw_tracepoint (struct symtab_and_line sal)
   struct cleanup *old_chain;
 
   t = (struct tracepoint *) xmalloc (sizeof (struct tracepoint));
-  old_chain = make_cleanup (free, t);
+  old_chain = make_cleanup (xfree, t);
   memset (t, 0, sizeof (*t));
   t->address = sal.pc;
   if (sal.symtab == NULL)
@@ -576,13 +576,13 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
 	delete_tracepoint_hook (t);
 
       if (t->addr_string)
-	free (t->addr_string);
+	xfree (t->addr_string);
       if (t->source_file)
-	free (t->source_file);
+	xfree (t->source_file);
       if (t->actions)
 	free_actions (t);
 
-      free (t);
+      xfree (t);
       break;
     }
 }
@@ -971,7 +971,7 @@ validate_actionline (char **line, struct tracepoint *t)
 	    error ("expression too complicated, try simplifying");
 
 	  ax_reqs (aexpr, &areqs);
-	  (void) make_cleanup (free, areqs.reg_mask);
+	  (void) make_cleanup (xfree, areqs.reg_mask);
 
 	  if (areqs.flaw != agent_flaw_none)
 	    error ("malformed expression");
@@ -1022,8 +1022,8 @@ free_actions (struct tracepoint *t)
     {
       next = line->next;
       if (line->action)
-	free (line->action);
-      free (line);
+	xfree (line->action);
+      xfree (line);
     }
   t->actions = NULL;
 }
@@ -1457,9 +1457,9 @@ free_actions_list (char **actions_list)
     return;
 
   for (ndx = 0; actions_list[ndx]; ndx++)
-    free (actions_list[ndx]);
+    xfree (actions_list[ndx]);
 
-  free (actions_list);
+  xfree (actions_list);
 }
 
 /* render all actions into gdb protocol */
@@ -2098,7 +2098,7 @@ trace_find_line_command (char *args, int from_tty)
 	  sal = sals.sals[0];
 	}
 
-      old_chain = make_cleanup (free, sals.sals);
+      old_chain = make_cleanup (xfree, sals.sals);
       if (sal.symtab == 0)
 	{
 	  printf_filtered ("TFIND: No line number information available");

@@ -89,9 +89,9 @@ tui_file_delete (struct ui_file *file)
   if ((tmpstream->ts_streamtype == astring) &&
       (tmpstream->ts_strbuf != NULL))
     {
-      free (tmpstream->ts_strbuf);
+      xfree (tmpstream->ts_strbuf);
     }
-  free (tmpstream);
+  xfree (tmpstream);
 }
 
 struct ui_file *

@@ -171,7 +171,7 @@ really_free_pendings (PTR dummy)
   for (next = free_pendings; next; next = next1)
     {
       next1 = next->next;
-      free ((void *) next);
+      xfree ((void *) next);
     }
   free_pendings = NULL;
 
@@ -180,14 +180,14 @@ really_free_pendings (PTR dummy)
   for (next = file_symbols; next != NULL; next = next1)
     {
       next1 = next->next;
-      free ((void *) next);
+      xfree ((void *) next);
     }
   file_symbols = NULL;
 
   for (next = global_symbols; next != NULL; next = next1)
     {
       next1 = next->next;
-      free ((void *) next);
+      xfree ((void *) next);
     }
   global_symbols = NULL;
 }
@@ -205,7 +205,7 @@ free_pending_blocks (void)
   for (bnext = pending_blocks; bnext; bnext = bnext1)
     {
       bnext1 = bnext->next;
-      free ((void *) bnext);
+      xfree ((void *) bnext);
     }
 #endif
   pending_blocks = NULL;
@@ -486,7 +486,7 @@ make_blockvector (struct objfile *objfile)
   for (next = pending_blocks; next; next = next1)
     {
       next1 = next->next;
-      free (next);
+      xfree (next);
     }
 #endif
   pending_blocks = NULL;
@@ -684,7 +684,7 @@ pop_subfile (void)
     }
   name = link->name;
   subfile_stack = link->next;
-  free ((void *) link);
+  xfree ((void *) link);
   return (name);
 }
 
@@ -993,23 +993,23 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	}
       if (subfile->name != NULL)
 	{
-	  free ((void *) subfile->name);
+	  xfree ((void *) subfile->name);
 	}
       if (subfile->dirname != NULL)
 	{
-	  free ((void *) subfile->dirname);
+	  xfree ((void *) subfile->dirname);
 	}
       if (subfile->line_vector != NULL)
 	{
-	  free ((void *) subfile->line_vector);
+	  xfree ((void *) subfile->line_vector);
 	}
       if (subfile->debugformat != NULL)
 	{
-	  free ((void *) subfile->debugformat);
+	  xfree ((void *) subfile->debugformat);
 	}
 
       nextsub = subfile->next;
-      free ((void *) subfile);
+      xfree ((void *) subfile);
     }
 
   /* Set this for the main source file.  */

@@ -340,7 +340,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	      /* No, we still fail.  Okay, time to punt. */
 	      if ((pt_status == -1) && errno)
 		{
-		  free (buffer);
+		  xfree (buffer);
 		  return 0;
 		}
 	    }
@@ -356,7 +356,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    {
-	      free (buffer);
+	      xfree (buffer);
 	      return 0;
 	    }
 	  QUIT;
@@ -365,7 +365,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       /* Copy appropriate bytes out of the buffer.  */
       memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
     }
-  free (buffer);
+  xfree (buffer);
   return len;
 }
 

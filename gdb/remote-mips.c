@@ -1576,9 +1576,9 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 	     the user didn't specify a local name, assume it's the same
 	     as the part of the remote name after the "host:".  */
 	  if (tftp_name)
-	    free (tftp_name);
+	    xfree (tftp_name);
 	  if (tftp_localname)
-	    free (tftp_localname);
+	    xfree (tftp_localname);
 	  if (local_name == NULL)
 	    if ((local_name = strchr (remote_name, ':')) != NULL)
 	      local_name++;	/* skip over the colon */
@@ -1624,7 +1624,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   set_current_frame (create_new_frame (read_fp (), stop_pc));
   select_frame (get_current_frame (), 0);
   print_stack_frame (selected_frame, -1, 1);
-  free (serial_port_name);
+  xfree (serial_port_name);
 }
 
 static void
@@ -3230,7 +3230,7 @@ pmon_end_download (int final, int bintotal)
       strcat (cmd, tftp_name);
       strcat (cmd, "\r");
       mips_send_command (cmd, 0);
-      free (cmd);
+      xfree (cmd);
       if (!mips_expect_download ("Downloading from "))
 	return;
       if (!mips_expect_download (tftp_name))

@@ -56,8 +56,8 @@ new_agent_expr (CORE_ADDR scope)
 void
 free_agent_expr (struct agent_expr *x)
 {
-  free (x->buf);
-  free (x);
+  xfree (x->buf);
+  xfree (x);
 }
 
 static void
@@ -416,7 +416,7 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
       if (ax->buf[i] > (sizeof (aop_map) / sizeof (aop_map[0])))
 	{
 	  reqs->flaw = agent_flaw_bad_instruction;
-	  free (reg_mask);
+	  xfree (reg_mask);
 	  return;
 	}
 
@@ -425,14 +425,14 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
       if (!op->name)
 	{
 	  reqs->flaw = agent_flaw_bad_instruction;
-	  free (reg_mask);
+	  xfree (reg_mask);
 	  return;
 	}
 
       if (i + 1 + op->op_size > ax->len)
 	{
 	  reqs->flaw = agent_flaw_incomplete_instruction;
-	  free (reg_mask);
+	  xfree (reg_mask);
 	  return;
 	}
 
@@ -441,7 +441,7 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
       if (targets[i] && (heights[i] != height))
 	{
 	  reqs->flaw = agent_flaw_height_mismatch;
-	  free (reg_mask);
+	  xfree (reg_mask);
 	  return;
 	}
 
@@ -468,7 +468,7 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
 	  if (target < 0 || target >= ax->len)
 	    {
 	      reqs->flaw = agent_flaw_bad_jump;
-	      free (reg_mask);
+	      xfree (reg_mask);
 	      return;
 	    }
 	  /* Have we already found other jumps to the same location?  */
@@ -477,7 +477,7 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
 	      if (heights[i] != height)
 		{
 		  reqs->flaw = agent_flaw_height_mismatch;
-		  free (reg_mask);
+		  xfree (reg_mask);
 		  return;
 		}
 	    }
@@ -496,7 +496,7 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
 	  if (!targets[i + 3])
 	    {
 	      reqs->flaw = agent_flaw_hole;
-	      free (reg_mask);
+	      xfree (reg_mask);
 	      return;
 	    }
 
@@ -531,7 +531,7 @@ ax_reqs (struct agent_expr *ax, struct agent_reqs *reqs)
     if (targets[i] && !boundary[i])
       {
 	reqs->flaw = agent_flaw_bad_jump;
-	free (reg_mask);
+	xfree (reg_mask);
 	return;
       }
 

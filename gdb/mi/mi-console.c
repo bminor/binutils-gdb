@@ -66,7 +66,7 @@ mi_console_file_delete (struct ui_file *file)
   struct mi_console_file *mi_console = ui_file_data (file);
   if (mi_console->magic != &mi_console_file_magic)
     internal_error ("mi_console_file_delete: bad magic number");
-  free (mi_console);
+  xfree (mi_console);
 }
 
 static void

@@ -48,7 +48,7 @@ core_file_command (char *filename, int from_tty)
      and mark data and stack spaces as empty.  */
 
   if (corefile)
-    free (corefile);
+    xfree (corefile);
   corefile = 0;
 
   if (corechan >= 0)
@@ -65,7 +65,7 @@ core_file_command (char *filename, int from_tty)
   if (filename)
     {
       filename = tilde_expand (filename);
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
 
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the program with \"kill\".");

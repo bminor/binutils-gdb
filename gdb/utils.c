@@ -295,7 +295,7 @@ do_my_cleanups (register struct cleanup **pmy_chain,
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
       (*ptr->function) (ptr->arg);
-      free (ptr);
+      xfree (ptr);
     }
 }
 
@@ -328,7 +328,7 @@ discard_my_cleanups (register struct cleanup **pmy_chain,
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
-      free (ptr);
+      xfree (ptr);
     }
 }
 
@@ -389,7 +389,7 @@ free_current_contents (void *ptr)
     internal_error ("free_current_contents: NULL pointer");
   if (*location != NULL)
     {
-      free (*location);
+      xfree (*location);
       *location = NULL;
     }
 }
@@ -449,7 +449,7 @@ do_all_continuations (void)
        (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
        saved_continuation = continuation_ptr;
        continuation_ptr = continuation_ptr->next;
-       free (saved_continuation);
+       xfree (saved_continuation);
      }
 }
 
@@ -464,7 +464,7 @@ discard_all_continuations (void)
     {
       continuation_ptr = cmd_continuation;
       cmd_continuation = continuation_ptr->next;
-      free (continuation_ptr);
+      xfree (continuation_ptr);
     }
 }
 
@@ -511,7 +511,7 @@ do_all_intermediate_continuations (void)
        (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
        saved_continuation = continuation_ptr;
        continuation_ptr = continuation_ptr->next;
-       free (saved_continuation);
+       xfree (saved_continuation);
      }
 }
 
@@ -526,7 +526,7 @@ discard_all_intermediate_continuations (void)
     {
       continuation_ptr = intermediate_continuation;
       intermediate_continuation = continuation_ptr->next;
-      free (continuation_ptr);
+      xfree (continuation_ptr);
     }
 }
 
@@ -621,7 +621,7 @@ verror (const char *string, va_list args)
   vfprintf_filtered (gdb_lasterr, string, args);
   /* Retrieve the last error and print it to gdb_stderr */
   err_string = error_last_message ();
-  err_string_cleanup = make_cleanup (free, err_string);
+  err_string_cleanup = make_cleanup (xfree, err_string);
   fputs_filtered (err_string, gdb_stderr);
   fprintf_filtered (gdb_stderr, "\n");
   do_cleanups (err_string_cleanup);
@@ -642,7 +642,7 @@ error_stream (struct ui_file *stream)
 {
   long size;
   char *msg = ui_file_xstrdup (stream, &size);
-  make_cleanup (free, msg);
+  make_cleanup (xfree, msg);
   error ("%s", msg);
 }
 
@@ -932,7 +932,7 @@ mrealloc (PTR md, PTR ptr, size_t size)
 void
 mfree (PTR md, PTR ptr)
 {
-  free (ptr);
+  xfree (ptr);
 }
 
 #endif /* USE_MMALLOC */
@@ -1076,6 +1076,16 @@ PTR
 xrealloc (PTR ptr, size_t size)
 {
   return (xmrealloc ((PTR) NULL, ptr, size));
+}
+
+/* Free up space allocated by one of xmalloc(), xcalloc(), or
+   xrealloc().  */
+
+void
+xfree (void *ptr)
+{
+  if (ptr != NULL)
+    free (ptr);
 }
 
 
@@ -1636,7 +1646,7 @@ prompt_for_continue (void)
 	  else
 	    async_request_quit (0);
 	}
-      free (ignore);
+      xfree (ignore);
     }
   immediate_quit--;
 
@@ -1982,7 +1992,7 @@ vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
   struct cleanup *old_cleanups;
 
   xvasprintf (&linebuffer, format, args);
-  old_cleanups = make_cleanup (free, linebuffer);
+  old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
   do_cleanups (old_cleanups);
 }
@@ -2001,7 +2011,7 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
   struct cleanup *old_cleanups;
 
   xvasprintf (&linebuffer, format, args);
-  old_cleanups = make_cleanup (free, linebuffer);
+  old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);
 }
@@ -2112,7 +2122,7 @@ n_spaces (int n)
   if (n > max_spaces)
     {
       if (spaces)
-	free (spaces);
+	xfree (spaces);
       spaces = (char *) xmalloc (n + 1);
       for (t = spaces + n; t != spaces;)
 	*--t = ' ';
@@ -2170,7 +2180,7 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
 	  fputs_filtered (demangled ? demangled : name, stream);
 	  if (demangled != NULL)
 	    {
-	      free (demangled);
+	      xfree (demangled);
 	    }
 	}
     }

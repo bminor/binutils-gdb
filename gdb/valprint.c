@@ -990,7 +990,7 @@ print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
     {
       fprintf_filtered (stream, "%1d", digits[i]);
     }
-  free (digits);
+  xfree (digits);
 
   fprintf_filtered (stream, local_decimal_format_suffix ());
 }
@@ -1202,7 +1202,7 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
     {
       buffer = (char *) xmalloc (len * width);
       bufptr = buffer;
-      old_chain = make_cleanup (free, buffer);
+      old_chain = make_cleanup (xfree, buffer);
 
       nfetch = partial_memory_read (addr, bufptr, len * width, &errcode)
 	/ width;
@@ -1225,7 +1225,7 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
 	      buffer = (char *) xrealloc (buffer, (nfetch + bufsize) * width);
 	    }
 
-	  old_chain = make_cleanup (free, buffer);
+	  old_chain = make_cleanup (xfree, buffer);
 	  bufptr = buffer + bufsize * width;
 	  bufsize += nfetch;
 

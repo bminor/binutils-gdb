@@ -1739,7 +1739,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   /* Allocate a new field list entry and link it in.  */
   new_field = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-  make_cleanup (free, new_field);
+  make_cleanup (xfree, new_field);
   memset (new_field, 0, sizeof (struct nextfield));
   new_field->next = fip->fields;
   fip->fields = new_field;
@@ -2026,7 +2026,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Create a new member function field and chain it to the field list
      entry. */
   new_fnfield = (struct nextfnfield *) xmalloc (sizeof (struct nextfnfield));
-  make_cleanup (free, new_fnfield);
+  make_cleanup (xfree, new_fnfield);
   memset (new_fnfield, 0, sizeof (struct nextfnfield));
   new_fnfield->next = flp->head;
   flp->head = new_fnfield;
@@ -2386,7 +2386,7 @@ read_enumeration (struct die_info *die, struct objfile *objfile,
 	    TYPE_ALLOC (type, sizeof (struct field) * num_fields);
 	  memcpy (TYPE_FIELDS (type), fields,
 		  sizeof (struct field) * num_fields);
-	  free (fields);
+	  xfree (fields);
 	}
       if (unsigned_enum)
 	TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
@@ -2949,8 +2949,8 @@ free_die_list (struct die_info *dies)
   while (die)
     {
       next = die->next;
-      free (die->attrs);
-      free (die);
+      xfree (die->attrs);
+      xfree (die);
       die = next;
     }
 }
@@ -3083,8 +3083,8 @@ dwarf2_empty_abbrev_table (PTR ignore)
       while (abbrev)
 	{
 	  next = abbrev->next;
-	  free (abbrev->attrs);
-	  free (abbrev);
+	  xfree (abbrev->attrs);
+	  xfree (abbrev);
 	  abbrev = next;
 	}
       dwarf2_abbrevs[i] = NULL;
@@ -4064,11 +4064,11 @@ dwarf2_start_subfile (char *filename, char *dirname)
 	  if (STREQ (subfile->name, fullname))
 	    {
 	      current_subfile = subfile;
-	      free (fullname);
+	      xfree (fullname);
 	      return;
 	    }
 	}
-      free (fullname);
+      xfree (fullname);
     }
   start_subfile (filename, dirname);
 }

@@ -379,7 +379,7 @@ restore_inferior_pid (void *arg)
 {
   int *saved_pid_ptr = arg;
   inferior_pid = *saved_pid_ptr;
-  free (arg);
+  xfree (arg);
 }
 
 /* Register a cleanup to restore the value of inferior_pid.  */

@@ -194,11 +194,11 @@ core_close (int quitting)
       if (!bfd_close (core_bfd))
 	warning ("cannot close \"%s\": %s",
 		 name, bfd_errmsg (bfd_get_error ()));
-      free (name);
+      xfree (name);
       core_bfd = NULL;
       if (core_ops.to_sections)
 	{
-	  free ((PTR) core_ops.to_sections);
+	  xfree (core_ops.to_sections);
 	  core_ops.to_sections = NULL;
 	  core_ops.to_sections_end = NULL;
 	}
@@ -273,11 +273,11 @@ core_open (char *filename, int from_tty)
   if (filename[0] != '/')
     {
       temp = concat (current_directory, "/", filename, NULL);
-      free (filename);
+      xfree (filename);
       filename = temp;
     }
 
-  old_chain = make_cleanup (free, filename);
+  old_chain = make_cleanup (xfree, filename);
 
   scratch_chan = open (filename, O_BINARY | ( write_files ? O_RDWR : O_RDONLY ), 0);
   if (scratch_chan < 0)

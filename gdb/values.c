@@ -331,9 +331,9 @@ clear_value_history (void)
     {
       for (i = 0; i < VALUE_HISTORY_CHUNK; i++)
 	if ((val = value_history_chain->values[i]) != NULL)
-	  free ((PTR) val);
+	  xfree (val);
       next = value_history_chain->next;
-      free ((PTR) value_history_chain);
+      xfree (value_history_chain);
       value_history_chain = next;
     }
   value_history_count = 0;
@@ -475,7 +475,7 @@ set_internalvar (struct internalvar *var, value_ptr val)
      something in the value chain (i.e., before release_value is
      called), because after the error free_all_values will get called before
      long.  */
-  free ((PTR) var->value);
+  xfree (var->value);
   var->value = newval;
   release_value (newval);
   /* End code which must not call error().  */
@@ -499,9 +499,9 @@ clear_internalvars (void)
     {
       var = internalvars;
       internalvars = var->next;
-      free ((PTR) var->name);
-      free ((PTR) var->value);
-      free ((PTR) var);
+      xfree (var->name);
+      xfree (var->value);
+      xfree (var);
     }
 }
 

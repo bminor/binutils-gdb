@@ -227,7 +227,7 @@ complete_command (char *arg, int from_tty)
        completion = line_completion_function (arg, ++i, arg, argpoint))
     {
       printf_unfiltered ("%s\n", completion);
-      free (completion);
+      xfree (completion);
     }
 }
 
@@ -287,7 +287,7 @@ cd_command (char *dir, int from_tty)
     error_no_arg ("new working directory");
 
   dir = tilde_expand (dir);
-  make_cleanup (free, dir);
+  make_cleanup (xfree, dir);
 
   if (chdir (dir) < 0)
     perror_with_name (dir);
@@ -321,7 +321,7 @@ cd_command (char *dir, int from_tty)
 	current_directory = concat (current_directory, dir, NULL);
       else
 	current_directory = concat (current_directory, SLASH_STRING, dir, NULL);
-      free (dir);
+      xfree (dir);
     }
 
   /* Now simplify any occurrences of `.' and `..' in the pathname.  */
@@ -383,7 +383,7 @@ source_command (char *args, int from_tty)
     }
 
   file = tilde_expand (file);
-  old_cleanups = make_cleanup (free, file);
+  old_cleanups = make_cleanup (xfree, file);
 
   stream = fopen (file, FOPEN_RT);
   if (!stream)

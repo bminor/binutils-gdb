@@ -995,15 +995,15 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 			  strncpy (demangled_no_static, demangled_no_class, length);
 			  *(demangled_no_static + length) = '\0';
 			  fputs_filtered (demangled_no_static, stream);
-			  free (demangled_no_static);
+			  xfree (demangled_no_static);
 			}
 		      else
 			fputs_filtered (demangled_no_class, stream);
-		      free (demangled_name);
+		      xfree (demangled_name);
 		    }
 
 		  if (TYPE_FN_FIELD_STUB (f, j))
-		    free (mangled_name);
+		    xfree (mangled_name);
 
 		  fprintf_filtered (stream, ";\n");
 		}

@@ -296,7 +296,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, PTR csip)
 	  /* This will be run after coffstab_build_psymtabs is called
 	     in coff_symfile_read, at which point we no longer need
 	     the information.  */
-	  make_cleanup (free, n);
+	  make_cleanup (xfree, n);
 	}
     }
 }
@@ -442,7 +442,7 @@ static void
 complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
 {
   if (last_source_file != NULL)
-    free (last_source_file);
+    xfree (last_source_file);
   last_source_file = savestring (name, strlen (name));
   current_source_start_addr = start_addr;
   current_source_end_addr = start_addr + size;
@@ -774,7 +774,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   memset (opaque_type_chain, 0, sizeof opaque_type_chain);
 
   if (type_vector)		/* Get rid of previous one */
-    free ((PTR) type_vector);
+    xfree (type_vector);
   type_vector_length = 160;
   type_vector = (struct type **)
     xmalloc (type_vector_length * sizeof (struct type *));
@@ -1243,7 +1243,7 @@ static void
 free_stringtab (void)
 {
   if (stringtab)
-    free (stringtab);
+    xfree (stringtab);
   stringtab = NULL;
 }
 
@@ -1345,7 +1345,7 @@ static void
 free_linetab (void)
 {
   if (linetab)
-    free (linetab);
+    xfree (linetab);
   linetab = NULL;
 }
 
@@ -1413,7 +1413,7 @@ patch_type (struct type *type, struct type *real_type)
   if (TYPE_NAME (real_target))
     {
       if (TYPE_NAME (target))
-	free (TYPE_NAME (target));
+	xfree (TYPE_NAME (target));
       TYPE_NAME (target) = concat (TYPE_NAME (real_target), NULL);
     }
 }

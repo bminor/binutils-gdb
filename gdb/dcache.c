@@ -435,8 +435,8 @@ dcache_free (DCACHE *dcache)
   if (last_cache == dcache)
     last_cache = NULL;
 
-  free (dcache->the_cache);
-  free (dcache);
+  xfree (dcache->the_cache);
+  xfree (dcache);
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring

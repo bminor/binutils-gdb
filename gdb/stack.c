@@ -737,7 +737,7 @@ parse_frame_specification (char *frame_exp)
 	  addr_string = savestring (frame_exp, p - frame_exp);
 
 	  {
-	    tmp_cleanup = make_cleanup (free, addr_string);
+	    tmp_cleanup = make_cleanup (xfree, addr_string);
 	    args[numargs++] = parse_and_eval_address (addr_string);
 	    do_cleanups (tmp_cleanup);
 	  }
@@ -1216,7 +1216,7 @@ backtrace_command (char *arg, int from_tty)
   backtrace_command_1 (argPtr, (argIndicatingFullTrace >= 0), from_tty);
 
   if (argIndicatingFullTrace >= 0 && totArgLen > 0)
-    free (argPtr);
+    xfree (argPtr);
 
   if (old_chain)
     do_cleanups (old_chain);
@@ -1959,7 +1959,7 @@ func_command (char *arg, int from_tty)
   while (!found && level == 0);
 
   if (func_bounds)
-    free (func_bounds);
+    xfree (func_bounds);
 
   if (!found)
     printf_filtered ("'%s' not within current stack frame.\n", arg);

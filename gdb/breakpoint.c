@@ -538,11 +538,11 @@ condition_command (char *arg, int from_tty)
     {
       if (b->cond)
 	{
-	  free ((PTR) b->cond);
+	  xfree (b->cond);
 	  b->cond = 0;
 	}
       if (b->cond_string != NULL)
-	free ((PTR) b->cond_string);
+	xfree (b->cond_string);
 
       if (*p == 0)
 	{
@@ -1655,7 +1655,7 @@ bpstat_clear (bpstat *bsp)
       q = p->next;
       if (p->old_val != NULL)
 	value_free (p->old_val);
-      free ((PTR) p);
+      xfree (p);
       p = q;
     }
   *bsp = NULL;
@@ -3044,7 +3044,7 @@ bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
          catchpoint triggers.  Clients who may wish to know the name
          later must get it from the catchpoint itself.) */
       if (ep->triggered_dll_pathname != NULL)
-	free (ep->triggered_dll_pathname);
+	xfree (ep->triggered_dll_pathname);
       if (ep->type == bp_catch_load)
 	dll_pathname = SOLIB_LOADED_LIBRARY_PATHNAME (inferior_pid);
       else
@@ -4059,13 +4059,13 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
 
   /* Make sure that all storage allocated in decode_line_1 gets freed
      in case the following errors out.  */
-  old_chain = make_cleanup (free, sals.sals);
+  old_chain = make_cleanup (xfree, sals.sals);
   if (canonical != (char **) NULL)
     {
-      make_cleanup (free, canonical);
+      make_cleanup (xfree, canonical);
       canonical_strings_chain = make_cleanup (null_cleanup, 0);
       if (canonical[0] != NULL)
-	make_cleanup (free, canonical[0]);
+	make_cleanup (xfree, canonical[0]);
     }
 
   resolve_sal_pc (&sals.sals[0]);
@@ -4678,18 +4678,18 @@ break_command_1 (char *arg, int flag, int from_tty)
   old_chain = make_cleanup (null_cleanup, 0);
 
   /* Make sure that all storage allocated to SALS gets freed.  */
-  make_cleanup (free, sals.sals);
+  make_cleanup (xfree, sals.sals);
 
   /* Cleanup the addr_string array but not its contents. */
-  make_cleanup (free, addr_string);
+  make_cleanup (xfree, addr_string);
 
   /* Allocate space for all the cond expressions. */
   cond = xcalloc (sals.nelts, sizeof (struct expression *));
-  make_cleanup (free, cond);
+  make_cleanup (xfree, cond);
 
   /* Allocate space for all the cond strings. */
   cond_string = xcalloc (sals.nelts, sizeof (char **));
-  make_cleanup (free, cond_string);
+  make_cleanup (xfree, cond_string);
 
   /* ----------------------------- SNIP -----------------------------
      Anything added to the cleanup chain beyond this point is assumed
@@ -4703,7 +4703,7 @@ break_command_1 (char *arg, int flag, int from_tty)
   for (i = 0; i < sals.nelts; i++)
     {
       if (addr_string[i] != NULL)
-	make_cleanup (free, addr_string[i]);
+	make_cleanup (xfree, addr_string[i]);
     }
 
   /* Resolve all line numbers to PC's and verify that the addresses
@@ -4737,10 +4737,10 @@ break_command_1 (char *arg, int flag, int from_tty)
 	    {
 	      tok = cond_start = end_tok + 1;
 	      cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
-	      make_cleanup (free, cond[i]);
+	      make_cleanup (xfree, cond[i]);
 	      cond_end = tok;
 	      cond_string[i] = savestring (cond_start, cond_end - cond_start);
-	      make_cleanup (free, cond_string[i]);
+	      make_cleanup (xfree, cond_string[i]);
 	    }
 	  else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
 	    {
@@ -4819,18 +4819,18 @@ do_captured_breakpoint (void *data)
   old_chain = make_cleanup (null_cleanup, 0);
 
   /* Always have a addr_string array, even if it is empty. */
-  make_cleanup (free, addr_string);
+  make_cleanup (xfree, addr_string);
 
   /* Make sure that all storage allocated to SALS gets freed.  */
-  make_cleanup (free, sals.sals);
+  make_cleanup (xfree, sals.sals);
 
   /* Allocate space for all the cond expressions. */
   cond = xcalloc (sals.nelts, sizeof (struct expression *));
-  make_cleanup (free, cond);
+  make_cleanup (xfree, cond);
 
   /* Allocate space for all the cond strings. */
   cond_string = xcalloc (sals.nelts, sizeof (char **));
-  make_cleanup (free, cond_string);
+  make_cleanup (xfree, cond_string);
 
   /* ----------------------------- SNIP -----------------------------
      Anything added to the cleanup chain beyond this point is assumed
@@ -4844,7 +4844,7 @@ do_captured_breakpoint (void *data)
   for (i = 0; i < sals.nelts; i++)
     {
       if (addr_string[i] != NULL)
-	make_cleanup (free, addr_string[i]);
+	make_cleanup (xfree, addr_string[i]);
     }
 
   /* Wait until now before checking for garbage at the end of the
@@ -4866,7 +4866,7 @@ do_captured_breakpoint (void *data)
 	  cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
 	  if (*tok != '\0')
 	    error ("Garbage %s follows condition", tok);
-	  make_cleanup (free, cond[i]);
+	  make_cleanup (xfree, cond[i]);
 	  cond_string[i] = xstrdup (args->condition);
 	}
     }
@@ -4968,7 +4968,7 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 	  else
 	    sprintf (addr_string, "*0x%s", paddr_nz (high));
 	  break_command_1 (addr_string, flag, from_tty);
-	  free (addr_string);
+	  xfree (addr_string);
 	}
       else
 	error ("No function contains the specified address");
@@ -5037,8 +5037,8 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
   sals = decode_line_1 (&addr_string, 1, (struct symtab *) NULL, 0,
 			(char ***) NULL);
 
-  free (beg_addr_string);
-  old_chain = make_cleanup (free, sals.sals);
+  xfree (beg_addr_string);
+  old_chain = make_cleanup (xfree, sals.sals);
   for (i = 0; (i < sals.nelts); i++)
     {
       sal = sals.sals[i];
@@ -5050,7 +5050,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
 	  else
 	    sprintf (break_string, "*0x%s", paddr_nz (high));
 	  break_command_1 (break_string, flag, from_tty);
-	  free (break_string);
+	  xfree (break_string);
 	}
       else
 	error ("No function contains the specified address");
@@ -5568,7 +5568,7 @@ until_break_command (char *arg, int from_tty)
     error ("Couldn't get information on specified line.");
 
   sal = sals.sals[0];
-  free ((PTR) sals.sals);	/* malloc'd, so freed */
+  xfree (sals.sals);	/* malloc'd, so freed */
 
   if (*arg)
     error ("Junk at end of arguments.");
@@ -6309,7 +6309,7 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
       warning ("Multiple breakpoints were set.");
       warning ("Use the \"delete\" command to delete unwanted breakpoints.");
     }
-  free ((PTR) sals.sals);
+  xfree (sals.sals);
 }
 
 #if 0
@@ -6644,7 +6644,7 @@ clear_command (char *arg, int from_tty)
       if (from_tty)
 	putchar_unfiltered ('\n');
     }
-  free ((PTR) sals.sals);
+  xfree (sals.sals);
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and
@@ -6803,25 +6803,25 @@ delete_breakpoint (struct breakpoint *bpt)
 
   free_command_lines (&bpt->commands);
   if (bpt->cond)
-    free (bpt->cond);
+    xfree (bpt->cond);
   if (bpt->cond_string != NULL)
-    free (bpt->cond_string);
+    xfree (bpt->cond_string);
   if (bpt->addr_string != NULL)
-    free (bpt->addr_string);
+    xfree (bpt->addr_string);
   if (bpt->exp != NULL)
-    free (bpt->exp);
+    xfree (bpt->exp);
   if (bpt->exp_string != NULL)
-    free (bpt->exp_string);
+    xfree (bpt->exp_string);
   if (bpt->val != NULL)
     value_free (bpt->val);
   if (bpt->source_file != NULL)
-    free (bpt->source_file);
+    xfree (bpt->source_file);
   if (bpt->dll_pathname != NULL)
-    free (bpt->dll_pathname);
+    xfree (bpt->dll_pathname);
   if (bpt->triggered_dll_pathname != NULL)
-    free (bpt->triggered_dll_pathname);
+    xfree (bpt->triggered_dll_pathname);
   if (bpt->exec_pathname != NULL)
-    free (bpt->exec_pathname);
+    xfree (bpt->exec_pathname);
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?
@@ -6843,7 +6843,7 @@ delete_breakpoint (struct breakpoint *bpt)
      bp, we mark it as deleted before freeing its storage. */
   bpt->type = bp_none;
 
-  free ((PTR) bpt);
+  xfree (bpt);
 }
 
 static void
@@ -6953,7 +6953,7 @@ breakpoint_re_set_one (PTR bint)
 	    {
 	      s = b->cond_string;
 	      if (b->cond)
-		free ((PTR) b->cond);
+		xfree (b->cond);
 	      b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
 	    }
 
@@ -6972,7 +6972,7 @@ breakpoint_re_set_one (PTR bint)
 	    )
 	    {
 	      if (b->source_file != NULL)
-		free (b->source_file);
+		xfree (b->source_file);
 	      if (sals.sals[i].symtab == NULL)
 		b->source_file = NULL;
 	      else
@@ -7001,7 +7001,7 @@ breakpoint_re_set_one (PTR bint)
 	  check_duplicates (b->address, b->section);
 
 	}
-      free ((PTR) sals.sals);
+      xfree (sals.sals);
       break;
 
     case bp_watchpoint:
@@ -7019,7 +7019,7 @@ breakpoint_re_set_one (PTR bint)
 
       /* So for now, just use a global context.  */
       if (b->exp)
-	free ((PTR) b->exp);
+	xfree (b->exp);
       b->exp = parse_expression (b->exp_string);
       b->exp_valid_block = innermost_block;
       mark = value_mark ();
@@ -7034,7 +7034,7 @@ breakpoint_re_set_one (PTR bint)
 	{
 	  s = b->cond_string;
 	  if (b->cond)
-	    free ((PTR) b->cond);
+	    xfree (b->cond);
 	  b->cond = parse_exp_1 (&s, (struct block *) 0, 0);
 	}
       if (b->enable == enabled)

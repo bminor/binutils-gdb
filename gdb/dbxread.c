@@ -323,7 +323,7 @@ free_header_files (void)
 {
   if (this_object_header_files)
     {
-      free ((PTR) this_object_header_files);
+      xfree (this_object_header_files);
       this_object_header_files = NULL;
     }
   n_allocated_this_object_header_files = 0;
@@ -767,10 +767,10 @@ dbx_symfile_finish (struct objfile *objfile)
 
 	  while (--i >= 0)
 	    {
-	      free (hfiles[i].name);
-	      free (hfiles[i].vector);
+	      xfree (hfiles[i].name);
+	      xfree (hfiles[i].vector);
 	    }
-	  free ((PTR) hfiles);
+	  xfree (hfiles);
 	}
       mfree (objfile->md, objfile->sym_stab_info);
     }
@@ -1093,7 +1093,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
     return;
 
   dynsyms = (asymbol **) xmalloc (dynsym_size);
-  back_to = make_cleanup (free, dynsyms);
+  back_to = make_cleanup (xfree, dynsyms);
 
   dynsym_count = bfd_canonicalize_dynamic_symtab (abfd, dynsyms);
   if (dynsym_count < 0)
@@ -1156,7 +1156,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
     }
 
   dynrels = (arelent **) xmalloc (dynrel_size);
-  make_cleanup (free, dynrels);
+  make_cleanup (xfree, dynrels);
 
   dynrel_count = bfd_canonicalize_dynamic_reloc (abfd, dynrels, dynsyms);
   if (dynrel_count < 0)

@@ -377,7 +377,7 @@ process_event (void)
 	  if (event_ptr->next_event == NULL)
 	    event_queue.last_event = prev_ptr;
 	}
-      free ((char *) event_ptr);
+      xfree (event_ptr);
 
       /* Now call the procedure associated with the event. */
       (*proc) (fd);
@@ -620,7 +620,7 @@ delete_file_handler (int fd)
 	      j++;
 	    }
 	}
-      free (gdb_notifier.poll_fds);
+      xfree (gdb_notifier.poll_fds);
       gdb_notifier.poll_fds = new_poll_fds;
       gdb_notifier.num_fds--;
 #else
@@ -668,7 +668,7 @@ delete_file_handler (int fd)
 	;
       prev_ptr->next_file = file_ptr->next_file;
     }
-  free ((char *) file_ptr);
+  xfree (file_ptr);
 }
 
 /* Handle the given event by calling the procedure associated to the
@@ -973,7 +973,7 @@ delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
       if (sighandler_list.last_handler == (*async_handler_ptr))
 	sighandler_list.last_handler = prev_ptr;
     }
-  free ((char *) (*async_handler_ptr));
+  xfree ((*async_handler_ptr));
   (*async_handler_ptr) = NULL;
 }
 
@@ -1080,7 +1080,7 @@ delete_timer (int id)
 	;
       prev_timer->next = timer_ptr->next;
     }
-  free ((char *) timer_ptr);
+  xfree (timer_ptr);
 
   gdb_notifier.timeout_valid = 0;
 }
@@ -1111,7 +1111,7 @@ handle_timer_event (int dummy)
       timer_ptr = timer_ptr->next;
       /* Call the procedure associated with that timer. */
       (*saved_timer->proc) (saved_timer->client_data);
-      free (saved_timer);
+      xfree (saved_timer);
     }
 
   gdb_notifier.timeout_valid = 0;

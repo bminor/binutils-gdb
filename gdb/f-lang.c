@@ -635,7 +635,7 @@ add_common_block (char *name, CORE_ADDR offset, int secnum, char *func_stab)
       STREQ (name, BLANK_COMMON_NAME_MF77))
     {
 
-      free (name);
+      xfree (name);
       name = alloca (strlen (BLANK_COMMON_NAME_LOCAL) + 1);
       strcpy (name, BLANK_COMMON_NAME_LOCAL);
     }
@@ -809,7 +809,7 @@ patch_all_commons_by_name (char *name, CORE_ADDR offset, int secnum)
   if ((STREQ (name, BLANK_COMMON_NAME_ORIGINAL)) ||
       (STREQ (name, BLANK_COMMON_NAME_MF77)))
     {
-      free (name);
+      xfree (name);
       name = alloca (strlen (BLANK_COMMON_NAME_LOCAL) + 1);
       strcpy (name, BLANK_COMMON_NAME_LOCAL);
     }
@@ -875,7 +875,7 @@ clear_bf_list (void)
   while (tmp != NULL)
     {
       next = tmp->next;
-      free (tmp);
+      xfree (tmp);
       tmp = next;
     }
   saved_bf_list = NULL;
@@ -946,7 +946,7 @@ clear_function_list (void)
   while (tmp != NULL)
     {
       next = tmp->next;
-      free (tmp);
+      xfree (tmp);
       tmp = next;
     }
 

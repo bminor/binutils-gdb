@@ -4596,7 +4596,7 @@ compare_sections_command (char *args, int from_tty)
 
       /* be clever; compute the host_crc before waiting for target reply */
       sectdata = xmalloc (size);
-      old_chain = make_cleanup (free, sectdata);
+      old_chain = make_cleanup (xfree, sectdata);
       bfd_get_section_contents (exec_bfd, s, sectdata, 0, size);
       host_crc = crc32 ((unsigned char *) sectdata, size, 0xffffffff);
 

@@ -231,7 +231,7 @@ set_language_command (char *ignore, int from_tty)
   /* Reset the language (esp. the global string "language") to the 
      correct values. */
   err_lang = savestring (language, strlen (language));
-  make_cleanup (free, err_lang);	/* Free it after error */
+  make_cleanup (xfree, err_lang);	/* Free it after error */
   set_language (current_language->la_language);
   error ("Unknown language `%s'.", err_lang);
 }
@@ -421,7 +421,7 @@ set_lang_str (void)
   char *prefix = "";
 
   if (language)
-    free (language);
+    xfree (language);
   if (language_mode == language_mode_auto)
     prefix = "auto; currently ";
 
@@ -434,7 +434,7 @@ set_type_str (void)
   char *tmp = NULL, *prefix = "";
 
   if (type)
-    free (type);
+    xfree (type);
   if (type_mode == type_mode_auto)
     prefix = "auto; currently ";
 
@@ -480,7 +480,7 @@ set_range_str (void)
     }
 
   if (range)
-    free (range);
+    xfree (range);
   range = concat (pref, tmp, NULL);
 }
 
@@ -504,7 +504,7 @@ set_case_str()
      error ("Unrecognized case-sensitive setting.");
    }
 
-   free (case_sensitive);
+   xfree (case_sensitive);
    case_sensitive = concat (prefix, tmp, NULL);
 }
 

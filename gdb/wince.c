@@ -1075,7 +1075,7 @@ child_init_thread_list (void)
       thread_info *here = th->next;
       th->next = here->next;
       (void) close_handle (here->h);
-      free (here);
+      xfree (here);
     }
 }
 
@@ -1099,7 +1099,7 @@ child_delete_thread (DWORD id)
       thread_info *here = th->next;
       th->next = here->next;
       close_handle (here->h);
-      free (here);
+      xfree (here);
     }
 }
 

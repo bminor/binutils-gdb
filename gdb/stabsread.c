@@ -654,7 +654,7 @@ read_cfront_baseclasses (struct field_info *fip, char **pp, struct type *type,
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-      make_cleanup (free, new);
+      make_cleanup (xfree, new);
       memset (new, 0, sizeof (struct nextfield));
       new->next = fip->list;
       fip->list = new;
@@ -814,7 +814,7 @@ read_cfront_member_functions (struct field_info *fip, char **pp,
 
       new_fnlist = (struct next_fnfieldlist *)
 	xmalloc (sizeof (struct next_fnfieldlist));
-      make_cleanup (free, new_fnlist);
+      make_cleanup (xfree, new_fnlist);
       memset (new_fnlist, 0, sizeof (struct next_fnfieldlist));
 
       /* The following is code to work around cfront generated stabs.
@@ -857,7 +857,7 @@ read_cfront_member_functions (struct field_info *fip, char **pp,
 
       new_sublist =
 	(struct next_fnfield *) xmalloc (sizeof (struct next_fnfield));
-      make_cleanup (free, new_sublist);
+      make_cleanup (xfree, new_sublist);
       memset (new_sublist, 0, sizeof (struct next_fnfield));
 
       /* eat 1; from :;2A.; */
@@ -2989,7 +2989,7 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 
       new_fnlist = (struct next_fnfieldlist *)
 	xmalloc (sizeof (struct next_fnfieldlist));
-      make_cleanup (free, new_fnlist);
+      make_cleanup (xfree, new_fnlist);
       memset (new_fnlist, 0, sizeof (struct next_fnfieldlist));
 
       if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && is_cplus_marker ((*pp)[2]))
@@ -3032,7 +3032,7 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	{
 	  new_sublist =
 	    (struct next_fnfield *) xmalloc (sizeof (struct next_fnfield));
-	  make_cleanup (free, new_sublist);
+	  make_cleanup (xfree, new_sublist);
 	  memset (new_sublist, 0, sizeof (struct next_fnfield));
 
 	  /* Check for and handle cretinous dbx symbol name continuation!  */
@@ -3508,7 +3508,7 @@ read_struct_fields (struct field_info *fip, char **pp, struct type *type,
       STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-      make_cleanup (free, new);
+      make_cleanup (xfree, new);
       memset (new, 0, sizeof (struct nextfield));
       new->next = fip->list;
       fip->list = new;
@@ -3628,7 +3628,7 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-      make_cleanup (free, new);
+      make_cleanup (xfree, new);
       memset (new, 0, sizeof (struct nextfield));
       new->next = fip->list;
       fip->list = new;
@@ -3848,7 +3848,7 @@ read_cfront_static_fields (struct field_info *fip, char **pp, struct type *type,
 
       /* allocate a new fip */
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-      make_cleanup (free, new);
+      make_cleanup (xfree, new);
       memset (new, 0, sizeof (struct nextfield));
       new->next = fip->list;
       fip->list = new;
@@ -3911,7 +3911,7 @@ copy_cfront_struct_fields (struct field_info *fip, struct type *type,
     {
       /* allocate a new fip */
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-      make_cleanup (free, new);
+      make_cleanup (xfree, new);
       memset (new, 0, sizeof (struct nextfield));
       new->next = fip->list;
       fip->list = new;
@@ -5150,7 +5150,7 @@ end_stabs (void)
 {
   if (type_vector)
     {
-      free ((char *) type_vector);
+      xfree (type_vector);
     }
   type_vector = 0;
   type_vector_length = 0;
@@ -5163,7 +5163,7 @@ finish_global_stabs (struct objfile *objfile)
   if (global_stabs)
     {
       patch_block_stabs (global_symbols, global_stabs, objfile);
-      free ((PTR) global_stabs);
+      xfree (global_stabs);
       global_stabs = NULL;
     }
 }

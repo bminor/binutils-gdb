@@ -367,6 +367,8 @@ extern void free_current_contents (void *);
 
 extern void null_cleanup (void *);
 
+extern void xfree (void *);
+
 extern int myread (int, char *, int);
 
 extern int query (char *, ...) ATTR_FORMAT (printf, 1, 2);

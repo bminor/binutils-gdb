@@ -262,13 +262,13 @@ allocate_objfile (bfd *abfd, int flags)
       memset (objfile, 0, sizeof (struct objfile));
       objfile->md = NULL;
       obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-				  xmalloc, free);
+				  xmalloc, xfree);
       obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
-				  free);
+				  xfree);
       obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
-				  free);
+				  xfree);
       obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
-				  free);
+				  xfree);
       flags &= ~OBJF_MAPPED;
     }
 
@@ -413,7 +413,7 @@ free_objfile (struct objfile *objfile)
       if (!bfd_close (objfile->obfd))
 	warning ("cannot close \"%s\": %s",
 		 name, bfd_errmsg (bfd_get_error ()));
-      free (name);
+      xfree (name);
     }
 
   /* Remove it from the chain of all objfiles. */
@@ -855,7 +855,7 @@ open_mapped_file (char *filename, long mtime, int flags)
   symsfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
   if ((fd = open_existing_mapped_file (symsfilename, mtime, flags)) < 0)
     {
-      free (symsfilename);
+      xfree (symsfilename);
       symsfilename = concat (filename, ".syms", (char *) NULL);
       fd = open_existing_mapped_file (symsfilename, mtime, flags);
     }
@@ -871,7 +871,7 @@ open_mapped_file (char *filename, long mtime, int flags)
 
   if ((fd < 0) && (flags & OBJF_MAPPED))
     {
-      free (symsfilename);
+      xfree (symsfilename);
       symsfilename = concat ("./", basename (filename), ".syms",
 			     (char *) NULL);
       if ((fd = open (symsfilename, O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)
@@ -884,7 +884,7 @@ open_mapped_file (char *filename, long mtime, int flags)
 	}
     }
 
-  free (symsfilename);
+  xfree (symsfilename);
   return (fd);
 }
 

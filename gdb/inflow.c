@@ -185,7 +185,7 @@ terminal_init_inferior_with_pgrp (int pgrp)
       /* We could just as well copy our_ttystate (if we felt like adding
          a new function SERIAL_COPY_TTY_STATE).  */
       if (inferior_ttystate)
-	free (inferior_ttystate);
+	xfree (inferior_ttystate);
       inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
 
 #ifdef PROCESS_GROUP_TYPE
@@ -331,7 +331,7 @@ terminal_ours_1 (int output_only)
 #endif
 
       if (inferior_ttystate)
-	free (inferior_ttystate);
+	xfree (inferior_ttystate);
       inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
 #ifdef HAVE_TERMIOS
       inferior_process_group = tcgetpgrp (0);

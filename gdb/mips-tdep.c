@@ -2548,7 +2548,7 @@ mips_pop_frame (void)
       else
 	linked_proc_desc_table = pi_ptr->next;
 
-      free (pi_ptr);
+      xfree (pi_ptr);
 
       write_register (HI_REGNUM,
 		      read_memory_integer (new_sp - 2 * MIPS_SAVED_REGSIZE,

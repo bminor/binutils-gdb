@@ -230,7 +230,7 @@ som_solib_sizeof_symbol_table (char *filename)
   if (!abfd)
     {
       close (desc);
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
       error ("\"%s\": can't open to read symbols: %s.", filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -238,7 +238,7 @@ som_solib_sizeof_symbol_table (char *filename)
   if (!bfd_check_format (abfd, bfd_object))	/* Reads in section info */
     {
       bfd_close (abfd);		/* This also closes desc */
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
       error ("\"%s\": can't read symbols: %s.", filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -256,7 +256,7 @@ som_solib_sizeof_symbol_table (char *filename)
     st_size += (LONGEST) bfd_section_size (abfd, sect);
 
   bfd_close (abfd);		/* This also closes desc */
-  free (filename);
+  xfree (filename);
 
   /* Unfortunately, just summing the sizes of various debug info
      sections isn't a very accurate measurement of how much heap
@@ -1007,7 +1007,7 @@ keep_going:
       struct so_list *temp;
 
       temp = so_list_head;
-      free (so_list_head);
+      xfree (so_list_head);
       so_list_head = temp->next;
     }
   clear_symtab_users ();
@@ -1500,7 +1500,7 @@ som_solib_restart (void)
   while (sl)
     {
       struct so_list *next_sl = sl->next;
-      free (sl);
+      xfree (sl);
       sl = next_sl;
     }
   so_list_head = NULL;

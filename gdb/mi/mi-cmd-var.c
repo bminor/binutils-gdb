@@ -64,13 +64,13 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   old_cleanups = make_cleanup (free_current_contents, &name);
 
   frame = xstrdup (argv[1]);
-  old_cleanups = make_cleanup (free, frame);
+  old_cleanups = make_cleanup (xfree, frame);
 
   expr = xstrdup (argv[2]);
 
   if (strcmp (name, "-") == 0)
     {
-      free (name);
+      xfree (name);
       name = varobj_gen_name ();
     }
   else if (!isalpha (*name))
@@ -104,7 +104,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   else
     {
       ui_out_field_string (uiout, "type", type);
-      free (type);
+      xfree (type);
     }
 
   do_cleanups (old_cleanups);
@@ -147,9 +147,9 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
       if (strcmp (name, "-c") != 0)
 	error ("mi_cmd_var_delete: Invalid option.");
       children_only_p = 1;
-      free (name);
+      xfree (name);
       name = xstrdup (expr);
-      free (expr);
+      xfree (expr);
     }
 
   /* If we didn't error out, now NAME contains the name of the
@@ -289,7 +289,7 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
       cc++;
     }
   ui_out_list_end (uiout);
-  free (childlist);
+  xfree (childlist);
   return MI_CMD_DONE;
 }
 
@@ -433,7 +433,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 	  varobj_update_one (*cr);
 	  cr++;
 	}
-      free (rootlist);
+      xfree (rootlist);
       ui_out_list_end (uiout);
     }
   else
@@ -494,7 +494,7 @@ varobj_update_one (struct varobj *var)
 	  ui_out_field_string (uiout, "type_changed", "false");
 	  cc++;
 	}
-      free (changelist);
+      xfree (changelist);
       return 1;
     }
   return 1;

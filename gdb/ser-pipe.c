@@ -124,7 +124,7 @@ pipe_close (serial_t scb)
       int pid = state->pid;
       close (scb->fd);
       scb->fd = -1;
-      free (state);
+      xfree (state);
       scb->state = NULL;
       kill (pid, SIGTERM);
       /* Might be useful to check that the child does die. */

@@ -409,7 +409,7 @@ solib_map_sections (void *arg)
   bfd *abfd;
 
   filename = tilde_expand (so->so_name);
-  old_chain = make_cleanup (free, filename);
+  old_chain = make_cleanup (xfree, filename);
 
   scratch_chan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&scratch_pathname);
@@ -1056,7 +1056,7 @@ clear_solib (void)
     {
       if (so_list_head->sections)
 	{
-	  free ((PTR) so_list_head->sections);
+	  xfree (so_list_head->sections);
 	}
       if (so_list_head->abfd)
 	{
@@ -1071,9 +1071,9 @@ clear_solib (void)
 
       next = so_list_head->next;
       if (bfd_filename)
-	free ((PTR) bfd_filename);
-      free (so_list_head->so_name);
-      free ((PTR) so_list_head);
+	xfree (bfd_filename);
+      xfree (so_list_head->so_name);
+      xfree (so_list_head);
       so_list_head = next;
     }
   debug_base = 0;

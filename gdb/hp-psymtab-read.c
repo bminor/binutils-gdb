@@ -381,7 +381,7 @@ clear_pst_syms (void)
 {
   pst_syms_count = 0;
   pst_syms_size = 0;
-  free (pst_syms_array);
+  xfree (pst_syms_array);
   pst_syms_array = 0;
 }
 
@@ -1025,7 +1025,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      /* Prepare for the next psymtab. */
 	      global_syms = objfile->global_psymbols.next;
 	      static_syms = objfile->static_psymbols.next;
-	      free (class_entered);
+	      xfree (class_entered);
 
 	      curr_fd++;
 	    }			/* Psymtab for file */
@@ -1254,7 +1254,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      /* Prepare for the next psymtab. */
 	      global_syms = objfile->global_psymbols.next;
 	      static_syms = objfile->static_psymbols.next;
-	      free (class_entered);
+	      xfree (class_entered);
 
 	      curr_md++;
 	      curr_fd++;

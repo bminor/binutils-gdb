@@ -249,7 +249,7 @@ child_init_thread_list (void)
       thread_info *here = th->next;
       th->next = here->next;
       (void) CloseHandle (here->h);
-      free (here);
+      xfree (here);
     }
 }
 
@@ -273,7 +273,7 @@ child_delete_thread (DWORD id)
       thread_info *here = th->next;
       th->next = here->next;
       CloseHandle (here->h);
-      free (here);
+      xfree (here);
     }
 }
 
@@ -619,7 +619,7 @@ child_clear_solibs (void)
   while ((so = so1) != NULL)
     {
       so1 = so->next;
-      free (so);
+      xfree (so);
     }
 
   solib_start.next = NULL;
@@ -715,7 +715,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	ourstatus->kind = TARGET_WAITKIND_STOPPED;
     }
 
-  free (s);
+  xfree (s);
   return gotasig;
 }
 
@@ -1610,9 +1610,9 @@ core_section_load_dll_symbols (bfd * abfd, asection * sect, PTR obj)
 
 out:
   if (buf)
-    free (buf);
+    xfree (buf);
   if (dll_name)
-    free (dll_name);
+    xfree (dll_name);
   return;
 }
 

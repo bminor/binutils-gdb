@@ -729,7 +729,7 @@ do_discard_minimal_symbols_cleanup (void *arg)
   while (msym_bunch != NULL)
     {
       next = msym_bunch->next;
-      free ((PTR) msym_bunch);
+      xfree (msym_bunch);
       msym_bunch = next;
     }
 }

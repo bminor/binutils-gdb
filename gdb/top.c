@@ -657,7 +657,7 @@ void
 do_chdir_cleanup (void *old_dir)
 {
   chdir (old_dir);
-  free (old_dir);
+  xfree (old_dir);
 }
 #endif
 
@@ -1023,7 +1023,7 @@ gdb_readline (char *prompt_arg)
 	       if we are called again fgetc will still return EOF and
 	       we'll return NULL then.  */
 	    break;
-	  free (result);
+	  xfree (result);
 	  return NULL;
 	}
 
@@ -1275,7 +1275,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
       while (*p1)
 	*p++ = *p1++;
 
-      free (rl);		/* Allocated in readline.  */
+      xfree (rl);		/* Allocated in readline.  */
 
       if (p == linebuffer || *(p - 1) != '\\')
 	break;
@@ -1323,7 +1323,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
 	    {
-	      free (history_value);
+	      xfree (history_value);
 	      return command_line_input (prompt_arg, repeat, annotation_suffix);
 	    }
 	  if (strlen (history_value) > linelength)
@@ -1333,7 +1333,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	    }
 	  strcpy (linebuffer, history_value);
 	  p = linebuffer + strlen (linebuffer);
-	  free (history_value);
+	  xfree (history_value);
 	}
     }
 
@@ -1574,7 +1574,7 @@ get_prompt_1 (void *data)
 		         from bad user-supplied format string? */
 		      sprintf (outp, fmt[0] == 0 ? default_fmt : fmt,
 			       tmp);
-		      free (tmp);
+		      xfree (tmp);
 		    }
 		  else
 		    {
@@ -1692,7 +1692,7 @@ set_prompt (char *s)
 /* ??rehrauer: I don't know why this fails, since it looks as though
    assignments to prompt are wrapped in calls to savestring...
    if (prompt != NULL)
-   free (prompt);
+   xfree (prompt);
  */
   if (event_loop_p)
     PROMPT (0) = savestring (s, strlen (s));

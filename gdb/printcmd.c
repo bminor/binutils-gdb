@@ -1438,8 +1438,8 @@ display_command (char *exp, int from_tty)
 static void
 free_display (struct display *d)
 {
-  free ((PTR) d->exp);
-  free ((PTR) d);
+  xfree (d->exp);
+  xfree (d);
 }
 
 /* Clear out the display_chain.
@@ -1453,9 +1453,9 @@ clear_displays (void)
 
   while ((d = display_chain) != NULL)
     {
-      free ((PTR) d->exp);
+      xfree (d->exp);
       display_chain = d->next;
-      free ((PTR) d);
+      xfree (d);
     }
 }
 

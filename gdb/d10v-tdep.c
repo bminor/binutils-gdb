@@ -986,8 +986,8 @@ pop_stack_item (struct stack_item *si)
 {
   struct stack_item *dead = si;
   si = si->prev;
-  free (dead->data);
-  free (dead);
+  xfree (dead->data);
+  xfree (dead);
   return si;
 }
 
@@ -1346,7 +1346,7 @@ d10v_eva_get_trace_data (void)
   oldsize = trace_data.size;
   trace_data.size += count;
 
-  free (tmpspace);
+  xfree (tmpspace);
 
   if (trace_display)
     display_trace (oldsize, trace_data.size);

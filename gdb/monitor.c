@@ -752,7 +752,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
   unpush_target (targ_ops);
 
   if (dev_name)
-    free (dev_name);
+    xfree (dev_name);
   dev_name = strsave (args);
 
   monitor_desc = SERIAL_OPEN (dev_name);
@@ -851,7 +851,7 @@ monitor_close (int quitting)
   /* Free breakpoint memory */
   if (breakaddr != NULL)
     {
-      free (breakaddr);
+      xfree (breakaddr);
       breakaddr = NULL;
     }
 

@@ -308,13 +308,13 @@ allocate_rt_common_objfile (void)
   memset (objfile, 0, sizeof (struct objfile));
   objfile->md = NULL;
   obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-			      xmalloc, free);
+			      xmalloc, xfree);
   obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
-			      free);
+			      xfree);
   obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
-			      free);
+			      xfree);
   obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
-			      free);
+			      xfree);
   objfile->name = mstrsave (objfile->md, "rt_common");
 
   /* Add this file onto the tail of the linked list of other such files. */
@@ -351,7 +351,7 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
     {
       obstack_free (&rt_common_objfile->symbol_obstack, 0);
       obstack_specify_allocation (&rt_common_objfile->symbol_obstack, 0, 0,
-				  xmalloc, free);
+				  xmalloc, xfree);
       rt_common_objfile->minimal_symbol_count = 0;
       rt_common_objfile->msymbols = NULL;
     }
@@ -384,7 +384,7 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
 
 	  prim_record_minimal_symbol (name, inferior_rtc_nlist.n_value,
 				      mst_bss, rt_common_objfile);
-	  free (name);
+	  xfree (name);
 	}
       rtc_symp = SOLIB_EXTRACT_ADDRESS (inferior_rtc_symb.rtc_next);
     }
@@ -439,7 +439,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, (PTR) symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
@@ -466,7 +466,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, (PTR) symbol_table);
       number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
@@ -853,7 +853,7 @@ first_link_map_member (void)
 #else /* SVR4_SHARED_LIBS */
   struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
   char *r_map_buf = xmalloc (lmo->r_map_size);
-  struct cleanup *cleanups = make_cleanup (free, r_map_buf);
+  struct cleanup *cleanups = make_cleanup (xfree, r_map_buf);
 
   read_memory (debug_base + lmo->r_map_offset, r_map_buf, lmo->r_map_size);
 
@@ -902,7 +902,7 @@ open_symbol_file_object (void *from_ttyp)
   int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
   char *l_name_buf = xmalloc (lmo->l_name_size);
-  struct cleanup *cleanups = make_cleanup (free, l_name_buf);
+  struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
 
   if (symfile_objfile)
     if (!query ("Attempt to reload symbols from process? "))
@@ -937,7 +937,7 @@ open_symbol_file_object (void *from_ttyp)
       return 0;
     }
 
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
   /* Have a pathname: read the symbol file.  */
   symbol_file_command (filename, from_tty);
 
@@ -1000,15 +1000,15 @@ svr4_current_sos (void)
       struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
       struct so_list *new
 	= (struct so_list *) xmalloc (sizeof (struct so_list));
-      struct cleanup *old_chain = make_cleanup (free, new);
+      struct cleanup *old_chain = make_cleanup (xfree, new);
 
       memset (new, 0, sizeof (*new));
 
       new->lm_info = xmalloc (sizeof (struct lm_info));
-      make_cleanup (free, new->lm_info);
+      make_cleanup (xfree, new->lm_info);
 
       new->lm_info->lm = xmalloc (lmo->link_map_size);
-      make_cleanup (free, new->lm_info->lm);
+      make_cleanup (xfree, new->lm_info->lm);
       memset (new->lm_info->lm, 0, lmo->link_map_size);
 
       read_memory (lm, new->lm_info->lm, lmo->link_map_size);
@@ -1039,7 +1039,7 @@ svr4_current_sos (void)
 	    {
 	      strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
 	      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-	      free (buffer);
+	      xfree (buffer);
 	      strcpy (new->so_original_name, new->so_name);
 	    }
 
@@ -1522,7 +1522,7 @@ svr4_relocate_main_executable (void)
 
       new_offsets = xcalloc (sizeof (struct section_offsets),
 			     symfile_objfile->num_sections);
-      old_chain = make_cleanup (free, new_offsets);
+      old_chain = make_cleanup (xfree, new_offsets);
 
       for (i = 0; i < symfile_objfile->num_sections; i++)
 	{
@@ -1667,8 +1667,8 @@ svr4_clear_solib (void)
 static void
 svr4_free_so (struct so_list *so)
 {
-  free (so->lm_info->lm);
-  free (so->lm_info);
+  xfree (so->lm_info->lm);
+  xfree (so->lm_info);
 }
 
 static void

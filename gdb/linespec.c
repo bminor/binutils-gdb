@@ -163,7 +163,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 						field_counter);
 		    phys_name = alloca (strlen (tmp_name) + 1);
 		    strcpy (phys_name, tmp_name);
-		    free (tmp_name);
+		    xfree (tmp_name);
 		  }
 		else
 		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
@@ -306,12 +306,12 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
     alloca (nelts * sizeof (struct symtab_and_line));
   return_values.sals = (struct symtab_and_line *)
     xmalloc (nelts * sizeof (struct symtab_and_line));
-  old_chain = make_cleanup (free, return_values.sals);
+  old_chain = make_cleanup (xfree, return_values.sals);
 
   if (canonical)
     {
       canonical_arr = (char **) xmalloc (nelts * sizeof (char *));
-      make_cleanup (free, canonical_arr);
+      make_cleanup (xfree, canonical_arr);
       memset (canonical_arr, 0, nelts * sizeof (char *));
       *canonical = canonical_arr;
     }
@@ -392,7 +392,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 	      if (canonical_arr)
 		{
 		  symname = SYMBOL_NAME (sym_arr[num]);
-		  make_cleanup (free, symname);
+		  make_cleanup (xfree, symname);
 		  canonical_arr[i] = savestring (symname, strlen (symname));
 		}
 	      return_values.sals[i++] = values.sals[num];

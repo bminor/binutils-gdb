@@ -235,7 +235,7 @@ ui_out_table_end (struct ui_out *uiout)
   uo_table_end (uiout);
 
   if (uiout->table_id)
-    free (uiout->table_id);
+    xfree (uiout->table_id);
   clear_header_list (uiout);
 }
 
@@ -315,7 +315,7 @@ ui_out_field_stream (struct ui_out *uiout, char *fldname, struct ui_stream *buf)
 {
   long length;
   char *buffer = ui_file_xstrdup (buf->stream, &length);
-  struct cleanup *old_cleanup = make_cleanup (free, buffer);
+  struct cleanup *old_cleanup = make_cleanup (xfree, buffer);
   if (length > 0)
     ui_out_field_string (uiout, fldname, buffer);
   else
@@ -425,7 +425,7 @@ void
 ui_out_stream_delete (struct ui_stream *buf)
 {
   ui_file_delete (buf->stream);
-  free (buf);
+  xfree (buf);
 }
 
 static void
@@ -770,8 +770,8 @@ clear_header_list (struct ui_out *uiout)
       uiout->headercurr = uiout->headerfirst;
       uiout->headerfirst = uiout->headerfirst->next;
       if (uiout->headercurr->colhdr != NULL)
-	free (uiout->headercurr->colhdr);
-      free (uiout->headercurr);
+	xfree (uiout->headercurr->colhdr);
+      xfree (uiout->headercurr);
     }
   uiout->headerlast = NULL;
   uiout->headercurr = NULL;

@@ -331,7 +331,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
     for (entry = local_bp_list; entry != NULL; entry = entry->next)
       {
 	if (preventry)
-	  free (preventry);
+	  xfree (preventry);
       }
   }
 
@@ -773,7 +773,7 @@ arm_rdi_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 	{
 	  preventry->next = entry->next;
 	}
-      free (entry);
+      xfree (entry);
     }
   return 0;
 }
@@ -982,7 +982,7 @@ rdilogfile_command (char *arg, int from_tty)
     }
 
   if (log_filename)
-    free (log_filename);
+    xfree (log_filename);
 
   log_filename = xstrdup (arg);
 

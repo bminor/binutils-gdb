@@ -696,7 +696,7 @@ rdp_set_command_line (char *command, char *args)
    */
 
   if (commandline != NULL)
-    free (commandline);
+    xfree (commandline);
 
   commandline = malloc (strlen (command) + strlen (args) + 2);
   if (commandline != NULL)

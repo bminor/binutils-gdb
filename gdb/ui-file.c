@@ -68,7 +68,7 @@ void
 ui_file_delete (struct ui_file *file)
 {
   file->to_delete (file);
-  free (file);
+  xfree (file);
 }
 
 static int
@@ -316,8 +316,8 @@ mem_file_delete (struct ui_file *file)
   if (stream->magic != &mem_file_magic)
     internal_error ("mem_file_delete: bad magic number");
   if (stream->buffer != NULL)
-    free (stream->buffer);
-  free (stream);
+    xfree (stream->buffer);
+  xfree (stream);
 }
 
 struct ui_file *
@@ -420,7 +420,7 @@ stdio_file_delete (struct ui_file *file)
     {
       fclose (stdio->file);
     }
-  free (stdio);
+  xfree (stdio);
 }
 
 static void

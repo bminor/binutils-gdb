@@ -664,7 +664,7 @@ push_target (struct target_ops *t)
 	else
 	  target_stack = cur->next;	/* Unchain first on list */
 	tmp = cur->next;
-	free (cur);
+	xfree (cur);
 	cur = tmp;
       }
 
@@ -718,7 +718,7 @@ unpush_target (struct target_ops *t)
   else
     prev->next = cur->next;
 
-  free (cur);			/* Release the target_stack_item */
+  xfree (cur);			/* Release the target_stack_item */
 
   update_current_target ();
   cleanup_target (&current_target);

@@ -126,7 +126,7 @@ ldr_read_memory (CORE_ADDR memaddr, char *myaddr, int len, int readstring)
       target_read_string (memaddr, &buffer, len, &result);
       if (result == 0)
 	strcpy (myaddr, buffer);
-      free (buffer);
+      xfree (buffer);
     }
   else
     result = target_read_memory (memaddr, myaddr, len);
@@ -228,7 +228,7 @@ solib_map_sections (char *arg)
   bfd *abfd;
 
   filename = tilde_expand (so->so_name);
-  old_chain = make_cleanup (free, filename);
+  old_chain = make_cleanup (xfree, filename);
 
   scratch_chan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&scratch_pathname);
@@ -445,7 +445,7 @@ xfer_link_map_member (struct so_list *so_list_ptr, struct link_map *lm)
 	error ("xfer_link_map_member: Can't read pathname for load map: %s\n",
 	       safe_strerror (errcode));
       strncpy (so_list_ptr->so_name, buffer, MAX_PATH_SIZE - 1);
-      free (buffer);
+      xfree (buffer);
       so_list_ptr->so_name[MAX_PATH_SIZE - 1] = '\0';
 
       for (i = 0; i < lm->module_info.region_count; i++)
@@ -472,7 +472,7 @@ xfer_link_map_member (struct so_list *so_list_ptr, struct link_map *lm)
 		region_name = "??";
 	      warning ("cannot handle shared library relocation for %s (%s)",
 		       so_list_ptr->so_name, region_name);
-	      free (buffer);
+	      xfree (buffer);
 	    }
 	}
 #endif
@@ -797,7 +797,7 @@ clear_solib (void)
     {
       if (so_list_head->sections)
 	{
-	  free ((PTR) so_list_head->sections);
+	  xfree (so_list_head->sections);
 	}
       if (so_list_head->abfd)
 	{
@@ -812,8 +812,8 @@ clear_solib (void)
 
       next = so_list_head->next;
       if (bfd_filename)
-	free ((PTR) bfd_filename);
-      free ((PTR) so_list_head);
+	xfree (bfd_filename);
+      xfree (so_list_head);
       so_list_head = next;
     }
 }

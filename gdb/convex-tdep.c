@@ -114,7 +114,7 @@
 /* OBSOLETE      Mark text segment as empty.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE   if (execfile) */
-/* OBSOLETE     free (execfile); */
+/* OBSOLETE     xfree (execfile); */
 /* OBSOLETE   execfile = 0; */
 /* OBSOLETE   data_start = 0; */
 /* OBSOLETE   data_end = 0; */
@@ -133,7 +133,7 @@
 /* OBSOLETE   if (filename) */
 /* OBSOLETE     { */
 /* OBSOLETE       filename = tilde_expand (filename); */
-/* OBSOLETE       make_cleanup (free, filename); */
+/* OBSOLETE       make_cleanup (xfree, filename); */
 /* OBSOLETE        */
 /* OBSOLETE       execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0, */
 /* OBSOLETE                     &execfile); */

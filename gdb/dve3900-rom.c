@@ -833,7 +833,7 @@ load_section (bfd *abfd, asection *s, unsigned int *data_count)
       buffer = (unsigned char *) xmalloc (section_size);
       bfd_get_section_contents (abfd, s, buffer, 0, section_size);
       process_read_request (buffer, section_size);
-      free (buffer);
+      xfree (buffer);
     }
 }
 

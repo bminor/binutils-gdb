@@ -696,10 +696,10 @@ dwarf_build_psymtabs (struct objfile *objfile, int mainline, file_ptr dbfoff,
   if ((bfd_seek (abfd, dbfoff, SEEK_SET) != 0) ||
       (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
-      free (dbbase);
+      xfree (dbbase);
       error ("can't read DWARF data from '%s'", bfd_get_filename (abfd));
     }
-  back_to = make_cleanup (free, dbbase);
+  back_to = make_cleanup (xfree, dbbase);
 
   /* If we are reinitializing, or if we have never loaded syms yet, init.
      Since we have no idea how many DIES we are looking at, we just guess
@@ -869,7 +869,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
 static void
 free_utypes (PTR dummy)
 {
-  free (utypes);
+  xfree (utypes);
   utypes = NULL;
   numutypes = 0;
 }
@@ -2265,10 +2265,10 @@ read_ofile_symtab (struct partial_symtab *pst)
   if (bfd_seek (abfd, foffset, SEEK_SET) ||
       (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
-      free (dbbase);
+      xfree (dbbase);
       error ("can't read DWARF data");
     }
-  back_to = make_cleanup (free, dbbase);
+  back_to = make_cleanup (xfree, dbbase);
 
   /* If there is a line number table associated with this compilation unit
      then read the size of this fragment in bytes, from the fragment itself.
@@ -2290,10 +2290,10 @@ read_ofile_symtab (struct partial_symtab *pst)
       if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
 	  (bfd_read (lnbase, lnsize, 1, abfd) != lnsize))
 	{
-	  free (lnbase);
+	  xfree (lnbase);
 	  error ("can't read DWARF line numbers");
 	}
-      make_cleanup (free, lnbase);
+      make_cleanup (xfree, lnbase);
     }
 
   process_dies (dbbase, dbbase + dbsize, pst->objfile);

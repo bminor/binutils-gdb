@@ -433,7 +433,7 @@ es1800_close (int quitting)
     }
   if (savename != NULL)
     {
-      free (savename);
+      xfree (savename);
     }
   savename = NULL;
 
@@ -1235,7 +1235,7 @@ es1800_load (char *filename, int from_tty)
     }
 
   filename = tilde_expand (filename);
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
 
   switch (es1800_load_format)
     {

@@ -161,7 +161,7 @@ nindy_close (int quitting)
   nindy_serial = NULL;
 
   if (savename)
-    free (savename);
+    xfree (savename);
   savename = 0;
 }
 
@@ -285,7 +285,7 @@ clean_up_tty (PTR ptrarg)
 {
   struct clean_up_tty_args *args = (struct clean_up_tty_args *) ptrarg;
   SERIAL_SET_TTY_STATE (args->serial, args->state);
-  free (args->state);
+  xfree (args->state);
   warning ("\n\nYou may need to reset the 80960 and/or reload your program.\n");
 }
 
@@ -299,7 +299,7 @@ static void
 clean_up_int (void)
 {
   SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
-  free (tty_args.state);
+  xfree (tty_args.state);
 
   signal (SIGINT, old_ctrlc);
 #ifdef SIGTSTP
@@ -392,7 +392,7 @@ nindy_wait (int pid, struct target_waitstatus *status)
     }
 
   SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
-  free (tty_args.state);
+  xfree (tty_args.state);
   discard_cleanups (old_cleanups);
 
   if (stop_exit)
@@ -603,7 +603,7 @@ nindy_load (char *filename, int from_tty)
 		  s->_raw_size,
 		  s->vma);
 	  ninMemPut (s->vma, buffer, s->_raw_size);
-	  free (buffer);
+	  xfree (buffer);
 	}
     }
   bfd_close (file);

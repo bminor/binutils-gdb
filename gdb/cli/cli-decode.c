@@ -346,7 +346,7 @@ delete_cmd (char *name, struct cmd_list_element **list)
       if ((*list)->hookee_post)
       (*list)->hookee_post->hook_post = 0; /* Hook slips out of its bottom  */
       p = (*list)->next;
-      free ((PTR) * list);
+      xfree (* list);
       *list = p;
     }
 
@@ -361,7 +361,7 @@ delete_cmd (char *name, struct cmd_list_element **list)
             c->next->hookee_post->hook_post = 0; /* remove post hook */
                                                /* :( no fishing metaphore */
 	    p = c->next->next;
-	    free ((PTR) c->next);
+	    xfree (c->next);
 	    c->next = p;
 	  }
 	else
@@ -626,7 +626,7 @@ print_doc_line (struct ui_file *stream, char *str)
   if (p - str > line_size - 1)
     {
       line_size = p - str + 1;
-      free ((PTR) line_buffer);
+      xfree (line_buffer);
       line_buffer = (char *) xmalloc (line_size);
     }
   strncpy (line_buffer, str, p - str);
@@ -1258,7 +1258,7 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
 
   if (matches == 0)
     {
-      free ((PTR) matchlist);
+      xfree (matchlist);
       matchlist = 0;
     }
   else
@@ -1329,7 +1329,7 @@ complete_on_enum (const char *enumlist[],
 
   if (matches == 0)
     {
-      free ((PTR) matchlist);
+      xfree (matchlist);
       matchlist = 0;
     }
   else

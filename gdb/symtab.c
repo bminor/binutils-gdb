@@ -595,7 +595,7 @@ lookup_symbol (const char *name, const struct block *block,
   returnval = lookup_symbol_aux (modified_name, block, namespace,
 				 is_a_field_of_this, symtab);
   if (needtofreename)
-    free (modified_name2);
+    xfree (modified_name2);
 
   return returnval;	 
 }
@@ -2278,7 +2278,7 @@ free_search_symbols (struct symbol_search *symbols)
   for (p = symbols; p != NULL; p = next)
     {
       next = p->next;
-      free (p);
+      xfree (p);
     }
 }
 
@@ -2637,7 +2637,7 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
       else
 	{
 	  fputs_filtered (demangled_name, stream);
-	  free (demangled_name);
+	  xfree (demangled_name);
 	}
 #endif
     }
@@ -2876,7 +2876,7 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
 	  {
 	    if (STREQ (new, return_val[i]))
 	      {
-		free (new);
+		xfree (new);
 		return;
 	      }
 	  }
@@ -3183,7 +3183,7 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
   /* skip symbols that cannot match */
   if (strcmp (sym_name, oload_name) != 0)
     {
-      free (sym_name);
+      xfree (sym_name);
       return;
     }
 
@@ -3206,7 +3206,7 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
   sym_return_val[sym_return_val_index++] = sym;
   sym_return_val[sym_return_val_index] = NULL;
 
-  free (sym_name);
+  xfree (sym_name);
 }
 
 /* Return a null-terminated list of pointers to function symbols that
@@ -3327,7 +3327,7 @@ make_symbol_overload_list (struct symbol *fsym)
       }
   }
 
-  free (oload_name);
+  xfree (oload_name);
 
   return (sym_return_val);
 }

@@ -136,14 +136,14 @@ mi_parse_free (struct mi_parse *parse)
   if (parse == NULL)
     return;
   if (parse->command != NULL)
-    free (parse->command);
+    xfree (parse->command);
   if (parse->token != NULL)
-    free (parse->token);
+    xfree (parse->token);
   if (parse->args != NULL)
-    free (parse->args);
+    xfree (parse->args);
   if (parse->argv != NULL)
     freeargv (parse->argv);
-  free (parse);
+  xfree (parse);
 }
 
 

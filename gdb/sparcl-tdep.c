@@ -411,7 +411,7 @@ sparclite_open (char *name, int from_tty)
   unpush_target (&sparclite_ops);
 
   if (remote_target_name)
-    free (remote_target_name);
+    xfree (remote_target_name);
 
   remote_target_name = strsave (name);
 

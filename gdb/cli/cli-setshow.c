@@ -146,7 +146,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    *q++ = '\0';
 	    new = (char *) xrealloc (new, q - new);
 	    if (*(char **) c->var != NULL)
-	      free (*(char **) c->var);
+	      xfree (*(char **) c->var);
 	    *(char **) c->var = new;
 	  }
 	  break;
@@ -154,14 +154,14 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  if (arg == NULL)
 	    arg = "";
 	  if (*(char **) c->var != NULL)
-	    free (*(char **) c->var);
+	    xfree (*(char **) c->var);
 	  *(char **) c->var = savestring (arg, strlen (arg));
 	  break;
 	case var_filename:
 	  if (arg == NULL)
 	    error_no_arg ("filename to set it to.");
 	  if (*(char **) c->var != NULL)
-	    free (*(char **) c->var);
+	    xfree (*(char **) c->var);
 	  *(char **) c->var = tilde_expand (arg);
 	  break;
 	case var_boolean:

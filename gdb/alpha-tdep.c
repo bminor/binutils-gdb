@@ -1154,7 +1154,7 @@ alpha_pop_frame (void)
       else
 	linked_proc_desc_table = pi_ptr->next;
 
-      free (pi_ptr);
+      xfree (pi_ptr);
     }
 }
 

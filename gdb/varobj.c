@@ -1065,7 +1065,7 @@ delete_variable_1 (struct cpstack **resultp, int *delcountp, struct varobj *var,
 	vc->child->parent = NULL;
       delete_variable_1 (resultp, delcountp, vc->child, 0, only_children_p);
       next = vc->next;
-      free (vc);
+      xfree (vc);
     }
 
   /* if we were called to delete only the children we are done here */
@@ -1182,7 +1182,7 @@ uninstall_variable (struct varobj *var)
   else
     prev->next = cv->next;
 
-  free (cv);
+  xfree (cv);
 
   /* If root, remove varobj from root list */
   if (var->root->rootvar == var)
@@ -1507,7 +1507,7 @@ vpop (struct vstack **pstack)
   s = *pstack;
   v = s->var;
   *pstack = (*pstack)->next;
-  free (s);
+  xfree (s);
 
   return v;
 }
@@ -1537,7 +1537,7 @@ cppop (struct cpstack **pstack)
   s = *pstack;
   v = s->name;
   *pstack = (*pstack)->next;
-  free (s);
+  xfree (s);
 
   return v;
 }

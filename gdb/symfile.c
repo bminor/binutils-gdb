@@ -491,8 +491,8 @@ free_section_addr_info (struct section_addr_info *sap)
 
   for (idx = 0; idx < MAX_SECTIONS; idx++)
     if (sap->other[idx].name)
-      free (sap->other[idx].name);
-  free (sap);
+      xfree (sap->other[idx].name);
+  xfree (sap);
 }
 
 
@@ -1061,10 +1061,10 @@ symfile_bfd_open (char *name)
 #endif
   if (desc < 0)
     {
-      make_cleanup (free, name);
+      make_cleanup (xfree, name);
       perror_with_name (name);
     }
-  free (name);			/* Free 1st new malloc'd copy */
+  xfree (name);			/* Free 1st new malloc'd copy */
   name = absolute_name;		/* Keep 2nd malloc'd copy in bfd */
   /* It'll be freed in free_objfile(). */
 
@@ -1072,7 +1072,7 @@ symfile_bfd_open (char *name)
   if (!sym_bfd)
     {
       close (desc);
-      make_cleanup (free, name);
+      make_cleanup (xfree, name);
       error ("\"%s\": can't open to read symbols: %s.", name,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -1084,7 +1084,7 @@ symfile_bfd_open (char *name)
          on error it does not free all the storage associated with the
          bfd).  */
       bfd_close (sym_bfd);	/* This also closes desc */
-      make_cleanup (free, name);
+      make_cleanup (xfree, name);
       error ("\"%s\": can't read symbols: %s.", name,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -1172,7 +1172,7 @@ generic_load (char *args, int from_tty)
   /* Parse the input argument - the user can specify a load offset as
      a second argument. */
   filename = xmalloc (strlen (args) + 1);
-  old_cleanups = make_cleanup (free, filename);
+  old_cleanups = make_cleanup (xfree, filename);
   strcpy (filename, args);
   offptr = strchr (filename, ' ');
   if (offptr != NULL)
@@ -1232,7 +1232,7 @@ generic_load (char *args, int from_tty)
 		block_size = size;
 
 	      buffer = xmalloc (size);
-	      old_chain = make_cleanup (free, buffer);
+	      old_chain = make_cleanup (xfree, buffer);
 
 	      /* Is this really necessary?  I guess it gives the user something
 	         to look at during a long download.  */
@@ -1269,7 +1269,7 @@ generic_load (char *args, int from_tty)
                          that.  remote.c could implement that method
                          using the ``qCRC'' packet.  */
 		      char *check = xmalloc (len);
-		      struct cleanup *verify_cleanups = make_cleanup (free, check);
+		      struct cleanup *verify_cleanups = make_cleanup (xfree, check);
 		      if (target_read_memory (lma, check, len) != 0)
 			error ("Download verify read failed at 0x%s",
 			       paddr (lma));
@@ -1453,7 +1453,7 @@ add_symbol_file_command (char *args, int from_tty)
 	{
 	  /* The first argument is the file name. */
 	  filename = tilde_expand (arg);
-	  my_cleanups = make_cleanup (free, filename);
+	  my_cleanups = make_cleanup (xfree, filename);
 	}
       else
 	if (argcnt == 1)
@@ -1685,13 +1685,13 @@ reread_symbols (void)
 	      /* obstack_specify_allocation also initializes the obstack so
 	         it is empty.  */
 	      obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-					  xmalloc, free);
+					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0,
-					  xmalloc, free);
+					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0,
-					  xmalloc, free);
+					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->type_obstack, 0, 0,
-					  xmalloc, free);
+					  xmalloc, xfree);
 	      if (build_objfile_section_table (objfile))
 		{
 		  error ("Can't find the file sections in `%s': %s",
@@ -1841,7 +1841,7 @@ set_ext_lang_command (char *args, int from_tty)
       /*   query ("Really make files of type %s '%s'?", */
       /*          ext_args, language_str (lang));           */
 
-      free (filename_language_table[i].ext);
+      xfree (filename_language_table[i].ext);
       filename_language_table[i].ext = strsave (ext_args);
       filename_language_table[i].lang = lang;
     }
@@ -2954,7 +2954,7 @@ static void
 simple_free_overlay_table (void)
 {
   if (cache_ovly_table)
-    free (cache_ovly_table);
+    xfree (cache_ovly_table);
   cache_novlys = 0;
   cache_ovly_table = NULL;
   cache_ovly_table_base = 0;
@@ -2966,7 +2966,7 @@ static void
 simple_free_overlay_region_table (void)
 {
   if (cache_ovly_region_table)
-    free (cache_ovly_region_table);
+    xfree (cache_ovly_region_table);
   cache_novly_regions = 0;
   cache_ovly_region_table = NULL;
   cache_ovly_region_table_base = 0;

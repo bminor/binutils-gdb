@@ -426,7 +426,7 @@ the baud rate, and the name of the program to run on the remote system.");
     /*EMPTY */ ;
 
   if (prog_name != NULL)
-    free (prog_name);
+    xfree (prog_name);
   prog_name = savestring (p, strlen (p));
 
   eb_close (0);

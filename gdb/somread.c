@@ -597,7 +597,7 @@ init_import_symbols (struct objfile *objfile)
     }
 
   objfile->import_list_size = import_list_size;
-  free (string_buffer);
+  xfree (string_buffer);
   return import_list_size;
 }
 
@@ -728,7 +728,7 @@ init_export_symbols (struct objfile *objfile)
     }
 
   objfile->export_list_size = export_list_size;
-  free (string_buffer);
+  xfree (string_buffer);
   return export_list_size;
 }
 

@@ -443,7 +443,7 @@ arrange_linetable (struct linetable *oldLineTb)
 
   if (function_count == 0)
     {
-      free (fentry);
+      xfree (fentry);
       return oldLineTb;
     }
   else if (function_count > 1)
@@ -473,7 +473,7 @@ arrange_linetable (struct linetable *oldLineTb)
 	   ++jj, ++newline)
 	newLineTb->item[newline] = oldLineTb->item[jj];
     }
-  free (fentry);
+  xfree (fentry);
   newLineTb->nitems = oldLineTb->nitems - function_count;
   return newLineTb;
 }
@@ -675,7 +675,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	}
       else
 	{
-	  free (lv);
+	  xfree (lv);
 	  current_subfile->line_vector = lineTb;
 	}
 
@@ -725,7 +725,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    if (fakename == NULL)
 	      fakename = " ?";
 	    start_subfile (fakename, (char *) 0);
-	    free (current_subfile->name);
+	    xfree (current_subfile->name);
 	  }
 	  current_subfile->name = xstrdup (inclTable[ii].name);
 #endif
@@ -740,7 +740,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    }
 	  else
 	    {
-	      free (lv);
+	      xfree (lv);
 	      current_subfile->line_vector = lineTb;
 	    }
 
@@ -1898,7 +1898,7 @@ xcoff_symfile_finish (struct objfile *objfile)
   /* Start with a fresh include table for the next objfile.  */
   if (inclTable)
     {
-      free (inclTable);
+      xfree (inclTable);
       inclTable = NULL;
     }
   inclIndx = inclLength = inclDepth = 0;

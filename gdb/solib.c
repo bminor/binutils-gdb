@@ -187,7 +187,7 @@ solib_map_sections (PTR arg)
 
   filename = tilde_expand (so->so_name);
 
-  old_chain = make_cleanup (free, filename);
+  old_chain = make_cleanup (xfree, filename);
   scratch_chan = solib_open (filename, &scratch_pathname);
 
   if (scratch_chan < 0)
@@ -270,7 +270,7 @@ free_so (struct so_list *so)
   char *bfd_filename = 0;
 
   if (so->sections)
-    free (so->sections);
+    xfree (so->sections);
       
   if (so->abfd)
     {
@@ -281,11 +281,11 @@ free_so (struct so_list *so)
     }
 
   if (bfd_filename)
-    free (bfd_filename);
+    xfree (bfd_filename);
 
   TARGET_SO_FREE_SO (so);
 
-  free (so);
+  xfree (so);
 }
 
 

@@ -152,7 +152,7 @@ common:
       else
 	{
 	  fputs_filtered (demangled_name, stream);
-	  free (demangled_name);
+	  xfree (demangled_name);
 	}
     }
   else
@@ -793,5 +793,5 @@ _initialize_cp_valprint (void)
   obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
   obstack_specify_allocation (&dont_print_statmem_obstack,
 			      32 * sizeof (CORE_ADDR), sizeof (CORE_ADDR),
-			      xmalloc, free);
+			      xmalloc, xfree);
 }

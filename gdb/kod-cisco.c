@@ -312,6 +312,6 @@ cisco_kod_request (char *arg, int from_tty)
 
   /* Free memory.  */
   for (i = 0; i < sync_next; ++i)
-    free (sync_ids[i]);
-  free (sync_ids);
+    xfree (sync_ids[i]);
+  xfree (sync_ids);
 }

@@ -686,7 +686,7 @@ clear_thread_info (void)
     {
       q = p;
       p = p->next;
-      free (q);
+      xfree (q);
     }
 
   thread_head.head = NULL;
@@ -698,7 +698,7 @@ clear_thread_info (void)
     {
       q = p;
       p = p->next;
-      free (q);
+      xfree (q);
     }
 
   deleted_threads.head = NULL;
@@ -3868,7 +3868,7 @@ kill_inferior (void)
       t = t->next;
     }
 
-  free (paranoia);
+  xfree (paranoia);
 
   call_ttrace (TT_PROC_STOP,
 	       inferior_pid,
@@ -5336,7 +5336,7 @@ remove_dictionary_entry_of_page (int pid, memory_page_t *page)
 
   memory_page_dictionary.page_count--;
 
-  free (page);
+  xfree (page);
 }
 
 

@@ -977,7 +977,7 @@ xcoff_relocate_symtab (unsigned int pid)
 	}
     } while (rc == -1);
   if (ldi)
-    free (ldi);
+    xfree (ldi);
 }
 
 /* Core file stuff.  */

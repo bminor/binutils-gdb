@@ -91,7 +91,7 @@ core_file_command (char *filename, int from_tty)
 	      {
 		char *symfile_copy = xstrdup (symfile);
 
-		make_cleanup (free, symfile_copy);
+		make_cleanup (xfree, symfile_copy);
 		symbol_file_command (symfile_copy, from_tty);
 	      }
 	    else
@@ -183,7 +183,7 @@ reopen_exec_file (void)
 
   /* If the timestamp of the exec file has changed, reopen it. */
   filename = xstrdup (bfd_get_filename (exec_bfd));
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
   mtime = bfd_get_mtime (exec_bfd);
   res = stat (filename, &st);
 
@@ -397,7 +397,7 @@ void
 set_gnutarget (char *newtarget)
 {
   if (gnutarget_string != NULL)
-    free (gnutarget_string);
+    xfree (gnutarget_string);
   gnutarget_string = savestring (newtarget, strlen (newtarget));
   set_gnutarget_command (NULL, 0, NULL);
 }

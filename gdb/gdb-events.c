@@ -179,7 +179,7 @@ gdb_events_deliver (struct gdb_events *vector)
     {
       struct event *event = delivering_events;
       delivering_events = event->next;
-      free (event);
+      xfree (event);
     }
   /* Process any pending events.  Because one of the deliveries could
      bail out we move everything off of the pending queue onto an
@@ -206,7 +206,7 @@ gdb_events_deliver (struct gdb_events *vector)
 	  break;
 	}
       delivering_events = event->next;
-      free (event);
+      xfree (event);
     }
 }
 

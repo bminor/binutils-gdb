@@ -148,7 +148,7 @@ restore_inferior_pid (void *arg)
 {
   int *saved_pid_ptr = arg;
   inferior_pid = *saved_pid_ptr;
-  free (arg);
+  xfree (arg);
 }
 
 static struct cleanup *

@@ -603,7 +603,7 @@ _tuiSetLayoutTo (layoutName)
 	    newLayout = _prevLayout ();
 	  else
 	    status = TUI_FAILURE;
-	  free (bufPtr);
+	  xfree (bufPtr);
 
 	  tuiSetLayout (newLayout, dpyType);
 	}

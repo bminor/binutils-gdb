@@ -631,7 +631,7 @@ destroy_one_procinfo (procinfo **list, procinfo *pi)
   close_procinfo_files (pi);
 
   /* Step three: free the memory. */
-  free (pi);
+  xfree (pi);
 }
 
 static void
@@ -2879,7 +2879,7 @@ proc_update_threads (procinfo *pi)
        malloc (sizeof (gdb_prstatus_t) * (nlwp + 1))) == 0)
     perror_with_name ("procfs: malloc failed in update_threads");
 
-  old_chain = make_cleanup (free, prstatus);
+  old_chain = make_cleanup (xfree, prstatus);
   if (ioctl (pi->ctl_fd, PIOCLSTATUS, prstatus) < 0)
     proc_error (pi, "update_threads (PIOCLSTATUS)", __LINE__);
 

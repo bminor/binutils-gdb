@@ -204,10 +204,10 @@ mi_cmd_exec_interrupt (char *args, int from_tty)
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("^done", raw_stdout);
-  free (last_async_command);
+  xfree (last_async_command);
   if (previous_async_command)
     last_async_command = xstrdup (previous_async_command);
-  free (previous_async_command);
+  xfree (previous_async_command);
   previous_async_command = NULL;
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
@@ -697,7 +697,7 @@ mi_cmd_target_download (char *args, int from_tty)
   struct cleanup *old_cleanups = NULL;
 
   xasprintf (&run, "load %s", args);
-  old_cleanups = make_cleanup (free, run);
+  old_cleanups = make_cleanup (xfree, run);
   execute_command (run, from_tty);
 
   do_cleanups (old_cleanups);
@@ -712,7 +712,7 @@ mi_cmd_target_select (char *args, int from_tty)
   struct cleanup *old_cleanups = NULL;
 
   xasprintf (&run, "target %s", args);
-  old_cleanups = make_cleanup (free, run);
+  old_cleanups = make_cleanup (xfree, run);
 
   /* target-select is always synchronous.  once the call has returned
      we know that we are connected. */
@@ -859,7 +859,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   /* create a buffer and read it in. */
   total_bytes = word_size * nr_rows * nr_cols;
   mbuf = calloc (total_bytes, 1);
-  make_cleanup (free, mbuf);
+  make_cleanup (xfree, mbuf);
   if (mbuf == NULL)
     {
       xasprintf (&mi_error_message,
@@ -1075,7 +1075,7 @@ captured_mi_execute_command (void *data)
 		  fputs_unfiltered (context->token, raw_stdout);
 		  fputs_unfiltered ("^error,msg=\"", raw_stdout);
 		  fputstr_unfiltered (mi_error_message, '"', raw_stdout);
-		  free (mi_error_message);
+		  xfree (mi_error_message);
 		  fputs_unfiltered ("\"\n", raw_stdout);
 		}
 	      mi_out_rewind (uiout);
@@ -1145,7 +1145,7 @@ mi_execute_command (char *cmd, int from_tty)
       if (rc == 0)
 	{
 	  char *msg = error_last_message ();
-	  struct cleanup *cleanup = make_cleanup (free, msg);
+	  struct cleanup *cleanup = make_cleanup (xfree, msg);
 	  /* The command execution failed and error() was called
 	     somewhere */
 	  fputs_unfiltered (command->token, raw_stdout);
@@ -1248,7 +1248,7 @@ mi_execute_cli_command (const char *cli, char *args)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
 			    cli, run);
-      old_cleanups = make_cleanup (free, run);
+      old_cleanups = make_cleanup (xfree, run);
       execute_command ( /*ui */ run, 0 /*from_tty */ );
       do_cleanups (old_cleanups);
       return;
@@ -1275,7 +1275,7 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
   else
     {
       xasprintf (&run, "%s %s", mi, args);
-      old_cleanups = make_cleanup (free, run);
+      old_cleanups = make_cleanup (xfree, run);
     }
 
   if (!target_can_async_p ())
@@ -1369,7 +1369,7 @@ mi_load_progress (const char *section_name,
 		 strcmp (previous_sect_name, section_name) : 1);
   if (new_section)
     {
-      free (previous_sect_name);
+      xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
       if (last_async_command)

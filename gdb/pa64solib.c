@@ -168,7 +168,7 @@ pa64_solib_sizeof_symbol_table (char *filename)
   if (!abfd)
     {
       close (desc);
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
       error ("\"%s\": can't open to read symbols: %s.", filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -176,7 +176,7 @@ pa64_solib_sizeof_symbol_table (char *filename)
   if (!bfd_check_format (abfd, bfd_object))
     {
       bfd_close (abfd);
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
       error ("\"%s\": can't read symbols: %s.", filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -192,7 +192,7 @@ pa64_solib_sizeof_symbol_table (char *filename)
     }
 
   bfd_close (abfd);
-  free (filename);
+  xfree (filename);
 
   /* Unfortunately, just summing the sizes of various debug info
      sections isn't a very accurate measurement of how much heap
@@ -573,7 +573,7 @@ get_out:
       struct so_list *temp;
 
       temp = so_list_head;
-      free (so_list_head);
+      xfree (so_list_head);
       so_list_head = temp->next;
     }
   clear_symtab_users ();
@@ -860,7 +860,7 @@ pa64_solib_restart (void)
   while (sl)
     {
       struct so_list *next_sl = sl->next;
-      free (sl);
+      xfree (sl);
       sl = next_sl;
     }
   so_list_head = NULL;
@@ -1213,7 +1213,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, (PTR) symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)

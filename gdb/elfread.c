@@ -249,7 +249,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       if (dynamic)
 	number_of_symbols = bfd_canonicalize_dynamic_symtab (objfile->obfd,
 							     symbol_table);

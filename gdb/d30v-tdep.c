@@ -1221,7 +1221,7 @@ d30v_eva_get_trace_data (void)
   oldsize = trace_data.size;
   trace_data.size += count;
 
-  free (tmpspace);
+  xfree (tmpspace);
 
   if (trace_display)
     display_trace (oldsize, trace_data.size);

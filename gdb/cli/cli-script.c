@@ -516,7 +516,7 @@ arg_cleanup (void *ignore)
     internal_error ("Internal error, arg_cleanup called with no user args.\n");
 
   user_args = user_args->next;
-  free (oargs);
+  xfree (oargs);
 }
 
 /* Bind the incomming arguments for a user defined command to
@@ -701,7 +701,7 @@ realloc_body_list (struct command_line *command, int new_length)
 
   memcpy (body_list, command->body_list, sizeof (struct command_line *) * n);
 
-  free (command->body_list);
+  xfree (command->body_list);
   command->body_list = body_list;
   command->body_count = new_length;
 }
@@ -1022,8 +1022,8 @@ free_command_lines (struct command_line **lptr)
 	    free_command_lines (blist);
 	}
       next = l->next;
-      free (l->line);
-      free ((PTR) l);
+      xfree (l->line);
+      xfree (l);
       l = next;
     }
 }
@@ -1192,7 +1192,7 @@ document_command (char *comname, int from_tty)
   doclines = read_command_lines (tmpbuf, from_tty);
 
   if (c->doc)
-    free (c->doc);
+    xfree (c->doc);
 
   {
     register struct command_line *cl1;
@@ -1266,7 +1266,7 @@ script_from_file (FILE *stream, char *file)
   source_file_name = file;
   source_pre_error = error_pre_print == NULL ? "" : error_pre_print;
   source_pre_error = savestring (source_pre_error, strlen (source_pre_error));
-  make_cleanup (free, source_pre_error);
+  make_cleanup (xfree, source_pre_error);
   /* This will get set every time we read a line.  So it won't stay "" for
      long.  */
   error_pre_print = "";

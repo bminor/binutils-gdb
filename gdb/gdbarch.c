@@ -463,7 +463,7 @@ void
 gdbarch_free (struct gdbarch *arch)
 {
   /* At the moment, this is trivial.  */
-  free (arch);
+  xfree (arch);
 }
 
 

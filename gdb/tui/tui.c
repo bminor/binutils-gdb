@@ -241,7 +241,7 @@ tuiFree (ptr)
 {
   if (ptr != (char *) NULL)
     {
-      free (ptr);
+      xfree (ptr);
     }
 
   return;
@@ -626,7 +626,7 @@ strcat_to_buf_with_fmt (va_alist)
   format = va_arg (args, char *);
 #endif
   vasprintf (&linebuffer, format, args);
-  old_cleanups = make_cleanup (free, linebuffer);
+  old_cleanups = make_cleanup (xfree, linebuffer);
   strcat_to_buf (buf, bufLen, linebuffer);
   do_cleanups (old_cleanups);
   va_end (args);

@@ -109,7 +109,7 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 			     dem->demangling_style_doc);
 	  if (dem->demangling_style == current_demangling_style)
 	    {
-	      free (current_demangling_style_string);
+	      xfree (current_demangling_style_string);
 	      current_demangling_style_string =
 		savestring (dem->demangling_style_name,
 			    strlen (dem->demangling_style_name));
@@ -138,7 +138,7 @@ set_demangling_style (char *style)
 {
   if (current_demangling_style_string != NULL)
     {
-      free (current_demangling_style_string);
+      xfree (current_demangling_style_string);
     }
   current_demangling_style_string = savestring (style, strlen (style));
   set_demangling_command ((char *) NULL, 0, (struct cmd_list_element *) NULL);

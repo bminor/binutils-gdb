@@ -646,7 +646,7 @@ follow_vfork (int parent_pid, int child_pid)
       pending_follow.fork_event.saw_child_exec = 0;
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
       follow_exec (inferior_pid, pending_follow.execd_pathname);
-      free (pending_follow.execd_pathname);
+      xfree (pending_follow.execd_pathname);
     }
 }
 
@@ -1715,7 +1715,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* This causes the eventpoints and symbol table to be reset.  Must
 	   do this now, before trying to determine whether to stop. */
 	follow_exec (inferior_pid, pending_follow.execd_pathname);
-	free (pending_follow.execd_pathname);
+	xfree (pending_follow.execd_pathname);
 
 	stop_pc = read_pc_pid (ecs->pid);
 	ecs->saved_inferior_pid = inferior_pid;
@@ -3891,7 +3891,7 @@ xdb_handle_command (char *args, int from_tty)
 	  else
 	    printf_filtered ("Invalid signal handling flag.\n");
 	  if (argBuf)
-	    free (argBuf);
+	    xfree (argBuf);
 	}
     }
   do_cleanups (old_chain);
@@ -3982,9 +3982,9 @@ xmalloc_inferior_status (void)
 static void
 free_inferior_status (struct inferior_status *inf_status)
 {
-  free (inf_status->registers);
-  free (inf_status->stop_registers);
-  free (inf_status);
+  xfree (inf_status->registers);
+  xfree (inf_status->stop_registers);
+  xfree (inf_status);
 }
 
 void
