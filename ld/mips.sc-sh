@@ -39,7 +39,7 @@ SECTIONS
     *(.sdata)
   }
   ${RELOCATING+ edata  =  .;}
-  ${BSS_VAR}
+  ${RELOCATING+ ${BSS_VAR}}
   .sbss ${RELOCATING+ .} : {
     *(.sbss)
     *(.scommon)
