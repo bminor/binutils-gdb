@@ -299,7 +299,8 @@ You may need to reset the 80960 and/or reload your program.\n");
  */
 
 static int
-nindy_wait( status )
+nindy_wait( pid, status )
+    int pid;
     WAITTYPE *status;
 {
   fd_set fds;

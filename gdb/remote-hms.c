@@ -664,7 +664,8 @@ hms_resume (pid, step, sig)
    storing status in STATUS just as `wait' would.  */
 
 int
-hms_wait (status)
+hms_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   /* Strings to look for.  '?' means match any single character.

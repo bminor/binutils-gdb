@@ -51,6 +51,8 @@ static void prune_threads PARAMS ((void));
 
 static void thread_switch PARAMS ((int pid));
 
+static struct thread_info * find_thread_id PARAMS ((int num));
+
 void
 init_thread_list ()
 {
@@ -94,6 +96,32 @@ find_thread_id (num)
       return tp;
 
   return NULL;
+}
+
+int
+valid_thread_id (num)
+    int num;
+{
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (tp->num == num)
+      return 1;
+
+  return 0;
+}
+
+int
+pid_to_thread_id (pid)
+    int pid;
+{
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (tp->pid == pid)
+      return tp->num;
+
+  return 0;
 }
 
 int

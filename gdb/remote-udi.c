@@ -406,7 +406,8 @@ udi_resume (pid, step, sig)
    storing status in STATUS just as `wait' would.  */
 
 static int
-udi_wait (status)
+udi_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   UDIInt32	MaxTime;

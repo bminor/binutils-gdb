@@ -187,10 +187,10 @@ store_inferior_registers (regno)
    of error; store status through argument pointer STATUS.  */
 
 int
-child_wait (status)
+child_wait (pid, status)
+     int pid;
      int *status;
 {
-  int pid;
   int save_errno;
   int thread;
 

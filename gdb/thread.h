@@ -25,8 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern void init_thread_list PARAMS ((void));
 
-extern void add_thread PARAMS ((int));
+extern void add_thread PARAMS ((int pid));
 
-extern int in_thread_list PARAMS ((int));
+extern int in_thread_list PARAMS ((int pid));
+
+extern int pid_to_thread_id PARAMS ((int pid));
+
+extern int valid_thread_id PARAMS ((int thread));
 
 #endif	/* THREAD_H */

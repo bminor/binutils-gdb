@@ -75,7 +75,7 @@ static void
 mips_resume PARAMS ((int pid, int step, int siggnal));
 
 static int
-mips_wait PARAMS ((WAITTYPE *status));
+mips_wait PARAMS ((int pid, WAITTYPE *status));
 
 static int
 mips_map_regno PARAMS ((int regno));

@@ -461,7 +461,8 @@ monitor_resume (pid, step, sig)
  */
 
 static int
-monitor_wait (status)
+monitor_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   int old_timeout = timeout;

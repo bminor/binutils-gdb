@@ -583,6 +583,9 @@ vx_resume (pid, step, siggnal)
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
 
+  if (pid == -1)
+    pid = inferior_pid;
+
   if (siggnal != 0 && siggnal != stop_signal)
     error ("Cannot send signals to VxWorks processes");
 
@@ -855,7 +858,8 @@ sleep_ms (ms)
  */
 
 static int
-vx_wait (status)
+vx_wait (pid, status)
+     int pid;
      int *status;
 {
   register int pid;

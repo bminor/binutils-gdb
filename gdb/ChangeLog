@@ -1,3 +1,42 @@
+Fri Oct 15 22:46:07 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* breakpoint.c (breakpoint_thread_match break_command_1):
+	Thread-specific breakpoint support.
+	* breakpoint.h (struct breakpoint):  Add thread id field.
+	* fork-child.c (fork_inferior):  Move call to init_thread_list()
+	back a bit so that init_trace_fun can do thread functions.
+	* hppa-tdep.c (restore_pc_queue):  Add pid to call to target_wait.
+	* hppab-nat.c (child_resume):  Handle default pid.
+	* hppah-nat.c (child_resume):  Handle default pid.
+	* i386lynx-nat.c (child_wait):  New arg pid.
+	* inflow.c (kill_command):  Reset thread list.
+	* infptrace.c (child_resume):  Handle default pid.
+	* infrun.c:  Thread-specific breakpoint support.
+	* inftarg.c (child_wait):  Add pid arg.
+	* osfsolib.c (solib_create_inferior_hook):  Add pid to call to
+	target_resume.
+	* procfs.c:  Multi-thread support.
+	* remote-bug.c (bug_wait):  Add pid arg.
+	* remote-hms.c (hms_wait):  Add pid arg.
+	* remote-mips.c (mips_wait):  Add pid arg.
+	* remote-mon.c (monitor_wait):  Add pid arg.
+	* remote-nindy.c (nindy_wait):  Add pid arg.
+	* remote-sim.c (gdbsim_wait):  Add pid arg.
+	* remote-udi.c (udi_wait):  Add pid arg.
+	* remote-vx.c (vx_wait):  Add pid arg.
+	* remote-z8k.c (sim_wait):  Add pid arg.
+	* remote.c (remote_wait):  Add pid arg.
+	* solib.c (solib_create_inferior_hook):  Add pid to call to
+	target_resume.
+	* target.h (struct target_ops):  Add pid arg to to_wait and
+	to_notice_signals.
+	* thread.c (valid_thread_id):  New func to validate thread #s.
+	* (pid_to_thread_id):  New func to do the obvious.
+	* thread.h:  Prototypes for above.
+
+	* coff-solib.c (coff_solib_add):  Use nameoffset field to locate
+	filename.
+
 Fri Oct 15 21:29:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* h8300-tdep.c, h8500-tdep.c: Define sim_load only, but not

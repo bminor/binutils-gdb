@@ -273,7 +273,8 @@ static char *wait_strings[] = {
 };
 
 int
-bug_wait (status)
+bug_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   int old_timeout = sr_get_timeout();

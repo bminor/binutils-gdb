@@ -39,6 +39,8 @@ regardless of whether or not the actual target has floating point hardware.
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <stropts.h>
+#include <poll.h>
 
 #include "inferior.h"
 #include "target.h"
@@ -74,10 +76,11 @@ CORE_ADDR kernel_u_addr;
     the inferior's procinfo information. */
 
 struct procinfo {
-  int valid;			/* Nonzero if pid, fd, & pathname are valid */
+  struct procinfo *next;
   int pid;			/* Process ID of inferior */
   int fd;			/* File descriptor for /proc entry */
   char *pathname;		/* Pathname to /proc entry */
+  int had_event;		/* poll/select says something happened */
   int was_stopped;		/* Nonzero if was stopped prior to attach */
   int nopass_next_sigstop;	/* Don't pass a sigstop on next resume */
   prrun_t prrun;		/* Control state when it is run */
@@ -95,7 +98,14 @@ struct procinfo {
   sysset_t saved_entryset;	/* Saved traced system call entry set */
 };
 
-static struct procinfo pi;	/* Inferior's process information */
+/* List of inferior process information */
+static struct procinfo *procinfo_list = NULL;
+
+static struct pollfd *poll_list; /* pollfds used for waiting on /proc */
+
+static int num_poll_list = 0;	/* Number of entries in poll_list */
+
+static int last_resume_pid = -1; /* Last pid used with procfs_resume */
 
 /*  Much of the information used in the /proc interface, particularly for
     printing status information, is kept as tables of structures of the
@@ -360,7 +370,7 @@ static char *
 errnoname PARAMS ((int));
 
 static int
-proc_address_to_fd PARAMS ((CORE_ADDR, int));
+proc_address_to_fd PARAMS ((struct procinfo *, CORE_ADDR, int));
 
 static int
 open_proc_file PARAMS ((int, struct procinfo *, int));
@@ -369,10 +379,10 @@ static void
 close_proc_file PARAMS ((struct procinfo *));
 
 static void
-unconditionally_kill_inferior PARAMS ((void));
+unconditionally_kill_inferior PARAMS ((struct procinfo *));
 
-static void
-proc_init_failed PARAMS ((char *));
+static NORETURN void
+proc_init_failed PARAMS ((struct procinfo *, char *));
 
 static void
 info_proc PARAMS ((char *, int));
@@ -417,7 +427,10 @@ static void
 procfs_create_inferior PARAMS ((char *, char *, char **));
 
 static void
-procfs_notice_signals PARAMS ((void));
+procfs_notice_signals PARAMS ((pid_t pid));
+
+static struct procinfo *
+find_procinfo PARAMS ((pid_t pid, int okfail));
 
 /* External function prototypes that can't be easily included in any
    header file because the args are typedefs in system include files. */
@@ -433,6 +446,117 @@ supply_fpregset PARAMS ((fpregset_t *));
 
 extern void
 fill_fpregset PARAMS ((fpregset_t *, int));
+
+/*
+
+LOCAL FUNCTION
+
+	find_procinfo -- convert a process id to a struct procinfo
+
+SYNOPSIS
+
+	static struct procinfo * find_procinfo (pid_t pid, int okfail);
+
+DESCRIPTION
+	
+	Given a process id, look it up in the procinfo chain.  Returns
+	a struct procinfo *.  If can't find pid, then call error(),
+	unless okfail is set, in which case, return NULL;
+ */
+
+static struct procinfo *
+find_procinfo (pid, okfail)
+     pid_t pid;
+     int okfail;
+{
+  struct procinfo *procinfo;
+
+  for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
+    if (procinfo->pid == pid)
+      return procinfo;
+
+  if (okfail)
+    return NULL;
+
+  error ("procfs (find_procinfo):  Couldn't locate pid %d", pid);
+}
+
+/*
+
+LOCAL FUNCTION
+
+	add_fd -- Add the fd to the poll/select list
+
+SYNOPSIS
+
+	static void add_fd (struct procinfo *);
+
+DESCRIPTION
+	
+	Add the fd of the supplied procinfo to the list of fds used for
+	poll/select operations.
+ */
+
+static void
+add_fd (pi)
+     struct procinfo *pi;
+{
+  if (num_poll_list <= 0)
+    poll_list = (struct pollfd *) xmalloc (sizeof (struct pollfd));
+  else
+    poll_list = (struct pollfd *) xrealloc (poll_list,
+					    (num_poll_list + 1)
+					    * sizeof (struct pollfd));
+  poll_list[num_poll_list].fd = pi->fd;
+  poll_list[num_poll_list].events = POLLPRI;
+
+  num_poll_list++;
+}
+
+static void
+remove_fd (pi)
+     struct procinfo *pi;
+{
+  int i;
+
+  for (i = 0; i < num_poll_list; i++)
+    {
+      if (poll_list[i].fd == pi->fd)
+	{
+	  if (i != num_poll_list - 1)
+	    memcpy (poll_list, poll_list + i + 1,
+		    (num_poll_list - i - 1) * sizeof (struct pollfd));
+
+	  num_poll_list--;
+
+	  if (num_poll_list == 0)
+	    free (poll_list);
+	  else
+	    poll_list = (struct pollfd *) xrealloc (poll_list,
+						    num_poll_list
+						    * sizeof (struct pollfd));
+	  return;
+	}
+    }
+}
+
+/*
+
+LOCAL MACRO
+
+	current_procinfo -- convert inferior_pid to a struct procinfo
+
+SYNOPSIS
+
+	static struct procinfo * current_procinfo;
+
+DESCRIPTION
+	
+	Looks up inferior_pid in the procinfo chain.  Always returns a
+	struct procinfo *.  If process can't be found, we error() out.
+ */
+
+#define current_procinfo find_procinfo (inferior_pid, 0)
 
 /*
 
@@ -1011,6 +1135,9 @@ init_syscall_table ()
 #if defined (SYS_seteuid)
   syscall_table[SYS_seteuid] = "seteuid";
 #endif
+#if defined (SYS_sproc)
+  syscall_table[SYS_sproc] = "sproc";
+#endif
 }
 
 /*
@@ -1068,11 +1195,12 @@ NOTES
 static void
 procfs_kill_inferior ()
 {
-  if (inferior_pid != 0)
-    {
-      unconditionally_kill_inferior ();
-      target_mourn_inferior ();
-    }
+  struct procinfo *pi;
+
+  for (pi = procinfo_list; pi; pi = pi->next)
+    unconditionally_kill_inferior (pi);
+
+  target_mourn_inferior ();
 }
 
 /*
@@ -1083,30 +1211,39 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void unconditionally_kill_inferior (void)
+	static void unconditionally_kill_inferior (struct procinfo *)
 
 DESCRIPTION
 
-	Kill the current inferior.  Should not be called until it
-	is at least tested that there is an inferior.
+	Kill the specified inferior.
 
 NOTE
 
 	A possibly useful enhancement would be to first try sending
 	the inferior a terminate signal, politely asking it to commit
-	suicide, before we murder it.
+	suicide, before we murder it (we could call that
+	politely_kill_inferior()).
 
 */
 
 static void
-unconditionally_kill_inferior ()
+unconditionally_kill_inferior (pi)
+     struct procinfo *pi;
 {
   int signo;
+  int ppid;
   
+  ppid = pi->prstatus.pr_ppid;
+
   signo = SIGKILL;
-  ioctl (pi.fd, PIOCKILL, &signo);
-  close_proc_file (&pi);
-  wait ((int *) 0);
+  ioctl (pi->fd, PIOCKILL, &signo);
+  close_proc_file (pi);
+
+/* Only wait() for our direct children.  Our grandchildren zombies are killed
+   by the death of their parents.  */
+
+  if (ppid == getpid())
+    wait ((int *) 0);
 }
 
 /*
@@ -1145,16 +1282,19 @@ procfs_xfer_memory (memaddr, myaddr, len, dowrite, target)
      struct target_ops *target; /* ignored */
 {
   int nbytes = 0;
+  struct procinfo *pi;
 
-  if (lseek (pi.fd, (off_t) memaddr, 0) == (off_t) memaddr)
+  pi = current_procinfo;
+
+  if (lseek(pi->fd, (off_t) memaddr, 0) == (off_t) memaddr)
     {
       if (dowrite)
 	{
-	  nbytes = write (pi.fd, myaddr, len);
+	  nbytes = write (pi->fd, myaddr, len);
 	}
       else
 	{
-	  nbytes = read (pi.fd, myaddr, len);
+	  nbytes = read (pi->fd, myaddr, len);
 	}
       if (nbytes < 0)
 	{
@@ -1206,12 +1346,16 @@ static void
 procfs_store_registers (regno)
      int regno;
 {
+  struct procinfo *pi;
+
+  pi = current_procinfo;
+
   if (regno != -1)
     {
-      ioctl (pi.fd, PIOCGREG, &pi.gregset);
+      ioctl (pi->fd, PIOCGREG, &pi->gregset);
     }
-  fill_gregset (&pi.gregset, regno);
-  ioctl (pi.fd, PIOCSREG, &pi.gregset);
+  fill_gregset (&pi->gregset, regno);
+  ioctl (pi->fd, PIOCSREG, &pi->gregset);
 
 #if defined (FP0_REGNUM)
 
@@ -1221,10 +1365,10 @@ procfs_store_registers (regno)
 
   if (regno != -1)
     {
-      ioctl (pi.fd, PIOCGFPREG, &pi.fpregset);
+      ioctl (pi->fd, PIOCGFPREG, &pi->fpregset);
     }
-  fill_fpregset (&pi.fpregset, regno);
-  ioctl (pi.fd, PIOCSFPREG, &pi.fpregset);
+  fill_fpregset (&pi->fpregset, regno);
+  ioctl (pi->fd, PIOCSFPREG, &pi->fpregset);
 
 #endif	/* FP0_REGNUM */
 
@@ -1234,7 +1378,64 @@ procfs_store_registers (regno)
 
 LOCAL FUNCTION
 
-	procfs_init_inferior - initialize access to a /proc entry
+	create_procinfo - initialize access to a /proc entry
+
+SYNOPSIS
+
+	void create_procinfo (int pid)
+
+DESCRIPTION
+
+	Allocate a procinfo structure, open the /proc file and then sets up
+	the set of signals and faults that are to be traced.
+
+NOTES
+
+	If proc_init_failed ever gets called, control returns to the command
+	processing loop via the standard error handling code.
+
+ */
+
+static void
+create_procinfo (pid)
+     int pid;
+{
+  struct procinfo *pi;
+
+  if (find_procinfo (pid, 1))
+    return;			/* All done!  It already exists */
+
+  pi = (struct procinfo *) xmalloc (sizeof (struct procinfo));
+
+  if (!open_proc_file (pid, pi, O_RDWR))
+    proc_init_failed (pi, "can't open process file");
+
+  /* Add new process to process info list */
+
+  pi->next = procinfo_list;
+  procinfo_list = pi;
+
+  add_fd (pi);			/* Add to list for poll/select */
+
+  memset ((char *) &pi->prrun, 0, sizeof (pi->prrun));
+  prfillset (&pi->prrun.pr_trace);
+  procfs_notice_signals (pid);
+  prfillset (&pi->prrun.pr_fault);
+  prdelset (&pi->prrun.pr_fault, FLTPAGE);
+
+  if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
+    proc_init_failed (pi, "PIOCWSTOP failed");
+
+  if (ioctl (pi->fd, PIOCSFAULT, &pi->prrun.pr_fault) < 0)
+    proc_init_failed (pi, "PIOCSFAULT failed");
+}
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_init_inferior - initialize target vector and access to a
+	/proc entry
 
 SYNOPSIS
 
@@ -1259,29 +1460,10 @@ static void
 procfs_init_inferior (pid)
      int pid;
 {
-
   push_target (&procfs_ops);
 
-  if (!open_proc_file (pid, &pi, O_RDWR))
-    {
-      proc_init_failed ("can't open process file");
-    }
-  else
-    {
-      memset ((char *) &pi.prrun, 0, sizeof (pi.prrun));
-      prfillset (&pi.prrun.pr_trace);
-      procfs_notice_signals ();
-      prfillset (&pi.prrun.pr_fault);
-      prdelset (&pi.prrun.pr_fault, FLTPAGE);
-      if (ioctl (pi.fd, PIOCWSTOP, &pi.prstatus) < 0)
-	{
-	  proc_init_failed ("PIOCWSTOP failed");
-	}
-      else if (ioctl (pi.fd, PIOCSFAULT, &pi.prrun.pr_fault) < 0)
-	{
-	  proc_init_failed ("PIOCSFAULT failed");
-	}
-    }
+  create_procinfo (pid);
+  add_thread (pid);		/* Setup initial thread */
 }
 
 /*
@@ -1292,7 +1474,7 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	static void procfs_notice_signals (void);
+	static void procfs_notice_signals (pid_t pid);
 
 DESCRIPTION
 
@@ -1310,29 +1492,30 @@ DESCRIPTION
  */
 
 static void
-procfs_notice_signals ()
+procfs_notice_signals (pid)
+     pid_t pid;
 {
   int signo;
+  struct procinfo *pi;
 
-  if (pi.valid)
+  pi = find_procinfo (pid, 0);
+
+  for (signo = 0; signo < NSIG; signo++)
     {
-      for (signo = 0; signo < NSIG; signo++)
+      if (signal_stop_state (signo) == 0 &&
+	  signal_print_state (signo) == 0 &&
+	  signal_pass_state (signo) == 1)
 	{
-	  if (signal_stop_state (signo) == 0 &&
-	      signal_print_state (signo) == 0 &&
-	      signal_pass_state (signo) == 1)
-	    {
-	      prdelset (&pi.prrun.pr_trace, signo);
-	    }
-	  else
-	    {
-	      praddset (&pi.prrun.pr_trace, signo);
-	    }
+	  prdelset (&pi->prrun.pr_trace, signo);
 	}
-      if (ioctl (pi.fd, PIOCSTRACE, &pi.prrun.pr_trace))
+      else
 	{
-	  print_sys_errmsg ("PIOCSTRACE failed", errno);
+	  praddset (&pi->prrun.pr_trace, signo);
 	}
+    }
+  if (ioctl (pi->fd, PIOCSTRACE, &pi->prrun.pr_trace))
+    {
+      print_sys_errmsg ("PIOCSTRACE failed", errno);
     }
 }
 
@@ -1464,15 +1647,18 @@ proc_iterate_over_mappings (func)
   int funcstat = 0;
   struct prmap *prmaps;
   struct prmap *prmap;
+  struct procinfo *pi;
 
-  if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
+  pi = current_procinfo;
+
+  if (ioctl (pi->fd, PIOCNMAP, &nmap) == 0)
     {
       prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
-      if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
+      if (ioctl (pi->fd, PIOCMAP, prmaps) == 0)
 	{
 	  for (prmap = prmaps; prmap -> pr_size && funcstat == 0; ++prmap)
 	    {
-	      fd = proc_address_to_fd ((CORE_ADDR) prmap -> pr_vaddr, 0);
+	      fd = proc_address_to_fd (pi, (CORE_ADDR) prmap -> pr_vaddr, 0);
 	      funcstat = (*func) (fd, (CORE_ADDR) prmap -> pr_vaddr);
 	      close (fd);
 	    }
@@ -1511,11 +1697,14 @@ proc_base_address (addr)
   struct prmap *prmaps;
   struct prmap *prmap;
   CORE_ADDR baseaddr = 0;
+  struct procinfo *pi;
 
-  if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
+  pi = current_procinfo;
+
+  if (ioctl (pi->fd, PIOCNMAP, &nmap) == 0)
     {
       prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
-      if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
+      if (ioctl (pi->fd, PIOCMAP, prmaps) == 0)
 	{
 	  for (prmap = prmaps; prmap -> pr_size; ++prmap)
 	    {
@@ -1541,7 +1730,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	int proc_address_to_fd (CORE_ADDR addr, complain)
+	int proc_address_to_fd (struct procinfo *pi, CORE_ADDR addr, complain)
 
 DESCRIPTION
 
@@ -1554,21 +1743,19 @@ DESCRIPTION
 */
 
 static int
-proc_address_to_fd (addr, complain)
+proc_address_to_fd (pi, addr, complain)
+     struct procinfo *pi;
      CORE_ADDR addr;
      int complain;
 {
   int fd = -1;
 
-  if (pi.valid)
+  if ((fd = ioctl (pi->fd, PIOCOPENM, (caddr_t *) &addr)) < 0)
     {
-      if ((fd = ioctl (pi.fd, PIOCOPENM, (caddr_t *) &addr)) < 0)
+      if (complain)
 	{
-	  if (complain)
-	    {
-	      print_sys_errmsg (pi.pathname, errno);
-	      warning ("can't find mapped file for address 0x%x", addr);
-	    }
+	  print_sys_errmsg (pi->pathname, errno);
+	  warning ("can't find mapped file for address 0x%x", addr);
 	}
     }
   return (fd);
@@ -1707,30 +1894,41 @@ do_attach (pid)
      int pid;
 {
   int result;
+  struct procinfo *pi;
 
-  if (!open_proc_file (pid, &pi, O_RDWR))
+  pi = (struct procinfo *) xmalloc (sizeof (struct procinfo));
+
+  if (!open_proc_file (pid, pi, O_RDWR))
     {
-      perror_with_name (pi.pathname);
+      free (pi);
+      perror_with_name (pi->pathname);
       /* NOTREACHED */
     }
   
+  /* Add new process to process info list */
+
+  pi->next = procinfo_list;
+  procinfo_list = pi;
+
+  add_fd (pi);			/* Add to list for poll/select */
+
   /*  Get current status of process and if it is not already stopped,
       then stop it.  Remember whether or not it was stopped when we first
       examined it. */
   
-  if (ioctl (pi.fd, PIOCSTATUS, &pi.prstatus) < 0)
+  if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
-      close_proc_file (&pi);
+      print_sys_errmsg (pi->pathname, errno);
+      close_proc_file (pi);
       error ("PIOCSTATUS failed");
     }
-  if (pi.prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
+  if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
     {
-      pi.was_stopped = 1;
+      pi->was_stopped = 1;
     }
   else
     {
-      pi.was_stopped = 0;
+      pi->was_stopped = 0;
       if (1 || query ("Process is currently running, stop it? "))
 	{
 	  /* Make it run again when we close it.  */
@@ -1738,26 +1936,26 @@ do_attach (pid)
 	  {
 	      long pr_flags;
 	      pr_flags = PR_RLC;
-	      result = ioctl (pi.fd, PIOCSET, &pr_flags);
+	      result = ioctl (pi->fd, PIOCSET, &pr_flags);
 	  }
 #else
 #if defined (PIOCSRLC)	/* Original method */
-	  result = ioctl (pi.fd, PIOCSRLC, 0);
+	  result = ioctl (pi->fd, PIOCSRLC, 0);
 #endif
 #endif
 	  if (result < 0)
 	    {
-	      print_sys_errmsg (pi.pathname, errno);
-	      close_proc_file (&pi);
+	      print_sys_errmsg (pi->pathname, errno);
+	      close_proc_file (pi);
 	      error ("PIOCSRLC or PIOCSET failed");
 	    }
-	  if (ioctl (pi.fd, PIOCSTOP, &pi.prstatus) < 0)
+	  if (ioctl (pi->fd, PIOCSTOP, &pi->prstatus) < 0)
 	    {
-	      print_sys_errmsg (pi.pathname, errno);
-	      close_proc_file (&pi);
+	      print_sys_errmsg (pi->pathname, errno);
+	      close_proc_file (pi);
 	      error ("PIOCSTOP failed");
 	    }
-	  pi.nopass_next_sigstop = 1;
+	  pi->nopass_next_sigstop = 1;
 	}
       else
 	{
@@ -1768,24 +1966,24 @@ do_attach (pid)
   /*  Remember some things about the inferior that we will, or might, change
       so that we can restore them when we detach. */
   
-  ioctl (pi.fd, PIOCGTRACE, &pi.saved_trace);
-  ioctl (pi.fd, PIOCGHOLD, &pi.saved_sighold);
-  ioctl (pi.fd, PIOCGFAULT, &pi.saved_fltset);
-  ioctl (pi.fd, PIOCGENTRY, &pi.saved_entryset);
-  ioctl (pi.fd, PIOCGEXIT, &pi.saved_exitset);
+  ioctl (pi->fd, PIOCGTRACE, &pi->saved_trace);
+  ioctl (pi->fd, PIOCGHOLD, &pi->saved_sighold);
+  ioctl (pi->fd, PIOCGFAULT, &pi->saved_fltset);
+  ioctl (pi->fd, PIOCGENTRY, &pi->saved_entryset);
+  ioctl (pi->fd, PIOCGEXIT, &pi->saved_exitset);
   
   /* Set up trace and fault sets, as gdb expects them. */
   
-  memset (&pi.prrun, 0, sizeof (pi.prrun));
-  prfillset (&pi.prrun.pr_trace);
-  procfs_notice_signals ();
-  prfillset (&pi.prrun.pr_fault);
-  prdelset (&pi.prrun.pr_fault, FLTPAGE);
-  if (ioctl (pi.fd, PIOCSFAULT, &pi.prrun.pr_fault))
+  memset (&pi->prrun, 0, sizeof (pi->prrun));
+  prfillset (&pi->prrun.pr_trace);
+  procfs_notice_signals (pid);
+  prfillset (&pi->prrun.pr_fault);
+  prdelset (&pi->prrun.pr_fault, FLTPAGE);
+  if (ioctl (pi->fd, PIOCSFAULT, &pi->prrun.pr_fault))
     {
       print_sys_errmsg ("PIOCSFAULT failed", errno);
     }
-  if (ioctl (pi.fd, PIOCSTRACE, &pi.prrun.pr_trace))
+  if (ioctl (pi->fd, PIOCSTRACE, &pi->prrun.pr_trace))
     {
       print_sys_errmsg ("PIOCSTRACE failed", errno);
     }
@@ -1827,52 +2025,55 @@ do_detach (signal)
      int signal;
 {
   int result;
+  struct procinfo *pi;
+
+  pi = current_procinfo;
 
   if (signal)
     {
-      set_proc_siginfo (&pi, signal);
+      set_proc_siginfo (pi, signal);
     }
-  if (ioctl (pi.fd, PIOCSEXIT, &pi.saved_exitset) < 0)
+  if (ioctl (pi->fd, PIOCSEXIT, &pi->saved_exitset) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
+      print_sys_errmsg (pi->pathname, errno);
       printf ("PIOCSEXIT failed.\n");
     }
-  if (ioctl (pi.fd, PIOCSENTRY, &pi.saved_entryset) < 0)
+  if (ioctl (pi->fd, PIOCSENTRY, &pi->saved_entryset) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
+      print_sys_errmsg (pi->pathname, errno);
       printf ("PIOCSENTRY failed.\n");
     }
-  if (ioctl (pi.fd, PIOCSTRACE, &pi.saved_trace) < 0)
+  if (ioctl (pi->fd, PIOCSTRACE, &pi->saved_trace) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
+      print_sys_errmsg (pi->pathname, errno);
       printf ("PIOCSTRACE failed.\n");
     }
-  if (ioctl (pi.fd, PIOCSHOLD, &pi.saved_sighold) < 0)
+  if (ioctl (pi->fd, PIOCSHOLD, &pi->saved_sighold) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
+      print_sys_errmsg (pi->pathname, errno);
       printf ("PIOSCHOLD failed.\n");
     }
-  if (ioctl (pi.fd, PIOCSFAULT, &pi.saved_fltset) < 0)
+  if (ioctl (pi->fd, PIOCSFAULT, &pi->saved_fltset) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
+      print_sys_errmsg (pi->pathname, errno);
       printf ("PIOCSFAULT failed.\n");
     }
-  if (ioctl (pi.fd, PIOCSTATUS, &pi.prstatus) < 0)
+  if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
     {
-      print_sys_errmsg (pi.pathname, errno);
+      print_sys_errmsg (pi->pathname, errno);
       printf ("PIOCSTATUS failed.\n");
     }
   else
     {
-      if (signal || (pi.prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)))
+      if (signal || (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)))
 	{
-	  if (signal || !pi.was_stopped ||
+	  if (signal || !pi->was_stopped ||
 	      query ("Was stopped when attached, make it runnable again? "))
 	    {
 	      /* Clear any fault that might have stopped it.  */
-	      if (ioctl (pi.fd, PIOCCFAULT, 0))
+	      if (ioctl (pi->fd, PIOCCFAULT, 0))
   		{
-  		  print_sys_errmsg (pi.pathname, errno);
+  		  print_sys_errmsg (pi->pathname, errno);
 		  printf ("PIOCCFAULT failed.\n");
   		}
 
@@ -1881,22 +2082,22 @@ do_detach (signal)
 	      {
 		  long pr_flags;
 		  pr_flags = PR_RLC;
-		  result = ioctl (pi.fd, PIOCSET, &pr_flags);
+		  result = ioctl (pi->fd, PIOCSET, &pr_flags);
 	      }
 #else
 #if defined (PIOCSRLC)	/* Original method */
-	      result = ioctl (pi.fd, PIOCSRLC, 0);
+	      result = ioctl (pi->fd, PIOCSRLC, 0);
 #endif
 #endif
 	      if (result)
 		{
-		  print_sys_errmsg (pi.pathname, errno);
+		  print_sys_errmsg (pi->pathname, errno);
 		  printf ("PIOCSRLC or PIOCSET failed.\n");
 		}
 	    }
 	}
     }
-  close_proc_file (&pi);
+  close_proc_file (pi);
   attach_flag = 0;
 }
 
@@ -1911,7 +2112,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	int procfs_wait (int *statloc)
+	int procfs_wait (int pid, int *statloc)
 
 DESCRIPTION
 
@@ -1941,7 +2142,8 @@ NOTES
  */
 
 static int
-procfs_wait (statloc)
+procfs_wait (pid, statloc)
+     int pid;
      int *statloc;
 {
   short what;
@@ -1949,24 +2151,73 @@ procfs_wait (statloc)
   int statval = 0;
   int checkerr = 0;
   int rtnval = -1;
-  
-  if (ioctl (pi.fd, PIOCSTATUS, &pi.prstatus) < 0)
+  struct procinfo *pi;
+
+  if (pid != -1)		/* Non-specific process? */
+    pi = NULL;
+  else
+    for (pi = procinfo_list; pi; pi = pi->next)
+      if (pi->had_event)
+	break;
+
+wait_again:
+
+  if (!pi)
     {
-      checkerr++;
-    }
-  else if (!(pi.prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)))
-    {
+      int num_fds;
+      int i;
+
       if (attach_flag)
 	set_sigint_trap();	/* Causes SIGINT to be passed on to the
 				   attached process. */
 
-      if (ioctl (pi.fd, PIOCWSTOP, &pi.prstatus) < 0)
+      num_fds = poll (poll_list, num_poll_list, -1);
+  
+      if (attach_flag)
+	clear_sigint_trap();
+
+      if (num_fds <= 0)
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("poll failed, returned %d\n", num_fds);
+	}
+
+      for (i = 0; i < num_poll_list && num_fds > 0; i++)
+	{
+	  if ((poll_list[i].revents & (POLLPRI|POLLERR|POLLHUP|POLLNVAL)) == 0)
+	    continue;
+	  for (pi = procinfo_list; pi; pi = pi->next)
+	    {
+	      if (poll_list[i].fd == pi->fd)
+		{
+		  if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
+		    checkerr++;
+		  /*		    perror_with_name (pi->pathname);*/
+		  num_fds--;
+		  pi->had_event = 1;
+		  break;
+		}
+	    }
+	  if (!pi)
+	    error ("procfs_wait: Couldn't find procinfo for fd %d\n",
+		   poll_list[i].fd);
+	}
+    }
+
+  if (pid != -1)
+    for (pi = procinfo_list; pi; pi = pi->next)
+      if (pi->pid == pid && pi->had_event)
+	break;
+
+  if (!pi && !checkerr)
+    goto wait_again;
+
+  if (!checkerr && !(pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)))
+    {
+      if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
 	{
 	  checkerr++;
 	}
-
-      if (attach_flag)
-	clear_sigint_trap();
     }    
   if (checkerr)
     {
@@ -1975,55 +2226,86 @@ procfs_wait (statloc)
 	  rtnval = wait (&statval);
 	  if (rtnval != inferior_pid)
 	    {
-	      print_sys_errmsg (pi.pathname, errno);
+	      print_sys_errmsg (pi->pathname, errno);
 	      error ("PIOCWSTOP, wait failed, returned %d", rtnval);
 	      /* NOTREACHED */
 	    }
 	}
       else
 	{
-	  print_sys_errmsg (pi.pathname, errno);
+	  print_sys_errmsg (pi->pathname, errno);
 	  error ("PIOCSTATUS or PIOCWSTOP failed.");
 	  /* NOTREACHED */
 	}
     }
-  else if (pi.prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
+  else if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
     {
-      rtnval = pi.prstatus.pr_pid;
-      why = pi.prstatus.pr_why;
-      what = pi.prstatus.pr_what;
-      if (why == PR_SIGNALLED)
+      rtnval = pi->prstatus.pr_pid;
+      why = pi->prstatus.pr_why;
+      what = pi->prstatus.pr_what;
+
+      switch (why)
 	{
+	case PR_SIGNALLED:
 	  statval = (what << 8) | 0177;
-	}
-      else if ((why == PR_SYSEXIT)
-	       &&
-	       (
+	  break;
+	case PR_SYSEXIT:
+	  switch (what)
+	    {
 #ifdef SYS_exec
-		what == SYS_exec
-#else
-		0 == 0
+	    case SYS_exec:
 #endif
 #ifdef SYS_execve
-		|| what == SYS_execve
+	    case SYS_execve:
 #endif
 #ifdef SYS_execv
-		|| what == SYS_execv
+	    case SYS_execv:
 #endif
-		))
-	{
-	  statval = (SIGTRAP << 8) | 0177;
-	}
-      else if (why == PR_REQUESTED)
-	{
+	      statval = (SIGTRAP << 8) | 0177;
+	      break;
+#ifdef SYS_sproc
+	    case SYS_sproc:
+/* We've just detected the completion of an sproc system call.  Now we need to
+   setup a procinfo struct for this thread, and notify the thread system of the
+   new arrival.  */
+
+/* If sproc failed, then nothing interesting happened.  Continue the process and
+   go back to sleep. */
+
+	      if (pi->prstatus.pr_errno != 0)
+		{
+		  pi->prrun.pr_flags &= PRSTEP;
+		  pi->prrun.pr_flags |= PRCFAULT;
+
+		  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+		    perror_with_name (pi->pathname);
+
+		  goto wait_again;
+		}
+
+/* At this point, the new thread is stopped at it's first instruction, and
+   the parent is stopped at the exit from sproc.  */
+
+/* Notify the caller of the arrival of a new thread. */
+	      create_procinfo (pi->prstatus.pr_rval1);
+
+	      rtnval = pi->prstatus.pr_rval1;
+	      statval = (SIGTRAP << 8) | 0177;
+
+	      break;
+#endif /* SYS_sproc */
+
+	    default:
+	      error ("PIOCSTATUS (PR_SYSEXIT):  Unknown system call %d", what); 
+	    }
+	  break;
+	case PR_REQUESTED:
 	  statval = (SIGSTOP << 8) | 0177;
-	}
-      else if (why == PR_JOBCONTROL)
-	{
+	  break;
+	case PR_JOBCONTROL:
 	  statval = (what << 8) | 0177;
-	}
-      else if (why == PR_FAULTED)
-	{
+	  break;
+	case PR_FAULTED:
 	  switch (what)
 	    {
 	    case FLTPRIV:
@@ -2046,23 +2328,32 @@ procfs_wait (statloc)
 	      break;
 	    case FLTPAGE:		/* Recoverable page fault */
 	    default:
-	      rtnval = -1;
 	      error ("PIOCWSTOP, unknown why %d, what %d", why, what);
-	      /* NOTREACHED */
 	    }
-	}
-      else
-	{
-	  rtnval = -1;
+	  break;
+	default:
 	  error ("PIOCWSTOP, unknown why %d, what %d", why, what);
-	  /* NOTREACHED */
 	}
+/* Stop all the other threads when any of them stops.  */
+
+      {
+	struct procinfo *procinfo;
+
+	for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
+	  {
+	    if (!procinfo->had_event)
+	      if (ioctl (procinfo->fd, PIOCSTOP, &procinfo->prstatus) < 0)
+		{
+		  print_sys_errmsg (procinfo->pathname, errno);
+		  error ("PIOCSTOP failed");
+		}
+	  }
+      }
     }
   else
     {
       error ("PIOCWSTOP, stopped for unknown/unhandled reason, flags %#x", 
-	     pi.prstatus.pr_flags);
-	  /* NOTREACHED */
+	     pi->prstatus.pr_flags);
     }
 
   if (statloc)
@@ -2077,6 +2368,7 @@ procfs_wait (statloc)
       return rtnval;
     }
 
+  pi->had_event = 0;		/* Indicate that we've seen this one */
   return (rtnval);
 }
 
@@ -2126,27 +2418,24 @@ set_proc_siginfo (pip, signo)
   struct siginfo newsiginfo;
   struct siginfo *sip;
 
-  if (pip -> valid)
+  if (signo == pip -> prstatus.pr_info.si_signo)
     {
-      if (signo == pip -> prstatus.pr_info.si_signo)
-	{
-	  sip = &pip -> prstatus.pr_info;
-	}
-      else
-	{
-	  memset ((char *) &newsiginfo, 0, sizeof (newsiginfo));
-	  sip = &newsiginfo;
-	  sip -> si_signo = signo;
-	  sip -> si_code = 0;
-	  sip -> si_errno = 0;
-	  sip -> si_pid = getpid ();
-	  sip -> si_uid = getuid ();
-	}
-      if (ioctl (pip -> fd, PIOCSSIG, sip) < 0)
-	{
-	  print_sys_errmsg (pip -> pathname, errno);
-	  warning ("PIOCSSIG failed");
-	}
+      sip = &pip -> prstatus.pr_info;
+    }
+  else
+    {
+      memset ((char *) &newsiginfo, 0, sizeof (newsiginfo));
+      sip = &newsiginfo;
+      sip -> si_signo = signo;
+      sip -> si_code = 0;
+      sip -> si_errno = 0;
+      sip -> si_pid = getpid ();
+      sip -> si_uid = getuid ();
+    }
+  if (ioctl (pip -> fd, PIOCSSIG, sip) < 0)
+    {
+      print_sys_errmsg (pip -> pathname, errno);
+      warning ("PIOCSSIG failed");
     }
 }
 
@@ -2161,9 +2450,12 @@ procfs_resume (pid, step, signo)
      int signo;
 {
   int signal_to_pass;
+  struct procinfo *pi, *procinfo;
+
+  pi = find_procinfo (pid == -1 ? inferior_pid : pid, 0);
 
   errno = 0;
-  pi.prrun.pr_flags = PRSTRACE | PRSFAULT | PRCFAULT;
+  pi->prrun.pr_flags = PRSTRACE | PRSFAULT | PRCFAULT;
 
 #if 0
   /* It should not be necessary.  If the user explicitly changes the value,
@@ -2180,12 +2472,12 @@ procfs_resume (pid, step, signo)
    random garbage.  We have to rely on the fact that PC and nPC have been
    written previously via PIOCSREG during a register flush. */
 
-  pi.prrun.pr_vaddr = (caddr_t) *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
-  pi.prrun.pr_flags != PRSVADDR;
+  pi->prrun.pr_vaddr = (caddr_t) *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
+  pi->prrun.pr_flags != PRSVADDR;
 #endif
 #endif
 
-  if (signo == SIGSTOP && pi.nopass_next_sigstop)
+  if (signo == SIGSTOP && pi->nopass_next_sigstop)
     /* When attaching to a child process, if we forced it to stop with
        a PIOCSTOP, then we will have set the nopass_next_sigstop flag.
        Upon resuming the first time after such a stop, we explicitly
@@ -2198,8 +2490,8 @@ procfs_resume (pid, step, signo)
        an inferior to continue running at the same time as gdb.  (FIXME?)  */
     signal_to_pass = 0;
   else if (signo == SIGTSTP
-	   && pi.prstatus.pr_cursig == SIGTSTP
-	   && pi.prstatus.pr_action.sa_handler == SIG_DFL)
+	   && pi->prstatus.pr_cursig == SIGTSTP
+	   && pi->prstatus.pr_action.sa_handler == SIG_DFL)
 
     /* We are about to pass the inferior a SIGTSTP whose action is
        SIG_DFL.  The SIG_DFL action for a SIGTSTP is to stop
@@ -2221,22 +2513,48 @@ procfs_resume (pid, step, signo)
 
   if (signal_to_pass)
     {
-      set_proc_siginfo (&pi, signal_to_pass);
+      set_proc_siginfo (pi, signal_to_pass);
     }
   else
     {
-      pi.prrun.pr_flags |= PRCSIG;
+      pi->prrun.pr_flags |= PRCSIG;
     }
-  pi.nopass_next_sigstop = 0;
+  pi->nopass_next_sigstop = 0;
   if (step)
     {
-      pi.prrun.pr_flags |= PRSTEP;
+      pi->prrun.pr_flags |= PRSTEP;
     }
-  if (ioctl (pi.fd, PIOCRUN, &pi.prrun) != 0)
+  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
     {
-      perror_with_name (pi.pathname);
+      perror_with_name (pi->pathname);
       /* NOTREACHED */
     }
+
+  pi->had_event = 0;
+
+  /* Continue all the other threads that haven't had an event of
+     interest.  */
+
+  if (pid == -1)
+    for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
+      {
+	if (pi != procinfo && !procinfo->had_event)
+	  {
+	    procinfo->prrun.pr_flags &= PRSTEP;
+	    procinfo->prrun.pr_flags |= PRCFAULT | PRCSIG;
+	    ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus);
+	    if (ioctl (procinfo->fd, PIOCRUN, &procinfo->prrun) < 0)
+	      {
+		if (ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus) < 0)
+		  {
+		    fprintf(stderr, "PIOCSTATUS failed, errno=%d\n", errno);
+		  }
+		print_sys_errmsg (procinfo->pathname, errno);
+		error ("PIOCRUN failed");
+	      }
+	    ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus);
+	  }
+      }
 }
 
 /*
@@ -2261,14 +2579,18 @@ static void
 procfs_fetch_registers (regno)
      int regno;
 {
-  if (ioctl (pi.fd, PIOCGREG, &pi.gregset) != -1)
+  struct procinfo *pi;
+
+  pi = current_procinfo;
+
+  if (ioctl (pi->fd, PIOCGREG, &pi->gregset) != -1)
     {
-      supply_gregset (&pi.gregset);
+      supply_gregset (&pi->gregset);
     }
 #if defined (FP0_REGNUM)
-  if (ioctl (pi.fd, PIOCGFPREG, &pi.fpregset) != -1)
+  if (ioctl (pi->fd, PIOCGFPREG, &pi->fpregset) != -1)
     {
-      supply_fpregset (&pi.fpregset);
+      supply_fpregset (&pi->fpregset);
     }
 #endif
 }
@@ -2277,11 +2599,12 @@ procfs_fetch_registers (regno)
 
 LOCAL FUNCTION
 
-	proc_init_failed - called whenever /proc access initialization fails
+	proc_init_failed - called whenever /proc access initialization
+fails
 
 SYNOPSIS
 
-	static void proc_init_failed (char *why)
+	static void proc_init_failed (struct procinfo *pi, char *why)
 
 DESCRIPTION
 
@@ -2292,12 +2615,13 @@ DESCRIPTION
  */
 
 static void
-proc_init_failed (why)
+proc_init_failed (pi, why)
+     struct procinfo *pi;
      char *why;
 {
-  print_sys_errmsg (pi.pathname, errno);
-  kill (pi.pid, SIGKILL);
-  close_proc_file (&pi);
+  print_sys_errmsg (pi->pathname, errno);
+  kill (pi->pid, SIGKILL);
+  close_proc_file (pi);
   error (why);
   /* NOTREACHED */
 }
@@ -2325,18 +2649,24 @@ static void
 close_proc_file (pip)
      struct procinfo *pip;
 {
-  pip -> pid = 0;
-  if (pip -> valid)
-    {
-      close (pip -> fd);
-    }
-  pip -> fd = -1;
-  if (pip -> pathname)
-    {
-      free (pip -> pathname);
-      pip -> pathname = NULL;
-    }
-  pip -> valid = 0;
+  struct procinfo *procinfo;
+
+  remove_fd (pip);		/* Remove fd from poll/select list */
+
+  close (pip -> fd);
+
+  free (pip -> pathname);
+
+  /* Unlink pip from the procinfo chain.  Note pip might not be on the list. */
+
+  if (procinfo_list == pip)
+    procinfo_list = pip->next;
+  else
+    for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
+      if (procinfo->next == pip)
+	procinfo->next = pip->next;
+
+  free (pip);
 }
 
 /*
@@ -2369,22 +2699,16 @@ open_proc_file (pid, pip, mode)
      struct procinfo *pip;
      int mode;
 {
-  pip -> valid = 0;		/* FIXME, what is this? ?!  */
-  if (pip -> valid)
-    {
-      close (pip -> fd);
-    }
-  if (pip -> pathname == NULL)
-    {
-      pip -> pathname = xmalloc (32);
-    }
+  pip -> next = NULL;
+  pip -> had_event = 0;
+  pip -> pathname = xmalloc (32);
+  pip -> pid = pid;
+
   sprintf (pip -> pathname, PROC_NAME_FMT, pid);
-  if ((pip -> fd = open (pip -> pathname, mode)) >= 0)
-    {
-      pip -> valid = 1;
-      pip -> pid = pid;
-    }
-  return (pip -> valid);
+  if ((pip -> fd = open (pip -> pathname, mode)) < 0)
+    return 0;
+
+  return 1;
 }
 
 static char *
@@ -2874,7 +3198,6 @@ info_proc (args, from_tty)
      int from_tty;
 {
   int pid;
-  struct procinfo pii;
   struct procinfo *pip;
   struct cleanup *old_chain;
   char **argv;
@@ -2892,9 +3215,10 @@ info_proc (args, from_tty)
 
   old_chain = make_cleanup (null_cleanup, 0);
 
-  /* Default to using the current inferior if no pid specified */
+  /* Default to using the current inferior if no pid specified.  Note
+     that inferior_pid may be 0, hence we set okerr.  */
 
-  pip = &pi;
+  pip = find_procinfo (inferior_pid, 1);
 
   if (args != NULL)
     {
@@ -2952,11 +3276,12 @@ info_proc (args, from_tty)
 	      summary = 0;
 	      times = 1;
 	    }
-	  else if ((pii.pid = atoi (*argv)) > 0)
+	  else if ((pid = atoi (*argv)) > 0)
 	    {
-	      pid = pii.pid;
-	      pip = &pii;
-	      memset (&pii, 0, sizeof (pii));
+	      pip = (struct procinfo *) xmalloc (sizeof (struct procinfo));
+	      memset (pip, 0, sizeof (*pip));
+
+	      pip->pid = pid;
 	      if (!open_proc_file (pid, pip, O_RDONLY))
 		{
 		  perror_with_name (pip -> pathname);
@@ -2975,7 +3300,7 @@ info_proc (args, from_tty)
   /* If we don't have a valid open process at this point, then we have no
      inferior or didn't specify a specific pid. */
 
-  if (!pip -> valid)
+  if (!pip)
     {
       error ("\
 No process.  Start debugging a program or specify an explicit process ID.");
@@ -3026,6 +3351,64 @@ No process.  Start debugging a program or specify an explicit process ID.");
   do_cleanups (old_chain);
 }
 
+/*
+
+LOCAL FUNCTION
+
+	procfs_set_sproc_trap -- arrange for exec'd child stop on sproc
+
+SYNOPSIS
+
+	void procfs_set_sproc_trap (void)
+
+DESCRIPTION
+
+	This function sets up a trap on sproc system call exits so that we can
+	detect the arrival of a new thread.  We are called with the child
+	stopped prior to it's first instruction.
+
+	Also note that we turn on the inherit-on-fork flag in the child process
+	so that any grand-children start with all tracing flags set.
+ */
+
+static void
+procfs_set_sproc_trap (pi)
+     struct procinfo *pi;
+{
+  sysset_t exitset;
+  
+  if (ioctl (pi->fd, PIOCGEXIT, &exitset) < 0)
+    {
+      print_sys_errmsg (pi->pathname, errno);
+      error ("PIOCGEXIT failed");
+    }
+
+#ifdef SYS_sproc
+  praddset (&exitset, SYS_sproc);
+#endif
+
+  if (ioctl (pi->fd, PIOCSEXIT, &exitset) < 0)
+    {
+      print_sys_errmsg (pi->pathname, errno);
+      error ("PIOCSEXIT failed");
+    }
+
+  /* Turn on inherit-on-fork flag so that all grand-children of gdb start with
+     tracing flags set. */
+
+#ifdef PIOCSET			/* New method */
+  {
+      long pr_flags;
+      pr_flags = PR_FORK;
+      ioctl (pi->fd, PIOCSET, &pr_flags);
+  }
+#else
+#ifdef PIOCSFORK		/* Original method */
+  ioctl (pi->fd, PIOCSFORK, NULL);
+#endif
+#endif
+}
+
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
@@ -3038,6 +3421,11 @@ procfs_create_inferior (exec_file, allargs, env)
 		 proc_set_exec_trap, procfs_init_inferior);
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
+
+  /* Setup traps on exit from sproc() */
+
+  procfs_set_sproc_trap(current_procinfo);
+
   proceed ((CORE_ADDR) -1, 0, 0);
 }
 

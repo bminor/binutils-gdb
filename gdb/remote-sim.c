@@ -345,7 +345,8 @@ gdbsim_resume (pid, step, siggnal)
    just as `wait' would.  */
 
 static int
-gdbsim_wait (status)
+gdbsim_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   if (sr_get_debug ())

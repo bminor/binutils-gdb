@@ -261,6 +261,9 @@ child_resume (pid, step, signal)
 {
   errno = 0;
 
+  if (pid == -1)
+    pid = inferior_pid;
+
   /* An address of (PTRACE_ARG3_TYPE) 1 tells ptrace to continue from where
      it was. (If GDB wanted it to start some other way, we have already
      written a new PC value to the child.)  */

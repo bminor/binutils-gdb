@@ -306,7 +306,7 @@ resume (step, sig)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  target_resume (inferior_pid, step, sig);
+  target_resume (-1, step, sig);
   discard_cleanups (old_cleanups);
 }
 
@@ -503,7 +503,7 @@ wait_for_inferior ()
       flush_cached_frames ();
       registers_changed ();
 
-      pid = target_wait (&w);
+      pid = target_wait (-1, &w);
 
 #ifdef SIGTRAP_STOP_AFTER_LOAD
 
@@ -559,7 +559,41 @@ wait_for_inferior ()
 #endif
 	  break;
 	}
-      
+
+      stop_signal = WSTOPSIG (w);
+
+      if (pid != inferior_pid)
+	{
+	  int save_pid = inferior_pid;
+
+	  inferior_pid = pid;	/* Setup for target memory/regs */
+	  registers_changed ();
+	  stop_pc = read_pc ();
+	  inferior_pid = save_pid;
+	  registers_changed ();
+	}
+      else
+	stop_pc = read_pc ();
+
+      if (stop_signal == SIGTRAP
+	  && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+	if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
+	  {
+	    /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
+	    if (breakpoints_inserted)
+	      {
+		remove_breakpoints ();
+		target_resume (pid, 1, 0); /* Single step */
+		target_wait (pid, NULL);
+		insert_breakpoints ();
+	      }
+	    target_resume (-1, 0, 0);
+	    continue;
+	  }
+	else
+	  if (pid != inferior_pid)
+	    goto switch_thread;
+
       if (pid != inferior_pid)
 	{
 	  int printed = 0;
@@ -569,13 +603,11 @@ wait_for_inferior ()
 	      fprintf (stderr, "[New %s]\n", target_pid_to_str (pid));
 	      add_thread (pid);
 
-	      target_resume (pid, 0, 0);
+	      target_resume (-1, 0, 0);
 	      continue;
 	    }
 	  else
 	    {
-	      stop_signal = WSTOPSIG (w);
-
 	      if (stop_signal >= NSIG || signal_print[stop_signal])
 		{
 		  char *signame;
@@ -593,8 +625,11 @@ wait_for_inferior ()
 		  fflush (stdout);
 		}
 
-	      if (stop_signal >= NSIG || signal_stop[stop_signal])
+	      if (stop_signal == SIGTRAP
+		  || stop_signal >= NSIG
+		  || signal_stop[stop_signal])
 		{
+switch_thread:
 		  inferior_pid = pid;
 		  printf_filtered ("[Switching to %s]\n", target_pid_to_str (pid));
 
@@ -624,11 +659,13 @@ wait_for_inferior ()
 		  if (signal_program[stop_signal] == 0)
 		    stop_signal = 0;
 
-		  target_resume (pid, 0, stop_signal);
+		  target_resume (-1, 0, stop_signal);
 		  continue;
 		}
 	    }
 	}
+
+same_pid:
 
 #ifdef NO_SINGLE_STEP
       if (one_stepped)
@@ -644,7 +681,6 @@ wait_for_inferior ()
 	  continue;
 	}
 
-      stop_pc = read_pc ();
       set_current_frame ( create_new_frame (read_fp (), stop_pc));
 
       stop_frame_address = FRAME_FP (get_current_frame ());
@@ -673,8 +709,6 @@ wait_for_inferior ()
 	 (set another_trap to 1 to single step once)
 	 3) set random_signal to 1, and the decision between 1 and 2
 	 will be made according to the signal handling tables.  */
-      
-      stop_signal = WSTOPSIG (w);
       
       /* First, distinguish signals caused by the debugger from signals
 	 that have to do with the program's own actions.
@@ -1598,7 +1632,7 @@ handle_command (args, from_tty)
       argv++;
     }
 
-  target_notice_signals();
+  target_notice_signals(inferior_pid);
 
   if (from_tty)
     {

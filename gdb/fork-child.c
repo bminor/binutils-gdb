@@ -238,11 +238,15 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
   /* Restore our environment in case a vforked child clob'd it.  */
   environ = save_our_env;
 
+  init_thread_list();
+
   /* Now that we have a child process, make it our target, and
      initialize anything target-vector-specific that needs initializing.  */
   (*init_trace_fun)(pid);
 
-  init_thread_list();
+#ifdef CREATE_INFERIOR_HOOK
+  CREATE_INFERIOR_HOOK (pid);
+#endif  
 
   /* The process was started by the fork that created it,
      but it will have stopped one instruction after execing the shell.

@@ -210,7 +210,8 @@ sim_detach (args, from_tty)
    storing status in STATUS just as `wait' would.  */
 
 int
-sim_wait (status)
+sim_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   *status = sim_stop_signal ();

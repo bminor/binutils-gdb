@@ -742,7 +742,7 @@ solib_create_inferior_hook()
   stop_signal = 0;
   do
     {
-      target_resume (inferior_pid, 0, stop_signal);
+      target_resume (-1, 0, stop_signal);
       wait_for_inferior ();
     }
   while (stop_signal != SIGTRAP);

@@ -869,7 +869,7 @@ restore_pc_queue (fsr)
   for (insn_count = 0; insn_count < 3; insn_count++)
     {
       resume (1, 0);
-      target_wait(&w);
+      target_wait(inferior_pid, &w);
 
       if (!WIFSTOPPED (w))
         {
