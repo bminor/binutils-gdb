@@ -1,3 +1,21 @@
+Thu Oct 24 04:13:20 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarf.h: New file for dwarf support.  Copied from gcc2
+	distribution.
+
+Wed Oct 16 13:31:45 1991  John Gilmore  (gnu at cygnus.com)
+
+	* aout64.h:  Remove PAGE_SIZE defines; they are target-dependent.
+	Add N_FN_SEQ for N_FN symbol type used on Sequent machines.
+	* stab.def:  Include N_FN_SEQ in table.
+	* bout.h:  External formats of structures use unsigned chars.
+
+Fri Oct 11 12:40:43 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* bfd.h:upgrade from bfd.c
+	* internalcoff.h: add n_name, n_zeroes and n_offset macros
+	* amdcoff.h: Define OMAGIC and AOUTHDRSZ.
+
 Fri Oct 11 10:58:06 1991  Per Bothner  (bothner at cygnus.com)
 
 	* a.out.host.h: Change SEGMENT_SIZE to 0x1000 for Sony.
