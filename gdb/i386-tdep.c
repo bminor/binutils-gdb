@@ -439,6 +439,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 			  struct i386_frame_cache *cache)
 {
   unsigned char op;
+  int skip = 0;
 
   if (current_pc <= pc)
     return current_pc;
@@ -456,25 +457,61 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
       if (current_pc <= pc + 1)
 	return current_pc;
 
-      /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
       op = read_memory_unsigned_integer (pc + 1, 1);
+
+      /* Check for some special instructions that might be migrated
+	 by GCC into the prologue.  We check for
+
+	    xorl %ebx, %ebx
+	    xorl %ecx, %ecx
+	    xorl %edx, %edx
+
+	 and the equivalent
+
+	    subl %ebx, %ebx
+	    subl %ecx, %ecx
+	    subl %edx, %edx
+
+	 Make sure we only skip these instructions if we later see the
+	 `movl %esp, %ebp' that actually sets up the frame.  */
+      while (op == 0x29 || op == 0x31)
+	{
+	  op = read_memory_unsigned_integer (pc + skip + 2, 1);
+	  switch (op)
+	    {
+	    case 0xdb:	/* %ebx */
+	    case 0xc9:	/* %ecx */
+	    case 0xd2:	/* %edx */
+	      skip += 2;
+	      break;
+	    default:
+	      return pc + 1;
+	    }
+
+	  op = read_memory_unsigned_integer (pc + skip + 1, 1);
+	}
+
+      /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
       switch (op)
 	{
 	case 0x8b:
-	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + skip + 2, 1) != 0xec)
 	    return pc + 1;
 	  break;
 	case 0x89:
-	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xe5)
+	  if (read_memory_unsigned_integer (pc + skip + 2, 1) != 0xe5)
 	    return pc + 1;
 	  break;
 	default:
 	  return pc + 1;
 	}
 
-      /* OK, we actually have a frame.  We just don't know how large it is
-	 yet.  Set its size to zero.  We'll adjust it if necessary.  */
+      /* OK, we actually have a frame.  We just don't know how large
+	 it is yet.  Set its size to zero.  We'll adjust it if
+	 necessary.  We also now commit to skipping the special
+	 instructions mentioned before.  */
       cache->locals = 0;
+      pc += skip;
 
       /* If that's all, return now.  */
       if (current_pc <= pc + 3)
