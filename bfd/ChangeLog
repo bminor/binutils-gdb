@@ -1,5 +1,30 @@
 Tue Nov 14 11:52:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (bfd_section_from_shdr): When using a different section
+	header, pass the new one to _bfd_elf_make_section_from_shdr.
+	(elf_fake_sections): Don't set sh_info and sh_entsize fields.
+	(elf_map_symbols): Add section VMA to symbol value when comparing
+	against 0.
+	(_bfd_elf_compute_section_file_positions): Only build symbol table
+	if there are some symbols.  Set file offset of symtab and strtab
+	sections.
+	(assign_file_positions_except_relocs): Remove dosyms parameter.
+	Change all callers.  Never set file offset of symtab and strtab
+	sections.
+	(_bfd_elf_copy_private_section_data): New function.
+	(MAP_ONESYMTAB, MAP_DYNSYMTAB, MAP_STRTAB, MAP_SHSTRTAB): Define.
+	(_bfd_elf_copy_private_symbol_data): New function.
+	(swap_out_syms): Check for special mapping of st_shndx created by
+	copy_private_symbol_data.
+	* elfxx-target.h: Use new copy routines.
+	* elf-bfd.h (_bfd_elf_copy_private_symbol_data): Declare.
+	(_bfd_elf_copy_private_section_data): Declare.
+
+	* config.bfd (sh-*-*): Set targ_defvec to shcoff_vec.
+
+	* coffcode.h (coff_slurp_symbol_table): If COFF_WITH_PE, handle
+	C_NT_WEAK.
+
 	* coff-sh.c (shlcoff_vec): Use _bfd_generic_archive_p, not
 	_bfd_dummy_target, matching the recent change to archive
 	recognition.

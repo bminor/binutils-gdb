@@ -56,6 +56,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define bfd_elfNN_sizeof_headers	_bfd_elf_sizeof_headers
 #define bfd_elfNN_write_object_contents _bfd_elf_write_object_contents
 
+#define bfd_elfNN_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
+
 #ifndef elf_backend_want_got_plt
 #define elf_backend_want_got_plt 0
 #endif
@@ -85,11 +88,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef bfd_elfNN_bfd_copy_private_symbol_data
 #define bfd_elfNN_bfd_copy_private_symbol_data \
-  ((boolean (*) PARAMS ((bfd *, asymbol *, bfd *, asymbol *))) bfd_true)
+  _bfd_elf_copy_private_symbol_data
 #endif
+
 #ifndef bfd_elfNN_bfd_copy_private_section_data
 #define bfd_elfNN_bfd_copy_private_section_data \
-  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+  _bfd_elf_copy_private_section_data
 #endif
 #ifndef bfd_elfNN_bfd_copy_private_bfd_data
 #define bfd_elfNN_bfd_copy_private_bfd_data \
