@@ -171,7 +171,7 @@ gdb_expect {
 		pass "step out of main on Solaris"
 	    }
 	    -re ".*in _int_reset ().*$gdb_prompt $" {
-		# This is what happens on Sanyo Stormy16
+		# This is what happens on Sanyo XStormy16
 		pass "step out of main"
 	    }
 	    -re ".*in ..change.mode ().*$gdb_prompt $" {
@@ -230,7 +230,7 @@ if {![target_info exists use_cygmon] || ![target_info use_cygmon]} {
 	    }
 	    -re ".*Single.*_int_reset.*$gdb_prompt $" {
 	        pass "step to end of run"
-		setup_xfail "stormy16-*-*"
+		setup_xfail "xstormy16-*-*"
 	    }
 	    -re ".*$gdb_prompt $" {
 		fail "step to end of run"
