@@ -119,7 +119,9 @@ double_to_i387 PARAMS ((char *, char *));
 
 #define NAMES_HAVE_UNDERSCORE
 
-
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
 #define SKIP_TRAMPOLINE_CODE(pc)           skip_trampoline_code (pc, 0)
 extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR pc, char *name));
+
+extern char *cygwin_pid_to_str PARAMS ((int pid));
+#define target_pid_to_str(PID) cygwin_pid_to_str (PID)

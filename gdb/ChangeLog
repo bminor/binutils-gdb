@@ -1,3 +1,39 @@
+Thu Nov  5 08:41:33 1998  Christopher Faylor <cgf@cygnus.com>
+
+	* top.c (gdb_readline): Allow CRLF line termination on systems
+	which define CRLF_SOURCE_FILES.
+	* win32-nat.c: 1) Add thread support, 2) fix ability to attach to
+	a running process, and 3) implement limited support for cygwin
+	signals.
+	(thread_rec): New function.
+	(child_add_thread): Ditto.
+	(child_init_thread_list): Ditto.
+	(child_delete_thread): Ditto.
+	(do_child_fetch_inferior_registers): Ditto.
+	(do_child_store_inferior_registers): Ditto.
+	(handle_output_debug_string): Ditto.
+	(child_fetch_inferior_registers): Use do_* function to perform
+	operation.
+	(child_store_inferior_registers): Ditto.
+	(child_continue): Ditto.
+	(child_thread_alive): Ditto.
+	(cygwin_pid_to_str): Ditto.
+	(handle_load_dll): Reorganize, add first attempt at reading
+	dll names from attached processes.  Change info messages to provide
+	more information when dll is already loaded.
+	(handle_exception): Changes mandated by new thread-aware structures.
+	(child_wait): Track thread creation/destruction.  Handle cygwin
+	signals.
+	(child_create_inferior): Ditto.
+	(child_resume): Ditto.
+	(child_kill_inferior): Ditto.  Close child process handle to avoid a
+	handle leak.
+	(child_ops): Fill out child_ops fields that deal with threads.
+	* config/i386/tm-cygwin32.h: Declare function and macro needed
+	for converting a cygwin "pid" to a string.
+	* config/i386/xm-cygwin32.h: define HAVE_SIGSETMASK as 0 since
+	sigsetmask is not defined in cygwin.
+
 Thu Nov  5 08:38:18 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* win32-nat.c: Remove obsolete PPC conditionals.
