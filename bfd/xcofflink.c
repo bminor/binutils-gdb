@@ -4185,12 +4185,9 @@ _bfd_xcoff_bfd_final_link (abfd, info)
   /* Now that we have written out all the global symbols, we know the
      symbol indices to use for relocs against them, and we can finally
      write out the relocs.  */
-  external_relocs = (bfd_byte *) malloc (max_output_reloc_count * relsz);
+  external_relocs = (bfd_byte *) bfd_malloc (max_output_reloc_count * relsz);
   if (external_relocs == NULL && max_output_reloc_count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   for (o = abfd->sections; o != NULL; o = o->next)
     {
