@@ -1,5 +1,8 @@
 Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* NOTES, NOTES.config: Removed.  These are rarely, if ever,
+	updated, and all the useful information is in doc/internals.texi.
+
 	Based on patch from Ronald F. Guilmette <rfg@monkeys.com>:
 	* read.c (read_a_source_file): Check for conditional operators
 	before doing an MRI pending alignment.
