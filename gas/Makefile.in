@@ -63,6 +63,8 @@ INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='-e "$(program_transform_name)"'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
+DISTSTUFF= make-gas.com
+
 AR = ar
 AR_FLAGS = qv
 BISON = bison
@@ -434,13 +436,12 @@ doc: $(srcdir)/as.info
 $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 	@(cd doc; $(MAKE) $(FLAGS_TO_PASS) as.info; mv as.info $srcdir)	
 
-diststuff: make-gas.com
+diststuff: $(DISTSTUFF)
 
 clean-here:
 	-rm -f $(STAGESTUFF) core
 
 clean mostlyclean: clean-here
-	-rm -f make-gas.com
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
 	@if [ -d testsuite ] ; then \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $@ ; \
@@ -456,6 +457,7 @@ distclean: clean-here
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
 		config-stamp config.h conf config.log config.cache
 realclean: clean distclean
+	-rm -rf $(DISTSTUFF)
 
 # Entry points `install', `includes' and `uninstall'.
 
@@ -529,8 +531,20 @@ stage3: force
 
 against=stage2
 
+COMPARE_SED= 's/stage./stageX/g'
 comparison: force
-	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+	for i in *.o ; do cmp $$i $(against)/$$i ; done
+	-rm -f x0-* x1-*
+	for i in as.new gasp.new ; do \
+	  sed $(COMPARE_SED) < $$i > x0-$$i ; \
+	  sed $(COMPARE_SED) < $(against)/$$i > x1-$$i ; \
+	  if cmp x0-$$i x1-$$i ; then \
+	    echo $$i match ; \
+	  else \
+	    echo $$i differs ; exit 1 ; \
+	  fi ; \
+	done
+	-rm -f x0-* x1-*
 
 de-stage1: force
 	- (cd stage1 ; rm -f as ; mv -f * ..)

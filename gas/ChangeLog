@@ -1,3 +1,9 @@
+Tue Oct 11 15:05:11 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* Makefile.in (comparison): When comparing as.new or gasp.new, try
+	running the binary through sed to avoid differences due to
+	"stage1" or "stage2" having been written into the binary.
+
 Sat Oct  8 01:48:04 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	ELF symbol size handling, based on code from Eric Youngdale:
