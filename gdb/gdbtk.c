@@ -1096,7 +1096,6 @@ gdbtk_init ()
   Tcl_CreateCommand (interp, "gdb_eval", call_wrapper, gdb_eval, NULL);
 
   command_loop_hook = Tk_MainLoop;
-  fputs_unfiltered_hook = gdbtk_fputs;
   print_frame_info_listing_hook = null_routine;
   query_hook = gdbtk_query;
   flush_hook = gdbtk_flush;
@@ -1154,8 +1153,19 @@ gdbtk_init ()
     else
       gdbtk_filename = GDBTK_FILENAME;
 
+/* Defer setup of fputs_unfiltered_hook to near the end so that error messages
+   prior to this point go to stdout/stderr.  */
+
+  fputs_unfiltered_hook = gdbtk_fputs;
+
   if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
-    error ("Failure reading %s: %s", gdbtk_filename, interp->result);
+    {
+      fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
+
+      fprintf_unfiltered (stderr, "%s:%d: %s\n", gdbtk_filename,
+			  interp->errorLine, interp->result);
+      error ("Stack trace:\n%s", Tcl_GetVar (interp, "errorInfo", 0));
+    }
 
   discard_cleanups (old_chain);
 }
