@@ -59,7 +59,7 @@ proc gas_start { prog as_opts } {
 	spawn -noecho -nottyinit $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog
     } foo
     if ![regexp {^[0-9]+} $foo] then {
-	error "Can't run $subdir/$prog: $foo"
+ perror "Can't run $subdir/$prog: $foo"
     }
 }
 
@@ -189,7 +189,7 @@ proc objdump_start_no_subdir { prog opts } {
 	spawn -noecho -nottyinit $srcdir/lib/run $OBJDUMP $opts $prog
     } foo
     if ![regexp {^[0-9]+} $foo] then {
-	error "Can't run $prog: $foo"
+ perror "Can't run $prog: $foo"
     }
 }
 
@@ -200,10 +200,10 @@ proc objdump_finish { } {
 }
 
 expect_after {
-    timeout			{ error "timeout" }
-    "virtual memory exhausted"	{ error "virtual memory exhausted" }
-    buffer_full			{ error "buffer full" }
-    eof				{ error "eof" }
+    timeout			{ perror "timeout" }
+    "virtual memory exhausted"	{ perror "virtual memory exhausted" }
+    buffer_full			{ perror "buffer full" }
+    eof				{ perror "eof" }
 }
 
 # regexp_diff, based on simple_diff taken from ld test suite

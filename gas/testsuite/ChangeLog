@@ -1,3 +1,7 @@
+Tue May 17 14:53:08 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* lib/gas-defs.exp: Replace error proc calls with perror calls.
+
 Mon May 16 13:19:16 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp: Tweak expected output to match new
