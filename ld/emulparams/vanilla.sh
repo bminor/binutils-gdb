@@ -1,6 +1,0 @@
-EMULATION_NAME=vanilla
-SCRIPT_NAME=vanilla
-TEXT_START_ADDR=??
-PAGE_SIZE=??
-ARCH=unknown
-TEMPLATE_NAME=vanilla

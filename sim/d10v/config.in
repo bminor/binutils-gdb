@@ -1,4 +1,0 @@
-/* config.in.  Generated automatically from configure.in by autoheader.  */
-
-/* Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H

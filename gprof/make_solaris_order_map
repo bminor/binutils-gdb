@@ -1,8 +1,0 @@
-#!/bin/csh -f
-# $1 is the file containing the function ordering
-# $2 is the output file (a linker map file for the solaris native linker)
-
-echo 'text = LOAD ?RXO;' > $2
-foreach func (`cat $1`)
-  echo "text: .text%$func;" >> $2
-end

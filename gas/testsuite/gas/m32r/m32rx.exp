@@ -1,5 +1,0 @@
-# M32Rx assembler testsuite.
-
-if [istarget m32r*-*-*] {
-    run_dump_test "m32rx"
-}

@@ -1,3 +1,0 @@
-MH_CFLAGS=-D__GO32__ -D__MSDOS__
-XDEPFILES= go32-xdep.o
-XM_FILE= xm-go32.h

@@ -1,7 +1,0 @@
-#
-sparclite-aout-gcc -g \
--Xlinker -Bstatic -Xlinker -N -Xlinker -Ttext -Xlinker 0 \
--Xlinker -Tdata -Xlinker 02000000 -Xlinker -e -Xlinker _trap_table -Xlinker -X \
--o $1:r -nostartfiles -nostdlib \
-srt0.S __main.c $* 
-size $1:r
