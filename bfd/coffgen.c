@@ -594,6 +594,7 @@ fixup_symbol_value (abfd, coff_symbol_ptr, syment)
       syment->n_scnum = N_UNDEF;
       syment->n_value = 0;
     }
+  /* FIXME: Do we need to handle the absolute section here?  */
   else
     {
       if (coff_symbol_ptr->symbol.section)
@@ -1746,19 +1747,25 @@ coff_get_normalized_symtab (abfd)
 	    }
 	  else
 	    {
-	      /* ordinary short filename, put into memory anyway */
+	      /* Ordinary short filename, put into memory anyway.  The
+                 Microsoft PE tools sometimes store a filename in
+                 multiple AUX entries.  */
 	      if (internal_ptr->u.syment.n_numaux > 1
 		  && coff_data (abfd)->pe)
 		{
-		  internal_ptr->u.syment._n._n_n._n_offset = (long)
-		    copy_name (abfd, (internal_ptr + 1)->u.auxent.x_file.x_fname,
-			       internal_ptr->u.syment.n_numaux * symesz);
+		  internal_ptr->u.syment._n._n_n._n_offset =
+		    ((long)
+		     copy_name (abfd,
+				(internal_ptr + 1)->u.auxent.x_file.x_fname,
+				internal_ptr->u.syment.n_numaux * symesz));
 		}
 	      else
 		{
-		  internal_ptr->u.syment._n._n_n._n_offset = (long)
-		    copy_name (abfd, (internal_ptr + 1)->u.auxent.x_file.x_fname,
-			       FILNMLEN);
+		  internal_ptr->u.syment._n._n_n._n_offset =
+		    ((long)
+		     copy_name (abfd,
+				(internal_ptr + 1)->u.auxent.x_file.x_fname,
+				FILNMLEN));
 		}
 	    }
 	}
