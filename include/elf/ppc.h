@@ -3,7 +3,7 @@
 
    By Michael Meissner, Cygnus Support, <meissner@cygnus.com>, from information
    in the System V Application Binary Interface, PowerPC Processor Supplement
-   and the PowerPC Embedded Application Binary Interface (eabi). */
+   and the PowerPC Embedded Application Binary Interface (eabi).
 
 This file is part of BFD, the Binary File Descriptor library.
 
