@@ -1,3 +1,12 @@
+2000-05-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * solib.c (symbol_add_stub): Remember the index and the name of
+        the section with the lowest address. Use this data (instead of
+        data from .text) to pass info into symbol_file_add.
+
+        * elfread.c (record_minimal_symbol_and_info): Use the section 
+	where the symbol lives to get the index, instead of guessing.
+
 2000-05-10  Michael Snyder  <msnyder@seadog.cygnus.com>
 	Make Sparc a Multi-Arch target.  Discard PARAMS macro (require ANSI).
 	* sparc-tdep.c: include arch-utils.h.

@@ -1165,10 +1165,10 @@ symbol_add_stub (arg)
      PTR arg;
 {
   register struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
-  CORE_ADDR text_addr = 0;
   struct section_addr_info *sap;
-  int i;
-  asection *text_section;
+  CORE_ADDR lowest_addr = 0;
+  int lowest_index;
+  asection *lowest_sect = NULL;
 
   /* Have we already loaded this shared object?  */
   ALL_OBJFILES (so->objfile)
@@ -1179,32 +1179,33 @@ symbol_add_stub (arg)
 
   /* Find the shared object's text segment.  */
   if (so->textsection)
-    text_addr = so->textsection->addr;
+    {
+      lowest_addr = so->textsection->addr;
+      lowest_sect = bfd_get_section_by_name (so->abfd, ".text");
+      lowest_index = lowest_sect->index;
+    }
   else if (so->abfd != NULL)
     {
-      asection *lowest_sect;
-
-      /* If we didn't find a mapped non zero sized .text section, set up
-         text_addr so that the relocation in symbol_file_add does no harm.  */
+      /* If we didn't find a mapped non zero sized .text section, set
+         up lowest_addr so that the relocation in symbol_file_add does
+         no harm.  */
       lowest_sect = bfd_get_section_by_name (so->abfd, ".text");
       if (lowest_sect == NULL)
 	bfd_map_over_sections (so->abfd, find_lowest_section,
 			       (PTR) &lowest_sect);
       if (lowest_sect)
-	text_addr = bfd_section_vma (so->abfd, lowest_sect)
-	  + LM_ADDR (so);
+	{
+	  lowest_addr = bfd_section_vma (so->abfd, lowest_sect)
+	    + LM_ADDR (so);
+	  lowest_index = lowest_sect->index;
+	}
     }
 
   sap = build_section_addr_info_from_section_table (so->sections,
                                                     so->sections_end);
 
-  /* Look for the index for the .text section in the sap structure. */
-  text_section = bfd_get_section_by_name (so->abfd, ".text");
-  for (i = 0; i < MAX_SECTIONS && sap->other[i].name; i++)
-    if (sap->other[i].sectindex == text_section->index)
-      break;
-  
-  sap->other[i].addr = text_addr;
+  sap->other[lowest_index].addr = lowest_addr;
+
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
 				 sap, 0, OBJF_SHARED);
   free_section_addr_info (sap);

@@ -191,18 +191,16 @@ record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
     {
     case mst_text:
     case mst_file_text:
-      section = SECT_OFF_TEXT (objfile);
+      section = bfd_section->index;
 #ifdef SMASH_TEXT_ADDRESS
       SMASH_TEXT_ADDRESS (address);
 #endif
       break;
     case mst_data:
     case mst_file_data:
-      section = SECT_OFF_DATA (objfile);
-      break;
     case mst_bss:
     case mst_file_bss:
-      section = SECT_OFF_BSS (objfile);
+      section = bfd_section->index;
       break;
     default:
       section = -1;
