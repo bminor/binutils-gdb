@@ -1,3 +1,8 @@
+1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* tui.h: Include stdarg.h instead of varargs.h if we're on an ISO Cish
+	system.
+
 Thu Dec 31 12:08:32 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Jim Blandy <jimb@cygnus.com>,
