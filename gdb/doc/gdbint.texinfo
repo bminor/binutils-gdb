@@ -2,7 +2,7 @@ GDB Internals documentation
 
 This needs to be wrapped in texinfo stuff...
 
-Cleanups
+  Cleanups
 
 Cleanups are a structured way to deal with things that need to be done
 later.  When your code does something (like malloc some memory, or open
@@ -42,6 +42,27 @@ Some functions, e.g. fputs_filtered() or error(), specify that they
 that any actions you need to reverse in the case of an error or
 interruption must be on the cleanup chain before you call these functions,
 since they might never return to your code (they "longjmp" instead).
+
+
+
+  Wrapping output lines
+
+Output that goes through printf_filtered or fputs_filtered or
+fputs_demangled needs only to have calls to wrap_here() added 
+in places that would be good breaking points.  The utility routines
+will take care of actually wrapping if the line width is exceeded.
+
+The argument to wrap_here() is an indentation string which is printed
+ONLY if the line breaks there.  This argument is saved away and used
+later.  It must remain valid until the next call to wrap_here() or
+until a newline has been printed through the *_filtered functions.
+Don't pass in a local variable and then return!
+
+It is usually best to call wrap_here() after printing a comma or space.
+If you call it before printing a space, make sure that your indentation
+properly accounts for the leading space that will print if the line wraps
+there.
+
 
 
 
