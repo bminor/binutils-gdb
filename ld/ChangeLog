@@ -1,3 +1,11 @@
+Fri Feb  4 23:02:19 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* ldlang.h (LANG_FOR_EACH_{INPUT,OUTPUT}_SECTION): Delete (unused)
+	GNU C specific macros.
+
+	* emultempl/hppaosf.em (hppaosf_finish): Expand the only remaining
+	call to LANG_FOR_EACH_INPUT_SECTION.
+
 Fri Feb  4 16:26:08 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldmisc.c (ldmalloc, xmalloc, ldrealloc, xrealloc): Functions

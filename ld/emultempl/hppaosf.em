@@ -103,41 +103,49 @@ hppaosf_finish()
   if (link_info.relocateable == false)
     {
       /* check for needed stubs */
-      LANG_FOR_EACH_INPUT_SECTION
-	(statement, abfd, section,
-	 (
-	  {
-	    int new_sym_cnt = 0;
-	    int i,j;
-	    asymbol *syms = hppa_look_for_stubs_in_section (stub_file->the_bfd,
-							    abfd,
-							    output_bfd,
-							    section,
-							    statement->asymbols,
-							    &new_sym_cnt,
-							    &link_info);
+      extern lang_statement_list_type file_chain;
+      lang_input_statement_type *statement;
 
-	    if ( (new_sym_cnt > 0) && syms )
-	      {
-		struct symbol_cache_entry **old_asymbols = stub_file->asymbols;
+      for (statement = (lang_input_statement_type *)file_chain.head;
+	   statement != (lang_input_statement_type *)NULL;
+	   statement = (lang_input_statement_type *)statement->next)
+	{
+	  asection *section;
+	  bfd *abfd = statement->the_bfd;
+	  for (section = abfd->sections;
+	       section != (asection *)NULL;
+	       section = section ->next)
+	    {
+	      int new_sym_cnt = 0;
+	      int i,j;
+	      asymbol *syms;
 
-		stub_file->asymbols = ldmalloc((stub_file->symbol_count + new_sym_cnt) * sizeof(asymbol *));
+	      syms = hppa_look_for_stubs_in_section (stub_file->the_bfd,
+						     abfd,
+						     output_bfd,
+						     section,
+						     statement->asymbols,
+						     &new_sym_cnt,
+						     &link_info);
 
-		for ( j = 0; j < stub_file->symbol_count; j++ )
-		  stub_file->asymbols[j] = old_asymbols[j];
+	      if ( (new_sym_cnt > 0) && syms )
+		{
+		  struct symbol_cache_entry **old_asymbols;
+
+		  old_asymbols = stub_file->asymbols;
+
+		  stub_file->asymbols = ldmalloc((stub_file->symbol_count + new_sym_cnt) * sizeof(asymbol *));
+
+		  for ( j = 0; j < stub_file->symbol_count; j++ )
+		    stub_file->asymbols[j] = old_asymbols[j];
 		
-		for ( j = 0, i = stub_file->symbol_count; j < new_sym_cnt; j++, i++ )
-		  stub_file->asymbols[i] = &syms[j];
+		  for ( j = 0, i = stub_file->symbol_count; j < new_sym_cnt; j++, i++ )
+		    stub_file->asymbols[i] = &syms[j];
 		
-		stub_file->symbol_count += new_sym_cnt;
-		/* Now, attach the contents of the new linker stub(s) */
-		/* to the linker stub input section. */
-
-		
-	      }
-	  }
-	  )
-	 )
+		  stub_file->symbol_count += new_sym_cnt;
+		}
+	    }
+        }
       /* Add a statement to get the linker stubs included in the output */
       lang_add_wild(".hppa_linker_stubs",NULL);
 
