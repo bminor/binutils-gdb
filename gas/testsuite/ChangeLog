@@ -1,3 +1,7 @@
+2001-03-30  H.J. Lu  <hjl@gnu.org>
+
+	* gas/i386/relax.d: Dump with -s instead of -drw.
+
 2001-03-29  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/relax.s: New test for relaxation between sections.

@@ -1,10 +1,11 @@
 #name: i386 relax
-#objdump: -drw
+#objdump: -s
 
 .*: +file format .*i386.*
 
-Disassembly of section .text:
-Disassembly of section .gnu.linkonce.t.blah:
-
-0+000 <.gnu.linkonce.t.blah>:
-   0:	eb 00 [ 	]*jmp    0x2
+Contents of section .text:
+Contents of section .data:
+Contents of section .gcc_except_table:
+ 0+000 02[ 	]*.[ 	]*
+Contents of section .gnu.linkonce.t.blah:
+ 0+000 eb00[ 	]+..[ 	]*
