@@ -1,3 +1,7 @@
+2002-12-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_output_extsym): Heed strip_discarded.
+
 2002-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c (bfd_arch_get_compatible): Add third parameter

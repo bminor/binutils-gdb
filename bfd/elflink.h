@@ -6123,11 +6123,16 @@ elf_link_output_extsym (h, data)
 	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 	   && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
     strip = TRUE;
-  else if (finfo->info->strip == strip_all
-	   || (finfo->info->strip == strip_some
-	       && bfd_hash_lookup (finfo->info->keep_hash,
-				   h->root.root.string,
-				   FALSE, FALSE) == NULL))
+  else if (finfo->info->strip == strip_all)
+    strip = TRUE;
+  else if (finfo->info->strip == strip_some
+	   && bfd_hash_lookup (finfo->info->keep_hash,
+			       h->root.root.string, FALSE, FALSE) == NULL)
+    strip = TRUE;
+  else if (finfo->info->strip_discarded
+	   && (h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
+	   && elf_discarded_section (h->root.u.def.section))
     strip = TRUE;
   else
     strip = FALSE;
