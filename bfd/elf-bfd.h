@@ -639,7 +639,7 @@ struct elf_backend_data
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments.  */
   bfd_boolean (*elf_backend_section_from_phdr)
-    (bfd *, Elf_Internal_Phdr *, int);
+    (bfd *, Elf_Internal_Phdr *, int, const char *);
 
   /* A function to set up the ELF section header for a BFD section in
      preparation for writing it out.  This is where the flags and type

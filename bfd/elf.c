@@ -2379,7 +2379,7 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
     default:
       /* Check for any processor-specific program segment types.  */
       bed = get_elf_backend_data (abfd);
-      return bed->elf_backend_section_from_phdr (abfd, hdr, index);
+      return bed->elf_backend_section_from_phdr (abfd, hdr, index, "proc");
     }
 }
 
