@@ -1,3 +1,15 @@
+Tue Jun 16 13:06:21 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* app.c (do_scrub_begin): If tc_symbol_chars is defined, treat all
+	characters in it as LEX_IS_SYMBOL_COMPONENT.
+	* config/tc-i386.h (tc_symbol_chars): Define.
+	(extra_symbol_chars): Declare.
+	* config/tc-i386.c (extra_symbol_chars): Define.
+	(comment_chars): Don't use '/' as comment start if TE_LINUX.
+	(line_comment_chars): Set to '/' if TE_LINUX.
+	* doc/c-i386.texi (i386-prefixes): Update.
+	* doc/internals.texi (CPU backend): Document tc_symbol_chars.
+
 Fri Jun 12 13:36:54 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
