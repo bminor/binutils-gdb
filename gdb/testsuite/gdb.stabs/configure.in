@@ -17,7 +17,7 @@ case "${target}" in
 # Do any other machines use .stabx?  What about i386-*-aix*?
 rs6000-*-aix*)		target_makefile_frag=xcoff.mt ;;
 
-alpha-*-*)		if [ x${with_gnu_as} = xyes ]; then
+alpha-*-*)		if test "x${with_gnu_as}" = xyes ; then
 			  target_makefile_frag=aout.mt
 			else
 			  target_makefile_frag=alpha.mt
@@ -27,7 +27,7 @@ alpha-*-*)		if [ x${with_gnu_as} = xyes ]; then
 hppa*-*-*)		target_makefile_frag=hppa.mt ;;
 
 mips-*-bsd*)		target_makefile_frag=aout.mt ;;
-mips-*-*)		if [ x${with_gnu_as} = xyes ]; then
+mips-*-*)		if test "x${with_gnu_as}" = xyes ; then
 			  target_makefile_frag=aout.mt
 			else
 			  target_makefile_frag=ecoff.mt
