@@ -51,6 +51,7 @@ i386v32.mh
 i386v4.mh
 i386v4.mt
 i386win32.mh
+i386win32.mt
 linux.mh
 linux.mt
 nbsd.mh
@@ -89,6 +90,7 @@ tm-i386nw.h
 tm-i386os9k.h
 tm-i386v.h
 tm-i386v4.h
+tm-i386win32.h
 tm-linux.h
 tm-nbsd.h
 tm-ptx.h

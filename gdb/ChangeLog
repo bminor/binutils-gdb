@@ -1,3 +1,15 @@
+Thu Oct  5 13:27:30 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* win32.c: New file; support for debugging on windows NT.
+	* configure.in: (i[345]86-*-win32): New target.
+	* configure: Regnerated.
+	* eval.c (evaluate_subexp_standard): Remove unused name.
+	* serial.c (gdb_string.h): Include.
+	* source.c (value.h): Include.
+	* config/i386/i386win32.mh (XDEPFILES): Add win32.o
+	* config/i386/i386win32.mt: New.
+	* config/i386/tm-i386win32.h: New.
+
 Wed Oct  4 18:41:34 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* expression.h (enum exp_code):  Added OP_NAME.

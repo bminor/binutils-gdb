@@ -317,6 +317,7 @@ i[345]86-*-mach*)	gdb_target=i386mach ;;
 i[345]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[345]86-*-osf1mk*)	gdb_target=i386mk ;;
+i[345]86-*-win32)	gdb_target=i386win32  ;;
 
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-*-coff*)		gdb_target=nindy960 ;;
