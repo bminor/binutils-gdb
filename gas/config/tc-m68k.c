@@ -562,6 +562,8 @@ short
 tc_coff_fix2rtype (fixP)
      fixS *fixP;
 {
+  if (fixP->fx_tcbit && fixP->fx_size == 4)
+    return R_RELLONG_NEG;
 #ifdef NO_PCREL_RELOCS
   know (fixP->fx_pcrel == 0);
   return (fixP->fx_size == 1 ? R_RELBYTE
@@ -589,6 +591,9 @@ tc_gen_reloc (section, fixp)
 {
   arelent *reloc;
   bfd_reloc_code_real_type code;
+
+  if (fixP->fx_tcbit)
+    abort ();
 
 #define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
   switch (F (fixp->fx_size, fixp->fx_pcrel))
@@ -3352,6 +3357,14 @@ md_apply_fix_2 (fixP, val)
       break;
     default:
       BAD_CASE (fixP->fx_size);
+    }
+
+  /* Fix up a negative reloc.  */
+  if (fixP->fx_addsy == NULL && fixP->fx_subsy != NULL)
+    {
+      fixP->fx_addsy = fixP->fx_subsy;
+      fixP->fx_subsy = NULL;
+      fixP->fx_tcbit = 1;
     }
 
   /* For non-pc-relative values, it's conceivable we might get something

@@ -1,5 +1,15 @@
 Mon Sep 18 15:22:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* write.c (fixup_segment): Handle ABS-sym in -sym case rather than
+	sym-sym case.
+	* config/obj-coff.c (fixup_segment): Likewise.  Permit negative
+	symbols if TC_M68K.
+	* config/tc-m68k.c (tc_coff_fix2rtype): If fx_tcbit is set, return
+	R_RELLONG_NEG.
+	(tc_gen_reloc): If fx_tcbit is set, abort.
+	(md_apply_fix_2): For a negative reloc, move fx_subsy to fx_addsy,
+	and set fx_tcbit.
+
 	* config/tc-m68k.c (s_reg): Ignore comment field in MRI mode.
 
 Mon Sep 18 14:44:04 1995  Arne H. Juul  <arnej@pvv.unit.no>
