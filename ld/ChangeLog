@@ -1,3 +1,10 @@
+Mon Feb  6 12:17:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/alpha.sc: Set address of .data section correctly
+	when -n or -N is used.  Patch from Chris G Demetriou
+	<Chris_G_Demetriou@LAGAVULIN.PDL.CS.CMU.EDU>.
+	* scripttempl/mips.sc: Similar change.
+
 Tue Jan 31 16:20:52 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* ldlang.c (lang_size_sections): Clarify error message when user
