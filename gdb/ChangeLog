@@ -1,5 +1,8 @@
 2004-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* standalone.c: Remove file.
+	* Makefile.in (standalone.o): Remove dependency.
+
 	* i386-linux-nat.c (dummy_sse_values): Remove function and
 	prototype.
 	(i386_linux_dr_get): Fix typo in comment.

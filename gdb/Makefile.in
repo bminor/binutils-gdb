@@ -2548,8 +2548,6 @@ stack.o: stack.c $(defs_h) $(gdb_string_h) $(value_h) $(symtab_h) \
 	$(gdbcore_h) $(target_h) $(source_h) $(breakpoint_h) $(demangle_h) \
 	$(inferior_h) $(annotate_h) $(ui_out_h) $(block_h) $(stack_h) \
 	$(gdb_assert_h) $(dictionary_h) $(reggroups_h) $(regcache_h)
-standalone.o: standalone.c $(gdb_stat_h) $(defs_h) $(symtab_h) $(frame_h) \
-	$(inferior_h) $(gdb_wait_h)
 std-regs.o: std-regs.c $(defs_h) $(user_regs_h) $(frame_h) $(gdbtypes_h) \
 	$(value_h) $(gdb_string_h)
 stop-gdb.o: stop-gdb.c $(defs_h)
