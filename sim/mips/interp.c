@@ -339,6 +339,21 @@ sim_open (kind, cb, abfd, argv)
      registers: */
   {
     int rn;
+<<<<<<< interp.c
+    for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++)
+      {
+	if (rn < 32)
+	  cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
+	else if ((rn >= FGRIDX) && (rn < (FGRIDX + NR_FGR)))
+	  cpu->register_widths[rn] = WITH_TARGET_FLOATING_POINT_BITSIZE;
+	else if ((rn >= 33) && (rn <= 37))
+	  cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
+	else if ((rn == SRIDX) || (rn == FCR0IDX) || (rn == FCR31IDX) || ((rn >= 72) && (rn <= 89)))
+	  cpu->register_widths[rn] = 32;
+	else
+	  cpu->register_widths[rn] = 0;
+      }
+=======
     for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++) {
       if (rn < 32)
        cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
@@ -351,6 +366,7 @@ sim_open (kind, cb, abfd, argv)
       else
        cpu->register_widths[rn] = 0;
     }
+>>>>>>> 1.94
     /* start-sanitize-r5900 */
 
     /* set the 5900 "upper" registers to 64 bits */
@@ -551,14 +567,21 @@ sim_store_register (sd,rn,memory)
     sim_io_eprintf(sd,"Invalid register width for %d (register store ignored)\n",rn);
   /* start-sanitize-r5900 */
   else if (rn == REGISTER_SA)
-    SA = T2H_8(*(uword64*)memory);
+    SA = T2H_8(*(unsigned64*)memory);
   else if (rn > LAST_EMBED_REGNUM)
-    cpu->registers1[rn - LAST_EMBED_REGNUM - 1] = T2H_8(*(uword64*)memory);
+    cpu->registers1[rn - LAST_EMBED_REGNUM - 1] = T2H_8(*(unsigned64*)memory);
   /* end-sanitize-r5900 */
+  else if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
+    {
+      if (cpu->register_widths[rn] == 32)
+	cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);
+      else
+	cpu->fgr[rn - FGRIDX] = T2H_8 (*(unsigned64*)memory);
+    }
   else if (cpu->register_widths[rn] == 32)
-    cpu->registers[rn] = T2H_4 (*(unsigned int*)memory);
+    cpu->registers[rn] = T2H_4 (*(unsigned32*)memory);
   else
-    cpu->registers[rn] = T2H_8 (*(uword64*)memory);
+    cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
 
   return;
 }
@@ -580,14 +603,21 @@ sim_fetch_register (sd,rn,memory)
     sim_io_eprintf(sd,"Invalid register width for %d (register fetch ignored)\n",rn);
   /* start-sanitize-r5900 */
   else if (rn == REGISTER_SA)
-    *((uword64 *)memory) = H2T_8(SA);
+    *((unsigned64*)memory) = H2T_8(SA);
   else if (rn > LAST_EMBED_REGNUM)
-    *((uword64 *)memory) = H2T_8(cpu->registers1[rn - LAST_EMBED_REGNUM - 1]);
+    *((unsigned64*)memory) = H2T_8(cpu->registers1[rn - LAST_EMBED_REGNUM - 1]);
   /* end-sanitize-r5900 */
+  else if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
+    {
+      if (cpu->register_widths[rn] == 32)
+	*(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGRIDX]);
+      else
+	*(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGRIDX]);
+    }
   else if (cpu->register_widths[rn] == 32)
-    *((unsigned int *)memory) = H2T_4 ((unsigned int)(cpu->registers[rn] & 0xFFFFFFFF));
+    *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
   else /* 64bit register */
-    *((uword64 *)memory) = H2T_8 (cpu->registers[rn]);
+    *(unsigned64*)memory = H2T_8 ((unsigned64)(cpu->registers[rn]));
 
   return;
 }

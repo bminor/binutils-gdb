@@ -1,3 +1,24 @@
+Sun Feb  1 16:52:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (SizeFGR): Determine from floating-point and not gpr
+ 	bitsize.
+
+	* interp.c (sim_fetch_register, sim_store_register): Read/write
+ 	FGR from correct location.
+	(sim_open): Set size of FGR's according to
+ 	WITH_TARGET_FLOATING_POINT_BITSIZE.
+	
+	* sim-main.h (FGR): Store floating point registers in a separate
+ 	array.
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+start-sanitize-vr5400
+	* mdmx.igen: Mark all instructions as 64bit/fp specific.
+
+end-sanitize-vr5400
 Tue Feb  3 00:10:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (ColdReset): Call PENDING_INVALIDATE.

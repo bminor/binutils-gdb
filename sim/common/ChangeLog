@@ -1,3 +1,15 @@
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Sun Feb  1 16:16:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-types.h (fp_word): New type, define according to
+ 	WITH_TARGET_FLOATING_POINT_BITSIZE.
+
+	* aclocal.m4 (default_sim_floating_point_bitsize): Add
+ 	configuration of size of floating point registers.
+
 Sun Feb  1 14:02:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-profile.c (profile_print): Only print CPU <N> if other
