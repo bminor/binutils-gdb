@@ -330,7 +330,7 @@ mips_expect (string)
     {
 
 /* Must use SERIAL_READCHAR here cuz mips_readchar would get confused if we
-   were waiting for "<IDT>"... */
+   were waiting for the TARGET_MONITOR_PROMPT... */
 
       c = SERIAL_READCHAR (mips_desc, 2);
 
@@ -357,23 +357,17 @@ mips_expect (string)
 
 /* Read a character from the remote, aborting on error.  Returns
    SERIAL_TIMEOUT on timeout (since that's what SERIAL_READCHAR
-   returns).  FIXME: If we see the string "<IDT>" from the board, then
-   we are debugging on the main console port, and we have somehow
-   dropped out of remote debugging mode.  In this case, we
-   automatically go back in to remote debugging mode.  This is a hack,
-   put in because I can't find any way for a program running on the
-   remote board to terminate without also ending remote debugging
+   returns).  FIXME: If we see the string TARGET_MONITOR_PROMPT from
+   the board, then we are debugging on the main console port, and we
+   have somehow dropped out of remote debugging mode.  In this case,
+   we automatically go back in to remote debugging mode.  This is a
+   hack, put in because I can't find any way for a program running on
+   the remote board to terminate without also ending remote debugging
    mode.  I assume users won't have any trouble with this; for one
    thing, the IDT documentation generally assumes that the remote
    debugging port is not the console port.  This is, however, very
    convenient for DejaGnu when you only have one connected serial
    port.  */
-
-/* CYGNUS LOCAL jsmith */
-/* The old code assumed a 5 character identification string, making it
-   a chore to change the string value.  However, we need to ensure
-   that the method of ascertaining the length of the string is
-   completely portable, without resorting to calling strlen(). */
 
 static int
 mips_readchar (timeout)
@@ -381,7 +375,7 @@ mips_readchar (timeout)
 {
   int ch;
   static int state = 0;
-  static char nextstate[] = TARGET_MONITOR_PROMPT; /* CYGNUS LOCAL jsmith */
+  static char nextstate[] = TARGET_MONITOR_PROMPT;
 #ifdef MAINTENANCE_CMDS
   int i;
 
@@ -390,7 +384,7 @@ mips_readchar (timeout)
     i = watchdog;
 #endif
 
-  if (state == (sizeof(nextstate) / sizeof(char))) /* CYGNUS LOCAL jsmith */
+  if (state == (sizeof(nextstate) / sizeof(char)))
     timeout = 1;
   ch = SERIAL_READCHAR (mips_desc, timeout);
 #ifdef MAINTENANCE_CMDS
@@ -414,13 +408,13 @@ mips_readchar (timeout)
 	printf_unfiltered ("Timed out in read\n");
     }
 
-  /* If we have seen <IDT> and we either time out, or we see a @
-     (which was echoed from a packet we sent), reset the board as
-     described above.  The first character in a packet after the SYN
-     (which is not echoed) is always an @ unless the packet is more
-     than 64 characters long, which ours never are.  */
+  /* If we have seen TARGET_MONITOR_PROMPT and we either time out, or
+     we see a @ (which was echoed from a packet we sent), reset the
+     board as described above.  The first character in a packet after
+     the SYN (which is not echoed) is always an @ unless the packet is
+     more than 64 characters long, which ours never are.  */
   if ((ch == SERIAL_TIMEOUT || ch == '@')
-      && state == (sizeof(nextstate) / sizeof(char)) /* CYGNUS LOCAL jsmith */
+      && state == (sizeof(nextstate) / sizeof(char))
       && ! mips_initializing)
     {
       if (sr_get_debug () > 0)
@@ -1788,14 +1782,14 @@ mips_load (file, from_tty)
     int  from_tty;
 {
   int err;
+  static char prompt[] = TARGET_MONITOR_PROMPT;
 
   /* Get the board out of remote debugging mode.  */
 
   mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
 		mips_receive_wait);
 
-
-  if (!mips_expect ("\015\012<IDT>"))
+  if (!mips_expect ("\015\012") || !mips_expect (prompt))
     error ("mips_load:  Couldn't get into monitor mode.");
 
   mips_load_srec (file);

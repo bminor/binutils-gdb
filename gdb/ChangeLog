@@ -1,3 +1,13 @@
+Mon Oct 23 16:03:33 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* configure.in (configdirs): Added support for the VR4300 default
+ 	builds (mips64*vr4300*el-*-elf*, mips64*vr4300*-*-elf*).
+
+	* configure: Regenerated.
+
+	* remote-mips.c (mips_load): Updated the prompt spotting code to
+ 	make use of the TARGET_MONITOR_PROMPT manifest.
+
 Sat Oct 21 06:11:49 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-tdep.c, mips-tdep.c (init_extra_frame_info):
