@@ -59,6 +59,8 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 
+#include "reggroups.h"
+
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register. Usually
@@ -1861,6 +1863,58 @@ rs6000_register_type (struct gdbarch *gdbarch, int n)
     }
 }
 
+/* Is REGNUM a member of REGGROUP?  */
+static int
+rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			    struct reggroup *group)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int float_p;
+  int vector_p;
+  int general_p;
+
+  if (REGISTER_NAME (regnum) == NULL
+      || *REGISTER_NAME (regnum) == '\0')
+    return 0;
+  if (group == all_reggroup)
+    return 1;
+
+  float_p = (regnum == tdep->ppc_fpscr_regnum
+	     || (regnum >= tdep->ppc_fp0_regnum
+		 && regnum < tdep->ppc_fp0_regnum + 32));
+  if (group == float_reggroup)
+    return float_p;
+
+  vector_p = ((regnum >= tdep->ppc_vr0_regnum
+	       && regnum < tdep->ppc_vr0_regnum + 32)
+	      || (regnum >= tdep->ppc_ev0_regnum
+		  && regnum < tdep->ppc_ev0_regnum + 32)
+	      || regnum == tdep->ppc_vrsave_regnum
+	      || regnum == tdep->ppc_acc_regnum
+	      || regnum == tdep->ppc_spefscr_regnum);
+  if (group == vector_reggroup)
+    return vector_p;
+
+  /* Note that PS aka MSR isn't included - it's a system register (and
+     besides, due to GCC's CFI foobar you do not want to restore
+     it).  */
+  general_p = ((regnum >= tdep->ppc_gp0_regnum
+		&& regnum < tdep->ppc_gp0_regnum + 32)
+	       || regnum == tdep->ppc_toc_regnum
+	       || regnum == tdep->ppc_cr_regnum
+	       || regnum == tdep->ppc_lr_regnum
+	       || regnum == tdep->ppc_ctr_regnum
+	       || regnum == tdep->ppc_xer_regnum
+	       || regnum == PC_REGNUM);
+  if (group == general_reggroup)
+    return general_p;
+
+  if (group == save_reggroup || group == restore_reggroup)
+    return general_p || vector_p || float_p;
+
+  return 0;   
+}
+
 /* The register format for RS/6000 floating point registers is always
    double, we need a conversion if the memory format is float.  */
 
@@ -3218,6 +3272,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
   set_gdbarch_register_type (gdbarch, rs6000_register_type);
+  set_gdbarch_register_reggroup_p (gdbarch, rs6000_register_reggroup_p);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
