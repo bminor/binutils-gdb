@@ -1,3 +1,9 @@
+2002-06-19  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_run_to_main): Use MIFLAGS to figure
+	out what version of MI is running. Use this to determine the proper
+	output of setting a breakpoint.
+
 2002-05-27  Michael Chastain  <mec@shout.net>
 From Benjamin Kosnik  <bkoz@redhat.com>
 
