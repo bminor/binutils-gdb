@@ -1,3 +1,7 @@
+2003-07-29  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c: Update to Iso C.
+
 2003-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (disassemble_data): Do not ignore sections without the

@@ -39,7 +39,7 @@
 #ifdef NEED_DECLARATION_FPRINTF
 /* This is needed by INIT_DISASSEMBLE_INFO.  */
 extern int fprintf
-  PARAMS ((FILE *, const char *, ...));
+  (FILE *, const char *, ...);
 #endif
 
 /* Exit status.  */
@@ -122,78 +122,76 @@ static bfd_size_type stabstr_size;
 /* Static declarations.  */
 
 static void usage
-  PARAMS ((FILE *, int));
+  (FILE *, int);
 static void nonfatal
-  PARAMS ((const char *));
+  (const char *);
 static void display_file
-  PARAMS ((char *, char *));
+  (char *, char *);
 static void dump_section_header
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 static void dump_headers
-  PARAMS ((bfd *));
+  (bfd *);
 static void dump_data
-  PARAMS ((bfd *));
+  (bfd *);
 static void dump_relocs
-  PARAMS ((bfd *));
+  (bfd *);
 static void dump_dynamic_relocs
-  PARAMS ((bfd *));
+  (bfd *);
 static void dump_reloc_set
-  PARAMS ((bfd *, asection *, arelent **, long));
+  (bfd *, asection *, arelent **, long);
 static void dump_symbols
-  PARAMS ((bfd *, bfd_boolean));
+  (bfd *, bfd_boolean);
 static void dump_bfd_header
-  PARAMS ((bfd *));
+  (bfd *);
 static void dump_bfd_private_header
-  PARAMS ((bfd *));
+  (bfd *);
 static void dump_bfd
-  PARAMS ((bfd *));
+  (bfd *);
 static void display_bfd
-  PARAMS ((bfd *));
+  (bfd *);
 static void objdump_print_value
-  PARAMS ((bfd_vma, struct disassemble_info *, bfd_boolean));
+  (bfd_vma, struct disassemble_info *, bfd_boolean);
 static void objdump_print_symname
-  PARAMS ((bfd *, struct disassemble_info *, asymbol *));
+  (bfd *, struct disassemble_info *, asymbol *);
 static asymbol *find_symbol_for_address
-  PARAMS ((bfd *, asection *, bfd_vma, bfd_boolean, long *));
+  (bfd *, asection *, bfd_vma, bfd_boolean, long *);
 static void objdump_print_addr_with_sym
-  PARAMS ((bfd *, asection *, asymbol *, bfd_vma,
-	   struct disassemble_info *, bfd_boolean));
+  (bfd *, asection *, asymbol *, bfd_vma,
+   struct disassemble_info *, bfd_boolean);
 static void objdump_print_addr
-  PARAMS ((bfd_vma, struct disassemble_info *, bfd_boolean));
+  (bfd_vma, struct disassemble_info *, bfd_boolean);
 static void objdump_print_address
-  PARAMS ((bfd_vma, struct disassemble_info *));
+  (bfd_vma, struct disassemble_info *);
 static int objdump_symbol_at_address
-  PARAMS ((bfd_vma, struct disassemble_info *));
+  (bfd_vma, struct disassemble_info *);
 static void show_line
-  PARAMS ((bfd *, asection *, bfd_vma));
+  (bfd *, asection *, bfd_vma);
 static void disassemble_bytes
-  PARAMS ((struct disassemble_info *, disassembler_ftype, bfd_boolean,
-	   bfd_byte *, bfd_vma, bfd_vma, arelent ***, arelent **));
+  (struct disassemble_info *, disassembler_ftype, bfd_boolean,
+   bfd_byte *, bfd_vma, bfd_vma, arelent ***, arelent **);
 static void disassemble_data
-  PARAMS ((bfd *));
+  (bfd *);
 static asymbol ** slurp_symtab
-  PARAMS ((bfd *));
+  (bfd *);
 static asymbol ** slurp_dynamic_symtab
-  PARAMS ((bfd *));
+  (bfd *);
 static long remove_useless_symbols
-  PARAMS ((asymbol **, long));
+  (asymbol **, long);
 static int compare_symbols
-  PARAMS ((const PTR, const PTR));
+  (const void *, const void *);
 static int compare_relocs
-  PARAMS ((const PTR, const PTR));
+  (const void *, const void *);
 static void dump_stabs
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean read_section_stabs
-  PARAMS ((bfd *, const char *, const char *));
+  (bfd *, const char *, const char *);
 static void print_section_stabs
-  PARAMS ((bfd *, const char *, const char *));
+  (bfd *, const char *, const char *);
 static void dump_section_stabs
-  PARAMS ((bfd *, char *, char *));
+  (bfd *, char *, char *);
 
 static void
-usage (stream, status)
-     FILE *stream;
-     int status;
+usage (FILE *stream, int status)
 {
   fprintf (stream, _("Usage: %s <option(s)> <file(s)>\n"), program_name);
   fprintf (stream, _(" Display information from object <file(s)>.\n"));
@@ -254,11 +252,13 @@ usage (stream, status)
 }
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
-
-#define OPTION_ENDIAN (150)
-#define OPTION_START_ADDRESS (OPTION_ENDIAN + 1)
-#define OPTION_STOP_ADDRESS (OPTION_START_ADDRESS + 1)
-#define OPTION_ADJUST_VMA (OPTION_STOP_ADDRESS + 1)
+enum option_values
+  {
+    OPTION_ENDIAN=150,
+    OPTION_START_ADDRESS,
+    OPTION_STOP_ADDRESS,
+    OPTION_ADJUST_VMA
+  };
 
 static struct option long_options[]=
 {
@@ -302,18 +302,15 @@ static struct option long_options[]=
 };
 
 static void
-nonfatal (msg)
-     const char *msg;
+nonfatal (const char *msg)
 {
   bfd_nonfatal (msg);
   exit_status = 1;
 }
 
 static void
-dump_section_header (abfd, section, ignored)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section;
-     PTR ignored ATTRIBUTE_UNUSED;
+dump_section_header (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
+		     void *ignored ATTRIBUTE_UNUSED)
 {
   char *comma = "";
   unsigned int opb = bfd_octets_per_byte (abfd);
@@ -388,8 +385,7 @@ dump_section_header (abfd, section, ignored)
 }
 
 static void
-dump_headers (abfd)
-     bfd *abfd;
+dump_headers (bfd *abfd)
 {
   printf (_("Sections:\n"));
 
@@ -409,12 +405,11 @@ dump_headers (abfd)
     printf (_("  Pg"));
   printf ("\n");
 
-  bfd_map_over_sections (abfd, dump_section_header, (PTR) NULL);
+  bfd_map_over_sections (abfd, dump_section_header, NULL);
 }
 
 static asymbol **
-slurp_symtab (abfd)
-     bfd *abfd;
+slurp_symtab (bfd *abfd)
 {
   asymbol **sy = (asymbol **) NULL;
   long storage;
@@ -440,8 +435,7 @@ slurp_symtab (abfd)
 /* Read in the dynamic symbols.  */
 
 static asymbol **
-slurp_dynamic_symtab (abfd)
-     bfd *abfd;
+slurp_dynamic_symtab (bfd *abfd)
 {
   asymbol **sy = (asymbol **) NULL;
   long storage;
@@ -472,11 +466,9 @@ slurp_dynamic_symtab (abfd)
    Return the number of useful symbols.  */
 
 static long
-remove_useless_symbols (symbols, count)
-     asymbol **symbols;
-     long count;
+remove_useless_symbols (asymbol **symbols, long count)
 {
-  register asymbol **in_ptr = symbols, **out_ptr = symbols;
+  asymbol **in_ptr = symbols, **out_ptr = symbols;
 
   while (--count >= 0)
     {
@@ -498,16 +490,18 @@ remove_useless_symbols (symbols, count)
 /* Sort symbols into value order.  */
 
 static int
-compare_symbols (ap, bp)
-     const PTR ap;
-     const PTR bp;
+compare_symbols (const void *ap, const void *bp)
 {
-  const asymbol *a = *(const asymbol **)ap;
-  const asymbol *b = *(const asymbol **)bp;
-  const char *an, *bn;
-  size_t anl, bnl;
-  bfd_boolean af, bf;
-  flagword aflags, bflags;
+  const asymbol *a = * (const asymbol **) ap;
+  const asymbol *b = * (const asymbol **) bp;
+  const char *an;
+  const char *bn;
+  size_t anl;
+  size_t bnl;
+  bfd_boolean af;
+  bfd_boolean bf;
+  flagword aflags;
+  flagword bflags;
 
   if (bfd_asymbol_value (a) > bfd_asymbol_value (b))
     return 1;
@@ -605,12 +599,10 @@ compare_symbols (ap, bp)
 /* Sort relocs into address order.  */
 
 static int
-compare_relocs (ap, bp)
-     const PTR ap;
-     const PTR bp;
+compare_relocs (const void *ap, const void *bp)
 {
-  const arelent *a = *(const arelent **)ap;
-  const arelent *b = *(const arelent **)bp;
+  const arelent *a = * (const arelent **) ap;
+  const arelent *b = * (const arelent **) bp;
 
   if (a->address > b->address)
     return 1;
@@ -630,10 +622,8 @@ compare_relocs (ap, bp)
 /* Print VMA to STREAM.  If SKIP_ZEROES is TRUE, omit leading zeroes.  */
 
 static void
-objdump_print_value (vma, info, skip_zeroes)
-     bfd_vma vma;
-     struct disassemble_info *info;
-     bfd_boolean skip_zeroes;
+objdump_print_value (bfd_vma vma, struct disassemble_info *info,
+		     bfd_boolean skip_zeroes)
 {
   char buf[30];
   char *p;
@@ -656,10 +646,8 @@ objdump_print_value (vma, info, skip_zeroes)
 /* Print the name of a symbol.  */
 
 static void
-objdump_print_symname (abfd, info, sym)
-     bfd *abfd;
-     struct disassemble_info *info;
-     asymbol *sym;
+objdump_print_symname (bfd *abfd, struct disassemble_info *info,
+		       asymbol *sym)
 {
   char *alloc;
   const char *name;
@@ -688,12 +676,8 @@ objdump_print_symname (abfd, info, sym)
    then *PLACE is set to the index of the symbol in sorted_syms.  */
 
 static asymbol *
-find_symbol_for_address (abfd, sec, vma, require_sec, place)
-     bfd *abfd;
-     asection *sec;
-     bfd_vma vma;
-     bfd_boolean require_sec;
-     long *place;
+find_symbol_for_address (bfd *abfd, asection *sec, bfd_vma vma,
+			 bfd_boolean require_sec, long *place)
 {
   /* @@ Would it speed things up to cache the last two symbols returned,
      and maybe their address ranges?  For many processors, only one memory
@@ -812,13 +796,9 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
 /* Print an address to INFO symbolically.  */
 
 static void
-objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
-     bfd *abfd;
-     asection *sec;
-     asymbol *sym;
-     bfd_vma vma;
-     struct disassemble_info *info;
-     bfd_boolean skip_zeroes;
+objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
+			     bfd_vma vma, struct disassemble_info *info,
+			     bfd_boolean skip_zeroes)
 {
   objdump_print_value (vma, info, skip_zeroes);
 
@@ -863,10 +843,8 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
    TRUE, don't output leading zeroes.  */
 
 static void
-objdump_print_addr (vma, info, skip_zeroes)
-     bfd_vma vma;
-     struct disassemble_info *info;
-     bfd_boolean skip_zeroes;
+objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
+		    bfd_boolean skip_zeroes)
 {
   struct objdump_disasm_info *aux;
   asymbol *sym;
@@ -889,9 +867,7 @@ objdump_print_addr (vma, info, skip_zeroes)
    routine.  */
 
 static void
-objdump_print_address (vma, info)
-     bfd_vma vma;
-     struct disassemble_info *info;
+objdump_print_address (bfd_vma vma, struct disassemble_info *info)
 {
   objdump_print_addr (vma, info, ! prefix_addresses);
 }
@@ -899,9 +875,7 @@ objdump_print_address (vma, info)
 /* Determine of the given address has a symbol associated with it.  */
 
 static int
-objdump_symbol_at_address (vma, info)
-     bfd_vma vma;
-     struct disassemble_info * info;
+objdump_symbol_at_address (bfd_vma vma, struct disassemble_info * info)
 {
   struct objdump_disasm_info * aux;
   asymbol * sym;
@@ -945,14 +919,9 @@ static struct print_file_list *print_files;
 /* Skip ahead to a given line in a file, optionally printing each
    line.  */
 
-static void skip_to_line
-  PARAMS ((struct print_file_list *, unsigned int, bfd_boolean));
-
 static void
-skip_to_line (p, line, show)
-     struct print_file_list *p;
-     unsigned int line;
-     bfd_boolean show;
+skip_to_line (struct print_file_list *p, unsigned int line,
+	      bfd_boolean show)
 {
   while (p->line < line)
     {
@@ -977,10 +946,7 @@ skip_to_line (p, line, show)
    listing.  */
 
 static void
-show_line (abfd, section, addr_offset)
-     bfd *abfd;
-     asection *section;
-     bfd_vma addr_offset;
+show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 {
   const char *filename;
   const char *functionname;
@@ -1127,17 +1093,16 @@ typedef struct
   char *current;
 } SFILE;
 
-/* sprintf to a "stream" */
+/* sprintf to a "stream".  */
 
 static int
-objdump_sprintf VPARAMS ((SFILE *f, const char *format, ...))
+objdump_sprintf (SFILE *f, const char *format, ...)
 {
   char *buf;
   size_t n;
+  va_list args;
 
-  VA_OPEN (args, format);
-  VA_FIXEDARG (args, SFILE *, f);
-  VA_FIXEDARG (args, const char *, format);
+  va_start (args, format);
 
   vasprintf (&buf, format, args);
 
@@ -1165,7 +1130,7 @@ objdump_sprintf VPARAMS ((SFILE *f, const char *format, ...))
 
   free (buf);
 
-  VA_CLOSE (args);
+  va_end (args);
   return n;
 }
 
@@ -1190,17 +1155,14 @@ objdump_sprintf VPARAMS ((SFILE *f, const char *format, ...))
 /* Disassemble some data in memory between given values.  */
 
 static void
-disassemble_bytes (info, disassemble_fn, insns, data,
-		   start_offset, stop_offset, relppp,
-		   relppend)
-     struct disassemble_info *info;
-     disassembler_ftype disassemble_fn;
-     bfd_boolean insns;
-     bfd_byte *data;
-     bfd_vma start_offset;
-     bfd_vma stop_offset;
-     arelent ***relppp;
-     arelent **relppend;
+disassemble_bytes (struct disassemble_info * info,
+		   disassembler_ftype        disassemble_fn,
+		   bfd_boolean               insns,
+		   bfd_byte *                data,
+		   bfd_vma                   start_offset,
+		   bfd_vma                   stop_offset,
+		   arelent ***               relppp,
+		   arelent **                relppend)
 {
   struct objdump_disasm_info *aux;
   asection *section;
@@ -1537,8 +1499,7 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 /* Disassemble the contents of an object file.  */
 
 static void
-disassemble_data (abfd)
-     bfd *abfd;
+disassemble_data (bfd *abfd)
 {
   unsigned long addr_offset;
   disassembler_ftype disassemble_fn;
@@ -1563,7 +1524,7 @@ disassemble_data (abfd)
 
   INIT_DISASSEMBLE_INFO (disasm_info, stdout, fprintf);
 
-  disasm_info.application_data = (PTR) &aux;
+  disasm_info.application_data = (void *) &aux;
   aux.abfd = abfd;
   aux.require_sec = FALSE;
   disasm_info.print_address_func = objdump_print_address;
@@ -1628,7 +1589,8 @@ disassemble_data (abfd)
       asymbol *sym = NULL;
       long place = 0;
 
-      /* Sections that do not contain machine code are not normally disassembled.  */
+      /* Sections that do not contain machine
+	 code are not normally disassembled.  */
       if (! disassemble_all
 	  && only == NULL
 	  && (section->flags & SEC_CODE) == 0)
@@ -1731,7 +1693,8 @@ disassemble_data (abfd)
 
 	      for (x = place;
 		   (x < sorted_symcount
-		    && bfd_asymbol_value (sorted_syms[x]) <= section->vma + addr_offset);
+		    && bfd_asymbol_value (sorted_syms[x])
+		       <= section->vma + addr_offset);
 		   ++x)
 		continue;
 
@@ -1751,7 +1714,8 @@ disassemble_data (abfd)
 	      (* disasm_info.fprintf_func) (disasm_info.stream, ":\n");
 	    }
 
-	  if (sym != NULL && bfd_asymbol_value (sym) > section->vma + addr_offset)
+	  if (sym != NULL
+	      && bfd_asymbol_value (sym) > section->vma + addr_offset)
 	    nextsym = sym;
 	  else if (sym == NULL)
 	    nextsym = NULL;
@@ -1822,8 +1786,7 @@ disassemble_data (abfd)
    uses Sun stabs encoding.  */
 
 static void
-dump_stabs (abfd)
-     bfd *abfd;
+dump_stabs (bfd *abfd)
 {
   dump_section_stabs (abfd, ".stab", ".stabstr");
   dump_section_stabs (abfd, ".stab.excl", ".stab.exclstr");
@@ -1837,10 +1800,8 @@ dump_stabs (abfd)
    Otherwise return FALSE.  */
 
 static bfd_boolean
-read_section_stabs (abfd, stabsect_name, strsect_name)
-     bfd *abfd;
-     const char *stabsect_name;
-     const char *strsect_name;
+read_section_stabs (bfd *abfd, const char *stabsect_name,
+		    const char *strsect_name)
 {
   asection *stabsect, *stabstrsect;
 
@@ -1866,7 +1827,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   stabs  = (bfd_byte *) xmalloc (stab_size);
   strtab = (char *) xmalloc (stabstr_size);
 
-  if (! bfd_get_section_contents (abfd, stabsect, (PTR) stabs, 0, stab_size))
+  if (! bfd_get_section_contents (abfd, stabsect, (void *) stabs, 0, stab_size))
     {
       non_fatal (_("Reading %s section of %s failed: %s"),
 		 stabsect_name, bfd_get_filename (abfd),
@@ -1877,7 +1838,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
       return FALSE;
     }
 
-  if (! bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0,
+  if (! bfd_get_section_contents (abfd, stabstrsect, (void *) strtab, 0,
 				  stabstr_size))
     {
       non_fatal (_("Reading %s section of %s failed: %s\n"),
@@ -1900,24 +1861,23 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
      4 byte stab value
    FIXME: This will have to change for a 64 bit object format.  */
 
-#define STRDXOFF (0)
-#define TYPEOFF (4)
-#define OTHEROFF (5)
-#define DESCOFF (6)
-#define VALOFF (8)
+#define STRDXOFF  (0)
+#define TYPEOFF   (4)
+#define OTHEROFF  (5)
+#define DESCOFF   (6)
+#define VALOFF    (8)
 #define STABSIZE (12)
 
 /* Print ABFD's stabs section STABSECT_NAME (in `stabs'),
    using string table section STRSECT_NAME (in `strtab').  */
 
 static void
-print_section_stabs (abfd, stabsect_name, strsect_name)
-     bfd *abfd;
-     const char *stabsect_name;
-     const char *strsect_name ATTRIBUTE_UNUSED;
+print_section_stabs (bfd *abfd, const char *stabsect_name,
+		     const char *strsect_name ATTRIBUTE_UNUSED)
 {
   int i;
-  unsigned file_string_table_offset = 0, next_file_string_table_offset = 0;
+  unsigned file_string_table_offset = 0;
+  unsigned next_file_string_table_offset = 0;
   bfd_byte *stabp, *stabs_end;
 
   stabp = stabs;
@@ -1980,10 +1940,7 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
 }
 
 static void
-dump_section_stabs (abfd, stabsect_name, strsect_name)
-     bfd *abfd;
-     char *stabsect_name;
-     char *strsect_name;
+dump_section_stabs (bfd *abfd, char *stabsect_name, char *strsect_name)
 {
   asection *s;
 
@@ -2016,8 +1973,7 @@ dump_section_stabs (abfd, stabsect_name, strsect_name)
 
 
 static void
-dump_bfd_header (abfd)
-     bfd *abfd;
+dump_bfd_header (bfd *abfd)
 {
   char *comma = "";
 
@@ -2045,8 +2001,7 @@ dump_bfd_header (abfd)
 
 
 static void
-dump_bfd_private_header (abfd)
-bfd *abfd;
+dump_bfd_private_header (bfd *abfd)
 {
   bfd_print_private_bfd_data (abfd, stdout);
 }
@@ -2054,8 +2009,7 @@ bfd *abfd;
 /* Dump selected contents of ABFD.  */
 
 static void
-dump_bfd (abfd)
-     bfd *abfd;
+dump_bfd (bfd *abfd)
 {
   /* If we are adjusting section VMA's, change them all now.  Changing
      the BFD information is a hack.  However, we must do it, or
@@ -2106,7 +2060,7 @@ dump_bfd (abfd)
     disassemble_data (abfd);
   if (dump_debugging)
     {
-      PTR dhandle;
+      void *dhandle;
 
       dhandle = read_debugging_info (abfd, syms, symcount);
       if (dhandle != NULL)
@@ -2135,8 +2089,7 @@ dump_bfd (abfd)
 }
 
 static void
-display_bfd (abfd)
-     bfd *abfd;
+display_bfd (bfd *abfd)
 {
   char **matching;
 
@@ -2176,9 +2129,7 @@ display_bfd (abfd)
 }
 
 static void
-display_file (filename, target)
-     char *filename;
-     char *target;
+display_file (char *filename, char *target)
 {
   bfd *file, *arfile = (bfd *) NULL;
 
@@ -2225,8 +2176,7 @@ display_file (filename, target)
 /* Actually display the various requested regions.  */
 
 static void
-dump_data (abfd)
-     bfd *abfd;
+dump_data (bfd *abfd)
 {
   asection *section;
   bfd_byte *data = 0;
@@ -2256,11 +2206,13 @@ dump_data (abfd)
 
 	      if (bfd_section_size (abfd, section) == 0)
 		continue;
-	      data = (bfd_byte *) xmalloc ((size_t) bfd_section_size (abfd, section));
+	      data = (bfd_byte *) xmalloc ((size_t) bfd_section_size
+					   (abfd, section));
 	      datasize = bfd_section_size (abfd, section);
 
 
-	      bfd_get_section_contents (abfd, section, (PTR) data, 0, bfd_section_size (abfd, section));
+	      bfd_get_section_contents (abfd, section, (void *) data, 0,
+					bfd_section_size (abfd, section));
 
 	      if (start_address == (bfd_vma) -1
 		  || start_address < section->vma)
@@ -2350,9 +2302,7 @@ dump_data (abfd)
 /* Should perhaps share code and display with nm?  */
 
 static void
-dump_symbols (abfd, dynamic)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_boolean dynamic;
+dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
 {
   asymbol **current;
   long max;
@@ -2413,8 +2363,7 @@ dump_symbols (abfd, dynamic)
 }
 
 static void
-dump_relocs (abfd)
-     bfd *abfd;
+dump_relocs (bfd *abfd)
 {
   arelent **relpp;
   long relcount;
@@ -2476,8 +2425,7 @@ dump_relocs (abfd)
 }
 
 static void
-dump_dynamic_relocs (abfd)
-     bfd *abfd;
+dump_dynamic_relocs (bfd *abfd)
 {
   long relsize;
   arelent **relpp;
@@ -2511,11 +2459,7 @@ dump_dynamic_relocs (abfd)
 }
 
 static void
-dump_reloc_set (abfd, sec, relpp, relcount)
-     bfd *abfd;
-     asection *sec;
-     arelent **relpp;
-     long relcount;
+dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 {
   arelent **p;
   char *last_filename, *last_functionname;
@@ -2626,12 +2570,8 @@ dump_reloc_set (abfd, sec, relpp, relcount)
     }
 }
 
-int main PARAMS ((int, char **));
-
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   int c;
   char *target = default_target;
@@ -2668,7 +2608,8 @@ main (argc, argv)
 	case 'M':
 	  if (disassembler_options)
 	    /* Ignore potential memory leak for now.  */
-	    disassembler_options = concat (disassembler_options, ",", optarg, NULL);
+	    disassembler_options = concat (disassembler_options, ",",
+					   optarg, NULL);
 	  else
 	    disassembler_options = optarg;
 	  break;
