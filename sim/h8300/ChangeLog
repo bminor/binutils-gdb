@@ -1,8 +1,13 @@
+2003-06-05  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_fetch_register): Handle SBR, VBR, MACH, MACL.
+	(sim_store_register): Ditto.
+
 2003-06-04  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_info): Fix typo in output.
 
-	* h8300/compile.c (set_h8300h): Replace 'flag' arguments
+	* compile.c (set_h8300h): Replace 'flag' arguments
 	with a bfd_machine argument, and decode it inline.
 	Check for bfd_mach_h8300hn and bfd_mach_h8300sn.
 

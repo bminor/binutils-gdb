@@ -4569,9 +4569,6 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
   init_pointers (sd);
   switch (rn)
     {
-    case PC_REGNUM:
-      h8_set_pc (sd, intval);
-      break;
     default:
       (*sim_callback->printf_filtered) (sim_callback, 
 					"sim_store_register: bad regnum %d.\n",
@@ -4586,20 +4583,33 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
     case R7_REGNUM:
       h8_set_reg (sd, rn, intval);
       break;
+    case PC_REGNUM:
+      h8_set_pc (sd, intval);
+      break;
     case CCR_REGNUM:
       h8_set_ccr (sd, intval);
       break;
     case EXR_REGNUM:
       h8_set_exr (sd, intval);
       break;
+    case SBR_REGNUM:
+      h8_set_sbr (sd, intval);
+      break;
+    case VBR_REGNUM:
+      h8_set_vbr (sd, intval);
+      break;
+    case MACH_REGNUM:
+      h8_set_mach (sd, intval);
+      break;
+    case MACL_REGNUM:
+      h8_set_macl (sd, intval);
+      break;
     case CYCLE_REGNUM:
       h8_set_cycles (sd, longval);
       break;
-
     case INST_REGNUM:
       h8_set_insts (sd, longval);
       break;
-
     case TICK_REGNUM:
       h8_set_ticks (sd, longval);
       break;
@@ -4633,6 +4643,18 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
       break;
     case PC_REGNUM:
       v = h8_get_pc (sd);
+      break;
+    case SBR_REGNUM:
+      v = h8_get_sbr (sd);
+      break;
+    case VBR_REGNUM:
+      v = h8_get_vbr (sd);
+      break;
+    case MACH_REGNUM:
+      v = h8_get_mach (sd);
+      break;
+    case MACL_REGNUM:
+      v = h8_get_macl (sd);
       break;
     case R0_REGNUM:
     case R1_REGNUM:
