@@ -2384,16 +2384,8 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 
       if (h->plt.refcount <= 0
 	  || h->root.root.string[0] != '.'
-	  || h->root.root.string[1] == '\0'
-	  || (! info->shared
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0))
+	  || h->root.root.string[1] == '\0')
 	{
-	  /* This case can occur if we saw a PLT reloc in an input
-	     file, but the symbol was never referred to by a dynamic
-	     object, or if all references were garbage collected.  In
-	     such a case, we don't actually need to build a procedure
-	     linkage table entry.  */
 	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  return true;
@@ -2426,6 +2418,25 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 	      return false;
 	    }
 	}
+
+      while (fdh->root.type == bfd_link_hash_indirect
+	     || fdh->root.type == bfd_link_hash_warning)
+	fdh = (struct elf_link_hash_entry *) fdh->root.u.i.link;
+
+      if (! info->shared
+	  && (fdh->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+	  && (fdh->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
+	{
+	  /* This case can occur if we saw a PLT reloc in an input
+	     file, but the symbol was never referred to by a dynamic
+	     object, or if all references were garbage collected.  In
+	     such a case, we don't actually need to build a procedure
+	     linkage table entry.  */
+	  h->plt.offset = (bfd_vma) -1;
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	  return true;
+	}
+
       return true;
     }
   else
