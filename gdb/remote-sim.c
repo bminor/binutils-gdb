@@ -270,8 +270,9 @@ static void
 #ifdef ANSI_PROTOTYPES
 gdb_os_vprintf_filtered (host_callback *p, const char *format, void *ap)
 #else
-gdb_os_vprintf_filtered (p, ap)
+gdb_os_vprintf_filtered (p, format, ap)
      host_callback *p;
+     char *format;
      void *ap;
 #endif
 {
@@ -285,8 +286,9 @@ static void
 #ifdef ANSI_PROTOTYPES
 gdb_os_evprintf_filtered (host_callback *p, const char *format, void *ap)
 #else
-gdb_os_vprintf_filtered (p, ap)
+gdb_os_evprintf_filtered (p, format, ap)
      host_callback *p;
+     char *format;
      void *ap;
 #endif
 {

@@ -1,3 +1,19 @@
+Thu Mar 20 20:52:04 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* remote-sim.c (gdb_os_vprintf_filtered): Fix to work with non-ANSI
+	compilers.
+	(gdb_os_evprintf_filtered): Similarly.
+	
+Wed Mar 19 16:13:22 1997  Geoffrey Noer  <noer@pizza.cygnus.com>
+
+	New UnixWare 2.1 configuration
+	* config/i386/i386v42mp.mt: new
+	* config/i386/i386v42mp.mh: new
+	* config/i386/tm-i386v42mp.h: new
+	* config/i386/nm-i386v42mp.h: new
+	* configure.tgt: added new entries
+	* configure.host: added new entries
+
 start-sanitize-gdbtk
 	Wed Mar 19 15:16:17 1997  Martin M. Hunt  <hunt@onions.cygnus.com>
 
@@ -91,6 +107,7 @@ Wed Mar 12 14:29:52 1997  Tom Tromey  <tromey@cygnus.com>
 	LIBS.
 
 end-sanitize-gdbtk
+
 Tue Mar 11 07:25:27 1997  Mark Alexander  <marka@cygnus.com>
 
 	First cut at supporting simulators in gdbserver:
