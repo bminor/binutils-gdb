@@ -1,3 +1,7 @@
+2004-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_debug_lines): Fix typo in error message.
+
 2004-10-26  Mark Mitchell  <mark@codesourcery.com>
 
 	* readelf.c (get_note_type): Handle notes not in core files.

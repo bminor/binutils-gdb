@@ -6875,7 +6875,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	 with this block of line number information.  */
       if (comp_unit >= num_debug_line_pointer_sizes)
 	{
-	  error (_("Not enough comp units for .debug_lines section\n"));
+	  error (_("Not enough comp units for .debug_line section\n"));
 	  return 0;
 	}
       else
