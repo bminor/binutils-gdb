@@ -1199,7 +1199,18 @@ get_prev_frame (struct frame_info *this_frame)
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
 
+  /* tausq/2004-12-07: Dummy frames are skipped because it doesn't make much
+     sense to stop unwinding at a dummy frame.  One place where a dummy
+     frame may have an address "inside_main_func" is on HPUX.  On HPUX, the
+     pcsqh register (space register for the instruction at the head of the
+     instruction queue) cannot be written directly; the only way to set it
+     is to branch to code that is in the target space.  In order to implement
+     frame dummies on HPUX, the called function is made to jump back to where 
+     the inferior was when the user function was called.  If gdb was inside 
+     the main function when we created the dummy frame, the dummy frame will 
+     point inside the main function.  */
   if (this_frame->level >= 0
+      && get_frame_type (this_frame) != DUMMY_FRAME
       && !backtrace_past_main
       && inside_main_func (this_frame))
     /* Don't unwind past main().  Note, this is done _before_ the

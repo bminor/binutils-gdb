@@ -1,5 +1,10 @@
 2004-12-07  Randolph Chung  <tausq@debian.org>
 
+	* frame.c (get_prev_frame): Don't terminate unwinding at main if we
+	are unwinding through a dummy frame.
+
+2004-12-07  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.h (gdbarch_tdep): Add unwind_adjust_stub method.
 	* hppa-hpux-tdep.c (hppa_hpux_unwind_adjust_stub): New function.
 	(hppa_hpux_init_abi) Set unwind_adjust_stub method.
