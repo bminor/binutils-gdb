@@ -106,10 +106,6 @@ typedef bfd_vma CORE_ADDR;
 
 #endif /* ! LONGEST */
 
-extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
-extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
-
-
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif

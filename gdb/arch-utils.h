@@ -59,4 +59,8 @@ extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer
    changed. */
 extern gdbarch_prologue_frameless_p_ftype generic_prologue_frameless_p;
 
+/* The only possible cases for inner_than. */
+extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
+extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
+
 #endif

@@ -144,6 +144,25 @@ generic_prologue_frameless_p (CORE_ADDR ip)
 }
 
 
+/* Helper functions for INNER_THAN */
+
+int
+core_addr_lessthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs < rhs);
+}
+
+int
+core_addr_greaterthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs > rhs);
+}
+
+
 /* */
 
 extern initialize_file_ftype __initialize_gdbarch_utils;

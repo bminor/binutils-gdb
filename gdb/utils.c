@@ -3010,20 +3010,3 @@ preg_nz (reg)
     }
   return preg_str;
 }
-
-/* Helper functions for INNER_THAN */
-int
-core_addr_lessthan (lhs, rhs)
-     CORE_ADDR lhs;
-     CORE_ADDR rhs;
-{
-  return (lhs < rhs);
-}
-
-int
-core_addr_greaterthan (lhs, rhs)
-     CORE_ADDR lhs;
-     CORE_ADDR rhs;
-{
-  return (lhs > rhs);
-}
