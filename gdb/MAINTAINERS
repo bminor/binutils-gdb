@@ -35,7 +35,7 @@ powerpc target		Kevin Buettner		kevinb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
 arm target		Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@cygnus.com
-			Scott Bambrough	scottb@netwinder.org
+			Scott Bambrough		scottb@netwinder.org
 m32r target		Michael Snyder		msnyder@cygnus.com
 IA-64 target		Kevin Buettner		kevinb@cygnus.com
 
@@ -50,8 +50,8 @@ maintainers when resolving more generic problems.
 The host maintainer ensures that gdb (including mmalloc) can be built
 as a cross debugger on their platform.
 
-hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
-djgpp native		Eli Zaretskii		eliz@gnu.org
+hp testsuite (gdb.hp)	*Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
+djgpp native		*Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@cygnus.com
 MS Windows (N.T., CE, '00) host & native
 			Chris Faylor		cgf@cygnus.com
@@ -85,9 +85,9 @@ defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
 svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
-coff reader		Philippe De Muyter	phdm@macqel.be
+coff reader		*Philippe De Muyter	phdm@macqel.be
 remote.c		Andrew Cagney		cagney@cygnus.com
-			J.T. Conklin		jtc@redback.com
+			*J.T. Conklin		jtc@redback.com
 sds protocol		Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@cygnus.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
@@ -118,7 +118,7 @@ mmalloc			ALL Host maintainers
 
 		Write After Approval
 
-J.T. Conklin					jtc@redback.com
+*J.T. Conklin					jtc@redback.com
 Jim Kingdon					kingdon@redhat.com
 Jason Molenda					jsm@cygnus.com
 H.J. Lu						hjl@lucon.org
@@ -127,3 +127,5 @@ Nick Clifton					nickc@cygnus.com
 
 * Indicates folks we need to get Kerberos/ssh accounts ready so they
 can write in the source tree
+
++ Indicates folks that have been caught up in a paper trail.
