@@ -39,25 +39,57 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "language.h"
 
-#define MAX_PATH_SIZE 256		/* FIXME: Should be dynamic */
+#define MAX_PATH_SIZE 1024		/* FIXME: Should be dynamic */
 
-/* FIXME: This is a terrible hack for shared library support under OSF/1.
-   The main problem is that the needed definitions are not contained in
-   the system header files.
-   The ldr_* routines described in loader(3) would be the way to go here.
-   But they do not work for arbitrary target processes (as documented).  */
+/* When handling shared libraries, GDB has to find out the pathnames
+   of all shared libraries that are currently loaded (to read in their
+   symbols) and where the shared libraries are loaded in memory
+   (to relocate them properly from their prelinked addresses to the
+   current load address).
+
+   Under OSF/1 there are two possibilities to get at this information:
+   1) Peek around in the runtime loader structures.
+      These are not documented, and they are not defined in the system
+      header files. The definitions below were obtained by experimentation,
+      but they seem stable enough.
+   2) Use the undocumented libxproc.a library, which contains the
+      equivalent ldr_* routines.
+      This approach is somewhat cleaner, but it requires that the GDB
+      executable is dynamically linked. In addition it requires a
+      NAT_CLIBS= -lxproc -Wl,-expect_unresolved,ldr_process_context
+      linker specification for GDB and all applications that are using
+      libgdb.
+   We will use the peeking approach until it becomes unwieldy.  */
 
 #ifndef USE_LDR_ROUTINES
+
+/* Definition of runtime loader structures, found by experimentation.  */
 #define RLD_CONTEXT_ADDRESS	0x3ffc0000000
 
 typedef struct
 {
 	CORE_ADDR next;
 	CORE_ADDR previous;
-	CORE_ADDR unknown;
+	CORE_ADDR unknown1;
 	char *module_name;
 	CORE_ADDR modinfo_addr;
+	long module_id;
+	CORE_ADDR unknown2;
+	CORE_ADDR unknown3;
+	long region_count;
+	CORE_ADDR regioninfo_addr;
 } ldr_module_info_t;
+
+typedef struct
+{
+	long unknown1;
+	CORE_ADDR regionname_addr;
+	long protection;
+	CORE_ADDR vaddr;
+	CORE_ADDR mapaddr;
+	long size;
+	long unknown2[5];
+} ldr_region_info_t;
 
 typedef struct
 {
@@ -68,20 +100,53 @@ typedef struct
 } ldr_context_t;
 
 static ldr_context_t ldr_context;
+
 #else
+
 #include <loader.h>
+static ldr_process_t fake_ldr_process;
+
+/* Called by ldr_* routines to read memory from the current target.  */
+
+static int ldr_read_memory PARAMS ((CORE_ADDR, char *, int, int));
+
+static int
+ldr_read_memory (memaddr, myaddr, len, readstring)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int readstring;
+{
+  int result;
+  char *buffer;
+
+  if (readstring)
+    {
+      target_read_string (memaddr, &buffer, len, &result);
+      if (result == 0)
+        strcpy (myaddr, buffer);
+      free (buffer);
+    }
+  else
+    result = target_read_memory (memaddr, myaddr, len);
+
+  if (result != 0)
+    result = -result;
+  return result;
+}
+
 #endif
 
 /* Define our own link_map structure.
    This will help to share code with solib.c.  */
 
 struct link_map {
-  CORE_ADDR l_addr;			/* address at which object mapped */
+  CORE_ADDR l_offset;			/* prelink to load address offset */
   char *l_name;				/* full name of loaded object */
   ldr_module_info_t module_info;	/* corresponding module info */
 };
 
-#define LM_ADDR(so) ((so) -> lm.l_addr)
+#define LM_OFFSET(so) ((so) -> lm.l_offset)
 #define LM_NAME(so) ((so) -> lm.l_name)
 
 struct so_list {
@@ -209,10 +274,10 @@ solib_map_sections (so)
   for (p = so -> sections; p < so -> sections_end; p++)
     {
       /* Relocate the section binding addresses as recorded in the shared
-	 object's file by the base address to which the object was actually
-	 mapped. */
-      p -> addr += (CORE_ADDR) LM_ADDR (so);
-      p -> endaddr += (CORE_ADDR) LM_ADDR (so);
+	 object's file by the offset to get the address to which the
+	 object was actually mapped.  */
+      p -> addr += LM_OFFSET (so);
+      p -> endaddr += LM_OFFSET (so);
       so -> lmend = (CORE_ADDR) max (p -> endaddr, so -> lmend);
       if (STREQ (p -> the_bfd_section -> name, ".text"))
 	{
@@ -251,9 +316,13 @@ first_link_map_member ()
   ldr_module_t mod_id = LDR_NULL_MODULE;
   size_t retsize;
 
-  if (ldr_next_module(inferior_pid, &mod_id) != 0
+  fake_ldr_process = ldr_core_process ();
+  ldr_set_core_reader (ldr_read_memory);
+  ldr_xdetach (fake_ldr_process);
+  if (ldr_xattach (fake_ldr_process) != 0
+      || ldr_next_module(fake_ldr_process, &mod_id) != 0
       || mod_id == LDR_NULL_MODULE
-      || ldr_inq_module(inferior_pid, mod_id,
+      || ldr_inq_module(fake_ldr_process, mod_id,
 			&first_lm.module_info, sizeof(ldr_module_info_t),
 			&retsize) != 0)
     return lm;
@@ -287,12 +356,12 @@ next_link_map_member (so_list_ptr)
   struct link_map *lm = NULL;
   static struct link_map next_lm;
 #ifdef USE_LDR_ROUTINES
-  ldr_module_t mod_id = lm->module_info.lmi_modid;
+  ldr_module_t mod_id = so_list_ptr->lm.module_info.lmi_modid;
   size_t retsize;
 
-  if (ldr_next_module(inferior_pid, &mod_id) != 0
+  if (ldr_next_module(fake_ldr_process, &mod_id) != 0
       || mod_id == LDR_NULL_MODULE
-      || ldr_inq_module(inferior_pid, mod_id,
+      || ldr_inq_module(fake_ldr_process, mod_id,
 			&next_lm.module_info, sizeof(ldr_module_info_t),
 			&retsize) != 0)
     return lm;
@@ -327,10 +396,21 @@ xfer_link_map_member (so_list_ptr, lm)
      struct so_list *so_list_ptr;
      struct link_map *lm;
 {
+  int i;
   so_list_ptr->lm = *lm;
 
-  /* OSF/1 has absolute addresses in shared libraries.  */
-  LM_ADDR (so_list_ptr) = 0;
+  /* OSF/1 shared libraries are pre-linked to particular addresses,
+     but the runtime loader may have to relocate them if the
+     address ranges of the libraries used by the target executable clash,
+     or if the target executable is linked with the -taso option.
+     The offset is the difference between the address where the shared
+     library is mapped and the pre-linked address of the shared library.
+
+     FIXME:  GDB is currently unable to relocate the shared library
+     sections by different offsets. If sections are relocated by
+     different offsets, put out a warning and use the offset of the
+     first section for all remaining sections.  */
+  LM_OFFSET (so_list_ptr) = 0;
 
   /* There is one entry that has no name (for the inferior executable)
      since it is not a shared object. */
@@ -343,6 +423,26 @@ xfer_link_map_member (so_list_ptr, lm)
       if (len > MAX_PATH_SIZE)
 	len = MAX_PATH_SIZE;
       strncpy (so_list_ptr->so_name, LM_NAME (so_list_ptr), MAX_PATH_SIZE);
+      so_list_ptr->so_name[MAX_PATH_SIZE - 1] = '\0';
+
+      for (i = 0; i < lm->module_info.lmi_nregion; i++)
+	{
+	  ldr_region_info_t region_info;
+	  size_t retsize;
+	  CORE_ADDR region_offset;
+
+	  if (ldr_inq_region (fake_ldr_process, lm->module_info.lmi_modid,
+			      i, &region_info, sizeof (region_info),
+			      &retsize) != 0)
+	    break;
+	  region_offset = (CORE_ADDR) region_info.lri_mapaddr
+			  - (CORE_ADDR) region_info.lri_vaddr;
+	  if (i == 0)
+	    LM_OFFSET (so_list_ptr) = region_offset;
+	  else if (LM_OFFSET (so_list_ptr) != region_offset)
+	    warning ("cannot handle shared library relocation for %s (%s)",
+		     so_list_ptr->so_name, region_info.lri_name);
+	}
 #else
       int errcode;
       char *buffer;
@@ -353,8 +453,36 @@ xfer_link_map_member (so_list_ptr, lm)
 	       safe_strerror (errcode));
       strncpy (so_list_ptr->so_name, buffer, MAX_PATH_SIZE - 1);
       free (buffer);
-#endif
       so_list_ptr->so_name[MAX_PATH_SIZE - 1] = '\0';
+
+      for (i = 0; i < lm->module_info.region_count; i++)
+	{
+	  ldr_region_info_t region_info;
+	  CORE_ADDR region_offset;
+
+	  if (target_read_memory (lm->module_info.regioninfo_addr
+				   + i * sizeof (region_info),
+				  (char *) &region_info,
+				  sizeof (region_info)) != 0)
+	    break;
+	  region_offset = region_info.mapaddr - region_info.vaddr;
+	  if (i == 0)
+	    LM_OFFSET (so_list_ptr) = region_offset;
+	  else if (LM_OFFSET (so_list_ptr) != region_offset)
+	    {
+	      char *region_name;
+	      target_read_string (region_info.regionname_addr, &buffer,
+				  MAX_PATH_SIZE - 1, &errcode);
+	      if (errcode == 0)
+		region_name = buffer;
+	      else
+		region_name = "??";
+	      warning ("cannot handle shared library relocation for %s (%s)",
+		        so_list_ptr->so_name, region_name);
+	      free (buffer);
+	    }
+	}
+#endif
 
       solib_map_sections (so_list_ptr);
     }

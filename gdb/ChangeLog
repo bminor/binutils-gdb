@@ -1,3 +1,13 @@
+Thu Nov  3 01:23:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* osfsolib.c (solib_map_sections, first_link_map_member,
+	next_link_map_member, xfer_link_map_member):  Retrieve and use
+	shared library relocation offset from runtime loader structures.
+	Use libxproc.a routines to get a working version if
+	USE_LDR_ROUTINES is defined.
+	* README:  Remove item about shared library relocation for
+	Alpha OSF/1.
+
 Wed Nov  2 15:05:39 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* c-exp.y (yylex): scan template names, and scan nested class
