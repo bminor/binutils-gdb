@@ -1,3 +1,25 @@
+2002-05-21  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-dll.c (autofilter_liblist): Add more system libs excluded by
+	default.
+	(autofilter_objlist): Add crtbegin.o, crtend.o.
+
+2002-05-21  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (OPTION_EXCLUDE_LIBS): Add new define.
+	(longopts): Add new option --exclude-libs.
+	(gld_${EMULATION_NAME}_list_options): Give quick help about it.
+	(gld_${EMULATION_NAME}_parse_args): Use it.
+	* pe-dll.h (pe_dll_add_excludes): Add second param to prototype.
+	* pe-dll.c (exclude_list_struct): Add field type to distinguish symbols
+	from whole archives.
+	(pe_dll_add_excludes): Set excludes->type.
+	(auto_export): Add new variable libname and set to archive basename if
+	abfd.  Use it when filtering default and user-specified libarary
+	excludes.  Let string "ALL" mean all libs when filtering user-specified
+	libs.
+	* ld.texinfo: Document --exclude-libs.
+
 2002-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldemul.c (ldemul_new_vers_pattern): New function.

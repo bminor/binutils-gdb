@@ -36,7 +36,7 @@ extern int pe_dll_compat_implib;
 extern int pe_dll_extra_pe_debug;
 
 extern void pe_dll_id_target PARAMS ((const char *));
-extern void pe_dll_add_excludes PARAMS ((const char *));
+extern void pe_dll_add_excludes PARAMS ((const char *, const int));
 extern void pe_dll_generate_def_file PARAMS ((const char *));
 extern void pe_dll_generate_implib PARAMS ((def_file *, const char *));
 extern void pe_process_import_defs PARAMS ((bfd *, struct bfd_link_info *));

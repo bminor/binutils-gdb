@@ -221,6 +221,7 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_DLL_ENABLE_AUTO_IMPORT	(OPTION_NO_DEFAULT_EXCLUDES + 1)
 #define OPTION_DLL_DISABLE_AUTO_IMPORT	(OPTION_DLL_ENABLE_AUTO_IMPORT + 1)
 #define OPTION_ENABLE_EXTRA_PE_DEBUG	(OPTION_DLL_DISABLE_AUTO_IMPORT + 1)
+#define OPTION_EXCLUDE_LIBS		(OPTION_ENABLE_EXTRA_PE_DEBUG + 1)
 
 static struct option longopts[] = {
   /* PE options */
@@ -247,6 +248,7 @@ static struct option longopts[] = {
   {"output-def", required_argument, NULL, OPTION_OUT_DEF},
   {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
   {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
+  {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},	
   {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
   {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
   {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
@@ -333,6 +335,7 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
   fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
   fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
+  fprintf (file, _("  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"));	
   fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --out-implib <file>                Generate import library\n"));
@@ -586,7 +589,10 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       pe_dll_export_everything = 1;
       break;
     case OPTION_EXCLUDE_SYMBOLS:
-      pe_dll_add_excludes (optarg);
+      pe_dll_add_excludes (optarg, 0);
+      break;
+    case OPTION_EXCLUDE_LIBS:
+      pe_dll_add_excludes (optarg, 1);
       break;
     case OPTION_KILL_ATS:
       pe_dll_kill_ats = 1;

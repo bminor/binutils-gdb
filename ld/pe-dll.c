@@ -231,6 +231,9 @@ static autofilter_entry_type autofilter_liblist[] =
   { "libgcc.", 7 },
   { "libstdc++.", 10 },
   { "libmingw32.", 11 },
+  { "libg2c.", 7 },
+  { "libsupc++.", 10 },
+  { "libobjc.", 8 }, 
   { NULL, 0 }
 };
 
@@ -244,6 +247,8 @@ static autofilter_entry_type autofilter_objlist[] =
   { "gcrt0.o", 7 },
   { "gcrt1.o", 7 },
   { "gcrt2.o", 7 },
+  { "crtbegin.o", 10 },
+  { "crtend.o", 8 },
   { NULL, 0 }
 };
 
@@ -368,14 +373,16 @@ typedef struct exclude_list_struct
   {
     char *string;
     struct exclude_list_struct *next;
+    int type;	
   }
 exclude_list_struct;
 
 static struct exclude_list_struct *excludes = 0;
 
 void
-pe_dll_add_excludes (new_excludes)
+pe_dll_add_excludes (new_excludes, type)
      const char *new_excludes;
+     const int type;	
 {
   char *local_copy;
   char *exclude_string;
@@ -391,12 +398,14 @@ pe_dll_add_excludes (new_excludes)
 		     xmalloc (sizeof (struct exclude_list_struct)));
       new_exclude->string = (char *) xmalloc (strlen (exclude_string) + 1);
       strcpy (new_exclude->string, exclude_string);
+      new_exclude->type = type;
       new_exclude->next = excludes;
       excludes = new_exclude;
     }
 
   free (local_copy);
 }
+
 
 /* abfd is a bfd containing n (or NULL)
    It can be used for contextual checks.  */
@@ -410,6 +419,9 @@ auto_export (abfd, d, n)
   int i;
   struct exclude_list_struct *ex;
   autofilter_entry_type *afptr;
+  const char * libname = 0;
+  if (abfd && abfd->my_archive)
+    libname = lbasename (abfd->my_archive->filename);
 
   /* We should not re-export imported stuff.  */
   if (strncmp (n, "_imp__", 6) == 0)
@@ -429,14 +441,14 @@ auto_export (abfd, d, n)
 		n, abfd, abfd->my_archive);
 
       /* First of all, make context checks:
-         Don't export anything from libgcc.  */
-      if (abfd && abfd->my_archive)
+         Don't export anything from standard libs.  */
+      if (libname)	
 	{
 	  afptr = autofilter_liblist;
 
 	  while (afptr->name)
 	    {
-	      if (strstr (abfd->my_archive->filename, afptr->name))
+	      if (strncmp (libname, afptr->name, afptr->len) == 0 )
 		return 0;
 	      afptr++;
 	    }
@@ -495,8 +507,17 @@ auto_export (abfd, d, n)
     }
 
   for (ex = excludes; ex; ex = ex->next)
-    if (strcmp (n, ex->string) == 0)
-      return 0;
+    {
+      if (ex->type == 1) /* exclude-libs */
+	{
+	  if (libname
+	      && ((strcmp (libname, ex->string) == 0)
+		   || (strcasecmp ("ALL", ex->string) == 0)))
+	    return 0;
+	}
+      else if (strcmp (n, ex->string) == 0)
+        return 0;	      		
+    }
 
   return 1;
 }

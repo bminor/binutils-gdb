@@ -1665,6 +1665,14 @@ These cygwin-excludes are: @code{_cygwin_dll_entry@@12},
 Specifies a list of symbols which should not be automatically
 exported.  The symbol names may be delimited by commas or colons.
 
+@kindex --exclude-libs
+@item --exclude-libs @var{lib},@var{lib},...
+Specifies a list of archive libraries from which symbols should not be automatically
+exported. The library names may be delimited by commas or colons.  Specifying
+@code{--exclude-libs ALL} excludes symbols in all archive libraries from
+automatic export. Symbols explicitly listed in a .def file are still exported,
+regardless of this option. 
+
 @kindex --file-alignment
 @item --file-alignment
 Specify the file alignment.  Sections in the file will always begin at
