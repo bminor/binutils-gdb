@@ -1,3 +1,9 @@
+2001-08-17  Keith Seitz  <keiths@redhat.com>
+
+	* Makefile.in (varobj_h): Define.
+	(mi-cmd-var.o): Depends on varobj_h.
+	(gdbtk-varobj.o): Change varobj.h to $(varobj_h).
+
 2001-08-16  Keith Seitz  <keiths@redhat.com>
 
 	* configure.in (GDBTK_SRC_DIR): We must have autoconf
