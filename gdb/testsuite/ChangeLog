@@ -1,3 +1,11 @@
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+        
+        * configure.in: Don't generate config.h from config.hin.
+        * configure: Regenerate.
+        * config.hin: Remove file.
+        * gdb.mi/pthreads.c: Remove include of config.h, and other ifdefs.
+        * gdb.threads/pthreads.c: Ditto.
+
 2003-08-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	From Kei Sakamoto <sakamoto.kei@renesas.com>:
