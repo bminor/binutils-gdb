@@ -2677,7 +2677,10 @@ shmedia_build_Mytes (shmedia_opcode_info *opcode,
 
 	    /* Don't allow complex expressions here.  */
 	    if (opjp->immediate.X_op_symbol != NULL)
-	      return 0;
+	      {
+		as_bad(_("invalid operand: expression in PT target"));
+		return 0;
+	      }
 
 	    if (opjp->reloctype == BFD_RELOC_32_PLT_PCREL)
 	      init = max = min = SH64PCRELPLT;
@@ -2714,7 +2717,10 @@ shmedia_build_Mytes (shmedia_opcode_info *opcode,
 
 	    /* Don't allow complex expressions here.  */
 	    if (opjp->immediate.X_op_symbol != NULL)
-	      return 0;
+	      {
+		as_bad(_("invalid operand: expression in PT target"));
+		return 0;
+	      }
 
 	    if (opjp->reloctype == BFD_RELOC_32_PLT_PCREL)
 	      init = max = min = SH64PCRELPLT;
