@@ -41,6 +41,9 @@ extern int errno;
 extern   int  sys_nerr;
 extern char *sys_errlist[];
 
+/* VARARGS*/
+static void finfo ();
+
 /*
  %F error is fatal
  %P print progam name
@@ -51,10 +54,32 @@ extern char *sys_errlist[];
  %T symbol table entry
  %X no object output, fail return
  %V hex bfd_vma
+ %v hex bfd_vma, no leading zeros
  %C Clever filename:linenumber 
  %R info about a relent
  %
 */
+extern bfd *output_bfd;
+
+static char *
+demangle(string, remove_underscore)
+char *string;
+int remove_underscore;
+{
+  char *res;
+  if (remove_underscore && output_bfd) 
+  {
+    if (bfd_get_symbol_leading_char(output_bfd) == string[0])
+     string++;
+  }
+  /* Note that there's a memory leak here, we keep buying memory
+     for demangled names, and never free.  But if you have so many
+     errors that you run out of VM with the error messages, then
+     there's something up */
+  res = cplus_demangle(string, DMGL_ANSI|DMGL_PARAMS);
+  return res ? res : string;
+}
+
 static void
 vfinfo(fp, fmt, arg)
      FILE *fp;
@@ -83,6 +108,19 @@ vfinfo(fp, fmt, arg)
 	 fprintf_vma(fp, value);
        }
 	break;
+      case 'v':
+	{
+	  char buf[100];
+	  char *p = buf;
+	  bfd_vma value = va_arg (arg, bfd_vma);
+	  sprintf_vma (p, value);
+	  while (*p == '0')
+	    p++;
+	  if (!*p)
+	    p--;
+	  fputs (p, fp);
+	}
+	break;
        case 'T':
        {
 	 asymbol *symbol = va_arg(arg, asymbol *);
@@ -91,24 +129,16 @@ vfinfo(fp, fmt, arg)
 
 	    
 	   asection *section = symbol->section;
-	   char *cplusname =
-	       cplus_demangle(symbol->name, DMGL_ANSI|DMGL_PARAMS);
+	   char *cplusname =   demangle(symbol->name, 1);
 	   CONST char *section_name =  section->name;
 	   if (section != &bfd_und_section) 
 	   {
-	     fprintf(fp,"%s (%s)", cplusname ? cplusname :
-		     symbol->name, section_name);
+	     fprintf(fp,"%s (%s)", cplusname, section_name);
 	   }
 	   else 
 	   {
-	     fprintf(fp,"%s", cplusname ? cplusname : symbol->name);
+	     fprintf(fp,"%s", cplusname);
 	   }
-	    
-	   if (cplusname) 
-	   {
-	     free(cplusname);
-	   }
-	    
 	 }
 	 else 
 	 {
@@ -173,12 +203,10 @@ vfinfo(fp, fmt, arg)
        {
 	 arelent *relent = va_arg(arg, arelent *);
 	
-	 fprintf(fp,"%s+0x%x (type %s)",
-		 (*(relent->sym_ptr_ptr))->name,
-		 relent->addend,
-		 relent->howto->name);
-	
-
+	 finfo (fp, "%s+0x%v (type %s)",
+		(*(relent->sym_ptr_ptr))->name,
+		relent->addend,
+		relent->howto->name);
        }
 	break;
 	
@@ -209,28 +237,19 @@ vfinfo(fp, fmt, arg)
 	    filename = abfd->filename;
 	   if (functionname != (char *)NULL) 
 	   {
-	     cplus_name = cplus_demangle(functionname, DMGL_ANSI|DMGL_PARAMS);
-	     fprintf(fp,"%s:%u: (%s)", filename, linenumber,
-		     cplus_name? cplus_name: functionname);
-	     if (cplus_name) 
-	      free(cplus_name);
-		  
-
+	     /* There is no initial '_' to remove here. */
+	     cplus_name = demangle(functionname, 0);
+	     fprintf(fp,"%s:%u: (%s)", filename, linenumber, cplus_name);
 	   }
 		
 	   else if (linenumber != 0) 
 	    fprintf(fp,"%s:%u", filename, linenumber);
 	   else
-	    fprintf(fp,"%s(%s+%0x)", filename,
-		    section->name,
-		    offset);
+	     finfo (fp, "%s(%s+0x%v)", filename, section->name, offset);
 
 	 }
-	 else {
-	   fprintf(fp,"%s(%s+%0x)", abfd->filename,
-		   section->name,
-		   offset);
-	 }
+	 else
+	   finfo (fp, "%s(%s+0x%v)", abfd->filename, section->name, offset);
        }
 	break;
 		
@@ -301,14 +320,14 @@ unsigned int line;
    whose contents concatenate those of S1, S2, S3.  */
 
 char *
-DEFUN(concat, (s1, s2, s3),
-      CONST char *s1 AND
-      CONST char *s2 AND
-      CONST char *s3)
+concat (s1, s2, s3)
+     CONST char *s1;
+     CONST char *s2;
+     CONST char *s3;
 {
-  bfd_size_type len1 = strlen (s1);
-  bfd_size_type len2 = strlen (s2);
-  bfd_size_type len3 = strlen (s3);
+  size_t len1 = strlen (s1);
+  size_t len2 = strlen (s2);
+  size_t len3 = strlen (s3);
   char *result = ldmalloc (len1 + len2 + len3 + 1);
 
   if (len1 != 0)
@@ -324,8 +343,8 @@ DEFUN(concat, (s1, s2, s3),
 
 
 PTR
-DEFUN(ldmalloc, (size),
-bfd_size_type size)
+ldmalloc (size)
+     size_t size;
 {
   PTR result =  malloc ((int)size);
 
@@ -336,17 +355,17 @@ bfd_size_type size)
 } 
 
 PTR
-DEFUN(xmalloc,(size),
-int size)
+xmalloc (size)
+     int size;
 {
 return ldmalloc(size);
 }
 
 
 PTR
-DEFUN(ldrealloc, (ptr, size),
-PTR ptr AND
-bfd_size_type size)
+ldrealloc (ptr, size)
+     PTR ptr;
+     size_t size;
 {
   PTR result =  realloc (ptr, (int)size);
 
@@ -356,12 +375,20 @@ bfd_size_type size)
   return result;
 } 
 
-
-
-char *DEFUN(buystring,(x),
-	    CONST char *CONST x)
+PTR
+xrealloc (ptr, size)
+     PTR ptr;
+     size_t size;
 {
-  bfd_size_type  l = strlen(x)+1;
+return ldrealloc(ptr, size);
+}
+
+
+char *
+buystring (x)
+     CONST char *CONST x;
+{
+  size_t l = strlen(x)+1;
   char *r = ldmalloc(l);
   memcpy(r, x,l);
   return r;
@@ -382,7 +409,19 @@ va_dcl
 }
 
 
-
+static void
+finfo (va_alist)
+     va_dcl
+{
+  char *fmt;
+  FILE *file;
+  va_list arg;
+  va_start (arg);
+  file = va_arg (arg, FILE *);
+  fmt = va_arg (arg, char *);
+  vfinfo (file, fmt, arg);
+  va_end (arg);
+}
 
 
 
@@ -391,18 +430,18 @@ va_dcl
  */
 
 void 
-DEFUN_VOID(print_space)
+print_space ()
 {
   fprintf(config.map_file, " ");
 }
 void 
-DEFUN_VOID(print_nl)
+print_nl ()
 {
   fprintf(config.map_file, "\n");
 }
 void 
-DEFUN(print_address,(value),
-      bfd_vma value)
+print_address (value)
+     bfd_vma value;
 {
   fprintf_vma(config.map_file, value);
 }
