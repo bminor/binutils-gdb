@@ -41,7 +41,7 @@ set seltests {
   {selective1 C 1.c {} {} {dropme1 dropme2} {}}
   {selective2 C 2.c {} {} {foo} {}}
   {selective3 C 2.c {-u foo} {foo} {{foo 0}} {}}
-  {selective4 C++ 3.cc {} {start foo__1A foo__1B} {bar__1A} {v850*-*-elf}}
+  {selective4 C++ 3.cc {} {start foo__1A foo__1B} {bar__1A} {}}
   {selective5 C++ 4.cc {} {} {foo__1B foo__1A} {}}
   {selective6 C++ 5.cc {} {} {foo__1B foo__1A dropme1__Fv dropme2__Fv} {*-*-*}}
 }
@@ -90,6 +90,11 @@ foreach testitem $seltests {
 	return
     }
 
+    # V850 targets need libgcc.a
+    if [istarget v850*-*-elf] {
+	set objfile "$objfile -L ../gcc -lgcc"
+    }
+    
     if ![ld_simple_link $ld $ldfile "$ldflags [join $ldargs] $objfile"] {
 	fail $testname
 	continue

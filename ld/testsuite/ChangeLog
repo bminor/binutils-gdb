@@ -1,5 +1,7 @@
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
+	* ld-selective/selective.exp: Link in libgcc when target is v850.
+
 	* ld-srec/srec.exp: Expect the srec_test to fail for ARM targets
 	because the -oformat linker command switch cannot be used.
 
