@@ -69,7 +69,7 @@
 #define PTRACE_EVENT_VFORK	2
 #define PTRACE_EVENT_CLONE	3
 #define PTRACE_EVENT_EXEC	4
-#define PTRACE_EVENT_VFORKDONE	5
+#define PTRACE_EVENT_VFORK_DONE	5
 #define PTRACE_EVENT_EXIT	6
 
 #endif /* PTRACE_EVENT_FORK */
@@ -314,7 +314,7 @@ child_follow_fork (int follow_child)
 
 	      ptrace (PTRACE_CONT, parent_pid, 0, 0);
 	      waitpid (parent_pid, &status, __WALL);
-	      if ((status >> 16) != PTRACE_EVENT_VFORKDONE)
+	      if ((status >> 16) != PTRACE_EVENT_VFORK_DONE)
 		warning ("Unexpected waitpid result %06x when waiting for "
 			 "vfork-done", status);
 	    }
