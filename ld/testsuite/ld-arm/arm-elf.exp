@@ -75,6 +75,12 @@ set armelftests {
     {"arm-rel31" "-static -T arm.ld" "" {arm-rel31.s}
      {{objdump -s arm-rel31.d}}
      "arm-rel31"}
+    {"TLS shared library" "-shared -T arm-lib.ld" "" {tls-lib.s}
+     {{objdump -fdw tls-lib.d} {objdump -Rw tls-lib.r}}
+     "tls-lib.so"}
+    {"TLS dynamic application" "-T arm-dyn.ld tmpdir/tls-lib.so" "" {tls-app.s}
+     {{objdump -fdw tls-app.d} {objdump -Rw tls-app.r}}
+     "tls-app"}
 }
 
 run_ld_link_tests $armelftests

@@ -1,3 +1,11 @@
+2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/tls-lib.s, ld-arm/tls-lib.d, ld-arm/tls-lib.r,
+	ld-arm/tls-app.s, ld-arm/tls-app.d, ld-arm/tls-app.r: New files.
+	* ld-arm/arm-lib.ld, ld-arm/arm-dyn.ld: Increase data segment
+	alignment.
+	* ld-arm/arm-elf.exp: Run TLS tests.
+
 2005-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 803

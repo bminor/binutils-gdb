@@ -4881,6 +4881,11 @@ arm_parse_reloc (void)
     MAP ("(target1)", BFD_RELOC_ARM_TARGET1),
     MAP ("(sbrel)", BFD_RELOC_ARM_SBREL32),
     MAP ("(target2)", BFD_RELOC_ARM_TARGET2),
+    MAP ("(tlsgd)", BFD_RELOC_ARM_TLS_GD32),
+    MAP ("(tlsldm)", BFD_RELOC_ARM_TLS_LDM32),
+    MAP ("(tlsldo)", BFD_RELOC_ARM_TLS_LDO32),
+    MAP ("(gottpoff)", BFD_RELOC_ARM_TLS_IE32),
+    MAP ("(tpoff)", BFD_RELOC_ARM_TLS_LE32),
     { NULL, 0,         BFD_RELOC_UNUSED }
 #undef MAP
   };
@@ -12224,6 +12229,14 @@ md_apply_fix3 (fixS *   fixP,
       break;
 
 #ifdef OBJ_ELF
+     case BFD_RELOC_ARM_TLS_GD32:
+     case BFD_RELOC_ARM_TLS_LE32:
+     case BFD_RELOC_ARM_TLS_IE32:
+     case BFD_RELOC_ARM_TLS_LDM32:
+     case BFD_RELOC_ARM_TLS_LDO32:
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+	/* fall through */
+
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
     case BFD_RELOC_ARM_TARGET2:
@@ -12547,6 +12560,18 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_ARM_PREL31:
     case BFD_RELOC_ARM_TARGET2:
+    case BFD_RELOC_ARM_TLS_LE32:
+    case BFD_RELOC_ARM_TLS_LDO32:
+      code = fixp->fx_r_type;
+      break;
+
+    case BFD_RELOC_ARM_TLS_GD32:
+    case BFD_RELOC_ARM_TLS_IE32:
+    case BFD_RELOC_ARM_TLS_LDM32:
+      /* BFD will include the symbol's address in the addend.  
+	 But we don't want that, so subtract it out again here.  */
+      if (!S_IS_COMMON (fixp->fx_addsy))
+	reloc->addend -= (*reloc->sym_ptr_ptr)->value;
       code = fixp->fx_r_type;
       break;
 #endif
@@ -13843,6 +13868,11 @@ arm_fix_adjustable (fixS * fixP)
   if (fixP->fx_r_type == BFD_RELOC_ARM_PLT32
       || fixP->fx_r_type == BFD_RELOC_ARM_GOT32
       || fixP->fx_r_type == BFD_RELOC_ARM_GOTOFF
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_GD32
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LE32
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_IE32
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LDM32
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LDO32
       || fixP->fx_r_type == BFD_RELOC_ARM_TARGET2)
     return 0;
 
@@ -13898,8 +13928,12 @@ s_arm_elf_cons (int nbytes)
   do
     {
       bfd_reloc_code_real_type reloc;
+      char *sym_start;
+      int sym_len;
 
+      sym_start = input_line_pointer;
       expression (& exp);
+      sym_len = input_line_pointer - sym_start;
 
       if (exp.X_op == O_symbol
 	  && * input_line_pointer == '('
@@ -13913,9 +13947,22 @@ s_arm_elf_cons (int nbytes)
 		    howto->name, nbytes);
 	  else
 	    {
-	      char *p = frag_more ((int) nbytes);
+	      char *p;
 	      int offset = nbytes - size;
+	      char *saved_buf = alloca (sym_len), *saved_input;
 
+	      /* We've parsed an expression stopping at O_symbol.  But there
+		 may be more expression left now that we have parsed the
+		 relocation marker.  Parse it again.  */
+	      saved_input = input_line_pointer - sym_len;
+	      memcpy (saved_buf, saved_input, sym_len);
+	      memmove (saved_input, sym_start, sym_len);
+	      input_line_pointer = saved_input;
+	      expression (& exp);
+	      memcpy (saved_input, saved_buf, sym_len);
+	      assert (input_line_pointer >= saved_input + sym_len);
+
+	      p = frag_more ((int) nbytes);
 	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
 			   &exp, 0, reloc);
 	    }
