@@ -116,7 +116,7 @@ main(argc, argv)
 [-E function-name] [-e function-name] \
 [-F function-name] [-f function-name] \
 [-k from to] [-s] [-T] [-z] [image-file] \
-[profile file]\n");
+[profile file(s)]\n");
 	    exit (1);
 	}
 	argv++;
