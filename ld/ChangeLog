@@ -1,3 +1,11 @@
+Wed Nov  3 12:07:39 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldlang.c (lang_add_output): Take new arg, FROM_SCRIPT.
+	Set output_filename instead of creating a new node.
+	(open_output): Don't set output_filename.
+	(lang_final): Create the new node here.
+	* ldlang.c, ldlang.h, ldgram.y, mri.c: pass FROM_SCRIPT.
+
 Tue Nov  2 15:45:51 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
  	From Pete Hoogenboom (hoogen@cs.utah.edu):
