@@ -26,8 +26,6 @@
 #ifndef TM_MIPS_H
 #define TM_MIPS_H 1
 
-#define GDB_MULTI_ARCH 1
-
 #include "regcache.h"
 
 struct frame_info;

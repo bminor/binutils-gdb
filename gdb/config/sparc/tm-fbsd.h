@@ -22,6 +22,4 @@
 #ifndef TM_FBSD_H
 #define TM_FBSD_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_TM
-
 #endif /* tm-fbsd.h */

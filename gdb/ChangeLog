@@ -1,3 +1,18 @@
+2004-09-02  Andrew Cagney  <cagney@gnu.org>
+
+	* config/sparc/tm-vxworks.h (GDB_MULTI_ARCH): Delete.
+	* config/sparc/tm-sol2.h (GDB_MULTI_ARCH): Delete.
+	* config/sparc/tm-nbsd.h (GDB_MULTI_ARCH): Delete.
+	* config/sparc/tm-linux.h (GDB_MULTI_ARCH): Delete.
+	* config/sparc/tm-fbsd.h (GDB_MULTI_ARCH): Delete.
+	* config/sh/tm-sh.h (GDB_MULTI_ARCH): Delete.
+	* config/rs6000/tm-rs6000.h (GDB_MULTI_ARCH): Delete.
+	* config/pa/tm-hppa.h (GDB_MULTI_ARCH): Delete.
+	* config/mips/tm-mips.h (GDB_MULTI_ARCH): Delete.
+	* config/ia64/tm-ia64.h (GDB_MULTI_ARCH): Delete.
+	* config/cris/tm-cris.h (GDB_MULTI_ARCH): Delete.
+	* config/arm/tm-arm.h (GDB_MULTI_ARCH): Delete.
+
 2004-09-01  Andrew Cagney  <cagney@gnu.org>
 
 	* objfiles.h (struct entry_info): Delete fields main_func_lowpc

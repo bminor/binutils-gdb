@@ -21,8 +21,6 @@
 #ifndef TM_SOL2_H
 #define TM_SOL2_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_TM
-
 /* Shared library support.  */
 #include "solib.h"
 

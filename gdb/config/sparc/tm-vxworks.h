@@ -23,8 +23,6 @@
 #ifndef TM_VXWORKS_H
 #define TM_VXWORKS_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_TM
-
 /* Get generic VxWorks definitions.  */
 #include "config/tm-vxworks.h"
 

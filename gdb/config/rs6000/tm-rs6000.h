@@ -24,8 +24,6 @@
 
 struct frame_info;
 
-#define GDB_MULTI_ARCH 1
-
 /* Minimum possible text address in AIX */
 
 #define TEXT_SEGMENT_BASE	0x10000000

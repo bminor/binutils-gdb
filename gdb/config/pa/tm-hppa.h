@@ -26,8 +26,6 @@
 
 #include "regcache.h"
 
-#define GDB_MULTI_ARCH 1
-
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
 
