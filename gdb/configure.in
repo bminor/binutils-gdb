@@ -101,6 +101,18 @@ AC_C_CONST
 AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask)
 AC_FUNC_ALLOCA
 
+dnl See if ptrace.h provides the PTRACE_GETREGS request.
+AC_MSG_CHECKING(for PTRACE_GETREGS)
+AC_CACHE_VAL(gdb_cv_have_ptrace_getregs,
+[AC_TRY_COMPILE([#include <sys/ptrace.h>],
+		[PTRACE_GETREGS;],
+		[gdb_cv_have_ptrace_getregs=yes],
+		[gdb_cv_have_ptrace_getregs=no])])
+AC_MSG_RESULT($gdb_cv_have_ptrace_getregs)
+if test $gdb_cv_have_ptrace_getregs = yes; then
+  AC_DEFINE(HAVE_PTRACE_GETREGS)
+fi
+
 dnl See if ptrace.h provides the PTRACE_GETXFPREGS request.
 dnl PTRACE_GETXFPREGS is a Cygnus invention, since we wrote our own
 dnl Linux kernel patch for SSE support.  That patch may or may not

@@ -1,5 +1,5 @@
 /* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1992, 1996, 1998
+   Copyright (C) 1986, 1987, 1989, 1992, 1996, 1998, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -62,8 +62,15 @@ extern int kernel_u_size PARAMS ((void));
 #include "solib.h"		/* Support for shared libraries. */
 #endif
 
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
+/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
+
+/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we fall
+   back on the code `infptrace.c' (well a copy of that code in
+   `i386-linux-nat.c' for now) and we can access only the
+   general-purpose registers in that way.  */
+#define CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
+#define CANNOT_STORE_REGISTER(regno) CANNOT_FETCH_REGISTER (regno)
 
 extern CORE_ADDR
   i386_stopped_by_watchpoint PARAMS ((int));
