@@ -591,6 +591,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
        fdr_ptr += fdr_add, i++)
     {
       FDR fdr;
+      bfd_vma fdr_adr;
       bfd_byte *sym_out;
       bfd_byte *lraw_src;
       bfd_byte *lraw_end;
@@ -607,19 +608,19 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       else
 	(*input_swap->swap_fdr_in) (input_bfd, (PTR) fdr_ptr, &fdr);
 
+      fdr_adr = fdr.adr;
+
       /* Adjust the FDR address for any changes that may have been
 	 made by relaxing.  */
       if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
 	{
-	  bfd_vma adr;
 	  struct ecoff_value_adjust *adjust;
 
-	  adr = fdr.adr;
 	  for (adjust = input_debug->adjust;
 	       adjust != (struct ecoff_value_adjust *) NULL;
 	       adjust = adjust->next)
-	    if (adr >= adjust->start
-		&& adr < adjust->end)
+	    if (fdr_adr >= adjust->start
+		&& fdr_adr < adjust->end)
 	      fdr.adr += adjust->adjust;
 	}
 
@@ -638,7 +639,8 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      if (!add_memory_shuffle (ainfo, &ainfo->sym, &ainfo->sym_end, sym_out, sz))
+      if (!add_memory_shuffle (ainfo, &ainfo->sym, &ainfo->sym_end, sym_out,
+			       sz))
 	return false;
       lraw_src = ((bfd_byte *) input_debug->external_sym
 		  + fdr.isymBase * input_swap->external_sym_size);
@@ -739,12 +741,17 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       output_symhdr->isymMax += fdr.csym;
 
       /* Copy the information that does not need swapping.  */
+
+      /* FIXME: If we are relaxing, we need to adjust the line
+	 numbers.  Frankly, forget it.  Anybody using stabs debugging
+	 information will not use this line number information, and
+	 stabs are adjusted correctly.  */
       if (fdr.cbLine > 0)
 	{
 	  if (!add_file_shuffle (ainfo, &ainfo->line, &ainfo->line_end,
-			    input_bfd,
-			    input_symhdr->cbLineOffset + fdr.cbLineOffset,
-			    fdr.cbLine))
+				 input_bfd,
+				 input_symhdr->cbLineOffset + fdr.cbLineOffset,
+				 fdr.cbLine))
 	    return false;
 	  fdr.ilineBase = output_symhdr->ilineMax;
 	  fdr.cbLineOffset = output_symhdr->cbLine;
@@ -754,10 +761,10 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       if (fdr.caux > 0)
 	{
 	  if (!add_file_shuffle (ainfo, &ainfo->aux, &ainfo->aux_end,
-			    input_bfd,
-			    (input_symhdr->cbAuxOffset
-			     + fdr.iauxBase * sizeof (union aux_ext)),
-			    fdr.caux * sizeof (union aux_ext)))
+				 input_bfd,
+				 (input_symhdr->cbAuxOffset
+				  + fdr.iauxBase * sizeof (union aux_ext)),
+				 fdr.caux * sizeof (union aux_ext)))
 	    return false;
 	  fdr.iauxBase = output_symhdr->iauxMax;
 	  output_symhdr->iauxMax += fdr.caux;
@@ -775,19 +782,21 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       else if (fdr.cbSs > 0)
 	{
 	  if (!add_file_shuffle (ainfo, &ainfo->ss, &ainfo->ss_end,
-			    input_bfd,
-			    input_symhdr->cbSsOffset + fdr.issBase,
-			    fdr.cbSs))
+				 input_bfd,
+				 input_symhdr->cbSsOffset + fdr.issBase,
+				 fdr.cbSs))
 	    return false;
 	  fdr.issBase = output_symhdr->issMax;
 	  output_symhdr->issMax += fdr.cbSs;
 	}
 
-      if (output_bfd->xvec->header_byteorder_big_p
-	  == input_bfd->xvec->header_byteorder_big_p)
+      if ((output_bfd->xvec->header_byteorder_big_p
+	   == input_bfd->xvec->header_byteorder_big_p)
+	  && input_debug->adjust == (struct ecoff_value_adjust *) NULL)
 	{
-	  /* The two BFD's have the same endianness, so simply copying
-	     the information will suffice.  */
+	  /* The two BFD's have the same endianness, and we don't have
+	     to adjust the PDR addresses, so simply copying the
+	     information will suffice.  */
 	  BFD_ASSERT (external_pdr_size == input_swap->external_pdr_size);
 	  if (fdr.cpd > 0)
 	    {
@@ -831,13 +840,31 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
-	  if (!add_memory_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end, out, sz))
+	  if (!add_memory_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end, out,
+				   sz))
 	    return false;
 	  for (; in < end; in += insz, out += outsz)
 	    {
 	      PDR pdr;
 
 	      (*input_swap->swap_pdr_in) (input_bfd, (PTR) in, &pdr);
+
+	      /* If we have been relaxing, we may have to adjust the
+		 address.  */
+	      if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
+		{
+		  bfd_vma adr;
+		  struct ecoff_value_adjust *adjust;
+
+		  adr = fdr_adr + pdr.adr;
+		  for (adjust = input_debug->adjust;
+		       adjust != (struct ecoff_value_adjust *) NULL;
+		       adjust = adjust->next)
+		    if (adr >= adjust->start
+			&& adr < adjust->end)
+		      pdr.adr += adjust->adjust;
+		}
+
 	      (*output_swap->swap_pdr_out) (output_bfd, &pdr, (PTR) out);
 	    }
 
@@ -854,7 +881,8 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
-	  if (!add_memory_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end, out, sz))
+	  if (!add_memory_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end, out,
+				   sz))
 	    return false;
 	  for (; in < end; in += insz, out += outsz)
 	    {

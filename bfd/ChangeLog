@@ -1,5 +1,10 @@
 Fri Apr 15 12:22:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-mips.c (mips_relocate_section): When relaxing, adjust local
+	relocs against the .text section as required.
+	* ecofflink.c (bfd_ecoff_debug_accumulate): When relaxing, adjust
+	PDR addresses as required.
+
 	* ecoff.c (ecoff_emit_aggregate): Take fdr argument.  Map fdr
 	index through rfd map if it exists.  Check for a couple of cases
 	which gdb handles specially.  Change all callers.
