@@ -100,6 +100,9 @@ typedef struct coff_tdata
   /* Used by coff_find_nearest_line.  */
   PTR line_info;
 
+  /* A place to stash dwarf2 info for this bfd. */
+  PTR dwarf2_find_line_info;
+
   /* The timestamp from the COFF file header.  */
   long timestamp;
 

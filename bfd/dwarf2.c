@@ -402,18 +402,16 @@ lookup_abbrev (number,abbrevs)
    in a hash table.  */
 
 static struct abbrev_info**
-read_abbrevs (abfd, offset)
+read_abbrevs (abfd, offset, stash)
      bfd * abfd;
      unsigned int offset;
+     struct dwarf2_debug *stash;
 {
   struct abbrev_info **abbrevs;
   char *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
-  struct dwarf2_debug *stash;
-
-  stash = elf_tdata(abfd)->dwarf2_find_line_info;
 
   if (! stash->dwarf_abbrev_buffer)
     {
@@ -701,7 +699,7 @@ concat_filename (table, file)
     }
 
   filename = table->files[file - 1].name;
-  if (*filename == '/')
+  if (IS_ABSOLUTE_PATH(filename))
     return filename;
 
   else
@@ -761,11 +759,11 @@ arange_add (unit, low_pc, high_pc)
 /* Decode the line number information for UNIT.  */
 
 static struct line_info_table*
-decode_line_info (unit)
+decode_line_info (unit, stash)
      struct comp_unit *unit;
+     struct dwarf2_debug *stash;
 {
   bfd *abfd = unit->abfd;
-  struct dwarf2_debug *stash;
   struct line_info_table* table;
   char *line_ptr;
   char *line_end;
@@ -773,8 +771,6 @@ decode_line_info (unit)
   unsigned int i, bytes_read;
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
-
-  stash = elf_tdata (abfd)->dwarf2_find_line_info;
 
   if (! stash->dwarf_line_buffer)
     {
@@ -1233,10 +1229,10 @@ scan_unit_for_functions (unit)
    to get to the line number information for the compilation unit.  */
 
 static struct comp_unit *
-parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
+parse_comp_unit (abfd, stash, unit_length, abbrev_length)
      bfd* abfd;
-     char* info_ptr;
-     char* end_ptr;
+     struct dwarf2_debug *stash;
+     bfd_vma unit_length;
      unsigned int abbrev_length;
 {
   struct comp_unit* unit;
@@ -1250,6 +1246,9 @@ parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
   struct abbrev_info *abbrev;
   struct attribute attr;
 
+  char *info_ptr = stash->info_ptr;
+  char *end_ptr = info_ptr + unit_length;
+  
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
   BFD_ASSERT (abbrev_length == 0
@@ -1287,7 +1286,7 @@ parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
     }
 
   /* Read the abbrevs for this compilation unit into a table.  */
-  abbrevs = read_abbrevs (abfd, abbrev_offset);
+  abbrevs = read_abbrevs (abfd, abbrev_offset, stash);
   if (! abbrevs)
       return 0;
 
@@ -1400,12 +1399,14 @@ comp_unit_contains_address (unit, addr)
 
 static boolean
 comp_unit_find_nearest_line (unit, addr,
-			     filename_ptr, functionname_ptr, linenumber_ptr)
+			     filename_ptr, functionname_ptr, linenumber_ptr,
+			     stash)
      struct comp_unit* unit;
      bfd_vma addr;
      const char **filename_ptr;
      const char **functionname_ptr;
      unsigned int *linenumber_ptr;
+     struct dwarf2_debug *stash;
 {
   boolean line_p;
   boolean func_p;
@@ -1421,7 +1422,7 @@ comp_unit_find_nearest_line (unit, addr,
 	  return false;
 	}
 
-      unit->line_table = decode_line_info (unit);
+      unit->line_table = decode_line_info (unit, stash);
 
       if (! unit->line_table)
 	{
@@ -1493,7 +1494,7 @@ boolean
 _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 			       filename_ptr, functionname_ptr,
 			       linenumber_ptr,
-			       addr_size)
+			       addr_size, pinfo)
      bfd *abfd;
      asection *section;
      asymbol **symbols ATTRIBUTE_UNUSED;
@@ -1502,6 +1503,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
      const char **functionname_ptr;
      unsigned int *linenumber_ptr;
      unsigned int addr_size;
+     PTR *pinfo;
 {
   /* Read each compilation unit from the section .debug_info, and check
      to see if it contains the address we are searching for.  If yes,
@@ -1511,7 +1513,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
      We keep a list of all the previously read compilation units, and
      a pointer to the next un-read compilation unit.  Check the
      previously read units before reading more.  */
-  struct dwarf2_debug *stash = elf_tdata (abfd)->dwarf2_find_line_info;
+  struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;
 
   /* What address are we looking for?  */
   bfd_vma addr = offset + section->vma;
@@ -1534,17 +1536,19 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
       unsigned long total_size;
       asection *msec;
 
-      stash = elf_tdata (abfd)->dwarf2_find_line_info =
+      stash =
 	(struct dwarf2_debug*) bfd_zalloc (abfd, sizeof (struct dwarf2_debug));
       if (! stash)
 	return false;
 
+      *pinfo = (PTR) stash;
+      
       msec = find_debug_info (abfd, NULL);
       if (! msec)
 	/* No dwarf2 info.  Note that at this point the stash
 	   has been allocated, but contains zeros, this lets
 	   future calls to this function fail quicker.  */
-	return false;
+	 return false;
 
       /* There can be more than one DWARF2 info section in a BFD these days.
          Read them all in and produce one large stash.  We do this in two
@@ -1606,7 +1610,8 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   for (each = stash->all_comp_units; each; each = each->next_unit)
     if (comp_unit_contains_address (each, addr))
       return comp_unit_find_nearest_line (each, addr, filename_ptr,
-					  functionname_ptr, linenumber_ptr);
+					  functionname_ptr, linenumber_ptr,
+					  stash);
 
   /* Read each remaining comp. units checking each as they are read.  */
   while (stash->info_ptr < stash->info_ptr_end)
@@ -1623,9 +1628,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
       if (length > 0)
         {
-	  each = parse_comp_unit (abfd, stash->info_ptr,
-				  stash->info_ptr + length,
-				  addr_size);
+	  each = parse_comp_unit (abfd, stash, length, addr_size);
 	  stash->info_ptr += length;
 
 	  if (each)
@@ -1644,14 +1647,16 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 		    return comp_unit_find_nearest_line (each, addr,
 						       filename_ptr,
 						       functionname_ptr,
-						       linenumber_ptr);
+						       linenumber_ptr,
+						       stash);
 		}
 	      else
 		{
 		  found = comp_unit_find_nearest_line (each, addr,
 						       filename_ptr,
 						       functionname_ptr,
-						       linenumber_ptr);
+						       linenumber_ptr,
+						       stash);
 		  if (found)
 		    return true;
 		}

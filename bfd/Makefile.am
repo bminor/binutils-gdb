@@ -29,13 +29,15 @@ BFD_LIBS = \
 	archive.lo archures.lo bfd.lo cache.lo coffgen.lo corefile.lo \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
-	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo
+	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
+	dwarf2.lo
 
 BFD_LIBS_CFILES = \
 	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
-	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c
+	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
+	dwarf2.c
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -167,7 +169,6 @@ BFD32_BACKENDS = \
 	coff-z8k.lo \
 	cofflink.lo \
 	dwarf1.lo \
-	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
 	efi-app-ia32.lo \
@@ -306,7 +307,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-z8k.c \
 	cofflink.c \
 	dwarf1.c \
-	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
 	efi-app-ia32.c \

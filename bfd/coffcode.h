@@ -349,6 +349,19 @@ static PTR coff_mkobject_hook PARAMS ((bfd *, PTR,  PTR));
 
 #ifndef COFF_WITH_PE
 
+/* Macros for setting debugging flags.  */
+#ifdef STYP_DEBUG
+#define STYP_XCOFF_DEBUG STYP_DEBUG
+#else
+#define STYP_XCOFF_DEBUG STYP_INFO
+#endif
+
+#ifdef COFF_ALIGN_IN_S_FLAGS
+#define STYP_DEBUG_INFO STYP_DSECT
+#else
+#define STYP_DEBUG_INFO STYP_INFO
+#endif
+
 static long
 sec_to_styp_flags (sec_name, sec_flags)
      CONST char *sec_name;
@@ -386,22 +399,24 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_LIT;
 #endif /* _LIT */
     }
-  else if (!strcmp (sec_name, ".debug"))
+  else if (!strncmp (sec_name, ".debug", 6))
     {
-#ifdef STYP_DEBUG
-      styp_flags = STYP_DEBUG;
-#else
-      styp_flags = STYP_INFO;
-#endif
+      /* Handle the XCOFF debug section and DWARF2 debug sections.  */
+      if (!sec_name[6])
+        styp_flags = STYP_XCOFF_DEBUG;
+      else
+        styp_flags = STYP_DEBUG_INFO;
     }
   else if (!strncmp (sec_name, ".stab", 5))
     {
-#ifdef COFF_ALIGN_IN_S_FLAGS
-      styp_flags = STYP_DSECT;
-#else
-      styp_flags = STYP_INFO;
-#endif
+      styp_flags = STYP_DEBUG_INFO;
     }
+#ifdef COFF_LONG_SECTION_NAMES
+  else if (!strncmp (sec_name, ".gnu.linkonce.wi.", 17))
+    {
+      styp_flags = STYP_DEBUG_INFO;
+    }
+#endif
 #ifdef RS6000COFF_C
   else if (!strcmp (sec_name, _PAD))
     {
@@ -626,9 +641,12 @@ styp_to_sec_flags (abfd, hdr, name, section)
 #endif
 	sec_flags |= SEC_ALLOC;
     }
-  else if (strcmp (name, ".debug") == 0
+  else if (strncmp (name, ".debug", 6) == 0
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
+#endif
+#ifdef COFF_LONG_SECTION_NAMES
+	   || strncmp (name, ".gnu.linkonce.wi.", 17) == 0
 #endif
 	   || strncmp (name, ".stab", 5) == 0)
     {

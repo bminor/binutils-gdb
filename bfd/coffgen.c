@@ -2185,9 +2185,17 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
   if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
 					     &found, filename_ptr,
 					     functionname_ptr, line_ptr,
-					     &coff_data (abfd)->line_info))
+					     &coff_data(abfd)->line_info))
     return false;
-  if (found)
+
+  /* Also try examining DWARF2 debugging information.  */
+  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
+				     filename_ptr, functionname_ptr,
+				     line_ptr, 0,
+				     &coff_data(abfd)->dwarf2_find_line_info))
+    return true;
+
+if (found)
     return true;
 
   *filename_ptr = 0;

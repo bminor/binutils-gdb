@@ -877,7 +877,7 @@ struct elf_obj_tdata
   struct dwarf1_debug *dwarf1_find_line_info;
 
   /* A place to stash dwarf2 info for this bfd. */
-  struct dwarf2_debug *dwarf2_find_line_info;
+  PTR dwarf2_find_line_info;
 
   /* An array of stub sections indexed by symbol number, used by the
      MIPS ELF linker.  FIXME: We should figure out some way to only

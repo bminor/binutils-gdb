@@ -3736,7 +3736,7 @@ _bfd_mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
   if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 				     filename_ptr, functionname_ptr,
 				     line_ptr,
-				     ABI_64_P (abfd) ? 8 : 0))
+				     ABI_64_P (abfd) ? 8 : 0, NULL))
     return true;
 
   msec = bfd_get_section_by_name (abfd, ".mdebug");
