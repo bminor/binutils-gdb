@@ -1,3 +1,8 @@
+2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (install-info): Support DESTDIR.
+	(install-html): Likewise.
+
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
 	Patch from Nick Roberts.

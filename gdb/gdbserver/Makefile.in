@@ -151,13 +151,15 @@ install: all install-only
 install-only: 
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	$(INSTALL_PROGRAM) gdbserver $(bindir)/$$n; \
-	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(man1dir)/$$n.1
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \
+	$(INSTALL_PROGRAM) gdbserver $(DESTDIR)$(bindir)/$$n; \
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
+	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(DESTDIR)$(man1dir)/$$n.1
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	rm -f $(bindir)/$$n $(man1dir)/$$n.1
+	rm -f $(bindir)/$$n $(DESTDIR)$(man1dir)/$$n.1
 
 installcheck:
 check:
