@@ -1177,14 +1177,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 void
 _initialize_remote_monitors ()
 {
-/***  add_show_from_set (
-                     add_set_cmd ("remotedebug", no_class, var_boolean,
-                                  (char *)&kiodebug,
-                                  "Set debugging of I/O to a serial based Monitor.\n\
-When enabled, debugging info is displayed.",
-                                  &setlist),
-		     &showlist);
-***/
   add_show_from_set (
                      add_set_cmd ("hash", no_class, var_boolean,
                                   (char *)&hashmark,

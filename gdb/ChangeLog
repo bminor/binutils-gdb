@@ -1,5 +1,10 @@
 Wed Oct 27 13:43:07 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-udi.c: Remove LOG_FILE stuff; superceded by "set remotedebug".
+	* remote-mon.c: Remove commented out "set remotedebug" command.
+	* remote-nindy.c: Clean up comment about wanting alternative to
+	options specified on the GDB command line.
+
 	* fork-child.c (fork_inferior): Set inferior_pid before calling
 	init_trace_fun.  Move the code which gets us through the shell
 	to new function startup_inferior.

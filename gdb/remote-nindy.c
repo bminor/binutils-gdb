@@ -174,9 +174,9 @@ nindy_close (quitting)
 }
 
 /* Open a connection to a remote debugger.   
-   FIXME, there should be a way to specify the various options that are
-   now specified with gdb command-line options.  (baud_rate, old_protocol,
-   and initial_brk)  */
+   FIXME, there should be "set" commands for the options that are
+   now specified with gdb command-line options (old_protocol,
+   and initial_brk).  */
 void
 nindy_open (name, from_tty)
     char *name;		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
@@ -188,7 +188,7 @@ nindy_open (name, from_tty)
     error_no_arg ("serial port device name");
 
   target_preopen (from_tty);
-  
+
   nindy_close (0);
 
   have_regs = regs_changed = 0;

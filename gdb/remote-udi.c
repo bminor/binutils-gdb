@@ -71,12 +71,6 @@ char   CoffFileName[100] = "";
 #define FREEZE_MODE     (read_register(CPS_REGNUM) & 0x400)
 #define USE_SHADOW_PC	((processor_type == a29k_freeze_mode) && FREEZE_MODE)
 
-/* FIXME: Replace with `set remotedebug'.  Also, seems not to be used.  */
-#define LLOG_FILE "udi.log"
-#if defined (LOG_FILE)
-FILE *log_file;
-#endif
-
 static int timeout = 5;
 extern struct target_ops udi_ops;             /* Forward declaration */
 
@@ -234,11 +228,6 @@ udi_open (name, from_tty)
 
   push_target (&udi_ops);
 
-#if defined (LOG_FILE)
-  log_file = fopen (LOG_FILE, "w");
-  if (log_file == NULL)
-    error ("udi_open: fopen(%s) %s", LOG_FILE, safe_strerror(errno));
-#endif
   /*
   ** Initialize target configuration structure (global)
   */
@@ -311,13 +300,6 @@ udi_close (quitting)	/*FIXME: how is quitting used */
   /* Do not try to close udi_session_id again, later in the program.  */
   udi_session_id = -1;
   inferior_pid = 0;
-
-#if defined (LOG_FILE)
-  if (ferror (log_file))
-    printf ("Error writing log file.\n");
-  if (fclose (log_file) != 0)
-    printf ("Error closing log file.\n");
-#endif
 
   printf_filtered ("  Ending remote debugging\n");
 } 
