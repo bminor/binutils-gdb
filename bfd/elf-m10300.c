@@ -1897,7 +1897,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  bfd_vma value = symval;
 	  value += irel->r_addend;
 
-	  /* See if the value will fit in 8 bits.
+	  /* See if the value will fit in 8 bits.  */
 	  if ((long)value < 0x7f && (long)value > -0x80)
 	    {
 	      unsigned char code;
@@ -1913,9 +1913,13 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	          /* Get the second opcode.  */
 	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
 
-	          if ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
-		      || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
-		      || (code & 0x0f) == 0x0e)
+		  /* We can not relax 0x6b, 0x7b, 0x8b, 0x9b as no 24bit
+		     equivalent instructions exists.  */
+	          if (code != 0x6b && code != 0x7b
+		      && code != 0x8b && code != 0x9b
+		      && ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+			  || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+			  || (code & 0x0f) == 0x0e))
 		    {
 		      /* Not safe if the high bit is on as relaxing may
 		         move the value out of high mem and thus not fit
