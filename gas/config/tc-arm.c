@@ -213,7 +213,7 @@ static const struct asm_shift_name shift_names [] =
   { "ROR", shift_properties + SHIFT_ROR },
   { "RRX", shift_properties + SHIFT_RRX }
 };
-  
+
 #define NO_SHIFT_RESTRICT 1
 #define SHIFT_RESTRICT	  0
 
@@ -5691,7 +5691,7 @@ md_apply_fix3 (fixP, val, seg)
 	       is the PC) with the destination register.  We have
 	       already added in the PC in the first instruction and we
 	       do not want to do it again.  */
-	    newinsn &= ~0xf0000;
+	    newinsn &= ~ 0xf0000;
 	    newinsn |= ((newinsn & 0x0f000) << 4);
 	  }
 
@@ -5707,7 +5707,7 @@ md_apply_fix3 (fixP, val, seg)
       sign = value >= 0;
 
       if (value < 0)
-	value = -value;
+	value = - value;
 
       if (validate_offset_imm (value, 0) == FAIL)
 	{
@@ -5728,7 +5728,7 @@ md_apply_fix3 (fixP, val, seg)
       sign = value >= 0;
 
       if (value < 0)
-	value = -value;
+	value = - value;
 
       if (validate_offset_imm (value, 1) == FAIL)
 	{
@@ -5751,7 +5751,7 @@ md_apply_fix3 (fixP, val, seg)
       sign = value >= 0;
 
       if (value < 0)
-	value = -value;
+	value = - value;
 
       if (validate_offset_imm (value, 0) == FAIL)
 	{
