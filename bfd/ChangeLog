@@ -1,3 +1,8 @@
+Tue Sep 14 14:34:45 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* libbfd-in.h (struct artdata):  Add armap_timestamp and
+	armap_datepos here too.
+
 Mon Sep 13 21:03:18 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	Improve timestamp support in BSD archive files to avoid linker
