@@ -1,5 +1,8 @@
 Thu Oct 10 13:11:48 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/mn10300/basic.exp: Check bit patterns for instructions
+	with a single 8bit or 16bit immediate operand.
+
 	* gas/mn10300/basic.exp: Check bit patterns for many
 	instructions.  Add missing test in do_mov1.
 	* gas/mn10300/mov1.s: Add missing test.
