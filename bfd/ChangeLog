@@ -1,5 +1,10 @@
 2004-01-16  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* coff-h8300.c: Fix comment typos.
+	* elf32-h8300.c: Likewise.
+
+2004-01-16  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* coff-h8300.c: Add comments about relaxation.
 	* elf32-h8300.c: Likewise.
 

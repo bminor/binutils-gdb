@@ -348,7 +348,7 @@ elf32_h8_final_link_relocate (unsigned long r_type, bfd *input_bfd,
       value += addend;
 
       /* HIT_DATA is the address for the first byte for the relocated
-	 value.  Subtract 1 so that we can manipulate the data in 32bit
+	 value.  Subtract 1 so that we can manipulate the data in 32-bit
 	 hunks.  */
       hit_data--;
 
@@ -358,7 +358,7 @@ elf32_h8_final_link_relocate (unsigned long r_type, bfd *input_bfd,
       /* Retrieve the type byte for value from the section contents.  */
       value |= (bfd_get_32 (input_bfd, hit_data) & 0xff000000);
 
-      /* Now scribble it out in one 32bit hunk.  */
+      /* Now scribble it out in one 32-bit hunk.  */
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
@@ -808,7 +808,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	 the linker is run.  */
       switch (ELF32_R_TYPE (irel->r_info))
 	{
-        /* Try to turn a 24 bit absolute branch/call into an 8 bit
+        /* Try to turn a 24-bit absolute branch/call into an 8-bit
 	   pc-relative branch/call.  */
 	case R_H8_DIR24R8:
 	  {
@@ -941,7 +941,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	    break;
 	  }
 
-	/* Try to turn a 16bit pc-relative branch into a 8bit pc-relative
+	/* Try to turn a 16-bit pc-relative branch into a 8-bit pc-relative
 	   branch.  */
 	case R_H8_PCREL16:
 	  {
@@ -1181,8 +1181,9 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 
 	/* Fall through.  */
 
-	/* This is a 24/32bit absolute address in a "mov" insn, which may
-	   become a 16-bit absolute address if it is in the right range.  */
+	/* This is a 24-/32-bit absolute address in a "mov" insn,
+	   which may become a 16-bit absolute address if it is in the
+	   right range.  */
 	case R_H8_DIR32A16:
 	  {
 	    bfd_vma value;
