@@ -1,3 +1,7 @@
+2001-11-02  Michael Chastain  <mec@shout.net>
+
+        * MAINTAINERS: Update my entry.
+
 2001-11-01  Fred Fish  <fnf@redhat.com>
 
 	* coff-solib.c (coff_solib_add): Add new readsyms arg.
