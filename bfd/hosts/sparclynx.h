@@ -28,6 +28,8 @@
 
 #include "fopen-same.h"
 
+#define FPRINTF_ALREADY_DECLARED
+
 /* Lynx has calloc, but no cfree, and gprof uses it. */
 
 #define cfree free

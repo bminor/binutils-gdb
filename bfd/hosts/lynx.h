@@ -27,6 +27,8 @@
 
 #include "fopen-same.h"
 
+#define FPRINTF_ALREADY_DECLARED
+
 #undef I386			/* Lynx defines this for some reason */
 
 /* Lynx has calloc, but no cfree, and gprof uses it. */
