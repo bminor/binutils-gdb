@@ -1,3 +1,7 @@
+Thu Mar 31 19:28:33 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* internal.h (internal_aouthdr): Added comments for Apollo fields.
+
 Thu Mar 31 16:28:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.h (STYP_ECOFF_LIB): Define as used on Irix 4.
