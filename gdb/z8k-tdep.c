@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbcmd.h"
 #include "gdbtypes.h"
-
+#include "dis-asm.h"
 /* Return the saved PC from this frame.
 
    If the frame has a memory copy of SRP_REGNUM, use that.  If not,

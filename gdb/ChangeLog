@@ -1,3 +1,7 @@
+Fri Mar 19 07:40:09 1993  Steve Chamberlain  (sac@cygnus.com)
+
+	* z8k-tdep.c (print_insn): Include the new dis-asm header file.
+
 Thu Mar 18 14:26:57 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ieee-float.c: Moved to ../libiberty.
