@@ -44,12 +44,12 @@ const struct v850_operand v850_operands[] = {
 #define I16	(I5U+1)
   { 16, 0, 0, 0, 0 }, 
 
-/* The DISP6 field in a format 4 insn. */
-#define D6	(I16+1)
-  { 6, 1, 0, 0, 0 },
+/* The signed DISP7 field in a format 4 insn. */
+#define D7S	(I16+1)
+  { 7, 0, 0, 0, V850_OPERAND_SIGNED },
 
 /* The DISP9 field in a format 3 insn. */
-#define D9	(D6+1)
+#define D9	(D7S+1)
   { 0, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
 
 /* The DISP16 field in a format 6 insn. */
@@ -66,7 +66,12 @@ const struct v850_operand v850_operands[] = {
 
 #define CCCC	(B3+1)
 /* The 4 bit condition code in a setf instruction */
-  { 4, 0, 0, 0, V850_OPERAND_CC }
+  { 4, 0, 0, 0, V850_OPERAND_CC },
+
+/* The unsigned DISP8 field in a format 4 insn. */
+#define D8	(CCCC+1)
+  { 8, 0, 0, 0, 0 },
+
 } ; 
 
 
@@ -80,8 +85,10 @@ const struct v850_operand v850_operands[] = {
 #define IF3	{D9}
 
 /* 16-bit load/store instruction (Format IV) */
-#define IF4A	{D6, R2}
-#define IF4B	{R2, D6}
+#define IF4A	{D7S, R1, R2}
+#define IF4B	{R2, D7S, R1}
+#define IF4C	{D8, R1, R2}
+#define IF4D	{R2, D8, R1}
 
 /* Jump instruction (Format V) */
 #define IF5	{D22}
@@ -117,11 +124,11 @@ const struct v850_operand v850_operands[] = {
 const struct v850_opcode v850_opcodes[] = {
 /* load/store instructions */
 { "sld.b",	OP(0x00),		OP_MASK,	IF4A },
-{ "sld.h",	OP(0x00),		OP_MASK,	IF4A },
-{ "sld.w",	OP(0x00),		OP_MASK,	IF4A },
+{ "sld.h",	OP(0x00),		OP_MASK,	IF4C },
+{ "sld.w",	OP(0x00),		OP_MASK,	IF4C },
 { "sst.b",	OP(0x00),		OP_MASK,	IF4B },
-{ "sst.h",	OP(0x00),		OP_MASK,	IF4B },
-{ "sst.w",	OP(0x00),		OP_MASK,	IF4B },
+{ "sst.h",	OP(0x00),		OP_MASK,	IF4D },
+{ "sst.w",	OP(0x00),		OP_MASK,	IF4D },
 
 { "ld.b",	OP(0x00),		OP_MASK,	IF7A },
 { "ld.h",	OP(0x00),		OP_MASK,	IF7A },
@@ -212,9 +219,9 @@ const struct v850_opcode v850_opcodes[] = {
 { "ei",		two(0x87e0,0x0160),	two(0xffff,0xffff),	{0} },
 { "halt",	two(0x07e0,0x0120),	two(0xffff,0xffff),	{0} },
 { "reti",	two(0x07e0,0x0140),	two(0xffff,0xffff),	{0} },
-{ "trap",	two(0x07e0,0x0100),	two(0xffe0,0xffff),	{I5} },
-{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{0} },
-{ "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	{0} },
+{ "trap",	two(0x07e0,0x0100),	two(0xffe0,0xffff),	I5U },
+{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	IF1 },
+{ "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	IF1 },
 { "nop",	one(0x00),		one(0xff),		{0} },
 
 } ;

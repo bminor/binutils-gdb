@@ -1,7 +1,14 @@
 start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* v850-opc.c (v850_operansd): 3-bit immediate for bit insns
+	* v850-opc.c (v850_operands): D6 -> DS7.  References changed.
+	Add D8 for 8-bit unsigned field in short load/store insns.
+	(IF4A, IF4D): These both need two registers.
+	(IF4C, IF4D): Define.  Use 8-bit unsigned field.
+	(v850_opcodes): For "sld.h", "sld.w", "sst.h", "sst.w", use
+	IF4C & IF4D.  For "trap" use I5U, not I5.  Add IF1 operand
+	for "ldsr" and "stsr".
+	* v850-opc.c (v850_operands): 3-bit immediate for bit insns
 	is unsigned.
 
 	* v850-opc.c (v850_opcodes): Correct short store half (sst.h) and
