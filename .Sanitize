@@ -34,6 +34,7 @@ bison
 bfd
 binutils
 config
+config.sub
 configure
 configure.in
 gas
@@ -54,7 +55,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/07/31 05:15:37  gnu
+# Revision 1.7  1991/08/22 07:30:50  gnu
+# New config.sub.
+#
+# Revision 1.6  1991/07/31  05:15:37  gnu
 # Add texinfo
 #
 # Revision 1.5  1991/07/25  16:11:27  tiemann
