@@ -1,3 +1,8 @@
+Wed Mar  6 00:32:44 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* valarith.c (value_in): Change builtin_type_chill_bool to
+	LA_BOOL_TYPE.
+
 Tue Mar  5 23:48:36 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (parse_primval): Handle CARD, MAX, MIN.
