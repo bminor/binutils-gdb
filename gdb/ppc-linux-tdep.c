@@ -632,6 +632,258 @@ ppc_linux_svr4_fetch_link_map_offsets (void)
   return lmp;
 }
 
+
+/* Macros for matching instructions.  Note that, since all the
+   operands are masked off before they're or-ed into the instruction,
+   you can use -1 to make masks.  */
+
+#define insn_d(opcd, rts, ra, d)                \
+  ((((opcd) & 0x3f) << 26)                      \
+   | (((rts) & 0x1f) << 21)                     \
+   | (((ra) & 0x1f) << 16)                      \
+   | ((d) & 0xffff))
+
+#define insn_ds(opcd, rts, ra, d, xo)           \
+  ((((opcd) & 0x3f) << 26)                      \
+   | (((rts) & 0x1f) << 21)                     \
+   | (((ra) & 0x1f) << 16)                      \
+   | ((d) & 0xfffc)                             \
+   | ((xo) & 0x3))
+
+#define insn_xfx(opcd, rts, spr, xo)            \
+  ((((opcd) & 0x3f) << 26)                      \
+   | (((rts) & 0x1f) << 21)                     \
+   | (((spr) & 0x1f) << 16)                     \
+   | (((spr) & 0x3e0) << 6)                     \
+   | (((xo) & 0x3ff) << 1))
+
+/* Read a PPC instruction from memory.  PPC instructions are always
+   big-endian, no matter what endianness the program is running in, so
+   we can't use read_memory_integer or one of its friends here.  */
+static unsigned int
+read_insn (CORE_ADDR pc)
+{
+  unsigned char buf[4];
+
+  read_memory (pc, buf, 4);
+  return (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+}
+
+
+/* An instruction to match.  */
+struct insn_pattern
+{
+  unsigned int mask;            /* mask the insn with this... */
+  unsigned int data;            /* ...and see if it matches this. */
+  int optional;                 /* If non-zero, this insn may be absent.  */
+};
+
+/* Return non-zero if the instructions at PC match the series
+   described in PATTERN, or zero otherwise.  PATTERN is an array of
+   'struct insn_pattern' objects, terminated by an entry whose mask is
+   zero.
+
+   When the match is successful, fill INSN[i] with what PATTERN[i]
+   matched.  If PATTERN[i] is optional, and the instruction wasn't
+   present, set INSN[i] to 0 (which is not a valid PPC instruction).
+   INSN should have as many elements as PATTERN.  Note that, if
+   PATTERN contains optional instructions which aren't present in
+   memory, then INSN will have holes, so INSN[i] isn't necessarily the
+   i'th instruction in memory.  */
+static int
+insns_match_pattern (CORE_ADDR pc,
+                     struct insn_pattern *pattern,
+                     unsigned int *insn)
+{
+  int i;
+
+  for (i = 0; pattern[i].mask; i++)
+    {
+      insn[i] = read_insn (pc);
+      if ((insn[i] & pattern[i].mask) == pattern[i].data)
+        pc += 4;
+      else if (pattern[i].optional)
+        insn[i] = 0;
+      else
+        return 0;
+    }
+
+  return 1;
+}
+
+
+/* Return the 'd' field of the d-form instruction INSN, properly
+   sign-extended.  */
+static CORE_ADDR
+insn_d_field (unsigned int insn)
+{
+  return ((((CORE_ADDR) insn & 0xffff) ^ 0x8000) - 0x8000);
+}
+
+
+/* Return the 'ds' field of the ds-form instruction INSN, with the two
+   zero bits concatenated at the right, and properly
+   sign-extended.  */
+static CORE_ADDR
+insn_ds_field (unsigned int insn)
+{
+  return ((((CORE_ADDR) insn & 0xfffc) ^ 0x8000) - 0x8000);
+}
+
+
+/* Pattern for the standard linkage function.  These are built by
+   build_plt_stub in elf64-ppc.c, whose GLINK argument is always
+   zero.  */
+static struct insn_pattern ppc64_standard_linkage[] =
+  {
+    /* addis r12, r2, <any> */
+    { insn_d (-1, -1, -1, 0), insn_d (15, 12, 2, 0), 0 },
+
+    /* std r2, 40(r1) */
+    { -1, insn_ds (62, 2, 1, 40, 0), 0 },
+
+    /* ld r11, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+
+    /* addis r12, r12, 1 <optional> */
+    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 2, 1), 1 },
+
+    /* ld r2, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 12, 0, 0), 0 },
+
+    /* addis r12, r12, 1 <optional> */
+    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 2, 1), 1 },
+
+    /* mtctr r11 */
+    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467),
+      0 },
+
+    /* ld r11, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+      
+    /* bctr */
+    { -1, 0x4e800420, 0 },
+
+    { 0, 0, 0 }
+  };
+#define PPC64_STANDARD_LINKAGE_LEN \
+  (sizeof (ppc64_standard_linkage) / sizeof (ppc64_standard_linkage[0]))
+
+
+/* Recognize a 64-bit PowerPC Linux linkage function --- what GDB
+   calls a "solib trampoline".  */
+static int
+ppc64_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+{
+  /* Detecting solib call trampolines on PPC64 Linux is a pain.
+
+     It's not specifically solib call trampolines that are the issue.
+     Any call from one function to another function that uses a
+     different TOC requires a trampoline, to save the caller's TOC
+     pointer and then load the callee's TOC.  An executable or shared
+     library may have more than one TOC, so even intra-object calls
+     may require a trampoline.  Since executable and shared libraries
+     will all have their own distinct TOCs, every inter-object call is
+     also an inter-TOC call, and requires a trampoline --- so "solib
+     call trampolines" are just a special case.
+
+     The 64-bit PowerPC Linux ABI calls these call trampolines
+     "linkage functions".  Since they need to be near the functions
+     that call them, they all appear in .text, not in any special
+     section.  The .plt section just contains an array of function
+     descriptors, from which the linkage functions load the callee's
+     entry point, TOC value, and environment pointer.  So
+     in_plt_section is useless.  The linkage functions don't have any
+     special linker symbols to name them, either.
+
+     The only way I can see to recognize them is to actually look at
+     their code.  They're generated by ppc_build_one_stub and some
+     other functions in bfd/elf64-ppc.c, so that should show us all
+     the instruction sequences we need to recognize.  */
+  unsigned int insn[PPC64_STANDARD_LINKAGE_LEN];
+
+  return insns_match_pattern (pc, ppc64_standard_linkage, insn);
+}
+
+
+/* When the dynamic linker is doing lazy symbol resolution, the first
+   call to a function in another object will go like this:
+
+   - The user's function calls the linkage function:
+
+     100007c4:	4b ff fc d5 	bl	10000498
+     100007c8:	e8 41 00 28 	ld	r2,40(r1)
+
+   - The linkage function loads the entry point (and other stuff) from
+     the function descriptor in the PLT, and jumps to it:
+
+     10000498:	3d 82 00 00 	addis	r12,r2,0
+     1000049c:	f8 41 00 28 	std	r2,40(r1)
+     100004a0:	e9 6c 80 98 	ld	r11,-32616(r12)
+     100004a4:	e8 4c 80 a0 	ld	r2,-32608(r12)
+     100004a8:	7d 69 03 a6 	mtctr	r11
+     100004ac:	e9 6c 80 a8 	ld	r11,-32600(r12)
+     100004b0:	4e 80 04 20 	bctr
+
+   - But since this is the first time that PLT entry has been used, it
+     sends control to its glink entry.  That loads the number of the
+     PLT entry and jumps to the common glink0 code:
+
+     10000c98:	38 00 00 00 	li	r0,0
+     10000c9c:	4b ff ff dc 	b	10000c78
+
+   - The common glink0 code then transfers control to the dynamic
+     linker's fixup code:
+
+     10000c78:	e8 41 00 28 	ld	r2,40(r1)
+     10000c7c:	3d 82 00 00 	addis	r12,r2,0
+     10000c80:	e9 6c 80 80 	ld	r11,-32640(r12)
+     10000c84:	e8 4c 80 88 	ld	r2,-32632(r12)
+     10000c88:	7d 69 03 a6 	mtctr	r11
+     10000c8c:	e9 6c 80 90 	ld	r11,-32624(r12)
+     10000c90:	4e 80 04 20 	bctr
+
+   Eventually, this code will figure out how to skip all of this,
+   including the dynamic linker.  At the moment, we just get through
+   the linkage function.  */
+
+/* If the current thread is about to execute a series of instructions
+   at PC matching the ppc64_standard_linkage pattern, and INSN is the result
+   from that pattern match, return the code address to which the
+   standard linkage function will send them.  (This doesn't deal with
+   dynamic linker lazy symbol resolution stubs.)  */
+static CORE_ADDR
+ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* The address of the function descriptor this linkage function
+     references.  */
+  CORE_ADDR desc
+    = ((CORE_ADDR) read_register (tdep->ppc_gp0_regnum + 2)
+       + (insn_d_field (insn[0]) << 16)
+       + insn_ds_field (insn[2]));
+
+  /* The first word of the descriptor is the entry point.  Return that.  */
+  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+}
+
+
+/* Given that we've begun executing a call trampoline at PC, return
+   the entry point of the function the trampoline will go to.  */
+static CORE_ADDR
+ppc64_skip_trampoline_code (CORE_ADDR pc)
+{
+  unsigned int ppc64_standard_linkage_insn[PPC64_STANDARD_LINKAGE_LEN];
+
+  if (insns_match_pattern (pc, ppc64_standard_linkage,
+                           ppc64_standard_linkage_insn))
+    return ppc64_standard_linkage_target (pc, ppc64_standard_linkage_insn);
+  else
+    return 0;
+}
+
+
 enum {
   ELF_NGREG = 48,
   ELF_NFPREG = 33,
@@ -743,13 +995,20 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
                                             ppc_linux_memory_remove_breakpoint);
+      /* Shared library handling.  */
+      set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+      set_gdbarch_skip_trampoline_code (gdbarch,
+                                        ppc_linux_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
         (gdbarch, ppc_linux_svr4_fetch_link_map_offsets);
     }
-
-  /* Shared library handling.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-  set_gdbarch_skip_trampoline_code (gdbarch, ppc_linux_skip_trampoline_code);
+  
+  if (tdep->wordsize == 8)
+    {
+      set_gdbarch_in_solib_call_trampoline
+        (gdbarch, ppc64_in_solib_call_trampoline);
+      set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
+    }
 }
 
 void
