@@ -316,7 +316,7 @@ int deprecated_exception_support_initialized = 0;
    unloaded.  */
 
 #ifndef SOLIB_CREATE_CATCH_UNLOAD_HOOK
-#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid,tempflag,filename,cond_string) \
+#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid, tempflag, filename, cond_string) \
    error ("catch of library unloads not yet implemented on this platform")
 #endif
 
@@ -4461,8 +4461,9 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
   char **canonical = (char **) NULL;
   int thread = -1;		/* All threads. */
 
-  /* Set a breakpoint on the specified hook. */
-  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 0, &canonical, NULL);
+  /* Set a breakpoint on the specified hook.  */
+  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 
+			0, &canonical, NULL);
   addr_end = hookname;
 
   if (sals.nelts == 0)
@@ -4536,7 +4537,7 @@ void
 create_solib_unload_event_breakpoint (char *hookname, int tempflag,
 				      char *dll_pathname, char *cond_string)
 {
-  solib_load_unload_1 (hookname,tempflag, dll_pathname, 
+  solib_load_unload_1 (hookname, tempflag, dll_pathname, 
 		       cond_string, bp_catch_unload);
 }
 
@@ -6723,7 +6724,7 @@ delete_breakpoint (struct breakpoint *bpt)
      A real solution to this problem might involve reference counts in bp's,
      and/or giving them pointers back to their referencing bpstat's, and
      teaching delete_breakpoint to only free a bp's storage when no more
-     references were extent.  A cheaper bandaid was chosen. */
+     references were extent.  A cheaper bandaid was chosen.  */
   if (bpt->type == bp_none)
     return;
 
@@ -6747,7 +6748,7 @@ delete_breakpoint (struct breakpoint *bpt)
      isn't actually running.  target_enable_exception_callback for a
      null target ops vector gives an undesirable error message, so we
      check here and avoid it. Since currently (1997-09-17) only HP-UX aCC's
-     exceptions are supported in this way, it's OK for now. FIXME */
+     exceptions are supported in this way, it's OK for now.  FIXME */
   if (ep_is_exception_catchpoint (bpt) && target_has_execution)
     {
       /* Format possible error msg */
@@ -7526,7 +7527,7 @@ enable_breakpoint (struct breakpoint *bpt)
 
 /* The enable command enables the specified breakpoints (or all defined
    breakpoints) so they once again become (or continue to be) effective
-   in stopping the inferior. */
+   in stopping the inferior.  */
 
 static void
 enable_command (char *args, int from_tty)

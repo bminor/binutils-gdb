@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* breakpoint.c: Whitespace tweaks.
 	* cli/cli-interp.c: Tweak comments, per coding standard.
 
 2005-01-13  Andrew Cagney  <cagney@gnu.org>
