@@ -1,5 +1,8 @@
 Fri Apr  4 13:26:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-hppa.h (TC_EOL_IN_INSN): Check explicitly for '!',
+	rather than for any end of line character.
+
 	* config/tc-hppa.c (tc_gen_reloc): If hppa_ren_reloc_type fails,
 	call abort (i.e., as_abort) rather than crashing.
 

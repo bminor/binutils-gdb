@@ -1,6 +1,5 @@
-/* tc-hppa.h -- Header file for the PA */
-
-/* Copyright (C) 1989, 1993 Free Software Foundation, Inc.
+/* tc-hppa.h -- Header file for the PA
+   Copyright (C) 1989, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -15,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 
 /* HP PA-RISC support was contributed by the Center for Software Science
@@ -39,6 +39,8 @@
 #define TC_HPPA	1
 #endif
 
+#define TARGET_BYTES_BIG_ENDIAN 1
+
 #define TARGET_ARCH bfd_arch_hppa
 
 /* FIXME.  The lack of a place to put things which are both target cpu
@@ -59,9 +61,6 @@
 #define TRUE    (!FALSE)
 #endif
 
-/* Local labels have an "L$" prefix.  */
-#define LOCAL_LABEL(name) ((name)[0] == 'L' && (name)[1] == '$')
-#define FAKE_LABEL_NAME "L$0\001"
 #define ASEC_NULL (asection *)0
 
 /* Labels are not required to have a colon for a suffix.  */
@@ -113,7 +112,7 @@ void elf_hppa_final_processing PARAMS ((void));
 /* Similarly for an exclamation point.  It is used in FP comparison
    instructions and as an end of line marker.  When used in an instruction
    it will always follow a comma.  */
-#define TC_EOL_IN_INSN(PTR)	(is_end_of_line[*(PTR)] && (PTR)[-1] == ',')
+#define TC_EOL_IN_INSN(PTR)	(*(PTR) == '!' && (PTR)[-1] == ',')
 
 #define tc_fix_adjustable hppa_fix_adjustable
 
@@ -131,6 +130,16 @@ void elf_hppa_final_processing PARAMS ((void));
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
 	    && (sym->bsym->flags & BSF_EXPORT) == 0)) \
       punt = 1
+
+/* We need to be able to make relocations involving the difference of
+   two symbols.  This includes the difference of two symbols when
+   one of them is undefined (this comes up in PIC code generation). 
+
+   We don't define DIFF_EXPR_OK because it does the wrong thing if
+   the add symbol is undefined and the sub symbol is a symbol in
+   the same section as the relocation.  We also need some way to
+   specialize some code in adjust_reloc_syms.  */
+#define UNDEFINED_DIFFERENCE_OK
 #endif
 
 #ifdef OBJ_ELF
@@ -150,5 +159,8 @@ void elf_hppa_final_processing PARAMS ((void));
 #endif
 
 #define md_operand(x)
+
+#define TC_FIX_TYPE PTR
+#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
 
 #endif /* _TC_HPPA_H */
