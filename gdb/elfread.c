@@ -205,7 +205,7 @@ elf_symtab_read (abfd, addr, objfile)
 
   if (storage_needed > 0)
     {
-      symbol_table = (asymbol **) bfd_xmalloc (storage_needed);
+      symbol_table = (asymbol **) xmalloc (storage_needed);
       back_to = make_cleanup (free, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
   
