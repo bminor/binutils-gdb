@@ -422,6 +422,8 @@ parse_args (pargc, pargv)
     {"target-help", no_argument, NULL, OPTION_TARGET_HELP},
 #define OPTION_WARN_FATAL (OPTION_STD_BASE + 20)
     {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
+    /* When you add options here, check that they do not collide with
+       OPTION_MD_BASE.  See as.h.  */
   };
 
   /* Construct the option lists from the standard list and the target

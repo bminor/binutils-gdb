@@ -1,3 +1,9 @@
+2000-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* as.h (OPTION_MD_BASE): Bump to 190.
+	* as.c (parse_args) <std_longopts>: Add comment about the need to
+	check OPTION_MD_BASE in as.h.
+
 2000-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (emulations): Add m68hc12.

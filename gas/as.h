@@ -105,8 +105,8 @@ extern void *alloca ();
    150 isn't special; it's just an arbitrary non-ASCII char value.  */
 #define OPTION_STD_BASE 150
 /* The first getopt value for machine-dependent long options.
-   170 gives the standard options room to grow.  */
-#define OPTION_MD_BASE 170
+   190 gives the standard options room to grow.  */
+#define OPTION_MD_BASE 190
 
 #ifdef DEBUG
 #undef NDEBUG
