@@ -21,10 +21,7 @@ SYMBOL TABLE:
 0+ l    d  \*ABS\*	0+ 
 0+18 g       \.text	0+ _start
 0+fe g       \*REG\*	0+ areg
-2000000000000000 g     O \*ABS\*	0+ __bss_start
-2000000000000000 g     O \*ABS\*	0+ _edata
-2000000000000000 g     O \*ABS\*	0+ _end
-0+18 g     O \.text	0+ _start\.
+#...
 0+1c g       \.text	0+ a
 
 Disassembly of section \.text:

@@ -18,10 +18,10 @@ SYMBOL TABLE:
 2000000000000200 g       \.data	0+ dloc1
 2000000000000200 g       \*ABS\*	0+ __\.MMIX\.start\.\.data
 0+ g       \.text	0+ _start
-200000000000020c g     O \*ABS\*	0+ __bss_start
-200000000000020c g     O \*ABS\*	0+ _edata
-2000000000000210 g     O \*ABS\*	0+ _end
-0+ g     O \.text	0+ _start\.
+200000000000020c g       \*ABS\*	0+ __bss_start
+200000000000020c g       \*ABS\*	0+ _edata
+2000000000000210 g       \*ABS\*	0+ _end
+0+ g       \.text	0+ _start\.
 
 Contents of section \.text:
  0000 e3fd0001                             .*

@@ -20,10 +20,7 @@ SYMBOL TABLE:
 0+ l    d  \*ABS\*	0+ 
 0+ g       \.text	0+ _start
 0+8 g       \.text	0+ areg
-2000000000000000 g     O \*ABS\*	0+ __bss_start
-2000000000000000 g     O \*ABS\*	0+ _edata
-2000000000000000 g     O \*ABS\*	0+ _end
-0+ g     O \.text	0+ _start\.
+#...
 
 Contents of section \.text:
  0000 e3fd0001 234dfe00 fd040810           .*
