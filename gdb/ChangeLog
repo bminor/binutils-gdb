@@ -1,3 +1,9 @@
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c: Full multi-arch.
+	* config/v850/tm-v850.h: Eliminate or move to v850-tdep.c everything.
+	Define GDB_MULTI_ARCH to 2.
+
 2002-05-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y (current_type): New static variable.
