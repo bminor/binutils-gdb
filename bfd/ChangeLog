@@ -1,5 +1,10 @@
 1999-08-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't use the relocation
+	value of a symbol in a SEC_DEBUGGING section.  Warn when doing a
+	relocation against a symbol in an input section with no output
+	section.  From Daniel Jacobowitz <drow@false.org>.
+
 	* coff-stgo32.c (go32_stubbed_coff_object_p): Remove; not used.
 
 	* acinclude.m4 (BFD_CC_FOR_BUILD): Change to use conftest, and to

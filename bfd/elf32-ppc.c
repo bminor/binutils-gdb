@@ -3038,7 +3038,12 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && ((! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && (input_section->flags & SEC_ALLOC) != 0
+		      && ((input_section->flags & SEC_ALLOC) != 0
+			  /* Testing SEC_DEBUGGING here may be wrong.
+                             It's here to avoid a crash when
+                             generating a shared library with DWARF
+                             debugging information.  */
+		          || (input_section->flags & SEC_DEBUGGING) != 0)
 		      && (r_type == R_PPC_ADDR32
 			  || r_type == R_PPC_ADDR24
 			  || r_type == R_PPC_ADDR16
@@ -3081,6 +3086,14 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                      obscure cases sec->output_section will be NULL.  */
 		  relocation = 0;
 		}
+	      else if (sec->output_section == NULL)
+	        {
+                  (*_bfd_error_handler)
+                    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
+                     bfd_get_filename (input_bfd), h->root.root.string,
+                     bfd_get_section_name (input_bfd, input_section));
+		  relocation = 0;
+	        }
 	      else
 		relocation = (h->root.u.def.value
 			      + sec->output_section->vma
