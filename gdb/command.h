@@ -124,12 +124,14 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 
 /* Set the commands corresponding callback.  */
 
+typedef void cmd_cfunc_ftype (char *args, int from_tty);
 extern void set_cmd_cfunc (struct cmd_list_element *cmd,
-			   void (*cfunc) (char *args, int from_tty));
+			   cmd_cfunc_ftype *cfunc);
 
+typedef void cmd_sfunc_ftype (char *args, int from_tty,
+			      struct cmd_list_element *c);
 extern void set_cmd_sfunc (struct cmd_list_element *cmd,
-			   void (*sfunc) (char *args, int from_tty,
-					  struct cmd_list_element * c));
+			   cmd_sfunc_ftype *sfunc);
 
 extern void set_cmd_completer (struct cmd_list_element *cmd,
 			       char **(*completer) (char *text, char *word));

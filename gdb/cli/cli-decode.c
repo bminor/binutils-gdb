@@ -53,8 +53,7 @@ do_cfunc (struct cmd_list_element *c, char *args, int from_tty)
 }
 
 void
-set_cmd_cfunc (struct cmd_list_element *cmd,
-	       void (*cfunc) (char *args, int from_tty))
+set_cmd_cfunc (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
 {
   if (cfunc == NULL)
     cmd->func = NULL;
@@ -70,9 +69,7 @@ do_sfunc (struct cmd_list_element *c, char *args, int from_tty)
 }
 
 void
-set_cmd_sfunc (struct cmd_list_element *cmd,
-	       void (*sfunc) (char *args, int from_tty,
-			      struct cmd_list_element * c))
+set_cmd_sfunc (struct cmd_list_element *cmd, cmd_sfunc_ftype *sfunc)
 {
   if (sfunc == NULL)
     cmd->func = NULL;

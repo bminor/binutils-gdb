@@ -69,12 +69,11 @@ struct cmd_list_element
        to one of the below.  */
     union
       {
-	/* If type is not_set_cmd, call it like this:  */
-	void (*cfunc) (char *args, int from_tty);
-
-	/* If type is set_cmd or show_cmd, first set the variables, and
-	   then call this.  */
-	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
+	/* If type is not_set_cmd, call it like this: */
+	cmd_cfunc_ftype *cfunc;
+	/* If type is set_cmd or show_cmd, first set the variables,
+	   and then call this: */
+	cmd_sfunc_ftype *sfunc;
       }
     function;
 
