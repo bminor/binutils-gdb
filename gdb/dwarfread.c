@@ -486,9 +486,11 @@ set_cu_language (dip)
       case LANG_C_PLUS_PLUS:
 	cu_language = language_cplus;
 	break;
+      /* start-sanitize-chill */
       case LANG_CHILL:
 	cu_language = language_chill;
 	break;
+      /* end-sanitize-chill */
       case LANG_MODULA2:
 	cu_language = language_m2;
 	break;

@@ -700,13 +700,14 @@ c-exp.tab.c: $(srcdir)/c-exp.y Makefile
 	  < y.tab.c > c-exp.tab.c
 	-rm y.tab.c
 
+# start-sanitize-chill
 # ch-exp.tab.c is generated in target dir from ch-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to ch-exp.tab.o.
 # Remove bogus decls for malloc/realloc/free which conflict with everything
 # else.
 ch-exp.tab.o: ch-exp.tab.c
 ch-exp.tab.c: $(srcdir)/ch-exp.y Makefile
-	@echo 'Expect 4 shift/reduce conflicts.'
+	@echo 'Expect rules never reduced, and lots of reduce/reduce conflicts.'
 	${YACC} $(srcdir)/ch-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
@@ -716,6 +717,7 @@ ch-exp.tab.c: $(srcdir)/ch-exp.y Makefile
 	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > ch-exp.tab.c
 	-rm y.tab.c
+# end-sanitize-chill
 
 # m2-exp.tab.c is generated in target dir from m2-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to m2-exp.tab.o.
