@@ -121,6 +121,7 @@ DESCRIPTION
 .#define bfd_mach_mips4010		4010
 .#define bfd_mach_mips4100		4100
 . {* start-sanitize-vr4xxx *}
+.#define bfd_mach_mips4111		4111
 .#define bfd_mach_mips4121		4121
 . {* end-sanitize-vr4xxx *}
 .#define bfd_mach_mips4300		4300
@@ -155,6 +156,7 @@ DESCRIPTION
 .  bfd_arch_i386,      {* Intel 386 *}
 .#define bfd_mach_i386_i386 0
 .#define bfd_mach_i386_i8086 1
+.#define bfd_mach_i386_i386_intel_syntax 2
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}
@@ -214,9 +216,9 @@ DESCRIPTION
 .  bfd_arch_mn10200,   {* Matsushita MN10200 *}
 .  bfd_arch_mn10300,   {* Matsushita MN10300 *}
 .#define bfd_mach_mn10300		300
-. {* start-sanitize-am33 *}
+. {* start-sanitize-cygnus *}
 .#define bfd_mach_am33		330
-. {* end-sanitize-am33 *}
+. {* end-sanitize-cygnus *}
 .  bfd_arch_fr30,
 .#define bfd_mach_fr30		0x46523330
 .  bfd_arch_last

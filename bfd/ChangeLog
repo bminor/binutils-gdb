@@ -1,3 +1,9 @@
+Mon Jan 18 03:35:35 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): If not D_PAGED,
+	align first section to largest section alignment, not first
+	section alignment.
+
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Require autoconf 2.12.1 or higher.
@@ -979,20 +985,20 @@ Fri Jul 24 13:54:19 1998  Nick Clifton  <nickc@cygnus.com>
 
 Fri Jul 24 11:24:29 1998  Jeffrey A Law  (law@cygnus.com)
 
-start-sanitize-am33
+start-sanitize-cygnus
 	* elf-m10300.c (mn10300_elf_relax_section): Fix typo when relaxing
 	from 24bit operand to an 8bit operand.
 
 	* elf-m10300.c (mn10300_elf_relax_section): Do not relax "dmul",
 	"dmulu", "dmach", "dmachu" with 32bit operands.
-end-sanitize-am33
+end-sanitize-cygnus
 
 	* elf-m10300.c (mn10300_elf_howto): Add R_MN10300_24 entry.
 	(mn10300_elf_reloc_map): Similarly.
 	(mn10300_elf_final_link_relocate): Handle R_MN10300_24.
-start-sanitize-am33
+start-sanitize-cygnus
 	(mn10300_elf_relax_section): Support relaxing on the am33.
-end-sanitize-am33
+end-sanitize-cygnus
 
 Fri Jul 24 12:36:04 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1024,10 +1030,10 @@ Thu Jul 23 13:33:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 Thu Jul 23 11:29:43 1998  Jeffrey A Law  (law@cygnus.com)
 
-start-sanitize-am33
+start-sanitize-cygnus
 	* elf-m10300.c (compute_function_info): Keep track of stack space
 	needed by am33 movm instruction variant.
-end-sanitize-am33
+end-sanitize-cygnus
 
 	* Re-add lost change:
         * elf-m10300.c (elf32_mn10300_link_hash_entry): Add new field
@@ -1377,11 +1383,11 @@ Fri Jun 26 10:48:23 1998  Jeffrey A Law  (law@cygnus.com)
 	(_bfd_mn10300_elf_object_p): Likewise.
 	(elf_backendfinal_write_processing): Define.
 	(elf_backend_object_p): Likewise.
-start-sanitize-am33
+start-sanitize-cygnus
 	* archures.c (bfd_mach_am33): Define.
 	* cpu-m10300.c (bfd_am33_arch): New arch info structure.  Link it
 	into the NEXT field of bfd_mn10300_arch.
-end-sanitize-am33
+end-sanitize-cygnus
 
 Thu Jun 25 18:31:08 1998  Nick Clifton  <nickc@cygnus.com>
 
