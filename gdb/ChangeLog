@@ -1,5 +1,22 @@
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
+	* frame.h (deprecated_frame_xmalloc_with_cleanup)
+	(frame_saved_regs_zalloc, frame_extra_info_zalloc)
+	(get_frame_extra_info, deprecated_get_frame_saved_regs): Delete.
+	* stack.c (frame_info): Delete references to
+	DEPRECATED_FRAME_INIT_SAVED_REGS and
+	deprecated_get_frame_saved_regs.
+	* frame.c (struct frame_info): Delete saved_regs and extra_info.
+	(frame_pc_unwind): Do not use DEPRECATED_FRAME_SAVED_PC.
+	(frame_register): Do not use DEPRECATED_GET_SAVED_REGISTER.
+	(frame_unwind_register_signed)
+	(frame_unwind_register_unsigned)
+	(frame_unwind_unsigned_register): Use register_size.
+	(create_new_frame): Do not use DEPRECATED_INIT_EXTRA_FRAME_INFO.
+	(deprecated_frame_xmalloc_with_cleanup)
+	(frame_saved_regs_zalloc, frame_extra_info_zalloc)
+	(get_frame_extra_info, deprecated_get_frame_saved_regs): Delete.
+
 	* sh-tdep.c (sh_gdbarch_init): Disable call to sh64_gdbarch_init.
 	* config/sh/nbsd.mt (TDEPFILES): Remove sh64-tdep.o.
 	* config/sh/linux.mt (TDEPFILES): Remove sh64-tdep.o.

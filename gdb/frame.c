@@ -66,22 +66,6 @@ struct frame_info
      moment leave this as speculation.  */
   int level;
 
-  /* For each register, address of where it was saved on entry to the
-     frame, or zero if it was not saved on entry to this frame.  This
-     includes special registers such as pc and fp saved in special
-     ways in the stack frame.  The SP_REGNUM is even more special, the
-     address here is the sp for the previous frame, not the address
-     where the sp was saved.  */
-  /* Allocated by frame_saved_regs_zalloc () which is called /
-     initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
-  CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
-
-  /* Anything extra for this structure that may have been defined in
-     the machine dependent files. */
-  /* Allocated by frame_extra_info_zalloc () which is called /
-     initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
-  struct frame_extra_info *extra_info;
-
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
      for the previous frame.  The low-level unwind methods are
@@ -434,14 +418,6 @@ frame_pc_unwind (struct frame_info *this_frame)
              global register cache.  The assumption is dangerous.  */
 	  pc = read_pc ();
 	}
-      else if (DEPRECATED_FRAME_SAVED_PC_P ())
-	{
-	  /* FIXME: cagney/2003-03-06: Old code, but not a sentinel
-             frame.  Do like was always done.  Note that this method,
-             unlike unwind_pc(), tries to handle all the different
-             frame cases directly.  It fails.  */
-	  pc = DEPRECATED_FRAME_SAVED_PC (this_frame);
-	}
       else
 	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
       this_frame->prev_pc.value = pc;
@@ -590,33 +566,6 @@ frame_register (struct frame_info *frame, int regnum,
   gdb_assert (realnump != NULL);
   /* gdb_assert (bufferp != NULL); */
 
-  /* Ulgh!  Old code that, for lval_register, sets ADDRP to the offset
-     of the register in the register cache.  It should instead return
-     the REGNUM corresponding to that register.  Translate the .  */
-  if (DEPRECATED_GET_SAVED_REGISTER_P ())
-    {
-      DEPRECATED_GET_SAVED_REGISTER (bufferp, optimizedp, addrp, frame,
-				     regnum, lvalp);
-      /* Compute the REALNUM if the caller wants it.  */
-      if (*lvalp == lval_register)
-	{
-	  int regnum;
-	  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	    {
-	      if (*addrp == register_offset_hack (current_gdbarch, regnum))
-		{
-		  *realnump = regnum;
-		  return;
-		}
-	    }
-	  internal_error (__FILE__, __LINE__,
-			  "Failed to compute the register number corresponding"
-			  " to 0x%s", paddr_d (*addrp));
-	}
-      *realnump = -1;
-      return;
-    }
-
   /* Obtain the register value by unwinding the register from the next
      (more inner frame).  */
   gdb_assert (frame != NULL && frame->next != NULL);
@@ -647,7 +596,8 @@ frame_unwind_register_signed (struct frame_info *frame, int regnum)
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+  return extract_signed_integer (buf, register_size (get_frame_arch (frame),
+						     regnum));
 }
 
 LONGEST
@@ -661,7 +611,8 @@ frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_unsigned_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+  return extract_unsigned_integer (buf, register_size (get_frame_arch (frame),
+						       regnum));
 }
 
 ULONGEST
@@ -676,7 +627,9 @@ frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_unsigned_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+  (*val) = extract_unsigned_integer (buf,
+				     register_size (get_frame_arch (frame),
+						    regnum));
 }
 
 void
@@ -712,8 +665,7 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
 /* frame_register_read ()
 
    Find and return the value of REGNUM for the specified stack frame.
-   The number of bytes copied is DEPRECATED_REGISTER_RAW_SIZE
-   (REGNUM).
+   The number of bytes copied is REGISTER_SIZE (REGNUM).
 
    Returns 0 if the register value could not be found.  */
 
@@ -801,20 +753,6 @@ frame_obstack_zalloc (unsigned long size)
   void *data = obstack_alloc (&frame_cache_obstack, size);
   memset (data, 0, size);
   return data;
-}
-
-CORE_ADDR *
-frame_saved_regs_zalloc (struct frame_info *fi)
-{
-  fi->saved_regs = (CORE_ADDR *)
-    frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
-  return fi->saved_regs;
-}
-
-CORE_ADDR *
-deprecated_get_frame_saved_regs (struct frame_info *fi)
-{
-  return fi->saved_regs;
 }
 
 /* Return the innermost (currently executing) stack frame.  This is
@@ -966,9 +904,6 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->this_id.p = 1;
   deprecated_update_frame_base_hack (fi, addr);
   deprecated_update_frame_pc_hack (fi, pc);
-
-  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
-    DEPRECATED_INIT_EXTRA_FRAME_INFO (0, fi);
 
   if (frame_debug)
     {
@@ -1415,19 +1350,6 @@ get_frame_type (struct frame_info *frame)
   return frame->unwind->type;
 }
 
-struct frame_extra_info *
-get_frame_extra_info (struct frame_info *fi)
-{
-  return fi->extra_info;
-}
-
-struct frame_extra_info *
-frame_extra_info_zalloc (struct frame_info *fi, long size)
-{
-  fi->extra_info = frame_obstack_zalloc (size);
-  return fi->extra_info;
-}
-
 void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
@@ -1458,27 +1380,6 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 			frame->level, paddr_nz (base));
   /* See comment in "frame.h".  */
   frame->this_id.value.stack_addr = base;
-}
-
-struct frame_info *
-deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
-				       long sizeof_extra_info)
-{
-  struct frame_info *frame = XMALLOC (struct frame_info);
-  memset (frame, 0, sizeof (*frame));
-  frame->this_id.p = 1;
-  make_cleanup (xfree, frame);
-  if (sizeof_saved_regs > 0)
-    {
-      frame->saved_regs = xcalloc (1, sizeof_saved_regs);
-      make_cleanup (xfree, frame->saved_regs);
-    }
-  if (sizeof_extra_info > 0)
-    {
-      frame->extra_info = xcalloc (1, sizeof_extra_info);
-      make_cleanup (xfree, frame->extra_info);
-    }
-  return frame;
 }
 
 /* Memory access methods.  */

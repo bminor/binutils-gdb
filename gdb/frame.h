@@ -657,22 +657,6 @@ extern struct frame_info *deprecated_safe_get_selected_frame (void);
 
 extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 
-
-/* Create/access the frame's `extra info'.  The extra info is used by
-   older code to store information such as the analyzed prologue.  The
-   zalloc() should only be called by the INIT_EXTRA_INFO method.  */
-
-extern struct frame_extra_info *frame_extra_info_zalloc (struct frame_info *fi,
-							 long size);
-extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
-
-/* Create/access the frame's `saved_regs'.  The saved regs are used by
-   older code to store the address of each register (except for
-   SP_REGNUM where the value of the register in the previous frame is
-   stored).  */
-extern CORE_ADDR *frame_saved_regs_zalloc (struct frame_info *);
-extern CORE_ADDR *deprecated_get_frame_saved_regs (struct frame_info *);
-
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
    "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
    the initial frame create.  This puts things back in sync.
@@ -690,14 +674,5 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
    This replaced: frame->frame = ....; */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
-
-/* FIXME: cagney/2003-01-05: Allocate a frame, along with the
-   saved_regs and extra_info.  Set up cleanups for all three.  Same as
-   for deprecated_frame_xmalloc, targets are calling this when
-   creating a scratch `struct frame_info'.  The frame overhaul makes
-   this unnecessary since all frame queries are parameterized with a
-   common cache parameter and a frame.  */
-extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
-								 long sizeof_extra_info);
 
 #endif /* !defined (FRAME_H)  */

@@ -1003,9 +1003,6 @@ frame_info (char *addr_exp, int from_tty)
       }
   }
 
-  if (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()
-      && deprecated_get_frame_saved_regs (fi) == NULL)
-    DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
   /* Print as much information as possible on the location of all the
      registers.  */
   {
