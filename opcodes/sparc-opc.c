@@ -697,10 +697,6 @@ struct sparc_opcode sparc_opcodes[] = {
 { "mov",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", F_ALIAS, v6 }, /* wr r,r,%tbr */
 { "mov",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", F_ALIAS, v6 }, /* wr r,i,%tbr */
 
-/* v9: FIXME: On disassembly, rd %wim,r still gets preferred to rdpr %tpc,r.
-   v9: This is because the former is stricter in which bits can be set and
-   v9: compare_opcodes() will prefer it, even though F_ALIAS is set.
-   v9: Methinks we will need some sort of F_NOTFORV9 flag.  */
 { "mov",	F3(2, 0x28, 0),		 F3(~2, ~0x28, ~0)|SIMM13(~0),			"M,d", F_ALIAS, v8 }, /* rd %asr1,r */
 { "mov",	F3(2, 0x28, 0),		 F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),		"y,d", F_ALIAS, v6 }, /* rd %y,r */
 { "mov",	F3(2, 0x29, 0),		 F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),		"p,d", F_ALIAS|F_NOTV9, v6 }, /* rd %psr,r */
@@ -1454,3 +1450,68 @@ IMPDEP ("impdep2", 0x37),
 };
 
 const int bfd_sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
+
+/* Handle ASI's.  */
+
+static struct asi
+{
+  int value;
+  char *name;
+} asi[] =
+{
+  { 0x10, "#ASI_AIUP" },
+  { 0x11, "#ASI_AIUS" },
+  { 0x18, "#ASI_AIUP_L" },
+  { 0x19, "#ASI_AIUS_L" },
+  { 0x80, "#ASI_P" },
+  { 0x81, "#ASI_S" },
+  { 0x82, "#ASI_PNF" },
+  { 0x83, "#ASI_SNF" },
+  { 0x88, "#ASI_P_L" },
+  { 0x89, "#ASI_S_L" },
+  { 0x8a, "#ASI_PNF_L" },
+  { 0x8b, "#ASI_SNF_L" },
+  { 0x10, "#ASI_AS_IF_USER_PRIMARY" },
+  { 0x11, "#ASI_AS_IF_USER_SECONDARY" },
+  { 0x18, "#ASI_AS_IF_USER_PRIMARY_L" },
+  { 0x19, "#ASI_AS_IF_USER_SECONDARY_L" },
+  { 0x80, "#ASI_PRIMARY" },
+  { 0x81, "#ASI_SECONDARY" },
+  { 0x82, "#ASI_PRIMARY_NOFAULT" },
+  { 0x83, "#ASI_SECONDARY_NOFAULT" },
+  { 0x88, "#ASI_PRIMARY_LITTLE" },
+  { 0x89, "#ASI_SECONDARY_LITTLE" },
+  { 0x8a, "#ASI_PRIMARY_NOFAULT_LITTLE" },
+  { 0x8b, "#ASI_SECONDARY_NOFAULT_LITTLE" },
+  { 0, 0 }
+};
+
+/* Return the value for ASI NAME, or -1 if not found.  */
+
+int
+sparc_encode_asi (name)
+     char *name;
+{
+  struct asi *p;
+
+  for (p = &asi[0]; p->name; ++p)
+    if (strcmp (name, p->name) == 0)
+      return p->value;
+
+  return -1;
+}
+
+/* Return the name for ASI value VALUE or NULL if not found.  */
+
+char *
+sparc_decode_asi (value)
+     int value;
+{
+  struct asi *p;
+
+  for (p = &asi[0]; p->name; ++p)
+    if (value == p->value)
+      return p->name;
+
+  return (char *) 0;
+}

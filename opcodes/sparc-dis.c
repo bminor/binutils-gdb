@@ -175,10 +175,6 @@ is_delayed_branch (insn)
 /* Nonzero of opcode table has been initialized.  */
 static int opcodes_initialized = 0;
 
-/* Nonzero of the current architecture is sparc64.
-   This is kept in a global because compare_opcodes uses it.  */
-static int sparc64_p;
-
 /* extern void qsort (); */
 static int compare_opcodes ();
 
@@ -191,9 +187,10 @@ static int compare_opcodes ();
    on that register.  */
 
 static int
-print_insn (memaddr, info)
+print_insn (memaddr, info, sparc64_p)
      bfd_vma memaddr;
      disassemble_info *info;
+     int sparc64_p;
 {
   FILE *stream = info->stream;
   bfd_byte buffer[4];
@@ -229,6 +226,16 @@ print_insn (memaddr, info)
   for (op = opcode_hash_table[HASH_INSN (insn)]; op; op = op->next)
     {
       CONST struct sparc_opcode *opcode = op->opcode;
+
+      /* If the current architecture isn't sparc64, skip sparc64 insns.  */
+      if (!sparc64_p
+	  && opcode->architecture == v9)
+	continue;
+
+      /* If the current architecture is sparc64, skip sparc32 only insns.  */
+      if (sparc64_p
+	  && (opcode->flags & F_NOTV9))
+	continue;
 
       if ((opcode->match & insn) == opcode->match
 	  && (opcode->lose & insn) == 0)
@@ -509,8 +516,15 @@ print_insn (memaddr, info)
 		    break;
 
 		  case 'A':
-		    (*info->fprintf_func) (stream, "(%d)", X_ASI (insn));
-		    break;
+		    {
+		      char *name = sparc_decode_asi (X_ASI (insn));
+
+		      if (name)
+			(*info->fprintf_func) (stream, "%s", name);
+		      else
+			(*info->fprintf_func) (stream, "(%d)", X_ASI (insn));
+		      break;
+		    }
 
 		  case 'C':
 		    (*info->fprintf_func) (stream, "%%csr");
@@ -659,20 +673,6 @@ compare_opcodes (a, b)
       lose1 = op1->lose;
     }
 
-  /* If the current architecture isn't sparc64, move v9 insns to the end.
-     Only do this when one isn't v9 and one is.  If both are v9 we still
-     need to properly sort them.
-     This must be done before checking match and lose.  */
-  if (!sparc64_p
-      && (op0->architecture == v9) != (op1->architecture == v9))
-    return (op0->architecture == v9) - (op1->architecture == v9);
-
-  /* If the current architecture is sparc64, move non-v9 insns to the end.
-     This must be done before checking match and lose.  */
-  if (sparc64_p
-      && (op0->flags & F_NOTV9) != (op1->flags & F_NOTV9))
-    return (op0->flags & F_NOTV9) - (op1->flags & F_NOTV9);
-
   /* Because the bits that are variable in one opcode are constant in
      another, it is important to order the opcodes in the right order.  */
   for (i = 0; i < 32; ++i)
@@ -694,6 +694,10 @@ compare_opcodes (a, b)
       if (x0 != x1)
 	return x1 - x0;
     }
+
+  /* Put non-sparc64 insns ahead of sparc64 ones.  */
+  if ((op0->architecture == v9) != (op1->architecture == v9))
+    return (op0->architecture == v9) - (op1->architecture == v9);
 
   /* They are functionally equal.  So as long as the opcode table is
      valid, we can put whichever one first we want, on aesthetic grounds.  */
@@ -742,6 +746,15 @@ compare_opcodes (a, b)
 	  /* op0 is 1+i and op1 is i+1, so op0 goes first.  */
 	  return -1;
       }
+  }
+
+  /* Put 1,i before i,1.  */
+  {
+    int i0 = strncmp (op0->args, "i,1", 3) == 0;
+    int i1 = strncmp (op1->args, "i,1", 3) == 0;
+
+    if (i0 ^ i1)
+      return i0 - i1;
   }
 
   /* They are, as far as we can tell, identical.
@@ -806,13 +819,7 @@ print_insn_sparc (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
-  /* It could happen that we'll switch cpus in a running program.
-     Consider objdump or gdb.  The frequency of occurrence is expected
-     to be low enough that our clumsy approach is not a problem.  */
-  if (sparc64_p)
-    opcodes_initialized = 0;
-  sparc64_p = 0;
-  return print_insn (memaddr, info);
+  return print_insn (memaddr, info, 0);
 }
 
 int
@@ -820,11 +827,5 @@ print_insn_sparc64 (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
-  /* It could happen that we'll switch cpus in a running program.
-     Consider objdump or gdb.  The frequency of occurrence is expected
-     to be low enough that our clumsy approach is not a problem.  */
-  if (!sparc64_p)
-    opcodes_initialized = 0;
-  sparc64_p = 1;
-  return print_insn (memaddr, info);
+  return print_insn (memaddr, info, 1);
 }
