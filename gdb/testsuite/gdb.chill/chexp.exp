@@ -66,7 +66,7 @@ proc test_integer_literals_accepted {} {
     gdb_test "p d'123" " = 123"
     gdb_test "p -D'123" " = -123"
     gdb_test "p -d'123" " = -123"
-    gdb_test "p 123_456" " = 123456"
+    gdb_test "p 12_345" " = 12345"
     gdb_test "p __1_2_3__" " = 123"
     gdb_test "p/d 123" " = D'123"
 
@@ -107,10 +107,12 @@ proc test_integer_literals_accepted {} {
     gdb_test "p H'_1_2_3_" " = 291"
     gdb_test "p h'_1_2_3_" " = 291"
     gdb_test "p -h'_1_2_3_" " = -291"
-    gdb_test "p H'ABCDEF" " = 11259375"
-    gdb_test "p H'abcdef" " = 11259375"
-    gdb_test "p H'AbCdEf" " = 11259375"
-    gdb_test "p H'_A_b_C_d_E_f_" " = 11259375"
+    gdb_test "p H'ABC" " = 2748"
+    gdb_test "p H'abc" " = 2748"
+    gdb_test "p H'AbC" " = 2748"
+    gdb_test "p H'_A_b_C_" " = 2748"
+    gdb_test "p H'_D_e_F_" " = 3567"
+    gdb_test "p H'_d_E_f_" " = 3567"
     gdb_test "p/x H'123" " = H'123"
 }
 
