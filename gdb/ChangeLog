@@ -1,3 +1,13 @@
+Tue Sep 16 19:56:23 1997  Per Bothner  <bothner@cygnus.com>
+
+	* util.c (run_cleanup_chain, make_run_cleanup, do_run_cleanups):
+	New cleanup clean for cleanups to be run when at each 'run' command.
+	* infcmd.c (run_command):  Call do_run_cleanups.
+
+	* solib.c (find_solib):  Register cleanup to call clear_solib
+	on a new 'run' command.
+	(symbol_add_stub):  First look for existing objfile with same name.
+
 Tue Sep 16 16:00:01 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-sds.c (sds_load): New function.
