@@ -1,3 +1,9 @@
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/gcore.exp: Issue an UNSUPPORTED and exit if we can't
+	create a core file.
+	* gdb.threads/gcore-thread.exp: Likewise.
+
 2003-10-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/call-rt-st.c (struct bit_flags_char_t): New bitfield
