@@ -2299,12 +2299,18 @@ s_mri (ignore)
 #ifdef TC_M68K
       flag_m68k_mri = 1;
 #endif
+      macro_mri_mode (1);
     }
   else
     {
       flag_mri = 0;
       flag_m68k_mri = 0;
+      macro_mri_mode (0);
     }
+
+  /* Operator precedence changes in m68k MRI mode, so we need to
+     update the operator rankings.  */
+  expr_set_precedence ();
 
 #ifdef MRI_MODE_CHANGE
   if (on != old_flag)
@@ -4390,7 +4396,7 @@ stringer (append_zero)		/* Worker to do .ascii etc statements. */
 
   /*
    * The following awkward logic is to parse ZERO or more strings,
-   * comma seperated. Recall a string expression includes spaces
+   * comma separated. Recall a string expression includes spaces
    * before the opening '\"' and spaces after the closing '\"'.
    * We fake a leading ',' if there is (supposed to be)
    * a 1st, expression. We keep demanding expressions for each

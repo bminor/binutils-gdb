@@ -4410,13 +4410,25 @@ find_real_start (symbolP)
   /* This definitonmust agree with the one in gcc/config/arm/thumb.c */
 #define STUB_NAME ".real_start_of"
 
+  if (name == NULL)
+    abort();
+
+  /* Names that start with '.' are local labels, not function entry points.
+     The compiler may generate BL instructions to these labels because it
+     needs to perform a branch to a far away location.  */
+  if (name[0] == '.')
+    return symbolP;
+  
   real_start = malloc (strlen (name) + strlen (STUB_NAME) + 1);
   sprintf (real_start, "%s%s", STUB_NAME, name);
 
   new_target = symbol_find (real_start);
   
   if (new_target == NULL)
-    abort();
+    {
+      as_warn ("Failed to find real start of function: %s\n", name);
+      new_target = symbolP;
+    }
 
   free (real_start);
 
@@ -4990,6 +5002,13 @@ md_section_align (segment, size)
      segT segment;
      valueT size;
 {
+/* start-sanitize-armelf */
+#ifdef OBJ_ELF
+  /* Don't align the dwarf2 debug sections */
+  if (!strncmp(segment->name,".debug",5))
+    return size;
+#endif
+/* end-sanitize-armelf */
   /* Round all sects to multiple of 4 */
   return (size + 3) & ~3;
 }
@@ -5504,10 +5523,14 @@ tc_gen_reloc (section, fixp)
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
+#ifndef OBJ_ELF
   if (fixp->fx_pcrel == 0)
     reloc->addend = fixp->fx_offset;
   else
     reloc->addend = fixp->fx_offset = reloc->address;
+#else  /* OBJ_ELF */
+  reloc->addend = fixp->fx_offset;
+#endif
 
   switch (fixp->fx_r_type)
     {
@@ -5596,30 +5619,6 @@ tc_gen_reloc (section, fixp)
     }
 
   return reloc;
-}
-
-CONST int md_short_jump_size = 4;
-CONST int md_long_jump_size = 4;
-
-/* These should never be called on the arm */
-void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("md_create_long_jump\n"));
-}
-
-void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("md_create_short_jump\n"));
 }
 
 int
