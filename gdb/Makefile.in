@@ -725,7 +725,7 @@ clean mostlyclean:
 # functionality described is if the distributed files are unmodified.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f nm.h tm.h xm.h config.status
+	rm -f nm.h tm.h xm.h config.status config.h stamp-h
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile
@@ -755,6 +755,10 @@ subdir_do: force
 
 Makefile: Makefile.in config.status @frags@
 	$(SHELL) config.status
+
+config.h: stamp-h ; @true
+stamp-h: config.h.in config.status
+	CONFIG_HEADERS=config.h:config.h.in $(SHELL) config.status
 
 config.status: configure
 	$(SHELL) config.status --recheck
