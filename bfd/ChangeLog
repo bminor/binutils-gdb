@@ -1,3 +1,8 @@
+Wed Jun 21 13:13:49 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Don't try to apply a
+	relocation against an undefined symbols.
+
 Wed Jun 21 10:16:10 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* versados.c: Second pass/rewrite.
