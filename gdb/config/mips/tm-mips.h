@@ -61,20 +61,6 @@ struct value;
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
-/* Some MIPS boards are provided both with and without a floating
-   point coprocessor.  The MIPS R4650 chip has only single precision
-   floating point.  We provide a user settable variable to tell gdb
-   what type of floating point to use.  */
-
-enum mips_fpu_type
-{
-  MIPS_FPU_DOUBLE,	/* Full double precision floating point.  */
-  MIPS_FPU_SINGLE,	/* Single precision floating point (R4650).  */
-  MIPS_FPU_NONE		/* No floating point.  */
-};
-
-extern enum mips_fpu_type mips_fpu;
-
 /* The name of the usual type of MIPS processor that is in the target
    system.  */
 

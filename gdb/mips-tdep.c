@@ -3366,6 +3366,7 @@ mips_gdbarch_init (info, arches)
 	   && info.bfd_arch_info->arch == bfd_arch_mips)
     switch (info.bfd_arch_info->mach)
       {
+      case bfd_mach_mips4100:
       case bfd_mach_mips4111:
       case bfd_mach_mips4121:
 	tdep->mips_fpu_type = MIPS_FPU_NONE;
