@@ -1,3 +1,11 @@
+Wed Aug 12 11:11:34 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: First cut at UDF instructions.
+
+Mon Aug 10 14:08:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-opc.c: Regenerate (remove semantic descriptions).
+
 start-sanitize-armelf
 Mon Aug 10 12:51:12 1998  Catherine Moore  <clm@cygnus.com>
 
@@ -415,13 +423,13 @@ Mon Jun  1 10:27:26 1998  Jeffrey A Law  (law@cygnus.com)
         (sqrt.s): Likewise.
 
 end-sanitize-r5900
-start-sanitize-vr5400
+start-sanitize-cygnus
 Thu May 28 08:46:09 1998  Catherine Moore <clm@cygnus.com>
 
        * mips-opc.c (macc, maccu, macchi, macchiu, msac, msacu, msachi, msachiu):
        Change pinfo to use WR_HILO.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Wed May 27 15:29:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c: Add new operand: Ra3.  Change SHORT_B3, SHORT_B3b,
@@ -1540,7 +1548,7 @@ Tue Nov 11 23:53:41 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	sh-opc.h (sh_table): Remove ftst/nan.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Mon Nov  3 13:23:15 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips-opc.c (dror32, dror, rzu.ob): Fix bugs in encoding.
@@ -1548,7 +1556,7 @@ Mon Nov  3 13:23:15 1997  Ken Raeburn  <raeburn@cygnus.com>
 	last.
 	* mips-dis.c (print_insn_arg): Handle VR5400 operand types.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 start-sanitize-tx49
 Wed Oct 29 15:10:56 1997  Gavin Koch  <gavin@cygnus.com>
 
@@ -1568,10 +1576,10 @@ Tue Oct 28 16:34:54 1997  Michael Meissner  <meissner@cygnus.com>
 Mon Oct 27 22:34:03 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips-opc.c: Fix bug in mask for "not" pseudo-instruction.
-start-sanitize-vr5400
+start-sanitize-cygnus
 	Added VR5400 instructions.
 	(N5): New cpu-id macro.
-end-sanitize-vr5400
+end-sanitize-cygnus
 	(WR_HILO, RD_HILO, MOD_HILO): New macros.
 
 Mon Oct 27 22:34:03 1997  Ken Raeburn  <raeburn@cygnus.com>
