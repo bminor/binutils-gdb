@@ -1,3 +1,12 @@
+2002-02-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Correct test for crossing
+	64k boundary.
+
+	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Add dynamic
+	DT_PPC64_OPD and DT_PPC64_OPDSZ tags.
+	(ppc64_elf_finish_dynamic_sections): Set values for them.
+
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c: Added missing prototypes.
@@ -452,14 +461,14 @@
 
 2002-01-31  Philipp Thomas  <pthomas@suse.de>
 
-        * coff-arm.c (coff_arm_merge_private_bfd_data): Move ERROR
-        to front of message. Unify messages with elf32-arm.h. Use
-        commas where neccessary.
-        * elf32-arm.h (elf32_arm_merge_private_bfd_data): Use all upcase
-        ERROR in messages. Unify messages with coff-arm.c. Correct
-        VFP/FPA error message.
-        (elf32_arm_print_private_bfd_data): Don't mark APCS-26 and
-        APCS-32 for translation.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Move ERROR
+	to front of message. Unify messages with elf32-arm.h. Use
+	commas where neccessary.
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Use all upcase
+	ERROR in messages. Unify messages with coff-arm.c. Correct
+	VFP/FPA error message.
+	(elf32_arm_print_private_bfd_data): Don't mark APCS-26 and
+	APCS-32 for translation.
 
 2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
