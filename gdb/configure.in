@@ -3,31 +3,235 @@ srctrigger=main.c
 
 # per-host:
 
-if [ ! -f xconfig/${host} ]; then
-	echo "No such host ${host}"
+# map host info into gdb names.
+
+case "${host_cpu}" in
+
+m68k)
+	case "${host_vendor}" in
+	att)	gdb_host=3b1 ;;
+	altos)
+		case "${host_os}" in
+		gas)	gdb_host=altosgas ;;
+		*)	gdb_host=altos ;;	
+		esac
+		;;
+	hp)
+		case ${host_os} in
+		hpux)	gdb_host=hp300hpux ;;
+		bsd)	gdb_host=hp300bsd ;;
+		esac
+		;;
+
+	isi)	gdb_host=isi ;;
+	sony)	gdb_host=news ;;
+	sun)
+		case "${host_os}" in
+		sunos3)	gdb_host=sun3os3 ;;
+		sunos4)	gdb_host=sun3os4 ;;
+		*)	gdb_host=sun3 ;;
+		esac
+		;;
+	esac
+	;;
+
+m68000)
+	case "${host_vendor}" in
+	sun)
+		case "${host_os}" in
+		sunos3)	gdb_host=sun2os3 ;;
+		sunos4)	gdb_host=sun2os4 ;;
+		*)	gdb_host=sun2 ;;
+		esac
+	esac
+	;;
+
+sparc)
+	case "${host_os}" in
+	sunos3)	gdb_host=sun4os3 ;;
+	sunos4)	gdb_host=sun4os4 ;;
+	*)	gdb_host=sun4 ;;
+	esac
+	;;
+
+m68030)
+	case "${host_vendor}" in
+	sony)	gdb_host=news1000 ;;
+	esac
+	;;
+
+mips)
+	case "${host_vendor}" in
+	sony)	gdb_host=bigmips ;;
+	dec)	gdb_host=dec3100 ;;
+	little)	gdb_host=littlemips ;;
+	esac
+	;;
+
+i386)
+	case "${host_vendor}" in
+	sun)	gdb_host=sun386 ;;
+	sco)	gdb_host=i386sco ;;
+	sequent)	gdb_host=symmetry ;;
+	*)
+		case "${host_os}" in
+		sysv)	gdb_host=i386v ;;
+		sysv32)	gdb_host=i386v32 ;;
+		esac
+		;;
+	esac
+	;;
+
+c1 | c2)	gdb_host=convex ;;
+
+ns32k)
+	case "${host_vendor}" in
+	umax)	gdb_host=umax ;;
+	esac
+	;;
+
+arm | vax | m88k | merlin | none | np1 | pn | pyramid | tahoe)	gdb_host=${host_cpu} ;;
+
+### unhandled hosts
+#altosgas
+#i386v-g
+#i386v32-g
+
+esac
+
+if [ ! -f xconfig/${gdb_host} ]; then
+	echo '***' "Gdb does not support host ${host}" 1>&2
 	exit 1
 fi
 
 #  We really shouldn't depend on there being a space after XM_FILE= ...
-hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <xconfig/$host`
+hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <xconfig/${gdb_host}`
 
 # per-target:
 
-if [ ! -f tconfig/${target} ]; then
-	echo "No such target ${target}"
+case "${target_cpu}" in
+
+m68k)
+	case "${target_vendor}" in
+	att)	gdb_target=3b1 ;;
+	altos)	gdb_target=altos ;;
+	hp)
+		case "${target_os}" in
+		bsd)	gdb_target=hp300bsd ;;
+		hpux)	gdb_target=hp300hpux ;;
+		esac
+		;;
+	sun)
+		case "${target_os}" in
+		sunos3)	gdb_target=sun3os3 ;;
+		sunos4)	gdb_target=sun3os4 ;;
+		*)	gdb_target=sun3 ;;
+		esac
+		;;
+	wrs)	gdb_target=vxworks68 ;;
+	isi)	gdb_target=isi ;;
+	sony)	gdb_target=news ;;
+	esac
+	;;
+
+m68000)
+	case "${target_vendor}" in
+	sun)
+		case "${target_os}" in
+		sunos3)	gdb_target=sun2os3 ;;
+		sunos4)	gdb_target=sun2os4 ;;
+		*)	gdb_target=sun2 ;;
+		esac
+	esac
+	;;
+
+m68030)
+	case "${target_vendor}" in
+	sony)	gdb_target=news1000 ;;
+	esac
+	;;
+
+none | np1 | pn | np1 | pn | pyramid | merlin | i960 | m88k | a29k)
+	gdb_target=${target_cpu} ;;
+
+arm)	gdb_target=${target_cpu} ;;
+
+mips)
+	case "${target_vendor}" in
+	sony)	gdb_target=bigmips ;;
+	dec)	gdb_target=dec3100 ;;
+	little)	gdb_target=littlemips ;;
+	esac
+	;;
+
+c1 | c2)	gdb_target=convex ;;
+
+i386)
+	case "${target_vendor}" in
+	sco)	gdb_target=i386sco ;;
+	sun)	gdb_target=sun386 ;;
+	esac
+	;;
+
+sparc)
+	case "${target_vendor}" in
+	sun)
+		case "${target_os}" in
+		sunos3)	gdb_target=sun4os3 ;;
+		sunos4)	gdb_target=sun4os4 ;;
+		*)	gdb_target=sun4 ;;
+		esac
+		;;
+	esac
+	;;
+
+
+i386)
+	case "${target_vendor}" in
+	sequent)	gdb_target=symmetry ;;
+	*)
+		case "${target_os}" in
+		sysv)	gdb_target=i386v ;;
+		sysv32)	gdb_target=i386v32 ;;
+		esac
+	esac
+	;;
+
+i960)
+	case "${target_vendor}" in
+	wrs)	gdb_target=vxworks960 ;;
+	intel)	gdb_target=nindy960 ;;
+	esac
+	;;
+
+ns32k)
+	case "${target_vendor}" in
+	utek)	gdb_target=umax ;;
+	esac
+	;;
+
+### unhandled targets
+# altosgas
+# i386v-g
+# i386v32-g
+
+esac
+
+if [ ! -f tconfig/${gdb_target} ]; then
+	echo '***' "Gdb does not support target ${target}" 1>&2
 	exit 1
 fi
 
 if [ -z "${removing}" ] ; then
-	cat xconfig/${host} tconfig/${target} | awk '$1 == "#msg" {
+	cat xconfig/${gdb_host} tconfig/${gdb_target} | awk '$1 == "#msg" {
 		print substr($0,6)}'
 fi
 
 #  We really shouldn't depend on there being a space after TM_FILE= ...
-targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <tconfig/$target`
+targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <tconfig/${gdb_target}`
 
-host_makefile_frag=xconfig/${host}
-target_makefile_frag=tconfig/${target}
+host_makefile_frag=xconfig/${gdb_host}
+target_makefile_frag=tconfig/${gdb_target}
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) is not set in the
 # ?config/* file, we don't make the corresponding links.  But we have
