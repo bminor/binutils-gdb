@@ -1,3 +1,7 @@
+2000-11-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh-opc.h: The operand of `mov.w r0, (<disp>,GBR)' is IMM1, not 0.
+
 2000-11-07  Matthew Green  <mrg@redhat.com>
 
 	* cgen-dis.in (print_insn): All insns which can fit into insn_value
