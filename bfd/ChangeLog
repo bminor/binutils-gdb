@@ -1,7 +1,7 @@
 2000-08-07  Kazu Hirata  <kazu@hxi.com>
 
-	* ieee.c: Fix a comment typo.
-	* elf64-ia64.c: Likewise.
+	* ieee.c (ieee_write_debug_part): Rewrite a comment.
+	* elf64-ia64.c: Fix a typo.
 
 2000-08-05  Jason Eckhardt  <jle@cygnus.com>
 

@@ -3197,9 +3197,8 @@ relocate_debug (output, input)
   block ();
 }
 
-/* During linking, we told about the bfds which made up our contents,
-   we have a list of them.  They will still be open, so go to the
-   debug info in each, and copy it out, relocating it as we go.  */
+/* Gather together all the debug information from each input BFD into
+   one place, relocating it and emitting it as we go.  */
 
 static boolean
 ieee_write_debug_part (abfd)
