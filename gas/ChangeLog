@@ -5,6 +5,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/obj-coff.c (coff_frob_symbol): Prohibit weak common
+	symbols.
+
 	* config/obj-coff.c (obj_coff_endef): Don't merge labels, or
 	symbols which do not have a constant value, or tags with
 	non-tags.  Remove the symbol from the list before adding it at the

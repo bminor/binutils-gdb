@@ -1169,6 +1169,11 @@ coff_frob_symbol (symp, punt)
       /* more ... */
     }
 
+  /* Double check weak symbols.  */
+  if (S_IS_WEAK (symp) && S_IS_COMMON (symp))
+    as_bad (_("Symbol `%s' can not be both weak and common"),
+	    S_GET_NAME (symp));
+
   if (SF_GET_TAG (symp))
     last_tagP = symp;
   else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
