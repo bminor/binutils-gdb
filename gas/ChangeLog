@@ -1,3 +1,15 @@
+Mon Oct  5 00:48:52 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* tc-hppa.c (fp_operand_format): Add some additional formats.
+	(pa_ip): Do not automatically promote into pa2.0 mode.
+	(pa_level): Handle ".level 2.0".
+start-sanitize-cygnus
+	(struct pa_it): New field "trunc".
+	(pa_parse_fp_cnv_format): New function.
+	(pa_parse_ftest_gfx_completer): New function.
+	(pa_ip): Handle various new letters for PA2.0 support.
+end-sanitize-cygnus
+
 Sun Oct  4 20:57:43 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (md_assemble): Handle AMD_3DNOW_OPCODE.

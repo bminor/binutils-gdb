@@ -238,7 +238,7 @@ else
 	done
 fi
 
-cygnus_files="tc-mips.c"
+cygnus_files="tc-mips.c tc-hppa.c"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $cygnus_files ; do
 		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
