@@ -1,5 +1,5 @@
 #objdump: -dr
-#name: ulh-empic
+#name: MIPS ulh-empic
 #as: -mips1 -membedded-pic
 #source: ulh-pic.s
 

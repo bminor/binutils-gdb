@@ -1,5 +1,5 @@
 #objdump: -dr
-#name: la-empic
+#name: MIPS la-empic
 #as: -mips1 -membedded-pic
 
 # Test the la macro with -membedded-pic.

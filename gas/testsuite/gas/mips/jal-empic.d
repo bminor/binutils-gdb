@@ -1,5 +1,5 @@
 #objdump: -dr
-#name: jal-empic
+#name: MIPS jal-empic
 #as: -mips1 -membedded-pic
 #source: jal.s
 

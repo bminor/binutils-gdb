@@ -1,5 +1,5 @@
 #objdump: -dr
-#name: lifloat-empic
+#name: MIPS lifloat-empic
 #as: -mips1 -membedded-pic
 #source: lifloat.s
 

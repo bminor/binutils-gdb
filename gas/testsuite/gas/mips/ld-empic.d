@@ -1,5 +1,5 @@
 #objdump: -dr
-#name: ld-empic
+#name: MIPS ld-empic
 #as: -mips1 -membedded-pic
 #source: ld-pic.s
 
