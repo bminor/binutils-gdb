@@ -1,3 +1,8 @@
+2002-06-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_file_header): Only read the first section header if
+	e_shoff is non-zero.
+
 2002-06-15  H.J. Lu  (hjl@gnu.org)
 
 	* nm.c (print_size): New variable. Initialize to 0.

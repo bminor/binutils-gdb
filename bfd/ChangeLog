@@ -1,3 +1,10 @@
+2002-06-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfcode.h (elf_object_p): Sanity check eh_shoff == 0 implies
+	e_shnum == 0.
+	Only read the first section header if e_shoff is non-zero.
+	Don't consider e_shstrndx if there are no sections.
+
 2002-06-17  Tom Rix <trix@redhat.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Change R_D10V_10_PCREL_R,

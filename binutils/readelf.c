@@ -9711,12 +9711,15 @@ get_file_header (file)
       elf_header.e_shstrndx  = BYTE_GET (ehdr64.e_shstrndx);
     }
 
-  /* There may be some extensions in the first section header.  Don't
-     bomb if we can't read it.  */
-  if (is_32bit_elf)
-    get_32bit_section_headers (file, 1);
-  else
-    get_64bit_section_headers (file, 1);
+  if (elf_header.e_shoff)
+    {
+      /* There may be some extensions in the first section header.  Don't
+	 bomb if we can't read it.  */
+      if (is_32bit_elf)
+	get_32bit_section_headers (file, 1);
+      else
+	get_64bit_section_headers (file, 1);
+    }
 
   return 1;
 }
