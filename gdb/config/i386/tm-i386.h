@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on an Intel i[345]86.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -115,10 +115,9 @@ extern int i386_skip_prologue PARAMS ((int));
 #define FPC_REGNUM 25	/* 80387 control register */
 
 /* Total amount of space needed to store our copies of the machine's register
-   state, the array `registers'.  Default is 16 i*86 registers and 8 floating
-   point registers. */
+   state, the array `registers'. */
 
-#define REGISTER_BYTES (16*4 + 8*10)
+#define REGISTER_BYTES ((NUM_REGS - NUM_FREGS)*4 + NUM_FREGS*10)
 
 /* Index within `registers' of the first byte of the space for register N. */
 

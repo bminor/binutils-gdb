@@ -1,5 +1,5 @@
 /* Native-dependent code for SVR4 Unix running on i386's, for GDB.
-   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -75,6 +75,12 @@ static int regmap[] =
 };
 
 
+/*  FIXME:  These routine absolutely depends upon (NUM_REGS - NUM_FREGS)
+    being less than or equal to the number of registers that can be stored
+    in a gregset_t.  Note that with the current scheme there will typically
+    be more registers actually stored in a gregset_t that what we know
+    about.  This is bogus and should be fixed. */
+
 /*  Given a pointer to a general register set in /proc format (gregset_t *),
     unpack the register contents and supply them as gdb's idea of the current
     register values. */
@@ -87,7 +93,7 @@ supply_gregset (gregsetp)
   register greg_t *regp = (greg_t *) gregsetp;
   extern int regmap[];
 
-  for (regi = 0 ; regi < NUM_REGS ; regi++)
+  for (regi = 0 ; regi < (NUM_REGS - NUM_FREGS) ; regi++)
     {
       supply_register (regi, (char *) (regp + regmap[regi]));
     }
@@ -103,7 +109,7 @@ fill_gregset (gregsetp, regno)
   extern char registers[];
   extern int regmap[];
 
-  for (regi = 0 ; regi < NUM_REGS ; regi++)
+  for (regi = 0 ; regi < (NUM_REGS - NUM_FREGS) ; regi++)
     {
       if ((regno == -1) || (regno == regi))
 	{

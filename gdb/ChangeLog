@@ -1,3 +1,12 @@
+Wed Jan  3 23:13:53 1996  Fred Fish  <fnf@cygnus.com>
+
+	* i386v4-nat.c (supply_gregset, fill_gregset): Subtract NUM_FREGS
+ 	from NUM_REGS to get number of general registers that we care about.
+	Update copyright to 1996.
+	* config/i386/tm-i386.h (REGISTER_BYTES): Define in terms
+	of number of general regs and number of floating point regs.
+	Update copyright to 1996.
+
 Wed Jan  3 19:49:54 1996  steve chamberlain  <sac@slash.cygnus.com>
 
 	* config/i386/tm-win32.h (IN_SOLIB_CALL_TRAMPOLINE): New.
