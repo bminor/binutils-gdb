@@ -682,12 +682,9 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #  define alloca __builtin_alloca
 # else
 #  ifdef sparc
-#   include <alloca.h>
-    extern char *alloca ();	/* SPARC alloca.h doesn't declare damn thing */
+#   include <alloca.h>		/* NOTE:  Doesn't declare alloca() */
 #  endif
-#  ifndef alloca		/* May be macro, with args, in <alloca.h> */
-    extern char *alloca ();
-#  endif
+   extern PTR alloca PARAMS ((size_t));
 # endif
 #endif
 

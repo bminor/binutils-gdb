@@ -1,3 +1,11 @@
+Sun Jun 28 13:30:22 1992  Fred Fish  (fnf@cygnus.com)
+
+	* remote.c (remote_wait):  Fix cast on signal() call.
+	* defs.h (alloca):  More diddling with alloca.  Have to ensure
+	that it has a prototype, so that if alloca is defined as a macro
+	that takes an arg, the definition is seen as a use of a macro
+	that takes an arg, to satisfy picky ANSI preprocessors.
+
 Sat Jun 27 12:12:20 1992  Fred Fish  (fnf@cygnus.com)
 
 	* sparc-pinsn.c:  Use <string.h> rather than "string.h", for
