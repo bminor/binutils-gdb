@@ -134,6 +134,9 @@ static boolean elf64_alpha_adjust_dynamic_symbol
   PARAMS((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean elf64_alpha_size_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
+static boolean elf64_alpha_relocate_section_r
+  PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean elf64_alpha_relocate_section
   PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -1399,15 +1402,6 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
 	    bfd_vma optdest, org;
 	    bfd_signed_vma odisp;
 
-	    /* If this symbol is undefined, we can't relax it to a branch.  */
-	    if (info->h
-		&& (info->h->root.root.type == bfd_link_hash_undefweak
-		    || info->h->root.root.type == bfd_link_hash_undefined))
-	      {
-		all_optimized = false;
-		break;
-	      }
-
 	    /* If not zero, place to jump without needing pv.  */
 	    optdest = elf64_alpha_relax_opt_call (info, symval);
 	    org = (info->sec->output_section->vma
@@ -2181,7 +2175,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	  shndx = shndx_buf + (shndx_buf ? ELF64_R_SYM (irel->r_info) : 0);
 	  bfd_elf64_swap_symbol_in (abfd, esym, shndx, &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
-	    info.tsec = bfd_und_section_ptr;
+	    continue;
 	  else if (isym.st_shndx == SHN_ABS)
 	    info.tsec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
@@ -2206,6 +2200,16 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	  while (h->root.root.type == bfd_link_hash_indirect
 		 || h->root.root.type == bfd_link_hash_warning)
 	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
+
+	  /* If the symbol is undefined, we can't do anything with it.  */
+	  if (h->root.root.type == bfd_link_hash_undefweak
+	      || h->root.root.type == bfd_link_hash_undefined)
+	    continue;
+
+	  /* If the symbol isn't defined in the current module, again
+	     we can't do anything.  */
+	  if (!(h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	    continue;
 
 	  info.h = h;
 	  info.tsec = h->root.root.u.def.section;
@@ -4173,6 +4177,71 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
   return true;
 }
 
+/* Relocate an Alpha ELF section for a relocatable link.
+
+   We don't have to change anything unless the reloc is against a section
+   symbol, in which case we have to adjust according to where the section
+   symbol winds up in the output section.  */
+
+static boolean
+elf64_alpha_relocate_section_r (output_bfd, info, input_bfd, input_section,
+			        contents, relocs, local_syms, local_sections)
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
+{
+  unsigned long symtab_hdr_sh_info;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
+  boolean ret_val = true;
+
+  symtab_hdr_sh_info = elf_tdata (input_bfd)->symtab_hdr.sh_info;
+
+  relend = relocs + input_section->reloc_count;
+  for (rel = relocs; rel < relend; rel++)
+    {
+      unsigned long r_symndx;
+      Elf_Internal_Sym *sym;
+      asection *sec;
+      unsigned long r_type;
+
+      r_type = ELF64_R_TYPE(rel->r_info);
+      if (r_type >= R_ALPHA_max)
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: unknown relocation type %d"),
+	     bfd_archive_filename (input_bfd), (int)r_type);
+	  bfd_set_error (bfd_error_bad_value);
+	  ret_val = false;
+	  continue;
+	}
+
+      r_symndx = ELF64_R_SYM(rel->r_info);
+
+      /* The symbol associated with GPDISP and LITUSE is
+	 immaterial.  Only the addend is significant.  */
+      if (r_type == R_ALPHA_GPDISP || r_type == R_ALPHA_LITUSE)
+	continue;
+
+      if (r_symndx < symtab_hdr_sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  if (ELF_ST_TYPE(sym->st_info) == STT_SECTION)
+	    {
+	      sec = local_sections[r_symndx];
+	      rel->r_addend += sec->output_offset + sym->st_value;
+	    }
+	}
+    }
+
+  return ret_val;
+}
+
 /* Relocate an Alpha ELF section.  */
 
 static boolean
@@ -4187,67 +4256,86 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
 {
-  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  struct elf_link_tls_segment *tls_segment = NULL;
-  asection *sgot = NULL, *srel = NULL, *srelgot = NULL;
-  bfd *dynobj = NULL, *gotobj = NULL;
-  bfd_vma gp = 0, tp_base = 0, dtp_base = 0;
-  boolean ret_val = true;
+  struct elf_link_tls_segment *tls_segment;
+  asection *sgot, *srel, *srelgot;
+  bfd *dynobj, *gotobj;
+  bfd_vma gp, tp_base, dtp_base;
+  struct alpha_elf_got_entry **local_got_entries;
+  boolean ret_val;
+  const char *section_name;
 
-  if (!info->relocateable)
+  /* Handle relocatable links with a smaller loop.  */
+  if (info->relocateable)
+    return elf64_alpha_relocate_section_r (output_bfd, info, input_bfd,
+					   input_section, contents, relocs,
+					   local_syms, local_sections);
+
+  /* This is a final link.  */
+
+  ret_val = true;
+
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+
+  dynobj = elf_hash_table (info)->dynobj;
+  if (dynobj)
+    srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  else
+    srelgot = NULL;
+
+  section_name = (bfd_elf_string_from_elf_section
+		  (input_bfd, elf_elfheader(input_bfd)->e_shstrndx,
+		   elf_section_data(input_section)->rel_hdr.sh_name));
+  BFD_ASSERT(section_name != NULL);
+  srel = bfd_get_section_by_name (dynobj, section_name);
+
+  /* Find the gp value for this input bfd.  */
+  gotobj = alpha_elf_tdata (input_bfd)->gotobj;
+  if (gotobj)
     {
-      const char *name;
-
-      dynobj = elf_hash_table (info)->dynobj;
-      if (dynobj)
-        srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-
-      name = (bfd_elf_string_from_elf_section
-	      (input_bfd, elf_elfheader(input_bfd)->e_shstrndx,
-	       elf_section_data(input_section)->rel_hdr.sh_name));
-      BFD_ASSERT(name != NULL);
-      srel = bfd_get_section_by_name (dynobj, name);
-
-      /* Find the gp value for this input bfd.  */
-      gotobj = alpha_elf_tdata (input_bfd)->gotobj;
-      if (gotobj)
+      sgot = alpha_elf_tdata (gotobj)->got;
+      gp = _bfd_get_gp_value (gotobj);
+      if (gp == 0)
 	{
-	  sgot = alpha_elf_tdata (gotobj)->got;
-	  gp = _bfd_get_gp_value (gotobj);
-	  if (gp == 0)
-	    {
-	      gp = (sgot->output_section->vma
-		    + sgot->output_offset
-		    + 0x8000);
-	      _bfd_set_gp_value (gotobj, gp);
-	    }
-        }
-
-      tls_segment = elf_hash_table (info)->tls_segment;
-      if (tls_segment)
-        {
-          dtp_base = alpha_get_dtprel_base (tls_segment);
-          tp_base = alpha_get_tprel_base (tls_segment);
-        }
+	  gp = (sgot->output_section->vma
+		+ sgot->output_offset
+		+ 0x8000);
+	  _bfd_set_gp_value (gotobj, gp);
+	}
+    }
+  else
+    {
+      sgot = NULL;
+      gp = 0;
     }
 
-  rel = relocs;
-  relend = relocs + input_section->reloc_count;
-  for (; rel < relend; rel++)
+  local_got_entries = alpha_elf_tdata(input_bfd)->local_got_entries;
+
+  tls_segment = elf_hash_table (info)->tls_segment;
+  if (tls_segment)
     {
-      struct alpha_elf_link_hash_entry *h;
+      dtp_base = alpha_get_dtprel_base (tls_segment);
+      tp_base = alpha_get_tprel_base (tls_segment);
+    }
+  else
+    dtp_base = tp_base = 0;
+
+  relend = relocs + input_section->reloc_count;
+  for (rel = relocs; rel < relend; rel++)
+    {
+      struct alpha_elf_link_hash_entry *h = NULL;
       struct alpha_elf_got_entry *gotent;
       bfd_reloc_status_type r;
       reloc_howto_type *howto;
       unsigned long r_symndx;
-      Elf_Internal_Sym *sym;
-      asection *sec;
+      Elf_Internal_Sym *sym = NULL;
+      asection *sec = NULL;
       bfd_vma value;
       bfd_vma addend;
       boolean dynamic_symbol_p;
-      boolean undef_weak_ref;
+      boolean undef_weak_ref = false;
       unsigned long r_type;
 
       r_type = ELF64_R_TYPE(rel->r_info);
@@ -4264,45 +4352,16 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = elf64_alpha_howto_table + r_type;
       r_symndx = ELF64_R_SYM(rel->r_info);
 
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-
-	  /* The symbol associated with GPDISP and LITUSE is
-	     immaterial.  Only the addend is significant.  */
-	  if (r_type == R_ALPHA_GPDISP || r_type == R_ALPHA_LITUSE)
-	    continue;
-
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE(sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
-
-      h = NULL;
-      sym = NULL;
-      sec = NULL;
-      undef_weak_ref = false;
-
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
 
-	  gotent = alpha_elf_tdata(input_bfd)->local_got_entries[r_symndx];
+	  if (local_got_entries)
+	    gotent = local_got_entries[r_symndx];
+	  else
+	    gotent = NULL;
 
 	  /* Need to adjust local GOT entries' addends for SEC_MERGE
 	     unless it has been done already.  */
