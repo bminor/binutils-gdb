@@ -2652,7 +2652,7 @@ void OP_DD000000 (insn, extension)
     }
 
   /* Update the stack pointer.  */
-  State.regs[REG_SP] = sp - extension;
+  State.regs[REG_SP] = sp - (extension & 0xff);
   State.regs[REG_MDR] = next_pc;
   State.regs[REG_PC] += (((insn & 0xffffff) << 8) | ((extension & 0xff0000) >> 16)) - 7;
 }

@@ -1,3 +1,7 @@
+Wed Jun 11 22:07:56 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix thinko in last change.
+
 Tue Jun 10 12:31:32 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: "call" stores the callee saved registers into the
