@@ -6,6 +6,9 @@
 /*
 modification history
 --------------------
+01b,25may91,maf  now uses counted bytes struct to transfer registers.
+		 removed xdr_regs_ptr (), xdr_fp_status_ptr (), and
+		   xdr_fpa_regs_ptr ().
 01a,05jun90,llk  extracted from xdr_ptrace.h, version 01c.
 */
 
@@ -17,55 +20,17 @@ modification history
 
 /********************************************************************
 *
-* xdr_regs_ptr -
+* xdr_c_bytes -
 *
-* xdr routine to get regs* branch of discriminated union ptrace_info
-*
-*/
-
-LOCAL bool_t xdr_regs_ptr(xdrs,objp)
-    XDR *xdrs;
-    struct regs **objp;
-    {
-    return (xdr_pointer(xdrs, (char **) objp, sizeof(struct regs), xdr_regs));
-    } /* xdr_regs_ptr */
-
-/********************************************************************
-*
-* xdr_fp_status_ptr -
-*
-* xdr routine for fp_status * branch of discrimanated union
+* xdr routine for counted bytes  
 *
 */
-
-LOCAL bool_t xdr_fp_status_ptr(xdrs,objp)
+bool_t xdr_c_bytes(xdrs,objp)
     XDR *xdrs;
-    struct fp_status **objp;
+    C_bytes *objp;
     {
-    return(xdr_pointer(xdrs, (char **) objp, sizeof(struct fp_status), 
-	    xdr_fp_status));
-    } /* xdr_fp_status_ptr */
-
-#ifndef I80960
-/********************************************************************
-*
-* xdr_fpa_regs_ptr - 
-*
-* xdr routine for fpa_regs* branch of ptrace_info
-*
-*/
-
-LOCAL bool_t xdr_fpa_regs_ptr(xdrs,objp)
-    XDR *xdrs;
-    struct fpa_regs **objp;
-    {
-    if (! xdr_pointer(xdrs, (char **) objp, sizeof(struct fpa_regs), 
-	    	      xdr_fpa_regs)) 
-	return(FALSE);
-    else
-	return(TRUE);
-    } /* xdr_fpa_regs_ptr */
-#endif
+    return(xdr_bytes(xdrs, &objp->bytes, (u_int *) &objp->len, MAX_LEN));
+    } /* xdr_c_bytes */
 
 /********************************************************************
 *
@@ -96,11 +61,6 @@ bool_t xdr_ptrace_info(xdrs,objp)
     {
     static struct xdr_discrim choices[] = 
 	{
-	    { (int) REGS, xdr_regs_ptr },
-	    { (int) FPREGS, xdr_fp_status_ptr },
-#ifndef I80960
-	    { (int) FPAREGS, xdr_fpa_regs_ptr },
-#endif
 	    { (int) DATA, xdr_c_bytes_ptr },
 	    { __dontcare__, NULL }
 	};
@@ -154,18 +114,3 @@ bool_t xdr_ptrace_return(xdrs, objp)
 
     return(TRUE);
     } /* xdr_ptrace_return */	
-
-/********************************************************************
-*
-* xdr_c_bytes -
-*
-* xdr routine for counted bytes  
-*
-*/
-bool_t xdr_c_bytes(xdrs,objp)
-    XDR *xdrs;
-    C_bytes *objp;
-    {
-    return(xdr_bytes(xdrs, &objp->bytes, (u_int *) &objp->len, MAX_LEN));
-    } /* xdr_c_bytes */
-

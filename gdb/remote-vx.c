@@ -50,6 +50,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern void symbol_file_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
+extern void host_convert_to_virtual ();
+extern void host_convert_from_virtual ();
 
 static int net_ptrace_clnt_call ();	/* Forward decl */
 static enum clnt_stat net_clnt_call ();	/* Forward decl */
@@ -158,7 +160,7 @@ net_break (addr, procnum)
  
 /* returns 0 if successful, errno otherwise */
 
-int
+static int
 vx_insert_breakpoint (addr)
     int addr;
     {
@@ -167,7 +169,7 @@ vx_insert_breakpoint (addr)
 
 /* returns 0 if successful, errno otherwise */
 
-int
+static int
 vx_remove_breakpoint (addr)
     int addr;
     {
@@ -181,7 +183,7 @@ vx_remove_breakpoint (addr)
    Returns process id.  Errors reported with error().
    On VxWorks, we ignore exec_file.  */
  
-void
+static void
 vx_create_inferior (exec_file, args, env)
      char *exec_file;
      char *args;
@@ -323,7 +325,7 @@ find_white_space (p)
    to the debugged task.
    Returns -1 if remote wait failed, task status otherwise.  */
 
-int
+static int
 net_wait (pEvent)
     RDB_EVENT *pEvent;
 {
@@ -341,7 +343,7 @@ net_wait (pEvent)
 /* Suspend the remote task.
    Returns -1 if suspend fails on target system, 0 otherwise.  */
 
-int
+static int
 net_quit ()
 {
     int pid;
@@ -363,15 +365,15 @@ net_quit ()
 
 /* Read a register or registers from the remote system.  */
 
-int
+static void
 vx_read_register (regno)
      int regno;
 {
   int status;
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
-  struct regs inferior_registers;
-  struct fp_status inferior_fp_registers;
+  C_bytes in_data;
+  C_bytes out_data;
   extern char registers[];
 
   bzero ((char *) &ptrace_in, sizeof (ptrace_in));
@@ -381,14 +383,17 @@ vx_read_register (regno)
   registers_fetched ();
   
   ptrace_in.pid = inferior_pid;
-  ptrace_out.info.more_data = (caddr_t) &inferior_registers;
+  ptrace_out.info.more_data = (caddr_t) &out_data;
+  out_data.len   = 18 * REGISTER_RAW_SIZE (0);		/* FIXME 68k hack */
+  out_data.bytes = (caddr_t) registers;
+  
   status = net_ptrace_clnt_call (PTRACE_GETREGS, &ptrace_in, &ptrace_out);
   if (status)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
       errno = ptrace_out.errno;
-      return -1;
+      perror_with_name ("net_ptrace_clnt_call(PTRACE_GETREGS)");
     }
   
 #ifdef I80960
@@ -424,7 +429,7 @@ vx_read_register (regno)
 	  if (ptrace_out.status == -1)
 	    {
 	      errno = ptrace_out.errno;
-	      return -1;
+	      perror_with_name ("net_ptrace_clnt_call(PTRACE_GETFPREGS)");
 	    }
 	  
 	  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
@@ -438,45 +443,37 @@ vx_read_register (regno)
 
 #else  /* not 960, thus must be 68000:  FIXME!  */
 
-  bcopy (&inferior_registers, registers, 16 * 4);
-  *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
-  *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
-
   if (target_has_fp)
     {
       ptrace_in.pid = inferior_pid;
-      ptrace_out.info.more_data = (caddr_t) &inferior_fp_registers;
+      ptrace_out.info.more_data = (caddr_t) &out_data;
+      out_data.len   =  8 * REGISTER_RAW_SIZE (FP0_REGNUM)	/* FIXME */
+		     + (3 * sizeof (REGISTER_TYPE));
+      out_data.bytes = (caddr_t) &registers[REGISTER_BYTE (FP0_REGNUM)];
+  
       status = net_ptrace_clnt_call (PTRACE_GETFPREGS, &ptrace_in, &ptrace_out);
       if (status)
 	error (rpcerr);
       if (ptrace_out.status == -1)
 	{
 	  errno = ptrace_out.errno;
-	  return -1;
+	  perror_with_name ("net_ptrace_clnt_call(PTRACE_GETFPREGS)");
 	}
-      
-      bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	     sizeof inferior_fp_registers.fps_regs);
-      bcopy (&inferior_fp_registers.fps_control,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
     }
   else
     {
       bzero (&registers[REGISTER_BYTE (FP0_REGNUM)],
-	     sizeof inferior_fp_registers.fps_regs);
+      	     8 * REGISTER_RAW_SIZE (FP0_REGNUM));
       bzero (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+	     3 * sizeof (REGISTER_TYPE));
     }
 #endif  /* various architectures */
-
-  return 0;
 }
 
 /* Prepare to store registers.  Since we will store all of them,
    read out their current values now.  */
 
-void
+static void
 vx_prepare_to_store ()
 {
   vx_read_register (-1);
@@ -488,11 +485,12 @@ vx_prepare_to_store ()
    Otherwise, REGNO specifies which register (so we can save time).  */
    /* FIXME, look at REGNO to save time here */
 
+static void
 vx_write_register (regno)
      int regno;
 {
-  struct regs inferior_registers;
-  struct fp_status inferior_fp_registers;
+  C_bytes in_data;
+  C_bytes out_data;
   extern char registers[];
   int status;
   Rptrace ptrace_in;
@@ -501,8 +499,15 @@ vx_write_register (regno)
   bzero ((char *) &ptrace_in, sizeof (ptrace_in));
   bzero ((char *) &ptrace_out, sizeof (ptrace_out));
 
+  ptrace_in.pid = inferior_pid;
+  ptrace_in.info.ttype     = DATA;
+  ptrace_in.info.more_data = (caddr_t) &in_data;
+
+  in_data.bytes = registers;
+
 #ifdef I80960
 
+  /* FIXME */
   bcopy (&registers[REGISTER_BYTE (R0_REGNUM)],
 	 (char *) inferior_registers.r_lreg, 16 * sizeof (int));
   bcopy (&registers[REGISTER_BYTE (G0_REGNUM)],
@@ -519,15 +524,9 @@ vx_write_register (regno)
 
 #else  /* not 960 -- assume 68k -- FIXME */
 
-  bcopy (registers, &inferior_registers, 16 * 4);
-  inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
+  in_data.len = 18 * sizeof (REGISTER_TYPE);
 
 #endif  /* Different register sets */
-
-  ptrace_in.pid = inferior_pid;
-  ptrace_in.info.ttype     = REGS;
-  ptrace_in.info.more_data = (caddr_t) &inferior_registers;
 
   /* XXX change second param to be a proc number */
   status = net_ptrace_clnt_call (PTRACE_SETREGS, &ptrace_in, &ptrace_out);
@@ -536,13 +535,18 @@ vx_write_register (regno)
   if (ptrace_out.status == -1)
     {
       errno = ptrace_out.errno;
-      return -1;
+      perror_with_name ("net_ptrace_clnt_call(PTRACE_SETREGS)");
     }
 
   /* Store floating point registers if the target has them.  */
 
   if (target_has_fp)
     {
+      ptrace_in.pid = inferior_pid;
+      ptrace_in.info.ttype     = DATA;
+      ptrace_in.info.more_data = (caddr_t) &in_data;
+
+
 #ifdef I80960
 
       bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
@@ -550,17 +554,11 @@ vx_write_register (regno)
 
 #else  /* not 960 -- assume 68k -- FIXME */
 
-      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	     sizeof inferior_fp_registers.fps_regs);
-      bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.fps_control,
-         sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+      in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
+      in_data.len = (8 * REGISTER_RAW_SIZE (FP0_REGNUM)
+                      + (3 * sizeof (REGISTER_TYPE)));
 
 #endif  /* Different register sets */
-
-      ptrace_in.pid = inferior_pid;
-      ptrace_in.info.ttype     = FPREGS;
-      ptrace_in.info.more_data = (caddr_t) &inferior_fp_registers;
 
       status = net_ptrace_clnt_call (PTRACE_SETFPREGS, &ptrace_in, &ptrace_out);
       if (status)
@@ -568,10 +566,9 @@ vx_write_register (regno)
       if (ptrace_out.status == -1)
 	{
 	  errno = ptrace_out.errno;
-	  return -1;
+	  perror_with_name ("net_ptrace_clnt_call(PTRACE_SETFPREGS)");
 	}
     }
-  return 0;
 }
 
 /* Copy LEN bytes to or from remote inferior's memory starting at MEMADDR
@@ -582,7 +579,7 @@ vx_write_register (regno)
    handle the current address but can handle one N bytes further, but
    vxworks doesn't give us that information.  */
 
-int
+static int
 vx_xfer_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -632,7 +629,7 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
   return len;		/* Moved *all* the bytes */
 }
 
-void
+static void
 vx_files_info ()
 {
   printf ("\tAttached to host `%s'", vx_host);
@@ -640,7 +637,7 @@ vx_files_info ()
   printf (".\n");
 }
 
-void
+static void
 vx_run_files_info ()
 {
   printf ("\tRunning %s VxWorks process %s", 
@@ -651,7 +648,7 @@ vx_run_files_info ()
   printf(".\n");
 }
 
-void
+static void
 vx_resume (step, siggnal)
      int step;
      int siggnal;
@@ -681,7 +678,7 @@ vx_resume (step, siggnal)
     }
 }
 
-void
+static void
 vx_mourn_inferior ()
 {
   pop_target ();		/* Pop back to no-child state */
@@ -691,7 +688,7 @@ vx_mourn_inferior ()
 
 /* This function allows the addition of incrementally linked object files.  */
 
-void
+static void
 vx_load_command (arg_string, from_tty)
      char* arg_string;
      int from_tty;
@@ -779,7 +776,7 @@ net_ptrace_clnt_call (request, pPtraceIn, pPtraceOut)
    NULL, memory for the buffer will be allocated by XDR.
    Returns -1 if rpc failed, 0 otherwise.  */
 
-int
+static int
 net_get_boot_file (pBootFile)
      char **pBootFile;
 {
@@ -795,7 +792,7 @@ net_get_boot_file (pBootFile)
    There's no way to check if the returned loadTable is correct.
    VxWorks doesn't check it.  */
 
-int
+static int
 net_get_symbols (pLoadTable)
      ldtabl *pLoadTable;		/* return pointer to ldtabl here */
 {
@@ -814,7 +811,7 @@ net_get_symbols (pLoadTable)
 struct complaint cant_contact_target =
   {"Lost contact with VxWorks target", 0, 0};
 
-int
+static int
 vx_lookup_symbol (name, pAddr)
      char *name;		/* symbol name */
      CORE_ADDR *pAddr;
@@ -840,7 +837,7 @@ vx_lookup_symbol (name, pAddr)
    Returns 1 if target has floating point processor, 0 otherwise.
    Calls error() if rpc fails.  */
 
-int
+static int
 net_check_for_fp ()
 {
   enum clnt_stat status;
@@ -856,7 +853,7 @@ net_check_for_fp ()
 /* Establish an RPC connection with the VxWorks target system.
    Calls error () if unable to establish connection.  */
 
-void
+static void
 net_connect (host)
      char *host;
 {
@@ -1289,7 +1286,7 @@ vx_kill (args, from_tty)
 
 /* Clean up from the VxWorks process target as it goes away.  */
 
-void
+static void
 vx_proc_close (quitting)
      int quitting;
 {
@@ -1297,77 +1294,6 @@ vx_proc_close (quitting)
   if (vx_running)
     free (vx_running);
   vx_running = 0;
-}
-
-/* Cross-net conversion of floats to and from extended form.
-   (This is needed because different target machines have different
-    extended floating point formats.)  */
-
-/* Convert from an extended float to a double.
-
-   The extended float is stored as raw data pointed to by FROM.
-   Return the converted value as raw data in the double pointed to by TO.
-*/
-
-static void
-vx_convert_to_virtual (regno, from, to)
-    int regno;
-    char *from;
-    char *to;
-{
-  enum clnt_stat status;
-
-  if (REGISTER_CONVERTIBLE (regno)) 
-    {
-      if (!target_has_fp) {
-	*(double *)to = 0.0;	/* Skip the trouble if no float anyway */
-	return;
-      }
-
-      status = net_clnt_call (VX_CONV_FROM_68881, xdr_ext_fp, from,
-			      xdr_double, to);
-
-      if (status == RPC_SUCCESS)
-	  return;
-      else
-	  error (rpcerr);
-    }
-  else
-    bcopy (from, to, REGISTER_VIRTUAL_SIZE (regno));
-}
-
-
-/* The converse:  convert from a double to an extended float.
-
-   The double is stored as raw data pointed to by FROM.
-   Return the converted value as raw data in the extended
-   float pointed to by TO.
-*/
-
-static void
-vx_convert_from_virtual (regno, from, to)
-    int regno;
-    char *from;
-    char *to;
-{
-  enum clnt_stat status;
-
-  if (REGISTER_CONVERTIBLE (regno)) 
-    {
-      if (!target_has_fp) {
-	bzero (to, REGISTER_RAW_SIZE (FP0_REGNUM));	/* Shrug */
-	return;
-      }
-
-      status = net_clnt_call (VX_CONV_TO_68881, xdr_double, from,
-			      xdr_ext_fp, to);
-      if (status == RPC_SUCCESS)
-	  return;
-      else
-	  error (rpcerr);
-    }
-  else
-    bcopy (from, to, REGISTER_VIRTUAL_SIZE (regno));
 }
 
 /* Make an RPC call to the VxWorks target.
@@ -1393,7 +1319,7 @@ net_clnt_call (procNum, inProc, in, outProc, out)
 
 /* Clean up before losing control.  */
 
-void
+static void
 vx_close (quitting)
      int quitting;
 {
@@ -1425,7 +1351,7 @@ Specify the name of the machine to connect to.",
 	vx_open, vx_close, vx_attach, 0, /* vx_detach, */
 	0, 0, /* resume, wait */
 	0, 0, /* read_reg, write_reg */
-	0, vx_convert_to_virtual, vx_convert_from_virtual,  /* prep_to_store, */
+	0, host_convert_to_virtual, host_convert_from_virtual,  /* prep_to_store, */
 	vx_xfer_memory, vx_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint */
 	0, 0, 0, 0, 0,	/* terminal stuff */
@@ -1447,7 +1373,7 @@ struct target_ops vx_run_ops = {
 	vx_proc_open, vx_proc_close, 0, vx_detach, /* vx_attach */
 	vx_resume, vx_wait,
 	vx_read_register, vx_write_register,
-	vx_prepare_to_store, vx_convert_to_virtual, vx_convert_from_virtual,
+	vx_prepare_to_store, host_convert_to_virtual, host_convert_from_virtual,
 	vx_xfer_memory, vx_run_files_info,
 	vx_insert_breakpoint, vx_remove_breakpoint,
 	0, 0, 0, 0, 0,	/* terminal stuff */

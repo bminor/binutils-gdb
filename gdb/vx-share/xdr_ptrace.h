@@ -3,15 +3,16 @@
 /*
 modification history
 --------------------
+01b,25may91,maf  now uses counted bytes struct to transfer registers;
+		   removed references to old xdr_regs functions.
+		 removed includes of "xdr_regs.h" and "reg.h".
 01a,05jun90,llk  extracted from xdr_ptrace.h.
 */
 
 
-#include "xdr_regs.h"
-#include "reg.h"
-
 /*
  *  Counted byte structure used by READ/WRITE TEXT/DATA
+ *  and GET/SET REGS/FPREGS
  */
 struct c_bytes {
 	u_int	len;
@@ -24,17 +25,13 @@ typedef struct c_bytes C_bytes;
  */
 enum ptype {
 	NOINFO = 0,		/* no additional infomation	*/
-	REGS = 1,		/* regs 	(SETREGS)  	*/
-	FPREGS = 2,		/* fp_status 	(SETFPREGS)	*/
-	FPAREGS = 3,		/* fpa_regs	(SETFPAREGS)	*/
-	DATA = 4		/* c_bytes	(WRITETEXT/DATA)*/
+	DATA = 1		/* c_bytes */
 };
 typedef enum ptype ptype;
 
 /*
  * discrimnated union for passing additional data to be 
- * written to the debugged process. With the exception of
- * c_bytes, the structures are defined in <machine/reg.h>
+ * written to the debugged process.
  */
 struct ptrace_info {
 	ptype	ttype;
@@ -52,6 +49,7 @@ struct rptrace {
 	Ptrace_info	info;
 };
 typedef struct rptrace Rptrace;
+
 /*
  * structure returned by server on all remote ptrace calls
  */
