@@ -1,3 +1,29 @@
+Mon Oct 19 14:13:05 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (SIM_EXTRA_DEPS): Replace cgen headers with
+	CGEN_INCLUDE_DEPS.
+	(M32RBF_INCLUDE_DEPS): Define.
+	(m32r .o's): Depend on it.
+	(mloop.c): Update call to genmloop.sh.
+	* cpu.h,cpuall.h: Regenerate.
+	* sim-main.h: Delete inclusion of cpu.h,decode.h, moved to cpuall.h.
+	#include cgen-scache.h,cgen-cpu.h.
+	* tconfig.in (WITH_FOO semantic macros): Delete.
+start-sanitize-m32rx
+	* Makefile.in (M32RXF_INCLUDE_DEPS): Define.
+	(m32rx .o's): Depend on it.
+	(mloopx.c): Update call to genmloop.sh.
+	* cpux.h: Regenerate.
+end-sanitize-m32rx
+
+Wed Oct 14 14:49:50 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (mloop.o): Don't depend on stamp-cpu, depend on
+	explicit files.
+start-sanitize-m32rx
+	(mloopx.o): Ditto for stamp-xcpu.
+end-sanitize-m32rx
+
 Fri Oct  9 16:11:58 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	Add pseudo-basic-block execution support.

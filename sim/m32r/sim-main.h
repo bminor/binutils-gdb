@@ -17,61 +17,42 @@ typedef struct _sim_cpu SIM_CPU;
 
 /* These must be defined before sim-base.h.  */
 typedef USI sim_cia;
-#define CIA_GET(cpu)     0 /* FIXME:(CPU_CGEN_HW (cpu)->h_pc) */
-#define CIA_SET(cpu,val) 0 /* FIXME:(CPU_CGEN_HW (cpu)->h_pc = (val)) */
 
-/* FIXME: Shouldn't be required to define these this early.  */
-#define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA)
-#define SIM_ENGINE_RESTART_HOOK(SD, LAST_CPU, CIA)
-
-/* Catch address exceptions.  */
-#define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
-m32r_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
-		  (TRANSFER), (ERROR))
+#define CIA_GET(cpu)     CPU_PC_GET (cpu)
+#define CIA_SET(cpu,val) CPU_PC_SET ((cpu), (val))
 
 #include "sim-base.h"
 #include "cgen-sim.h"
-/*#include "cgen-mem.h"*/
+#include "cgen-scache.h"
+#include "cgen-cpu.h"
 #include "cgen-trace.h"
 #include "cpu-sim.h"
-
-/* Function to catch address exceptions.  */
-extern SIM_CORE_SIGNAL_FN m32r_core_signal;
-
-#ifdef WANT_CPU_M32R
-#include "cpu.h"
-#include "decode.h"
-#endif
-/* start-sanitize-m32rx */
-#ifdef WANT_CPU_M32RX
-#include "cpux.h"
-#include "decodex.h"
-#endif
-/* end-sanitize-m32rx */
 #include "cpuall.h"
 
 /* The _sim_cpu struct.  */
 
 struct _sim_cpu {
+  /* sim/common cpu base.  */
   sim_cpu_base base;
 
   /* Static parts of cgen.  */
   CGEN_CPU cgen_cpu;
 
   M32R_MISC_PROFILE m32r_misc_profile;
-#define CPU_M32R_MISC_PROFILE(cpu) ((cpu)->m32r_misc_profile)
+#define CPU_M32R_MISC_PROFILE(cpu) (& (cpu)->m32r_misc_profile)
 
   /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
-     won't be defined and thus these parts won't appear.  This is ok.
+     won't be defined and thus these parts won't appear.  This is ok in the
+     sense that things work.  It is a source of bugs though.
      One has to of course be careful to not take the size of this
      struct and no structure members accessed in non-cpu specific files can
-     go after here.  */
-#if defined (WANT_CPU_M32R)
-  M32R_CPU_DATA cpu_data;
+     go after here.  Oh for a better language.  */
+#if defined (WANT_CPU_M32RBF)
+  M32RBF_CPU_DATA cpu_data;
 /* start-sanitize-m32rx */
-#elif defined (WANT_CPU_M32RX)
-  M32RX_CPU_DATA cpu_data;
+#elif defined (WANT_CPU_M32RXF)
+  M32RXF_CPU_DATA cpu_data;
 /* end-sanitize-m32rx */
 #endif
 };
@@ -89,10 +70,11 @@ struct sim_state {
 
 /* Misc.  */
 
+/* Catch address exceptions.  */
+extern SIM_CORE_SIGNAL_FN m32r_core_signal;
+#define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
+m32r_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
+		  (TRANSFER), (ERROR))
+
 /* Default memory size.  */
 #define M32R_DEFAULT_MEM_SIZE 0x800000 /* 8M */
-
-/* Register access fns.  These look up the current mach and call the
-   appropriate handler.  */
-SI h_gr_get (SIM_CPU *, UINT);
-void h_gr_set (SIM_CPU *, UINT, SI);
