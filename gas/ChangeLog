@@ -1,3 +1,9 @@
+Wed Nov 24 01:22:54 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_procend): Do not call process_exit.
+	(exit_processing_complete): Delete unwanted variable and all
+	references.
+
 Wed Nov 24 02:31:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_setup_ext): Renamed from ecoff_build_ext.

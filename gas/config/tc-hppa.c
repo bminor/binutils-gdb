@@ -801,10 +801,6 @@ static int callinfo_found;
 /* Nonzero if the assembler is currently within a .entry/.exit pair.  */
 static int within_entry_exit;
 
-/* Nonzero if the assembler has completed exit processing for the
-   current procedure.  */
-static int exit_processing_complete;
-
 /* Nonzero if the assembler is currently within a procedure definition.  */
 static int within_procedure;
 
@@ -1150,7 +1146,9 @@ static struct default_subspace_dict pa_def_subspaces[] =
   {"$DATA$", 1, 1, 0, 0, 0, 0, 24, 0x1f, 1, 8, 1, 1, ".data", SUBSEG_DATA},
   {"$LIT$", 1, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_LIT},
   {"$BSS$", 1, 1, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, ".bss", SUBSEG_BSS},
+#ifdef OBJ_ELF
   {"$UNWIND$", 1, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, 0, ".hppa_unwind", SUBSEG_UNWIND},
+#endif
   {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
 };
 
@@ -4687,7 +4685,6 @@ process_exit ()
 		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0, NULL);
 #endif
 
-  exit_processing_complete = TRUE;
 }
 
 /* Process a .EXIT pseudo-op.  */
@@ -5042,7 +5039,6 @@ pa_proc (unused)
   /* Reset global variables for new procedure.  */
   callinfo_found = FALSE;
   within_procedure = TRUE;
-  exit_processing_complete = FALSE;
 
   /* Create another call_info structure.  */
   call_info = (struct call_info *) xmalloc (sizeof (struct call_info));
@@ -5112,9 +5108,6 @@ pa_procend (unused)
 
   if (within_entry_exit)
     as_bad ("Missing .EXIT for a .ENTRY");
-
-  if (!exit_processing_complete)
-    process_exit ();
 
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
