@@ -52,6 +52,9 @@ struct monitor_ops *current_monitor;
 extern struct cmd_list_element *setlist;
 extern struct cmd_list_element *unsetlist;
 struct cmd_list_element *showlist;
+extern char *version;
+extern char *host_name;
+extern char *target_name;
 
 static int hashmark;				/* flag set by "set hash" */
 
@@ -72,6 +75,8 @@ static serial_t monitor_desc = NULL;
 char *loadtype;
 static char *loadtype_str;
 static void set_loadtype_command();
+static void monitor_load_srec();
+static int monitor_write_srec();
 
 /*
  * set_loadtype_command -- set the type for downloading. Check to make
@@ -83,24 +88,27 @@ set_loadtype_command (ignore, from_tty, c)
      int from_tty;
      struct cmd_list_element *c;
 {
-#if 0
+  char *tmp;
   char *type;
-  if (strcmp (LOADTYPES, "")) {
+  if (STREQ (LOADTYPES, "")) {
     error ("No loadtype set");
     return;
   }
   
-  type = strtok(LOADTYPES, ",");
+  tmp = savestring (LOADTYPES, strlen(LOADTYPES));
+  type = strtok(tmp, ",");
   if (STREQ (type, (*(char **) c->var))) {
       loadtype_str = savestring (*(char **) c->var, strlen (*(char **) c->var));
       return;
     }
   
-  while (type = strtok (NULL, ",") != (char *)NULL)
+  while ((type = strtok (NULL, ",")) != (char *)NULL) {
     if (STREQ (type, (*(char **) c->var)))
       loadtype_str = savestring (*(char **) c->var, strlen (*(char **) c->var));
-#endif
-      loadtype_str = savestring (*(char **) c->var, strlen (*(char **) c->var));
+    return;
+  }
+  free (tmp);
+  error ("Loadtype \"%s\" does not exist.", (*(char **) c->var));
 }
 
 /*
@@ -473,6 +481,9 @@ monitor_open(args, name, from_tty)
   log_file = fopen (LOG_FILE, "w");
   if (log_file == NULL)
     perror_with_name (LOG_FILE);
+  fprintf_filtered (log_file, "GDB %s (%s", version, host_name);
+  fprintf_filtered (log_file, " --target %s)\n", target_name);
+  fprintf_filtered (log_file, "Remote target %s connected to %s\n\n", TARGET_NAME, dev_name);
 #endif
 
   /* wake up the monitor and see if it's alive */
@@ -949,60 +960,96 @@ monitor_remove_breakpoint (addr, shadow)
   return 1;
 }
 
-/* Load a file. This is usually an srecord, which is ascii. No 
-   protocol, just sent line by line. */
-
-#define DOWNLOAD_LINE_SIZE 100
+/* monitor_load -- load a file. This file determines which of the
+ *	supported formats to use. The current types are:
+ *	FIXME: not all types supported yet.
+ *	default - reads any file using bfd and writes it to memory.
+ *	srec    - reads binary file using bfd and writes it as an
+ *		ascii srecord.
+ *	xmodem-bin - reads a binary file using bfd, and  downloads it
+ *		 using xmodem protocol.
+ *	xmodem-srec - reads a binary file using bfd, and after converting
+ *		 it downloads it as an srecord using xmodem protocol.
+ *	ascii-srec - reads a ascii srecord file and downloads it
+ *		without a change.
+ *	ascii-xmodem - reads a ascii file and downloads using xmodem
+ *		protocol.
+ */
 void
-monitor_load (arg)
-    char	*arg;
+monitor_load (file, fromtty)
+    char *file;
+    int  fromtty;
+{
+  FILE *download;
+  int i, bytes_read;
+
+  debuglogs (1, "Loading %s to monitor", file);
+
+  if (STREQ (loadtype_str, "default")) {	/* default, load a binary */
+    gr_load_image (file, fromtty);		/* by writing it into memory */
+  }
+
+  if (STREQ (loadtype_str, "srec")) {		/* load an srecord by converting */
+    monitor_load_srec(file, fromtty);		/* if from a binary */
+  }
+
+  if (STREQ (loadtype_str, "ascii-srec")) {	/* load an srecord file */
+    monitor_load_ascii_srec(file, fromtty);		/* if from a binary */
+  }
+
+  if (STREQ (loadtype_str, "xmodem-srec")) {	/* load an srecord using the */
+   error ("This protocol is not implemented yet.");	/* xmodem protocol */
+  }
+}
+
+/*
+ * monitor_load_ascii_srec -- download an ASCII srecord file.
+ */
+#define DOWNLOAD_LINE_SIZE 100
+int
+monitor_load_ascii_srec (file, fromtty)
+    char *file;
+    int fromtty;
 {
   FILE *download;
   char buf[DOWNLOAD_LINE_SIZE];
   int i, bytes_read;
 
-  if (sr_get_debug())
-    printf ("Loading %s to monitor\n", arg);
+  debuglogs (1, "Loading an ASCII srecord file, %s.", file);
 
-  download = fopen (arg, "r");
-  if (download == NULL)
-    {
-    error (sprintf (buf, "%s Does not exist", arg));
+  download = fopen (file, "r");
+  if (download == NULL) {
+    error ("%s Does not exist", file);
     return;
   }
 
   printf_monitor (LOAD_CMD);
-/*  expect ("Waiting for S-records from host... ", 1); */
 
-  while (!feof (download))
-    {
-      bytes_read = fread (buf, sizeof (char), DOWNLOAD_LINE_SIZE, download);
-      if (hashmark)
-	{
-	  putchar ('.');
-	  fflush (stdout);
-	}
-
-      if (SERIAL_WRITE(monitor_desc, buf, bytes_read)) {
-	fprintf(stderr, "SERIAL_WRITE failed: (while downloading) %s\n", safe_strerror(errno));
-	break;
-      }
-      i = 0;
-      while (i++ <=200000) {} ;     			/* Ugly HACK, probably needs flow control */
-      if (bytes_read < DOWNLOAD_LINE_SIZE)
-	{
-	  if (!feof (download))
-	    error ("Only read %d bytes\n", bytes_read);
-	  break;
-	}
+  while (!feof (download)) {
+    bytes_read = fread (buf, sizeof (char), DOWNLOAD_LINE_SIZE, download);
+    if (hashmark) {
+      putchar ('.');
+      fflush (stdout);
     }
-
-  if (hashmark)
-    {
-      putchar ('\n');
+    if (SERIAL_WRITE(monitor_desc, buf, bytes_read)) {
+      fprintf(stderr, "SERIAL_WRITE failed: (while downloading) %s\n", safe_strerror(errno));
+      break;
     }
+    i = 0;
+    while (i++ <=200) {} ;     			/* Ugly HACK, probably needs flow control */
+    if (bytes_read < DOWNLOAD_LINE_SIZE) {
+      if (!feof (download))
+	error ("Only read %d bytes\n", bytes_read);
+      break;
+    }
+  }
+  
+  if (hashmark) {
+    putchar ('\n');
+  }
   if (!feof (download))
     error ("Never got EOF while downloading");
+  expect_prompt(1);
   fclose (download);
 }
 
@@ -1036,6 +1083,200 @@ monitor_command (args, fromtty)
 }
 
 /*
+ * monitor_load_srec -- download a binary file by converting it to srecords.
+ */
+static void
+monitor_load_srec (args, fromtty)
+     char *args;
+     int fromtty;
+{
+  bfd *abfd;
+  asection *s;
+  char buffer[1024];
+  int srec_frame = SREC_SIZE;
+
+  abfd = bfd_openr (args, 0);
+  if (!abfd) {
+    printf_filtered ("Unable to open file %s\n", args);
+    return;
+  }
+
+  if (bfd_check_format (abfd, bfd_object) == 0) {
+    printf_filtered ("File is not an object file\n");
+    return;
+  }
+  
+  s = abfd->sections;
+  while (s != (asection *) NULL) {
+    srec_frame = SREC_SIZE;
+    if (s->flags & SEC_LOAD) {
+      int i;
+      char *buffer = xmalloc (srec_frame);
+      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s
+		       ->_raw_size);
+      fflush (stdout);
+      for (i = 0; i < s->_raw_size; i += srec_frame) {
+	if (srec_frame > s->_raw_size - i)
+	  srec_frame = s->_raw_size - i;
+	
+	bfd_get_section_contents (abfd, s, buffer, i, srec_frame);
+	monitor_write_srec (s->vma + i, buffer, srec_frame);
+	printf_filtered ("*");
+	fflush (stdout);
+      }
+      printf_filtered ("\n");
+      free (buffer);
+    }
+    s = s->next;
+  }
+  sprintf (buffer, "rs ip %lx", (unsigned long) abfd->start_address);
+  printf_monitor (buffer);
+  expect_prompt ();
+}
+
+
+static int
+monitor_write_srec (memaddr, myaddr, len)
+     CORE_ADDR memaddr;
+     unsigned char *myaddr;
+     int len;
+{
+  int done;
+  int checksum;
+  int x;
+  int retries;
+  int srec_bytes = 40;
+  int srec_max_retries = 3;
+  int srec_echo_pace = 0;
+  int srec_sleep = 0;
+  int srec_noise = 0;
+  char *buffer = alloca ((srec_bytes + 8) << 1);
+
+  retries = 0;
+
+  while (1) {					/* FIXME !!! */
+    done = 0;
+    
+    if (retries > srec_max_retries)
+      return(-1);
+    
+      if (retries > 0) {
+	if (sr_get_debug() > 0)
+	  printf("\n<retrying...>\n");
+	
+          /* This gr_expect_prompt call is extremely important.  Without
+             it, we will tend to resend our packet so fast that it
+             will arrive before the bug monitor is ready to receive
+             it.  This would lead to a very ugly resend loop.  */
+	
+	gr_expect_prompt();
+      }
+    
+    /* FIXME: this is just start_load pasted in... */
+    { char *command;
+    command = (srec_echo_pace ? "lo 0 ;x" : "lo 0");
+    sr_write_cr (command);
+    sr_expect (command);
+    sr_expect ("\r\n");
+#if 0
+    bug_srec_write_cr ("S0030000FC");
+#endif
+    }
+    /* end of hack */
+
+      while (done < len) {
+	int thisgo;
+	int idx;
+	char *buf = buffer;
+	CORE_ADDR address;
+	
+	checksum = 0;
+	thisgo = len - done;
+	if (thisgo > srec_bytes)
+	  thisgo = srec_bytes;
+	
+	address = memaddr + done;
+	sprintf (buf, "S3%02X%08X", thisgo + 4 + 1, address);
+	buf += 12;
+	
+	checksum += (thisgo + 4 + 1
+		     + (address & 0xff)
+		     + ((address >>  8) & 0xff)
+		     + ((address >> 16) & 0xff)
+		     + ((address >> 24) & 0xff));
+	
+	for (idx = 0; idx < thisgo; idx++) {
+	  sprintf (buf, "%02X", myaddr[idx + done]);
+	  checksum += myaddr[idx + done];
+	  buf += 2;
+	}
+	
+	if (srec_noise > 0) {
+	  /* FIXME-NOW: insert a deliberate error every now and then.
+	     This is intended for testing/debugging the error handling
+	     stuff.  */
+	  static int counter = 0;
+	  if (++counter > srec_noise) {
+	    counter = 0;
+	    ++checksum;
+	  }
+	}
+	
+	sprintf(buf, "%02X", ~checksum & 0xff);
+#if 0
+	bug_srec_write_cr (buffer);
+#endif
+	
+	if (srec_sleep != 0)
+	  sleep(srec_sleep);
+	
+	/* This pollchar is probably redundant to the gr_multi_scan
+	   below.  Trouble is, we can't be sure when or where an
+	   error message will appear.  Apparently, when running at
+	   full speed from a typical sun4, error messages tend to
+	   appear to arrive only *after* the s7 record.   */
+	
+	if ((x = sr_pollchar()) != 0) {
+	  if (sr_get_debug() > 0)
+	    printf("\n<retrying...>\n");
+
+	  ++retries;
+	  
+	  /* flush any remaining input and verify that we are back
+	     at the prompt level. */
+	  gr_expect_prompt();
+	  /* start all over again. */
+    /* FIXME: this is just start_load pasted in... */
+    { char *command;
+    command = (srec_echo_pace ? "lo 0 ;x" : "lo 0");
+    sr_write_cr (command);
+    sr_expect (command);
+    sr_expect ("\r\n");
+#if 0
+    bug_srec_write_cr ("S0030000FC");
+#endif
+    }
+    /* end of hack */
+
+	  done = 0;
+	  continue;
+	}
+	
+	done += thisgo;
+      }
+#if 0    
+    bug_srec_write_cr("S7060000000000F9");
+#endif
+    ++retries;
+    
+    /* Having finished the load, we need to figure out whether we
+       had any errors.  */
+  }
+  
+  return(0);
+}
+
+/*
  * _initialize_remote_monitors -- setup a few addtitional commands that
  *		are usually only used by monitors.
  */
@@ -1049,7 +1290,7 @@ _initialize_remote_monitors ()
        "Set the type of the remote load protocol.\n", &setlist);
   c->function.sfunc =  set_loadtype_command;
   add_show_from_set (c, &showlist);
-  loadtype_str = savestring ("generic", 8);
+  loadtype_str = savestring ("default", 8);
 
   add_show_from_set (add_set_cmd ("hash", no_class, var_boolean,
                                   (char *)&hashmark,

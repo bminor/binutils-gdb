@@ -114,7 +114,7 @@ struct monitor_ops w89k_cmds = {
   "",					/* end-of-command delimitor */
   "",					/* optional command terminator */
   &w89k_ops,				/* target operations */
-  "xmodem-srec,xmodem-som",		/* load types */
+  "srec,xmodem-ascii,xmodem-srec,default",/* load types */
   w89k_regnames				/* registers names */
 };
 

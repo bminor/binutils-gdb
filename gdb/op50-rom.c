@@ -119,7 +119,7 @@ struct monitor_ops op50n_cmds = {
   " ",					/* end-of-command delimitor */
   ".\n",				/* optional command terminator */
   &op50n_ops,				/* target operations */
-  "srec,binary",			/* load types */
+  "srec,ascii-srec,default",		/* load types */
   op50n_regnames
 };
 
