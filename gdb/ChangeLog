@@ -1,3 +1,16 @@
+2004-04-15  Roland McGrath  <roland@redhat.com>
+
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Take ABFD as
+	argument instead of NAME.
+	(symbol_file_add, reread_separate_symbols): Call symfile_bfd_open
+	in call to symbol_file_add_with_addrs_or_offsets.
+	(build_addr_info): New function, helper for ...
+	(symbol_file_add_from_memory): New function.
+	(add_symbol_file_from_memory_command): New function using that.
+	(_initialize_symfile): Register it for add-symbol-file-from-memory.
+	(pre_add_symbol_hook): Add const to argument type.
+	* symfile.h (symbol_file_add_from_memory): Declare it.
+
 2004-04-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS (New native configurations): Mention OpenBSD/vax.
@@ -147,30 +160,30 @@
 	AMD64_FS_REGNUM and AMD64_GS_REGNUM.
 
 2004-04-10  Randolph Chung  <tausq@debian.org>
-	
+
 	* MAINTAINERS (write after approval): Add myself.
 
 2004-04-07  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_inner_than): Remove.
 	(is_pa_2): Remove unused static variable.
-	(hppa_gdbarch_init): Use core_addr_greaterthan instead of own version. 
+	(hppa_gdbarch_init): Use core_addr_greaterthan instead of own version.
 
 2004-03-10  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* language.h (language_defn): Add new la_post_parser field.
 	* parser-defs.h (null_post_parser): New declaration (default for
 	la_post_parser).
-	
+
 	* parse.c (parse_exp_1): Move code to parse_exp_in_context and
 	insert call to that function.
 	(parse_exp_in_context): New function, including code formerly in
-	parse_exp_1.  Calls language-dependent post-parser after 
+	parse_exp_1.  Calls language-dependent post-parser after
 	prefixification.
 	(parse_expression_in_context): New exported function.
 	(null_post_parser): New definition.
 	* expression.h (parse_expression_in_context): Add declaration.
-	
+
 	* p-lang.c (pascal_language_defn): Add trivial post-parser.
 	* c-lang.c (c_language_defn): Ditto.
 	(cplus_language_defn): Ditto.
@@ -184,7 +197,7 @@
 	* m2-lang.c (m2_language_defn): Ditto.
 	* scm-lang.c (scm_language_defn): Ditto.
 	* obj-lang.c (objc_language_defn): Ditto.
-	
+
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64nbsd-tdep.c (amd64nbsd_sigcontext_addr): Remove function.
@@ -342,7 +355,7 @@
 
 	* breakpoint.h (deprecated_exception_catchpoints_are_fragile)
 	(deprecated_exception_support_initialized): Declare.
-	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support) 
+	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support)
 	(initialize_hp_cxx_exception_support)
 	(child_enable_exception_callback): Update.
 	* breakpoint.c (deprecated_exception_catchpoints_are_fragile)
@@ -357,15 +370,15 @@
 	* symfile.c (hp_som_som_object_present, RESET_HP_UX_GLOBALS):
 	Update.  Delete extern declaration.
 	* valops.c (hp_som_som_object_present): Ditto.
-	* parse.c (deprecated_hp_som_som_object_present) 
+	* parse.c (deprecated_hp_som_som_object_present)
 	(parse_nested_classes_for_hpacc): Ditto.
 	* hpread.c (hp_som_som_object_present, hpread_expand_symtab): Ditto.
-	* hppa-hpux-tdep.c (hp_som_som_object_present) 
+	* hppa-hpux-tdep.c (hp_som_som_object_present)
 	(initialize_hp_cxx_exception_support): Ditto.
 	* eval.c (hp_som_som_object_present, evaluate_subexp_standard): Ditto.
-	* cp-valprint.c (hp_som_som_object_present) 
+	* cp-valprint.c (hp_som_som_object_present)
 	(cp_print_class_method): Ditto.
-	* c-typeprint.c (hp_som_som_object_present): 
+	* c-typeprint.c (hp_som_som_object_present):
 	(c_type_print_base): Ditto.
 	* c-exp.y (hp_som_som_object_present): Ditto.
 
@@ -383,7 +396,7 @@
 	* tramp-frame.h (tramp_frame_prepend_unwinder): Rename
 	tramp_frame_append.
 	* tramp-frame.c (tramp_frame_prepend_unwinder): Update.
-	* mips-linux-tdep.c (mips_linux_init_abi, mips_linux_init_abi) 
+	* mips-linux-tdep.c (mips_linux_init_abi, mips_linux_init_abi)
 	(mips_linux_init_abi): Update.
 
 2004-04-08  Kevin Buettner  <kevinb@redhat.com>
@@ -432,7 +445,7 @@
 	* infttrace.h: Include "target.h".
 	* Makefile.in (infttrace_h): Update.
 	(infttrace.o): Update.
-	
+
 2004-04-06  Andrew Cagney  <cagney@redhat.com>
 
 	* hppah-nat.c (hpux_has_forked, hpux_has_vforked)
@@ -443,7 +456,7 @@
 
 	* hppa-tdep.c (hppa_breakpoint_from_pc): Make static.
 	(hppa_gdbarch_init): Set gdbarch_breakpoint_from_pc
-	* config/pa/tm-hppa.h (BREAKPOINT_FROM_PC, BREAKPOINT32): 
+	* config/pa/tm-hppa.h (BREAKPOINT_FROM_PC, BREAKPOINT32):
 	(hppa_breakpoint_from_pc): Delete.
 
 	* MAINTAINERS: Mark hppa-elf as buildable with -Werror.
@@ -453,7 +466,7 @@
 	* hppa-tdep.c: Do not include <sys/types.h>, <sys/param.h>,
 	<signal.h>, <sys/ptrace.h>, #include "a.out.encap.h",
 	<sys/file.h>.
-	
+
 2004-04-06  Randolph Chung  <tausq@debian.org>
 
 	Committed by Andrew Cagney (mechanical change).
@@ -534,7 +547,7 @@
 	* config/m68k/tm-sun2os4.h, config/m68k/3b1.mh: Delete.
 	* config/m68k/dpx2.mt, config/m68k/delta68.mt: Delete.
 	* config/m68k/tm-sun2.h, config/m68k/delta68.mh: Delete.
-	
+
 	* configure.tgt: Remove m68000-*-sunos3*, m68000-*-sunos4*,
 	m68*-bull-sysv*, m68*-att-*, m68*-motorola-*, m68*-*-lynxos*,
 	m68*-*-sunos3*, m68*-*-sunos4*, m68*-*-sysv4*, mips*-*-sysv4*.
@@ -573,7 +586,7 @@
 	(dummy_frame_sniffer): Delete check for generic dummy frames.
 
 	* config/pa/tm-hppa.h (REG_PARM_STACK_SPACE): Delete.
-	* config/pa/tm-hppa64.h (PA20W_CALLING_CONVENTIONS) 
+	* config/pa/tm-hppa64.h (PA20W_CALLING_CONVENTIONS)
 	(REG_PARM_STACK_SPACE): Delete.
 	* hppa-tdep.c (hppa64_push_dummy_call, hppa32_push_dummy_call):
 	Inline reference to REG_PARM_STACK_SPACE.
@@ -604,7 +617,7 @@
 	* gdbarch.h, gdbarch.c: Re-generate.
 
 2004-04-02  Joel Brobecker  <brobecker@gnat.com>
-	
+
 	Committed by Andrew Cagney <cagney@redhat.com>.
         * alpha-tdep.c (alpha_heuristic_frame_unwind_cache): Do not take
         into account an instruction saving a register if we have already
@@ -696,9 +709,9 @@
 	(value_less): Ditto.
 	(value_neg): Ditto.
 	(value_complement): Ditto.
-	(value_binop): Simplify slightly by using is_integral_type and 
+	(value_binop): Simplify slightly by using is_integral_type and
 	eliminiating unnecessary COERCE_ENUMs.
-	
+
 2004-03-31  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (frame_unwind_id): Declare.
@@ -869,9 +882,9 @@
 	* i386obsd-tdep.c (i386obsd_init_abi): Update.
 	* i386nbsd-tdep.c (i386nbsd_init_abi): Update.
 	* i386bsd-tdep.c (i386bsd_init_abi): Update.
-	* config/vax/tm-vaxbsd.h (DEPRECATED_SIGTRAMP_END) 
+	* config/vax/tm-vaxbsd.h (DEPRECATED_SIGTRAMP_END)
 	(DEPRECATED_SIGTRAMP_START): Update.
-	* config/m68k/tm-nbsd.h (DEPRECATED_SIGTRAMP_END) 
+	* config/m68k/tm-nbsd.h (DEPRECATED_SIGTRAMP_END)
 	(DEPRECATED_SIGTRAMP_START): Update.
 	* blockframe.c (find_pc_sect_partial_function): Update.
 	* arch-utils.c (legacy_pc_in_sigtramp): Update.
@@ -928,7 +941,7 @@
 	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Update.
 	* sparcnbsd-tdep.c (sparc32nbsd_init_abi): Update.
 	* sparcobsd-tdep.c (sparc32obsd_init_abi): Update.
-	
+
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* tramp-frame.h, tramp-frame.h: New files.
@@ -949,7 +962,7 @@
 	(trad_frame_cache_zalloc): New function.
 	(trad_frame_set_id, trad_frame_get_id): New functions.
 	(trad_frame_set_reg_addr, trad_frame_get_register): New functions.
-	
+
 2004-03-22  Andrew Cagney  <cagney@redhat.com>
 
 	* s390-tdep.c (struct s390_stub_unwind_cache): Rename
@@ -1009,7 +1022,7 @@
 	(legacy_get_prev_frame): Ditto.
 	* inferior.h: Delete reference to generic_pc_in_call_dummy in
 	comment.
-	
+
 2004-03-21  Andrew Cagney  <cagney@redhat.com>
 
 	* inferior.h (deprecated_pc_in_call_dummy_at_entry_point): Delete
@@ -1284,7 +1297,7 @@
 	(dwarf2_frame_set_init_reg): Use gdbarch_data.
 	(dwarf2_frame_init_reg): Use gdbarch_data.
 	(_initialize_dwarf2_frame): Use gdbarch_data_register_pre_init.
-	* solib-svr4.c (set_solib_svr4_fetch_link_map_offsets) 
+	* solib-svr4.c (set_solib_svr4_fetch_link_map_offsets)
 	(_initialize_svr4_solib): Update.
 	* user-regs.c (_initialize_user_regs): Update.
 	* reggroups.c (_initialize_reggroup): Update.
@@ -1302,7 +1315,7 @@
 	* frame-base.c (frame_base_table): Update.
 	* remote.c (_initialize_remote): Update.
 	* gdb_obstack.h (OBSTACK_ZALLOC, OBSTACK_CALLOC): Define.
-	
+
 2004-03-15  Andrew Cagney  <cagney@redhat.com>
 
 	* cris-tdep.c (bfd_lookup_symbol): Delete unused function.
@@ -1371,7 +1384,7 @@
 2004-03-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (read_structure_type): Rename from
-	read_structure_scope.  Don't create a symbol or call process_die. 
+	read_structure_scope.  Don't create a symbol or call process_die.
 	Return immediately if die->type is set.  Call read_type_die before
 	dwarf2_add_member_fn.
 	(process_structure_scope): New function.
@@ -1617,27 +1630,27 @@
 	* config/pa/tm-hppa.h (DEPRECATED_DO_REGISTERS_INFO)
 	(pa_do_registers_info): Delete.
 	* hppa-tdep.c (pa_do_registers_info, pa_do_strcat_registers_info)
-	(pa_print_registers, pa_print_fp_reg, pa_strcat_registers) 
+	(pa_print_registers, pa_print_fp_reg, pa_strcat_registers)
 	(pa_strcat_fp_reg, pa_register_look_aside): Delete.
 
 	* infcall.c (legacy_push_dummy_code): Delete #ifdef
 	GDB_TARGET_IS_HPPA code.
 	* config/pa/tm-hppa.h (DEPRECATED_FIX_CALL_DUMMY)
-	(hppa_fix_call_dummy, DEPRECATED_CALL_DUMMY_HAS_COMPLETED) 
+	(hppa_fix_call_dummy, DEPRECATED_CALL_DUMMY_HAS_COMPLETED)
 	(DEPRECATED_DUMMY_WRITE_SP, CALL_DUMMY): Delete.
 	* config/pa/tm-hppa64.h (CALL_DUMMY): Delete.
-	* hppa-tdep.c (hppa_frame_chain, hppa_frame_chain_valid) 
-	(hppa_push_dummy_frame, hppa_pop_frame, hppa_push_arguments) 
-	(hppa_fix_call_dummy, hppa64_stack_align, hppa_frame_saved_pc) 
+	* hppa-tdep.c (hppa_frame_chain, hppa_frame_chain_valid)
+	(hppa_push_dummy_frame, hppa_pop_frame, hppa_push_arguments)
+	(hppa_fix_call_dummy, hppa64_stack_align, hppa_frame_saved_pc)
 	(hppa_init_extra_frame_info, hppa_saved_pc_after_call)
-	(hppa64_call_dummy_breakpoint_offset, hppa_frame_init_saved_regs) 
-	(hppa_frameless_function_invocation, hppa64_store_return_value) 
-	(hppa_store_struct_return, hppa64_extract_return_value) 
+	(hppa64_call_dummy_breakpoint_offset, hppa_frame_init_saved_regs)
+	(hppa_frameless_function_invocation, hppa64_store_return_value)
+	(hppa_store_struct_return, hppa64_extract_return_value)
 	(hppa64_use_struct_convention, hppa_frame_find_saved_regs)
-	(hppa32_call_dummy_length, hppa64_call_dummy_length) 
+	(hppa32_call_dummy_length, hppa64_call_dummy_length)
 	(find_dummy_frame_regs, FUNC_LDIL_OFFSET, FUNC_LDO_OFFSET)
-	(find_proc_framesize, deposit_21, restore_pc_queue) 
-	(find_return_regnum, pc_in_interrupt_handler, deposit_14) 
+	(find_proc_framesize, deposit_21, restore_pc_queue)
+	(find_return_regnum, pc_in_interrupt_handler, deposit_14)
 	(rp_saved, pc_in_linker_stub): Delete.
 
 	Unconditionally enable 64-bit frame and ABI code.
@@ -1709,8 +1722,8 @@
 2004-03-04  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (cris_scan_prologue): Save the frame pointer's offset
-	when the frame pointer is pushed.  Don't set the frame pointer's 
-	address on the stack unless it's actually located there.  
+	when the frame pointer is pushed.  Don't set the frame pointer's
+	address on the stack unless it's actually located there.
 	Set the SRP's address on the stack correctly when the PC is still in
 	the prologue.
 	(cris_return_value): New function.
@@ -1876,7 +1889,7 @@
 	(cris_unwind_sp, cris_store_return_value, cris_extract_return_value)
 	(cris_reg_struct_has_addr): New functions.
 	(cris_examine, cris_frame_init_saved_regs, cris_frame_chain)
-	(cris_frame_saved_pc, cris_saved_pc_after_call, 
+	(cris_frame_saved_pc, cris_saved_pc_after_call,
 	(cris_store_struct_return, cris_frameless_function_invocation)
 	(cris_pop_frame, cris_skip_prologue_main)
 	(cris_abi_original_store_return_value)
@@ -1889,18 +1902,18 @@
 	(cris_push_return_address, cris_abi_update): Remove.
 	(_initialize_cris_tdep): Remove ABI command.
 	(cris_dump_tdep): Ditto.
-	(cris_gdbarch_init): Remove ABI command.  
+	(cris_gdbarch_init): Remove ABI command.
 	Set store_return_value, extract_return_value, push_dummy_code,
 	push_dummy_call, frame_align, unwind_pc, unwind_sp, unwind_dummy_id,
 	frame_unwind_append_sniffer, frame_base_set_default.
 	Clear deprecated init_frame_pc, push_arguments, store_return_value,
 	extract_return_value, fp_regnum, pc_in_call_dummy, call_dummy_words,
 	sizeof_call_dummy_words, get_saved_register, push_return_address,
-	pop_frame, store_struct_return, frame_init_saved_regs, 
+	pop_frame, store_struct_return, frame_init_saved_regs,
 	init_extra_frame_info, frameless_function_invocation, frame_chain,
 	frame_saved_pc, saved_pc_after_call, save_dummy_frame_tos,
 	dummy_write_sp.
-	
+
 2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* valprint.h (print_hex_chars, print_char_chars): New prototypes.
@@ -1972,7 +1985,7 @@
 	"x86-64-tdep.h".
 	* amd64obsd-nat.c: Include "amd64-tdep.h" instead of
 	"x86-64-tdep.h".
-	* configure.host: (x86_64-*-linux*): Set gdb_target to linux64. 
+	* configure.host: (x86_64-*-linux*): Set gdb_target to linux64.
 	* configure.tgt (x86_64-*-linux*): Set gdb_target to linux64.
 	* Makefile.in (amd64_linux_tdep_h): Renamed from
 	x86_64_linux_tdep_h.
