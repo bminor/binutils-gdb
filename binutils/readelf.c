@@ -423,15 +423,15 @@ print_vma (vma, mode)
 	case FULL_HEX:
 	  printf ("0x");
 	  /* drop through */
-	  
+
 	case LONG_HEX:
 	  printf_vma (vma);
 	  break;
-	  
+
 	case PREFIX_HEX:
 	  printf ("0x");
 	  /* drop through */
-	  
+
 	case HEX:
 #if BFD_HOST_64BIT_LONG
 	  printf ("%lx", vma);
@@ -452,7 +452,7 @@ print_vma (vma, mode)
 	    printf ("++%ld", _bfd_int64_low (vma));
 	  else
 	    printf ("%ld", _bfd_int64_low (vma));
-#endif	  
+#endif
 	  break;
 
 	case DEC_5:
@@ -464,13 +464,13 @@ print_vma (vma, mode)
 	    printf ("++%ld", _bfd_int64_low (vma));
 	  else
 	    printf ("%5ld", _bfd_int64_low (vma));
-#endif	  
+#endif
 	  break;
-	  
+
 	case UNSIGNED:
 #if BFD_HOST_64BIT_LONG
 	  printf ("%lu", vma);
-#else	  
+#else
 	  if (_bfd_int64_high (vma))
 	    /* ugg */
 	    printf ("++%lu", _bfd_int64_low (vma));
@@ -1284,13 +1284,13 @@ decode_ARM_machine_flags (e_flags, buf)
       strcat (buf, ", relocatable executable");
       e_flags &= ~ EF_ARM_RELEXEC;
     }
-	      
+
   if (e_flags & EF_ARM_HASENTRY)
     {
       strcat (buf, ", has entry point");
       e_flags &= ~ EF_ARM_HASENTRY;
     }
-  
+
   /* Now handle EABI specific flags.  */
   switch (eabi)
     {
@@ -1304,67 +1304,67 @@ decode_ARM_machine_flags (e_flags, buf)
       while (e_flags)
 	{
 	  unsigned flag;
-	  
+
 	  /* Process flags one bit at a time.  */
 	  flag = e_flags & - e_flags;
 	  e_flags &= ~ flag;
-	  
+
 	  switch (flag)
 	    {
 	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_INTERWORK.  */
 	      strcat (buf, ", sorted symbol tables");
 	      break;
-	      
+
 	    default:
 	      unknown = 1;
 	      break;
 	    }
 	}
       break;
-      
+
     case EF_ARM_EABI_UNKNOWN:
       while (e_flags)
 	{
 	  unsigned flag;
-	  
+
 	  /* Process flags one bit at a time.  */
 	  flag = e_flags & - e_flags;
 	  e_flags &= ~ flag;
-	  
+
 	  switch (flag)
 	    {
 	    case EF_INTERWORK:
 	      strcat (buf, ", interworking enabled");
 	      break;
-	  
+
 	    case EF_APCS_26:
 	      strcat (buf, ", uses APCS/26");
 	      break;
-	  
+
 	    case EF_APCS_FLOAT:
 	      strcat (buf, ", uses APCS/float");
 	      break;
-	  
+
 	    case EF_PIC:
 	      strcat (buf, ", position independent");
 	      break;
-	  
+
 	    case EF_ALIGN8:
 	      strcat (buf, ", 8 bit structure alignment");
 	      break;
-	  
+
 	    case EF_NEW_ABI:
 	      strcat (buf, ", uses new ABI");
 	      break;
-	  
+
 	    case EF_OLD_ABI:
 	      strcat (buf, ", uses old ABI");
 	      break;
-	  
+
 	    case EF_SOFT_FLOAT:
 	      strcat (buf, ", software FP");
 	      break;
-	  
+
 	    default:
 	      unknown = 1;
 	      break;
@@ -1384,7 +1384,7 @@ get_machine_flags (e_flags, e_machine)
   static char buf [1024];
 
   buf[0] = '\0';
-  
+
   if (e_flags)
     {
       switch (e_machine)
@@ -1395,7 +1395,7 @@ get_machine_flags (e_flags, e_machine)
 	case EM_ARM:
 	  decode_ARM_machine_flags (e_flags, buf);
 	  break;
-	  
+
         case EM_68K:
           if (e_flags & EF_CPU32)
             strcat (buf, ", cpu32");
@@ -1527,7 +1527,7 @@ get_machine_flags (e_flags, e_machine)
 	  if (e_flags & EF_PARISC_LAZYSWAP)
 	    strcat (buf, ", lazyswap");
 	  break;
-	  
+
 	case EM_PJ:
 	  if ((e_flags & EF_PICOJAVA_NEWCALLS) == EF_PICOJAVA_NEWCALLS)
 	    strcat (buf, ", new calling convention");
@@ -2145,7 +2145,7 @@ process_file_header ()
 	      get_machine_name (elf_header.e_machine));
       printf (_("  Version:                           0x%lx\n"),
 	      (unsigned long) elf_header.e_version);
-      
+
       printf (_("  Entry point address:               "));
       print_vma ((bfd_vma) elf_header.e_entry, PREFIX_HEX);
       printf (_("\n  Start of program headers:          "));
@@ -2153,7 +2153,7 @@ process_file_header ()
       printf (_(" (bytes into file)\n  Start of section headers:          "));
       print_vma ((bfd_vma) elf_header.e_shoff, DEC);
       printf (_(" (bytes into file)\n"));
-	
+
       printf (_("  Flags:                             0x%lx%s\n"),
 	      (unsigned long) elf_header.e_flags,
 	      get_machine_flags (elf_header.e_flags, elf_header.e_machine));
@@ -2291,7 +2291,7 @@ process_program_headers (file)
     {
       printf
 	(_("\nProgram Header%s:\n"), elf_header.e_phnum > 1 ? "s" : "");
-      
+
       if (is_32bit_elf)
 	printf
 	  (_("  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
@@ -2604,14 +2604,14 @@ get_elf_section_flags (sh_flags)
   static char buff [32];
 
   * buff = 0;
-  
+
   while (sh_flags)
     {
       bfd_vma flag;
 
       flag = sh_flags & - sh_flags;
       sh_flags &= ~ flag;
-      
+
       switch (flag)
 	{
 	case SHF_WRITE:            strcat (buff, "W"); break;
@@ -2622,7 +2622,7 @@ get_elf_section_flags (sh_flags)
 	case SHF_INFO_LINK:        strcat (buff, "I"); break;
 	case SHF_LINK_ORDER:       strcat (buff, "L"); break;
 	case SHF_OS_NONCONFORMING: strcat (buff, "O"); break;
-	  
+
 	default:
 	  if (flag & SHF_MASKOS)
 	    {
@@ -2639,7 +2639,7 @@ get_elf_section_flags (sh_flags)
 	  break;
 	}
     }
-  
+
   return buff;
 }
 
@@ -2742,7 +2742,7 @@ process_section_headers (file)
     return 1;
 
   printf (_("\nSection Header%s:\n"), elf_header.e_shnum > 1 ? "s" : "");
-  
+
   if (is_32bit_elf)
     printf
       (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
@@ -2764,14 +2764,14 @@ process_section_headers (file)
       if (is_32bit_elf)
 	{
 	  print_vma (section->sh_addr, LONG_HEX);
-      
+
 	  printf ( " %6.6lx %6.6lx %2.2lx",
 		   (unsigned long) section->sh_offset,
 		   (unsigned long) section->sh_size,
 		   (unsigned long) section->sh_entsize);
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
-		  
+
 	  printf (" %2ld %3lx %ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
@@ -2786,9 +2786,9 @@ process_section_headers (file)
 	  print_vma (section->sh_size, LONG_HEX);
 	  printf ("  ");
 	  print_vma (section->sh_entsize, LONG_HEX);
-	  
+
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
-		  
+
 	  printf ("     %2ld   %3lx     %ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
@@ -3048,7 +3048,7 @@ dynamic_segment_parisc_val (entry)
 	      first = 0;
 	      val ^= flags[cnt].bit;
 	    }
-	
+
 	if (val != 0 || first)
 	  {
 	    if (! first)
@@ -3057,7 +3057,7 @@ dynamic_segment_parisc_val (entry)
 	  }
       }
       break;
-      
+
     default:
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       break;
@@ -3349,7 +3349,7 @@ process_dynamic_segment (file)
 	  if (do_dynamic)
 	    printf ("%s", get_dynamic_flags (entry->d_un.d_val));
 	  break;
-	  
+
 	case DT_AUXILIARY:
 	case DT_FILTER:
 	case DT_CONFIG:
@@ -4413,7 +4413,7 @@ process_symbol_table (file)
 	      print_vma (psym->st_value, LONG_HEX);
 	      putchar (' ' );
 	      print_vma (psym->st_size, DEC_5);
-		      
+
 	      printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
@@ -5242,7 +5242,7 @@ display_debug_pubnames (section, start, file)
 	      warn (_("Only DWARF 2 pubnames are currently supported\n"));
 	      warned = 1;
 	    }
-	  
+
 	  continue;
 	}
 
@@ -6018,7 +6018,7 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
     {
     default:
       break;
-      
+
     case DW_FORM_ref_addr:
     case DW_FORM_addr:
       uvalue = byte_get (data, pointer_size);
@@ -6060,7 +6060,7 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
     case DW_FORM_ref_addr:
       printf (" <#%lx>", uvalue);
       break;
-      
+
     case DW_FORM_ref1:
     case DW_FORM_ref2:
     case DW_FORM_ref4:
@@ -6782,7 +6782,7 @@ process_mips_specific (file)
 
       offset = cnt = 0;
       option = iopt;
-      
+
       while (offset < sect->sh_size)
 	{
 	  Elf_External_Options * eoption;
@@ -6795,7 +6795,7 @@ process_mips_specific (file)
 	  option->info = BYTE_GET (eoption->info);
 
 	  offset += option->size;
-	  
+
 	  ++option;
 	  ++cnt;
 	}
@@ -6804,7 +6804,7 @@ process_mips_specific (file)
 	      string_table + sect->sh_name, cnt);
 
       option = iopt;
-      
+
       while (cnt-- > 0)
 	{
 	  size_t len;
@@ -7081,7 +7081,7 @@ process_corefile_note_segment (file, offset, length)
       inote.descsz   = BYTE_GET (external->descsz);
       inote.descdata = inote.namedata + align_power (inote.namesz, 2);
       inote.descpos  = offset + (inote.descdata - (char *) pnotes);
-      
+
       external = (Elf_External_Note *)(inote.descdata + align_power (inote.descsz, 2));
 
       /* Verify that name is null terminated.  It appears that at least
@@ -7091,17 +7091,17 @@ process_corefile_note_segment (file, offset, length)
       if (inote.namedata[inote.namesz] != '\0')
 	{
 	  temp = malloc (inote.namesz + 1);
-	  
+
 	  if (temp == NULL)
 	    {
 	      error (_("Out of memory\n"));
 	      res = 0;
 	      break;
 	    }
-	  
+
 	  strncpy (temp, inote.namedata, inote.namesz);
 	  temp[inote.namesz] = 0;
-	  
+
 	  /* warn (_("'%s' NOTE name not properly null terminated\n"), temp);  */
 	  inote.namedata = temp;
 	}
