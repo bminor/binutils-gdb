@@ -50,7 +50,7 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-VERSION=2.1.4
+VERSION=cygnus-2.2.1
 
 SHELL = /bin/sh
 
@@ -155,6 +155,7 @@ REAL_SOURCES = \
 	$(srcdir)/symbols.c \
 	$(srcdir)/write.c \
 	$(srcdir)/listing.c \
+	$(srcdir)/ecoff.c \
 	$(srcdir)/xmalloc.c
 
 # in an expedient order
@@ -180,7 +181,8 @@ REAL_HEADERS = \
 	$(srcdir)/struc-symbol.h \
 	$(srcdir)/subsegs.h \
 	$(srcdir)/symbols.h \
-	$(srcdir)/write.h
+	$(srcdir)/write.h \
+	$(srcdir)/ecoff.h
 
 LINKED_HEADERS = \
 	a.out.gnu.h \
@@ -218,6 +220,7 @@ OBJS = \
 	symbols.o \
 	write.o \
 	listing.o \
+	ecoff.o \
 	xmalloc.o
 
 #### host, target, and site specific Makefile frags come in here.
@@ -359,6 +362,12 @@ write.o : write.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h  output-file.h 
+ecoff.o : ecoff.c as.h host.h targ-env.h obj-format.h \
+  targ-cpu.h  struc-symbol.h \
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
+  ecoff.h $(srcdir)/../include/coff/internal.h \
+  $(srcdir)/../include/coff/sym.h $(srcdir)/../include/coff/ecoff.h \
+  $(srcdir)/../include/coff/symconst.h $(srcdir)/../include/aout/stab_gnu.h
 xmalloc.o : xmalloc.c
 atof-targ.o : atof-targ.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
