@@ -1,5 +1,8 @@
 Fri Jul  2 18:22:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/mips/{x,n}m-irix{3,4}.h: Make some definitions here
+	rather than including xm-bigmips.h.
+
 	* eval.c (evaluate_subexp): Improve error messages for OP_TYPE and
 	default cases.
 

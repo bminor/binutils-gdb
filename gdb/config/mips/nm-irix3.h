@@ -29,3 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+
+/* Is this really true or is this just a leftover from a DECstation
+   config file?  */
+
+#define	ONE_PROCESS_WRITETEXT

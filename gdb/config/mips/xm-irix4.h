@@ -20,22 +20,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This is for the iris. */
 
-#define HAVE_TERMIO
+#include "mips/xm-irix3.h"
 
-#include "mips/xm-bigmips.h"
+/* Irix defines psignal() in signal.h, in a way which conflicts with the
+   definition in defs.h.  */
 
-/* Override register locations in upage for SGI machines */
-#undef REGISTER_U_ADDR
-#define REGISTER_U_ADDR(addr, blockend, regno) 		\
-  if (regno < PC_REGNUM)				\
-      addr = regno;					\
-  else							\
-      addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
-
-/* BEGIN GW MODS */
-/* Irix defines psignal() in signal.h, which gets gcc rather angry at us
- * because their definition is markedly different.
- */
 #define PSIGNAL_IN_SIGNAL_H
 
 #define BROKEN_SIGINFO_H	/* <sys/siginfo.h> si_pid & si_uid are bogus */

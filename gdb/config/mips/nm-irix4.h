@@ -29,3 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef FETCH_INFERIOR_REGISTERS
 
 #define U_REGS_OFFSET 0
+
+/* Is this really true or is this just a leftover from a DECstation
+   config file?  */
+
+#define	ONE_PROCESS_WRITETEXT
