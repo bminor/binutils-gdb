@@ -1,6 +1,24 @@
-/*** nm.c -- Describe symbol table of a rel file. */
-#include "sysdep.h"
+/* nm.c -- Describe symbol table of a rel file.
+   Copyright (C) 1991 Free Software Foundation, Inc.
+
+This file is part of GNU Binutils.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 #include "bfd.h"
+#include "sysdep.h"
 #include "getopt.h"
 #include "stab.gnu.h"
 #include <ranlib.h>
@@ -8,7 +26,7 @@
 
 
 PROTO(static boolean, display_file, (char *filename));
-PROTO(static boolean, do_one_rel_file, (bfd *file));
+PROTO(static void, do_one_rel_file, (bfd *file));
 PROTO(static unsigned int, filter_symbols, (bfd *file, asymbol **syms,
 					 unsigned long symcount));
 
@@ -47,6 +65,8 @@ struct option long_options[] = {
 	{"undefined-only",  0, &undefined_only,    1},
 	{0, 0, 0, 0}
 };
+
+int show_names = 0;
 
 /* Some error-reporting functions */
 
@@ -63,12 +83,14 @@ main (argc, argv)
      int argc;
      char **argv;
 {
-  int c; /* sez which option char */
-  int ind = 0; /* used by getopt and ignored by us */
-  extern int optind; /* steps thru options */
-	
+  int c;			/* sez which option char */
+  int ind = 0;			/* used by getopt and ignored by us */
+  extern int optind;		/* steps thru options */
+  int retval;	
   program_name = *argv;
-	
+
+  bfd_init();
+
   while ((c = getopt_long(argc, argv, "agnoprsu", long_options, &ind)) != EOF) {
     switch (c) {
     case 'a': print_debug_syms = 1; break;
@@ -85,7 +107,7 @@ main (argc, argv)
 	target = optarg;
       }
 			
-      break; /* we've been given a long option */
+      break;			/* we've been given a long option */
 			
     default:
       usage ();
@@ -98,11 +120,16 @@ main (argc, argv)
   /* OK, all options now parsed.  If no filename specified, do a.out. */
   if (optind == argc) return !display_file ("a.out");
   
+  retval = 0;
+  show_names = (argc -optind)>1;
   /* We were given several filenames to do: */
-  while (optind < argc)
-    if (!display_file (argv[optind++])) return 1;
+  while (optind < argc) {
+    if (!display_file (argv[optind++])) {
+      retval++;
+    }
+  }
 
-  return 0;
+  return retval;
 }
 
 /** Display a file's stats */
@@ -113,44 +140,58 @@ static boolean
 display_file (filename)
      char *filename;
 {
-  boolean retval = false;
+  boolean retval = true;
   bfd *file;
   bfd *arfile = NULL;
 	
   file = bfd_openr(filename, target);
   if (file == NULL) {
-    bfd_fatal (filename);
+    fprintf (stderr, "\n%s: can't open '%s'.\n", program_name, filename);
+    return false;
+
+
   }
 
-  if (bfd_check_format(file, bfd_object)) {
-    retval = do_one_rel_file (file);
-    goto closer;
-  }
 
-  if (!bfd_check_format (file, bfd_archive)) {
-    fprintf (stderr, "%s:  %s: unknown format.\n", program_name, filename);
-    retval = false;
-    goto closer;
-  }
-
-  printf("In archive %s:\n", filename);
-  if (print_armap) print_symdef_entry (file);
-  for (;;) {
-    arfile = bfd_openr_next_archived_file (file, arfile);
-
-    if (arfile == NULL) {
-      if (bfd_error != no_more_archived_files)
-	bfd_fatal (filename);
+  if (bfd_check_format(file, bfd_object)) 
+      {
+	if (show_names) {
+	  printf ("\n%s:\n",filename);
+	}
+	do_one_rel_file (file);
+ 
+      }
+  else if (bfd_check_format (file, bfd_archive)) {
+    if (!bfd_check_format (file, bfd_archive)) {
+      fprintf (stderr, "%s:  %s: unknown format.\n", program_name, filename);
+      retval = false;
       goto closer;
     }
+
+    printf("\n%s:\n", filename);
+    if (print_armap) print_symdef_entry (file);
+    for (;;) {
+      arfile = bfd_openr_next_archived_file (file, arfile);
+
+      if (arfile == NULL) {
+	if (bfd_error != no_more_archived_files)
+	  bfd_fatal (filename);
+	goto closer;
+      }
 			
-    if (!bfd_check_format(arfile, bfd_object))
-      printf("%s: not an object file\n", arfile->filename);
-    else {
-      printf ("\n%s:\n", arfile->filename);
-      if (!do_one_rel_file (arfile)) return false;
+      if (!bfd_check_format(arfile, bfd_object))
+	printf("%s: not an object file\n", arfile->filename);
+      else {
+	printf ("\n%s:\n", arfile->filename);
+	do_one_rel_file (arfile) ;
+      }
     }
   }
+  else {
+    fprintf (stderr, "\n%s:  %s: unknown format.\n", program_name, filename);
+    retval = false;
+  }
+
 
  closer:
   if (bfd_close(file) == false)
@@ -160,7 +201,7 @@ display_file (filename)
 }
 
 
-static boolean
+static void
 do_one_rel_file (abfd)
      bfd *abfd;
 {
@@ -170,7 +211,7 @@ do_one_rel_file (abfd)
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS)) {
     (void) printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
-    return true;
+    return;
   }
 
       
@@ -202,7 +243,7 @@ do_one_rel_file (abfd)
 	
   print_symbols (abfd, syms, symcount);
   free (syms);
-  return true;
+
 }
 
 /* Symbol-sorting predicates */
@@ -306,7 +347,10 @@ decode_symclass (sym)
 
  
    if ( (flags & BSF_GLOBAL) || (flags & BSF_LOCAL) ){
-     if ( !strcmp(sym->section->name, ".text") ){
+     if (sym->section == (asection *)NULL) {
+       return '*';
+     }
+     else if ( !strcmp(sym->section->name, ".text") ){
        return 't';
      } else if ( !strcmp(sym->section->name, ".data") ){
        return 'd';
@@ -357,7 +401,7 @@ print_symbols (abfd, syms, symcount)
 	printf_vma( (p->section ? p->value + p->section->vma : p->value));
       else fputs ("        ", stdout);
 
-      printf (" %c %s\n", class, p->name);
+      printf (" %c %s\n", class, p->name ? p->name : "");
     }
     }
   }
