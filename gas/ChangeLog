@@ -1,5 +1,8 @@
 Thu Mar 13 11:20:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (read_a_source_file): Call LISTING_NEWLINE before
+	HANDLE_CONDITIONAL_ASSEMBLY when handling an MRI line label.
+
 	* config/obj-elf.c (obj_elf_data): Call md_flush_pending_output
 	and md_elf_section_change_hook if they are defined.
 	(obj_elf_text, obj_elf_previous): Likewise.
