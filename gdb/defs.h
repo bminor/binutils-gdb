@@ -698,7 +698,7 @@ extern void print_address (CORE_ADDR, struct ui_file *);
 
 /* From source.c */
 
-extern int openp (char *, int, char *, int, int, char **);
+extern int openp (const char *, int, const char *, int, int, char **);
 
 extern int source_full_path_of (char *, char **);
 

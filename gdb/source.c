@@ -515,12 +515,14 @@ source_info (char *ignore, int from_tty)
 /*  >>>> This should only allow files of certain types,
    >>>>  eg executable, non-directory */
 int
-openp (char *path, int try_cwd_first, char *string, int mode, int prot,
+openp (const char *path, int try_cwd_first, const char *string,
+       int mode, int prot,
        char **filename_opened)
 {
   register int fd;
   register char *filename;
-  register char *p, *p1;
+  const char *p;
+  const char *p1;
   register int len;
   int alloclen;
 
@@ -534,7 +536,8 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
   if (try_cwd_first || IS_ABSOLUTE_PATH (string))
     {
       int i;
-      filename = string;
+      filename = alloca (strlen (string) + 1);
+      strcpy (filename, string);
       fd = open (filename, mode, prot);
       if (fd >= 0)
 	goto done;
@@ -548,11 +551,11 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
     string += 2;
 
   alloclen = strlen (path) + strlen (string) + 2;
-  filename = (char *) alloca (alloclen);
+  filename = alloca (alloclen);
   fd = -1;
   for (p = path; p; p = p1 ? p1 + 1 : 0)
     {
-      p1 = (char *) strchr (p, DIRNAME_SEPARATOR);
+      p1 = strchr (p, DIRNAME_SEPARATOR);
       if (p1)
 	len = p1 - p;
       else
@@ -570,7 +573,7 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
-	      filename = (char *) alloca (alloclen);
+	      filename = alloca (alloclen);
 	    }
 	  strcpy (filename, current_directory);
 	}
@@ -597,7 +600,7 @@ done:
   if (filename_opened)
     {
       if (fd < 0)
-	*filename_opened = (char *) 0;
+	*filename_opened = NULL;
       else if (IS_ABSOLUTE_PATH (filename))
 	*filename_opened = savestring (filename, strlen (filename));
       else

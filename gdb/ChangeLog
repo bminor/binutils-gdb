@@ -1,3 +1,15 @@
+Mon Jun 11 17:26:43 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* source.c (openp): Make parameters ``path'' and ``string''
+ 	constant.
+	(openp): Use alloca to safely duplicate ``string''. Make local
+ 	variables ``p'' and ``p1'' constant. Delete char* casts.
+	* defs.h: Update.
+
+	* symtab.c (lookup_symtab_1): Make parameter ``name'' constant.
+	(lookup_symtab, lookup_partial_symtab): Ditto.
+	* symtab.h (lookup_symtab, lookup_partial_symtab): Update.
+
 2001-06-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.h (ui_out_table_begin): Make char* parameters constant.

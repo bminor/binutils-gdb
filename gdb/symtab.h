@@ -1072,7 +1072,7 @@ extern int asm_demangle;
 
 /* lookup a symbol table by source file name */
 
-extern struct symtab *lookup_symtab (char *);
+extern struct symtab *lookup_symtab (const char *);
 
 /* lookup a symbol by name (optional block, optional symtab) */
 
@@ -1122,7 +1122,7 @@ find_pc_sect_partial_function (CORE_ADDR, asection *,
 
 /* lookup partial symbol table by filename */
 
-extern struct partial_symtab *lookup_partial_symtab (char *);
+extern struct partial_symtab *lookup_partial_symtab (const char *);
 
 /* lookup partial symbol table by address */
 

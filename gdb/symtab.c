@@ -79,7 +79,7 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *, int,
 						     namespace_enum);
 
-static struct symtab *lookup_symtab_1 (char *);
+static struct symtab *lookup_symtab_1 (const char *);
 
 static struct symbol *lookup_symbol_aux (const char *name, const
 					 struct block *block, const
@@ -138,7 +138,7 @@ cplusplus_hint (char *name)
    in the symtab filename will also work.  */
 
 static struct symtab *
-lookup_symtab_1 (char *name)
+lookup_symtab_1 (const char *name)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -192,7 +192,7 @@ got_symtab:
    of variations if the first lookup doesn't work.  */
 
 struct symtab *
-lookup_symtab (char *name)
+lookup_symtab (const char *name)
 {
   register struct symtab *s;
 #if 0
@@ -229,7 +229,7 @@ lookup_symtab (char *name)
    in the psymtab filename will also work.  */
 
 struct partial_symtab *
-lookup_partial_symtab (char *name)
+lookup_partial_symtab (const char *name)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
