@@ -108,7 +108,6 @@ i[3456]86-pc-linux-gnu)	gdb_target=linux
 		configdirs="${configdirs} gdbserver" ;;
 i[3456]86-*-isc*)	gdb_target=i386v ;;
 i[3456]86-*-mach3*)	gdb_target=i386m3 ;;
-i[3456]86-*-mach*)	gdb_target=i386mach ;;
 i[3456]86-*-gnu*)	gdb_target=i386gnu ;;
 i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
@@ -159,7 +158,6 @@ m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 m88*-harris-cxux*)	gdb_target=cxux ;;
 m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
-m88*-*-mach3*)		gdb_target=mach3 ;;
 m88*-motorola-*)	gdb_target=delta88 ;;
 m88*-*-*)		gdb_target=m88k ;;
 
@@ -212,7 +210,7 @@ mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix5 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
 mips*-sony-*)		gdb_target=bigmips ;;
-mips*-*-mach3*)		gdb_target=mach3 ;;
+mips*-*-mach3*)		gdb_target=mipsm3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;
@@ -225,7 +223,7 @@ none-*-*)		gdb_target=none ;;
 
 np1-*-*)		gdb_target=np1 ;;
 
-ns32k-*-mach3*)		gdb_target=mach3 ;;
+ns32k-*-mach3*)		gdb_target=ns32km3 ;;
 ns32k-*-netbsd*)	gdb_target=nbsd ;;
 ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
