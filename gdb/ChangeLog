@@ -1,3 +1,14 @@
+Mon Jan 29 00:10:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-valprint.c (calculate_array_length): New function to determine
+	the length of an array type (see comment).
+	(chill_val_print (case TYPE_CODE_ARRAY)): If the length of an
+	array type is zero, call calculate_array_length.
+
+	* gdbtypes.c (get_discrete_bounds (case TYPE_CODE_ENUM)): They values
+	may not be sorted. Scan all entries and set the real lower and
+	upper bound.
+
 Sun Jan 28 15:50:42 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/xm-linux.h: Move include of solib.h and #define of

@@ -356,8 +356,18 @@ get_discrete_bounds (type, lowp, highp)
     case TYPE_CODE_ENUM:
       if (TYPE_NFIELDS (type) > 0)
 	{
-	  *lowp = TYPE_FIELD_BITPOS (type, 0);
-	  *highp = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+	  /* The enums may not be sorted by value, so search all
+	     entries */
+	  int i;
+
+	  *lowp = *highp = TYPE_FIELD_BITPOS (type, 0);
+	  for (i = 0; i < TYPE_NFIELDS (type); i++)
+	    {
+	      if (TYPE_FIELD_BITPOS (type, i) < *lowp)
+		*lowp = TYPE_FIELD_BITPOS (type, i);
+	      if (TYPE_FIELD_BITPOS (type, i) > *highp)
+		*highp = TYPE_FIELD_BITPOS (type, i);
+	    }
 	}
       else
 	{
