@@ -1,3 +1,13 @@
+Thu Oct 22 03:14:36 1992  John Gilmore  (gnu@cygnus.com)
+
+	* partial-stab.h ('f', 'F'):  Don't reference pst->textlow if pst
+	is null.
+	* tm-sun4sol2.h (PROLOGUE_FIRSTLINE_OVERLAP):  Remove -- it 
+	causes problems in setting breakpoint in the right place in
+	functions with `float' args which are passed as doubles.
+	* xm-vaxbsd.h (MEM_FNS_DECLARED):  Avoid erroneous redecl's.
+	* config/rs6000.mh (NATDEPFILES):  Add corelow.o.
+
 Thu Oct 22 01:01:24 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (HFILES):  Add nm-i386sco.h.

@@ -489,7 +489,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
-	      if (pst->textlow == 0)
+	      if (pst && pst->textlow == 0)
 		pst->textlow = CUR_SYMBOL_VALUE;
 #if 0
 	      if (startup_file_end == 0)
@@ -511,7 +511,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
-	      if (pst->textlow == 0)
+	      if (pst && pst->textlow == 0)
 		pst->textlow = CUR_SYMBOL_VALUE;
 #if 0
 	      if (startup_file_end == 0)

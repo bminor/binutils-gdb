@@ -37,10 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SUN_FIXED_LBRAC_BUG
 
-/* May be needed, may be not?  From Pace Willisson's port.  FIXME.  */
-#define PROLOGUE_FIRSTLINE_OVERLAP
-
-
 #if 0		/* Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
