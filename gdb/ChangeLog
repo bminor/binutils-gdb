@@ -1,5 +1,10 @@
 2001-07-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_extract_return_value): Undo 2001-07-11 changes
+	to comment.
+	(i386_store_return_value): Improve comments about storing
+	floating-point return values.
+
 	* config/arm/xm-linux.h, config/i386/xm-linux.h,
 	config/m68k/xm-linux.h, config/powerpc/xm-linux.h,
 	config/sparc/xm-linux.h, config/ia64/xm-linux.h (HAVE_TERMIOS):

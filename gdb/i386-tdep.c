@@ -803,8 +803,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  return;
 	}
 
-      /* Floating-point return values can be found in %st(0).
-         FIXME: Does %st(0) always correspond to FP0?  */
+      /* Floating-point return values can be found in %st(0).  */
       if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
 	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
 	{
@@ -870,7 +869,10 @@ i386_store_return_value (struct type *type, char *valbuf)
 	  return;
 	}
 
-      /* Floating-point return values can be found in %st(0).  */
+      /* Returning floating-point values is a bit tricky.  Apart from
+         storing the return value in %st(0), we have to simulate the
+         state of the FPU at function return point.  */
+
       if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
 	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
 	{
@@ -884,7 +886,7 @@ i386_store_return_value (struct type *type, char *valbuf)
 	  DOUBLEST val;
 
 	  /* Convert the value found in VALBUF to the extended
-             floating point format used by the FPU.  This is probably
+             floating-point format used by the FPU.  This is probably
              not exactly how it would happen on the target itself, but
              it is the best we can do.  */
 	  val = extract_floating (valbuf, TYPE_LENGTH (type));
@@ -893,14 +895,17 @@ i386_store_return_value (struct type *type, char *valbuf)
 				FPU_REG_RAW_SIZE);
 	}
 
-      /* Set the top of the floating point register stack to 7.  That
-         makes sure that FP0 (which we set above) is indeed %st(0).
-         FIXME: Perhaps we should completely reset the status word?  */
+      /* Set the top of the floating-point register stack to 7.  The
+         actual value doesn't really matter, but 7 is what a normal
+         function return would end up with if the program started out
+         with a freshly initialized FPU.  */
       fstat = read_register (FSTAT_REGNUM);
       fstat |= (7 << 11);
       write_register (FSTAT_REGNUM, fstat);
 
-      /* Mark %st(1) through %st(7) as empty.  */
+      /* Mark %st(1) through %st(7) as empty.  Since we set the top of
+         the floating-point register stack to 7, the appropriate value
+         for the tag word is 0x3fff.  */
       write_register (FTAG_REGNUM, 0x3fff);
     }
   else
