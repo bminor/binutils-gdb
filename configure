@@ -772,18 +772,6 @@ EOF
                 echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
             fi 
 
-            # fixme: this shouldn't be in configure.
-            # Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
-            case "${host_alias}" in
-              "${target_alias}")
-                      echo "ALL=all.internal" >> ${Makefile}
-                      ;;
-              *)
-                      echo "CROSS=-DCROSS_COMPILE" >> ${Makefile}
-                      echo "ALL=all.cross" >> ${Makefile}
-                      ;;
-            esac
-
             # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
             # remove any form feeds.
             if [ -z "${subdirs}" ]; then
@@ -800,13 +788,13 @@ EOF
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
                     -e "s:^program_suffix[ 	]*=.*$:program_suffix = ${program_suffix}:" \
-                    -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = \"${program_transform_name}\":" \
+                    -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = ${program_transform_name}:" \
                     -e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
                     ${subdir}/Makefile.tem >> ${Makefile}
             # final copy now in ${Makefile}
 
         else
-           echo "No Makefile.in found in ${srcdir}, unable to configure" 1>&2
+           echo "No Makefile.in found in ${srcdir}/${subdir}, unable to configure" 1>&2
         fi
 
         rm -f ${subdir}/Makefile.tem
