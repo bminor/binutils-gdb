@@ -1,3 +1,8 @@
+Tue Jun  2 15:22:22 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* armos.h: Add Angel SWI and its reason codes.
+	* armos.c (ARMul_OSHandleSWI): Ignore Angel SWIs (for now).
+
 Mon Jun  1 17:14:19 1998  Anthony Thompson (athompso@cambridge.arm.com)
 
 	* armos.c (ARMul_OSHandleSWI::SWI_Open): Handle special case

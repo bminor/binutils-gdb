@@ -296,6 +296,8 @@ unsigned ARMul_OSHandleSWI(ARMul_State *state,ARMword number)
       {
 	char dummy[2000];
 	int i;
+	int flags;
+	
 	for (i = 0; 
 	     dummy[i] = ARMul_ReadByte(state, state->Reg[0] + i);
 	     i++)
@@ -417,6 +419,11 @@ unsigned ARMul_OSHandleSWI(ARMul_State *state,ARMword number)
           } while (temp != 0) ;
        return(TRUE) ;
 
+    case AngelSWI_ARM:
+    case AngelSWI_Thumb:
+      /* Ignore these SWIs (for now).  */
+      return TRUE;
+      
     default :
       state->Emulate = FALSE ;      
       return(FALSE) ;
