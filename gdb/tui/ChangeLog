@@ -1,3 +1,28 @@
+2002-03-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* tui-hooks.c: Add FIXME to explain true/false problem.  Update
+	copyright.
+	* tui.c, tuiCommand.c, tuiData.c, tuiDataWin.c: Ditto.
+	* tuiDisassem.c, tuiGeneralWin.c, tuiIO.c, tuiLayout.c: Ditto.
+	* tuiRegs.c, tuiSource.c, tuiSourceWin.c, tuiStack.c: Ditto.
+	* tuiWin.c: Ditto.
+
+	2002-02-08  Daniel Jacobowitz  <drow@mvista.com>
+	* tui-hooks.c: Include <curses.h> before "bfd.h".
+	* tui.c: Likewise.
+	* tuiCommand.c: Likewise.
+	* tuiData.c: Likewise.
+	* tuiDataWin.c: Likewise.
+	* tuiDisassem.c: Likewise.
+	* tuiGeneralWin.c: Likewise.
+	* tuiIO.c: Likewise.
+	* tuiLayout.c: Likewise.
+	* tuiRegs.c: Likewise.
+	* tuiSource.c: Likewise.
+	* tuiSourceWin.c: Likewise.
+	* tuiStack.c: Likewise.
+	* tuiWin.c: Likewise.
+
 2002-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiWin.c (_initialize_tuiWin): Replace NO_FUNCTION with NULL.

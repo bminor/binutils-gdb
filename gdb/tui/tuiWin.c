@@ -1,5 +1,8 @@
 /* TUI window generic functions.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -24,7 +27,14 @@
 
    Author: Susan B. Macchia  */
 
-/* If we need <curses.h>, we must include it before we get "bfd.h".  */
+/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
+   "defs.h" should be included first.  Unfortunatly some systems
+   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
+   and they clash with "bfd.h"'s definiton of true/false.  The correct
+   fix is to remove true/false from "bfd.h", however, until that
+   happens, hack around it by including "config.h" and <curses.h>
+   first.  */
+
 #include "config.h"
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>
