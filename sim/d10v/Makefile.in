@@ -1,4 +1,4 @@
-#    Makefile template for Configure for the SH sim library.
+#    Makefile template for Configure for the D10v sim library.
 #    Copyright (C) 1996 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
@@ -83,7 +83,7 @@ INCLUDE = d10v_sim.h $(srcdir)/../../gdb/callback.h
 INCDIR = $(srcdir)/../../include 
 CSEARCH = -I. -I$(srcdir)  -I../../include  \
   -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/d10v \
-  -I$(srcdir)/opcodes
+  -I$(srcdir)/../../opcodes
 DEP = mkdep
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
