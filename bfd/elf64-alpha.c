@@ -2548,7 +2548,8 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  sreloc = bfd_make_section (dynobj, rel_sec_name);
 		  if (sreloc == NULL
 		      || !bfd_set_section_flags (dynobj, sreloc,
-						 (SEC_ALLOC|SEC_LOAD
+						 ((sec->flags & (SEC_ALLOC
+								 | SEC_LOAD))
 						  | SEC_HAS_CONTENTS
 						  | SEC_IN_MEMORY
 						  | SEC_LINKER_CREATED

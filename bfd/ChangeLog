@@ -1,3 +1,8 @@
+2000-11-15  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_check_relocs): Create the reloc
+	section with the same ALLOC|LOAD flags as the source section.
+
 2000-11-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_opt_call): Only check bits used
