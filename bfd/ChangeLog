@@ -5,6 +5,7 @@
 	* elf32-avr.c (elf32_avr_relocate_section): Likewise.
 	* elf32-cris.c (cris_elf_relocate_section): Likewise.
 	* elf32-fr30.c (elf32_frv_relocate_section): Likewise.
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
 	* elf32-h8300.c (elf32_h8_relocate_section): Likewise.
 	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
 	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
@@ -15,6 +16,7 @@
 	* elf32-avr.c (elf_backend_rela_normal): Define.
 	* elf32-cris.c: Likewise.
 	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
 	* elf32-h8300.c: Likewise.
 	* elf32-hppa.c: Likewise.
 	* elf32-ip2k.c: Likewise.
@@ -24,6 +26,7 @@
 	* elf64-hppa.c: Likewise.
 	* elf64-sparc.c: Likewise.
 	* elf32-fr30.c (elf32_frv_relocate_section): Edit comment.
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
 	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
 	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
 	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
@@ -31,6 +34,7 @@
 	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
 	* elf-m10200.c (USE_RELA): Don't define.
 	* elf-m10300.c: Likewise.
+	* elfarm-oabi.c: Likewise.
 	* elf32-i370.c: Likewise.
 	* elf32-ip2k.c: Likewise.
 	* elf32-m68k.c: Likewise.
