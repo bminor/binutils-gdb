@@ -8,7 +8,7 @@ srcdir = .
 
 destdir = /usr/local
 
-version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
+version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
 bindir = $(prefix)/bin
 libdir = $(prefix)/lib
@@ -80,8 +80,8 @@ SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
 # for self hosting
 GNUTARGET=a.out-sunos-big
 LDEMULATION=gld
-BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
-LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
+BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
+LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwarn.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o ldindr.o \
 	ldm88k.o ldglda29k.o news.o \
