@@ -1072,9 +1072,9 @@ what speed to use over the serial device.
 @end enumerate
 
 @menu
-* Hitachi Boards::      Connecting to Hitachi boards
-* Hitachi ICE::         Using the E7000 In-Circuit Emulator
-* H8500 Special::       Special @value{GDBN} commands for the H8/500
+* Hitachi Boards::      Connecting to Hitachi boards.
+* Hitachi ICE::         Using the E7000 In-Circuit Emulator.
+* Hitachi Special::     Special @value{GDBN} commands for Hitachi micros.
 @end menu
 
 @node Hitachi Boards
@@ -1192,6 +1192,7 @@ to detect program completion.
 
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
+@end ifset
 
 @node Hitachi ICE
 @subsubsection Using the E7000 in-circuit emulator
@@ -1238,7 +1239,6 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @code{big}, @code{medium}, and @code{compact}.
 @end table
 
-@end ifset
 @end ifset
 
 @ifset MIPS
