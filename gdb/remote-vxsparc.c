@@ -124,10 +124,10 @@ vx_read_register (int regno)
     }
   else
     {
-      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
-	     32 * SPARC_FPREG_SIZE);
-      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)],
-	     1 * SPARC_FPREG_SIZE);
+      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
+	      0, 32 * SPARC_FPREG_SIZE);
+      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)],
+	      0, 1 * SPARC_FPREG_SIZE);
     }
 
   /* Mark the register cache valid.  */

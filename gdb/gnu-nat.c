@@ -1024,7 +1024,7 @@ inf_validate_procs (struct inf *inf)
     /* The current thread we're considering. */
     struct proc *thread = inf->threads;
 
-    bzero (matched, sizeof (matched));
+    memset (matched, 0, sizeof (matched));
 
     while (thread)
       {
