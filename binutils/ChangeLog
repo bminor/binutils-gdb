@@ -1,3 +1,9 @@
+Sat Nov  7 15:06:13 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: handle -I includes better, adding $(BASEDIR)/bfd to
+	the list (since some of the bfd/hosts/*.h files include other
+	files from that directory)
+
 Fri Nov  6 00:12:51 1992  John Gilmore  (gnu@cygnus.com)
 
 	* i960-pinsn.c (MEM_MAX, MEM_SIZ):  Set upper bound properly.
