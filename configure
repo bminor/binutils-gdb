@@ -181,6 +181,7 @@ srcname="gnu development package"
 
 # per-host:
 
+
 ## end of common part
 
 # are we rebuilding config itself?
@@ -212,7 +213,7 @@ if [ -n "${template}" ] ; then
 		sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
 
 		sed -e '/^#### configure.in common parts/  r configure.com' \
-			-e '/^##### /  r configure.tgt' \
+			-e '/^#### /  r configure.tgt' \
 			${template} >> configure
 
 		rm -f configure.com configure.tgt configure.hst
@@ -264,6 +265,7 @@ for host in ${hosts} ; do
 	fi
 
 #### configure.in per-host parts come in here.
+
 ## end of per-target part
 
 
@@ -274,6 +276,7 @@ for host in ${hosts} ; do
 		fi
 
 #### configure.in per-target parts come in here.
+
 ## end of per-target part
 
 		# Temporarily, we support only direct subdir builds.
@@ -549,7 +552,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.6  1991/04/15 23:43:41  rich
+# Revision 1.7  1991/04/16 00:18:22  rich
+# Now handles multiple hosts and targets.
+#
+# Revision 1.5  1991/04/15  23:43:44  rich
 # Now handles multiple hosts and targets.
 #
 # Revision 1.4  1991/04/13  02:11:03  rich
