@@ -1,3 +1,8 @@
+2002-09-26Martin M. Hunt  <hunt@redhat.com>
+
+	* mips-tdep.c (find_proc_desc): Initialize startaddr.
+
+
 2002-09-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* rs6000-tdep.c (rs6000_frame_chain): Don't chain past the dummy

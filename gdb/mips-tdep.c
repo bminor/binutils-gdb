@@ -2336,7 +2336,7 @@ static mips_extra_func_info_t
 find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 {
   mips_extra_func_info_t proc_desc;
-  CORE_ADDR startaddr;
+  CORE_ADDR startaddr = 0;
 
   proc_desc = non_heuristic_proc_desc (pc, &startaddr);
 
