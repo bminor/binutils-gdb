@@ -53,8 +53,9 @@ AR = ar
 AR_FLAGS = qv
 CFLAGS = -g
 MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
 RANLIB = ranlib
-HOST_CC=$(CC)
+CC_FOR_BUILD=$(CC)
 BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
 
@@ -72,6 +73,9 @@ LIB_PATH =
 BASEDIR	= ../..
 INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir) -I$(srcdir)/../bfd -I$(INCLUDE) 
+
+# What version of the manual to build
+DOCVER = gen
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
@@ -155,6 +159,7 @@ STAGESTUFF = *.x *.x[runN] *.sc[runN] $(GENERATED_SOURCES) $(GENERATED_HEADERS) 
 all: $(LD_PROG)
 
 check: bootstrap check-cdtest
+installcheck:
 info: ld.info
 
 ldgram.h ldgram.c: ldgram.y
@@ -169,7 +174,6 @@ DEF_EMUL = ` if [ -z "$(EMUL)" ] ; then \
 	     else \
 	       echo -DDEFAULT_EMULATION='"$(EMUL)"' ; \
              fi`
-	       
 
 ldmain.o: ldmain.c
 	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(DEF_EMUL) -c $<
@@ -304,18 +308,24 @@ check-cdtest: cdtest $(srcdir)/cdtest.exp
 
 ######################################################################
 # DOCUMENTATION TARGETS
+# Manual configuration file; not usually attached to normal configuration,
+# because almost all configs use "gen" version of manual.
+#  Set DOCVER above to change.
+configdoc.texi:	${DOCVER}-doc.texi
+	ln -s ${DOCVER}-doc.texi configdoc.texi || \
+	ln ${DOCVER}-doc.texi configdoc.texi || \
+	cp ${DOCVER}-doc.texi configdoc.texi
+
 # TeX output
+dvi: ld.dvi
 ld.dvi: $(srcdir)/ld.texinfo
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ld.texinfo
-	texindex ld.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ld.texinfo
+	$(TEXI2DVI) $(srcdir)/ld.texinfo
+
 ldint.dvi: $(srcdir)/ldint.texinfo
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ldint.texinfo
-	texindex ldint.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ldint.texinfo
+	$(TEXI2DVI) $(srcdir)/ldint.texinfo
 
 # info file for online browsing
-ld.info: $(srcdir)/ld.texinfo
+ld.info: $(srcdir)/ld.texinfo configdoc.texi
 	$(MAKEINFO) -o ld.info $(srcdir)/ld.texinfo
 
 ldint.info: $(srcdir)/ldint.texinfo
@@ -399,7 +409,7 @@ ld-index.me: ld.me
 ######################################################################
 
 ./mkscript: $(srcdir)/mkscript.c
-	$(HOST_CC)  -o mkscript $(srcdir)/mkscript.c
+	$(CC_FOR_BUILD)  -o mkscript $(srcdir)/mkscript.c
 
 ldlex.o: ldlex.c ldgram.h
 ldgram.o: ldgram.c

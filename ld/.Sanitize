@@ -49,7 +49,9 @@ ebmon29k.sc-sh
 ebmon29k.sh
 generic.em
 genscripts.sh
+h8-doc.texi
 ld.1
+gen-doc.texi
 gld960.em
 gld960.sh
 go32.sh
@@ -161,7 +163,21 @@ fi
 #
 #
 # $Log$
-# Revision 1.54  1993/03/09 18:12:14  ian
+# Revision 1.55  1993/03/30 23:24:53  pesch
+# ld.texinfo:
+# Conditionalize manual to maintain Cygnus, Hitachi versions in parallel.
+# (Texinfo conditionals are stable enough to permit this, at last!)
+# NOTE: @ignore'd passages from earlier versions DELETED; use CVS history
+#       to retrieve if wanted.
+#
+# gen-doc.texi, h8-doc.texi: manual configuration definitions.
+#
+# Makefile.in: link config defn (`gen' by default) to configdoc.texi, included
+#       by ld.texinfo
+#
+# .Sanitize: add gen-doc.texi, h8-doc.texi
+#
+# Revision 1.54  1993/03/09  18:12:14  ian
 # Removed obsolete Makefile.dos.
 #
 # Revision 1.53  1993/03/04  20:49:05  ian
