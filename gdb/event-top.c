@@ -410,7 +410,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
 {
   if (error)
     {
-      printf_unfiltered ("error detected on stdin\n");
+      printf_unfiltered (_("error detected on stdin\n"));
       delete_file_handler (input_fd);
       discard_all_continuations ();
       /* If stdin died, we may as well kill gdb. */
@@ -533,7 +533,7 @@ command_handler (char *command)
 	{
 	  long cmd_time = get_run_time () - time_at_cmd_start;
 
-	  printf_unfiltered ("Command execution time: %ld.%06ld\n",
+	  printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
 			     cmd_time / 1000000, cmd_time % 1000000);
 	}
 
@@ -544,7 +544,7 @@ command_handler (char *command)
 	  long space_now = lim - lim_at_start;
 	  long space_diff = space_now - space_at_cmd_start;
 
-	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
+	  printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
 			     space_now,
 			     (space_diff >= 0 ? '+' : '-'),
 			     space_diff);
@@ -572,7 +572,7 @@ command_line_handler_continuation (struct continuation_arg *arg)
     {
       long cmd_time = get_run_time () - time_at_cmd_start;
 
-      printf_unfiltered ("Command execution time: %ld.%06ld\n",
+      printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
 			 cmd_time / 1000000, cmd_time % 1000000);
     }
   if (display_space)
@@ -582,7 +582,7 @@ command_line_handler_continuation (struct continuation_arg *arg)
       long space_now = lim - lim_at_start;
       long space_diff = space_now - space_at_cmd_start;
 
-      printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
+      printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
 			 space_now,
 			 (space_diff >= 0 ? '+' : '-'),
 			 space_diff);
@@ -615,9 +615,9 @@ command_line_handler (char *rl)
 
   if (annotation_level > 1 && instream == stdin)
     {
-      printf_unfiltered ("\n\032\032post-");
+      printf_unfiltered (("\n\032\032post-"));
       puts_unfiltered (async_annotation_suffix);
-      printf_unfiltered ("\n");
+      printf_unfiltered (("\n"));
     }
 
   if (linebuffer == 0)

@@ -583,21 +583,21 @@ source_info (char *ignore, int from_tty)
 
   if (!s)
     {
-      printf_filtered ("No current source file.\n");
+      printf_filtered (_("No current source file.\n"));
       return;
     }
-  printf_filtered ("Current source file is %s\n", s->filename);
+  printf_filtered (_("Current source file is %s\n"), s->filename);
   if (s->dirname)
-    printf_filtered ("Compilation directory is %s\n", s->dirname);
+    printf_filtered (_("Compilation directory is %s\n"), s->dirname);
   if (s->fullname)
-    printf_filtered ("Located in %s\n", s->fullname);
+    printf_filtered (_("Located in %s\n"), s->fullname);
   if (s->nlines)
-    printf_filtered ("Contains %d line%s.\n", s->nlines,
+    printf_filtered (_("Contains %d line%s.\n"), s->nlines,
 		     s->nlines == 1 ? "" : "s");
 
-  printf_filtered ("Source language is %s.\n", language_str (s->language));
-  printf_filtered ("Compiled with %s debugging format.\n", s->debugformat);
-  printf_filtered ("%s preprocessor macro info.\n",
+  printf_filtered (_("Source language is %s.\n"), language_str (s->language));
+  printf_filtered (_("Compiled with %s debugging format.\n"), s->debugformat);
+  printf_filtered (_("%s preprocessor macro info.\n"),
                    s->macro_table ? "Includes" : "Does not include");
 }
 
@@ -1317,7 +1317,7 @@ line_info (char *arg, int from_tty)
 
       if (sal.symtab == 0)
 	{
-	  printf_filtered ("No line number information available");
+	  printf_filtered (_("No line number information available"));
 	  if (sal.pc != 0)
 	    {
 	      /* This is useful for "info line *0x7f34".  If we can't tell the
@@ -1372,7 +1372,7 @@ line_info (char *arg, int from_tty)
 	/* Is there any case in which we get here, and have an address
 	   which the user would want to see?  If we have debugging symbols
 	   and no line numbers?  */
-	printf_filtered ("Line number %d is out of range for \"%s\".\n",
+	printf_filtered (_("Line number %d is out of range for \"%s\".\n"),
 			 sal.line, sal.symtab->filename);
     }
   xfree (sals.sals);
@@ -1469,7 +1469,7 @@ forward_search_command (char *regex, int from_tty)
       line++;
     }
 
-  printf_filtered ("Expression not found\n");
+  printf_filtered (_("Expression not found\n"));
   fclose (stream);
 }
 
@@ -1556,7 +1556,7 @@ reverse_search_command (char *regex, int from_tty)
 	}
     }
 
-  printf_filtered ("Expression not found\n");
+  printf_filtered (_("Expression not found\n"));
   fclose (stream);
   return;
 }

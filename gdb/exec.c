@@ -150,7 +150,7 @@ exec_file_clear (int from_tty)
   unpush_target (&exec_ops);
 
   if (from_tty)
-    printf_unfiltered ("No executable file now.\n");
+    printf_unfiltered (_("No executable file now.\n"));
 }
 
 /*  Process the first arg in ARGS as the new exec file.
@@ -183,7 +183,7 @@ exec_file_attach (char *filename, int from_tty)
   if (!filename)
     {
       if (from_tty)
-        printf_unfiltered ("No executable file now.\n");
+        printf_unfiltered (_("No executable file now.\n"));
     }
   else
     {
@@ -527,10 +527,10 @@ print_section_info (struct target_ops *t, bfd *abfd)
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");
-  printf_filtered ("file type %s.\n", bfd_get_target (abfd));
+  printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == exec_bfd)
     {
-      printf_filtered ("\tEntry point: ");
+      printf_filtered (_("\tEntry point: "));
       print_address_numeric (bfd_get_start_address (abfd), 1, gdb_stdout);
       printf_filtered ("\n");
     }
@@ -544,14 +544,13 @@ print_section_info (struct target_ops *t, bfd *abfd)
 	 since most output will then be much wider than necessary.  It
 	 may make sense to test the size of the file and choose the
 	 format string accordingly.  */
+      /* FIXME: i18n: Need to rewrite this sentence.  */
       if (info_verbose)
 	printf_filtered (" @ %s",
 			 hex_string_custom (p->the_bfd_section->filepos, 8));
       printf_filtered (" is %s", bfd_section_name (p->bfd, p->the_bfd_section));
       if (p->bfd != abfd)
-	{
-	  printf_filtered (" in %s", bfd_get_filename (p->bfd));
-	}
+	printf_filtered (" in %s", bfd_get_filename (p->bfd));
       printf_filtered ("\n");
     }
 }
@@ -565,7 +564,7 @@ exec_files_info (struct target_ops *t)
     {
       struct vmap *vp;
 
-      printf_unfiltered ("\tMapping info for file `%s'.\n", vmap->name);
+      printf_unfiltered (_("\tMapping info for file `%s'.\n"), vmap->name);
       printf_unfiltered ("\t  %*s   %*s   %*s   %*s %8.8s %s\n",
 			 strlen_paddr (), "tstart",
 			 strlen_paddr (), "tend",

@@ -295,8 +295,8 @@ static struct cmd_list_element *tuilist;
 static void
 tui_command (char *args, int from_tty)
 {
-  printf_unfiltered ("\"tui\" must be followed by the name of a "
-                     "tui command.\n");
+  printf_unfiltered (_("\"tui\" must be followed by the name of a "
+                     "tui command.\n"));
   help_list (tuilist, "tui ", -1, gdb_stdout);
 }
 
@@ -866,7 +866,7 @@ The window name specified must be valid and visible.\n"));
       if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
 	tui_refresh_data_win ();
       xfree (buf_ptr);
-      printf_filtered ("Focus set to %s window.\n",
+      printf_filtered (_("Focus set to %s window.\n"),
 		       tui_win_name ((struct tui_gen_win_info *) tui_win_with_focus ()));
     }
   else

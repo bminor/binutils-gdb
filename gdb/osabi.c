@@ -600,14 +600,14 @@ static void
 show_osabi (char *args, int from_tty)
 {
   if (user_osabi_state == osabi_auto)
-    printf_filtered ("The current OS ABI is \"auto\" (currently \"%s\").\n",
+    printf_filtered (_("The current OS ABI is \"auto\" (currently \"%s\").\n"),
 		     gdbarch_osabi_name (gdbarch_osabi (current_gdbarch)));
   else
-    printf_filtered ("The current OS ABI is \"%s\".\n",
+    printf_filtered (_("The current OS ABI is \"%s\".\n"),
 		     gdbarch_osabi_name (user_selected_osabi));
 
   if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
-    printf_filtered ("The default OS ABI is \"%s\".\n",
+    printf_filtered (_("The default OS ABI is \"%s\".\n"),
 		     gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
 

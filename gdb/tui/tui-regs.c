@@ -582,8 +582,8 @@ static struct cmd_list_element *tuireglist;
 static void
 tui_reg_command (char *args, int from_tty)
 {
-  printf_unfiltered ("\"tui reg\" must be followed by the name of a "
-                     "tui reg command.\n");
+  printf_unfiltered (_("\"tui reg\" must be followed by the name of a "
+                     "tui reg command.\n"));
   help_list (tuireglist, "tui reg ", -1, gdb_stdout);
 }
 

@@ -170,8 +170,9 @@ set_language_command (char *ignore, int from_tty)
 
   if (!language || !language[0])
     {
-      printf_unfiltered ("The currently understood settings are:\n\n");
-      printf_unfiltered ("local or auto    Automatic setting based on source file\n");
+      printf_unfiltered (_("\
+The currently understood settings are:\n\n\
+local or auto    Automatic setting based on source file\n"));
 
       for (i = 0; i < languages_size; ++i)
 	{
@@ -180,8 +181,8 @@ set_language_command (char *ignore, int from_tty)
 	      || languages[i]->la_language == language_auto)
 	    continue;
 
-	  /* FIXME for now assume that the human-readable name is just
-	     a capitalization of the internal name.  */
+	  /* FIXME: i18n: for now assume that the human-readable name
+	     is just a capitalization of the internal name.  */
 	  printf_unfiltered ("%-16s Use the %c%s language\n",
 			     languages[i]->la_name,
 	  /* Capitalize first letter of language
@@ -513,16 +514,16 @@ language_info (int quietly)
     return;
 
   expected_language = current_language;
-  printf_unfiltered ("Current language:  %s\n", language);
+  printf_unfiltered (_("Current language:  %s\n"), language);
   show_language_command ((char *) 0, 1);
 
   if (!quietly)
     {
-      printf_unfiltered ("Type checking:     %s\n", type);
+      printf_unfiltered (_("Type checking:     %s\n"), type);
       show_type_command ((char *) 0, 1);
-      printf_unfiltered ("Range checking:    %s\n", range);
+      printf_unfiltered (_("Range checking:    %s\n"), range);
       show_range_command ((char *) 0, 1);
-      printf_unfiltered ("Case sensitivity:  %s\n", case_sensitive);
+      printf_unfiltered (_("Case sensitivity:  %s\n"), case_sensitive);
       show_case_command ((char *) 0, 1);
     }
 }

@@ -87,7 +87,7 @@ int watchdog = 0;
 static void
 maintenance_command (char *args, int from_tty)
 {
-  printf_unfiltered ("\"maintenance\" must be followed by the name of a maintenance command.\n");
+  printf_unfiltered (_("\"maintenance\" must be followed by the name of a maintenance command.\n"));
   help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
 }
 
@@ -146,7 +146,7 @@ maintenance_demangle (char *args, int from_tty)
 
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered ("\"maintenance demangle\" takes an argument to demangle.\n");
+      printf_unfiltered (_("\"maintenance demangle\" takes an argument to demangle.\n"));
     }
   else
     {
@@ -159,7 +159,7 @@ maintenance_demangle (char *args, int from_tty)
 	}
       else
 	{
-	  printf_unfiltered ("Can't demangle \"%s\"\n", args);
+	  printf_unfiltered (_("Can't demangle \"%s\"\n"), args);
 	}
     }
 }
@@ -170,7 +170,7 @@ maintenance_time_display (char *args, int from_tty)
   extern int display_time;
 
   if (args == NULL || *args == '\0')
-    printf_unfiltered ("\"maintenance time\" takes a numeric argument.\n");
+    printf_unfiltered (_("\"maintenance time\" takes a numeric argument.\n"));
   else
     display_time = strtol (args, NULL, 10);
 }
@@ -193,7 +193,7 @@ maintenance_space_display (char *args, int from_tty)
 static void
 maintenance_info_command (char *arg, int from_tty)
 {
-  printf_unfiltered ("\"maintenance info\" must be followed by the name of an info command.\n");
+  printf_unfiltered (_("\"maintenance info\" must be followed by the name of an info command.\n"));
   help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
 }
 
@@ -356,10 +356,10 @@ maintenance_info_sections (char *arg, int from_tty)
 {
   if (exec_bfd)
     {
-      printf_filtered ("Exec file:\n");
+      printf_filtered (_("Exec file:\n"));
       printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
       wrap_here ("        ");
-      printf_filtered ("file type %s.\n", bfd_get_target (exec_bfd));
+      printf_filtered (_("file type %s.\n"), bfd_get_target (exec_bfd));
       if (arg && *arg && match_substring (arg, "ALLOBJ"))
 	{
 	  struct objfile *ofile;
@@ -374,7 +374,7 @@ maintenance_info_sections (char *arg, int from_tty)
 
 	  ALL_OBJFILES (ofile)
 	    {
-	      printf_filtered ("  Object file: %s\n", 
+	      printf_filtered (_("  Object file: %s\n"), 
 			       bfd_get_filename (ofile->obfd));
 	      ALL_OBJFILE_OSECTIONS (ofile, osect)
 		{
@@ -388,10 +388,10 @@ maintenance_info_sections (char *arg, int from_tty)
 
   if (core_bfd)
     {
-      printf_filtered ("Core file:\n");
+      printf_filtered (_("Core file:\n"));
       printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
       wrap_here ("        ");
-      printf_filtered ("file type %s.\n", bfd_get_target (core_bfd));
+      printf_filtered (_("file type %s.\n"), bfd_get_target (core_bfd));
       bfd_map_over_sections (core_bfd, print_bfd_section_info, arg);
     }
 }
@@ -425,7 +425,7 @@ maintenance_print_architecture (char *args, int from_tty)
 static void
 maintenance_print_command (char *arg, int from_tty)
 {
-  printf_unfiltered ("\"maintenance print\" must be followed by the name of a print command.\n");
+  printf_unfiltered (_("\"maintenance print\" must be followed by the name of a print command.\n"));
   help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
 }
 
@@ -483,9 +483,9 @@ maintenance_translate_address (char *arg, int from_tty)
 		     SYMBOL_PRINT_NAME (sym),
 		     paddr_u (address - SYMBOL_VALUE_ADDRESS (sym)));
   else if (sect)
-    printf_filtered ("no symbol at %s:0x%s\n", sect->name, paddr (address));
+    printf_filtered (_("no symbol at %s:0x%s\n"), sect->name, paddr (address));
   else
-    printf_filtered ("no symbol at 0x%s\n", paddr (address));
+    printf_filtered (_("no symbol at 0x%s\n"), paddr (address));
 
   return;
 }
@@ -500,9 +500,9 @@ maintenance_deprecate (char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered ("\"maintenance deprecate\" takes an argument, \n\
+      printf_unfiltered (_("\"maintenance deprecate\" takes an argument, \n\
 the command you want to deprecate, and optionally the replacement command \n\
-enclosed in quotes.\n");
+enclosed in quotes.\n"));
     }
 
   maintenance_do_deprecate (args, 1);
@@ -515,8 +515,8 @@ maintenance_undeprecate (char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered ("\"maintenance undeprecate\" takes an argument, \n\
-the command you want to undeprecate.\n");
+      printf_unfiltered (_("\"maintenance undeprecate\" takes an argument, \n\
+the command you want to undeprecate.\n"));
     }
 
   maintenance_do_deprecate (args, 0);
@@ -548,7 +548,7 @@ maintenance_do_deprecate (char *text, int deprecate)
 
   if (!lookup_cmd_composition (text, &alias, &prefix_cmd, &cmd))
     {
-      printf_filtered ("Can't find command '%s' to deprecate.\n", text);
+      printf_filtered (_("Can't find command '%s' to deprecate.\n"), text);
       return;
     }
 
@@ -615,7 +615,7 @@ struct cmd_list_element *maintenance_show_cmdlist;
 static void
 maintenance_set_cmd (char *args, int from_tty)
 {
-  printf_unfiltered ("\"maintenance set\" must be followed by the name of a set command.\n");
+  printf_unfiltered (_("\"maintenance set\" must be followed by the name of a set command.\n"));
   help_list (maintenance_set_cmdlist, "maintenance set ", -1, gdb_stdout);
 }
 

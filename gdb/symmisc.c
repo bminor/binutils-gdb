@@ -174,7 +174,7 @@ print_symbol_bcache_statistics (void)
   immediate_quit++;
   ALL_OBJFILES (objfile)
   {
-    printf_filtered ("Byte cache statistics for '%s':\n", objfile->name);
+    printf_filtered (_("Byte cache statistics for '%s':\n"), objfile->name);
     print_bcache_statistics (objfile->psymbol_cache, "partial symbol cache");
   }
   immediate_quit--;
@@ -191,21 +191,21 @@ print_objfile_statistics (void)
   immediate_quit++;
   ALL_OBJFILES (objfile)
   {
-    printf_filtered ("Statistics for '%s':\n", objfile->name);
+    printf_filtered (_("Statistics for '%s':\n"), objfile->name);
     if (OBJSTAT (objfile, n_stabs) > 0)
-      printf_filtered ("  Number of \"stab\" symbols read: %d\n",
+      printf_filtered (_("  Number of \"stab\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_stabs));
     if (OBJSTAT (objfile, n_minsyms) > 0)
-      printf_filtered ("  Number of \"minimal\" symbols read: %d\n",
+      printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_minsyms));
     if (OBJSTAT (objfile, n_psyms) > 0)
-      printf_filtered ("  Number of \"partial\" symbols read: %d\n",
+      printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_psyms));
     if (OBJSTAT (objfile, n_syms) > 0)
-      printf_filtered ("  Number of \"full\" symbols read: %d\n",
+      printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_syms));
     if (OBJSTAT (objfile, n_types) > 0)
-      printf_filtered ("  Number of \"types\" defined: %d\n",
+      printf_filtered (_("  Number of \"types\" defined: %d\n"),
 		       OBJSTAT (objfile, n_types));
     i = 0;
     ALL_OBJFILE_PSYMTABS (objfile, ps)
@@ -213,7 +213,7 @@ print_objfile_statistics (void)
         if (ps->readin == 0)
           i++;
       }
-    printf_filtered ("  Number of psym tables (not yet expanded): %d\n", i);
+    printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"), i);
     i = linetables = blockvectors = 0;
     ALL_OBJFILE_SYMTABS (objfile, s)
       {
@@ -223,20 +223,20 @@ print_objfile_statistics (void)
         if (s->primary == 1)
           blockvectors++;
       }
-    printf_filtered ("  Number of symbol tables: %d\n", i);
-    printf_filtered ("  Number of symbol tables with line tables: %d\n", 
+    printf_filtered (_("  Number of symbol tables: %d\n"), i);
+    printf_filtered (_("  Number of symbol tables with line tables: %d\n"), 
                      linetables);
-    printf_filtered ("  Number of symbol tables with blockvectors: %d\n", 
+    printf_filtered (_("  Number of symbol tables with blockvectors: %d\n"), 
                      blockvectors);
     
     if (OBJSTAT (objfile, sz_strtab) > 0)
-      printf_filtered ("  Space used by a.out string tables: %d\n",
+      printf_filtered (_("  Space used by a.out string tables: %d\n"),
 		       OBJSTAT (objfile, sz_strtab));
-    printf_filtered ("  Total memory used for objfile obstack: %d\n",
+    printf_filtered (_("  Total memory used for objfile obstack: %d\n"),
 		     obstack_memory_used (&objfile->objfile_obstack));
-    printf_filtered ("  Total memory used for psymbol cache: %d\n",
+    printf_filtered (_("  Total memory used for psymbol cache: %d\n"),
 		     bcache_memory_used (objfile->psymbol_cache));
-    printf_filtered ("  Total memory used for macro cache: %d\n",
+    printf_filtered (_("  Total memory used for macro cache: %d\n"),
 		     bcache_memory_used (objfile->macro_cache));
   }
   immediate_quit--;

@@ -2348,6 +2348,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 		  /* Inform about additional files that need to be read in. */
 		  if (info_verbose)
 		    {
+		      /* FIXME: i18n: Need to make this a single
+			 string.  */
 		      fputs_filtered (" ", gdb_stdout);
 		      wrap_here ("");
 		      fputs_filtered ("and ", gdb_stdout);
@@ -2367,7 +2369,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 	      read_ofile_symtab (pst);
 	      if (info_verbose)
 		{
-		  printf_filtered ("%d DIE's, sorting...", diecount);
+		  printf_filtered (_("%d DIE's, sorting..."), diecount);
 		  wrap_here ("");
 		  gdb_flush (gdb_stdout);
 		}
@@ -2415,7 +2417,7 @@ dwarf_psymtab_to_symtab (struct partial_symtab *pst)
 	         disconcerting pauses.  */
 	      if (info_verbose)
 		{
-		  printf_filtered ("Reading in symbols for %s...",
+		  printf_filtered (_("Reading in symbols for %s..."),
 				   pst->filename);
 		  gdb_flush (gdb_stdout);
 		}
@@ -2434,7 +2436,7 @@ dwarf_psymtab_to_symtab (struct partial_symtab *pst)
 	      /* Finish up the verbose info message.  */
 	      if (info_verbose)
 		{
-		  printf_filtered ("done.\n");
+		  printf_filtered (_("done.\n"));
 		  gdb_flush (gdb_stdout);
 		}
 	    }

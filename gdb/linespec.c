@@ -500,7 +500,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
     }
 
   i = 0;
-  printf_unfiltered ("[0] cancel\n[1] all\n");
+  printf_unfiltered (_("[0] cancel\n[1] all\n"));
   while (i < nelts)
     {
       init_sal (&return_values.sals[i]);	/* Initialize to zeroes.  */
@@ -515,14 +515,14 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 			       values.sals[i].symtab->filename,
 			       values.sals[i].line);
 	  else
-	    printf_unfiltered ("[%d] %s at ?FILE:%d [No symtab? Probably broken debug info...]\n",
+	    printf_unfiltered (_("[%d] %s at ?FILE:%d [No symtab? Probably broken debug info...]\n"),
 			       (i + 2),
 			       SYMBOL_PRINT_NAME (sym_arr[i]),
 			       values.sals[i].line);
 
 	}
       else
-	printf_unfiltered ("?HERE\n");
+	printf_unfiltered (_("?HERE\n"));
       i++;
     }
 
@@ -573,7 +573,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 
       if (num >= nelts + 2)
 	{
-	  printf_unfiltered ("No choice number %d.\n", num);
+	  printf_unfiltered (_("No choice number %d.\n"), num);
 	}
       else
 	{
@@ -591,7 +591,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 	    }
 	  else
 	    {
-	      printf_unfiltered ("duplicate request for %d ignored.\n", num);
+	      printf_unfiltered (_("duplicate request for %d ignored.\n"), num);
 	    }
 	}
 

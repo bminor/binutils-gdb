@@ -306,7 +306,7 @@ nosupport_runtime (void)
 static void
 default_terminal_info (char *args, int from_tty)
 {
-  printf_unfiltered ("No saved terminal information.\n");
+  printf_unfiltered (_("No saved terminal information.\n"));
 }
 
 /* This is the default target_create_inferior and target_attach function.
@@ -319,7 +319,7 @@ kill_or_be_killed (int from_tty)
 {
   if (target_has_execution)
     {
-      printf_unfiltered ("You are already running a program:\n");
+      printf_unfiltered (_("You are already running a program:\n"));
       target_files_info ();
       if (query ("Kill it? "))
 	{
@@ -1391,7 +1391,7 @@ target_info (char *args, int from_tty)
   int has_all_mem = 0;
 
   if (symfile_objfile != NULL)
-    printf_unfiltered ("Symbols from \"%s\".\n", symfile_objfile->name);
+    printf_unfiltered (_("Symbols from \"%s\".\n"), symfile_objfile->name);
 
   for (t = target_stack; t != NULL; t = t->beneath)
     {
@@ -1401,7 +1401,7 @@ target_info (char *args, int from_tty)
       if ((int) (t->to_stratum) <= (int) dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf_unfiltered ("\tWhile running this, GDB does not access memory from...\n");
+	printf_unfiltered (_("\tWhile running this, GDB does not access memory from...\n"));
       printf_unfiltered ("%s:\n", t->to_longname);
       (t->to_files_info) (t);
       has_all_mem = t->to_has_all_memory;

@@ -849,7 +849,7 @@ static void
 maintenance_cplus_namespace (char *args, int from_tty)
 {
   struct objfile *objfile;
-  printf_unfiltered ("Possible namespaces:\n");
+  printf_unfiltered (_("Possible namespaces:\n"));
   ALL_OBJFILES (objfile)
     {
       struct dict_iterator iter;

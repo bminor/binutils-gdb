@@ -49,7 +49,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   /* lo == hi is a useless empty region */
   if (lo >= hi && hi != 0)
     {
-      printf_unfiltered ("invalid memory region: low >= high\n");
+      printf_unfiltered (_("invalid memory region: low >= high\n"));
       return NULL;
     }
 
@@ -61,7 +61,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 	  || (hi > n->lo && (hi <= n->hi || n->hi == 0))
 	  || (lo <= n->lo && (hi >= n->hi || hi == 0)))
 	{
-	  printf_unfiltered ("overlapping memory region\n");
+	  printf_unfiltered (_("overlapping memory region\n"));
 	  return NULL;
 	}
       n = n->next;
@@ -218,7 +218,7 @@ mem_info_command (char *args, int from_tty)
 
   if (!mem_region_chain)
     {
-      printf_unfiltered ("There are no memory regions defined.\n");
+      printf_unfiltered (_("There are no memory regions defined.\n"));
       return;
     }
 
@@ -346,7 +346,7 @@ mem_enable (int num)
 	m->enabled_p = 1;
 	return;
       }
-  printf_unfiltered ("No memory region number %d.\n", num);
+  printf_unfiltered (_("No memory region number %d.\n"), num);
 }
 
 static void
@@ -396,7 +396,7 @@ mem_disable (int num)
 	m->enabled_p = 0;
 	return;
       }
-  printf_unfiltered ("No memory region number %d.\n", num);
+  printf_unfiltered (_("No memory region number %d.\n"), num);
 }
 
 static void
@@ -455,7 +455,7 @@ mem_delete (int num)
 
   if (!mem_region_chain)
     {
-      printf_unfiltered ("No memory region number %d.\n", num);
+      printf_unfiltered (_("No memory region number %d.\n"), num);
       return;
     }
 

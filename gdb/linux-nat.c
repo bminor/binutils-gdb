@@ -822,7 +822,7 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
     }
 
   if (verbose)
-    printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
+    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
 
   found_lp = lp = find_lwp_pid (ptid);
   if (lp == NULL)
@@ -1218,7 +1218,7 @@ wait_lwp (struct lwp_info *lp)
 	  /* Core GDB cannot deal with us deleting the current thread.  */
 	  if (!ptid_equal (lp->ptid, inferior_ptid))
 	    delete_thread (lp->ptid);
-	  printf_unfiltered ("[%s exited]\n",
+	  printf_unfiltered (_("[%s exited]\n"),
 			     target_pid_to_str (lp->ptid));
 	}
 
@@ -1470,7 +1470,7 @@ flush_callback (struct lwp_info *lp, void *data)
   if (lp->status)
     {
       if (debug_linux_nat)
-	printf_unfiltered ("FC: LP has pending status %06x\n", lp->status);
+	printf_unfiltered (_("FC: LP has pending status %06x\n"), lp->status);
       if (WIFSTOPPED (lp->status) && sigismember (flush_mask, WSTOPSIG (lp->status)))
 	lp->status = 0;
     }
@@ -1967,7 +1967,7 @@ retry:
 		    }
 
 		  add_thread (lp->ptid);
-		  printf_unfiltered ("[New %s]\n",
+		  printf_unfiltered (_("[New %s]\n"),
 				     target_pid_to_str (lp->ptid));
 		}
 	    }
@@ -1995,7 +1995,7 @@ retry:
 		     thread.  */
 		  if (!ptid_equal (lp->ptid, inferior_ptid))
 		    delete_thread (lp->ptid);
-		  printf_unfiltered ("[%s exited]\n",
+		  printf_unfiltered (_("[%s exited]\n"),
 				     target_pid_to_str (lp->ptid));
 		}
 
@@ -2048,7 +2048,7 @@ retry:
 		     thread.  */
 		  if (!ptid_equal (lp->ptid, inferior_ptid))
 		    delete_thread (lp->ptid);
-		  printf_unfiltered ("[%s exited]\n",
+		  printf_unfiltered (_("[%s exited]\n"),
 				     target_pid_to_str (lp->ptid));
 		}
 	      if (debug_linux_nat)
@@ -2729,7 +2729,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (stat (fname1, &dummy) != 0)
     error (_("No /proc directory: '%s'"), fname1);
 
-  printf_filtered ("process %lld\n", pid);
+  printf_filtered (_("process %lld\n"), pid);
   if (cmdline_f || all)
     {
       sprintf (fname1, "/proc/%lld/cmdline", pid);
@@ -2768,7 +2768,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  long long addr, endaddr, size, offset, inode;
 	  char permissions[8], device[8], filename[MAXPATHLEN];
 
-	  printf_filtered ("Mapped address spaces:\n\n");
+	  printf_filtered (_("Mapped address spaces:\n\n"));
 	  if (TARGET_ADDR_BIT == 32)
 	    {
 	      printf_filtered ("\t%10s %10s %10s %10s %7s\n",
@@ -2841,34 +2841,34 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  char ctmp;
 
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Process: %d\n", itmp);
+	    printf_filtered (_("Process: %d\n"), itmp);
 	  if (fscanf (procfile, "%s ", &buffer[0]) > 0)
-	    printf_filtered ("Exec file: %s\n", buffer);
+	    printf_filtered (_("Exec file: %s\n"), buffer);
 	  if (fscanf (procfile, "%c ", &ctmp) > 0)
-	    printf_filtered ("State: %c\n", ctmp);
+	    printf_filtered (_("State: %c\n"), ctmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Parent process: %d\n", itmp);
+	    printf_filtered (_("Parent process: %d\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Process group: %d\n", itmp);
+	    printf_filtered (_("Process group: %d\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Session id: %d\n", itmp);
+	    printf_filtered (_("Session id: %d\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("TTY: %d\n", itmp);
+	    printf_filtered (_("TTY: %d\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("TTY owner process group: %d\n", itmp);
+	    printf_filtered (_("TTY owner process group: %d\n"), itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Flags: 0x%x\n", itmp);
+	    printf_filtered (_("Flags: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Minor faults (no memory page): %u\n",
+	    printf_filtered (_("Minor faults (no memory page): %u\n"),
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Minor faults, children: %u\n",
+	    printf_filtered (_("Minor faults, children: %u\n"),
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Major faults (memory page faults): %u\n",
+	    printf_filtered (_("Major faults (memory page faults): %u\n"),
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Major faults, children: %u\n",
+	    printf_filtered (_("Major faults, children: %u\n"),
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered ("utime: %d\n", itmp);
@@ -2879,48 +2879,48 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered ("stime, children: %d\n", itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("jiffies remaining in current time slice: %d\n",
+	    printf_filtered (_("jiffies remaining in current time slice: %d\n"),
 			     itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered ("'nice' value: %d\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("jiffies until next timeout: %u\n",
+	    printf_filtered (_("jiffies until next timeout: %u\n"),
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("jiffies until next SIGALRM: %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("start time (jiffies since system boot): %d\n",
+	    printf_filtered (_("start time (jiffies since system boot): %d\n"),
 			     itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Virtual memory size: %u\n",
+	    printf_filtered (_("Virtual memory size: %u\n"),
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Resident set size: %u\n", (unsigned int) itmp);
+	    printf_filtered (_("Resident set size: %u\n"), (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("rlim: %u\n", (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Start of text: 0x%x\n", itmp);
+	    printf_filtered (_("Start of text: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("End of text: 0x%x\n", itmp);
+	    printf_filtered (_("End of text: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Start of stack: 0x%x\n", itmp);
+	    printf_filtered (_("Start of stack: 0x%x\n"), itmp);
 #if 0				/* Don't know how architecture-dependent the rest is...
 				   Anyway the signal bitmap info is available from "status".  */
 	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
-	    printf_filtered ("Kernel stack pointer: 0x%x\n", itmp);
+	    printf_filtered (_("Kernel stack pointer: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
-	    printf_filtered ("Kernel instr pointer: 0x%x\n", itmp);
+	    printf_filtered (_("Kernel instr pointer: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Pending signals bitmap: 0x%x\n", itmp);
+	    printf_filtered (_("Pending signals bitmap: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Blocked signals bitmap: 0x%x\n", itmp);
+	    printf_filtered (_("Blocked signals bitmap: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Ignored signals bitmap: 0x%x\n", itmp);
+	    printf_filtered (_("Ignored signals bitmap: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("Catched signals bitmap: 0x%x\n", itmp);
+	    printf_filtered (_("Catched signals bitmap: 0x%x\n"), itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
-	    printf_filtered ("wchan (system call): 0x%x\n", itmp);
+	    printf_filtered (_("wchan (system call): 0x%x\n"), itmp);
 #endif
 	  fclose (procfile);
 	}

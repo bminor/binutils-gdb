@@ -558,22 +558,22 @@ dcache_info (char *exp, int tty)
 {
   struct dcache_block *p;
 
-  printf_filtered ("Dcache line width %d, depth %d\n",
+  printf_filtered (_("Dcache line width %d, depth %d\n"),
 		   LINE_SIZE, DCACHE_SIZE);
 
   if (last_cache)
     {
-      printf_filtered ("Cache state:\n");
+      printf_filtered (_("Cache state:\n"));
 
       for (p = last_cache->valid_head; p; p = p->p)
 	{
 	  int j;
-	  printf_filtered ("Line at %s, referenced %d times\n",
+	  printf_filtered (_("Line at %s, referenced %d times\n"),
 			   paddr (p->addr), p->refs);
 
 	  for (j = 0; j < LINE_SIZE; j++)
 	    printf_filtered ("%02x", p->data[j] & 0xFF);
-	  printf_filtered ("\n");
+	  printf_filtered (("\n"));
 
 	  for (j = 0; j < LINE_SIZE; j++)
 	    printf_filtered ("%2x", p->state[j]);

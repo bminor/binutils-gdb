@@ -105,10 +105,10 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
     {
       if (*current_demangling_style_string != '\0')
 	{
-	  printf_unfiltered ("Unknown demangling style `%s'.\n",
+	  printf_unfiltered (_("Unknown demangling style `%s'.\n"),
 			     current_demangling_style_string);
 	}
-      printf_unfiltered ("The currently understood settings are:\n\n");
+      printf_unfiltered (_("The currently understood settings are:\n\n"));
       for (dem = libiberty_demanglers; 
 	   dem->demangling_style != unknown_demangling; 
 	   dem++)

@@ -133,33 +133,34 @@ set_logging_off (char *args, int from_tty)
 static void
 set_logging_command (char *args, int from_tty)
 {
-  printf_unfiltered ("\"set logging\" lets you log output to a file.\n");
-  printf_unfiltered ("Usage: set logging on [FILENAME]\n");
-  printf_unfiltered ("       set logging off\n");
-  printf_unfiltered ("       set logging file FILENAME\n");
-  printf_unfiltered ("       set logging overwrite [on|off]\n");
-  printf_unfiltered ("       set logging redirect [on|off]\n");
+  printf_unfiltered (_("\
+\"set logging\" lets you log output to a file.\n\
+Usage: set logging on [FILENAME]\n\
+       set logging off\n\
+       set logging file FILENAME\n\
+       set logging overwrite [on|off]\n\
+       set logging redirect [on|off]\n"));
 }
 
 void
 show_logging_command (char *args, int from_tty)
 {
   if (saved_filename)
-    printf_unfiltered ("Currently logging to \"%s\".\n", saved_filename);
+    printf_unfiltered (_("Currently logging to \"%s\".\n"), saved_filename);
   if (saved_filename == NULL
       || strcmp (logging_filename, saved_filename) != 0)
-    printf_unfiltered ("Future logs will be written to %s.\n",
+    printf_unfiltered (_("Future logs will be written to %s.\n"),
 		       logging_filename);
 
   if (logging_overwrite)
-    printf_unfiltered ("Logs will overwrite the log file.\n");
+    printf_unfiltered (_("Logs will overwrite the log file.\n"));
   else
-    printf_unfiltered ("Logs will be appended to the log file.\n");
+    printf_unfiltered (_("Logs will be appended to the log file.\n"));
 
   if (logging_redirect)
-    printf_unfiltered ("Output will be sent only to the log file.\n");
+    printf_unfiltered (_("Output will be sent only to the log file.\n"));
   else
-    printf_unfiltered ("Output will be logged and displayed.\n");
+    printf_unfiltered (_("Output will be logged and displayed.\n"));
 }
 
 void

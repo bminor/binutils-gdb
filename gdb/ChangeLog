@@ -1,5 +1,21 @@
 2005-02-11  Andrew Cagney  <cagney@gnu.org>
 
+	Mark up some of printf_filtered and printf_unfiltered.
+	* ada-lang.c, annotate.c, arch-utils.c, breakpoint.c: Update.
+	* corelow.c, cp-namespace.c, cp-support.c, dcache.c: Update.
+	* demangle.c, dsrec.c, dwarf2read.c, dwarfread.c: Update.
+	* event-loop.c, event-top.c, exec.c, f-valprint.c: Update.
+	* gdbtypes.c, inf-loop.c, inf-ptrace.c, inf-ttrace.c: Update.
+	* infcmd.c, inflow.c, infrun.c, inftarg.c, language.c: Update.
+	* linespec.c, linux-nat.c, linux-thread-db.c, maint.c: Update.
+	* mdebugread.c, memattr.c, monitor.c, objc-lang.c: Update.
+	* ocd.c, osabi.c, printcmd.c, procfs.c, regcache.c: Update.
+	* remote.c, solib-som.c, solib.c, somsolib.c, source.c: Update.
+	* stack.c, symfile.c, symmisc.c, target.c, thread.c: Update.
+	* top.c, utils.c, valprint.c, value.c, cli/cli-cmds.c: Update.
+	* cli/cli-dump.c, cli/cli-logging.c, tui/tui-hooks.c: Update.
+	* tui/tui-regs.c, tui/tui-win.c: Update.
+
 	Mark up error_no_arg, query, perror_with_name, complaint, and
 	internal_error.
 	* breakpoint.c, cp-abi.c, cp-namespace.c, cp-support.c: Update.

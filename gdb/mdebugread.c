@@ -311,7 +311,7 @@ mdebug_psymtab_to_symtab (struct partial_symtab *pst)
 
   if (info_verbose)
     {
-      printf_filtered ("Reading in symbols for %s...", pst->filename);
+      printf_filtered (_("Reading in symbols for %s..."), pst->filename);
       gdb_flush (gdb_stdout);
     }
 
@@ -324,7 +324,7 @@ mdebug_psymtab_to_symtab (struct partial_symtab *pst)
   scan_file_globals (pst->objfile);
 
   if (info_verbose)
-    printf_filtered ("done.\n");
+    printf_filtered (_("done.\n"));
 }
 
 /* File-level interface functions */
@@ -407,9 +407,9 @@ mdebug_build_psymtabs (struct objfile *objfile,
   if (compare_glevel (max_glevel, GLEVEL_2) < 0)
     {
       if (max_gdbinfo == 0)
-	printf_unfiltered ("\n%s not compiled with -g, debugging support is limited.\n",
+	printf_unfiltered (_("\n%s not compiled with -g, debugging support is limited.\n"),
 			   objfile->name);
-      printf_unfiltered ("You should compile with -g2 or -g3 for best debugging support.\n");
+      printf_unfiltered (_("You should compile with -g2 or -g3 for best debugging support.\n"));
       gdb_flush (gdb_stdout);
     }
 #endif
@@ -2043,7 +2043,7 @@ parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
       n_undef_symbols++;
       /* FIXME:  Turn this into a complaint? */
       if (info_verbose)
-	printf_filtered ("Warning: %s `%s' is undefined (in %s)\n",
+	printf_filtered (_("Warning: %s `%s' is undefined (in %s)\n"),
 			 what, debug_info->ssext + es->asym.iss,
 			 fdr_name (cur_fdr));
       return;
@@ -4109,7 +4109,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
          from a shared library, so tell the user only if verbose is on.  */
       if (info_verbose && n_undef_symbols)
 	{
-	  printf_filtered ("File %s contains %d unresolved references:",
+	  printf_filtered (_("File %s contains %d unresolved references:"),
 			   st->filename, n_undef_symbols);
 	  printf_filtered ("\n\t%4d variables\n\t%4d procedures\n\t%4d labels\n",
 			   n_undef_vars, n_undef_procs, n_undef_labels);

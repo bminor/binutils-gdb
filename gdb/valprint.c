@@ -161,12 +161,12 @@ value_print (struct value *val, struct ui_file *stream, int format,
 {
   if (val == 0)
     {
-      printf_filtered ("<address of value unknown>");
+      printf_filtered (_("<address of value unknown>"));
       return 0;
     }
   if (value_optimized_out (val))
     {
-      printf_filtered ("<value optimized out>");
+      printf_filtered (_("<value optimized out>"));
       return 0;
     }
   return LA_VALUE_PRINT (val, stream, format, pretty);
@@ -1086,7 +1086,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
   input_radix = radix;
   if (from_tty)
     {
-      printf_filtered ("Input radix now set to decimal %u, hex %x, octal %o.\n",
+      printf_filtered (_("Input radix now set to decimal %u, hex %x, octal %o.\n"),
 		       radix, radix, radix);
     }
 }
@@ -1122,7 +1122,7 @@ set_output_radix_1 (int from_tty, unsigned radix)
   output_radix = radix;
   if (from_tty)
     {
-      printf_filtered ("Output radix now set to decimal %u, hex %x, octal %o.\n",
+      printf_filtered (_("Output radix now set to decimal %u, hex %x, octal %o.\n"),
 		       radix, radix, radix);
     }
 }
@@ -1145,7 +1145,7 @@ set_radix (char *arg, int from_tty)
   set_input_radix_1 (0, radix);
   if (from_tty)
     {
-      printf_filtered ("Input and output radices now set to decimal %u, hex %x, octal %o.\n",
+      printf_filtered (_("Input and output radices now set to decimal %u, hex %x, octal %o.\n"),
 		       radix, radix, radix);
     }
 }
@@ -1159,14 +1159,14 @@ show_radix (char *arg, int from_tty)
     {
       if (input_radix == output_radix)
 	{
-	  printf_filtered ("Input and output radices set to decimal %u, hex %x, octal %o.\n",
+	  printf_filtered (_("Input and output radices set to decimal %u, hex %x, octal %o.\n"),
 			   input_radix, input_radix, input_radix);
 	}
       else
 	{
-	  printf_filtered ("Input radix set to decimal %u, hex %x, octal %o.\n",
+	  printf_filtered (_("Input radix set to decimal %u, hex %x, octal %o.\n"),
 			   input_radix, input_radix, input_radix);
-	  printf_filtered ("Output radix set to decimal %u, hex %x, octal %o.\n",
+	  printf_filtered (_("Output radix set to decimal %u, hex %x, octal %o.\n"),
 			   output_radix, output_radix, output_radix);
 	}
     }

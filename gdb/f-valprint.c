@@ -597,7 +597,7 @@ list_all_visible_commons (char *funname)
 
   tmp = head_common_list;
 
-  printf_filtered ("All COMMON blocks visible at this level:\n\n");
+  printf_filtered (_("All COMMON blocks visible at this level:\n\n"));
 
   while (tmp != NULL)
     {
@@ -683,9 +683,9 @@ info_common_command (char *comname, int from_tty)
   if (the_common)
     {
       if (strcmp (comname, BLANK_COMMON_NAME_LOCAL) == 0)
-	printf_filtered ("Contents of blank COMMON block:\n");
+	printf_filtered (_("Contents of blank COMMON block:\n"));
       else
-	printf_filtered ("Contents of F77 COMMON block '%s':\n", comname);
+	printf_filtered (_("Contents of F77 COMMON block '%s':\n"), comname);
 
       printf_filtered ("\n");
       entry = the_common->entries;
@@ -699,7 +699,7 @@ info_common_command (char *comname, int from_tty)
 	}
     }
   else
-    printf_filtered ("Cannot locate the common block %s in function '%s'\n",
+    printf_filtered (_("Cannot locate the common block %s in function '%s'\n"),
 		     comname, funname);
 }
 

@@ -3523,10 +3523,10 @@ procfs_attach (char *args, int from_tty)
       exec_file = get_exec_file (0);
 
       if (exec_file)
-	printf_filtered ("Attaching to program `%s', %s\n",
+	printf_filtered (_("Attaching to program `%s', %s\n"),
 			 exec_file, target_pid_to_str (pid_to_ptid (pid)));
       else
-	printf_filtered ("Attaching to %s\n",
+	printf_filtered (_("Attaching to %s\n"),
 	                 target_pid_to_str (pid_to_ptid (pid)));
 
       fflush (stdout);
@@ -3552,7 +3552,7 @@ procfs_detach (char *args, int from_tty)
       if (exec_file == NULL)
 	exec_file = "";
 
-      printf_filtered ("Detaching from program: %s, %s\n", exec_file,
+      printf_filtered (_("Detaching from program: %s, %s\n"), exec_file,
 		       target_pid_to_str (pid_to_ptid (pid)));
       gdb_flush (gdb_stdout);
     }
@@ -3973,7 +3973,7 @@ wait_again:
 	      case PR_SYSENTRY:
 		if (syscall_is_lwp_exit (pi, what))
 		  {
-		    printf_filtered ("[%s exited]\n",
+		    printf_filtered (_("[%s exited]\n"),
 				     target_pid_to_str (retval));
 		    delete_thread (retval);
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
@@ -4020,7 +4020,7 @@ wait_again:
 		  }
 		else
 		  {
-		    printf_filtered ("procfs: trapped on entry to ");
+		    printf_filtered (_("procfs: trapped on entry to "));
 		    proc_prettyprint_syscall (proc_what (pi), 0);
 		    printf_filtered ("\n");
 #ifndef PIOCSSPCACT
@@ -4030,7 +4030,7 @@ wait_again:
 		      if ((nsysargs = proc_nsysarg (pi)) > 0 &&
 			  (sysargs  = proc_sysargs (pi)) != NULL)
 			{
-			  printf_filtered ("%ld syscall arguments:\n", nsysargs);
+			  printf_filtered (_("%ld syscall arguments:\n"), nsysargs);
 			  for (i = 0; i < nsysargs; i++)
 			    printf_filtered ("#%ld: 0x%08lx\n",
 					     i, sysargs[i]);
@@ -4097,7 +4097,7 @@ wait_again:
 		    /* If not in GDB's thread list, add it.  */
 		    if (!in_thread_list (temp_ptid))
 		      {
-			printf_filtered ("[New %s]\n",
+			printf_filtered (_("[New %s]\n"),
 					 target_pid_to_str (temp_ptid));
 			add_thread (temp_ptid);
 		      }
@@ -4107,7 +4107,7 @@ wait_again:
 		  }
 		else if (syscall_is_lwp_exit (pi, what))
 		  {
-		    printf_filtered ("[%s exited]\n",
+		    printf_filtered (_("[%s exited]\n"),
 				     target_pid_to_str (retval));
 		    delete_thread (retval);
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
@@ -4124,7 +4124,7 @@ wait_again:
 		  }
 		else
 		  {
-		    printf_filtered ("procfs: trapped on exit from ");
+		    printf_filtered (_("procfs: trapped on exit from "));
 		    proc_prettyprint_syscall (proc_what (pi), 0);
 		    printf_filtered ("\n");
 #ifndef PIOCSSPCACT
@@ -4134,7 +4134,7 @@ wait_again:
 		      if ((nsysargs = proc_nsysarg (pi)) > 0 &&
 			  (sysargs  = proc_sysargs (pi)) != NULL)
 			{
-			  printf_filtered ("%ld syscall arguments:\n", nsysargs);
+			  printf_filtered (_("%ld syscall arguments:\n"), nsysargs);
 			  for (i = 0; i < nsysargs; i++)
 			    printf_filtered ("#%ld: 0x%08lx\n",
 					     i, sysargs[i]);
@@ -4152,7 +4152,7 @@ wait_again:
 #else
 		if (retry < 5)
 		  {
-		    printf_filtered ("Retry #%d:\n", retry);
+		    printf_filtered (_("Retry #%d:\n"), retry);
 		    pi->status_valid = 0;
 		    goto wait_again;
 		  }
@@ -4167,7 +4167,7 @@ wait_again:
 		    temp_ptid = MERGEPID (pi->pid, temp_tid);
 		    if (!in_thread_list (temp_ptid))
 		      {
-			printf_filtered ("[New %s]\n",
+			printf_filtered (_("[New %s]\n"),
 					 target_pid_to_str (temp_ptid));
 			add_thread (temp_ptid);
 		      }
@@ -4230,7 +4230,7 @@ wait_again:
 		default:	 /* FIXME: use si_signo if possible for fault */
 		  retval = pid_to_ptid (-1);
 		  printf_filtered ("procfs:%d -- ", __LINE__);
-		  printf_filtered ("child stopped for unknown reason:\n");
+		  printf_filtered (_("child stopped for unknown reason:\n"));
 		  proc_prettyprint_why (why, what, 1);
 		  error (_("... giving up..."));
 		  break;
@@ -4238,7 +4238,7 @@ wait_again:
 		break;	/* case PR_FAULTED: */
 	      default:	/* switch (why) unmatched */
 		printf_filtered ("procfs:%d -- ", __LINE__);
-		printf_filtered ("child stopped for unknown reason:\n");
+		printf_filtered (_("child stopped for unknown reason:\n"));
 		proc_prettyprint_why (why, what, 1);
 		error (_("... giving up..."));
 		break;
@@ -4257,7 +4257,7 @@ wait_again:
 		   * If we don't create a procinfo, resume may be unhappy
 		   * later.
 		   */
-		  printf_filtered ("[New %s]\n", target_pid_to_str (retval));
+		  printf_filtered (_("[New %s]\n"), target_pid_to_str (retval));
 		  add_thread (retval);
 		  if (find_procinfo (PIDGET (retval), TIDGET (retval)) == NULL)
 		    create_procinfo (PIDGET (retval), TIDGET (retval));
@@ -4614,7 +4614,7 @@ procfs_notice_signals (ptid_t ptid)
 static void
 procfs_files_info (struct target_ops *ignore)
 {
-  printf_filtered ("\tUsing the running image of %s %s via /proc.\n",
+  printf_filtered (_("\tUsing the running image of %s %s via /proc.\n"),
 		   attach_flag? "attached": "child",
 		   target_pid_to_str (inferior_ptid));
 }
@@ -5770,7 +5770,7 @@ info_proc_mappings (procinfo *pi, int summary)
   if (summary)
     return;	/* No output for summary mode. */
 
-  printf_filtered ("Mapped address spaces:\n\n");
+  printf_filtered (_("Mapped address spaces:\n\n"));
   printf_filtered (header_fmt_string,
 		   "Start Addr",
 		   "  End Addr",
@@ -5854,7 +5854,7 @@ info_proc_cmd (char *args, int from_tty)
 
   if (process)
     {
-      printf_filtered ("process %d flags:\n", process->pid);
+      printf_filtered (_("process %d flags:\n"), process->pid);
       proc_prettyprint_flags (proc_flags (process), 1);
       if (proc_flags (process) & (PR_STOPPED | PR_ISTOP))
 	proc_prettyprint_why (proc_why (process), proc_what (process), 1);
@@ -5864,7 +5864,7 @@ info_proc_cmd (char *args, int from_tty)
     }
   if (thread)
     {
-      printf_filtered ("thread %d flags:\n", thread->tid);
+      printf_filtered (_("thread %d flags:\n"), thread->tid);
       proc_prettyprint_flags (proc_flags (thread), 1);
       if (proc_flags (thread) & (PR_STOPPED | PR_ISTOP))
 	proc_prettyprint_why (proc_why (thread), proc_what (thread), 1);

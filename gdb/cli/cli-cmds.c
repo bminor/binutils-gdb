@@ -190,7 +190,7 @@ error_no_arg (char *why)
 static void
 info_command (char *arg, int from_tty)
 {
-  printf_unfiltered ("\"info\" must be followed by the name of an info command.\n");
+  printf_unfiltered (_("\"info\" must be followed by the name of an info command.\n"));
   help_list (infolist, "info ", -1, gdb_stdout);
 }
 
@@ -317,10 +317,10 @@ pwd_command (char *args, int from_tty)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
 
   if (strcmp (gdb_dirbuf, current_directory) != 0)
-    printf_unfiltered ("Working directory %s\n (canonically %s).\n",
+    printf_unfiltered (_("Working directory %s\n (canonically %s).\n"),
 		       current_directory, gdb_dirbuf);
   else
-    printf_unfiltered ("Working directory %s.\n", current_directory);
+    printf_unfiltered (_("Working directory %s.\n"), current_directory);
 }
 
 void
@@ -994,14 +994,14 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
   int i;
 
   for (i = 0; i < sals->nelts; ++i)
-    printf_filtered ("file: \"%s\", line number: %d\n",
+    printf_filtered (_("file: \"%s\", line number: %d\n"),
 		     sals->sals[i].symtab->filename, sals->sals[i].line);
 }
 
 static void
 set_debug (char *arg, int from_tty)
 {
-  printf_unfiltered ("\"set debug\" must be followed by the name of a print subcommand.\n");
+  printf_unfiltered (_("\"set debug\" must be followed by the name of a print subcommand.\n"));
   help_list (setdebuglist, "set debug ", -1, gdb_stdout);
 }
 

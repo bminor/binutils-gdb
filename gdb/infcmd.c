@@ -563,7 +563,7 @@ continue_command (char *proc_count_exp, int from_tty)
     }
 
   if (from_tty)
-    printf_filtered ("Continuing.\n");
+    printf_filtered (_("Continuing.\n"));
 
   clear_proceed_status ();
 
@@ -666,9 +666,9 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 		    error (_("Cannot find bounds of current function"));
 
 		  target_terminal_ours ();
-		  printf_filtered ("\
+		  printf_filtered (_("\
 Single stepping until exit from function %s, \n\
-which has no line number information.\n", name);
+which has no line number information.\n"), name);
 		}
 	    }
 	  else
@@ -771,9 +771,9 @@ step_once (int skip_subroutines, int single_inst, int count)
 		error (_("Cannot find bounds of current function"));
 
 	      target_terminal_ours ();
-	      printf_filtered ("\
+	      printf_filtered (_("\
 Single stepping until exit from function %s, \n\
-which has no line number information.\n", name);
+which has no line number information.\n"), name);
 	    }
 	}
       else
@@ -888,7 +888,7 @@ jump_command (char *arg, int from_tty)
 
   if (from_tty)
     {
-      printf_filtered ("Continuing at ");
+      printf_filtered (_("Continuing at "));
       print_address_numeric (addr, 1, gdb_stdout);
       printf_filtered (".\n");
     }
@@ -944,9 +944,9 @@ signal_command (char *signum_exp, int from_tty)
   if (from_tty)
     {
       if (oursig == TARGET_SIGNAL_0)
-	printf_filtered ("Continuing with no signal.\n");
+	printf_filtered (_("Continuing with no signal.\n"));
       else
-	printf_filtered ("Continuing with signal %s.\n",
+	printf_filtered (_("Continuing with signal %s.\n"),
 			 target_signal_to_name (oursig));
     }
 
@@ -1242,7 +1242,7 @@ finish_command (char *arg, int from_tty)
      source.  */
   if (from_tty)
     {
-      printf_filtered ("Run till exit from ");
+      printf_filtered (_("Run till exit from "));
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
     }
 
@@ -1312,15 +1312,15 @@ program_info (char *args, int from_tty)
 
   if (!target_has_execution)
     {
-      printf_filtered ("The program being debugged is not being run.\n");
+      printf_filtered (_("The program being debugged is not being run.\n"));
       return;
     }
 
   target_files_info ();
-  printf_filtered ("Program stopped at %s.\n",
+  printf_filtered (_("Program stopped at %s.\n"),
 		   hex_string ((unsigned long) stop_pc));
   if (stop_step)
-    printf_filtered ("It stopped after being stepped.\n");
+    printf_filtered (_("It stopped after being stepped.\n"));
   else if (num != 0)
     {
       /* There may be several breakpoints in the same place, so this
@@ -1329,25 +1329,25 @@ program_info (char *args, int from_tty)
 	{
 	  if (num < 0)
 	    {
-	      printf_filtered ("It stopped at a breakpoint that has ");
-	      printf_filtered ("since been deleted.\n");
+	      printf_filtered (_("\
+It stopped at a breakpoint that has since been deleted.\n"));
 	    }
 	  else
-	    printf_filtered ("It stopped at breakpoint %d.\n", num);
+	    printf_filtered (_("It stopped at breakpoint %d.\n"), num);
 	  num = bpstat_num (&bs);
 	}
     }
   else if (stop_signal != TARGET_SIGNAL_0)
     {
-      printf_filtered ("It stopped with signal %s, %s.\n",
+      printf_filtered (_("It stopped with signal %s, %s.\n"),
 		       target_signal_to_name (stop_signal),
 		       target_signal_to_string (stop_signal));
     }
 
   if (!from_tty)
     {
-      printf_filtered ("Type \"info stack\" or \"info registers\" ");
-      printf_filtered ("for more information.\n");
+      printf_filtered (_("\
+Type \"info stack\" or \"info registers\" for more information.\n"));
     }
 }
 
@@ -1435,8 +1435,9 @@ set_environment_command (char *arg, int from_tty)
   var = savestring (arg, p - arg);
   if (nullset)
     {
-      printf_filtered ("Setting environment variable ");
-      printf_filtered ("\"%s\" to null value.\n", var);
+      printf_filtered (_("\
+Setting environment variable \"%s\" to null value.\n"),
+		       var);
       set_in_environ (inferior_environ, var, "");
     }
   else
@@ -1965,8 +1966,8 @@ float_info (char *args, int from_tty)
 static void
 unset_command (char *args, int from_tty)
 {
-  printf_filtered ("\"unset\" must be followed by the name of ");
-  printf_filtered ("an unset subcommand.\n");
+  printf_filtered (_("\
+\"unset\" must be followed by the name of an unset subcommand.\n"));
   help_list (unsetlist, "unset ", -1, gdb_stdout);
 }
 

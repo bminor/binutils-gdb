@@ -939,14 +939,14 @@ frame_info (char *addr_exp, int from_tty)
 
   if (selected_frame_p && frame_relative_level (fi) >= 0)
     {
-      printf_filtered ("Stack level %d, frame at ",
+      printf_filtered (_("Stack level %d, frame at "),
 		       frame_relative_level (fi));
       print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   else
     {
-      printf_filtered ("Stack frame at ");
+      printf_filtered (_("Stack frame at "));
       print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
@@ -1218,7 +1218,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 
   /* If we've stopped before the end, mention that.  */
   if (fi && from_tty)
-    printf_filtered ("(More stack frames follow...)\n");
+    printf_filtered (_("(More stack frames follow...)\n"));
 }
 
 struct backtrace_command_args
@@ -1977,7 +1977,7 @@ func_command (char *arg, int from_tty)
     xfree (func_bounds);
 
   if (!found)
-    printf_filtered ("'%s' not within current stack frame.\n", arg);
+    printf_filtered (_("'%s' not within current stack frame.\n"), arg);
   else if (fp != deprecated_selected_frame)
     select_and_print_frame (fp);
 }

@@ -380,9 +380,9 @@ show_endian (char *args, int from_tty)
 			   "(currently little endian)\n"));
   else
     if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-      printf_unfiltered ("The target is assumed to be big endian\n");
+      printf_unfiltered (_("The target is assumed to be big endian\n"));
   else
-      printf_unfiltered ("The target is assumed to be little endian\n");
+      printf_unfiltered (_("The target is assumed to be little endian\n"));
 }
 
 static void

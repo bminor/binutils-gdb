@@ -1130,15 +1130,15 @@ query (const char *ctlstr, ...)
       gdb_flush (gdb_stdout);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032pre-query\n");
+	printf_filtered (("\n\032\032pre-query\n"));
 
       va_start (args, ctlstr);
       vfprintf_filtered (gdb_stdout, ctlstr, args);
       va_end (args);
-      printf_filtered ("(y or n) ");
+      printf_filtered (_("(y or n) "));
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032query\n");
+	printf_filtered (("\n\032\032query\n"));
 
       wrap_here ("");
       gdb_flush (gdb_stdout);
@@ -1171,11 +1171,11 @@ query (const char *ctlstr, ...)
 	  retval = 0;
 	  break;
 	}
-      printf_filtered ("Please answer y or n.\n");
+      printf_filtered (_("Please answer y or n.\n"));
     }
 
   if (annotation_level > 1)
-    printf_filtered ("\n\032\032post-query\n");
+    printf_filtered (("\n\032\032post-query\n"));
   return retval;
 }
 
@@ -1232,13 +1232,13 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       gdb_flush (gdb_stdout);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032pre-query\n");
+	printf_filtered (("\n\032\032pre-query\n"));
 
       vfprintf_filtered (gdb_stdout, ctlstr, args);
-      printf_filtered ("(%s or %s) ", y_string, n_string);
+      printf_filtered (_("(%s or %s) "), y_string, n_string);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032query\n");
+	printf_filtered (("\n\032\032query\n"));
 
       wrap_here ("");
       gdb_flush (gdb_stdout);
@@ -1277,12 +1277,12 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 	  break;
 	}
       /* Invalid entries are not defaulted and require another selection.  */
-      printf_filtered ("Please answer %s or %s.\n",
+      printf_filtered (_("Please answer %s or %s.\n"),
 		       y_string, n_string);
     }
 
   if (annotation_level > 1)
-    printf_filtered ("\n\032\032post-query\n");
+    printf_filtered (("\n\032\032post-query\n"));
   return retval;
 }
 
@@ -1666,7 +1666,7 @@ prompt_for_continue (void)
   char cont_prompt[120];
 
   if (annotation_level > 1)
-    printf_unfiltered ("\n\032\032pre-prompt-for-continue\n");
+    printf_unfiltered (("\n\032\032pre-prompt-for-continue\n"));
 
   strcpy (cont_prompt,
 	  "---Type <return> to continue, or q <return> to quit---");
@@ -1692,7 +1692,7 @@ prompt_for_continue (void)
   ignore = gdb_readline_wrapper (cont_prompt);
 
   if (annotation_level > 1)
-    printf_unfiltered ("\n\032\032post-prompt-for-continue\n");
+    printf_unfiltered (("\n\032\032post-prompt-for-continue\n"));
 
   if (ignore)
     {

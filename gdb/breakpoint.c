@@ -394,7 +394,7 @@ get_number_trailer (char **pp, int trailer)
 	retval = (int) value_as_long (val);
       else
 	{
-	  printf_filtered ("Convenience variable must have integer value.\n");
+	  printf_filtered (_("Convenience variable must have integer value.\n"));
 	  retval = 0;
 	}
     }
@@ -548,7 +548,7 @@ condition_command (char *arg, int from_tty)
 	  b->cond = 0;
 	  b->cond_string = NULL;
 	  if (from_tty)
-	    printf_filtered ("Breakpoint %d now unconditional.\n", bnum);
+	    printf_filtered (_("Breakpoint %d now unconditional.\n"), bnum);
 	}
       else
 	{
@@ -995,9 +995,10 @@ insert_bp_location (struct bp_location *bpt,
 	}
       else
 	{
-	  printf_filtered (_("Hardware watchpoint %d deleted "), bpt->owner->number);
-	  printf_filtered ("because the program has left the block \n");
-	  printf_filtered ("in which its expression is valid.\n");
+	  printf_filtered (_("\
+Hardware watchpoint %d deleted because the program has left the block \n\
+in which its expression is valid.\n"),
+			   bpt->owner->number);
 	  if (bpt->owner->related_breakpoint)
 	    bpt->owner->related_breakpoint->disposition = disp_del_at_next_stop;
 	  bpt->owner->disposition = disp_del_at_next_stop;
@@ -2098,60 +2099,58 @@ print_it_typical (bpstat bs)
       /* Did we stop because the user set the stop_on_solib_events
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
-      printf_filtered ("Stopped due to shared library event\n");
+      printf_filtered (_("Stopped due to shared library event\n"));
       return PRINT_NOTHING;
       break;
 
     case bp_thread_event:
       /* Not sure how we will get here. 
 	 GDB should not stop for these breakpoints.  */
-      printf_filtered ("Thread Event Breakpoint: gdb should not stop!\n");
+      printf_filtered (_("Thread Event Breakpoint: gdb should not stop!\n"));
       return PRINT_NOTHING;
       break;
 
     case bp_overlay_event:
       /* By analogy with the thread event, GDB should not stop for these. */
-      printf_filtered ("Overlay Event Breakpoint: gdb should not stop!\n");
+      printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
       return PRINT_NOTHING;
       break;
 
     case bp_catch_load:
       annotate_catchpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
-      printf_filtered ("loaded");
-      printf_filtered (" %s), ", bs->breakpoint_at->triggered_dll_pathname);
+      printf_filtered (_("\nCatchpoint %d (loaded %s), "),
+		       bs->breakpoint_at->number,
+		       bs->breakpoint_at->triggered_dll_pathname);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_unload:
       annotate_catchpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
-      printf_filtered ("unloaded");
-      printf_filtered (" %s), ", bs->breakpoint_at->triggered_dll_pathname);
+      printf_filtered (_("\nCatchpoint %d (unloaded %s), "),
+		       bs->breakpoint_at->number,
+		       bs->breakpoint_at->triggered_dll_pathname);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_fork:
       annotate_catchpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
-      printf_filtered ("forked");
-      printf_filtered (" process %d), ", 
+      printf_filtered (_("\nCatchpoint %d (forked process %d), "),
+		       bs->breakpoint_at->number, 
 		       bs->breakpoint_at->forked_inferior_pid);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_vfork:
       annotate_catchpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
-      printf_filtered ("vforked");
-      printf_filtered (" process %d), ", 
+      printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
+		       bs->breakpoint_at->number, 
 		       bs->breakpoint_at->forked_inferior_pid);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_exec:
       annotate_catchpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nCatchpoint %d (exec'd %s), ",
+      printf_filtered (_("\nCatchpoint %d (exec'd %s), "),
 		       bs->breakpoint_at->number,
 		       bs->breakpoint_at->exec_pathname);
       return PRINT_SRC_AND_LOC;
@@ -2162,25 +2161,22 @@ print_it_typical (bpstat bs)
 	  (CURRENT_EXCEPTION_KIND == EX_EVENT_CATCH))
 	{
 	  annotate_catchpoint (bs->breakpoint_at->number);
-	  printf_filtered ("\nCatchpoint %d (exception caught), ", 
+	  printf_filtered (_("\nCatchpoint %d (exception caught), "), 
 			   bs->breakpoint_at->number);
-	  printf_filtered ("throw location ");
 	  if (CURRENT_EXCEPTION_THROW_PC && CURRENT_EXCEPTION_THROW_LINE)
-	    printf_filtered ("%s:%d",
+	    printf_filtered (_("throw location %s:%d, "),
 			     CURRENT_EXCEPTION_THROW_FILE,
 			     CURRENT_EXCEPTION_THROW_LINE);
 	  else
-	    printf_filtered ("unknown");
+	    printf_filtered (_("throw location unknown, "));
 
-	  printf_filtered (", catch location ");
 	  if (CURRENT_EXCEPTION_CATCH_PC && CURRENT_EXCEPTION_CATCH_LINE)
-	    printf_filtered ("%s:%d",
+	    printf_filtered (_("catch location %s:%d\n"),
 			     CURRENT_EXCEPTION_CATCH_FILE,
 			     CURRENT_EXCEPTION_CATCH_LINE);
 	  else
-	    printf_filtered ("unknown");
+	    printf_filtered (_("catch location unknown\n"));
 
-	  printf_filtered ("\n");
 	  /* don't bother to print location frame info */
 	  return PRINT_SRC_ONLY;
 	}
@@ -2196,25 +2192,22 @@ print_it_typical (bpstat bs)
 	  (CURRENT_EXCEPTION_KIND == EX_EVENT_THROW))
 	{
 	  annotate_catchpoint (bs->breakpoint_at->number);
-	  printf_filtered ("\nCatchpoint %d (exception thrown), ",
+	  printf_filtered (_("\nCatchpoint %d (exception thrown), "),
 			   bs->breakpoint_at->number);
-	  printf_filtered ("throw location ");
 	  if (CURRENT_EXCEPTION_THROW_PC && CURRENT_EXCEPTION_THROW_LINE)
-	    printf_filtered ("%s:%d",
+	    printf_filtered (_("throw location %s:%d, "),
 			     CURRENT_EXCEPTION_THROW_FILE,
 			     CURRENT_EXCEPTION_THROW_LINE);
 	  else
-	    printf_filtered ("unknown");
+	    printf_filtered (_("throw location unknown, "));
 
-	  printf_filtered (", catch location ");
 	  if (CURRENT_EXCEPTION_CATCH_PC && CURRENT_EXCEPTION_CATCH_LINE)
-	    printf_filtered ("%s:%d",
+	    printf_filtered (_("catch location %s:%d\n"),
 			     CURRENT_EXCEPTION_CATCH_FILE,
 			     CURRENT_EXCEPTION_CATCH_LINE);
 	  else
-	    printf_filtered ("unknown");
+	    printf_filtered (_("catch location unknown\n"));
 
-	  printf_filtered ("\n");
 	  /* don't bother to print location frame info */
 	  return PRINT_SRC_ONLY; 
 	}
@@ -2704,7 +2697,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	    /* FALLTHROUGH */
 	  case 0:
 	    /* Error from catch_errors.  */
-	    printf_filtered ("Watchpoint %d deleted.\n", b->number);
+	    printf_filtered (_("Watchpoint %d deleted.\n"), b->number);
 	    if (b->related_breakpoint)
 	      b->related_breakpoint->disposition = disp_del_at_next_stop;
 	    b->disposition = disp_del_at_next_stop;
@@ -2781,7 +2774,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 		/* Can't happen.  */
 	      case 0:
 		/* Error from catch_errors.  */
-		printf_filtered ("Watchpoint %d deleted.\n", b->number);
+		printf_filtered (_("Watchpoint %d deleted.\n"), b->number);
 		if (b->related_breakpoint)
 		  b->related_breakpoint->disposition = disp_del_at_next_stop;
 		b->disposition = disp_del_at_next_stop;
@@ -3754,7 +3747,10 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
 	others++;
   if (others > 0)
     {
-      printf_filtered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
+      if (others == 1)
+	printf_filtered (_("Note: breakpoint "));
+      else /* if (others == ???) */
+	printf_filtered (_("Note: breakpoints "));
       ALL_BREAKPOINTS (b)
 	if (b->loc->address == pc)	/* address match / overlay match */
 	  if (!b->pending && (!overlay_debugging || b->loc->section == section))
@@ -3772,7 +3768,7 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
 			       (others > 1) ? "," 
 			       : ((others == 1) ? " and" : ""));
 	    }
-      printf_filtered ("also set at pc ");
+      printf_filtered (_("also set at pc "));
       print_address_numeric (pc, 1, gdb_stdout);
       printf_filtered (".\n");
     }
@@ -4309,7 +4305,7 @@ resolve_pending_breakpoint (struct breakpoint *b)
   
   if (rc == GDB_RC_OK)
     /* Pending breakpoint has been resolved.  */
-    printf_filtered ("Pending breakpoint \"%s\" resolved\n", b->addr_string);
+    printf_filtered (_("Pending breakpoint \"%s\" resolved\n"), b->addr_string);
 
   do_cleanups (old_chain);
   return rc;
@@ -4750,7 +4746,7 @@ mention (struct breakpoint *b)
     switch (b->type)
       {
       case bp_none:
-	printf_filtered ("(apparently deleted?) Eventpoint %d: ", b->number);
+	printf_filtered (_("(apparently deleted?) Eventpoint %d: "), b->number);
 	break;
       case bp_watchpoint:
 	ui_out_text (uiout, "Watchpoint ");
@@ -4794,7 +4790,7 @@ mention (struct breakpoint *b)
 	    say_where = 0;
 	    break;
 	  }
-	printf_filtered ("Breakpoint %d", b->number);
+	printf_filtered (_("Breakpoint %d"), b->number);
 	say_where = 1;
 	break;
       case bp_hardware_breakpoint:
@@ -4803,12 +4799,12 @@ mention (struct breakpoint *b)
 	    say_where = 0;
 	    break;
 	  }
-	printf_filtered ("Hardware assisted breakpoint %d", b->number);
+	printf_filtered (_("Hardware assisted breakpoint %d"), b->number);
 	say_where = 1;
 	break;
       case bp_catch_load:
       case bp_catch_unload:
-	printf_filtered ("Catchpoint %d (%s %s)",
+	printf_filtered (_("Catchpoint %d (%s %s)"),
 			 b->number,
 			 (b->type == bp_catch_load) ? "load" : "unload",
 			 (b->dll_pathname != NULL) ? 
@@ -4816,17 +4812,17 @@ mention (struct breakpoint *b)
 	break;
       case bp_catch_fork:
       case bp_catch_vfork:
-	printf_filtered ("Catchpoint %d (%s)",
+	printf_filtered (_("Catchpoint %d (%s)"),
 			 b->number,
 			 (b->type == bp_catch_fork) ? "fork" : "vfork");
 	break;
       case bp_catch_exec:
-	printf_filtered ("Catchpoint %d (exec)",
+	printf_filtered (_("Catchpoint %d (exec)"),
 			 b->number);
 	break;
       case bp_catch_catch:
       case bp_catch_throw:
-	printf_filtered ("Catchpoint %d (%s)",
+	printf_filtered (_("Catchpoint %d (%s)"),
 			 b->number,
 			 (b->type == bp_catch_catch) ? "catch" : "throw");
 	break;
@@ -4847,9 +4843,11 @@ mention (struct breakpoint *b)
 
   if (say_where)
     {
+      /* i18n: cagney/2005-02-11: Below needs to be merged into a
+	 single string.  */
       if (b->pending)
 	{
-	  printf_filtered (" (%s) pending.", b->addr_string);
+	  printf_filtered (_(" (%s) pending."), b->addr_string);
 	}
       else
 	{
@@ -5511,9 +5509,9 @@ thbreak_command (char *arg, int from_tty)
 static void
 stop_command (char *arg, int from_tty)
 {
-  printf_filtered ("Specify the type of breakpoint to set.\n\
+  printf_filtered (_("Specify the type of breakpoint to set.\n\
 Usage: stop in <function | address>\n\
-       stop at <line>\n");
+       stop at <line>\n"));
 }
 
 static void
@@ -5544,7 +5542,7 @@ stopin_command (char *arg, int from_tty)
     }
 
   if (badInput)
-    printf_filtered ("Usage: stop in <function | address>\n");
+    printf_filtered (_("Usage: stop in <function | address>\n"));
   else
     break_command_1 (arg, 0, from_tty, NULL);
 }
@@ -5576,7 +5574,7 @@ stopat_command (char *arg, int from_tty)
     }
 
   if (badInput)
-    printf_filtered ("Usage: stop at <line>\n");
+    printf_filtered (_("Usage: stop at <line>\n"));
   else
     break_command_1 (arg, 0, from_tty, NULL);
 }
@@ -6277,10 +6275,10 @@ print_exception_catchpoint (struct breakpoint *b)
   annotate_catchpoint (b->number);
 
   if (strstr (b->addr_string, "throw") != NULL)
-    printf_filtered ("\nCatchpoint %d (exception thrown)\n",
+    printf_filtered (_("\nCatchpoint %d (exception thrown)\n"),
 		     b->number);
   else
-    printf_filtered ("\nCatchpoint %d (exception caught)\n",
+    printf_filtered (_("\nCatchpoint %d (exception caught)\n"),
 		     b->number);
 
   return PRINT_SRC_AND_LOC;
@@ -6306,9 +6304,9 @@ static void
 print_mention_exception_catchpoint (struct breakpoint *b)
 {
   if (strstr (b->addr_string, "throw") != NULL)
-    printf_filtered ("Catchpoint %d (throw)", b->number);
+    printf_filtered (_("Catchpoint %d (throw)"), b->number);
   else
-    printf_filtered ("Catchpoint %d (catch)", b->number);
+    printf_filtered (_("Catchpoint %d (catch)"), b->number);
 }
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
@@ -6651,7 +6649,12 @@ clear_command (char *arg, int from_tty)
   if (found->next)
     from_tty = 1;		/* Always report if deleted more than one */
   if (from_tty)
-    printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
+    {
+      if (!found->next)
+	printf_unfiltered (_("Deleted breakpoint "));
+      else
+	printf_unfiltered (_("Deleted breakpoints "));
+    }
   breakpoints_changed ();
   while (found)
     {
@@ -7143,7 +7146,7 @@ breakpoint_re_set_one (void *bint)
       break;
 
     default:
-      printf_filtered ("Deleting unknown breakpoint type %d\n", b->type);
+      printf_filtered (_("Deleting unknown breakpoint type %d\n"), b->type);
       /* fall through */
       /* Delete longjmp and overlay event breakpoints; they will be
          reset later by breakpoint_re_set.  */
@@ -7243,13 +7246,13 @@ set_ignore_count (int bptnum, int count, int from_tty)
       if (from_tty)
 	{
 	  if (count == 0)
-	    printf_filtered ("Will stop next time breakpoint %d is reached.",
+	    printf_filtered (_("Will stop next time breakpoint %d is reached."),
 			     bptnum);
 	  else if (count == 1)
-	    printf_filtered ("Will ignore next crossing of breakpoint %d.",
+	    printf_filtered (_("Will ignore next crossing of breakpoint %d."),
 			     bptnum);
 	  else
-	    printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
+	    printf_filtered (_("Will ignore next %d crossings of breakpoint %d."),
 			     count, bptnum);
 	}
       breakpoints_changed ();
@@ -7332,7 +7335,7 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
 		break;
 	      }
 	  if (match == 0)
-	    printf_unfiltered ("No breakpoint number %d.\n", num);
+	    printf_unfiltered (_("No breakpoint number %d.\n"), num);
 	}
       p = p1;
     }
@@ -7455,9 +7458,9 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 		fr = frame_find_by_id (bpt->watchpoint_frame);
 	      if (fr == NULL)
 		{
-		  printf_filtered ("\
+		  printf_filtered (_("\
 Cannot enable watchpoint %d because the block in which its expression\n\
-is valid is not currently in scope.\n", bpt->number);
+is valid is not currently in scope.\n"), bpt->number);
 		  bpt->enable_state = bp_disabled;
 		  return;
 		}
@@ -7486,9 +7489,9 @@ is valid is not currently in scope.\n", bpt->number);
 		 bp_watchpoint in the following condition */
 	      if (target_resources_ok < 0)
 		{
-		  printf_filtered ("\
+		  printf_filtered (_("\
 Cannot enable watchpoint %d because target watch resources\n\
-have been allocated for other watchpoints.\n", bpt->number);
+have been allocated for other watchpoints.\n"), bpt->number);
 		  bpt->enable_state = bp_disabled;
 		  value_free_to_mark (mark);
 		  return;

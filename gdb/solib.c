@@ -381,7 +381,7 @@ solib_read_symbols (struct so_list *so, int from_tty)
   if (so->symbols_loaded)
     {
       if (from_tty)
-	printf_unfiltered ("Symbols already loaded for %s\n", so->so_name);
+	printf_unfiltered (_("Symbols already loaded for %s\n"), so->so_name);
     }
   else
     {
@@ -390,7 +390,7 @@ solib_read_symbols (struct so_list *so, int from_tty)
 			RETURN_MASK_ALL))
 	{
 	  if (from_tty)
-	    printf_unfiltered ("Loaded symbols for %s\n", so->so_name);
+	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
 	  so->symbols_loaded = 1;
 	  return 1;
 	}
@@ -703,7 +703,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
     }
   if (so_list_head == NULL)
     {
-      printf_unfiltered ("No shared libraries loaded at this time.\n");
+      printf_unfiltered (_("No shared libraries loaded at this time.\n"));
     }
 }
 

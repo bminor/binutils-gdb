@@ -829,7 +829,7 @@ the program."));
   return;
 
 old_dld:
-  error (_("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported.));
+  error (_("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported."));
 
 err:
   error (_("Error while reading dynamic library list."));

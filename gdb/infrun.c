@@ -390,7 +390,7 @@ follow_exec (int pid, char *execd_pathname)
   step_range_end = 0;
 
   /* What is this a.out's name? */
-  printf_unfiltered ("Executing new program: %s\n", execd_pathname);
+  printf_unfiltered (_("Executing new program: %s\n"), execd_pathname);
 
   /* We've followed the inferior through an exec.  Therefore, the
      inferior has essentially been killed & reborn. */
@@ -2939,7 +2939,7 @@ normal_stop (void)
       && last.kind != TARGET_WAITKIND_EXITED)
     {
       target_terminal_ours_for_output ();
-      printf_filtered ("[Switching to %s]\n",
+      printf_filtered (_("[Switching to %s]\n"),
 		       target_pid_or_tid_to_str (inferior_ptid));
       previous_inferior_ptid = inferior_ptid;
     }
@@ -2960,10 +2960,10 @@ normal_stop (void)
       if (remove_breakpoints ())
 	{
 	  target_terminal_ours_for_output ();
-	  printf_filtered ("Cannot remove breakpoints because ");
-	  printf_filtered ("program is no longer writable.\n");
-	  printf_filtered ("It might be running in another process.\n");
-	  printf_filtered ("Further execution is probably impossible.\n");
+	  printf_filtered (_("\
+Cannot remove breakpoints because program is no longer writable.\n\
+It might be running in another process.\n\
+Further execution is probably impossible.\n"));
 	}
     }
   breakpoints_inserted = 0;
@@ -3145,8 +3145,8 @@ signal_pass_update (int signo, int state)
 static void
 sig_print_header (void)
 {
-  printf_filtered ("\
-Signal        Stop\tPrint\tPass to program\tDescription\n");
+  printf_filtered (_("\
+Signal        Stop\tPrint\tPass to program\tDescription\n"));
 }
 
 static void
@@ -3311,7 +3311,7 @@ Are you sure you want to change it? ", target_signal_to_name ((enum target_signa
 		    }
 		  else
 		    {
-		      printf_unfiltered ("Not confirmed, unchanged.\n");
+		      printf_unfiltered (_("Not confirmed, unchanged.\n"));
 		      gdb_flush (gdb_stdout);
 		    }
 		}
@@ -3407,7 +3407,7 @@ xdb_handle_command (char *args, int from_tty)
 	  if (validFlag)
 	    handle_command (argBuf, from_tty);
 	  else
-	    printf_filtered ("Invalid signal handling flag.\n");
+	    printf_filtered (_("Invalid signal handling flag.\n"));
 	  if (argBuf)
 	    xfree (argBuf);
 	}
@@ -3453,7 +3453,7 @@ signals_info (char *signum_exp, int from_tty)
 	sig_print_info (oursig);
     }
 
-  printf_filtered ("\nUse the \"handle\" command to change these tables.\n");
+  printf_filtered (_("\nUse the \"handle\" command to change these tables.\n"));
 }
 
 struct inferior_status

@@ -253,7 +253,7 @@ GDB will be unable to track shl_load/shl_unload calls"));
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_(\
+      warning (_("\
 Unable to find __dld_d_trap symbol in object file.\n\
 Suggest linking with /opt/langtools/lib/end.o.\n\
 GDB will be unable to track shl_load/shl_unload calls"));

@@ -64,13 +64,13 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
   abfd = bfd_openr (file, 0);
   if (!abfd)
     {
-      printf_filtered ("Unable to open file %s\n", file);
+      printf_filtered (_("Unable to open file %s\n"), file);
       return;
     }
 
   if (bfd_check_format (abfd, bfd_object) == 0)
     {
-      printf_filtered ("File is not an object file\n");
+      printf_filtered (_("File is not an object file\n"));
       return;
     }
 

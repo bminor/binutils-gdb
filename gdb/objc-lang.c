@@ -899,7 +899,7 @@ selectors_info (char *regexp, int from_tty)
     }
   if (matches)
     {
-      printf_filtered ("Selectors matching \"%s\":\n\n", 
+      printf_filtered (_("Selectors matching \"%s\":\n\n"), 
 		       regexp ? regexp : "*");
 
       sym_arr = alloca (matches * sizeof (struct symbol *));
@@ -946,7 +946,7 @@ selectors_info (char *regexp, int from_tty)
       begin_line();
     }
   else
-    printf_filtered ("No selectors matching \"%s\"\n", regexp ? regexp : "*");
+    printf_filtered (_("No selectors matching \"%s\"\n"), regexp ? regexp : "*");
 }
 
 /*
@@ -1033,7 +1033,7 @@ classes_info (char *regexp, int from_tty)
     }
   if (matches)
     {
-      printf_filtered ("Classes matching \"%s\":\n\n", 
+      printf_filtered (_("Classes matching \"%s\":\n\n"), 
 		       regexp ? regexp : "*");
       sym_arr = alloca (matches * sizeof (struct symbol *));
       matches = 0;
@@ -1072,7 +1072,7 @@ classes_info (char *regexp, int from_tty)
       begin_line();
     }
   else
-    printf_filtered ("No classes matching \"%s\"\n", regexp ? regexp : "*");
+    printf_filtered (_("No classes matching \"%s\"\n"), regexp ? regexp : "*");
 }
 
 /* 
@@ -1568,7 +1568,7 @@ print_object_command (char *args, int from_tty)
 	read_memory (string_addr + i++, &c, 1);
       } while (c != 0);
   else
-    printf_filtered("<object returns empty description>");
+    printf_filtered(_("<object returns empty description>"));
   printf_filtered ("\n");
 }
 

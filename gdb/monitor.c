@@ -839,7 +839,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
     }
 
   if (from_tty)
-    printf_unfiltered ("Remote target %s connected to %s\n", name, dev_name);
+    printf_unfiltered (_("Remote target %s connected to %s\n"), name, dev_name);
 
   push_target (targ_ops);
 
@@ -879,7 +879,7 @@ monitor_detach (char *args, int from_tty)
 {
   pop_target ();		/* calls monitor_close to do the real work */
   if (from_tty)
-    printf_unfiltered ("Ending remote %s debugging\n", target_shortname);
+    printf_unfiltered (_("Ending remote %s debugging\n"), target_shortname);
 }
 
 /* Convert VALSTR into the target byte-ordered value of REGNO and store it.  */
@@ -1411,7 +1411,7 @@ monitor_prepare_to_store (void)
 static void
 monitor_files_info (struct target_ops *ops)
 {
-  printf_unfiltered ("\tAttached to %s at %d baud.\n", dev_name, baud_rate);
+  printf_unfiltered (_("\tAttached to %s at %d baud.\n"), dev_name, baud_rate);
 }
 
 static int

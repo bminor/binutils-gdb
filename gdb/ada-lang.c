@@ -3091,7 +3091,7 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
           else if (is_enumeral
                    && TYPE_NAME (SYMBOL_TYPE (syms[i].sym)) != NULL)
             {
-              printf_unfiltered ("[%d] ", i + first_choice);
+              printf_unfiltered (("[%d] "), i + first_choice);
               ada_print_type (SYMBOL_TYPE (syms[i].sym), NULL,
                               gdb_stdout, -1, 0);
               printf_unfiltered (_("'(%s) (enumeral)\n"),
@@ -3151,7 +3151,7 @@ get_selections (int *choices, int n_choices, int max_results,
   if (prompt == NULL)
     prompt = ">";
 
-  printf_unfiltered ("%s ", prompt);
+  printf_unfiltered (("%s "), prompt);
   gdb_flush (gdb_stdout);
 
   args = command_line_input ((char *) NULL, 0, annotation_suffix);

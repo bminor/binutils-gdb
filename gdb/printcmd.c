@@ -1021,16 +1021,16 @@ sym_info (char *arg, int from_tty)
 	  printf_filtered ("%s in ",
 			   SYMBOL_PRINT_NAME (msymbol));
 	if (pc_in_unmapped_range (addr, sect))
-	  printf_filtered ("load address range of ");
+	  printf_filtered (_("load address range of "));
 	if (section_is_overlay (sect))
-	  printf_filtered ("%s overlay ",
+	  printf_filtered (_("%s overlay "),
 			   section_is_mapped (sect) ? "mapped" : "unmapped");
-	printf_filtered ("section %s", sect->name);
+	printf_filtered (_("section %s"), sect->name);
 	printf_filtered ("\n");
       }
   }
   if (matches == 0)
-    printf_filtered ("No symbol matches %s.\n", arg);
+    printf_filtered (_("No symbol matches %s.\n"), arg);
 }
 
 static void
@@ -1131,84 +1131,84 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_REGISTER:
-      printf_filtered ("a variable in register %s", REGISTER_NAME (val));
+      printf_filtered (_("a variable in register %s"), REGISTER_NAME (val));
       break;
 
     case LOC_STATIC:
-      printf_filtered ("static storage at address ");
+      printf_filtered (_("static storage at address "));
       print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
 			     1, gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
-	  printf_filtered (",\n -- loaded at ");
+	  printf_filtered (_(",\n -- loaded at "));
 	  print_address_numeric (load_addr, 1, gdb_stdout);
-	  printf_filtered (" in overlay section %s", section->name);
+	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
       break;
 
     case LOC_INDIRECT:
-      printf_filtered ("external global (indirect addressing), at address *(");
+      printf_filtered (_("external global (indirect addressing), at address *("));
       print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
 			     1, gdb_stdout);
       printf_filtered (")");
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
-	  printf_filtered (",\n -- loaded at ");
+	  printf_filtered (_(",\n -- loaded at "));
 	  print_address_numeric (load_addr, 1, gdb_stdout);
-	  printf_filtered (" in overlay section %s", section->name);
+	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
       break;
 
     case LOC_REGPARM:
-      printf_filtered ("an argument in register %s", REGISTER_NAME (val));
+      printf_filtered (_("an argument in register %s"), REGISTER_NAME (val));
       break;
 
     case LOC_REGPARM_ADDR:
-      printf_filtered ("address of an argument in register %s", REGISTER_NAME (val));
+      printf_filtered (_("address of an argument in register %s"), REGISTER_NAME (val));
       break;
 
     case LOC_ARG:
-      printf_filtered ("an argument at offset %ld", val);
+      printf_filtered (_("an argument at offset %ld"), val);
       break;
 
     case LOC_LOCAL_ARG:
-      printf_filtered ("an argument at frame offset %ld", val);
+      printf_filtered (_("an argument at frame offset %ld"), val);
       break;
 
     case LOC_LOCAL:
-      printf_filtered ("a local variable at frame offset %ld", val);
+      printf_filtered (_("a local variable at frame offset %ld"), val);
       break;
 
     case LOC_REF_ARG:
-      printf_filtered ("a reference argument at offset %ld", val);
+      printf_filtered (_("a reference argument at offset %ld"), val);
       break;
 
     case LOC_BASEREG:
-      printf_filtered ("a variable at offset %ld from register %s",
+      printf_filtered (_("a variable at offset %ld from register %s"),
 		       val, REGISTER_NAME (basereg));
       break;
 
     case LOC_BASEREG_ARG:
-      printf_filtered ("an argument at offset %ld from register %s",
+      printf_filtered (_("an argument at offset %ld from register %s"),
 		       val, REGISTER_NAME (basereg));
       break;
 
     case LOC_TYPEDEF:
-      printf_filtered ("a typedef");
+      printf_filtered (_("a typedef"));
       break;
 
     case LOC_BLOCK:
-      printf_filtered ("a function at address ");
+      printf_filtered (_("a function at address "));
       print_address_numeric (load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
 			     1, gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
-	  printf_filtered (",\n -- loaded at ");
+	  printf_filtered (_(",\n -- loaded at "));
 	  print_address_numeric (load_addr, 1, gdb_stdout);
-	  printf_filtered (" in overlay section %s", section->name);
+	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
       break;
 
@@ -1222,15 +1222,15 @@ address_info (char *exp, int from_tty)
 	else
 	  {
 	    section = SYMBOL_BFD_SECTION (msym);
-	    printf_filtered ("static storage at address ");
+	    printf_filtered (_("static storage at address "));
 	    print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (msym),
 				   1, gdb_stdout);
 	    if (section_is_overlay (section))
 	      {
 		load_addr = overlay_unmapped_address (load_addr, section);
-		printf_filtered (",\n -- loaded at ");
+		printf_filtered (_(",\n -- loaded at "));
 		print_address_numeric (load_addr, 1, gdb_stdout);
-		printf_filtered (" in overlay section %s", section->name);
+		printf_filtered (_(" in overlay section %s"), section->name);
 	      }
 	  }
       }
@@ -1243,11 +1243,11 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_OPTIMIZED_OUT:
-      printf_filtered ("optimized out");
+      printf_filtered (_("optimized out"));
       break;
 
     default:
-      printf_filtered ("of unknown (botched) type");
+      printf_filtered (_("of unknown (botched) type"));
       break;
     }
   printf_filtered (".\n");
@@ -1591,7 +1591,7 @@ disable_display (int num)
 	d->enabled_p = 0;
 	return;
       }
-  printf_unfiltered ("No display number %d.\n", num);
+  printf_unfiltered (_("No display number %d.\n"), num);
 }
 
 void
@@ -1612,10 +1612,10 @@ display_info (char *ignore, int from_tty)
   struct display *d;
 
   if (!display_chain)
-    printf_unfiltered ("There are no auto-display expressions now.\n");
+    printf_unfiltered (_("There are no auto-display expressions now.\n"));
   else
-    printf_filtered ("Auto-display expressions now in effect:\n\
-Num Enb Expression\n");
+    printf_filtered (_("Auto-display expressions now in effect:\n\
+Num Enb Expression\n"));
 
   for (d = display_chain; d; d = d->next)
     {
@@ -1627,7 +1627,7 @@ Num Enb Expression\n");
 	printf_filtered ("/%c ", d->format.format);
       print_expression (d->exp, gdb_stdout);
       if (d->block && !contained_in (get_selected_block (0), d->block))
-	printf_filtered (" (cannot be evaluated in the current context)");
+	printf_filtered (_(" (cannot be evaluated in the current context)"));
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
     }
@@ -1663,7 +1663,7 @@ enable_display (char *args, int from_tty)
 	      d->enabled_p = 1;
 	      goto win;
 	    }
-	printf_unfiltered ("No display number %d.\n", num);
+	printf_unfiltered (_("No display number %d.\n"), num);
       win:
 	p = p1;
 	while (*p == ' ' || *p == '\t')

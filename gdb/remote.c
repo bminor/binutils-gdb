@@ -490,12 +490,12 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
 static void
 show_memory_packet_size (struct memory_packet_config *config)
 {
-  printf_filtered ("The %s is %ld. ", config->name, config->size);
+  printf_filtered (_("The %s is %ld. "), config->name, config->size);
   if (config->fixed_p)
-    printf_filtered ("Packets are fixed at %ld bytes.\n",
+    printf_filtered (_("Packets are fixed at %ld bytes.\n"),
 		     get_memory_packet_size (config));
   else
-    printf_filtered ("Packets are limited to %ld bytes.\n",
+    printf_filtered (_("Packets are limited to %ld bytes.\n"),
 		     get_memory_packet_size (config));
 }
 
@@ -618,12 +618,12 @@ show_packet_config_cmd (struct packet_config *config)
   switch (config->detect)
     {
     case AUTO_BOOLEAN_AUTO:
-      printf_filtered ("Support for remote protocol `%s' (%s) packet is auto-detected, currently %s.\n",
+      printf_filtered (_("Support for remote protocol `%s' (%s) packet is auto-detected, currently %s.\n"),
 		       config->name, config->title, support);
       break;
     case AUTO_BOOLEAN_TRUE:
     case AUTO_BOOLEAN_FALSE:
-      printf_filtered ("Support for remote protocol `%s' (%s) packet is currently %s.\n",
+      printf_filtered (_("Support for remote protocol `%s' (%s) packet is currently %s.\n"),
 		       config->name, config->title, support);
       break;
     }
@@ -4161,7 +4161,7 @@ read_frame (char *buf,
 	      }
 
 	    buf[bc] = '\0';
-	    printf_filtered ("Repeat count %d too large for buffer: ", 
+	    printf_filtered (_("Repeat count %d too large for buffer: "), 
 			     repeat);
 	    puts_filtered (buf);
 	    puts_filtered ("\n");
@@ -4287,7 +4287,7 @@ getpkt_sane (char *buf,
   /* We have tried hard enough, and just can't receive the packet.  
      Give up.  */
 
-  printf_unfiltered ("Ignoring packet error, continuing...\n");
+  printf_unfiltered (_("Ignoring packet error, continuing...\n"));
   serial_write (remote_desc, "+", 1);
   return 1;
 }
@@ -4797,7 +4797,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, char *shadow)
 void
 push_remote_target (char *name, int from_tty)
 {
-  printf_filtered ("Switching to remote protocol\n");
+  printf_filtered (_("Switching to remote protocol\n"));
   remote_open (name, from_tty);
 }
 
@@ -4918,7 +4918,7 @@ compare_sections_command (char *args, int from_tty)
     warning (_("One or more sections of the remote executable does not match\n\
 the loaded file\n"));
   if (args && !matched)
-    printf_filtered ("No loaded section named '%s'.\n", args);
+    printf_filtered (_("No loaded section named '%s'.\n"), args);
 }
 
 static LONGEST
@@ -5164,7 +5164,7 @@ threadset_test_cmd (char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
 
-  printf_filtered ("Remote threadset test\n");
+  printf_filtered (_("Remote threadset test\n"));
   set_thread (sample_thread, 1);
 }
 

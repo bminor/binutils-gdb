@@ -415,13 +415,13 @@ static void
 inf_ttrace_prepare (void)
 {
   if (pipe (inf_ttrace_pfd1) == -1)
-    perror_with_name ("pipe");
+    perror_with_name (("pipe"));
 
   if (pipe (inf_ttrace_pfd2) == -1)
     {
       close (inf_ttrace_pfd1[0]);
       close (inf_ttrace_pfd2[0]);
-      perror_with_name ("pipe");
+      perror_with_name (("pipe"));
     }
 }
 
@@ -568,7 +568,7 @@ inf_ttrace_attach (char *args, int from_tty)
   ttevent_t tte;
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   dummy = args;
   pid = strtol (args, &dummy, 0);
@@ -583,10 +583,10 @@ inf_ttrace_attach (char *args, int from_tty)
       exec_file = (char *) get_exec_file (0);
 
       if (exec_file)
-	printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
+	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
 			   target_pid_to_str (pid_to_ptid (pid)));
       else
-	printf_unfiltered ("Attaching to %s\n",
+	printf_unfiltered (_("Attaching to %s\n"),
 			   target_pid_to_str (pid_to_ptid (pid)));
 
       gdb_flush (gdb_stdout);
@@ -630,7 +630,7 @@ inf_ttrace_detach (char *args, int from_tty)
       char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
-      printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
+      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
 			 target_pid_to_str (pid_to_ptid (pid)));
       gdb_flush (gdb_stdout);
     }
@@ -709,7 +709,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       set_sigio_trap ();
 
       if (ttrace_wait (pid, lwpid, TTRACE_WAITOK, &tts, sizeof tts) == -1)
-	perror_with_name ("ttrace_wait");
+	perror_with_name (("ttrace_wait"));
 
       clear_sigio_trap ();
       clear_sigint_trap ();
@@ -757,14 +757,14 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  add_thread (ptid_build (tts.tts_pid, tts.tts_lwpid, 0));
 	  inf_ttrace_num_lwps++;
 	}
-      printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
+      printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
       add_thread (ptid);
       inf_ttrace_num_lwps++;
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
       break;
 
     case TTEVT_LWP_EXIT:
-      printf_filtered("[%s exited]\n", target_pid_to_str (ptid));
+      printf_filtered(_("[%s exited]\n"), target_pid_to_str (ptid));
       delete_thread (ptid);
       inf_ttrace_num_lwps--;
       /* If we don't return -1 here, core GDB will re-add the thread.  */
@@ -774,7 +774,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     case TTEVT_LWP_TERMINATE:
       lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
       ptid = ptid_build (tts.tts_pid, lwpid, 0);
-      printf_filtered("[%s has been terminated]\n", target_pid_to_str (ptid));
+      printf_filtered(_("[%s has been terminated]\n"), target_pid_to_str (ptid));
       delete_thread (ptid);
       inf_ttrace_num_lwps--;
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
@@ -890,7 +890,7 @@ inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
 static void
 inf_ttrace_files_info (struct target_ops *ignore)
 {
-  printf_unfiltered ("\tUsing the running image of %s %s.\n",
+  printf_unfiltered (_("\tUsing the running image of %s %s.\n"),
 		     attach_flag ? "attached" : "child",
 		     target_pid_to_str (inferior_ptid));
 }

@@ -519,7 +519,7 @@ command_loop (void)
 	{
 	  long cmd_time = get_run_time () - time_at_cmd_start;
 
-	  printf_unfiltered ("Command execution time: %ld.%06ld\n",
+	  printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
 			     cmd_time / 1000000, cmd_time % 1000000);
 	}
 
@@ -530,7 +530,7 @@ command_loop (void)
 	  long space_now = lim - lim_at_start;
 	  long space_diff = space_now - space_at_cmd_start;
 
-	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
+	  printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
 			     space_now,
 			     (space_diff >= 0 ? '+' : '-'),
 			     space_diff);
@@ -1265,7 +1265,7 @@ set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 void
 set_history (char *args, int from_tty)
 {
-  printf_unfiltered ("\"set history\" must be followed by the name of a history subcommand.\n");
+  printf_unfiltered (_("\"set history\" must be followed by the name of a history subcommand.\n"));
   help_list (sethistlist, "set history ", -1, gdb_stdout);
 }
 

@@ -688,11 +688,11 @@ handle_file_event (int event_file_desc)
 		  /* Work in progress. We may need to tell somebody what
 		     kind of error we had. */
 		  if (error_mask_returned & POLLHUP)
-		    printf_unfiltered ("Hangup detected on fd %d\n", file_ptr->fd);
+		    printf_unfiltered (_("Hangup detected on fd %d\n"), file_ptr->fd);
 		  if (error_mask_returned & POLLERR)
-		    printf_unfiltered ("Error detected on fd %d\n", file_ptr->fd);
+		    printf_unfiltered (_("Error detected on fd %d\n"), file_ptr->fd);
 		  if (error_mask_returned & POLLNVAL)
-		    printf_unfiltered ("Invalid or non-`poll'able fd %d\n", file_ptr->fd);
+		    printf_unfiltered (_("Invalid or non-`poll'able fd %d\n"), file_ptr->fd);
 		  file_ptr->error = 1;
 		}
 	      else
@@ -706,7 +706,7 @@ handle_file_event (int event_file_desc)
 	    {
 	      if (file_ptr->ready_mask & GDB_EXCEPTION)
 		{
-		  printf_unfiltered ("Exception condition detected on fd %d\n", file_ptr->fd);
+		  printf_unfiltered (_("Exception condition detected on fd %d\n"), file_ptr->fd);
 		  file_ptr->error = 1;
 		}
 	      else

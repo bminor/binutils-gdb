@@ -2694,13 +2694,9 @@ print_bit_vector (B_TYPE *bits, int nbits)
 	  puts_filtered (" ");
 	}
       if (B_TST (bits, bitno))
-	{
-	  printf_filtered ("1");
-	}
+	printf_filtered (("1"));
       else
-	{
-	  printf_filtered ("0");
-	}
+	printf_filtered (("0"));
     }
 }
 
@@ -2737,7 +2733,7 @@ dump_fn_fieldlists (struct type *type, int spaces)
 			TYPE_FN_FIELDLIST_NAME (type, method_idx));
       gdb_print_host_address (TYPE_FN_FIELDLIST_NAME (type, method_idx),
 			      gdb_stdout);
-      printf_filtered (") length %d\n",
+      printf_filtered (_(") length %d\n"),
 		       TYPE_FN_FIELDLIST_LENGTH (type, method_idx));
       for (overload_idx = 0;
 	   overload_idx < TYPE_FN_FIELDLIST_LENGTH (type, method_idx);
@@ -2857,7 +2853,7 @@ print_bound_type (int bt)
       printf_filtered ("(BOUND_SIMPLE)");
       break;
     default:
-      printf_filtered ("(unknown bound type)");
+      printf_filtered (_("(unknown bound type)"));
       break;
     }
 }
@@ -2887,7 +2883,7 @@ recursive_dump_type (struct type *type, int spaces)
 	    {
 	      printfi_filtered (spaces, "type node ");
 	      gdb_print_host_address (type, gdb_stdout);
-	      printf_filtered (" <same as already seen type>\n");
+	      printf_filtered (_(" <same as already seen type>\n"));
 	      return;
 	    }
 	}
@@ -3140,7 +3136,7 @@ recursive_dump_type (struct type *type, int spaces)
       gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), gdb_stdout);
       if (TYPE_CPLUS_SPECIFIC (type) != NULL)
 	{
-	  printf_filtered (" (unknown data form)");
+	  printf_filtered (_(" (unknown data form)"));
 	}
       printf_filtered ("\n");
       break;

@@ -189,7 +189,7 @@ ocd_start_remote (void *dummy)
 
   p = ocd_do_command (OCD_GET_VERSION, &status, &pktlen);
 
-  printf_unfiltered ("[Wiggler version %x.%x, capability 0x%x]\n",
+  printf_unfiltered (_("[Wiggler version %x.%x, capability 0x%x]\n"),
 		     p[0], p[1], (p[2] << 16) | p[3]);
 
   /* If processor is still running, stop it.  */

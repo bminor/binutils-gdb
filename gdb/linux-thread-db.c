@@ -641,7 +641,7 @@ thread_db_new_objfile (struct objfile *objfile)
 	if (library == NULL)
 	  /* Paranoid - don't let a NULL path slip through.  */
 	  library = LIBTHREAD_DB_SO;
-	printf_unfiltered ("Using host libthread_db library \"%s\".\n",
+	printf_unfiltered (_("Using host libthread_db library \"%s\".\n"),
 			   library);
 	dejavu = 1;
       }
@@ -682,7 +682,7 @@ thread_db_new_objfile (struct objfile *objfile)
       break;
 
     case TD_OK:
-      printf_unfiltered ("[Thread debugging using libthread_db enabled]\n");
+      printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
 
       /* The thread library was detected.  Activate the thread_db target.  */
       push_target (&thread_db_ops);
@@ -743,7 +743,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   memset (tp->private, 0, sizeof (struct private_thread_info));
 
   if (verbose)
-    printf_unfiltered ("[New %s]\n", target_pid_to_str (ptid));
+    printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
 
   if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
     return;			/* A zombie thread -- do not attach.  */
@@ -783,7 +783,7 @@ detach_thread (ptid_t ptid, int verbose)
   struct thread_info *thread_info;
 
   if (verbose)
-    printf_unfiltered ("[%s exited]\n", target_pid_to_str (ptid));
+    printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (ptid));
 
   /* Don't delete the thread now, because it still reports as active
      until it has executed a few instructions after the event

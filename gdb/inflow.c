@@ -429,11 +429,11 @@ child_terminal_info (char *args, int from_tty)
 {
   if (!gdb_has_a_terminal ())
     {
-      printf_filtered ("This GDB does not control a terminal.\n");
+      printf_filtered (_("This GDB does not control a terminal.\n"));
       return;
     }
 
-  printf_filtered ("Inferior's terminal status (currently saved by GDB):\n");
+  printf_filtered (_("Inferior's terminal status (currently saved by GDB):\n"));
 
   /* First the fcntl flags.  */
   {
@@ -590,7 +590,7 @@ kill_command (char *arg, int from_tty)
      print the state we are left in.  */
   if (target_has_stack)
     {
-      printf_filtered ("In %s,\n", target_longname);
+      printf_filtered (_("In %s,\n"), target_longname);
       if (deprecated_selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else

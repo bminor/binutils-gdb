@@ -202,10 +202,10 @@ inf_ptrace_attach (char *args, int from_tty)
       exec_file = (char *) get_exec_file (0);
 
       if (exec_file)
-	printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
+	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
 			   target_pid_to_str (pid_to_ptid (pid)));
       else
-	printf_unfiltered ("Attaching to %s\n",
+	printf_unfiltered (_("Attaching to %s\n"),
 			   target_pid_to_str (pid_to_ptid (pid)));
 
       gdb_flush (gdb_stdout);
@@ -254,7 +254,7 @@ inf_ptrace_detach (char *args, int from_tty)
       char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
-      printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
+      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
 			 target_pid_to_str (pid_to_ptid (pid)));
       gdb_flush (gdb_stdout);
     }
@@ -280,7 +280,7 @@ inf_ptrace_detach (char *args, int from_tty)
 static void
 inf_ptrace_files_info (struct target_ops *ignore)
 {
-  printf_unfiltered ("\tUsing the running image of %s %s.\n",
+  printf_unfiltered (_("\tUsing the running image of %s %s.\n"),
 		     attach_flag ? "attached" : "child",
 		     target_pid_to_str (inferior_ptid));
 }

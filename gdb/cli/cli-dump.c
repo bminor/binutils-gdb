@@ -181,14 +181,14 @@ struct cmd_list_element *binary_append_cmdlist;
 static void
 dump_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"dump\" must be followed by a subcommand.\n\n");
+  printf_unfiltered (_("\"dump\" must be followed by a subcommand.\n\n"));
   help_list (dump_cmdlist, "dump ", -1, gdb_stdout);
 }
 
 static void
 append_command (char *cmd, int from_tty)
 {
-  printf_unfiltered ("\"append\" must be followed by a subcommand.\n\n");
+  printf_unfiltered (_("\"append\" must be followed by a subcommand.\n\n"));
   help_list (dump_cmdlist, "append ", -1, gdb_stdout);
 }
 
@@ -473,7 +473,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
       || (data->load_end > 0 && sec_start >= data->load_end))
     {
       /* No, no useable data in this section. */
-      printf_filtered ("skipping section %s...\n", 
+      printf_filtered (_("skipping section %s...\n"), 
 		       bfd_section_name (ibfd, isec));
       return;
     }

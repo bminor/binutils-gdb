@@ -682,9 +682,9 @@ show_values (char *num_exp, int from_tty)
   for (i = num; i < num + 10 && i <= value_history_count; i++)
     {
       val = access_value_history (i);
-      printf_filtered ("$%d = ", i);
+      printf_filtered (("$%d = "), i);
       value_print (val, gdb_stdout, 0, Val_pretty_default);
-      printf_filtered ("\n");
+      printf_filtered (("\n"));
     }
 
   /* The next "info history +" should start after what we just printed.  */
@@ -819,14 +819,15 @@ show_convenience (char *ignore, int from_tty)
 	{
 	  varseen = 1;
 	}
-      printf_filtered ("$%s = ", var->name);
+      printf_filtered (("$%s = "), var->name);
       value_print (var->value, gdb_stdout, 0, Val_pretty_default);
-      printf_filtered ("\n");
+      printf_filtered (("\n"));
     }
   if (!varseen)
-    printf_unfiltered ("No debugger convenience variables now defined.\n\
+    printf_unfiltered (_("\
+No debugger convenience variables now defined.\n\
 Convenience variables have names starting with \"$\";\n\
-use \"set\" as in \"set $foo = 5\" to define them.\n");
+use \"set\" as in \"set $foo = 5\" to define them.\n"));
 }
 
 /* Extract a value as a C number (either long or double).

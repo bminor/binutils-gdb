@@ -1140,7 +1140,7 @@ reg_flush_command (char *command, int from_tty)
   /* Force-flush the register cache.  */
   registers_changed ();
   if (from_tty)
-    printf_filtered ("Register cache flushed.\n");
+    printf_filtered (_("Register cache flushed.\n"));
 }
 
 static void

@@ -534,7 +534,7 @@ thread_apply_all_command (char *cmd, int from_tty)
     if (thread_alive (tp))
       {
 	switch_to_thread (tp->ptid);
-	printf_filtered ("\nThread %d (%s):\n",
+	printf_filtered (_("\nThread %d (%s):\n"),
 			 tp->num, target_tid_to_str (inferior_ptid));
 	execute_command (cmd, from_tty);
 	strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
@@ -605,7 +605,7 @@ thread_apply_command (char *tidlist, int from_tty)
 	  else
 	    {
 	      switch_to_thread (tp->ptid);
-	      printf_filtered ("\nThread %d (%s):\n", tp->num,
+	      printf_filtered (_("\nThread %d (%s):\n"), tp->num,
 			       target_tid_to_str (inferior_ptid));
 	      execute_command (cmd, from_tty);
 	      strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
@@ -627,7 +627,7 @@ thread_command (char *tidstr, int from_tty)
     {
       /* Don't generate an error, just say which thread is current. */
       if (target_has_stack)
-	printf_filtered ("[Current thread is %d (%s)]\n",
+	printf_filtered (_("[Current thread is %d (%s)]\n"),
 			 pid_to_thread_id (inferior_ptid),
 			 target_tid_to_str (inferior_ptid));
       else
