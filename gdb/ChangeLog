@@ -1,3 +1,12 @@
+Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c (main): Print help message on stdout not stderr
+	per standards.texi.
+	New option --version per standards.texi.
+	In help message, show long options with "--" not "-".
+	Don't try to print help message or version until after we have
+	called initialize_all_files.
+
 Tue Jun 22 03:15:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* solib.c (solib_add_common_symbols): Don't call lookup_minimal_symbol.
