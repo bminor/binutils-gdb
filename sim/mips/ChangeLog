@@ -1,3 +1,14 @@
+start-sanitize-vr4320
+Tue Mar  3 11:56:29 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* vr4320.igen: New file.
+	* Makefile.in (vr4320.igen) : Added.
+	* configure.in (mips64vr4320-*-*): Added.
+	* configure : Rebuilt.
+	* mips.igen : Correct the bfd-names in the mips-ISA model entries.
+	Add the vr4320 model entry and mark the vr4320 insn as necessary.
+
+end-sanitize-vr4320
 Tue Mar  3 13:58:43 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (GETFCC): Return an unsigned value.

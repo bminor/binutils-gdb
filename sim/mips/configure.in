@@ -150,6 +150,19 @@ case "${target}" in
 			sim_igen_machine="-M r5900"
 			;;
 # end-sanitize-r5900
+# start-sanitize-vr4320
+  mips64vr4320-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
+			sim_igen_machine="-M mipsIV,vr4320 -G gen-multi-sim=vr4320"
+			;;
+# end-sanitize-vr4320
+  mips64vr43*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
+			sim_igen_machine="-M mipsIV"
+# start-sanitize-vr4320
+			sim_igen_machine="-M mipsIV,vr4320 -G gen-multi-sim=mipsIV"
+# end-sanitize-vr4320
+			;;
 # start-sanitize-vr5400
   mips64vr54*-*-*)	sim_default_gen=IGEN
 			sim_use_gen=IGEN
