@@ -352,10 +352,10 @@ cris_set_size_to_dword (unsigned short *insn)
   *insn |= 0x20; 
 }
 
-static char
+static signed char
 cris_get_signed_offset (unsigned short insn)
 {
-  return ((char) (insn & 0x00FF));
+  return ((signed char) (insn & 0x00FF));
 }
 
 /* Calls an op function given the op-type, working on the insn and the

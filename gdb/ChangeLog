@@ -1,5 +1,8 @@
 2001-09-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* cris-tdep.c (cris_get_signed_offset): Change return type to an
+	explicitly signed char.
+
 	* config/mcore/tm-mcore.h (mcore_virtual_frame_pointer): Update
 	function signature to match recent tracepoint.c:encode_actions
 	changes.
