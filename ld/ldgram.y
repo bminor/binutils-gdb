@@ -1130,16 +1130,31 @@ vers_defns:
 		{
 		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang);
 		}
+	|	vers_defns ';' EXTERN NAME '{'
+			{
+			  $<name>$ = ldgram_vers_current_lang;
+			  ldgram_vers_current_lang = $4;
+			}
+		vers_defns opt_semicolon '}'
+			{
+			  $$ = $7;
+			  ldgram_vers_current_lang = $<name>6;
+			}
 	|	EXTERN NAME '{'
 			{
 			  $<name>$ = ldgram_vers_current_lang;
 			  ldgram_vers_current_lang = $2;
 			}
-		vers_defns '}'
+		vers_defns opt_semicolon '}'
 			{
 			  $$ = $5;
 			  ldgram_vers_current_lang = $<name>4;
 			}
+	;
+
+opt_semicolon:
+		/* empty */
+	|	';'
 	;
 
 %%
