@@ -1,3 +1,30 @@
+Tue Sep  6 16:24:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	 * c-typeprint.c (c_type_print_varspec_prefix,
+	 c_type_print_varspec_suffix): Add cases for Fortran type codes.
+	 * eval.c (evaluate_subexp): For OP_ARRAY expressions in Fortran,
+	 call f77_value_literal_string instead.
+	 * f_exp.y: Include <string.h>, move include of parser-defs.h.
+	 (parse_number): Translate 'd' floats to 'e' so atof() works. 
+	 (yylex): Remove unused variables.
+	 * f-lang.c: Include <string.h>.
+	 (get_bf_for_fcn): Remove unused variable.
+	 * f-typeprint.c (f_type_print_varspec_prefix,
+	 f_type_print_varspec_suffix): Remove unused
+	 variables, add cases to switch statements.
+	 (f_type_print_base): Remove unused variables.
+	 * f-valprint.c (gdbcore.h, command.h): Include.
+	 (f77_get_dynamic_lowerbound, f77_get_dynamic_upperbound):
+	 Call read_memory_integer with correct number of arguments.
+	 (f77_get_dynamic_upperbound): Call f77_get_dynamic_lowerbound
+	 with correct argument type.
+	 (f77_print_array): Removed unused array array_size_array.
+	 (f_val_print): Don't use a CORE_ADDR as a char *.
+	 * valops.c (value_cast): Handle COMPLEX and BOOL types.
+	 (value_assign): Handle Fortran literal string and complex values.
+	 (f77_cast_into_complex, f77_assign_from_literal_string,
+	 f77_assign_from_literal_complex): New functions.
+
 Mon Sep  5 14:46:41 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* ch-typeprint.c (chill_type_print_base):  Make TYPE_CODE_RANGE

@@ -20,6 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -29,10 +30,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "f-lang.h" 
 #include "frame.h"
+#include "gdbcore.h"
+#include "command.h"
 
 extern struct obstack dont_print_obstack;
 
 extern unsigned int print_max; /* No of array elements to print */ 
+
+extern int calc_f77_array_dims PARAMS ((struct type *));
 
 int f77_array_offset_tbl[MAX_FORTRAN_DIMS+1][2];
 
@@ -64,7 +69,8 @@ f77_get_dynamic_lowerbound (type, lower_bound)
 	{
 	  *lower_bound = 
 	    read_memory_integer (current_frame_addr + 
-				 TYPE_ARRAY_LOWER_BOUND_VALUE (type),4);
+				 TYPE_ARRAY_LOWER_BOUND_VALUE (type),
+				 4);
 	}
       else
 	{
@@ -78,7 +84,7 @@ f77_get_dynamic_lowerbound (type, lower_bound)
       break; 
       
     case BOUND_CANNOT_BE_DETERMINED: 
-      error("Lower bound may not be '*' in F77"); 
+      error ("Lower bound may not be '*' in F77"); 
       break; 
       
     case BOUND_BY_REF_ON_STACK:
@@ -89,7 +95,7 @@ f77_get_dynamic_lowerbound (type, lower_bound)
 	    read_memory_integer (current_frame_addr + 
 				 TYPE_ARRAY_LOWER_BOUND_VALUE (type),
 				 4);
-	  *lower_bound = read_memory_integer(ptr_to_lower_bound); 
+	  *lower_bound = read_memory_integer (ptr_to_lower_bound, 4); 
 	}
       else
 	{
@@ -123,7 +129,8 @@ f77_get_dynamic_upperbound (type, upper_bound)
 	{
 	  *upper_bound = 
 	    read_memory_integer (current_frame_addr + 
-				 TYPE_ARRAY_UPPER_BOUND_VALUE (type),4);
+				 TYPE_ARRAY_UPPER_BOUND_VALUE (type),
+				 4);
 	}
       else
 	{
@@ -142,7 +149,7 @@ f77_get_dynamic_upperbound (type, upper_bound)
 	 1 element.If the user wants to see more elements, let 
 	 him manually ask for 'em and we'll subscript the 
 	 array and show him */
-      f77_get_dynamic_lowerbound (type, &upper_bound);
+      f77_get_dynamic_lowerbound (type, upper_bound);
       break; 
       
     case BOUND_BY_REF_ON_STACK:
@@ -153,7 +160,7 @@ f77_get_dynamic_upperbound (type, upper_bound)
 	    read_memory_integer (current_frame_addr + 
 				 TYPE_ARRAY_UPPER_BOUND_VALUE (type),
 				 4);
-	  *upper_bound = read_memory_integer(ptr_to_upper_bound); 
+	  *upper_bound = read_memory_integer(ptr_to_upper_bound, 4); 
 	}
       else
 	{
@@ -179,13 +186,11 @@ f77_get_dynamic_length_of_aggregate (type)
 {
   int upper_bound = -1;
   int lower_bound = 1; 
-  unsigned int current_total = 1;
   int retcode; 
   
-  /* Recursively go all the way down into a possibly 
-     multi-dimensional F77 array 
-     and get the bounds.  For simple arrays, this is pretty easy 
-     but when the bounds are dynamic, we must be very careful 
+  /* Recursively go all the way down into a possibly multi-dimensional
+     F77 array and get the bounds.  For simple arrays, this is pretty
+     easy but when the bounds are dynamic, we must be very careful 
      to add up all the lengths correctly.  Not doing this right 
      will lead to horrendous-looking arrays in parameter lists.
      
@@ -224,7 +229,6 @@ f77_print_cmplx (valaddr, type, stream, which_complex)
 {
   float *f1,*f2;
   double *d1, *d2;
-  int i; 
   
   switch (which_complex)
     {
@@ -267,7 +271,7 @@ f77_print_cmplx (valaddr, type, stream, which_complex)
 }
 
 /* Function that sets up the array offset,size table for the array 
-   type "type". */ 
+   type "type".  */ 
 
 void 
 f77_create_arrayprint_offset_tbl (type, stream)
@@ -388,7 +392,6 @@ f77_print_array (type, valaddr, address, stream, format, deref_ref, recurse,
      int recurse;
      enum val_prettyprint pretty;
 {
-  int array_size_array[MAX_FORTRAN_DIMS+1]; 
   int ndimensions; 
   
   ndimensions = calc_f77_array_dims (type); 
@@ -436,11 +439,9 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   register unsigned int i = 0;		/* Number of characters printed */
   unsigned len;
   struct type *elttype;
-  unsigned eltlen;
   LONGEST val;
-  struct internalvar *ivar; 
-  char *localstr; 
-  unsigned char c;
+  char *localstr;
+  char *straddr;
   CORE_ADDR addr;
   
   switch (TYPE_CODE (type))
@@ -454,15 +455,15 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	 and for straight literals (i.e. of the form 'hello world'), 
 	 valaddr points a ptr to VALUE_LITERAL_DATA(value). */
       
-      /* First deref. valaddr  */ 
+      /* First dereference valaddr.  */ 
       
-      addr = * (CORE_ADDR *) valaddr; 
+      straddr = * (CORE_ADDR *) valaddr; 
       
-      if (addr)
+      if (straddr)
 	{
 	  len = TYPE_LENGTH (type); 
 	  localstr = alloca (len + 1);
-	  strncpy (localstr, addr, len);
+	  strncpy (localstr, straddr, len);
 	  localstr[len] = '\0'; 
 	  fprintf_filtered (stream, "'%s'", localstr);
 	}
@@ -637,10 +638,10 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	 bytes for the the literal complex number are stored   
 	 at the address pointed to by valaddr */ 
       
-      if (TYPE_LENGTH(type) == 32)
-	error("Cannot currently print out complex*32 literals");
+      if (TYPE_LENGTH (type) == 32)
+	error ("Cannot currently print out complex*32 literals");
       
-      /* First deref. valaddr  */ 
+      /* First dereference valaddr.  */ 
       
       addr = * (CORE_ADDR *) valaddr; 
       
@@ -733,7 +734,6 @@ info_common_command (comname, from_tty)
   struct frame_info *fi;
   register char *funname = 0;
   struct symbol *func;
-  char *cmd; 
   
   /* We have been told to display the contents of F77 COMMON 
      block supposedly visible in this function.  Let us 
@@ -825,7 +825,6 @@ there_is_a_visible_common_named (comname)
      char *comname;
 {
   SAVED_F77_COMMON_PTR  the_common; 
-  COMMON_ENTRY_PTR entry; 
   struct frame_info *fi;
   register char *funname = 0;
   struct symbol *func;

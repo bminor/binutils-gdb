@@ -43,9 +43,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 %{
 
 #include "defs.h"
+#include <string.h>
 #include "expression.h"
-#include "parser-defs.h"
 #include "value.h"
+#include "parser-defs.h"
 #include "language.h"
 #include "f-lang.h"
 #include "bfd.h" /* Required by objfiles.h.  */
@@ -213,7 +214,6 @@ type_exp:	type
 			  write_exp_elt_type($1);
 			  write_exp_elt_opcode(OP_TYPE); }
 	;
-
 
 exp     :       '(' exp ')'
         		{ }
@@ -390,8 +390,7 @@ exp	:	NAME_OR_INT
 			  write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (val.typed_val.type);
 			  write_exp_elt_longcst ((LONGEST)val.typed_val.val);
-			  write_exp_elt_opcode (OP_LONG);
-			}
+			  write_exp_elt_opcode (OP_LONG); }
 	;
 
 exp	:	FLOAT
@@ -668,7 +667,15 @@ parse_number (p, len, parsed_float, putithere)
   if (parsed_float)
     {
       /* It's a float since it contains a point or an exponent.  */
-      putithere->dval = atof (p);
+      /* [dD] is not understood as an exponent by atof, change it to 'e'.  */
+      char *tmp, *tmp2;
+
+      tmp = strsave (p);
+      for (tmp2 = tmp; *tmp2; ++tmp2)
+	if (*tmp2 == 'd' || *tmp2 == 'D')
+	  *tmp2 = 'e';
+      putithere->dval = atof (tmp);
+      free (tmp);
       return FLOAT;
     }
 
@@ -931,10 +938,6 @@ yylex ()
   int namelen;
   unsigned int i,token;
   char *tokstart;
-  char *tokptr;
-  int tempbufindex;
-  static char *tempbuf;
-  static int tempbufsize;
   
  retry:
   
@@ -945,14 +948,14 @@ yylex ()
   
   if (*lexptr == '.')
     { 
-      for (i=0;boolean_values[i].name != NULL;i++)
+      for (i = 0; boolean_values[i].name != NULL; i++)
 	{
-	  if STREQN(tokstart,boolean_values[i].name,
-		    strlen(boolean_values[i].name))
+	  if STREQN (tokstart, boolean_values[i].name,
+		    strlen (boolean_values[i].name))
 	    {
-	      lexptr += strlen(boolean_values[i].name); 
+	      lexptr += strlen (boolean_values[i].name); 
 	      yylval.lval = boolean_values[i].value; 
-	      return (BOOLEAN_LITERAL);
+	      return BOOLEAN_LITERAL;
 	    }
 	}
     }
@@ -960,10 +963,9 @@ yylex ()
   /* See if it is a special .foo. operator */
   
   for (i = 0; dot_ops[i].operator != NULL; i++)
-    if (STREQN(tokstart, dot_ops[i].operator,
-               strlen(dot_ops[i].operator)))
+    if (STREQN (tokstart, dot_ops[i].operator, strlen (dot_ops[i].operator)))
       {
-	lexptr += strlen(dot_ops[i].operator);
+	lexptr += strlen (dot_ops[i].operator);
 	yylval.opcode = dot_ops[i].opcode;
 	return dot_ops[i].token;
       }
@@ -1040,12 +1042,12 @@ yylex ()
 	  {
 	    if (!hex && !got_e && (*p == 'e' || *p == 'E'))
 	      got_dot = got_e = 1;
-	    else if (!hex && !got_e && (*p == 'd' || *p == 'D'))
+	    else if (!hex && !got_d && (*p == 'd' || *p == 'D'))
 	      got_dot = got_d = 1;
 	    else if (!hex && !got_dot && *p == '.')
 	      got_dot = 1;
-	    else if ((got_e && (p[-1] == 'e' || p[-1] == 'E')
-		      || got_d && (p[-1] == 'd' || p[-1] == 'D'))
+	    else if ((got_e && (p[-1] == 'e' || p[-1] == 'E'))
+		     || (got_d && (p[-1] == 'd' || p[-1] == 'D'))
 		     && (*p == '-' || *p == '+'))
 	      /* This is the sign of the exponent, not the end of the
 		 number.  */

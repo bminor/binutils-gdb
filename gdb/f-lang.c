@@ -20,6 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -882,7 +883,6 @@ get_bf_for_fcn (the_function)
 {
   SAVED_BF_PTR tmp;
   int nprobes = 0;
-  long retval = 0; 
   
   /* First use a simple queuing algorithm (i.e. look and see if the 
      item at the head of the queue is the one you want)  */

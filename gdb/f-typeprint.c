@@ -1,5 +1,5 @@
 /* Support for printing Fortran types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C version by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -102,7 +102,6 @@ f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
      int show;
      int passed_a_ptr;
 {
-  char *name;
   if (type == 0)
     return;
 
@@ -140,6 +139,13 @@ f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_LITERAL_COMPLEX:
+    case TYPE_CODE_LITERAL_STRING:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -192,8 +198,7 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
      int passed_a_ptr;
      int demangled_args;
 {
-  CORE_ADDR current_frame_addr = 0;
-  int upper_bound,lower_bound;
+  int upper_bound, lower_bound;
   int lower_bound_was_default = 0;
   static int arrayprint_recurse_level = 0;
   int retcode;
@@ -281,14 +286,18 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
     case TYPE_CODE_BOOL:
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
-    case TYPE_CODE_LITERAL_STRING:
     case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_LITERAL_COMPLEX:
+    case TYPE_CODE_LITERAL_STRING:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;
     }
 }
-
 
 void
 print_equivalent_f77_float_type (type, stream)
@@ -331,14 +340,9 @@ f_type_print_base (type, stream, show, level)
      int show;
      int level;
 {
-  char *name;
-  register int i;
-  register int len;
-  register int lastval;
-  char *mangled_name;
-  char *demangled_name;
-  enum {s_none, s_public, s_private, s_protected} section_type;
-  int retcode,upper_bound;
+  int retcode;
+  int upper_bound;
+
   QUIT;
 
   wrap_here ("    ");
@@ -353,9 +357,6 @@ f_type_print_base (type, stream, show, level)
 
   if ((show <= 0) && (TYPE_NAME (type) != NULL))
     {
-      /* Damn builtin types on RS6000!  They call a float "float"
-         so we gotta translate to appropriate F77'isms */
-
       if (TYPE_CODE (type) == TYPE_CODE_FLT)
 	print_equivalent_f77_float_type (type, stream);
       else
@@ -405,20 +406,20 @@ f_type_print_base (type, stream, show, level)
          through as TYPE_CODE_INT since dbxstclass.h is so
          C-oriented, we must change these to "character" from "char".  */
 
-      if (STREQ(TYPE_NAME(type),"char"))
-	fprintf_filtered (stream,"character");
+      if (STREQ (TYPE_NAME (type), "char"))
+	fprintf_filtered (stream, "character");
       else
 	goto default_case;
       break;
 
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_LITERAL_COMPLEX:
-      fprintf_filtered (stream,"complex*");
-      fprintf_filtered (stream,"%d",TYPE_LENGTH(type));
+      fprintf_filtered (stream, "complex*");
+      fprintf_filtered (stream, "%d", TYPE_LENGTH (type));
       break;
 
     case TYPE_CODE_FLT:
-      print_equivalent_f77_float_type(type,stream);
+      print_equivalent_f77_float_type (type, stream);
       break;
 
     case TYPE_CODE_LITERAL_STRING:
@@ -427,18 +428,18 @@ f_type_print_base (type, stream, show, level)
        break;
 
     case TYPE_CODE_STRING:
-      /* Strings may have dynamic upperbounds (lengths) like arrays */
+      /* Strings may have dynamic upperbounds (lengths) like arrays. */
 
       if (TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BOUND_CANNOT_BE_DETERMINED)
-	fprintf_filtered("character*(*)");
+	fprintf_filtered ("character*(*)");
       else
 	{
-	  retcode = f77_get_dynamic_upperbound(type,&upper_bound);
+	  retcode = f77_get_dynamic_upperbound (type, &upper_bound);
 
 	  if (retcode == BOUND_FETCH_ERROR)
-	    fprintf_filtered(stream,"character*???");
+	    fprintf_filtered (stream, "character*???");
 	  else
-	    fprintf_filtered(stream,"character*%d",upper_bound);
+	    fprintf_filtered (stream, "character*%d", upper_bound);
 	}
       break;
 
