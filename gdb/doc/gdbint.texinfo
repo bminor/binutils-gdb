@@ -61,6 +61,9 @@ are preserved on all copies.
 
 @node Top
 @top
+@c IMHO much information should go into *comments* as you discover it
+@c or design changes to GDB.  It's more likely to get noticed and
+@c easier to maintain there.  -kingdon
 This documents the internals of the GNU debugger, GDB.  It is a
 collection of miscellaneous information with little form at this point.
 Mostly, it is a repository into which you can put information about
@@ -68,6 +71,8 @@ GDB as you discover it (or as you design changes to GDB).
 
 @menu
 * README::			The README File
+* Getting Started::		Getting started working on GDB
+* Debugging GDB::		Debugging GDB with itself
 * New Architectures::		Defining a New Host or Target Architecture
 * Config::			Adding a New Configuration
 * Host::			Adding a New Host
@@ -100,6 +105,117 @@ GDB as you discover it (or as you design changes to GDB).
 Check the @file{README} file, it often has useful information that does not
 appear anywhere else in the directory.
 
+@node Getting Started
+@chapter Getting Started Working on GDB
+
+GDB is a large and complicated program, and if you first starting to
+work on it, it can be hard to know where to start.  Fortunately, if you
+know how to go about it, there are ways to figure out what is going on:
+
+@table @bullet
+@item
+This manual, the GDB Internals manual, has information which applies
+generally to many parts of GDB.
+
+@item
+Information about particular functions or data structures are located in
+comments with those functions or data structures.  If you run across a
+function or a global variable which does not have a comment correctly
+explaining what is does, this can be thought of as a bug in GDB; feel
+free to submit a bug report, with a suggested comment if you can figure
+out what the comment should say (@pxref{Submitting Patches}).  If you
+find a comment which is actually wrong, be especially sure to report that.
+
+Comments explaining the function of macros defined in host, target, or
+native dependent files can be in several places.  Sometimes they are
+repeated every place the macro is defined.  Sometimes they are where the
+macro is used.  Sometimes there is a header file which supplies a
+default definition of the macro, and the comment is there.  This manual
+also has a list of macros (@pxref{Host Conditionals}, @pxref{Target
+Conditionals}, @pxref{Native Conditionals}, and @pxref{Obsolete
+Conditionals}) with some documentation.
+
+@item
+Start with the header files.  Once you some idea of how GDB's internal
+symbol tables are stored (see @file{symtab.h}, @file{gdbtypes.h}), you
+will find it much easier to understand the code which uses and creates
+those symbol tables.
+
+@item
+You may wish to process the information you are getting somehow, to
+enhance your understanding of it.  Summarize it, translate it to another
+language, add some (perhaps trivial or non-useful) feature to GDB, use
+the code to predict what a test case would do and write the test case
+and verify your prediction, etc.  If you are reading code and your eyes
+are starting to glaze over, this is a sign you need to use a more active
+approach.
+
+@item
+Once you have a part of GDB to start with, you can find more
+specifically the part you are looking for by stepping through each
+function with the @code{next} command.  Do not use @code{step} or you
+will quickly get distracted; when the function you are stepping through
+calls another function try only to get a big-picture understanding
+(perhaps using the comment at the beginning of the function being
+called) of what it does.  This way you can identify which of the
+functions being called by the function you are stepping through is the
+one which you are interested in.  You may need to examine the data
+structures generated at each stage, with reference to the comments in
+the header files explaining what the data structures are supposed to
+look like.
+
+Of course, this same technique can be used if you are just reading the
+code, rather than actually stepping through it.  The same general
+principle applies---when the code you are looking at calls something
+else, just try to understand generally what the code being called does,
+rather than worrying about all its details.
+
+@item
+A good place to start when tracking down some particular area is with a
+command which invokes that feature.  Suppose you want to know how
+single-stepping works.  As a GDB user, you know that the @code{step}
+command invokes single-stepping.  The command is invoked via command
+tables (see @file{command.h}); by convention the function which actually
+performs the command is formed by taking the name of the command and
+adding @samp{_command}, or in the case of an @code{info} subcommand,
+@samp{_info}.  For example, the @code{step} command invokes the
+@code{step_command} function and the @code{info display} command invokes
+@code{display_info}.  When this convention is not followed, you might
+have to use @code{grep} or @kbd{M-x tags-search} in emacs, or run GDB on
+itself and set a breakpoint in @code{execute_command}.
+
+@item
+If all of the above fail, it may be appropriate to ask for information
+on @code{bug-gdb}.  But @emph{never} post a generic question like ``I was
+wondering if anyone could give me some tips about understanding
+GDB''---if we had some magic secret we would put it in this manual.
+Suggestions for improving the manual are always welcome, of course.
+@end table
+
+Good luck!
+
+@node Debugging GDB
+@chapter Debugging GDB with itself
+If gdb is limping on your machine, this is the preferred way to get it
+fully functional.  Be warned that in some ancient Unix systems, like
+Ultrix 4.0, a program can't be running in one process while it is being
+debugged in another.  Rather than typing the command @code{@w{./gdb
+./gdb}}, which works on Suns and such, you can copy @file{gdb} to
+@file{gdb2} and then type @code{@w{./gdb ./gdb2}}.
+
+When you run gdb in the gdb source directory, it will read a
+@file{.gdbinit} file that sets up some simple things to make debugging
+gdb easier.  The @code{info} command, when executed without a subcommand
+in a gdb being debugged by gdb, will pop you back up to the top level
+gdb.  See @file{.gdbinit} for details.
+
+If you use emacs, you will probably want to do a @code{make TAGS} after
+you configure your distribution; this will put the machine dependent
+routines for your local machine where they will be accessed first by
+@kbd{M-.}
+
+Also, make sure that you've either compiled gdb with your local cc, or
+have run @code{fixincludes} if you are compiling with gcc.
 
 @node New Architectures
 @chapter Defining a New Host or Target Architecture
@@ -1125,11 +1241,11 @@ is target specific, you will need to define it in the appropriate
 @chapter Coding Style
 
 GDB is generally written using the GNU coding standards, as described in
-@file{standards.texi}, which you can get from the Free Software
-Foundation.  There are some additional considerations for GDB maintainers
-that reflect the unique environment and style of GDB maintenance.
-If you follow these guidelines, GDB will be more consistent and easier
-to maintain.
+@file{standards.texi}, which is available for anonymous FTP from GNU
+archive sites.  There are some additional considerations for GDB
+maintainers that reflect the unique environment and style of GDB
+maintenance.  If you follow these guidelines, GDB will be more
+consistent and easier to maintain.
 
 GDB's policy on the use of prototypes is that prototypes are used
 to @emph{declare} functions but never to @emph{define} them.  Simple
@@ -1223,6 +1339,56 @@ define @code{WRANGLE_SIGNALS} to do the machine-dependent thing.  Take
 a bit of care in defining the hook, so that it can be used by other
 ports in the future, if they need a hook in the same place.
 
+If the hook is not defined, the code should do whatever "most" machines
+want.  Using @code{#ifdef}, as above, is the preferred way to do this,
+but sometimes that gets convoluted, in which case use
+
+@example
+#ifndef SPECIAL_FOO_HANDLING
+#define SPECIAL_FOO_HANDLING(pc, sp) (0)
+#endif
+@end example
+
+where the macro is used or in an appropriate header file.
+
+Whether to include a @dfn{small} hook, a hook around the exact pieces of
+code which are system-dependent, or whether to replace a whole function
+with a hook depends on the case.  A good example of this dilemma can be
+found in @code{get_saved_register}.  All machines that GDB 2.8 ran on
+just needed the @code{FRAME_FIND_SAVED_REGS} hook to find the saved
+registers.  Then the SPARC and Pyramid came along, and
+@code{HAVE_REGISTER_WINDOWS} and @code{REGISTER_IN_WINDOW_P} were
+introduced.  Then the 29k and 88k required the @code{GET_SAVED_REGISTER}
+hook.  The first three are examples of small hooks; the latter replaces
+a whole function.  In this specific case, it is useful to have both
+kinds; it would be a bad idea to replace all the uses of the small hooks
+with @code{GET_SAVED_REGISTER}, since that would result in much
+duplicated code.  Other times, duplicating a few lines of code here or
+there is much cleaner than introducing a large number of small hooks.
+
+Another way to generalize GDB along a particular interface is with an
+attribute struct.  For example, GDB has been generalized to handle
+multiple kinds of remote interfaces -- not by #ifdef's everywhere, but
+by defining the "target_ops" structure and having a current target (as
+well as a stack of targets below it, for memory references).  Whenever
+something needs to be done that depends on which remote interface we are
+using, a flag in the current target_ops structure is tested (e.g.
+`target_has_stack'), or a function is called through a pointer in the
+current target_ops structure.  In this way, when a new remote interface
+is added, only one module needs to be touched -- the one that actually
+implements the new remote interface.  Other examples of
+attribute-structs are BFD access to multiple kinds of object file
+formats, or GDB's access to multiple source languages.
+
+Please avoid duplicating code.  For example, in GDB 3.x all the code
+interfacing between @code{ptrace} and the rest of GDB was duplicated in
+@file{*-dep.c}, and so changing something was very painful.  In GDB 4.x,
+these have all been consolidated into @file{infptrace.c}.
+@file{infptrace.c} can deal with variations between systems the same way
+any system-independent file would (hooks, #if defined, etc.), and
+machines which are radically different don't need to use infptrace.c at
+all.
+
 @item
 @emph{Do} write code that doesn't depend on the sizes of C data types,
 the format of the host's floating point numbers, the alignment of anything,
@@ -1243,7 +1409,7 @@ The two main problems with getting your patches in are,
 
 @table @bullet
 @item
-The GDB maintainers will only install "cleanly designed" patches.
+The GDB maintainers will only install ``cleanly designed'' patches.
 You may not always agree on what is clean design.
 @pxref{Coding Style}, @pxref{Clean Design}.
 
@@ -1259,16 +1425,16 @@ I don't know how to get past these problems except by continuing to try.
 There are two issues here -- technical and legal.
 
 The legal issue is that to incorporate substantial changes requires a
-copyright assignment from you and/or your employer, granting ownership of the changes to
-the Free Software Foundation.  You can get the standard document for
-doing this by sending mail to @code{gnu@@prep.ai.mit.edu} and asking for it.
-I recommend that people write in "All programs owned by the
-Free Software Foundation" as "NAME OF PROGRAM", so that changes in
-many programs (not just GDB, but GAS, Emacs, GCC, etc) can be
-contributed with only one piece of legalese pushed through the
-bureacracy and filed with the FSF.  I can't start merging changes until
-this paperwork is received by the FSF (their rules, which I follow since
-I maintain it for them).
+copyright assignment from you and/or your employer, granting ownership
+of the changes to the Free Software Foundation.  You can get the
+standard document for doing this by sending mail to
+@code{gnu@@prep.ai.mit.edu} and asking for it.  I recommend that people
+write in "All programs owned by the Free Software Foundation" as "NAME
+OF PROGRAM", so that changes in many programs (not just GDB, but GAS,
+Emacs, GCC, etc) can be contributed with only one piece of legalese
+pushed through the bureacracy and filed with the FSF.  I can't start
+merging changes until this paperwork is received by the FSF (their
+rules, which I follow since I maintain it for them).
 
 Technically, the easiest way to receive changes is to receive each
 feature as a small context diff or unidiff, suitable for "patch".
@@ -1307,6 +1473,12 @@ sometimes.  It's in both our interests to make patch installation easy
 GDB in a normal 12-hour day (instead of them having to wait until I
 have a 14-hour or 16-hour day to spend cleaning up patches before I
 can install them).
+
+Please send patches to @code{bug-gdb@@prep.ai.mit.edu}, if they are less
+than about 25,000 characters.  If longer than that, either make them
+available somehow (e.g. anonymous FTP), and announce it on
+@code{bug-gdb}, or send them directly to the GDB maintainers at
+@code{gdb-patches@@cygnus.com}.
 
 @node Host Conditionals
 @chapter Host Conditionals
@@ -2087,6 +2259,8 @@ Unused?  6-oct-92 rich@@cygnus.com.  FIXME.
 blockframe.c
 @item FRAME_ARGS_ADDRESS_CORRECT
 stack.c
+@item FRAME_CHAIN
+Given FRAME, return a pointer to the calling frame.
 @item FRAME_CHAIN_COMBINE
 blockframe.c
 @item FRAME_CHAIN_VALID
@@ -2101,6 +2275,8 @@ frame.h
 tm-m68k.h
 @item FRAME_SPECIFICATION_DYADIC
 stack.c
+@item FRAME_SAVED_PC
+Given FRAME, return the pc saved there.  That is, the return address.
 @item FUNCTION_EPILOGUE_SIZE
 coffread.c
 @item F_OK

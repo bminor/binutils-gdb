@@ -1,3 +1,9 @@
+Tue Apr 27 14:02:57 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdbint.texinfo (new node Debugging GDB, elsewhere):
+	Move a bunch of information from ../README.
+	(Getting Started): New node.
+
 Fri Apr 23 17:21:13 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdbinv-s.texi, gdb.texinfo: include Hitachi SH target
