@@ -107,10 +107,8 @@ case "${host}" in
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux*)             host_makefile_frag=config/mh-hpux ;;
   *-*-hiux*)              host_makefile_frag=config/mh-hpux ;;
-  rs6000-*-lynxos*)	  host_makefile_frag=config/mh-lynxosrs6k
-				cross_only="xiberty" ;;
-  *-*-lynxos*)	  	  host_makefile_frag=config/mh-lynxos
-				cross_only="xiberty" ;;
+  rs6000-*-lynxos*)	  host_makefile_frag=config/mh-lynxosrs6k ;;
+  *-*-lynxos*)	  	  host_makefile_frag=config/mh-lynxos ;;
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
   *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
 esac
@@ -262,6 +260,10 @@ case "${target}" in
   *-*-sysv4)
     use_gnu_ld=no
     ;;
+   *-*-lynxos*)
+     # Newlib makes problems for libg++ in crosses.
+     noconfigdirs="$noconfigdirs newlib"
+     ;;    
   *-*-vms)
     noconfigdirs="$noconfigdirs bfd ld binutils gdb"
     ;;
