@@ -1128,7 +1128,7 @@ read_xcoff_symtab (objfile, nsyms)
     /* if explicitly specified as a function, treat is as one. */
     if (ISFCN(cs->c_type) && cs->c_sclass != C_TPDEF) {
       bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			    &main_aux);
+			    0, cs->c_naux, &main_aux);
       goto function_entry_point;
     }
 
@@ -1144,7 +1144,7 @@ read_xcoff_symtab (objfile, nsyms)
 
 	/* Convert the auxent to something we can access.  */
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			      &main_aux);
+			      0, cs->c_naux, &main_aux);
 
 	switch (CSECT_SMTYP (&main_aux)) {
 
@@ -1410,7 +1410,7 @@ function_entry_point:
       if (STREQ (cs->c_name, ".bf")) {
 
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			      &main_aux);
+			      0, cs->c_naux, &main_aux);
 
 	within_function = 1;
 
@@ -1426,7 +1426,7 @@ function_entry_point:
       else if (STREQ (cs->c_name, ".ef")) {
 
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			      &main_aux);
+			      0, cs->c_naux, &main_aux);
 
 	/* the value of .ef is the address of epilogue code;
 	   not useful for gdb */
@@ -1784,7 +1784,8 @@ gotit:
   /* take aux entry and return its lineno */
   symno++;
   bfd_coff_swap_aux_in (symfile_bfd, symtbl+(symno*local_symesz),
-			symbol->n_type, symbol->n_sclass, main_aux);
+			symbol->n_type, symbol->n_sclass,
+			0, symbol->n_numaux, main_aux);
 
   return main_aux->x_sym.x_misc.x_lnsz.x_lnno;
 }

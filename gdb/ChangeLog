@@ -1,3 +1,9 @@
+Tue Feb  1 12:21:00 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coffread.c (read_one_sym): bfd_coff_swap_aux_in now takes
+	additional arguments.
+	* xcoffread.c (read_xcoff_symtab, read_symbol_lineno): Likewise.
+
 Mon Jan 31 16:10:41 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-stub.c:  Remove unnecessary #include of memory.h.

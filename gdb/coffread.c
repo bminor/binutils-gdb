@@ -1118,7 +1118,7 @@ read_one_sym (cs, sym, aux)
     {
     fread (temp_aux, local_auxesz, 1, nlist_stream_global);
     bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass,
-			  (char *)aux);
+			  0, cs->c_naux, (char *)aux);
     /* If more than one aux entry, read past it (only the first aux
        is important). */
     for (i = 1; i < cs->c_naux; i++)
