@@ -25,177 +25,177 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static const template i386_optab[] = {
 
-#define _ None
+#define Z_ None
 
 /* move instructions */
 #define MOV_AX_DISP32 0xa0
-{ "mov", 2, 0xa0, _, DW, { Disp32, Acc, 0 } },
-{ "mov", 2, 0x88, _, DW|Modrm, { Reg, Reg|Mem, 0 } },
-{ "mov", 2, 0xb0, _, ShortFormW, { Imm, Reg, 0 } },
-{ "mov", 2, 0xc6, _,  W|Modrm,  { Imm, Reg|Mem, 0 } },
+{ "mov", 2, 0xa0, Z_, DW, { Disp32, Acc, 0 } },
+{ "mov", 2, 0x88, Z_, DW|Modrm, { Reg, Reg|Mem, 0 } },
+{ "mov", 2, 0xb0, Z_, ShortFormW, { Imm, Reg, 0 } },
+{ "mov", 2, 0xc6, Z_,  W|Modrm,  { Imm, Reg|Mem, 0 } },
 /* The next instruction accepts WordReg so that `movl %gs,%esi' can be
    used to move a segment register to a 32 bit register without using
    a size prefix.  This will set the upper 16 bits of the 32 bit
    register to an implementation defined value (on the Pentium Pro,
    the implementation defined value is zero).  */
-{ "mov", 2, 0x8c, _, D|Modrm,  { SReg3|SReg2, WordReg|WordMem, 0 } },
+{ "mov", 2, 0x8c, Z_, D|Modrm,  { SReg3|SReg2, WordReg|WordMem, 0 } },
 /* move to/from control debug registers */
-{ "mov", 2, 0x0f20, _, D|Modrm, { Control, Reg32, 0} },
-{ "mov", 2, 0x0f21, _, D|Modrm, { Debug, Reg32, 0} },
-{ "mov", 2, 0x0f24, _, D|Modrm, { Test, Reg32, 0} },
+{ "mov", 2, 0x0f20, Z_, D|Modrm, { Control, Reg32, 0} },
+{ "mov", 2, 0x0f21, Z_, D|Modrm, { Debug, Reg32, 0} },
+{ "mov", 2, 0x0f24, Z_, D|Modrm, { Test, Reg32, 0} },
 
 /* move with sign extend */
 /* "movsbl" & "movsbw" must not be unified into "movsb" to avoid
    conflict with the "movs" string move instruction.  Thus,
-   {"movsb", 2, 0x0fbe, _, ReverseRegRegmem|Modrm, { Reg8|Mem,  Reg16|Reg32, 0} },
+   {"movsb", 2, 0x0fbe, Z_, ReverseRegRegmem|Modrm, { Reg8|Mem,  Reg16|Reg32, 0} },
    is not kosher; we must seperate the two instructions. */
-{"movsbl", 2, 0x0fbe, _, ReverseRegRegmem|Modrm|Data32, { Reg8|Mem,  Reg32, 0} },
-{"movsbw", 2, 0x0fbe, _, ReverseRegRegmem|Modrm|Data16, { Reg8|Mem,  Reg16, 0} },
-{"movswl", 2, 0x0fbf, _, ReverseRegRegmem|Modrm, { Reg16|Mem, Reg32, 0} },
+{"movsbl", 2, 0x0fbe, Z_, ReverseRegRegmem|Modrm|Data32, { Reg8|Mem,  Reg32, 0} },
+{"movsbw", 2, 0x0fbe, Z_, ReverseRegRegmem|Modrm|Data16, { Reg8|Mem,  Reg16, 0} },
+{"movswl", 2, 0x0fbf, Z_, ReverseRegRegmem|Modrm, { Reg16|Mem, Reg32, 0} },
 
 /* move with zero extend */
-{"movzb", 2, 0x0fb6, _, ReverseRegRegmem|Modrm, { Reg8|Mem, Reg16|Reg32, 0} },
-{"movzwl", 2, 0x0fb7, _, ReverseRegRegmem|Modrm, { Reg16|Mem, Reg32, 0} },
+{"movzb", 2, 0x0fb6, Z_, ReverseRegRegmem|Modrm, { Reg8|Mem, Reg16|Reg32, 0} },
+{"movzwl", 2, 0x0fb7, Z_, ReverseRegRegmem|Modrm, { Reg16|Mem, Reg32, 0} },
 
 /* push instructions */
-{"push", 1, 0x50, _, ShortForm, { WordReg,0,0 } },
+{"push", 1, 0x50, Z_, ShortForm, { WordReg,0,0 } },
 {"push", 1, 0xff, 0x6,  Modrm, { WordReg|WordMem, 0, 0 } },
-{"push", 1, 0x6a, _, 0, { Imm8S, 0, 0} },
-{"push", 1, 0x68, _, 0, { Imm16|Imm32, 0, 0} },
-{"push", 1, 0x06, _,  Seg2ShortForm, { SReg2,0,0 } },
-{"push", 1, 0x0fa0, _, Seg3ShortForm, { SReg3,0,0 } },
+{"push", 1, 0x6a, Z_, 0, { Imm8S, 0, 0} },
+{"push", 1, 0x68, Z_, 0, { Imm16|Imm32, 0, 0} },
+{"push", 1, 0x06, Z_,  Seg2ShortForm, { SReg2,0,0 } },
+{"push", 1, 0x0fa0, Z_, Seg3ShortForm, { SReg3,0,0 } },
 /* push all */
-{"pusha", 0, 0x60, _, 0, { 0, 0, 0 } },
+{"pusha", 0, 0x60, Z_, 0, { 0, 0, 0 } },
 
 /* pop instructions */
-{"pop", 1, 0x58, _, ShortForm, { WordReg,0,0 } },
+{"pop", 1, 0x58, Z_, ShortForm, { WordReg,0,0 } },
 {"pop", 1, 0x8f, 0x0,  Modrm, { WordReg|WordMem, 0, 0 } },
 #define POP_SEG_SHORT 0x7
-{"pop", 1, 0x07, _,  Seg2ShortForm, { SReg2,0,0 } },
-{"pop", 1, 0x0fa1, _, Seg3ShortForm, { SReg3,0,0 } },
+{"pop", 1, 0x07, Z_,  Seg2ShortForm, { SReg2,0,0 } },
+{"pop", 1, 0x0fa1, Z_, Seg3ShortForm, { SReg3,0,0 } },
 /* pop all */
-{"popa", 0, 0x61, _, 0, { 0, 0, 0 } },
+{"popa", 0, 0x61, Z_, 0, { 0, 0, 0 } },
 
 /* xchg exchange instructions
    xchg commutes:  we allow both operand orders */
-{"xchg", 2, 0x90, _, ShortForm, { WordReg, Acc, 0 } },
-{"xchg", 2, 0x90, _, ShortForm, { Acc, WordReg, 0 } },
-{"xchg", 2, 0x86, _, W|Modrm, { Reg, Reg|Mem, 0 } },
-{"xchg", 2, 0x86, _, W|Modrm, { Reg|Mem, Reg, 0 } },
+{"xchg", 2, 0x90, Z_, ShortForm, { WordReg, Acc, 0 } },
+{"xchg", 2, 0x90, Z_, ShortForm, { Acc, WordReg, 0 } },
+{"xchg", 2, 0x86, Z_, W|Modrm, { Reg, Reg|Mem, 0 } },
+{"xchg", 2, 0x86, Z_, W|Modrm, { Reg|Mem, Reg, 0 } },
 
 /* in/out from ports */
-{"in", 2, 0xe4, _, W, { Imm8, Acc, 0 } },
-{"in", 2, 0xec, _, W, { InOutPortReg, Acc, 0 } },
-{"in", 1, 0xe4, _, W, { Imm8, 0, 0 } },
-{"in", 1, 0xec, _, W, { InOutPortReg, 0, 0 } },
-{"out", 2, 0xe6, _, W, { Acc, Imm8, 0 } },
-{"out", 2, 0xee, _, W, { Acc, InOutPortReg, 0 } },
-{"out", 1, 0xe6, _, W, { Imm8, 0, 0 } },
-{"out", 1, 0xee, _, W, { InOutPortReg, 0, 0 } },
+{"in", 2, 0xe4, Z_, W, { Imm8, Acc, 0 } },
+{"in", 2, 0xec, Z_, W, { InOutPortReg, Acc, 0 } },
+{"in", 1, 0xe4, Z_, W, { Imm8, 0, 0 } },
+{"in", 1, 0xec, Z_, W, { InOutPortReg, 0, 0 } },
+{"out", 2, 0xe6, Z_, W, { Acc, Imm8, 0 } },
+{"out", 2, 0xee, Z_, W, { Acc, InOutPortReg, 0 } },
+{"out", 1, 0xe6, Z_, W, { Imm8, 0, 0 } },
+{"out", 1, 0xee, Z_, W, { InOutPortReg, 0, 0 } },
 
 /* load effective address */
-{"lea", 2, 0x8d, _, Modrm, { WordMem, WordReg, 0 } },
+{"lea", 2, 0x8d, Z_, Modrm, { WordMem, WordReg, 0 } },
 
 /* load segment registers from memory */
-{"lds", 2, 0xc5, _, Modrm, { Mem, Reg32, 0} },
-{"les", 2, 0xc4, _, Modrm, { Mem, Reg32, 0} },
-{"lfs", 2, 0x0fb4, _, Modrm, { Mem, Reg32, 0} },
-{"lgs", 2, 0x0fb5, _, Modrm, { Mem, Reg32, 0} },
-{"lss", 2, 0x0fb2, _, Modrm, { Mem, Reg32, 0} },
+{"lds", 2, 0xc5, Z_, Modrm, { Mem, Reg32, 0} },
+{"les", 2, 0xc4, Z_, Modrm, { Mem, Reg32, 0} },
+{"lfs", 2, 0x0fb4, Z_, Modrm, { Mem, Reg32, 0} },
+{"lgs", 2, 0x0fb5, Z_, Modrm, { Mem, Reg32, 0} },
+{"lss", 2, 0x0fb2, Z_, Modrm, { Mem, Reg32, 0} },
 
 /* flags register instructions */
-{"clc", 0, 0xf8, _, 0, { 0, 0, 0} },
-{"cld", 0, 0xfc, _, 0, { 0, 0, 0} },
-{"cli", 0, 0xfa, _, 0, { 0, 0, 0} },
-{"clts", 0, 0x0f06, _, 0, { 0, 0, 0} },
-{"cmc", 0, 0xf5, _, 0, { 0, 0, 0} },
-{"lahf", 0, 0x9f, _, 0, { 0, 0, 0} },
-{"sahf", 0, 0x9e, _, 0, { 0, 0, 0} },
-{"pushfl", 0, 0x9c, _, Data32, { 0, 0, 0} },
-{"popfl", 0, 0x9d, _, Data32, { 0, 0, 0} },
-{"pushfw", 0, 0x9c, _, Data16, { 0, 0, 0} },
-{"popfw", 0, 0x9d, _, Data16, { 0, 0, 0} },
-{"pushf", 0, 0x9c, _, 0, { 0, 0, 0} },
-{"popf", 0, 0x9d, _, 0, { 0, 0, 0} },
-{"stc", 0, 0xf9, _, 0, { 0, 0, 0} },
-{"std", 0, 0xfd, _, 0, { 0, 0, 0} },
-{"sti", 0, 0xfb, _, 0, { 0, 0, 0} },
+{"clc", 0, 0xf8, Z_, 0, { 0, 0, 0} },
+{"cld", 0, 0xfc, Z_, 0, { 0, 0, 0} },
+{"cli", 0, 0xfa, Z_, 0, { 0, 0, 0} },
+{"clts", 0, 0x0f06, Z_, 0, { 0, 0, 0} },
+{"cmc", 0, 0xf5, Z_, 0, { 0, 0, 0} },
+{"lahf", 0, 0x9f, Z_, 0, { 0, 0, 0} },
+{"sahf", 0, 0x9e, Z_, 0, { 0, 0, 0} },
+{"pushfl", 0, 0x9c, Z_, Data32, { 0, 0, 0} },
+{"popfl", 0, 0x9d, Z_, Data32, { 0, 0, 0} },
+{"pushfw", 0, 0x9c, Z_, Data16, { 0, 0, 0} },
+{"popfw", 0, 0x9d, Z_, Data16, { 0, 0, 0} },
+{"pushf", 0, 0x9c, Z_, 0, { 0, 0, 0} },
+{"popf", 0, 0x9d, Z_, 0, { 0, 0, 0} },
+{"stc", 0, 0xf9, Z_, 0, { 0, 0, 0} },
+{"std", 0, 0xfd, Z_, 0, { 0, 0, 0} },
+{"sti", 0, 0xfb, Z_, 0, { 0, 0, 0} },
 
-{"add", 2, 0x0,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"add", 2, 0x0,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"add", 2, 0x83, 0,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"add", 2, 0x4,  _,  W, { Imm,  Acc,    0} },
+{"add", 2, 0x4,  Z_,  W, { Imm,  Acc,    0} },
 {"add", 2, 0x80, 0, W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"inc", 1, 0x40, _, ShortForm, { WordReg, 0, 0} },
+{"inc", 1, 0x40, Z_, ShortForm, { WordReg, 0, 0} },
 {"inc", 1, 0xfe, 0, W|Modrm, { Reg|Mem, 0, 0} },
 
-{"sub", 2, 0x28,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"sub", 2, 0x28,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"sub", 2, 0x83, 5,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"sub", 2, 0x2c,  _,  W, { Imm,  Acc,    0} },
+{"sub", 2, 0x2c,  Z_,  W, { Imm,  Acc,    0} },
 {"sub", 2, 0x80, 5,  W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"dec", 1, 0x48, _, ShortForm, { WordReg, 0, 0} },
+{"dec", 1, 0x48, Z_, ShortForm, { WordReg, 0, 0} },
 {"dec", 1, 0xfe, 1, W|Modrm, { Reg|Mem, 0, 0} },
 
-{"sbb", 2, 0x18,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"sbb", 2, 0x18,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"sbb", 2, 0x83, 3,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"sbb", 2, 0x1c,  _,  W, { Imm,  Acc,    0} },
+{"sbb", 2, 0x1c,  Z_,  W, { Imm,  Acc,    0} },
 {"sbb", 2, 0x80, 3,  W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"cmp", 2, 0x38,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"cmp", 2, 0x38,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"cmp", 2, 0x83, 7,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"cmp", 2, 0x3c,  _,  W, { Imm,  Acc,    0} },
+{"cmp", 2, 0x3c,  Z_,  W, { Imm,  Acc,    0} },
 {"cmp", 2, 0x80, 7,  W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"test", 2, 0x84, _, W|Modrm, { Reg|Mem, Reg, 0} },
-{"test", 2, 0x84, _, W|Modrm, { Reg, Reg|Mem, 0} },
-{"test", 2, 0xa8, _, W, { Imm, Acc, 0} },
+{"test", 2, 0x84, Z_, W|Modrm, { Reg|Mem, Reg, 0} },
+{"test", 2, 0x84, Z_, W|Modrm, { Reg, Reg|Mem, 0} },
+{"test", 2, 0xa8, Z_, W, { Imm, Acc, 0} },
 {"test", 2, 0xf6, 0, W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"and", 2, 0x20,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"and", 2, 0x20,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"and", 2, 0x83, 4,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"and", 2, 0x24,  _,  W, { Imm,  Acc,    0} },
+{"and", 2, 0x24,  Z_,  W, { Imm,  Acc,    0} },
 {"and", 2, 0x80, 4,  W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"or", 2, 0x08,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"or", 2, 0x08,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"or", 2, 0x83, 1,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"or", 2, 0x0c,  _,  W, { Imm,  Acc,    0} },
+{"or", 2, 0x0c,  Z_,  W, { Imm,  Acc,    0} },
 {"or", 2, 0x80, 1,  W|Modrm, { Imm, Reg|Mem, 0} },
 
-{"xor", 2, 0x30,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"xor", 2, 0x30,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"xor", 2, 0x83, 6,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"xor", 2, 0x34,  _,  W, { Imm,  Acc,    0} },
+{"xor", 2, 0x34,  Z_,  W, { Imm,  Acc,    0} },
 {"xor", 2, 0x80, 6,  W|Modrm, { Imm, Reg|Mem, 0} },
 
 /* iclr with 1 operand is really xor with 2 operands.  */
-{"clr", 1, 0x30, _, W|Modrm|iclrKludge, { Reg } },
+{"clr", 1, 0x30, Z_, W|Modrm|iclrKludge, { Reg } },
 
-{"adc", 2, 0x10,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
+{"adc", 2, 0x10,  Z_, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"adc", 2, 0x83, 2,  Modrm, { Imm8S, WordReg|WordMem, 0} },
-{"adc", 2, 0x14,  _,  W, { Imm,  Acc,    0} },
+{"adc", 2, 0x14,  Z_,  W, { Imm,  Acc,    0} },
 {"adc", 2, 0x80, 2,  W|Modrm, { Imm, Reg|Mem, 0} },
 
 {"neg", 1, 0xf6, 3, W|Modrm, { Reg|Mem, 0, 0} },
 {"not", 1, 0xf6, 2, W|Modrm, { Reg|Mem, 0, 0} },
 
-{"aaa", 0, 0x37, _, 0, { 0, 0, 0} },
-{"aas", 0, 0x3f, _, 0, { 0, 0, 0} },
-{"daa", 0, 0x27, _, 0, { 0, 0, 0} },
-{"das", 0, 0x2f, _, 0, { 0, 0, 0} },
-{"aad", 0, 0xd50a, _, 0, { 0, 0, 0} },
-{"aam", 0, 0xd40a, _, 0, { 0, 0, 0} },
+{"aaa", 0, 0x37, Z_, 0, { 0, 0, 0} },
+{"aas", 0, 0x3f, Z_, 0, { 0, 0, 0} },
+{"daa", 0, 0x27, Z_, 0, { 0, 0, 0} },
+{"das", 0, 0x2f, Z_, 0, { 0, 0, 0} },
+{"aad", 0, 0xd50a, Z_, 0, { 0, 0, 0} },
+{"aam", 0, 0xd40a, Z_, 0, { 0, 0, 0} },
 
 /* conversion insns */
 /* conversion:  intel naming */
-{"cbw", 0, 0x98, _, Data16, { 0, 0, 0} },
-{"cwd", 0, 0x99, _, Data16, { 0, 0, 0} },
-{"cwde", 0, 0x98, _, Data32, { 0, 0, 0} },
-{"cdq", 0, 0x99, _, Data32, { 0, 0, 0} },
+{"cbw", 0, 0x98, Z_, Data16, { 0, 0, 0} },
+{"cwd", 0, 0x99, Z_, Data16, { 0, 0, 0} },
+{"cwde", 0, 0x98, Z_, Data32, { 0, 0, 0} },
+{"cdq", 0, 0x99, Z_, Data32, { 0, 0, 0} },
 /*  att naming */
-{"cbtw", 0, 0x98, _, Data16, { 0, 0, 0} },
-{"cwtl", 0, 0x98, _, Data32, { 0, 0, 0} },
-{"cwtd", 0, 0x99, _, Data16, { 0, 0, 0} },
-{"cltd", 0, 0x99, _, Data32, { 0, 0, 0} },
+{"cbtw", 0, 0x98, Z_, Data16, { 0, 0, 0} },
+{"cwtl", 0, 0x98, Z_, Data32, { 0, 0, 0} },
+{"cwtd", 0, 0x99, Z_, Data16, { 0, 0, 0} },
+{"cltd", 0, 0x99, Z_, Data32, { 0, 0, 0} },
 
 /* Warning! the mul/imul (opcode 0xf6) must only have 1 operand!  They are
    expanding 64-bit multiplies, and *cannot* be selected to accomplish
@@ -211,15 +211,15 @@ static const template i386_optab[] = {
    These instructions are exceptions:  'imul $2, %eax, %ecx' would put
    '%eax' in the reg field and '%ecx' in the regmem field if we did not
    switch them. */
-{"imul", 2, 0x0faf, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
-{"imul", 3, 0x6b, _, Modrm|ReverseRegRegmem, { Imm8S, WordReg|Mem, WordReg} },
-{"imul", 3, 0x69, _, Modrm|ReverseRegRegmem, { Imm16|Imm32, WordReg|Mem, WordReg} },
+{"imul", 2, 0x0faf, Z_, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
+{"imul", 3, 0x6b, Z_, Modrm|ReverseRegRegmem, { Imm8S, WordReg|Mem, WordReg} },
+{"imul", 3, 0x69, Z_, Modrm|ReverseRegRegmem, { Imm16|Imm32, WordReg|Mem, WordReg} },
 /*
   imul with 2 operands mimicks imul with 3 by puting register both
   in i.rm.reg & i.rm.regmem fields
 */
-{"imul", 2, 0x6b, _, Modrm|imulKludge, { Imm8S, WordReg, 0} },
-{"imul", 2, 0x69, _, Modrm|imulKludge, { Imm16|Imm32, WordReg, 0} },
+{"imul", 2, 0x6b, Z_, Modrm|imulKludge, { Imm8S, WordReg, 0} },
+{"imul", 2, 0x69, Z_, Modrm|imulKludge, { Imm16|Imm32, WordReg, 0} },
 {"div", 1, 0xf6, 6, W|Modrm, { Reg|Mem, 0, 0} },
 {"div", 2, 0xf6, 6, W|Modrm, { Reg|Mem, Acc, 0} },
 {"idiv", 1, 0xf6, 7, W|Modrm, { Reg|Mem, 0, 0} },
@@ -254,18 +254,18 @@ static const template i386_optab[] = {
 {"shl", 2, 0xd2, 4, W|Modrm, { ShiftCount, Reg|Mem, 0} },
 {"shl", 1, 0xd0, 4, W|Modrm, { Reg|Mem, 0, 0} },
 
-{"shld", 3, 0x0fa4, _, Modrm, { Imm8, WordReg, WordReg|Mem} },
-{"shld", 3, 0x0fa5, _, Modrm, { ShiftCount, WordReg, WordReg|Mem} },
-{"shld", 2, 0x0fa5, _, Modrm, { WordReg, WordReg|Mem, 0} },
+{"shld", 3, 0x0fa4, Z_, Modrm, { Imm8, WordReg, WordReg|Mem} },
+{"shld", 3, 0x0fa5, Z_, Modrm, { ShiftCount, WordReg, WordReg|Mem} },
+{"shld", 2, 0x0fa5, Z_, Modrm, { WordReg, WordReg|Mem, 0} },
 
 {"shr", 2, 0xd0, 5, W|Modrm, { Imm1, Reg|Mem, 0} },
 {"shr", 2, 0xc0, 5, W|Modrm, { Imm8, Reg|Mem, 0} },
 {"shr", 2, 0xd2, 5, W|Modrm, { ShiftCount, Reg|Mem, 0} },
 {"shr", 1, 0xd0, 5, W|Modrm, { Reg|Mem, 0, 0} },
 
-{"shrd", 3, 0x0fac, _, Modrm, { Imm8, WordReg, WordReg|Mem} },
-{"shrd", 3, 0x0fad, _, Modrm, { ShiftCount, WordReg, WordReg|Mem} },
-{"shrd", 2, 0x0fad, _, Modrm, { WordReg, WordReg|Mem, 0} },
+{"shrd", 3, 0x0fac, Z_, Modrm, { Imm8, WordReg, WordReg|Mem} },
+{"shrd", 3, 0x0fad, Z_, Modrm, { ShiftCount, WordReg, WordReg|Mem} },
+{"shrd", 2, 0x0fad, Z_, Modrm, { WordReg, WordReg|Mem, 0} },
 
 {"sar", 2, 0xd0, 7, W|Modrm, { Imm1, Reg|Mem, 0} },
 {"sar", 2, 0xc0, 7, W|Modrm, { Imm8, Reg|Mem, 0} },
@@ -274,98 +274,98 @@ static const template i386_optab[] = {
 
 /* control transfer instructions */
 #define CALL_PC_RELATIVE 0xe8
-{"call", 1, 0xe8, _, JumpDword, { Disp32, 0, 0} },
+{"call", 1, 0xe8, Z_, JumpDword, { Disp32, 0, 0} },
 {"call", 1, 0xff, 2, Modrm|Data32, { Reg|Mem|JumpAbsolute, 0, 0} },
 {"callw", 1, 0xff, 2, Modrm|Data16, { Reg|Mem|JumpAbsolute, 0, 0} },
 #define CALL_FAR_IMMEDIATE 0x9a
-{"lcall", 2, 0x9a, _, JumpInterSegment, { Imm16, Imm32, 0} },
+{"lcall", 2, 0x9a, Z_, JumpInterSegment, { Imm16, Imm32, 0} },
 {"lcall", 1, 0xff, 3, Modrm|Data32, { Mem, 0, 0} },
 {"lcallw", 1, 0xff, 3, Modrm|Data16, { Mem, 0, 0} },
 
 #define JUMP_PC_RELATIVE 0xeb
-{"jmp", 1, 0xeb, _, Jump, { Disp, 0, 0} },
+{"jmp", 1, 0xeb, Z_, Jump, { Disp, 0, 0} },
 {"jmp", 1, 0xff, 4, Modrm, { Reg32|Mem|JumpAbsolute, 0, 0} },
 #define JUMP_FAR_IMMEDIATE 0xea
-{"ljmp", 2, 0xea, _, JumpInterSegment, { Imm16, Imm32, 0} },
+{"ljmp", 2, 0xea, Z_, JumpInterSegment, { Imm16, Imm32, 0} },
 {"ljmp", 1, 0xff, 5, Modrm|Data32, { Mem, 0, 0} },
 
-{"ret", 0, 0xc3, _, Data32, { 0, 0, 0} },
-{"ret", 1, 0xc2, _, Data32, { Imm16, 0, 0} },
-{"retw", 0, 0xc3, _, Data16, { 0, 0, 0} },
-{"retw", 1, 0xc2, _, Data16, { Imm16, 0, 0} },
-{"lret", 0, 0xcb, _, Data32, { 0, 0, 0} },
-{"lret", 1, 0xca, _, Data32, { Imm16, 0, 0} },
-{"lretw", 0, 0xcb, _, Data16, { 0, 0, 0} },
-{"lretw", 1, 0xca, _, Data16, { Imm16, 0, 0} },
-{"enter", 2, 0xc8, _, Data32, { Imm16, Imm8, 0} },
-{"leave", 0, 0xc9, _, Data32, { 0, 0, 0} },
-{"enterw", 2, 0xc8, _, Data16, { Imm16, Imm8, 0} },
-{"leavew", 0, 0xc9, _, Data16, { 0, 0, 0} },
+{"ret", 0, 0xc3, Z_, Data32, { 0, 0, 0} },
+{"ret", 1, 0xc2, Z_, Data32, { Imm16, 0, 0} },
+{"retw", 0, 0xc3, Z_, Data16, { 0, 0, 0} },
+{"retw", 1, 0xc2, Z_, Data16, { Imm16, 0, 0} },
+{"lret", 0, 0xcb, Z_, Data32, { 0, 0, 0} },
+{"lret", 1, 0xca, Z_, Data32, { Imm16, 0, 0} },
+{"lretw", 0, 0xcb, Z_, Data16, { 0, 0, 0} },
+{"lretw", 1, 0xca, Z_, Data16, { Imm16, 0, 0} },
+{"enter", 2, 0xc8, Z_, Data32, { Imm16, Imm8, 0} },
+{"leave", 0, 0xc9, Z_, Data32, { 0, 0, 0} },
+{"enterw", 2, 0xc8, Z_, Data16, { Imm16, Imm8, 0} },
+{"leavew", 0, 0xc9, Z_, Data16, { 0, 0, 0} },
 
 /* conditional jumps */
-{"jo", 1, 0x70, _, Jump, { Disp, 0, 0} },
+{"jo", 1, 0x70, Z_, Jump, { Disp, 0, 0} },
 
-{"jno", 1, 0x71, _, Jump, { Disp, 0, 0} },
+{"jno", 1, 0x71, Z_, Jump, { Disp, 0, 0} },
 
-{"jb", 1, 0x72, _, Jump, { Disp, 0, 0} },
-{"jc", 1, 0x72, _, Jump, { Disp, 0, 0} },
-{"jnae", 1, 0x72, _, Jump, { Disp, 0, 0} },
+{"jb", 1, 0x72, Z_, Jump, { Disp, 0, 0} },
+{"jc", 1, 0x72, Z_, Jump, { Disp, 0, 0} },
+{"jnae", 1, 0x72, Z_, Jump, { Disp, 0, 0} },
 
-{"jnb", 1, 0x73, _, Jump, { Disp, 0, 0} },
-{"jnc", 1, 0x73, _, Jump, { Disp, 0, 0} },
-{"jae", 1, 0x73, _, Jump, { Disp, 0, 0} },
+{"jnb", 1, 0x73, Z_, Jump, { Disp, 0, 0} },
+{"jnc", 1, 0x73, Z_, Jump, { Disp, 0, 0} },
+{"jae", 1, 0x73, Z_, Jump, { Disp, 0, 0} },
 
-{"je", 1, 0x74, _, Jump, { Disp, 0, 0} },
-{"jz", 1, 0x74, _, Jump, { Disp, 0, 0} },
+{"je", 1, 0x74, Z_, Jump, { Disp, 0, 0} },
+{"jz", 1, 0x74, Z_, Jump, { Disp, 0, 0} },
 
-{"jne", 1, 0x75, _, Jump, { Disp, 0, 0} },
-{"jnz", 1, 0x75, _, Jump, { Disp, 0, 0} },
+{"jne", 1, 0x75, Z_, Jump, { Disp, 0, 0} },
+{"jnz", 1, 0x75, Z_, Jump, { Disp, 0, 0} },
 
-{"jbe", 1, 0x76, _, Jump, { Disp, 0, 0} },
-{"jna", 1, 0x76, _, Jump, { Disp, 0, 0} },
+{"jbe", 1, 0x76, Z_, Jump, { Disp, 0, 0} },
+{"jna", 1, 0x76, Z_, Jump, { Disp, 0, 0} },
 
-{"jnbe", 1, 0x77, _, Jump, { Disp, 0, 0} },
-{"ja", 1, 0x77, _, Jump, { Disp, 0, 0} },
+{"jnbe", 1, 0x77, Z_, Jump, { Disp, 0, 0} },
+{"ja", 1, 0x77, Z_, Jump, { Disp, 0, 0} },
 
-{"js", 1, 0x78, _, Jump, { Disp, 0, 0} },
+{"js", 1, 0x78, Z_, Jump, { Disp, 0, 0} },
 
-{"jns", 1, 0x79, _, Jump, { Disp, 0, 0} },
+{"jns", 1, 0x79, Z_, Jump, { Disp, 0, 0} },
 
-{"jp", 1, 0x7a, _, Jump, { Disp, 0, 0} },
-{"jpe", 1, 0x7a, _, Jump, { Disp, 0, 0} },
+{"jp", 1, 0x7a, Z_, Jump, { Disp, 0, 0} },
+{"jpe", 1, 0x7a, Z_, Jump, { Disp, 0, 0} },
 
-{"jnp", 1, 0x7b, _, Jump, { Disp, 0, 0} },
-{"jpo", 1, 0x7b, _, Jump, { Disp, 0, 0} },
+{"jnp", 1, 0x7b, Z_, Jump, { Disp, 0, 0} },
+{"jpo", 1, 0x7b, Z_, Jump, { Disp, 0, 0} },
 
-{"jl", 1, 0x7c, _, Jump, { Disp, 0, 0} },
-{"jnge", 1, 0x7c, _, Jump, { Disp, 0, 0} },
+{"jl", 1, 0x7c, Z_, Jump, { Disp, 0, 0} },
+{"jnge", 1, 0x7c, Z_, Jump, { Disp, 0, 0} },
 
-{"jnl", 1, 0x7d, _, Jump, { Disp, 0, 0} },
-{"jge", 1, 0x7d, _, Jump, { Disp, 0, 0} },
+{"jnl", 1, 0x7d, Z_, Jump, { Disp, 0, 0} },
+{"jge", 1, 0x7d, Z_, Jump, { Disp, 0, 0} },
 
-{"jle", 1, 0x7e, _, Jump, { Disp, 0, 0} },
-{"jng", 1, 0x7e, _, Jump, { Disp, 0, 0} },
+{"jle", 1, 0x7e, Z_, Jump, { Disp, 0, 0} },
+{"jng", 1, 0x7e, Z_, Jump, { Disp, 0, 0} },
 
-{"jnle", 1, 0x7f, _, Jump, { Disp, 0, 0} },
-{"jg", 1, 0x7f, _, Jump, { Disp, 0, 0} },
+{"jnle", 1, 0x7f, Z_, Jump, { Disp, 0, 0} },
+{"jg", 1, 0x7f, Z_, Jump, { Disp, 0, 0} },
 
 #define IS_JUMP_ON_CX_ZERO(o) \
   (o == 0xe3)
 
 /* jcxz vs. jecxz is chosen on the basis of the address size prefix.  */
-{"jcxz", 1, 0xe3, _, JumpByte|Data16, { Disp, 0, 0} },
-{"jecxz", 1, 0xe3, _, JumpByte|Data32, { Disp, 0, 0} },
+{"jcxz", 1, 0xe3, Z_, JumpByte|Data16, { Disp, 0, 0} },
+{"jecxz", 1, 0xe3, Z_, JumpByte|Data32, { Disp, 0, 0} },
 
 #define IS_LOOP_ECX_TIMES(o) \
   (o == 0xe2 || o == 0xe1 || o == 0xe0)
 
-{"loop", 1, 0xe2, _, JumpByte, { Disp, 0, 0} },
+{"loop", 1, 0xe2, Z_, JumpByte, { Disp, 0, 0} },
 
-{"loopz", 1, 0xe1, _, JumpByte, { Disp, 0, 0} },
-{"loope", 1, 0xe1, _, JumpByte, { Disp, 0, 0} },
+{"loopz", 1, 0xe1, Z_, JumpByte, { Disp, 0, 0} },
+{"loope", 1, 0xe1, Z_, JumpByte, { Disp, 0, 0} },
 
-{"loopnz", 1, 0xe0, _, JumpByte, { Disp, 0, 0} },
-{"loopne", 1, 0xe0, _, JumpByte, { Disp, 0, 0} },
+{"loopnz", 1, 0xe0, Z_, JumpByte, { Disp, 0, 0} },
+{"loopne", 1, 0xe0, Z_, JumpByte, { Disp, 0, 0} },
 
 /* set byte on flag instructions */
 {"seto", 1, 0x0f90, 0, Modrm, { Reg8|Mem, 0, 0} },
@@ -415,30 +415,30 @@ static const template i386_optab[] = {
 {"setg", 1, 0x0f9f, 0, Modrm, { Reg8|Mem, 0, 0} },
 
 /* string manipulation */
-{"cmps", 0, 0xa6, _, W|IsString, { 0, 0, 0} },
-{"scmp", 0, 0xa6, _, W|IsString, { 0, 0, 0} },
-{"ins",  0, 0x6c, _, W|IsString, { 0, 0, 0} },
-{"outs", 0, 0x6e, _, W|IsString, { 0, 0, 0} },
-{"lods", 0, 0xac, _, W|IsString, { 0, 0, 0} },
-{"slod", 0, 0xac, _, W|IsString, { 0, 0, 0} },
-{"movs", 0, 0xa4, _, W|IsString, { 0, 0, 0} },
-{"smov", 0, 0xa4, _, W|IsString, { 0, 0, 0} },
-{"scas", 0, 0xae, _, W|IsString, { 0, 0, 0} },
-{"ssca", 0, 0xae, _, W|IsString, { 0, 0, 0} },
-{"stos", 0, 0xaa, _, W|IsString, { 0, 0, 0} },
-{"ssto", 0, 0xaa, _, W|IsString, { 0, 0, 0} },
-{"xlat", 0, 0xd7, _, IsString, { 0, 0, 0} },
+{"cmps", 0, 0xa6, Z_, W|IsString, { 0, 0, 0} },
+{"scmp", 0, 0xa6, Z_, W|IsString, { 0, 0, 0} },
+{"ins",  0, 0x6c, Z_, W|IsString, { 0, 0, 0} },
+{"outs", 0, 0x6e, Z_, W|IsString, { 0, 0, 0} },
+{"lods", 0, 0xac, Z_, W|IsString, { 0, 0, 0} },
+{"slod", 0, 0xac, Z_, W|IsString, { 0, 0, 0} },
+{"movs", 0, 0xa4, Z_, W|IsString, { 0, 0, 0} },
+{"smov", 0, 0xa4, Z_, W|IsString, { 0, 0, 0} },
+{"scas", 0, 0xae, Z_, W|IsString, { 0, 0, 0} },
+{"ssca", 0, 0xae, Z_, W|IsString, { 0, 0, 0} },
+{"stos", 0, 0xaa, Z_, W|IsString, { 0, 0, 0} },
+{"ssto", 0, 0xaa, Z_, W|IsString, { 0, 0, 0} },
+{"xlat", 0, 0xd7, Z_, IsString, { 0, 0, 0} },
 
 /* bit manipulation */
-{"bsf", 2, 0x0fbc, _, Modrm|ReverseRegRegmem, { Reg|Mem, Reg, 0} },
-{"bsr", 2, 0x0fbd, _, Modrm|ReverseRegRegmem, { Reg|Mem, Reg, 0} },
-{"bt", 2, 0x0fa3, _, Modrm, { Reg, Reg|Mem, 0} },
+{"bsf", 2, 0x0fbc, Z_, Modrm|ReverseRegRegmem, { Reg|Mem, Reg, 0} },
+{"bsr", 2, 0x0fbd, Z_, Modrm|ReverseRegRegmem, { Reg|Mem, Reg, 0} },
+{"bt", 2, 0x0fa3, Z_, Modrm, { Reg, Reg|Mem, 0} },
 {"bt", 2, 0x0fba, 4, Modrm, { Imm8, Reg|Mem, 0} },
-{"btc", 2, 0x0fbb, _, Modrm, { Reg, Reg|Mem, 0} },
+{"btc", 2, 0x0fbb, Z_, Modrm, { Reg, Reg|Mem, 0} },
 {"btc", 2, 0x0fba, 7, Modrm, { Imm8, Reg|Mem, 0} },
-{"btr", 2, 0x0fb3, _, Modrm, { Reg, Reg|Mem, 0} },
+{"btr", 2, 0x0fb3, Z_, Modrm, { Reg, Reg|Mem, 0} },
 {"btr", 2, 0x0fba, 6, Modrm, { Imm8, Reg|Mem, 0} },
-{"bts", 2, 0x0fab, _, Modrm, { Reg, Reg|Mem, 0} },
+{"bts", 2, 0x0fab, Z_, Modrm, { Reg, Reg|Mem, 0} },
 {"bts", 2, 0x0fba, 5, Modrm, { Imm8, Reg|Mem, 0} },
 
 /* interrupts & op. sys insns */
@@ -446,30 +446,30 @@ static const template i386_optab[] = {
    int 3 insn. */
 #define INT_OPCODE 0xcd
 #define INT3_OPCODE 0xcc
-{"int", 1, 0xcd, _, 0, { Imm8, 0, 0} },
-{"int3", 0, 0xcc, _, 0, { 0, 0, 0} },
-{"into", 0, 0xce, _, 0, { 0, 0, 0} },
-{"iret", 0, 0xcf, _, Data32, { 0, 0, 0} },
-{"iretw", 0, 0xcf, _, Data16, { 0, 0, 0} },
+{"int", 1, 0xcd, Z_, 0, { Imm8, 0, 0} },
+{"int3", 0, 0xcc, Z_, 0, { 0, 0, 0} },
+{"into", 0, 0xce, Z_, 0, { 0, 0, 0} },
+{"iret", 0, 0xcf, Z_, Data32, { 0, 0, 0} },
+{"iretw", 0, 0xcf, Z_, Data16, { 0, 0, 0} },
 /* i386sl, i486sl, later 486, and Pentium */
-{"rsm", 0, 0x0faa, _, 0,{ 0, 0, 0} },
+{"rsm", 0, 0x0faa, Z_, 0,{ 0, 0, 0} },
 
-{"boundl", 2, 0x62, _, Modrm|Data32, { Reg32, Mem, 0} },
-{"boundw", 2, 0x62, _, Modrm|Data16, { Reg16, Mem, 0} },
+{"boundl", 2, 0x62, Z_, Modrm|Data32, { Reg32, Mem, 0} },
+{"boundw", 2, 0x62, Z_, Modrm|Data16, { Reg16, Mem, 0} },
 
-{"hlt", 0, 0xf4, _, 0, { 0, 0, 0} },
-{"wait", 0, 0x9b, _, 0, { 0, 0, 0} },
+{"hlt", 0, 0xf4, Z_, 0, { 0, 0, 0} },
+{"wait", 0, 0x9b, Z_, 0, { 0, 0, 0} },
 /* nop is actually 'xchgl %eax, %eax' */
-{"nop", 0, 0x90, _, 0, { 0, 0, 0} },
+{"nop", 0, 0x90, Z_, 0, { 0, 0, 0} },
 
 /* protection control */
-{"arpl", 2, 0x63, _, Modrm, { Reg16, Reg16|Mem, 0} },
-{"lar", 2, 0x0f02, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
+{"arpl", 2, 0x63, Z_, Modrm, { Reg16, Reg16|Mem, 0} },
+{"lar", 2, 0x0f02, Z_, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
 {"lgdt", 1, 0x0f01, 2, Modrm, { Mem, 0, 0} },
 {"lidt", 1, 0x0f01, 3, Modrm, { Mem, 0, 0} },
 {"lldt", 1, 0x0f00, 2, Modrm, { WordReg|Mem, 0, 0} },
 {"lmsw", 1, 0x0f01, 6, Modrm, { WordReg|Mem, 0, 0} },
-{"lsl", 2, 0x0f03, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
+{"lsl", 2, 0x0f03, Z_, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
 {"ltr", 1, 0x0f00, 3, Modrm, { WordReg|Mem, 0, 0} },
 
 {"sgdt", 1, 0x0f01, 0, Modrm, { Mem, 0, 0} },
@@ -484,10 +484,10 @@ static const template i386_optab[] = {
 /* floating point instructions */
 
 /* load */
-{"fld", 1, 0xd9c0, _, ShortForm, { FloatReg, 0, 0} }, /* register */
+{"fld", 1, 0xd9c0, Z_, ShortForm, { FloatReg, 0, 0} }, /* register */
 {"flds", 1, 0xd9, 0, Modrm, { Mem, 0, 0} },		/* %st0 <-- mem float */
 {"fldl", 1, 0xdd, 0, Modrm, { Mem, 0, 0} },		/* %st0 <-- mem double */
-{"fldl", 1, 0xd9c0, _, ShortForm, { FloatReg, 0, 0} }, /* register */
+{"fldl", 1, 0xd9c0, Z_, ShortForm, { FloatReg, 0, 0} }, /* register */
 {"fild", 1, 0xdf, 0, Modrm, { Mem, 0, 0} },		/* %st0 <-- mem word (16) */
 {"fildl", 1, 0xdb, 0, Modrm, { Mem, 0, 0} },	/* %st0 <-- mem dword (32) */
 {"fildq",1, 0xdf, 5, Modrm, { Mem, 0, 0} },		/* %st0 <-- mem qword (64) */
@@ -496,18 +496,18 @@ static const template i386_optab[] = {
 {"fbld", 1, 0xdf, 4, Modrm, { Mem, 0, 0} },		/* %st0 <-- mem bcd */
 
 /* store (no pop) */
-{"fst", 1, 0xddd0, _, ShortForm, { FloatReg, 0, 0} }, /* register */
+{"fst", 1, 0xddd0, Z_, ShortForm, { FloatReg, 0, 0} }, /* register */
 {"fsts", 1, 0xd9, 2, Modrm, { Mem, 0, 0} },		/* %st0 --> mem float */
 {"fstl", 1, 0xdd, 2, Modrm, { Mem, 0, 0} },		/* %st0 --> mem double */
-{"fstl", 1, 0xddd0, _, ShortForm, { FloatReg, 0, 0} }, /* register */
+{"fstl", 1, 0xddd0, Z_, ShortForm, { FloatReg, 0, 0} }, /* register */
 {"fist", 1, 0xdf, 2, Modrm, { Mem, 0, 0} },		/* %st0 --> mem word (16) */
 {"fistl", 1, 0xdb, 2, Modrm, { Mem, 0, 0} },	/* %st0 --> mem dword (32) */
 
 /* store (with pop) */
-{"fstp", 1, 0xddd8, _, ShortForm, { FloatReg, 0, 0} }, /* register */
+{"fstp", 1, 0xddd8, Z_, ShortForm, { FloatReg, 0, 0} }, /* register */
 {"fstps", 1, 0xd9, 3, Modrm, { Mem, 0, 0} },	/* %st0 --> mem float */
 {"fstpl", 1, 0xdd, 3, Modrm, { Mem, 0, 0} },	/* %st0 --> mem double */
-{"fstpl", 1, 0xddd8, _, ShortForm, { FloatReg, 0, 0} }, /* register */
+{"fstpl", 1, 0xddd8, Z_, ShortForm, { FloatReg, 0, 0} }, /* register */
 {"fistp", 1, 0xdf, 3, Modrm, { Mem, 0, 0} },	/* %st0 --> mem word (16) */
 {"fistpl",1, 0xdb, 3, Modrm, { Mem, 0, 0} },	/* %st0 --> mem dword (32) */
 {"fistpq",1, 0xdf, 7, Modrm, { Mem, 0, 0} },	/* %st0 --> mem qword (64) */
@@ -516,54 +516,54 @@ static const template i386_optab[] = {
 {"fbstp", 1, 0xdf, 6, Modrm, { Mem, 0, 0} },	/* %st0 --> mem bcd */
 
 /* exchange %st<n> with %st0 */
-{"fxch", 1, 0xd9c8, _, ShortForm, { FloatReg, 0, 0} },
-{"fxch", 0, 0xd9c9, _, 0, { 0, 0, 0} }, /* alias for fxch %st, %st(1) */
+{"fxch", 1, 0xd9c8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fxch", 0, 0xd9c9, Z_, 0, { 0, 0, 0} }, /* alias for fxch %st, %st(1) */
 
 /* comparison (without pop) */
-{"fcom", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
+{"fcom", 1, 0xd8d0, Z_, ShortForm, { FloatReg, 0, 0} },
 {"fcoms", 1, 0xd8, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
 {"ficoml", 1, 0xda, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword  */
 {"fcoml", 1, 0xdc, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
-{"fcoml", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
+{"fcoml", 1, 0xd8d0, Z_, ShortForm, { FloatReg, 0, 0} },
 {"ficoms", 1, 0xde, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word */
 
 /* comparison (with pop) */
-{"fcomp", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
-{"fcomp", 0, 0xd8d9, _, 0, {0, 0, 0} },   /* fcomp %st, %st(1) */
+{"fcomp", 1, 0xd8d8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fcomp", 0, 0xd8d9, Z_, 0, {0, 0, 0} },   /* fcomp %st, %st(1) */
 {"fcomps", 1, 0xd8, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
 {"ficompl", 1, 0xda, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword  */
 {"fcompl", 1, 0xdc, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
-{"fcompl", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
+{"fcompl", 1, 0xd8d8, Z_, ShortForm, { FloatReg, 0, 0} },
 {"ficomps", 1, 0xde, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word */
-{"fcompp", 0, 0xded9, _, 0, { 0, 0, 0} },	/* compare %st0, %st1 & pop 2 */
+{"fcompp", 0, 0xded9, Z_, 0, { 0, 0, 0} },	/* compare %st0, %st1 & pop 2 */
 
 /* unordered comparison (with pop) */
-{"fucom", 1, 0xdde0, _, ShortForm, { FloatReg, 0, 0} },
-{"fucomp", 1, 0xdde8, _, ShortForm, { FloatReg, 0, 0} },
-{"fucompp", 0, 0xdae9, _, 0, { 0, 0, 0} }, /* ucompare %st0, %st1 & pop twice */
+{"fucom", 1, 0xdde0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fucomp", 1, 0xdde8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fucompp", 0, 0xdae9, Z_, 0, { 0, 0, 0} }, /* ucompare %st0, %st1 & pop twice */
 
-{"ftst", 0, 0xd9e4, _, 0, { 0, 0, 0} },	/* test %st0 */
-{"fxam", 0, 0xd9e5, _, 0, { 0, 0, 0} },	/* examine %st0 */
+{"ftst", 0, 0xd9e4, Z_, 0, { 0, 0, 0} },	/* test %st0 */
+{"fxam", 0, 0xd9e5, Z_, 0, { 0, 0, 0} },	/* examine %st0 */
 
 /* load constants into %st0 */
-{"fld1", 0, 0xd9e8, _, 0, { 0, 0, 0} },	/* %st0 <-- 1.0 */
-{"fldl2t", 0, 0xd9e9, _, 0, { 0, 0, 0} },	/* %st0 <-- log2(10) */
-{"fldl2e", 0, 0xd9ea, _, 0, { 0, 0, 0} },	/* %st0 <-- log2(e) */
-{"fldpi", 0, 0xd9eb, _, 0, { 0, 0, 0} },	/* %st0 <-- pi */
-{"fldlg2", 0, 0xd9ec, _, 0, { 0, 0, 0} },	/* %st0 <-- log10(2) */
-{"fldln2", 0, 0xd9ed, _, 0, { 0, 0, 0} },	/* %st0 <-- ln(2) */
-{"fldz", 0, 0xd9ee, _, 0, { 0, 0, 0} },	/* %st0 <-- 0.0 */
+{"fld1", 0, 0xd9e8, Z_, 0, { 0, 0, 0} },	/* %st0 <-- 1.0 */
+{"fldl2t", 0, 0xd9e9, Z_, 0, { 0, 0, 0} },	/* %st0 <-- log2(10) */
+{"fldl2e", 0, 0xd9ea, Z_, 0, { 0, 0, 0} },	/* %st0 <-- log2(e) */
+{"fldpi", 0, 0xd9eb, Z_, 0, { 0, 0, 0} },	/* %st0 <-- pi */
+{"fldlg2", 0, 0xd9ec, Z_, 0, { 0, 0, 0} },	/* %st0 <-- log10(2) */
+{"fldln2", 0, 0xd9ed, Z_, 0, { 0, 0, 0} },	/* %st0 <-- ln(2) */
+{"fldz", 0, 0xd9ee, Z_, 0, { 0, 0, 0} },	/* %st0 <-- 0.0 */
 
 /* arithmetic */
 
 /* add */
-{"fadd", 1, 0xd8c0, _, ShortForm, { FloatReg, 0, 0} },
-{"fadd", 2, 0xd8c0, _, ShortForm|FloatD, { FloatReg, FloatAcc, 0} },
-{"fadd", 0, 0xdcc1, _, 0, { 0, 0, 0} }, /* alias for fadd %st, %st(1) */
-{"faddp", 1, 0xdec0, _, ShortForm, { FloatReg, 0, 0} },
-{"faddp", 2, 0xdec0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"faddp", 2, 0xdec0, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"faddp", 0, 0xdec1, _, 0, { 0, 0, 0} }, /* alias for faddp %st, %st(1) */
+{"fadd", 1, 0xd8c0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fadd", 2, 0xd8c0, Z_, ShortForm|FloatD, { FloatReg, FloatAcc, 0} },
+{"fadd", 0, 0xdcc1, Z_, 0, { 0, 0, 0} }, /* alias for fadd %st, %st(1) */
+{"faddp", 1, 0xdec0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"faddp", 2, 0xdec0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"faddp", 2, 0xdec0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"faddp", 0, 0xdec1, Z_, 0, { 0, 0, 0} }, /* alias for faddp %st, %st(1) */
 {"fadds", 1, 0xd8, 0, Modrm, { Mem, 0, 0} },
 {"fiaddl", 1, 0xda, 0, Modrm, { Mem, 0, 0} },
 {"faddl", 1, 0xdc, 0, Modrm, { Mem, 0, 0} },
@@ -572,22 +572,22 @@ static const template i386_optab[] = {
 /* sub */
 /* Note:  intel has decided that certain of these operations are reversed
    in assembler syntax. */
-{"fsub", 1, 0xd8e0, _, ShortForm, { FloatReg, 0, 0} },
-{"fsub", 2, 0xd8e0, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fsub", 1, 0xd8e0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fsub", 2, 0xd8e0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fsub", 2, 0xdce8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsub", 2, 0xdce8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fsub", 2, 0xdce0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsub", 2, 0xdce0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fsub", 0, 0xdce1, _, 0, { 0, 0, 0} },
-{"fsubp", 1, 0xdee8, _, ShortForm, { FloatReg, 0, 0} },
-{"fsubp", 2, 0xdee8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fsub", 0, 0xdce1, Z_, 0, { 0, 0, 0} },
+{"fsubp", 1, 0xdee8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fsubp", 2, 0xdee8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fsubp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fsubp", 0, 0xdee9, _, 0, { 0, 0, 0} },
+{"fsubp", 2, 0xdee8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubp", 0, 0xdee9, Z_, 0, { 0, 0, 0} },
 #else
-{"fsubp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fsubp", 0, 0xdee1, _, 0, { 0, 0, 0} },
+{"fsubp", 2, 0xdee0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubp", 0, 0xdee1, Z_, 0, { 0, 0, 0} },
 #endif
 {"fsubs", 1, 0xd8, 4, Modrm, { Mem, 0, 0} },
 {"fisubl", 1, 0xda, 4, Modrm, { Mem, 0, 0} },
@@ -595,22 +595,22 @@ static const template i386_optab[] = {
 {"fisubs", 1, 0xde, 4, Modrm, { Mem, 0, 0} },
 
 /* sub reverse */
-{"fsubr", 1, 0xd8e8, _, ShortForm, { FloatReg, 0, 0} },
-{"fsubr", 2, 0xd8e8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fsubr", 1, 0xd8e8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fsubr", 2, 0xd8e8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fsubr", 2, 0xdce0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubr", 2, 0xdce0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fsubr", 2, 0xdce8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubr", 2, 0xdce8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fsubr", 0, 0xdce9, _, 0, { 0, 0, 0} },
-{"fsubrp", 1, 0xdee0, _, ShortForm, { FloatReg, 0, 0} },
-{"fsubrp", 2, 0xdee0, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fsubr", 0, 0xdce9, Z_, 0, { 0, 0, 0} },
+{"fsubrp", 1, 0xdee0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fsubrp", 2, 0xdee0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fsubrp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fsubrp", 0, 0xdee1, _, 0, { 0, 0, 0} },
+{"fsubrp", 2, 0xdee0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubrp", 0, 0xdee1, Z_, 0, { 0, 0, 0} },
 #else
-{"fsubrp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fsubrp", 0, 0xdee9, _, 0, { 0, 0, 0} },
+{"fsubrp", 2, 0xdee8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubrp", 0, 0xdee9, Z_, 0, { 0, 0, 0} },
 #endif
 {"fsubrs", 1, 0xd8, 5, Modrm, { Mem, 0, 0} },
 {"fisubrl", 1, 0xda, 5, Modrm, { Mem, 0, 0} },
@@ -618,13 +618,13 @@ static const template i386_optab[] = {
 {"fisubrs", 1, 0xde, 5, Modrm, { Mem, 0, 0} },
 
 /* mul */
-{"fmul", 1, 0xd8c8, _, ShortForm, { FloatReg, 0, 0} },
-{"fmul", 2, 0xd8c8, _, ShortForm|FloatD, { FloatReg, FloatAcc, 0} },
-{"fmul", 0, 0xdcc9, _, 0, { 0, 0, 0} },
-{"fmulp", 1, 0xdec8, _, ShortForm, { FloatReg, 0, 0} },
-{"fmulp", 2, 0xdec8, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fmulp", 2, 0xdec8, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fmulp", 0, 0xdec9, _, 0, { 0, 0, 0} },
+{"fmul", 1, 0xd8c8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fmul", 2, 0xd8c8, Z_, ShortForm|FloatD, { FloatReg, FloatAcc, 0} },
+{"fmul", 0, 0xdcc9, Z_, 0, { 0, 0, 0} },
+{"fmulp", 1, 0xdec8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fmulp", 2, 0xdec8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fmulp", 2, 0xdec8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fmulp", 0, 0xdec9, Z_, 0, { 0, 0, 0} },
 {"fmuls", 1, 0xd8, 1, Modrm, { Mem, 0, 0} },
 {"fimull", 1, 0xda, 1, Modrm, { Mem, 0, 0} },
 {"fmull", 1, 0xdc, 1, Modrm, { Mem, 0, 0} },
@@ -633,22 +633,22 @@ static const template i386_optab[] = {
 /* div */
 /* Note:  intel has decided that certain of these operations are reversed
    in assembler syntax. */
-{"fdiv", 1, 0xd8f0, _, ShortForm, { FloatReg, 0, 0} },
-{"fdiv", 2, 0xd8f0, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fdiv", 1, 0xd8f0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fdiv", 2, 0xd8f0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fdiv", 2, 0xdcf8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdiv", 2, 0xdcf8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fdiv", 2, 0xdcf0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdiv", 2, 0xdcf0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fdiv", 0, 0xdcf1, _, 0, { 0, 0, 0} },
-{"fdivp", 1, 0xdef8, _, ShortForm, { FloatReg, 0, 0} },
-{"fdivp", 2, 0xdef8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fdiv", 0, 0xdcf1, Z_, 0, { 0, 0, 0} },
+{"fdivp", 1, 0xdef8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fdivp", 2, 0xdef8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fdivp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fdivp", 0, 0xdef9, _, 0, { 0, 0, 0} },
+{"fdivp", 2, 0xdef8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivp", 0, 0xdef9, Z_, 0, { 0, 0, 0} },
 #else
-{"fdivp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fdivp", 0, 0xdef1, _, 0, { 0, 0, 0} },
+{"fdivp", 2, 0xdef0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivp", 0, 0xdef1, Z_, 0, { 0, 0, 0} },
 #endif
 {"fdivs", 1, 0xd8, 6, Modrm, { Mem, 0, 0} },
 {"fidivl", 1, 0xda, 6, Modrm, { Mem, 0, 0} },
@@ -656,62 +656,62 @@ static const template i386_optab[] = {
 {"fidivs", 1, 0xde, 6, Modrm, { Mem, 0, 0} },
 
 /* div reverse */
-{"fdivr", 1, 0xd8f8, _, ShortForm, { FloatReg, 0, 0} },
-{"fdivr", 2, 0xd8f8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fdivr", 1, 0xd8f8, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fdivr", 2, 0xd8f8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fdivr", 2, 0xdcf0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivr", 2, 0xdcf0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fdivr", 2, 0xdcf8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivr", 2, 0xdcf8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fdivr", 0, 0xdcf9, _, 0, { 0, 0, 0} },
-{"fdivrp", 1, 0xdef0, _, ShortForm, { FloatReg, 0, 0} },
-{"fdivrp", 2, 0xdef0, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fdivr", 0, 0xdcf9, Z_, 0, { 0, 0, 0} },
+{"fdivrp", 1, 0xdef0, Z_, ShortForm, { FloatReg, 0, 0} },
+{"fdivrp", 2, 0xdef0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
-{"fdivrp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fdivrp", 0, 0xdef1, _, 0, { 0, 0, 0} },
+{"fdivrp", 2, 0xdef0, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivrp", 0, 0xdef1, Z_, 0, { 0, 0, 0} },
 #else
-{"fdivrp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
-{"fdivrp", 0, 0xdef9, _, 0, { 0, 0, 0} },
+{"fdivrp", 2, 0xdef8, Z_, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivrp", 0, 0xdef9, Z_, 0, { 0, 0, 0} },
 #endif
 {"fdivrs", 1, 0xd8, 7, Modrm, { Mem, 0, 0} },
 {"fidivrl", 1, 0xda, 7, Modrm, { Mem, 0, 0} },
 {"fdivrl", 1, 0xdc, 7, Modrm, { Mem, 0, 0} },
 {"fidivrs", 1, 0xde, 7, Modrm, { Mem, 0, 0} },
 
-{"f2xm1", 0,   0xd9f0, _, 0, { 0, 0, 0} },
-{"fyl2x", 0,   0xd9f1, _, 0, { 0, 0, 0} },
-{"fptan", 0,   0xd9f2, _, 0, { 0, 0, 0} },
-{"fpatan", 0,  0xd9f3, _, 0, { 0, 0, 0} },
-{"fxtract", 0, 0xd9f4, _, 0, { 0, 0, 0} },
-{"fprem1", 0,  0xd9f5, _, 0, { 0, 0, 0} },
-{"fdecstp", 0,  0xd9f6, _, 0, { 0, 0, 0} },
-{"fincstp", 0,  0xd9f7, _, 0, { 0, 0, 0} },
-{"fprem", 0,   0xd9f8, _, 0, { 0, 0, 0} },
-{"fyl2xp1", 0, 0xd9f9, _, 0, { 0, 0, 0} },
-{"fsqrt", 0,   0xd9fa, _, 0, { 0, 0, 0} },
-{"fsincos", 0, 0xd9fb, _, 0, { 0, 0, 0} },
-{"frndint", 0, 0xd9fc, _, 0, { 0, 0, 0} },
-{"fscale", 0,  0xd9fd, _, 0, { 0, 0, 0} },
-{"fsin", 0,    0xd9fe, _, 0, { 0, 0, 0} },
-{"fcos", 0,    0xd9ff, _, 0, { 0, 0, 0} },
+{"f2xm1", 0,   0xd9f0, Z_, 0, { 0, 0, 0} },
+{"fyl2x", 0,   0xd9f1, Z_, 0, { 0, 0, 0} },
+{"fptan", 0,   0xd9f2, Z_, 0, { 0, 0, 0} },
+{"fpatan", 0,  0xd9f3, Z_, 0, { 0, 0, 0} },
+{"fxtract", 0, 0xd9f4, Z_, 0, { 0, 0, 0} },
+{"fprem1", 0,  0xd9f5, Z_, 0, { 0, 0, 0} },
+{"fdecstp", 0,  0xd9f6, Z_, 0, { 0, 0, 0} },
+{"fincstp", 0,  0xd9f7, Z_, 0, { 0, 0, 0} },
+{"fprem", 0,   0xd9f8, Z_, 0, { 0, 0, 0} },
+{"fyl2xp1", 0, 0xd9f9, Z_, 0, { 0, 0, 0} },
+{"fsqrt", 0,   0xd9fa, Z_, 0, { 0, 0, 0} },
+{"fsincos", 0, 0xd9fb, Z_, 0, { 0, 0, 0} },
+{"frndint", 0, 0xd9fc, Z_, 0, { 0, 0, 0} },
+{"fscale", 0,  0xd9fd, Z_, 0, { 0, 0, 0} },
+{"fsin", 0,    0xd9fe, Z_, 0, { 0, 0, 0} },
+{"fcos", 0,    0xd9ff, Z_, 0, { 0, 0, 0} },
 
-{"fchs", 0, 0xd9e0, _, 0, { 0, 0, 0} },
-{"fabs", 0, 0xd9e1, _, 0, { 0, 0, 0} },
+{"fchs", 0, 0xd9e0, Z_, 0, { 0, 0, 0} },
+{"fabs", 0, 0xd9e1, Z_, 0, { 0, 0, 0} },
 
 /* processor control */
-{"fninit", 0, 0xdbe3, _, 0,	{ 0, 0, 0} },
-{"finit",  0, 0xdbe3, _, FWait, { 0, 0, 0} },
+{"fninit", 0, 0xdbe3, Z_, 0,	{ 0, 0, 0} },
+{"finit",  0, 0xdbe3, Z_, FWait, { 0, 0, 0} },
 {"fldcw",  1,	0xd9, 5, Modrm,		{ Mem, 0, 0} },
 {"fnstcw", 1,	0xd9, 7, Modrm,		{ Mem, 0, 0} },
 {"fstcw",  1,	0xd9, 7, FWait|Modrm,	{ Mem, 0, 0} },
-{"fnstsw", 1, 0xdfe0, _, 0,	{ Acc, 0, 0} },
+{"fnstsw", 1, 0xdfe0, Z_, 0,	{ Acc, 0, 0} },
 {"fnstsw", 1,	0xdd, 7, Modrm,		{ Mem, 0, 0} },
-{"fnstsw", 0, 0xdfe0, _, 0,	{ 0, 0, 0} },
-{"fstsw",  1, 0xdfe0, _, FWait,	{ Acc, 0, 0} },
+{"fnstsw", 0, 0xdfe0, Z_, 0,	{ 0, 0, 0} },
+{"fstsw",  1, 0xdfe0, Z_, FWait,	{ Acc, 0, 0} },
 {"fstsw",  1,	0xdd, 7, FWait|Modrm,	{ Mem, 0, 0} },
-{"fstsw",  0, 0xdfe0, _, FWait,	{ 0, 0, 0} },
-{"fnclex", 0, 0xdbe2, _, 0,	{ 0, 0, 0} },
-{"fclex",  0, 0xdbe2, _, FWait,	{ 0, 0, 0} },
+{"fstsw",  0, 0xdfe0, Z_, FWait,	{ 0, 0, 0} },
+{"fnclex", 0, 0xdbe2, Z_, 0,	{ 0, 0, 0} },
+{"fclex",  0, 0xdbe2, Z_, FWait,	{ 0, 0, 0} },
 {"fnstenv",1,	0xd9, 6, Modrm,		{ Mem, 0, 0} },
 {"fstenv", 1,	0xd9, 6, FWait|Modrm,	{ Mem, 0, 0} },
 {"fldenv", 1,	0xd9, 4, Modrm,		{ Mem, 0, 0} },
@@ -725,151 +725,151 @@ static const template i386_optab[] = {
 {"fstenvs", 1,	0xd9, 6, FWait|Modrm|Data16, { Mem, 0, 0} },
 {"fldenvs", 1,	0xd9, 4, Modrm|Data16,	{ Mem, 0, 0} },
 
-{"ffree",  1, 0xddc0, _, ShortForm,	{ FloatReg, 0, 0} },
+{"ffree",  1, 0xddc0, Z_, ShortForm,	{ FloatReg, 0, 0} },
 /* P6:free st(i), pop st */
-{"ffreep", 1, 0xdfc0, _, ShortForm,	{ FloatReg, 0, 0} },
-{"fnop",   0, 0xd9d0, _, 0,	{ 0, 0, 0} },
+{"ffreep", 1, 0xdfc0, Z_, ShortForm,	{ FloatReg, 0, 0} },
+{"fnop",   0, 0xd9d0, Z_, 0,	{ 0, 0, 0} },
 #define FWAIT_OPCODE 0x9b
-{"fwait",  0,	0x9b, _, 0,	{ 0, 0, 0} },
+{"fwait",  0,	0x9b, Z_, 0,	{ 0, 0, 0} },
 
 /*
   opcode prefixes; we allow them as seperate insns too
   (see prefix table below)
 */
-{"aword", 0, 0x67, _, 0, { 0, 0, 0} },
-{"addr16", 0, 0x67, _, 0, { 0, 0, 0} },
-{"word", 0, 0x66, _, 0, { 0, 0, 0} },
-{"data16", 0, 0x66, _, 0, { 0, 0, 0} },
-{"lock", 0, 0xf0, _, 0, { 0, 0, 0} },
-{"cs", 0, 0x2e, _, 0, { 0, 0, 0} },
-{"ds", 0, 0x3e, _, 0, { 0, 0, 0} },
-{"es", 0, 0x26, _, 0, { 0, 0, 0} },
-{"fs", 0, 0x64, _, 0, { 0, 0, 0} },
-{"gs", 0, 0x65, _, 0, { 0, 0, 0} },
-{"ss", 0, 0x36, _, 0, { 0, 0, 0} },
-{"rep", 0, 0xf3, _, 0, { 0, 0, 0} },
-{"repe", 0, 0xf3, _, 0, { 0, 0, 0} },
-{"repz", 0, 0xf3, _, 0, { 0, 0, 0} },
-{"repne", 0, 0xf2, _, 0, { 0, 0, 0} },
-{"repnz", 0, 0xf2, _, 0, { 0, 0, 0} },
+{"aword", 0, 0x67, Z_, 0, { 0, 0, 0} },
+{"addr16", 0, 0x67, Z_, 0, { 0, 0, 0} },
+{"word", 0, 0x66, Z_, 0, { 0, 0, 0} },
+{"data16", 0, 0x66, Z_, 0, { 0, 0, 0} },
+{"lock", 0, 0xf0, Z_, 0, { 0, 0, 0} },
+{"cs", 0, 0x2e, Z_, 0, { 0, 0, 0} },
+{"ds", 0, 0x3e, Z_, 0, { 0, 0, 0} },
+{"es", 0, 0x26, Z_, 0, { 0, 0, 0} },
+{"fs", 0, 0x64, Z_, 0, { 0, 0, 0} },
+{"gs", 0, 0x65, Z_, 0, { 0, 0, 0} },
+{"ss", 0, 0x36, Z_, 0, { 0, 0, 0} },
+{"rep", 0, 0xf3, Z_, 0, { 0, 0, 0} },
+{"repe", 0, 0xf3, Z_, 0, { 0, 0, 0} },
+{"repz", 0, 0xf3, Z_, 0, { 0, 0, 0} },
+{"repne", 0, 0xf2, Z_, 0, { 0, 0, 0} },
+{"repnz", 0, 0xf2, Z_, 0, { 0, 0, 0} },
 
 /* 486 extensions */
 
-{"bswap", 1, 0x0fc8, _, ShortForm, { Reg32,0,0 } },
-{"xadd", 2, 0x0fc0, _, W|Modrm, { Reg, Reg|Mem, 0 } },
-{"cmpxchg", 2, 0x0fb0, _, W|Modrm, { Reg, Reg|Mem, 0 } },
-{"invd", 0, 0x0f08, _, 0, { 0, 0, 0} },
-{"wbinvd", 0, 0x0f09, _, 0, { 0, 0, 0} },
+{"bswap", 1, 0x0fc8, Z_, ShortForm, { Reg32,0,0 } },
+{"xadd", 2, 0x0fc0, Z_, W|Modrm, { Reg, Reg|Mem, 0 } },
+{"cmpxchg", 2, 0x0fb0, Z_, W|Modrm, { Reg, Reg|Mem, 0 } },
+{"invd", 0, 0x0f08, Z_, 0, { 0, 0, 0} },
+{"wbinvd", 0, 0x0f09, Z_, 0, { 0, 0, 0} },
 {"invlpg", 1, 0x0f01, 7, Modrm, { Mem, 0, 0} },
 
 /* 586 and late 486 extensions */
-{"cpuid", 0, 0x0fa2, _, 0, { 0, 0, 0} },
+{"cpuid", 0, 0x0fa2, Z_, 0, { 0, 0, 0} },
 
 /* Pentium extensions */
-{"wrmsr", 0, 0x0f30, _, 0, { 0, 0, 0} },
-{"rdtsc", 0, 0x0f31, _, 0, { 0, 0, 0} },
-{"rdmsr", 0, 0x0f32, _, 0, { 0, 0, 0} },
+{"wrmsr", 0, 0x0f30, Z_, 0, { 0, 0, 0} },
+{"rdtsc", 0, 0x0f31, Z_, 0, { 0, 0, 0} },
+{"rdmsr", 0, 0x0f32, Z_, 0, { 0, 0, 0} },
 {"cmpxchg8b", 1, 0x0fc7, 1, Modrm, { Mem, 0, 0} },
 
 /* Pentium Pro extensions */
-{"rdpmc", 0, 0x0f33, _, 0, { 0, 0, 0} },
+{"rdpmc", 0, 0x0f33, Z_, 0, { 0, 0, 0} },
 
-{"ud2", 0, 0x0f0b, _, 0, {0, 0, 0} }, /* official undefined instr. */
+{"ud2", 0, 0x0f0b, Z_, 0, {0, 0, 0} }, /* official undefined instr. */
 
-{"cmovo",  2, 0x0f40, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovno", 2, 0x0f41, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovb",  2, 0x0f42, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovae", 2, 0x0f43, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmove",  2, 0x0f44, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovne", 2, 0x0f45, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovbe", 2, 0x0f46, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmova",  2, 0x0f47, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovs",  2, 0x0f48, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovns", 2, 0x0f49, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovp",  2, 0x0f4a, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovnp", 2, 0x0f4b, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovl",  2, 0x0f4c, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovge", 2, 0x0f4d, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovle", 2, 0x0f4e, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
-{"cmovg",  2, 0x0f4f, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovo",  2, 0x0f40, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovno", 2, 0x0f41, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovb",  2, 0x0f42, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovae", 2, 0x0f43, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmove",  2, 0x0f44, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovne", 2, 0x0f45, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovbe", 2, 0x0f46, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmova",  2, 0x0f47, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovs",  2, 0x0f48, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovns", 2, 0x0f49, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovp",  2, 0x0f4a, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovnp", 2, 0x0f4b, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovl",  2, 0x0f4c, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovge", 2, 0x0f4d, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovle", 2, 0x0f4e, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
+{"cmovg",  2, 0x0f4f, Z_, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
 
-{"fcmovb", 2, 0xdac0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmove", 2, 0xdac8, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmovbe",2, 0xdad0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmovu", 2, 0xdad8, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmovnb", 2, 0xdbc0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmovne", 2, 0xdbc8, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmovnbe",2, 0xdbd0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcmovnu", 2, 0xdbd8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovb", 2, 0xdac0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmove", 2, 0xdac8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovbe",2, 0xdad0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovu", 2, 0xdad8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovnb", 2, 0xdbc0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovne", 2, 0xdbc8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovnbe",2, 0xdbd0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcmovnu", 2, 0xdbd8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 
-{"fcomi",  2, 0xdbf0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fucomi", 2, 0xdbe8, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fcomip", 2, 0xdff0, _, ShortForm, { FloatReg, FloatAcc, 0} },
-{"fucomip",2, 0xdfe8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcomi",  2, 0xdbf0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fucomi", 2, 0xdbe8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fcomip", 2, 0xdff0, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fucomip",2, 0xdfe8, Z_, ShortForm, { FloatReg, FloatAcc, 0} },
 
 /* MMX instructions.  */
 
-{"emms",      0, 0x0f77, _, 0, { 0, 0, 0 } },
-{"movd",      2, 0x0f6e, _, Modrm, { Reg32|WordMem, RegMMX, 0 } },
-{"movd",      2, 0x0f7e, _, Modrm, { RegMMX, Reg32|WordMem, 0 } },
-{"movq",      2, 0x0f6f, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"movq",      2, 0x0f7f, _, Modrm, { RegMMX, RegMMX|WordMem, 0 } },
-{"packssdw",  2, 0x0f6b, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"packsswb",  2, 0x0f63, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"packuswb",  2, 0x0f67, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddb",     2, 0x0ffc, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddw",     2, 0x0ffd, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddd",     2, 0x0ffe, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddsb",    2, 0x0fec, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddsw",    2, 0x0fed, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddusb",   2, 0x0fdc, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"paddusw",   2, 0x0fdd, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pand",      2, 0x0fdb, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pandn",     2, 0x0fdf, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pcmpeqb",   2, 0x0f74, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pcmpeqw",   2, 0x0f75, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pcmpeqd",   2, 0x0f76, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pcmpgtb",   2, 0x0f64, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pcmpgtw",   2, 0x0f65, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pcmpgtd",   2, 0x0f66, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pmaddwd",   2, 0x0ff5, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pmulhw",    2, 0x0fe5, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pmullw",    2, 0x0fd5, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"por",       2, 0x0feb, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psllw",     2, 0x0ff1, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"emms",      0, 0x0f77, Z_, 0, { 0, 0, 0 } },
+{"movd",      2, 0x0f6e, Z_, Modrm, { Reg32|WordMem, RegMMX, 0 } },
+{"movd",      2, 0x0f7e, Z_, Modrm, { RegMMX, Reg32|WordMem, 0 } },
+{"movq",      2, 0x0f6f, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"movq",      2, 0x0f7f, Z_, Modrm, { RegMMX, RegMMX|WordMem, 0 } },
+{"packssdw",  2, 0x0f6b, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"packsswb",  2, 0x0f63, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"packuswb",  2, 0x0f67, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddb",     2, 0x0ffc, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddw",     2, 0x0ffd, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddd",     2, 0x0ffe, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddsb",    2, 0x0fec, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddsw",    2, 0x0fed, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddusb",   2, 0x0fdc, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"paddusw",   2, 0x0fdd, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pand",      2, 0x0fdb, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pandn",     2, 0x0fdf, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pcmpeqb",   2, 0x0f74, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pcmpeqw",   2, 0x0f75, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pcmpeqd",   2, 0x0f76, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pcmpgtb",   2, 0x0f64, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pcmpgtw",   2, 0x0f65, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pcmpgtd",   2, 0x0f66, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pmaddwd",   2, 0x0ff5, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pmulhw",    2, 0x0fe5, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pmullw",    2, 0x0fd5, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"por",       2, 0x0feb, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psllw",     2, 0x0ff1, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psllw",     2, 0x0f71, 6, Modrm, { Imm8, RegMMX, 0 } },
-{"pslld",     2, 0x0ff2, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pslld",     2, 0x0ff2, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"pslld",     2, 0x0f72, 6, Modrm, { Imm8, RegMMX, 0 } },
-{"psllq",     2, 0x0ff3, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psllq",     2, 0x0ff3, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psllq",     2, 0x0f73, 6, Modrm, { Imm8, RegMMX, 0 } },
-{"psraw",     2, 0x0fe1, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psraw",     2, 0x0fe1, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psraw",     2, 0x0f71, 4, Modrm, { Imm8, RegMMX, 0 } },
-{"psrad",     2, 0x0fe2, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psrad",     2, 0x0fe2, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psrad",     2, 0x0f72, 4, Modrm, { Imm8, RegMMX, 0 } },
-{"psrlw",     2, 0x0fd1, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psrlw",     2, 0x0fd1, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psrlw",     2, 0x0f71, 2, Modrm, { Imm8, RegMMX, 0 } },
-{"psrld",     2, 0x0fd2, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psrld",     2, 0x0fd2, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psrld",     2, 0x0f72, 2, Modrm, { Imm8, RegMMX, 0 } },
-{"psrlq",     2, 0x0fd3, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psrlq",     2, 0x0fd3, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"psrlq",     2, 0x0f73, 2, Modrm, { Imm8, RegMMX, 0 } },
-{"psubb",     2, 0x0ff8, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psubw",     2, 0x0ff9, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psubd",     2, 0x0ffa, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psubsb",    2, 0x0fe8, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psubsw",    2, 0x0fe9, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psubusb",   2, 0x0fd8, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"psubusw",   2, 0x0fd9, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"punpckhbw", 2, 0x0f68, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"punpckhwd", 2, 0x0f69, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"punpckhdq", 2, 0x0f6a, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"punpcklbw", 2, 0x0f60, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"punpcklwd", 2, 0x0f61, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"punpckldq", 2, 0x0f62, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pxor",      2, 0x0fef, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubb",     2, 0x0ff8, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubw",     2, 0x0ff9, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubd",     2, 0x0ffa, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubsb",    2, 0x0fe8, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubsw",    2, 0x0fe9, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubusb",   2, 0x0fd8, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"psubusw",   2, 0x0fd9, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"punpckhbw", 2, 0x0f68, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"punpckhwd", 2, 0x0f69, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"punpckhdq", 2, 0x0f6a, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"punpcklbw", 2, 0x0f60, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"punpcklwd", 2, 0x0f61, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"punpckldq", 2, 0x0f62, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pxor",      2, 0x0fef, Z_, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 
 {"", 0, 0, 0, 0, { 0, 0, 0} }	/* sentinel */
 };
-#undef _
+#undef Z_
 
 static const template *const i386_optab_end
   = i386_optab + sizeof (i386_optab)/sizeof(i386_optab[0]);

@@ -1,3 +1,8 @@
+Sun Apr 19 13:54:06 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* i386.h (Z_): Renamed from `_' to avoid clash with common alias
+	for `gettext'.
+
 start-sanitize-sky
 Mon Apr  6 17:33:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 
