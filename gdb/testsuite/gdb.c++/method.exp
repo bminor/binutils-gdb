@@ -182,7 +182,7 @@ gdb_expect {
 
 send_gdb "cont\n"
 gdb_expect {
-    -re "Continuing\r\n\r\nProgram exited normally.*$gdb_prompt $" {
+    -re "Continuing.\r\n\r\nProgram exited normally.*$gdb_prompt $" {
 	pass "finish program"
     }
     -re "Continuing.* EXIT code 0.*Program exited normally.*$gdb_prompt $" {
