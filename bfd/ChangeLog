@@ -1,3 +1,79 @@
+2000-09-14  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (elf32_hppa_link_hash_entry): Make pic_call
+	packed.  Add plabel, plt_abs packed booleans.
+	(hppa_link_hash_newfunc): Init new fields.
+	(PLABEL_PLT_ENTRY_SIZE): Define.
+	(hppa_stub_name): Use size_t len vars.
+	(hppa_add_stub): Likewise.
+	(elf32_hppa_build_stubs): Likewise.
+	(hppa_build_one_stub): Kill some compiler warnings.
+	(elf32_hppa_check_relocs): Always generate a plt entry for PLABELs
+	if dynamic linking.  Munge the local plt offsets into
+	local_got_refcounts.  Set h->plabel for all global PLABELs.  Use
+	size_t len vars.  Add assert for plabel addend.
+	(elf32_hppa_gc_sweep_hook): Sweep local plt entries too.
+	(elf32_hppa_hide_symbol): New function.
+	(elf_backend_hide_symbol): Define.
+	(elf32_hppa_adjust_dynamic_symbol): Don't throw away plt entries
+	with h->plabel set.  Don't make plt entries to have dynamic syms
+	when they have been forced local.  If plt entry is used by a
+	plabel, make it PLABEL_PLT_ENTRY_SIZE.
+	(elf32_hppa_size_dynamic_sections): Set plt_abs for init fns.
+	Set up .plt offsets for local syms.
+	(elf32_hppa_relocate_section): Initialise plt entries for local
+	syms.  Leave weak undefined plabels zero.  Make global plabel
+	relocs against function symbol, and leave the addend zero.
+	Use *ABS* DIR32 relocs instead of SEGREL32 for dynamic got relocs.
+	(elf32_hppa_finish_dynamic_symbol): Set up IPLT relocs for
+	non-dynamic syms.  Init extra plt for plabels.  Use *ABS* DIR32
+	relocs instead of SEGREL32 for dynamic got relocs.
+	(elf32_hppa_finish_dynamic_sections): Reserve one more .got entry.
+	(elf_backend_got_header_size): Adjust.
+	(elf32_hppa_set_gp): Calculate an "ideal" LTP.
+
+	* elf32-hppa.c (LONG_BRANCH_VIA_PLT): Define.
+	(hppa_type_of_stub): Use it instead of #if 0
+	(hppa_discard_copies): Use it here too.
+	(elf32_hppa_size_dynamic_sections): And here.
+
+	* elf32-hppa.c (elf32_hppa_link_hash_table): Remove `offset' field.
+	(elf32_hppa_link_hash_table_create): And here.
+	(hppa_build_one_stub): And here.  Instead keep track of stub
+	offset using _raw_size.
+	(elf32_hppa_size_stubs): Likewise.
+	(elf32_hppa_build_stubs): Likewise.
+	(hppa_size_one_stub): Likewise.  Resize reloc section too.
+
+	* elf32-hppa.c (hppa_add_stub): Correct first_init_sec and
+	first_fini_sec handling.  Don't search for reloc section or set
+	hplink->reloc_section_created here.
+	(elf32_hppa_size_stubs): Instead search for reloc sections, and
+	set reloc_section_created here.
+	(hppa_handle_PIC_calls): Set ELF_LINK_HASH_NEEDS_PLT.
+	(elf32_hppa_size_dynamic_sections): Make a .plt entry for DT_INIT
+	and DT_FINI.
+	(elf32_hppa_finish_dynamic_sections): Set DT_INIT and DT_FINI.
+
+	* elf32-hppa.c (hppa_build_one_stub): Replace `elf_hash_table (info)'
+	with `hplink->root.'.
+	(elf32_hppa_check_relocs): Likewise.
+	(elf32_hppa_gc_sweep_hook): Likewise.
+	(elf32_hppa_adjust_dynamic_symbol): Likewise.
+	(hppa_handle_PIC_calls): Likewise.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(elf32_hppa_set_gp): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+	(elf32_hppa_finish_dynamic_sections): Likewise.
+
+	From  David Huggins-Daines  <dhd@linuxcare.com>
+	* elf32-hppa.c (hppa_type_of_stub): Generate import stubs for
+	defined weak symbols in shared links.
+	(final_link_relocate): Calls to defined weak symbols in shared
+	objects must go via import stubs, as the target might not be known
+	at link time.
+
 2000-09-14  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c (sh_elf_howto_table): Moved R_SH_GOT32, R_SH_PLT32,
