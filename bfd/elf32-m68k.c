@@ -1626,8 +1626,9 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);
-	  rela.r_addend = bfd_get_32 (output_bfd,
-				      sgot->contents + (h->got_offset & ~1));
+	  rela.r_addend = bfd_get_signed_32 (output_bfd,
+					     (sgot->contents
+					      + (h->got_offset & ~1)));
 	}
       else
 	{

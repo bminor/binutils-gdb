@@ -1,3 +1,15 @@
+Mon Jun 16 14:42:14 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* elfcode.h (put_signed_word): Define.
+	(get_signed_word): Define.
+	(elf_swap_reloca_in): Use get_signed_word for the r_addend field.
+	(elf_swap_reloca_out): Use put_signed_word for the r_addend
+	field.
+	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): Use
+	bfd_get_signed_32 to set the r_addend field.
+	* elf64-mips.c (mips_elf64_swap_reloca_in): Use
+	bfd_h_get_signed_64 to set the r_addend field.
+
 Mon Jun 16 12:31:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Call
