@@ -1224,6 +1224,11 @@ _bfd_strip_section_from_output (info, s)
      orders have not yet been set up.  So why are we checking them? --
      Ian */
   os = s->output_section;
+
+  /* Handle a section that wasn't output.  */
+  if (os == NULL)
+    return;
+
   for (p = os->link_order_head, pp = NULL; p != NULL; pp = p, p = p->next)
     if (p->type == bfd_indirect_link_order
 	&& p->u.indirect.section == s)

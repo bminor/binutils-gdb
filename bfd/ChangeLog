@@ -1,3 +1,8 @@
+2001-06-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* section.c (_bfd_strip_section_from_output): Handle NULL
+	output_section.
+
 2001-06-02  H.J. Lu  <hjl@gnu.org>
 
 	* config.bfd (powerpc-*-aix*, powerpc-*-beos*, rs6000-*-*): Add
