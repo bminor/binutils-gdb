@@ -1421,7 +1421,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static enum gdb_osabi
 i386_coff_osabi_sniffer (bfd *abfd)
 {
-  if (strcmp (bfd_get_target (abfd), "coff-go32-exe") == 0)
+  if (strcmp (bfd_get_target (abfd), "coff-go32-exe") == 0
+      || strcmp (bfd_get_target (abfd), "coff-go32") == 0)
     return GDB_OSABI_GO32;
 
   return GDB_OSABI_UNKNOWN;

@@ -1,5 +1,8 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_coff_osabi_sniffer): Add "coff-go32" to the
+	list of DJGPP COFF targets.
+
 	* config/i386/tm-i386.h (REGISTER_SIZE): Remove define.
 	(NUM_GREGS, NUM_FREGS, NUM_SSE_REGS): Remove defines.
 	(FP_REGNUM, SP_REGNUM, PC_REGNUM, PS_REGNUM): Remove defines.
