@@ -1,5 +1,8 @@
 Wed Oct 19 01:26:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* binary.c (binary_set_section_contents): Set the base file
+	position from the lowest section VMA, not the start address.
+
 	* aoutx.h (NAME(aout,slurp_symbol_table)): Don't return an error
 	if there are no symbols.
 	* coffgen.c (coff_get_normalized_symtab): Likewise.
