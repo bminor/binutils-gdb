@@ -1,3 +1,7 @@
+Mon Dec  4 12:05:40 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Add support for exec-prefix.
+
 Mon Dec  4 10:22:50 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* config.guess: Recognize HP model 816 machines as having
