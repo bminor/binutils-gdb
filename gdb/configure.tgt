@@ -176,6 +176,7 @@ mips*-*-magic*)		gdb_target=embed ;;
 mips*el-*-elf*)		gdb_target=embedl ;;
 mips*-*-elf*)		gdb_target=embed ;;
 mips*-little-*)		gdb_target=littlemips ;;
+mips*-*-lnews*)		gdb_target=embedl ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix5 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
