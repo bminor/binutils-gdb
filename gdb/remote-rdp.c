@@ -1096,9 +1096,9 @@ rdp_step (void)
       char handle[4];
       CORE_ADDR pc = read_register (PC_REGNUM);
       pc = arm_get_next_pc (pc);
-      remote_rdp_insert_breakpoint (pc, &handle);
+      remote_rdp_insert_breakpoint (pc, handle);
       rdp_execute ();
-      remote_rdp_remove_breakpoint (pc, &handle);
+      remote_rdp_remove_breakpoint (pc, handle);
     }
 }
 

@@ -141,7 +141,7 @@ arm_rdi_start_remote (char *dummy)
    these to forward output from the target system and so forth.  */
 
 void
-voiddummy (void)
+voiddummy (void *dummy)
 {
   fprintf_unfiltered (gdb_stdout, "void dummy\n");
 }

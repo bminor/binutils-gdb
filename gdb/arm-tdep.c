@@ -51,8 +51,13 @@
    done.  It should not be necessary to modify the code below where
    this macro is used.  */
 
-#ifndef SIGCONTEXT_REGISTER_ADDRESS
-#define SIGCONTEXT_REGISTER_ADDRESS 0
+#ifdef SIGCONTEXT_REGISTER_ADDRESS
+#ifndef SIGCONTEXT_REGISTER_ADDRESS_P
+#define SIGCONTEXT_REGISTER_ADDRESS_P() 1
+#endif
+#else
+#define SIGCONTEXT_REGISTER_ADDRESS(SP,PC,REG) 0
+#define SIGCONTEXT_REGISTER_ADDRESS_P() 0
 #endif
 
 extern void _initialize_arm_tdep (void);
@@ -1040,7 +1045,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      to first fetch the name of the function and then pass this name
      to IN_SIGTRAMP. */
 
-  if (SIGCONTEXT_REGISTER_ADDRESS 
+  if (SIGCONTEXT_REGISTER_ADDRESS_P () 
       && (fi->signal_handler_caller || IN_SIGTRAMP (fi->pc, 0)))
     {
       CORE_ADDR sp;
