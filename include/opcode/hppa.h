@@ -205,6 +205,9 @@ static const struct pa_opcode pa_opcodes[] =
 { "nop",        0x08000240, 0xffffffff, "", pa10},      /* or 0,0,0 */
 { "copy",       0x08000240, 0xffe0ffe0, "x,t", pa10},   /* or r,0,t */
 { "mtsar",      0x01601840, 0xffe0ffff, "x", pa10}, /* mtctl r,cr11 */
+/* start-sanitize-cygnus */
+{ "mtsarcm",    0x016018c0, 0xffe0ffff, "x", pa20},
+/* end-sanitize-cygnus */
 
 /* Loads and Stores for integer registers.  */
 { "ldw",        0x48000000, 0xfc000000, "j(s,b),x", pa10},

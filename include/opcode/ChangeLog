@@ -1,7 +1,9 @@
 start-sanitize-cygnus
 Fri Jan 15 23:38:50 1999  Jeffrey A Law  (law@cygnus.com)
 
-	* Fix mask for PA2.0 floating point load instructions.
+	* hppa.h (mtsarcm): Add new PA2.0 instruction.
+
+	* hppa.h: Fix mask for PA2.0 floating point load instructions.
 
 Mon Jan 11 13:38:32 1999  Jeffrey A Law  (law@cygnus.com)
 
