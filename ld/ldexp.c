@@ -282,6 +282,17 @@ bfd_vma dot;
   etree_value_type result;
   switch (tree->type.node_code) 
       {
+      case SIZEOF_HEADERS:
+	if (allocation_done != lang_first_phase_enum) 
+	    {
+	      result = new_abs(bfd_sizeof_headers(output_bfd,
+						config.relocateable_output));
+
+	    }
+	else {
+	  result.valid = false;
+	}
+	break;
       case DEFINED:
 	result.value =
 	  ldsym_get_soft(tree->name.name) != (ldsym_type *)NULL;
@@ -323,7 +334,7 @@ bfd_vma dot;
 		      ((lang_input_statement_type*)(sdef->the_bfd->usrdata))->just_syms_flag == true) 
 		      {
 			result = new_abs(sdef->value + (sdef->section ?
-					 sdef->section->vma : 0));
+							sdef->section->vma : 0));
 		      }
 		  else {
 		    result = new_rel(sdef->value + sdef->section->output_offset, os);
@@ -423,7 +434,14 @@ bfd_vma *dotp;
 		      result.value = -result.value;
 		      break;
 		    case NEXT:
+		      if (allocation_done ==lang_allocating_phase_enum) {
+			make_abs(&result);
+			result.value = ALIGN(dot, result.value);
+		      }
+		      else {
+		      /* Return next place aligned to value */
 		      result.valid = false;
+		    }
 		      break;
 		    default:
 		      FAIL();
@@ -767,3 +785,4 @@ lang_phase_type allocation_done;
 {
   return (int)exp_get_vma(tree,(bfd_vma)def,name, allocation_done);
 }
+

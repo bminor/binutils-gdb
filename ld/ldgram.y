@@ -113,7 +113,7 @@ boolean ldgram_had_equals = false;
 %token SECTIONS  
 %token '{' '}'
 %token ALIGNMENT SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
-%token NEXT SIZEOF ADDR  SCRIPT ENDSCRIPT
+%token NEXT SIZEOF ADDR  SCRIPT ENDSCRIPT SIZEOF_HEADERS
 %token MEMORY 
 %token DSECT NOLOAD COPY INFO OVERLAY 
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
@@ -621,6 +621,8 @@ exp	:
 			{ $$ = exp_nameop(DEFINED, $3); }
 	|	INT
 			{ $$ = exp_intop($1); }
+        |	SIZEOF_HEADERS 
+			{ $$ = exp_nameop(SIZEOF_HEADERS,0); }
 
 	|	SIZEOF  '('  NAME ')'
 			{ $$ = exp_nameop($1,$3); }

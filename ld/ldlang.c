@@ -1060,7 +1060,7 @@ DEFUN(print_data_statement,(data),
   print_space();
   print_section("");
   print_space();
-  ASSERT(print_dot == data->output_vma);
+/*  ASSERT(print_dot == data->output_vma);*/
 
   print_address(data->output_vma);
   print_space();
@@ -1352,7 +1352,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
 	case lang_data_statement_enum: 
 	    {
 	      unsigned int size;
-	      s->data_statement.output_vma = dot;
+	      s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
 	      s->data_statement.output_section =
 		output_section_statement->bfd_section;
 
