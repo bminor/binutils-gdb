@@ -1,3 +1,25 @@
+2001-07-23  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiIO.c (tui_cont_sig): Update cursor position on the screen to
+	leave it in the command window.
+	(tui_redisplay_readline): Save cursor position to restore the
+	cursor after we go back from background.
+	* tuiData.h (TuiCommandInfo): Add start_line member.
+
+2001-07-23  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiStack.c (tuiUpdateLocatorFilename): Use const char*.
+	* tuiStack.h (tuiUpdateLocatorFilename): Update prototype.
+	* tuiWin.c (_initialize_tuiWin): Don't cast table of enum in calls
+	to add_set_enum_cmd.
+	* tui.c (tui_show_source): New function.
+	(tuiGetLowDisassemblyAddress): Use CORE_ADDR for newLow.
+	(tui_switch_mode): Prep or deprep readline terminal;
+	make sure the \n we return does not redo the last command.
+	* tui.h (tui_show_source): Declare.
+	(tui_out_new, tui_install_hooks, tui_remove_hooks): Likewise.
+	(tui_active, tui_initialize_io, tui_initialize_readline): Likewise.
+
 2001-07-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiIO.c (tui_initialize_io): Install tui_cont_sig signal handler
