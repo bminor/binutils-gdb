@@ -6732,22 +6732,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma offset;
       bfd_vma value;
 
-      if (sym->st_value)
-	value = sym->st_value;
-      else
-	{
-	  /* For an entity defined in a shared object, this will be
-	     NULL.  (For functions in shared objects for
-	     which we have created stubs, ST_VALUE will be non-NULL.
-	     That's because such the functions are now no longer defined
-	     in a shared object.)  */
-
-	  if ((info->shared && h->root.type == bfd_link_hash_undefined)
-	      || h->root.type == bfd_link_hash_undefweak)
-	    value = 0;
-	  else
-	    value = h->root.u.def.value;
-	}
+      value = sym->st_value;
       offset = mips_elf_global_got_index (dynobj, output_bfd, h);
       MIPS_ELF_PUT_WORD (output_bfd, value, sgot->contents + offset);
     }

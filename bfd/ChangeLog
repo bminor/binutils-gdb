@@ -1,3 +1,8 @@
+2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Always
+	initialize a GOT entry to the symbol's st_value.
+
 2003-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_obj_tdata): Move linker_section_pointers..
