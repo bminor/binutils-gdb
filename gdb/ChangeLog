@@ -1,3 +1,7 @@
+2000-07-06  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* mips-tdep.c: Replace '16' with bfd_mach_mips16 where appropriate.
+
 2000-07-06  Christopher Faylor  <cgf@cygnus.com>
 
 	* infcmd.c (attach_command): Move "stop_soon_quietly" setting

@@ -3549,12 +3549,14 @@ gdb_print_insn_mips (memaddr, info)
      it's definitely a 16-bit function.  Otherwise, we have to just
      guess that if the address passed in is odd, it's 16-bits.  */
   if (proc_desc)
-    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ? 16 : TM_PRINT_INSN_MACH;
+    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ? 
+      bfd_mach_mips16 : TM_PRINT_INSN_MACH;
   else
-    info->mach = pc_is_mips16 (memaddr) ? 16 : TM_PRINT_INSN_MACH;
+    info->mach = pc_is_mips16 (memaddr) ? 
+      bfd_mach_mips16 : TM_PRINT_INSN_MACH;
 
   /* Round down the instruction address to the appropriate boundary.  */
-  memaddr &= (info->mach == 16 ? ~1 : ~3);
+  memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
 
   /* Call the appropriate disassembler based on the target endian-ness.  */
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
