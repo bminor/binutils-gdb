@@ -1515,23 +1515,19 @@ mips_find_saved_regs (struct frame_info *fci)
 #define SIGFRAME_FPREGSAVE_OFF	\
         (SIGFRAME_REGSAVE_OFF + MIPS_NUMREGS * mips_regsize (current_gdbarch) + 3 * mips_regsize (current_gdbarch))
 #endif
-#ifndef SIGFRAME_REG_SIZE
-  /* FIXME!  Is this correct?? */
-#define SIGFRAME_REG_SIZE	mips_regsize (current_gdbarch)
-#endif
   if ((get_frame_type (fci) == SIGTRAMP_FRAME))
     {
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
 	  CORE_ADDR reg_position = (get_frame_base (fci) + SIGFRAME_REGSAVE_OFF
-				    + ireg * SIGFRAME_REG_SIZE);
+				    + ireg * mips_regsize (current_gdbarch));
 	  set_reg_offset (saved_regs, ireg, reg_position);
 	}
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
 	  CORE_ADDR reg_position = (get_frame_base (fci)
 				    + SIGFRAME_FPREGSAVE_OFF
-				    + ireg * SIGFRAME_REG_SIZE);
+				    + ireg * mips_regsize (current_gdbarch));
 	  set_reg_offset (saved_regs, mips_regnum (current_gdbarch)->fp0 + ireg, reg_position);
 	}
 
@@ -6335,9 +6331,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SIGFRAME_REGSAVE_OFF = %d\n",
 		      SIGFRAME_REGSAVE_OFF);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SIGFRAME_REG_SIZE = %d\n",
-		      SIGFRAME_REG_SIZE);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SKIP_TRAMPOLINE_CODE # %s\n",
 		      XSTRING (SKIP_TRAMPOLINE_CODE (PC)));

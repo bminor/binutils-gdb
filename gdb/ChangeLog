@@ -1,5 +1,13 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (SIGFRAME_REG_SIZE): Delete macro.
+	(mips_find_saved_regs): Replace SIGFRAME_REG_SIZE with
+	mips_regsize.
+	(mips_dump_tdep): Do not print SIGFRAME_REG_SIZE.
+	* config/mips/tm-irix6.h (SIGFRAME_REG_SIZE): Delete macro.
+	* config/mips/tm-irix5.h: Update copyright.
+	(SIGFRAME_REG_SIZE): Delete macro.
+
 	* hppa-tdep.c (hppa_value_returned_from_stack): Delete function.
 	* config/pa/tm-hppa.h (hppa_value_returned_from_stack): Delete
 	declaration.

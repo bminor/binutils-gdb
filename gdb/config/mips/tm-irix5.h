@@ -1,6 +1,7 @@
 /* Target machine description for SGI Iris under Irix 5, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2003 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,4 +45,3 @@
 #define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 2 * 4 + 8 + 4)
 #undef SIGFRAME_FPREGSAVE_OFF
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 2 * 4 + 8 + 32 * 8 + 4)
-#define SIGFRAME_REG_SIZE	8
