@@ -23,6 +23,7 @@
 #define OBJ_COFF 1
 
 #define WORKING_DOT_WORD
+#define WARN_SIGNED_OVERFLOW_WORD
 
 #include "targ-cpu.h"
 

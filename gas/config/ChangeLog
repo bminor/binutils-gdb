@@ -1,5 +1,9 @@
 Sun Sep 13 20:29:39 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* obj-coffbfd.h: define WARN_SIGNED_OVERFLOW_WORD.
+	obj-coffbfd.c (fixup_segment): check for signed .word overflow if
+	WARN_SIGNED_OVERFLOW_WORD.
+
 	* obj-coffbfd.c (fixup_segment): fixed missing parens in
 	expression checking for byte or word overflow.
 
