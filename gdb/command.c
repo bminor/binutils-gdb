@@ -1811,7 +1811,7 @@ do_setshow_command (arg, from_tty, c)
 	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
 	  break;
 	case var_auto_boolean:
-	  switch (*(enum auto_boolean*) c->var)
+	  switch (*(enum cmd_auto_boolean*) c->var)
 	    {
 	    case CMD_AUTO_BOOLEAN_TRUE:
 	      fputs_filtered ("on", stb->stream);

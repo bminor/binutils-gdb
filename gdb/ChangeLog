@@ -1,3 +1,8 @@
+2000-07-11  Scott Bambrough <scottb@netwinder.org>
+
+	* command.c (do_setshow_command): Fix typo in var_auto_boolean
+	case.
+
 Tue Jul 11 20:38:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c: General cleanup.  Delete all #if 0 code.  Convert
