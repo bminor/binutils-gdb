@@ -2,6 +2,7 @@
 #name: MIPS hardware rol/ror
 #source: rol.s
 #stderr: rol-hw.l
+#as: -32
 
 # Test the rol and ror macros.
 

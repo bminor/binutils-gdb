@@ -423,7 +423,7 @@ if { [istarget mips*-*-*] } then {
     run_dump_test_arches "blt"		[mips_arch_list_matching mips2]
     run_dump_test_arches "bltu"		[mips_arch_list_matching mips2]
     run_dump_test_arches "branch-misc-1" [mips_arch_list_matching mips1]
-    run_list_test_arches "branch-misc-2" "" [mips_arch_list_matching mips1]
+    run_list_test_arches "branch-misc-2" "-32" [mips_arch_list_matching mips1]
 
     if $ilocks {
 	run_dump_test "div-ilocks"
@@ -447,7 +447,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test_arches "jal-empic-elf-2" [mips_arch_list_matching mips1]
 	run_dump_test_arches "jal-empic-elf-3" [mips_arch_list_matching mips1]
     }
-    run_list_test_arches "jal-range" ""	[mips_arch_list_matching mips1]
+    run_list_test_arches "jal-range" "-32" [mips_arch_list_matching mips1]
     if !$aout { run_dump_test "la" }
     if $elf { run_dump_test "la-svr4pic" }
     if $elf { run_dump_test "la-xgot" }
@@ -537,7 +537,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "mips16-jalx"
 	run_dump_test "mips-jalx"
     }
-    run_list_test "mips-no-jalx" ""
+    run_list_test "mips-no-jalx" "-32"
     run_dump_test "delay"
     run_dump_test "nodelay"
     run_dump_test "mips4010"
@@ -555,7 +555,7 @@ if { [istarget mips*-*-*] } then {
     run_dump_test_arches "mips32"	[mips_arch_list_matching mips32]
 
     run_dump_test_arches "mips32r2"	[mips_arch_list_matching mips32r2]
-    run_list_test_arches "mips32r2-ill" "" [mips_arch_list_matching mips32r2]
+    run_list_test_arches "mips32r2-ill" "-32" [mips_arch_list_matching mips32r2]
 
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
 
@@ -568,8 +568,8 @@ if { [istarget mips*-*-*] } then {
 
     run_dump_test "relax"
 
-    run_list_test "illegal" ""
-    run_list_test "baddata1" ""
+    run_list_test "illegal" "-32"
+    run_list_test "baddata1" "-32"
 
     # LOSE: As of 2002-02-08, the next 4 tests fail for target mips-ecoff.
     # It's unknown whether they _should_ pass as-is, or whether different

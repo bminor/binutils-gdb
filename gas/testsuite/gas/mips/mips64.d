@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS MIPS64 instructions
+#as: -32
 
 # Check MIPS64 instruction assembly
 

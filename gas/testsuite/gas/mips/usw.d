@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS usw
-#as: -mips1
+#as: -32 -mips1
 
 # Test the usw macro.
 

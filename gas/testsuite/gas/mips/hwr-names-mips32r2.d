@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa32r2 -M gpr-names=numeric,hwr-names=mips32r2
 #name: MIPS HWR disassembly (mips32r2)
-#as: -mips32r2
+#as: -32 -mips32r2
 #source: hwr-names.s
 
 # Check objdump's handling of -M hwr-names=foo options.

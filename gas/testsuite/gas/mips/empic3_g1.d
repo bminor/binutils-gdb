@@ -1,6 +1,6 @@
 #objdump: --prefix-addresses -dr --show-raw-insn -mmips:4000
 #name: MIPS empic3 (global, negative)
-#as: -membedded-pic -mips3
+#as: -mabi=o64 -membedded-pic -mips3
 
 # Check PC-relative HI/LO relocs relocs for -membedded-pic when HI and
 # LO are split over a 32K boundary.

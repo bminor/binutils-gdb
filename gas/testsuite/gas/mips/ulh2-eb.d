@@ -1,4 +1,4 @@
-#as: -EB
+#as: -EB -32
 #objdump: -dr --prefix-addresses --show-raw-insn -M reg-names=numeric
 #name: ulh2 -EB
 #source: ulh2.s

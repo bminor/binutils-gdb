@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS jal-empic-elf
-#as: -membedded-pic
+#as: -32 -membedded-pic
 #source: jal.s
 
 # Test the jal macro with -membedded-pic.

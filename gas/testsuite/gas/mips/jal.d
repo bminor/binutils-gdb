@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:4000
 #name: MIPS jal
+#as: -32
 
 # Test the jal macro.
 

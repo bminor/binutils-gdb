@@ -1,6 +1,6 @@
 #objdump: -rst -mmips:4000
 #name: MIPS empic
-#as: -membedded-pic -mips3
+#as: -mabi=o64 -membedded-pic -mips3
 #stderr: empic.l
 
 # Check GNU-specific embedded relocs, for ELF.

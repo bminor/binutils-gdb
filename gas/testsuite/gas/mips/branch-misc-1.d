@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS branch-misc-1
+#as: -32
 
 # Test the branches to local symbols in current file.
 

@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses
 #name: MIPS abs
+#as: -32
 
 # Test the abs macro.
 

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa32 -M gpr-names=numeric,cp0-names=mips64
 #name: MIPS CP0 with sel register disassembly (mips64)
-#as: -march=mips32
+#as: -32 -march=mips32
 #source: cp0sel-names.s
 
 # Check objdump's handling of -M cp0-names=foo options.
