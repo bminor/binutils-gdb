@@ -2,6 +2,8 @@ Sat Aug  3 04:02:46 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/alpha/alpha-osf3.mh (XM_FILE): Change from xm-alpha.h to
 	xm-alphaosf.h.
+	(MMALLOC_CFLAGS): Define NO_MMCHECK to not install consistency
+	checks.
 
 start-sanitize-gdbtk
 Thu Aug  1 20:35:01 1996  Tom Tromey  <tromey@creche.cygnus.com>
