@@ -1,3 +1,8 @@
+Fri Nov 21 14:14:22 1997  Richard Henderson  <rth@cygnus.com>
+
+	* coff-sh.c (sh_relax_section): Force sign extention of USES r_offset.
+	(sh_relax_delete_bytes): Don't kill LABEL relocs.
+
 Mon Nov 17 15:08:38 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Fix typo.
