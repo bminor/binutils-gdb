@@ -111,6 +111,7 @@ struct section_list
   const char *          name;      /* Section name.  */
   boolean               used;      /* Whether this entry was used.  */
   boolean               remove;    /* Whether to remove this section.  */
+  boolean		copy;      /* Whether to copy this section.  */
   enum change_action    change_vma;/* Whether to change or set VMA.  */
   bfd_vma 		vma_val;   /* Amount to change by or set to.  */
   enum change_action    change_lma;/* Whether to change or set LMA.  */
@@ -121,6 +122,7 @@ struct section_list
 
 static struct section_list *change_sections;
 static boolean sections_removed;
+static boolean sections_copied;
 
 /* Changes to the start address.  */
 static bfd_vma change_start = 0;
@@ -246,6 +248,7 @@ static struct option copy_options[] =
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
+  {"only-section", required_argument, 0, 'j'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"help", no_argument, 0, 'h'},
@@ -292,10 +295,12 @@ copy_usage (stream, exit_status)
 {
   fprintf (stream, _("\
 Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
-       [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
+       [-j section] [-R section]\n\
+       [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--debugging] [--remove-section=section]\n"),
+       [--discard-locals] [--debugging]\n\
+       [--only-section=section] [--remove-section=section]\n"),
 	   program_name);
   fprintf (stream, _("\
        [--gap-fill=val] [--pad-to=address] [--preserve-dates]\n\
@@ -411,6 +416,7 @@ find_section_list (name, add)
   p->name = name;
   p->used = false;
   p->remove = false;
+  p->copy = false;
   p->change_vma = CHANGE_IGNORE;
   p->change_lma = CHANGE_IGNORE;
   p->vma_val = 0;
@@ -474,10 +480,15 @@ is_strip_section (abfd, sec)
 	  || convert_debugging))
     return true;
 
-  if (! sections_removed)
+  if (! sections_removed && ! sections_copied)
     return false;
+
   p = find_section_list (bfd_get_section_name (abfd, sec), false);
-  return p != NULL && p->remove ? true : false;
+  if (sections_removed && p != NULL && p->remove)
+    return true;
+  if (sections_copied && (p == NULL || ! p->copy))
+    return true;
+  return false;
 }
 
 /* Choose which symbol entries to copy; put the result in OSYMS.
@@ -816,6 +827,7 @@ copy_object (ibfd, obfd)
       || localize_specific_list != NULL
       || weaken_specific_list != NULL
       || sections_removed
+      || sections_copied
       || convert_debugging
       || change_leading_char
       || remove_leading_char
@@ -1127,7 +1139,9 @@ setup_section (ibfd, isection, obfdarg)
   if (p != NULL)
     p->used = true;
 
-  if (p != NULL && p->remove)
+  if (sections_removed && p != NULL && p->remove)
+    return;
+  if (sections_copied && (p == NULL || ! p->copy))
     return;
 
   osection = bfd_make_section_anyway (obfd, bfd_section_name (ibfd, isection));
@@ -1256,7 +1270,9 @@ copy_section (ibfd, isection, obfdarg)
 
   p = find_section_list (bfd_section_name (ibfd, isection), false);
 
-  if (p != NULL && p->remove)
+  if (sections_removed && p != NULL && p->remove)
+    return;
+  if (sections_copied && (p == NULL || ! p->copy))
     return;
 
   osection = isection->output_section;
@@ -1657,7 +1673,7 @@ copy_main (argc, argv)
   struct section_list *p;
   struct stat statbuf;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:K:N:s:O:d:F:L:R:SpgxXVvW:",
+  while ((c = getopt_long (argc, argv, "b:i:I:j:K:N:s:O:d:F:L:R:SpgxXVvW:",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1683,8 +1699,17 @@ copy_main (argc, argv)
 	case 'F':
 	  input_target = output_target = optarg;
 	  break;
+	case 'j':
+	  p = find_section_list (optarg, true);
+	  if (p->remove)
+	    fatal (_("%s both copied and removed"), optarg);
+	  p->copy = true;
+	  sections_copied = true;
+	  break;
 	case 'R':
 	  p = find_section_list (optarg, true);
+	  if (p->copy)
+	    fatal (_("%s both copied and removed"), optarg);
 	  p->remove = true;
 	  sections_removed = true;
 	  break;

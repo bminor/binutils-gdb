@@ -18,6 +18,9 @@ Changes in binutils 2.10:
 * dlltool now takes --export-all-symbols, --no-export-all-symbols,
   --exclude-symbols, and --no-default-excludes options.
 
+* objcopy now takes a -j/--only-section option to copy only the specified
+  sections.
+
 Changes in binutils 2.9:
 
 * Added windres program, which can be used to manipulate resources in WIN32

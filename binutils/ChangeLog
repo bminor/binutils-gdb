@@ -1,5 +1,18 @@
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
+	Based on patch from H. Peter Anvin <hpa@transmeta.com>:
+	* objcopy.c (struct section_list): Add copy field.
+	(sections_copied): New static variable.
+	(copy_options): Add "only-section".
+	(copy_usage): Mention -j and --only-section.
+	(find_section_list): Initialize copy field.
+	(is_strip_section): Check for copying sections.
+	(copy_object): Check sections_copied when calling filter_symbols.
+	(setup_section): Check for copying sections.
+	(copy_section): Likewise.
+	(copy_main): Handle -j/--only-section.
+	* binutils.texi, objcopy.1: Document -j/--only-section.
+
 	* configure.in: If frexp is not available, check in -lm.
 	* configure: Rebuild.
 
