@@ -1,3 +1,7 @@
+Wed Mar 25 14:08:51 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdbtk.c (gdbtk_pre_add_symbol): Use Tcl_merge to form Tcl commands.
+
 Mon Mar 23 13:41:39 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdbtk.c (gdb_get_mem): Rewrite to fetch entire contents

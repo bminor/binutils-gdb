@@ -2946,10 +2946,13 @@ void
 gdbtk_pre_add_symbol (name)
   char *name;
 {
-  char command[256];
+  char *merge, *v[2];
 
-  sprintf (command, "gdbtk_tcl_pre_add_symbol %s", name);
-  Tcl_Eval (interp, command);
+  v[0] = "gdbtk_tcl_pre_add_symbol";
+  v[1] = name;
+  merge = Tcl_Merge (2, v);
+  Tcl_Eval (interp, merge);
+  Tcl_Free (merge);
 }
 
 /* This hook is called whenever we finish loading a symbol file. */
