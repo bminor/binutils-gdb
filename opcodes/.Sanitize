@@ -454,7 +454,9 @@ else
 				echo Removing traces of \"m32rx\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-m32rx/,/end\-sanitize\-m32rx/d' < $i > new
+			# The PIPE sanitization will be much cleaner with redact.
+			sed -e '/start\-sanitize\-m32rx/,/end\-sanitize\-m32rx/d' \
+				-e 's/, PIPE_[A-Z]*//g' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
