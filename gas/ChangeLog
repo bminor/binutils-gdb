@@ -1,3 +1,10 @@
+start-sanitize-sky
+Thu Mar 26 13:29:59 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (s_endunpack): Round up to word boundary after
+	we've computed the data length.
+
+end-sanitize-sky
 Wed Mar 25 13:44:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* expr.h (expr_build_uconstant): Add prototype.
