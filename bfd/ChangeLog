@@ -1,3 +1,7 @@
+2002-04-09  DJ Delorie  <dj@redhat.com>
+
+	* elfarm-nabi.c (elf32_arm_howto_table): Fix ABS16 masks.
+
 2002-04-09  Casper S. Hornstrup <chorns@users.sourceforge.net>
 
 	* coffcode.h (coff_read_word): New.
