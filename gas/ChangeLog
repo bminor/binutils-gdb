@@ -1,3 +1,8 @@
+1999-09-13  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_assemble): Correct frag_var size.  Tidy
+	jump handling code and comments.
+
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-i386.c (md_apply_fix3): Add horrible adjustments to
