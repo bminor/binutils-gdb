@@ -1,3 +1,10 @@
+Tue Jun  4 18:53:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (_bfd_generic_link_add_one_symbol): If notice_all is
+	set, always call the notice callback.
+
+	* VERSION: Increment for bfdlink.h change.
+
 Mon Jun  3 11:01:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (COFF_DEFAULT_SECTION_ALIGNMENT_POWER): Set to 4.
