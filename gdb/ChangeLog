@@ -1,3 +1,9 @@
+Wed Apr  9 11:36:14 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c: Almost completely rewritten based on mn10200
+	port.
+	* config/mn10300/tm-mn10300.h: Likewise.
+
 Tue Apr  8 10:45:24 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* config/pa/{hppabsd.mt hppahpux.mt hppaosf.mt}:  Remove
