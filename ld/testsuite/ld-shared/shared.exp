@@ -28,7 +28,9 @@ if ![isnative] then {return}
 
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
-if { ![istarget i?86-*-sysv4*] \
+if { ![istarget hppa*64*-*-hpux*] \
+     && ![istarget hppa*-*-linux*] \
+     && ![istarget i?86-*-sysv4*] \
      && ![istarget i?86-*-unixware] \
      && ![istarget i?86-*-elf*] \
      && ![istarget i?86-*-linux*] \

@@ -1,6 +1,6 @@
-.globl data
+	.globl data
 	.section	.data.exit,"aw"
 data:
-.globl text
+	.globl text
 	.section	.text.exit,"aw"
 text:

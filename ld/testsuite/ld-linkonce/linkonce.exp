@@ -21,7 +21,10 @@
 # Test for ELF here (or really, .gnu.linkonce functionality), so we don't
 # have to qualify on ELF specifically in every .d-file.
 
-if { ![istarget *-*-linux*] && ![istarget *-*-gnu] && ![istarget *-*-elf] } {
+if { ![istarget *-*-linux*] \
+     && ![istarget *-*-gnu] \
+     && ![istarget hppa*64*-*-hpux*] \
+     && ![istarget *-*-elf] } {
     return
 }
 

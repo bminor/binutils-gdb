@@ -1,3 +1,14 @@
+2002-07-30  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* ld-discard/discard.exp, ld-scripts/phdrs.exp, ld-scripts/phdrs2.exp,
+	ld-selective/sel-dump.exp: Test hppa*64*-*-hpux* target.
+	* ld-elfvers/vers.exp, ld-elfvsb/elfvsb.exp, ld-elfweak/elfweak.exp,
+	ld-linkonce/linkonce.exp, ld-shared/shared.exp,
+	ld-undefined/weak-undef.exp:  Test hppa*64*-*-hpux* and hppa*-*-linux*
+	targets.
+	* ld-discard/exit.s, ld-discard/extern.s, ld-discard/start.s,
+	ld-discard/static.s: Add whitespace before assembler directives.
+
 2002-07-29  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/mips16-1.d: Check that ASE flag is actually set.
