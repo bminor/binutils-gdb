@@ -81,23 +81,28 @@ int unionprint;			/* Controls printing of nested unions.  */
 int addressprint;		/* Controls printing of machine addresses */
 
 
-/* Print data of type TYPE located at VALADDR (within GDB),
-   which came from the inferior at address ADDRESS,
-   onto stdio stream STREAM according to FORMAT
-   (a letter or 0 for natural format).  The data at VALADDR
-   is in target byte order.
+/* Print data of type TYPE located at VALADDR (within GDB), which came from
+   the inferior at address ADDRESS, onto stdio stream STREAM according to
+   FORMAT (a letter, or 0 for natural format using TYPE).
 
-   If the data are a string pointer, returns the number of
-   sting characters printed.
+   If DEREF_REF is nonzero, then dereference references, otherwise just print
+   them like pointers.
 
-   if DEREF_REF is nonzero, then dereference references,
-   otherwise just print them like pointers.
+   The PRETTY parameter controls prettyprinting.
 
-   The PRETTY parameter controls prettyprinting.  */
+   If the data are a string pointer, returns the number of string characters
+   printed.
+
+   FIXME:  The data at VALADDR is in target byte order.  If gdb is ever
+   enhanced to be able to debug more than the single target it was compiled
+   for (specific CPU type and thus specific target byte ordering), then
+   either the print routines are going to have to take this into account,
+   or the data is going to have to be passed into here already converted
+   to the host byte ordering, whichever is more convenient. */
+
 
 int
-val_print (type, valaddr, address, stream, format, deref_ref, recurse,
-	     pretty)
+val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
@@ -545,6 +550,91 @@ value_print_array_elements (val, stream, format, pretty)
     }
 }
 
+int
+val_print_string (addr, stream)
+    CORE_ADDR addr;
+    FILE *stream;
+{
+  int first_addr_err;
+  int errcode;
+  unsigned char c;
+  char *string;
+  int force_ellipses;
+  unsigned int i = 0;		/* Number of characters printed.  */
+
+  /* Get first character.  */
+  errcode = target_read_memory (addr, (char *)&c, 1);
+  if (errcode != 0)
+    {
+      /* First address out of bounds.  */
+      first_addr_err = 1;
+    }
+  else
+    {
+      first_addr_err = 0;
+      /* A real string.  */
+      string = (char *) alloca (print_max);
+      
+      /* If the loop ends by us hitting print_max characters,
+	 we need to have elipses at the end.  */
+      force_ellipses = 1;
+      
+      /* This loop always fetches print_max characters, even
+	 though LA_PRINT_STRING might want to print more or fewer
+	 (with repeated characters).  This is so that
+	 we don't spend forever fetching if we print
+	 a long string consisting of the same character
+	 repeated.  Also so we can do it all in one memory
+	 operation, which is faster.  However, this will be
+	 slower if print_max is set high, e.g. if you set
+	 print_max to 1000, not only will it take a long
+	 time to fetch short strings, but if you are near
+	 the end of the address space, it might not work. */
+      QUIT;
+      errcode = target_read_memory (addr, string, print_max);
+      if (errcode != 0)
+	{
+	  /* Try reading just one character.  If that succeeds,
+	     assume we hit the end of the address space, but
+	     the initial part of the string is probably safe. */
+	  char x[1];
+	  errcode = target_read_memory (addr, x, 1);
+	}
+      if (errcode != 0)
+	force_ellipses = 0;
+      else 
+	for (i = 0; i < print_max; i++)
+	  if (string[i] == '\0')
+	    {
+	      force_ellipses = 0;
+	      break;
+	    }
+      QUIT;
+      
+      if (addressprint)
+	{
+	  fputs_filtered (" ", stream);
+	}
+      LA_PRINT_STRING (stream, string, i, force_ellipses);
+    }
+  
+  if (errcode != 0)
+    {
+      if (errcode == EIO)
+	{
+	  fprintf_filtered (stream,
+			    (" <Address 0x%x out of bounds>" + first_addr_err),
+			    addr + i);
+	}
+      else
+	{
+	  error ("Error reading memory address 0x%x: %s.", addr + i,
+		 safe_strerror (errcode));
+	}
+    }
+  fflush (stream);
+  return (i);
+}
 
 #if 0
 /* Validate an input or output radix setting, and make sure the user

@@ -34,12 +34,15 @@ extern int demangle;		/* whether to print C++ syms raw or src-form */
 extern void
 cp_print_class_member PARAMS ((char *, struct type *, FILE *, char *));
 
-extern int
-cp_is_vtbl_ptr_type PARAMS ((struct type *));
+extern void
+cp_print_class_method PARAMS ((char *, struct type *, FILE *));
 
 extern void
 cp_print_value_fields PARAMS ((struct type *, char *, FILE *, int, int,
 			       enum val_prettyprint, struct type **));
+
+extern int
+cp_is_vtbl_ptr_type PARAMS ((struct type *));
 
 extern int
 cp_is_vtbl_member PARAMS ((struct type *));
@@ -142,78 +145,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
 	{
-	  struct type *domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
-	  struct fn_field *f;
-	  int j, len2;
-	  char *kind = "";
-	  CORE_ADDR addr;
-
-	  addr = unpack_pointer (lookup_pointer_type (builtin_type_void),
-				valaddr);
-	  if (METHOD_PTR_IS_VIRTUAL(addr))
-	    {
-	      int offset = METHOD_PTR_TO_VOFFSET(addr);
-	      len = TYPE_NFN_FIELDS (domain);
-	      for (i = 0; i < len; i++)
-		{
-		  f = TYPE_FN_FIELDLIST1 (domain, i);
-		  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		  for (j = 0; j < len2; j++)
-		    {
-		      QUIT;
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
-			{
-			  kind = "virtual ";
-			  goto common;
-			}
-		    }
-		}
-	    }
-	  else
-	    {
-	      struct symbol *sym = find_pc_function (addr);
-	      if (sym == 0)
-		{
-		  error ("invalid pointer to member function");
-		}
-	      len = TYPE_NFN_FIELDS (domain);
-	      for (i = 0; i < len; i++)
-		{
-		  f = TYPE_FN_FIELDLIST1 (domain, i);
-		  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		  for (j = 0; j < len2; j++)
-		    {
-		      QUIT;
-		      if (STREQ (SYMBOL_NAME (sym),
-				  TYPE_FN_FIELD_PHYSNAME (f, j)))
-			{
-			  goto common;
-			}
-		    }
-		}
-	    }
-	common:
-	  if (i < len)
-	    {
-	      fprintf_filtered (stream, "&");
-	      c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
-	      fprintf (stream, kind);
-	      if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-		  && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
-		cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-					   TYPE_FN_FIELDLIST_NAME (domain, i),
-					   0, stream);
-	      else
-		cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j), "",
-					   TYPE_FN_FIELDLIST_NAME (domain, i),
-					   0, stream);
-	      break;
-	    }
-	  fprintf_filtered (stream, "(");
-  	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") %d", (int) addr >> 3);
+	  cp_print_class_method (valaddr, type, stream);
 	}
       else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
 	{
@@ -250,81 +182,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	         In that case don't try to print the string.  */
 	      print_max < UINT_MAX)
 	    {
-	      int first_addr_err = 0;
-	      int errcode = 0;
-	      
-	      /* Get first character.  */
-	      errcode = target_read_memory (addr, (char *)&c, 1);
-	      if (errcode != 0)
-		{
-		  /* First address out of bounds.  */
-		  first_addr_err = 1;
-		}
-	      else
-		{
-		  /* A real string.  */
-		  char *string = (char *) alloca (print_max);
-
-		  /* If the loop ends by us hitting print_max characters,
-		     we need to have elipses at the end.  */
-		  int force_ellipses = 1;
-
-		  /* This loop always fetches print_max characters, even
-		     though LA_PRINT_STRING might want to print more or fewer
-		     (with repeated characters).  This is so that
-		     we don't spend forever fetching if we print
-		     a long string consisting of the same character
-		     repeated.  Also so we can do it all in one memory
-		     operation, which is faster.  However, this will be
-		     slower if print_max is set high, e.g. if you set
-		     print_max to 1000, not only will it take a long
-		     time to fetch short strings, but if you are near
-		     the end of the address space, it might not work. */
-		  QUIT;
-		  errcode = target_read_memory (addr, string, print_max);
-		  if (errcode != 0)
-		    {
-		      /* Try reading just one character.  If that succeeds,
-			 assume we hit the end of the address space, but
-			 the initial part of the string is probably safe. */
-		      char x[1];
-		      errcode = target_read_memory (addr, x, 1);
-		    }
-		  if (errcode != 0)
-		      force_ellipses = 0;
-		  else 
-		    for (i = 0; i < print_max; i++)
-		      if (string[i] == '\0')
-			{
-			  force_ellipses = 0;
-			  break;
-		        }
-		  QUIT;
-
-		  if (addressprint)
-		    {
-		      fputs_filtered (" ", stream);
-		    }
-		  LA_PRINT_STRING (stream, string, i, force_ellipses);
-		}
-
-	      if (errcode != 0)
-		{
-		  if (errcode == EIO)
-		    {
-		      fprintf_filtered (stream,
-					(" <Address 0x%x out of bounds>" +
-					 first_addr_err),
-					addr + i);
-		    }
-		  else
-		    {
-		      error ("Error reading memory address 0x%x: %s.",
-			     addr + i, safe_strerror (errcode));
-		    }
-		}
-
-	      fflush (stream);
+	      i = val_print_string (addr, stream);
 	    }
 	  else if (cp_is_vtbl_member(type))
   	    {

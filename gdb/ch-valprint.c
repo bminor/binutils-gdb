@@ -52,6 +52,10 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      enum val_prettyprint pretty;
 {
   LONGEST val;
+  unsigned int i;
+  struct type *elttype;
+  unsigned eltlen;
+  CORE_ADDR addr;
 
   switch (TYPE_CODE (type))
     {
@@ -130,6 +134,44 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       break;
 
     case TYPE_CODE_PTR:
+      if (format && format != 's')
+	{
+	  print_scalar_formatted (valaddr, type, format, 0, stream);
+	  break;
+	}
+      addr = unpack_pointer (type, valaddr);
+      elttype = TYPE_TARGET_TYPE (type);
+      
+      if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+	{
+	  /* Try to print what function it points to.  */
+	  print_address_demangle (addr, stream, demangle);
+	  /* Return value is irrelevant except for string pointers.  */
+	  return (0);
+	}
+      if (addressprint && format != 's')
+	{
+	  fprintf_filtered (stream, "0x%x", addr);
+	}
+      
+      /* For a pointer to char or unsigned char, also print the string
+	 pointed to, unless pointer is null.  */
+      i = 0;		/* Number of characters printed.  */
+      if (TYPE_LENGTH (elttype) == 1
+	  && TYPE_CODE (elttype) == TYPE_CODE_CHAR
+	  && (format == 0 || format == 's')
+	  && addr != 0
+	  && /* If print_max is UINT_MAX, the alloca below will fail.
+		In that case don't try to print the string.  */
+	  print_max < UINT_MAX)
+	  {
+	    i = val_print_string (addr, stream);
+	  }
+      /* Return number of characters printed, plus one for the
+	 terminating null if we have "reached the end".  */
+      return (i + (print_max && i != print_max));
+      break;
+
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_UNION:

@@ -1,3 +1,28 @@
+Wed Jan 13 20:49:59 1993  Fred Fish  (fnf@cygnus.com)
+
+	* c-valprint.c (cp_print_class_member):  Add extern decl.
+	* c-valprint.c (c_val_print):  Extract code for printing methods
+	and move it to cp_print_class_method in cp-valprint.c.
+	* c-valprint.c (c_val_print):  Extract code to print strings and
+	move it to val_print_string in valprint.c.
+	* cp-valprint.c (cp_print_class_method):  New function using
+	code extracted from c_val_print.
+	* valprint.c (val_print_string):  New function using code
+	extracted from c_val_print.
+	* value.h (val_print_string):  Add prototype.
+	**** start-sanitize-chill ****
+	* ch-exp.y (CHARACTER_STRING_LITERAL):  Set correct token type.
+	* ch-exp.y (literal):  Add action for CHARACTER_STRING_LITERAL.
+	* ch-exp.y (tempbuf, tempbufsize, tempbufindex, GROWBY_MIN_SIZE,
+	CHECKBUF, growbuf_by_size):  New variables, macros, and support
+	functions for implementing a dynamically expandable temp buffer.
+	* ch-exp.y (match_string_literal):  New lexer function.
+	* ch-exp.y (match_bitstring_literal):  Dynamic buffer code
+	removed and replaced with new CHECKBUF macro.
+	* ch-exp.y (yylex):  Call match_string_literal when appropriate.
+	* ch-valprint.c (ch_val_print):  Add code for TYPE_CODE_PTR.
+	**** end-sanitize-chill ****
+
 Sat Jan  9 19:59:33 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  Add info for paread.o.

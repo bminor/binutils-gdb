@@ -60,6 +60,96 @@ c_val_print PARAMS ((struct type *, char *, CORE_ADDR, FILE *, int, int, int,
 /* END-FIXME */
 
 
+void
+cp_print_class_method (valaddr, type, stream)
+     char *valaddr;
+     struct type *type;
+     FILE *stream;
+{
+  struct type *domain;
+  struct fn_field *f;
+  int j;
+  int len2;
+  int offset;
+  char *kind = "";
+  CORE_ADDR addr;
+  struct symbol *sym;
+  unsigned len;
+  unsigned int i;
+
+  domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
+  addr = unpack_pointer (lookup_pointer_type (builtin_type_void), valaddr);
+  if (METHOD_PTR_IS_VIRTUAL (addr))
+    {
+      offset = METHOD_PTR_TO_VOFFSET (addr);
+      len = TYPE_NFN_FIELDS (domain);
+      for (i = 0; i < len; i++)
+	{
+	  f = TYPE_FN_FIELDLIST1 (domain, i);
+	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+	  
+	  for (j = 0; j < len2; j++)
+	    {
+	      QUIT;
+	      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
+		{
+		  kind = "virtual ";
+		  goto common;
+		}
+	    }
+	}
+    }
+  else
+    {
+      sym = find_pc_function (addr);
+      if (sym == 0)
+	{
+	  error ("invalid pointer to member function");
+	}
+      len = TYPE_NFN_FIELDS (domain);
+      for (i = 0; i < len; i++)
+	{
+	  f = TYPE_FN_FIELDLIST1 (domain, i);
+	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+	  
+	  for (j = 0; j < len2; j++)
+	    {
+	      QUIT;
+	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+		{
+		  goto common;
+		}
+	    }
+	}
+    }
+  common:
+  if (i < len)
+    {
+      fprintf_filtered (stream, "&");
+      c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
+      fprintf (stream, kind);
+      if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
+	  && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
+	{
+	  cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
+				     TYPE_FN_FIELDLIST_NAME (domain, i),
+				     0, stream);
+	}
+      else
+	{
+	  cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j), "",
+				     TYPE_FN_FIELDLIST_NAME (domain, i),
+				     0, stream);
+	}
+    }
+  else
+    {
+      fprintf_filtered (stream, "(");
+      type_print (type, "", stream, -1);
+      fprintf_filtered (stream, ") %d", (int) addr >> 3);
+    }
+}
+
 /* Return truth value for assertion that TYPE is of the type
    "pointer to virtual function".  */
 

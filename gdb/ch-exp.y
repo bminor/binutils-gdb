@@ -149,7 +149,7 @@ yyerror PARAMS ((char *));
 %token <ssym>		LOCATION_NAME
 %token <voidval>	SET_LITERAL
 %token <voidval>	EMPTINESS_LITERAL
-%token <voidval>	CHARACTER_STRING_LITERAL
+%token <sval>		CHARACTER_STRING_LITERAL
 %token <sval>		BIT_STRING_LITERAL
 
 %token <voidval>	STRING
@@ -493,7 +493,9 @@ literal		:	INTEGER_LITERAL
 			}
 		|	CHARACTER_STRING_LITERAL
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (OP_STRING);
+			  write_exp_string ($1);
+			  write_exp_elt_opcode (OP_STRING);
 			}
 		|	BIT_STRING_LITERAL
 			{
@@ -973,6 +975,45 @@ buffer_location 	:	FIXME { $$ = 0; }
 
 %%
 
+/* Implementation of a dynamically expandable buffer for processing input
+   characters acquired through lexptr and building a value to return in
+   yylval. */
+
+static char *tempbuf;		/* Current buffer contents */
+static int tempbufsize;		/* Size of allocated buffer */
+static int tempbufindex;	/* Current index into buffer */
+
+#define GROWBY_MIN_SIZE 64	/* Minimum amount to grow buffer by */
+
+#define CHECKBUF(size) \
+  do { \
+    if (tempbufindex + (size) >= tempbufsize) \
+      { \
+	growbuf_by_size (size); \
+      } \
+  } while (0);
+
+/* Grow the static temp buffer if necessary, including allocating the first one
+   on demand. */
+
+static void
+growbuf_by_size (count)
+     int count;
+{
+  int growby;
+
+  growby = max (count, GROWBY_MIN_SIZE);
+  tempbufsize += growby;
+  if (tempbuf == NULL)
+    {
+      tempbuf = (char *) malloc (tempbufsize);
+    }
+  else
+    {
+      tempbuf = (char *) realloc (tempbuf, tempbufsize);
+    }
+}
+
 /* Try to consume a simple name string token.  If successful, returns
    a pointer to a nullbyte terminated copy of the name that can be used
    in symbol table lookups.  If not successful, returns NULL. */
@@ -1270,6 +1311,49 @@ match_float_literal ()
   return (0);
 }
 
+/* Recognize a string literal.  A string literal is a nonzero sequence
+   of characters enclosed in matching single or double quotes, except that
+   a single character inside single quotes is a character literal, which
+   we reject as a string literal.  To embed the terminator character inside
+   a string, it is simply doubled (I.E. "this""is""one""string") */
+
+static int
+match_string_literal ()
+{
+  char *tokptr = lexptr;
+
+  for (tempbufindex = 0, tokptr++; *tokptr != '\0'; tokptr++)
+    {
+      CHECKBUF (1);
+      if (*tokptr == *lexptr)
+	{
+	  if (*(tokptr + 1) == *lexptr)
+	    {
+	      tokptr++;
+	    }
+	  else
+	    {
+	      break;
+	    }
+	}
+      tempbuf[tempbufindex++] = *tokptr;
+    }
+  if (*tokptr == '\0'					/* no terminator */
+      || tempbufindex == 0				/* no string */
+      || (tempbufindex == 1 && *tokptr == '\''))	/* char literal */
+    {
+      return (0);
+    }
+  else
+    {
+      tempbuf[tempbufindex] = '\0';
+      yylval.sval.ptr = tempbuf;
+      yylval.sval.length = tempbufindex;
+      lexptr = ++tokptr;
+      return (CHARACTER_STRING_LITERAL);
+    }
+}
+
 /* Recognize a character literal.  A character literal is single character
    or a control sequence, enclosed in single quotes.  A control sequence
    is a comma separated list of one or more integer literals, enclosed
@@ -1279,6 +1363,9 @@ match_float_literal ()
 
    As a GNU chill extension, the syntax C'xx' is also recognized as a 
    character literal, where xx is a hex value for the character.
+
+   Note that more than a single character, enclosed in single quotes, is
+   a string literal.
 
    Returns CHARACTER_LITERAL if a match is found.
    */
@@ -1383,10 +1470,9 @@ match_bitstring_literal ()
   int bitcount = 0;
   int base;
   int digit;
-  static char *tempbuf;
-  static int tempbufsize;
-  static int tempbufindex;
   
+  tempbufindex = 0;
+
   /* Look for the required explicit base specifier. */
   
   switch (*tokptr++)
@@ -1448,20 +1534,7 @@ match_bitstring_literal ()
 	  for (mask = (base >> 1); mask > 0; mask >>= 1)
 	    {
 	      bitcount++;
-	      /* Grow the static temp buffer if necessary, including allocating
-		 the first one on demand. */
-	      if (tempbufindex >= tempbufsize)
-		{
-		  tempbufsize += 64;
-		  if (tempbuf == NULL)
-		    {
-		      tempbuf = (char *) malloc (tempbufsize);
-		    }
-		  else
-		    {
-		      tempbuf = (char *) realloc (tempbuf, tempbufsize);
-		    }
-		}
+	      CHECKBUF (1);
 	      if (digit & mask)
 		{
 		  tempbuf[tempbufindex] |= (1 << bitoffset);
@@ -1707,12 +1780,31 @@ yylex ()
 	}
     /* Look for characters which start a particular kind of multicharacter
        token, such as a character literal, register name, convenience
-       variable name, etc. */
+       variable name, string literal, etc. */
     switch (*lexptr)
       {
+	case '\'':
+	case '\"':
+	  /* First try to match a string literal, which is any nonzero
+	     sequence of characters enclosed in matching single or double
+	     quotes, except that a single character inside single quotes
+	     is a character literal, so we have to catch that case also. */
+	  token = match_string_literal ();
+	  if (token != 0)
+	    {
+	      return (token);
+	    }
+	  if (*lexptr == '\'')
+	    {
+	      token = match_character_literal ();
+	      if (token != 0)
+		{
+		  return (token);
+		}
+	    }
+	  break;
         case 'C':
         case 'c':
-	case '\'':
 	  token = match_character_literal ();
 	  if (token != 0)
 	    {
