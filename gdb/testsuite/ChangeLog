@@ -1,3 +1,8 @@
+Fri Feb  4 23:45:11 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.exp (xmpyu_tests): Fix buglet in expect
+	string.  No longer expected to fail.
+
 Fri Feb  4 10:35:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t24/demangle.exp: Remove a bunch more tests which differ
