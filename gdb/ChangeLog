@@ -1,3 +1,31 @@
+2002-07-04  Mark Kettenis  <kettenis@gnu.org>
+
+	Convert i386 target to generic dummy frames.
+	* i386-tdep.c: Include "symfile.h".
+	(i386_frameless_signal_p): Consider a function to be frameless if
+	the pc points at the first instruction of the function.
+	(i386_frame_chain): Handle (generic) call dummies.
+	(i386_frame_saved_pc): Likewise.
+	(i386_frame_init_saved_regs): Remove code dealing with call
+	dummies on the stack.
+	(i386_push_dummy_frame): Removed.
+	(i386_call_dummy_words): Removed.
+	(i386_fix_call_dummy): Removed.
+	(i386_push_return_address): New function.
+	(i386_do_pop_frame): Renamed from i386_pop_frame.  Add FRAME
+	parameter, and don't call get_current_frame.
+	(i386_pop_frame): New function.
+	(i386_gdbarch_init): Set use_generic_dummy_frames to 1, set
+	call_dummy_location to AT_ENTRY_POINT, set call_dummy_address to
+	entry_point_address, set call_dummy_breakpoint_offset to 0, set
+	call_dummy_length to 0, set call_dummy_words to NULL, set
+	sizeof_call_dummy_words to 0, set fix_call_dummy to
+	generic_fix_call_dummy, set pc_in_call_dummy to
+	pc_in_call_dummy_at_entry_point, set push_dummy_frame to
+	generic_push_dummy_frame, set push_return_address to
+	i386_push_return_address and set frame_chain_valid to
+	generic_file_frame_chain_valid.
+
 2002-07-04  Michal Ludvig  <mludvig@suse.cz>
 
 	* gdbserver/linux-x86-64-low.c (x86_64_regmap): Make it an array of 

@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "floatformat.h"
+#include "symfile.h"
 #include "symtab.h"
 #include "gdbcmd.h"
 #include "command.h"
@@ -471,7 +472,11 @@ i386_get_frame_setup (CORE_ADDR pc)
 
    This should work in most cases except in horrible situations where
    a signal occurs just as we enter a function but before the frame
-   has been set up.  */
+   has been set up.  Incidentally, that's just what happens when we
+   call a function from GDB with a signal pending (there's a test in
+   the testsuite that makes this happen).  Therefore we pretend that
+   we have a frameless function if we're stopped at the start of a
+   function.  */
 
 /* Return non-zero if we're dealing with a frameless signal, that is,
    a signal trampoline invoked from a frameless function.  */
@@ -479,9 +484,9 @@ i386_get_frame_setup (CORE_ADDR pc)
 static int
 i386_frameless_signal_p (struct frame_info *frame)
 {
-  return (frame->next
-	  && frame->next->signal_handler_caller
-	  && frameless_look_for_prologue (frame));
+  return (frame->next && frame->next->signal_handler_caller
+	  && (frameless_look_for_prologue (frame)
+	      || frame->pc == get_pc_function_start (frame->pc)));
 }
 
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
@@ -491,6 +496,9 @@ i386_frameless_signal_p (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
+  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    return frame->frame;
+
   if (frame->signal_handler_caller
       || i386_frameless_signal_p (frame))
     return frame->frame;
@@ -545,6 +553,10 @@ i386_sigtramp_saved_sp (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
+  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    return generic_read_register_dummy (frame->pc, frame->frame,
+					PC_REGNUM);
+
   if (frame->signal_handler_caller)
     return i386_sigtramp_saved_pc (frame);
 
@@ -673,7 +685,6 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 {
   long locals = -1;
   unsigned char op;
-  CORE_ADDR dummy_bottom;
   CORE_ADDR addr;
   CORE_ADDR pc;
   int i;
@@ -682,23 +693,6 @@ i386_frame_init_saved_regs (struct frame_info *fip)
     return;
 
   frame_saved_regs_zalloc (fip);
-
-  /* If the frame is the end of a dummy, compute where the beginning
-     would be.  */
-  dummy_bottom = fip->frame - 4 - REGISTER_BYTES - CALL_DUMMY_LENGTH;
-
-  /* Check if the PC points in the stack, in a dummy frame.  */
-  if (dummy_bottom <= fip->pc && fip->pc <= fip->frame)
-    {
-      /* All registers were saved by push_call_dummy.  */
-      addr = fip->frame;
-      for (i = 0; i < NUM_REGS; i++)
-	{
-	  addr -= REGISTER_RAW_SIZE (i);
-	  fip->saved_regs[i] = addr;
-	}
-      return;
-    }
 
   pc = get_pc_function_start (fip->pc);
   if (pc != 0)
@@ -829,63 +823,22 @@ i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
   return break_insn;
 }
 
-static void
-i386_push_dummy_frame (void)
+/* Push the return address (pointing to the call dummy) onto the stack
+   and return the new value for the stack pointer.  */
+
+static CORE_ADDR
+i386_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  CORE_ADDR sp = read_register (SP_REGNUM);
-  CORE_ADDR fp;
-  int regnum;
-  char regbuf[MAX_REGISTER_RAW_SIZE];
+  char buf[4];
 
-  sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (FP_REGNUM));
-  fp = sp;
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      read_register_gen (regnum, regbuf);
-      sp = push_bytes (sp, regbuf, REGISTER_RAW_SIZE (regnum));
-    }
-  write_register (SP_REGNUM, sp);
-  write_register (FP_REGNUM, fp);
-}
-
-/* The i386 call dummy sequence:
-
-     call 11223344 (32-bit relative)
-     int 3
-
-   It is 8 bytes long.  */
-
-static LONGEST i386_call_dummy_words[] =
-{
-  0x223344e8,
-  0xcc11
-};
-
-/* Insert the (relative) function address into the call sequence
-   stored at DYMMY.  */
-
-static void
-i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		     struct value **args, struct type *type, int gcc_p)
-{
-  int from, to, delta, loc;
-
-  loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH);
-  from = loc + 5;
-  to = (int)(fun);
-  delta = to - from;
-
-  *((char *)(dummy) + 1) = (delta & 0xff);
-  *((char *)(dummy) + 2) = ((delta >> 8) & 0xff);
-  *((char *)(dummy) + 3) = ((delta >> 16) & 0xff);
-  *((char *)(dummy) + 4) = ((delta >> 24) & 0xff);
+  store_unsigned_integer (buf, 4, CALL_DUMMY_ADDRESS ());
+  write_memory (sp - 4, buf, 4);
+  return sp - 4;
 }
 
 static void
-i386_pop_frame (void)
+i386_do_pop_frame (struct frame_info *frame)
 {
-  struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
   int regnum;
   char regbuf[MAX_REGISTER_RAW_SIZE];
@@ -908,6 +861,12 @@ i386_pop_frame (void)
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
+}
+
+static void
+i386_pop_frame (void)
+{
+  generic_pop_current_frame (i386_do_pop_frame);
 }
 
 
@@ -1484,20 +1443,20 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
 
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 8);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_words (gdbarch, i386_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch,
-				       sizeof (i386_call_dummy_words));
+  set_gdbarch_call_dummy_words (gdbarch, NULL);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, i386_fix_call_dummy);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
@@ -1507,7 +1466,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
 
   /* "An argument's size is increased, if necessary, to make it a
      multiple of [32-bit] words.  This may require tail padding,
@@ -1517,7 +1476,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       i386_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, i386_push_dummy_frame);
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
@@ -1544,7 +1504,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, default_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
