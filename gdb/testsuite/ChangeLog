@@ -1,5 +1,9 @@
 Tue Aug 10 09:56:56 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
+	* gdb.t20 {classes.exp, inherit.exp, misc.exp}, gdb.t21/cplusfuncs.exp,
+	gdb.t22/virtfunc.exp, gdb.t23/templates.exp, gdb.t31/chillvars.exp:
+	Only issue warning for missing executables if -all option is used.
+
 	* gdb.stabs/wierd.exp:  Only issue warning for missing wierd.o
 	file if -all option is used.  It's like an unpredictable XFAIL.
 
