@@ -1,3 +1,7 @@
+2001-05-30  Richard Henderson  <rth@redhat.com>
+
+	* read.c (emit_leb128_expr): Call md_cons_align.
+
 2001-05-28  Jeff Sturm  <jsturm@one-point.com>
 
 	* config/tc-sparc.c (md_apply_fix3): Handle BFD_RELOC_SPARC_UA16,

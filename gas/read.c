@@ -4411,6 +4411,11 @@ emit_leb128_expr (exp, sign)
   if (check_eh_frame (exp, &nbytes))
     abort ();
 
+  /* Let the backend know that subsequent data may be byte aligned.  */
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
   if (op == O_constant)
     {
       /* If we've got a constant, emit the thing directly right now.  */
