@@ -2,6 +2,7 @@
    GDB, the GNU debugger.
 
    Copyright 1999, 2000 Free Software Foundation, Inc.
+   Written by Nick Duffek <nsd@cygnus.com>.
 
    This file is part of GDB.
 
@@ -152,11 +153,11 @@ do {					\
  *
  * Otherwise, issue an error message and return nonlocally.
  */
-#define CALL_BASE(call)					\
-do {							\
-  if (!lwp_infpid ())					\
-    error ("uw-thread: "__FUNCTION__": no lwp");	\
-  CALL_BASE_1 (call);					\
+#define CALL_BASE(call)			\
+do {					\
+  if (!lwp_infpid ())			\
+    error ("uw-thread: no lwp");	\
+  CALL_BASE_1 (call);			\
 } while (0)
 
 /*
