@@ -4622,7 +4622,7 @@ symbol to write conditional code which should only be compiled for
 such hosts.
 
 @findex IS_DIR_SEPARATOR
-@item IS_DIR_SEPARATOR (@var{c}
+@item IS_DIR_SEPARATOR (@var{c})
 Evaluates to a non-zero value if @var{c} is a directory separator
 character.  On Unix and GNU/Linux systems, only a slash @file{/} is
 such a character, but on Windows, both @file{/} and @file{\} will
@@ -4924,7 +4924,7 @@ The @file{gdb/MAINTAINERS} file still holds.
 @item
 Don't fix something on the branch unless/until it is also fixed in the
 trunk.  If this isn't possible, mentioning it in the @file{gdb/PROBLEMS}
-file is better than committing a hack
+file is better than committing a hack.
 @item
 When considering a patch for the branch, suggested criteria include:
 Does it fix a build?  Does it fix the sequence @kbd{break main; run}
@@ -4947,8 +4947,8 @@ reason) support for a new host are considered acceptable.}
 @section Obsolete any code
 
 Before anything else, poke the other developers (and around the source
-code) to see there is anything that can be removed from @value{GDBN} (an
-old target, an unused file).
+code) to see if there is anything that can be removed from @value{GDBN}
+(an old target, an unused file).
 
 Obsolete code is identified by adding an @code{OBSOLETE} prefix to every
 line.  Doing this means that it is easy to identify obsolete code when

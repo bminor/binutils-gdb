@@ -1,3 +1,8 @@
+2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbint.texinfo (Releasing GDB, Coding): Fix typos.  Reported by
+	"Theodore A. Roth" <troth@verinet.com>.
+
 2002-04-15  Don Howard  <dhoward@redhat.com>
 
 	From Eli Zaretskii <eliz@is.elta.co.il>
