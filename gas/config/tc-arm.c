@@ -5676,7 +5676,7 @@ md_apply_fix3 (fixP, val, seg)
 	    if (newimm != (unsigned int) FAIL)
 	      newinsn = temp;
 	    /* Still No ?  Try using a negated value.  */
-	    else if (validate_immediate_twopart (- value, & highpart) != (unsigned int) FAIL)
+	    else if ((newimm = validate_immediate_twopart (- value, & highpart)) != (unsigned int) FAIL)
 	      temp = newinsn = (temp & OPCODE_MASK) | OPCODE_SUB << DATA_OP_SHIFT;
 	    /* Otherwise - give up.  */
 	    else
