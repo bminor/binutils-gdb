@@ -1,5 +1,10 @@
 2002-07-31  Kevin Buettner  <kevinb@redhat.com>
 
+	* config/mips/tm-irix6.h (MIPS_REGSIZE): Define to be 8.
+	(REGISTER_VIRTUAL_TYPE): Some registers are now 64 bits wide.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
 	* utils.c (host_pointer_to_address, address_to_host_pointer):
 	Use gdb_assert() instead of explicit call to internal_error().
 

@@ -21,6 +21,9 @@
 
 #include "mips/tm-bigmips.h"
 
+#undef MIPS_REGSIZE
+#define MIPS_REGSIZE 8
+
 /* SGI's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER
@@ -89,11 +92,12 @@
       32 * sizeof(double) + ((N) - 32) * MIPS_REGSIZE)
 
 #undef  REGISTER_VIRTUAL_TYPE
+/* define 8 byte register type */
 #define REGISTER_VIRTUAL_TYPE(N) \
 	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
 	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
-	 : builtin_type_int)
+	 : builtin_type_long_long)
 
 /* Force N32 ABI as the default. */
 #define MIPS_DEFAULT_ABI MIPS_ABI_N32
