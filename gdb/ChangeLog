@@ -1,3 +1,8 @@
+2000-01-27  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c (child_xfer_memory): Add missing argument required by
+	2001-01-23 change.
+
 2001-01-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* ui-out.c (do_list_end): New function.
