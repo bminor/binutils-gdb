@@ -1,3 +1,9 @@
+2001-07-09  Andreas Jaeger  <aj@suse.de>, Karsten Keil <kkeil@suse.de>
+
+	* i386-dis.c (set_op): Handle 64 bit and 32 bit mode.
+	(OP_J): Use bfd_vma for mask to work properly with 64 bits.
+	(op_address,op_riprel): Use bfd_vma to handle 64 bits.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.am (CPUDIR): Define.

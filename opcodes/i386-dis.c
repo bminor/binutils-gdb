@@ -67,7 +67,7 @@ static bfd_vma get64 PARAMS ((void));
 static bfd_signed_vma get32 PARAMS ((void));
 static bfd_signed_vma get32s PARAMS ((void));
 static int get16 PARAMS ((void));
-static void set_op PARAMS ((unsigned int, int));
+static void set_op PARAMS ((bfd_vma, int));
 static void OP_REG PARAMS ((int, int));
 static void OP_IMREG PARAMS ((int, int));
 static void OP_I PARAMS ((int, int));
@@ -1786,8 +1786,8 @@ prefix_name (pref, sizeflag)
 
 static char op1out[100], op2out[100], op3out[100];
 static int op_ad, op_index[3];
-static unsigned int op_address[3];
-static unsigned int op_riprel[3];
+static bfd_vma op_address[3];
+static bfd_vma op_riprel[3];
 static bfd_vma start_pc;
 
 
@@ -3238,12 +3238,21 @@ get16 ()
 
 static void
 set_op (op, riprel)
-     unsigned int op;
+     bfd_vma op;
      int riprel;
 {
   op_index[op_ad] = op_ad;
-  op_address[op_ad] = op;
-  op_riprel[op_ad] = riprel;
+  if (mode_64bit)
+    {
+      op_address[op_ad] = op;
+      op_riprel[op_ad] = riprel;
+    }
+  else
+    {
+      /* Mask to get a 32-bit address.  */
+      op_address[op_ad] = op & 0xffffffff;
+      op_riprel[op_ad] = riprel & 0xffffffff;
+    }
 }
 
 static void
@@ -3515,7 +3524,7 @@ OP_J (bytemode, sizeflag)
      int sizeflag;
 {
   bfd_vma disp;
-  int mask = -1;
+  bfd_vma mask = -1;
 
   switch (bytemode)
     {
