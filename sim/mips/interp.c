@@ -886,8 +886,10 @@ sim_open (kind, cb, abfd, argv)
     for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++) {
       if (rn < 32)
        register_widths[rn] = GPRLEN;
+#if defined(HASFPU)
       else if ((rn >= FGRIDX) && (rn < (FGRIDX + 32)))
        register_widths[rn] = GPRLEN;
+#endif
       else if ((rn >= 33) && (rn <= 37))
        register_widths[rn] = GPRLEN;
       else if ((rn == SRIDX) || (rn == FCR0IDX) || (rn == FCR31IDX) || ((rn >= 72) && (rn <= 89)))
@@ -2015,6 +2017,7 @@ mips16_entry (insn)
 
       SP += 32;
 
+#if defined(HASFPU)
       if (aregs == 5)
 	{
 	  FGR[0] = WORD64LO (GPR[4]);
@@ -2027,6 +2030,7 @@ mips16_entry (insn)
 	  fpr_state[0] = fmt_uninterpreted;
 	  fpr_state[1] = fmt_uninterpreted;
 	}
+#endif /* defined(HASFPU) */
 
       PC = RA;
     }
@@ -3987,16 +3991,18 @@ COP_SW(coproc_num,coproc_reg)
      int coproc_num, coproc_reg;
 {
   unsigned int value = 0;
-  FP_formats hold;
 
   switch (coproc_num) {
 #if defined(HASFPU)
     case 1:
 #if 1
-     hold = fpr_state[coproc_reg];
-     fpr_state[coproc_reg] = fmt_word;
-     value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
-     fpr_state[coproc_reg] = hold;
+      {
+        FP_formats hold;
+        hold = fpr_state[coproc_reg];
+        fpr_state[coproc_reg] = fmt_word;
+        value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
+        fpr_state[coproc_reg] = hold;
+      }
 #else
 #if 1
      value = (unsigned int)ValueFPR(coproc_reg,fpr_state[coproc_reg]);
@@ -4410,7 +4416,11 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
               printf("pending_slot_value[%d] = 0x%s\n",index,pr_addr(pending_slot_value[index]));
 #endif /* DEBUG */
               if (pending_slot_reg[index] == COCIDX) {
+#if defined(HASFPU)
                 SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
+#else
+                ;
+#endif
               } else {
                 registers[pending_slot_reg[index]] = pending_slot_value[index];
 #if defined(HASFPU)
