@@ -44,7 +44,7 @@ make_environ (void)
 /* Free an environment and all the strings in it.  */
 
 void
-free_environ (register struct environ *e)
+free_environ (struct environ *e)
 {
   char **vector = e->vector;
 
@@ -59,7 +59,7 @@ free_environ (register struct environ *e)
    that all strings in these environments are safe to free.  */
 
 void
-init_environ (register struct environ *e)
+init_environ (struct environ *e)
 {
   extern char **environ;
   int i;
@@ -80,8 +80,8 @@ init_environ (register struct environ *e)
 
   while (--i >= 0)
     {
-      register int len = strlen (e->vector[i]);
-      register char *new = (char *) xmalloc (len + 1);
+      int len = strlen (e->vector[i]);
+      char *new = (char *) xmalloc (len + 1);
       memcpy (new, e->vector[i], len + 1);
       e->vector[i] = new;
     }

@@ -899,7 +899,7 @@ frame_info (char *addr_exp, int from_tty)
     }
   else
     {
-      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
 	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
@@ -1347,7 +1347,7 @@ print_block_frame_locals (struct block *b, struct frame_info *fi,
 
 static int
 print_block_frame_labels (struct block *b, int *have_default,
-			  register struct ui_file *stream)
+			  struct ui_file *stream)
 {
   struct dict_iterator iter;
   struct symbol *sym;
@@ -1388,8 +1388,8 @@ print_block_frame_labels (struct block *b, int *have_default,
    on the function running in FRAME.  */
 
 static void
-print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
-			register struct ui_file *stream)
+print_frame_local_vars (struct frame_info *fi, int num_tabs,
+			struct ui_file *stream)
 {
   struct block *block = get_frame_block (fi, 0);
   int values_printed = 0;
@@ -1421,8 +1421,8 @@ print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
 /* Same, but print labels.  */
 
 static void
-print_frame_label_vars (register struct frame_info *fi, int this_level_only,
-			register struct ui_file *stream)
+print_frame_label_vars (struct frame_info *fi, int this_level_only,
+			struct ui_file *stream)
 {
   struct blockvector *bl;
   struct block *block = get_frame_block (fi, 0);
@@ -1526,8 +1526,8 @@ catch_info (char *ignore, int from_tty)
 }
 
 static void
-print_frame_arg_vars (register struct frame_info *fi,
-		      register struct ui_file *stream)
+print_frame_arg_vars (struct frame_info *fi,
+		      struct ui_file *stream)
 {
   struct symbol *func = get_frame_function (fi);
   struct block *b;
@@ -1657,8 +1657,8 @@ get_selected_block (CORE_ADDR *addr_in_block)
    how much farther the original request asked to go.  */
 
 struct frame_info *
-find_relative_frame (register struct frame_info *frame,
-		     register int *level_offset_ptr)
+find_relative_frame (struct frame_info *frame,
+		     int *level_offset_ptr)
 {
   struct frame_info *prev;
   struct frame_info *frame1;

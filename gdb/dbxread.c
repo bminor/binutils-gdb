@@ -752,8 +752,8 @@ dbx_symfile_finish (struct objfile *objfile)
     {
       if (HEADER_FILES (objfile) != NULL)
 	{
-	  register int i = N_HEADER_FILES (objfile);
-	  register struct header_file *hfiles = HEADER_FILES (objfile);
+	  int i = N_HEADER_FILES (objfile);
+	  struct header_file *hfiles = HEADER_FILES (objfile);
 
 	  while (--i >= 0)
 	    {
@@ -1715,7 +1715,7 @@ read_dbx_symtab (struct objfile *objfile)
 	    if (pst && STREQ (namestring, pst->filename))
 	    continue;
 	    {
-	      register int i;
+	      int i;
 	      for (i = 0; i < includes_used; i++)
 		if (STREQ (namestring, psymtab_include_list[i]))
 		  {

@@ -1630,7 +1630,7 @@ find_main_psymtab (void)
 */
 
 struct symbol *
-lookup_block_symbol (register const struct block *block, const char *name,
+lookup_block_symbol (const struct block *block, const char *name,
 		     const char *linkage_name,
 		     const domain_enum domain)
 {
@@ -2288,7 +2288,7 @@ find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
    Set *EXACT_MATCH nonzero if the value returned is an exact match.  */
 
 static int
-find_line_common (register struct linetable *l, register int lineno,
+find_line_common (struct linetable *l, int lineno,
 		  int *exact_match)
 {
   int i;
@@ -2309,7 +2309,7 @@ find_line_common (register struct linetable *l, register int lineno,
   len = l->nitems;
   for (i = 0; i < len; i++)
     {
-      register struct linetable_entry *item = &(l->item[i]);
+      struct linetable_entry *item = &(l->item[i]);
 
       if (item->line == lineno)
 	{
@@ -2417,7 +2417,7 @@ operator_chars (char *p, char **end)
 
   if (isalpha (*p) || *p == '_' || *p == '$')
     {
-      register char *q = p + 1;
+      char *q = p + 1;
       while (isalnum (*q) || *q == '_' || *q == '$')
 	q++;
       *end = q;

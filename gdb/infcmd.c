@@ -1337,7 +1337,7 @@ environment_info (char *var, int from_tty)
 {
   if (var)
     {
-      register char *val = get_in_environ (inferior_environ, var);
+      char *val = get_in_environ (inferior_environ, var);
       if (val)
 	{
 	  puts_filtered (var);
@@ -1354,7 +1354,7 @@ environment_info (char *var, int from_tty)
     }
   else
     {
-      register char **vector = environ_vector (inferior_environ);
+      char **vector = environ_vector (inferior_environ);
       while (*vector)
 	{
 	  puts_filtered (*vector++);

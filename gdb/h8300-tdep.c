@@ -321,7 +321,7 @@ h8300_next_prologue_insn (CORE_ADDR addr,
  */
 
 static CORE_ADDR
-h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
+h8300_examine_prologue (CORE_ADDR ip, CORE_ADDR limit,
 			CORE_ADDR after_prolog_fp, CORE_ADDR *fsr,
 			struct frame_info *fi)
 {

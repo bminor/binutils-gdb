@@ -631,7 +631,7 @@ info_common_command (char *comname, int from_tty)
     }
   else
     {
-      register struct minimal_symbol *msymbol =
+      struct minimal_symbol *msymbol =
       lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL)
@@ -723,7 +723,7 @@ there_is_a_visible_common_named (char *comname)
     }
   else
     {
-      register struct minimal_symbol *msymbol =
+      struct minimal_symbol *msymbol =
       lookup_minimal_symbol_by_pc (fi->pc);
 
       if (msymbol != NULL)

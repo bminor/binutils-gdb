@@ -5912,7 +5912,7 @@ dwarf2_extension (struct die_info *die)
 /* Convert a DIE tag into its string name.  */
 
 static char *
-dwarf_tag_name (register unsigned tag)
+dwarf_tag_name (unsigned tag)
 {
   switch (tag)
     {
@@ -6044,7 +6044,7 @@ dwarf_tag_name (register unsigned tag)
 /* Convert a DWARF attribute code into its string name.  */
 
 static char *
-dwarf_attr_name (register unsigned attr)
+dwarf_attr_name (unsigned attr)
 {
   switch (attr)
     {
@@ -6235,7 +6235,7 @@ dwarf_attr_name (register unsigned attr)
 /* Convert a DWARF value form code into its string name.  */
 
 static char *
-dwarf_form_name (register unsigned form)
+dwarf_form_name (unsigned form)
 {
   switch (form)
     {
@@ -6289,7 +6289,7 @@ dwarf_form_name (register unsigned form)
 /* Convert a DWARF stack opcode into its string name.  */
 
 static char *
-dwarf_stack_op_name (register unsigned op)
+dwarf_stack_op_name (unsigned op)
 {
   switch (op)
     {
@@ -6612,7 +6612,7 @@ dwarf_bool_name (unsigned mybool)
 /* Convert a DWARF type code into its string name.  */
 
 static char *
-dwarf_type_encoding_name (register unsigned enc)
+dwarf_type_encoding_name (unsigned enc)
 {
   switch (enc)
     {
@@ -6643,7 +6643,7 @@ dwarf_type_encoding_name (register unsigned enc)
 
 #if 0
 static char *
-dwarf_cfi_name (register unsigned cfi_opc)
+dwarf_cfi_name (unsigned cfi_opc)
 {
   switch (cfi_opc)
     {

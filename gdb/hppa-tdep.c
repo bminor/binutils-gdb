@@ -2068,7 +2068,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    gets the value from the stack rather than from the buffer where all the
    registers were saved when the function called completed. */
 struct value *
-hppa_value_returned_from_stack (register struct type *valtype, CORE_ADDR addr)
+hppa_value_returned_from_stack (struct type *valtype, CORE_ADDR addr)
 {
   struct value *val;
 

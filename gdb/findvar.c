@@ -391,7 +391,7 @@ symbol_read_needs_frame (struct symbol *sym)
    If FRAME is NULL, use the deprecated_selected_frame.  */
 
 struct value *
-read_var_value (register struct symbol *var, struct frame_info *frame)
+read_var_value (struct symbol *var, struct frame_info *frame)
 {
   struct value *v;
   struct type *type = SYMBOL_TYPE (var);
@@ -730,7 +730,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
    address.  */
 
 struct value *
-locate_var_value (register struct symbol *var, struct frame_info *frame)
+locate_var_value (struct symbol *var, struct frame_info *frame)
 {
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);

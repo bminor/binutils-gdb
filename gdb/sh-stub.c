@@ -450,10 +450,10 @@ retry:
 /* send the packet in buffer. */
 
 static void
-putpacket (register char *buffer)
+putpacket (char *buffer)
 {
-  register  int checksum;
-  register  int count;
+  int checksum;
+  int count;
 
   /*  $<packet info>#<checksum>. */
   do

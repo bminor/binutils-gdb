@@ -709,7 +709,7 @@ pop_subfile (void)
    line vector for SUBFILE.  */
 
 void
-record_line (register struct subfile *subfile, int line, CORE_ADDR pc)
+record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 {
   struct linetable_entry *e;
   /* Ignore the dummy line number in libg.o */

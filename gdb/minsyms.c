@@ -148,7 +148,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
    names (the dynamic linker deals with the duplication).  */
 
 struct minimal_symbol *
-lookup_minimal_symbol (register const char *name, const char *sfile,
+lookup_minimal_symbol (const char *name, const char *sfile,
 		       struct objfile *objf)
 {
   struct objfile *objfile;
@@ -268,7 +268,7 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_text (register const char *name, const char *sfile,
+lookup_minimal_symbol_text (const char *name, const char *sfile,
 			    struct objfile *objf)
 {
   struct objfile *objfile;
@@ -345,8 +345,9 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_solib_trampoline (register const char *name,
-					const char *sfile, struct objfile *objf)
+lookup_minimal_symbol_solib_trampoline (const char *name,
+					const char *sfile,
+					struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;

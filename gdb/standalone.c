@@ -283,7 +283,7 @@ fprintf (int ign, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
   display_string (buffer);
 }
 
-fwrite (register char *buf, int numelts, int size, int stream)
+fwrite (char *buf, int numelts, int size, int stream)
 {
   int i = numelts * size;
   while (i-- > 0)

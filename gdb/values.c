@@ -883,7 +883,7 @@ value_change_enclosing_type (struct value *val, struct type *new_encl_type)
 
 struct value *
 value_primitive_field (struct value *arg1, int offset,
-		       register int fieldno, register struct type *arg_type)
+		       int fieldno, struct type *arg_type)
 {
   struct value *v;
   struct type *type;
@@ -952,7 +952,7 @@ value_primitive_field (struct value *arg1, int offset,
    FIELDNO says which field. */
 
 struct value *
-value_field (struct value *arg1, register int fieldno)
+value_field (struct value *arg1, int fieldno)
 {
   return value_primitive_field (arg1, 0, fieldno, VALUE_TYPE (arg1));
 }
@@ -1114,7 +1114,7 @@ modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
 /* Convert C numbers into newly allocated values */
 
 struct value *
-value_from_longest (struct type *type, register LONGEST num)
+value_from_longest (struct type *type, LONGEST num)
 {
   struct value *val = allocate_value (type);
   enum type_code code;

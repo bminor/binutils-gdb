@@ -67,8 +67,8 @@ static LONGEST init_array_element (struct value *, struct value *,
 				   LONGEST, LONGEST);
 
 static struct value *
-evaluate_subexp (struct type *expect_type, register struct expression *exp,
-		 register int *pos, enum noside noside)
+evaluate_subexp (struct type *expect_type, struct expression *exp,
+		 int *pos, enum noside noside)
 {
   return (*exp->language_defn->evaluate_exp) (expect_type, exp, pos, noside);
 }
@@ -176,7 +176,7 @@ evaluate_type (struct expression *exp)
    returning the label.  Otherwise, does nothing and returns NULL. */
 
 static char *
-get_label (register struct expression *exp, int *pos)
+get_label (struct expression *exp, int *pos)
 {
   if (exp->elts[*pos].opcode == OP_LABELED)
     {
@@ -195,8 +195,8 @@ get_label (register struct expression *exp, int *pos)
 
 static struct value *
 evaluate_struct_tuple (struct value *struct_val,
-		       register struct expression *exp,
-		       register int *pos, enum noside noside, int nargs)
+		       struct expression *exp,
+		       int *pos, enum noside noside, int nargs)
 {
   struct type *struct_type = check_typedef (VALUE_TYPE (struct_val));
   struct type *substruct_type = struct_type;
@@ -338,7 +338,7 @@ evaluate_struct_tuple (struct value *struct_val,
 
 static LONGEST
 init_array_element (struct value *array, struct value *element,
-		    register struct expression *exp, register int *pos,
+		    struct expression *exp, int *pos,
 		    enum noside noside, LONGEST low_bound, LONGEST high_bound)
 {
   LONGEST index;
@@ -379,7 +379,7 @@ init_array_element (struct value *array, struct value *element,
 
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
-			  register struct expression *exp, register int *pos,
+			  struct expression *exp, int *pos,
 			  enum noside noside)
 {
   enum exp_opcode op;
@@ -2063,7 +2063,7 @@ nosideret:
    then only the type of the result need be correct.  */
 
 static struct value *
-evaluate_subexp_for_address (register struct expression *exp, register int *pos,
+evaluate_subexp_for_address (struct expression *exp, int *pos,
 			     enum noside noside)
 {
   enum exp_opcode op;
@@ -2143,8 +2143,8 @@ evaluate_subexp_for_address (register struct expression *exp, register int *pos,
  */
 
 struct value *
-evaluate_subexp_with_coercion (register struct expression *exp,
-			       register int *pos, enum noside noside)
+evaluate_subexp_with_coercion (struct expression *exp,
+			       int *pos, enum noside noside)
 {
   enum exp_opcode op;
   int pc;
@@ -2180,7 +2180,7 @@ evaluate_subexp_with_coercion (register struct expression *exp,
    Advance *POS over the subexpression.  */
 
 static struct value *
-evaluate_subexp_for_sizeof (register struct expression *exp, register int *pos)
+evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
 {
   enum exp_opcode op;
   int pc;

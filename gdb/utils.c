@@ -282,38 +282,38 @@ make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
 void
-do_cleanups (register struct cleanup *old_chain)
+do_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&cleanup_chain, old_chain);
 }
 
 void
-do_final_cleanups (register struct cleanup *old_chain)
+do_final_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&final_cleanup_chain, old_chain);
 }
 
 void
-do_run_cleanups (register struct cleanup *old_chain)
+do_run_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&run_cleanup_chain, old_chain);
 }
 
 void
-do_exec_cleanups (register struct cleanup *old_chain)
+do_exec_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&exec_cleanup_chain, old_chain);
 }
 
 void
-do_exec_error_cleanups (register struct cleanup *old_chain)
+do_exec_error_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
-do_my_cleanups (register struct cleanup **pmy_chain,
-		register struct cleanup *old_chain)
+do_my_cleanups (struct cleanup **pmy_chain,
+		struct cleanup *old_chain)
 {
   struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
@@ -328,26 +328,26 @@ do_my_cleanups (register struct cleanup **pmy_chain,
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
 void
-discard_cleanups (register struct cleanup *old_chain)
+discard_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&cleanup_chain, old_chain);
 }
 
 void
-discard_final_cleanups (register struct cleanup *old_chain)
+discard_final_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&final_cleanup_chain, old_chain);
 }
 
 void
-discard_exec_error_cleanups (register struct cleanup *old_chain)
+discard_exec_error_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
-discard_my_cleanups (register struct cleanup **pmy_chain,
-		     register struct cleanup *old_chain)
+discard_my_cleanups (struct cleanup **pmy_chain,
+		     struct cleanup *old_chain)
 {
   struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
@@ -1265,7 +1265,7 @@ mstrsave (void *md, const char *ptr)
 }
 
 void
-print_spaces (register int n, register struct ui_file *file)
+print_spaces (int n, struct ui_file *file)
 {
   fputs_unfiltered (n_spaces (n), file);
 }
@@ -1456,8 +1456,8 @@ parse_escape (char **string_ptr)
       case '6':
       case '7':
 	{
-	  register int i = c - '0';
-	  register int count = 0;
+	  int i = c - '0';
+	  int count = 0;
 	  while (++count < 3)
 	    {
 	      c = (**string_ptr);

@@ -2589,7 +2589,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
          to have their own proc_descs, and even if they don't,
          heuristic_proc_desc knows how to create them! */
 
-      register struct linked_proc_info *link;
+      struct linked_proc_info *link;
 
       for (link = linked_proc_desc_table; link; link = link->next)
 	if (PROC_LOW_ADDR (&link->info) <= pc

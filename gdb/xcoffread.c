@@ -1438,7 +1438,7 @@ static struct type *var_symbol_type;
 /* process one xcoff symbol. */
 
 static struct symbol *
-process_xcoff_symbol (register struct coff_symbol *cs, struct objfile *objfile)
+process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 {
   struct symbol onesymbol;
   struct symbol *sym = &onesymbol;
@@ -2535,7 +2535,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	    if (pst && STREQ (namestring, pst->filename))
 	      continue;
 	    {
-	      register int i;
+	      int i;
 	      for (i = 0; i < includes_used; i++)
 		if (STREQ (namestring, psymtab_include_list[i]))
 		  {

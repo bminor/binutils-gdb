@@ -116,7 +116,7 @@ free_symtab_block (struct objfile *objfile, struct block *b)
    It is s->free_code that says which alternative to use.  */
 
 void
-free_symtab (register struct symtab *s)
+free_symtab (struct symtab *s)
 {
   int i, n;
   struct blockvector *bv;
@@ -1228,7 +1228,7 @@ block_depth (struct block *block)
    be freed in free_objfile().  */
 
 void
-extend_psymbol_list (register struct psymbol_allocation_list *listp,
+extend_psymbol_list (struct psymbol_allocation_list *listp,
 		     struct objfile *objfile)
 {
   int new_size;

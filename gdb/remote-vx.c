@@ -255,7 +255,7 @@ vx_create_inferior (char *exec_file, char *args, char **env)
    argument string ARGSTRING.  */
 
 static void
-parse_args (register char *arg_string, arg_array *arg_struct)
+parse_args (char *arg_string, arg_array *arg_struct)
 {
   int arg_count = 0;	/* number of arguments */
   int arg_index = 0;
@@ -295,7 +295,7 @@ parse_args (register char *arg_string, arg_array *arg_struct)
    to the first non-white character.  */
 
 static char *
-skip_white_space (register char *p)
+skip_white_space (char *p)
 {
   while (*p == ' ' || *p == '\t')
     p++;
@@ -307,7 +307,7 @@ skip_white_space (register char *p)
    if no whitespace is found.  */
 
 static char *
-find_white_space (register char *p)
+find_white_space (char *p)
 {
   int c;
 
@@ -1139,7 +1139,7 @@ vx_open (char *args, int from_tty)
       pLoadFile = &loadTable.tbl_ent[i];
 #ifdef WRS_ORIG
       {
-	register int desc;
+	int desc;
 	struct cleanup *old_chain;
 	char *fullname = NULL;
 

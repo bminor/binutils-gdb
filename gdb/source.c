@@ -219,7 +219,7 @@ clear_current_source_symtab_and_line (void)
    before we need to would make things slower than necessary.  */
 
 void
-select_source_symtab (register struct symtab *s)
+select_source_symtab (struct symtab *s)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -418,7 +418,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
   do
     {
       char *name = dirname;
-      register char *p;
+      char *p;
       struct stat st;
 
       {
@@ -526,7 +526,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
     append:
       {
-	register unsigned int len = strlen (name);
+	unsigned int len = strlen (name);
 
 	p = *which_path;
 	while (1)
@@ -1019,7 +1019,7 @@ source_line_charpos (struct symtab *s, int line)
 /* Return the line number of character position POS in symtab S.  */
 
 int
-source_charpos_line (register struct symtab *s, register int chr)
+source_charpos_line (struct symtab *s, int chr)
 {
   int line = 0;
   int *lnp;
@@ -1390,7 +1390,7 @@ forward_search_command (char *regex, int from_tty)
   while (1)
     {
       static char *buf = NULL;
-      register char *p;
+      char *p;
       int cursize, newsize;
 
       cursize = 256;
@@ -1487,7 +1487,7 @@ reverse_search_command (char *regex, int from_tty)
     {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
       char buf[4096];		/* Should be reasonable??? */
-      register char *p = buf;
+      char *p = buf;
 
       c = getc (stream);
       if (c == EOF)

@@ -1020,7 +1020,7 @@ smash_to_method_type (struct type *type, struct type *domain,
    "union ", or "enum ".  If the type has a NULL name, return NULL.  */
 
 char *
-type_name_no_tag (register const struct type *type)
+type_name_no_tag (const struct type *type)
 {
   if (TYPE_TAG_NAME (type) != NULL)
     return TYPE_TAG_NAME (type);

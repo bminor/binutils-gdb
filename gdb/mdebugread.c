@@ -508,7 +508,7 @@ push_parse_stack (void)
   /* Initialize new frame with previous content */
   if (top_stack)
     {
-      register struct parse_stack *prev = new->prev;
+      struct parse_stack *prev = new->prev;
 
       *new = *top_stack;
       top_stack->prev = new;
@@ -2936,7 +2936,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      if (pst && STREQ (namestring, pst->filename))
 			continue;
 		      {
-			register int i;
+			int i;
 			for (i = 0; i < includes_used; i++)
 			  if (STREQ (namestring, psymtab_include_list[i]))
 			    {
@@ -4438,7 +4438,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
    keeping the symtab sorted */
 
 static struct symbol *
-mylookup_symbol (char *name, register struct block *block,
+mylookup_symbol (char *name, struct block *block,
 		 domain_enum domain, enum address_class class)
 {
   struct dict_iterator iter;
@@ -4568,8 +4568,8 @@ sort_blocks (struct symtab *s)
 	   compare_blocks);
 
   {
-    register CORE_ADDR high = 0;
-    register int i, j = BLOCKVECTOR_NBLOCKS (bv);
+    CORE_ADDR high = 0;
+    int i, j = BLOCKVECTOR_NBLOCKS (bv);
 
     for (i = FIRST_LOCAL_BLOCK; i < j; i++)
       if (high < BLOCK_END (BLOCKVECTOR_BLOCK (bv, i)))

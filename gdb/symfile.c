@@ -249,8 +249,8 @@ obsavestring (const char *ptr, int size, struct obstack *obstackp)
      short.  FIXME: Is this really still true with a compiler that can
      inline memcpy? */
   {
-    register const char *p1 = ptr;
-    register char *p2 = p;
+    const char *p1 = ptr;
+    char *p2 = p;
     const char *end = ptr + size;
     while (p1 != end)
       *p2++ = *p1++;
@@ -290,7 +290,7 @@ decrement_reading_symtab (void *dummy)
    case inline.  */
 
 struct symtab *
-psymtab_to_symtab (register struct partial_symtab *pst)
+psymtab_to_symtab (struct partial_symtab *pst)
 {
   /* If it's been looked up before, return it. */
   if (pst->symtab)

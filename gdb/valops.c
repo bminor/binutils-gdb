@@ -969,7 +969,7 @@ push_bytes (CORE_ADDR sp, char *buffer, int len)
    it to be an argument to a function.  */
 
 static CORE_ADDR
-value_push (register CORE_ADDR sp, struct value *arg)
+value_push (CORE_ADDR sp, struct value *arg)
 {
   int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
   int container_len = len;
@@ -1232,7 +1232,7 @@ typecmp (int staticp, int varargs, int nargs,
 
 static struct value *
 search_struct_field (char *name, struct value *arg1, int offset,
-		     register struct type *type, int looking_for_baseclass)
+		     struct type *type, int looking_for_baseclass)
 {
   int i;
   int nbases = TYPE_N_BASECLASSES (type);
@@ -1472,7 +1472,7 @@ find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
 static struct value *
 search_struct_method (char *name, struct value **arg1p,
 		      struct value **args, int offset,
-		      int *static_memfuncp, register struct type *type)
+		      int *static_memfuncp, struct type *type)
 {
   int i;
   struct value *v;
@@ -2138,7 +2138,7 @@ destructor_name_p (const char *name, const struct type *type)
    target structure/union is defined, otherwise, return 0. */
 
 static int
-check_field_in (register struct type *type, const char *name)
+check_field_in (struct type *type, const char *name)
 {
   int i;
 

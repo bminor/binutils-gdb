@@ -2602,7 +2602,7 @@ sh_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
   fprintf_filtered (file, "\t(raw 0x");
   for (j = 0; j < register_size (gdbarch, regnum); j++)
     {
-      register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
+      int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	: register_size (gdbarch, regnum) - 1 - j;
       fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
     }

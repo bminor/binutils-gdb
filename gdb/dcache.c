@@ -240,7 +240,7 @@ dcache_hit (DCACHE *dcache, CORE_ADDR addr)
    be written is. */
 
 static int
-dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
+dcache_write_line (DCACHE *dcache, struct dcache_block *db)
 {
   CORE_ADDR memaddr;
   char *myaddr;

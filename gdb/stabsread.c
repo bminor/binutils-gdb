@@ -468,7 +468,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
    Returns 0 for success, -1 for error.  */
 
 static int
-read_type_number (register char **pp, register int *typenums)
+read_type_number (char **pp, int *typenums)
 {
   int nbits;
   if (**pp == '(')
@@ -1941,7 +1941,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       if (synonym)
 	{
 	  /* Clone the sym and then modify it. */
-	  register struct symbol *typedef_sym = (struct symbol *)
+	  struct symbol *typedef_sym = (struct symbol *)
 	  obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
 	  *typedef_sym = *sym;
 	  SYMBOL_CLASS (typedef_sym) = LOC_TYPEDEF;
@@ -2264,7 +2264,7 @@ error_type (char **pp, struct objfile *objfile)
    deciding whether to call read_type.  */
 
 static struct type *
-read_type (register char **pp, struct objfile *objfile)
+read_type (char **pp, struct objfile *objfile)
 {
   struct type *type = 0;
   struct type *type1;
@@ -4027,7 +4027,7 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 }
 
 static int
-attach_fn_fields_to_type (struct field_info *fip, register struct type *type)
+attach_fn_fields_to_type (struct field_info *fip, struct type *type)
 {
   int n;
 
@@ -4178,7 +4178,7 @@ attach_fn_fields_to_type (struct field_info *fip, register struct type *type)
    for this class's virtual functions.  */
 
 static int
-attach_fields_to_type (struct field_info *fip, register struct type *type,
+attach_fields_to_type (struct field_info *fip, struct type *type,
 		       struct objfile *objfile)
 {
   int nfields = 0;
@@ -4382,7 +4382,7 @@ read_struct_type (char **pp, struct type *type, enum type_code type_code,
    array.  */
 
 static struct type *
-read_array_type (register char **pp, register struct type *type,
+read_array_type (char **pp, struct type *type,
 		 struct objfile *objfile)
 {
   struct type *index_type, *element_type, *range_type;
@@ -4445,7 +4445,7 @@ read_array_type (register char **pp, register struct type *type,
    Also defines the symbols that represent the values of the type.  */
 
 static struct type *
-read_enum_type (register char **pp, register struct type *type,
+read_enum_type (char **pp, struct type *type,
 		struct objfile *objfile)
 {
   char *p;
@@ -5119,7 +5119,7 @@ fix_common_block (struct symbol *sym, int valu)
   struct pending *next = (struct pending *) SYMBOL_TYPE (sym);
   for (; next; next = next->next)
     {
-      register int j;
+      int j;
       for (j = next->nsyms - 1; j >= 0; j--)
 	SYMBOL_VALUE_ADDRESS (next->symbol[j]) += valu;
     }

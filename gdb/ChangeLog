@@ -1,3 +1,15 @@
+2003-09-16  Andrew Cagney  <cagney@redhat.com>
+
+	* buildsym.c: Remove more occurances of "register".
+	* coffread.c, dbxread.c, dcache.c, dwarf2read.c: Ditto.
+	* environ.c, eval.c, f-valprint.c, findvar.c: Ditto.
+	* gdbtypes.c, gnu-v2-abi.c, h8300-tdep.c, hppa-tdep.c: Ditto.
+	* infcmd.c, mdebugread.c, minsyms.c, mips-tdep.c: Ditto.
+	* printcmd.c, remote-vx.c, sh-stub.c, sh-tdep.c: Ditto.
+	* sh64-tdep.c, source.c, stabsread.c, stack.c: Ditto.
+	* standalone.c, symfile.c, symmisc.c, symtab.c: Ditto.
+	* utils.c, valops.c, values.c, xcoffread.c: Ditto.
+
 2003-09-16  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.h (struct gdbarch_tdep): Remove.  Change all register

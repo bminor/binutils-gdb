@@ -275,7 +275,7 @@ decode_format (char **string_ptr, int oformat, int osize)
    This is used to pad hex numbers so they line up.  */
 
 static void
-print_formatted (struct value *val, register int format, int size,
+print_formatted (struct value *val, int format, int size,
 		 struct ui_file *stream)
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
