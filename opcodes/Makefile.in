@@ -55,7 +55,7 @@ RANLIB = ranlib
 
 INCDIR = $(srcdir)/../include 
 BFDDIR = $(srcdir)/../bfd
-CSEARCH = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR)
+CSEARCH = -I. -I$(srcdir) -I../include -I$(INCDIR) -I$(BFDDIR)
 DEP = mkdep
 
 
