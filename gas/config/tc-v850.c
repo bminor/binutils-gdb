@@ -60,12 +60,6 @@ const relax_typeS md_relax_table[] = {
   {0x1fffff, -0x200000, 6, 0},
 };
 
-/* start-sanitize-v850e */
-static boolean support_v850e = false;
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-static boolean support_v850eq = false;
-/* end-sanitize-v850eq */
 
 /* local functions */
 static unsigned long v850_insert_operand
@@ -450,12 +444,7 @@ md_show_usage (stream)
   FILE *stream;
 {
   fprintf (stream, "V850 options:\n");
-/* start-sanitize-v850e */
-  fprintf (stream, "  -mcpu=v850e    target the V850E processor\n");
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-  fprintf (stream, "  -mcpu=v850eq   target the V850E processor with Quantum's extensions\n");
-/* end-sanitize-v850eq */
+  fprintf (stream, "\tnone at present\n");
 } 
 
 int
@@ -463,23 +452,6 @@ md_parse_option (c, arg)
      int    c;
      char * arg;
 {
-/* start-sanitize-v850e */
-  if ((c == 'm') && arg != NULL && (strcmp (arg, "cpu=v850e") == 0))
-    {
-      support_v850e = true;
-      return 1;
-    }
-/* end-sanitize-v850e */
-
-/* start-sanitize-v850eq */
-  if ((c == 'm') && arg != NULL && (strcmp (arg, "cpu=v850eq") == 0))
-    {
-      support_v850e = true;
-      support_v850eq = true;
-      return 1;
-    }
-/* end-sanitize-v850eq */
-
   return 0;
 }
 
@@ -736,22 +708,6 @@ md_assemble (str)
 
       input_line_pointer = str = start_of_operands;
 
-/* start-sanitize-v850e */
-      if ((opcode->flags & V850E_INSTRUCTION) && ! support_v850e)
-	{
-	  errmsg = "V850E instructions not allowed";
-	  goto error;
-	}
-/* end-sanitize-v850e */
-      
-/* start-sanitize-v850eq */
-      if ((opcode->flags & V850EQ_INSTRUCTION) && ! support_v850eq)
-	{
-	  errmsg = "V850EQ instructions not allowed";
-	  goto error;
-	}
-/* end-sanitize-v850eq */
-      
       for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
 	{
 	  const struct v850_operand * operand;
@@ -961,21 +917,21 @@ md_assemble (str)
 		  /* Special case:
 		     If we are assembling a MOV instruction (or a CALLT.... :-)
 		     and the immediate value does not fit into the bits available
-		     and we are supporting V850e instructions
 		     then create a fake error so that the next MOV instruction
 		      will be selected.  This one has a 32 bit immediate field.  */
 
 		  if (((insn & 0x07e0) == 0x0200)
 		      && ex.X_op == O_constant
-		      && (ex.X_add_number < (- (1 << (operand->bits - 1))) || ex.X_add_number > ((1 << operand->bits) - 1))
-		      && support_v850e)
+		      && (ex.X_add_number < (- (1 << (operand->bits - 1))) || ex.X_add_number > ((1 << operand->bits) - 1)))
 		    errmsg = "use bigger instruction";
 /* end-sanitize-v850e */
 		}
 
 	      if (errmsg)
 		goto error;
-		  
+	      
+//fprintf (stderr, "insn: %x, operand %d, op: %d, add_number: %d\n", insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number );
+
 	      switch (ex.X_op) 
 		{
 		case O_illegal:
@@ -990,13 +946,6 @@ md_assemble (str)
 		      errmsg = "invalid operand";
 		      goto error;
 		    }
-#if 0
-		  if (ex.X_add_number == 0
-		      && (operand->shift == 11))
-		    {
-		      as_warn ("register 0 being used as destination of instruction" );
-		    }
-#endif	  
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
 					      (char *) NULL, 0);
 		  break;
@@ -1266,6 +1215,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	fixp->fx_r_type = BFD_RELOC_V850_22_PCREL;
       else if (operand->bits == 9)
 	fixp->fx_r_type = BFD_RELOC_V850_9_PCREL;
+      else if (operand->bits == 16)
+	fixp->fx_r_type = BFD_RELOC_V850_16_PCREL;
       else
 	{
 	  as_bad_where(fixp->fx_file, fixp->fx_line,
