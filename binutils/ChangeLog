@@ -1,3 +1,13 @@
+Thu Jun 11 14:48:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: New file: Display contents of ELF format file.
+	* readelf.h: New file: Header file for readelf.c
+	* Makefile.am: Add rules to build readelf.
+	* Makefile.in: Rebuilt.
+	* binutils.texi: Document readelf.
+	* NEWS: Mention inclusion of readelf into binutils.
+	* po?POTFILES.in; Rebuilt.
+
 Fri Jun  5 18:43:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (setup_section): Adjust the section size if copy_byte
