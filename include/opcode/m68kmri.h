@@ -19,28 +19,29 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* These are used as bit flags for arch below. */
 
-enum m68k_architecture {
-	_m68k_undef = 0,
-	m68000 = 0x01,
-	m68008 = m68000, /* synonym for -m68000.  otherwise unused. */
-	m68010 = 0x02,
-	m68020 = 0x04,
-	m68030 = 0x08,
-	m68040 = 0x10,
-	m68881 = 0x20,
-	m68882 = m68881, /* synonym for -m68881.  otherwise unused. */
-	m68851 = 0x40,
+enum m68k_architecture { a,b };
+
+#define	_m68k_undef  0
+#define	m68000  0x01
+#define	m68008  m68000 /* synonym for -m68000.  otherwise unused. */
+#define	m68010  0x02
+#define	m68020  0x04
+#define	m68030  0x08
+#define	m68040  0x10
+#define	m68881  0x20
+#define	m68882  m68881 /* synonym for -m68881.  otherwise unused. */
+#define	m68851  0x40
 
  /* handy aliases */
-	m68040up = m68040,
-	m68030up = (m68030 | m68040up),
-	m68020up = (m68020 | m68030up),
-	m68010up = (m68010 | m68020up),
-	m68000up = (m68000 | m68010up),
+#define	m68040up m68040
+#define	m68030up  (m68030 | m68040up)
+#define	m68020up  (m68020 | m68030up)
+#define	m68010up  (m68010 | m68020up)
+#define	m68000up  (m68000 | m68010up)
 
-	mfloat = (m68881 | m68882 | m68040),
-	mmmu   = (m68851 | m68030 | m68040)
-}; /* enum m68k_architecture */
+#define	mfloat  (m68881 | m68882 | m68040)
+#define	mmmu    (m68851 | m68030 | m68040)
+
 
  /* note that differences in addressing modes that aren't distinguished
     in the following table are handled explicitly by gas. */
@@ -50,7 +51,7 @@ struct m68k_opcode {
   unsigned long opcode;
   unsigned long  match;
   char *args;
-  enum m68k_architecture arch;
+  int  arch;
 };
 
 /* We store four bytes of opcode for all opcodes because that
@@ -277,9 +278,9 @@ struct m68k_opcode m68k_opcodes[] =
 {"addb",	one(0150000),		one(0170700), ";bDd", m68000up },	/* addb <ea>,	Dd */
 {"addb",	one(0150400),		one(0170700), "Dd~b", m68000up },	/* addb Dd,	<ea> */
 
+{"addw",	one(0150300),		one(0170700), "*wAd", m68000up },	/* adda written as add */
 {"addw",	one(0050100),		one(0170700), "Qd%w", m68000up },	/* addq written as add */
 {"addw",	one(0003100),		one(0177700), "#w$w", m68000up },	/* addi written as add */
-{"addw",	one(0150300),		one(0170700), "*wAd", m68000up },	/* adda written as add */
 {"addw",	one(0150100),		one(0170700), "*wDd", m68000up },	/* addw <ea>,	Dd */
 {"addw",	one(0150500),		one(0170700), "Dd~w", m68000up },	/* addw Dd,	<ea> */
 
@@ -420,6 +421,11 @@ struct m68k_opcode m68k_opcodes[] =
 {"bclrb",	one(0000600),		one(0170700),		"Dd$s", m68000up },
 {"bclrb",	one(0004200),		one(0177700),		"#b$s", m68000up },
 
+{"bchgl",	one(0000500),		one(0170700),		"Dd$s", m68000up },
+{"bchgl",	one(0004100),		one(0177700),		"#b$s", m68000up },
+{"bclrl",	one(0000600),		one(0170700),		"Dd$s", m68000up },
+{"bclrl",	one(0004200),		one(0177700),		"#b$s", m68000up },
+
 #endif
 
 {"bchg",	one(0000500),		one(0170700),		"Dd$s", m68000up },
@@ -443,6 +449,12 @@ struct m68k_opcode m68k_opcodes[] =
 {"bsetb",	one(0004300),		one(0177700),		"#b$s", m68000up },
 {"btstb",	one(0000400),		one(0170700),		"Dd@s", m68000up },
 {"btstb",	one(0004000),		one(0177700),		"#b@s", m68000up },
+
+{"bsetl",	one(0000700),		one(0170700),		"Dd$s", m68000up },
+{"bsetl",	one(0004300),		one(0177700),		"#b$s", m68000up },
+{"btstl",	one(0000400),		one(0170700),		"Dd@s", m68000up },
+{"btstl",	one(0004000),		one(0177700),		"#b@s", m68000up },
+
 
 #endif
 
@@ -1978,6 +1990,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"subil",	one(0002200),		one(0177700),		"#l$s", m68000up },
 {"subiw",	one(0002100),		one(0177700),		"#w$s", m68000up },
 {"subl",	one(0050600),		one(0170700),		"Qd%s", m68000up },
+{"suba",	one(0110700),		one(0170700),		"*lAd", m68000up },
 {"subl",	one(0002200),		one(0177700),		"#l$s", m68000up },
 {"subl",	one(0110700),		one(0170700),		"*lAd", m68000up },
 {"subl",	one(0110200),		one(0170700),		"*lDd", m68000up },
@@ -2030,39 +2043,39 @@ struct m68k_opcode m68k_opcodes[] =
 {"trapvc",	one(0054374),		one(0177777),		"", m68020up },
 {"trapvs",	one(0054774),		one(0177777),		"", m68020up },
 
-{"trapcc.w",	one(0052372),		one(0177777),		"", m68020up },
-{"trapcs.w",	one(0052772),		one(0177777),		"", m68020up },
-{"trapeq.w",	one(0053772),		one(0177777),		"", m68020up },
-{"trapf.w",	one(0050772),		one(0177777),		"", m68020up },
-{"trapge.w",	one(0056372),		one(0177777),		"", m68020up },
-{"trapgt.w",	one(0057372),		one(0177777),		"", m68020up },
-{"traphi.w",	one(0051372),		one(0177777),		"", m68020up },
-{"traple.w",	one(0057772),		one(0177777),		"", m68020up },
-{"trapls.w",	one(0051772),		one(0177777),		"", m68020up },
-{"traplt.w",	one(0056772),		one(0177777),		"", m68020up },
-{"trapmi.w",	one(0055772),		one(0177777),		"", m68020up },
-{"trapne.w",	one(0053372),		one(0177777),		"", m68020up },
-{"trappl.w",	one(0055372),		one(0177777),		"", m68020up },
-{"trapt.w",	one(0050372),		one(0177777),		"", m68020up },
-{"trapvc.w",	one(0054372),		one(0177777),		"", m68020up },
-{"trapvs.w",	one(0054772),		one(0177777),		"", m68020up },
+{"trapccw",	one(0052372),		one(0177777),		"#w", m68020up },
+{"trapcsw",	one(0052772),		one(0177777),		"#w", m68020up },
+{"trapeqw",	one(0053772),		one(0177777),		"#w", m68020up },
+{"trapfw",	one(0050772),		one(0177777),		"#w", m68020up },
+{"trapgew",	one(0056372),		one(0177777),		"#w", m68020up },
+{"trapgtw",	one(0057372),		one(0177777),		"#w", m68020up },
+{"traphiw",	one(0051372),		one(0177777),		"#w", m68020up },
+{"traplew",	one(0057772),		one(0177777),		"#w", m68020up },
+{"traplsw",	one(0051772),		one(0177777),		"#w", m68020up },
+{"trapltw",	one(0056772),		one(0177777),		"#w", m68020up },
+{"trapmiw",	one(0055772),		one(0177777),		"#w", m68020up },
+{"trapnew",	one(0053372),		one(0177777),		"#w", m68020up },
+{"trapplw",	one(0055372),		one(0177777),		"#w", m68020up },
+{"traptw",	one(0050372),		one(0177777),		"#w", m68020up },
+{"trapvcw",	one(0054372),		one(0177777),		"#w", m68020up },
+{"trapvsw",	one(0054772),		one(0177777),		"#w", m68020up },
 
-{"trapcc.l",	one(0052373),		one(0177777),		"", m68020up },
-{"trapcs.l",	one(0052773),		one(0177777),		"", m68020up },
-{"trapeq.l",	one(0053773),		one(0177777),		"", m68020up },
-{"trapf.l",	one(0050773),		one(0177777),		"", m68020up },
-{"trapge.l",	one(0056373),		one(0177777),		"", m68020up },
-{"trapgt.l",	one(0057373),		one(0177777),		"", m68020up },
-{"traphi.l",	one(0051373),		one(0177777),		"", m68020up },
-{"traple.l",	one(0057773),		one(0177777),		"", m68020up },
-{"trapls.l",	one(0051773),		one(0177777),		"", m68020up },
-{"traplt.l",	one(0056773),		one(0177777),		"", m68020up },
-{"trapmi.l",	one(0055773),		one(0177777),		"", m68020up },
-{"trapne.l",	one(0053373),		one(0177777),		"", m68020up },
-{"trappl.l",	one(0055373),		one(0177777),		"", m68020up },
-{"trapt.l",	one(0050373),		one(0177777),		"", m68020up },
-{"trapvc.l",	one(0054373),		one(0177777),		"", m68020up },
-{"trapvs.l",	one(0054773),		one(0177777),		"", m68020up },
+{"trapccl",	one(0052373),		one(0177777),		"#l", m68020up },
+{"trapcsl",	one(0052773),		one(0177777),		"#l", m68020up },
+{"trapeql",	one(0053773),		one(0177777),		"#l", m68020up },
+{"trapfl",	one(0050773),		one(0177777),		"#l", m68020up },
+{"trapgel",	one(0056373),		one(0177777),		"#l", m68020up },
+{"trapgtl",	one(0057373),		one(0177777),		"#l", m68020up },
+{"traphil",	one(0051373),		one(0177777),		"#l", m68020up },
+{"traplel",	one(0057773),		one(0177777),		"#l", m68020up },
+{"traplsl",	one(0051773),		one(0177777),		"#l", m68020up },
+{"trapltl",	one(0056773),		one(0177777),		"#l", m68020up },
+{"trapmil",	one(0055773),		one(0177777),		"#l", m68020up },
+{"trapnel",	one(0053373),		one(0177777),		"#l", m68020up },
+{"trappll",	one(0055373),		one(0177777),		"#l", m68020up },
+{"traptl",	one(0050373),		one(0177777),		"#l", m68020up },
+{"trapvcl",	one(0054373),		one(0177777),		"#l", m68020up },
+{"trapvsl",	one(0054773),		one(0177777),		"#l", m68020up },
 
 {"trapv",	one(0047166),		one(0177777),		"", m68000up },
 
@@ -2083,7 +2096,10 @@ struct m68k_opcode m68k_opcodes[] =
 {"jbsr",	one(0047200),		one(0177700),		"!s", m68000up },
 {"jra",		one(0060000),		one(0177400),		"Bg", m68000up },
 {"jra",		one(0047300),		one(0177700),		"!s", m68000up },
-
+#ifdef MRI
+{"jbra",	one(0060000),		one(0177400),		"Bg", m68000up },
+{"jbra",	one(0047300),		one(0177700),		"!s", m68000up },
+#endif
 {"jhi",		one(0061000),		one(0177400),		"Bg", m68000up },
 {"jls",		one(0061400),		one(0177400),		"Bg", m68000up },
 {"jcc",		one(0062000),		one(0177400),		"Bg", m68000up },
@@ -2099,6 +2115,23 @@ struct m68k_opcode m68k_opcodes[] =
 {"jgt",		one(0067000),		one(0177400),		"Bg", m68000up },
 {"jle",		one(0067400),		one(0177400),		"Bg", m68000up },
 
+#ifdef MRI
+
+{"jbhi",		one(0061000),		one(0177400),		"Bg", m68000up },
+{"jbls",		one(0061400),		one(0177400),		"Bg", m68000up },
+{"jbcc",		one(0062000),		one(0177400),		"Bg", m68000up },
+{"jbcs",		one(0062400),		one(0177400),		"Bg", m68000up },
+{"jbne",		one(0063000),		one(0177400),		"Bg", m68000up },
+{"jbeq",		one(0063400),		one(0177400),		"Bg", m68000up },
+{"jbvc",		one(0064000),		one(0177400),		"Bg", m68000up },
+{"jbvs",		one(0064400),		one(0177400),		"Bg", m68000up },
+{"jbpl",		one(0065000),		one(0177400),		"Bg", m68000up },
+{"jbmi",		one(0065400),		one(0177400),		"Bg", m68000up },
+{"jbge",		one(0066000),		one(0177400),		"Bg", m68000up },
+{"jblt",		one(0066400),		one(0177400),		"Bg", m68000up },
+{"jbgt",		one(0067000),		one(0177400),		"Bg", m68000up },
+{"jble",		one(0067400),		one(0177400),		"Bg", m68000up },
+#endif
 /* aliases */
 #ifdef MRI
 
