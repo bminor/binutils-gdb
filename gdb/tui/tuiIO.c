@@ -22,618 +22,383 @@
 #include <stdio.h>
 #include "defs.h"
 #include "terminal.h"
+#include "target.h"
+#include "event-loop.h"
+#include "command.h"
+#include "top.h"
+#include "readline/readline.h"
 #include "tui.h"
 #include "tuiData.h"
 #include "tuiIO.h"
 #include "tuiCommand.h"
 #include "tuiWin.h"
+#include "tuiGeneralWin.h"
+#include "tui-file.h"
+#include "ui-out.h"
+#include "cli-out.h"
+#include <fcntl.h>
 
-#include <stdarg.h>
+/* This file controls the IO interactions between gdb and curses.
+   When the TUI is enabled, gdb has two modes a curses and a standard
+   mode.
 
-/* The Solaris header files seem to provide no declaration for this at
-   all when __STDC__ is defined.  This shouldn't conflict with
-   anything.  */
-extern char *tgoto ();
+   In curses mode, the gdb outputs are made in a curses command window.
+   For this, the gdb_stdout and gdb_stderr are redirected to the specific
+   ui_file implemented by TUI.  The output is handled by tui_puts().
+   The input is also controlled by curses with tui_getc().  The readline
+   library uses this function to get its input.  Several readline hooks
+   are installed to redirect readline output to the TUI (see also the
+   note below).
 
-int insert_mode = 0;
+   In normal mode, the gdb outputs are restored to their origin, that
+   is as if TUI is not used.  Readline also uses its original getc()
+   function with stdin.
 
-/********************************************
-**       LOCAL STATIC FORWARD DECLS        **
-********************************************/
-static void _updateCommandInfo (int);
+   Note: the current readline is not clean in its management of the output.
+   Even if we install a redisplay handler, it sometimes writes on a stdout
+   file.  It is important to redirect every output produced by readline,
+   otherwise the curses window will be garbled.  This is implemented with
+   a pipe that TUI reads and readline writes to.  A gdb input handler
+   is created so that reading the pipe is handled automatically.
+   This will probably not work on non-Unix platforms.  The best fix is
+   to make readline clean enougth so that is never write on stdout.  */
+
+/* TUI output files.  */
+static struct ui_file *tui_stdout;
+static struct ui_file *tui_stderr;
+static struct ui_out *tui_out;
+
+/* GDB output files in non-curses mode.  */
+static struct ui_file *tui_old_stdout;
+static struct ui_file *tui_old_stderr;
+static struct ui_out *tui_old_uiout;
+
+/* Readline previous hooks.  */
+static Function *tui_old_rl_getc_function;
+static VFunction *tui_old_rl_redisplay_function;
+static VFunction *tui_old_rl_prep_terminal;
+static VFunction *tui_old_rl_deprep_terminal;
+static int tui_old_readline_echoing_p;
+
+/* Readline output stream.
+   Should be removed when readline is clean.  */
+static FILE *tui_rl_outstream;
+static FILE *tui_old_rl_outstream;
+static int tui_readline_pipe[2];
+
 static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
 
-/*********************************************************************************
-**                              PUBLIC FUNCTIONS                                **
-*********************************************************************************/
-
-/*
-   ** tuiPuts_unfiltered().
-   **        Function to put a string to the command window
-   **              When running in TUI mode, this is the "hook"
-   **              for fputs_unfiltered(). That is, all debugger
-   **              output eventually makes it's way to the bottom-level
-   **              routine fputs_unfiltered (main.c), which (in TUI
-   **              mode), calls tuiPuts_unfiltered().
- */
+/* Print the string in the curses command window.  */
 void
-tuiPuts_unfiltered (const char *string, struct ui_file * stream)
+tui_puts (const char *string)
 {
-  int len = strlen (string);
-  int i, linech;
+  static int tui_skip_line = -1;
+  char c;
+  WINDOW *w;
 
-  for (i = 0; i < len; i++)
+  w = cmdWin->generic.handle;
+  while ((c = *string++) != 0)
     {
-      if (string[i] == '\n' || string[i] == '\r')
-	m_tuiStartNewLine;
+      /* Catch annotation and discard them.  We need two \032 and
+         discard until a \n is seen.  */
+      if (c == '\032')
+        {
+          tui_skip_line++;
+        }
+      else if (tui_skip_line != 1)
+        {
+          tui_skip_line = -1;
+          waddch (w, c);
+        }
+      else if (c == '\n')
+        tui_skip_line = -1;
+    }
+  getyx (w, cmdWin->detail.commandInfo.curLine,
+         cmdWin->detail.commandInfo.curch);
+
+  /* We could defer the following.  */
+  wrefresh (w);
+  fflush (stdout);
+}
+
+/* Readline callback.
+   Redisplay the command line with its prompt after readline has
+   changed the edited text.  */
+static void
+tui_redisplay_readline (void)
+{
+  int prev_col;
+  int height;
+  int col, line;
+  int c_pos;
+  int c_line;
+  int in;
+  WINDOW *w;
+  char *prompt;
+  int start_line;
+  
+  prompt = get_prompt ();
+  
+  c_pos = -1;
+  c_line = -1;
+  w = cmdWin->generic.handle;
+  start_line = cmdWin->detail.commandInfo.curLine;
+  wmove (w, start_line, 0);
+  prev_col = 0;
+  height = 1;
+  for (in = 0; prompt && prompt[in]; in++)
+    {
+      waddch (w, prompt[in]);
+      getyx (w, line, col);
+      if (col < prev_col)
+        height++;
+      prev_col = col;
+    }
+  for (in = 0; in < rl_end; in++)
+    {
+      unsigned char c;
+      
+      c = (unsigned char) rl_line_buffer[in];
+      if (in == rl_point)
+	{
+          getyx (w, c_line, c_pos);
+	}
+
+      if (CTRL_CHAR (c) || c == RUBOUT)
+	{
+          waddch (w, '^');
+          waddch (w, CTRL_CHAR (c) ? UNCTRL (c) : '?');
+	}
       else
 	{
-	  if ((cmdWin->detail.commandInfo.curch + 1) > cmdWin->generic.width)
-	    m_tuiStartNewLine;
-
-	  if (insert_mode)
-	    {
-	      mvwinsch (cmdWin->generic.handle,
-			cmdWin->detail.commandInfo.curLine,
-			cmdWin->detail.commandInfo.curch++,
-			string[i]);
-	      wmove (cmdWin->generic.handle,
-		     cmdWin->detail.commandInfo.curLine,
-		     cmdWin->detail.commandInfo.curch);
-	    }
-	  else
-	    mvwaddch (cmdWin->generic.handle,
-		      cmdWin->detail.commandInfo.curLine,
-		      cmdWin->detail.commandInfo.curch++,
-		      string[i]);
+          waddch (w, c);
 	}
+      if (c == '\n')
+        {
+          getyx (w, cmdWin->detail.commandInfo.curLine,
+                 cmdWin->detail.commandInfo.curch);
+        }
+      getyx (w, line, col);
+      if (col < prev_col)
+        height++;
+      prev_col = col;
     }
-  tuiRefreshWin (&cmdWin->generic);
+  wclrtobot (w);
+  getyx (w, cmdWin->detail.commandInfo.curLine,
+         cmdWin->detail.commandInfo.curch);
+  if (c_line >= 0)
+    wmove (w, c_line, c_pos);
 
-  return;
-}				/* tuiPuts_unfiltered */
+  cmdWin->detail.commandInfo.curLine -= height - 1;
+  
+  wrefresh (w);
+  fflush(stdout);
+}
 
-/* A cover routine for tputs().
- * tputs() is called from the readline package to put
- * out strings representing cursor positioning.
- * In TUI mode (non-XDB-style), tui_tputs() is called instead.
- *
- * The reason we need to hook tputs() is:
- * Since the output is going to curses and not to
- * a raw terminal, we need to intercept these special
- * sequences, and handle them them here.
- *
- * This function seems to be correctly handling all sequences
- * aimed at hpterm's, but there is additional work to do
- * for xterm's and dtterm's. I abandoned further work on this
- * in favor of "XDB style". In "XDB style", the command region
- * looks like terminal, not a curses window, and this routine
- * is not called. - RT
- */
-void
-tui_tputs (str, affcnt, putfunc)
-     char *str;
-     int affcnt;
-     int (*putfunc) (int);
+/* Readline callback to prepare the terminal.  It is called once
+   each time we enter readline.  There is nothing to do in curses mode.  */
+static void
+tui_prep_terminal (void)
 {
-  extern char *rl_prompt;	/* the prompt string */
+}
 
-  /* This set of globals are defined and initialized
-   * by the readline package.
-   *
-   * Note we're assuming tui_tputs() is being called
-   * by the readline package. That's because we're recognizing
-   * that a given string is being passed by
-   * matching the string address against readline's
-   * term_<whatever> global. To make this more general,
-   * we'd have to actually recognize the termcap sequence
-   * inside the string (more work than I want to do). - RT
-   *
-   * We don't see or need to handle every one of these here;
-   * this is just the full list defined in readline/readline.c
-   */
-  extern char *term_backspace;
-  extern char *term_clreol;
-  extern char *term_clrpag;
-  extern char *term_cr;
-  extern char *term_dc;
-  extern char *term_ei;
-  extern char *term_goto;
-  extern char *term_ic;
-  extern char *term_im;
-  extern char *term_mm;
-  extern char *term_mo;
-  extern char *term_up;
-  extern char *term_scroll_region;
-  extern char *term_memory_lock;
-  extern char *term_memory_unlock;
-  extern char *term_cursor_move;
-  extern char *visible_bell;
+/* Readline callback to restore the terminal.  It is called once
+   each time we leave readline.  There is nothing to do in curses mode.  */
+static void
+tui_deprep_terminal (void)
+{
+}
 
-  /* Sanity check - if not TUI, just call tputs() */
-  if (!tui_version)
-    tputs (str, affcnt, putfunc);
+/* Read readline output pipe and feed the command window with it.
+   Should be removed when readline is clean.  */
+static void
+tui_readline_output (int code, gdb_client_data data)
+{
+  int size;
+  char buf[256];
 
-  /* The strings we special-case are handled first */
-
-  if (str == term_backspace)
+  size = read (tui_readline_pipe[0], buf, sizeof (buf) - 1);
+  if (size > 0 && tui_active)
     {
-      /* Backspace. */
-
-      /* We see this on an emacs control-B.
-         * I.e., it's like the left-arrow key (not like the backspace key).
-         * The effect that readline wants when it transmits this
-         * character to us is simply to back up one character
-         * (but not to write a space over the old character).
-       */
-
-      _updateCommandInfo (-1);
-      wmove (cmdWin->generic.handle,
-	     cmdWin->detail.commandInfo.curLine,
-	     cmdWin->detail.commandInfo.curch);
-      wrefresh (cmdWin->generic.handle);
-
+      buf[size] = 0;
+      tui_puts (buf);
     }
-  else if (str == term_clreol)
+}
+
+/* Setup the IO for curses or non-curses mode.
+   - In non-curses mode, readline and gdb use the standard input and
+   standard output/error directly.
+   - In curses mode, the standard output/error is controlled by TUI
+   with the tui_stdout and tui_stderr.  The output is redirected in
+   the curses command window.  Several readline callbacks are installed
+   so that readline asks for its input to the curses command window
+   with wgetch().  */
+void
+tui_setup_io (int mode)
+{
+  extern int readline_echoing_p;
+ 
+  if (mode)
     {
+      /* Redirect readline to TUI.  */
+      tui_old_rl_redisplay_function = rl_redisplay_function;
+      tui_old_rl_deprep_terminal = rl_deprep_term_function;
+      tui_old_rl_prep_terminal = rl_prep_term_function;
+      tui_old_rl_getc_function = rl_getc_function;
+      tui_old_rl_outstream = rl_outstream;
+      tui_old_readline_echoing_p = readline_echoing_p;
+      rl_redisplay_function = tui_redisplay_readline;
+      rl_deprep_term_function = tui_deprep_terminal;
+      rl_prep_term_function = tui_prep_terminal;
+      rl_getc_function = tui_getc;
+      readline_echoing_p = 0;
+      rl_outstream = tui_rl_outstream;
+      rl_prompt = 0;
 
-      /* Clear to end of line. */
-      wclrtoeol (cmdWin->generic.handle);
-      wrefresh (cmdWin->generic.handle);
+      /* Keep track of previous gdb output.  */
+      tui_old_stdout = gdb_stdout;
+      tui_old_stderr = gdb_stderr;
+      tui_old_uiout = uiout;
 
-    }
-  else if (str == term_cr)
-    {
-
-      /* Carriage return */
-      _updateCommandInfo (-cmdWin->detail.commandInfo.curch);
-      wmove (cmdWin->generic.handle,
-	     cmdWin->detail.commandInfo.curLine,
-	     0 /* readline will rewrite the prompt from 0 */ );
-      wrefresh (cmdWin->generic.handle);
-
-    }
-  else if (str == term_goto)
-    {
-
-      /* This is actually a tgoto() specifying a character position,
-         * followed by either a term_IC/term_DC which [I think] means
-         * insert/delete one character at that position.
-         * There are complications with this one - need to either
-         * extract the position from the string, or have a backdoor
-         * means of communicating it from ../readline/display.c.
-         * So this one is not yet implemented.
-         * Not doing it seems to have no ill effects on command-line-editing
-         * that I've noticed so far. - RT
-       */
-
-    }
-  else if (str == term_dc)
-    {
-
-      /* Delete character at current cursor position */
-      wdelch (cmdWin->generic.handle);
-      wrefresh (cmdWin->generic.handle);
-
-    }
-  else if (str == term_im)
-    {
-
-      /* Turn on insert mode. */
-      insert_mode = 1;
-
-    }
-  else if (str == term_ei)
-    {
-
-      /* Turn off insert mode. */
-      insert_mode = 0;
-
-      /* Strings we know about but don't handle
-         * specially here are just passed along to tputs().
-         *
-         * These are not handled because (as far as I can tell)
-         * they are not actually emitted by the readline package
-         * in the course of doing command-line editing. Some of them
-         * theoretically could be used in the future, in which case we'd
-         * need to handle them.
-       */
-    }
-  else if (str == term_ic ||	/* insert character */
-	   str == term_cursor_move ||	/* cursor move */
-	   str == term_clrpag ||	/* clear page */
-	   str == term_mm ||	/* turn on meta key */
-	   str == term_mo ||	/* turn off meta key */
-	   str == term_up ||	/* up one line (not expected) */
-	   str == term_scroll_region ||		/* set scroll region */
-	   str == term_memory_lock ||	/* lock screen above cursor */
-	   str == term_memory_unlock ||		/* unlock screen above cursor */
-	   str == visible_bell)
-    {				/* flash screen */
-      tputs (str, affcnt, putfunc);
+      /* Reconfigure gdb output.  */
+      gdb_stdout = tui_stdout;
+      gdb_stderr = tui_stderr;
+      gdb_stdlog = gdb_stdout;	/* for moment */
+      gdb_stdtarg = gdb_stderr;	/* for moment */
+      uiout = tui_out;
     }
   else
-    {				/* something else */
-      tputs (str, affcnt, putfunc);
+    {
+      /* Restore gdb output.  */
+      gdb_stdout = tui_old_stdout;
+      gdb_stderr = tui_old_stderr;
+      gdb_stdlog = gdb_stdout;	/* for moment */
+      gdb_stdtarg = gdb_stderr;	/* for moment */
+      uiout = tui_old_uiout;
+
+      /* Restore readline.  */
+      rl_redisplay_function = tui_old_rl_redisplay_function;
+      rl_deprep_term_function = tui_old_rl_deprep_terminal;
+      rl_prep_term_function = tui_old_rl_prep_terminal;
+      rl_getc_function = tui_old_rl_getc_function;
+      rl_outstream = tui_old_rl_outstream;
+      readline_echoing_p = tui_old_readline_echoing_p;
     }
-}				/* tui_tputs */
+}
 
-
-/*
-   ** tui_vwgetch()
-   **        Wrapper around wgetch with the window in a va_list
- */
-unsigned int
-tui_vwgetch (va_list args)
+/* Initialize the IO for gdb in curses mode.  */
+void
+tui_initialize_io ()
 {
-  unsigned int ch;
-  WINDOW *window;
+  /* Create tui output streams.  */
+  tui_stdout = tui_fileopen (stdout);
+  tui_stderr = tui_fileopen (stderr);
+  tui_out = tui_out_new (tui_stdout);
 
-  window = va_arg (args, WINDOW *);
+  /* Create the default UI.  It is not created because we installed
+     a init_ui_hook.  */
+  uiout = cli_out_new (gdb_stdout);
 
-  return ((unsigned int) wgetch (window));
-}				/* tui_vwgetch */
+  /* Temporary solution for readline writing to stdout:
+     redirect readline output in a pipe, read that pipe and
+     output the content in the curses command window.  */
+  if (pipe (tui_readline_pipe) != 0)
+    {
+      fprintf_unfiltered (gdb_stderr, "Cannot create pipe for readline");
+      exit (1);
+    }
+  tui_rl_outstream = fdopen (tui_readline_pipe[1], "w");
+  if (tui_rl_outstream == 0)
+    {
+      fprintf_unfiltered (gdb_stderr, "Cannot redirect readline output");
+      exit (1);
+    }
+  setlinebuf (tui_rl_outstream);
 
-
-/*
-   ** tuiGetc().
-   **        Get a character from the command window.
-   **           This is called from the readline package,
-   **              that is, we have:
-   **                tuiGetc() [here], called from
-   **                readline code [in ../readline/], called from
-   **                command_line_input() in top.c
- */
-unsigned int
-tuiGetc (void)
-{
-  unsigned int ch;
-  extern char *rl_prompt;
-  extern char *rl_line_buffer;
-  extern int rl_point;
-
-  /* Call the curses routine that reads one character */
-#ifndef COMMENT
-  ch = (unsigned int) vcatch_errors ((OpaqueFuncPtr) tui_vwgetch,
-				     cmdWin->generic.handle);
+#ifdef O_NONBLOCK
+  (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NONBLOCK);
 #else
-  ch = wgetch (cmdWin->generic.handle);
+#ifdef O_NDELAY
+  (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NDELAY);
 #endif
+#endif
+
+  add_file_handler (tui_readline_pipe[0], tui_readline_output, 0);
+}
+
+/* Get a character from the command window.  This is called from the readline
+   package.  */
+int
+tui_getc (FILE *fp)
+{
+  int ch;
+  WINDOW *w;
+
+  w = cmdWin->generic.handle;
+
+  /* Flush readline output.  */
+  tui_readline_output (GDB_READABLE, 0);
+  
+  ch = wgetch (w);
   ch = _tuiHandleResizeDuringIO (ch);
 
+  /* The \n must be echoed because it will not be printed by readline.  */
+  if (ch == '\n')
+    {
+      /* When hitting return with an empty input, gdb executes the last
+         command.  If we emit a newline, this fills up the command window
+         with empty lines with gdb prompt at beginning.  Instead of that,
+         stay on the same line but provide a visual effect to show the
+         user we recognized the command.  */
+      if (rl_end == 0)
+        {
+          wmove (w, cmdWin->detail.commandInfo.curLine, 0);
+
+          /* Clear the line.  This will blink the gdb prompt since
+             it will be redrawn at the same line.  */
+          wclrtoeol (w);
+          wrefresh (w);
+          napms (20);
+        }
+      else
+        {
+          wmove (w, cmdWin->detail.commandInfo.curLine,
+                 cmdWin->detail.commandInfo.curch);
+          waddch (w, ch);
+        }
+    }
+  
   if (m_isCommandChar (ch))
     {				/* Handle prev/next/up/down here */
-      tuiTermSetup (0);
       ch = tuiDispatchCtrlChar (ch);
-      cmdWin->detail.commandInfo.curch = strlen (rl_prompt) + rl_point;
-      tuiTermUnsetup (0, cmdWin->detail.commandInfo.curch);
     }
+  
   if (ch == '\n' || ch == '\r' || ch == '\f')
     cmdWin->detail.commandInfo.curch = 0;
+#if 0
   else
     tuiIncrCommandCharCountBy (1);
-
+#endif
+  if (ch == KEY_BACKSPACE)
+    return '\b';
+  
   return ch;
-}				/* tuiGetc */
+}
 
 
-/*
-   ** tuiBufferGetc().
- */
-/*elz: this function reads a line of input from the user and
-   puts it in a static buffer. Subsequent calls to this same function
-   obtain one char at the time, providing the caller with a behavior
-   similar to fgetc. When the input is buffered, the backspaces have
-   the needed effect, i.e. ignore the last char active in the buffer */
-/* so far this function is called only from the query function in
-   utils.c */
-
-unsigned int
-tuiBufferGetc (void)
-{
-  unsigned int ch;
-  static unsigned char _ibuffer[512];
-  static int index_read = -1;
-  static int length_of_answer = -1;
-  int pos = 0;
-
-  if (length_of_answer == -1)
-    {
-      /* this is the first time through, need to read the answer */
-      do
-	{
-	  /* Call the curses routine that reads one character */
-	  ch = (unsigned int) wgetch (cmdWin->generic.handle);
-	  if (ch != '\b')
-	    {
-	      _ibuffer[pos] = ch;
-	      pos++;
-	    }
-	  else
-	    pos--;
-	}
-      while (ch != '\r' && ch != '\n');
-
-      length_of_answer = pos;
-      index_read = 0;
-    }
-
-  ch = _ibuffer[index_read];
-  index_read++;
-
-  if (index_read == length_of_answer)
-    {
-      /*this is the last time through, reset for next query */
-      index_read = -1;
-      length_of_answer = -1;
-    }
-
-  wrefresh (cmdWin->generic.handle);
-
-  return (ch);
-}				/* tuiBufferGetc */
-
-
-/*
-   ** tuiStartNewLines().
- */
-void
-tuiStartNewLines (int numLines)
-{
-  if (numLines > 0)
-    {
-      if (cmdWin->generic.viewportHeight > 1 &&
-	cmdWin->detail.commandInfo.curLine < cmdWin->generic.viewportHeight)
-	cmdWin->detail.commandInfo.curLine += numLines;
-      else
-	scroll (cmdWin->generic.handle);
-      cmdWin->detail.commandInfo.curch = 0;
-      wmove (cmdWin->generic.handle,
-	     cmdWin->detail.commandInfo.curLine,
-	     cmdWin->detail.commandInfo.curch);
-      tuiRefreshWin (&cmdWin->generic);
-    }
-
-  return;
-}				/* tuiStartNewLines */
-
-
-/*
-   ** tui_vStartNewLines().
-   **        With numLines in a va_list
- */
-void
-tui_vStartNewLines (va_list args)
-{
-  int numLines = va_arg (args, int);
-
-  tuiStartNewLines (numLines);
-
-  return;
-}				/* tui_vStartNewLines */
-
-
-/****************************************************************************
-**                   LOCAL STATIC FUNCTIONS                                **
-*****************************************************************************/
-
-
-/*
-   ** _tuiHandleResizeDuringIO
-   **    This function manages the cleanup when a resize has occured
-   **    From within a call to getch() or read.  Returns the character
-   **    to return from getc or read.
- */
+/* Cleanup when a resize has occured.
+   Returns the character that must be processed.  */
 static unsigned int
 _tuiHandleResizeDuringIO (unsigned int originalCh)
-	/* the char just read */
 {
   if (tuiWinResized ())
     {
       tuiRefreshAll ();
       dont_repeat ();
       tuiSetWinResizedTo (FALSE);
-      rl_reset ();
       return '\n';
     }
   else
     return originalCh;
-}				/* _tuiHandleResizeDuringIO */
-
-
-/*
-   ** _updateCommandInfo().
-   **        Function to update the command window information.
- */
-static void
-_updateCommandInfo (int sizeOfString)
-{
-
-  if ((sizeOfString +
-       cmdWin->detail.commandInfo.curch) > cmdWin->generic.width)
-    {
-      int newCurch = sizeOfString + cmdWin->detail.commandInfo.curch;
-
-      tuiStartNewLines (1);
-      cmdWin->detail.commandInfo.curch = newCurch - cmdWin->generic.width;
-    }
-  else
-    cmdWin->detail.commandInfo.curch += sizeOfString;
-
-  return;
-}				/* _updateCommandInfo */
-
-
-/* Looked at in main.c, fputs_unfiltered(), to decide
- * if it's safe to do standard output to the command window.
- */
-int tui_owns_terminal = 0;
-
-/* Called to set up the terminal for TUI (curses) I/O.
- * We do this either on our way "in" to GDB after target
- * program execution, or else within tuiDo just before
- * going off to TUI routines.
- */
-
-void
-tuiTermSetup (int turn_off_echo)
-{
-  char *buffer;
-  int start;
-  int end;
-  int endcol;
-  extern char *term_scroll_region;
-  extern char *term_cursor_move;
-  extern char *term_memory_lock;
-  extern char *term_memory_unlock;
-
-  /* Turn off echoing, since the TUI does not
-     * expect echoing. Below I only put in the TERMIOS
-     * case, since that is what applies on HP-UX. turn_off_echo
-     * is 1 except for the case where we're being called
-     * on a "quit", in which case we want to leave echo on.
-   */
-  if (turn_off_echo)
-    {
-#ifdef HAVE_TERMIOS
-      struct termios tio;
-      tcgetattr (0, &tio);
-      tio.c_lflag &= ~(ECHO);
-      tcsetattr (0, TCSANOW, &tio);
-#endif
-    }
-
-  /* Compute the start and end lines of the command
-     * region. (Actually we only use end here)
-   */
-  start = winList[CMD_WIN]->generic.origin.y;
-  end = start + winList[CMD_WIN]->generic.height - 1;
-  endcol = winList[CMD_WIN]->generic.width - 1;
-
-  if (term_memory_unlock)
-    {
-
-      /* Un-do the effect of the memory lock in terminal_inferior() */
-      tputs (term_memory_unlock, 1, (int (*) (int)) putchar);
-      fflush (stdout);
-
-    }
-  else if (term_scroll_region)
-    {
-
-      /* Un-do the effect of setting scroll region in terminal_inferior() */
-      /* I'm actually not sure how to do this (we don't know for
-       * sure what the scroll region was *before* we changed it),
-       * but I'll guess that setting it to the whole screen is
-       * the right thing. So, ...
-       */
-
-      /* Set scroll region to be 0..end */
-      buffer = (char *) tgoto (term_scroll_region, end, 0);
-      tputs (buffer, 1, (int (*) (int)) putchar);
-
-    }				/* else we're out of luck */
-
-  /* This is an attempt to keep the logical & physical
-     * cursor in synch, going into curses. Without this,
-     * curses seems to be confused by the fact that
-     * GDB has physically moved the curser on it. One
-     * visible effect of removing this code is that the
-     * locator window fails to get updated and the line
-     * of text that *should* go into the locator window
-     * often goes to the wrong place.
-   */
-  /* What's done here is to  tell curses to write a ' '
-     * at the bottom right corner of the screen.
-     * The idea is to wind up with the cursor in a known
-     * place.
-     * Note I'm relying on refresh()
-     * only writing what changed (the space),
-     * not the whole screen.
-   */
-  standend ();
-  move (end, endcol - 1);
-  addch (' ');
-  refresh ();
-
-  tui_owns_terminal = 1;
-}				/* tuiTermSetup */
-
-
-/* Called to set up the terminal for target program I/O, meaning I/O
- * is confined to the command-window area.  We also call this on our
- * way out of tuiDo, thus setting up the terminal this way for
- * debugger command I/O.  */
-void
-tuiTermUnsetup (int turn_on_echo, int to_column)
-{
-  int start;
-  int end;
-  int curline;
-  char *buffer;
-  /* The next bunch of things are from readline */
-  extern char *term_scroll_region;
-  extern char *term_cursor_move;
-  extern char *term_memory_lock;
-  extern char *term_memory_unlock;
-  extern char *term_se;
-
-  /* We need to turn on echoing, since the TUI turns it off */
-  /* Below I only put in the TERMIOS case, since that
-     * is what applies on HP-UX.
-   */
-  if (turn_on_echo)
-    {
-#ifdef HAVE_TERMIOS
-      struct termios tio;
-      tcgetattr (0, &tio);
-      tio.c_lflag |= (ECHO);
-      tcsetattr (0, TCSANOW, &tio);
-#endif
-    }
-
-  /* Compute the start and end lines of the command
-     * region, as well as the last "real" line of
-     * the region (normally same as end, except when
-     * we're first populating the region)
-   */
-  start = winList[CMD_WIN]->generic.origin.y;
-  end = start + winList[CMD_WIN]->generic.height - 1;
-  curline = start + winList[CMD_WIN]->detail.commandInfo.curLine;
-
-  /* We want to confine target I/O to the command region.
-     * In order to do so, we must either have "memory lock"
-     * (hpterm's) or "scroll regions" (xterm's).
-   */
-  if (term_cursor_move && term_memory_lock)
-    {
-
-      /* Memory lock means lock region above cursor.
-       * So first position the cursor, then call memory lock.
-       */
-      buffer = tgoto (term_cursor_move, 0, start);
-      tputs (buffer, 1, (int (*) (int)) putchar);
-      tputs (term_memory_lock, 1, (int (*) (int)) putchar);
-
-    }
-  else if (term_scroll_region)
-    {
-
-      /* Set the scroll region to the command window */
-      buffer = tgoto (term_scroll_region, end, start);
-      tputs (buffer, 1, (int (*) (int)) putchar);
-
-    }				/* else we can't do anything about target I/O */
-
-  /* Also turn off standout mode, in case it is on */
-  if (term_se != NULL)
-    tputs (term_se, 1, (int (*) (int)) putchar);
-
-  /* Now go to the appropriate spot on the end line */
-  buffer = tgoto (term_cursor_move, to_column, end);
-  tputs (buffer, 1, (int (*) (int)) putchar);
-  fflush (stdout);
-
-  tui_owns_terminal = 0;
-}				/* tuiTermUnsetup */
+}

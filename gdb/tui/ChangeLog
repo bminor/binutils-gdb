@@ -1,5 +1,21 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+        * tuiIO.h: Remove old declarations and add the new ones.
+        * tuiIO.c: New management for curses and gdb terminal interactions.
+        (tui_tputs): Remove.
+        (tuiTermSetup, tuiTermUnsetup): Remove, must use normal curses ops.
+        (tuiBufferGetc, tui_vStartNewLines, _updateCommandInfo): Remove.
+        (tui_owns_terminal): Remove.
+        (tui_redisplay_readline): New function.
+        (tui_puts): New function.
+        (tui_prep_terminal): New function.
+        (tui_deprep_terminal): New function.
+        (tui_getc): Rename of tuiGetc, simplify and fix.
+        (tui_setup_io): New function.
+        (tui_initialize_io): New function.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiRegs.c (tuiDisplayRegistersFrom): Call touchwin.
 	(_tuiRegisterFormat): Reduce size of format result.
 
