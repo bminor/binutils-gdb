@@ -1,3 +1,16 @@
+Mon Apr 17 13:37:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Make multi-arch variable defaults, defaults for non-
+ 	multi-arch targets.
+	(TARGET_BFD_VMA_BIT, IEEE_FLOAT, CALL_DUMMY_WORDS,
+ 	SIZEOF_CALL_DUMMY_WORDS): Update.
+
+	* inferior.h (CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS): Default
+ 	provided by gdbarch.
+	(CALL_DUMMY_P): Add FIXME. gdbarch should provide default.
+
+	* valprint.c (IEEE_FLOAT): Default provided by gdbarch.
+
 2000-04-19  Jim Blandy  <jimb@redhat.com>
 
 	Bring RETURN_VALUE_ON_STACK under gdbarch's control.

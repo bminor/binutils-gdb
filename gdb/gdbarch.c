@@ -339,7 +339,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   /* Force the explicit initialization of these. */
   gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
-  gdbarch->ieee_float = 1;
   gdbarch->num_regs = -1;
   gdbarch->sp_regnum = -1;
   gdbarch->fp_regnum = -1;
@@ -663,11 +662,9 @@ gdbarch_dump (void)
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_LONG_DOUBLE_BIT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_BIT);
-#ifdef IEEE_FLOAT
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: IEEE_FLOAT = %ld\n",
                       (long) IEEE_FLOAT);
-#endif
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_READ_PC = 0x%08lx\n",
                       (long) current_gdbarch->read_pc
@@ -988,6 +985,8 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
 int
 gdbarch_bfd_vma_bit (struct gdbarch *gdbarch)
 {
+  if (GDB_MULTI_ARCH == 0)
+    return TARGET_ARCHITECTURE->bits_per_address;
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_bfd_vma_bit called\n");
@@ -1634,6 +1633,8 @@ set_gdbarch_call_dummy_p (struct gdbarch *gdbarch,
 LONGEST *
 gdbarch_call_dummy_words (struct gdbarch *gdbarch)
 {
+  if (GDB_MULTI_ARCH == 0)
+    return legacy_call_dummy_words;
   /* Skip verify of call_dummy_words, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_words called\n");
@@ -1650,6 +1651,8 @@ set_gdbarch_call_dummy_words (struct gdbarch *gdbarch,
 int
 gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch)
 {
+  if (GDB_MULTI_ARCH == 0)
+    return legacy_sizeof_call_dummy_words;
   /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_sizeof_call_dummy_words called\n");
@@ -3248,13 +3251,6 @@ set_gdbarch_from_file (abfd)
   set_architecture_from_file (abfd);
   set_endian_from_file (abfd);
 }
-
-
-#if defined (CALL_DUMMY)
-/* FIXME - this should go away */
-LONGEST call_dummy_words[] = CALL_DUMMY;
-int sizeof_call_dummy_words = sizeof (call_dummy_words);
-#endif
 
 
 /* Initialize the current architecture.  */

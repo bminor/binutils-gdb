@@ -89,10 +89,8 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 
 extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (TARGET_BFD_VMA_BIT)
 #define TARGET_BFD_VMA_BIT (gdbarch_bfd_vma_bit (current_gdbarch))
-#endif
 #endif
 
 extern int gdbarch_ptr_bit (struct gdbarch *gdbarch);
@@ -161,10 +159,8 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 
 extern int gdbarch_ieee_float (struct gdbarch *gdbarch);
 extern void set_gdbarch_ieee_float (struct gdbarch *gdbarch, int ieee_float);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (IEEE_FLOAT)
 #define IEEE_FLOAT (gdbarch_ieee_float (current_gdbarch))
-#endif
 #endif
 
 typedef CORE_ADDR (gdbarch_read_pc_ftype) (int pid);
@@ -404,18 +400,14 @@ extern void set_gdbarch_call_dummy_p (struct gdbarch *gdbarch, int call_dummy_p)
 
 extern LONGEST * gdbarch_call_dummy_words (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_words (struct gdbarch *gdbarch, LONGEST * call_dummy_words);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_WORDS)
 #define CALL_DUMMY_WORDS (gdbarch_call_dummy_words (current_gdbarch))
-#endif
 #endif
 
 extern int gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch);
 extern void set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch, int sizeof_call_dummy_words);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (SIZEOF_CALL_DUMMY_WORDS)
 #define SIZEOF_CALL_DUMMY_WORDS (gdbarch_sizeof_call_dummy_words (current_gdbarch))
-#endif
 #endif
 
 extern int gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch);

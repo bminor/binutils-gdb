@@ -426,29 +426,14 @@ extern int attach_flag;
 #define CALL_DUMMY_STACK_ADJUST_P (0)
 #endif
 
+/* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
+   shouldn't be necessary. */
+
 #if !defined (CALL_DUMMY_P)
 #if defined (CALL_DUMMY)
 #define CALL_DUMMY_P 1
 #else
 #define CALL_DUMMY_P 0
-#endif
-#endif
-
-#if !defined (CALL_DUMMY_WORDS)
-#if defined (CALL_DUMMY)
-extern LONGEST call_dummy_words[];
-#define CALL_DUMMY_WORDS (call_dummy_words)
-#else
-#define CALL_DUMMY_WORDS (internal_error ("CALL_DUMMY_WORDS"), (void*) 0)
-#endif
-#endif
-
-#if !defined (SIZEOF_CALL_DUMMY_WORDS)
-#if defined (CALL_DUMMY)
-extern int sizeof_call_dummy_words;
-#define SIZEOF_CALL_DUMMY_WORDS (sizeof_call_dummy_words)
-#else
-#define SIZEOF_CALL_DUMMY_WORDS (internal_error ("SIZEOF_CALL_DUMMY_WORDS"), 0)
 #endif
 #endif
 

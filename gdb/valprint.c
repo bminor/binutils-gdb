@@ -562,12 +562,6 @@ longest_to_int (arg)
 }
 
 
-/* Provide a default value for IEEE_FLOAT.  */
-#ifndef IEEE_FLOAT
-#define IEEE_FLOAT (0)
-#endif
-
-
 /* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,
    on STREAM.  */
 
