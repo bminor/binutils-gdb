@@ -1,5 +1,9 @@
 2002-12-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_edit_opd): Correct typo.
+
+2002-12-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* srec.c (srec_write_symbols): Restore '$' prefix to address
 	accidentally removed in 2002-04-04 change.
 	(srec_get_symtab): Use 0 instead of `(long) FALSE'.
@@ -7,22 +11,22 @@
 2002-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-ppc.c (apuinfo_list_init): New function.
-        (apuinfo_list_add): New function: Add a value to the list.
-        (apuinfo_list_length): New function: Return the number of
-        values on the list.
-        (apuinfo_list_element): New function: Return a value on the
-        list.
-        (apuinfo_list_finish): New function: Free the resources used
-        by the list.
-        (ppc_elf_begin_write_processing): New function.  Scan the
-        input bfds for apuinfo sections.
-        (ppc_elf_write_section): New function: Delay the creation of
-        the contents of an apuinfo section in an output bfd.
-        (ppc_elf_final_write_processing): New function.  Create the
-        contents of an apuinfo section in an output bfd.
-        (elf_backend_begin_write_processing): Define.
-        (elf_backend_final_write_processing): Define.
-        (elf_backend_write_section): Define.
+	(apuinfo_list_add): New function: Add a value to the list.
+	(apuinfo_list_length): New function: Return the number of
+	values on the list.
+	(apuinfo_list_element): New function: Return a value on the
+	list.
+	(apuinfo_list_finish): New function: Free the resources used
+	by the list.
+	(ppc_elf_begin_write_processing): New function.  Scan the
+	input bfds for apuinfo sections.
+	(ppc_elf_write_section): New function: Delay the creation of
+	the contents of an apuinfo section in an output bfd.
+	(ppc_elf_final_write_processing): New function.  Create the
+	contents of an apuinfo section in an output bfd.
+	(elf_backend_begin_write_processing): Define.
+	(elf_backend_final_write_processing): Define.
+	(elf_backend_write_section): Define.
 
 2002-12-03  Richard Henderson  <rth@redhat.com>
 
@@ -101,7 +105,7 @@
 	pei-mips.c, pei-sh.c, peicode.h, ppcboot.c, ptrace-core.c, reloc.c,
 	reloc16.c, riscix.c, rs6000-core.c, sco5-core.c, section.c, simple.c,
 	som.c, som.h, sparclinux.c, sparclynx.c, srec.c, stabs.c, sunos.c,
-	syms.c, targets.c, tekhex.c, ticoff.h, trad-core.c, versados.c,	
+	syms.c, targets.c, tekhex.c, ticoff.h, trad-core.c, versados.c,
 	vms-gsd.c, vms-hdr.c, vms-misc.c, vms-tir.c, vms.c, vms.h,
 	xcoff-target.h, xcofflink.c, xsym.c, xsym.h: Replace boolean with
 	bfd_boolean, true with TRUE, false with FALSE.  Simplify comparisons
@@ -173,7 +177,7 @@
 2002-11-28  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_relocate_section): Don't complain about
-        unresolved debugging relocs in dynamic applications.
+	unresolved debugging relocs in dynamic applications.
 	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
 
 2002-11-26  Alan Modra  <amodra@bigpond.net.au>
