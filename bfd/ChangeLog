@@ -1,3 +1,12 @@
+Mon May  5 18:18:45 1997  Philip Blundell  <pjb27@cam.ac.uk>
+
+	* config.bfd: cope with '*-*-linux-gnuaout' targets.
+
+Thu May  1 11:31:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* targmatch.sed: Add explicit \n characters to work around bug in
+	HP/UX 10.20 sed program.
+
 Wed Apr 30 12:27:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (copy_private_bfd_data): Cast csecs to avoid sign
