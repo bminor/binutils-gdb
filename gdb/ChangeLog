@@ -1,5 +1,7 @@
 2003-09-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (sparc-sol2-nat.o): Fix typo.
+
 	* sparc-sol2-nat.c: Move include of "gregset.h" after
 	<sys/procfs.h>.
 

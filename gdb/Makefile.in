@@ -2311,7 +2311,7 @@ sparc-sol2-tdep.o: sparc-sol2-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(trad_frame_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(sparc_tdep_h)
-sparc-sol2-nat.o: sparc-sol2-nat.o $(defs_h) $(gregset_h) $(regcache_h) \
+sparc-sol2-nat.o: sparc-sol2-nat.c $(defs_h) $(gregset_h) $(regcache_h) \
 	$(sparc_tdep_h)
 sparcbsd-nat.o: sparcbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(sparc64_tdep_h) $(sparcbsd_nat_h)
