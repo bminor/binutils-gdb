@@ -1,8 +1,11 @@
 Mon Feb  9 14:48:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	* cgen-sim.h (DECODE): Always use switch for `read' for now.
+	* cgen.sh (decode): Add s/@arch@/$arch/.
 	* genmloop.sh (@cpu@_engine_run): Delete `current_state'.
 	(engine_resume): Likewise.  Make `engine' volatile.  Save copy
-	of cpu pointer in volatile object.
+	of cpu pointer in volatile object.  Initialize read switch if
+	-parallel.
 
 Thu Feb  5 13:27:04 1998  Doug Evans  <devans@seba.cygnus.com>
 

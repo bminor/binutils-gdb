@@ -48,6 +48,7 @@ typedef struct parallel_exec PARALLEL_EXEC;
 
 /* Types of the machine generated extract and semantic fns.  */
 typedef void (EXTRACT_FN) (SIM_CPU *, PCADDR, insn_t, ARGBUF *);
+/* ??? READ_FN isn't currently used anywhere, we always use a switch.  */
 typedef void (READ_FN) (SIM_CPU *, PCADDR, insn_t, PARALLEL_EXEC *);
 /*typedef CIA (SEMANTIC_FN) (SEM_ARG);*/
 typedef PCADDR (SEMANTIC_FN) (SIM_CPU *, ARGBUF *);
@@ -62,20 +63,13 @@ typedef struct {
   const struct cgen_insn *opcode;
   EXTRACT_FN *extract;
 #ifdef HAVE_PARALLEL_EXEC
-#ifdef USE_READ_SWITCH
 #ifdef __GNUC__
   void *read;
 #else
   int read;
 #endif
-#else
-  READ_FN *read;
-#endif
 #endif
   SEMANTIC_FN *semantic;
-#if 0 /* wip */
-  EXTRACT_CACHE_FN *extract_fast;
-#endif
   SEMANTIC_CACHE_FN *semantic_fast;
 #if WITH_SEM_SWITCH_FULL && defined (__GNUC__)
   /* Set at runtime.  */
