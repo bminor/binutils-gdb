@@ -1,3 +1,7 @@
+2002-02-19  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (error_type_complaint): Improve error message.
+
 2002-02-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/README: Update documentation.
