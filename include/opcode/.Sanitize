@@ -42,7 +42,6 @@ i386.h
 i860.h
 i960.h
 m68k.h
-m68kmri.h
 m88k.h
 mips.h
 np1.h
