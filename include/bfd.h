@@ -80,8 +80,6 @@ typedef HOST_64_BIT symvalue;
 typedef HOST_64_BIT bfd_64_type;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
-#define printf_vma(x) \
-		printf(   "%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else
 typedef struct {int a,b;} bfd_64_type;
 typedef unsigned long rawdata_offset;
@@ -91,9 +89,9 @@ typedef unsigned long bfd_word;
 typedef unsigned long bfd_size;
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
-#define printf_vma(x)	 printf(    "%08lx", x)
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
 #endif
+#define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */
 
@@ -1614,7 +1612,7 @@ actual number of symbol pointers not including the NULL.
 
 /*
  bfd_set_symtab
-Provided a table of pointers to to symbols and a count, writes to the
+Provided a table of pointers to symbols and a count, writes to the
 output BFD the symbols when closed.
 */
 
