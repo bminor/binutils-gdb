@@ -1,3 +1,8 @@
+Tue Sep 19 14:02:21 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* peicode.h (coff_swap_scnhdr_out): Get sizes for BSS right.
+	(pr 8045)	
+
 Mon Sep 18 14:35:01 1995  Arne H. Juul  <arnej@pvv.unit.no>
 
 	* config.bfd (mips-dec-netbsd*): New target.

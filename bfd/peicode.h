@@ -894,15 +894,16 @@ static void
 }
 
 static unsigned int
- coff_swap_scnhdr_out (abfd, in, out)
-bfd       *abfd;
-PTR	in;
-PTR	out;
+coff_swap_scnhdr_out (abfd, in, out)
+     bfd       *abfd;
+     PTR	in;
+     PTR	out;
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
   SCNHDR *scnhdr_ext = (SCNHDR *)out;
   unsigned int ret = sizeof (SCNHDR);
-  bfd_vma s;
+  bfd_vma ps;
+  bfd_vma ss;
 
   memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof(scnhdr_int->s_name));
 
@@ -912,21 +913,26 @@ PTR	out;
 		     - pe_data(abfd)->pe_opthdr.ImageBase),
 		    (bfd_byte *) scnhdr_ext->s_vaddr);
 
-  /* Note that we're really stuffing in the raw size into here. */
-
-
-  PUT_SCNHDR_SIZE (abfd, scnhdr_int->s_size,
-		    (bfd_byte *) scnhdr_ext->s_size);
-
   /* NT wants the size data to be rounded up to the next NT_FILE_ALIGNMENT
      value except for the BSS section, its s_size should be 0 */
 
-  if (strcmp (scnhdr_int->s_name, _BSS) == 0) 
-    s = 0;
-  else
-    s = scnhdr_int->s_paddr;
 
-  PUT_SCNHDR_PADDR (abfd, s, (bfd_byte *) scnhdr_ext->s_paddr);
+  if (strcmp (scnhdr_int->s_name, _BSS) == 0) 
+    {
+      ps = scnhdr_int->s_size;
+      ss = 0;
+    }
+  else
+    {
+      ps = scnhdr_int->s_paddr;
+      ss = scnhdr_int->s_size;
+    }
+
+  PUT_SCNHDR_SIZE (abfd, ss,
+		   (bfd_byte *) scnhdr_ext->s_size);
+
+
+  PUT_SCNHDR_PADDR (abfd, ps, (bfd_byte *) scnhdr_ext->s_paddr);
 
   PUT_SCNHDR_SCNPTR (abfd, scnhdr_int->s_scnptr,
 		     (bfd_byte *) scnhdr_ext->s_scnptr);
