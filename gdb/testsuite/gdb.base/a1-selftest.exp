@@ -384,7 +384,11 @@ proc test_with_self {} {
 	    }
 	}
     }
-    
+
+    # We'll need this when we send a ^C to GDB    
+    gdb_test "shell stty intr ^C" "" \
+	"set interrupt character in test_with_self"
+
     # start the "xgdb" process
     send "continue\n"
     expect {
