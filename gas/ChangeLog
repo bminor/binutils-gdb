@@ -1,5 +1,7 @@
 Thu Mar 27 12:23:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (clean-here): Remove dependency files.
+
 	* read.c (s_comm): Check S_IS_COMMON as well as S_IS_DEFINED.
 	(s_mri_common): Check S_IS_COMMON unconditionally.
 	* symbols.c (colon): Check S_IS_COMMON as well as S_IS_DEFINED.
