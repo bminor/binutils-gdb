@@ -1216,7 +1216,6 @@ debug_record_variable (handle, name, type, kind, val)
 
 /* Make a type with a given kind and size.  */
 
-/*ARGSUSED*/
 static struct debug_type *
 debug_make_type (info, kind, size)
      struct debug_handle *info ATTRIBUTE_UNUSED;
@@ -1778,7 +1777,6 @@ debug_make_undefined_tagged_type (handle, name, kind)
    The fourth argument is whether this is a virtual class.  The fifth
    argument is the visibility of the base class.  */
 
-/*ARGSUSED*/
 debug_baseclass
 debug_make_baseclass (handle, type, bitpos, virtual, visibility)
      PTR handle ATTRIBUTE_UNUSED;
@@ -1806,7 +1804,6 @@ debug_make_baseclass (handle, type, bitpos, virtual, visibility)
    the field (it may be zero).  The sixth argument is the visibility
    of the field.  */
 
-/*ARGSUSED*/
 debug_field
 debug_make_field (handle, name, type, bitpos, bitsize, visibility)
      PTR handle ATTRIBUTE_UNUSED;
@@ -1837,7 +1834,6 @@ debug_make_field (handle, name, type, bitpos, bitsize, visibility)
    global variable).  The fifth argument is the visibility of the
    member.  */
 
-/*ARGSUSED*/
 debug_field
 debug_make_static_member (handle, name, type, physname, visibility)
      PTR handle ATTRIBUTE_UNUSED;
@@ -1863,7 +1859,6 @@ debug_make_static_member (handle, name, type, physname, visibility)
 /* Make a method.  The second argument is the name, and the third
    argument is a NULL terminated array of method variants.  */
 
-/*ARGSUSED*/
 debug_method
 debug_make_method (handle, name, variants)
      PTR handle ATTRIBUTE_UNUSED;
@@ -1890,7 +1885,6 @@ debug_make_method (handle, name, variants)
    function context.  FIXME: Are the const and volatile arguments
    necessary?  Could we just use debug_make_const_type?  */
 
-/*ARGSUSED*/
 debug_method_variant
 debug_make_method_variant (handle, physname, type, visibility, constp,
 			   volatilep, voffset, context)
@@ -2055,7 +2049,6 @@ debug_tag_type (handle, name, type)
 
 /* Record the size of a given type.  */
 
-/*ARGSUSED*/
 boolean
 debug_record_type_size (handle, type, size)
      PTR handle ATTRIBUTE_UNUSED;
@@ -2391,7 +2384,6 @@ debug_get_fields (handle, type)
 
 /* Get the type of a field.  */
 
-/*ARGSUSED*/
 debug_type
 debug_get_field_type (handle, field)
      PTR handle ATTRIBUTE_UNUSED;
@@ -2404,7 +2396,6 @@ debug_get_field_type (handle, field)
 
 /* Get the name of a field.  */
 
-/*ARGSUSED*/
 const char *
 debug_get_field_name (handle, field)
      PTR handle ATTRIBUTE_UNUSED;
@@ -2417,7 +2408,6 @@ debug_get_field_name (handle, field)
 
 /* Get the bit position of a field.  */
 
-/*ARGSUSED*/
 bfd_vma
 debug_get_field_bitpos (handle, field)
      PTR handle ATTRIBUTE_UNUSED;
@@ -2430,7 +2420,6 @@ debug_get_field_bitpos (handle, field)
 
 /* Get the bit size of a field.  */
 
-/*ARGSUSED*/
 bfd_vma
 debug_get_field_bitsize (handle, field)
      PTR handle ATTRIBUTE_UNUSED;
@@ -2443,7 +2432,6 @@ debug_get_field_bitsize (handle, field)
 
 /* Get the visibility of a field.  */
 
-/*ARGSUSED*/
 enum debug_visibility
 debug_get_field_visibility (handle, field)
      PTR handle ATTRIBUTE_UNUSED;

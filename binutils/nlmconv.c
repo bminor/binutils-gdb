@@ -1380,7 +1380,6 @@ mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 /* By default all we need to do for relocs is change the address by
    the output_offset.  */
 
-/*ARGSUSED*/
 static void
 default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 		       contents_size)
@@ -1585,7 +1584,6 @@ static reloc_howto_type nlm32_alpha_nw_howto =
 	 0,			/* dst_mask */
 	 false);		/* pcrel_offset */
 
-/*ARGSUSED*/
 static void
 alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 		     contents_size)
@@ -1906,7 +1904,6 @@ powerpc_resolve_stubs (inbfd, outbfd)
    r2, will be set to the correct TOC value, so there is no need for
    any further reloc.  */
 
-/*ARGSUSED*/
 static void
 powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 		       contents_size)

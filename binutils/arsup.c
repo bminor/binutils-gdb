@@ -93,7 +93,6 @@ map_over_list (arch, function, list)
 
 FILE *outfile;
 
-/*ARGSUSED*/
 static void
 ar_directory_doer (abfd, ignore)
      bfd *abfd;

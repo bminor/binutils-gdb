@@ -366,7 +366,6 @@ warn_stab (p, err)
 
 /* Create a handle to parse stabs symbols with.  */
 
-/*ARGSUSED*/
 PTR
 start_stab (dhandle, abfd, sections, syms, symcount)
      PTR dhandle ATTRIBUTE_UNUSED;

@@ -4102,7 +4102,6 @@ static const struct debug_write_fns ieee_fns =
 
 /* Initialize a buffer to be empty.  */
 
-/*ARGSUSED*/
 static boolean
 ieee_init_buffer (info, buflist)
      struct ieee_handle *info ATTRIBUTE_UNUSED;
@@ -4143,7 +4142,6 @@ ieee_change_buffer (info, buflist)
 
 /* Append a buffer chain.  */
 
-/*ARGSUSED*/
 static boolean
 ieee_append_buffer (info, mainbuf, newbuf)
      struct ieee_handle *info ATTRIBUTE_UNUSED;
@@ -5273,7 +5271,6 @@ ieee_add_bb11 (info, sec, low, high)
    down the file name anyhow.  IEEE debugging information doesn't seem
    to store this information anywhere.  */
 
-/*ARGSUSED*/
 static boolean
 ieee_start_source (p, filename)
      PTR p ATTRIBUTE_UNUSED;
@@ -5737,7 +5734,6 @@ ieee_range_type (p, low, high)
 
 /* Make an array type.  */
 
-/*ARGSUSED*/
 static boolean
 ieee_array_type (p, low, high, stringp)
      PTR p;
