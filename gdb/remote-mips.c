@@ -1076,22 +1076,21 @@ mips_initialize ()
 				   the board. */
 	      }
 	    break;
-	  case 4:
-	    mips_error ("Failed to initialize.");
 	  }
-
-	  if (mips_expect (TARGET_MONITOR_PROMPT))
-	    break;
+	case 4:
+          mips_error ("Failed to initialize.");
 	}
 
-      SERIAL_WRITE (mips_desc, "db tty0\015", sizeof "db tty0\015" - 1);
-      mips_expect ("db tty0\015\012"); /* Eat the echo */
-
-      SERIAL_WRITE (mips_desc, "\015", sizeof "\015" - 1);
-
-      if (mips_receive_packet (buff, 1, 3) < 0)
-	mips_error ("Failed to initialize (didn't receive packet).");
+      if (mips_expect (TARGET_MONITOR_PROMPT))
+       break;
     }
+  SERIAL_WRITE (mips_desc, "db tty0\015", sizeof "db tty0\015" - 1);
+  mips_expect ("db tty0\015\012"); /* Eat the echo */
+
+  SERIAL_WRITE (mips_desc, "\015", sizeof "\015" - 1);
+  
+  if (mips_receive_packet (buff, 1, 3) < 0)
+   mips_error ("Failed to initialize (didn't receive packet).");
 
   if (common_breakpoint ('b', -1, 0, NULL)) /* Clear all breakpoints */
     monitor_supports_breakpoints = 0; /* Failed, don't use it anymore */
@@ -2082,8 +2081,6 @@ mips_load (file, from_tty)
     error ("mips_load:  Couldn't get into monitor mode.");
 
   mips_load_srec (file);
-
-  SERIAL_WRITE (mips_desc, "\015db tty0\015", sizeof "\015db tty0\015" - 1);
 
   mips_initialize ();
 

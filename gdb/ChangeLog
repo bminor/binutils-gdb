@@ -1,3 +1,8 @@
+Tue Nov  7 14:59:51 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* remote-mips.c (mips_initialize): Updated to talk to VR4300 RISQ
+ 	monitor board.
+
 Mon Nov  6 11:44:11 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* config/mips/{tm-vr4300.h tm-vr4300el.h} (TARGET_MONITOR_PROMPT):
