@@ -1,3 +1,7 @@
+2003-10-07  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Add sh specific case.
+
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/watchpoint.exp: Delete obsolete clear_xfail.
