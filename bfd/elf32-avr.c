@@ -914,7 +914,8 @@ elf32_avr_object_p (abfd)
      bfd *abfd;
 {
   int e_set = bfd_mach_avr2;
-  if (elf_elfheader (abfd)->e_machine == EM_AVR)
+  if (elf_elfheader (abfd)->e_machine == EM_AVR
+      || elf_elfheader (abfd)->e_machine == EM_AVR_OLD)
     {
       int e_mach = elf_elfheader (abfd)->e_flags & EF_AVR_MACH;
       switch (e_mach)
@@ -947,6 +948,7 @@ elf32_avr_object_p (abfd)
 
 #define ELF_ARCH		bfd_arch_avr
 #define ELF_MACHINE_CODE	EM_AVR
+#define ELF_MACHINE_ALT1	EM_AVR_OLD
 #define ELF_MAXPAGESIZE		1
 
 #define TARGET_LITTLE_SYM       bfd_elf32_avr_vec

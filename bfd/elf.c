@@ -3347,119 +3347,22 @@ prep_headers (abfd)
     case bfd_arch_unknown:
       i_ehdrp->e_machine = EM_NONE;
       break;
-    case bfd_arch_sparc:
-      if (bfd_get_arch_size (abfd) == 64)
-	i_ehdrp->e_machine = EM_SPARCV9;
-      else
-	i_ehdrp->e_machine = EM_SPARC;
-      break;
-    case bfd_arch_i370:
-      i_ehdrp->e_machine = EM_S370;
-      break;
-    case bfd_arch_i386:
-      if (bfd_get_arch_size (abfd) == 64)
-	i_ehdrp->e_machine = EM_X86_64;
-      else
-	i_ehdrp->e_machine = EM_386;
-      break;
-    case bfd_arch_ia64:
-      i_ehdrp->e_machine = EM_IA_64;
-      break;
-    case bfd_arch_m68hc11:
-      i_ehdrp->e_machine = EM_68HC11;
-      break;
-    case bfd_arch_m68hc12:
-      i_ehdrp->e_machine = EM_68HC12;
-      break;
-    case bfd_arch_s390:
-      i_ehdrp->e_machine = EM_S390;
-      break;
-    case bfd_arch_m68k:
-      i_ehdrp->e_machine = EM_68K;
-      break;
-    case bfd_arch_m88k:
-      i_ehdrp->e_machine = EM_88K;
-      break;
-    case bfd_arch_i860:
-      i_ehdrp->e_machine = EM_860;
-      break;
-    case bfd_arch_i960:
-      i_ehdrp->e_machine = EM_960;
-      break;
-    case bfd_arch_mips:	/* MIPS Rxxxx */
-      i_ehdrp->e_machine = EM_MIPS;	/* only MIPS R3000 */
-      break;
-    case bfd_arch_hppa:
-      i_ehdrp->e_machine = EM_PARISC;
-      break;
-    case bfd_arch_powerpc:
-      if (bed->s->arch_size == 64)
-	i_ehdrp->e_machine = EM_PPC64;
-      else
-	i_ehdrp->e_machine = EM_PPC;
-      break;
-    case bfd_arch_alpha:
-      i_ehdrp->e_machine = EM_ALPHA;
-      break;
-    case bfd_arch_sh:
-      i_ehdrp->e_machine = EM_SH;
-      break;
-    case bfd_arch_d10v:
-      i_ehdrp->e_machine = EM_CYGNUS_D10V;
-      break;
-    case bfd_arch_d30v:
-      i_ehdrp->e_machine = EM_CYGNUS_D30V;
-      break;
-    case bfd_arch_fr30:
-      i_ehdrp->e_machine = EM_CYGNUS_FR30;
-      break;
-    case bfd_arch_mcore:
-      i_ehdrp->e_machine = EM_MCORE;
-      break;
-    case bfd_arch_avr:
-      i_ehdrp->e_machine = EM_AVR;
-      break;
-    case bfd_arch_v850:
-      switch (bfd_get_mach (abfd))
-	{
-	default:
-	case 0:               i_ehdrp->e_machine = EM_CYGNUS_V850; break;
-	}
-      break;
-    case bfd_arch_arc:
-      i_ehdrp->e_machine = EM_CYGNUS_ARC;
-      break;
-    case bfd_arch_arm:
-      i_ehdrp->e_machine = EM_ARM;
-      break;
-    case bfd_arch_m32r:
-      i_ehdrp->e_machine = EM_CYGNUS_M32R;
-      break;
-    case bfd_arch_mn10200:
-      i_ehdrp->e_machine = EM_CYGNUS_MN10200;
-      break;
-    case bfd_arch_mn10300:
-      i_ehdrp->e_machine = EM_CYGNUS_MN10300;
-      break;
-    case bfd_arch_pj:
-      i_ehdrp->e_machine = EM_PJ;
-      break;
-    case bfd_arch_cris:
-      i_ehdrp->e_machine = EM_CRIS;
-      break;
-    case bfd_arch_openrisc:
-      i_ehdrp->e_machine = EM_OPENRISC;
-      break;
-      /* Also note that EM_M32, AT&T WE32100 is unknown to bfd.  */
-    case bfd_arch_h8300:
-      i_ehdrp->e_machine = EM_H8_300;
-      break;
-    case bfd_arch_h8500:
-      i_ehdrp->e_machine = EM_H8_500;
-      break;
+
+      /* There used to be a long list of cases here, each one setting
+	 e_machine to the same EM_* macro #defined as ELF_MACHINE_CODE
+	 in the corresponding bfd definition.  To avoid duplication,
+	 the switch was removed.  Machines that need special handling
+	 can generally do it in elf_backend_final_write_processing(),
+	 unless they need the information earlier than the final write.
+	 Such need can generally be supplied by replacing the tests for
+	 e_machine with the conditions used to determine it.  */
     default:
-      i_ehdrp->e_machine = EM_NONE;
-    }
+      if (get_elf_backend_data (abfd) != NULL)
+	i_ehdrp->e_machine = get_elf_backend_data (abfd)->elf_machine_code;
+      else
+	i_ehdrp->e_machine = EM_NONE;
+      }
+
   i_ehdrp->e_version = bed->s->ev_current;
   i_ehdrp->e_ehsize = bed->s->sizeof_ehdr;
 

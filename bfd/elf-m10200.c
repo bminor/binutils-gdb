@@ -1517,7 +1517,8 @@ mn10200_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10200_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10200"
 #define ELF_ARCH		bfd_arch_mn10200
-#define ELF_MACHINE_CODE	EM_CYGNUS_MN10200
+#define ELF_MACHINE_CODE	EM_MN10200
+#define ELF_MACHINE_ALT1	EM_CYGNUS_MN10200
 #define ELF_MAXPAGESIZE		0x1000
 
 #define elf_info_to_howto	mn10200_info_to_howto

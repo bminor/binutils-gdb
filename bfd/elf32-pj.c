@@ -341,6 +341,7 @@ pj_elf_final_write_processing (abfd, linker)
 #define TARGET_LITTLE_NAME	"elf32-pjl"
 #define ELF_ARCH		bfd_arch_pj
 #define ELF_MACHINE_CODE	EM_PJ
+#define ELF_MACHINE_ALT1	EM_PJ_OLD
 #define ELF_MAXPAGESIZE		0x1000
 #define bfd_elf32_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define bfd_elf32_bfd_reloc_type_lookup	             pj_elf_reloc_type_lookup

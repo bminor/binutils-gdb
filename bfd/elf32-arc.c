@@ -207,7 +207,6 @@ arc_elf_final_write_processing (abfd, linker)
       val = E_ARC_MACH_ARC8;
       break;
     }
-  elf_elfheader (abfd)->e_machine = EM_ARC;
   elf_elfheader (abfd)->e_flags &=~ EF_ARC_MACH;
   elf_elfheader (abfd)->e_flags |= val;
 }

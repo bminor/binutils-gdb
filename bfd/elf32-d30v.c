@@ -546,7 +546,8 @@ d30v_info_to_howto_rela (abfd, cache_ptr, dst)
 }
 
 #define ELF_ARCH		bfd_arch_d30v
-#define ELF_MACHINE_CODE	EM_CYGNUS_D30V
+#define ELF_MACHINE_CODE	EM_D30V
+#define ELF_MACHINE_ALT1	EM_CYGNUS_D30V
 #define ELF_MAXPAGESIZE		0x1000
 
 #define TARGET_BIG_SYM          bfd_elf32_d30v_vec

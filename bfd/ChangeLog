@@ -1,3 +1,28 @@
+2001-09-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf.c (prep_headers): Get the machine code from the elf
+	backend data.
+	* elf-m10200.c (ELF_MACHINE_CODE): Redefine to EM_MN10200.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_MN10200.
+	* elf-m10300.c (ELF_MACHINE_CODE): Redefine to EM_MN10300.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_MN10300.
+	* elf-arc.c (arc_elf_final_write_processing): Don't override
+	e_machine, it's now properly set in prep_headers.
+	* elf32-avr.c (elf32_avr_object_p): Accept both EM_AVR and
+	EM_AVR_OLD.
+	(ELF_MACHINE_ALT1): Define to EM_AVR_OLD.
+	* elf-d10v.c (ELF_MACHINE_CODE): Redefine to EM_D10V.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_D10V.
+	* elf-d30v.c (ELF_MACHINE_CODE): Redefine to EM_D30V.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_D30V.
+	* elf-fr30.c (ELF_MACHINE_CODE): Redefine to EM_FR30.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_FR30.
+	* elf-m32r.c (ELF_MACHINE_CODE): Redefine to EM_M32R.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_M32R.
+	* elf32-pj.c (ELF_MACHINE_ALT1): DEfine to EM_PJ_OLD.
+	* elf-v850.c (ELF_MACHINE_CODE): Redefine to EM_V850.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_V850.
+
 2001-09-11  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_section_flags): New.

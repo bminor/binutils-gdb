@@ -2218,7 +2218,8 @@ v850_elf_fake_sections (abfd, hdr, sec)
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"
 #define ELF_ARCH				bfd_arch_v850
-#define ELF_MACHINE_CODE			EM_CYGNUS_V850
+#define ELF_MACHINE_CODE			EM_V850
+#define ELF_MACHINE_ALT1			EM_CYGNUS_V850
 #define ELF_MAXPAGESIZE				0x1000
 
 #define elf_info_to_howto			v850_elf_info_to_howto_rela
