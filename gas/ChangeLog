@@ -1,4 +1,10 @@
+Wed Mar 26 13:35:15 1997  H.J. Lu  <hjl@lucon.org>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Only define if
+	BFD_ASSEMBLER.
+
 Wed Mar 26 11:32:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
 
 	* config/tc-mips.c (insn_uses_reg): Map register numbers in mips16
 	instructions.
