@@ -46,12 +46,12 @@
 	(CANNOT_FETCH_REGISTER, CANNOT_STORE_REGISTER): Undefine and then
 	define unconditionally.
 
-2004-03-15  Mark Kettenis  <m.kettenis@osp.nl>
+2004-03-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.h (i387_collect_fsave): New prototype.
 	* i387-tdep.c (i387_collect_fsave): New function containing most
 	of the code from i387_fill_fsave.
-	(i387_fill_fsave): Call i387_fill_fsave.
+	(i387_fill_fsave): Call i387_collect_fsave.
 
 2004-03-15  Mark Kettenis  <kettenis@gnu.org>
 
