@@ -38,8 +38,15 @@
 
 struct bstring
 {
+  /* Hash chain.  */
   struct bstring *next;
-  size_t length;
+  /* Assume the data length is no more than 64k.  */
+  unsigned short length;
+  /* The half hash hack.  This contains the upper 16 bits of the hash
+     value and is used as a pre-check when comparing two strings and
+     avoids the need to do length or memcmp calls.  It proves to be
+     roughly 100% effective.  */
+  unsigned short half_hash;
 
   union
   {
@@ -79,6 +86,10 @@ struct bcache
      expand_hash_count.  */
   unsigned long expand_count;
   unsigned long expand_hash_count;
+  /* Number of times that the half-hash compare hit (compare the upper
+     16 bits of hash values) hit, but the corresponding combined
+     length/data compare missed.  */
+  unsigned long half_hash_miss_count;
 };
 
 /* The old hash function was stolen from SDBM. This is what DB 3.0 uses now,
@@ -187,6 +198,8 @@ expand_hash_table (struct bcache *bcache)
 void *
 bcache (const void *addr, int length, struct bcache *bcache)
 {
+  unsigned long full_hash;
+  unsigned short half_hash;
   int hash_index;
   struct bstring *s;
 
@@ -197,13 +210,24 @@ bcache (const void *addr, int length, struct bcache *bcache)
   bcache->total_count++;
   bcache->total_size += length;
 
-  hash_index = hash (addr, length) % bcache->num_buckets;
+  full_hash = hash (addr, length);
+  half_hash = (full_hash >> 16);
+  hash_index = full_hash % bcache->num_buckets;
 
-  /* Search the hash bucket for a string identical to the caller's.  */
+  /* Search the hash bucket for a string identical to the caller's.
+     As a short-circuit first compare the upper part of each hash
+     values.  */
   for (s = bcache->bucket[hash_index]; s; s = s->next)
-    if (s->length == length
-	&& ! memcmp (&s->d.data, addr, length))
-      return &s->d.data;
+    {
+      if (s->half_hash == half_hash)
+	{
+	  if (s->length == length
+	      && ! memcmp (&s->d.data, addr, length))
+	    return &s->d.data;
+	  else
+	    bcache->half_hash_miss_count++;
+	}
+    }
 
   /* The user's string isn't in the list.  Insert it after *ps.  */
   {
@@ -212,6 +236,7 @@ bcache (const void *addr, int length, struct bcache *bcache)
     memcpy (&new->d.data, addr, length);
     new->length = length;
     new->next = bcache->bucket[hash_index];
+    new->half_hash = half_hash;
     bcache->bucket[hash_index] = new;
 
     bcache->unique_count++;
@@ -378,6 +403,8 @@ print_bcache_statistics (struct bcache *c, char *type)
 		   c->expand_count);
   printf_filtered ("    Hash table hashes:         %lu\n",
 		   c->total_count + c->expand_hash_count);
+  printf_filtered ("    Half hash misses:          %lu\n",
+		   c->half_hash_miss_count);
   printf_filtered ("    Hash table population:     ");
   print_percentage (occupied_buckets, c->num_buckets);
   printf_filtered ("    Median hash chain length:  %3d\n",

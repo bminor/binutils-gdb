@@ -1,5 +1,15 @@
 2003-11-07  Andrew Cagney  <cagney@redhat.com>
 
+	* bcache.h: Update copyright.  Add comments on bcache VS hashtab.
+	* bcache.c (struct bstring): Make "length" an unsigned short, add
+	"half_hash".
+	(struct bcache): Add "half_hash_error_count".
+	(bcache): Compute and save the "half_hash".  Compare the
+	"half_hash" before comparing the length.  Update
+	half_hash_error_count.
+
+2003-11-07  Andrew Cagney  <cagney@redhat.com>
+
 	* inftarg.c (child_xfer_partial): New function
 	(init_child_ops): Set "to_xfer_partial".
 
