@@ -1,3 +1,9 @@
+Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (define_symbol): When combining a LOC_ARG and a
+	LOC_REGISTER, use the type from the LOC_REGISTER, not from the
+	LOC_ARG.
+
 Wed Oct 20 14:34:38 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/i386/xm-go32.h: define some signals if they aren't

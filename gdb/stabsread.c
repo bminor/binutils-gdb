@@ -948,6 +948,9 @@ define_symbol (valu, string, desc, type, objfile)
 		  && STREQ (SYMBOL_NAME (prev_sym), SYMBOL_NAME(sym)))
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
+		  /* Use the type from the LOC_REGISTER; that is the type
+		     that is actually in that register.  */
+		  SYMBOL_TYPE (prev_sym) = SYMBOL_TYPE (sym);
 		  SYMBOL_VALUE (prev_sym) = SYMBOL_VALUE (sym);
 		  sym = prev_sym;
 		  break;
