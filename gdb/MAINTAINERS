@@ -57,7 +57,7 @@ maintainer works with the native maintainer when resolving API issues.
 	ia64		Kevin Buettner		kevinb@cygnus.com
 	m32r		Michael Snyder		msnyder@cygnus.com
 
-	m68hc11		maintenance only (m68hc11-elf)
+	m68hc11		Stephane Carrez		Stephane.Carrez@worldnet.fr
 
 	m68k		maintenance only (m68k-aout, m68k-coff, m68k-elf)
 	m88k		maintenance only (?)
