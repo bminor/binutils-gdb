@@ -1,3 +1,13 @@
+Thu Oct 20 13:51:31 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objcopy.c (gap_fill_set, gap_fill): New static variables.
+	(copy_options): Accept --gap-fill.
+	(copy_usage): Mention --gap-fill.
+	(copy_object): Support --gap-fill.
+	(get_sections, compare_section_vma): New static functions.
+	(copy_main): Handle --gap-fill.
+	* binutils.texi, objcopy.1: Document --gap-fill.
+
 Wed Oct 19 14:09:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* Makefile.in (check): Add a dummy else clause to the if

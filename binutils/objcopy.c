@@ -26,6 +26,8 @@
 static bfd_vma parse_vma PARAMS ((const char *, const char *));
 static void setup_section PARAMS ((bfd *, asection *, PTR));
 static void copy_section PARAMS ((bfd *, asection *, PTR));
+static void get_sections PARAMS ((bfd *, asection *, PTR));
+static int compare_section_vma PARAMS ((const PTR, const PTR));
 static void mark_symbols_used_in_relocations PARAMS ((bfd *, asection *, PTR));
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
@@ -91,6 +93,10 @@ static bfd_vma set_start;
 static bfd_vma adjust_section_vma = 0;
 static struct section_list *adjust_sections;
 
+/* Filling gaps between sections.  */
+static boolean gap_fill_set = false;
+static bfd_byte gap_fill;
+
 /* Options to handle if running as "strip".  */
 
 static struct option strip_options[] =
@@ -120,7 +126,8 @@ static struct option strip_options[] =
 #define OPTION_ADJUST_VMA (OPTION_ADJUST_START + 1)
 #define OPTION_ADJUST_SECTION_VMA (OPTION_ADJUST_VMA + 1)
 #define OPTION_ADJUST_WARNINGS (OPTION_ADJUST_SECTION_VMA + 1)
-#define OPTION_NO_ADJUST_WARNINGS (OPTION_ADJUST_WARNINGS + 1)
+#define OPTION_GAP_FILL (OPTION_ADJUST_WARNINGS + 1)
+#define OPTION_NO_ADJUST_WARNINGS (OPTION_GAP_FILL + 1)
 #define OPTION_SET_START (OPTION_NO_ADJUST_WARNINGS + 1)
 
 static struct option copy_options[] =
@@ -133,6 +140,7 @@ static struct option copy_options[] =
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
+  {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"help", no_argument, 0, 'h'},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
@@ -170,10 +178,11 @@ Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--remove-section=section] [--set-start=val] [--adjust-start=incr]\n\
-       [--adjust-vma=incr] [--adjust-section-vma=section{=,+,-}val]\n\
-       [--adjust-warnings] [--no-adjust-warnings] [--verbose] [--version]\n\
-       [--help] in-file [out-file]\n",
+       [--remove-section=section] [--gap-fill=val] [--set-start=val]\n\
+       [--adjust-start=incr] [--adjust-vma=incr]\n\
+       [--adjust-section-vma=section{=,+,-}val] [--adjust-warnings]\n\
+       [--no-adjust-warnings] [--verbose] [--version] [--help]\n\
+       in-file [out-file]\n",
 	   program_name);
   exit (status);
 }
@@ -302,6 +311,9 @@ copy_object (ibfd, obfd)
 {
   bfd_vma start;
   long symcount;
+  asection **osections = NULL;
+  bfd_size_type *gaps = NULL;
+  bfd_size_type max_gap = 0;
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     {
@@ -349,6 +361,58 @@ copy_object (ibfd, obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
 
+  if (gap_fill_set)
+    {
+      asection **set;
+      unsigned int c, i;
+
+      /* We must fill in gaps between the sections.  We do this by
+	 grabbing a list of the sections, sorting them by VMA, and
+	 adding new sections to occupy any gaps.  */
+
+      c = bfd_count_sections (obfd);
+      osections = (asection **) xmalloc (c * sizeof (asection *));
+      set = osections;
+      bfd_map_over_sections (obfd, get_sections, (void *) &set);
+
+      qsort (osections, c, sizeof (asection *), compare_section_vma);
+
+      gaps = (bfd_size_type *) xmalloc (c * sizeof (bfd_size_type));
+      for (i = 0; i < c - 1; i++)
+	{
+	  flagword flags;
+	  bfd_size_type size;
+	  bfd_vma gap_start, gap_stop;
+
+	  flags = bfd_get_section_flags (obfd, osections[i]);
+	  if ((flags & SEC_HAS_CONTENTS) == 0
+	      || (flags & SEC_LOAD) == 0)
+	    continue;
+
+	  size = bfd_section_size (obfd, osections[i]);
+	  gap_start = bfd_section_vma (obfd, osections[i]) + size;
+	  gap_stop = bfd_section_vma (obfd, osections[i + 1]);
+	  if (gap_start >= gap_stop)
+	    gaps[i] = 0;
+	  else
+	    {
+	      if (! bfd_set_section_size (obfd, osections[i],
+					  size + (gap_stop - gap_start)))
+		{
+		  fprintf (stderr, "%s: Can't fill gap after %s: %s\n",
+			   program_name,
+			   bfd_get_section_name (obfd, osections[i]),
+			   bfd_errmsg (bfd_get_error()));
+		  status = 1;
+		  break;
+		}
+	      gaps[i] = gap_stop - gap_start;
+	      if (max_gap < gap_stop - gap_start)
+		max_gap = gap_stop - gap_start;
+	    }
+	}
+    }
+
   /* Symbol filtering must happen after the output sections have
      been created, but before their contents are set.  */
   if (strip_symbols == strip_all && discard_locals == locals_undef)
@@ -395,6 +459,49 @@ copy_object (ibfd, obfd)
 
   /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, (void *) obfd);
+
+  if (gap_fill_set)
+    {
+      bfd_byte *buf;
+      int c, i;
+
+      /* Fill in the gaps.  */
+
+      if (max_gap > 8192)
+	max_gap = 8192;
+      buf = (bfd_byte *) xmalloc (max_gap);
+      memset (buf, gap_fill, max_gap);
+
+      c = bfd_count_sections (obfd);
+      for (i = 0; i < c - 1; i++)
+	{
+	  if (gaps[i] != 0)
+	    {
+	      bfd_size_type left;
+	      file_ptr off;
+
+	      left = gaps[i];
+	      off = bfd_section_size (obfd, osections[i]) - left;
+	      while (left > 0)
+		{
+		  bfd_size_type now;
+
+		  if (left > 8192)
+		    now = 8192;
+		  else
+		    now = left;
+		  if (! bfd_set_section_contents (obfd, osections[i], buf,
+						  off, now))
+		    {
+		      nonfatal (bfd_get_filename (obfd));
+		      status = 1;
+		    }
+		  left -= now;
+		  off += now;
+		}
+	    }
+	}
+    }
 
   /* Allow the BFD backend to copy any private data it understands
      from the input BFD to the output BFD.  This is done last to
@@ -771,6 +878,39 @@ copy_section (ibfd, isection, obfdarg)
     }
 }
 
+/* Get all the sections.  This is used when --gap-fill is used.  */
+
+static void
+get_sections (obfd, osection, secppparg)
+     bfd *obfd;
+     asection *osection;
+     PTR secppparg;
+{
+  asection ***secppp = (asection ***) secppparg;
+
+  **secppp = osection;
+  ++(*secppp);
+}
+
+/* Sort sections by VMA.  This is called via qsort, and is used when
+   --gap-fill is used.  */
+
+static int
+compare_section_vma (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
+{
+  const asection **sec1 = (const asection **) arg1;
+  const asection **sec2 = (const asection **) arg2;
+
+  if ((*sec1)->vma > (*sec2)->vma)
+    return 1;
+  else if ((*sec1)->vma < (*sec2)->vma)
+    return -1;
+  else
+    return 0;
+}
+
 /* Mark all the symbols which will be used in output relocations with
    the BSF_KEEP flag so that those symbols will not be stripped.
 
@@ -1120,6 +1260,22 @@ copy_main (argc, argv)
 	  break;
 	case OPTION_ADJUST_WARNINGS:
 	  adjust_warn = true;
+	  break;
+	case OPTION_GAP_FILL:
+	  {
+	    bfd_vma gap_fill_vma;
+
+	    gap_fill_vma = parse_vma (optarg, "--gap-fill");
+	    gap_fill = (bfd_byte) gap_fill_vma;
+	    if ((bfd_vma) gap_fill != gap_fill_vma)
+	      {
+		fprintf (stderr, "%s: warning: truncating gap-fill from 0x",
+			 program_name);
+		fprintf_vma (stderr, gap_fill_vma);
+		fprintf (stderr, "to 0x%x\n", (unsigned int) gap_fill);
+	      }
+	    gap_fill_set = true;
+	  }
 	  break;
 	case OPTION_NO_ADJUST_WARNINGS:
 	  adjust_warn = false;

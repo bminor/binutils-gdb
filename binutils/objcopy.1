@@ -25,6 +25,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-X\ |\ \-\-discard\-locals\fR "\|]" 
 .RB "[\|" \-b\ \fIbyte\fP |\ \-\-byte=\fIbyte\fP "\|]" 
 .RB "[\|" \-i\ \fIinterleave\fP |\ \-\-interleave=\fIinterleave\fP "\|]" 
+.RB "[\|" \-\-gap\-fill=\fIval\fP "\|]"
 .RB "[\|" \-\-set\-start=\fIval\fP "\|]"
 .RB "[\|" \-\-adjust\-start=\fIincr\fP "\|]"
 .RB "[\|" \-\-adjust\-vma=\fIincr\fP "\|]"
@@ -135,6 +136,11 @@ ROMs.  It is typically used with an srec output target.
 Only copy one out of every \fIinterleave\fP bytes.  Which one to copy is
 selected by the \fB\-b\fP or \fB\-\-byte\fP option.  The default is 4.
 The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
+.TP
+.B \-\-gap\-fill=\fIval
+Fill gaps between sections with \fIval\fP.  This is done by increasing
+the size of the section with the lower address, and filling in the extra
+space created with \fIval\fP.
 .TP
 .B \fB\-\-set\-start=\fIval
 Set the start address of the new file to \fIval\fP.  Not all object
