@@ -2224,7 +2224,10 @@
 	    (sequence
 	      ()
 	      (set (mem size addr) value)
-	      (set cbit 0))
+	      ; Write failures are signalled (by whatever entity "sends
+	      ; the signal") by setting P at time of the write above, if X
+	      ; is set.  Here, we just need to copy P into C.
+	      (set cbit pbit))
 	    (set cbit 1))
 	(set (mem size addr) value))
 

@@ -1,3 +1,7 @@
+2004-12-21  Mikael Starvik  <starvik@axis.com>
+
+	* cris.cpu (cris-set-mem): Correct integral write semantics.
+
 2004-11-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris.cpu: New file.
