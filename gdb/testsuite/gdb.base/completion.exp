@@ -656,8 +656,14 @@ gdb_expect  {
         timeout         { fail "(timeout) complete 'file ./Make'" }
         }
 
+# ${srcdir} may be a relative path.  We want to make sure we end up
+# in the right directory - so make sure we know where it is.
+set mydir [pwd]
+cd ${srcdir}
+set fullsrcdir [pwd]
+cd ${mydir}
 
-gdb_test "cd ${srcdir}" "Working directory ${srcdir}.*" "cd to \${srcdir}"
+gdb_test "cd ${fullsrcdir}" "Working directory ${fullsrcdir}.*" "cd to \${srcdir}"
 send_gdb "file ./gdb.base/compl\t"
 sleep 1
 gdb_expect  {

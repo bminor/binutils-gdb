@@ -1,3 +1,7 @@
+2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/completion.exp: Expand ${srcdir} to an absolute path.
+
 2002-01-10  Jason Merrill  <jason@redhat.com>
 
 	* gdb.c++/namespace.exp: Accept trailing const for 'this'.
