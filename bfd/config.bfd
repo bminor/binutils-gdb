@@ -120,6 +120,7 @@ case "${targ}" in
     targ_defvec=arm_epoc_pe_little_vec
     targ_selvecs="arm_epoc_pe_little_vec arm_epoc_pe_big_vec arm_epoc_pei_little_vec arm_epoc_pei_big_vec"
     targ_underscore=no
+    targ_cflags=-DARM_COFF_BUGFIX
     ;;
   arm-wince-pe | arm-*-wince)
     targ_defvec=armpe_little_vec
@@ -144,7 +145,7 @@ case "${targ}" in
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
-    targ_cflags=-DVXWORKS
+    targ_cflags=-DARM_COFF_BUGFIX
     ;;
   arm-*-coff)
     targ_defvec=armcoff_little_vec

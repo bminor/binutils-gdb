@@ -1,3 +1,11 @@
+2001-08-01  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config.bfd (arm-vxworks): Change name of define from VXWORKS to
+	ARM_COFF_BUGFIX.
+	(arm-epoc-pe): Define ARM_COFF_BUGFIX.
+	coff-arm.c (coff_arm_relocate_section): Replace VXWORKS with
+	ARM_COFF_BUGFIX.
+
 2001-07-30  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 
 	* libecoff.h (_bfd_ecoff_styp_to_sec_flags): Changed return type

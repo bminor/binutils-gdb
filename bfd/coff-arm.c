@@ -1246,10 +1246,10 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
             continue;
 	  /* FIXME - it is not clear which targets need this next test
 	     and which do not.  It is known that it is needed for the
-	     VXworks target (hence the #ifdef), but it is also known
-	     that it was supressed for other (arm) targets.  This ought
-	     to be sorted out one day.  */
-#ifdef VXWORKS
+	     VxWorks and EPOC-PE targets, but it is also known that it
+	     was supressed for other ARM targets.  This ought to be
+	     sorted out one day.  */
+#ifdef ARM_COFF_BUGFIX
 	  /* We must not ignore the symbol value.  If the symbol is
 	     within the same section, the relocation should have already
 	     been fixed, but if it is not, we'll be handed a reloc into
