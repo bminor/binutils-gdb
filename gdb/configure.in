@@ -411,9 +411,9 @@ if test "${target}" = "${host}"; then
 nativefile=`sed -n '
 s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${host_makefile_frag}`
-else
+# else
 # GDBserver is only useful in a "native" enviroment
-configdirs=`echo $configdirs | sed 's/gdbserver//'`
+# configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 changequote([,])
 
