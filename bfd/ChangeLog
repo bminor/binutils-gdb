@@ -1,3 +1,9 @@
+Fri Dec 20 12:06:17 1991  Fred Fish  (fnf at cygnus.com)
+
+	* configure.in:  Change svr4 references to sysv4.  Add case
+	"unknown" for target vendor and infer some targets based
+	on the specified operating system.
+
 Wed Dec 18 17:17:59 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* bfd-in.h, libaout.h:  ANSIfy enums.
