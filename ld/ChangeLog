@@ -1,3 +1,9 @@
+Tue Jun  2 12:55:03 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_finish): If the entry symbol is not found, try
+	parsing it as a number.
+	* ld.texinfo (Options): Document this.
+
 Mon Jun  1 14:01:20 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo (Input Section Wildcards): Document SORT keyword.

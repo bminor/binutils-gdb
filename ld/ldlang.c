@@ -985,9 +985,9 @@ wild_sort (wild, file, section)
 	  int i;
 
 	  i = strcmp (file->filename, ls->ifile->filename);
-	  if (i < 0)
+	  if (i > 0)
 	    continue;
-	  else if (i > 0)
+	  else if (i < 0)
 	    break;
 	}
 
@@ -999,7 +999,7 @@ wild_sort (wild, file, section)
 	  if (strcmp (section_name,
 		      bfd_get_section_name (ls->ifile->the_bfd,
 					    ls->section))
-	      > 0)
+	      < 0)
 	    break;
 	}
     }
@@ -2791,25 +2791,40 @@ lang_finish ()
     }
   else
     {
-      asection *ts;
+      bfd_vma val;
+      char *send;
 
-      /* Can't find the entry symbol.  Use the first address in the
-	 text section.  */
-      ts = bfd_get_section_by_name (output_bfd, ".text");
-      if (ts != (asection *) NULL)
+      /* We couldn't find the entry symbol.  Try parsing it as a
+         number.  */
+      val = bfd_scan_vma (entry_symbol, &send, 0);
+      if (*send == '\0')
 	{
-	  if (warn)
-	    einfo (_("%P: warning: cannot find entry symbol %s; defaulting to %V\n"),
-		   entry_symbol, bfd_get_section_vma (output_bfd, ts));
-	  if (! bfd_set_start_address (output_bfd,
-				       bfd_get_section_vma (output_bfd, ts)))
+	  if (! bfd_set_start_address (output_bfd, val))
 	    einfo (_("%P%F: can't set start address\n"));
 	}
       else
 	{
-	  if (warn)
-	    einfo (_("%P: warning: cannot find entry symbol %s; not setting start address\n"),
-		   entry_symbol);
+	  asection *ts;
+
+	  /* Can't find the entry symbol, and it's not a number.  Use
+	     the first address in the text section.  */
+	  ts = bfd_get_section_by_name (output_bfd, ".text");
+	  if (ts != (asection *) NULL)
+	    {
+	      if (warn)
+		einfo (_("%P: warning: cannot find entry symbol %s; defaulting to %V\n"),
+		       entry_symbol, bfd_get_section_vma (output_bfd, ts));
+	      if (! bfd_set_start_address (output_bfd,
+					   bfd_get_section_vma (output_bfd,
+								ts)))
+		einfo (_("%P%F: can't set start address\n"));
+	    }
+	  else
+	    {
+	      if (warn)
+		einfo (_("%P: warning: cannot find entry symbol %s; not setting start address\n"),
+		       entry_symbol);
+	    }
 	}
     }
 }
