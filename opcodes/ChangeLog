@@ -1,3 +1,15 @@
+Fri Oct  6 16:26:45 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-dis.c (print_insn_m68k): Recognize all two-word
+	instructions that take no args by looking at the match mask.
+  	(print_insn_arg): Always print "%" before register names.
+	[case 'c']: Use "nc" for the no-cache case, as recognized by gas.
+	[case '_']: Don't print "@#" before address.
+	[case 'J']: Use "%s" as format string, not register name.
+	[case 'B']: Treat place == 'C' like 'l' and 'L'.
+
 Thu Oct  5 22:16:20 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* i386-dis.c: Describe cmpxchg8b operand, and spell the opcode
