@@ -1,3 +1,12 @@
+Wed Jun 30 18:01:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t{02,13}/comp-info.c, gdb.t06/twice.exp: Add "return 0" to end.
+
+Tue Jun 29 13:15:42 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t12/scope.exp:  Remove xfail for parameter printing in wrong
+	order.
+
 Tue Jun 29 09:22:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t16/printcmds.exp: Add printf tests.
