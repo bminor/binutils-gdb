@@ -410,6 +410,7 @@ GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 # This is a list of the targets for all of the modules which are compiled
 # using $(FLAGS_TO_PASS).
 ALL_MODULES = \
+	all-apache \
 	all-autoconf \
 	all-bfd \
 	all-binutils \
@@ -470,6 +471,7 @@ NATIVE_CHECK_MODULES = \
 	check-flex
 
 CROSS_CHECK_MODULES = \
+	check-apache \
 	check-autoconf \
 	check-bfd \
 	check-binutils \
@@ -517,6 +519,7 @@ CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 # This is a list of the install targets for all of the modules which are
 # compiled using $(FLAGS_TO_PASS).
 INSTALL_MODULES = \
+	install-apache \
 	install-autoconf \
 	install-bfd \
 	install-binutils \
@@ -1220,6 +1223,7 @@ install-dosrel-fake:
 
 
 # This is a list of inter-dependencies among modules.
+all-apache:
 all-autoconf: all-m4
 all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc

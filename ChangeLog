@@ -1,3 +1,12 @@
+Mon Apr 15 15:09:05 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (ALL_MODULES): Include all-apache.
+	(CROSS_CHECK_MODULES): Include check-apache.
+	(INSTALL_MODULES): Include install-apache.
+	(all-apache): New target.
+
+	* configure.in: Added apache everywhere perl is seen.
+
 Mon Apr 15 14:59:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in: Add support for clean-{module} and

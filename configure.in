@@ -36,7 +36,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
 	    textutils wdiff find emacs emacs19 uudecode hello tar gzip indent
-	    recode release sed utils guile perl"
+	    recode release sed utils guile perl apache"
 
 
 # these libraries are built for the target environment, and are built after
@@ -66,7 +66,7 @@ target_tools="target-examples target-groff"
 #
 native_only="autoconf cvs emacs emacs19 fileutils find grep gzip hello
 	     indent ispell m4 rcs recode sed shellutils tar textutils gash
-	     uudecode wdiff gprof target-groff guile perl"
+	     uudecode wdiff gprof target-groff guile perl apache"
 
 # directories to be built in a cross environment only
 #
@@ -347,16 +347,16 @@ noconfigdirs=""
 
 case "${host}" in
   i[345]86-*-vsta)
-    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl"
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache"
     ;;
   i[345]86-*-go32)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl"
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache"
 	;;
   *-*-cygwin32)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache"
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff  make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl"
+     noconfigdirs="patch diff  make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache"
     ;;
 esac
 
