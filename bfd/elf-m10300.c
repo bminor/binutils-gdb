@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -873,6 +873,12 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      asection *sym_sec = NULL;
 	      const char *sym_name;
 	      char *new_name;
+
+	      /* If there's nothing to do in this section, skip it.  */
+	      if (! (((section->flags & SEC_RELOC) != 0
+		      && section->reloc_count != 0)
+		     || (section->flags & SEC_CODE) != 0))
+		continue;
 
 	      /* Get cached copy of section contents if it exists.  */
 	      if (elf_section_data (section)->this_hdr.contents != NULL)
