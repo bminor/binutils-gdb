@@ -1,3 +1,18 @@
+Wed Apr  1 11:08:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (arm_validate_fix): New function.  Determine if
+	the destination of a branch instruction should be altered.
+	(find_real_start): New function:  Locate the real, Thumb coded
+	start of a Thumb function.
+	(do_t_branch23): Alter the destination of branches to Thumb
+	functions. 
+
+	* config/tc-arm.h: Define TC_VALIDATE_FIX.
+
+Tue Mar 31 13:27:33 1998  Dean M. Deaver  <deaver@amt.tay1.dec.com>
+
+	* tc-arm.c (decode_shift): handle addressing mode 2 w/rrx also
+	
 Wed Apr  1 13:13:20 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* doc/as.texinfo: Use @itemx for a secondary item in a table.

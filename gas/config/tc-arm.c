@@ -2101,8 +2101,8 @@ decode_shift (str, unrestrict)
   *p = c;
   if (shft)
     {
-      if (!strcmp (*str, "rrx")
-          || !strcmp (*str, "RRX"))
+      if (!strncmp (*str, "rrx", 3)
+          || !strncmp (*str, "RRX", 3))
 	{
 	  *str = p;
 	  inst.instruction |= shft->value;
@@ -4390,15 +4390,52 @@ do_t_branch12 (str)
   end_of_line (str);
 }
 
+/* Find the real, Thumb encoded start of a Thumb function.  */
+
+static symbolS *
+find_real_start (symbolP)
+     symbolS * symbolP;
+{
+  char *       real_start;
+  const char * name = S_GET_NAME (symbolP);
+  symbolS *    new_target;
+
+  /* This definitonmust agree with the one in gcc/config/arm/thumb.c */
+#define STUB_NAME ".real_start_of"
+
+  real_start = malloc (strlen (name) + strlen (STUB_NAME) + 1);
+  sprintf (real_start, "%s%s", STUB_NAME, name);
+
+  new_target = symbol_find (real_start);
+  
+  if (new_target == NULL)
+    abort();
+
+  free (real_start);
+
+  return new_target;
+}
+
+
 static void
 do_t_branch23 (str)
      char *str;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
-  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH23;
+  inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BRANCH23;
   inst.reloc.pc_rel = 1;
   end_of_line (str);
+
+  /* If the destination of the branch is a defined symbol which does not have
+     the THUMB_FUNC attribute, then we must be calling a function which has
+     the (interfacearm) attribute.  We look for the Thumb entry point to that
+     function and change the branch to refer to that function instead.  */
+  if (   inst.reloc.exp.X_op == O_symbol
+      && inst.reloc.exp.X_add_symbol != NULL
+      && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
+      && ! THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
+    inst.reloc.exp.X_add_symbol = find_real_start (inst.reloc.exp.X_add_symbol);
 }
 
 static void
@@ -4924,7 +4961,8 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  if (fixP->fx_addsy && S_GET_SEGMENT (fixP->fx_addsy) == undefined_section
+  if (   fixP->fx_addsy
+      && S_GET_SEGMENT (fixP->fx_addsy) == undefined_section
       && fixP->fx_subsy == NULL)
     return 0;	/* HACK */
 
@@ -4935,7 +4973,7 @@ md_pcrel_from (fixP)
 	 for the calculation */
       return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
     }
-  
+
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
@@ -5058,7 +5096,8 @@ md_apply_fix3 (fixP, val, seg)
      so we have to undo it's effects here.  */
   if (fixP->fx_pcrel)
     {
-      if (S_IS_DEFINED (fixP->fx_addsy)
+      if (fixP->fx_addsy != NULL
+	  && S_IS_DEFINED (fixP->fx_addsy)
 	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
 	{
 	  if (fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)
@@ -5211,7 +5250,7 @@ md_apply_fix3 (fixP, val, seg)
          diff |= ~0xff;
 
         value += diff;
-        if ((value & 0x100) && ((value & ~0xff) != ~0xff))
+        if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
          as_bad_where (fixP->fx_file, fixP->fx_line,
                        "Branch out of range");
         newval = (newval & 0xff00) | ((value & 0x1ff) >> 1);
@@ -5227,7 +5266,7 @@ md_apply_fix3 (fixP, val, seg)
          diff |= ~0x7ff;
 
         value += diff;
-        if ((value & 0x800) && ((value & ~0x7ff) != ~0x7ff))
+        if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
          as_bad_where (fixP->fx_file, fixP->fx_line,
                        "Branch out of range");
         newval = (newval & 0xf800) | ((value & 0xfff) >> 1);
@@ -5236,24 +5275,24 @@ md_apply_fix3 (fixP, val, seg)
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
-      newval = md_chars_to_number (buf, THUMB_SIZE);
       {
         offsetT newval2;
         addressT diff;
-
-        newval2 = md_chars_to_number (buf + 2, THUMB_SIZE);
+	
+	newval  = md_chars_to_number (buf, THUMB_SIZE);
+        newval2 = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
         diff = ((newval & 0x7ff) << 12) | ((newval2 & 0x7ff) << 1);
         if (diff & 0x400000)
-         diff |= ~0x3fffff;
+	  diff |= ~0x3fffff;
         value += diff;
-        if ((value & 0x400000) && ((value & ~0x3fffff) != ~0x3fffff))
-         as_bad_where (fixP->fx_file, fixP->fx_line,
-                       "Branch with link out of range");
+        if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			"Branch with link out of range");
 
-        newval = (newval & 0xf800) | ((value & 0x7fffff) >> 12);
+        newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
         newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
         md_number_to_chars (buf, newval, THUMB_SIZE);
-        md_number_to_chars (buf + 2, newval2, THUMB_SIZE);
+        md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
       }
       break;
 
@@ -6226,7 +6265,7 @@ fix_new_arm (frag, where, size, exp, pc_rel, reloc)
  * for this kind of use.  We need to dump the literal pool before
  * references are made to a null symbol pointer.  */
 void
-arm_after_pass_hook ()
+arm_cleanup ()
 {
   if (current_poolP != NULL)
     {
@@ -6340,3 +6379,24 @@ arm_canonicalize_symbol_name (name)
 
   return name;
 }
+
+boolean
+arm_validate_fix (fixP)
+     fixS * fixP;
+{
+  /* If the destination of the branch is a defined symbol which does not have
+     the THUMB_FUNC attribute, then we must be calling a function which has
+     the (interfacearm) attribute.  We look for the Thumb entry point to that
+     function and change the branch to refer to that function instead.  */
+  if (   fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23
+      && fixP->fx_addsy != NULL
+      && S_IS_DEFINED (fixP->fx_addsy)
+      && ! THUMB_IS_FUNC (fixP->fx_addsy))
+    {
+      fixP->fx_addsy = find_real_start (fixP->fx_addsy);
+      return true;
+    }
+
+  return false;
+}
+
