@@ -1,5 +1,21 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	Fix PR gdb/844
+	* lib/gdb.exp (gdb_compile): Handle "quiet" option.
+	(gdb_compile_pthreads): Pass "quiet" to gdb_compile.
+
+	* gdb.threads/gcore-thread.exp: Use gdb_compile_pthreads.  Return
+	instead of calling gdb_suppress_entire_file.
+	* gdb.threads/print-threads.exp: Likewise.
+	* gdb.threads/schedlock.exp: Likewise.
+
+	* gdb.threads/killed.exp: Return instead of calling
+	gdb_suppress_entire_file.
+	* gdb.threads/linux-dp.exp: Likewise.
+	* gdb.threads/pthreads.exp: Likewise.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/callfuncs.exp: Don't XFAIL unprototyped functions for
 	stabs.
 	* gdb.base/completion.exp: Allow marker1(void) as well as marker1().
