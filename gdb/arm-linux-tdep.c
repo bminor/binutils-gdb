@@ -30,7 +30,7 @@
 
 #include "arm-tdep.h"
 
-/* For arm_linux_skip_solib_resolver.  */
+/* For shared library handling.  */
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -534,6 +534,10 @@ arm_linux_init_abi (struct gdbarch_info info,
   /* The following two overrides shouldn't be needed.  */
   set_gdbarch_extract_return_value (gdbarch, arm_linux_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, arm_linux_push_arguments);
+
+  /* Shared library handling.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 }
 
 void

@@ -37,23 +37,15 @@ extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);
 /* Offset to saved PC in sigcontext structure, from <asm/sigcontext.h> */
 #define SIGCONTEXT_PC_OFFSET	(sizeof(unsigned long) * 18)
 
-/* On ARM GNU/Linux, each call to a library routine goes through a
-   small piece of trampoline code in the ".plt" section.  The
-   wait_for_inferior() routine uses this macro to detect when we have
-   stepped into one of these fragments.  We do not use
-   lookup_solib_trampoline_symbol_by_pc, because we cannot always find
-   the shared library trampoline symbols.  */
-extern int in_plt_section (CORE_ADDR, char *);
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) in_plt_section((pc), (name))
+/* We've multi-arched this.  */
+#undef IN_SOLIB_CALL_TRAMPOLINE
 
 /* On ARM GNU/Linux, a call to a library routine does not have to go
    through any trampoline code.  */
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	0
 
-/* If PC is in a shared library trampoline code, return the PC
-   where the function itself actually starts.  If not, return 0.  */
-extern CORE_ADDR find_solib_trampoline_target (CORE_ADDR pc);   
-#define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
+/* We've multi-arched this.  */
+#undef SKIP_TRAMPOLINE_CODE
 
 /* When we call a function in a shared library, and the PLT sends us
    into the dynamic linker to find the function's real address, we

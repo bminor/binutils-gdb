@@ -1,3 +1,11 @@
+2002-02-23  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Register
+	IN_SOLIB_CALL_TRAMPOLINE and SKIP_TRAMPOLINE_CODE
+	* config/arm/tm-linux.h (IN_SOLIB_CALL_TRAMPOLINE): Replace old
+	definition with undef, since we don't want the sysvr4 definition.
+	(SKIP_TRAMPOLINE_CODE): Likewise.
+
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-02-22 Alfred M. Szmidt <ams@kemisten.nu>:
