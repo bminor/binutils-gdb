@@ -391,9 +391,9 @@ DESCRIPTION
 /* Sign extension to bfd_signed_vma.  */
 #define COERCE16(x) (((bfd_signed_vma) (x) ^ 0x8000) - 0x8000)
 #define COERCE32(x) (((bfd_signed_vma) (x) ^ 0x80000000) - 0x80000000)
-#define EIGHT_GAZILLION ((BFD_HOST_64_BIT) 1 << 63)
+#define EIGHT_GAZILLION ((bfd_int64_t) 1 << 63)
 #define COERCE64(x) \
-  (((bfd_signed_vma) (x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION)
+  (((bfd_int64_t) (x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION)
 
 bfd_vma
 bfd_getb16 (const void *p)
@@ -491,12 +491,12 @@ bfd_getl_signed_32 (const void *p)
   return COERCE32 (v);
 }
 
-bfd_vma
+bfd_uint64_t
 bfd_getb64 (const void *p ATTRIBUTE_UNUSED)
 {
-#ifdef BFD64
+#ifdef BFD_HOST_64_BIT
   const bfd_byte *addr = p;
-  bfd_vma v;
+  bfd_uint64_t v;
 
   v  = addr[0]; v <<= 8;
   v |= addr[1]; v <<= 8;
@@ -514,12 +514,12 @@ bfd_getb64 (const void *p ATTRIBUTE_UNUSED)
 #endif
 }
 
-bfd_vma
+bfd_uint64_t
 bfd_getl64 (const void *p ATTRIBUTE_UNUSED)
 {
-#ifdef BFD64
+#ifdef BFD_HOST_64_BIT
   const bfd_byte *addr = p;
-  bfd_vma v;
+  bfd_uint64_t v;
 
   v  = addr[7]; v <<= 8;
   v |= addr[6]; v <<= 8;
@@ -538,12 +538,12 @@ bfd_getl64 (const void *p ATTRIBUTE_UNUSED)
 
 }
 
-bfd_signed_vma
+bfd_int64_t
 bfd_getb_signed_64 (const void *p ATTRIBUTE_UNUSED)
 {
-#ifdef BFD64
+#ifdef BFD_HOST_64_BIT
   const bfd_byte *addr = p;
-  bfd_vma v;
+  bfd_uint64_t v;
 
   v  = addr[0]; v <<= 8;
   v |= addr[1]; v <<= 8;
@@ -561,12 +561,12 @@ bfd_getb_signed_64 (const void *p ATTRIBUTE_UNUSED)
 #endif
 }
 
-bfd_signed_vma
+bfd_int64_t
 bfd_getl_signed_64 (const void *p ATTRIBUTE_UNUSED)
 {
-#ifdef BFD64
+#ifdef BFD_HOST_64_BIT
   const bfd_byte *addr = p;
-  bfd_vma v;
+  bfd_uint64_t v;
 
   v  = addr[7]; v <<= 8;
   v |= addr[6]; v <<= 8;
@@ -605,9 +605,9 @@ bfd_putl32 (bfd_vma data, void *p)
 }
 
 void
-bfd_putb64 (bfd_vma data ATTRIBUTE_UNUSED, void *p ATTRIBUTE_UNUSED)
+bfd_putb64 (bfd_uint64_t data ATTRIBUTE_UNUSED, void *p ATTRIBUTE_UNUSED)
 {
-#ifdef BFD64
+#ifdef BFD_HOST_64_BIT
   bfd_byte *addr = p;
   addr[0] = (data >> (7*8)) & 0xff;
   addr[1] = (data >> (6*8)) & 0xff;
@@ -623,9 +623,9 @@ bfd_putb64 (bfd_vma data ATTRIBUTE_UNUSED, void *p ATTRIBUTE_UNUSED)
 }
 
 void
-bfd_putl64 (bfd_vma data ATTRIBUTE_UNUSED, void *p ATTRIBUTE_UNUSED)
+bfd_putl64 (bfd_uint64_t data ATTRIBUTE_UNUSED, void *p ATTRIBUTE_UNUSED)
 {
-#ifdef BFD64
+#ifdef BFD_HOST_64_BIT
   bfd_byte *addr = p;
   addr[7] = (data >> (7*8)) & 0xff;
   addr[6] = (data >> (6*8)) & 0xff;
@@ -641,7 +641,7 @@ bfd_putl64 (bfd_vma data ATTRIBUTE_UNUSED, void *p ATTRIBUTE_UNUSED)
 }
 
 void
-bfd_put_bits (bfd_vma data, void *p, int bits, bfd_boolean big_p)
+bfd_put_bits (bfd_uint64_t data, void *p, int bits, bfd_boolean big_p)
 {
   bfd_byte *addr = p;
   int i;
@@ -660,11 +660,11 @@ bfd_put_bits (bfd_vma data, void *p, int bits, bfd_boolean big_p)
     }
 }
 
-bfd_vma
+bfd_uint64_t
 bfd_get_bits (const void *p, int bits, bfd_boolean big_p)
 {
   const bfd_byte *addr = p;
-  bfd_vma data;
+  bfd_uint64_t data;
   int i;
   int bytes;
 

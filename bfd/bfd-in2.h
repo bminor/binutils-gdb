@@ -62,6 +62,8 @@ extern "C" {
 #if @BFD_HOST_64_BIT_DEFINED@
 #define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
 #define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
+typedef BFD_HOST_64_BIT bfd_int64_t;
+typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #endif
 
 #if BFD_ARCH_SIZE >= 64
@@ -101,24 +103,6 @@ typedef int bfd_boolean;
 #define false dont_use_false_in_bfd
 #define true dont_use_true_in_bfd
 #endif
-
-/* Support for different sizes of target format ints and addresses.
-   If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
-   set to 1 above.  Otherwise, if the host compiler used during
-   configuration supports long long, this code will use it.
-   Otherwise, BFD_HOST_64_BIT must be defined above.  */
-
-#ifndef BFD_HOST_64_BIT
-# if BFD_HOST_64BIT_LONG
-#  define BFD_HOST_64_BIT long
-#  define BFD_HOST_U_64_BIT unsigned long
-# else
-#  if BFD_HOST_LONG_LONG
-#    define BFD_HOST_64_BIT long long
-#    define BFD_HOST_U_64_BIT unsigned long long
-#  endif /* ! BFD_HOST_LONG_LONG */
-# endif /* ! BFD_HOST_64BIT_LONG */
-#endif /* ! defined (BFD_HOST_64_BIT) */
 
 #ifdef BFD64
 
@@ -166,6 +150,15 @@ typedef unsigned long bfd_size_type;
 #define sprintf_vma(s,x) sprintf (s, "%08lx", x)
 
 #endif /* not BFD64  */
+
+#ifndef BFD_HOST_64_BIT
+/* Fall back on a 32 bit type.  The idea is to make these types always
+   available for function return types, but in the case that
+   BFD_HOST_64_BIT is undefined such a function should abort or
+   otherwise signal an error.  */
+typedef bfd_signed_vma bfd_int64_t;
+typedef bfd_vma bfd_uint64_t;
+#endif
 
 /* An offset into a file.  BFD always uses the largest possible offset
    based on the build time availability of fseek, fseeko, or fseeko64.  */
@@ -525,10 +518,10 @@ extern bfd_boolean bfd_record_phdr
 
 /* Byte swapping routines.  */
 
-bfd_vma bfd_getb64 (const void *);
-bfd_vma bfd_getl64 (const void *);
-bfd_signed_vma bfd_getb_signed_64 (const void *);
-bfd_signed_vma bfd_getl_signed_64 (const void *);
+bfd_uint64_t bfd_getb64 (const void *);
+bfd_uint64_t bfd_getl64 (const void *);
+bfd_int64_t bfd_getb_signed_64 (const void *);
+bfd_int64_t bfd_getl_signed_64 (const void *);
 bfd_vma bfd_getb32 (const void *);
 bfd_vma bfd_getl32 (const void *);
 bfd_signed_vma bfd_getb_signed_32 (const void *);
@@ -537,8 +530,8 @@ bfd_vma bfd_getb16 (const void *);
 bfd_vma bfd_getl16 (const void *);
 bfd_signed_vma bfd_getb_signed_16 (const void *);
 bfd_signed_vma bfd_getl_signed_16 (const void *);
-void bfd_putb64 (bfd_vma, void *);
-void bfd_putl64 (bfd_vma, void *);
+void bfd_putb64 (bfd_uint64_t, void *);
+void bfd_putl64 (bfd_uint64_t, void *);
 void bfd_putb32 (bfd_vma, void *);
 void bfd_putl32 (bfd_vma, void *);
 void bfd_putb16 (bfd_vma, void *);
@@ -546,8 +539,8 @@ void bfd_putl16 (bfd_vma, void *);
 
 /* Byte swapping routines which take size and endiannes as arguments.  */
 
-bfd_vma bfd_get_bits (const void *, int, bfd_boolean);
-void bfd_put_bits (bfd_vma, void *, int, bfd_boolean);
+bfd_uint64_t bfd_get_bits (const void *, int, bfd_boolean);
+void bfd_put_bits (bfd_uint64_t, void *, int, bfd_boolean);
 
 /* Externally visible ECOFF routines.  */
 
@@ -4100,9 +4093,9 @@ typedef struct bfd_target
   /* Entries for byte swapping for data. These are different from the
      other entry points, since they don't take a BFD asthe first argument.
      Certain other handlers could do the same.  */
-  bfd_vma        (*bfd_getx64) (const void *);
-  bfd_signed_vma (*bfd_getx_signed_64) (const void *);
-  void           (*bfd_putx64) (bfd_vma, void *);
+  bfd_uint64_t   (*bfd_getx64) (const void *);
+  bfd_int64_t    (*bfd_getx_signed_64) (const void *);
+  void           (*bfd_putx64) (bfd_uint64_t, void *);
   bfd_vma        (*bfd_getx32) (const void *);
   bfd_signed_vma (*bfd_getx_signed_32) (const void *);
   void           (*bfd_putx32) (bfd_vma, void *);
@@ -4111,9 +4104,9 @@ typedef struct bfd_target
   void           (*bfd_putx16) (bfd_vma, void *);
 
   /* Byte swapping for the headers.  */
-  bfd_vma        (*bfd_h_getx64) (const void *);
-  bfd_signed_vma (*bfd_h_getx_signed_64) (const void *);
-  void           (*bfd_h_putx64) (bfd_vma, void *);
+  bfd_uint64_t   (*bfd_h_getx64) (const void *);
+  bfd_int64_t    (*bfd_h_getx_signed_64) (const void *);
+  void           (*bfd_h_putx64) (bfd_uint64_t, void *);
   bfd_vma        (*bfd_h_getx32) (const void *);
   bfd_signed_vma (*bfd_h_getx_signed_32) (const void *);
   void           (*bfd_h_putx32) (bfd_vma, void *);

@@ -1,5 +1,36 @@
 2004-03-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd-in.h (bfd_int64_t, bfd_uint64_t): New types.
+	(BFD_HOST_64_BIT, BFD_HOST_U_64_BIT): Don't define here.
+	(bfd_getb64, bfd_getl64, bfd_get_bits): Return bfd_uint64_t.
+	(bfd_getb_signed_64, bfd_getl_signed_64): Return bfd_int64_t.
+	(bfd_putb64, bfd_putl64, bfd_put_bits): Accept bfd_uint64_t.
+	* configure.in (HOST_U_64BIT_TYPE): Set when sizeof long is 8.
+	(BFD_HOST_64_BIT_DEFINED, BFD_HOST_64_BIT, BFD_HOST_U_64_BIT): Set
+	when using long.
+	* libbfd.c (EIGHT_GAZILLION, COERCE64): Use bfd_int64_t.
+	(bfd_getb64): Return bfd_uint64_t.  Enable when BFD_HOST_64_BIT.
+	(bfd_getl64, bfd_getb_signed_64, bfd_getl_signed_64): Likewise.
+	(bfd_putb64): Accept bfd_uint64_t.  Enable when BFD_HOST_64_BIT.
+	(bfd_putl64, bfd_put_bits, bfd_get_bits): Likewise.
+	* dwarf2.c (struct attribute): Use bfd_int64_t and bfd_uint64_t.
+	(read_8_bytes, read_indirect_string, read_address): Likewise.
+	(read_abbrevs, parse_comp_unit): Likewise.
+	* targets.c (struct bfd_target): Likewise.
+	* aix386-core.c (NO_GET64, NO_PUT64, NO_GETS64): Define and use.
+	* hppabsd-core.c: Likewise.  Formatting.
+	* hpux-core.c: Likewise.
+	* irix-core.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* osf-core.c: Likewise.
+	* ptrace-core.c: Likewise.
+	* sco5-core.c: Likewise.
+	* trad-core.c: Likewise.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2004-03-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd-in.h (bfd_getb64, bfd_getl64): Replace bfd_byte* with void*.
 	(bfd_getb32, bfd_getl32, bfd_getb16, bfd_getl16): Likewise.
 	(bfd_getb_signed_64, bfd_getl_signed_64): Likewise.
