@@ -358,7 +358,7 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	$(start-sanitize-chill) \
 	all-chillrt \
 	$(end-sanitize-chill) \
-	all-gprof all-send_pr all-libm all-deja-gnu \
+	all-gprof all-send-pr all-libm all-deja-gnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
 	all-textutils all-time all-wdiff all-uudecode \
 	all-hello all-tar all-gzip all-indent all-recode
@@ -443,7 +443,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-readline \
 	install-recode \	
 	install-sed \
-	install-send_pr \
+	install-send-pr \
 	install-shellutils \
 	install-sim \
 	install-tar \
@@ -1139,20 +1139,20 @@ install-ispell: force
 		true ; \
 	fi
 
-### send_pr
-all-send_pr: force
-	@if [ -f ./send_pr/Makefile ] ; then \
+### send-pr
+all-send-pr: force
+	@if [ -f ./send-pr/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./send_pr; \
+		(cd ./send-pr; \
 		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
 
-install-send_pr: force
-	@if [ -f ./send_pr/Makefile ] ; then \
+install-send-pr: force
+	@if [ -f ./send-pr/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./send_pr; \
+		(cd ./send-pr; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
