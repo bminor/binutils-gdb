@@ -1,3 +1,26 @@
+Thu Mar 14 10:31:18 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* solib.c (solib_break_names): Add _r_debug_state for
+	vanilla SVR4 implementations.  From Peter Schauer.
+
+Mon Mar 11 14:24:57 1996  Dawn Perchik  <dawn@critters.cygnus.com>
+
+	* mon960-rom.c: New file; support mon960 rom monitor on i960.
+	* monitor.c (monitor_debug): Change remotedebug to buffer strings.
+	* monitor.c (monitor_open): Add test for flag MO_NO_ECHO_ON_OPEN before
+	epecting prompt and echo during open.
+	* monitor.c (monitor_stop): Add test for flag MO_SEND_BREAK_ON_OPEN to 
+	determine if break should be sent as stop command.
+	* monitor.h: Add flags MO_NO_ECHO_ON_OPEN and MO_SEND_BREAK_ON_OPEN.
+	* i960-tdep.c (mon960_frame_chain_valid): New function for getting 
+	stack frame on mon960.
+	* Makefile.in: Add mon960 files.
+	* configure.in: Changed i960-*-coff* and i960-*-elf* to target mon960;
+ 	added i960-nindy-coff* and i960-nindy-elf* for target nindy.
+	* configure: Regenerated.
+	* config/i960/mon960.mt, config/i960/tm-mon960.h: New files; 
+	support mon960 rom monitor on i960.
+
 Mon Mar 11 11:02:47 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	With Michael Snyder:

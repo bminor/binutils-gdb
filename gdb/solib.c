@@ -64,6 +64,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef SVR4_SHARED_LIBS
 static char *solib_break_names[] = {
   "r_debug_state",
+  "_r_debug_state",
   "_dl_debug_state",
   NULL
 };
@@ -403,34 +404,6 @@ solib_add_common_symbols (rtc_symp)
 
 #ifdef SVR4_SHARED_LIBS
 
-#ifdef HANDLE_SVR4_EXEC_EMULATORS
-
-/*
-	Solaris BCP (the part of Solaris which allows it to run SunOS4
-	a.out files) throws in another wrinkle. Solaris does not fill
-	in the usual a.out link map structures when running BCP programs,
-	the only way to get at them is via groping around in the dynamic
-	linker.
-	The dynamic linker and it's structures are located in the shared
-	C library, which gets run as the executable's "interpreter" by
-	the kernel.
-
-	Note that we can assume nothing about the process state at the time
-	we need to find these structures.  We may be stopped on the first
-	instruction of the interpreter (C shared library), the first
-	instruction of the executable itself, or somewhere else entirely
-	(if we attached to the process for example).
-*/
-
-static char *debug_base_symbols[] = {
-  "r_debug",	/* Solaris 2.3 */
-  "_r_debug",	/* Solaris 2.1, 2.2 */
-  NULL
-};
-
-static int
-look_for_base PARAMS ((int, CORE_ADDR));
-
 static CORE_ADDR
 bfd_lookup_symbol PARAMS ((bfd *, char *));
 
@@ -490,6 +463,34 @@ bfd_lookup_symbol (abfd, symname)
     }
   return (symaddr);
 }
+
+#ifdef HANDLE_SVR4_EXEC_EMULATORS
+
+/*
+	Solaris BCP (the part of Solaris which allows it to run SunOS4
+	a.out files) throws in another wrinkle. Solaris does not fill
+	in the usual a.out link map structures when running BCP programs,
+	the only way to get at them is via groping around in the dynamic
+	linker.
+	The dynamic linker and it's structures are located in the shared
+	C library, which gets run as the executable's "interpreter" by
+	the kernel.
+
+	Note that we can assume nothing about the process state at the time
+	we need to find these structures.  We may be stopped on the first
+	instruction of the interpreter (C shared library), the first
+	instruction of the executable itself, or somewhere else entirely
+	(if we attached to the process for example).
+*/
+
+static char *debug_base_symbols[] = {
+  "r_debug",	/* Solaris 2.3 */
+  "_r_debug",	/* Solaris 2.1, 2.2 */
+  NULL
+};
+
+static int
+look_for_base PARAMS ((int, CORE_ADDR));
 
 /*
 
