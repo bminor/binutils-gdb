@@ -1,3 +1,8 @@
+2000-09-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* os9kread.c (os9k_symfile_read, os9k_end_psymtab): Protoize.
+	* osfsolib.c (find_solib): Protoize.
+
 2000-09-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* ns32knbsd-nat.c (fetch_core_registers): Protoize.

@@ -312,9 +312,7 @@ read_minimal_symbols (struct objfile *objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-os9k_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;		/* FIXME comments above */
+os9k_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *sym_bfd;
   struct cleanup *back_to;
@@ -987,16 +985,11 @@ os9k_start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
    FIXME:  List variables and peculiarities of same.  */
 
 static struct partial_symtab *
-os9k_end_psymtab (pst, include_list, num_includes, capping_symbol_cnt,
-		  capping_text, dependency_list, number_dependencies)
-     struct partial_symtab *pst;
-     char **include_list;
-     int num_includes;
-     int capping_symbol_cnt;
-     CORE_ADDR capping_text;
-     struct partial_symtab **dependency_list;
-     int number_dependencies;
-     /* struct partial_symbol *capping_global, *capping_static; */
+os9k_end_psymtab (struct partial_symtab *pst, char **include_list,
+		  int num_includes, int capping_symbol_cnt,
+		  CORE_ADDR capping_text,
+		  struct partial_symtab **dependency_list,
+		  int number_dependencies)
 {
   int i;
   struct partial_symtab *p1;

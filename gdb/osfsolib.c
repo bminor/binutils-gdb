@@ -507,8 +507,7 @@ xfer_link_map_member (struct so_list *so_list_ptr, struct link_map *lm)
  */
 
 static struct so_list *
-find_solib (so_list_ptr)
-     struct so_list *so_list_ptr;	/* Last lm or NULL for first one */
+find_solib (struct so_list *so_list_ptr)
 {
   struct so_list *so_list_next = NULL;
   struct link_map *lm = NULL;
