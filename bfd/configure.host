@@ -51,14 +51,6 @@ i[345]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;
 i[345]86-ncr*-sysv4*)	CC=${CC-/usr/ccs/ATT/cc}
 			test -z "$CFLAGS" && CFLAGS=" "
 			;;
-i[345]86-*-go32*)	test -z "$CC" && CC="i386-go32-gcc -fno-omit-frame-pointer -O2 -Wl,-S"
-			AR=${AR-i386-go32-ar}
-			RANLIB=${RANLIB-i386-go32-ranlib}
-			;;
-i[345]86-*-win32)	test -z "$CC" && CC="i386-win32-gcc -O2"
-			AR=${AR-i386-win32-ar}
-			RANLIB=${RANLIB-i386-win32-ranlib}
-			;;
 
 mips-dec-netbsd*)	;;
 mips-dec-*)		HDEFINES="-G 4"	;;
