@@ -1,3 +1,21 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:38:08 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h: New file.
+	* Make-common.in (top_builddir): New macro.
+	(INTL_LIB): Removed.
+	(INTLLIBS): New macro.
+	(INTLDEPS): Likewise.
+	(LIBDEPS): Use INTLDEPS.
+	(EXTRA_LIBS): Use INTLLIBS.
+	* aclocal.m4 (SIM_AC_COMMON): Call CY_GNU_GETTEXT.
+	(CY_WITH_NLS, CY_GNU_GETTEXT, AM_PATH_PROG_WITH_TEST,
+	AM_LC_MESSAGES): New macros from GNU gettext.
+
 Fri Apr 24 19:57:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-config.h: Discard leading _ from macros.
