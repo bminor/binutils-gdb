@@ -1,3 +1,8 @@
+Tue Mar  7 16:41:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c: Sort recently added instructions by minor opcode
+	number within major opcode number.
+
 Mon Mar  6 10:04:36 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-dis.c: Include libhppa.h.
