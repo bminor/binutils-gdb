@@ -1,5 +1,15 @@
 2003-10-31  Andrew Cagney  <cagney@redhat.com>
 
+	* solib-svr4.c: Update copyright.  Include "bfd-target.h" and
+	"exec.h".
+	(exec_entry_point): New function.
+	(enable_break): Create a "tmp_bfd_target", use that and
+	entry_point_address when computing the relocation offset.
+	(svr4_relocate_main_executable): Ditto with exec_bfd and exec_ops.
+	* Makefile.in (solib-svr4.o): Update dependencies.
+
+2003-10-31  Andrew Cagney  <cagney@redhat.com>
+
 	* defs.h (XZALLOC): Define.
 	* target.h (struct target_ops): Add "to_data";
 	* bfd-target.h, bfd-target.c: New files.
