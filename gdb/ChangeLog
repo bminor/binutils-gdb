@@ -1,3 +1,10 @@
+Thu Feb  3 12:38:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* m68k-stub.c: Treat mc68332 like mc68020 most places.  Provide
+	a special exceptionSize for the 68332.
+
+	* remote-udi.c (udi_attach): If no arguments, print error.
+
 Thu Feb  3 17:34:05 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.12.1

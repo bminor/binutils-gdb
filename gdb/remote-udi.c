@@ -337,6 +337,9 @@ udi_attach (args, from_tty)
   UDIBool	HostEndian = 0;
   UDIError	err;
 
+  if (args == NULL)
+    error_no_arg ("program to attach");
+
   if (udi_session_id < 0)
       error ("UDI connection not opened yet, use the 'target udi' command.\n");
 	
