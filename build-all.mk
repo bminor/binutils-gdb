@@ -366,6 +366,19 @@ build:
 	  fi ; \
 	done
 
+build-all-latest:
+	@for i in $(TARGETS) ; do \
+	  if [ "$$i" = "native" ] ; then \
+	    echo "building 3stage for $(canonhost)" ; \
+	    $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
+	       echo "     completed successfully" ; \
+	  else \
+	    echo "building $(canonhost) cross to $$i" ; \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-latest $(cyglog) && \
+	       echo "     completed successfully" ; \
+	  fi ; \
+	done
+
 ### Local Variables:
 ### fill-column: 131
 ### End:
