@@ -81,6 +81,13 @@ Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
 	match "FOO".  This allows 'break Foo' to work when Foo is
 	a mangled C++ function.  (See comment before function.)
 
+Thu Sep  3 13:44:46 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* symtab.c (completion_list_add_symbol): restructured to optimize
+	  for time.  First clip names that cannot match.  Then clip any
+	  names we've already considered.  Drop a redundant strncpy.  Drop
+	  a redundant malloc and associated free for demangled names.
+
 Thu Sep  3 09:17:05 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* a68v-xdep.c (store_inferior_registers):  Define as type void.

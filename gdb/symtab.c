@@ -2482,35 +2482,50 @@ completion_list_add_symbol (symname, text, text_len)
 {
   char *demangled;
   int newsize;
+  int i;
 
-  /* First see if SYMNAME is a C++ mangled name, and if so, use the
-     demangled name instead, including any parameters. */
+  /* clip symbols that cannot match */
+
+  if (!cplus_match (symname, text, text_len)) {
+    return;
+  }
+
+  /* matches mangled, may match unmangled.  now clip any symbol names
+     that we've already considered.  (This is a time optimization)  */
+
+  for (i = 0; i < return_val_index; ++i) {
+    if (strcmp (symname, return_val[i]) == 0) {
+      return;
+    }
+  }
+  
+  /* See if SYMNAME is a C++ mangled name, and if so, use the
+     demangled name instead, including any parameters.  */
 
   if ((demangled = cplus_demangle (symname, DMGL_PARAMS | DMGL_ANSI)) != NULL)
     {
+      if (strncmp (demangled, text, text_len) != 0) {
+	return;
+      }	/* demangled, but didn't match so clip it */
+
       symname = demangled;
+    } else {
+      symname = savestring (symname, strlen (symname));
     }
 
   /* If we have a match for a completion, then add SYMNAME to the current
-     list of matches. Note that we always make a copy of the string, even
-     if it is one that was returned from cplus_demangle and is already
-     in malloc'd memory. */
+     list of matches. Note that the name is in freshly malloc'd space;
+     either from cplus_demangle or from savestring above.  */
 
-  if (strncmp (symname, text, text_len) == 0)
+  if (return_val_index + 3 > return_val_size)
     {
-      if (return_val_index + 3 > return_val_size)
-	{
-	  newsize = (return_val_size *= 2) * sizeof (char *);
-	  return_val = (char **) xrealloc ((char *) return_val, newsize);
-	}
-      return_val[return_val_index++] = savestring (symname, strlen (symname));
-      return_val[return_val_index] = NULL;
+      newsize = (return_val_size *= 2) * sizeof (char *);
+      return_val = (char **) xrealloc ((char *) return_val, newsize);
     }
+  return_val[return_val_index++] = symname;
+  return_val[return_val_index] = NULL;
 
-  if (demangled != NULL)
-    {
-      free (demangled);
-    }
+  return;
 }
 
 /* Return a NULL terminated array of all symbols (regardless of class) which
