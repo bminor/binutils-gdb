@@ -1,5 +1,8 @@
 Thu Jun 11 08:56:46 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-d30v.c (md_apply_fix3): Catch BFD_RELOC_8,
+	BFD_RELOC_16, BFD_RELOC_64 and issue appropriate error messages.  
+
 	* write.c (adjust_reloc_syms): Add more checks for NULL pointers. 
 
 	* config/tc-v850.c (v850_comm): Set SEC_COMMON bit on special

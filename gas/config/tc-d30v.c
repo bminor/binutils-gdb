@@ -1628,6 +1628,24 @@ md_apply_fix3 (fixp, valuep, seg)
   
   switch (fixp->fx_r_type)
     {
+    case BFD_RELOC_8:
+      /* Caused by a bad .byte directive.  */
+      as_fatal (_("line %d: unable to place address of symbol '%s' into a byte"),
+		fixp->fx_line, S_GET_NAME (fixp->fx_addsy));
+      break;
+      
+    case BFD_RELOC_16:
+      /* Caused by a bad .short directive.  */
+      as_fatal (_("line %d: unable to place address of symbol '%s' into a short"),
+		fixp->fx_line, S_GET_NAME (fixp->fx_addsy));
+      break;
+      
+    case BFD_RELOC_64:
+      /* Caused by a bad .quad directive.  */
+      as_fatal (_("line %d: unable to place address of symbol '%s' into a .quad"),
+		fixp->fx_line, S_GET_NAME (fixp->fx_addsy));
+      break;
+      
     case BFD_RELOC_D30V_6:
       check_size (value, 6, fixp->fx_file, fixp->fx_line);
       insn |= value & 0x3F;
