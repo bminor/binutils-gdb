@@ -1001,10 +1001,17 @@ EOF
 EOF
 
 	;;
-  i[345]86-*-bsd* | i[345]86-*-freebsd* | i[345]86-*-netbsd*)
+  i[345]86-*-bsd* | i[345]86-*-freebsd*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/i386bsd.h"
+EOF
+
+	;;
+  i[345]86-*-netbsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/i386nbsd.h"
 EOF
 
 	;;
@@ -1052,7 +1059,13 @@ EOF
 EOF
 
 	;;
-  mips-dec-netbsd*)	;;
+  mips-*-netbsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/mipsnbsd.h"
+EOF
+
+	;;
   mips-dec-*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
@@ -1107,6 +1120,13 @@ EOF
 EOF
 
 	;;
+  m68*-*-netbsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/m68knbsd.h"
+EOF
+
+	;;
   m88*-*-sysv4*)	;;
   m88*-motorola-sysv*)	COREFILE=trad-core.o ;;
   m88*-*-mach3*)
@@ -1123,11 +1143,25 @@ EOF
 EOF
 
 	;;
+  ns32k-*-netbsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/ns32knbsd.h"
+EOF
+
+	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.o ;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.o ;;
   rs6000-*-*)		COREFILE=rs6000-core.o ;;
   powerpc-*-aix4*)	COREFILE=rs6000-core.o ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
+  sparc-*-netbsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/sparcnbsd.h"
+EOF
+
+	;;
   tahoe-*-*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
@@ -1178,7 +1212,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1182 "configure"
+#line 1216 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
@@ -1354,6 +1388,7 @@ do
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
     m68klynx_coff_vec)		tb="$tb cf-m68klynx.o coff-m68k.o cofflink.o lynx-core.o stab-syms.o" ;;
     m68knetbsd_vec)		tb="$tb m68knetbsd.o aout32.o stab-syms.o" ;;
+    m68k4knetbsd_vec)		tb="$tb m68k4knetbsd.o aout32.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
