@@ -1,3 +1,7 @@
+Thu Jul  4 12:01:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Released binutils 2.7.
+
 Thu Jun 27 11:36:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_ISC_POSIX.

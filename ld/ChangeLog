@@ -1,3 +1,7 @@
+Thu Jul  4 12:01:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Released binutils 2.7.
+
 Wed Jul  3 11:40:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (print_padding_statement): Use %u, not %x, to print
