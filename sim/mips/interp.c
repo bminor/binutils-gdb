@@ -4277,9 +4277,6 @@ sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
       CANCELDELAYSLOT();
     }
 
-    if (MIPSISA < 4)
-      PENDING_TICK();
-
 #if !defined(FASTSIM)
     if (sim_events_tickn (sd, pipeline_count))
       {

@@ -2717,6 +2717,15 @@ build_instruction (doisa, features, mips16, insn)
 
     case BREAK:
 
+      if (mips16)
+	{
+	  printf("        if (STATE & simDELAYSLOT)\n");
+	  printf("          PC = cia - 2; /* reference the branch instruction */\n");
+	  printf("        else\n");
+	  printf("          PC = cia;\n");
+	  printf("        sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);\n");
+	  break;
+	}
      printf("    unsigned int break_code = instruction & HALT_INSTRUCTION_MASK;\n");
      printf("    if (   break_code == (HALT_INSTRUCTION  & HALT_INSTRUCTION_MASK)\n");
      printf("        || break_code == (HALT_INSTRUCTION2 & HALT_INSTRUCTION_MASK))\n");

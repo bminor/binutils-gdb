@@ -449,7 +449,7 @@ typedef struct _pending_write_queue {
 #define PENDING_OUT ((CPU)->pending.out)
 #define PENDING_TOTAL ((CPU)->pending.total)
 #define PENDING_SLOT_SIZE ((CPU)->pending.slot_size)
-#define PENDING_SLOT_BIT ((CPU)->pending.slot_size)
+#define PENDING_SLOT_BIT ((CPU)->pending.slot_bit)
 #define PENDING_SLOT_DELAY ((CPU)->pending.slot_delay)
 #define PENDING_SLOT_DEST ((CPU)->pending.slot_dest)
 #define PENDING_SLOT_VALUE ((CPU)->pending.slot_value)
@@ -472,12 +472,17 @@ memset (&(CPU)->pending, 0, sizeof ((CPU)->pending))
       sim_engine_abort (SD, CPU, cia,					\
 		        "PENDING_SCHED - buffer overflow\n");		\
     if (PENDING_TRACE)							\
-      sim_io_printf (SD, "PENDING_SCHED - dest 0x%lx, val 0x%lx, pending_in %d, pending_out %d, pending_total %d\n", (unsigned long) (DEST), (unsigned long) (VAL), PENDING_IN, PENDING_OUT, PENDING_TOTAL); \
+      sim_io_eprintf (SD, "PENDING_SCHED - 0x%lx - dest 0x%lx, val 0x%lx, bit %d, size %d, pending_in %d, pending_out %d, pending_total %d\n",			\
+		      (unsigned long) cia, (unsigned long) &(DEST),	\
+		      (unsigned long) (VAL), (BIT), (int) sizeof (DEST),\
+		      PENDING_IN, PENDING_OUT, PENDING_TOTAL);		\
     PENDING_SLOT_DELAY[PENDING_IN] = (DELAY) + 1;			\
     PENDING_SLOT_DEST[PENDING_IN] = &(DEST);				\
     PENDING_SLOT_VALUE[PENDING_IN] = (VAL);				\
     PENDING_SLOT_SIZE[PENDING_IN] = sizeof (DEST);			\
     PENDING_SLOT_BIT[PENDING_IN] = (BIT);				\
+    PENDING_IN = (PENDING_IN + 1) % PSLOTS;                             \
+    PENDING_TOTAL += 1;			                                \
   } while (0)
 
 #define PENDING_WRITE(DEST,VAL,DELAY) PENDING_SCHED(DEST,VAL,DELAY,-1)
@@ -492,9 +497,12 @@ memset (&(CPU)->pending, 0, sizeof ((CPU)->pending))
 #define PENDING_FILL(R,VAL) 						\
 {									\
   if ((R) >= FGRIDX && (R) < FGRIDX + NR_FGR)				\
-    PENDING_SCHED(FGR[(R) - FGRIDX], VAL, 2, -1);			\
+    {									\
+      PENDING_SCHED(FGR[(R) - FGRIDX], VAL, 1, -1);			\
+      PENDING_SCHED(FPR_STATE[(R) - FGRIDX], fmt_uninterpreted, 1, -1);	\
+    }									\
   else									\
-    PENDING_SCHED(GPR[(R)], VAL, 2, -1);				\
+    PENDING_SCHED(GPR[(R)], VAL, 1, -1);				\
 }
 
 

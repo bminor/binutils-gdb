@@ -1,3 +1,29 @@
+Sat Nov  7 09:54:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (build_instruction - BREAK): For MIPS16, handle BREAK
+ 	insn as a debug breakpoint.
+
+	* sim-main.h (PENDING_SLOT_BIT): Fix, was incorrectly defined as
+ 	pending.slot_size.
+	(PENDING_SCHED): Clean up trace statement.
+	(PENDING_SCHED): Increment PENDING_IN and PENDING_TOTAL.
+	(PENDING_FILL): Delay write by only one cycle.
+	(PENDING_FILL): For FSRs, write fmt_uninterpreted to FPR_STATE.
+
+	* sim-main.c (pending_tick): Clean up trace statements. Add trace
+ 	of pending writes.
+	(pending_tick): Fix sizes in switch statements, 4 & 8 instead of
+ 	32 & 64.
+	(pending_tick): Move incrementing of index to FOR statement.
+	(pending_tick): Only update PENDING_OUT after a write has occured.
+	
+	* configure.in: Add explicit mips-lsi-* target.  Use gencode to
+ 	build simulator.
+	* configure: Re-generate.
+	
+	* interp.c (sim_engine_run OLD): Delete explicit call to
+ 	PENDING_TICK. Now called via ENGINE_ISSUE_PREFIX_HOOK.
+	
 start-sanitize-r5900
 Wed Nov 11 16:53:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

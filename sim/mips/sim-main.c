@@ -791,7 +791,7 @@ pending_tick (SIM_DESC SD,
 	      address_word cia)
 {
   if (PENDING_TRACE)							
-    sim_io_printf (SD, "PENDING_DRAIN - pending_in = %d, pending_out = %d, pending_total = %d\n", PENDING_IN, PENDING_OUT, PENDING_TOTAL); 
+    sim_io_eprintf (SD, "PENDING_DRAIN - 0x%lx - pending_in = %d, pending_out = %d, pending_total = %d\n", (unsigned long) cia, PENDING_IN, PENDING_OUT, PENDING_TOTAL); 
   if (PENDING_OUT != PENDING_IN)					
     {									
       int loop;							
@@ -799,17 +799,26 @@ pending_tick (SIM_DESC SD,
       int total = PENDING_TOTAL;					
       if (PENDING_TOTAL == 0)						
 	sim_engine_abort (SD, CPU, cia, "PENDING_DRAIN - Mis-match on pending update pointers\n"); 
-      for (loop = 0; (loop < total); loop++)				
+      for (loop = 0, index = PENDING_OUT;
+	   (loop < total);
+	   loop++, index = (index + 1) % PSLOTS)
 	{								
 	  if (PENDING_SLOT_DEST[index] != NULL)			
 	    {								
 	      PENDING_SLOT_DELAY[index] -= 1;				
 	      if (PENDING_SLOT_DELAY[index] == 0)			
 		{							
+		  if (PENDING_TRACE)
+		    sim_io_eprintf (SD, "PENDING_DRAIN - drained - index %d, dest 0x%lx, bit %d, val 0x%lx, size %d\n",
+				    index,
+				    (unsigned long) PENDING_SLOT_DEST[index],
+				    PENDING_SLOT_BIT[index],
+				    (unsigned long) PENDING_SLOT_VALUE[index],
+				    PENDING_SLOT_SIZE[index]);
 		  if (PENDING_SLOT_BIT[index] >= 0)			
 		    switch (PENDING_SLOT_SIZE[index])                 
 		      {						
-		      case 32:					
+		      case 4:
 			if (PENDING_SLOT_VALUE[index])		
 			  *(unsigned32*)PENDING_SLOT_DEST[index] |= 	
 			    BIT32 (PENDING_SLOT_BIT[index]);		
@@ -817,7 +826,7 @@ pending_tick (SIM_DESC SD,
 			  *(unsigned32*)PENDING_SLOT_DEST[index] &= 	
 			    BIT32 (PENDING_SLOT_BIT[index]);		
 			break;					
-		      case 64:					
+		      case 8:					
 			if (PENDING_SLOT_VALUE[index])		
 			  *(unsigned64*)PENDING_SLOT_DEST[index] |= 	
 			    BIT64 (PENDING_SLOT_BIT[index]);		
@@ -825,30 +834,36 @@ pending_tick (SIM_DESC SD,
 			  *(unsigned64*)PENDING_SLOT_DEST[index] &= 	
 			    BIT64 (PENDING_SLOT_BIT[index]);		
 			break;					
-			break;					
 		      }
 		  else
 		    switch (PENDING_SLOT_SIZE[index])                 
 		      {						
-		      case 32:					
+		      case 4:					
 			*(unsigned32*)PENDING_SLOT_DEST[index] = 	
 			  PENDING_SLOT_VALUE[index];			
 			break;					
-		      case 64:					
+		      case 8:					
 			*(unsigned64*)PENDING_SLOT_DEST[index] = 	
 			  PENDING_SLOT_VALUE[index];			
 			break;					
 		      }							
+		  if (PENDING_OUT == index)
+		    {
+		      PENDING_SLOT_DEST[index] = NULL;
+		      PENDING_OUT = (PENDING_OUT + 1) % PSLOTS;
+		      PENDING_TOTAL--;
+		    }
 		}							
-	      if (PENDING_OUT == index)				
-		{							
-		  PENDING_SLOT_DEST[index] = NULL;			
-		  PENDING_OUT = (PENDING_OUT + 1) % PSLOTS;		
-		  PENDING_TOTAL--;					
-		}							
+	      else if (PENDING_TRACE && PENDING_SLOT_DELAY[index] > 0)
+		sim_io_eprintf (SD, "PENDING_DRAIN - queued - index %d, delay %d, dest 0x%lx, bit %d, val 0x%lx, size %d\n",
+				index, PENDING_SLOT_DELAY[index],
+				(unsigned long) PENDING_SLOT_DEST[index],
+				PENDING_SLOT_BIT[index],
+				(unsigned long) PENDING_SLOT_VALUE[index],
+				PENDING_SLOT_SIZE[index]);
+
 	    }								
 	}								
-      index = (index + 1) % PSLOTS;					
     }									
 }
 
