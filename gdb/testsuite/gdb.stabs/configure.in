@@ -15,6 +15,9 @@ case "${target}" in
 # Do any other machines use .stabx?  What about i386-*-aix*?
 rs6000-*-aix*)		target_makefile_frag=xcoff.mt ;;
 
+mips-*-bsd*)		target_makefile_frag=aout.mt ;;
+mips-*-*)		target_makefile_frag=ecoff.mt ;;
+
 *-*-*)			target_makefile_frag=aout.mt ;;
 
 esac

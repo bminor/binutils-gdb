@@ -1,3 +1,10 @@
+Sun Jul 18 08:40:45 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.stabs/{ecoff.mt,wierd-ecoff.S,wierd-ecoff.sed}:  New files
+	to make the stabs test work on ecoff systems using gcc and -with-stabs.
+	* gdb.stabs/{Makefile.in,configure.in,aout.mt,xcoff.mt}:  Modify to
+	enable ecoff configuration.
+
 Thu Jul 15 11:54:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t15/funcargs.exp (localvars_in_indirect_call): New test.
