@@ -1,3 +1,13 @@
+start-sanitize-tic80
+Mon Feb 24 23:34:14 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c (md_apply_fix): Handle R_ABS type fixups.
+
+end-sanitize-tic80
+Mon Feb 24 18:27:43 1997  Eric Youngdale  <eric@andante.jic.com>
+
+	* doc/as.texinfo: Document .symver.
+
 Mon Feb 24 15:19:57 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Change pre_defined_registers to 

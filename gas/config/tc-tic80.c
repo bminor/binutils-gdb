@@ -879,6 +879,9 @@ md_apply_fix (fixP, val)
       *dest++ = val >> 2;
       *dest = (*dest & 0x80) | val >> 10;
       break;
+    case R_ABS:
+      md_number_to_chars (dest, (valueT) val, fixP -> fx_size);
+      break;
     default:
       internal_error_a ("unhandled relocation type in fixup", fixP -> fx_r_type);
       break;
