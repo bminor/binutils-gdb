@@ -1,3 +1,8 @@
+2002-06-11  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* ld-scripts/cross1.t: Add .hash, .dynstr and .dynsym sections to
+	script.
+
 2002-06-11  Andreas Jaeger  <aj@suse.de>
 
 	* ld-undefined/undefined.exp: Add s390x to dwarf2 xfails.
