@@ -1,3 +1,14 @@
+Wed Aug  7 12:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patches from Eric Valette <valette@crf.canon.fr>:
+	* elf32-i386.c (enum reloc_type): Add FIRST_INVALID_RELOC,
+	LAST_INVALID_RELOC, R_386_16, R_386_PC16, R_386_8, R_386_PC8.
+	(elf_howto_table): Add entries for new relocs.
+	(elf_i386_reloc_type_lookup): Handle new relocs.
+	(elf_i386_info_to_howto): Just call abort.
+	(elf_i386_info_to_howto_rel): Check that the reloc type is valid.
+	(elf_i386_relocate_section): Likewise.
+
 start-sanitize-d10v
 Tue Aug  6 12:54:56 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
