@@ -32,6 +32,7 @@ ebmon29k.sh
 elf32_sparc.sh
 elf64_sparc.sh
 elf32mipb.sh
+elf32mipl.sh
 elf32ppc.sh
 elf_i386.sh
 gld960.sh

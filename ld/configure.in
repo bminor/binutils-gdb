@@ -82,6 +82,7 @@ case "${targ}" in
   a29k-*-udi)		ld_target=sa29200 ;;
   a29k-*-ebmon)		ld_target=ebmon29k ;;
   a29k-*-*)		ld_target=coff-a29k ;;
+#  arm-*-riscix*)	ld_target=riscix ;;
   h8300-*-hms)		ld_target=coff-h8300 ;;
   h8300h-*-hms)		ld_target=cf-h8300h ;;
   h8500-*-hms)		ld_target=coff-h8500 ;;
@@ -103,6 +104,7 @@ case "${targ}" in
   mips*el-idt-ecoff*)	ld_target=mipsl-idt ;;
   mips*-idt-ecoff*)	ld_target=mips-idt ;;
   mips*-dec-bsd*)	ld_target=mipsbsd ;;
+  mips*el-elf*)		ld_target=mipsl-elf32 ;;
   mips*-*-elf*)		ld_target=mipsb-elf32 ;;
   alpha-*-osf*)		ld_target=alpha ;;
   alpha-*-netware*)	ld_target=alpha ;;

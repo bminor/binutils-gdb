@@ -1,3 +1,9 @@
+Tue Sep 20 14:35:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in (mips*el-elf*): New target.
+	* config/mipsl-elf32.mt: New file.
+	* emulparams/elf32mipl.sh: New file.
+
 Fri Sep 16 12:16:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldmain.c (main): Rather than prohibiting ld -r -s, treat it as
