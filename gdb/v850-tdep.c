@@ -285,12 +285,12 @@ handle_pushm (int insn, int insn2, struct prologue_info *pi,
 
 /* Function: scan_prologue
    Scan the prologue of the function that contains PC, and record what
-   we find in PI.  PI->fsr must be zeroed by the called.  Returns the
-   pc after the prologue.  Note that the addresses saved in pi->fsr
-   are actually just frame relative (negative offsets from the frame
-   pointer).  This is because we don't know the actual value of the
-   frame pointer yet.  In some circumstances, the frame pointer can't
-   be determined till after we have scanned the prologue.  */
+   we find in PI.  Returns the pc after the prologue.  Note that the
+   addresses saved in frame->saved_regs are just frame relative (negative
+   offsets from the frame pointer).  This is because we don't know the
+   actual value of the frame pointer yet.  In some circumstances, the
+   frame pointer can't be determined till after we have scanned the
+   prologue.  */
 
 static CORE_ADDR
 v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
@@ -536,6 +536,46 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
   return current_pc;
 }
 
+void
+v850_frame_init_saved_regs (struct frame_info *fi)
+{
+  struct prologue_info pi;
+  struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
+  CORE_ADDR func_addr, func_end;
+
+  if (!fi->saved_regs)
+    {
+      frame_saved_regs_zalloc (fi);
+
+      /* The call dummy doesn't save any registers on the stack, so we
+         can return now.  */
+      if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+	return;
+
+      /* Find the beginning of this function, so we can analyze its
+         prologue. */
+      if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
+	{
+	  pi.pifsrs = pifsrs;
+
+	  v850_scan_prologue (fi->pc, &pi);
+
+	  if (!fi->next && pi.framereg == SP_REGNUM)
+	    fi->frame = read_register (pi.framereg) - pi.frameoffset;
+
+	  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
+	    {
+	      fi->saved_regs[pifsr->reg] = pifsr->offset + fi->frame;
+
+	      if (pifsr->framereg == SP_REGNUM)
+		fi->saved_regs[pifsr->reg] += pi.frameoffset;
+	    }
+	}
+      /* Else we're out of luck (can't debug completely stripped code). 
+         FIXME. */
+    }
+}
+
 /* Function: init_extra_frame_info
    Setup the frame's frame pointer, pc, and frame addresses for saved
    registers.  Most of the work is done in scan_prologue().
@@ -553,32 +593,11 @@ void
 v850_init_extra_frame_info (struct frame_info *fi)
 {
   struct prologue_info pi;
-  struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
 
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
-  memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
-
-  /* The call dummy doesn't save any registers on the stack, so we can return
-     now.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return;
-
-  pi.pifsrs = pifsrs;
-
-  v850_scan_prologue (fi->pc, &pi);
-
-  if (!fi->next && pi.framereg == SP_REGNUM)
-    fi->frame = read_register (pi.framereg) - pi.frameoffset;
-
-  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
-    {
-      fi->fsr.regs[pifsr->reg] = pifsr->offset + fi->frame;
-
-      if (pifsr->framereg == SP_REGNUM)
-	fi->fsr.regs[pifsr->reg] += pi.frameoffset;
-    }
+  v850_frame_init_saved_regs (fi);
 }
 
 /* Function: frame_chain
@@ -630,8 +649,8 @@ v850_find_callers_reg (struct frame_info *fi, int regnum)
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return generic_read_register_dummy (fi->pc, fi->frame, regnum);
-    else if (fi->fsr.regs[regnum] != 0)
-      return read_memory_unsigned_integer (fi->fsr.regs[regnum],
+    else if (fi->saved_regs[regnum] != 0)
+      return read_memory_unsigned_integer (fi->saved_regs[regnum],
 					   REGISTER_RAW_SIZE (regnum));
 
   return read_register (regnum);
@@ -682,9 +701,9 @@ v850_pop_frame (struct frame_info *frame)
       write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
 
       for (regnum = 0; regnum < NUM_REGS; regnum++)
-	if (frame->fsr.regs[regnum] != 0)
+	if (frame->saved_regs[regnum] != 0)
 	  write_register (regnum,
-		      read_memory_unsigned_integer (frame->fsr.regs[regnum],
+		      read_memory_unsigned_integer (frame->saved_regs[regnum],
 					       REGISTER_RAW_SIZE (regnum)));
 
       write_register (SP_REGNUM, FRAME_FP (frame));

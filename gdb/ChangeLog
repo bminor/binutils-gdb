@@ -1,5 +1,19 @@
 2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
 
+	* v850-tdep.c: Fix comment for v850_scan_prologue.  Remove extra
+	frame info.  Use frame_info's saved_regs instead of matching member
+	in extra_frame_info throughout.
+	(v850_frame_init_saved_regs): New function.
+	(v850_init_extra_frame_info): Move most functionality into
+	v850_frame_init_saved_regs().
+	* config/v850/tm-v850.h (EXTRA_FRAME_INFO): Remove definition.
+	(v850_frame_find_saved_regs): Remove declaration.
+	(FRAME_FIND_SAVED_REGS): Remove definition.
+	(v850_frame_init_saved_regs): Add declaration.
+	(FRAME_INIT_SAVED_REGS): Add definition.
+
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
 	* v850-tdep.c: Begin multi-arch'ing v850.
 	(v850_target_architecture_hook): Remove function.
 	(v850_gdbarch_init): New function.  Add code previously in

@@ -99,15 +99,12 @@ struct frame_saved_regs;
 struct type;
 struct value;
 
-#define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
-
 extern void v850_init_extra_frame_info (struct frame_info *fi);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) v850_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
-extern void v850_frame_find_saved_regs (struct frame_info *fi,
-					struct frame_saved_regs *regaddr);
-#define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
+extern void v850_frame_init_saved_regs (struct frame_info *fi);
+#define FRAME_INIT_SAVED_REGS(FI) v850_frame_init_saved_regs (FI)
 
 extern CORE_ADDR v850_frame_chain (struct frame_info *fi);
 #define FRAME_CHAIN(fi) v850_frame_chain (fi)
