@@ -1,3 +1,10 @@
+2003-08-21  Michael Snyder  <msnyder@redhat.com>
+
+	* tracepoint.c (trace_dump_command): Trace break address
+	is subject to DECR_PC_AFTER_BREAK.
+	(set_traceframe_context): Make "trace_line" an int.
+	Fixes suggested by Mark Newman  <mark.newman@lmco.com>
+	
 2003-08-20  Michael Snyder  <msnyder@redhat.com>
 
 	* sh-tdep.h (struct gdbarch_tdep): New member FLOAT_ARGLAST_REG.
