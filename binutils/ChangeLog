@@ -1,5 +1,9 @@
 Tue Mar 12 12:09:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (ieee_write_undefined_tag): Switch to global_types even
+	if it is not empty.
+	(ieee_tag_type): For an enum, look through info->enums.
+
 	* configure: Rebuild with autoconf 2.8.
 
 	* debug.c (debug_type_samep): Don't loop endlessly in

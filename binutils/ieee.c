@@ -3446,6 +3446,9 @@ ieee_regno_to_genreg (abfd, r)
          32 to 35 for fp0 to fp3.  */
       --r;
       break;
+
+    default:
+      break;
     }
 
   return r;
@@ -3471,6 +3474,9 @@ ieee_genreg_to_regno (abfd, r)
       /* Stabs uses 0 to 15 for r0 to r15, 16 to 31 for g0 to g15, and
          32 to 35 for fp0 to fp3.  */
       ++r;
+      break;
+
+    default:
       break;
     }
 
@@ -4669,6 +4675,14 @@ ieee_write_undefined_tag (h, p)
 	      || ! ieee_write_byte (info, 2)
 	      || ! ieee_write_number (info, 0)
 	      || ! ieee_write_id (info, ""))
+	    {
+	      info->error = true;
+	      return false;
+	    }
+	}
+      else
+	{
+	  if (! ieee_change_buffer (info, &info->global_types))
 	    {
 	      info->error = true;
 	      return false;
@@ -6448,6 +6462,18 @@ ieee_tag_type (p, name, id, kind)
   char ab[20];
   struct ieee_name_type_hash_entry *h;
   struct ieee_name_type *nt;
+
+  if (kind == DEBUG_KIND_ENUM)
+    {
+      struct ieee_defined_enum *e;
+
+      if (name == NULL)
+	abort ();
+      for (e = info->enums; e != NULL; e = e->next)
+	if (e->tag != NULL && strcmp (e->tag, name) == 0)
+	  return ieee_push_type (info, e->indx, 0, true, false);
+      abort ();
+    }
 
   localp = false;
 
