@@ -81,6 +81,8 @@ store_inferior_registers (regno)
   : regno >= FP0_REGNUM ?	FPR_BASE + (regno - FP0_REGNUM) \
   : 0)
 
+static const char zerobuf[MAX_REGISTER_RAW_SIZE];
+
 /* Get all registers from the inferior */
 
 void
@@ -104,6 +106,10 @@ fetch_inferior_registers (regno)
  	}
       supply_register (regno, buf);
     }
+
+  supply_register (ZERO_REGNUM, zerobuf);
+  /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
+  supply_register (FP_REGNUM, zerobuf);
 }
 
 /* Store our register values back into the inferior.

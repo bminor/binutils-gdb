@@ -318,6 +318,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   (((int*)dummyname)[11] |= (((unsigned long)(fun)) >> 16), \
    ((int*)dummyname)[12] |= (unsigned short)(fun))
 
+/* There's a mess in stack frame creation.  See comments in blockframe.c
+   near reference to INIT_FRAME_PC_FIRST.  */
+
+#define	INIT_FRAME_PC(fromleaf, prev) /* nada */
+
+#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
+  (prev)->pc = ((fromleaf) ? SAVED_PC_AFTER_CALL ((prev)->next) : \
+	      (prev)->next ? FRAME_SAVED_PC ((prev)->next) : read_pc ());
+
 /* Specific information about a procedure.
    This overlays the MIPS's PDR records, 
    mipsread.c (ab)uses this to save memory */
@@ -333,6 +342,25 @@ typedef struct mips_extra_func_info {
   struct frame_saved_regs *saved_regs;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
+
+#define	PRINT_EXTRA_FRAME_INFO(fi) \
+  { \
+    if (fi && fi->proc_desc && fi->proc_desc->pdr.framereg < NUM_REGS) \
+      printf_filtered (" frame pointer is at %s+%d\n", \
+                       reg_names[fi->proc_desc->pdr.framereg], \
+                                 fi->proc_desc->pdr.frameoffset); \
+  }
+
+/* It takes two values to specify a frame (at least!) on the MIPS.  Sigh.
+
+   In fact, at the moment, the *PC* is the primary value that sets up
+   a frame.  The PC is looked up to see what function it's in; symbol
+   information from that function tells us which register is the frame
+   pointer base, and what offset from there is the "virtual frame pointer".
+   (This is usually an offset from SP.)  FIXME -- this should be cleaned
+   up so that the primary value is the SP, and the PC is used to disambiguate
+   multiple functions with the same SP that are at different stack levels. */
+#define	FRAME_SPECIFICATION_DYADIC
 
 #define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
 

@@ -1,3 +1,27 @@
+Fri Sep 18 02:07:39 1992  John Gilmore  (gnu@cygnus.com)
+
+	Support for accessing arbitrary MIPS stack frames in memory.
+
+	* blockframe.c (get_prev_frame_info):  If INIT_FRAME_PC_FIRST is
+	set, run it before INIT_EXTRA_FRAME_INFO.
+	* stack.c (frame_info):  If PRINT_EXTRA_FRAME_INFO defined, call it.
+
+	* mips-tdep.c (init_extra_frame_info): Only clobber the `frame'
+	(FP) value in the frame_info struct if it is zero (as from top of
+	execution stack).
+	(setup_arbitrary_frame):  Implement FRAME_SPECIFICATION_DYADIC.
+
+	* mips-xdep.c (fetch_inferior_registers):  ZERO_REGNUM always
+	comes back as zero.  So does FP_REGNUM, as a trigger for
+	init_extra_frame_info.
+
+	* tm-mips.h (INIT_FRAME_PC_FIRST):  Kludge, FIXME, defined to get
+	the program counter set before INIT_EXTRA_FRAME_INFO is run.
+	(INIT_FRAME_PC):  Defined to null.
+	(PRINT_EXTRA_FRAME_INFO): print frame pointer location via symtab.
+	(FRAME_SPECIFICATION_DYADIC):  Ask for two args in frame command.
+	Briefly explain MIPS stacks in GDB.
+
 Thu Sep 17 03:49:59 1992  John Gilmore  (gnu@cygnus.com)
 
 	* copying.awk, copying.c (show_copying_command,
