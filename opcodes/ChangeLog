@@ -1,3 +1,10 @@
+Tue Jul 15 12:05:23 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cgen-opc.c: #include <ctype.h>.
+	(hash_keyword_name): New arg `case_sensitive_p'.  Callers updated.
+	Handle case insensitive hashing.
+	(hash_keyword_value): Change type of `value' to unsigned int.
+
 Thu Jul 10 12:56:10 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mips-opc.c (mips_builtin_opcodes): If an insn uses single
