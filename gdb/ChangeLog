@@ -1,3 +1,7 @@
+Thu Jan 26 17:32:54 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* sparcl-tdep.c:  Clean up formatting and indentation.
+
 Thu Jan 26 10:49:59 1995  Steve Chamberlain  <sac@splat>
 
 	* remote-hms.c (hms_ops): Change ref of hr_load_image
