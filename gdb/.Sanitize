@@ -117,6 +117,7 @@ m88k-xdep.c
 main.c
 mcheck.c
 mem-break.c
+minimon.h
 mips-opcode.h
 mips-pinsn.c
 mips-tdep.c
@@ -143,7 +144,9 @@ pyr-xdep.c
 regex.c
 regex.h
 rem-multi.shar
+remote-adapt.c
 remote-eb.c
+remote-mm.c
 remote-nindy.c
 remote-vx.c
 remote.c
@@ -213,6 +216,7 @@ tm-umax.h
 tm-vax.h
 tm-vx68.h
 tm-vx960.h
+ultra3-xdep.c
 umax-xdep.c
 utils.c
 valarith.c
@@ -243,6 +247,7 @@ xm-news1000.h
 xm-np1.h
 xm-pn.h
 xm-pyr.h
+xm-rtbsd.h
 xm-sparc.h
 xm-sun2.h
 xm-sun3.h
@@ -251,6 +256,7 @@ xm-sun3os4.h
 xm-sun4os4.h
 xm-symmetry.h
 xm-tahoe.h
+xm-ultra3.h
 xm-umax.h
 xm-vax.h
 
