@@ -53,7 +53,7 @@ fi
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
 # know that we are building the simulator.
-host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvssrc fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
+host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvssrc fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn libtool"
 # start-sanitize-ide
 host_tools="${host_tools} ilu vmake jstools"
 # end-sanitize-ide
@@ -85,7 +85,7 @@ target_tools="target-examples target-groff target-gperf"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf automake cvssrc emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv target-gperf"
+native_only="autoconf automake cvssrc emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv target-gperf libtool"
 
 # directories to be built in a cross environment only
 #
@@ -504,7 +504,7 @@ case "${host}" in
 	;;
   i[3456]86-*-mingw32*)
     # noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
-     noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
+     noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet libtool"
 	;;
   *-*-cygwin32)
      noconfigdirs="autoconf automake send-pr gprof rcs guile perl texinfo apache inet"

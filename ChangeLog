@@ -1,3 +1,7 @@
+Thu Feb  5 17:01:12 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+        * configure.in (host_tools, native_only): Add libtool.
+
 Wed Feb  4 16:53:58 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: add target-gperf to noconfigdirs for Cygwin32.
