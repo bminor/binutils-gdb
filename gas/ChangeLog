@@ -1,3 +1,9 @@
+2003-12-10  Zack Weinberg  <zack@codesourcery.com>
+
+	* tc-ppc.c (md_assemble): Rewrite comment about optional operands
+	to indicate that 'all or none' is also handled.  Pluralize a
+	word in another comment.
+
 2003-12-10  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (FPU_MAVERICK): Define.
@@ -32,7 +38,7 @@
 2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>
 	    Richard Earnshaw  <rearnsha@arm.com>
-	
+
 	Add V6 support.
 	* config/tc-arm.c (ARM_EXT_V6): New macro.
 	(ARM_ARCH_V6): Likewise.
@@ -96,11 +102,11 @@
 
 	* config/tc-sh.c: Add support for sh4a and no-fpu variants.
 	* testsuite/gas/sh/basic.exp: Call tests for sh4a.
-	* testsuite/gas/sh/{err-sh4a-fp.s, err-sh4a.s, 
-	err-sh4al-dsp.s, sh4a-dsp.d, sh4a-dsp.s, sh4a-fp.d, 
+	* testsuite/gas/sh/{err-sh4a-fp.s, err-sh4a.s,
+	err-sh4al-dsp.s, sh4a-dsp.d, sh4a-dsp.s, sh4a-fp.d,
 	sh4a-fp.s, sh4a.d, sh4a.s, sh4al-dsp.d, sh4al-dsp.s:
 	New files, tests for sh4a and related variants.
-	
+
 2003-12-05  Michael Snyder  <msnyder@redhat.com>
 
 	* config/tc-sh.c (md_show_usage): Mention new -isa options.

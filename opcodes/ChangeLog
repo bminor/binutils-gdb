@@ -1,3 +1,9 @@
+2003-12-10  Zack Weinberg  <zack@codesourcery.com>
+
+	* ppc-opc.c (MO): Make optional.
+	(RAO, RSO, SHO): New optional forms of RA, RS, SH operands.
+	(tlbwe): Accept for both PPC403 and BOOKE.  Make all operands optional.
+
 2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>
 	    Richard Earnshaw  <rearnsha@arm.com>

@@ -1,3 +1,9 @@
+2003-12-10  Zack Weinberg  <zack@codesourcery.com>
+
+	* gas/ppc/booke.s: Add two more forms of the mbar instruction
+	and three forms of the tlbwe instruction.
+	* gas/ppc/booke.d: Update to match.
+
 2003-12-10  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/arm.exp: Add r15-bad.
@@ -95,13 +101,13 @@
 2003-11-14  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arm7.d: Pass -D instead of -d to objdump in order to
-        display the contents of data fields in the .text section.
-        This change is necessary after the addition of arm elf mapping
-        symbol support to gas.
-        * gas/arm/pic.d: Expect addresses with function name offsets.
-        This change is necessary after the addition of arm elf mapping
-        symbol support to gas.
-        
+	display the contents of data fields in the .text section.
+	This change is necessary after the addition of arm elf mapping
+	symbol support to gas.
+	* gas/arm/pic.d: Expect addresses with function name offsets.
+	This change is necessary after the addition of arm elf mapping
+	symbol support to gas.
+
 2003-11-13  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/mapping.s: New test: Source for ARM ELF mapping
@@ -215,10 +221,10 @@
 	* gas/z8k/jr-back.d: New file.
 	* gas/z8k/jr-forw.d: New file.
 	* gas/z8k/jr-back.s: Fix displacement length. Add some more jumps
-	for jr-back.d. 
+	for jr-back.d.
 	* gas/z8k/jr-backf.s: Fix displacement length.
 	* gas/z8k/jr-forw.s: Fix displacement length. Add some more jumps
-	for jr-forw.d. 
+	for jr-forw.d.
 	* gas/z8k/jr-forwf.s: Fix displacement length.
 	* gas/z8k/z8k.exp: Run new tests.
 
@@ -372,11 +378,11 @@
 
 2003-09-01  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
-        * gas/mips/elf-rel-got-n32.d: Fix ulw and usw patterns for
-        little-endian.
-        * gas/mips/elf-rel-got-n64.d: Likewise.
-        * gas/mips/elf-rel-xgot-n32.d: Likewise.
-        * gas/mips/elf-rel-xgot-n64.d: Likewise.
+	* gas/mips/elf-rel-got-n32.d: Fix ulw and usw patterns for
+	little-endian.
+	* gas/mips/elf-rel-got-n64.d: Likewise.
+	* gas/mips/elf-rel-xgot-n32.d: Likewise.
+	* gas/mips/elf-rel-xgot-n64.d: Likewise.
 
 2003-08-29  Jakub Jelinek  <jakub@redhat.com>
 

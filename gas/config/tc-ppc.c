@@ -2136,13 +2136,14 @@ md_assemble (str)
 
   /* PowerPC operands are just expressions.  The only real issue is
      that a few operand types are optional.  All cases which might use
-     an optional operand separate the operands only with commas (in
-     some cases parentheses are used, as in ``lwz 1,0(1)'' but such
-     cases never have optional operands).  There is never more than
-     one optional operand for an instruction.  So, before we start
-     seriously parsing the operands, we check to see if we have an
-     optional operand, and, if we do, we count the number of commas to
-     see whether the operand should be omitted.  */
+     an optional operand separate the operands only with commas (in some
+     cases parentheses are used, as in ``lwz 1,0(1)'' but such cases never
+     have optional operands).  Most instructions with optional operands
+     have only one.  Those that have more than one optional operand can
+     take either all their operands or none.  So, before we start seriously
+     parsing the operands, we check to see if we have optional operands,
+     and if we do, we count the number of commas to see which operands
+     have been omitted.  */
   skip_optional = 0;
   for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
     {
@@ -2178,7 +2179,7 @@ md_assemble (str)
 
 	  /* If there are fewer operands in the line then are called
 	     for by the instruction, we want to skip the optional
-	     operand.  */
+	     operands.  */
 	  if (opcount < num_operands_expected)
 	    skip_optional = 1;
 

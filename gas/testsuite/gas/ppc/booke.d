@@ -81,59 +81,64 @@ Disassembly of section \.text:
   dc:	7c 09 56 26 	tlbivaxe	r9,r10
   e0:	7c 0b 67 24 	tlbsx	r11,r12
   e4:	7c 0d 77 26 	tlbsxe	r13,r14
+  e8:	7c 00 07 a4 	tlbwe	
+  ec:	7c 00 07 a4 	tlbwe	
+  f0:	7c 21 0f a4 	tlbwe	r1,r1,1
 
-0+00000e8 <branch_target_7>:
-  e8:	7c 22 1b 14 	adde64	r1,r2,r3
-  ec:	7c 85 37 14 	adde64o	r4,r5,r6
-  f0:	7c e8 03 d4 	addme64	r7,r8
-  f4:	7d 2a 07 d4 	addme64o	r9,r10
-  f8:	7d 6c 03 94 	addze64	r11,r12
-  fc:	7d ae 07 94 	addze64o	r13,r14
- 100:	7e 80 04 40 	mcrxr64	cr5
- 104:	7d f0 8b 10 	subfe64	r15,r16,r17
- 108:	7e 53 a7 10 	subfe64o	r18,r19,r20
- 10c:	7e b6 03 d0 	subfme64	r21,r22
- 110:	7e f8 07 d0 	subfme64o	r23,r24
- 114:	7f 3a 03 90 	subfze64	r25,r26
- 118:	7f 7c 07 90 	subfze64o	r27,r28
+0+00000f4 <branch_target_7>:
+  f4:	7c 22 1b 14 	adde64	r1,r2,r3
+  f8:	7c 85 37 14 	adde64o	r4,r5,r6
+  fc:	7c e8 03 d4 	addme64	r7,r8
+ 100:	7d 2a 07 d4 	addme64o	r9,r10
+ 104:	7d 6c 03 94 	addze64	r11,r12
+ 108:	7d ae 07 94 	addze64o	r13,r14
+ 10c:	7e 80 04 40 	mcrxr64	cr5
+ 110:	7d f0 8b 10 	subfe64	r15,r16,r17
+ 114:	7e 53 a7 10 	subfe64o	r18,r19,r20
+ 118:	7e b6 03 d0 	subfme64	r21,r22
+ 11c:	7e f8 07 d0 	subfme64o	r23,r24
+ 120:	7f 3a 03 90 	subfze64	r25,r26
+ 124:	7f 7c 07 90 	subfze64o	r27,r28
 
-0+000011c <branch_target_8>:
- 11c:	e8 22 03 28 	stbe	r1,50\(r2\)
- 120:	e8 64 02 89 	stbue	r3,40\(r4\)
- 124:	7c a6 39 fe 	stbuxe	r5,r6,r7
- 128:	7d 09 51 be 	stbxe	r8,r9,r10
- 12c:	7d 6c 6b ff 	stdcxe\.	r11,r12,r13
- 130:	f9 cf 00 78 	stde	r14,28\(r15\)
- 134:	fa 11 00 59 	stdue	r16,20\(r17\)
- 138:	7e 53 a7 3e 	stdxe	r18,r19,r20
- 13c:	7e b6 bf 7e 	stduxe	r21,r22,r23
- 140:	f8 38 00 3e 	stfde	f1,12\(r24\)
- 144:	f8 59 00 0f 	stfdue	f2,0\(r25\)
- 148:	7c 7a dd be 	stfdxe	f3,r26,r27
- 14c:	7c 9c ed fe 	stfduxe	f4,r28,r29
- 150:	7c be ff be 	stfiwxe	f5,r30,r31
- 154:	f8 de 00 6c 	stfse	f6,24\(r30\)
- 158:	f8 fd 00 5d 	stfsue	f7,20\(r29\)
- 15c:	7d 1c dd 3e 	stfsxe	f8,r28,r27
- 160:	7d 3a cd 7e 	stfsuxe	f9,r26,r25
- 164:	7f 17 b7 3c 	sthbrxe	r24,r23,r22
- 168:	ea b4 01 ea 	sthe	r21,30\(r20\)
- 16c:	ea 72 02 8b 	sthue	r19,40\(r18\)
- 170:	7e 30 7b 7e 	sthuxe	r17,r16,r15
- 174:	7d cd 63 3e 	sthxe	r14,r13,r12
- 178:	7d 6a 4d 3c 	stwbrxe	r11,r10,r9
- 17c:	7d 07 31 3d 	stwcxe\.	r8,r7,r6
- 180:	e8 a4 03 2e 	stwe	r5,50\(r4\)
- 184:	e8 62 02 8f 	stwue	r3,40\(r2\)
- 188:	7c 22 19 7e 	stwuxe	r1,r2,r3
- 18c:	7c 85 31 3e 	stwxe	r4,r5,r6
- 190:	4c 00 00 66 	rfci
- 194:	7c 60 01 06 	wrtee	r3
- 198:	7c 00 81 46 	wrteei	1
- 19c:	7c 85 02 06 	mfdcrx	r4,r5
- 1a0:	7c aa 3a 86 	mfdcr	r5,234
- 1a4:	7c e6 03 06 	mtdcrx	r6,r7
- 1a8:	7d 10 6b 86 	mtdcr	432,r8
- 1ac:	7c 00 04 ac 	msync
- 1b0:	7c 09 55 ec 	dcba	r9,r10
- 1b4:	7c 00 06 ac 	mbar	0
+0+0000128 <branch_target_8>:
+ 128:	e8 22 03 28 	stbe	r1,50\(r2\)
+ 12c:	e8 64 02 89 	stbue	r3,40\(r4\)
+ 130:	7c a6 39 fe 	stbuxe	r5,r6,r7
+ 134:	7d 09 51 be 	stbxe	r8,r9,r10
+ 138:	7d 6c 6b ff 	stdcxe\.	r11,r12,r13
+ 13c:	f9 cf 00 78 	stde	r14,28\(r15\)
+ 140:	fa 11 00 59 	stdue	r16,20\(r17\)
+ 144:	7e 53 a7 3e 	stdxe	r18,r19,r20
+ 148:	7e b6 bf 7e 	stduxe	r21,r22,r23
+ 14c:	f8 38 00 3e 	stfde	f1,12\(r24\)
+ 150:	f8 59 00 0f 	stfdue	f2,0\(r25\)
+ 154:	7c 7a dd be 	stfdxe	f3,r26,r27
+ 158:	7c 9c ed fe 	stfduxe	f4,r28,r29
+ 15c:	7c be ff be 	stfiwxe	f5,r30,r31
+ 160:	f8 de 00 6c 	stfse	f6,24\(r30\)
+ 164:	f8 fd 00 5d 	stfsue	f7,20\(r29\)
+ 168:	7d 1c dd 3e 	stfsxe	f8,r28,r27
+ 16c:	7d 3a cd 7e 	stfsuxe	f9,r26,r25
+ 170:	7f 17 b7 3c 	sthbrxe	r24,r23,r22
+ 174:	ea b4 01 ea 	sthe	r21,30\(r20\)
+ 178:	ea 72 02 8b 	sthue	r19,40\(r18\)
+ 17c:	7e 30 7b 7e 	sthuxe	r17,r16,r15
+ 180:	7d cd 63 3e 	sthxe	r14,r13,r12
+ 184:	7d 6a 4d 3c 	stwbrxe	r11,r10,r9
+ 188:	7d 07 31 3d 	stwcxe\.	r8,r7,r6
+ 18c:	e8 a4 03 2e 	stwe	r5,50\(r4\)
+ 190:	e8 62 02 8f 	stwue	r3,40\(r2\)
+ 194:	7c 22 19 7e 	stwuxe	r1,r2,r3
+ 198:	7c 85 31 3e 	stwxe	r4,r5,r6
+ 19c:	4c 00 00 66 	rfci
+ 1a0:	7c 60 01 06 	wrtee	r3
+ 1a4:	7c 00 81 46 	wrteei	1
+ 1a8:	7c 85 02 06 	mfdcrx	r4,r5
+ 1ac:	7c aa 3a 86 	mfdcr	r5,234
+ 1b0:	7c e6 03 06 	mtdcrx	r6,r7
+ 1b4:	7d 10 6b 86 	mtdcr	432,r8
+ 1b8:	7c 00 04 ac 	msync
+ 1bc:	7c 09 55 ec 	dcba	r9,r10
+ 1c0:	7c 00 06 ac 	mbar	
+ 1c4:	7c 00 06 ac 	mbar	
+ 1c8:	7c 20 06 ac 	mbar	1

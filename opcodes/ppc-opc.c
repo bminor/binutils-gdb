@@ -344,7 +344,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The MO field in an mbar instruction.  */
 #define MO MB6 + 1
-  { 5, 21, 0, 0, 0 },
+  { 5, 21, 0, 0, PPC_OPERAND_OPTIONAL },
 
   /* The NB field in an X form instruction.  The value 32 is stored as
      0.  */
@@ -384,8 +384,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define RAS RAM + 1
   { 5, 16, insert_ras, 0, PPC_OPERAND_GPR },
 
+  /* The RA field of the tlbwe instruction, which is optional.  */
+#define RAO RAS + 1
+  { 5, 16, 0, 0, PPC_OPERAND_GPR|PPC_OPERAND_OPTIONAL },
+
   /* The RB field in an X, XO, M, or MDS form instruction.  */
-#define RB RAS + 1
+#define RB RAO + 1
 #define RB_MASK (0x1f << 11)
   { 5, 11, 0, 0, PPC_OPERAND_GPR },
 
@@ -413,8 +417,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define RTQ RSQ + 1
   { 5, 21, insert_rtq, 0, PPC_OPERAND_GPR },
 
+  /* The RS field of the tlbwe instruction, which is optional.  */
+#define RSO RTQ + 1
+  { 5, 21, 0, 0, PPC_OPERAND_GPR|PPC_OPERAND_OPTIONAL },
+
   /* The SH field in an X or M form instruction.  */
-#define SH RTQ + 1
+#define SH RSO + 1
 #define SH_MASK (0x1f << 11)
   { 5, 11, 0, 0, 0 },
 
@@ -423,8 +431,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define SH6_MASK ((0x1f << 11) | (1 << 1))
   { 6, 1, insert_sh6, extract_sh6, 0 },
 
+  /* The SH field of the tlbwe instruction, which is optional.  */
+#define SHO SH6 + 1
+  { 5, 11,0, 0, PPC_OPERAND_OPTIONAL },
+
   /* The SI field in a D form instruction.  */
-#define SI SH6 + 1
+#define SI SHO + 1
   { 16, 0, 0, 0, PPC_OPERAND_SIGNED },
 
   /* The SI field in a D form instruction when we accept a wide range
@@ -4256,8 +4268,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "tlbwehi", XTLB(31,978,0), XTLB_MASK,	PPC403,		{ RT, RA } },
 { "tlbwelo", XTLB(31,978,1), XTLB_MASK,	PPC403,		{ RT, RA } },
-{ "tlbwe",   X(31,978),	X_MASK,		BOOKE,		{ 0 } },
-{ "tlbwe",   X(31,978),	X_MASK,		PPC403,		{ RS, RA, SH } },
+{ "tlbwe",   X(31,978),	X_MASK,		PPC403|BOOKE,	{ RSO, RAO, SHO } },
 { "tlbld",   X(31,978),	XRTRA_MASK,	PPC,		{ RB } },
 
 { "icbi",    X(31,982),	XRT_MASK,	PPC,		{ RA, RB } },
