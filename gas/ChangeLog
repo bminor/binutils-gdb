@@ -1,5 +1,7 @@
 Mon Jun 20 16:30:54 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* configure.in (ppc-*-elf*): New target, like -sysv4*.
+
 	* expr.c (operand): If "0f" is followed by '\0', don't do eol
 	checks.
 
