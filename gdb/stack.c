@@ -571,14 +571,6 @@ print_frame (struct frame_info *fi,
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
 	{
-#if 0
-	  /* There is no particular reason to think the line number
-	     information is wrong.  Someone might have just put in
-	     a label with asm() but left the line numbers alone.  */
-	  /* In this case we have no way of knowing the source file
-	     and line number, so don't print them.  */
-	  sal.symtab = 0;
-#endif
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
@@ -942,14 +934,6 @@ frame_info (char *addr_exp, int from_tty)
   print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
-  {
-    int frameless;
-    frameless = (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
-		 && DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (fi));
-    if (frameless)
-      printf_filtered (" (FRAMELESS),");
-  }
-
   if (calling_frame_info)
     {
       printf_filtered (" called by frame at ");
@@ -1103,33 +1087,6 @@ frame_info (char *addr_exp, int from_tty)
       puts_filtered ("\n");
   }
 }
-
-#if 0
-/* Set a limit on the number of frames printed by default in a
-   backtrace.  */
-
-static int backtrace_limit;
-
-static void
-set_backtrace_limit_command (char *count_exp, int from_tty)
-{
-  int count = parse_and_eval_long (count_exp);
-
-  if (count < 0)
-    error ("Negative argument not meaningful as backtrace limit.");
-
-  backtrace_limit = count;
-}
-
-static void
-backtrace_limit_info (char *arg, int from_tty)
-{
-  if (arg)
-    error ("\"Info backtrace-limit\" takes no arguments.");
-
-  printf_unfiltered ("Backtrace limit: %d.\n", backtrace_limit);
-}
-#endif
 
 /* Print briefly all stack frames or just the innermost COUNT frames.  */
 
@@ -1355,7 +1312,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      if (DEPRECATED_STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
+      if (strcmp (DEPRECATED_SYMBOL_NAME (sym), "default") == 0)
 	{
 	  if (*have_default)
 	    continue;
@@ -1509,10 +1466,6 @@ catch_info (char *ignore, int from_tty)
       /* Ideally, here we should interact with the C++ runtime
          system to find the list of active handlers, etc. */
       fprintf_filtered (gdb_stdout, "Info catch not supported with this target/compiler combination.\n");
-#if 0
-      if (!deprecated_selected_frame)
-	error ("No frame selected.");
-#endif
     }
   else
     {
@@ -1695,7 +1648,6 @@ void
 select_frame_command (char *level_exp, int from_tty)
 {
   struct frame_info *frame;
-  int level = frame_relative_level (deprecated_selected_frame);
 
   if (!target_has_stack)
     error ("No stack.");
