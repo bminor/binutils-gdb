@@ -113,6 +113,8 @@ case "${host}" in
       :
     elif grep 'No such file' conftest.t >/dev/null 2>&1; then
       :
+    elif grep 'do not mix' conftest.t >/dev/null 2>&1; then
+      :
     elif [ "${shared}" = "true" ]; then
       HLDFLAGS='-Wl,-rpath=$(libdir)'
     else

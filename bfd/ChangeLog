@@ -1,3 +1,8 @@
+Sun Feb 18 15:02:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Check for 'do not mix' from native linker before
+	trying to use -rpath.
+
 Fri Feb 16 12:46:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd.c (_bfd_get_gp_value): New function.
