@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright 1989, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
+   Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -104,6 +104,12 @@ typedef som_symbol_type obj_symbol_type;
 #define R_N1SEL 0xd9
 #endif
 #endif /* OBJ_SOM */
+
+#if TARGET_ARCH_SIZE == 64
+#define DEFAULT_LEVEL 25
+#else
+#define DEFAULT_LEVEL 10
+#endif
 
 /* Various structures and types used internally in tc-hppa.c.  */
 
@@ -1393,7 +1399,7 @@ md_begin ()
   call_info_root = NULL;
 
   /* Set the default machine type.  */
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 10))
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, DEFAULT_LEVEL))
     as_warn (_("could not set architecture and machine"));
 
   /* Folding of text and data segments fails miserably on the PA.

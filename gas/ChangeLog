@@ -1,3 +1,8 @@
+2001-03-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (DEFAULT_LEVEL): Define.
+	(md_begin): Use it when setting default architecture.
+
 2001-03-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in (cris-*-*): Change default emulation to criself.
