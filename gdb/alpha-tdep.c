@@ -863,14 +863,20 @@ alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
-  /* We shouldn't even bother to try if the OSABI didn't register
-     a sigcontext_addr handler.  */
-  if (!gdbarch_tdep (current_gdbarch)->sigcontext_addr)
+  /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
+     look at tramp-frame.h and other simplier per-architecture
+     sigtramp unwinders.  */
+
+  /* We shouldn't even bother to try if the OSABI didn't register a
+     sigcontext_addr handler or pc_in_sigtramp hander.  */
+  if (gdbarch_tdep (current_gdbarch)->sigcontext_addr == NULL)
+    return NULL;
+  if (gdbarch_tdep (current_gdbarch)->pc_in_sigtramp == NULL)
     return NULL;
 
   /* Otherwise we should be in a signal frame.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
+  if (gdbarch_tdep (current_gdbarch)->pc_in_sigtramp (pc, name))
     return &alpha_sigtramp_frame_unwind;
 
   return NULL;

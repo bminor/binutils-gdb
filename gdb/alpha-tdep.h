@@ -83,6 +83,12 @@ struct gdbarch_tdep
      the sigcontext structure for that signal handler.  */
   CORE_ADDR (*sigcontext_addr) (struct frame_info *);
 
+  /* Does the PC fall in a signal trampoline.  */
+  /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
+     look at tramp-frame.h and other simplier per-architecture
+     sigtramp unwinders.  */
+  int (*pc_in_sigtramp) (CORE_ADDR pc, char *name);
+
   /* Offset of registers in `struct sigcontext'.  */
   int sc_pc_offset;
   int sc_regs_offset;

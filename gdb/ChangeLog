@@ -1,5 +1,11 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* alpha-tdep.c (alpha_sigtramp_frame_sniffer): Use pc_in_sigtramp.
+	* alpha-tdep.h (struct gdbarch_tdep): Add pc_in_sigtramp.
+	* alphafbsd-tdep.c (alphafbsd_init_abi): Update.
+	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Update.
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Update.
+
 	* Makefile.in (m68klinux-nat.o): Update dependencies.
 	* m68klinux-tdep.c: Include "trad-frame.h" and "frame-unwind.h".
 	(m68k_linux_sigtramp_frame_cache)

@@ -205,8 +205,6 @@ alphanbsd_init_abi (struct gdbarch_info info,
   /* Hook into the MDEBUG frame unwinder.  */
   alpha_mdebug_init_abi (info, gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, alphanbsd_pc_in_sigtramp);
-
   /* NetBSD/alpha does not provide single step support via ptrace(2); we
      must use software single-stepping.  */
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
@@ -215,6 +213,7 @@ alphanbsd_init_abi (struct gdbarch_info info,
                                  nbsd_lp64_solib_svr4_fetch_link_map_offsets);
 
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
+  tdep->pc_in_sigtramp = alphanbsd_pc_in_sigtramp;
   tdep->sigcontext_addr = alphanbsd_sigcontext_addr;
 
   tdep->jb_pc = 2;
