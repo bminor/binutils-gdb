@@ -38,6 +38,7 @@ logical.s
 mem.s
 misc.s
 move.s
+range.s
 Things-to-lose:
 
 Do-last:
