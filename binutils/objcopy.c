@@ -1684,18 +1684,23 @@ copy_section (ibfd, isection, obfdarg)
   sec_ptr osection;
   bfd_size_type size;
   long relsize;
+  flagword flags;
 
   /* If we have already failed earlier on,
      do not keep on generating complaints now.  */
   if (status != 0)
     return;
 
-  if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
+  flags = bfd_get_section_flags (ibfd, isection);
+  if ((flags & SEC_DEBUGGING) != 0
       && (strip_symbols == STRIP_DEBUG
 	  || strip_symbols == STRIP_UNNEEDED
 	  || strip_symbols == STRIP_ALL
 	  || discard_locals == LOCALS_ALL
 	  || convert_debugging))
+    return;
+
+  if ((flags & SEC_GROUP) != 0)
     return;
 
   p = find_section_list (bfd_section_name (ibfd, isection), false);

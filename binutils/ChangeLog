@@ -1,4 +1,8 @@
-2002-06-3  Elias Athanasopoulos  <eathan@otenet.gr>
+2002-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_section): Don't copy SEC_GROUP sections.
+
+2002-06-03  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* objdump.c: Fix formatting.
 
