@@ -220,7 +220,9 @@ case "${target}" in
     ;;
   i[34]86-*-go32)
     # add the go32 support tools to the list
+    # but don't build gdb
     configdirs=`echo go32 ${configdirs}`
+    noconfigdis="$noconfigdirs gdb"
     ;;
   i[34]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"
