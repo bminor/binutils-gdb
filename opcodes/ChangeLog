@@ -1,3 +1,31 @@
+Fri May 14 00:09:14 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hppa-dis.c: Include dis-asm.h before sysdep.h.
+
+Thu May  6 20:51:17 1993  Fred Fish  (fnf@cygnus.com)
+
+	* a29k-dis.c, alpha-dis.c, i960-dis.c, sparc-dis.c, z8k-dis.c:
+	Cast second arg to read_memory_func to "bfd_byte *", as necessary.
+
+Tue May  4 20:31:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hppa-dis.c: New file from Utah, adapted to new disassembler
+	calling interface.
+	* Makefile.in: Include it.
+
+Mon Apr 26 18:17:42 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* sh-dis.c, sh-opc.h: New files.
+
+Fri Apr 23 18:51:22 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* alpha-dis.c, alpha-opc.h: New files.
+
+Tue Apr  6 12:54:08 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-dis.c: Sign extend 'j' and 'b' arguments, delta is a signed
+	value.
+
 Mon Apr  5 17:37:37 1993  John Gilmore  (gnu@cygnus.com)
 
 	* sparc-dis.c: Make "ta" the default trap instruction, "t" the alias.

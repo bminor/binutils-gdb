@@ -31,6 +31,7 @@ configure.in
 dis-buf.c
 h8500-dis.c
 h8500-opc.h
+hppa-dis.c
 i386-dis.c
 i960-dis.c
 m68881-ext.c
