@@ -1,3 +1,14 @@
+Thu Jun 17 15:08:35 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* configure.in (alpha-*-osf*), config/alpha/alpha-osf.mh: New
+	host.
+	* sh-tdep.c (frame_find_saved_regs): Use NUM_REGS rather than hard
+	wired (and wrong) constant.
+	* values.c (unpack_long): Add case to unpack when target object is
+	sizeof(int).
+	* config/sh/tm-sh.h (REGISTER_NAMES): Know about the news ones the
+	simulator defines.
+
 Wed Jun 16 16:08:18 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* NEWS: tracking user visible changes starting with
@@ -203,7 +214,7 @@ Tue Jun  8 17:54:09 1993  Rob Savoye  (rob@rtl.cygnus.com)
 
 	* serial.c (serial_close): If scb is NULL, don't try to close
 	it. 
-	* configure.in: Add support for rom68k and bug boot monitors.
+o	* configure.in: Add support for rom68k and bug boot monitors.
 
 Tue Jun  8 17:39:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 

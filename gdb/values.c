@@ -717,6 +717,13 @@ unpack_long (type, valaddr)
 	SWAP_TARGET_AND_HOST (&retval, len);
 	return retval;
       }
+      else if (len == sizeof(int))
+      {
+	unsigned int retval;
+	memcpy (&retval, valaddr, len);
+	SWAP_TARGET_AND_HOST (&retval, len);
+	return retval;
+      }
 #ifdef CC_HAS_LONG_LONG
       else if (len == sizeof(long long))
       {

@@ -126,9 +126,9 @@ extern CORE_ADDR sh_skip_prologue ();
 #define REGISTER_NAMES \
   {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \
    "r8", "r9", "r10","r11","r12","r13","r14","r15",\
-   "pc", "pr","gbr","vbr","mach","macl","sr","ticks","cycles","insts"     }
+   "pc", "pr","gbr","vbr","mach","macl","sr","ticks","stalls","cycles","insts" ,"plr","tlr"    }
 
-#define NUM_REGS 25
+#define NUM_REGS 28
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -196,8 +196,6 @@ extern CORE_ADDR sh_skip_prologue ();
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
-CORE_ADDR h8500_frame_chain (/* FRAME thisframe */);
-
 #define FRAME_CHAIN(FRAME)       sh_frame_chain(FRAME)
 #define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
@@ -227,7 +225,7 @@ CORE_ADDR h8500_frame_chain (/* FRAME thisframe */);
 
 typedef unsigned short INSN_WORD;
 
-#define ADDR_BITS_REMOVE(addr) ((addr) & 0xfffff)
+#define ADDR_BITS_REMOVE(addr) ((addr) & 0xffffff)
 #define ADDR_BITS_SET(addr)    (addr)
 
 #define CALL_DUMMY_LENGTH 10

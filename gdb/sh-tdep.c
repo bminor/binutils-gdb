@@ -111,7 +111,7 @@ frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
      struct frame_saved_regs *fsr;
 {
-  int where[16];
+  int where[NUM_REGS];
   int rn;
   int have_fp = 0;
   int depth;
