@@ -2125,7 +2125,12 @@ static void
 lang_finish ()
 {
   struct bfd_link_hash_entry *h;
-  boolean warn = link_info.relocateable ? false : true;
+  boolean warn;
+
+  if (link_info.relocateable || link_info.shared)
+    warn = false;
+  else
+    warn = true;
 
   if (entry_symbol == (char *) NULL)
     {
@@ -2581,6 +2586,8 @@ lang_process ()
   current_target = default_target;
   open_input_bfds (statement_list.head, false);
 
+  ldemul_after_open ();
+
   /* Build all sets based on the information gathered from the input
      files.  */
   ldctor_build_sets ();
@@ -2776,7 +2783,7 @@ lang_add_data (type, exp)
 void
 lang_add_reloc (reloc, howto, section, name, addend)
      bfd_reloc_code_real_type reloc;
-     const reloc_howto_type *howto;
+     reloc_howto_type *howto;
      asection *section;
      const char *name;
      union etree_union *addend;

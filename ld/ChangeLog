@@ -1,3 +1,10 @@
+Wed Jan 11 22:59:09 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* ldctor.c (ldctor_build_sets): Don't use `const' with typedef
+	name `reloc_howto_type', since it's now defined to be const.
+	* ldlang.c (lang_add_reloc): Ditto.
+	* ldlang.h (lang_reloc_statement_type, lang_add_reloc): Ditto.
+
 Wed Jan 11 11:24:45 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ldexp.c (fold_binary): Adding or subtracting an absolute value
