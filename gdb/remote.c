@@ -1975,7 +1975,7 @@ remote_start_remote_dummy (void *dummy)
 static int
 remote_start_remote (PTR dummy)
 {
-  immediate_quit = 1;		/* Allow user to interrupt it */
+  immediate_quit++;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
   SERIAL_WRITE (remote_desc, "+", 1);
@@ -1988,7 +1988,7 @@ remote_start_remote (PTR dummy)
   get_offsets ();		/* Get text, data & bss offsets */
 
   putpkt ("?");			/* initiate a query from remote machine */
-  immediate_quit = 0;
+  immediate_quit--;
 
   return remote_start_remote_dummy (dummy);
 }

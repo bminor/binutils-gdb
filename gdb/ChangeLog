@@ -1,3 +1,34 @@
+2000-08-31  J.T. Conklin  <jtc@redback.com>
+
+	* dcache.c (dcache_info): Output a cache line's state vector so it
+ 	lines up under the data vector.
+
+	* dcache.c (dcache_read_line): New function.
+	(dcache_peek_byte): Use it.
+	(dcache_alloc): Return NULL if write of reclaimed cache line fails.
+	(dcache_peek_byte, dcache_poke_byte): Return failure if
+ 	dcache_alloc() returns a NULL data block pointer.  
+	(dcache_xfer_memory): Don't force writeback unless we were writing.
+
+	* monitor.c (monitor_expect): Change places where immediate_quit
+ 	is set to 1 or 0 to increments and decrements respectively.  This
+	allows such changes to nest properly.
+	* ocd.c (ocd_start_remote): Likewise.
+	* remote-adapt.c (expect): Likewise.
+	* remote-array.c (expect): Likewise.
+	* remote-eb.c (expect): Likewise.
+	* remote-e7000.c (e7000_start_remote): Likewise.
+	* remote-mips.c (mips_expect_timeout, mips_getstring): Likewise.
+	* remote-nrom.c (expect): Likewise.
+	* remote-os9k.c (expect): Likewise.
+	* remote-sds.c (sds_start_remote): Likewise.
+	* remote-st.c (expect): Likewise.
+	* remote-utils.c (sr_expect): Likewise.
+	* remote.c (remote_start_remote): Likewise.
+	* tracepoint.c (read_actions): Likewise.
+
+	* remote-mips.c (mips_getstring): Balance changes to immediate_quit.
+
 2000-08-31  David Anderson  <davea@sgi.com>
 
 	* MAINTAINERS: Add myself to write-after-approval list.

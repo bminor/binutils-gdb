@@ -117,7 +117,7 @@ expect (char *string, int discard)
   char *p = string;
   int c;
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       c = readchar (timeout);
@@ -125,7 +125,7 @@ expect (char *string, int discard)
 	{
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      return;
 	    }
 	}

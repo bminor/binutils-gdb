@@ -143,7 +143,7 @@ expect (char *string, int discard)
   if (sr_get_debug ())
     printf ("Expecting \"%s\"\n", string);
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       c = readchar (timeout);
@@ -153,7 +153,7 @@ expect (char *string, int discard)
 	{
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      if (sr_get_debug ())
 		printf ("\nMatched\n");
 	      return;

@@ -181,7 +181,7 @@ ocd_start_remote (PTR dummy)
 
   target_type = *(enum ocd_target_type *) dummy;
 
-  immediate_quit = 1;		/* Allow user to interrupt it */
+  immediate_quit++;		/* Allow user to interrupt it */
 
   SERIAL_SEND_BREAK (ocd_desc);	/* Wake up the wiggler */
 
@@ -243,7 +243,7 @@ ocd_start_remote (PTR dummy)
     ocd_error ("OCD_SET_CTL_FLAGS:", error_code);
 #endif
 
-  immediate_quit = 0;
+  immediate_quit--;
 
 /* This is really the job of start_remote however, that makes an assumption
    that the target is about to print out a status message of some sort.  That

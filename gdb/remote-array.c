@@ -363,7 +363,7 @@ expect (char *string, int discard)
 
   debuglogs (1, "Expecting \"%s\".", string);
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       c = readchar (timeout);
@@ -373,7 +373,7 @@ expect (char *string, int discard)
 	{
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      debuglogs (4, "Matched");
 	      return;
 	    }

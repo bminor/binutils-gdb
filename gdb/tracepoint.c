@@ -889,7 +889,7 @@ read_actions (struct tracepoint *t)
   if (job_control)
     signal (STOP_SIGNAL, SIG_DFL);
 #endif
-  immediate_quit = 0;
+  immediate_quit--;
   discard_cleanups (old_chain);
 }
 

@@ -521,7 +521,7 @@ monitor_expect (char *string, char *buf, int buflen)
       fprintf_unfiltered (gdb_stdlog, "MON Expecting '%s'\n", safe_string);
     }
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       if (buf)
@@ -529,7 +529,7 @@ monitor_expect (char *string, char *buf, int buflen)
 	  if (buflen < 2)
 	    {
 	      *buf = '\000';
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      return -1;
 	    }
 
@@ -549,7 +549,7 @@ monitor_expect (char *string, char *buf, int buflen)
 	  p++;
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 
 	      if (buf)
 		{

@@ -163,7 +163,7 @@ sds_start_remote (PTR dummy)
   char c;
   unsigned char buf[200];
 
-  immediate_quit = 1;		/* Allow user to interrupt it */
+  immediate_quit++;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
   SERIAL_WRITE (sds_desc, "{#*\r\n", 5);
@@ -181,7 +181,7 @@ sds_start_remote (PTR dummy)
   buf[0] = 0;
   sds_send (buf, 1);
 
-  immediate_quit = 0;
+  immediate_quit--;
 
   start_remote ();		/* Initialize gdb process mechanisms */
   return 1;

@@ -264,7 +264,7 @@ sr_expect (char *string)
 {
   char *p = string;
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       if (sr_readchar () == *p)
@@ -272,7 +272,7 @@ sr_expect (char *string)
 	  p++;
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      return;
 	    }
 	}

@@ -66,7 +66,7 @@ expect (char *string)
   char *p = string;
   int c;
 
-  immediate_quit = 1;
+  immediate_quit++;
 
   while (1)
     {
@@ -76,8 +76,7 @@ expect (char *string)
 	{
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
-
+	      immediate_quit--;
 	      return 0;
 	    }
 	}

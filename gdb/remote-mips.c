@@ -551,7 +551,7 @@ mips_expect_timeout (const char *string, int timeout)
       fprintf_unfiltered (gdb_stdlog, "\", got \"");
     }
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       int c;
@@ -575,7 +575,7 @@ mips_expect_timeout (const char *string, int timeout)
 	{
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog, "\": OK\n");
 	      return 1;
@@ -609,7 +609,7 @@ mips_getstring (char *string, int n)
   char *p = string;
   int c;
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (n > 0)
     {
       c = SERIAL_READCHAR (mips_desc, 2);
@@ -618,6 +618,7 @@ mips_getstring (char *string, int n)
 	{
 	  fprintf_unfiltered (gdb_stderr,
 		 "Failed to read %d characters from target (TIMEOUT)\n", n);
+	  immediate_quit--;
 	  return 0;
 	}
 
@@ -625,6 +626,7 @@ mips_getstring (char *string, int n)
       n--;
     }
 
+  immediate_quit--;
   return 1;
 }
 

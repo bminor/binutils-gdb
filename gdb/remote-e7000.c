@@ -569,7 +569,7 @@ e7000_start_remote (void *dummy)
   int try;
   int quit_trying;
 
-  immediate_quit = 1;		/* Allow user to interrupt it */
+  immediate_quit++;		/* Allow user to interrupt it */
 
   /* Hello?  Are you there?  */
   sync = 0;
@@ -635,7 +635,7 @@ e7000_start_remote (void *dummy)
   puts_e7000debug ("b -\r");	/* Clear breakpoints */
   expect_prompt ();
 
-  immediate_quit = 0;
+  immediate_quit--;
 
 /* This is really the job of start_remote however, that makes an assumption
    that the target is about to print out a status message of some sort.  That
