@@ -75,9 +75,8 @@ p2.c:writecode
 writecode:writecode.c
 	$(CC) -o writecode -g $(CSEARCH)  $(srcdir)/writecode.c 
 
-
-
-
+run.o: run.c
+perifs.o: perifs.c
 
 #### host and target dependent Makefile fragments come in here.
 ###

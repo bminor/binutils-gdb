@@ -51,11 +51,11 @@ littleendian;
 static void
 meminit ()
 {
-  if (!saved_state.mem)
+  if (saved_state.mem == 0)
     {
       int tmp;
 
-      saved_state.mem = calloc (1024, 64);
+      saved_state.mem = (unsigned short *)calloc (1024, 64);
       littleendian.i = 1;
       /* initialze the array of pointers to byte registers */
       for (tmp = 0; tmp < 8; tmp++)
