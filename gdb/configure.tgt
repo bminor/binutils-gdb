@@ -169,7 +169,7 @@ mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
 mips64*-*-ecoff*)	gdb_target=embed64 ;;
 # start-sanitize-vr4320
 mips64*vr4320*el-*-elf*)gdb_target=vr4300el ;;
-mips64*vr4320*-*-elf*)	gdb_target=vr4300 ;;
+mips64*vr4320*-*-elf*)	gdb_target=vr4320 ;;
 # end-sanitize-vr4320
 mips64*vr4300*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4300*-*-elf*)	gdb_target=vr4300 ;;

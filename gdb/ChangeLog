@@ -1,3 +1,10 @@
+Tue Apr 14 15:43:49 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* configure.tgt: Switch over to use tm-4320.h. Since I switched to
+ 	MIPS EABI the fixes are no longer backward compatible with 4300.
+	* tm-vr4320.h: Added
+	* vr4320.mt:   Added
+
 Mon Apr 13 16:28:07 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* utils.c: (warning) added call to warning_hook
