@@ -1,6 +1,8 @@
 Tue Aug  8 17:27:17 1995  Ken Raeburn  <raeburn@cygnus.com>
 
-	* config/obj-vms.c: Some whitespace changes from Pat Rankin.
+	* expr.h (operatorT): Remove comma after last enumerator value.
+
+	* config/obj-vms.c: Some whitespace cleanup from Pat Rankin.
 
 	Wed Aug  2 18:54:37 1995  Pat Rankin  <rankin@eql.caltech.edu>
 
