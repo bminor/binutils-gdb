@@ -1,3 +1,21 @@
+Tue Apr  6 17:07:37 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* symtab.c (list_symbols): When call break_command, pass both
+	filename and function name not just function name.
+
+Tue Apr  6 15:00:09 1993  Fred Fish  (fnf@cygnus.com)
+
+	(Changes and new files to make "none" a full fledged configuration)
+	* config/none/{nm-none.h, tm-none.h, xm-none.h}:  New files.
+	Currently only tm-none.h has any meaningful contents.
+	* config/none/none.mh (NAT_FILE):  Use nm-none.h
+	* config/none/none.mh (XM_FILE):  Use xm-none.h
+	* config/none/none.mt (TM_FILE):  Use tm-none.h
+	* Makefile.in (depend):  Remove comment about parse errors in
+	valops.c, it now parses correctly and generates a correct depend
+	line.  Remove line that touches xm.h, tm.h, and nm.h; they are
+	now linked to config/none/{xm-none.h, tm-none.h, nm-none.h}.
+
 Tue Apr  6 09:54:29 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* values.c (USE_STRUCT_RETURN): Only use gcc wierdness for gcc1.
