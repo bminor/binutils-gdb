@@ -1,3 +1,11 @@
+1999-09-06  Donn Terry  <donn@interix.com>
+
+	* section.c (struct bfd_comdat_info): Define.
+	(asection): Add comdat field.
+	(STD_SECTION): Initialize comdat field.
+	(bfd_make_section_anyway): Likewise.
+	* bfd-in2.h: Rebuild.
+
 1999-09-06  Andreas Schwab  <schwab@suse.de>
 
 	* elflink.h (elf_link_add_object_symbols): Copy NON_GOT_REF flag

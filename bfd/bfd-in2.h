@@ -847,6 +847,27 @@ bfd_make_readable PARAMS ((bfd *abfd));
 #define bfd_h_get_signed_64(abfd, ptr) \
                 BFD_SEND(abfd, bfd_h_getx_signed_64, (ptr))
 
+  /* This structure is used for a comdat section, as in PE.  A comdat
+    section is associated with a particular symbol.  When the linker
+    sees a comdat section, it keeps only one of the sections with a
+    given name and associated with a given symbol. */
+
+struct bfd_comdat_info
+{
+   /* The name of the symbol associated with a comdat section.  */
+  const char *name;
+
+   /* The local symbol table index of the symbol associated with a
+     comdat section.  This is only meaningful to the object file format
+     specific code; it is not an index into the list returned by
+     bfd_canonicalize_symtab.  */
+  long symbol;
+
+   /* If this section is being discarded, the linker uses this field
+     to point to the input section which is being kept.  */
+  struct sec *sec;
+};
+
 typedef struct sec
 {
          /* The name of the section; the name isn't a copy, the pointer is
@@ -1117,6 +1138,10 @@ typedef struct sec
          /* Number of line number records   */
 
    unsigned int lineno_count;
+
+         /* Optional information about a COMDAT entry; NULL if not COMDAT */
+
+   struct bfd_comdat_info *comdat;
 
          /* When a section is being output, this value changes as more
            linenumbers are written out */

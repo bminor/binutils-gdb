@@ -150,6 +150,27 @@ SUBSECTION
 
 CODE_FRAGMENT
 .
+. {* This structure is used for a comdat section, as in PE.  A comdat
+.    section is associated with a particular symbol.  When the linker
+.    sees a comdat section, it keeps only one of the sections with a
+.    given name and associated with a given symbol. *}
+.
+.struct bfd_comdat_info
+.{
+.  {* The name of the symbol associated with a comdat section.  *}
+.  const char *name;
+.
+.  {* The local symbol table index of the symbol associated with a
+.     comdat section.  This is only meaningful to the object file format
+.     specific code; it is not an index into the list returned by
+.     bfd_canonicalize_symtab.  *}
+.  long symbol;
+.
+.  {* If this section is being discarded, the linker uses this field
+.     to point to the input section which is being kept.  *}
+.  struct sec *sec;
+.};
+.
 .typedef struct sec
 .{
 .        {* The name of the section; the name isn't a copy, the pointer is
@@ -421,6 +442,10 @@ CODE_FRAGMENT
 .
 .   unsigned int lineno_count;
 .
+.	 {* Optional information about a COMDAT entry; NULL if not COMDAT *}
+.
+.   struct bfd_comdat_info *comdat;
+.
 .        {* When a section is being output, this value changes as more
 .           linenumbers are written out *}
 .
@@ -511,9 +536,27 @@ static const asymbol global_syms[] =
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; \
   const asection SEC = \
-    { NAME, 0, 0, FLAGS, 0, 0, 0, 0, 0, 0, 0, 0, 0, (asection *) &SEC, \
-      0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, \
-      (asymbol *) &global_syms[IDX], (asymbol **) &SYM, 0, 0 }
+    /* name, index, next, flags, set_vma, reloc_done, linker_mark, gc_mark */ \
+    { NAME,  0,     0,    FLAGS, 0,       0,          0,           0,	      \
+									      \
+    /* vma, lma, _cooked_size, _raw_size, output_offset, output_section, */   \
+       0,   0,   0,            0,         0,             (struct sec *) &SEC, \
+									      \
+    /* alig..., reloc..., orel..., reloc_count, filepos, rel_..., line_... */ \
+       0,       0,        0,       0,           0,       0, 	   0,	      \
+									      \
+    /* userdata, contents, lineno, lineno_count */ 			      \
+       0,        0,        0,      0,                      		      \
+									      \
+    /* comdat_info, moving_line_filepos, target_index, used_by_bfd,  */       \
+       NULL,        0,                   0,            0, 		      \
+									      \
+    /* cons..., owner, symbol */ 					      \
+       0,       0,     (struct symbol_cache_entry *) &global_syms[IDX],       \
+									      \
+    /* symbol_ptr_ptr,                      link_order_head, ..._tail */      \
+       (struct symbol_cache_entry **) &SYM, 0,               0                \
+    }
 
 STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol,
 	     BFD_COM_SECTION_NAME, 0);
@@ -656,6 +699,7 @@ bfd_make_section_anyway (abfd, name)
   newsect->reloc_count = 0;
   newsect->line_filepos = 0;
   newsect->owner = abfd;
+  newsect->comdat = NULL;
 
   /* Create a symbol whos only job is to point to this section. This is
      useful for things like relocs which are relative to the base of a
