@@ -1,6 +1,7 @@
 Mon Jun 16 15:33:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (CC, CFLAGS): Substitute from configure script.
+	From Jeff Makey <jeff@cts.com>.
 
 Tue Apr 15 12:37:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
