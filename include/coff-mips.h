@@ -1,3 +1,4 @@
+/* Rudimentary ECOFF support on MIPS machines.  */
 
 /********************** FILE HEADER **********************/
 
@@ -16,8 +17,6 @@ struct external_filehdr {
 #define MIPS_MAGIC_1 0x0180
 #define MIPS_MAGIC_2 0x0162
 #define MIPS_MAGIC_3 0x0160
-
-
 
 #define ECOFFBADMAG(x) (((x).f_magic!=MIPS_MAGIC_1) && \
 			((x).f_magic!=MIPS_MAGIC_2) &&\
@@ -42,20 +41,12 @@ typedef struct external_aouthdr
   char 	data_start[4];		/* base of data used for this file */
 } AOUTHDR;
 
-/* return a pointer to the tag bits array */
-
-#define TAGPTR(aout) ((TAGBITS *) (&(aout.tagentries)+1))
-
 /* compute size of a header */
 
-/*#define AOUTSZ(aout) (sizeof(AOUTHDR)+(aout.tagentries*sizeof(TAGBITS)))*/
 #define AOUTSZ (sizeof(AOUTHDR))
 
 
-
-
 /********************** SECTION HEADER **********************/
-
 
 struct external_scnhdr {
 	char		s_name[8];	/* section name			*/
@@ -72,145 +63,6 @@ struct external_scnhdr {
 
 #define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
-
-
-/********************** LINE NUMBERS **********************/
-
-/* 1 line number entry for every "breakpointable" source line in a section.
- * Line numbers are grouped on a per function basis; first entry in a function
- * grouping will have l_lnno = 0 and in place of physical address will be the
- * symbol table index of the function name.
- */
-struct external_lineno {
-	union {
-		char l_symndx[4];	/* function name symbol index, iff l_lnno == 0*/
-		char l_paddr[4];	/* (physical) address of line number	*/
-	} l_addr;
-	char l_lnno[2];		/* line number		*/
-	char padding[2];	/* force alignment	*/
-};
-
-
-#define	LINENO	struct external_lineno
-#define	LINESZ	8
-
-
-/********************** SYMBOLS **********************/
-
-#define SYMNMLEN	8	/* # characters in a symbol name	*/
-#define FILNMLEN	14	/* # characters in a file name		*/
-#define DIMNUM		4	/* # array dimensions in auxiliary entry */
-
-struct external_syment 
-{
-  union {
-    char e_name[SYMNMLEN];
-    struct {
-      char e_zeroes[4];
-      char e_offset[4];
-    } e;
-  } e;
-  char e_value[4];
-  char e_scnum[2];
-  char e_flags[2];
-  char e_type[4];
-  char e_sclass[1];
-  char e_numaux[1];
-  char pad2[2];
-};
-
-
-
-#define N_BTMASK	(0x1f)
-#define N_TMASK		(0x60)
-#define N_BTSHFT	(5)
-#define N_TSHIFT	(2)
-union external_auxent {
-	struct {
-		char x_tagndx[4];	/* str, un, or enum tag indx */
-		union {
-			struct {
-			    char  x_lnno[2]; /* declaration line number */
-			    char  x_size[2]; /* str/union/array size */
-			} x_lnsz;
-			char x_fsize[4];	/* size of function */
-		} x_misc;
-		union {
-			struct {		/* if ISFCN, tag, or .bb */
-			    char x_lnnoptr[4];	/* ptr to fcn line # */
-			    char x_endndx[4];	/* entry ndx past block end */
-			} x_fcn;
-			struct {		/* if ISARY, up to 4 dimen. */
-			    char x_dimen[DIMNUM][2];
-			} x_ary;
-		} x_fcnary;
-		char x_tvndx[2];		/* tv index */
-	} x_sym;
-
-	union {
-		char x_fname[FILNMLEN];
-		struct {
-			char x_zeroes[4];
-			char x_offset[4];
-		} x_n;
-	} x_file;
-
-	struct {
-		char x_scnlen[4];			/* section length */
-		char x_nreloc[2];	/* # relocation entries */
-		char x_nlinno[2];	/* # line numbers */
-	} x_scn;
-
-        struct {
-		char x_tvfill[4];	/* tv fill value */
-		char x_tvlen[2];	/* length of .tv */
-		char x_tvran[2][2];	/* tv range */
-	} x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
-
-	/******************************************
-	 *  I960-specific *2nd* aux. entry formats
-	 ******************************************/
-	struct {
-	  /* This is a very old typo that keeps getting propagated. */
-#define x_stdindx x_stindx
-		char x_stindx[4];	/* sys. table entry */
-	} x_sc;	/* system call entry */
-
-	struct {
-		char x_balntry[4]; /* BAL entry point */
-	} x_bal; /* BAL-callable function */
-
-        struct {
-		char x_timestamp[4];	        /* time stamp */
-		char 	x_idstring[20];	        /* producer identity string */
-	} x_ident;	                        /* Producer ident info */
-
-};
-
-
-
-#define	SYMENT	struct external_syment
-#define	SYMESZ	sizeof(SYMENT)			/* FIXME - calc by hand */
-#define	AUXENT	union external_auxent
-#define	AUXESZ	sizeof(AUXENT)			/* FIXME - calc by hand */
-
-#	define _ETEXT	"_etext"
-
-/********************** RELOCATION DIRECTIVES **********************/
-
-struct external_reloc {
-  char r_vaddr[4];
-  char r_symndx[4];
-  char r_type[2];
-  char pad[2];
-};
-
-
-/* Relevent values for r_type and i960.  Would someone please document them */
-
-
-#define RELOC struct external_reloc
-#define RELSZ 12
 
 #define DEFAULT_DATA_SECTION_ALIGNMENT 4
 #define DEFAULT_BSS_SECTION_ALIGNMENT 4

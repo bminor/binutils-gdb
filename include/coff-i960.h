@@ -1,9 +1,6 @@
 /*** coff information for 80960.  Origins: Intel corp, natch. */
 
-/* This include file is also used for rudimentary ECOFF support on MIPS
-   machines.  Such differences as are needed are #ifdef MIPS.  */
-
-/* NOTE: Tagentries (cf TAGBITS) are not used by the 960 */
+/* NOTE: Tagentries (cf TAGBITS) are no longer used by the 960 */
 
 /********************** FILE HEADER **********************/
 
