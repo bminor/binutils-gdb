@@ -2746,8 +2746,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
       set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
-
-      /* Handle RS/6000 function pointers.  */
+    }
+  if (!sysv_abi)
+    {
+      /* Handle RS/6000 function pointers (which are really function
+         descriptors).  */
       set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 	rs6000_convert_from_func_ptr_addr);
     }
