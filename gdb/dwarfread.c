@@ -2586,10 +2586,10 @@ add_partial_symbol (dip, objfile)
   switch (dip -> die_tag)
     {
     case TAG_global_subroutine:
-      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_BLOCK,
-			   objfile -> global_psymbols,
-			   dip -> at_low_pc, cu_language, objfile);
+      ADD_PSYMBOL_ADDR_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+				VAR_NAMESPACE, LOC_BLOCK,
+				objfile -> global_psymbols,
+				dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_global_variable:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
@@ -2598,10 +2598,10 @@ add_partial_symbol (dip, objfile)
 			   0, cu_language, objfile);
       break;
     case TAG_subroutine:
-      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_BLOCK,
-			   objfile -> static_psymbols,
-			   dip -> at_low_pc, cu_language, objfile);
+      ADD_PSYMBOL_ADDR_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+				VAR_NAMESPACE, LOC_BLOCK,
+				objfile -> static_psymbols,
+				dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_local_variable:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
@@ -2951,12 +2951,12 @@ new_symbol (dip, objfile)
       switch (dip -> die_tag)
 	{
 	case TAG_label:
-	  SYMBOL_VALUE (sym) = dip -> at_low_pc;
+	  SYMBOL_VALUE_ADDRESS (sym) = dip -> at_low_pc;
 	  SYMBOL_CLASS (sym) = LOC_LABEL;
 	  break;
 	case TAG_global_subroutine:
 	case TAG_subroutine:
-	  SYMBOL_VALUE (sym) = dip -> at_low_pc;
+	  SYMBOL_VALUE_ADDRESS (sym) = dip -> at_low_pc;
 	  SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
 	  SYMBOL_CLASS (sym) = LOC_BLOCK;
 	  if (dip -> die_tag == TAG_global_subroutine)
