@@ -4816,6 +4816,7 @@ copy_private_bfd_data (ibfd, obfd)
 		 correct value.  Note - some backends require that
 		 p_paddr be left as zero.  */
 	      if (segment->p_paddr == 0
+		  && segment->p_vaddr != 0
 		  && (! bed->want_p_paddr_set_to_zero)
 		  && isec == 0
 		  && output_section->lma != 0
