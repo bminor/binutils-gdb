@@ -1112,6 +1112,21 @@ enum return_reason
 #define RETURN_MASK_ALL		(RETURN_MASK_QUIT | RETURN_MASK_ERROR)
 typedef int return_mask;
 
+/* Throw an exception of type RETURN_REASON.  Will execute a LONG JUMP
+   to the inner most containing exception handler (established using
+   catch_exceptions() or the legacy catch_errors()).
+
+   Useful when a section of code that caught an exception finds it
+   needs to repropagate that exception up the call chain.
+
+   The name return_to_top_level() dates back to a time when GDB had
+   only one exception handler installed at the top level.  This really
+   did return to the top level.  The name should probably be changed.
+
+   NOTE: Some sections of code are using error_begin() in conjunction
+   with return_to_top_level() to throw the initial exception.  That
+   code should, instead, use either error() or error_string().  */
+
 extern NORETURN void return_to_top_level (enum return_reason) ATTR_NORETURN;
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception

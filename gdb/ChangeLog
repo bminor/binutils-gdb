@@ -1,3 +1,7 @@
+2001-11-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (return_to_top_level): Comment.
+
 Mon Nov 19 14:58:52 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* remote.c (remote_open_1, remote_async_open_1): Use ISO C string
