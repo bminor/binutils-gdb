@@ -1,5 +1,5 @@
 /* memory allocation routines with error checking.
-   Copyright 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1989, 90, 91, 92, 93, 94, 1999 Free Software Foundation, Inc.
    
 This file is part of the libiberty library.
 Libiberty is free software; you can redistribute it and/or
@@ -47,22 +47,28 @@ static const char *name = "";
 #define __CYGWIN__ 1
 #endif
 
-#if ! defined (_WIN32) || defined (__CYGWIN__) || defined (__UWIN__)
+/* On Unix systems we use sbrk to determine how much memory has been
+   allocated.  */
+#undef USE_SBRK
+#if (! defined (_WIN32) && ! defined (__INTERIX)) || defined (__CYGWIN__) || defined (__UWIN__)
+#define USE_SBRK
+#endif
+
+#ifdef USE_SBRK
 /* The initial sbrk, set when the program name is set. Not used for win32
    ports other than cygwin32.  */
 static char *first_break = NULL;
-#endif /* ! _WIN32 || __CYGWIN __ || __UWIN__ */
+#endif
 
 void
 xmalloc_set_program_name (s)
      const char *s;
 {
   name = s;
-#if ! defined (_WIN32) || defined (__CYGWIN__) || defined (__UWIN__)
-  /* Win32 ports other than cygwin32 don't have brk() */
+#ifdef USE_SBRK
   if (first_break == NULL)
     first_break = (char *) sbrk (0);
-#endif /* ! _WIN32 || __CYGWIN __ || __UWIN__ */
+#endif
 }
 
 PTR
@@ -76,7 +82,7 @@ xmalloc (size)
   newmem = malloc (size);
   if (!newmem)
     {
-#if ! defined (_WIN32) || defined (__CYGWIN__) || defined (__UWIN__)
+#ifdef USE_SBRK
       extern char **environ;
       size_t allocated;
 
@@ -93,7 +99,7 @@ xmalloc (size)
               "\n%s%sCan not allocate %lu bytes\n",
               name, *name ? ": " : "",
               (unsigned long) size);
-#endif /* ! _WIN32 || __CYGWIN __ || __UWIN__ */
+#endif /* ! USE_SBRK */
       xexit (1);
     }
   return (newmem);
@@ -111,7 +117,7 @@ xcalloc (nelem, elsize)
   newmem = calloc (nelem, elsize);
   if (!newmem)
     {
-#if ! defined (_WIN32) || defined (__CYGWIN__)
+#ifdef USE_SBRK
       extern char **environ;
       size_t allocated;
 
@@ -128,7 +134,7 @@ xcalloc (nelem, elsize)
               "\n%s%sCan not allocate %lu bytes\n",
               name, *name ? ": " : "",
               (unsigned long) (nelem * elsize));
-#endif /* ! _WIN32 || __CYGWIN __ */
+#endif /* ! USE_SBRK */
       xexit (1);
     }
   return (newmem);
@@ -149,7 +155,7 @@ xrealloc (oldmem, size)
     newmem = realloc (oldmem, size);
   if (!newmem)
     {
-#ifndef __MINGW32__
+#ifdef USE_SBRK
       extern char **environ;
       size_t allocated;
 
@@ -166,7 +172,7 @@ xrealloc (oldmem, size)
               "\n%s%sCan not reallocate %lu bytes\n",
               name, *name ? ": " : "",
               (unsigned long) size);
-#endif /* __MINGW32__ */
+#endif /* ! USE_SBRK */
       xexit (1);
     }
   return (newmem);

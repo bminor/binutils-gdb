@@ -1,3 +1,8 @@
+1999-08-05  Ian Lance Taylor  <ian@zembu.com>
+
+	* xmalloc.c: Control all uses of SBRK with a single define,
+	USE_SBRK.  Don't define it if __INTERIX.
+
 1999-08-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* floatformat.c: Add casts to avoid signed/unsigned warnings.
