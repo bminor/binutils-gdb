@@ -213,6 +213,27 @@ struct target_ops
 					 int len, int write,
 					 struct target_ops * target));
 
+#if 0
+  /* Enable this after 4.12.  */
+
+  /* Search target memory.  Start at STARTADDR and take LEN bytes of
+     target memory, and them with MASK, and compare to DATA.  If they
+     match, set *ADDR_FOUND to the address we found it at, store the data
+     we found at LEN bytes starting at DATA_FOUND, and return.  If
+     not, add INCREMENT to the search address and keep trying until
+     the search address is outside of the range [LORANGE,HIRANGE).
+
+     If we don't find anything, set *ADDR_FOUND to (CORE_ADDR)0 and return.  */
+  void (*to_search) PARAMS ((int len, char *data, char *mask,
+			     CORE_ADDR startaddr, int increment,
+			     CORE_ADDR lorange, CORE_ADDR hirange,
+			     CORE_ADDR *addr_found, char *data_found));
+
+#define	target_search(len, data, mask, startaddr, increment, lorange, hirange, addr_found, data_found)	\
+  (*current_target->to_search) (len, data, mask, startaddr, increment, \
+				lorange, hirange, addr_found, data_found)
+#endif /* 0 */
+
   void 	      (*to_files_info) PARAMS ((struct target_ops *));
   int  	      (*to_insert_breakpoint) PARAMS ((CORE_ADDR, char *));
   int 	      (*to_remove_breakpoint) PARAMS ((CORE_ADDR, char *));
@@ -306,9 +327,13 @@ target_detach PARAMS ((char *, int));
 #define	target_resume(pid, step, siggnal)	\
 	(*current_target->to_resume) (pid, step, siggnal)
 
-/* Wait for process pid to do something.  Pid = -1 to wait for any pid to do
-   something.  Return pid of child, or -1 in case of error; store status
-   through argument pointer STATUS.  */
+/* Wait for process pid to do something.  Pid = -1 to wait for any pid
+   to do something.  Return pid of child, or -1 in case of error;
+   store status through argument pointer STATUS.  Note that it is
+   *not* OK to return_to_top_level out of target_wait without popping
+   the debugging target from the stack; GDB isn't prepared to get back
+   to the prompt with a debugging target but without the frame cache,
+   stop_pc, etc., set up.  */
 
 #define	target_wait(pid, status)		\
 	(*current_target->to_wait) (pid, status)
@@ -594,7 +619,7 @@ find_core_target PARAMS ((void));
    information (higher values, more information).  */
 extern int remote_debug;
 
-/* Speed in bits per second.  */
+/* Speed in bits per second, or -1 which means don't mess with the speed.  */
 extern int baud_rate;
 
 /* Functions for helping to write a native target.  */

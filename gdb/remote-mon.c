@@ -341,11 +341,13 @@ general_open(args, name, from_tty)
   if (monitor_desc == NULL)
     perror_with_name(dev_name);
 
-  /* The baud rate was specified when GDB was started.  */
-  if (SERIAL_SETBAUDRATE (monitor_desc, sr_get_baud_rate()))
+  if (baud_rate != -1)
     {
-      SERIAL_CLOSE (monitor_desc);
-      perror_with_name (name);
+      if (SERIAL_SETBAUDRATE (monitor_desc, baud_rate))
+	{
+	  SERIAL_CLOSE (monitor_desc);
+	  perror_with_name (name);
+	}
     }
 
   SERIAL_RAW(monitor_desc);

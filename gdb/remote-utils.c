@@ -123,7 +123,7 @@ sr_scan_args(proto, args)
 
   /* check for missing or empty baud rate.  */
   CHECKDONE(p, q);
-  sr_set_baud_rate(n);
+  baud_rate = n;
 
   /* look for debug value.  */
   n = strtol(p, &q, 10);
@@ -177,10 +177,13 @@ gr_open(args, from_tty, gr)
   if (!sr_get_desc())
     perror_with_name((char *) sr_get_device());
 
-  if (SERIAL_SETBAUDRATE(sr_get_desc(), sr_get_baud_rate()) != 0)
+  if (baud_rate != -1)
     {
-      SERIAL_CLOSE(sr_get_desc());
-      perror_with_name(sr_get_device());
+      if (SERIAL_SETBAUDRATE(sr_get_desc(), baud_rate) != 0)
+	{
+	  SERIAL_CLOSE(sr_get_desc());
+	  perror_with_name(sr_get_device());
+	}
     }
 
   SERIAL_RAW (sr_get_desc());
@@ -198,8 +201,13 @@ gr_open(args, from_tty, gr)
     gr_settings->clear_all_breakpoints = remove_breakpoints;
 
   if (from_tty)
-      printf_filtered ("Remote debugging using `%s' at baud rate of %d\n",
-		       sr_get_device(), sr_get_baud_rate());
+    {
+      printf_filtered ("Remote debugging using `%s'", sr_get_device ());
+      if (baud_rate != -1)
+	printf_filtered (" at baud rate of %d",
+			 baud_rate);
+      print_filtered ("\n");
+    }
 
   push_target(gr->ops);
   gr_checkin();
@@ -439,8 +447,10 @@ gr_files_info (ops)
 #ifdef __GO32__
   printf_filtered ("\tAttached to DOS asynctsr\n");
 #else
-  printf_filtered ("\tAttached to %s at %d baud\n",
-		   sr_get_device(), sr_get_baud_rate());
+  printf_filtered ("\tAttached to %s", sr_get_device());
+  if (baud_rate != -1)
+    printf_filtered ("at %d baud", baud_rate);
+  printf_filtered ("\n");
 #endif
 
   if (exec_bfd)

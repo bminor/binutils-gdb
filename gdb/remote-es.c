@@ -371,10 +371,13 @@ es1800_open (name, from_tty)
       perror_with_name ("fcntl serial");
     }
 
-  if (SERIAL_SETBAUDRATE (es1800_desc, baud_rate))
+  if (baud_rate != -1)
     {
-      SERIAL_CLOSE (es1800_desc);
-      perror_with_name (name);
+      if (SERIAL_SETBAUDRATE (es1800_desc, baud_rate))
+	{
+	  SERIAL_CLOSE (es1800_desc);
+	  perror_with_name (name);
+	}
     }
 
   SERIAL_RAW (es1800_desc);

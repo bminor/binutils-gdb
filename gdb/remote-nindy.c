@@ -197,7 +197,10 @@ nindy_open (name, from_tty)
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
   immediate_quit++;
-  sprintf(baudrate, "%d", sr_get_baud_rate());
+  /* If baud_rate is -1, then ninConnect will not recognize the baud rate
+     and will deal with the situation in a (more or less) reasonable
+     fashion.  */
+  sprintf(baudrate, "%d", baud_rate);
   ninConnect(name, baudrate,
 	     nindy_initial_brk, !from_tty, nindy_old_protocol);
   immediate_quit--;
@@ -227,8 +230,9 @@ nindy_detach (name, from_tty)
 static void
 nindy_files_info ()
 {
-  printf_unfiltered("\tAttached to %s at %d bps%s%s.\n", savename,
-	 sr_get_baud_rate(),
+  /* FIXME: this lies about the baud rate if we autobauded.  */
+  printf_unfiltered("\tAttached to %s at %d bits per second%s%s.\n", savename,
+	 baud_rate,
 	 nindy_old_protocol? " in old protocol": "",
          nindy_initial_brk? " with initial break": "");
 }

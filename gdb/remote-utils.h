@@ -44,10 +44,6 @@ extern struct _sr_settings sr_settings;
 #define sr_get_debug()			(remote_debug)
 #define sr_set_debug(newval)		(remote_debug = (newval))
 
-/* get and set baud rate. */
-#define sr_get_baud_rate()		(baud_rate)
-#define sr_set_baud_rate(newval)	(baud_rate = (newval))
-
 /* get and set timeout. */
 #define sr_get_timeout()		(sr_settings.timeout)
 #define sr_set_timeout(newval)		(sr_settings.timeout = (newval))

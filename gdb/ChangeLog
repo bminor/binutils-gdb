@@ -1,5 +1,11 @@
 Fri Feb 25 09:41:11 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* remote.c, remote-mon.c, remote-utils.c, remote-utils.h,
+	target.h, remote-es.c, remote-nindy.c: Don't set baud rate if
+	baud_rate is -1.  Remove sr_get_baud_rate and sr_set_baud_rate;
+	just use the global variable itself.  When printing baud rate,
+	don't print a baud rate if baud_rate is -1.
+
 	* coffread.c (read_coff_symtab): Pass mst_file_* to
 	record_minimal_symbol for C_STAT symbols.  Put C_EXT and C_STAT
 	symbols in the minimal symbols regardless of SDB_TYPE.
