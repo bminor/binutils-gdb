@@ -3747,45 +3747,6 @@
 }
 
 
-
-
-
-
-// C.EQ.S
-// C.EQ.D
-// ...
-
-:function:::void:do_c_cond_fmt:int fmt, int ft, int fs, int cc, int cond, instruction_word insn
-{
-  int less;
-  int equal;
-  int unordered;
-  int condition;
-  unsigned64 ofs = ValueFPR (fs, fmt);
-  unsigned64 oft = ValueFPR (ft, fmt);
-  if (NaN (ofs, fmt) || NaN (oft, fmt))
-    {
-      if (FCSR & FP_ENABLE (IO))
-	{
-	  FCSR |= FP_CAUSE (IO);
-	  SignalExceptionFPE ();
-	}
-      less = 0;
-      equal = 0;
-      unordered = 1;
-    }
-  else
-    {
-      less = Less (ofs, oft, fmt);
-      equal = Equal (ofs, oft, fmt);
-      unordered = 0;
-    }
-  condition = (((cond & (1 << 2)) && less)
-	       || ((cond & (1 << 1)) && equal)
-	       || ((cond & (1 << 0)) && unordered));
-  SETFCC (cc, condition);
-}
-
 010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32,f::C.cond.fmta
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>"
 *mipsI:
@@ -3795,7 +3756,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  do_c_cond_fmt (SD_, fmt, FT, FS, 0, COND, instruction_0);
+  Compare (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt, COND, 0);
+  TRACE_ALU_RESULT (ValueFCR (31));
 }
 
 010001,10,3.FMT,5.FT,5.FS,3.CC,00,11,4.COND:COP1:32,f::C.cond.fmtb
@@ -3812,7 +3774,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  do_c_cond_fmt (SD_, fmt, FT, FS, CC, COND, instruction_0);
+  Compare (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt, COND, CC);
+  TRACE_ALU_RESULT (ValueFCR (31));
 }
 
 
@@ -3851,80 +3814,92 @@
 }
 
 
-// CFC1
-// CTC1
-010001,00,X,10,5.RT,5.FS,00000000000:COP1Sa:32,f::CxC1
-"c%s<X>c1 r<RT>, f<FS>"
+010001,00010,5.RT,5.FS,00000000000:COP1:32,f::CFC1a
+"cfc1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
 {
   check_fpu (SD_);
-  if (X)
-    {
-      if (FS == 0)
-	PENDING_FILL(FCR0IDX,VL4_8(GPR[RT]));
-      else if (FS == 31)
-	PENDING_FILL(FCR31IDX,VL4_8(GPR[RT]));
-      /* else NOP */
-      PENDING_SCHED(FCSR, FCR31 & (1<<23), 1, 23);
-    }
-  else
-    { /* control from */
-      if (FS == 0)
- 	PENDING_FILL(RT, EXTEND32 (FCR0));
-      else if (FS == 31)
- 	PENDING_FILL(RT, EXTEND32 (FCR31));
-      /* else NOP */
-    }
+  if (FS == 0)
+    PENDING_FILL (RT, EXTEND32 (FCR0));
+  else if (FS == 31)
+    PENDING_FILL (RT, EXTEND32 (FCR31));
+  /* else NOP */
 }
-010001,00,X,10,5.RT,5.FS,00000000000:COP1Sb:32,f::CxC1
-"c%s<X>c1 r<RT>, f<FS>"
+
+010001,00010,5.RT,5.FS,00000000000:COP1:32,f::CFC1b
+"cfc1 r<RT>, f<FS>"
 *mipsIV:
-*mipsV:
-*mips32:
-*mips64:
 *vr4100:
 *vr5000:
 *r3900:
 {
   check_fpu (SD_);
-  if (X)
+  if (FS == 0 || FS == 31)
     {
-      /* control to */
-      TRACE_ALU_INPUT1 (GPR[RT]);
-      if (FS == 0)
-	{
-	  FCR0 = VL4_8(GPR[RT]);
-	  TRACE_ALU_RESULT (FCR0);
-	}
-      else if (FS == 31)
-	{
-	  FCR31 = VL4_8(GPR[RT]);
-	  SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
-	  TRACE_ALU_RESULT (FCR31);
-	}
-      else
-	{
-	  TRACE_ALU_RESULT0 ();
-	}
-      /* else NOP */
+      unsigned_word  fcr = ValueFCR (FS);
+      TRACE_ALU_INPUT1 (fcr);
+      GPR[RT] = fcr;
     }
-  else
-    { /* control from */
-      if (FS == 0)
-	{
-	  TRACE_ALU_INPUT1 (FCR0);
-	  GPR[RT] = EXTEND32 (FCR0);
-	}
-      else if (FS == 31)
-	{
-	  TRACE_ALU_INPUT1 (FCR31);
-	  GPR[RT] = EXTEND32 (FCR31);
-	}
-      TRACE_ALU_RESULT (GPR[RT]);
-      /* else NOP */
+  /* else NOP */
+  TRACE_ALU_RESULT (GPR[RT]);
+}
+
+010001,00010,5.RT,5.FS,00000000000:COP1:32,f::CFC1c
+"cfc1 r<RT>, f<FS>"
+*mipsV:
+*mips32:
+*mips64:
+{
+  check_fpu (SD_);
+  if (FS == 0 || FS == 25 || FS == 26 || FS == 28 || FS == 31)
+    {
+      unsigned_word  fcr = ValueFCR (FS);
+      TRACE_ALU_INPUT1 (fcr);
+      GPR[RT] = fcr;
     }
+  /* else NOP */
+  TRACE_ALU_RESULT (GPR[RT]);
+}
+
+010001,00110,5.RT,5.FS,00000000000:COP1:32,f::CTC1a
+"ctc1 r<RT>, f<FS>"
+*mipsI:
+*mipsII:
+*mipsIII:
+{
+  check_fpu (SD_);
+  if (FS == 31)
+    PENDING_FILL (FCRCS_REGNUM, VL4_8 (GPR[RT]));
+  /* else NOP */
+}
+
+010001,00110,5.RT,5.FS,00000000000:COP1:32,f::CTC1b
+"ctc1 r<RT>, f<FS>"
+*mipsIV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  check_fpu (SD_);
+  TRACE_ALU_INPUT1 (GPR[RT]);
+  if (FS == 31)
+    StoreFCR (FS, GPR[RT]);
+  /* else NOP */
+}
+
+010001,00110,5.RT,5.FS,00000000000:COP1:32,f::CTC1c
+"ctc1 r<RT>, f<FS>"
+*mipsV:
+*mips32:
+*mips64:
+{
+  check_fpu (SD_);
+  TRACE_ALU_INPUT1 (GPR[RT]);
+  if (FS == 25 || FS == 26 || FS == 28 || FS == 31)
+      StoreFCR (FS, GPR[RT]);
+  /* else NOP */
 }
 
 
@@ -4047,42 +4022,25 @@
 }
 
 
-// DMFC1
-// DMTC1
-010001,00,X,01,5.RT,5.FS,00000000000:COP1Sa:64,f::DMxC1
-"dm%s<X>c1 r<RT>, f<FS>"
+010001,00001,5.RT,5.FS,00000000000:COP1:64,f::DMFC1a
+"dmfc1 r<RT>, f<FS>"
 *mipsIII:
 {
+  unsigned64 v;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
-  if (X)
-    {
-      if (SizeFGR() == 64)
-	PENDING_FILL((FS + FGR_BASE),GPR[RT]);
-      else if ((FS & 0x1) == 0)
-	{
-	  PENDING_FILL(((FS + 1) + FGR_BASE),VH4_8(GPR[RT]));
-	  PENDING_FILL((FS + FGR_BASE),VL4_8(GPR[RT]));
-	}
-    }
+  if (SizeFGR () == 64)
+    v = FGR[FS];
+  else if ((FS & 0x1) == 0)
+    v = SET64HI (FGR[FS+1]) | FGR[FS];
   else
-    {
-      if (SizeFGR() == 64)
-	PENDING_FILL(RT,FGR[FS]);
-      else if ((FS & 0x1) == 0)
-	PENDING_FILL(RT,(SET64HI(FGR[FS+1]) | FGR[FS]));
-      else
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD,
-	      "Warning: PC 0x%lx: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
-	      (long) CIA);
-	  PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
-	}
-    }
+    v = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+  PENDING_FILL (RT, v);
+  TRACE_ALU_RESULT (v);
 }
-010001,00,X,01,5.RT,5.FS,00000000000:COP1Sb:64,f::DMxC1
-"dm%s<X>c1 r<RT>, f<FS>"
+
+010001,00001,5.RT,5.FS,00000000000:COP1:64,f::DMFC1b
+"dmfc1 r<RT>, f<FS>"
 *mipsIV:
 *mipsV:
 *mips64:
@@ -4092,28 +4050,52 @@
 {
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
-  if (X)
+  if (SizeFGR () == 64)
+    GPR[RT] = FGR[FS];
+  else if ((FS & 0x1) == 0)
+    GPR[RT] = SET64HI (FGR[FS+1]) | FGR[FS];
+  else
+    GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+  TRACE_ALU_RESULT (GPR[RT]);
+}
+
+
+010001,00101,5.RT,5.FS,00000000000:COP1:64,f::DMTC1a
+"dmtc1 r<RT>, f<FS>"
+*mipsIII:
+{
+  unsigned64 v;
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  if (SizeFGR () == 64)
+    PENDING_FILL ((FS + FGR_BASE), GPR[RT]);
+  else if ((FS & 0x1) == 0)
     {
-      if (SizeFGR() == 64)
-	StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
-      else if ((FS & 0x1) == 0)
-	StoreFPR (FS, fmt_uninterpreted_64, SET64HI (FGR[FS+1]) | FGR[FS]);
+      PENDING_FILL (((FS + 1) + FGR_BASE), VH4_8 (GPR[RT]));
+      PENDING_FILL ((FS + FGR_BASE), VL4_8 (GPR[RT]));
     }
   else
-    {
-      if (SizeFGR() == 64)
-	GPR[RT] = FGR[FS];
-      else if ((FS & 0x1) == 0)
-	GPR[RT] = SET64HI (FGR[FS+1]) | FGR[FS];
-      else
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD,
-	      "Warning: PC 0x%lx: DMxC1 32-bit use of odd FPR number\n",
-			    (long) CIA);
-	  GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
-	}
-    }
+    Unpredictable ();
+  TRACE_FP_RESULT (GPR[RT]);
+}
+
+010001,00101,5.RT,5.FS,00000000000:COP1:64,f::DMTC1b
+"dmtc1 r<RT>, f<FS>"
+*mipsIV:
+*mipsV:
+*mips64:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  if (SizeFGR () == 64)
+    StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
+  else if ((FS & 0x1) == 0)
+    StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
+  else
+    Unpredictable ();
 }
 
 
@@ -4247,33 +4229,21 @@
 }
 
 
-// MFC1
-// MTC1
-010001,00,X,00,5.RT,5.FS,00000000000:COP1Sa:32,f::MxC1
-"m%s<X>c1 r<RT>, f<FS>"
+010001,00000,5.RT,5.FS,00000000000:COP1:32,f::MFC1a
+"mfc1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
 {
+  unsigned64 v;
   check_fpu (SD_);
-  if (X)
-    { /*MTC1*/
-      if (SizeFGR() == 64)
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD,
-			    "Warning:  PC 0x%lx: MTC1 not DMTC1 with 64 bit regs\n",
-			    (long) CIA);
-	  PENDING_FILL ((FS + FGR_BASE), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
-	}
-      else
-	PENDING_FILL ((FS + FGR_BASE), VL4_8(GPR[RT]));
-    }
-  else /*MFC1*/
-    PENDING_FILL (RT, EXTEND32 (FGR[FS]));
+  v = EXTEND32 (FGR[FS]);
+  PENDING_FILL (RT, v);
+  TRACE_ALU_RESULT (v);
 }
-010001,00,X,00,5.RT,5.FS,00000000000:COP1Sb:32,f::MxC1
-"m%s<X>c1 r<RT>, f<FS>"
+  
+010001,00000,5.RT,5.FS,00000000000:COP1:32,f::MFC1b
+"mfc1 r<RT>, f<FS>"
 *mipsIV:
 *mipsV:
 *mips32:
@@ -4281,14 +4251,10 @@
 *vr4100:
 *vr5000:
 *r3900:
-{
-  int fs = FS;
+{ 
   check_fpu (SD_);
-  if (X)
-    /*MTC1*/
-    StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
-  else /*MFC1*/
-    GPR[RT] = EXTEND32 (FGR[FS]);
+  GPR[RT] = EXTEND32 (FGR[FS]);
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 
@@ -4414,7 +4380,33 @@
 }
 
 
-// MTC1 see MxC1
+010001,00100,5.RT,5.FS,00000000000:COP1:32,f::MTC1a
+"mtc1 r<RT>, f<FS>"
+*mipsI:
+*mipsII:
+*mipsIII:
+{ 
+  check_fpu (SD_);
+  if (SizeFGR () == 64)
+    PENDING_FILL ((FS + FGR_BASE), (SET64HI (0xDEADC0DE) | VL4_8 (GPR[RT])));
+  else
+    PENDING_FILL ((FS + FGR_BASE), VL4_8 (GPR[RT]));
+  TRACE_FP_RESULT (GPR[RT]);
+} 
+
+010001,00100,5.RT,5.FS,00000000000:COP1:32,f::MTC1b
+"mtc1 r<RT>, f<FS>"
+*mipsIV:
+*mipsV:
+*mips32:
+*mips64:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  check_fpu (SD_); 
+  StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
+}
 
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000010:COP1:32,f::MUL.fmt

@@ -1,3 +1,29 @@
+2002-06-06  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* cp1.h: New file.
+	* sim-main.h: Include cp1.h.
+	(SETFCC, GETFCC, IR, UF, OF, DX, IO, UO, FP_FLAGS, FP_ENABLE)
+	(FP_CAUSE, GETFS, FP_RM_NEAREST, FP_RM_TOZERO, FP_RM_TOPINF)
+	(FP_RM_TOMINF, GETRM): Remove.  Moved to cp1.h.
+	(FP_FS, FP_MASK_RM, FP_SH_RM, Nan, Less, Equal): Remove.
+	(value_fcr, store_fcr, test_fcsr, fp_cmp): New prototypes.
+	(ValueFCR, StoreFCR, TestFCSR, Compare): New macros.
+	* cp1.c: Don't include sim-fpu.h; already included by
+	sim-main.h.  Clean up formatting of some comments.
+	(NaN, Equal, Less): Remove.
+	(test_fcsr, value_fcr, store_fcr, update_fcsr, fp_test)
+	(fp_cmp): New functions.
+	* mips.igen (do_c_cond_fmt): Remove.
+	(C.cond.fmta, C.cond.fmtb): Replace uses of do_c_cond_fmt_a with
+	Compare.  Add result tracing.
+	(CxC1): Remove, replace with...
+	(CFC1a, CFC1b, CFC1c, CTC1a, CTC1b, CTC1c): New instructions.
+	(DMxC1): Remove, replace with...
+	(DMFC1a, DMFC1b, DMTC1a, DMTC1b): New instructions.
+	(MxC1): Remove, replace with... 
+	(MFC1a, MFC1b, MTC1a, MTC1b): New instructions.  
+
 2002-06-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* sim-main.h (FGRIDX): Remove, replace all uses with...

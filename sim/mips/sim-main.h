@@ -64,6 +64,7 @@ typedef unsigned64 uword64;
 /* Floating-point operations: */
 
 #include "sim-fpu.h"
+#include "cp1.h"
 
 /* FPU registers must be one of the following types. All other values
    are reserved (and undefined). */
@@ -80,17 +81,6 @@ typedef enum {
  fmt_uninterpreted_64 = 0x80000000U,
 } FP_formats;
 
-/* Macro to update FPSR condition-code field. This is complicated by
-   the fact that there is a hole in the index range of the bits within
-   the FCSR register. Also, the number of bits visible depends on the
-   MIPS ISA version being supported. */
-
-#define SETFCC(cc,v) {\
-  int bit = ((cc == 0) ? 23 : (24 + (cc)));\
-  FCSR = ((FCSR & ~(1 << bit)) | ((v) << bit));\
-}
-#define GETFCC(cc) (((((cc) == 0) ? (FCSR & (1 << 23)) : (FCSR & (1 << (24 + (cc))))) != 0) ? 1U : 0)
-
 /* This should be the COC1 value at the start of the preceding
    instruction: */
 #define PREVCOC1() ((STATE & simPCOC1) ? 1 : 0)
@@ -103,36 +93,6 @@ typedef enum {
 #else
 #define SizeFGR() (WITH_TARGET_FLOATING_POINT_BITSIZE)
 #endif
-
-/* Standard FCRS bits: */
-#define IR (0) /* Inexact Result */
-#define UF (1) /* UnderFlow */
-#define OF (2) /* OverFlow */
-#define DZ (3) /* Division by Zero */
-#define IO (4) /* Invalid Operation */
-#define UO (5) /* Unimplemented Operation */
-
-/* Get masks for individual flags: */
-#if 1 /* SAFE version */
-#define FP_FLAGS(b)  (((unsigned)(b) < 5) ? (1 << ((b) + 2)) : 0)
-#define FP_ENABLE(b) (((unsigned)(b) < 5) ? (1 << ((b) + 7)) : 0)
-#define FP_CAUSE(b)  (((unsigned)(b) < 6) ? (1 << ((b) + 12)) : 0)
-#else
-#define FP_FLAGS(b)  (1 << ((b) + 2))
-#define FP_ENABLE(b) (1 << ((b) + 7))
-#define FP_CAUSE(b)  (1 << ((b) + 12))
-#endif
-
-#define FP_FS         (1 << 24) /* MIPS III onwards : Flush to Zero */
-
-#define FP_MASK_RM    (0x3)
-#define FP_SH_RM      (0)
-#define FP_RM_NEAREST (0) /* Round to nearest        (Round) */
-#define FP_RM_TOZERO  (1) /* Round to zero           (Trunc) */
-#define FP_RM_TOPINF  (2) /* Round to Plus infinity  (Ceil) */
-#define FP_RM_TOMINF  (3) /* Round to Minus infinity (Floor) */
-#define GETRM()       (int)((FCSR >> FP_SH_RM) & FP_MASK_RM)
-
 
 
 
@@ -716,10 +676,18 @@ void store_fpr (SIM_STATE, int fpr, FP_formats fmt, unsigned64 value);
 #define StoreFPR(FPR,FMT,VALUE) store_fpr (SIM_ARGS, (FPR), (FMT), (VALUE))
 
 
+/* FCR access.  */
+unsigned_word value_fcr (SIM_STATE, int fcr);
+#define ValueFCR(FCR) value_fcr (SIM_ARGS, (FCR))
+void store_fcr (SIM_STATE, int fcr, unsigned_word value);
+#define StoreFCR(FCR,VALUE) store_fcr (SIM_ARGS, (FCR), (VALUE))
+void test_fcsr (SIM_STATE);
+#define TestFCSR() test_fcsr (SIM_ARGS)
+
+
 /* FPU operations.  */
-int NaN (unsigned64 op, FP_formats fmt);
-int Less (unsigned64 op1, unsigned64 op2, FP_formats fmt);
-int Equal (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+void fp_cmp (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt, int abs, int cond, int cc);
+#define Compare(op1,op2,fmt,cond,cc) fp_cmp(SIM_ARGS, op1, op2, fmt, 0, cond, cc)
 unsigned64 fp_abs (SIM_STATE, unsigned64 op, FP_formats fmt);
 #define AbsoluteValue(op,fmt) fp_abs(SIM_ARGS, op, fmt)
 unsigned64 fp_neg (SIM_STATE, unsigned64 op, FP_formats fmt);

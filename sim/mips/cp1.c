@@ -40,7 +40,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "sim-main.h"
-#include "sim-fpu.h"
 
 /* Within cp1.c we refer to sim_cpu directly.  */
 #define CPU cpu
@@ -313,126 +312,163 @@ store_fpr (sim_cpu *cpu,
   return;
 }
 
-int
-NaN (op, fmt)
-     uword64 op;
-     FP_formats fmt;
+
+/* CP1 control/status registers */
+
+void
+test_fcsr (sim_cpu *cpu,
+	   address_word cia)
 {
-  int boolean = 0;
-  switch (fmt)
+  unsigned int cause;
+
+  cause = (FCSR & fcsr_CAUSE_mask) >> fcsr_CAUSE_shift;
+  if ((cause & ((FCSR & fcsr_ENABLES_mask) >> fcsr_ENABLES_shift)) != 0
+      || (cause & (1 << UO)))
     {
-    case fmt_single:
-    case fmt_word:
-      {
-	sim_fpu wop;
-	sim_fpu_32to (&wop, op);
-	boolean = sim_fpu_is_nan (&wop);
-	break;
-      }
-    case fmt_double:
-    case fmt_long:
-      {
-	sim_fpu wop;
-	sim_fpu_64to (&wop, op);
-	boolean = sim_fpu_is_nan (&wop);
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
+      SignalExceptionFPE();
     }
-
-#ifdef DEBUG
-  printf ("DBG: NaN: returning %d for 0x%s (format = %s)\n",
-	  boolean, pr_addr (op), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (boolean);
 }
 
-int
-Less (op1, op2, fmt)
-     uword64 op1;
-     uword64 op2;
-     FP_formats fmt;
+unsigned_word
+value_fcr(sim_cpu *cpu,
+	  address_word cia,
+	  int fcr)
 {
-  int boolean = 0;
+  unsigned32 value = 0;
 
-  /* Argument checking already performed by the FPCOMPARE code */
-
-#ifdef DEBUG
-  printf ("DBG: Less: %s: op1 = 0x%s : op2 = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op1), pr_addr (op2));
-#endif /* DEBUG */
-
-  /* The format type should already have been checked:  */
-  switch (fmt)
+  switch (fcr)
     {
-    case fmt_single:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu_32to (&wop1, op1);
-	sim_fpu_32to (&wop2, op2);
-	boolean = sim_fpu_is_lt (&wop1, &wop2);
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu_64to (&wop1, op1);
-	sim_fpu_64to (&wop2, op2);
-	boolean = sim_fpu_is_lt (&wop1, &wop2);
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
+    case 0:  /* FP Implementation and Revision Register */
+      value = FCR0;
+      break;
+    case 25:  /* FP Condition Codes Register */
+      value = (FCR31 & fcsr_FCC_mask) >> fcsr_FCC_shift;
+      value = (value & 0x1) | (value >> 1);   /* close FCC gap */
+      break;
+    case 26:  /* FP Exceptions Register */
+      value = FCR31 & (fcsr_CAUSE_mask | fcsr_FLAGS_mask);
+      break;
+    case 28:  /* FP Enables Register */
+      value = FCR31 & (fcsr_ENABLES_mask | fcsr_RM_mask);
+      if (FCR31 & fcsr_FS)
+	value |= 0x4;                        /* nonstandard FS bit */
+      break;
+    case 31:  /* FP Control/Status Register */
+      value = FCR31 & ~fcsr_ZERO_mask;
+      break;
     }
 
-#ifdef DEBUG
-  printf ("DBG: Less: returning %d (format = %s)\n",
-	  boolean, fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (boolean);
+  return (EXTEND32 (value));
 }
 
-int
-Equal (op1, op2, fmt)
-     uword64 op1;
-     uword64 op2;
-     FP_formats fmt;
+void
+store_fcr(sim_cpu *cpu,
+	  address_word cia,
+	  int fcr,
+	  unsigned_word value)
 {
-  int boolean = 0;
+  unsigned32 v;
 
-  /* Argument checking already performed by the FPCOMPARE code */
+  v = VL4_8(value);
+  switch (fcr)
+    {
+    case 25:  /* FP Condition Codes Register */
+      v = (v << 1) | (v & 0x1);             /* adjust for FCC gap */
+      FCR31 &= ~fcsr_FCC_mask;
+      FCR31 |= ((v << fcsr_FCC_shift) & fcsr_FCC_mask);
+      break;
+    case 26:  /* FP Exceptions Register */
+      FCR31 &= ~(fcsr_CAUSE_mask | fcsr_FLAGS_mask);
+      FCR31 |= (v & (fcsr_CAUSE_mask | fcsr_FLAGS_mask));
+      test_fcsr(cpu, cia);
+      break;
+    case 28:  /* FP Enables Register */
+      if (v & 0x4)                         /* nonstandard FS bit */
+	v |= fcsr_FS;
+      else
+	v &= ~fcsr_FS;
+      FCR31 &= (fcsr_FCC_mask | fcsr_CAUSE_mask | fcsr_FLAGS_mask);
+      FCR31 |= (v & (fcsr_FS | fcsr_ENABLES_mask | fcsr_RM_mask));
+      test_fcsr(cpu, cia);
+      break;
+    case 31:  /* FP Control/Status Register */
+      FCR31 = v & ~fcsr_ZERO_mask;
+      test_fcsr(cpu, cia);
+      break;
+    }
+}
 
-#ifdef DEBUG
-  printf ("DBG: Equal: %s: op1 = 0x%s : op2 = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op1), pr_addr (op2));
-#endif /* DEBUG */
+void
+update_fcsr (sim_cpu *cpu,
+	     address_word cia,
+	     sim_fpu_status status)
+{
+  FCSR &= ~fcsr_CAUSE_mask;
 
-  /* The format type should already have been checked:  */
+  if (status != 0)
+    {
+      unsigned int cause = 0;
+
+      /* map between sim_fpu codes and MIPS FCSR */
+      if (status & (sim_fpu_status_invalid_snan
+		    | sim_fpu_status_invalid_isi
+		    | sim_fpu_status_invalid_idi
+		    | sim_fpu_status_invalid_zdz
+		    | sim_fpu_status_invalid_imz
+		    | sim_fpu_status_invalid_cmp
+		    | sim_fpu_status_invalid_sqrt
+		    | sim_fpu_status_invalid_cvi))
+	cause |= (1 << IO);
+      if (status & sim_fpu_status_invalid_div0)
+	cause |= (1 << DZ);
+      if (status & sim_fpu_status_overflow)
+	cause |= (1 << OF);
+      if (status & sim_fpu_status_underflow)
+	cause |= (1 << UF);
+      if (status & sim_fpu_status_inexact)
+	cause |= (1 << IR);
+#if 0 /* Not yet.  */
+      /* Implicit clearing of other bits by unimplemented done by callers. */
+      if (status & sim_fpu_status_unimplemented)
+	cause |= (1 << UO);
+#endif
+
+      FCSR |= (cause << fcsr_CAUSE_shift);
+      test_fcsr (cpu, cia);
+      FCSR |= ((cause & ~(1 << UO)) << fcsr_FLAGS_shift);
+    }
+  return;
+}
+
+
+/* Comparison operations.  */
+
+static sim_fpu_status
+fp_test(unsigned64 op1,
+	unsigned64 op2,
+	FP_formats fmt,
+	int abs,
+	int cond,
+	int *condition)
+{
+  sim_fpu wop1;
+  sim_fpu wop2;
+  sim_fpu_status status = 0;
+  int  less, equal, unordered;
+
+  /* The format type has already been checked:  */
   switch (fmt)
     {
     case fmt_single:
       {
-	sim_fpu wop1;
-	sim_fpu wop2;
 	sim_fpu_32to (&wop1, op1);
 	sim_fpu_32to (&wop2, op2);
-	boolean = sim_fpu_is_eq (&wop1, &wop2);
 	break;
       }
     case fmt_double:
       {
-	sim_fpu wop1;
-	sim_fpu wop2;
 	sim_fpu_64to (&wop1, op1);
 	sim_fpu_64to (&wop2, op2);
-	boolean = sim_fpu_is_eq (&wop1, &wop2);
 	break;
       }
     default:
@@ -440,12 +476,60 @@ Equal (op1, op2, fmt)
       abort ();
     }
 
-#ifdef DEBUG
-  printf ("DBG: Equal: returning %d (format = %s)\n",
-	  boolean, fpu_format_name (fmt));
-#endif /* DEBUG */
+  if (sim_fpu_is_nan (&wop1) || sim_fpu_is_nan (&wop2))
+    {
+      if ((cond & (1 << 3)) ||
+	  sim_fpu_is_snan (&wop1) || sim_fpu_is_snan (&wop2))
+	status = sim_fpu_status_invalid_snan;
+      less = 0;
+      equal = 0;
+      unordered = 1;
+    }
+  else
+    {
+      if (abs)
+	{
+	  status |= sim_fpu_abs (&wop1, &wop1);
+	  status |= sim_fpu_abs (&wop2, &wop2);
+	}
+      equal = sim_fpu_is_eq (&wop1, &wop2);
+      less = !equal && sim_fpu_is_lt (&wop1, &wop2);
+      unordered = 0;
+    }
+  *condition = (((cond & (1 << 2)) && less)
+		|| ((cond & (1 << 1)) && equal)
+		|| ((cond & (1 << 0)) && unordered));
+  return status;
+}
 
-  return (boolean);
+void
+fp_cmp(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op1,
+       unsigned64 op2,
+       FP_formats fmt,
+       int abs,
+       int cond,
+       int cc)
+{
+  sim_fpu_status status = 0;
+
+  /* The format type should already have been checked: */
+  switch (fmt)
+    {
+    case fmt_single:
+    case fmt_double:
+      {
+	int result;
+	status = fp_test(op1, op2, fmt, abs, cond, &result);
+	update_fcsr (cpu, cia, status);
+	SETFCC (cc, result);
+	break;
+      }
+    default:
+      sim_io_eprintf (SD, "Bad switch\n");
+      abort ();
+    }
 }
 
 
@@ -612,6 +696,8 @@ fp_sqrt(sim_cpu *cpu,
   return fp_unary(cpu, cia, &sim_fpu_sqrt, op, fmt);
 }
 
+
+/* Conversion operations.  */
 
 uword64
 convert (sim_cpu *cpu,
