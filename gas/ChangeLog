@@ -1,3 +1,8 @@
+2002-09-16  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* dwarf2dbg.c (out_debug_abbrev): Add support for the DW_AT_name field.
+	(out_debug_info): Likewise.
+
 2002-09-16  Bruno Haible  <bruno@clisp.org>
 
 	* config/tc-i386.h (ELF_TARGET_FORMAT): New macro.
