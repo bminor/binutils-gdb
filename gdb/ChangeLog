@@ -1,3 +1,7 @@
+2004-05-25  Nick Roberts  <nickrob@gnu.org>
+
+	* gdb-mi.el: New file.
+
 2004-05-25  Andrew Cagney  <cagney@gnu.org>
 
 	* inftarg.c: Include "observer.h".
