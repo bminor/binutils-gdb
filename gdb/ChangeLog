@@ -1,3 +1,9 @@
+2004-11-10  msnyder  <msnyder@redhat.com>
+
+	* rs6000-tdep.c (skip_prologue): After saving lr_offset, 
+	must invalidate lr_reg (so we don't try to save it again).  
+	Ditto for cr_offset and cr_reg.
+
 2004-11-05  Jon Beniston <jon@beniston.com>
 
 	* remote.c (putpkt_binary) Fix PR gdb/1806. Send an ACK 

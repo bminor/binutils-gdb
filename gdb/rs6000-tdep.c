@@ -981,7 +981,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (lr_reg != -1 &&
+      else if (lr_reg >= 0 &&
 	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
 	       (((op & 0xffff0000) == (lr_reg | 0xf8010000)) ||
 		/* stw Rx, NUM(r1) */
@@ -991,7 +991,9 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	{	/* where Rx == lr */
 	  fdata->lr_offset = offset;
 	  fdata->nosavedpc = 0;
-	  lr_reg = 0;
+	  /* Invalidate lr_reg, but don't set it to -1.
+	     That would mean that it had never been set.  */
+	  lr_reg = -2;
 	  if ((op & 0xfc000003) == 0xf8000000 ||	/* std */
 	      (op & 0xfc000000) == 0x90000000)		/* stw */
 	    {
@@ -1001,7 +1003,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (cr_reg != -1 &&
+      else if (cr_reg >= 0 &&
 	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
 	       (((op & 0xffff0000) == (cr_reg | 0xf8010000)) ||
 		/* stw Rx, NUM(r1) */
@@ -1010,7 +1012,9 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 		((op & 0xffff0000) == (cr_reg | 0x94010000))))
 	{	/* where Rx == cr */
 	  fdata->cr_offset = offset;
-	  cr_reg = 0;
+	  /* Invalidate cr_reg, but don't set it to -1.
+	     That would mean that it had never been set.  */
+	  cr_reg = -2;
 	  if ((op & 0xfc000003) == 0xf8000000 ||
 	      (op & 0xfc000000) == 0x90000000)
 	    {
