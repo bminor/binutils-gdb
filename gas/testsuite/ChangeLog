@@ -1,3 +1,6 @@
+
+	* Makefile.in (distclean): Remove site config files and gas.sum.
+
 Fri May 27 12:24:18 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* gas/m68k/disperr.s: Use % for registers.
