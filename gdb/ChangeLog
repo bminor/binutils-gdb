@@ -1,5 +1,9 @@
 2003-12-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-sol2-tdep.c (i386_sol2_mcontext_addr): New function.
+	(i386_sol2_init_abi): Initialize TDEP->sigcontext_addr,
+	TDEP->sc_reg_offset and TDEP->sc_num_regs.
+
 	* i386-tdep.h (i386_regnum): Add I386_CS_REGNUM and
 	I386_SS_REGNUM.
 
