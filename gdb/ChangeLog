@@ -1,3 +1,24 @@
+2000-02-18  Jimmy Guo  <guo@cup.hp.com>
+
+	* buildsym.h (add_free_pendings): Declare.
+	* buildsym.c (add_free_pendings): New function.
+	(make_blockvector): 32x64 fix using longest_local_hex_string().
+	(start_subfile): initialize variable 'subfile'.
+
+2000-02-18  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh: Make the `default' field really default to zero, as
+ 	documented.
+
+	Bring COERCE_FLOAT_TO_DOUBLE under gdbarch's control.
+	* valops.c (COERCE_FLOAT_TO_DOUBLE): Rework definition to be
+	more function-like.
+	* gdbarch.sh (coerce_float_to_double): New entry, replacing macro.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* tm-alpha.h, tm-fr30.h, tm-m32r.h, tm-mips.h, tm-hppa.h,
+ 	tm-rs6000.h, tm-sh.h, tm-sparc.h (COERCE_FLOAT_TO_DOUBLE): Change
+ 	definitions.
+
 2000-02-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote.c (remote_async_detach): Use target_mourn_inferior(), to
