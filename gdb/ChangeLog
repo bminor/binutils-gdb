@@ -1,3 +1,15 @@
+2003-06-16  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (deprecated_get_next_frame_hack): Declare.
+	* frame.c (legacy_saved_regs_prev_register): Only require
+	DEPRECATED_FRAME_INIT_SAVED_REGS when it is needed.  Assert that
+	there are always saved regs.
+	(deprecated_generic_get_saved_register): Do not require
+	DEPRECATED_FRAME_INIT_SAVED_REGS.
+	(legacy_get_prev_frame): Do not require DEPRECATED_FRAME_CHAIN,
+	use frame ID unwind instead.
+	(deprecated_get_next_frame_hack): New function.
+
 2003-06-16  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c (h8300_push_arguments): Remove.  Substitute by...

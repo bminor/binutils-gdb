@@ -993,14 +993,13 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
   struct frame_info *frame = next_frame->prev;
   gdb_assert (frame != NULL);
 
-  /* Only (older) architectures that implement the
-     DEPRECATED_FRAME_INIT_SAVED_REGS method should be using this
-     function.  */
-  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
-
-  /* Load the saved_regs register cache.  */
   if (get_frame_saved_regs (frame) == NULL)
-    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+    {
+      /* If nothing's initialized the saved regs, do it now.  */
+      gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+      gdb_assert (get_frame_saved_regs (frame) != NULL);
+    }
 
   if (get_frame_saved_regs (frame) != NULL
       && get_frame_saved_regs (frame)[regnum] != 0)
@@ -1111,8 +1110,6 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 {
   if (!target_has_registers)
     error ("No registers.");
-
-  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 
   /* Normal systems don't optimize out things with register numbers.  */
   if (optimized != NULL)
@@ -1265,6 +1262,12 @@ get_next_frame (struct frame_info *this_frame)
     return this_frame->next;
   else
     return NULL;
+}
+
+struct frame_info *
+deprecated_get_next_frame_hack (struct frame_info *this_frame)
+{
+  return this_frame->next;
 }
 
 /* Flush the entire frame cache.  */
@@ -1501,6 +1504,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
     /* FIXME: 2002-11-09: There isn't any reason to special case this
        edge condition.  Instead the per-architecture code should hande
        it locally.  */
+    /* FIXME: cagney/2003-06-16: This returns the inner most stack
+       address for the previous frame, that, however, is wrong.  It
+       should be the inner most stack address for the previous to
+       previous frame.  This is because it is the previous to previous
+       frame's innermost stack address that is constant through out
+       the lifetime of the previous frame (trust me :-).  */
     address = get_frame_base (this_frame);
   else
     {
@@ -1519,8 +1528,29 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
-      address = DEPRECATED_FRAME_CHAIN (this_frame);
+      if (DEPRECATED_FRAME_CHAIN_P ())
+	address = DEPRECATED_FRAME_CHAIN (this_frame);
+      else
+	{
+	  /* Someone is part way through coverting an old architecture
+             to the new frame code.  Implement FRAME_CHAIN the way the
+             new frame will.  */
+	  /* Find PREV frame's unwinder.  */
+	  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						  frame_pc_unwind (this_frame));
+	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	     type in the frame, the unwinder's type should be returned
+	     directly.  Unfortunatly, legacy code, called by
+	     legacy_get_prev_frame, explicitly set the frames type
+	     using the method deprecated_set_frame_type().  */
+	  prev->type = prev->unwind->type;
+	  /* Find PREV frame's ID.  */
+	  prev->unwind->this_id (this_frame,
+				 &prev->prologue_cache,
+				 &prev->this_id.value);
+	  prev->this_id.p = 1;
+	  address = prev->this_id.value.stack_addr;
+	}
 
       if (!legacy_frame_chain_valid (address, this_frame))
 	{
@@ -1663,9 +1693,13 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   /* Initialize the code used to unwind the frame PREV based on the PC
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
-     use that to decide how the frame should be unwound.  */
-  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					  get_frame_pc (prev));
+     use that to decide how the frame should be unwound.
+
+     If there isn't a FRAME_CHAIN, the code above will have already
+     done this.  */
+  if (prev->unwind == NULL)
+    prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					    get_frame_pc (prev));
 
   /* If the unwinder provides a frame type, use it.  Otherwize
      continue on to that heuristic mess.  */
@@ -1673,6 +1707,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
     {
       prev->type = prev->unwind->type;
       if (prev->type == NORMAL_FRAME)
+	/* FIXME: cagney/2003-06-16: would get_frame_pc() be better?  */
 	prev->this_id.value.code_addr
 	  = get_pc_function_start (prev->this_id.value.code_addr);
       if (frame_debug)
