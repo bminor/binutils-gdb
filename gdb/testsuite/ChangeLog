@@ -1,5 +1,10 @@
 2004-09-14  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.threads/killed.c: Include <stdlib.h>.
+	* gdb.threads/pthreads.c: Likewise.
+
+2004-09-14  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.threads/killed.c: Add copyright notice.
 
 2004-09-10  Jason Molenda  (jmolenda@apple.com)
