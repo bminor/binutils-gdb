@@ -1380,6 +1380,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
       Elf_Internal_Sym *sym;
       asection *sec;
       bfd_vma relocation;
+      bfd_boolean unresolved_reloc;
       bfd_reloc_status_type r;
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1395,6 +1396,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
       h = NULL;
       sym = NULL;
       sec = NULL;
+      unresolved_reloc = FALSE;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -1407,71 +1409,29 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  relocation = 0;
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if (((r_type == R_68K_PLT8
-		    || r_type == R_68K_PLT16
-		    || r_type == R_68K_PLT32
-		    || r_type == R_68K_PLT8O
-		    || r_type == R_68K_PLT16O
-		    || r_type == R_68K_PLT32O)
-		   && h->plt.offset != (bfd_vma) -1
-		   && elf_hash_table (info)->dynamic_sections_created)
-		  || ((r_type == R_68K_GOT8O
-		       || r_type == R_68K_GOT16O
-		       || r_type == R_68K_GOT32O
-		       || ((r_type == R_68K_GOT8
-			    || r_type == R_68K_GOT16
-			    || r_type == R_68K_GOT32)
-			   && strcmp (h->root.root.string,
-				      "_GLOBAL_OFFSET_TABLE_") != 0))
-		      && (WILL_CALL_FINISH_DYNAMIC_SYMBOL
-			  (elf_hash_table (info)->dynamic_sections_created,
-			   info->shared, h))
-		      && (! info->shared
-			  || (! info->symbolic
-			      && h->dynindx != -1
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_FORCED_LOCAL) == 0)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
-		  || (info->shared
-		      && ((! info->symbolic && h->dynindx != -1)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && ((input_section->flags & SEC_ALLOC) != 0
-			  /* DWARF will emit R_68K_32 relocations in its
-			     sections against symbols defined externally
-			     in shared libraries.  We can't do anything
-			     with them here.  */
-			  || ((input_section->flags & SEC_DEBUGGING) != 0
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
-		      && (r_type == R_68K_8
-			  || r_type == R_68K_16
-			  || r_type == R_68K_32
-			  || r_type == R_68K_PC8
-			  || r_type == R_68K_PC16
-			  || r_type == R_68K_PC32)))
-		{
-		  /* In these cases, we don't need the relocation
-		     value.  We check specially because in some
-		     obscure cases sec->output_section will be NULL.  */
-		  relocation = 0;
-		}
+	      if (sec->output_section == NULL)
+		/* Set a flag that will be cleared later if we find a
+		   relocation value for this symbol.  output_section
+		   is typically NULL for symbols satisfied by a shared
+		   library.  */
+		unresolved_reloc = TRUE;
 	      else
 		relocation = (h->root.u.def.value
 			      + sec->output_section->vma
 			      + sec->output_offset);
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
+	    ;
 	  else if (info->shared
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
+	    ;
 	  else
 	    {
 	      if (!(info->callbacks->undefined_symbol
@@ -1480,7 +1440,6 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		     (!info->shared || info->no_undefined
 		      || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
-	      relocation = 0;
 	    }
 	}
 
@@ -1546,6 +1505,8 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			h->got.offset |= 1;
 		      }
 		  }
+		else
+		  unresolved_reloc = FALSE;
 	      }
 	    else
 	      {
@@ -1628,6 +1589,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (splt->output_section->vma
 			+ splt->output_offset
 			+ h->plt.offset);
+	  unresolved_reloc = FALSE;
 	  break;
 
 	case R_68K_PLT8O:
@@ -1644,6 +1606,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 
 	  relocation = h->plt.offset;
+	  unresolved_reloc = FALSE;
 
 	  /* This relocation does not use the addend.  */
 	  rel->r_addend = 0;
@@ -1790,39 +1753,58 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
+      if (unresolved_reloc
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
+	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
+	{
+	  (*_bfd_error_handler)
+	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
+	     bfd_archive_filename (input_bfd),
+	     bfd_get_section_name (input_bfd, input_section),
+	     (long) rel->r_offset,
+	     h->root.root.string);
+	  return FALSE;
+	}
+
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, rel->r_addend);
 
       if (r != bfd_reloc_ok)
 	{
-	  switch (r)
-	    {
-	    default:
-	    case bfd_reloc_outofrange:
-	      abort ();
-	    case bfd_reloc_overflow:
-	      {
-		const char *name;
+	  const char *name;
 
-		if (h != NULL)
-		  name = h->root.root.string;
-		else
-		  {
-		    name = bfd_elf_string_from_elf_section (input_bfd,
-							    symtab_hdr->sh_link,
-							    sym->st_name);
-		    if (name == NULL)
-		      return FALSE;
-		    if (*name == '\0')
-		      name = bfd_section_name (input_bfd, sec);
-		  }
-		if (!(info->callbacks->reloc_overflow
-		      (info, name, howto->name, (bfd_vma) 0,
-		       input_bfd, input_section, rel->r_offset)))
-		  return FALSE;
-	      }
-	      break;
+	  if (h != NULL)
+	    name = h->root.root.string;
+	  else
+	    {
+	      name = bfd_elf_string_from_elf_section (input_bfd,
+						      symtab_hdr->sh_link,
+						      sym->st_name);
+	      if (name == NULL)
+		return FALSE;
+	      if (*name == '\0')
+		name = bfd_section_name (input_bfd, sec);
+	    }
+
+	  if (r == bfd_reloc_overflow)
+	    {
+	      if (!(info->callbacks->reloc_overflow
+		    (info, name, howto->name, (bfd_vma) 0,
+		     input_bfd, input_section, rel->r_offset)))
+		return FALSE;
+	    }
+	  else
+	    {
+	      (*_bfd_error_handler)
+		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
+		 bfd_archive_filename (input_bfd),
+		 bfd_get_section_name (input_bfd, input_section),
+		 (long) rel->r_offset, name, (int) r);
+	      return FALSE;
 	    }
 	}
     }
