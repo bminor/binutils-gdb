@@ -1,3 +1,7 @@
+Tue Mar 28 11:52:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (print_gdb_version): Bump copyright year to 2000.
+
 Tue Mar 28 10:13:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Glen McCready to write after approval list.
