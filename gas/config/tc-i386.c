@@ -681,10 +681,10 @@ md_assemble (line)
 
     /* There may be operands to parse. */
     if (*l != END_OF_INSN &&
-    /* For string instructions, we ignore any operands if given.  This
-		       kludges, for example, 'rep/movsb %ds:(%esi), %es:(%edi)' where
-		       the operands are always going to be the same, and are not really
-		       encoded in machine code. */
+	/* For string instructions, we ignore any operands if given.  This
+	   kludges, for example, 'rep/movsb %ds:(%esi), %es:(%edi)' where
+	   the operands are always going to be the same, and are not really
+	   encoded in machine code. */
 	!IS_STRING_INSTRUCTION (current_templates->
 				start->base_opcode))
       {
@@ -778,10 +778,11 @@ md_assemble (line)
   }
 
   /* Now we've parsed the opcode into a set of templates, and have the
-	   operands at hand.
-	   Next, we find a template that matches the given insn,
-	   making sure the overlap of the given operands types is consistent
-	   with the template operand types. */
+     operands at hand.
+
+     Next, we find a template that matches the given insn,
+     making sure the overlap of the given operands types is consistent
+     with the template operand types. */
 
 #define MATCH(overlap,given_type) \
 	(overlap && \
@@ -789,18 +790,18 @@ md_assemble (line)
 	 == (given_type & (JumpAbsolute|BaseIndex|Mem8)))
 
   /* If m0 and m1 are register matches they must be consistent
-	       with the expected operand types t0 and t1.
-	       That is, if both m0 & m1 are register matches
-	       i.e. ( ((m0 & (Reg)) && (m1 & (Reg)) ) ?
-	       then, either 1. or 2. must be true:
-	       1. the expected operand type register overlap is null:
-	       (t0 & t1 & Reg) == 0
-	       AND
-	       the given register overlap is null:
-	       (m0 & m1 & Reg) == 0
-	       2. the expected operand type register overlap == the given
-	       operand type overlap:  (t0 & t1 & m0 & m1 & Reg).
-	       */
+     with the expected operand types t0 and t1.
+     That is, if both m0 & m1 are register matches
+     i.e. ( ((m0 & (Reg)) && (m1 & (Reg)) ) ?
+     then, either 1. or 2. must be true:
+     1. the expected operand type register overlap is null:
+     (t0 & t1 & Reg) == 0
+     AND
+     the given register overlap is null:
+     (m0 & m1 & Reg) == 0
+     2. the expected operand type register overlap == the given
+     operand type overlap:  (t0 & t1 & m0 & m1 & Reg).
+     */
 #define CONSISTENT_REGISTER_MATCH(m0, m1, t0, t1) \
 	    ( ((m0 & (Reg)) && (m1 & (Reg))) ? \
 	     ( ((t0 & t1 & (Reg)) == 0 && (m0 & m1 & (Reg)) == 0) || \
@@ -875,7 +876,7 @@ md_assemble (line)
 		  continue;
 	      }
 	    /* found either forward/reverse 2 or 3 operand match here:
-					   slip through to break */
+	       slip through to break */
 	  }
 	break;			/* we've found a match; break out of loop */
       }				/* for (t = ... */
@@ -890,12 +891,12 @@ md_assemble (line)
     t = &i.tm;			/* alter new copy of template */
 
     /* If there's no opcode suffix we try to invent one based on register
-			   operands. */
+       operands. */
     if (!i.suffix && i.reg_operands)
       {
 	/* We take i.suffix from the LAST register operand specified.  This
-				   assumes that the last register operands is the destination register
-				   operand. */
+	   assumes that the last register operands is the destination register
+	   operand. */
 	int o;
 	for (o = 0; o < MAX_OPERANDS; o++)
 	  if (i.types[o] & Reg)
@@ -907,8 +908,8 @@ md_assemble (line)
       }
 
     /* Make still unresolved immediate matches conform to size of immediate
-			   given in i.suffix. Note:  overlap2 cannot be an immediate!
-			   We assume this. */
+       given in i.suffix. Note:  overlap2 cannot be an immediate!
+       We assume this. */
     if ((overlap0 & (Imm8 | Imm8S | Imm16 | Imm32))
 	&& overlap0 != Imm8 && overlap0 != Imm8S
 	&& overlap0 != Imm16 && overlap0 != Imm32)
@@ -956,8 +957,8 @@ md_assemble (line)
       }
 
     /* Finalize opcode.  First, we change the opcode based on the operand
-			   size given by i.suffix: we never have to change things for byte insns,
-			   or when no opcode suffix is need to size the operands. */
+       size given by i.suffix: we never have to change things for byte insns,
+       or when no opcode suffix is need to size the operands. */
 
     if (!i.suffix && (t->opcode_modifier & W))
       {
@@ -988,28 +989,28 @@ md_assemble (line)
     if (i.operands)
       {
 	/* If we found a reverse match we must alter the opcode direction bit
-				   found_reverse_match holds bit to set (different for int &
-				   float insns). */
+	   found_reverse_match holds bit to set (different for int &
+	   float insns). */
 
 	if (found_reverse_match)
 	  {
 	    t->base_opcode |= found_reverse_match;
 	  }
 
-	/*
-				  The imul $imm, %reg instruction is converted into
-				  imul $imm, %reg, %reg. */
+	/* The imul $imm, %reg instruction is converted into
+	   imul $imm, %reg, %reg. */
 	if (t->opcode_modifier & imulKludge)
 	  {
-	    i.regs[2] = i.regs[1];	/* Pretend we saw the 3 operand case. */
+	    /* Pretend we saw the 3 operand case. */
+	    i.regs[2] = i.regs[1];
 	    i.reg_operands = 2;
 	  }
 
 	/* Certain instructions expect the destination to be in the i.rm.reg
-				   field.  This is by far the exceptional case.  For these instructions,
-				   if the source operand is a register, we must reverse the i.rm.reg
-				   and i.rm.regmem fields.  We accomplish this by faking that the
-				   two register operands were given in the reverse order. */
+	   field.  This is by far the exceptional case.  For these
+	   instructions, if the source operand is a register, we must reverse
+	   the i.rm.reg and i.rm.regmem fields.  We accomplish this by faking
+	   that the two register operands were given in the reverse order. */
 	if ((t->opcode_modifier & ReverseRegRegmem) && i.reg_operands == 2)
 	  {
 	    unsigned int first_reg_operand = (i.types[0] & Reg) ? 0 : 1;
@@ -1046,30 +1047,31 @@ md_assemble (line)
 	else if (t->opcode_modifier & Seg3ShortForm)
 	  {
 	    /* 'push %fs' is 0x0fa0; 'pop %fs' is 0x0fa1.
-					   'push %gs' is 0x0fa8; 'pop %fs' is 0x0fa9.
-					   So, only if i.regs[0]->reg_num == 5 (%gs) do we need
-					   to change the opcode. */
+	       'push %gs' is 0x0fa8; 'pop %fs' is 0x0fa9.
+	       So, only if i.regs[0]->reg_num == 5 (%gs) do we need
+	       to change the opcode. */
 	    if (i.regs[0]->reg_num == 5)
 	      t->base_opcode |= 0x08;
 	  }
 	else if (t->opcode_modifier & Modrm)
 	  {
 	    /* The opcode is completed (modulo t->extension_opcode which must
-					   be put into the modrm byte.
-					   Now, we make the modrm & index base bytes based on all the info
-					   we've collected. */
+	       be put into the modrm byte.
+	       Now, we make the modrm & index base bytes based on all the info
+	       we've collected. */
 
 	    /* i.reg_operands MUST be the number of real register operands;
-					   implicit registers do not count. */
+	       implicit registers do not count. */
 	    if (i.reg_operands == 2)
 	      {
 		unsigned int source, dest;
 		source = (i.types[0] & (Reg | SReg2 | SReg3 | Control | Debug | Test)) ? 0 : 1;
 		dest = source + 1;
 		i.rm.mode = 3;
-		/* We must be careful to make sure that all segment/control/test/
-						   debug registers go into the i.rm.reg field (despite the whether
-						   they are source or destination operands). */
+		/* We must be careful to make sure that all
+		   segment/control/test/debug registers go into the i.rm.reg
+		   field (despite the whether they are source or destination
+		   operands). */
 		if (i.regs[dest]->reg_type & (SReg2 | SReg3 | Control | Debug | Test))
 		  {
 		    i.rm.reg = i.regs[dest]->reg_num;
@@ -1115,11 +1117,11 @@ md_assemble (line)
 		    else if (!i.base_reg && (i.types[o] & BaseIndex))
 		      {
 			/* There are three cases here.
-								   Case 1:  '<32bit disp>(,1)' -- indirect absolute.
-								   (Same as cases 2 & 3 with NO index register)
-								   Case 2:  <32bit disp> (,<index>) -- no base register with disp
-								   Case 3:  (, <index>)       --- no base register;
-								   no disp (must add 32bit 0 disp). */
+			   Case 1:  '<32bit disp>(,1)' -- indirect absolute.
+			   (Same as cases 2 & 3 with NO index register)
+			   Case 2:  <32bit disp> (,<index>) -- no base register with disp
+			   Case 3:  (, <index>)       --- no base register;
+			   no disp (must add 32bit 0 disp). */
 			i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 			i.rm.mode = 0;	/* 32bit mode */
 			i.bi.base = NO_BASE_REGISTER;
@@ -1167,8 +1169,8 @@ md_assemble (line)
 		      }
 		    if (fake_zero_displacement)
 		      {
-			/* Fakes a zero displacement assuming that i.types[o] holds
-								   the correct displacement size. */
+			/* Fakes a zero displacement assuming that i.types[o]
+			   holds the correct displacement size. */
 			exp = &disp_expressions[i.disp_operands++];
 			i.disps[o] = exp;
 			exp->X_seg = SEG_ABSOLUTE;
@@ -1194,7 +1196,7 @@ md_assemble (line)
 			    default_seg = one_byte_segment_defaults[seg_index];
 			  }
 			/* If the specified segment is not the default, use an
-								   opcode prefix to select it */
+			   opcode prefix to select it */
 			if (i.seg != default_seg)
 			  {
 			    if (i.prefixes == MAX_PREFIXES)
@@ -1209,24 +1211,24 @@ md_assemble (line)
 		  }
 
 		/* Fill in i.rm.reg or i.rm.regmem field with register operand
-						   (if any) based on t->extension_opcode. Again, we must be careful
-						   to make sure that segment/control/debug/test registers are coded
-						   into the i.rm.reg field. */
+		   (if any) based on t->extension_opcode. Again, we must be
+		   careful to make sure that segment/control/debug/test
+		   registers are coded into the i.rm.reg field. */
 		if (i.reg_operands)
 		  {
 		    unsigned int o =
 		    (i.types[0] & (Reg | SReg2 | SReg3 | Control | Debug | Test)) ? 0 :
 		    (i.types[1] & (Reg | SReg2 | SReg3 | Control | Debug | Test)) ? 1 : 2;
-		    /* If there is an extension opcode to put here, the register number
-							   must be put into the regmem field. */
+		    /* If there is an extension opcode to put here, the
+		       register number must be put into the regmem field. */
 		    if (t->extension_opcode != None)
 		      i.rm.regmem = i.regs[o]->reg_num;
 		    else
 		      i.rm.reg = i.regs[o]->reg_num;
 
 		    /* Now, if no memory operand has set i.rm.mode = 0, 1, 2
-							   we must set it to 3 to indicate this is a register operand
-							   int the regmem field */
+		       we must set it to 3 to indicate this is a register
+		       operand int the regmem field */
 		    if (!i.mem_operands)
 		      i.rm.mode = 3;
 		  }
@@ -1294,10 +1296,10 @@ md_assemble (line)
 	    break;
 	  default:
 	    /* It's a symbol; end frag & setup for relax.
-				   Make sure there are 6 chars left in the current frag; if not
-				   we'll have to start a new one. */
+	       Make sure there are 6 chars left in the current frag; if not
+	       we'll have to start a new one. */
 	    /* I caught it failing with obstack_room == 6,
-				   so I changed to <=   pace */
+	       so I changed to <=   pace */
 	    if (obstack_room (&frags) <= 6)
 	      {
 		frag_wane (frag_now);
@@ -2456,11 +2458,5 @@ tc_coff_fix2rtype (fixP)
 }
 
 #endif
-
-/*
- * Local Variables:
- * comment-column: 0
- * End:
- */
 
 /* end of tc-i386.c */
