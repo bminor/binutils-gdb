@@ -1,3 +1,10 @@
+Fri Sep 17 18:08:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Don't return an error when
+	performing a reloc against an undefined weak symbol.
+	* syms.c (bfd_print_symbol_vandf): Show value of BSF_WEAK rather
+	than obsolete BSF_EXPORT.
+
 Fri Sep 17 02:04:31 1993  John Gilmore  (gnu@cygnus.com)
 
 	* hosts/{alphaosf.h, amix.h, apollo68.h, apollov68.h,
