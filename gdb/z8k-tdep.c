@@ -88,50 +88,50 @@ examine_frame (pc, regs, sp)
   int regno;
 
   for (regno = 0; regno < NUM_REGS; regno++)
-   regs->regs[regno] = 0;
+    regs->regs[regno] = 0;
 
   while (IS_PUSHW (w) || IS_PUSHL (w))
-  {
-    /* work out which register is being pushed to where */
-    if (IS_PUSHL (w))
     {
-      regs->regs[w & 0xf] = offset;
-      regs->regs[(w & 0xf) + 1] = offset + 2;
-      offset += 4;
+      /* work out which register is being pushed to where */
+      if (IS_PUSHL (w))
+	{
+	  regs->regs[w & 0xf] = offset;
+	  regs->regs[(w & 0xf) + 1] = offset + 2;
+	  offset += 4;
+	}
+      else
+	{
+	  regs->regs[w & 0xf] = offset;
+	  offset += 2;
+	}
+      pc += 2;
+      w = read_memory_short (pc);
     }
-    else
-    {
-      regs->regs[w & 0xf] = offset;
-      offset += 2;
-    }
-    pc += 2;
-    w = read_memory_short (pc);
-  }
 
   if (IS_MOVE_FP (w))
-  {
-    /* We know the fp */
+    {
+      /* We know the fp */
 
-  }
+    }
   else if (IS_SUB_SP (w))
-  {
-    /* Subtracting a value from the sp, so were in a function
+    {
+      /* Subtracting a value from the sp, so were in a function
        which needs stack space for locals, but has no fp.  We fake up
        the values as if we had an fp */
-    regs->regs[FP_REGNUM] = sp;
-  }
+      regs->regs[FP_REGNUM] = sp;
+    }
   else
-  {
-    /* This one didn't have an fp, we'll fake it up */
-    regs->regs[SP_REGNUM] = sp;
-  }
+    {
+      /* This one didn't have an fp, we'll fake it up */
+      regs->regs[SP_REGNUM] = sp;
+    }
   /* stack pointer contains address of next frame */
   /*  regs->regs[fp_regnum()] = fp;*/
   regs->regs[SP_REGNUM] = sp;
   return pc;
 }
 
-CORE_ADDR 
+CORE_ADDR
 z8k_skip_prologue (start_pc)
      CORE_ADDR start_pc;
 {
@@ -140,7 +140,7 @@ z8k_skip_prologue (start_pc)
   return examine_frame (start_pc, &dummy, 0);
 }
 
-CORE_ADDR 
+CORE_ADDR
 addr_bits_remove (x)
      CORE_ADDR x;
 {
@@ -180,7 +180,7 @@ init_frame_pc ()
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-void 
+void
 get_frame_saved_regs (frame_info, frame_saved_regs)
      struct frame_info *frame_info;
      struct frame_saved_regs *frame_saved_regs;
@@ -197,13 +197,13 @@ get_frame_saved_regs (frame_info, frame_saved_regs)
 
 }
 
-void 
+void
 z8k_push_dummy_frame ()
 {
   abort ();
 }
 
-int 
+int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
@@ -312,7 +312,6 @@ void
 print_register_hook (regno)
      int regno;
 {
-
   if ((regno & 1) == 0 && regno < 16)
     {
       unsigned short l[2];
@@ -327,10 +326,10 @@ print_register_hook (regno)
     {
       unsigned short l[4];
 
-      read_relative_register_raw_bytes (regno, l + 0);
-      read_relative_register_raw_bytes (regno + 1, l + 1);
-      read_relative_register_raw_bytes (regno + 2, l + 2);
-      read_relative_register_raw_bytes (regno + 3, l + 3);
+      read_relative_register_raw_bytes (regno, (char *) (l + 0));
+      read_relative_register_raw_bytes (regno + 1, (char *) (l + 1));
+      read_relative_register_raw_bytes (regno + 2, (char *) (l + 2));
+      read_relative_register_raw_bytes (regno + 3, (char *) (l + 3));
 
       printf ("\t");
       printf ("%04x%04x%04x%04x", l[0], l[1], l[2], l[3]);
@@ -373,14 +372,14 @@ register_convert_to_raw (regnum, to, from)
   to[3] = from[3];
 }
 
-void 
+void
 z8k_pop_frame ()
 {
 }
 
 struct cmd_list_element *setmemorylist;
 
-void 
+void
 z8k_set_pointer_size (newsize)
      int newsize;
 {
