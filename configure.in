@@ -564,7 +564,7 @@ case "${target}" in
   tic80-*-*)
     noconfigdirs="$noconfigdirs gcc gdb ld target-libio target-libg++ target-libstdc++ target-libgloss"
     ;;
-# end-sanitize-v850
+# end-sanitize-tic80
   v810-*-*)
     noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes target-libgloss"
     ;;
