@@ -1,3 +1,8 @@
+Fri Apr 12 16:40:56 1996  Rob Savoye  <rob@chinadoll>
+
+	* scripttempl/m68kcoff.sc: Remove default address for .data so
+	.text, .data, and .bss are all sequential.
+
 Thu Apr 11 12:05:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/m68kcoff.sc: Remove regions and simplify.
