@@ -1,3 +1,8 @@
+Thu Mar 30 12:09:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c: Re-indent.  Remove FIXMEs.
+	* gdbarch.sh: Re-sync with gdbarch.[hc].
+
 2000-03-29  Daniel Berlin  <dan@cgsoftware.com>
 
 	* minsyms.c (add_minsym_to_demangled_hash_table): New function.

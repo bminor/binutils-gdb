@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 
 # Architecture commands for GDB, the GNU debugger.
-# Copyright 1998-1999 Free Software Foundation, Inc.
+# Copyright 1998-2000 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -19,6 +19,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+compare_new ()
+{
+    file=$1
+    if ! test -r ${file}
+    then
+	echo "${file} missing? cp new-${file} ${file}" 1>&2
+    elif diff -c ${file} new-${file}
+    then
+	echo "${file} unchanged" 1>&2
+    else
+	echo "${file} has changed? cp new-${file} ${file}" 1>&2
+    fi
+}
+
+
+# Format of the input table
 read="class level macro returntype function formal actual attrib default init invalid_p fmt print print_p description"
 
 # dump out/verify the doco
@@ -259,6 +275,8 @@ fi
 copyright ()
 {
 cat <<EOF
+/* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
+
 /* Dynamic architecture support for GDB, the GNU debugger.
    Copyright 1998-1999, Free Software Foundation, Inc.
 
@@ -278,8 +296,6 @@ cat <<EOF
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-/* *INDENT-OFF* */ /* \`\`typedef (f)();'' confuses indent */
 
 /* This file was created with the aid of \`\`gdbarch.sh''.
 
@@ -742,15 +758,7 @@ extern void gdbarch_dump (void);
 EOF
 exec 1>&2
 #../move-if-change new-gdbarch.h gdbarch.h
-if ! test -r gdbarch.h
-then
-  echo "gdbarch.h missing? cp new-gdbarch.h gdbarch.h" 1>&2
-elif diff -c gdbarch.h new-gdbarch.h
-then
-  echo "gdbarch.h unchanged" 1>&2
-else
-  echo "gdbarch.h has changed? cp new-gdbarch.h gdbarch.h" 1>&2
-fi
+compare_new gdbarch.h
 
 
 #
@@ -1076,7 +1084,6 @@ struct gdbarch_tdep *
 gdbarch_tdep (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
-    /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\n");
   return gdbarch->tdep;
 }
@@ -1098,7 +1105,6 @@ do
         echo "  if (gdbarch->${function} == 0)"
         echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	echo "  if (gdbarch_debug >= 2)"
-	echo "    /* FIXME: gdb_std??? */"
 	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
         test "${actual}" = "-" && actual=""
        	if [ "${returntype}" = "void" ]
@@ -1131,7 +1137,6 @@ do
 	  echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	fi
 	echo "  if (gdbarch_debug >= 2)"
-	echo "    /* FIXME: gdb_std??? */"
 	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
 	echo "  return gdbarch->${function};"
 	echo "}"
@@ -1149,7 +1154,6 @@ do
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
 	echo "{"
 	echo "  if (gdbarch_debug >= 2)"
-	echo "    /* FIXME: gdb_std??? */"
 	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
 	echo "  return gdbarch->${function};"
 	echo "}"
@@ -1965,6 +1969,8 @@ extern void _initialize_gdbarch (void);
 void
 _initialize_gdbarch ()
 {
+  struct cmd_list_element *c;
+
   add_prefix_cmd ("endian", class_support, set_endian,
 		  "Set endianness of target.",
 		  &endianlist, "set endian ", 0, &setlist);
@@ -1991,25 +1997,26 @@ _initialize_gdbarch ()
   tm_print_insn_info.memory_error_func = dis_asm_memory_error;
   tm_print_insn_info.print_address_func = dis_asm_print_address;
 
-  add_show_from_set (add_set_cmd ("archdebug",
+  add_show_from_set (add_set_cmd ("arch",
 				  class_maintenance,
 				  var_zinteger,
 				  (char *)&gdbarch_debug,
 				  "Set architecture debugging.\n\\
-When non-zero, architecture debugging is enabled.", &setlist),
-		     &showlist);
+When non-zero, architecture debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
+  c = add_set_cmd ("archdebug",
+		   class_maintenance,
+		   var_zinteger,
+		   (char *)&gdbarch_debug,
+		   "Set architecture debugging.\n\\
+When non-zero, architecture debugging is enabled.", &setlist);
+
+  deprecate_cmd (c, "set debug arch");
+  deprecate_cmd (add_show_from_set (c, &showlist), "show debug arch");
 }
 EOF
 
 # close things off
 exec 1>&2
 #../move-if-change new-gdbarch.c gdbarch.c
-if ! test -r gdbarch.c
-then
-  echo "gdbarch.c missing? cp new-gdbarch.c gdbarch.c" 1>&2
-elif diff -c gdbarch.c new-gdbarch.c
-then
-  echo "gdbarch.c unchanged" 1>&2
-else
-  echo "gdbarch.c has changed? cp new-gdbarch.c gdbarch.c" 1>&2
-fi
+compare_new gdbarch.c
