@@ -2878,6 +2878,11 @@ read_args (pp, end)
     {
       rval = (struct type **) xmalloc (2 * sizeof (struct type *));
     }
+  else if (TYPE_CODE (types[n-1]) != TYPE_CODE_VOID)
+    {
+      rval = (struct type **) xmalloc ((n + 1) * sizeof (struct type *));
+      bzero (rval + n, sizeof (struct type *));
+    }
   else
     {
       rval = (struct type **) xmalloc (n * sizeof (struct type *));

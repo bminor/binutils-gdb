@@ -957,8 +957,8 @@ int typecmp(t1, t2)
   int i;
   
   if (t1[0]->code == TYPE_CODE_VOID) return 0;
-  if (!t1[1])return 0;
-  for (i = 1; t1[i]->code != TYPE_CODE_VOID; i++)
+  if (!t1[1]) return 0;
+  for (i = 1; t1[i] && t1[i]->code != TYPE_CODE_VOID; i++)
     {
       if (! t2[i]
 	  || t1[i]->code != t2[i]->type->code
@@ -967,6 +967,7 @@ int typecmp(t1, t2)
 	  return i+1;
 	}
     }
+  if (!t1[i]) return 0;
   return t2[i] ? i+1 : 0;
 }
 

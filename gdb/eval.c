@@ -386,7 +386,10 @@ evaluate_subexp (exp, pos, noside)
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
-      return value_assign (arg1, arg2);
+      if (binop_must_be_user_defined (arg1, arg2))
+	return value_x_binop (arg1, arg2, op, 0);
+      else
+	return value_assign (arg1, arg2);
 
     case BINOP_ASSIGN_MODIFY:
       (*pos) += 2;
@@ -395,7 +398,9 @@ evaluate_subexp (exp, pos, noside)
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
       op = exp->elts[pc + 1].opcode;
-      if (op == BINOP_ADD)
+      if (binop_must_be_user_defined (arg1, arg2))
+	return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op);
+      else if (op == BINOP_ADD)
 	arg2 = value_add (arg1, arg2);
       else if (op == BINOP_SUB)
 	arg2 = value_sub (arg1, arg2);
@@ -408,14 +413,20 @@ evaluate_subexp (exp, pos, noside)
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_add (arg1, arg2);
+      if (binop_must_be_user_defined (arg1, arg2))
+	return value_x_binop (arg1, arg2, op, 0);
+      else
+	return value_add (arg1, arg2);
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_sub (arg1, arg2);
+      if (binop_must_be_user_defined (arg1, arg2))
+	return value_x_binop (arg1, arg2, op, 0);
+      else
+	return value_sub (arg1, arg2);
 
     case BINOP_MUL:
     case BINOP_DIV:
@@ -429,78 +440,142 @@ evaluate_subexp (exp, pos, noside)
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_binop (arg1, arg2, op);
+      if (binop_must_be_user_defined (arg1, arg2))
+	return value_x_binop (arg1, arg2, op, 0);
+      else
+	return value_binop (arg1, arg2, op);
 
     case BINOP_SUBSCRIPT:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_subscript (arg1, arg2, op);
+      if (binop_must_be_user_defined (arg1, arg2))
+	return value_x_binop (arg1, arg2, op, 0);
+      else
+	return value_subscript (arg1, arg2, op);
       
     case BINOP_AND:
       arg1 = evaluate_subexp (exp, pos, noside);
-      tem = value_zerop (arg1);
-      arg2 = evaluate_subexp (exp, pos,
-			      (tem ? EVAL_SKIP : noside));
-      return value_from_long (builtin_type_int,
-			      !tem && !value_zerop (arg2));
+      if (binop_must_be_user_defined (arg1, arg2)) 
+	{
+	  arg2 = evaluate_subexp (exp, pos, noside);
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_zerop (arg1);
+	  arg2 = evaluate_subexp (exp, pos,
+				  (tem ? EVAL_SKIP : noside));
+	  return value_from_long (builtin_type_int,
+				  !tem && !value_zerop (arg2));
+	}
 
     case BINOP_OR:
       arg1 = evaluate_subexp (exp, pos, noside);
-      tem = value_zerop (arg1);
-      arg2 = evaluate_subexp (exp, pos,
-			      (!tem ? EVAL_SKIP : noside));
-      return value_from_long (builtin_type_int,
-			      !tem || !value_zerop (arg2));
+      if (binop_must_be_user_defined (arg1, arg2)) 
+	{
+	  arg2 = evaluate_subexp (exp, pos, noside);
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_zerop (arg1);
+	  arg2 = evaluate_subexp (exp, pos,
+				  (!tem ? EVAL_SKIP : noside));
+	  return value_from_long (builtin_type_int,
+				  !tem || !value_zerop (arg2));
+	}
 
     case BINOP_EQUAL:
       arg1 = evaluate_subexp (exp, pos, noside);
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      tem = value_equal (arg1, arg2);
-      return value_from_long (builtin_type_int, tem);
+      if (binop_must_be_user_defined (arg1, arg2))
+	{
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_equal (arg1, arg2);
+	  return value_from_long (builtin_type_int, tem);
+	}
 
     case BINOP_NOTEQUAL:
       arg1 = evaluate_subexp (exp, pos, noside);
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      tem = value_equal (arg1, arg2);
-      return value_from_long (builtin_type_int, ! tem);
+      if (binop_must_be_user_defined (arg1, arg2))
+	{
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_equal (arg1, arg2);
+	  return value_from_long (builtin_type_int, ! tem);
+	}
 
     case BINOP_LESS:
       arg1 = evaluate_subexp (exp, pos, noside);
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      tem = value_less (arg1, arg2);
-      return value_from_long (builtin_type_int, tem);
+      if (binop_must_be_user_defined (arg1, arg2))
+	{
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_less (arg1, arg2);
+	  return value_from_long (builtin_type_int, tem);
+	}
 
     case BINOP_GTR:
       arg1 = evaluate_subexp (exp, pos, noside);
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      tem = value_less (arg2, arg1);
-      return value_from_long (builtin_type_int, tem);
+      if (binop_must_be_user_defined (arg1, arg2))
+	{
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_less (arg2, arg1);
+	  return value_from_long (builtin_type_int, tem);
+	}
 
     case BINOP_GEQ:
       arg1 = evaluate_subexp (exp, pos, noside);
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      tem = value_less (arg1, arg2);
-      return value_from_long (builtin_type_int, ! tem);
+      if (binop_must_be_user_defined (arg1, arg2))
+	{
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else
+	{
+	  tem = value_less (arg1, arg2);
+	  return value_from_long (builtin_type_int, ! tem);
+	}
 
     case BINOP_LEQ:
       arg1 = evaluate_subexp (exp, pos, noside);
       arg2 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      tem = value_less (arg2, arg1);
-      return value_from_long (builtin_type_int, ! tem);
+      if (binop_must_be_user_defined (arg1, arg2))
+	{
+	  return value_x_binop (arg1, arg2, op, 0);
+	}
+      else 
+	{
+	  tem = value_less (arg2, arg1);
+	  return value_from_long (builtin_type_int, ! tem);
+	}
 
     case BINOP_REPEAT:
       arg1 = evaluate_subexp (exp, pos, noside);
@@ -517,19 +592,28 @@ evaluate_subexp (exp, pos, noside)
       arg1 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_neg (arg1);
+      if (unop_must_be_user_defined (arg1))
+	return value_x_unop (arg1, op, 0);
+      else
+	return value_neg (arg1);
 
     case UNOP_LOGNOT:
       arg1 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_lognot (arg1);
+      if (unop_must_be_user_defined (arg1))
+	return value_x_unop (arg1, op, 0);
+      else
+	return value_lognot (arg1);
 
     case UNOP_ZEROP:
       arg1 = evaluate_subexp (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_from_long (builtin_type_int, value_zerop (arg1));
+      if (unop_must_be_user_defined (arg1))
+	return value_x_unop (arg1, op, 0);
+      else
+	return value_from_long (builtin_type_int, value_zerop (arg1));
 
     case UNOP_IND:
       arg1 = evaluate_subexp (exp, pos, noside);
@@ -584,34 +668,62 @@ evaluate_subexp (exp, pos, noside)
 
     case UNOP_PREINCREMENT:
       arg1 = evaluate_subexp (exp, pos, noside);
-      arg2 = value_add (arg1, value_from_long (builtin_type_char, 1));
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
-      return value_assign (arg1, arg2);
+      else if (unop_must_be_user_defined (arg1))
+	{
+	  return value_x_unop (arg1, op, 0);
+	}
+      else
+	{
+	  arg2 = value_add (arg1, value_from_long (builtin_type_char, 1));
+	  return value_assign (arg1, arg2);
+	}
 
     case UNOP_PREDECREMENT:
       arg1 = evaluate_subexp (exp, pos, noside);
-      arg2 = value_sub (arg1, value_from_long (builtin_type_char, 1));
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
-      return value_assign (arg1, arg2);
+      else if (unop_must_be_user_defined (arg1))
+	{
+	  return value_x_unop (arg1, op, 0);
+	}
+      else
+	{
+	  arg2 = value_sub (arg1, value_from_long (builtin_type_char, 1));
+	  return value_assign (arg1, arg2);
+	}
 
     case UNOP_POSTINCREMENT:
       arg1 = evaluate_subexp (exp, pos, noside);
-      arg2 = value_add (arg1, value_from_long (builtin_type_char, 1));
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
-      value_assign (arg1, arg2);
-      return arg1;
+      else if (unop_must_be_user_defined (arg1))
+	{
+	  return value_x_unop (arg1, op, 0);
+	}
+      else
+	{
+	  arg2 = value_add (arg1, value_from_long (builtin_type_char, 1));
+	  value_assign (arg1, arg2);
+	  return arg1;
+	}
 
     case UNOP_POSTDECREMENT:
       arg1 = evaluate_subexp (exp, pos, noside);
-      arg2 = value_sub (arg1, value_from_long (builtin_type_char, 1));
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
-      value_assign (arg1, arg2);
-      return arg1;
-
+      else if (unop_must_be_user_defined (arg1))
+	{
+	  return value_x_unop (arg1, op, 0);
+	}
+      else
+	{
+	  arg2 = value_sub (arg1, value_from_long (builtin_type_char, 1));
+	  value_assign (arg1, arg2);
+	  return arg1;
+	}
+	
     case OP_THIS:
       (*pos) += 1;
       return value_of_this (1);

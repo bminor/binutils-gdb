@@ -220,7 +220,7 @@ val_print (type, valaddr, address, stream)
 	    common:
 	      if (i < len)
 		{
-		  fprintf (stream, "& ");
+		  fputc ('&', stream);
 		  type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
 		  fprintf (stream, kind);
 		  if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
@@ -265,7 +265,7 @@ val_print (type, valaddr, address, stream)
 		}
 	      if (i < len)
 		{
-		  fprintf (stream, "& ");
+		  fputc ('&', stream);
 		  type_print_base (domain, stream, 0, 0);
 		  fprintf (stream, "::");
 		  fprintf (stream, "%s", TYPE_FIELD_NAME (domain, i));
@@ -517,7 +517,12 @@ type_print_method_args (args, prefix, varstring, stream)
       while (1)
 	{
 	  type_print (args[i++], "", stream, 0);
-	  if (args[i]->code != TYPE_CODE_VOID)
+	  if (!args[i]) 
+	    {
+	      fprintf (stream, " ...");
+	      break;
+	    }
+	  else if (args[i]->code != TYPE_CODE_VOID)
 	    {
 	      fprintf (stream, ", ");
 	    }
@@ -555,7 +560,9 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
       break;
 
     case TYPE_CODE_MEMBER:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
+      fputc (' ', stream);
       type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
 		       passed_a_ptr);
       fprintf (stream, "::");
@@ -748,8 +755,7 @@ type_print_base (type, stream, show, level)
 		  print_spaces (level + 4, stream);
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 		    fprintf (stream, "virtual ");
-		  type_print_base (TYPE_FN_FIELD_TYPE (f, j), stream, 0, level);
-		  type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
+		  type_print (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j))), "", stream, 0);
 		  if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
 		      && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
 		    type_print_method_args

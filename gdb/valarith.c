@@ -27,8 +27,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 START_FILE
 
-value value_x_binop ();
-
 value
 value_add (arg1, arg2)
 	value arg1, arg2;
@@ -65,7 +63,7 @@ value_add (arg1, arg2)
       return val;
     }
 
-  return value_x_binop (arg1, arg2, BINOP_ADD);
+  return value_binop (arg1, arg2, BINOP_ADD);
 }
 
 value
@@ -98,7 +96,7 @@ value_sub (arg1, arg2)
       return val;
     }
 
-  return value_x_binop (arg1, arg2, BINOP_SUB);
+  return value_binop (arg1, arg2, BINOP_SUB);
 }
 
 /* Return the value of ARRAY[IDX].  */
@@ -110,16 +108,43 @@ value_subscript (array, idx)
   return value_ind (value_add (array, idx));
 }
 
-/* Check to see if either argument is a structure.  If so, then
-   create an argument vector that calls arg1.operator @ (arg1,arg2)
-   and return that value (where '@' is any binary operator which
-   is legal for GNU C++).  If both args are scalar types then just
-   return value_binop().  */
+/* Check to see if either argument is a structure.  This is called so
+   we know whether to go ahead with the normal binop or look for a 
+   user defined function instead */
+
+int
+binop_must_be_user_defined (arg1, arg2)
+     value arg1, arg2;
+{
+  return (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_STRUCT
+	  || (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF
+	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_STRUCT)
+	  || (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_REF
+	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_STRUCT));
+}
+
+/* Check to see if argument is a structure.  This is called so
+   we know whether to go ahead with the normal unop or look for a 
+   user defined function instead */
+
+int unop_must_be_user_defined (arg1)
+     value arg1;
+{
+  return (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT
+	  || (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF
+	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_STRUCT));
+}
+
+/* We know either arg1 or arg2 is a structure, so try to find the right
+   user defined function.  Create an argument vector that calls 
+   arg1.operator @ (arg1,arg2) and return that value (where '@' is any
+   binary operator which is legal for GNU C++).  */
 
 value
-value_x_binop (arg1, arg2, op)
+value_x_binop (arg1, arg2, op, otherop)
      value arg1, arg2;
-     int op;
+     int op, otherop;
 {
   value * argvec;
   char *ptr;
@@ -128,49 +153,114 @@ value_x_binop (arg1, arg2, op)
   COERCE_ENUM (arg1);
   COERCE_ENUM (arg2);
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT
-      || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_STRUCT)
+  /* now we know that what we have to do is construct our
+     arg vector and find the right function to call it with.  */
+
+  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_STRUCT)
+    error ("friend functions not implemented yet");
+
+  argvec = (value *) alloca (sizeof (value) * 4);
+  argvec[1] = value_addr (arg1);
+  argvec[2] = arg2;
+  argvec[3] = 0;
+
+  /* make the right function name up */  
+  strcpy(tstr, "operator __");
+  ptr = tstr+9;
+  switch (op)
     {
-      /* now we know that what we have to do is construct our
-	 arg vector and find the right function to call it with.  */
-
-      if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_STRUCT)
-	error ("friend functions not implemented yet");
-
-      argvec = (value *) alloca (sizeof (value) * 4);
-      argvec[1] = value_addr (arg1);
-      argvec[2] = arg2;
-      argvec[3] = 0;
-
-      /* make the right function name up */  
-      strcpy(tstr,"operator __");
-      ptr = tstr+9;
-      switch (op)
+    case BINOP_ADD:	strcpy(ptr,"+"); break;
+    case BINOP_SUB:	strcpy(ptr,"-"); break;
+    case BINOP_MUL:	strcpy(ptr,"*"); break;
+    case BINOP_DIV:	strcpy(ptr,"/"); break;
+    case BINOP_REM:	strcpy(ptr,"%"); break;
+    case BINOP_LSH:	strcpy(ptr,"<<"); break;
+    case BINOP_RSH:	strcpy(ptr,">>"); break;
+    case BINOP_LOGAND:	strcpy(ptr,"&"); break;
+    case BINOP_LOGIOR:	strcpy(ptr,"|"); break;
+    case BINOP_LOGXOR:	strcpy(ptr,"^"); break;
+    case BINOP_AND:	strcpy(ptr,"&&"); break;
+    case BINOP_OR:	strcpy(ptr,"||"); break;
+    case BINOP_MIN:	strcpy(ptr,"<?"); break;
+    case BINOP_MAX:	strcpy(ptr,">?"); break;
+    case BINOP_ASSIGN:	strcpy(ptr,"="); break;
+    case BINOP_ASSIGN_MODIFY:	
+      switch (otherop)
 	{
-	case BINOP_ADD:	*ptr++ = '+'; *ptr = '\0'; break;
-	case BINOP_SUB:	*ptr++ = '-'; *ptr = '\0'; break;
-	case BINOP_MUL:	*ptr++ = '*'; *ptr = '\0'; break;
-	case BINOP_DIV:	*ptr++ = '/'; *ptr = '\0'; break;
-	case BINOP_REM:	*ptr++ = '%'; *ptr = '\0';break;
-	case BINOP_LSH:	*ptr++ = '<'; *ptr = '<'; break;
-	case BINOP_RSH:	*ptr++ = '>'; *ptr = '>'; break;
-	case BINOP_LOGAND:	*ptr++ = '&'; *ptr = '\0'; break;
-	case BINOP_LOGIOR:	*ptr++ = '|'; *ptr = '\0'; break;
-	case BINOP_LOGXOR:	*ptr++ = '^'; *ptr = '\0'; break;
-	case BINOP_AND:	*ptr++ = '&'; *ptr = '&'; break;
-	case BINOP_OR:	*ptr++ = '|'; *ptr = '|'; break;
-	case BINOP_MIN:	*ptr++ = '<'; *ptr = '?'; break;
-	case BINOP_MAX:	*ptr++ = '>'; *ptr = '?'; break;
+	case BINOP_ADD:      strcpy(ptr,"+="); break;
+	case BINOP_SUB:      strcpy(ptr,"-="); break;
+	case BINOP_MUL:      strcpy(ptr,"*="); break;
+	case BINOP_DIV:      strcpy(ptr,"/="); break;
+	case BINOP_REM:      strcpy(ptr,"%="); break;
+	case BINOP_LOGAND:   strcpy(ptr,"&="); break;
+	case BINOP_LOGIOR:   strcpy(ptr,"|="); break;
+	case BINOP_LOGXOR:   strcpy(ptr,"^="); break;
 	default:
 	  error ("Invalid binary operation specified.");
 	}
-      argvec[0] = value_struct_elt (arg1, argvec+1, tstr, "structure");
-      if (argvec[0])
-	return call_function (argvec[0], 2, argvec + 1);
-      else error ("member function %s not found", tstr);
+      break;
+    case BINOP_SUBSCRIPT: strcpy(ptr,"[]"); break;
+    case BINOP_EQUAL:	  strcpy(ptr,"=="); break;
+    case BINOP_NOTEQUAL:  strcpy(ptr,"!="); break;
+    case BINOP_LESS:      strcpy(ptr,"<"); break;
+    case BINOP_GTR:       strcpy(ptr,">"); break;
+    case BINOP_GEQ:       strcpy(ptr,">="); break;
+    case BINOP_LEQ:       strcpy(ptr,"<="); break;
+    default:
+      error ("Invalid binary operation specified.");
     }
+  argvec[0] = value_struct_elt (arg1, argvec+1, tstr, "structure");
+  if (argvec[0])
+    return call_function (argvec[0], 2, argvec + 1);
+  else error ("member function %s not found", tstr);
+}
 
-  return value_binop(arg1, arg2, op);
+/* We know that arg1 is a structure, so try to find a unary user
+   defined operator that matches the operator in question.  
+   Create an argument vector that calls arg1.operator @ (arg1)
+   and return that value (where '@' is (almost) any unary operator which
+   is legal for GNU C++).  */
+
+value
+value_x_unop (arg1, op)
+     value arg1;
+     int op;
+{
+  value * argvec;
+  char *ptr;
+  char tstr[13];
+  
+  COERCE_ENUM (arg1);
+
+  /* now we know that what we have to do is construct our
+     arg vector and find the right function to call it with.  */
+
+  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_STRUCT)
+    error ("friend functions not implemented yet");
+
+  argvec = (value *) alloca (sizeof (value) * 3);
+  argvec[1] = value_addr (arg1);
+  argvec[2] = 0;
+
+  /* make the right function name up */  
+  strcpy(tstr,"operator __");
+  ptr = tstr+9;
+  switch (op)
+    {
+    case UNOP_PREINCREMENT:	strcpy(ptr,"++"); break;
+    case UNOP_PREDECREMENT:	strcpy(ptr,"++"); break;
+    case UNOP_POSTINCREMENT:	strcpy(ptr,"++"); break;
+    case UNOP_POSTDECREMENT:	strcpy(ptr,"++"); break;
+    case UNOP_ZEROP:	strcpy(ptr,"!"); break;
+    case UNOP_LOGNOT:	strcpy(ptr,"~"); break;
+    case UNOP_NEG:	strcpy(ptr,"-"); break;
+    default:
+      error ("Invalid binary operation specified.");
+    }
+  argvec[0] = value_struct_elt (arg1, argvec+1, tstr, "structure");
+  if (argvec[0])
+    return call_function (argvec[0], 1, argvec + 1);
+  else error ("member function %s not found", tstr);
 }
 
 /* Perform a binary operation on two integers or two floats.
