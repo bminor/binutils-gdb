@@ -1,7 +1,7 @@
 2005-04-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* main.c: Update copyright year.
-	(captured_main): Avois using strcpy and strcat.
+	(captured_main): Avoid using strcpy and strcat.
 
 2005-04-01  Michael Snyder  <msnyder@redhat.com>
 
