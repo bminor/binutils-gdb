@@ -1467,6 +1467,9 @@ s_text (ignore)
   temp = get_absolute_expression ();
   subseg_set (text_section, (subsegT) temp);
   demand_empty_rest_of_line ();
+#ifdef OBJ_VMS
+  const_flag &= ~IN_DEFAULT_SECTION;
+#endif
 }				/* s_text() */
 
 
@@ -1580,7 +1583,9 @@ pseudo_set (symbolP)
 	symbolP->sy_value = exp;
       else
 	{
-	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (exp.X_add_symbol));
+	  symbolS *s = exp.X_add_symbol;
+
+	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (s));
 #if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
 	  if (ext)
 	    S_SET_EXTERNAL (symbolP);
@@ -1588,8 +1593,17 @@ pseudo_set (symbolP)
 	    S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
 	  S_SET_VALUE (symbolP,
-		       exp.X_add_number + S_GET_VALUE (exp.X_add_symbol));
-	  symbolP->sy_frag = exp.X_add_symbol->sy_frag;
+		       exp.X_add_number + S_GET_VALUE (s));
+	  symbolP->sy_frag = s->sy_frag;
+#ifdef BFD_ASSEMBLER
+	  /* In an expression, transfer the settings of these flags.
+	     The user can override later, of course.  */
+#define COPIED_SYMFLAGS	(BSF_FUNCTION)
+	  symbolP->bsym->flags |= s->bsym->flags & COPIED_SYMFLAGS;
+#endif
+#ifdef OBJ_COPY_SYMBOL_ATTRIBUTES
+	  OBJ_COPY_SYMBOL_ATTRIBUTES (symbolP, s);
+#endif
 	}
       break;
 
