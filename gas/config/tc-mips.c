@@ -10296,10 +10296,10 @@ mips_after_parse_args ()
       g_switch_value = 0;
     }
 
-  /* The following code determines the architecture, ABI and register
-     size.  Similar code was added to GCC 3.2 (see override_options()
-     in config/mips/mips.c).  The GAS and GCC code should be kept in
-     sync as much as possible.  */
+  /* The following code determines the architecture and register size.
+     Similar code was added to GCC 3.3 (see override_options() in
+     config/mips/mips.c).  The GAS and GCC code should be kept in sync
+     as much as possible.  */
 
   if (mips_arch_string != 0)
     mips_set_architecture (mips_parse_cpu ("-march", mips_arch_string));
