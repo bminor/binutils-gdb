@@ -1529,6 +1529,11 @@ alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) $(alpha_tdep_h) \
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(regcache_h) $(value_h) $(solib_svr4_h) $(alpha_tdep_h) \
 	$(alphabsd_tdep_h) $(nbsd_tdep_h) $(osabi_h)
+amd64fbsd-nat.o: amd64fbsd-nat.o $(defs_h) $(inferior_h) $(regcache_h) \
+	$(gdb_assert_h) $(gregset_h) $(x86_64_tdep_h)
+amd64fbsd-tdep.o: amd64fbsd-tdep.o $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
+	$(x86_64_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) \

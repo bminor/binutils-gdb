@@ -1,3 +1,14 @@
+2003-07-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.host: Add x86_64-*-freebsd*.
+	* configure.tgt: Add x86_64-*-freebsd*.
+	* Makefile.in (amd64fbsd-nat.o, amd64fbsd-tdep.o): New targets.
+	* amd64fbsd-nat.c: New file.
+	* amd64fbsd-tdep.c: New file.
+	* config/i386/nm-fbsd64.h: New file.
+	* config/i386/fbsd64.mh: New file.
+	* config/i386/fbsd64.mt: New file.
+
 2003-07-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* alpha-tdep.h (struct gdbarch_tdep): Add members `sc_pc_offset',
