@@ -6000,6 +6000,11 @@ tc_gen_reloc (section, fixp)
       return NULL;
     }
 
+   /* HACK: Since arm ELF uses Rel instead of Rela, encode the
+      vtable entry to be used in the relocation's section offset.  */
+   if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+     reloc->address = fixp->fx_offset;
+
   return reloc;
 }
 

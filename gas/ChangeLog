@@ -1,3 +1,8 @@
+1999-07-30  Catherine Moore  <clm@cygnus.com>
+
+	* config/tc-arm.c (tc_gen_reloc):  Record the vtable entry in
+	the relocation's section offset.
+
 1999-07-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* write.c (fixup_segment): Fix generic error check overflow test.
