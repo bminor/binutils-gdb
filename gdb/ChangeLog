@@ -1,3 +1,7 @@
+Fri Jul 14 09:49:47 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* procfs.c (procfs_ops): Fix typo in last change.
+
 Thu Jul 13 13:42:38 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* inftarg.c (child_thread_alive): New function to see if a
