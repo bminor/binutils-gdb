@@ -1,3 +1,10 @@
+2001-12-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldgram.y (vers_node): Support anonymous version tags.
+	* ldlang.c (lang_register_vers_node): Ensure anonymous version
+	tag is not defined together with non-anonymous versions.
+	* ld.texinfo: Document it.
+
 2001-12-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/tr.po: New file: Turkish translation.

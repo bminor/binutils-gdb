@@ -3246,6 +3246,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
          just linking a regular application.  */
       verdefs = asvinfo.verdefs;
 
+      /* Skip anonymous version tag.  */
+      if (verdefs != NULL && verdefs->vernum == 0)
+	verdefs = verdefs->next;
+
       if (verdefs == NULL)
 	_bfd_strip_section_from_output (info, s);
       else
@@ -4307,6 +4311,9 @@ elf_link_assign_sym_version (h, data)
 	  t->used = true;
 
 	  version_index = 1;
+	  /* Don't count anonymous version tag.  */
+	  if (sinfo->verdefs != NULL && sinfo->verdefs->vernum == 0)
+	    version_index = 0;
 	  for (pp = &sinfo->verdefs; *pp != NULL; pp = &(*pp)->next)
 	    ++version_index;
 	  t->vernum = version_index;

@@ -1061,7 +1061,11 @@ vers_nodes:
 	;
 
 vers_node:
-		VERS_TAG '{' vers_tag '}' ';'
+		'{' vers_tag '}' ';'
+		{
+		  lang_register_vers_node (NULL, $2, NULL);
+		}
+	|	VERS_TAG '{' vers_tag '}' ';'
 		{
 		  lang_register_vers_node ($1, $3, NULL);
 		}

@@ -1,5 +1,10 @@
 2001-12-18  Jakub Jelinek  <jakub@redhat.com>
 
+	* elflink.h (size_dynamic_sections): Skip anonymous version tag.
+	(elf_link_assign_sym_version): Don't count anonymous version tag.
+
+2001-12-18  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf-eh-frame.c (struct cie): Add make_lsda_relative.
 	(struct eh_cie_fde): Add lsda_encoding, lsda_offset,
 	make_lsda_relative.

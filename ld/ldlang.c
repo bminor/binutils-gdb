@@ -5031,6 +5031,16 @@ lang_register_vers_node (name, version, deps)
   struct bfd_elf_version_tree *t, **pp;
   struct bfd_elf_version_expr *e1;
 
+  if (name == NULL)
+    name = "";
+
+  if ((name[0] == '\0' && lang_elf_version_info != NULL)
+      || (lang_elf_version_info && lang_elf_version_info->name[0] == '\0'))
+    {
+      einfo (_("%X%P: anonymous version tag cannot be combined with other version tags\n"));
+      return;
+    }
+
   /* Make sure this node has a unique name.  */
   for (t = lang_elf_version_info; t != NULL; t = t->next)
     if (strcmp (t->name, name) == 0)
@@ -5067,8 +5077,13 @@ lang_register_vers_node (name, version, deps)
 
   version->deps = deps;
   version->name = name;
-  ++version_index;
-  version->vernum = version_index;
+  if (name[0] != '\0')
+    {
+      ++version_index;
+      version->vernum = version_index;
+    }
+  else
+    version->vernum = 0;
 
   for (pp = &lang_elf_version_info; *pp != NULL; pp = &(*pp)->next)
     ;
