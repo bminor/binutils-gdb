@@ -1,3 +1,8 @@
+2003-07-02  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.c: Revert change committed as part of trad-frame code
+	below.
+
 2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* breakpoint.c (insert_catchpoint): Make static.
