@@ -22,16 +22,18 @@
 #define EMULATION_ENVIRON "LDEMULATION"
 /* If in there look for the strings: */
 #define GLD_EMULATION_NAME "gld"
+#define GLD68K_EMULATION_NAME "gld68k"
 #define GLD960_EMULATION_NAME "gld960"
 #define LNK960_EMULATION_NAME "lnk960"
 /* Otherwise default to this emulation */
-#define DEFAULT_EMULATION GLD960_EMULATION_NAME
+#define DEFAULT_EMULATION GLD68K_EMULATION_NAME
 
 
 /* Look in this variable for a target format */
 #define TARGET_ENVIRON "GNUTARGET"
 /* If not there then choose this */
 #define GLD_TARGET "a.out-generic-big"
+#define GLD68K_TARGET "a.out-generic-big"
 #define LNK960_TARGET "coff-Intel-big"
 #define GLD960_TARGET "b.out.big"
 

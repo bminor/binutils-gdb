@@ -20,37 +20,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*
  * $Id$ 
  *
- * $Log$
- * Revision 1.1  1991/03/21 21:28:41  gumby
- * Initial revision
- *
- * Revision 1.2  1991/03/16  22:27:24  rich
- * fish
- *
- * Revision 1.1  1991/03/13  00:48:21  chrisb
- * Initial revision
- *
- * Revision 1.6  1991/03/10  09:31:26  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.5  1991/03/09  03:25:48  sac
- * Can now parse the -Ur flag
- *
- * Revision 1.4  1991/03/06  02:26:01  sac
- * Added support for constructor sections.
- * Remove parsing ambiguity.
- * Lint
- *
- * Revision 1.3  1991/02/22  17:15:13  sac
- * Added RCS keywords and copyrights
  *
 */
 
@@ -113,10 +82,11 @@ char *current_file;
 boolean ldgram_want_filename = true;
 boolean had_script = false;
 boolean force_make_executable = false;
-boolean ldgram_mustbe_filename = false;
-boolean ldgram_mustbe_symbolname = false;
 boolean ldgram_has_inputfile = false;
 
+boolean ldgram_in_expression = false;
+
+boolean ldgram_in_defsym = false;
 /* LOCALS */
 
 
@@ -171,7 +141,9 @@ boolean ldgram_has_inputfile = false;
 %token MEMORY 
 %token DSECT NOLOAD COPY INFO OVERLAY 
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
-%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_format
+%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S
+%token OPTION_format  OPTION_F
+
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X
 %token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT OPTION_defsym
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_A
@@ -195,14 +167,7 @@ file:	command_line  { lang_final(); };
 
 
 filename:
-	{
-	ldgram_mustbe_filename =true;
-	}
-	NAME
-	{
-	ldgram_mustbe_filename = false;
-	$$ = $2;
-	}
+  NAME;
 
 command_line:
 		command_line command_line_option
@@ -271,23 +236,23 @@ command_line_option:
 			{
 			/* Ignored */
 			}
-        |      OPTION_dp
+        |      	OPTION_dp
 			 {
 			  command_line.force_common_definition = true;
 			}
-        | OPTION_format NAME
-           {
-	     lang_add_target($2);
-           }
+        | 	OPTION_format NAME
+	           {
+			  lang_add_target($2);
+       		   }
 
-	| OPTION_Texp { hex_mode  =true; } 
-		  exp_head
+	| 	OPTION_Texp { hex_mode  =true; } 
+		  exp
 		{ lang_section_start($1, $3);
 		  hex_mode = false; }
 	
-	| OPTION_Aarch 
+	| 	OPTION_Aarch 
 		{ ldfile_add_arch($1); }
-	| OPTION_b NAME
+	|	 OPTION_b NAME
 			{
 			lang_add_target($2);
 			}
@@ -295,6 +260,11 @@ command_line_option:
 			{
 			ldfile_add_library_path($1);
 		}
+	|	OPTION_F
+		{
+		/* Ignore */
+		}
+
 	|	ifile_p1
 	|	input_list
 	|	OPTION_c filename
@@ -317,7 +287,15 @@ command_line_option:
 				lang_input_file_is_symbols_only_enum,
 				(char *)NULL);
 			}
-	|	OPTION_defsym assignment_with_nospaces
+	|	OPTION_defsym 
+			{
+			ldgram_in_defsym = true;
+			}
+			 assignment
+			{
+			ldgram_in_defsym = false;
+			}	
+
 	;
 
 
@@ -468,11 +446,6 @@ assign_op:
 end:	';' | ','
 	;
 
-assignment_with_nospaces:
-	{ ldgram_want_filename = false; }
-		assignment
-	{ ldgram_want_filename = true; }
-	;
 
 assignment:
 	
@@ -663,14 +636,18 @@ opt_things:
 	;
 
 exp_head:
-	{ ldgram_mustbe_symbolname = true; }
+		{ 
+		ldgram_in_expression = true; 
+		}
 	exp
-	{ ldgram_mustbe_symbolname = false; 
-	$$ = $2;
-	}
+		{
+		ldgram_in_expression = false; 
+		$$ = $2;
+		}
+	;
 
 opt_exp:
-		exp
+		exp_head
 			{ $$ = $1; }
 	|		{ $$= (etree_type *)NULL; }
 	;

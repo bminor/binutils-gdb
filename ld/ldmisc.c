@@ -18,40 +18,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
  * $Id$ 
- *
- * $Log$
- * Revision 1.2  1991/03/22 23:02:37  steve
- * Brought up to sync with Intel again.
- *
- * Revision 1.2  1991/03/15  18:45:55  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:48:30  chrisb
- * Initial revision
- *
- * Revision 1.7  1991/03/10  09:31:34  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.6  1991/03/09  03:31:01  sac
- * After a fatal info message, the output file is deleted.
- *
- * Revision 1.5  1991/03/06  21:59:54  sac
- * Made %C print function name if available
- *
- * Revision 1.4  1991/03/06  02:27:45  sac
- * Added support for linenumber printing via %C
- *
- * Revision 1.3  1991/02/22  17:15:03  sac
- * Added RCS keywords and copyrights
- *
  */
 
 /*
@@ -184,11 +150,21 @@ va_dcl
 	    fprintf(stderr,"command line");
 	  }
 	  else {
-	    fprintf(stderr,"%s:%u", ldfile_input_filename, lineno + 1);
+	    fprintf(stderr,"%s:%u", ldfile_input_filename, lineno );
 	  }
 	}
 	else {
-	  fprintf(stderr,"command line ");
+	  int ch;
+	  int n = 0;
+	  fprintf(stderr,"command (before <");
+	  ch = lex_input();
+	  while (ch != 0 && n < 10) {
+	    fprintf(stderr, "%c", ch);
+	    ch = lex_input();
+	    n++;
+	  }
+	  fprintf(stderr,")");
+	    
 	}
 	break;
       case 'C':

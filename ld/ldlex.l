@@ -19,41 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
  *  $Id$ 
- *
- * $Log$
- * Revision 1.1  1991/03/21 21:28:50  gumby
- * Initial revision
- *
- * Revision 1.3  1991/03/16  22:27:24  rich
- * fish
- *
- * Revision 1.2  1991/03/15  18:45:55  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:48:27  chrisb
- * Initial revision
- *
- * Revision 1.6  1991/03/10  09:31:32  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.5  1991/03/09  03:25:49  sac
- * Can now parse the -Ur flag
- *
- * Revision 1.4  1991/03/06  02:26:04  sac
- * Added support for constructor sections.
- * Remove parsing ambiguity.
- * Lint
- *
- * Revision 1.3  1991/02/22  17:15:14  sac
- * Added RCS keywords and copyrights
+
  *
 */
 
@@ -79,9 +45,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define input lex_input
 #define unput lex_unput
 int debug;
-extern boolean ldgram_want_filename;
-extern boolean ldgram_mustbe_filename;
-extern boolean ldgram_mustbe_symbolname;
+
+extern boolean ldgram_in_expression;
+extern boolean ldgram_in_defsym;
+
 static char *command_line;
 
 extern int fgetc();
@@ -138,16 +105,7 @@ extern char *ldfile_input_filename;
 int
 lex_input()
 {
-  /*
-     When we know that the next token must be a filename we force the 
-     input routine to return a '#' character, which will cause the special
-     filname regexp to match the following chars even if they don't look
-     much like a filename to any sane person.
-     */
-  if (ldgram_mustbe_filename) {
-    ldgram_mustbe_filename = false;
-    return '#';
-  }
+
 
   if (have_pushback > 0) 
     {
@@ -170,6 +128,7 @@ lex_input()
   }
   else thischar = 0;
   if(thischar == '\t') thischar = ' ';
+  if (thischar == '\n') { thischar = ' '; lineno++; }
   return thischar ;
 }
 
@@ -289,7 +248,6 @@ FILENAME	{FILENAMECHAR}+
 WHITE		[ \t]+
 
 %%
-"\n"		{ lineno++; }
 
 
 "\ -defsym" { return OPTION_defsym; }
@@ -343,6 +301,13 @@ WHITE		[ \t]+
 		 return OPTION_T;
 	       }
 
+"\ -F"{FILENAME}  {
+		 return OPTION_F;
+	       }
+"\ -F"          {
+		 return OPTION_F;
+	       }
+
 "\ -A"{FILENAME} {
                  yylval.name = buystring(yytext+3);
 		 return OPTION_Aarch;
@@ -394,7 +359,6 @@ WHITE		[ \t]+
     int ch;
     ch = input();
     while (ch != '*') {
-      if (ch == '\n') {lineno++; }
       ch = input();
     }
 
@@ -441,33 +405,45 @@ WHITE		[ \t]+
   yylval.name = buystring(p);
   return NAME;
 }
+{FILENAMECHAR} {
 
-
-{FILENAMECHAR} 	{
-
-int ch;
+  boolean loop = false;
+  /*
+    Tokenize a name, this is really pain, since a name can be a
+    filename or a symbol name. filenames have slashes and stuff whist
+    in an expression those things are seperate tokens. We hack this by
+    setting lang_in_expression when we are expecting a symbol, so that
+    [/+-] get taken to be seperate tokens. An extra gotcha is
+    expressions after defsyms, we only allow +s and -s in a defsym
+    expression, so -defsym foo=bar+9 /file.o is parsed ok.
+    
+    */
+  int ch;
   keyword_type *k;
-  if (yytext[0] == '/' && ldgram_mustbe_symbolname) 
-    { RTOKEN('/');}
-   ch = input();
-  while (true) {
-    if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_') {
-      yytext[yyleng++] = ch;
+  if (ldgram_in_expression) {
+    if (yytext[0] != '/' ||  ldgram_in_defsym == false)  {
+      switch (yytext[0]) {
+      case '/': RTOKEN('/');
+      case '+': RTOKEN('+');
+      case '-': RTOKEN('-');
+      }
     }
-    else if (ch == '-' && ldgram_want_filename == true) {
-      yytext[yyleng++] = ch;
-    }
-    else if (ch == '+' && ldgram_want_filename == true) {
-      yytext[yyleng++] = ch;
-    }
-
-    else if (ch == '/' && ldgram_want_filename == true) {
-      yytext[yyleng++] = ch;
-    }
-
-    else break;
-    ch = input();
   }
+
+  ch = input();
+  while (true)
+      {
+	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_') {
+	  yytext[yyleng++] = ch;
+	}
+	else if (ch == '+' || ch == '-' || ch == '/') {
+	  if (ldgram_in_expression) break;
+	  yytext[yyleng++] = ch;
+	}
+	else 
+	  break;
+	ch = input();
+      }
 
   yytext[yyleng] = 0;
   unput(ch);

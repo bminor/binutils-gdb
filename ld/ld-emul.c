@@ -20,27 +20,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
    $Id$ 
-
-   $Log$
-   Revision 1.2  1991/03/22 23:02:28  steve
-   Brought up to sync with Intel again.
-
- * Revision 1.1  1991/03/13  00:48:09  chrisb
- * Initial revision
- *
- * Revision 1.4  1991/03/10  09:31:16  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.3  1991/02/22  17:14:55  sac
- * Added RCS keywords and copyrights
  *
 */
 /*
@@ -57,6 +36,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern ld_emulation_xfer_type ld_lnk960_emulation;
 extern ld_emulation_xfer_type ld_gld_emulation;
+extern ld_emulation_xfer_type ld_gld68k_emulation;
 extern ld_emulation_xfer_type ld_gld960_emulation;
 
 
@@ -131,6 +111,9 @@ char *target;
   }
   else if (strcmp(target,GLD_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld_emulation;
+  }
+  else if (strcmp(target,GLD68K_EMULATION_NAME)==0) {
+    ld_emulation = &ld_gld68k_emulation;
   }
   else if (strcmp(target,GLD960_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld960_emulation;

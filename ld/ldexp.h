@@ -97,3 +97,31 @@ PROTO(etree_type *,exp_assop,(int, char *, etree_type *));
 PROTO(void, exp_print_tree,(struct _iobuf *, etree_type *));
 PROTO(bfd_vma, exp_get_vma,(etree_type *, bfd_vma, char *, enum boolean));
 PROTO(int, exp_get_value_int,(etree_type *, int, char *, enum boolean));
+#if 0
+#define LONG 1000
+#define SHORT 1001
+#define BYTE 1002
+#define NAME 1003
+#define NEXT 1004
+#define DEFINED 1005
+#define SIZEOF 1006
+#define ADDR 1007
+#define ALIGN_K 1008
+#define BLOCK 1009
+#define SECTIONS 1010
+#define SIZEOF_HEADERS 1011
+#define MEMORY 1012
+#define DSECT 1013
+#define COPY 1014
+#define INFO 1015
+#define OVERLAY 1016
+#define TARGET_K 1017
+#define MAP 1018
+#define ENTRY 1019
+#define ORIGIN 1020
+#define LENGTH 1021
+#define NOLOAD 1022
+#define SEARCH_DIR 1023
+#define ALIGNMENT 1024
+
+#endif
