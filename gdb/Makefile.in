@@ -534,7 +534,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	memattr.c mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
-	scm-valprint.c signals.c source.c stabsread.c stack.c symfile.c \
+	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
 	serial.c ser-unix.c mdebugread.c os9kread.c \
@@ -839,6 +839,7 @@ init.c: $(INIT_FILES)
 	    -e '/^[a-z0-9A-Z_]*_[SU].o/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/' \
+	    -e 's,signals\.c,signals/signals\.c,' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' > init.l-tmp
@@ -2009,7 +2010,8 @@ sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(arch_utils_h) \
 	$(regcache_h)
 
-signals.o: signals.c $(defs_h) $(target_h)
+signals.o: signals/signals.c $(defs_h) $(target_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $<
 
 mon960-rom.o: mon960-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h)
