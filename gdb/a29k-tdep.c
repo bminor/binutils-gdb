@@ -845,6 +845,9 @@ push_dummy_frame ()
   write_register (lrnum++, read_register (PC_REGNUM));
   write_register (lrnum++, read_register (NPC_REGNUM));
   write_register (lrnum++, read_register (PC2_REGNUM));
+
+  /* Why are we saving LR0?  What would clobber it? (the dummy frame should
+     be below it on the register stack, no?).  */
   write_register (lrnum++, original_lr0);
 }
 

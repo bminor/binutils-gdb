@@ -1,3 +1,7 @@
+Thu Jan 13 10:32:38 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* a29k-tdep.c (push_dummy_frame): Add comment about saving lr0.
+
 Wed Jan 12 20:53:16 1994  John Gilmore  (gnu@cygnus.com)
 
 	* printcmd.c (print_address_symbolic):  Make it search the
