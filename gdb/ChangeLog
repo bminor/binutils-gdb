@@ -1,3 +1,17 @@
+2002-12-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (mips-linux-tdep.o): Add $(osabi_h) and $(gdb_string_h).
+	* config/mips/tm-linux.h (mips_linux_svr4_fetch_link_map_offsets)
+	(mips_linux_get_longjmp_target): Delete declarations.
+	(SVR4_FETCH_LINK_MAP_OFFSETS, GET_LONGJMP_TARGET)
+	(MIPS_LINUX_JB_ELEMENT_SIZE, MIPS_LINUX_JB_PC): Delete definitions.
+	* mips-linux-tdep.c (osabi.h, gdb_string.h): Include.
+	(MIPS_LINUX_JB_ELEMENT_SIZE, MIPS_LINUX_JB_PC): Define.
+	(mips_linux_get_longjmp_target)
+	(mips_linux_svr4_fetch_link_map_offsets): Make static.
+	(mips_linux_init_abi): New function.
+	(_initialize_mips_linux_tdep): Register mips_linux_init_abi().
+
 2002-12-19  Keith Seitz  <keiths@redhat.com>
 
 	patch committed by Elena Zannoni  <ezannoni@redhat.com>
