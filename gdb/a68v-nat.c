@@ -1,4 +1,4 @@
-/* Host-dependent code for Apollo-68ksfor GDB, the GNU debugger.
+/* Host-dependent code for Apollo-68ks for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -19,42 +19,52 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
-#include "gdbcore.h"
+
+#ifndef _ISP__M68K
+#define _ISP__M68K 1
+#endif
+
+#include <ptrace.h>
 
 extern int errno;
 
-#if defined (GDB_TARGET_IS_SUN3)
-/* All of this stuff is only relevant if both host and target are sun3.  */
 void
-fetch_inferior_registers ()
+fetch_inferior_registers (ignored)
+    int ignored;
 {
-  struct regs inferior_registers;
-#ifdef FP0_REGNUM
-  struct fp_status inferior_fp_registers;
-#endif
+  struct ptrace_$data_regs_m68k inferior_registers;
+  struct ptrace_$floating_regs_m68k inferior_fp_registers;
+  struct ptrace_$control_regs_m68k inferior_control_registers;
   extern char registers[];
+
+  ptrace_$init_control(&inferior_control_registers);
+  inferior_fp_registers.size = sizeof(inferior_fp_registers);
 
   registers_fetched ();
   
   ptrace (PTRACE_GETREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-#ifdef FP0_REGNUM
-  ptrace (PTRACE_GETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
-#endif 
-  
-  memcpy (registers, &inferior_registers, 16 * 4);
-#ifdef FP0_REGNUM
-  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	 sizeof inferior_fp_registers.fps_regs);
-#endif 
-  *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
-  *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
-#ifdef FP0_REGNUM
-  memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.fps_control,
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
-#endif 
+	  (PTRACE_ARG3_TYPE) &inferior_registers,
+	  ptrace_$data_set,
+	  (PTRACE_ARG3_TYPE) &inferior_registers,
+	  ptrace_$data_set);
+
+  ptrace (PTRACE_GETREGS, inferior_pid,
+	(PTRACE_ARG3_TYPE) &inferior_fp_registers,
+	ptrace_$floating_set_m68k,
+	(PTRACE_ARG3_TYPE) &inferior_fp_registers,
+	ptrace_$floating_set_m68k);
+
+  ptrace (PTRACE_GETREGS, inferior_pid,
+	(PTRACE_ARG3_TYPE) &inferior_control_registers,
+	ptrace_$control_set_m68k,
+	(PTRACE_ARG3_TYPE) &inferior_control_registers,
+	ptrace_$control_set_m68k);
+
+  bcopy (&inferior_registers, registers, 16 * 4);
+  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	 sizeof inferior_fp_registers.regs);
+  *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_control_registers.sr;
+  *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_control_registers.pc;
 }
 
 /* Store our register values back into the inferior.
@@ -65,89 +75,54 @@ void
 store_inferior_registers (regno)
      int regno;
 {
-  struct regs inferior_registers;
-#ifdef FP0_REGNUM
-  struct fp_status inferior_fp_registers;
-#endif
+  struct ptrace_$data_regs_m68k inferior_registers;
+  struct ptrace_$floating_regs_m68k inferior_fp_registers;
+  struct ptrace_$control_regs_m68k inferior_control_registers;
   extern char registers[];
 
-  memcpy (&inferior_registers, registers, 16 * 4);
-#ifdef FP0_REGNUM
-  memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	 sizeof inferior_fp_registers.fps_regs);
-#endif
-  inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
+  ptrace_$init_control(&inferior_control_registers);
+  inferior_fp_registers.size = sizeof(inferior_fp_registers);
 
-#ifdef FP0_REGNUM
-  memcpy (&inferior_fp_registers.fps_control,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
-#endif
+  ptrace (PTRACE_GETREGS, inferior_pid,
+	(PTRACE_ARG3_TYPE) &inferior_fp_registers,
+	ptrace_$floating_set_m68k,
+	(PTRACE_ARG3_TYPE) &inferior_fp_registers,
+	ptrace_$floating_set_m68k);
+
+  ptrace (PTRACE_GETREGS, inferior_pid,
+	(PTRACE_ARG3_TYPE) &inferior_control_registers,
+	ptrace_$control_set_m68k,
+	(PTRACE_ARG3_TYPE) &inferior_control_registers,
+	ptrace_$control_set_m68k);
+
+  bcopy (registers, &inferior_registers, sizeof(inferior_registers));
+
+  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], inferior_fp_registers.regs,
+	 sizeof inferior_fp_registers.regs);
+
+  inferior_control_registers.sr = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
+  inferior_control_registers.pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
 
   ptrace (PTRACE_SETREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-#if FP0_REGNUM
-  ptrace (PTRACE_SETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
-#endif
+	  (PTRACE_ARG3_TYPE) &inferior_registers,
+	  ptrace_$data_set_m68k,
+	  (PTRACE_ARG3_TYPE) &inferior_registers,
+	  ptrace_$data_set_m68k);
+
+  ptrace (PTRACE_SETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_fp_registers,
+	  ptrace_$floating_set_m68k,
+	  (PTRACE_ARG3_TYPE) &inferior_fp_registers,
+	  ptrace_$floating_set_m68k);
+
+  ptrace (PTRACE_SETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_control_registers,
+	  ptrace_$control_set_m68k,
+	  (PTRACE_ARG3_TYPE) &inferior_control_registers,
+	  ptrace_$control_set_m68k);
 }
 
-/* Machine-dependent code for pulling registers out of a Sun-3 core file. */
-
-void
-fetch_core_registers (core_reg_sect, core_reg_size, which)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-{
-  extern char registers[];
-  struct regs *regs = (struct regs *) core_reg_sect;
-
-  if (which == 0) {
-    if (core_reg_size < sizeof (struct regs))
-      error ("Can't find registers in core file");
-
-    memcpy (registers, (char *)regs, 16 * 4);
-    supply_register (PS_REGNUM, &regs->r_ps);
-    supply_register (PC_REGNUM, &regs->r_pc);
-
-  } else if (which == 2) {
-
-#define fpustruct  ((struct fpu *) core_reg_sect)
-
-    if (core_reg_size >= sizeof (struct fpu))
-      {
-#ifdef FP0_REGNUM
-	memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
-	      fpustruct->f_fpstatus.fps_regs,
-	      sizeof fpustruct->f_fpstatus.fps_regs);
-	memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	      &fpustruct->f_fpstatus.fps_control,
-	      sizeof fpustruct->f_fpstatus - 
-		sizeof fpustruct->f_fpstatus.fps_regs);
-#endif
-      }
-    else
-      fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
-  }
-}
-#else /* Not sun3 target.  */
-/* These functions shouldn't be called when we're cross-debugging.  */
-
-void
-fetch_inferior_registers ()
-{
-}
-
-/* ARGSUSED */
-void
-store_inferior_registers (regno)
-     int regno;
-{
-}
-
-/* ARGSUSED */
+/* Apollos don't dump cores */
 void
 fetch_core_registers (core_reg_sect, core_reg_size, which)
      char *core_reg_sect;
@@ -155,4 +130,3 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
      int which;
 {
 }
-#endif /* Not sun3 target.  */

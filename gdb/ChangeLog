@@ -1,5 +1,10 @@
 Tue Nov 16 13:33:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* a68v-nat.c: Replace with new version from Troy Rollo.  The
+	version	I am replacing appears to be an old copy of sun3-nat.c.
+	* dstread.c (dst_symfile_read): Replace sort_all_symtab_syms call
+	with loop.
+
 	* Makefile.in (TAGS): Depend on TAGFILES_{NO,WITH}_SRCDIR.
 
 	* Makefile.in: (HFILES,TAGFILES): Split into _WITH_SRCDIR and
