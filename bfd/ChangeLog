@@ -1,3 +1,7 @@
+2000-09-09  Kazu Hirata  <kazu@hxi.com>
+
+	* riscix.c: Remove DEFUN.
+
 2000-09-08  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Do not
