@@ -1,3 +1,38 @@
+Mon Jun  6 18:26:50 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Reorganization of the GDB Test Suite.
+
+	* gdb.base: New directory, contains all the basic tests.
+	* gdb.c++: New directory, tests specific to C++.
+	* gdb.chill: New directory, tests specific to Chill.
+	* gdb.t00, gdb.t01, gdb.t02, gdb.t03, gdb.t04, gdb.t05, gdb.t06,
+	gdb.t07, gdb.t08, gdb.t09, gdb.t10, gdb.t11, gdb.t12, gdb.t13,
+	gdb.t15, gdb.t16, gdb.t17, gdb.t20, gdb.t21, gdb.t22, gdb.t23,
+	gdb.t24, gdb.t30, gdb.t31: Removed directories, contents moved
+	into appropriate new directories (t00-t17 to base, t20-t23 to c++,
+	t30-31 to chill).
+	* */gdbme.*: Rename to match appropriate expect scripts.
+	* gdb.base/bitfields.c, gdb.base/break.c, gdb.base/callfuncs.c,
+	gdb.base/coremaker.c, gdb.base/exprs.c, gdb.base/funcargs.c,
+	gdb.base/interrupt.c, gdb.base/list0.c, gdb.base/list0.h,
+	gdb.base/list1.c, gdb.base/mips_pro.c, gdb.base/nodebug.c,
+	gdb.base/opaque-info.c, gdb.base/opaque0.c, gdb.base/opaque1.c,
+	gdb.base/printcmds.c, gdb.base/ptype.c, gdb.base/recurse.c,
+	gdb.base/return.c, gdb.base/run.c, gdb.base/scope0.c,
+	gdb.base/scope1.c, gdb.base/setvar.c, gdb.base/signals.c,
+	gdb.base/types.c, gdb.base/twice.c, gdb.base/watchpoint.c,
+	gdb.base/whatis-info.c, gdb.base/whatis.c: New names of C files.
+	* gdb.c++/cplusfuncs.cc, gdb.c++/templates.cc, gdb.c++/misc.cc,
+	gdb.c++/virtfunc.cc: New names of C++ files.
+	* gdb.chill/chillvars.ch: New name of Chill file.
+	* gdb.base/configure.in, gdb.c++/configure.in,
+	gdb.chill/configure.in: Merge in contents of gdb.t*/configure.in.
+	* gdb.base/Makefile.in, gdb.c++/Makefile.in,
+	gdb.chill/Makefile.in: Merge in contents of gdb.t*/Makefile.in.
+	* configure.in (configdirs): Update to reflect directory changes.
+	(target_abbrev): No longer define for any configuration.
+	* Makefile.in: Cosmetic improvements to header comments.
+
 Fri Jun  3 18:56:06 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	Various changes to gdb.t31:

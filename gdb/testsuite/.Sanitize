@@ -1,6 +1,6 @@
-# .Sanitize for deja-gnu.
+# .Sanitize for gdb/testsuite.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -16,9 +16,9 @@
 Do-first:
 
 if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="gdb.t30 gdb.t31"
+	keep_these_too="gdb.chill"
 else
-	lose_these_too="gdb.t30 gdb.t31"
+	lose_these_too="gdb.chill"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -35,8 +35,15 @@ Makefile.in
 TODO
 config
 configure.in
+gdb.base
+gdb.c++
 gdb.disasm
 gdb.stabs
+lib
+
+Things-to-lose:
+
+gdb.all
 gdb.t00
 gdb.t01
 gdb.t02
@@ -59,11 +66,8 @@ gdb.t21
 gdb.t22
 gdb.t23
 gdb.t24
-lib
-
-Things-to-lose:
-
-gdb.all
+gdb.t30
+gdb.t31
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
