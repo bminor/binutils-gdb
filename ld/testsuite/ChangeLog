@@ -1,3 +1,11 @@
+2002-06-17  Tom Rix  <trix@redhat.com>
+
+	* ld-d10v/d10v.exp: New driver for d10v.
+	* ld-d10v/default_layout.d : New test.
+	* ld-d10v/regression-001.lt: New test for a linker regression.
+	* ld-d10v/linktest-002.lt: New test for run_link_test.
+	* ld-d10v/reloc-001.d - reloc-016.d: New tests. 
+
 2002-06-11  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* ld-scripts/cross1.t: Add .hash, .dynstr and .dynsym sections to
