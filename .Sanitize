@@ -85,6 +85,7 @@ libg++
 libgcc
 libiberty
 libio
+librx
 m4
 make
 mmalloc
