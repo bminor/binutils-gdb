@@ -21,4 +21,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGET_SYM	m68klynx_coff_vec
 #define TARGET_NAME	"coff-m68k-lynx"
 
+#define ONLY_DECLARE_RELOCS
 #include "coff-m68k.c"
