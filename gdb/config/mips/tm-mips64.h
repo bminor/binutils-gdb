@@ -35,6 +35,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define OP_LDFPR 065	/* ldc1 */
 #define OP_LDGPR 067	/* ld */
 
-/* Get the basic MIPS definitions.  Default to big endian, since that
-   is how the chips are mostly used.  */
+/* Get the basic MIPS definitions.  */
 #include "tm-mips.h"
