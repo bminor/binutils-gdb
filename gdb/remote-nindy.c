@@ -250,7 +250,6 @@ nindy_detach (name, from_tty)
      char *name;
      int from_tty;
 {
-  dont_repeat ();
   if (name)
     error ("Too many arguments");
   pop_target ();

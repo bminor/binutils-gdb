@@ -40,10 +40,17 @@ ieee_extended_to_double (ext_format, from, to)
   bcopy (&from[MANBYTE_L], &mant1, 4);
   exp = ((ufrom[EXPBYTE_H] & (unsigned char)~SIGNMASK) << 8) | ufrom[EXPBYTE_L];
 
+#if 0
+  /* We can't do anything useful with a NaN anyway, so ignore its
+     difference.  It will end up as Infinity or something close.  */
   if (exp == EXT_EXP_NAN) {
     /* We have a NaN source.  */
-    dto = 0.123456789;	/* Not much else useful to do */
-  } else if (exp == 0 && mant0 == 0 && mant1 == 0) {
+    dto = 0.123456789;	/* Not much else useful to do -- we don't know if 
+			   the host system even *has* NaNs, nor how to
+			   generate an innocuous one if it does.  */
+  } else
+#endif
+         if (exp == 0 && mant0 == 0 && mant1 == 0) {
     dto = 0;
   } else {
     /* Build the result algebraically.  Might go infinite, underflow, etc;
@@ -51,6 +58,8 @@ ieee_extended_to_double (ext_format, from, to)
     mant0 |= 0x80000000;
     dto = ldexp  ((double)mant0, exp - EXT_EXP_BIAS - 31);
     dto += ldexp ((double)mant1, exp - EXT_EXP_BIAS - 31 - 32);
+    if (ufrom[EXPBYTE_H] & SIGNMASK)	/* If negative... */
+      dto = -dto;			/* ...negate.  */
   }
   *to = dto;
 }
@@ -129,10 +138,10 @@ ieee_test (n)
   extern struct ext_format ext_format_68881;
 
   for (i = 0; i < n; i++) {
-    di.i[0] = random();
-    di.i[1] = random();
-    double_to_ieee_extended (ext_format_68881, &di.d, exten);
-    ieee_extended_to_double (ext_format_68881, exten, &result);
+    di.i[0] = (random() << 16) | (random() & 0xffff);
+    di.i[1] = (random() << 16) | (random() & 0xffff);
+    double_to_ieee_extended (&ext_format_68881, &di.d, exten);
+    ieee_extended_to_double (&ext_format_68881, exten, &result);
     if (di.d != result)
       printf ("Differ: %x %x %g => %x %x %g\n", di.d, di.d, result, result);
   }

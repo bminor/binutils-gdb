@@ -155,10 +155,9 @@ core_detach (args, from_tty)
      char *args;
      int from_tty;
 {
-  dont_repeat ();
   if (args)
     error ("Too many arguments");
-  pop_target ();
+  unpush_target (&core_ops);
   if (from_tty)
     printf ("No core file now.\n");
 }
@@ -170,6 +169,7 @@ core_file_command (filename, from_tty)
      char *filename;
      int from_tty;
 {
+  dont_repeat ();			/* Either way, seems bogus. */
   if (!filename)
     core_detach (filename, from_tty);
   else

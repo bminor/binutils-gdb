@@ -92,6 +92,10 @@ The child doesn't let any refs through, but when the child terminates,
 you are back to debugging the core file -- you might even want to swap
 back and forth between the two, or between two core files.
 
+Add a command for searching memory, a la adb.  It specifies size,
+mask, value, start address.  ADB searches until it finds it or hits
+an error (or is interrupted).
+
 # Local Variables:
 # mode: text
 # End:

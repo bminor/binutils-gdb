@@ -857,8 +857,14 @@ name	:	NAME { $$ = $1.stoken; }
 
 name_not_typename :	NAME
 	|	BLOCKNAME
-	|	NAME_OR_INT
-	|	NAME_OR_UINT
+/* These would be useful if name_not_typename was useful, but it is just
+   a fake for "variable", so these cause reduce/reduce conflicts because
+   the parser can't tell whether NAME_OR_INT is a name_not_typename (=variable,
+   =exp) or just an exp.  If name_not_typename was ever used in an lvalue
+   context where only a name could occur, this might be useful.
+  	|	NAME_OR_INT
+  	|	NAME_OR_UINT
+ */
 	;
 
 %%

@@ -31,7 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static CONST char undoc[] = "unknown signal";
 
-CONST char *sys_siglist[NSIG];
+char *sys_siglist[NSIG];
 #endif /* SYS_SIGLIST_MISSING */
 
 /* Table of abbreviations for signals.  Note:  A given number can
@@ -62,6 +62,8 @@ init_sig (number, abbrev, name)
 static void init_sigs ()
 {
 #ifdef SYS_SIGLIST_MISSING
+  int i;
+
   /* Initialize signal names.  */
 	for (i = 0; i < NSIG; i++)
 		sys_siglist[i] = undoc;

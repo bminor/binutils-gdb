@@ -1111,6 +1111,11 @@ unpack_field_as_long (type, valaddr, fieldno)
   return val;
 }
 
+/* Modify the value of a bitfield.  ADDR points to a block of memory in
+   target byte order; the bitfield starts in the byte pointed to.  FIELDVAL
+   is the desired value of the field, in host byte order.  BITPOS and BITSIZE
+   indicate which bits (in target bit order) comprise the bitfield.  */
+
 void
 modify_field (addr, fieldval, bitpos, bitsize)
      char *addr;
@@ -1125,14 +1130,17 @@ modify_field (addr, fieldval, bitpos, bitsize)
     error ("Value %d does not fit in %d bits.", fieldval, bitsize);
   
   bcopy (addr, &oword, sizeof oword);
+  SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To host format */
 
-  /* Shifting for bit field depends on endianness of the machine.  */
+  /* Shifting for bit field depends on endianness of the target machine.  */
 #ifdef BITS_BIG_ENDIAN
   bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 #endif
 
   oword &= ~(((1 << bitsize) - 1) << bitpos);
   oword |= fieldval << bitpos;
+
+  SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To target format */
   bcopy (&oword, addr, sizeof oword);
 }
 

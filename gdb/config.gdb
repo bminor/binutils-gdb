@@ -165,7 +165,7 @@ case ${srcdir} in
   .)
     ;;
   *)
-    echo "srcdir=${srcdir}" >./Makefile.srcdir
+    echo "srcdir=${srcdir}" >./Makefile.sdir
     grep -s "source ${srcdir}/.gdbinit" .gdbinit 2>/dev/null || \
       echo "source ${srcdir}/.gdbinit" >> .gdbinit
     if [ ! -d readline ]; then

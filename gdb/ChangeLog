@@ -1,3 +1,141 @@
+Thu Apr  4 10:09:35 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* tm-i386v.h (FLOAT_INFO):  Don't define it, since the code
+	for printing the float info is host-dependent, not
+	target-dependent.  FIXME.
+	* i386-pinsn.c:  Move #includes to top, remove useless ones.
+	* i386-tdep.c:  Don't bother including <.../reg.h> since we
+	don't use it (and it doesn't exist on host systems).
+
+	* ieee-float.c (ieee_extended_to_double):  Convert NaN to Inf.
+	Convert negative numbers properly.
+	(ieee_test):  Make numbers really random; fix format arg.
+
+	* infcmd.c (attach_command, detach_command):  Don't repeat on CR.
+	* core.c (core_detach):  Unpush core_ops, which might not be on
+	top.  We used to just pop the top, which broke things.  Don't
+	need dont_repeat() any more.
+	(core_file_command):  Psst!  Don't repeat it.
+	* remote-nindy.c (nindy_detach):  Don't need dont_repeat() now.
+	* expprint.c (print_subexp):  Avoid switch fallthru on
+	BINOP_ASSIGN_MODIFY, so we can print += and such.
+	* frame.h:  Fix typo.
+	* inflow.c (kill_command):  After killing inferior, print our
+	current frame in the core file, if we have one.
+	(generic_mourn_inferior):  When inferior dies, either select
+	the current frame (in the new target, e.g. core file), or 
+	set both the current and selected frames to NULL.
+
+	Changes from Peter Schauer.
+
+	* infptrace.c:  Avoid <sys/ptrace.h> on USG.
+
+	* Make all file names fit in 14 characters (sigh and damn!):
+	mv hp300hpux-xdep.c hp300ux-xdep.c
+	mv symmetry-xdep.c symm-xdep.c
+	mv symmetry-tdep.c symm-tdep.c
+	mv convex-opcode.h convx-opcode.h
+	mv tm-vxworks960.h tm-vx960.h
+	mv tm-vxworks68.h tm-vx68.h
+	mv Makefile.srcdir Makefile.sdir
+	mv gdb-int.texinfo gdbint.texinfo
+	mv remote-sa.m68k.shar rem-m68k.shar
+	mv remote-multi.shar rem-multi.shar
+	* Makefile.dist, README, config.gdb, convex-pinsn.c,
+	tconfig/symmetry, tconfig/vxworks960, tconfig/vxworks68,
+	xconfig/hp300hpux, xconfig/symmetry:  Change names to shorter
+	names.
+
+	* command.c (user_info_1, user_info):  New command for listing
+	the user-defined commands.
+
+Wed Apr  3 15:00:26 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* dbxread.c (really_free_pendings):  Clear file_symbols
+	and global_symbols after freeing them; otherwise, running
+	this function twice (if it appears twice on the cleanup
+	chain), we try to free things twice.
+
+	* dbxread.c (read_dbx_symtab):  Calculate end_of_text_addr
+	based on text_addr (the address of text in core), not on addr (the
+	offset between text in the .o file and in core).  This change
+	is from Peter Schauer.
+
+	* main.c:  Define ALL_CLEANUPS as a cast of zero.
+	(return_to_top_level):  Use it.
+	(main):  Do all cleanups after each command run as part
+	of the gdb startup sequence.  Also do all cleanups before
+	entering the command loop, and every time we exit the command
+	loop and reenter.  Before, the cleanups from the startup sequence
+	were being left undone until the first error!
+	(command_loop):  Rename do_nothing cleanup to command_loop_marker
+	so we can see it easily when examining the cleanup chain.
+	(init_signals):  Add another do_nothing for signal handling.
+	(quit_command):  Only try to kill target if it has execution.
+	Problems in the target stack got us into a state where
+	inferior_pid was nonzero but none of the targets had execution.
+	In this state you couldn't exit gdb.
+
+	* dbxread.c:  Two changes from Peter Schauer.
+	(echo_command):  Fflush output after an echo command.
+	(show_history):  Pass all args to cmd_show_list.
+
+	* utils.c (init_malloc):  Call mtrace to turn on tracing
+	if the environment variable MALLOC_TRACE is set to a file name.
+	* mtrace.c:  Add source file which provides a log of every malloc,
+	free, and realloc to a trace file.
+	* mtrace.awk:  Add source file which analyzes the trace file.
+	* Makefile.dist (GNU_MALLOC, MALLOCSRC):  Add mtrace.{c,o,awk}.
+	(VERSION):  Roll to 3.94.3.
+
+	* breakpoint.c (breakpoint_1):  Add a space to "i watch" output.
+	(check_duplicates):  Don't bother with watchpoints.
+	(set_raw_breakpoint):  Comment about danger of this routine.
+	(watch_command):  Parse and eval all args before calling
+	set_raw_breakpoint.
+
+	* solib.c (find_solib):  Avoid error in referencing memory to
+	see if any more shared libraries have been added.  This is
+	particularly useful if the target has terminated.  Bug reported
+	by Peter Schauer.
+
+	Changes from Peter Schauer <pesrem@regent.e-technik.tu-muenchen.de>
+	in bringing up 3.94.2 on the Sun-3.
+
+        * Makefile.dist:  Include CFLAGS in rule for cplus-dem.o.
+        * breakpoint.c (enable_breakpoint):  Check for valid watchpoint
+        expression (in scope) before reenabling watchpoint.
+	* signame.c (init_sigs):  Add missing declaration of i, fix
+	sys_siglist declaration.
+	* source.c (list_command):  Fixed range computation to use
+	lines_to_list ().
+	* stack.c (backtrace_command):  Do not allow command if target has
+	no stack, print informative error message.
+	* target.c (target_command):  Do not write into command line
+	because this fails if the target command is used in a user defined
+	command.  [This change was enhanced by gnu to support any-
+	unique-prefix matching on target names.]
+	* valops.c (value_struct_elt):  Avoid infinite loop on an
+	erroneous attempt to print the member of function (try p main.p).
+
+Mon Apr  1 17:05:45 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* expread.y (name_no_typename):  Avoid reduce/reduce errors
+	caused by ambiguity in handling NAME_OR_INT and NAME_OR_UINT.
+	Since the GDB parser really doesn't use name_no_typename in a
+	name-only context, the parser can't tell the diff between
+	names and numbers here.  Avoid allowing a name_no_typename
+	to be a NAME_OR_*INT to resolve the conflict.
+
+Sun Mar 31 20:12:07 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Bugfixes from Mark Fox (markf@wrs.com) (test=testField.c):
+
+	* valprint.c (val_print_fields):  bitfield printing didn't handle
+	byte order.  Indirect through a few more fns to cope.
+
+	* values.c (modify_field):  also cope with byte order.
+
 Sat Mar 23 10:02:21 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	Cleanup for release 3.94.2:

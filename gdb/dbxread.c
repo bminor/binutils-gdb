@@ -791,11 +791,14 @@ really_free_pendings (foo)
       next1 = next->next;
       free (next);
     }
+  file_symbols = 0;
+
   for (next = global_symbols; next; next = next1)
     {
       next1 = next->next;
       free (next);
     }
+  global_symbols = 0;
 }
 
 /* Take one of the lists of symbols and make a block from it.
@@ -1709,7 +1712,7 @@ read_dbx_symtab (symfile_name, addr,
 #ifdef END_OF_TEXT_DEFAULT
   end_of_text_addr = END_OF_TEXT_DEFAULT;
 #else
-  end_of_text_addr = addr + text_size;
+  end_of_text_addr = text_addr + text_size;
 #endif
 
   symtab_input_desc = desc;	/* This is needed for fill_symbuf below */

@@ -1,5 +1,5 @@
 
-/*  A Bison parser, made from ../expread.y  */
+/*  A Bison parser, made from expread.y  */
 
 #define	INT	258
 #define	CHAR	259
@@ -41,7 +41,7 @@
 #define	DECREMENT	295
 #define	ARROW	296
 
-#line 29 "../expread.y"
+#line 29 "expread.y"
 
 #include <stdio.h>
 #include "defs.h"
@@ -133,7 +133,7 @@ static enum type_pieces pop_type ();
 /* Allow debugging of parsing.  */
 #define YYDEBUG 1
 
-#line 125 "../expread.y"
+#line 125 "expread.y"
 typedef union
   {
     LONGEST lval;
@@ -228,7 +228,7 @@ static const short yyrline[] = {     0,
    767,   768,   770,   772,   775,   782,   784,   786,   788,   790,
    792,   794,   796,   798,   801,   804,   807,   809,   811,   813,
    817,   818,   824,   830,   839,   844,   851,   852,   853,   854,
-   855,   858,   859,   860,   861
+   855,   858,   859
 };
 
 static const char * const yytname[] = {     0,
@@ -253,7 +253,7 @@ static const short yyr1[] = {     0,
     78,    78,    78,    78,    78,    79,    79,    79,    79,    79,
     79,    79,    79,    79,    79,    79,    79,    79,    79,    79,
     80,    80,    80,    80,    81,    81,    82,    82,    82,    82,
-    82,    83,    83,    83,    83
+    82,    83,    83
 };
 
 static const short yyr2[] = {     0,
@@ -268,7 +268,7 @@ static const short yyr2[] = {     0,
      1,     3,     6,     8,     9,     1,     1,     1,     1,     2,
      3,     2,     3,     2,     2,     2,     2,     1,     2,     1,
      1,     1,     1,     1,     1,     3,     1,     1,     1,     1,
-     1,     1,     1,     1,     1
+     1,     1,     1
 };
 
 static const short yydefact[] = {     0,
@@ -778,199 +778,199 @@ yyreduce:
   switch (yyn) {
 
 case 3:
-#line 224 "../expread.y"
+#line 224 "expread.y"
 { write_exp_elt_opcode (BINOP_COMMA); ;
     break;}
 case 4:
-#line 229 "../expread.y"
+#line 229 "expread.y"
 { write_exp_elt_opcode (UNOP_IND); ;
     break;}
 case 5:
-#line 232 "../expread.y"
+#line 232 "expread.y"
 { write_exp_elt_opcode (UNOP_ADDR); ;
     break;}
 case 6:
-#line 235 "../expread.y"
+#line 235 "expread.y"
 { write_exp_elt_opcode (UNOP_NEG); ;
     break;}
 case 7:
-#line 239 "../expread.y"
+#line 239 "expread.y"
 { write_exp_elt_opcode (UNOP_ZEROP); ;
     break;}
 case 8:
-#line 243 "../expread.y"
+#line 243 "expread.y"
 { write_exp_elt_opcode (UNOP_LOGNOT); ;
     break;}
 case 9:
-#line 247 "../expread.y"
+#line 247 "expread.y"
 { write_exp_elt_opcode (UNOP_PREINCREMENT); ;
     break;}
 case 10:
-#line 251 "../expread.y"
+#line 251 "expread.y"
 { write_exp_elt_opcode (UNOP_PREDECREMENT); ;
     break;}
 case 11:
-#line 255 "../expread.y"
+#line 255 "expread.y"
 { write_exp_elt_opcode (UNOP_POSTINCREMENT); ;
     break;}
 case 12:
-#line 259 "../expread.y"
+#line 259 "expread.y"
 { write_exp_elt_opcode (UNOP_POSTDECREMENT); ;
     break;}
 case 13:
-#line 263 "../expread.y"
+#line 263 "expread.y"
 { write_exp_elt_opcode (UNOP_SIZEOF); ;
     break;}
 case 14:
-#line 267 "../expread.y"
+#line 267 "expread.y"
 { write_exp_elt_opcode (STRUCTOP_PTR);
 			  write_exp_string (yyvsp[0].sval);
 			  write_exp_elt_opcode (STRUCTOP_PTR); ;
     break;}
 case 15:
-#line 273 "../expread.y"
+#line 273 "expread.y"
 { write_exp_elt_opcode (STRUCTOP_MPTR); ;
     break;}
 case 16:
-#line 277 "../expread.y"
+#line 277 "expread.y"
 { write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  write_exp_string (yyvsp[0].sval);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT); ;
     break;}
 case 17:
-#line 283 "../expread.y"
+#line 283 "expread.y"
 { write_exp_elt_opcode (STRUCTOP_MEMBER); ;
     break;}
 case 18:
-#line 287 "../expread.y"
+#line 287 "expread.y"
 { write_exp_elt_opcode (BINOP_SUBSCRIPT); ;
     break;}
 case 19:
-#line 293 "../expread.y"
+#line 293 "expread.y"
 { start_arglist (); ;
     break;}
 case 20:
-#line 295 "../expread.y"
+#line 295 "expread.y"
 { write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
 			  write_exp_elt_opcode (OP_FUNCALL); ;
     break;}
 case 22:
-#line 304 "../expread.y"
+#line 304 "expread.y"
 { arglist_len = 1; ;
     break;}
 case 23:
-#line 308 "../expread.y"
+#line 308 "expread.y"
 { arglist_len++; ;
     break;}
 case 24:
-#line 312 "../expread.y"
+#line 312 "expread.y"
 { write_exp_elt_opcode (UNOP_MEMVAL);
 			  write_exp_elt_type (yyvsp[-2].tval);
 			  write_exp_elt_opcode (UNOP_MEMVAL); ;
     break;}
 case 25:
-#line 318 "../expread.y"
+#line 318 "expread.y"
 { write_exp_elt_opcode (UNOP_CAST);
 			  write_exp_elt_type (yyvsp[-2].tval);
 			  write_exp_elt_opcode (UNOP_CAST); ;
     break;}
 case 26:
-#line 324 "../expread.y"
+#line 324 "expread.y"
 { ;
     break;}
 case 27:
-#line 330 "../expread.y"
+#line 330 "expread.y"
 { write_exp_elt_opcode (BINOP_REPEAT); ;
     break;}
 case 28:
-#line 334 "../expread.y"
+#line 334 "expread.y"
 { write_exp_elt_opcode (BINOP_MUL); ;
     break;}
 case 29:
-#line 338 "../expread.y"
+#line 338 "expread.y"
 { write_exp_elt_opcode (BINOP_DIV); ;
     break;}
 case 30:
-#line 342 "../expread.y"
+#line 342 "expread.y"
 { write_exp_elt_opcode (BINOP_REM); ;
     break;}
 case 31:
-#line 346 "../expread.y"
+#line 346 "expread.y"
 { write_exp_elt_opcode (BINOP_ADD); ;
     break;}
 case 32:
-#line 350 "../expread.y"
+#line 350 "expread.y"
 { write_exp_elt_opcode (BINOP_SUB); ;
     break;}
 case 33:
-#line 354 "../expread.y"
+#line 354 "expread.y"
 { write_exp_elt_opcode (BINOP_LSH); ;
     break;}
 case 34:
-#line 358 "../expread.y"
+#line 358 "expread.y"
 { write_exp_elt_opcode (BINOP_RSH); ;
     break;}
 case 35:
-#line 362 "../expread.y"
+#line 362 "expread.y"
 { write_exp_elt_opcode (BINOP_EQUAL); ;
     break;}
 case 36:
-#line 366 "../expread.y"
+#line 366 "expread.y"
 { write_exp_elt_opcode (BINOP_NOTEQUAL); ;
     break;}
 case 37:
-#line 370 "../expread.y"
+#line 370 "expread.y"
 { write_exp_elt_opcode (BINOP_LEQ); ;
     break;}
 case 38:
-#line 374 "../expread.y"
+#line 374 "expread.y"
 { write_exp_elt_opcode (BINOP_GEQ); ;
     break;}
 case 39:
-#line 378 "../expread.y"
+#line 378 "expread.y"
 { write_exp_elt_opcode (BINOP_LESS); ;
     break;}
 case 40:
-#line 382 "../expread.y"
+#line 382 "expread.y"
 { write_exp_elt_opcode (BINOP_GTR); ;
     break;}
 case 41:
-#line 386 "../expread.y"
+#line 386 "expread.y"
 { write_exp_elt_opcode (BINOP_LOGAND); ;
     break;}
 case 42:
-#line 390 "../expread.y"
+#line 390 "expread.y"
 { write_exp_elt_opcode (BINOP_LOGXOR); ;
     break;}
 case 43:
-#line 394 "../expread.y"
+#line 394 "expread.y"
 { write_exp_elt_opcode (BINOP_LOGIOR); ;
     break;}
 case 44:
-#line 398 "../expread.y"
+#line 398 "expread.y"
 { write_exp_elt_opcode (BINOP_AND); ;
     break;}
 case 45:
-#line 402 "../expread.y"
+#line 402 "expread.y"
 { write_exp_elt_opcode (BINOP_OR); ;
     break;}
 case 46:
-#line 406 "../expread.y"
+#line 406 "expread.y"
 { write_exp_elt_opcode (TERNOP_COND); ;
     break;}
 case 47:
-#line 410 "../expread.y"
+#line 410 "expread.y"
 { write_exp_elt_opcode (BINOP_ASSIGN); ;
     break;}
 case 48:
-#line 414 "../expread.y"
+#line 414 "expread.y"
 { write_exp_elt_opcode (BINOP_ASSIGN_MODIFY);
 			  write_exp_elt_opcode (yyvsp[-1].opcode);
 			  write_exp_elt_opcode (BINOP_ASSIGN_MODIFY); ;
     break;}
 case 49:
-#line 420 "../expread.y"
+#line 420 "expread.y"
 { write_exp_elt_opcode (OP_LONG);
 			  if (yyvsp[0].lval == (int) yyvsp[0].lval || yyvsp[0].lval == (unsigned int) yyvsp[0].lval)
 			    write_exp_elt_type (builtin_type_int);
@@ -980,7 +980,7 @@ case 49:
 			  write_exp_elt_opcode (OP_LONG); ;
     break;}
 case 50:
-#line 430 "../expread.y"
+#line 430 "expread.y"
 { YYSTYPE val;
 			  parse_number (yyvsp[0].ssym.stoken.ptr, yyvsp[0].ssym.stoken.length, 0, &val);
 			  write_exp_elt_opcode (OP_LONG);
@@ -993,7 +993,7 @@ case 50:
 			  write_exp_elt_opcode (OP_LONG); ;
     break;}
 case 51:
-#line 443 "../expread.y"
+#line 443 "expread.y"
 {
 			  write_exp_elt_opcode (OP_LONG);
 			  if (yyvsp[0].ulval == (unsigned int) yyvsp[0].ulval)
@@ -1005,7 +1005,7 @@ case 51:
 			;
     break;}
 case 52:
-#line 455 "../expread.y"
+#line 455 "expread.y"
 { YYSTYPE val;
 			  parse_number (yyvsp[0].ssym.stoken.ptr, yyvsp[0].ssym.stoken.length, 0, &val);
 			  write_exp_elt_opcode (OP_LONG);
@@ -1018,57 +1018,57 @@ case 52:
 			;
     break;}
 case 53:
-#line 468 "../expread.y"
+#line 468 "expread.y"
 { write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (builtin_type_char);
 			  write_exp_elt_longcst ((LONGEST) yyvsp[0].lval);
 			  write_exp_elt_opcode (OP_LONG); ;
     break;}
 case 54:
-#line 475 "../expread.y"
+#line 475 "expread.y"
 { write_exp_elt_opcode (OP_DOUBLE);
 			  write_exp_elt_type (builtin_type_double);
 			  write_exp_elt_dblcst (yyvsp[0].dval);
 			  write_exp_elt_opcode (OP_DOUBLE); ;
     break;}
 case 56:
-#line 485 "../expread.y"
+#line 485 "expread.y"
 { write_exp_elt_opcode (OP_LAST);
 			  write_exp_elt_longcst ((LONGEST) yyvsp[0].lval);
 			  write_exp_elt_opcode (OP_LAST); ;
     break;}
 case 57:
-#line 491 "../expread.y"
+#line 491 "expread.y"
 { write_exp_elt_opcode (OP_REGISTER);
 			  write_exp_elt_longcst ((LONGEST) yyvsp[0].lval);
 			  write_exp_elt_opcode (OP_REGISTER); ;
     break;}
 case 58:
-#line 497 "../expread.y"
+#line 497 "expread.y"
 { write_exp_elt_opcode (OP_INTERNALVAR);
 			  write_exp_elt_intern (yyvsp[0].ivar);
 			  write_exp_elt_opcode (OP_INTERNALVAR); ;
     break;}
 case 59:
-#line 503 "../expread.y"
+#line 503 "expread.y"
 { write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (builtin_type_int);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH (yyvsp[-1].tval));
 			  write_exp_elt_opcode (OP_LONG); ;
     break;}
 case 60:
-#line 510 "../expread.y"
+#line 510 "expread.y"
 { write_exp_elt_opcode (OP_STRING);
 			  write_exp_string (yyvsp[0].sval);
 			  write_exp_elt_opcode (OP_STRING); ;
     break;}
 case 61:
-#line 517 "../expread.y"
+#line 517 "expread.y"
 { write_exp_elt_opcode (OP_THIS);
 			  write_exp_elt_opcode (OP_THIS); ;
     break;}
 case 62:
-#line 524 "../expread.y"
+#line 524 "expread.y"
 {
 			  if (yyvsp[0].ssym.sym != 0)
 			      yyval.bval = SYMBOL_BLOCK_VALUE (yyvsp[0].ssym.sym);
@@ -1085,7 +1085,7 @@ case 62:
 			;
     break;}
 case 63:
-#line 541 "../expread.y"
+#line 541 "expread.y"
 { struct symbol *tem
 			    = lookup_symbol (copy_name (yyvsp[0].sval), yyvsp[-2].bval,
 					     VAR_NAMESPACE, 0, NULL);
@@ -1095,7 +1095,7 @@ case 63:
 			  yyval.bval = SYMBOL_BLOCK_VALUE (tem); ;
     break;}
 case 64:
-#line 551 "../expread.y"
+#line 551 "expread.y"
 { struct symbol *sym;
 			  sym = lookup_symbol (copy_name (yyvsp[0].sval), yyvsp[-2].bval,
 					       VAR_NAMESPACE, 0, NULL);
@@ -1107,7 +1107,7 @@ case 64:
 			  write_exp_elt_opcode (OP_VAR_VALUE); ;
     break;}
 case 65:
-#line 563 "../expread.y"
+#line 563 "expread.y"
 {
 			  struct type *type = yyvsp[-2].tval;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -1122,7 +1122,7 @@ case 65:
 			;
     break;}
 case 66:
-#line 576 "../expread.y"
+#line 576 "expread.y"
 {
 			  char *name = copy_name (yyvsp[0].sval);
 			  struct symbol *sym;
@@ -1168,7 +1168,7 @@ case 66:
 			;
     break;}
 case 67:
-#line 622 "../expread.y"
+#line 622 "expread.y"
 { struct symbol *sym = yyvsp[0].ssym.sym;
 
 			  if (sym)
@@ -1241,7 +1241,7 @@ case 67:
 			;
     break;}
 case 69:
-#line 697 "../expread.y"
+#line 697 "expread.y"
 {
 		  /* This is where the interesting stuff happens.  */
 		  int done = 0;
@@ -1276,26 +1276,26 @@ case 69:
 		;
     break;}
 case 70:
-#line 732 "../expread.y"
+#line 732 "expread.y"
 { push_type (tp_pointer); yyval.voidval = 0; ;
     break;}
 case 71:
-#line 734 "../expread.y"
+#line 734 "expread.y"
 { push_type (tp_pointer); yyval.voidval = yyvsp[0].voidval; ;
     break;}
 case 73:
-#line 739 "../expread.y"
+#line 739 "expread.y"
 { yyval.voidval = yyvsp[-1].voidval; ;
     break;}
 case 74:
-#line 741 "../expread.y"
+#line 741 "expread.y"
 {
 			  push_type ((enum type_pieces) yyvsp[0].lval);
 			  push_type (tp_array);
 			;
     break;}
 case 75:
-#line 746 "../expread.y"
+#line 746 "expread.y"
 {
 			  push_type ((enum type_pieces) yyvsp[0].lval);
 			  push_type (tp_array);
@@ -1303,109 +1303,109 @@ case 75:
 			;
     break;}
 case 76:
-#line 752 "../expread.y"
+#line 752 "expread.y"
 { push_type (tp_function); ;
     break;}
 case 77:
-#line 754 "../expread.y"
+#line 754 "expread.y"
 { push_type (tp_function); ;
     break;}
 case 78:
-#line 758 "../expread.y"
+#line 758 "expread.y"
 { yyval.lval = -1; ;
     break;}
 case 79:
-#line 760 "../expread.y"
+#line 760 "expread.y"
 { yyval.lval = yyvsp[-1].lval; ;
     break;}
 case 80:
-#line 764 "../expread.y"
+#line 764 "expread.y"
 { yyval.voidval = 0; ;
     break;}
 case 82:
-#line 769 "../expread.y"
+#line 769 "expread.y"
 { yyval.tval = lookup_member_type (builtin_type_int, yyvsp[-2].tval); ;
     break;}
 case 83:
-#line 771 "../expread.y"
+#line 771 "expread.y"
 { yyval.tval = lookup_member_type (yyvsp[-5].tval, yyvsp[-3].tval); ;
     break;}
 case 84:
-#line 773 "../expread.y"
+#line 773 "expread.y"
 { yyval.tval = lookup_member_type
 			    (lookup_function_type (yyvsp[-7].tval), yyvsp[-5].tval); ;
     break;}
 case 85:
-#line 776 "../expread.y"
+#line 776 "expread.y"
 { yyval.tval = lookup_member_type
 			    (lookup_function_type (yyvsp[-8].tval), yyvsp[-6].tval);
 			  free (yyvsp[-1].tvec); ;
     break;}
 case 86:
-#line 783 "../expread.y"
+#line 783 "expread.y"
 { yyval.tval = yyvsp[0].tsym.type; ;
     break;}
 case 87:
-#line 785 "../expread.y"
+#line 785 "expread.y"
 { yyval.tval = builtin_type_int; ;
     break;}
 case 88:
-#line 787 "../expread.y"
+#line 787 "expread.y"
 { yyval.tval = builtin_type_long; ;
     break;}
 case 89:
-#line 789 "../expread.y"
+#line 789 "expread.y"
 { yyval.tval = builtin_type_short; ;
     break;}
 case 90:
-#line 791 "../expread.y"
+#line 791 "expread.y"
 { yyval.tval = builtin_type_long; ;
     break;}
 case 91:
-#line 793 "../expread.y"
+#line 793 "expread.y"
 { yyval.tval = builtin_type_unsigned_long; ;
     break;}
 case 92:
-#line 795 "../expread.y"
+#line 795 "expread.y"
 { yyval.tval = builtin_type_short; ;
     break;}
 case 93:
-#line 797 "../expread.y"
+#line 797 "expread.y"
 { yyval.tval = builtin_type_unsigned_short; ;
     break;}
 case 94:
-#line 799 "../expread.y"
+#line 799 "expread.y"
 { yyval.tval = lookup_struct (copy_name (yyvsp[0].sval),
 					      expression_context_block); ;
     break;}
 case 95:
-#line 802 "../expread.y"
+#line 802 "expread.y"
 { yyval.tval = lookup_union (copy_name (yyvsp[0].sval),
 					     expression_context_block); ;
     break;}
 case 96:
-#line 805 "../expread.y"
+#line 805 "expread.y"
 { yyval.tval = lookup_enum (copy_name (yyvsp[0].sval),
 					    expression_context_block); ;
     break;}
 case 97:
-#line 808 "../expread.y"
+#line 808 "expread.y"
 { yyval.tval = lookup_unsigned_typename (TYPE_NAME(yyvsp[0].tsym.type)); ;
     break;}
 case 98:
-#line 810 "../expread.y"
+#line 810 "expread.y"
 { yyval.tval = builtin_type_unsigned_int; ;
     break;}
 case 99:
-#line 812 "../expread.y"
+#line 812 "expread.y"
 { yyval.tval = yyvsp[0].tsym.type; ;
     break;}
 case 100:
-#line 814 "../expread.y"
+#line 814 "expread.y"
 { yyval.tval = builtin_type_int; ;
     break;}
 case 102:
-#line 819 "../expread.y"
+#line 819 "expread.y"
 {
 		  yyval.tsym.stoken.ptr = "int";
 		  yyval.tsym.stoken.length = 3;
@@ -1413,7 +1413,7 @@ case 102:
 		;
     break;}
 case 103:
-#line 825 "../expread.y"
+#line 825 "expread.y"
 {
 		  yyval.tsym.stoken.ptr = "long";
 		  yyval.tsym.stoken.length = 4;
@@ -1421,7 +1421,7 @@ case 103:
 		;
     break;}
 case 104:
-#line 831 "../expread.y"
+#line 831 "expread.y"
 {
 		  yyval.tsym.stoken.ptr = "short";
 		  yyval.tsym.stoken.length = 5;
@@ -1429,37 +1429,37 @@ case 104:
 		;
     break;}
 case 105:
-#line 840 "../expread.y"
+#line 840 "expread.y"
 { yyval.tvec = (struct type **)xmalloc (sizeof (struct type *) * 2);
 		  yyval.tvec[0] = (struct type *)0;
 		  yyval.tvec[1] = yyvsp[0].tval;
 		;
     break;}
 case 106:
-#line 845 "../expread.y"
+#line 845 "expread.y"
 { int len = sizeof (struct type *) * ++(yyvsp[-2].ivec[0]);
 		  yyval.tvec = (struct type **)xrealloc (yyvsp[-2].tvec, len);
 		  yyval.tvec[yyval.ivec[0]] = yyvsp[0].tval;
 		;
     break;}
 case 107:
-#line 851 "../expread.y"
+#line 851 "expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 case 108:
-#line 852 "../expread.y"
+#line 852 "expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 case 109:
-#line 853 "../expread.y"
+#line 853 "expread.y"
 { yyval.sval = yyvsp[0].tsym.stoken; ;
     break;}
 case 110:
-#line 854 "../expread.y"
+#line 854 "expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 case 111:
-#line 855 "../expread.y"
+#line 855 "expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 }
@@ -1615,7 +1615,7 @@ yyerrhandle:
   yystate = yyn;
   goto yynewstate;
 }
-#line 864 "../expread.y"
+#line 870 "expread.y"
 
 
 /* Begin counting arguments for a function call,

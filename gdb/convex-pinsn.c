@@ -73,7 +73,7 @@ struct formstr {
     unsigned i:5, j:5, k:2;	/* operand formats */
 };
 
-#include "convex-opcode.h"
+#include "convx-opcode.h"
 
 unsigned char formdecode [] = {
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
