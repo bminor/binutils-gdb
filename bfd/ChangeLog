@@ -1,5 +1,15 @@
 Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bout.c (calljx_callback, callj_callback): Use get_value to get
+	the symbol value and check for undefined symbols.
+	(get_value): If the symbol is undefined, look it up in the linker
+	hash table.
+	(b_out_get_relocated_section_contents): For PCREL24 and PCREL13
+	use get_value to get the symbol value and check for undefined
+	symbols.
+	* reloc16.c (bfd_coff_reloc16_get_value): If the symbol is
+	undefined, look it up in the linker hash table.
+
 	* aoutx.h (translate_symbol_table): The string index 0 has a
 	special meaning for normal symbols, but not for dynamic symbols.
 
