@@ -1,3 +1,7 @@
+2004-02-04  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (_after_open): Fix thinko in 2003-12-18 patch.
+
 2004-01-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* genscripts.sh: Fix typo.
