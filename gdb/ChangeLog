@@ -1,5 +1,7 @@
 Tue Apr  7 08:45:46 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* symfile.c:  #include <ctype.h> to get proper def if isspace().
+
 	* i386-tdep.c (get_longjmp_target):  #ifdef GET_LONGJMP_TARGET.
 
 Mon Apr  6 17:25:45 1992  Per Bothner  (bothner@cygnus.com)
