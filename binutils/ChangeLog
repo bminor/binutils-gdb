@@ -1,3 +1,9 @@
+2001-06-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Mention hppa64-elf.  Add binutils-2.11 marker.
+
+	* MAINTAINERS: Replace with mainline version.
+
 2001-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* Most files: Update copyright notices.
@@ -436,15 +442,15 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
-	* binutils/binutils.texi: Put back "@end table" deleted by
+	* binutils.texi: Put back "@end table" deleted by
 	accident.
 
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
-	* binutils/nm.c: Add optional style to demangle switch.
-	* binutils/objdump.c: Add optional style to demangle switch.
-	* binutils/addr2line.c: Add optional style to demangle switch.
-	* binutils/binutils.texi: Document optional style to demangle
+	* nm.c: Add optional style to demangle switch.
+	* objdump.c: Add optional style to demangle switch.
+	* addr2line.c: Add optional style to demangle switch.
+	* binutils.texi: Document optional style to demangle
 	switch.
 
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
@@ -757,7 +763,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 
 2000-04-10  Philippe De Muyter  <phdm@macqel.be>
 
-	* readelf (dynamic_segment_mips_val): Call `sprintf', not
+	* readelf.c (dynamic_segment_mips_val): Call `sprintf', not
 	`strftime' since strftime is not available on all systems.
 	(process_mips_specific): Ditto.
 
@@ -1010,7 +1016,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.in: Add arm-wince, mips-pe and sh-pe targets.
 	* configure: Regenerate.
 
-	* dlltoolc.: Add support for sh-pe and mips-pe targets.
+	* dlltool.c: Add support for sh-pe and mips-pe targets.
 	* rescoff.c: Add support for sh-pe and mips-pe targets.
 
 2000-02-23  H.J. Lu  <hjl@gnu.org>
@@ -1055,7 +1061,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-02-03  Timothy Wall <twall@redhat.com>
 
-	* binutils/objdump.c (dump_section_header, find_symbol_for_address,
+	* objdump.c (dump_section_header, find_symbol_for_address,
 	show_line, disassemble_bytes, disassemble_data, dump_data):
 	distinguish between octets and bytes.
 
