@@ -1537,7 +1537,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	 Probably not, but it works, and if it works it don't need fixing!  nickc@cygnus.com */
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
       if (! info->relocateable
-	  && rel->r_type == ARM_32)
+	  && (rel->r_type == ARM_32 || rel->r_type == ARM_RVA32))
 	{
 	  /* Determine if we need to set the bottom bit of a relocated address
 	     because the address is the address of a Thumb code symbol.  */

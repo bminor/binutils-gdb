@@ -1,4 +1,9 @@
-999-05-05  Catherine Moore  <clm@cygnus.com>
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+
+        * coff-arm.c (coff_arm_relocate_section):  Add one to
+        address of ARM_RVA32 thumb functions.
+ 
+1999-05-05  Catherine Moore  <clm@cygnus.com>
  
         * elf32-m68k.c (elf32_m68k_set_private_flags): New.
         (elf32_m68k_copy_private_bfd_data): New.
