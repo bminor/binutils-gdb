@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
 
-#define FP_REGNUM 14 /* needs to be virtual register ??? */
+#define FP_REGNUM 7 /* needs to be virtual register ??? */
 #define V0_REGNUM 15 /* needs to be virtual register ??? */
 #define RP_REGNUM 16 /* needs to be virtual register ??? */
 #define ARG0_REGNUM 17 /* needs to be virtual register ??? */
