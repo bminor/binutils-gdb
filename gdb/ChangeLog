@@ -1,3 +1,9 @@
+2002-04-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (gdbarch_update_p): Keep the list of architectures
+	sorted in most most-recent-used order.  Document.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
 2002-04-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/inferiors.c (struct inferior_info): Add regcache_data.
