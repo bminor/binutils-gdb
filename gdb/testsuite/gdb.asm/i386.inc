@@ -30,3 +30,10 @@
 	.macro gdbasm_startup
 	xor	%ebp, %ebp
 	.endm
+
+	comment "Declare a data variable"
+	.macro gdbasm_datavar name value
+	.data
+\name:
+	.long	\value
+	.endm

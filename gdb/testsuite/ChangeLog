@@ -15,6 +15,19 @@
 	the S/390 architecture.
         * gdb.asm/configure: Regenerated.
 
+2001-11-30  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add tests for list, search, finish, return,
+	next, info source, info sources, info line, global and static
+	variables, and static functions.
+	* gdb.asm/common.inc: New macro gdbasm_datavar (default definition).
+	* gdb.asm/i386.inc: Override default definition of gdbasm_datavar.
+	* gdb.asm/asmsrc1.s: Add a static function and some variables.
+	* gdb.asm/asmsrc2.s: Make foo2 call foo3 twice (to test 'next').
+	* gdb.asm/d10v.inc (gdbasm_enter): Set up frame pointer.
+	(gdbasm_leave): Restore frame pointer.
+	(gdbasm_startup): Copy stack set-up from crt0.S.
+
 2001-11-26  Fernando Nasser  <fnasser@redhat.com>
 
 	From 2001-11-12 Jackie Smith Cashion  <jsmith@redhat.com>:

@@ -46,3 +46,18 @@ foo3:
 	.global exit
 exit:
 	gdbasm_exit0
+
+comment "A static function"
+
+foostatic:
+	gdbasm_enter
+	gdbasm_leave
+
+comment "A global variable"
+
+	.global globalvar
+gdbasm_datavar	globalvar	11
+
+comment "A static variable"
+
+gdbasm_datavar	staticvar	5
