@@ -1,3 +1,7 @@
+2005-01-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.host: Correct sed patterns for last change.
+
 2005-01-10  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/609

@@ -156,11 +156,11 @@ mips*-sgi-irix6*)
   ;;
 
 mips*-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld.so.1,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
 m68*-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld.so.1,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
 m68*-motorola-sysv)
@@ -184,19 +184,19 @@ m88*-motorola-sysv3)
   ;;
 
 powerpc64*-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib64/ld64.so.1,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld64.so.1,"`
   ;;
 
 powerpc*-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld.so.1,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
 s390x-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld64.so.1,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld64.so.1,"`
   ;;
 
 s390-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld.so.1,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
 sparc-*-solaris2*)
@@ -210,15 +210,15 @@ sparc64-*-solaris2* | sparcv9-*-solaris2*)
   ;;
 
 sparc-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld-linux.so.2,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld-linux.so.2,"`
   ;;
 
 sparc64-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib64/ld-linux.so.2,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld-linux.so.2,"`
   ;;
 
 x86_64-*-linux-gnu*)
-  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib64/ld-linux-x86-64.so.2,"`
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld-linux-x86-64.so.2,"`
   ;;
 
 *-*-freebsd* | *-*-kfreebsd*-gnu)
