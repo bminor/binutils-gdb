@@ -1,3 +1,8 @@
+2001-02-21  Ben Elliston  <bje@redhat.com>
+
+	* sim-trace.h (TRACE_BRANCH_INPUT1): New macro.
+	(TRACE_BRANCH_INPUT2): Likewise.
+
 2001-02-09  Ben Elliston  <bje@redhat.com>
 
 	* (profile_print_pc): Write header out in target byte order.

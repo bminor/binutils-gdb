@@ -383,7 +383,7 @@ extern void trace_result_word1_string1 PARAMS ((SIM_DESC sd,
 /* Other trace_result{_<type><nr-results>} */
 
 
-/* Macro's for tracing ALU instructions */
+/* Macros for tracing ALU instructions */
 
 #define TRACE_ALU_INPUT0() \
 do { \
@@ -441,8 +441,21 @@ do { \
     trace_result_word4 (SD, CPU, TRACE_ALU_IDX, (R0), (R1), (R2), (R3)); \
 } while (0)
 
+/* Macros for tracing inputs to comparative branch instructions. */
 
-/* Macro's for tracing FPU instructions */
+#define TRACE_BRANCH_INPUT1(V0) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) \
+    trace_input_word1 (SD, CPU, TRACE_BRANCH_IDX, (V0)); \
+} while (0)
+
+#define TRACE_BRANCH_INPUT2(V0,V1) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) \
+    trace_input_word2 (SD, CPU, TRACE_BRANCH_IDX, (V0), (V1)); \
+} while (0)
+
+/* Macros for tracing FPU instructions */
 
 #define TRACE_FP_INPUT0() \
 do { \
