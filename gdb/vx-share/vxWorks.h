@@ -161,10 +161,6 @@ modification history
 
 #define FOREVER	for (;;)
 
-#define max(x, y)	(((x) < (y)) ? (y) : (x))
-#define min(x, y)	(((x) < (y)) ? (x) : (y))
-
-
 /* storage class specifier definitions */
 
 #define FAST	register

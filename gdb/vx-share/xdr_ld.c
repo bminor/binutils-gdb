@@ -17,6 +17,7 @@ for object files that are downloaded to VxWorks.  They are used by
 remote debuggers that use RPC (such as dbxWorks and vxGdb).
 */
 
+#include "defs.h"
 #include "vxWorks.h"
 #include "rpc/rpc.h"
 #include "xdr_ld.h"

@@ -16,6 +16,7 @@ This module contains the eXternal Data Representation (XDR) routines
 for the RDB interface for VxWorks.
 */
 
+#include "defs.h"
 #include "vxWorks.h"
 #include <rpc/rpc.h>
 #include "xdr_rdb.h"
