@@ -1352,6 +1352,7 @@ ALLDEPFILES = \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.c ppcnbsd-tdep.c \
+	ppcobsd-nat.c ppcobsd-tdep.c \
 	procfs.c \
 	remote-e7000.c \
 	remote-hms.c remote-m32r-sdi.c remote-mips.c \
@@ -2157,6 +2158,11 @@ ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
 ppcnbsd-tdep.o: ppcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(breakpoint_h) $(value_h) $(osabi_h) $(ppc_tdep_h) \
 	$(ppcnbsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
+ppcobsd-nat.o: ppcobsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(ppcobsd_tdep_h)
+ppcobsd-tdep.o: ppcobsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
+	$(regcache_h) $(regset_h) $(gdb_string_h) $(ppc_tdep_h) \
+	$(ppcobsd_tdep_h) $(solib_svr4_h)
 ppc-sysv-tdep.o: ppc-sysv-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(value_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(ppc_tdep_h) $(target_h) $(objfiles_h)
@@ -2254,11 +2260,11 @@ rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(ppc_tdep_h) $(exec_h) $(gdb_stat_h)
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(target_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) $(arch_utils_h) \
-	$(regcache_h) $(doublest_h) $(value_h) $(parser_defs_h) $(osabi_h) \
-	$(libbfd_h) $(coff_internal_h) $(libcoff_h) $(coff_xcoff_h) \
-	$(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) $(ppc_tdep_h) \
-	$(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
-	$(frame_base_h)
+	$(regcache_h) $(regset_g) $(doublest_h) $(value_h) $(parser_defs_h) \
+	$(osabi_h) $(libbfd_h) $(coff_internal_h) $(libcoff_h) \
+	$(coff_xcoff_h) $(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) \
+	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
+	$(frame_unwind_h) $(frame_base_h)
 s390-nat.o: s390-nat.c $(defs_h) $(tm_h) $(regcache_h) $(inferior_h) \
 	$(s390_tdep_h)
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \

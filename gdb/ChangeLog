@@ -1,3 +1,26 @@
+2004-04-22  Mark Kettenis  <kettenis@gnu.org>
+
+	Add OpenBSD/powerpc support.
+	* NEWS (New native configurations): Mention OpenBSD/powerpc.
+	* ppc-tdep.h (struct ppc_reg_offsets): New structure.
+	(ppc_supply_gregset, ppc_supply_fpregset, ppc_collect_gregset)
+	(ppc_collect_fpregset): New prototypes.
+	* ppcobsd-nat.c: New file.
+	* ppcobsd-tdep.c: New file.
+	* ppcobsd-tdep.h: New file.
+	* rs6000-tdep.c: Include "regset.h".
+	(ppc_supply_reg, ppc_collect_reg, ppc_supply_gregset)
+	(ppc_supply_fpregset, ppc_collect_gregset, ppc_collect_fpregset):
+	New functions.
+	* Makefile.in (ALLDEPFILES): Add pccobsd-nat.c and ppcobsd-tdep.c.
+	(ppcobsd-nat.o, ppcobsd-tdep.o): New dependencies.
+	(rs6000-tdep.o): Update dependencies.
+	* configure.host: Add powerpc-*-openbsd.
+	* configure.tgt: Add powerpc-*-openbsd.
+	* config/powerpc/obsd.mh: New file.
+	* config/powerpc/nm-obsd.h: New file.
+	* config/powerpc/obsd.mt: New file.
+
 2004-04-22  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (show_frame_info): Delete declaration.

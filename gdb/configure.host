@@ -98,6 +98,7 @@ powerpc-*-aix4.3.[0-1]*)	gdb_host=aix ;;
 powerpc-*-aix*)		gdb_host=aix432 ;;
 powerpc-*-linux*)	gdb_host=linux ;;
 powerpc-*-netbsd*)	gdb_host=nbsd ;;
+powerpc-*-openbsd*)	gdb_host=obsd ;;
 
 powerpc64-*-linux*)     gdb_host=ppc64-linux ;;
 

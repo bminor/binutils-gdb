@@ -31,6 +31,7 @@
 #include "objfiles.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "regset.h"
 #include "doublest.h"
 #include "value.h"
 #include "parser-defs.h"
@@ -150,6 +151,166 @@ ppc_floating_point_unit_p (struct gdbarch *gdbarch)
     return 1;
   return 0;
 }
+
+
+/* Register set support functions.  */
+
+static void
+ppc_supply_reg (struct regcache *regcache, int regnum, 
+		const char *regs, size_t offset)
+{
+  if (regnum != -1 && offset != -1)
+    regcache_raw_supply (regcache, regnum, regs + offset);
+}
+
+static void
+ppc_collect_reg (const struct regcache *regcache, int regnum,
+		 char *regs, size_t offset)
+{
+  if (regnum != -1 && offset != -1)
+    regcache_raw_collect (regcache, regnum, regs + offset);
+}
+    
+/* Supply register REGNUM in the general-purpose register set REGSET
+   from the buffer specified by GREGS and LEN to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+void
+ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
+		    int regnum, const void *gregs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct ppc_reg_offsets *offsets = regset->descr;
+  size_t offset;
+  int i;
+
+  for (i = 0, offset = offsets->r0_offset; i < 32; i++, offset += 4)
+    {
+      if (regnum == -1 || regnum == i)
+	ppc_supply_reg (regcache, i, gregs, offset);
+    }
+
+  if (regnum == -1 || regnum == PC_REGNUM)
+    ppc_supply_reg (regcache, PC_REGNUM, gregs, offsets->pc_offset);
+  if (regnum == -1 || regnum == tdep->ppc_ps_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_ps_regnum,
+		    gregs, offsets->ps_offset);
+  if (regnum == -1 || regnum == tdep->ppc_cr_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_cr_regnum,
+		    gregs, offsets->cr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_lr_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_lr_regnum,
+		    gregs, offsets->lr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_ctr_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_ctr_regnum,
+		    gregs, offsets->ctr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_xer_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_xer_regnum,
+		    gregs, offsets->cr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_mq_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_mq_regnum, gregs, offsets->mq_offset);
+}
+
+/* Supply register REGNUM in the floating-point register set REGSET
+   from the buffer specified by FPREGS and LEN to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+void
+ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+		     int regnum, const void *fpregs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct ppc_reg_offsets *offsets = regset->descr;
+  size_t offset;
+  int i;
+
+  offset = offsets->f0_offset;
+  for (i = FP0_REGNUM; i < FP0_REGNUM + 32; i++, offset += 4)
+    {
+      if (regnum == -1 || regnum == i)
+	ppc_supply_reg (regcache, i, fpregs, offset);
+    }
+
+  if (regnum == -1 || regnum == tdep->ppc_fpscr_regnum)
+    ppc_supply_reg (regcache, tdep->ppc_fpscr_regnum,
+		    fpregs, offsets->fpscr_offset);
+}
+
+/* Collect register REGNUM in the general-purpose register set
+   REGSET. from register cache REGCACHE into the buffer specified by
+   GREGS and LEN.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+void
+ppc_collect_gregset (const struct regset *regset,
+		     const struct regcache *regcache,
+		     int regnum, void *gregs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct ppc_reg_offsets *offsets = regset->descr;
+  size_t offset;
+  int i;
+
+  offset = offsets->r0_offset;
+  for (i = 0; i <= 32; i++, offset += 4)
+    {
+      if (regnum == -1 || regnum == i)
+	ppc_collect_reg (regcache, regnum, gregs, offset);
+    }
+
+  if (regnum == -1 || regnum == PC_REGNUM)
+    ppc_collect_reg (regcache, PC_REGNUM, gregs, offsets->pc_offset);
+  if (regnum == -1 || regnum == tdep->ppc_ps_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_ps_regnum,
+		     gregs, offsets->ps_offset);
+  if (regnum == -1 || regnum == tdep->ppc_cr_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_cr_regnum,
+		     gregs, offsets->cr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_lr_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_lr_regnum,
+		     gregs, offsets->lr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_ctr_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_ctr_regnum,
+		     gregs, offsets->ctr_offset);
+  if (regnum == -1 || regnum == tdep->ppc_xer_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_xer_regnum,
+		     gregs, offsets->xer_offset);
+  if (regnum == -1 || regnum == tdep->ppc_mq_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_mq_regnum,
+		     gregs, offsets->mq_offset);
+}
+
+/* Collect register REGNUM in the floating-point register set
+   REGSET. from register cache REGCACHE into the buffer specified by
+   FPREGS and LEN.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+void
+ppc_collect_fpregset (const struct regset *regset,
+		      const struct regcache *regcache,
+		      int regnum, void *fpregs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct ppc_reg_offsets *offsets = regset->descr;
+  size_t offset;
+  int i;
+
+  offset = offsets->f0_offset;
+  for (i = FP0_REGNUM; i <= FP0_REGNUM + 32; i++, offset += 4)
+    {
+      if (regnum == -1 || regnum == i)
+	ppc_collect_reg (regcache, regnum, fpregs, offset);
+    }
+
+  if (regnum == -1 || regnum == tdep->ppc_fpscr_regnum)
+    ppc_collect_reg (regcache, tdep->ppc_fpscr_regnum,
+		     fpregs, offsets->fpscr_offset);
+}
+
 
 /* Read a LEN-byte address from debugged memory address MEMADDR. */
 

@@ -74,10 +74,67 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 /* From rs6000-tdep.c... */
 int altivec_register_p (int regno);
 
-
 /* Return non-zero when the architecture has an FPU (or at least when
    the ABI is using the FPU).  */
 int ppc_floating_point_unit_p (struct gdbarch *gdbarch);
+
+/* Register set description.  */
+
+struct ppc_reg_offsets
+{
+  /* General-purpose registers.  */
+  int r0_offset;
+  int pc_offset;
+  int ps_offset;
+  int cr_offset;
+  int lr_offset;
+  int ctr_offset;
+  int xer_offset;
+  int mq_offset;
+
+  /* Floating-point registers.  */
+  int f0_offset;
+  int fpscr_offset;
+
+  /* AltiVec registers.  */
+  int vr0_offset;
+  int vscr_offset;
+  int vrsave_offset;
+};
+
+/* Supply register REGNUM in the general-purpose register set REGSET
+   from the buffer specified by GREGS and LEN to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+extern void ppc_supply_gregset (const struct regset *regset,
+				struct regcache *regcache,
+				int regnum, const void *gregs, size_t len);
+
+/* Supply register REGNUM in the floating-point register set REGSET
+   from the buffer specified by FPREGS and LEN to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+extern void ppc_supply_fpregset (const struct regset *regset,
+				 struct regcache *regcache,
+				 int regnum, const void *fpregs, size_t len);
+
+/* Collect register REGNUM in the general-purpose register set
+   REGSET. from register cache REGCACHE into the buffer specified by
+   GREGS and LEN.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+extern void ppc_collect_gregset (const struct regset *regset,
+				 const struct regcache *regcache,
+				 int regnum, void *gregs, size_t len);
+
+/* Collect register REGNUM in the floating-point register set
+   REGSET. from register cache REGCACHE into the buffer specified by
+   FPREGS and LEN.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+extern void ppc_collect_fpregset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *fpregs, size_t len);
 
 /* Private data that this module attaches to struct gdbarch. */
 

@@ -5,6 +5,7 @@
 
 * New native configurations
 
+OpenBSD/powerpc					powerpc-*-openbsd*
 NetBSD/vax					vax-*-netbsd*
 OpenBSD/vax					vax-*-openbsd*
 
