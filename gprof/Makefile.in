@@ -108,7 +108,7 @@ clean: mostlyclean
 	-rm -f gprof
 distclean: clean
 	-rm -f config.cache config.log config.status Makefile
-realclean: distclean
+maintainer-clean realclean: distclean
 	-rm -f $(DISTSTUFF)
 
 Makefile: Makefile.in config.status

@@ -1,3 +1,8 @@
+Wed Sep 20 13:21:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New target, synonym for
+	realclean.
+
 Fri Sep  8 14:38:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (install): Don't install in $(tooldir).
