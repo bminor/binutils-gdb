@@ -13,7 +13,7 @@
 @chapter ARC Dependent Features
 @end ifclear
 
-@set ARC_CORE_DEFAULT 5
+@set ARC_CORE_DEFAULT 6
 
 @cindex ARC support
 @menu

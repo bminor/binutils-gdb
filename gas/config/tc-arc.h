@@ -66,3 +66,5 @@ arc_parse_cons_expression (EXP, NBYTES)
 extern void arc_cons_fix_new ();
 #define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP) \
 arc_cons_fix_new (FRAG, WHERE, NBYTES, EXP)
+
+#define DWARF2_LINE_MIN_INSN_LENGTH 4

@@ -2,7 +2,7 @@
    Copyright 1994, 1995, 1997, 1998, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
@@ -382,7 +382,7 @@ const struct arc_operand_value arc_reg_names[] =
   { "r59", 59, REG, 0 },
 
   /* Loop count register (24 bits).  */
-  { "lp_count", 60, REG, ARC_REGISTER_READONLY },
+  { "lp_count", 60, REG, 0 },
   /* Short immediate data indicator setting flags.  */
   { "r61", 61, REG, ARC_REGISTER_READONLY },
   /* Long immediate data indicator setting flags.  */
@@ -694,21 +694,21 @@ insert_reg (insn, operand, mods, reg, value, errmsg)
 	{
 	  int marker;
 
-          op_type = OP_SHIMM;
-	 /* forget about shimm as dest mlm.  */
+	  op_type = OP_SHIMM;
+	  /* forget about shimm as dest mlm.  */
 
-	  if('a' != operand->fmt)
+	  if ('a' != operand->fmt)
 	    {
 	      shimm_p = 1;
 	      shimm = value;
 	      flagshimm_handled_p = 1;
 	      marker = flag_p ? ARC_REG_SHIMM_UPDATE : ARC_REG_SHIMM;
 	    }
-          else
-            {
+	  else
+	    {
 	      /* don't request flag setting on shimm as dest.  */
 	      marker = ARC_REG_SHIMM;
-            }
+	    }
 	  insn |= marker << operand->shift;
 	  /* insn |= value & 511; - done later.  */
 	}
@@ -736,33 +736,33 @@ insert_reg (insn, operand, mods, reg, value, errmsg)
 	    *errmsg = "auxiliary register not allowed here";
 	  else
 	    {
-              if((insn & I(-1)) == I(2)) /* check for use validity.  */
-                 {
-		   if(reg->flags & ARC_REGISTER_READONLY)
-		     *errmsg = "attempt to set readonly register";
-                 }
-               else
-                 {
-		   if(reg->flags & ARC_REGISTER_WRITEONLY)
-		     *errmsg = "attempt to read writeonly register";
-                 }
+	      if ((insn & I(-1)) == I(2)) /* check for use validity.  */
+		{
+		  if (reg->flags & ARC_REGISTER_READONLY)
+		    *errmsg = "attempt to set readonly register";
+		}
+	      else
+		{
+		  if (reg->flags & ARC_REGISTER_WRITEONLY)
+		    *errmsg = "attempt to read writeonly register";
+		}
 	      insn |= ARC_REG_SHIMM << operand->shift;
 	      insn |= reg->value << arc_operands[reg->type].shift;
 	    }
 	}
       else
 	{
-      /* check for use validity.  */
-          if('a' == operand->fmt || ((insn & I(-1)) < I(2)))
-            {
-	      if(reg->flags & ARC_REGISTER_READONLY)
+	  /* check for use validity.  */
+	  if ('a' == operand->fmt || ((insn & I(-1)) < I(2)))
+	    {
+	      if (reg->flags & ARC_REGISTER_READONLY)
 		*errmsg = "attempt to set readonly register";
-            }
-          if('a' != operand->fmt)
-            {
-	      if(reg->flags & ARC_REGISTER_WRITEONLY)
+	    }
+	  if ('a' != operand->fmt)
+	    {
+	      if (reg->flags & ARC_REGISTER_WRITEONLY)
 		*errmsg = "attempt to read writeonly register";
-            }
+	    }
 	  /* We should never get an invalid register number here.  */
 	  if ((unsigned int) reg->value > 60)
 	    {
@@ -770,23 +770,23 @@ insert_reg (insn, operand, mods, reg, value, errmsg)
 	      *errmsg = buf;
 	    }
 	  insn |= reg->value << operand->shift;
-          op_type = OP_REG;
+	  op_type = OP_REG;
 	}
     }
 
   switch (operand->fmt)
     {
     case 'a':
-      ls_operand[LS_DEST] = op_type; 
+      ls_operand[LS_DEST] = op_type;
       break;
     case 's':
-      ls_operand[LS_BASE] = op_type; 
+      ls_operand[LS_BASE] = op_type;
       break;
     case 'c':
       if ((insn & I(-1)) == I(2))
-          ls_operand[LS_VALUE] = op_type; 
+	ls_operand[LS_VALUE] = op_type;
       else
-          ls_operand[LS_OFFSET] = op_type;
+	ls_operand[LS_OFFSET] = op_type;
       break;
     case 'o': case 'O':
       ls_operand[LS_OFFSET] = op_type;
@@ -916,19 +916,19 @@ insert_base (insn, operand, mods, reg, value, errmsg)
       arc_insn myinsn;
       myinsn = insert_reg (0, operand,mods, reg, value, errmsg) >> operand->shift;
       insn |= B(myinsn);
-      ls_operand[LS_BASE] = OP_REG; 
+      ls_operand[LS_BASE] = OP_REG;
     }
   else if (ARC_SHIMM_CONST_P (value) && !cond_p)
     {
       if (shimm_p && value != shimm)
-        {
-          /* convert the previous shimm operand to a limm.  */
-          limm_p = 1;
-          limm = shimm;
-          insn &= ~C(-1); /* we know where the value is in insn.  */
-          insn |= C(ARC_REG_LIMM);
-          ls_operand[LS_VALUE] = OP_LIMM;
-        }
+	{
+	  /* convert the previous shimm operand to a limm.  */
+	  limm_p = 1;
+	  limm = shimm;
+	  insn &= ~C(-1); /* we know where the value is in insn.  */
+	  insn |= C(ARC_REG_LIMM);
+	  ls_operand[LS_VALUE] = OP_LIMM;
+	}
       insn |= ARC_REG_SHIMM << operand->shift;
       shimm_p = 1;
       shimm = value;
@@ -937,10 +937,10 @@ insert_base (insn, operand, mods, reg, value, errmsg)
   else
     {
       if (limm_p && value != limm)
-        {
-          *errmsg = "too many long constants";
-          return insn;
-        }
+	{
+	  *errmsg = "too many long constants";
+	  return insn;
+	}
       limm_p = 1;
       limm = value;
       insn |= B(ARC_REG_LIMM);
@@ -970,8 +970,8 @@ insert_offset (insn, operand, mods, reg, value, errmsg)
       myinsn = insert_reg (0,operand,mods,reg,value,errmsg) >> operand->shift;
       ls_operand[LS_OFFSET] = OP_REG;
       if (operand->flags & ARC_OPERAND_LOAD) /* not if store, catch it later.  */
-          if ((insn & I(-1)) != I(1)) /* not if opcode == 1, catch it later.  */
-              insn |= C(myinsn);
+	if ((insn & I(-1)) != I(1)) /* not if opcode == 1, catch it later.  */
+	  insn |= C(myinsn);
     }
   else
     {
@@ -989,26 +989,26 @@ insert_offset (insn, operand, mods, reg, value, errmsg)
 	}
       if ((cond_p && !limm_p) || (value < minval || value > maxval))
 	{
-        if (limm_p && value != limm)
-          {
-	    *errmsg = "too many long constants";
-          }
-        else
-          {
-	    limm_p = 1;
-	    limm = value;
-	    if (operand->flags & ARC_OPERAND_STORE)
-	      insn |= B(ARC_REG_LIMM);
-	    if (operand->flags & ARC_OPERAND_LOAD)
-	      insn |= C(ARC_REG_LIMM);
-	    ls_operand[LS_OFFSET] = OP_LIMM;
-          }
+	  if (limm_p && value != limm)
+	    {
+	      *errmsg = "too many long constants";
+	    }
+	  else
+	    {
+	      limm_p = 1;
+	      limm = value;
+	      if (operand->flags & ARC_OPERAND_STORE)
+		insn |= B(ARC_REG_LIMM);
+	      if (operand->flags & ARC_OPERAND_LOAD)
+		insn |= C(ARC_REG_LIMM);
+	      ls_operand[LS_OFFSET] = OP_LIMM;
+	    }
 	}
       else
-        {
+	{
 	  if ((value < minval || value > maxval))
 	    *errmsg = "need too many limms";
-	  else if (shimm_p && value != shimm) 
+	  else if (shimm_p && value != shimm)
 	    {
 	      /* check for bad operand combinations before we lose info about them.  */
 	      if ((insn & I(-1)) == I(1))
@@ -1040,7 +1040,7 @@ insert_offset (insn, operand, mods, reg, value, errmsg)
 	  shimm = value;
 	  shimm_p = 1;
 	  ls_operand[LS_OFFSET] = OP_SHIMM;
-        }
+	}
     }
  out:
   return insn;
@@ -1060,14 +1060,15 @@ extract_st_syntax (insn, operand, mods, opval, invalid)
 ((ls_operand[LS_VALUE]  == (V) && \
   ls_operand[LS_BASE]   == (B) && \
   ls_operand[LS_OFFSET] == (O)))
-  if (!((ST_SYNTAX(OP_REG,OP_REG,OP_NONE)   && (insn[0] & 511) == 0)
+
+  if (!((ST_SYNTAX(OP_REG,OP_REG,OP_NONE) && (insn[0] & 511) == 0)
 	|| ST_SYNTAX(OP_REG,OP_LIMM,OP_NONE)
 	|| (ST_SYNTAX(OP_SHIMM,OP_REG,OP_NONE) && (insn[0] & 511) == 0)
 	|| (ST_SYNTAX(OP_SHIMM,OP_SHIMM,OP_NONE) && (insn[0] & 511) == 0)
 	|| ST_SYNTAX(OP_SHIMM,OP_LIMM,OP_NONE)
 	|| ST_SYNTAX(OP_SHIMM,OP_LIMM,OP_SHIMM)
 	|| ST_SYNTAX(OP_SHIMM,OP_SHIMM,OP_SHIMM)
-	|| (ST_SYNTAX(OP_LIMM,OP_REG,OP_NONE)  && (insn[0] & 511) == 0)
+	|| (ST_SYNTAX(OP_LIMM,OP_REG,OP_NONE) && (insn[0] & 511) == 0)
 	|| ST_SYNTAX(OP_REG,OP_REG,OP_SHIMM)
 	|| ST_SYNTAX(OP_REG,OP_SHIMM,OP_SHIMM)
 	|| ST_SYNTAX(OP_SHIMM,OP_REG,OP_SHIMM)
@@ -1086,13 +1087,13 @@ arc_limm_fixup_adjust(insn)
 
   /* check for st shimm,[limm].  */
   if ((insn & (I(-1) | C(-1) | B(-1))) ==
-     (I(2) | C(ARC_REG_SHIMM) | B(ARC_REG_LIMM)))
+      (I(2) | C(ARC_REG_SHIMM) | B(ARC_REG_LIMM)))
     {
       retval = insn & 0x1ff;
       if (retval & 0x100) /* sign extend 9 bit offset.  */
 	retval |= ~0x1ff;
     }
-  return(-retval); /* negate offset for return.  */
+  return -retval; /* negate offset for return.  */
 }
 
 /* Used in st insns to do final syntax check.  */
@@ -1122,27 +1123,27 @@ insert_st_syntax (insn, operand, mods, reg, value, errmsg)
   if (ST_SYNTAX(OP_REG,OP_SHIMM,OP_NONE) || ST_SYNTAX(OP_LIMM,OP_SHIMM,OP_NONE))
     {
       /* try to salvage this syntax.  */
-    if (shimm & 0x1) /* odd shimms won't work.  */
-      {
-	if (limm_p) /* do we have a limm already?  */
-	  {
-	    *errmsg = "impossible store";
-	  }
-	limm_p = 1;
-	limm = shimm;
-	shimm = 0;
-	shimm_p = 0;
-	insn = insn & ~(B(-1) | 511);
-	insn |= B(ARC_REG_LIMM);
-	ls_operand[LS_BASE] = OP_LIMM;
-      }
-    else
-      {
-	shimm >>= 1;
-	insn = insn & ~511;
-	insn |= shimm;
-	ls_operand[LS_OFFSET] = OP_SHIMM;
-      }
+      if (shimm & 0x1) /* odd shimms won't work.  */
+	{
+	  if (limm_p) /* do we have a limm already?  */
+	    {
+	      *errmsg = "impossible store";
+	    }
+	  limm_p = 1;
+	  limm = shimm;
+	  shimm = 0;
+	  shimm_p = 0;
+	  insn = insn & ~(B(-1) | 511);
+	  insn |= B(ARC_REG_LIMM);
+	  ls_operand[LS_BASE] = OP_LIMM;
+	}
+      else
+	{
+	  shimm >>= 1;
+	  insn = insn & ~511;
+	  insn |= shimm;
+	  ls_operand[LS_OFFSET] = OP_SHIMM;
+	}
     }
   if (ST_SYNTAX(OP_SHIMM,OP_LIMM,OP_NONE))
     {
@@ -1166,7 +1167,7 @@ insert_st_syntax (insn, operand, mods, reg, value, errmsg)
 	|| ST_SYNTAX(OP_SHIMM,OP_REG,OP_SHIMM)
 	|| ST_SYNTAX(OP_SHIMM,OP_SHIMM,OP_SHIMM)
 	|| ST_SYNTAX(OP_LIMM,OP_SHIMM,OP_SHIMM)
-	|| ST_SYNTAX(OP_LIMM,OP_REG,OP_NONE) 
+	|| ST_SYNTAX(OP_LIMM,OP_REG,OP_NONE)
 	|| ST_SYNTAX(OP_LIMM,OP_REG,OP_SHIMM)))
     *errmsg = "st operand error";
   if (addrwb_p)
@@ -1199,19 +1200,19 @@ insert_ld_syntax (insn, operand, mods, reg, value, errmsg)
   int test = insn & I(-1);
 
   if (!(test == I(1)))
-   {
-     if ((ls_operand[LS_DEST] == OP_SHIMM || ls_operand[LS_BASE] == OP_SHIMM
-	  || ls_operand[LS_OFFSET] == OP_SHIMM))
-       *errmsg = "invalid load/shimm insn";
-   }
+    {
+      if ((ls_operand[LS_DEST] == OP_SHIMM || ls_operand[LS_BASE] == OP_SHIMM
+	   || ls_operand[LS_OFFSET] == OP_SHIMM))
+	*errmsg = "invalid load/shimm insn";
+    }
   if (!(LD_SYNTAX(OP_REG,OP_REG,OP_NONE)
 	|| LD_SYNTAX(OP_REG,OP_REG,OP_REG)
 	|| LD_SYNTAX(OP_REG,OP_REG,OP_SHIMM)
 	|| (LD_SYNTAX(OP_REG,OP_LIMM,OP_REG) && !(test == I(1)))
 	|| (LD_SYNTAX(OP_REG,OP_REG,OP_LIMM) && !(test == I(1)))
-	|| LD_SYNTAX(OP_REG,OP_SHIMM,OP_SHIMM) 
+	|| LD_SYNTAX(OP_REG,OP_SHIMM,OP_SHIMM)
 	|| (LD_SYNTAX(OP_REG,OP_LIMM,OP_NONE) && (test == I(1)))))
-      *errmsg = "ld operand error";
+    *errmsg = "ld operand error";
   if (addrwb_p)
     {
       if (ls_operand[LS_BASE] != OP_REG)
@@ -1235,8 +1236,8 @@ extract_ld_syntax (insn, operand, mods, opval, invalid)
 
   if (!(test == I(1)))
     {
-      if((ls_operand[LS_DEST] == OP_SHIMM || ls_operand[LS_BASE] == OP_SHIMM
-	  || ls_operand[LS_OFFSET] == OP_SHIMM))
+      if ((ls_operand[LS_DEST] == OP_SHIMM || ls_operand[LS_BASE] == OP_SHIMM
+	   || ls_operand[LS_OFFSET] == OP_SHIMM))
 	*invalid = 1;
     }
   if (!((LD_SYNTAX(OP_REG,OP_REG,OP_NONE) && (test == I(1)))
@@ -1326,8 +1327,8 @@ insert_jumpflags (insn, operand, mods, reg, value, errmsg)
       *errmsg = "bad jump flags value";
     }
   jumpflags_p = 1;
-  limm = (limm & ((1 << operand->shift) - 1))
-    | ((value & ((1 << operand->bits) - 1)) << operand->shift); 
+  limm = ((limm & ((1 << operand->shift) - 1))
+	  | ((value & ((1 << operand->bits) - 1)) << operand->shift));
   return insn;
 }
 
@@ -1397,7 +1398,7 @@ insert_absaddr (insn, operand, mods, reg, value, errmsg)
 	    }
 	  else
 	    {
-	      if(nullify != 0x02)
+	      if (nullify != 0x02)
 		{
 		  *errmsg = "must specify .jd or no nullify suffix";
 		}
@@ -1450,7 +1451,7 @@ extract_reg (insn, operand, mods, opval, invalid)
   if (regno == ARC_REG_SHIMM)
     {
       op_type = OP_SHIMM;
-    /* always return zero if dest is a shimm  mlm.  */
+      /* always return zero if dest is a shimm  mlm.  */
 
       if ('a' != operand->fmt)
 	{
@@ -1492,10 +1493,10 @@ extract_reg (insn, operand, mods, opval, invalid)
       value = insn[1];
       limm_p = 1;
       /* if this is a jump instruction (j,jl), show new pc correctly.  */
-      if(0x07 == ((*insn & I(-1)) >> 27))
-        {
+      if (0x07 == ((*insn & I(-1)) >> 27))
+	{
 	  value = (value & 0xffffff);
-        }
+	}
     }
   /* It's a register, set OPVAL (that's the only way we distinguish registers
      from constants here).  */
@@ -1523,23 +1524,23 @@ extract_reg (insn, operand, mods, opval, invalid)
 	*opval = reg;
     }
   switch(operand->fmt)
-   {
-   case 'a':
-     ls_operand[LS_DEST] = op_type; 
-     break;
-   case 's':
-     ls_operand[LS_BASE] = op_type; 
-     break;
-   case 'c':
-     if((insn[0]& I(-1)) == I(2))
-       ls_operand[LS_VALUE] = op_type; 
-     else
-       ls_operand[LS_OFFSET] = op_type;
-     break;
-   case 'o': case 'O':
-     ls_operand[LS_OFFSET] = op_type;
-     break;
-   }
+    {
+    case 'a':
+      ls_operand[LS_DEST] = op_type;
+      break;
+    case 's':
+      ls_operand[LS_BASE] = op_type;
+      break;
+    case 'c':
+      if ((insn[0]& I(-1)) == I(2))
+	ls_operand[LS_VALUE] = op_type;
+      else
+	ls_operand[LS_OFFSET] = op_type;
+      break;
+    case 'o': case 'O':
+      ls_operand[LS_OFFSET] = op_type;
+      break;
+    }
 
   return value;
 }
@@ -1633,8 +1634,8 @@ extract_jumpflags(insn, operand, mods, opval, invalid)
 {
   if (!flag_p || !limm_p)
     *invalid = 1;
-  return((flag_p && limm_p)
-         ? (insn[1] >> operand->shift) & ((1 << operand->bits) -1): 0);
+  return ((flag_p && limm_p)
+	  ? (insn[1] >> operand->shift) & ((1 << operand->bits) -1): 0);
 }
 
 /* extract st insn's offset.  */
@@ -1654,7 +1655,7 @@ extract_st_offset (insn, operand, mods, opval, invalid)
       value = insn[0] & 511;
       if ((operand->flags & ARC_OPERAND_SIGNED) && (value & 256))
 	value -= 512;
-      if(value)
+      if (value)
 	ls_operand[LS_OFFSET] = OP_SHIMM;
     }
   else
@@ -1686,9 +1687,9 @@ extract_ld_offset (insn, operand, mods, opval, invalid)
 	ls_operand[LS_OFFSET] = OP_SHIMM;
       return(value);
     }
-/* if it isn't in the insn, it's concealed behind reg 'c'.  */
-  return extract_reg(insn,
-                     &arc_operands[arc_operand_map['c']], mods, opval, invalid);
+  /* if it isn't in the insn, it's concealed behind reg 'c'.  */
+  return extract_reg (insn, &arc_operands[arc_operand_map['c']],
+		      mods, opval, invalid);
 }
 
 /* The only thing this does is set the `invalid' flag if B != C.
@@ -1779,8 +1780,8 @@ int
 arc_insn_not_jl(insn)
   arc_insn insn;
 {
-  return (insn & (I(-1)|A(-1)|C(-1)|R(-1,7,1)|R(-1,9,1))) !=
-    (I(0x7) | R(-1,9,1));
+  return ((insn & (I(-1)|A(-1)|C(-1)|R(-1,7,1)|R(-1,9,1)))
+	  != (I(0x7) | R(-1,9,1)));
 }
 
 int
@@ -1814,11 +1815,11 @@ get_ext_suffix(s)
 	return(&suffix->operand);
       suffix = suffix->next;
     }
-  return(NULL);
+  return NULL;
 }
 
 int
 arc_get_noshortcut_flag()
 {
-  return(ARC_REGISTER_NOSHORT_CUT);
+  return ARC_REGISTER_NOSHORT_CUT;
 }

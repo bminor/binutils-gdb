@@ -1,3 +1,8 @@
+2001-05-12  Peter Targett  <peter.targett@arccores.com>
+
+	* arc-opc.c (arc_reg_names): Correct attribute for lp_count
+	register to r/w.  Formatting fixes throughout file.
+
 2001-05-12  Alan Modra  <amodra@one.net.au>
 
 	* i386-dis.c (prefix_user_table): Correct movq2dq, movdq2q, and

@@ -1,3 +1,8 @@
+2001-05-12  Peter Targett  <peter.targett@arccores.com>
+
+	* gas/arc/st.s: Add test case @h30 fixup.
+	* gas/arc/st.d: Update to suit.
+
 2001-05-12  Alan Modra  <amodra@one.net.au>
 
 	* gas/i386/sse2.s: Correct cvtps2dq, movdq2q, and movq2dq

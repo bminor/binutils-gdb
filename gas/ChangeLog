@@ -1,3 +1,21 @@
+2001-05-12  Peter Targett  <peter.targett@arccores.com>
+
+	* config/tc-arc.c: Update copyright and tidy source comments.
+	(md_pseudo_table): Add directive .cpu back as an alias for
+	.option.  Add .file and .line for dwarf2 support.
+	(arc_mach_type): Make bfd_mach_arc_6 default.
+	(md_longopts): Add entry 'pre-v6' representing old command line
+	option when assembling for 'arc5' core versions.
+	(md_parse_option): Make OPTION_ARC same as OPTION_ARC6, for new
+	default behaviour.
+	(arc_code_symbol): Make symbol value for @h30 fixup expression
+	equal to O_constant.
+	(md_assemble): Call dwarf2_emit_insn.
+	Include "dwarf2dbg2.h".  Formatting fixes throughout file.
+	* config/tc-arc.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+
+	* doc/c-arc.texi (ARC_CORE_DEFAULT): Update to new default.
+
 2001-05-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-ia64.c (special_linkonce_name): New.
