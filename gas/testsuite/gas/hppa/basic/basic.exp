@@ -359,6 +359,52 @@ proc do_branch {} {
     if [expr $x==183] then { pass $testname } else { fail $testname }
 }
 
+proc do_branch2 {} {
+    set testname "branch2.s: branch tests"
+    set x 0
+
+    gas_start "branch2.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 C0045FF5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 C004DFED\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 C0045FE7\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c C004DFDF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 C0047FD5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 C004FFCD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 C0047FC7\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c C004FFBF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 C4A47FB5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 C4A4FFAD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 C4A47FA7\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c C4A4FF9F\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 E8004005\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 E800400D\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 E8004F9D\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c E8004001\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 E8044001\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==17] then { pass $testname } else { fail $testname }
+}
+
 proc do_add {} {
     set testname "add.s: add tests"
     set x 0
@@ -2025,6 +2071,42 @@ proc do_fp_fcmp {} {
     if [expr $x==96] then { pass $testname } else { fail $testname }
 }
 
+proc do_media {} {
+    set testname "media.s: purge tests"
+    set x 0
+
+    gas_start "media.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 096702CC\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 0967074C\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 0967078C\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c 096707CC\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 0967054C\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 0967058C\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 096705CC\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==18] then { pass $testname } else { fail $testname }
+}
+
 proc do_special {} {
     set testname "special.s: special tests"
     set x 0
@@ -2309,4 +2391,6 @@ if [istarget hppa*-*-*] then {
 
     # PA2.0 tests
     do_fp_comp2
+    do_branch2
+    do_media
 }
