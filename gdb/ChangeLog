@@ -1,3 +1,11 @@
+Thu Jan 11 23:13:24 1996  Per Bothner  <bothner@cygnus.com>
+
+	* symfile.c (decrement_reading_symtab):  New function.
+	* symfile.c, symtab.h (currently_reading_symtab):  New variable.
+	* symfile.c (psymtab_to_symtab):  Adjust currently_reading_symtab.
+	* gdbtypes.c (check_typedef):  Don't call lookup_symbol if
+	currently_reading_symtab (since that could infinitely recurse).
+
 Thu Jan 11 17:21:25 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* stabsread.c (read_struct_type):  Trivial simplification.

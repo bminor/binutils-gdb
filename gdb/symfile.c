@@ -267,6 +267,17 @@ obconcat (obstackp, s1, s2, s3)
   return val;
 }
 
+/* True if we are nested inside psymtab_to_symtab. */
+
+int currently_reading_symtab = 0;
+
+static int
+decrement_reading_symtab (dummy)
+     void *dummy;
+{
+  currently_reading_symtab--;
+}
+
 /* Get the symbol table that corresponds to a partial_symtab.
    This is fast after the first time you do it.  In fact, there
    is an even faster macro PSYMTAB_TO_SYMTAB that does the fast
@@ -283,7 +294,10 @@ psymtab_to_symtab (pst)
   /* If it has not yet been read in, read it.  */
   if (!pst->readin)
     { 
+      struct cleanup *back_to = make_cleanup (decrement_reading_symtab, NULL);
+      currently_reading_symtab++;
       (*pst->read_symtab) (pst);
+      do_cleanups (back_to);
     }
 
   return pst->symtab;

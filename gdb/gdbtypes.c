@@ -878,12 +878,19 @@ check_typedef (type)
     {
       if (!TYPE_TARGET_TYPE (type))
 	{
-	  char* name = type_name_no_tag (type);
+	  char* name;
+	  struct symbol *sym;
+
+	  /* It is dangerous to call lookup_symbol if we are currently
+	     reading a symtab.  Infinite recursion is one danger. */
+	  if (currently_reading_symtab)
+	    return type;
+
+	  name = type_name_no_tag (type);
 	  /* FIXME: shouldn't we separately check the TYPE_NAME and the
 	     TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
 	     as appropriate?  (this code was written before TYPE_NAME and
 	     TYPE_TAG_NAME were separate).  */
-	  struct symbol *sym;
 	  if (name == NULL)
 	    {
 	      complain (&stub_noname_complaint);
@@ -899,7 +906,7 @@ check_typedef (type)
       type = TYPE_TARGET_TYPE (type);
     }
 
-  if (TYPE_FLAGS(type) & TYPE_FLAG_STUB)
+  if ((TYPE_FLAGS(type) & TYPE_FLAG_STUB) && ! currently_reading_symtab)
     {
       char* name = type_name_no_tag (type);
       /* FIXME: shouldn't we separately check the TYPE_NAME and the
