@@ -40,7 +40,11 @@ if { ![ld_assemble $as $srcdir/$subdir/tbss.s tmpdir/tbss.o ]
 if { [ld_simple_link $ld tmpdir/frame.so "--shared tmpdir/frame.o tmpdir/tbss.o"] } {
     pass "$test1"
 } else {
-    fail "$test1"
+    if [string match "*shared not supported*" $link_output] {
+	unsupported "-shared is not supported by this target"
+    } else {
+	fail "$test1"
+    }
 }
 
 if ![ld_assemble $as $srcdir/$subdir/table.s tmpdir/table.o ] {
@@ -51,5 +55,9 @@ if ![ld_assemble $as $srcdir/$subdir/table.s tmpdir/table.o ] {
 if { [ld_simple_link $ld tmpdir/table.so "--shared tmpdir/table.o tmpdir/tbss.o"] } {
     pass "$test2"
 } else {
-    fail "$test2"
+    if [string match "*shared not supported*" $link_output] {
+	unsupported "-shared is not supported by this target"
+    } else {
+	fail "$test2"
+    }
 }

@@ -1,3 +1,8 @@
+2004-06-21  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/frame.exp: Handle ports which do not support the --shared
+	linker switch.
+
 2004-06-18 Jan Beulich <jbeulich@novell.com>
 
 	* ld-elfvsb/main.c: Ensure visibility_def and visibility_func are
