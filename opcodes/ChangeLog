@@ -1,3 +1,12 @@
+Fri Mar 28 12:10:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add stdlib.h to AC_CHECK_HEADERS list.
+	* configure, config.in: Rebuild.
+	* sysdep.h: Include <stdlib.h> if it exists.
+	* sparc-dis.c: Include <stdio.h> and "sysdep.h".  Don't include
+	<string.h>.
+	* Makefile.in: Rebuild dependencies.
+
 Thu Mar 27 14:24:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c: Add PPC 403 instructions and extended opcodes.  From
