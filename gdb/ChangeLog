@@ -1,8 +1,51 @@
+Sat Sep 28 10:02:33 1991  John Gilmore  (gnu at cygnus.com)
+
+	* eval.c (evaluate_subexp_for_address):  Don't use
+	TYPE_POINTER_TYPE directly (it might be zero if this type has
+	never had a pointer created before); use lookup_pointer_type.
+
+Fri Sep 27 18:09:31 1991  John Gilmore  (gnu at cygnus.com)
+
+	* c-exp.y, m2-exp.y:  Define more yysymbols that happen to be
+	"bss" rather than "data" symbols, but which still conflict.
+	* m2-exp.y:  Lint.
+
+	* coffread.c (coff_symfile_read):  Use xmalloc, not malloc.
+	* core.c (core_files_info):  Shorten output.
+	* exec.c (exec_files_info):  Ditto.
+	(build_section_table):  Ignore zero-length sections.
+	* language.c, printcmd.c:  Lint.
+	* language.h (get_frame_language):  Declare.
+	* saber.suppress:  update.
+	* stack.c (find_relative_frame):  Remove complex code that was
+	#if 0'd, stick with simple code.  Lint.
+        * saber.suppress:  Update a bit.
+	* symfile.c (add_symbol_file_command):  Add "?" to question.
+	* utils.c (parse_escape):  Avoid \a due to bdead compilers.
+	* value.h:  Declare typedef_print.
+
+	* valprint.c (val_print, type_print_base):  TYPE_CODE_RANGE less
+	kludgey.
+
+	* nindy-tdep.c (nindy_frame_chain_valid):  Use lookup_misc_func.
+	(Reported by Mark Peek <mark@imagen.com>.)
+
+	* solib.c (solib_map_sections):  Relocate all sections, even
+	though only the text section's size is tracked.  Mark ld_text
+	for eventual elimination as we generalize to N sections.
+
+	* infrun.c (wait_for_inferior):  Don't check if the PC is in a
+	call_dummy if we were stopped by a random signal that is being
+	passed to the program.  This produced wierd results when calling
+	functions in the inferior and signals (e.g. SIGALRM) were in use.
+
 Tue Sep 24 18:05:30 1991  John Gilmore  (gnu at cygnus.com)
 
 	* infrun.c (IN_SIGTRAMP):  Not parenthesized properly.
 	Bugfix from Paul Eggert <eggert@twinsun.com>.
 	* tm-ultra3.h (IN_SIGTRAMP):  Ditto.
+	* valprint.c (print_floating):  Print 9 digits for IEEE floats.
+	From Paul Eggert.
 
 Mon Sep 23 15:50:07 1991  John Gilmore  (gnu at cygnus.com)
 
