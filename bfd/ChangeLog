@@ -1,8 +1,18 @@
 2002-11-06  David O'Brien  <obrien@FreeBSD.org>
-            Alan Modra  <amodra@bigpond.net.au>
+	    Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-sparc.c (sparc64_elf_relocate_section): Adjust addend of
 	dynamic relocs against section symbols for the output section vma.
+
+2002-11-05  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* vms-gsd.c (_bfd_vms_write_gsd): Check that symbol->udata.p is
+	non-NULL before dereferencing.
+
+2002-11-04  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* vms.c (vms_object_p): Restore the start address when returning
+	NULL.
 
 2002-10-31  David O'Brien  <obrien@FreeBSD.org>
 
