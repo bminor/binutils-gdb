@@ -1,3 +1,14 @@
+Wed Apr  7 15:48:19 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: Handle an empty program-prefix, program-suffix or
+	program-transform-name correctly.
+
+Tue Apr  6 13:48:41 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* build-all.mk: -G 8 no longer required for MIPS targets.
+	* test-build.mk: Don't pass host argument to configure; make it
+	guess.
+
 Tue Apr  6 10:36:53 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (gdb.tar.Z):  Fix for building gzip'd distribution.
