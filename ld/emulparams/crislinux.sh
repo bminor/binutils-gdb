@@ -4,7 +4,9 @@ SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-cris"
 ARCH=cris
 TEMPLATE_NAME=elf32
-ENTRY=__start
+
+ENTRY=_start
+
 # Needed?  Perhaps should be page-size alignment.
 ALIGNMENT=32
 GENERATE_SHLIB_SCRIPT=yes
@@ -16,12 +18,10 @@ MAXPAGESIZE=8192
 
 # FIXME: GOT, PLT...
 
-TEXT_START_SYMBOLS='PROVIDE (__Stext = .);
-__start = DEFINED(__start) ? __start : 
-  DEFINED(_start) ? _start : 
-    DEFINED(start) ? start :
-      DEFINED(.startup) ? .startup + 2 : 2;
-'
+# We don't do the hoops through DEFINED to provide [_]*start, as it
+# doesn't work with --gc-sections, and the start-name is pretty fixed
+# anyway.
+TEXT_START_SYMBOLS='PROVIDE (__Stext = .);'
 
 # Smuggle an "OTHER_TEXT_END_SYMBOLS" here.
 OTHER_READONLY_SECTIONS='PROVIDE (__Etext = .);'

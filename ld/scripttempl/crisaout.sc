@@ -7,10 +7,10 @@ SECTIONS
   .text ${RELOCATING+ ${TEXT_START_ADDR}}:
   {
    CREATE_OBJECT_SYMBOLS;
-    ${RELOCATING+ __Stext = .;}
+    ${CONSTRUCTING+ __Stext = .;}
     ${RELOCATING+*(.startup)}
     *(.text)
-    ${RELOCATING+__start = DEFINED(__start) ? __start : 
+    ${CONSTRUCTING+__start = DEFINED(__start) ? __start : 
 		   DEFINED(_start) ? _start :
 		     DEFINED(start) ? start :
 		        DEFINED(.startup) ? .startup + 2 : 2;}
@@ -25,25 +25,25 @@ SECTIONS
        default.
        FIXME: It's somewhat unexpected to have code emitted by the linker
        script.  Some other mechanism could probably do better.  */
-    ${RELOCATING+. = ALIGN (2);}
-    ${RELOCATING+ ___init__start = .;}
-    ${RELOCATING+PROVIDE (___do_global_ctors = .);}
-    ${RELOCATING+SHORT (0xe1fc); /* push srp */}
-    ${RELOCATING+SHORT (0xbe7e);}
-    ${RELOCATING+*(.init)}
-    ${RELOCATING+SHORT (0x0d3e); /* jump [sp+] */}
-    ${RELOCATING+PROVIDE (__init__end = .);}
-    ${RELOCATING+PROVIDE (___init__end = .);}
+    ${CONSTRUCTING+ . = ALIGN (2);}
+    ${CONSTRUCTING+  ___init__start = .;}
+    ${CONSTRUCTING+ PROVIDE (___do_global_ctors = .);}
+    ${CONSTRUCTING+ SHORT (0xe1fc); /* push srp */}
+    ${CONSTRUCTING+ SHORT (0xbe7e);}
+    ${CONSTRUCTING+ *(.init)}
+    ${CONSTRUCTING+ SHORT (0x0d3e); /* jump [sp+] */}
+    ${CONSTRUCTING+ PROVIDE (__init__end = .);}
+    ${CONSTRUCTING+ PROVIDE (___init__end = .);}
 
-    ${RELOCATING+. = ALIGN (2);}
-    ${RELOCATING+ ___fini__start = .;}
-    ${RELOCATING+PROVIDE (___do_global_dtors = .);}
-    ${RELOCATING+SHORT (0xe1fc); /* push srp */}
-    ${RELOCATING+SHORT (0xbe7e);}
-    ${RELOCATING+*(.fini)}
-    ${RELOCATING+SHORT (0x0d3e); /* jump [sp+] */}
-    ${RELOCATING+PROVIDE (__fini__end = .);}
-    ${RELOCATING+ ___fini__end = .;}
+    ${CONSTRUCTING+ . = ALIGN (2);}
+    ${CONSTRUCTING+  ___fini__start = .;}
+    ${CONSTRUCTING+ PROVIDE (___do_global_dtors = .);}
+    ${CONSTRUCTING+ SHORT (0xe1fc); /* push srp */}
+    ${CONSTRUCTING+ SHORT (0xbe7e);}
+    ${CONSTRUCTING+ *(.fini)}
+    ${CONSTRUCTING+ SHORT (0x0d3e); /* jump [sp+] */}
+    ${CONSTRUCTING+ PROVIDE (__fini__end = .);}
+    ${CONSTRUCTING+  ___fini__end = .;}
 
     /* Cater to linking from ELF.  */
     ${CONSTRUCTING+ PROVIDE(___ctors = .);}
@@ -68,12 +68,12 @@ SECTIONS
        of itself in the a.out header.  This should only matter for
        testing; for production use, .data is at a "known" location.
        We assume .data does not get an alignment larger than 32 bytes.  */
-    ${RELOCATING+. = ALIGN (32);}
+    ${CONSTRUCTING+. = ALIGN (32);}
 
-    ${RELOCATING+ __Etext = .;}
+    ${CONSTRUCTING+ __Etext = .;}
 
     /* Deprecated, use __Etext.  */
-    ${RELOCATING+ PROVIDE(_etext = .);}
+    ${CONSTRUCTING+ PROVIDE(_etext = .);}
   }
 
   /* Any dot-relative start-expression (such as "ALIGN(2)", also including
@@ -84,7 +84,7 @@ SECTIONS
      unimportant.  */
   .data :
   {
-    ${RELOCATING+ __Sdata = .;}
+    ${CONSTRUCTING+ __Sdata = .;}
     *(.data);
     ${RELOCATING+*(.data.*)}
     ${RELOCATING+*(.gnu.linkonce.d*)}
@@ -92,30 +92,30 @@ SECTIONS
     ${RELOCATING+*(.gcc_except_table)}
 
     /* See comment at ALIGN before __Etext.  */
-    ${RELOCATING+. = ALIGN (32);}
+    ${CONSTRUCTING+. = ALIGN (32);}
 
-    ${RELOCATING+ __Edata = .;}
+    ${CONSTRUCTING+ __Edata = .;}
 
     /* Deprecated, use __Edata.  */
-    ${RELOCATING+ PROVIDE(_edata = .);}
+    ${CONSTRUCTING+ PROVIDE(_edata = .);}
   }
 
   .bss :
   {
     /* Deprecated, use __Sbss.  */
-    ${RELOCATING+ PROVIDE(_bss_start = .);}
+    ${CONSTRUCTING+ PROVIDE(_bss_start = .);}
 
-    ${RELOCATING+ __Sbss = .;}
+    ${CONSTRUCTING+ __Sbss = .;}
     *(.bss)
     ${RELOCATING+*(.bss.*)}
     *(COMMON)
-    ${RELOCATING+ __Ebss = .;}
+    ${CONSTRUCTING+ __Ebss = .;}
 
     /* Deprecated, use __Ebss or __Eall as appropriate.  */
-    ${RELOCATING+ PROVIDE(_end = .);}
-    ${RELOCATING+ PROVIDE(__end = .);}
+    ${CONSTRUCTING+ PROVIDE(_end = .);}
+    ${CONSTRUCTING+ PROVIDE(__end = .);}
   }
-  ${RELOCATING+ __Eall = .;}
+  ${CONSTRUCTING+ __Eall = .;}
 
   /* Unfortunately, stabs are not mappable from ELF to a.out.
      It can probably be fixed with some amount of work.  */
@@ -123,9 +123,9 @@ SECTIONS
   { *(.stab) *(.stab*) *(.debug) *(.debug*) *(.comment) *(.gnu.warning.*) }
 
   /* For the rsim and xsim simulators.  */
-  ${RELOCATING+ PROVIDE(__Endmem = 0x10000000);}
+  ${CONSTRUCTING+ PROVIDE(__Endmem = 0x10000000);}
 
   /* For elinux.  */
-  ${RELOCATING+ PROVIDE(__Stacksize = 0);}
+  ${CONSTRUCTING+ PROVIDE(__Stacksize = 0);}
 }
 EOF

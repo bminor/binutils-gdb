@@ -1,3 +1,11 @@
+2000-11-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* emulparams/crislinux.sh (ENTRY): Change back to _start.
+	(TEXT_START_SYMBOLS): Remove conditional setting of __start.
+
+	* scripttempl/crisaout.sc: Change all RELOCATING not related to
+	merging non-a.out sections into CONSTRUCTING.
+
 2000-11-28  Nick Clifton  <nickc@redhat.com>
 
 	* ld.1 (COPYING): Mention that the GNU Free Documentation
