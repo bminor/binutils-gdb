@@ -11,7 +11,7 @@ proc default_ld_version { ld } {
     }
     
     catch "exec $ld --version" tmp
-    set tmp [prune_system_crud $host_triplet $tmp]
+    set tmp [prune_warnings $tmp]
     regexp "\[^\n\]* (cygnus-|)(\[-0-9.a-zA-Z-\]+)\[\r\n\].*" $tmp version cyg number
     if [info exists number] then {
 	clone_output "$ld $number\n"
@@ -34,7 +34,7 @@ proc default_ld_relocate { ld target objects } {
     verbose -log "$ld $HOSTING_EMU -o $target -r $objects"
     
     catch "exec $ld $HOSTING_EMU -o $target -r $objects" exec_output
-    set exec_output [prune_system_crud $host_triplet $exec_output]
+    set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	return 1
     } else {
@@ -65,7 +65,7 @@ proc default_ld_link { ld target objects } {
     verbose -log "$ld $HOSTING_EMU -o $target $objs $libs"
     
     catch "exec $ld $HOSTING_EMU -o $target $objs $libs" exec_output
-    set exec_output [prune_system_crud $host_triplet $exec_output]
+    set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	return 1
     } else {
@@ -89,7 +89,7 @@ proc default_ld_simple_link { ld target objects } {
     verbose -log "$ld -o $target $objects"
     
     catch "exec $ld -o $target $objects" exec_output
-    set exec_output [prune_system_crud $host_triplet $exec_output]
+    set exec_output [prune_warnings $exec_output]
 
     # We don't care if we get a warning about a non-existent start
     # symbol, since the default linker script might use ENTRY.
@@ -127,7 +127,7 @@ proc default_ld_compile { cc source object } {
     verbose -log "$cc -I$srcdir/$subdir -c $CFLAGS $source -o $object"
 
     catch "exec $cc -I$srcdir/$subdir -c $CFLAGS $source -o $object" exec_output
-    set exec_output [prune_system_crud $host_triplet $exec_output]
+    set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	if {![file exists $object]} then {
 	    regexp ".*/(\[^/\]*)$" $source all dobj
@@ -136,7 +136,7 @@ proc default_ld_compile { cc source object } {
 	    if {[file exists $realobj]} then {
 		verbose -log "mv $realobj $object"
 		catch "exec mv $realobj $object" exec_output
-		set exec_output [prune_system_crud $host_triplet $exec_output]
+		set exec_output [prune_warnings $exec_output]
 		if {![string match "" $exec_output]} then {
 		    verbose -log "$exec_output"
 		    perror "could not move $realobj to $object"
@@ -173,7 +173,7 @@ proc default_ld_assemble { as source object } {
     verbose -log "$as $ASFLAGS -o $object $source"
 
     catch "exec $as $ASFLAGS -o $object $source" exec_output
-    set exec_output [prune_system_crud $host_triplet $exec_output]
+    set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	return 1
     } else {
@@ -202,7 +202,7 @@ proc default_ld_nm { nm object } {
     verbose -log "$nm $NMFLAGS $object >tmpdir/nm.out"
 
     catch "exec $nm $NMFLAGS $object >tmpdir/nm.out" exec_output
-    set exec_output [prune_system_crud $host_triplet $exec_output]
+    set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	set file [open tmpdir/nm.out r]
 	while { [gets $file line] != -1 } {
@@ -295,19 +295,16 @@ proc simple_diff { file_1 file_2 } {
 # This definition is taken from an unreleased version of DejaGnu.  Once
 # that version gets released, and has been out in the world for a few
 # months at least, it may be safe to delete this copy.
-if ![string length [info proc prune_system_crud]] {
+if ![string length [info proc prune_warnings]] {
     #
-    # prune_system_crud -- delete various system verbosities from TEXT on SYSTEM
+    # prune_warnings -- delete various system verbosities from TEXT
     #
     # An example is:
     # ld.so: warning: /usr/lib/libc.so.1.8.1 has older revision than expected 9
     #
-    # SYSTEM is typical $target_triplet or $host_triplet.
-    #
-    # This is useful when trying to do pattern matches on program output.
     # Sites with particular verbose os's may wish to override this in site.exp.
     #
-    proc prune_system_crud { system text } {
+    proc prune_warnings { text } {
 	# This is from sun4's.  Do it for all machines for now.
 	# The "\\1" is to try to preserve a "\n" but only if necessary.
 	regsub -all "(^|\n)(ld.so: warning:\[^\n\]*\n?)+" $text "\\1" text

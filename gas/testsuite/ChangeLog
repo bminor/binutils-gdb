@@ -1,3 +1,8 @@
+Fri Feb  7 16:42:53 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gasp/gasp.exp: Use prune_warnings instead of prune_system_crud.
+	* lib/gas-defs.exp: Ditto.
+
 Mon Feb  3 15:46:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/arm/inst.d, gas/arm/arm7t.d: Pass --prefix-addresses to
