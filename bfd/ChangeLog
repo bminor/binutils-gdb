@@ -1,5 +1,8 @@
 Fri Sep 10 12:56:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coffswap.h (coff_swap_aouthdr_out): For ALPHAECOFF, force
+	padding field to zero.
+
 	* config.bfd (i[34]86-*-netbsd*): New target; use i386-netbsd.
 	* configure.in: Remove bogus netbsd386 handling.
 
