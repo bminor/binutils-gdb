@@ -30,4 +30,5 @@ if { [istarget alpha*-*-*] } then {
     }
 
     run_dump_test "fp"
+    run_dump_test "unop"
 }
