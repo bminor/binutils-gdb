@@ -1,3 +1,9 @@
+2000-09-24  H.J. Lu  <hjl@gnu.org>
+
+	From 2000-04-20  H.J. Lu  <hjl@gnu.org>
+	* elf32-i386.c (elf_i386_relocate_section): Restrict 1998-12-10
+	patch to symbols defined by a shared object.
+
 2000-09-06  Philip Blundell  <philb@gnu.org>
 
 	Merge from mainline:

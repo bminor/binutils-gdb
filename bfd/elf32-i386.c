@@ -1291,7 +1291,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 			     sections against symbols defined externally
 			     in shared libraries.  We can't do anything
 			     with them here.  */
-			  || (input_section->flags & SEC_DEBUGGING) != 0)))
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
 		{
 		  /* In these cases, we don't need the relocation
                      value.  We check specially because in some
