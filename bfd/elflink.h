@@ -395,57 +395,8 @@ elf_link_add_object_symbols (abfd, info)
     {
       /* Read in any version definitions.  */
 
-      if (elf_dynverdef (abfd) != 0)
-	{
-	  Elf_Internal_Shdr *verdefhdr;
-	  bfd_byte *dynver;
-	  int i;
-	  const Elf_External_Verdef *extverdef;
-	  Elf_Internal_Verdef *intverdef;
-
-	  verdefhdr = &elf_tdata (abfd)->dynverdef_hdr;
-	  elf_tdata (abfd)->verdef =
-	    ((Elf_Internal_Verdef *)
-	     bfd_zalloc (abfd,
-			 verdefhdr->sh_info * sizeof (Elf_Internal_Verdef)));
-	  if (elf_tdata (abfd)->verdef == NULL)
-	    goto error_return;
-
-	  dynver = (bfd_byte *) bfd_malloc (verdefhdr->sh_size);
-	  if (dynver == NULL)
-	    goto error_return;
-
-	  if (bfd_seek (abfd, verdefhdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read ((PTR) dynver, 1, verdefhdr->sh_size, abfd)
-		  != verdefhdr->sh_size))
-	    goto error_return;
-
-	  extverdef = (const Elf_External_Verdef *) dynver;
-	  intverdef = elf_tdata (abfd)->verdef;
-	  for (i = 0; i < verdefhdr->sh_info; i++, intverdef++)
-	    {
-	      const Elf_External_Verdaux *extverdaux;
-	      Elf_Internal_Verdaux intverdaux;
-
-	      _bfd_elf_swap_verdef_in (abfd, extverdef, intverdef);
-
-	      /* Pick up the name of the version.  */
-	      extverdaux = ((const Elf_External_Verdaux *)
-			    ((bfd_byte *) extverdef + intverdef->vd_aux));
-	      _bfd_elf_swap_verdaux_in (abfd, extverdaux, &intverdaux);
-
-	      intverdef->vd_bfd = abfd;
-	      intverdef->vd_nodename =
-		bfd_elf_string_from_elf_section (abfd, verdefhdr->sh_link,
-						 intverdaux.vda_name);
-
-	      extverdef = ((const Elf_External_Verdef *)
-			   ((bfd_byte *) extverdef + intverdef->vd_next));
-	    }
-
-	  free (dynver);
-	  dynver = NULL;
-	}
+      if (! _bfd_elf_slurp_version_tables (abfd))
+	goto error_return;
 
       /* Read in the symbol versions, but don't bother to convert them
          to internal format.  */
@@ -807,19 +758,58 @@ elf_link_add_object_symbols (abfd, info)
 		  int namelen, newlen;
 		  char *newname, *p;
 
-		  if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
+		  if (sym.st_shndx != SHN_UNDEF)
 		    {
-		      (*_bfd_error_handler)
-			("%s: %s: invalid version %d (max %d)",
-			 abfd->filename, name, vernum,
-			 elf_tdata (abfd)->dynverdef_hdr.sh_info);
-		      bfd_set_error (bfd_error_bad_value);
-		      goto error_return;
+		      if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
+			{
+			  (*_bfd_error_handler)
+			    ("%s: %s: invalid version %d (max %d)",
+			     abfd->filename, name, vernum,
+			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
+			  bfd_set_error (bfd_error_bad_value);
+			  goto error_return;
+			}
+		      else if (vernum > 1)
+			verstr =
+			  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+		      else
+			verstr = "";
 		    }
-		  else if (vernum > 1)
-		    verstr = elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
 		  else
-		    verstr = "";
+		    {
+		      /* We cannot simply test for the number of
+			 entries in the VERNEED section since the
+			 numbers for the needed versions do not start
+			 at 0.  */
+		      Elf_Internal_Verneed *t;
+
+		      verstr = NULL;
+		      for (t = elf_tdata (abfd)->verref;
+			   t != NULL;
+			   t = t->vn_nextref)
+			{
+			  Elf_Internal_Vernaux *a;
+
+			  for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+			    {
+			      if (a->vna_other == vernum)
+				{
+				  verstr = a->vna_nodename;
+				  break;
+				}
+			    }
+			  if (a != NULL)
+			    break;
+			}
+		      if (verstr == NULL)
+			{
+			  (*_bfd_error_handler)
+			    ("%s: %s: invalid needed version %d",
+			     abfd->filename, name, vernum);
+			  bfd_set_error (bfd_error_bad_value);
+			  goto error_return;
+			}
+		    }
 
 		  namelen = strlen (name);
 		  newlen = namelen + strlen (verstr) + 2;
@@ -2479,8 +2469,13 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 		t->vn_version = VER_NEED_CURRENT;
 		t->vn_cnt = caux;
-		indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					   t->vn_bfd->filename, true, false);
+		if (elf_dt_name (t->vn_bfd) != NULL)
+		  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					     elf_dt_name (t->vn_bfd),
+					     true, false);
+		else
+		  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					     t->vn_bfd->filename, true, false);
 		if (indx == (bfd_size_type) -1)
 		  return false;
 		t->vn_file = indx;

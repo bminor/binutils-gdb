@@ -1,3 +1,12 @@
+1997-06-10 22:58  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Also read verneed
+	information by calling `_bfd_elf_slurp_version_tables'.
+	(elf_link_add_object_symbols): For undefined symbols look for
+	version informaiton in the verneed records.
+	(elf_link_add_object_symbols): Use soname of shared object
+	for verneed record if it is available.
+
 Tue Jun 10 11:13:03 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* cpu-arm.c: Add prototypes for compatible and scan.
