@@ -7,6 +7,10 @@ Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 Thu Jun 16 12:22:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* lexsup.c (parse_args): Add -shared to longopts, and handle it.
+	* ldmain.c (main): Initialize link_info.shared to false.  Give
+	error if link_info.relocateable and link_info.shared are both set.
+
 	* configure.in: If EMUL_EXTRA* is defined in a config file, treat
 	it as naming an emulation to be added to EMULATION_OFILES.
 	* config/i386-linux.mt (EMUL_EXTRA1): Define as elf_i386.
