@@ -2,6 +2,19 @@ Fri Jan 30 11:02:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* read.h (include_dirs): Declare.
 	(include_dir_count,include_dir_maxlen): Declare.
+start-sanitize-sky
+
+	* config/tc-dvp.c (md_longopts): Add -no-dma, -no-dma-pke.
+	(md_parse_option): Handle them.
+	(md_show_usage): Print them.
+	(output_dma,output_pke): New static globals.
+	(md_begin): Initialize them to 1.
+	(assemble_pke): Handle -no-dma-pke.
+	(insert_file): Search include dir list.
+	(s_enddirect): Validate length if prespecified.
+	(s_endmpg): Likewise.  Handle -no-dma-pke.
+	(s_endunpack): Handle -no-dma-pke.
+end-sanitize-sky
 
 Fri Jan 30 11:47:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 
