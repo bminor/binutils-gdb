@@ -1,5 +1,10 @@
 2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.hp/gdb.defects/bs15503.exp: Renamed to gdb.cp/bs15503.exp.
+	* gdb.hp/gdb.defects/bs15503.cc: Renamed to gdb.cp/bs15503.cc.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/funcargs.exp: Remove obsolete setup_xfail for
 	hp_cc_compiler.
 
