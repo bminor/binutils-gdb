@@ -396,7 +396,7 @@ obj_aout_weak (ignore)
 
 /* Handle .type.  On {Net,Open}BSD, this is used to set the n_other field,
    which is then apparently used when doing dynamic linking.  Older
-   versions ogas ignored the .type pseudo-op, so we also ignore it if
+   versions of gas ignored the .type pseudo-op, so we also ignore it if
    we can't parse it.  */
 
 static void
@@ -409,31 +409,28 @@ obj_aout_type (ignore)
 
   name = input_line_pointer;
   c = get_symbol_end ();
-  sym = symbol_find (name);
+  sym = symbol_find_or_make (name);
   *input_line_pointer = c;
-  if (sym != NULL)
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
     {
+      ++input_line_pointer;
       SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
+      if (*input_line_pointer == '@')
 	{
 	  ++input_line_pointer;
-	  SKIP_WHITESPACE ();
-	  if (*input_line_pointer == '@')
-	    {
-	      ++input_line_pointer;
-	      if (strncmp (input_line_pointer, "object", 6) == 0)
+	  if (strncmp (input_line_pointer, "object", 6) == 0)
 #ifdef BFD_ASSEMBLER
-		aout_symbol (symbol_get_bfdsym (sym))->other = 1;
+	    aout_symbol (symbol_get_bfdsym (sym))->other = 1;
 #else
-		S_SET_OTHER (sym, 1);
+	  S_SET_OTHER (sym, 1);
 #endif
-	      else if (strncmp (input_line_pointer, "function", 8) == 0)
+	  else if (strncmp (input_line_pointer, "function", 8) == 0)
 #ifdef BFD_ASSEMBLER
-		aout_symbol (symbol_get_bfdsym (sym))->other = 2;
+	    aout_symbol (symbol_get_bfdsym (sym))->other = 2;
 #else
-		S_SET_OTHER (sym, 2);
+	  S_SET_OTHER (sym, 2);
 #endif
-	    }
 	}
     }
 
