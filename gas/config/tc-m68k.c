@@ -471,7 +471,8 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    How far Backward this mode will reach:
    How many bytes this mode will add to the size of the frag
    Which mode to go to if the offset won't fit in this one
-   */
+
+   Please check tc-m68k.h:md_prepare_relax_scan if changing this table.  */
 relax_typeS md_relax_table[] =
 {
   {   127,   -128,  0, TAB (BRANCHBWL, SHORT) },

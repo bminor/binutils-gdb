@@ -1,3 +1,8 @@
+2002-01-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-m68k.h (md_prepare_relax_scan): Rewrite.
+	* config/tc-m68k.c (md_relax_table): Add md_prepare_relax_scan comment.
+
 2002-01-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* tc-mips.c (mips_cprestore_valid): New flag.
