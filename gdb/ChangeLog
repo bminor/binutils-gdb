@@ -1,3 +1,7 @@
+Fri Apr 24 17:18:56 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.in: enable EXEEXT setting
+
 start-sanitize-r5900
 Fri Apr 24 11:25:07 1998  Jeffrey A Law  (law@cygnus.com)
 

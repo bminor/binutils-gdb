@@ -45,7 +45,7 @@ includedir = @includedir@
 top_builddir = .
 
 SHELL = @SHELL@
-EXEEXT = # @EXEEXT@ # This isn't getting substituted in correctly :-(
+EXEEXT = @EXEEXT@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
