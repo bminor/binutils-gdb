@@ -1,3 +1,11 @@
+Tue Sep 12 12:24:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_one_common): Add cast to avoid warning.
+	(topower): Likewise.  Also, reindent.
+	* ldwrite.c (clone_section): Change i to unsigned int.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): Add
+	cast to avoid warning.
+
 Fri Sep  8 16:32:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (config.status): Depend upon configure.tgt.
