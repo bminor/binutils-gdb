@@ -1,3 +1,8 @@
+Tue Jun  9 09:36:48 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (lang_finish): Add CONST type modifier to declaration
+	of 'send'.
+
 start-sanitize-sky
 Fri Jun  5 15:55:26 1998  Doug Evans  <devans@canuck.cygnus.com>
 
