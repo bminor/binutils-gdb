@@ -1,8 +1,13 @@
+2002-02-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* wrapper.c (sim_create_inferior): Modify previous patch so that
+	it is only triggered for COFF format executables.
+
 2002-02-04  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* wrapper.c: If a v5 architecture is detected, assume it might be
-	an XScale binary, since there is no way to distinguish between
-	the two in the COFF file format.
+	* wrapper.c (sin_create_inferior): If a v5 architecture is
+	detected, assume it might be an XScale binary, since there is no
+	way to distinguish between the two in the COFF file format.
 
 2002-01-10  Nick Clifton  <nickc@cambridge.redhat.com>
 
