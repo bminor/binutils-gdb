@@ -35,6 +35,7 @@ elf32mipb.sh
 elf32ppc.sh
 elf_i386.sh
 gld960.sh
+gld960coff.sh
 go32.sh
 h8300.sh
 h8300h.sh
