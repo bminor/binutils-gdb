@@ -1,5 +1,9 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* ocd.c (ocd_open): Do not try to open the "ocd" device.
+	* serial.c (serial_open): Delete check for "ocd".
+	Fix PR gdb/349.
+
 	* Makefile.in (linux-thread.o): Delete target.
 	* linux-thread.c: Delete file.
 

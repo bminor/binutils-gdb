@@ -185,9 +185,7 @@ serial_open (const char *name)
 	return scb;
       }
 
-  if (strcmp (name, "ocd") == 0)
-    ops = serial_interface_lookup ("ocd");
-  else if (strcmp (name, "pc") == 0)
+  if (strcmp (name, "pc") == 0)
     ops = serial_interface_lookup ("pc");
   else if (strchr (name, ':'))
     ops = serial_interface_lookup ("tcp");
