@@ -256,6 +256,8 @@ md_show_usage (stream)
   fprintf (stream, _(" M32R specific command line options:\n"));
 
   fprintf (stream, _("\
+  -m32r                   disable support for the m32rx instruction set\n"));
+  fprintf (stream, _("\
   -m32rx                  support the extended m32rx instruction set\n"));
   fprintf (stream, _("\
   -O                      try to combine instructions in parallel\n"));

@@ -4,6 +4,11 @@
 	switch.
 	(md_parse_option): Parse -m32r command line switch - disable m32rx
 	compatability.
+	(md_show_usage): Document new option.
+
+	* doc/Makefile.am (CPU_DOCS): Add c-m32r.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/c-m32r.texi (M32R-Opts): Document new command line switch.
 
 2000-03-02  Michael Meissner  <meissner@redhat.com>
 

@@ -25,6 +25,7 @@ CPU_DOCS = \
 	c-i370.texi \
 	c-i386.texi \
 	c-i960.texi \
+	c-m32r.texi \
 	c-m68k.texi \
 	c-mips.texi \
 	c-ns32k.texi \

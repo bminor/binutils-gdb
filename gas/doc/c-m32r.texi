@@ -38,6 +38,14 @@ to the M32RX microprocessor, which adds some more instructions to the
 basic M32R instruction set, and some additional parameters to some of
 the original instructions.
 
+@item -m32r
+@cindex @samp{-m32r} option, M32R
+@cindex architecture options, M32R
+@cindex M32R architecture options
+This option can be used to restore the assembler's default behaviour of
+assembling for the M32R microprocessor.  This can be useful if the
+default has been changed by a previous command line option.
+
 @item -warn-explicit-parallel-conflicts
 @cindex @samp{-warn-explicit-parallel-conflicts} option, M32RX
 Instructs @code{@value{AS}} to produce warning messages when
