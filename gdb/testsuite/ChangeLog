@@ -1,5 +1,7 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/twice.exp: Start with a fresh gdb.
+
 	* gdb.chill/chexp.exp: Remove skip_chill_tests check; these tests
 	only depend on gdb's expression code, not the chill runtime.
 
