@@ -1,3 +1,8 @@
+Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
+	
+	* Makefile.in: canonicalize install.sh; for use within
+	this directory (and subdirs)
+
 Thu Jun 17 14:56:07 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* config/obj-coffbfd.c (fill_section): Don't allow fills backwards.
