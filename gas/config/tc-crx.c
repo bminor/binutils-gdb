@@ -134,7 +134,7 @@ const relax_typeS md_relax_table[] =
   {0xfffe, -0x10000, 4, 4},		/* 16 */
   {0xfffffffe, -0xfffffffe, 6, 0},	/* 32 */
 
-  /* cmpbr  */
+  /* cmpbr/bcop  */
   {0xfe, -0x100, 4, 6},			/*  8 */
   {0xfffffe, -0x1000000, 6, 0}		/* 24 */
 };
@@ -707,10 +707,8 @@ process_label_constant (char *str, ins * crx_ins)
 	    crx_ins->rtype = BFD_RELOC_CRX_ABS32;
 	  else if (IS_INSN_TYPE (BRANCH_NEQ_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL4;
-          else if (IS_INSN_TYPE (CMPBR_INS))
+          else if (IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL8_CMP;
-          else if (IS_INSN_TYPE (COP_BRANCH_INS))
-	    crx_ins->rtype = BFD_RELOC_CRX_REL24;
 	  break;
 	
 	case arg_ic:
@@ -1949,8 +1947,8 @@ print_insn (ins *insn)
       /* bal  */
       else if (IS_INSN_TYPE (DCR_BRANCH_INS) || IS_INSN_MNEMONIC ("bal"))
 	relax_subtype = 3;
-      /* cmpbr  */
-      else if (IS_INSN_TYPE (CMPBR_INS))
+      /* cmpbr/bcop  */
+      else if (IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
 	relax_subtype = 5;
       else
 	abort ();

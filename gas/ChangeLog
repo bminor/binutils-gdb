@@ -1,3 +1,8 @@
+2004-12-23  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c: Support 'bcop' relaxation (dealt as in 'cmp&branch'
+	case).
+
 2004-12-22  Ian Lance Taylor  <ian@airs.com>
 
 	* configure.tgt: New.
