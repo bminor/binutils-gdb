@@ -1,5 +1,5 @@
 /* HP PA-RISC SOM object file format:  definitions internal to BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -24,6 +24,7 @@
 #define _HPPA_H
 
 #define BYTES_IN_WORD 4
+#define PA_PAGESIZE 0x1000
 
 #ifndef INLINE
 #ifdef __GNUC__
@@ -307,7 +308,6 @@ hppa_field_adjust (value, constant_value, r_field)
      unsigned long constant_value;
      unsigned short r_field;
 {
-  value += constant_value;
   switch (r_field)
     {
     case e_fsel:		/* F  : no change                      */
