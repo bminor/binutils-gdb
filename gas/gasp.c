@@ -3605,7 +3605,9 @@ main (argc, argv)
   ifstack[0].on = 1;
   ifi = 0;
 
+#ifdef HAVE_SETLOCALE
   setlocale (LC_MESSAGES, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

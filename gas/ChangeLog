@@ -1,3 +1,10 @@
+Tue Apr 28 19:16:26 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* as.c (main): Conditionally call setlocale.
+	* gasp.c (main): Likewise.
+	* asintl.h: Include <locale.h> if HAVE_LOCALE_H.
+	(LC_MESSAGES): Now can be defined even when ENABLE_NLS.
+
 start-sanitize-d30v
 Tue Apr 28 18:33:23 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
