@@ -974,9 +974,9 @@ gdb_disassemble (clientData, interp, argc, argv)
 
   di.mach = tm_print_insn_info.mach;
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-    tm_print_insn_info.endian = BFD_ENDIAN_BIG;
+    di.endian = BFD_ENDIAN_BIG;
   else
-    tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
+    di.endian = BFD_ENDIAN_LITTLE;
 
   if (argc != 3 && argc != 4)
     error ("wrong # args");

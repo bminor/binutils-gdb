@@ -1,3 +1,9 @@
+start-sanitize-gdbtk
+Mon Apr 21 14:00:08 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Store endian-ness in `di'.
+
+end-sanitize-gdbtk
 Mon Apr 21 09:49:25 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* remote-pa.c:  Remove.  It's broken and no longer necessary.
