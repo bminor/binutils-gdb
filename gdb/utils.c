@@ -57,12 +57,7 @@
 
 #include <sys/param.h>		/* For MAXPATHLEN */
 
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#ifdef HAVE_TERM_H
-#include <term.h>
-#endif
+#include "gdb_curses.h"
 
 #include "readline/readline.h"
 

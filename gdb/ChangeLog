@@ -1,3 +1,11 @@
+2004-11-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* configure.in: Check for ncurses/term.h.
+	* gdb_curses.h: Include term.h here, prefering ncurses/term.h.
+	* utils.c: Include gdb_curses.h instead of curses.h and term.h.
+	* tui/tui.c: Don't include term.h.
+	* configure, config.in: Rebuilt.
+
 2004-11-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68kbsd-nat.c: Include "inf-ptrace.h".

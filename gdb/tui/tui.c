@@ -44,9 +44,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#ifdef HAVE_TERM_H
-#include <term.h>
-#endif
 #include <signal.h>
 #include <fcntl.h>
 #if 0

@@ -314,6 +314,9 @@
 /* Define if you have the <ncurses/ncurses.h> header file.  */
 #undef HAVE_NCURSES_NCURSES_H
 
+/* Define if you have the <ncurses/term.h> header file.  */
+#undef HAVE_NCURSES_TERM_H
+
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
 
