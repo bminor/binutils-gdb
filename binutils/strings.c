@@ -203,7 +203,7 @@ main (argc, argv)
 
 	default:
 	  if (string_min < 0)
-	    string_min = optc;
+	    string_min = optc - '0';
 	  else
 	    string_min = string_min * 10 + optc - '0';
 	  break;

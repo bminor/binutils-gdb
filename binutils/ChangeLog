@@ -1,3 +1,7 @@
+1999-12-26  Ian Lance Taylor  <ian@zembu.com>
+
+	* strings.c (main): Correct handling of numeric argument.
+
 1999-12-23  Andrew Haley  <aph@cygnus.com>
 
 	* dlltool.c (mtable): mcore how_jtab_roff is 4 bytes into the
