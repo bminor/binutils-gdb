@@ -1,3 +1,10 @@
+Wed Feb 11 23:26:28 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-mips.c (load_address): Don't use mips III or mips IV
+	insns regardless of the size of a pointer if we're in mips I or
+	MIPS II mode.
+        (macro, macro2, s_cprestore, s_cpadd): Likewise.
+
 Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 Fix rac to accept only a0:

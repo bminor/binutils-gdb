@@ -1009,21 +1009,29 @@ md_begin ()
   if (mips_opts.isa < 2 && mips_trap)
     as_bad ("trap exception not supported at ISA 1");
 
-  switch (mips_opts.isa)
+  if (mips_cpu != 0 && mips_cpu != -1)
     {
-    case 1:
-      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 3000);
-      break;
-    case 2:
-      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 6000);
-      break;
-    case 3:
-      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 4000);
-      break;
-    case 4:
-      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 8000);
-      break;
+      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_cpu);
     }
+  else
+    {
+      switch (mips_opts.isa)
+	{
+	case 1:
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 3000);
+	  break;
+	case 2:
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 6000);
+	  break;
+	case 3:
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 4000);
+	  break;
+	case 4:
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 8000);
+	  break;
+	}
+    }
+
   if (! ok)
     as_warn ("Could not set architecture and machine");
 
@@ -3210,7 +3218,9 @@ load_address (counter, reg, ep)
 	{
 	  frag_grow (20);
 	  macro_build ((char *) NULL, counter, ep,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
 	  p = frag_var (rs_machine_dependent, 8, 0,
 			RELAX_ENCODE (4, 8, 0, 4, 0,
@@ -3221,7 +3231,9 @@ load_address (counter, reg, ep)
       if (p != NULL)
 	p += 4;
       macro_build (p, counter, ep,
-		   mips_opts.isa < 3 ? "addiu" : "daddiu",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa < 3)
+		    ? "addiu" : "daddiu"),
 		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
     }
   else if (mips_pic == SVR4_PIC && ! mips_big_got)
@@ -3239,14 +3251,18 @@ load_address (counter, reg, ep)
       ep->X_add_number = 0;
       frag_grow (20);
       macro_build ((char *) NULL, counter, ep,
-		   mips_opts.isa < 3 ? "lw" : "ld",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "lw" : "ld"),
 		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16, GP);
       macro_build ((char *) NULL, counter, (expressionS *) NULL, "nop", "");
       p = frag_var (rs_machine_dependent, 4, 0,
 		    RELAX_ENCODE (0, 4, -8, 0, 0, mips_opts.warn_about_macros),
 		    ep->X_add_symbol, (offsetT) 0, (char *) NULL);
       macro_build (p, counter, ep,
-		   mips_opts.isa < 3 ? "addiu" : "daddiu",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "addiu" : "daddiu"),
 		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
       if (ex.X_add_number != 0)
 	{
@@ -3254,7 +3270,9 @@ load_address (counter, reg, ep)
 	    as_bad ("PIC code offset overflow (max 16 signed bits)");
 	  ex.X_op = O_constant;
 	  macro_build ((char *) NULL, counter, &ex,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa  < 3)
+			? "addiu" : "daddiu"),
 		       "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
 	}
     }
@@ -3283,10 +3301,14 @@ load_address (counter, reg, ep)
       macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,
 		   (int) BFD_RELOC_MIPS_GOT_HI16);
       macro_build ((char *) NULL, counter, (expressionS *) NULL,
-		   mips_opts.isa < 3 ? "addu" : "daddu",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "addu" : "daddu"),
 		   "d,v,t", reg, reg, GP);
       macro_build ((char *) NULL, counter, ep,
-		   mips_opts.isa < 3 ? "lw" : "ld",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "lw" : "ld"),
 		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT_LO16, reg);
       p = frag_var (rs_machine_dependent, 12 + off, 0,
 		    RELAX_ENCODE (12, 12 + off, off, 8 + off, 0,
@@ -3302,13 +3324,17 @@ load_address (counter, reg, ep)
 	  p += 4;
 	}
       macro_build (p, counter, ep,
-		   mips_opts.isa < 3 ? "lw" : "ld",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "lw" : "ld"),
 		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16, GP);
       p += 4;
       macro_build (p, counter, (expressionS *) NULL, "nop", "");
       p += 4;
       macro_build (p, counter, ep,
-		   mips_opts.isa < 3 ? "addiu" : "daddiu",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "addiu" : "daddiu"),
 		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
       if (ex.X_add_number != 0)
 	{
@@ -3316,7 +3342,9 @@ load_address (counter, reg, ep)
 	    as_bad ("PIC code offset overflow (max 16 signed bits)");
 	  ex.X_op = O_constant;
 	  macro_build ((char *) NULL, counter, &ex,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+		         || mips_opts.isa  < 3)
+			? "addiu" : "daddiu"),
 		       "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
 	}
     }
@@ -3326,7 +3354,9 @@ load_address (counter, reg, ep)
 	   addiu	$reg,$gp,<sym>		(BFD_RELOC_MIPS_GPREL)
 	 */
       macro_build ((char *) NULL, counter, ep,
-		   mips_opts.isa < 3 ? "addiu" : "daddiu",
+		   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     || mips_opts.isa  < 3)
+		    ? "addiu" : "daddiu"),
 		   "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
     }
   else
@@ -4068,7 +4098,9 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 		       treg, (int) BFD_RELOC_PCREL_HI16_S);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+		         || mips_opts.isa  < 3)
+			? "addiu" : "daddiu"),
 		       "t,r,j", treg, treg, (int) BFD_RELOC_PCREL_LO16);
 	  return;
 	}
@@ -4109,7 +4141,9 @@ macro (ip)
 	    {
 	      frag_grow (20);
 	      macro_build ((char *) NULL, &icnt, &offset_expr,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+		     	     || mips_opts.isa  < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
 	      p = frag_var (rs_machine_dependent, 8, 0,
 			    RELAX_ENCODE (4, 8, 0, 4, 0,
@@ -4121,7 +4155,9 @@ macro (ip)
 	  if (p != NULL)
 	    p += 4;
 	  macro_build (p, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa  < 3)
+			? "addiu" : "daddiu"),
 		       "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
@@ -4186,7 +4222,9 @@ macro (ip)
 		  p += 4;
 		}
 	      macro_build (p, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	      /* FIXME: If breg == 0, and the next instruction uses
 		 $tempreg, then if this variant case is used an extra
@@ -4198,7 +4236,9 @@ macro (ip)
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			   "nop", "");
 	      macro_build ((char *) NULL, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	      (void) frag_var (rs_machine_dependent, 0, 0,
 			       RELAX_ENCODE (0, 0, -12, -4, 0, 0),
@@ -4223,7 +4263,9 @@ macro (ip)
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			       "nop", "");
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			       mips_opts.isa < 3 ? "addu" : "daddu",
+			       ((bfd_arch_bits_per_address (stdoutput) == 32
+				 || mips_opts.isa < 3)
+				? "addu" : "daddu"),
 			       "d,v,t", treg, AT, breg);
 		  breg = 0;
 		  tempreg = treg;
@@ -4238,10 +4280,14 @@ macro (ip)
 	      mips_optimize = hold_mips_optimize;
 
 	      macro_build ((char *) NULL, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", AT, AT, (int) BFD_RELOC_LO16);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", tempreg, tempreg, AT);
 	      (void) frag_var (rs_machine_dependent, 0, 0,
 			       RELAX_ENCODE (0, 0, -16 + off1, -8, 0, 0),
@@ -4300,7 +4346,9 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 		       tempreg, (int) BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		       mips_opts.isa < 3 ? "addu" : "daddu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+			? "addu" : "daddu"),
 		       "d,v,t", tempreg, tempreg, GP);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       dbl ? "ld" : "lw",
@@ -4337,7 +4385,9 @@ macro (ip)
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			   "nop", "");
 	      macro_build ((char *) NULL, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 
 	      p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
@@ -4370,7 +4420,9 @@ macro (ip)
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			       "nop", "");
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			       mips_opts.isa < 3 ? "addu" : "daddu",
+			       ((bfd_arch_bits_per_address (stdoutput) == 32
+				 || mips_opts.isa < 3)
+				? "addu" : "daddu"),
 			       "d,v,t", treg, AT, breg);
 		  dreg = treg;
 		  adj = 8;
@@ -4384,10 +4436,14 @@ macro (ip)
 	      mips_optimize = hold_mips_optimize;
 
 	      macro_build ((char *) NULL, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", AT, AT, (int) BFD_RELOC_LO16);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", dreg, dreg, AT);
 
 	      p = frag_var (rs_machine_dependent, 16 + gpdel + adj, 0,
@@ -4419,7 +4475,9 @@ macro (ip)
 	      macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	      p += 4;
 	      macro_build (p, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	      /* FIXME: If add_number is 0, and there was no base
                  register, the external symbol case ended with a load,
@@ -4437,7 +4495,9 @@ macro (ip)
 		  macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 		  p += 4;
 		  macro_build (p, &icnt, (expressionS *) NULL,
-			       mips_opts.isa < 3 ? "addu" : "daddu",
+			       ((bfd_arch_bits_per_address (stdoutput) == 32
+				 || mips_opts.isa < 3)
+				? "addu" : "daddu"),
 			       "d,v,t", treg, AT, breg);
 		  p += 4;
 		  tempreg = treg;
@@ -4449,11 +4509,15 @@ macro (ip)
 	      macro_build_lui (p, &icnt, &expr1, AT);
 	      p += 4;
 	      macro_build (p, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "addiu" : "daddiu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addiu" : "daddiu"),
 			   "t,r,j", AT, AT, (int) BFD_RELOC_LO16);
 	      p += 4;
 	      macro_build (p, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", tempreg, tempreg, AT);
 	      p += 4;
 	    }
@@ -4464,7 +4528,9 @@ macro (ip)
 	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_MIPS_GPREL)
 	     */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+			? "addiu" : "daddiu"),
 		       "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
 	}
       else
@@ -4472,7 +4538,9 @@ macro (ip)
 
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     mips_opts.isa < 3 ? "addu" : "daddu",
+		     ((bfd_arch_bits_per_address (stdoutput) == 32
+		       || mips_opts.isa < 3)
+		      ? "addu" : "daddu"),
 		     "d,v,t", treg, tempreg, breg);
 
       if (! used_at)
@@ -4514,7 +4582,9 @@ macro (ip)
 	    {
 	      expr1.X_add_number = mips_cprestore_offset;
 	      macro_build ((char *) NULL, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "lw" : "ld",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "lw" : "ld"),
 			   "t,o(b)", GP, (int) BFD_RELOC_LO16, mips_frame_reg);
 	    }
 	}
@@ -4555,7 +4625,9 @@ macro (ip)
 	  if (! mips_big_got)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr,
-			   mips_opts.isa < 3 ? "lw" : "ld",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "lw" : "ld"),
 			   "t,o(b)", PIC_CALL_REG,
 			   (int) BFD_RELOC_MIPS_CALL16, GP);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
@@ -4576,10 +4648,14 @@ macro (ip)
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 			   PIC_CALL_REG, (int) BFD_RELOC_MIPS_CALL_HI16);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", PIC_CALL_REG, PIC_CALL_REG, GP);
 	      macro_build ((char *) NULL, &icnt, &offset_expr,
-			   mips_opts.isa < 3 ? "lw" : "ld",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "lw" : "ld"),
 			   "t,o(b)", PIC_CALL_REG,
 			   (int) BFD_RELOC_MIPS_CALL_LO16, PIC_CALL_REG);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
@@ -4595,7 +4671,9 @@ macro (ip)
 		  p += 4;
 		}
 	      macro_build (p, &icnt, &offset_expr,
-			   mips_opts.isa < 3 ? "lw" : "ld",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "lw" : "ld"),
 			   "t,o(b)", PIC_CALL_REG,
 			   (int) BFD_RELOC_MIPS_GOT16, GP);
 	      p += 4;
@@ -4603,7 +4681,9 @@ macro (ip)
 	      p += 4;
 	    }			   
 	  macro_build (p, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+			? "addiu" : "daddiu"),
 		       "t,r,j", PIC_CALL_REG, PIC_CALL_REG,
 		       (int) BFD_RELOC_LO16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
@@ -4617,7 +4697,9 @@ macro (ip)
 			     "nop", "");
 	      expr1.X_add_number = mips_cprestore_offset;
 	      macro_build ((char *) NULL, &icnt, &expr1,
-			   mips_opts.isa < 3 ? "lw" : "ld",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "lw" : "ld"),
 			   "t,o(b)", GP, (int) BFD_RELOC_LO16,
 			   mips_frame_reg);
 	    }
@@ -4872,7 +4954,9 @@ macro (ip)
 		{
 		  frag_grow (28);
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			       mips_opts.isa < 3 ? "addu" : "daddu",
+			       ((bfd_arch_bits_per_address (stdoutput) == 32
+				 || mips_opts.isa < 3)
+				? "addu" : "daddu"),
 			       "d,v,t", tempreg, breg, GP);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			       treg, (int) BFD_RELOC_MIPS_GPREL, tempreg);
@@ -4885,7 +4969,9 @@ macro (ip)
 	      if (p != NULL)
 		p += 4;
 	      macro_build (p, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", tempreg, tempreg, breg);
 	      if (p != NULL)
 		p += 4;
@@ -4918,7 +5004,9 @@ macro (ip)
 	    as_bad ("PIC code offset overflow (max 16 signed bits)");
 	  frag_grow (20);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
 	  p = frag_var (rs_machine_dependent, 4, 0, 
@@ -4926,11 +5014,15 @@ macro (ip)
 			offset_expr.X_add_symbol, (offsetT) 0,
 			(char *) NULL);
 	  macro_build (p, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	  if (breg != 0)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			 mips_opts.isa < 3 ? "addu" : "daddu",
+			 ((bfd_arch_bits_per_address (stdoutput) == 32
+			   || mips_opts.isa < 3)
+			  ? "addu" : "daddu"),
 			 "d,v,t", tempreg, tempreg, breg);
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt, treg,
 		       (int) BFD_RELOC_LO16, tempreg);
@@ -4969,10 +5061,14 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 		       tempreg, (int) BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		       mips_opts.isa < 3 ? "addu" : "daddu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addu" : "daddu"),
 		       "d,v,t", tempreg, tempreg, GP);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT_LO16,
 		       tempreg);
 	  p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
@@ -4984,17 +5080,23 @@ macro (ip)
 	      p += 4;
 	    }
 	  macro_build (p, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  p += 4;
 	  macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	  p += 4;
 	  macro_build (p, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	  if (breg != 0)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			 mips_opts.isa < 3 ? "addu" : "daddu",
+			 ((bfd_arch_bits_per_address (stdoutput) == 32
+			   || mips_opts.isa < 3)
+			  ? "addu" : "daddu"),
 			 "d,v,t", tempreg, tempreg, breg);
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt, treg,
 		       (int) BFD_RELOC_LO16, tempreg);
@@ -5017,7 +5119,9 @@ macro (ip)
 	  else
 	    {
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", tempreg, breg, GP);
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   treg, (int) BFD_RELOC_MIPS_GPREL, tempreg);
@@ -5111,7 +5215,9 @@ macro (ip)
       else if (mips_pic == SVR4_PIC)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
 	}
       else if (mips_pic == EMBEDDED_PIC)
@@ -5119,7 +5225,9 @@ macro (ip)
 	  /* For embedded PIC we pick up the entire address off $gp in
 	     a single instruction.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", AT, GP, (int) BFD_RELOC_MIPS_GPREL);
 	  offset_expr.X_op = O_constant;
 	  offset_expr.X_add_number = 0;
@@ -5201,7 +5309,9 @@ macro (ip)
 	  assert (strcmp (s, RDATA_SECTION_NAME) == 0);
 	  if (mips_pic == SVR4_PIC)
 	    macro_build ((char *) NULL, &icnt, &offset_expr,
-			 mips_opts.isa < 3 ? "lw" : "ld",
+			 ((bfd_arch_bits_per_address (stdoutput) == 32
+			   || mips_opts.isa < 3)
+			  ? "lw" : "ld"),
 			 "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  else
 	    {
@@ -5378,7 +5488,9 @@ macro (ip)
 		{
 		  frag_grow (36);
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			       mips_opts.isa < 3 ? "addu" : "daddu",
+			       ((bfd_arch_bits_per_address (stdoutput) == 32
+				 || mips_opts.isa < 3)
+				? "addu" : "daddu"),
 			       "d,v,t", AT, breg, GP);
 		  tempreg = AT;
 		  off = 4;
@@ -5434,7 +5546,9 @@ macro (ip)
 	  if (breg != 0)
 	    {
 	      macro_build (p, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", AT, breg, AT);
 	      if (p != NULL)
 		p += 4;
@@ -5481,12 +5595,16 @@ macro (ip)
 	    off = 4;
 	  frag_grow (24 + off);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
 	  if (breg != 0)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			 mips_opts.isa < 3 ? "addu" : "daddu",
+			 ((bfd_arch_bits_per_address (stdoutput) == 32
+			   || mips_opts.isa < 3)
+			  ? "addu" : "daddu"),
 			 "d,v,t", AT, breg, AT);
           /* Itbl support may require additional care here. */
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
@@ -5546,15 +5664,21 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 		       AT, (int) BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		       mips_opts.isa < 3 ? "addu" : "daddu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addu" : "daddu"),
 		       "d,v,t", AT, AT, GP);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT_LO16, AT);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
 	  if (breg != 0)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			 mips_opts.isa < 3 ? "addu" : "daddu",
+			 ((bfd_arch_bits_per_address (stdoutput) == 32
+			   || mips_opts.isa < 3)
+			  ? "addu" : "daddu"),
 			 "d,v,t", AT, breg, AT);
           /* Itbl support may require additional care here. */
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
@@ -5584,7 +5708,9 @@ macro (ip)
 	      p += 4;
 	    }
 	  macro_build (p, &icnt, &offset_expr,
-		       mips_opts.isa < 3 ? "lw" : "ld",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "lw" : "ld"),
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  p += 4;
 	  macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
@@ -5592,7 +5718,9 @@ macro (ip)
 	  if (breg != 0)
 	    {
 	      macro_build (p, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", AT, breg, AT);
 	      p += 4;
 	    }
@@ -5631,7 +5759,9 @@ macro (ip)
 	  else
 	    {
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			   mips_opts.isa < 3 ? "addu" : "daddu",
+			   ((bfd_arch_bits_per_address (stdoutput) == 32
+			     || mips_opts.isa < 3)
+			    ? "addu" : "daddu"),
 			   "d,v,t", AT, breg, GP);
 	      tempreg = AT;
 	      used_at = 1;
@@ -5661,7 +5791,7 @@ macro (ip)
     case M_SD_OB:
       s = "sw";
     sd_ob:
-      assert (mips_opts.isa < 3);
+      assert (bfd_arch_bits_per_address (stdoutput) == 32 || mips_opts.isa < 3);
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       offset_expr.X_add_number += 4;
@@ -5934,7 +6064,9 @@ macro2 (ip)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build ((char *) NULL, &icnt, &imm_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", dreg, sreg,
 		       (int) BFD_RELOC_LO16);
 	  used_at = 0;
@@ -6085,7 +6217,9 @@ macro2 (ip)
 	  as_warn ("Instruction %s: result is always true",
 		   ip->insn_mo->name);
 	  macro_build ((char *) NULL, &icnt, &expr1,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", dreg, 0, (int) BFD_RELOC_LO16);
 	  return;
 	}
@@ -6103,7 +6237,9 @@ macro2 (ip)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build ((char *) NULL, &icnt, &imm_expr,
-		       mips_opts.isa < 3 ? "addiu" : "daddiu",
+		       ((bfd_arch_bits_per_address (stdoutput) == 32
+			 || mips_opts.isa < 3)
+		        ? "addiu" : "daddiu"),
 		       "t,r,j", dreg, sreg, (int) BFD_RELOC_LO16);
 	  used_at = 0;
 	}
@@ -6270,7 +6406,9 @@ macro2 (ip)
       load_address (&icnt, AT, &offset_expr);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     mips_opts.isa < 3 ? "addu" : "daddu",
+		     ((bfd_arch_bits_per_address (stdoutput) == 32
+		       || mips_opts.isa < 3)
+		      ? "addu" : "daddu"),
 		     "d,v,t", AT, AT, breg);
       if (! target_big_endian)
 	expr1.X_add_number = off;
@@ -6291,7 +6429,9 @@ macro2 (ip)
       load_address (&icnt, AT, &offset_expr);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     mips_opts.isa < 3 ? "addu" : "daddu",
+		     ((bfd_arch_bits_per_address (stdoutput) == 32
+		       || mips_opts.isa < 3)
+		      ? "addu" : "daddu"),
 		     "d,v,t", AT, AT, breg);
       if (target_big_endian)
 	expr1.X_add_number = 0;
@@ -6363,7 +6503,9 @@ macro2 (ip)
       load_address (&icnt, AT, &offset_expr);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     mips_opts.isa < 3 ? "addu" : "daddu",
+		     ((bfd_arch_bits_per_address (stdoutput) == 32
+		       || mips_opts.isa < 3)
+		      ? "addu" : "daddu"),
 		     "d,v,t", AT, AT, breg);
       if (! target_big_endian)
 	expr1.X_add_number = off;
@@ -6383,7 +6525,9 @@ macro2 (ip)
       load_address (&icnt, AT, &offset_expr);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     mips_opts.isa < 3 ? "addu" : "daddu",
+		     ((bfd_arch_bits_per_address (stdoutput) == 32
+		       || mips_opts.isa < 3)
+		      ? "addu" : "daddu"),
 		     "d,v,t", AT, AT, breg);
       if (! target_big_endian)
 	expr1.X_add_number = 0;
@@ -10112,7 +10256,9 @@ s_cprestore (ignore)
   ex.X_add_number = mips_cprestore_offset;
 
   macro_build ((char *) NULL, &icnt, &ex,
-	       mips_opts.isa < 3 ? "sw" : "sd",
+	       ((bfd_arch_bits_per_address (stdoutput) == 32
+		 || mips_opts.isa < 3)
+		? "sw" : "sd"),
 	       "t,o(b)", GP, (int) BFD_RELOC_LO16, SP);
 
   demand_empty_rest_of_line ();
@@ -10178,7 +10324,9 @@ s_cpadd (ignore)
   /* Add $gp to the register named as an argument.  */
   reg = tc_get_register (0);
   macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-	       mips_opts.isa < 3 ? "addu" : "daddu",
+	       ((bfd_arch_bits_per_address (stdoutput) == 32
+		 || mips_opts.isa < 3)
+		? "addu" : "daddu"),
 	       "d,v,t", reg, reg, GP);
 
   demand_empty_rest_of_line ();  
