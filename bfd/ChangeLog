@@ -1,3 +1,9 @@
+2003-03-06  Jakub Jelinek <jakub@redhat.com>
+	Andrew Haley  <aph@redhat.com>
+
+	* elflink.h (elf_bfd_discard_info): Don't process eh frames if
+	output is relocateable.
+
 2003-03-06  Steven Konopa <skonopa@kgo.csc.com>
 
 	* som.c (som_fixup_formats): Correct formats for R_AUX_UNWIND and
