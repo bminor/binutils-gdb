@@ -1,5 +1,13 @@
 2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/vax/tm-vax.h: Protect from multiple inclusion.
+	(TARGET_UPAGES, TARGET_NBPG, STACK_END_ADDR)
+	(SIGTRAMP_START, SIGTRAMP_END, SIGCONTEXT_PC_OFFSET): Move to...
+	* config/vax/tm-vaxbsd.h: ...here.  New file.
+	* config/vax/vax.mt (TM_FILE): Set to tm-vaxbsd.h.
+
+2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/vax/tm-vax.h (BREAKPOINT): Remove.
 	(BELIEVE_PCC_PROMOTION): Remove.
 	(AP_REGNUM): Move to...

@@ -1,6 +1,6 @@
-/* Target definitions for VAX systems for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1996, 1998, 1999, 2000, 2002
-   Free Software Foundation, Inc.
+/* Target-dependent definitions for NetBSD/vax.
+   Copyright 2002 Free Software Foundation, Inc.
+   Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
 
@@ -19,13 +19,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_VAX_H
-#define TM_VAX_H
+#ifndef TM_NBSD_H
+#define TM_NBSD_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+#include "vax/tm-vax.h"
+#include "solib.h"
 
-/* XXXJRT not yet under gdbarch control */
-#define FRAME_ARGS_ADDRESS_CORRECT(fi) vax_frame_args_address_correct ((fi))
-extern CORE_ADDR vax_frame_args_address_correct (struct frame_info *);
-
-#endif /* TM_VAX_H */
+#endif /* TM_NBSD_H */

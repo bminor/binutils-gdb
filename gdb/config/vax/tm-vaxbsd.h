@@ -1,4 +1,4 @@
-/* Target definitions for VAX systems for GDB.
+/* Definitions to make GDB run on a vax under 4.2bsd.
    Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
@@ -19,13 +19,23 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_VAX_H
-#define TM_VAX_H
+#ifndef TM_VAXBSD_H
+#define TM_VAXBSD_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+#include "vax/tm-vax.h"
 
-/* XXXJRT not yet under gdbarch control */
-#define FRAME_ARGS_ADDRESS_CORRECT(fi) vax_frame_args_address_correct ((fi))
-extern CORE_ADDR vax_frame_args_address_correct (struct frame_info *);
+#define TARGET_UPAGES 14
+#define TARGET_NBPG 512
+#define STACK_END_ADDR (0x80000000 - (TARGET_UPAGES * TARGET_NBPG))
 
-#endif /* TM_VAX_H */
+/* On the VAX, sigtramp is in the u area.  Can't check the exact
+   addresses because for cross-debugging we don't have VAX include
+   files around.  This should be close enough.  */
+#define SIGTRAMP_START(pc)	STACK_END_ADDR
+#define SIGTRAMP_END(pc)	0x80000000
+
+/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
+/* XXXJRT should go away */
+#define SIGCONTEXT_PC_OFFSET 12
+
+#endif /* TM_VAXBSD_H */
