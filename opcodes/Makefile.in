@@ -62,6 +62,7 @@ SHLIB = @SHLIB@
 SHLIB_CC = @SHLIB_CC@
 SHLIB_CFLAGS = @SHLIB_CFLAGS@
 COMMON_SHLIB = @COMMON_SHLIB@
+SHLIB_DEP = @SHLIB_DEP@
 SHLINK = @SHLINK@
 
 SONAME = lib`echo $(SHLIB) | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed '$(program_transform_name)'`
@@ -129,32 +130,33 @@ $(TARGETLIB): $(OFILES)
 	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
 	 $(RANLIB) $(TARGETLIB)
 
-stamp-piclist: Makefile
+LIBIBERTY_LISTS = ../libiberty/required-list ../libiberty/needed-list
+BFD_LIST = ../bfd/piclist
+
+stamp-piclist: Makefile $(LIBIBERTY_LISTS) $(BFD_LIST)
 	rm -f tpiclist
 	if [ -n "$(PICFLAG)" ]; then \
 	  echo $(OFILES) | sed -e 's,\([^ ][^ ]*\),pic/\1,g' > tpiclist; \
 	else \
 	  echo $(OFILES) > tpiclist; \
 	fi
+	if [ "$(COMMON_SHLIB)" = "yes" ]; then \
+	  lobjs=`cat $(LIBIBERTY_LISTS)`; \
+	  if [ -n "$(PICFLAG)" ]; then \
+	    lobjs=`echo $$lobjs | sed -e 's,\([^ ][^ ]*\),pic/\1,g'`; \
+	  fi; \
+	  lobjs=`echo $$lobjs | sed -e 's,\([^ ][^ ]*\),../libiberty/\1,g'`; \
+	  echo $$lobjs >> tpiclist; \
+	  sed -e 's,\([^ ][^ ]*\),../bfd/\1,g' $(BFD_LIST) >> tpiclist; \
+	else true; fi
 	$(srcdir)/../move-if-change tpiclist piclist
 	touch stamp-piclist
 
 piclist: stamp-piclist ; @true
 
-$(SHLIB): stamp-picdir $(OFILES) piclist
+$(SHLIB): stamp-picdir $(OFILES) piclist $(SHLIB_DEP)
 	rm -f $(SHLIB)
-	if [ "$(COMMON_SHLIB)" != "yes" ]; then \
-	  $(SHLIB_CC) $(SHLIB_CFLAGS) -o $(SHLIB) `cat piclist`; \
-	else \
-	  lobjs=`cat ../libiberty/required-list ../libiberty/needed-list`; \
-	  if [ -n "$(PICFLAG)" ]; then \
-	    lobjs=`echo $$lobjs | sed -e 's,\([^ ][^ ]*\),pic/\1,g'`; \
-	  fi; \
-	  lobjs=`echo $$lobjs | sed -e 's,\([^ ][^ ]*\),../libiberty/\1,g'`; \
-	  $(SHLIB_CC) $(SHLIB_CFLAGS) -o $(SHLIB) \
-		`sed -e 's,\([^ ][^ ]*\),../bfd/\1,g' ../bfd/piclist` \
-		`cat piclist` $$lobjs; \
-	fi
+	$(SHLIB_CC) $(SHLIB_CFLAGS) -o $(SHLIB) `cat piclist`
 
 $(SHLINK): $(SHLIB)
 	ts=lib`echo $(SHLIB) | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed -e '$(program_transform_name)'`; \
@@ -284,7 +286,7 @@ config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
-config.status : configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config.bfd
+config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config.bfd $(srcdir)/../bfd/VERSION
 	$(SHELL) config.status --recheck
 
 dep: $(CFILES)

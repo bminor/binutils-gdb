@@ -1,3 +1,8 @@
+Fri Mar 29 13:02:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (config.status): Depend upon BFD VERSION file, so
+	that the shared library version number is set correctly.
+
 Tue Mar 26 15:47:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Use AC_CHECK_TOOL to find ar and ranlib.  From
