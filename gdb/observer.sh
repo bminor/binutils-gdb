@@ -62,22 +62,22 @@ esac
 IFS=:
 sed -n '
 /@deftypefun void/{
-    # Save original line for later processing into the actual parameter
+# Save original line for later processing into the actual parameter
     h
-    # Convert from: @deftypefun void EVENT (TYPE @var{PARAM},...)
-    # to event and formals: EVENT:TYPE PARAM, ...:
+# Convert from: @deftypefun void EVENT (TYPE @var{PARAM},...)
+# to event and formals: EVENT:TYPE PARAM, ...:
     s/^.* void \([a-z_][a-z_]*\) (\(.*\))$/\1:\2/
     s/@var{//g
     s/}//g
-    # Switch to held
+# Switch to held
     x
-    # Convert from: @deftypefun void FUNC (TYPE @var{PARAM},...)
-    # to actuals: PARAM, ...
+# Convert from: @deftypefun void FUNC (TYPE @var{PARAM},...)
+# to actuals: PARAM, ...
     s/^[^{]*[{]*//
     s/[}]*[^}]*$//
     s/}[^{]*{/, /g
-    # Combine held (EVENT:TYPE PARAM, ...:) and pattern (PARAM, ...) into
-    # FUNC:TYPE PARAM, ...:PARAM, ...
+# Combine held (EVENT:TYPE PARAM, ...:) and pattern (PARAM, ...) into
+# FUNC:TYPE PARAM, ...:PARAM, ...
     H
     x
     s/\n/:/g
