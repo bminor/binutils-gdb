@@ -79,7 +79,7 @@ _if__(!_GENERIC__)
 @subtitle for the _HOST__ family
 _fi__(!_GENERIC__)
 @sp 1
-@subtitle January 1992
+@subtitle November 1992
 @sp 1
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
@@ -5254,9 +5254,21 @@ _fi__(_GENERIC__)
 _CHAPSEC__(0+_GENERIC__) Z8000 Dependent Features
 
 @cindex Z8000 support
+The Z8000 _AS__ supports both members of the Z8000 family: the
+unsegmented Z8002, with 16 bit addresses, and the segmented Z8001 with
+24 bit addresses.
+
+When the assembler is in unsegmented mode (specified with the
+@code{unsegm} directive), an address will take up one word (16 bit)
+sized register.  When the assembler is in segmented mode (specified with
+the @code{segm} directive), a 24-bit address takes up a long (32 bit)
+register.  @xref{Z8000 Directives,,Assembler Directives for the Z8000},
+for a list of other Z8000 specific assembler directives.
+
 @menu
 * Z8000 Options::               No special command-line options for Z8000
-* Z8000 Syntax::                Assembler Syntax for the Z8000
+* Z8000 Syntax::                Assembler syntax for the Z8000
+* Z8000 Directives::            Special directives for the Z8000
 * Z8000 Opcodes::               Opcodes
 @end menu
 
@@ -5330,25 +5342,105 @@ Register direct
 Indirect register 
 
 @item @var{addr}
-Direct: the 16/24 bit address of the operand is in the instruction.
+Direct: the 16 bit or 24 bit address (depending on whether the assembler
+is in segmented or unsegmented mode) of the operand is in the instruction.
 
 @item address(r@var{n})
-Indexed: the 16/24 bit address is added to the 16 bit register to produce
+Indexed: the 16 or 24 bit address is added to the 16 bit register to produce
 the final address in memory of the operand.
 
 @item r@var{n}(#@var{imm})
-Base Address: the 16/24 bit register is added to the 16 bit sign
+Base Address: the 16 or 24 bit register is added to the 16 bit sign
 extended immediate displacement to produce the final address in memory
 of the operand.
 
 @item r@var{n}(r@var{m})
-Base Index: the 16/24 bit register r@var{n} is added to the sign
+Base Index: the 16 or 24 bit register r@var{n} is added to the sign
 extended 16 bit index register r@var{m} to produce the final address in
 memory of the operand.
 
 @item #@var{xx}
 Immediate data @var{xx}.
 @end table
+
+@node Z8000 Directives
+_CHAPSEC__(1+_GENERIC__) Assembler Directives for the Z8000
+
+@cindex Z8000 directives
+@cindex directives, Z8000
+The Z8000 port of _AS__ includes these additional assembler directives,
+for compatibility with other Z8000 assemblers:
+
+@table @code
+@item segm
+@kindex segm
+Generates code for the segmented Z8001.
+
+@item unsegm
+@kindex unsegm
+Generates code for the unsegmented Z8002.
+
+@item name
+@kindex name
+Synonym for @code{.file}
+
+@item global
+@kindex global
+Synonum for @code{.global}
+
+@item wval
+@kindex wval
+Synonym for @code{.word}
+
+@item lval
+@kindex lval
+Synonym for @code{.long}
+
+@item bval
+@kindex bval
+Synonym for @code{.byte}
+
+@item sval
+@kindex sval
+Assemble a string.  @code{sval} expects one string literal, delimited by
+single quotes.  It assembles each byte of the string into consecutive
+addresses.  You can use the escape sequence @samp{%@var{xx}} (where
+@var{xx} represents a two-digit hexadecimal number) to represent the
+character whose @sc{ascii} value is @var{xx}.  Use this feature to
+describe single quote and other characters that may not appear in string
+literals as themselves.  For example, the C statement @w{@samp{char *a =
+"he said \"it's 50% off\"";}} is represented in Z8000 assembly language
+(shown with the assembler output in hex at the left) as
+
+@iftex
+@begingroup
+@let@nonarrowing=@comment
+@end iftex
+@smallexample
+68652073    sval    'he said %22it%27s 50%25 off%22%00'
+61696420 
+22697427 
+73203530 
+25206F66
+662200
+@end smallexample
+@iftex
+@endgroup
+@end iftex
+
+@item rsect
+@kindex rsect
+synonym for @code{.section}
+
+@item block
+@kindex block
+synonym for @code{.space}
+
+@item even
+@kindex even
+synonym for @code{.align 1}
+@end table
+
 @node Z8000 Opcodes
 _CHAPSEC__(1+_GENERIC__) Opcodes
 
@@ -5358,58 +5450,6 @@ _CHAPSEC__(1+_GENERIC__) Opcodes
 @cindex instruction summary, Z8000
 For detailed information on the Z8000 machine instruction set, see
 @cite{Z8000 Technical Manual}.
-
-@cindex Z8000 directives
-The Z8000 port of _AS__ includes these additional assembler directives,
-for compatibility with other Z8000 assemblers:
-
-@table @code
-@item segm
-@cindex segm
-Generates code for the segmented Z8001.
-
-@item unsegm
-Generates code for the unsegmented Z8002.
-
-@item name
-Synonym for @code{.file}
-
-@item global
-Synonum for @code{.global}
-
-@item wval
-Synonym for .word
-
-@item lval
-Synonym for .long
-
-@item bval
-Synonym for .byte
-
-@item sval
-Assemble a string.  @code{sval} expects one string literal, delimited by
-single quotes.  It assembles each byte of the string into consecutive
-addresses.  You can use the escape sequence @samp{%@var{xx}} (where
-@var{xx} represents a two-digit hexadecimal number) to represent the
-character whose @sc{ascii} value is @var{xx}.  Use this feature to
-describe single quote and other characters that may not appear in string
-literals as themselves.  For example, the C statement @w{@samp{char *a =
-"he said \"it's 50% off\"";}} is represented in Z8000 assembly language
-as
-
-@smallexample
-sval    'he said %22it%27s 50%25 off%22%00'
-@end smallexample
-
-@item rsect
-synonym for @code{.section}
-
-@item block
-synonym for @code{.space}
-
-@item even
-synonym for @code{.align 1}
-@end table
 
 The following table summarizes the opcodes and their arguments:
 @iftex
