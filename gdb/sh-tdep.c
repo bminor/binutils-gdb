@@ -112,10 +112,6 @@ sh_processor_type_table[] =
   }
   ,
   {
-    sh3e_reg_names, bfd_mach_sh4
-  }
-  ,
-  {
     NULL, 0
   }
 };
@@ -635,10 +631,6 @@ sh_show_regs (args, from_tty)
     cpu = TARGET_ARCHITECTURE->mach;
   else
     cpu = 0;
-
-  /* FIXME: sh4 has more registers */
-  if (cpu == bfd_mach_sh4)
-    cpu = bfd_mach_sh3;
 
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),

@@ -1,3 +1,7 @@
+2000-02-14  Nick Clifton  <nickc@cygnus.com>
+
+	* sh-tdep.c: Remove extraneous code.
+
 2000-02-14  Amit S. Kale  <akale@veritas.com>
 
 	* elfread.c (elf_symtab_read): Move the use of sym to after where
