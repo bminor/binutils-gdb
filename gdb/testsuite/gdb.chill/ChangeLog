@@ -1,3 +1,7 @@
+Tue Dec  5 01:51:45 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* tests2.exp: Add compiling of the test case.
+
 Fri Dec  1 00:08:37 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* pr-8405.ch, pr-8405.exp, Makefile.in:  New test case.
