@@ -80,6 +80,7 @@ responsibility among the other maintainers.
   ix86 INTEL MODE  Diego Novillo <dnovillo@redhat.com>
   M68HC11 M68HC12  Stephane Carrez <stcarrez@nerim.fr>
   M68k		   Ben Elliston <bje@gnu.org>
+  MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
   MIPS		   Eric Christopher <echristo@redhat.com>
   MIPS		   Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
