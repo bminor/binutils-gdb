@@ -382,6 +382,7 @@ Show QNX NTO internal debugging."), _("\
 When non-zero, nto specific debug info is\n\
 displayed. Different information is displayed\n\
 for different positive values."),
+			    NULL,
 			    NULL, /* FIXME: i18n: QNX NTO internal debugging is %s.  */
-			    NULL, NULL, &setdebuglist, &showdebuglist);
+			    &setdebuglist, &showdebuglist);
 }

@@ -868,8 +868,8 @@ of time passes without a response from the target, an error occurs.",
 Set internal profiling."), _("\
 Show internal profiling."), _("\
 When enabled GDB is profiled."),
+			   maintenance_set_profile_cmd,
 			   NULL, /* FIXME: i18n: Internal profiling is %s.  */
-			   maintenance_set_profile_cmd, NULL,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 }

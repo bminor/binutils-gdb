@@ -9649,7 +9649,8 @@ Show the upper bound on the age of cached dwarf2 compilation units."), _("\
 A higher limit means that cached compilation units will be stored\n\
 in memory longer, and more total memory will be used.  Zero disables\n\
 caching, which can slow down startup."),
+			    NULL,
 			    NULL, /* FIXME: i18n: The upper bound on the age of cached dwarf2 compilation units is %d.  */
-			    NULL, NULL, &set_dwarf2_cmdlist,
+			    &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
 }

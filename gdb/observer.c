@@ -204,8 +204,8 @@ _initialize_observer (void)
 Set observer debugging."), _("\
 Show observer debugging."), _("\
 When non-zero, observer debugging is enabled."),
+			    NULL,
 			    NULL, /* FIXME: i18n: Observer debugging is %s.  */
-			    NULL, NULL,
 			    &setdebuglist, &showdebuglist);
 }
 

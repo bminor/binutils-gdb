@@ -886,8 +886,9 @@ information to determine that a function is prototyped.  If this flag is\n\
 set, GDB will perform the conversion for a function it considers\n\
 unprototyped.\n\
 The default is to perform the conversion.\n"),
+			   NULL,
 			   NULL, /* FIXME: i18n: Coercion of floats to doubles when calling functions is %s.  */
-			   NULL, NULL, &setlist, &showlist);
+			   &setlist, &showlist);
 
   add_setshow_boolean_cmd ("unwindonsignal", no_class,
 			   &unwind_on_signal_p, _("\
@@ -897,6 +898,7 @@ The unwindonsignal lets the user determine what gdb should do if a signal\n\
 is received while in a function called from gdb (call dummy).  If set, gdb\n\
 unwinds the stack and restore the context to what as it was before the call.\n\
 The default is to stop in the frame where the signal was received."),
+			   NULL,
 			   NULL, /* FIXME: i18n: Unwinding of stack if a signal is received while in a call dummy is %s.  */
-			   NULL, NULL, &setlist, &showlist);
+			   &setlist, &showlist);
 }

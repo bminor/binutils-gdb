@@ -2879,6 +2879,7 @@ Show whether hppa target specific debugging information is displayed."), _("\
 This flag controls whether hppa target specific debugging information is\n\
 displayed.  This information is particularly useful for debugging frame\n\
 unwinding problems."),
+			   NULL,
 			   NULL, /* FIXME: i18n: hppa debug flag is %s.  */
-			   NULL, NULL, &setdebuglist, &showdebuglist);
+			   &setdebuglist, &showdebuglist);
 }

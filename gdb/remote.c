@@ -659,8 +659,7 @@ add_packet_config_cmd (struct packet_config *config,
   /* set/show TITLE-packet {auto,on,off} */
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
-				&config->detect, set_doc, show_doc,
-				"", NULL /* FIXME: i18n: Print message is? */,
+				&config->detect, set_doc, show_doc, NULL, /* help_doc */
 				set_func, show_func,
 				set_remote_list, show_remote_list);
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
@@ -5624,8 +5623,7 @@ terminating `#' character and checksum."),
 Set whether to send break if interrupted."), _("\
 Show whether to send break if interrupted."), _("\
 If set, a break, instead of a cntrl-c, is sent to the remote target."),
-			   NULL, /* FIXME: i18n: Whether to send break if interrupted is %s.  */
-			   NULL, NULL,
+			   NULL, NULL, /* FIXME: i18n: Whether to send break if interrupted is %s.  */
 			   &setlist, &showlist);
 
   /* Install commands for configuring memory read/write packets.  */
@@ -5666,16 +5664,14 @@ further restriction and ``limit'' to enable that restriction."),
 Set the maximum number of target hardware watchpoints."), _("\
 Show the maximum number of target hardware watchpoints."), _("\
 Specify a negative limit for unlimited."),
-			    NULL, /* FIXME: i18n: The maximum number of target hardware watchpoints is %s.  */
-			    NULL, NULL,
+			    NULL, NULL, /* FIXME: i18n: The maximum number of target hardware watchpoints is %s.  */
 			    &remote_set_cmdlist, &remote_show_cmdlist);
   add_setshow_zinteger_cmd ("hardware-breakpoint-limit", no_class,
 			    &remote_hw_breakpoint_limit, _("\
 Set the maximum number of target hardware breakpoints."), _("\
 Show the maximum number of target hardware breakpoints."), _("\
 Specify a negative limit for unlimited."),
-			    NULL, /* FIXME: i18n: The maximum number of target hardware breakpoints is %s.  */
-			    NULL, NULL,
+			    NULL, NULL, /* FIXME: i18n: The maximum number of target hardware breakpoints is %s.  */
 			    &remote_set_cmdlist, &remote_show_cmdlist);
 
   deprecated_add_show_from_set
@@ -5779,9 +5775,8 @@ Set use of remote protocol `Z' packets"), _("\
 Show use of remote protocol `Z' packets "), _("\
 When set, GDB will attempt to use the remote breakpoint and watchpoint\n\
 packets."),
-				NULL, /* FIXME: i18n: Use of remote protocol `Z' packets is %s.  */
 				set_remote_protocol_Z_packet_cmd,
-				show_remote_protocol_Z_packet_cmd,
+				show_remote_protocol_Z_packet_cmd, /* FIXME: i18n: Use of remote protocol `Z' packets is %s.  */
 				&remote_set_cmdlist, &remote_show_cmdlist);
 
   /* Eventually initialize fileio.  See fileio.c */

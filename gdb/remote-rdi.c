@@ -994,8 +994,8 @@ Set target has ROM at addr 0."), _("\
 Show if target has ROM at addr 0."), _("\
 A true value disables vector catching, false enables vector catching.\n\
 This is evaluated at the time the 'target rdi' command is executed."),
+			   NULL,
 			   NULL, /* FIXME: i18n: Target has ROM at addr 0 is %s.  */
-			   NULL, NULL,
 			   &setlist, &showlist);
 
   add_setshow_boolean_cmd ("rdiheartbeat", no_class, &rdi_heartbeat, _("\
@@ -1004,8 +1004,8 @@ Show enable for ADP heartbeat packets."), _("\
 I don't know why you would want this. If you enable them,\n\
 it will confuse ARM and EPI JTAG interface boxes as well\n\
 as the Angel Monitor."),
+			   NULL,
 			   NULL, /* FIXME: i18n: Enable for ADP heartbeat packets is %s.  */
-			   NULL, NULL,
 			   &setlist, &showlist);
 }
 

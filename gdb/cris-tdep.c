@@ -3919,8 +3919,8 @@ _initialize_cris_tdep (void)
 			    _("Set the current CRIS version."),
 			    _("Show the current CRIS version."),
 			    _("Set if autodetection fails."),
+			    set_cris_version,
 			    NULL, /* FIXME: i18n: Current CRIS version is %s.  */
-			    set_cris_version, NULL,
 			    &setlist, &showlist);
   
   add_setshow_boolean_cmd ("cris-dwarf2-cfi", class_support,
@@ -3928,8 +3928,8 @@ _initialize_cris_tdep (void)
 			   _("Set the usage of Dwarf-2 CFI for CRIS."),
 			   _("Show the usage of Dwarf-2 CFI for CRIS."),
 			   _("Set to \"off\" if using gcc-cris < R59."),
+			   set_cris_dwarf2_cfi,
 			   NULL, /* FIXME: i18n: Usage of Dwarf-2 CFI for CRIS is %d.  */
-			   set_cris_dwarf2_cfi, NULL,
 			   &setlist, &showlist);
 
   deprecated_add_core_fns (&cris_elf_core_fns);
