@@ -7119,6 +7119,23 @@ ia64_frob_label (sym)
     }
 }
 
+#ifdef TE_HPUX
+/* The HP-UX linker will give unresolved symbol errors for symbols
+   that are declared but unused.  This routine removes declared,
+   unused symbols from an object.  */
+int
+ia64_frob_symbol (sym)
+     struct symbol *sym;
+{
+  if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym) &&
+       ELF_ST_VISIBILITY (S_GET_OTHER (sym)) == STV_DEFAULT)
+      || (S_GET_SEGMENT (sym) == &bfd_abs_section
+	  && ! S_IS_EXTERNAL (sym)))
+    return 1;
+  return 0;
+}
+#endif
+
 void
 ia64_flush_pending_output ()
 {

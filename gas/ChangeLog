@@ -1,3 +1,9 @@
+2004-02-10  Steve Ellcey  <sje@cup.hp.com>
+
+	* config/tc-ia64.h (ia64_frob_symbol): New declaration.
+	(tc_frob_symbol): New macro definition.
+	* config/tc-ia64.c (ia64_frob_symbol): New routine.
+
 2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/tc-arm.c (md_begin): Mark .note.gnu.arm.ident as
