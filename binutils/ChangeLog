@@ -1,3 +1,21 @@
+Wed Sep 28 13:04:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* objdump.c (disassemble_data): Pass the reloc buffer to free, not
+	the pointer used to loop over the relocs.
+
+Sat Sep 24 16:16:57 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* objdump.c (disassemble_data): Cast result of xmalloc.
+
+Wed Sep 21 19:30:35 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* objdump.c (sorted_syms, sorted_symcount): New global variables.
+	(objdump_print_address): Use sorted_syms and sorted_symcount
+	instead of syms and symcount.
+	(disassemble_data): Don't bother to get the relocs before looping
+	over the sections.  Before filtering and sorting the symbol table,
+	copy it into sorted_syms.
+
 Fri Sep 16 11:27:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* objdump.c (struct objdump_disasm_info): Add field require_sec.
