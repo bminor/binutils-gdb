@@ -1,3 +1,8 @@
+Mon Oct 30 12:27:16 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET):  Add $(TARGET_SUBDIR)
+	where needed.
+
 Mon Oct 30 12:45:25 1995  Doug Evans  <dje@cygnus.com>
 
 	* Makefile.in (all-gcc): Fix typo.

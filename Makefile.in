@@ -134,6 +134,9 @@ OTHERS =
 # should be built using the target tools.
 TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup
 
+# Target libraries are put under this directory:
+TARGET_SUBDIR = . # Changed by configure to $(target_alias) if cross.
+
 # This is set by the configure script to the arguments passed to configure.
 CONFIG_ARGUMENTS = 
 
@@ -148,8 +151,8 @@ INSTALL_TARGET = install-dirs \
 
 CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
-    if [ -f $$r/newlib/Makefile ] ; then \
-      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+    if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
+      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
     else \
       echo $$r/gcc/xgcc -B$$r/gcc/; \
     fi; \
@@ -177,8 +180,8 @@ CHILL_FOR_TARGET = ` \
 
 CXX_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
-    if [ -f $$r/newlib/Makefile ] ; then \
-      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+    if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
+      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
     else \
       echo $$r/gcc/xgcc -B$$r/gcc/; \
     fi; \
@@ -592,9 +595,6 @@ CHECK_TARGET_MODULES = \
 
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
-CROSS=native # or CROSS=cross
-# Target libraries are put under this directory:
-TARGET_SUBDIR = . # Changed by configure to $(target_alias) if cross.
 
 INSTALL_TARGET_MODULES = \
 	install-target-libio \
