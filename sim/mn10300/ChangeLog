@@ -1,4 +1,10 @@
 start-sanitize-am30
+Fri June 12 16:24:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+	* dv-mn103iop.c: New file for handling am32 io ports.
+	* configure.in: Add mn103iop to hw_device list.
+	* configure: Re-generate.
+	* interp.c (sim_open): Create io port device.
+
 Wed June 10 14:34:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 	* dv-mn103int.c (external_group): Use enumerated types to access
 	correct group addresses.
