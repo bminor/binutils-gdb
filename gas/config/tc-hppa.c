@@ -4489,7 +4489,10 @@ pa_equ (reg)
   if (label_symbol)
     {
       symbol = label_symbol->lss_label;
-      S_SET_VALUE (symbol, pa_parse_number (&input_line_pointer, 0));
+      if (reg)
+	S_SET_VALUE (symbol, pa_parse_number (&input_line_pointer, 0));
+      else
+	S_SET_VALUE (symbol, (unsigned int) get_absolute_expression ());
       S_SET_SEGMENT (symbol, &bfd_abs_section);
     }
   else
