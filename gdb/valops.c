@@ -50,7 +50,61 @@ search_struct_method PARAMS ((char *, value *, value *, int, int *,
 static int
 check_field_in PARAMS ((struct type *, const char *));
 
+static CORE_ADDR
+allocate_space_in_inferior PARAMS ((int));
+
 
+/* Allocate NBYTES of space in the inferior using the inferior's malloc
+   and return a value that is a pointer to the allocated space. */
+
+static CORE_ADDR
+allocate_space_in_inferior (len)
+     int len;
+{
+  register value val;
+  register struct symbol *sym;
+  struct minimal_symbol *msymbol;
+  struct type *type;
+  value blocklen;
+  LONGEST maddr;
+
+  /* Find the address of malloc in the inferior.  */
+
+  sym = lookup_symbol ("malloc", 0, VAR_NAMESPACE, 0, NULL);
+  if (sym != NULL)
+    {
+      if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+	{
+	  error ("\"malloc\" exists in this program but is not a function.");
+	}
+      val = value_of_variable (sym);
+    }
+  else
+    {
+      msymbol = lookup_minimal_symbol ("malloc", (struct objfile *) NULL);
+      if (msymbol != NULL)
+	{
+	  type = lookup_pointer_type (builtin_type_char);
+	  type = lookup_function_type (type);
+	  type = lookup_pointer_type (type);
+	  maddr = (LONGEST) SYMBOL_VALUE_ADDRESS (msymbol);
+	  val = value_from_longest (type, maddr);
+	}
+      else
+	{
+	  error ("evaluation of this expression requires the program to have a function \"malloc\".");
+	}
+    }
+
+  blocklen = value_from_longest (builtin_type_int, (LONGEST) len);
+  val = call_function_by_hand (val, 1, &blocklen);
+  if (value_logical_not (val))
+    {
+      error ("No memory available to program.");
+    }
+  return (value_as_long (val));
+}
+
 /* Cast value ARG2 to type TYPE and return as a value.
    More general than a C cast: accepts any two types of the same length,
    and if ARG2 is an lvalue it can be cast into anything at all.  */
@@ -425,9 +479,28 @@ value_of_variable (var)
   return val;
 }
 
-/* Given a value which is an array, return a value which is
-   a pointer to its first (actually, zeroth) element. 
-   FIXME, this should be subtracting the array's lower bound. */
+/* Given a value which is an array, return a value which is a pointer to its
+   first element, regardless of whether or not the array has a nonzero lower
+   bound.
+
+   FIXME:  A previous comment here indicated that this routine should be
+   substracting the array's lower bound.  It's not clear to me that this
+   is correct.  Given an array subscripting operation, it would certainly
+   work to do the adjustment here, essentially computing:
+
+   (&array[0] - (lowerbound * sizeof array[0])) + (index * sizeof array[0])
+
+   However I believe a more appropriate and logical place to account for
+   the lower bound is to do so in value_subscript, essentially computing:
+
+   (&array[0] + ((index - lowerbound) * sizeof array[0]))
+
+   As further evidence consider what would happen with operations other
+   than array subscripting, where the caller would get back a value that
+   had an address somewhere before the actual first element of the array,
+   and the information about the lower bound would be lost because of
+   the coercion to pointer type.
+   */
 
 value
 value_coerce_array (arg1)
@@ -917,54 +990,147 @@ call_function_by_hand (function, nargs, args)
   error ("Cannot invoke functions on this machine.");
 }
 #endif /* no CALL_DUMMY.  */
+
 
-/* Create a value for a string constant:
-   Call the function malloc in the inferior to get space for it,
-   then copy the data into that space
-   and then return the address with type char *.
-   PTR points to the string constant data; LEN is number of characters.
-   Note that the string may contain embedded null bytes. */
+/* Create a value for an array by allocating space in the inferior, copying
+   the data into that space, and then setting up an array value.
+
+   The array bounds are set from LOWBOUND and HIGHBOUND, and the array is
+   populated from the values passed in ELEMVEC.
+
+   The element type of the array is inherited from the type of the
+   first element, and all elements must have the same size (though we
+   don't currently enforce any restriction on their types). */
+
+value
+value_array (lowbound, highbound, elemvec)
+     int lowbound;
+     int highbound;
+     value *elemvec;
+{
+  int nelem;
+  int idx;
+  int typelength;
+  value val;
+  struct type *rangetype;
+  struct type *arraytype;
+  CORE_ADDR addr;
+
+  /* Validate that the bounds are reasonable and that each of the elements
+     have the same size. */
+
+  nelem = highbound - lowbound + 1;
+  if (nelem <= 0)
+    {
+      error ("bad array bounds (%d, %d)", lowbound, highbound);
+    }
+  typelength = TYPE_LENGTH (VALUE_TYPE (elemvec[0]));
+  for (idx = 0; idx < nelem; idx++)
+    {
+      if (TYPE_LENGTH (VALUE_TYPE (elemvec[idx])) != typelength)
+	{
+	  error ("array elements must all be the same size");
+	}
+    }
+
+  /* Allocate space to store the array in the inferior, and then initialize
+     it by copying in each element.  FIXME:  Is it worth it to create a
+     local buffer in which to collect each value and then write all the
+     bytes in one operation? */
+
+  addr = allocate_space_in_inferior (nelem * typelength);
+  for (idx = 0; idx < nelem; idx++)
+    {
+      write_memory (addr + (idx * typelength), VALUE_CONTENTS (elemvec[idx]),
+		    typelength);
+    }
+
+  /* Create the array type and set up an array value to be evaluated lazily. */
+
+  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
+				 lowbound, highbound);
+  arraytype = create_array_type ((struct type *) NULL, 
+				 VALUE_TYPE (elemvec[0]), rangetype);
+  val = value_at_lazy (arraytype, addr);
+  return (val);
+}
+
+/* Create a value for a string constant by allocating space in the inferior,
+   copying the data into that space, and returning the address with type
+   TYPE_CODE_STRING.  PTR points to the string constant data; LEN is number
+   of characters.
+   Note that string types are like array of char types with a lower bound of
+   zero and an upper bound of LEN - 1.  Also note that the string may contain
+   embedded null bytes. */
 
 value
 value_string (ptr, len)
      char *ptr;
      int len;
 {
-  register value val;
-  register struct symbol *sym;
-  value blocklen;
+  value val;
+  struct type *rangetype;
+  struct type *stringtype;
+  CORE_ADDR addr;
 
-  /* Find the address of malloc in the inferior.  */
+  /* Allocate space to store the string in the inferior, and then
+     copy LEN bytes from PTR in gdb to that address in the inferior. */
 
-  sym = lookup_symbol ("malloc", 0, VAR_NAMESPACE, 0, NULL);
-  if (sym != NULL)
-    {
-      if (SYMBOL_CLASS (sym) != LOC_BLOCK)
-	error ("\"malloc\" exists in this program but is not a function.");
-      val = value_of_variable (sym);
-    }
-  else
-    {
-      struct minimal_symbol *msymbol;
-      msymbol = lookup_minimal_symbol ("malloc", (struct objfile *) NULL);
-      if (msymbol != NULL)
-	val =
-	  value_from_longest (lookup_pointer_type (lookup_function_type (
-				lookup_pointer_type (builtin_type_char))),
-			      (LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
-      else
-	error ("String constants require the program to have a function \"malloc\".");
-    }
+  addr = allocate_space_in_inferior (len);
+  write_memory (addr, ptr, len);
 
-  blocklen = value_from_longest (builtin_type_int, (LONGEST) (len + 1));
-  val = call_function_by_hand (val, 1, &blocklen);
-  if (value_logical_not (val))
-    error ("No memory available for string constant.");
-  write_memory (value_as_pointer (val), ptr, len + 1);
-  VALUE_TYPE (val) = lookup_pointer_type (builtin_type_char);
-  return val;
+  /* Create the string type and set up a string value to be evaluated
+     lazily. */
+
+  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
+				 0, len - 1);
+  stringtype = create_string_type ((struct type *) NULL, rangetype);
+  val = value_at_lazy (stringtype, addr);
+  return (val);
 }
 
+/* Compare two argument lists and return the position in which they differ,
+   or zero if equal.
+
+   STATICP is nonzero if the T1 argument list came from a
+   static member function.
+
+   For non-static member functions, we ignore the first argument,
+   which is the type of the instance variable.  This is because we want
+   to handle calls with objects from derived classes.  This is not
+   entirely correct: we should actually check to make sure that a
+   requested operation is type secure, shouldn't we?  FIXME.  */
+
+static int
+typecmp (staticp, t1, t2)
+     int staticp;
+     struct type *t1[];
+     value t2[];
+{
+  int i;
+
+  if (t2 == 0)
+    return 1;
+  if (staticp && t1 == 0)
+    return t2[1] != 0;
+  if (t1 == 0)
+    return 1;
+  if (TYPE_CODE (t1[0]) == TYPE_CODE_VOID) return 0;
+  if (t1[!staticp] == 0) return 0;
+  for (i = !staticp; t1[i] && TYPE_CODE (t1[i]) != TYPE_CODE_VOID; i++)
+    {
+      if (! t2[i])
+	return i+1;
+      if (TYPE_CODE (t1[i]) == TYPE_CODE_REF
+	  && TYPE_TARGET_TYPE (t1[i]) == VALUE_TYPE (t2[i]))
+	continue;
+      if (TYPE_CODE (t1[i]) != TYPE_CODE (VALUE_TYPE (t2[i])))
+	return i+1;
+    }
+  if (!t1[i]) return 0;
+  return t2[i] ? i+1 : 0;
+}
+
 /* Helper function used by value_struct_elt to recurse through baseclasses.
    Look for a field NAME in ARG1. Adjust the address of ARG1 by OFFSET bytes,
    and search in it assuming it has (class) type TYPE.
@@ -1444,46 +1610,6 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 	return v;
     }
   return 0;
-}
-
-/* Compare two argument lists and return the position in which they differ,
-   or zero if equal.
-
-   STATICP is nonzero if the T1 argument list came from a
-   static member function.
-
-   For non-static member functions, we ignore the first argument,
-   which is the type of the instance variable.  This is because we want
-   to handle calls with objects from derived classes.  This is not
-   entirely correct: we should actually check to make sure that a
-   requested operation is type secure, shouldn't we?  FIXME.  */
-
-int
-typecmp (staticp, t1, t2)
-     int staticp;
-     struct type *t1[];
-     value t2[];
-{
-  int i;
-
-  if (t2 == 0)
-    return 1;
-  if (staticp && t1 == 0)
-    return t2[1] != 0;
-  if (t1 == 0)
-    return 1;
-  if (t1[0]->code == TYPE_CODE_VOID) return 0;
-  if (t1[!staticp] == 0) return 0;
-  for (i = !staticp; t1[i] && t1[i]->code != TYPE_CODE_VOID; i++)
-    {
-      if (! t2[i]
-	  || t1[i]->code != t2[i]->type->code
-/* Too pessimistic:  || t1[i]->target_type != t2[i]->type->target_type */
- )
-	return i+1;
-    }
-  if (!t1[i]) return 0;
-  return t2[i] ? i+1 : 0;
 }
 
 /* C++: return the value of the class instance variable, if one exists.
