@@ -854,7 +854,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	      for (s = symtab_list; s; s = s->next)
 		{
 		  bv = BLOCKVECTOR (s);
-		  b = BLOCKVECTOR_BLOCK (bv, 0);
+		  b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 		  if (BLOCK_START (b) <= BLOCK_START (block)
 		      && BLOCK_END (b) > BLOCK_START (block))
 		    break;
@@ -889,7 +889,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   for (s = symtab_list; s; s = s->next)
     {
       bv = BLOCKVECTOR (s);
-      block = BLOCKVECTOR_BLOCK (bv, 0);
+      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       sym = lookup_block_symbol (block, name, namespace);
       if (sym) 
 	{
@@ -936,7 +936,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	  if (s)
 	    {
 	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, 0);
+	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	      sym = lookup_block_symbol (block, misc_function_vector[ind].name,
 				         namespace);
 	      /* sym == 0 if symbol was found in the misc_function_vector
@@ -964,7 +964,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
       {
 	s = PSYMTAB_TO_SYMTAB(ps);
 	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, 0);
+	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	sym = lookup_block_symbol (block, name, namespace);
 	if (!sym)
 	  fatal ("Internal: global symbol found in psymtab but not in symtab");
@@ -980,7 +980,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   for (s = symtab_list; s; s = s->next)
     {
       bv = BLOCKVECTOR (s);
-      block = BLOCKVECTOR_BLOCK (bv, 1);
+      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
       sym = lookup_block_symbol (block, name, namespace);
       if (sym) 
 	{
@@ -996,7 +996,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
       {
 	s = PSYMTAB_TO_SYMTAB(ps);
 	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, 1);
+	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	sym = lookup_block_symbol (block, name, namespace);
 	if (!sym)
 	  fatal ("Internal: static symbol found in psymtab but not in symtab");
@@ -1197,7 +1197,7 @@ find_pc_symtab (pc)
   for (s = symtab_list; s; s = s->next)
     {
       bv = BLOCKVECTOR (s);
-      b = BLOCKVECTOR_BLOCK (bv, 0);
+      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       if (BLOCK_START (b) <= pc
 	  && BLOCK_END (b) > pc)
 	break;
@@ -1339,7 +1339,7 @@ find_pc_line (pc, notcurrent)
     {
       val.symtab = alt_symtab;
       val.line = alt_line - 1;
-      val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, 0));
+      val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
       val.end = alt_pc;
     }
   else
@@ -1349,7 +1349,7 @@ find_pc_line (pc, notcurrent)
       val.pc = best_pc;
       val.end = (best_end ? best_end
 		   : (alt_pc ? alt_pc
-		      : BLOCK_END (BLOCKVECTOR_BLOCK (bv, 0))));
+		      : BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))));
     }
   return val;
 }
@@ -1850,7 +1850,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
      If file specified, use that file's per-file block to start with.  */
 
   sym = lookup_symbol (copy,
-		       (s ? BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), 1)
+		       (s ? BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
 			: get_selected_block ()),
 		       VAR_NAMESPACE, 0, &sym_symtab);
 
@@ -2206,6 +2206,7 @@ list_symbols (regexp, class, bpt)
 		}
 	      else
 		keep_going = 0;
+	      continue;
 	    }
 	  else
 	    {
@@ -2262,7 +2263,7 @@ list_symbols (regexp, class, bpt)
 	 It happens that the first symtab in the list
 	 for any given blockvector is the main file.  */
       if (bv != prev_bv)
-	for (i = 0; i < 2; i++)
+	for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	  {
 	    b = BLOCKVECTOR_BLOCK (bv, i);
 	    /* Skip the sort if this block is always sorted.  */
@@ -2293,7 +2294,7 @@ list_symbols (regexp, class, bpt)
 		      }
 		    found_in_file = 1;
 
-		    if (class != 2 && i == 1)
+		    if (class != 2 && i == STATIC_BLOCK)
 		      printf_filtered ("static ");
 		    if (class == 2
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
@@ -2349,14 +2350,12 @@ functions_info (regexp)
   list_symbols (regexp, 1, 0);
 }
 
-#if 0
 static void
 types_info (regexp)
      char *regexp;
 {
   list_symbols (regexp, 2, 0);
 }
-#endif
 
 #if 0
 /* Tiemann says: "info methods was never implemented."  */
@@ -2540,7 +2539,7 @@ make_symbol_completion_list (text)
 
   for (s = symtab_list; s; s = s->next)
     {
-      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), 0);
+      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
       
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	if (!strncmp (SYMBOL_NAME (BLOCK_SYM (b, i)), text, text_len))
@@ -2549,7 +2548,7 @@ make_symbol_completion_list (text)
 
   for (s = symtab_list; s; s = s->next)
     {
-      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), 1);
+      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
 
       /* Don't do this block twice.  */
       if (b == surrounding_static_block) continue;
@@ -2569,8 +2568,8 @@ _initialize_symtab ()
 	    "All global and static variable names, or those matching REGEXP.");
   add_info ("functions", functions_info,
 	    "All function names, or those matching REGEXP.");
-#if 0
-  /* This command has at least the following problems:
+
+  /* FIXME:  This command has at least the following problems:
      1.  It prints builtin types (in a very strange and confusing fashion).
      2.  It doesn't print right, e.g. with
          typedef struct foo *FOO
@@ -2580,7 +2579,7 @@ _initialize_symtab ()
      there is much disagreement "info types" can be fixed).  */
   add_info ("types", types_info,
 	    "All types names, or those matching REGEXP.");
-#endif
+
 #if 0
   add_info ("methods", methods_info,
 	    "All method names, or those matching REGEXP::REGEXP.\n\
