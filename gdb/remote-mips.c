@@ -338,6 +338,8 @@ mips_readchar (timeout)
   static int state = 0;
   static char nextstate[5] = { '<', 'I', 'D', 'T', '>' };
 
+  if (state == 5) 
+    timeout = 1;
   ch = SERIAL_READCHAR (mips_desc, timeout);
   if (ch == SERIAL_EOF)
     mips_error ("End of file from remote");
