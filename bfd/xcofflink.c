@@ -3546,14 +3546,6 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	    skip = true;
 	}
 
-      /* On the other hand, we can't skip global symbols which have
-         relocs against them.  */
-      if (skip
-	  && isym.n_sclass == C_EXT
-	  && (*sym_hash)->indx == -2
-	  && finfo->info->strip != strip_all)
-	skip = false;
-
       /* We can not skip the first TOC anchor.  */
       if (skip
 	  && require
