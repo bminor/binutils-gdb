@@ -17226,7 +17226,7 @@ Show the core addresses of the code for a source line.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} comamnd is @samp{info line}.
+The corresponding @value{GDBN} command is @samp{info line}.
 @code{gdbtk} has the @samp{gdb_get_line} and @samp{gdb_get_file} commands.
 
 @subsubheading Example

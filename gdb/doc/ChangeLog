@@ -1,3 +1,9 @@
+2003-10-09  Andrew Cagney  <cagney@redhat.com>
+
+	From 2003-09-18 David Anderson <davea@sgi.com>:
+	* gdb.texinfo (GDB/MI Symbol Query): Replace "comamnd" with
+	"command".
+
 2003-10-03  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Deprecate
