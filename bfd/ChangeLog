@@ -4,6 +4,12 @@ Mon Dec  4 16:40:47 1995  Kim Knuttila  <krk@cygnus.com>
 
 Mon Dec  4 11:25:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ihex.c (ihex_scan): Handle record types 4 and 5.
+	(ihex_object_p): Permit types 4 and 5.
+	(ihex_set_section_contents): Remove check for out of range
+	addresses.
+	(ihex_write_object_contents): Generate types 4 and 5.
+
 	* elflink.h (elf_link_output_extsym): Just ignore warning and
 	indirect references to symbols which don't really exist.
 
