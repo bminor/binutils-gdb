@@ -106,3 +106,4 @@ int arm_pc_is_thumb (CORE_ADDR);
 
 CORE_ADDR thumb_get_next_pc (CORE_ADDR);
 
+CORE_ADDR arm_get_next_pc (CORE_ADDR);

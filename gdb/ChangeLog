@@ -1,3 +1,7 @@
+2002-02-13  Keith Seitz  <keiths@redhat.com>
+
+	* arm-tdep.h (arm_get_next_pc): Add declaration.
+
 2002-02-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (arm_use_struct_convention): Make static.  Move to be
