@@ -3475,6 +3475,7 @@ fixup_segment (segP, this_segment_type)
 
 	      add_symbolP = NULL;
 	      fixP->fx_addsy = NULL;
+	      fixP->fx_subsy = NULL;
 	      fixP->fx_done = 1;
 	    }
 	  else

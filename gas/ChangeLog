@@ -1,3 +1,9 @@
+Tue Sep 13 12:08:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/obj-coff.c (fixup_segment): After handling the difference
+	of two symbols from the same segment, set fx_subsy to NULL, to
+	satisfy existing TC_COUNT_RELOC macros.
+
 Tue Sep 13 01:47:08 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* aclocal.m4 (GAS_GDBINIT): New macro.
