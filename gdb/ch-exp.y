@@ -326,6 +326,17 @@ access_name	:	LOCATION_NAME
 			}
 		;
 
+/* Z.200, 4.2.8 */
+
+expression_list	:	expression
+			{
+			  arglist_len = 1;
+			}
+		|	expression_list ',' expression
+			{
+			  arglist_len++;
+			}
+
 /* Z.200, 5.2.1 */
 
 primitive_value	:	location_contents
@@ -495,9 +506,15 @@ value_string_slice:	string_primitive_value '(' left_element ':' right_element ')
 
 /* Z.200, 5.2.8 */
 
-value_array_element:	array_primitive_value '(' expression_list ')'
+value_array_element:	array_primitive_value '('
+				/* This is to save the value of arglist_len
+				   being accumulated for each dimension. */
+				{ start_arglist (); }
+			expression_list ')'
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
+			  write_exp_elt_longcst ((LONGEST) end_arglist ());
+			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
 			}
 		;
 
@@ -793,7 +810,16 @@ integer_literal_expression:
 			  $$ = 0;
 			}
 
+/* Z.200, 12.4.3 */
+
+array_primitive_value :	primitive_value
+			{
+			  $$ = 0;
+			}
+
+
 /* Things which still need productions... */
+
 synonym_name	 	:	FIXME { $$ = 0; }
 value_enumeration_name 	:	FIXME { $$ = 0; }
 value_do_with_name 	:	FIXME { $$ = 0; }
@@ -803,8 +829,6 @@ start_element 		:	FIXME { $$ = 0; }
 left_element 		:	FIXME { $$ = 0; }
 right_element 		:	FIXME { $$ = 0; }
 slice_size 		:	FIXME { $$ = 0; }
-array_primitive_value 	:	FIXME { $$ = 0; }
-expression_list 	:	FIXME { $$ = 0; }
 lower_element 		:	FIXME { $$ = 0; }
 upper_element 		:	FIXME { $$ = 0; }
 first_element 		:	FIXME { $$ = 0; }
@@ -1304,6 +1328,7 @@ yylex ()
 	{
 	    case '\0':
 	        return (0);
+	    case ',':
 	    case '.':
 	    case '=':
 	    case ';':

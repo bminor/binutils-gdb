@@ -584,6 +584,57 @@ evaluate_subexp (expect_type, exp, pos, noside)
       else
 	return value_subscript (arg1, arg2);
       
+    case MULTI_SUBSCRIPT:
+      (*pos) += 2;
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+      while (nargs-- > 0)
+	{
+	  arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+	  /* FIXME:  EVAL_SKIP handling may not be correct. */
+	  if (noside == EVAL_SKIP)
+	    {
+	      if (nargs > 0)
+		{
+		  continue;
+		}
+	      else
+		{
+		  goto nosideret;
+		}
+	    }
+	  /* FIXME:  EVAL_AVOID_SIDE_EFFECTS handling may not be correct. */
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    {
+	      /* If the user attempts to subscript something that has no target
+		 type (like a plain int variable for example), then report this
+		 as an error. */
+	      
+	      type = TYPE_TARGET_TYPE (VALUE_TYPE (arg1));
+	      if (type != NULL)
+		{
+		  arg1 = value_zero (type, VALUE_LVAL (arg1));
+		  noside = EVAL_SKIP;
+		  continue;
+		}
+	      else
+		{
+		  error ("cannot subscript something of type `%s'",
+			 TYPE_NAME (VALUE_TYPE (arg1)));
+		}
+	    }
+	  
+	  if (binop_user_defined_p (op, arg1, arg2))
+	    {
+	      arg1 = value_x_binop (arg1, arg2, op, OP_NULL);
+	    }
+	  else
+	    {
+	      arg1 = value_subscript (arg1, arg2);
+	    }
+	}
+      return (arg1);
+
     case BINOP_LOGICAL_AND:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)

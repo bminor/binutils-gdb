@@ -1,3 +1,27 @@
+Sat Jan  2 12:16:41 1993  Fred Fish  (fnf@cygnus.com)
+
+	* eval.c (evaluate_subexp):  Add case MULTI_SUBSCRIPT.
+	* expprint.c (print_subexp):  Rename BINOP_MULTI_SUBSCRIPT to
+	MULTI_SUBSCRIPT.
+	* expprint.c (dump_expression):  New function for dumping
+	expression vectors during gdb debugging.
+	* expression.h (BINOP_MULTI_SUBSCRIPT):  Name changed to
+	MULTI_SUBSCRIPT and moved out of BINOP range.
+	* expression.h (DUMP_EXPRESSION):  New macro that calls
+	dump_expression if DEBUG_EXPRESSIONS is defined.
+	* m2-exp.y (BINOP_MULTI_SUBSCRIPT):  Changed to MULTI_SUBSCRIPT.
+	* parse.c (length_of_subexp, prefixify_subexp):  Change
+	BINOP_MULTI_SUBSCRIPT to MULTI_SUBSCRIPT.
+	* parse.c (parse_exp_1):  Call DUMP_EXPRESSION before and after
+	prefixify'ing the expression.
+	* printcmd.c (print_command_1):  Add comment.
+	**** start-sanitize-chill ****
+	* ch-exp.y (expression_list):  Add useful actions.
+	* ch-exp.y (value_array_element):  Add useful actions.
+	* ch-exp.y (array_primitive_value):  Add production.
+	* ch-exp.y (yylex):  Recognize ',' as a token.
+	**** end-sanitize-chill ****
+
 Fri Jan  1 18:22:02 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: pass prefix and exec_prefix via FLAGS_TO_PASS,

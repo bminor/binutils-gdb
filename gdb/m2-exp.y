@@ -333,9 +333,9 @@ exp     :       exp '['
 			   function types */
                         { start_arglist(); }
                 non_empty_arglist ']'  %prec DOT
-                        { write_exp_elt_opcode (BINOP_MULTI_SUBSCRIPT);
+                        { write_exp_elt_opcode (MULTI_SUBSCRIPT);
 			  write_exp_elt_longcst ((LONGEST) end_arglist());
-			  write_exp_elt_opcode (BINOP_MULTI_SUBSCRIPT); }
+			  write_exp_elt_opcode (MULTI_SUBSCRIPT); }
         ;
 
 exp	:	exp '('

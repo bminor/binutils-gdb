@@ -264,7 +264,7 @@ print_subexp (exp, pos, stream, prec)
 
     /* Modula-2 ops */
 
-    case BINOP_MULTI_SUBSCRIPT:
+    case MULTI_SUBSCRIPT:
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
@@ -412,3 +412,130 @@ op_string(op)
       return op_print_tab[tem].string;
   return NULL;
 }
+
+#ifdef DEBUG_EXPRESSIONS
+
+/* Support for dumping the raw data from expressions in a human readable
+   form.  */
+
+void
+dump_expression (exp, stream, note)
+     struct expression *exp;
+     FILE *stream;
+     char *note;
+{
+  int elt;
+  char *opcode_name;
+  char *eltscan;
+  int eltsize;
+
+  fprintf_filtered (stream, "Dump of expression @ 0x%x, %s:\n", exp, note);
+  fprintf_filtered (stream, "\tLanguage %s, %d elements, %d bytes each.\n",
+		    exp->language_defn->la_name, exp -> nelts,
+		    sizeof (union exp_element));
+  fprintf_filtered (stream, "\t%5s  %20s  %16s  %s\n", "Index", "Opcode",
+		    "Hex Value", "String Value");
+  for (elt = 0; elt < exp -> nelts; elt++)
+    {
+      fprintf_filtered (stream, "\t%5d  ", elt);
+      switch (exp -> elts[elt].opcode)
+	{
+	  default: opcode_name = "<unknown>"; break;
+	  case OP_NULL: opcode_name = "OP_NULL"; break;
+	  case BINOP_ADD: opcode_name = "BINOP_ADD"; break;
+	  case BINOP_SUB: opcode_name = "BINOP_SUB"; break;
+	  case BINOP_MUL: opcode_name = "BINOP_MUL"; break;
+	  case BINOP_DIV: opcode_name = "BINOP_DIV"; break;
+	  case BINOP_REM: opcode_name = "BINOP_REM"; break;
+	  case BINOP_LSH: opcode_name = "BINOP_LSH"; break;
+	  case BINOP_RSH: opcode_name = "BINOP_RSH"; break;
+	  case BINOP_LOGICAL_AND: opcode_name = "BINOP_LOGICAL_AND"; break;
+	  case BINOP_LOGICAL_OR: opcode_name = "BINOP_LOGICAL_OR"; break;
+	  case BINOP_BITWISE_AND: opcode_name = "BINOP_BITWISE_AND"; break;
+	  case BINOP_BITWISE_IOR: opcode_name = "BINOP_BITWISE_IOR"; break;
+	  case BINOP_BITWISE_XOR: opcode_name = "BINOP_BITWISE_XOR"; break;
+	  case BINOP_EQUAL: opcode_name = "BINOP_EQUAL"; break;
+	  case BINOP_NOTEQUAL: opcode_name = "BINOP_NOTEQUAL"; break;
+	  case BINOP_LESS: opcode_name = "BINOP_LESS"; break;
+	  case BINOP_GTR: opcode_name = "BINOP_GTR"; break;
+	  case BINOP_LEQ: opcode_name = "BINOP_LEQ"; break;
+	  case BINOP_GEQ: opcode_name = "BINOP_GEQ"; break;
+	  case BINOP_REPEAT: opcode_name = "BINOP_REPEAT"; break;
+	  case BINOP_ASSIGN: opcode_name = "BINOP_ASSIGN"; break;
+	  case BINOP_COMMA: opcode_name = "BINOP_COMMA"; break;
+	  case BINOP_SUBSCRIPT: opcode_name = "BINOP_SUBSCRIPT"; break;
+	  case MULTI_SUBSCRIPT: opcode_name = "MULTI_SUBSCRIPT"; break;
+	  case BINOP_EXP: opcode_name = "BINOP_EXP"; break;
+	  case BINOP_MIN: opcode_name = "BINOP_MIN"; break;
+	  case BINOP_MAX: opcode_name = "BINOP_MAX"; break;
+	  case BINOP_SCOPE: opcode_name = "BINOP_SCOPE"; break;
+	  case STRUCTOP_MEMBER: opcode_name = "STRUCTOP_MEMBER"; break;
+	  case STRUCTOP_MPTR: opcode_name = "STRUCTOP_MPTR"; break;
+	  case BINOP_INTDIV: opcode_name = "BINOP_INTDIV"; break;
+	  case BINOP_ASSIGN_MODIFY: opcode_name = "BINOP_ASSIGN_MODIFY"; break;
+	  case BINOP_VAL: opcode_name = "BINOP_VAL"; break;
+	  case BINOP_INCL: opcode_name = "BINOP_INCL"; break;
+	  case BINOP_EXCL: opcode_name = "BINOP_EXCL"; break;
+	  case BINOP_END: opcode_name = "BINOP_END"; break;
+	  case TERNOP_COND: opcode_name = "TERNOP_COND"; break;
+	  case OP_LONG: opcode_name = "OP_LONG"; break;
+	  case OP_DOUBLE: opcode_name = "OP_DOUBLE"; break;
+	  case OP_VAR_VALUE: opcode_name = "OP_VAR_VALUE"; break;
+	  case OP_LAST: opcode_name = "OP_LAST"; break;
+	  case OP_REGISTER: opcode_name = "OP_REGISTER"; break;
+	  case OP_INTERNALVAR: opcode_name = "OP_INTERNALVAR"; break;
+	  case OP_FUNCALL: opcode_name = "OP_FUNCALL"; break;
+	  case OP_STRING: opcode_name = "OP_STRING"; break;
+	  case UNOP_CAST: opcode_name = "UNOP_CAST"; break;
+	  case UNOP_MEMVAL: opcode_name = "UNOP_MEMVAL"; break;
+	  case UNOP_NEG: opcode_name = "UNOP_NEG"; break;
+	  case UNOP_LOGICAL_NOT: opcode_name = "UNOP_LOGICAL_NOT"; break;
+	  case UNOP_COMPLEMENT: opcode_name = "UNOP_COMPLEMENT"; break;
+	  case UNOP_IND: opcode_name = "UNOP_IND"; break;
+	  case UNOP_ADDR: opcode_name = "UNOP_ADDR"; break;
+	  case UNOP_PREINCREMENT: opcode_name = "UNOP_PREINCREMENT"; break;
+	  case UNOP_POSTINCREMENT: opcode_name = "UNOP_POSTINCREMENT"; break;
+	  case UNOP_PREDECREMENT: opcode_name = "UNOP_PREDECREMENT"; break;
+	  case UNOP_POSTDECREMENT: opcode_name = "UNOP_POSTDECREMENT"; break;
+	  case UNOP_SIZEOF: opcode_name = "UNOP_SIZEOF"; break;
+	  case UNOP_PLUS: opcode_name = "UNOP_PLUS"; break;
+	  case UNOP_CAP: opcode_name = "UNOP_CAP"; break;
+	  case UNOP_CHR: opcode_name = "UNOP_CHR"; break;
+	  case UNOP_ORD: opcode_name = "UNOP_ORD"; break;
+	  case UNOP_ABS: opcode_name = "UNOP_ABS"; break;
+	  case UNOP_FLOAT: opcode_name = "UNOP_FLOAT"; break;
+	  case UNOP_HIGH: opcode_name = "UNOP_HIGH"; break;
+	  case UNOP_MAX: opcode_name = "UNOP_MAX"; break;
+	  case UNOP_MIN: opcode_name = "UNOP_MIN"; break;
+	  case UNOP_ODD: opcode_name = "UNOP_ODD"; break;
+	  case UNOP_TRUNC: opcode_name = "UNOP_TRUNC"; break;
+	  case OP_BOOL: opcode_name = "OP_BOOL"; break;
+	  case OP_M2_STRING: opcode_name = "OP_M2_STRING"; break;
+	  case STRUCTOP_STRUCT: opcode_name = "STRUCTOP_STRUCT"; break;
+	  case STRUCTOP_PTR: opcode_name = "STRUCTOP_PTR"; break;
+	  case OP_THIS: opcode_name = "OP_THIS"; break;
+	  case OP_SCOPE: opcode_name = "OP_SCOPE"; break;
+	  case OP_TYPE: opcode_name = "OP_TYPE"; break;
+	}
+      fprintf_filtered (stream, "%20s  ", opcode_name);
+      fprintf_filtered (stream,
+#if defined (LONG_LONG)
+			"%ll16x  ",
+#else
+			"%l16x  ",
+#endif
+			exp -> elts[elt].longconst);
+
+      for (eltscan = (char *) &exp->elts[elt],
+	     eltsize = sizeof (union exp_element) ;
+	   eltsize-- > 0;
+	   eltscan++)
+	{
+	  fprintf_filtered (stream, "%c",
+			    isprint (*eltscan) ? (*eltscan & 0xFF) : '.');
+	}
+      fprintf_filtered (stream, "\n");
+    }
+}
+
+#endif	/* DEBUG_EXPRESSIONS */
