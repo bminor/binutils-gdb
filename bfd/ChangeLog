@@ -1,3 +1,7 @@
+Wed Jan 14 17:23:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-m32r.c: Add macros to handle NOP insertion.
+
 Wed Jan 14 16:15:22 1998  Richard Henderson  <rth@cygnus.com>
 
 	* xcofflink.c (xcoff_mark_symbol): Don't mark the absolute section.
