@@ -1,3 +1,9 @@
+Thu Jul  7 10:10:34 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* aoutx.h (howto_table_std):  Add entry for GOT relocations
+	which are present in sun3 shared libraries, to avoid assertions
+	when reading the dynamic relocations.
+
 Thu Jul  7 10:19:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.h (R_HPPA_COMPLEX): Fix dumb typo. 
