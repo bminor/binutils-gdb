@@ -282,13 +282,11 @@ core_files_info (t)
   printf ("\tCore file `%s'.\n", bfd_get_filename(core_bfd));
 
   for (p = t->sections; p < t->sections_end; p++) {
-    printf(p->bfd == core_bfd? "\tcore file  ": "\tshared lib ");
-    printf("from %s", local_hex_string_custom (p->addr, "08"));
-    printf(" to %s", local_hex_string_custom (p->endaddr, "08"));
+    printf("\t%s", local_hex_string_custom (p->addr, "08"));
+    printf(" - %s is %s", local_hex_string_custom (p->endaddr, "08"),
+	   bfd_section_name (p->bfd, p->sec_ptr));
     if (p->bfd != core_bfd) {
-      printf(" is %s in %s",
-	     bfd_section_name (p->bfd, p->sec_ptr),
-	     bfd_get_filename (p->bfd));
+      printf(" in %s", bfd_get_filename (p->bfd));
     }
     printf ("\n");
   }

@@ -52,7 +52,7 @@ int write_files = 0;
 
 /* Text start and end addresses (KLUDGE) if needed */
 
-#if NEED_TEXT_START_END
+#ifdef NEED_TEXT_START_END
 CORE_ADDR text_start = 0;
 CORE_ADDR text_end   = 0;
 #endif
@@ -144,15 +144,18 @@ exec_file_command (filename, from_tty)
 	error ("Can't find the file sections in `%s': %s", 
 		exec_bfd->filename, bfd_errmsg (bfd_error));
 
-#if NEED_TEXT_START_END
+#ifdef NEED_TEXT_START_END
       /* This is a KLUDGE (FIXME) because a few places in a few ports
 	 (29K springs to mind) need this info for now.  */
       {
 	struct section_table *p;
 	for (p = exec_ops.sections; p < exec_ops.sections_end; p++)
-	  if (!strcmp (".text", bfd_section_name (p->bfd, p->sec_ptr))
-	    text_start = p->addr;
-	    text_end   = p->endaddr;
+	  if (!strcmp (".text", bfd_section_name (p->bfd, p->sec_ptr)))
+	    {
+	      text_start = p->addr;
+	      text_end   = p->endaddr;
+	      break;
+	    }
       }
 #endif
 
@@ -200,6 +203,8 @@ add_to_section_table (abfd, asect, table_pp_char)
   aflag = bfd_get_section_flags (abfd, asect);
   /* FIXME, we need to handle BSS segment here...it alloc's but doesn't load */
   if (!(aflag & SEC_LOAD))
+    return;
+  if (0 == bfd_section_size (abfd, asect))
     return;
   (*table_pp)->bfd = abfd;
   (*table_pp)->sec_ptr = asect;
@@ -320,10 +325,11 @@ exec_files_info ()
 
   printf ("\tExecutable file `%s'.\n", bfd_get_filename(exec_bfd));
 
-  for (p = exec_ops.sections; p < exec_ops.sections_end; p++)
-    printf("\texecutable from 0x%08x to 0x%08x is %s\n",
-	p->addr, p->endaddr,
+  for (p = exec_ops.sections; p < exec_ops.sections_end; p++) {
+    printf("\t%s", local_hex_string_custom (p->addr, "08"));
+    printf(" - %s is %s\n", local_hex_string_custom (p->endaddr, "08"),
 	bfd_section_name (exec_bfd, p->sec_ptr));
+  }
 }
 
 static void
