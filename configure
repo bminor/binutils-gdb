@@ -90,7 +90,7 @@ x11=default
 
 ### we might need to use some other shell than /bin/sh for running subshells
 #
-config_shell=${CONFIG_SHELL-}
+config_shell=${CONFIG_SHELL-/bin/sh}
 
 NO_EDIT="This file was generated automatically by configure.  Do not edit."
 
@@ -339,16 +339,18 @@ case "${fatal}" in
 
 ### This is a bit twisted.
 ### * if all three are specified, this is an error.
-### * if we have neither hosts, nor unadorned args, this is an error.
+### * if we have neither hosts, nor unadorned args, guess with config.guess.
 ### * if no hosts are specified, then the unadorned args are hosts, but if
 ### there were none, this is an error.
 ### * if no targets are specified, then the unadorned args are targets, but if
 ### there were no unadorned args, then the hosts are also targets.
 
-        if [ -n "${host_alias}" -a -n "${target_alias}" -a -n "${undefs}" ] ; then
+        if [ -n "${host_alias}" -a -n "${target_alias}" -a -n "${undefs}" ]
+	then
                 echo '***' Can only configure for one host and one target at a time.  1>&2
                 fatal=yes
-        elif [ -z "${host_alias}" -a -z "${undefs}" ] ; then
+        elif [ -z "${host_alias}" -a -z "${target_alias}" -a -z "${undefs}" ]
+	then
                 guesssys=`echo ${progname} | sed 's/configure$/config.guess/'`
                 if tmp_alias=`${guesssys}` ; then
                         echo "Configuring for a ${tmp_alias} host." 1>&2
@@ -364,7 +366,12 @@ case "${fatal}" in
                 fi
         else
                 case "${host_alias}" in
-                "") host_alias=${undefs} ;;
+                "")
+                        case "${undefs}" in
+                        "")     host_alias=${target_alias} ;;
+                        *)      host_alias=${undefs} ;;
+                        esac
+                        ;;
                 *) ;;
                 esac
 
@@ -467,7 +474,7 @@ esac
 ### break up ${srcdir}/configure.in.
 case "`grep '^# per\-host:' ${srcdir}/configure.in`" in
 "")
-        echo '***' ${srcdir}/configure.in has no "per-host:" line. 1>&2
+        echo '***' ${srcdir}/configure.in has no \"per-host:\" line. 1>&2
         exit 1
         ;;
 *) ;;
@@ -475,7 +482,7 @@ esac
 
 case "`grep '^# per\-target:' ${srcdir}/configure.in`" in
 "")
-        echo '***' ${srcdir}/configure.in has no "per-target:" line. 1>&2
+        echo '***' ${srcdir}/configure.in has no \"per-target:\" line. 1>&2
         exit 1
         ;;
 *) ;;
@@ -813,24 +820,7 @@ EOF
             fi
             sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
                     -e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
-		    -e "/^CC[ 	]*=/{
-			b chkcc
-			:contcc
-			N
-			:chkcc
-			s/\\\\$//
-			t contcc
-			s/^CC[ 	]*=.*$/CC = ${CC}/
-			}" \
-		    -e "/^CXX[ 	]*=/{
-			b chkcxx
-			:contcxx
-			N
-			:chkcxx
-			s/\\\\$//
-			t contcxx
-			s/^CXX[ 	]*=.*$/CXX = ${CXX}/
-			}" \
+		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
                     -e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
