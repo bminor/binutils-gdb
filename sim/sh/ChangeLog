@@ -1,3 +1,20 @@
+Thu Jun 17 18:30:42 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* gencode.c: Fix some opcodes.
+	* interp.c: Support for profiling and portability fixes.
+	* run.c (main): Get profiling args.
+
+Wed May  5 13:17:22 1993  Steve Chamberlain  (sac@cygnus.com)
+
+	* gencode.c (tab): Lint for sgi compiler
+	* interp.c: Lint for sgi compiler.
+
+Mon May  3 15:25:33 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* run.c (main): Support for resizing simulated RAM.	
+	* Makefile.in: Support for broken makes.
+	* interp.c, gencode.c: Lint.
+
 Mon Apr 26 18:01:10 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* created

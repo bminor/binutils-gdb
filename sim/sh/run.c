@@ -46,6 +46,17 @@ main (ac, av)
 	{
 	  trace = 1;
 	}
+      else if (strcmp (av[i], "-p") == 0)
+	{
+	  sim_set_profile(atoi(av[i+1]));
+	  i++;
+	  
+	}
+      else if (strcmp (av[i], "-s") == 0)
+	{
+	  sim_set_profile_size(atoi(av[i+1]));
+	  i++;
+	}
       else if (strcmp (av[i], "-m") == 0)
 	{
 	  sim_size(atoi(av[i+1]));
