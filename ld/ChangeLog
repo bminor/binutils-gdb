@@ -1,3 +1,8 @@
+Thu Feb 25 15:33:10 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldsym.c (KEEP macro):  Add spaces around '=' for the
+	sake of old (e.g. PCC) compilers.
+
 Wed Feb 24 19:49:31 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ldver.c:  Bump to version 2.1.

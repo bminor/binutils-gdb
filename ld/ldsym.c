@@ -215,7 +215,7 @@ process_keepsyms (table, size)
   errno = 0;
 
 #define KEEP(S) \
-  do { asymbol **p=(S), *tmp=*out; *out=*p; *p=tmp; out++; } while (0)
+  do { asymbol **p = (S), *tmp = *out; *out = *p; *p = tmp; out++; } while (0)
 
   while (!feof (ks_file) && !ferror (ks_file))
     {
