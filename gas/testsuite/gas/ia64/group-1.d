@@ -1,7 +1,7 @@
 #readelf: -Sg
 #name: ia64 group
 
-There are 9 section headers, starting at offset 0x90:
+There are 9 section headers, starting at offset 0x98:
 
 Section Headers:
   \[Nr\] Name              Type             Address           Offset
@@ -18,11 +18,11 @@ Section Headers:
        0000000000000000  0000000000000000  WA       0     0     1
   \[ 5\] \.text             PROGBITS         0000000000000000  00000050
        0000000000000010  0000000000000000 AXG       0     0     16
-  \[ 6\] \.shstrtab         STRTAB           0000000000000000  00000058
+  \[ 6\] \.shstrtab         STRTAB           0000000000000000  00000060
        0000000000000032  0000000000000000           0     0     1
-  \[ 7\] \.symtab           SYMTAB           0000000000000000  000002d0
+  \[ 7\] \.symtab           SYMTAB           0000000000000000  000002d8
        00000000000000a8  0000000000000018           8     7     8
-  \[ 8\] \.strtab           STRTAB           0000000000000000  00000378
+  \[ 8\] \.strtab           STRTAB           0000000000000000  00000380
        0000000000000006  0000000000000000           0     0     1
 Key to Flags:
   W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\)
@@ -31,4 +31,4 @@ Key to Flags:
 
 COMDAT group section `\._foo' \[\._foo\] contains 1 sections:
    \[Index\]    Name
-   \[    4\]   \.text
+   \[    5\]   \.text
