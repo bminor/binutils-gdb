@@ -281,17 +281,17 @@ core_files_info (t)
 
   printf ("\tCore file `%s'.\n", bfd_get_filename(core_bfd));
 
-  for (p = t->sections; p < t->sections_end; p++)
-    if (p->bfd == core_bfd)
-      printf("\tcore file  from 0x%08x to 0x%08x is %s\n",
-	  p->addr, p->endaddr,
-	  bfd_section_name (p->bfd, p->sec_ptr));
-    else {
-      printf("\tshared lib from 0x%08x to 0x%08x is %s in %s\n",
-	  p->addr, p->endaddr,
-	  bfd_section_name (p->bfd, p->sec_ptr),
-	  bfd_get_filename (p->bfd));
+  for (p = t->sections; p < t->sections_end; p++) {
+    printf(p->bfd == core_bfd? "\tcore file  ": "\tshared lib ");
+    printf("from %s", local_hex_string_custom (p->addr, "08"));
+    printf(" to %s", local_hex_string_custom (p->endaddr, "08"));
+    if (p->bfd != core_bfd) {
+      printf(" is %s in %s",
+	     bfd_section_name (p->bfd, p->sec_ptr),
+	     bfd_get_filename (p->bfd));
     }
+    printf ("\n");
+  }
 }
 
 void
@@ -304,16 +304,16 @@ memory_error (status, memaddr)
     {
       /* Actually, address between memaddr and memaddr + len
 	 was out of bounds. */
-      error ("Cannot access memory at address 0x%x.", memaddr);
+      error ("Cannot access memory at address %s.", local_hex_string(memaddr));
     }
   else
     {
       if (status >= sys_nerr || status < 0)
-	error ("Error accessing memory address 0x%x: unknown error (%d).",
-	       memaddr, status);
+	error ("Error accessing memory address %s: unknown error (%d).",
+	       local_hex_string(memaddr), status);
       else
-	error ("Error accessing memory address 0x%x: %s.",
-	       memaddr, sys_errlist[status]);
+	error ("Error accessing memory address %s: %s.",
+	       local_hex_string(memaddr), sys_errlist[status]);
     }
 }
 
