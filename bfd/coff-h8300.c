@@ -1,6 +1,7 @@
-/* Motorola 68000 COFF back-end for BFD.
+/* Hitachi H8/300 COFF back-end for BFD.
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
-   Written by Cygnus Support.
+   Written by Steve Chamberlain
+   sac@cygnus.com
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -23,8 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "coff-h8300.h"
-#include "internalcoff.h"
+#include "coff/h8300.h"
+#include "coff/internal.h"
 #include "libcoff.h"
 
 static reloc_howto_type howto_table[] = 
@@ -35,12 +36,21 @@ static reloc_howto_type howto_table[] =
   HOWTO(R_PCRBYTE,	       0,  0, 	8,  true,  0, false, true,0,"DISP8",    true, 0x000000ff,0x000000ff, true),
   HOWTO(R_PCRWORD,	       0,  1, 	16, true,  0, false, true,0,"DISP16",   true, 0x0000ffff,0x0000ffff, true),
   HOWTO(R_PCRLONG,	       0,  2, 	32, true,  0, false, true,0,"DISP32",   true, 0xffffffff,0xffffffff, true),
+  HOWTO(R_MOVB1,	       0,  1, 	16, false, 0, true,
+	true,0,"16/8",	true, 0x0000ffff,0x0000ffff, false),
+  HOWTO(R_MOVB2,	       0,  1, 	16, false, 0, true,
+	true,0,"8/16",	true, 0x0000ffff,0x0000ffff, false),
+  HOWTO(R_JMP1,	       0,  1, 	16, false, 0, true,  true,0,"16/pcrel",	true, 0x0000ffff,0x0000ffff, false),
+  HOWTO(R_JMP2,	       0,  0,  	8,  false, 0, true,  true,0,"pcrecl/16",	true, 0x000000ff,0x000000ff, false),
+
 };
 
 
 /* Turn a howto into a reloc number */
 
-#define SELECT_RELOC(x,howto) { x = howto_table[howto->size +(int)howto->pc_relative*3].type; }
+#define SELECT_RELOC(x,howto) \
+  { x = howto_table[howto->size +(int)howto->pc_relative*3].type; }
+
 #define BADMAG(x) H8300BADMAG(x)
 #define H8300 1		/* Customize coffcode.h */
 #define __A_MAGIC_SET__
@@ -48,8 +58,8 @@ static reloc_howto_type howto_table[] =
 
 
 /* Code to swap in the reloc */
-#define SWAP_IN_RELOC_OFFSET   bfd_h_get_16
-#define SWAP_OUT_RELOC_OFFSET bfd_h_put_16
+#define SWAP_IN_RELOC_OFFSET   bfd_h_get_32
+#define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) \
   dst->r_stuff[0] = 'S'; \
   dst->r_stuff[1] = 'C'; 
@@ -57,8 +67,45 @@ static reloc_howto_type howto_table[] =
 /* Code to turn a r_type into a howto ptr, uses the above howto table
    */
 
-#define RTYPE2HOWTO(internal, relocentry) \
-    (internal)->howto = ( howto_table + (relocentry).r_type - R_RELBYTE);
+static void 
+DEFUN(rtype2howto,(internal, dst),
+arelent *internal AND
+struct internal_reloc *dst)
+{
+  switch (dst->r_type) {
+    case R_RELBYTE:
+      internal->howto =  howto_table+ 0;
+      break;
+    case R_RELWORD:
+      internal->howto =  howto_table+ 1;
+      break;    
+    case R_PCRBYTE:
+      internal->howto =  howto_table+3;
+      break;
+    case R_PCRWORD:
+      internal->howto =  howto_table+ 4;
+      break;
+    case R_MOVB1:
+      internal->howto = howto_table + 6;
+      break;
+    case R_MOVB2:
+      internal->howto = howto_table + 7;
+      break;
+    case R_JMP1:
+      internal->howto = howto_table +8;
+      break;
+
+    case R_JMP2:
+      internal->howto = howto_table +9;
+      break;
+      
+    default:
+      abort();
+      break;
+    }
+}
+
+#define RTYPE2HOWTO(internal, relocentry) rtype2howto(internal,relocentry)
 
 
 /* Perform any necessaru magic to the addend in a reloc entry */
@@ -68,6 +115,40 @@ static reloc_howto_type howto_table[] =
  cache_ptr->addend =  ext_reloc.r_offset;
 
  
+#define RELOC_PROCESSING(relent,reloc,symbols,abfd,section) \
+ reloc_processing(relent, reloc, symbols, abfd, section)
+
+static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
+	   arelent *relent AND
+	   struct internal_reloc *reloc AND
+	   asymbol **symbols AND
+	   bfd *abfd AND
+	   asection *section)
+{
+
+  asymbol *ptr;
+  relent->address = reloc->r_vaddr;		
+  rtype2howto(relent,reloc);
+
+  if (reloc->r_symndx > 0) 
+  {
+    
+    relent->sym_ptr_ptr = symbols + obj_convert(abfd)[reloc->r_symndx];
+
+  }
+  else 
+  {
+    relent->sym_ptr_ptr = &(bfd_abs_symbol);
+  }
+  
+
+  
+  relent->addend = reloc->r_offset;
+  
+  relent->address-= section->vma;
+/*  relent->section = 0;*/
+}
+
 #include "coffcode.h"
 
 
@@ -84,7 +165,7 @@ bfd_target h8300coff_vec =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  ( SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   1,				/* minimum section alignment */

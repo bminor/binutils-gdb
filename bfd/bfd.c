@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION
 	<<typedef bfd>>
 
-DESCRIPTION
 	A BFD is has type <<bfd>>; objects of this type are the
 	cornerstone of any application using <<libbfd>>. References
 	though the BFD and to data in the BFD give the entire BFD
@@ -34,131 +33,142 @@ DESCRIPTION
 	contains he major data about the file, and contains pointers
 	to the rest of the data.
 
+CODE_FRAGMENT
+.
 .struct _bfd 
 .{
-	The filename the application opened the BFD with.
-
-.  CONST char *filename;                
-
-	A pointer to the target jump table.
-
-.  struct bfd_target *xvec;
-
-	To avoid dragging too many header files into every file that
-	includes @file{bfd.h}, IOSTREAM has been declared as a "char
-	*", and MTIME as a "long".  Their correct types, to which they
-	are cast when used, are "FILE *" and "time_t".    The iostream
-	is the result of an fopen on the filename. 
-
-.  char *iostream;
-
-Is the file being cached @xref{File Caching}.
-
-.  boolean cacheable;
-
-	Marks whether there was a default target specified when the
-	BFD was opened. This is used to select what matching algorithm
-	to use to chose the back end.
-
-.  boolean target_defaulted;
-
-	The caching routines use these to maintain a
-	least-recently-used list of BFDs (@pxref{File Caching}).
-
-.  struct _bfd *lru_prev, *lru_next;
-
-	When a file is closed by the caching routines, BFD retains
-	state information on the file here:
-
-.  file_ptr where;              
-
-	and here:
-
-.  boolean opened_once;
-
-.  boolean mtime_set;
-
-File modified time 
-
-.  long mtime;          
-
-	Reserved for an unimplemented file locking extension.
-
-.  int ifd;
-
-	The format which belongs to the BFD.
-
-.  bfd_format format;
-
-	The direction the BFD was opened with
-
-.  enum bfd_direction {no_direction = 0,
-.                       read_direction = 1,
-.                       write_direction = 2,
-.                       both_direction = 3} direction;
-
-	Format_specific flags
-
-.  flagword flags;              
-
-	Currently my_archive is tested before adding origin to
-	anything. I believe that this can become always an add of
-	origin, with origin set to 0 for non archive files.  
-
-.  file_ptr origin;             
-
-	Remember when output has begun, to stop strange things happening.
-
-.  boolean output_has_begun;
-
-	Pointer to linked list of sections
-
-.  struct sec  *sections;
-
-	The number of sections 
-
-.  unsigned int section_count;
-
-	Stuff only useful for object files: 
-	The start address.
-
-.  bfd_vma start_address;
-
-	Used for input and output
-
-.  unsigned int symcount;
-
-	Symbol table for output BFD
-
-.  struct symbol_cache_entry  **outsymbols;             
-
-	Pointer to structure which contains architecture information
-
-.  struct bfd_arch_info *arch_info;
-
-	Stuff only useful for archives:
-
-.  PTR arelt_data;              
-.  struct _bfd *my_archive;     
-.  struct _bfd *next;           
-.  struct _bfd *archive_head;   
-.  boolean has_armap;           
-
-	Used by the back end to hold private data.
-
-.  PTR tdata;
-
-	Used by the application to hold private data
-
-.  PTR usrdata;
-
-	Where all the allocated stuff under this BFD goes
-	(@pxref{Memory Usage}).
-
-.  struct obstack memory;
+.    {* The filename the application opened the BFD with.  *}
+.    CONST char *filename;                
+.
+.    {* A pointer to the target jump table.             *}
+.    struct bfd_target *xvec;
+.
+.    {* To avoid dragging too many header files into every file that
+.       includes @file{bfd.h}, IOSTREAM has been declared as a "char
+.       *", and MTIME as a "long".  Their correct types, to which they
+.       are cast when used, are "FILE *" and "time_t".    The iostream
+.       is the result of an fopen on the filename. *}
+.    char *iostream;
+.
+.    {* Is the file being cached *}
+.
+.    boolean cacheable;
+.
+.    {* Marks whether there was a default target specified when the
+.       BFD was opened. This is used to select what matching algorithm
+.       to use to chose the back end. *}
+.
+.    boolean target_defaulted;
+.
+.    {* The caching routines use these to maintain a
+.       least-recently-used list of BFDs *}
+.
+.    struct _bfd *lru_prev, *lru_next;
+.
+.    {* When a file is closed by the caching routines, BFD retains
+.       state information on the file here: 
+.     *}
+.
+.    file_ptr where;              
+.
+.    {* and here:*}
+.
+.    boolean opened_once;
+.
+.    {* Set if we have a locally maintained mtime value, rather than
+.       getting it from the file each time: *}
+.
+.    boolean mtime_set;
+.
+.    {* File modified time, if mtime_set is true: *}
+.
+.    long mtime;          
+.
+.    {* Reserved for an unimplemented file locking extension.*}
+.
+.    int ifd;
+.
+.    {* The format which belongs to the BFD.*}
+.
+.    bfd_format format;
+.
+.    {* The direction the BFD was opened with*}
+.
+.    enum bfd_direction {no_direction = 0,
+.                        read_direction = 1,
+.                        write_direction = 2,
+.                        both_direction = 3} direction;
+.
+.    {* Format_specific flags*}
+.
+.    flagword flags;              
+.
+.    {* Currently my_archive is tested before adding origin to
+.       anything. I believe that this can become always an add of
+.       origin, with origin set to 0 for non archive files.   *}
+.
+.    file_ptr origin;             
+.
+.    {* Remember when output has begun, to stop strange things
+.       happening. *}
+.    boolean output_has_begun;
+.
+.    {* Pointer to linked list of sections*}
+.    struct sec  *sections;
+.
+.    {* The number of sections *}
+.    unsigned int section_count;
+.
+.    {* Stuff only useful for object files: 
+.       The start address. *}
+.    bfd_vma start_address;
+.
+.    {* Used for input and output*}
+.    unsigned int symcount;
+.
+.    {* Symbol table for output BFD*}
+.    struct symbol_cache_entry  **outsymbols;             
+.
+.    {* Pointer to structure which contains architecture information*}
+.    struct bfd_arch_info *arch_info;
+.
+.    {* Stuff only useful for archives:*}
+.    PTR arelt_data;              
+.    struct _bfd *my_archive;     
+.    struct _bfd *next;           
+.    struct _bfd *archive_head;   
+.    boolean has_armap;           
+.
+.    {* Used by the back end to hold private data. *}
+.
+.    union 
+.      {
+.      struct aout_data_struct *aout_data;
+.      struct artdata *aout_ar_data;
+.      struct _oasys_data *oasys_obj_data;
+.      struct _oasys_ar_data *oasys_ar_data;
+.      struct coff_tdata *coff_obj_data;
+.      struct ieee_data_struct *ieee_data;
+.      struct ieee_ar_data_struct *ieee_ar_data;
+.      struct srec_data_struct *srec_data;
+.      struct elf_obj_tdata_struct *elf_obj_data;
+.      struct elf_core_tdata_struct *elf_core_data;
+.      struct bout_data_struct *bout_data;
+.      struct sun_core_struct *sun_core_data;
+.      PTR any;
+.      } tdata;
+.  
+.    {* Used by the application to hold private data*}
+.    PTR usrdata;
+.
+.    {* Where all the allocated stuff under this BFD goes *}
+.    struct obstack memory;
+.
+.    asymbol **ld_symbols;
 .};
-
+.
 */
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -215,10 +225,46 @@ DEFUN(bfd_nonrepresentable_section,(abfd, name),
   exit(1);
 }
 
+static 
+void 
+DEFUN(bfd_undefined_symbol,(relent, seclet),
+      CONST  arelent *relent AND
+      CONST  struct bfd_seclet_struct *seclet)
+{
+  asymbol *symbol = *(relent->sym_ptr_ptr);
+  printf("bfd error relocating, symbol %s is undefined\n",
+         symbol->name);
+  exit(1);
+}
+static 
+void 
+DEFUN(bfd_reloc_value_truncated,(relent, seclet),
+         CONST  arelent *relent AND
+      struct bfd_seclet_struct *seclet)
+{
+  asymbol *symbol = *(relent->sym_ptr_ptr);
+  printf("bfd error relocating, value truncated\n");
+  exit(1);
+}
+static 
+void 
+DEFUN(bfd_reloc_is_dangerous,(relent, seclet),
+      CONST  arelent *relent AND
+     CONST  struct bfd_seclet_struct *seclet)
+{
+  asymbol *symbol = *(relent->sym_ptr_ptr);
+  printf("bfd error relocating, dangerous\n");
+  exit(1);
+}
+
 bfd_error_vector_type bfd_error_vector = 
   {
-  bfd_nonrepresentable_section 
+  bfd_nonrepresentable_section ,
+  bfd_undefined_symbol,
+  bfd_reloc_value_truncated,
+  bfd_reloc_is_dangerous,
   };
+
 
 char *
 bfd_errmsg (error_tag)
@@ -264,12 +310,26 @@ DEFUN(bfd_perror,(message),
  
 /** Symbols */
 
-/* returns the number of octets of storage required */
+
+/*
+FUNCTION
+	bfd_get_reloc_upper_bound
+
+SYNOPSIS
+	unsigned int bfd_get_reloc_upper_bound(bfd *abfd, asection *sect);
+
+DESCRIPTION
+	This function return the number of bytes required to store the
+	relocation information associated with section <<sect>>
+	attached to bfd <<abfd>>
+
+*/
+
 
 unsigned int
-get_reloc_upper_bound (abfd, asect)
-     bfd *abfd;
-     sec_ptr asect;
+DEFUN(bfd_get_reloc_upper_bound,(abfd, asect),
+     bfd *abfd AND
+     sec_ptr asect)
 {
   if (abfd->format != bfd_object) {
     bfd_error = invalid_operation;
@@ -279,6 +339,30 @@ get_reloc_upper_bound (abfd, asect)
   return BFD_SEND (abfd, _get_reloc_upper_bound, (abfd, asect));
 }
 
+/*
+FUNCTION
+	bfd_canonicalize_reloc
+
+SYNOPSIS
+	unsigned int bfd_canonicalize_reloc
+        	(bfd *abfd,
+		asection *sec,
+		arelent **loc,
+		asymbol	**syms);
+
+DESCRIPTION
+	This function calls the back end associated with the open
+	<<abfd>> and translates the external form of the relocation
+	information attached to <<sec>> into the internal canonical
+	form.  The table is placed into memory at <<loc>>, which has
+	been preallocated, usually by a call to
+	<<bfd_get_reloc_upper_bound>>.
+
+	The <<syms>> table is also needed for horrible internal magic
+	reasons.
+
+
+*/
 unsigned int
 DEFUN(bfd_canonicalize_reloc,(abfd, asect, location, symbols),
      bfd *abfd AND
@@ -287,12 +371,34 @@ DEFUN(bfd_canonicalize_reloc,(abfd, asect, location, symbols),
      asymbol **symbols)
 {
     if (abfd->format != bfd_object) {
-	bfd_error = invalid_operation;
-	return 0;
-    }
-    return BFD_SEND (abfd, _bfd_canonicalize_reloc, (abfd, asect, location, symbols));
+	    bfd_error = invalid_operation;
+	    return 0;
+	}
+    return BFD_SEND (abfd, _bfd_canonicalize_reloc,
+		     (abfd, asect, location, symbols));
 }
 
+
+/*
+FUNCTION
+	bfd_set_file_flags
+
+SYNOPSIS
+	boolean bfd_set_file_flags(bfd *abfd, flagword flags);
+
+DESCRIPTION
+	This function attempts to set the flag word in the referenced
+	BFD structure to the value supplied.
+
+	Possible errors are:
+	o wrong_format - The target bfd was not of object format.
+	o invalid_operation - The target bfd was open for reading.
+	o invalid_operation -
+	The flag word contained a bit which was not applicable to the
+	type of file. eg, an attempt was made to set the D_PAGED bit
+	on a bfd format which does not support demand paging
+
+*/
 
 boolean
 bfd_set_file_flags (abfd, flags)
@@ -318,6 +424,19 @@ bfd_set_file_flags (abfd, flags)
 return true;
 }
 
+/*
+FUNCTION
+	bfd_set_reloc
+
+SYNOPSIS
+	void bfd_set_reloc
+	  (bfd *abfd, asection *sec, arelent **rel, unsigned int count)
+
+DESCRIPTION
+	This function sets the relocation pointer and count within a
+	section to the supplied values.
+
+*/
 
 void
 bfd_set_reloc (ignore_abfd, asect, location, count)
@@ -344,7 +463,6 @@ FUNCTION
 	bfd_set_start_address
 
 DESCRIPTION
-
 	Marks the entry point of an output BFD.
 
 RETURNS
@@ -366,16 +484,15 @@ bfd_vma vma;
 
 /*
 FUNCTION
-	bfd_get_mtime
-
-DESCRIPTION
-	Return cached file modification time (e.g. as read from
-	archive header for archive members, or from file system if we
-	have been called before); else determine modify time, cache
-	it, and return it.  
+	The bfd_get_mtime function
 
 SYNOPSIS
 	long bfd_get_mtime(bfd *);
+
+DESCRIPTION
+	Return file modification time (as read from file system, or
+	from archive header for archive members).
+
 */
 
 long
@@ -392,9 +509,8 @@ bfd_get_mtime (abfd)
   if (0 != fstat (fileno (fp), &buf))
     return 0;
 
-  abfd->mtime_set = true;
-  abfd->mtime = buf.st_mtime;
-  return abfd->mtime;
+  abfd->mtime = buf.st_mtime;		/* Save value in case anyone wants it */
+  return buf.st_mtime;
 }
 
 /*
@@ -407,8 +523,8 @@ DESCRIPTION
 .#define bfd_sizeof_headers(abfd, reloc) \
 .     BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 .
-.#define bfd_find_nearest_line(abfd, section, symbols, offset, filename_ptr, func, line_ptr) \
-.     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, section, symbols, offset, filename_ptr, func, line_ptr))
+.#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
+.     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
 .
 .#define bfd_debug_info_start(abfd) \
 .        BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
@@ -455,6 +571,8 @@ DESCRIPTION
 .#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
 .        BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
 .
+.#define bfd_get_relocated_section_contents(abfd, seclet) \
+.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet))
 */
 
 

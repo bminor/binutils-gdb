@@ -93,7 +93,7 @@ d[0] = digs[((x)>>4)&0xf]; ch += (x & 0xff);
 
 
 
-static 
+static void
 DEFUN_VOID(srec_init) 
 {
     unsigned int i;
@@ -142,7 +142,7 @@ struct srec_data_list_struct
 typedef struct srec_data_list_struct srec_data_list_type;
 
 
-typedef struct 
+typedef struct  srec_data_struct
 {
     srec_data_list_type *head;    
     unsigned int type;
@@ -208,7 +208,7 @@ DEFUN(pass_over,(abfd, func, section),
 {
     unsigned int bytes_on_line;
     boolean eof = false;
-    bfd_vma address;
+
     /* To the front of the file */
     bfd_seek(abfd, (file_ptr)0, SEEK_SET);
     while (eof == false)
@@ -291,12 +291,12 @@ DEFUN(srec_object_p, (abfd),
      and allocate enough room for the entire file.  */
 
   section =  bfd_make_section(abfd, ".text");
-  section->size = 0;
+  section->_raw_size = 0;
   section->vma = 0xffffffff;
   low = 0xffffffff;
   high = 0;
   pass_over(abfd, size_srec, section);
-  section->size = high - low;
+  section->_raw_size = high - low;
   section->vma = low;
   section->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
   
@@ -314,7 +314,7 @@ DEFUN(srec_get_section_contents,(abfd, section, location, offset, count),
 {
     if (section->used_by_bfd == (PTR)NULL) 
     {
-	section->used_by_bfd = (PTR)bfd_alloc (abfd, section->size);
+	section->used_by_bfd = (PTR)bfd_alloc (abfd, section->_raw_size);
 	pass_over(abfd, fillup, section);
     }
     (void) memcpy((PTR)location,
@@ -346,7 +346,7 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
       file_ptr offset AND
       bfd_size_type bytes_to_do)
 {
-    tdata_type  *tdata = (tdata_type *)(abfd->tdata);
+    tdata_type  *tdata = abfd->tdata.srec_data;
     srec_data_list_type *entry = (srec_data_list_type *)
      bfd_alloc(abfd, sizeof(srec_data_list_type));
     unsigned  char *data = (unsigned char *) bfd_alloc(abfd, bytes_to_do);
@@ -371,7 +371,7 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
     entry->size = bytes_to_do;
     entry->next = tdata->head;
     tdata->head = entry;
-    
+    return true;    
 }
 
 /* Write a record of type, of the supplied number of bytes. The
@@ -471,7 +471,6 @@ DEFUN(srec_write_section,(abfd, tdata, list),
 	char buffer[MAXCHUNK];
 	char *dst = buffer;
 	bfd_vma address;
-	unsigned int i;
 	
 	unsigned int bytes_this_chunk = list->size - bytes_written;
 
@@ -511,7 +510,7 @@ DEFUN(srec_mkobject, (abfd),
       bfd *abfd)
 {
     tdata_type *tdata = (tdata_type *)bfd_alloc(abfd,  sizeof(tdata_type));
-    abfd->tdata = (PTR)tdata;
+    abfd->tdata.srec_data = tdata;
     tdata->type = 1;
     tdata->head = (srec_data_list_type *)NULL;
     return true;
@@ -523,12 +522,8 @@ static boolean
 DEFUN(srec_write_object_contents,(abfd),
      bfd *abfd)
 {
-    bfd_vma address;
     int bytes_written;
-    
-    int type;
-    unsigned int i;
-    tdata_type *tdata = (tdata_type *)(abfd->tdata);
+    tdata_type *tdata = abfd->tdata.srec_data;
     srec_data_list_type *list;
 
     bytes_written = 0;
@@ -591,7 +586,7 @@ DEFUN(srec_make_empty_symbol, (abfd),
 #define srec_bfd_debug_info_start bfd_void
 #define srec_bfd_debug_info_end bfd_void
 #define srec_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *,	 asection *))) bfd_void
-
+#define srec_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 
 bfd_target srec_vec =
 {

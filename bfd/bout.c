@@ -153,6 +153,10 @@ b_out_callback (abfd)
   /* The starting addresses of the sections.  */
   obj_textsec (abfd)->vma = execp->a_tload;
   obj_datasec (abfd)->vma = execp->a_dload;
+
+  /* And reload the sizes, since the aout module zaps them */
+  obj_textsec (abfd)->_raw_size = execp->a_text;
+
   bss_start = execp->a_dload + execp->a_data; /* BSS = end of data section */
   obj_bsssec (abfd)->vma = align_power (bss_start, execp->a_balign);
 
@@ -164,14 +168,14 @@ b_out_callback (abfd)
   obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
   obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);
 
-  adata(abfd)->page_size = 1; /* Not applicable. */
-  adata(abfd)->segment_size = 1; /* Not applicable. */
-  adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
+  adata(abfd).page_size = 1; /* Not applicable. */
+  adata(abfd).segment_size = 1; /* Not applicable. */
+  adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 
   return abfd->xvec;
 }
 
-struct container {
+struct bout_data_struct {
     struct aoutdata a;
     struct internal_exec e;
 };
@@ -180,15 +184,15 @@ static boolean
 b_out_mkobject (abfd)
      bfd *abfd;
 {
-  struct container *rawptr;
+  struct bout_data_struct *rawptr;
 
-  rawptr = (struct container *) bfd_zalloc (abfd, sizeof (struct container));
+  rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
   if (rawptr == NULL) {
-    bfd_error = no_memory;
-    return false;
-  }
+      bfd_error = no_memory;
+      return false;
+    }
 
-  set_tdata (abfd, &rawptr->a);
+  abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
 
   /* For simplicity's sake we just make all the sections right here. */
@@ -211,9 +215,9 @@ b_out_write_object_contents (abfd)
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
-  exec_hdr (abfd)->a_text = obj_textsec (abfd)->size;
-  exec_hdr (abfd)->a_data = obj_datasec (abfd)->size;
-  exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->size;
+  exec_hdr (abfd)->a_text = obj_textsec (abfd)->_cooked_size;
+  exec_hdr (abfd)->a_data = obj_datasec (abfd)->_cooked_size;
+  exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->_cooked_size;
   exec_hdr (abfd)->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
   exec_hdr (abfd)->a_entry = bfd_get_start_address (abfd);
   exec_hdr (abfd)->a_trsize = ((obj_textsec (abfd)->reloc_count) *
@@ -318,6 +322,9 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
      sec_ptr asect;
      asymbol **symbols;
 {
+  abort();
+  
+#if 0
   unsigned int count;
   size_t  reloc_size;
   struct relocation_info *relocs;
@@ -399,7 +406,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 	   */
 	  cache_ptr->sym_ptr_ptr = symbols + symnum;
 	  cache_ptr->addend = 0;
-	  cache_ptr->section = (asection*)NULL;
+/*!!	  cache_ptr->section = (asection*)NULL;*/
 	} else {
 	  /* In a.out symbols are relative to the beginning of the
 	   * file rather than sections ?
@@ -449,6 +456,8 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   free (relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
+
+#endif
   return true;
 }
 
@@ -458,6 +467,9 @@ b_out_squirt_out_relocs (abfd, section)
      bfd *abfd;
      asection *section;
 {
+  abort();
+  
+#if 0
   arelent **generic;
 
   unsigned int count = section->reloc_count;
@@ -556,7 +568,7 @@ b_out_squirt_out_relocs (abfd, section)
     return false;
   }
   free ((PTR)native);
-
+#endif
   return true;
 }
 
@@ -617,14 +629,14 @@ b_out_set_section_contents (abfd, section, location, offset, count)
 {
   if (abfd->output_has_begun == false) { /* set by bfd.c handler */
     if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL) /*||
-        (obj_textsec (abfd)->size == 0) || (obj_datasec (abfd)->size == 0)*/) {
+        (obj_textsec (abfd)->_cooked_size == 0) || (obj_datasec (abfd)->_cooked_size == 0)*/) {
       bfd_error = invalid_operation;
       return false;
     }
 
     obj_textsec (abfd)->filepos = sizeof(struct internal_exec);
     obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos 
-                                +  obj_textsec (abfd)->size;
+                                +  obj_textsec (abfd)->_cooked_size;
 
   }
   /* regardless, once we know what we're doing, we might as well get going */
@@ -701,7 +713,7 @@ DEFUN(b_out_sizeof_headers,(ignore_abfd, ignore),
 #define aout_32_bfd_debug_info_end		bfd_void
 #define aout_32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
 
-
+#define aout_32_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 bfd_target b_out_vec_big_host =
 {
   "b.out.big",			/* name */

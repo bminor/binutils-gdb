@@ -80,8 +80,6 @@ typedef HOST_64_BIT symvalue;
 typedef HOST_64_BIT bfd_64_type;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
-#define printf_vma(x) \
-		printf(   "%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else
 typedef struct {int a,b;} bfd_64_type;
 typedef unsigned long rawdata_offset;
@@ -91,9 +89,9 @@ typedef unsigned long bfd_word;
 typedef unsigned long bfd_size;
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
-#define printf_vma(x)	 printf(    "%08lx", x)
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
 #endif
+#define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */
 
@@ -183,7 +181,7 @@ typedef struct lineno_cache_entry {
 typedef struct sec *sec_ptr;
 
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
-#define bfd_section_size(bfd, ptr) ((ptr)->size)
+#define bfd_section_size(bfd, ptr) (bfd_get_section_size_before_reloc(ptr))
 #define bfd_section_vma(bfd, ptr) ((ptr)->vma)
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
 #define bfd_get_section_flags(bfd, ptr) ((ptr)->flags)
@@ -209,10 +207,23 @@ typedef enum bfd_error {
 	      invalid_error_code} bfd_ec;
 
 extern bfd_ec bfd_error;
+struct reloc_cache_entry;
+struct bfd_seclet_struct ;
+
 
 typedef struct bfd_error_vector {
   PROTO(void,(* nonrepresentable_section ),(CONST bfd  *CONST abfd,
 					    CONST char *CONST name));
+  PROTO(void,(* undefined_symbol),(CONST struct reloc_cache_entry *rel,
+				   CONST struct bfd_seclet_struct *sec
+				   ));
+  PROTO(void, (* reloc_value_truncated),(CONST struct
+					  reloc_cache_entry *rel,
+					  struct bfd_seclet_struct *sec));
+
+  PROTO(void, (* reloc_dangerous),(CONST struct reloc_cache_entry *rel,
+				   CONST struct bfd_seclet_struct *sec));
+  
 } bfd_error_vector_type;
 
 PROTO (char *, bfd_errmsg, ());
@@ -223,7 +234,8 @@ typedef enum bfd_print_symbol
 { 
   bfd_print_symbol_name,
   bfd_print_symbol_more,
-  bfd_print_symbol_all
+  bfd_print_symbol_all,
+  bfd_print_symbol_nm, /* Pretty format suitable for nm program. */
 } bfd_print_symbol_type;
     
 
@@ -268,7 +280,8 @@ CAT(NAME,_generic_stat_arch_elt),\
 CAT(NAME,_sizeof_headers),\
 CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
-CAT(NAME,_bfd_debug_info_accumulate)
+CAT(NAME,_bfd_debug_info_accumulate),\
+CAT(NAME,_bfd_get_relocated_section_contents)
 
 #define COFF_SWAP_TABLE \
  coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
@@ -294,7 +307,7 @@ extern CONST short _bfd_host_big_endian;
 #define bfd_get_file_flags(abfd) ((abfd)->flags)
 #define bfd_applicable_file_flags(abfd) ((abfd)->xvec->object_flags)
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)
-#define bfd_my_archive(abfd) ((abfd)->my_archive);
+#define bfd_my_archive(abfd) ((abfd)->my_archive)
 #define bfd_has_map(abfd) ((abfd)->has_armap)
 #define bfd_header_twiddle_required(abfd) \
         ((((abfd)->xvec->header_byteorder_big_p)		\
@@ -318,38 +331,13 @@ extern CONST short _bfd_host_big_endian;
 
 
 
-/*THE FOLLOWING IS EXTRACTED FROM THE SOURCE */
-
-
-/*:init.c*/
-
-/*:opncls.c*/
-
-
-/*:libbfd.c*/
-
-/*:section.c*/
-
-
-/*:archures.c*/
-
-/*:reloc.c*/
-
-/*:syms.c*/
-
-/*:bfd.c*/
-
-/*:archive.c*/
-
-/*:core.c*/
-
-/*:targets.c*/
-
-/*:format.c*/
-
-#endif
+/* ANd more from the source */
 
 
 
 
 
+
+
+
+ 

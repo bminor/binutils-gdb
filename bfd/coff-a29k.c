@@ -45,7 +45,9 @@ asymbol *symbol;
   long relocation = 0;
 
   if (symbol != (asymbol *)NULL) {              
-    if (symbol->flags & BSF_FORT_COMM) {        
+      if (symbol->section == &bfd_com_section) 
+      {
+	
       relocation = 0;                           
     } else {                                      
       relocation = symbol->value;               
@@ -83,7 +85,7 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
     r_type = reloc_entry->howto->type;
 
     /* FIXME: Do we need to check for partial linking here */
-    if (symbol_in && (symbol_in->flags & BSF_UNDEFINED)) 
+    if (symbol_in && (symbol_in->section == &bfd_und_section))
     {
 	/* Keep the state machine happy in case we're called again */
 	if (r_type == R_IHIHALF) 
@@ -233,7 +235,7 @@ static reloc_howto_type howto_table[] =
 #define RELOC_PROCESSING(relent, reloc, symbols, abfd, section) \
  reloc_processing(relent, reloc, symbols, abfd, section)
 
-void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
+static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 	   arelent *relent AND
 	   struct internal_reloc *reloc AND
 	   asymbol **symbols AND
@@ -266,7 +268,7 @@ void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 	  relent->addend = 0;			
       }			
       relent->address-= section->vma;
-      relent->section = 0;
+/*      relent->section = 0;*/
   }
 }
 

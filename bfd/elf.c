@@ -100,16 +100,17 @@ typedef struct
    in the bfd structure.  This information is different for ELF core files
    and other ELF files. */
 
-typedef struct
+typedef struct elf_core_tdata_struct
 {
   void *prstatus;		/* The raw /proc prstatus structure */
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
 } elf_core_tdata;
 
-#define core_prpsinfo(bfd) (((elf_core_tdata *)((bfd)->tdata))->prpsinfo)
-#define core_prstatus(bfd) (((elf_core_tdata *)((bfd)->tdata))->prstatus)
+#define core_prpsinfo(bfd) (((bfd)->tdata.elf_core_data))->prpsinfo)
+#define core_prpstatus(bfd) (((bfd)->tdata.elf_core_data))->prpstatus)
 
-typedef struct
+
+typedef struct elf_obj_tdata_struct
 {
   file_ptr symtab_filepos;	/* Offset to start of ELF symtab section */
   long symtab_filesz;		/* Size of ELF symtab section */
@@ -117,7 +118,7 @@ typedef struct
   long strtab_filesz;		/* Size of ELF string tbl section */
 } elf_obj_tdata;
 
-#define elf_tdata(bfd)		((elf_obj_tdata *) ((bfd) -> tdata))
+#define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
 #define elf_symtab_filepos(bfd)	(elf_tdata(bfd) -> symtab_filepos)
 #define elf_symtab_filesz(bfd)	(elf_tdata(bfd) -> symtab_filesz)
 #define elf_strtab_filepos(bfd)	(elf_tdata(bfd) -> strtab_filepos)
@@ -150,7 +151,7 @@ DEFUN(elf_swap_ehdr_in,(abfd, src, dst),
       Elf_External_Ehdr *src AND
       Elf_Internal_Ehdr *dst)
 {
-  bcopy (src -> e_ident, dst -> e_ident, EI_NIDENT);
+  memcpy (dst -> e_ident, src -> e_ident, EI_NIDENT);
   dst -> e_type = bfd_h_get_16 (abfd, (bfd_byte *) src -> e_type);
   dst -> e_machine = bfd_h_get_16 (abfd, (bfd_byte *) src -> e_machine);
   dst -> e_version = bfd_h_get_32 (abfd, (bfd_byte *) src -> e_version);
@@ -223,7 +224,7 @@ DEFUN(bfd_section_from_shdr, (abfd, hdr, shstrtab),
   name = hdr -> sh_name ? shstrtab + hdr -> sh_name : "unnamed";
   newsect = bfd_make_section (abfd, name);
   newsect -> vma = hdr -> sh_addr;
-  newsect -> size = hdr -> sh_size;
+  newsect -> _raw_size = hdr -> sh_size;
   if (!(hdr -> sh_type == SHT_NOBITS))
     {
       newsect -> filepos = hdr -> sh_offset;
@@ -298,7 +299,7 @@ DEFUN(bfd_section_from_phdr, (abfd, hdr, index),
   (void) strcpy (name, namebuf);
   newsect = bfd_make_section (abfd, name);
   newsect -> vma = hdr -> p_vaddr;
-  newsect -> size = hdr -> p_filesz;
+  newsect -> _raw_size = hdr -> p_filesz;
   newsect -> filepos = hdr -> p_offset;
   newsect -> flags |= SEC_HAS_CONTENTS;
   if (hdr -> p_type == PT_LOAD)
@@ -324,7 +325,7 @@ DEFUN(bfd_section_from_phdr, (abfd, hdr, index),
       (void) strcpy (name, namebuf);
       newsect = bfd_make_section (abfd, name);
       newsect -> vma = hdr -> p_vaddr + hdr -> p_filesz;
-      newsect -> size = hdr -> p_memsz - hdr -> p_filesz;
+      newsect -> _raw_size = hdr -> p_memsz - hdr -> p_filesz;
       if (hdr -> p_type == PT_LOAD)
 	{
 	  newsect -> flags |= SEC_ALLOC;
@@ -362,7 +363,7 @@ DEFUN(bfd_prstatus,(abfd, descdata, descsz, filepos),
       newsect -> alignment_power = 2;
       if ((core_prstatus (abfd) = bfd_alloc (abfd, descsz)) != NULL)
 	{
-	  bcopy (descdata, core_prstatus (abfd), descsz);
+	  memcpy (core_prstatus (abfd), descdata, descsz);
 	}
     }
 }
@@ -418,7 +419,7 @@ char *
 DEFUN(elf_core_file_failing_command, (abfd),
      bfd *abfd)
 {
-#if HAVE_PROCFS
+#ifdef HAVE_PROCFS
   if (core_prpsinfo (abfd))
     {
       prpsinfo_t *p = core_prpsinfo (abfd);
@@ -444,7 +445,7 @@ static int
 DEFUN(elf_core_file_failing_signal, (abfd),
       bfd *abfd)
 {
-#if HAVE_PROCFS
+#ifdef HAVE_PROCFS
   if (core_prstatus (abfd))
     {
       return (((prstatus_t *)(core_prstatus (abfd))) -> pr_cursig);
@@ -464,7 +465,7 @@ DEFUN(elf_core_file_matches_executable_p, (core_bfd, exec_bfd),
       bfd *core_bfd AND
       bfd *exec_bfd)
 {
-#if HAVE_PROCFS
+#ifdef HAVE_PROCFS
   char *corename;
   char *execname;
 #endif
@@ -477,7 +478,7 @@ DEFUN(elf_core_file_matches_executable_p, (core_bfd, exec_bfd),
       return (false);
     }
 
-#if HAVE_PROCFS
+#ifdef HAVE_PROCFS
 
   /* If no prpsinfo, just return true.  Otherwise, grab the last component
      of the exec'd pathname from the prpsinfo. */
@@ -587,7 +588,7 @@ DEFUN(elf_corefile_note, (abfd, hdr),
 	  if (sectname != NULL)
 	    {
 	      newsect = bfd_make_section (abfd, sectname);
-	      newsect -> size = i_note.descsz;
+	      newsect -> _raw_size = i_note.descsz;
 	      newsect -> filepos = filepos;
 	      newsect -> flags = SEC_ALLOC | SEC_HAS_CONTENTS;
 	      newsect -> alignment_power = 2;
@@ -707,7 +708,9 @@ wrong:
   /* Allocate an instance of the elf_obj_tdata structure and hook it up to
      the tdata pointer in the bfd. */
 
-  if ((abfd -> tdata = bfd_zalloc (abfd, sizeof (elf_obj_tdata))) == NULL)
+  if ((abfd -> tdata.elf_obj_data = 
+       (elf_obj_tdata*) bfd_zalloc (abfd, sizeof (elf_obj_tdata))) 
+      == NULL)
     {
       bfd_error = no_memory;
       return (NULL);
@@ -882,7 +885,9 @@ wrong:
   /* Allocate an instance of the elf_core_tdata structure and hook it up to
      the tdata pointer in the bfd. */
 
-  if ((abfd -> tdata = bfd_zalloc (abfd, sizeof (elf_core_tdata))) == NULL)
+  if ((abfd -> tdata.elf_core_data =
+       (elf_core_tdata *) bfd_zalloc (abfd, sizeof (elf_core_tdata))) 
+      == NULL)
     {
       bfd_error = no_memory;
       return (NULL);
@@ -1049,11 +1054,11 @@ DEFUN (elf_slurp_symbol_table, (abfd), bfd *abfd)
 	    }
 	  else if (i_sym.st_shndx == SHN_ABS)
 	    {
-	      sym -> flags |= BSF_ABSOLUTE;
+/*	      sym -> flags |= BSF_ABSOLUTE; OBSOLETE */
 	    }
 	  else if (i_sym.st_shndx == SHN_COMMON)
 	    {
-	      sym -> flags |= BSF_FORT_COMM;
+	      sym -> section = &bfd_com_section;
 	    }
 	  switch (ELF_ST_BIND (i_sym.st_info))
 	    {
@@ -1256,6 +1261,8 @@ DEFUN (elf_sizeof_headers, (abfd, reloc),
 #define elf_bfd_debug_info_start	bfd_void
 #define elf_bfd_debug_info_end		bfd_void
 #define elf_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+#define elf_bfd_get_relocated_section_contents \
+ bfd_generic_get_relocated_section_contents
 
 bfd_target elf_big_vec =
 {

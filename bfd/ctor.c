@@ -132,18 +132,18 @@ void DEFUN(bfd_constructor_entry,(abfd, symbol_ptr_ptr, type),
        arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd,
 							 sizeof(arelent_chain));
 
-       reloc->relent.section = (asection *)NULL;
+/*       reloc->relent.section = (asection *)NULL;*/
        reloc->relent.addend = 0;
 
        reloc->relent.sym_ptr_ptr = symbol_ptr_ptr;
        reloc->next = rel_section->constructor_chain;
        rel_section->constructor_chain = reloc;
-       reloc->relent.address = rel_section->size;
+       reloc->relent.address = rel_section->_cooked_size;
        /* ask the cpu which howto to use */
        reloc->relent.howto =
 	bfd_reloc_type_lookup(abfd->arch_info,
 			      BFD_RELOC_CTOR);
-       rel_section->size += sizeof(int *);
+       rel_section->_cooked_size += sizeof(int *);
        rel_section->reloc_count++;
    }
 

@@ -46,7 +46,7 @@ struct artdata {
   char *extended_names;		/* clever intel extension */
 };
 
-#define bfd_ardata(bfd) ((struct artdata *) ((bfd)->tdata))
+#define bfd_ardata(bfd) ((bfd)->tdata.aout_ar_data)
 
 /* Goes in bfd's arelt_data slot */
 struct areltdata {
@@ -189,11 +189,16 @@ extern bfd *bfd_last_cache;
 /* And more follows */
 
 void EXFUN(bfd_check_init, (void));
+PTR  EXFUN(bfd_xmalloc, ( bfd_size_type size));
+void EXFUN(bfd_write_bigendian_4byte_int, (bfd *abfd,  int i));
 bfd_vma EXFUN(bfd_log2, (bfd_vma x));
 void EXFUN(bfd_check_init, (void));
+PTR  EXFUN(bfd_xmalloc, ( bfd_size_type size));
+void EXFUN(bfd_write_bigendian_4byte_int, (bfd *abfd,  int i));
 bfd_vma EXFUN(bfd_log2, (bfd_vma x));
 #define BFD_CACHE_MAX_OPEN 10
 extern bfd *bfd_last_cache;
+
 #define bfd_cache_lookup(x) \
     ((x)==bfd_last_cache? \
       (FILE*)(bfd_last_cache->iostream): \
@@ -203,17 +208,23 @@ void EXFUN(bfd_cache_close , (bfd *));
 FILE* EXFUN(bfd_open_file, (bfd *));
 FILE *EXFUN(bfd_cache_lookup_worker, (bfd *));
 void EXFUN(bfd_constructor_entry, (bfd *abfd, 
-asymbol **symbol_ptr_ptr,
-CONST char*type));
+    asymbol **symbol_ptr_ptr,
+    CONST char*type));
 CONST struct reloc_howto_struct *EXFUN(bfd_default_reloc_type_lookup
-, (CONST struct bfd_arch_info *,
-bfd_reloc_code_type  code));
+    , (CONST struct bfd_arch_info *,
+    bfd_reloc_code_type  code));
+bfd_byte *
+EXFUN(bfd_generic_get_relocated_section_contents, (bfd *abfd,
+    struct bfd_seclet_struct  *seclet)
+    
+    );
+extern bfd_arch_info_type bfd_default_arch_struct;
 boolean EXFUN(bfd_default_set_arch_mach, (bfd *abfd,
-enum bfd_architecture arch,
-unsigned long mach));
+    enum bfd_architecture arch,
+    unsigned long mach));
 void  EXFUN(bfd_arch_init, (void));
 void EXFUN(bfd_arch_linkin, (bfd_arch_info_type *));
 CONST bfd_arch_info_type *EXFUN(bfd_default_compatible
-, (CONST bfd_arch_info_type *a,
-CONST bfd_arch_info_type *b));
+    , (CONST bfd_arch_info_type *a,
+    CONST bfd_arch_info_type *b));
 boolean EXFUN(bfd_default_scan, (CONST struct bfd_arch_info *, CONST char *));
