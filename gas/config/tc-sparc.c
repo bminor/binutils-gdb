@@ -26,7 +26,7 @@
 /* careful, this file includes data *declarations* */
 #include "opcode/sparc.h"
 
-static void sparc_ip PARAMS ((char *));
+static void sparc_ip PARAMS ((char *, const struct sparc_opcode **));
 
 /* Current architecture.  We don't bump up unless necessary.  */
 static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
@@ -179,6 +179,9 @@ static int special_case;
  */
 #define	SPECIAL_CASE_SET	1
 #define	SPECIAL_CASE_FDIV	2
+
+/* The last instruction to be assembled.  */
+static const struct sparc_opcode *last_insn;
 
 /*
  * sort of like s_lcomm
@@ -660,8 +663,15 @@ sparc_md_end ()
     bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
   else if (current_architecture == SPARC_OPCODE_ARCH_V9A)
     bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
+  else if (current_architecture == SPARC_OPCODE_ARCH_SPARCLET)
+    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclet);
   else
-    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
+    {
+      /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
+	 be but for now it is (since that's the way it's always been
+	 treated).  */
+      bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
+    }
 #endif
 }
 
@@ -669,11 +679,34 @@ void
 md_assemble (str)
      char *str;
 {
+  const struct sparc_opcode *insn;
   char *toP;
   int rsd;
 
   know (str);
-  sparc_ip (str);
+  sparc_ip (str, &insn);
+
+  /* We warn about attempts to put a floating point branch in a delay
+     slot.  */
+  if (insn != NULL
+      && last_insn != NULL
+      && (insn->flags & F_FBR) != 0
+      && (last_insn->flags & F_DELAYED) != 0)
+    as_warn ("FP branch in delay slot");
+
+  /* SPARC before v9 requires a nop instruction between a floating
+     point instruction and a floating point branch.  We insert one
+     automatically, with a warning.  */
+  if (max_architecture < SPARC_OPCODE_ARCH_V9
+      && insn != NULL
+      && last_insn != NULL
+      && (insn->flags & F_FBR) != 0
+      && (last_insn->flags & F_FLOAT) != 0)
+    {
+      as_warn ("FP branch preceded by FP instruction; NOP inserted");
+      toP = frag_more (4);
+      md_number_to_chars (toP, (valueT) 0x01000000, 4);
+    }
 
   /* See if "set" operand is absolute and small; skip sethi if so. */
   if (special_case == SPECIAL_CASE_SET
@@ -704,6 +737,8 @@ md_assemble (str)
 		   the_insn.pcrel,
 		   the_insn.reloc);
     }
+
+  last_insn = insn;
 
   switch (special_case)
     {
@@ -821,8 +856,9 @@ parse_const_expr_arg (input_pointerP, valueP)
 }
 
 static void
-sparc_ip (str)
+sparc_ip (str, pinsn)
      char *str;
+     const struct sparc_opcode **pinsn;
 {
   char *error_message = "";
   char *s;
@@ -858,6 +894,7 @@ sparc_ip (str)
       as_fatal ("Unknown opcode: `%s'", str);
     }
   insn = (struct sparc_opcode *) hash_find (op_hash, str);
+  *pinsn = insn;
   if (insn == NULL)
     {
       as_bad ("Unknown opcode: `%s'", str);
@@ -1243,6 +1280,7 @@ sparc_ip (str)
 	      break;
 
 	    case 'r':		/* next operand must be a register */
+	    case 'O':
 	    case '1':
 	    case '2':
 	    case 'd':
@@ -1337,7 +1375,6 @@ sparc_ip (str)
 		     it goes in the opcode.  */
 		  switch (*args)
 		    {
-
 		    case '1':
 		      opcode |= mask << 14;
 		      continue;
@@ -1352,6 +1389,10 @@ sparc_ip (str)
 
 		    case 'r':
 		      opcode |= (mask << 25) | (mask << 14);
+		      continue;
+
+		    case 'O':
+		      opcode |= (mask << 25) | (mask << 0);
 		      continue;
 		    }
 		}

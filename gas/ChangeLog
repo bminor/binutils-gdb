@@ -1,5 +1,13 @@
 Thu Apr 11 12:39:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (last_insn): New static variable.
+	(md_assemble): Warn about putting floating point branches in a
+	delay slot.  If architecture is less than v9, insert NOP
+	instructions between floating point instructions and floating
+	point branches.  (The SunOS assembler does both these operations.)
+	Save the last instruction opcode.
+	(sparc_ip): Add pinsn parameter.  Change caller.
+
 	* config/tc-m68k.c (md_estimate_size_before_relax): Correct check
 	for byte jump to next instruction to skip empty frags.
 
