@@ -195,7 +195,7 @@ extern void
 puts_filtered PARAMS ((char *));
 
 extern void
-vfprintf_filtered PARAMS ((FILE *, char *, va_list));
+vfprintf_filtered ();
 
 extern void
 fprintf_filtered ();
@@ -810,5 +810,7 @@ push_word ();
 #ifndef MAINTENANCE_CMDS
 #define MAINTENANCE_CMDS 1
 #endif
+
+#include "energize.h"
 
 #endif /* !defined (DEFS_H) */
