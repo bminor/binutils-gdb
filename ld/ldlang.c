@@ -64,9 +64,10 @@ static size_t longest_section_name = 8;
 static asection common_section;
 static section_userdata_type common_section_userdata;
 static lang_statement_list_type statement_list;
+
 /* EXPORTS */
 boolean relaxing;
-
+lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_input_statement_type *script_file = 0;
 boolean option_longmap = false;
@@ -752,6 +753,12 @@ DEFUN(open_input_bfds,(statement),
 static void
 lang_reasonable_defaults()
 {
+
+abs_output_section = lang_output_section_statement_lookup(BFD_ABS_SECTION_NAME);
+
+abs_output_section->bfd_section = &bfd_abs_section;
+
+  
 #if 0
       lang_output_section_statement_lookup(".text");
       lang_output_section_statement_lookup(".data");
@@ -1136,7 +1143,9 @@ DEFUN(print_padding_statement,(s),
   print_space();
   print_fill(s->fill);
   print_nl();
+
   print_dot = s->output_offset + s->output_section->vma + s->size;
+
 }
 
 static void 
@@ -1463,7 +1472,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
 			    dot,
 			    &newdot);
 
-	      if (newdot != dot) 
+	      if (newdot != dot && ) 
 		/* We've been moved ! so insert a pad */
 		  {
 		    lang_statement_union_type *new = 
@@ -1540,7 +1549,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
 	      else {
 		etree_value_type r ;
 		r = exp_fold_tree(os->addr_tree,
-				  (lang_output_section_statement_type *)NULL,
+				  abs_output_section,
 				  lang_allocating_phase_enum,
 				  dot, &dot);
 		if (r.valid == false) {
@@ -1575,6 +1584,19 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
 	      if (os->addr_tree == (etree_type *)NULL 
 		  && os->region !=(lang_memory_region_type*)NULL ) {
 		os->region->current = dot;
+		/* Make sure this isn't silly */
+		if (os->region->current  >
+		    os->region->origin +
+		    os->region->length) 
+		{
+		  einfo("%X%P: Region %s is full (%B section %s)\n",
+			os->region->name,
+			os->bfd_section->owner,
+			os->bfd_section->name);
+		  /* Reset the region pointer */
+		  os->region->current = 0;
+		}
+		
 	      }
 	    }
 
@@ -1656,7 +1678,7 @@ had_relax |=  relax_section(prev);
 			    dot,
 			    &newdot);
 
-	      if (newdot != dot) 
+	      if (newdot != dot && !relax) 
 		/* We've been moved ! so insert a pad */
 		  {
 		    lang_statement_union_type *new = 
@@ -2300,17 +2322,17 @@ DEFUN_VOID(lang_process)
 
   /* Size up the sections */
   lang_size_sections(statement_list.head,
-		     (lang_output_section_statement_type *)NULL,
+		     abs_output_section,
 		     &(statement_list.head), 0, (bfd_vma)0, false);
 
-
-  /* Move the global symbols around */
-  lang_relocate_globals();
 
   /* Now run around and relax if we can */
   if (command_line.relax) 
   {
     reset_memory_regions();
+
+  /* Move the global symbols around */
+  lang_relocate_globals();
     
     had_relax = true;
     while (had_relax) 
@@ -2342,9 +2364,12 @@ DEFUN_VOID(lang_process)
      of all the symbols */
 
   lang_do_assignments(statement_list.head,
-		      (lang_output_section_statement_type *)NULL,
+		      abs_output_section,
 		      0, (bfd_vma)0);
 
+
+  /* Move the global symbols around */
+  lang_relocate_globals();
 
   /* Make sure that we're not mixing architectures */
 
