@@ -363,37 +363,15 @@ step_1 (skip_subroutines, single_inst, count_string)
 	  find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
 	  if (step_range_end == 0)
 	    {
-	      struct minimal_symbol *msymbol;
+	      char *name;
+	      if (find_pc_partial_function (stop_pc, &name, &step_range_start,
+					    &step_range_end) == 0)
+		error ("Cannot find bounds of current function");
 
-	      /* FIXME: This should be using containing_function_bounds or a
-		 cleaned-up version thereof, to deal with things like the
-		 end of the text segment.  */
-
-	      msymbol = lookup_minimal_symbol_by_pc (stop_pc);
 	      target_terminal_ours ();
-	      printf_filtered ("Current function has no line number information.\n");
-	      fflush (stdout);
-
-	      if (msymbol == NULL || SYMBOL_NAME (msymbol + 1) == NULL)
-		{
-		  /* If sigtramp is in the u area, check for it.  */
-#if defined SIGTRAMP_START
-		  if (IN_SIGTRAMP (stop_pc, (char *)NULL))
-		    {
-		      step_range_start = SIGTRAMP_START;
-		      step_range_end = SIGTRAMP_END;
-		    }
-		  else
-#endif
-		    error ("Cannot find bounds of current function.");
-	        }
-	      else
-		{
-		  step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
-		  step_range_end = SYMBOL_VALUE_ADDRESS (msymbol + 1);
-		}
-
-	      printf_filtered ("Single stepping until function exit.\n");
+	      printf_filtered ("\
+Single stepping until exit from function %s, \n\
+which has no line number information.\n", name);
 	      fflush (stdout);
 	    }
 	}
@@ -530,20 +508,16 @@ signal_command (signum_exp, from_tty)
 
    The dummy's frame is automatically popped whenever that break is hit.
    If that is the first time the program stops, run_stack_dummy
-   returns to its caller with that frame already gone.
-   Otherwise, the caller never gets returned to.
-
-   NAME is a string to print to identify the function which we are calling.
-   It is not guaranteed to be the name of a function, it could be something
-   like "at 0x4370" if a name can't be found for the function.  */
+   returns to its caller with that frame already gone and returns 0.
+   Otherwise, run_stack-dummy returns 1 (the frame will eventually be popped
+   when we do hit that breakpoint).  */
 
 /* DEBUG HOOK:  4 => return instead of letting the stack dummy run.  */
 
 static int stack_dummy_testing = 0;
 
-void
-run_stack_dummy (name, addr, buffer)
-     char *name;
+int
+run_stack_dummy (addr, buffer)
      CORE_ADDR addr;
      char buffer[REGISTER_BYTES];
 {
@@ -558,21 +532,12 @@ run_stack_dummy (name, addr, buffer)
   proceed (addr, 0, 0);
 
   if (!stop_stack_dummy)
-    /* This used to say
-       "The expression which contained the function call has been discarded."
-       It is a hard concept to explain in a few words.  Ideally, GDB would
-       be able to resume evaluation of the expression when the function
-       finally is done executing.  Perhaps someday this will be implemented
-       (it would not be easy).  */
-    error ("\
-The program being debugged stopped while in a function called from GDB.\n\
-When the function (%s) is done executing, GDB will silently\n\
-stop (instead of continuing to evaluate the expression containing\n\
-the function call).", name);
+    return 1;
 
   /* On return, the stack dummy has been popped already.  */
 
   memcpy (buffer, stop_registers, sizeof stop_registers);
+  return 0;
 }
 
 /* Proceed until we reach a different source line with pc greater than
@@ -713,7 +678,7 @@ finish_command (arg, from_tty)
       funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
 
       val = value_being_returned (value_type, stop_registers,
-	      using_struct_return (value_of_variable (function),
+	      using_struct_return (value_of_variable (function, NULL),
 				   funcaddr,
 				   value_type,
 		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function))));
@@ -931,18 +896,10 @@ path_command (dirname, from_tty)
 CORE_ADDR
 read_pc ()
 {
-#ifdef GDB_TARGET_IS_HPPA
-  int flags = read_register(FLAGS_REGNUM);
-
-  if (flags & 2)
-    return read_register(31) & ~0x3; /* User PC is here when in sys call */
-  return read_register (PC_REGNUM) & ~0x3;
-#else
 #ifdef TARGET_READ_PC
   return TARGET_READ_PC ();
 #else
   return ADDR_BITS_REMOVE ((CORE_ADDR) read_register (PC_REGNUM));
-#endif
 #endif
 }
 

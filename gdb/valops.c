@@ -1030,7 +1030,6 @@ call_function_by_hand (function, nargs, args)
      wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
   write_sp (sp);
 
-  /* Figure out the value returned by the function.  */
   {
     char retbuf[REGISTER_BYTES];
     char *name;
@@ -1063,10 +1062,37 @@ call_function_by_hand (function, nargs, args)
     /* Execute the stack dummy routine, calling FUNCTION.
        When it is done, discard the empty frame
        after storing the contents of all regs into retbuf.  */
-    run_stack_dummy (name, real_pc + CALL_DUMMY_START_OFFSET, retbuf);
+    if (run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf))
+      {
+	/* We stopped somewhere besides the call dummy.  */
+
+	/* If we did the cleanups, we would print a spurious error message
+	   (Unable to restore previously selected frame), would write the
+	   registers from the inf_status (which is wrong), and would do other
+	   wrong things (like set stop_bpstat to the wrong thing).  */
+	discard_cleanups (old_chain);
+	/* Prevent memory leak.  */
+	bpstat_clear (inf_status.stop_bpstat);
+
+	/* The following error message used to say "The expression
+	   which contained the function call has been discarded."  It
+	   is a hard concept to explain in a few words.  Ideally, GDB
+	   would be able to resume evaluation of the expression when
+	   the function finally is done executing.  Perhaps someday
+	   this will be implemented (it would not be easy).  */
+
+	/* FIXME: Insert a bunch of wrap_here; name can be very long if it's
+	   a C++ name with arguments and stuff.  */
+	error ("\
+The program being debugged stopped while in a function called from GDB.\n\
+When the function (%s) is done executing, GDB will silently\n\
+stop (instead of continuing to evaluate the expression containing\n\
+the function call).", name);
+      }
 
     do_cleanups (old_chain);
 
+    /* Figure out the value returned by the function.  */
     return value_being_returned (value_type, retbuf, struct_return);
   }
 }
@@ -1494,6 +1520,14 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
     }
 
   if (!v)
+    /* FIXME: This error message is very confusing, since it can also
+       mean that argument matching failed.  But I don't want to say
+       "or argument matching failed" for C programs.  Checking the
+       current language isn't right, because whether we attempt
+       argument matching does not depend on the language.  The right
+       fix is to restructure the above code to be able to distinguish
+       between argument matching failure and the field not being found
+       at all.  */
     error ("Structure has no component named %s.", name);
   return v;
 }

@@ -1,5 +1,17 @@
 Thu Aug 26 14:32:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* infcmd.c, inferior.h (run_stack_dummy): If we stop somewhere
+	besides the dummy, return 1 rather than calling error().
+	Let caller print the error message.  Remove name argument.
+	* valops.c (call_function_by_hand): Deal with changes to calling
+	sequence of run_stack_dummy.  Discard restore_inferior_status cleanup
+	if run_stack_dummy returns 1.
+
+	* Version 4.10.2.
+
+	* config/mips/tm-mips.h (EXTRACT_STRUCT_VALUE_ADDRESS):
+	Get struct return address from v0, not a0.
+
 	* infrun.c (restore_inferior_status): Use catch_errors when
 	restoring selected frame.
 
