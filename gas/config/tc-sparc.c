@@ -752,7 +752,7 @@ md_begin ()
   while (i < sparc_num_opcodes)
     {
       const char *name = sparc_opcodes[i].name;
-      retval = hash_insert (op_hash, name, &sparc_opcodes[i]);
+      retval = hash_insert (op_hash, name, (PTR) &sparc_opcodes[i]);
       if (retval != NULL)
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
@@ -1143,7 +1143,7 @@ parse_keyword_arg (lookup_fn, input_pointerP, valueP)
   char c, *p, *q;
 
   p = *input_pointerP;
-  for (q = p + (*p == '#' || *p == '%'); isalpha (*q) || *q == '_'; ++q)
+  for (q = p + (*p == '#' || *p == '%'); isalnum (*q) || *q == '_'; ++q)
     continue;
   c = *q;
   *q = 0;

@@ -1,3 +1,7 @@
+Thu Sep 18 11:24:01 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-sparc.c (parse_keyword_arg): Allow numbers in reg names.
+
 Wed Sep 17 16:54:20 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (v850_reloc_prefix): Recoded to use CHECK_ ()
