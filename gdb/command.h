@@ -80,8 +80,11 @@ typedef enum var_types
     /* String which stores what the user types verbatim.
        *VAR is a malloc'd string, or NULL if the string is empty.  */
     var_string_noescape,
-    /* String which stores a filename.
-       *VAR is a malloc'd string, or NULL if the string is empty.  */
+    /* String which stores a filename.  (*VAR) is a malloc'd string,
+       or "" if the string was empty.  */
+    var_optional_filename,
+    /* String which stores a filename.  (*VAR) is a malloc'd
+       string.  */
     var_filename,
     /* ZeroableInteger.  *VAR is an int.  Like Unsigned Integer except
        that zero really means zero.  */
@@ -300,6 +303,17 @@ extern void add_setshow_string_noescape_cmd (char *name,
 					     show_value_ftype *show_func,
 					     struct cmd_list_element **set_list,
 					     struct cmd_list_element **show_list);
+
+extern void add_setshow_optional_filename_cmd (char *name,
+					       enum command_class class,
+					       char **var,
+					       const char *set_doc,
+					       const char *show_doc,
+					       const char *help_doc,
+					       cmd_sfunc_ftype *set_func,
+					       show_value_ftype *show_func,
+					       struct cmd_list_element **set_list,
+					       struct cmd_list_element **show_list);
 
 extern void add_setshow_integer_cmd (char *name,
 				     enum command_class class,

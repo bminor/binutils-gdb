@@ -250,8 +250,10 @@ notice_args_set (char *args, int from_tty, struct cmd_list_element *c)
 
 /* Notice when `show args' is run.  */
 static void
-notice_args_read (char *args, int from_tty, struct cmd_list_element *c)
+notice_args_read (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   /* Might compute the value.  */
   get_inferior_args ();
 }
@@ -1980,15 +1982,14 @@ _initialize_infcmd (void)
 	       _("Set terminal for future runs of program being debugged."));
   set_cmd_completer (c, filename_completer);
 
-  c = add_set_cmd ("args", class_run, var_string_noescape,
-		   (char *) &inferior_args,
-		   "Set argument list to give program being debugged when it is started.\n\
-Follow this command with any number of args, to be passed to the program.",
-		   &setlist);
-  set_cmd_completer (c, filename_completer);
-  set_cmd_sfunc (c, notice_args_set);
-  c = deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, notice_args_read);
+  add_setshow_optional_filename_cmd ("args", class_run,
+				     &inferior_args, _("\
+Set argument list to give program being debugged when it is started."), _("\
+Show argument list to give program being debugged when it is started."), _("\
+Follow this command with any number of args, to be passed to the program."),
+				     notice_args_set,
+				     notice_args_read,
+				     &setlist, &showlist);
 
   c = add_cmd ("environment", no_class, environment_info, _("\
 The environment to give the program, or one variable's value.\n\
