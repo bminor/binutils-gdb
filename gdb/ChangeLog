@@ -1,3 +1,9 @@
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Document what UNWIND_DUMMY_ID replaces.  Clarify
+	when deprecated REGISTER macros can be deleted.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2003-06-13  Jim Blandy  <jimb@redhat.com>
 
 	* solib-svr4.c (solib_break_names): Recognize the 64-bit PowerPC

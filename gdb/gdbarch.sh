@@ -428,9 +428,6 @@ v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
 F:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
-# This is simply not needed.  See value_of_builtin_frame_fp_reg and
-# call_function_by_hand.
-F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
 # UNWIND_SP is a direct replacement for TARGET_READ_SP.
 F:2:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # The dummy call frame SP should be set by push_dummy_call.
@@ -455,9 +452,6 @@ v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 # all (-1).
 # SP_REGNUM will hopefully be replaced by UNWIND_SP.
 v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
-# This is simply not needed.  See value_of_builtin_frame_fp_reg and
-# call_function_by_hand.
-v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0
 v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
@@ -484,18 +478,23 @@ F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg
 # DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
 # from REGISTER_TYPE.
 v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
-# DEPRECATED_REGISTER_BYTE can be deleted.  The value is computed from
-# REGISTER_TYPE.  NOTE: cagney/2002-05-02: This function with
-# predicate has a valid (callable) initial value.  As a consequence,
-# even when the predicate is false, the corresponding function works.
-# This simplifies the migration process - old code, calling
-# DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
+# If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
+# register offsets computed using just REGISTER_TYPE, this can be
+# deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
+# function with predicate has a valid (callable) initial value.  As a
+# consequence, even when the predicate is false, the corresponding
+# function works.  This simplifies the migration process - old code,
+# calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
 F::REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
-# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  The value is computed
-# from REGISTER_TYPE.
+# If all registers have identical raw and virtual sizes and those
+# sizes agree with the value computed from REGISTER_TYPE,
+# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
+# registers.
 f:2:REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  The value is
-# computed from REGISTER_TYPE.
+# If all registers have identical raw and virtual sizes and those
+# sizes agree with the value computed from REGISTER_TYPE,
+# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
+# registers.
 f:2:REGISTER_VIRTUAL_SIZE:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 # DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
 # replaced by the constant MAX_REGISTER_SIZE.
@@ -503,6 +502,18 @@ V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
 # DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE can be deleted.  It has been
 # replaced by the constant MAX_REGISTER_SIZE.
 V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
+
+# See gdbint.texinfo, and PUSH_DUMMY_CALL.
+M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
+# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+# SAVE_DUMMY_FRAME_TOS.
+F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
+# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+# DEPRECATED_FP_REGNUM.
+v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0
+# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+# DEPRECATED_TARGET_READ_FP.
+F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
 
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
@@ -631,10 +642,6 @@ M:::CORE_ADDR:frame_align:CORE_ADDR address:address
 # NOTE: cagney/2003-03-24: This is better handled by PUSH_ARGUMENTS.
 v:2:DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED:int:deprecated_extra_stack_alignment_needed::::0:0::0:::
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
-# FIXME: kettenis/2003-03-08: This should be replaced by a function
-# parametrized with (at least) the regcache.
-F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
-M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name

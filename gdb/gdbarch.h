@@ -333,44 +333,6 @@ extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftyp
 #define TARGET_WRITE_PC(val, ptid) (gdbarch_write_pc (current_gdbarch, val, ptid))
 #endif
 
-/* This is simply not needed.  See value_of_builtin_frame_fp_reg and
-   call_function_by_hand. */
-
-#if defined (DEPRECATED_TARGET_READ_FP)
-/* Legacy for systems yet to multi-arch DEPRECATED_TARGET_READ_FP */
-#if !defined (DEPRECATED_TARGET_READ_FP_P)
-#define DEPRECATED_TARGET_READ_FP_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_TARGET_READ_FP_P)
-#define DEPRECATED_TARGET_READ_FP_P() (0)
-#endif
-
-extern int gdbarch_deprecated_target_read_fp_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP_P)
-#error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_TARGET_READ_FP_P)
-#define DEPRECATED_TARGET_READ_FP_P() (gdbarch_deprecated_target_read_fp_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_TARGET_READ_FP)
-#define DEPRECATED_TARGET_READ_FP() (internal_error (__FILE__, __LINE__, "DEPRECATED_TARGET_READ_FP"), 0)
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_target_read_fp_ftype) (void);
-extern CORE_ADDR gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch, gdbarch_deprecated_target_read_fp_ftype *deprecated_target_read_fp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP)
-#error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
-#endif
-#if !defined (DEPRECATED_TARGET_READ_FP)
-#define DEPRECATED_TARGET_READ_FP() (gdbarch_deprecated_target_read_fp (current_gdbarch))
-#endif
-
 /* UNWIND_SP is a direct replacement for TARGET_READ_SP. */
 
 #if defined (TARGET_READ_SP)
@@ -521,23 +483,6 @@ extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #endif
 #if !defined (SP_REGNUM)
 #define SP_REGNUM (gdbarch_sp_regnum (current_gdbarch))
-#endif
-
-/* This is simply not needed.  See value_of_builtin_frame_fp_reg and
-   call_function_by_hand. */
-
-/* Default (value) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FP_REGNUM)
-#define DEPRECATED_FP_REGNUM (-1)
-#endif
-
-extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch, int deprecated_fp_regnum);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FP_REGNUM)
-#error "Non multi-arch definition of DEPRECATED_FP_REGNUM"
-#endif
-#if !defined (DEPRECATED_FP_REGNUM)
-#define DEPRECATED_FP_REGNUM (gdbarch_deprecated_fp_regnum (current_gdbarch))
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
@@ -764,12 +709,13 @@ extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int 
 #define DEPRECATED_REGISTER_BYTES (gdbarch_deprecated_register_bytes (current_gdbarch))
 #endif
 
-/* DEPRECATED_REGISTER_BYTE can be deleted.  The value is computed from
-   REGISTER_TYPE.  NOTE: cagney/2002-05-02: This function with
-   predicate has a valid (callable) initial value.  As a consequence,
-   even when the predicate is false, the corresponding function works.
-   This simplifies the migration process - old code, calling
-   DEPRECATED_REGISTER_BYTE, doesn't need to be modified. */
+/* If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
+   register offsets computed using just REGISTER_TYPE, this can be
+   deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
+   function with predicate has a valid (callable) initial value.  As a
+   consequence, even when the predicate is false, the corresponding
+   function works.  This simplifies the migration process - old code,
+   calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified. */
 
 #if defined (REGISTER_BYTE)
 /* Legacy for systems yet to multi-arch REGISTER_BYTE */
@@ -806,8 +752,10 @@ extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbar
 #define REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
 #endif
 
-/* DEPRECATED_REGISTER_RAW_SIZE can be deleted.  The value is computed
-   from REGISTER_TYPE. */
+/* If all registers have identical raw and virtual sizes and those
+   sizes agree with the value computed from REGISTER_TYPE,
+   DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
+   registers. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
@@ -824,8 +772,10 @@ extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, g
 #define REGISTER_RAW_SIZE(reg_nr) (gdbarch_deprecated_register_raw_size (current_gdbarch, reg_nr))
 #endif
 
-/* DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  The value is
-   computed from REGISTER_TYPE. */
+/* If all registers have identical raw and virtual sizes and those
+   sizes agree with the value computed from REGISTER_TYPE,
+   DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
+   registers. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
@@ -914,6 +864,107 @@ extern void set_gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gd
 #endif
 #if !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
 #define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE (gdbarch_deprecated_max_register_virtual_size (current_gdbarch))
+#endif
+
+/* See gdbint.texinfo, and PUSH_DUMMY_CALL. */
+
+extern int gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch);
+
+typedef struct frame_id (gdbarch_unwind_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *info);
+extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info);
+extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
+
+/* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+   SAVE_DUMMY_FRAME_TOS. */
+
+#if defined (SAVE_DUMMY_FRAME_TOS)
+/* Legacy for systems yet to multi-arch SAVE_DUMMY_FRAME_TOS */
+#if !defined (SAVE_DUMMY_FRAME_TOS_P)
+#define SAVE_DUMMY_FRAME_TOS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS_P)
+#define SAVE_DUMMY_FRAME_TOS_P() (0)
+#endif
+
+extern int gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVE_DUMMY_FRAME_TOS_P)
+#error "Non multi-arch definition of SAVE_DUMMY_FRAME_TOS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVE_DUMMY_FRAME_TOS_P)
+#define SAVE_DUMMY_FRAME_TOS_P() (gdbarch_save_dummy_frame_tos_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS)
+#define SAVE_DUMMY_FRAME_TOS(sp) (internal_error (__FILE__, __LINE__, "SAVE_DUMMY_FRAME_TOS"), 0)
+#endif
+
+typedef void (gdbarch_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
+extern void gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
+extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVE_DUMMY_FRAME_TOS)
+#error "Non multi-arch definition of SAVE_DUMMY_FRAME_TOS"
+#endif
+#if !defined (SAVE_DUMMY_FRAME_TOS)
+#define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
+#endif
+
+/* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+   DEPRECATED_FP_REGNUM. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FP_REGNUM)
+#define DEPRECATED_FP_REGNUM (-1)
+#endif
+
+extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch, int deprecated_fp_regnum);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FP_REGNUM)
+#error "Non multi-arch definition of DEPRECATED_FP_REGNUM"
+#endif
+#if !defined (DEPRECATED_FP_REGNUM)
+#define DEPRECATED_FP_REGNUM (gdbarch_deprecated_fp_regnum (current_gdbarch))
+#endif
+
+/* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+   DEPRECATED_TARGET_READ_FP. */
+
+#if defined (DEPRECATED_TARGET_READ_FP)
+/* Legacy for systems yet to multi-arch DEPRECATED_TARGET_READ_FP */
+#if !defined (DEPRECATED_TARGET_READ_FP_P)
+#define DEPRECATED_TARGET_READ_FP_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_TARGET_READ_FP_P)
+#define DEPRECATED_TARGET_READ_FP_P() (0)
+#endif
+
+extern int gdbarch_deprecated_target_read_fp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP_P)
+#error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_TARGET_READ_FP_P)
+#define DEPRECATED_TARGET_READ_FP_P() (gdbarch_deprecated_target_read_fp_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_TARGET_READ_FP)
+#define DEPRECATED_TARGET_READ_FP() (internal_error (__FILE__, __LINE__, "DEPRECATED_TARGET_READ_FP"), 0)
+#endif
+
+typedef CORE_ADDR (gdbarch_deprecated_target_read_fp_ftype) (void);
+extern CORE_ADDR gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch, gdbarch_deprecated_target_read_fp_ftype *deprecated_target_read_fp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP)
+#error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
+#endif
+#if !defined (DEPRECATED_TARGET_READ_FP)
+#define DEPRECATED_TARGET_READ_FP() (gdbarch_deprecated_target_read_fp (current_gdbarch))
 #endif
 
 #if defined (DEPRECATED_DO_REGISTERS_INFO)
@@ -2471,50 +2522,6 @@ extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_re
 #if !defined (REG_STRUCT_HAS_ADDR)
 #define REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
-
-/* FIXME: kettenis/2003-03-08: This should be replaced by a function
-   parametrized with (at least) the regcache. */
-
-#if defined (SAVE_DUMMY_FRAME_TOS)
-/* Legacy for systems yet to multi-arch SAVE_DUMMY_FRAME_TOS */
-#if !defined (SAVE_DUMMY_FRAME_TOS_P)
-#define SAVE_DUMMY_FRAME_TOS_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS_P)
-#define SAVE_DUMMY_FRAME_TOS_P() (0)
-#endif
-
-extern int gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVE_DUMMY_FRAME_TOS_P)
-#error "Non multi-arch definition of SAVE_DUMMY_FRAME_TOS"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVE_DUMMY_FRAME_TOS_P)
-#define SAVE_DUMMY_FRAME_TOS_P() (gdbarch_save_dummy_frame_tos_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS)
-#define SAVE_DUMMY_FRAME_TOS(sp) (internal_error (__FILE__, __LINE__, "SAVE_DUMMY_FRAME_TOS"), 0)
-#endif
-
-typedef void (gdbarch_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
-extern void gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
-extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVE_DUMMY_FRAME_TOS)
-#error "Non multi-arch definition of SAVE_DUMMY_FRAME_TOS"
-#endif
-#if !defined (SAVE_DUMMY_FRAME_TOS)
-#define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
-#endif
-
-extern int gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch);
-
-typedef struct frame_id (gdbarch_unwind_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *info);
-extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info);
-extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
 
 extern int gdbarch_parm_boundary (struct gdbarch *gdbarch);
 extern void set_gdbarch_parm_boundary (struct gdbarch *gdbarch, int parm_boundary);
