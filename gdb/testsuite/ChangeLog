@@ -1,3 +1,7 @@
+2003-03-27  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.c++/casts.exp: Fix startup to run also on embedded targets.
+
 2003-03-26  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/ptype.exp: Actually use some typedef'd types.
