@@ -282,64 +282,7 @@ proc gdb_test { args } {
     return $result
 }
 
-# Testing printing of a specific value.  For passes and fails, return
-# a 1 to indicate that more tests can proceed.  However a timeout
-# is a serious error, generates a special fail message, and causes
-# a 0 to be returned to indicate that more tests are likely to fail
-# as well.
-#
-# Args are:
-#
-#	First one is string to send to gdb
-#	Second one is string to match gdb result to
-#	Third one is an optional message to be printed
-#
-# This differs from gdb_test in a few ways: (1) handling of empty
-# sendthis (I suspect test_print_accept callers never use this), (2)
-# it tests for the " =" (that could easily be moved to the callers.
-
-proc test_print_accept { args } {
-    global prompt
-    global verbose
-
-    if [llength $args]==3 then {
-	set message [lindex $args 2]
-    } else {
-	set message [lindex $args 0]
-    }
-    set sendthis [lindex $args 0]
-    set expectthis [lindex $args 1]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-	send_user "Message is \"$message\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re ".* = $expectthis\r\n$prompt $" {
-	    if ![string match "" $message] then {
-		pass "$sendthis ($message)"
-	    } else {
-		pass "$sendthis"
-	    }
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    if ![string match "" $message] then {
-		fail "$sendthis ($message)"
-	    } else {
-		fail "$sendthis"
-	    }
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
-}
-
-# Testing printing of a specific value.  For pass or fail, return
+# Test that a command gives an error.  For pass or fail, return
 # a 1 to indicate that more tests can proceed.  However a timeout
 # is a serious error, generates a special fail message, and causes
 # a 0 to be returned to indicate that more tests are likely to fail

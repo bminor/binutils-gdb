@@ -103,10 +103,10 @@ proc do_tests {} {
     send "break printdow\n" ; expect -re "$prompt $"
     send "continue\n" ; expect -re "$prompt $"
     send "set var w:= dow\[monday\]\n" ; expect -re "$prompt $"
-    test_print_accept "print w" "\\\[monday\\\]" \
+    gdb_test "print w" " = \\\[monday\\\]" \
 	"print bitstring after assignment"
     send "set var w:=\[\]\n" ; expect -re "$prompt $"
-    test_print_accept "print w" "\\\[\\\]" \
+    gdb_test "print w" " = \\\[\\\]" \
 	"print bitstring after assignment of \[\]"
 }
 

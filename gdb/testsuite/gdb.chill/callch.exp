@@ -45,10 +45,10 @@ proc do_tests {} {
     gdb_test_exact "call fred()" {too few arguments in function call}
     # Too many arguments are allowed
     gdb_test_exact "call klaus(10, 20, 30)" {here's klaus calling.}
-    test_print_accept "print a" {\[\(FALSE:TRUE\): \[\(FALSE:TRUE\): 1\]\]}\
+    gdb_test "print a" { = \[\(FALSE:TRUE\): \[\(FALSE:TRUE\): 1\]\]}\
 	"print a before king"
     gdb_test {call king(a, otto[[10, 15], [20, 25]])} "x\\(FALSE, FALSE\\) = 10.*p\\(FALSE, FALSE\\) = -1.*x\\(FALSE, TRUE\\) = 15.*p\\(FALSE, TRUE\\) = -1.*x\\(TRUE, FALSE\\) = 20.*p\\(TRUE, FALSE\\) = -1.*x\\(TRUE, TRUE\\) = 25.*p\\(TRUE, TRUE\\) = -1.*"
-    test_print_accept "print a" {\[\(FALSE:TRUE\): \[\(FALSE:TRUE\): -1\]\]}\
+    gdb_test "print a" { = \[\(FALSE:TRUE\): \[\(FALSE:TRUE\): -1\]\]}\
 	"print a after king"
     gdb_test_exact "call ralph(b)" {x.f1 = 10, x.f2 = FALSE.}
     gdb_test "call whitney(c)" "x.f1\\(FALSE, FALSE\\) = 1.*x.f1\\(FALSE, TRUE\\) = 1.*x.f1\\(TRUE, FALSE\\) = 1.*x.f1\\(TRUE, TRUE\\) = 1.*"

@@ -42,7 +42,7 @@ proc do_tests {} {
     send "run\n"; expect -re "Breakpoint .*pr-6292.ch:15.*$prompt $"
     gdb_test_exact "call klaus()" {here's klaus calling.}
     gdb_test {set fred(10, i)} {a was '10'; b was '12'.}
-    test_print_accept "print i" {13} "print i after call"
+    gdb_test "print i" { = 13} "print i after call"
 }
 
 # Check to see if we have an executable to test.  If not, then either we

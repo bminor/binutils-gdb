@@ -1,5 +1,17 @@
 Wed Mar 15 04:11:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/printcmds.exp (test_character_literals_accepted): Test
+	printing of '\'' (which is what the comment says we are testing,
+	even though we were not), not '''.
+	(test_integer_literals_rejected): Test that printing ''' is an error.
+
+	* gdb.fortran/exprs.exp, gdb.fortran/types.exp,
+	gdb.chill/chexp.exp, gdb.base/printcmds.exp,
+	gdb.c++/cplusfuncs.exp, gdb.chill/callch.exp, gdb.chill/misc.exp,
+	gdb.chill/pr-6292.exp, gdb.chill/string.exp, gdb.chill/tuples.exp:
+	Use gdb_test not test_print_accept.
+	* lib/gdb.exp: Remove test_print_accept.
+
 	* gdb.base/signals.exp (signal_tests_1): Make pass message
 	consistent with fail message.
 
