@@ -1,3 +1,14 @@
+Wed Feb 14 16:33:12 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
+
+	* read.c (s_mri_sect): Don't return '\0' in type.  Set all
+	appropriate flags in BFD section.
+
+	* configure.in (m68k-*-psos*): New target.
+	* configure: Rebuild.
+	* config/te-psos.h: New file.
+	* config/tc-m68k.c (comment_chars): Don't include '#' if TE_PSOS
+	is defined.
+
 Wed Feb 14 13:43:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_big_got): New static variable.

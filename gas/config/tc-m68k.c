@@ -28,7 +28,7 @@
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-#if defined (OBJ_ELF) || defined (TE_DELTA)
+#if (defined (OBJ_ELF) && ! defined (TE_PSOS)) || defined (TE_DELTA)
 const char comment_chars[] = "|#";
 #else
 const char comment_chars[] = "|";
