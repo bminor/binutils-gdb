@@ -1,3 +1,14 @@
+Tue Feb 10 18:31:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-load.c (sim_load_file): Print LMA/VMA according to value
+ 	used.
+
+Tue Feb 10 14:56:23 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* sim-core.c: Add missing prototypes for WITH_DEVICES.
+	Add missing parameters to device_io calls.
+	* sim-core.h: Add missing parameters to device_io calls.
+
 Mon Feb  9 14:48:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-sim.h (DECODE): Always use switch for `read' for now.
