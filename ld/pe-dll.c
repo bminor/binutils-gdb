@@ -565,7 +565,7 @@ fill_edata (abfd, info)
 	    {
 	      char *ename = pe_def_file->exports[s].name;
 	      bfd_put_32 (abfd, ERVA (enamestr), (void *) enameptrs);
-	      strcpy (enamestr, ename[0] == '_' ? ename + 1 : ename);
+	      strcpy (enamestr, ename);
 	      enamestr += strlen (enamestr) + 1;
 	      bfd_put_16 (abfd, i, (void *) eordinals);
 	      enameptrs++;

@@ -1,3 +1,7 @@
+Wed Nov 11 13:44:54 1998  DJ Delorie  <dj@cygnus.com>
+
+	* pe-dll.c (fill_edata): don't strip underscores
+
 Tue Nov 10 21:28:19 1998  DJ Delorie  <dj@cygnus.com>
 
 	* ld.texinfo: added i386pe option summary
