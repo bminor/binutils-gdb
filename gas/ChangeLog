@@ -1,3 +1,7 @@
+Wed May 27 11:16:25 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.c (md_show_usage): Add \n\ to new string.
+
 Tue May 26 19:27:52 1998  Stan Cox  <scox@equinox.cygnus.com>
 
 	* config/tc-sparc.c (OPTION_LITTLE_ENDIAN_DATA): New.
