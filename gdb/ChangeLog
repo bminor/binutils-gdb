@@ -1,3 +1,7 @@
+Fri Aug 23 11:46:08 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* doc/gdb.texinfo: update, fix bugs in "Installing" appendix
+
 Fri Aug 23 01:02:00 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* Makefile.in:  Add config.sub, make doc/rdl-apps.texinfo for
