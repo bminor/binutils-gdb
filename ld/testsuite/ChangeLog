@@ -1,3 +1,7 @@
+2002-02-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* vers.exp: Do not call diff -q.
+
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/b-nosym.d, ld-mmix/sec-6.d: Tweak for change in symbol
