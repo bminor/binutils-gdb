@@ -1,3 +1,8 @@
+Fri Jan 24 01:30:27 1992  Fred Fish  (fnf at cygnus.com)
+
+	* depend:  Convert the couple of references to ansidecl.h that
+	used the local gdb version to use the ../include version.
+
 Thu Jan 23 22:24:43 1992  Fred Fish  (fnf at cygnus.com)
 
 	* procfs.c

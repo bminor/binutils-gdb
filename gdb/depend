@@ -55,11 +55,11 @@ dbxread.o : dbxread.c defs.h xm.h config.status tm.h config.status symtab.h brea
   ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def partial-stab.h 
 dwarfread.o : dwarfread.c defs.h xm.h config.status tm.h config.status ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h symtab.h symfile.h \
-  ${srcdir}/../include/elf/dwarf.h ansidecl.h 
+  ${srcdir}/../include/elf/dwarf.h ${srcdir}/../include/ansidecl.h 
 elfread.o : elfread.c defs.h xm.h config.status tm.h config.status ${srcdir}/../include/elf/common.h \
   ${srcdir}/../include/elf/external.h ${srcdir}/../include/elf/internal.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h symfile.h symtab.h \
-  ansidecl.h 
+  ${srcdir}/../include/ansidecl.h 
 environ.o : environ.c environ.h defs.h xm.h config.status tm.h config.status 
 eval.o : eval.c defs.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h value.h \
   expression.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h frame.h 
