@@ -1,3 +1,14 @@
+Fri Apr 17 08:57:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* relax.c: added handling for new "padding" seclet type, used to
+	fill out gaps between section.
+	* ldgram.y, ldlex.l: now -defsym on the command line is done
+	properly.
+
+Wed Apr 15 21:20:07 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: the tooldir copy of ld goes directly in tooldir.
+
 Wed Apr 15 16:09:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* mri.c, ldgram.y, ldlex.l: added support for minimal strange link
@@ -13,8 +24,6 @@ Sat Apr  4 17:44:06 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* ldlex.l, ldgram.y, ldlex.h: Rewrote lexer. Now it's much nicer. 
 	* h8300*: fix bit rot and add support for h8300xray target
 	* go32.sh: target emulation for go32.
-
-
 
 Mon Mar 16 14:53:29 1992  Steve Chamberlain  (sac@rtl.cygnus.com)
 

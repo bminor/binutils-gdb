@@ -56,6 +56,7 @@ AR_FLAGS = qv
 BISON = bison -y
 MAKEINFO = makeinfo
 RANLIB = ranlib
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 #version=/`./../gcc/gcc -dumpversion`
 version=
@@ -103,12 +104,12 @@ LIBIBERTY=./../libiberty/libiberty.a
 
 ALL_EMULATIONS=ld__lnk960.o ld__sun3.o ld__i386aout.o \
 	ld__go32.o ld__m88kbcs.o ld__a29k.o ld__news.o ld__hp300bsd.o ld__h8300hms.o ld__ebmon29k.o \
-	ld__sun4.o ld__gld960.o ld__vanilla.o ld__h8300xray.o
+	ld__sun4.o ld__gld960.o ld__vanilla.o ld__h8300xray.o ld__st2000.o
 
 EMULATION_OFILES=${ALL_EMULATIONS}
 #EMULATION_OFILES=ld__${EMUL}.o ${OTHER_EMULATIONS}
 
-OFILES= ldgram.o ldlex.o lexsup.o ldlang.o ldctor.o ldmain.o ldindr.o \
+OFILES= ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o ldindr.o \
 	ldwarn.o ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o ldsym.o \
 	ldfile.o relax.o  lderror.o cplus-dem.o ${EMULATION_OFILES}
 
@@ -118,7 +119,7 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 
 MANSOURCES=ld.tex
 
-LDCSOURCES=ldlang.c lexsup.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
+LDCSOURCES=ldlang.c lexsup.c ldctor.c mri.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
 	ld__gld.c ld__sun3.c ld__go32.c ld__m88k.c ld__ebmon29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
 	relax.c  lderror.c cplus-dem.c
@@ -166,7 +167,7 @@ ldemul.o: ldemul-list.h
 
 ldlex.c: ldlex.l
 #	/lib/cpp -E -P $(INCLUDES)  $(HDEFINES) $(TDEFINES) $(CDEFINES) $(VPATH)/ldlex.l >ldlex.p
-	flex -Cem -t $(VPATH)/ldlex.l >ldlex.c
+	$(LEX) -Cem -t $(VPATH)/ldlex.l >ldlex.c
 #	cp ldlex.q ldlex.c
 
 
@@ -208,6 +209,9 @@ ld__h8300hms.c: $(srcdir)/h8300hms.sh \
 ld__h8300xray.c: $(srcdir)/h8300xray.sh \
   $(srcdir)/h8300xray.em $(srcdir)/h8300xray.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300xray.sh
+ld__st2000.c: $(srcdir)/st2000.sh \
+  $(srcdir)/st2000.em $(srcdir)/st2000.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} st2000.sh
 ld__vanilla.c: $(srcdir)/vanilla.sh \
   $(srcdir)/vanilla.em $(srcdir)/vanilla.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla.sh
@@ -339,6 +343,7 @@ ldgram.c:ldgram.y
 
 h8300hms.o:h8300hms.c
 h8300xray.o:h8300xray.c
+st2000.o:st2000.c
 
 stage1:	force
 	-mkdir stage1
@@ -403,8 +408,8 @@ install: $(LD_PROG)
 	mv ld.new ld
 	-rm -f $(bindir)/$(program_prefix)ld
 	$(INSTALL_PROGRAM) ld $(bindir)/$(program_prefix)ld
-	-rm -f $(tooldir)/bin/ld
-	$(INSTALL_PROGRAM) ld $(tooldir)/bin/ld
+	-rm -f $(tooldir)/ld
+	$(INSTALL_PROGRAM) ld $(tooldir)/ld
 	-rm -f $(man1dir)/$(program_prefix)ld.1
 	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld.1
 
