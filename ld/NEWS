@@ -1,5 +1,26 @@
 -*- text -*-
 
+Changes since version 2.5:
+
+* When an ELF section name is representable as a C identifier (this is not true
+of most ELF section names), the linker will automatically define symbols
+__start_SECNAME and __stop_SECNAME, where SECNAME is the section name, at the
+beginning and the end of the section.  This is used by glibc.
+
+* When an ELF section named .gnu.warning is encountered in an input file, the
+contents of the section are displayed as an error message, and the section is
+not copied into the output file.  This is used by glibc.
+
+* New options -split-by-reloc and -split-by-file.
+
+* The linker now supports linking PIC compiled code on SPARC SunOS.  It still
+can not create SunOS shared libraries.
+
+* The COFF linker now combines debugging information for structs, unions, and
+enums, so that even if the same type is defined in multiple input files it will
+only be defined once in the output file.  The --traditional-format switch will
+prevent this optimization.
+
 Changes since version 2.4:
 
 * The linker now supports linking against SunOS shared libraries.  It still can
@@ -16,9 +37,9 @@ Solaris again.
 Linux a.out shared libraries.  The linker produces Linux QMAGIC binaries.
 
 * The ELF backend has been converted to the new linker code.  To use the new
-ELF linker, each particular targets requires a relocation function.  So far,
-this function has been written for i386 (UnixWare), SPARC (Solaris) and MIPS
-(Irix 5) targets.
+ELF linker, each particular target requires a relocation function.  So far,
+this function has been written for i386 (UnixWare), SPARC (Solaris) MIPS (Irix
+5), and HPPA ELF targets.
 
 * The -( (--start-group) and -) (--end-group) options have been added to
 support searching a group of archives as though they were a single archive.
@@ -31,6 +52,13 @@ default linker script.
 
 * The -warn-once option was added.  It causes the linker to only warn once per
 undefined symbol, rather than once per reference.
+
+* The COFF backend has been converted to the new linker code.  As with ELF, to
+use the new linker, each particular target requires a relocation function.  So
+far, this function has been written for the i386, m68k, a29k and SH targets.
+
+* The -V flag was made a synonym for -v, for SVR4 compatibility.  The old -V
+behaviour is available via --verbose.
 
 Changes since version 2.3:
 
