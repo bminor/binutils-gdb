@@ -471,6 +471,50 @@ cb_syscall (cb, sc)
       }
       break;
 
+    case CB_SYS_lstat :
+      {
+	char *path, *buf;
+	int buflen;
+	struct stat statbuf;
+	TADDR addr = sc->arg2;
+
+	errcode = get_path (cb, sc, sc->arg1, &path);
+	if (errcode != 0)
+	  {
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	result = (*cb->lstat) (cb, path, &statbuf);
+	free (path);
+	if (result < 0)
+	  goto ErrorFinish;
+
+	buflen = cb_host_to_target_stat (cb, NULL, NULL);
+	buf = xmalloc (buflen);
+	if (cb_host_to_target_stat (cb, &statbuf, buf) != buflen)
+	  {
+	    /* The translation failed.  This is due to an internal
+	       host program error, not the target's fault.
+	       Unfortunately, it's hard to test this case, so there's no
+	       test-case for this execution path.  */
+	    free (buf);
+	    errcode = ENOSYS;
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
+	  {
+	    free (buf);
+	    errcode = EINVAL;
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+
+	free (buf);
+      }
+      break;
+
     case CB_SYS_time :
       {
 	/* FIXME: May wish to change CB_SYS_time to something else.

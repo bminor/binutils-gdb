@@ -1,3 +1,8 @@
+2004-12-13  Hans-Peter Nilsson  <hp@axis.com>
+
+	* syscall.c (cb_syscall) <case CB_SYS_lstat>: New case.
+	* callback.c (os_lstat): New function.
+
 2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* run.1: Document --sysroot=filepath.

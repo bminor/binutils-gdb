@@ -407,6 +407,16 @@ os_fstat (p, fd, buf)
   return wrap (p, fstat (fdmap (p, fd), buf));
 }
 
+static int
+os_lstat (p, file, buf)
+     host_callback *p;
+     const char *file;
+     struct stat *buf;
+{
+  /* NOTE: hpn/2004-12-12: Same issue here as with os_fstat.  */
+  return wrap (p, lstat (file, buf));
+}
+
 static int 
 os_ftruncate (p, fd, len)
      host_callback *p;
@@ -589,6 +599,7 @@ host_callback default_callback =
 
   os_stat,
   os_fstat,
+  os_lstat,
 
   os_ftruncate,
   os_truncate,
