@@ -119,6 +119,7 @@ extern int sh64_consume_datalabel
 /* Saying "$" is the same as saying ".".  */
 #define DOLLAR_DOT
 
+#undef MD_PCREL_FROM_SECTION
 #define MD_PCREL_FROM_SECTION(FIXP, SEC)		\
   shmedia_md_pcrel_from_section (FIXP, SEC)
 
