@@ -453,6 +453,11 @@ set_internalvar (var, val)
 
   free ((PTR)var->value);
   var->value = value_copy (val);
+  /* Force the value to be fetched from the target now, to avoid problems
+     later when this internalvar is referenced and the target is gone or
+     has changed.  */
+  if (VALUE_LAZY (var->value))
+    value_fetch_lazy (var->value);
   release_value (var->value);
 }
 
