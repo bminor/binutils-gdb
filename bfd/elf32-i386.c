@@ -2579,7 +2579,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		dr_type = R_386_TLS_TPOFF32;
 	      if (dr_type == R_386_TLS_TPOFF32 && indx == 0)
-		bfd_put_32 (output_bfd, relocation - dtpoff_base (info),
+		bfd_put_32 (output_bfd, dtpoff_base (info) - relocation,
 			    htab->sgot->contents + off);
 	      else
 		bfd_put_32 (output_bfd, 0,
