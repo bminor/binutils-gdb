@@ -287,6 +287,9 @@
   unsigned32 usp = State.regs[REG_USP];
   unsigned32 mask;
 
+  PC = cia;
+  mask = REGS;
+
   if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33
       )
     {
@@ -1578,6 +1581,7 @@
   if (start == -1)
     start = 31;
     
+  c = 0;
   for (i = start; i >= 0; i--)
     {
       if (temp & (1 << i))
@@ -1641,7 +1645,7 @@
 {
   int dstreg, imm;
   int z, c, n, v;
-  unsigned32 reg1, reg2, sum;
+  unsigned32 reg2, sum;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -1682,7 +1686,7 @@
 {
   int imm, dstreg;
   int z, c, n, v;
-  unsigned32 reg1, reg2, difference;
+  unsigned32 reg2, difference;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -1828,7 +1832,7 @@
 "asl"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
   int z, n;
 
   PC = cia;
@@ -2755,7 +2759,7 @@
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM0);
-  srcreg1 = translate_rreg (SD_, RI0);
+  srcreg2 = translate_rreg (SD_, RI0);
   dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = load_word (State.regs[srcreg1] + State.regs[srcreg2]);
 }
@@ -2783,7 +2787,7 @@
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM0);
-  srcreg1 = translate_rreg (SD_, RI0);
+  srcreg2 = translate_rreg (SD_, RI0);
   dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = load_byte (State.regs[srcreg1] + State.regs[srcreg2]);
 }
@@ -2811,7 +2815,7 @@
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM0);
-  srcreg1 = translate_rreg (SD_, RI0);
+  srcreg2 = translate_rreg (SD_, RI0);
   dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = load_half (State.regs[srcreg1] + State.regs[srcreg2]);
 }
@@ -3167,7 +3171,8 @@
   start = (State.regs[srcreg2] & 0x1f) - 1;
   if (start == -1)
     start = 31;
-    
+
+  c = 0;    
   for (i = start; i >= 0; i--)
     {
       if (temp & (1 << i))
@@ -3415,7 +3420,7 @@
 "asl"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
   int z, n;
 
   PC = cia;
@@ -4172,7 +4177,7 @@
 "asl"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
   int z, n;
 
   PC = cia;
@@ -4985,7 +4990,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5024,7 +5028,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5197,7 +5200,6 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5232,7 +5234,6 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5340,7 +5341,6 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  int result1;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5457,7 +5457,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5496,7 +5495,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5721,7 +5719,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5760,7 +5757,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -5974,7 +5970,6 @@
 {
   int dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6011,7 +6006,6 @@
 {
   int dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6174,7 +6168,6 @@
 *am33
 {
   int dstreg1, dstreg2;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6207,7 +6200,6 @@
 *am33
 {
   int dstreg1, dstreg2;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6293,7 +6285,6 @@
 *am33
 {
   int srcreg2, dstreg1, dstreg2;
-  int result1;
 
   PC = cia;
   srcreg2 = translate_rreg (SD_, RM2);
@@ -6310,7 +6301,6 @@
 *am33
 {
   int dstreg1, dstreg2;
-  int result1;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6421,7 +6411,6 @@
 {
   int dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6458,7 +6447,6 @@
 {
   int dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6671,7 +6659,6 @@
 {
   int dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6708,7 +6695,6 @@
 {
   int dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   dstreg1 = translate_rreg (SD_, RN1);
@@ -6932,7 +6918,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -6971,7 +6956,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7530,7 +7514,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7569,7 +7552,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7804,7 +7786,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7845,7 +7826,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -8071,7 +8051,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -8110,7 +8089,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -8226,7 +8204,6 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  int result1;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -8234,7 +8211,7 @@
   dstreg1 = translate_rreg (SD_, RN1);
   dstreg2 = translate_rreg (SD_, RN2);
 
-  State.regs[dstreg1] = result1;
+  genericCmp (State.regs[dstreg2], State.regs[dstreg1]);
   if (State.regs[srcreg1] >= 0x7fff)
     State.regs[dstreg1] = 0x7fff;
   else if (State.regs[srcreg1] <= 0xffff8000)
@@ -8400,7 +8377,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -8451,7 +8427,6 @@
 {
   int srcreg1, dstreg1, dstreg2;
   int result1;
-  signed int temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -8475,7 +8450,6 @@
 *am33
 {
   int srcreg, dstreg;
-  int result1;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM);
@@ -8489,7 +8463,6 @@
       State.regs[REG_PC] = State.regs[REG_LAR] - 4;
       nia = PC;
     }
-  State.regs[dstreg] = result1;
 }
 
 // 1111 0111 1110 0000 Rm1 Rn1 imm4 0001; mov_lgt (Rm+,imm4),Rn

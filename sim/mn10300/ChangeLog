@@ -1,3 +1,12 @@
+Wed Aug  9 02:24:53 2000  Graham Stott  <grahams@cygnus.co.uk>
+
+	* am33.igen: Warning clean-up.
+	(movm): Initialize PC and mask.
+	(mov, movbu, movhu): Set srcreg2 from RI0.
+	(bsch): Initialize c.
+	(sat16_cmp): Actually do the comparison.
+	(mov_llt): Do not overwrite dstreg with uninitialized variable.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
