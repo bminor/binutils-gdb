@@ -902,6 +902,12 @@ print_insn_hppa (memaddr, info)
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
 		  break;
+		case 'M':
+		  fputs_filtered (",push", info);
+		  break;
+		case 'L':
+		  fputs_filtered (",%r2", info);
+		  break;
 		case 'g':
 		  fputs_filtered (",gate", info);
 		  break;
