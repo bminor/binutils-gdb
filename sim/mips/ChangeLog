@@ -1,3 +1,9 @@
+start-sanitize-tx19
+Sun Sep  7 16:05:46 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips/configure.in, mips/gencode: Add tx19/r1900.
+
+end-sanitize-tx19
 Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

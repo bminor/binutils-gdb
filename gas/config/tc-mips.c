@@ -199,6 +199,11 @@ static int mips_4010 = -1;
 /* Whether the 4100 MADD16 and DMADD16 are permitted. */
 static int mips_4100 = -1;
 
+/* start-sanitize-tx19 */
+/* Whether Toshiba r3900 instructions are permitted. */
+static int mips_1900 = -1;
+/* end-sanitize-tx19 */
+
 /* start-sanitize-r5900 */
 /* Whether Toshiba r5900 instructions are permitted. */
 static int mips_5900 = -1;
@@ -796,6 +801,17 @@ md_begin ()
 	  if (mips_cpu == -1)
 	    mips_cpu = 3000;
 	}
+      /* start-sanitize-tx19 */
+      else if (strcmp (cpu, "r1900") == 0
+               || strcmp (cpu, "mipstx19") == 0)
+	{
+	  mips_opts.isa = 1;
+	  if (mips_cpu == -1)
+	    mips_cpu = 1900;
+          if (mips_1900 == -1)
+            mips_1900 = 1;
+	}
+      /* end-sanitize-tx19 */
       else if (strcmp (cpu, "r3900") == 0
                || strcmp (cpu, "mipsr3900") == 0)
 	{
@@ -10635,7 +10651,7 @@ md_convert_frag (abfd, asec, fragp)
 	  ext = false;
 	}
 
-      resolve_symbol_value (fragp->fr_symbol);
+      resolve_symbol_value (fragp->fr_symbol, 1);
       val = S_GET_VALUE (fragp->fr_symbol);
       if (op->pcrel)
 	{

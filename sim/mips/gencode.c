@@ -475,9 +475,15 @@ typedef struct instruction {
 /* start-sanitize-r5900 */
 #define ARCH_R5900        ((unsigned)1 << 30) /* Toshiba r5900 extension instructions */
 /* end-sanitize-r5900 */
+/* start-sanitize-tx19 */
+#define ARCH_TX19         ((unsigned)1 << 27) /* Toshiba TX19 extention instruction */
+/* end-sanitize-tx19 */
 
 /* A list (or'ed) of extension insn sets that can be requested independant of the ISA# */
 #define MASK_ISA_INDEP  (0                                             \
+                         /* start-sanitize-tx19 */                     \
+                         | ARCH_TX19                                   \
+                         /* end-sanitize-tx19 */                       \
                          /* start-sanitize-r5900 */                    \
                          | ARCH_R5900                                  \
                          /* end-sanitize-r5900 */                      \
@@ -4111,6 +4117,9 @@ struct architectures {
 };
 
 static const struct architectures available_architectures[] = {
+  /* start-sanitize-tx19 */
+  {"1900",ARCH_TX19},   /* Toshiba TX19 */
+  /* end-sanitize-tx19  */
   {"4100",ARCH_VR4100}, /* NEC MIPS VR4100 */
   /* start-sanitize-r5900 */
   {"5900",ARCH_R5900},

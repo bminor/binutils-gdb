@@ -64,6 +64,20 @@ case $1 in
 	;;
 esac
 
+# CYGNUS LOCAL marketing-names
+# Here we handle any "marketing" names - translating them to
+#  standard triplets
+case $1 in 
+# start-sanitize-tx19
+	mips-tx19-elf)
+		set mipstx19-unknown-elf
+                ;;
+# end-sanitize-tx19
+	*)
+		;;
+esac
+# END CYGNUS LOCAL marketing-names
+
 # Separate what the user gave into CPU-COMPANY and OS or KERNEL-OS (if any).
 # Here we must recognize all the valid KERNEL-OS combinations.
 maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
@@ -172,6 +186,11 @@ case $basic_machine in
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-tx19
+        mipstx19 | mipstx19el)
+                basic_machine=$basic_machine-unknown
+                ;;
+# end-sanitize-tx19
 	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith/vr4300
 		basic_machine=$basic_machine-unknown
 		;;
@@ -259,6 +278,10 @@ case $basic_machine in
 		;;
 	mips64vr4100-* | mips64vr4100el-*) # CYGNUS LOCAL jsmith/vr4100
 		;;
+# start-sanitize-tx19
+	mipstx19-* | mipstx19el-*)
+		;;
+# end-sanitize-tx19
 # start-sanitize-r5900
 	mips64vr5900-* | mips64vr5900el-*) # CYGNUS LOCAL gavin/r5900
                 ;;
@@ -680,6 +703,14 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
+# start-sanitize-tx19
+	r1900)
+		basic_machine=mipstx19-unknown
+		;;
+	r1900el)
+		basic_machine=mipstx19el-unknown
+		;;
+# end-sanitize-tx19
 # start-sanitize-r5900
         r5900)                                          # CYGNUS LOCAL
                 basic_machine=mips64vr5900el-unknown
@@ -768,6 +799,14 @@ case $basic_machine in
 		basic_machine=i386-sequent
 		os=-dynix
 		;;
+# start-sanitize-tx19
+	tx19)
+		basic_machine=mipstx19-unknown
+		;;
+	tx19el)
+		basic_machine=mipstx19el-unknown
+		;;
+# end-sanitize-tx19
 	tx39)
 		basic_machine=mipstx39-unknown
 		;;
