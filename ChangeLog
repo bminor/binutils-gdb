@@ -1,3 +1,7 @@
+Mon Oct 17 16:22:12 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* configure.in (*-*-netware*): Add libio.
+
 Thu Oct 13 15:51:20 1994  Jason Merrill  (jason@phydeaux.cygnus.com)
 
 	* Makefile.in (ALL_TARGET_MODULES): Add libstdc++.

@@ -306,7 +306,7 @@ esac
 
 case "${target}" in
   *-*-netware)
-    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx newlib"
+    noconfigdirs="$noconfigdirs libg++ libstdc++ librx newlib"
     ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
