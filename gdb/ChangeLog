@@ -1,5 +1,21 @@
 2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.c (setarmcmdlist, showarmcmdlist): New command lists.
+	(set_arm_command, show_arm_command): New functions.
+	(_initialize_arm_tdep): Add them.
+	(num_disassembly_options): Renamed from num_flavor_options.
+	(valid_disassembly_styles): Renamed from valid_flavors.
+	(disassembly_style): Renamed from disassembly_flavor.
+	(set_disassembly_style_sfunc): Renamed from 
+	set_disassembly_flavor_sfunc.
+	(set_disassembly_style): Renamed from set_disassembly_flavor.
+	(arm_othernames): Updated.
+	(_initialize_arm_tdep): Deprecate "set/show disassembly-flavor"
+	command.  Add "set/show arm disassembly" commands.  Deprecate
+	"othernames" command.
+
+2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
+
 	* Makefile.in (elf_reloc_macros_h, elf_arm_h): Define.
 	(arm-tdep.o): Depend on elf_arm_h.
 

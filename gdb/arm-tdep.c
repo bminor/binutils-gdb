@@ -28,7 +28,7 @@
 #include "gdbcore.h"
 #include "symfile.h"
 #include "gdb_string.h"
-#include "dis-asm.h"		/* For register flavors. */
+#include "dis-asm.h"		/* For register styles. */
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
@@ -99,8 +99,12 @@ static int arm_debug;
 #define MSYMBOL_SIZE(msym)				\
 	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
 
+/* The list of available "set arm ..." and "show arm ..." commands.  */
+static struct cmd_list_element *setarmcmdlist = NULL;
+static struct cmd_list_element *showarmcmdlist = NULL;
+
 /* Number of different reg name sets (options).  */
-static int num_flavor_options;
+static int num_disassembly_options;
 
 /* We have more registers than the disassembler as gdb can print the value
    of special registers as well.
@@ -118,19 +122,19 @@ static char * arm_register_name_strings[] =
  "fps", "cpsr" };		/* 24 25       */
 static char **arm_register_names = arm_register_name_strings;
 
-/* Valid register name flavors.  */
-static const char **valid_flavors;
+/* Valid register name styles.  */
+static const char **valid_disassembly_styles;
 
-/* Disassembly flavor to use. Default to "std" register names.  */
-static const char *disassembly_flavor;
+/* Disassembly style to use. Default to "std" register names.  */
+static const char *disassembly_style;
 /* Index to that option in the opcodes table.  */
 static int current_option;
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
-   flavor.  */
-static void set_disassembly_flavor_sfunc(char *, int,
+   style.  */
+static void set_disassembly_style_sfunc(char *, int,
 					 struct cmd_list_element *);
-static void set_disassembly_flavor (void);
+static void set_disassembly_style (void);
 
 static void convert_from_extended (const struct floatformat *, const void *,
 				   void *);
@@ -2516,16 +2520,29 @@ arm_skip_stub (CORE_ADDR pc)
   return 0;			/* not a stub */
 }
 
-/* If the user changes the register disassembly flavor used for info
-   register and other commands, we have to also switch the flavor used
-   in opcodes for disassembly output.  This function is run in the set
-   disassembly_flavor command, and does that.  */
+static void
+set_arm_command (char *args, int from_tty)
+{
+  printf_unfiltered ("\"set arm\" must be followed by an apporpriate subcommand.\n");
+  help_list (setarmcmdlist, "set arm ", all_commands, gdb_stdout);
+}
 
 static void
-set_disassembly_flavor_sfunc (char *args, int from_tty,
+show_arm_command (char *args, int from_tty)
+{
+  help_list (showarmcmdlist, "show arm ", all_commands, gdb_stdout);
+}
+
+/* If the user changes the register disassembly style used for info
+   register and other commands, we have to also switch the style used
+   in opcodes for disassembly output.  This function is run in the "set
+   arm disassembly" command, and does that.  */
+
+static void
+set_disassembly_style_sfunc (char *args, int from_tty,
 			      struct cmd_list_element *c)
 {
-  set_disassembly_flavor ();
+  set_disassembly_style ();
 }
 
 /* Return the ARM register name corresponding to register I.  */
@@ -2536,16 +2553,16 @@ arm_register_name (int i)
 }
 
 static void
-set_disassembly_flavor (void)
+set_disassembly_style (void)
 {
   const char *setname, *setdesc, **regnames;
   int numregs, j;
 
-  /* Find the flavor that the user wants in the opcodes table.  */
+  /* Find the style that the user wants in the opcodes table.  */
   int current = 0;
   numregs = get_arm_regnames (current, &setname, &setdesc, &regnames);
-  while ((disassembly_flavor != setname)
-	 && (current < num_flavor_options))
+  while ((disassembly_style != setname)
+	 && (current < num_disassembly_options))
     get_arm_regnames (++current, &setname, &setdesc, &regnames);
   current_option = current;
 
@@ -2569,19 +2586,17 @@ set_disassembly_flavor (void)
   set_arm_regname_option (current);
 }
 
-/* arm_othernames implements the "othernames" command.  This is kind
-   of hacky, and I prefer the set-show disassembly-flavor which is
-   also used for the x86 gdb.  I will keep this around, however, in
-   case anyone is actually using it.  */
+/* arm_othernames implements the "othernames" command.  This is deprecated
+   by the "set arm disassembly" command.  */
 
 static void
 arm_othernames (char *names, int n)
 {
   /* Circle through the various flavors.  */
-  current_option = (current_option + 1) % num_flavor_options;
+  current_option = (current_option + 1) % num_disassembly_options;
 
-  disassembly_flavor = valid_flavors[current_option];
-  set_disassembly_flavor ();
+  disassembly_style = valid_disassembly_styles[current_option];
+  set_disassembly_style ();
 }
 
 /* Fetch, and possibly build, an appropriate link_map_offsets structure
@@ -3026,28 +3041,38 @@ _initialize_arm_tdep (void)
   tm_print_insn = gdb_print_insn_arm;
 
   /* Get the number of possible sets of register names defined in opcodes.  */
-  num_flavor_options = get_arm_regname_num_options ();
+  num_disassembly_options = get_arm_regname_num_options ();
+
+  /* Add root prefix command for all "set arm"/"show arm" commands.  */
+  add_prefix_cmd ("arm", no_class, set_arm_command,
+		  "Various ARM-specific commands.",
+		  &setarmcmdlist, "set arm ", 0, &setlist);
+
+  add_prefix_cmd ("arm", no_class, show_arm_command,
+		  "Various ARM-specific commands.",
+		  &showarmcmdlist, "show arm ", 0, &showlist);
 
   /* Sync the opcode insn printer with our register viewer.  */
   parse_arm_disassembler_option ("reg-names-std");
 
   /* Begin creating the help text.  */
   stb = mem_fileopen ();
-  fprintf_unfiltered (stb, "Set the disassembly flavor.\n\
-The valid values are:\n");
+  fprintf_unfiltered (stb, "Set the disassembly style.\n"
+		      "The valid values are:\n");
 
   /* Initialize the array that will be passed to add_set_enum_cmd().  */
-  valid_flavors = xmalloc ((num_flavor_options + 1) * sizeof (char *));
-  for (i = 0; i < num_flavor_options; i++)
+  valid_disassembly_styles
+    = xmalloc ((num_disassembly_options + 1) * sizeof (char *));
+  for (i = 0; i < num_disassembly_options; i++)
     {
       numregs = get_arm_regnames (i, &setname, &setdesc, &regnames);
-      valid_flavors[i] = setname;
+      valid_disassembly_styles[i] = setname;
       fprintf_unfiltered (stb, "%s - %s\n", setname,
 			  setdesc);
       /* Copy the default names (if found) and synchronize disassembler.  */
       if (!strcmp (setname, "std"))
 	{
-          disassembly_flavor = setname;
+          disassembly_style = setname;
           current_option = i;
 	  for (j = 0; j < numregs; j++)
             arm_register_names[j] = (char *) regnames[j];
@@ -3055,21 +3080,29 @@ The valid values are:\n");
 	}
     }
   /* Mark the end of valid options.  */
-  valid_flavors[num_flavor_options] = NULL;
+  valid_disassembly_styles[num_disassembly_options] = NULL;
 
   /* Finish the creation of the help text.  */
   fprintf_unfiltered (stb, "The default is \"std\".");
   helptext = ui_file_xstrdup (stb, &length);
   ui_file_delete (stb);
 
-  /* Add the disassembly-flavor command.  */
+  /* Add the deprecated disassembly-flavor command.  */
   new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
-			      valid_flavors,
-			      &disassembly_flavor,
+			      valid_disassembly_styles,
+			      &disassembly_style,
 			      helptext,
 			      &setlist);
-  set_cmd_sfunc (new_cmd, set_disassembly_flavor_sfunc);
-  add_show_from_set (new_cmd, &showlist);
+  set_cmd_sfunc (new_cmd, set_disassembly_style_sfunc);
+  deprecate_cmd (new_cmd, "set arm disassembly");
+  deprecate_cmd (add_show_from_set (new_cmd, &showlist),
+		 "show arm disassembly");
+
+  /* And now add the new interface.  */
+  new_cmd = add_set_enum_cmd ("disassembly", no_class, valid_disassembly_styles,
+			      &disassembly_style, helptext, &setarmcmdlist);
+
+  add_show_from_set (new_cmd, &showarmcmdlist);
 
   /* ??? Maybe this should be a boolean.  */
   add_show_from_set (add_set_cmd ("apcs32", no_class,
@@ -3078,13 +3111,13 @@ The valid values are:\n");
 		     &showlist);
 
   /* Add the deprecated "othernames" command.  */
-
-  add_com ("othernames", class_obscure, arm_othernames,
-	   "Switch to the next set of register names.");
+  deprecate_cmd (add_com ("othernames", class_obscure, arm_othernames,
+			  "Switch to the next set of register names."),
+		 "set arm disassembly");
 
   /* Debugging flag.  */
   add_show_from_set (add_set_cmd ("arm", class_maintenance, var_zinteger,
-				  &arm_debug, "Set arm debugging.\n\
-When non-zero, arm specific debugging is enabled.", &setdebuglist),
-		     &showdebuglist);
+				  &arm_debug, "Set arm debugging.\n"
+				  "When non-zero, arm specific debugging is enabled.",
+				  &setdebuglist), &showdebuglist);
 }
