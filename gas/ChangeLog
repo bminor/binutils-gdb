@@ -1,3 +1,9 @@
+Mon Aug 14 20:51:56 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* write.c (write_contents): Always do it the BFD_FAST_SECTION_FILL
+	way.  Reformat and reindent that code to GNU standards.
+	(BFD_FAST_SECTION_FILL): Don't define.
+
 Mon Aug 14 14:08:07 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_apply_fix): Don't try to apply BEGIN_BRTAB
