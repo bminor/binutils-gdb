@@ -1,3 +1,7 @@
+2004-05-20  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_push_dummy_call): Formatting fixes.
+
 2004-05-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* regset.h: Make prototype const-correct.

@@ -1318,8 +1318,8 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     there is no way we would run out of them.  */
 
 	  if (len > 8)
-	    printf_unfiltered (
-				"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
+	    printf_unfiltered ("Fatal Error: a floating point parameter "
+                               "#%d with a size > 8 is found!\n", argno);
 
 	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE
                                         (tdep->ppc_fp0_regnum + 1 + f_argno)],
@@ -1432,8 +1432,8 @@ ran_out_of_registers_for_arguments:
 	    {
 
 	      if (len > 8)
-		printf_unfiltered (
-				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
+		printf_unfiltered ("Fatal Error: a floating point parameter"
+                                   " #%d with a size > 8 is found!\n", argno);
 
 	      memcpy (&(deprecated_registers
                         [DEPRECATED_REGISTER_BYTE
@@ -1443,7 +1443,9 @@ ran_out_of_registers_for_arguments:
 	      ++f_argno;
 	    }
 
-	  write_memory (sp + 24 + (ii * 4), (char *) VALUE_CONTENTS (arg), len);
+	  write_memory (sp + 24 + (ii * 4),
+                        (char *) VALUE_CONTENTS (arg),
+                        len);
 	  ii += ((len + 3) & -4) / 4;
 	}
     }
