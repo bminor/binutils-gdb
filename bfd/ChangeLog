@@ -1,5 +1,9 @@
 Thu May 30 15:30:10 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
+	* bfd.c (bfd_check_format): Fixed problem where when a defaulted
+	target didn't match, the format got set to the attempted match,
+	breaking a future test.
+
         *../include/i386coff.h : fixed typo in type field with size
 
 	* i386coff.c icoff.c m88k-bcs.c ecoff.c ../include/bfd.h : Added
@@ -32,6 +36,7 @@ Fri May 24 18:56:52 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 Wed May 22 07:26:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
+	* coffcode.h: removed all put_x_<sizes>
 	* libbfd.c: Changed #ifdef __GNUC__ to #ifdef HOST_64_BIT, Added
 	DEFUNS 
 
