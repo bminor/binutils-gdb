@@ -1,3 +1,8 @@
+Fri Apr 17 22:29:04 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_relocate_section): Do not complain about
+	an out of range pc-relative jump/call to an undefined weak symbol.
+
 Thu Apr 16 13:49:00 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_do_reloc_gpdisp): Do all gpdisp 
