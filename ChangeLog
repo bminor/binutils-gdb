@@ -6,8 +6,6 @@ Mon Dec  1 10:53:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* modules/modules: add libide to gdb's checkout list
 
-	* ChangeLog: tidy up 11/26 entry
-	
 Sun Nov 30 16:12:27 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* Makefile.in: Add rules for cygmon.
@@ -16,8 +14,8 @@ Sun Nov 30 16:12:27 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 Wed Nov 26 11:53:33 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
-	* Makefile.in, configure, configure.in: merge with foundry's
-	11/18/97 build
+	* Makefile.in, configure, configure.in, ChangeLog: merge with foundry's
+	11/18/97 build 
 
 Mon Nov 10 15:23:21 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
