@@ -83,6 +83,10 @@ static segT tbss_section = NULL;
 static segT zbss_section = NULL;
 static segT rosdata_section = NULL;
 static segT rozdata_section = NULL;
+/* start-sanitize-v850e */
+static segT call_table_data_section = NULL;
+static segT call_table_text_section = NULL;
+/* end-sanitize-v850e */
 
 
 /* local functions */
@@ -166,6 +170,24 @@ v850_rozdata (int ignore)
   demand_empty_rest_of_line ();
 }
 
+/* start-sanitize-v850e */
+void
+v850_call_table_data (int ignore)
+{
+  subseg_set (call_table_data_section, (subsegT) get_absolute_expression ());
+  
+  demand_empty_rest_of_line ();
+}
+
+void
+v850_call_table_text (int ignore)
+{
+  subseg_set (call_table_text_section, (subsegT) get_absolute_expression ());
+  
+  demand_empty_rest_of_line ();
+}
+/* end-sanitize-v850e */
+
 static void
 v850_section (int arg)
 {
@@ -244,10 +266,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"word",    cons,         4},
   {"v850",    set_machine,  0},
 /* start-sanitize-v850e */
-  {"v850e",   set_machine,  bfd_mach_v850e},
+  {"call_table_data", v850_call_table_data, 0},
+  {"call_table_text", v850_call_table_text, 0},
+  {"v850e",           set_machine,          bfd_mach_v850e},
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
-  {"v850eq",  set_machine,  bfd_mach_v850eq},
+  {"v850eq",          set_machine,          bfd_mach_v850eq},
 /* end-sanitize-v850eq */
   { NULL,     NULL,         0}
 };
@@ -509,7 +533,7 @@ system_register_name (expressionP, accept_numbers)
  */
 static boolean
 cc_name (expressionP)
-     expressionS *expressionP;
+     expressionS * expressionP;
 {
   int    reg_number;
   char * name;
@@ -791,7 +815,7 @@ size_t md_longopts_size = sizeof md_longopts;
 
 void
 md_show_usage (stream)
-  FILE *stream;
+  FILE * stream;
 {
   fprintf (stream, "V850 options:\n");
   fprintf (stream, "\t-wsigned_overflow    Warn if signed immediate values overflow\n");
@@ -1003,8 +1027,78 @@ md_begin ()
 			 
   rozdata_section = subseg_new (".rozdata", 0);
   bfd_set_section_flags (stdoutput, rozdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY));
+
+/* start-sanitize-v850e */
+  call_table_data_section = subseg_new (".call_table_data", 0);
+  bfd_set_section_flags (stdoutput, call_table_data_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS));
+  
+  call_table_text_section = subseg_new (".call_table_text", 0);
+  bfd_set_section_flags (stdoutput, call_table_text_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE));
+/* end-sanitize-v850e */
 }
 
+
+/* start-sanitize-v850e */
+static bfd_reloc_code_real_type
+handle_ctoff (const struct v850_operand * operand)
+{
+  if (operand == NULL)
+    return BFD_RELOC_V850_CALLT_16_16_OFFSET;
+
+  assert (operand->bits == 6);
+  assert (operand->shift == 0);
+      
+  return BFD_RELOC_V850_CALLT_6_7_OFFSET;
+}
+/* end-sanitize-v850e */
+
+static bfd_reloc_code_real_type
+handle_sdaoff (const struct v850_operand * operand)
+{
+  if (operand == NULL)                             return BFD_RELOC_V850_SDA_16_16_OFFSET;
+  if (operand->bits == 15 && operand->shift == 17) return BFD_RELOC_V850_SDA_15_16_OFFSET;
+  /* start-sanitize-v850e */
+  if (operand->bits == -1)                         return BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET;
+  /* end-sanitize-v850e */
+  
+  assert (operand->bits == 16);
+  assert (operand->shift == 16);
+  
+  return BFD_RELOC_V850_SDA_16_16_OFFSET;
+}
+
+static bfd_reloc_code_real_type
+handle_zdaoff (const struct v850_operand * operand)
+{
+  if (operand == NULL)                             return BFD_RELOC_V850_ZDA_16_16_OFFSET;
+  if (operand->bits == 15 && operand->shift == 17) return BFD_RELOC_V850_ZDA_15_16_OFFSET;
+  /* start-sanitize-v850e */
+  if (operand->bits == -1)                         return BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET;
+  /* end-sanitize-v850e */
+  
+  assert (operand->bits == 16);
+  assert (operand->shift == 16);
+  
+  return BFD_RELOC_V850_ZDA_16_16_OFFSET;
+}
+
+static bfd_reloc_code_real_type
+handle_tdaoff (const struct v850_operand * operand)
+{
+  if (operand == NULL)                               return BFD_RELOC_V850_TDA_7_7_OFFSET;  /* data item, not an instruction.  */
+  if (operand->bits == 6 && operand->shift == 1)     return BFD_RELOC_V850_TDA_6_8_OFFSET;  /* sld.w/sst.w, operand: D8_6  */
+  /* start-sanitize-v850e */
+  if (operand->bits == 4 && operand->insert != NULL) return BFD_RELOC_V850_TDA_4_5_OFFSET;  /* sld.hu, operand: D5-4 */
+  if (operand->bits == 4 && operand->insert == NULL) return BFD_RELOC_V850_TDA_4_4_OFFSET;  /* sld.bu, operand: D4   */
+  /* end-sanitize-v850e */
+  if (operand->bits == 16 && operand->shift == 16)   return BFD_RELOC_V850_TDA_16_16_OFFSET; /* set1 & chums, operands: D16 */
+  
+  assert (operand->bits == 7);
+  
+  return  operand->insert != NULL
+    ? BFD_RELOC_V850_TDA_7_8_OFFSET     /* sld.h/sst.h, operand: D8_7 */
+    : BFD_RELOC_V850_TDA_7_7_OFFSET;    /* sld.b/sst.b, opreand: D7   */
+}
 
 /* Warning: The code in this function relies upon the definitions
    in the v850_operands[] array (defined in opcodes/v850-opc.c)
@@ -1022,83 +1116,28 @@ v850_reloc_prefix (const struct v850_operand * operand)
       ++ input_line_pointer;
       paren_skipped = true;
     }
+
+#define CHECK_(name, reloc) 						\
+  if (strncmp (input_line_pointer, name##"(", strlen (name) + 1) == 0)	\
+    {									\
+      input_line_pointer += strlen (name);				\
+      return reloc;							\
+    }
   
-  if (strncmp (input_line_pointer, "hi0(", 4) == 0)
-    {
-      input_line_pointer += 3;
-      return BFD_RELOC_HI16;
-    }
-  if (strncmp (input_line_pointer, "hi(", 3) == 0)
-    {
-      input_line_pointer += 2;
-      return BFD_RELOC_HI16_S;
-    }
-  if (strncmp (input_line_pointer, "lo(", 3) == 0)
-    {
-      input_line_pointer += 2;
-      return BFD_RELOC_LO16;
-    }
+  CHECK_ ("hi0",    BFD_RELOC_HI16);
+  CHECK_ ("hi",     BFD_RELOC_HI16_S);
+  CHECK_ ("lo",     BFD_RELOC_LO16);
+  CHECK_ ("sdaoff", handle_sdaoff (operand));
+  CHECK_ ("zdaoff", handle_zdaoff (operand));
+  CHECK_ ("tdaoff", handle_tdaoff (operand));
+
 /* start-sanitize-v850e */
-  if (strncmp (input_line_pointer, "hilo(", 5) == 0)
-    {
-      input_line_pointer += 4;
-      return BFD_RELOC_32;
-    }
+  CHECK_ ("hilo", BFD_RELOC_32);
+  CHECK_ ("ctoff",  handle_ctoff (operand));
 /* end-sanitize-v850e */
-
-  if (strncmp (input_line_pointer, "sdaoff(", 7) == 0)
-    {
-      input_line_pointer += 6;
-      
-      if (operand == NULL)                             return BFD_RELOC_V850_SDA_16_16_OFFSET;
-      if (operand->bits == 15 && operand->shift == 17) return BFD_RELOC_V850_SDA_15_16_OFFSET;
-      /* start-sanitize-v850e */
-      if (operand->bits == -1)                         return BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET;
-      /* end-sanitize-v850e */
-      
-      assert (operand->bits == 16);
-      assert (operand->shift == 16);
-      
-      return BFD_RELOC_V850_SDA_16_16_OFFSET;
-    }
-      
-  if (strncmp (input_line_pointer, "zdaoff(", 7) == 0)
-    {
-      input_line_pointer += 6;
-      
-      if (operand == NULL)                             return BFD_RELOC_V850_ZDA_16_16_OFFSET;
-      if (operand->bits == 15 && operand->shift == 17) return BFD_RELOC_V850_ZDA_15_16_OFFSET;
-      /* start-sanitize-v850e */
-      if (operand->bits == -1)                         return BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET;
-      /* end-sanitize-v850e */
-      
-      assert (operand->bits == 16);
-      assert (operand->shift == 16);
-      
-      return BFD_RELOC_V850_ZDA_16_16_OFFSET;
-    }
   
-  if (strncmp (input_line_pointer, "tdaoff(", 7) == 0)
-    {
-      input_line_pointer += 6;
-      
-      if (operand == NULL)                               return BFD_RELOC_V850_TDA_7_7_OFFSET;  
-      if (operand->bits == 6 && operand->shift == 1)     return BFD_RELOC_V850_TDA_6_8_OFFSET;  /* sld.w/sst.w, operand: D8_6  */
-      /* start-sanitize-v850e */
-      if (operand->bits == 4 && operand->insert != NULL) return BFD_RELOC_V850_TDA_4_5_OFFSET;  /* sld.hu, operand: D5-4 */
-      if (operand->bits == 4 && operand->insert == NULL) return BFD_RELOC_V850_TDA_4_4_OFFSET;  /* sld.bu, operand: D4   */
-      /* end-sanitize-v850e */
-      if (operand->bits == 16 && operand->shift == 16)   return BFD_RELOC_V850_TDA_16_16_OFFSET; /* set1 & chums, operands: D16 */
-      
-      assert (operand->bits == 7);
-      
-      return  operand->insert != NULL
-	? BFD_RELOC_V850_TDA_7_8_OFFSET     /* sld.h/sst.h, operand: D8_7 */
-	: BFD_RELOC_V850_TDA_7_7_OFFSET;    /* sld.b/sst.b, opreand: D7   */
-    }
-
+  /* Restore skipped parenthesis.  */
   if (paren_skipped)
-    /* Restore skipped character.  */
     -- input_line_pointer;
   
   return BFD_RELOC_UNUSED;

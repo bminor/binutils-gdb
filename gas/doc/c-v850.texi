@@ -358,10 +358,25 @@ that the label is somewhere within the first 32K of memory.  (Strictly
 speaking it also possible to access the last 32K of memory as well, as
 the offsets are signed).
 
+@c start-santize-v850e
+@cindex @code{ctoff} pseudo-op, V850
+@item ctoff()
+Computes the offset of the named variable from the start of the Call
+Table Area (whoes address is helg in system register 20, the CTBP
+register) and stores the result a 6 or 16 bit unsigned value in the
+immediate field of then given instruction or piece of data.  For
+example:
+
+     @samp{callt ctoff(table_func1)}
+
+will put the call the function whoes address is held in the call table
+at the location labeled 'table_func1'.
+@c end-santize-v850e
+
 @end table
 
 
-For information on the V850 or Thumb instruction sets, see @cite{V850
+For information on the V850 instruction set, see @cite{V850
 Family 32-/16-Bit single-Chip Microcontroller Architecture Manual} from NEC.
 Ltd.
 
