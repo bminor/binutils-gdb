@@ -600,13 +600,9 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   BFD doesn't really handle relocations without symbols well.
 	   (At least, the COFF support doesn't.)  So for now we fake up
 	   a local symbol in the absolute section.  */
-	static symbolS *abs_sym;
-	if (!abs_sym)
-	  {
-	    abs_sym = section_symbol (absolute_section);
-	    abs_sym->sy_used_in_reloc = 1;
-	  }
-	fixp->fx_addsy = abs_sym;
+
+	abs_symbol.sy_used_in_reloc = 1;
+	fixp->fx_addsy = &abs_symbol;
       }
 #endif
 
