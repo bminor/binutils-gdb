@@ -42,7 +42,6 @@
 
 extern void report_transfer_performance (unsigned long, time_t, time_t);
 
-#ifndef _MSC_VER
 /*
  * All this stuff just to get my host computer's IP address!
  */
@@ -51,7 +50,6 @@ extern void report_transfer_performance (unsigned long, time_t, time_t);
 #include <netinet/in.h>		/* for struct in_addr */
 #if 1
 #include <arpa/inet.h>		/* for inet_ntoa */
-#endif
 #endif
 
 static char *board_addr;	/* user-settable IP address for M32R-EVA */
@@ -392,8 +390,6 @@ mon2000_open (char *args, int from_tty)
   monitor_open (args, &mon2000_cmds, from_tty);
 }
 
-#ifndef _MSC_VER
-
 /* Function: set_board_address
    Tell the BootOne monitor what it's ethernet IP address is. */
 
@@ -575,8 +571,6 @@ m32r_upload_command (char *args, int from_tty)
   clear_symtab_users ();
 }
 
-#endif /* ! _MSC_VER */
-
 void
 _initialize_m32r_rom (void)
 {
@@ -604,7 +598,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   mon2000_ops.to_open = mon2000_open;
   add_target (&mon2000_ops);
 
-#ifndef _MSC_VER
   add_show_from_set
     (add_set_cmd ("download-path", class_obscure, var_string,
 		  (char *) &download_path,
@@ -630,5 +623,4 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
       "Upload the srec file via the monitor's Ethernet upload capability.");
 
   add_com ("tload", class_obscure, m32r_load, "test upload command.");
-#endif
 }

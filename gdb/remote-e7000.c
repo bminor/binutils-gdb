@@ -86,8 +86,6 @@
 #define SR_REGNUM 	-1
 #endif
 
-extern void notice_quit (void);
-
 extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 extern char *sh_processor_type;
@@ -260,21 +258,6 @@ expect (char *string)
   while (1)
     {
       c = readchar (timeout);
-#if 0
-      notice_quit ();
-      if (quit_flag == 1)
-	{
-	  if (ctrl_c)
-	    {
-	      putchar_e7000 (CTRLC);
-	      --ctrl_c;
-	    }
-	  else
-	    {
-	      quit ();
-	    }
-	}
-#endif
 
       if (echo)
 	{

@@ -1590,21 +1590,8 @@ static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
 /* This is not an arbitrary limit: the arguments which represent offsets
    into the pattern are two bytes long.  So if 2^16 bytes turns out to
    be too small, many things would have to change.  */
-/* Any other compiler which, like MSC, has allocation limit below 2^16
-   bytes will have to use approach similar to what was done below for
-   MSC and drop MAX_BUF_SIZE a bit.  Otherwise you may end up
-   reallocating to 0 bytes.  Such thing is not going to work too well.
-   You have been warned!!  */
-#if defined _MSC_VER  && !defined WIN32
-/* Microsoft C 16-bit versions limit malloc to approx 65512 bytes.
-   The REALLOC define eliminates a flurry of conversion warnings,
-   but is not required. */
-# define MAX_BUF_SIZE  65500L
-# define REALLOC(p,s) realloc ((p), (size_t) (s))
-#else
-# define MAX_BUF_SIZE (1L << 16)
-# define REALLOC(p,s) realloc ((p), (s))
-#endif
+#define MAX_BUF_SIZE (1L << 16)
+#define REALLOC(p,s) realloc ((p), (s))
 
 /* Extend the buffer by twice its current size via realloc and
    reset the pointers that pointed into the old block to point to the

@@ -611,7 +611,6 @@ gdb_os_poll_quit (host_callback *p)
   if (ui_loop_hook != NULL)
     ui_loop_hook (0);
 
-  notice_quit ();
   if (quit_flag)		/* gdb's idea of quit */
     {
       quit_flag = 0;		/* we've stolen it */

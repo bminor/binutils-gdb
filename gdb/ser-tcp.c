@@ -29,9 +29,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#ifndef __CYGWIN__
 #include <netinet/tcp.h>
-#endif
 
 #include <signal.h>
 #include "gdb_string.h"

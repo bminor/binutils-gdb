@@ -920,13 +920,7 @@ typedef struct ptid ptid_t;
 #include "fopen-same.h"
 #endif
 
-/* Microsoft C can't deal with const pointers */
-
-#ifdef _MSC_VER
-#define CONST_PTR
-#else
 #define CONST_PTR const
-#endif
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).
    FIXME: Assumes 2's complement arithmetic */
@@ -1092,11 +1086,6 @@ extern char *getenv (const char *);
 #endif
 
 #ifdef HAVE_STDLIB_H
-#if defined(_MSC_VER) && !defined(__cplusplus)
-/* msvc defines these in stdlib.h for c code */
-#undef min
-#undef max
-#endif
 #include <stdlib.h>
 #endif
 #ifndef min

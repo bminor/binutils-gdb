@@ -24,13 +24,8 @@
 #include "serial.h"
 #include "gdb_string.h"
 
-/* MSVC uses strnicmp instead of strncasecmp */
-#ifdef _MSC_VER
-#define strncasecmp strnicmp
-#define WIN32_LEAN_AND_MEAN
-#endif
-
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
@@ -129,36 +124,7 @@ sigs[] =
     0
 };
 
-#ifdef _MSC_VER
-/* Get the base of the data segment.  This is needed to calculate the offset
-   between data segment addresses and the base of linear memory, which is where
-   device registers reside.  Note that this is really only necessary for
-   Win32s, since Win95 and NT keep the data segment at linear 0.  */
-
-static unsigned long
-get_ds_base (void)
-{
-  unsigned short dsval;
-  LDT_ENTRY ldt;
-  unsigned long dsbase;
-
-  __asm
-  {
-    mov dsval, ds
-  }
-
-  dsbase = 0;
-
-  GetThreadSelectorEntry (GetCurrentThread (), dsval, &ldt);
-
-  dsbase = ldt.HighWord.Bits.BaseHi << 24 | ldt.HighWord.Bits.BaseMid << 16
-    | ldt.BaseLow;
-
-  return dsbase;
-}
-#else /* !_MSC_VER */
 #define get_ds_base() 0
-#endif /* _MSC_VER */
 
 static int
 e7000pc_init (void)

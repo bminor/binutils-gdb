@@ -1,3 +1,23 @@
+2001-06-10 Christopher Faylor <cgf@redhat.com>
+
+	* gnu-regex.c: Eliminate obsolete check for _MSC_VER.
+	* utils.c (notice_quit): Remove dummy function only used for _MSC_VER.
+	* values.c (unpack_double): Remove obsolete check for _MSC_VER.
+	* defs.h: Ditto.
+	* m32r-rom.c: Ditto.
+	* p-exp.y: Ditto.
+	* ser-e7kpc.c: Ditto.  Define WIN32_LEAN_AND_MEAN under _WIN32, for
+	faster compilation.
+	(get_ds_base): Remove _MSC_VER version of this function.
+	* nindy-share/ttyflush.c: Ditto. X
+	* rdi-share/host.h: Ditto. X
+	* ser-go32.c (dos_readchar): Remove call to obsolete function.
+	* remote-sim.c (gdb_os_poll_quit): Ditto.
+	* remote-e7000.c (expect): Remove obsolete #if 0'ed code.
+
+	* main.c (captured_main): Eliminate special Cygwin checks.
+	* ser-tcp.c: Remove unneeded __CYGWIN__ guard against system include.
+
 2001-06-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (gdbcmd_h): Add ui_out_h.

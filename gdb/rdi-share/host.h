@@ -59,13 +59,6 @@
 #  define COMPILING_ON_WINDOWS_CONSOLE 1
 #  define COMPILING_ON_WINDOWS 1
 #endif
-#ifdef _MSC_VER
-#  define COMPILING_ON_MSDOS    1
-#  define COMPILING_ON_WINDOWS  1
-#  if defined(__cplusplus)
-#    define IMPLEMENT_BOOL_AS_INT 1 /* VC++ doesn't have 'bool' (yet) */
-#  endif
-#endif
 /* The '(defined(__sparc) && defined(P_tmpdir)                     */
 /* && !defined(__svr4__))' is to detect gcc on SunOS.              */
 /* C++ compilers don't have to define __STDC__                     */
@@ -187,8 +180,7 @@ typedef char *ArgvType;
 #  define FILENAME_MAX 256
 #endif
 
-#if (!defined(__STDC__) && !defined(__cplusplus) && !defined(_MSC_VER)) || \
-    defined(COMPILING_ON_SUNOS)
+#if (!defined(__STDC__) && !defined(__cplusplus) || defined(COMPILING_ON_SUNOS)
 /* Use bcopy rather than memmove, as memmove is not available.     */
 /* There does not seem to be a header for bcopy.                   */
 void bcopy(const char *src, char *dst, int length);

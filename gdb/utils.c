@@ -868,35 +868,6 @@ quit (void)
   return_to_top_level (RETURN_QUIT);
 }
 
-
-#if defined(_MSC_VER)		/* should test for wingdb instead? */
-
-/*
- * Windows translates all keyboard and mouse events 
- * into a message which is appended to the message 
- * queue for the process.
- */
-
-void
-notice_quit (void)
-{
-  int k = win32pollquit ();
-  if (k == 1)
-    quit_flag = 1;
-  else if (k == 2)
-    immediate_quit = 1;
-}
-
-#else /* !defined(_MSC_VER) */
-
-void
-notice_quit (void)
-{
-  /* Done by signals */
-}
-
-#endif /* !defined(_MSC_VER) */
-
 /* Control C comes here */
 void
 request_quit (int signo)
