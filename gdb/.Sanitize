@@ -341,7 +341,9 @@ energize
 energize-patches
 energize.c
 energize.h
+remote-mon.c
 remote-sa.sparc.c
+ser-go32-para.c
 state.c
 state.h
 arc-tdep.c
