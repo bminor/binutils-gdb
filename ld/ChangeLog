@@ -1,3 +1,17 @@
+Mon Jul  4 19:35:45 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* scripttempl/hppaelf.sc (__stack_zero): Don't define this name,
+	it was for the HPUX dynamic loader's use and it creates problems
+	with ELF GDB.
+
+Fri Jul  1 12:53:47 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* ldlang.c (lang_do_assignments): No longer static.  Delete decl.
+	* ldlang.h (lang_do_assignments): Put external decl here.
+	* emultempl/hppaelf.em: Minor cleanups throughout file.
+	(hppa_elf_create_output_section_statements): Rewrite.
+	(hppaelf_finish): Rewrite.
+
 Wed Jun 29 16:50:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/solaris2.mh (NATIVE_LIB_DIRS): Define as /usr/ccs/lib.
