@@ -1,3 +1,11 @@
+2004-03-15  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf-hppa.h (elf_hppa_relocate_section): Pass input_bfd instead of
+	input_section in calls to get_dyn_name.
+	* elf64-hppa.c (get_dyn_name): Change type of first argument to "bfd *".	Use section id of first section in input BFD to build dynamic name for
+	local symbols.
+	(elf64_hppa_check_relocs): Pass abfd in call to get_dyn_name.
+
 2004-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (bfd_int64_t, bfd_uint64_t): New types.

@@ -1350,7 +1350,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 
 	  /* If this symbol has an entry in the PA64 dynamic hash
 	     table, then get it.  */
-	  dyn_name = get_dyn_name (input_section, h, rel,
+	  dyn_name = get_dyn_name (input_bfd, h, rel,
 				   &dynh_buf, &dynh_buflen);
 	  dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 					      dyn_name, FALSE, FALSE);
@@ -1373,7 +1373,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
-	      dyn_name = get_dyn_name (input_section, h, rel,
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, FALSE, FALSE);
@@ -1410,7 +1410,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
-	      dyn_name = get_dyn_name (input_section, h, rel,
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, FALSE, FALSE);
@@ -1426,7 +1426,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
             {
-	      dyn_name = get_dyn_name (input_section, h, rel,
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, FALSE, FALSE);
