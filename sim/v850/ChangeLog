@@ -1,3 +1,8 @@
+Thu Oct 31 14:44:10 1996  Gavin Koch  <gavin@cygnus.com>
+        
+        * simops.c: Include <sys/time.h> for struct timeval and 
+        struct timezone.
+        
 Wed Oct 30 08:49:10 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c (OP_10007E0): Handle SYS_times and SYS_gettimeofday.
