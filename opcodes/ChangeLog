@@ -1,3 +1,9 @@
+2001-02-21  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-opc-d.c (ia64_opcodes_d): Break the "add" pattern into two
+	separate variants: one for IMM22 and the other for IMM14.
+	* ia64-asmtab.c: Regenerate.
+	
 Mon Feb 12 17:38:59 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_user_t): Add 'Y' to SSE ineger converison

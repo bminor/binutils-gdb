@@ -421,7 +421,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
     { CST, ins_const, ext_const, "ar.ccv",	{{ 0, 0}}, 0, "ar.ccv" },
     { CST, ins_const, ext_const, "ar.pfs",	{{ 0, 0}}, 0, "ar.pfs" },
     { CST, ins_const, ext_const, "1",		{{ 0, 0}}, 0, "1" },
-    { CST, ins_const, ext_const, "8",		{{ 0, 0}}, 0, "1" },
+    { CST, ins_const, ext_const, "8",		{{ 0, 0}}, 0, "8" },
     { CST, ins_const, ext_const, "16",		{{ 0, 0}}, 0, "16" },
     { CST, ins_const, ext_const, "r0",		{{ 0, 0}}, 0, "r0" },
     { CST, ins_const, ext_const, "ip",		{{ 0, 0}}, 0, "ip" },
@@ -551,7 +551,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
       "a 21-bit unsigned" },
     { ABS, ins_imms,  ext_imms,  0,				/* IMM22 */
       {{ 7, 13}, { 9, 27}, { 5, 22}, { 1, 36}}, SDEC,
-      "a 22-bit integer" },
+      "a 22-bit signed integer" },
     { ABS, ins_immu,  ext_immu,  0,				/* IMMU24 */
       {{21,  6}, { 2, 31}, { 1, 36}}, 0,
       "a 24-bit unsigned" },

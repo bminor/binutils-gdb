@@ -124,6 +124,13 @@ enum dynreg_type
     DYNREG_NUM_TYPES
   };
 
+enum operand_match_result
+  {
+    OPERAND_MATCH,
+    OPERAND_OUT_OF_RANGE,
+    OPERAND_MISMATCH
+  };
+
 /* On the ia64, we can't know the address of a text label until the
    instructions are packed into a bundle.  To handle this, we keep
    track of the list of labels that appear in front of each
@@ -690,8 +697,9 @@ static void add_unwind_entry PARAMS((unw_rec_list *ptr));
 static symbolS *declare_register PARAMS ((const char *name, int regnum));
 static void declare_register_set PARAMS ((const char *, int, int));
 static unsigned int operand_width PARAMS ((enum ia64_opnd));
-static int operand_match PARAMS ((const struct ia64_opcode *idesc,
-				  int index, expressionS *e));
+static enum operand_match_result operand_match PARAMS ((const struct ia64_opcode *idesc,
+							int index,
+							expressionS *e));
 static int parse_operand PARAMS ((expressionS *e));
 static struct ia64_opcode * parse_operands PARAMS ((struct ia64_opcode *));
 static void build_insn PARAMS ((struct slot *, bfd_vma *));
@@ -4740,7 +4748,7 @@ operand_width (opnd)
   return bits;
 }
 
-static int
+static enum operand_match_result
 operand_match (idesc, index, e)
      const struct ia64_opcode *idesc;
      int index;
@@ -4757,62 +4765,77 @@ operand_match (idesc, index, e)
 
     case IA64_OPND_AR_CCV:
       if (e->X_op == O_register && e->X_add_number == REG_AR + 32)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_AR_PFS:
       if (e->X_op == O_register && e->X_add_number == REG_AR + 64)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_GR0:
       if (e->X_op == O_register && e->X_add_number == REG_GR + 0)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_IP:
       if (e->X_op == O_register && e->X_add_number == REG_IP)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PR:
       if (e->X_op == O_register && e->X_add_number == REG_PR)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PR_ROT:
       if (e->X_op == O_register && e->X_add_number == REG_PR_ROT)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PSR:
       if (e->X_op == O_register && e->X_add_number == REG_PSR)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PSR_L:
       if (e->X_op == O_register && e->X_add_number == REG_PSR_L)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PSR_UM:
       if (e->X_op == O_register && e->X_add_number == REG_PSR_UM)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_C1:
-      if (e->X_op == O_constant && e->X_add_number == 1)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if (e->X_add_number == 1)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_C8:
-      if (e->X_op == O_constant && e->X_add_number == 8)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if (e->X_add_number == 8)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_C16:
-      if (e->X_op == O_constant && e->X_add_number == 16)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if (e->X_add_number == 16)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
       /* register operands:  */
@@ -4820,20 +4843,20 @@ operand_match (idesc, index, e)
     case IA64_OPND_AR3:
       if (e->X_op == O_register && e->X_add_number >= REG_AR
 	  && e->X_add_number < REG_AR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_B1:
     case IA64_OPND_B2:
       if (e->X_op == O_register && e->X_add_number >= REG_BR
 	  && e->X_add_number < REG_BR + 8)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_CR3:
       if (e->X_op == O_register && e->X_add_number >= REG_CR
 	  && e->X_add_number < REG_CR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_F1:
@@ -4842,14 +4865,14 @@ operand_match (idesc, index, e)
     case IA64_OPND_F4:
       if (e->X_op == O_register && e->X_add_number >= REG_FR
 	  && e->X_add_number < REG_FR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_P1:
     case IA64_OPND_P2:
       if (e->X_op == O_register && e->X_add_number >= REG_P
 	  && e->X_add_number < REG_P + 64)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_R1:
@@ -4857,13 +4880,17 @@ operand_match (idesc, index, e)
     case IA64_OPND_R3:
       if (e->X_op == O_register && e->X_add_number >= REG_GR
 	  && e->X_add_number < REG_GR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_R3_2:
-      if (e->X_op == O_register && e->X_add_number >= REG_GR
-	  && e->X_add_number < REG_GR + 4)
-	return 1;
+      if (e->X_op == O_register && e->X_add_number >= REG_GR)
+	{ 
+	  if (e->X_add_number < REG_GR + 4)
+	    return OPERAND_MATCH;
+	  else if (e->X_add_number < REG_GR + 128)
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
       /* indirect operands:  */
@@ -4880,12 +4907,12 @@ operand_match (idesc, index, e)
       if (e->X_op == O_index && e->X_op_symbol
 	  && (S_GET_VALUE (e->X_op_symbol) - IND_CPUID
 	      == opnd - IA64_OPND_CPUID_R3))
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_MR3:
       if (e->X_op == O_index && !e->X_op_symbol)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
       /* immediate operands:  */
@@ -4893,40 +4920,58 @@ operand_match (idesc, index, e)
     case IA64_OPND_LEN4:
     case IA64_OPND_LEN6:
       bits = operand_width (idesc->operands[index]);
-      if (e->X_op == O_constant
-	  && (bfd_vma) (e->X_add_number - 1) < ((bfd_vma) 1 << bits))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) (e->X_add_number - 1) < ((bfd_vma) 1 << bits))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_CNT2b:
-      if (e->X_op == O_constant
-	  && (bfd_vma) (e->X_add_number - 1) < 3)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) (e->X_add_number - 1) < 3)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_CNT2c:
       val = e->X_add_number;
-      if (e->X_op == O_constant
-	  && (val == 0 || val == 7 || val == 15 || val == 16))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((val == 0 || val == 7 || val == 15 || val == 16))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_SOR:
       /* SOR must be an integer multiple of 8 */
-      if (e->X_add_number & 0x7)
-	break;
+      if (e->X_op == O_constant && e->X_add_number & 0x7)
+	return OPERAND_OUT_OF_RANGE;
     case IA64_OPND_SOF:
     case IA64_OPND_SOL:
-      if (e->X_op == O_constant &&
-	  (bfd_vma) e->X_add_number <= 96)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) e->X_add_number <= 96)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_IMMU62:
       if (e->X_op == O_constant)
 	{
 	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << 62))
-	    return 1;
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       else
 	{
@@ -4952,10 +4997,10 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 0;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 	}
       else if (e->X_op == O_constant)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_CCNT5:
@@ -4973,59 +5018,78 @@ operand_match (idesc, index, e)
     case IA64_OPND_MHTYPE8:
     case IA64_OPND_POS6:
       bits = operand_width (idesc->operands[index]);
-      if (e->X_op == O_constant
-	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_IMMU9:
       bits = operand_width (idesc->operands[index]);
-      if (e->X_op == O_constant
-	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+      if (e->X_op == O_constant)
 	{
-	  int lobits = e->X_add_number & 0x3;
-	  if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
-	    e->X_add_number |= (bfd_vma) 0x3;
-	  return 1;
+	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+	    {
+	      int lobits = e->X_add_number & 0x3;
+	      if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
+		e->X_add_number |= (bfd_vma) 0x3;
+	      return OPERAND_MATCH;
+	    }
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       break;
 
     case IA64_OPND_IMM44:
       /* least 16 bits must be zero */
       if ((e->X_add_number & 0xffff) != 0)
+	/* XXX technically, this is wrong: we should not be issuing warning
+	   messages until we're sure this instruction pattern is going to
+	   be used! */
 	as_warn (_("lower 16 bits of mask ignored"));
 
-      if (e->X_op == O_constant
-	  && ((e->X_add_number >= 0
-	       && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 44))
-	      || (e->X_add_number < 0
-		  && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 44))))
+      if (e->X_op == O_constant)
 	{
-	  /* sign-extend */
-	  if (e->X_add_number >= 0
-	      && (e->X_add_number & ((bfd_vma) 1 << 43)) != 0)
+	  if (((e->X_add_number >= 0
+		&& (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 44))
+	       || (e->X_add_number < 0
+		   && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 44))))
 	    {
-	      e->X_add_number |= ~(((bfd_vma) 1 << 44) - 1);
+	      /* sign-extend */
+	      if (e->X_add_number >= 0
+		  && (e->X_add_number & ((bfd_vma) 1 << 43)) != 0)
+		{
+		  e->X_add_number |= ~(((bfd_vma) 1 << 44) - 1);
+		}
+	      return OPERAND_MATCH;
 	    }
-	  return 1;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       break;
 
     case IA64_OPND_IMM17:
       /* bit 0 is a don't care (pr0 is hardwired to 1) */
-      if (e->X_op == O_constant
-	  && ((e->X_add_number >= 0
-	       && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 17))
-	      || (e->X_add_number < 0
-		  && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 17))))
+      if (e->X_op == O_constant)
 	{
-	  /* sign-extend */
-	  if (e->X_add_number >= 0
-	      && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
+	  if (((e->X_add_number >= 0
+		&& (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 17))
+	       || (e->X_add_number < 0
+		   && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 17))))
 	    {
-	      e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
+	      /* sign-extend */
+	      if (e->X_add_number >= 0
+		  && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
+		{
+		  e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
+		}
+	      return OPERAND_MATCH;
 	    }
-	  return 1;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       break;
 
@@ -5063,18 +5127,18 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 0;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 	}
       else if (e->X_op != O_constant
 	       && ! (e->X_op == O_big && opnd == IA64_OPND_IMM8M1U8))
-	return 0;
+	return OPERAND_MISMATCH;
 
       if (opnd == IA64_OPND_IMM8M1U4)
 	{
 	  /* Zero is not valid for unsigned compares that take an adjusted
 	     constant immediate range.  */
 	  if (e->X_add_number == 0)
-	    return 0;
+	    return OPERAND_OUT_OF_RANGE;
 
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
@@ -5086,7 +5150,7 @@ operand_match (idesc, index, e)
 	  /* Check for 0x100000000.  This is valid because
 	     0x100000000-1 is the same as ((uint32_t) -1).  */
 	  if (val == ((bfd_signed_vma) 1 << 32))
-	    return 1;
+	    return OPERAND_MATCH;
 
 	  val = val - 1;
 	}
@@ -5095,7 +5159,7 @@ operand_match (idesc, index, e)
 	  /* Zero is not valid for unsigned compares that take an adjusted
 	     constant immediate range.  */
 	  if (e->X_add_number == 0)
-	    return 0;
+	    return OPERAND_OUT_OF_RANGE;
 
 	  /* Check for 0x10000000000000000.  */
 	  if (e->X_op == O_big)
@@ -5105,9 +5169,9 @@ operand_match (idesc, index, e)
 		  && generic_bignum[2] == 0
 		  && generic_bignum[3] == 0
 		  && generic_bignum[4] == 1)
-		return 1;
+		return OPERAND_MATCH;
 	      else
-		return 0;
+		return OPERAND_OUT_OF_RANGE;
 	    }
 	  else
 	    val = e->X_add_number - 1;
@@ -5128,17 +5192,22 @@ operand_match (idesc, index, e)
 
       if ((val >= 0 && (bfd_vma) val < ((bfd_vma) 1 << (bits - 1)))
 	  || (val < 0 && (bfd_vma) -val <= ((bfd_vma) 1 << (bits - 1))))
-	return 1;
-      break;
+	return OPERAND_MATCH;
+      else
+	return OPERAND_OUT_OF_RANGE;
 
     case IA64_OPND_INC3:
       /* +/- 1, 4, 8, 16 */
       val = e->X_add_number;
       if (val < 0)
 	val = -val;
-      if (e->X_op == O_constant
-	  && (val == 1 || val == 4 || val == 8 || val == 16))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((val == 1 || val == 4 || val == 8 || val == 16))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_TGT25:
@@ -5164,14 +5233,14 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 	}
     case IA64_OPND_TAG13:
     case IA64_OPND_TAG13b:
       switch (e->X_op)
 	{
 	case O_constant:
-	  return 1;
+	  return OPERAND_MATCH;
 
 	case O_symbol:
 	  fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
@@ -5180,7 +5249,7 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 
 	default:
 	  break;
@@ -5190,7 +5259,7 @@ operand_match (idesc, index, e)
     default:
       break;
     }
-  return 0;
+  return OPERAND_MISMATCH;
 }
 
 static int
@@ -5238,8 +5307,9 @@ parse_operands (idesc)
      struct ia64_opcode *idesc;
 {
   int i = 0, highest_unmatched_operand, num_operands = 0, num_outputs = 0;
-  int sep = 0;
+  int error_pos, out_of_range_pos, curr_out_of_range_pos, sep = 0;
   enum ia64_opnd expected_operand = IA64_OPND_NIL;
+  enum operand_match_result result;
   char mnemonic[129];
   char *first_arg = 0, *end, *saved_input_pointer;
   unsigned int sof;
@@ -5321,6 +5391,8 @@ parse_operands (idesc)
     }
 
   highest_unmatched_operand = 0;
+  curr_out_of_range_pos = -1;
+  error_pos = 0;
   expected_operand = idesc->operands[0];
   for (; idesc; idesc = get_next_opcode (idesc))
     {
@@ -5328,16 +5400,52 @@ parse_operands (idesc)
 	continue;		/* mismatch in # of outputs */
 
       CURR_SLOT.num_fixups = 0;
-      for (i = 0; i < num_operands && idesc->operands[i]; ++i)
-	if (!operand_match (idesc, i, CURR_SLOT.opnd + i))
-	  break;
 
-      if (i != num_operands)
+      /* Try to match all operands.  If we see an out-of-range operand,
+	 then continue trying to match the rest of the operands, since if
+	 the rest match, then this idesc will give the best error message.  */
+
+      out_of_range_pos = -1;
+      for (i = 0; i < num_operands && idesc->operands[i]; ++i)
 	{
-	  if (i > highest_unmatched_operand)
+	  result = operand_match (idesc, i, CURR_SLOT.opnd + i);
+	  if (result != OPERAND_MATCH)
+	    {
+	      if (result != OPERAND_OUT_OF_RANGE)
+		break;
+	      if (out_of_range_pos < 0)
+		/* remember position of the first out-of-range operand: */
+		out_of_range_pos = i;
+	    }
+	}
+
+      /* If we did not match all operands, or if at least one operand was
+	 out-of-range, then this idesc does not match.  Keep track of which
+	 idesc matched the most operands before failing.  If we have two
+	 idescs that failed at the same position, and one had an out-of-range
+	 operand, then prefer the out-of-range operand.  Thus if we have
+	 "add r0=0x1000000,r1" we get an error saying the constant is out
+	 of range instead of an error saying that the constant should have been
+	 a register.  */
+
+      if (i != num_operands || out_of_range_pos >= 0)
+	{
+	  if (i > highest_unmatched_operand
+	      || (i == highest_unmatched_operand
+		  && out_of_range_pos > curr_out_of_range_pos))
 	    {
 	      highest_unmatched_operand = i;
-	      expected_operand = idesc->operands[i];
+	      if (out_of_range_pos >= 0)
+		{
+		  expected_operand = idesc->operands[out_of_range_pos];
+		  error_pos = out_of_range_pos;
+		}
+	      else
+		{
+		  expected_operand = idesc->operands[i];
+		  error_pos = i;
+		}
+	      curr_out_of_range_pos = out_of_range_pos;
 	    }
 	  continue;
 	}
@@ -5352,7 +5460,7 @@ parse_operands (idesc)
     {
       if (expected_operand)
 	as_bad ("Operand %u of `%s' should be %s",
-		highest_unmatched_operand + 1, mnemonic,
+		error_pos + 1, mnemonic,
 		elf64_ia64_operands[expected_operand].desc);
       else
 	as_bad ("Operand mismatch");

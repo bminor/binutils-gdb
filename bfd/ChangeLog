@@ -1,3 +1,9 @@
+2001-02-21  David Mosberger  <davidm@hpl.hp.com>
+
+	* cpu-ia64-opc.c (elf64_ia64_operands}: Fix typo: error string for
+	C8 said "1" instead of "8".  Clarify error string for IMM22:
+	"signed integer" instead of just "integer".
+
 2001-02-20  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_symbol): Don't make
