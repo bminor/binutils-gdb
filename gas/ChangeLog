@@ -1,5 +1,8 @@
 Tue Sep  9 10:19:37 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* doc/c-v850.texi: Document new pseudo ops and command line
+	options.
+
 	* config/tc-v850.c (set_machine): New function.
 	* config/tc-v850.c (.v850): New pseudo op.
 start-sanitize-v850e

@@ -18,8 +18,51 @@
 @section Options
 @cindex V850 options (none)
 @cindex options for V850 (none)
-@code{@value{AS}} has no additional command-line options for the V850
-processor family.
+@code{@value{AS}} supports the following additional command-line options
+for the V850 processor family:
+
+@cindex command line options, V850
+@cindex V850 command line options
+@table @code
+
+@cindex @code{-wsigned_overflow} command line option, V850
+@item -wsigned_overflow
+Causes warnings to be produced when signed immediate values overflow the
+space available for then within their opcodes.  By default this option
+is disabled as it is possible to receive spurious warnings due to using
+exact bit patterns as immediate constants.
+
+@cindex @code{-wunsigned_overflow} command line option, V850
+@item -wunsigned_overflow
+Causes warnings to be produced when unsigned immediate values overflow
+the space available for then within their opcodes.  By default this
+option is disabled as it is possible to receive spurious warnings due to
+using exact bit patterns as immediate constants.
+
+@cindex @code{-mv850} command line option, V850
+@item -mv850
+Specifies that the assembled code should be marked as being targeted at
+the V850 processor.  This allows the linker to detect attempts to link
+such code with code assembled for other processors.
+
+@c start-santize-v850e
+@cindex @code{-mv850e} command line option, V850
+@item -mv850e
+Specifies that the assembled code should be marked as being targeted at
+the V850E processor.  This allows the linker to detect attempts to link
+such code with code assembled for other processors.
+@c end-santize-v850e
+
+@c start-santize-v850eq
+@cindex @code{-mv850eq} command line option, V850
+@item -mv850eq
+Specifies that the assembled code should be marked as being targeted at
+the V850EQ processor.  This allows the linker to detect attempts to link
+such code with code assembled for other processors.
+@c end-santize-v850eq
+
+@end table
+
 
 @node V850 Syntax
 @section Syntax
@@ -170,6 +213,28 @@ Moves the offset into the current section to the specified amount.
 This is an extension to the standard .section directive.  It sets the
 current section to be <type> and creates an alias for this section
 called "name". 
+
+@cindex @code{.v850} directive, V850
+@item .v850
+Specifies that the assembled code should be marked as being targeted at
+the V850 processor.  This allows the linker to detect attempts to link
+such code with code assembled for other processors.
+
+@c start-santize-v850e
+@cindex @code{.v850e} directive, V850
+@item .v850e
+Specifies that the assembled code should be marked as being targeted at
+the V850E processor.  This allows the linker to detect attempts to link
+such code with code assembled for other processors.
+@c end-santize-v850e
+
+@c start-santize-v850eq
+@cindex @code{.v850eq} directive, V850
+@item .v850eq
+Specifies that the assembled code should be marked as being targeted at
+the V850EQ processor.  This allows the linker to detect attempts to link
+such code with code assembled for other processors.
+@c end-santize-v850eq
 
 @end table
 
