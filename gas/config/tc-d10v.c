@@ -309,7 +309,7 @@ get_reloc (op)
       if (bits == 8)
 	return (BFD_RELOC_D10V_10_PCREL_R);
       else
-	  return (BFD_RELOC_D10V_18_PCREL);
+	return (BFD_RELOC_D10V_18_PCREL);
     }
 
   return (BFD_RELOC_16);
@@ -466,7 +466,7 @@ build_insn (opcode, opers, insn)
 	  /*
 	  printf("need a fixup: ");
 	  print_expr_1(stdout,&opers[i]);
-	  printf("\n");
+	  printf("\n");ddd
 	  */
 
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
@@ -524,7 +524,7 @@ write_long (opcode, insn, fx)
 		       4,
 		       &(fx->fix[i].exp),
 		       1,
-		       fx->fix[i].reloc);
+		       fx->fix[i].reloc|2048);
 	}
     }
   fx->fc = 0;
@@ -575,7 +575,7 @@ write_1_short (opcode, insn, fx)
 		       4,
 		       &(fx->fix[i].exp),
 		       1,
-		       fx->fix[i].reloc);
+		       fx->fix[i].reloc|2048);
 	}
     }
   fx->fc = 0;
@@ -687,7 +687,7 @@ for (j=0; j<2; j++)
 			 4,
 			 &(fx->fix[i].exp),
 			 1,
-			 fx->fix[i].reloc);
+			 fx->fix[i].reloc|2048);
 	  }
       }
     fx->fc = 0;
@@ -1003,7 +1003,7 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   reloc->addend = fixp->fx_addnumber;
-  /*  printf("tc_gen_reloc: addr=%x  addend=%x\n", reloc->address, reloc->addend); */
+  /* printf("tc_gen_reloc: addr=%x  addend=%x\n", reloc->address, reloc->addend); */
   return reloc;
 }
 
@@ -1060,17 +1060,21 @@ md_apply_fix3 (fixp, valuep, seg)
 	}
     }
   
-  /* printf("md_apply_fix: value=0x%x  type=%d\n",  value, fixp->fx_r_type);  */
+  /* printf("md_apply_fix: value=0x%x  type=0x%x  where=0x%x\n",  value, fixp->fx_r_type,fixp->fx_where); */
 
   op_type = fixp->fx_r_type;
-  if (op_type & 1024)
+  if (op_type & 2048)
     {
-      op_type -= 1024;
-      fixp->fx_r_type = BFD_RELOC_D10V_10_PCREL_L;
-      left = 1;
+      op_type -= 2048;
+      if (op_type & 1024)
+	{
+	  op_type -= 1024;
+	  fixp->fx_r_type = BFD_RELOC_D10V_10_PCREL_L;
+	  left = 1;
+	}
+      else
+	fixp->fx_r_type = get_reloc((struct d10v_operand *)&d10v_operands[op_type]); 
     }
-  else
-    fixp->fx_r_type = get_reloc((struct d10v_operand *)&d10v_operands[op_type]); 
 
   /* Fetch the instruction, insert the fully resolved operand
      value, and stuff the instruction back again.  */
@@ -1087,13 +1091,16 @@ md_apply_fix3 (fixp, valuep, seg)
       if (!fixp->fx_pcrel)
 	value -= fixp->fx_where;
       value >>= 2;
+      break;
+    case BFD_RELOC_32:
+      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      return 1;
     default:
       break;
     }
-  /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */ 
- 
+
+  /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */
   insn = d10v_insert_operand (insn, op_type, (offsetT)value, left);
-  
   /* printf("   new insn=%x\n",insn); */
   
   bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
