@@ -1539,11 +1539,18 @@ print_symbol_info_bsd (info, abfd)
     }
   else
     {
-      print_value (abfd, SYM_VALUE (info));
+      /* Normally we print the value of the symbol.  If we are printing the
+	 size or sorting by size then we print its size, execpt for the
+	 (weird) special case where both flags are defined, in which case we
+	 print both values.  This conforms to documented behaviour.  */
+      if (sort_by_size && !print_size)
+	print_value (abfd, SYM_SIZE (info));
+      else
+	print_value (abfd, SYM_VALUE (info));
 
       if (print_size && SYM_SIZE (info))
 	{
-	  printf(" ");
+	  printf (" ");
 	  print_value (abfd, SYM_SIZE (info));
 	}
     }

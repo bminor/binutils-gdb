@@ -857,7 +857,7 @@ Equivalent to @samp{-f posix}.
 
 @item -S
 @itemx --print-size
-Print size of defined symbols for the @code{bsd} output format.
+Print size, not the value, of defined symbols for the @code{bsd} output format.
 
 @item -s
 @itemx --print-armap
@@ -874,8 +874,7 @@ last come first.
 @item --size-sort
 Sort symbols by size.  The size is computed as the difference between
 the value of the symbol and the value of the symbol with the next higher
-value.  The size of the symbol is printed, rather than the value.
-structure.  If the @code{bsd} output format is used the size of the symbol 
+value.  If the @code{bsd} output format is used the size of the symbol 
 is printed, rather than the value, and @samp{-S} must be used in order 
 both size and value to be printed.
 

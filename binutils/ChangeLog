@@ -1,3 +1,10 @@
+2003-03-16  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* nm.c (print_symbol_info_bsd): Print the symbol's size instead of
+	the symbol's value when --size-sort is used, unless -S is used.
+	doc/binutils.texi (--size-sort): For non-bsd formats both the
+	value and size of the symbols are displayed.
+	
 2003-03-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Update.
