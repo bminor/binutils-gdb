@@ -209,442 +209,6 @@ x86_64_convert_register_p (int regnum, struct type *type)
 }
 
 
-/* The returning of values is done according to the special algorithm.
-   Some types are returned in registers an some (big structures) in
-   memory.  See the System V psABI for details.  */
-
-#define MAX_CLASSES 4
-
-enum x86_64_reg_class
-{
-  X86_64_NO_CLASS,
-  X86_64_INTEGER_CLASS,
-  X86_64_INTEGERSI_CLASS,
-  X86_64_SSE_CLASS,
-  X86_64_SSESF_CLASS,
-  X86_64_SSEDF_CLASS,
-  X86_64_SSEUP_CLASS,
-  X86_64_X87_CLASS,
-  X86_64_X87UP_CLASS,
-  X86_64_MEMORY_CLASS
-};
-
-/* Return the union class of CLASS1 and CLASS2.
-   See the System V psABI for details.  */
-
-static enum x86_64_reg_class
-merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
-{
-  /* Rule (a): If both classes are equal, this is the resulting class.  */
-  if (class1 == class2)
-    return class1;
-
-  /* Rule (b): If one of the classes is NO_CLASS, the resulting class
-     is the other class.  */
-  if (class1 == X86_64_NO_CLASS)
-    return class2;
-  if (class2 == X86_64_NO_CLASS)
-    return class1;
-
-  /* Rule (c): If one of the classes is MEMORY, the result is MEMORY.  */
-  if (class1 == X86_64_MEMORY_CLASS || class2 == X86_64_MEMORY_CLASS)
-    return X86_64_MEMORY_CLASS;
-
-  /* Rule (d): If one of the classes is INTEGER, the result is INTEGER.  */
-  if ((class1 == X86_64_INTEGERSI_CLASS && class2 == X86_64_SSESF_CLASS)
-      || (class2 == X86_64_INTEGERSI_CLASS && class1 == X86_64_SSESF_CLASS))
-    return X86_64_INTEGERSI_CLASS;
-  if (class1 == X86_64_INTEGER_CLASS || class1 == X86_64_INTEGERSI_CLASS
-      || class2 == X86_64_INTEGER_CLASS || class2 == X86_64_INTEGERSI_CLASS)
-    return X86_64_INTEGER_CLASS;
-
-  /* Rule (e): If one of the classes is X87 or X87UP class, MEMORY is
-     used as class.  */
-  if (class1 == X86_64_X87_CLASS || class1 == X86_64_X87UP_CLASS
-      || class2 == X86_64_X87_CLASS || class2 == X86_64_X87UP_CLASS)
-    return X86_64_MEMORY_CLASS;
-
-  /* Rule (f): Otherwise class SSE is used.  */
-  return X86_64_SSE_CLASS;
-}
-
-/* Classify the argument type.  CLASSES will be filled by the register
-   class used to pass each word of the operand.  The number of words
-   is returned.  In case the parameter should be passed in memory, 0
-   is returned.  As a special case for zero sized containers,
-   classes[0] will be NO_CLASS and 1 is returned.
-
-   See the System V psABI for details.  */
-
-static int
-classify_argument (struct type *type,
-		   enum x86_64_reg_class classes[MAX_CLASSES], int bit_offset)
-{
-  int bytes = TYPE_LENGTH (type);
-  int words = (bytes + 8 - 1) / 8;
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      {
-	int i;
-	enum x86_64_reg_class subclasses[MAX_CLASSES];
-
-	/* On x86-64 we pass structures larger than 16 bytes on the stack.  */
-	if (bytes > 16)
-	  return 0;
-
-	for (i = 0; i < words; i++)
-	  classes[i] = X86_64_NO_CLASS;
-
-	/* Zero sized arrays or structures are NO_CLASS.  We return 0
-	   to signalize memory class, so handle it as special case.  */
-	if (!words)
-	  {
-	    classes[0] = X86_64_NO_CLASS;
-	    return 1;
-	  }
-	switch (TYPE_CODE (type))
-	  {
-	  case TYPE_CODE_STRUCT:
-	    {
-	      int j;
-	      for (j = 0; j < TYPE_NFIELDS (type); ++j)
-		{
-		  int num = classify_argument (TYPE_FIELDS (type)[j].type,
-					       subclasses,
-					       (TYPE_FIELDS (type)[j].loc.
-						bitpos + bit_offset) % 256);
-		  if (!num)
-		    return 0;
-		  for (i = 0; i < num; i++)
-		    {
-		      int pos =
-			(TYPE_FIELDS (type)[j].loc.bitpos +
-			 bit_offset) / 8 / 8;
-		      classes[i + pos] =
-			merge_classes (subclasses[i], classes[i + pos]);
-		    }
-		}
-	    }
-	    break;
-	  case TYPE_CODE_ARRAY:
-	    {
-	      int num;
-
-	      num = classify_argument (TYPE_TARGET_TYPE (type),
-				       subclasses, bit_offset);
-	      if (!num)
-		return 0;
-
-	      /* The partial classes are now full classes.  */
-	      if (subclasses[0] == X86_64_SSESF_CLASS && bytes != 4)
-		subclasses[0] = X86_64_SSE_CLASS;
-	      if (subclasses[0] == X86_64_INTEGERSI_CLASS && bytes != 4)
-		subclasses[0] = X86_64_INTEGER_CLASS;
-
-	      for (i = 0; i < words; i++)
-		classes[i] = subclasses[i % num];
-	    }
-	    break;
-	  case TYPE_CODE_UNION:
-	    {
-	      int j;
-	      {
-		for (j = 0; j < TYPE_NFIELDS (type); ++j)
-		  {
-		    int num;
-		    num = classify_argument (TYPE_FIELDS (type)[j].type,
-					     subclasses, bit_offset);
-		    if (!num)
-		      return 0;
-		    for (i = 0; i < num; i++)
-		      classes[i] = merge_classes (subclasses[i], classes[i]);
-		  }
-	      }
-	    }
-	    break;
-	  default:
-	    break;
-	  }
-	/* Final merger cleanup.  */
-	for (i = 0; i < words; i++)
-	  {
-	    /* If one class is MEMORY, everything should be passed in
-	       memory.  */
-	    if (classes[i] == X86_64_MEMORY_CLASS)
-	      return 0;
-
-	    /* The X86_64_SSEUP_CLASS should be always preceeded by
-	       X86_64_SSE_CLASS.  */
-	    if (classes[i] == X86_64_SSEUP_CLASS
-		&& (i == 0 || classes[i - 1] != X86_64_SSE_CLASS))
-	      classes[i] = X86_64_SSE_CLASS;
-
-	    /* X86_64_X87UP_CLASS should be preceeded by X86_64_X87_CLASS.  */
-	    if (classes[i] == X86_64_X87UP_CLASS
-		&& (i == 0 || classes[i - 1] != X86_64_X87_CLASS))
-	      classes[i] = X86_64_SSE_CLASS;
-	  }
-	return words;
-      }
-      break;
-    case TYPE_CODE_FLT:
-      switch (bytes)
-	{
-	case 4:
-	  if (!(bit_offset % 64))
-	    classes[0] = X86_64_SSESF_CLASS;
-	  else
-	    classes[0] = X86_64_SSE_CLASS;
-	  return 1;
-	case 8:
-	  classes[0] = X86_64_SSEDF_CLASS;
-	  return 1;
-	case 16:
-	  classes[0] = X86_64_X87_CLASS;
-	  classes[1] = X86_64_X87UP_CLASS;
-	  return 2;
-	}
-      break;
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_REF:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_PTR:
-      switch (bytes)
-	{
-	case 1:
-	case 2:
-	case 4:
-	case 8:
-	  if (bytes * 8 + bit_offset <= 32)
-	    classes[0] = X86_64_INTEGERSI_CLASS;
-	  else
-	    classes[0] = X86_64_INTEGER_CLASS;
-	  return 1;
-	case 16:
-	  classes[0] = classes[1] = X86_64_INTEGER_CLASS;
-	  return 2;
-	default:
-	  break;
-	}
-    case TYPE_CODE_VOID:
-      return 0;
-    default:			/* Avoid warning.  */
-      break;
-    }
-  internal_error (__FILE__, __LINE__,
-		  "classify_argument: unknown argument type");
-}
-
-/* Examine the argument and set *INT_NREGS and *SSE_NREGS to the
-   number of registers required based on the information passed in
-   CLASSES.  Return 0 if parameter should be passed in memory.  */
-
-static int
-examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
-		  int n, int *int_nregs, int *sse_nregs)
-{
-  *int_nregs = 0;
-  *sse_nregs = 0;
-  if (!n)
-    return 0;
-  for (n--; n >= 0; n--)
-    switch (classes[n])
-      {
-      case X86_64_INTEGER_CLASS:
-      case X86_64_INTEGERSI_CLASS:
-	(*int_nregs)++;
-	break;
-      case X86_64_SSE_CLASS:
-      case X86_64_SSESF_CLASS:
-      case X86_64_SSEDF_CLASS:
-	(*sse_nregs)++;
-	break;
-      case X86_64_NO_CLASS:
-      case X86_64_SSEUP_CLASS:
-      case X86_64_X87_CLASS:
-      case X86_64_X87UP_CLASS:
-	break;
-      case X86_64_MEMORY_CLASS:
-	internal_error (__FILE__, __LINE__,
-			"examine_argument: unexpected memory class");
-      }
-  return 1;
-}
-
-#define INT_REGS 6
-#define SSE_REGS 8
-
-static CORE_ADDR
-x86_64_push_arguments (struct regcache *regcache, int nargs,
-		       struct value **args, CORE_ADDR sp)
-{
-  int intreg = 0;
-  int ssereg = 0;
-  /* For varargs functions we have to pass the total number of SSE
-     registers used in %rax.  So, let's count this number.  */
-  int total_sse_args = 0;
-  /* Once an SSE/int argument is passed on the stack, all subsequent
-     arguments are passed there.  */
-  int sse_stack = 0;
-  int int_stack = 0;
-  unsigned total_sp;
-  int i;
-  char buf[8];
-  static int int_parameter_registers[INT_REGS] =
-  {
-    X86_64_RDI_REGNUM, 4,	/* %rdi, %rsi */
-    X86_64_RDX_REGNUM, 2,	/* %rdx, %rcx */
-    8, 9			/* %r8, %r9 */
-  };
-  /* %xmm0 - %xmm7 */
-  static int sse_parameter_registers[SSE_REGS] =
-  {
-    X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
-    X86_64_XMM0_REGNUM + 2, X86_64_XMM0_REGNUM + 3,
-    X86_64_XMM0_REGNUM + 4, X86_64_XMM0_REGNUM + 5,
-    X86_64_XMM0_REGNUM + 6, X86_64_XMM0_REGNUM + 7,
-  };
-  int stack_values_count = 0;
-  int *stack_values;
-  stack_values = alloca (nargs * sizeof (int));
-
-  for (i = 0; i < nargs; i++)
-    {
-      enum x86_64_reg_class class[MAX_CLASSES];
-      int n = classify_argument (args[i]->type, class, 0);
-      int needed_intregs;
-      int needed_sseregs;
-
-      if (!n ||
-	  !examine_argument (class, n, &needed_intregs, &needed_sseregs))
-	{			/* memory class */
-	  stack_values[stack_values_count++] = i;
-	}
-      else
-	{
-	  int j;
-	  int offset = 0;
-
-	  if (intreg / 2 + needed_intregs > INT_REGS)
-	    int_stack = 1;
-	  if (ssereg / 2 + needed_sseregs > SSE_REGS)
-	    sse_stack = 1;
-	  if (!sse_stack)
-	    total_sse_args += needed_sseregs;
-
-	  for (j = 0; j < n; j++)
-	    {
-	      switch (class[j])
-		{
-		case X86_64_NO_CLASS:
-		  break;
-		case X86_64_INTEGER_CLASS:
-		  if (int_stack)
-		    stack_values[stack_values_count++] = i;
-		  else
-		    {
-		      regcache_cooked_write
-			(regcache, int_parameter_registers[(intreg + 1) / 2],
-			 VALUE_CONTENTS_ALL (args[i]) + offset);
-		      offset += 8;
-		      intreg += 2;
-		    }
-		  break;
-		case X86_64_INTEGERSI_CLASS:
-		  if (int_stack)
-		    stack_values[stack_values_count++] = i;
-		  else
-		    {
-		      LONGEST val = extract_signed_integer
-			(VALUE_CONTENTS_ALL (args[i]) + offset, 4);
-		      regcache_cooked_write_signed
-			(regcache, int_parameter_registers[intreg / 2], val);
-		      
-		      offset += 8;
-		      intreg++;
-		    }
-		  break;
-		case X86_64_SSEDF_CLASS:
-		case X86_64_SSESF_CLASS:
-		case X86_64_SSE_CLASS:
-		  if (sse_stack)
-		    stack_values[stack_values_count++] = i;
-		  else
-		    {
-		      regcache_cooked_write
-			(regcache, sse_parameter_registers[(ssereg + 1) / 2],
-			 VALUE_CONTENTS_ALL (args[i]) + offset);
-		      offset += 8;
-		      ssereg += 2;
-		    }
-		  break;
-		case X86_64_SSEUP_CLASS:
-		  if (sse_stack)
-		    stack_values[stack_values_count++] = i;
-		  else
-		    {
-		      regcache_cooked_write
-			(regcache, sse_parameter_registers[ssereg / 2],
-			 VALUE_CONTENTS_ALL (args[i]) + offset);
-		      offset += 8;
-		      ssereg++;
-		    }
-		  break;
-		case X86_64_X87_CLASS:
-		case X86_64_MEMORY_CLASS:
-		  stack_values[stack_values_count++] = i;
-		  break;
-		case X86_64_X87UP_CLASS:
-		  break;
-		default:
-		  internal_error (__FILE__, __LINE__,
-				  "Unexpected argument class");
-		}
-	      intreg += intreg % 2;
-	      ssereg += ssereg % 2;
-	    }
-	}
-    }
-
-  /* We have to make sure that the stack is 16-byte aligned after the
-     setup.  Let's calculate size of arguments first, align stack and
-     then fill in the arguments.  */
-  total_sp = 0;
-  for (i = 0; i < stack_values_count; i++)
-    {
-      struct value *arg = args[stack_values[i]];
-      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-      total_sp += (len + 7) & ~7;
-    }
-  /* total_sp is now a multiple of 8, if it is not a multiple of 16,
-     change the stack pointer so that it will be afterwards correctly
-     aligned.  */
-  if (total_sp & 15)
-    sp -= 8;
-    
-  /* Push any remaining arguments onto the stack.  */
-  while (--stack_values_count >= 0)
-    {
-      struct value *arg = args[stack_values[stack_values_count]];
-      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-
-      /* Make sure the stack is 8-byte-aligned.  */
-      sp -= (len + 7) & ~7;
-      write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
-    }
-
-  /* Write number of SSE type arguments to RAX to take care of varargs
-     functions.  */
-  store_unsigned_integer (buf, 8, total_sse_args);
-  regcache_cooked_write (regcache, X86_64_RAX_REGNUM, buf);
-
-  return sp;
-}
-
 /* Register classes as defined in the psABI.  */
 
 enum amd64_reg_class
@@ -903,6 +467,131 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 
 
 static CORE_ADDR
+amd64_push_arguments (struct regcache *regcache, int nargs,
+		      struct value **args, CORE_ADDR sp)
+{
+  static int integer_regnum[] =
+  {
+    X86_64_RDI_REGNUM, 4,	/* %rdi, %rsi */
+    X86_64_RDX_REGNUM, 2,	/* %rdx, %rcx */
+    8, 9			/* %r8, %r9 */
+  };
+  static int sse_regnum[] =
+  {
+    /* %xmm0 ... %xmm7 */
+    X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
+    X86_64_XMM0_REGNUM + 2, X86_64_XMM0_REGNUM + 3,
+    X86_64_XMM0_REGNUM + 4, X86_64_XMM0_REGNUM + 5,
+    X86_64_XMM0_REGNUM + 6, X86_64_XMM0_REGNUM + 7,
+  };
+  struct value **stack_args = alloca (nargs * sizeof (struct value *));
+  int num_stack_args = 0;
+  int num_elements = 0;
+  int element = 0;
+  int integer_reg = 0;
+  int sse_reg = 0;
+  int i;
+
+  for (i = 0; i < nargs; i++)
+    {
+      struct type *type = VALUE_TYPE (args[i]);
+      int len = TYPE_LENGTH (type);
+      enum amd64_reg_class class[2];
+      int needed_integer_regs = 0;
+      int needed_sse_regs = 0;
+      int j;
+
+      /* Classify argument.  */
+      amd64_classify (type, class);
+
+      /* Calculate the number of integer and SSE registers needed for
+         this argument.  */
+      for (j = 0; j < 2; j++)
+	{
+	  if (class[j] == AMD64_INTEGER)
+	    needed_integer_regs++;
+	  else if (class[j] == AMD64_SSE)
+	    needed_sse_regs++;
+	}
+
+      /* Check whether enough registers are available, and if the
+         argument should be passed in registers at all.  */
+      if (integer_reg + needed_integer_regs > ARRAY_SIZE (integer_regnum)
+	  || sse_reg + needed_sse_regs > ARRAY_SIZE (sse_regnum)
+	  || (needed_integer_regs == 0 && needed_sse_regs == 0))
+	{
+	  /* The argument will be passed on the stack.  */
+	  num_elements += ((len + 7) / 8);
+	  stack_args[num_stack_args++] = args[i];
+	}
+      else
+	{
+	  /* The argument will be passed in registers.  */
+	  char *valbuf = VALUE_CONTENTS (args[i]);
+	  char buf[8];
+
+	  gdb_assert (len <= 16);
+
+	  for (j = 0; len > 0; j++, len -= 8)
+	    {
+	      int regnum = -1;
+	      int offset = 0;
+
+	      switch (class[j])
+		{
+		case AMD64_INTEGER:
+		  regnum = integer_regnum[integer_reg++];
+		  break;
+
+		case AMD64_SSE:
+		  regnum = sse_regnum[sse_reg++];
+		  break;
+
+		case AMD64_SSEUP:
+		  gdb_assert (sse_reg > 0);
+		  regnum = sse_regnum[sse_reg - 1];
+		  offset = 8;
+		  break;
+
+		default:
+		  gdb_assert (!"Unexpected register class.");
+		}
+
+	      gdb_assert (regnum != -1);
+	      memset (buf, 0, sizeof buf);
+	      memcpy (buf, valbuf + j * 8, min (len, 8));
+	      regcache_raw_write_part (regcache, regnum, offset, 8, buf);
+	    }
+	}
+    }
+
+  /* Allocate space for the arguments on the stack.  */
+  sp -= num_elements * 8;
+
+  /* The psABI says that "The end of the input argument area shall be
+     aligned on a 16 byte boundary."  */
+  sp &= ~0xf;
+
+  /* Write out the arguments to the stack.  */
+  for (i = 0; i < num_stack_args; i++)
+    {
+      struct type *type = VALUE_TYPE (stack_args[i]);
+      char *valbuf = VALUE_CONTENTS (stack_args[i]);
+      int len = TYPE_LENGTH (type);
+
+      write_memory (sp + element * 8, valbuf, len);
+      element += ((len + 7) / 8);
+    }
+
+  /* The psABI says that "For calls that may call functions that use
+     varargs or stdargs (prototype-less calls or calls to functions
+     containing ellipsis (...) in the declaration) %al is used as
+     hidden argument to specify the number of SSE registers used.  */
+  regcache_raw_write_unsigned (regcache, X86_64_RAX_REGNUM, sse_reg);
+  return sp; 
+}
+
+static CORE_ADDR
 x86_64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args,	CORE_ADDR sp,
@@ -911,7 +600,7 @@ x86_64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   char buf[8];
 
   /* Pass arguments.  */
-  sp = x86_64_push_arguments (regcache, nargs, args, sp);
+  sp = amd64_push_arguments (regcache, nargs, args, sp);
 
   /* Pass "hidden" argument".  */
   if (struct_return)

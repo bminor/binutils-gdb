@@ -1,3 +1,15 @@
+2003-11-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (MAX_CLASSES): Remove macro.
+	(x86_64_reg_class): Remove enum.
+	(merge_classes, classify_argument, examine_argument): Remove
+	functions.
+	(INT_REGS, SSE_REGS): Remove macros.
+	(x86_64_push_arguments): Remove function.
+	(amd64_push_arguments): New function.
+	(x86_64_push_dummy_call): Call amd64_push_arguments instead of
+	x86_64_push_arguments.
+
 2003-11-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (x86_64_frame_cache): Don't bail out if %rbp is
