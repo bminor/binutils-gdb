@@ -310,7 +310,7 @@ obj_crawl_symbol_chain (headers)
 	    }
 	  else			/* .Stabd case.  */
 	    symbolP->sy_name_offset = 0;
-	  symbolPP = &(symbol_next (symbolP));
+	  symbolPP = &(symbolP->sy_next);
 	}
       else
 	{
