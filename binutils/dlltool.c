@@ -2517,16 +2517,19 @@ make_one_lib_file (export_type *exp, int i)
                      why it did that, and it does not match what I see
                      in programs compiled with the MS tools.  */
 		  int idx = exp->hint;
-		  si->size = strlen (xlate (exp->name)) + 3;
+		  char const * internal_name =
+		    exp->internal_name ? exp->internal_name : xlate (exp->name);
+
+		  si->size = strlen (internal_name) + 3;
 		  si->data = xmalloc (si->size);
 		  si->data[0] = idx & 0xff;
 		  si->data[1] = idx >> 8;
-		  strcpy (si->data + 2, xlate (exp->name));
+		  strcpy (si->data + 2, internal_name);
 		}
 	      break;
 	    case IDATA7:
 	      si->size = 4;
-	      si->data =xmalloc (4);
+	      si->data = xmalloc (4);
 	      memset (si->data, 0, si->size);
 	      rel = xmalloc (sizeof (arelent));
 	      rpp = xmalloc (sizeof (arelent *) * 2);

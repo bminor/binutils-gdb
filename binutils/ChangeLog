@@ -1,3 +1,9 @@
+2004-09-02  Carlo  <carlo@alinoe.com> 
+
+	PR binutils/351
+	* dlltool.c (make_one_lib_file): For IDATA6 take the name from
+	exp->internal_name if it is present.
+
 2004-09-02  Alexandre Oliva  <aoliva@redhat.com>
 
 	* MAINTAINERS: Add self as co-maintainer of FR-V.
