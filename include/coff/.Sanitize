@@ -63,7 +63,7 @@ Things-to-lose:
 
 Do-last:
 
-tic80_files="ChangeLog"
+tic80_files="ChangeLog internal.h"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then

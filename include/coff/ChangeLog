@@ -1,3 +1,20 @@
+start-sanitize-tic80
+Sat May  3 08:24:59 1997  Fred Fish  <fnf@cygnus.com>
+
+	* internal.h (C_UEXT, C_STATLAB, C_EXTLAB, C_SYSTEM):
+	New storage classes for TIc80.
+
+end-sanitize-tic80
+Fri Apr 18 11:52:55 1997  Niklas Hallqvist  <niklas@appli.se>
+
+	* alpha.h (ALPHA_ECOFF_BADMAG): Recognize *BSD/alpha magic too.
+	(ALPHA_R_LITERALSLEAZY): Define.
+	* ecoff.h (ALPHA_MAGIC_BSD): Define.
+
+Wed Jan 29 11:31:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i960.h (R_IPR13, R_ALIGN): Define.
+
 Mon Jan 27 13:34:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* internal.h (R_IPRMED, R_OPTCALL, R_OPTCALLX): Move definitions
