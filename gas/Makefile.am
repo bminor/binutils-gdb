@@ -78,6 +78,7 @@ CPU_TYPES = \
 	sparc \
 	tahoe \
 	tic30 \
+	tic4x \
 	tic54x \
 	tic80 \
 	vax \
