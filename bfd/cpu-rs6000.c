@@ -46,7 +46,7 @@ rs6000_compatible (a,b)
     case bfd_arch_rs6000:
       return bfd_default_compatible (a, b);
     case bfd_arch_powerpc:
-      if (b->mach == 0)
+      if (b->mach == bfd_mach_rs6k)
 	return b;
       return NULL;
     }

@@ -76,8 +76,8 @@ compatible (a,b)
     return NULL;
 
   /* Special case for ATmega[16]03 (avr:3) and ATmega83 (avr:4).  */
-  if ((a->mach == 3 && b->mach == 4)
-      || (a->mach == 4 && b->mach == 3))
+  if ((a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr4)
+      || (a->mach == bfd_mach_avr4 && b->mach == bfd_mach_avr3))
     return NULL;
 
   /* So far all newer AVR architecture cores are supersets of previous
