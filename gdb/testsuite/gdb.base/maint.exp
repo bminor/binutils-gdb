@@ -650,34 +650,22 @@ gdb_expect  {
         }
 
 send_gdb "maint internal-error\n"
-gdb_expect  {
-    -re "Quit this debugging session.*\\(y or n\\) $" {
-	send_gdb "n\n"
-	gdb_expect {
-	    -re "Create a core file.*\\(y or n\\) $" {
-		send_gdb "n\n"
-		gdb_expect {
-		    -re ".*$gdb_prompt $" {
-			pass "maint internal-error"
-		    }
-		    timeout {
-			fail "(timeout)  maint internal-error"
-		    }
-		}
-	    }
-	    -re ".*$gdb_prompt $" {
-		fail "maint internal-error"
-	    }
-	    timeout {
-		fail "(timeout)  maint internal-error"
-	    }
+gdb_expect {
+    -re "A problem internal to GDB has been detected" {
+	pass "maint internal-error"
+	if [gdb_internal_error_resync] {
+	    pass "internal-error resync"
+	} else {
+	    fail "internal-error resync"
 	}
     }
     -re ".*$gdb_prompt $" {
 	fail "maint internal-error"
+	untested "internal-error resync"
     }
     timeout {
-	fail "(timeout) maint internal-error"
+	fail "maint internal-error (timeout)"
+	untested "internal-error resync"
     }
 }
 

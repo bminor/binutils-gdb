@@ -360,6 +360,55 @@ proc gdb_continue_to_breakpoint {name} {
 }
 
 
+# gdb_internal_error_resync:
+#
+# Answer the questions GDB asks after it reports an internal error
+# until we get back to a GDB prompt.  Decline to quit the debugging
+# session, and decline to create a core file.  Return non-zero if the
+# resync succeeds.
+#
+# This procedure just answers whatever questions come up until it sees
+# a GDB prompt; it doesn't require you to have matched the input up to
+# any specific point.  However, it only answers questions it sees in
+# the output itself, so if you've matched a question, you had better
+# answer it yourself before calling this.
+#
+# You can use this function thus:
+#
+# gdb_expect {
+#     ...
+#     -re ".*A problem internal to GDB has been detected" {
+#         gdb_internal_error_resync
+#     }
+#     ...
+# }
+#
+proc gdb_internal_error_resync {} {
+    global gdb_prompt
+
+    set count 0
+    while {$count < 10} {
+	gdb_expect {
+	    -re "Quit this debugging session\\? \\(y or n\\) $" {
+		send_gdb "n\n"
+		incr count
+	    }
+	    -re "Create a core file of GDB\\? \\(y or n\\) $" {
+		send_gdb "n\n"
+		incr count
+	    }
+	    -re "$gdb_prompt $" {
+		# We're resynchronized.
+		return 1
+	    }
+	    timeout {
+		perror "Could not resync from internal error (timeout)"
+		return 0
+	    }
+	}
+    }
+}
+
 
 # gdb_test_multiple COMMAND MESSAGE EXPECT_ARGUMENTS
 # Send a command to gdb; test the result.
@@ -511,6 +560,10 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     set code {
+         -re ".*A problem internal to GDB has been detected" {
+             fail "$message (GDB internal error)"
+             gdb_internal_error_resync
+         }
 	 -re "\\*\\*\\* DOSEXIT code.*" {
 	     if { $message != "" } {
 		 fail "$message";
