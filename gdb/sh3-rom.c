@@ -124,7 +124,7 @@ sh3_load (desc, file, hashmark)
   if (parallel_in_use) 
     {
       monitor_printf("pl;s\r");
-      load_srec (parallel, file, 80, SREC_ALL, hashmark, NULL);
+      load_srec (parallel, file, 0, 80, SREC_ALL, hashmark, NULL);
       monitor_expect_prompt (NULL, 0);
     }
   else 
@@ -134,7 +134,7 @@ sh3_load (desc, file, hashmark)
       SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
       monitor_expect ("LO x\r", NULL, 0); /* Look for filename */
 
-      load_srec (desc, file, 80, SREC_ALL, hashmark, NULL);
+      load_srec (desc, file, 0, 80, SREC_ALL, hashmark, NULL);
 
       monitor_expect ("\005", NULL, 0); /* Look for ENQ */
       SERIAL_WRITE (desc, "\006", 1); /* Send ACK */

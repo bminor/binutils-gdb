@@ -1,3 +1,11 @@
+Wed Dec 11 11:15:08 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* monitor.c (monitor_load): Add support for load address argument.
+	* dsrec.c: #include <time.h>.
+	(load_srec): New argument load_offset.  Print download stats.
+	* srec.h (load_srec): Update prototype.
+	* sh3-rom.c (sh3_load): Update call to load_srec.
+
 Mon Dec  9 17:34:05 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* config/mn10300/tm-mn10300.h: more small register fixes
