@@ -1,5 +1,16 @@
 2001-10-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (my_getSmallParser): New function prototype.
+	(small_ex_type): Named this enum, more return values for
+	my_getSmallExpression.
+	(mips_ip): Allow SPC and HT between arguments. Handle some NewABI
+	triple relocations. Protect some parts with ifdef OBJ_ELF.
+	(percent_op_match): New struct, lookup table for %some_reloc().
+	(my_getSmallParser): New function, parses nested percent_ops also.
+	(my_getSmallExpression): Rewite to support nested percent_ops.
+
+2001-10-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c
 	(load_address): Support both 32- and 64-bit addresses.
 	(macro): Call load_register correctly. Expand 64-bit loads ans stores.

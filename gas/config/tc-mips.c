@@ -675,8 +675,9 @@ static void mips16_ip PARAMS ((char *str, struct mips_cl_insn * ip));
 static void mips16_immed PARAMS ((char *, unsigned int, int, offsetT, boolean,
 				  boolean, boolean, unsigned long *,
 				  boolean *, unsigned short *));
-static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
-static void my_getExpression PARAMS ((expressionS * ep, char *str));
+static int my_getSmallParser PARAMS ((char **, unsigned int *, int *));
+static int my_getSmallExpression PARAMS ((expressionS *, char *));
+static void my_getExpression PARAMS ((expressionS *, char *));
 static int support_64bit_objects PARAMS((void));
 static symbolS *get_symbol PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill, symbolS *label));
@@ -709,17 +710,30 @@ static const char *mips_cpu_to_str PARAMS ((int));
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 static void show PARAMS ((FILE *, char *, int *, int *));
 
-/* Return values of my_getSmallExpression() */
+/* Return values of my_getSmallExpression().  */
 
-enum
+enum small_ex_type
 {
   S_EX_NONE = 0,
-  S_EX_LO,
+  S_EX_REGISTER,
+
+  /* Direct relocation creation by %percent_op().  */
+  S_EX_HALF,
   S_EX_HI,
+  S_EX_LO,
+  S_EX_GP_REL,
+  S_EX_GOT,
+  S_EX_CALL16,
+  S_EX_GOT_DISP,
+  S_EX_GOT_PAGE,
+  S_EX_GOT_OFST,
+  S_EX_GOT_HI,
+  S_EX_GOT_LO,
+  S_EX_NEG,
   S_EX_HIGHER,
   S_EX_HIGHEST,
-  S_EX_GPREL,
-  S_EX_NEG
+  S_EX_CALL_HI,
+  S_EX_CALL_LO
 };
 
 /* Table and functions used to map between CPU/ISA names, and
@@ -7426,8 +7440,7 @@ mips_ip (str, ip)
       insn_error = NULL;
       for (args = insn->args;; ++args)
 	{
-	  if (*s == ' ')
-	    ++s;
+	  s += strspn (s, " \t");
 	  switch (*args)
 	    {
 	    case '\0':		/* end of args */
@@ -8085,10 +8098,31 @@ mips_ip (str, ip)
 		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
+#ifdef OBJ_ELF
 		      else if (c == S_EX_HIGHEST)
 			  *imm_reloc = BFD_RELOC_MIPS_HIGHEST;
 		      else if (c == S_EX_HIGHER)
 			  *imm_reloc = BFD_RELOC_MIPS_HIGHER;
+		      else if (c == S_EX_GP_REL)
+			{
+			  /* This occurs in NewABI only.  */
+			  c = my_getSmallExpression (&imm_expr, s);
+			  if (c != S_EX_NEG)
+			    as_bad (_("bad composition of relocations"));
+			  else
+			    {
+			      c = my_getSmallExpression (&imm_expr, s);
+			      if (c != S_EX_LO)
+				as_bad (_("bad composition of relocations"));
+			      else
+				{
+				  imm_reloc[0] = BFD_RELOC_GPREL16;
+				  imm_reloc[1] = BFD_RELOC_MIPS_SUB;
+				  imm_reloc[2] = BFD_RELOC_LO16;
+				}
+			    }
+			}
+#endif
 		      else if (c == S_EX_HI)
 			{
 			  *imm_reloc = BFD_RELOC_HI16_S;
@@ -8209,6 +8243,7 @@ mips_ip (str, ip)
 		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
+#ifdef OBJ_ELF
 		      else if (c == S_EX_HIGHEST)
 			  *imm_reloc = BFD_RELOC_MIPS_HIGHEST;
 		      else if (c == S_EX_HI)
@@ -8216,6 +8251,26 @@ mips_ip (str, ip)
 			  *imm_reloc = BFD_RELOC_HI16_S;
 			  imm_unmatched_hi = true;
 			}
+		      else if (c == S_EX_GP_REL)
+			{
+			  /* This occurs in NewABI only.  */
+			  c = my_getSmallExpression (&imm_expr, s);
+			  if (c != S_EX_NEG)
+			    as_bad (_("bad composition of relocations"));
+			  else
+			    {
+			      c = my_getSmallExpression (&imm_expr, s);
+			      if (c != S_EX_HI)
+				as_bad (_("bad composition of relocations"));
+			      else
+				{
+				  imm_reloc[0] = BFD_RELOC_GPREL16;
+				  imm_reloc[1] = BFD_RELOC_MIPS_SUB;
+				  imm_reloc[2] = BFD_RELOC_HI16_S;
+				}
+			    }
+			}
+#endif
 		      else
 			*imm_reloc = BFD_RELOC_HI16;
 		    }
@@ -9017,151 +9072,192 @@ mips16_immed (file, line, type, val, warn, small, ext, insn, use_extend,
     }
 }
 
+static struct percent_op_match
+{
+   const char *str;
+   const enum small_ex_type type;
+} percent_op[] =
+{
+#ifdef OBJ_ELF
+  {"%half", S_EX_HALF},
+#endif
+  {"%hi", S_EX_HI},
+  {"%lo", S_EX_LO},
+#ifdef OBJ_ELF
+  {"%gp_rel", S_EX_GP_REL},
+  {"%got", S_EX_GOT},
+  {"%call16", S_EX_CALL16},
+  {"%got_disp", S_EX_GOT_DISP},
+  {"%got_page", S_EX_GOT_PAGE},
+  {"%got_ofst", S_EX_GOT_OFST},
+  {"%got_hi", S_EX_GOT_HI},
+  {"%got_lo", S_EX_GOT_LO},
+  {"%neg", S_EX_NEG},
+  {"%higher", S_EX_HIGHER},
+  {"%highest", S_EX_HIGHEST},
+  {"%call_hi", S_EX_CALL_HI},
+  {"%call_lo", S_EX_CALL_LO}
+#endif
+};
+
+/* Parse small expression input.  STR gets adjusted to eat up whitespace.
+   It detects valid "%percent_op(...)" and "($reg)" strings.  Percent_op's
+   can be nested, this is handled by blanking the innermost, parsing the
+   rest by subsequent calls.  */
+
+static int
+my_getSmallParser (str, len, nestlevel)
+     char **str;
+     unsigned int *len;
+     int *nestlevel;
+{
+  int type = S_EX_NONE;
+
+  *len = 0;
+  *str += strspn (*str, " \t");
+  if (**str == '(')
+    {
+      char *b = *str + 1 + strspn (*str + 1, " \t");
+      char *e;
+
+      /* Check for base register.  */
+      if (b[0] == '$')
+	{
+	  if (strchr (b, ')')
+	      && (e = b + strcspn (b, ") \t"))
+	      && e - b > 1 && e - b < 4)
+	    {
+	       if ((e - b == 3
+		    && ((b[1] == 'f' && b[2] == 'p')
+			|| (b[1] == 's' && b[2] == 'p')
+			|| (b[1] == 'g' && b[2] == 'p')
+			|| (b[1] == 'a' && b[2] == 't')
+			|| (ISDIGIT (b[1])
+			    && ISDIGIT (b[2]))))
+		   || (ISDIGIT (b[1])))
+		 {
+		   *len = strcspn (*str, ")") + 1;
+		   return S_EX_REGISTER;
+		 }
+	    }
+	}
+      else if (b[0] == '%')
+	{
+	  *str = b;
+	  goto percent_op;
+	}
+      else
+        /* Some other expression in the braces.  */
+        *len = strcspn (*str, ")") + 1;
+    }
+  /* Check for percent_op.  */
+  else if (*str[0] == '%')
+    {
+      char *tmp;
+      unsigned int i;
+
+percent_op:
+      tmp = *str + 1;
+      i = 0;
+
+      while (ISALPHA (*tmp) || *tmp == '_')
+	{
+	  *tmp = TOLOWER (*tmp);
+	  tmp++;
+	}
+      while (i < (sizeof (percent_op) / sizeof (struct percent_op_match)))
+	{
+	  if (strncmp (*str, percent_op[i].str, strlen (percent_op[i].str)))
+	      i++;
+	  else
+	    {
+	      type = percent_op[i].type;
+
+	      /* Only %hi and %lo are allowed for OldABI.  */
+	      if (! HAVE_NEWABI && type != S_EX_HI && type != S_EX_LO)
+		return S_EX_NONE;
+
+	      *len = strlen (percent_op[i].str);
+	      (*nestlevel)++;
+	      return type;
+	    }
+	}
+    }
+
+  /* Any other expression.  */
+  return S_EX_NONE;
+}
 
 static int
 my_getSmallExpression (ep, str)
      expressionS *ep;
      char *str;
 {
-  char *sp;
-  char *oldstr = str;
+  static char *oldstr = NULL;
   int c = S_EX_NONE;
+  int oldc;
+  int nest_level = 0;
+  unsigned int len;
 
-  if (*str == ' ')
-    str++;
-  if (*str == '(')
-    c = S_EX_NONE;
-  else if (str[0] == '%'
-	   && TOLOWER (str[1]) == 'l'
-	   && TOLOWER (str[2]) == 'o'
-	   && str[3] == '(')
+  /* Don't update oldstr if the last call had nested percent_op's.  */
+  if (! oldstr)
+    oldstr = str;
+	
+  do
     {
-      c = S_EX_LO;
-      str += sizeof ("%lo(") - 2;
+      oldc = c;
+      c = my_getSmallParser (&str, &len, &nest_level);
+      if (c != S_EX_NONE && c != S_EX_REGISTER)
+	str += len;
     }
-  else if (str[0] == '%'
-	   && TOLOWER (str[1]) == 'h'
-	   && TOLOWER (str[2]) == 'i'
-	   && str[3] == '(')
+  while (c != S_EX_NONE && c != S_EX_REGISTER);
+
+  /* A percent_op was encountered.  */
+  if (nest_level)
     {
-      c = S_EX_HI;
-      str += sizeof ("%hi(") - 2;
+      /* Don't try to get a expression if it is already blanked out.  */
+      if (*(str + strspn (str + 1, " )")) != ')')
+	{
+	  char save;
+
+	  save = *(str + len);
+	  *(str + len) = '\0';
+	  my_getExpression (ep, str);
+	  *(str + len) = save;
+	}
+      if (nest_level > 1)
+	{
+	  /* blank out including the % sign.  */
+	  char *p = strrchr (oldstr, '%');
+	  memset (p, ' ', str - p + len);
+	  str = oldstr;
+	}
+      else
+	{
+	  expr_end = strchr (str, ')') + 1;
+	}
+      c = oldc;
     }
-  else if (str[0] == '%'
-	   && TOLOWER (str[1]) == 'h'
-	   && TOLOWER (str[2]) == 'i'
-	   && TOLOWER (str[3]) == 'g'
-	   && TOLOWER (str[4]) == 'h'
-	   && TOLOWER (str[5]) == 'e'
-	   && TOLOWER (str[6]) == 'r'
-	   && str[7] == '(')
-    {
-      c = S_EX_HIGHER;
-      str += sizeof ("%higher(") - 2;
-    }
-  else if (str[0] == '%'
-	   && TOLOWER (str[1]) == 'h'
-	   && TOLOWER (str[2]) == 'i'
-	   && TOLOWER (str[3]) == 'g'
-	   && TOLOWER (str[4]) == 'h'
-	   && TOLOWER (str[5]) == 'e'
-	   && TOLOWER (str[6]) == 's'
-	   && TOLOWER (str[7]) == 't'
-	   && str[8] == '(')
-    {
-      c = S_EX_HIGHEST;
-      str += sizeof ("%highest(") - 2;
-    }
-/* currently unsupported */
-#if 0
-  else if (str[0] == '%'
-	   && TOLOWER (str[1]) == 'g'
-	   && TOLOWER (str[2]) == 'p'
-	   && TOLOWER (str[3]) == '_'
-	   && TOLOWER (str[4]) == 'r'
-	   && TOLOWER (str[5]) == 'e'
-	   && TOLOWER (str[6]) == 'l'
-	   && str[7] == '(')
-    {
-      c = S_EX_GPREL;
-      str += sizeof ("%gp_rel(") - 2;
-    }
-  else if (str[0] == '%'
-	   && TOLOWER (str[1]) == 'n'
-	   && TOLOWER (str[2]) == 'e'
-	   && TOLOWER (str[3]) == 'g'
-	   && str[4] == '(')
-    {
-      c = S_EX_NEG;
-      str += sizeof ("%neg(") - 2;
-    }
-#endif
-  else
+  else if (c == S_EX_NONE)
     {
       my_getExpression (ep, str);
-      return c;
     }
-
-  /*
-   * A small expression may be followed by a base register.
-   * Scan to the end of this operand, and then back over a possible
-   * base register.  Then scan the small expression up to that
-   * point.  (Based on code in sparc.c...)
-   */
-  for (sp = str; *sp && *sp != ','; sp++)
-    ;
-  if (sp - 4 >= str && sp[-1] == ')')
+  else if (c == S_EX_REGISTER)
     {
-      if (ISDIGIT (sp[-2]))
-	{
-	  for (sp -= 3; sp >= str && ISDIGIT (*sp); sp--)
-	    ;
-	  if (*sp == '$' && sp > str && sp[-1] == '(')
-	    {
-	      sp--;
-	      goto do_it;
-	    }
-	}
-      else if (sp - 5 >= str
-	       && sp[-5] == '('
-	       && sp[-4] == '$'
-	       && ((sp[-3] == 'f' && sp[-2] == 'p')
-		   || (sp[-3] == 's' && sp[-2] == 'p')
-		   || (sp[-3] == 'g' && sp[-2] == 'p')
-		   || (sp[-3] == 'a' && sp[-2] == 't')))
-	{
-	  sp -= 5;
-	do_it:
-	  if (sp == str)
-	    {
-	      /* no expression means zero offset */
-	      if (c != S_EX_NONE)
-		{
-		  /* %xx(reg) is an error */
-		  ep->X_op = O_absent;
-		  expr_end = oldstr;
-		}
-	      else
-		{
-		  ep->X_op = O_constant;
-		  expr_end = sp;
-		}
-	      ep->X_add_symbol = NULL;
-	      ep->X_op_symbol = NULL;
-	      ep->X_add_number = 0;
-	    }
-	  else
-	    {
-	      *sp = '\0';
-	      my_getExpression (ep, str);
-	      *sp = '(';
-	    }
-	  return c;
-	}
+      ep->X_op = O_constant;
+      expr_end = str;
+      ep->X_add_symbol = NULL;
+      ep->X_op_symbol = NULL;
+      ep->X_add_number = 0;
     }
-  my_getExpression (ep, str);
+  else
+    {
+      as_fatal(_("internal error"));
+    }
 
-  /* => %highest, %higher, %hi, %lo, %gprel, %neg encountered */
+  if (nest_level <= 1)
+    oldstr = NULL;
+
   return c;
 }
 
