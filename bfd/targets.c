@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -48,7 +48,9 @@ DESCRIPTION
 
 	o If the target string is still NULL, or the target string is
 	<<default>>, then the first item in the target vector is used
-	as the target type. @xref{bfd_target}.
+	as the target type, and <<target_defaulted>> is set to
+	cause <<bfd_check_format>> to loop through all the targets.
+	@xref{bfd_target}.  @xref{Formats}.
 
 	o Otherwise, the elements in the target vector are inspected
 	one by one, until a match on target name is found. When found,
@@ -62,7 +64,9 @@ DESCRIPTION
 
 	Once the BFD has been opened and the target selected, the file
 	format may be determined. This is done by calling
-	<<bfd_check_format>> on the BFD with a suggested format. The
+	<<bfd_check_format>> on the BFD with a suggested format. 
+	If <<target_defaulted>> has been set, each possible target
+	type is tried to see if it recognizes the specified format.  The
 	routine returns <<true>> when the application guesses right.
 @menu
 @* bfd_target::
@@ -375,6 +379,7 @@ extern bfd_target sunos_big_vec;
 extern bfd_target demo_64_vec;
 extern bfd_target srec_vec;
 extern bfd_target tekhex_vec;
+extern bfd_target a_out_adobe_vec;
 extern bfd_target b_out_vec_little_host;
 extern bfd_target b_out_vec_big_host;
 extern bfd_target icoff_little_vec;
@@ -443,6 +448,7 @@ bfd_target *target_vector[] = {
 	&icoff_big_vec,
 	&elf_little_vec,
 	&elf_big_vec,
+	&a_out_adobe_vec,
 	&b_out_vec_little_host,
 	&b_out_vec_big_host,
 	&m68kcoff_vec,

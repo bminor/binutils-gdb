@@ -1,3 +1,19 @@
+Fri Sep 25 19:14:48 1992  John Gilmore  (gnu@cygnus.com)
+
+	Add Adobe a.out support.
+
+	* aout-adobe.c:  New file.  So far, only reads a.out.adobe.  FIXME.
+	* config/adobe.mt:  Add.
+	* configure.in (*-adobe-* target):  Add.
+	* targets.c (a_out_adobe_vec):  Add.
+	* Makefile.in:  add aout-adobe.c.
+
+	* configure.in:  Put two dashes in all entries to be matched.
+	Add comments to remind people to do this.
+	Reorder all entries that match manufacturer names, to occur
+	last, so they will only be matched if no more specific match
+	occurs.  Remove manufacturers `aout', `bout', `coff', and `elf'.
+
 Fri Sep 25 15:03:22 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
 
 	* elf.c (section_from_elf_index): Return bfd_abs_section, not 0,
@@ -13,8 +29,6 @@ Fri Sep 25 11:11:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	types.
 	* seclet.h: #ifndef around it to allow multiple inclusion
 	* srec.c: minor doc fix
-	
-	
 
 Mon Sep 21 14:33:58 1992  Ian Lance Taylor  (ian@cygnus.com)
 
