@@ -1,5 +1,39 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* config/vax/nm-obsd.h: Delete file.
+	* config/vax/obsd.mh (NAT_FILE): Set to config/nm-bsd.h.
+	* config/vax/nm-nbsd.h: Delete file.
+	* config/vax/nm-nbsdaout.h: Include config/nm-nbsd.h.
+	* config/vax/nbsdelf.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/sh/nm-nbsd.h: Delete file.
+	* config/sh/nbsd.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/rs6000/nm-rs6000ly.h: Delete file.
+	* config/djgpp/fnchange.lst: Do not rename nm-rs6000ly.h.
+	* config/rs6000/rs6000lynx.mh (NAT_FILE): Set to config/nm-lynx.h.
+	* config/powerpc/nm-obsd.h: Delete file.
+	* config/powerpc/obsd.mh (NAT_FILE): Set to config/nm-bsd.h.
+	* config/powerpc/nm-nbsd.h: Delete file.
+	* config/powerpc/nbsd.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/pa/nm-obsd.h: Delete file.
+	* config/pa/obsd.mh (NAT_FILE): Set to config/nm-bsd.h.
+	* config/mips/nm-nbsd.h: Delete file.
+	* config/mips/nbsd.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/m88k/nm-obsd.h: Delete file.
+	* config/m88k/obsd.mh (NAT_FILE): Set to config/nm-bsd.h.
+	* config/m68k/nm-nbsd.h: Delete file.
+	* config/m68k/nm-nbsdaout.h: Include config/nm-nbsd.h.
+	* config/m68k/nbsdelf.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/i386/nm-nbsd.h: Delete file.
+	* config/i386/nm-nbsdaout.h: Include config/nm-nbsd.h.
+	* config/i386/obsd64.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/i386/nbsd64.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/i386/nbsdelf.mh (NAT_FILE): Set to config/nm-nbsd.h.
+	* config/i386/nm-i386lynx.h: Delete file.
+	* config/i386/i386lynx.mh (NAT_FILE): Set to config/nm-lynx.h.
+	* config/arm/nm-nbsd.h: Delete file.
+	* config/arm/nm-nbsdaout.h: Include config/nm-nbsd.h.
+	* config/arm/nbsdelf.mh (NAT_FILE): Set to config/nm-nbsd.h.
+
 	* config/i386/tm-fbsd.h: Delete file.
 	* config/i386/fbsd64.mt (TM_FILE): Set to solib.h.
 	* config/i386/fbsd.mt (TM_FILE): Set to solib.h.

@@ -22,7 +22,7 @@
 #ifndef NM_NBSDAOUT_H
 #define NM_NBSDAOUT_H
 
-#include "vax/nm-nbsd.h"
+#include "config/nm-nbsd.h"
 
 /* Get generic NetBSD a.out native definitions.  */
 #include "config/nm-nbsdaout.h"
