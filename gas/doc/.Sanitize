@@ -45,6 +45,7 @@ pretex.m4
 sparc.m4
 vax.m4
 vintage.m4
+z8000.m4
 
 Do-last:
 
@@ -53,7 +54,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.4  1992/03/10 00:50:59  rich
+# Revision 1.5  1992/11/19 19:48:43  sac
+#     	z8000 documentation
+# 	* Makefile.in, all.m4, as-all.texinfo as.texinfo: all modified
+#
+# Revision 1.4  1992/03/10  00:50:59  rich
 # keep ChangeLog and as-all.texinfo
 #
 # Revision 1.3  1992/02/24  13:54:45  tiemann
