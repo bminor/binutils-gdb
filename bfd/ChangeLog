@@ -1,3 +1,9 @@
+2005-03-31  Jerome Guitton  <guitton@gnat.com>
+
+	* bfd/config.in (HAVE_DECL_BASENAME): New configure macro.
+	* bfd/configure.in: Check for basename.
+	* bfd/configure: Regenerate.
+
 2005-03-30  Julian Brown  <julian@codesourcery.com>
 
 	* bfd-in.h (bfd_is_arm_mapping_symbol_name): Rename from
