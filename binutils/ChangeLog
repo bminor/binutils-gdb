@@ -1,3 +1,8 @@
+2004-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* strings.c (print_strings): Cast file_off to unsigned long in
+	printf arg list.
+
 2004-04-07  Benjamin Monate  <benjamin.monate@cea.fr>
 
 	PR 86

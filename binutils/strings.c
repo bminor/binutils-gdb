@@ -1,6 +1,6 @@
 /* strings -- print the strings of printable characters in files
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -512,7 +512,7 @@ print_strings (const char *filename, FILE *stream, file_off address,
 	}
 
       /* We found a run of `string_min' graphic characters.  Print up
-         to the next non-graphic character.  */
+	 to the next non-graphic character.  */
 
       if (print_filenames)
 	printf ("%s: ", filename);
@@ -557,7 +557,8 @@ print_strings (const char *filename, FILE *stream, file_off address,
 #else
 # if !BFD_HOST_64BIT_LONG
 	    if (start != (unsigned long) start)
-	      printf ("%lx%8.8lx ", start >> 32, start & 0xffffffff);
+	      printf ("%lx%8.8lx ", (unsigned long) (start >> 32),
+		      (unsigned long) (start & 0xffffffff));
 	    else
 # endif
 #endif
