@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-11-12 11:36-0500\n"
+"POT-Creation-Date: 1998-11-16 11:04-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -157,7 +157,7 @@ msgstr ""
 msgid "GP relative relocation used when GP not defined"
 msgstr ""
 
-#: coff-alpha.c:1486 elf64-alpha.c:4148
+#: coff-alpha.c:1486 elf64-alpha.c:4120
 msgid "using multiple gp values"
 msgstr ""
 
@@ -781,7 +781,7 @@ msgstr ""
 msgid "static procedure (no name)"
 msgstr ""
 
-#: elf32-mips.c:4555 elf64-alpha.c:4522
+#: elf32-mips.c:4555 elf64-alpha.c:4494
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr ""
@@ -954,7 +954,6 @@ msgstr ""
 msgid "v850 architecture"
 msgstr ""
 
-#. start-sanitize-v850e
 #: elf32-v850.c:1902
 msgid "v850e architecture"
 msgstr ""

@@ -1339,10 +1339,8 @@ enum bfd_architecture
   /* end-sanitize-tic80 */
   bfd_arch_v850,       /* NEC V850 */
 #define bfd_mach_v850          0
-  /* start-sanitize-v850e */
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850ea        'A'
-  /* end-sanitize-v850e */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
   bfd_arch_m32r,       /* Mitsubishi M32R/D */
@@ -2132,7 +2130,6 @@ data area pointer. */
 
 /* This is a 16 bit offset from the tiny data area pointer. */
   BFD_RELOC_V850_TDA_16_16_OFFSET,
-/* start-sanitize-v850e */
 
 /* This is a 5 bit offset (of which only 4 bits are used) from the tiny
 data area pointer. */
@@ -2154,8 +2151,6 @@ bits placed non-contigously in the instruction. */
 
 /* This is a 16 bit offset from the call table base pointer. */
   BFD_RELOC_V850_CALLT_16_16_OFFSET,
-/* end-sanitize-v850e */
-
 
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction. */

@@ -317,34 +317,6 @@ for i in $never_files ; do
 	fi
 done
 
-v850_files="ChangeLog ChangeLog-9697 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h elf32-v850.c cpu-v850.c"
-if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	for i in $v850_files ; do
-		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850_files ; do
-		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850e\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850e/,/end\-sanitize\-v850e/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 r5900_files="ChangeLog ChangeLog-9697 config.bfd archures.c bfd-in2.h cpu-mips.c elf32-mips.c libbfd.h reloc.c"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do

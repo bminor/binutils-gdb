@@ -626,14 +626,12 @@ case "${targ}" in
   v850-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-# start-sanitize-v850e
   v850e-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
   v850ea-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-# end-sanitize-v850e
 #if HAVE_host_aout_vec
   vax-*-bsd* | vax-*-ultrix*)
     targ_defvec=host_aout_vec
