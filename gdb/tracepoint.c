@@ -47,17 +47,6 @@ extern int info_verbose;
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
-/* Walk the following statement or block through all tracepoints.
-   ALL_TRACEPOINTS_SAFE does so even if the statment deletes the current
-   breakpoint.  */
-
-#define ALL_TRACEPOINTS(t)  for (t = tracepoint_chain; t; t = t->next)
-
-#define ALL_TRACEPOINTS_SAFE(t,tmp)	\
-	for (t = tracepoint_chain;	\
-	     t ? (tmp = t->next, 1) : 0;\
-	     t = tmp)
-
 /* Chain of all tracepoints defined.  */
 struct tracepoint *tracepoint_chain;
 
@@ -200,8 +189,14 @@ set_raw_tracepoint (sal)
   if (sal.symtab == NULL)
     t->source_file = NULL;
   else
-    t->source_file = savestring (sal.symtab->filename,
-				 strlen (sal.symtab->filename));
+    {
+      t->source_file = (char *) xmalloc (strlen (sal.symtab->filename) +
+                                         strlen (sal.symtab->dirname) + 1);
+
+      strcpy (t->source_file, sal.symtab->dirname);
+      strcat (t->source_file, sal.symtab->filename);
+    }
+
   t->language = current_language->la_language;
   t->input_radix = input_radix;
   t->line_number = sal.line;
@@ -270,13 +265,17 @@ trace_command (arg, from_tty)
       t->number = tracepoint_count;
 
       /* If a canonical line spec is needed use that instead of the
-	 command string.  */
+         command string.  */
       if (canonical != (char **)NULL && canonical[i] != NULL)
-	t->addr_string = canonical[i];
+        t->addr_string = canonical[i];
       else if (addr_start)
-	t->addr_string = savestring (addr_start, addr_end - addr_start);
+        t->addr_string = savestring (addr_start, addr_end - addr_start);
       if (cond_start)
-	t->cond_string = savestring (cond_start, cond_end - cond_start);
+        t->cond_string = savestring (cond_start, cond_end - cond_start);
+
+      /* Let the UI know of any additions */
+      if (create_tracepoint_hook)
+        create_tracepoint_hook (t);
     }
 
   if (sals.nelts > 1)
@@ -411,6 +410,11 @@ tracepoint_operation (t, from_tty, opcode)
 	  t2->next = t->next;
 	  break;
 	}
+
+    /* Let the UI know of any deletions */
+    if (delete_tracepoint_hook)
+      delete_tracepoint_hook (t);
+
     if (t->cond_string)
       free (t->cond_string);
     if (t->addr_string)
@@ -430,7 +434,7 @@ tracepoint_operation (t, from_tty, opcode)
 }
 
 /* Utility: parse a tracepoint number and look it up in the list.  */
-static struct tracepoint *
+struct tracepoint *
 get_tracepoint_by_number (arg)
      char **arg;
 {
@@ -1861,4 +1865,3 @@ _initialize_tracepoint ()
 
 #endif
 }
-

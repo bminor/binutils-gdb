@@ -20,8 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if !defined (TRACEPOINT_H)
 #define TRACEPOINT_H 1
 
-enum enabled { disabled, enabled };
-
+#if !defined (BREAKPOINT_H)
+enum enable { disabled, enabled };
+#endif
 /* The data structure for an action: */
 struct action_line 
 {
@@ -35,7 +36,7 @@ struct tracepoint
 {
   struct tracepoint *next;
 
-  enum enabled enabled;
+  enum enable enabled;
 
 #if 0
   /* Type of tracepoint (MVS FIXME: needed?). */
@@ -93,5 +94,25 @@ struct tracepoint
   int thread;
 };
 
+/* The tracepont chain of all tracepoints */
 
+extern struct tracepoint *tracepoint_chain;
+
+/* A hook used to notify the UI of tracepoint operations */
+
+void (*create_tracepoint_hook) PARAMS ((struct tracepoint *));
+void (*delete_tracepoint_hook) PARAMS ((struct tracepoint *));
+
+struct tracepoint *get_tracepoint_by_number PARAMS ((char **));
+
+/* Walk the following statement or block through all tracepoints.
+   ALL_TRACEPOINTS_SAFE does so even if the statment deletes the current
+   breakpoint.  */
+
+#define ALL_TRACEPOINTS(t)  for (t = tracepoint_chain; t; t = t->next)
+
+#define ALL_TRACEPOINTS_SAFE(t,tmp)	\
+	for (t = tracepoint_chain;	\
+	     t ? (tmp = t->next, 1) : 0;\
+	     t = tmp)
 #endif /* TRACEPOINT_H */
