@@ -1,5 +1,9 @@
 Tue Jul 11 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* archive.c (bfd_generic_archive_p): If the archive has a map, and
+	the target was defaulted, but the first object in the archive can
+	not be matched with that target, then return a bad format error.
+
 	* elf64-sparc.c (elf_sparc_howto_table): Set howto for WDISP16 to
 	elf64_wdisp16_reloc.
 	(elf64_wdisp16_reloc): New static function.
