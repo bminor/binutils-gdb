@@ -47,6 +47,12 @@ extern struct obstack frame_cache_obstack;
 #define MIPS_NUMREGS 32		/* Number of integer or float registers */
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
+/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
+   macros to test, set, or clear bit 0 of addresses.  */
+#define IS_MIPS16_ADDR(addr)	 ((addr) & 1)
+#define MAKE_MIPS16_ADDR(addr)	 ((addr) | 1)
+#define UNMAKE_MIPS16_ADDR(addr) ((addr) & ~1)
+
 #if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
@@ -409,13 +415,15 @@ mips_find_saved_regs (fci)
       unsigned long gen_save_found = 0;
       unsigned long float_save_found = 0;
 
-      if ((addr = PROC_LOW_ADDR (proc_desc)) & 1)
+      /* If the address is odd, assume this is MIPS16 code.  */
+      addr = PROC_LOW_ADDR (proc_desc);
+      if (IS_MIPS16_ADDR (addr))
 	{
-	  instlen = MIPS16_INSTLEN;	/* MIPS16 */
-	  addr &= ~1;
+	  instlen = MIPS16_INSTLEN;
+	  addr = UNMAKE_MIPS16_ADDR (addr);
 	}
       else
-	instlen = MIPS_INSTLEN;		/* MIPS32 */
+	instlen = MIPS_INSTLEN;
 
       /* Scan through this function's instructions preceding the current
          PC, and look for those that save registers.  */
@@ -568,7 +576,7 @@ heuristic_proc_start(pc)
 	|| fence < VM_MIN_ADDRESS)
       fence = VM_MIN_ADDRESS;
 
-    instlen = pc & 1 ? MIPS16_INSTLEN : MIPS_INSTLEN;
+    instlen = IS_MIPS16_ADDR (pc) ? MIPS16_INSTLEN : MIPS_INSTLEN;
 
     /* search back for previous return */
     for (start_pc -= instlen; ; start_pc -= instlen)
@@ -603,15 +611,17 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 
 	    return 0; 
 	  }
-	else if (start_pc & 1)
+	else if (IS_MIPS16_ADDR (start_pc))
 	  {
+	    unsigned short inst;
+
 	    /* On MIPS16, any one of the following is likely to be the
 	       start of a function:
 		 entry
 		 addiu sp,-n
 		 daddiu sp,-n
 		 extend -n followed by 'addiu sp,+n' or 'daddiu sp,+n'  */
-	    unsigned short inst = read_memory_integer (start_pc & ~1, 2);
+	    inst = read_memory_integer (UNMAKE_MIPS16_ADDR (start_pc), 2);
 	    if (((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
 		|| (inst & 0xff80) == 0x6380	/* addiu sp,-n */
 		|| (inst & 0xff80) == 0xfb80	/* daddiu sp,-n */
@@ -699,7 +709,8 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
       prev_inst = inst;
 
       /* Fetch the instruction.   */
-      status = read_memory_nobpt (cur_pc & ~1, buf, MIPS16_INSTLEN);
+      status = read_memory_nobpt (UNMAKE_MIPS16_ADDR (cur_pc), buf,
+				  MIPS16_INSTLEN);
       if (status) memory_error (status, cur_pc);
       inst = (unsigned short) extract_unsigned_integer (buf, MIPS16_INSTLEN);
 
@@ -922,7 +933,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 
   if (start_pc + 200 < limit_pc)
     limit_pc = start_pc + 200;
-  if (start_pc & 1)
+  if (IS_MIPS16_ADDR (start_pc))
     mips16_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
   else
     mips32_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
@@ -930,16 +941,18 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 }
 
 static mips_extra_func_info_t
-find_proc_desc (pc, next_frame)
+non_heuristic_proc_desc (pc, addrptr)
      CORE_ADDR pc;
-     struct frame_info *next_frame;
+     CORE_ADDR *addrptr;
 {
+  CORE_ADDR startaddr;
   mips_extra_func_info_t proc_desc;
   struct block *b = block_for_pc(pc);
   struct symbol *sym;
-  CORE_ADDR startaddr;
 
   find_pc_partial_function (pc, NULL, &startaddr, NULL);
+  if (addrptr)
+    *addrptr = startaddr;
   if (b == NULL || PC_IN_CALL_DUMMY (pc, 0, 0))
     sym = NULL;
   else
@@ -950,41 +963,62 @@ find_proc_desc (pc, next_frame)
 	   symbol reading.  */
 	sym = NULL;
       else
-	sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE,
-			     0, NULL);
+	sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
     }
 
   /* If we never found a PDR for this function in symbol reading, then
      examine prologues to find the information.  */
-  if (sym && ((mips_extra_func_info_t) SYMBOL_VALUE (sym))->pdr.framereg == -1)
-    sym = NULL;
-
   if (sym)
     {
-	/* IF this is the topmost frame AND
-	 * (this proc does not have debugging information OR
-	 * the PC is in the procedure prologue)
-	 * THEN create a "heuristic" proc_desc (by analyzing
-	 * the actual code) to replace the "official" proc_desc.
-	 */
-	proc_desc = (mips_extra_func_info_t) SYMBOL_VALUE (sym);
-	if (next_frame == NULL) {
-	    struct symtab_and_line val;
-	    struct symbol *proc_symbol =
-		PROC_DESC_IS_DUMMY(proc_desc) ? 0 : PROC_SYMBOL(proc_desc);
+      proc_desc = (mips_extra_func_info_t) SYMBOL_VALUE (sym);
+      if (PROC_FRAME_REG (proc_desc) == -1)
+	return NULL;
+      else
+	return proc_desc;
+    }
+  else
+    return NULL;
+}
 
-	    if (proc_symbol) {
-		val = find_pc_line (BLOCK_START
-				    (SYMBOL_BLOCK_VALUE(proc_symbol)),
-				    0);
-		val.pc = val.end ? val.end : pc;
+
+static mips_extra_func_info_t
+find_proc_desc (pc, next_frame)
+     CORE_ADDR pc;
+     struct frame_info *next_frame;
+{
+  mips_extra_func_info_t proc_desc;
+  CORE_ADDR startaddr;
+
+  proc_desc = non_heuristic_proc_desc (pc, &startaddr);
+
+  if (proc_desc)
+    {
+      /* IF this is the topmost frame AND
+       * (this proc does not have debugging information OR
+       * the PC is in the procedure prologue)
+       * THEN create a "heuristic" proc_desc (by analyzing
+       * the actual code) to replace the "official" proc_desc.
+       */
+      if (next_frame == NULL)
+	{
+	  struct symtab_and_line val;
+	  struct symbol *proc_symbol =
+	      PROC_DESC_IS_DUMMY(proc_desc) ? 0 : PROC_SYMBOL(proc_desc);
+
+	  if (proc_symbol)
+	    {
+	      val = find_pc_line (BLOCK_START
+				  (SYMBOL_BLOCK_VALUE(proc_symbol)),
+				  0);
+	      val.pc = val.end ? val.end : pc;
 	    }
-	    if (!proc_symbol || pc < val.pc) {
-		mips_extra_func_info_t found_heuristic =
-		  heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				       pc, next_frame);
-		if (found_heuristic)
-		  proc_desc = found_heuristic;
+	  if (!proc_symbol || pc < val.pc)
+	    {
+	      mips_extra_func_info_t found_heuristic =
+		heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
+				     pc, next_frame);
+	      if (found_heuristic)
+		proc_desc = found_heuristic;
 	    }
 	}
     }
@@ -1570,7 +1604,7 @@ mips_step_skips_delay (pc)
   char buf[MIPS_INSTLEN];
 
   /* There is no branch delay slot on MIPS16.  */
-  if (pc & 1)
+  if (IS_MIPS16_ADDR (pc))
     return 0;
 
   if (target_read_memory (pc, buf, MIPS_INSTLEN) != 0)
@@ -1724,7 +1758,8 @@ mips16_skip_prologue (pc, lenient)
 	int prev_extend_bytes;
 	int i;
 
-	status = read_memory_nobpt (pc & ~1, buf, MIPS16_INSTLEN);
+	status = read_memory_nobpt (UNMAKE_MIPS16_ADDR (pc), buf,
+				    MIPS16_INSTLEN);
 	if (status)
 	  memory_error (status, pc);
 	inst = (unsigned long)extract_unsigned_integer (buf, MIPS16_INSTLEN);
@@ -1788,7 +1823,7 @@ mips_skip_prologue (pc, lenient)
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */
 
-  if (pc & 1)
+  if (IS_MIPS16_ADDR (pc))
     return mips16_skip_prologue (pc, lenient);
   else
     return mips32_skip_prologue (pc, lenient);
@@ -2046,21 +2081,19 @@ gdb_print_insn_mips (memaddr, info)
      that is the start of a 16-bit function.  If we didn't do this,
      the search would fail because the symbol table says the function
      starts at an odd address, i.e. 1 byte past the given address.  */
-  proc_desc = find_proc_desc (memaddr | 1, NULL);
+  memaddr = ADDR_BITS_REMOVE (memaddr);
+  proc_desc = non_heuristic_proc_desc (MAKE_MIPS16_ADDR (memaddr), NULL);
 
   /* Make an attempt to determine if this is a 16-bit function.  If
      the procedure descriptor exists and the address therein is odd,
      it's definitely a 16-bit function.  Otherwise, we have to just
      guess that if the address passed in is odd, it's 16-bits.  */
   if (proc_desc)
-    info->mach = PROC_LOW_ADDR (proc_desc) & 1 ? 16 : 0;
+    info->mach = IS_MIPS16_ADDR (PROC_LOW_ADDR (proc_desc)) ? 16 : 0;
   else
-    info->mach = memaddr & 1 ? 16 : 0;
+    info->mach = IS_MIPS16_ADDR (memaddr) ? 16 : 0;
 
-  /* Round down the instruction address to the appropriate boundary.
-     Save the amount rounded down and subtract it from the returned size of
-     the instruction so that the next time through the address won't
-     look bogus.  */
+  /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == 16 ? ~1 : ~3);
       
   /* Call the appropriate disassembler based on the target endian-ness.  */
@@ -2083,10 +2116,10 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     {
-      if (*pcptr & 1)
+      if (IS_MIPS16_ADDR (*pcptr))
 	{
 	  static char mips16_big_breakpoint[] = MIPS16_BIG_BREAKPOINT;
-	  *pcptr &= ~1;
+	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof(mips16_big_breakpoint);
 	  return mips16_big_breakpoint;
 	}
@@ -2099,10 +2132,10 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
     }
   else
     {
-      if (*pcptr & 1)
+      if (IS_MIPS16_ADDR (*pcptr))
 	{
 	  static char mips16_little_breakpoint[] = MIPS16_LITTLE_BREAKPOINT;
-	  *pcptr &= ~1;
+	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof(mips16_little_breakpoint);
 	  return mips16_little_breakpoint;
 	}
@@ -2122,14 +2155,14 @@ int
 mips_about_to_return (pc)
      CORE_ADDR pc;
 {
-  if (pc & 1)
+  if (IS_MIPS16_ADDR (pc))
     /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
        generates a "jr $ra"; other times it generates code to load
        the return address from the stack to an accessible register (such
        as $a3), then a "jr" using that register.  This second case
        is almost impossible to distinguish from an indirect jump
        used for switch statements, so we don't even try.  */
-    return read_memory_integer (pc & ~1, 2) == 0xe820;	/* jr $ra */
+    return read_memory_integer (UNMAKE_MIPS16_ADDR (pc), 2) == 0xe820; /* jr $ra */
   else
     return read_memory_integer (pc, 4) == 0x3e00008;	/* jr $ra */
 }

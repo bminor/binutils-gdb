@@ -1,3 +1,10 @@
+Thu Feb 27 18:54:11 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (IS_MIPS16_ADDR, MAKE_MIPS16_ADDR, UNMAKE_MIPS16_ADDR):
+	New macros for testing, setting, and clearing bit 0 of addresses.
+	Change numerous bits of code where bit 0 was being manipulated
+	to use these macros.
+
 Thu Feb 27 14:12:41 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c: Put back the form feeds.
