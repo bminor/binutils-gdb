@@ -1,3 +1,8 @@
+Mon Feb  1 12:35:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure: check return code from mkdir, print error message and
+	  exit on failure.
+
 Sat Jan 30 16:40:28 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (make-gdb.tar.Z):  New location for texinfo.tex.

@@ -561,7 +561,12 @@ for subdir in . ${subdirs} ; do
     fi
 
     if [ ! -d ${subdir} ] ; then
-	mkdir ${subdir}
+	if mkdir ${subdir} ; then
+		true
+        else
+		echo '***' "${progname}: could not make ${PWD=`pwd`}/${subdir}" 1>&2
+		exit 1
+        fi
     fi
 
     case "${removing}" in
@@ -815,14 +820,19 @@ done
 # If there are subdirectories, then recur. 
 if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
 	for configdir in ${configdirs} ; do
-		eval echo Configuring ${configdir}... ${redirect}
 
 		if [ -d ${srcdir}/${configdir} ] ; then
+			eval echo Configuring ${configdir}... ${redirect}
 			case "${srcdir}" in
 			".") ;;
 			*)
 				if [ ! -d ./${configdir} ] ; then
-					mkdir ./${configdir}
+					if mkdir ./${configdir} ; then
+						true
+					else
+						echo '***' "${progname}: could not make ${PWD=`pwd`}/${configdir}" 1>&2
+						exit 1
+					fi
 				fi
 				;;
 			esac
@@ -863,8 +873,6 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			fi
 
 			cd ${POPDIR}
-		else
-			eval echo Warning: source directory \"${srcdir}/${configdir}\" is missing. ${redirect}
 		fi
 	done
 fi
