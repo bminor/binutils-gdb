@@ -591,7 +591,9 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   /* Append source filename and line number if desired.  */
   if (symbol && print_symbol_filename)
     {
-      struct symtab_and_line sal = find_pc_line (addr, 0);
+      struct symtab_and_line sal;
+
+      sal = find_pc_line (addr, 0);
       if (sal.symtab)
 	fprintf_filtered (stream, " at %s:%d", sal.symtab->filename, sal.line);
     }

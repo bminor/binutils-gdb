@@ -1,3 +1,9 @@
+Fri May 28 17:24:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* printcmd.c (print_address_symbolic): turn this into an assigment
+	instead of an initialization (many compilers don't accept
+	structure initialization). 
+
 Thu May 27 16:56:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* xcoffread.c (read_xcoff_symtab): If several program csects in one
