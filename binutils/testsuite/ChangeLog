@@ -1,3 +1,8 @@
+2001-07-27  H.J. Lu  <hjl@gnu.org>
+
+	* binutils-all/windres/windres.exp: Don't set xfail for
+	bmpalign (compare) on none-ix86/pe targets.
+
 2001-07-24  H.J. Lu  <hjl@gnu.org>
 
 	* binutils-all/windres/windres.exp: Set xfail on none-ix86/pe
