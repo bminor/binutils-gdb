@@ -82,6 +82,7 @@ ppc-endian.h
 ppc-instructions
 ppc-opcode-complex
 ppc-opcode-simple
+ppc-opcode-stupid
 ppc-spr-table
 ppc.mt
 psim.c
