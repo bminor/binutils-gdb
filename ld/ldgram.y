@@ -128,7 +128,8 @@ static int error_index;
 %token END
 %left <token> '('
 %token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE
-%token SECTIONS PHDRS SORT DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
+%token SECTIONS PHDRS DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
+%token SORT_BY_NAME SORT_BY_ALIGNMENT
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION
@@ -412,25 +413,55 @@ wildcard_spec:
 		wildcard_name
 			{
 			  $$.name = $1;
-			  $$.sorted = FALSE;
+			  $$.sorted = none;
 			  $$.exclude_name_list = NULL;
 			}
 	| 	EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name
 			{
 			  $$.name = $5;
-			  $$.sorted = FALSE;
+			  $$.sorted = none;
 			  $$.exclude_name_list = $3;
 			}
-	|	SORT '(' wildcard_name ')'
+	|	SORT_BY_NAME '(' wildcard_name ')'
 			{
 			  $$.name = $3;
-			  $$.sorted = TRUE;
+			  $$.sorted = by_name;
 			  $$.exclude_name_list = NULL;
 			}
-	|	SORT '(' EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name ')'
+	|	SORT_BY_ALIGNMENT '(' wildcard_name ')'
+			{
+			  $$.name = $3;
+			  $$.sorted = by_alignment;
+			  $$.exclude_name_list = NULL;
+			}
+	|	SORT_BY_NAME '(' SORT_BY_ALIGNMENT '(' wildcard_name ')' ')'
+			{
+			  $$.name = $5;
+			  $$.sorted = by_name_alignment;
+			  $$.exclude_name_list = NULL;
+			}
+	|	SORT_BY_NAME '(' SORT_BY_NAME '(' wildcard_name ')' ')'
+			{
+			  $$.name = $5;
+			  $$.sorted = by_name;
+			  $$.exclude_name_list = NULL;
+			}
+	|	SORT_BY_ALIGNMENT '(' SORT_BY_NAME '(' wildcard_name ')' ')'
+			{
+			  $$.name = $5;
+			  $$.sorted = by_alignment_name;
+			  $$.exclude_name_list = NULL;
+			}
+	|	SORT_BY_ALIGNMENT '(' SORT_BY_ALIGNMENT '(' wildcard_name ')' ')'
+			{
+			  $$.name = $5;
+			  $$.sorted = by_alignment;
+			  $$.exclude_name_list = NULL;
+			}
+	|	SORT_BY_NAME '(' EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name ')'
 			{
 			  $$.name = $7;
-			  $$.sorted = TRUE;
+			  $$.sorted = by_name;
 			  $$.exclude_name_list = $5;
 			}
 	;
@@ -481,7 +512,7 @@ input_section_spec_no_keep:
 			  struct wildcard_spec tmp;
 			  tmp.name = $1;
 			  tmp.exclude_name_list = NULL;
-			  tmp.sorted = FALSE;
+			  tmp.sorted = none;
 			  lang_add_wild (&tmp, NULL, ldgram_had_keep);
 			}
         |	'[' file_NAME_list ']'
@@ -514,7 +545,7 @@ statement:
 
 		  lang_add_attribute(lang_constructors_statement_enum);
 		}
-	| SORT '(' CONSTRUCTORS ')'
+	| SORT_BY_NAME '(' CONSTRUCTORS ')'
 		{
 		  constructors_sorted = TRUE;
 		  lang_add_attribute (lang_constructors_statement_enum);

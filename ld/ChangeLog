@@ -1,3 +1,42 @@
+2004-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention SORT_BY_NAME, SORT_BY_ALIGNMENT and
+	--sort-section name|alignment.
+
+	* ld.texinfo: Document SORT_BY_NAME, SORT_BY_ALIGNMENT and
+	--sort-section name|alignment.
+
+	* ld.h (sort_type): New enum.
+	(wildcard_spec): Change the type of `sorted' to sort_type.
+
+	* ldgram.y (SORT): Removed.
+	(SORT_BY_NAME): Added.
+	(SORT_BY_ALIGNMENT): Added.
+	(wildcard_spec): Updated `sorted'. Handle SORT_BY_NAME and
+	SORT_BY_ALIGNMENT.
+	(input_section_spec_no_keep): Updated `sorted'.
+	(statement): Replace SORT with SORT_BY_NAME.
+
+	* ldlang.c (compare_section): New function to compare 2
+	sections with different sorting schemes.
+	(wild_sort): Updated. Use compare_section.
+	(update_wild_statements): New function.
+	(lang_process): Call update_wild_statements before
+	map_input_to_output_sections.
+
+	* ldlex.l (SORT_BY_NAME): New.
+	(SORT_BY_ALIGNMENT): New.
+	(SORT): Return SORT_BY_NAME.
+
+	* ldmain.c (sort_section): New. Defined.
+	(main): Initialize it to none.
+
+	* lexsup.c (option_values): Add OPTION_SORT_SECTION.
+	(ld_options): Add an entry for OPTION_SORT_SECTION.
+	(parse_args): Handle OPTION_SORT_SECTION.
+
+	* mri.c (mri_draw_tree): Updated `sorted'.
+
 2004-10-04  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldgram.y (DATA_SEGMENT_RELRO_END): Add one argument.

@@ -91,6 +91,7 @@ enum option_values
   OPTION_SHARED,
   OPTION_SONAME,
   OPTION_SORT_COMMON,
+  OPTION_SORT_SECTION,
   OPTION_STATS,
   OPTION_SYMBOLIC,
   OPTION_TASK_LINK,
@@ -419,6 +420,9 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Sort common symbols by size"), TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
     '\0', NULL, NULL, NO_HELP },
+  { {"sort-section", required_argument, NULL, OPTION_SORT_SECTION},
+    '\0', N_("name|alignment"), 
+    N_("Sort sections by name or maximum alignment"), TWO_DASHES },
   { {"spare-dynamic-tags", required_argument, NULL, OPTION_SPARE_DYNAMIC_TAGS},
     '\0', N_("COUNT"), N_("How many tags to reserve in .dynamic section"),
     TWO_DASHES },
@@ -1065,6 +1069,15 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_SORT_COMMON:
 	  config.sort_common = TRUE;
+	  break;
+	case OPTION_SORT_SECTION:
+	  if (strcmp (optarg, N_("name")) == 0)
+	    sort_section = by_name;
+	  else if (strcmp (optarg, N_("alignment")) == 0)
+	    sort_section = by_alignment;
+	  else
+	    einfo (_("%P%F: invalid section sorting option: %s\n"),
+		   optarg);
 	  break;
 	case OPTION_STATS:
 	  config.stats = TRUE;

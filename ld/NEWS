@@ -1,5 +1,12 @@
 -*- text -*-
 
+* Added SORT_BY_NAME and SORT_BY_ALIGNMENT to the linker script
+  language to permit sorting sections by section name or section
+  maximum alignment.
+
+* Added a new linker command line switch, --sort-section name|alignment,
+  to sort sections by section name or maximum alignment.
+
 * New ELF --add-needed/--no-add-needed options to control if a
 DT_NEEDED tag should be added when a shared library comes from
 DT_NEEDED tags.

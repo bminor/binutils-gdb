@@ -1449,6 +1449,16 @@ byte symbols, then all the two byte, then all the four byte, and then
 everything else.  This is to prevent gaps between symbols due to
 alignment constraints.
 
+@kindex --sort-section name
+@item --sort-section name
+This option will apply @code{SORT_BY_NAME} to all wildcard section
+patterns in the linker script.
+
+@kindex --sort-section alignment
+@item --sort-section alignment
+This option will apply @code{SORT_BY_ALIGNMENT} to all wildcard section
+patterns in the linker script.
+
 @kindex --split-by-file
 @item --split-by-file [@var{size}]
 Similar to @option{--split-by-reloc} but creates a new output section for
@@ -3076,13 +3086,65 @@ sequence of input section descriptions is probably in error, because the
 .data1 : @{ data.o(.data) @}
 @end smallexample
 
-@cindex SORT
+@cindex SORT_BY_NAME
 Normally, the linker will place files and sections matched by wildcards
 in the order in which they are seen during the link.  You can change
-this by using the @code{SORT} keyword, which appears before a wildcard
-pattern in parentheses (e.g., @code{SORT(.text*)}).  When the
-@code{SORT} keyword is used, the linker will sort the files or sections
+this by using the @code{SORT_BY_NAME} keyword, which appears before a wildcard
+pattern in parentheses (e.g., @code{SORT_BY_NAME(.text*)}).  When the
+@code{SORT_BY_NAME} keyword is used, the linker will sort the files or sections
 into ascending order by name before placing them in the output file.
+
+@cindex SORT_BY_ALIGNMENT
+@code{SORT_BY_ALIGNMENT} is very similar to @code{SORT_BY_NAME}. The
+difference is @code{SORT_BY_ALIGNMENT} will sort sections into
+ascending order by alignment before placing them in the output file.
+
+@cindex SORT
+@code{SORT} is an alias for @code{SORT_BY_NAME}.
+
+When there are nested section sorting commands in linker script, there
+can be at most 1 level of nesting for section sorting commands.
+
+@enumerate
+@item
+@code{SORT_BY_NAME} (@code{SORT_BY_ALIGNMENT} (wildcard section pattern)).
+It will sort the input sections by name first, then by alignment if 2
+sections have the same name.
+@item
+@code{SORT_BY_ALIGNMENT} (@code{SORT_BY_NAME} (wildcard section pattern)).
+It will sort the input sections by alignment first, then by name if 2
+sections have the same alignment.
+@item
+@code{SORT_BY_NAME} (@code{SORT_BY_NAME} (wildcard section pattern)) is 
+treated the same as @code{SORT_BY_NAME} (wildcard section pattern).
+@item
+@code{SORT_BY_ALIGNMENT} (@code{SORT_BY_ALIGNMENT} (wildcard section pattern))
+is treated the same as @code{SORT_BY_ALIGNMENT} (wildcard section pattern).
+@item
+All other nested section sorting commands are invalid.
+@end enumerate
+
+When both command line section sorting option and linker script
+section sorting command are used, section sorting command always
+takes precedence over the command line option.
+
+If the section sorting command in linker script isn't nested, the
+command line option will make the section sorting command to be
+treated as nested sorting command.
+
+@enumerate
+@item
+@code{SORT_BY_NAME} (wildcard section pattern ) with
+@option{--sort-sections alignment} is equivalent to
+@code{SORT_BY_NAME} (@code{SORT_BY_ALIGNMENT} (wildcard section pattern)).
+@item
+@code{SORT_BY_ALIGNMENT} (wildcard section pattern) with
+@option{--sort-section name} is equivalent to
+@code{SORT_BY_ALIGNMENT} (@code{SORT_BY_NAME} (wildcard section pattern)).
+@end enumerate
+
+If the section sorting command in linker script is nested, the
+command line option will be ignored.
 
 If you ever get confused about where input sections are going, use the
 @samp{-M} linker option to generate a map file.  The map file shows
@@ -3149,7 +3211,7 @@ When link-time garbage collection is in use (@samp{--gc-sections}),
 it is often useful to mark sections that should not be eliminated.
 This is accomplished by surrounding an input section's wildcard entry
 with @code{KEEP()}, as in @code{KEEP(*(.init))} or
-@code{KEEP(SORT(*)(.ctors))}.
+@code{KEEP(SORT_BY_NAME(*)(.ctors))}.
 
 @node Input Section Example
 @subsubsection Input Section Example
@@ -3333,9 +3395,9 @@ If you are using the @sc{gnu} C++ support for initialization priority,
 which provides some control over the order in which global constructors
 are run, you must sort the constructors at link time to ensure that they
 are executed in the correct order.  When using the @code{CONSTRUCTORS}
-command, use @samp{SORT(CONSTRUCTORS)} instead.  When using the
-@code{.ctors} and @code{.dtors} sections, use @samp{*(SORT(.ctors))} and
-@samp{*(SORT(.dtors))} instead of just @samp{*(.ctors)} and
+command, use @samp{SORT_BY_NAME(CONSTRUCTORS)} instead.  When using the
+@code{.ctors} and @code{.dtors} sections, use @samp{*(SORT_BY_NAME(.ctors))} and
+@samp{*(SORT_BY_NAME(.dtors))} instead of just @samp{*(.ctors)} and
 @samp{*(.dtors)}.
 
 Normally the compiler and linker will handle these issues automatically,

@@ -1054,6 +1054,46 @@ lang_add_section (lang_statement_list_type *ptr,
     }
 }
 
+/* Compare sections ASEC and BSEC according to SORT.  */
+
+static int
+compare_section (sort_type sort, asection *asec, asection *bsec)
+{
+  int ret;
+
+  switch (sort)
+    {
+    default:
+      abort ();
+
+    case by_alignment_name:
+      ret = (bfd_section_alignment (bsec->owner, bsec)
+	     - bfd_section_alignment (asec->owner, asec));
+      if (ret)
+	break;
+      /* Fall through.  */
+
+    case by_name:
+      ret = strcmp (bfd_get_section_name (asec->owner, asec),
+		    bfd_get_section_name (bsec->owner, bsec));
+      break;
+
+    case by_name_alignment:
+      ret = strcmp (bfd_get_section_name (asec->owner, asec),
+		    bfd_get_section_name (bsec->owner, bsec));
+      if (ret)
+	break;
+      /* Fall through.  */
+
+    case by_alignment:
+      ret = (bfd_section_alignment (bsec->owner, bsec)
+	     - bfd_section_alignment (asec->owner, asec));
+      break;
+    }
+
+  return ret;
+}
+
 /* Handle wildcard sorting.  This returns the lang_input_section which
    should follow the one we are going to create for SECTION and FILE,
    based on the sorting requirements of WILD.  It returns NULL if the
@@ -1068,7 +1108,8 @@ wild_sort (lang_wild_statement_type *wild,
   const char *section_name;
   lang_statement_union_type *l;
 
-  if (!wild->filenames_sorted && (sec == NULL || !sec->spec.sorted))
+  if (!wild->filenames_sorted
+      && (sec == NULL || sec->spec.sorted == none))
     return NULL;
 
   section_name = bfd_get_section_name (file->the_bfd, section);
@@ -1142,12 +1183,10 @@ wild_sort (lang_wild_statement_type *wild,
       /* Here either the files are not sorted by name, or we are
          looking at the sections for this file.  */
 
-      if (sec != NULL && sec->spec.sorted)
+      if (sec != NULL && sec->spec.sorted != none)
 	{
-	  if (strcmp (section_name,
-		      bfd_get_section_name (ls->ifile->the_bfd,
-					    ls->section))
-	      < 0)
+	  if (compare_section (sec->spec.sorted, section,
+			       ls->section) < 0)
 	    break;
 	}
     }
@@ -2013,6 +2052,71 @@ check_input_sections
       default:
 	break;
       }
+    }
+}
+
+/* Update wildcard statements if needed.  */
+
+static void
+update_wild_statements (lang_statement_union_type *s)
+{
+  struct wildcard_list *sec;
+
+  switch (sort_section)
+    {
+    default:
+      FAIL ();
+
+    case none:
+      break;
+
+    case by_name:
+    case by_alignment:
+      for (; s != NULL; s = s->header.next)
+	{
+	  switch (s->header.type)
+	    {
+	    default:
+	      break;
+
+	    case lang_wild_statement_enum:
+	      sec = s->wild_statement.section_list;
+	      if (sec != NULL)
+		{
+		  switch (sec->spec.sorted)
+		    {
+		    case none:
+		      sec->spec.sorted = sort_section;
+		      break;
+		    case by_name:
+		      if (sort_section == by_alignment)
+			sec->spec.sorted = by_name_alignment;
+		      break;
+		    case by_alignment:
+		      if (sort_section == by_name)
+			sec->spec.sorted = by_alignment_name;
+		      break;
+		    default:
+		      break;
+		    }
+		}
+	      break;
+
+	    case lang_constructors_statement_enum:
+	      update_wild_statements (constructor_list.head);
+	      break;
+
+	    case lang_output_section_statement_enum:
+	      update_wild_statements
+		(s->output_section_statement.children.head);
+	      break;
+
+	    case lang_group_statement_enum:
+	      update_wild_statements (s->group_statement.children.head);
+	      break;
+	    }
+	}
+      break;
     }
 }
 
@@ -4250,6 +4354,9 @@ lang_process (void)
   /* Size up the common data.  */
   lang_common ();
 
+  /* Update wild statements.  */
+  update_wild_statements (statement_list.head);
+
   /* Run through the contours of the script and attach input sections
      to the correct output sections.  */
   map_input_to_output_sections (statement_list.head, NULL, NULL);
@@ -4399,7 +4506,7 @@ lang_add_wild (struct wildcard_spec *filespec,
   if (filespec != NULL)
     {
       new->filename = filespec->name;
-      new->filenames_sorted = filespec->sorted;
+      new->filenames_sorted = filespec->sorted == by_name;
     }
   new->section_list = section_list;
   new->keep_sections = keep_sections;

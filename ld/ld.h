@@ -64,13 +64,18 @@ typedef struct name_list {
 }
 name_list;
 
-/* A wildcard specification.  This is only used in ldgram.y, but it
-   winds up in ldgram.h, so we need to define it outside.  */
+/* A wildcard specification.  */
+
+typedef enum {
+  none, by_name, by_alignment, by_name_alignment, by_alignment_name
+} sort_type;
+
+extern sort_type sort_section;
 
 struct wildcard_spec {
   const char *name;
   struct name_list *exclude_name_list;
-  bfd_boolean sorted;
+  sort_type sorted;
 };
 
 struct wildcard_list {

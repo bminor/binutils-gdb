@@ -108,6 +108,8 @@ args_type command_line;
 
 ld_config_type config;
 
+sort_type sort_section;
+
 static char *get_emulation
   (int, char **);
 static void set_scripts_dir
@@ -279,6 +281,8 @@ main (int argc, char **argv)
   command_line.check_section_addresses = TRUE;
   command_line.accept_unknown_input_arch = FALSE;
   command_line.reduce_memory_overheads = FALSE;
+
+  sort_section = none;
 
   /* We initialize DEMANGLING based on the environment variable
      COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
