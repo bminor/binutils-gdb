@@ -82,7 +82,7 @@ struct extra
   {
     char str[128];
     int len;
-  };				/* maximum extention is 128! FIXME */
+  };				/* maximum extension is 128! FIXME */
 
 static void add_name (struct extra *, char *);
 static void add_mangled_type (struct extra *, struct type *);
