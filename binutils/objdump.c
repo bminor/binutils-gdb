@@ -165,8 +165,8 @@ dump_headers (abfd)
 }
 
 static asymbol **
-DEFUN (slurp_symtab, (abfd),
-       bfd * abfd)
+slurp_symtab (abfd)
+     bfd *abfd;
 {
   asymbol **sy = (asymbol **) NULL;
 
@@ -1157,24 +1157,25 @@ dump_relocs (abfd)
 #define _DUMMY_NAME_ "##dummy"
 #endif
 static void
-DEFUN (display_info_table, (first, last),
-       int first AND int last)
+display_info_table (first, last)
+     int first;
+     int last;
 {
   unsigned int i, j;
-  extern bfd_target *target_vector[];
+  extern bfd_target *bfd_target_vector[];
 
   printf ("\n%12s", " ");
-  for (i = first; i++ < last && target_vector[i];)
-    printf ("%s ", target_vector[i]->name);
+  for (i = first; i++ < last && bfd_target_vector[i];)
+    printf ("%s ", bfd_target_vector[i]->name);
   printf ("\n");
 
   for (j = (int) bfd_arch_obscure + 1; (int) j < (int) bfd_arch_last; j++)
     if (strcmp (bfd_printable_arch_mach (j, 0), "UNKNOWN!") != 0)
       {
 	printf ("%11s ", bfd_printable_arch_mach (j, 0));
-	for (i = first; i++ < last && target_vector[i];)
+	for (i = first; i++ < last && bfd_target_vector[i];)
 	  {
-	    bfd_target *p = target_vector[i];
+	    bfd_target *p = bfd_target_vector[i];
 	    bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
 	    int l = strlen (p->name);
 	    int ok;
@@ -1195,17 +1196,17 @@ DEFUN (display_info_table, (first, last),
 }
 
 static void
-DEFUN_VOID (display_info)
+display_info ()
 {
   char *colum;
   unsigned int i, j, columns;
-  extern bfd_target *target_vector[];
+  extern bfd_target *bfd_target_vector[];
   extern char *getenv ();
 
   printf ("BFD header file version %s\n", BFD_VERSION);
-  for (i = 0; target_vector[i]; i++)
+  for (i = 0; bfd_target_vector[i]; i++)
     {
-      bfd_target *p = target_vector[i];
+      bfd_target *p = bfd_target_vector[i];
       bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
       bfd_set_format (abfd, bfd_object);
       printf ("%s\n (header %s, data %s)\n", p->name,
@@ -1221,12 +1222,12 @@ DEFUN_VOID (display_info)
     columns = atoi (colum);
   if (!columns)
     columns = 80;
-  for (i = 0; target_vector[i];)
+  for (i = 0; bfd_target_vector[i];)
     {
       int old;
       old = i;
-      for (j = 12; target_vector[i] && j < columns; i++)
-	j += strlen (target_vector[i]->name) + 1;
+      for (j = 12; bfd_target_vector[i] && j < columns; i++)
+	j += strlen (bfd_target_vector[i]->name) + 1;
       i--;
       if (old == i)
 	break;
@@ -1241,8 +1242,6 @@ main (argc, argv)
      char **argv;
 {
   int c;
-  extern int optind;
-  extern char *optarg;
   char *target = default_target;
   boolean seenflag = false;
 
