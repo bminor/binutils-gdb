@@ -2658,7 +2658,7 @@ dwarf_attr (die, name)
 struct filenames
 {
   int num_files;
-  struct file
+  struct fileinfo
   {
     char *name;
     unsigned int dir;
@@ -2759,7 +2759,7 @@ dwarf_decode_lines (offset, abfd)
       if ((files.num_files % FILE_ALLOC_CHUNK) == 0)
 	{
 	  files.files = xrealloc (files.files,
-	    (files.num_files + FILE_ALLOC_CHUNK) * sizeof (struct file));
+	    (files.num_files + FILE_ALLOC_CHUNK) * sizeof (struct fileinfo));
 	}
       files.files[files.num_files].name = cur_file;
       files.files[files.num_files].dir = read_unsigned_leb128 (abfd,
@@ -2805,7 +2805,7 @@ dwarf_decode_lines (offset, abfd)
 		  {
 		    files.files = xrealloc (files.files,
 		      (files.num_files + FILE_ALLOC_CHUNK)
-			* sizeof (struct file));
+			* sizeof (struct fileinfo));
 		  }
 		files.files[files.num_files].name = cur_file;
 		files.files[files.num_files].dir = read_unsigned_leb128 (
