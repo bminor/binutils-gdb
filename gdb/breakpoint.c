@@ -193,10 +193,6 @@ static char *ep_parse_optional_if_clause (char **arg);
 
 static char *ep_parse_optional_filename (char **arg);
 
-#if defined(CHILD_INSERT_EXEC_CATCHPOINT)
-static void catch_exec_command_1 (char *arg, int tempflag, int from_tty);
-#endif
-
 static void create_exception_catchpoint (int tempflag, char *cond_string,
 					 enum exception_event_kind ex_event,
 					 struct symtab_and_line *sal);
@@ -5990,10 +5986,6 @@ typedef enum
 }
 catch_fork_kind;
 
-#if defined(CHILD_INSERT_FORK_CATCHPOINT) || defined(CHILD_INSERT_VFORK_CATCHPOINT)
-static void catch_fork_command_1 (catch_fork_kind fork_kind,
-				  char *arg, int tempflag, int from_tty);
-
 static void
 catch_fork_command_1 (catch_fork_kind fork_kind, char *arg, int tempflag,
 		      int from_tty)
@@ -6027,9 +6019,7 @@ catch_fork_command_1 (catch_fork_kind fork_kind, char *arg, int tempflag,
       break;
     }
 }
-#endif
 
-#if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 static void
 catch_exec_command_1 (char *arg, int tempflag, int from_tty)
 {
@@ -6051,9 +6041,7 @@ catch_exec_command_1 (char *arg, int tempflag, int from_tty)
      and enable reporting of such events. */
   create_exec_event_catchpoint (tempflag, cond_string);
 }
-#endif
 
-#if defined(SOLIB_ADD)
 static void
 catch_load_command_1 (char *arg, int tempflag, int from_tty)
 {
@@ -6137,7 +6125,6 @@ catch_unload_command_1 (char *arg, int tempflag, int from_tty)
   SOLIB_CREATE_CATCH_UNLOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
 				  dll_pathname, cond_string);
 }
-#endif /* SOLIB_ADD */
 
 /* Commands to deal with catching exceptions.  */
 
@@ -6386,43 +6373,23 @@ catch_command_1 (char *arg, int tempflag, int from_tty)
     }
   else if (strncmp (arg1_start, "fork", arg1_length) == 0)
     {
-#if defined(CHILD_INSERT_FORK_CATCHPOINT)
       catch_fork_command_1 (catch_fork, arg1_end + 1, tempflag, from_tty);
-#else
-      error ("Catch of fork not yet implemented");
-#endif
     }
   else if (strncmp (arg1_start, "vfork", arg1_length) == 0)
     {
-#if defined(CHILD_INSERT_VFORK_CATCHPOINT)
       catch_fork_command_1 (catch_vfork, arg1_end + 1, tempflag, from_tty);
-#else
-      error ("Catch of vfork not yet implemented");
-#endif
     }
   else if (strncmp (arg1_start, "exec", arg1_length) == 0)
     {
-#if defined(CHILD_INSERT_EXEC_CATCHPOINT)
       catch_exec_command_1 (arg1_end + 1, tempflag, from_tty);
-#else
-      error ("Catch of exec not yet implemented");
-#endif
     }
   else if (strncmp (arg1_start, "load", arg1_length) == 0)
     {
-#if defined(SOLIB_ADD)
       catch_load_command_1 (arg1_end + 1, tempflag, from_tty);
-#else
-      error ("Catch of load not implemented");
-#endif
     }
   else if (strncmp (arg1_start, "unload", arg1_length) == 0)
     {
-#if defined(SOLIB_ADD)
       catch_unload_command_1 (arg1_end + 1, tempflag, from_tty);
-#else
-      error ("Catch of load not implemented");
-#endif
     }
   else if (strncmp (arg1_start, "stop", arg1_length) == 0)
     {

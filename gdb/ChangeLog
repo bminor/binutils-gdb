@@ -1,5 +1,11 @@
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.c (catch_command_1): Delete #ifdef code.
+	(catch_fork_command_1): Delete #ifdef wrapper.
+	(catch_exec_command_1): Ditto.
+	(catch_load_command_1): Ditto.
+	(catch_unload_command_1): Ditto.
+
 	* breakpoint.c (watchpoint_check): Delete #if0ed variable.
 	(catch_breakpoint): Delete #if0ed function.
 	(disable_catch_breakpoint): Ditto.
