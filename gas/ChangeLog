@@ -1,3 +1,8 @@
+Mon Mar 13 17:03:46 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/tc-vax.c (md_assemble):  issue a warning if a constant
+	is used as an operand where an immediate value is not allowed.
+
 Fri Mar 10 19:21:19 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/obj-coff.c: Redo my 10 Jan change, but	get it right this
