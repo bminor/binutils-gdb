@@ -1,5 +1,5 @@
 /* Target-struct-independent code to start (run) and stop an inferior process.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1993
+   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -317,12 +317,12 @@ The same program may be running in another process.");
       breakpoints_inserted = 1;
     }
 
-  if (siggnal >= 0)
+  if (siggnal != TARGET_SIGNAL_DEFAULT)
     stop_signal = siggnal;
   /* If this signal should not be seen by program,
      give it zero.  Used for debugging signals.  */
   else if (!signal_program[stop_signal])
-    stop_signal= 0;
+    stop_signal = TARGET_SIGNAL_0;
 
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
@@ -432,17 +432,23 @@ wait_for_inferior ()
 
       pid = target_wait (-1, &w);
 
-#ifdef SIGTRAP_STOP_AFTER_LOAD
-
-      /* Somebody called load(2), and it gave us a "trap signal after load".
-         Ignore it gracefully. */
-
-      SIGTRAP_STOP_AFTER_LOAD (w);
-#endif
-
-      /* See if the process still exists; clean up if it doesn't.  */
-      if (w.kind == TARGET_WAITKIND_EXITED)
+      switch (w.kind)
 	{
+	case TARGET_WAITKIND_LOADED:
+	  /* Ignore it gracefully.  */
+	  if (breakpoints_inserted)
+	    {
+	      mark_breakpoints_out ();
+	      insert_breakpoints ();
+	    }
+	  resume (0, TARGET_SIGNAL_0);
+	  continue;
+
+	case TARGET_WAITKIND_SPURIOUS:
+	  resume (0, TARGET_SIGNAL_0);
+	  continue;
+
+	case TARGET_WAITKIND_EXITED:
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
 	  if (w.value.integer)
 	    printf_filtered ("\nProgram exited with code 0%o.\n", 
@@ -456,12 +462,9 @@ wait_for_inferior ()
 	  one_stepped = 0;
 #endif
 	  stop_print_frame = 0;
-	  break;
-	}
-      else if (w.kind == TARGET_WAITKIND_SIGNALLED)
-	{
-	  char *signame;
+	  goto stop_stepping;
 
+	case TARGET_WAITKIND_SIGNALLED:
 	  stop_print_frame = 0;
 	  stop_signal = w.value.sig;
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
@@ -475,6 +478,11 @@ wait_for_inferior ()
 #ifdef NO_SINGLE_STEP
 	  one_stepped = 0;
 #endif
+	  goto stop_stepping;
+
+	case TARGET_WAITKIND_STOPPED:
+	  /* This is the only case in which we keep going; the above cases
+	     end in a continue or goto.  */
 	  break;
 	}
 
@@ -1559,15 +1567,18 @@ handle_command (args, from_tty)
 	      error ("Signal %d not in range 0-%d", siglast, nsigs - 1);
 	    }
 	}
-      else if ((oursig = target_signal_from_name (*argv))
-	       != TARGET_SIGNAL_UNKNOWN)
-	{
-	  sigfirst = siglast = (int)oursig;
-	}
       else
 	{
-	  /* Not a number and not a recognized flag word => complain.  */
-	  error ("Unrecognized or ambiguous flag word: \"%s\".", *argv);
+	  oursig = target_signal_from_name (*argv);
+	  if (oursig != TARGET_SIGNAL_UNKNOWN)
+	    {
+	      sigfirst = siglast = (int)oursig;
+	    }
+	  else
+	    {
+	      /* Not a number and not a recognized flag word => complain.  */
+	      error ("Unrecognized or ambiguous flag word: \"%s\".", *argv);
+	    }
 	}
 
       /* If any signal numbers or symbol names were found, set flags for
@@ -1651,7 +1662,8 @@ signals_info (signum_exp, from_tty)
 	  int i = parse_and_eval_address (signum_exp);
 	  if (i >= (int)TARGET_SIGNAL_LAST
 	      || i < 0
-	      || i == TARGET_SIGNAL_UNKNOWN)
+	      || i == (int)TARGET_SIGNAL_UNKNOWN
+	      || i == (int)TARGET_SIGNAL_DEFAULT)
 	    error ("Signal number out of bounds.");
 	  oursig = (enum target_signal)i;
 	}
@@ -1664,7 +1676,9 @@ signals_info (signum_exp, from_tty)
     {
       QUIT;
 
-      if (oursig != TARGET_SIGNAL_UNKNOWN)
+      if (oursig != TARGET_SIGNAL_UNKNOWN
+	  && oursig != TARGET_SIGNAL_DEFAULT
+	  && oursig != TARGET_SIGNAL_0)
 	sig_print_info (oursig);
     }
 

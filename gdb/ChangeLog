@@ -1,3 +1,25 @@
+Thu Jan  6 07:17:53 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* target.h: Add TARGET_WAITKIND_LOADED and TARGET_WAITKIND_SPURIOUS.
+	* target.c (store_waitstatus): Add CHILD_SPECIAL_WAITSTATUS hook.
+	* infrun.c (wait_for_inferior): Replace SIGTRAP_STOP_AFTER_LOAD with
+	code which looks for those two waitkinds.  Use switch statement.
+	* config/rs6000/tm-rs6000.h: Replace SIGTRAP_STOP_AFTER_LOAD with
+	CHILD_SPECIAL_WAITSTATUS.
+
+	* procfs.c (procfs_wait): Fix argument name to match 4 Jan changes.
+	* Move target_signal_from_host, target_signal_to_host, and
+	store_waitstatus from inftarg.c to target.c.  procfs needs them.
+	* target.c: Include "wait.h" and <signal.h>.
+	* target.h, infrun.c (proceed), proceed callers: Pass new code
+	TARGET_SIGNAL_DEFAULT instead of -1.  This avoids problems with
+	enums being treated as unsigned and is cleaner.
+	* infrun.c (signals_info): Don't print TARGET_SIGNAL_DEFAULT or
+	TARGET_SIGNAL_0.
+	* infcmd.c (signal_command), infrun.c (signals_info):
+	Don't allow user to specify numeric equivalent of
+	TARGET_SIGNAL_DEFAULT.
+
 Tue Jan  4 15:34:36 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* config/alpha/alpha-netware.mt:  New target support for Alpha

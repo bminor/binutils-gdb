@@ -1,5 +1,5 @@
 /* Interface between GDB and target environments, including files and processes
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
 This file is part of GDB.
@@ -61,7 +61,16 @@ enum target_waitkind {
 
   /* The program has terminated with a signal.  Which signal is in
      value.sig.  */
-  TARGET_WAITKIND_SIGNALLED
+  TARGET_WAITKIND_SIGNALLED,
+
+  /* The program is letting us know that it dynamically loaded something
+     (e.g. it called load(2) on AIX).  */
+  TARGET_WAITKIND_LOADED,
+
+  /* Nothing happened, but we stopped anyway.  This perhaps should be handled
+     within target_wait, but I'm not sure target_wait should be resuming the
+     inferior.  */
+  TARGET_WAITKIND_SPURIOUS
   };
 
 /* The numbering of these signals is chosen to match traditional unix
@@ -137,6 +146,10 @@ enum target_signal {
 
   /* Some signal we don't know about.  */
   TARGET_SIGNAL_UNKNOWN,
+
+  /* Use whatever signal we use when one is not specifically specified
+     (for passing to proceed and so on).  */
+  TARGET_SIGNAL_DEFAULT,
 
   /* Last and unused enum value, for sizing arrays, etc.  */
   TARGET_SIGNAL_LAST
@@ -286,8 +299,9 @@ extern void
 target_detach PARAMS ((char *, int));
 
 /* Resume execution of the target process PID.  STEP says whether to
-   single-step or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be
-   given to the target, or zero for no signal.  */
+   single-step or to run free; SIGGNAL is the signal to be given to
+   the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
+   pass TARGET_SIGNAL_DEFAULT.  */
 
 #define	target_resume(pid, step, siggnal)	\
 	(*current_target->to_resume) (pid, step, siggnal)
