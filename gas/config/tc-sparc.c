@@ -1299,7 +1299,7 @@ long val;
 #ifndef NO_V9
 	case RELOC_11:
 		if (((val > 0) && (val & ~0x7ff))
-		    || ((val < 0) && (~val & ~0x7ff))) {
+		    || ((val < 0) && (~(val - 1) & ~0x7ff))) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
 
@@ -1309,7 +1309,7 @@ long val;
 
 	case RELOC_WDISP2_14:
 		if (((val > 0) && (val & ~0x3fffc))
-		    || ((val < 0) && (~val & ~0x3fffc))) {
+		    || ((val < 0) && (~(val - 1) & ~0x3fffc))) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
 
@@ -1321,7 +1321,7 @@ long val;
 
 	case RELOC_WDISP19:
 		if (((val > 0) && (val & ~0x1ffffc))
-		    || ((val < 0) && (~val & ~0x1ffffc))) {
+		    || ((val < 0) && (~(val - 1) & ~0x1ffffc))) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
 
