@@ -1,5 +1,5 @@
 /* Parameters for execution on a Matsushita mn10300 processor.
-   Copyright 1996, 1997 Free Software Foundation, Inc. 
+   Copyright 1996, 1997, 2000 Free Software Foundation, Inc. 
 
    Contributed by Geoffrey Noer <noer@cygnus.com>
 
@@ -20,6 +20,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define GDB_MULTI_ARCH 1
+
 /* The mn10300 is little endian.  */
 #define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
 
@@ -37,9 +39,6 @@
 #define MAX_REGISTER_VIRTUAL_SIZE 4
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
-
-extern char *mn10300_register_name (int regnr);
-#define REGISTER_NAME(i) (mn10300_register_name (i))
 
 #define D2_REGNUM 2
 #define D3_REGNUM 3
@@ -141,7 +140,7 @@ extern CORE_ADDR mn10300_push_return_address (CORE_ADDR, CORE_ADDR);
 
 extern CORE_ADDR
 mn10300_push_arguments (int, struct value **, CORE_ADDR,
-			unsigned char, CORE_ADDR);
+			int, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10300_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

@@ -1,5 +1,5 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,13 @@ extern void _initialize_mn10300_tdep (void);
 static CORE_ADDR mn10300_analyze_prologue (struct frame_info *fi,
 					   CORE_ADDR pc);
 
+/* mn10300 private data */
+struct gdbarch_tdep
+{
+  int am33_mode;
+#define AM33_MODE (gdbarch_tdep (current_gdbarch)->am33_mode)
+};
+
 /* Additional info used by the frame */
 
 struct frame_extra_info
@@ -42,27 +49,40 @@ struct frame_extra_info
   };
 
 
-static char *mn10300_generic_register_names[] =
-{"d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
- "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
- "", "", "", "", "", "", "", "",
- "", "", "", "", "", "", "", "fp"};
-
-static char **mn10300_register_names = mn10300_generic_register_names;
-static char *am33_register_names[] =
+static char *
+register_name (int reg, char **regs, long sizeof_regs)
 {
-  "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
-  "sp", "pc", "mdr", "psw", "lir", "lar", "",
-  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-  "ssp", "msp", "usp", "mcrh", "mcrl", "mcvf", "", "", ""};
-static int am33_mode;
-
-char *
-mn10300_register_name (int i)
-{
-  return mn10300_register_names[i];
+  if (reg < 0 || reg >= sizeof_regs / sizeof (regs[0]))
+    return NULL;
+  else
+    return regs[reg];
 }
 
+static char *
+mn10300_generic_register_name (int reg)
+{
+  static char *regs[] =
+  { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+    "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "fp"
+  };
+  return register_name (reg, regs, sizeof regs);
+}
+
+
+static char *
+am33_register_name (int reg)
+{
+  static char *regs[] =
+  { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+    "sp", "pc", "mdr", "psw", "lir", "lar", "",
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "ssp", "msp", "usp", "mcrh", "mcrl", "mcvf", "", "", ""
+  };
+  return register_name (reg, regs, sizeof regs);
+}
+  
 CORE_ADDR
 mn10300_saved_pc_after_call (struct frame_info *fi)
 {
@@ -194,7 +214,7 @@ set_movm_offsets (struct frame_info *fi, int movm_args)
       fi->saved_regs[D2_REGNUM] = fi->frame + offset;
       offset += 4;
     }
-  if (am33_mode && movm_args & 0x02)
+  if (AM33_MODE && movm_args & 0x02)
     {
       fi->saved_regs[E0_REGNUM + 5] = fi->frame + offset;
       fi->saved_regs[E0_REGNUM + 4] = fi->frame + offset + 4;
@@ -543,7 +563,7 @@ mn10300_frame_chain (struct frame_info *fi)
       adjust += (fi->saved_regs[D3_REGNUM] ? 4 : 0);
       adjust += (fi->saved_regs[A2_REGNUM] ? 4 : 0);
       adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
-      if (am33_mode)
+      if (AM33_MODE)
 	{
 	  adjust += (fi->saved_regs[E0_REGNUM + 5] ? 4 : 0);
 	  adjust += (fi->saved_regs[E0_REGNUM + 4] ? 4 : 0);
@@ -611,8 +631,8 @@ mn10300_pop_frame (struct frame_info *frame)
    order on the stack.  */
 
 CORE_ADDR
-mn10300_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
-			unsigned char struct_return, CORE_ADDR struct_addr)
+mn10300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+			int struct_return, CORE_ADDR struct_addr)
 {
   int argnum = 0;
   int len = 0;
@@ -729,7 +749,7 @@ mn10300_frame_saved_pc (struct frame_info *fi)
   adjust += (fi->saved_regs[D3_REGNUM] ? 4 : 0);
   adjust += (fi->saved_regs[A2_REGNUM] ? 4 : 0);
   adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
-  if (am33_mode)
+  if (AM33_MODE)
     {
       adjust += (fi->saved_regs[E0_REGNUM + 5] ? 4 : 0);
       adjust += (fi->saved_regs[E0_REGNUM + 4] ? 4 : 0);
@@ -794,27 +814,78 @@ mn10300_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
     }
 }
 
-/* This can be made more generic later.  */
-static void
-set_machine_hook (char *filename)
+static int
+mn10300_reg_struct_has_addr (int gcc_p, struct type *type)
 {
-  int i;
-
-  if (bfd_get_mach (exec_bfd) == bfd_mach_mn10300
-      || bfd_get_mach (exec_bfd) == 0)
-    {
-      mn10300_register_names = mn10300_generic_register_names;
-    }
-
-  am33_mode = 0;
-  if (bfd_get_mach (exec_bfd) == bfd_mach_am33)
-    {
-
-      mn10300_register_names = am33_register_names;
-      am33_mode = 1;
-    }
+  return (TYPE_LENGTH (type) > 8);
 }
 
+/* Dump out the mn10300 speciic architecture information. */
+
+static void
+mn10300_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  fprintf_unfiltered (file, "mn10300_dump_tdep: am33_mode = %d\n",
+		      tdep->am33_mode);
+}
+
+static struct gdbarch *
+mn10300_gdbarch_init (struct gdbarch_info info,
+		      struct gdbarch_list *arches)
+{
+  struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep = NULL;
+  int am33_mode;
+  gdbarch_register_name_ftype *register_name;
+  int mach;
+  int num_regs;
+
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  if (info.bfd_arch_info != NULL
+      && info.bfd_arch_info->arch == bfd_arch_mips)
+    mach = info.bfd_arch_info->mach;
+  else
+    mach = 0;
+  switch (mach)
+    {
+    case 0:
+      am33_mode = 0;
+      register_name = mn10300_generic_register_name;
+      num_regs = 32;
+      break;
+    case bfd_mach_am33:
+      am33_mode = 1;
+      register_name = am33_register_name;
+      num_regs = 32;
+      break;
+    default:
+      internal_error ("mn10300_gdbarch_init: Unknown mn10300 variant");
+      return NULL; /* keep GCC happy. */
+    }
+
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_register_name (gdbarch, register_name);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);
+  set_gdbarch_push_return_address (gdbarch, mn10300_push_return_address);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
+  set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_num_regs (gdbarch, num_regs);
+  tdep->am33_mode = am33_mode;
+
+  return gdbarch;
+}
+ 
 void
 _initialize_mn10300_tdep (void)
 {
@@ -822,5 +893,5 @@ _initialize_mn10300_tdep (void)
 
   tm_print_insn = print_insn_mn10300;
 
-  specify_exec_file_hook (set_machine_hook);
+  register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
 }

@@ -1,3 +1,21 @@
+2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
+
+	* config/mn10300/tm-mn10300.h, mn10300-tdep.c
+ 	(mn10300_push_arguments): Fix function signature to match gdbarch
+ 	vector.
+	* config/mn10300/tm-mn10300.h (REGISTER_NAME): Delete.
+	* mn10300-tdep.c (struct gdbarch_tdep): Define.
+	(mn10300_generic_register_names, am33_register_names): Convert to
+	functions.
+	(set_machine_hook): Delete.
+	(register_name): New function.
+	(mn10300_register_name): Delete.
+	(mn10300_dump_tdep, mn10300_gdbarch_init): New functions.
+	(_initialize_mn10300_tdep): Call register_gdbarch_init instead of
+	specify_exec_file_hook.
+	(AM33_MODE): Define.
+	(set_movm_offsets): Update.
+	
 2000-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	Adapt support for SSE registers in Linux/x86 for Linux 2.4.
