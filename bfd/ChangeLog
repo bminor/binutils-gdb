@@ -1,3 +1,9 @@
+Tue Dec 14 21:48:33 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * som.c (som_begin_writing): Fix thinkos in auxiliary header
+	support.
+	(bfd_som_attach_aux_hdr): Likewise.
+
 Mon Dec 13 23:34:48 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (hppa_elf_gen_reloc_type): Handle 'T' field
