@@ -58,8 +58,8 @@ CSOURCES = readline.c history.c funmap.c keymaps.c vi_mode.c \
 HSOURCES = readline.h chardefs.h history.h keymaps.h
 SOURCES  = $(CSOURCES) $(HSOURCES)
 
-DOCUMENTATION = readline.texinfo inc-readline.texinfo \
-		history.texinfo inc-history.texinfo
+DOCUMENTATION = readline.texi inc-read.texi \
+		history.texi inc-hist.texi
 
 SUPPORT = COPYING Makefile $(DOCUMENTATION) ChangeLog
 
@@ -69,7 +69,13 @@ THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
 
 STAGESTUFF = *.o
 
-all: libreadline.a
+all: libreadline.a history.info readline.info
+
+history.info: history.texi
+	- $(MAKEINFO) -o history.info $(srcdir)/history.texi
+
+readline.info: readline.texi
+	- $(MAKEINFO) -o readline.info $(srcdir)/readline.texi
 
 libreadline.a:	readline.o history.o funmap.o keymaps.o
 		$(RM) -f libreadline.a
@@ -95,7 +101,16 @@ readline.tar:	$(THINGS_TO_TAR)
 readline.tar.Z:	readline.tar
 		compress -f readline.tar
 
-install:	$(DESTDIR)/libreadline.a includes
+install:	includes
+		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.a.new
+		-mv $(DESTDIR)/libreadline.a.new $(DESTDIR)/libreadline.a
+		$(RANLIB) $(DESTDIR)/libreadline.a
+		for i in *.info* ; do \
+			echo Installing $$i... ; \
+			(cp $$i $(idestdir)/info/$$i.new \
+				&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
+			|| exit 1 ; \
+		done
 
 includes:
 		if [ ! -r $(INCDIR)/readline ]; then\
@@ -106,12 +121,10 @@ includes:
 		$(INSTALL_FILE) $(srcdir)/keymaps.h $(INCDIR)/readline/
 		$(INSTALL_FILE) $(srcdir)/chardefs.h $(INCDIR)/readline/
 clean:
-		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
+		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn
+		rm -f *.aux *.pg *.toc *.info*
 
 $(DESTDIR)/libreadline.a: libreadline.a
-		-mv $(DESTDIR)/libreadline.a $(DESTDIR)/libreadline.old
-		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.a
-		$(RANLIB) $(DESTDIR)/libreadline.a
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force
