@@ -1,3 +1,10 @@
+Sat Mar 19 07:06:59 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_begin_writing): Account for alignment needs of
+	subspaces too when writing executables.  Never request a negative
+	bss size.  Fixes some problems with demand paged executables,
+	still having problems with pure executables and shared executables.
+
 Fri Mar 18 19:12:47 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* trad-core.c (trad_unix_core_file_p): Call bfd_zmalloc not

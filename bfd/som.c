@@ -3001,6 +3001,27 @@ som_begin_writing (abfd)
 	      /* Only do this for the first subspace within each space.  */
 	      first_subspace = 0;
 	    }
+	  else if (abfd->flags & EXEC_P)
+	    {
+	      /* Have to keep proper alignments for the subspaces
+		 in executables too!  */
+	      if (subsection->flags & SEC_CODE)
+		{
+		  unsigned tmp = exec_header.exec_tsize;
+
+		  tmp = SOM_ALIGN (tmp, 1 << subsection->alignment_power);
+		  current_offset += (tmp - exec_header.exec_tsize);
+		  exec_header.exec_tsize = tmp;
+		}
+	      else
+		{
+		  unsigned tmp = exec_header.exec_dsize;
+
+		  tmp = SOM_ALIGN (tmp, 1 << subsection->alignment_power);
+		  current_offset += (tmp - exec_header.exec_dsize);
+		  exec_header.exec_dsize = tmp;
+		}
+	    }
 
 	  subsection->target_index = total_subspaces++;
 	  /* This is real data to be loaded from the file.  */
@@ -3127,6 +3148,8 @@ som_begin_writing (abfd)
       tmp = exec_header.exec_dsize;
       tmp = SOM_ALIGN (tmp, PA_PAGESIZE);
       exec_header.exec_bsize -= (tmp - exec_header.exec_dsize);
+      if (exec_header.exec_bsize < 0)
+	exec_header.exec_bsize = 0;
       exec_header.exec_dsize = tmp;
 
       bfd_seek (abfd, obj_som_file_hdr (abfd)->aux_header_location, SEEK_SET);
