@@ -1,3 +1,16 @@
+2004-02-02  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* gas/mips/div.d: Update to accomodate changes in macro
+	expansions.
+	gas/mips/elf-rel-got-n32.d: Likewise.
+	gas/mips/elf-rel-got-n64.d: Likewise.
+	gas/mips/elf-rel-xgot-n32.d: Likewise.
+	gas/mips/elf-rel-xgot-n64.d: Likewise.
+	gas/mips/la-svr4pic.d: Likewise.
+	gas/mips/la-xgot.d: Likewise.
+	gas/mips/lca-svr4pic.d: Likewise.
+	gas/mips/lca-xgot.d: Likewise.
+
 2004-02-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/sh4a-fp.d: Fix opcode name fssra to fsrra.

@@ -34,8 +34,8 @@ Disassembly of section \.text:
 			24: R_MIPS_GOT_LO16	dg1
 			24: R_MIPS_NONE	\*ABS\*
 			24: R_MIPS_NONE	\*ABS\*
-0000000000000028 <fn\+0x28> 3c010002 	lui	at,0x2
-000000000000002c <fn\+0x2c> 6421e240 	daddiu	at,at,-7616
+0000000000000028 <fn\+0x28> 3c010001 	lui	at,0x1
+000000000000002c <fn\+0x2c> 3421e240 	ori	at,at,0xe240
 0000000000000030 <fn\+0x30> 00a1282d 	daddu	a1,a1,at
 0000000000000034 <fn\+0x34> 3c050000 	lui	a1,0x0
 			34: R_MIPS_GOT_HI16	dg1
@@ -67,8 +67,8 @@ Disassembly of section \.text:
 			60: R_MIPS_GOT_LO16	dg1
 			60: R_MIPS_NONE	\*ABS\*
 			60: R_MIPS_NONE	\*ABS\*
-0000000000000064 <fn\+0x64> 3c010002 	lui	at,0x2
-0000000000000068 <fn\+0x68> 6421e240 	daddiu	at,at,-7616
+0000000000000064 <fn\+0x64> 3c010001 	lui	at,0x1
+0000000000000068 <fn\+0x68> 3421e240 	ori	at,at,0xe240
 000000000000006c <fn\+0x6c> 00a1282d 	daddu	a1,a1,at
 0000000000000070 <fn\+0x70> 00b1282d 	daddu	a1,a1,s1
 0000000000000074 <fn\+0x74> 3c050000 	lui	a1,0x0
@@ -465,8 +465,8 @@ Disassembly of section \.text:
 			2d8: R_MIPS_GOT_LO16	dg2
 			2d8: R_MIPS_NONE	\*ABS\*
 			2d8: R_MIPS_NONE	\*ABS\*
-00000000000002dc <fn\+0x2dc> 3c010002 	lui	at,0x2
-00000000000002e0 <fn\+0x2e0> 6421e240 	daddiu	at,at,-7616
+00000000000002dc <fn\+0x2dc> 3c010001 	lui	at,0x1
+00000000000002e0 <fn\+0x2e0> 3421e240 	ori	at,at,0xe240
 00000000000002e4 <fn\+0x2e4> 00a1282d 	daddu	a1,a1,at
 00000000000002e8 <fn\+0x2e8> 3c050000 	lui	a1,0x0
 			2e8: R_MIPS_GOT_HI16	dg2
@@ -498,8 +498,8 @@ Disassembly of section \.text:
 			314: R_MIPS_GOT_LO16	dg2
 			314: R_MIPS_NONE	\*ABS\*
 			314: R_MIPS_NONE	\*ABS\*
-0000000000000318 <fn\+0x318> 3c010002 	lui	at,0x2
-000000000000031c <fn\+0x31c> 6421e240 	daddiu	at,at,-7616
+0000000000000318 <fn\+0x318> 3c010001 	lui	at,0x1
+000000000000031c <fn\+0x31c> 3421e240 	ori	at,at,0xe240
 0000000000000320 <fn\+0x320> 00a1282d 	daddu	a1,a1,at
 0000000000000324 <fn\+0x324> 00b1282d 	daddu	a1,a1,s1
 0000000000000328 <fn\+0x328> 3c050000 	lui	a1,0x0

@@ -4044,8 +4044,8 @@ move_register (int dest, int source)
 }
 
 /* Emit an SVR4 PIC sequence to load address LOCAL into DEST, where
-   LOCAL is the sum of a symbol and a 16-bit displacement.  The two
-   alternatives are:
+   LOCAL is the sum of a symbol and a 16-bit or 32-bit displacement.
+   The two alternatives are:
 
    Global symbol		Local sybmol
    -------------		------------
@@ -4054,7 +4054,8 @@ move_register (int dest, int source)
    addiu DEST,DEST,OFFSET	addiu DEST,DEST,%lo(SYMBOL + OFFSET)
 
    load_got_offset emits the first instruction and add_got_offset
-   emits the second.  */
+   emits the second for a 16-bit offset or add_got_offset_hilo emits
+   a sequence to add a 32-bit offset using a scratch register.  */
 
 static void
 load_got_offset (int dest, expressionS *local)
@@ -4089,6 +4090,32 @@ add_got_offset (int dest, expressionS *local)
   relax_switch ();
   macro_build (local, ADDRESS_ADDI_INSN, "t,r,j", dest, dest, BFD_RELOC_LO16);
   relax_end ();
+}
+
+static void
+add_got_offset_hilo (int dest, expressionS *local, int tmp)
+{
+  expressionS global;
+  int hold_mips_optimize;
+
+  global.X_op = O_constant;
+  global.X_op_symbol = NULL;
+  global.X_add_symbol = NULL;
+  global.X_add_number = local->X_add_number;
+
+  relax_start (local->X_add_symbol);
+  load_register (tmp, &global, HAVE_64BIT_ADDRESSES);
+  relax_switch ();
+  /* Set mips_optimize around the lui instruction to avoid
+     inserting an unnecessary nop after the lw.  */
+  hold_mips_optimize = mips_optimize;
+  mips_optimize = 2;
+  macro_build_lui (&global, tmp);
+  mips_optimize = hold_mips_optimize;
+  macro_build (local, ADDRESS_ADDI_INSN, "t,r,j", tmp, tmp, BFD_RELOC_LO16);
+  relax_end ();
+
+  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", dest, dest, tmp);
 }
 
 /*
@@ -4674,14 +4701,13 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
-      macro_build (&expr1, dbl ? "daddiu" : "addiu", "t,r,j", AT, 0,
-		   BFD_RELOC_LO16);
+      load_register (AT, &expr1, dbl);
       expr1.X_add_number = mips_trap ? (dbl ? 12 : 8) : (dbl ? 20 : 16);
       macro_build (&expr1, "bne", "s,t,p", treg, AT);
       if (dbl)
 	{
 	  expr1.X_add_number = 1;
-	  macro_build (&expr1, "daddiu", "t,r,j", AT, 0, BFD_RELOC_LO16);
+	  load_register (AT, &expr1, dbl);
 	  macro_build (NULL, "dsll32", "d,w,<", AT, AT, 31);
 	}
       else
@@ -5069,6 +5095,7 @@ macro (struct mips_cl_insn *ip)
 	      offset_expr.X_add_number =
 		((offset_expr.X_add_number + 0x8000) & 0xffff) - 0x8000;
 	      load_got_offset (tempreg, &offset_expr);
+	      offset_expr.X_add_number = expr1.X_add_number;
 	      /* If we are going to add in a base register, and the
 		 target register and the base register are the same,
 		 then we are using AT as a temporary register.  Since
@@ -5084,17 +5111,7 @@ macro (struct mips_cl_insn *ip)
 		  breg = 0;
 		  tempreg = treg;
 		}
-
-	      /* Set mips_optimize around the lui instruction to avoid
-		 inserting an unnecessary nop after the lw.  */
-	      hold_mips_optimize = mips_optimize;
-	      mips_optimize = 2;
-	      macro_build_lui (&expr1, AT);
-	      mips_optimize = hold_mips_optimize;
-
-	      add_got_offset (AT, &offset_expr);
-	      macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
-			   tempreg, tempreg, AT);
+	      add_got_offset_hilo (tempreg, &offset_expr, AT);
 	      used_at = 1;
 	    }
 	}
@@ -5162,9 +5179,7 @@ macro (struct mips_cl_insn *ip)
 		      add_breg_early = 1;
 		    }
 
-		  macro_build_lui (&expr1, AT);
-		  macro_build (&expr1, ADDRESS_ADDI_INSN, "t,r,j",
-			       AT, AT, BFD_RELOC_LO16);
+		  load_register (AT, &expr1, HAVE_64BIT_ADDRESSES);
 		  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       dreg, dreg, AT);
 
@@ -5305,15 +5320,7 @@ macro (struct mips_cl_insn *ip)
 		  dreg = treg;
 		}
 
-	      /* Set mips_optimize around the lui instruction to avoid
-		 inserting an unnecessary nop after the lw.  */
-	      hold_mips_optimize = mips_optimize;
-	      mips_optimize = 2;
-	      macro_build_lui (&expr1, AT);
-	      mips_optimize = hold_mips_optimize;
-
-	      macro_build (&expr1, ADDRESS_ADDI_INSN, "t,r,j",
-			   AT, AT, BFD_RELOC_LO16);
+	      load_register (AT, &expr1, HAVE_64BIT_ADDRESSES);
 	      macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", dreg, dreg, AT);
 
 	      used_at = 1;
@@ -5451,11 +5458,7 @@ macro (struct mips_cl_insn *ip)
 		  add_breg_early = 1;
 		}
 
-	      /* Set mips_optimize around the lui instruction to avoid
-		 inserting an unnecessary nop after the lw.  */
-	      macro_build_lui (&expr1, AT);
-	      macro_build (&expr1, ADDRESS_ADDI_INSN, "t,r,j",
-			   AT, AT, BFD_RELOC_LO16);
+	      load_register (AT, &expr1, HAVE_64BIT_ADDRESSES);
 	      macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", dreg, dreg, AT);
 
 	      used_at = 1;

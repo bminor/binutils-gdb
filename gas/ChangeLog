@@ -1,3 +1,9 @@
+2004-02-02  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (add_got_offset_hilo): New function.
+	(macro): Use load_register() and add_got_offset_hilo() to load
+	constants instead of hardcoding code sequences throughout.
+
 2004-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Add proper indentation.
