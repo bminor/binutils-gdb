@@ -1,3 +1,15 @@
+2005-01-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386obsd-tdep.c: Update copyright year.  Include
+	"bsd-uthread.h".
+	(i386obsd_uthread_reg_offset): New variable.
+	(I386OBSD_UTHREAD_ESP_OFFSET): New define.
+	(i386obsd_supply_uthread, i386obsd_collect_uthread): New
+	functions.
+	(i386obsd_init_abi): Set supply_uthread and collect_uthread.
+	* Makefile.in (i386obsd-tdep.o): Update dependencies.
+	* config/i386/obsd.mt (TDEPFILES): Add bsd-uthread.o.
+
 2005-01-23  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c: Update copyright year.
