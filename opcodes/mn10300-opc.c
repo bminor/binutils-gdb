@@ -492,6 +492,14 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "sat16",	0xf640,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "sat24",	0xf650,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "bsch",	0xf670,		0xfff0,		FMT_D0, {DM1, DN0}},
+
+/* Extension.  When talking to the simulator, gdb requires some instruction
+   that will trigger a "breakpoint" (really just an instruction that isn't
+   otherwise used by the tools.  This instruction must be the same size
+   as the smallest instruction on the target machine.  In the case of the
+   mn10x00 the "break" instruction must be one byte.  0xff is available on
+   both mn10x00 architectures.  */
+{ "break",	0xff,		0xff,		FMT_S0, {UNUSED}},
 { 0, 0, 0, 0, {0}},
 
 } ;
