@@ -2249,15 +2249,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					  ELF64_R_TYPE_INFO (
 					    ELF64_R_TYPE_DATA (rel->r_info),
 							       r_type));
-
-			/* For non-RELATIVE dynamic relocations, we keep the
-			   same symbol, and so generally the same addend.  But
-			   we do need to adjust those relocations referencing
-			   sections.  */
-			outrel.r_addend = rel->r_addend;
-			if (r_symndx < symtab_hdr->sh_info
-			    && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-			  outrel.r_addend += sec->output_offset+sym->st_value;
+			outrel.r_addend = relocation + rel->r_addend;
 		      }
 		  }
 

@@ -1,3 +1,10 @@
+1999-08-09  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* elf64-sparc.c (sparc64_elf_relocate_section): Back out part of
+	the Sep. 4th, 1998 change.  glibc 2.0.x dynamic linker had bug,
+	not binutils.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
 1999-08-09  Geoff Keating  <geoffk@cygnus.com>
 
 	* elflink.h (elf_link_output_extsym): Don't output a weak
