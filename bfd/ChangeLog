@@ -1,3 +1,12 @@
+Fri May 16 12:10:52 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Don't decrease the
+ 	alignment of a common symbol.  If two symbols that look like
+ 	common symbols are found in two shared libraries, and the size is
+ 	different, use the larger size, and warn if --warn-common.  If a
+	common symbol overrides a definition in a shared library, set the
+	size to the larger size, and warn if --warn-common.
+
 Thu May 15 14:31:28 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-arm.c (compatible):  Allow default machine to be polymorphed
