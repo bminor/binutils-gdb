@@ -499,14 +499,12 @@ Sun Nov 23 22:25:21 1997  Michael Meissner  <meissner@cygnus.com>
 	(d30v_format_table): Add SHORT_CMPU cases for cmpu.
 
 end-sanitize-d30v
-start-sanitize-sh4
 Wed Nov 19 17:42:35 1997  Richard Henderson  <rth@cygnus.com>
 
         * sh-dis.c (print_insn_shx): Recognize all sh4 additions.
         * sh-opc.h (fmov): Add @<REG_M>+,<DX_REG_N> variant for sh4.
         (ftrv): Slay the cut-and-paste monster.
 
-end-sanitize-sh4
 Tue Nov 18 23:10:03 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* d10v-dis.c (print_operand):
@@ -814,7 +812,6 @@ Thu Aug 21 11:09:09 1997  Nick Clifton  <nickc@cygnus.com>
 	* v850-opc.c (v850_opcodes[]): Move divh opcodes next to each other.
 end-sanitize-v850e
 
-start-sanitize-sh4
 Wed Aug 20 00:43:11 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* sh-opc.h (sh_arg_type): Add A_SGR and A_DBR.
@@ -823,7 +820,6 @@ Wed Aug 20 00:43:11 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 	Add insns to access SGR and DBR.
 	* sh-dis.c (print_insn_shx): Add SH4 floating point extensions.
 
-end-sanitize-sh4
 Tue Aug 19 10:59:59 1997  Richard Henderson  <rth@cygnus.com>
 
 	* alpha-opc.c (alpha_opcodes): Fix hw_rei_stall mungage.
