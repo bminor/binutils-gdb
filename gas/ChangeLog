@@ -1,3 +1,5 @@
+	* 
+
 2003-12-05  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-sh.c (md_show_usage): Fix compilation errors
@@ -5,13 +7,16 @@
 
 2003-12-03  Alexandre Oliva  <aoliva@redhat.com>
 
-	* config/tc-sh.c: Add support for sh4a and no-fpu variants,
-	with appropriate additions to md_show_usage.
+	* config/tc-sh.c: Add support for sh4a and no-fpu variants.
 	* testsuite/gas/sh/basic.exp: Call tests for sh4a.
 	* testsuite/gas/sh/{err-sh4a-fp.s, err-sh4a.s, 
 	err-sh4al-dsp.s, sh4a-dsp.d, sh4a-dsp.s, sh4a-fp.d, 
 	sh4a-fp.s, sh4a.d, sh4a.s, sh4al-dsp.d, sh4al-dsp.s:
 	New files, tests for sh4a and related variants.
+	
+2003-12-05  Michael Snyder  <msnyder@redhat.com>
+
+	* config/tc-sh.c (md_show_usage): Mention new -isa options.
 	* doc/c-sh.texi: Document new -isa options.
 	* doc/c-sh64.texi: Ditto.
 	* NEWS: Mention new support for sh4a.
