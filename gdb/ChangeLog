@@ -1,5 +1,10 @@
 2001-11-30  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* findvar.c (locate_var_value): Specify in which register a register
+	variable is stored.
+
+2001-11-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* win32-nat.c (mappings): Correct position of XMM registers,
 	based on FXSAVE instruction structure.
 

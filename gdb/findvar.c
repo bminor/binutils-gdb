@@ -29,6 +29,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
+#include "gdb_assert.h"
 #include "floatformat.h"
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
@@ -869,9 +870,21 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
   switch (VALUE_LVAL (lazy_value))
     {
     case lval_register:
+	gdb_assert (REGISTER_NAME (VALUE_REGNO (lazy_value)) != NULL
+	            && *REGISTER_NAME (VALUE_REGNO (lazy_value)) != '\0');
+      error("Address requested for identifier "
+	    "\"%s\" which is in register $%s",
+            SYMBOL_SOURCE_NAME (var), 
+	    REGISTER_NAME (VALUE_REGNO (lazy_value)));
+      break;
+
     case lval_reg_frame_relative:
-      error ("Address requested for identifier \"%s\" which is in a register.",
-	     SYMBOL_SOURCE_NAME (var));
+	gdb_assert (REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)) != NULL
+	            && *REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)) != '\0');
+      error("Address requested for identifier "
+	    "\"%s\" which is in frame register $%s",
+            SYMBOL_SOURCE_NAME (var), 
+	    REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)));
       break;
 
     default:
