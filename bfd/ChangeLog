@@ -1,3 +1,9 @@
+2001-08-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elfxx-target.h (bfd_elfNN_bfd_link_hash_table_create): Never
+	select the generic has table creator.  All elf backends need elf
+	specific fields in the hash table.
+
 2001-08-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* archive.c (offsetof): Remove define.

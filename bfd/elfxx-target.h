@@ -162,16 +162,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   _bfd_elf_canonicalize_dynamic_reloc
 #endif
 
-#ifdef elf_backend_relocate_section
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
 #endif
-#else /* ! defined (elf_backend_relocate_section) */
+#ifndef elf_backend_relocate_section
 /* If no backend relocate_section routine, use the generic linker.  */
-#ifndef bfd_elfNN_bfd_link_hash_table_create
-#define bfd_elfNN_bfd_link_hash_table_create \
-  _bfd_generic_link_hash_table_create
-#endif
 #ifndef bfd_elfNN_bfd_link_add_symbols
 #define bfd_elfNN_bfd_link_add_symbols	_bfd_generic_link_add_symbols
 #endif
