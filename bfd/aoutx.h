@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -240,7 +240,7 @@ HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	f
 
 #define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
 
-CONST struct reloc_howto_struct *
+reloc_howto_type *
 NAME(aout,reloc_type_lookup) (abfd,code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -268,7 +268,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
 	EXT (BFD_RELOC_SPARC_WDISP22, 7);
 	EXT (BFD_RELOC_SPARC13, 10);
 	EXT (BFD_RELOC_SPARC_BASE13, 15);
-      default: return (CONST struct reloc_howto_struct *) 0;
+      default: return (reloc_howto_type *) NULL;
       }
   else
     /* std relocs */
@@ -281,7 +281,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
 	STD (BFD_RELOC_32_PCREL, 6);
 	STD (BFD_RELOC_16_BASEREL, 9);
 	STD (BFD_RELOC_32_BASEREL, 10);
-      default: return (CONST struct reloc_howto_struct *) 0;
+      default: return (reloc_howto_type *) NULL;
       }
 }
 

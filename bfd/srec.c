@@ -1,5 +1,5 @@
 /* BFD back-end for s-record objects.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -140,7 +140,6 @@ static CONST char digs[] = "0123456789ABCDEF";
 static void
 srec_init ()
 {
-  unsigned int i;
   static boolean inited = false;
 
   if (inited == false)

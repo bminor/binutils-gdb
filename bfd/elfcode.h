@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -6499,7 +6499,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
      asection *output_section;
      struct bfd_link_order *link_order;
 {
-  const reloc_howto_type *howto;
+  reloc_howto_type *howto;
   long indx;
   bfd_vma offset;
   struct elf_link_hash_entry **rel_hash_ptr;
