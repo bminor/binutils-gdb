@@ -1,6 +1,6 @@
 1998-09-02 14:50  Ulrich Drepper  <drepper@cygnus.com>
 
-	* elf/readelf.c (process_dynamic_segment): Print DT_* value only if
+	* readelf.c (process_dynamic_segment): Print DT_* value only if
 	do_dynamic.
 	(do_histogram): New variable.
 	(options): New long option histogram.  Set do_histogram if this
