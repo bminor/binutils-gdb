@@ -3012,24 +3012,26 @@ Similar to BREAKPOINT, but used for bi-endian targets.
 @code{BIG_BREAKPOINT} and @code{LITTLE_BREAKPOINT} have been deprecated in
 favor of @code{BREAKPOINT_FROM_PC}.
 
-@item REMOTE_BREAKPOINT
-@itemx LITTLE_REMOTE_BREAKPOINT
-@itemx BIG_REMOTE_BREAKPOINT
-@findex BIG_REMOTE_BREAKPOINT
-@findex LITTLE_REMOTE_BREAKPOINT
-@findex REMOTE_BREAKPOINT
-Similar to BREAKPOINT, but used for remote targets.
-
-@code{BIG_REMOTE_BREAKPOINT} and @code{LITTLE_REMOTE_BREAKPOINT} have been
-deprecated in favor of @code{BREAKPOINT_FROM_PC}.
+@item DEPRECATED_REMOTE_BREAKPOINT
+@itemx DEPRECATED_LITTLE_REMOTE_BREAKPOINT
+@itemx DEPRECATED_BIG_REMOTE_BREAKPOINT
+@findex DEPRECATED_BIG_REMOTE_BREAKPOINT
+@findex DEPRECATED_LITTLE_REMOTE_BREAKPOINT
+@findex DEPRECATED_REMOTE_BREAKPOINT
+Specify the breakpoint instruction sequence for a remote target.
+@code{DEPRECATED_REMOTE_BREAKPOINT},
+@code{DEPRECATED_BIG_REMOTE_BREAKPOINT} and
+@code{DEPRECATED_LITTLE_REMOTE_BREAKPOINT} have been deprecated in
+favor of @code{BREAKPOINT_FROM_PC} (@pxref{BREAKPOINT_FROM_PC}).
 
 @item BREAKPOINT_FROM_PC (@var{pcptr}, @var{lenptr})
 @findex BREAKPOINT_FROM_PC
-Use the program counter to determine the contents and size of a
-breakpoint instruction.  It returns a pointer to a string of bytes
-that encode a breakpoint instruction, stores the length of the string
-to *@var{lenptr}, and adjusts pc (if necessary) to point to the actual
-memory location where the breakpoint should be inserted.
+@anchor{BREAKPOINT_FROM_PC} Use the program counter to determine the
+contents and size of a breakpoint instruction.  It returns a pointer to
+a string of bytes that encode a breakpoint instruction, stores the
+length of the string to @code{*@var{lenptr}}, and adjusts the program
+counter (if necessary) to point to the actual memory location where the
+breakpoint should be inserted.
 
 Although it is common to use a trap instruction for a breakpoint, it's
 not required; for instance, the bit pattern could be an invalid
