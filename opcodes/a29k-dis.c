@@ -43,7 +43,7 @@ print_general (num, info)
    assembler uses.  */
 static void
 print_special (num, info)
-     int num;
+     unsigned int num;
      struct disassemble_info *info;
 {
   /* Register names of registers 0-SPEC0_NUM-1.  */
@@ -166,7 +166,7 @@ print_insn (memaddr, info)
        opcode < &a29k_opcodes[num_opcodes];
        ++opcode)
     {
-      if ((insn24<<24) == opcode->opcode)
+      if (((unsigned long) insn24 << 24) == opcode->opcode)
 	{
 	  char *s;
 	  
