@@ -180,6 +180,15 @@ gdb_expect {
    timeout { fail "(timeout) ptype A" }
 }
 
-gdb_test "cont" \
-  "Continuing.\r\n\r\nProgram exited normally." \
-  "finish program"
+send_gdb "cont\n"
+gdb_expect {
+    -re "Continuing\r\n\r\nProgram exited normally.*$gdb_prompt $" {
+	pass "finish program"
+    }
+    -re "Continuing.* EXIT code 0.*Program exited normally.*$gdb_prompt $" {
+	pass "finish program (exit wrapper)" 
+    }
+    -re ".*$gdb_prompt $" { fail "finish program" }
+    default:{               fail "finish program (timeout)" }
+}
+

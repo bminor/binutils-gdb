@@ -1092,8 +1092,34 @@ proc gdb_preprocess {source dest args} {
     return $result;
 }
 
+set gdb_wrapper_initialized 0
+
+proc gdb_wrapper_init { args } {
+    global gdb_wrapper_initialized;
+    global gdb_wrapper_file;
+    global gdb_wrapper_flags;
+
+    if { $gdb_wrapper_initialized == 1 } { return; }
+
+    if {[target_info exists needs_status_wrapper] && \
+	    [target_info needs_status_wrapper] != "0" && \
+	    ![info exists gdb_wrapper_file]} {
+	set result [build_wrapper "testglue.o"];
+	if { $result != "" } {
+	    set gdb_wrapper_file [lindex $result 0];
+	    set gdb_wrapper_flags [lindex $result 1];
+	} else {
+	    warning "Status wrapper failed to build."
+	}
+    }
+    set gdb_wrapper_initialized 1
+}
+
 proc gdb_compile {source dest type options} {
     global GDB_TESTCASE_OPTIONS;
+    global gdb_wrapper_file;
+    global gdb_wrapper_flags;
+    global gdb_wrapper_initialized;
 
     if [target_info exists gdb_stub] {
 	set options2 { "additional_flags=-Dusestubs" }
@@ -1110,6 +1136,15 @@ proc gdb_compile {source dest type options} {
     }
     verbose "options are $options"
     verbose "source is $source $dest $type $options"
+
+    if { $gdb_wrapper_initialized == 0 } { gdb_wrapper_init }
+
+    if {[target_info exists needs_status_wrapper] && \
+	    [target_info needs_status_wrapper] != "0" && \
+	    [info exists gdb_wrapper_file]} {
+	lappend options "libs=${gdb_wrapper_file}"
+	lappend options "ldflags=${gdb_wrapper_flags}"
+    }
 
     set result [target_compile $source $dest $type $options];
     regsub "\[\r\n\]*$" "$result" "" result;

@@ -80,6 +80,9 @@ if [istarget "*-*-vxworks*"] then {
 	-re ".*usage:  factorial <number>.*Program exited with code 01.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args"
 	}
+	-re ".*usage:  factorial <number>.* EXIT code 1.*Program exited normally.*$gdb_prompt $" {
+	    pass "run \"$testfile\" with no args (exit wrapper)"
+	}
 	-re ".*$gdb_prompt $" {
 	    fail "run \"$testfile\" with no args"
 	    verbose "expect_out is $expect_out(buffer)" 2

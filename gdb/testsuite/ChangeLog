@@ -1,3 +1,11 @@
+2002-05-06  Michael Snyder  <msnyder@redhat.com>
+
+	Enable the "needs_status_wrapper" testsuite feature.
+	* lib/gdb.exp (gdb_wrapper_init): New procedure.
+	(gdb_compile): Conditionally call gdb_wrapper_init.
+	* gdb.base/a2-run.exp: Recognize output from status wrapper.
+	* gdb.c++/method.exp: Recognize output from status wrapper.
+
 2002-05-06  Ben Elliston  <bje@redhat.com>
 From Graydon Hoare  <graydon@redhat.com>
 
