@@ -1,3 +1,8 @@
+2002-06-27  Kevin Buettner <kevinb@redhat.com>
+
+	* dwarf2.c (decode_line_info): Handle older, non-standard, 64-bit
+	DWARF2 formats.
+
 2002-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* cpu-powerpc.c: Comment on ordering of arch_info.
@@ -20,8 +25,8 @@
 
 	* config.bfd (powerpc-*-aix5*): Only create a selvecs for
 	aix5coff64_vec if 64-bit bfd support has been enabled.
-        (powerpc64-*-aix5*): Only define if 64-bit bfd support has
-	been enabled.	
+	(powerpc64-*-aix5*): Only define if 64-bit bfd support has
+	been enabled.
 
 	* targets.c (_bfd_target_vector[]): Only include
 	aix5coff64_vec if 64-bit bfd support has been enabled.

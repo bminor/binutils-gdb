@@ -981,24 +981,20 @@ decode_line_info (unit, stash)
   line_ptr = stash->dwarf_line_buffer + unit->line_offset;
 
   /* Read in the prologue.  */
-  if (unit->addr_size == 4)
-    {
-      lh.total_length = read_4_bytes (abfd, line_ptr);
-      line_ptr += 4;
-      offset_size = 4;
-    }
-  else
-    {
-      BFD_ASSERT (unit->addr_size == 8);
-      lh.total_length = read_8_bytes (abfd, line_ptr);
-      line_ptr += 8;
-      offset_size = 8;
-    }
-
+  lh.total_length = read_4_bytes (abfd, line_ptr);
+  line_ptr += 4;
+  offset_size = 4;
   if (lh.total_length == 0xffffffff)
     {
       lh.total_length = read_8_bytes (abfd, line_ptr);
       line_ptr += 8;
+      offset_size = 8;
+    }
+  else if (lh.total_length == 0 && unit->addr_size == 8)
+    {
+      /* Handle (non-standard) 64-bit DWARF2 formats.  */
+      lh.total_length = read_4_bytes (abfd, line_ptr);
+      line_ptr += 4;
       offset_size = 8;
     }
   line_end = line_ptr + lh.total_length;
