@@ -106,6 +106,9 @@ extern void pa_check_eof PARAMS ((void));
 
 #define tc_frob_label(sym) pa_define_label (sym)
 
+extern const char	hppa_symbol_chars[];
+#define tc_symbol_chars	hppa_symbol_chars
+
 /* The PA does not need support for either of these.  */
 #define tc_crawl_symbol_chain(headers) {;}
 #define tc_headers_hook(headers) {;}
