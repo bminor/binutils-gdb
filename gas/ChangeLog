@@ -1,3 +1,19 @@
+Wed Aug 24 12:46:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Recognize i586 as a synonym for i[34]86.
+
+Tue Aug 23 12:32:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/obj-coff.c (c_line_new): Change line_number argument from
+	unsigned short to int so that the type in the prototype matches
+	the promoted type in the definition.
+	(stack_delete): Comment out; not used.
+	* config/obj-coff.h (tc_coff_symbol_emit_hook): Declare if not
+	BFD_ASSEMBLER, not if BFD_ASSEMBLER.  Declare argument type.
+	* config/tc-m68k.h (tc_coff_sizemachdep): Declare.
+	* config/tc-m68k.c (tc_coff_symbol_emit_hook): Add ignored
+	argument.
+
 Tue Aug 16 01:48:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/config/tc-hppa.c (pa_comm): Set sy_frag for the common

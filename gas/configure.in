@@ -47,11 +47,12 @@ case "${host}" in
   hppa*-*-osf*)			gas_host=hppaosf	;;
   hppa*-*-hiux*)		gas_host=hpux		;;
 
-  i[34]86-ibm-aix*)		gas_host=i386aix	;;
-  i[34]86-*-isc*)		gas_host=sysv		;;
-  i386-sun-sunos*)		gas_host=sun386		;;
-  i386-*-mach*)			gas_host=mach3		;;
-  i386-*-go32)			target_makefile_frag=config/go32.mh	;;
+  i[345]86-ibm-aix*)		gas_host=i386aix	;;
+  i[345]86-*-isc*)		gas_host=sysv		;;
+  i[345]86-sun-sunos*)		gas_host=sun386		;;
+  i[345]86-*-mach*)		gas_host=mach3		;;
+  i[345]86-*-go32)		host_makefile_frag=config/go32.mh	
+				gas_host=go32		;;
 
   m68k-sun-sunos*)		gas_host=sun3		;;
   m68*-*-hpux)			gas_host=hpux		;;
@@ -108,7 +109,7 @@ case ${target_cpu} in
   # Actually we've only got support for the 1.1, so we shouldn't generalize,
   # but this is what the support files are named...
   hppa*)	cpu_type=hppa ;;
-  i486)		cpu_type=i386 ;;
+  i[45]86)	cpu_type=i386 ;;
   m680[012346]0) cpu_type=m68k ;;
   m68008)	cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
@@ -217,9 +218,14 @@ case ${generic_target} in
 			;;
 
   ppc-*-aix*)		obj_format=coff bfd_gas=yes ;;
+  ppc-*-elf*)		obj_format=elf bfd_gas=yes ;;
+  ppc-*-netware*)	obj_format=elf emulation=ppcnw ;;
   ppc-*-sysv4*)		obj_format=elf bfd_gas=yes ;;
 
   sh-*-coff)		obj_format=coff ;;
+
+  ns32k-pc532-mach*)	obj_format=aout emulation=pc532 bfd_gas=yes ;;
+  ns32k-pc532-netbsd*)	obj_format=aout emulation=netbsd532 bfd_gas=yes ;;
 
   sparc*-*-sunos4*)	obj_format=aout emulation=sun3 bfd_gas=yes ;;
   sparc*-*-aout | sparc*-*-vxworks)
@@ -257,7 +263,7 @@ esac
 # IEEE FP.  On those that don't support FP at all, usually IEEE
 # is emulated.
 case ${target_cpu} in
-  ns32k | vax | tahoe )	atof=${target_cpu} ;;
+  vax | tahoe )	atof=${target_cpu} ;;
   *)			atof=ieee ;;
 esac
 
