@@ -35,14 +35,14 @@ original English.
 @end ifinfo
 @c @smallbook
 @setchapternewpage odd
-@settitle Using GDB (v4.0)
+@settitle Using GDB (v3.94)
 @titlepage
 @title{Using GDB}
 @subtitle{A Guide to the GNU Source-Level Debugger}
 @sp 1
 @c Maybe crank this up to "Fourth Edition" when released at FSF
 @c @subtitle Third Edition---GDB version 4.0
-@subtitle GDB version 4.0
+@subtitle GDB version 3.94
 @subtitle January 1991
 @author{Richard M. Stallman}
 @author{(Revised by Roland Pesch for Cygnus Support)}
@@ -126,7 +126,7 @@ from anyone else.
 For full details, @pxref{License}.
 
 @menu
-* New Features::		New Features in GDB version 4.0
+* New Features::		New Features in GDB version 3.94
 * Invocation::			Starting GDB
 * User Interface::		GDB Commands and Displays
 * Files::			Specifying GDB's Files
@@ -247,7 +247,7 @@ Reporting Bugs in GDB
 @end menu
 
 @node New Features, Invocation, Top, Top
-@unnumbered New Features in GDB version 4.0
+@unnumbered New Features in GDB version 3.94
 
 @itemize @bullet
 @item
@@ -304,7 +304,7 @@ endian MIPS machines, Motorola 88k, Sun 386i, and Sun 3 running SunOS
 29k, Intel 960, and Wind River's VxWorks.
 
 @item
-SHARED LIBRARIES: GDB 4.0 supports SunOS shared libraries.
+SHARED LIBRARIES: GDB 3.94 supports SunOS shared libraries.
 
 @item
 WORK IN PROGRESS: kernel debugging for BSD and Mach systems; Tahoe and
@@ -390,16 +390,20 @@ messages are also suppressed in batch mode, or if an executable file name is
 specified on the GDB command line.
 
 @item -batch
-Run in batch mode.  Exit with code 0 after processing all the command
+Run in batch mode.  Exit with code @code{0} after processing all the command
 files specified with @samp{-x} (and @file{.gdbinit}, if not inhibited).
 Exit with nonzero status if an error occurs in executing the GDB
 commands in the command files.  
 
 Batch mode may be useful for running GDB as a filter, for example to
 download and run a program on another computer; in order to make this
-more useful, the message @samp{Program exited normally.} (which is
-ordinarily issued whenever a program running under GDB control stops) is
-not issued when running in batch mode.
+more useful, the message 
+@example
+Program exited normally.
+@end example
+@noindent
+(which is ordinarily issued whenever a program running under GDB control
+terminates) is not issued when running in batch mode.
 
 @item -fullname
 This option is used when Emacs runs GDB as a subprocess.  It tells GDB
@@ -413,16 +417,15 @@ a signal to display the source code for the frame.
 
 @item -b @var{bps}
 Set the line speed (baud rate or bps) of any serial interface used by
-GDB (for remote debugging).
+GDB for remote debugging.
 @end table
 
 @node Remote i960-Nindy,  , Mode Options, Invocation
 @section Starting GDB with a Remote Intel 960 (Nindy)
 
-When GDB is configured to control a remote intel 960 attached to your
-host (through a Nindy monitor: Nindy is the name of a Rom Monitor
-program for Intel 960 target systems), you can attach to the 960 in
-several ways:
+``Nindy'' is the name of a Rom Monitor program for Intel 960 target
+systems.  When GDB is configured to control a remote Intel 960 using
+Nindy, you can tell GDB how to connect to the 960 in several ways:
 
 @itemize @bullet
 @item
@@ -436,7 +439,7 @@ By using the @samp{target} command at any point during your GDB session.
 @end itemize
 
 The command-line options for Nindy are detailed below.  If you simply
-start GDB-960 without using options to specify a serial port, you are
+start @code{gdb960} without using options to specify a serial port, you are
 prompted for it, @emph{before} you reach the ordinary GDB prompt:
 @example
 Attach /dev/ttyNN -- specify NN, or "quit" to quit:  
@@ -452,17 +455,17 @@ Nindy-960 board attached:
 @table @code
 @item -r @var{port}
 Specify the serial port name of a serial interface to be used to connect
-to the target system's Nindy monitor.  (Nindy is the name of a ROM Monitor
-program for Intel 960 target systems.)  This option is only available when
-GDB is configured for the Intel 960 target architecture.  You may
-specify @var{port} as any of: a full pathname (e.g. @samp{-r /dev/ttya}), a
+to the target system.  This option is only available when GDB is
+configured for the Intel 960 target architecture.  You may specify
+@var{port} as any of: a full pathname (e.g. @samp{-r /dev/ttya}), a
 device name in @samp{/dev} (e.g. @samp{-r ttya}), or simply the unique
 suffix for a specific @code{tty} (e.g. @samp{-r a}).
 
 @item -O
-Specify that GDB should use the ``old'' Nindy monitor protocol to connect
-to the target system.  This option is only available when GDB is configured
-for the Intel 960 target architecture.
+(An uppercase letter ``O'', not a zero.)  Specify that GDB should use
+the ``old'' Nindy monitor protocol to connect to the target system.
+This option is only available when GDB is configured for the Intel 960
+target architecture.
 
 @quotation
 @emph{Warning:} if you specify @samp{-O}, but are actually trying to
@@ -478,7 +481,15 @@ system, in an attempt to reset it, before connecting to a Nindy target.
 This option is only available when GDB is configured for the Intel 960
 target architecture.
 
+@quotation
+@emph{Warning:} Many target systems do not have the hardware that this
+requires; it only works with a few boards.
+@end quotation
+
 @end table
+
+The standard @samp{-b} option controls the line speed used on the serial
+port. 
 
 
 @node User Interface, Files, Invocation, Top
@@ -914,6 +925,13 @@ When the symbol table is stored in COFF format, @samp{symbol-file} does
 read the symbol table data in full right away.  We haven't implemented
 the two-stage strategy for COFF yet.
 
+When GDB is configured for a particular environment, it will understand
+debugging information in whatever format is the standard generated for
+that environment; you may use either the GNU compiler GCC, or other
+compilers that adhere to the local conventions.  Best results are
+usually obtained from GCC; for example, using GCC you can generate
+debugging information for optimized code.
+
 While the symbol file is being read, GDB will occasionally encounter
 problems, such as symbol types it does not recognize, or known bugs in
 compiler output.  By default, it prints one message about each such
@@ -999,10 +1017,10 @@ for some C++ object.
 @itemx core @var{filename}
 @kindex core
 @kindex core-file
-Specify the whereabouts of a core dump file to be used as the
-``contents of memory''.  Note that the core dump contains only the
-writable parts of memory; the read-only parts must come from the
-executable file.
+Specify the whereabouts of a core dump file to be used as the ``contents
+of memory''.  Traditionally, core files contain only some parts of the
+address space of the process that generated them; GDB can access the
+executable file itself for other parts.
 
 @samp{core-file} with no argument specifies that no core file is
 to be used.
@@ -1067,7 +1085,7 @@ following commands:
 @item sharedlibrary @var{regex}
 @itemx share @var{regex}
 Load shared object library symbols for files matching a UNIX regular
-expresssion.
+expression.
 
 @item share
 @itemx sharedlibrary
@@ -1170,8 +1188,8 @@ When you specify a new target in a given stratum, it replaces any target
 previously in that stratum.
 
 To get rid of a target without replacing it, use the @samp{detach}
-command.  The related command @samp{attach} provides you
-with an alternative way of choosing a new target. @xref{Attach}.
+command.  The related command @samp{attach} provides you with a way of
+choosing a particular running process as a new target. @xref{Attach}.
 
 @node Target Commands,  , Active Targets, Targets
 @section Commands for Managing Targets
@@ -1181,8 +1199,8 @@ with an alternative way of choosing a new target. @xref{Attach}.
 Connects the GDB host environment to a target machine or process.  A
 target is typically a protocol for talking to debugging facilities.  You
 use the argument @var{type} to specify the type or protocol of the
-target machine; for example, @samp{target child} for Unix child processes, or
-@samp{target vxworks} for a TCP/IP link to a VxWorks system.  
+target machine; for example, @samp{target vxworks} for a TCP/IP link to
+a VxWorks system.
 
 Further @var{parameters} are interpreted by the target protocol, but
 typically include things like device names or host names to connect
@@ -1203,6 +1221,42 @@ all available ones.  @samp{info files} gives the same information as
 @samp{info target} (@pxref{Files}).
 @end table
 
+Here are some common targets (available, or not, depending on GDB
+configuration):
+
+@table @code
+@item target remote @var{dev}
+@kindex target remote
+Remote serial target in gdb-specific protocol.  The argument @var{dev}
+specifies what serial device to use for the connection (e.g.
+@code{/dev/ttya}).
+
+@item target exec @var{prog}
+@kindex target exec
+An executable file.  @samp{target exec @var{prog}} is the same as
+@samp{exec-file @var{prog}}.
+
+@item target core @var{filename}
+@kindex target core
+A core dump file.  @samp{target core @var{filename}} is the same as
+@samp{core-file @var{filename}}.
+
+@item target nindy @var{devicename}
+@kindex target nindy
+An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
+the name of the serial device to use for the connection, e.g.
+@samp{/dev/ttya}.  
+
+@item target vxworks @var{machinename}
+@kindex target vxworks
+A VxWorks system, attached via TCP/IP.  The argument @var{machinename}
+is the target system's machine name or IP address.
+
+@end table
+
+Different targets are available on different configurations of GDB; your
+configuration may have more or fewer targets.
+
 @node Running, Stopping, Targets, Top
 @chapter Running Your Program Under GDB
 
@@ -1211,8 +1265,12 @@ all available ones.  @samp{info files} gives the same information as
 To start your program under GDB, use the @samp{run} command.  Except on
 VxWorks, the program must already have been specified using the
 @samp{file} or @samp{exec-file} command, or with an argument to GDB
-(@pxref{Files}); what @samp{run} does is create an inferior process,
-load the program into it, and allow it to execute.
+(@pxref{Files}).
+
+On targets that support processes, @samp{run} creates an inferior
+process and makes that process run your program.  On other targets,
+@samp{run} jumps to the location it has recorded for the start of the
+program.
 
 The execution of a program is affected by certain information it
 receives from its superior.  GDB provides ways to specify this
@@ -1224,7 +1282,11 @@ divided into three categories:
 @table @asis
 @item The @i{arguments.}
 You specify the arguments to give the program as the arguments of the
-@samp{run} command.  
+@samp{run} command.  If a shell is available on your target, the shell
+is used to pass the arguments, so that you may use normal conventions
+(for example regular expression expansion or variable substitution) in
+describing the arguments.  In Unix systems, you can control which shell
+is used with the @code{SHELL} environment variable.
 
 @item The @i{environment.}
 The program normally inherits its environment from GDB, but you can
@@ -1245,9 +1307,9 @@ Note that once your program has been started by the @samp{run} command,
 you may evaluate expressions that involve calls to functions in the
 inferior, using the @samp{print} or @samp{call} commands.  @xref{Data}.
 
-If your program's timestamp has changed since the last time GDB read its
-symbols, GDB will discard its symbol table and re-read it from your
-program.  In this process, it tries to retain your current breakpoints.
+If the modification time of your symbol file has changed since the last
+time GDB read its symbols, GDB will discard its symbol table and re-read
+it.  In this process, it tries to retain your current breakpoints.
 
 @menu
 * Arguments::			Specifying the arguments for your program.
@@ -1411,14 +1473,14 @@ for GDB still comes from your terminal.
 
 @table @code
 @item attach @var{process--id}
-@itemx attach @var{device}
-This command attaches to another target, of the same type as your last
-@samp{target} command (@samp{info files} will show your active targets).
-The command may take as argument a process ID or a device file.
+This command attaches to a running process, if your currently selected
+target supports processes. (@samp{target} command (@samp{info files}
+will show your active targets).  The command takes as argument a
+process ID.
 
 You specify a process ID to debug an already-running process that was
 started outside of GDB.  (The usual way to find out the process-id of
-the process is with the @code{ps} utility, or with the @code{jobs -l}
+a Unix process is with the @code{ps} utility, or with the @code{jobs -l}
 shell command.)  In this case, you must have permission to send the
 process a signal, and it must have the same effective user ID as the
 debugger.
@@ -1446,9 +1508,6 @@ process, you kill that process.  By default, you will be asked for
 confirmation if you try to do either of these things; you can control
 whether or not this happens by using the @samp{set caution} command
 (@pxref{User Interface}).
-
-The @samp{attach} command is also used to debug a remote machine via a
-serial connection.  @xref{Remote}, for more info.
 
 @node Kill Process,  , Attach, Running
 @section Killing the Child Process
@@ -1966,6 +2025,8 @@ a count of zero.
 
 @item continue @var{count}
 @itemx cont @var{count}
+@itemx c @var{count}
+@itemx fg @var{count}
 @kindex cont @var{count}
 @kindex continue @var{count}
 Continue execution of the program, setting the ignore count of the
@@ -1975,6 +2036,9 @@ Thus, the program will not stop at this breakpoint until the
 
 This command is allowed only when the program stopped due to a
 breakpoint.  At other times, the argument to @samp{cont} is ignored.
+
+The synonym @samp{fg} is provided purely for convenience, and has
+exactly the same behavior as other forms of the command.
 @end table
 
 If a breakpoint has a positive ignore count and a condition, the condition
@@ -2460,7 +2524,7 @@ ten lines centered on the point of execution in the frame.  @xref{List}.
 @itemx down-silently @var{n}
 @kindex down-silently
 @kindex up-silently
-These two commants are variants of @samp{up} and @samp{down},
+These two commands are variants of @samp{up} and @samp{down},
 respectively; they differ in that they do their work silently, without
 causing display of the new frame.  They are intended primarily for use
 in GDB command scripts, where the output might be unnecessary and
@@ -3331,7 +3395,7 @@ Remove item numbers @var{dnums} from the list of expressions to display.
 @kindex disable display
 Disable the display of item numbers @var{dnums}.  A disabled display
 item is not printed automatically, but is not forgotten.  It may be
-reenabled later.
+enabled again later.
 
 @item enable display @var{dnums}@dots{}
 @kindex enable display
@@ -4206,11 +4270,11 @@ establish communication using the @samp{target remote} command with a device
 name as an argument.  For example:
 
 @example
-target remote /dev/ttyd
+target remote /dev/ttyb
 @end example
 
 @noindent
-if the serial line is connected to the device named @file{/dev/ttyd}.  This
+if the serial line is connected to the device named @file{/dev/ttyb}.  This
 will stop the remote machine if it is not already stopped.
 
 Now you can use all the usual commands to examine and change data and to
@@ -4218,6 +4282,9 @@ step and continue the remote program.
 
 To resume the remote program and stop debugging it, use the @samp{detach}
 command.
+
+Other remote targets be available in your
+configuration of GDB; use @samp{info targets} to list them.  
 
 @table @code
 @item reset
@@ -4326,7 +4393,7 @@ As a last resort, send bug reports on paper to:
 
 @example
 GNU Debugger Bugs
-545 Tech Sq
+545 Tech Square
 Cambridge, MA 02139
 @end example
 
