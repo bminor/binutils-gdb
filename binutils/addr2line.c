@@ -1,6 +1,6 @@
 /* addr2line.c -- convert addresses to line number and function name
    Copyright 1997, 98, 99, 2000 Free Software Foundation, Inc.
-   Contributed by Ulrich Lauther <Ulrich.Lauther@zfe.siemens.de>
+   Contributed by Ulrich Lauther <Ulrich.Lauther@mchp.siemens.de>
 
    This file is part of GNU Binutils.
 
@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Derived from objdump.c and nm.c by Ulrich.Lauther@zfe.siemens.de
+/* Derived from objdump.c and nm.c by Ulrich.Lauther@mchp.siemens.de
 
    Usage: 
    addr2line [options] addr addr ...
