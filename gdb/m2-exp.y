@@ -216,6 +216,7 @@ type_exp:	type
 
 exp     :       exp '^'   %prec UNARY
                         { write_exp_elt_opcode (UNOP_IND); }
+	;
 
 exp	:	'-'
 			{ number_sign = -1; }
@@ -330,6 +331,7 @@ exp	:	INCL '(' exp ',' exp ')'
 
 exp	:	EXCL '(' exp ',' exp ')'
 			{ error("Sets are not implemented.");}
+	;
 
 set	:	'{' arglist '}'
 			{ error("Sets are not implemented.");}
