@@ -1,3 +1,15 @@
+2000-05-13  Philip Blundell  <pb@futuretv.com>
+
+	From Joel Sherrill <joel@OARcorp.com>:
+	* configure.tgt (sparc-*-rtemsaout*, sparc-*-rtemself*): New.
+	(sparc-*-rtems*): Use ELF.
+	(i960-*-rtemself*, i960-*-rtemscoff*): New.
+	(i[3456]86-*-rtemscoff*): New.
+	(i[3456]86-*-rtems*): Use ELF.
+	(sh-*-rtemscoff*): New.
+	(m68*-*-rtemscoff*, m68*-*-rtemself): New.
+	(m68*-*-rtems*): Use ELF.
+
 2000-05-03  Alan Modra  <alan@linuxcare.com.au>
 
 	From Ulf Carlsson <ulfc@engr.sgi.com> and Andreas Jaeger <aj@suse.de>

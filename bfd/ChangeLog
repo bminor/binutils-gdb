@@ -1,3 +1,11 @@
+Sat Jul  3 10:35:19 CDT 1999 Joel Sherrill <joel@OARcorp.com>
+
+	* config.bfd (sparc-rtemself): Added.
+	(sparc-rtemsaout): Added as alternate name for current sparc-rtems.
+	(sparc-rtems): Switched to ELF from a.out
+	(i386-rtemscoff): Added as alternate name for current i386-rtems.
+	(i386-rtems): Switched to ELF.
+
 2000-05-09  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf.c (bfd_section_from_shdr): Don't set use_rela_p if rela
