@@ -1,3 +1,8 @@
+Tue May  5 09:30:25 1998  Christopher Faylor <cgf@cygnus.com>
+
+	* gdbtk.c (_initialize_gdbtk): Use correct device names in
+	cygwin-specific call (cosmetic change). 
+
 Wed Apr 29 15:53:16 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdbtk.c (gdbtk_ignorable_warning): removed va_list parameter,
