@@ -1,3 +1,8 @@
+Fri Jul  7 17:16:15 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (do_mostlyclean): Remove config.log.
+	(do_distclean): Remove config.cache.
+
 Thu Jul  6 14:37:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Revert May 24 patch.
