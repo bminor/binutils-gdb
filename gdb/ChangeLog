@@ -1,5 +1,7 @@
 2004-11-09  Andrew Cagney  <cagney@gnu.org>
 
+	* TODO: Delete.
+
 	* value.h (struct value): Delete field bfd_section.
 	(VALUE_BFD_SECTION): Delete macro.
 	(COERCE_REF): Update.
