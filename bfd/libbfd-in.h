@@ -62,10 +62,10 @@ char *zalloc PARAMS ((bfd_size_type size));
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
 
-PTR	bfd_alloc PARAMS ((bfd *abfd, bfd_size_type size));
-PTR	bfd_zalloc PARAMS ((bfd *abfd, bfd_size_type size));
-PTR	bfd_realloc PARAMS ((bfd *abfd, PTR orig, bfd_size_type new));
-void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, bfd_size_type size));
+PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
+PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
+PTR	bfd_realloc PARAMS ((bfd *abfd, PTR orig, size_t new));
+void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, size_t size));
 PTR	bfd_alloc_finish PARAMS ((bfd *abfd));
 PTR	bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t wanted));
 
@@ -86,6 +86,7 @@ boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
 struct areltdata *	snarf_ar_hdr PARAMS ((bfd *abfd));
 bfd_target *		bfd_generic_archive_p PARAMS ((bfd *abfd));
 boolean	bfd_slurp_armap PARAMS ((bfd *abfd));
+boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
 #define bfd_slurp_bsd_armap bfd_slurp_armap
 #define bfd_slurp_coff_armap bfd_slurp_armap
 boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
@@ -96,24 +97,47 @@ bfd *	new_bfd PARAMS (());
 boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
 					 unsigned int *table_length,
 					 char **free_ptr));
-bfd_vma _do_getb64 PARAMS ((unsigned char *addr));     
-bfd_vma _do_getl64 PARAMS ((unsigned char *addr));     
-bfd_signed_vma _do_getb_signed_64 PARAMS ((unsigned char *addr));     
-bfd_signed_vma _do_getl_signed_64 PARAMS ((unsigned char *addr));     
-bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
-bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getb_signed_32 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getl_signed_32 PARAMS ((unsigned char *addr));
-bfd_vma _do_getb16 PARAMS ((unsigned char *addr));
-bfd_vma _do_getl16 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getb_signed_16 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getl_signed_16 PARAMS ((unsigned char *addr));
-void    _do_putb64 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putl64 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putb32 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putb16 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putl16 PARAMS ((bfd_vma data, unsigned char *addr));
+
+/* Byte swapping routines from libbfd.c */
+
+/* namespace protection */
+#define _do_getb64		_bfd__do_getb64
+#define _do_getl64		_bfd__do_getl64
+#define _do_getb_signed_64	_bfd__do_getb_signed_64
+#define _do_getl_signed_64	_bfd__do_getl_signed_64
+#define _do_getb32 		_bfd__do_getb32
+#define _do_getl32 		_bfd__do_getl32
+#define _do_getb_signed_32 	_bfd__do_getb_signed_32
+#define _do_getl_signed_32 	_bfd__do_getl_signed_32
+#define _do_getb16 		_bfd__do_getb16
+#define _do_getl16 		_bfd__do_getl16
+#define _do_getb_signed_16 	_bfd__do_getb_signed_16
+#define _do_getl_signed_16 	_bfd__do_getl_signed_16
+#define _do_putb64 		_bfd__do_putb64
+#define _do_putl64 		_bfd__do_putl64
+#define _do_putb32 		_bfd__do_putb32
+#define _do_putl32 		_bfd__do_putl32
+#define _do_putb16 		_bfd__do_putb16
+#define _do_putl16 		_bfd__do_putl16
+
+bfd_vma		_do_getb64	   PARAMS ((unsigned char *addr));     
+bfd_vma 	_do_getl64	   PARAMS ((unsigned char *addr));     
+bfd_signed_vma	_do_getb_signed_64 PARAMS ((unsigned char *addr));     
+bfd_signed_vma	_do_getl_signed_64 PARAMS ((unsigned char *addr));     
+bfd_vma		_do_getb32	   PARAMS ((unsigned char *addr));
+bfd_vma		_do_getl32	   PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getb_signed_32 PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getl_signed_32 PARAMS ((unsigned char *addr));
+bfd_vma		_do_getb16	   PARAMS ((unsigned char *addr));
+bfd_vma		_do_getl16	   PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getb_signed_16 PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getl_signed_16 PARAMS ((unsigned char *addr));
+void		_do_putb64	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putl64	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putb32	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putl32	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putb16	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putl16	   PARAMS ((bfd_vma data, unsigned char *addr));
 
 boolean	bfd_false PARAMS ((bfd *ignore));
 boolean	bfd_true PARAMS ((bfd *ignore));
