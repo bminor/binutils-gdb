@@ -174,6 +174,7 @@ static void out_debug_line PARAMS ((segT));
 static void out_debug_aranges PARAMS ((segT, segT));
 static void out_debug_abbrev PARAMS ((segT));
 static void out_debug_info PARAMS ((segT, segT, segT));
+static void scale_addr_delta PARAMS ((int *));
 
 /* Find or create an entry for SEG+SUBSEG in ALL_SEGS.  */
 
@@ -596,6 +597,24 @@ out_set_addr (seg, frag, ofs)
   emit_expr (&expr, sizeof_address);
 }
 
+#if DWARF2_LINE_MIN_INSN_LENGTH > 1
+static void
+scale_addr_delta (addr_delta)
+     int *addr_delta;
+{
+  static int printed_this = 0;
+  if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0)
+    {
+      if (!printed_this)
+	as_bad("unaligned opcodes detected in executable segment");
+      printed_this = 1;
+    }
+  *addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
+}
+#else
+#define scale_addr_delta(A)
+#endif
+
 /* Encode a pair of line and address skips as efficiently as possible.
    Note that the line skip is signed, whereas the address skip is unsigned.
 
@@ -612,10 +631,7 @@ size_inc_line_addr (line_delta, addr_delta)
   int len = 0;
 
   /* Scale the address delta by the minimum instruction length.  */
-#if DWARF2_LINE_MIN_INSN_LENGTH > 1
-  assert (addr_delta % DWARF2_LINE_MIN_INSN_LENGTH == 0);
-  addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
-#endif
+  scale_addr_delta (&addr_delta);
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
@@ -678,11 +694,9 @@ emit_inc_line_addr (line_delta, addr_delta, p, len)
   int need_copy = 0;
   char *end = p + len;
 
-#if DWARF2_LINE_MIN_INSN_LENGTH > 1
   /* Scale the address delta by the minimum instruction length.  */
-  assert (addr_delta % DWARF2_LINE_MIN_INSN_LENGTH == 0);
-  addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
-#endif
+  scale_addr_delta (&addr_delta);
+
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
      to emit the matrix entry.  */

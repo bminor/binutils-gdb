@@ -1,3 +1,9 @@
+2002-11-26  DJ Delorie  <dj@redhat.com.
+
+	* dwarf2dbg.c (scale_addr_delta): New.
+	(size_inc_line_addr): Use it.
+	(emit_inc_line_addr): Use it.
+
 2002-11-26  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (cris_relax_frag): Fix typo in comment.
