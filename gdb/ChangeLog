@@ -1,3 +1,7 @@
+Wed Oct 27 13:43:07 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* m68k-stub.c: Change vector 13 from SIGFPE to SIGBUS.
+
 Tue Oct 26 22:05:03 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* mips-tdep.c (mips_pop_frame): If proc_desc is NULL, don't dump core.
