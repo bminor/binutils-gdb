@@ -18,521 +18,414 @@ along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
- *  $Id$ 
-
- *
+This was written by steve chamberlain
+                    sac@cygnus.com
 */
 
 
-
-/*SUPPRESS 529*/
-/*SUPPRESS 26*/
-/*SUPPRESS 29*/
-/*#define LEXDEBUG 0*/
-#include "bfd.h"
-#include "sysdep.h"
-
-#include <ctype.h>
-#include "ldlex.h"
-
-#include "ld.h"
-#include "ldexp.h"
+typedef int bfd_vma;
+#include <ansidecl.h>
 #include "ldgram.h"
-#include "ldmisc.h"
 
-#undef input
-#undef unput
-#define input lex_input
-#define unput lex_unput
+int ldgram_in_defsym;
+int ldgram_had_equals;
+int ldgram_in_script;
 
-int debug;
-
-
-static boolean ldgram_in_defsym;
-static boolean ldgram_had_equals;
-extern boolean ldgram_in_script;
-static char *command_line;
-
+int hex_mode;
 extern int fgetc();
 extern int yyparse();
 
-typedef struct {
-	char *name;	
-int value;
-} keyword_type;
+
+
+char *buystring();
+
+int lineno = 1;
+int old;
+
+#undef YY_INPUT
+#define YY_INPUT(buf,result,max_size) yy_input(buf, &result, max_size)
+#undef YY_FATAL_ERROR
+#define YY_FATAL_ERROR ;
+#define MAX_INCLUDE_DEPTH 10
+YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+unsigned int include_stack_ptr = 0;
+
+
+/* FOUR STATES 
+	COMMAND	 	on command line
+	COMMENT		in a C comment
+	EXPRESSION	definiatelyt in an expression
+	SCRIPT		definately in a script
+	SOMEWHERE	either EXPRESSION or SCRIPT
+*/
 #define RTOKEN(x)  {  yylval.token = x; return x; }
-keyword_type keywords[] = 
-{
-"/", '/',
-"MEMORY",MEMORY,
-"ORIGIN",ORIGIN,
-"BLOCK",BLOCK,
-"LENGTH",LENGTH,
-"ALIGN",ALIGN_K,
-"ADDR",ADDR,
-"ENTRY",ENTRY,
-"NEXT",NEXT,
-"sizeof_headers",SIZEOF_HEADERS,
-"SIZEOF_HEADERS",SIZEOF_HEADERS,
-"MAP",MAP,
-"SIZEOF",SIZEOF,
-"TARGET",TARGET_K,
-"SEARCH_DIR",SEARCH_DIR,
-"OUTPUT",OUTPUT,
-"INPUT",INPUT,
-"DEFINED",DEFINED,
-"CREATE_OBJECT_SYMBOLS",CREATE_OBJECT_SYMBOLS,
-"CONSTRUCTORS", CONSTRUCTORS,
-"FORCE_COMMON_ALLOCATION",FORCE_COMMON_ALLOCATION,
-"SECTIONS",SECTIONS,
-"FILL",FILL,
-"STARTUP",STARTUP,
-"OUTPUT_FORMAT",OUTPUT_FORMAT,
-"OUTPUT_ARCH", OUTPUT_ARCH,
-"HLL",HLL,
-"SYSLIB",SYSLIB,
-"FLOAT",FLOAT,
-"LONG", LONG,
-"SHORT", SHORT,
-"BYTE", BYTE,
-"NOFLOAT",NOFLOAT,
-
-"NOLOAD",NOLOAD,
-"DSECT",DSECT,
-"COPY",COPY,
-"INFO",INFO,
-"OVERLAY",OVERLAY,
-
-"o",ORIGIN,
-"org",ORIGIN,
-"l", LENGTH,
-"len", LENGTH,
-0,0};
-unsigned int lineno;
-extern boolean hex_mode;
-FILE *ldlex_input_stack;
-static unsigned int have_pushback;
-
-#define NPUSHBACK 10
-int pushback[NPUSHBACK];
-int thischar;
-extern char *ldfile_input_filename;
-int donehash = 0;
-int
-lex_input()
-{
-  if (have_pushback > 0) 
-      {
-	have_pushback --;
-	return thischar = pushback[have_pushback];
-      }
-  if (ldlex_input_stack) {
-    thischar = fgetc(ldlex_input_stack);
-
-    if (thischar == EOF)  {
-      fclose(ldlex_input_stack);
-      ldlex_input_stack = (FILE *)NULL;
-      ldfile_input_filename = (char *)NULL;
-      /* First char after script eof is a @ so that we can tell the grammer
-	 that we've left */
-      thischar = '@';
-
-    }
-  }
-  else if (command_line && *command_line)  {
-    thischar = *(command_line++);
-  }
-  else {
- thischar = 0;
-  }
-  if(thischar == '\t') thischar = ' ';
-  if (thischar == '\n') { thischar = ' '; lineno++; }
-  return thischar ;
-}
-
-void
-lex_unput(c)
-int c;
-{
-  if (have_pushback > NPUSHBACK) {
-    info("%F%P Too many pushbacks\n");
-  }
-
-  pushback[have_pushback] = c;
-  have_pushback ++;
-}
-
-
-	int
-yywrap()
-	 { return 1; }
-/*VARARGS*/
-
-void
-allprint(x) 
-int x;
-{
-fprintf(yyout,"%d",x);
-}
-
-void
-sprint(x) 
-char *x;
-{
-fprintf(yyout,"%s",x);
-}
-
-int  thischar;
-
-void parse_line(arg)
-char *arg;
-{
-  command_line = arg;
-  have_pushback = 0;
-  yyparse();
-}
-
-
-
-void
-parse_args(ac, av)
-int ac;
-char **av;
-{
-  char *p;
-  int i;
-  size_t size = 0;
-  char *dst;
-  debug = 1;
-  for (i= 1; i < ac; i++) {
-    size += strlen(av[i]) + 2; 
-  }
-  dst = p = (char *)ldmalloc(size + 2);
-/* Put a space arount each option */
-
-
-  for (i =1; i < ac; i++) {
-
-    unsigned int s = strlen(av[i]);
-  *dst++ = ' ';
-    memcpy(dst, av[i], s);
-    dst[s] = ' ';
-    dst += s + 1;
-  }
-  *dst	= 0;
-  parse_line(p);
-
-  free(p);
-
-
-}
-
-static long 
-DEFUN(number,(default_if_zero,base),
-      int default_if_zero AND
-      int base)
-{
-  unsigned  long l = 0;
-  int ch = yytext[0];
-  if (ch == 0) {
-    base = default_if_zero;
-  }
-  while (1) {
-    switch (ch) {
-    case 'x':
-      base = 16;
-      break;
-    case 'k':
-    case 'K':
-      l =l * 1024;
-      break;
-    case 'm':
-    case 'M':
-      l =l * 1024 * 1024;
-      break;
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-      l = l * base + ch - '0';
-      break;
-    case 'a': case 'b': case 'c' : case 'd' : case 'e': case 'f':
-      l =l *base + ch - 'a' + 10;
-      break;
-    case 'A': case 'B': case 'C' : case 'D' : case 'E': case 'F':
-      l =l *base + ch - 'A' + 10;
-      break;
-    default:
-      unput(ch);
-      yylval.integer = l;
-      return INT;
-    }
-ch = input();
-  }
-}
 %}
 
 %a 4000
 %o 5000
-FILENAMECHAR	[a-zA-Z0-9\/\.\-\_\+\=]
+FILENAMECHAR1	[_a-zA-Z\/\.\\]
+FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\]
 FILENAME	{FILENAMECHAR}+
-WHITE		[ \t]+ 
+WHITE		[ \t\n]+ 
 
+%x COMMAND
+%x SCRIPT
+%x EXPRESSION
+%x COMMENT
+%x BOTH
 %%
+  
+<COMMAND>"-defsym" 		{ return OPTION_defsym; }
+<COMMAND>"-noinhibit_exec" 	{ return OPTION_noinhibit_exec; }
+<COMMAND>"-noinhibit-exec"	{ return OPTION_noinhibit_exec; }
+<COMMAND>"-sort_common"		{ return OPTION_sort_common;}
+<COMMAND>"-sort-common"		{ return OPTION_sort_common;}
+<COMMAND>"-format"		{ return OPTION_format; }
+<COMMAND>"-n"			{ return OPTION_n; }
+<COMMAND>"-N"			{ return OPTION_N; }
+<COMMAND>"-r"			{ return OPTION_r; }
+<COMMAND>"-relax"		{ return OPTION_relax; }
+<COMMAND>"-i"			{ return OPTION_r; }
+<COMMAND>"-Ur"			{ return OPTION_Ur; }
+<COMMAND>"-o"			{ return OPTION_o; }
+<COMMAND>"-g"			{ return OPTION_g; }
+<COMMAND>"-e"			{ return OPTION_e; }
+<COMMAND>"-b"			{ return OPTION_b; }
+<COMMAND>"-dc"			{ return OPTION_dc; }
+<COMMAND>"-dp"			{ return OPTION_dp; }
+<COMMAND>"-d"			{ return OPTION_d; }
+<COMMAND>"-v"			{ return OPTION_v; }
+<COMMAND>"-V"			{ return OPTION_V; }
+<COMMAND>"-M"			{ return OPTION_M; }
+<COMMAND>"-Map"	             	{ return OPTION_Map;}
+<COMMAND>"-t"			{ return OPTION_t; }
+<COMMAND>"-X"			{ return OPTION_X; }
+<COMMAND>"-x"			{ return OPTION_x; }
+<COMMAND>"-c"			{ return OPTION_c; }
+<COMMAND>"-R"			{ return OPTION_R; }
+<COMMAND>"-u"			{ return OPTION_u; }
+<COMMAND>"-s"	           	{ return OPTION_s; }
+<COMMAND>"-S"	           	{ return OPTION_S; }
+<COMMAND>"-Bstat"	 	{ return OPTION_Bstatic; }
+<COMMAND>"-B"{FILENAME}	   	{ /* Ignored */ }
+<COMMAND>"-l"{FILENAME} 	{
+ 					yylval.name = buystring(yytext+2);
+				  	return OPTION_l; 
+				}
 
-"@" { return '}'; }
-"\ -defsym\ " { ldgram_in_defsym = true; return OPTION_defsym; }
-"\ -noinhibit_exec\ " { return OPTION_noinhibit_exec; }
-"\ -sort_common\ " { return OPTION_sort_common;}
-"\ -format\ " { return OPTION_format; }
-"\ -n\ "		{ return OPTION_n; }
-"\ -N\ "		{ return OPTION_N; }
-"\ -r\ "		{ return OPTION_r; }
-"\ -relax\ "		{ return OPTION_relax; }
-"\ -i\ "		{ return OPTION_r; }
-"\ -Ur\ "		{ return OPTION_Ur; }
-"\ -o\ "		{ return OPTION_o; }
-"\ -g\ "		{ return OPTION_g; }
-"\ -e\ "		{ return OPTION_e; }
-"\ -b\ "		{ return OPTION_b; }
-"\ -dc\ "		{ return OPTION_dc; }
-"\ -dp\ "		{ return OPTION_dp; }
-"\ -d\ "		{ return OPTION_d; }
-"\ -v\ "		{ return OPTION_v; }
-"\ -V\ "		{ return OPTION_V; }
-"\ -M\ "		{ return OPTION_M; }
-"\ -Map\ "              { return OPTION_Map;}
-"\ -t\ "		{ return OPTION_t; }
-"\ -X\ "		{ return OPTION_X; }
-"\ -x\ "		{ return OPTION_x; }
-"\ -c\ "		{ return OPTION_c; }
-"\ -R\ "		{ return OPTION_R; }
-"\ -u\ "		{ return OPTION_u; }
-"\ -s\ "            { return OPTION_s; }
-"\ -S\ "            { return OPTION_S; }
-"\ -Bstatic"  { return OPTION_Bstatic; }
-"\ -B{FILENAME}\ "    { /* Ignored */ }
-"\ -l"{FILENAME} {
-	 	yylval.name = buystring(yytext+3);
-		return OPTION_l; 
-	}
+<COMMAND>"-L"{FILENAME} 	{ 
+					yylval.name = buystring(yytext+2);
+					return OPTION_L; 
+				}
+<COMMAND>"-Ttext" 	        {
+				 yylval.name = ".text";
+				 return OPTION_Texp;
+				}
+<COMMAND>"-Tdata"  		{
+				 yylval.name = ".data";
+				 return OPTION_Texp;
+			       }
+<COMMAND>"-Tbss"		{
+				 yylval.name = ".bss";
+				 return OPTION_Texp;
+			       }
+<COMMAND>"-O"{FILENAME} 	{
+				yylval.name = buystring(yytext+2);
+				return OPTION_Texp;
+				}
 
-"\ -L"{FILENAME} 	{ 
-		yylval.name = buystring(yytext+3);
-	 	return OPTION_L; 
-	 }
-"\ -Ttext\ "  {
-		 yylval.name = ".text";
-		 return OPTION_Texp;
-	       }
-"\ -Tdata\ "  {
-		 yylval.name = ".data";
-		 return OPTION_Texp;
-	       }
-"\ -Tbss\ "  {
-		 yylval.name = ".bss";
-		 return OPTION_Texp;
-	       }
-"\ -O"{FILENAME} {
-		yylval.name = buystring(yytext+3);
-		return OPTION_Texp;
-		}
+<COMMAND>"-T"{FILENAME}  	{
+				 yylval.name = buystring(yytext+2);
+				 return OPTION_Tfile;
+			       }
+<COMMAND>"-T"          		{
+				 return OPTION_T;
+			       }
 
-"\ -T"{FILENAME}  {
-		 yylval.name = buystring(yytext+3);
-		 return OPTION_Tfile;
-	       }
-"\ -T\ "          {
-		 return OPTION_T;
-	       }
+<COMMAND>"-F"{FILENAME}  	{
+				 return OPTION_F;
+			       }
+<COMMAND>"-F"          		{
+				 return OPTION_F;
+			       }
 
-"\ -F"{FILENAME}  {
-		 return OPTION_F;
-	       }
-"\ -F\ "          {
-		 return OPTION_F;
-	       }
+<COMMAND>"-A"{FILENAME} 	{
+		                	yylval.name = buystring(yytext+2);
+				 	return OPTION_Aarch;
+			       	}
+<BOTH,EXPRESSION>"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
+				  yylval.integer = strtol(yytext,0,hex_mode);
+				  if (yytext[yyleng-1]=='M'
+					|| yytext[yyleng-1] == 'm') {
+				      yylval.integer *= 1024*1024;
+				    }	
+				  if (yytext[yyleng-1]=='K' 
+				|| yytext[yyleng-1]=='k') {
+				      yylval.integer *= 1024;
+				    }		
+				  return INT;
+				}
+<BOTH,SCRIPT,EXPRESSION>"]"		{ RTOKEN(']');}
+<BOTH,SCRIPT,EXPRESSION>"["		{ RTOKEN('[');}
+<BOTH,SCRIPT,EXPRESSION>"<<="	{ RTOKEN(LSHIFTEQ);}
+<BOTH,SCRIPT,EXPRESSION>">>="	{ RTOKEN(RSHIFTEQ);}
+<BOTH,SCRIPT,EXPRESSION>"||"	{ RTOKEN(OROR);}
+<BOTH,SCRIPT,EXPRESSION>"=="	{ RTOKEN(EQ);}
+<BOTH,SCRIPT,EXPRESSION>"!="	{ RTOKEN(NE);}
+<BOTH,SCRIPT,EXPRESSION>">="	{ RTOKEN(GE);}
+<BOTH,SCRIPT,EXPRESSION>"<="	{ RTOKEN(LE);}
+<BOTH,SCRIPT,EXPRESSION>"<<"	{ RTOKEN(LSHIFT);}
+<BOTH,SCRIPT,EXPRESSION>">>"	{ RTOKEN(RSHIFT);}
+<BOTH,SCRIPT,EXPRESSION>"+="	{ RTOKEN(PLUSEQ);}
+<BOTH,SCRIPT,EXPRESSION>"-="	{ RTOKEN(MINUSEQ);}
+<BOTH,SCRIPT,EXPRESSION>"*="	{ RTOKEN(MULTEQ);}
+<BOTH,SCRIPT,EXPRESSION>"/="	{ RTOKEN(DIVEQ);}
+<BOTH,SCRIPT,EXPRESSION>"&="	{ RTOKEN(ANDEQ);}
+<BOTH,SCRIPT,EXPRESSION>"|="	{ RTOKEN(OREQ);}
+<BOTH,SCRIPT,EXPRESSION>"&&"	{ RTOKEN(ANDAND);}
+<BOTH,SCRIPT,EXPRESSION>">"		{ RTOKEN('>');}
+<BOTH,SCRIPT,EXPRESSION>","		{ RTOKEN(',');}
+<BOTH,SCRIPT,EXPRESSION>"&"		{ RTOKEN('&');}
+<BOTH,SCRIPT,EXPRESSION>"|"		{ RTOKEN('|');}
+<BOTH,SCRIPT,EXPRESSION>"~"		{ RTOKEN('~');}
+<BOTH,SCRIPT,EXPRESSION>"!"		{ RTOKEN('!');}
+<BOTH,SCRIPT,EXPRESSION>"?"		{ RTOKEN('?');}
+<BOTH,SCRIPT,EXPRESSION>"*"		{ RTOKEN('*');}
+<BOTH,SCRIPT,EXPRESSION>"+"		{ RTOKEN('+');}
+<BOTH,SCRIPT,EXPRESSION>"-"		{ RTOKEN('-');}
+<BOTH,SCRIPT,EXPRESSION>"/"		{ RTOKEN('/');}
+<BOTH,SCRIPT,EXPRESSION>"%"		{ RTOKEN('%');}
+<BOTH,SCRIPT,EXPRESSION>"<"		{ RTOKEN('<');}
+<BOTH,SCRIPT,EXPRESSION>">"		{ RTOKEN('>');}
+<BOTH,SCRIPT,EXPRESSION>"="          { RTOKEN('=');}
+<BOTH,SCRIPT,EXPRESSION>"}"			{ RTOKEN('}') ; }
+<BOTH,SCRIPT,EXPRESSION>"{"			{ RTOKEN('{'); }
+<BOTH,SCRIPT,EXPRESSION>")"			{ RTOKEN(')');}
+<BOTH,SCRIPT,EXPRESSION>"("			{ RTOKEN('(');}
+<BOTH,SCRIPT,EXPRESSION>"]"		{ RTOKEN(']');}
+<BOTH,SCRIPT,EXPRESSION>"["		{ RTOKEN('[');}
+<BOTH,SCRIPT,EXPRESSION>":"		{ RTOKEN(':'); }
+<BOTH,SCRIPT,EXPRESSION>";"		{ RTOKEN(';');}
+<BOTH,SCRIPT,EXPRESSION>"-"		{ RTOKEN('-');}
+<BOTH,SCRIPT,EXPRESSION>"/"		{ RTOKEN('/');}
+<BOTH,SCRIPT>"MEMORY"		{ RTOKEN(MEMORY);}
+<BOTH,SCRIPT>"ORIGIN"		{ RTOKEN(ORIGIN);}
+<BOTH,SCRIPT>"BLOCK"			{ RTOKEN(BLOCK);}
+<BOTH,SCRIPT>"LENGTH"		{ RTOKEN(LENGTH);}
+<EXPRESSION,BOTH,SCRIPT>"ALIGN"			{ RTOKEN(ALIGN_K);}
+<EXPRESSION,BOTH,SCRIPT>"ADDR"			{ RTOKEN(ADDR);}
+<BOTH,SCRIPT>"ENTRY"			{ RTOKEN(ENTRY);}
+<EXPRESSION,BOTH,SCRIPT>"NEXT"			{ RTOKEN(NEXT);}
+<EXPRESSION,BOTH,SCRIPT>"sizeof_headers"	{ RTOKEN(SIZEOF_HEADERS);}
+<EXPRESSION,BOTH,SCRIPT>"SIZEOF_HEADERS"	{ RTOKEN(SIZEOF_HEADERS);}
+<BOTH,SCRIPT>"MAP"			{ RTOKEN(MAP);}
+<EXPRESSION,BOTH,SCRIPT>"SIZEOF"		{ RTOKEN(SIZEOF);}
+<BOTH,SCRIPT>"TARGET"		{ RTOKEN(TARGET_K);}
+<BOTH,SCRIPT>"SEARCH_DIR"		{ RTOKEN(SEARCH_DIR);}
+<BOTH,SCRIPT>"OUTPUT"		{ RTOKEN(OUTPUT);}
+<BOTH,SCRIPT>"INPUT"			{ RTOKEN(INPUT);}
+<BOTH,SCRIPT>"DEFINED"		{ RTOKEN(DEFINED);}
+<BOTH,SCRIPT>"CREATE_OBJECT_SYMBOLS"	{ RTOKEN(CREATE_OBJECT_SYMBOLS);}
+<BOTH,SCRIPT>"CONSTRUCTORS"		{ RTOKEN( CONSTRUCTORS);}
+<BOTH,SCRIPT>"FORCE_COMMON_ALLOCATION" { RTOKEN(FORCE_COMMON_ALLOCATION);}
+<BOTH,SCRIPT>"SECTIONS"		{ RTOKEN(SECTIONS);}
+<BOTH,SCRIPT>"FILL"			{ RTOKEN(FILL);}
+<BOTH,SCRIPT>"STARTUP"		{ RTOKEN(STARTUP);}
+<BOTH,SCRIPT>"OUTPUT_FORMAT"		{ RTOKEN(OUTPUT_FORMAT);}
+<BOTH,SCRIPT>"OUTPUT_ARCH"		{ RTOKEN( OUTPUT_ARCH);}
+<BOTH,SCRIPT>"HLL"			{ RTOKEN(HLL);}
+<BOTH,SCRIPT>"SYSLIB"		{ RTOKEN(SYSLIB);}
+<BOTH,SCRIPT>"FLOAT"			{ RTOKEN(FLOAT);}
+<BOTH,SCRIPT>"LONG"			{ RTOKEN( LONG);}
+<BOTH,SCRIPT>"SHORT"			{ RTOKEN( SHORT);}
+<BOTH,SCRIPT>"BYTE"			{ RTOKEN( BYTE);}
+<BOTH,SCRIPT>"NOFLOAT"		{ RTOKEN(NOFLOAT);}
+<BOTH,SCRIPT>"NOLOAD"		{ RTOKEN(NOLOAD);}
+<BOTH,SCRIPT>"DSECT"			{ RTOKEN(DSECT);}
+<BOTH,SCRIPT>"COPY"			{ RTOKEN(COPY);}
+<BOTH,SCRIPT>"INFO"			{ RTOKEN(INFO);}
+<BOTH,SCRIPT>"OVERLAY"		{ RTOKEN(OVERLAY);}
+<BOTH,SCRIPT>"o"			{ RTOKEN(ORIGIN);}
+<BOTH,SCRIPT>"org"			{ RTOKEN(ORIGIN);}
+<BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
+<BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
 
-"\ -A"{FILENAME} {
-                 yylval.name = buystring(yytext+3);
-		 return OPTION_Aarch;
-	       }
+<BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
+				 yylval.name = buystring(yytext); 
+				  return NAME;
+				}
+<SCRIPT,COMMAND>{FILENAMECHAR}* { yylval.name = buystring(yytext); 
+				  return NAME;
+				}
 
-" "		{
-		 if (ldgram_had_equals == true) {
-			  ldgram_in_defsym = false;
-			  ldgram_had_equals = false;
-		  }
-	}
-"<<="		{ RTOKEN(LSHIFTEQ);}
-">>="		{ RTOKEN(RSHIFTEQ);}
-"||"		{ RTOKEN(OROR);}
-"=="		{ RTOKEN(EQ);}
-"!="		{ RTOKEN(NE);}
-">="		{ RTOKEN(GE);}
-"<="		{ RTOKEN(LE);}
-"<<"		{ RTOKEN(LSHIFT);}
-">>"		{ RTOKEN(RSHIFT);}
-"+="		{ RTOKEN(PLUSEQ);}
-"-="		{ RTOKEN(MINUSEQ);}
-"*="		{ RTOKEN(MULTEQ);}
-"/="		{ RTOKEN(DIVEQ);}
-"&="		{ RTOKEN(ANDEQ);}
-"|="		{ RTOKEN(OREQ);}
-"&&"		{ RTOKEN(ANDAND);}
-">"		{ RTOKEN('>');}
-","		{ RTOKEN(',');}
-"&"		{ RTOKEN('&');}
-"|"		{ RTOKEN('|');}
-"~"		{ RTOKEN('~');}
-"!"		{ RTOKEN('!');}
-"?"		{ RTOKEN('?');}
-"*"		{ RTOKEN('*');}
-"%"		{ RTOKEN('%');}
-"<"		{ RTOKEN('<');}
-">"		{ RTOKEN('>');}
-"}"		{ RTOKEN('}') ; }
-"{"		{ RTOKEN('{'); }
-")"		{ RTOKEN(')');}
-"("		{ RTOKEN('(');}
-"]"		{ RTOKEN(']');}
-"["		{ RTOKEN('[');}
-":"		{ RTOKEN(':'); }
-";"		{ RTOKEN(';');}
-"-"		{ RTOKEN('-');}
+<EXPRESSION,BOTH,COMMAND,SCRIPT>"\""[^\"]*"\"" {
+					/* No matter the state, quotes
+					   give what's inside */
+					yylval.name = buystring(yytext+1);
+					yylval.name[yyleng-2] = 0;
+					return NAME;
+				}
+<BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}
+<COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
 
+"/*"				{ old = INITIAL; BEGIN(COMMENT); }
+<COMMAND>"/*"			{ old = COMMAND; BEGIN(COMMENT); }
+<BOTH>"/*"			{ old =BOTH; BEGIN(COMMENT); }
+<SCRIPT>"/*"			{ old = EXPRESSION; BEGIN(COMMENT); }
+<EXPRESSION>"/*"		{ old = SCRIPT; BEGIN(COMMENT); }
+"/*"				{ old = INITIAL; BEGIN(COMMENT); }
+<COMMENT>[^*\\n]*
+<COMMENT>"*"+[^*/\\n]*
+<COMMENT>\\n             	{ ++lineno;}
+<COMMENT>"*"+"/" 		{ BEGIN(old); }
 
-
-"/*"		{ 
-  while (1) {
-    int ch;
-    ch = input();
-    while (ch != '*') {
-      ch = input();
+<<EOF>> {
+    include_stack_ptr--;
+    
+    if (include_stack_ptr == 0) 
+    {
+      yyterminate();
     }
-
-
-
-    if (input() == '/') {
-      break;
+    else 
+    {
+      yy_switch_to_buffer(include_stack[include_stack_ptr]);
     }
-    unput(yytext[yyleng-1]);
+	BEGIN(COMMAND);
+	return END;
   }
-}
-
-"\""[^\"]*"\"" {
-
-  yylval.name = buystring(yytext+1);
-  yylval.name[yyleng-2] = 0; /* Fry final quote */
-  return NAME;
-}
-
-{FILENAMECHAR} {
-
-  boolean loop = false;
-  int ch;
-  keyword_type *k;
-
-  /* If we're in hex mode (only after a -T) then all we can see are numbers
-     hex digit we see will be a number. */
-
-  if (hex_mode) {	
-    return number(16, 16);
-  }
-
-  /* If we're in a defsym then all things starting with a digit are in
-     hex */
-
-  if (isdigit(yytext[0]) && ldgram_in_defsym) {
-    return number(16,16);
-  }
+    
 
 
-  /* Otherwise if we're in a script we will parse the numbers
-     normally */
-
-  if (ldgram_in_script == true && isdigit(yytext[0])) {
-    return number(8,10);
-  }
-
-  /* Anywhere not in a script or defsym, an opertor is part of a
-     filename, except / and, which is an operator when on its own */
-  if (ldgram_in_script == true|| ldgram_in_defsym == true) {
-
-    switch (yytext[0]) {
-      case '*': RTOKEN('*');
-
-      case '=': {
-	ldgram_had_equals = true;
-	RTOKEN('=');
-      }
-	break;
-     case '/': {
-       if (ldgram_in_defsym) RTOKEN('/');
-     }
-	break;
-      case '+': RTOKEN('+');
-      case '-': RTOKEN('-');
-      case '!': RTOKEN('!');
-      case '~': RTOKEN('~');
-      }
-    }
-
-
-/* Otherwise this must be a file or a symbol name, and it will continue to be a
-   filename until we get to something strange. In scripts operator looking
-   things  are taken to be operators, except /, which will be left
- */
-  ch = input();
-  while (true)
-      {
-	if (ldgram_in_defsym == true) {
-	  switch (ch) {
-	  case '*': 
-	  case '=': 
-	  case '+': 
-	  case '/': 
-	  case '-': 
-	  case '!': 
-	  case '~': 
-	    goto quit;
-	  }
-	  
-	}
-	if(ldgram_in_script == true) {
-	  switch (ch) {
-	  case '*': 
-	  case '=': 
-	  case '+': 
-	  case '-': 
-	  case '!': 
-	  case '~': 
-	    goto quit;
-	  }
-        }
-
-	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_'  ||
-	    ch == '/' || ch == '.' || ch == '+' || ch == '-' || ch =='=') {
-	  yytext[yyleng++] = ch;
-	}
-	else 
-	  break;
-	ch = input();
-      }
- quit:;
-  yytext[yyleng] = 0;
-  unput(ch);
-
-  for(k = keywords; k ->name != (char *)NULL; k++) {
-    if (strcmp(k->name, yytext)==0) {
-      yylval.token = k->value;
-      return k->value;
-    }
-  }
-  yylval.name = buystring(yytext);
-  return NAME;
-}
 
 
 
 
 
 %%
+
+void
+DEFUN(lex_push_file,(file),
+     FILE *file)
+{
+  if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
+  {
+    einfo("%F:includes nested too deeply");
+  }
+  include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+  yyin = file;
+  yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+
+  BEGIN(SCRIPT);
+}
+
+YY_BUFFER_STATE 
+DEFUN(yy_create_string_buffer,(string,  size),
+      CONST char *string AND
+      int size )
+{
+  YY_BUFFER_STATE b;
+
+  b = (YY_BUFFER_STATE) malloc( sizeof( struct yy_buffer_state ) );
+  b->yy_input_file = 0;
+  
+  if ( ! b )
+   YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
+
+  b->yy_buf_size = size;
+
+  /* yy_ch_buf has to be 2 characters longer than the size given because
+   * we need to put in 2 end-of-buffer characters.
+   */
+  b->yy_ch_buf = (YY_CHAR *) malloc( (unsigned) (b->yy_buf_size + 3) );
+
+  if ( ! b->yy_ch_buf )
+   YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
+
+
+  b->yy_ch_buf[0] = '\n';
+  strcpy(b->yy_ch_buf+1,  string);
+  b->yy_ch_buf[size+1] = YY_END_OF_BUFFER_CHAR;
+  b->yy_ch_buf[size+2] = YY_END_OF_BUFFER_CHAR;
+    b->yy_n_chars = size+1;
+  b->yy_buf_pos = &b->yy_ch_buf[1];
+
+  b->yy_eof_status = EOF_NOT_SEEN;
+
+  return ( b );
+}
+
+
+
+void
+DEFUN(lex_redirect,( string),
+    CONST  char *string)
+{
+  YY_BUFFER_STATE tmp;
+
+  int len = strlen(string);
+yy_init = 0  ;  
+  if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
+  {
+    einfo("%F: macros nested too deeply");
+  }
+  include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+
+  tmp =   yy_create_string_buffer(string, len);
+  
+  yy_switch_to_buffer(tmp);
+  BEGIN(COMMAND);
+yyout = stdout;
+}
+
+int state_stack[20];
+int *state_stack_p = state_stack;
+
+void
+DEFUN_VOID(ldlex_script)
+{
+*(state_stack_p)++ = yy_start;
+
+BEGIN(SCRIPT);
+}
+
+
+void
+DEFUN_VOID(ldlex_expression)
+{
+*(state_stack_p)++ = yy_start;
+BEGIN(EXPRESSION);
+
+}
+void
+DEFUN_VOID(ldlex_both)
+{
+*(state_stack_p)++ = yy_start;
+BEGIN(BOTH);
+}
+void
+DEFUN_VOID(ldlex_command)
+{
+*(state_stack_p)++ = yy_start;
+BEGIN(COMMAND);
+}
+
+void
+DEFUN_VOID(ldlex_popstate)
+{
+yy_start = *(--state_stack_p);
+}
+
+yy_input(buf, result, max_size)
+char *buf;
+int *result;
+int max_size;
+{
+  *result = 0; 
+  if (yy_current_buffer->yy_input_file)
+  {
+    if (yyin)
+     if ( (*result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) 
+      YY_FATAL_ERROR( "read() in flex scanner failed" );
+  }
+}
+

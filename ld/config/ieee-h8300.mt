@@ -1,0 +1,1 @@
+EMUL=h8300xray

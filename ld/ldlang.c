@@ -340,6 +340,10 @@ DEFUN_VOID(lang_init)
   first_file = lang_add_input_file((char *)NULL, 
 				   lang_input_file_is_marker_enum,
 				   (char *)NULL);
+abs_output_section = lang_output_section_statement_lookup(BFD_ABS_SECTION_NAME);
+
+abs_output_section->bfd_section = &bfd_abs_section;
+
 }
 
 
@@ -387,6 +391,8 @@ DEFUN(lang_memory_region_lookup,(name),
       new->origin = 0;
       new->length = ~0;
       new->current = 0;
+      new->had_full_message = false;
+      
       return new;
     }
 }
@@ -442,7 +448,7 @@ DEFUN(lang_output_section_statement_lookup,(name),
 
 
 
-
+/*ARGSUSED*/
 static void
 DEFUN(print_flags, ( ignore_flags),
       int  *ignore_flags)
@@ -494,20 +500,20 @@ static void
 DEFUN(init_os,(s),
       lang_output_section_statement_type *s)
 {
-    asection *section = bfd_get_section_by_name(output_bfd, s->name);
-    section_userdata_type *new =
-     (section_userdata_type *)
-      ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
+/*  asection *section = bfd_get_section_by_name(output_bfd, s->name);*/
+  section_userdata_type *new =
+   (section_userdata_type *)
+    ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
 
   s->bfd_section = bfd_get_section_by_name(output_bfd, s->name);
   if (s->bfd_section == (asection *)NULL)
-    s->bfd_section = bfd_make_section(output_bfd, s->name);
+   s->bfd_section = bfd_make_section(output_bfd, s->name);
   if (s->bfd_section == (asection *)NULL) {
-    einfo("%P%F output format %s cannot represent section called %s\n",
-	  output_bfd->xvec->name, s->name);
-  }
+      einfo("%P%F output format %s cannot represent section called %s\n",
+	    output_bfd->xvec->name, s->name);
+    }
   s->bfd_section->output_section = s->bfd_section;
-/* s->bfd_section->flags = s->flags;*/
+  /* s->bfd_section->flags = s->flags;*/
 
   /* We initialize an output sections output offset to minus its own */
   /* vma to allow us to output a section through itself */
@@ -754,9 +760,6 @@ static void
 lang_reasonable_defaults()
 {
 
-abs_output_section = lang_output_section_statement_lookup(BFD_ABS_SECTION_NAME);
-
-abs_output_section->bfd_section = &bfd_abs_section;
 
   
 #if 0
@@ -853,6 +856,10 @@ DEFUN_VOID(lang_init_script_file)
   script_file->the_bfd = bfd_create("script file", output_bfd);
   script_file->symbol_count = 0;
   script_file->the_bfd->sections = output_bfd->sections;
+abs_output_section = lang_output_section_statement_lookup(BFD_ABS_SECTION_NAME);
+
+abs_output_section->bfd_section = &bfd_abs_section;
+
 }
 
 
@@ -1330,187 +1337,7 @@ output_section_statement->bfd_section->_raw_size =
   return dot ;
 }
 
-#if 0
-/* Work out the size of the output sections 
-   from the sizes of the input sections */
-static bfd_vma
-DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
-			  dot),
-      lang_statement_union_type *s AND
-      lang_output_section_statement_type * output_section_statement AND
-      lang_statement_union_type **prev AND
-      unsigned short fill AND
-      bfd_vma dot)
 
-{
-  /* Size up the sections from their constituent parts */
-  for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
-      {
-	switch (s->header.type) {
-
-	  
-	case lang_output_section_statement_enum:
-	    {
-	      bfd_vma after;
-	      lang_output_section_statement_type *os =
-		&(s->output_section_statement);
-	      /* The start of a section */
-	  
-	      if (os->addr_tree == (etree_type *)NULL) {
-		/* No address specified for this section, get one
-		   from the region specification
-		   */
-		if (os->region == (lang_memory_region_type *)NULL) {
-		  os->region = lang_memory_region_lookup("*default*");
-		}
-		dot = os->region->current;
-	      }
-	      else {
-		etree_value_type r ;
-		r = exp_fold_tree(os->addr_tree,
-				  (lang_output_section_statement_type *)NULL,
-				  lang_allocating_phase_enum,
-				  dot, &dot);
-		if (r.valid == false) {
-		  einfo("%F%S: non constant address expression for section %s\n",
-		       os->name);
-		}
-		dot = r.value;
-	      }
-	      /* The section starts here */
-	      /* First, align to what the section needs */
-
-	      dot = align_power(dot, os->bfd_section->alignment_power);
-	      os->bfd_section->vma = dot;
-	      os->bfd_section->output_offset = 0;
-
-	      (void)  lang_size_sections(os->children.head, os, &os->children.head,
-					 os->fill, dot);
-	      /* Ignore the size of the input sections, use the vma and size to */
-	      /* align against */
-
-
-	      after = ALIGN(os->bfd_section->vma +
-			    os->bfd_section->size,
-			    os->block_value) ;
-
-
-	      os->bfd_section->size = after - os->bfd_section->vma;
-	      dot = os->bfd_section->vma + os->bfd_section->size;
-	      os->processed = true;
-
-	      /* Replace into region ? */
-	      if (os->addr_tree == (etree_type *)NULL 
-		  && os->region !=(lang_memory_region_type*)NULL ) {
-		os->region->current = dot;
-	      }
-	    }
-
-	  break;
-	case lang_constructors_statement_enum:
-	    dot = lang_size_sections(constructor_list.head,
-				      output_section_statement,
-				      &s->wild_statement.children.head,
-				      fill,
-				      dot);
-	    break;
-				      
-	case lang_data_statement_enum: 
-	    {
-	      unsigned int size = 0;
-	      s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
-	      s->data_statement.output_section =
-		output_section_statement->bfd_section;
-
-	      switch (s->data_statement.type) {
-	      case LONG:
-		size = LONG_SIZE;
-		break;
-	      case SHORT:
-		size = SHORT_SIZE;
-		break;
-	      case BYTE:
-		size = BYTE_SIZE;
-		break;
-
-	      }
-	      dot += size;
-	      output_section_statement->bfd_section->size += size;
-	    }
-	  break;
-
-	case lang_wild_statement_enum:
-
-	  dot =	lang_size_sections(s->wild_statement.children.head,
-				   output_section_statement,
-				   &s->wild_statement.children.head,
-
-				   fill, dot);
-
-	  break;
-
-	case lang_object_symbols_statement_enum:
-	  create_object_symbols = output_section_statement;
-	  break;
-	case lang_output_statement_enum:
-	case lang_target_statement_enum:
-	  break;
-	case lang_input_section_enum:
-	  dot =	size_input_section(prev,
-				   output_section_statement,
-				   output_section_statement->fill, dot);
-	  break;
-	case lang_input_statement_enum:
-	  break;
-	case lang_fill_statement_enum:
-	  fill = s->fill_statement.fill;
-	  break;
-	case lang_assignment_statement_enum:
-	    {
-	      bfd_vma newdot = dot;
-	      exp_fold_tree(s->assignment_statement.exp,
-			    output_section_statement,
-			    lang_allocating_phase_enum,
-			    dot,
-			    &newdot);
-
-	      if (newdot != dot && ) 
-		/* We've been moved ! so insert a pad */
-		  {
-		    lang_statement_union_type *new = 
-		      (lang_statement_union_type *)
-			ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
-		    /* Link into existing chain */
-		    new->header.next = *prev;
-		    *prev = new;
-		    new->header.type = lang_padding_statement_enum;
-		    new->padding_statement.output_section =
-		      output_section_statement->bfd_section;
-		    new->padding_statement.output_offset =
-		      dot - output_section_statement->bfd_section->vma;
-		    new->padding_statement.fill = fill;
-		    new->padding_statement.size = newdot - dot;
-		    output_section_statement->bfd_section->size +=
-		      new->padding_statement.size;
-		    dot =   newdot;
-		  }
-	    }
-
-	  break;
-	case lang_padding_statement_enum:
-	  FAIL();
-	  break;
-	default:
-	  FAIL();
-	  break;
-	case lang_address_statement_enum:
-	  break;
-	}
-	prev = &s->header.next;      
-      }
-  return dot;
-}
-#else
 /* Sizing happens in two passes, first pass we allocate worst case
    stuff. The second pass (if relaxing), we use what we learnt to
    change the size of some relocs from worst case to better
@@ -1529,194 +1356,207 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
 {
   /* Size up the sections from their constituent parts */
   for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
+  {
+    switch (s->header.type) {
+	  
+      case lang_output_section_statement_enum:
       {
-	switch (s->header.type) {
-	  
-	case lang_output_section_statement_enum:
+	bfd_vma after;
+	lang_output_section_statement_type *os =&(s->output_section_statement);
+
+	if (os->bfd_section == &bfd_abs_section)
+	{
+	  /* No matter what happens, an abs section starts at zero */
+	  os->bfd_section->vma = 0;
+	}
+	else 
+	{	  
+	  if (os->addr_tree == (etree_type *)NULL) 
+	  {
+	    /* No address specified for this section, get one
+	       from the region specification
+	       */
+	    if (os->region == (lang_memory_region_type *)NULL) {
+		os->region = lang_memory_region_lookup("*default*");
+	      }
+	    dot = os->region->current;
+	  }
+	  else 
+	  {
+	    etree_value_type r ;
+	    r = exp_fold_tree(os->addr_tree,
+			      abs_output_section,
+			      lang_allocating_phase_enum,
+			      dot, &dot);
+	    if (r.valid == false) 
 	    {
-	      bfd_vma after;
-	      lang_output_section_statement_type *os =
-		&(s->output_section_statement);
-	      /* The start of a section */
-	  
-	      if (os->addr_tree == (etree_type *)NULL) {
-		/* No address specified for this section, get one
-		   from the region specification
-		   */
-		if (os->region == (lang_memory_region_type *)NULL) {
-		  os->region = lang_memory_region_lookup("*default*");
-		}
-		dot = os->region->current;
-	      }
-	      else {
-		etree_value_type r ;
-		r = exp_fold_tree(os->addr_tree,
-				  abs_output_section,
-				  lang_allocating_phase_enum,
-				  dot, &dot);
-		if (r.valid == false) {
-		  einfo("%F%S: non constant address expression for section %s\n",
-		       os->name);
-		}
-		dot = r.value;
-	      }
-	      /* The section starts here */
-	      /* First, align to what the section needs */
-
-	      dot = align_power(dot, os->bfd_section->alignment_power);
-	      os->bfd_section->vma = dot;
-	      os->bfd_section->output_offset = 0;
-
-	      (void)  lang_size_sections(os->children.head, os, &os->children.head,
-					 os->fill, dot, relax);
-	      /* Ignore the size of the input sections, use the vma and size to */
-	      /* align against */
+	      einfo("%F%S: non constant address expression for section %s\n",
+		    os->name);
+	    }
+	    dot = r.value;
+	  }
+	  /* The section starts here */
+	  /* First, align to what the section needs */
 
 
-	      after = ALIGN(os->bfd_section->vma +
-			    os->bfd_section->_raw_size,
-			    os->block_value) ;
+	  dot = align_power(dot, os->bfd_section->alignment_power);
+	  os->bfd_section->vma = dot;
+	}
+	
+	
+	os->bfd_section->output_offset = 0;
+
+	(void)  lang_size_sections(os->children.head, os, &os->children.head,
+				   os->fill, dot, relax);
+	/* Ignore the size of the input sections, use the vma and size to */
+	/* align against */
 
 
-	      os->bfd_section->_raw_size = after - os->bfd_section->vma;
-	      dot = os->bfd_section->vma + os->bfd_section->_raw_size;
-	      os->processed = true;
+	after = ALIGN(os->bfd_section->vma +
+		      os->bfd_section->_raw_size,
+		      os->block_value) ;
 
-	      /* Replace into region ? */
-	      if (os->addr_tree == (etree_type *)NULL 
-		  && os->region !=(lang_memory_region_type*)NULL ) {
-		os->region->current = dot;
-		/* Make sure this isn't silly */
-		if (os->region->current  >
-		    os->region->origin +
-		    os->region->length) 
-		{
-		  einfo("%X%P: Region %s is full (%B section %s)\n",
-			os->region->name,
-			os->bfd_section->owner,
-			os->bfd_section->name);
-		  /* Reset the region pointer */
-		  os->region->current = 0;
-		}
+
+	os->bfd_section->_raw_size = after - os->bfd_section->vma;
+	dot = os->bfd_section->vma + os->bfd_section->_raw_size;
+	os->processed = true;
+
+	/* Replace into region ? */
+	if (os->addr_tree == (etree_type *)NULL 
+	    && os->region !=(lang_memory_region_type*)NULL ) {
+	    os->region->current = dot;
+	    /* Make sure this isn't silly */
+	    if (os->region->current  >
+		os->region->origin +
+		os->region->length) 
+	    {
+	      einfo("%X%P: Region %s is full (%B section %s)\n",
+		    os->region->name,
+		    os->bfd_section->owner,
+		    os->bfd_section->name);
+	      /* Reset the region pointer */
+	      os->region->current = 0;
+
+	    }
 		
-	      }
-	    }
+	  }
+      }
 
-	  break;
-	case lang_constructors_statement_enum:
-	    dot = lang_size_sections(constructor_list.head,
-				      output_section_statement,
-				      &s->wild_statement.children.head,
-				      fill,
-				      dot, relax);
-	    break;
+	break;
+      case lang_constructors_statement_enum:
+	dot = lang_size_sections(constructor_list.head,
+				 output_section_statement,
+				 &s->wild_statement.children.head,
+				 fill,
+				 dot, relax);
+	break;
 				      
-	case lang_data_statement_enum: 
-	    {
-	      unsigned int size = 0;
-	      s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
-	      s->data_statement.output_section =
-		output_section_statement->bfd_section;
+      case lang_data_statement_enum: 
+      {
+	unsigned int size = 0;
+	s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
+	s->data_statement.output_section =
+	 output_section_statement->bfd_section;
 
-	      switch (s->data_statement.type) {
-	      case LONG:
-		size = LONG_SIZE;
-		break;
-	      case SHORT:
-		size = SHORT_SIZE;
-		break;
-	      case BYTE:
-		size = BYTE_SIZE;
-		break;
+	switch (s->data_statement.type) {
+	  case LONG:
+	    size = LONG_SIZE;
+	    break;
+	  case SHORT:
+	    size = SHORT_SIZE;
+	    break;
+	  case BYTE:
+	    size = BYTE_SIZE;
+	    break;
 
-	      }
-	      dot += size;
-	      output_section_statement->bfd_section->_raw_size += size;
-	    }
-	  break;
+	  }
+	dot += size;
+	output_section_statement->bfd_section->_raw_size += size;
+      }
+	break;
 
-	case lang_wild_statement_enum:
+      case lang_wild_statement_enum:
 
-	  dot =	lang_size_sections(s->wild_statement.children.head,
+	dot =	lang_size_sections(s->wild_statement.children.head,
 				   output_section_statement,
 				   &s->wild_statement.children.head,
 
 				   fill, dot, relax);
 
-	  break;
+	break;
 
-	case lang_object_symbols_statement_enum:
-	  create_object_symbols = output_section_statement;
-	  break;
-	case lang_output_statement_enum:
-	case lang_target_statement_enum:
-	  break;
-	case lang_input_section_enum:
-if (relax)
-{
-  relaxing = true;
+      case lang_object_symbols_statement_enum:
+	create_object_symbols = output_section_statement;
+	break;
+      case lang_output_statement_enum:
+      case lang_target_statement_enum:
+	break;
+      case lang_input_section_enum:
+	if (relax)
+	{
+	  relaxing = true;
   
 
-had_relax |=  relax_section(prev);
-  relaxing = false;
+	  had_relax |=  relax_section(prev);
+	  relaxing = false;
   
-}
+	}
 
-	  dot =	size_input_section(prev,
+	dot =	size_input_section(prev,
 				   output_section_statement,
 				   output_section_statement->fill, dot);
-	  break;
-	case lang_input_statement_enum:
-	  break;
-	case lang_fill_statement_enum:
-	  fill = s->fill_statement.fill;
-	  break;
-	case lang_assignment_statement_enum:
-	    {
-	      bfd_vma newdot = dot;
-	      exp_fold_tree(s->assignment_statement.exp,
-			    output_section_statement,
-			    lang_allocating_phase_enum,
-			    dot,
-			    &newdot);
+	break;
+      case lang_input_statement_enum:
+	break;
+      case lang_fill_statement_enum:
+	fill = s->fill_statement.fill;
+	break;
+      case lang_assignment_statement_enum:
+      {
+	bfd_vma newdot = dot;
+	exp_fold_tree(s->assignment_statement.exp,
+		      output_section_statement,
+		      lang_allocating_phase_enum,
+		      dot,
+		      &newdot);
 
-	      if (newdot != dot && !relax) 
-		/* We've been moved ! so insert a pad */
-		  {
-		    lang_statement_union_type *new = 
-		      (lang_statement_union_type *)
-			ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
-		    /* Link into existing chain */
-		    new->header.next = *prev;
-		    *prev = new;
-		    new->header.type = lang_padding_statement_enum;
-		    new->padding_statement.output_section =
-		      output_section_statement->bfd_section;
-		    new->padding_statement.output_offset =
-		      dot - output_section_statement->bfd_section->vma;
-		    new->padding_statement.fill = fill;
-		    new->padding_statement.size = newdot - dot;
-		    output_section_statement->bfd_section->_raw_size +=
-		      new->padding_statement.size;
-		    dot =   newdot;
-		  }
-	    }
-
-	  break;
-	default:
-	  FAIL();
-	  break;
-/* This can only get here when relaxing is turned on */
-	case lang_padding_statement_enum:
-
-	case lang_address_statement_enum:
-	  break;
+	if (newdot != dot && !relax) 
+	 /* We've been moved ! so insert a pad */
+	{
+	  lang_statement_union_type *new = 
+	   (lang_statement_union_type *)
+	    ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
+	  /* Link into existing chain */
+	  new->header.next = *prev;
+	  *prev = new;
+	  new->header.type = lang_padding_statement_enum;
+	  new->padding_statement.output_section =
+	   output_section_statement->bfd_section;
+	  new->padding_statement.output_offset =
+	   dot - output_section_statement->bfd_section->vma;
+	  new->padding_statement.fill = fill;
+	  new->padding_statement.size = newdot - dot;
+	  output_section_statement->bfd_section->_raw_size +=
+	   new->padding_statement.size;
+	  dot =   newdot;
 	}
-	prev = &s->header.next;      
       }
+
+	break;
+      default:
+	FAIL();
+	break;
+	/* This can only get here when relaxing is turned on */
+      case lang_padding_statement_enum:
+
+      case lang_address_statement_enum:
+	break;
+      }
+    prev = &s->header.next;      
+  }
   return dot;
 }
-#endif
+
 
 static bfd_vma
 DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
@@ -1764,7 +1604,8 @@ DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
 	{
 	  etree_value_type value ;
 	  value =   exp_fold_tree(s->data_statement.exp,
-				  0, lang_final_phase_enum, dot, &dot);
+				  abs_output_section,
+				  lang_final_phase_enum, dot, &dot);
 	  s->data_statement.value = value.value;
 	  if (value.valid == false) einfo("%F%P: Invalid data statement\n");
 	}
@@ -2281,8 +2122,9 @@ DEFUN(create_symbol,(name, flags, section),
 void
 DEFUN_VOID(lang_process)
 {               
+
   if (had_script == false) {
-      parse_line(ldemul_get_script());
+      parse_line(ldemul_get_script(),1);
     }
   lang_reasonable_defaults();
   current_target = default_target;

@@ -56,6 +56,7 @@ i386)
 	case "${host_vendor}" in
 	*)
 		case "${host_os}" in
+		go32)	my_host=go32 ;;
 		sysv)	my_host=i386v ;;
 		mach)	my_host=i386mach ;;
 		bsd)	my_host=i386-aout ;;
@@ -91,7 +92,7 @@ vax)
 esac
 
 # Set up to make a link between the host's include file and "sysdep.h".
-files="../bfd/hosts/h-${my_host}.h"
+files="../bfd/hosts/${my_host}.h"
 links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
@@ -102,8 +103,8 @@ if [ ! -f ${srcdir}/${files} ] ; then
 	exit 1
 fi
 host_makefile_frag=
-if [ -f ${srcdir}/config/mh-${my_host} ] ; then
-	host_makefile_frag=${srcdir}/config/mh-${my_host}
+if [ -f ${srcdir}/config/${my_host}.mh ] ; then
+	host_makefile_frag=config/${my_host}.mh
 fi
 
 # per-target:
@@ -116,19 +117,34 @@ sun)
 	m68k)	my_target=sun3 ;;
 	esac
 	;;
+wrs)	
+	case ${target_cpu} in
+	i960) my_target=vxworks960 ;;
+	m68k) my_target=vxworks68;;
+	esac
+	;;
+tandem)
+	my_target=sun3
+	;;
 *)
 	case ${target_cpu} in
+	i386)	my_target=go32 ;;
 	m88k)	my_target=m88k-bcs ;;
 	a29k)	case ${target_os} in
 		ebmon) my_target=ebmon29k ;;
 		*) my_target=coff-a29k ;;
 		esac
 		;;
-	h8300)	my_target=coff-h8300 ;;
+	h8300)	case ${target_os} in
+		hms) my_target=coff-h8300 ;;
+		xray) my_target=ieee-h8300 ;;
+		esac
+		;;
 	m68k)	
 		case ${target_vendor} in
 		sony)	my_target=news ;;
 		hp)	my_target=hp300bsd ;;
+
 		wrs)	my_target=sun3 ;;
 		*)
 			echo "Unknown m68k target vendor:" ${target_vendor}
@@ -140,4 +156,4 @@ sun)
 	;;
 esac
 
-target_makefile_frag=${srcdir}/config/mt-${my_target}
+target_makefile_frag=config/${my_target}.mt

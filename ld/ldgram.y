@@ -100,7 +100,7 @@ struct sec *section;
   
 }
 
-%type <etree> exp  opt_exp  
+%type <etree> exp  opt_exp  mustbe_exp
 %type <integer> fill_opt opt_block opt_type
 %type <name> memspec_opt
 %token <integer> INT  
@@ -123,6 +123,7 @@ struct sec *section;
 
 /*%token <token> '+' '-' '*' '/' '%'*/
 %right UNARY
+%token END
 %left <token> '('
 %token <token> ALIGN_K BLOCK LONG SHORT BYTE
 %token SECTIONS  
@@ -155,8 +156,8 @@ ld_config_type config;
 
 file:	command_line  { lang_final(); };
 
-filename:
-  NAME;
+
+filename:  NAME;
 
 
 command_line:
@@ -165,12 +166,7 @@ command_line:
 	;
 
 command_line_option:
-		'{'
-                 	{ ldgram_in_script = true; }
-		ifile_list 
-			{ ldgram_in_script = false; }
-		'}'
-        |	OPTION_Bstatic { }
+        	OPTION_Bstatic { }
 	|	OPTION_v
 			{	
 			ldversion(0);
@@ -189,7 +185,6 @@ command_line_option:
 		write_map = true;
 		config.map_filename = $2;
 		}
-
 	|	OPTION_M {
 	    config.map_filename = "-";
 	    
@@ -269,12 +264,12 @@ command_line_option:
        		   }
 	| 	OPTION_Texp 
 		{ 
-			hex_mode  =true; 
+			hex_mode  = 16; 
 		} 
 		INT
 		{ 
 			lang_section_start($1,exp_intop($3));
-			hex_mode = false; 
+			hex_mode = 0; 
 		}
 	
 	| 	OPTION_Aarch 
@@ -297,12 +292,15 @@ command_line_option:
 		{ lang_add_input_file($1,lang_input_file_is_file_enum,
 				 (char *)NULL); }
 	|	OPTION_c filename 
-			{ ldfile_open_command_file($2); } script_file
+			{ ldfile_open_command_file($2); } script_file  END {  ldlex_command()};
+
 	|	OPTION_Tfile 
 			{ ldfile_open_command_file($1); } script_file
+END {  ldlex_command();}
 
 	|	OPTION_T filename 
 			{ ldfile_open_command_file($2); } script_file
+END {  ldlex_command();}
 
 	|	OPTION_l
 			{
@@ -316,17 +314,16 @@ command_line_option:
 				lang_input_file_is_symbols_only_enum,
 				(char *)NULL);
 			}
-	|	OPTION_defsym 
-			{
+	|	OPTION_defsym  { ldlex_expression();
+  
 			}
-		NAME 	 '='
-		exp 
-			{
+		NAME 	 '=' mustbe_exp  { ldlex_popstate();
 			lang_add_assignment(exp_assop($4,$3,$5));
 			}	
 	| '-' NAME
 		 { info("%P%F Unrecognised option -%s\n", $2);  }
 
+	| '{' script_file '}'  
 	;
 
 
@@ -336,11 +333,14 @@ command_line_option:
 
 
 
-script_file:
-	{ ldgram_in_script = true; }
-       ifile_list '}'
-        { ldgram_in_script = false; }
-
+script_file: 
+	{
+	 ldlex_both();
+	}
+       ifile_list 
+	{
+	ldlex_popstate();
+	}
         ;
 
 
@@ -359,7 +359,7 @@ ifile_p1:
 	|	low_level_library
 	|	floating_point_support
 	|	statement_anywhere
-        |	';'
+        |	 ';'
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
 	|	SEARCH_DIR '(' filename ')'
@@ -390,13 +390,12 @@ input_list:
 	;
 
 sections:
-		SECTIONS  '{'sec_or_group_p1  '}' 
+		SECTIONS '{' sec_or_group_p1  '}' 
 	;
 
 sec_or_group_p1:
 		sec_or_group_p1 section
 	|	sec_or_group_p1 statement_anywhere
-	|	sec_or_group_p1 
 	|
 	;
 
@@ -438,11 +437,10 @@ input_section_spec:
 
 statement:
 		statement assignment end
-        |	statement ';'
-        |	statement 
 	|	statement CREATE_OBJECT_SYMBOLS
 		{
  		  lang_add_attribute(lang_object_symbols_statement_enum); }
+        |	statement ';'
         |	statement CONSTRUCTORS
 		{
  		  lang_add_attribute(lang_constructors_statement_enum); }
@@ -474,7 +472,7 @@ length:
 	;
 
 fill_opt:
-          '=' exp
+          '=' mustbe_exp
 		{
 		  $$ =	 exp_get_value_int($2,
 					   0,
@@ -506,16 +504,16 @@ assign_op:
 
 	;
 
-end:	';' | ',' 
+end:	';' | ','
 	;
 
 
 assignment:
-		NAME '=' exp 
+		NAME '=' mustbe_exp 
 		{
 		  lang_add_assignment(exp_assop($2,$1,$3));
 		}
-	|	NAME assign_op exp 
+	|	NAME assign_op mustbe_exp 
 		{
 		  lang_add_assignment(exp_assop('=',$1,exp_binop($2,exp_nameop(NAME,$1),$3)));
 		}
@@ -528,7 +526,7 @@ opt_comma:
 
 
 memory:
-		MEMORY  '{'  memory_spec memory_spec_list '}'
+		MEMORY  '{' memory_spec memory_spec_list '}' 
 	;
 
 memory_spec_list:
@@ -541,21 +539,18 @@ memory_spec_list:
 memory_spec:
 		NAME 
 			{ region = lang_memory_region_lookup($1); }
-		attributes_opt  ':' origin_spec opt_comma length_spec
+		attributes_opt  ':' 
+		origin_spec opt_comma length_spec
 
-		{
-		 
-
-		}
 	;
 origin_spec:
-	ORIGIN '=' exp
+	ORIGIN '=' mustbe_exp
 		{ region->current =
 		 region->origin =
 		 exp_get_vma($3, 0L,"origin", lang_first_phase_enum); }
 	;
 length_spec:
-             LENGTH '=' exp		
+             LENGTH '=' mustbe_exp		
                {  region->length = exp_get_vma($3,
 					       ~((bfd_vma)0),
 					       "length",
@@ -608,12 +603,15 @@ floating_point_support:
 	;
 		
 
-	
+mustbe_exp:		 {  ldlex_expression(); }
+		exp
+			 { ldlex_popstate(); $$=$2;}
+	;
 
 exp	:
 		'-' exp    %prec UNARY
 			{ $$ = exp_unop('-', $2); }
-	|	'('  exp   ')'
+	|	'(' exp ')'
 			{ $$ = $2; }
 	|	NEXT '(' exp ')' %prec UNARY
 			{ $$ = exp_unop($1,$3); }
@@ -682,13 +680,15 @@ exp	:
 
 
 
-section:	NAME opt_exp opt_type opt_block ':' opt_things'{' 
+section:	NAME 		{  ldlex_expression();    }
+		opt_exp 	{ ldlex_popstate(); }
+		opt_type opt_block ':' opt_things'{' 
 		{
-		lang_enter_output_section_statement($1,$2,$3,$4);
+		lang_enter_output_section_statement($1,$3,$5,$6);
 		}
 	       statement 	'}' 	fill_opt memspec_opt
 		{
-		  lang_leave_output_section_statement($11, $12);
+		  lang_leave_output_section_statement($13, $14);
 		}
 
 	;
@@ -702,7 +702,9 @@ opt_type:
   	|    { $$ = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
 	;
 
-opt_things:  ;
+opt_things: 
+      {
+      };
 
 
 opt_exp:
@@ -712,7 +714,7 @@ opt_exp:
 	;
 
 opt_block:
-		BLOCK   '('   exp ')'
+		BLOCK '(' exp ')'
 		{ $$ = exp_get_value_int($3,
 					 1L,
 					 "block",
@@ -722,7 +724,7 @@ opt_block:
 	;
   
 memspec_opt:
-		'>'   NAME
+		'>' NAME
 		{ $$ = $2; }
 	|	{ $$ = "*default*"; }
 	;

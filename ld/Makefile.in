@@ -102,8 +102,8 @@ BFDLIB=./../bfd/libbfd.a
 LIBIBERTY=./../libiberty/libiberty.a
 
 ALL_EMULATIONS=ld__lnk960.o ld__sun3.o ld__i386aout.o \
-	ld__m88kbcs.o ld__a29k.o ld__news.o ld__hp300bsd.o ld__h8300hms.o ld__ebmon29k.o \
-	ld__sun4.o ld__gld960.o ld__vanilla.o
+	ld__go32.o ld__m88kbcs.o ld__a29k.o ld__news.o ld__hp300bsd.o ld__h8300hms.o ld__ebmon29k.o \
+	ld__sun4.o ld__gld960.o ld__vanilla.o ld__h8300xray.o
 
 EMULATION_OFILES=${ALL_EMULATIONS}
 #EMULATION_OFILES=ld__${EMUL}.o ${OTHER_EMULATIONS}
@@ -119,7 +119,7 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c lexsup.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
-	ld__gld.c ld__sun3.c ld__m88k.c ld__ebmon29k.c \
+	ld__gld.c ld__sun3.c ld__go32.c ld__m88k.c ld__ebmon29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
 	relax.c  lderror.c cplus-dem.c
 
@@ -165,12 +165,9 @@ ldemul-list.h:  Makefile
 ldemul.o: ldemul-list.h
 
 ldlex.c: ldlex.l
-	/lib/cpp -E -P $(INCLUDES)  $(HDEFINES) $(TDEFINES) $(CDEFINES) $(VPATH)/ldlex.l >ldlex.p
-	lex -t ldlex.p >ldlex.q
-	sed -e "s/define input/define old_input/" \
-            -e "s/define unput/define old_unput/" \
-	    -e "s/input/lex_input/" \
-            -e "s/unput/lex_unput/" <ldlex.q >ldlex.c
+#	/lib/cpp -E -P $(INCLUDES)  $(HDEFINES) $(TDEFINES) $(CDEFINES) $(VPATH)/ldlex.l >ldlex.p
+	flex -Cem -t $(VPATH)/ldlex.l >ldlex.c
+#	cp ldlex.q ldlex.c
 
 
 # These all start with ld__ so 'make clean' can find them.
@@ -184,6 +181,9 @@ ld__sun4.c: $(srcdir)/sun4.sh \
 ld__sun3.c: $(srcdir)/sun3.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} sun3.sh
+ld__go32.c: $(srcdir)/go32.sh \
+  $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} go32.sh
 ld__news.c: $(srcdir)/news.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} news.sh
@@ -205,6 +205,9 @@ ld__m88kbcs.c: $(srcdir)/m88kbcs.sh \
 ld__h8300hms.c: $(srcdir)/h8300hms.sh \
   $(srcdir)/h8300hms.em $(srcdir)/h8300hms.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300hms.sh
+ld__h8300xray.c: $(srcdir)/h8300xray.sh \
+  $(srcdir)/h8300xray.em $(srcdir)/h8300xray.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} h8300xray.sh
 ld__vanilla.c: $(srcdir)/vanilla.sh \
   $(srcdir)/vanilla.em $(srcdir)/vanilla.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla.sh
@@ -335,6 +338,7 @@ ldgram.o: ldgram.c
 ldgram.c:ldgram.y
 
 h8300hms.o:h8300hms.c
+h8300xray.o:h8300xray.c
 
 stage1:	force
 	-mkdir stage1
@@ -396,10 +400,13 @@ objdump:objdump.c
 
 .PHONY: install
 install: $(LD_PROG)
+	mv ld.new ld
 	-rm -f $(bindir)/$(program_prefix)ld
-	$(INSTALL_PROGRAM) ld.new $(bindir)/$(program_prefix)ld
+	$(INSTALL_PROGRAM) ld $(bindir)/$(program_prefix)ld
 	-rm -f $(tooldir)/ld
-	ln $(bindir)/$(program_prefix)ld $(tooldir)/ld
+	$(INSTALL_PROGRAM) ld $(tooldir)/$(program_prefix)ld
+	-rm -f $(man1dir)/$(program_prefix)ld.1
+	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld.1
 
 install-info: info
 	for i in ld.info* ; do \

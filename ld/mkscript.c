@@ -23,9 +23,10 @@ int
 main() 
 {
   int ch;
+
   ch = getchar();
   printf("/* Generated through mkscript */\n");
-  printf("\"{ \\\n");
+  printf("\"{");
   while (ch != EOF) {
     if (ch == '\"' || ch == '\\' || ch == '\'') {
       putchar('\\');

@@ -38,6 +38,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldindr.h"
 #include "ldwarn.h"
 #include "ldctor.h"
+#include "lderror.h"
+
 /* IMPORTS */
 extern boolean lang_has_input_file;
 extern boolean trace_files;
@@ -118,7 +120,7 @@ unsigned int total_files_seen;
 /* IMPORTS */
 args_type command_line;
 ld_config_type config;
-int
+void
 main (argc, argv)
      char **argv;
      int argc;
@@ -147,6 +149,7 @@ main (argc, argv)
 #endif
 
   /* Initialize the data about options.  */
+
 
   trace_files = false;
   write_map = false;
@@ -182,14 +185,18 @@ main (argc, argv)
   lang_has_input_file = false;
   parse_args(argc, argv);
   lang_final(); 
+
   if (trace_files) {
+
       info("%P: mode %s\n", emulation);
+
     }
   if (lang_has_input_file == false) {
       einfo("%P%F: No input files\n");
     }
 
   ldemul_after_parse();
+
 
   if (config.map_filename) 
   {
@@ -800,7 +807,8 @@ struct lang_input_statement_struct *entry;
       }
 
       if (p->section == &bfd_com_section
-	  || p->flags & BSF_GLOBAL)
+	  || (p->flags & BSF_GLOBAL)
+	  || (p->flags & BSF_INDIRECT))
 	{
 	  register ldsym_type *sp = ldsym_get_soft (p->name);
 

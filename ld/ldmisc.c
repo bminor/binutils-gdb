@@ -72,51 +72,73 @@ vfinfo(fp, fmt, arg)
      char *fmt;
      va_list arg;
 {
+  extern char *cplus_demangle();
   boolean fatal = false;
-  while (*fmt) {
-    while (*fmt != '%' && *fmt != '\0') {
+  while (*fmt) 
+  {
+    while (*fmt != '%' && *fmt != '\0') 
+    {
       putc(*fmt, fp);
       fmt++;
     }
-    if (*fmt == '%') {
+    if (*fmt == '%') 
+    {
       fmt ++;
-      switch (*fmt++) {
+      switch (*fmt++) 
+      {
       case 'X':
 	config.make_executable = false;
 	break;
       case 'V':
-	  {
-	    bfd_vma value = va_arg(arg, bfd_vma);
-	    fprintf_vma(fp, value);
-	  }
+      {
+	bfd_vma value = va_arg(arg, bfd_vma);
+	fprintf_vma(fp, value);
+      }
 	break;
       case 'T':
+      {
+	asymbol *symbol = va_arg(arg, asymbol *);
+	if (symbol) 
 	{
-	  asymbol *symbol = va_arg(arg, asymbol *);
-	  if (symbol) 
+
+	    
+	  asection *section = symbol->section;
+	  char *cplusname = cplus_demangle(symbol->name, 1);
+	  CONST char *section_name =  section->name;
+	  if (section != &bfd_und_section) 
 	  {
-	    asection *section = symbol->section;
-	    CONST char *section_name =  section->name;
-	    fprintf(fp,"%s (%s)", symbol->name, section_name);
+	    fprintf(fp,"%s (%s)", cplusname ? cplusname :
+		    symbol->name, section_name);
 	  }
 	  else 
 	  {
-	    fprintf(fp,"no symbol");
+	    fprintf(fp,"%s", cplusname ? cplusname : symbol->name);
 	  }
+	    
+	  if (cplusname) 
+	  {
+	    free(cplusname);
+	  }
+	    
 	}
+	else 
+	{
+	  fprintf(fp,"no symbol");
+	}
+      }
 	break;
       case 'B':
-	{ 
-	  bfd *abfd = va_arg(arg, bfd *);
-	  if (abfd->my_archive) {
+      { 
+	bfd *abfd = va_arg(arg, bfd *);
+	if (abfd->my_archive) {
 	    fprintf(fp,"%s(%s)", abfd->my_archive->filename,
 		    abfd->filename);
 	  }
-	  else {
+	else {
 	    fprintf(fp,"%s", abfd->filename);
 
 	  }
-	}
+      }
 	break;
       case 'F':
 	fatal = true;
@@ -133,38 +155,28 @@ vfinfo(fp, fmt, arg)
 
 	break;
       case 'I':
-	{
-	  lang_input_statement_type *i =
-	    va_arg(arg,lang_input_statement_type *);
+      {
+	lang_input_statement_type *i =
+	 va_arg(arg,lang_input_statement_type *);
 	
-	  fprintf(fp,"%s", i->local_sym_name);
-	}
+	fprintf(fp,"%s", i->local_sym_name);
+      }
 	break;
       case 'S':
 	/* Print source script file and line number */
 
-	if (ldlex_input_stack) {
-	  extern unsigned int lineno;
-	  if (ldfile_input_filename == (char *)NULL) {
-	    fprintf(fp,"command line");
+      {
+	
+	 
+	    extern unsigned int lineno;
+	    if (ldfile_input_filename == (char *)NULL) {
+		fprintf(fp,"command line");
+	      }
+	    else {
+		fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
+	      }
 	  }
-	  else {
-	    fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
-	  }
-	}
-	else {
-	  int ch;
-	  int n = 0;
-	  fprintf(fp,"command (just before \"");
-	  ch = lex_input();
-	  while (ch != 0 && n < 10) {
-	    fprintf(fp, "%c", ch);
-	    ch = lex_input();
-	    n++;
-	  }
-	  fprintf(fp,"\")");
-	    
-	}
+	
 	break;
 
       case 'R':
@@ -185,41 +197,52 @@ vfinfo(fp, fmt, arg)
 
 	
       case 'C':
-	{
-	 CONST char *filename;
-	 CONST char *functionname;
-	  unsigned int linenumber;
-	  bfd *abfd = va_arg(arg, bfd *);
-	  asection *section = va_arg(arg, asection *);
-	  asymbol **symbols = va_arg(arg, asymbol **);
-	  bfd_vma offset = va_arg(arg, bfd_vma);
+      {
+	CONST char *filename;
+	CONST char *functionname;
+	char *cplus_name;
 	 
-	  if (bfd_find_nearest_line(abfd,
-				    section,
-				    symbols,
-				    offset,
-				    &filename,
-				    &functionname,
-				    &linenumber))
-	    {
-		if (filename == (char *)NULL) 	
-		    filename = abfd->filename;
-		if (functionname != (char *)NULL)
-		    fprintf(fp,"%s:%u: (%s)", filename, linenumber,  functionname);
-		else if (linenumber != 0) 
-		    fprintf(fp,"%s:%u", filename, linenumber);
-		else
-		    fprintf(fp,"%s(%s+%0x)", filename,
-			    section->name,
-			    offset);
+	unsigned int linenumber;
+	bfd *abfd = va_arg(arg, bfd *);
+	asection *section = va_arg(arg, asection *);
+	asymbol **symbols = va_arg(arg, asymbol **);
+	bfd_vma offset = va_arg(arg, bfd_vma);
+	 
+	if (bfd_find_nearest_line(abfd,
+				  section,
+				  symbols,
+				  offset,
+				  &filename,
+				  &functionname,
+				  &linenumber))
+	{
+	  if (filename == (char *)NULL) 	
+	   filename = abfd->filename;
+	  if (functionname != (char *)NULL) 
+	  {
+	    cplus_name = cplus_demangle(functionname, 1);
+	    fprintf(fp,"%s:%u: (%s)", filename, linenumber,
+		    cplus_name? cplus_name: functionname);
+	    if (cplus_name) 
+	     free(cplus_name);
+		  
 
-	    }
-	  else {
+	  }
+		
+	  else if (linenumber != 0) 
+	   fprintf(fp,"%s:%u", filename, linenumber);
+	  else
+	   fprintf(fp,"%s(%s+%0x)", filename,
+		   section->name,
+		   offset);
+
+	}
+	else {
 	    fprintf(fp,"%s(%s+%0x)", abfd->filename,
 		    section->name,
 		    offset);
 	  }
-	}
+      }
 	break;
 		
       case 's':
@@ -235,11 +258,11 @@ vfinfo(fp, fmt, arg)
     }
   }
   if (fatal == true) {
-    extern char *output_filename;
-    if (output_filename)
-      unlink(output_filename);
-    exit(1);
-  }
+      extern char *output_filename;
+      if (output_filename)
+       unlink(output_filename);
+      exit(1);
+    }
 }
 
 /* Format info message and print on stdout. */
@@ -316,6 +339,20 @@ bfd_size_type size)
 } 
 
 
+PTR
+DEFUN(ldrealloc, (ptr, size),
+PTR ptr AND
+bfd_size_type size)
+{
+  PTR result =  realloc (ptr, (int)size);
+
+  if (result == (char *)NULL && size != 0)
+    einfo("%F%P virtual memory exhausted\n");
+
+  return result;
+} 
+
+
 
 char *DEFUN(buystring,(x),
 	    CONST char *CONST x)
@@ -327,6 +364,24 @@ char *DEFUN(buystring,(x),
 }
 
 
+/* ('m' for map) Format info message and print on map. */
+
+void minfo(va_alist)
+va_dcl
+{
+  char *fmt;
+  va_list arg;
+  va_start(arg);
+  fmt = va_arg(arg, char *);
+  vfinfo(config.map_file, fmt, arg);
+  va_end(arg);
+}
+
+
+
+
+
+
 /*----------------------------------------------------------------------
   Functions to print the link map 
  */
@@ -334,16 +389,16 @@ char *DEFUN(buystring,(x),
 void 
 DEFUN_VOID(print_space)
 {
-  printf(" ");
+  fprintf(config.map_file, " ");
 }
 void 
 DEFUN_VOID(print_nl)
 {
-  printf("\n");
+  fprintf(config.map_file, "\n");
 }
 void 
 DEFUN(print_address,(value),
       bfd_vma value)
 {
-  printf_vma(value);
+  fprintf_vma(config.map_file, value);
 }

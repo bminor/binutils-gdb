@@ -88,6 +88,7 @@ lnk960.em
 lnk960.sh
 m88kbcs.sc-sh
 m88kbcs.sh
+go32.sh
 mkscript.c
 news.sh
 relax.c
@@ -105,7 +106,12 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.32  1992/03/07 18:32:27  sac
+# Revision 1.33  1992/04/05 01:46:05  sac
+# New lexer.
+#
+# New targets for h8/300 simulator and DOS
+#
+# Revision 1.32  1992/03/07  18:32:27  sac
 # *** empty log message ***
 #
 # Revision 1.31  1992/02/27  17:23:59  sac
