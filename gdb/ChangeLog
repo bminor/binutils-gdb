@@ -1,5 +1,7 @@
 2003-08-07  Michal Ludvig  <mludvig@suse.cz>
+
 	* x86-64-tdep.c (x86_64_dwarf_regmap): Correct register numbers.
+	(x86_64_push_arguments): Skip the red zone.
 		
 2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
 

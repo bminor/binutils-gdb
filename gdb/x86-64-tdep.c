@@ -624,6 +624,14 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
   int stack_values_count = 0;
   int *stack_values;
   stack_values = alloca (nargs * sizeof (int));
+
+  /* Before storing anything to the stack we must skip
+     the "Red zone" (see the "Function calling sequence" section
+     of AMD64 ABI).
+     It could have already been skipped in the function's
+     prologue, but we don't care and will easily skip it once again.  */
+  sp -= 128;
+
   for (i = 0; i < nargs; i++)
     {
       enum x86_64_reg_class class[MAX_CLASSES];
