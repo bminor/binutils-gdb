@@ -1,3 +1,8 @@
+Wed Jun 19 11:37:52 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binary.c (binary_set_section_contents): Set section file
+	position based on LMA rather than VMA.
+
 Wed Jun 19 11:19:25 1996  Manfred Hollstein KS/EIC5 60/3/142 #40283  <manfred@lts.sel.alcatel.de>
 
 	* linker.c (_bfd_generic_link_output_symbols): Don't output any
