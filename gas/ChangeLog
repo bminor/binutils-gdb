@@ -1,5 +1,9 @@
 Wed Feb  8 18:51:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* messages.c (as_abort): New function.
+	* as.h (as_abort): Declare it.
+	(abort): New macro.
+
 	Thu Jan 19 18:10:05 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/vms-conf.h (HAVE_UNISTD_H):  define it unconditionally.
