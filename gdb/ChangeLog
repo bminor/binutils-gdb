@@ -1,5 +1,11 @@
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-nat.c: Reformat to be closer to coding standards.
+	(i386_handle_nonaligned_watchpoint): Rename local variable `rv' to
+	`retval'.  Make variables `align' and `size' local to while-loop.
+	(i386_stopped_data_address): Rename local variable `ret' to `addr'.
+	(_initialize_i386_nat): New prototype.
+
 	* tui/tui.c: Include <readline/readline.h> instead of
 	"readline/readline.h".  Include it after <term.h> and
 	"gdb_curses.h".
