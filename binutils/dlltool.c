@@ -363,7 +363,7 @@ void
 process_def_file (name)
      char *name;
 {
-  FILE *f = fopen (name, "r");
+  FILE *f = fopen (name, FOPEN_RT);
   if (!f)
     {
       fprintf (stderr, "%s: Can't open def file %s\n", program_name, name);
@@ -849,7 +849,7 @@ gen_exp_file ()
     fprintf (stderr, "%s: Generate exp file %s\n",
 	     program_name, exp_name);
 
-  f = fopen (outfile, "w");
+  f = fopen (outfile, FOPEN_WT);
   if (!f)
     {
       fprintf (stderr, "%s: Unable to open output file %s\n", program_name, outfile);
@@ -1187,7 +1187,7 @@ int i;
       FILE *f;
       char *prefix="d";
       sprintf (outfile, "%ss%d.s", prefix, i);
-      f = fopen (outfile, "w");
+      f = fopen (outfile, FOPEN_WT);
       fprintf (f, "\t.text\n");
       fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX, exp->name);
       fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
@@ -1428,7 +1428,7 @@ static
 bfd *
 make_head()
 {
-  FILE *  f = fopen ("dh.s", "w");
+  FILE *  f = fopen ("dh.s", FOPEN_WT);
 
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section	.idata$2\n");
@@ -1480,7 +1480,7 @@ make_head()
 static 
 bfd * make_tail()
 {
-  FILE *  f = fopen ("dt.s", "w");
+  FILE *  f = fopen ("dt.s", FOPEN_WT);
   fprintf (f, "\t.section	.idata$7\n");
   fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name_lab);
   fprintf (f, "__%s_iname:\t%s\t\"%s\"\n",
@@ -1730,6 +1730,10 @@ fill_ordinals (d_export_vec)
 	}
     }
 
+  /* Start at 1 for compatibility with MS toolchain.  */
+  if (lowest == 0)
+    lowest = 1;
+
   for (i = 0; i < d_nfuncs; i++)
     {
       if (d_export_vec[i]->ordinal == -1)
@@ -1919,7 +1923,7 @@ main (ac, av)
 	  add_indirect = 1;
 	  break;
 	case 'z':
-	  output_def = fopen (optarg, "w");
+	  output_def = fopen (optarg, FOPEN_WT);
 	  break;
 	case 'D':
 	  dll_name = optarg;
@@ -1956,7 +1960,7 @@ main (ac, av)
 	  dontdeltemps++;
 	  break;
 	case 'b':
-	  base_file = fopen (optarg, "r");
+	  base_file = fopen (optarg, FOPEN_RB);
 	  if (!base_file)
 	    {
 	      fprintf (stderr, "%s: Unable to open base-file %s\n",
