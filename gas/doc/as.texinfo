@@ -21,11 +21,11 @@
 @ifset H8/500
 @set H8
 @end ifset
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 @ifset SH
 @set H8
 @end ifset
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @c ------------
 @ifset GENERIC
 @settitle Using @value{AS}
@@ -363,12 +363,12 @@ Series Programming Manual} (Hitachi ADE--602--025).
 For information on the H8/500 machine instruction set, see @cite{H8/500
 Series Programming Manual} (Hitachi M21T001).
 @end ifset
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 @ifset SH
 For information on the Hitachi SH machine instruction set, see
 @cite{SH-Microcomputer User's Manual} (Hitachi Micro Systems, Inc.).
 @end ifset
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @ifset Z8000
 For information on the Z8000 machine instruction set, see @cite{Z8000 CPU Technical Manual}
 @end ifset
@@ -991,11 +991,11 @@ is considered a comment and is ignored.  The line comment character is
 @ifset H8/500
 @samp{!} for the H8/500 family;
 @end ifset
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 @ifset SH
 @samp{!} for the Hitachi SH;
 @end ifset
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @ifset Z8000
 @samp{!} for the Z8000;
 @end ifset
@@ -1081,9 +1081,9 @@ are an exception: they don't end statements.
 @ifset H8
 A @dfn{statement} ends at a newline character (@samp{\n}); or (for the
 H8/300) a dollar sign (@samp{$}); or (for the
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 Hitachi-SH or the
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 H8/500) a semicolon
 (@samp{;}).  The newline or separator character is considered part of
 the preceding statement.  Newlines and separators within character
@@ -1306,9 +1306,9 @@ grave accent.  A newline
 @end ifset
 @ifset H8
 (or dollar sign @samp{$}, for the H8/300; or semicolon @samp{;} for the
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 Hitachi SH or
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 H8/500)
 @end ifset
 @end ifset
@@ -1411,9 +1411,9 @@ to allow any of @samp{defghDEFGH}.)
 @end ignore
 
 On the H8/300, H8/500,
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 Hitachi SH,
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 and AMD 29K architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
@@ -1539,9 +1539,9 @@ the task of adjusting mentions of object-file addresses so they refer to
 the proper run-time addresses.
 @ifset H8
 For the H8/300 and H8/500,
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 and for the Hitachi SH,
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @code{@value{AS}} pads sections if needed to
 ensure they end on a word (sixteen bit) boundary.
 @end ifset
@@ -1851,9 +1851,9 @@ of @code{@value{AS}}.)
 @ifset H8
 On the H8/300 and H8/500 platforms, each subsection is zero-padded to a word
 boundary (two bytes).
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 The same is true on the Hitachi SH.
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @end ifset
 @ifset I960
 @c FIXME section padding (alignment)?
@@ -1995,9 +1995,9 @@ body of a symbol name, though not at its beginning.
 @ifset SPECIAL-SYMS
 @ifset H8
 Symbol names begin with a letter or with one of @samp{._}.  On the
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 Hitachi SH or the
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 H8/500, you can also use @code{$} in symbol names.  That character may
 be followed by any string of digits, letters, dollar signs (save on the
 H8/300), and underscores.
@@ -2985,9 +2985,9 @@ the program.
 @ifclear GENERIC
 @ifset H8
 On the H8/300 and H8/500, @code{.int} emits 16-bit integers.
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 On the Hitachi SH, however, @code{.int} emits 32-bit integers.
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @end ifset
 @end ifclear
 
@@ -3613,11 +3613,11 @@ subject, see the hardware manufacturer's manual.
 @ifset H8/500
 * H8/500-Dependent::            Hitachi H8/500 Dependent Features
 @end ifset
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
 @end ifset
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
 @end ifset
@@ -4159,10 +4159,10 @@ family.
 @menu
 * H8/300-Dependent::            Hitachi H8/300 Dependent Features
 * H8/500-Dependent::            Hitachi H8/500 Dependent Features
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 
 * SH-Dependent::                Hitachi SH Dependent Features
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @end menu
 @down
 @end ifclear
@@ -4690,7 +4690,7 @@ mov[:g] sz ea,rd
 @end smallexample
 
 @end ifset
-@c start Hitachi-SH
+@c start-sanitize-Hitachi-SH
 @ifset SH
 @page
 @node SH-Dependent
@@ -4948,7 +4948,7 @@ stc SR,Rn
 @end ifset
 
 @end ifset
-@c end Hitachi-SH
+@c end-sanitize-Hitachi-SH
 @ifset I960
 @ifset GENERIC
 @page
