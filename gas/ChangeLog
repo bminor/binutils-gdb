@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Thu Oct 30 11:11:26 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-d30v.c (build_insn): Allow odd registers for ld2w and
+	friends.
+
+end-sanitize-d30v
 start-sanitize-tx49
 Wed Oct 29 16:22:38 1997  Gavin Koch  <gavin@cygnus.com>
 
