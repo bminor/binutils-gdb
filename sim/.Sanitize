@@ -67,6 +67,8 @@ z8k
 
 Things-to-lose:
 
+sparc
+
 Do-last:
 
 tic80_files="configure configure.in ChangeLog"
