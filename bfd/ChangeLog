@@ -1,3 +1,20 @@
+Wed Oct  8 11:36:00 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config.bfd: Missed one alpha* change.
+
+Tue Oct  7 13:00:17 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Remove BFD64 support.
+	* elf64-sparc.c (SPARC64_OLD_RELOCS): Undef.
+	(MINUS_ONE): New macro.
+	(sparc_elf_notsup_reloc): New function.
+	(sparc64_elf_howto_table): Add entries for DISP64,PLT64,HIX22,LOX10,
+	H44,M44,L44,REGISTER.
+	(sparc_reloc_map): Likewise.  Map BFD_RELOC_CTOR to R_SPARC_64.
+	(init_insn_reloc): New function.
+	(sparc_elf_wdisp16_reloc): Use it.
+	(sparc64_elf_relocate_section): Add entries for OLO10,HIX22,LOX10.
+
 Tue Oct  7 11:40:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* som.c (som_construct_extended_name_table): Remove static

@@ -28,6 +28,7 @@ targ_underscore=no
 
 targ_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 case "${targ_cpu}" in
+alpha*) targ_archs=bfd_alpha_arch ;;
 arm*)	targ_archs=bfd_arm_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
 i[3456]86) targ_archs=bfd_i386_arch ;;
@@ -364,12 +365,6 @@ case "${targ}" in
     targ_defvec=ecoff_little_vec
     targ_selvecs=ecoff_big_vec
     ;;
-# start-sanitize-gm
-  mips*-*-magic*)
-    targ_defvec=ecoff_big_vec
-    targ_selvecs=bfd_elf32_bigmips_vec
-    ;;
-# end-sanitize-gm
   mips*-*-ecoff*)
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
