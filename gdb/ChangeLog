@@ -1,3 +1,8 @@
+2003-09-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-linux-tdep.c (arm_linux_arm_be_breakpoint): New.
+	(arm_linux_init_abi): Use arm_linux_arm_be_breakpoint.
+
 2003-09-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* sol-thread.c: Include "gdb_string.h".
