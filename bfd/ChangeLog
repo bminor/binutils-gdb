@@ -1,3 +1,9 @@
+Mon Oct 16 10:52:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_symbol_processing): Set SEC_ALLOC, not
+	SEC_NO_FLAGS, for .acommon section.  From Peter Schauer
+	<Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>.
+
 Sat Oct 14 21:36:02 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* coff-ppc.c (in_reloc_p): Add, clone from coff-i386.c.
