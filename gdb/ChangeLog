@@ -1,3 +1,8 @@
+Tue Mar 14 05:52:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbtypes.h (struct type): Fix comment about what units the
+	TYPE_LENGTH is in.
+
 Mon Mar 13 18:27:25 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* ch-valprint.c (annotate.h): Include.

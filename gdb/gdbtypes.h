@@ -178,8 +178,16 @@ struct type
 
   char *tag_name;
 
-  /* Length, in units of TARGET_CHAR_BIT bits,
-     of storage for a value of this type */
+  /* Length of storage for a value of this type.  Various places pass
+     this to memcpy and such, meaning it must be in units of
+     HOST_CHAR_BIT.  Various other places expect they can calculate
+     addresses by adding it and such, meaning it must be in units of
+     TARGET_CHAR_BIT.  For some DSP targets, in which HOST_CHAR_BIT
+     will (presumably) be 8 and TARGET_CHAR_BIT will be (say) 32, this
+     is a problem.  One fix would be to make this field in bits
+     (requiring that it always be a multiple of HOST_CHAR_BIT and
+     TARGET_CHAR_BIT)--the other choice would be to make it
+     consistently in units of HOST_CHAR_BIT.  */
 
   unsigned length;
 
