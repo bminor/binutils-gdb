@@ -128,9 +128,9 @@ char lex_type[256] =
 char is_end_of_line[256] =
 {
 #ifdef CR_EOL
-  _, _, _, _, _, _, _, _, _, _, 99, _, _, 99, _, _,	/* @abcdefghijklmno */
+  99, _, _, _, _, _, _, _, _, _, 99, _, _, 99, _, _,	/* @abcdefghijklmno */
 #else
-  _, _, _, _, _, _, _, _, _, _, 99, _, _, _, _, _,	/* @abcdefghijklmno */
+  99, _, _, _, _, _, _, _, _, _, 99, _, _, _, _, _,	/* @abcdefghijklmno */
 #endif
   _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
 #ifdef TC_HPPA
@@ -1318,7 +1318,7 @@ s_align_bytes (arg)
   s_align (arg, 1);
 }
 
-/* Handle the .align pseud-op on machines where ".align 4" means align
+/* Handle the .align pseudo-op on machines where ".align 4" means align
    to a 2**4 boundary.  */
 
 void 
@@ -1866,11 +1866,14 @@ s_linkonce (ignore)
   demand_empty_rest_of_line ();
 }
 
-void 
-s_lcomm (needs_align)
+static void 
+s_lcomm_internal (needs_align, bytes_p)
      /* 1 if this was a ".bss" directive, which may require a 3rd argument
 	(alignment); 0 if it was an ".lcomm" (2 args only)  */
      int needs_align;
+     /* 1 if the alignment value should be interpreted as the byte boundary,
+	rather than the power of 2. */
+     int bytes_p;
 {
   register char *name;
   register char c;
@@ -1965,6 +1968,20 @@ s_lcomm (needs_align)
 	  return;
 	}
       align = get_absolute_expression ();
+      if (bytes_p)
+	{
+	  /* Convert to a power of 2.  */
+	  if (align != 0)
+	    {
+	      unsigned int i;
+
+	      for (i = 0; (align & 1) == 0; align >>= 1, ++i)
+		;
+	      if (align != 1)
+		as_bad ("Alignment not a power of 2");
+	      align = i;
+	    }
+	}
       if (align > max_alignment)
 	{
 	  align = max_alignment;
@@ -2040,7 +2057,20 @@ s_lcomm (needs_align)
   subseg_set (current_seg, current_subseg);
 
   demand_empty_rest_of_line ();
-}				/* s_lcomm() */
+}				/* s_lcomm_internal() */
+
+void
+s_lcomm (needs_align)
+     int needs_align;
+{
+  s_lcomm_internal (needs_align, 0);
+}
+
+void s_lcomm_bytes (needs_align)
+     int needs_align;
+{
+  s_lcomm_internal (needs_align, 1);
+}
 
 void 
 s_lsym (ignore)
