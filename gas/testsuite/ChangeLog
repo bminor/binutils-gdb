@@ -1,3 +1,10 @@
+2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sh/basic.exp: Add dsp dump test.
+        * sh/dsp/d: New file: Expected output of disassembly of dsp.s
+        * sh/dsp.s: New file: Test assembly source of DSP single data
+	transfer instructions.
+
 2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
 
 	* gas/arm/arm.exp: Run arm9e tests.
