@@ -1,3 +1,9 @@
+2005-04-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/rw.po: New translation: Kinyarwanda
+	* configure.in (ALL_LINGUAS): Add rw
+	* configure: Regenerate.
+
 2005-04-05  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (MIPS_ELF_OPTIONS_SECTION_NAME_P): New macro.
