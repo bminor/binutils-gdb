@@ -1,3 +1,7 @@
+2003-05-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* emulparams/elf64_ia64.sh: Don't set COMMONPAGESIZE for now.
+
 2003-05-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add earmelfb.o and earmelfb_linux.o.
