@@ -1,3 +1,8 @@
+Thu May  7 13:20:56 1998  Anders Blomdell  <anders.blomdell@control.lth.se>
+
+	* gasp.c (grab_label): Permit a label to be a preprocessor
+	variable by permitting a label to start with a backslash.
+
 start-sanitize-d30v
 Thu May  7 11:13:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

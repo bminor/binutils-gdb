@@ -1080,7 +1080,7 @@ grab_label (in, out)
 {
   int i = 0;
   sb_reset (out);
-  if (ISFIRSTCHAR (in->ptr[i]))
+  if (ISFIRSTCHAR (in->ptr[i]) || in->ptr[i] == '\\')
     {
       sb_add_char (out, in->ptr[i]);
       i++;
