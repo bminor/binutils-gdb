@@ -1,5 +1,9 @@
 Thu Jun 22 20:21:59 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* utils.c (error): Move local `args' outside conditional,
+	move local `string1' inside, declare function as void if
+	non-ANSI compiler, dereference error_hook when calling.
+
 	* mac-xdep.c (stdarg.h): Don't include.
 
 Thu Jun 22 13:12:33 1995  Kung Hsu  <kung@mexican.cygnus.com>
