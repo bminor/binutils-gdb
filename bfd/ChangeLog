@@ -1,5 +1,16 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	* elf64-hppa.c (elf64_hppa_check_relocs): Handle R_PARISC_PCREL12F.
+	(elf64_hppa_size_dynamic_sections): Remove the FIXME at bfd_zalloc
+	comment.
+
+	From  David Huggins-Daines  <dhd@linuxcare.com>
+	* elf64-hppa.c (elf64_hppa_check_relocs): Fix a warning.
+	(elf64_hppa_mark_exported_functions): Set dyn_h->st_shndx.
+	(elf64_hppa_link_output_symbol_hook): Test dyn_h->st_shndx has
+	been updated in finish_dynamic_symbol before modifying function
+	symbol.
+
 	* elf-hppa.h (elf_hppa_howto_table): Restructure into groups of
 	eight entries.  Replace NULL with bfd_elf_generic_reloc.  Add
 	R_PARISC_GNU_VTENTRY, R_PARISC_GNU_VTINHERIT and R_PARISC_PCREL12F.

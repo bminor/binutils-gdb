@@ -574,7 +574,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
  
   if (info->shared && hppa_info->section_syms_bfd != abfd)
     {
-      unsigned int i;
+      unsigned long i;
       int highest_shndx;
       Elf_Internal_Sym *local_syms, *isym;
       Elf64_External_Sym *ext_syms, *esym;
@@ -748,6 +748,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	/* These are function calls.  Depending on their precise target we
 	   may need to make a stub for them.  The stub uses the PLT, so we
 	   need to create PLT entries for these symbols too.  */
+	case R_PARISC_PCREL12F:
 	case R_PARISC_PCREL17F:
 	case R_PARISC_PCREL22F:
 	case R_PARISC_PCREL32:
@@ -978,6 +979,8 @@ elf64_hppa_mark_exported_functions (h, data)
 	return false;
 
       dyn_h->want_opd = 1;
+      /* Put a flag here for output_symbol_hook.  */
+      dyn_h->st_shndx = -1;
       h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
     }
 
@@ -1737,14 +1740,13 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents if it has not
-	 been allocated already.  */
+	 been allocated already.  We use bfd_zalloc here in case
+	 unused entries are not reclaimed before the section's
+	 contents are written out.  This should not happen, but this
+	 way if it does, we get a R_PARISC_NONE reloc instead of
+	 garbage.  */
       if (s->contents == NULL)
 	{
-	  /* FIXME: This should be a call to bfd_alloc not bfd_zalloc.
-	     Unused entries should be reclaimed before the section's contents
-	     are written out, but at the moment this does not happen.  Thus in
-	     order to prevent writing out garbage, we initialise the section's
-	     contents to zero.  */
 	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
 	  if (s->contents == NULL && s->_raw_size != 0)
 	    return false;
@@ -1831,9 +1833,14 @@ elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
   dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 				      name, false, false);
 
-  /* Function symbols for which we created .opd entries were munged
-     by finish_dynamic_symbol and have to be un-munged here.  */
-  if (dyn_h && dyn_h->want_opd)
+  /* Function symbols for which we created .opd entries *may* have been
+     munged by finish_dynamic_symbol and have to be un-munged here.
+
+     Note that finish_dynamic_symbol sometimes turns dynamic symbols
+     into non-dynamic ones, so we initialize st_shndx to -1 in
+     mark_exported_functions and check to see if it was overwritten
+     here instead of just checking dyn_h->h->dynindx.  */
+  if (dyn_h && dyn_h->want_opd && dyn_h->st_shndx != -1)
     {
       /* Restore the saved value and section index.  */
       sym->st_value = dyn_h->st_value;
