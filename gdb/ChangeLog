@@ -1,3 +1,9 @@
+Wed Mar 18 18:22:46 1992  Fred Fish  (fnf@cygnus.com)
+
+	* infrun.c (IN_SOLIB_TRAMPOLINE):  Add default definition.
+	* infrun.c (wait_for_inferior):  Use IN_SOLIB_TRAMPOLINE.
+	* tm-sysv4.h (IN_SOLIB_TRAMPOLINE): Add SVR4 definition.
+
 Wed Mar 18 15:51:15 1992  Per Bothner  (bothner@cygnus.com)
 
 	Some improvements to g++ debugging.
