@@ -1,3 +1,8 @@
+Wed Feb 21 17:00:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-h8300.c (tc_reloc_mangle): Change reloc based on size
+	if it is TC_CONS_RELOC.  Set a size of 4 to R_RELLONG.
+
 Wed Feb 21 09:25:39 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* config/tc-sparc.c (sparc_ip): Recognize %asr0 for v8.
