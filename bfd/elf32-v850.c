@@ -1564,20 +1564,29 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
      bfd * ibfd;
      bfd * obfd;
 {
-  flagword old_flags;
-  flagword new_flags;
+  flagword out_flags;
+  flagword in_flags;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  old_flags = elf_elfheader (obfd)->e_flags;
+  in_flags = elf_elfheader (ibfd)->e_flags;
+  out_flags = elf_elfheader (obfd)->e_flags;
 
   if (! elf_flags_init (obfd))
     {
+      /* If the input is the default architecture then do not
+	 bother setting the flags for the output architecture,
+	 instead allow future merges to do this.  If no future
+	 merges ever set these flags then they will retain their
+	 unitialised values, which surprise surprise, correspond
+	 to the default values.  */
+      if (bfd_get_arch_info (ibfd)->the_default)
+	return true;
+      
       elf_flags_init (obfd) = true;
-      elf_elfheader (obfd)->e_flags = new_flags;
+      elf_elfheader (obfd)->e_flags = in_flags;
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && bfd_get_arch_info (obfd)->the_default)
@@ -1589,16 +1598,13 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
     }
 
   /* Check flag compatibility.  */
-  if (new_flags == old_flags)
+  if (in_flags == out_flags)
     return true;
 
-  if ((new_flags & EF_V850_ARCH) != (old_flags & EF_V850_ARCH))
-    {
-      if ((old_flags & EF_V850_ARCH) != E_V850_ARCH)
-	_bfd_error_handler ("%s: Architecture mismatch with previous modules",
-			    bfd_get_filename (ibfd));
-      return true;
-    }
+  if ((in_flags & EF_V850_ARCH) != (out_flags & EF_V850_ARCH)
+      && (in_flags & EF_V850_ARCH) != E_V850_ARCH)
+    _bfd_error_handler ("%s: Architecture mismatch with previous modules",
+			bfd_get_filename (ibfd));
 
   return true;
 }
