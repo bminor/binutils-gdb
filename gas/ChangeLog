@@ -1,3 +1,11 @@
+Mon Nov 13 20:39:06 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (ppc-*-macos*, ppc-*-mpw*): New configurations.
+	* configure: Update.
+	* mpw-make.sed: Reorder commands to make sed happier.
+	* config/te-macos.h: New file.
+	* config/tc-ppc.h (TARGET_FORMAT): Set correctly for PowerMac.
+
 Sun Nov 12 21:14:56 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Fix off-by-2 bug in length check for

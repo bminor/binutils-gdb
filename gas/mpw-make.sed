@@ -64,16 +64,18 @@ LOCAL_LOADLIBES = \
 # Whack out recursive makes, they won't work.
 /^[ 	][ 	]*srcroot=/,/^[ 	][ 	]*(cd /d
 
+# Work around quoting problems by using multiple echo commands.
 /'#define GAS_VERSION "{VERSION}"'/c\
 	Echo -n '#define GAS_VERSION "' >> "{o}"config.new\
 	Echo -n "{VERSION}" >> "{o}"config.new\
 	Echo -n '"' >> "{o}"config.new
 
-# Whack out config-rebuilding targets, they won't work.
-/^config.status \\Option-f/,/^$/d
-
-/^"{o}"config.h \\Option-f/s/^/#/
-
 # Add a "stamps" target.
 $a\
 stamps \\Option-f config-stamp\
+
+# Whack out config-rebuilding targets, they won't work.
+/^Makefile \\Option-f/,/^$/d
+/^config.status \\Option-f/,/^$/d
+
+/^"{o}"config.h \\Option-f/s/^/#/
