@@ -534,6 +534,11 @@ get_reg_name (regno)
   if (sr_get_debug() > 5)
     printf ("Got name \"%s\" from regno #%d.\n", buf, regno);
 
+#ifdef LOG_FILE
+  fprintf (log_file, "Got name \"%s\" from regno #%d.\n", buf, regno);
+  fflush (log_file);
+#endif
+
   return buf;
 }
 
@@ -552,8 +557,8 @@ monitor_fetch_registers ()
 }
 
 /* 
- * monitor_fetch_register -- fetch register REGNO, or all registers if REGNO is -1.
- *  Returns errno value.
+ * monitor_fetch_register -- fetch register REGNO, or all registers if REGNO
+ *	is -1. Returns errno value.
  */
 void
 monitor_fetch_register (regno)
@@ -582,7 +587,7 @@ monitor_fetch_register (regno)
     supply_register (regno, (char *) &val);
     
     if (*ROMDELIM(GET_REG) != 0) {
-/***      expect (ROMRES(GET_REG)); ***/
+/***  expect (ROMRES(GET_REG)); ***/
       printf_monitor (CMD_END);
     }
     expect_prompt (1);
@@ -607,13 +612,18 @@ monitor_store_registers ()
   registers_changed ();
 }
 
-/* Store register REGNO, or all if REGNO == 0.
-   return errno value.  */
+/* 
+ * monitor_store_register -- store register REGNO, or all if REGNO == 0.
+ *	return errno value.
+ */
 void
 monitor_store_register (regno)
      int regno;
 {
   char *name;
+  int i;
+
+  i = read_register(regno);
 
 #ifdef LOG_FILE
   fprintf (log_file, "\nIn Store_register (regno=%d)\n", regno);
@@ -628,14 +638,12 @@ monitor_store_register (regno)
     name = get_reg_name (regno);
     if (STREQ(name, ""))
       return;
-    printf_monitor (ROMCMD(SET_REG), name);	/* send the command */
-    expect (name, 1);				/* then strip the leading garbage */
+    printf_monitor (ROMCMD(SET_REG), name, read_register(regno));
+    expect (name, 1);				/* strip the leading garbage */
     if (*ROMDELIM(SET_REG) != 0) {		/* if there's a delimiter */
       expect (ROMDELIM(SET_REG), 1);
-    }
-    
-    if (*ROMDELIM(SET_REG) != 0) {
-      printf_monitor ("%s%s\n",read_register(regno), CMD_END);
+      get_hex_word(1);
+      printf_monitor ("%d%s\n", i, CMD_END);
     }
     expect_prompt (1);
   }
@@ -668,8 +676,10 @@ monitor_files_info ()
 	  dev_name, baudrate);
 }
 
-/* Copy LEN bytes of data from debugger memory at MYADDR
-   to inferior's memory at MEMADDR.  Returns length moved.  */
+/*
+ * monitor_write_inferior_memory -- Copy LEN bytes of data from debugger
+ *	memory at MYADDR to inferior's memory at MEMADDR.  Returns length moved.
+ */
 int
 monitor_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
@@ -683,23 +693,25 @@ monitor_write_inferior_memory (memaddr, myaddr, len)
   fprintf (log_file, "\nIn Write_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
 #endif
 
-#define MEM_PROMPT ""				/* FIXME, bogus */
-  for (i = 0; i < len; i++)
-    {
-      printf_monitor (SET_MEM, memaddr + i);
-      expect (sprintf (buf, MEM_PROMPT, memaddr + i), 1); 
+  if (sr_get_debug() > 0)
+    printf ("\nTrying to set 0x%x to 0x%x\n", memaddr, myaddr);
+
+  for (i = 0; i < len; i++) {
+    printf_monitor (ROMCMD(SET_MEM), memaddr + i, myaddr[i] );
+    if (*ROMDELIM(SET_MEM) != 0) {		/* if there's a delimiter */
+      expect (ROMDELIM(SET_MEM), 1);
       expect (CMD_DELIM);
       printf_monitor ("%x", myaddr[i]);
-      if (sr_get_debug())
-	printf ("\nSet 0x%x to 0x%x\n", memaddr + i, myaddr[i]);
-      if (CMD_END)
-	{
-/***	  expect (sprintf (buf, MEM_PROMPT, memaddr + i +1), 1); 	  
-	  expect (CMD_DELIM); ***/
-	  printf_monitor (CMD_END);
-	}
-      expect_prompt (1);
     }
+/***    printf_monitor ("%x", myaddr[i]); ***/
+    if (sr_get_debug() > 1)
+      printf ("\nSet 0x%x to 0x%x\n", memaddr + i, myaddr[i]);
+    if (*ROMDELIM(SET_MEM) != 0) {
+      expect (CMD_DELIM);
+      printf_monitor (CMD_END);
+    }
+    expect_prompt (1);
+  }
   return len;
 }
 
@@ -835,18 +847,21 @@ monitor_insert_breakpoint (addr, shadow)
   fprintf (log_file, "\nIn Insert_breakpoint (addr=%x)\n", addr);
 #endif
 
-  for (i = 0; i <= MAX_MONITOR_BREAKPOINTS; i++)
-    if (breakaddr[i] == 0)
-      {
-	breakaddr[i] = addr;
-	if (sr_get_debug())
-	  printf ("Breakpoint at %x\n", addr);
-	monitor_read_inferior_memory(addr, shadow, memory_breakpoint_size);
-	printf_monitor(SET_BREAK_CMD, addr);
-	expect_prompt(1);
-	return 0;
-      }
-  
+  if (sr_get_debug() > 4)
+    printf ("insert_breakpoint() addr = 0x%x\n", addr);
+
+  for (i = 0; i <= MAX_MONITOR_BREAKPOINTS; i++) {
+    if (breakaddr[i] == 0) {
+      breakaddr[i] = addr;
+      if (sr_get_debug() > 4)
+	printf ("Breakpoint at %x\n", addr);
+      monitor_read_inferior_memory(addr, shadow, memory_breakpoint_size);
+      printf_monitor(SET_BREAK_CMD, addr);
+      expect_prompt(1);
+      return 0;
+    }
+  }
+
   fprintf(stderr, "Too many breakpoints (> 16) for monitor\n");
   return 1;
 }

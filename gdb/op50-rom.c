@@ -111,7 +111,7 @@ struct monitor_ops op50n_cmds = {
   {
     "x %s\n",				/* get a register */
     "=",				/* delimiter between registers */
-    " ",				/* the result */
+    "",					/* the result */
   },
   "r 0\n",				/* download command */
   "#",					/* monitor command prompt */
