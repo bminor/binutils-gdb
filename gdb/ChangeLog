@@ -1,3 +1,21 @@
+2001-06-28  Jim Blandy  <jimb@redhat.com>
+
+	* d10v-tdep.c (10v_frame_chain_valid, d10v_use_struct_convention,
+	d10v_breakpoint_from_pc, d10v_register_byte,
+	d10v_register_raw_size, d10v_register_virtual_size,
+	d10v_register_virtual_type, d10v_register_convertible,
+	d10v_register_convert_to_virtual, d10v_register_convert_to_raw,
+	d10v_make_daddr, d10v_make_iaddr, d10v_daddr_p, d10v_iaddr_p,
+	d10v_convert_iaddr_to_raw, d10v_convert_daddr_to_raw,
+	d10v_store_struct_return, d10v_store_return_value,
+	d10v_extract_struct_value_address, d10v_frame_saved_pc,
+	d10v_saved_pc_after_call, d10v_pop_frame, d10v_skip_prologue,
+	d10v_frame_chain, d10v_frame_init_saved_regs,
+	d10v_init_extra_frame_info, d10v_read_pc, d10v_write_pc,
+	d10v_read_sp, d10v_write_sp, d10v_write_fp, d10v_read_fp,
+	d10v_push_return_address, d10v_push_arguments,
+	d10v_extract_return_value): Make these functions static.
+
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	From Fernando Nasser:

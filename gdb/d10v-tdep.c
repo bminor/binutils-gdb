@@ -96,11 +96,11 @@ static void d10v_eva_get_trace_data (void);
 static int prologue_find_regs (unsigned short op, struct frame_info *fi,
 			       CORE_ADDR addr);
 
-extern void d10v_frame_init_saved_regs (struct frame_info *);
+static void d10v_frame_init_saved_regs (struct frame_info *);
 
 static void do_d10v_pop_frame (struct frame_info *fi);
 
-int
+static int
 d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
   return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
@@ -119,14 +119,14 @@ d10v_stack_align (CORE_ADDR len)
    The d10v returns anything less than 8 bytes in size in
    registers. */
 
-int
+static int
 d10v_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 8);
 }
 
 
-unsigned char *
+static unsigned char *
 d10v_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =
@@ -276,7 +276,7 @@ d10v_ts3_register_sim_regno (int nr)
 /* Index within `registers' of the first byte of the space for
    register REG_NR.  */
 
-int
+static int
 d10v_register_byte (int reg_nr)
 {
   if (reg_nr < A0_REGNUM)
@@ -293,7 +293,7 @@ d10v_register_byte (int reg_nr)
 /* Number of bytes of storage in the actual machine representation for
    register REG_NR.  */
 
-int
+static int
 d10v_register_raw_size (int reg_nr)
 {
   if (reg_nr < A0_REGNUM)
@@ -307,7 +307,7 @@ d10v_register_raw_size (int reg_nr)
 /* Number of bytes of storage in the program's representation
    for register N.  */
 
-int
+static int
 d10v_register_virtual_size (int reg_nr)
 {
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg_nr));
@@ -316,7 +316,7 @@ d10v_register_virtual_size (int reg_nr)
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-struct type *
+static struct type *
 d10v_register_virtual_type (int reg_nr)
 {
   if (reg_nr >= A0_REGNUM
@@ -330,13 +330,13 @@ d10v_register_virtual_type (int reg_nr)
 }
 
 /* convert $pc and $sp to/from virtual addresses */
-int
+static int
 d10v_register_convertible (int nr)
 {
   return ((nr) == PC_REGNUM || (nr) == SP_REGNUM);
 }
 
-void
+static void
 d10v_register_convert_to_virtual (int regnum, struct type *type, char *from,
 				  char *to)
 {
@@ -348,7 +348,7 @@ d10v_register_convert_to_virtual (int regnum, struct type *type, char *from,
   store_unsigned_integer (to, TYPE_LENGTH (type), x);
 }
 
-void
+static void
 d10v_register_convert_to_raw (struct type *type, int regnum, char *from,
 			      char *to)
 {
@@ -360,38 +360,38 @@ d10v_register_convert_to_raw (struct type *type, int regnum, char *from,
 }
 
 
-CORE_ADDR
+static CORE_ADDR
 d10v_make_daddr (CORE_ADDR x)
 {
   return ((x) | DMEM_START);
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_make_iaddr (CORE_ADDR x)
 {
   return (((x) << 2) | IMEM_START);
 }
 
-int
+static int
 d10v_daddr_p (CORE_ADDR x)
 {
   return (((x) & 0x3000000) == DMEM_START);
 }
 
-int
+static int
 d10v_iaddr_p (CORE_ADDR x)
 {
   return (((x) & 0x3000000) == IMEM_START);
 }
 
 
-CORE_ADDR
+static CORE_ADDR
 d10v_convert_iaddr_to_raw (CORE_ADDR x)
 {
   return (((x) >> 2) & 0xffff);
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_convert_daddr_to_raw (CORE_ADDR x)
 {
   return ((x) & 0xffff);
@@ -403,7 +403,7 @@ d10v_convert_daddr_to_raw (CORE_ADDR x)
    We store structs through a pointer passed in the first Argument
    register. */
 
-void
+static void
 d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (ARG1_REGNUM, (addr));
@@ -414,7 +414,7 @@ d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 
    Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
 
-void
+static void
 d10v_store_return_value (struct type *type, char *valbuf)
 {
   write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
@@ -426,7 +426,7 @@ d10v_store_return_value (struct type *type, char *valbuf)
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-CORE_ADDR
+static CORE_ADDR
 d10v_extract_struct_value_address (char *regbuf)
 {
   return (extract_address ((regbuf) + REGISTER_BYTE (ARG1_REGNUM),
@@ -434,7 +434,7 @@ d10v_extract_struct_value_address (char *regbuf)
 	  | DMEM_START);
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
   return ((frame)->extra_info->return_pc);
@@ -444,7 +444,7 @@ d10v_frame_saved_pc (struct frame_info *frame)
    use frame->return_pc beause that is determined by reading R13 off
    the stack and that may not be written yet. */
 
-CORE_ADDR
+static CORE_ADDR
 d10v_saved_pc_after_call (struct frame_info *frame)
 {
   return ((read_register (LR_REGNUM) << 2)
@@ -454,7 +454,7 @@ d10v_saved_pc_after_call (struct frame_info *frame)
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
-void
+static void
 d10v_pop_frame (void)
 {
   generic_pop_current_frame (do_d10v_pop_frame);
@@ -533,7 +533,7 @@ check_prologue (unsigned short op)
   return 0;
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_skip_prologue (CORE_ADDR pc)
 {
   unsigned long op;
@@ -601,7 +601,7 @@ d10v_skip_prologue (CORE_ADDR pc)
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
  */
 
-CORE_ADDR
+static CORE_ADDR
 d10v_frame_chain (struct frame_info *fi)
 {
   d10v_frame_init_saved_regs (fi);
@@ -700,7 +700,7 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
    in the stack frame.  sp is even more special: the address we return
    for it IS the sp for the next frame. */
 
-void
+static void
 d10v_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR fp, pc;
@@ -801,7 +801,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
     }
 }
 
-void
+static void
 d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   fi->extra_info = (struct frame_extra_info *)
@@ -884,7 +884,7 @@ show_regs (char *args, int from_tty)
   printf_filtered ("\n");
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_read_pc (ptid_t ptid)
 {
   ptid_t save_ptid;
@@ -899,7 +899,7 @@ d10v_read_pc (ptid_t ptid)
   return retval;
 }
 
-void
+static void
 d10v_write_pc (CORE_ADDR val, ptid_t ptid)
 {
   ptid_t save_ptid;
@@ -910,25 +910,25 @@ d10v_write_pc (CORE_ADDR val, ptid_t ptid)
   inferior_ptid = save_ptid;
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_read_sp (void)
 {
   return (D10V_MAKE_DADDR (read_register (SP_REGNUM)));
 }
 
-void
+static void
 d10v_write_sp (CORE_ADDR val)
 {
   write_register (SP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
 }
 
-void
+static void
 d10v_write_fp (CORE_ADDR val)
 {
   write_register (FP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_read_fp (void)
 {
   return (D10V_MAKE_DADDR (read_register (FP_REGNUM)));
@@ -938,7 +938,7 @@ d10v_read_fp (void)
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
-CORE_ADDR
+static CORE_ADDR
 d10v_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (LR_REGNUM, D10V_CONVERT_IADDR_TO_RAW (CALL_DUMMY_ADDRESS ()));
@@ -982,7 +982,7 @@ pop_stack_item (struct stack_item *si)
 }
 
 
-CORE_ADDR
+static CORE_ADDR
 d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
@@ -1079,7 +1079,7 @@ d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */
 
-void
+static void
 d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
 			   char *valbuf)
 {
