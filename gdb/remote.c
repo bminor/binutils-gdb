@@ -533,8 +533,15 @@ remote_wait (status)
 	    {
 	      struct section_offsets *offs;
 
+	      /* FIXME: This code assumes gdb-stabs.h is being used;
+		 it's broken for xcoff, dwarf, sdb-coff, etc.  But
+		 there is no simple canonical representation for this
+		 stuff.  (Just what does "text" as seen by the stub
+		 mean, anyway?).  */
+
 	      /* FIXME: Why don't the various symfile_offsets routines
-		 in the sym_fns vectors set this?  */
+		 in the sym_fns vectors set this?
+		 (no good reason -kingdon).  */
 	      if (symfile_objfile->num_sections == 0)
 		symfile_objfile->num_sections = SECT_OFF_MAX;
 
