@@ -30,6 +30,10 @@
 #define NOP_OPCODE 0x00
 #endif
 
+#ifndef TC_ADJUST_RELOC_COUNT
+#define TC_ADJUST_RELOC_COUNT(FIXP,COUNT)
+#endif
+
 #ifndef TC_FORCE_RELOCATION
 #define TC_FORCE_RELOCATION(FIXP) 0
 #endif
@@ -651,8 +655,9 @@ write_relocs (abfd, sec, xxx)
 	  reloc->addend += reloc->address;
 	}
       /* Pass bogus address so that when bfd_perform_relocation adds
-	 `address' back in, it'll come up with `data', which is where
-	 we want it to operate.  */
+	 `reloc->address' back in, it'll come up with `data', which is where
+	 we want it to operate.  We can't just do it by fudging reloc->address,
+	 since that might be used in the calculations(?).  */
       s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
 				  sec, stdoutput);
       switch (s)
@@ -1812,292 +1817,307 @@ fixup_segment (fixP, this_segment_type)
      register fixS *fixP;
      segT this_segment_type;	/* N_TYPE bits for segment. */
 {
-  register long seg_reloc_count;
-  register symbolS *add_symbolP;
-  register symbolS *sub_symbolP;
+  long seg_reloc_count = 0;
+  symbolS *add_symbolP;
+  symbolS *sub_symbolP;
   valueT add_number;
-  register int size;
-  register char *place;
-  register long where;
-  register char pcrel;
-  register fragS *fragP;
-  register segT add_symbol_segment = absolute_section;
+  int size;
+  char *place;
+  long where;
+  char pcrel;
+  fragS *fragP;
+  segT add_symbol_segment = absolute_section;
+  
+  /* If the linker is doing the relaxing, we must not do any fixups.
 
-  seg_reloc_count = 0;
-  /* If the linker is doing the relaxing, we must not do any fixups.  */
-  /* Well, strictly speaking that's not true -- we could do any that
-     are PC-relative and don't cross regions that could change size.
-     And for the i960 (the only machine for which we've got a relaxing
-     linker right now), we might be able to turn callx/callj into bal
-     in cases where we know the maximum displacement.  */
+     Well, strictly speaking that's not true -- we could do any that are
+     PC-relative and don't cross regions that could change size.  And for the
+     i960 (the only machine for which we've got a relaxing linker right now),
+     we might be able to turn callx/callj into bal anyways in cases where we
+     know the maximum displacement.  */
   if (linkrelax)
-    for (; fixP; fixP = fixP->fx_next)
-      seg_reloc_count++;
-  else
-    for (; fixP; fixP = fixP->fx_next)
-      {
-	fragP = fixP->fx_frag;
-	know (fragP);
-	where = fixP->fx_where;
-	place = fragP->fr_literal + where;
-	size = fixP->fx_size;
-	add_symbolP = fixP->fx_addsy;
-#ifdef TC_I960
-	if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
-	  {
-	    /* Relocation should be done via the associated 'bal'
-	       entry point symbol. */
+    {
+      for (; fixP; fixP = fixP->fx_next)
+	seg_reloc_count++;
+      TC_ADJUST_RELOC_COUNT (fixP, seg_reloc_count);
+      return seg_reloc_count;
+    }
 
-	    if (!TC_S_IS_BALNAME (tc_get_bal_of_call (add_symbolP)))
-	      {
-		as_bad ("No 'bal' entry point for leafproc %s",
-			S_GET_NAME (add_symbolP));
-		continue;
-	      }
-	    fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
-	  }
+  for (; fixP; fixP = fixP->fx_next)
+    {
+      fragP = fixP->fx_frag;
+      know (fragP);
+      where = fixP->fx_where;
+      place = fragP->fr_literal + where;
+      size = fixP->fx_size;
+      add_symbolP = fixP->fx_addsy;
+#ifdef TC_VALIDATE_FIX
+      TC_VALIDATE_FIX (fixP, this_segment_type, skip);
 #endif
-	sub_symbolP = fixP->fx_subsy;
-	add_number = fixP->fx_offset;
-	pcrel = fixP->fx_pcrel;
-
-	if (add_symbolP)
-	  add_symbol_segment = S_GET_SEGMENT (add_symbolP);
-
-	if (sub_symbolP)
-	  {
-	    if (!add_symbolP)
-	      {
-		/* Its just -sym */
-		/* @@ Should try converting to pcrel ref to fixed addr.  */
-		if (S_GET_SEGMENT (sub_symbolP) != absolute_section)
-		  as_bad ("Negative of non-absolute symbol %s",
-			  S_GET_NAME (sub_symbolP));
-
+      sub_symbolP = fixP->fx_subsy;
+      add_number = fixP->fx_offset;
+      pcrel = fixP->fx_pcrel;
+      
+      if (add_symbolP)
+	add_symbol_segment = S_GET_SEGMENT (add_symbolP);
+      
+      if (sub_symbolP)
+	{
+	  if (!add_symbolP)
+	    {
+	      /* Its just -sym */
+	      if (S_GET_SEGMENT (sub_symbolP) == absolute_section)
 		add_number -= S_GET_VALUE (sub_symbolP);
-	      }
-	    else if ((S_GET_SEGMENT (sub_symbolP) == add_symbol_segment)
-		     && (SEG_NORMAL (add_symbol_segment)
-			 || (add_symbol_segment == absolute_section)))
-	      {
-		/* Difference of 2 symbols from same segment.
-		   Can't make difference of 2 undefineds: 'value' means
-		   something different for N_UNDF. */
+	      else if (pcrel
+		       && S_GET_SEGMENT (sub_symbolP) == this_segment_type)
+		{
+		  /* Should try converting to a constant.  */
+		  goto bad_sub_reloc;
+		}
+	      else
+	      bad_sub_reloc:
+		as_bad ("Negative of non-absolute symbol %s",
+			S_GET_NAME (sub_symbolP));
+	    }
+	  else if ((S_GET_SEGMENT (sub_symbolP) == add_symbol_segment)
+		   && (SEG_NORMAL (add_symbol_segment)
+		       || (add_symbol_segment == absolute_section)))
+	    {
+	      /* Difference of 2 symbols from same segment.
+		 Can't make difference of 2 undefineds: 'value' means
+		 something different for N_UNDF. */
 #ifdef TC_I960
-		/* Makes no sense to use the difference of 2 arbitrary symbols
-		   as the target of a call instruction.  */
-		if (fixP->fx_tcbit)
-		  {
-		    as_bad ("callj to difference of 2 symbols");
-		  }
+	      /* Makes no sense to use the difference of 2 arbitrary symbols
+		 as the target of a call instruction.  */
+	      if (fixP->fx_tcbit)
+		as_bad ("callj to difference of 2 symbols");
 #endif /* TC_I960 */
-		add_number += S_GET_VALUE (add_symbolP) -
-		  S_GET_VALUE (sub_symbolP);
+	      add_number += S_GET_VALUE (add_symbolP) -
+		S_GET_VALUE (sub_symbolP);
 
-		add_symbolP = NULL;
+	      add_symbolP = NULL;
 
-		/* Let the target machine make the final determination
-		   as to whether or not a relocation will be needed to
-		   handle this fixup.  */
-		if (!TC_FORCE_RELOCATION (fixP))
-		  fixP->fx_addsy = NULL;
-	      }
-	    else
-	      {
-		/* Different segments in subtraction. */
-		know (!(S_IS_EXTERNAL (sub_symbolP)
-			&& (S_GET_SEGMENT (sub_symbolP) == absolute_section)));
+	      /* Let the target machine make the final determination
+		 as to whether or not a relocation will be needed to
+		 handle this fixup.  */
+	      if (!TC_FORCE_RELOCATION (fixP))
+		fixP->fx_addsy = NULL;
+	    }
+	  else
+	    {
+	      /* Different segments in subtraction. */
+	      know (!(S_IS_EXTERNAL (sub_symbolP)
+		      && (S_GET_SEGMENT (sub_symbolP) == absolute_section)));
 
-		if ((S_GET_SEGMENT (sub_symbolP) == absolute_section))
-		  {
-		    add_number -= S_GET_VALUE (sub_symbolP);
-		  }
+	      if ((S_GET_SEGMENT (sub_symbolP) == absolute_section))
+		add_number -= S_GET_VALUE (sub_symbolP);
+
 #ifdef DIFF_EXPR_OK
-		else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type
-#if 0
-			 /* Do this even if it's already described as
-			    pc-relative.  For example, on the m68k, an
-			    operand of "pc@(foo-.-2)" should address "foo"
-			    in a pc-relative mode.  */
-			 && pcrel
+	      else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type
+#if 0 /* Do this even if it's already described as pc-relative.  For example,
+	 on the m68k, an operand of "pc@(foo-.-2)" should address "foo" in a
+	 pc-relative mode.  */
+		       && pcrel
 #endif
-			 )
-		  {
-		    /* Make it pc-relative.  */
-		    add_number += (md_pcrel_from (fixP)
-				   - S_GET_VALUE (sub_symbolP));
-		    pcrel = 1;
-		    fixP->fx_pcrel = 1;
-		    sub_symbolP = 0;
-		    fixP->fx_subsy = 0;
-		  }
+		       )
+		{
+		  /* Make it pc-relative.  */
+		  add_number += (md_pcrel_from (fixP)
+				 - S_GET_VALUE (sub_symbolP));
+		  pcrel = 1;
+		  fixP->fx_pcrel = 1;
+		  sub_symbolP = 0;
+		  fixP->fx_subsy = 0;
+		}
 #endif
-		else
-		  {
-		    char buf[50];
-		    sprint_value (buf, fragP->fr_address + where);
-		    as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %s.",
-			    segment_name (S_GET_SEGMENT (sub_symbolP)),
-			    S_GET_NAME (sub_symbolP), buf);
-		  }
-	      }
-	  }
+	      else
+		{
+		  char buf[50];
+		  sprint_value (buf, fragP->fr_address + where);
+		  as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %s.",
+			  segment_name (S_GET_SEGMENT (sub_symbolP)),
+			  S_GET_NAME (sub_symbolP), buf);
+		}
+	    }
+	}
 
-	if (add_symbolP)
-	  {
-	    if (add_symbol_segment == this_segment_type && pcrel)
-	      {
-		/*
-		 * This fixup was made when the symbol's segment was
-		 * SEG_UNKNOWN, but it is now in the local segment.
-		 * So we know how to do the address without relocation.
-		 */
+      if (add_symbolP)
+	{
+	  if (add_symbol_segment == this_segment_type && pcrel)
+	    {
+	      /*
+	       * This fixup was made when the symbol's segment was
+	       * SEG_UNKNOWN, but it is now in the local segment.
+	       * So we know how to do the address without relocation.
+	       */
 #ifdef TC_I960
-		/* reloc_callj() may replace a 'call' with a 'calls' or a
-		   'bal', in which cases it modifies *fixP as appropriate.
-		   In the case of a 'calls', no further work is required,
-		   and *fixP has been set up to make the rest of the code
-		   below a no-op. */
-		reloc_callj (fixP);
+	      /* reloc_callj() may replace a 'call' with a 'calls' or a
+		 'bal', in which cases it modifies *fixP as appropriate.
+		 In the case of a 'calls', no further work is required,
+		 and *fixP has been set up to make the rest of the code
+		 below a no-op. */
+	      reloc_callj (fixP);
 #endif /* TC_I960 */
 
-		add_number += S_GET_VALUE (add_symbolP);
-		add_number -= md_pcrel_from (fixP);
-		pcrel = 0;	/* Lie. Don't want further pcrel processing. */
-
-		/* Let the target machine make the final determination
-		   as to whether or not a relocation will be needed to
-		   handle this fixup.  */
-		if (!TC_FORCE_RELOCATION (fixP))
-		  fixP->fx_addsy = NULL;
-	      }
-	    else
-	      {
-		if (add_symbol_segment == absolute_section)
-		  {
+	      add_number += S_GET_VALUE (add_symbolP);
+	      add_number -= md_pcrel_from (fixP);
+	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
+	      
+	      /* Let the target machine make the final determination
+		 as to whether or not a relocation will be needed to
+		 handle this fixup.  */
+	      if (!TC_FORCE_RELOCATION (fixP))
+		fixP->fx_addsy = NULL;
+	    }
+	  else
+	    {
+	      if (add_symbol_segment == absolute_section)
+		{
 #ifdef TC_I960
-		    /* See comment about reloc_callj() above.  */
-		    reloc_callj (fixP);
+		  /* See comment about reloc_callj() above.  */
+		  reloc_callj (fixP);
 #endif /* TC_I960 */
-		    add_number += S_GET_VALUE (add_symbolP);
+		  add_number += S_GET_VALUE (add_symbolP);
 
-		    /* Let the target machine make the final determination
-		       as to whether or not a relocation will be needed to
-		       handle this fixup.  */
-		    if (!TC_FORCE_RELOCATION (fixP))
-		      fixP->fx_addsy = NULL;
-		    add_symbolP = NULL;
-		  }
-		else if (add_symbol_segment == undefined_section
+		  /* Let the target machine make the final determination
+		     as to whether or not a relocation will be needed to
+		     handle this fixup.  */
+		  if (!TC_FORCE_RELOCATION (fixP))
+		    fixP->fx_addsy = NULL;
+		  add_symbolP = NULL;
+		}
+	      else if (add_symbol_segment == undefined_section
 #ifdef BFD_ASSEMBLER
-			 || bfd_is_com_section (add_symbol_segment)
+		       || bfd_is_com_section (add_symbol_segment)
 #endif
-			 )
-		  {
+		       )
+		{
 #ifdef TC_I960
-		    if ((int) fixP->fx_bit_fixP == 13)
-		      {
-			/* This is a COBR instruction.  They have only a
-			 * 13-bit displacement and are only to be used
-			 * for local branches: flag as error, don't generate
-			 * relocation.
-			 */
-			as_bad ("can't use COBR format with external label");
-
-			/* Let the target machine make the final determination
-			   as to whether or not a relocation will be needed to
-			   handle this fixup.  */
-			if (!TC_FORCE_RELOCATION (fixP))
-			  fixP->fx_addsy = NULL;
-			continue;
-		      }		/* COBR */
+		  if ((int) fixP->fx_bit_fixP == 13)
+		    {
+		      /* This is a COBR instruction.  They have only a
+		       * 13-bit displacement and are only to be used
+		       * for local branches: flag as error, don't generate
+		       * relocation.
+		       */
+		      as_bad ("can't use COBR format with external label");
+		      
+		      /* Let the target machine make the final determination
+			 as to whether or not a relocation will be needed to
+			 handle this fixup.  */
+		      if (!TC_FORCE_RELOCATION (fixP))
+			fixP->fx_addsy = NULL;
+		      continue;
+		    }		/* COBR */
 #endif /* TC_I960 */
-
+		  
 #ifdef OBJ_COFF
 #ifdef TE_I386AIX
-		    if (S_IS_COMMON (add_symbolP))
-		      add_number += S_GET_VALUE (add_symbolP);
+		  if (S_IS_COMMON (add_symbolP))
+		    add_number += S_GET_VALUE (add_symbolP);
 #endif /* TE_I386AIX */
 #endif /* OBJ_COFF */
-		    ++seg_reloc_count;
-		  }
-		else
-		  {
-		    seg_reloc_count++;
-		    add_number += S_GET_VALUE (add_symbolP);
-		  }
-	      }
-	  }
+		  ++seg_reloc_count;
+		}
+	      else
+		{
+		  seg_reloc_count++;
+		  add_number += S_GET_VALUE (add_symbolP);
+		}
+	    }
+	}
 
-	if (pcrel)
-	  {
-	    add_number -= md_pcrel_from (fixP);
-	    if (add_symbolP == 0)
-	      {
-		fixP->fx_addsy = &abs_symbol;
-		++seg_reloc_count;
-	      }			/* if there's an add_symbol */
-	  }			/* if pcrel */
+      if (pcrel)
+	{
+	  add_number -= md_pcrel_from (fixP);
+	  if (add_symbolP == 0)
+	    {
+	      fixP->fx_addsy = &abs_symbol;
+	      ++seg_reloc_count;
+	    }			/* if there's an add_symbol */
+	}			/* if pcrel */
 
-	if (!fixP->fx_bit_fixP && size > 0)
-	  {
-	    valueT mask = 0;
-	    /* set all bits to one */
-	    mask--;
-	    /* Technically speaking, combining these produces an
-	       undefined result if size is sizeof (valueT), though I
-	       think these two half-way operations should both be
-	       defined.  */
-	    mask <<= size * 4;
-	    mask <<= size * 4;
-	    if ((add_number & mask) != 0
-		&& (add_number & mask) != mask)
-	      {
-		char buf[50], buf2[50];
-		sprint_value (buf, fragP->fr_address + where);
-		if (add_number > 1000)
-		  sprint_value (buf2, add_number);
-		else
-		  sprintf (buf2, "%ld", (long) add_number);
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      "Value of %s too large for field of %d bytes at %s",
-			      buf2, size, buf);
-	      }			/* generic error checking */
-#ifdef WARN_SIGNED_OVERFLOW_WORD
-	    /* Warn if a .word value is too large when treated as a signed
-	       number.  We already know it is not too negative.  This is to
-	       catch over-large switches generated by gcc on the 68k.  */
-	    if (!flagseen['J']
-		&& size == 2
-		&& add_number > 0x7fff)
+      if (!fixP->fx_bit_fixP && size > 0)
+	{
+	  valueT mask = 0;
+	  /* set all bits to one */
+	  mask--;
+	  /* Technically speaking, combining these produces an
+	     undefined result if size is sizeof (valueT), though I
+	     think these two half-way operations should both be
+	     defined.  */
+	  mask <<= size * 4;
+	  mask <<= size * 4;
+	  if ((add_number & mask) != 0
+	      && (add_number & mask) != mask)
+	    {
+	      char buf[50], buf2[50];
+	      sprint_value (buf, fragP->fr_address + where);
+	      if (add_number > 1000)
+		sprint_value (buf2, add_number);
+	      else
+		sprintf (buf2, "%ld", (long) add_number);
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "Signed .word overflow; switch may be too large; %ld at 0x%lx",
-			    (long) add_number,
-			    (unsigned long) (fragP->fr_address + where));
+			    "Value of %s too large for field of %d bytes at %s",
+			    buf2, size, buf);
+	    }			/* generic error checking */
+#ifdef WARN_SIGNED_OVERFLOW_WORD
+	  /* Warn if a .word value is too large when treated as a signed
+	     number.  We already know it is not too negative.  This is to
+	     catch over-large switches generated by gcc on the 68k.  */
+	  if (!flagseen['J']
+	      && size == 2
+	      && add_number > 0x7fff)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  "Signed .word overflow; switch may be too large; %ld at 0x%lx",
+			  (long) add_number,
+			  (unsigned long) (fragP->fr_address + where));
 #endif
-	  }			/* not a bit fix */
+	}			/* not a bit fix */
 
 #ifdef BFD_ASSEMBLER
-	md_apply_fix (fixP, &add_number);
+      md_apply_fix (fixP, &add_number);
 #else
-	md_apply_fix (fixP, add_number);
+      md_apply_fix (fixP, add_number);
 #endif
-      }				/* For each fixS in this segment. */
+    skip:
+      ;
+    }				/* For each fixS in this segment. */
 
-#if defined (OBJ_COFF) && defined (TC_I960)
-  {
-    fixS *topP = fixP;
-
-    /* two relocs per callj under coff. */
-    for (fixP = topP; fixP; fixP = fixP->fx_next)
-      if (fixP->fx_tcbit && fixP->fx_addsy != 0)
-	++seg_reloc_count;
-  }
-#endif /* OBJ_COFF && TC_I960 */
-
-  return (seg_reloc_count);
+  TC_ADJUST_RELOC_COUNT (fixP, seg_reloc_count);
+  return seg_reloc_count;
 }
 
 #endif /* defined (BFD_ASSEMBLER) || !defined (BFD) */
+
+void
+number_to_chars_bigendian (buf, val, n)
+     char *buf;
+     valueT val;
+     int n;
+{
+  if (n > sizeof (val)|| n <= 0)
+    abort ();
+  while (n--)
+    {
+      buf[n] = val & 0xff;
+      val >>= 8;
+    }
+}
+
+void
+number_to_chars_littleendian (buf, val, n)
+     char *buf;
+     valueT val;
+     int n;
+{
+  if (n > sizeof (val) || n <= 0)
+    abort ();
+  while (n--)
+    {
+      *buf++ = val & 0xff;
+      val >>= 8;
+    }
+}
 
 /* end of write.c */
