@@ -2757,6 +2757,29 @@ step_into_function (struct execution_control_state *ecs)
       && ecs->sal.end < ecs->stop_func_end)
     ecs->stop_func_start = ecs->sal.end;
 
+  /* Architectures which require breakpoint adjustment might not be able
+     to place a breakpoint at the computed address.  If so, the test
+     ``ecs->stop_func_start == stop_pc'' will never succeed.  Adjust
+     ecs->stop_func_start to an address at which a breakpoint may be
+     legitimately placed.
+     
+     Note:  kevinb/2004-01-19:  On FR-V, if this adjustment is not
+     made, GDB will enter an infinite loop when stepping through
+     optimized code consisting of VLIW instructions which contain
+     subinstructions corresponding to different source lines.  On
+     FR-V, it's not permitted to place a breakpoint on any but the
+     first subinstruction of a VLIW instruction.  When a breakpoint is
+     set, GDB will adjust the breakpoint address to the beginning of
+     the VLIW instruction.  Thus, we need to make the corresponding
+     adjustment here when computing the stop address.  */
+     
+  if (gdbarch_adjust_breakpoint_address_p (current_gdbarch))
+    {
+      ecs->stop_func_start
+	= gdbarch_adjust_breakpoint_address (current_gdbarch,
+	                                     ecs->stop_func_start);
+    }
+
   if (ecs->stop_func_start == stop_pc)
     {
       /* We are already there: stop now.  */
