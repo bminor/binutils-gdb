@@ -1,3 +1,25 @@
+2003-11-12  Michael Snyder  <msnyder@redhat.com>
+
+	* sh64-tdep.c: Coding standard and spelling comment fixes.
+	(sh64_extract_return_value): Replace deprecated_store_floating
+	with store_typed_floating.
+	(sh_sh64_register_convert_to_raw): Replace 
+	deprecated_store_floating with store_typed_floating.
+	(sh_sh64_register_virtual_type): Convert to sh64_register_type.
+	(sh64_frame_chain, sh64_get_saved_pr, sh64_get_saved_register,
+	sh64_nofp_frame_init_saved_regs, sh64_push_arguments,
+	sh64_extract_struct_value_address, sh64_pop_frame, 
+	sh64_extract_return_value, sh64_store_return_value,
+	sh_sh64_register_convert_to_virtual, sh64_pseudo_register_read, 
+	sh_sh64_register_convert_to_raw, sh_pseudo_register_write):
+	Replace DEPRECATED_REGISTER_RAW_SIZE with register_size.
+	Replace DEPRECATED_REGISTER_VIRTUAL_TYPE with register_type.
+	(sh64_gdbarch_init): Don't set deprecated_register_bytes,
+	deprecated_register_virtual_type, deprecated_register_raw_size,
+	deprecated_max_register_raw_size, or 
+	deprecated_max_register_virtual_size.  Instead, just set
+	gdbarch_register_type.
+
 2003-11-12  Daniel Jacobowitz <drow@mvista.com>
 
 	* dwarf2read.c (struct dwarf2_cu): New type.
@@ -1759,7 +1781,7 @@
 2003-09-29  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_REGISTER_VIRTUAL_TYPE): Rename
-	DEPRECATED_REGISTER_VIRTUAL_TYPE.
+	REGISTER_VIRTUAL_TYPE.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* arch-utils.c,	hppa-tdep.c, regcache.c, regcache.h: Update.
 	* sh64-tdep.c, sparc-tdep.c: Update.
@@ -8150,7 +8172,7 @@ Fri Aug  8 00:28:38 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 	for 32-bit targets.  Set extract_return_value and
 	store_return_value instead.
 	* config/sparc/tm-sparc.h (DEPRECATED_STORE_RETURN_VALUE,
-	DEPRECTAED_EXTRACT_RETURN_VALUE,
+	DEPRECATED_EXTRACT_RETURN_VALUE,
 	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Don't define these.
 	(STORE_RETURN_VALUE, EXTRACT_RETURN_VALUE,
 	EXTRACT_STRUCT_VALUE_ADDRESS): Define these instead.
