@@ -6049,9 +6049,9 @@ dwarf_attr_name (register unsigned attr)
       return "DW_AT_MIPS_loop_unroll_factor";
     case DW_AT_MIPS_software_pipeline_depth:
       return "DW_AT_MIPS_software_pipeline_depth";
+#endif
     case DW_AT_MIPS_linkage_name:
       return "DW_AT_MIPS_linkage_name";
-#endif
 
     case DW_AT_sf_names:
       return "DW_AT_sf_names";
