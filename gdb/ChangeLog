@@ -1,3 +1,16 @@
+Fri Jun 12 14:22:55 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* configure.in (LIBS): Add -lw to the list of libraries if needed.
+
+Thu Jun 11 15:05:10 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* btowc.c: Removed.
+	* configure.in: Don't see if we need to replace btowc().
+	* Makefile.in: Don't include LIBOBJS.
+	* configure: Regenerated.
+	* gnu-regex.c (regex_compile): Only support i18n [:foo:] if
+	we have btowc().
+
 Wed Jun 10 15:39:14 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* c-exp.y:  Fix problems with parsing "'foo.bar'::func".  Some languages

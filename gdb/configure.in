@@ -475,6 +475,9 @@ AC_ARG_WITH(sim-funit,
 esac])dnl
 # end-sanitize-sky
 
+dnl Solaris puts wctype in /usr/lib/libw.a
+AC_CHECK_LIB(w, wctype, [LIBS="$LIBS -lw"])
+
 AC_SUBST(ENABLE_CFLAGS)
 
 AC_SUBST(CONFIG_OBS)
