@@ -1,3 +1,9 @@
+2003-05-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Remove
+	symbol_used_in_reloc_p check.
+	(md_apply_fix3): Remove check for howto->pcrel_offset.
+
 2003-05-03  H.J. Lu <hjl@gnu.org>
 
 	* config/obj-elf.c (obj_elf_parse_section_letters): Make it a
