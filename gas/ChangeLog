@@ -1,3 +1,11 @@
+Wed May  3 13:08:53 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+ 	* config/tc-hppa.c (md_apply_fix): Do nothing for an out of range
+	PC relative call since those only occur in cases where the linker
+	can fix them up.
+	(hppa_force_relocation): Force relocations for out of range PC
+	relative calls.
+
 Tue May  2 16:34:47 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* configure (hppa*-*-lites*): Handle just like hppa*-*-*elf*.

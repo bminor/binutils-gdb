@@ -236,9 +236,9 @@ struct pa_it
    handles the L/R notation and returns the correct
    value to put into the instruction register field.
    The correct value to put into the instruction is
-   encoded in the structure 'pa_89_fp_reg_struct'.  */
+   encoded in the structure 'pa_11_fp_reg_struct'.  */
 
-struct pa_89_fp_reg_struct
+struct pa_11_fp_reg_struct
   {
     /* The register number.  */
     char number_part;
@@ -499,9 +499,9 @@ static void pa_spnum PARAMS ((int));
 static void pa_subspace PARAMS ((int));
 static void pa_param PARAMS ((int));
 static void pa_undefine_label PARAMS ((void));
-static int need_89_opcode PARAMS ((struct pa_it *,
-				   struct pa_89_fp_reg_struct *));
-static int pa_parse_number PARAMS ((char **, struct pa_89_fp_reg_struct *));
+static int need_pa11_opcode PARAMS ((struct pa_it *,
+				     struct pa_11_fp_reg_struct *));
+static int pa_parse_number PARAMS ((char **, struct pa_11_fp_reg_struct *));
 static label_symbol_struct *pa_get_label PARAMS ((void));
 static sd_chain_struct *create_new_space PARAMS ((char *, int, int,
 						  int, int, int,
@@ -561,10 +561,6 @@ static struct call_info *last_call_info;
 
 /* The last call description (for actual calls).  */
 static struct call_desc last_call_desc;
-
-/* Relaxation isn't supported for the PA yet.  */
-const relax_typeS md_relax_table[] =
-{0};
 
 /* Jumps are always the same size -- one instruction.  */
 int md_short_jump_size = 4;
@@ -1265,6 +1261,10 @@ md_begin ()
   last_call_info = NULL;
   call_info_root = NULL;
 
+  /* Set the default machine type.  */
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 10))
+    as_warn ("could not set architecture and machine");
+
   /* Folding of text and data segments fails miserably on the PA.
      Warn user and disable "-R" option.  */
   if (flag_readonly_data_in_text)
@@ -1450,6 +1450,14 @@ pa_ip (str)
       bzero (&the_insn, sizeof (the_insn));
 
       the_insn.reloc = R_HPPA_NONE;
+
+      /* If this instruction is specific to a particular architecture,
+	 then set a new architecture.  */
+      if (bfd_get_mach (stdoutput) < insn->arch)
+	{
+	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
+	    as_warn ("could not update architecture and machine");
+	}
 
       /* Build the opcode, checking as we go to make
          sure that the operands match.  */
@@ -2298,7 +2306,7 @@ pa_ip (str)
 	    /* Handle L/R register halves like 't'.  */
 	    case 'v':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
@@ -2307,7 +2315,7 @@ pa_ip (str)
 		/* 0x30 opcodes are FP arithmetic operation opcodes
 		   and need to be turned into 0x38 opcodes.  This
 		   is not necessary for loads/stores.  */
-		if (need_89_opcode (&the_insn, &result)
+		if (need_pa11_opcode (&the_insn, &result)
 		    && ((opcode & 0xfc000000) == 0x30000000))
 		  opcode |= 1 << 27;
 
@@ -2317,12 +2325,12 @@ pa_ip (str)
 	    /* Handle L/R register halves like 'b'.  */
 	    case 'E':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		opcode |= result.number_part << 21;
-		if (need_89_opcode (&the_insn, &result))
+		if (need_pa11_opcode (&the_insn, &result))
 		  {
 		    opcode |= (result.l_r_select & 1) << 7;
 		    opcode |= 1 << 27;
@@ -2333,12 +2341,12 @@ pa_ip (str)
 	    /* Handle L/R register halves like 'x'.  */
 	    case 'X':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		opcode |= (result.number_part & 0x1f) << 16;
-		if (need_89_opcode (&the_insn, &result))
+		if (need_pa11_opcode (&the_insn, &result))
 		  {
 		    opcode |= (result.l_r_select & 1) << 12;
 		    opcode |= 1 << 27;
@@ -2349,7 +2357,7 @@ pa_ip (str)
 	    /* Handle a 5 bit register field at 10.  */
 	    case '4':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
@@ -2364,7 +2372,7 @@ pa_ip (str)
 	    /* Handle a 5 bit register field at 15.  */
 	    case '6':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
@@ -2379,7 +2387,7 @@ pa_ip (str)
 	    /* Handle a 5 bit register field at 31.  */
 	    case '7':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
@@ -2394,7 +2402,7 @@ pa_ip (str)
 	    /* Handle a 5 bit register field at 20.  */
 	    case '8':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
@@ -2409,7 +2417,7 @@ pa_ip (str)
 	    /* Handle a 5 bit register field at 25.  */
 	    case '9':
 	      {
-		struct pa_89_fp_reg_struct result;
+		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
@@ -2873,20 +2881,21 @@ md_apply_fix (fixP, valp)
 	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
 
       /* Handle pc-relative exceptions from above.  */
-#define stub_needed(CALLER, CALLEE) \
+#define arg_reloc_stub_needed(CALLER, CALLEE) \
   ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
       if ((fmt == 12 || fmt == 17)
 	  && fixP->fx_addsy
 	  && fixP->fx_pcrel
-	  && !stub_needed (((obj_symbol_type *)
-			    fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
-			   hppa_fixP->fx_arg_reloc)
+	  && !arg_reloc_stub_needed (((obj_symbol_type *)
+				fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
+				    hppa_fixP->fx_arg_reloc)
+	  && (*valp > -262144 && *valp < 262143)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
 	      
 	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
-#undef stub_needed
+#undef arg_reloc_stub_needed
 	
       switch (fmt)
 	{
@@ -3009,7 +3018,7 @@ is_end_of_statement ()
 static int
 pa_parse_number (s, result)
      char **s;
-     struct pa_89_fp_reg_struct *result;
+     struct pa_11_fp_reg_struct *result;
 {
   int num;
   char *name;
@@ -3242,15 +3251,24 @@ reg_name_search (name)
 
 
 /* Return nonzero if the given INSN and L/R information will require
-   a new PA-89 opcode.  */
+   a new PA-1.1 opcode.  */
 
 static int
-need_89_opcode (insn, result)
+need_pa11_opcode (insn, result)
      struct pa_it *insn;
-     struct pa_89_fp_reg_struct *result;
+     struct pa_11_fp_reg_struct *result;
 {
   if (result->l_r_select == 1 && !(insn->fpof1 == DBL && insn->fpof2 == DBL))
-    return TRUE;
+    {
+      /* If this instruction is specific to a particular architecture,
+	 then set a new architecture.  */
+      if (bfd_get_mach (stdoutput) < pa11)
+	{
+	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, pa11))
+	    as_warn ("could not update architecture and machine");
+	}
+      return TRUE;
+    }
   else
     return FALSE;
 }
@@ -4248,7 +4266,17 @@ pa_code (unused)
    where <label> is optional and is a symbol whose address will be the start of
    a block of memory <length> bytes long. <length> must be an absolute
    expression.  <length> bytes will be allocated in the current space
-   and subspace.  */
+   and subspace.
+
+   Also note the label may not even be on the same line as the .comm.
+
+   This difference in syntax means the colon function will be called
+   on the symbol before we arrive in pa_comm.  colon will set a number
+   of attributes of the symbol that need to be fixed here.  In particular
+   the value, section pointer, fragment pointer, flags, etc.  What
+   a pain.
+
+   This also makes error detection all but impossible.  */
 
 static void
 pa_comm (unused)
@@ -4268,30 +4296,14 @@ pa_comm (unused)
 
   if (symbol)
     {
-      /* It is incorrect to check S_IS_DEFINED at this point as
-         the symbol will *always* be defined.  FIXME.  How to
-         correctly determine when this label really as been
-         defined before.  */
-      if (S_GET_VALUE (symbol))
-	{
-	  if (S_GET_VALUE (symbol) != size)
-	    {
-	      as_warn ("Length of .comm \"%s\" is already %ld. Not changed.",
-		       S_GET_NAME (symbol), S_GET_VALUE (symbol));
-	      return;
-	    }
-	}
-      else
-	{
-	  S_SET_VALUE (symbol, size);
-	  S_SET_SEGMENT (symbol, bfd_und_section_ptr);
-	  S_SET_EXTERNAL (symbol);
+      S_SET_VALUE (symbol, size);
+      S_SET_SEGMENT (symbol, bfd_und_section_ptr);
+      S_SET_EXTERNAL (symbol);
 
-	  /* colon() has already set the frag to the current location in the
-	     $BSS$ subspace; we need to reset the fragment to the zero address
-	     fragment.  */
-	  symbol->sy_frag = &zero_address_frag;
-	}
+      /* colon() has already set the frag to the current location in the
+         current subspace; we need to reset the fragment to the zero address
+         fragment.  We also need to reset the segment pointer.  */
+      symbol->sy_frag = &zero_address_frag;
     }
   demand_empty_rest_of_line ();
 }
@@ -6187,6 +6199,7 @@ hppa_force_relocation (fixp)
      fixS *fixp;
 {
   struct hppa_fix_struct *hppa_fixp;
+  unsigned int distance;
 
   hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
 #ifdef OBJ_SOM
@@ -6194,19 +6207,26 @@ hppa_force_relocation (fixp)
     return 1;
 #endif
 
-#define stub_needed(CALLER, CALLEE) \
+#define arg_reloc_stub_needed(CALLER, CALLEE) \
   ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
 
   /* It is necessary to force PC-relative calls/jumps to have a relocation
      entry if they're going to need either a argument relocation or long
      call stub.  FIXME.  Can't we need the same for absolute calls?  */
   if (fixp->fx_pcrel && fixp->fx_addsy
-      && (stub_needed (((obj_symbol_type *)
-			fixp->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
-		       hppa_fixp->fx_arg_reloc)))
-	return 1;
+      && (arg_reloc_stub_needed (((obj_symbol_type *)
+				  fixp->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
 
-#undef stub_needed
+				 hppa_fixp->fx_arg_reloc)))
+    return 1;
+  distance = (fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy)
+	      - md_pcrel_from (fixp));
+  /* Now check and see if we're going to need a long-branch stub.  */
+  if (fixp->fx_r_type == R_HPPA_PCREL_CALL
+      && (distance > 262143 || distance < -262144))
+    return 1;
+
+#undef arg_reloc_stub_needed
 
   /* No need (yet) to force another relocations to be emitted.  */
   return 0;
