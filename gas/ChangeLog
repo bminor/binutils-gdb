@@ -1,3 +1,7 @@
+2001-04-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (xr_registers): Added `pc'.
+
 2001-04-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in: Add h8500-*-coff and h8500-*-rtems targets.
