@@ -6,6 +6,9 @@ Tue Nov  2 18:04:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Tue Nov  2 15:07:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/ho-hpux.h: Do not include ho-sysv.h.  Instead include
+	standard hpux include files to pick up various function decls.
+
 	* config/ho-hppaosf.h: Delete _IO* macros.  They are defined in
 	stdio.h.  Delete bogus declaration of free.  Get path to
 	alloca-conf.h right.
