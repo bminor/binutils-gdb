@@ -90,26 +90,26 @@ struct type;
 
 #undef  CALL_DUMMY
 #define CALL_DUMMY {0}
-#undef  CALL_DUMMY_LENGTH
-#define CALL_DUMMY_LENGTH 0
+#undef  DEPRECATED_CALL_DUMMY_LENGTH
+#define DEPRECATED_CALL_DUMMY_LENGTH 0
 #undef  CALL_DUMMY_CALL_OFFSET
 #define CALL_DUMMY_CALL_OFFSET 0
-#undef  CALL_DUMMY_START_OFFSET
-#define CALL_DUMMY_START_OFFSET 0
-#undef  CALL_DUMMY_BREAKPOINT_OFFSET
-#define CALL_DUMMY_BREAKPOINT_OFFSET 0
+#undef  DEPRECATED_CALL_DUMMY_START_OFFSET
+#define DEPRECATED_CALL_DUMMY_START_OFFSET 0
+#undef  DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
+#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET 0
 #undef  CALL_DUMMY_LOCATION 
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 #undef  DEPRECATED_PC_IN_CALL_DUMMY
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
 #undef  DEPRECATED_CALL_DUMMY_STACK_ADJUST
 #define DEPRECATED_CALL_DUMMY_STACK_ADJUST 128
-#undef  SIZEOF_CALL_DUMMY_WORDS
-#define SIZEOF_CALL_DUMMY_WORDS 0
+#undef  DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
+#define DEPRECATED_SIZEOF_CALL_DUMMY_WORDS 0
 #undef  CALL_DUMMY_ADDRESS
 #define CALL_DUMMY_ADDRESS() entry_point_address()
-#undef  FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) 
+#undef  DEPRECATED_FIX_CALL_DUMMY
+#define DEPRECATED_FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) 
 #undef  DEPRECATED_PUSH_RETURN_ADDRESS
 #define DEPRECATED_PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
 extern CORE_ADDR sparc_at_entry_push_return_address (CORE_ADDR pc,
@@ -147,20 +147,20 @@ extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #define DEPRECATED_CALL_DUMMY_STACK_ADJUST 128
 
 /* Size of the call dummy in bytes. */
-#undef  CALL_DUMMY_LENGTH
-#define CALL_DUMMY_LENGTH 192
+#undef  DEPRECATED_CALL_DUMMY_LENGTH
+#define DEPRECATED_CALL_DUMMY_LENGTH 192
 
 /* Offset within CALL_DUMMY of the 'call' instruction. */
-#undef  CALL_DUMMY_START_OFFSET
-#define CALL_DUMMY_START_OFFSET 148
+#undef  DEPRECATED_CALL_DUMMY_START_OFFSET
+#define DEPRECATED_CALL_DUMMY_START_OFFSET 148
 
 /* Offset within CALL_DUMMY of the 'call' instruction. */
 #undef  CALL_DUMMY_CALL_OFFSET
-#define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + (5 * 4))
+#define CALL_DUMMY_CALL_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + (5 * 4))
 
 /* Offset within CALL_DUMMY of the 'ta 1' instruction. */
-#undef  CALL_DUMMY_BREAKPOINT_OFFSET
-#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (8 * 4))
+#undef  DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
+#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + (8 * 4))
 
 /* Call dummy will be located on the stack.  */
 #undef  CALL_DUMMY_LOCATION
@@ -169,15 +169,15 @@ extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 
 /* Insert the function address into the call dummy.  */
-#undef  FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+#undef  DEPRECATED_FIX_CALL_DUMMY
+#define DEPRECATED_FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
  sparc_fix_call_dummy (dummyname, pc, fun, type, gcc_p)
 void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 			   struct type *value_type, int using_gcc);
 
 
 /* The remainder of these will accept the default definition.  */
-#undef  SIZEOF_CALL_DUMMY_WORDS
+#undef  DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
 #undef  DEPRECATED_PUSH_RETURN_ADDRESS
 #undef  CALL_DUMMY_ADDRESS
 #undef  STORE_STRUCT_RETURN
@@ -269,7 +269,7 @@ extern CORE_ADDR sparc64_read_fp ();
 extern void sparc64_write_sp (CORE_ADDR);
 
 #define TARGET_READ_SP() (sparc64_read_sp ())
-#define TARGET_READ_FP() (sparc64_read_fp ())
+#define DEPRECATED_TARGET_READ_FP() (sparc64_read_fp ())
 #define DEPRECATED_DUMMY_WRITE_SP(X) (sparc64_write_sp (X))
 
 #undef DEPRECATED_EXTRACT_RETURN_VALUE
@@ -297,7 +297,7 @@ extern void sp64_extract_return_value (struct type *, char[], char *, int);
 #define	L0_REGNUM 16		/* First local reg that's saved on stack frame
 				   rather than in machine registers */
 #define	I0_REGNUM 24		/* %i0 */
-#define	FP_REGNUM 30		/* Contains address of executing stack frame */
+#define	DEPRECATED_FP_REGNUM 30		/* Contains address of executing stack frame */
 #define	I7_REGNUM 31		/* Last local reg saved on stack frame */
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 #endif
@@ -376,8 +376,8 @@ extern void sp64_extract_return_value (struct type *, char[], char *, int);
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
-#undef  REGISTER_SIZE
-#define REGISTER_SIZE 8
+#undef  DEPRECATED_REGISTER_SIZE
+#define DEPRECATED_REGISTER_SIZE 8
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */

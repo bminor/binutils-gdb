@@ -33,6 +33,7 @@
 #include "source.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
+#include "infcall.h"
 
 extern void _initialize_scheme_language (void);
 static struct value *evaluate_subexp_scm (struct type *, struct expression *,

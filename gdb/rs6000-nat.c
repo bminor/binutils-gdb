@@ -218,7 +218,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, int *buf)
 static void
 fetch_register (int regno)
 {
-  int *addr = alloca (MAX_REGISTER_RAW_SIZE);
+  int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
   /* Retrieved values may be -1, so infer errors from errno. */
@@ -275,7 +275,7 @@ fetch_register (int regno)
 static void
 store_register (int regno)
 {
-  int *addr = alloca (MAX_REGISTER_RAW_SIZE);
+  int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
   /* Fetch the register's value from the register cache.  */

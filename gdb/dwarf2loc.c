@@ -223,7 +223,10 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   result = dwarf_expr_fetch (ctx, 0);
 
   if (ctx->in_reg)
-    retval = value_from_register (SYMBOL_TYPE (var), result, frame);
+    {
+      int regnum = DWARF2_REG_TO_REGNUM (result);
+      retval = value_from_register (SYMBOL_TYPE (var), regnum, frame);
+    }
   else
     {
       retval = allocate_value (SYMBOL_TYPE (var));

@@ -935,7 +935,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, 7); /* %rsp */
-  set_gdbarch_fp_regnum (gdbarch, 6); /* %rbp */
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 6); /* %rbp */
   set_gdbarch_pc_regnum (gdbarch, 16); /* %rip */
   set_gdbarch_ps_regnum (gdbarch, 17); /* %eflags */
   set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS); /* %st(0) */
@@ -954,7 +954,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      in use on any of the supported x86-64 targets.  */
 
   set_gdbarch_register_name (gdbarch, x86_64_register_name);
-  set_gdbarch_register_size (gdbarch, 8);
+  set_gdbarch_deprecated_register_size (gdbarch, 8);
 
   /* Total amount of space needed to store our copies of the machine's
      register (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS +
@@ -977,7 +977,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_deprecated_get_saved_register (gdbarch, cfi_get_saved_register);
 
   /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
-  set_gdbarch_read_fp (gdbarch, cfi_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, cfi_read_fp);
 
   set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
 

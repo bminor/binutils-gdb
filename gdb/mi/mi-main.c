@@ -398,7 +398,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 static int
 register_changed_p (int regnum)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
@@ -511,8 +511,8 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 static int
 get_register (int regnum, int format)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
+  char virtual_buffer[MAX_REGISTER_SIZE];
   int optim;
   int realnum;
   CORE_ADDR addr;
@@ -636,9 +636,9 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  /* Get the value as a number */
 	  value = parse_and_eval_address (argv[i + 1]);
 	  /* Get the value into an array */
-	  buffer = xmalloc (REGISTER_SIZE);
+	  buffer = xmalloc (DEPRECATED_REGISTER_SIZE);
 	  old_chain = make_cleanup (xfree, buffer);
-	  store_signed_integer (buffer, REGISTER_SIZE, value);
+	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
 	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */

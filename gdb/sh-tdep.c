@@ -1003,7 +1003,7 @@ sh64_frame_chain (struct frame_info *frame)
       if (gdbarch_tdep (current_gdbarch)->sh_abi == SH_ABI_32)
 	size = 4;
       else
-	size = REGISTER_RAW_SIZE (translate_insn_rn (FP_REGNUM, media_mode));
+	size = REGISTER_RAW_SIZE (translate_insn_rn (DEPRECATED_FP_REGNUM, media_mode));
       return read_memory_integer (get_frame_base (frame)
 				  + get_frame_extra_info (frame)->f_offset,
 				  size);
@@ -1172,7 +1172,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
     {
       if (where[rn] >= 0)
 	{
-	  if (rn == FP_REGNUM)
+	  if (rn == DEPRECATED_FP_REGNUM)
 	    have_fp = 1;
 
 	  get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - where[rn] + depth - 4;
@@ -1185,14 +1185,14 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 
   if (have_fp)
     {
-      get_frame_saved_regs (fi)[SP_REGNUM] = read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4);
+      get_frame_saved_regs (fi)[SP_REGNUM] = read_memory_integer (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4);
     }
   else
     {
       get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
     }
 
-  get_frame_extra_info (fi)->f_offset = depth - where[FP_REGNUM] - 4;
+  get_frame_extra_info (fi)->f_offset = depth - where[DEPRECATED_FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
 }
@@ -1477,7 +1477,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
  /* The frame pointer register is general register 14 in shmedia and
     shcompact modes. In sh compact it is a pseudo register.  Same goes
     for the stack pointer register, which is register 15. */
-  fp_regnum = translate_insn_rn (FP_REGNUM, media_mode);
+  fp_regnum = translate_insn_rn (DEPRECATED_FP_REGNUM, media_mode);
   sp_regnum = translate_insn_rn (SP_REGNUM, media_mode);
 
   for (opc = pc + (insn_size * 28); pc < opc; pc += insn_size)
@@ -1602,8 +1602,8 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	 register r15 which still is the SP register. */
       /* The place on the stack where fp is stored contains the sp of
          the caller. */
-      /* Again, saved_registers contains only space for the real registers,
-	 so we store in FP_REGNUM position. */
+      /* Again, saved_registers contains only space for the real
+	 registers, so we store in DEPRECATED_FP_REGNUM position.  */
       int size;
       if (tdep->sh_abi == SH_ABI_32)
 	size = 4;
@@ -1724,7 +1724,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
     {
       if (where[rn] >= 0)
 	{
-	  if (rn == FP_REGNUM)
+	  if (rn == DEPRECATED_FP_REGNUM)
 	    have_fp = 1;
 
 	  get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - where[rn] + depth - 4;
@@ -1738,14 +1738,14 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
   if (have_fp)
     {
       get_frame_saved_regs (fi)[SP_REGNUM] =
-	read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4);
+	read_memory_integer (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4);
     }
   else
     {
       get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
     }
 
-  get_frame_extra_info (fi)->f_offset = depth - where[FP_REGNUM] - 4;
+  get_frame_extra_info (fi)->f_offset = depth - where[DEPRECATED_FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
 }
@@ -1763,14 +1763,14 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
     {
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
+      /* We need to setup fi->frame here because call_function_by_hand
+         gets it wrong by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
 									     SP_REGNUM));
       get_frame_extra_info (fi)->return_pc = deprecated_read_register_dummy (get_frame_pc (fi),
 								  get_frame_base (fi),
 								  PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->f_offset = -(DEPRECATED_CALL_DUMMY_LENGTH + 4);
       get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
@@ -1795,13 +1795,13 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
     {
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
+      /* We need to setup fi->frame here because call_function_by_hand
+         gets it wrong by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
       get_frame_extra_info (fi)->return_pc = 
 	deprecated_read_register_dummy (get_frame_pc (fi),
 					get_frame_base (fi), PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->f_offset = -(DEPRECATED_CALL_DUMMY_LENGTH + 4);
       get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
@@ -1885,7 +1885,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 		{
 		  int size;
 		  if (tdep->sh_abi == SH_ABI_32
-		      && (live_regnum == FP_REGNUM
+		      && (live_regnum == DEPRECATED_FP_REGNUM
 			  || live_regnum == tdep->PR_REGNUM))
 		    size = 4;
 		  else
@@ -1993,7 +1993,7 @@ sh64_pop_frame (void)
 	  {
 	    int size;
 	    if (tdep->sh_abi == SH_ABI_32
-		&& (regnum == FP_REGNUM
+		&& (regnum == DEPRECATED_FP_REGNUM
 		    || regnum ==  tdep->PR_REGNUM))
 	      size = 4;
 	    else
@@ -3481,7 +3481,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			 int reg_nr, void *buffer)
 {
   int base_regnum, portion;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM 
@@ -3520,7 +3520,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum;
   int portion;
   int offset = 0;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM 
@@ -3684,7 +3684,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			  int reg_nr, const void *buffer)
 {
   int base_regnum, portion;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM
@@ -3721,7 +3721,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum, portion;
   int offset;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (reg_nr >= tdep->DR0_REGNUM
@@ -4087,7 +4087,7 @@ sh64_do_pseudo_register (int regnum)
 static void
 sh_do_register (int regnum)
 {
-  char *raw_buffer = alloca (max_register_size (current_gdbarch));
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
@@ -4365,9 +4365,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_num_regs (gdbarch, SH_DEFAULT_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, 15);
-  set_gdbarch_fp_regnum (gdbarch, 14);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 14);
   set_gdbarch_pc_regnum (gdbarch, 16);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
@@ -4586,7 +4586,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* the number of real registers is the same whether we are in 
 	 ISA16(compact) or ISA32(media). */
       set_gdbarch_num_regs (gdbarch, SIM_SH64_NR_REGS);
-      set_gdbarch_register_size (gdbarch, 8); /*????*/
+      set_gdbarch_deprecated_register_size (gdbarch, 8); /*????*/
       set_gdbarch_register_bytes (gdbarch, 
 				  ((SIM_SH64_NR_FP_REGS + 1) * 4)
 				  + (SIM_SH64_NR_REGS - SIM_SH64_NR_FP_REGS -1) * 8);
@@ -4639,7 +4639,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
@@ -4653,8 +4652,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 
-  set_gdbarch_call_dummy_words (gdbarch, sh_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (sh_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, sh_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (sh_call_dummy_words));
 
   set_gdbarch_deprecated_push_return_address (gdbarch, sh_push_return_address);
 

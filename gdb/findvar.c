@@ -300,7 +300,7 @@ value_of_register (int regnum, struct frame_info *frame)
   int optim;
   struct value *reg_val;
   int realnum;
-  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   enum lval_type lval;
 
   /* Builtin registers lie completly outside of the range of normal
@@ -664,7 +664,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 struct value *
 value_from_register (struct type *type, int regnum, struct frame_info *frame)
 {
-  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   CORE_ADDR addr;
   int optim;
   struct value *v = allocate_value (type);
@@ -699,7 +699,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       CORE_ADDR last_addr = 0;
       CORE_ADDR first_addr = 0;
 
-      value_bytes = (char *) alloca (len + MAX_REGISTER_RAW_SIZE);
+      value_bytes = (char *) alloca (len + MAX_REGISTER_SIZE);
 
       /* Copy all of the data out, whereever it may be.  */
 

@@ -3925,7 +3925,7 @@ retrieve_internal_relocs (abfd, sec, keep_memory)
 
   internal_relocs = elf_section_data (sec)->relocs;
   if (internal_relocs == NULL)
-    internal_relocs = (_bfd_elf32_link_read_relocs
+    internal_relocs = (_bfd_elf_link_read_relocs
 		       (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 			keep_memory));
   return internal_relocs;

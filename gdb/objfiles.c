@@ -325,7 +325,7 @@ allocate_objfile (bfd *abfd, int flags)
     }
   else
     {
-      objfile->name = "<<anonymous objfile>>";
+      objfile->name = mstrsave (objfile->md, "<<anonymous objfile>>");
     }
 
   /* Initialize the section indexes for this objfile, so that we can

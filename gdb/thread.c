@@ -292,7 +292,6 @@ gdb_list_thread_ids (struct ui_out *uiout)
 void
 load_infrun_state (ptid_t ptid,
 		   CORE_ADDR *prev_pc,
-		   char **prev_func_name,
 		   int *trap_expected,
 		   struct breakpoint **step_resume_breakpoint,
 		   struct breakpoint **through_sigtramp_breakpoint,
@@ -316,7 +315,6 @@ load_infrun_state (ptid_t ptid,
     return;
 
   *prev_pc = tp->prev_pc;
-  *prev_func_name = tp->prev_func_name;
   *trap_expected = tp->trap_expected;
   *step_resume_breakpoint = tp->step_resume_breakpoint;
   *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
@@ -340,7 +338,6 @@ load_infrun_state (ptid_t ptid,
 void
 save_infrun_state (ptid_t ptid,
 		   CORE_ADDR prev_pc,
-		   char *prev_func_name,
 		   int trap_expected,
 		   struct breakpoint *step_resume_breakpoint,
 		   struct breakpoint *through_sigtramp_breakpoint,
@@ -364,7 +361,6 @@ save_infrun_state (ptid_t ptid,
     return;
 
   tp->prev_pc = prev_pc;
-  tp->prev_func_name = prev_func_name;
   tp->trap_expected = trap_expected;
   tp->step_resume_breakpoint = step_resume_breakpoint;
   tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;

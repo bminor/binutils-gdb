@@ -26,8 +26,6 @@
 
 static reloc_howto_type *elf_i386_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void elf_i386_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void elf_i386_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static bfd_boolean elf_i386_is_local_label_name
@@ -370,15 +368,6 @@ elf_i386_reloc_type_lookup (abfd, code)
 
   TRACE ("Unknown");
   return 0;
-}
-
-static void
-elf_i386_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
-{
-  abort ();
 }
 
 static void
@@ -849,7 +838,19 @@ elf_i386_copy_indirect_symbol (bed, dir, ind)
       edir->tls_type = eind->tls_type;
       eind->tls_type = GOT_UNKNOWN;
     }
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+
+  if (ELIMINATE_COPY_RELOCS
+      && ind->root.type != bfd_link_hash_indirect
+      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    /* If called to transfer flags for a weakdef during processing
+       of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+       We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+    dir->elf_link_hash_flags |=
+      (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+  else
+    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static int
@@ -1557,7 +1558,9 @@ allocate_dynrelocs (h, inf)
   htab = elf_i386_hash_table (info);
 
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0)
+      && h->plt.refcount > 0
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -1655,8 +1658,10 @@ allocate_dynrelocs (h, inf)
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
       else if (tls_type == GOT_TLS_GD)
 	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rel);
-      else if (info->shared
-	       || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+      else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		|| h->root.type != bfd_link_hash_undefweak)
+	       && (info->shared
+		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
     }
   else
@@ -1690,6 +1695,12 @@ allocate_dynrelocs (h, inf)
 		pp = &p->next;
 	    }
 	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -2297,7 +2308,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && (info->symbolic
 			  || h->dynindx == -1
 			  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+		  || (ELF_ST_VISIBILITY (h->other)
+		      && h->root.type == bfd_link_hash_undefweak))
 		{
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
@@ -2421,6 +2434,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak)
 	       && (r_type != R_386_PC32
 		   || (h != NULL
 		       && h->dynindx != -1
@@ -3367,7 +3383,8 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
-#define elf_info_to_howto		      elf_i386_info_to_howto
+/* Support RELA for objdump of prelink objects.  */
+#define elf_info_to_howto		      elf_i386_info_to_howto_rel
 #define elf_info_to_howto_rel		      elf_i386_info_to_howto_rel
 
 #define bfd_elf32_mkobject		      elf_i386_mkobject

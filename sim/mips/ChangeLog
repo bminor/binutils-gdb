@@ -1,3 +1,12 @@
+2003-05-03  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c: Tweak attribution slightly.
+	* cp1.h: Likewise.
+	* mdmx.c: Likewise.
+	* mdmx.igen: Likewise.
+	* mips3d.igen: Likewise.
+	* sb1.igen: Likewise.
+
 2003-04-15  Richard Sandiford  <rsandifo@redhat.com>
 
 	* vr.igen (do_vr_mul_op): Zero-extend the low 32 bits of

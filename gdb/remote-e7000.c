@@ -785,7 +785,7 @@ void
 fetch_regs_from_dump (int (*nextchar) (), char *want)
 {
   int regno;
-  char *buf = alloca (max_register_size (current_gdbarch));
+  char buf[MAX_REGISTER_SIZE];
 
   int thischar = nextchar ();
 
@@ -856,9 +856,9 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 	      want++;
 	      break;
 #endif
-#ifdef FP_REGNUM
+#ifdef DEPRECATED_FP_REGNUM
 	    case 'f':
-	      regno = FP_REGNUM;
+	      regno = DEPRECATED_FP_REGNUM;
 	      want++;
 	      break;
 #endif

@@ -31,6 +31,7 @@
 #include "gdb_string.h"
 #include "doublest.h"
 #include <math.h>
+#include "infcall.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). */

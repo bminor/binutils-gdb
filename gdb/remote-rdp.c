@@ -550,7 +550,7 @@ rdp_fetch_one_fpu_register (int mask, char *buf)
       send_rdp ("bbw-SWWWWZ", RDP_COPRO_READ, FPU_COPRO_NUMBER, mask, buf + 0, buf + 4, buf + 8, &dummy);
     }
 #endif
-  memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+  memset (buf, 0, MAX_REGISTER_SIZE);
 }
 
 

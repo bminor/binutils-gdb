@@ -836,15 +836,15 @@ extern void target_load (char *arg, int from_tty);
 #define target_async(CALLBACK,CONTEXT) \
      (current_target.to_async((CALLBACK), (CONTEXT)))
 
-/* This is to be used ONLY within run_stack_dummy(). It
-   provides a workaround, to have inferior function calls done in
-   sychronous mode, even though the target is asynchronous. After
+/* This is to be used ONLY within call_function_by_hand(). It provides
+   a workaround, to have inferior function calls done in sychronous
+   mode, even though the target is asynchronous. After
    target_async_mask(0) is called, calls to target_can_async_p() will
    return FALSE , so that target_resume() will not try to start the
    target asynchronously. After the inferior stops, we IMMEDIATELY
    restore the previous nature of the target, by calling
    target_async_mask(1). After that, target_can_async_p() will return
-   TRUE. ANY OTHER USE OF THIS FEATURE IS DEPRECATED. 
+   TRUE. ANY OTHER USE OF THIS FEATURE IS DEPRECATED.
 
    FIXME ezannoni 1999-12-13: we won't need this once we move
    the turning async on and off to the single execution commands,

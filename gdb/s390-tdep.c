@@ -280,7 +280,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 
   memset (gprs_saved, 0, sizeof (gprs_saved));
   memset (fprs_saved, 0, sizeof (fprs_saved));
-  info.read_memory_func = dis_asm_read_memory;
+  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
 
   save_link_regidx = subtract_sp_regidx = 0;
   if (fextra_info)
@@ -682,7 +682,7 @@ s390_check_function_end (CORE_ADDR pc)
   disassemble_info info;
   int regidx, instrlen;
 
-  info.read_memory_func = dis_asm_read_memory;
+  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
   instrlen = s390_readinstruction (instr, pc, &info);
   if (instrlen < 0)
     return -1;
@@ -819,7 +819,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 
   scontext = temp_sregs = 0;
 
-  info.read_memory_func = dis_asm_read_memory;
+  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
   instrlen = s390_readinstruction (instr, pc, &info);
   if (sigcaller_pc)
     *sigcaller_pc = 0;
@@ -1150,7 +1150,7 @@ void
 s390_store_return_value (struct type *valtype, char *valbuf)
 {
   int arglen;
-  char *reg_buff = alloca (max (S390_FPR_SIZE, REGISTER_SIZE)), *value;
+  char *reg_buff = alloca (max (S390_FPR_SIZE, DEPRECATED_REGISTER_SIZE)), *value;
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
@@ -1658,7 +1658,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
      frame.  This will help us get backtraces from within functions
      called from GDB.  */
   write_memory_unsigned_integer (sp, (TARGET_PTR_BIT / TARGET_CHAR_BIT),
-                                 read_fp ());
+                                 deprecated_read_fp ());
 
   return sp;
 }
@@ -1841,7 +1841,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
-  set_gdbarch_read_fp (gdbarch, s390_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, s390_read_fp);
   /* This function that tells us whether the function invocation represented
      by FI does not have a frame on the stack associated with it.  If it
      does not, FRAMELESS is set to 1, else 0.  */
@@ -1856,7 +1856,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, S390_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, S390_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, S390_FP0_REGNUM);
   set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
   set_gdbarch_cannot_fetch_register (gdbarch, s390_cannot_fetch_register);
@@ -1876,14 +1876,13 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch,
                                               s390_push_return_address);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch,
-                                       sizeof (s390_call_dummy_words));
-  set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (s390_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, s390_call_dummy_words);
 
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_s390_31:
-      set_gdbarch_register_size (gdbarch, 4);
+      set_gdbarch_deprecated_register_size (gdbarch, 4);
       set_gdbarch_register_raw_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_type (gdbarch, s390_register_virtual_type);
@@ -1892,7 +1891,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
     case bfd_mach_s390_64:
-      set_gdbarch_register_size (gdbarch, 8);
+      set_gdbarch_deprecated_register_size (gdbarch, 8);
       set_gdbarch_register_raw_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_type (gdbarch,
@@ -1925,8 +1924,8 @@ _initialize_s390_tdep (void)
 
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
-  if (!tm_print_insn)		/* Someone may have already set it */
-    tm_print_insn = gdb_print_insn_s390;
+  if (!deprecated_tm_print_insn)	/* Someone may have already set it */
+    deprecated_tm_print_insn = gdb_print_insn_s390;
 }
 
 #endif /* GDBSERVER */

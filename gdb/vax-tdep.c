@@ -50,7 +50,6 @@ static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
 static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
-static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
 /* Return 1 if P points to an invalid floating point value.
    LEN is the length in bytes -- not relevant on the Vax.  */
@@ -143,12 +142,12 @@ vax_frame_init_saved_regs (struct frame_info *frame)
     }
 
   get_frame_saved_regs (frame)[SP_REGNUM] = next_addr + 4;
-  if (regmask & (1 << FP_REGNUM))
+  if (regmask & (1 << DEPRECATED_FP_REGNUM))
     get_frame_saved_regs (frame)[SP_REGNUM] +=
       4 + (4 * read_memory_integer (next_addr + 4, 4));
 
   get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 16;
-  get_frame_saved_regs (frame)[FP_REGNUM] = get_frame_base (frame) + 12;
+  get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = get_frame_base (frame) + 12;
   get_frame_saved_regs (frame)[VAX_AP_REGNUM] = get_frame_base (frame) + 8;
   get_frame_saved_regs (frame)[PS_REGNUM] = get_frame_base (frame) + 4;
 }
@@ -252,19 +251,19 @@ vax_push_dummy_frame (void)
   for (regnum = 11; regnum >= 0; regnum--)
     sp = push_word (sp, read_register (regnum));
   sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (FP_REGNUM));
+  sp = push_word (sp, read_register (DEPRECATED_FP_REGNUM));
   sp = push_word (sp, read_register (VAX_AP_REGNUM));
   sp = push_word (sp, (read_register (PS_REGNUM) & 0xffef) + 0x2fff0000);
   sp = push_word (sp, 0);
   write_register (SP_REGNUM, sp);
-  write_register (FP_REGNUM, sp);
+  write_register (DEPRECATED_FP_REGNUM, sp);
   write_register (VAX_AP_REGNUM, sp + (17 * 4));
 }
 
 static void
 vax_pop_frame (void)
 {
-  CORE_ADDR fp = read_register (FP_REGNUM);
+  CORE_ADDR fp = read_register (DEPRECATED_FP_REGNUM);
   int regnum;
   int regmask = read_memory_integer (fp + 4, 4);
 
@@ -272,7 +271,7 @@ vax_pop_frame (void)
 		  (regmask & 0xffff)
 		  | (read_register (PS_REGNUM) & 0xffff0000));
   write_register (PC_REGNUM, read_memory_integer (fp + 16, 4));
-  write_register (FP_REGNUM, read_memory_integer (fp + 12, 4));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp + 12, 4));
   write_register (VAX_AP_REGNUM, read_memory_integer (fp + 8, 4));
   fp += 16;
   for (regnum = 0; regnum < 12; regnum++)
@@ -622,12 +621,12 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, VAX_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, VAX_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, VAX_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, VAX_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, VAX_PS_REGNUM);
 
   set_gdbarch_register_name (gdbarch, vax_register_name);
-  set_gdbarch_register_size (gdbarch, VAX_REGISTER_SIZE);
+  set_gdbarch_deprecated_register_size (gdbarch, VAX_REGISTER_SIZE);
   set_gdbarch_register_bytes (gdbarch, VAX_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, vax_register_byte);
   set_gdbarch_register_raw_size (gdbarch, vax_register_raw_size);
@@ -667,10 +666,10 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_words (gdbarch, vax_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_vax_call_dummy_words);
-  set_gdbarch_fix_call_dummy (gdbarch, vax_fix_call_dummy);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 7);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, vax_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof_vax_call_dummy_words);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, vax_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 7);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
 
@@ -696,5 +695,5 @@ _initialize_vax_tdep (void)
 {
   gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
 
-  tm_print_insn = vax_print_insn;
+  deprecated_tm_print_insn = vax_print_insn;
 }

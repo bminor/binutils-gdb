@@ -2292,6 +2292,10 @@ bfd_section_from_phdr (abfd, hdr, index)
     case PT_PHDR:
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "phdr");
 
+    case PT_GNU_EH_FRAME:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index,
+					      "eh_frame_hdr");
+
     default:
       /* Check for any processor-specific program segment types.
          If no handler for them, default to making "segment" sections.  */
@@ -2331,7 +2335,7 @@ _bfd_elf_init_reloc_shdr (abfd, rel_hdr, asect, use_rela_p)
   rel_hdr->sh_entsize = (use_rela_p
 			 ? bed->s->sizeof_rela
 			 : bed->s->sizeof_rel);
-  rel_hdr->sh_addralign = bed->s->file_align;
+  rel_hdr->sh_addralign = 1 << bed->s->log_file_align;
   rel_hdr->sh_flags = 0;
   rel_hdr->sh_addr = 0;
   rel_hdr->sh_size = 0;
@@ -2361,9 +2365,9 @@ elf_fake_sections (abfd, asect, failedptrarg)
 
   this_hdr = &elf_section_data (asect)->this_hdr;
 
-  this_hdr->sh_name = (unsigned long) _bfd_elf_strtab_add (elf_shstrtab (abfd),
-							   asect->name, FALSE);
-  if (this_hdr->sh_name == (unsigned long) -1)
+  this_hdr->sh_name = (unsigned int) _bfd_elf_strtab_add (elf_shstrtab (abfd),
+							  asect->name, FALSE);
+  if (this_hdr->sh_name == (unsigned int) -1)
     {
       *failedptr = TRUE;
       return;
@@ -3744,7 +3748,7 @@ assign_file_positions_for_segments (abfd)
 	  && (abfd->flags & D_PAGED) != 0)
 	p->p_align = bed->maxpagesize;
       else if (m->count == 0)
-	p->p_align = bed->s->file_align;
+	p->p_align = 1 << bed->s->log_file_align;
       else
 	p->p_align = 0;
 
@@ -4241,7 +4245,7 @@ assign_file_positions_except_relocs (abfd)
     }
 
   /* Place the section headers.  */
-  off = align_file_position (off, bed->s->file_align);
+  off = align_file_position (off, 1 << bed->s->log_file_align);
   i_ehdrp->e_shoff = off;
   off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
 
@@ -4778,7 +4782,7 @@ copy_private_bfd_data (ibfd, obfd)
 	   section = section->next)
 	if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	  ++section_count;
- 
+
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map);
@@ -5298,7 +5302,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
   symtab_hdr->sh_entsize = bed->s->sizeof_sym;
   symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
   symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
-  symtab_hdr->sh_addralign = bed->s->file_align;
+  symtab_hdr->sh_addralign = 1 << bed->s->log_file_align;
 
   symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
   symstrtab_hdr->sh_type = SHT_STRTAB;
@@ -5458,11 +5462,11 @@ swap_out_syms (abfd, sttp, relocatable_p)
 Unable to find equivalent output section for symbol '%s' from section '%s'"),
 					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
 					  sec->name);
-		      bfd_set_error (bfd_error_invalid_operation);      
+		      bfd_set_error (bfd_error_invalid_operation);
 		      _bfd_stringtab_free (stt);
 		      return FALSE;
 		    }
-  
+
 		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
 		  BFD_ASSERT (shndx != -1);
 		}
@@ -7071,7 +7075,7 @@ elfcore_grok_nto_note (abfd, note)
      Elf_Internal_Note *note;
 {
   /* Every GREG section has a STATUS section before it.  Store the
-     tid from the previous call to pass down to the next gregs 
+     tid from the previous call to pass down to the next gregs
      function.  */
   static pid_t tid = 1;
 
@@ -7121,7 +7125,7 @@ elfcore_write_note (abfd, buf, bufsiz, name, type, input, size)
 
       namesz = strlen (name) + 1;
       bed = get_elf_backend_data (abfd);
-      pad = -namesz & (bed->s->file_align - 1);
+      pad = -namesz & ((1 << bed->s->log_file_align) - 1);
     }
 
   newspace = sizeof (Elf_External_Note) - 1 + namesz + pad + size;

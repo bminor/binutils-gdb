@@ -3170,7 +3170,7 @@ const struct elf_size_info sparc64_elf_size_info =
      we use 2.  */
   1,
   64,		/* arch_size.  */
-  8,		/* file_align.  */
+  3,		/* log_file_align.  */
   ELFCLASS64,
   EV_CURRENT,
   bfd_elf64_write_out_phdrs,

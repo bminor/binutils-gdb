@@ -606,7 +606,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
      the special sections required for dynamic linking.  */
   if (! elf_hash_table (info)->dynamic_sections_created)
     {
-      if (! bfd_elf64_link_create_dynamic_sections (abfd, info))
+      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	return FALSE;
     }
 
@@ -2692,7 +2692,7 @@ const struct elf_size_info hppa64_elf_size_info =
   sizeof (Elf_External_Note),
   4,
   1,
-  64, 8,
+  64, 3,
   ELFCLASS64, EV_CURRENT,
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,

@@ -150,6 +150,36 @@ static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
 
+/* Return the contents of register REGNUM as a signed integer.  */
+
+static LONGEST
+read_signed_register (int regnum)
+{
+  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  deprecated_read_register_gen (regnum, buf);
+  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
+}
+
+static LONGEST
+read_signed_register_pid (int regnum, ptid_t ptid)
+{
+  ptid_t save_ptid;
+  LONGEST retval;
+
+  if (ptid_equal (ptid, inferior_ptid))
+    return read_signed_register (regnum);
+
+  save_ptid = inferior_ptid;
+
+  inferior_ptid = ptid;
+
+  retval = read_signed_register (regnum);
+
+  inferior_ptid = save_ptid;
+
+  return retval;
+}
+
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi
 mips_abi (struct gdbarch *gdbarch)
@@ -215,7 +245,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
 		    enum bfd_endian endian, bfd_byte *in, const bfd_byte *out,
 		    int buf_offset)
 {
-  bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+  bfd_byte reg[MAX_REGISTER_SIZE];
   int reg_offset = 0;
   /* Need to transfer the left or right part of the register, based on
      the targets byte order.  */
@@ -623,9 +653,9 @@ if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
    
    Note: kevinb/2002-08-01: The definition below should faithfully
    reproduce the behavior of each of the REGISTER_VIRTUAL_TYPE
-   definitions found in config/mips/tm-*.h.  I'm concerned about
-   the ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause
-   though.  In some cases FP_REGNUM is in this range, and I doubt
+   definitions found in config/mips/tm-*.h.  I'm concerned about the
+   ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause though.
+   In some cases DEPRECATED_FP_REGNUM is in this range, and I doubt
    that this code is correct for the 64-bit case.  */
 
 static struct type *
@@ -1612,7 +1642,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
   CORE_ADDR addr;
   int realnum;
   enum lval_type lval;
-  void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   if (fi == NULL)
     {
@@ -2721,7 +2751,7 @@ mips_eabi_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -2972,7 +3002,7 @@ mips_n32n64_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3195,7 +3225,7 @@ mips_o32_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3494,7 +3524,7 @@ mips_o64_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4014,7 +4044,7 @@ mips_print_fp_register (int regnum)
 static void
 mips_print_register (int regnum, int all)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int offset;
 
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
@@ -4070,7 +4100,7 @@ static int
 do_gp_register_row (int regnum)
 {
   /* do values for GP (int) regs */
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int ncols = (MIPS_REGSIZE == 8 ? 4 : 8);	/* display cols per row */
   int col, byte;
   int start_regnum = regnum;
@@ -4573,7 +4603,7 @@ mips_o64_extract_return_value (struct type *valtype,
 static void
 mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
   return_value_location (valtype, &hi, &lo);
@@ -4595,7 +4625,7 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 static void
 mips_o64_store_return_value (struct type *valtype, char *valbuf)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
   return_value_location (valtype, &hi, &lo);
@@ -4677,7 +4707,7 @@ mips_o32_xfer_return_value (struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = FP0_REGNUM;
@@ -4789,7 +4819,7 @@ mips_n32n64_xfer_return_value (struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = FP0_REGNUM;
@@ -5543,9 +5573,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* Reset the disassembly info, in case it was set to something
      non-default.  */
-  tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  tm_print_insn_info.arch = bfd_arch_unknown;
-  tm_print_insn_info.mach = 0;
+  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
+  deprecated_tm_print_insn_info.arch = bfd_arch_unknown;
+  deprecated_tm_print_insn_info.mach = 0;
 
   elf_flags = 0;
 
@@ -5626,7 +5656,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (wanted_abi != MIPS_ABI_UNKNOWN)
     mips_abi = wanted_abi;
 
-  /* We have to set tm_print_insn_info before looking for a
+  /* We have to set deprecated_tm_print_insn_info before looking for a
      pre-existing architecture, otherwise we may return before we get
      a chance to set it up.  */
   if (mips_abi == MIPS_ABI_N32 || mips_abi == MIPS_ABI_N64)
@@ -5634,17 +5664,17 @@ mips_gdbarch_init (struct gdbarch_info info,
       /* Set up the disassembler info, so that we get the right
 	 register names from libopcodes.  */
       if (mips_abi == MIPS_ABI_N32)
-	tm_print_insn_info.disassembler_options = "gpr-names=n32";
+	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=n32";
       else
-	tm_print_insn_info.disassembler_options = "gpr-names=64";
-      tm_print_insn_info.flavour = bfd_target_elf_flavour;
-      tm_print_insn_info.arch = bfd_arch_mips;
+	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=64";
+      deprecated_tm_print_insn_info.flavour = bfd_target_elf_flavour;
+      deprecated_tm_print_insn_info.arch = bfd_arch_mips;
       if (info.bfd_arch_info != NULL
 	  && info.bfd_arch_info->arch == bfd_arch_mips
 	  && info.bfd_arch_info->mach)
-	tm_print_insn_info.mach = info.bfd_arch_info->mach;
+	deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
-	tm_print_insn_info.mach = bfd_mach_mips8000;
+	deprecated_tm_print_insn_info.mach = bfd_mach_mips8000;
     }
   else
     /* This string is not recognized explicitly by the disassembler,
@@ -5652,7 +5682,7 @@ mips_gdbarch_init (struct gdbarch_info info,
        the bfd elf headers, such that, if the user overrides the ABI
        of a program linked as NewABI, the disassembly will follow the
        register naming conventions specified by the user.  */
-    tm_print_insn_info.disassembler_options = "gpr-names=32";
+    deprecated_tm_print_insn_info.disassembler_options = "gpr-names=32";
 
   if (gdbarch_debug)
     {
@@ -5880,7 +5910,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
+  set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
@@ -5908,9 +5938,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
-  set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
-  set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, mips_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, mips_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
@@ -6396,8 +6426,8 @@ _initialize_mips_tdep (void)
     internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
-  if (!tm_print_insn)		/* Someone may have already set it */
-    tm_print_insn = gdb_print_insn_mips;
+  if (!deprecated_tm_print_insn)	 /* Someone may have already set it */
+    deprecated_tm_print_insn = gdb_print_insn_mips;
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,

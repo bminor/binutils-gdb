@@ -51,8 +51,8 @@ supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) (gregsetp->gp_regs);
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   /* FIXME: somewhere, there should be a #define for the meaning
      of this magic number 32; we should use that. */
@@ -104,8 +104,8 @@ void
 supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,

@@ -1,3 +1,15 @@
+2003-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_d10v_translate_addr): Add "regcache" parameter.
+	(sim_d10v_translate_imap_addr): Ditto.
+	(sim_d10v_translate_dmap_addr): Ditto.
+	(xfer_mem): Pass NULL regcache to sim_d10v_translate_addr.
+	(dmem_addr): Pass NULL regcache to sim_d10v_translate_dmap_addr.
+	(dmap_register, imap_register): Add "regcache" parameter.
+	(imem_addr): Pass NULL regcache to sim_d10v_translate_imap_addr.
+	(sim_fetch_register): Pass NULL regcache to imap_register and
+	dmap_register.
+
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (sim_open, sim_create_inferior): Rename _bfd to bfd.

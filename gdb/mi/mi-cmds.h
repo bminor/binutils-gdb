@@ -88,6 +88,7 @@ extern mi_cmd_argv_ftype mi_cmd_stack_list_args;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_frames;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_locals;
 extern mi_cmd_argv_ftype mi_cmd_stack_select_frame;
+extern mi_cmd_argv_ftype mi_cmd_symbol_list_lines;
 extern mi_cmd_args_ftype mi_cmd_target_download;
 extern mi_cmd_args_ftype mi_cmd_target_select;
 extern mi_cmd_argv_ftype mi_cmd_thread_list_ids;

@@ -678,8 +678,8 @@ rse_address_add(CORE_ADDR addr, int nslots)
    computationally expensive.  So, instead of making life difficult
    (and slow), we pick a more convenient representation of the frame
    chain, knowing that we'll have to make some small adjustments in
-   other places.  (E.g, note that read_fp() is actually read_sp() in
-   ia64_gdbarch_init() below.)
+   other places.  (E.g, note that deprecated_read_fp() is actually
+   read_sp() in ia64_gdbarch_init() below.)
 
    Okay, so what is the frame chain exactly?  It'll be the SP value
    at the time that the function in question was entered.
@@ -1259,7 +1259,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
     {
-      char *pr_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+      char pr_raw_buffer[MAX_REGISTER_SIZE];
       int  pr_optim;
       enum lval_type pr_lval;
       CORE_ADDR pr_addr;
@@ -1282,7 +1282,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
-      char *unat_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+      char unat_raw_buffer[MAX_REGISTER_SIZE];
       int  unat_optim;
       enum lval_type unat_lval;
       CORE_ADDR unat_addr;
@@ -2033,7 +2033,9 @@ ia64_pop_frame_regular (struct frame_info *frame)
 }
 
 static void
-ia64_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
+ia64_remote_translate_xfer_address (struct gdbarch *gdbarch,
+				    struct regcache *regcache,
+				    CORE_ADDR memaddr, int nr_bytes,
 				    CORE_ADDR *targ_addr, int *targ_len)
 {
   *targ_addr = memaddr;
@@ -2168,12 +2170,12 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, ia64_num_regs);
   set_gdbarch_sp_regnum (gdbarch, sp_regnum);
-  set_gdbarch_fp_regnum (gdbarch, fp_regnum);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, fp_regnum);
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
   set_gdbarch_fp0_regnum (gdbarch, IA64_FR0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, ia64_register_name);
-  set_gdbarch_register_size (gdbarch, 8);
+  set_gdbarch_deprecated_register_size (gdbarch, 8);
   set_gdbarch_register_bytes (gdbarch, ia64_num_regs * 8 + 128*8);
   set_gdbarch_register_byte (gdbarch, ia64_register_byte);
   set_gdbarch_register_raw_size (gdbarch, ia64_register_raw_size);
@@ -2217,18 +2219,18 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, ia64_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, ia64_pop_frame);
 
-  set_gdbarch_call_dummy_words (gdbarch, ia64_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, ia64_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
   set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);
 
-  /* We won't necessarily have a frame pointer and even if we do,
-     it winds up being extraordinarly messy when attempting to find
-     the frame chain.  So for the purposes of creating frames (which
-     is all read_fp() is used for), simply use the stack pointer value
-     instead.  */
-  set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+  /* We won't necessarily have a frame pointer and even if we do, it
+     winds up being extraordinarly messy when attempting to find the
+     frame chain.  So for the purposes of creating frames (which is
+     all deprecated_read_fp() is used for), simply use the stack
+     pointer value instead.  */
+  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -2251,6 +2253,6 @@ _initialize_ia64_tdep (void)
 {
   register_gdbarch_init (bfd_arch_ia64, ia64_gdbarch_init);
 
-  tm_print_insn = print_insn_ia64;
-  tm_print_insn_info.bytes_per_line = SLOT_MULTIPLIER;
+  deprecated_tm_print_insn = print_insn_ia64;
+  deprecated_tm_print_insn_info.bytes_per_line = SLOT_MULTIPLIER;
 }

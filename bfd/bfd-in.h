@@ -651,9 +651,7 @@ struct bfd_link_needed_list
   const char *name;
 };
 
-extern bfd_boolean bfd_elf32_record_link_assignment
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, bfd_boolean));
-extern bfd_boolean bfd_elf64_record_link_assignment
+extern bfd_boolean bfd_elf_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, bfd_boolean));
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));

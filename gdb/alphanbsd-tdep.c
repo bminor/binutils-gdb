@@ -70,7 +70,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   for (regno = 0; regno < ALPHA_ZERO_REGNUM; regno++)
     supply_register (regno, regs + (regmap[regno] * 8));
   supply_register (ALPHA_ZERO_REGNUM, NULL);
-  supply_register (FP_REGNUM, NULL);
+  supply_register (DEPRECATED_FP_REGNUM, NULL);
   supply_register (PC_REGNUM, regs + (28 * 8));
 
   /* Floating point registers.  */

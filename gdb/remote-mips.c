@@ -1791,7 +1791,7 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 		    &rpc, &rfp, &rsp, flags);
   if (nfields >= 3)
     {
-      char *buf = alloca (max_register_size (current_gdbarch));
+      char buf[MAX_REGISTER_SIZE];
 
       store_unsigned_integer (buf, REGISTER_RAW_SIZE (PC_REGNUM), rpc);
       supply_register (PC_REGNUM, buf);
@@ -1802,8 +1802,8 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
       store_unsigned_integer (buf, REGISTER_RAW_SIZE (SP_REGNUM), rsp);
       supply_register (SP_REGNUM, buf);
 
-      store_unsigned_integer (buf, REGISTER_RAW_SIZE (FP_REGNUM), 0);
-      supply_register (FP_REGNUM, buf);
+      store_unsigned_integer (buf, REGISTER_RAW_SIZE (DEPRECATED_FP_REGNUM), 0);
+      supply_register (DEPRECATED_FP_REGNUM, buf);
 
       if (nfields == 9)
 	{
@@ -1943,9 +1943,9 @@ mips_fetch_registers (int regno)
       return;
     }
 
-  if (regno == FP_REGNUM || regno == ZERO_REGNUM)
-    /* FP_REGNUM on the mips is a hack which is just supposed to read
-       zero (see also mips-nat.c).  */
+  if (regno == DEPRECATED_FP_REGNUM || regno == ZERO_REGNUM)
+    /* DEPRECATED_FP_REGNUM on the mips is a hack which is just
+       supposed to read zero (see also mips-nat.c).  */
     val = 0;
   else
     {
@@ -1972,7 +1972,7 @@ mips_fetch_registers (int regno)
     }
 
   {
-    char *buf = alloca (max_register_size (current_gdbarch));
+    char buf[MAX_REGISTER_SIZE];
 
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */

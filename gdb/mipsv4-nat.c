@@ -47,8 +47,8 @@ supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = &(*gregsetp)[0];
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi <= CXT_RA; regi++)
     supply_register (regi, (char *) (regp + regi));
@@ -61,7 +61,7 @@ supply_gregset (gregset_t *gregsetp)
   /* Fill inaccessible registers with zero.  */
   supply_register (PS_REGNUM, zerobuf);
   supply_register (BADVADDR_REGNUM, zerobuf);
-  supply_register (FP_REGNUM, zerobuf);
+  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
   supply_register (UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi <= LAST_EMBED_REGNUM; regi++)
     supply_register (regi, zerobuf);
@@ -102,8 +102,8 @@ void
 supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,

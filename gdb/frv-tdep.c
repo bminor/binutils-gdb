@@ -1053,11 +1053,11 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, frv_num_regs);
   set_gdbarch_sp_regnum (gdbarch, sp_regnum);
-  set_gdbarch_fp_regnum (gdbarch, fp_regnum);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, fp_regnum);
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
 
   set_gdbarch_register_name (gdbarch, frv_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, frv_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, frv_register_byte);
   set_gdbarch_register_raw_size (gdbarch, frv_register_raw_size);
@@ -1092,8 +1092,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, frv_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, frv_pop_frame);
 
-  set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, frv_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
 
   /* Settings that should be unnecessary.  */
@@ -1101,7 +1101,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
@@ -1147,7 +1146,7 @@ _initialize_frv_tdep (void)
 {
   register_gdbarch_init (bfd_arch_frv, frv_gdbarch_init);
 
-  tm_print_insn = print_insn_frv;
+  deprecated_tm_print_insn = print_insn_frv;
 }
 
 

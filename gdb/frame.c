@@ -139,7 +139,7 @@ static int frame_debug;
 
 static int backtrace_below_main;
 
-static void
+void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
   fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",
@@ -295,10 +295,8 @@ frame_id_eq (struct frame_id l, struct frame_id r)
     /* The .stack and .code are identical, the ID's are identical.  */
     eq = 1;
   else
-    /* FIXME: cagney/2003-04-06: This should be zero.  Can't yet do
-       this because most frame ID's are not being initialized
-       correctly.  */
-    eq = 1;
+    /* No luck.  */
+    eq = 0;
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=");
@@ -620,7 +618,7 @@ void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {
-  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }
@@ -629,7 +627,7 @@ void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {
-  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }
@@ -1388,7 +1386,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     using the same sequence as is found a traditional
 	     unwinder.  Once all architectures supply the
 	     unwind_dummy_id method, this code can go away.  */
-	  prev->this_id.value = frame_id_build (read_fp (), read_pc ());
+	  prev->this_id.value = frame_id_build (deprecated_read_fp (),
+						read_pc ());
 	}
 
       /* Check that the unwound ID is valid.  */
@@ -1543,8 +1542,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      DEPRECATED_INIT_EXTRA_FRAME_INFO, one possible scheme:
 
      SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
-     (read_fp ()), read_pc ()).  Machines with extra frame info would
-     do that (or the local equivalent) and then set the extra fields.
+     (deprecated_read_fp ()), read_pc ()).  Machines with extra frame
+     info would do that (or the local equivalent) and then set the
+     extra fields.
 
      SETUP_ARBITRARY_FRAME(argc, argv): Only change here is that
      create_new_frame would no longer init extra frame info;
@@ -2069,7 +2069,12 @@ get_frame_type (struct frame_info *frame)
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
-  if (frame->unwind == NULL)
+
+  /* Some legacy code, e.g, mips_init_extra_frame_info() wants
+     to determine the frame's type prior to it being completely
+     initialized.  Don't attempt to lazily initialize ->unwind for
+     legacy code.  It will be initialized in legacy_get_prev_frame().  */
+  if (frame->unwind == NULL && !legacy_frame_p (current_gdbarch))
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */

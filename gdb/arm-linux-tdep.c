@@ -46,7 +46,7 @@
 
 static const char arm_linux_arm_le_breakpoint[] = {0x01,0x00,0x9f,0xef};
 
-/* CALL_DUMMY_WORDS:
+/* DEPRECATED_CALL_DUMMY_WORDS:
    This sequence of words is the instructions
 
    mov  lr, pc
@@ -115,10 +115,10 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Walk through the list of args and determine how large a temporary
      stack is required.  Need to take care here as structs may be
      passed on the stack, and we have to to push them.  */
-  nstack_size = -4 * REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
+  nstack_size = -4 * DEPRECATED_REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
 
   if (struct_return)			/* The struct address goes in A1.  */
-    nstack_size += REGISTER_SIZE;
+    nstack_size += DEPRECATED_REGISTER_SIZE;
 
   /* Walk through the arguments and add their size to nstack_size.  */
   for (argnum = 0; argnum < nargs; argnum++)
@@ -131,7 +131,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       /* ANSI C code passes float arguments as integers, K&R code
          passes float arguments as doubles.  Correct for this here.  */
-      if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && REGISTER_SIZE == len)
+      if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && DEPRECATED_REGISTER_SIZE == len)
 	nstack_size += FP_REGISTER_VIRTUAL_SIZE;
       else
 	nstack_size += len;
@@ -178,7 +178,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          .stabs records the type as FP_FLOAT.  In this latter case
          the compiler converts the float arguments to double before
          calling the function.  */
-      if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
+      if (TYPE_CODE_FLT == typecode && DEPRECATED_REGISTER_SIZE == len)
 	{
 	  DOUBLEST dblval;
 	  dblval = deprecated_extract_floating (val, len);
@@ -203,7 +203,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          registers and stack.  */
       while (len > 0)
 	{
-	  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+	  int partial_len = len < DEPRECATED_REGISTER_SIZE ? len : DEPRECATED_REGISTER_SIZE;
 
 	  if (argreg <= ARM_LAST_ARG_REGNUM)
 	    {
@@ -214,8 +214,8 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  else
 	    {
 	      /* Push the arguments onto the stack.  */
-	      write_memory ((CORE_ADDR) fp, val, REGISTER_SIZE);
-	      fp += REGISTER_SIZE;
+	      write_memory ((CORE_ADDR) fp, val, DEPRECATED_REGISTER_SIZE);
+	      fp += DEPRECATED_REGISTER_SIZE;
 	    }
 
 	  len -= partial_len;
@@ -530,9 +530,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->jb_pc = ARM_LINUX_JB_PC;
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
-  set_gdbarch_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch,
-				       sizeof (arm_linux_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (arm_linux_call_dummy_words));
 
   /* The following two overrides shouldn't be needed.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);

@@ -58,7 +58,7 @@ fetch_inferior_registers (int regno)
   RF (R0_REGNUM + 7, inferior_registers.r_r7);
 
   RF (SP_REGNUM, inferior_registers.r_sp);
-  RF (FP_REGNUM, inferior_registers.r_fp);
+  RF (DEPRECATED_FP_REGNUM, inferior_registers.r_fp);
   RF (PC_REGNUM, inferior_registers.r_pc);
   RF (PS_REGNUM, inferior_registers.r_psr);
 
@@ -90,7 +90,7 @@ store_inferior_registers (int regno)
   RS (R0_REGNUM + 7, inferior_registers.r_r7);
 
   RS (SP_REGNUM, inferior_registers.r_sp);
-  RS (FP_REGNUM, inferior_registers.r_fp);
+  RS (DEPRECATED_FP_REGNUM, inferior_registers.r_fp);
   RS (PC_REGNUM, inferior_registers.r_pc);
   RS (PS_REGNUM, inferior_registers.r_psr);
 
@@ -150,7 +150,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   RF (R0_REGNUM + 7, core_reg->intreg.r_r7);
 
   RF (SP_REGNUM, core_reg->intreg.r_sp);
-  RF (FP_REGNUM, core_reg->intreg.r_fp);
+  RF (DEPRECATED_FP_REGNUM, core_reg->intreg.r_fp);
   RF (PC_REGNUM, core_reg->intreg.r_pc);
   RF (PS_REGNUM, core_reg->intreg.r_psr);
 
@@ -223,7 +223,7 @@ fetch_kcore_registers (struct pcb *pcb)
 
   dummy = pcb->pcb_kfp + 8;
   RF (SP_REGNUM, dummy);
-  RF (FP_REGNUM, sf.sf_fp);
+  RF (DEPRECATED_FP_REGNUM, sf.sf_fp);
   RF (PC_REGNUM, sf.sf_pc);
   RF (PS_REGNUM, intreg.r_psr);
 
@@ -258,7 +258,7 @@ clear_regs (void)
   RF (R0_REGNUM + 7, null);
 
   RF (SP_REGNUM, null);
-  RF (FP_REGNUM, null);
+  RF (DEPRECATED_FP_REGNUM, null);
   RF (PC_REGNUM, null);
   RF (PS_REGNUM, null);
 

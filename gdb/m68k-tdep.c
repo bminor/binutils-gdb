@@ -429,9 +429,9 @@ void
 m68k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 		     struct value **args, struct type *type, int gcc_p)
 {
-  bfd_putb32 (fun, (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 2);
+  bfd_putb32 (fun, (unsigned char *) dummy + DEPRECATED_CALL_DUMMY_START_OFFSET + 2);
   bfd_putb32 (nargs * 4,
-	      (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 8);
+	      (unsigned char *) dummy + DEPRECATED_CALL_DUMMY_START_OFFSET + 8);
 }
 
 
@@ -445,8 +445,8 @@ m68k_push_dummy_frame (void)
   char raw_buffer[12];
 
   sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (FP_REGNUM));
-  write_register (FP_REGNUM, sp);
+  sp = push_word (sp, read_register (DEPRECATED_FP_REGNUM));
+  write_register (DEPRECATED_FP_REGNUM, sp);
 
   /* Always save the floating-point registers, whether they exist on
      this target or not.  */
@@ -456,7 +456,7 @@ m68k_push_dummy_frame (void)
       sp = push_bytes (sp, raw_buffer, 12);
     }
 
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)
+  for (regnum = DEPRECATED_FP_REGNUM - 1; regnum >= 0; regnum--)
     {
       sp = push_word (sp, read_register (regnum));
     }
@@ -486,7 +486,7 @@ m68k_pop_frame (void)
 					   12);
 	}
     }
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)
+  for (regnum = DEPRECATED_FP_REGNUM - 1; regnum >= 0; regnum--)
     {
       if (get_frame_saved_regs (frame)[regnum])
 	{
@@ -499,7 +499,7 @@ m68k_pop_frame (void)
       write_register (PS_REGNUM,
 		      read_memory_integer (get_frame_saved_regs (frame)[PS_REGNUM], 4));
     }
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
@@ -589,7 +589,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 
   /* First possible address for a pc in a call dummy for this frame.  */
   CORE_ADDR possible_call_dummy_start =
-    get_frame_base (frame_info) - 28 - FP_REGNUM * 4 - 4 - 8 * 12;
+    get_frame_base (frame_info) - 28 - DEPRECATED_FP_REGNUM * 4 - 4 - 8 * 12;
 
   int nextinsn;
 
@@ -743,7 +743,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
     }
 lose:;
   get_frame_saved_regs (frame_info)[SP_REGNUM] = get_frame_base (frame_info) + 8;
-  get_frame_saved_regs (frame_info)[FP_REGNUM] = get_frame_base (frame_info);
+  get_frame_saved_regs (frame_info)[DEPRECATED_FP_REGNUM] = get_frame_base (frame_info);
   get_frame_saved_regs (frame_info)[PC_REGNUM] = get_frame_base (frame_info) + 4;
 #ifdef SIG_SP_FP_OFFSET
   /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
@@ -1025,27 +1025,27 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 12);
   set_gdbarch_register_virtual_type (gdbarch, m68k_register_virtual_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_byte (gdbarch, m68k_register_byte);
   set_gdbarch_num_regs (gdbarch, 29);
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
   set_gdbarch_sp_regnum (gdbarch, M68K_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, M68K_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, M68K_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, M68K_PS_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, M68K_FP0_REGNUM);
 
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24);
+  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 24);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-  set_gdbarch_call_dummy_length (gdbarch, 28);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 12);
+  set_gdbarch_deprecated_call_dummy_length (gdbarch, 28);
+  set_gdbarch_deprecated_call_dummy_start_offset (gdbarch, 12);
 
-  set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
-  set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, m68k_pop_frame);
 
@@ -1066,5 +1066,5 @@ void
 _initialize_m68k_tdep (void)
 {
   gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
-  tm_print_insn = print_insn_m68k;
+  deprecated_tm_print_insn = print_insn_m68k;
 }

@@ -987,9 +987,9 @@ maintenance_print_objfiles (char *ignore, int from_tty)
 }
 
 
-/* List all the symbol tables.  */
+/* List all the symbol tables whose names match REGEXP (optional).  */
 void
-maintenance_list_symtabs (char *regexp, int from_tty)
+maintenance_info_symtabs (char *regexp, int from_tty)
 {
   struct objfile *objfile;
 
@@ -1036,9 +1036,9 @@ maintenance_list_symtabs (char *regexp, int from_tty)
 }
 
 
-/* List all the partial symbol tables.  */
+/* List all the partial symbol tables whose names match REGEXP (optional).  */
 void
-maintenance_list_psymtabs (char *regexp, int from_tty)
+maintenance_info_psymtabs (char *regexp, int from_tty)
 {
   struct objfile *objfile;
 

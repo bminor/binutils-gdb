@@ -1,4 +1,4 @@
-/* BFD library support routines for the Renesas SH architecture.
+/* BFD library support routines for the Renesas / SuperH SH architecture.
    Copyright 1993, 1994, 1997, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.

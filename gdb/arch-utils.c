@@ -191,7 +191,9 @@ LONGEST legacy_call_dummy_words[1];
 int legacy_sizeof_call_dummy_words = sizeof (legacy_call_dummy_words);
 
 void
-generic_remote_translate_xfer_address (CORE_ADDR gdb_addr, int gdb_len,
+generic_remote_translate_xfer_address (struct gdbarch *gdbarch,
+				       struct regcache *regcache,
+				       CORE_ADDR gdb_addr, int gdb_len,
 				       CORE_ADDR * rem_addr, int *rem_len)
 {
   *rem_addr = gdb_addr;
@@ -209,7 +211,7 @@ generic_prologue_frameless_p (CORE_ADDR ip)
 int
 legacy_print_insn (bfd_vma vma, disassemble_info *info)
 {
-  return (*tm_print_insn) (vma, info);
+  return (*deprecated_tm_print_insn) (vma, info);
 }
 
 /* Helper functions for INNER_THAN */
@@ -410,7 +412,8 @@ cannot_register_not (int regnum)
 }
 
 /* Legacy version of target_virtual_frame_pointer().  Assumes that
-   there is an FP_REGNUM and that it is the same, cooked or raw.  */
+   there is an DEPRECATED_FP_REGNUM and that it is the same, cooked or
+   raw.  */
 
 void
 legacy_virtual_frame_pointer (CORE_ADDR pc,
@@ -422,8 +425,8 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
      register and an offset can determine this.  I think it should
      instead generate a byte code expression as that would work better
      with things like Dwarf2's CFI.  */
-  if (FP_REGNUM >= 0 && FP_REGNUM < NUM_REGS)
-    *frame_regnum = FP_REGNUM;
+  if (DEPRECATED_FP_REGNUM >= 0 && DEPRECATED_FP_REGNUM < NUM_REGS)
+    *frame_regnum = DEPRECATED_FP_REGNUM;
   else if (SP_REGNUM >= 0 && SP_REGNUM < NUM_REGS)
     *frame_regnum = SP_REGNUM;
   else

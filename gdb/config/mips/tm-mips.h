@@ -49,10 +49,10 @@ extern int mips_step_skips_delay (CORE_ADDR);
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
-#define REGISTER_SIZE 4
+#define DEPRECATED_REGISTER_SIZE 4
 
 /* The size of a register.  This is predefined in tm-mips64.h.  We
-   can't use REGISTER_SIZE because that is used for various other
+   can't use DEPRECATED_REGISTER_SIZE because that is used for various other
    things.  */
 
 #ifndef MIPS_REGSIZE

@@ -731,7 +731,7 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 array_fetch_registers (int ignored)
 {
-  char *reg = alloca (MAX_REGISTER_RAW_SIZE);
+  char reg[MAX_REGISTER_SIZE];
   int regno;
   char *p;
   char *packet = alloca (PBUFSIZ);

@@ -3272,6 +3272,7 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
      struct elf_link_hash_entry *dir, *ind;
 {
   struct ppc_link_hash_entry *edir, *eind;
+  flagword mask;
 
   edir = (struct ppc_link_hash_entry *) dir;
   eind = (struct ppc_link_hash_entry *) ind;
@@ -3316,20 +3317,24 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
   edir->is_entry |= eind->is_entry;
   edir->tls_mask |= eind->tls_mask;
 
-  /* Copy down any references that we may have already seen to the
-     symbol which just became indirect.  */
-  edir->elf.elf_link_hash_flags |=
-    (eind->elf.elf_link_hash_flags
-     & (ELF_LINK_HASH_REF_DYNAMIC
-	| ELF_LINK_HASH_REF_REGULAR
-	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-	| ELF_LINK_NON_GOT_REF));
+  mask = (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR
+	  | ELF_LINK_HASH_REF_REGULAR_NONWEAK | ELF_LINK_NON_GOT_REF);
+  /* If called to transfer flags for a weakdef during processing
+     of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+  if (ELIMINATE_COPY_RELOCS
+      && eind->elf.root.type != bfd_link_hash_indirect
+      && (edir->elf.elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    mask &= ~ELF_LINK_NON_GOT_REF;
+
+  edir->elf.elf_link_hash_flags |= eind->elf.elf_link_hash_flags & mask;
 
   /* If we were called to copy over info for a weak sym, that's all.  */
   if (eind->elf.root.type != bfd_link_hash_indirect)
     return;
 
-  /* Copy over got entries.  */
+  /* Copy over got entries that we may have already seen to the
+     symbol which just became indirect.  */
   if (eind->elf.got.glist != NULL)
     {
       if (edir->elf.got.glist != NULL)
@@ -3877,6 +3882,10 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
 	case R_PPC64_TOC:
+	  if (h != NULL && !info->shared)
+	    /* We may need a copy reloc.  */
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  /* Don't propagate .opd relocs.  */
 	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
 	    break;
@@ -4864,9 +4873,9 @@ ppc64_elf_edit_opd (obfd, info)
       sym_hashes = elf_sym_hashes (ibfd);
 
       /* Read the relocations.  */
-      relstart = _bfd_elf64_link_read_relocs (ibfd, sec, (PTR) NULL,
-					      (Elf_Internal_Rela *) NULL,
-					      info->keep_memory);
+      relstart = _bfd_elf_link_read_relocs (ibfd, sec, (PTR) NULL,
+					    (Elf_Internal_Rela *) NULL,
+					    info->keep_memory);
       if (relstart == NULL)
 	return FALSE;
 
@@ -5187,9 +5196,9 @@ ppc64_elf_tls_optimize (obfd, info)
 	    int expecting_tls_get_addr;
 
 	    /* Read the relocations.  */
-	    relstart = _bfd_elf64_link_read_relocs (ibfd, sec, (PTR) NULL,
-						    (Elf_Internal_Rela *) NULL,
-						    info->keep_memory);
+	    relstart = _bfd_elf_link_read_relocs (ibfd, sec, (PTR) NULL,
+						  (Elf_Internal_Rela *) NULL,
+						  info->keep_memory);
 	    if (relstart == NULL)
 	      return FALSE;
 
@@ -5488,7 +5497,9 @@ allocate_dynrelocs (h, inf)
 
   if (htab->elf.dynamic_sections_created
       && h->dynindx != -1
-      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h)
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       struct plt_entry *pent;
       bfd_boolean doneone = FALSE;
@@ -5588,8 +5599,10 @@ allocate_dynrelocs (h, inf)
 	s->_raw_size
 	  += (gent->tls_type & eh->tls_mask & (TLS_GD | TLS_LD)) ? 16 : 8;
 	dyn = htab->elf.dynamic_sections_created;
-	if (info->shared
-	    || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	if ((info->shared
+	     || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	    && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		|| h->root.type != bfd_link_hash_undefweak))
 	  htab->srelgot->_raw_size
 	    += (gent->tls_type & eh->tls_mask & TLS_GD
 		? 2 * sizeof (Elf64_External_Rela)
@@ -5625,6 +5638,12 @@ allocate_dynrelocs (h, inf)
 		pp = &p->next;
 	    }
 	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -6575,9 +6594,9 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 
 	      /* Get the relocs.  */
 	      internal_relocs
-		= _bfd_elf64_link_read_relocs (input_bfd, section, NULL,
-					       (Elf_Internal_Rela *) NULL,
-					       info->keep_memory);
+		= _bfd_elf_link_read_relocs (input_bfd, section, NULL,
+					     (Elf_Internal_Rela *) NULL,
+					     info->keep_memory);
 	      if (internal_relocs == NULL)
 		goto error_ret_free_local;
 
@@ -7631,7 +7650,10 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   the case of TLSLD where we'll use one entry per
 		   module.  */
 		*offp = off | 1;
-		if (info->shared || indx != 0)
+		if ((info->shared || indx != 0)
+		    && (h == NULL
+			|| ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			|| h->root.type != bfd_link_hash_undefweak))
 		  {
 		    outrel.r_offset = (htab->sgot->output_section->vma
 				       + htab->sgot->output_offset
@@ -7855,6 +7877,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
 		       && h->dynindx != -1

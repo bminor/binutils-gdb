@@ -95,6 +95,10 @@ extern int frame_id_eq (struct frame_id l, struct frame_id r);
    above about frameless functions.  */
 extern int frame_id_inner (struct frame_id l, struct frame_id r);
 
+/* Write the internal representation of a frame ID on the specified
+   stream.  */
+extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
+
 
 /* For every stopped thread, GDB tracks two frames: current and
    selected.  Current frame is the inner most frame of the selected
@@ -369,6 +373,7 @@ enum print_what
 
 extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
+#define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
 
 /* If legacy_frame_chain_valid() returns zero it means that the given
    frame is the outermost one and has no caller.
@@ -556,9 +561,9 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 
 /* FIXME: cagney/2002-12-18: Has the frame's base changed?  Or to be
    more exact, whas that initial guess at the frame's base as returned
-   by read_fp() wrong.  If it was, fix it.  This shouldn't be
-   necessary since the code should be getting the frame's base correct
-   from the outset.
+   by deprecated_read_fp() wrong.  If it was, fix it.  This shouldn't
+   be necessary since the code should be getting the frame's base
+   correct from the outset.
 
    This replaced: frame->frame = ....; */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,

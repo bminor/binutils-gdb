@@ -91,7 +91,7 @@ mips_linux_get_longjmp_target (CORE_ADDR *pc)
 static void
 supply_32bit_reg (int regnum, const void *addr)
 {
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   store_signed_integer (buf, REGISTER_RAW_SIZE (regnum),
                         extract_signed_integer (addr, 4));
   supply_register (regnum, buf);
@@ -104,9 +104,9 @@ supply_gregset (elf_gregset_t *gregsetp)
 {
   int regi;
   elf_greg_t *regp = *gregsetp;
-  char *zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+  char zerobuf[MAX_REGISTER_SIZE];
 
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = EF_REG0; regi <= EF_REG31; regi++)
     supply_32bit_reg ((regi - EF_REG0), (char *)(regp + regi));
@@ -192,9 +192,9 @@ void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   register int regi;
-  char *zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+  char zerobuf[MAX_REGISTER_SIZE];
 
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
@@ -379,9 +379,9 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
 {
   int regi;
   mips64_elf_greg_t *regp = *gregsetp;
-  char *zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+  char zerobuf[MAX_REGISTER_SIZE];
 
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = MIPS64_EF_REG0; regi <= MIPS64_EF_REG31; regi++)
     supply_register ((regi - MIPS64_EF_REG0), (char *)(regp + regi));
@@ -467,9 +467,9 @@ static void
 mips64_supply_fpregset (mips64_elf_fpregset_t *fpregsetp)
 {
   register int regi;
-  char *zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+  char zerobuf[MAX_REGISTER_SIZE];
 
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,

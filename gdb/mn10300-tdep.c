@@ -695,7 +695,8 @@ mn10300_frame_chain (struct frame_info *fi)
       /* Our caller has a frame pointer.  So find the frame in $a3 or
          in the stack.  */
       if (get_frame_saved_regs (fi)[A3_REGNUM])
-	return (read_memory_integer (get_frame_saved_regs (fi)[A3_REGNUM], REGISTER_SIZE));
+	return (read_memory_integer (get_frame_saved_regs (fi)[A3_REGNUM],
+				     DEPRECATED_REGISTER_SIZE));
       else
 	return read_register (A3_REGNUM);
     }
@@ -879,7 +880,8 @@ mn10300_frame_saved_pc (struct frame_info *fi)
 {
   int adjust = saved_regs_size (fi);
 
-  return (read_memory_integer (get_frame_base (fi) + adjust, REGISTER_SIZE));
+  return (read_memory_integer (get_frame_base (fi) + adjust,
+			       DEPRECATED_REGISTER_SIZE));
 }
 
 /* Function: mn10300_init_extra_frame_info
@@ -892,9 +894,10 @@ mn10300_frame_saved_pc (struct frame_info *fi)
    always be correct.  mn10300_analyze_prologue will fix fi->frame if
    it's not valid.
 
-   We can be called with the PC in the call dummy under two circumstances.
-   First, during normal backtracing, second, while figuring out the frame
-   pointer just prior to calling the target function (see run_stack_dummy).  */
+   We can be called with the PC in the call dummy under two
+   circumstances.  First, during normal backtracing, second, while
+   figuring out the frame pointer just prior to calling the target
+   function (see call_function_by_hand).  */
 
 static void
 mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
@@ -1007,7 +1010,7 @@ mn10300_dwarf2_reg_to_regnum (int dwarf2)
 static void
 mn10300_print_register (const char *name, int regnum, int reg_width)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   if (reg_width)
     printf_filtered ("%*s: ", reg_width, name);
@@ -1143,9 +1146,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_register_name (gdbarch, register_name);
-  set_gdbarch_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, 
-                              num_regs * gdbarch_register_size (gdbarch));
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, num_regs * gdbarch_deprecated_register_size (gdbarch));
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
   set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
@@ -1156,7 +1158,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_do_registers_info (gdbarch, mn10300_do_registers_info);
   set_gdbarch_sp_regnum (gdbarch, 8);
   set_gdbarch_pc_regnum (gdbarch, 9);
-  set_gdbarch_fp_regnum (gdbarch, 31);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 31);
   set_gdbarch_virtual_frame_pointer (gdbarch, mn10300_virtual_frame_pointer);
 
   /* Breakpoints.  */
@@ -1182,12 +1184,11 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
-  set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
 
   /* Calling functions in the inferior from GDB.  */
-  set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 
-                                       sizeof (mn10300_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mn10300_call_dummy_words));
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
@@ -1208,7 +1209,7 @@ _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
 
-  tm_print_insn = print_insn_mn10300;
+  deprecated_tm_print_insn = print_insn_mn10300;
 
   register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
 }

@@ -69,16 +69,22 @@ h8300_scan (info, string)
 
   if (*string == 'h' || *string == 'H')
     {
+      string++;
+      if (*string == 'n' || *string == 'N')
+	return (info->mach == bfd_mach_h8300hn);
+
       return (info->mach == bfd_mach_h8300h);
     }
   else if (*string == 's' || *string == 'S')
     {
+      string++;
+      if (*string == 'n' || *string == 'N')
+	return (info->mach == bfd_mach_h8300sn);
+
       return (info->mach == bfd_mach_h8300s);
     }
   else
-    {
-      return info->mach == bfd_mach_h8300;
-    }
+    return info->mach == bfd_mach_h8300;
 }
 
 /* This routine is provided two arch_infos and works out the machine
@@ -97,33 +103,66 @@ compatible (in, out)
     return in;
 }
 
-static const bfd_arch_info_type h8300s_info_struct =
+static const bfd_arch_info_type h8300sn_info_struct =
 {
-  32,				/* 32 bits in a word */
-  32,				/* 32 bits in an address */
-  8,				/* 8 bits in a byte */
+  32,				/* 32 bits in a word.  */
+  32,				/* 32 bits in an address.  */
+  8,				/* 8 bits in a byte.  */
   bfd_arch_h8300,
-  bfd_mach_h8300s,
-  "h8300s",			/* arch_name  */
-  "h8300s",			/* printable name */
+  bfd_mach_h8300sn,
+  "h8300sn",			/* Architecture name.  */
+  "h8300sn",			/* Printable name.  */
   1,
-  FALSE,			/* the default machine */
+  FALSE,			/* The default machine.  */
   compatible,
   h8300_scan,
   0
 };
 
+
+static const bfd_arch_info_type h8300hn_info_struct =
+{
+  32,				/* 32 bits in a word.  */
+  32,				/* 32 bits in an address.  */
+  8,				/* 8 bits in a byte.  */
+  bfd_arch_h8300,
+  bfd_mach_h8300hn,
+  "h8300hn",			/* Architecture name.  */
+  "h8300hn",			/* Printable name.  */
+  1,
+  FALSE,			/* The default machine.  */
+  compatible,
+  h8300_scan,
+  &h8300sn_info_struct
+};
+
+static const bfd_arch_info_type h8300s_info_struct =
+{
+  32,				/* 32 bits in a word.  */
+  32,				/* 32 bits in an address.  */
+  8,				/* 8 bits in a byte.  */
+  bfd_arch_h8300,
+  bfd_mach_h8300s,
+  "h8300s",			/* Architecture name.  */
+  "h8300s",			/* Printable name.  */
+  1,
+  FALSE,			/* The default machine.  */
+  compatible,
+  h8300_scan,
+  & h8300hn_info_struct
+};
+
 static const bfd_arch_info_type h8300h_info_struct =
 {
-  32,				/* 32 bits in a word */
-  32,				/* 32 bits in an address */
-  8,				/* 8 bits in a byte */
+  32,				/* 32 bits in a word.  */
+  32,				/* 32 bits in an address.  */
+  8,				/* 8 bits in a byte.  */
   bfd_arch_h8300,
   bfd_mach_h8300h,
-  "h8300h",			/* arch_name  */
-  "h8300h",			/* printable name */
+  "h8300h",			/* Architecture name.  */
+  "h8300h",			/* Printable name.  */
   1,
-  FALSE,			/* the default machine */
+  FALSE,			/* The default machine.  */
   compatible,
   h8300_scan,
   &h8300s_info_struct
@@ -131,15 +170,15 @@ static const bfd_arch_info_type h8300h_info_struct =
 
 const bfd_arch_info_type bfd_h8300_arch =
 {
-  16,				/* 16 bits in a word */
-  16,				/* 16 bits in an address */
-  8,				/* 8 bits in a byte */
+  16,				/* 16 bits in a word.  */
+  16,				/* 16 bits in an address.  */
+  8,				/* 8 bits in a byte.  */
   bfd_arch_h8300,
   bfd_mach_h8300,
-  "h8300",			/* arch_name  */
-  "h8300",			/* printable name */
+  "h8300",			/* Architecture name.  */
+  "h8300",			/* Printable name.  */
   1,
-  TRUE,				/* the default machine */
+  TRUE,				/* The default machine.  */
   compatible,
   h8300_scan,
   &h8300h_info_struct

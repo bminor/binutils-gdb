@@ -174,7 +174,7 @@ extern int sparc_intreg_size (void);
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
-#define REGISTER_SIZE 4
+#define DEPRECATED_REGISTER_SIZE 4
 
 /* Number of machine registers */
 
@@ -182,7 +182,7 @@ extern int sparc_intreg_size (void);
 
 #define	SP_REGNUM 14		/* Contains address of top of stack, \
 				   which is also the bottom of the frame.  */
-#define	FP_REGNUM 30		/* Contains address of executing stack frame */
+#define	DEPRECATED_FP_REGNUM 30		/* Contains address of executing stack frame */
 
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 
@@ -201,8 +201,9 @@ extern int sparc_intreg_size (void);
    remove the ins and locals from `registers', make sure that
    frame_register() can get them from the stack (even in the innermost
    frame), and make this the way to access them.  For the frame
-   pointer we would do that via TARGET_READ_FP.  On the other hand,
-   that is likely to be confusing or worse for flat frames.  */
+   pointer we would do that via DEPRECATED_TARGET_READ_FP.  On the
+   other hand, that is likely to be confusing or worse for flat
+   frames.  */
 
 #define REGISTER_BYTES (32*4+32*4+8*4)
 
@@ -545,9 +546,9 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
  *
  *   call_function then writes CALL_DUMMY, pushes the args onto the
  * stack, and adjusts the stack pointer.
- *
- *   run_stack_dummy then starts execution (in the middle of
- * CALL_DUMMY, as directed by call_function).  */
+ 
+   call_function_by_hand then starts execution (in the middle of
+   CALL_DUMMY, as directed by call_function).  */
 
 #ifndef CALL_DUMMY
 /* This sequence of words is the instructions
@@ -588,19 +589,19 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
 /* Size of the call dummy in bytes. */
 
-#define CALL_DUMMY_LENGTH 0x38
+#define DEPRECATED_CALL_DUMMY_LENGTH 0x38
 
 /* Offset within call dummy of first instruction to execute. */
 
-#define CALL_DUMMY_START_OFFSET 0
+#define DEPRECATED_CALL_DUMMY_START_OFFSET 0
 
 /* Offset within CALL_DUMMY of the 'call' instruction. */
 
-#define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + 0x24)
+#define CALL_DUMMY_CALL_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + 0x24)
 
 /* Offset within CALL_DUMMY of the 'ta 1' trap instruction. */
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 0x30)
+#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + 0x30)
 
 #define DEPRECATED_CALL_DUMMY_STACK_ADJUST 68
 
@@ -625,7 +626,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) \
+#define DEPRECATED_FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) \
      sparc_fix_call_dummy (DUMMYNAME, PC, FUN, TYPE, GCC_P)
 void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 			   struct type *value_type, int using_gcc);

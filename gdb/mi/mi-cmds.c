@@ -119,6 +119,7 @@ struct mi_cmd mi_cmds[] =
   {"symbol-info-line", 0, 0},
   {"symbol-info-symbol", 0, 0},
   {"symbol-list-functions", 0, 0},
+  {"symbol-list-lines", 0, 0, mi_cmd_symbol_list_lines},
   {"symbol-list-types", 0, 0},
   {"symbol-list-variables", 0, 0},
   {"symbol-locate", 0, 0},

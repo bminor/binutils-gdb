@@ -70,10 +70,10 @@ void
 fetch_inferior_registers (int regno)
 {
   register unsigned int regaddr;
-  char *buf = alloca (max_register_size (current_gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   register int i;
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   deprecated_registers_fetched ();
 
@@ -91,7 +91,7 @@ fetch_inferior_registers (int regno)
 
   supply_register (ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
-  supply_register (FP_REGNUM, zerobuf);
+  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 /* Store our register values back into the inferior.
@@ -108,7 +108,7 @@ store_inferior_registers (int regno)
     {
       if (regno == ZERO_REGNUM || regno == PS_REGNUM
 	  || regno == BADVADDR_REGNUM || regno == CAUSE_REGNUM
-	  || regno == FCRIR_REGNUM || regno == FP_REGNUM
+	  || regno == FCRIR_REGNUM || regno == DEPRECATED_FP_REGNUM
 	  || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
 	return;
       regaddr = REGISTER_PTRACE_ADDR (regno);
@@ -174,8 +174,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   int bad_reg = -1;
   register reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
 
-  char *zerobuf = alloca (max_register_size (current_gdbarch));
-  memset (zerobuf, 0, max_register_size (current_gdbarch));
+  char zerobuf[MAX_REGISTER_SIZE];
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
 
   /* If u.u_ar0 was an absolute address in the core file, relativize it now,
@@ -210,7 +210,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
     }
   supply_register (ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
-  supply_register (FP_REGNUM, zerobuf);
+  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 /* Return the address in the core dump or inferior of register REGNO.
