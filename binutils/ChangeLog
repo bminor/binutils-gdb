@@ -1,5 +1,8 @@
 Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* ar.c: Use bfd_fatal and bfd_nonfatal instead of bfd_perror and exit.
+	Indent.  Remove DEFUNs.
+
 	* nlmconv.c (main), objcopy.c (copy_file): Print matching formats
 	if ambiguous match.
 	* nm.c (display_file), size.c (display_bfd): Eliminate gotos.
