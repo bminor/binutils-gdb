@@ -1,5 +1,7 @@
 Fri Sep  3 08:57:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c, utils.c: Add comments about immediate_quit.
+
 	* elfread.c (elf_symtab_read): Don't add symbols starting with ".L"
 	to minimal symbols.
 
