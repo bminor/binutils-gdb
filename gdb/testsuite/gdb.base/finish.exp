@@ -43,11 +43,18 @@ proc finish_1 { type } {
 	    "continue to ${type}_func"
     send_gdb "finish\n"
     gdb_expect {
-	-re ".*Value returned is .* = 1 '.001'\r\n$gdb_prompt $" {
+	-re ".*Value returned is .* = 49 '1'\r\n$gdb_prompt $" {
 	    if { $type == "char" } {
 		pass "finish from char_func"
 	    } else {
-		fail "finish from char_func"
+		fail "finish from ${type}_func"
+	    }
+	}
+	-re ".*Value returned is .* = \[0123456789\]* '1'\r\n$gdb_prompt $" {
+	    if { $type == "char" } {
+		pass "finish from char_func (non-ASCII char set?)"
+	    } else {
+		fail "finish from ${type}_func"
 	    }
 	}
 	-re ".*Value returned is .* = 1\r\n$gdb_prompt $" {

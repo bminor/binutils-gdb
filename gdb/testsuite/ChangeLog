@@ -1,3 +1,8 @@
+2000-12-21  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/finish.exp: Accept '1' instead of \001 from char_func.
+	Add a RE to accept a non-ascii char if one is ever presented.
+
 2000-12-20  Fernando Nasser  <fnasser@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_start): Test for MI_OUT, not UI_OUT.
