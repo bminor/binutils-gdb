@@ -91,7 +91,10 @@ delta68_in_sigtramp (pc, name)
      CORE_ADDR pc;
      char *name;
 {
-  return strcmp (name, "_sigcode") == 0;
+  if (name != NULL)
+    return strcmp (name, "_sigcode") == 0;
+  else
+    return 0;
 }
 
 CORE_ADDR
