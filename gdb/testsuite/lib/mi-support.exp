@@ -212,7 +212,7 @@ proc mi_delete_breakpoints {} {
 	 -re ".*102-break-delete\r\n102\\\^done\r\n$mi_gdb_prompt$" {
             # This happens if there were no breakpoints
 	 }
-	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
+	 timeout { perror "Delete all breakpoints in mi_delete_breakpoints (timeout)" ; return }
     }
 
 # The correct output is not "No breakpoints or watchpoints." but an
