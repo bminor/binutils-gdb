@@ -1993,9 +1993,9 @@ get_fptr (abfd, info, ia64_info)
       if (info->pie)
 	{
 	  asection *fptr_rel;
-	  fptr_rel = bfd_make_section(abfd, ".rela.opd");
+	  fptr_rel = bfd_make_section(dynobj, ".rela.opd");
 	  if (fptr_rel == NULL
-	      || !bfd_set_section_flags (abfd, fptr_rel,
+	      || !bfd_set_section_flags (dynobj, fptr_rel,
 					 (SEC_ALLOC | SEC_LOAD
 					  | SEC_HAS_CONTENTS
 					  | SEC_IN_MEMORY
@@ -2927,6 +2927,15 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	{
 	  if (strip)
 	    ia64_info->fptr_sec = NULL;
+	}
+      else if (sec == ia64_info->rel_fptr_sec)
+	{
+	  if (strip)
+	    ia64_info->rel_fptr_sec = NULL;
+	  else
+	    /* We use the reloc_count field as a counter if we need to
+	       copy relocs into the output file.  */
+	    sec->reloc_count = 0;
 	}
       else if (sec == ia64_info->plt_sec)
 	{

@@ -1,3 +1,8 @@
+2003-11-18  James E Wilson  <wilson@specifixinc.com>
+
+	* emulparams/elf64_ia64.sh (OTHER_PLT_RELOC_SECTIONS): Include
+	.rela.opd if -pie.
+
 2003-11-10  Jonathan Wilson <jonwil@tpgi.com.au>
 
 	* scripttempl/pe.sc: Add support for TLS sections.

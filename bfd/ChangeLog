@@ -1,3 +1,9 @@
+2003-11-18  James E Wilson  <wilson@specifixinc.com>
+
+	* elfxx-ia64.c (get_fptr): For fptr_rel, use dynobj not abfd.
+	(elfNN_ia64_size_dynamic_sections): When stripping sections, check
+	for ia64_info->rel_fptr_sec.
+
 2003-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Exit early if section
