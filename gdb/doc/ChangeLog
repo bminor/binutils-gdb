@@ -1,5 +1,17 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbint.texinfo: Include fdl.texi.
+	(Top): Add GNU Free Documentation License.
+	* Makefile.in (SFILES_INCLUDED): Add gpl.texi.
+	(gdbint.dvi, gdbint.pdf, gdbint.info): Add dependency on fdl.texi.
+	(gdbint_toc.html): Add dependency on gdb-cfg.texi and fdl.texi.
+	(gdbint.info): Add srcdir to include path.
+	* gdb.texinfo: Include gpl.texi.
+	(Top): Add Copying.
+	* gpl.texi: New file.
+
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbint.texinfo (Debugging GDB): Remove references to cygnus.com.
 
 2002-02-19  Pierre Muller  <muller@ics.u-strasbg.fr>

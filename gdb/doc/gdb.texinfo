@@ -154,6 +154,8 @@ Copyright (C) 1988-2002 Free Software Foundation, Inc.
 * Installing GDB::              Installing GDB
 * Maintenance Commands::        Maintenance Commands
 * Remote Protocol::             GDB Remote Serial Protocol
+* Copying::			GNU General Public License says
+                                how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
 * Index::                       Index
 @end menu
@@ -14947,6 +14949,7 @@ Example sequence of a target being stepped by a single instruction:
 <- @code{+}
 @end example
 
+@include gpl.texi
 
 @include fdl.texi
 

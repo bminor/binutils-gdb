@@ -93,6 +93,8 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Releasing GDB::
 * Testsuite::
 * Hints::
+
+* GNU Free Documentation License::  The license for this documentation
 * Index::
 @end menu
 
@@ -5624,6 +5626,8 @@ pyr-xdep.c
 exec.c
 
 @end table
+
+@include fdl.texi
 
 @node Index
 @unnumbered Index

@@ -97,7 +97,10 @@ TEX = tex
 DVIPS = dvips
 
 # Main GDB manual's source files
-SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/annotate.texi $(srcdir)/fdl.texi
+SFILES_INCLUDED = gdb-cfg.texi \
+	$(srcdir)/annotate.texi \
+	$(srcdir)/fdl.texi \
+	$(srcdir)/gpl.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 
@@ -362,7 +365,7 @@ gdb_toc.html: ${SFILES_DOC}
 	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
 # GDB INTERNALS MANUAL: TeX dvi file
-gdbint.dvi: gdbint.texinfo gdb-cfg.texi
+gdbint.dvi: gdbint.texinfo gdb-cfg.texi fdl.texi
 	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/gdbint.texinfo
 	rm -f gdbint.aux gdbint.cp* gdbint.fn* gdbint.ky* \
 		gdbint.log gdbint.pg* gdbint.toc gdbint.tp* gdbint.vr*
@@ -370,19 +373,19 @@ gdbint.dvi: gdbint.texinfo gdb-cfg.texi
 gdbint.ps : gdbint.dvi
 	$(DVIPS) -o $@ $?
 
-gdbint.pdf: gdbint.dvi gdb-cfg.texi
+gdbint.pdf: gdbint.texinfo gdb-cfg.texi fdl.texi
 	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/gdbint.texinfo
 	rm -f gdbint.aux gdbint.cp* gdbint.fn* gdbint.ky* \
 		gdbint.log gdbint.pg* gdbint.toc gdbint.tp* gdbint.vr*
 
 # GDB INTERNALS MANUAL: info file
 
-gdbint.info: gdbint.texinfo
-	$(MAKEINFO) -o gdbint.info $(srcdir)/gdbint.texinfo
+gdbint.info: gdbint.texinfo fdl.texi
+	$(MAKEINFO) -I $(srcdir) -o gdbint.info $(srcdir)/gdbint.texinfo
 
 # GDB INTERNALS MANUAL: HTML file
 
-gdbint_toc.html: gdbint.texinfo
+gdbint_toc.html: gdbint.texinfo gdb-cfg.texi fdl.texi
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/gdbint.texinfo
 
 stabs.info: stabs.texinfo
