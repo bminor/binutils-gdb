@@ -1,3 +1,27 @@
+2002-10-25  Andrew Cagney  <cagney@redhat.com>
+
+	* complaints.h (struct deprecated_complaint): Rename `struct
+	complaint'.
+	* complaints.c (complain): Update.
+	* remote-vx68.c, remote-vxmips.c, remote-vxsparc.c: Delete
+	incorrect comment indicating that "symfile.h" was being included
+	for the `struct complaint' definition.
+	* remote-vx.c: Update.
+	* objc-lang.c: Update.
+	* xcoffread.c: Update.
+	* hpread.c: Update.
+	* mdebugread.c: Update.
+	* stabsread.c: Update.
+	* dwarf2read.c: Update.
+	* dwarfread.c: Update.
+	* elfread.c: Update.
+	* coffread.c: Update.
+	* stabsread.h: Update.
+	* dbxread.c: Update.
+	* buildsym.c: Update.
+	* gdbtypes.c: Update.
+	* macrotab.c: Update.
+
 2002-10-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (x86_64_gdbarch_init): Make a bit more similar to

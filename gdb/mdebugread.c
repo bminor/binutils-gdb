@@ -143,94 +143,94 @@ struct symloc
 
 /* Various complaints about symbol reading that don't abort the process */
 
-static struct complaint bad_file_number_complaint =
+static struct deprecated_complaint bad_file_number_complaint =
 {"bad file number %d", 0, 0};
 
-static struct complaint index_complaint =
+static struct deprecated_complaint index_complaint =
 {"bad aux index at symbol %s", 0, 0};
 
-static struct complaint aux_index_complaint =
+static struct deprecated_complaint aux_index_complaint =
 {"bad proc end in aux found from symbol %s", 0, 0};
 
-static struct complaint block_index_complaint =
+static struct deprecated_complaint block_index_complaint =
 {"bad aux index at block symbol %s", 0, 0};
 
-static struct complaint unknown_ext_complaint =
+static struct deprecated_complaint unknown_ext_complaint =
 {"unknown external symbol %s", 0, 0};
 
-static struct complaint unknown_sym_complaint =
+static struct deprecated_complaint unknown_sym_complaint =
 {"unknown local symbol %s", 0, 0};
 
-static struct complaint unknown_st_complaint =
+static struct deprecated_complaint unknown_st_complaint =
 {"with type %d", 0, 0};
 
-static struct complaint block_overflow_complaint =
+static struct deprecated_complaint block_overflow_complaint =
 {"block containing %s overfilled", 0, 0};
 
-static struct complaint basic_type_complaint =
+static struct deprecated_complaint basic_type_complaint =
 {"cannot map ECOFF basic type 0x%x for %s", 0, 0};
 
-static struct complaint unknown_type_qual_complaint =
+static struct deprecated_complaint unknown_type_qual_complaint =
 {"unknown type qualifier 0x%x", 0, 0};
 
-static struct complaint array_index_type_complaint =
+static struct deprecated_complaint array_index_type_complaint =
 {"illegal array index type for %s, assuming int", 0, 0};
 
-static struct complaint bad_tag_guess_complaint =
+static struct deprecated_complaint bad_tag_guess_complaint =
 {"guessed tag type of %s incorrectly", 0, 0};
 
-static struct complaint block_member_complaint =
+static struct deprecated_complaint block_member_complaint =
 {"declaration block contains unhandled symbol type %d", 0, 0};
 
-static struct complaint stEnd_complaint =
+static struct deprecated_complaint stEnd_complaint =
 {"stEnd with storage class %d not handled", 0, 0};
 
-static struct complaint unknown_mdebug_symtype_complaint =
+static struct deprecated_complaint unknown_mdebug_symtype_complaint =
 {"unknown symbol type 0x%x", 0, 0};
 
-static struct complaint stab_unknown_complaint =
+static struct deprecated_complaint stab_unknown_complaint =
 {"unknown stabs symbol %s", 0, 0};
 
-static struct complaint pdr_for_nonsymbol_complaint =
+static struct deprecated_complaint pdr_for_nonsymbol_complaint =
 {"PDR for %s, but no symbol", 0, 0};
 
-static struct complaint pdr_static_symbol_complaint =
+static struct deprecated_complaint pdr_static_symbol_complaint =
 {"can't handle PDR for static proc at 0x%lx", 0, 0};
 
-static struct complaint bad_setjmp_pdr_complaint =
+static struct deprecated_complaint bad_setjmp_pdr_complaint =
 {"fixing bad setjmp PDR from libc", 0, 0};
 
-static struct complaint bad_fbitfield_complaint =
+static struct deprecated_complaint bad_fbitfield_complaint =
 {"can't handle TIR fBitfield for %s", 0, 0};
 
-static struct complaint bad_continued_complaint =
+static struct deprecated_complaint bad_continued_complaint =
 {"illegal TIR continued for %s", 0, 0};
 
-static struct complaint bad_rfd_entry_complaint =
+static struct deprecated_complaint bad_rfd_entry_complaint =
 {"bad rfd entry for %s: file %d, index %d", 0, 0};
 
-static struct complaint unexpected_type_code_complaint =
+static struct deprecated_complaint unexpected_type_code_complaint =
 {"unexpected type code for %s", 0, 0};
 
-static struct complaint unable_to_cross_ref_complaint =
+static struct deprecated_complaint unable_to_cross_ref_complaint =
 {"unable to cross ref btTypedef for %s", 0, 0};
 
-static struct complaint bad_indirect_xref_complaint =
+static struct deprecated_complaint bad_indirect_xref_complaint =
 {"unable to cross ref btIndirect for %s", 0, 0};
 
-static struct complaint illegal_forward_tq0_complaint =
+static struct deprecated_complaint illegal_forward_tq0_complaint =
 {"illegal tq0 in forward typedef for %s", 0, 0};
 
-static struct complaint illegal_forward_bt_complaint =
+static struct deprecated_complaint illegal_forward_bt_complaint =
 {"illegal bt %d in forward typedef for %s", 0, 0};
 
-static struct complaint bad_linetable_guess_complaint =
+static struct deprecated_complaint bad_linetable_guess_complaint =
 {"guessed size of linetable for %s incorrectly", 0, 0};
 
-static struct complaint bad_ext_ifd_complaint =
+static struct deprecated_complaint bad_ext_ifd_complaint =
 {"bad ifd for external symbol: %d (max %d)", 0, 0};
 
-static struct complaint bad_ext_iss_complaint =
+static struct deprecated_complaint bad_ext_iss_complaint =
 {"bad iss for external symbol: %ld (max %ld)", 0, 0};
 
 /* Macros and extra defs */
@@ -2720,7 +2720,7 @@ parse_partial_symbols (struct objfile *objfile)
 
 		switch (type_code)
 		  {
-		    static struct complaint function_outside_compilation_unit = {
+		    static struct deprecated_complaint function_outside_compilation_unit = {
 		      "function `%s' appears to be defined outside of all compilation units", 0, 0
 		    };
 		    char *p;

@@ -129,52 +129,52 @@ struct symloc
 
 /* FIXME: Shouldn't this stuff be in a .h file somewhere?  */
 /* Complaints about the symbols we have encountered.  */
-extern struct complaint string_table_offset_complaint;
-extern struct complaint lbrac_unmatched_complaint;
-extern struct complaint lbrac_mismatch_complaint;
+extern struct deprecated_complaint string_table_offset_complaint;
+extern struct deprecated_complaint lbrac_unmatched_complaint;
+extern struct deprecated_complaint lbrac_mismatch_complaint;
 
-static struct complaint hpread_unhandled_end_common_complaint =
+static struct deprecated_complaint hpread_unhandled_end_common_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n", 0, 0
 };
 
-static struct complaint hpread_unhandled_type_complaint =
+static struct deprecated_complaint hpread_unhandled_type_complaint =
 {
   "hpread_type_translate: unhandled type code.", 0, 0
 };
 
-static struct complaint hpread_struct_complaint =
+static struct deprecated_complaint hpread_struct_complaint =
 {
   "hpread_read_struct_type: expected SVAR type...", 0, 0
 };
 
-static struct complaint hpread_array_complaint =
+static struct deprecated_complaint hpread_array_complaint =
 {
   "error in hpread_array_type.", 0, 0
 };
 
-static struct complaint hpread_type_lookup_complaint =
+static struct deprecated_complaint hpread_type_lookup_complaint =
 {
   "error in hpread_type_lookup().", 0, 0
 };
 
 
-static struct complaint hpread_unexpected_end_complaint =
+static struct deprecated_complaint hpread_unexpected_end_complaint =
 {
   "internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind.", 0, 0
 };
 
-static struct complaint hpread_tagdef_complaint =
+static struct deprecated_complaint hpread_tagdef_complaint =
 {
   "error processing class tagdef", 0, 0
 };
 
-static struct complaint hpread_unhandled_common_complaint =
+static struct deprecated_complaint hpread_unhandled_common_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON.", 0, 0
 };
 
-static struct complaint hpread_unhandled_blockdata_complaint =
+static struct deprecated_complaint hpread_unhandled_blockdata_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA.", 0, 0
 };

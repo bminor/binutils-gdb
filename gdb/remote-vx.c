@@ -820,7 +820,7 @@ net_get_symbols (ldtabl *pLoadTable)
    Returns status of symbol read on target side (0=success, -1=fail)
    Returns -1 and complain()s if rpc fails.  */
 
-struct complaint cant_contact_target =
+struct deprecated_complaint cant_contact_target =
 {"Lost contact with VxWorks target", 0, 0};
 
 static int

@@ -202,46 +202,46 @@ static const char vb_name[] = "_vb$";
 #define BELIEVE_PCC_PROMOTION_TYPE 0
 #endif
 
-static struct complaint invalid_cpp_abbrev_complaint =
+static struct deprecated_complaint invalid_cpp_abbrev_complaint =
 {"invalid C++ abbreviation `%s'", 0, 0};
 
-static struct complaint invalid_cpp_type_complaint =
+static struct deprecated_complaint invalid_cpp_type_complaint =
 {"C++ abbreviated type name unknown at symtab pos %d", 0, 0};
 
-static struct complaint member_fn_complaint =
+static struct deprecated_complaint member_fn_complaint =
 {"member function type missing, got '%c'", 0, 0};
 
-static struct complaint const_vol_complaint =
+static struct deprecated_complaint const_vol_complaint =
 {"const/volatile indicator missing, got '%c'", 0, 0};
 
-static struct complaint error_type_complaint =
+static struct deprecated_complaint error_type_complaint =
 {"couldn't parse type; debugger out of date?", 0, 0};
 
-static struct complaint invalid_member_complaint =
+static struct deprecated_complaint invalid_member_complaint =
 {"invalid (minimal) member type data format at symtab pos %d.", 0, 0};
 
-static struct complaint range_type_base_complaint =
+static struct deprecated_complaint range_type_base_complaint =
 {"base type %d of range type is not defined", 0, 0};
 
-static struct complaint reg_value_complaint =
+static struct deprecated_complaint reg_value_complaint =
 {"register number %d too large (max %d) in symbol %s", 0, 0};
 
-static struct complaint vtbl_notfound_complaint =
+static struct deprecated_complaint vtbl_notfound_complaint =
 {"virtual function table pointer not found when defining class `%s'", 0, 0};
 
-static struct complaint unrecognized_cplus_name_complaint =
+static struct deprecated_complaint unrecognized_cplus_name_complaint =
 {"Unknown C++ symbol name `%s'", 0, 0};
 
-static struct complaint rs6000_builtin_complaint =
+static struct deprecated_complaint rs6000_builtin_complaint =
 {"Unknown builtin type %d", 0, 0};
 
-static struct complaint unresolved_sym_chain_complaint =
+static struct deprecated_complaint unresolved_sym_chain_complaint =
 {"%s: common block `%s' from global_sym_chain unresolved", 0, 0};
 
-static struct complaint stabs_general_complaint =
+static struct deprecated_complaint stabs_general_complaint =
 {"%s", 0, 0};
 
-static struct complaint lrs_general_complaint =
+static struct deprecated_complaint lrs_general_complaint =
 {"%s", 0, 0};
 
 /* Make a list of forward references which haven't been defined.  */
@@ -311,7 +311,7 @@ dbx_lookup_type (int typenums[2])
 
   if (filenum < 0 || filenum >= n_this_object_header_files)
     {
-      static struct complaint msg =
+      static struct deprecated_complaint msg =
       {"\
 Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
        0, 0};
@@ -618,11 +618,11 @@ static int
 read_cfront_baseclasses (struct field_info *fip, char **pp, struct type *type,
 			 struct objfile *objfile)
 {
-  static struct complaint msg_unknown =
+  static struct deprecated_complaint msg_unknown =
   {"\
 	 Unsupported token in stabs string %s.\n",
    0, 0};
-  static struct complaint msg_notfound =
+  static struct deprecated_complaint msg_notfound =
   {"\
 	           Unable to find base type for %s.\n",
    0, 0};
@@ -692,7 +692,7 @@ read_cfront_baseclasses (struct field_info *fip, char **pp, struct type *type,
 	  /* Bad visibility format.  Complain and treat it as
 	     public.  */
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {
 	      "Unknown visibility `%c' for baseclass", 0, 0};
 	    complain (&msg, new->visibility);
@@ -810,7 +810,7 @@ read_cfront_member_functions (struct field_info *fip, char **pp,
       ref_func = lookup_symbol (fname, 0, VAR_NAMESPACE, 0, 0);		/* demangled name */
       if (!ref_func)
 	{
-	  static struct complaint msg =
+	  static struct deprecated_complaint msg =
 	  {"\
       		Unable to find function symbol for %s\n",
 	   0, 0};
@@ -2435,7 +2435,7 @@ again:
 	      {
 		/* Complain and keep going, so compilers can invent new
 		   cross-reference types.  */
-		static struct complaint msg =
+		static struct deprecated_complaint msg =
 		{"Unrecognized cross-reference type `%c'", 0, 0};
 		complain (&msg, (*pp)[0]);
 		code = TYPE_CODE_STRUCT;
@@ -2660,7 +2660,7 @@ again:
           ++*pp;
         else
           {
-            static struct complaint msg = {
+            static struct deprecated_complaint msg = {
               "Prototyped function type didn't end arguments with `#':\n%s",
               0, 0
             };
@@ -4018,7 +4018,7 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
 	default:
 	  /* Unknown character.  Complain and treat it as non-virtual.  */
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {
 	      "Unknown virtual character `%c' for baseclass", 0, 0};
 	    complain (&msg, **pp);
@@ -4037,7 +4037,7 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
 	  /* Bad visibility format.  Complain and treat it as
 	     public.  */
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {
 	      "Unknown visibility `%c' for baseclass", 0, 0
 	    };
@@ -4210,7 +4210,7 @@ read_cfront_static_fields (struct field_info *fip, char **pp, struct type *type,
       ref_static = lookup_symbol (sname, 0, VAR_NAMESPACE, 0, 0);	/*demangled_name */
       if (!ref_static)
 	{
-	  static struct complaint msg =
+	  static struct deprecated_complaint msg =
 	  {"\
       		Unable to find symbol for static data field %s\n",
 	   0, 0};
@@ -4389,7 +4389,7 @@ attach_fields_to_type (struct field_info *fip, register struct type *type,
 	default:
 	  /* Unknown visibility.  Complain and treat it as public.  */
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {
 	      "Unknown visibility `%c' for field", 0, 0};
 	    complain (&msg, fip->list->visibility);
@@ -4402,7 +4402,7 @@ attach_fields_to_type (struct field_info *fip, register struct type *type,
 }
 
 
-static struct complaint multiply_defined_struct =
+static struct deprecated_complaint multiply_defined_struct =
 {"struct/union type gets multiply defined: %s%s", 0, 0};
 
 
@@ -5214,7 +5214,7 @@ common_block_start (char *name, struct objfile *objfile)
 {
   if (common_block_name != NULL)
     {
-      static struct complaint msg =
+      static struct deprecated_complaint msg =
       {
 	"Invalid symbol data: common block within common block",
 	0, 0};
@@ -5244,7 +5244,7 @@ common_block_end (struct objfile *objfile)
 
   if (common_block_name == NULL)
     {
-      static struct complaint msg =
+      static struct deprecated_complaint msg =
       {"ECOMM symbol unmatched by BCOMM", 0, 0};
       complain (&msg);
       return;
@@ -5359,7 +5359,7 @@ cleanup_undefined_types (void)
 
 		if (typename == NULL)
 		  {
-		    static struct complaint msg =
+		    static struct deprecated_complaint msg =
 		    {"need a type name", 0, 0};
 		    complain (&msg);
 		    break;
@@ -5384,7 +5384,7 @@ cleanup_undefined_types (void)
 
 	default:
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"\
 GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};
 	    complain (&msg, TYPE_CODE (*type));

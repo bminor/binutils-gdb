@@ -1341,7 +1341,7 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
    This used to be coded as a macro, but I don't think it is called 
    often enough to merit such treatment.  */
 
-struct complaint stub_noname_complaint =
+struct deprecated_complaint stub_noname_complaint =
 {"stub type has NULL name", 0, 0};
 
 struct type *
@@ -1512,7 +1512,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	default:
 	  {
 
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"Bad int type code length x%x\n", 0, 0};
 
 	    complain (&msg, tlen);
@@ -1534,7 +1534,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	  break;
 	default:
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"Bad float type code length x%x\n", 0, 0};
 	    complain (&msg, tlen);
 	  }
@@ -1550,7 +1550,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
       break;
     case TYPE_CODE_TYPEDEF:
       {
-	static struct complaint msg =
+	static struct deprecated_complaint msg =
 	{"Typedefs in overloaded functions not yet supported\n", 0, 0};
 	complain (&msg);
       }
@@ -1590,7 +1590,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
     case TYPE_CODE_ERROR:
     default:
       {
-	static struct complaint msg =
+	static struct deprecated_complaint msg =
 	{"Unknown type code x%x\n", 0, 0};
 	complain (&msg, tcode);
       }

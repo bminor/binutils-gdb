@@ -74,11 +74,11 @@ struct objc_method {
 
 /* Complaints about ObjC classes, selectors, etc.  */
 
-static struct complaint noclass_lookup_complaint = {
+static struct deprecated_complaint noclass_lookup_complaint = {
   "no way to lookup Objective-C classes", 0, 0
 };
 
-static struct complaint nosel_lookup_complaint = {
+static struct deprecated_complaint nosel_lookup_complaint = {
   "no way to lookup Objective-C selectors", 0, 0
 };
 

@@ -561,135 +561,135 @@ struct field_info
 
 /* Various complaints about symbol reading that don't abort the process */
 
-static struct complaint dwarf2_const_ignored =
+static struct deprecated_complaint dwarf2_const_ignored =
 {
   "type qualifier 'const' ignored", 0, 0
 };
-static struct complaint dwarf2_volatile_ignored =
+static struct deprecated_complaint dwarf2_volatile_ignored =
 {
   "type qualifier 'volatile' ignored", 0, 0
 };
-static struct complaint dwarf2_non_const_array_bound_ignored =
+static struct deprecated_complaint dwarf2_non_const_array_bound_ignored =
 {
   "non-constant array bounds form '%s' ignored", 0, 0
 };
-static struct complaint dwarf2_missing_line_number_section =
+static struct deprecated_complaint dwarf2_missing_line_number_section =
 {
   "missing .debug_line section", 0, 0
 };
-static struct complaint dwarf2_statement_list_fits_in_line_number_section =
+static struct deprecated_complaint dwarf2_statement_list_fits_in_line_number_section =
 {
   "statement list doesn't fit in .debug_line section", 0, 0
 };
-static struct complaint dwarf2_mangled_line_number_section =
+static struct deprecated_complaint dwarf2_mangled_line_number_section =
 {
   "mangled .debug_line section", 0, 0
 };
-static struct complaint dwarf2_unsupported_die_ref_attr =
+static struct deprecated_complaint dwarf2_unsupported_die_ref_attr =
 {
   "unsupported die ref attribute form: '%s'", 0, 0
 };
-static struct complaint dwarf2_unsupported_stack_op =
+static struct deprecated_complaint dwarf2_unsupported_stack_op =
 {
   "unsupported stack op: '%s'", 0, 0
 };
-static struct complaint dwarf2_complex_location_expr =
+static struct deprecated_complaint dwarf2_complex_location_expr =
 {
   "location expression too complex", 0, 0
 };
-static struct complaint dwarf2_unsupported_tag =
+static struct deprecated_complaint dwarf2_unsupported_tag =
 {
   "unsupported tag: '%s'", 0, 0
 };
-static struct complaint dwarf2_unsupported_at_encoding =
+static struct deprecated_complaint dwarf2_unsupported_at_encoding =
 {
   "unsupported DW_AT_encoding: '%s'", 0, 0
 };
-static struct complaint dwarf2_unsupported_at_frame_base =
+static struct deprecated_complaint dwarf2_unsupported_at_frame_base =
 {
   "unsupported DW_AT_frame_base for function '%s'", 0, 0
 };
-static struct complaint dwarf2_unexpected_tag =
+static struct deprecated_complaint dwarf2_unexpected_tag =
 {
   "unexepected tag in read_type_die: '%s'", 0, 0
 };
-static struct complaint dwarf2_missing_at_frame_base =
+static struct deprecated_complaint dwarf2_missing_at_frame_base =
 {
   "DW_AT_frame_base missing for DW_OP_fbreg", 0, 0
 };
-static struct complaint dwarf2_bad_static_member_name =
+static struct deprecated_complaint dwarf2_bad_static_member_name =
 {
   "unrecognized static data member name '%s'", 0, 0
 };
-static struct complaint dwarf2_unsupported_accessibility =
+static struct deprecated_complaint dwarf2_unsupported_accessibility =
 {
   "unsupported accessibility %d", 0, 0
 };
-static struct complaint dwarf2_bad_member_name_complaint =
+static struct deprecated_complaint dwarf2_bad_member_name_complaint =
 {
   "cannot extract member name from '%s'", 0, 0
 };
-static struct complaint dwarf2_missing_member_fn_type_complaint =
+static struct deprecated_complaint dwarf2_missing_member_fn_type_complaint =
 {
   "member function type missing for '%s'", 0, 0
 };
-static struct complaint dwarf2_vtbl_not_found_complaint =
+static struct deprecated_complaint dwarf2_vtbl_not_found_complaint =
 {
   "virtual function table pointer not found when defining class '%s'", 0, 0
 };
-static struct complaint dwarf2_absolute_sibling_complaint =
+static struct deprecated_complaint dwarf2_absolute_sibling_complaint =
 {
   "ignoring absolute DW_AT_sibling", 0, 0
 };
-static struct complaint dwarf2_const_value_length_mismatch =
+static struct deprecated_complaint dwarf2_const_value_length_mismatch =
 {
   "const value length mismatch for '%s', got %d, expected %d", 0, 0
 };
-static struct complaint dwarf2_unsupported_const_value_attr =
+static struct deprecated_complaint dwarf2_unsupported_const_value_attr =
 {
   "unsupported const value attribute form: '%s'", 0, 0
 };
-static struct complaint dwarf2_misplaced_line_number =
+static struct deprecated_complaint dwarf2_misplaced_line_number =
 {
   "misplaced first line number at 0x%lx for '%s'", 0, 0
 };
-static struct complaint dwarf2_line_header_too_long =
+static struct deprecated_complaint dwarf2_line_header_too_long =
 {
   "line number info header doesn't fit in `.debug_line' section", 0, 0
 };
-static struct complaint dwarf2_missing_macinfo_section =
+static struct deprecated_complaint dwarf2_missing_macinfo_section =
 {
   "missing .debug_macinfo section", 0, 0
 };
-static struct complaint dwarf2_macros_too_long =
+static struct deprecated_complaint dwarf2_macros_too_long =
 {
   "macro info runs off end of `.debug_macinfo' section", 0, 0
 };
-static struct complaint dwarf2_macros_not_terminated =
+static struct deprecated_complaint dwarf2_macros_not_terminated =
 {
   "no terminating 0-type entry for macros in `.debug_macinfo' section", 0, 0
 };
-static struct complaint dwarf2_macro_outside_file =
+static struct deprecated_complaint dwarf2_macro_outside_file =
 {
   "debug info gives macro %s outside of any file: %s", 0, 0
 };
-static struct complaint dwarf2_macro_unmatched_end_file =
+static struct deprecated_complaint dwarf2_macro_unmatched_end_file =
 {
   "macro debug info has an unmatched `close_file' directive", 0, 0
 };
-static struct complaint dwarf2_macro_malformed_definition =
+static struct deprecated_complaint dwarf2_macro_malformed_definition =
 {
   "macro debug info contains a malformed macro definition:\n`%s'", 0, 0
 };
-static struct complaint dwarf2_macro_spaces_in_definition =
+static struct deprecated_complaint dwarf2_macro_spaces_in_definition =
 {
   "macro definition contains spaces in formal argument list:\n`%s'", 0, 0
 };
-static struct complaint dwarf2_invalid_attrib_class =
+static struct deprecated_complaint dwarf2_invalid_attrib_class =
 {
   "invalid attribute class or form for '%s' in '%s'", 0, 0
 };
-static struct complaint dwarf2_invalid_pointer_size = 
+static struct deprecated_complaint dwarf2_invalid_pointer_size = 
 {
   "invalid pointer size %d", 0, 0
 };

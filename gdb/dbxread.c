@@ -167,34 +167,34 @@ static int has_line_numbers;
 
 /* Complaints about the symbols we have encountered.  */
 
-struct complaint lbrac_complaint =
+struct deprecated_complaint lbrac_complaint =
 {"bad block start address patched", 0, 0};
 
-struct complaint string_table_offset_complaint =
+struct deprecated_complaint string_table_offset_complaint =
 {"bad string table offset in symbol %d", 0, 0};
 
-struct complaint unknown_symtype_complaint =
+struct deprecated_complaint unknown_symtype_complaint =
 {"unknown symbol type %s", 0, 0};
 
-struct complaint unknown_symchar_complaint =
+struct deprecated_complaint unknown_symchar_complaint =
 {"unknown symbol descriptor `%c'", 0, 0};
 
-struct complaint lbrac_rbrac_complaint =
+struct deprecated_complaint lbrac_rbrac_complaint =
 {"block start larger than block end", 0, 0};
 
-struct complaint lbrac_unmatched_complaint =
+struct deprecated_complaint lbrac_unmatched_complaint =
 {"unmatched N_LBRAC before symtab pos %d", 0, 0};
 
-struct complaint lbrac_mismatch_complaint =
+struct deprecated_complaint lbrac_mismatch_complaint =
 {"N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", 0, 0};
 
-struct complaint repeated_header_complaint =
+struct deprecated_complaint repeated_header_complaint =
 {"\"repeated\" header file %s not previously seen, at symtab pos %d", 0, 0};
 
-struct complaint unclaimed_bincl_complaint =
+struct deprecated_complaint unclaimed_bincl_complaint =
 {"N_BINCL %s not in entries for any file, at symtab pos %d", 0, 0};
 
-struct complaint discarding_local_symbols_complaint =
+struct deprecated_complaint discarding_local_symbols_complaint =
 {"misplaced N_LBRAC entry; discarding local symbols which have no enclosing block", 0, 0};
 
 /* find_text_range --- find start and end of loadable code sections
@@ -1360,7 +1360,7 @@ read_dbx_symtab (struct objfile *objfile)
 
       switch (nlist.n_type)
 	{
-	  static struct complaint function_outside_compilation_unit = {
+	  static struct deprecated_complaint function_outside_compilation_unit = {
 	    "function `%s' appears to be defined outside of all compilation units", 0, 0
 	  };
 	  char *p;

@@ -30,7 +30,7 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "symtab.h"
-#include "symfile.h"		/* for struct complaint */
+#include "symfile.h"
 #include "regcache.h"
 
 #include "gdb_string.h"
