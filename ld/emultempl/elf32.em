@@ -1010,7 +1010,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   static struct orphan_save hold_interp;
   static int count = 1;
   struct orphan_save *place;
-  lang_statement_list_type *old = NULL;
+  lang_statement_list_type *old;
   lang_statement_list_type add;
   etree_type *address;
   const char *secname;
@@ -1060,8 +1060,10 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   if (s->flags & SEC_EXCLUDE)
     return false;
-  else if ((s->flags & SEC_ALLOC) == 0)
-    place = NULL;
+
+  place = NULL;
+  if ((s->flags & SEC_ALLOC) == 0)
+    ;
   else if ((s->flags & SEC_LOAD) != 0
 	   && strncmp (secname, ".note", 4) == 0
 	   && HAVE_SECTION (hold_interp, ".interp"))
@@ -1076,15 +1078,12 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	   && (hold_rel.os != NULL
 	       || (hold_rel.os = output_rel_find ()) != NULL))
     place = &hold_rel;
-  else if ((s->flags & SEC_CODE) == 0
-	   && (s->flags & SEC_READONLY) != 0
+  else if ((s->flags & (SEC_CODE | SEC_READONLY)) == SEC_READONLY
 	   && HAVE_SECTION (hold_rodata, ".rodata"))
     place = &hold_rodata;
-  else if ((s->flags & SEC_READONLY) != 0
+  else if ((s->flags & (SEC_CODE | SEC_READONLY)) == (SEC_CODE | SEC_READONLY)
 	   && hold_text.os != NULL)
     place = &hold_text;
-  else
-    place = NULL;
 
 #undef HAVE_SECTION
 
@@ -1097,19 +1096,27 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 					      outsecname,
 					      &count);
 
+  /* Start building a list of statements for this section.
+     First save the current statement pointer.  */
+  old = stat_ptr;
+
+  /* If we have found an appropriate place for the output section
+     statements for this orphan, add them to our own private list,
+     inserting them later into the global statement list.  */
   if (place != NULL)
     {
-      /* Start building a list of statements for this section.  */
-      old = stat_ptr;
       stat_ptr = &add;
       lang_list_init (stat_ptr);
+    }
 
+  if (config.build_constructors)
+    {
       /* If the name of the section is representable in C, then create
 	 symbols to mark the start and the end of the section.  */
       for (ps = outsecname; *ps != '\0'; ps++)
 	if (! isalnum ((unsigned char) *ps) && *ps != '_')
 	  break;
-      if (*ps == '\0' && config.build_constructors)
+      if (*ps == '\0')
 	{
 	  char *symname;
 	  etree_type *e_align;
@@ -1139,29 +1146,35 @@ gld${EMULATION_NAME}_place_orphan (file, s)
     ((bfd_vma) 0, "*default*",
      (struct lang_output_section_phdr_list *) NULL, "*default*");
 
+  if (config.build_constructors && *ps == '\0')
+    {
+      char *symname;
+
+      /* lang_leave_ouput_section_statement resets stat_ptr.  Put
+	 stat_ptr back where we want it.  */
+      if (place != NULL)
+	stat_ptr = &add;
+
+      symname = (char *) xmalloc (ps - outsecname + sizeof "__stop_");
+      sprintf (symname, "__stop_%s", outsecname);
+      lang_add_assignment (exp_assop ('=', symname,
+				      exp_nameop (NAME, ".")));
+    }
+
+  /* Restore the global list pointer.  */
+  stat_ptr = old;
+
   if (place != NULL)
     {
       asection *snew, **pps;
-
-      stat_ptr = &add;
-
-      if (*ps == '\0' && config.build_constructors)
-	{
-	  char *symname;
-
-	  symname = (char *) xmalloc (ps - outsecname + sizeof "__stop_");
-	  sprintf (symname, "__stop_%s", outsecname);
-	  lang_add_assignment (exp_assop ('=', symname,
-					  exp_nameop (NAME, ".")));
-	}
-      stat_ptr = old;
 
       snew = os->bfd_section;
       if (place->section != NULL
 	  || (place->os->bfd_section != NULL
 	      && place->os->bfd_section != snew))
 	{
-	  /* Shuffle the section to make the output file look neater.  */
+	  /* Shuffle the section to make the output file look neater.
+	     This is really only cosmetic.  */
 	  if (place->section == NULL)
 	    {
 #if 0
@@ -1190,6 +1203,9 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	}
       place->section = &snew->next;	/* Save the end of this list.  */
 
+      /* We try to put the output statements in some sort of
+	 reasonable order here, because they determine the final load
+	 addresses of the orphan sections.  */
       if (place->stmt == NULL)
 	{
 	  /* Put the new statement list right at the head.  */
@@ -1202,7 +1218,14 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	  *add.tail = *place->stmt;
 	  *place->stmt = add.head;
 	}
-      place->stmt = add.tail;		/* Save the end of this list.  */
+
+      /* Fix the global list pointer if we happened to tack our new
+	 list at the tail.  */
+      if (*old->tail == add.head)
+	old->tail = add.tail;
+
+      /* Save the end of this list.  */
+      place->stmt = add.tail;
     }
 
   return true;

@@ -1,3 +1,10 @@
+2000-09-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Fix
+	broken list handling.  Create __start_SECNAME and __stop_SECNAME
+	when no place-holder.  Add some comments.  Test both SEC_CODE and
+	SEC_READONLY for hold_text to prevent .rodata orphan poisoning.
+
 2000-09-07  Niibe Yutaka  <gniibe@m17n.org>, Kaz Kojima  <kkojima@rr.iij4u.or.jp>, Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.tgt (sh-*-linux*): Added.
