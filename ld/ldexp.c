@@ -322,8 +322,8 @@ bfd_vma dot;
 		  if (sdef->the_bfd->usrdata && 
 		      ((lang_input_statement_type*)(sdef->the_bfd->usrdata))->just_syms_flag == true) 
 		      {
-			result = new_abs(sdef->value + sdef->section ?
-					 sdef->section->vma : 0);
+			result = new_abs(sdef->value + (sdef->section ?
+					 sdef->section->vma : 0));
 		      }
 		  else {
 		    result = new_rel(sdef->value, os);

@@ -643,7 +643,8 @@ DEFUN(wild,(s, section, file, target, output),
     /* Perform the iteration over a single file */
     wild_section( s, section, lookup_name(file), output);
   }
-  if (strcmp(section,"COMMON") == 0 	
+  if (section != (char *)NULL
+      && strcmp(section,"COMMON") == 0 	
       && default_common_section == (lang_output_section_statement_type*)NULL) 
       {
 	/* Remember the section that common is going to incase we later
