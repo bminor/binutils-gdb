@@ -1,5 +1,10 @@
 2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
 
+	* bfd.c (bfd_alt_mach_code): New function.
+	* bfd-in2.h: Rebuilt.
+
+2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
+
 	* elf-m10300.c (mn10300_elf_relocate_section): Test the right
 	`type' field in the hash entry when deciding whether to follow a
 	link.

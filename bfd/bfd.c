@@ -1288,3 +1288,58 @@ bfd_fprintf_vma (abfd, stream, value)
   else
     fprintf_vma ((FILE *) stream, value);
 }
+
+/*
+FUNCTION
+	bfd_alt_mach_code
+
+SYNOPSIS
+	boolean bfd_alt_mach_code(bfd *abfd, int index);
+
+DESCRIPTION
+
+	When more than one machine code number is available for the
+	same machine type, this function can be used to switch between
+	the preferred one (index == 0) and any others.  Currently,
+	only ELF supports this feature, with up to two alternate
+	machine codes.
+*/
+
+boolean
+bfd_alt_mach_code (abfd, index)
+     bfd *abfd;
+     int index;
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      int code;
+
+      switch (index)
+	{
+	case 0:
+	  code = get_elf_backend_data (abfd)->elf_machine_code;
+	  break;
+
+	case 1:
+	  code = get_elf_backend_data (abfd)->elf_machine_alt1;
+	  if (code == 0)
+	    return false;
+	  break;
+
+	case 2:
+	  code = get_elf_backend_data (abfd)->elf_machine_alt2;
+	  if (code == 0)
+	    return false;
+	  break;
+
+	default:
+	  return false;
+	}
+
+      elf_elfheader (abfd)->e_machine = code;
+
+      return true;
+    }
+
+  return false;
+}
