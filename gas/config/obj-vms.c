@@ -4736,6 +4736,11 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	       If you can find a test case that triggers this, report
 	       it (and tell me what the entry mask field ought to be),
 	       and I'll try to fix it.  KR */
+	    /* First frag might be empty if we're generating listings.
+	       So skip empty rs_fill frags.  */
+	    while (fragP && fragP->fr_type == rs_fill && fragP->fr_fix == 0)
+	      fragP = fragP->fr_next;
+
 	    if (fragP->fr_fix < 2)
 	      abort ();
 
