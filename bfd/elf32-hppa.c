@@ -154,7 +154,7 @@ typedef enum
    be performed to make caller and callee agree.  */
 static CONST arg_reloc_type mismatches[6][6] =
 {
- {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR,
+ {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC,
     NO_ARG_RELOC, NO_ARG_RELOC},
  {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, ARG_RELOC_ERR,
     R01_TO_FR, ARG_RELOC_ERR},
@@ -171,7 +171,7 @@ static CONST arg_reloc_type mismatches[6][6] =
 /* Likewise for the return value.  */
 static CONST arg_reloc_type retval_mismatches[6][6] =
 {
- {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR,
+ {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC,
     NO_ARG_RELOC, NO_ARG_RELOC},
  {NO_ARG_RELOC, NO_ARG_RELOC, FR_TO_R, ARG_RELOC_ERR,
     FR_TO_R01, ARG_RELOC_ERR},
@@ -2078,7 +2078,7 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
   /* Some initialization.  */
   unsigned insn = data[0];
   asymbol *stub_sym = NULL;
-  asymbol *target_sym = reloc_entry->sym_ptr_ptr[0];
+  asymbol **orig_sym = reloc_entry->sym_ptr_ptr;
   asection *stub_sec = bfd_get_section_by_name (abfd, ".hppa_linker_stubs");
   elf32_hppa_stub_description *stub_desc = find_stubs (abfd, stub_sec);
 
@@ -2112,7 +2112,7 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
       /* Dyncall is special because the user code has already
 	 put the return pointer in %r2 (aka RP).  Other millicode
 	 calls have the return pointer in %r31.  */
-      if (strcmp (target_sym->name, "$$dyncall") == 0)
+      if (strcmp ((*orig_sym)->name, "$$dyncall") == 0)
 	dyncall = true;
       
       /* If we are creating a call from a stub to another stub, then
@@ -2123,10 +2123,10 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
 	 symbol will be '.hppa_linker_stubs'.  This is only an issue
 	 for long-calls; they are the only stubs allowed to call another
 	 stub.  */
-      if ((strncmp (target_sym->name, "_stub_", 6) == 0)
-	  || (strncmp (target_sym->name, "_lb_stub_", 9) == 0))
+      if ((strncmp ((*orig_sym)->name, "_stub_", 6) == 0)
+	  || (strncmp ((*orig_sym)->name, "_lb_stub_", 9) == 0))
 	{
-	  BFD_ASSERT (strcmp (target_sym->section->name, ".hppa_linker_stubs")
+	  BFD_ASSERT (strcmp ((*orig_sym)->section->name, ".hppa_linker_stubs")
 		      == 0);
 	  rtn_adjust = false;
 	}
@@ -2415,12 +2415,12 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
       /* Long branch to the target function.  */
       NEW_INSTRUCTION (stub_entry, LDIL_XXX_31)
       hppa_elf_stub_reloc (stub_entry->stub_desc,
-			   abfd, reloc_entry->sym_ptr_ptr,
+			   abfd, orig_sym,
 			   CURRENT_STUB_OFFSET (stub_entry),
 			   R_HPPA_L21);
       NEW_INSTRUCTION (stub_entry, BLE_XXX_0_31)
       hppa_elf_stub_reloc (stub_entry->stub_desc,
-			   abfd, reloc_entry->sym_ptr_ptr,
+			   abfd, orig_sym,
 			   CURRENT_STUB_OFFSET (stub_entry),
 			   R_HPPA_ABS_CALL_R17);
 

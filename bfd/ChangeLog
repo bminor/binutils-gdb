@@ -1,5 +1,10 @@
 Sun Feb 27 16:30:55 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* elf32-hppa.c (mismatches, retval_mismatches): Fix mismatch
+	action in case where caller specified no argument relocation.
+	(hppa_elf_build_linker_stub): Try again to get the sym_ptr_ptr
+	right in the original relocation and the stub's relocation.
+
         * elf32-hppa.h (hppa_look_for_stub_in_section): Fix typo.  Delete
 	unused symbols argument.
 
