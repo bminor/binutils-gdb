@@ -2815,7 +2815,12 @@ elf_add_dt_needed_tag (bfd *abfd,
 
 /* Called via elf_link_hash_traverse, elf_smash_syms sets all symbols
    belonging to NOT_NEEDED to bfd_link_hash_new.  We know there are no
-   references to these symbols.  */
+   references from regular objects to these symbols.
+
+   ??? Should we do something about references from other dynamic
+   obects?  If not, we potentially lose some warnings about undefined
+   symbols.  But how can we recover the initial undefined / undefweak
+   state?  */
 
 struct elf_smash_syms_data
 {
@@ -4094,8 +4099,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     free (isymbuf);
   isymbuf = NULL;
 
-  if (!add_needed)
+  if (!add_needed
+      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0)
     {
+      /* Remove symbols defined in an as-needed shared lib that wasn't
+	 needed.  */
       struct elf_smash_syms_data inf;
       inf.not_needed = abfd;
       inf.htab = hash_table;

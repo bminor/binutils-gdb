@@ -1,5 +1,9 @@
 2005-02-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_smash_syms): Expand comments.
+	(elf_link_add_object_symbols): Only call elf_smash_syms for
+	as-needed dynamic objects.
+
 	* elfxx-ia64.c (elfNN_ia64_new_elf_hash_entry): Don't clear
 	everything, just the field specific to ia64.
 	* elf64-hppa.c (elf64_hppa_new_dyn_hash_entry): Likewise.
@@ -93,7 +97,7 @@
 
 	* elf32-arm.c (elf32_arm_symbian_special_sections): Do not set
 	SHF_WRITE for .init_array, .fini_array, and .preinit_array.
-	
+
 2005-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* confg.bfd: Make targets scheduled for obsoletion (m68k-lynxos,
@@ -115,9 +119,9 @@
 	* bin-in2.h (bfd_elf32_arm_set_target_relocs): Update prototype.
 	* elf32-arm.c (elf32_arm_link_hash_table): Add fix_v4bx flag.
 	(bfd_elf32_arm_set_target_relocs): Add formal parameter fix_v4bx for
-	passing flag value from ld. Set flag value in global hash table entry. 
+	passing flag value from ld. Set flag value in global hash table entry.
 	(elf32_arm_final_link_relocate): Add code to implement R_ARM_V4BX
-	relocation. 
+	relocation.
 
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
@@ -126,7 +130,7 @@
 2005-01-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.c (elf_backend_default_use_rela_p): Define to zero for
-	SymbianOS. 
+	SymbianOS.
 
 2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
 
