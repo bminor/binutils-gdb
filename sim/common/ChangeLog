@@ -1,3 +1,9 @@
+2002-05-17  Andrey Volkov  <avolkov@transas.com>
+
+	* run.c: Made h8300s as new target, not h8300h alias.
+	Added new option -S (h8300s target)
+	* sim-options.c: Ditto.
+	
 2002-05-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* callback.c: Use 'deprecated' rather than 'depreciated.'

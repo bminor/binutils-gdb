@@ -115,7 +115,7 @@ main (ac, av)
      do all argv processing.  */
 
 #ifdef SIM_H8300 /* FIXME: quick hack */
-  while ((i = getopt (ac, av, "a:c:m:op:s:htv")) != EOF) 
+  while ((i = getopt (ac, av, "a:c:m:op:s:hStv")) != EOF) 
 #else
   while ((i = getopt (ac, av, "a:c:m:op:s:tv")) != EOF) 
 #endif
@@ -173,8 +173,11 @@ main (ac, av)
 	/* FIXME: Quick hack, to be replaced by more general facility.  */
 #ifdef SIM_H8300
       case 'h':
-	set_h8300h (1);
+	set_h8300h (1,0);
 	break;
+      case 'S':
+	set_h8300h (1,1);
+        break;
 #endif
       default:
 	usage ();
@@ -318,7 +321,8 @@ usage ()
   fprintf (stderr, "-c size         Set simulator cache size to `size'.\n");
 #endif
 #ifdef SIM_H8300
-  fprintf (stderr, "-h              Executable is for H8/300H or H8/S.\n");
+  fprintf (stderr, "-h              Executable is for h8/300h.\n");
+  fprintf (stderr, "-S              Executable is for h8/300s.\n");
 #endif
   fprintf (stderr, "-m size         Set memory size of simulator, in bytes.\n");
 #ifdef SIM_HAVE_ENVIRONMENT

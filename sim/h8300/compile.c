@@ -704,7 +704,9 @@ init_pointers ()
       init = 1;
       littleendian.i = 1;
 
-      if (h8300hmode)
+      if (h8300smode)
+	memory_size = H8300S_MSIZE;
+      else if (h8300hmode)
 	memory_size = H8300H_MSIZE;
       else
 	memory_size = H8300_MSIZE;
@@ -2008,13 +2010,14 @@ sim_info (sd, verbose)
    FLAG is non-zero for the H8/300H.  */
 
 void
-set_h8300h (flag)
-     int flag;
+set_h8300h (h_flag, s_flag)
+     int h_flag, s_flag;
 {
   /* FIXME: Much of the code in sim_load can be moved to sim_open.
      This function being replaced by a sim_open:ARGV configuration
      option.  */
-  h8300hmode = flag;
+  h8300hmode = h_flag;
+  h8300smode = s_flag;
 }
 
 SIM_DESC
@@ -2069,8 +2072,8 @@ sim_load (sd, prog, abfd, from_tty)
       if (bfd_check_format (prog_bfd, bfd_object))
 	{
 	  unsigned long mach = bfd_get_mach (prog_bfd);
-	  set_h8300h (mach == bfd_mach_h8300h
-		      || mach == bfd_mach_h8300s);
+	  set_h8300h (mach == bfd_mach_h8300h || mach == bfd_mach_h8300s,
+		      mach == bfd_mach_h8300s);
 	}
     }
 
@@ -2088,7 +2091,10 @@ sim_load (sd, prog, abfd, from_tty)
      so we just reallocate memory now; this will also allow us to handle
      switching between H8/300 and H8/300H programs without exiting
      gdb.  */
-  if (h8300hmode)
+
+  if (h8300smode)
+    memory_size = H8300S_MSIZE;
+  else if (h8300hmode)
     memory_size = H8300H_MSIZE;
   else
     memory_size = H8300_MSIZE;
