@@ -1,3 +1,11 @@
+2003-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-xstormy16.c (md_pcrel_from_section): Do not produce
+	section relative offsets for relocs that will not be based on the
+	section symbol.
+	(xstormy16_md_apply_fix3): Remove previous patch to this
+	function.
+
 2003-05-07  Eric Christopher  <echristo@redhat.com>
 
         * config/tc-mips.c (mips_abicalls): New variable.

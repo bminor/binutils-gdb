@@ -330,12 +330,13 @@ md_pcrel_from_section (fixP, sec)
 {
   if (fixP->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
-	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
-    {
-      /* The symbol is undefined (or is defined but not in this section).
-	 Let the linker figure it out.  */
-      return 0;
-    }
+	  || S_GET_SEGMENT (fixP->fx_addsy) != sec)
+          || xstormy16_force_relocation (fixP))
+    /* The symbol is undefined,
+       or it is defined but not in this section,
+       or the relocation will be relative to this symbol not the section symbol.	 
+       Let the linker figure it out.  */
+    return 0;
 
   return fixP->fx_frag->fr_address + fixP->fx_where;
 }
@@ -581,12 +582,8 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 
   /* Tuck `value' away for use by tc_gen_reloc.
      See the comment describing fx_addnumber in write.h.
-     This field is misnamed (or misused :-).
-     We do not do this for pc-relative relocs against a
-     defined symbol, since it will be done for us.  */
-  if ((! fixP->fx_pcrel)
-      || (fixP->fx_addsy && ! S_IS_DEFINED (fixP->fx_addsy)))
-    fixP->fx_addnumber += value;
+     This field is misnamed (or misused :-).  */
+  fixP->fx_addnumber += value;
 }
 
 
