@@ -143,6 +143,7 @@ SIM_EXTRA_CLEAN =
 
 SIM_COMMON_HW_OBJS = \
 	hw-device.o \
+	hw-events.o \
 	hw-ports.o \
 	hw-properties.o \
 	hw-base.o \
@@ -315,6 +316,7 @@ sim-signal_h = $(srccom)/sim-signal.h
 
 hw-base_h = $(srccom)/hw-base.h
 hw-device_h = $(srccom)/hw-device.h
+hw-events_h = $(srccom)/hw-events.h
 hw-handles_h = #$(srccom)/hw-handles.h
 hw-instances_h = #$(srccom)/hw-instances.h
 hw-ports_h = $(srccom)/hw-ports.h
@@ -324,6 +326,7 @@ hw-tree_h = $(srccom)/hw-tree.h
 hw_base_headers = \
 	$(hw-base_h) \
 	$(hw-device_h) \
+	$(hw-events_h) \
 	$(hw-instances_h) \
 	$(hw-handles_h) \
 	$(hw-ports_h) \
@@ -476,6 +479,10 @@ hw-base.o: $(srccom)/hw-base.c $(sim_main_headers) \
 hw-device.o: $(srccom)/hw-device.c $(sim_main_headers) \
 	  $(hw-device_h)
 	$(CC) -c $(srccom)/hw-device.c $(ALL_CFLAGS)
+
+hw-events.o: $(srccom)/hw-events.c $(sim_main_headers) \
+	  $(hw-events_h)
+	$(CC) -c $(srccom)/hw-events.c $(ALL_CFLAGS)
 
 hw-instances.o: $(srccom)/hw-instances.c $(sim_main_headers) \
 	  $(hw_base_headers)

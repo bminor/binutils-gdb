@@ -27,6 +27,7 @@
 #include "hw-device.h"
 
 #include "hw-properties.h"
+#include "hw-events.h"
 /* #include "hw-instances.h" */
 /* #include "hw-handles.h" */
 #include "hw-ports.h"
@@ -138,6 +139,15 @@ extern void create_hw_port_data
 (struct hw *hw);
 extern void delete_hw_port_data
 (struct hw *hw);
+
+
+/* EVENTS */
+
+extern void create_hw_event_data
+(struct hw *hw);
+extern void delete_hw_event_data
+(struct hw *hw);
+
 
 
 #endif

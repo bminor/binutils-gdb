@@ -404,28 +404,6 @@ int hw_ioctl
  ...);
 
 
-/* Event queue:
-
-   Device specific versions of certain event handlers */
-
-typedef struct _hw_event hw_event;
-typedef void (hw_event_handler) (struct hw *me, void *data);
-
-hw_event *hw_event_queue_schedule
-(struct hw *me,
- signed64 delta_time,
- hw_event_handler *handler,
- void *data);
-
-void hw_event_queue_deschedule
-(struct hw *me,
- hw_event *event_to_remove);
-
-signed64 hw_event_queue_time
-(struct hw *me);
-
-
-
 /* Error reporting::
 
    So that errors originating from devices appear in a consistent
@@ -476,6 +454,7 @@ struct hw_property_data;
 struct hw_port_data;
 struct hw_base_data;
 struct hw_alloc_data;
+struct hw_event_data;
 
 /* Finally the hardware device - keep your grubby little mits off of
    these internals! :-) */
@@ -531,6 +510,7 @@ struct hw {
   struct hw_port_data *ports_of_hw;
   struct hw_base_data *base_of_hw;
   struct hw_alloc_data *alloc_of_hw;
+  struct hw_event_data *events_of_hw;
 
 };
 

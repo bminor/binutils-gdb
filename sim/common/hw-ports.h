@@ -1,4 +1,4 @@
-/* Common hardware.
+/* Hardware ports.
    Copyright (C) 1998 Free Software Foundation, Inc.
    Contributed by Andrew Cagney and Cygnus Solutions.
 

@@ -107,7 +107,7 @@ struct mn103cpu_block {
 
 struct mn103cpu {
   struct mn103cpu_block block;
-  hw_event *pending_handler;
+  struct hw_event *pending_handler;
   int pending_level;
   int pending_nmi;
   int pending_reset;

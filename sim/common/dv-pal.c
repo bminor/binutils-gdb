@@ -128,6 +128,11 @@
    Specify the address (within the parent bus) that this device is to
    be located.
 
+   poll? = <boolean>
+
+   If present and true, indicates that the device should poll its
+   input.
+
 
    PORTS
 
@@ -170,7 +175,7 @@ enum {
   hw_pal_countdown_value = 0x24,
   hw_pal_timer = 0x28,
   hw_pal_timer_value = 0x2c,
-  hw_pal_address_mask = 0x2f,
+  hw_pal_address_mask = 0x3f,
 };
 
 
@@ -180,7 +185,7 @@ typedef struct _hw_pal_console_buffer {
 } hw_pal_console_buffer;
 
 typedef struct _hw_pal_counter {
-  hw_event *handler;
+  struct hw_event *handler;
   signed64 start;
   unsigned32 delta;
   int periodic_p;
@@ -193,6 +198,7 @@ typedef struct _hw_pal_device {
   hw_pal_counter countdown;
   hw_pal_counter timer;
   struct hw *disk;
+  do_hw_poll_read_method *reader;
 } hw_pal_device;
 
 enum {
@@ -220,14 +226,14 @@ do_counter_event (struct hw *me,
     {
       HW_TRACE ((me, "timer expired"));
       counter->start = hw_event_queue_time (me);
-      hw_port_event (me, TIMER_PORT, 1, NULL, NULL_CIA);
+      hw_port_event (me, TIMER_PORT, 1);
       hw_event_queue_schedule (me, counter->delta, do_counter_event, counter);
     }
   else
     {
       HW_TRACE ((me, "countdown expired"));
       counter->delta = 0;
-      hw_port_event (me, COUNTDOWN_PORT, 1, NULL, NULL_CIA);
+      hw_port_event (me, COUNTDOWN_PORT, 1);
     }
 }
 
@@ -296,17 +302,14 @@ do_counter_write (struct hw *me,
 static void
 scan_hw_pal (struct hw *me)
 {
-#if 0
-  hw_pal_struct hw *hw_pal = (hw_pal_struct hw *) hw_data (me);
-#endif
+  hw_pal_device *hw_pal = (hw_pal_device *)hw_data (me);
   char c;
   int count;
-  count = sim_io_read_stdin (hw_system (me), &c, sizeof(c));
-#if 0
+  count = do_hw_poll_read (me, hw_pal->reader, 0/*STDIN*/, &c, sizeof(c));
   switch (count)
     {
-    case sim_io_not_ready:
-    case sim_io_eof:
+    case HW_IO_NOT_READY:
+    case HW_IO_EOF:
       hw_pal->input.buffer = 0;
       hw_pal->input.status = 0;
       break;
@@ -314,7 +317,6 @@ scan_hw_pal (struct hw *me)
       hw_pal->input.buffer = c;
       hw_pal->input.status = 1;
     }
-#endif
 }
 
 /* write the character to the hw_pal */
@@ -337,9 +339,7 @@ hw_pal_io_read_buffer (struct hw *me,
 		       void *dest,
 		       int space,
 		       unsigned_word addr,
-		       unsigned nr_bytes,
-		       sim_cpu *cpu,
-		       sim_cia cia)
+		       unsigned nr_bytes)
 {
   hw_pal_device *hw_pal = (hw_pal_device *) hw_data (me);
   unsigned_1 *byte = (unsigned_1 *) dest;
@@ -349,7 +349,7 @@ hw_pal_io_read_buffer (struct hw *me,
 
     case hw_pal_cpu_nr_register:
 #ifdef CPU_INDEX
-      *byte = CPU_INDEX (cpu);
+      *byte = CPU_INDEX (hw_system_cpu (me));
 #else
       *byte = 0;
 #endif
@@ -424,9 +424,7 @@ hw_pal_io_write_buffer (struct hw *me,
 			const void *source,
 			int space,
 			unsigned_word addr,
-			unsigned nr_bytes,
-			sim_cpu *cpu,
-			sim_cia cia)
+			unsigned nr_bytes)
 {
   hw_pal_device *hw_pal = (hw_pal_device*) hw_data (me);
   unsigned_1 *byte = (unsigned_1 *) source;
@@ -435,14 +433,13 @@ hw_pal_io_write_buffer (struct hw *me,
     {
 
     case hw_pal_reset_register:
-      sim_engine_halt (hw_system (me), cpu, NULL, cia, sim_exited, byte[0]);
+      hw_halt (me, sim_exited, byte[0]);
       break;
 
     case hw_pal_int_register:
       hw_port_event (me,
 		     INT_PORT + byte[0], /*port*/
-		     (nr_bytes > 1 ? byte[1] : 0), /* val */
-		     cpu, cia);
+		     (nr_bytes > 1 ? byte[1] : 0)); /* val */
       break;
 
     case hw_pal_read_fifo:
@@ -587,7 +584,16 @@ hw_pal_finish (struct hw *hw)
   set_hw_ports (hw, hw_pal_ports);
   /* attach ourselves */
   do_hw_attach_regs (hw);
-
+  /* If so configured, enable polled input */
+  if (hw_find_property (hw, "poll?") != NULL
+      && hw_find_boolean_property (hw, "poll?"))
+    {
+      hw_pal->reader = sim_io_poll_read;
+    }
+  else
+    {
+      hw_pal->reader = sim_io_read;
+    }
   /* tag the periodic timer */
   hw_pal->timer.periodic_p = 1;
 }

@@ -1,3 +1,21 @@
+Mon May 25 17:14:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-pal.c: Update.
+
+	* hw-events.h, hw-events.c: New files.  Move event code to here.
+  	* sim-hw.c: From here.
+	* hw-base.h: Include "hw-events.h".
+
+	* hw-device.h (struct hw): Add struct hw_event_data events_of_hw.
+	* hw-events.h (struct hw_event): Replace typedef hw_event.
+	
+	* hw-base.h (create_hw_event_data, delete_hw_event_data): Declare.
+	* hw-base.c (hw_create, hw_delete): Call.
+	* hw-events.c (create_hw_event_data, delete_hw_event_data): Define.
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add hw-events.o.
+	(hw-events.o): New target.
+
 Mon May 25 16:55:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-base.c (panic_hw_port_event, empty_hw_ports): Move from here.
