@@ -1,3 +1,9 @@
+Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mipsread.c (parse_symbol): In third-eye, a function has a block
+	within it which represents the whole function.  Create only one
+	GDB block for both.
+
 Wed Oct 20 17:47:42 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* main.c:  Make baud_rate and remote_debug be global variables,
