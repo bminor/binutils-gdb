@@ -1,3 +1,8 @@
+2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add
+	explanation of TARGET_PRINT_INSN macro.
+
 2001-08-30  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (`add-symbol-file'): Correct synopsis.
@@ -13,7 +18,7 @@ Wed Aug 15 10:47:28 2001  Christopher Faylor <cgf@cygnus.com>
 	* gdbint.texinfo: Add a cautionary note about macro use.
 
 2001-08-02  Corinna Vinschen  <vinschen@redhat.com>
-
+ 
 	* gdb.texinfo: Explain omitting the hostname in the
 	`target remote' command.
 

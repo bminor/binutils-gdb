@@ -3566,6 +3566,18 @@ If non-zero, the target has support for hardware-assisted
 watchpoints.  @xref{Algorithms, watchpoints}, for more details and
 other related macros.
 
+@item TARGET_PRINT_INSN (@var{addr}, @var{info})
+@findex TARGET_PRINT_INSN
+This is the function used by @value{GDBN} to print an assembly
+instruction.  It prints the instruction at address @var{addr} in
+debugged memory and returns the length of the instruction, in bytes.  If
+a target doesn't define its own printing routine, it defaults to an
+accessor function for the global pointer @code{tm_print_insn}. This
+usually points to a function in the @code{opcodes} library (@pxref{Support
+Libraries, ,Opcodes}).  @var{info} is a structure (of type
+@code{disassemble_info}) defined in @file{include/dis-asm.h} used to
+pass information to the instruction decoding routine.
+
 @item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
 @findex USE_STRUCT_CONVENTION
 If defined, this must be an expression that is nonzero if a value of the
