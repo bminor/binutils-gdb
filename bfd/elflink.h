@@ -2062,7 +2062,6 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
   Elf_External_Sym esym;
   unsigned long dynstr_index;
   char *name;
-  int elfsec, link;
 
   /* See if the entry exists already.  */
   for (entry = elf_hash_table (info)->dynlocal; entry ; entry = entry->next)
@@ -4189,7 +4188,7 @@ elf_bfd_final_link (abfd, info)
 	  struct elf_link_local_dynamic_entry *e;
 	  for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
 	    {
-	      asection *s, *os;
+	      asection *s;
 
 	      sym.st_size = e->isym.st_size;
 	      sym.st_other = e->isym.st_other;

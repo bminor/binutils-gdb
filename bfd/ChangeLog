@@ -1,3 +1,9 @@
+1999-07-16  Andreas Schwab  <schwab@suse.de>
+
+	* elflink.h (elf_link_record_local_dynamic_symbol): Remove unused
+	variables `link' and `elfsec'.
+	(elf_bfd_final_link): Remove unused variable `os'.
+
 Thu Jul 15 17:55:31 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (_bfd_mips_elf_modify_segment_map): Don't require
