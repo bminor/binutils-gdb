@@ -1,5 +1,5 @@
 /* Handle lists of commands, their decoding and documentation, for GDB.
-   Copyright 1986, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1998 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,26 +37,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
-static void
-undef_cmd_error PARAMS ((char *, char *));
+static void undef_cmd_error PARAMS ((char *, char *));
 
-static void
-show_user PARAMS ((char *, int));
+static void show_user PARAMS ((char *, int));
 
-static void
-show_user_1 PARAMS ((struct cmd_list_element *, GDB_FILE *));
+static void show_user_1 PARAMS ((struct cmd_list_element *, GDB_FILE *));
 
-static void
-make_command PARAMS ((char *, int));
+static void make_command PARAMS ((char *, int));
 
-static void
-shell_escape PARAMS ((char *, int));
+static void shell_escape PARAMS ((char *, int));
 
-static int
-parse_binary_operation PARAMS ((char *));
+static int parse_binary_operation PARAMS ((char *));
 
-static void
-print_doc_line PARAMS ((GDB_FILE *, char *));
+static void print_doc_line PARAMS ((GDB_FILE *, char *));
+
+void _initialize_command PARAMS ((void));
 
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down

@@ -83,6 +83,8 @@ static int hardwire_flush_input PARAMS ((serial_t));
 static int hardwire_send_break PARAMS ((serial_t));
 static int hardwire_setstopbits PARAMS ((serial_t, int));
 
+void _initialize_ser_hardwire PARAMS ((void));
+
 #ifdef __CYGWIN32__
 extern void (*ui_loop_hook) PARAMS ((int));
 #endif
@@ -102,13 +104,11 @@ hardwire_open(scb, name)
 }
 
 static int
-get_tty_state(scb, state)
+get_tty_state (scb, state)
      serial_t scb;
      struct hardwire_ttystate *state;
 {
 #ifdef HAVE_TERMIOS
-  extern int errno;
-
   if (tcgetattr(scb->fd, &state->termios) < 0)
     return -1;
 
@@ -546,11 +546,14 @@ wait_for(scb, timeout)
    char if successful.  Returns SERIAL_TIMEOUT if timeout expired, EOF if line
    dropped dead, or SERIAL_ERROR for any other error (see errno in that case).  */
 static int
-hardwire_readchar(scb, timeout)
+hardwire_readchar (scb, timeout)
      serial_t scb;
      int timeout;
 {
-  int status, t;
+  int status;
+#ifdef __CYGWIN32__
+  int t;
+#endif
 
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;

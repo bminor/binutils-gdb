@@ -1,7 +1,7 @@
 /* Caching code.  Typically used by remote back ends for
    caching remote memory.
 
-   Copyright 1992, 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1995, 1998 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -148,14 +148,14 @@ struct dcache_struct
   int cache_has_stuff;
 } ;
 
-static int
-dcache_poke_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, char *ptr));
+static int dcache_poke_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, 
+                                     char *ptr));
 
-static int
-dcache_peek_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, char *ptr));
+static int dcache_peek_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, 
+                                     char *ptr));
 
-static struct dcache_block *
-dcache_hit PARAMS ((DCACHE *dcache, CORE_ADDR addr));
+static struct dcache_block *dcache_hit PARAMS ((DCACHE *dcache, 
+                                                CORE_ADDR addr));
 
 static int dcache_write_line PARAMS ((DCACHE *dcache,struct dcache_block *db));
 
@@ -165,10 +165,11 @@ static int dcache_writeback PARAMS ((DCACHE *dcache));
 
 static void dcache_info PARAMS ((char *exp, int tty));
 
+void _initialize_dcache PARAMS ((void));
+
 int remote_dcache = 0;
 
 DCACHE *last_cache; /* Used by info dcache */
-
 
 
 /* Free all the data cache blocks, thus discarding all cached data.  */

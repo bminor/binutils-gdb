@@ -1,5 +1,5 @@
 /* Extract registers from a "standard" core file, for GDB.
-   Copyright (C) 1988-1995  Free Software Foundation, Inc.
+   Copyright (C) 1988-1998  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -55,6 +55,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+
+void _initialize_core_aout PARAMS ((void));
 
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.

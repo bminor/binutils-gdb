@@ -1,5 +1,5 @@
 /* Support routines for manipulating internal types for GDB.
-   Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -78,6 +78,8 @@ static void print_arg_types PARAMS ((struct type **, int));
 static void dump_fn_fieldlists PARAMS ((struct type *, int));
 static void print_cplus_stuff PARAMS ((struct type *, int));
 
+void _initialize_gdbtypes PARAMS ((void));
+
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
    in that objfile's type_obstack. */
@@ -127,13 +129,15 @@ make_pointer_type (type, typeptr)
   ntype = TYPE_POINTER_TYPE (type);
 
   if (ntype) 
-    if (typeptr == 0)		
-      return ntype;	/* Don't care about alloc, and have new type.  */
-    else if (*typeptr == 0)
-      {
-	*typeptr = ntype;	/* Tracking alloc, and we have new type.  */
-	return ntype;
-      }
+    {
+      if (typeptr == 0)		
+        return ntype;	/* Don't care about alloc, and have new type.  */
+      else if (*typeptr == 0)
+        {
+	  *typeptr = ntype;	/* Tracking alloc, and we have new type.  */
+	  return ntype;
+        }
+    }
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {
@@ -192,13 +196,15 @@ make_reference_type (type, typeptr)
   ntype = TYPE_REFERENCE_TYPE (type);
 
   if (ntype) 
-    if (typeptr == 0)		
-      return ntype;	/* Don't care about alloc, and have new type.  */
-    else if (*typeptr == 0)
-      {
-	*typeptr = ntype;	/* Tracking alloc, and we have new type.  */
-	return ntype;
-      }
+    {
+      if (typeptr == 0)		
+        return ntype;	/* Don't care about alloc, and have new type.  */
+      else if (*typeptr == 0)
+        {
+	  *typeptr = ntype;	/* Tracking alloc, and we have new type.  */
+	  return ntype;
+        }
+    }
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {

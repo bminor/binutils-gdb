@@ -56,6 +56,8 @@ static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
 
 static int ignore PARAMS ((CORE_ADDR, char *));
 
+void _initialize_corelow PARAMS ((void));
+
 /* Link a new core_fns into the global core_file_fns list.  Called on gdb
    startup by the _initialize routine in each core file register reader, to
    register information about each format the the reader is prepared to
@@ -426,7 +428,7 @@ struct target_ops core_ops = {
 int coreops_suppress_target;
 
 void
-_initialize_corelow()
+_initialize_corelow ()
 {
   if (!coreops_suppress_target)
     add_target (&core_ops);

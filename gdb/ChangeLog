@@ -1,3 +1,45 @@
+1998-10-16  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* command.c copying.c copying.awk core-aout.c core-regset.c
+	  corelow.c dcache.c i386-tdep.c i386v4-nat.c i387-tdep.c
+	  infcmd.c infptrace.c infrun.c remote.c solib.c symfile.c
+	  symmisc.c valarith.c: Add prototypes.
+
+	* defs.h: Add prototype for utils.c::do_run_cleanups.
+
+	* gdbtypes.c: Add prototypes.
+	(make_pointer_type): Add braces to remove nested if-else ambiguity.
+	(make_reference_type): Ditto.
+
+	* printcmd.c (printf_command): Initialize 'f' and 'string' at 
+	function startup to suppress possibly-used-before-initialized warning.
+
+	* remote-utils.c: Add prototypes.
+	(sr_pollchar): Add braces to remove nested if-else ambiguity.
+
+	* ser-tcp.c: Add prototypes.
+	(wait_for): Add braces to remove nested if-else ambiguity.
+	(tcp_readchar): Ditto.
+
+	* ser-unix.c: Add prototypes.
+	(get_tty_state): Don't define errno here.
+	(hardwire_readchar): Only define 't' if we are compiling in a Cygwin
+	environment.
+
+	* symtab.c: Add prototypes.
+	(find_methods): Add braces to remove nested if-else ambiguity.
+	(search_symbols): Set 'i' to an initial value to suppress a
+	possibly-used-before-initialized warning.
+
+	* valops.c: Add prototypes.
+	(value_cast): Set 'eltype2' to an initial value to suppress a
+	possibly-used-before-initialized warning.
+	(value_of_variable): Add braces to remove nested if-else ambiguity.
+	(value_of_this): Ditto.
+
+	* valprint.c: Add prototypes.
+	(print_floating): Add braces to remove nested if-else ambiguity.
+
 Thu Oct 15 19:50:48 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* tm-sp64.h (SETUP_ARBITRARY_FRAME, RAME_SPECIFICATION_DYADIC):

@@ -1,6 +1,6 @@
 /* Generic support for remote debugging interfaces.
 
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -49,6 +49,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h" /* for exec_bfd */
 #include "inferior.h" /* for generic_mourn_inferior */
 #include "remote-utils.h"
+
+
+void _initialize_sr_support PARAMS ((void));
 
 struct _sr_settings sr_settings = {
   4, /* timeout:
@@ -244,10 +247,12 @@ sr_pollchar()
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
   if (sr_get_debug() > 0)
-    if (buf)
-      printf_unfiltered ("%c", buf);
-    else
-      printf_unfiltered ("<empty character poll>");
+    {
+      if (buf)
+        printf_unfiltered ("%c", buf);
+      else
+        printf_unfiltered ("<empty character poll>");
+    }
 
   return buf & 0x7f;
 }

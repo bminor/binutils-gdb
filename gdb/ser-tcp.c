@@ -1,5 +1,5 @@
 /* Serial interface for raw TCP connections on Un*x like systems
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -53,6 +53,8 @@ static int tcp_return_0 PARAMS ((serial_t));
 static int tcp_noflush_set_tty_state PARAMS ((serial_t, serial_ttystate,
 					      serial_ttystate));
 static void tcp_print_tty_state PARAMS ((serial_t, serial_ttystate));
+
+void _initialize_ser_tcp PARAMS ((void));
 
 /* Open up a raw tcp socket */
 
@@ -183,7 +185,7 @@ tcp_raw(scb)
  */
 
 static int
-wait_for(scb, timeout)
+wait_for (scb, timeout)
      serial_t scb;
      int timeout;
 {
@@ -208,12 +210,14 @@ wait_for(scb, timeout)
 	numfds = select(scb->fd+1, &readfds, 0, &exceptfds, 0);
 
       if (numfds <= 0)
-	if (numfds == 0)
-	  return SERIAL_TIMEOUT;
-	else if (errno == EINTR)
-	  continue;
-	else
-	  return SERIAL_ERROR;	/* Got an error from select or poll */
+        {
+	  if (numfds == 0)
+	    return SERIAL_TIMEOUT;
+	  else if (errno == EINTR)
+	    continue;
+	  else
+	    return SERIAL_ERROR;	/* Got an error from select or poll */
+        }
 
       return 0;
     }
@@ -225,7 +229,7 @@ wait_for(scb, timeout)
    dead, or -3 for any other error (see errno in that case). */
 
 static int
-tcp_readchar(scb, timeout)
+tcp_readchar (scb, timeout)
      serial_t scb;
      int timeout;
 {
@@ -247,12 +251,14 @@ tcp_readchar(scb, timeout)
     }
 
   if (scb->bufcnt <= 0)
-    if (scb->bufcnt == 0)
-      return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-				   distinguish between EOF & timeouts
-				   someday] */
-    else
-      return SERIAL_ERROR;	/* Got an error from read */
+    {
+      if (scb->bufcnt == 0)
+        return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
+				     distinguish between EOF & timeouts
+				     someday] */
+      else
+        return SERIAL_ERROR;	/* Got an error from read */
+    }
 
   scb->bufcnt--;
   scb->bufp = scb->buf;
