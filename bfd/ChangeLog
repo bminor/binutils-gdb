@@ -1,3 +1,8 @@
+2004-02-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Update version to 2.15.90.
+	* configure: Regenerate.
+
 2004-02-17  Daniel Jacobowitz  <drow@mvista.com>
             Richard Sandiford  <rsandifo@redhat.com>
 
