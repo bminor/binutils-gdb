@@ -1,5 +1,5 @@
-/* Host-dependent definitions for any CPU running NetBSD.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+/* Native-dependent definitions for Sparc running NetBSD, for GDB.
+   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,22 +17,19 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>
+#ifndef NM_NBSD_H
+#define NM_NBSD_H
 
-#include <machine/endian.h>
-#if BYTE_ORDER == BIG_ENDIAN
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#else
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
 
-/* NetBSD has termios facilities. */
-#define HAVE_TERMIOS
+#include <machine/vmparam.h>
+#define KERNEL_U_ADDR USRSTACK
 
-/* psignal() is in <signal.h>.  */
-#define PSIGNAL_IN_SIGNAL_H
+#define PTRACE_ARG3_TYPE char*
 
-/* Get rid of any system-imposed stack limit if possible. */
-#define SET_STACK_LIMIT_HUGE
+#define ATTACH_DETACH
+
+#define FETCH_INFERIOR_REGISTERS
+
+#endif /* NM_NBSD_H */

@@ -49,6 +49,7 @@ sh
 sparc
 tahoe
 tm-lynx.h
+tm-nbsd.h
 tm-sunos.h
 tm-sysv4.h
 vax

@@ -1,5 +1,5 @@
-/* Host-dependent definitions for any CPU running NetBSD.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+/* Parameters for execution on a Sparc running NetBSD, for GDB.
+   Copyright 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,22 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>
+/* Get generic NetBSD host definitions. */
+#include "xm-nbsd.h"
 
-#include <machine/endian.h>
-#if BYTE_ORDER == BIG_ENDIAN
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#else
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
-
-/* NetBSD has termios facilities. */
-#define HAVE_TERMIOS
-
-/* psignal() is in <signal.h>.  */
-#define PSIGNAL_IN_SIGNAL_H
-
-/* Get rid of any system-imposed stack limit if possible. */
-#define SET_STACK_LIMIT_HUGE
+/* Before storing, we need to read all the registers. */
+#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)

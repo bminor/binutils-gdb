@@ -1,5 +1,5 @@
-/* Host-dependent definitions for any CPU running NetBSD.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+/* Macro definitions for Sparc running under NetBSD.
+   Copyright 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,22 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>
+#ifndef TM_NBSD_H
+#define TM_NBSD_H
 
-#include <machine/endian.h>
-#if BYTE_ORDER == BIG_ENDIAN
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#else
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
+#include "sparc/tm-sparc.h"
+#include "tm-nbsd.h"
 
-/* NetBSD has termios facilities. */
-#define HAVE_TERMIOS
-
-/* psignal() is in <signal.h>.  */
-#define PSIGNAL_IN_SIGNAL_H
-
-/* Get rid of any system-imposed stack limit if possible. */
-#define SET_STACK_LIMIT_HUGE
+#endif /* TM_NBSD_H */
