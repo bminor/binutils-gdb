@@ -239,7 +239,8 @@ gnuv3_rtti_type (struct value *value,
      type_info object itself to get the class name.  But this way
      should work just as well, and doesn't read target memory.  */
   vtable_symbol_name = SYMBOL_DEMANGLED_NAME (vtable_symbol);
-  if (strncmp (vtable_symbol_name, "vtable for ", 11))
+  if (vtable_symbol_name == NULL
+      || strncmp (vtable_symbol_name, "vtable for ", 11))
     error ("can't find linker symbol for virtual table for `%s' value",
            TYPE_NAME (value_type));
   class_name = vtable_symbol_name + 11;
