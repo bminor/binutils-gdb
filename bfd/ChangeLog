@@ -1,3 +1,34 @@
+2003-10-29  Daniel Jacobowitz  <drow@mvista.com>
+
+        * elf32-arm.h (elf32_arm_final_link_relocate): Move check for
+        SEC_ALLOC.
+
+2003-10-29  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_plt0_entry, elf32_arm_plt_entry): New
+	code sequence.
+	(PLT_HEADER_SIZE): New.
+	(struct elf32_arm_pcrel_relocs_copied): Rename to ...
+	(struct elf32_arm_relocs_copied): ... this.  Count both
+	pcrel and non-pcrel relocs.  All uses updated.
+	(struct elf32_arm_link_hash_table): Add pointers to dynamic linker
+	sections and symbol/section mapping cache.
+	(create_got_section): New.
+	(elf32_arm_create_dynamic_sections): New.
+	(elf_backend_create_dynamic_sections): Use it.
+	(elf32_arm_final_link_relocate): Support garbage collection of relocs.
+	(elf32_arm_check_relocs): Likewise.
+	(elf32_arm_adjust_dynamic_symbol): Likewise.
+	(elf32_arm_copy_indirect_symbol): New.
+	(elf32_arm_link_hash_table_create): Initialise new fields. 
+	(elf32_arm_gc_sweep_hook): Implement.
+	(elf32_arm_discard_copies): Delete.
+	(elf32_arm_finish_dynamic_symbol): Use new PLT code.
+	(elf32_arm_finish_dynamic_sections): Likewise.
+	(elf_backend_can_refcount): Define.
+	(elf_backend_copy_indirect_symbol): Likewise.
+	(elf_backend_plt_header_size): Set to PLT_HEADER_SIZE.
+
 2003-10-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (elf_backend_grok_prstatus): Define.
