@@ -1,3 +1,7 @@
+Mon Feb 26 13:03:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Edit out shared library support bits.
+
 Tue Feb 20 20:48:28 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc-opc.c (v8,v6notv9): Add MASK_SPARCLET.
