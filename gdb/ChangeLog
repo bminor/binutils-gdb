@@ -1,3 +1,20 @@
+2003-09-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.h (struct gdbarch_tdep): Remove.  Change all register
+	numbers to enumeration values.
+	* sh-tdep.c: Accomodate above change.
+	(SH_NUM_REGS): Rename from SH_DEFAULT_NUM_REGS.
+	(NUM_PSEUDO_REGS_SH_MEDIA): Remove (sh5 only).
+	(NUM_PSEUDO_REGS_SH_COMPACT): Remove (sh5 only).
+	(IS_ADD_IMM_SP): Rename from IS_ADD_SP.
+	(IS_FPUSH): Rename from IS_FMOV.
+	(sh_extract_struct_value_address): Remove useless comment.
+	(sh_dsp_register_sim_regno): Use register values from sh-tdep.h
+	instead of own local values.
+	(sh_dump_tdep): Remove.
+	(_initialize_sh_tdep): Accomodate removing sh_dump_tdep.
+	* sh3-rom.c (sh3_supply_register): Accomodate sh-tdep.h changes.
+
 2003-09-15  Andrew Cagney  <cagney@redhat.com>
 
 	* doublest.c (convert_floatformat_to_doublest): No longer need to

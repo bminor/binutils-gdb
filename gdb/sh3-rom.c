@@ -77,9 +77,9 @@ sh3_supply_register (char *regname, int regnamelen, char *val, int vallen)
 	  break;
 	case 'S':
 	  if (regname[1] == 'S' && regname[2] == 'R')
-	    regno = gdbarch_tdep (current_gdbarch)->SSR_REGNUM;
+	    regno = SSR_REGNUM;
 	  else if (regname[1] == 'P' && regname[2] == 'C')
-	    regno = gdbarch_tdep (current_gdbarch)->SPC_REGNUM;
+	    regno = SPC_REGNUM;
 	  break;
 	}
     }

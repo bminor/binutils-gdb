@@ -24,52 +24,51 @@
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-struct gdbarch_tdep
-  {
-    int FPUL_REGNUM;  /*                       sh3e, sh4 */
-    int FPSCR_REGNUM; /*                       sh3e, sh4 */
-    int DSR_REGNUM;   /* sh-dsp,      sh3-dsp            */
-    int FP_LAST_REGNUM; /*                     sh3e, sh4 */
-    int A0G_REGNUM;   /* sh-dsp,      sh3-dsp            */
-    int A0_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int A1G_REGNUM;   /* sh-dsp,      sh3-dsp            */
-    int A1_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int M0_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int M1_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int X0_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int X1_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int Y0_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int Y1_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int MOD_REGNUM;   /* sh-dsp,      sh3-dsp            */
-    int SSR_REGNUM;   /*         sh3, sh3-dsp, sh3e, sh4 */
-    int SPC_REGNUM;   /*         sh3, sh3-dsp, sh3e, sh4 */
-    int RS_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int RE_REGNUM;    /* sh-dsp,      sh3-dsp            */
-    int DR0_REGNUM;   /*                             sh4 */
-    int DR_LAST_REGNUM; /*                           sh4 */
-    int FV0_REGNUM;   /*                             sh4 */
-    int FV_LAST_REGNUM; /*                           sh4 */
-    /* FPP stands for Floating Point Pair, to avoid confusion with
-       GDB's FP0_REGNUM, which is the number of the first Floating
-       point register. Unfortunately on the sh5, the floating point
-       registers are called FR, and the floating point pairs are called FP. */
-  };
-
-/* Registers common to all the SH variants. */
+/* Registers for all SH variants.  Used also by sh3-rom.c. */
 enum
   {
     R0_REGNUM = 0,
     STRUCT_RETURN_REGNUM = 2,
     ARG0_REGNUM = 4,
     ARGLAST_REGNUM = 7,
+    FP_REGNUM = 14,
     PR_REGNUM = 17,
     GBR_REGNUM = 18,
     VBR_REGNUM = 19,
     MACH_REGNUM = 20,
     MACL_REGNUM = 21,
     SR_REGNUM = 22,
+    FPUL_REGNUM = 23,
+    /* Floating point registers */
+    FPSCR_REGNUM = 24,
     FLOAT_ARG0_REGNUM = 29,
-    FLOAT_ARGLAST_REGNUM = 36
+    FLOAT_ARGLAST_REGNUM = 36,
+    FP_LAST_REGNUM = 40,
+    /* sh3,sh4 registers */
+    SSR_REGNUM = 41,
+    SPC_REGNUM = 42,
+    /* DSP registers */
+    DSR_REGNUM = 24,
+    A0G_REGNUM = 25,
+    A0_REGNUM = 26,
+    A1G_REGNUM = 27,
+    A1_REGNUM = 28,
+    M0_REGNUM = 29,
+    M1_REGNUM = 30,
+    X0_REGNUM = 31,
+    X1_REGNUM = 32,
+    Y0_REGNUM = 33,
+    Y1_REGNUM = 34,
+    MOD_REGNUM = 40,
+    RS_REGNUM = 43,
+    RE_REGNUM = 44,
+    R0_BANK_REGNUM = 51,
+    R7_BANK_REGNUM = 58,
+    /* Floating point pseudo registers */
+    DR0_REGNUM = 59,
+    DR_LAST_REGNUM = 66,
+    FV0_REGNUM = 67,
+    FV_LAST_REGNUM = 70
   };
 
 extern gdbarch_init_ftype sh64_gdbarch_init;
