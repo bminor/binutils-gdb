@@ -1,5 +1,6 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   Copyright 1992, 1993, 1995, 1998, 1999, 2000, 2001, 2003
+   
+   Copyright 1992, 1993, 1995, 1998, 1999, 2000, 2001, 2003, 2005 
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,6 +24,7 @@
 #define SOLIB_H
 
 /* Forward decl's for prototypes */
+struct so_list;
 struct target_ops;
 
 /* Called when we free all symtabs, to free the shared library information
@@ -38,6 +40,7 @@ extern void clear_solib (void);
     solib_add (filename, from_tty, targ, readsyms)
 
 extern void solib_add (char *, int, struct target_ops *, int);
+extern int solib_read_symbols (struct so_list *, int);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to

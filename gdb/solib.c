@@ -1,7 +1,8 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -370,6 +371,33 @@ symbol_add_stub (void *arg)
   return (1);
 }
 
+/* Read in symbols for shared object SO.  If FROM_TTY is non-zero, be
+   chatty about it.  Return non-zero if any symbols were actually
+   loaded.  */
+
+int
+solib_read_symbols (struct so_list *so, int from_tty)
+{
+  if (so->symbols_loaded)
+    {
+      if (from_tty)
+	printf_unfiltered ("Symbols already loaded for %s\n", so->so_name);
+    }
+  else
+    {
+      if (catch_errors (symbol_add_stub, so,
+			"Error while reading shared library symbols:\n",
+			RETURN_MASK_ALL))
+	{
+	  if (from_tty)
+	    printf_unfiltered ("Loaded symbols for %s\n", so->so_name);
+	  so->symbols_loaded = 1;
+	  return 1;
+	}
+    }
+
+  return 0;
+}
 
 /* LOCAL FUNCTION
 
@@ -480,8 +508,8 @@ update_solib_list (int from_tty, struct target_ops *target)
       /* If it's not on the inferior's list, remove it from GDB's tables.  */
       else
 	{
-	  /* Notify any observer that the SO has been unloaded
-	     before we remove it from the gdb tables.  */
+	  /* Notify any observer that the shared object has been
+	     unloaded before we remove it from GDB's tables.  */
 	  observer_notify_solib_unloaded (gdb);
 
 	  *gdb_link = gdb->next;
@@ -534,6 +562,10 @@ update_solib_list (int from_tty, struct target_ops *target)
 			  count * sizeof (i->sections[0]));
 		}
 	    }
+
+	  /* Notify any observer that the shared object has been
+             loaded now that we've added it to GDB's tables.  */
+	  observer_notify_solib_loaded (i);
 	}
     }
 }
@@ -585,27 +617,8 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
       if (! pattern || re_exec (gdb->so_name))
 	{
 	  any_matches = 1;
-
-	  if (gdb->symbols_loaded)
-	    {
-	      if (from_tty)
-		printf_unfiltered ("Symbols already loaded for %s\n",
-				   gdb->so_name);
-	    }
-	  else if (readsyms)
-	    {
-	      if (catch_errors
-		  (symbol_add_stub, gdb,
-		   "Error while reading shared library symbols:\n",
-		   RETURN_MASK_ALL))
-		{
-		  if (from_tty)
-		    printf_unfiltered ("Loaded symbols for %s\n",
-				       gdb->so_name);
-		  gdb->symbols_loaded = 1;
-		  loaded_any_symbols = 1;
-		}
-	    }
+	  if (readsyms && solib_read_symbols (gdb, from_tty))
+	    loaded_any_symbols = 1;
 	}
 
     if (from_tty && pattern && ! any_matches)

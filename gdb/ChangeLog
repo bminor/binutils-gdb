@@ -1,5 +1,12 @@
 2005-01-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib.h Update copyright year.
+	(struct so_list): Forward declaration.
+	(solib_read_symbols): New prototype.
+	* solib.c (solib_read_symbols): New function.
+	(solib_add): Call solib_read_symbols to read in symbols.
+	(update_solib_list): Call observer_notify_solib_loaded.
+
 	* i386bsd-nat.c: Update copyright year.  Don't include
 	<sys/param.h> and <sys/user.h>.
 	(register_u_addr, kernel_u_size): Remove functions.
