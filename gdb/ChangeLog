@@ -1,3 +1,11 @@
+Wed Dec 23 15:03:42 1998  Per Bothner  <bothner@cygnus.com>
+
+	* Makefile.in (READLINE_CFLAGS):  Search $(READLINE_SRC)/.. rather
+	than $(READLINE_SRC) so #include <readline/readline.h> will work.
+	* top.c:  #include <readline/history.h> instead of "history.h".
+	* tracepoint.c:  Likewise.
+	* mac-xdep.c:  Likewise.
+
 Wed Dec 23 12:32:00 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* defs.h (TARGET_FLOAT_FORMAT, TARGET_DOUBLE_FORMAT): Define using
