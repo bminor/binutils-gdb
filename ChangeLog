@@ -1,3 +1,8 @@
+Fri Apr 11 17:07:04 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* README, Makefile.in (ETC_SUPPORT): Remove references to
+	cfg-paper*, configure.{texi,man,info*}._
+
 Sun Apr  6 18:47:57 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* Makefile.in (all.normal): Ensure that gcc is built after all

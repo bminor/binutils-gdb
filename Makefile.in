@@ -1440,9 +1440,8 @@ DEVO_SUPPORT= README Makefile.in configure configure.in \
 # Files in devo/etc used in any net release.
 # ChangeLog omitted because it may refer to files which are not in this
 # distribution (perhaps it would be better to include it anyway).
-ETC_SUPPORT= Makefile.in cfg-paper.texi configure configure.in configure.man \
-	configure.texi standards.texi make-stds.texi \
-	configure.info* standards.info* cfg-paper.info*
+ETC_SUPPORT= Makefile.in configure configure.in standards.texi \
+	make-stds.texi standards.info*
 
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
