@@ -395,6 +395,8 @@ mips_stack_argsize (struct gdbarch *gdbarch)
 
 static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
 						   struct frame_info *, int);
+static mips_extra_func_info_t non_heuristic_proc_desc (CORE_ADDR pc,
+						       CORE_ADDR *addrptr);
 
 static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
@@ -1720,7 +1722,35 @@ static const struct frame_unwind mips_mdebug_frame_unwind =
 static const struct frame_unwind *
 mips_mdebug_frame_sniffer (struct frame_info *next_frame)
 {
-  return &mips_mdebug_frame_unwind;
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR startaddr = 0;
+  mips_extra_func_info_t proc_desc;
+  int kernel_trap;
+
+  /* Only use the mdebug frame unwinder on mdebug frames where all the
+     registers have been saved.  Leave hard cases such as no mdebug or
+     in prologue for the heuristic unwinders.  */
+
+  proc_desc = non_heuristic_proc_desc (pc, &startaddr);
+  if (proc_desc == NULL)
+    return NULL;
+
+  /* Not sure exactly what kernel_trap means, but if it means the
+     kernel saves the registers without a prologue doing it, we better
+     not examine the prologue to see whether registers have been saved
+     yet.  */
+  kernel_trap = PROC_REG_MASK (proc_desc) & 1;
+  if (kernel_trap)
+    return &mips_mdebug_frame_unwind;
+
+  /* In any frame other than the innermost or a frame interrupted by a
+     signal, we assume that all registers have been saved.  This
+     assumes that all register saves in a function happen before the
+     first function call.  */
+  if (!in_prologue (pc, PROC_LOW_ADDR (proc_desc)))
+    return &mips_mdebug_frame_unwind;
+
+  return NULL;
 }
 
 static CORE_ADDR
@@ -1742,7 +1772,601 @@ static const struct frame_base mips_mdebug_frame_base = {
 static const struct frame_base *
 mips_mdebug_frame_base_sniffer (struct frame_info *next_frame)
 {
-  return &mips_mdebug_frame_base;
+  if (mips_mdebug_frame_sniffer (next_frame) != NULL)
+    return &mips_mdebug_frame_base;
+  else
+    return NULL;
+}
+
+static struct mips_frame_cache *
+mips16_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  mips_extra_func_info_t proc_desc;
+  struct mips_frame_cache *cache;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  /* r0 bit means kernel trap */
+  int kernel_trap;
+  /* What registers have been saved?  Bitmasks.  */
+  unsigned long gen_mask, float_mask;
+
+  if ((*this_cache) != NULL)
+    return (*this_cache);
+  cache = FRAME_OBSTACK_ZALLOC (struct mips_frame_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* Get the mdebug proc descriptor.  */
+  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame, 1);
+  if (proc_desc == NULL)
+    /* I'm not sure how/whether this can happen.  Normally when we
+       can't find a proc_desc, we "synthesize" one using
+       heuristic_proc_desc and set the saved_regs right away.  */
+    return cache;
+
+  /* Extract the frame's base.  */
+  cache->base = (frame_unwind_register_signed (next_frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
+		 + PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
+
+  kernel_trap = PROC_REG_MASK (proc_desc) & 1;
+  gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);
+  float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK (proc_desc);
+  
+  /* In any frame other than the innermost or a frame interrupted by a
+     signal, we assume that all registers have been saved.  This
+     assumes that all register saves in a function happen before the
+     first function call.  */
+  if (in_prologue (frame_pc_unwind (next_frame), PROC_LOW_ADDR (proc_desc))
+      /* Not sure exactly what kernel_trap means, but if it means the
+	 kernel saves the registers without a prologue doing it, we
+	 better not examine the prologue to see whether registers
+	 have been saved yet.  */
+      && !kernel_trap)
+    {
+      /* We need to figure out whether the registers that the
+         proc_desc claims are saved have been saved yet.  */
+
+      CORE_ADDR addr;
+
+      /* Bitmasks; set if we have found a save for the register.  */
+      unsigned long gen_save_found = 0;
+      unsigned long float_save_found = 0;
+      int mips16;
+
+      /* If the address is odd, assume this is MIPS16 code.  */
+      addr = PROC_LOW_ADDR (proc_desc);
+      mips16 = pc_is_mips16 (addr);
+
+      /* Scan through this function's instructions preceding the
+         current PC, and look for those that save registers.  */
+      while (addr < frame_pc_unwind (next_frame))
+	{
+	  if (mips16)
+	    {
+	      mips16_decode_reg_save (mips16_fetch_instruction (addr),
+				      &gen_save_found);
+	      addr += MIPS16_INSTLEN;
+	    }
+	  else
+	    {
+	      mips32_decode_reg_save (mips32_fetch_instruction (addr),
+				      &gen_save_found, &float_save_found);
+	      addr += MIPS_INSTLEN;
+	    }
+	}
+      gen_mask = gen_save_found;
+      float_mask = float_save_found;
+    }
+
+  /* Fill in the offsets for the registers which gen_mask says were
+     saved.  */
+  {
+    CORE_ADDR reg_position = (cache->base
+			      + PROC_REG_OFFSET (proc_desc));
+    int ireg;
+    for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
+      if (gen_mask & 0x80000000)
+	{
+	  cache->saved_regs[NUM_REGS + ireg].addr = reg_position;
+	  reg_position -= mips_abi_regsize (gdbarch);
+	}
+  }
+
+  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse
+     order of that normally used by gcc.  Therefore, we have to fetch
+     the first instruction of the function, and if it's an entry
+     instruction that saves $s0 or $s1, correct their saved addresses.  */
+  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
+    {
+      ULONGEST inst = mips16_fetch_instruction (PROC_LOW_ADDR (proc_desc));
+      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
+	/* entry */
+	{
+	  int reg;
+	  int sreg_count = (inst >> 6) & 3;
+
+	  /* Check if the ra register was pushed on the stack.  */
+	  CORE_ADDR reg_position = (cache->base
+				    + PROC_REG_OFFSET (proc_desc));
+	  if (inst & 0x20)
+	    reg_position -= mips_abi_regsize (gdbarch);
+
+	  /* Check if the s0 and s1 registers were pushed on the
+	     stack.  */
+	  /* NOTE: cagney/2004-02-08: Huh?  This is doing no such
+             check.  */
+	  for (reg = 16; reg < sreg_count + 16; reg++)
+	    {
+	      cache->saved_regs[NUM_REGS + reg].addr = reg_position;
+	      reg_position -= mips_abi_regsize (gdbarch);
+	    }
+	}
+    }
+
+  /* Fill in the offsets for the registers which float_mask says were
+     saved.  */
+  {
+    CORE_ADDR reg_position = (cache->base
+			      + PROC_FREG_OFFSET (proc_desc));
+    int ireg;
+    /* Fill in the offsets for the float registers which float_mask
+       says were saved.  */
+    for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
+      if (float_mask & 0x80000000)
+	{
+	  if (mips_abi_regsize (gdbarch) == 4
+	      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	    {
+	      /* On a big endian 32 bit ABI, floating point registers
+	         are paired to form doubles such that the most
+	         significant part is in $f[N+1] and the least
+	         significant in $f[N] vis: $f[N+1] ||| $f[N].  The
+	         registers are also spilled as a pair and stored as a
+	         double.
+
+	         When little-endian the least significant part is
+	         stored first leading to the memory order $f[N] and
+	         then $f[N+1].
+
+	         Unfortunately, when big-endian the most significant
+	         part of the double is stored first, and the least
+	         significant is stored second.  This leads to the
+	         registers being ordered in memory as firt $f[N+1] and
+	         then $f[N].
+
+	         For the big-endian case make certain that the
+	         addresses point at the correct (swapped) locations
+	         $f[N] and $f[N+1] pair (keep in mind that
+	         reg_position is decremented each time through the
+	         loop).  */
+	      if ((ireg & 1))
+		cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
+		  .addr = reg_position - mips_abi_regsize (gdbarch);
+	      else
+		cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
+		  .addr = reg_position + mips_abi_regsize (gdbarch);
+	    }
+	  else
+	    cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
+	      .addr = reg_position;
+	  reg_position -= mips_abi_regsize (gdbarch);
+	}
+
+    cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
+      = cache->saved_regs[NUM_REGS + RA_REGNUM];
+  }
+
+  /* SP_REGNUM, contains the value and not the address.  */
+  trad_frame_set_value (cache->saved_regs, NUM_REGS + MIPS_SP_REGNUM, cache->base);
+
+  return (*this_cache);
+}
+
+static void
+mips16_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			   struct frame_id *this_id)
+{
+  struct mips_frame_cache *info = mips16_frame_cache (next_frame,
+							   this_cache);
+  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+}
+
+static void
+mips16_frame_prev_register (struct frame_info *next_frame,
+				 void **this_cache,
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *valuep)
+{
+  struct mips_frame_cache *info = mips16_frame_cache (next_frame,
+							   this_cache);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind mips16_frame_unwind =
+{
+  NORMAL_FRAME,
+  mips16_frame_this_id,
+  mips16_frame_prev_register
+};
+
+static const struct frame_unwind *
+mips16_frame_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  if (pc_is_mips16 (pc))
+    return &mips16_frame_unwind;
+  return NULL;
+}
+
+static CORE_ADDR
+mips16_frame_base_address (struct frame_info *next_frame,
+				void **this_cache)
+{
+  struct mips_frame_cache *info = mips16_frame_cache (next_frame,
+							   this_cache);
+  return info->base;
+}
+
+static const struct frame_base mips16_frame_base =
+{
+  &mips16_frame_unwind,
+  mips16_frame_base_address,
+  mips16_frame_base_address,
+  mips16_frame_base_address
+};
+
+static const struct frame_base *
+mips16_frame_base_sniffer (struct frame_info *next_frame)
+{
+  if (mips16_frame_sniffer (next_frame) != NULL)
+    return &mips16_frame_base;
+  else
+    return NULL;
+}
+
+static struct mips_frame_cache *
+mips32_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  mips_extra_func_info_t proc_desc;
+  struct mips_frame_cache *cache;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  /* r0 bit means kernel trap */
+  int kernel_trap;
+  /* What registers have been saved?  Bitmasks.  */
+  unsigned long gen_mask, float_mask;
+
+  if ((*this_cache) != NULL)
+    return (*this_cache);
+  cache = FRAME_OBSTACK_ZALLOC (struct mips_frame_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* Get the mdebug proc descriptor.  */
+  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame, 1);
+  if (proc_desc == NULL)
+    /* I'm not sure how/whether this can happen.  Normally when we
+       can't find a proc_desc, we "synthesize" one using
+       heuristic_proc_desc and set the saved_regs right away.  */
+    return cache;
+
+  /* Extract the frame's base.  */
+  cache->base = (frame_unwind_register_signed (next_frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
+		 + PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
+
+  kernel_trap = PROC_REG_MASK (proc_desc) & 1;
+  gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);
+  float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK (proc_desc);
+  
+  /* In any frame other than the innermost or a frame interrupted by a
+     signal, we assume that all registers have been saved.  This
+     assumes that all register saves in a function happen before the
+     first function call.  */
+  if (in_prologue (frame_pc_unwind (next_frame), PROC_LOW_ADDR (proc_desc))
+      /* Not sure exactly what kernel_trap means, but if it means the
+	 kernel saves the registers without a prologue doing it, we
+	 better not examine the prologue to see whether registers
+	 have been saved yet.  */
+      && !kernel_trap)
+    {
+      /* We need to figure out whether the registers that the
+         proc_desc claims are saved have been saved yet.  */
+
+      CORE_ADDR addr;
+
+      /* Bitmasks; set if we have found a save for the register.  */
+      unsigned long gen_save_found = 0;
+      unsigned long float_save_found = 0;
+      int mips16;
+
+      /* If the address is odd, assume this is MIPS16 code.  */
+      addr = PROC_LOW_ADDR (proc_desc);
+      mips16 = pc_is_mips16 (addr);
+
+      /* Scan through this function's instructions preceding the
+         current PC, and look for those that save registers.  */
+      while (addr < frame_pc_unwind (next_frame))
+	{
+	  if (mips16)
+	    {
+	      mips16_decode_reg_save (mips16_fetch_instruction (addr),
+				      &gen_save_found);
+	      addr += MIPS16_INSTLEN;
+	    }
+	  else
+	    {
+	      mips32_decode_reg_save (mips32_fetch_instruction (addr),
+				      &gen_save_found, &float_save_found);
+	      addr += MIPS_INSTLEN;
+	    }
+	}
+      gen_mask = gen_save_found;
+      float_mask = float_save_found;
+    }
+
+  /* Fill in the offsets for the registers which gen_mask says were
+     saved.  */
+  {
+    CORE_ADDR reg_position = (cache->base
+			      + PROC_REG_OFFSET (proc_desc));
+    int ireg;
+    for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
+      if (gen_mask & 0x80000000)
+	{
+	  cache->saved_regs[NUM_REGS + ireg].addr = reg_position;
+	  reg_position -= mips_abi_regsize (gdbarch);
+	}
+  }
+
+  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse
+     order of that normally used by gcc.  Therefore, we have to fetch
+     the first instruction of the function, and if it's an entry
+     instruction that saves $s0 or $s1, correct their saved addresses.  */
+  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
+    {
+      ULONGEST inst = mips16_fetch_instruction (PROC_LOW_ADDR (proc_desc));
+      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
+	/* entry */
+	{
+	  int reg;
+	  int sreg_count = (inst >> 6) & 3;
+
+	  /* Check if the ra register was pushed on the stack.  */
+	  CORE_ADDR reg_position = (cache->base
+				    + PROC_REG_OFFSET (proc_desc));
+	  if (inst & 0x20)
+	    reg_position -= mips_abi_regsize (gdbarch);
+
+	  /* Check if the s0 and s1 registers were pushed on the
+	     stack.  */
+	  /* NOTE: cagney/2004-02-08: Huh?  This is doing no such
+             check.  */
+	  for (reg = 16; reg < sreg_count + 16; reg++)
+	    {
+	      cache->saved_regs[NUM_REGS + reg].addr = reg_position;
+	      reg_position -= mips_abi_regsize (gdbarch);
+	    }
+	}
+    }
+
+  /* Fill in the offsets for the registers which float_mask says were
+     saved.  */
+  {
+    CORE_ADDR reg_position = (cache->base
+			      + PROC_FREG_OFFSET (proc_desc));
+    int ireg;
+    /* Fill in the offsets for the float registers which float_mask
+       says were saved.  */
+    for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
+      if (float_mask & 0x80000000)
+	{
+	  if (mips_abi_regsize (gdbarch) == 4
+	      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	    {
+	      /* On a big endian 32 bit ABI, floating point registers
+	         are paired to form doubles such that the most
+	         significant part is in $f[N+1] and the least
+	         significant in $f[N] vis: $f[N+1] ||| $f[N].  The
+	         registers are also spilled as a pair and stored as a
+	         double.
+
+	         When little-endian the least significant part is
+	         stored first leading to the memory order $f[N] and
+	         then $f[N+1].
+
+	         Unfortunately, when big-endian the most significant
+	         part of the double is stored first, and the least
+	         significant is stored second.  This leads to the
+	         registers being ordered in memory as firt $f[N+1] and
+	         then $f[N].
+
+	         For the big-endian case make certain that the
+	         addresses point at the correct (swapped) locations
+	         $f[N] and $f[N+1] pair (keep in mind that
+	         reg_position is decremented each time through the
+	         loop).  */
+	      if ((ireg & 1))
+		cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
+		  .addr = reg_position - mips_abi_regsize (gdbarch);
+	      else
+		cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
+		  .addr = reg_position + mips_abi_regsize (gdbarch);
+	    }
+	  else
+	    cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
+	      .addr = reg_position;
+	  reg_position -= mips_abi_regsize (gdbarch);
+	}
+
+    cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
+      = cache->saved_regs[NUM_REGS + RA_REGNUM];
+  }
+
+  /* SP_REGNUM, contains the value and not the address.  */
+  trad_frame_set_value (cache->saved_regs, NUM_REGS + MIPS_SP_REGNUM, cache->base);
+
+  return (*this_cache);
+}
+
+static void
+mips32_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			   struct frame_id *this_id)
+{
+  struct mips_frame_cache *info = mips32_frame_cache (next_frame,
+							   this_cache);
+  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+}
+
+static void
+mips32_frame_prev_register (struct frame_info *next_frame,
+				 void **this_cache,
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *valuep)
+{
+  struct mips_frame_cache *info = mips32_frame_cache (next_frame,
+							   this_cache);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind mips32_frame_unwind =
+{
+  NORMAL_FRAME,
+  mips32_frame_this_id,
+  mips32_frame_prev_register
+};
+
+static const struct frame_unwind *
+mips32_frame_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  if (! pc_is_mips16 (pc))
+    return &mips32_frame_unwind;
+  return NULL;
+}
+
+static CORE_ADDR
+mips32_frame_base_address (struct frame_info *next_frame,
+				void **this_cache)
+{
+  struct mips_frame_cache *info = mips32_frame_cache (next_frame,
+							   this_cache);
+  return info->base;
+}
+
+static const struct frame_base mips32_frame_base =
+{
+  &mips32_frame_unwind,
+  mips32_frame_base_address,
+  mips32_frame_base_address,
+  mips32_frame_base_address
+};
+
+static const struct frame_base *
+mips32_frame_base_sniffer (struct frame_info *next_frame)
+{
+  if (mips32_frame_sniffer (next_frame) != NULL)
+    return &mips32_frame_base;
+  else
+    return NULL;
+}
+
+static struct trad_frame_cache *
+mips_stub_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  CORE_ADDR pc;
+  CORE_ADDR start_addr;
+  CORE_ADDR stack_addr;
+  struct trad_frame_cache *this_trad_cache;
+
+  if ((*this_cache) != NULL)
+    return (*this_cache);
+  this_trad_cache = trad_frame_cache_zalloc (next_frame);
+  (*this_cache) = this_trad_cache;
+
+  /* The return address is in the link register.  */
+  trad_frame_set_reg_realreg (this_trad_cache, PC_REGNUM, RA_REGNUM);
+
+  /* Frame ID, since it's a frameless / stackless function, no stack
+     space is allocated and SP on entry is the current SP.  */
+  pc = frame_pc_unwind (next_frame);
+  find_pc_partial_function (pc, NULL, &start_addr, NULL);
+  stack_addr = frame_unwind_register_signed (next_frame, SP_REGNUM);
+  trad_frame_set_id (this_trad_cache, frame_id_build (start_addr, stack_addr));
+
+  /* Assume that the frame's base is the same as the
+     stack-pointer.  */
+  trad_frame_set_this_base (this_trad_cache, stack_addr);
+
+  return this_trad_cache;
+}
+
+static void
+mips_stub_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			 struct frame_id *this_id)
+{
+  struct trad_frame_cache *this_trad_cache
+    = mips_stub_frame_cache (next_frame, this_cache);
+  trad_frame_get_id (this_trad_cache, this_id);
+}
+
+static void
+mips_stub_frame_prev_register (struct frame_info *next_frame,
+				 void **this_cache,
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *valuep)
+{
+  struct trad_frame_cache *this_trad_cache
+    = mips_stub_frame_cache (next_frame, this_cache);
+  trad_frame_get_register (this_trad_cache, next_frame, regnum, optimizedp,
+			   lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind mips_stub_frame_unwind =
+{
+  NORMAL_FRAME,
+  mips_stub_frame_this_id,
+  mips_stub_frame_prev_register
+};
+
+static const struct frame_unwind *
+mips_stub_frame_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  if (in_plt_section (pc, NULL))
+    return &mips_stub_frame_unwind;
+  else
+    return NULL;
+}
+
+static CORE_ADDR
+mips_stub_frame_base_address (struct frame_info *next_frame,
+			      void **this_cache)
+{
+  struct trad_frame_cache *this_trad_cache
+    = mips_stub_frame_cache (next_frame, this_cache);
+  return trad_frame_get_this_base (this_trad_cache);
+}
+
+static const struct frame_base mips_stub_frame_base =
+{
+  &mips_stub_frame_unwind,
+  mips_stub_frame_base_address,
+  mips_stub_frame_base_address,
+  mips_stub_frame_base_address
+};
+
+static const struct frame_base *
+mips_stub_frame_base_sniffer (struct frame_info *next_frame)
+{
+  if (mips_stub_frame_sniffer (next_frame) != NULL)
+    return &mips_stub_frame_base;
+  else
+    return NULL;
 }
 
 static CORE_ADDR
@@ -5801,8 +6425,14 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   /* Unwind the frame.  */
+  frame_unwind_append_sniffer (gdbarch, mips_stub_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, mips_mdebug_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, mips16_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, mips32_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, mips_stub_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_mdebug_frame_base_sniffer);
+  frame_base_append_sniffer (gdbarch, mips16_frame_base_sniffer);
+  frame_base_append_sniffer (gdbarch, mips32_frame_base_sniffer);
 
   return gdbarch;
 }

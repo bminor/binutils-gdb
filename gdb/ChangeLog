@@ -1,5 +1,26 @@
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (mips16_frame_cache)
+	(mips16_frame_this_id, mips16_frame_prev_register)
+	(mips16_frame_unwind, mips16_frame_sniffer)
+	(mips16_frame_base_address, mips16_frame_base)
+	(mips16_frame_base_sniffer, mips32_frame_cache)
+	(mips32_frame_this_id, mips32_frame_prev_register)
+	(mips32_frame_unwind, mips32_frame_sniffer)
+	(mips32_frame_base_address, mips32_frame_base)
+	(mips32_frame_base_sniffer): Clone the mdebug unwinder into
+	separate heuristic mips16 and mips32 unwinders.
+	(mips_stub_frame_cache, mips_stub_frame_this_id)
+	(mips_stub_frame_prev_register)
+	(mips_stub_frame_unwind, mips_stub_frame_sniffer)
+	(mips_stub_frame_base_address, mips_stub_frame_base)
+	(mips_stub_frame_base_sniffer): Add a simple stub unwinder.
+	(mips_mdebug_frame_base_sniffer, mips_mdebug_frame_sniffer): Only
+	match true mdebug frames.
+	(non_heuristic_proc_desc): Add forward declaration.
+
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
 	* config/mips/tm-irix6.h: Delete file.
 	* config/mips/tm-irix5.h: Delete file.
 	* config/mips/irix5.mt (TM_FILE): Set to tm-mips.h
