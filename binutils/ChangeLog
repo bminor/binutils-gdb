@@ -1,3 +1,8 @@
+Tue Mar 29 14:59:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nm.c (display_archive): Close each archive element after it has
+	been displayed.
+
 Mon Mar 28 13:04:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Change error message to refer to bfd/config.bfd

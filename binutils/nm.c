@@ -271,6 +271,7 @@ main (argc, argv)
   int retval;
 
   program_name = *argv;
+  xmalloc_set_program_name (program_name);
 
   bfd_init ();
 
@@ -381,7 +382,7 @@ display_archive (file)
 
       if (arfile == NULL)
 	{
-	  if (bfd_error != no_more_archived_files)
+	  if (bfd_get_error () != bfd_error_no_more_archived_files)
 	    bfd_fatal (bfd_get_filename (file));
 	  break;
 	}
@@ -395,12 +396,14 @@ display_archive (file)
       else
 	{
 	  bfd_nonfatal (bfd_get_filename (arfile));
-	  if (bfd_error == file_ambiguously_recognized)
+	  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	    {
 	      list_matching_formats (matching);
 	      free (matching);
 	    }
 	}
+
+      bfd_close (arfile);
     }
 }
 
@@ -431,7 +434,7 @@ display_file (filename)
   else
     {
       bfd_nonfatal (filename);
-      if (bfd_error == file_ambiguously_recognized)
+      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	{
 	  list_matching_formats (matching);
 	  free (matching);
