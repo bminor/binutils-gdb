@@ -1,3 +1,7 @@
+2001-04-05  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* readelf.c (display_debug_lines): Fix typo for "Prologue".
+
 2001-03-30  H.J. Lu  <hjl@gnu.org>
 
 	* readelf.c (process_unwind): Just return if do_unwind is 0.

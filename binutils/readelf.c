@@ -5494,7 +5494,7 @@ display_debug_lines (section, start, file)
 
       printf (_("  Length:                      %ld\n"), info.li_length);
       printf (_("  DWARF Version:               %d\n"), info.li_version);
-      printf (_("  Prolgue Length:              %d\n"), info.li_prologue_length);
+      printf (_("  Prologue Length:             %d\n"), info.li_prologue_length);
       printf (_("  Minimum Instruction Length:  %d\n"), info.li_min_insn_length);
       printf (_("  Initial value of 'is_stmt':  %d\n"), info.li_default_is_stmt);
       printf (_("  Line Base:                   %d\n"), info.li_line_base);
