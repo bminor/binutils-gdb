@@ -144,31 +144,123 @@ print_insn_tic80 (memaddr, info)
 	    }
 	  else if ((operand -> flags & TIC80_OPERAND_RELATIVE) != 0)
 	    {
-	      (*info -> print_address_func) (memaddr + value, info);
+	      (*info -> print_address_func) (memaddr + 4 * value, info);
 	    }
-	  else if ((operand -> flags & TIC80_OPERAND_CC_SZ) != 0)
+	  else if ((operand -> flags & TIC80_OPERAND_BITNUM) != 0)
 	    {
-#if 0	/* FIXME */	      
-	      if (operand -> bits == 3)
-		(*info -> fprintf_func) (info -> stream, "cr%d", value);
+	      char *syms[30] = {
+		"eq.b", "ne.b", "gt.b", "le.b", "lt.b", "ge.b",
+		"hi.b", "ls.b", "lo.b", "hs.b", "eq.h", "ne.h",
+		"gt.h", "le.h", "lt.h", "ge.h", "hi.h", "ls.h",
+		"lo.h", "hs.h", "eq.w", "ne.w", "gt.w", "le.w",
+		"lt.w", "ge.w", "hi.w", "ls.w", "lo.w", "hs.w"
+	      };
+	      int bitnum = ~value & 0x1F;
+
+	      if (bitnum < 30)
+		{
+		  /* Found a value within range */
+		  (*info -> fprintf_func) (info -> stream, "%s", syms[bitnum]);
+		}
 	      else
 		{
-		  static const char *cbnames[4] = { "lt", "gt", "eq", "so" };
-		  int cr;
-		  int cc;
-
-		  cr = value >> 2;
-		  if (cr != 0)
-		    (*info -> fprintf_func) (info -> stream, "4*cr%d", cr);
-		  cc = value & 3;
-		  if (cc != 0)
-		    {
-		      if (cr != 0)
-			(*info -> fprintf_func) (info -> stream, "+");
-		      (*info -> fprintf_func) (info -> stream, "%s", cbnames[cc]);
-		    }
+		  /* Not in range, just print as bit number */
+		  (*info -> fprintf_func) (info -> stream, "%ld", bitnum);
 		}
-#endif
+	    }
+	  else if ((operand -> flags & TIC80_OPERAND_CC) != 0)
+	    {
+	      char *syms[24] = {
+		"nev.b", "gt0.b", "eq0.b", "ge0.b", "lt0.b", "ne0.b", "le0.b", "alw.b",
+		"nev.h", "gt0.h", "eq0.h", "ge0.h", "lt0.h", "ne0.h", "le0.h", "alw.h",
+		"nev.w", "gt0.w", "eq0.w", "ge0.w", "lt0.w", "ne0.w", "le0.w", "alw.w"
+	      };
+	      if (value < 24)
+		{
+		  /* Found a value within range */
+		  (*info -> fprintf_func) (info -> stream, "%s", syms[value]);
+		}
+	      else
+		{
+		  /* Not in range, just print as decimal digit. */
+		  (*info -> fprintf_func) (info -> stream, "%ld", value);
+		}
+	    }
+	  else if ((operand -> flags & TIC80_OPERAND_CR) != 0)
+	    {
+	      char *tmp;
+	      switch (value)
+		{
+		case 0:		tmp = "EPC";		break;
+		case 1:		tmp = "EIP";		break;
+		case 2:		tmp = "CONFIG";		break;
+		case 4:		tmp = "INTPEN";		break;
+		case 6:		tmp = "IE";		break;
+		case 8:		tmp = "FPST";		break;
+		case 0xA:	tmp = "PPERROR";	break;
+		case 0xD:	tmp = "PKTREQ";		break;
+		case 0xE:	tmp = "TCOUNT";		break;
+		case 0xF:	tmp = "TSCALE";		break;
+		case 0x10:	tmp = "FLTOP";		break;
+		case 0x11:	tmp = "FLTADR";		break;
+		case 0x12:	tmp = "FLTTAG";		break;
+		case 0x13:	tmp = "FLTDTL";		break;
+		case 0x14:	tmp = "FLTDTH";		break;
+		case 0x20:	tmp = "SYSSTK";		break;
+		case 0x21:	tmp = "SYSTMP";		break;
+		case 0x30:	tmp = "MPC";		break;
+		case 0x31:	tmp = "MIP";		break;
+		case 0x33:	tmp = "ECOMCNTL";	break;
+		case 0x34:	tmp = "ANASTAT";	break;
+		case 0x39:	tmp = "BRK1";		break;
+		case 0x3A:	tmp = "BRK2";		break;
+		case 0x200:	tmp = "ITAG0";		break;
+		case 0x201:	tmp = "ITAG1";		break;
+		case 0x202:	tmp = "ITAG2";		break;
+		case 0x203:	tmp = "ITAG3";		break;
+		case 0x204:	tmp = "ITAG4";		break;
+		case 0x205:	tmp = "ITAG5";		break;
+		case 0x206:	tmp = "ITAG6";		break;
+		case 0x207:	tmp = "ITAG7";		break;
+		case 0x208:	tmp = "ITAG8";		break;
+		case 0x209:	tmp = "ITAG9";		break;
+		case 0x20A:	tmp = "ITAG10";		break;
+		case 0x20B:	tmp = "ITAG11";		break;
+		case 0x20C:	tmp = "ITAG12";		break;
+		case 0x20D:	tmp = "ITAG13";		break;
+		case 0x20E:	tmp = "ITAG14";		break;
+		case 0x20F:	tmp = "ITAG15";		break;
+		case 0x300:	tmp = "ILRU";		break;
+		case 0x400:	tmp = "DTAG0";		break;
+		case 0x401:	tmp = "DTAG1";		break;
+		case 0x402:	tmp = "DTAG2";		break;
+		case 0x403:	tmp = "DTAG3";		break;
+		case 0x404:	tmp = "DTAG4";		break;
+		case 0x405:	tmp = "DTAG5";		break;
+		case 0x406:	tmp = "DTAG6";		break;
+		case 0x407:	tmp = "DTAG7";		break;
+		case 0x408:	tmp = "DTAG8";		break;
+		case 0x409:	tmp = "DTAG9";		break;
+		case 0x40A:	tmp = "DTAG10";		break;
+		case 0x40B:	tmp = "DTAG11";		break;
+		case 0x40C:	tmp = "DTAG12";		break;
+		case 0x40D:	tmp = "DTAG13";		break;
+		case 0x40E:	tmp = "DTAG14";		break;
+		case 0x40F:	tmp = "DTAG15";		break;
+		case 0x500:	tmp = "DLRU";		break;
+		case 0x4000:	tmp = "IN0P";		break;
+		case 0x4001:	tmp = "IN1P";		break;
+		case 0x4002:	tmp = "OUTP";		break;
+		default:	tmp = NULL;		break;
+		}
+	      if (tmp != NULL)
+		{
+		  (*info -> fprintf_func) (info -> stream, "%s", tmp);
+		}
+	      else
+		{
+		  (*info -> fprintf_func) (info -> stream, "%#lx", value);
+		}
 	    }
 	  else
 	    {

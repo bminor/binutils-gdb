@@ -92,6 +92,36 @@ const struct tic80_operand tic80_operands[] =
 #define REG27 (REG22 + 1)
   { 5, 27, NULL, NULL, TIC80_OPERAND_GPR },
 
+  /* Short signed offset in bits 14-0 */
+
+#define SSOFF (REG27 + 1)
+  { 15, 0, NULL, NULL, TIC80_OPERAND_RELATIVE | TIC80_OPERAND_SIGNED },
+
+  /* Long signed offset in following 32 bit word */
+
+#define LSOFF (SSOFF + 1)
+  {32, 0, NULL, NULL, TIC80_OPERAND_RELATIVE | TIC80_OPERAND_SIGNED },
+
+  /* BITNUM in bits 31-27 */
+
+#define BITNUM (LSOFF + 1)
+  { 5, 27, NULL, NULL, TIC80_OPERAND_BITNUM },
+
+  /* Condition code in bits 31-27 */
+
+#define CC (BITNUM + 1)
+  { 5, 27, NULL, NULL, TIC80_OPERAND_CC },
+
+  /* Control register number in bits 14-0 */
+
+#define SICR (CC + 1)
+  { 15, 0, NULL, NULL, TIC80_OPERAND_CR },
+
+  /* Control register number in next 32 bit word */
+
+#define LICR (SICR + 1)
+  { 32, 0, NULL, NULL, TIC80_OPERAND_CR },
+
 };
 
 const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
@@ -117,6 +147,23 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 #define MASK_REG_M	MASK_LI_M	/* For readability */
 
 const struct tic80_opcode tic80_opcodes[] = {
+
+  /* The "nop" instruction is really "rdcr 0,r0".  We put it first so that this
+     specific bit pattern will get dissembled as a nop rather than an rdcr. The
+     mask of all ones ensures that this will happen. */
+
+  {"nop",	OP_SI(0x4),	~0,		0,		{0}			},
+
+  /* The "br" instruction is really "bbz target,r0,31".  We put it first so that
+     this specific bit pattern will get disassembled as a br rather than bbz. */
+
+  {"br",	OP_SI(0x48),	0xFFFF8000,	0,		{SSOFF}			},
+  {"br",	OP_LI(0x391),	0xFFFFF000,	0,		{LSOFF}			},
+  {"br",	OP_REG(0x390),	0xFFFFF000,	0,		{REG0}			},
+
+  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,		{SSOFF}			},
+  {"br.a",	OP_LI(0x393),	0xFFFFF000,	0,		{LSOFF}			},
+  {"br.a",	OP_REG(0x392),	0xFFFFF000,	0,		{REG0}			},
 
   /* Signed integer ADD */
 
@@ -158,11 +205,50 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"and.tf",	OP_LI(0x325),	MASK_LI,	FMT_LI,		{LUBF, REG22, REG27}	},
   {"and.tf",	OP_REG(0x324),	MASK_REG,	FMT_REG,	{REG0, REG22, REG27}	},
 
+  /* Branch Bit One - nonannulled */
+
+  {"bbo",	OP_SI(0x4A),	MASK_SI,	FMT_SI, 	{SSOFF, REG22, BITNUM}	},
+  {"bbo",	OP_LI(0x395),	MASK_LI,	FMT_LI, 	{LSOFF, REG22, BITNUM}	},
+  {"bbo",	OP_REG(0x394),	MASK_REG,	FMT_REG, 	{REG0, REG22, BITNUM}	},
+
+  /* Branch Bit One - annulled */
+
+  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	FMT_SI, 	{SSOFF, REG22, BITNUM}	},
+  {"bbo.a",	OP_LI(0x397),	MASK_LI,	FMT_LI, 	{LSOFF, REG22, BITNUM}	},
+  {"bbo.a",	OP_REG(0x396),	MASK_REG,	FMT_REG, 	{REG0, REG22, BITNUM}	},
+
+  /* Branch Bit Zero - nonannulled */
+
+  {"bbz",	OP_SI(0x48),	MASK_SI,	FMT_SI, 	{SSOFF, REG22, BITNUM}	},
+  {"bbz",	OP_LI(0x391),	MASK_LI,	FMT_LI, 	{LSOFF, REG22, BITNUM}	},
+  {"bbz",	OP_REG(0x390),	MASK_REG,	FMT_REG, 	{REG0, REG22, BITNUM}	},
+
+  /* Branch Bit Zero - annulled */
+
+  {"bbz.a",	OP_SI(0x49),	MASK_SI,	FMT_SI, 	{SSOFF, REG22, BITNUM}	},
+  {"bbz.a",	OP_LI(0x393),	MASK_LI,	FMT_LI, 	{LSOFF, REG22, BITNUM}	},
+  {"bbz.a",	OP_REG(0x392),	MASK_REG,	FMT_REG, 	{REG0, REG22, BITNUM}	},
+
+  /* Branch Conditional - nonannulled */
+
+  {"bcnd",	OP_SI(0x4C),	MASK_SI,	FMT_SI, 	{SSOFF, REG22, CC}	},
+  {"bcnd",	OP_LI(0x399),	MASK_LI,	FMT_LI, 	{LSOFF, REG22, CC}	},
+  {"bcnd",	OP_REG(0x398),	MASK_REG,	FMT_REG, 	{REG0, REG22, CC}	},
+
+  /* Branch Conditional - annulled */
+
+  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	FMT_SI, 	{SSOFF, REG22, CC}	},
+  {"bcnd.a",	OP_LI(0x39B),	MASK_LI,	FMT_LI, 	{LSOFF, REG22, CC}	},
+  {"bcnd.a",	OP_REG(0x39A),	MASK_REG,	FMT_REG, 	{REG0, REG22, CC}	},
+
+  /* Branch Control Register */
+
+  {"brcr",	OP_SI(0x6),	MASK_SI,	FMT_SI,		{SICR}			},
+  {"brcr",	OP_LI(0x30D),	MASK_LI,	FMT_LI,		{LICR}			},
+  {"brcr",	OP_REG(0x30C),	MASK_REG,	FMT_REG,	{REG0}			},
+
   /* WORK IN PROGRESS BELOW THIS POINT */
 
-  {"brcr",	OP_LI(0x30D),	MASK_LI,	FMT_LI,		FIXME},
-  {"brcr",	OP_REG(0x30C),	MASK_REG,	FMT_REG,	FIXME},
-  {"brcr",	OP_SI(0x6),	MASK_SI,	FMT_SI,		FIXME},
   {"cmnd",	OP_LI(0x305),	MASK_LI,	FMT_LI,		FIXME},
   {"cmnd",	OP_REG(0x304),	MASK_REG,	FMT_REG,	FIXME},
   {"cmnd",	OP_SI(0x2),	MASK_SI,	FMT_SI,		FIXME},
