@@ -1,3 +1,13 @@
+Fri Jun 12 19:33:17 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (HFILES): Remove config.h.
+	(EMULATION_OFILES, POTFILES): Move patch of May 14 from
+	Makefile.in to Makefile.am.
+	(earmcoff.c): Depend upon armcoff.em, not generic.em.
+	* po/Make-in (all-yes): Correct misspelling in $(PACKAGE).
+	($(srcdir)/$(PACKAGE).pot): Pass -C to $(XGETTEXT).
+	* Makefile.in, po/POTFILES.in, po/ld.pot: Rebuild.
+
 Fri Jun 12 13:43:17 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.

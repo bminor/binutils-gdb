@@ -208,7 +208,7 @@ CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c
 
-HFILES = config.h ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
+HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h
 
@@ -221,7 +221,12 @@ OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 
 STAGESTUFF = *.o ldscripts/* e*.c
 
-POTFILES = $(CFILES) $(HFILES)
+# At the moment this is just a list of those emulation template files
+# that contain internationalised strings.
+EMULATION_FILES = emultempl/pe.em emultempl/armcoff.em
+
+POTFILES = $(CFILES) $(HFILES) $(EMULATION_FILES)
+
 po/POTFILES.in: @MAINT@ Makefile
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
@@ -272,7 +277,7 @@ earmaoutl.c:	$(srcdir)/emulparams/armaoutl.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutl "$(tdir_armaoutl)"
 earmcoff.c:	$(srcdir)/emulparams/armcoff.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armcoff.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/armcoff.em $(srcdir)/scripttempl/armcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armcoff "$(tdir_armcoff)"
 earmpe.c: $(srcdir)/emulparams/armpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
@@ -603,7 +608,8 @@ check-DEJAGNU: site.exp
 		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
-		LIBIBERTY="$(LIBIBERTY)" HOSTING_EMU="$(HOSTING_EMU)" \
+		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" \
+		HOSTING_EMU="$(HOSTING_EMU)" \
 		HOSTING_CRT0="$(HOSTING_CRT0)" HOSTING_LIBS="$(HOSTING_LIBS)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
