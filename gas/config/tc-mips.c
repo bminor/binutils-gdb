@@ -203,6 +203,11 @@ static int mips_4010 = -1;
 /* Whether the 4100 MADD16 and DMADD16 are permitted. */
 static int mips_4100 = -1;
 
+/* start-sanitize-vr4320 */
+/* Whether NEC vr4320 instructions are permitted. */
+static int mips_4320 = -1;
+
+/* end-sanitize-vr4320 */
 /* start-sanitize-vr5400 */
 /* Whether NEC vr5400 instructions are permitted. */
 static int mips_5400 = -1;
@@ -234,6 +239,9 @@ static int mips_4900 = -1;
                          /* start-sanitize-tx49 */                  \
                          || mips_cpu == 4900 || mips_4900           \
                          /* end-sanitize-tx49 */                    \
+			 /* start-sanitize-vr4320 */		    \
+			 || mips_cpu == 4320			    \
+			 /* end-sanitize-vr4320 */		    \
 			 /* start-sanitize-vr5400 */		    \
 			 || mips_cpu == 5400			    \
 			 /* end-sanitize-vr5400 */		    \
@@ -251,11 +259,14 @@ static int mips_4900 = -1;
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here. */
-#define cop_interlocks (mips_cpu == 4300)
-/* start-sanitize-vr5400 */
-#undef cop_interlocks
-#define cop_interlocks (mips_cpu == 4300 || mips_cpu == 5400)
-/* end-sanitize-vr5400 */
+#define cop_interlocks (mips_cpu == 4300                            \
+			/* start-sanitize-vr4320 */		    \
+			|| mips_cpu == 4320			    \
+			/* end-sanitize-vr4320 */		    \
+			/* start-sanitize-vr5400 */		    \
+			|| mips_cpu == 5400			    \
+			/* end-sanitize-vr5400 */		    \
+			)
 
 /* MIPS PIC level.  */
 
@@ -880,6 +891,12 @@ md_begin ()
       else if (strcmp (cpu, "mips64vr4300") == 0)
         mips_cpu = 4300;
 
+      /* start-sanitize-vr4320 */
+      else if (strcmp (cpu, "r4320") == 0
+	       || strcmp (cpu, "mips64vr4320") == 0)
+	mips_cpu = 4320;
+
+      /* end-sanitize-vr4320 */
       else if (strcmp (cpu, "mips64vr4100") == 0
 	       /* start-sanitize-vr4111 */
 	       || strcmp (cpu, "mips64vr4111") == 0
@@ -939,6 +956,9 @@ md_begin ()
                || mips_cpu == 4100
                || mips_cpu == 4400
                || mips_cpu == 4300
+               /* start-sanitize-vr4320 */
+               || mips_cpu == 4320
+               /* end-sanitize-4320 */
                || mips_cpu == 4600
                /* start-sanitize-tx49 */
                || mips_cpu == 4900
@@ -978,6 +998,11 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = (mips_cpu == 4100);
 
+  /* start-sanitize-vr4320 */
+  if (mips_4320 < 0)
+    mips_4320 = (mips_cpu == 4320);
+
+  /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
   if (mips_5400 < 0)
     mips_5400 = (mips_cpu == 5400);
@@ -2451,6 +2476,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  && (insn.insn_mo->membership & INSN_4010) != 0)
 	      || (mips_4100
 		  && (insn.insn_mo->membership & INSN_4100) != 0)
+	      /* start-sanitize-vr4320 */
+	      || (mips_4320
+		  && (insn.insn_mo->membership & INSN_4320) != 0)
+	      /* end-sanitize-vr4320 */
 	      /* start-sanitize-tx49 */
 	      || (mips_4900
 		  && (insn.insn_mo->membership & INSN_4900) != 0)
@@ -6976,6 +7005,9 @@ mips_ip (str, ip)
       else if ((mips_4650 && (insn->membership & INSN_4650) != 0)
 	       || (mips_4010 && (insn->membership & INSN_4010) != 0)
 	       || (mips_4100 && (insn->membership & INSN_4100) != 0)
+	       /* start-sanitize-vr4320 */
+	       || (mips_4320 && (insn->membership & INSN_4320) != 0)
+	       /* end-sanitize-vr4320 */
 	       /* start-sanitize-tx49 */
 	       || (mips_4900 && (insn->membership & INSN_4900) != 0)
 	       /* end-sanitize-tx49 */
@@ -8812,6 +8844,13 @@ struct option md_longopts[] = {
   {"no-m4900", no_argument, NULL, OPTION_NO_M4900},
 
   /* end-sanitize-tx49 */
+  /* start-sanitize-vr4320 */
+#define OPTION_M4320 (OPTION_MD_BASE + 32)
+  {"m4320", no_argument, NULL, OPTION_M4320},
+#define OPTION_NO_M4320 (OPTION_MD_BASE + 33)
+  {"no-m4320", no_argument, NULL, OPTION_NO_M4320},
+
+  /* end-sanitize-vr4320 */
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -8951,6 +8990,10 @@ md_parse_option (c, arg)
                     mips_cpu = 4100;
 		else if (strcmp (p, "4300") == 0)
 		  mips_cpu = 4300;
+		/* start-sanitize-vr4320 */
+		else if (strcmp (p, "4320") == 0)
+		  mips_cpu = 4320;
+		/* end-sanitize-vr4320 */
 		else if (strcmp (p, "4400") == 0)
 		  mips_cpu = 4400;
 		else if (strcmp (p, "4600") == 0)
@@ -9003,6 +9046,9 @@ md_parse_option (c, arg)
 	    if (sv
 		&& (mips_cpu != 4300
 		    && mips_cpu != 4100
+		    /* start-sanitize-vr4320 */
+		    && mips_cpu != 4320
+		    /* end-sanitize-vr4320 */
 		    /* start-sanitize-vr5400 */
 		    && mips_cpu != 5400
 		    /* end-sanitize-vr5400 */
@@ -9055,6 +9101,16 @@ md_parse_option (c, arg)
       break;
       /* end-sanitize-r5900 */
 
+      /* start-sanitize-vr4320 */
+    case OPTION_M4320:
+      mips_4320 = 1;
+      break;
+
+    case OPTION_NO_M4320:
+      mips_4320 = 0;
+      break;
+
+      /* end-sanitize-vr4320 */
       /* start-sanitize-vr5400 */
     case OPTION_M5400:
       mips_5400 = 1;
