@@ -1,3 +1,8 @@
+2003-02-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (elf32_hppa_size_stubs): Double the size left for
+	stubs if !stubs_always_before_branch.
+
 2003-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (swap_out_syms): Generate an error message if an
@@ -7,7 +12,6 @@
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Don't crash if
 	local_got_entries is NULL.
-
 
 2003-02-06  Andreas Schwab  <schwab@suse.de>
 
@@ -407,7 +411,7 @@
 	* elf64-alpha.c (alpha_dynamic_entries_for_reloc): GOTTPREL and
 	TPREL also get a reloc if shared.  Remove SREL support.
 	(elf64_alpha_emit_dynrel): New.
-	(elf64_alpha_relocate_section): Use it.  Resolve dynamic TPREL 
+	(elf64_alpha_relocate_section): Use it.  Resolve dynamic TPREL
 	and GOTTPREL relocs to local symbols against the tp base.
 	(elf64_alpha_finish_dynamic_symbol): Use elf64_alpha_emit_dynrel.
 
@@ -419,15 +423,15 @@
 2003-01-20  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* coffcode.h (coff_set_flags): Added get/set arch hooks.
-	
+
 2003-01-20  Fabio Alemagna  <falemagn@aros.org>
 
 	* elf32-sh.c: Treat elfNN_bed like other macros defined in
 	  elfxx-target.h and #undef it before #define'ing it.
 	* elf32-i386.c: Likewise.
-        * elf32-sh64.c: Likewise.
-        * elf64-alpha.c: Likewise.
-        * elf64-sh64.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-sh64.c: Likewise.
 
 2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
@@ -505,7 +509,7 @@
 	* Makefile.am (ALL_MACHINES): Use cpu-msp430.lo, not cpu-msp430.c.
 	(BFD32_BACKENDS): Use elf32-msp430.lo, not elf32-msp430.c.
 	* Makefile.in: Regenerate.
-	
+
 2003-01-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfn32-mips.c (prev_reloc_section): New.
@@ -542,7 +546,7 @@
 	(bfd_archures_list): Add bfd_iq2000_arch.
 	* configure.in: Handle bfd_elf32_iq2000_vec.
 	* configure: Regenerate.
-	* reloc.c: Add BFD_RELOC_IQ2000_OFFSET_16, BFD_RELOC_IQ2000_OFFSET_21, 
+	* reloc.c: Add BFD_RELOC_IQ2000_OFFSET_16, BFD_RELOC_IQ2000_OFFSET_21,
 	and BFD_RELOC_IQ2000_UHI16.
 	* targets.c (bfd_elf32_iq2000_vec): Declare.
 	(bfd_target_vector): Add bfd_elf32_iq2000_vec.
@@ -632,7 +636,7 @@
 	* archures.c (bfd_arch_get_compatible): Add third parameter
 	'accept_unknowns'.  Only accept unknown format BFDs if
 	accept_unknowns is true, or if the format is "binary".
-        * bfd-in2.h: Regenerate.
+	* bfd-in2.h: Regenerate.
 
 2002-12-21  Nick Clifton  <nickc@redhat.com>
 
@@ -658,7 +662,7 @@
 	* bfd-in2.h: Regenerate.
 	* elf32-xstormy16.c (xstormy16_elf_howto): Add R_XSTORMY16_12.
 	(xstormy16_reloc_map): Add R_XSTORMY16_12.
-	
+
 2002-12-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* doc/bfdint.texi: Fix typos.

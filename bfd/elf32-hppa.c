@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -2901,11 +2901,22 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
   if (stub_group_size == 1)
     {
       /* Default values.  */
-      stub_group_size = 7680000;
-      if (htab->has_17bit_branch || htab->multi_subspace)
-	stub_group_size = 240000;
-      if (htab->has_12bit_branch)
-	stub_group_size = 7500;
+      if (stubs_always_before_branch)
+	{
+	  stub_group_size = 7680000;
+	  if (htab->has_17bit_branch || htab->multi_subspace)
+	    stub_group_size = 240000;
+	  if (htab->has_12bit_branch)
+	    stub_group_size = 7500;
+	}
+      else
+	{
+	  stub_group_size = 6971392;
+	  if (htab->has_17bit_branch || htab->multi_subspace)
+	    stub_group_size = 217856;
+	  if (htab->has_12bit_branch)
+	    stub_group_size = 6808;
+	}
     }
 
   group_sections (htab, stub_group_size, stubs_always_before_branch);
