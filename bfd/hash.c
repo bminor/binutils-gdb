@@ -504,12 +504,12 @@ bfd_hash_traverse (table, func, info)
 void
 bfd_hash_set_default_size (bfd_size_type hash_size)
 {
-  int index;
   /* Extend this prime list if you want more granularity of hash table size.  */
-  static bfd_size_type hash_size_primes[] =
+  static const bfd_size_type hash_size_primes[] =
     {
       1021, 4051, 8599, 16699
     };
+  size_t index;
 
   /* Work out best prime number near the hash_size.  */
   for (index = 0; index < ARRAY_SIZE (hash_size_primes) - 1; ++index)
