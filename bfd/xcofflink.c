@@ -3503,11 +3503,10 @@ xcoff_build_ldsyms (h, p)
       else
 	{
 	  (*_bfd_error_handler)
-	    ("attempt to export undefined symbol `%s'",
+	    ("warning: attempt to export undefined symbol `%s'",
 	     h->root.root.string);
-	  ldinfo->failed = true;
-	  bfd_set_error (bfd_error_invalid_operation);
-	  return false;
+	  h->ldsym = NULL;
+	  return true;
 	}
     }
 
