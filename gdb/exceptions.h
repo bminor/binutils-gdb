@@ -65,6 +65,11 @@ struct exception
 /* A pre-defined non-exception.  */
 extern const struct exception exception_none;
 
+/* If E is an exception, print it's error message on the specified
+   stream.  */
+extern void exception_print (struct ui_file *file, const char *pre_print,
+			     struct exception e);
+
 /* Throw an exception (as described by "struct exception").  Will
    execute a LONG JUMP to the inner most containing exception handler
    established using catch_exceptions() (or similar).
@@ -121,6 +126,10 @@ extern int catch_exceptions_with_msg (struct ui_out *uiout,
 			     	      void *func_args,
 			     	      char *errstring, char **gdberrmsg,
 				      return_mask mask);
+
+/* This function, in addition, suppresses the printing of the captured
+   error message.  It's up to the client to print it.  */
+
 extern struct exception catch_exception (struct ui_out *uiout,
 					 catch_exception_ftype *func,
 					 void *func_args,

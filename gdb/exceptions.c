@@ -69,8 +69,13 @@ struct catcher
   enum catcher_state state;
   /* Jump buffer pointing back at the exception handler.  */
   SIGJMP_BUF buf;
-  /* Status buffer belonging to that exception handler.  */
+  /* Status buffer belonging to the exception handler.  */
   volatile struct exception *exception;
+  /* Should the error / quit message be printed?  Old code assumes
+     that this file prints the error/quit message when first reported.
+     New code instead directly handles the printing of error/quit
+     messages.  */
+  int print_message;
   /* Saved/current state.  */
   int mask;
   char *saved_error_pre_print;
@@ -88,7 +93,8 @@ static SIGJMP_BUF *
 catcher_init (struct ui_out *func_uiout,
 	      char *errstring,
 	      volatile struct exception *exception,
-	      return_mask mask)
+	      return_mask mask,
+	      int print_message)
 {
   struct catcher *new_catcher = XZALLOC (struct catcher);
 
@@ -99,6 +105,7 @@ catcher_init (struct ui_out *func_uiout,
   new_catcher->exception = exception;
 
   new_catcher->mask = mask;
+  new_catcher->print_message = print_message;
 
   /* Override error/quit messages during FUNC. */
   new_catcher->saved_error_pre_print = error_pre_print;
@@ -295,6 +302,40 @@ do_write (void *data, const char *buffer, long length_buffer)
 }
 
 
+void
+exception_print (struct ui_file *file, const char *pre_print,
+		 struct exception e)
+{
+  if (e.reason < 0 && e.message != NULL)
+    {
+      target_terminal_ours ();
+      wrap_here ("");		/* Force out any buffered output */
+      gdb_flush (file);
+      annotate_error_begin ();
+      if (pre_print)
+	fputs_filtered (pre_print, file);
+
+      /* KLUGE: cagney/2005-01-13: Write the string out one line at a
+	 time as that way the MI's behavior is preserved.  */
+      {
+	const char *start;
+	const char *end;
+	for (start = e.message; start != NULL; start = end)
+	  {
+	    end = strchr (start, '\n');
+	    if (end == NULL)
+	      fputs_filtered (start, file);
+	    else
+	      {
+		end++;
+		ui_file_write (file, start, end - start);
+	      }
+	  }					    
+      }
+      fprintf_filtered (file, "\n");
+    }
+}
+
 NORETURN static void
 print_and_throw (enum return_reason reason, enum errors error,
 		 const char *prefix, const char *fmt,
@@ -322,18 +363,23 @@ print_and_throw (enum return_reason reason, enum errors error,
   xfree (last_message);
   last_message = ui_file_xstrdup (tmp_stream, &len);
 
-  if (deprecated_error_begin_hook)
-    deprecated_error_begin_hook ();
+  /* Print the mesage to stderr, but only if the catcher isn't going
+     to handle/print it locally.  */
+  if (current_catcher->print_message)
+    {
+      if (deprecated_error_begin_hook)
+	deprecated_error_begin_hook ();
 
-  /* Write the message plus any pre_print to gdb_stderr.  */
-  target_terminal_ours ();
-  wrap_here ("");		/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-  annotate_error_begin ();
-  if (error_pre_print)
-    fputs_filtered (error_pre_print, gdb_stderr);
-  ui_file_put (tmp_stream, do_write, gdb_stderr);
-  fprintf_filtered (gdb_stderr, "\n");
+      /* Write the message plus any pre_print to gdb_stderr.  */
+      target_terminal_ours ();
+      wrap_here ("");		/* Force out any buffered output */
+      gdb_flush (gdb_stdout);
+      annotate_error_begin ();
+      if (error_pre_print)
+	fputs_filtered (error_pre_print, gdb_stderr);
+      ui_file_put (tmp_stream, do_write, gdb_stderr);
+      fprintf_filtered (gdb_stderr, "\n");
+    }
 
   /* Throw the exception.  */
   e.reason = reason;
@@ -417,7 +463,7 @@ catch_exception (struct ui_out *uiout,
 {
   volatile struct exception exception;
   SIGJMP_BUF *catch;
-  catch = catcher_init (uiout, NULL, &exception, mask);
+  catch = catcher_init (uiout, NULL, &exception, mask, 0);
   for (SIGSETJMP ((*catch));
        catcher_state_machine (CATCH_ITER);)
     (*func) (uiout, func_args);
@@ -434,7 +480,7 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 {
   volatile struct exception exception;
   volatile int val = 0;
-  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask);
+  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask, 1);
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = (*func) (uiout, func_args);
   gdb_assert (val >= 0);
@@ -462,7 +508,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 {
   volatile int val = 0;
   volatile struct exception exception;
-  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask);
+  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask, 1);
   /* This illustrates how it is possible to nest the mechanism and
      hence catch "break".  Of course this doesn't address the need to
      also catch "return".  */

@@ -125,11 +125,16 @@ do_captured_execute_command (struct ui_out *uiout, void *data)
 static struct exception
 safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 {
+  struct exception e;
   struct captured_execute_command_args args;
   args.command = command;
   args.from_tty = from_tty;
-  return catch_exception (uiout, do_captured_execute_command, &args,
-			  RETURN_MASK_ALL);
+  e = catch_exception (uiout, do_captured_execute_command, &args,
+		       RETURN_MASK_ALL);
+  /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
+     caller should print the exception.  */
+  exception_print (gdb_stderr, NULL, e);
+  return e;
 }
 
 

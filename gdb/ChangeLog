@@ -1,5 +1,16 @@
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
+	* mi/mi-main.c (mi_execute_command): Print the exception.
+	* cli/cli-interp.c (safe_execute_command): Print the exception.
+	* exceptions.h (exception_print): Declare.
+	* exceptions.c (struct catcher): Add field print_message.
+	(catcher_init): Add parameter print_message, store in the catcher
+	struct.
+	(print_and_throw): Only print the message when print_message.
+	(catch_exceptions_with_msg, catch_errors): Pass print_message=1 to
+	catcher_init.
+	(catch_exception): Pass print_message=0 to catcher_init.
+
 	* varobj.c (varobj_create): Add missing \n.
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>

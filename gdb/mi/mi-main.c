@@ -1156,6 +1156,7 @@ mi_execute_command (char *cmd, int from_tty)
       args.command = command;
       result = catch_exception (uiout, captured_mi_execute_command, &args,
 				RETURN_MASK_ALL);
+      exception_print (gdb_stderr, NULL, result);
 
       if (args.action == EXECUTE_COMMAND_SUPRESS_PROMPT)
 	{
