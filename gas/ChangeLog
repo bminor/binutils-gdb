@@ -1,3 +1,7 @@
+Mon Jan 15 17:43:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (mapping): Add more relocation suffixes.
+
 Sun Jan 14 21:29:36 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_validate_fix): Allow .gcc_except_table
