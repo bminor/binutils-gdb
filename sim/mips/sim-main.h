@@ -838,6 +838,7 @@ decode_coproc (SD, CPU, cia, (instruction))
 #endif
 
 /* start-sanitize-sky */
+#ifdef OOPS_THIS_DOESN_T_WORK
 #ifdef TARGET_SKY
      /* 128-bit accesses are allowed */
 #undef LOADDRMASK
@@ -845,6 +846,7 @@ decode_coproc (SD, CPU, cia, (instruction))
 #undef PSIZE
 #define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
 #endif /* TARGET_SKY */
+#endif
 /* end-sanitize-sky */
 
 
