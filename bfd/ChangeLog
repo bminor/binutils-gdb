@@ -1,3 +1,11 @@
+1999-12-07  Jim Blandy  <jimb@cygnus.com>
+
+	Add support for SSE registers in ELF core files.
+	* elf.c (elfcore_make_note_pseudosection): New function.
+	(elfcore_grok_prfpreg): Use it.
+	(elfcore_grok_prxfpreg): New function.
+	(elfcore_grok_note): Recognize Linux NT_PRXFPREG notes.
+
 1999-12-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Divide R_MIPS_PC16
