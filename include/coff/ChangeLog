@@ -1,3 +1,8 @@
+Tue Nov  7 14:38:45 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff/powerpc.h (IMAGE_NT_OPTIONAL_HDR_MAGIC): Added define.
+	* coff/pe.h: Added defines for file level flags
+
 Mon Nov  6 17:28:01 1995  Harry Dolan  <dolan@ssd.intel.com>
 
 	* i860.h: New file, based on i386.h.
