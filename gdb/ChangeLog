@@ -25,11 +25,11 @@ Fri Jan 29 15:25:09 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 Fri Jan 29 16:44:01 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 
-	* inferior.h: ran indent
+	* inferior.h: Ran indent.
 
-	* fork-child.c: ran indent
+	* fork-child.c: Ran indent.
 
-	* infrun.c : ran indent
+	* infrun.c : Ran indent.
 
 Fri Jan 29 12:57:34 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
