@@ -5390,6 +5390,7 @@ emit_one_bundle ()
 	    as_fatal ("emit_one_bundle: unexpected dynamic op");
 
 	  sprintf (mnemonic, "%s.%c", idesc->name, "?imbf??"[insn_unit]);
+	  ia64_free_opcode (idesc);
 	  md.slot[curr].idesc = idesc = ia64_find_opcode (mnemonic);
 #if 0
 	  know (!idesc->next);	/* no resolved dynamic ops have collisions */
@@ -8493,6 +8494,7 @@ md_assemble (str)
 	    mnemonic = "addl";
 	  else
 	    mnemonic = "adds";
+	  ia64_free_opcode (idesc);
 	  idesc = ia64_find_opcode (mnemonic);
 #if 0
 	  know (!idesc->next);
@@ -8516,6 +8518,7 @@ md_assemble (str)
 	    mnemonic = "mov.i";
 	  else
 	    mnemonic = "mov.m";
+	  ia64_free_opcode (idesc);
 	  idesc = ia64_find_opcode (mnemonic);
 	  while (idesc != NULL
 		 && (idesc->operands[0] != opnd1

@@ -1,3 +1,9 @@
+2000-08-02  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Call ia64_free_opcode
+	before ia64_find_opcode.
+	(md_assemble): Likewise.
+
 2000-08-01  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (do_mrs): Fix skip fo 'cpsr_all' flag.

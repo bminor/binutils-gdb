@@ -254,6 +254,7 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
     (*info->fprintf_func) (info->stream, ";;");
 
  done:
+  ia64_free_opcode (idesc);
   if (slotnum == 2)
     retval += 16 - 3*slot_multiplier;
   return retval;
