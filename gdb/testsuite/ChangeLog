@@ -1,5 +1,9 @@
 2002-04-22  Michael Chastain  <mec@shout.net>
 
+	* gdb.c++/local.exp: Add PR numbers: gdb/482, gdb/483.
+
+2002-04-22  Michael Chastain  <mec@shout.net>
+
 	* gdb.c++/method.exp: Fix syntax of reference to gdb/277.
 
 2002-04-17  David S. Miller  <davem@redhat.com>

@@ -101,7 +101,10 @@ set sep "(\[.\]|___)\[0-9\]"
 send_gdb "ptype Local\n"
 gdb_expect {
   -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
-  -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { fail "ptype Local (double loc_foo)" }
+  -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
+    # setup_kfail "gdb/483"
+    fail "ptype Local (gdb/483)"
+  }
   -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*Local & operator *=\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((void|)\\);\[\r\n\t \]*char loc_foo\\(char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
   -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*char loc_foo\\(char\\);\r\n\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\)\r\n\}.*$gdb_prompt $" { xpass "ptype Local (old aCC)" }
   -re ".*$gdb_prompt $"   {  fail "ptype Local" }
@@ -186,7 +189,10 @@ send_gdb "ptype InnerLocal::NestedInnerLocal\n"
 gdb_expect {
   -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
   -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
-  -re "There is no field named NestedInnerLocal.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus field lookup)" }
+  -re "There is no field named NestedInnerLocal.*$gdb_prompt $" {
+    # setup_kfail "gdb/482"
+    fail "ptype InnerLocal::NestedInnerLocal (gdb/482)"
+  }
   -re "No symbol .*NestedInnerLocal.* in current context.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus symbol lookup)" }
   -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }
   timeout             { fail "(timeout) ptype InnerLocal::NestedInnerLocal" }
