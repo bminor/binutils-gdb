@@ -117,6 +117,13 @@ Thu Jul  6 16:49:38 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* All files: Updated FSF address.
 
+Thu Jul  6 16:30:34 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* ecoff.c (add_file): Don't collapse multiple .file commands into
+	a single file structure.
+	(ecoff_build_lineno): Set ilineBase to sum of previous file's
+	ilineBase and cline.
+
 Thu Jul  6 12:54:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Patches from Jerry Blakely <gerry_blakley@wellfleet.com>:
