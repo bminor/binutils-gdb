@@ -31,6 +31,10 @@ SECTION
 	haven't bothered yet.
  */
 
+#ifdef __sparcv9
+#define _SYSCALL32	/* For Sparc64-cross-32 */
+#endif
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -2918,18 +2922,21 @@ assign_file_positions_for_segments (abfd)
 
 	  if (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core)
 	    {
-	      if (i == 0)	/* the actual "note" segment */
-		{		/* this one actually contains everything. */
+	      /* The actual "note" segment has i == 0.
+		 This is the one that actually contains everything.  */
+	      if (i == 0)
+		{
 		  sec->filepos = off;
 		  p->p_filesz = sec->_raw_size;
 		  off += sec->_raw_size;
 		  voff = off;
 		}
-	      else	/* fake sections -- don't need to be written */
+	      else
 		{
+		  /* Fake sections -- don't need to be written.  */
 		  sec->filepos = 0;
 		  sec->_raw_size = 0;
-		  flags = sec->flags = 0;	/* no contents */
+		  flags = sec->flags = 0;
 		}
 	      p->p_memsz = 0;
 	      p->p_align = 1;
@@ -5106,7 +5113,7 @@ elfcore_maybe_make_sect (abfd, name, sect)
 
 
 /* prstatus_t exists on:
-     solaris 2.[567]
+     solaris 2.5+
      linux 2.[01] + glibc
      unixware 4.2
 */
@@ -5117,28 +5124,57 @@ elfcore_grok_prstatus (abfd, note)
      bfd* abfd;
      Elf_Internal_Note* note;
 {
-  prstatus_t prstat;
   char buf[100];
   char* name;
   asection* sect;
 
-  if (note->descsz != sizeof (prstat))
-    return true;
+  if (note->descsz == sizeof (prstatus_t))
+    {
+      prstatus_t prstat;
 
-  memcpy (&prstat, note->descdata, sizeof (prstat));
+      memcpy (&prstat, note->descdata, sizeof (prstat));
 
-  elf_tdata (abfd)->core_signal = prstat.pr_cursig;
-  elf_tdata (abfd)->core_pid = prstat.pr_pid;
+      elf_tdata (abfd)->core_signal = prstat.pr_cursig;
+      elf_tdata (abfd)->core_pid = prstat.pr_pid;
 
-  /* pr_who exists on:
-       solaris 2.[567]
-       unixware 4.2
-     pr_who doesn't exist on:
-       linux 2.[01]
-  */
+      /* pr_who exists on:
+	 solaris 2.5+
+	 unixware 4.2
+	 pr_who doesn't exist on:
+	 linux 2.[01]
+	 */
 #if defined (HAVE_PRSTATUS_T_PR_WHO)
-  elf_tdata (abfd)->core_lwpid = prstat.pr_who;
+      elf_tdata (abfd)->core_lwpid = prstat.pr_who;
 #endif
+    }
+#if defined (__sparcv9)
+  else if (note->descsz == sizeof (prstatus32_t))
+    {
+      /* 64-bit host, 32-bit corefile */
+      prstatus32_t prstat;
+
+      memcpy (&prstat, note->descdata, sizeof (prstat));
+
+      elf_tdata (abfd)->core_signal = prstat.pr_cursig;
+      elf_tdata (abfd)->core_pid = prstat.pr_pid;
+
+      /* pr_who exists on:
+	 solaris 2.5+
+	 unixware 4.2
+	 pr_who doesn't exist on:
+	 linux 2.[01]
+	 */
+#if defined (HAVE_PRSTATUS_T_PR_WHO)
+      elf_tdata (abfd)->core_lwpid = prstat.pr_who;
+#endif
+    }
+#endif /* __sparcv9 */
+  else
+    {
+      /* Fail - we don't know how to handle any other
+	 note size (ie. data object type).  */
+      return true;
+    }
 
   /* Make a ".reg/999" section. */
 
@@ -5151,8 +5187,20 @@ elfcore_grok_prstatus (abfd, note)
   sect = bfd_make_section (abfd, name);
   if (sect == NULL)
     return false;
-  sect->_raw_size = sizeof (prstat.pr_reg);
-  sect->filepos = note->descpos + offsetof (prstatus_t, pr_reg);
+
+  if (note->descsz == sizeof (prstatus_t))
+    {
+      sect->_raw_size = sizeof (prgregset_t);
+      sect->filepos = note->descpos + offsetof (prstatus_t, pr_reg);
+    }
+#if defined (__sparcv9)
+  else if (note->descsz == sizeof (prstatus32_t))
+    {
+      sect->_raw_size = sizeof (prgregset32_t);
+      sect->filepos = note->descpos + offsetof (prstatus32_t, pr_reg);
+    }
+#endif
+
   sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
@@ -5230,11 +5278,17 @@ elfcore_grok_prxfpreg (abfd, note)
 
 
 #if defined (HAVE_PRPSINFO_T)
-# define elfcore_psinfo_t prpsinfo_t
+typedef prpsinfo_t   elfcore_psinfo_t;
+#if defined (__sparcv9)	/* Sparc64 cross Sparc32 */
+typedef prpsinfo32_t elfcore_psinfo32_t;
+#endif
 #endif
 
 #if defined (HAVE_PSINFO_T)
-# define elfcore_psinfo_t psinfo_t
+typedef psinfo_t   elfcore_psinfo_t;
+#if defined (__sparcv9)	/* Sparc64 cross Sparc32 */
+typedef psinfo32_t elfcore_psinfo32_t;
+#endif
 #endif
 
 
@@ -5274,18 +5328,40 @@ elfcore_grok_psinfo (abfd, note)
      bfd* abfd;
      Elf_Internal_Note* note;
 {
-  elfcore_psinfo_t psinfo;
+  if (note->descsz == sizeof (elfcore_psinfo_t))
+    {
+      elfcore_psinfo_t psinfo;
 
-  if (note->descsz != sizeof (elfcore_psinfo_t))
-    return true;
+      memcpy (&psinfo, note->descdata, note->descsz);
 
-  memcpy (&psinfo, note->descdata, note->descsz);
+      elf_tdata (abfd)->core_program
+	= elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
 
-  elf_tdata (abfd)->core_program
-    = elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
+      elf_tdata (abfd)->core_command
+	= elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+    }
+#if defined (__sparcv9)
+  else if (note->descsz == sizeof (elfcore_psinfo32_t))
+    {
+      /* 64-bit host, 32-bit corefile */
+      elfcore_psinfo32_t psinfo;
 
-  elf_tdata (abfd)->core_command
-    = elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+      memcpy (&psinfo, note->descdata, note->descsz);
+
+      elf_tdata (abfd)->core_program
+	= elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
+
+      elf_tdata (abfd)->core_command
+	= elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+    }
+#endif
+
+  else
+    {
+      /* Fail - we don't know how to handle any other
+	 note size (ie. data object type).  */
+      return true;
+    }
 
   /* Note that for some reason, a spurious space is tacked
      onto the end of the args in some (at least one anyway)
@@ -5310,15 +5386,25 @@ elfcore_grok_pstatus (abfd, note)
      bfd* abfd;
      Elf_Internal_Note* note;
 {
-  pstatus_t pstat;
+  if (note->descsz == sizeof (pstatus_t))
+    {
+      pstatus_t pstat;
 
-  if (note->descsz != sizeof (pstat))
-    return true;
+      memcpy (&pstat, note->descdata, sizeof (pstat));
 
-  memcpy (&pstat, note->descdata, sizeof (pstat));
+      elf_tdata (abfd)->core_pid = pstat.pr_pid;
+    }
+#if defined (__sparcv9)
+  else if (note->descsz == sizeof (pstatus32_t))
+    {
+      /* 64-bit host, 32-bit corefile */
+      pstatus32_t pstat;
 
-  elf_tdata (abfd)->core_pid = pstat.pr_pid;
+      memcpy (&pstat, note->descdata, sizeof (pstat));
 
+      elf_tdata (abfd)->core_pid = pstat.pr_pid;
+    }
+#endif
   /* Could grab some more details from the "representative"
      lwpstatus_t in pstat.pr_lwp, but we'll catch it all in an
      NT_LWPSTATUS note, presumably. */

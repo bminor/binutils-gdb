@@ -62,6 +62,13 @@ Tue May 30 15:39:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elf.c (_bfd_elf_link_hash_table_init): Initialize dynlocal.
 
+2000-05-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* elf.c (elfcore_grok_prstatus, elfcore_grok_pstatus, 
+	elfcore_grok_psinfo): Add code to allow debugging a 32-bit
+	corefile on a 64-bit (Sparc Solaris) host.  Also clean up
+	a few old comments.
+
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am: Update dependencies with "make dep-am"
