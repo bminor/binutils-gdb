@@ -111,6 +111,7 @@ case "${host}" in
   i[345]86-*-solaris2*)   host_makefile_frag=config/mh-sysv4 ;;
   i[345]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
   i[345]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
+  i[345]86-*-pe*)	  host_makefile_frag=config/mh-i386pe ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
@@ -331,6 +332,9 @@ case "${host}" in
     ;;
   i[345]86-*-go32)
     noconfigdirs="tcl tk expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
+	;;
+  i[345]86-*-pe*)
+    noconfigdirs="tcl tk expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
 esac
 
@@ -384,6 +388,12 @@ case "${target}" in
     # add the go32 support tools to the list
     # but don't build gdb
     configdirs=`echo go32 ${configdirs}`
+    noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
+    ;;
+  i[345]86-*-pe)
+    # add the pe support tools to the list
+    # but don't build gdb
+    configdirs=`echo pei386 ${configdirs}`
     noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
     ;;
   i[345]86-*-sco*)
