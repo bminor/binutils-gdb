@@ -1,5 +1,7 @@
 Sat Aug 15 02:58:03 1992  John Gilmore  (gnu@cygnus.com)
 
+	* m68k-pinsn.c:  Surround extended support with #ifdef HAVE_68881.
+
 	* infcmd.c (registers_info):  Handle multiple register names.
 	Changes inspired by Roland McGrath.
 
