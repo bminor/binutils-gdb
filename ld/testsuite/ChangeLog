@@ -1,3 +1,8 @@
+2001-11-30  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp (build_vers_lib): Preserve the library
+	order.
+
 2001-11-29  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp (build_vers_lib): Support linking against

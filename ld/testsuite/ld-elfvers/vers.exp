@@ -483,7 +483,7 @@ proc build_vers_lib { test source libname other mapfile verexp versymexp symexp 
     set other_lib ""
     if ![string match "" $other] then {
 	foreach o $other {
-	    set other_lib "$tmpdir/$o $other_lib"
+	    set other_lib "$other_lib $tmpdir/$o"
 	}
     }
 
