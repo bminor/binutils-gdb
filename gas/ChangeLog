@@ -1,5 +1,10 @@
 Fri May 31 01:08:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_begin): If -64, create a .MIPS.options
+	section rather than a .reginfo section.
+	(mips_elf_final_processing): If -64, write out 64 bit RegInfo
+	information.
+
 	* config/tc-mips.c (load_register): If mips_isa < 3, permit a 32
 	bit value with the high bit set.
 

@@ -774,18 +774,51 @@ md_begin ()
 
 	seg = now_seg;
 	subseg = now_subseg;
-	sec = subseg_new (".reginfo", (subsegT) 0);
 
-	/* The ABI says this section should be loaded so that the
-	   running program can access it.  */
-	(void) bfd_set_section_flags (stdoutput, sec,
-				      (SEC_ALLOC | SEC_LOAD
-				       | SEC_READONLY | SEC_DATA));
-	(void) bfd_set_section_alignment (stdoutput, sec, 2);
+	if (! mips_64)
+	  {
+	    sec = subseg_new (".reginfo", (subsegT) 0);
+
+	    /* The ABI says this section should be loaded so that the
+	       running program can access it.  */
+	    (void) bfd_set_section_flags (stdoutput, sec,
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_READONLY | SEC_DATA));
+	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
+	
+#ifdef OBJ_ELF
+	    mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
+#endif
+	  }
+	else
+	  {
+	    /* The 64-bit ABI uses a .MIPS.options section rather than
+               .reginfo section.  */
+	    sec = subseg_new (".MIPS.options", (subsegT) 0);
+	    (void) bfd_set_section_flags (stdoutput, sec,
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_READONLY | SEC_DATA));
+	    (void) bfd_set_section_alignment (stdoutput, sec, 3);
 
 #ifdef OBJ_ELF
-	mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
+	    /* Set up the option header.  */
+	    {
+	      Elf_Internal_Options opthdr;
+	      char *f;
+
+	      opthdr.kind = ODK_REGINFO;
+	      opthdr.size = (sizeof (Elf_External_Options)
+			     + sizeof (Elf64_External_RegInfo));
+	      opthdr.section = 0;
+	      opthdr.info = 0;
+	      f = frag_more (sizeof (Elf_External_Options));
+	      bfd_mips_elf_swap_options_out (stdoutput, &opthdr,
+					     (Elf_External_Options *) f);
+
+	      mips_regmask_frag = frag_more (sizeof (Elf64_External_RegInfo));
+	    }
 #endif
+	  }
 
 	if (ECOFF_DEBUGGING)
 	  {
@@ -7648,19 +7681,38 @@ mips_local_label (name)
 void
 mips_elf_final_processing ()
 {
-  Elf32_RegInfo s;
+  /* Write out the register information.  */
+  if (! mips_64)
+    {
+      Elf32_RegInfo s;
 
-  /* Write out the .reginfo section.  */
-  s.ri_gprmask = mips_gprmask;
-  s.ri_cprmask[0] = mips_cprmask[0];
-  s.ri_cprmask[1] = mips_cprmask[1];
-  s.ri_cprmask[2] = mips_cprmask[2];
-  s.ri_cprmask[3] = mips_cprmask[3];
-  /* The gp_value field is set by the MIPS ELF backend.  */
+      s.ri_gprmask = mips_gprmask;
+      s.ri_cprmask[0] = mips_cprmask[0];
+      s.ri_cprmask[1] = mips_cprmask[1];
+      s.ri_cprmask[2] = mips_cprmask[2];
+      s.ri_cprmask[3] = mips_cprmask[3];
+      /* The gp_value field is set by the MIPS ELF backend.  */
 
-  bfd_mips_elf32_swap_reginfo_out (stdoutput, &s,
-				   ((Elf32_External_RegInfo *)
-				    mips_regmask_frag));
+      bfd_mips_elf32_swap_reginfo_out (stdoutput, &s,
+				       ((Elf32_External_RegInfo *)
+					mips_regmask_frag));
+    }
+  else
+    {
+      Elf64_Internal_RegInfo s;
+
+      s.ri_gprmask = mips_gprmask;
+      s.ri_pad = 0;
+      s.ri_cprmask[0] = mips_cprmask[0];
+      s.ri_cprmask[1] = mips_cprmask[1];
+      s.ri_cprmask[2] = mips_cprmask[2];
+      s.ri_cprmask[3] = mips_cprmask[3];
+      /* The gp_value field is set by the MIPS ELF backend.  */
+
+      bfd_mips_elf64_swap_reginfo_out (stdoutput, &s,
+				       ((Elf64_External_RegInfo *)
+					mips_regmask_frag));
+    }
 
   /* Set the MIPS ELF flag bits.  FIXME: There should probably be some
      sort of BFD interface for this.  */
