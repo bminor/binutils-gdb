@@ -296,6 +296,10 @@ extern void record_debugformat (char *format);
 extern void merge_symbol_lists (struct pending **srclist,
 				struct pending **targetlist);
 
+/* The macro table for the compilation unit whose symbols we're
+   currently reading.  All the symtabs for this CU will point to this.  */
+EXTERN struct macro_table *pending_macros;
+
 #undef EXTERN
 
 #endif /* defined (BUILDSYM_H) */

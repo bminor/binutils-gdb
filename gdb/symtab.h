@@ -824,6 +824,11 @@ struct symtab
 
     int primary;
 
+    /* The macro table for this symtab.  Like the blockvector, this
+       may be shared between different symtabs --- and normally is for
+       all the symtabs in a given compilation unit.  */
+    struct macro_table *macro_table;
+
     /* Name of this source file.  */
 
     char *filename;
