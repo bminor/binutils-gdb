@@ -1,3 +1,10 @@
+2003-09-08  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (dbxread.o): Note new dependency on $(gdb_assert_h).
+	* dbxread.c: #include "gdb_assert.h".
+	(read_dbx_symtab): If the objfile has no .data section, use the
+	section index for the .bss section instead.
+
 2003-09-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* frame.c (deprecated_safe_get_selected_frame): New function.

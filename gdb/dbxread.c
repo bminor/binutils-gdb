@@ -58,6 +58,7 @@
 #include "language.h"		/* Needed for local_hex_string */
 #include "complaints.h"
 #include "cp-abi.h"
+#include "gdb_assert.h"
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -1304,6 +1305,7 @@ read_dbx_symtab (struct objfile *objfile)
   struct cleanup *back_to;
   bfd *abfd;
   int textlow_not_set;
+  int data_sect_index;
 
   /* Current partial symtab */
   struct partial_symtab *pst;
@@ -1355,6 +1357,12 @@ read_dbx_symtab (struct objfile *objfile)
   textlow_not_set = 1;
   has_line_numbers = 0;
 
+  /* If the objfile has no .data section, try using the .bss section.  */
+  data_sect_index = objfile->sect_index_data;
+  if (data_sect_index == -1)
+    data_sect_index = SECT_OFF_BSS (objfile);
+  gdb_assert (data_sect_index != -1);
+
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
       /* Get the symbol for this run and pull out some info */
@@ -1401,7 +1409,7 @@ read_dbx_symtab (struct objfile *objfile)
 
 	  case N_DATA | N_EXT:
 	  case N_NBDATA | N_EXT:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
 	  goto record_it;
 
 	  case N_BSS:
@@ -1468,7 +1476,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  continue;
 
 	  case N_DATA:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
 	  goto record_it;
 
 	  case N_UNDF | N_EXT:
@@ -1757,7 +1765,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  switch (p[1])
 	  {
 	  case 'S':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
 #ifdef STATIC_TRANSFORM_NAME
 	    namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
@@ -1768,7 +1776,7 @@ read_dbx_symtab (struct objfile *objfile)
 				 psymtab_language, objfile);
 	    continue;
 	  case 'G':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
 	    /* The addresses in these entries are reported to be
 	       wrong.  See the code that reads 'G's for symtabs. */
 	    add_psymbol_to_list (namestring, p - namestring,
