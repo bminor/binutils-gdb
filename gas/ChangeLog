@@ -1,3 +1,9 @@
+Thu May  7 15:49:07 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_assemble): Handle "bra" just like "jmp"
+	instructions.
+	* config/tc-mn10300.c (md_assemble): Likewise.
+
 Thu May  7 11:47:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen.c (cgen_md_apply_fix3): Don't pass newline to as_warn_where.
