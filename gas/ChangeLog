@@ -1,3 +1,8 @@
+2002-02-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-tic54x.c: Add missing prototypes and remove ANSI style
+	function declarations.
+
 2002-02-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* NEWS: Note that GASP is now deprecated.
