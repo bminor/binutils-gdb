@@ -1,5 +1,9 @@
 Fri Aug 26 14:30:05 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
+	* config.guess (netbsd, freebsd, linux):  Accept any machine,
+	not just i[34]86.
+	(m68k-atari-sysv4):  Relocate to match FSF version.
+
 	* config.guess:  More merges from the FSF:
 
 	Add a space before function call or macro invocation.
