@@ -1,5 +1,11 @@
 2004-05-24  Randolph Chung  <tausq@debian.org>
 
+	* thread.c (info_threads_command, thread_apply_all_command)
+	(thread_apply_command, thread_command, do_captured_thread_select):
+	Remove HPUXHPPA-specific code.
+
+2004-05-24  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (SR4EXPORT_LDIL_OFFSET, SR4EXPORT_LDO_OFFSET): Remove
 	unused symbols.
 	* hppa-tdep.h (HPPA_INSTRUCTION_SIZE): Remove, since there are no more

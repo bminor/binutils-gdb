@@ -424,11 +424,7 @@ info_threads_command (char *arg, int from_tty)
       else
 	printf_filtered ("  ");
 
-#ifdef HPUXHPPA
       printf_filtered ("%d %s", tp->num, target_tid_to_str (tp->ptid));
-#else
-      printf_filtered ("%d %s", tp->num, target_pid_to_str (tp->ptid));
-#endif
 
       extra_info = target_extra_thread_info (tp);
       if (extra_info)
@@ -541,13 +537,8 @@ thread_apply_all_command (char *cmd, int from_tty)
     if (thread_alive (tp))
       {
 	switch_to_thread (tp->ptid);
-#ifdef HPUXHPPA
 	printf_filtered ("\nThread %d (%s):\n",
 			 tp->num, target_tid_to_str (inferior_ptid));
-#else
-	printf_filtered ("\nThread %d (%s):\n", tp->num,
-			 target_pid_to_str (inferior_ptid));
-#endif
 	execute_command (cmd, from_tty);
 	strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
       }
@@ -617,13 +608,8 @@ thread_apply_command (char *tidlist, int from_tty)
 	  else
 	    {
 	      switch_to_thread (tp->ptid);
-#ifdef HPUXHPPA
 	      printf_filtered ("\nThread %d (%s):\n", tp->num,
 			       target_tid_to_str (inferior_ptid));
-#else
-	      printf_filtered ("\nThread %d (%s):\n", tp->num,
-			       target_pid_to_str (inferior_ptid));
-#endif
 	      execute_command (cmd, from_tty);
 	      strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
 	    }
@@ -646,12 +632,7 @@ thread_command (char *tidstr, int from_tty)
       if (target_has_stack)
 	printf_filtered ("[Current thread is %d (%s)]\n",
 			 pid_to_thread_id (inferior_ptid),
-#if defined(HPUXHPPA)
-			 target_tid_to_str (inferior_ptid)
-#else
-			 target_pid_to_str (inferior_ptid)
-#endif
-	  );
+			 target_tid_to_str (inferior_ptid));
       else
 	error ("No stack.");
       return;
@@ -681,11 +662,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   ui_out_text (uiout, "[Switching to thread ");
   ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
   ui_out_text (uiout, " (");
-#if defined(HPUXHPPA)
   ui_out_text (uiout, target_tid_to_str (inferior_ptid));
-#else
-  ui_out_text (uiout, target_pid_to_str (inferior_ptid));
-#endif
   ui_out_text (uiout, ")]");
 
   print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
