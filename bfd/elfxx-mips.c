@@ -475,6 +475,8 @@ static bfd *reldyn_sorting_bfd;
     : "/usr/lib/libc.so.1")
 
 #ifdef BFD64
+#define MNAME(bfd,pre,pos) \
+  (ABI_64_P (bfd) ? CONCAT4 (pre,64,_,pos) : CONCAT4 (pre,32,_,pos))
 #define ELF_R_SYM(bfd, i)					\
   (ABI_64_P (bfd) ? ELF64_R_SYM (i) : ELF32_R_SYM (i))
 #define ELF_R_TYPE(bfd, i)					\
@@ -482,6 +484,7 @@ static bfd *reldyn_sorting_bfd;
 #define ELF_R_INFO(bfd, s, t)					\
   (ABI_64_P (bfd) ? ELF64_R_INFO (s, t) : ELF32_R_INFO (s, t))
 #else
+#define MNAME(bfd,pre,pos) CONCAT4 (pre,32,_,pos)
 #define ELF_R_SYM(bfd, i)					\
   (ELF32_R_SYM (i))
 #define ELF_R_TYPE(bfd, i)					\
@@ -4128,7 +4131,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 			      sizeof CALL_FP_STUB - 1) == 0)
 		continue;
 
-	      sec_relocs = (_bfd_elf32_link_read_relocs
+	      sec_relocs = (MNAME(abfd,_bfd_elf,link_read_relocs)
 			    (abfd, o, (PTR) NULL,
 			     (Elf_Internal_Rela *) NULL,
 			     info->keep_memory));
@@ -6481,9 +6484,10 @@ _bfd_mips_elf_discard_info (abfd, cookie, info)
   if (! tdata)
     return false;
 
-  cookie->rels = _bfd_elf32_link_read_relocs (abfd, o, (PTR) NULL,
-					      (Elf_Internal_Rela *) NULL,
-					      info->keep_memory);
+  cookie->rels = (MNAME(abfd,_bfd_elf,link_read_relocs)
+		  (abfd, o, (PTR) NULL,
+		   (Elf_Internal_Rela *) NULL,
+		   info->keep_memory));
   if (!cookie->rels)
     {
       free (tdata);
@@ -6495,7 +6499,7 @@ _bfd_mips_elf_discard_info (abfd, cookie, info)
 
   for (i = 0, skip = 0; i < o->_raw_size; i ++)
     {
-      if (_bfd_elf32_reloc_symbol_deleted_p (i * PDR_SIZE, cookie))
+      if (MNAME(abfd,_bfd_elf,reloc_symbol_deleted_p) (i * PDR_SIZE, cookie))
 	{
 	  tdata[i] = 1;
 	  skip ++;
@@ -7599,17 +7603,7 @@ _bfd_mips_elf_final_link (abfd, info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (ABI_64_P (abfd))
-    {
-#ifdef BFD64
-      if (!bfd_elf64_bfd_final_link (abfd, info))
-	return false;
-#else
-      abort ();
-      return false;
-#endif /* BFD64 */
-    }
-  else if (!bfd_elf32_bfd_final_link (abfd, info))
+  if (!MNAME(abfd,bfd_elf,bfd_final_link) (abfd, info))
     return false;
 
   /* Now write out the computed sections.  */

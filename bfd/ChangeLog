@@ -1,3 +1,10 @@
+2002-11-19  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (MNAME): New macro.
+	(_bfd_mips_elf_check_relocs): Use it.
+	(_bfd_mips_elf_discard_info): Likewise.
+	(_bfd_mips_elf_final_link): Likewise.
+
 2002-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_edit_opd): When deleting relocs, adjust
