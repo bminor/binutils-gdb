@@ -31,9 +31,9 @@
 
 struct ui_out *cli_uiout;
 
-/* These are the ui_out and the interpreter for the console interpreter. */
+/* These are the ui_out and the interpreter for the console interpreter.  */
 
-/* Longjmp-safe wrapper for "execute_command" */
+/* Longjmp-safe wrapper for "execute_command".  */
 static struct exception safe_execute_command (struct ui_out *uiout,
 					      char *command, int from_tty);
 struct captured_execute_command_args
@@ -107,7 +107,7 @@ cli_interpreter_exec (void *data, const char *command_str)
      a new ui_file for gdb_stdout, use that one instead of the default.
 
      It is important that it gets reset everytime, since the user could
-     set gdb to use a different interpreter. */
+     set gdb to use a different interpreter.  */
   old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
   result = safe_execute_command (cli_uiout, str, 1);
   cli_out_set_stream (cli_uiout, old_stream);
@@ -133,7 +133,7 @@ safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 }
 
 
-/* standard gdb initialization hook */
+/* Standard gdb initialization hook.  */
 extern initialize_file_ftype _initialize_cli_interp; /* -Wmissing-prototypes */
 
 void
@@ -148,7 +148,7 @@ _initialize_cli_interp (void)
   };
   struct interp *cli_interp;
 
-  /* Create a default uiout builder for the CLI. */
+  /* Create a default uiout builder for the CLI.  */
   cli_uiout = cli_out_new (gdb_stdout);
   cli_interp = interp_new (INTERP_CONSOLE, NULL, cli_uiout, &procs);
 
