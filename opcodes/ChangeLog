@@ -1,3 +1,9 @@
+Fri Aug  1 13:02:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set enable_shared before AM_PROG_LIBTOOL.
+	* acinclude.m4: Just include acinclude.m4 from BFD.
+	* aclocal.m4, configure: Rebuild.
+
 Thu Jul 31 21:44:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: New file, based on old Makefile.in.
