@@ -1,3 +1,9 @@
+2002-10-11  Martin M. Hunt  <hunt@redhat.com>
+
+	* utils.c (string_to_core_addr): After turning string into
+	a number, convert to a CORE_ADDR using INTEGER_TO_ADDRESS
+	which will do necessary sign-extension, etc.
+
 2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-exp.y (THIS): Delete token and grammar rule.
