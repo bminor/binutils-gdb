@@ -63,6 +63,7 @@ dosrel
 dvips
 emacs
 etc
+examples
 expect
 fileutils
 flex
