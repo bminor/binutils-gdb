@@ -1,3 +1,7 @@
+2001-05-25  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c (remote_write_bytes): Update 'p' packet pointer.
+
 2001-05-25  Jim Blandy  <jimb@redhat.com>
 
 	* gnu-v2-abi.c (gnuv2_virtual_fn_field): There's no need to clear

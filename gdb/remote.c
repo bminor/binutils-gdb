@@ -3632,6 +3632,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
       nr_bytes = bin2hex (myaddr, p, todo);
+      p += 2 * nr_bytes;
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
