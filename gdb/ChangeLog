@@ -1,3 +1,7 @@
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* thread-db.c (disable_thread_signals): Remove unused function.
+
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
 	GDB 6.1 branch created.

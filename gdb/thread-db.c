@@ -585,27 +585,6 @@ check_thread_signals (void)
 }
 
 static void
-disable_thread_signals (void)
-{
-#ifdef GET_THREAD_SIGNALS
-  if (thread_signals)
-    {
-      int i;
-
-      for (i = 1; i < NSIG; i++)
-	{
-	  if (sigismember (&thread_stop_set, i))
-	    signal_stop_update (target_signal_from_host (i), 1);
-	  if (sigismember (&thread_print_set, i))
-	    signal_print_update (target_signal_from_host (i), 1);
-	}
-
-      thread_signals = 0;
-    }
-#endif
-}
-
-static void
 thread_db_new_objfile (struct objfile *objfile)
 {
   td_err_e err;
