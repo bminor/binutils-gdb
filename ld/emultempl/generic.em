@@ -39,9 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "ldemul.h"
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
-
 EOF
 
 # Import any needed special functions and/or overrides.
@@ -54,7 +51,7 @@ if test x"$LDEMUL_BEFORE_PARSE" != xgld"$EMULATION_NAME"_before_parse; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static void
-gld${EMULATION_NAME}_before_parse()
+gld${EMULATION_NAME}_before_parse (void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`");
@@ -68,8 +65,7 @@ if test x"$LDEMUL_GET_SCRIPT" != xgld"$EMULATION_NAME"_get_script; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static char *
-gld${EMULATION_NAME}_get_script(isfile)
-     int *isfile;
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"
@@ -80,7 +76,7 @@ then
 sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 0;
 
   if (link_info.relocatable && config.build_constructors)
@@ -101,7 +97,7 @@ else
 # Scripts read from the filesystem.
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 1;
 
   if (link_info.relocatable && config.build_constructors)
@@ -121,7 +117,7 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
   ${LDEMUL_SYSLIB-syslib_default},

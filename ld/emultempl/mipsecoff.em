@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-if [ -z "$MACHINE" ]; then 
+if [ -z "$MACHINE" ]; then
   OUTPUT_ARCH=${ARCH}
 else
   OUTPUT_ARCH=${ARCH}:${MACHINE}
@@ -44,14 +44,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "ldemul.h"
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-static void check_sections PARAMS ((bfd *, asection *, PTR));
-static void gld${EMULATION_NAME}_after_allocation PARAMS ((void));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
+static void check_sections (bfd *, asection *, void *);
 
 static void
-gld${EMULATION_NAME}_before_parse()
+gld${EMULATION_NAME}_before_parse (void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
@@ -74,7 +70,7 @@ gld${EMULATION_NAME}_before_parse()
    have been compiled using -membedded-pic.  */
 
 static void
-gld${EMULATION_NAME}_after_open ()
+gld${EMULATION_NAME}_after_open (void)
 {
   bfd *abfd;
 
@@ -119,7 +115,7 @@ gld${EMULATION_NAME}_after_open ()
 
       /* Double check that all other data sections are empty, as is
          required for embedded PIC code.  */
-      bfd_map_over_sections (abfd, check_sections, (PTR) datasec);
+      bfd_map_over_sections (abfd, check_sections, datasec);
     }
 }
 
@@ -127,13 +123,10 @@ gld${EMULATION_NAME}_after_open ()
    relocs.  This is called via bfd_map_over_sections.  */
 
 static void
-check_sections (abfd, sec, sdatasec)
-     bfd *abfd;
-     asection *sec;
-     PTR sdatasec;
+check_sections (bfd *abfd, asection *sec, void *sdatasec)
 {
   if ((bfd_get_section_flags (abfd, sec) & SEC_CODE) == 0
-      && sec != (asection *) sdatasec
+      && sec != sdatasec
       && sec->reloc_count != 0)
     einfo ("%B%X: section %s has relocs; can not use --embedded-relocs\n",
 	   abfd, bfd_get_section_name (abfd, sec));
@@ -144,7 +137,7 @@ check_sections (abfd, sec, sdatasec)
    BFD backend routine to do the work.  */
 
 static void
-gld${EMULATION_NAME}_after_allocation ()
+gld${EMULATION_NAME}_after_allocation (void)
 {
   bfd *abfd;
 
@@ -180,8 +173,7 @@ gld${EMULATION_NAME}_after_allocation ()
 }
 
 static char *
-gld${EMULATION_NAME}_get_script(isfile)
-     int *isfile;
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"
@@ -192,7 +184,7 @@ then
 sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 0;
 
   if (link_info.relocatable && config.build_constructors)
@@ -213,7 +205,7 @@ else
 # Scripts read from the filesystem.
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 1;
 
   if (link_info.relocatable && config.build_constructors)
@@ -233,7 +225,7 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,

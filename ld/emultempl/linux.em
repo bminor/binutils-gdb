@@ -44,18 +44,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "ldemul.h"
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static bfd_boolean gld${EMULATION_NAME}_open_dynamic_archive
-  PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
-static void gld${EMULATION_NAME}_find_address_statement
-  PARAMS ((lang_statement_union_type *));
-static void gld${EMULATION_NAME}_create_output_section_statements
-  PARAMS ((void));
-static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
-
 static void
-gld${EMULATION_NAME}_before_parse()
+gld${EMULATION_NAME}_before_parse (void)
 {
   const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
   if (arch)
@@ -74,10 +64,8 @@ gld${EMULATION_NAME}_before_parse()
    dynamic libraries have an extension of .sa.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
-     const char *arch;
-     search_dirs_type *search;
-     lang_input_statement_type *entry;
+gld${EMULATION_NAME}_open_dynamic_archive
+  (const char *arch, search_dirs_type *search, lang_input_statement_type *entry)
 {
   char *string;
 
@@ -110,8 +98,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
    Linux tools.  */
 
 static void
-gld${EMULATION_NAME}_find_address_statement (s)
-     lang_statement_union_type *s;
+gld${EMULATION_NAME}_find_address_statement (lang_statement_union_type *s)
 {
   if (s->header.type == lang_address_statement_enum
       && strcmp (s->address_statement.section_name, ".text") == 0)
@@ -124,7 +111,7 @@ gld${EMULATION_NAME}_find_address_statement (s)
 /* This is called before opening the input BFD's.  */
 
 static void
-gld${EMULATION_NAME}_create_output_section_statements ()
+gld${EMULATION_NAME}_create_output_section_statements (void)
 {
   lang_for_each_statement (gld${EMULATION_NAME}_find_address_statement);
 }
@@ -133,7 +120,7 @@ gld${EMULATION_NAME}_create_output_section_statements ()
    sections, but before any sizes or addresses have been set.  */
 
 static void
-gld${EMULATION_NAME}_before_allocation ()
+gld${EMULATION_NAME}_before_allocation (void)
 {
   if (link_info.relocatable)
     return;
@@ -145,8 +132,7 @@ gld${EMULATION_NAME}_before_allocation ()
 }
 
 static char *
-gld${EMULATION_NAME}_get_script(isfile)
-     int *isfile;
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"

@@ -24,13 +24,10 @@
 cat >>e${EMULATION_NAME}.c <<EOF
 #include "elf/mmix.h"
 
-static void mmix_before_allocation PARAMS ((void));
-static void mmix_after_allocation PARAMS ((void));
-
 /* Set up handling of linker-allocated global registers.  */
 
 static void
-mmix_before_allocation ()
+mmix_before_allocation (void)
 {
   /* Call the default first.  */
   gld${EMULATION_NAME}_before_allocation ();
@@ -55,7 +52,7 @@ mmix_before_allocation ()
    GREGs.  */
 
 static void
-mmix_after_allocation ()
+mmix_after_allocation (void)
 {
   asection *sec
     = bfd_get_section_by_name (output_bfd, MMIX_REG_CONTENTS_SECTION_NAME);

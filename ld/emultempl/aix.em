@@ -56,40 +56,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libcoff.h"
 #include "libxcoff.h"
 
-static void gld${EMULATION_NAME}_before_parse
-  PARAMS ((void));
-static bfd_boolean gld${EMULATION_NAME}_parse_args
-  PARAMS ((int, char **));
-static void gld${EMULATION_NAME}_add_options
-  PARAMS ((int, char **, int, struct option **, int, struct option **));
-static bfd_boolean gld${EMULATION_NAME}_handle_option
-  PARAMS ((int));
-static void gld${EMULATION_NAME}_after_open
-  PARAMS ((void));
-static char *gld${EMULATION_NAME}_choose_target
-  PARAMS ((int, char **));
-static void gld${EMULATION_NAME}_before_allocation
-  PARAMS ((void));
-static void gld${EMULATION_NAME}_read_file
-  PARAMS ((const char *, bfd_boolean));
-static void gld${EMULATION_NAME}_free
-  PARAMS ((PTR));
-static void gld${EMULATION_NAME}_find_relocs
-  PARAMS ((lang_statement_union_type *));
-static void gld${EMULATION_NAME}_find_exp_assignment
-  PARAMS ((etree_type *));
-static char *gld${EMULATION_NAME}_get_script
-  PARAMS ((int *isfile));
-static bfd_boolean gld${EMULATION_NAME}_unrecognized_file
-  PARAMS ((lang_input_statement_type *));
-static void gld${EMULATION_NAME}_create_output_section_statements
-  PARAMS ((void));
-static void gld${EMULATION_NAME}_set_output_arch
-  PARAMS ((void));
-static int is_syscall
-  PARAMS ((char *, unsigned int *));
-static int change_symbol_mode
-  PARAMS ((char *));
+static void gld${EMULATION_NAME}_read_file (const char *, bfd_boolean);
+static void gld${EMULATION_NAME}_free (void *);
+static void gld${EMULATION_NAME}_find_relocs (lang_statement_union_type *);
+static void gld${EMULATION_NAME}_find_exp_assignment (etree_type *);
+
 
 /* The file alignment required for each section.  */
 static unsigned long file_align;
@@ -160,7 +131,7 @@ static char *command_line_blibpath = NULL;
 /* This routine is called before anything else is done.  */
 
 static void
-gld${EMULATION_NAME}_before_parse ()
+gld${EMULATION_NAME}_before_parse (void)
 {
   const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
   if (arch)
@@ -210,13 +181,9 @@ enum
   };
 
 static void
-gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
-     int ns;
-     char **shortopts;
-     int nl;
-     struct option **longopts;
-     int nrl ATTRIBUTE_UNUSED;
-     struct option **really_longopts ATTRIBUTE_UNUSED;
+gld${EMULATION_NAME}_add_options
+  (int ns, char **shortopts, int nl, struct option **longopts,
+   int nrl ATTRIBUTE_UNUSED, struct option **really_longopts ATTRIBUTE_UNUSED)
 {
   static const char xtra_short[] = "D:H:KT:z";
   static const struct option xtra_long[] = {
@@ -291,15 +258,13 @@ gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longo
 
   *shortopts = (char *) xrealloc (*shortopts, ns + sizeof (xtra_short));
   memcpy (*shortopts + ns, &xtra_short, sizeof (xtra_short));
-  *longopts = (struct option *)
-    xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  *longopts = xrealloc (*longopts,
+			nl * sizeof (struct option) + sizeof (xtra_long));
   memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
 }
 
 static bfd_boolean
-gld${EMULATION_NAME}_parse_args (argc, argv)
-     int argc;
-     char **argv;
+gld${EMULATION_NAME}_parse_args (int argc, char **argv)
 {
   int indx;
 
@@ -327,8 +292,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 }
 
 static bfd_boolean
-gld${EMULATION_NAME}_handle_option (optc)
-     int optc;
+gld${EMULATION_NAME}_handle_option (int optc)
 {
   bfd_signed_vma val;
   const char *end;
@@ -570,8 +534,7 @@ gld${EMULATION_NAME}_handle_option (optc)
    as an import file.  This is for AIX compatibility.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_unrecognized_file (entry)
-     lang_input_statement_type *entry;
+gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry)
 {
   FILE *e;
   bfd_boolean ret;
@@ -607,7 +570,7 @@ gld${EMULATION_NAME}_unrecognized_file (entry)
 /* This is called after the input files have been opened.  */
 
 static void
-gld${EMULATION_NAME}_after_open ()
+gld${EMULATION_NAME}_after_open (void)
 {
   bfd_boolean r;
   struct set_info *p;
@@ -652,7 +615,7 @@ gld${EMULATION_NAME}_after_open ()
    sections, but before any sizes or addresses have been set.  */
 
 static void
-gld${EMULATION_NAME}_before_allocation ()
+gld${EMULATION_NAME}_before_allocation (void)
 {
   struct filelist *fl;
   struct export_symbol_list *el;
@@ -834,9 +797,7 @@ gld${EMULATION_NAME}_before_allocation ()
 }
 
 static char *
-gld${EMULATION_NAME}_choose_target (argc, argv)
-     int argc;
-     char **argv;
+gld${EMULATION_NAME}_choose_target (int argc, char **argv)
 {
   int i, j, jmax;
   static char *from_outside;
@@ -871,8 +832,7 @@ gld${EMULATION_NAME}_choose_target (argc, argv)
    1 : state changed
    0 : no change */
 static int
-change_symbol_mode (input)
-     char *input;
+change_symbol_mode (char *input)
 {
   char *symbol_mode_string[] = {
     "# 32",			/* 0x01 */
@@ -906,9 +866,7 @@ change_symbol_mode (input)
    0 : ignore
    -1 : error, try something else */
 static int
-is_syscall (input, flag)
-     char *input;
-     unsigned int *flag;
+is_syscall (char *input, unsigned int *flag)
 {
   unsigned int bit;
   char *string;
@@ -958,9 +916,7 @@ is_syscall (input, flag)
    this is called by the handle_option emulation routine.  */
 
 static void
-gld${EMULATION_NAME}_read_file (filename, import)
-     const char *filename;
-     bfd_boolean import;
+gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 {
   struct obstack *o;
   FILE *f;
@@ -1201,8 +1157,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 /* This routine saves us from worrying about declaring free.  */
 
 static void
-gld${EMULATION_NAME}_free (p)
-     PTR p;
+gld${EMULATION_NAME}_free (void *p)
 {
   free (p);
 }
@@ -1212,8 +1167,7 @@ gld${EMULATION_NAME}_free (p)
    to symbols.  */
 
 static void
-gld${EMULATION_NAME}_find_relocs (s)
-     lang_statement_union_type *s;
+gld${EMULATION_NAME}_find_relocs (lang_statement_union_type *s)
 {
   if (s->header.type == lang_reloc_statement_enum)
     {
@@ -1233,8 +1187,7 @@ gld${EMULATION_NAME}_find_relocs (s)
 /* Look through an expression for an assignment statement.  */
 
 static void
-gld${EMULATION_NAME}_find_exp_assignment (exp)
-     etree_type *exp;
+gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 {
   struct bfd_link_hash_entry *h;
 
@@ -1278,8 +1231,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
 }
 
 static char *
-gld${EMULATION_NAME}_get_script (isfile)
-     int *isfile;
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"
@@ -1332,7 +1284,7 @@ fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static void
-gld${EMULATION_NAME}_create_output_section_statements ()
+gld${EMULATION_NAME}_create_output_section_statements (void)
 {
   /* __rtinit */
   if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour)
@@ -1371,7 +1323,7 @@ gld${EMULATION_NAME}_create_output_section_statements ()
 }
 
 static void
-gld${EMULATION_NAME}_set_output_arch ()
+gld${EMULATION_NAME}_set_output_arch (void)
 {
   bfd_set_arch_mach (output_bfd,
 		     bfd_xcoff_architecture (output_bfd),

@@ -32,22 +32,13 @@ EOF
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static bfd_boolean mmo_place_orphan
-  PARAMS ((lang_input_statement_type *, asection *));
-static asection *output_prev_sec_find
-  PARAMS ((lang_output_section_statement_type *));
-static void mmo_finish PARAMS ((void));
-static void mmo_wipe_sec_reloc_flag PARAMS ((bfd *, asection *, PTR));
-static void mmo_after_open PARAMS ((void));
-
 /* Find the last output section before given output statement.
    Used by place_orphan.  */
 
 static asection *
-output_prev_sec_find (os)
-     lang_output_section_statement_type *os;
+output_prev_sec_find (lang_output_section_statement_type *os)
 {
-  asection *s = (asection *) NULL;
+  asection *s = NULL;
   lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
 
@@ -85,9 +76,7 @@ struct orphan_save {
    from elf32.em.  */
 
 static bfd_boolean
-mmo_place_orphan (file, s)
-	lang_input_statement_type *file;
-	asection *s;
+mmo_place_orphan (lang_input_statement_type *file, asection *s)
 {
   static struct orphan_save hold_text;
   struct orphan_save *place;
@@ -227,10 +216,7 @@ mmo_place_orphan (file, s)
    paper over the bug similarly.  */
 
 static void
-mmo_wipe_sec_reloc_flag (abfd, sec, ptr)
-     bfd *abfd;
-     asection *sec;
-     PTR ptr ATTRIBUTE_UNUSED;
+mmo_wipe_sec_reloc_flag (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
 {
   bfd_set_section_flags (abfd, sec,
 			 bfd_get_section_flags (abfd, sec) & ~SEC_RELOC);
@@ -239,7 +225,7 @@ mmo_wipe_sec_reloc_flag (abfd, sec, ptr)
 /* Iterate with bfd_map_over_sections over mmo_wipe_sec_reloc_flag... */
 
 static void
-mmo_finish ()
+mmo_finish (void)
 {
   bfd_map_over_sections (output_bfd, mmo_wipe_sec_reloc_flag, NULL);
 }
@@ -251,7 +237,7 @@ mmo_finish ()
    when all input files are seen, which is equivalent.  */
 
 static void
-mmo_after_open ()
+mmo_after_open (void)
 {
   /* When there's a mismatch between the output format and the emulation
      (using weird combinations like "-m mmo --oformat elf64-mmix" for

@@ -61,33 +61,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 # endif
 #endif
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static void gld${EMULATION_NAME}_set_symbols PARAMS ((void));
-static void gld${EMULATION_NAME}_create_output_section_statements
-  PARAMS ((void));
 static void gld${EMULATION_NAME}_find_so
-  PARAMS ((lang_input_statement_type *));
+  (lang_input_statement_type *);
 static char *gld${EMULATION_NAME}_search_dir
-  PARAMS ((const char *, const char *, bfd_boolean *));
-static void gld${EMULATION_NAME}_after_open PARAMS ((void));
+  (const char *, const char *, bfd_boolean *);
 static void gld${EMULATION_NAME}_check_needed
-  PARAMS ((lang_input_statement_type *));
+  (lang_input_statement_type *);
 static bfd_boolean gld${EMULATION_NAME}_search_needed
-  PARAMS ((const char *, const char *));
+  (const char *, const char *);
 static bfd_boolean gld${EMULATION_NAME}_try_needed
-  PARAMS ((const char *, const char *));
-static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
+  (const char *, const char *);
 static void gld${EMULATION_NAME}_find_assignment
-  PARAMS ((lang_statement_union_type *));
-static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
+  (lang_statement_union_type *);
+static void gld${EMULATION_NAME}_find_exp_assignment
+  (etree_type *);
 static void gld${EMULATION_NAME}_count_need
-  PARAMS ((lang_input_statement_type *));
+  (lang_input_statement_type *);
 static void gld${EMULATION_NAME}_set_need
-  PARAMS ((lang_input_statement_type *));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
+  (lang_input_statement_type *);
 
 static void
-gld${EMULATION_NAME}_before_parse()
+gld${EMULATION_NAME}_before_parse (void)
 {
   const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
   if (arch)
@@ -108,7 +102,7 @@ gld${EMULATION_NAME}_before_parse()
    list.  */
 
 static void
-gld${EMULATION_NAME}_set_symbols ()
+gld${EMULATION_NAME}_set_symbols (void)
 {
 EOF
 if [ "x${host}" = "x${target}" ] ; then
@@ -154,7 +148,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
    search it after including the .so file.  */
 
 static void
-gld${EMULATION_NAME}_create_output_section_statements ()
+gld${EMULATION_NAME}_create_output_section_statements (void)
 {
   lang_for_each_input_file (gld${EMULATION_NAME}_find_so);
 }
@@ -162,8 +156,7 @@ gld${EMULATION_NAME}_create_output_section_statements ()
 /* Search the directory for a .so file for each library search.  */
 
 static void
-gld${EMULATION_NAME}_find_so (inp)
-     lang_input_statement_type *inp;
+gld${EMULATION_NAME}_find_so (lang_input_statement_type *inp)
 {
   search_dirs_type *search;
   char *found = NULL;
@@ -234,10 +227,8 @@ gld${EMULATION_NAME}_find_so (inp)
 /* Search a directory for a .so file.  */
 
 static char *
-gld${EMULATION_NAME}_search_dir (dirname, filename, found_static)
-     const char *dirname;
-     const char *filename;
-     bfd_boolean *found_static;
+gld${EMULATION_NAME}_search_dir
+  (const char *dirname, const char *filename, bfd_boolean *found_static)
 {
   int force_maj, force_min;
   const char *dot;
@@ -302,9 +293,9 @@ gld${EMULATION_NAME}_search_dir (dirname, filename, found_static)
 	}
 
       /* We accept libfoo.so without a version number, even though the
-         native linker does not.  This is more convenient for packages
-         which just generate .so files for shared libraries, as on ELF
-         systems.  */
+	 native linker does not.  This is more convenient for packages
+	 which just generate .so files for shared libraries, as on ELF
+	 systems.  */
       if (strncmp (entry->d_name + 3 + len, ".so", 3) != 0)
 	continue;
       if (entry->d_name[6 + len] == '\0')
@@ -378,7 +369,7 @@ static bfd_boolean global_found;
 /* This is called after all the input files have been opened.  */
 
 static void
-gld${EMULATION_NAME}_after_open ()
+gld${EMULATION_NAME}_after_open (void)
 {
   struct bfd_link_needed_list *needed, *l;
 
@@ -514,9 +505,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 /* Search for a needed file in a path.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_search_needed (path, name)
-     const char *path;
-     const char *name;
+gld${EMULATION_NAME}_search_needed (const char *path, const char *name)
 {
   const char *s;
 
@@ -559,9 +548,7 @@ gld${EMULATION_NAME}_search_needed (path, name)
    dynamic object.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_try_needed (dir, name)
-     const char *dir;
-     const char *name;
+gld${EMULATION_NAME}_try_needed (const char *dir, const char *name)
 {
   char *file;
   char *alc;
@@ -603,8 +590,7 @@ gld${EMULATION_NAME}_try_needed (dir, name)
    dynamic object more than once.  */
 
 static void
-gld${EMULATION_NAME}_check_needed (s)
-     lang_input_statement_type *s;
+gld${EMULATION_NAME}_check_needed (lang_input_statement_type *s)
 {
   if (s->filename == NULL)
     return;
@@ -679,7 +665,7 @@ static bfd_byte *need_pnames;
    sections, but before any sizes or addresses have been set.  */
 
 static void
-gld${EMULATION_NAME}_before_allocation ()
+gld${EMULATION_NAME}_before_allocation (void)
 {
   struct bfd_link_hash_entry *hdyn = NULL;
   asection *sneed;
@@ -718,7 +704,7 @@ gld${EMULATION_NAME}_before_allocation ()
       lang_output_section_statement_type *os;
 
       /* Set the .text section to start at 0x20, not 0x2020.  FIXME:
-         This is too magical.  */
+	 This is too magical.  */
       os = lang_output_section_statement_lookup (".text");
       if (os->addr_tree == NULL)
 	os->addr_tree = exp_intop (0x20);
@@ -842,8 +828,7 @@ gld${EMULATION_NAME}_before_allocation ()
    symbols which are referred to by dynamic objects.  */
 
 static void
-gld${EMULATION_NAME}_find_assignment (s)
-     lang_statement_union_type *s;
+gld${EMULATION_NAME}_find_assignment (lang_statement_union_type *s)
 {
   if (s->header.type == lang_assignment_statement_enum
       && (find_assign == NULL || ! found_assign))
@@ -853,8 +838,7 @@ gld${EMULATION_NAME}_find_assignment (s)
 /* Look through an expression for an assignment statement.  */
 
 static void
-gld${EMULATION_NAME}_find_exp_assignment (exp)
-     etree_type *exp;
+gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 {
   switch (exp->type.node_class)
     {
@@ -902,8 +886,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
    for more information.  */
 
 static void
-gld${EMULATION_NAME}_count_need (inp)
-     lang_input_statement_type *inp;
+gld${EMULATION_NAME}_count_need (lang_input_statement_type *inp)
 {
   if (inp->the_bfd != NULL
       && (inp->the_bfd->flags & DYNAMIC) != 0)
@@ -924,8 +907,7 @@ gld${EMULATION_NAME}_count_need (inp)
 /* Fill in the contents of the .need section.  */
 
 static void
-gld${EMULATION_NAME}_set_need (inp)
-     lang_input_statement_type *inp;
+gld${EMULATION_NAME}_set_need (lang_input_statement_type *inp)
 {
   if (inp->the_bfd != NULL
       && (inp->the_bfd->flags & DYNAMIC) != 0)
@@ -974,8 +956,7 @@ gld${EMULATION_NAME}_set_need (inp)
 }
 
 static char *
-gld${EMULATION_NAME}_get_script(isfile)
-     int *isfile;
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"

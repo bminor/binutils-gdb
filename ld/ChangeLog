@@ -1,3 +1,38 @@
+2003-06-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/aix.em: Convert to C90, remove unnecessary prototypes
+	and casts.  Replace PTR with void *.  Formatting.
+	* emultempl/alphaelf.em: Likewise
+	* emultempl/armcoff.em: Likewise
+	* emultempl/armelf.em: Likewise
+	* emultempl/armelf_oabi.em: Likewise
+	* emultempl/beos.em: Likewise
+	* emultempl/elf32.em: Likewise
+	* emultempl/generic.em: Likewise
+	* emultempl/gld960.em: Likewise
+	* emultempl/gld960c.em: Likewise
+	* emultempl/hppaelf.em: Likewise
+	* emultempl/linux.em: Likewise
+	* emultempl/lnk960.em: Likewise
+	* emultempl/m68hc1xelf.em: Likewise
+	* emultempl/m68kcoff.em: Likewise
+	* emultempl/m68kelf.em: Likewise
+	* emultempl/mipsecoff.em: Likewise
+	* emultempl/mipself.em: Likewise
+	* emultempl/mmix-elfnmmo.em: Likewise
+	* emultempl/mmixelf.em: Likewise
+	* emultempl/mmo.em: Likewise
+	* emultempl/needrelax.em: Likewise
+	* emultempl/netbsd.em: Likewise
+	* emultempl/pe.em: Likewise
+	* emultempl/sh64elf.em: Likewise
+	* emultempl/sunos.em: Likewise
+	* emultempl/ticoff.em: Likewise
+	* emultempl/vanilla.em: Likewise
+	* emultempl/xtensaelf.em: Likewise
+	* Makefile.am: Correct dependencies.
+	* Makefile.in: Regenerate.
+
 2003-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Correct spelling of "relocatable".

@@ -1363,38 +1363,42 @@ eelf32_i960.c: $(srcdir)/emulparams/elf32_i960.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_i960 "$(tdir_elf32_i960)"
 eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
-  $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32b4300 "$(tdir_elf32b4300)"
 eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bmip "$(tdir_elf32bmip)"
 eelf32bsmip.c: $(srcdir)/emulparams/elf32bsmip.sh \
-  $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bsmip "$(tdir_elf32bsmip)"
 eelf32btsmip.c: $(srcdir)/emulparams/elf32btsmip.sh \
-  $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32btsmip "$(tdir_elf32btsmip)"
 eelf32btsmipn32.c: $(srcdir)/emulparams/elf32btsmipn32.sh \
-  $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32btsmipn32 "$(tdir_elf32btsmipn32)"
 eelf32ltsmip.c: $(srcdir)/emulparams/elf32ltsmip.sh \
   $(srcdir)/emulparams/elf32btsmip.sh $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ltsmip "$(tdir_elf32ltsmip)"
 eelf32ltsmipn32.c: $(srcdir)/emulparams/elf32ltsmipn32.sh \
   $(srcdir)/emulparams/elf32btsmip.sh $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ltsmipn32 "$(tdir_elf32ltsmipn32)"
 eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
-  $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"
 eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32elmip "$(tdir_elf32elmip)"
 eelf32bmipn32.c: $(srcdir)/emulparams/elf32bmipn32.sh \
@@ -1402,10 +1406,11 @@ eelf32bmipn32.c: $(srcdir)/emulparams/elf32bmipn32.sh \
 	${GENSCRIPTS} elf32bmipn32 "$(tdir_elf32bmipn32)"
 eelf32l4300.c: $(srcdir)/emulparams/elf32l4300.sh \
   $(srcdir)/emulparams/elf32b4300.sh $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32l4300 "$(tdir_elf32l4300)"
 eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
-  $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip "$(tdir_elf32lmip)"
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
@@ -1430,6 +1435,7 @@ eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh \
 	${GENSCRIPTS} elf32ppcwindiss "$(tdir_elf32ppcwindiss)"
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \
+  $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lsmip "$(tdir_elf32lsmip)"
 eelf32openrisc.c: $(srcdir)/emulparams/elf32openrisc.sh \
@@ -1696,16 +1702,20 @@ elnk960.c: $(srcdir)/emulparams/lnk960.sh \
   $(srcdir)/emultempl/lnk960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} lnk960 "$(tdir_lnk960)"
 em68hc11elf.c: $(srcdir)/emulparams/m68hc11elf.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/m68hc1xelf.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc11elf "$(tdir_m68hc11)"
 em68hc11elfb.c: $(srcdir)/emulparams/m68hc11elfb.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/m68hc1xelf.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc11elfb "$(tdir_m68hc11b)"
 em68hc12elf.c: $(srcdir)/emulparams/m68hc12elf.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/m68hc1xelf.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc12elf "$(tdir_m68hc12)"
 em68hc12elfb.c: $(srcdir)/emulparams/m68hc12elfb.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/m68hc1xelf.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc12elfb "$(tdir_m68hc12b)"
 em68k4knbsd.c:	$(srcdir)/emulparams/m68k4knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

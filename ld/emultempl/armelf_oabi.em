@@ -47,13 +47,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "ldemul.h"
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
-static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-
 static void
-gld${EMULATION_NAME}_before_parse ()
+gld${EMULATION_NAME}_before_parse (void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`");
@@ -64,7 +59,7 @@ gld${EMULATION_NAME}_before_parse ()
    sections, but before any sizes or addresses have been set.  */
 
 static void
-gld${EMULATION_NAME}_before_allocation ()
+gld${EMULATION_NAME}_before_allocation (void)
 {
   /* we should be able to set the size of the interworking stub section */
 
@@ -86,7 +81,7 @@ gld${EMULATION_NAME}_before_allocation ()
 }
 
 static void
-gld${EMULATION_NAME}_after_open ()
+gld${EMULATION_NAME}_after_open (void)
 {
 
   LANG_FOR_EACH_INPUT_STATEMENT (is)
@@ -98,8 +93,7 @@ gld${EMULATION_NAME}_after_open ()
 }
 
 static char *
-gld${EMULATION_NAME}_get_script (isfile)
-     int *isfile;
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"
@@ -110,7 +104,7 @@ then
 sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 0;
 
   if (link_info.relocatable && config.build_constructors)
@@ -131,7 +125,7 @@ else
 # Scripts read from the filesystem.
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 1;
 
   if (link_info.relocatable && config.build_constructors)
@@ -151,7 +145,7 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,

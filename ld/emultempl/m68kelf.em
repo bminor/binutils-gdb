@@ -31,16 +31,14 @@ esac
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static void m68k_elf_after_open PARAMS ((void));
 #ifdef SUPPORT_EMBEDDED_RELOCS
-static void check_sections PARAMS ((bfd *, asection *, PTR));
+static void check_sections (bfd *, asection *, void *);
 #endif
-static void m68k_elf_after_allocation PARAMS ((void));
 
 /* This function is run after all the input files have been opened.  */
 
 static void
-m68k_elf_after_open ()
+m68k_elf_after_open (void)
 {
   /* Call the standard elf routine.  */
   gld${EMULATION_NAME}_after_open ();
@@ -106,10 +104,7 @@ m68k_elf_after_open ()
    relocs.  This is called via bfd_map_over_sections.  */
 
 static void
-check_sections (abfd, sec, datasec)
-     bfd *abfd;
-     asection *sec;
-     PTR datasec;
+check_sections (bfd *abfd, asection *sec, PTR datasec)
 {
   if ((bfd_get_section_flags (abfd, sec) & SEC_DATA)
       && sec != (asection *) datasec
@@ -124,7 +119,7 @@ check_sections (abfd, sec, datasec)
    been set.  */
 
 static void
-m68k_elf_after_allocation ()
+m68k_elf_after_allocation (void)
 {
   /* Call the standard elf routine.  */
   after_allocation_default ();

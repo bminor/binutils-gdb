@@ -39,24 +39,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static int coff_version;
 
-static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
-static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
-static void gld${EMULATION_NAME}_add_options
-  PARAMS ((int, char **, int, struct option **, int, struct option **));
-static bfd_boolean gld${EMULATION_NAME}_handle_option PARAMS ((int));
-static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE *));
-
 /* TI COFF extra command line options */
 #define OPTION_COFF_FORMAT		(300 + 1)
 
 static void
-gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
-     int ns ATTRIBUTE_UNUSED;
-     char **shortopts ATTRIBUTE_UNUSED;
-     int nl;
-     struct option **longopts;
-     int nrl ATTRIBUTE_UNUSED;
-     struct option **really_longopts ATTRIBUTE_UNUSED;
+gld${EMULATION_NAME}_add_options
+  (int ns ATTRIBUTE_UNUSED, char **shortopts ATTRIBUTE_UNUSED, int nl,
+   struct option **longopts, int nrl ATTRIBUTE_UNUSED,
+   struct option **really_longopts ATTRIBUTE_UNUSED)
 {
   static const struct option xtra_long[] = {
     /* TI COFF options */
@@ -70,15 +60,13 @@ gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longo
 }
 
 static void
-gld_${EMULATION_NAME}_list_options (file)
-    FILE * file;
+gld_${EMULATION_NAME}_list_options (FILE * file)
 {
   fprintf (file, _("  --format 0|1|2         Specify which COFF version to use"));
 }				  
 
 static bfd_boolean
-gld${EMULATION_NAME}_handle_option (optc)
-     int optc;
+gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
@@ -106,7 +94,7 @@ gld${EMULATION_NAME}_handle_option (optc)
 }
 
 static void
-gld_${EMULATION_NAME}_before_parse()
+gld_${EMULATION_NAME}_before_parse(void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`");
@@ -114,8 +102,7 @@ gld_${EMULATION_NAME}_before_parse()
 }
 
 static char *
-gld_${EMULATION_NAME}_get_script (isfile)
-     int *isfile;
+gld_${EMULATION_NAME}_get_script (int *isfile)
 EOF
 if test -n "$COMPILE_IN"
 then

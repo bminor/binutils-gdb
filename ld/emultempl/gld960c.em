@@ -41,15 +41,10 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldfile.h"
 #include "ldemul.h"
 
-static void gld960_before_parse PARAMS ((void));
-static void gld960_set_output_arch PARAMS ((void));
-static char *gld960_choose_target PARAMS ((int, char **));
-static char *gld960_get_script PARAMS ((int *));
-
 #ifdef GNU960
 
 static void
-gld960_before_parse()
+gld960_before_parse (void)
 {
   static char *env_variables[] = { "G960LIB", "G960BASE", 0 };
   char **p;
@@ -69,7 +64,7 @@ gld960_before_parse()
 
 #else	/* not GNU960 */
 
-static void gld960_before_parse()
+static void gld960_before_parse (void)
 {
   char *env ;
   env =  getenv("G960LIB");
@@ -87,7 +82,7 @@ static void gld960_before_parse()
 
 
 static void
-gld960_set_output_arch()
+gld960_set_output_arch (void)
 {
   if (ldfile_output_machine_name != NULL
       && *ldfile_output_machine_name != '\0')
@@ -105,9 +100,7 @@ gld960_set_output_arch()
 }
 
 static char *
-gld960_choose_target (argc, argv)
-     int argc ATTRIBUTE_UNUSED;
-     char **argv ATTRIBUTE_UNUSED;
+gld960_choose_target (int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED)
 {
 #ifdef GNU960
 
@@ -128,8 +121,7 @@ gld960_choose_target (argc, argv)
 }
 
 static char *
-gld960_get_script(isfile)
-     int *isfile;
+gld960_get_script (int *isfile)
 EOF
 
 if test -n "$COMPILE_IN"

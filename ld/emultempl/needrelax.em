@@ -25,10 +25,8 @@ LDEMUL_BEFORE_ALLOCATION=need_relax_${EMULATION_NAME}_before_allocation
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static void need_relax_${EMULATION_NAME}_before_allocation PARAMS ((void));
-
 static void
-need_relax_${EMULATION_NAME}_before_allocation ()
+need_relax_${EMULATION_NAME}_before_allocation (void)
 {
   /* Call main function; we're just extending it.  */
   gld${EMULATION_NAME}_before_allocation ();
