@@ -1,3 +1,11 @@
+2003-05-03  Richard Henderson  <rth@redhat.com>
+
+	* readelf.c (struct Frame_Chunk): Add cfa_exp.
+	(frame_display_row): Just print "exp" for cfa or register
+	defined by a location expression.
+	(display_debug_frames): Handle DW_CFA_def_cfa_expression,
+	DW_CFA_expression, DW_CFA_MIPS_advance_loc8.
+
 2003-04-30  H.J. Lu <hjl@gnu.org>
 
 	* objdump.c (only): Change it to char **.
