@@ -51,7 +51,6 @@ arm*-*-netbsdelf* | arm*-*-knetbsd*-gnu)
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 
 hppa*64*-*-hpux11*)	gdb_host=hpux11w ;;
-hppa*-*-hpux11*)	gdb_host=hpux11 ;;
 hppa*-*-hpux* | hppa*-*-hiux*)
 			gdb_host=hpux ;;
 hppa*-*-linux*)		gdb_host=linux ;;

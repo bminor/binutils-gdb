@@ -1,5 +1,8 @@
 2004-12-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.host (hppa*-*-hpux11*): Remove.
+	* config/pa/hpux11.mh: Remove file.
+
 	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Fix
 	typo.
 
