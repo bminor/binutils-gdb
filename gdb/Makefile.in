@@ -1276,8 +1276,8 @@ typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(value_h) 
 
 ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
-ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h
-umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h
+ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	language.h signals.h target.h terminal.h

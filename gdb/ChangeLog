@@ -1,3 +1,7 @@
+Tue Jul 13 11:15:15 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (ultra3-xdep.o, umax-xdep.o):  Add missing ')'.
+
 Mon Jul 12 17:46:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* a29k-tdep.c (read_register_stack): Make val static.
