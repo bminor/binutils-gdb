@@ -1,3 +1,8 @@
+2000-02-18  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d10v.c (find_opcode): Add a symbol's value to
+	the computed frag offset, rather than overwriting it.
+
 Thu Feb 17 00:11:08 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c ("elf/sh.h"): Include.

@@ -1253,7 +1253,7 @@ find_opcode (opcode, myops)
 		    value = S_GET_VALUE(myops[opnum].X_add_symbol) - value -
 		      (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
 		  else
-		    value = S_GET_VALUE(myops[opnum].X_add_symbol);
+		    value += S_GET_VALUE(myops[opnum].X_add_symbol);
 
 		  if (AT_WORD_P (&myops[opnum]))
 		    {
