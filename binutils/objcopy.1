@@ -1,6 +1,6 @@
 .\" Copyright (c) 1991 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
-.TH objcopy 1 "June 1993" "cygnus support" "GNU Development Tools"
+.TH objcopy 1 "October 1994" "cygnus support" "GNU Development Tools"
 .de BP
 .sp
 .ti \-.2i
@@ -23,8 +23,14 @@ objcopy \- copy and translate object files
 .RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
 .RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
 .RB "[\|" \-X\ |\ \-\-discard\-locals\fR "\|]" 
-.RB  "[\|" \-b\ \fIbyte\fP |\ \-\-byte=\fIbyte\fP "\|]" 
-.RB  "[\|" \-i\ \fIinterleave\fP |\ \-\-interleave=\fIinterleave\fP "\|]" 
+.RB "[\|" \-b\ \fIbyte\fP |\ \-\-byte=\fIbyte\fP "\|]" 
+.RB "[\|" \-i\ \fIinterleave\fP |\ \-\-interleave=\fIinterleave\fP "\|]" 
+.RB "[\|" \-\-set\-start=\fIval\fP "\|]"
+.RB "[\|" \-\-adjust\-start=\fIincr\fP "\|]"
+.RB "[\|" \-\-adjust\-vma=\fIincr\fP "\|]"
+.RB "[\|" \-\-adjust\-section\-vma=\fIsection{=,+,-}val\fP "\|]"
+.RB "[\|" \-\-adjust\-warnings "\|]"
+.RB "[\|" \-\-no\-adjust\-warnings "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
 .RB "[\|" \-\-help\fR "\|]" 
@@ -104,6 +110,38 @@ Only copy one out of every \fIinterleave\fP bytes.  Which one to copy is
 selected by the \fB\-b\fP or \fB\-\-byte\fP option.  The default is 4.
 The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
 .TP
+.B \fB\-\-set\-start=\fIval
+Set the start address of the new file to \fIval\fP.  Not all object
+file formats support setting the start address.
+.TP
+.B \fB\-\-adjust\-start=\fIincr
+Adjust the start address by adding \fIincr\fP.  Not all object file
+formats support setting the start address.
+.TP
+.B \fB\-\-adjust\-vma=\fIincr
+Adjust the address of all sections, as well as the start address, by
+adding \fIincr\fP.  Some object file formats do not permit section
+addresses to be changed arbitrarily.  Note that this does not relocate
+the sections; if the program expects sections to be loaded at a
+certain address, and this option is used to change the sections such
+that they are loaded at a different address, the program may fail.
+.TP
+.B \fB\-\-adjust\-section\-vma=\fIsection{=,+,-}val
+Set or adjust the address of the named \fIsection\fP.  If \fI=\fP is
+used, the section address is set to \fIval\fP.  Otherwise, \fIval\fP
+is added to or subtracted from the section address.  See the comments
+under \fB\-\-adjust\-vma\fP, above.  If \fIsection\fP does not exist
+in the input file, a warning will be issued, unless
+\fB\-\-no\-adjust\-warnings\fP is used.
+.TP
+.B \fB\-\-adjust\-warnings
+If \fB\-\-adjust\-section\-vma\fP is used, and the named section does
+not exist, issue a warning.  This is the default.
+.TP
+.B \fB\-\-no\-adjust\-warnings
+Do not issue a warning if \fB\-\-adjust\-section\-vma\fP is used, even
+if the named section does not exist.
+.TP
 .B \-v\fR, \fB\-\-verbose
 Verbose output: list all object files modified.  In the case of
 archives, "\fBobjcopy \-V\fR" lists all members of the archive.
@@ -128,7 +166,7 @@ The GNU Binary Utilities\c
 \&, Roland H. Pesch (June 1993).
 
 .SH COPYING
-Copyright (c) 1993 Free Software Foundation, Inc.
+Copyright (c) 1993,1994 Free Software Foundation, Inc.
 .PP
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice

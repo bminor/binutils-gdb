@@ -21,10 +21,12 @@
 #include "sysdep.h"
 #include "bucomm.h"
 #include <getopt.h>
+#include "libiberty.h"
 
-static void setup_section ();
-static void copy_section ();
-static void mark_symbols_used_in_relocations ();
+static bfd_vma parse_vma PARAMS ((const char *, const char *));
+static void setup_section PARAMS ((bfd *, asection *, PTR));
+static void copy_section PARAMS ((bfd *, asection *, PTR));
+static void mark_symbols_used_in_relocations PARAMS ((bfd *, asection *, PTR));
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
 
@@ -59,6 +61,36 @@ enum locals_action
 /* Which local symbols to remove.  Overrides strip_all.  */
 static enum locals_action discard_locals;
 
+/* Structure used to hold lists of sections and actions to take.  */
+
+struct section_list
+{
+  /* Next section to adjust.  */
+  struct section_list *next;
+  /* Section name.  */
+  const char *name;
+  /* Whether this entry was used.  */
+  boolean used;
+  /* Remaining fields only used if not on remove_sections list.  */
+  /* Whether to adjust or set VMA.  */
+  boolean adjust;
+  /* Amount to adjust by or set to.  */
+  bfd_vma val;
+};
+
+/* List of sections to remove.  */
+
+static struct section_list *remove_sections;
+
+/* Adjustments to the start address.  */
+static bfd_vma adjust_start = 0;
+static boolean set_start_set = false;
+static bfd_vma set_start;
+
+/* Adjustments to section VMA's.  */
+static bfd_vma adjust_section_vma = 0;
+static struct section_list *adjust_sections;
+
 /* Options to handle if running as "strip".  */
 
 static struct option strip_options[] =
@@ -71,6 +103,7 @@ static struct option strip_options[] =
   {"input-target", required_argument, 0, 'I'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
+  {"remove-section", required_argument, 0, 'R'},
   {"strip-all", no_argument, 0, 's'},
   {"strip-debug", no_argument, 0, 'S'},
   {"target", required_argument, 0, 'F'},
@@ -81,8 +114,21 @@ static struct option strip_options[] =
 
 /* Options to handle if running as "objcopy".  */
 
+/* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+
+#define OPTION_ADJUST_START 150
+#define OPTION_ADJUST_VMA (OPTION_ADJUST_START + 1)
+#define OPTION_ADJUST_SECTION_VMA (OPTION_ADJUST_VMA + 1)
+#define OPTION_ADJUST_WARNINGS (OPTION_ADJUST_SECTION_VMA + 1)
+#define OPTION_NO_ADJUST_WARNINGS (OPTION_ADJUST_WARNINGS + 1)
+#define OPTION_SET_START (OPTION_NO_ADJUST_WARNINGS + 1)
+
 static struct option copy_options[] =
 {
+  {"adjust-start", required_argument, 0, OPTION_ADJUST_START},
+  {"adjust-vma", required_argument, 0, OPTION_ADJUST_VMA},
+  {"adjust-section-vma", required_argument, 0, OPTION_ADJUST_SECTION_VMA},
+  {"adjust-warnings", no_argument, 0, OPTION_ADJUST_WARNINGS},
   {"byte", required_argument, 0, 'b'},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
@@ -91,8 +137,11 @@ static struct option copy_options[] =
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"interleave", required_argument, 0, 'i'},
+  {"no-adjust-warnings", no_argument, 0, OPTION_NO_ADJUST_WARNINGS},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
+  {"remove-section", required_argument, 0, 'R'},
+  {"set-start", required_argument, 0, OPTION_SET_START},
   {"strip-all", no_argument, 0, 'S'},
   {"strip-debug", no_argument, 0, 'g'},
   {"target", required_argument, 0, 'F'},
@@ -118,10 +167,13 @@ copy_usage (stream, status)
 {
   fprintf (stream, "\
 Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
-       [-i interleave] [--interleave=interleave] [--byte=byte]\n\
+       [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--verbose] [--version] [--help] in-file [out-file]\n",
+       [--remove-section=section] [--set-start=val] [--adjust-start=incr]\n\
+       [--adjust-vma=incr] [--adjust-section-vma=section{=,+,-}val]\n\
+       [--adjust-warnings] [--no-adjust-warnings] [--verbose] [--version]\n\
+       [--help] in-file [out-file]\n",
 	   program_name);
   exit (status);
 }
@@ -132,14 +184,33 @@ strip_usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-vVsSgxX] [-I bfdname] [-O bfdname] [-F bfdname]\n\
+Usage: %s [-vVsSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--verbose] [--version] [--help] file...\n",
+       [--remove-section=section] [--verbose] [--version] [--help] file...\n",
 	   program_name);
   exit (status);
 }
 
+/* Parse a string into a VMA, with a fatal error if it can't be
+   parsed.  */
+
+static bfd_vma
+parse_vma (s, arg)
+     const char *s;
+     const char *arg;
+{
+  bfd_vma ret;
+  const char *end;
+
+  ret = bfd_scan_vma (s, &end, 0);
+  if (*end != '\0')
+    {
+      fprintf (stderr, "%s: %s: bad number: %s\n", program_name, arg, s);
+      exit (1);
+    }
+  return ret;
+}
 
 /* Return the name of a temporary file in the same directory as FILENAME.  */
 
@@ -191,7 +262,7 @@ filter_symbols (abfd, osyms, isyms, symcount)
 
       if ((flags & BSF_GLOBAL)	/* Keep if external.  */
 	  || (flags & BSF_KEEP)	/* Keep if used in a relocation.  */
-	  || bfd_get_section (sym) == &bfd_und_section
+	  || bfd_is_und_section (bfd_get_section (sym))
 	  || bfd_is_com_section (bfd_get_section (sym)))
 	keep = 1;
       else if ((flags & BSF_DEBUGGING) != 0)	/* Debugging symbol.  */
@@ -229,6 +300,7 @@ copy_object (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
+  bfd_vma start;
   long symcount;
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
@@ -241,7 +313,13 @@ copy_object (ibfd, obfd)
 	    bfd_get_filename(ibfd), bfd_get_target(ibfd),
 	    bfd_get_filename(obfd), bfd_get_target(obfd));
 
-  if (!bfd_set_start_address (obfd, bfd_get_start_address (ibfd))
+  if (set_start_set)
+    start = set_start;
+  else
+    start = bfd_get_start_address (ibfd);
+  start += adjust_start;
+
+  if (!bfd_set_start_address (obfd, start)
       || !bfd_set_file_flags (obfd,
 			      (bfd_get_file_flags (ibfd)
 			       & bfd_applicable_file_flags (obfd))))
@@ -307,7 +385,7 @@ copy_object (ibfd, obfd)
 	     section.  */
 	  bfd_map_over_sections (ibfd,
 				 mark_symbols_used_in_relocations,
-				 (void *)isympp);
+				 (PTR)isympp);
 	  osympp = (asymbol **) xmalloc (symcount * sizeof (asymbol *));
 	  symcount = filter_symbols (ibfd, osympp, isympp, symcount);
 	}
@@ -442,7 +520,14 @@ copy_file (input_filename, output_filename, input_target, output_target)
 
   if (bfd_check_format (ibfd, bfd_archive))
     {
-      bfd *obfd = bfd_openw (output_filename, output_target);
+      bfd *obfd;
+
+      /* bfd_get_target does not return the correct value until
+         bfd_check_format succeeds.  */
+      if (output_target == NULL)
+	output_target = bfd_get_target (ibfd);
+
+      obfd = bfd_openw (output_filename, output_target);
       if (obfd == NULL)
 	{
 	  nonfatal (output_filename);
@@ -451,7 +536,14 @@ copy_file (input_filename, output_filename, input_target, output_target)
     }
   else if (bfd_check_format_matches (ibfd, bfd_object, &matching))
     {
-      bfd *obfd = bfd_openw (output_filename, output_target);
+      bfd *obfd;
+
+      /* bfd_get_target does not return the correct value until
+         bfd_check_format succeeds.  */
+      if (output_target == NULL)
+	output_target = bfd_get_target (ibfd);
+
+      obfd = bfd_openw (output_filename, output_target);
       if (obfd == NULL)
 	{
 	  nonfatal (output_filename);
@@ -485,12 +577,15 @@ copy_file (input_filename, output_filename, input_target, output_target)
    as ISECTION in IBFD.  */
 
 static void
-setup_section (ibfd, isection, obfd)
+setup_section (ibfd, isection, obfdarg)
      bfd *ibfd;
      sec_ptr isection;
-     bfd *obfd;
+     PTR obfdarg;
 {
+  bfd *obfd = (bfd *) obfdarg;
+  struct section_list *p;
   sec_ptr osection;
+  bfd_vma vma;
   char *err;
 
   if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
@@ -498,6 +593,15 @@ setup_section (ibfd, isection, obfd)
 	  || strip_symbols == strip_all
 	  || discard_locals == locals_all))
     return;
+
+  for (p = remove_sections; p != NULL; p = p->next)
+    {
+      if (strcmp (p->name, bfd_section_name (ibfd, isection)) == 0)
+	{
+	  p->used = true;
+	  return;
+	}
+    }
 
   osection = bfd_make_section_anyway (obfd, bfd_section_name (ibfd, isection));
   if (osection == NULL)
@@ -514,10 +618,23 @@ setup_section (ibfd, isection, obfd)
       goto loser;
     }
 
-  if (bfd_set_section_vma (obfd,
-			   osection,
-			   bfd_section_vma (ibfd, isection))
-      == false)
+  vma = bfd_section_vma (ibfd, isection);
+  for (p = adjust_sections; p != NULL; p = p->next)
+    {
+      if (strcmp (p->name, bfd_section_name (ibfd, isection)) == 0)
+	{
+	  if (p->adjust)
+	    vma += p->val;
+	  else
+	    vma = p->val;
+	  p->used = true;
+	  break;
+	}
+    }
+  if (p == NULL)
+    vma += adjust_section_vma;
+
+  if (! bfd_set_section_vma (obfd, osection, vma))
     {
       err = "vma";
       goto loser;
@@ -569,11 +686,13 @@ loser:
    If stripping then don't copy any relocation info.  */
 
 static void
-copy_section (ibfd, isection, obfd)
+copy_section (ibfd, isection, obfdarg)
      bfd *ibfd;
      sec_ptr isection;
-     bfd *obfd;
+     PTR obfdarg;
 {
+  bfd *obfd = (bfd *) obfdarg;
+  struct section_list *p;
   arelent **relpp;
   long relcount;
   sec_ptr osection;
@@ -586,6 +705,10 @@ copy_section (ibfd, isection, obfd)
     {
       return;
     }
+
+  for (p = remove_sections; p != NULL; p = p->next)
+    if (strcmp (p->name, bfd_section_name (ibfd, isection)) == 0)
+      return;
 
   osection = isection->output_section;
   size = bfd_get_section_size_before_reloc (isection);
@@ -654,11 +777,12 @@ copy_section (ibfd, isection, obfd)
    Ignore relocations which will not appear in the output file.  */
 
 static void
-mark_symbols_used_in_relocations (ibfd, isection, symbols)
+mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
      bfd *ibfd;
      sec_ptr isection;
-     asymbol **symbols;
+     PTR symbolsarg;
 {
+  asymbol **symbols = (asymbol **) symbolsarg;
   long relsize;
   arelent **relpp;
   long relcount, i;
@@ -680,9 +804,9 @@ mark_symbols_used_in_relocations (ibfd, isection, symbols)
      special bfd section symbols, then mark it with BSF_KEEP.  */
   for (i = 0; i < relcount; i++)
     {
-      if (*relpp[i]->sym_ptr_ptr != bfd_com_section.symbol
-	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section.symbol
-	  && *relpp[i]->sym_ptr_ptr != bfd_und_section.symbol)
+      if (*relpp[i]->sym_ptr_ptr != bfd_com_section_ptr->symbol
+	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section_ptr->symbol
+	  && *relpp[i]->sym_ptr_ptr != bfd_und_section_ptr->symbol)
 	(*relpp[i]->sym_ptr_ptr)->flags |= BSF_KEEP;
     }
 
@@ -781,7 +905,7 @@ strip_main (argc, argv)
   boolean show_version = false;
   int c, i;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:sSgxXVv",
+  while ((c = getopt_long (argc, argv, "I:O:F:R:sSgxXVv",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -794,6 +918,17 @@ strip_main (argc, argv)
 	  break;
 	case 'F':
 	  input_target = output_target = optarg;
+	  break;
+	case 'R':
+	  {
+	    struct section_list *n;
+
+	    n = (struct section_list *) xmalloc (sizeof (struct section_list));
+	    n->name = optarg;
+	    n->used = false;
+	    n->next = remove_sections;
+	    remove_sections = n;
+	  }
 	  break;
 	case 's':
 	  strip_symbols = strip_all;
@@ -865,12 +1000,14 @@ copy_main (argc, argv)
      int argc;
      char *argv[];
 {
-  char *input_filename, *output_filename;
+  char *input_filename = NULL, *output_filename = NULL;
   char *input_target = NULL, *output_target = NULL;
   boolean show_version = false;
+  boolean adjust_warn = true;
   int c;
+  struct section_list *p;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:s:O:d:F:SgxXVv",
+  while ((c = getopt_long (argc, argv, "b:i:I:s:O:d:F:R:SgxXVv",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -904,6 +1041,13 @@ copy_main (argc, argv)
 	case 'F':
 	  input_target = output_target = optarg;
 	  break;
+	case 'R':
+	  p = (struct section_list *) xmalloc (sizeof (struct section_list));
+	  p->name = optarg;
+	  p->used = false;
+	  p->next = remove_sections;
+	  remove_sections = p;
+	  break;
 	case 'S':
 	  strip_symbols = strip_all;
 	  break;
@@ -921,6 +1065,68 @@ copy_main (argc, argv)
 	  break;
 	case 'V':
 	  show_version = true;
+	  break;
+	case OPTION_ADJUST_START:
+	  adjust_start = parse_vma (optarg, "--adjust-start");
+	  break;
+	case OPTION_ADJUST_SECTION_VMA:
+	  {
+	    const char *s;
+	    int len;
+	    char *name;
+
+	    p = (struct section_list *) xmalloc (sizeof (struct section_list));
+	    s = strchr (optarg, '=');
+	    if (s != NULL)
+	      {
+		p->adjust = false;
+		p->val = parse_vma (s + 1, "--adjust-section-vma");
+	      }
+	    else
+	      {
+		s = strchr (optarg, '+');
+		if (s == NULL)
+		  {
+		    s = strchr (optarg, '-');
+		    if (s == NULL)
+		      {
+			fprintf (stderr,
+				 "%s: bad format for --adjust-section-vma\n",
+				 program_name);
+			exit (1);
+		      }
+		  }
+		p->adjust = true;
+		p->val = parse_vma (s + 1, "--adjust-section-vma");
+		if (*s == '-')
+		  p->val = - p->val;
+	      }
+
+	    len = s - optarg;
+	    name = (char *) xmalloc (len + 1);
+	    strncpy (name, optarg, len);
+	    name[len] = '\0';
+	    p->name = name;
+
+	    p->used = false;
+
+	    p->next = adjust_sections;
+	    adjust_sections = p;
+	  }
+	  break;
+	case OPTION_ADJUST_VMA:
+	  adjust_section_vma = parse_vma (optarg, "--adjust-vma");
+	  adjust_start = adjust_section_vma;
+	  break;
+	case OPTION_ADJUST_WARNINGS:
+	  adjust_warn = true;
+	  break;
+	case OPTION_NO_ADJUST_WARNINGS:
+	  adjust_warn = false;
+	  break;
+	case OPTION_SET_START:
+	  set_start = parse_vma (optarg, "--set-start");
+	  set_start_set = true;
 	  break;
 	case 0:
 	  break;		/* we've been given a long option */
@@ -974,6 +1180,24 @@ copy_main (argc, argv)
     {
       copy_file (input_filename, output_filename, input_target, output_target);
     }
+
+  if (adjust_warn)
+    {
+      for (p = adjust_sections; p != NULL; p = p->next)
+	{
+	  if (! p->used)
+	    {
+	      fprintf (stderr, "%s: warning: --adjust-section-vma %s%c0x",
+		       program_name, p->name,
+		       p->adjust ? '=' : '+');
+	      fprintf_vma (stderr, p->val);
+	      fprintf (stderr, " never used\n");
+	    }
+	}
+    }
+
+  /* We could issue similar warnings for remove_sections, but I don't
+     think that would be as useful.  */
 
   return 0;
 }

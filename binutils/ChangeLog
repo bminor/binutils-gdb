@@ -1,3 +1,24 @@
+Tue Oct 18 11:12:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* objcopy.c (struct section_list): Add fields used, adjust, val.
+	(adjust_start, set_start_set, set_start): New static variables.
+	(adjust_section_vma, adjust_sections): New static variables.
+	(copy_options): Add --adjust-start, --adjust-vma,
+	--adjust-section-vma, --adjust-warnings, --no-adjust-warnings,
+	--set-start.
+	(parse_vma): New static function.
+	(copy_usage): Mention new options.
+	(copy_object): Handle --set-start and --adjust-start.
+	(setup_section): Correct type of last argument to PTR.  Set used
+	field if section is removed.  Handle --adjust-vma and
+	--adjust-section-vma.
+	(copy_section): Correct type of last argument to PTR.
+	(mark_symbols_used_in_relocations): Likewise.
+	(strip_main): Clear used field when handling -R.
+	(copy_main): Handle new options.
+	* binutils.texi (objcopy): Document new options.
+	* objcopy.1: Document new options.
+
 Fri Oct 14 14:38:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* configure.in (configdirs): Remove definition--testsuite is no
@@ -6,6 +27,11 @@ Fri Oct 14 14:38:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 	(site.exp): New target.
 	(check): Rewrite.
 	(clean, distclean): Don't recur into testsuite directory.
+
+Thu Oct 13 19:24:09 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (VERSION): Updated to 2.5.
+	* Version 2.5 released.
 
 Tue Oct 11 15:26:42 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
