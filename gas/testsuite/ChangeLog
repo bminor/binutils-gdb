@@ -1,3 +1,10 @@
+2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gas/m68hc11/bug-1825.s: Add some tests.
+	* gas/m68hc11/bug-1825.d: Update.
+	* gas/m68hc11/opers12.d: Update.
+	* gas/m68hc11/opers12-dwarf2.d: Update.
+
 2002-12-05  Richard Henderson  <rth@redhat.com>
 
 	* gas/ia64/ltoff22x-1.[ds]: New.

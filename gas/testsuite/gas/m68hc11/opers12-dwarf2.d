@@ -55,7 +55,7 @@ L1:	ldy	,x
 	ldd	\[32768,pc\]
   39:	ec fb 80 00 	ldd	\[32768,PC\]
 	ldd	L1,pc
-  3d:	ec f9 ca    	ldd	-54,PC \{9 <L1>\}
+  3d:	ec f9 c9    	ldd	-55,PC \{9 <L1>\}
 	std	a,x		; Two\-reg index
   40:	6c e4       	std	A,X
 	ldx	b,x
@@ -211,31 +211,31 @@ t2:
 	leas	max5b,pc
  105:	1b cf       	leas	15,PC \{116 <t2\+0x21>\}
 	leas	min9b,pc
- 107:	1b f9 00    	leas	-256,PC \{9 <L1>\}
+ 107:	1b fa ff 00 	leas	-256,PC \{b <L1\+0x2>\}
 	leas	max9b,pc
- 10a:	1b f8 ff    	leas	255,PC \{20b <.L0\+0xd8>\}
+ 10b:	1b f8 ff    	leas	255,PC \{20d <.L0\+0xd9>\}
 
 ;;
 ;; Disassembler bug with movb
 ;;
 	movb	#23,0x2345
- 10d:	18 0b 17 23 	movb	#23, 2345 <.L0\+0x2212>
- 111:	45 
+ 10e:	18 0b 17 23 	movb	#23, 2345 <.L0\+0x2211>
+ 112:	45 
 	movb	#40,12,sp
- 112:	18 08 8c 28 	movb	#40, 12,SP
+ 113:	18 08 8c 28 	movb	#40, 12,SP
 	movb	#39,3,\+sp
- 116:	18 08 a2 27 	movb	#39, 3,\+SP
+ 117:	18 08 a2 27 	movb	#39, 3,\+SP
 	movb	#20,14,sp
- 11a:	18 08 8e 14 	movb	#20, 14,SP
+ 11b:	18 08 8e 14 	movb	#20, 14,SP
 	movw	#0x3210,0x3456
- 11e:	18 03 32 10 	movw	#3210 <bb\+0xa10>, 3456 <bb\+0xc56>
- 122:	34 56 
+ 11f:	18 03 32 10 	movw	#3210 <bb\+0xa10>, 3456 <bb\+0xc56>
+ 123:	34 56 
 	movw	#0x4040,12,sp
- 124:	18 00 8c 40 	movw	#4040 <bb\+0x1840>, 12,SP
- 128:	40 
+ 125:	18 00 8c 40 	movw	#4040 <bb\+0x1840>, 12,SP
+ 129:	40 
 	movw	#0x3900,3,\+sp
- 129:	18 00 a2 39 	movw	#3900 <bb\+0x1100>, 3,\+SP
- 12d:	00 
+ 12a:	18 00 a2 39 	movw	#3900 <bb\+0x1100>, 3,\+SP
+ 12e:	00 
 	movw	#0x2000,14,sp
- 12e:	18 00 8e 20 	movw	#2000 <.L0\+0x1ecd>, 14,SP
- 132:	00 
+ 12f:	18 00 8e 20 	movw	#2000 <.L0\+0x1ecc>, 14,SP
+ 133:	00 
