@@ -275,6 +275,8 @@ Possible values are these symbols:
     user -- gdb output should be copied to the gud buffer 
             for the user to see.
 
+    inferior -- gdb output should be copied to the inferior-io buffer
+
     pre-emacs -- output should be ignored util the post-prompt
                  annotation is received.  Then the output-sink
 		 becomes:...
@@ -445,28 +447,69 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 	  "*"))
 
 
-(gdb-set-instance-buffer-rules 'gdb-inferior-io 'gdb-inferior-io-name)
+(gdb-set-instance-buffer-rules 'gdb-inferior-io
+			       'gdb-inferior-io-name
+			       'gud-inferior-io-mode)
 
 (defun gdb-inferior-io-name (instance)
   (concat "*input/output of "
 	  (gdb-instance-target-string instance)
 	  "*"))
 
-(defvar gud-inferior-io-mode-map nil)
-(setq gud-inferior-io-mode-map (make-keymap))
-(suppress-keymap gud-inferior-io-mode-map)
-(define-key gud-inferior-io-mode-map " " 'gud-toggle-bp-this-line)
-(define-key gud-inferior-io-mode-map "d" 'gud-delete-bp-this-line)
+(defvar gdb-inferior-io-mode-map (copy-keymap comint-mode-map))
+(define-key comint-mode-map "\C-c\C-c" 'gdb-inferior-io-interrupt)
+(define-key comint-mode-map "\C-c\C-z" 'gdb-inferior-io-stop)
+(define-key comint-mode-map "\C-c\C-\\" 'gdb-inferior-io-quit)
+(define-key comint-mode-map "\C-c\C-d" 'gdb-inferior-io-eof)
 
 (defun gud-inferior-io-mode ()
   "Major mode for gud inferior-io.
 
-\\{gud-inferior-io-mode-map}"
+\\{comint-mode-map}"
+  ;; We want to use comint because it has various nifty and familiar
+  ;; features.  We don't need a process, but comint wants one, so create
+  ;; a dummy one.
+  (make-comint (substring (buffer-name) 1 (- (length (buffer-name)) 1))
+	       "/bin/cat")
   (setq major-mode 'gud-inferior-io-mode)
   (setq mode-name "Debuggee I/O")
-  (use-local-map gud-inferior-io-mode-map)
+  (setq comint-input-sender 'gud-inferior-io-sender)
 )
 
+(defun gud-inferior-io-sender (proc string)
+  (save-excursion
+    (set-buffer (process-buffer proc))
+    (let ((instance gdb-buffer-instance))
+      (set-buffer (gdb-get-instance-buffer instance 'gud))
+      (let ((gud-proc (get-buffer-process (current-buffer))))
+	(process-send-string gud-proc string)
+	(process-send-string gud-proc "\n")
+    ))
+    ))
+
+(defun gdb-inferior-io-interrupt (instance)
+  "Interrupt the program being debugged."
+  (interactive (list (gdb-needed-default-instance)))
+  (interrupt-process
+   (get-buffer-process (gdb-get-instance-buffer instance 'gud)) comint-ptyp))
+
+(defun gdb-inferior-io-quit (instance)
+  "Send quit signal to the program being debugged."
+  (interactive (list (gdb-needed-default-instance)))
+  (quit-process
+   (get-buffer-process (gdb-get-instance-buffer instance 'gud)) comint-ptyp))
+
+(defun gdb-inferior-io-stop (instance)
+  "Stop the program being debugged."
+  (interactive (list (gdb-needed-default-instance)))
+  (stop-process
+   (get-buffer-process (gdb-get-instance-buffer instance 'gud)) comint-ptyp))
+
+(defun gdb-inferior-io-eof (instance)
+  "Send end-of-file to the program being debugged."
+  (interactive (list (gdb-needed-default-instance)))
+  (process-send-eof
+   (get-buffer-process (gdb-get-instance-buffer instance 'gud))))
 
 
 ;;
@@ -594,6 +637,7 @@ This filter may simply queue output for a later time."
     ("signal" gdb-stopping)
     ("breakpoint" gdb-stopping)
     ("watchpoint" gdb-stopping)
+    ("stopped" gdb-stopped)
     )
   "An assoc mapping annotation tags to functions which process them.")
 
@@ -696,6 +740,19 @@ This filter may simply queue output for a later time."
       )
      (t (error "Unexpected stopping annotation")))))
 
+;; An annotation handler for `stopped'.  It is just like gdb-stopping, except
+;; that if we already set the output sink to 'user in gdb-stopping, that is 
+;; fine.
+(defun gdb-stopped (instance ignored)
+  (let ((sink (gdb-instance-output-sink instance)))
+    (cond
+     ((eq sink 'inferior)
+      (set-gdb-instance-output-sink instance 'user)
+      )
+     ((eq sink 'user)
+      t)
+     (t (error "Unexpected stopping annotation")))))
+
 ;; An annotation handler for `post-prompt'.
 ;; This begins the collection of output from the current
 ;; command if that happens to be appropriate."
@@ -710,17 +767,6 @@ This filter may simply queue output for a later time."
      (t
       (set-gdb-instance-output-sink instance 'user)
       (error "Output sink phase error 3.")))))
-
-;; A buffer-local indication of how output from an inferior gdb 
-;; should be directed.  Legit values are:
-;;
-;;    USER -- the output should be appended to the gud
-;;            buffer.
-;;
-;;    PRE-EMACS -- throw away output preceding output for emacs.
-;;    EMACS -- redirect output to the partial-output buffer.
-;;    POST-EMACS -- throw away output following output for emacs."
-;;
 
 ;; Handle a burst of output from a gdb instance.
 ;; This function is (indirectly) used as a gud-marker-filter.
@@ -838,7 +884,7 @@ buffer."
      (gdb-get-create-instance-buffer
       instance 'gdb-inferior-io))
     (goto-char (point-max))
-    (insert string))
+    (insert-before-markers string))
   (gud-display-buffer
    (gdb-get-create-instance-buffer instance
 				   'gdb-inferior-io)))
@@ -2232,15 +2278,26 @@ program.")
 	      (gud-display-frame)))
 	(if moving (goto-char (process-mark proc)))))))
 
+(defun gud-proc-died (proc)
+  ;; Stop displaying an arrow in a source file.
+  (setq overlay-arrow-position nil)
+
+  ;; Kill the dummy process, so that C-x C-c won't worry about it.
+  (save-excursion
+    (set-buffer (process-buffer proc))
+    (kill-process
+     (get-buffer-process
+      (gdb-get-instance-buffer gdb-buffer-instance 'gdb-inferior-io))))
+  )
+
 (defun gud-sentinel (proc msg)
   (cond ((null (buffer-name (process-buffer proc)))
 	 ;; buffer killed
-	 ;; Stop displaying an arrow in a source file.
-	 (setq overlay-arrow-position nil)
+	 (gud-proc-died proc)
 	 (set-process-buffer proc nil))
 	((memq (process-status proc) '(signal exit))
-	 ;; Stop displaying an arrow in a source file.
-	 (setq overlay-arrow-position nil)
+	 (gud-proc-died proc)
+
 	 ;; Fix the mode line.
 	 (setq mode-line-process
 	       (concat ": "
