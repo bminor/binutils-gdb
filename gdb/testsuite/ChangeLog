@@ -1,5 +1,9 @@
 2004-07-31  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/namespace.exp: Accept more varieties of ptype output.
+
+2004-07-31  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/virtfunc.exp: Accept more varieties of ptype output.
 
 2004-07-31  Michael Chastain  <mec.gnu@mindspring.com>
