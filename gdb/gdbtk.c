@@ -742,10 +742,11 @@ gdb_eval (clientData, interp, argc, argv)
 /* addr: address of data to dump */
 /* form: a char indicating format */
 /* size: size of each element; 1,2,4, or 8 bytes*/
-/* num: the number of 'size' elements to return */
-/* acshar:  an optional ascii character to use in ASCII dump */
-/* returns a list of 'num' elements followed by an optional */
+/* num: the number of bytes to read */
+/* acshar: an optional ascii character to use in ASCII dump */
+/* returns a list of elements followed by an optional */
 /* ASCII dump */
+
 static int
 gdb_get_mem (clientData, interp, argc, argv)
      ClientData clientData;
@@ -753,22 +754,44 @@ gdb_get_mem (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  int size, asize, num, i, j;
-  CORE_ADDR addr, saved_addr, ptr;
-  int format;
+  int size, asize, i, j, bc;
+  CORE_ADDR addr;
+  int nbytes, rnum, bpr;
+  char format, c, *ptr, buff[128], aschar, *mbuf, *mptr, *cptr, *bptr;
   struct type *val_type;
-  value_ptr vptr;
-  char c, buff[128], aschar;
 
-  if (argc != 6)
-    error ("wrong # args");
+  if (argc < 6 || argc > 7)
+    {
+      interp->result = "addr format size bytes bytes_per_row ?ascii_char?";
+      return TCL_ERROR; 
+    }
+
+  size = (int)strtoul(argv[3],(char **)NULL,0);
+  nbytes = (int)strtoul(argv[4],(char **)NULL,0);
+  bpr = (int)strtoul(argv[5],(char **)NULL,0);
+  if (nbytes <= 0 || bpr <= 0 || size <= 0)
+    {
+      interp->result = "Invalid number of bytes.";
+      return TCL_ERROR;
+    }
 
   addr = (CORE_ADDR)strtoul(argv[1],(char **)NULL,0);
-  saved_addr = addr;
   format = *argv[2];
-  size = (int)strtoul(argv[3],(char **)NULL,0);
-  num = (int)strtoul(argv[4],(char **)NULL,0);
-  aschar = *argv[5];
+  mbuf = (char *)malloc (nbytes+32);
+  if (!mbuf)
+    {
+      interp->result = "Out of memory.";
+      return TCL_ERROR;
+    }
+  memset (mbuf, 0, nbytes+32);
+  mptr = cptr = mbuf;
+
+  rnum = target_read_memory_partial (addr, mbuf, nbytes, NULL);
+
+  if (argv[6])
+    aschar = *argv[6]; 
+  else
+    aschar = 0;
 
   switch (size) {
   case 1:
@@ -792,38 +815,55 @@ gdb_get_mem (clientData, interp, argc, argv)
     asize = 'b';
   }
 
-  for (i=0; i < num; i++)
+  bc = 0;        /* count of bytes in a row */
+  buff[0] = '"'; /* buffer for ascii dump */
+  bptr = &buff[1];   /* pointer for ascii dump */
+  
+  for (i=0; i < nbytes; i+= size)
     {
-      vptr = value_at (val_type, addr, (asection *)NULL);
-      print_scalar_formatted (VALUE_CONTENTS(vptr), val_type, format, asize, gdb_stdout);
-      fputs_unfiltered (" ", gdb_stdout);
-      addr += size;
-    }
-
-  if (aschar)
-    {
-      val_type = builtin_type_char;
-      ptr = saved_addr;
-      buff[0] = '"';
-      i = 1;
-      for (j=0; j < num*size; j++)
+      if ( i >= rnum)
 	{
-	  c = *(char *)VALUE_CONTENTS(value_at (val_type, ptr, (asection *)NULL));
-	  if (c < 32 || c > 126)
-	    c = aschar;
-	  if (c == '"')
-	    buff[i++] = '\\';
-	  buff[i++] = c;
-	  ptr++;
+	  fputs_unfiltered ("N/A ", gdb_stdout);
+	  if (aschar)
+	    for ( j = 0; j < size; j++)
+	      *bptr++ = 'X';
 	}
-      buff[i++] = '"';
-      buff[i] = 0;
-      fputs_unfiltered (buff, gdb_stdout);
-    }
+      else
+	{
+	  print_scalar_formatted (mptr, val_type, format, asize, gdb_stdout);
+	  fputs_unfiltered (" ", gdb_stdout);
+	  if (aschar)
+	    {
+	      for ( j = 0; j < size; j++)
+		{
+		  c = *cptr++;
+		  if (c < 32 || c > 126)
+		    c = aschar;
+		  if (c == '"')
+		    *bptr++ = '\\';
+		  *bptr++ = c;
+		}
+	    }
+	}
 
+      mptr += size;
+      bc += size;
+
+      if (aschar && (bc >= bpr))
+	{
+	  /* end of row. print it and reset variables */
+	  bc = 0;
+	  *bptr++ = '"';
+	  *bptr++ = ' ';
+	  *bptr = 0;
+	  fputs_unfiltered (buff, gdb_stdout);
+	  bptr = &buff[1];
+	}
+    }
+  
+  free (mbuf);
   return TCL_OK;
 }
-
 
 static int
 map_arg_registers (argc, argv, func, argp)

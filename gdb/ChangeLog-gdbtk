@@ -1,3 +1,8 @@
+Mon Mar 23 13:41:39 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdbtk.c (gdb_get_mem): Rewrite to fetch entire contents
+	of the memory window at once.
+
 Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	Merged changes from Foundry: list follows by author:
