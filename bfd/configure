@@ -2327,7 +2327,7 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
 fi
 fi
 WARN_CFLAGS=""
-if test "x${build_warnings}" != x -a "x$GCC" = xyes ; then
+if test "x${build_warnings}" != x && test "x$GCC" = xyes ; then
     WARN_CFLAGS="${build_warnings}"
 fi
 
@@ -2370,7 +2370,7 @@ if test "${enable_install_libbfd+set}" = set; then
   enableval="$enable_install_libbfd"
   install_libbfd_p=$enableval
 else
-  if test "${host}" = "${target}" -o "$enable_shared" = "yes"; then
+  if test "${host}" = "${target}" || test "$enable_shared" = "yes"; then
         install_libbfd_p=yes
       else
         install_libbfd_p=no
@@ -5933,7 +5933,7 @@ case "${host}" in
     fi
     ;;
   *)
-    x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | tail -1`
+    x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
     if test -n "$x"; then
       WIN32LIBADD="-L../libiberty/pic -liberty"
     fi

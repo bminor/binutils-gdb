@@ -86,7 +86,7 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting warning flags = $build_warnings" 6>&1
 fi])dnl
 WARN_CFLAGS=""
-if test "x${build_warnings}" != x -a "x$GCC" = xyes ; then
+if test "x${build_warnings}" != x && test "x$GCC" = xyes ; then
     WARN_CFLAGS="${build_warnings}"
 fi
 AC_SUBST(WARN_CFLAGS)
@@ -446,7 +446,7 @@ case "${host}" in
     ;;
   *)
 changequote(,)dnl
-    x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | tail -1`
+    x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
 changequote([,])dnl
     if test -n "$x"; then
       WIN32LIBADD="-L../libiberty/pic -liberty"

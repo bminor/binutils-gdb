@@ -1,3 +1,12 @@
+2002-12-20  Paul Eggert  <eggert@twinsun.com>
+
+	Port to POSIX 1003.1-2001.
+	* acinclude.m4 (AM_INSTALL_LIBBFD): Do not rely on "test -o".
+	* configure.in (build-warnings): Likewise.
+	(Horrible hacks to build DLLs on Windows): Do not rely on "tail -1".
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2002-12-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-h8300.c: Include libiberty.h.
