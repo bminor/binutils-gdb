@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright (C) 1999, 2000 Free Software Foundation.
+   Copyright (C) 1999, 2000, 2001 Free Software Foundation.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
    This file is part of GAS, the GNU Assembler.
@@ -2527,6 +2527,16 @@ md_convert_frag (abfd, sec, fragP)
     }
 }
 
+/* On an ELF system, we can't relax an externally visible symbol,
+   as well as a weak symbol.  The weak symbol can be overriden
+   at final link time by a non weak symbol.  */
+static int
+relaxable_symbol (symbol)
+     symbolS* symbol;
+{
+  return ! S_IS_EXTERNAL (symbol) && ! S_IS_WEAK (symbol);
+}
+
 /* Force truly undefined symbols to their maximum size, and generally set up
    the frag list to be relaxed.  */
 int
@@ -2549,7 +2559,8 @@ md_estimate_size_before_relax (fragP, segment)
 	      || IS_OPCODE (fragP->fr_opcode[0], M6812_BSR));
 
       /* A relaxable case.  */
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment)
+      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+          && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_PC_RELATIVE, STATE_BYTE);
 	}
@@ -2575,7 +2586,8 @@ md_estimate_size_before_relax (fragP, segment)
     case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_UNDF):
       assert (current_architecture & cpu6811);
 
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment)
+      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+          && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH,
 					    STATE_BYTE);
@@ -2600,7 +2612,8 @@ md_estimate_size_before_relax (fragP, segment)
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF):
       assert (current_architecture & cpu6812);
 
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment)
+      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+          && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_INDEXED_OFFSET,
 					    STATE_BITS5);
@@ -2622,7 +2635,8 @@ md_estimate_size_before_relax (fragP, segment)
     case ENCODE_RELAX (STATE_XBCC_BRANCH, STATE_UNDF):
       assert (current_architecture & cpu6812);
 
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment)
+      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+          && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_XBCC_BRANCH, STATE_BYTE);
 	}
@@ -2646,7 +2660,8 @@ md_estimate_size_before_relax (fragP, segment)
     case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH_6812, STATE_UNDF):
       assert (current_architecture & cpu6812);
 
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment)
+      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+          && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH_6812,
 					    STATE_BYTE);
