@@ -616,6 +616,7 @@ unpack_long (type, valaddr)
     case TYPE_CODE_BOOL:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
+    case TYPE_CODE_RANGE:
       if (nosign)
 	return extract_unsigned_integer (valaddr, len);
       else
@@ -1301,6 +1302,7 @@ value_from_longest (type, num)
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_BOOL:
+    case TYPE_CODE_RANGE:
       store_signed_integer (VALUE_CONTENTS_RAW (val), len, num);
       break;
       

@@ -1,3 +1,8 @@
+Tue Apr  5 12:58:47 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* values.c (unpack_long, value_from_longest),
+	valarith.c (value_binop):  Allow TYPE_CODE_RANGE.
+
 Fri Apr  1 14:04:34 1994  Jason Merrill  (jason@deneb.cygnus.com)
 
 	* symfile.c (deduce_language_from_filename): .cpp is a C++ extension.
