@@ -1,3 +1,8 @@
+Tue Jan 11 15:21:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t12/scope.exp: Add xfails for rs6000.  Remove 1806 from existing
+	xfails; I'm not sure why they are failing, but not because of PR 1806.
+
 Mon Jan 10 22:14:20 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* config/unix-gdb.exp: Remove gdb_unload cause it's already
