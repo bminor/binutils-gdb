@@ -473,6 +473,15 @@ generic_elf_osabi_sniff_abi_tag_sections: unknown OS number %d",
       return;
     }
 
+  /* .note.openbsd.ident notes, used by OpenBSD.  */
+  if (strcmp (name, ".note.openbsd.ident") == 0
+      && check_note (abfd, sect, note, "OpenBSD", 4, NT_OPENBSD_IDENT))
+    {
+      /* There is no need to check the version yet.  */
+      *osabi = GDB_OSABI_OPENBSD_ELF;
+      return;
+    }
+
   /* .note.netbsdcore.procinfo notes, used by NetBSD.  */
   if (strcmp (name, ".note.netbsdcore.procinfo") == 0)
     {

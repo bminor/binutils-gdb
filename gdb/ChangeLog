@@ -1,3 +1,8 @@
+2004-01-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Recognize
+	OpenBSD .note.openbsd.ident sections.
+
 2004-01-22  David Carlton  <carlton@kealia.com>
 
 	* dwarf2read.c (psymtab_to_symtab_1): Calculate lowpc, highpc via
