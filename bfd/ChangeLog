@@ -1,3 +1,8 @@
+1999-05-10  Nick Clifton  <nickc@cygnus.com>
+
+	* elf.c (elf_fake_sections): Check for .rel. as start of rel
+	section, not just .rel.  Same for .rela.
+
 1999-05-07  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (coff_mcore_relocate_section): Replace assert about
