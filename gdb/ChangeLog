@@ -1,3 +1,9 @@
+Tue Jul  7 09:00:42 1992  Fred Fish  (fnf@cygnus.com)
+
+	* maint.c (maintenance_command, maintenance_info_command):
+	Install with allow_unknown as 0 and call help_list to show
+	list of possibilities when no subcommand is specified.
+
 Tue Jul  7 00:20:29 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in:  Add m68k-ericsson-*.

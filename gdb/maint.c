@@ -54,7 +54,8 @@ maintenance_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  error ("Unimplemented maintenance command '%s'", args);
+  printf ("\"maintenance\" must be followed by the name of a maintenance command.\n");
+  help_list (maintenancelist, "maintenance ", -1, stdout);
 }
 
 
@@ -111,12 +112,12 @@ _initialize_maint_cmds ()
 Includes commands to dump specific internal GDB structures in\n\
 a human readable form, including dumping of symbol tables, type\n\
 chains, etc.",
-		  &maintenancelist, "maintenance ", 1,
+		  &maintenancelist, "maintenance ", 0,
 		  &cmdlist);
 
   add_prefix_cmd ("info", class_info, maintenance_info_command,
         "Maintenance command for showing things about the program being debugged.",
-		  &maintenanceinfolist, "maintenance info ", 1,
+		  &maintenanceinfolist, "maintenance info ", 0,
 		  &maintenancelist);
 
   add_cmd ("dump-me", class_maintenance, maintenance_dump_me,
