@@ -1,3 +1,8 @@
+Sun Sep  4 16:47:21 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* gdbint.texinfo: Removed mentions of some incorrectly placed and
+	obsolete conditionals, described some others.
+
 Mon Aug  1 15:42:39 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbint.texinfo: Remove references to BROKEN_LARGE_ALLOCA and
