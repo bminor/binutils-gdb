@@ -3,6 +3,20 @@ Wed Sep 28 14:56:39 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* expr.c (make_expr_symbol): No longer static.  Use symbol_create,
 	not symbol_new, for symbols holding expression values.
 	* expr.h (make_expr_symbol): Move declaration here.
+	* write.c (fix_new_exp): Handle O_add by creating an
+	expression-valued symbol, and calling fix_new_exp recursively.
+	(adjust_reloc_syms): If a fixup's symbol value is a sum of an
+	undefined symbol and a constant, fold the constant into the fixup,
+	and refer to the undefined symbol directly.  Then process the
+	fixup again from scratch.
+	(write_object_file): Before calling adjust_reloc_syms, make a pass
+	through the symbol list trying to resolve values.
+
+	* write.c (print_fixup): New routine, for debugging.
+	(write_relocs): Call bfd_install_relocation.  Deleted various
+	hacks for working around problems with bfd_perform_relocation.
+
+	* Makefile.in (VERSION): Update to 2.4.90.
 
 Wed Sep 28 11:50:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
