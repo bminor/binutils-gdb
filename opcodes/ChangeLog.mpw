@@ -1,3 +1,7 @@
+Mon Feb  7 15:53:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (CSEARCH): Add extra-include to search path.
+
 Mon Jan 24 12:07:22 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in (varargs.h): Don't create.
