@@ -166,29 +166,19 @@ static void lnk960_after_parse()
   }
 
   /* if there has been no hll list then add our own */
-
+  
   if(had_hll && !had_hll_name) {
-    append(&hll_list_tail,"c");
-    if (lang_float_flag == true) {
-      append(&hll_list_tail,"m");
-    }
-    else {
-      append(&hll_list_tail,"mstub");
-    }
+    append(&hll_list_tail,"cg");
     if (ldfile_output_machine == bfd_mach_i960_ka_sa ||
-	ldfile_output_machine == bfd_mach_i960_ca) {
-      {
-	append(&hll_list_tail,"f");
-      }
+  	ldfile_output_machine == bfd_mach_i960_ca) {
+        {
+	  append(&hll_list_tail,"fpg");
+        }
     }
   }
-
-
-
+  
   add_on(hll_list, lang_input_file_is_l_enum);
   add_on(syslib_list, lang_input_file_is_search_file_enum);
-
-
 }
 
 static void
