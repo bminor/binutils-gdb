@@ -157,8 +157,6 @@ static char *find_name_end (char *name);
 
 static int process_reference (char **string);
 
-static CORE_ADDR ref_search_value (int refnum);
-
 void stabsread_clear_cache (void);
 
 static const char vptr_name[] = "_vptr$";

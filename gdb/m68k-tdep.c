@@ -1,7 +1,7 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -69,17 +69,6 @@
 #endif
 
 
-/* gdbarch_breakpoint_from_pc is set to m68k_local_breakpoint_from_pc
-   so m68k_remote_breakpoint_from_pc is currently not used.  */
-
-static const unsigned char *
-m68k_remote_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
-{
-  static unsigned char break_insn[] = {0x4e, (0x40 | REMOTE_BPT_VECTOR)};
-  *lenptr = sizeof (break_insn);
-  return break_insn;
-}
-
 static const unsigned char *
 m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
@@ -143,20 +132,6 @@ m68k_register_name (int regnum)
 		    "m68k_register_name: illegal register number %d", regnum);
   else
     return register_names[regnum];
-}
-
-/* Index within `registers' of the first byte of the space for
-   register regnum.  */
-
-static int
-m68k_register_byte (int regnum)
-{
-  if (regnum >= M68K_FPC_REGNUM)
-    return (((regnum - M68K_FPC_REGNUM) * 4) + 168);
-  else if (regnum >= FP0_REGNUM)
-    return (((regnum - FP0_REGNUM) * 12) + 72);
-  else
-    return (regnum * 4);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state, a

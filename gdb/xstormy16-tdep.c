@@ -151,16 +151,6 @@ xstormy16_register_raw_size (int regnum)
     return xstormy16_reg_size;
 }
 
-/* Function: xstormy16_register_virtual_size
-   Returns the number of bytes occupied by the register as represented
-   internally by gdb. */
-
-static int
-xstormy16_register_virtual_size (int regnum)
-{
-  return xstormy16_register_raw_size (regnum);
-}
-
 /* Function: xstormy16_reg_virtual_type 
    Returns the default type for register N. */
 

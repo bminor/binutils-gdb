@@ -1,3 +1,22 @@
+2004-01-18  Andrew Cagney  <cagney@redhat.com>
+
+	* remote-sds.c (tohex): Delete unused function.  Update copyright.
+	* xstormy16-tdep.c (xstormy16_register_virtual_size): Ditto.
+	* v850-tdep.c (v850_register_virtual_size): Ditto.
+	* target.c (normal_target_post_startup_inferior): Ditto.
+	* source.c (ambiguous_line_spec): Ditto.
+	* remote.c (adapt_remote_get_threadinfo): Ditto.
+	* mi/mi-out.c (out_field_fmt): Ditto.
+	* mi/mi-interp.c (mi_interp_read_one_line_hook): Ditto.
+	(output_control_change_notification): Ditto.
+	* m68k-tdep.c (m68k_register_byte): Ditto.
+	(m68k_remote_breakpoint_from_pc): Ditto.
+	* ui-out.c (init_ui_out_state): Delete unused declaration.
+	* stabsread.c (search_value): Ditto.
+	* mi/mi-cmd-env.c (env_cli_command): Ditto.
+	* maint.c (print_section_table): Ditto.
+	* infrun.c (set_follow_fork_mode_command): Ditto.
+
 2004-01-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (execute_cfa_program): Move DWA_CFA_nop before

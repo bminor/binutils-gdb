@@ -248,16 +248,6 @@ v850_register_raw_size (int regnum)
     return v850_reg_size;
 }
 
-/* Function: v850_register_virtual_size
-   Returns the number of bytes occupied by the register as represented
-   internally by gdb. */
-
-static int
-v850_register_virtual_size (int regnum)
-{
-  return v850_register_raw_size (regnum);
-}
-
 /* Function: v850_reg_virtual_type 
    Returns the default type for register N. */
 

@@ -1162,10 +1162,6 @@ static int remote_unpack_thread_info_response (char *pkt,
 static int remote_get_threadinfo (threadref * threadid, int fieldset,	/*TAG mask */
 				  struct gdb_ext_thread_info *info);
 
-static int adapt_remote_get_threadinfo (gdb_threadref * ref,
-					int selection,
-					struct gdb_ext_thread_info *info);
-
 static char *pack_threadlist_request (char *pkt, int startflag,
 				      int threadcount,
 				      threadref * nextthread);
@@ -1575,19 +1571,6 @@ remote_get_threadinfo (threadref *threadid, int fieldset,	/* TAG mask */
   result = remote_unpack_thread_info_response (threadinfo_pkt + 2, threadid,
 					       info);
   return result;
-}
-
-/* Unfortunately, 61 bit thread-ids are bigger than the internal
-   representation of a threadid.  */
-
-static int
-adapt_remote_get_threadinfo (gdb_threadref *ref, int selection,
-			     struct gdb_ext_thread_info *info)
-{
-  threadref lclref;
-
-  int_to_threadref (&lclref, *ref);
-  return remote_get_threadinfo (&lclref, selection, info);
 }
 
 /*    Format: i'Q':8,i"L":8,initflag:8,batchsize:16,lastthreadid:32   */
