@@ -697,7 +697,7 @@ main (argc, argv)
 
   program_name = *argv;
 
-  while ((c = getopt_long (argc, argv, "ib:m:dlfahrtxsj:", long_options, &ind))
+  while ((c = getopt_long (argc, argv, "Aib:m:dlfahrtxsj:", long_options, &ind))
 	 != EOF) {
     seenflag = true;
     switch (c) {
@@ -726,6 +726,15 @@ main (argc, argv)
       dump_ar_hdrs = 1;
       dump_section_headers = 1;
       break;
+ case 'A':
+      disassemble = true;
+      dump_ar_hdrs = 1;
+      dump_file_header = true;
+      dump_reloc_info = 1;
+      dump_section_headers = 1;
+      dump_symtab = 1; 
+      break;
+      
     case  0 : break;		/* we've been given a long option */
     case 't': dump_symtab = 1; break;
     case 'd': disassemble = true ; break;
