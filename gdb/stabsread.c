@@ -3383,8 +3383,6 @@ read_range_type (pp, typenums, objfile)
 
   /* First comes a type we are a subrange of.
      In C it is usually 0, 1 or the type being defined.  */
-  /* FIXME: according to stabs.texinfo and AIX doc, this can be a type-id
-     not just a type number.  */
   if (read_type_number (pp, rangenums) != 0)
     return error_type (pp);
   self_subrange = (rangenums[0] == typenums[0] &&

@@ -1,3 +1,9 @@
+Thu Mar 30 19:46:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (read_range_type): Remove FIXME comment about
+	type-id (I presume this meant a number followed by = followed by a
+	type) versus type number; Per fixed it.
+
 Wed Mar 29 09:56:04 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in: sparc-*-sunos5* is same as sparc-*-solaris2*.
