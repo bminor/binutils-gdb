@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1268,20 +1268,21 @@ gdb_print_insn_powerpc (memaddr, info)
 void
 _initialize_rs6000_tdep ()
 {
-  /* Initialize hook in xcoffread for recording the toc offset value
-     of a symbol table into the ldinfo structure, for native rs6000
-     config. */
+#ifndef ELF_OBJECT_FORMAT
   {
     extern void (*xcoff_add_toc_to_loadinfo_hook) PARAMS ((unsigned long));
-    xcoff_add_toc_to_loadinfo_hook = &xcoff_add_toc_to_loadinfo;
-  }
-
-  /* Initialize hook in xcoffread for calling xcoff_init_loadinfo in
-     a native rs6000 config. */
-  {
     extern void (*xcoff_init_loadinfo_hook) PARAMS ((void));
+
+    /* Initialize hook in xcoffread for recording the toc offset value
+       of a symbol table into the ldinfo structure, for native rs6000
+       config. */
+    xcoff_add_toc_to_loadinfo_hook = &xcoff_add_toc_to_loadinfo;
+
+    /* Initialize hook in xcoffread for calling xcoff_init_loadinfo in
+       a native rs6000 config. */
     xcoff_init_loadinfo_hook = &xcoff_init_loadinfo;
   }
+#endif /* ELF_OBJECT_FORMAT */
 
   /* FIXME, this should not be decided via ifdef. */
 #ifdef GDB_TARGET_POWERPC

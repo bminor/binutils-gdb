@@ -1,3 +1,10 @@
+Mon May  6 07:52:48 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* rs6000-tdep.c (_initialize_rs6000_tdep): Don't do XCOFF specific
+	hooks under ELF.
+
+	* config/powerpc/tm-ppc-eabi.h: Define ELF_OBJECT_FORMAT.
+
 start-sanitize-gdbtk
 Thu May  2 19:17:49 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
