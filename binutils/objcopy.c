@@ -696,6 +696,7 @@ strip_main (argc, argv)
 	{
 	case 'I':
 	  input_target = optarg;
+	  break;
 	case 'O':
 	  output_target = optarg;
 	  break;
@@ -803,6 +804,7 @@ copy_main (argc, argv)
 	case 'I':
 	case 's':		/* "source" - 'I' is preferred */
 	  input_target = optarg;
+	  break;
 	case 'O':
 	case 'd':		/* "destination" - 'O' is preferred */
 	  output_target = optarg;
@@ -890,6 +892,7 @@ main (argc, argv)
      char *argv[];
 {
   program_name = argv[0];
+  xmalloc_set_program_name (program_name);
   strip_symbols = strip_undef;
   discard_locals = locals_undef;
 

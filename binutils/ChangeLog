@@ -1,3 +1,16 @@
+Fri Feb 11 15:54:51 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objcopy.c (strip_main, copy_main): Add missing 'break' in switch.
+
+Mon Feb  7 19:45:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (disassemble_data): Handle bfd_arch_powerpc.
+
+Sun Feb  6 22:08:20 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* strings.c objdump.c nlmconv.c objcopy.c nm.c ar.c size.c (main):
+	Call xmalloc_set_program_name.
+
 Fri Feb  4 10:46:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* objcopy.c (filter_bytes): Make MEMHUNK a char *, not PTR, so we
