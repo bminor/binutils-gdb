@@ -609,8 +609,13 @@ static struct special_section const special_sections[] =
   { ".data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
   { ".data1",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
   { ".debug",	SHT_PROGBITS,	0				},
+#if defined (TC_HPPA) && !defined (TE_LINUX) && TARGET_ARCH_SIZE == 64
+  { ".fini",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
+  { ".init",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
+#else
   { ".fini",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
   { ".init",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
+#endif
   { ".line",	SHT_PROGBITS,	0				},
   { ".note",	SHT_NOTE,	0				},
   { ".rodata",	SHT_PROGBITS,	SHF_ALLOC			},

@@ -1,3 +1,8 @@
+2003-01-01  John David Anglin  <dave.anglin@nrc.ca>
+
+        * config/obj-elf.c (special_sections): Work around HP's incorrect usage
+        of .init and .fini sections for array initializers and finalizers.
+
 2002-12-31  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (validate_mips_insn, mips_ip): Recognize
