@@ -1,6 +1,20 @@
+Tue Feb  4 11:39:29 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (ALL_MODULES): Added all-db.
+	(CROSS_CHECK_MODULES): Addec check-db.
+	(INSTALL_MODULES): Added install-db.
+	(CLEAN_MODULES): Added clean-db.
+
 Mon Feb  3 13:29:36 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.guess: Merge with latest FSF sources.
+
+Tue Jan 28 09:20:37 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (ALL_MODULES): Added all-itcl.
+	(CROSS_CHECK_MODULES): Added check-itcl.
+	(INSTALL_MODULES): Added install-itcl.
+	(CLEAN_MODULES): Added clean-itcl.
 
 Thu Jan 23 01:44:27 1997  Geoffrey Noer  <noer@cygnus.com>
 

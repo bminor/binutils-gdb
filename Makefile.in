@@ -110,7 +110,7 @@ M4 = `if [ -f $$r/m4/m4 ] ; \
 	then echo $$r/m4/m4 ; \
 	else echo m4 ; fi`
 
-MAKEINFO = `if [ -f $$r/texinfo/makeinfo/makeinfo ] ; \
+MAKEINFO = `if [ -f $$r/texinfo/makeinfo/Makefile ] ; \
 	then echo $$r/texinfo/makeinfo/makeinfo ; \
 	else echo makeinfo ; fi`
 
@@ -357,7 +357,7 @@ EXTRA_HOST_FLAGS = \
 	'RANLIB=$(RANLIB)' 
 
 
-FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(HOST_FLAGS)
+FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
 
 # Flags that are concerned with the location of the X11 include files
 # and library files
@@ -398,15 +398,6 @@ TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 # If any variables are added here, they must be added to do-*, below.
 # The HOST_* variables are a special case, which are used for the gcc
 # cross-building scheme.
-# The condition for setting GCC_FOR_TARGET is so that if CC_FOR_TARGET
-# is overridden on the command line we use that value for
-# GCC_FOR_TARGET, and, if it is not, we use the value of
-# GCC_FOR_TARGET.  We do this because the default value of
-# CC_FOR_TARGET depends on gcc/xgcc, which won't exist when we first
-# go into the gcc directory.  FIXME: The test won't work correctly for
-# older non-Posix make programs that do not set MAKEFLAGS; in that
-# case, overriding CC_FOR_TARGET on the command line will not affect
-# GCC_FOR_TARGET.
 EXTRA_GCC_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$(AS)' \
@@ -418,7 +409,7 @@ EXTRA_GCC_FLAGS = \
 	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
-	'GCC_FOR_TARGET=$(GCC_FOR_TARGET)' \
+	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
 	`if test x"$(LANGUAGES)" != x; then echo "LANGUAGES=$(LANGUAGES)"; fi` \
 	`if test x"$(STMP_FIXPROTO)" != x; then echo "STMP_FIXPROTO=$(STMP_FIXPROTO)"; fi` \
 	`if test x"$(LIMITS_H_TEST)" != x; then echo "LIMITS_H_TEST=$(LIMITS_H_TEST)"; fi` \
@@ -440,11 +431,13 @@ ALL_MODULES = \
 	all-binutils \
 	all-byacc \
 	all-cvs \
+	all-db \
 	all-dejagnu \
 	all-diff \
 	all-dosutils \
 	all-etc \
 	all-fileutils \
+	all-findutils \
 	all-find \
 	all-flex \
 	all-gas \
@@ -457,6 +450,7 @@ ALL_MODULES = \
 	all-indent \
 	all-inet \
 	all-ispell \
+	all-itcl \
 	all-ld \
 	all-libiberty \
 	all-m4 \
@@ -500,10 +494,12 @@ CROSS_CHECK_MODULES = \
 	check-bfd \
 	check-binutils \
 	check-cvs \
+	check-db \
 	check-dejagnu \
 	check-diff \
 	check-etc \
 	check-fileutils \
+	check-findutils \
 	check-find \
 	check-gas \
 	check-gawk \
@@ -514,6 +510,7 @@ CROSS_CHECK_MODULES = \
 	check-indent \
 	check-inet \
 	check-ispell \
+	check-itcl \
 	check-ld \
 	check-libiberty \
 	check-m4 \
@@ -551,11 +548,13 @@ INSTALL_MODULES = \
 	install-binutils \
 	install-byacc \
 	install-cvs \
+	install-db \
 	install-dejagnu \
 	install-diff \
 	install-dosutils \
 	install-etc \
 	install-fileutils \
+	install-findutils \
 	install-find \
 	install-flex \
 	install-gas \
@@ -568,6 +567,7 @@ INSTALL_MODULES = \
 	install-indent \
 	install-inet \
 	install-ispell \
+	install-itcl \
 	install-ld \
 	install-libiberty \
 	install-m4 \
@@ -684,11 +684,13 @@ CLEAN_MODULES = \
 	clean-binutils \
 	clean-byacc \
 	clean-cvs \
+	clean-db \
 	clean-dejagnu \
 	clean-diff \
 	clean-dosutils \
 	clean-etc \
 	clean-fileutils \
+	clean-findutils \
 	clean-find \
 	clean-flex \
 	clean-gas \
@@ -701,6 +703,7 @@ CLEAN_MODULES = \
 	clean-indent \
 	clean-inet \
 	clean-ispell \
+	clean-itcl \
 	clean-ld \
 	clean-libiberty \
 	clean-m4 \
@@ -837,6 +840,9 @@ $(DO_X):
 info: do-info
 installcheck: do-installcheck
 dvi: do-dvi
+
+# Make sure makeinfo is built before we do a `make info'.
+do-info: all-texinfo
 
 install-info: do-install-info dir.info
 	s=`cd $(srcdir); pwd`; export s; \
@@ -1295,6 +1301,7 @@ configure-target-examples: $(ALL_GCC)
 all-target-examples: configure-target-examples
 all-expect: all-tcl all-tk
 all-fileutils: all-libiberty
+all-findutils:
 all-find:
 all-flex: all-libiberty all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
@@ -1315,6 +1322,7 @@ all-hello: all-libiberty
 all-indent:
 all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
+all-tcl: all-tcl all-tk
 all-ld: all-libiberty all-bfd all-opcodes all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++
@@ -1352,7 +1360,7 @@ all-textutils:
 all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
 all-wdiff:
-all-target-winsup: all-target-newlib all-target-libiberty configure-target-winsup 
+all-target-winsup: all-target-newlib all-target-libiberty all-target-librx all-target-libio configure-target-winsup 
 configure-target-winsup: configure-target-newlib
 all-uudecode: all-libiberty
 configure-target-libiberty: $(ALL_GCC)
