@@ -1,3 +1,15 @@
+2003-12-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y (%union): Add abstract_fn.
+	(conversion_op): New non-terminal, broken out of operator.
+	(conversion_op_name, abstract_declarator_fn): New non-terminals.
+	(ptr_operator_seq): Remove.
+	(function): Use D_COMP_LOCAL_NAME.  Handle conversion operators.
+	(declarator_1): Use D_COMP_LOCAL_NAME.
+	(tokentab2, tokentab3): Remove.
+	(HANDLE_TOKEN3): Fix typo.
+	(yylex): Call HANDLE_TOKEN3 before HANDLE_TOKEN2.
+
 2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (tokentab2, tokentab3): Remove.

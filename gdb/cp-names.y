@@ -182,6 +182,9 @@ void yyerror (char *);
     struct {
       struct d_comp *comp, *last;
     } nested1;
+    struct {
+      struct d_comp *comp, **last, *fn;
+    } abstract_fn;
     LONGEST lval;
     struct {
       LONGEST val;
@@ -202,15 +205,17 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %type <comp> typespec typespec_2 array_indicator
 %type <comp> colon_ext_only ext_only_name
 
-%type <comp> demangler_special function
+%type <comp> demangler_special function conversion_op
+%type <nested> conversion_op_name
 
 %type <nested> abstract_declarator direct_abstract_declarator
+%type <abstract_fn> abstract_declarator_fn
 %type <nested> declarator direct_declarator function_arglist
 
 %type <nested> declarator_1 direct_declarator_1
 
 %type <nested> template_params function_args
-%type <nested> ptr_operator ptr_operator_seq
+%type <nested> ptr_operator
 
 %type <nested1> nested_name
 
@@ -320,10 +325,23 @@ function
 		   types.  */
 		|	typespec_2 function_arglist start_opt
 			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
-			  if ($3) $$ = d_make_comp (di, D_COMP_QUAL_NAME, $$, $3); }
+			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
 		|	colon_ext_only function_arglist start_opt
 			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
-			  if ($3) $$ = d_make_comp (di, D_COMP_QUAL_NAME, $$, $3); }
+			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
+
+		|	conversion_op_name abstract_declarator_fn start_opt
+			{ if ($2.last)
+			    {
+			       /* First complete the abstract_declarator's type using
+				  the typespec from the conversion_op_name.  */
+			      *$2.last = *$1.last;
+			      /* Then complete the conversion_op_name with the type.  */
+			      *$1.last = $2.comp;
+			    }
+			  /* Then finally build the function.  */
+			  $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1.comp, $2.fn);
+			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
 
 		;
 
@@ -406,15 +424,35 @@ operator	:	OPERATOR NEW
 			{ $$ = d_op_from_string ("()"); }
 		|	OPERATOR '[' ']'
 			{ $$ = d_op_from_string ("[]"); }
+		;
 
 		/* Conversion operators.  We don't try to handle some of
 		   the wackier demangler output for function pointers,
 		   since it's not clear that it's parseable.  */
-		|	OPERATOR typespec_2
+conversion_op
+		:	OPERATOR typespec_2
 			{ $$ = d_make_comp (di, D_COMP_CAST, $2, NULL); }
-		|	OPERATOR typespec_2 ptr_operator_seq
-			{ *$3.last = $2;
-			  $$ = d_make_comp (di, D_COMP_CAST, $3.comp, NULL); }
+		;
+
+conversion_op_name
+		:	nested_name conversion_op
+			{ $$.comp = $1.comp;
+			  d_right ($1.last) = $2;
+			  $$.last = &d_left ($2);
+			}
+		|	conversion_op
+			{ $$.comp = $1;
+			  $$.last = &d_left ($1);
+			}
+		|	COLONCOLON nested_name conversion_op
+			{ $$.comp = $2.comp;
+			  d_right ($2.last) = $3;
+			  $$.last = &d_left ($3);
+			}
+		|	COLONCOLON conversion_op
+			{ $$.comp = $2;
+			  $$.last = &d_left ($2);
+			}
 		;
 
 /* D_COMP_NAME */
@@ -657,13 +695,6 @@ ptr_operator	:	'*' qualifiers_opt
 			  $$.comp = d_qualify ($$.comp, $4, 0); }
 		;
 
-ptr_operator_seq:	ptr_operator
-		|	ptr_operator_seq ptr_operator
-			{ $$.comp = $1.comp;
-			  $$.last = $2.last;
-			  *$1.last = $2.comp; }
-		;
-
 array_indicator	:	'[' ']'
 			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
 			  d_left ($$) = NULL;
@@ -720,6 +751,30 @@ direct_abstract_declarator
 		   functions, but not in function types - so leave this
 		   out.  */
 		/* |	function_arglist */
+		;
+
+abstract_declarator_fn
+		:	function_arglist
+			{ $$.fn = $1.comp;
+			  $$.comp = NULL;
+			  $$.last = NULL;
+			}
+		|	ptr_operator abstract_declarator_fn
+			{ $$.fn = $2.fn;
+			  $$.last = $1.last;
+			  if ($2.comp)
+			    {
+			      $$.comp = $2.comp;
+			      *$2.last = $1.comp;
+			    }
+			  else
+			    $$.comp = $1.comp;
+			}
+		|	direct_abstract_declarator function_arglist
+			{ $$.fn = $2.comp;
+			  $$.comp = $1.comp;
+			  $$.last = $1.last;
+			}
 		;
 
 type		:	typespec_2
@@ -781,7 +836,7 @@ declarator_1	:	ptr_operator declarator_1
 		|	colon_ext_name function_arglist COLONCOLON start
 			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
 			  $$.last = $2.last;
-			  $$.comp = d_make_comp (di, D_COMP_QUAL_NAME, $$.comp, $4);
+			  $$.comp = d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
 			}
 		;
 
@@ -1432,7 +1487,7 @@ struct token
 #define HANDLE_TOKEN3(string, token, op)		\
   if (lexptr[1] == string[1] && lexptr[2] == string[2])	\
     {							\
-      lexptr += 2;					\
+      lexptr += 3;					\
       yylval.opname = string;				\
       return token;					\
     }      
@@ -1647,15 +1702,15 @@ yylex (void)
       lexptr++;
       return c;
     case '<':
+      HANDLE_TOKEN3 ("<<=", ASSIGN_MODIFY, BINOP_LSH);
       HANDLE_TOKEN2 ("<=", LEQ, BINOP_END);
       HANDLE_TOKEN2 ("<<", LSH, BINOP_END);
-      HANDLE_TOKEN3 ("<<=", ASSIGN_MODIFY, BINOP_LSH);
       lexptr++;
       return c;
     case '>':
+      HANDLE_TOKEN3 (">>=", ASSIGN_MODIFY, BINOP_RSH);
       HANDLE_TOKEN2 (">=", GEQ, BINOP_END);
       HANDLE_TOKEN2 (">>", RSH, BINOP_END);
-      HANDLE_TOKEN3 (">>=", ASSIGN_MODIFY, BINOP_RSH);
       lexptr++;
       return c;
     case '=':
