@@ -1089,6 +1089,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
   set_gdbarch_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
+  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);

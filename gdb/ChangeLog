@@ -1,3 +1,8 @@
+2001-08-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/mn10300/tm-mn10300.h (INIT_FRAME_PC): Delete.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Initialize init_frame_pc.
+
 2001-08-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* target.h (TARGET_VIRTUAL_FRAME_POINTER): Delete, multi-arched.

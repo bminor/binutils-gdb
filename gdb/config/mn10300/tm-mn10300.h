@@ -71,5 +71,3 @@ enum movm_register_bits {
   movm_d3_bit      = 0x40,
   movm_d2_bit      = 0x80
 };
-
-#define INIT_FRAME_PC		/* Not necessary */
