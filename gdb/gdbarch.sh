@@ -137,22 +137,42 @@ fallback_default_p ()
 
 class_is_variable_p ()
 {
-    [ "${class}" = "v" -o "${class}" = "V" ]
+    case "${class}" in
+	*v* | *V* ) true ;;
+	* ) false ;;
+    esac
 }
 
 class_is_function_p ()
 {
-    [ "${class}" = "f" -o "${class}" = "F" ]
+    case "${class}" in
+	*f* | *F* | *m* | *M* ) true ;;
+	* ) false ;;
+    esac
+}
+
+class_is_multiarch_p ()
+{
+    case "${class}" in
+	*m* | *M* ) true ;;
+	* ) false ;;
+    esac
 }
 
 class_is_predicate_p ()
 {
-    [ "${class}" = "F" -o "${class}" = "V" ]
+    case "${class}" in
+	*F* | *V* | *M* ) true ;;
+	* ) false ;;
+    esac
 }
 
 class_is_info_p ()
 {
-    [ "${class}" = "i" ]
+    case "${class}" in
+	*i* ) true ;;
+	* ) false ;;
+    esac
 }
 
 
@@ -174,6 +194,10 @@ do
 	#   hiding a variable + predicate to test variables validity
 	# i -> set from info
 	#   hiding something from the ``struct info'' object
+	# m -> multi-arch function
+	#   hiding a multi-arch function (parameterised with the architecture)
+        # M -> multi-arch function + predicate
+	#   hiding a multi-arch function + predicate to test function validity
 
     level ) : ;;
 
@@ -630,12 +654,12 @@ do
 	    -e '3,$ s,#,  ,' \
 	    -e '$ s,$, */,'
     fi
-    if class_is_predicate_p
+    if class_is_predicate_p && ! class_is_multiarch_p
     then
 	printf "\n"
 	printf "#if defined (${macro})\n"
 	printf "/* Legacy for systems yet to multi-arch ${macro} */\n"
-#	printf "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	#printf "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
 	printf "#define ${macro}_P() (1)\n"
 	printf "#endif\n"
 	printf "\n"
@@ -648,6 +672,11 @@ do
 	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
 	printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
 	printf "#endif\n"
+    fi
+    if class_is_predicate_p && class_is_multiarch_p
+    then
+	printf "\n"
+	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
     fi
     if class_is_variable_p
     then
@@ -671,7 +700,7 @@ do
     fi
     if class_is_function_p
     then
-	if fallback_default_p || class_is_predicate_p
+	if ( fallback_default_p || class_is_predicate_p ) && ! class_is_multiarch_p
 	then
 	    printf "\n"
 	    printf "/* Default (function) for non- multi-arch platforms. */\n"
@@ -687,7 +716,15 @@ do
 	    printf "#endif\n"
 	fi
 	printf "\n"
-	printf "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});\n"
+	if [ "${formal}" = "void" ] && class_is_multiarch_p
+	then
+	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (struct gdbarch *gdbarch);\n"
+	elif class_is_multiarch_p
+	then
+	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (struct gdbarch *gdbarch, ${formal});\n"
+	else
+	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});\n"
+	fi
 	if [ "${formal}" = "void" ]
 	then
 	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
@@ -695,19 +732,22 @@ do
 	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});\n"
 	fi
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
-	printf "#if GDB_MULTI_ARCH\n"
-	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
-	if [ "${actual}" = "" ]
+	if ! class_is_multiarch_p
 	then
-	  printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
-	elif [ "${actual}" = "-" ]
-	then
-	  printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	else
-	  printf "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))\n"
+	    printf "#if GDB_MULTI_ARCH\n"
+	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
+	    if [ "${actual}" = "" ]
+	    then
+		printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
+	    elif [ "${actual}" = "-" ]
+	    then
+		printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	    else
+		printf "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))\n"
+	    fi
+	    printf "#endif\n"
+	    printf "#endif\n"
 	fi
-	printf "#endif\n"
-	printf "#endif\n"
     fi
 done
 
@@ -1345,6 +1385,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 EOF
 function_list | while do_read
 do
+    # multiarch functions don't have macros.
+    class_is_multiarch_p && continue
     if [ "${returntype}" = "void" ]
     then
 	printf "#if defined (${macro}) && GDB_MULTI_ARCH\n"
@@ -1367,16 +1409,24 @@ do
 done
 function_list | while do_read
 do
+    if class_is_multiarch_p
+    then
+	printf "  if (GDB_MULTI_ARCH)\n"
+	printf "    fprintf_unfiltered (file,\n"
+	printf "                        \"gdbarch_dump: ${function} = 0x%%08lx\\\\n\",\n"
+	printf "                        (long) current_gdbarch->${function});\n"
+	continue
+    fi
     printf "#ifdef ${macro}\n"
     if [ "${print_p}" = "()" ]
     then
-	printf "  gdbarch_dump_${function} (current_gdbarch);\n"
+        printf "  gdbarch_dump_${function} (current_gdbarch);\n"
     elif [ "${print_p}" = "0" ]
     then
-	printf "  /* skip print of ${macro}, print_p == 0. */\n"
+        printf "  /* skip print of ${macro}, print_p == 0. */\n"
     elif [ "${print_p}" ]
     then
-	printf "  if (${print_p})\n"
+        printf "  if (${print_p})\n"
 	printf "    fprintf_unfiltered (file,\n"
 	printf "                        \"gdbarch_dump: ${macro} = %s\\\\n\",\n" "${fmt}"
 	printf "                        ${print});\n"
@@ -1445,12 +1495,27 @@ do
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
-        test "${actual}" = "-" && actual=""
+	if [ "${actual}" = "-" -o "${actual}" = "" ]
+	then
+	    if class_is_multiarch_p
+	    then
+		params="gdbarch"
+	    else
+		params=""
+	    fi
+	else
+	    if class_is_multiarch_p
+	    then
+		params="gdbarch, ${actual}"
+	    else
+		params="${actual}"
+	    fi
+        fi
        	if [ "${returntype}" = "void" ]
 	then
-	  printf "  gdbarch->${function} (${actual});\n"
+	  printf "  gdbarch->${function} (${params});\n"
 	else
-	  printf "  return gdbarch->${function} (${actual});\n"
+	  printf "  return gdbarch->${function} (${params});\n"
 	fi
 	printf "}\n"
 	printf "\n"

@@ -1,3 +1,12 @@
+2001-03-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh: Add classes ``m'' and ``M'' for pure multi-arch.  Do
+	not generate macro wrappers for multi-arch functions or
+	predicates.
+	(class_is_info_p, class_is_predicate_p): Update.
+	(class_is_function_p, class_is_variable_p): Ditto.
+	(class_is_multiarch_p): New class function.
+
 2001-03-16  J.T. Conklin  <jtc@redback.com>
 
 	* config/h8300/tm-h8300.h (FRAME_ARGS_ADDRESS): Changed to use
