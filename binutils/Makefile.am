@@ -69,14 +69,14 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
 
-MKDEP = mkdep
+MKDEP = gcc -MM
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
 	windres.h winduni.h dyn-string.h
 
-GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
+GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h
 
 CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	dlltool.c filemode.c ieee.c is-ranlib.c is-strip.c maybe-ranlib.c \
@@ -190,7 +190,7 @@ ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 addr2line_SOURCES = addr2line.c $(BULIBS)
 
-# The following is commented out for the convertion to automake.
+# The following is commented out for the conversion to automake.
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
 # However, you have to install things by hand.
@@ -232,6 +232,13 @@ sysinfo.o: sysinfo.c
 	else \
 	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/sysinfo.c ; \
 	fi
+
+# We need these for parallel make.
+arparse.h: arparse.c
+defparse.h: defparse.c
+nlmheader.h: nlmheader.c
+rcparse.h: rcparse.c
+sysinfo.h: sysinfo.c
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
@@ -276,15 +283,15 @@ DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
 DEP: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
 	rm -f DEP1
-	$(MAKE) MKDEP=$(MKDEP) DEP1
-	sed -f dep.sed <DEP1 >DEP
+	$(MAKE) MKDEP="$(MKDEP)" DEP1
+	sed -f dep.sed < DEP1 > $@
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@
 
-# This rule really wants a mkdep that runs "gcc -MM".
 DEP1: $(CFILES) $(GENERATED_CFILES)
-	rm -f DEP2
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
-	$(MKDEP) -f DEP2 $(INCLUDES) $?
-	$(SHELL) $(srcdir)/../move-if-change DEP2 DEP1
+	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP2
+	$(MKDEP) $(INCLUDES) $(CFLAGS) $? >> DEP2
+	mv -f DEP2 $@
 
 dep.sed: dep-in.sed config.status
 	objdir=`pwd`; \
@@ -332,7 +339,7 @@ MOSTLYCLEANFILES = sysinfo $(DEMANGLER_NAME).1 binutils.log binutils.sum \
 mostlyclean-local:
 	-rm -rf tmpdir
 
-CLEANFILES = dep.sed DEP DEP1
+CLEANFILES = dep.sed DEP DEP1 DEP2
 
 .PHONY: install-exec-local
 
@@ -361,101 +368,108 @@ install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-
 addr2line.o: addr2line.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h
 ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/aout/ar.h $(BFDDIR)/libbfd.h arsup.h
+  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/aout/ar.h $(BFDDIR)/libbfd.h \
+  arsup.h
 arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  arsup.h $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h
-bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h
-coffdump.o: coffdump.c coffgrok.h bucomm.h config.h \
+  arsup.h $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
   $(INCDIR)/fopen-same.h
-coffgrok.o: coffgrok.c bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  coffgrok.h
+bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h
+coffdump.o: coffdump.c coffgrok.h bucomm.h config.h \
+  $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h
+coffgrok.o: coffgrok.c bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h coffgrok.h
 debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  debug.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h debug.h
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dyn-string.h \
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/demangle.h dyn-string.h \
   dlltool.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h
 ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  debug.h budbg.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h debug.h budbg.h
 is-ranlib.o: is-ranlib.c
 is-strip.o: is-strip.c
 maybe-ranlib.o: maybe-ranlib.c
 maybe-strip.o: maybe-strip.c
 nlmconv.o: nlmconv.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(BFDDIR)/libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
-  $(INCDIR)/nlm/external.h nlmconv.h
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(BFDDIR)/libnlm.h $(INCDIR)/nlm/common.h \
+  $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlmconv.h
 nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/progress.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ranlib.h \
   $(INCDIR)/demangle.h $(INCDIR)/libiberty.h
 not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h budbg.h
+  $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h budbg.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h $(INCDIR)/progress.h bucomm.h config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h debug.h budbg.h $(INCDIR)/aout/aout64.h
-prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  debug.h budbg.h
-rdcoff.o: rdcoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/coff/internal.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h \
   $(INCDIR)/libiberty.h $(INCDIR)/demangle.h debug.h \
-  budbg.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+  budbg.h $(INCDIR)/aout/aout64.h
+prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h debug.h budbg.h
+rdcoff.o: rdcoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/coff/internal.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
+  debug.h budbg.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 rddbg.o: rddbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  debug.h budbg.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h debug.h budbg.h
 size.o: size.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h
-srconv.o: srconv.c bucomm.h config.h $(INCDIR)/fopen-same.h \
-  sysroff.h coffgrok.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h sysroff.c
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h
+srconv.o: srconv.c bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h sysroff.h coffgrok.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h sysroff.c
 stabs.o: stabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
-strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h
-sysdump.o: sysdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h sysroff.h \
-  sysroff.c
-version.o: version.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h
-wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  debug.h budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/demangle.h debug.h \
+  budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def
+strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h
+sysdump.o: sysdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  sysroff.h sysroff.c
+version.o: version.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h
+wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 windres.o: windres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/getopt.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/obstack.h windres.h \
-  winduni.h
+  $(INCDIR)/getopt.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h $(INCDIR)/obstack.h \
+  windres.h winduni.h
 resrc.o: resrc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  windres.h winduni.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h winduni.h
 rescoff.o: rescoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  windres.h winduni.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h winduni.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  windres.h winduni.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h winduni.h
 winduni.o: winduni.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h winduni.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  winduni.h
 readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h \
@@ -465,36 +479,38 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h \
   $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h \
   $(INCDIR)/elf/fr30.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/i960.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
+  $(INCDIR)/elf/pj.h $(INCDIR)/elf/avr.h bucomm.h config.h \
+  $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h
 resres.o: resres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  windres.h winduni.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h winduni.h
 dyn-string.o: dyn-string.c config.h $(INCDIR)/ansidecl.h \
   dyn-string.h
 dllwrap.o: dllwrap.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h dyn-string.h
+  $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h dyn-string.h
 rename.o: rename.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  arsup.h
 arlex.o: arlex.c $(INCDIR)/libiberty.h arparse.h
 sysroff.o: sysroff.c
 sysinfo.o: sysinfo.c
 syslex.o: syslex.c sysinfo.h
 defparse.o: defparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h dlltool.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  dlltool.h
 deflex.o: deflex.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   defparse.h dlltool.h
 nlmheader.o: nlmheader.c ../bfd/bfd.h bucomm.h config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
-  nlmconv.h
+  $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h $(INCDIR)/nlm/common.h \
+  $(INCDIR)/nlm/internal.h nlmconv.h
 rcparse.o: rcparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  windres.h winduni.h
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h winduni.h
 rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  windres.h winduni.h rcparse.h
-
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h windres.h winduni.h rcparse.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

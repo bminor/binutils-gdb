@@ -1,3 +1,16 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* po/bfd.pot: Regenerate.
+
+	* Makefile.am: Remove extraneous mkdep comment.
+	(MKDEP): Use gcc -MM rather than mkdep.
+	(DEP): Quote when passing vars to sub-make.  Add warning
+	message to end.
+	(DEP1): Rewrite for "gcc -MM".
+	(CLEANFILES): Add DEP2.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
 2000-04-03  H.J. Lu  <hjl@gnu.org>
 
 	* cache.c (bfd_open_file): Unlink the output file only if

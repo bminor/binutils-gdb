@@ -33,7 +33,7 @@ LIB_PATH =
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
-MKDEP = mkdep
+MKDEP = gcc -MM
 
 # What version of the manual to build
 DOCVER = gen
@@ -807,7 +807,7 @@ MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
 mostlyclean-local:
 	-rm -rf tmpdir
-CLEANFILES = dep.sed DEP DEP1
+CLEANFILES = dep.sed DEP DEP1 DEP2
 
 .PHONY: install-exec-local install-data-local
 
@@ -845,15 +845,15 @@ distclean-local:
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
 DEP: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
 	rm -f DEP1
-	$(MAKE) MKDEP=$(MKDEP) DEP1
-	sed -f dep.sed <DEP1 >DEP
+	$(MAKE) MKDEP="$(MKDEP)" DEP1
+	sed -f dep.sed < DEP1 > $@
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@
 
-# This rule really wants a mkdep that runs "gcc -MM".
 DEP1: $(CFILES) $(GENERATED_CFILES)
-	rm -f DEP2
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
-	$(MKDEP) -f DEP2 $(INCLUDES) $?
-	$(srcdir)/../move-if-change DEP2 DEP1
+	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP2
+	$(MKDEP) $(INCLUDES) $(CFLAGS) $? >> DEP2
+	mv -f DEP2 $@
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -881,67 +881,70 @@ dep-am: DEP
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-
 ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  ld.h ldexp.h ldlang.h ldmisc.h ldgram.h ldmain.h ldctor.h
+  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldmisc.h \
+  ldgram.h ldmain.h ldctor.h
 ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h ldemul.h \
-  ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldemul-list.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
+  ldemul.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h \
+  ldemul-list.h
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  ld.h ldmain.h ldmisc.h ldexp.h ldgram.h ldlang.h
+  ld.h $(INCDIR)/bin-bugs.h ldmain.h ldmisc.h ldexp.h \
+  ldgram.h ldlang.h
 ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
-  ldlex.h ldemul.h
+  ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
+  ldfile.h ldmain.h ldgram.h ldlex.h ldemul.h
 ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/obstack.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
-  ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h ldmisc.h \
-  ldctor.h ldfile.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
+  $(INCDIR)/obstack.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
+  ldmain.h ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h \
+  ldmisc.h ldctor.h ldfile.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/progress.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
-  ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h ldemul.h \
-  ldlex.h ldfile.h ldctor.h
+  $(INCDIR)/progress.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
+  ldmain.h ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h \
+  ldemul.h ldlex.h ldfile.h ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h ld.h ldmisc.h ldexp.h ldlang.h \
-  ldgram.h ldlex.h ldmain.h ldfile.h
+  $(INCDIR)/demangle.h ld.h $(INCDIR)/bin-bugs.h ldmisc.h \
+  ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h ldfile.h
 ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h ldver.h \
-  ldemul.h ldmain.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
+  ldver.h ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/libiberty.h ld.h ldexp.h ldlang.h ldwrite.h \
-  ldmisc.h ldgram.h ldmain.h
+  $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \
+  ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
+  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
   ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
   ldver.h ldemul.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
-  config.h $(INCDIR)/fopen-same.h ld.h ldexp.h ldlang.h \
-  ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
+  config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
+  ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
 ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/libiberty.h ld.h ldmain.h ldmisc.h ldexp.h \
-  ldlang.h
+  $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
+  ldmisc.h ldexp.h ldlang.h
 pe-dll.o: pe-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/libiberty.h ld.h ldexp.h ldlang.h ldwrite.h \
-  ldmisc.h ldgram.h ldmain.h ldemul.h $(INCDIR)/coff/internal.h \
-  ../bfd/libcoff.h deffile.h pe-dll.h
+  $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \
+  ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h ldemul.h \
+  $(INCDIR)/coff/internal.h ../bfd/libcoff.h deffile.h \
+  pe-dll.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
-  ld.h ldexp.h ldver.h ldlang.h ldemul.h ldfile.h ldmisc.h \
-  ldmain.h mri.h ldctor.h ldlex.h
+  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldver.h ldlang.h \
+  ldemul.h ldfile.h ldmisc.h ldmain.h mri.h ldctor.h \
+  ldlex.h
 ldlex.o: ldlex.c ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h \
-  ldmain.h
+  ld.h $(INCDIR)/bin-bugs.h ldgram.h ldmisc.h ldexp.h \
+  ldlang.h ldfile.h ldlex.h ldmain.h
 deffilep.o: deffilep.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  ld.h ldmisc.h deffile.h
-
+  ld.h $(INCDIR)/bin-bugs.h ldmisc.h deffile.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

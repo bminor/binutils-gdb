@@ -274,7 +274,7 @@ usage (stream, status)
       disassembler_usage (stream);
     }
   if (status == 0)
-    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+    fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }
 

@@ -878,14 +878,14 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --gap-fill=@var{val} ] [ --pad-to=@var{address} ]
         [ --set-start=@var{val} ] [ --adjust-start=@var{incr} ]
         [ --change-addresses=@var{incr} ]
-        [ --change-section-address=@var{section}@{=,+,-@}@var{val} ]
-        [ --change-section-lma=@var{section}@{=,+,-@}@var{val} ]
-        [ --change-section-vma=@var{section}@{=,+,-@}@var{val} ]
+        [ --change-section-address @var{section}@{=,+,-@}@var{val} ]
+        [ --change-section-lma @var{section}@{=,+,-@}@var{val} ]
+        [ --change-section-vma @var{section}@{=,+,-@}@var{val} ]
         [ --change-warnings ] [ --no-change-warnings ]
-        [ --set-section-flags=@var{section}=@var{flags} ]
-        [ --add-section=@var{sectionname}=@var{filename} ]
+        [ --set-section-flags @var{section}=@var{flags} ]
+        [ --add-section @var{sectionname}=@var{filename} ]
         [ --change-leading-char ] [ --remove-leading-char ]
-        [ --weaken ]
+        [ --redefine-sym @var{old}=@var{new} ] [ --weaken ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
 @end smallexample
@@ -1136,6 +1136,11 @@ different conventions for symbol names.  This is different from
 @code{--change-leading-char} because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
 file.
+
+@item --redefine-sym @var{old}=@var{new}
+Change the name of a symbol @var{old}, to @var{new}.  This can be useful
+when one is trying link two things together for which you have no
+source, and there are name collisions.
 
 @item --weaken
 Change all global symbols in the file to be weak.  This can be useful

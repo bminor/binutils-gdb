@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/types.h>
 
 #include "config.h"
+#include "bin-bugs.h"
 
 #ifdef USE_BINARY_FOPEN
 #include "fopen-bin.h"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-02 13:22-0700\n"
+"POT-Creation-Date: 2000-04-05 14:09+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,9 +22,10 @@ msgid ""
 "       [--basenames] [--functions] [addr addr ...]\n"
 msgstr ""
 
-#: addr2line.c:83 ar.c:286 nlmconv.c:1141 nm.c:304 objcopy.c:344 objcopy.c:376
+#: addr2line.c:83 ar.c:286 nlmconv.c:1141 nm.c:306 objcopy.c:358 objcopy.c:390
 #: objdump.c:277 readelf.c:1703 size.c:89 strings.c:512 windres.c:737
-msgid "Report bugs to bug-gnu-utils@gnu.org\n"
+#, c-format
+msgid "Report bugs to %s\n"
 msgstr ""
 
 #: addr2line.c:243
@@ -175,7 +176,7 @@ msgstr ""
 msgid "%s: internal error -- this option not implemented\n"
 msgstr ""
 
-#: ar.c:790 ar.c:841 ar.c:1283 objcopy.c:1021
+#: ar.c:790 ar.c:841 ar.c:1283 objcopy.c:1104
 #, c-format
 msgid "internal stat error on %s"
 msgstr ""
@@ -479,7 +480,7 @@ msgstr ""
 msgid "Excluding symbol: %s\n"
 msgstr ""
 
-#: dlltool.c:1462 dlltool.c:1473 nm.c:902 nm.c:913 objdump.c:444 objdump.c:461
+#: dlltool.c:1462 dlltool.c:1473 nm.c:904 nm.c:915 objdump.c:444 objdump.c:461
 #, c-format
 msgid "%s: no symbols\n"
 msgstr ""
@@ -1159,7 +1160,7 @@ msgstr ""
 msgid "%s: Execution of %s failed\n"
 msgstr ""
 
-#: nm.c:292
+#: nm.c:294
 #, c-format
 msgid ""
 "Usage: %s [-aABCDglnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n"
@@ -1172,22 +1173,22 @@ msgid ""
 "       [file...]\n"
 msgstr ""
 
-#: nm.c:337
+#: nm.c:339
 #, c-format
 msgid "%s: %s: invalid radix\n"
 msgstr ""
 
-#: nm.c:363
+#: nm.c:365
 #, c-format
 msgid "%s: %s: invalid output format\n"
 msgstr ""
 
-#: nm.c:490
+#: nm.c:492
 #, c-format
 msgid "%s: data size %ld\n"
 msgstr ""
 
-#: nm.c:1281
+#: nm.c:1283
 #, c-format
 msgid ""
 "\n"
@@ -1196,7 +1197,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: nm.c:1283
+#: nm.c:1285
 #, c-format
 msgid ""
 "\n"
@@ -1205,19 +1206,10 @@ msgid ""
 "\n"
 msgstr ""
 
-#: nm.c:1284 nm.c:1338
+#: nm.c:1286 nm.c:1340
 msgid ""
 "Name                  Value   Class        Type         Size   Line  "
 "Section\n"
-"\n"
-msgstr ""
-
-#: nm.c:1335
-#, c-format
-msgid ""
-"\n"
-"\n"
-"Undefined symbols from %s[%s]:\n"
 "\n"
 msgstr ""
 
@@ -1226,26 +1218,35 @@ msgstr ""
 msgid ""
 "\n"
 "\n"
+"Undefined symbols from %s[%s]:\n"
+"\n"
+msgstr ""
+
+#: nm.c:1339
+#, c-format
+msgid ""
+"\n"
+"\n"
 "Symbols from %s[%s]:\n"
 "\n"
 msgstr ""
 
-#: nm.c:1508
+#: nm.c:1510
 msgid ""
 "\n"
 "Archive index:\n"
 msgstr ""
 
-#: objcopy.c:296
+#: objcopy.c:309
 #, c-format
 msgid "Usage: %s <switches> in-file [out-file]\n"
 msgstr ""
 
-#: objcopy.c:297 objcopy.c:354
+#: objcopy.c:310 objcopy.c:368
 msgid " The switches are:\n"
 msgstr ""
 
-#: objcopy.c:298
+#: objcopy.c:311
 msgid ""
 "  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n"
 "  -O --output-target <bfdname>     Create an output file in format "
@@ -1306,17 +1307,18 @@ msgid ""
 "style\n"
 "     --remove-leading-char         Remove leading character from global "
 "symbols\n"
+"     --redefine-sym <old>=<new>    Redefine symbol name <old> to <new>\n"
 "  -v --verbose                     List all object files modified\n"
 "  -V --version                     Display this program's version number\n"
 "  -h --help                        Display this output\n"
 msgstr ""
 
-#: objcopy.c:353
+#: objcopy.c:367
 #, c-format
 msgid "Usage: %s <switches> in-file(s)\n"
 msgstr ""
 
-#: objcopy.c:355
+#: objcopy.c:369
 msgid ""
 "  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n"
 "  -O --output-target <bfdname>     Create an output file in format "
@@ -1341,140 +1343,136 @@ msgid ""
 "  -o <file>                        Place stripped output into <file>\n"
 msgstr ""
 
-#: objcopy.c:425
+#: objcopy.c:439
 #, c-format
 msgid "unrecognized section flag `%s'"
 msgstr ""
 
-#: objcopy.c:426
-msgid ""
-"supported flags: alloc, load, noload, readonly, debug, code, data, rom, "
-"share, contents"
+#: objcopy.c:440
+#, c-format
+msgid "supported flags: %s"
 msgstr ""
 
-#: objcopy.c:671
+#: objcopy.c:692
+#, c-format
+msgid "%s: Multiple redefinition of symbol \"%s\""
+msgstr ""
+
+#: objcopy.c:699
+#, c-format
+msgid "%s: Symbol \"%s\" is target of more than one redefinition"
+msgstr ""
+
+#: objcopy.c:753
 #, c-format
 msgid "copy from %s(%s) to %s(%s)\n"
 msgstr ""
 
-#: objcopy.c:690
+#: objcopy.c:772
 #, c-format
 msgid "Warning: Output file cannot represent architecture %s"
 msgstr ""
 
-#: objcopy.c:717
+#: objcopy.c:799
 #, c-format
 msgid "can't create section `%s': %s"
 msgstr ""
 
-#: objcopy.c:803
+#: objcopy.c:885
 #, c-format
 msgid "Can't fill gap after %s: %s"
 msgstr ""
 
-#: objcopy.c:828
+#: objcopy.c:910
 #, c-format
 msgid "Can't add padding to %s: %s"
 msgstr ""
 
-#: objcopy.c:965
+#: objcopy.c:1048
 #, c-format
 msgid "%s: error copying private BFD data: %s"
 msgstr ""
 
-#: objcopy.c:999
+#: objcopy.c:1082
 #, c-format
 msgid "cannot mkdir %s for archive copying (error: %s)"
 msgstr ""
 
-#: objcopy.c:1268
+#: objcopy.c:1351
 #, c-format
 msgid "%s: section `%s': error in %s: %s"
 msgstr ""
 
-#: objcopy.c:1542
+#: objcopy.c:1625
 #, c-format
 msgid "%s: can't create debugging section: %s"
 msgstr ""
 
-#: objcopy.c:1557
+#: objcopy.c:1640
 #, c-format
 msgid "%s: can't set debugging section contents: %s"
 msgstr ""
 
-#: objcopy.c:1566
+#: objcopy.c:1649
 #, c-format
 msgid "%s: don't know how to write debugging information for %s"
 msgstr ""
 
-#: objcopy.c:1671
+#: objcopy.c:1754
 #, c-format
 msgid "%s: cannot stat: %s"
 msgstr ""
 
-#: objcopy.c:1721
+#: objcopy.c:1804
 msgid "byte number must be non-negative"
 msgstr ""
 
-#: objcopy.c:1726
+#: objcopy.c:1810
 msgid "interleave must be positive"
 msgstr ""
 
-#: objcopy.c:1742 objcopy.c:1749
+#: objcopy.c:1830 objcopy.c:1838
 #, c-format
 msgid "%s both copied and removed"
 msgstr ""
 
-#: objcopy.c:1804
-msgid "bad format for --add-section NAME=FILENAME"
-msgstr ""
-
-#: objcopy.c:1807
-#, c-format
-msgid "cannot stat: %s: %s"
-msgstr ""
-
-#: objcopy.c:1825
-#, c-format
-msgid "cannot open: %s: %s"
-msgstr ""
-
-#: objcopy.c:1829
-#, c-format
-msgid "%s: fread failed"
-msgstr ""
-
-#: objcopy.c:1872
+#: objcopy.c:1907 objcopy.c:1977 objcopy.c:2078 objcopy.c:2106
 #, c-format
 msgid "bad format for %s"
 msgstr ""
 
-#: objcopy.c:1936
+#: objcopy.c:1910
+#, c-format
+msgid "cannot stat: %s: %s"
+msgstr ""
+
+#: objcopy.c:1928
+#, c-format
+msgid "cannot open: %s: %s"
+msgstr ""
+
+#: objcopy.c:1932
+#, c-format
+msgid "%s: fread failed"
+msgstr ""
+
+#: objcopy.c:2046
 #, c-format
 msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr ""
 
-#: objcopy.c:1960
-msgid "bad format for --set-section-flags"
-msgstr ""
-
-#: objcopy.c:1990
+#: objcopy.c:2140
 msgid "byte number must be less than interleave"
 msgstr ""
 
-#: objcopy.c:2009
+#: objcopy.c:2159
 #, c-format
 msgid "Cannot stat: %s: %s"
 msgstr ""
 
-#: objcopy.c:2049
+#: objcopy.c:2199 objcopy.c:2213
 #, c-format
-msgid "Warning: --change-section-vma %s%c0x%s never used"
-msgstr ""
-
-#: objcopy.c:2062
-#, c-format
-msgid "Warning: --change-section-lma %s%c0x%s never used"
+msgid "%s %s%c0x%s never used"
 msgstr ""
 
 #: objdump.c:229

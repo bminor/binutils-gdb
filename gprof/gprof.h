@@ -76,6 +76,7 @@
 # define N_(String) (String)
 #endif
 
+#include "bin-bugs.h"
 
 /*
  * These may already be defined on some systems.  We could probably

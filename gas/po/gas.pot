@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-02 13:23-0700\n"
+"POT-Creation-Date: 2000-04-05 14:09+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -248,95 +248,94 @@ msgid ""
 "                          for the output data column of the listing\n"
 msgstr ""
 
-#: as.c:325 gasp.c:3553
-msgid ""
-"\n"
-"Report bugs to bug-gnu-utils@gnu.org\n"
+#: as.c:326 gasp.c:3554
+#, c-format
+msgid "Report bugs to %s\n"
 msgstr ""
 
 #. This output is intended to follow the GNU standards document.
-#: as.c:515
+#: as.c:516
 #, c-format
 msgid "GNU assembler %s\n"
 msgstr ""
 
-#: as.c:516
+#: as.c:517
 msgid "Copyright 1997 Free Software Foundation, Inc.\n"
 msgstr ""
 
-#: as.c:517 gasp.c:3647
+#: as.c:518 gasp.c:3648
 msgid ""
 "This program is free software; you may redistribute it under the terms of\n"
 "the GNU General Public License.  This program has absolutely no warranty.\n"
 msgstr ""
 
-#: as.c:520
+#: as.c:521
 #, c-format
 msgid "This assembler was configured for a target of `%s'.\n"
 msgstr ""
 
-#: as.c:527
+#: as.c:528
 msgid "multiple emulation names specified"
 msgstr ""
 
-#: as.c:529
+#: as.c:530
 msgid "emulations not handled in this configuration"
-msgstr ""
-
-#: as.c:534
-#, c-format
-msgid "alias = %s\n"
 msgstr ""
 
 #: as.c:535
 #, c-format
-msgid "canonical = %s\n"
+msgid "alias = %s\n"
 msgstr ""
 
 #: as.c:536
 #, c-format
+msgid "canonical = %s\n"
+msgstr ""
+
+#: as.c:537
+#, c-format
 msgid "cpu-type = %s\n"
 msgstr ""
 
-#: as.c:538
+#: as.c:539
 #, c-format
 msgid "format = %s\n"
 msgstr ""
 
-#: as.c:541
+#: as.c:542
 #, c-format
 msgid "bfd-target = %s\n"
 msgstr ""
 
-#: as.c:554
+#: as.c:555
 msgid "bad defsym; format is --defsym name=value"
 msgstr ""
 
-#: as.c:574
+#: as.c:575
 msgid "No file name following -t option\n"
 msgstr ""
 
-#: as.c:590
+#: as.c:591
 #, c-format
 msgid "Failed to read instruction table %s\n"
 msgstr ""
 
-#: as.c:704
+#: as.c:705
 #, c-format
 msgid "invalid listing option `%c'"
 msgstr ""
 
-#: as.c:898
+#: as.c:899
 #, c-format
 msgid "%d warnings, treating warnings as errors"
 msgstr ""
 
-#: as.c:929
+#: as.c:930
 #, c-format
 msgid "%s: total time in assembly: %ld.%06ld\n"
 msgstr ""
 
-#: as.c:932
+#: as.c:933
 #, c-format
 msgid "%s: data size %ld\n"
 msgstr ""
@@ -2937,102 +2936,102 @@ msgid "expecting operand before ','; got nothing"
 msgstr ""
 
 #. we found no match
-#: config/tc-i386.c:1461
+#: config/tc-i386.c:1464
 #, c-format
 msgid "suffix or operands invalid for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:1469
+#: config/tc-i386.c:1472
 #, c-format
 msgid "indirect %s without `*'"
 msgstr ""
 
 #. Warn them that a data or address size prefix doesn't affect
 #. assembly of the next line of code.
-#: config/tc-i386.c:1476
+#: config/tc-i386.c:1479
 #, c-format
 msgid "stand-alone `%s' prefix"
 msgstr ""
 
-#: config/tc-i386.c:1511 config/tc-i386.c:1526
+#: config/tc-i386.c:1514 config/tc-i386.c:1529
 msgid "`%s' operand %d must use `%%es' segment"
 msgstr ""
 
-#: config/tc-i386.c:1593 config/tc-i386.c:1634 config/tc-i386.c:1661
+#: config/tc-i386.c:1596 config/tc-i386.c:1637 config/tc-i386.c:1664
 msgid "using `%%%s' instead of `%%%s' due to `%c' suffix"
 msgstr ""
 
-#: config/tc-i386.c:1606 config/tc-i386.c:1623 config/tc-i386.c:1650
+#: config/tc-i386.c:1609 config/tc-i386.c:1626 config/tc-i386.c:1653
 msgid "`%%%s' not allowed with `%s%c'"
 msgstr ""
 
-#: config/tc-i386.c:1694 config/tc-i386.c:1714
+#: config/tc-i386.c:1697 config/tc-i386.c:1717
 msgid "no instruction mnemonic suffix given; can't determine immediate size"
 msgstr ""
 
-#: config/tc-i386.c:1739
+#: config/tc-i386.c:1742
 msgid ""
 "no instruction mnemonic suffix given and no register operands; can't size "
 "instruction"
 msgstr ""
 
 #. reversed arguments on faddp, fsubp, etc.
-#: config/tc-i386.c:1841
+#: config/tc-i386.c:1844
 msgid "translating to `%s %%%s,%%%s'"
 msgstr ""
 
 #. extraneous `l' suffix on fp insn
-#: config/tc-i386.c:1848
+#: config/tc-i386.c:1851
 msgid "translating to `%s %%%s'"
 msgstr ""
 
-#: config/tc-i386.c:2063
+#: config/tc-i386.c:2066
 msgid "you can't `pop %%cs'"
 msgstr ""
 
 #. UnixWare fsub no args is alias for fsubp, fadd -> faddp, etc.
-#: config/tc-i386.c:2094
+#: config/tc-i386.c:2097
 #, c-format
 msgid "translating to `%sp'"
 msgstr ""
 
-#: config/tc-i386.c:2143 config/tc-i386.c:2205 config/tc-i386.c:2247
+#: config/tc-i386.c:2146 config/tc-i386.c:2208 config/tc-i386.c:2250
 msgid "skipping prefixes on this instruction"
 msgstr ""
 
-#: config/tc-i386.c:2262
+#: config/tc-i386.c:2265
 msgid "16-bit jump out of range"
 msgstr ""
 
-#: config/tc-i386.c:2271
+#: config/tc-i386.c:2274
 #, c-format
 msgid "can't handle non absolute segment in `%s'"
 msgstr ""
 
-#: config/tc-i386.c:2379 config/tc-i386.c:2429
+#: config/tc-i386.c:2382 config/tc-i386.c:2432
 #, c-format
 msgid "%ld shortened to %ld"
 msgstr ""
 
-#: config/tc-i386.c:2499
+#: config/tc-i386.c:2502
 msgid "only 1 or 2 immediate operands are allowed"
 msgstr ""
 
-#: config/tc-i386.c:2531 config/tc-i386.c:2755
+#: config/tc-i386.c:2534 config/tc-i386.c:2755
 msgid "GOT relocations not supported in 16 bit mode"
 msgstr ""
 
-#: config/tc-i386.c:2552 config/tc-i386.c:2776
+#: config/tc-i386.c:2555 config/tc-i386.c:2776
 msgid "bad reloc specifier in expression"
 msgstr ""
 
-#: config/tc-i386.c:2570 config/tc-i386.c:2810
+#: config/tc-i386.c:2573 config/tc-i386.c:2810
 #, c-format
 msgid "ignoring junk `%s' after expression"
 msgstr ""
 
 #. missing or bad expr becomes absolute 0
-#: config/tc-i386.c:2577
+#: config/tc-i386.c:2580
 #, c-format
 msgid "missing or invalid immediate expression `%s' taken as 0"
 msgstr ""
@@ -5492,7 +5491,7 @@ msgid ""
 "-EL\t\t\tgenerate code for a little endian machine\n"
 "-EB\t\t\tgenerate code for a big endian machine\n"
 "--little-endian-data\tgenerate code for a machine having big endian\n"
-"                        instructions and little endian data."
+"                        instructions and little endian data.\n"
 msgstr ""
 
 #: config/tc-sparc.c:754
@@ -6751,273 +6750,273 @@ msgstr ""
 msgid "attempt to allocate data in common section"
 msgstr ""
 
-#: gasp.c:454
+#: gasp.c:455
 msgid "redefinition not allowed\n"
 msgstr ""
 
-#: gasp.c:528
+#: gasp.c:529
 #, c-format
 msgid "the %c operator cannot take non-absolute arguments.\n"
 msgstr ""
 
-#: gasp.c:605
+#: gasp.c:606
 msgid "string where expression expected.\n"
 msgstr ""
 
-#: gasp.c:611
+#: gasp.c:612
 msgid "can't find primary in expression.\n"
 msgstr ""
 
-#: gasp.c:651
+#: gasp.c:652
 msgid "misplaced closing parens.\n"
 msgstr ""
 
-#: gasp.c:688
+#: gasp.c:689
 msgid "attempt to divide by zero.\n"
 msgstr ""
 
-#: gasp.c:720
+#: gasp.c:721
 msgid "can't add two relocatable expressions\n"
 msgstr ""
 
-#: gasp.c:925
+#: gasp.c:926
 msgid "unreasonable nesting.\n"
 msgstr ""
 
-#: gasp.c:1003
+#: gasp.c:1004
 msgid "End of file not at start of line.\n"
 msgstr ""
 
-#: gasp.c:1124
+#: gasp.c:1125
 #, c-format
 msgid "Illegal base character %c.\n"
 msgstr ""
 
-#: gasp.c:1239
+#: gasp.c:1240
 #, c-format
 msgid "radix is %c must be one of b, q, d or h"
 msgstr ""
 
-#: gasp.c:1275
+#: gasp.c:1276
 #, c-format
 msgid "size must be one of b, w or l, is %c.\n"
 msgstr ""
 
-#: gasp.c:1383
+#: gasp.c:1384
 msgid "datab repeat must be constant.\n"
 msgstr ""
 
-#: gasp.c:1385
+#: gasp.c:1386
 msgid "datab data must be absolute.\n"
 msgstr ""
 
-#: gasp.c:1399
+#: gasp.c:1400
 msgid "align needs absolute expression.\n"
 msgstr ""
 
-#: gasp.c:1406
+#: gasp.c:1407
 msgid ".align needs absolute fill value.\n"
 msgstr ""
 
-#: gasp.c:1434
+#: gasp.c:1435
 msgid "res needs absolute expression for fill count.\n"
 msgstr ""
 
-#: gasp.c:1514
+#: gasp.c:1515
 msgid "form LIN= needs absolute expresssion.\n"
 msgstr ""
 
-#: gasp.c:1517
+#: gasp.c:1518
 msgid "COL="
 msgstr ""
 
-#: gasp.c:1520
+#: gasp.c:1521
 msgid "form COL= needs absolute expresssion.\n"
 msgstr ""
 
 #. Turns the next expression into a string
-#: gasp.c:1562 macro.c:366
+#: gasp.c:1563 macro.c:366
 #, c-format
 msgid "% operator needs absolute expression"
 msgstr ""
 
-#: gasp.c:1624
+#: gasp.c:1625
 msgid "misplaced ( .\n"
 msgstr ""
 
-#: gasp.c:1639
+#: gasp.c:1640
 msgid "misplaced ).\n"
 msgstr ""
 
-#: gasp.c:1693
+#: gasp.c:1694
 msgid ".instr needs absolute expresson.\n"
 msgstr ""
 
-#: gasp.c:1731
+#: gasp.c:1732
 msgid "need absolute position.\n"
 msgstr ""
 
-#: gasp.c:1733
+#: gasp.c:1734
 msgid "need absolute length.\n"
 msgstr ""
 
-#: gasp.c:1982
+#: gasp.c:1983
 msgid "END missing from end of file.\n"
 msgstr ""
 
-#: gasp.c:2012
+#: gasp.c:2013
 msgid ".ASSIGNA needs constant expression argument.\n"
 msgstr ""
 
-#: gasp.c:2016
+#: gasp.c:2017
 msgid ".ASSIGNA without label.\n"
 msgstr ""
 
-#: gasp.c:2041
+#: gasp.c:2042
 msgid ".ASSIGNS without label.\n"
 msgstr ""
 
-#: gasp.c:2108
+#: gasp.c:2109
 #, c-format
 msgid "Can't find preprocessor variable %s.\n"
 msgstr ""
 
-#: gasp.c:2173
+#: gasp.c:2174
 msgid "Comparison operator must be one of EQ, NE, LT, LE, GT or GE.\n"
 msgstr ""
 
-#: gasp.c:2207
+#: gasp.c:2208
 msgid "Comparison operator for strings must be EQ or NE\n"
 msgstr ""
 
-#: gasp.c:2219 gasp.c:2229 gasp.c:2331
+#: gasp.c:2220 gasp.c:2230 gasp.c:2332
 msgid "Conditional operator must have absolute operands.\n"
 msgstr ""
 
-#: gasp.c:2224
+#: gasp.c:2225
 msgid "String compared against expression.\n"
 msgstr ""
 
-#: gasp.c:2274
+#: gasp.c:2275
 msgid "AIF nesting unreasonable.\n"
 msgstr ""
 
-#: gasp.c:2289
+#: gasp.c:2290
 msgid "Multiple AELSEs in AIF.\n"
 msgstr ""
 
-#: gasp.c:2305
+#: gasp.c:2306
 msgid "AENDI without AIF.\n"
 msgstr ""
 
-#: gasp.c:2328 gasp.c:2410
+#: gasp.c:2329 gasp.c:2411
 msgid "IF nesting unreasonable.\n"
 msgstr ""
 
-#: gasp.c:2420
+#: gasp.c:2421
 msgid "Bad format for IF or IFNC.\n"
 msgstr ""
 
-#: gasp.c:2440
+#: gasp.c:2441
 msgid "AENDR without a AREPEAT.\n"
 msgstr ""
 
-#: gasp.c:2442
+#: gasp.c:2443
 msgid "ENDR without a REPT.\n"
 msgstr ""
 
-#: gasp.c:2465
+#: gasp.c:2466
 #, c-format
 msgid "AWHILE without a AENDW at %d.\n"
 msgstr ""
 
-#: gasp.c:2503
+#: gasp.c:2504
 msgid "AENDW without a AENDW.\n"
 msgstr ""
 
-#: gasp.c:2548
+#: gasp.c:2549
 msgid "AREPEAT must have absolute operand.\n"
 msgstr ""
 
-#: gasp.c:2554
+#: gasp.c:2555
 #, c-format
 msgid "AREPEAT without a AENDR at %d.\n"
 msgstr ""
 
-#: gasp.c:2596
+#: gasp.c:2597
 msgid ".ENDM without a matching .MACRO.\n"
 msgstr ""
 
-#: gasp.c:2630
+#: gasp.c:2631
 msgid "LOCAL outside of MACRO"
 msgstr ""
 
-#: gasp.c:2643
+#: gasp.c:2644
 #, c-format
 msgid "macro at line %d: %s\n"
 msgstr ""
 
-#: gasp.c:2666
+#: gasp.c:2667
 msgid "macro expansion"
 msgstr ""
 
-#: gasp.c:2718
+#: gasp.c:2719
 msgid "Character code in string must be absolute expression.\n"
 msgstr ""
 
-#: gasp.c:2723
+#: gasp.c:2724
 msgid "Missing > for character code.\n"
 msgstr ""
 
-#: gasp.c:2782
+#: gasp.c:2783
 #, c-format
 msgid "string for SDATAC longer than 255 characters (%d).\n"
 msgstr ""
 
-#: gasp.c:2810
+#: gasp.c:2811
 #, c-format
 msgid "illegal character in SDATA line (0x%x).\n"
 msgstr ""
 
-#: gasp.c:2831
+#: gasp.c:2832
 msgid "Must have absolute SDATAB repeat count.\n"
 msgstr ""
 
-#: gasp.c:2834
+#: gasp.c:2835
 #, c-format
 msgid "Must have positive SDATAB repeat count (%d).\n"
 msgstr ""
 
-#: gasp.c:2862
+#: gasp.c:2863
 #, c-format
 msgid "Unreasonable include depth (%ld).\n"
 msgstr ""
 
-#: gasp.c:2916
+#: gasp.c:2917
 #, c-format
 msgid "Can't open include file `%s'.\n"
 msgstr ""
 
-#: gasp.c:2990
+#: gasp.c:2991
 msgid "Unreasonable expansion (-u turns off check).\n"
 msgstr ""
 
 #. This one causes lots of pain when trying to preprocess
 #. ordinary code
-#: gasp.c:3211
+#: gasp.c:3212
 #, c-format
 msgid "Unrecognised pseudo op `%s'.\n"
 msgstr ""
 
-#: gasp.c:3278
+#: gasp.c:3279
 msgid "ORG command not allowed.\n"
 msgstr ""
 
-#: gasp.c:3495
+#: gasp.c:3496
 msgid "Invalid expression on command line.\n"
 msgstr ""
 
-#: gasp.c:3536
+#: gasp.c:3537
 #, c-format
 msgid ""
 "Usage: %s \n"
@@ -7030,7 +7029,7 @@ msgid ""
 "  [-p]      [--print]             print line numbers\n"
 msgstr ""
 
-#: gasp.c:3545
+#: gasp.c:3546
 msgid ""
 "  [-s]      [--copysource]        copy source through as comments \n"
 "  [-u]      [--unreasonable]      allow unreasonable nesting\n"
@@ -7041,37 +7040,37 @@ msgid ""
 "  [in-file]\n"
 msgstr ""
 
-#: gasp.c:3561
+#: gasp.c:3562
 #, c-format
 msgid "%s: Gnu Assembler Macro Preprocessor\n"
 msgstr ""
 
 #. This output is intended to follow the GNU standards document.
-#: gasp.c:3645
+#: gasp.c:3646
 #, c-format
 msgid "GNU assembler pre-processor %s\n"
 msgstr ""
 
-#: gasp.c:3646
+#: gasp.c:3647
 msgid "Copyright 1996 Free Software Foundation, Inc.\n"
 msgstr ""
 
-#: gasp.c:3668
+#: gasp.c:3669
 #, c-format
 msgid "%s: Can't open output file `%s'.\n"
 msgstr ""
 
-#: gasp.c:3691
+#: gasp.c:3692
 #, c-format
 msgid "%s: Can't open input file `%s'.\n"
 msgstr ""
 
-#: gasp.c:3710
+#: gasp.c:3711
 #, c-format
 msgid "Internal error, aborting at %s line %d"
 msgstr ""
 
-#: gasp.c:3713
+#: gasp.c:3714
 msgid ""
 "\n"
 "Please report this bug.\n"

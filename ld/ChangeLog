@@ -1,3 +1,22 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* po/ld.pot: Regenerate.
+
+	* lexsup.c (help): Restore translated part of bug string.
+
+	* Makefile.am (MKDEP): Use gcc -MM rather than mkdep.
+	(DEP): Quote when passing vars to sub-make.  Add warning message
+	to end.
+	(DEP1): Rewrite for "gcc -MM".
+	(CLEANFILES): Add DEP2.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld.h: #include "bin-bugs.h"
+	* lexsup.c (help): Use REPORT_BUGS_TO.
+
 2000-03-27  Denis Chertykov  <denisc@overta.ru>
 
 	* configure.tgt (avr-*-*): New target support.

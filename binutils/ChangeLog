@@ -1,3 +1,89 @@
+2000-04-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* binutils.texi: Remove optional `=' from long options that have
+	an `=' in the argument.
+	* objcopy.1: Here too.  Remove extra space on discard-all.
+
+	* binutils.texi (objcopy): Mention --redefine-sym.
+	* objcopy.1: Here too.
+	* NEWS: And here.
+
+	* objcopy.c (parse_flags): Split off flag names from error message
+	gettext as they are not translated.
+	(copy_main): Similarly split off option name for --add-section,
+	--set-section-flags, --change-section-vma, --change-section-lma
+	error messages.
+	Some white space changes.
+
+	from Matthew Benjamin <matt@linuxbox.nu>
+	* objcopy.c (struct redefine_node): New.
+	(redefine_sym_list): New.
+	(redefine_list_append): New.
+	(lookup_sym_redefinition): New.
+	(OPTION_REDEFINE_SYM): New.
+	(copy_options): Add --redefine-sym option.
+	(copy_usage): Mention it.
+	(filter_symbols): Rename symbols on redefine_sym_list.
+	(copy_object): Call filter_symbols if redefine_sym_list != NULL.
+	(copy_main): Handle OPTION_REDEFINE_SYM.
+
+2000-04-04  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (process_symbol_table): Correctly read in symbol
+	versioning information.
+
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* po/binutils.pot: Regenerate.
+
+	* addr2line.c (usage): Restore translated part of bug string.
+	* ar.c (usage): Likewise.
+	* nlmconv.c (show_usage): Likewise.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage): Likewise.
+	(strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* readelf.c (usage): Likewise.
+	* size.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+	* windres.c (usage): Likewise.
+
+	* Makefile.am (MKDEP): Use gcc -MM rather than mkdep.
+	(DEP): Quote when passing vars to sub-make.  Add warning
+	message to end.
+	(DEP1): Rewrite for "gcc -MM".
+	(CLEANFILES): Add DEP2.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
+2000-04-04  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (GENERATED_HFILES): Add rcparse.h
+	(arparse.h): Depend on arparse.c
+	(defparse.h, nlmheader.h, rcparse.h, sysinfo.h): Similarly.
+
+2000-04-03  H.J. Lu  (hjl@gnu.org)
+
+	* size.c (usage): Use REPORT_BUGS_TO.
+
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* bucomm.h: #include "bin-bugs.h"
+	* addr2line.c (usage): Use REPORT_BUGS_TO.
+	* ar.c (usage): Likewise.
+	* nlmconv.c (show_usage): Likewise.
+	* nm.c (usage): Likewise.
+	(OPTION_TARGET): Define.
+	(long_options): Use OPTION_TARGET rather than 200.
+	(main): Likewise.
+
+	* objcopy.c (copy_usage): Use REPORT_BUGS_TO.
+	(strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* readelf.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+	* windres.c (usage): Likewise.
+
 2000-03-31  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* readelf.c: Include sys/types.h before sys/stat.h for ultrix.
@@ -7,7 +93,7 @@
 	* rddbg.c (read_section_stabs_debugging_info): Catch out of range
 	string offsets in corrupt stabs entries.
 
-2000-03-27  Alan Modra  <alan@linuxcare.com>
+2000-03-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* readelf.c: Include elf/avr.h
 	(dump_relocations): Add EM_AVR case.

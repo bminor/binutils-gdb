@@ -638,7 +638,7 @@ md_show_usage (stream)
 -EL			generate code for a little endian machine\n\
 -EB			generate code for a big endian machine\n\
 --little-endian-data	generate code for a machine having big endian\n\
-                        instructions and little endian data."));
+                        instructions and little endian data.\n"));
 #endif
 }
 

@@ -1,3 +1,21 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* po/gas.pot: Regenerate.
+
+	* as.c (show_usage): Restore translated part of bug string.
+	* gasp.c (show_usage): Likewise.
+
+	* Makefile.am (MKDEP): Use gcc -MM rather than ../mkdep.
+	(DEP): Quote when passing vars to sub-make.  Use "mv -f" rather
+	than move-if-change.
+	(DEP1): Modify for "gcc -MM".
+	(DEPTC): Likewise.
+	(DEPOBJ): Likewise.
+	(DEP2): Likewise.
+	(CLEANFILES): Add DEPTCA, DEPOBJA, DEP2a, DEPA.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
 2000-04-04  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* config/tc-mn10300.c (md_pseudo_table): Use constant names.
@@ -5,6 +23,15 @@
 	(HAVE_AM33): New macro.
 	(md_assemble): Use it.  Match r_regs and xr_regs only if
 	HAVE_AM33.
+
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* as.h: #include "bin-bugs.h"
+	* as.c (show_usage): Use REPORT_BUGS_TO.
+	* gasp.c: #include "bin-bugs.h"
+	(show_usage): Use REPORT_BUGS_TO.
+
+	* config/tc-sparc.c (md_show_usage): Add a trailing newline.
 
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 

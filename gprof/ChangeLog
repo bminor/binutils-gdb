@@ -1,7 +1,28 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* po/gprof.pot: Regenerate.
+
+	* gprof.c (usage): Restore translated part of bug string.
+
+	* Makefile.am (BASEDIR): Define.
+	(BFDDIR): Define.
+	(INCDIR): Define.
+	(MKDEP): Define.
+	(INCLUDES): Add "-I."
+	(DEP, DEP1, dep.sed, dep, dep-in, dep-am): New targets.
+	(CLEANFILES): Define.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* gprof.h: #include "bin-bugs.h".
+	* gprof.c (usage): Use REPORT_BUGS_TO.
+
 2000-03-31  Alan Modra  <alan@linuxcare.com.au>
 
 	* symtab.c (symtab_finalize): Don't use post-increment on
-	structure copy to work around a ppc gcc bug.
+	structure copy, to work around a ppc gcc bug.
 
 1999-09-29  Mark Kettenis  <kettenis@gnu.org>
 
