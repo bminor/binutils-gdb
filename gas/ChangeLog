@@ -1,3 +1,10 @@
+Thu Feb 24 11:30:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* read.c (potable): Added ".this_GCC_requires_the_GNU_assembler",
+	which is ignored by gas, but will cause other assemblers to choke.
+	Intended for use by gcc ports that require gas instead of native
+	assemblers.
+
 Thu Feb 24 07:10:31 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/ho-hppaosf.h: Fix braino in test for ANSI-C.
