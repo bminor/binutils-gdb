@@ -35,3 +35,4 @@ INSTALL = cp
 # This is commented out because we don't assume that the Sun compiler
 # is in use.
 #MH_CFLAGS=-xs
+HOST_IPC=-DBSD_IPC

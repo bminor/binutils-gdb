@@ -3,3 +3,4 @@ XDEPFILES=
 XM_FILE= xm-sun4os4.h
 NAT_FILE= nm-sun4os4.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o
+HOST_IPC=-DBSD_IPC
