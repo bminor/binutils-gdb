@@ -49,7 +49,7 @@ i[345]86-sequent-sysv4*) gdb_host=ptx4 ;;
 i[345]86-sequent-sysv*)	gdb_host=ptx ;;
 i[345]86-*-aix*)	gdb_host=i386aix ;;
 i[345]86-*-bsd*)	gdb_host=i386bsd ;;
-i[345]86-*-netbsd*)	gdb_host=i386bsd ;;
+i[345]86-*-netbsd*)	gdb_host=nbsd ;;
 i[345]86-*-go32*)	gdb_host=go32 ;;
 i[345]86-*-linux*)	gdb_host=linux ;;
 i[345]86-*-lynxos*)	gdb_host=i386lynx ;;
@@ -211,7 +211,7 @@ i[345]86-*-coff*)	gdb_target=i386v ;;
 i[345]86-*-elf*)	gdb_target=i386v ;;
 i[345]86-*-aix*)	gdb_target=i386aix ;;
 i[345]86-*-bsd*)	gdb_target=i386bsd ;;
-i[345]86-*-netbsd*)	gdb_target=i386bsd ;;
+i[345]86-*-netbsd*)	gdb_target=nbsd ;;
 i[345]86-*-os9k)	gdb_target=i386os9k ;;
 i[345]86-*-go32*)	gdb_target=i386aout ;;
 i[345]86-*-lynxos*)	gdb_target=i386lynx
@@ -370,29 +370,17 @@ files=
 links=
 rm -f xm.h
 if [ "${hostfile}" != "" ]; then
-	if [ -f ${srcdir}/config/${hostfile} ]; then
-		files="${files} config/${hostfile}"
-	else
-		files="${files} config/${gdb_host_cpu}/${hostfile}"
-	fi
+	files="${files} config/${gdb_host_cpu}/${hostfile}"
 	links="${links} xm.h"
 fi
 rm -f tm.h
 if [ "${targetfile}" != "" ]; then
-	if [ -f ${srcdir}/config/${targetfile} ]; then
-		files="${files} config/${targetfile}"
-	else
-		files="${files} config/${gdb_target_cpu}/${targetfile}"
-	fi
+	files="${files} config/${gdb_target_cpu}/${targetfile}"
 	links="${links} tm.h"
 fi
 rm -f nm.h
 if [ "${nativefile}" != "" ]; then
-	if [ -f ${srcdir}/config/${nativefile} ]; then
-		files="${files} config/${nativefile}"
-	else
-		files="${files} config/${gdb_host_cpu}/${nativefile}"
-	fi
+	files="${files} config/${gdb_host_cpu}/${nativefile}"
 	links="${links} nm.h"
 # temporary scaffolding until all hosts have the host/target/native
 # split in place.

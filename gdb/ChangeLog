@@ -1,3 +1,8 @@
+Fri Sep  2 17:35:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* configure.in: No longer looks for nm, tm, and xm headers in
+	  config/<header>; they are always in config/<cpu>/<header>.
+
 Fri Sep  2 16:40:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* objfiles.c (allocate_objfile): Add the newly-created objfile to
