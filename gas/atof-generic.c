@@ -319,10 +319,19 @@ atof_generic (address_of_string_pointer,
 		   + 1);	/* Number of destination littlenums. */
 
       /* Includes guard bits (two littlenums worth) */
+#if 0 /* The integer version below is very close, and it doesn't
+	 require floating point support (which is currently buggy on
+	 the Alpha).  */
       maximum_useful_digits = (((double) (precision - 2))
 			       * ((double) (LITTLENUM_NUMBER_OF_BITS))
 			       / (LOG_TO_BASE_2_OF_10))
 	+ 2;			/* 2 :: guard digits. */
+#else
+      maximum_useful_digits = (((precision - 2))
+			       * ( (LITTLENUM_NUMBER_OF_BITS))
+			       * 1000000 / 3321928)
+	+ 2;			/* 2 :: guard digits. */
+#endif
 
       if (number_of_digits_available > maximum_useful_digits)
 	{
