@@ -7757,7 +7757,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 		return false;
 	    }
 
-	  if (SGI_COMPAT (dynobj))
+	  if (SGI_COMPAT (abfd))
 	    mips_elf_hash_table (info)->compact_rel_size +=
 	      sizeof (Elf32_External_crinfo);
 	  break;
@@ -7766,7 +7766,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MIPS_GPREL16:
 	case R_MIPS_LITERAL:
 	case R_MIPS_GPREL32:
-	  if (SGI_COMPAT (dynobj))
+	  if (SGI_COMPAT (abfd))
 	    mips_elf_hash_table (info)->compact_rel_size +=
 	      sizeof (Elf32_External_crinfo);
 	  break;

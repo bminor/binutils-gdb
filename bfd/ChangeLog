@@ -1,3 +1,8 @@
+2000-07-23  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elf32-mips.c (_bfd_mips_elf_check_relocs): Use abfd instead
+	of dynobj for SGI_COMPAT checks.
+
 2000-07-27  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
         * coff-m68k.c (bfd_m68k_coff_create_embedded_relocs): New function.
@@ -122,7 +127,7 @@ Tue Jul 18 13:11:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-07-18  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elf32-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Add
-	paranthesis in if statement.
+	parenthesis in if statement.
 
 2000-07-17  Koundinya K  <kk@ddeorg.soft.net>
 
