@@ -1,7 +1,7 @@
 _dnl__								-*- Texinfo -*-
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @c
 @syncodeindex ky cp
 @c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
@@ -45,7 +45,7 @@ _if__(!_GENERIC__)
 @settitle Using _GDBN__ v4.0 (_HOST__)
 _fi__(!_GENERIC__)
 @iftex
-@c @finalout
+@finalout
 @end iftex
 @titlepage
 @title{Using _GDBN__}
@@ -61,6 +61,13 @@ _fi__(!_GENERIC__)
 @author{Richard M. Stallman@qquad @hfill Free Software Foundation}
 @author{Roland H. Pesch@qquad @hfill Cygnus Support}
 @page
+@tex
+{\parskip=0pt
+\hfill rms\@ai.mit.edu, pesch\@cygnus.com\par
+\hfill {\it Using _GDBN__}, \manvers\par
+\hfill \TeX{}info \texinfoversion\par
+}
+@end tex
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
@@ -107,11 +114,154 @@ This file describes version 4.0 of GDB, the GNU symbolic debugger.
 * Controlling _GDBN__::		Controlling _GDBN__
 * Sequences::			Canned Sequences of Commands
 * Emacs::			Using _GDBN__ under GNU Emacs
-* _GDBN__ Bugs::		Reporting Bugs in _GDBN__
+* _GDBN__ Bugs::			Reporting Bugs in _GDBN__
 * Renamed Commands::		
 * Installing _GDBN__::		Installing _GDBN__
 * Copying::			GNU GENERAL PUBLIC LICENSE
 * Index::			Index
+ --- The Detailed Node Listing ---
+
+Summary of _GDBN__
+
+* Free Software::		Free Software
+* Contributors::		Contributors to _GDBN__
+
+Getting In and Out of _GDBN__
+
+* Starting _GDBN__::		Starting _GDBN__
+* Leaving _GDBN__::			Leaving _GDBN__
+* Shell Commands::		Shell Commands
+
+Starting _GDBN__
+
+* File Options::		Choosing Files
+* Mode Options::		Choosing Modes
+
+_GDBN__ Commands
+
+* Command Syntax::		Command Syntax
+* Help::			Getting Help
+
+Running Programs Under _GDBN__
+
+* Compilation::			Compiling for Debugging
+* Starting::			Starting your Program
+* Arguments::			Your Program's Arguments
+* Environment::			Your Program's Environment
+* Working Directory::		Your Program's Working Directory
+* Input/Output::		Your Program's Input and Output
+* Attach::			Debugging an Already-Running Process
+* Kill Process::		Killing the Child Process
+
+Stopping and Continuing
+
+* Breakpoints::			Breakpoints, Watchpoints, and Exceptions
+* Stepping::			Stepping
+* Continuing::			Continuing
+* Signals::			Signals
+
+Breakpoints, Watchpoints, and Exceptions
+
+* Set Breaks::			Setting Breakpoints
+* Set Watchpoints::		Setting Watchpoints
+* Exception Handling::		Breakpoints and Exceptions
+* Delete Breaks::		Deleting Breakpoints
+* Disabling::			Disabling Breakpoints
+* Conditions::			Break Conditions
+* Break Commands::		Breakpoint Command Lists
+* Breakpoint Menus::		Breakpoint Menus
+* Error in Breakpoints::	
+
+Examining the Stack
+
+* Frames::			Stack Frames
+* Backtrace::			Backtraces
+* Selection::			Selecting a Frame
+* Frame Info::			Information on a Frame
+
+Examining Source Files
+
+* List::			Printing Source Lines
+* Search::			Searching Source Files
+* Source Path::			Specifying Source Directories
+* Machine Code::		Source and Machine Code
+
+Examining Data
+
+* Expressions::			Expressions
+* Variables::			Program Variables
+* Arrays::			Artificial Arrays
+* Output formats::		Output formats
+* Memory::			Examining Memory
+* Auto Display::		Automatic Display
+* Print Settings::		Print Settings
+* Value History::		Value History
+* Convenience Vars::		Convenience Variables
+* Registers::			Registers
+* Floating Point Hardware::	Floating Point Hardware
+
+Altering Execution
+
+* Assignment::			Assignment to Variables
+* Jumping::			Continuing at a Different Address
+* Signaling::			Giving the Program a Signal
+* Returning::			Returning from a Function
+* Calling::			Calling your Program's Functions
+
+_GDBN__'s Files
+
+* Files::			Commands to Specify Files
+* Symbol Errors::		Errors Reading Symbol Files
+
+Specifying a Debugging Target 
+
+* Active Targets::		Active Targets
+* Target Commands::		Commands for Managing Targets
+* Remote::			Remote Debugging
+
+Remote Debugging
+
+* i960-Nindy Remote::		
+* EB29K Remote::		
+* VxWorks Remote::		
+
+_GDBN__ with a Remote i960 (Nindy)
+
+* Nindy Startup::		Startup with Nindy
+* Nindy Options::		Options for Nindy
+* Nindy reset::			Nindy Reset Command
+
+_GDBN__ with a Remote EB29K
+
+* Comms (EB29K)::		Communications Setup
+* gdb-EB29K::			EB29K cross-debugging
+* Remote Log::			Remote Log
+
+_GDBN__ and VxWorks
+
+* VxWorks connection::		Connecting to VxWorks
+* VxWorks download::		VxWorks Download
+* VxWorks attach::		Running Tasks
+
+Controlling _GDBN__
+
+* Prompt::			Prompt
+* Editing::			Command Editing
+* History::			Command History
+* Screen Size::			Screen Size
+* Numbers::			Numbers
+* Messages/Warnings::		Optional Warnings and Messages
+
+Canned Sequences of Commands
+
+* Define::			User-Defined Commands
+* Command Files::		Command Files
+* Output::			Commands for Controlled Output
+
+Reporting Bugs in _GDBN__
+
+* Bug Criteria::		Have You Found a Bug?
+* Bug Reporting::		How to Report Bugs
 @end menu
 
 @node Summary, New Features, Top, Top

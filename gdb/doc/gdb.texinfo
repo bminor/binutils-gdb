@@ -1,9 +1,9 @@
 _dnl__						-*-Texinfo-*-
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file controls overall layout of the GDB manual.
-_dnl__ $Id$
 \input texinfo
 @setfilename _GDBP__.info
+@c $Id$
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
 @c
 @c NOTE: this manual is marked up for preprocessing with a collection
@@ -17,7 +17,7 @@ _if__(0)
 THIS IS THE SOURCE PRIOR TO PREPROCESSING.  The full source needs to
 be run through m4 before either tex- or info- formatting: for example,
 _0__
-    m4 pretex.m4 none.m4 m680x0.m4 gdb.texi-m4 >gdb-680x0.texinfo
+    m4 pretex.m4 none.m4 m680x0.m4 gdb.texinfo >gdb-680x0.texinfo
 _1__
 will produce (assuming your path finds either GNU or SysV m4; Berkeley
 won't do) a file suitable for formatting.  See the text in "pretex.m4"
@@ -27,11 +27,6 @@ _fi__(0)
 @tex
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
-{\parskip=0pt
-\hfill rms\@ai.mit.edu, pesch\@cygnus.com\par
-\hfill {\it Using _GDBN__}, \manvers\par
-\hfill \TeX{}info \texinfoversion\par
-}
 @end tex
 _include__(gdb.top-m4)
 _include__(gdb.sample-m4)
