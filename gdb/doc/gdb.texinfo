@@ -11904,7 +11904,7 @@ Set acquisition qualifier for HW trace.
 Set HW trace stopping criteria.
 
 @kindex htrace record
-@item htrace record @var{[data]*}
+@item htrace record [@var{data}]*
 Selects the data to be recorded, when qualifier is met and HW trace was
 triggered.
 
@@ -11915,14 +11915,14 @@ triggered.
 Enables/disables the HW trace.
 
 @kindex htrace rewind
-@item htrace rewind @var{[filename]}
+@item htrace rewind [@var{filename}]
 Clears currently recorded trace data.
 
 If filename is specified, new trace file is made and any newly collected data
 will be written there.
 
 @kindex htrace print
-@item htrace print @var{[start [len]]}
+@item htrace print [@var{start} [@var{len}]]
 Prints trace buffer, using current record configuration.
 
 @kindex htrace mode continuous

@@ -1,5 +1,9 @@
 2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
 
+	(OpenRISC 1000): Fix formatting of command names.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
 	* gdb.texinfo (Continuing and Stepping): Add new command
 	'advance'. Clarify behavior of 'until'.
 
