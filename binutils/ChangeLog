@@ -1,3 +1,15 @@
+Wed Jan 24 12:06:05 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (struct ieee_var): Remove variable field.  Add kind
+	field, and define some enum constants for it.
+	(parse_ieee_ty): Set kind field of variable for 'x' and 'X' types.
+	(parse_ieee_atn): Make an indirect slot for an external variable,
+	although we otherwise don't record it.  Set kind field rather than
+	variable field of pvar.
+	(ieee_read_cxx_class): Try to get the type of a static member.
+	(ieee_read_reference): Check kind field rather than variable
+	field.
+
 Tue Jan 23 15:54:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c: Various changes to handle reading C++ reference type

@@ -67,8 +67,16 @@ struct ieee_var
   debug_type type;
   /* Slot if we make an indirect type.  */
   debug_type *pslot;
-  /* Kind of variable (DEBUG_VAR_ILLEGAL if not a variable).  */
-  enum debug_var_kind variable;
+  /* Kind of variable or function.  */
+  enum
+    {
+      IEEE_UNKNOWN,
+      IEEE_EXTERNAL,
+      IEEE_GLOBAL,
+      IEEE_STATIC,
+      IEEE_LOCAL,
+      IEEE_FUNCTION
+    } kind;
 };
 
 /* This structure holds all the variables.  */
@@ -1708,6 +1716,7 @@ parse_ieee_ty (info, pp)
 	while (present);
 
 	pv = info->vars.vars + varindx;
+	pv->kind = IEEE_EXTERNAL;
 	if (pv->namlen > 0
 	    && debug_get_type_kind (dhandle, rtype) == DEBUG_KIND_POINTER)
 	  {
@@ -1906,6 +1915,10 @@ parse_ieee_ty (info, pp)
 	    || ! ieee_read_optional_number (info, pp, &father, &present))
 	  return false;
 
+	/* We can't distinguish between a global function and a static
+           function.  */
+	pv->kind = IEEE_FUNCTION;
+
 	if (pv->namlen > 0
 	    && debug_get_type_kind (dhandle, rtype) == DEBUG_KIND_POINTER)
 	  {
@@ -2055,6 +2068,7 @@ parse_ieee_atn (info, pp)
 	case 1:
 	case 2:
 	case 3:
+	case 5:
 	case 8:
 	case 10:
 	  pvar->pslot = (debug_type *) xmalloc (sizeof *pvar->pslot);
@@ -2080,7 +2094,7 @@ parse_ieee_atn (info, pp)
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
       if (pvar != NULL)
-	pvar->variable = DEBUG_LOCAL;
+	pvar->kind = IEEE_LOCAL;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_LOCAL, v);
 
     case 2:
@@ -2091,7 +2105,7 @@ parse_ieee_atn (info, pp)
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
       if (pvar != NULL)
-	pvar->variable = DEBUG_REGISTER;
+	pvar->kind = IEEE_LOCAL;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_REGISTER,
 				    ieee_regno_to_genreg (info->abfd, v));
 
@@ -2109,9 +2123,9 @@ parse_ieee_atn (info, pp)
       if (pvar != NULL)
 	{
 	  if (blocktype == 4 || blocktype == 6)
-	    pvar->variable = DEBUG_LOCAL_STATIC;
+	    pvar->kind = IEEE_LOCAL;
 	  else
-	    pvar->variable = DEBUG_STATIC;
+	    pvar->kind = IEEE_STATIC;
 	}
       return debug_record_variable (dhandle, namcopy, type,
 				    (blocktype == 4 || blocktype == 6
@@ -2121,10 +2135,14 @@ parse_ieee_atn (info, pp)
 
     case 4:
       /* External function.  We don't currently record these.  FIXME.  */
+      if (pvar != NULL)
+	pvar->kind = IEEE_EXTERNAL;
       return true;
 
     case 5:
       /* External variable.  We don't currently record these.  FIXME.  */
+      if (pvar != NULL)
+	pvar->kind = IEEE_EXTERNAL;
       return true;
 
     case 7:
@@ -2156,7 +2174,7 @@ parse_ieee_atn (info, pp)
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
       if (pvar != NULL)
-	pvar->variable = DEBUG_GLOBAL;
+	pvar->kind = IEEE_GLOBAL;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_GLOBAL, v);
 
     case 9:
@@ -2180,7 +2198,7 @@ parse_ieee_atn (info, pp)
       if (type == NULL)
 	type = debug_make_void_type (dhandle);
       if (pvar != NULL)
-	pvar->variable = DEBUG_REGISTER;
+	pvar->kind = IEEE_LOCAL;
       return debug_record_variable (dhandle, namcopy, type, DEBUG_REGISTER, v);
 
     case 11:
@@ -2618,13 +2636,23 @@ ieee_read_cxx_class (info, pp, count)
 
 	    if (staticp)
 	      {
-		/* We can only figure out the type here if mangledname
-                   happens to have already been defined, but that is
-                   not necessarily the case.  In fact, it may never be
-                   defined.  For now, we don't even try.  FIXME.  */
-		pf = NULL;
-		ftype = ieee_builtin_type (info, start,
-					   (unsigned int) builtin_void);
+		struct ieee_var *pv, *pvend;
+
+		/* See if we can find a definition for this variable.  */
+		pv = info->vars.vars;
+		pvend = pv + info->vars.alloc;
+		for (; pv < pvend; pv++)
+		  if (pv->namlen == mangledlen
+		      && strncmp (pv->name, mangledname, mangledlen) == 0)
+		    break;
+		if (pv < pvend)
+		  ftype = pv->type;
+		else
+		  {
+		    /* This can happen if the variable is never used.  */
+		    ftype = ieee_builtin_type (info, start,
+					       (unsigned int) builtin_void);
+		  }
 	      }
 	    else
 	      {
@@ -2710,7 +2738,7 @@ ieee_read_cxx_class (info, pp, count)
 		break;
 	      }
 
-	    if ((flags & CXXFLAGS_STATIC) != 0)
+	    if (staticp)
 	      {
 		char *mangledcopy;
 
@@ -3225,29 +3253,22 @@ ieee_read_reference (info, pp)
 
 	    case 0:
 	      /* Global variable or function.  */
-	      if (pv->variable == DEBUG_GLOBAL)
-		found = true;
-	      else if (pv->type != DEBUG_TYPE_NULL
-		       && (debug_get_type_kind (info->dhandle, pv->type)
-			   == DEBUG_KIND_FUNCTION))
+	      if (pv->kind == IEEE_GLOBAL
+		  || pv->kind == IEEE_EXTERNAL
+		  || pv->kind == IEEE_FUNCTION)
 		found = true;
 	      break;
 
 	    case 1:
 	      /* Global static variable or function.  */
-	      if (pv->variable == DEBUG_STATIC)
-		found = true;
-	      else if (pv->type != DEBUG_TYPE_NULL
-		       && (debug_get_type_kind (info->dhandle, pv->type)
-			   == DEBUG_KIND_FUNCTION))
+	      if (pv->kind == IEEE_STATIC
+		  || pv->kind == IEEE_FUNCTION)
 		found = true;
 	      break;
 
 	    case 2:
 	      /* Local variable.  */
-	      if (pv->variable == DEBUG_LOCAL_STATIC
-		  || pv->variable == DEBUG_LOCAL
-		  || pv->variable == DEBUG_REGISTER)
+	      if (pv->kind == IEEE_LOCAL)
 		found = true;
 	      break;
 	    }
