@@ -1,3 +1,33 @@
+start-sanitize-vr4xxx
+1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
+	
+	* vr4run.c: New.
+	* Makefile.in (SIM_HACK_OBJ,HACK_OBJS,HACK_GEN_SRCS,libhack.a,
+	tmp-hack,tmp-m32-hack,tmp-m16-hack,tmp-itable-hack,
+	tmp-run-hack) : New.
+	* configure.in (mips64vr4xxx): Switch to using the HACK
+	generator.  Set TARGET_ENABLE_FR.
+	* m16.igen (LD,DADDIU,DADDUI5,DADJSP,DADDIUSP,DADDI,DADDU,DSUBU,
+	DSLL,DSRL,DSRA,DSLLV,DSRAV,DMULT,DMULTU,DDIV,DDIVU,JALX32,JALX): 
+	Drop the "64" qualifier to get the HACK generator working.
+	Use IMMEDIATE rather than IMMED.  Use SHAMT rather than SHIFT.
+	Add vr4121 where necessary.
+	* mips.igen (do_daddiu,do_ddiv,do_divu): Remove the 64-only
+	qualifier to get the hack generator working.
+	(do_dsll,do_dsllv,do_dsra,do_dsrl,do_dsrlv): New.
+	(DSLL): Use do_dsll.
+	(DSLLV): Use do_dsllv.
+	(DSRA): Use do_dsra.
+	(DSRL): Use do_dsrl.
+	(DSRLV): Use do_dsrlv.
+	(BC1): Move *vr4100,*vr4111, and *vr4121 to get the HACK 
+	generator working.
+	(CxC1, DMxC1, MxC1,MACCU,MACCHI,MACCHIU): Rename to 
+	get the HACK generator working.
+	* vr.igen: Add *vr4320 where missing.
+	(MACC) Rename to get the HACK generator working.
+	(DMACC,MACCS,DMACCS): Add the 64.
+	
 start-sanitize-vr4320
 1998-12-14  Gavin Romig-Koch  <gavin@cygnus.com>
 	

@@ -69,16 +69,11 @@ SIM_OBJS = \
 # List of flags to always pass to $(CC).
 SIM_SUBTARGET=@SIM_SUBTARGET@
 
-SIM_NO_CFLAGS = -DWITH_IGEN=0
-SIM_IGEN_CFLAGS = -DWITH_IGEN=1
-SIM_M16_CFLAGS = -DWITH_IGEN=1
-
 # FIXME: Hack to find syscall.h?  Better support for syscall.h
 # is in progress.
 SIM_EXTRA_CFLAGS = \
 	$(SIM_SUBTARGET) \
-	-I$(srcdir)/../../newlib/libc/sys/idt \
-	$(SIM_@sim_gen@_CFLAGS)
+	-I$(srcdir)/../../newlib/libc/sys/idt
 
 SIM_EXTRA_CLEAN = clean-extra
 
@@ -95,30 +90,6 @@ SIM_RUN_OBJS = nrun.o
 
 SIM_NO_INTERP = oengine.c
 interp.o: $(srcdir)/interp.c config.h sim-main.h $(SIM_@sim_gen@_INTERP)
-
-
-
-#
-# Old deprecated generator
-#
-
-SIM_NO_ALL = oengine.c
-
-oengine.c: gencode
-	./gencode @SIMCONF@ > tmp-oengine
-	mv tmp-oengine oengine.c
-
-gencode: gencode.o getopt.o getopt1.o
-	$(CC_FOR_BUILD) -o $@ gencode.o getopt.o getopt1.o
-
-gencode.o: $(srcdir)/gencode.c
-	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/gencode.c
-
-getopt.o: $(srcdir)/../../libiberty/getopt.c
-	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt.c
-getopt1.o: $(srcdir)/../../libiberty/getopt1.c
-	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt1.c
-
 
 
 ../igen/igen:
@@ -164,7 +135,6 @@ BUILT_SRC_FROM_GEN = \
 	itable.c \
 
 $(BUILT_SRC_FROM_GEN): $(SIM_@sim_gen@_ALL)
-
 
 $(BUILT_SRC_FROM_IGEN): tmp-igen
 
@@ -345,5 +315,206 @@ clean-extra:
 	rm -f $(BUILT_SRC_FROM_GEN)
 	rm -f $(BUILT_SRC_FROM_IGEN)
 	rm -f $(BUILT_SRC_FROM_M16)
-	rm -f tmp-igen
-	rm -f tmp-m16
+	rm -f tmp-*
+	rm -f libhack.a hack
+	rm -f m16* m32* itable*
+
+# start-sanitize-vr4xxx
+# HACK ....
+
+SIM_HACK_OBJ = \
+	itable.o \
+        m16vr4111_icache.o m16vr4111_idecode.o m16vr4111_model.o \
+	m16vr4111_run.o m16vr4111_semantics.o m16vr4111_support.o \
+        m16vr4121_icache.o m16vr4121_idecode.o m16vr4121_model.o \
+        m16vr4121_run.o m16vr4121_semantics.o m16vr4121_support.o \
+	m32mipsIV_engine.o m32mipsIV_icache.o m32mipsIV_idecode.o \
+	m32mipsIV_model.o m32mipsIV_semantics.o m32mipsIV_support.o \
+	m32vr4100_engine.o m32vr4100_icache.o m32vr4100_idecode.o \
+	m32vr4100_model.o m32vr4100_semantics.o m32vr4100_support.o \
+	m32vr4111_engine.o m32vr4111_icache.o m32vr4111_idecode.o \
+	m32vr4111_model.o m32vr4111_semantics.o m32vr4111_support.o \
+	m32vr4320_engine.o m32vr4320_icache.o m32vr4320_idecode.o \
+	m32vr4320_model.o m32vr4320_semantics.o m32vr4320_support.o \
+	m32vr4121_engine.o m32vr4121_icache.o m32vr4121_idecode.o \
+	m32vr4121_model.o m32vr4121_semantics.o m32vr4121_support.o \
+        vr4run.o
+
+HACK_OBJS = \
+	itable.o m16vr4111_icache.o m16vr4111_idecode.o \
+	m16vr4111_model.o m16vr4111_run.o m16vr4111_semantics.o \
+	m16vr4111_support.o m16vr4121_icache.o m16vr4121_idecode.o \
+	m16vr4121_model.o m16vr4121_run.o m16vr4121_semantics.o \
+	m16vr4121_support.o m32mipsIV_engine.o m32mipsIV_icache.o \
+	m32mipsIV_idecode.o m32mipsIV_model.o m32mipsIV_semantics.o \
+	m32mipsIV_support.o m32vr4100_engine.o m32vr4100_icache.o \
+	m32vr4100_idecode.o m32vr4100_model.o m32vr4100_semantics.o \
+	m32vr4100_support.o m32vr4111_engine.o m32vr4111_icache.o \
+	m32vr4111_idecode.o m32vr4111_model.o m32vr4111_semantics.o \
+	m32vr4111_support.o m32vr4320_engine.o m32vr4320_icache.o \
+	m32vr4320_idecode.o m32vr4320_model.o m32vr4320_semantics.o \
+	m32vr4320_support.o m32vr4121_engine.o m32vr4121_icache.o \
+	m32vr4121_idecode.o m32vr4121_model.o m32vr4121_semantics.o \
+	m32vr4121_support.o \
+	$(SIM_NEW_COMMON_OBJS) \
+	$(MIPS_EXTRA_OBJS) \
+	interp.o \
+	sim-main.o \
+	sim-hload.o \
+	sim-engine.o \
+	sim-stop.o \
+	sim-resume.o \
+	sim-reason.o \
+	callback.o syscall.o targ-map.o \
+	vr4run.o
+
+HACK_GEN_SRCS = \
+	itable.c \
+	m16vr4111_icache.c m16vr4111_idecode.c m16vr4111_model.c \
+	m16vr4111_run.c m16vr4111_semantics.c m16vr4111_support.c \
+	m16vr4121_icache.c m16vr4121_idecode.c m16vr4121_model.c \
+	m16vr4121_run.c m16vr4121_semantics.c m16vr4121_support.c \
+	m32mipsIV_engine.c m32mipsIV_icache.c m32mipsIV_idecode.c \
+	m32mipsIV_model.c m32mipsIV_semantics.c m32mipsIV_support.c \
+	m32vr4100_engine.c m32vr4100_icache.c m32vr4100_idecode.c \
+	m32vr4100_model.c m32vr4100_semantics.c m32vr4100_support.c \
+	m32vr4111_engine.c m32vr4111_icache.c m32vr4111_idecode.c \
+	m32vr4111_model.c m32vr4111_semantics.c m32vr4111_support.c \
+	m32vr4320_engine.c m32vr4320_icache.c m32vr4320_idecode.c \
+	m32vr4320_model.c m32vr4320_semantics.c m32vr4320_support.c \
+	m32vr4121_engine.c m32vr4121_icache.c m32vr4121_idecode.c \
+	m32vr4121_model.c m32vr4121_semantics.c m32vr4121_support.c
+
+$(HACK_GEN_SRCS): tmp-hack
+
+libhack.a: $(HACK_OBJS)
+	rm -f libhack.a
+	$(AR) $(AR_FLAGS) libhack.a $(HACK_OBJS)
+	$(RANLIB) libhack.a
+hack: tmp-hack $(SIM_RUN_OBJS) libhack.a
+	$(CC) $(ALL_CFLAGS) -o hack$(EXEEXT) \
+	  $(SIM_RUN_OBJS) libhack.a $(EXTRA_LIBS)
+
+tmp-hack: tmp-m16-hack tmp-m32-hack tmp-itable-hack tmp-run-hack targ-vals.h
+tmp-m32-hack: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+	for t in m32mipsIV:mipsIV m32vr4100:vr4100 m32vr4111:vr4100 m32vr4320:vr4320 m32vr4121:vr4121 ; \
+	do \
+	  p=`echo $${t} | sed -e 's/:.*//'` ; \
+	  m=`echo $${t} | sed -e 's/.*://'` ; \
+	  ../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		-N 0 \
+		-M $${m} -F 32,64,f \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 32 \
+		-H 31 \
+		-i $(IGEN_INSN) \
+		-o $(IGEN_DC) \
+		-P $${p}_ \
+		-x \
+		-n $${p}_icache.h    -hc tmp-icache.h \
+		-n $${p}_icache.c    -c  tmp-icache.c \
+		-n $${p}_semantics.h -hs tmp-semantics.h \
+		-n $${p}_semantics.c -s  tmp-semantics.c \
+		-n $${p}_idecode.h   -hd tmp-idecode.h \
+		-n $${p}_idecode.c   -d  tmp-idecode.c \
+		-n $${p}_model.h     -hm tmp-model.h \
+		-n $${p}_model.c     -m  tmp-model.c \
+		-n $${p}_support.h   -hf tmp-support.h \
+		-n $${p}_support.c   -f  tmp-support.c \
+		-n $${p}_engine.h    -he tmp-engine.h \
+		-n $${p}_engine.c    -e  tmp-engine.c \
+		; \
+	  $(srcdir)/../../move-if-change tmp-icache.h $${p}_icache.h ; \
+	  $(srcdir)/../../move-if-change tmp-icache.c $${p}_icache.c ; \
+	  $(srcdir)/../../move-if-change tmp-idecode.h $${p}_idecode.h ; \
+	  $(srcdir)/../../move-if-change tmp-idecode.c $${p}_idecode.c ; \
+	  $(srcdir)/../../move-if-change tmp-semantics.h $${p}_semantics.h ; \
+	  $(srcdir)/../../move-if-change tmp-semantics.c $${p}_semantics.c ; \
+	  $(srcdir)/../../move-if-change tmp-model.h $${p}_model.h ; \
+	  $(srcdir)/../../move-if-change tmp-model.c $${p}_model.c ; \
+	  $(srcdir)/../../move-if-change tmp-support.h $${p}_support.h ; \
+	  $(srcdir)/../../move-if-change tmp-support.c $${p}_support.c ; \
+	  $(srcdir)/../../move-if-change tmp-engine.h $${p}_engine.h ; \
+	  $(srcdir)/../../move-if-change tmp-engine.c $${p}_engine.c ; \
+	done
+	touch tmp-m32-hack
+tmp-m16-hack: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+	for t in m16vr4111:vr4100 m16vr4121:vr4121 ; \
+	do \
+	  p=`echo $${t} | sed -e 's/:.*//'` ; \
+	  m=`echo $${t} | sed -e 's/.*://'` ; \
+	  ../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		-N 0 \
+		-M $${m},mips16 -F 16 \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 16 \
+		-H 15 \
+		-i $(IGEN_INSN) \
+		-o $(M16_DC) \
+		-P $${p}_ \
+		-x \
+		-n $${p}_icache.h    -hc tmp-icache.h \
+		-n $${p}_icache.c    -c  tmp-icache.c \
+		-n $${p}_semantics.h -hs tmp-semantics.h \
+		-n $${p}_semantics.c -s  tmp-semantics.c \
+		-n $${p}_idecode.h   -hd tmp-idecode.h \
+		-n $${p}_idecode.c   -d  tmp-idecode.c \
+		-n $${p}_model.h     -hm tmp-model.h \
+		-n $${p}_model.c     -m  tmp-model.c \
+		-n $${p}_support.h   -hf tmp-support.h \
+		-n $${p}_support.c   -f  tmp-support.c \
+		-n $${p}_engine.h    -he tmp-engine.h \
+		; \
+	  $(srcdir)/../../move-if-change tmp-icache.h $${p}_icache.h ; \
+	  $(srcdir)/../../move-if-change tmp-icache.c $${p}_icache.c ; \
+	  $(srcdir)/../../move-if-change tmp-idecode.h $${p}_idecode.h ; \
+	  $(srcdir)/../../move-if-change tmp-idecode.c $${p}_idecode.c ; \
+	  $(srcdir)/../../move-if-change tmp-semantics.h $${p}_semantics.h ; \
+	  $(srcdir)/../../move-if-change tmp-semantics.c $${p}_semantics.c ; \
+	  $(srcdir)/../../move-if-change tmp-model.h $${p}_model.h ; \
+	  $(srcdir)/../../move-if-change tmp-model.c $${p}_model.c ; \
+	  $(srcdir)/../../move-if-change tmp-support.h $${p}_support.h ; \
+	  $(srcdir)/../../move-if-change tmp-support.c $${p}_support.c ; \
+	  $(srcdir)/../../move-if-change tmp-engine.h $${p}_engine.h ; \
+	done
+	touch tmp-m16-hack
+tmp-itable-hack: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+	../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		-Wnowidth \
+		-N 0 \
+		-F 32,64,f -M vr4100,vr4320,mipsIV,vr4121 -F 16 -M mips16 \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-i $(IGEN_INSN) \
+		-n itable.h    -ht tmp-itable.h \
+		-n itable.c    -t  tmp-itable.c \
+		#
+	$(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(srcdir)/../../move-if-change tmp-itable.c itable.c
+	touch tmp-itable-hack
+tmp-run-hack: $(srcdir)/m16run.c
+	for m in vr4111 vr4121 ; \
+	do \
+	  sed <  $(srcdir)/m16run.c > tmp-run \
+		-e "s/^sim_/m16$${m}_/" \
+		-e "s/m16_/m16$${m}_/" \
+		-e "s/m32_/m32$${m}_/" ; \
+	  $(srcdir)/../../move-if-change tmp-run m16$${m}_run.c ; \
+	done
+	touch tmp-run-hack
+
+# end-sanitize-vr4xxx
