@@ -1,5 +1,5 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   Copyright 1992, 1993, 1995, 1998, 1999, 2000, 2001
+   Copyright 1992, 1993, 1995, 1998, 1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -112,7 +112,7 @@ extern void solib_create_inferior_hook (void);	/* solib.c */
  */
 
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) \
-(0)
+""
 
 /* This function returns TRUE if the dynamic linker has just reported
    an unload of a library.

@@ -1,3 +1,9 @@
+2003-07-10  Fred Fish  <fnf@ninemoons.com>
+
+	* coff-solib.h (SOLIB_LOADED_LIBRARY_PATHNAME): Default to a
+	null string instead of a null pointer.
+	* solib.h (SOLIB_LOADED_LIBRARY_PATHNAME): Ditto.
+
 2003-07-09  Michael Snyder  <msnyder@redhat.com>
 
 	* sh-tdep.c (sh_dsp_register_sim_regno): Off-by-one error.
