@@ -240,8 +240,12 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   else
     rc = gdb_thread_select (uiout, argv[0]);
 
-  if (rc == GDB_RC_FAIL)
+  /* RC is enum gdb_rc if it is successful (>=0)
+     enum return_reason if not (<0). */
+  if ((int) rc < 0 && (enum return_reason) rc == RETURN_ERROR)
     return MI_CMD_CAUGHT_ERROR;
+  else if ((int) rc >= 0 && rc == GDB_RC_FAIL)
+    return MI_CMD_ERROR;
   else
     return MI_CMD_DONE;
 }
