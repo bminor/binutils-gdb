@@ -801,7 +801,6 @@ obj_elf_section (push)
 	      return;
 	    }
 	  attr |= obj_elf_parse_section_letters (beg, strlen (beg));
-	  free (beg);
 
 	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer == ',')
@@ -819,7 +818,6 @@ obj_elf_section (push)
 		      return;
 		    }
 		  type = obj_elf_section_type (beg, strlen (beg));
-		  free (beg);
 		}
 	      else if (c == '@' || c == '%')
 		{

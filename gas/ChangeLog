@@ -1,3 +1,8 @@
+1999-06-06  Richard Henderson  <rth@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_section): Don't free the return
+	value of demand_copy_C_string.
+
 1999-06-05  Richard Henderson  <rth@cygnus.com>
 
 	* dwarf2dbg.c (dwarf2_gen_line_info): Mirror the section symbol
