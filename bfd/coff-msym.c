@@ -366,7 +366,7 @@ ecoff_swap_rfd_in (abfd, ext, intern)
      RFDT *intern;
 {
   
-  *intern = bfd_h_get_32 (abfd, (bfd_byte *)&ext->rfd);
+  *intern = bfd_h_get_32 (abfd, (bfd_byte *)ext->rfd);
 
 #ifdef TEST
   if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)

@@ -1,3 +1,7 @@
+Mon Mar 23 22:37:34 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* coff-msym.c (ecoff_swap_rfd_in):  remove & for array ref.
+
 Tue Mar 17 14:12:25 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* bout.c (b_out_slurp_reloc_table):  Use BFD_ASSERT macro,
