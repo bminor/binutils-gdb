@@ -1,5 +1,8 @@
 Sat May 22 10:03:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* infrun.c (wait_for_inferior),
+	infcmd.c (program_info, signal_command):  Use symbolic signal names.
+
 	* inftarg.c (child_wait): Deal with EINTR and include message from
 	strerror if printing an error message.
 
