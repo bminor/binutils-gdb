@@ -1,5 +1,22 @@
 Fri Sep 13 15:50:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd.c (bfd_copy_private_bfd_data): Switch on output BFD rather
+	than input BFD.
+	(bfd_merge_private_bfd_data): Likewise.
+	* section.c (bfd_copy_private_section_data): Likewise.
+	* syms.c (bfd_copy_private_symbol_data): Likewise.
+	* bfd-in2.h: Rebuild.
+	* aout-target.h (MY_bfd_copy_private_section_data): Check that
+	both BFD's are the right flavour.
+	* ecoff.c (_bfd_ecoff_bfd_copy_private_bfd_data): Likewise.
+	* elf.c (_bfd_elf_copy_private_symbol_data): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_copy_private_bfd_data): Likewise.
+	(_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* elf32-ppc.c (ppc_elf_copy_private_bfd_data): Likewise.
+	(ppc_elf_merge_private_bfd_data): Likewise.
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Likewise.
+	* peicode.h (pe_bfd_copy_private_section_data): Likewise.
+
 	* elf32-hppa.c (elf_hppa_howto_table): Fill in some fields for
 	R_PARISC_DIR32, so that _bfd_stab_section_find_nearest_line passes
 	its sanity check.
@@ -10,8 +27,8 @@ Thu Sep 12 11:45:57 1996  Doug Evans  <dje@seba.cygnus.com>
 	* reloc.c: Add m32r relocs.
 	* bfd-in2.h, libbfd.h: Rebuilt.
 	* cpu-m32r.c,elf32-m32r.c: New files.
-end-sanitize-m32r
 
+end-sanitize-m32r
 Thu Sep 12 11:10:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_vec): Set symbol_leading_char field to '_'.
