@@ -1,3 +1,8 @@
+Thu Oct  7 18:36:29 1993  Michael Meissner  (meissner@osf.org)
+
+	* config/obj-elf.c (obj_elf_common): Allow the alignment field to
+	not be specified.
+
 Wed Oct  6 13:01:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (cons_fix_new_mips): New function.  Turn
