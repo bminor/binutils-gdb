@@ -1,5 +1,5 @@
 /* chew
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1998, 2000
    Free Software Foundation, Inc.
    Contributed by steve chamberlain @cygnus
 
@@ -634,7 +634,7 @@ DEFUN_VOID(outputdots)
 	    {
 	      if (c == '{' && at(tos,idx+1) =='*') 
 		{
-		    cattext(&out," /*");
+		    cattext(&out,"/*");
 		    idx+=2;
 		}
 	      else if (c == '*' && at(tos,idx+1) =='}') 
@@ -685,7 +685,7 @@ WORD(courierize)
 		{
 		    if (at(tos,idx)=='{' && at(tos,idx+1) =='*') 
 		    {
-			cattext(&out," /*");
+			cattext(&out,"/*");
 			idx+=2;
 		    }
 		    else if (at(tos,idx)=='*' && at(tos,idx+1) =='}') 
