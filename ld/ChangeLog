@@ -1,3 +1,9 @@
+2003-05-02  Nick Clifton  <nickc@redhat.com>
+	
+	* ldlang.c (lang_size_sections_1): Default to generating a
+	fatal error message if a loadable section is not allocated
+	to a memory region when regions are defined.
+
 2003-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (em68hc11elf.c): Correct dependencies.

@@ -3050,7 +3050,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax,
 
 		    /* If a loadable section is using the default memory
 		       region, and some non default memory regions were
-		       defined, issue a warning.  */
+		       defined, issue an error message.  */
 		    if ((bfd_get_section_flags (output_bfd, os->bfd_section)
 			 & (SEC_ALLOC | SEC_LOAD)) != 0
 			&& (bfd_get_section_flags (output_bfd, os->bfd_section)
@@ -3062,9 +3062,25 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax,
 			&& (strcmp (lang_memory_region_list->name,
 				    "*default*") != 0
 			    || lang_memory_region_list->next != NULL))
-		      einfo (_("%P: warning: no memory region specified for section `%s'\n"),
-			     bfd_get_section_name (output_bfd,
-						   os->bfd_section));
+		      {
+			/* By default this is an error rather than just a
+			   warning because if we allocate the section to the
+			   default memory region we can end up creating an
+			   excessivly large binary, or even seg faulting when
+			   attmepting to perform a negative seek.  See
+			     http://sources.redhat.com/ml/binutils/2003-04/msg00423.html			 
+			   for an example of this.  This behaviour can be
+			   overridden by the using the --no-check-sections
+			   switch.  */
+			if (command_line.check_section_addresses)
+			  einfo (_("%P%F: error: no memory region specified for loadable section `%s'\n"),
+				 bfd_get_section_name (output_bfd,
+						       os->bfd_section));
+			else
+			  einfo (_("%P: warning: no memory region specified for loadable section `%s'\n"),
+				 bfd_get_section_name (output_bfd,
+						       os->bfd_section));
+		      }
 
 		    dot = os->region->current;
 
