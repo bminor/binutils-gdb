@@ -1607,29 +1607,39 @@ xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
   return true;
 }
 
-/*ARGSUSED*/
+/* Write a single armap in the big format.  */
 static boolean
-xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
+xcoff_write_one_armap_big (abfd, map, orl_count, orl_ccount, stridx, bits64,
+			   prevoff, nextoff)
      bfd *abfd;
-     unsigned int elength ATTRIBUTE_UNUSED;
      struct orl *map;
      unsigned int orl_count;
-     int stridx;
+     unsigned int orl_ccount;
+     unsigned int stridx;
+     int bits64;
+     const char *prevoff;
+     char *nextoff;
 {
   struct xcoff_ar_hdr_big hdr;
   char *p;
   unsigned char buf[4];
   bfd *sub;
   file_ptr fileoff;
+  const bfd_arch_info_type *arch_info;
+  bfd *object_bfd;
   unsigned int i;
 
   memset (&hdr, 0, sizeof hdr);
   /* XXX This call actually should use %lld (at least on 32-bit
      machines) since the fields's width is 20 and there numbers with
      more than 32 bits can be represented.  */
-  sprintf (hdr.size, "%ld", (long) (4 + orl_count * 4 + stridx));
-  sprintf (hdr.nextoff, "%d", 0);
-  memcpy (hdr.prevoff, xcoff_ardata (abfd)->memoff, 12);
+  sprintf (hdr.size, "%ld", (long) (4 + orl_ccount * 4 + stridx));
+  if (bits64)
+    sprintf (hdr.nextoff, "%d", 0);
+  else
+    sprintf (hdr.nextoff, "%d", (strtol (prevoff, (char **) NULL, 10)
+				 + 4 + orl_ccount * 4 + stridx));
+  memcpy (hdr.prevoff, prevoff, sizeof (hdr.prevoff));
   sprintf (hdr.date, "%d", 0);
   sprintf (hdr.uid, "%d", 0);
   sprintf (hdr.gid, "%d", 0);
@@ -1641,11 +1651,13 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
     if (*p == '\0')
       *p = ' ';
 
+  memcpy (nextoff, hdr.nextoff, sizeof (hdr.nextoff));
+
   if (bfd_write ((PTR) &hdr, SIZEOF_AR_HDR_BIG, 1, abfd) != SIZEOF_AR_HDR_BIG
       || bfd_write (XCOFFARFMAG, 1, SXCOFFARFMAG, abfd) != SXCOFFARFMAG)
     return false;
 
-  bfd_h_put_32 (abfd, orl_count, buf);
+  bfd_h_put_32 (abfd, orl_ccount, buf);
   if (bfd_write (buf, 1, 4, abfd) != 4)
     return false;
 
@@ -1656,13 +1668,18 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
     {
       size_t namlen;
 
-      while (((bfd *) (map[i]).pos) == sub)
-	{
-	  bfd_h_put_32 (abfd, fileoff, buf);
-	  if (bfd_write (buf, 1, 4, abfd) != 4)
-	    return false;
-	  ++i;
-	}
+      if ((bfd_arch_bits_per_address ((bfd *) map[i].pos) == 64) == bits64)
+	while (((bfd *) (map[i]).pos) == sub)
+	  {
+	    bfd_h_put_32 (abfd, fileoff, buf);
+	    if (bfd_write (buf, 1, 4, abfd) != 4)
+	      return false;
+	    i++;
+	  }
+      else
+	while (((bfd *) (map[i]).pos) == sub)
+	  i++;
+
       namlen = strlen (normalize_filename (sub));
       namlen = (namlen + 1) &~ 1;
       fileoff += (SIZEOF_AR_HDR_BIG
@@ -1673,10 +1690,17 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
       sub = sub->next;
     }
 
+  object_bfd = NULL;
   for (i = 0; i < orl_count; i++)
     {
       const char *name;
       size_t namlen;
+      bfd *ob = (bfd *)map[i].pos;
+
+      if (ob != object_bfd)
+	arch_info = bfd_get_arch_info (ob);
+      if ((arch_info->bits_per_address == 64) != bits64)
+	continue;
 
       name = *map[i].name;
       namlen = strlen (name);
@@ -1693,6 +1717,66 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	return false;
     }
 
+  return true;
+}
+
+/*ARGSUSED*/
+static boolean
+xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
+     bfd *abfd;
+     unsigned int elength ATTRIBUTE_UNUSED;
+     struct orl *map;
+     unsigned int orl_count;
+     int stridx;
+{
+  unsigned int i;
+  unsigned int orl_count_32, orl_count_64;
+  unsigned int stridx_32, stridx_64;
+  const bfd_arch_info_type *arch_info;
+  bfd *object_bfd;
+
+  /* First, we look through the symbols and work out which are
+     from 32-bit objects and which from 64-bit ones.  */
+  orl_count_32 = 0;
+  orl_count_64 = 0;
+  stridx_32 = 0;
+  stridx_64 = 0;
+  object_bfd = NULL;
+  for (i = 0; i < orl_count; i++)
+    {
+      bfd *ob = (bfd *)map[i].pos;
+      unsigned int len;
+      if (ob != object_bfd)
+	arch_info = bfd_get_arch_info (ob);
+      len = strlen (*map[i].name) + 1;
+      if (arch_info->bits_per_address == 64)
+	{
+	  orl_count_64++;
+	  stridx_64 += len;
+	}
+      else
+	{
+	  orl_count_32++;
+	  stridx_32 += len;
+	}
+      object_bfd = ob;
+    }
+  /* A quick sanity check... */
+  BFD_ASSERT (orl_count_64 + orl_count_32 == orl_count);
+  BFD_ASSERT (stridx_64 + stridx_32 == stridx);
+
+  /* Now write out each map.  */
+  if (! xcoff_write_one_armap_big (abfd, map, orl_count, orl_count_32,
+				   stridx_32, false, 
+				   xcoff_ardata_big (abfd)->memoff,
+				   xcoff_ardata_big (abfd)->symoff))
+    return false;
+  if (! xcoff_write_one_armap_big (abfd, map, orl_count, orl_count_64,
+				   stridx_64, true,
+				   xcoff_ardata_big (abfd)->symoff,
+				   xcoff_ardata_big (abfd)->symoff64))
+    return false;
+    
   return true;
 }
 
@@ -2207,7 +2291,6 @@ xcoff_write_archive_contents_big (abfd)
       /* XXX This call actually should use %lld (at least on 32-bit
 	 machines) since the fields's width is 20 and there numbers with
 	 more than 32 bits can be represented.  */
-      sprintf (fhdr.symoff, "%ld", (long) nextoff);
       bfd_ardata (abfd)->tdata = (PTR) &fhdr;
       if (! _bfd_compute_and_write_armap (abfd, 0))
 	return false;

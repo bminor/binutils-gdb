@@ -1,3 +1,10 @@
+2000-07-25  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* coff-rs6000.c (xcoff_write_one_armap_big): New procedure.
+	(xcoff_write_armap_big): Write both 32-bit and 64-bit armaps.
+	(xcoff_write_archive_contents_big): Don't update the offset
+	of the symbol table, xcoff_write_armap will do it.
+
 2000-07-23  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elf32-mips.c (_bfd_mips_elf_check_relocs): Use abfd instead
