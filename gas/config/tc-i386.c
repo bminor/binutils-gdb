@@ -239,7 +239,7 @@ static char digit_chars[256];
 #define is_identifier_char(x) (identifier_chars[(unsigned char) x])
 #define is_digit_char(x) (digit_chars[(unsigned char) x])
 
-/* All non-digit non-letter charcters that may occur in an operand.  */
+/* All non-digit non-letter characters that may occur in an operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
 
 /* md_assemble() always leaves the strings it's passed unaltered.  To
@@ -4632,7 +4632,7 @@ md_apply_fix3 (fixP, valP, seg)
     }
 
   /* Fix a few things - the dynamic linker expects certain values here,
-     and we must not dissappoint it.  */
+     and we must not disappoint it.  */
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
       && fixP->fx_addsy)

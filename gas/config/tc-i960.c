@@ -177,7 +177,7 @@ static void relax_cobr PARAMS ((fragS *));
 static void s_leafproc PARAMS ((int, char *[]));
 /* Process '.sysproc' pseudo-op */
 static void s_sysproc PARAMS ((int, char *[]));
-/* Will a 'shlo' substiture for a 'ldconst'? */
+/* Will a 'shlo' substitute for a 'ldconst'? */
 static int shift_ok PARAMS ((int));
 /* Give syntax error */
 static void syntax PARAMS ((void));
@@ -1323,7 +1323,7 @@ ctrl_fmt (targP, opcode, num_ops)
 	  colon (brlab_next ());
 	}
 
-      /* The operand MUST be an ip-relative displacment. Parse it
+      /* The operand MUST be an ip-relative displacement. Parse it
          * and set up address fix for the instruction we just output.
        */
       get_cdisp (targP, "CTRL", opcode, 24, 0, 0);
@@ -1888,7 +1888,7 @@ parse_ldconst (arg)
        *        ldconst -1,<reg> ->subo 1,0,<reg>
        *        ldconst -31,<reg>->subo 31,0,<reg>
        *
-       * anthing else becomes:
+       * anything else becomes:
        *        lda xxx,<reg>
        */
       n = offs (e);

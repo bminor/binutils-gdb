@@ -43,7 +43,7 @@ error only one of OBJ_ELF and OBJ_SOM can be defined
 #ifdef OBJ_ELF
 #include "dwarf2dbg.h"
 
-/* A "convient" place to put object file dependencies which do
+/* A "convenient" place to put object file dependencies which do
    not need to be seen outside of tc-hppa.c.  */
 
 /* Object file formats specify relocation types.  */
@@ -748,7 +748,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 static struct pa_it the_insn;
 
-/* Points to the end of an expression just parsed by get_expressoin
+/* Points to the end of an expression just parsed by get_expression
    and friends.  FIXME.  This shouldn't be handled with a file-global
    variable.  */
 static char *expr_end;
@@ -1158,7 +1158,7 @@ static struct default_space_dict pa_def_spaces[] =
     continue; \
   }
 
-/* Simple range checking for FIELD againt HIGH and LOW bounds.
+/* Simple range checking for FIELD against HIGH and LOW bounds.
    IGNORE is used to suppress the error message.  */
 
 #define CHECK_FIELD(FIELD, HIGH, LOW, IGNORE) \
@@ -1186,7 +1186,7 @@ static struct default_space_dict pa_def_spaces[] =
       } \
   }
 
-/* Simple alignment checking for FIELD againt ALIGN (a power of two).
+/* Simple alignment checking for FIELD against ALIGN (a power of two).
    IGNORE is used to suppress the error message.  */
 
 #define CHECK_ALIGN(FIELD, ALIGN, IGNORE) \
@@ -1543,7 +1543,7 @@ md_assemble (str)
   /* Assemble the instruction.  Results are saved into "the_insn".  */
   pa_ip (str);
 
-  /* Get somewhere to put the assembled instrution.  */
+  /* Get somewhere to put the assembled instruction.  */
   to = frag_more (4);
 
   /* Output the opcode.  */
@@ -1639,7 +1639,7 @@ pa_ip (str)
       /* If this instruction is specific to a particular architecture,
 	 then set a new architecture.  */
       /* But do not automatically promote to pa2.0.  The automatic promotion
-	 crud is for compatability with HP's old assemblers only.  */
+	 crud is for compatibility with HP's old assemblers only.  */
       if (insn->arch < 20
 	  && bfd_get_mach (stdoutput) < insn->arch)
 	{
@@ -4845,7 +4845,7 @@ pa_parse_number (s, is_float)
 	  /* There is where we'd come for an undefined symbol
 	     or for an empty string.  For an empty string we
 	     will return zero.  That's a concession made for
-	     compatability with the braindamaged HP assemblers.  */
+	     compatibility with the braindamaged HP assemblers.  */
 	  if (*name == 0)
 	    num = 0;
 	  else
@@ -5216,11 +5216,11 @@ pa_get_absolute_expression (insn, strp)
   expression (&insn->exp);
   /* This is not perfect, but is a huge improvement over doing nothing.
 
-     The PA assembly syntax is ambigious in a variety of ways.  Consider
+     The PA assembly syntax is ambiguous in a variety of ways.  Consider
      this string "4 %r5"  Is that the number 4 followed by the register
      r5, or is that 4 MOD r5?
 
-     If we get a modulo expresion When looking for an absolute, we try
+     If we get a modulo expression when looking for an absolute, we try
      again cutting off the input string at the first whitespace character.  */
   if (insn->exp.X_op == O_modulus)
     {
@@ -5358,7 +5358,7 @@ pa_parse_nullif (s)
 }
 
 /* Parse a non-negated compare/subtract completer returning the
-   number (for encoding in instrutions) of the given completer.  */
+   number (for encoding in instructions) of the given completer.  */
 
 static int
 pa_parse_nonneg_cmpsub_cmpltr (s)
@@ -5429,7 +5429,7 @@ pa_parse_nonneg_cmpsub_cmpltr (s)
 }
 
 /* Parse a negated compare/subtract completer returning the
-   number (for encoding in instrutions) of the given completer.  */
+   number (for encoding in instructions) of the given completer.  */
 
 static int
 pa_parse_neg_cmpsub_cmpltr (s)
@@ -5504,7 +5504,7 @@ pa_parse_neg_cmpsub_cmpltr (s)
 }
 
 /* Parse a 64 bit compare and branch completer returning the number (for
-   encoding in instrutions) of the given completer.
+   encoding in instructions) of the given completer.
 
    Nonnegated comparisons are returned as 0-7, negated comparisons are
    returned as 8-15.  */
@@ -5601,7 +5601,7 @@ pa_parse_cmpb_64_cmpltr (s)
 }
 
 /* Parse a 64 bit compare immediate and branch completer returning the number
-   (for encoding in instrutions) of the given completer.  */
+   (for encoding in instructions) of the given completer.  */
 
 static int
 pa_parse_cmpib_64_cmpltr (s)
@@ -5663,7 +5663,7 @@ pa_parse_cmpib_64_cmpltr (s)
 }
 
 /* Parse a non-negated addition completer returning the number
-   (for encoding in instrutions) of the given completer.  */
+   (for encoding in instructions) of the given completer.  */
 
 static int
 pa_parse_nonneg_add_cmpltr (s)
@@ -5733,7 +5733,7 @@ pa_parse_nonneg_add_cmpltr (s)
 }
 
 /* Parse a negated addition completer returning the number
-   (for encoding in instrutions) of the given completer.  */
+   (for encoding in instructions) of the given completer.  */
 
 static int
 pa_parse_neg_add_cmpltr (s)
@@ -5807,7 +5807,7 @@ pa_parse_neg_add_cmpltr (s)
 }
 
 /* Parse a 64 bit wide mode add and branch completer returning the number (for
-   encoding in instrutions) of the given completer.  */
+   encoding in instructions) of the given completer.  */
 
 static int
 pa_parse_addb_64_cmpltr (s)
@@ -5974,7 +5974,7 @@ pa_brtab (begin)
 {
 
 #ifdef OBJ_SOM
-  /* The BRTAB relocations are only availble in SOM (to denote
+  /* The BRTAB relocations are only available in SOM (to denote
      the beginning and end of branch tables).  */
   char *where = frag_more (0);
 
@@ -6000,7 +6000,7 @@ pa_try (begin)
   if (! begin)
     expression (&exp);
 
-  /* The TRY relocations are only availble in SOM (to denote
+  /* The TRY relocations are only available in SOM (to denote
      the beginning and end of exception handling regions).  */
 
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
@@ -6423,7 +6423,7 @@ pa_enter (unused)
 }
 
 /* Process a .ENTRY pseudo-op.  .ENTRY marks the beginning of the
-   procesure.  */
+   procedure.  */
 static void
 pa_entry (unused)
      int unused ATTRIBUTE_UNUSED;
@@ -6781,7 +6781,7 @@ pa_type_args (symbolP, is_export)
 #endif
 	  *input_line_pointer = c;
 	}
-      /* Privelege level.  */
+      /* Privilege level.  */
       else if ((strncasecmp (name, "priv_lev", 8)) == 0)
 	{
 	  p = input_line_pointer;
@@ -6836,7 +6836,7 @@ pa_import (unused)
 	}
       else
 	{
-	  /* Sigh.  To be compatable with the HP assembler and to help
+	  /* Sigh.  To be compatible with the HP assembler and to help
 	     poorly written assembly code, we assign a type based on
 	     the current segment.  Note only BSF_FUNCTION really
 	     matters, we do not need to set the full SYMBOL_TYPE_* info.  */
@@ -7065,7 +7065,7 @@ pa_proc (unused)
   demand_empty_rest_of_line ();
 }
 
-/* Process the syntatical end of a procedure.  Make sure all the
+/* Process the syntactical end of a procedure.  Make sure all the
    appropriate pseudo-ops were found within the procedure.  */
 
 static void
@@ -7274,7 +7274,7 @@ pa_parse_space_stmt (space_name, create_flag)
   /* If create_flag is nonzero, then create the new space with
      the attributes computed above.  Else set the values in
      an already existing space -- this can only happen for
-     the first occurence of a built-in space.  */
+     the first occurrence of a built-in space.  */
   if (create_flag)
     space = create_new_space (space_name, spnum, loadable, defined,
 			      private, sort, seg, 1);
@@ -8462,7 +8462,7 @@ hppa_fix_adjustable (fixp)
      .			RR%sect+4092 == (R%sect)+4092
      .			RR%sect+4096 == (R%sect)-4096
      and the last address loses because rounding the addend to 8k
-     mutiples takes us up to 8192 with an offset of -4096.
+     multiples takes us up to 8192 with an offset of -4096.
 
      In cases where the LR% expression is identical to the RR% one we
      will never have a problem, but is so happens that gcc rounds

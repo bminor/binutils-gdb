@@ -698,7 +698,7 @@ static struct
 
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
 
-/* Forward delarations:  */
+/* Forward declarations:  */
 static int ar_is_in_integer_unit PARAMS ((int regnum));
 static void set_section PARAMS ((char *name));
 static unsigned int set_regstack PARAMS ((unsigned int, unsigned int,
@@ -2669,7 +2669,7 @@ optimize_unw_records (list)
 
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
-   this has been run, all neccessary information should be available
+   this has been run, all necessary information should be available
    within each record to generate an image.  */
 
 static void
@@ -2855,7 +2855,7 @@ setup_unwind_header (int size, unsigned char **mem)
   int x, extra = 0;
   valueT flag_value;
 
-  /* pad to pointer-size boundry.  */
+  /* pad to pointer-size boundary.  */
   x = size % md.pointer_size;
   if (x != 0)
     extra = md.pointer_size - x;
@@ -6574,7 +6574,7 @@ md_begin ()
 
   bfd_set_section_alignment (stdoutput, text_section, 4);
 
-  /* Make sure fucntion pointers get initialized.  */
+  /* Make sure function pointers get initialized.  */
   target_big_endian = -1;
   dot_byteorder (TARGET_BYTES_BIG_ENDIAN);
 
