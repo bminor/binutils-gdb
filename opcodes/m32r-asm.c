@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "symcat.h"
 #include "m32r-opc.h"
+#include "opintl.h"
 
 /* ??? The layout of this stuff is still work in progress.
    For speed in assembly/disassembly, we use inline functions.  That of course
@@ -73,7 +74,7 @@ parse_hi16 (strp, opindex, valuep)
   if (**strp == '#')
     ++*strp;
 
-  if (strncmp (*strp, "high(", 5) == 0)
+  if (strncasecmp (*strp, "high(", 5) == 0)
     {
       *strp += 5;
       errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_HI16_ULO,
@@ -86,7 +87,7 @@ parse_hi16 (strp, opindex, valuep)
 	*valuep >>= 16;
       return errmsg;
     }
-  else if (strncmp (*strp, "shigh(", 6) == 0)
+  else if (strncasecmp (*strp, "shigh(", 6) == 0)
     {
       *strp += 6;
       errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_HI16_SLO,
@@ -119,7 +120,7 @@ parse_slo16 (strp, opindex, valuep)
   if (**strp == '#')
     ++*strp;
 
-  if (strncmp (*strp, "low(", 4) == 0)
+  if (strncasecmp (*strp, "low(", 4) == 0)
     {
       *strp += 4;
       errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_LO16,
@@ -133,7 +134,7 @@ parse_slo16 (strp, opindex, valuep)
       return errmsg;
     }
 
-  if (strncmp (*strp, "sda(", 4) == 0)
+  if (strncasecmp (*strp, "sda(", 4) == 0)
     {
       *strp += 4;
       errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_SDA16, NULL, valuep);
@@ -162,7 +163,7 @@ parse_ulo16 (strp, opindex, valuep)
   if (**strp == '#')
     ++*strp;
 
-  if (strncmp (*strp, "low(", 4) == 0)
+  if (strncasecmp (*strp, "low(", 4) == 0)
     {
       *strp += 4;
       errmsg = cgen_parse_address (strp, opindex, BFD_RELOC_M32R_LO16,
@@ -284,7 +285,8 @@ m32r_cgen_parse_operand (opindex, strp, fields)
       break;
 
     default :
-      fprintf (stderr, "Unrecognized field %d while parsing.\n", opindex);
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while parsing.\n"), opindex);
       abort ();
   }
 
@@ -407,7 +409,8 @@ m32r_cgen_insert_operand (opindex, fields, buffer)
       break;
 
     default :
-      fprintf (stderr, "Unrecognized field %d while building insn.\n",
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while building insn.\n"),
 	       opindex);
       abort ();
   }
@@ -462,35 +465,42 @@ insert_normal (value, attrs, start, length, total_length, buffer)
 {
   bfd_vma x;
   static char buf[100];
+  /* Written this way to avoid undefined behaviour.
+     Yes, `long' will be bfd_vma but not yet.  */
+  long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+
+  /* If LENGTH is zero, this operand doesn't contribute to the value.  */
+  if (length == 0)
+    return NULL;
 
   /* Ensure VALUE will fit.  */
-  if ((attrs & (1 << CGEN_OPERAND_UNSIGNED)) != 0)
+  if ((attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED)) != 0)
     {
-      unsigned long max = (1 << length) - 1;
+      unsigned long max = mask;
       if ((unsigned long) value > max)
 	{
-	  const char *err = "operand out of range (%lu not between 0 and %lu)";
-
-	  sprintf (buf, err, value, max);
+	  /* xgettext:c-format */
+	  sprintf (buf, _("operand out of range (%lu not between 0 and %lu)"),
+		   value, max);
 	  return buf;
 	}
     }
   else
     {
-      long min = - (1 << (length - 1));
-      long max = (1 << (length - 1)) - 1;
+      long min = - (1L << (length - 1));
+      long max = (1L << (length - 1)) - 1;
       if (value < min || value > max)
 	{
-	  const char *err = "operand out of range (%ld not between %ld and %ld)";
-
-	  sprintf (buf, err, value, min, max);
+	  sprintf
+	    /* xgettext:c-format */
+	    (buf, _("operand out of range (%ld not between %ld and %ld)"),
+	     value, min, max);
 	  return buf;
 	}
     }
 
 #if 0 /*def CGEN_INT_INSN*/
-  *buffer |= ((value & ((1 << length) - 1))
-	      << (total_length - (start + length)));
+  *buffer |= (value & mask) << (total_length - (start + length));
 #else
   switch (total_length)
     {
@@ -513,8 +523,7 @@ insert_normal (value, attrs, start, length, total_length, buffer)
       abort ();
     }
 
-  x |= ((value & ((1 << length) - 1))
-	<< (total_length - (start + length)));
+  x |= (value & mask) << (total_length - (start + length));
 
   switch (total_length)
     {
@@ -575,8 +584,9 @@ parse_insn_normal (insn, strp, fields)
   p = CGEN_INSN_MNEMONIC (insn);
   while (* p && * p == * str)
     ++ p, ++ str;
+  
   if (* p || (* str && !isspace (* str)))
-    return "unrecognized instruction";
+    return _("unrecognized instruction");
 
   CGEN_INIT_PARSE ();
   cgen_init_parse_operand ();
@@ -614,7 +624,7 @@ parse_insn_normal (insn, strp, fields)
 	      /* Syntax char didn't match.  Can't be this insn.  */
 	      /* FIXME: would like to return something like
 		 "expected char `c'" */
-	      return "syntax error";
+	      return _("syntax error");
 	    }
 	  continue;
 	}
@@ -640,7 +650,7 @@ parse_insn_normal (insn, strp, fields)
 	++ str;
 
       if (* str != '\0')
-	return "junk at end of line"; /* FIXME: would like to include `str' */
+	return _("junk at end of line"); /* FIXME: would like to include `str' */
 
       return NULL;
     }
@@ -790,8 +800,13 @@ m32r_cgen_assemble_insn (str, fields, buf, errmsg)
      Need to track why it failed and pick the right one.  */
   {
     static char errbuf[100];
-    sprintf (errbuf, "bad instruction `%.50s%s'",
-	     start, strlen (start) > 50 ? "..." : "");
+    if (strlen (start) > 50)
+      /* xgettext:c-format */
+      sprintf (errbuf, _("bad instruction `%.50s...'"), start);
+    else 
+      /* xgettext:c-format */
+      sprintf (errbuf, _("bad instruction `%.50s'"), start);
+      
     *errmsg = errbuf;
     return NULL;
   }
