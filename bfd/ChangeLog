@@ -1,3 +1,7 @@
+2001-09-25  H.J. Lu  <hjl@gnu.org>
+
+	* bfd-in2.h: Regenerated.
+
 2001-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c: Add comment re linker function names and ordering.
@@ -84,13 +88,13 @@
 2001-09-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elfxx-ia64.c: Fix compile time warning messages.
-	* bfd/coff-mcore.c: Fix compile time warning messages.
-	* bfd/coff-ppc.c: Fix compile time warning messages.
-	* bfd/coffcode.h: Fix compile time warning messages.
-	* bfd/elf32-mips.c: Fix compile time warning messages.
-	* bfd/elf64-alpha.c: Fix compile time warning messages.
-	* bfd/libbfd.c: Fix compile time warning messages.
-	* bfd/bfd-in2.h: Regenerate.
+	* coff-mcore.c: Fix compile time warning messages.
+	* coff-ppc.c: Fix compile time warning messages.
+	* coffcode.h: Fix compile time warning messages.
+	* elf32-mips.c: Fix compile time warning messages.
+	* elf64-alpha.c: Fix compile time warning messages.
+	* libbfd.c: Fix compile time warning messages.
+	* bfd-in2.h: Regenerate.
 
 2001-09-21  Alan Modra  <amodra@bigpond.net.au>
 
