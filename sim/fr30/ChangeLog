@@ -1,3 +1,16 @@
+2001-03-05  Dave Brolley  <brolley@redhat.com>
+
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* model.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+
 2001-01-12  Frank Ch. Eigler  <fche@redhat.com>
 
 	* configure: Regenerated with sim_scache fix.

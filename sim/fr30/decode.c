@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Simulators.
 
@@ -282,69 +282,31 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
 {
   /* Result of decoder.  */
   FR30BF_INSN_TYPE itype;
+  CGEN_INSN_INT insn = base_insn;
 
   {
-    CGEN_INSN_INT insn = base_insn;
 
     {
       unsigned int val = (((insn >> 8) & (255 << 0)));
       switch (val)
       {
-      case 0 : itype = FR30BF_INSN_LDR13; goto extract_sfmt_ldr13;
-      case 1 : itype = FR30BF_INSN_LDR13UH; goto extract_sfmt_ldr13;
-      case 2 : itype = FR30BF_INSN_LDR13UB; goto extract_sfmt_ldr13;
-      case 3 : itype = FR30BF_INSN_LDR15; goto extract_sfmt_ldr15;
-      case 4 : itype = FR30BF_INSN_LD; goto extract_sfmt_ld;
-      case 5 : itype = FR30BF_INSN_LDUH; goto extract_sfmt_ld;
-      case 6 : itype = FR30BF_INSN_LDUB; goto extract_sfmt_ld;
-      case 7 :
+      case 0 : itype = FR30BF_INSN_LDR13; goto extract_sfmt_ldr13;      case 1 : itype = FR30BF_INSN_LDR13UH; goto extract_sfmt_ldr13;      case 2 : itype = FR30BF_INSN_LDR13UB; goto extract_sfmt_ldr13;      case 3 : itype = FR30BF_INSN_LDR15; goto extract_sfmt_ldr15;      case 4 : itype = FR30BF_INSN_LD; goto extract_sfmt_ld;      case 5 : itype = FR30BF_INSN_LDUH; goto extract_sfmt_ld;      case 6 : itype = FR30BF_INSN_LDUB; goto extract_sfmt_ld;      case 7 :
         {
-          unsigned int val = (((insn >> 4) & (15 << 0)));
+          unsigned int val = (((insn >> 6) & (1 << 1)) | ((insn >> 4) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FR30BF_INSN_LDR15GR; goto extract_sfmt_ldr15gr;
-          case 1 : itype = FR30BF_INSN_MOV2PS; goto extract_sfmt_mov2ps;
-          case 8 : itype = FR30BF_INSN_LDR15DR; goto extract_sfmt_ldr15dr;
-          case 9 : itype = FR30BF_INSN_LDR15PS; goto extract_sfmt_ldr15ps;
-          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = FR30BF_INSN_LDR15GR; goto extract_sfmt_ldr15gr;          case 1 : itype = FR30BF_INSN_MOV2PS; goto extract_sfmt_mov2ps;          case 2 : itype = FR30BF_INSN_LDR15DR; goto extract_sfmt_ldr15dr;          case 3 : itype = FR30BF_INSN_LDR15PS; goto extract_sfmt_ldr15ps;          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 8 : itype = FR30BF_INSN_DMOV2R13; goto extract_sfmt_dmov2r13;
-      case 9 : itype = FR30BF_INSN_DMOV2R13H; goto extract_sfmt_dmov2r13h;
-      case 10 : itype = FR30BF_INSN_DMOV2R13B; goto extract_sfmt_dmov2r13b;
-      case 11 : itype = FR30BF_INSN_DMOV2R15PD; goto extract_sfmt_dmov2r15pd;
-      case 12 : itype = FR30BF_INSN_DMOV2R13PI; goto extract_sfmt_dmov2r13pi;
-      case 13 : itype = FR30BF_INSN_DMOV2R13PIH; goto extract_sfmt_dmov2r13pih;
-      case 14 : itype = FR30BF_INSN_DMOV2R13PIB; goto extract_sfmt_dmov2r13pib;
-      case 15 : itype = FR30BF_INSN_ENTER; goto extract_sfmt_enter;
-      case 16 : itype = FR30BF_INSN_STR13; goto extract_sfmt_str13;
-      case 17 : itype = FR30BF_INSN_STR13H; goto extract_sfmt_str13;
-      case 18 : itype = FR30BF_INSN_STR13B; goto extract_sfmt_str13;
-      case 19 : itype = FR30BF_INSN_STR15; goto extract_sfmt_str15;
-      case 20 : itype = FR30BF_INSN_ST; goto extract_sfmt_st;
-      case 21 : itype = FR30BF_INSN_STH; goto extract_sfmt_st;
-      case 22 : itype = FR30BF_INSN_STB; goto extract_sfmt_st;
-      case 23 :
+      case 8 : itype = FR30BF_INSN_DMOV2R13; goto extract_sfmt_dmov2r13;      case 9 : itype = FR30BF_INSN_DMOV2R13H; goto extract_sfmt_dmov2r13h;      case 10 : itype = FR30BF_INSN_DMOV2R13B; goto extract_sfmt_dmov2r13b;      case 11 : itype = FR30BF_INSN_DMOV2R15PD; goto extract_sfmt_dmov2r15pd;      case 12 : itype = FR30BF_INSN_DMOV2R13PI; goto extract_sfmt_dmov2r13pi;      case 13 : itype = FR30BF_INSN_DMOV2R13PIH; goto extract_sfmt_dmov2r13pih;      case 14 : itype = FR30BF_INSN_DMOV2R13PIB; goto extract_sfmt_dmov2r13pib;      case 15 : itype = FR30BF_INSN_ENTER; goto extract_sfmt_enter;      case 16 : itype = FR30BF_INSN_STR13; goto extract_sfmt_str13;      case 17 : itype = FR30BF_INSN_STR13H; goto extract_sfmt_str13;      case 18 : itype = FR30BF_INSN_STR13B; goto extract_sfmt_str13;      case 19 : itype = FR30BF_INSN_STR15; goto extract_sfmt_str15;      case 20 : itype = FR30BF_INSN_ST; goto extract_sfmt_st;      case 21 : itype = FR30BF_INSN_STH; goto extract_sfmt_st;      case 22 : itype = FR30BF_INSN_STB; goto extract_sfmt_st;      case 23 :
         {
-          unsigned int val = (((insn >> 4) & (15 << 0)));
+          unsigned int val = (((insn >> 6) & (1 << 1)) | ((insn >> 4) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FR30BF_INSN_STR15GR; goto extract_sfmt_str15gr;
-          case 1 : itype = FR30BF_INSN_MOVPS; goto extract_sfmt_movps;
-          case 8 : itype = FR30BF_INSN_STR15DR; goto extract_sfmt_str15dr;
-          case 9 : itype = FR30BF_INSN_STR15PS; goto extract_sfmt_str15ps;
-          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = FR30BF_INSN_STR15GR; goto extract_sfmt_str15gr;          case 1 : itype = FR30BF_INSN_MOVPS; goto extract_sfmt_movps;          case 2 : itype = FR30BF_INSN_STR15DR; goto extract_sfmt_str15dr;          case 3 : itype = FR30BF_INSN_STR15PS; goto extract_sfmt_str15ps;          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 24 : itype = FR30BF_INSN_DMOVR13; goto extract_sfmt_dmovr13;
-      case 25 : itype = FR30BF_INSN_DMOVR13H; goto extract_sfmt_dmovr13h;
-      case 26 : itype = FR30BF_INSN_DMOVR13B; goto extract_sfmt_dmovr13b;
-      case 27 : itype = FR30BF_INSN_DMOVR15PI; goto extract_sfmt_dmovr15pi;
-      case 28 : itype = FR30BF_INSN_DMOVR13PI; goto extract_sfmt_dmovr13pi;
-      case 29 : itype = FR30BF_INSN_DMOVR13PIH; goto extract_sfmt_dmovr13pih;
-      case 30 : itype = FR30BF_INSN_DMOVR13PIB; goto extract_sfmt_dmovr13pib;
-      case 31 : itype = FR30BF_INSN_INT; goto extract_sfmt_int;
-      case 32 : /* fall through */
+      case 24 : itype = FR30BF_INSN_DMOVR13; goto extract_sfmt_dmovr13;      case 25 : itype = FR30BF_INSN_DMOVR13H; goto extract_sfmt_dmovr13h;      case 26 : itype = FR30BF_INSN_DMOVR13B; goto extract_sfmt_dmovr13b;      case 27 : itype = FR30BF_INSN_DMOVR15PI; goto extract_sfmt_dmovr15pi;      case 28 : itype = FR30BF_INSN_DMOVR13PI; goto extract_sfmt_dmovr13pi;      case 29 : itype = FR30BF_INSN_DMOVR13PIH; goto extract_sfmt_dmovr13pih;      case 30 : itype = FR30BF_INSN_DMOVR13PIB; goto extract_sfmt_dmovr13pib;      case 31 : itype = FR30BF_INSN_INT; goto extract_sfmt_int;      case 32 : /* fall through */
       case 33 : /* fall through */
       case 34 : /* fall through */
       case 35 : /* fall through */
@@ -359,8 +321,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 44 : /* fall through */
       case 45 : /* fall through */
       case 46 : /* fall through */
-      case 47 : itype = FR30BF_INSN_LDR14; goto extract_sfmt_ldr14;
-      case 48 : /* fall through */
+      case 47 : itype = FR30BF_INSN_LDR14; goto extract_sfmt_ldr14;      case 48 : /* fall through */
       case 49 : /* fall through */
       case 50 : /* fall through */
       case 51 : /* fall through */
@@ -375,8 +336,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 60 : /* fall through */
       case 61 : /* fall through */
       case 62 : /* fall through */
-      case 63 : itype = FR30BF_INSN_STR14; goto extract_sfmt_str14;
-      case 64 : /* fall through */
+      case 63 : itype = FR30BF_INSN_STR14; goto extract_sfmt_str14;      case 64 : /* fall through */
       case 65 : /* fall through */
       case 66 : /* fall through */
       case 67 : /* fall through */
@@ -391,8 +351,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 76 : /* fall through */
       case 77 : /* fall through */
       case 78 : /* fall through */
-      case 79 : itype = FR30BF_INSN_LDR14UH; goto extract_sfmt_ldr14uh;
-      case 80 : /* fall through */
+      case 79 : itype = FR30BF_INSN_LDR14UH; goto extract_sfmt_ldr14uh;      case 80 : /* fall through */
       case 81 : /* fall through */
       case 82 : /* fall through */
       case 83 : /* fall through */
@@ -407,8 +366,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 92 : /* fall through */
       case 93 : /* fall through */
       case 94 : /* fall through */
-      case 95 : itype = FR30BF_INSN_STR14H; goto extract_sfmt_str14h;
-      case 96 : /* fall through */
+      case 95 : itype = FR30BF_INSN_STR14H; goto extract_sfmt_str14h;      case 96 : /* fall through */
       case 97 : /* fall through */
       case 98 : /* fall through */
       case 99 : /* fall through */
@@ -423,8 +381,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 108 : /* fall through */
       case 109 : /* fall through */
       case 110 : /* fall through */
-      case 111 : itype = FR30BF_INSN_LDR14UB; goto extract_sfmt_ldr14ub;
-      case 112 : /* fall through */
+      case 111 : itype = FR30BF_INSN_LDR14UB; goto extract_sfmt_ldr14ub;      case 112 : /* fall through */
       case 113 : /* fall through */
       case 114 : /* fall through */
       case 115 : /* fall through */
@@ -439,110 +396,23 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 124 : /* fall through */
       case 125 : /* fall through */
       case 126 : /* fall through */
-      case 127 : itype = FR30BF_INSN_STR14B; goto extract_sfmt_str14b;
-      case 128 : itype = FR30BF_INSN_BANDL; goto extract_sfmt_bandl;
-      case 129 : itype = FR30BF_INSN_BANDH; goto extract_sfmt_bandl;
-      case 130 : itype = FR30BF_INSN_AND; goto extract_sfmt_and;
-      case 131 : itype = FR30BF_INSN_ANDCCR; goto extract_sfmt_andccr;
-      case 132 : itype = FR30BF_INSN_ANDM; goto extract_sfmt_andm;
-      case 133 : itype = FR30BF_INSN_ANDH; goto extract_sfmt_andh;
-      case 134 : itype = FR30BF_INSN_ANDB; goto extract_sfmt_andb;
-      case 135 : itype = FR30BF_INSN_STILM; goto extract_sfmt_stilm;
-      case 136 : itype = FR30BF_INSN_BTSTL; goto extract_sfmt_btstl;
-      case 137 : itype = FR30BF_INSN_BTSTH; goto extract_sfmt_btstl;
-      case 138 : itype = FR30BF_INSN_XCHB; goto extract_sfmt_xchb;
-      case 139 : itype = FR30BF_INSN_MOV; goto extract_sfmt_mov;
-      case 140 : itype = FR30BF_INSN_LDM0; goto extract_sfmt_ldm0;
-      case 141 : itype = FR30BF_INSN_LDM1; goto extract_sfmt_ldm1;
-      case 142 : itype = FR30BF_INSN_STM0; goto extract_sfmt_stm0;
-      case 143 : itype = FR30BF_INSN_STM1; goto extract_sfmt_stm1;
-      case 144 : itype = FR30BF_INSN_BORL; goto extract_sfmt_bandl;
-      case 145 : itype = FR30BF_INSN_BORH; goto extract_sfmt_bandl;
-      case 146 : itype = FR30BF_INSN_OR; goto extract_sfmt_and;
-      case 147 : itype = FR30BF_INSN_ORCCR; goto extract_sfmt_andccr;
-      case 148 : itype = FR30BF_INSN_ORM; goto extract_sfmt_andm;
-      case 149 : itype = FR30BF_INSN_ORH; goto extract_sfmt_andh;
-      case 150 : itype = FR30BF_INSN_ORB; goto extract_sfmt_andb;
-      case 151 :
+      case 127 : itype = FR30BF_INSN_STR14B; goto extract_sfmt_str14b;      case 128 : itype = FR30BF_INSN_BANDL; goto extract_sfmt_bandl;      case 129 : itype = FR30BF_INSN_BANDH; goto extract_sfmt_bandl;      case 130 : itype = FR30BF_INSN_AND; goto extract_sfmt_and;      case 131 : itype = FR30BF_INSN_ANDCCR; goto extract_sfmt_andccr;      case 132 : itype = FR30BF_INSN_ANDM; goto extract_sfmt_andm;      case 133 : itype = FR30BF_INSN_ANDH; goto extract_sfmt_andh;      case 134 : itype = FR30BF_INSN_ANDB; goto extract_sfmt_andb;      case 135 : itype = FR30BF_INSN_STILM; goto extract_sfmt_stilm;      case 136 : itype = FR30BF_INSN_BTSTL; goto extract_sfmt_btstl;      case 137 : itype = FR30BF_INSN_BTSTH; goto extract_sfmt_btstl;      case 138 : itype = FR30BF_INSN_XCHB; goto extract_sfmt_xchb;      case 139 : itype = FR30BF_INSN_MOV; goto extract_sfmt_mov;      case 140 : itype = FR30BF_INSN_LDM0; goto extract_sfmt_ldm0;      case 141 : itype = FR30BF_INSN_LDM1; goto extract_sfmt_ldm1;      case 142 : itype = FR30BF_INSN_STM0; goto extract_sfmt_stm0;      case 143 : itype = FR30BF_INSN_STM1; goto extract_sfmt_stm1;      case 144 : itype = FR30BF_INSN_BORL; goto extract_sfmt_bandl;      case 145 : itype = FR30BF_INSN_BORH; goto extract_sfmt_bandl;      case 146 : itype = FR30BF_INSN_OR; goto extract_sfmt_and;      case 147 : itype = FR30BF_INSN_ORCCR; goto extract_sfmt_andccr;      case 148 : itype = FR30BF_INSN_ORM; goto extract_sfmt_andm;      case 149 : itype = FR30BF_INSN_ORH; goto extract_sfmt_andh;      case 150 : itype = FR30BF_INSN_ORB; goto extract_sfmt_andb;      case 151 :
         {
           unsigned int val = (((insn >> 4) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FR30BF_INSN_JMP; goto extract_sfmt_jmp;
-          case 1 : itype = FR30BF_INSN_CALLR; goto extract_sfmt_callr;
-          case 2 : itype = FR30BF_INSN_RET; goto extract_sfmt_ret;
-          case 3 : itype = FR30BF_INSN_RETI; goto extract_sfmt_reti;
-          case 4 : itype = FR30BF_INSN_DIV0S; goto extract_sfmt_div0s;
-          case 5 : itype = FR30BF_INSN_DIV0U; goto extract_sfmt_div0u;
-          case 6 : itype = FR30BF_INSN_DIV1; goto extract_sfmt_div1;
-          case 7 : itype = FR30BF_INSN_DIV2; goto extract_sfmt_div2;
-          case 8 : itype = FR30BF_INSN_EXTSB; goto extract_sfmt_extsb;
-          case 9 : itype = FR30BF_INSN_EXTUB; goto extract_sfmt_extub;
-          case 10 : itype = FR30BF_INSN_EXTSH; goto extract_sfmt_extsh;
-          case 11 : itype = FR30BF_INSN_EXTUH; goto extract_sfmt_extuh;
-          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = FR30BF_INSN_JMP; goto extract_sfmt_jmp;          case 1 : itype = FR30BF_INSN_CALLR; goto extract_sfmt_callr;          case 2 : itype = FR30BF_INSN_RET; goto extract_sfmt_ret;          case 3 : itype = FR30BF_INSN_RETI; goto extract_sfmt_reti;          case 4 : itype = FR30BF_INSN_DIV0S; goto extract_sfmt_div0s;          case 5 : itype = FR30BF_INSN_DIV0U; goto extract_sfmt_div0u;          case 6 : itype = FR30BF_INSN_DIV1; goto extract_sfmt_div1;          case 7 : itype = FR30BF_INSN_DIV2; goto extract_sfmt_div2;          case 8 : itype = FR30BF_INSN_EXTSB; goto extract_sfmt_extsb;          case 9 : itype = FR30BF_INSN_EXTUB; goto extract_sfmt_extub;          case 10 : itype = FR30BF_INSN_EXTSH; goto extract_sfmt_extsh;          case 11 : itype = FR30BF_INSN_EXTUH; goto extract_sfmt_extuh;          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 152 : itype = FR30BF_INSN_BEORL; goto extract_sfmt_bandl;
-      case 153 : itype = FR30BF_INSN_BEORH; goto extract_sfmt_bandl;
-      case 154 : itype = FR30BF_INSN_EOR; goto extract_sfmt_and;
-      case 155 : itype = FR30BF_INSN_LDI20; goto extract_sfmt_ldi20;
-      case 156 : itype = FR30BF_INSN_EORM; goto extract_sfmt_andm;
-      case 157 : itype = FR30BF_INSN_EORH; goto extract_sfmt_andh;
-      case 158 : itype = FR30BF_INSN_EORB; goto extract_sfmt_andb;
-      case 159 :
+      case 152 : itype = FR30BF_INSN_BEORL; goto extract_sfmt_bandl;      case 153 : itype = FR30BF_INSN_BEORH; goto extract_sfmt_bandl;      case 154 : itype = FR30BF_INSN_EOR; goto extract_sfmt_and;      case 155 : itype = FR30BF_INSN_LDI20; goto extract_sfmt_ldi20;      case 156 : itype = FR30BF_INSN_EORM; goto extract_sfmt_andm;      case 157 : itype = FR30BF_INSN_EORH; goto extract_sfmt_andh;      case 158 : itype = FR30BF_INSN_EORB; goto extract_sfmt_andb;      case 159 :
         {
           unsigned int val = (((insn >> 4) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FR30BF_INSN_JMPD; goto extract_sfmt_jmp;
-          case 1 : itype = FR30BF_INSN_CALLRD; goto extract_sfmt_callr;
-          case 2 : itype = FR30BF_INSN_RET_D; goto extract_sfmt_ret;
-          case 3 : itype = FR30BF_INSN_INTE; goto extract_sfmt_inte;
-          case 6 : itype = FR30BF_INSN_DIV3; goto extract_sfmt_div3;
-          case 7 : itype = FR30BF_INSN_DIV4S; goto extract_sfmt_div4s;
-          case 8 : itype = FR30BF_INSN_LDI32; goto extract_sfmt_ldi32;
-          case 9 : itype = FR30BF_INSN_LEAVE; goto extract_sfmt_leave;
-          case 10 : itype = FR30BF_INSN_NOP; goto extract_sfmt_bnod;
-          case 12 : itype = FR30BF_INSN_COPOP; goto extract_sfmt_copop;
-          case 13 : itype = FR30BF_INSN_COPLD; goto extract_sfmt_copop;
-          case 14 : itype = FR30BF_INSN_COPST; goto extract_sfmt_copop;
-          case 15 : itype = FR30BF_INSN_COPSV; goto extract_sfmt_copop;
-          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = FR30BF_INSN_JMPD; goto extract_sfmt_jmp;          case 1 : itype = FR30BF_INSN_CALLRD; goto extract_sfmt_callr;          case 2 : itype = FR30BF_INSN_RET_D; goto extract_sfmt_ret;          case 3 : itype = FR30BF_INSN_INTE; goto extract_sfmt_inte;          case 6 : itype = FR30BF_INSN_DIV3; goto extract_sfmt_div3;          case 7 : itype = FR30BF_INSN_DIV4S; goto extract_sfmt_div4s;          case 8 : itype = FR30BF_INSN_LDI32; goto extract_sfmt_ldi32;          case 9 : itype = FR30BF_INSN_LEAVE; goto extract_sfmt_leave;          case 10 : itype = FR30BF_INSN_NOP; goto extract_sfmt_bnod;          case 12 : itype = FR30BF_INSN_COPOP; goto extract_sfmt_copop;          case 13 : itype = FR30BF_INSN_COPLD; goto extract_sfmt_copop;          case 14 : itype = FR30BF_INSN_COPST; goto extract_sfmt_copop;          case 15 : itype = FR30BF_INSN_COPSV; goto extract_sfmt_copop;          default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 160 : itype = FR30BF_INSN_ADDNI; goto extract_sfmt_addni;
-      case 161 : itype = FR30BF_INSN_ADDN2; goto extract_sfmt_addn2;
-      case 162 : itype = FR30BF_INSN_ADDN; goto extract_sfmt_addn;
-      case 163 : itype = FR30BF_INSN_ADDSP; goto extract_sfmt_addsp;
-      case 164 : itype = FR30BF_INSN_ADDI; goto extract_sfmt_addi;
-      case 165 : itype = FR30BF_INSN_ADD2; goto extract_sfmt_add2;
-      case 166 : itype = FR30BF_INSN_ADD; goto extract_sfmt_add;
-      case 167 : itype = FR30BF_INSN_ADDC; goto extract_sfmt_addc;
-      case 168 : itype = FR30BF_INSN_CMPI; goto extract_sfmt_cmpi;
-      case 169 : itype = FR30BF_INSN_CMP2; goto extract_sfmt_cmp2;
-      case 170 : itype = FR30BF_INSN_CMP; goto extract_sfmt_cmp;
-      case 171 : itype = FR30BF_INSN_MULU; goto extract_sfmt_mulu;
-      case 172 : itype = FR30BF_INSN_SUB; goto extract_sfmt_add;
-      case 173 : itype = FR30BF_INSN_SUBC; goto extract_sfmt_addc;
-      case 174 : itype = FR30BF_INSN_SUBN; goto extract_sfmt_addn;
-      case 175 : itype = FR30BF_INSN_MUL; goto extract_sfmt_mul;
-      case 176 : itype = FR30BF_INSN_LSRI; goto extract_sfmt_lsli;
-      case 177 : itype = FR30BF_INSN_LSR2; goto extract_sfmt_lsli;
-      case 178 : itype = FR30BF_INSN_LSR; goto extract_sfmt_lsl;
-      case 179 : itype = FR30BF_INSN_MOV2DR; goto extract_sfmt_mov2dr;
-      case 180 : itype = FR30BF_INSN_LSLI; goto extract_sfmt_lsli;
-      case 181 : itype = FR30BF_INSN_LSL2; goto extract_sfmt_lsli;
-      case 182 : itype = FR30BF_INSN_LSL; goto extract_sfmt_lsl;
-      case 183 : itype = FR30BF_INSN_MOVDR; goto extract_sfmt_movdr;
-      case 184 : itype = FR30BF_INSN_ASRI; goto extract_sfmt_lsli;
-      case 185 : itype = FR30BF_INSN_ASR2; goto extract_sfmt_lsli;
-      case 186 : itype = FR30BF_INSN_ASR; goto extract_sfmt_lsl;
-      case 187 : itype = FR30BF_INSN_MULUH; goto extract_sfmt_mulh;
-      case 188 : itype = FR30BF_INSN_LDRES; goto extract_sfmt_ldres;
-      case 189 : itype = FR30BF_INSN_STRES; goto extract_sfmt_ldres;
-      case 191 : itype = FR30BF_INSN_MULH; goto extract_sfmt_mulh;
-      case 192 : /* fall through */
+      case 160 : itype = FR30BF_INSN_ADDNI; goto extract_sfmt_addni;      case 161 : itype = FR30BF_INSN_ADDN2; goto extract_sfmt_addn2;      case 162 : itype = FR30BF_INSN_ADDN; goto extract_sfmt_addn;      case 163 : itype = FR30BF_INSN_ADDSP; goto extract_sfmt_addsp;      case 164 : itype = FR30BF_INSN_ADDI; goto extract_sfmt_addi;      case 165 : itype = FR30BF_INSN_ADD2; goto extract_sfmt_add2;      case 166 : itype = FR30BF_INSN_ADD; goto extract_sfmt_add;      case 167 : itype = FR30BF_INSN_ADDC; goto extract_sfmt_addc;      case 168 : itype = FR30BF_INSN_CMPI; goto extract_sfmt_cmpi;      case 169 : itype = FR30BF_INSN_CMP2; goto extract_sfmt_cmp2;      case 170 : itype = FR30BF_INSN_CMP; goto extract_sfmt_cmp;      case 171 : itype = FR30BF_INSN_MULU; goto extract_sfmt_mulu;      case 172 : itype = FR30BF_INSN_SUB; goto extract_sfmt_add;      case 173 : itype = FR30BF_INSN_SUBC; goto extract_sfmt_addc;      case 174 : itype = FR30BF_INSN_SUBN; goto extract_sfmt_addn;      case 175 : itype = FR30BF_INSN_MUL; goto extract_sfmt_mul;      case 176 : itype = FR30BF_INSN_LSRI; goto extract_sfmt_lsli;      case 177 : itype = FR30BF_INSN_LSR2; goto extract_sfmt_lsli;      case 178 : itype = FR30BF_INSN_LSR; goto extract_sfmt_lsl;      case 179 : itype = FR30BF_INSN_MOV2DR; goto extract_sfmt_mov2dr;      case 180 : itype = FR30BF_INSN_LSLI; goto extract_sfmt_lsli;      case 181 : itype = FR30BF_INSN_LSL2; goto extract_sfmt_lsli;      case 182 : itype = FR30BF_INSN_LSL; goto extract_sfmt_lsl;      case 183 : itype = FR30BF_INSN_MOVDR; goto extract_sfmt_movdr;      case 184 : itype = FR30BF_INSN_ASRI; goto extract_sfmt_lsli;      case 185 : itype = FR30BF_INSN_ASR2; goto extract_sfmt_lsli;      case 186 : itype = FR30BF_INSN_ASR; goto extract_sfmt_lsl;      case 187 : itype = FR30BF_INSN_MULUH; goto extract_sfmt_mulh;      case 188 : itype = FR30BF_INSN_LDRES; goto extract_sfmt_ldres;      case 189 : itype = FR30BF_INSN_STRES; goto extract_sfmt_ldres;      case 191 : itype = FR30BF_INSN_MULH; goto extract_sfmt_mulh;      case 192 : /* fall through */
       case 193 : /* fall through */
       case 194 : /* fall through */
       case 195 : /* fall through */
@@ -557,56 +427,21 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 204 : /* fall through */
       case 205 : /* fall through */
       case 206 : /* fall through */
-      case 207 : itype = FR30BF_INSN_LDI8; goto extract_sfmt_ldi8;
-      case 208 : /* fall through */
+      case 207 : itype = FR30BF_INSN_LDI8; goto extract_sfmt_ldi8;      case 208 : /* fall through */
       case 209 : /* fall through */
       case 210 : /* fall through */
       case 211 : /* fall through */
       case 212 : /* fall through */
       case 213 : /* fall through */
       case 214 : /* fall through */
-      case 215 : itype = FR30BF_INSN_CALL; goto extract_sfmt_call;
-      case 216 : /* fall through */
+      case 215 : itype = FR30BF_INSN_CALL; goto extract_sfmt_call;      case 216 : /* fall through */
       case 217 : /* fall through */
       case 218 : /* fall through */
       case 219 : /* fall through */
       case 220 : /* fall through */
       case 221 : /* fall through */
       case 222 : /* fall through */
-      case 223 : itype = FR30BF_INSN_CALLD; goto extract_sfmt_call;
-      case 224 : itype = FR30BF_INSN_BRA; goto extract_sfmt_brad;
-      case 225 : itype = FR30BF_INSN_BNO; goto extract_sfmt_bnod;
-      case 226 : itype = FR30BF_INSN_BEQ; goto extract_sfmt_beqd;
-      case 227 : itype = FR30BF_INSN_BNE; goto extract_sfmt_beqd;
-      case 228 : itype = FR30BF_INSN_BC; goto extract_sfmt_bcd;
-      case 229 : itype = FR30BF_INSN_BNC; goto extract_sfmt_bcd;
-      case 230 : itype = FR30BF_INSN_BN; goto extract_sfmt_bnd;
-      case 231 : itype = FR30BF_INSN_BP; goto extract_sfmt_bnd;
-      case 232 : itype = FR30BF_INSN_BV; goto extract_sfmt_bvd;
-      case 233 : itype = FR30BF_INSN_BNV; goto extract_sfmt_bvd;
-      case 234 : itype = FR30BF_INSN_BLT; goto extract_sfmt_bltd;
-      case 235 : itype = FR30BF_INSN_BGE; goto extract_sfmt_bltd;
-      case 236 : itype = FR30BF_INSN_BLE; goto extract_sfmt_bled;
-      case 237 : itype = FR30BF_INSN_BGT; goto extract_sfmt_bled;
-      case 238 : itype = FR30BF_INSN_BLS; goto extract_sfmt_blsd;
-      case 239 : itype = FR30BF_INSN_BHI; goto extract_sfmt_blsd;
-      case 240 : itype = FR30BF_INSN_BRAD; goto extract_sfmt_brad;
-      case 241 : itype = FR30BF_INSN_BNOD; goto extract_sfmt_bnod;
-      case 242 : itype = FR30BF_INSN_BEQD; goto extract_sfmt_beqd;
-      case 243 : itype = FR30BF_INSN_BNED; goto extract_sfmt_beqd;
-      case 244 : itype = FR30BF_INSN_BCD; goto extract_sfmt_bcd;
-      case 245 : itype = FR30BF_INSN_BNCD; goto extract_sfmt_bcd;
-      case 246 : itype = FR30BF_INSN_BND; goto extract_sfmt_bnd;
-      case 247 : itype = FR30BF_INSN_BPD; goto extract_sfmt_bnd;
-      case 248 : itype = FR30BF_INSN_BVD; goto extract_sfmt_bvd;
-      case 249 : itype = FR30BF_INSN_BNVD; goto extract_sfmt_bvd;
-      case 250 : itype = FR30BF_INSN_BLTD; goto extract_sfmt_bltd;
-      case 251 : itype = FR30BF_INSN_BGED; goto extract_sfmt_bltd;
-      case 252 : itype = FR30BF_INSN_BLED; goto extract_sfmt_bled;
-      case 253 : itype = FR30BF_INSN_BGTD; goto extract_sfmt_bled;
-      case 254 : itype = FR30BF_INSN_BLSD; goto extract_sfmt_blsd;
-      case 255 : itype = FR30BF_INSN_BHID; goto extract_sfmt_blsd;
-      default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 223 : itype = FR30BF_INSN_CALLD; goto extract_sfmt_call;      case 224 : itype = FR30BF_INSN_BRA; goto extract_sfmt_brad;      case 225 : itype = FR30BF_INSN_BNO; goto extract_sfmt_bnod;      case 226 : itype = FR30BF_INSN_BEQ; goto extract_sfmt_beqd;      case 227 : itype = FR30BF_INSN_BNE; goto extract_sfmt_beqd;      case 228 : itype = FR30BF_INSN_BC; goto extract_sfmt_bcd;      case 229 : itype = FR30BF_INSN_BNC; goto extract_sfmt_bcd;      case 230 : itype = FR30BF_INSN_BN; goto extract_sfmt_bnd;      case 231 : itype = FR30BF_INSN_BP; goto extract_sfmt_bnd;      case 232 : itype = FR30BF_INSN_BV; goto extract_sfmt_bvd;      case 233 : itype = FR30BF_INSN_BNV; goto extract_sfmt_bvd;      case 234 : itype = FR30BF_INSN_BLT; goto extract_sfmt_bltd;      case 235 : itype = FR30BF_INSN_BGE; goto extract_sfmt_bltd;      case 236 : itype = FR30BF_INSN_BLE; goto extract_sfmt_bled;      case 237 : itype = FR30BF_INSN_BGT; goto extract_sfmt_bled;      case 238 : itype = FR30BF_INSN_BLS; goto extract_sfmt_blsd;      case 239 : itype = FR30BF_INSN_BHI; goto extract_sfmt_blsd;      case 240 : itype = FR30BF_INSN_BRAD; goto extract_sfmt_brad;      case 241 : itype = FR30BF_INSN_BNOD; goto extract_sfmt_bnod;      case 242 : itype = FR30BF_INSN_BEQD; goto extract_sfmt_beqd;      case 243 : itype = FR30BF_INSN_BNED; goto extract_sfmt_beqd;      case 244 : itype = FR30BF_INSN_BCD; goto extract_sfmt_bcd;      case 245 : itype = FR30BF_INSN_BNCD; goto extract_sfmt_bcd;      case 246 : itype = FR30BF_INSN_BND; goto extract_sfmt_bnd;      case 247 : itype = FR30BF_INSN_BPD; goto extract_sfmt_bnd;      case 248 : itype = FR30BF_INSN_BVD; goto extract_sfmt_bvd;      case 249 : itype = FR30BF_INSN_BNVD; goto extract_sfmt_bvd;      case 250 : itype = FR30BF_INSN_BLTD; goto extract_sfmt_bltd;      case 251 : itype = FR30BF_INSN_BGED; goto extract_sfmt_bltd;      case 252 : itype = FR30BF_INSN_BLED; goto extract_sfmt_bled;      case 253 : itype = FR30BF_INSN_BGTD; goto extract_sfmt_bled;      case 254 : itype = FR30BF_INSN_BLSD; goto extract_sfmt_blsd;      case 255 : itype = FR30BF_INSN_BHID; goto extract_sfmt_blsd;      default : itype = FR30BF_INSN_X_INVALID; goto extract_sfmt_empty;
       }
     }
   }
@@ -616,7 +451,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -630,7 +464,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_add:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_Rj;
     UINT f_Ri;
@@ -661,7 +494,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addi:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_u4;
     UINT f_Ri;
@@ -690,7 +522,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_add2:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     SI f_m4;
     UINT f_Ri;
@@ -719,7 +550,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addc:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_Rj;
     UINT f_Ri;
@@ -750,7 +580,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addn:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_Rj;
     UINT f_Ri;
@@ -781,7 +610,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addni:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_u4;
     UINT f_Ri;
@@ -810,7 +638,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addn2:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     SI f_m4;
     UINT f_Ri;
@@ -839,7 +666,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmp:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -869,7 +695,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmpi:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_u4;
     UINT f_Ri;
@@ -897,7 +722,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmp2:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     SI f_m4;
     UINT f_Ri;
@@ -925,7 +749,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_and:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_Rj;
     UINT f_Ri;
@@ -956,7 +779,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_andm:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -986,7 +808,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_andh:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1016,7 +837,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_andb:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1046,7 +866,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bandl:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_u4;
     UINT f_Ri;
@@ -1074,7 +893,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_btstl:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_u4;
     UINT f_Ri;
@@ -1102,7 +920,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mul:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1132,7 +949,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mulu:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1162,7 +978,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mulh:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1192,7 +1007,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div0s:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Ri;
 
@@ -1217,7 +1031,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div0u:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -1231,7 +1044,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div1:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Ri;
 
@@ -1256,7 +1068,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div2:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Ri;
 
@@ -1281,7 +1092,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div3:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -1295,7 +1105,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div4s:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -1309,7 +1118,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lsl:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1340,7 +1148,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lsli:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_u4;
     UINT f_Ri;
@@ -1369,7 +1176,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldi8:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldi8.f
     UINT f_i8;
     UINT f_Ri;
@@ -1397,7 +1203,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldi20:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldi20.f
     UINT f_i20_16;
     UINT f_i20_4;
@@ -1434,7 +1239,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldi32:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldi32.f
     UINT f_i32;
     UINT f_Ri;
@@ -1467,7 +1271,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ld:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1497,7 +1300,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr13:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1528,7 +1330,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr14:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr14.f
     SI f_disp10;
     UINT f_Ri;
@@ -1557,7 +1358,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr14uh:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr14uh.f
     SI f_disp9;
     UINT f_Ri;
@@ -1586,7 +1386,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr14ub:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr14ub.f
     INT f_disp8;
     UINT f_Ri;
@@ -1615,7 +1414,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr15:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr15.f
     USI f_udisp6;
     UINT f_Ri;
@@ -1644,7 +1442,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr15gr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr15gr.f
     UINT f_Ri;
 
@@ -1671,7 +1468,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr15dr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr15dr.f
     UINT f_Rs2;
 
@@ -1696,7 +1492,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldr15ps:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addsp.f
 
 
@@ -1718,7 +1513,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_st:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1748,7 +1542,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str13:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1779,7 +1572,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str14:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str14.f
     SI f_disp10;
     UINT f_Ri;
@@ -1808,7 +1600,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str14h:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str14h.f
     SI f_disp9;
     UINT f_Ri;
@@ -1837,7 +1628,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str14b:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str14b.f
     INT f_disp8;
     UINT f_Ri;
@@ -1866,7 +1656,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str15:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str15.f
     USI f_udisp6;
     UINT f_Ri;
@@ -1895,7 +1684,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str15gr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_str15gr.f
     UINT f_Ri;
 
@@ -1922,7 +1710,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str15dr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr15dr.f
     UINT f_Rs2;
 
@@ -1947,7 +1734,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_str15ps:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addsp.f
 
 
@@ -1969,7 +1755,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mov:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldr13.f
     UINT f_Rj;
     UINT f_Ri;
@@ -1999,7 +1784,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movdr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_movdr.f
     UINT f_Rs1;
     UINT f_Ri;
@@ -2027,7 +1811,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movps:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_movdr.f
     UINT f_Ri;
 
@@ -2052,7 +1835,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mov2dr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Rs1;
     UINT f_Ri;
@@ -2080,7 +1862,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mov2ps:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Ri;
 
@@ -2105,7 +1886,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_jmp:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Ri;
 
@@ -2130,7 +1910,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_callr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_mov2dr.f
     UINT f_Ri;
 
@@ -2155,7 +1934,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_call:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_call.f
     SI f_rel12;
 
@@ -2178,7 +1956,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ret:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -2198,7 +1975,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_int:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_int.f
     UINT f_u8;
 
@@ -2221,7 +1997,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_inte:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -2241,7 +2016,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_reti:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -2261,7 +2035,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_brad:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2284,7 +2057,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bnod:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -2298,7 +2070,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_beqd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2321,7 +2092,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bcd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2344,7 +2114,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bnd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2367,7 +2136,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bvd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2390,7 +2158,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bltd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2413,7 +2180,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bled:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2436,7 +2202,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_blsd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_brad.f
     SI f_rel9;
 
@@ -2459,7 +2224,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr13:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pi.f
     USI f_dir10;
 
@@ -2483,7 +2247,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr13h:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pih.f
     USI f_dir9;
 
@@ -2507,7 +2270,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr13b:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pib.f
     UINT f_dir8;
 
@@ -2531,7 +2293,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr13pi:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pi.f
     USI f_dir10;
 
@@ -2556,7 +2317,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr13pih:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pih.f
     USI f_dir9;
 
@@ -2581,7 +2341,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr13pib:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pib.f
     UINT f_dir8;
 
@@ -2606,7 +2365,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmovr15pi:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr15pi.f
     USI f_dir10;
 
@@ -2631,7 +2389,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r13:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pi.f
     USI f_dir10;
 
@@ -2655,7 +2412,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r13h:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pih.f
     USI f_dir9;
 
@@ -2679,7 +2435,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r13b:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pib.f
     UINT f_dir8;
 
@@ -2703,7 +2458,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r13pi:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pi.f
     USI f_dir10;
 
@@ -2728,7 +2482,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r13pih:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pih.f
     USI f_dir9;
 
@@ -2753,7 +2506,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r13pib:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr13pib.f
     UINT f_dir8;
 
@@ -2778,7 +2530,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmov2r15pd:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_dmovr15pi.f
     USI f_dir10;
 
@@ -2803,7 +2554,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldres:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     UINT f_Ri;
 
@@ -2829,7 +2579,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_copop:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
     /* Contents of trailing part of insn.  */
     UINT word_1;
@@ -2846,7 +2595,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_andccr:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_int.f
     UINT f_u8;
 
@@ -2863,7 +2611,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stilm:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_int.f
     UINT f_u8;
 
@@ -2880,7 +2627,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addsp:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_addsp.f
     SI f_s10;
 
@@ -2905,7 +2651,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_extsb:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     UINT f_Ri;
 
@@ -2931,7 +2676,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_extub:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     UINT f_Ri;
 
@@ -2957,7 +2701,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_extsh:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     UINT f_Ri;
 
@@ -2983,7 +2726,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_extuh:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add2.f
     UINT f_Ri;
 
@@ -3009,7 +2751,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldm0:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldm0.f
     UINT f_reglist_low_ld;
 
@@ -3042,7 +2783,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldm1:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_ldm1.f
     UINT f_reglist_hi_ld;
 
@@ -3074,7 +2814,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stm0:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_stm0.f
     UINT f_reglist_low_st;
 
@@ -3107,7 +2846,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stm1:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_stm1.f
     UINT f_reglist_hi_st;
 
@@ -3139,7 +2877,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_enter:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_enter.f
     USI f_u10;
 
@@ -3166,7 +2903,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_leave:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_enter.f
 
 
@@ -3190,7 +2926,6 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_xchb:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_Rj;
     UINT f_Ri;
