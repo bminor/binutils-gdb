@@ -71,6 +71,10 @@ extern void engine_init
 #endif
 
 #ifndef HAVE_KILL
-#define kill() (errno = EINVAL, -1)
+#define kill(sig, pid) (errno = EINVAL, -1)
 #endif
+#endif
+
+#ifndef SIGTRAP
+# define SIGTRAP 5
 #endif
