@@ -1084,8 +1084,8 @@ hppa64_return_value (struct gdbarch *gdbarch,
     {
       /* All return values larget than 128 bits must be aggregate
          return values.  */
-      gdb_assert (!hppa64_integral_or_pointer_p());
-      gdb_assert (!hppa64_floating_p());
+      gdb_assert (!hppa64_integral_or_pointer_p (type));
+      gdb_assert (!hppa64_floating_p (type));
 
       /* "Aggregate return values larger than 128 bits are returned in
 	 a buffer allocated by the caller.  The address of the buffer

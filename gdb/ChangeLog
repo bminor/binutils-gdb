@@ -1,5 +1,9 @@
 2004-12-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.c (hppa64_return_value): Fix previous commit.
+
+2004-12-21  Mark Kettenis  <kettenis@gnu.org>
+
 	* hppa-tdep.c (hppa32_return_value): Move further down.
 	(hppa64_return_value): Re-implement.
 
