@@ -43,7 +43,7 @@ Fix for gdb/702: a -var-assign that updates the value now shows up
 
 * Multi-arched targets.
 
-HP/PA HPUX11, 32bit ABI (partial)	hppa*-*-hpux* except hppa*64*-*-hpux11*
+HP/PA HPUX11                                    hppa*-*-hpux*
 Mitsubishi M32R/D w/simulator			m32r-*-elf*
 
 * OBSOLETE configurations and files

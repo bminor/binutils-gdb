@@ -1,3 +1,8 @@
+2003-08-08  J. Brobecker  <brobecker@gnat.com>
+
+	* NEWS (Multi-arched targets): Document that all hppa-hpux targets
+	are now multiarched.
+
 2003-08-08  Andrew Cagney  <cagney@redhat.com>
 
 	* interps.c (interp_set): Check for a NULL "old_interp".
