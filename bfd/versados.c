@@ -1,5 +1,5 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 

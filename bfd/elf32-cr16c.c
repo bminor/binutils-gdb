@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CR16C ELF
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

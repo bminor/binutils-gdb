@@ -1,6 +1,6 @@
 /* BFD back-end for MIPS PE COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Modified from coff-i386.c by DJ Delorie, dj@cygnus.com
 
 This file is part of BFD, the Binary File Descriptor library.

@@ -1,6 +1,6 @@
 /* BFD back-end for RISC iX (Acorn, arm) binaries.
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2004
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004,
+   2005 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 This file is part of BFD, the Binary File Descriptor library.

@@ -1,5 +1,5 @@
 /* BFD back-end for OpenRISC 1000 COFF binaries.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Ivan Guzvinec  <ivang@opencores.org>
 
    This file is part of BFD, the Binary File Descriptor library.

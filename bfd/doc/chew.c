@@ -1,6 +1,6 @@
 /* chew
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
-   2002, 2003
+   2002, 2003, 2005
    Free Software Foundation, Inc.
    Contributed by steve chamberlain @cygnus
 

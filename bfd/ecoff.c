@@ -1,6 +1,6 @@
 /* Generic ECOFF (Extended-COFF) routines.
    Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 

@@ -1,6 +1,6 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)

@@ -1,5 +1,5 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
-   Copyright 2001, 2002, 2004
+   Copyright 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Tom Rix
    Contributed by Redhat.

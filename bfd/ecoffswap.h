@@ -1,5 +1,5 @@
 /* Generic ECOFF swapping routines, for BFD.
-   Copyright 1992, 1993, 1994, 1995, 1996, 2000, 2001, 2002
+   Copyright 1992, 1993, 1994, 1995, 1996, 2000, 2001, 2002, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 

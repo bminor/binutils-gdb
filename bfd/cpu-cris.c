@@ -1,5 +1,5 @@
 /* BFD support for the Axis CRIS architecture.
-   Copyright 2000, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson.
 

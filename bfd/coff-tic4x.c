@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C4X coff binaries.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    Contributed by Michael Hayes (m.hayes@elec.canterbury.ac.nz)

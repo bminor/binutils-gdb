@@ -1,5 +1,5 @@
 /* Motorola 68HC11/HC12-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
 
