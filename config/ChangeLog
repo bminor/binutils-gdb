@@ -1,6 +1,11 @@
+Fri Jul  5 11:49:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-irix4 (RANLIB): Don't define; Irix 4 does have ranlib.
+
 Sun Jun 23 22:59:25 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* mh-cygwin32: new file.  Like mh-go32 without the CFLAGS entry.
+	* .Sanitize: listed new file
 
 Tue Mar 26 14:10:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
