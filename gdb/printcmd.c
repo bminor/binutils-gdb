@@ -1364,7 +1364,7 @@ display_command (char *exp, int from_tty)
 #if defined(TUI)
   /* NOTE: cagney/2003-02-13 The `tui_active' was previously
      `tui_version'.  */
-  if (tui_active && *exp == '$')
+  if (tui_active && exp != NULL && *exp == '$')
     display_it = (tui_set_layout_for_display_command (exp) == TUI_FAILURE);
 #endif
 

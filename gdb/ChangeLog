@@ -1,5 +1,8 @@
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
+	* printcmd.c (display_command): Check that EXP isn't NULL.  Fix
+	suggested by Joshua Neuheisel
+
 	* configure.in: Always check for curses, including pdcurses.
 	Warn, instead of error, when no curses are found.  Enable TUI when
 	curses is available.
