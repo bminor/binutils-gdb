@@ -1,5 +1,6 @@
 /* ELF object file format
-   Copyright (C) 1992, 93-99, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -503,28 +504,28 @@ obj_elf_visibility (visibility)
       c = get_symbol_end ();
       symbolP = symbol_find_or_make (name);
       *input_line_pointer = c;
-      
+
       SKIP_WHITESPACE ();
-      
+
       bfdsym = symbol_get_bfdsym (symbolP);
       elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
-      
+
       assert (elfsym);
-      
+
       elfsym->internal_elf_sym.st_other = visibility;
-      
+
       if (c == ',')
 	{
 	  input_line_pointer ++;
-	  
+
 	  SKIP_WHITESPACE ();
-	  
+
 	  if (*input_line_pointer == '\n')
 	    c = '\n';
 	}
     }
   while (c == ',');
-  
+
   demand_empty_rest_of_line ();
 }
 
@@ -833,7 +834,7 @@ obj_elf_section (push)
 	  ignore_rest_of_line ();
 	  return;
 	}
-    
+
       name = xmalloc (end - input_line_pointer + 1);
       memcpy (name, input_line_pointer, end - input_line_pointer);
       name[end - input_line_pointer] = '\0';
@@ -1185,7 +1186,7 @@ obj_elf_vtable_inherit (ignore)
 	   symbol_get_value_expression (csym)->X_add_number, 0, psym, 0, 0,
 	   BFD_RELOC_VTABLE_INHERIT);
 }
-  
+
 /* This handles the .vtable_entry pseudo-op, which is used to indicate
    to the linker that a vtable slot was used.  The syntax is
    ".vtable_entry tablename, offset".  */
@@ -1364,7 +1365,7 @@ obj_elf_size (ignore)
 
 /* Handle the ELF .type pseudo-op.  This sets the type of a symbol.
    There are four syntaxes:
-   
+
    The first (used on Solaris) is
        .type SYM,#function
    The second (used on UnixWare) is
@@ -1799,14 +1800,14 @@ elf_frob_file_after_relocs ()
    SCO OpenServer 5 identifies it's ELF modules with a standard ELF
    .note section.
 
-   int_32 namesz  = 4 ;  Name size 
-   int_32 descsz  = 12 ; Descriptive information 
-   int_32 type    = 1 ;  
-   char   name[4] = "SCO" ; Originator name ALWAYS SCO + NULL 
+   int_32 namesz  = 4 ;  Name size
+   int_32 descsz  = 12 ; Descriptive information
+   int_32 type    = 1 ;
+   char   name[4] = "SCO" ; Originator name ALWAYS SCO + NULL
    int_32 version = (major ver # << 16)  | version of tools ;
    int_32 source  = (tool_id << 16 ) | 1 ;
    int_32 info    = 0 ;    These are set by the SCO tools, but we
-                           don't know enough about the source 
+                           don't know enough about the source
 			   environment to set them.  SCO ld currently
 			   ignores them, and recommends we set them
 			   to zero.  */
@@ -1838,7 +1839,7 @@ sco_id ()
 
   /* process the version string */
 
-  i_note.namesz = 4; 
+  i_note.namesz = 4;
   i_note.descsz = 12;		/* 12 descriptive bytes */
   i_note.type = NT_VERSION;	/* Contains a version string */
 
@@ -1852,7 +1853,7 @@ sco_id ()
   md_number_to_chars (p, (valueT) i_note.type, 4);
 
   p = frag_more (4);
-  strcpy (p, "SCO"); 
+  strcpy (p, "SCO");
 
   /* Note: this is the version number of the ELF we're representing */
   p = frag_more (4);
@@ -1869,7 +1870,7 @@ sco_id ()
      and just set them to zero.  */
   p = frag_more (4);
   md_number_to_chars (p, 0x0000, 4);
- 
+
   frag_align (2, 0, 0);
 
   /* We probably can't restore the current segment, for there likely
