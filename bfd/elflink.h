@@ -3345,7 +3345,7 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
 	      outrel.r_info = ELF_R_INFO (0, relative_reloc);
 	      outrel.r_addend = 0;
 	      elf_swap_reloca_out (output_bfd, &outrel,
-				   (((Elf32_External_Rela *)
+				   (((Elf_External_Rela *)
 				     lsect->section->contents)
 				    + lsect->section->reloc_count));
 	      ++lsect->section->reloc_count;

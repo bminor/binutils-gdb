@@ -1,5 +1,7 @@
 Mon Jan 22 08:52:04 1996  Doug Evans  <dje@charmed.cygnus.com>
 
+	* elflink.h (elf_finish_pointer_linker_section): Fix typo.
+
 	* archures.c (bfd_mach_sparc_v9): Renamed from bfd_mach_sparc64.
 start-sanitize-v8plus
 	(bfd_mach_sparc_{v8plus,v8plusa}): Define.
