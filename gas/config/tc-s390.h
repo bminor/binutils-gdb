@@ -32,6 +32,10 @@ struct fix;
 #define TC_FORCE_RELOCATION(FIX) tc_s390_force_relocation(FIX)
 extern int tc_s390_force_relocation PARAMS ((struct fix *));
 
+/* Don't resolve foo@PLT-bar to offset@PLT.  */
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
+  (! SEG_NORMAL (SEG) || TC_FORCE_RELOCATION (FIX))
+
 #define tc_fix_adjustable(X)  tc_s390_fix_adjustable(X)
 extern int tc_s390_fix_adjustable PARAMS ((struct fix *));
 

@@ -1,3 +1,8 @@
+2003-02-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (TC_FORCE_RELOCATION_SUB_SAME): Revert last change.
+	* config/tc-s390.h (TC_FORCE_RELOCATION_SUB_SAME): Define.
+
 2003-02-11  Uwe Stieber  <uwe@wwws.de>
 
 	* configure.in: Add support for kaOS as cross build target system.
