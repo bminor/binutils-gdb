@@ -1,5 +1,7 @@
 2002-04-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-s390.c (md_parse_option): Formatting.
+
 	* config/tc-i386.c: Formatting fixes, add missing space in error
 	message.
 

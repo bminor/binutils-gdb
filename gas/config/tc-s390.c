@@ -388,9 +388,9 @@ md_parse_option (c, arg)
 
     case 'A':
       if (arg != NULL && strcmp (arg, "esa") == 0)
-	  current_architecture = S390_OPCODE_ESA;
+	current_architecture = S390_OPCODE_ESA;
       else if (arg != NULL && strcmp (arg, "esame") == 0)
-	  current_architecture = S390_OPCODE_ESAME;
+	current_architecture = S390_OPCODE_ESAME;
       else
 	as_bad ("invalid architecture -A%s", arg);
       current_arch_mask = 1 << current_architecture;
