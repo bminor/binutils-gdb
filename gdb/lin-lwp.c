@@ -327,7 +327,10 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
     lp = add_lwp (ptid);
 
   if (is_cloned (ptid))
-    lp->signalled = 1;
+    {
+      lp->signalled = 1;
+      stop_wait_callback (lp, NULL);
+    }
 }
 
 static void
@@ -370,6 +373,7 @@ detach_callback (struct lwp_info *lp, void *data)
 	       strerror (errno));
 
       lp->stopped = 0;
+      lp->signalled = 0;
       lp->status = 0;
       stop_wait_callback (lp, NULL);
 
@@ -481,7 +485,7 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
   resume_all = (PIDGET (ptid) == -1) || !step;
 
   /* If PID is -1, it's the current inferior that should be
-     handled special.  */
+     handled specially.  */
   if (PIDGET (ptid) == -1)
     ptid = inferior_ptid;
 
@@ -544,6 +548,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
       pid_t pid;
       int status;
 
+    get_another_event:
       gdb_assert (lp->status == 0);
 
       pid = waitpid (GET_LWP (lp->ptid), &status,
@@ -609,6 +614,10 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		write_pc_pid (read_pc_pid (pid_to_ptid (pid)) 
 		                - DECR_PC_AFTER_BREAK,
 			      pid_to_ptid (pid));
+
+	      /* Now resume this LWP and get the SIGSTOP event. */
+	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+	      goto get_another_event;
 	    }
 	  else if (WSTOPSIG (status) == SIGINT &&
 		   signal_pass_state (SIGINT) == 0)
@@ -617,7 +626,10 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		 (in the case where ^C/BREAK is typed at the tty/console),
 		 just ignore all SIGINT events from all lwp's except for
 		 the one that was caught by lin_lwp_wait.  */
-	      ;  /* Don't save.  Signal will disappear into oblivion. */
+
+	      /* Now resume this LWP and get the SIGSTP event. */
+	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+	      goto get_another_event;
 	    }
 	  else
 	    {
@@ -868,8 +880,14 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)
 	{
-	  child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step, signo);
+	  /* First mark this LWP as "not stopped", so that
+	     resume_callback will not resume it. */
 	  lp->stopped = 0;
+	  /* Resume all threads except this one
+	     (mainly to get the newly attached ones). */
+	  iterate_over_lwps (resume_callback, NULL);
+	  /* Now resume this thread, forwarding the signal to it. */
+	  child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step, signo);
 	  status = 0;
 	  goto retry;
 	}
