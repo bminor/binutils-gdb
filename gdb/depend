@@ -98,7 +98,7 @@ i387-tdep.o : i387-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
 i960-pinsn.o : i960-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h 
 i960-tdep.o : i960-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h \
-  ${srcdir}/../include/obstack.h value.h gdbtypes.h expression.h frame.h signame.h ieee-float.h 
+  ${srcdir}/../include/obstack.h value.h gdbtypes.h expression.h frame.h ieee-float.h 
 ieee-float.o : ieee-float.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status ieee-float.h 
 infcmd.o : infcmd.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h \
   gdbtypes.h frame.h inferior.h breakpoint.h value.h expression.h environ.h gdbcmd.h \
@@ -111,7 +111,7 @@ infptrace.o : infptrace.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   target.h ${srcdir}/../include/bfd.h gdbcore.h 
 infrun.o : infrun.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h \
   frame.h inferior.h breakpoint.h value.h gdbtypes.h expression.h ${srcdir}/../include/wait.h \
-  gdbcore.h ${srcdir}/../include/bfd.h signame.h command.h terminal.h target.h 
+  gdbcore.h ${srcdir}/../include/bfd.h command.h terminal.h target.h 
 inftarg.o : inftarg.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h inferior.h \
   symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
   target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/wait.h gdbcore.h ieee-float.h 
@@ -135,7 +135,7 @@ m88k-xdep.o : m88k-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   gdbcore.h ${srcdir}/../include/bfd.h /usr/include/setjmp.h 
 mach386-xdep.o : mach386-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
-  signame.h gdbcore.h ${srcdir}/../include/bfd.h 
+  gdbcore.h ${srcdir}/../include/bfd.h 
 main.o : main.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status gdbcmd.h command.h \
   call-cmds.h symtab.h ${srcdir}/../include/obstack.h inferior.h breakpoint.h frame.h \
   value.h gdbtypes.h expression.h signals.h target.h ${srcdir}/../include/bfd.h language.h \
@@ -213,7 +213,6 @@ rs6000-tdep.o : rs6000-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config
 rs6000-xdep.o : rs6000-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
   target.h ${srcdir}/../include/bfd.h 
-signame.o : signame.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status signame.h 
 solib.o : solib.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h \
   ${srcdir}/../include/bfd.h symfile.h objfiles.h gdbcore.h command.h target.h frame.h \
   regex.h inferior.h breakpoint.h value.h gdbtypes.h expression.h 
@@ -225,7 +224,7 @@ sparc-pinsn.o : sparc-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config
   /usr/include/string.h target.h 
 sparc-tdep.o : sparc-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
-  signame.h target.h ${srcdir}/../include/bfd.h ieee-float.h gdbcore.h 
+  target.h ${srcdir}/../include/bfd.h ieee-float.h gdbcore.h 
 sparc-xdep.o : sparc-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm-sparc.h inferior.h \
   symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h gdbtypes.h expression.h \
   target.h ${srcdir}/../include/bfd.h gdbcore.h 

@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
-#include "signame.h"
 #include "gdbcore.h"
 
 #if defined (GDB_TARGET_IS_MACH386)

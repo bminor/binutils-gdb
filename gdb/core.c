@@ -49,10 +49,6 @@ get_core_registers PARAMS ((int));
 static void
 core_files_info PARAMS ((struct target_ops *));
 
-extern int sys_nerr;
-extern char *sys_errlist[];
-extern char *sys_siglist[];
-
 extern char registers[];
 
 /* Hook for `exec_file_command' command to call.  */
@@ -176,7 +172,7 @@ core_open (filename, from_tty)
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
     printf ("Program terminated with signal %d, %s.\n", siggy,
-	    siggy < NSIG ? sys_siglist[siggy] : "(undocumented)");
+	    safe_strsignal (siggy));
 
   if (ontop) {
     /* Fetch all registers from core file */
@@ -312,12 +308,8 @@ memory_error (status, memaddr)
     }
   else
     {
-      if (status >= sys_nerr || status < 0)
-	error ("Error accessing memory address %s: unknown error (%d).",
-	       local_hex_string(memaddr), status);
-      else
-	error ("Error accessing memory address %s: %s.",
-	       local_hex_string(memaddr), sys_errlist[status]);
+      error ("Error accessing memory address %s: %s.",
+	     local_hex_string (memaddr), safe_strerror (status));
     }
 }
 

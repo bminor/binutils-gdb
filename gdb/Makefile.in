@@ -184,7 +184,7 @@ SFILES_MAINDIR = \
 	 main.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
-	 signame.c cplus-dem.c mem-break.c target.c inftarg.c \
+	 cplus-dem.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 	 minsyms.c mipsread.c
@@ -232,7 +232,7 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	ieee-float.h inferior.h minimon.h objfiles.h partial-stab.h \
-	signals.h signame.h symfile.h symtab.h solib.h xcoffsolib.h \
+	signals.h symfile.h symtab.h solib.h xcoffsolib.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h xm-vax.h
 
@@ -270,7 +270,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
-    copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
+    copying.o $(DEPFILES) cplus-dem.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
@@ -539,7 +539,7 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	chmod og=u `find . -print`
 
 clean:
-	rm -f *.o ${ADD_FILES}
+	rm -f *.o ${ADD_FILES} *~
 	rm -f init.c version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]

@@ -79,9 +79,6 @@ is_vtbl_ptr_type PARAMS ((struct type *));
 static void
 print_hex_chars PARAMS ((FILE *, unsigned char *, unsigned));
 
-extern int sys_nerr;
-extern char *sys_errlist[];
-
 extern int demangle;	/* whether to print C++ syms raw or source-form */
 
 /* Maximum number of chars to print for a string pointer value
@@ -1018,12 +1015,8 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 		    }
 		  else
 		    {
-		      if (errcode >= sys_nerr || errcode < 0)
-			error ("Error reading memory address 0x%x: unknown error (%d).",
-			       addr + i, errcode);
-		      else
-			error ("Error reading memory address 0x%x: %s.",
-			       addr + i, sys_errlist[errcode]);
+		      error ("Error reading memory address 0x%x: %s.",
+			     addr + i, safe_strerror (errcode));
 		    }
 		}
 
@@ -1672,18 +1665,16 @@ type_print_base (type, stream, show, level)
   QUIT;
 
   wrap_here ("    ");
-  if (type == 0)
+  if (type == NULL)
     {
-      fprintf_filtered (stream, "<type unknown>");
+      fputs_filtered ("<type unknown>", stream);
       return;
     }
 
-  /* If the type is a fundamental type, then always print the type name
-     directly from the type.  Also print the type name directly whenever
-     SHOW drops to zero and there is a valid type name to print. */
+  /* When SHOW is zero or less, and there is a valid type name, then always
+     just print the type name directly from the type. */
 
-  if ((TYPE_FLAGS (type) & TYPE_FLAG_FUND_TYPE) ||
-      ((show <= 0) && (TYPE_NAME (type) != NULL)))
+  if ((show <= 0) && (TYPE_NAME (type) != NULL))
     {
       fputs_filtered (TYPE_NAME (type), stream);
       return;
@@ -1881,7 +1872,19 @@ type_print_base (type, stream, show, level)
       break;
 
     default:
-      error ("Invalid type code in symbol table.");
+      /* Handle types not explicitly handled by the other cases,
+	 such as fundamental types.  For these, just print whatever
+	 the type name is, as recorded in the type itself.  If there
+	 is no type name, then complain. */
+      if (TYPE_NAME (type) != NULL)
+	{
+	  fputs_filtered (TYPE_NAME (type), stream);
+	}
+      else
+	{
+	  error ("Invalid type code (%d) in symbol table.", TYPE_CODE (type));
+	}
+      break;
     }
 }
 

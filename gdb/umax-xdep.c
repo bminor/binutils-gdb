@@ -94,10 +94,7 @@ core_file_command (filename, from_tty)
 	printf ("Core file is from \"%s\".\n", u.pt_comm);
 	if (u.pt_signal > 0)
 	  printf ("Program terminated with signal %d, %s.\n",
-			u.pt_signal,
-			u.pt_signal < NSIG
-			? sys_siglist[u.pt_signal]
-			: "(undocumented)");
+		  u.pt_signal, safe_strsignal (u.pt_signal));
 
 	/* Read the register values out of the core file and store
 	   them where `read_register' will find them.  */

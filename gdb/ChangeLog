@@ -1,3 +1,67 @@
+Wed Apr 22 09:42:15 1992  Fred Fish  (fnf@cygnus.com)
+
+	* signame.c, signame.h:  Remove, replaced by strsignal.c in
+	libiberty.
+	* i960-tdep.c, infrun.c, mach386-xdep.c, procfs.c, sparc-tdep.c,
+	sun386-xdep.c:  Remove include of signame.h	
+	* Makefile.in (SFILES_MAINDIR):  Remove signame.c
+	* Makefile.in (HFILES):  Remove signame.h
+	* Makefile.in (OBS):  Remove signame.o
+	* defs.h (safe_strerror, safe_strsignal, strerrno, strsigno,
+	errno_max, signo_max, strtoerrno, strtosigno, strsignal,
+	psignal, perror):  Add prototypes.
+	* defs.h, xm-apollo68v.h, xm-ultra3.h (SYS_SIGLIST_MISSING):
+	Remove define.
+	* depend:  Manually remove signame.[cho] references.
+	* convex-tdep.c (subsig_name):  Replace use of sys_siglist with
+	strsignal.
+	* convex-xdep.c (core_file_command):  Replace use of sys_siglist
+	with safe_strsignal.
+	* core.c (core_open):  Replace use of sys_siglist with
+	safe_strsignal.
+	* core.c (memory_error):  Replace use of sys_errlist with
+	safe_strerror.
+	* i960-tdep.c (print_fault):  Replace use of sys_siglist with
+	safe_strsignal.
+	* infcmd.c (program_info):  Replace use of sys_siglist with
+	safe_strsignal.
+	* infrun.c (signal_stop, signal_print, signal_program):
+	Allocate dynamically based on dynamic determination of number
+	of signals to support.
+	* infrun.c (child_create_inferior):  Replace use of sys_errlist
+	with safe_strerror.
+	* infrun.c (wait_for_inferior):  Replace use of sys_siglist with
+	safe_strsignal.
+	* infrun.c (sig_print_info):  Replace use of sig_abbrev with
+	strsigno and sys_siglist with safe_strsignal.
+	* infrun.c (handle_command):  Call signo_max to find number of
+	signals.  Replace sig_number with strtosigno and sig_abbrev with
+	strsigno.
+	* infrun.c (signals_info):  Replace sig_number with strtosigno.	
+	* infrun.c (_initialize_infrun):  Call signo_max to find number of
+	signals.  Dynamically allocate signal_{stop,print,program}.
+	* procfs.c (errno_table):  Remove, now in libiberty/strerror.c.
+	* procfs.c (errnoname):  Add function and prototype.
+	* procfs.c (info_proc_siginfo):  Call errnoname, replace use
+	of sys_siglist with safe_strsignal.
+	* procfs.c (info_proc_stop, info_proc_signals):  Replace use of
+	sys_siglist with safe_strsignal.
+	* procfs.c (info_proc_stop):  Call errnoname.
+	* procfs.c (signalname):  Replace sig_abbrev with strsigno.
+	* stuff.c (main, get_offset):  Replace use of sys_errlist with
+	strerror.
+	* sun386-xdep.c (core_file_command):  Replace use of sys_siglist
+	with safe_strsignal.
+	* umax-xdep.c (core_file_command):  Replace use of sys_siglist
+	with safe_strsignal.
+	* utils.c (safe_strerror, safe_strsignal):  Add functions that
+	call strerror and strsignal respectively, and deal with NULL
+	returns.
+	* utils.c (perror_with_name, print_sys_errmsg):  Replace use of
+	sys_errlist with safe_strerror.
+	* valprint.c (val_print):  Replace use of sys_errlist with
+	safe_strerror.
+
 Tue Apr 21 12:00:47 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: rework CFLAGS so that they can be set from the

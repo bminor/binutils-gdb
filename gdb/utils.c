@@ -309,6 +309,45 @@ fatal_dump_core (va_alist)
   exit (1);
 }
 
+/* The strerror() function can return NULL for errno values that are
+   out of range.  Provide a "safe" version that always returns a
+   printable string. */
+
+char *
+safe_strerror (errnum)
+     int errnum;
+{
+  char *msg;
+  static char buf[32];
+
+  if ((msg = strerror (errnum)) == NULL)
+    {
+      sprintf (buf, "(undocumented errno %d)", errnum);
+      msg = buf;
+    }
+  return (msg);
+}
+
+/* The strsignal() function can return NULL for signal values that are
+   out of range.  Provide a "safe" version that always returns a
+   printable string. */
+
+char *
+safe_strsignal (signo)
+     int signo;
+{
+  char *msg;
+  static char buf[32];
+
+  if ((msg = strsignal (signo)) == NULL)
+    {
+      sprintf (buf, "(undocumented signal %d)", signo);
+      msg = buf;
+    }
+  return (msg);
+}
+
+
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
    Then return to command level.  */
@@ -317,16 +356,10 @@ void
 perror_with_name (string)
      char *string;
 {
-  extern int sys_nerr;
-  extern char *sys_errlist[];
   char *err;
   char *combined;
 
-  if (errno < sys_nerr)
-    err = sys_errlist[errno];
-  else
-    err = "unknown error";
-
+  err = safe_strerror (errno);
   combined = (char *) alloca (strlen (err) + strlen (string) + 3);
   strcpy (combined, string);
   strcat (combined, ": ");
@@ -349,16 +382,10 @@ print_sys_errmsg (string, errcode)
      char *string;
      int errcode;
 {
-  extern int sys_nerr;
-  extern char *sys_errlist[];
   char *err;
   char *combined;
 
-  if (errcode < sys_nerr)
-    err = sys_errlist[errcode];
-  else
-    err = "unknown error";
-
+  err = safe_strerror (errcode);
   combined = (char *) alloca (strlen (err) + strlen (string) + 3);
   strcpy (combined, string);
   strcat (combined, ": ");
@@ -422,7 +449,10 @@ mrealloc (md, ptr, size)
      PTR ptr;
      long size;
 {
-  return (realloc (ptr, size));
+  if (ptr == 0)		/* Guard against old realloc's */
+    return malloc (size);
+  else
+    return realloc (ptr, size);
 }
 
 void
@@ -1325,7 +1355,7 @@ _initialize_utils ()
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 
-  /* If tere is a better way to determine window size, use it. */
+  /* If there is a better way to determine the window size, use it. */
   SIGWINCH_HANDLER ();
 #endif
 

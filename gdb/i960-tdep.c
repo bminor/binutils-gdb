@@ -27,7 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "value.h"
 #include "frame.h"
-#include "signame.h"
 #include "ieee-float.h"
 
 /* Structure of i960 extended floating point format.  */
@@ -619,8 +618,7 @@ print_fault( siggnal )
 
 	if (siggnal < NSIG) {
 	      printf ("\nProgram received signal %d, %s\n",
-		      siggnal,
-		      sys_siglist[siggnal]);
+		      siggnal, safe_strsignal (siggnal));
 	} else {
 		/* The various target_wait()s bias the 80960 "signal number"
 		   by adding NSIG to it, so it won't get confused with any

@@ -56,9 +56,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    this is the right value for U_REGS_OFFSET.  */
 #define	U_REGS_OFFSET	0
 
-/* System doesn't provide a list of signal names. */
-#define	SYS_SIGLIST_MISSING 1
-
 /* System doesn't provide siginterrupt().  */
 #define	NO_SIGINTERRUPT
 

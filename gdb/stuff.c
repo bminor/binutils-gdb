@@ -26,8 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <varargs.h>
 
-extern char *sys_errlist[];
-
 main (argc, argv)
      int argc;
      char *argv[];
@@ -59,9 +57,9 @@ main (argc, argv)
 
   out_fd = open (outfile, O_WRONLY);
   if (out_fd < 0)
-    err ("Error opening %s for write: %s\n", outfile, sys_errlist[errno]);
+    err ("Error opening %s for write: %s\n", outfile, strerror (errno));
   if (lseek (out_fd, offset, 0) < 0)
-    err ("Error seeking to heap in %s: %s\n", outfile, sys_errlist[errno]);
+    err ("Error seeking to heap in %s: %s\n", outfile, strerror (errno));
 
   /* For each file listed on the command line, write it into the
    * 'heap' of the output file.  Make sure to skip the arguments
@@ -71,9 +69,10 @@ main (argc, argv)
       if (strcmp (argv[i], "-o") == 0)
 	continue;
       if ((in_fd = open (argv[i], O_RDONLY)) < 0)
-	err ("Error opening %s for read: %s\n", argv[i], sys_errlist[errno]);
+	err ("Error opening %s for read: %s\n", argv[i],
+	     strerror (errno));
       if (fstat (in_fd, &stat_buf) < 0)
-	err ("Error stat'ing %s: %s\n", argv[i], sys_errlist[errno]);
+	err ("Error stat'ing %s: %s\n", argv[i], strerror (errno));
       size = strlen (argv[i]);
       pad = 4 - (size & 3);
       size += pad + stat_buf.st_size + sizeof (int);
@@ -105,9 +104,9 @@ get_offset (file, sym_name)
 
   f = open (file, O_RDONLY);
   if (f < 0)
-    err ("Error opening %s: %s\n", file, sys_errlist[errno]);
+    err ("Error opening %s: %s\n", file, strerror (errno));
   if (read (f, &file_hdr, sizeof (file_hdr)) < 0)
-    err ("Error reading exec structure: %s\n", sys_errlist[errno]);
+    err ("Error reading exec structure: %s\n", strerror (errno));
   if (N_BADMAG (file_hdr))
     err ("File %s not an a.out file\n", file);
 
@@ -115,17 +114,18 @@ get_offset (file, sym_name)
   if ((symbol_table = (struct nlist *)malloc (file_hdr.a_syms)) == 0)
     err ("Couldn't allocate space for symbol table\n");
   if (lseek (f, N_SYMOFF (file_hdr), 0) == -1)
-    err ("lseek error: %s\n", sys_errlist[errno]);
+    err ("lseek error: %s\n", strerror (errno));
   if (read (f, symbol_table, file_hdr.a_syms) == -1)
-    err ("Error reading symbol table from %s: %s\n", file, sys_errlist[errno]);
+    err ("Error reading symbol table from %s: %s\n", file,
+	 strerror (errno));
 
   /* read in string table */
   if (read (f, &size, 4) == -1)
-    err ("reading string table size: %s\n", sys_errlist[errno]);
+    err ("reading string table size: %s\n", strerror (errno));
   if ((strings = (char *)malloc (size)) == 0)
     err ("Couldn't allocate memory for string table\n");
   if (read (f, strings, size - 4) == -1)
-    err ("reading string table: %s\n", sys_errlist[errno]);
+    err ("reading string table: %s\n", strerror (errno));
 
   /* Find the core address at which the first byte of kdb text segment
      should be loaded into core when kdb is run.  */

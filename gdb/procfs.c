@@ -43,7 +43,6 @@ regardless of whether or not the actual target has floating point hardware.
 
 #include "inferior.h"
 #include "target.h"
-#include "signame.h"
 
 #define MAX_SYSCALLS	256	/* Maximum number of syscalls for table */
 
@@ -338,380 +337,6 @@ static struct sigcode {
   0, 0, NULL, NULL
 };
 
-/* Translation table for errno values.  See intro(2) in most UNIX systems
-   Programmers Reference Manuals.
-
-   Note that some systems provide a function (strerror) that returns the
-   error message string, or a global variable that is the base address of the
-   array of character pointers.  Perhaps we should try to make use of these
-   provided strings if they are present, but at least this is more portable.
-   (FIXME?) */
-
-static struct trans errno_table[] =
-{
-#if defined (EPERM)
-  EPERM, "EPERM", "Not super-user",
-#endif
-#if defined (ENOENT)
-  ENOENT, "ENOENT", "No such file or directory",
-#endif
-#if defined (ESRCH)
-  ESRCH, "ESRCH", "No such process",
-#endif
-#if defined (EINTR)
-  EINTR, "EINTR", "Interrupted system call",
-#endif
-#if defined (EIO)
-  EIO, "EIO", "I/O error",
-#endif
-#if defined (ENXIO)
-  ENXIO, "ENXIO", "No such device or address",
-#endif
-#if defined (E2BIG)
-  E2BIG, "E2BIG", "Arg list too long",
-#endif
-#if defined (ENOEXEC)
-  ENOEXEC, "ENOEXEC", "Exec format error",
-#endif
-#if defined (EBADF)
-  EBADF, "EBADF", "Bad file number",
-#endif
-#if defined (ECHILD)
-  ECHILD, "ECHILD", "No child process",
-#endif
-#if defined (EAGAIN)
-  EAGAIN, "EAGAIN", "No more processes",
-#endif
-#if defined (ENOMEM)
-  ENOMEM, "ENOMEM", "Not enough space",
-#endif
-#if defined (EACCES)
-  EACCES, "EACCES", "Permission denied",
-#endif
-#if defined (EFAULT)
-  EFAULT, "EFAULT", "Bad address",
-#endif
-#if defined (ENOTBLK)
-  ENOTBLK, "ENOTBLK", "Block device required",
-#endif
-#if defined (EBUSY)
-  EBUSY, "EBUSY", "Device busy",
-#endif
-#if defined (EEXIST)
-  EEXIST, "EEXIST", "File exists",
-#endif
-#if defined (EXDEV)
-  EXDEV, "EXDEV", "Cross-device link",
-#endif
-#if defined (ENODEV)
-  ENODEV, "ENODEV", "No such device",
-#endif
-#if defined (ENOTDIR)
-  ENOTDIR, "ENOTDIR", "Not a directory",
-#endif
-#if defined (EISDIR)
-  EISDIR, "EISDIR", "Is a directory",
-#endif
-#if defined (EINVAL)
-  EINVAL, "EINVAL", "Invalid argument",
-#endif
-#if defined (ENFILE)
-  ENFILE, "ENFILE", "File table overflow",
-#endif
-#if defined (EMFILE)
-  EMFILE, "EMFILE", "Too many open files",
-#endif
-#if defined (ENOTTY)
-  ENOTTY, "ENOTTY", "Not a typewriter",
-#endif
-#if defined (ETXTBSY)
-  ETXTBSY, "ETXTBSY", "Text file busy",
-#endif
-#if defined (EFBIG)
-  EFBIG, "EFBIG", "File too large",
-#endif
-#if defined (ENOSPC)
-  ENOSPC, "ENOSPC", "No space left on device",
-#endif
-#if defined (ESPIPE)
-  ESPIPE, "ESPIPE", "Illegal seek",
-#endif
-#if defined (EROFS)
-  EROFS, "EROFS", "Read only file system",
-#endif
-#if defined (EMLINK)
-  EMLINK, "EMLINK", "Too many links",
-#endif
-#if defined (EPIPE)
-  EPIPE, "EPIPE", "Broken pipe",
-#endif
-#if defined (EDOM)
-  EDOM, "EDOM", "Math argument out of domain of func",
-#endif
-#if defined (ERANGE)
-  ERANGE, "ERANGE", "Math result not representable",
-#endif
-#if defined (ENOMSG)
-  ENOMSG, "ENOMSG", "No message of desired type",
-#endif
-#if defined (EIDRM)
-  EIDRM, "EIDRM", "Identifier removed",
-#endif
-#if defined (ECHRNG)
-  ECHRNG, "ECHRNG", "Channel number out of range",
-#endif
-#if defined (EL2NSYNC)
-  EL2NSYNC, "EL2NSYNC", "Level 2 not synchronized",
-#endif
-#if defined (EL3HLT)
-  EL3HLT, "EL3HLT", "Level 3 halted",
-#endif
-#if defined (EL3RST)
-  EL3RST, "EL3RST", "Level 3 reset",
-#endif
-#if defined (ELNRNG)
-  ELNRNG, "ELNRNG", "Link number out of range",
-#endif
-#if defined (EUNATCH)
-  EUNATCH, "EUNATCH", "Protocol driver not attached",
-#endif
-#if defined (ENOCSI)
-  ENOCSI, "ENOCSI", "No CSI structure available",
-#endif
-#if defined (EL2HLT)
-  EL2HLT, "EL2HLT", "Level 2 halted",
-#endif
-#if defined (EDEADLK)
-  EDEADLK, "EDEADLK", "Deadlock condition",
-#endif
-#if defined (ENOLCK)
-  ENOLCK, "ENOLCK", "No record locks available",
-#endif
-#if defined (EBADE)
-  EBADE, "EBADE", "Invalid exchange",
-#endif
-#if defined (EBADR)
-  EBADR, "EBADR", "Invalid request descriptor",
-#endif
-#if defined (EXFULL)
-  EXFULL, "EXFULL", "Exchange full",
-#endif
-#if defined (ENOANO)
-  ENOANO, "ENOANO", "No anode",
-#endif
-#if defined (EBADRQC)
-  EBADRQC, "EBADRQC", "Invalid request code",
-#endif
-#if defined (EBADSLT)
-  EBADSLT, "EBADSLT", "Invalid slot",
-#endif
-#if defined (EDEADLOCK)
-  EDEADLOCK, "EDEADLOCK", "File locking deadlock error",
-#endif
-#if defined (EBFONT)
-  EBFONT, "EBFONT", "Bad font file fmt",
-#endif
-#if defined (ENOSTR)
-  ENOSTR, "ENOSTR", "Device not a stream",
-#endif
-#if defined (ENODATA)
-  ENODATA, "ENODATA", "No data available",
-#endif
-#if defined (ETIME)
-  ETIME, "ETIME", "Timer expired",
-#endif
-#if defined (ENOSR)
-  ENOSR, "ENOSR", "Out of streams resources",
-#endif
-#if defined (ENONET)
-  ENONET, "ENONET", "Machine is not on the network",
-#endif
-#if defined (ENOPKG)
-  ENOPKG, "ENOPKG", "Package not installed",
-#endif
-#if defined (EREMOTE)
-  EREMOTE, "EREMOTE", "Object is remote",
-#endif
-#if defined (ENOLINK)
-  ENOLINK, "ENOLINK", "Link has been severed",
-#endif
-#if defined (EADV)
-  EADV, "EADV", "Advertise error",
-#endif
-#if defined (ESRMNT)
-  ESRMNT, "ESRMNT", "Srmount error",
-#endif
-#if defined (ECOMM)
-  ECOMM, "ECOMM", "Communication error on send",
-#endif
-#if defined (EPROTO)
-  EPROTO, "EPROTO", "Protocol error",
-#endif
-#if defined (EMULTIHOP)
-  EMULTIHOP, "EMULTIHOP", "Multihop attempted",
-#endif
-#if defined (EDOTDOT)
-  EDOTDOT, "EDOTDOT", "RFS specific error",
-#endif
-#if defined (EBADMSG)
-  EBADMSG, "EBADMSG", "Not a data message",
-#endif
-#if defined (ENAMETOOLONG)
-  ENAMETOOLONG, "ENAMETOOLONG", "File name too long",
-#endif
-#if defined (EOVERFLOW)
-  EOVERFLOW, "EOVERFLOW", "Value too large for defined data type",
-#endif
-#if defined (ENOTUNIQ)
-  ENOTUNIQ, "ENOTUNIQ", "Name not unique on network",
-#endif
-#if defined (EBADFD)
-  EBADFD, "EBADFD", "File descriptor in bad state",
-#endif
-#if defined (EREMCHG)
-  EREMCHG, "EREMCHG", "Remote address changed",
-#endif
-#if defined (ELIBACC)
-  ELIBACC, "ELIBACC", "Cannot access a needed shared library",
-#endif
-#if defined (ELIBBAD)
-  ELIBBAD, "ELIBBAD", "Accessing a corrupted shared library",
-#endif
-#if defined (ELIBSCN)
-  ELIBSCN, "ELIBSCN", ".lib section in a.out corrupted",
-#endif
-#if defined (ELIBMAX)
-  ELIBMAX, "ELIBMAX", "Attempting to link in too many shared libraries",
-#endif
-#if defined (ELIBEXEC)
-  ELIBEXEC, "ELIBEXEC", "Cannot exec a shared library directly",
-#endif
-#if defined (EILSEQ)
-  EILSEQ, "EILSEQ", "Illegal byte sequence",
-#endif
-#if defined (ENOSYS)
-  ENOSYS, "ENOSYS", "Operation not applicable",
-#endif
-#if defined (ELOOP)
-  ELOOP, "ELOOP", "Too many symbolic links encountered",
-#endif
-#if defined (ERESTART)
-  ERESTART, "ERESTART", "Interrupted system call should be restarted",
-#endif
-#if defined (ESTRPIPE)
-  ESTRPIPE, "ESTRPIPE", "Streams pipe error",
-#endif
-#if defined (ENOTEMPTY)
-  ENOTEMPTY, "ENOTEMPTY", "Directory not empty",
-#endif
-#if defined (EUSERS)
-  EUSERS, "EUSERS", "Too many users",
-#endif
-#if defined (ENOTSOCK)
-  ENOTSOCK, "ENOTSOCK", "Socket operation on non-socket",
-#endif
-#if defined (EDESTADDRREQ)
-  EDESTADDRREQ, "EDESTADDRREQ", "Destination address required",
-#endif
-#if defined (EMSGSIZE)
-  EMSGSIZE, "EMSGSIZE", "Message too long",
-#endif
-#if defined (EPROTOTYPE)
-  EPROTOTYPE, "EPROTOTYPE", "Protocol wrong type for socket",
-#endif
-#if defined (ENOPROTOOPT)
-  ENOPROTOOPT, "ENOPROTOOPT", "Protocol not available",
-#endif
-#if defined (EPROTONOSUPPORT)
-  EPROTONOSUPPORT, "EPROTONOSUPPORT", "Protocol not supported",
-#endif
-#if defined (ESOCKTNOSUPPORT)
-  ESOCKTNOSUPPORT, "ESOCKTNOSUPPORT", "Socket type not supported",
-#endif
-#if defined (EOPNOTSUPP)
-  EOPNOTSUPP, "EOPNOTSUPP", "Operation not supported on transport endpoint ",
-#endif
-#if defined (EPFNOSUPPORT)
-  EPFNOSUPPORT, "EPFNOSUPPORT", "Protocol family not supported",
-#endif
-#if defined (EAFNOSUPPORT)
-  EAFNOSUPPORT, "EAFNOSUPPORT", "Address family not supported by protocol",
-#endif
-#if defined (EADDRINUSE)
-  EADDRINUSE, "EADDRINUSE", "Address already in use",
-#endif
-#if defined (EADDRNOTAVAIL)
-  EADDRNOTAVAIL, "EADDRNOTAVAIL","Cannot assign requested address",
-#endif
-#if defined (ENETDOWN)
-  ENETDOWN, "ENETDOWN", "Network is down",
-#endif
-#if defined (ENETUNREACH)
-  ENETUNREACH, "ENETUNREACH", "Network is unreachable",
-#endif
-#if defined (ENETRESET)
-  ENETRESET, "ENETRESET", "Network dropped connection because of reset",
-#endif
-#if defined (ECONNABORTED)
-  ECONNABORTED, "ECONNABORTED", "Software caused connection abort",
-#endif
-#if defined (ECONNRESET)
-  ECONNRESET, "ECONNRESET", "Connection reset by peer",
-#endif
-#if defined (ENOBUFS)
-  ENOBUFS, "ENOBUFS", "No buffer space available",
-#endif
-#if defined (EISCONN)
-  EISCONN, "EISCONN", "Transport endpoint is already connected",
-#endif
-#if defined (ENOTCONN)
-  ENOTCONN, "ENOTCONN", "Transport endpoint is not connected",
-#endif
-#if defined (ESHUTDOWN)
-  ESHUTDOWN, "ESHUTDOWN", "Cannot send after transport endpoint shutdown",
-#endif
-#if defined (ETOOMANYREFS)
-  ETOOMANYREFS, "ETOOMANYREFS", "Too many references: cannot splice",
-#endif
-#if defined (ETIMEDOUT)
-  ETIMEDOUT, "ETIMEDOUT", "Connection timed out",
-#endif
-#if defined (ECONNREFUSED)
-  ECONNREFUSED, "ECONNREFUSED", "Connection refused",
-#endif
-#if defined (EHOSTDOWN)
-  EHOSTDOWN, "EHOSTDOWN", "Host is down",
-#endif
-#if defined (EHOSTUNREACH)
-  EHOSTUNREACH, "EHOSTUNREACH", "No route to host",
-#endif
-#if defined (EWOULDBLOCK)
-  EWOULDBLOCK, "EWOULDBLOCK", "Operation already in progress",
-#endif
-#if defined (EINPROGRESS)
-  EINPROGRESS, "EINPROGRESS", "Operation now in progress",
-#endif
-#if defined (ESTALE)
-  ESTALE, "ESTALE", "Stale NFS file handle",
-#endif
-#if defined (EUCLEAN)
-  EUCLEAN, "EUCLEAN", "Structure needs cleaning",
-#endif
-#if defined (ENOTNAM)
-  ENOTNAM, "ENOTNAM", "Not a XENIX named type file",
-#endif
-#if defined (ENAVAIL)
-  ENAVAIL, "ENAVAIL", "No XENIX semaphores available",
-#endif
-#if defined (EISNAM)
-  EISNAM, "EISNAM", "Is a named type file",
-#endif
-#if defined (EREMOTEIO)
-  EREMOTEIO, "EREMOTEIO", "Remote I/O error",
-#endif
- 0, NULL, NULL
-};
-
 static char *syscall_table[MAX_SYSCALLS];
 
 /* Prototypes for local functions */
@@ -727,6 +352,9 @@ syscallname PARAMS ((int));
 
 static char *
 signalname PARAMS ((int));
+
+static char *
+errnoname PARAMS ((int));
 
 static int
 proc_address_to_fd PARAMS ((CORE_ADDR, int));
@@ -2742,7 +2370,7 @@ info_proc_stop (pip, summary)
 	    else
 	      {
 		printf_filtered ("\t%-16s %s.\n", signalname (what),
-				 sys_siglist[what]);
+				 safe_strsignal (what));
 	      }
 	    break;
 	  case PR_SYSENTRY:
@@ -2803,8 +2431,7 @@ info_proc_siginfo (pip, summary)
 	  printf_filtered ("%s ", signalname (sip -> si_signo));
 	  if (sip -> si_errno > 0)
 	    {
-	      printf_filtered ("%s ", lookupname (errno_table,
-						  sip -> si_errno, "errno"));
+	      printf_filtered ("%s ", errnoname (sip -> si_errno));
 	    }
 	  if (sip -> si_code <= 0)
 	    {
@@ -2837,13 +2464,12 @@ info_proc_siginfo (pip, summary)
 	{
 	  printf_filtered ("\n\n");
 	  printf_filtered ("\t%-16s %s.\n", signalname (sip -> si_signo),
-			   sys_siglist[sip -> si_signo]);
+			   safe_strsignal (sip -> si_signo));
 	  if (sip -> si_errno > 0)
 	    {
 	      printf_filtered ("\t%-16s %s.\n",
-			       lookupname (errno_table,
-					   sip -> si_errno, "errno"),
-			       lookupdesc (errno_table, sip -> si_errno));
+			       errnoname (sip -> si_errno),
+			       safe_strerror (sip -> si_errno));
 	    }
 	  if (sip -> si_code <= 0)
 	    {
@@ -2954,17 +2580,36 @@ static char *
 signalname (signo)
      int signo;
 {
-  char *abbrev;
+  char *name;
   static char locbuf[32];
 
-  abbrev = sig_abbrev (signo);
-  if (abbrev == NULL)
+  name = strsigno (signo);
+  if (name == NULL)
     {
-      sprintf (locbuf, "signal %d", signo);
+      sprintf (locbuf, "Signal %d", signo);
     }
   else
     {
-      sprintf (locbuf, "SIG%s (%d)", abbrev, signo);
+      sprintf (locbuf, "%s (%d)", name, signo);
+    }
+  return (locbuf);
+}
+
+static char *
+errnoname (errnum)
+     int errnum;
+{
+  char *name;
+  static char locbuf[32];
+
+  name = strerrno (errnum);
+  if (name == NULL)
+    {
+      sprintf (locbuf, "Errno %d", errnum);
+    }
+  else
+    {
+      sprintf (locbuf, "%s (%d)", name, errnum);
     }
   return (locbuf);
 }
@@ -3000,7 +2645,7 @@ info_proc_signals (pip, summary)
 	  printf_filtered ("%-8s ",
 			   prismember (&pip -> prstatus.pr_sigpend, signo)
 			   ? "yes" : "no");
-	  printf_filtered (" %s\n", sys_siglist[signo]);
+	  printf_filtered (" %s\n", safe_strsignal (signo));
 	}
       printf_filtered ("\n");
     }

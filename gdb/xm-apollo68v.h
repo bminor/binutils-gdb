@@ -43,6 +43,3 @@ on those where it does, it occurs quite reliably.  */
 #define HAVE_TERMIO
 
 #define	FETCH_INFERIOR_REGISTERS
-
-#define	SYS_SIGLIST_MISSING	0	/* we have it on the apollo */
-

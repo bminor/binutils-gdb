@@ -664,8 +664,10 @@ subsig_name (signo, subcode)
     {0, 0, 0, 0, subsig4, subsig5, 0, 0, subsig8, 0, subsig10, subsig11, 0};
 
   int i;
-  char *p = signo < NSIG ? sys_siglist[signo] : "unknown";
+  char *p;
 
+  if ((p = strsignal (signo)) == NULL)
+    p = "unknown";
   if (signo >= (sizeof subsig_list / sizeof *subsig_list)
       || !subsig_list[signo])
     return p;

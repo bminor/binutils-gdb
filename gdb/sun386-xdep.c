@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
-#include "signame.h"
 #include "gdbcore.h"
 
 #include <sys/param.h>
@@ -186,10 +185,7 @@ core_file_command (filename, from_tty)
 	printf ("Core file is from \"%s\".\n", corestr.c_cmdname);
 	if (corestr.c_signo > 0)
 	  printf ("Program terminated with signal %d, %s.\n",
-			corestr.c_signo,
-			corestr.c_signo < NSIG
-			? sys_siglist[corestr.c_signo]
-			: "(undocumented)");
+		  corestr.c_signo, safe_strsignal (corestr.c_signo));
       }
       if (filename[0] == '/')
 	corefile = savestring (filename, strlen (filename));

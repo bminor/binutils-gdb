@@ -212,7 +212,6 @@ static void psw_info ();
 static sig_noop ();
 static ptr_cmp ();
 
-extern char *sys_siglist[];
 
 /* Execute ptrace.  Convex V7 replaced ptrace with pattach.
    Allow ptrace (0) as a no-op.  */
@@ -950,9 +949,7 @@ core_file_command (filename, from_tty)
 
 	  printf_filtered ("thread %d received signal %d, %s\n",
 			   n, thread_signal[n],
-			   thread_signal[n] < NSIG
-			   ? sys_siglist[thread_signal[n]]
-			   : "(undocumented)");
+			   safe_strsignal (thread_signal[n]));
 	}
 
       /* Select an interesting thread -- also-rans died with SIGKILL,
