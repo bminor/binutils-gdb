@@ -1,3 +1,16 @@
+Mon Aug 10 20:38:39 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_calc_dynrel_sizes): Correct last change
+	to not count too few relocs for dynamicly linked executables.
+
+Mon Aug 10 15:35:34 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Never consider
+	symbols without a dynamic index dynamic.  Consider all weak
+	symbols dynamic.
+	(elf64_alpha_strip_section_from_output): Don't assume 1-1
+	correspondance between input and output sections.
+
 Mon Aug 10 15:31:39 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elflink.h (elf_gc_common_finalize_got_offsets): For backends
