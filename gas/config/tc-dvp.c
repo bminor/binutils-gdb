@@ -51,7 +51,9 @@ const char FLT_CHARS[] = "dD";
 
 /* Current assembler state.
    Instructions like mpg and direct are followed by a restricted set of
-   instructions until an end marker (e.g. mpg is followed by vu insns).  */
+   instructions.  In the case of a '*' length argument an end marker must
+   be provided.  (e.g. mpg is followed by vu insns until a .EndMpg is
+   seen).  */
 typedef enum {
   ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_GPUIF, ASM_VU
 } asm_state;
@@ -62,35 +64,60 @@ static asm_state cur_asm_state = ASM_INIT;
    cur_asm_state is one of ASM_MPG, ASM_DIRECT, ASM_UNPACK.  */
 static fragS *cur_varlen_frag;
 static char *cur_varlen_insn;
+/* The length value specified in the insn, or -1 if '*'.  */
+static int cur_varlen_value;
 
 /* Non-zero if packing pke instructions in dma tags.  */
 static int dma_pack_pke_p;
+
+/* Non-zero if dma insns are to be included in the output.
+   This is the default, but writing "if (! no_dma)" is klunky.  */
+static int output_dma;
+/* Non-zero if pke insns are to be included in the output.  */
+static int output_pke;
 
 const char *md_shortopts = "";
 
 struct option md_longopts[] =
 {
-  /* insert options here */
+#define OPTION_NO_DMA (OPTION_MD_BASE + 1)
+  { "no-dma", no_argument, NULL, OPTION_NO_DMA },
+#define OPTION_NO_PKE (OPTION_NO_DMA_PKE + 1)
+  { "no-dma-pke", no_argument, NULL, OPTION_NO_DMA_PKE },
 
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);       
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
 md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  return 0;
+  switch (c)
+    {
+    case OPTION_NO_DMA :
+      output_dma = 0;
+      break;
+    case OPTION_NO_DMA_PKE :
+      output_dma = 0;
+      output_pke = 0;
+      break;
+    default :
+      return 0;
+    }
+  return 1;
 }
 
 void
 md_show_usage (stream)
   FILE *stream;
 {
-#if 0
-  fprintf (stream, "DVP options:\n");
-#endif
+  fprintf (stream, "\
+DVP options:\n\
+-no-dma			do not include DMA instructions in the output\n\
+-no-dma-pke		do not include DMA or PKE instructions in the output\n\
+");
 } 
 
 /* Set by md_assemble for use by dvp_fill_insn.  */
@@ -141,6 +168,8 @@ md_begin ()
 
   cur_asm_state = ASM_INIT;
   dma_pack_pke_p = 0;
+  output_dma = 1;
+  output_pke = 1;
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -221,6 +250,8 @@ assemble_dma (str)
 			      &str, insn_buf);
   if (opcode == NULL)
     return;
+  if (! output_dma)
+    return;
 }
 
 /* Subroutine of md_assemble to assemble PKE instructions.  */
@@ -255,38 +286,43 @@ assemble_pke (str)
   else
     len = 1;
 
-  /* Reminder: it is important to fetch enough space in one call to
-     `frag_more'.  We use (f - frag_now->fr_literal) to compute where
-     we are and we don't want frag_now to change between calls.  */
-  f = frag_more (len * 4);
-
-  /* Write out the instruction.  */
-  for (i = 0; i < len; ++i)
-    md_number_to_chars (f + i * 4, insn_buf[i], 4);
-
-  /* Create any fixups.  */
-  /* FIXME: It might eventually be possible to combine all the various
-     copies of this bit of code.  */
-  for (i = 0; i < fixup_count; ++i)
+  /* We still have to switch modes (if mpg for example) so we can't exit
+     early if -no-pke.  */
+  if (output_pke)
     {
-      int op_type, reloc_type, offset;
-      const dvp_operand *operand;
+      /* Reminder: it is important to fetch enough space in one call to
+	 `frag_more'.  We use (f - frag_now->fr_literal) to compute where
+	 we are and we don't want frag_now to change between calls.  */
+      f = frag_more (len * 4);
 
-      /* Create a fixup for this operand.
-	 At this point we do not use a bfd_reloc_code_real_type for
-	 operands residing in the insn, but instead just use the
-	 operand index.  This lets us easily handle fixups for any
-	 operand type, although that is admittedly not a very exciting
-	 feature.  We pick a BFD reloc type in md_apply_fix.  */
+      /* Write out the instruction.  */
+      for (i = 0; i < len; ++i)
+	md_number_to_chars (f + i * 4, insn_buf[i], 4);
 
-      op_type = fixups[i].opindex;
-      offset = fixups[i].offset;
-      reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
-      operand = &pke_operands[op_type];
-      fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
-		   &fixups[i].exp,
-		   (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
-		   (bfd_reloc_code_real_type) reloc_type);
+      /* Create any fixups.  */
+      /* FIXME: It might eventually be possible to combine all the various
+	 copies of this bit of code.  */
+      for (i = 0; i < fixup_count; ++i)
+	{
+	  int op_type, reloc_type, offset;
+	  const dvp_operand *operand;
+
+	  /* Create a fixup for this operand.
+	     At this point we do not use a bfd_reloc_code_real_type for
+	     operands residing in the insn, but instead just use the
+	     operand index.  This lets us easily handle fixups for any
+	     operand type, although that is admittedly not a very exciting
+	     feature.  We pick a BFD reloc type in md_apply_fix.  */
+
+	  op_type = fixups[i].opindex;
+	  offset = fixups[i].offset;
+	  reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
+	  operand = &pke_operands[op_type];
+	  fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
+		       &fixups[i].exp,
+		       (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
+		       (bfd_reloc_code_real_type) reloc_type);
+	}
     }
 
   /* Handle variable length insns.  */
@@ -304,7 +340,8 @@ assemble_pke (str)
       if (file)
 	{
 	  int byte_len = insert_file (file);
-	  install_pke_length (f, byte_len);
+	  if (output_pke)
+	    install_pke_length (f, byte_len);
 	  /* Update $.MpgLoc.  */
 	  pke_set_mpgloc (pke_get_mpgloc () + byte_len);
 	}
@@ -314,31 +351,15 @@ assemble_pke (str)
 	     the data.  */
 	  if (data_len == 0 || data_len < -2)
 	    as_bad ("invalid data length");
-	  else if (data_len == -1)
-	    {
-	      cur_varlen_frag = frag_now;
-	      cur_varlen_insn = f;
-	      if (opcode->flags & PKE_OPCODE_MPG)
-		cur_asm_state = ASM_MPG;
-	      else if (opcode->flags & PKE_OPCODE_DIRECT)
-		cur_asm_state = ASM_DIRECT;
-	      else if (opcode->flags & PKE_OPCODE_UNPACK)
-		cur_asm_state = ASM_UNPACK;
-	    }
-	  else
-	    {
-	      install_pke_length (f, data_len * 4);
-	      /* Switch to VU state.  We don't use MPG state as that is
-		 used to indicate we're expecting to see a .endmpg.  */
-	      if (opcode->flags & PKE_OPCODE_MPG)
-		cur_asm_state = ASM_VU;
-	      else if (opcode->flags & PKE_OPCODE_DIRECT)
-		cur_asm_state = ASM_GPUIF;
-	      else if (opcode->flags & PKE_OPCODE_UNPACK)
-		cur_asm_state = ASM_INIT;
-	      /* FIXME: We assume there is exactly the right amount of
-		 data.  */
-	    }
+	  cur_varlen_frag = frag_now;
+	  cur_varlen_insn = f;
+	  cur_varlen_value = data_len;
+	  if (opcode->flags & PKE_OPCODE_MPG)
+	    cur_asm_state = ASM_MPG;
+	  else if (opcode->flags & PKE_OPCODE_DIRECT)
+	    cur_asm_state = ASM_DIRECT;
+	  else if (opcode->flags & PKE_OPCODE_UNPACK)
+	    cur_asm_state = ASM_UNPACK;
 	}
     }
 }
@@ -1236,6 +1257,7 @@ install_pke_length (buf, len)
 }
 
 /* Insert a file into the output.
+   -I is used to specify where to find the file.
    The result is the number of bytes inserted.
    If an error occurs an error message is printed and zero is returned.  */
 
@@ -1245,9 +1267,22 @@ insert_file (file)
 {
   FILE *f;
   char buf[256];
-  int n, total;
+  int i, n, total;
+  char *path;
 
-  f = fopen (file, FOPEN_RB);
+  path = xmalloc (strlen (file) + include_dir_maxlen + 5 /*slop*/);
+  f = NULL;
+  for (i = 0; i < include_dir_count; i++)
+    {
+      strcpy (path, include_dirs[i]);
+      strcat (path, "/");
+      strcat (path, file);
+      if ((f = fopen (path, FOPEN_RB)) != NULL)
+	break;
+    }
+  free (path);
+  if (f == NULL)
+    f = fopen (file, FOPEN_RB);
   if (f == NULL)
     {
       as_bad ("unable to read file `%s'", file);
@@ -1266,6 +1301,8 @@ insert_file (file)
   } while (n > 0);
 
   fclose (f);
+  /* We assume the file is smaller than 2^31 bytes.
+     Ok, we shouldn't make any assumptions.  Later.  */
   return total;
 }
 
@@ -1483,11 +1520,18 @@ s_enddirect (ignore)
     }
 
   byte_len = cur_pke_insn_length ();
-  install_pke_length (cur_varlen_insn, byte_len);
+  if (cur_varlen_value != -1
+      && cur_varlen_value * 16 != byte_len)
+    as_warn ("length in `direct' instruction does not match length of data");
+  if (output_pke)
+    install_pke_length (cur_varlen_insn, byte_len);
 
   cur_asm_state = ASM_INIT;
+
+  /* These needn't be reset, but to catch bugs they are.  */
   cur_varlen_frag = NULL;
   cur_varlen_insn = NULL;
+  cur_varlen_value = 0;
 }
 
 static void
@@ -1503,11 +1547,18 @@ s_endmpg (ignore)
     }
 
   byte_len = cur_pke_insn_length ();
-  install_pke_length (cur_varlen_insn, byte_len);
+  if (cur_varlen_value != -1
+      && cur_varlen_value * 8 != byte_len)
+    as_warn ("length in `mpg' instruction does not match length of data");
+  if (output_pke)
+    install_pke_length (cur_varlen_insn, byte_len);
 
   cur_asm_state = ASM_INIT;
+
+  /* These needn't be reset, but to catch bugs they are.  */
   cur_varlen_frag = NULL;
   cur_varlen_insn = NULL;
+  cur_varlen_value = 0;
 
   /* Update $.MpgLoc.  */
   pke_set_mpgloc (pke_get_mpgloc () + byte_len);
@@ -1526,11 +1577,19 @@ s_endunpack (ignore)
     }
 
   byte_len = cur_pke_insn_length ();
-  install_pke_length (cur_varlen_insn, byte_len);
+#if 0 /* unpack doesn't support prespecifying a length */
+  if (cur_varlen_value * 16 != bytelen)
+    as_warn ("length in `direct' instruction does not match length of data");
+#endif
+  if (output_pke)
+    install_pke_length (cur_varlen_insn, byte_len);
 
   cur_asm_state = ASM_INIT;
+
+  /* These needn't be reset, but to catch bugs they are.  */
   cur_varlen_frag = NULL;
   cur_varlen_insn = NULL;
+  cur_varlen_value = 0;
 
   /* Update $.UnpackLoc.  */
   pke_set_unpackloc (pke_get_unpackloc () + byte_len);
