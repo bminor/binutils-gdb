@@ -111,6 +111,18 @@ ppcnbsd_supply_fpreg (char *fpregs, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
 
+  /* FIXME: jimb/2004-05-05: Some PPC variants don't have floating
+     point registers.  Traditionally, GDB's register set has still
+     listed the floating point registers for such machines, so this
+     code is harmless.  However, the new E500 port actually omits the
+     floating point registers entirely from the register set --- they
+     don't even have register numbers assigned to them.
+
+     It's not clear to me how best to update this code, so this assert
+     will alert the first person to encounter the NetBSD/E500
+     combination to the problem.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+
   for (i = 0; i < ppc_num_fprs; i++)
     {
       if (regno == tdep->ppc_fp0_regnum + i || regno == -1)
@@ -127,6 +139,18 @@ ppcnbsd_fill_fpreg (char *fpregs, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
+
+  /* FIXME: jimb/2004-05-05: Some PPC variants don't have floating
+     point registers.  Traditionally, GDB's register set has still
+     listed the floating point registers for such machines, so this
+     code is harmless.  However, the new E500 port actually omits the
+     floating point registers entirely from the register set --- they
+     don't even have register numbers assigned to them.
+
+     It's not clear to me how best to update this code, so this assert
+     will alert the first person to encounter the NetBSD/E500
+     combination to the problem.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   for (i = 0; i < ppc_num_fprs; i++)
     {

@@ -37,6 +37,7 @@
 #include "ocd.h"
 #include "ppc-tdep.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 static void bdm_ppc_open (char *name, int from_tty);
 
@@ -193,6 +194,12 @@ bdm_ppc_fetch_registers (int regno)
       return;			/* Unsupported register */
     }
 
+  /* FIXME: jimb/2004-05-04: I'm not sure how to adapt this code to
+     processors that lack floating point registers, and I don't have
+     have the equipment to test it.  So we'll leave that case for the
+     next person who encounters it.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+
 #if 1
   /* Can't ask for floating point regs on ppc 8xx, also need to
      avoid asking for the mq register. */
@@ -286,6 +293,12 @@ bdm_ppc_store_registers (int regno)
 
   if (first_bdm_regno == -1)
     return;			/* Unsupported register */
+
+  /* FIXME: jimb/2004-05-04: I'm not sure how to adapt this code to
+     processors that lack floating point registers, and I don't have
+     have the equipment to test it.  So we'll leave that case for the
+     next person who encounters it.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   for (i = first_regno; i <= last_regno; i++)
     {

@@ -140,16 +140,16 @@ altivec_register_p (int regno)
     return (regno >= tdep->ppc_vr0_regnum && regno <= tdep->ppc_vrsave_regnum);
 }
 
-/* Use the architectures FP registers?  */
+
+/* Return non-zero if the architecture described by GDBARCH has
+   floating-point registers (f0 --- f31 and fpscr).  */
 int
 ppc_floating_point_unit_p (struct gdbarch *gdbarch)
 {
-  const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
-  if (info->arch == bfd_arch_powerpc)
-    return (info->mach != bfd_mach_ppc_e500);
-  if (info->arch == bfd_arch_rs6000)
-    return 1;
-  return 0;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  return (tdep->ppc_fp0_regnum >= 0
+          && tdep->ppc_fpscr_regnum >= 0);
 }
 
 
@@ -226,6 +226,8 @@ ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   size_t offset;
   int i;
 
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
+
   offset = offsets->f0_offset;
   for (i = tdep->ppc_fp0_regnum;
        i < tdep->ppc_fp0_regnum + ppc_num_fprs;
@@ -300,6 +302,8 @@ ppc_collect_fpregset (const struct regset *regset,
   const struct ppc_reg_offsets *offsets = regset->descr;
   size_t offset;
   int i;
+
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   offset = offsets->f0_offset;
   for (i = tdep->ppc_fp0_regnum;
@@ -1190,6 +1194,11 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   CORE_ADDR saved_sp;
 
+  /* The calling convention this function implements assumes the
+     processor has floating-point registers.  We shouldn't be using it
+     on PPC variants that lack them.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+
   /* The first eight words of ther arguments are passed in registers.
      Copy them appropriately.  */
   ii = 0;
@@ -1415,6 +1424,11 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
   int offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* The calling convention this function implements assumes the
+     processor has floating-point registers.  We shouldn't be using it
+     on PPC variants that lack them.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
@@ -1727,6 +1741,9 @@ rs6000_dwarf2_stab_reg_to_regnum (int num)
   if (0 <= num && num <= 31)
     return tdep->ppc_gp0_regnum + num;
   else if (32 <= num && num <= 63)
+    /* FIXME: jimb/2004-05-05: What should we do when the debug info
+       specifies registers the architecture doesn't have?  Our
+       callers don't check the value we return.  */
     return tdep->ppc_fp0_regnum + (num - 32);
   else if (1200 <= num && num < 1200 + 32)
     return tdep->ppc_ev0_regnum + (num - 1200);
@@ -1764,6 +1781,11 @@ static void
 rs6000_store_return_value (struct type *type, char *valbuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* The calling convention this function implements assumes the
+     processor has floating-point registers.  We shouldn't be using it
+     on PPC variants that lack them.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
 
@@ -2445,11 +2467,17 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
     {
       int i;
       CORE_ADDR fpr_addr = cache->base + fdata.fpr_offset;
-      for (i = fdata.saved_fpr; i < 32; i++)
-	{
-	  cache->saved_regs[tdep->ppc_fp0_regnum + i].addr = fpr_addr;
-	  fpr_addr += 8;
-	}
+
+      /* If skip_prologue says floating-point registers were saved,
+         but the current architecture has no floating-point registers,
+         then that's strange.  But we have no indices to even record
+         the addresses under, so we just ignore it.  */
+      if (ppc_floating_point_unit_p (gdbarch))
+        for (i = fdata.saved_fpr; i < 32; i++)
+          {
+            cache->saved_regs[tdep->ppc_fp0_regnum + i].addr = fpr_addr;
+            fpr_addr += 8;
+          }
     }
 
   /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr.
@@ -2763,6 +2791,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         tdep->ppc_xer_regnum = 5;
 	tdep->ppc_ev0_regnum = 7;
 	tdep->ppc_ev31_regnum = 38;
+        tdep->ppc_fp0_regnum = -1;
+        tdep->ppc_fpscr_regnum = -1;
         set_gdbarch_pc_regnum (gdbarch, 0);
         set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_deprecated_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
