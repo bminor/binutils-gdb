@@ -1907,6 +1907,13 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	      length = read_8_bytes (abfd, stash->info_ptr + 4);
 	      stash->info_ptr += 8;
 	    }
+	  else if (length == 0)
+	    {
+	      /* Handle (non-standard) 64-bit DWARF2 formats.  */
+	      offset_size = 8;
+	      length = read_4_bytes (abfd, stash->info_ptr + 4);
+	      stash->info_ptr += 4;
+	    }
 	}
       else
 	length = read_8_bytes (abfd, stash->info_ptr);
