@@ -6,7 +6,8 @@
 	* configure.tgt: Replace fr30 with elf32fr30.
 
 	* emulparams/elf32fr30.sh: New file: Replaces fr30.sh, and uses
-	generic elf.sc script.
+	generic elf.sc script.  Also replaces the .stack section with a
+	user definable symbol __stack.
 
 1999-01-11  Nick Clifton  <nickc@cygnus.com>
 
