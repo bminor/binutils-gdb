@@ -1,3 +1,7 @@
+2004-03-07  Andreas Schwab  <schwab@suse.de>
+
+	* doc/c-hppa.texi (HPPA Directives): Fix typo.
+
 2004-03-07  Richard Henderson  <rth@redhat.com>
 
 	* dw2gencfi.c (output_cie): Align length to 4 byte boundary.
