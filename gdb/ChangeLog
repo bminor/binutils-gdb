@@ -75,6 +75,12 @@ Fri Nov 20 21:35:57 1992  Fred Fish  (fnf@cygnus.com)
 	chill_printstr.
 	**** end-sanitize-chill ****
 
+Thu Nov 19 21:22:21 1992  John Gilmore  (gnu@cygnus.com)
+
+	* main.c (main):  Print GDB version number in gdb -help; doc pid arg.
+	Suggested by Marty Leisner, <leisner@eso.mc.xerox.com>.
+	(print_gdb_version):  New arg is stdout or stderr.  Callers changed.
+
 Wed Nov 18 15:05:45 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* remote-vx.c (vx_kill): just warn if we can't contact the board,
