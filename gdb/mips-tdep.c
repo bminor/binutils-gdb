@@ -1,7 +1,8 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -5775,11 +5776,11 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_elf_make_msymbol_special (gdbarch, 
 					mips_elf_make_msymbol_special);
 
-  /* Fill in the OS dependant register numbers.  */
+  /* Fill in the OS dependant register numbers and names.  */
   {
+    const char **reg_names;
     struct mips_regnum *regnum = GDBARCH_OBSTACK_ZALLOC (gdbarch,
 							 struct mips_regnum);
-    tdep->regnum = regnum;
     if (info.osabi == GDB_OSABI_IRIX)
       {
 	regnum->fp0 = 32;
@@ -5791,6 +5792,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 	regnum->fp_control_status = 69;
 	regnum->fp_implementation_revision = 70;
 	num_regs = 71;
+	reg_names = mips_irix_reg_names;
       }
     else
       {
@@ -5803,6 +5805,11 @@ mips_gdbarch_init (struct gdbarch_info info,
 	regnum->fp_control_status = 70;
 	regnum->fp_implementation_revision = 71;
 	num_regs = 90;
+	if (info.bfd_arch_info != NULL
+	    && info.bfd_arch_info->mach == bfd_mach_mips3900)
+	  reg_names = mips_tx39_reg_names;
+	else
+	  reg_names = mips_generic_reg_names;
       }
     /* FIXME: cagney/2003-11-15: For MIPS, hasn't PC_REGNUM been
        replaced by read_pc?  */
@@ -5810,6 +5817,9 @@ mips_gdbarch_init (struct gdbarch_info info,
     set_gdbarch_fp0_regnum (gdbarch, regnum->fp0);
     set_gdbarch_num_regs (gdbarch, num_regs);
     set_gdbarch_num_pseudo_regs (gdbarch, num_regs);
+    set_gdbarch_register_name (gdbarch, mips_register_name);
+    tdep->mips_processor_reg_names = reg_names;
+    tdep->regnum = regnum;
   }
 
   switch (mips_abi)
@@ -5960,14 +5970,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   else
     tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
 
-  /* MIPS version of register names.  */
-  set_gdbarch_register_name (gdbarch, mips_register_name);
-  if (info.osabi == GDB_OSABI_IRIX)
-    tdep->mips_processor_reg_names = mips_irix_reg_names;
-  else if (info.bfd_arch_info != NULL && info.bfd_arch_info->mach == bfd_mach_mips3900)
-    tdep->mips_processor_reg_names = mips_tx39_reg_names;
-  else
-    tdep->mips_processor_reg_names = mips_generic_reg_names;
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */

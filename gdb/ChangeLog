@@ -1,3 +1,9 @@
+2004-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c: Update copyright.
+	(mips_gdbarch_init): Merge two code blocks handling the register
+	name and number layout.
+
 2004-01-02  Pawel Ostrowski  <pasza@zodiac.mimuw.edu.pl>
 
 	* tracepoint.c (validate_actionline): Fix segv at EOF
