@@ -1,3 +1,9 @@
+Fri Jan  3 16:04:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (MAKEINFO): Check for the existence of the Makefile,
+	rather than the makeinfo program.
+	(do-info): Depend upon all-texinfo.
+
 Tue Dec 31 16:00:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Remove uses of config/mh-linux.
