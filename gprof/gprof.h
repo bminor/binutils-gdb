@@ -20,7 +20,9 @@
  */
 
 #include <stdio.h>
+#ifdef	__STDC__
 #include <stdlib.h>
+#endif	/* __STDC__ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "bfd.h"

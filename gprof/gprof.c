@@ -29,6 +29,8 @@ static char sccsid[] = "@(#)gprof.c	5.6 (Berkeley) 6/1/90";
 
 #include "gprof.h"
 
+bfd	*abfd;
+
 char	*whoami = "gprof";
 
     /*
@@ -185,7 +187,6 @@ main(argc, argv)
      */
 getnfile()
 {
-  bfd	*abfd;
   int		valcmp();
 
   abfd = bfd_openr (a_outname, NULL);
@@ -216,33 +217,9 @@ getnfile()
 #   endif DEBUG
 }
 
-#if 0
-getstrtab(nfile)
-    FILE	*nfile;
-{
-
-    fseek(nfile, (long)(N_SYMOFF(xbuf) + xbuf.a_syms), 0);
-    if (fread(&ssiz, sizeof (ssiz), 1, nfile) == 0) {
-	fprintf(stderr, "%s: %s: no string table (old format?)\n" ,
-		whoami , a_outname );
-	done();
-    }
-    strtab = (char *)calloc(ssiz, 1);
-    if (strtab == NULL) {
-	fprintf(stderr, "%s: %s: no room for %d bytes of string table",
-		whoami , a_outname , ssiz);
-	done();
-    }
-    if (fread(strtab+sizeof(ssiz), ssiz-sizeof(ssiz), 1, nfile) != 1) {
-	fprintf(stderr, "%s: %s: error reading string table\n",
-		whoami , a_outname );
-	done();
-    }
-}
-#endif	/* 0 */
-    /*
-     * Read in symbol table
-     */
+/*
+ * Read in symbol table
+ */
 getsymtab(abfd)
 bfd	*abfd;
 {
@@ -349,6 +326,9 @@ getpfile(filename)
 	 *	a bunch of <from,self,count> tuples.
 	 */
     while ( fread( &arc , sizeof arc , 1 , pfile ) == 1 ) {
+      arc.raw_frompc = bfd_get_32 (abfd, &arc.raw_frompc);
+      arc.raw_selfpc = bfd_get_32 (abfd, &arc.raw_selfpc);
+      arc.raw_count = bfd_get_32 (abfd, &arc.raw_count);
 #	ifdef DEBUG
 	    if ( debug & SAMPLEDEBUG ) {
 		printf( "[getpfile] frompc 0x%x selfpc 0x%x count %d\n" ,
@@ -375,6 +355,10 @@ openpfile(filename)
 	done();
     }
     fread(&tmp, sizeof(struct hdr), 1, pfile);
+    tmp.lowpc = bfd_get_32 (abfd, &tmp.lowpc);
+    tmp.highpc = bfd_get_32 (abfd, &tmp.highpc);
+    tmp.ncnt = bfd_get_32 (abfd, &tmp.ncnt);
+
     if ( s_highpc != 0 && ( tmp.lowpc != h.lowpc ||
 	 tmp.highpc != h.highpc || tmp.ncnt != h.ncnt ) ) {
 	fprintf(stderr, "%s: incompatible with first gmon file\n", filename);
@@ -496,15 +480,17 @@ readsamples(pfile)
     UNIT	sample;
     
     if (samples == 0) {
-	samples = (UNIT *) calloc(sampbytes, sizeof (UNIT));
+	samples = (UNIT *) malloc (sampbytes * sizeof(UNIT));
 	if (samples == 0) {
 	    fprintf( stderr , "%s: No room for %d sample pc's\n", 
 		whoami , sampbytes / sizeof (UNIT));
 	    done();
 	}
+  	memset (samples, 0, sampbytes * sizeof(UNIT));
     }
     for (i = 0; i < nsamples; i++) {
 	fread(&sample, sizeof (UNIT), 1, pfile);
+	sample = bfd_get_16 (abfd, &sample);
 	if (feof(pfile))
 		break;
 	samples[i] += sample;
@@ -667,22 +653,25 @@ funcsymbol( symp )
   extern char	*strtab;	/* string table from a.out */
   extern int	aflag;		/* if static functions aren't desired */
   char	*name;
-  
+  int i;
+
   /*
    *	must be a text symbol,
    *	and static text symbols don't qualify if aflag set.
    */
   
+
   if (!symp->section)
     return FALSE;
 
+#if 0
   if (!aflag && (symp->flags&BSF_LOCAL)) {
-#ifdef	DEBUG
+#if defined(DEBUG)
     fprintf (stderr, "%s(%d):  %s:  not a function\n", __FILE__, __LINE__, symp->name);
 #endif
     return FALSE;
   }
-
+#endif	/* 0 */
   /*
    *	can't have any `funny' characters in name,
    *	where `funny' includes	`.', .o file names
@@ -696,7 +685,14 @@ funcsymbol( symp )
       return FALSE;
     }
   }
-  return TRUE;
+
+  i = bfd_decode_symclass (symp);
+#if defined(DEBUG) && 0
+  if (i != 'T' && i != 't')
+    fprintf (stderr, "%s(%d):  %s is of class %c\n", __FILE__, __LINE__, symp->name, i);
+#endif
+
+  return (i == 'T' || i == 't');
 }
 
 done()
