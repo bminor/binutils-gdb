@@ -1,3 +1,10 @@
+start-sanitize-sky
+Mon Sep 21 13:08:01 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (md_begin): Set st_other field of mpgloc_sym.
+	(assemble_vif,create_vuoverlay_section,s_endmpg,s_vu): Ditto.
+
+end-sanitize-sky
 Mon Sep 21 10:42:57 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (m32r_do_align): After inserting NOPs, reset
@@ -14,6 +21,14 @@ Sun Sep 20 00:58:12 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.
 	relocs.
 	* config/tc-m68k.c (md_apply_fix_2): Do nothing for vtable relocs.
 
+start-sanitize-sky
+Tue Sep 15 17:04:43 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* config/tc-dvp.c (parse_float): Strtol() will not convert
+	0xFfffFfff properly, it returns 0x7fffFfff.
+	Changed to use strtoul() which does work properly.
+
+end-sanitize-sky
 Tue Sep 15 08:51:07 1998  Catherine Moore  <clm@cygnus.com>
  
         * config/obj-elf.c (obj_elf_vtable_inherit):  Handle arm
@@ -26,6 +41,14 @@ Tue Sep 15 08:51:07 1998  Catherine Moore  <clm@cygnus.com>
         (elf32_arm_force_relocation): New.
         (armelf_frob_symbol):  Remove coff-style symbol support.
 
+start-sanitize-sky
+Mon Sep 14 22:28:24 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (parse_float): Support 0fNNN.
+	(tc_gen_reloc): Don't crash if given a pc-relative reloc for .word,
+	just signal an error.
+
+end-sanitize-sky
 Wed Sep  9 11:27:16 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Fix typo in last patch.

@@ -159,7 +159,10 @@ static symbolS *vif_data_start;
 static symbolS *vif_data_end;
 
 /* Special symbol $.mpgloc.  The value is in bytes.
-   This value is kept absolute, for simplicity.  */
+   This value is kept absolute, for simplicity.
+   The st_other field for this must always be set to STO_DVP_VU because
+   symbols computed from this will get their st_other field clobbered
+   with this one (via resolve_symbol_value,copy_symbol_attributes).  */
 static symbolS *mpgloc_sym;
 
 /* Handle of the current vu overlay section.  */
@@ -320,6 +323,7 @@ md_begin ()
 
   /* Initialize $.mpgloc.  */
   mpgloc_sym = expr_build_uconstant (0);
+  S_SET_OTHER (mpgloc_sym, STO_DVP_VU);
 
   /* Create the vu overlay table section.  */
   {
@@ -677,11 +681,16 @@ assemble_vif (str)
 	      {
 		/* The value is recorded in bytes, mpgloc is in dwords.  */
 		mpgloc_sym = expr_build_uconstant (mpgloc * 8);
+		S_SET_OTHER (mpgloc_sym, STO_DVP_VU);
 	      }
 
 	    section_name = vuoverlay_section_name (mpgloc_sym);
 	    vif_data_start = create_colon_label (STO_DVP_VU,
+#if 0
 						 VUOVERLAY_START_PREFIX,
+#else
+						 LOCAL_LABEL_PREFIX,
+#endif
 						 section_name);
 	    insn_frag->fr_symbol = vif_data_start;
 
@@ -2069,7 +2078,14 @@ tc_gen_reloc (section, fixP)
       return NULL;
     }
 
-  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+  if (!fixP->fx_pcrel != !reloc->howto->pc_relative)
+    {
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    fixP->fx_pcrel
+		    ? "PC-relative reloc not supported here"
+		    : "PC-relative reloc required here");
+      return NULL;
+    }
 
   reloc->addend = fixP->fx_addnumber;
 
@@ -2173,12 +2189,15 @@ parse_float (pstr, errmsg)
     {
       long value;
       (*pstr) += 2;
-      value = strtol (*pstr, pstr, 16);
+      value = strtoul (*pstr, pstr, 16);
       return value;
     }
   else
     {
       LITTLENUM_TYPE words[MAX_LITTLENUMS];
+      if ((*pstr)[0] == '0'
+	  && isalpha ((*pstr)[1]))
+	(*pstr) += 2;
       *pstr = atof_ieee (*pstr, 'f', words);
       return (words[0] << 16) | words[1];
     }
@@ -2375,6 +2394,21 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
   if (addr->sy_value.X_op == O_constant)
     bfd_set_section_vma (stdoutput, vuoverlay_section, S_GET_VALUE (addr));
 #endif
+
+#if 1
+  /* Create a symbol marking the start of the section.
+     This is different than START_LABEL as this one is for gdb.
+     It needs a symbol to start a section so we give it one.
+     This one could be combined with START_LABEL, but I haven't since
+     they serve different purposes.  */
+  {
+    symbolS * gdb_start_sym;
+    gdb_start_sym = create_colon_label (STO_DVP_VU, VUOVERLAY_START_PREFIX,
+					section_name);
+    gdb_start_sym->sy_value = addr->sy_value;
+  }
+#endif
+
   /* The size of the section won't be known until we see the .endmpg,
      but we can compute it from the start and end labels.  */
   /* FIXME: This causes the section to occupy space in the file.  */
@@ -2382,14 +2416,11 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
     frag_var (rs_space, 1, 1, (relax_substateT) 0,
 	      expr_build_binary (O_subtract, end_label, start_label),
 	      (offsetT) 0, (char *) 0);
-#if 0
-  /* Create a symbol marking the start of the section.  */
-  begin_label = create_colon_label (STO_DVP_VU, "__start_", section_name);
-#endif
 
 #if 0 /* already done */
   /* Initialize $.mpgloc.  */
   mpgloc_sym = expr_build_uconstant (addr);
+  S_SET_OTHER (mpgloc_sym, STO_DVP_VU);
 #endif
 
 #if 0 /* $.mpgloc is kept in the ABS section.  */
@@ -2714,6 +2745,10 @@ insert_mpg_marker (ignore)
   /* Record the cpu type in case we're in the middle of reading binary
      data.  */
   record_mach (DVP_VUUP, 0);
+  /* We need a stabs line number entry at the start of the vu code.
+     This has already been called, but too early and we can't stop that.
+     So just emit another.  */
+  generate_lineno_debug ();
 }
 
 /* Finish off the current unpack insn and start a new one.
@@ -3077,6 +3112,7 @@ s_endmpg (caller)
      result we're ok.  The new value is the old value plus the number of
      double words in this chunk.  */
   mpgloc_sym = compute_mpgloc (mpgloc_sym, vif_data_start, vif_data_end);
+  S_SET_OTHER (mpgloc_sym, STO_DVP_VU);
 
   pop_asm_state (1);
 
@@ -3240,6 +3276,7 @@ s_vu (ignore)
      to be supported everywhere.  */
   vif_data_start = expr_build_dot ();
   mpgloc_sym = expr_build_uconstant (0);
+  S_SET_OTHER (mpgloc_sym, STO_DVP_VU);
 #if 0 /* ??? wip */
   create_vuoverlay_section (vuoverlay_section_name (NULL), mpgloc_sym,
 			    NULL, NULL);
