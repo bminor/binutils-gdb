@@ -34,10 +34,10 @@
 #
 # To configure/build for fewer targets, specify TARGETS="native cross1 ...".
   
-TREE	= devo
+TREE = devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /abc
+TEST_INSTALL_DISK = /dumbo
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -141,27 +141,24 @@ ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
 	i386-go32 	\
 	a29k-amd-udi 	\
-	h8300-hms 	\
-	i386-aout	\
-	i386-lynx 	\
-	i960-vxworks5.0 i960-vxworks5.1 \
+	h8300-hms 	h8500-hms \
+	hppa1.1-hp-proelf \
+	i386-aout	i386-elf \
+	i960-nindy-coff	i960-vxworks5.0	i960-vxworks5.1 \
+	m68k-aout	m68k-coff 	m68k-elf	m68k-vxworks5.1 \
 	mips-idt-ecoff	mips64-elf	mips-elf \
-	m68k-aout	m68k-vxworks 	m68k-coff \
-	m68k-lynx 	\
-	sh-hms 		\
-	sparc-aout	sparc-lynx	sparc-vxworks	\
-	sparclite-aout  sparclite-vxworks \
-	sparclite-coff  z8k-coff \
-	OSE68000 OSE68k mips-ncd-elf
-# The OSE68000 and OSE68k targets are for Ericsson only;
-# the mips-ncd-elf target is for NCD only.
+	sh-hms 	\
+	sparc-aout	sparc64-aout	sparc-vxworks \
+	sparclite-aout  sparclite-coff	sparclite-vxworks \
+	z8k-coff \
+	OSE68000 OSE68k mips-ncd-elf i386-unixware
+# The OSE68000 and OSE68k targets are for Ericsson only.
 GCC = gcc -O2 -pipe
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
-TARGETS = $(NATIVE) \
-	m68k-coff 
+TARGETS = $(NATIVE)
 GCC = gcc -O2 -msoft-float
 CC = cc -J
 all: all-cygnus
@@ -170,10 +167,12 @@ endif
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
 	a29k-amd-udi \
+	h8300-hms 	h8500-hms \
+	hppa1.1-hp-proelf \
 	i960-vxworks5.0 i960-vxworks5.1 \
-	m68k-aout	m68k-coff 	m68k-vxworks \
-	mipsel-idt-ecoff sparc-lynx \
-	sparclite-aout sparclite-coff m88k-coff z8k-coff \
+	m68k-aout	m68k-coff 	m68k-vxworks5.1	m88k-coff \
+	mips-idt-ecoff	mips-elf \
+	sparc64-elf	sparclite-aout sparclite-coff \
 	OSE68000 OSE68k \
 	sparc-sun-sunos4.1.3
 # The latter assures that BNR's special build (which they now
@@ -199,17 +198,24 @@ endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
 TARGETS	= $(NATIVE) \
-	mips-idt-ecoff	sh-hms \
-	mips64-elf
+	mips-idt-ecoff \
+	mips-elf mips64-elf \
+	sh-hms
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix5)
 TARGETS	= $(NATIVE) \
-	mips-idt-ecoff	sh-hms \
-	mips64-elf
+	mips-idt-ecoff \
+	mips-elf mips64-elf \
+	sh-hms
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
+all: all-cygnus
+endif
+
+ifeq ($(canonhost),powerpc-ibm-aix4.1.1)
+TARGETS	= $(NATIVE)
 all: all-cygnus
 endif
 
@@ -220,10 +226,17 @@ TARGETS	= $(NATIVE) \
 all: all-cygnus
 endif
 
+ifeq ($(canonhost),rs6000-ibm-aix3.2.5)
+TARGETS	= $(NATIVE) \
+	i960-vxworks5.0 i960-vxworks5.1 \
+	m68k-aout
+all: all-cygnus
+endif
+
 ifeq ($(canonhost),m68k-hp-hpux)
 TARGETS	= $(NATIVE)	m68k-aout
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
-CC = cc -Wp,-P 
+CC = cc -Wp,-P,-H256000
 #CFLAGS = +O1000 
 CFLAGS = -g
 all: all-cygnus
@@ -232,9 +245,10 @@ endif
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS = \
 	$(NATIVE) \
+	h8300-hms \
+	hppa1.1-hp-proelf \
 	i960-vxworks5.0 i960-vxworks5.1 \
-	m68k-aout  m68k-coff  m68k-vxworks \
-	z8k-coff
+	m68k-aout  m68k-coff  m68k-vxworks5.1
 CC = cc -Wp,-H256000
 #CFLAGS = +Obb2000
 CFLAGS = -g
@@ -242,19 +256,19 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),i386-sco3.2v4)
-TARGETS = $(NATIVE) i386-aout
+TARGETS = $(NATIVE)
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),i386-go32)
 TARGETS = \
 	a29k-amd-udi \
-	h8300-hms 	\
+	h8300-hms 	hppa1.1-hp-proelf \
 	i386-aout 	\
 	m68k-aout	m68k-coff \
-	mips-idt-ecoff 	\
+	mips-elf	mips-idt-ecoff	mips64-elf \
 	sh-hms 		\
-	sparclite-aout
+	sparc-aout	sparclite-aout	sparclite-coff
 CC = i386-go32-gcc
 GCC = i386-go32-gcc -O2
 CFLAGS =
@@ -346,8 +360,11 @@ all-cygnus:
             if [ ! -f $(canonhost)-stamp-3stage-done ] ; then \
 	      echo "3staging $(canonhost) native" ; \
 	      echo Flags passed to make: $(FLAGS_TO_PASS) ; \
-	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
-	         echo "     completed successfully" ; \
+	      if $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log); then \
+	        echo "     completed successfully" ; \
+	      else \
+		exit 1; \
+	      fi; \
 	    else \
 	      true ; \
 	    fi ; \
