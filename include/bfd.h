@@ -815,11 +815,11 @@ typedef CONST struct reloc_howto_struct
   unsigned int rightshift;
 
         /*  The size of the item to be relocated - 0, is one byte, 1 is 2
-           bytes, 3 is four bytes.  A -ve value indicates that the
-	    result is to be subtracted from the data*/
+           bytes, 3 is four bytes.  A negative value indicates that the
+	    result is to be subtracted from the data.  */
   int size;
 
-        /*  Now obsolete.  But m68k-coff still uses it. */
+        /*  Now obsolete?  But m68k-coff still uses it... */
   unsigned int bitsize;
 
         /*  Notes that the relocation is relative to the location in the
@@ -830,10 +830,8 @@ typedef CONST struct reloc_howto_struct
 
   unsigned int bitpos;
 
-#if 1
         /*  Now obsolete */
   boolean absolute;
-#endif
 
         /* Causes the relocation routine to return an error if overflow
           is detected when relocating. */
@@ -841,7 +839,7 @@ typedef CONST struct reloc_howto_struct
 
         /* If this field is non null, then the supplied function is
           called rather than the normal function. This allows really
-          strange relocation methods to be accomodated (eg, i960 callj
+          strange relocation methods to be accomodated (e.g., i960 callj
           instructions). */
   bfd_reloc_status_type (*special_function) 
 				    PARAMS ((bfd *abfd,
@@ -859,7 +857,7 @@ typedef CONST struct reloc_howto_struct
   boolean partial_inplace;
 
         /* The src_mask is used to select what parts of the read in data
-          are to be used in the relocation sum. Eg, if this was an 8 bit
+          are to be used in the relocation sum.  E.g., if this was an 8 bit
           bit of data which we read and relocated, this would be
           0x000000ff. When we have relocs which have an addend, such as
           sun4 extended relocs, the value in the offset part of a
@@ -876,9 +874,9 @@ typedef CONST struct reloc_howto_struct
         /* When some formats create PC relative instructions, they leave
           the value of the pc of the place being relocated in the offset
           slot of the instruction, so that a PC relative relocation can
-          be made just by adding in an ordinary offset (eg sun3 a.out).
+          be made just by adding in an ordinary offset (e.g., sun3 a.out).
           Some formats leave the displacement part of an instruction
-          empty (eg m88k bcs), this flag signals the fact.*/
+          empty (e.g., m88k bcs), this flag signals the fact.*/
   boolean pcrel_offset;
 
 } reloc_howto_type;
@@ -1092,9 +1090,6 @@ typedef struct symbol_cache_entry
 	   of making this a union. */
   PTR udata;
 
-        /* Application data. */
-  union { unsigned long aflags; PTR aptr; } app_data;
-
 } asymbol;
 #define get_symtab_upper_bound(abfd) \
      BFD_SEND (abfd, _get_symtab_upper_bound, (abfd))
@@ -1275,7 +1270,7 @@ bfd_set_start_address PARAMS ((bfd *, bfd_vma));
 long 
 bfd_get_mtime PARAMS ((bfd *));
 
-long
+long 
 bfd_get_size PARAMS ((bfd *));
 
 #define bfd_sizeof_headers(abfd, reloc) \
