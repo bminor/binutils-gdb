@@ -30,17 +30,17 @@ TEXINDEX	= texindex
 # this is the directory we look in to find Texinfo
 texidir		= $(srcdir)/../texinfo
 
-MY_MACHINE=	@MY_MACHINE@
+MY_TARGET=	@MY_TARGET@
 
 PROG=	gprof
-SRCS=	$(MY_MACHINE).c basic_blocks.c call_graph.c \
+SRCS=	$(MY_TARGET).c basic_blocks.c call_graph.c \
 	cg_arcs.c cg_dfn.c cg_print.c core.c \
 	gmon_io.c gprof.c hertz.c hist.c source.c search_list.c symtab.c \
 	sym_ids.c utils.c
 
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
-OBJS=	$(MY_MACHINE).o basic_blocks.o bsd_callg_bl.o call_graph.o \
+OBJS=	$(MY_TARGET).o basic_blocks.o bsd_callg_bl.o call_graph.o \
 	cg_arcs.o cg_dfn.o cg_print.o core.o flat_bl.o fsf_callg_bl.o \
 	gmon_io.o gprof.o hertz.o hist.o source.o search_list.o symtab.o \
 	sym_ids.o utils.o
@@ -51,7 +51,7 @@ DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 CFLAGS=-g -DDEBUG
 LDFLAGS=
 .c.o:
-	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
+	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_TARGET).h\" $(TCFLAGS) $(HCFLAGS) $<
 
 all:	diststuff $(PROG)
 
@@ -119,7 +119,7 @@ Makefile : Makefile.in
 
 
 # These get around a bug in Sun Make in SunOS 4.1.1 and Solaris 2
-$(MY_MACHINE).o: $(MY_MACHINE).c
+$(MY_TARGET).o: $(MY_TARGET).c
 basic_blocks.o: basic_blocks.c
 bsd_call_bl.o: bsd_call_bl.c
 call_graph.o: call_graph.c
