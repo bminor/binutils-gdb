@@ -1,3 +1,7 @@
+2002-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Updated Turkish translation.
+
 2002-09-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-i386.c (md_apply_fix3): Allow addend for

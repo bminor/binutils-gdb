@@ -1,3 +1,9 @@
+2002-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: New Danish translation file.
+	* configure.in (LINGUAS): Add 'da'.
+	* configure: Regenerate.
+
 2002-09-10  Michael Snyder  <msnyder@redhat.com>
 
 	* irix-core.c (do_sections, do_sections64): New functions.
