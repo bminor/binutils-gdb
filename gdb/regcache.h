@@ -149,12 +149,6 @@ extern int max_register_size (struct gdbarch *gdbarch);
 
 extern char *registers;
 
-/* DEPRECATED: Character array containing the current state of each
-   register (unavailable<0, invalid=0, valid>0) for the most recently
-   referenced thread. */
-
-extern signed char *register_valid;
-
 /* Copy/duplicate the contents of a register cache.  By default, the
    operation is pass-through.  Writes to DST and reads from SRC will
    go through to the target.
@@ -187,6 +181,17 @@ extern char *deprecated_grub_regcache_for_registers (struct regcache *);
 extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
 extern void deprecated_read_register_gen (int regnum, char *myaddr);
 extern void deprecated_write_register_gen (int regnum, char *myaddr);
+
+/* Character array containing the current state of each register
+   (unavailable<0, invalid=0, valid>0) for the most recently
+   referenced thread.  This global is often found in close proximity
+   to code that is directly manipulating the deprecated_registers[]
+   array.  In such cases, it should be possible to replace the lot
+   with a call to supply_register().  If you find yourself in dire
+   straits, still needing access to the cache status bit, the
+   regcache_valid_p() and set_register_cached() functions are
+   available.  */
+extern signed char *deprecated_register_valid;
 
 extern int register_cached (int regnum);
 

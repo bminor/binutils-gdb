@@ -299,7 +299,7 @@ fetch_inferior_registers (int regno)
       memcpy (&registers[REGISTER_BYTE (G1_REGNUM)], &ec.g1,
 	      4 * REGISTER_RAW_SIZE (G1_REGNUM));
       for (i = G1_REGNUM; i <= G1_REGNUM + 3; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
 
       supply_register (PS_REGNUM, (char *) &ec.psr);
       supply_register (Y_REGNUM, (char *) &ec.y);
@@ -310,7 +310,7 @@ fetch_inferior_registers (int regno)
       memcpy (&registers[REGISTER_BYTE (O0_REGNUM)], ec.o,
 	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
       for (i = O0_REGNUM; i <= O0_REGNUM + 7; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
     }
 
   if (whatregs & WHATREGS_STACK)
@@ -324,13 +324,13 @@ fetch_inferior_registers (int regno)
 			  &registers[REGISTER_BYTE (I0_REGNUM)],
 			  8 * REGISTER_RAW_SIZE (I0_REGNUM));
       for (i = I0_REGNUM; i <= I7_REGNUM; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
 
       target_read_memory (sp + FRAME_SAVED_L0,
 			  &registers[REGISTER_BYTE (L0_REGNUM)],
 			  8 * REGISTER_RAW_SIZE (L0_REGNUM));
       for (i = L0_REGNUM; i <= L0_REGNUM + 7; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
     }
 
   if (whatregs & WHATREGS_FLOAT)
@@ -348,7 +348,7 @@ fetch_inferior_registers (int regno)
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], fc.f.fregs,
 	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
       for (i = FP0_REGNUM; i <= FP0_REGNUM + 31; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
 
       supply_register (FPS_REGNUM, (char *) &fc.fsr);
     }
@@ -411,7 +411,7 @@ store_inferior_registers (int regno)
 
       if (regno == -1 || regno == SP_REGNUM)
 	{
-	  if (!register_valid[L0_REGNUM + 5])
+	  if (!deprecated_register_valid[L0_REGNUM + 5])
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp + FRAME_SAVED_I0,
 			      &registers[REGISTER_BYTE (I0_REGNUM)],
@@ -423,7 +423,7 @@ store_inferior_registers (int regno)
 	}
       else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
 	{
-	  if (!register_valid[regno])
+	  if (!deprecated_register_valid[regno])
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  if (regno >= L0_REGNUM && regno <= L0_REGNUM + 7)
 	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM)

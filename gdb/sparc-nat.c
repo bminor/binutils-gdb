@@ -73,7 +73,7 @@ fetch_inferior_registers (int regno)
      to the stack pointer.  */
   if (regno < O7_REGNUM		/* including -1 */
       || regno >= Y_REGNUM
-      || (!register_valid[SP_REGNUM] && regno < I7_REGNUM))
+      || (!deprecated_register_valid[SP_REGNUM] && regno < I7_REGNUM))
     {
       if (0 != ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 		       (PTRACE_ARG3_TYPE) & inferior_registers, 0))
@@ -88,16 +88,16 @@ fetch_inferior_registers (int regno)
       *(int *) &registers[REGISTER_BYTE (Y_REGNUM)] = inferior_registers.r_y;
 
       for (i = G0_REGNUM; i <= O7_REGNUM; i++)
-	register_valid[i] = 1;
-      register_valid[Y_REGNUM] = 1;
-      register_valid[PS_REGNUM] = 1;
-      register_valid[PC_REGNUM] = 1;
-      register_valid[NPC_REGNUM] = 1;
+	deprecated_register_valid[i] = 1;
+      deprecated_register_valid[Y_REGNUM] = 1;
+      deprecated_register_valid[PS_REGNUM] = 1;
+      deprecated_register_valid[PC_REGNUM] = 1;
+      deprecated_register_valid[NPC_REGNUM] = 1;
       /* If we don't set these valid, read_register_bytes() rereads
          all the regs every time it is called!  FIXME.  */
-      register_valid[WIM_REGNUM] = 1;	/* Not true yet, FIXME */
-      register_valid[TBR_REGNUM] = 1;	/* Not true yet, FIXME */
-      register_valid[CPS_REGNUM] = 1;	/* Not true yet, FIXME */
+      deprecated_register_valid[WIM_REGNUM] = 1;	/* Not true yet, FIXME */
+      deprecated_register_valid[TBR_REGNUM] = 1;	/* Not true yet, FIXME */
+      deprecated_register_valid[CPS_REGNUM] = 1;	/* Not true yet, FIXME */
     }
 
   /* Floating point registers */
@@ -115,8 +115,8 @@ fetch_inferior_registers (int regno)
 	      &inferior_fp_registers.Fpu_fsr,
 	      sizeof (FPU_FSR_TYPE));
       for (i = FP0_REGNUM; i <= FP0_REGNUM + 31; i++)
-	register_valid[i] = 1;
-      register_valid[FPS_REGNUM] = 1;
+	deprecated_register_valid[i] = 1;
+      deprecated_register_valid[FPS_REGNUM] = 1;
     }
 
   /* These regs are saved on the stack by the kernel.  Only read them
@@ -127,17 +127,17 @@ fetch_inferior_registers (int regno)
       target_read_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
 			  16 * REGISTER_RAW_SIZE (L0_REGNUM));
       for (i = L0_REGNUM; i <= I7_REGNUM; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
     }
   else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
     {
       CORE_ADDR sp = *(unsigned int *) & registers[REGISTER_BYTE (SP_REGNUM)];
       i = REGISTER_BYTE (regno);
-      if (register_valid[regno])
+      if (deprecated_register_valid[regno])
 	printf_unfiltered ("register %d valid and read\n", regno);
       target_read_memory (sp + i - REGISTER_BYTE (L0_REGNUM),
 			  &registers[i], REGISTER_RAW_SIZE (regno));
-      register_valid[regno] = 1;
+      deprecated_register_valid[regno] = 1;
     }
 }
 
@@ -199,7 +199,7 @@ store_inferior_registers (int regno)
 
       if (regno < 0 || regno == SP_REGNUM)
 	{
-	  if (!register_valid[L0_REGNUM + 5])
+	  if (!deprecated_register_valid[L0_REGNUM + 5])
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp,
 			       &registers[REGISTER_BYTE (L0_REGNUM)],
@@ -207,7 +207,7 @@ store_inferior_registers (int regno)
 	}
       else
 	{
-	  if (!register_valid[regno])
+	  if (!deprecated_register_valid[regno])
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp + REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM),
 			       &registers[REGISTER_BYTE (regno)],
@@ -218,7 +218,7 @@ store_inferior_registers (int regno)
 
   if (wanna_store & INT_REGS)
     {
-      if (!register_valid[G1_REGNUM])
+      if (!deprecated_register_valid[G1_REGNUM])
 	internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
       memcpy (&inferior_registers.r_g1, &registers[REGISTER_BYTE (G1_REGNUM)],
@@ -240,7 +240,7 @@ store_inferior_registers (int regno)
 
   if (wanna_store & FP_REGS)
     {
-      if (!register_valid[FP0_REGNUM + 9])
+      if (!deprecated_register_valid[FP0_REGNUM + 9])
 	internal_error (__FILE__, __LINE__, "failed internal consistency check");
       memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	      sizeof inferior_fp_registers.fpu_fr);

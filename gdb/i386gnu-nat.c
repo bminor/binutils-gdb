@@ -184,7 +184,7 @@ store_fpregs (struct proc *thread, int regno)
     }
 
   /* FIXME: kettenis/2001-07-15: Is this right?  Should we somehow
-     take into account REGISTER_VALID like the old code did?  */
+     take into account DEPRECATED_REGISTER_VALID like the old code did?  */
   i387_fill_fsave (state.hw_state, regno);
 
   err = thread_set_state (thread->port, i386_FLOAT_STATE,
@@ -266,14 +266,14 @@ gnu_store_registers (int regno)
 	  proc_debug (thread, "storing all registers");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    if (register_valid[i])
+	    if (deprecated_register_valid[i])
 	      fill (state, i);
 	}
       else
 	{
 	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
 
-	  gdb_assert (register_valid[regno]);
+	  gdb_assert (deprecated_register_valid[regno]);
 	  fill (state, regno);
 	}
 

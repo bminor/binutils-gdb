@@ -71,11 +71,11 @@ supply_gregset (prgregset_t *gregsetp)
      by other means.  Those that aren't are already handled by the
      code above.  */
   for (regi = IA64_GR32_REGNUM; regi <= IA64_GR127_REGNUM; regi++)
-    register_valid[regi] = 1;
+    deprecated_register_valid[regi] = 1;
   for (regi = IA64_PR0_REGNUM; regi <= IA64_PR63_REGNUM; regi++)
-    register_valid[regi] = 1;
+    deprecated_register_valid[regi] = 1;
   for (regi = IA64_VFP_REGNUM; regi <= NUM_REGS; regi++)
-    register_valid[regi] = 1;
+    deprecated_register_valid[regi] = 1;
 }
 
 void

@@ -135,7 +135,7 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
       /* The FPU Registers.  */
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], core_reg_sect, 31 * 8);
       memset (&registers[REGISTER_BYTE (FP0_REGNUM + 31)], 0, 8);
-      memset (&register_valid[FP0_REGNUM], 1, 32);
+      memset (&deprecated_register_valid[FP0_REGNUM], 1, 32);
     }
   else
     {
@@ -144,8 +144,8 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
               31 * 8);
       memcpy (&registers[REGISTER_BYTE (PC_REGNUM)], core_reg_sect + 31 * 8, 8);
       memset (&registers[REGISTER_BYTE (ALPHA_ZERO_REGNUM)], 0, 8);
-      memset (&register_valid[ALPHA_V0_REGNUM], 1, 32);
-      register_valid[PC_REGNUM] = 1;
+      memset (&deprecated_register_valid[ALPHA_V0_REGNUM], 1, 32);
+      deprecated_register_valid[PC_REGNUM] = 1;
     }
 }
 

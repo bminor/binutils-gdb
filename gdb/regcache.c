@@ -418,7 +418,7 @@ deprecated_grub_regcache_for_register_valid (struct regcache *regcache)
 
 /* Global structure containing the current regcache.  */
 /* FIXME: cagney/2002-05-11: The two global arrays registers[] and
-   register_valid[] currently point into this structure.  */
+   deprecated_register_valid[] currently point into this structure.  */
 struct regcache *current_regcache;
 
 /* NOTE: this is a write-through cache.  There is no "dirty" bit for
@@ -430,7 +430,7 @@ struct regcache *current_regcache;
 
 char *registers;
 
-/* REGISTER_VALID is 0 if the register needs to be fetched,
+/* DEPRECATED_REGISTER_VALID is 0 if the register needs to be fetched,
                      1 if it has been fetched, and
 		    -1 if the register value was not available.  
 
@@ -441,7 +441,7 @@ char *registers;
    system being debugged - some of the registers in such a system may
    not have been saved.  */
 
-signed char *register_valid;
+signed char *deprecated_register_valid;
 
 /* The thread/process associated with the current set of registers. */
 
@@ -460,7 +460,7 @@ static ptid_t registers_ptid;
 int
 register_cached (int regnum)
 {
-  return register_valid[regnum];
+  return deprecated_register_valid[regnum];
 }
 
 /* Record that REGNUM's value is cached if STATE is >0, uncached but
@@ -675,7 +675,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
       gdb_assert (regcache == current_regcache);
       /* For moment, just use underlying legacy code.  Ulgh!!! This
 	 silently and very indirectly updates the regcache's regcache
-	 via the global register_valid[].  */
+	 via the global deprecated_register_valid[].  */
       legacy_read_register_gen (regnum, buf);
       return;
     }
@@ -850,7 +850,7 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
     {
       /* For moment, just use underlying legacy code.  Ulgh!!! This
 	 silently and very indirectly updates the regcache's buffers
-	 via the globals register_valid[] and registers[].  */
+	 via the globals deprecated_register_valid[] and registers[].  */
       gdb_assert (regcache == current_regcache);
       legacy_write_register_gen (regnum, buf);
       return;
@@ -1455,7 +1455,7 @@ build_regcache (void)
   current_regcache = regcache_xmalloc (current_gdbarch);
   current_regcache->passthrough_p = 1;
   registers = deprecated_grub_regcache_for_registers (current_regcache);
-  register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
+  deprecated_register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
 }
 
 static void
@@ -1737,7 +1737,7 @@ _initialize_regcache (void)
 						 xfree_regcache_descr);
   REGISTER_GDBARCH_SWAP (current_regcache);
   register_gdbarch_swap (&registers, sizeof (registers), NULL);
-  register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);
+  register_gdbarch_swap (&deprecated_register_valid, sizeof (deprecated_register_valid), NULL);
   register_gdbarch_swap (NULL, 0, build_regcache);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,

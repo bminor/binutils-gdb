@@ -1,3 +1,14 @@
+2002-11-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.h (deprecated_register_valid): Rename register_valid.
+	* regcache.c: Update.
+	* ia64-aix-nat.c: Update.
+	* i386gnu-nat.c: Update.
+	* alpha-nat.c: Update.
+	* sparc-nat.c: Update.
+	* lynx-nat.c: Update.
+	* remote-mips.c: Update.
+
 2002-11-06  Joel Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (_initialize_hppa_tdep): Move function body
