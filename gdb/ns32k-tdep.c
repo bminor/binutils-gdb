@@ -311,7 +311,7 @@ ns32k_frame_chain (struct frame_info *frame)
   if (inside_entry_file (get_frame_pc (frame)))
     return 0;
 
-  return (read_memory_integer (frame->frame, 4));
+  return (read_memory_integer (get_frame_base (frame), 4));
 }
 
 
@@ -345,14 +345,14 @@ ns32k_frame_saved_pc (struct frame_info *frame)
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return (ns32k_sigtramp_saved_pc (frame)); /* XXXJRT */
 
-  return (read_memory_integer (frame->frame + 4, 4));
+  return (read_memory_integer (get_frame_base (frame) + 4, 4));
 }
 
 static CORE_ADDR
 ns32k_frame_args_address (struct frame_info *frame)
 {
   if (ns32k_get_enter_addr (get_frame_pc (frame)) > 1)
-    return (frame->frame);
+    return (get_frame_base (frame));
 
   return (read_register (SP_REGNUM) - 4);
 }
@@ -360,7 +360,7 @@ ns32k_frame_args_address (struct frame_info *frame)
 static CORE_ADDR
 ns32k_frame_locals_address (struct frame_info *frame)
 {
-  return (frame->frame);
+  return (get_frame_base (frame));
 }
 
 /* Code to initialize the addresses of the saved registers of frame described
@@ -385,7 +385,7 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
     {
       regmask = read_memory_integer (enter_addr + 1, 1) & 0xff;
       localcount = ns32k_localcount (enter_addr);
-      next_addr = frame->frame + localcount;
+      next_addr = get_frame_base (frame) + localcount;
 
       for (regnum = 0; regnum < 8; regnum++)
 	{
@@ -393,9 +393,9 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
 	    get_frame_saved_regs (frame)[regnum] = next_addr -= 4;
 	}
 
-      get_frame_saved_regs (frame)[SP_REGNUM] = frame->frame + 4;
-      get_frame_saved_regs (frame)[PC_REGNUM] = frame->frame + 4;
-      get_frame_saved_regs (frame)[FP_REGNUM] = read_memory_integer (frame->frame, 4);
+      get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
+      get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
+      get_frame_saved_regs (frame)[FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
     }
   else if (enter_addr == 1)
     {
@@ -428,7 +428,7 @@ ns32k_pop_frame (void)
   CORE_ADDR fp;
   int regnum;
 
-  fp = frame->frame;
+  fp = get_frame_base (frame);
   FRAME_INIT_SAVED_REGS (frame);
 
   for (regnum = 0; regnum < 8; regnum++)

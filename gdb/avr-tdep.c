@@ -749,11 +749,12 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   avr_scan_prologue (fi);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
+      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
 									     AVR_PC_REGNUM));
     }
   else if (!fi->next)		/* this is the innermost frame? */
@@ -763,7 +764,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       struct frame_info *next_fi = fi->next;
       if (fi->extra_info->framereg == AVR_SP_REGNUM)
-	deprecated_update_frame_base_hack (fi, next_fi->frame + 2 /* ret addr */ + next_fi->extra_info->framesize);
+	deprecated_update_frame_base_hack (fi, get_frame_base (next_fi) + 2 /* ret addr */ + next_fi->extra_info->framesize);
       /* FIXME: I don't analyse va_args functions  */
       else
 	{
@@ -798,7 +799,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       CORE_ADDR addr;
       int i;
 
-      addr = fi->frame + fi->extra_info->framesize + 1;
+      addr = get_frame_base (fi) + fi->extra_info->framesize + 1;
 
       /* Return address in stack in different endianness */
 
@@ -831,7 +832,9 @@ avr_pop_frame (void)
   CORE_ADDR saddr;
   struct frame_info *frame = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       generic_pop_dummy_frame ();
     }
@@ -850,7 +853,7 @@ avr_pop_frame (void)
 			      read_memory_unsigned_integer (saddr, 1));
 	    }
 	  else if (get_frame_saved_regs (frame)[regnum] && regnum == AVR_SP_REGNUM)
-	    write_register (regnum, frame->frame + 2);
+	    write_register (regnum, get_frame_base (frame) + 2);
 	}
 
       /* Don't forget the update the PC too!  */
@@ -864,8 +867,11 @@ avr_pop_frame (void)
 static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
-    return deprecated_read_register_dummy (get_frame_pc (frame), frame->frame,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
+    return deprecated_read_register_dummy (get_frame_pc (frame),
+					   get_frame_base (frame),
 					   AVR_PC_REGNUM);
   else
     return frame->extra_info->return_pc;
@@ -1015,7 +1021,7 @@ avr_skip_prologue (CORE_ADDR pc)
 static CORE_ADDR
 avr_frame_address (struct frame_info *fi)
 {
-  return avr_make_saddr (fi->frame);
+  return avr_make_saddr (get_frame_base (fi));
 }
 
 /* Given a GDB frame, determine the address of the calling function's
@@ -1029,16 +1035,19 @@ avr_frame_address (struct frame_info *fi)
 static CORE_ADDR
 avr_frame_chain (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       /* initialize the return_pc now */
       frame->extra_info->return_pc
-	= deprecated_read_register_dummy (get_frame_pc (frame), frame->frame,
+	= deprecated_read_register_dummy (get_frame_pc (frame),
+					  get_frame_base (frame),
 					  AVR_PC_REGNUM);
-      return frame->frame;
+      return get_frame_base (frame);
     }
   return (frame->extra_info->is_main ? 0
-	  : frame->frame + frame->extra_info->framesize + 2 /* ret addr */ );
+	  : get_frame_base (frame) + frame->extra_info->framesize + 2 /* ret addr */ );
 }
 
 /* Store the address of the place in which to copy the structure the

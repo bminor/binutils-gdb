@@ -1420,17 +1420,17 @@ mips_find_saved_regs (struct frame_info *fci)
     {
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
-	  reg_position = fci->frame + SIGFRAME_REGSAVE_OFF
+	  reg_position = get_frame_base (fci) + SIGFRAME_REGSAVE_OFF
 	    + ireg * SIGFRAME_REG_SIZE;
 	  get_frame_saved_regs (fci)[ireg] = reg_position;
 	}
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
-	  reg_position = fci->frame + SIGFRAME_FPREGSAVE_OFF
+	  reg_position = get_frame_base (fci) + SIGFRAME_FPREGSAVE_OFF
 	    + ireg * SIGFRAME_REG_SIZE;
 	  get_frame_saved_regs (fci)[FP0_REGNUM + ireg] = reg_position;
 	}
-      get_frame_saved_regs (fci)[PC_REGNUM] = fci->frame + SIGFRAME_PC_OFF;
+      get_frame_saved_regs (fci)[PC_REGNUM] = get_frame_base (fci) + SIGFRAME_PC_OFF;
       return;
     }
 
@@ -1496,7 +1496,7 @@ mips_find_saved_regs (struct frame_info *fci)
 
   /* Fill in the offsets for the registers which gen_mask says
      were saved.  */
-  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
+  reg_position = get_frame_base (fci) + PROC_REG_OFFSET (proc_desc);
   for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
     if (gen_mask & 0x80000000)
       {
@@ -1517,7 +1517,7 @@ mips_find_saved_regs (struct frame_info *fci)
 	  int sreg_count = (inst >> 6) & 3;
 
 	  /* Check if the ra register was pushed on the stack.  */
-	  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
+	  reg_position = get_frame_base (fci) + PROC_REG_OFFSET (proc_desc);
 	  if (inst & 0x20)
 	    reg_position -= MIPS_SAVED_REGSIZE;
 
@@ -1532,7 +1532,7 @@ mips_find_saved_regs (struct frame_info *fci)
 
   /* Fill in the offsets for the registers which float_mask says
      were saved.  */
-  reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
+  reg_position = get_frame_base (fci) + PROC_FREG_OFFSET (proc_desc);
 
   /* Apparently, the freg_offset gives the offset to the first 64 bit
      saved.
@@ -1576,7 +1576,7 @@ mips_frame_init_saved_regs (struct frame_info *frame)
     {
       mips_find_saved_regs (frame);
     }
-  get_frame_saved_regs (frame)[SP_REGNUM] = frame->frame;
+  get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame);
 }
 
 static CORE_ADDR
@@ -1704,7 +1704,7 @@ mips_frame_saved_pc (struct frame_info *frame)
       saved_pc = tmp;
     }
   else if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
-    saved_pc = read_memory_integer (frame->frame - MIPS_SAVED_REGSIZE, MIPS_SAVED_REGSIZE);
+    saved_pc = read_memory_integer (get_frame_base (frame) - MIPS_SAVED_REGSIZE, MIPS_SAVED_REGSIZE);
   else
     saved_pc = read_next_frame_reg (frame, pcreg);
 
@@ -2433,7 +2433,7 @@ mips_frame_chain (struct frame_info *frame)
       /* A dummy frame, uses SP not FP.  Get the old SP value.  If all
          is well, frame->frame the bottom of the current frame will
          contain that value.  */
-      return frame->frame;
+      return get_frame_base (frame);
     }
 
   /* Look up the procedure descriptor for this PC.  */
@@ -2517,7 +2517,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 		 value of the stack pointer register.  The other saved_regs
 		 values are addresses (in the inferior) at which a given
 		 register's value may be found.  */
-	      get_frame_saved_regs (fci)[SP_REGNUM] = fci->frame;
+	      get_frame_saved_regs (fci)[SP_REGNUM] = get_frame_base (fci);
 	    }
 	}
 

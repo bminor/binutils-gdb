@@ -258,9 +258,9 @@ static CORE_ADDR
 m68k_frame_chain (struct frame_info *thisframe)
 {
   if (get_frame_type (thisframe) == SIGTRAMP_FRAME)
-    return thisframe->frame;
+    return get_frame_base (thisframe);
   else if (!inside_entry_file (get_frame_pc (thisframe)))
-    return read_memory_unsigned_integer (thisframe->frame, 4);
+    return read_memory_unsigned_integer (get_frame_base (thisframe), 4);
   else
     return 0;
 }
@@ -284,14 +284,14 @@ m68k_frame_saved_pc (struct frame_info *frame)
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
     {
       if (frame->next)
-	return read_memory_unsigned_integer (frame->next->frame
+	return read_memory_unsigned_integer (get_frame_base (frame->next)
 					     + SIG_PC_FP_OFFSET, 4);
       else
 	return read_memory_unsigned_integer (read_register (SP_REGNUM)
 					     + SIG_PC_FP_OFFSET - 8, 4);
     }
   else
-    return read_memory_unsigned_integer (frame->frame + 4, 4);
+    return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
 }
 
 
@@ -332,17 +332,17 @@ delta68_frame_args_address (struct frame_info *frame_info)
   /* we assume here that the only frameless functions are the system calls
      or other functions who do not put anything on the stack. */
   if (get_frame_type (frame_info) == SIGTRAMP_FRAME)
-    return frame_info->frame + 12;
+    return get_frame_base (frame_info) + 12;
   else if (frameless_look_for_prologue (frame_info))
     {
       /* Check for an interrupted system call */
       if (frame_info->next && (get_frame_type (frame_info->next) == SIGTRAMP_FRAME))
-	return frame_info->next->frame + 16;
+	return get_frame_base (frame_info->next) + 16;
       else
-	return frame_info->frame + 4;
+	return get_frame_base (frame_info) + 4;
     }
   else
-    return frame_info->frame;
+    return get_frame_base (frame_info);
 }
 
 CORE_ADDR
@@ -589,7 +589,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 
   /* First possible address for a pc in a call dummy for this frame.  */
   CORE_ADDR possible_call_dummy_start =
-    frame_info->frame - 28 - FP_REGNUM * 4 - 4 - 8 * 12;
+    get_frame_base (frame_info) - 28 - FP_REGNUM * 4 - 4 - 8 * 12;
 
   int nextinsn;
 
@@ -601,7 +601,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
   memset (get_frame_saved_regs (frame_info), 0, SIZEOF_FRAME_SAVED_REGS);
 
   if (get_frame_pc (frame_info) >= possible_call_dummy_start
-      && get_frame_pc (frame_info) <= frame_info->frame)
+      && get_frame_pc (frame_info) <= get_frame_base (frame_info))
     {
 
       /* It is a call dummy.  We could just stop now, since we know
@@ -609,7 +609,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
          to parse the "prologue" which is part of the call dummy.
          This is needlessly complex and confusing.  FIXME.  */
 
-      next_addr = frame_info->frame;
+      next_addr = get_frame_base (frame_info);
       pc = possible_call_dummy_start;
     }
   else
@@ -622,7 +622,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	{
 	  /* pea %fp
 	     move.l %sp, %fp */
-	  next_addr = frame_info->frame;
+	  next_addr = get_frame_base (frame_info);
 	  pc += 4;
 	}
       else if (P_LINKL_FP == nextinsn)
@@ -630,7 +630,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	/* Find the address above the saved   
 	   regs using the amount of storage from the link instruction.  */
 	{
-	  next_addr = frame_info->frame + read_memory_integer (pc + 2, 4);
+	  next_addr = get_frame_base (frame_info) + read_memory_integer (pc + 2, 4);
 	  pc += 6;
 	}
       else if (P_LINKW_FP == nextinsn)
@@ -638,7 +638,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	/* Find the address above the saved   
 	   regs using the amount of storage from the link instruction.  */
 	{
-	  next_addr = frame_info->frame + read_memory_integer (pc + 2, 2);
+	  next_addr = get_frame_base (frame_info) + read_memory_integer (pc + 2, 2);
 	  pc += 4;
 	}
       else
@@ -667,7 +667,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	{
 	  register CORE_ADDR addr;
 
-	  addr = frame_info->frame + read_memory_integer (pc + 4, 2);
+	  addr = get_frame_base (frame_info) + read_memory_integer (pc + 4, 2);
 	  /* Regmask's low bit is for register fp7, the first pushed */
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
@@ -694,7 +694,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	{
 	  register CORE_ADDR addr;
 
-	  addr = frame_info->frame + read_memory_integer (pc + 4, 2);
+	  addr = get_frame_base (frame_info) + read_memory_integer (pc + 4, 2);
 	  /* Regmask's low bit is for register 0, the first written */
 	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
 	    if (regmask & 1)
@@ -742,9 +742,9 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	break;
     }
 lose:;
-  get_frame_saved_regs (frame_info)[SP_REGNUM] = (frame_info)->frame + 8;
-  get_frame_saved_regs (frame_info)[FP_REGNUM] = (frame_info)->frame;
-  get_frame_saved_regs (frame_info)[PC_REGNUM] = (frame_info)->frame + 4;
+  get_frame_saved_regs (frame_info)[SP_REGNUM] = get_frame_base (frame_info) + 8;
+  get_frame_saved_regs (frame_info)[FP_REGNUM] = get_frame_base (frame_info);
+  get_frame_saved_regs (frame_info)[PC_REGNUM] = get_frame_base (frame_info) + 4;
 #ifdef SIG_SP_FP_OFFSET
   /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
   if ((get_frame_type (frame_info) == SIGTRAMP_FRAME) && frame_info->next)

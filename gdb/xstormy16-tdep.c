@@ -333,7 +333,8 @@ xstormy16_pop_frame (void)
   if (fi == NULL)
     return;			/* paranoia */
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     {
       generic_pop_dummy_frame ();
     }
@@ -466,7 +467,8 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				       get_frame_base (fi)))
 	return start_addr;
 
       /* Grab the frame-relative values of SP and FP, needed below. 
@@ -756,9 +758,11 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     {
-      saved_pc = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
+      saved_pc = deprecated_read_register_dummy (get_frame_pc (fi),
+						 get_frame_base (fi),
 						 E_PC_REGNUM);
     }
   else
@@ -816,15 +820,16 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 xstormy16_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     {
       /* Call dummy's frame is the same as caller's.  */
-      return fi->frame;
+      return get_frame_base (fi);
     }
   else
     {
       /* Return computed offset from this frame's fp. */
-      return fi->frame - fi->extra_info->framesize;
+      return get_frame_base (fi) - fi->extra_info->framesize;
     }
 }
 
@@ -833,7 +838,7 @@ xstormy16_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return chain < 0x8000 && FRAME_SAVED_PC (thisframe) >= 0x8000 &&
     (thisframe->extra_info->frameless_p ||
-     thisframe->frame - thisframe->extra_info->framesize == chain);
+     get_frame_base (thisframe) - thisframe->extra_info->framesize == chain);
 }
 
 /* Function: xstormy16_saved_pc_after_call

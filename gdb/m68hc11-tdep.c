@@ -409,7 +409,7 @@ m68hc11_frame_args_address (struct frame_info *frame)
 {
   CORE_ADDR addr;
 
-  addr = frame->frame + frame->extra_info->size + STACK_CORRECTION + 2;
+  addr = get_frame_base (frame) + frame->extra_info->size + STACK_CORRECTION + 2;
   if (frame->extra_info->return_kind == RETURN_RTC)
     addr += 1;
   else if (frame->extra_info->return_kind == RETURN_RTI)
@@ -421,7 +421,7 @@ m68hc11_frame_args_address (struct frame_info *frame)
 static CORE_ADDR
 m68hc11_frame_locals_address (struct frame_info *frame)
 {
-  return frame->frame;
+  return get_frame_base (frame);
 }
 
 /* Discard from the stack the innermost frame, restoring all saved
@@ -434,7 +434,9 @@ m68hc11_pop_frame (void)
   register CORE_ADDR fp, sp;
   register int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     generic_pop_dummy_frame ();
   else
     {
@@ -812,19 +814,21 @@ m68hc11_frame_chain (struct frame_info *frame)
 {
   CORE_ADDR addr;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
-    return frame->frame;	/* dummy frame same as caller's frame */
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
+    return get_frame_base (frame);	/* dummy frame same as caller's frame */
 
   if (frame->extra_info->return_pc == 0
       || inside_entry_file (frame->extra_info->return_pc))
     return (CORE_ADDR) 0;
 
-  if (frame->frame == 0)
+  if (get_frame_base (frame) == 0)
     {
       return (CORE_ADDR) 0;
     }
 
-  addr = frame->frame + frame->extra_info->size + STACK_CORRECTION - 2;
+  addr = get_frame_base (frame) + frame->extra_info->size + STACK_CORRECTION - 2;
   addr = read_memory_unsigned_integer (addr, 2) & 0x0FFFF;
   return addr;
 }  
@@ -847,10 +851,10 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
 
   pc = get_frame_pc (fi);
   fi->extra_info->return_kind = m68hc11_get_return_insn (pc);
-  m68hc11_guess_from_prologue (pc, fi->frame, &pc, &fi->extra_info->size,
+  m68hc11_guess_from_prologue (pc, get_frame_base (fi), &pc, &fi->extra_info->size,
                                get_frame_saved_regs (fi));
 
-  addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
+  addr = get_frame_base (fi) + fi->extra_info->size + STACK_CORRECTION;
   if (soft_regs[SOFT_FP_REGNUM].name)
     get_frame_saved_regs (fi)[SOFT_FP_REGNUM] = addr - 2;
 

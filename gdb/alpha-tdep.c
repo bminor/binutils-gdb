@@ -411,7 +411,7 @@ alpha_find_saved_regs (struct frame_info *frame)
   /* Fill in the offsets for the registers which gen_mask says
      were saved.  */
 
-  reg_position = frame->frame + PROC_REG_OFFSET (proc_desc);
+  reg_position = get_frame_base (frame) + PROC_REG_OFFSET (proc_desc);
   mask = PROC_REG_MASK (proc_desc);
 
   returnreg = PROC_PC_REG (proc_desc);
@@ -436,7 +436,7 @@ alpha_find_saved_regs (struct frame_info *frame)
   /* Fill in the offsets for the registers which float_mask says
      were saved.  */
 
-  reg_position = frame->frame + PROC_FREG_OFFSET (proc_desc);
+  reg_position = get_frame_base (frame) + PROC_FREG_OFFSET (proc_desc);
   mask = PROC_FREG_MASK (proc_desc);
 
   for (ireg = 0; ireg <= 31; ++ireg)
@@ -454,7 +454,7 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
 {
   if (get_frame_saved_regs (fi) == NULL)
     alpha_find_saved_regs (fi);
-  get_frame_saved_regs (fi)[SP_REGNUM] = fi->frame;
+  get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi);
 }
 
 static CORE_ADDR
@@ -473,7 +473,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
       /* We have to get the saved sp from the sigcontext
          if it is a signal handler frame.  */
       if (regno == SP_REGNUM && !(get_frame_type (fi) == SIGTRAMP_FRAME))
-	return fi->frame;
+	return get_frame_base (fi);
       else
 	{
 	  if (get_frame_saved_regs (fi) == NULL)
@@ -495,7 +495,7 @@ alpha_frame_saved_pc (struct frame_info *frame)
                                            : frame->extra_info->pc_reg;
 
   if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
-    return read_memory_integer (frame->frame - 8, 8);
+    return read_memory_integer  (get_frame_base (frame) - 8, 8);
 
   return read_next_frame_reg (frame, pcreg);
 }
@@ -1043,13 +1043,13 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 static CORE_ADDR
 alpha_frame_locals_address (struct frame_info *fi)
 {
-  return (fi->frame - fi->extra_info->localoff);
+  return (get_frame_base (fi) - fi->extra_info->localoff);
 }
 
 static CORE_ADDR
 alpha_frame_args_address (struct frame_info *fi)
 {
-  return (fi->frame - (ALPHA_NUM_ARG_REGS * 8));
+  return (get_frame_base (fi) - (ALPHA_NUM_ARG_REGS * 8));
 }
 
 /* ALPHA stack frames are almost impenetrable.  When execution stops,
@@ -1289,7 +1289,7 @@ alpha_pop_frame (void)
 {
   register int regnum;
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR new_sp = frame->frame;
+  CORE_ADDR new_sp = get_frame_base (frame);
 
   alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 

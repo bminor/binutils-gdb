@@ -95,7 +95,7 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
 	/* If this isn't the top frame, the next frame must be for the
 	   signal handler itself.  The sigcontext structure is part of
 	   the user context. */
-	return frame->next->frame + LINUX_SIGINFO_SIZE +
+	return get_frame_base (frame->next) + LINUX_SIGINFO_SIZE +
 	  LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
 
@@ -164,10 +164,10 @@ x86_64_linux_frame_chain (struct frame_info *fi)
       if (fp)
 	return fp;
       else
-	addr = fi->frame;
+	addr = get_frame_base (fi);
     }
   else
-    addr = fi->next->frame;
+    addr = get_frame_base (fi->next);
 
   addr += LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 

@@ -285,9 +285,9 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
   save_link_regidx = subtract_sp_regidx = 0;
   if (fextra_info)
     {
-      if (fi && fi->frame)
+      if (fi && get_frame_base (fi))
 	{
-          orig_sp = fi->frame;
+          orig_sp = get_frame_base (fi);
           if (! init_extra_info && fextra_info->initialised)
             orig_sp += fextra_info->stack_bought;
 	  saved_regs = get_frame_saved_regs (fi);
@@ -829,11 +829,10 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
       if (sighandler_fi)
 	{
 	  if (s390_frameless_function_invocation (sighandler_fi))
-	    orig_sp = sighandler_fi->frame;
+	    orig_sp = get_frame_base (sighandler_fi);
 	  else
 	    orig_sp = ADDR_BITS_REMOVE ((CORE_ADDR)
-					read_memory_integer (sighandler_fi->
-							     frame,
+					read_memory_integer (get_frame_base (sighandler_fi),
 							     S390_GPR_SIZE));
 	  if (orig_sp && sigcaller_pc)
 	    {
@@ -944,7 +943,7 @@ s390_frame_args_address (struct frame_info *fi)
 {
 
   /* Apparently gdb already knows gdb_args_offset itself */
-  return fi->frame;
+  return get_frame_base (fi);
 }
 
 
@@ -954,8 +953,10 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
   if (fi->extra_info && fi->extra_info->saved_pc_valid)
     return fi->extra_info->saved_pc;
 
-  if (deprecated_generic_find_dummy_frame (get_frame_pc (fi), fi->frame))
-    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, S390_PC_REGNUM);
+  if (deprecated_generic_find_dummy_frame (get_frame_pc (fi),
+					   get_frame_base (fi)))
+    return deprecated_read_register_dummy (get_frame_pc (fi),
+					   get_frame_base (fi), S390_PC_REGNUM);
 
   s390_frame_init_saved_regs (fi);
   if (fi->extra_info)
@@ -1008,8 +1009,10 @@ s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
 
-  if (deprecated_generic_find_dummy_frame (get_frame_pc (thisframe), thisframe->frame))
-    return deprecated_read_register_dummy (get_frame_pc (thisframe), thisframe->frame,
+  if (deprecated_generic_find_dummy_frame (get_frame_pc (thisframe),
+					   get_frame_base (thisframe)))
+    return deprecated_read_register_dummy (get_frame_pc (thisframe),
+					   get_frame_base (thisframe),
 					   S390_SP_REGNUM);
   else
     {

@@ -335,7 +335,7 @@ read_sigcontext_register (struct frame_info *frame, int regnum)
     internal_error (__FILE__, __LINE__,
 		    "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
 
-  regaddr = SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regnum);
+  regaddr = SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regnum);
   if (regaddr)
     return read_memory_integer (regaddr, REGISTER_RAW_SIZE (regnum));
   else
@@ -705,15 +705,18 @@ ia64_frame_chain (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, sp_regnum);
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
-    return frame->frame;
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+					get_frame_base (frame),
+					get_frame_base (frame)))
+    return get_frame_base (frame);
   else
     {
       FRAME_INIT_SAVED_REGS (frame);
       if (get_frame_saved_regs (frame)[IA64_VFP_REGNUM])
 	return read_memory_integer (get_frame_saved_regs (frame)[IA64_VFP_REGNUM], 8);
       else
-	return frame->frame + frame->extra_info->mem_stack_frame_size;
+	return (get_frame_base (frame)
+		+ frame->extra_info->mem_stack_frame_size);
     }
 }
 
@@ -722,8 +725,11 @@ ia64_frame_saved_pc (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, pc_regnum);
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
-    return deprecated_read_register_dummy (get_frame_pc (frame), frame->frame, pc_regnum);
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+					get_frame_base (frame),
+					get_frame_base (frame)))
+    return deprecated_read_register_dummy (get_frame_pc (frame),
+					   get_frame_base (frame), pc_regnum);
   else
     {
       FRAME_INIT_SAVED_REGS (frame);
@@ -937,7 +943,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	      /* Hmm... whether or not this will work will depend on
 	         where the pc is.  If it's still early in the prologue
 		 this'll be wrong.  FIXME */
-	      spill_addr  = (frame ? frame->frame : 0)
+	      spill_addr  = (frame ? get_frame_base (frame) : 0)
 	                  + (rM == 12 ? 0 : mem_stack_frame_size) 
 			  + imm;
 	      spill_reg   = rN;
@@ -1170,37 +1176,37 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
       frame_saved_regs_zalloc (frame);
 
       get_frame_saved_regs (frame)[IA64_VRAP_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_IP_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_IP_REGNUM);
       get_frame_saved_regs (frame)[IA64_CFM_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_CFM_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_CFM_REGNUM);
       get_frame_saved_regs (frame)[IA64_PSR_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_PSR_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_PSR_REGNUM);
 #if 0
       get_frame_saved_regs (frame)[IA64_BSP_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_BSP_REGNUM);
 #endif
       get_frame_saved_regs (frame)[IA64_RNAT_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_RNAT_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_RNAT_REGNUM);
       get_frame_saved_regs (frame)[IA64_CCV_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_CCV_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_CCV_REGNUM);
       get_frame_saved_regs (frame)[IA64_UNAT_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_UNAT_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_UNAT_REGNUM);
       get_frame_saved_regs (frame)[IA64_FPSR_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_FPSR_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_FPSR_REGNUM);
       get_frame_saved_regs (frame)[IA64_PFS_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_PFS_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_PFS_REGNUM);
       get_frame_saved_regs (frame)[IA64_LC_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_LC_REGNUM);
+	SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), IA64_LC_REGNUM);
       for (regno = IA64_GR1_REGNUM; regno <= IA64_GR31_REGNUM; regno++)
 	if (regno != sp_regnum)
 	  get_frame_saved_regs (frame)[regno] =
-	    SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
+	    SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regno);
       for (regno = IA64_BR0_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
 	get_frame_saved_regs (frame)[regno] =
-	  SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
+	  SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regno);
       for (regno = IA64_FR2_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
 	get_frame_saved_regs (frame)[regno] =
-	  SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
+	  SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regno);
     }
   else
     {
@@ -1233,12 +1239,15 @@ ia64_get_saved_register (char *raw_buffer,
   if (lval != NULL)
     *lval = not_lval;
 
-  is_dummy_frame = DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame);
+  is_dummy_frame = DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+						get_frame_base (frame),
+						get_frame_base (frame));
 
   if (regnum == SP_REGNUM && frame->next)
     {
       /* Handle SP values for all frames but the topmost. */
-      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), frame->frame);
+      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+		     get_frame_base (frame));
     }
   else if (regnum == IA64_BSP_REGNUM)
     {
@@ -1251,7 +1260,8 @@ ia64_get_saved_register (char *raw_buffer,
          for the frame pointer, it'll be found by ia64_find_saved_register()
 	 above.  If the function lacks one of these frame pointers, we can
 	 still provide a value since we know the size of the frame */
-      CORE_ADDR vfp = frame->frame + frame->extra_info->mem_stack_frame_size;
+      CORE_ADDR vfp = (get_frame_base (frame)
+		       + frame->extra_info->mem_stack_frame_size);
       store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_VFP_REGNUM), vfp);
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
@@ -1481,8 +1491,9 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
   int next_frame_is_call_dummy = ((frame->next != NULL)
-    && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame->next), frame->next->frame,
-                                          frame->next->frame));
+    && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame->next),
+				    get_frame_base (frame->next),
+				    get_frame_base (frame->next)));
 
   frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
 
@@ -1500,10 +1511,10 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   else if (next_frame_is_call_dummy)
     {
       bsp = deprecated_read_register_dummy (get_frame_pc (frame->next),
-					    frame->next->frame,
+					    get_frame_base (frame->next),
 					    IA64_BSP_REGNUM);
       cfm = deprecated_read_register_dummy (get_frame_pc (frame->next),
-					    frame->next->frame,
+					    get_frame_base (frame->next),
 					    IA64_CFM_REGNUM);
     }
   else
@@ -1517,9 +1528,11 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       else if (frn->next && (get_frame_type (frn->next) == SIGTRAMP_FRAME))
 	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
       else if (frn->next
-               && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frn->next), frn->next->frame,
-	                                           frn->next->frame))
-	cfm = deprecated_read_register_dummy (get_frame_pc (frn->next), frn->next->frame,
+               && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frn->next),
+					       get_frame_base (frn->next),
+					       get_frame_base (frn->next)))
+	cfm = deprecated_read_register_dummy (get_frame_pc (frn->next),
+					      get_frame_base (frn->next),
 					      IA64_PFS_REGNUM);
       else
 	cfm = read_register (IA64_PFS_REGNUM);

@@ -215,9 +215,9 @@ extern CORE_ADDR h8500_frame_chain (struct frame_info *);
 #define FRAME_SAVED_PC(FRAME) frame_saved_pc(FRAME)
 extern CORE_ADDR frame_saved_pc (struct frame_info *frame);
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_ARGS_ADDRESS(fi) (get_frame_base (fi))
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_LOCALS_ADDRESS(fi) (get_frame_base (fi))
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */

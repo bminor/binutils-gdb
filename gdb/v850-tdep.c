@@ -801,8 +801,10 @@ CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
-      return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
+    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				     get_frame_base (fi)))
+      return deprecated_read_register_dummy (get_frame_pc (fi),
+					     get_frame_base (fi), regnum);
     else if (get_frame_saved_regs (fi)[regnum] != 0)
       return read_memory_unsigned_integer (get_frame_saved_regs (fi)[regnum],
 					   v850_register_raw_size (regnum));
@@ -842,7 +844,7 @@ v850_frame_chain (struct frame_info *fi)
   if (pi.framereg == E_FP_RAW_REGNUM)
     return v850_find_callers_reg (fi, pi.framereg);
 
-  return fi->frame - pi.frameoffset;
+  return get_frame_base (fi) - pi.frameoffset;
 }
 
 /* Function: skip_prologue
@@ -884,7 +886,9 @@ v850_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     generic_pop_dummy_frame ();
   else
     {
@@ -1010,8 +1014,10 @@ v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
-    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, E_PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
+    return deprecated_read_register_dummy (get_frame_pc (fi),
+					   get_frame_base (fi), E_PC_REGNUM);
   else
     return v850_find_callers_reg (fi, E_RP_REGNUM);
 }
@@ -1112,7 +1118,8 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
       /* The call dummy doesn't save any registers on the stack, so we
          can return now.  */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				       get_frame_base (fi)))
 	return;
 
       /* Find the beginning of this function, so we can analyze its
@@ -1128,7 +1135,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
 	  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
 	    {
-	      get_frame_saved_regs (fi)[pifsr->reg] = pifsr->offset + fi->frame;
+	      get_frame_saved_regs (fi)[pifsr->reg] = pifsr->offset + get_frame_base (fi);
 
 	      if (pifsr->framereg == E_SP_REGNUM)
 		get_frame_saved_regs (fi)[pifsr->reg] += pi.frameoffset;

@@ -291,14 +291,14 @@ arm_frameless_function_invocation (struct frame_info *fi)
 static CORE_ADDR
 arm_frame_args_address (struct frame_info *fi)
 {
-  return fi->frame;
+  return get_frame_base (fi);
 }
 
 /* The address of the local variables in the frame.  */
 static CORE_ADDR
 arm_frame_locals_address (struct frame_info *fi)
 {
-  return fi->frame;
+  return get_frame_base (fi);
 }
 
 /* The number of arguments being passed in the frame.  */
@@ -832,7 +832,7 @@ arm_scan_prologue (struct frame_info *fi)
     {
       /* Get address of the stmfd in the prologue of the callee; 
          the saved PC is the address of the stmfd + 8.  */
-      if (!safe_read_memory_integer (fi->frame, 4,  &return_value))
+      if (!safe_read_memory_integer (get_frame_base (fi), 4,  &return_value))
         return;
       else
         {
@@ -996,7 +996,8 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
     {
       if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
 	{
-	  return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
+	  return deprecated_read_register_dummy (get_frame_pc (fi),
+						 get_frame_base (fi), regnum);
 	}
       else if (get_frame_saved_regs (fi)[regnum] != 0)
 	{
@@ -1025,7 +1026,7 @@ arm_frame_chain (struct frame_info *fi)
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
     /* A generic call dummy's frame is the same as caller's.  */
-    return fi->frame;
+    return get_frame_base (fi);
 
   if (get_frame_pc (fi) < LOWEST_PC)
     return 0;
@@ -1061,7 +1062,7 @@ arm_frame_chain (struct frame_info *fi)
   if (framereg == ARM_FP_REGNUM || framereg == THUMB_FP_REGNUM)
     return arm_find_callers_reg (fi, framereg);
   else
-    return fi->frame + fi->extra_info->framesize;
+    return get_frame_base (fi) + fi->extra_info->framesize;
 }
 
 /* This function actually figures out the frame address for a given pc
@@ -1100,10 +1101,11 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
-    sp = deprecated_read_register_dummy (get_frame_pc (fi->next), fi->next->frame,
+    sp = deprecated_read_register_dummy (get_frame_pc (fi->next),
+					 get_frame_base (fi->next),
 					 ARM_SP_REGNUM);
   else
-    sp = (fi->next->frame - fi->next->extra_info->frameoffset
+    sp = (get_frame_base (fi->next) - fi->next->extra_info->frameoffset
 	  + fi->next->extra_info->framesize);
 
   /* Determine whether or not we're in a sigtramp frame.
@@ -1146,7 +1148,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
-	deprecated_update_frame_base_hack (fi, fi->next->frame);
+	deprecated_update_frame_base_hack (fi, get_frame_base (fi->next));
       else if (fi->extra_info->framereg == ARM_FP_REGNUM
 	       || fi->extra_info->framereg == THUMB_FP_REGNUM)
 	{
@@ -1164,7 +1166,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
          determined by arm_scan_prologue.  */
       for (reg = 0; reg < NUM_REGS; reg++)
 	if (get_frame_saved_regs (fi)[reg] != 0)
-	  get_frame_saved_regs (fi)[reg] += (fi->frame + fi->extra_info->framesize
+	  get_frame_saved_regs (fi)[reg] += (get_frame_base (fi)
+					     + fi->extra_info->framesize
 					     - fi->extra_info->frameoffset);
     }
 }
@@ -1183,10 +1186,13 @@ arm_frame_saved_pc (struct frame_info *fi)
 {
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
-    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, ARM_PC_REGNUM);
+    return deprecated_read_register_dummy (get_frame_pc (fi),
+					   get_frame_base (fi), ARM_PC_REGNUM);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame - fi->extra_info->frameoffset,
-			fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
+				   (get_frame_base (fi)
+				    - fi->extra_info->frameoffset),
+				   get_frame_base (fi)))
     {
       return read_memory_integer (get_frame_saved_regs (fi)[ARM_PC_REGNUM],
 				  REGISTER_RAW_SIZE (ARM_PC_REGNUM));
@@ -1508,10 +1514,12 @@ arm_pop_frame (void)
 {
   int regnum;
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
+  CORE_ADDR old_SP = (get_frame_base (frame) - frame->extra_info->frameoffset
 		      + frame->extra_info->framesize);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();

@@ -297,8 +297,8 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   fi->extra_info->bottom =
     (fi->next ?
-     (fi->frame == fi->next->frame ? fi->next->extra_info->bottom : 
-      fi->next->frame) : read_sp ());
+     (get_frame_base (fi) == get_frame_base (fi->next) ? fi->next->extra_info->bottom : 
+      get_frame_base (fi->next)) : read_sp ());
 
   /* If fi->next is NULL, then we already set ->frame by passing read_fp()
      to create_new_frame.  */
@@ -326,8 +326,8 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  get_saved_register (buf, 0, 0, fi, FP_REGNUM, 0);
 	  deprecated_update_frame_base_hack (fi, extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM)));
 
-	  if (GDB_TARGET_IS_SPARC64 && (fi->frame & 1))
-	    deprecated_update_frame_base_hack (fi, fi->frame + 2047);
+	  if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
+	    deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
 	}
     }
 
@@ -367,12 +367,12 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	      get_saved_register (buf, 0, 0, fi, I7_REGNUM, 0);
 	      deprecated_update_frame_base_hack (fi, extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM)));
 
-	      if (GDB_TARGET_IS_SPARC64 && (fi->frame & 1))
-		deprecated_update_frame_base_hack (fi, fi->frame + 2047);
+	      if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
+		deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
 
 	      /* Record where the fp got saved.  */
 	      fi->extra_info->fp_addr = 
-		fi->frame + fi->extra_info->sp_offset + X_SIMM13 (insn);
+		get_frame_base (fi) + fi->extra_info->sp_offset + X_SIMM13 (insn);
 
 	      /* Also try to collect where the pc got saved to.  */
 	      fi->extra_info->pc_addr = 0;
@@ -382,7 +382,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 		  && X_OP3 (insn) == 4
 		  && X_RS1 (insn) == 14)
 		fi->extra_info->pc_addr = 
-		  fi->frame + fi->extra_info->sp_offset + X_SIMM13 (insn);
+		  get_frame_base (fi) + fi->extra_info->sp_offset + X_SIMM13 (insn);
 	    }
 	}
       else
@@ -415,10 +415,10 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	    }
 	}
     }
-  if (fi->next && fi->frame == 0)
+  if (fi->next && get_frame_base (fi) == 0)
     {
       /* Kludge to cause init_prev_frame_info to destroy the new frame.  */
-      deprecated_update_frame_base_hack (fi, fi->next->frame);
+      deprecated_update_frame_base_hack (fi, get_frame_base (fi->next));
       deprecated_update_frame_pc_hack (fi, get_frame_pc (fi->next));
     }
 }
@@ -673,7 +673,7 @@ examine_prologue (CORE_ADDR start_pc, int frameless_p, struct frame_info *fi,
 	{
 	  if (saved_regs && X_I (insn))
 	    saved_regs[X_RD (insn)] =
-	      fi->frame + fi->extra_info->sp_offset + X_SIMM13 (insn);
+	      get_frame_base (fi) + fi->extra_info->sp_offset + X_SIMM13 (insn);
 	}
       else
 	break;
@@ -851,7 +851,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	     The window registers are saved on the stack, just like in a
 	     normal frame.  */
 	  if (regnum >= G1_REGNUM && regnum < G1_REGNUM + 7)
-	    addr = frame1->frame + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
+	    addr = get_frame_base (frame1) + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 8 * SPARC_INTREG_SIZE);
 	  else if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
 	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
@@ -872,18 +872,18 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_L0);
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
-	    addr = frame1->frame + (regnum - O0_REGNUM) * SPARC_INTREG_SIZE
+	    addr = get_frame_base (frame1) + (regnum - O0_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 16 * SPARC_INTREG_SIZE);
 	  else if (SPARC_HAS_FPU &&
 		   regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32)
-	    addr = frame1->frame + (regnum - FP0_REGNUM) * 4
+	    addr = get_frame_base (frame1) + (regnum - FP0_REGNUM) * 4
 	      - (FP_REGISTER_BYTES);
 	  else if (GDB_TARGET_IS_SPARC64 && SPARC_HAS_FPU && 
 		   regnum >= FP0_REGNUM + 32 && regnum < FP_MAX_REGNUM)
-	    addr = frame1->frame + 32 * 4 + (regnum - FP0_REGNUM - 32) * 8
+	    addr = get_frame_base (frame1) + 32 * 4 + (regnum - FP0_REGNUM - 32) * 8
 	      - (FP_REGISTER_BYTES);
 	  else if (regnum >= Y_REGNUM && regnum < NUM_REGS)
-	    addr = frame1->frame + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
+	    addr = get_frame_base (frame1) + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 24 * SPARC_INTREG_SIZE);
 	}
       else if (frame1->extra_info->flat)
@@ -1284,7 +1284,7 @@ sparc_pop_frame (void)
 			read_memory_integer (fsr[O0_REGNUM + 7],
 					     SPARC_INTREG_SIZE));
 
-      write_sp (frame->frame);
+      write_sp (get_frame_base (frame));
     }
   else if (fsr[I0_REGNUM])
     {

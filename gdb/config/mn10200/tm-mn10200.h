@@ -177,8 +177,8 @@ extern CORE_ADDR mn10200_skip_prologue (CORE_ADDR);
 
 #define FRAME_ARGS_SKIP 0
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_ARGS_ADDRESS(fi) (get_frame_base (fi))
+#define FRAME_LOCALS_ADDRESS(fi) (get_frame_base (fi))
 #define FRAME_NUM_ARGS(fi) (-1)
 
 extern void mn10200_pop_frame (struct frame_info *);

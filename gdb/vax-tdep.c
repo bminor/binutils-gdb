@@ -135,9 +135,9 @@ vax_frame_init_saved_regs (struct frame_info *frame)
 
   frame_saved_regs_zalloc (frame);
 
-  regmask = read_memory_integer (frame->frame + 4, 4) >> 16;
+  regmask = read_memory_integer (get_frame_base (frame) + 4, 4) >> 16;
 
-  next_addr = frame->frame + 16;
+  next_addr = get_frame_base (frame) + 16;
 
   /* regmask's low bit is for register 0, which is the first one
      what would be pushed.  */
@@ -152,10 +152,10 @@ vax_frame_init_saved_regs (struct frame_info *frame)
     get_frame_saved_regs (frame)[SP_REGNUM] +=
       4 + (4 * read_memory_integer (next_addr + 4, 4));
 
-  get_frame_saved_regs (frame)[PC_REGNUM] = frame->frame + 16;
-  get_frame_saved_regs (frame)[FP_REGNUM] = frame->frame + 12;
-  get_frame_saved_regs (frame)[VAX_AP_REGNUM] = frame->frame + 8;
-  get_frame_saved_regs (frame)[PS_REGNUM] = frame->frame + 4;
+  get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 16;
+  get_frame_saved_regs (frame)[FP_REGNUM] = get_frame_base (frame) + 12;
+  get_frame_saved_regs (frame)[VAX_AP_REGNUM] = get_frame_base (frame) + 8;
+  get_frame_saved_regs (frame)[PS_REGNUM] = get_frame_base (frame) + 4;
 }
 
 /* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
@@ -190,7 +190,7 @@ vax_frame_saved_pc (struct frame_info *frame)
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return (vax_sigtramp_saved_pc (frame)); /* XXXJRT */
 
-  return (read_memory_integer (frame->frame + 16, 4));
+  return (read_memory_integer (get_frame_base (frame) + 16, 4));
 }
 
 CORE_ADDR
@@ -206,7 +206,7 @@ vax_frame_args_address_correct (struct frame_info *frame)
      we don't know the address of the arglist) if we don't know what frame
      this frame calls.  */
   if (frame->next)
-    return (read_memory_integer (frame->next->frame + 8, 4));
+    return (read_memory_integer (get_frame_base (frame->next) + 8, 4));
 
   return (0);
 }
@@ -218,7 +218,7 @@ vax_frame_args_address (struct frame_info *frame)
      just say "I don't know".  This is sometimes wrong for functions
      that aren't on top of the stack, but c'est la vie.  */
   if (frame->next)
-    return (read_memory_integer (frame->next->frame + 8, 4));
+    return (read_memory_integer (get_frame_base (frame->next) + 8, 4));
 
   return (read_register (VAX_AP_REGNUM));
 }
@@ -226,7 +226,7 @@ vax_frame_args_address (struct frame_info *frame)
 static CORE_ADDR
 vax_frame_locals_address (struct frame_info *frame)
 {
-  return (frame->frame);
+  return (get_frame_base (frame));
 }
 
 static int
@@ -243,7 +243,7 @@ vax_frame_chain (struct frame_info *frame)
   if (inside_entry_file (get_frame_pc (frame)))
     return (0);
 
-  return (read_memory_integer (frame->frame + 12, 4));
+  return (read_memory_integer (get_frame_base (frame) + 12, 4));
 }
 
 static void

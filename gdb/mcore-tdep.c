@@ -627,7 +627,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
 	{
 	  if (register_offsets[rn] >= 0)
 	    {
-	      get_frame_saved_regs (fi)[rn] = fi->frame - register_offsets[rn];
+	      get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - register_offsets[rn];
 	      mcore_insn_debug (("Saved register %s stored at 0x%08x, value=0x%08x\n",
 			       mcore_register_names[rn], fi->saved_regs[rn],
 			      read_memory_integer (fi->saved_regs[rn], 4)));
@@ -669,7 +669,7 @@ mcore_frame_chain (struct frame_info * fi)
 
      If our caller does not have a frame pointer, then his frame base
      is <our base> + -<caller's frame size>. */
-  dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), fi->frame);
+  dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), get_frame_base (fi));
 
   if (dummy->extra_info->status & MY_FRAME_IN_FP)
     {
@@ -693,7 +693,7 @@ mcore_frame_chain (struct frame_info * fi)
   else
     {
       /* Our caller does not have a frame pointer. */
-      callers_addr = fi->frame + dummy->extra_info->framesize;
+      callers_addr = get_frame_base (fi) + dummy->extra_info->framesize;
     }
 
   return callers_addr;
@@ -724,13 +724,13 @@ mcore_skip_prologue (CORE_ADDR pc)
 CORE_ADDR
 mcore_frame_args_address (struct frame_info * fi)
 {
-  return fi->frame - fi->extra_info->framesize;
+  return get_frame_base (fi) - fi->extra_info->framesize;
 }
 
 CORE_ADDR
 mcore_frame_locals_address (struct frame_info * fi)
 {
-  return fi->frame - fi->extra_info->framesize;
+  return get_frame_base (fi) - fi->extra_info->framesize;
 }
 
 /* Return the frame pointer in use at address PC. */
@@ -758,8 +758,10 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = fi->next)
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
-	return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				       get_frame_base (fi)))
+	return deprecated_read_register_dummy (get_frame_pc (fi),
+					       get_frame_base (fi), regnum);
       else if (get_frame_saved_regs (fi)[regnum] != 0)
 	return read_memory_integer (get_frame_saved_regs (fi)[regnum],
 				    REGISTER_SIZE);
@@ -774,8 +776,10 @@ CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
-    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
+    return deprecated_read_register_dummy (get_frame_pc (fi),
+					   get_frame_base (fi), PC_REGNUM);
   else
     return mcore_find_callers_reg (fi, PR_REGNUM);
 }
@@ -791,7 +795,8 @@ mcore_pop_frame (void)
   int rn;
   struct frame_info *fi = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     generic_pop_dummy_frame ();
   else
     {
@@ -1048,11 +1053,12 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->status = 0;
   fi->extra_info->framesize = 0;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, SP_REGNUM));
+      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
     }
   else
     mcore_analyze_prologue (fi, 0, 0);

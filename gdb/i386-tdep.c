@@ -512,14 +512,14 @@ static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
   if (pc_in_dummy_frame (get_frame_pc (frame)))
-    return frame->frame;
+    return get_frame_base (frame);
 
   if (get_frame_type (frame) == SIGTRAMP_FRAME
       || i386_frameless_signal_p (frame))
-    return frame->frame;
+    return get_frame_base (frame);
 
   if (! inside_entry_file (get_frame_pc (frame)))
-    return read_memory_unsigned_integer (frame->frame, 4);
+    return read_memory_unsigned_integer (get_frame_base (frame), 4);
 
   return 0;
 }
@@ -585,7 +585,7 @@ i386_frame_saved_pc (struct frame_info *frame)
       return read_memory_unsigned_integer (sp, 4);
     }
 
-  return read_memory_unsigned_integer (frame->frame + 4, 4);
+  return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
 }
 
 /* Immediately after a function call, return the saved pc.  */
@@ -719,7 +719,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
   if (locals >= 0)
     {
-      addr = fip->frame - 4 - locals;
+      addr = get_frame_base (fip) - 4 - locals;
       for (i = 0; i < 8; i++)
 	{
 	  op = codestream_get ();
@@ -735,8 +735,8 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 	}
     }
 
-  get_frame_saved_regs (fip)[PC_REGNUM] = fip->frame + 4;
-  get_frame_saved_regs (fip)[FP_REGNUM] = fip->frame;
+  get_frame_saved_regs (fip)[PC_REGNUM] = get_frame_base (fip) + 4;
+  get_frame_saved_regs (fip)[FP_REGNUM] = get_frame_base (fip);
 }
 
 /* Return PC of first real instruction.  */
@@ -1371,7 +1371,7 @@ i386_svr4_sigcontext_addr (struct frame_info *frame)
   gdb_assert (sigcontext_offset != -1);
 
   if (frame->next)
-    return frame->next->frame + sigcontext_offset;
+    return get_frame_base (frame->next) + sigcontext_offset;
   return read_register (SP_REGNUM) + sigcontext_offset;
 }
 
