@@ -2832,15 +2832,15 @@ cd_command (dir, from_tty)
     perror_with_name (dir);
 
   len = strlen (dir);
-  dir = savestring (dir, len - (len > 1 && dir[len-1] == '/'));
-  if (dir[0] == '/')
+  dir = savestring (dir, len - (len > 1 && SLASH_P(dir[len-1])));
+  if (ROOTED_P(dir))
     current_directory = dir;
   else
     {
-      if (current_directory[0] == '/' && current_directory[1] == '\0')
+      if (SLASH_P (current_directory[0]) && current_directory[1] == '\0')
 	current_directory = concat (current_directory, dir, NULL);
       else
-	current_directory = concat (current_directory, "/", dir, NULL);
+	current_directory = concat (current_directory, SLASH_STRING, dir, NULL);
       free (dir);
     }
 
@@ -2849,17 +2849,17 @@ cd_command (dir, from_tty)
   found_real_path = 0;
   for (p = current_directory; *p;)
     {
-      if (p[0] == '/' && p[1] == '.' && (p[2] == 0 || p[2] == '/'))
+      if (SLASH_P (p[0]) && p[1] == '.' && (p[2] == 0 || SLASH_P (p[2])))
 	strcpy (p, p + 2);
-      else if (p[0] == '/' && p[1] == '.' && p[2] == '.'
-	       && (p[3] == 0 || p[3] == '/'))
+      else if (SLASH_P (p[0]) && p[1] == '.' && p[2] == '.'
+	       && (p[3] == 0 || SLASH_P (p[3])))
 	{
 	  if (found_real_path)
 	    {
 	      /* Search backwards for the directory just before the "/.."
 		 and obliterate it and the "/..".  */
 	      char *q = p;
-	      while (q != current_directory && q[-1] != '/')
+	      while (q != current_directory && ! SLASH_P (q[-1]))
 		--q;
 
 	      if (q == current_directory)

@@ -1,3 +1,16 @@
+Mon Jun 12 12:48:13 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Windows support bits from Steve Chamberlain <sac@slash.cygnus.com>.
+	* defs.h: Don't declare strchr and friends if WIN32.
+	(DIRNAME_SEPARATOR): Move here from source.c.
+	(SLASH_P, SLASH_CHAR, SLASH_STRING, ROOTED_P): New macros,
+	symbolic definitions for filename bits.
+	* top.c (cd_command): Use these.
+	* source.c (mod_path, openp): Ditto.
+	* terminal.h: Disable termio/sgtty definitions if WIN32.
+	* findvar.c (registers_changed): Call registers_changed_hook
+	if it is defined.
+
 Mon Jun 12 12:22:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in (distclean, realclean): Remove config.cache and
