@@ -5059,11 +5059,16 @@ mips_abi_update (char *ignore_args, int from_tty, struct cmd_list_element *c)
 /* Print out which MIPS ABI is in use.  */
 
 static void
-show_mips_abi (char *ignore_args, int from_tty)
+show_mips_abi (struct ui_file *file,
+	       int from_tty,
+	       struct cmd_list_element *ignored_cmd,
+	       const char *ignored_value)
 {
   if (gdbarch_bfd_arch_info (current_gdbarch)->arch != bfd_arch_mips)
-    printf_filtered
-      ("The MIPS ABI is unknown because the current architecture is not MIPS.\n");
+    fprintf_filtered
+      (file, 
+       "The MIPS ABI is unknown because the current architecture "
+       "is not MIPS.\n");
   else
     {
       enum mips_abi global_abi = global_mips_abi ();
@@ -5071,18 +5076,21 @@ show_mips_abi (char *ignore_args, int from_tty)
       const char *actual_abi_str = mips_abi_strings[actual_abi];
 
       if (global_abi == MIPS_ABI_UNKNOWN)
-	printf_filtered
-	  ("The MIPS ABI is set automatically (currently \"%s\").\n",
+	fprintf_filtered
+	  (file, 
+	   "The MIPS ABI is set automatically (currently \"%s\").\n",
 	   actual_abi_str);
       else if (global_abi == actual_abi)
-	printf_filtered
-	  ("The MIPS ABI is assumed to be \"%s\" (due to user setting).\n",
+	fprintf_filtered
+	  (file,
+	   "The MIPS ABI is assumed to be \"%s\" (due to user setting).\n",
 	   actual_abi_str);
       else
 	{
 	  /* Probably shouldn't happen...  */
-	  printf_filtered
-	    ("The (auto detected) MIPS ABI \"%s\" is in use even though the user setting was \"%s\".\n",
+	  fprintf_filtered
+	    (file,
+	     "The (auto detected) MIPS ABI \"%s\" is in use even though the user setting was \"%s\".\n",
 	     actual_abi_str, mips_abi_strings[global_abi]);
 	}
     }

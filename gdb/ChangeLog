@@ -1,3 +1,9 @@
+2005-03-11  Jim Blandy  <jimb@redhat.com>
+
+	* mips-tdep.c (show_mips_abi): Change calling conventions to match
+	those expected by add_setshow_enum_cmd.  Use 'file' argument as
+	appropriate.
+
 2005-03-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (SFILES): Add cp-names.y.
