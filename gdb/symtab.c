@@ -154,7 +154,7 @@ got_symtab:
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
-  if (basename (name) == name)
+  if (lbasename (name) == name)
     ALL_SYMTABS (objfile, s)
     {
       if (FILENAME_CMP (basename (s->filename), name) == 0)
@@ -244,7 +244,7 @@ lookup_partial_symtab (char *name)
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
-  if (basename (name) == name)
+  if (lbasename (name) == name)
     ALL_PSYMTABS (objfile, pst)
     {
       if (FILENAME_CMP (basename (pst->filename), name) == 0)

@@ -1,3 +1,11 @@
+2001-05-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* symtab.c (lookup_symtab_1): Use lbasename (NAME) instead of
+	basename (NAME).  The FreeBSD basename returns a pointer to a
+	static buffer, even if it's simply returning a string identical to
+	its argument.
+	(lookup_partial_symtab): Likewise.
+
 2001-05-14  Michael Snyder  <msnyder@redhat.com>
 
 	* solib.c, solib.h: Add comment for function no_shared_libraries.
