@@ -2180,7 +2180,7 @@ do_msr (str, flags)
 
   if (inst.instruction & ((PSR_c | PSR_x | PSR_s) << PSR_SHIFT))
     {
-      inst.error = _("can only set flag field with immediate value");
+      inst.error = _("only flag field of psr can be set with immediate value");
       return;
     }
 

@@ -1,3 +1,7 @@
+2000-11-02  Theo Honohan  <th@futuretv.com>
+
+	* config/tc-arm.c (do_msr): Improve error message. 
+
 2000-10-31  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mn10300.c (md_apply_fix3): Use valuep if fully resolved
