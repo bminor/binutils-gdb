@@ -1,5 +1,7 @@
 Tue Feb 25 11:41:51 1997  Tom Tromey  <tromey@cygnus.com>
 
+	* configure.in (host_libs): Build itcl after tcl, tk.
+
 	* configure.in (host_libs): Added db, itcl.
 	(host_tools): Added sn.
 	(noconfigdirs): Added itcl, db, sn in appropriate places.

@@ -41,7 +41,7 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline gash db itcl tcl tk tclX"
+host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl"
 
 if [ "${enable_gdbgui}" = "yes" ] ; then
 	host_libs="${host_libs} libgui"
