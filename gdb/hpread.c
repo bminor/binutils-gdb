@@ -1216,12 +1216,14 @@ hpread_lookup_type (hp_type, objfile)
 	    {
 	      TYPE_VECTOR_LENGTH (objfile) = 100;
 	      TYPE_VECTOR (objfile) = (struct type **)
-		xmalloc (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
+		xmmalloc (objfile -> md,
+			  TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
 	    }
 	  while (index >= TYPE_VECTOR_LENGTH (objfile))
 	    TYPE_VECTOR_LENGTH (objfile) *= 2;
 	  TYPE_VECTOR (objfile) = (struct type **)
-	    xrealloc ((char *) TYPE_VECTOR (objfile),
+	    xmrealloc (objfile -> md,
+		       (char *) TYPE_VECTOR (objfile),
 		      (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
 	  memset (&TYPE_VECTOR (objfile)[old_len], 0,
 		  (TYPE_VECTOR_LENGTH (objfile) - old_len) *
