@@ -57,12 +57,12 @@ const char FLT_CHARS[] = "dD";
 const relax_typeS md_relax_table[] = {
   /* bCC relaxing  */
   {0x7f, -0x80, 2, 1},
-  {0x7fff, -0x8000, 5, 2},
+  {0x7fff, -0x8000 + 1, 5, 2},
   {0x7fffffff, -0x80000000, 7, 0},
 
   /* bCC relaxing (uncommon cases)  */
   {0x7f, -0x80, 3, 4},
-  {0x7fff, -0x8000, 6, 5},
+  {0x7fff, -0x8000 + 1, 6, 5},
   {0x7fffffff, -0x80000000, 8, 0},
 
   /* call relaxing  */
@@ -80,7 +80,7 @@ const relax_typeS md_relax_table[] = {
 
   /* fbCC relaxing  */
   {0x7f, -0x80, 3, 14},
-  {0x7fff, -0x8000, 6, 15},
+  {0x7fff, -0x8000 + 1, 6, 15},
   {0x7fffffff, -0x80000000, 8, 0},
 
 };

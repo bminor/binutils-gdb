@@ -1,3 +1,10 @@
+2004-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* gas/mn10300/basic.exp: Add relax test.
+	* gas/mn10300/relax.s: New test.
+	* gas/mn10300/relax.d: Expected results.  Make sure that the
+	correct size of instruction has been selected.
+
 2004-11-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/xtensa/short_branch_offset.s: New.

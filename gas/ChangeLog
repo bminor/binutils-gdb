@@ -1,3 +1,8 @@
+2004-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mn10300.c (md_relax_table): Fix off by one negative
+	offsets for conditional branches.
+
 2004-11-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (MAX_IMMED6): Change value to 65.
