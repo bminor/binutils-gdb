@@ -936,8 +936,8 @@ whatever base is currently selected (either 10, or selected by the most
 recent @code{.RADIX}).
 
 To write a number in a @emph{specific base}, use the pattern
-@code{'@var{s}@var{ddd}}: a single quote, followed by a base specifier
-character @var{s}, followed by digits @var{ddd}.  The base specifier
+@code{@var{s}'@var{ddd}}: a base specifier character @var{s}, followed
+by a single quote followed by digits @var{ddd}.  The base specifier
 character matches those you can specify with @code{.RADIX}: @samp{B} for
 base 2, @samp{Q} for base 8, @samp{D} for base 10, and @samp{H} for base
 16.  (You can write this character in lower case if you prefer.)
