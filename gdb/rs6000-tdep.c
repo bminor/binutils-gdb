@@ -1,5 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -464,6 +465,9 @@ pop_frame ()
     return;
   }
 
+  /* Make sure that all registers are valid.  */
+  read_register_bytes (0, NULL, REGISTER_BYTES);
+
   /* figure out previous %pc value. If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
      saved %pc value in the previous frame. */
@@ -471,8 +475,11 @@ pop_frame ()
   addr = get_pc_function_start (fr->pc) + FUNCTION_START_OFFSET;
   function_frame_info (addr, &fdata);
 
-  prev_sp = read_memory_integer (sp, 4);
   if (fdata.frameless)
+    prev_sp = sp;
+  else
+    prev_sp = read_memory_integer (sp, 4);
+  if (fdata.nosavedpc)
     lr = read_register (LR_REGNUM);
   else
     lr = read_memory_integer (prev_sp+8, 4);
@@ -666,10 +673,12 @@ function_frame_info (pc, fdata)
       fdata->frameless = 0;
     }
 
-  if (op == 0x603f0000) {			/* oril r31, r1, 0x0 */
-    fdata->alloca_reg = 31;
-    fdata->frameless = 0;
-  }
+  if (op == 0x603f0000				/* oril r31, r1, 0x0 */
+      || op == 0x7c3f0b78)			/* mr r31, r1 */
+    {
+      fdata->alloca_reg = 31;
+      fdata->frameless = 0;
+    }
 }
 
 
@@ -887,6 +896,8 @@ CORE_ADDR rs6000_struct_return_address;
 /* Indirect function calls use a piece of trampoline code to do context
    switching, i.e. to set the new TOC table. Skip such code if we are on
    its first instruction (as when we have single-stepped to here). 
+   Also skip shared library trampoline code (which is different from
+   indirect function call trampolines).
    Result is desired PC to step until, or NULL if we are not in
    trampoline code.  */
 
@@ -895,6 +906,7 @@ skip_trampoline_code (pc)
 CORE_ADDR pc;
 {
   register unsigned int ii, op;
+  CORE_ADDR solib_target_pc;
 
   static unsigned trampoline_code[] = {
 	0x800b0000,			/*     l   r0,0x0(r11)	*/
@@ -906,6 +918,11 @@ CORE_ADDR pc;
 	0x4e800020,			/*    br		*/
 	0
   };
+
+  /* If pc is in a shared library trampoline, return its target.  */
+  solib_target_pc = find_solib_trampoline_target (pc);
+  if (solib_target_pc)
+    return solib_target_pc;
 
   for (ii=0; trampoline_code[ii]; ++ii) {
     op  = read_memory_integer (pc + (ii*4), 4);

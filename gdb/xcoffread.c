@@ -1,5 +1,5 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
    	     Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -1365,38 +1365,9 @@ read_xcoff_symtab (objfile, nsyms)
 	    /* record trampoline code entries as mst_solib_trampoline symbol.
 	       When we lookup mst symbols, we will choose mst_text over
 	       mst_solib_trampoline. */
-
-#if 1
-	    /* After the implementation of incremental loading of shared
-	       libraries, we don't want to access trampoline entries. This
-	       approach has a consequence of the necessity to bring the whole 
-	       shared library at first, in order do anything with it (putting
-	       breakpoints, using malloc, etc). On the other side, this is
-	       consistient with gdb's behaviour on a SUN platform. */
-
-	    /* FIXME: I think this code is using "<trampoline>" instead of
-	       the real name because there didn't used to be a way to prefer
-	       mst_text symbols over mst_solib_trampoline symbols (in fact,
-	       it was using mst_unknown because mst_solib_trampoline didn't
-	       exist yet).  Using the real name would cause better output
-	       from print_address.   */
-
-	    /* Recording this entry is necessary. Single stepping relies on
-	       this vector to get an idea about function address boundaries. */
-
-	    prim_record_minimal_symbol_and_info
-	      ("<trampoline>", cs->c_value, mst_solib_trampoline,
-	       (char *)NULL, cs->c_secnum, objfile);
-#else
-
-	    /* record trampoline code entries as mst_solib_trampoline symbol.
-	       When we lookup minimal symbols, we will choose mst_text over
-	       mst_solib_trampoline. */
-
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value,
 				   mst_solib_trampoline,
-				   symname_alloced, objfile);
-#endif
+				   symname_alloced, cs->c_secnum, objfile);
 	    continue;
 
 	  case XMC_DS:

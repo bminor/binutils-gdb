@@ -1466,8 +1466,6 @@ set_return_value (val)
      value_ptr val;
 {
   register enum type_code code = TYPE_CODE (VALUE_TYPE (val));
-  double dbuf;
-  LONGEST lbuf;
 
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");
@@ -1476,19 +1474,7 @@ set_return_value (val)
       || code == TYPE_CODE_UNION)	/* FIXME, implement struct return.  */
     error ("GDB does not support specifying a struct or union return value.");
 
-  /* FIXME, this is bogus.  We don't know what the return conventions
-     are, or how values should be promoted.... */
-  if (code == TYPE_CODE_FLT)
-    {
-      dbuf = value_as_double (val);
-
-      STORE_RETURN_VALUE (VALUE_TYPE (val), (char *)&dbuf);
-    }
-  else
-    {
-      lbuf = value_as_long (val);
-      STORE_RETURN_VALUE (VALUE_TYPE (val), (char *)&lbuf);
-    }
+  STORE_RETURN_VALUE (VALUE_TYPE (val), VALUE_CONTENTS (val));
 }
 
 void
