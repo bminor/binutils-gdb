@@ -26,6 +26,8 @@ Do-first:
 
 Things-to-keep:
 
+align.d
+align.s
 gas.exp
 cofftag.d
 cofftag.s
