@@ -1,3 +1,11 @@
+Thu Aug 27 13:05:28 1992  Brendan Kehoe  (brendan@cygnus.com)
+
+	Add preliminary support for the we32k:
+
+	* Makefile.in, archures.c, coffocode.h, configure.in, targets.c:
+	Minor edits.
+	* coff-we32k.c, cpu-we32k.c, config/we32k.mt, hosts/we32k.h: New files.
+
 Wed Aug 26 14:20:16 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* bout.c: added support for relaxable alignment relocs.
