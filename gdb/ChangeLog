@@ -1,3 +1,10 @@
+start-sanitize-gdbtk
+Fri Mar 28 17:04:02 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (gdbtk.o): look for GDBTK_LIBRARY in $(datadir) by
+	default, not $(srcdir).
+
+end-sanitize-gdbtk	
 Thu Mar 27 14:21:46 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c: Clean up comment and extraneous semicolon
