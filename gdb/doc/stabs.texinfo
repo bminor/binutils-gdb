@@ -3945,10 +3945,10 @@ section would be wrong.
 
 The GNU linker is able to optimize stabs information by merging
 duplicate strings and removing duplicate header file information
-(@pxref{Include Files}).  When the GNU linker optimizes stabs in
-sections, it removes the leading @code{N_UNDF} symbol, and arranges for
-all the @code{n_strx} fields to be relative to the start of the
-@code{.stabstr} section.
+(@pxref{Include Files}).  When some versions of the GNU linker optimize
+stabs in sections, they remove the leading @code{N_UNDF} symbol and
+arranges for all the @code{n_strx} fields to be relative to the start of
+the @code{.stabstr} section.
 
 @node ELF Linker Relocation
 @appendixsec Having the Linker Relocate Stabs in ELF 

@@ -1,3 +1,8 @@
+Tue Mar 25 14:44:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.texinfo (Stab Section Basics): Make it clear that only
+	some versions of the GNU linker remove the leading N_UNDF symbol.
+
 Thu Feb 27 17:45:19 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.texinfo (String Field): Document type number pairs here,
