@@ -1,3 +1,8 @@
+Fri Jun  4 02:53:13 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* elf32-sh.c (sh_elf_relax_delete_bytes): Handle R_SH_SWITCH32
+	in other text sections.
+
 Fri Jun  4 02:29:34 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* libbfd.c (_bfd_generic_verify_endian_match): New function.

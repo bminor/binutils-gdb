@@ -1307,6 +1307,56 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	{
 	  Elf_Internal_Sym sym;
 
+	  /* Dwarf line numbers use R_SH_SWITCH32 relocs.  */
+	  if (ELF32_R_TYPE (irelscan->r_info) == (int) R_SH_SWITCH32)
+	    {
+	      bfd_vma start, stop;
+	      bfd_signed_vma voff;
+
+	      if (ocontents == NULL)
+		{
+		  if (elf_section_data (o)->this_hdr.contents != NULL)
+		    ocontents = elf_section_data (o)->this_hdr.contents;
+		  else
+		    {
+		      /* We always cache the section contents.
+                         Perhaps, if info->keep_memory is false, we
+                         should free them, if we are permitted to,
+                         when we leave sh_coff_relax_section.  */
+		      ocontents = (bfd_byte *) bfd_malloc (o->_raw_size);
+		      if (ocontents == NULL)
+			return false;
+		      if (! bfd_get_section_contents (abfd, o, ocontents,
+						      (file_ptr) 0,
+						      o->_raw_size))
+			return false;
+		      elf_section_data (o)->this_hdr.contents = ocontents;
+		    }
+		}
+
+	      stop = irelscan->r_offset;
+	      start
+		= (bfd_vma) ((bfd_signed_vma) stop - (long) irelscan->r_addend);
+
+	      /* STOP is in a different section, so it won't change.  */
+	      if (start > addr && start < toaddr)
+		irelscan->r_addend += count;
+
+	      voff = bfd_get_signed_32 (abfd, ocontents + irelscan->r_offset);
+	      stop = (bfd_vma) ((bfd_signed_vma) start + voff);
+
+	      if (start > addr
+		  && start < toaddr
+		  && (stop <= addr || stop >= toaddr))
+		bfd_put_signed_32 (abfd, voff + count,
+				   ocontents + irelscan->r_offset);
+	      else if (stop > addr
+		       && stop < toaddr
+		       && (start <= addr || start >= toaddr))
+		bfd_put_signed_32 (abfd, voff - count,
+				   ocontents + irelscan->r_offset);
+	    }
+
 	  if (ELF32_R_TYPE (irelscan->r_info) != (int) R_SH_DIR32)
 	    continue;
 
