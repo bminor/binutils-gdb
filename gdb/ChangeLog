@@ -1,3 +1,17 @@
+Wed Nov 18 14:39:57 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* infcmd.c (set_environment_command):  Make set env FOO x=y work.
+	Fix from maj@lucid.com.
+	* remote-udi.c (udi_open):  Reset vars so that user can re-run
+	programs without leaving GDB.
+	* (many routines):  Slightly improve error handling.
+	* (download):  Zero out BSS by longs instead of bytes to avoid
+	timeouts in real hardware.
+	* 29k-share/udi/udip2soc.c (UDIDisconnect, UDIKill):  Indicate
+	that connection is no longer in use after shutdown() of socket.
+	This keeps GDB from dying of a SIGPIPE when you issue multiple
+	`target udi' commands.
+
 Wed Nov 18 14:27:47 1992  Fred Fish  (fnf@cygnus.com)
 
 	* language.h (language_format_info):  New structure to bundle
