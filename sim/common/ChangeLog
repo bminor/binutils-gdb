@@ -12,6 +12,7 @@ Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 	(sim_cpu_base): New typedef.
 	* sim-trace.h: New file.
 	* sim-basics.h: #include it.
+	* sim-load.c: New file.
 
 Tue Apr 15 15:10:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
