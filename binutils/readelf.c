@@ -4262,7 +4262,7 @@ display_debug_lines (section, start, file)
       printf (_("\n Opcodes:\n"));
       
       for (i = 1; i < info.li_opcode_base; i++)
-	printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i]);
+	printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
       
       /* Display the contents of the Directory table.  */
       data = standard_opcodes + info.li_opcode_base - 1;
@@ -5754,6 +5754,7 @@ display_debug_aranges (section, start, file)
       unsigned char *          ranges;
       unsigned long            length;
       unsigned long            address;
+      int		       excess;
 
       external = (DWARF2_External_ARange *) start;
 
@@ -5773,12 +5774,14 @@ display_debug_aranges (section, start, file)
 
       ranges = start + sizeof (* external);
 
+      /* Must pad to an alignment boundary that is twice the pointer size.  */
+      excess = sizeof (*external) % (2 * arange.ar_pointer_size);
+      if (excess)
+	ranges += (2 * arange.ar_pointer_size) - excess;
+
       for (;;)
 	{
 	  address = byte_get (ranges, arange.ar_pointer_size);
-
-	  if (address == 0)
-	    break;
 
 	  ranges += arange.ar_pointer_size;
 
@@ -5786,6 +5789,10 @@ display_debug_aranges (section, start, file)
 
 	  ranges += arange.ar_pointer_size;
 
+	  /* A pair of zeros marks the end of the list.  */
+	  if (address == 0 && length == 0)
+	    break;
+	  
 	  printf ("    %8.8lx %lu\n", address, length);
 	}
 

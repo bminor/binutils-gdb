@@ -1,5 +1,12 @@
 1999-08-27  Jim Wilson  <wilson@cygnus.com>
 
+	* readelf.c (display_debug_lines): Use i-1 not i in standard_opcodes
+	access.
+	(display_debug_aranges): New local excess.  Use for calculating padding
+	and add that into ranges.  Break from loop only if length is also 0.
+
+1999-08-27  Jim Wilson  <wilson@cygnus.com>
+
 	* readelf.c (display_debug_lines, case DW_LNS_const_add_pc): Multiply
 	adv by info.li_min_insn_length. 
 
