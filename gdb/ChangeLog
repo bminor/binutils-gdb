@@ -1,3 +1,15 @@
+2000-12-11  Fernando Nasser  <fnasser@redhat.com>
+
+        * Makefile.in (CONFIG_LOBS): New macro.  Configured to the files
+	that must be added to the gdblib itself.
+	(DEPFILES): Use CONFIG_LOBS, not CONFIG_OBS.
+	(INIT_FILES): Include CONFIG_OBS.
+	(gdb$(EXEEXT)): Depend on CONFIG_OBS and link with it.
+	(kdb): Ditto.
+	* configure.in (CONFIG_LOBS): New variable. Object files that must
+	be added to gdblib for the specific configuration.
+	* configure: Regenerate.
+
 2000-12-11  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sh-tdep.c (sh_extract_struct_value_address): Protoize.

@@ -40,6 +40,7 @@ CY_GNU_GETTEXT
 dnl List of object files added by configure.
 
 CONFIG_OBS=
+CONFIG_LOBS=
 CONFIG_DEPS=
 CONFIG_SRCS=
 CONFIG_INITS=
@@ -407,7 +408,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          if test "$GCC" = "yes" ; then
             AC_MSG_RESULT(yes)
             AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
-            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
+            CONFIG_LOBS="${CONFIG_LOBS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             AC_MSG_RESULT(no (suppressed because you are not using GCC))
@@ -421,7 +422,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
       if test -f /usr/lib/libthread_db.so.1 ; then
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_THREAD_DB_LIB)
-         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
+         CONFIG_LOBS="${CONFIG_LOBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
          AC_CHECK_LIB(dl, dlopen)
          if test "$GCC" = "yes" ; then
@@ -560,7 +561,7 @@ no)	enable_netrom=no ;;
 esac])
 
 if test "${enable_netrom}" = "yes"; then
-	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
+	CONFIG_LOBS="${CONFIG_LOBS} remote-nrom.o" 
         CONFIG_SRCS="${CONFIG_SRCS} remote-nrom.c"
 fi
 
@@ -962,6 +963,7 @@ AC_SUBST(IGNORE_SIM_OBS)
 AC_SUBST(ENABLE_CFLAGS)
 
 AC_SUBST(CONFIG_OBS)
+AC_SUBST(CONFIG_LOBS)
 AC_SUBST(CONFIG_DEPS)
 AC_SUBST(CONFIG_SRCS)
 AC_SUBST(CONFIG_INITS)

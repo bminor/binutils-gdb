@@ -277,6 +277,7 @@ SUBDIR_GDBTK_INSTALL= install-gdbtk
 SUBDIR_GDBTK_UNINSTALL= 
 
 CONFIG_OBS= @CONFIG_OBS@
+CONFIG_LOBS= @CONFIG_LOBS@
 CONFIG_SRCS= @CONFIG_SRCS@
 CONFIG_DEPS= @CONFIG_DEPS@
 CONFIG_INITS= @CONFIG_INITS@
@@ -643,7 +644,7 @@ POSSLIBS = gnu-regex.c gnu-regex.h
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
+	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_LOBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -775,7 +776,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 # tui-file.c.
 #
 
-INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_INITS)
+INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
@@ -816,9 +817,11 @@ init.c: $(INIT_FILES)
 init.o: init.c $(defs_h) $(call_cmds_h)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) main.o libgdb.a $(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
+	main.o libgdb.a $(CONFIG_OBS) $(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS)\
+	$(LOADLIBES)
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
@@ -887,9 +890,9 @@ tm-sun4os4.h: tm-sparc.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
 
-kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
-	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
-	  -lc $(CLIBS)
+kdb:	$(NTSSTART) $(OBS) $(CONFIG_OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
+	ld -o kdb $(NTSSTART) $(OBS) $(CONFIG_OBS) $(NTSOBS) init.o \
+	 $(ADD_FILES) -lc $(CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those
