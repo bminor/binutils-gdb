@@ -1,3 +1,9 @@
+2004-04-04  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/foll-fork.exp: Update the expected output for
+	"help set follow-fork-mode", to match a change that was made
+	to the help of this variable on 2004-01-13.
+
 2004-04-01  Joel Brobecker  <brobecker@gnat.com>
 
 	* lib/ada.exp: Add copyright notice.
