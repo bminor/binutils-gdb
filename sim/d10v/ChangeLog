@@ -1,7 +1,29 @@
+Sat Oct 12 22:17:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_{31000000,6601,6201,6200}): Store address in a
+	temporary in case the register is overriden when loading.
+	(OP_6200): Output type is OP_DREG for tracing.
+
+Fri Oct  4 23:46:18 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* d10v_sim.h (struct _state): Add mem_{min,max} fields.
+
+	* interp.c (sim_size): Initialize mem_{min,max} fields.
+	(sim_write): Update mem_{min,max} fields.
+	(sim_resume): If PC is not in the minimum/maximum memory range,
+	abort.
+	(sim_create_inferior): Preserve mem_{min,max} fields.
+
+Fri Sep 27 13:11:58 1996  Mark Alexander  <marka@cygnus.com>
+
+	* simops.c (OP_5F00): Add support for time() system call.
+
 Wed Sep 25 16:31:41 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c (OP_{6E01,6A01,6E1F,6A00}): Print both words being
 	stored if tracing.
+	(OP_5F00,trace_{in,out}put_func): Add finer grain tracing for
+	system calls.
 
 Mon Sep 23 17:55:30 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
