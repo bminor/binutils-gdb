@@ -22,7 +22,7 @@
 #ifndef dbg_hif__h
 #define dbg_hif__h
 
-#if defined __STDC__ || defined ALMOST_STDC
+#ifdef STDC_HEADERS
 #  include <stdarg.h>
 #else
 #  include <varargs.h>

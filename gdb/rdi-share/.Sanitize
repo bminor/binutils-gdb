@@ -23,8 +23,10 @@ Do-first:
 
 Things-to-keep:
 
+Makefile.am
 Makefile.in
 README.CYGNUS
+aclocal.m4
 adp.h
 adperr.h
 angel.h
@@ -37,6 +39,7 @@ bytesex.h
 chandefs.h
 channels.h
 chanpriv.h
+configure
 configure.in
 crc.c
 crc.h
@@ -72,6 +75,7 @@ sys.h
 tx.c
 unixcomm.c
 unixcomm.h
+
 
 # Things which are explicitly *not* kept, for now.
 

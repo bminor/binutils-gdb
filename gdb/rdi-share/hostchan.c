@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 
-#if defined(__unix) || defined(__CYGWIN32__)
+#ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #else
 #  include "winsock.h"

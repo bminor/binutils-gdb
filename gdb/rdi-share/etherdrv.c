@@ -25,7 +25,7 @@
 #ifdef __hpux
 # define uint hide_HPs_uint
 #endif
-#ifdef __unix
+#ifdef STDC_HEADERS
 # include <unistd.h>
 # ifdef __hpux
 #   undef uint
@@ -62,7 +62,7 @@
 # include <netdb.h>
 # include <sys/time.h>
 # include <sys/ioctl.h>
-# if !defined(__hpux) && !defined(__linux__) && !defined(_WIN32)
+# ifdef HAVE_SYS_FILIO_H
 #   include <sys/filio.h>
 # endif
 # include <netinet/in.h>
@@ -79,7 +79,7 @@
 #include "ethernet.h"
 
 
-#ifndef COMPILING_ON_WINDOWS
+#if !defined(COMPILING_ON_WINDOWS) && !defined(STDC_HEADERS)
 /* These two might not work for windows.  */
 extern int sys_nerr;
 extern char * sys_errlist[];
