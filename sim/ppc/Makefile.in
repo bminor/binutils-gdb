@@ -288,7 +288,7 @@ TAGS: tmp-gencode config.h ppc-config.h
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oas] core psim run gen config.log
+	rm -f tmp-* *.[ioas] *.out core psim run gen config.log
 	rm -f icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c ppc-config.h
 
 distclean maintainer-clean realclean: clean

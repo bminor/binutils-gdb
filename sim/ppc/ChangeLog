@@ -1,5 +1,7 @@
 Thu Oct 26 10:42:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* Makefile.in (clean): Delete *.i and *.out files.
+
 	* ppc-endian.c (SWAP_n): Add SET argument to allow use of SWAP
 	macros for either assignment or return.  Fix SWAP_8 to use a
 	union, and two SWAP_4's.  Delete SWAP_N, since nobody uses it now.
