@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "inferior.h"
 #include "wait.h"
-#include "value.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -33,9 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <errno.h>
 
 #include "terminal.h"
-#include "target.h"
 #include "gdbcore.h"
-#include "serial.h"
 #include "gdbcmd.h"
 
 #include "remote-utils.h"
@@ -228,7 +225,7 @@ bug_open (args, from_tty)
   sr_write_cr("rs cr06");
   sr_expect("rs cr06");
 
-  switch (sr_multi_scan(cpu_check_strings, 0))
+  switch (gr_multi_scan(cpu_check_strings, 0))
     {
     case 0: /* this is an m88100 */
       target_is_m88110 = 0;
@@ -438,6 +435,12 @@ bug_fetch_register(regno)
       for (i = 0; i < NUM_REGS; ++i)
 	bug_fetch_register(i);
     }
+  else if (target_is_m88110 && regno == SFIP_REGNUM)
+    {
+      /* m88110 has no sfip. */
+      long l = 0;
+      supply_register(regno, (char *) &l);
+    }
   else if (regno < XFP_REGNUM)
     {
       sr_write("rs ", 3);
@@ -445,14 +448,6 @@ bug_fetch_register(regno)
       sr_expect("=");
       regval = sr_get_hex_word();
       gr_expect_prompt();
-
-      /* the following registers contain flag bits in the lower to bit slots.
-	 Mask them off */
-      if (regno == PC_REGNUM	/* aka sxip */
-	  || regno == NPC_REGNUM /* aka snip */
-	  || regno == SFIP_REGNUM)	/* aka sfip */
-	regval &= ~0x3;
-
       supply_register(regno, (char *) &regval);
     }
   else
@@ -523,7 +518,9 @@ bug_store_register (regno)
 
       regname = get_reg_name(regno);
 
-      if (regno < XFP_REGNUM)
+      if (target_is_m88110 && regno == SFIP_REGNUM)
+	return;
+      else if (regno < XFP_REGNUM)
 	sprintf(buffer, "rs %s %08x",
 		regname,
 		read_register(regno));
@@ -531,7 +528,7 @@ bug_store_register (regno)
 	{
 	  unsigned char *value = &registers[REGISTER_BYTE(regno)];
 	  
-	  sprintf(buffer, "rs %s %1x_%2x%1x_%1x%2x%2x%2x%2x%2x%2x",
+	  sprintf(buffer, "rs %s %1x_%02x%1x_%1x%02x%02x%02x%02x%02x%02x;d",
 		  regname,
 		  /* sign */
 		  (value[0] >> 7) & 0xf,

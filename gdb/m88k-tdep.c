@@ -26,12 +26,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "setjmp.h"
 #include "value.h"
+#include "ieee-float.h"	/* for ext_format & friends */
 
 /* Size of an instruction */
 #define	BYTES_PER_88K_INSN	4
 
 void frame_find_saved_regs ();
 
+/* is this target an m88110?  Otherwise assume m88100.  This has
+   relevance for the ways in which we screw with instruction pointers.  */ 
+int target_is_m88110 = 0;
+
+/* FIXME: this is really just a guess based on m88110 being big
+   endian. */
+const struct ext_format ext_format_m88110 = {
+/* tot sbyte smask expbyte	manbyte */
+   10, 0,    0x80, 0,1,		4,8		/* m88110 */
+};
 
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
@@ -124,7 +135,7 @@ struct pic_prologue_code {
 
 static struct pic_prologue_code pic_prologue_code [] = {
 /* FIXME -- until this is translated to hex, we won't match it... */
-	0xffffffff, 0,
+  { 0xffffffff, 0 },
 					/* or r10,r1,0  (if not saved) */
 					/* bsr.n LabN */
 					/* or.u r25,r0,const */
@@ -152,8 +163,6 @@ next_insn (memaddr, pword1)
      unsigned long *pword1;
      CORE_ADDR memaddr;
 {
-  unsigned long buf[1];
-
   *pword1 = read_memory_integer (memaddr, BYTES_PER_88K_INSN);
   return memaddr + BYTES_PER_88K_INSN;
 }
@@ -448,9 +457,6 @@ frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
      struct frame_saved_regs *fsr;
 {
-  register CORE_ADDR next_addr;
-  register CORE_ADDR *saved_regs;
-  register int regnum;
   register struct frame_saved_regs *cache_fsr;
   extern struct obstack frame_cache_obstack;
   CORE_ADDR ip;
@@ -490,9 +496,7 @@ CORE_ADDR
 frame_locals_address (fi)
      struct frame_info *fi;
 {
-  register FRAME frame;
   struct frame_saved_regs fsr;
-  CORE_ADDR ap;
 
   if (fi->args_pointer)	/* Cached value is likely there.  */
     return fi->args_pointer;
@@ -511,9 +515,7 @@ CORE_ADDR
 frame_args_address (fi)
      struct frame_info *fi;
 {
-  register FRAME frame;
   struct frame_saved_regs fsr;
-  CORE_ADDR ap;
 
   if (fi->args_pointer)		/* Cached value is likely there.  */
     return fi->args_pointer;
@@ -694,7 +696,9 @@ push_parameters (return_type, struct_conv, nargs, args)
  
            write_register (SP_REGNUM, rv_addr); /* push space onto the stack */
            write_register (SRA_REGNUM, rv_addr);/* set return value register */
+	   break;
          }
+       default: break;
      }
  
    /* Here we make a pre-pass on the whole parameter list to figure out exactly

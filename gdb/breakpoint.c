@@ -1152,15 +1152,7 @@ bpstat_stop_status (pc, frame_address)
 	{
 	  *pc = bp_addr;
 #if defined (SHIFT_INST_REGS)
-	  {
-	    CORE_ADDR pc = read_register (PC_REGNUM);
-	    CORE_ADDR npc = read_register (NPC_REGNUM);
-	    if (pc != npc)
-	      {
-		write_register (NNPC_REGNUM, npc);
-		write_register (NPC_REGNUM, pc);
-	      }
-	  }
+	  SHIFT_INST_REGS();
 #else /* No SHIFT_INST_REGS.  */
 	  write_pc (bp_addr);
 #endif /* No SHIFT_INST_REGS.  */
