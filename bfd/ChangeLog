@@ -1,3 +1,11 @@
+Tue Mar 22 10:04:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* archive.c (bfd_construct_extended_name_table): Use ar_padchar
+	for first character in an extended name.
+	(_bfd_write_archive_contents): If ar_padchar == '/', then use
+	"//" as the name of the special archive member holding the
+	extended name table.
+
 Mon Mar 21 12:28:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Support for link_order types which generate relocs in order to
