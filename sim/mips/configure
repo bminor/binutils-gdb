@@ -3412,7 +3412,7 @@ if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
   echo "Setting sim profile = $sim_profile" 6>&1
 fi
 else
-  sim_profile=""
+  sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"
 fi
 
 
