@@ -1,7 +1,7 @@
-#  Build all of the targets for any given host.....
+# Build all of the targets for any given host.....
 #
-#  This file is going to be ugly.  It will be VERY specific to the
-#  Cygnus environment and build-process.
+# This file is going to be ugly.  It will be VERY specific to the
+# Cygnus environment and build-process.
 #
 # Useful targets (rt = recursion target):
 # (please correct or expand on this)
@@ -15,7 +15,7 @@
 #		(rt = $(canonhost)-stamp-3stage-1)
 # build-cygnus	- build 3stage native and all supported cross targets
 #		(rt = $(canonhost)-stamp-3stage-done, build-cygnus for cross)
-# build-latest	- build native and all supported cross targets
+# build-latest	- build all supported cross targets
 #		(rt = build-latest)
 # all-native	- set up install directories, build native
 #		(rt = do-native)
@@ -114,7 +114,7 @@ TARGETS = $(NATIVE) \
 	h8300-hms 	\
 	i386-aout	\
 	i386-lynx 	\
-	i960-vxworks 	\
+	i960-vxworks5.0 i960-vxworks5.1 \
 	mips-idt-ecoff	mips64-elf	mips-elf \
 	m68k-aout	m68k-vxworks 	m68k-coff \
 	m68k-lynx 	\
@@ -137,10 +137,10 @@ endif
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
 	a29k-amd-udi \
-	i960-vxworks \
+	i960-vxworks5.0 i960-vxworks5.1 \
 	m68k-aout	m68k-coff 	m68k-vxworks \
-	m88k-coff     \
-	mipsel-idt-ecoff sparc-lynx 
+	mipsel-idt-ecoff sparc-lynx \
+	sparclite-aout sparclite-coff m88k-coff 
 CC = cc -Xs
 GCC = gcc -O2 -pipe
 all: all-cygnus
@@ -149,6 +149,12 @@ endif
 ifeq ($(canonhost),mips-dec-ultrix)
 TARGETS = $(NATIVE) m68k-aout
 CC = cc -Wf,-XNg1000
+all: all-cygnus
+endif
+
+ifeq ($(canonhost),alpha-dec-osf1.3)
+TARGETS = $(NATIVE)
+CC = cc
 all: all-cygnus
 endif
 
@@ -162,7 +168,7 @@ endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) \
-	i960-vxworks \
+	i960-vxworks5.0 i960-vxworks5.1 \
 	m68k-aout
 all: all-cygnus
 endif
@@ -172,15 +178,16 @@ TARGETS	= $(NATIVE)	m68k-aout
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 CC = cc -Wp,-P 
 #CFLAGS = +O1000 
-CFLAGS = 
+CFLAGS = -g
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS = \
 	$(NATIVE) \
-	i960-vxworks	m68k-aout \
-	m68k-coff 	m68k-vxworks
+	i960-vxworks5.0 i960-vxworks5.1 \
+	m68k-aout  m68k-coff  m68k-vxworks \
+	z8k-coff
 CC = cc -Wp,-H256000
 #CFLAGS = +Obb2000
 CFLAGS = -g
@@ -254,7 +261,7 @@ FLAGS_TO_PASS := \
 	"SHELL=$(SHELL)"
 
 # set GNU_MAKE and CONFIG_SHELL correctly in sub-builds
-ifeq ($(patsubst %-lynxos,lynxos,$(canonhost)),lynxos)
+ifeq ($(patsubst %-lynx,lynx,$(canonhost)),lynx)
 FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)" "CONFIG_SHELL=/bin/bash"
 endif
 
@@ -272,15 +279,16 @@ all-cygnus:
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
 	-rm -f $(ROOTING)/$(RELEASE_TAG) && ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 #
-#       The following line to be used during regular progressive builds
-#       to help developers test, but should be commented out for final
-#       progressive build.
+#      The following line to be used during regular progressive builds
+#      to help developers test, but should be commented out for final
+#      progressive build.
 #
-#       -rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progresssive
+#      -rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progresssive
 	@for i in $(TARGETS) ; do \
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-stamp-3stage-done ] ; then \
 	      echo "3staging $(canonhost) native" ; \
+	      echo Flags passed to make: $(FLAGS_TO_PASS) ; \
 	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
 	         echo "     completed successfully" ; \
 	    else \
