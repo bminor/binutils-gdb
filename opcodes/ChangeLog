@@ -1,3 +1,7 @@
+2002-02-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh-opc.h (sh_arg_type): Added A_DISP_PC_ABS.
+
 2002-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am"
