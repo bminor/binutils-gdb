@@ -17,4 +17,5 @@ if [istarget tic80*-*-*] then {
     run_dump_test "relocs1b"
     run_dump_test "relocs2"
     run_dump_test "relocs2b"
+    run_dump_test "align"
 }
