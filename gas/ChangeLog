@@ -1,3 +1,7 @@
+2000-07-20  Kazu Hirata  <kazu@hxi.com>
+	
+	* read.c: Fix formatting.
+
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
 	* sb.c: Include <stdlib.h> if exists for abort ().
