@@ -66,6 +66,8 @@ x86_64_linux_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
+#define LINUX_SIGINFO_SIZE 128
+
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
 #define LINUX_UCONTEXT_SIGCONTEXT_OFFSET (36)
 
@@ -83,12 +85,12 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
 	/* If this isn't the top frame, the next frame must be for the
 	   signal handler itself.  The sigcontext structure is part of
 	   the user context. */
-	return frame->next->frame + sizeof (struct siginfo) +
+	return frame->next->frame + LINUX_SIGINFO_SIZE +
 	  LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
 
       /* This is the top frame. */
-      return read_register (SP_REGNUM) + sizeof (struct siginfo) +
+      return read_register (SP_REGNUM) + LINUX_SIGINFO_SIZE +
 	LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
     }

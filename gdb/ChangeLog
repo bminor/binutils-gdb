@@ -1,3 +1,9 @@
+2001-09-24  Jiri Smid  <smid@naga.suse.cz>
+
+	* x86-64-linux-tdep.c (LINUX_SIGINFO_SIZE): Add.
+	(x86_64_linux_sigcontext_addr): Replace `sizeof (struct siginfo)'
+	by LINUX_SIGINFO_SIZE.
+
 2001-09-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* maint.c (maintenance_set_cmdlist, maintenance_show_cmdlist): New
