@@ -2661,8 +2661,10 @@ fixup_segment (fixP, this_segment_type)
 		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("callj to difference of 2 symbols"));
 #endif /* TC_I960  */
-	      add_number += S_GET_VALUE (add_symbolP) -
-		S_GET_VALUE (sub_symbolP);
+	      add_number += (S_GET_VALUE (add_symbolP)
+			     - S_GET_VALUE (sub_symbolP));
+	      if (pcrel)
+		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment_type);
 
 	      add_symbolP = NULL;
 	      pcrel = 0;	/* No further pcrel processing.  */

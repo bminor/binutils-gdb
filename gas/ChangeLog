@@ -1,3 +1,8 @@
+2001-06-27  Tracy A. Kuhrt  <Tracy.Kuhrt@microchip.com>
+
+	* write.c (fixup_segment <Difference of 2 syms same seg>): If
+	pcrel, subtract MD_PCREL_FROM_SECTION value.
+
 2001-06-24  Ben Elliston  <bje@redhat.com>
 
 	* stabs.c (generate_asm_file): Make local variable `len' a size_t.
@@ -34,8 +39,9 @@
 
 2001-06-22  Matthew Wilcox  <willy@ldl.fc.hp.com>
 
-	* config/tc-hppa.c: Add %mrp (millicode return pointer) alias
-	for %r2 or %r31, depending on 32 or 64 bit architecture.
+	* config/tc-hppa.c (pre_defined_registers): Add %mrp (millicode
+	return pointer) alias for %r2 or %r31, depending on 32 or 64 bit
+	architecture.
 
 2001-06-21  Philip Blundell  <philb@gnu.org>
 
