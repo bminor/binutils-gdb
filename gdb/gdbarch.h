@@ -39,15 +39,7 @@ struct frame_info;
 struct value;
 
 
-#ifndef GDB_MULTI_ARCH
-#define GDB_MULTI_ARCH 0
-#endif
-
 extern struct gdbarch *current_gdbarch;
-
-
-/* See gdb/doc/gdbint.texi for a discussion of the GDB_MULTI_ARCH
-   macro */
 
 
 /* If any of the following are defined, the target wasn't correctly
@@ -71,7 +63,7 @@ extern struct gdbarch *current_gdbarch;
 extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbarch);
 /* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized. */
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_ARCHITECTURE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_ARCHITECTURE)
 #define TARGET_ARCHITECTURE (gdbarch_bfd_arch_info (current_gdbarch))
 #endif
 #endif
@@ -79,7 +71,7 @@ extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbar
 extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized. */
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_BYTE_ORDER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_BYTE_ORDER)
 #define TARGET_BYTE_ORDER (gdbarch_byte_order (current_gdbarch))
 #endif
 #endif
@@ -88,14 +80,14 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 /* The following are initialized by the target dependant code. */
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_BFD_VMA_BIT)
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_BFD_VMA_BIT)
 #define TARGET_BFD_VMA_BIT (TARGET_ARCHITECTURE->bits_per_address)
 #endif
 
 extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_BFD_VMA_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_BFD_VMA_BIT)
 #define TARGET_BFD_VMA_BIT (gdbarch_bfd_vma_bit (current_gdbarch))
 #endif
 #endif
@@ -103,7 +95,7 @@ extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
 extern int gdbarch_ptr_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_PTR_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_PTR_BIT)
 #define TARGET_PTR_BIT (gdbarch_ptr_bit (current_gdbarch))
 #endif
 #endif
@@ -111,7 +103,7 @@ extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 extern int gdbarch_short_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_short_bit (struct gdbarch *gdbarch, int short_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_SHORT_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_SHORT_BIT)
 #define TARGET_SHORT_BIT (gdbarch_short_bit (current_gdbarch))
 #endif
 #endif
@@ -119,7 +111,7 @@ extern void set_gdbarch_short_bit (struct gdbarch *gdbarch, int short_bit);
 extern int gdbarch_int_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_int_bit (struct gdbarch *gdbarch, int int_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_INT_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_INT_BIT)
 #define TARGET_INT_BIT (gdbarch_int_bit (current_gdbarch))
 #endif
 #endif
@@ -127,7 +119,7 @@ extern void set_gdbarch_int_bit (struct gdbarch *gdbarch, int int_bit);
 extern int gdbarch_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_LONG_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_LONG_BIT)
 #define TARGET_LONG_BIT (gdbarch_long_bit (current_gdbarch))
 #endif
 #endif
@@ -135,7 +127,7 @@ extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
 extern int gdbarch_long_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_LONG_LONG_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_LONG_LONG_BIT)
 #define TARGET_LONG_LONG_BIT (gdbarch_long_long_bit (current_gdbarch))
 #endif
 #endif
@@ -143,7 +135,7 @@ extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bi
 extern int gdbarch_float_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_float_bit (struct gdbarch *gdbarch, int float_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_FLOAT_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_FLOAT_BIT)
 #define TARGET_FLOAT_BIT (gdbarch_float_bit (current_gdbarch))
 #endif
 #endif
@@ -151,7 +143,7 @@ extern void set_gdbarch_float_bit (struct gdbarch *gdbarch, int float_bit);
 extern int gdbarch_double_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_double_bit (struct gdbarch *gdbarch, int double_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_DOUBLE_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_DOUBLE_BIT)
 #define TARGET_DOUBLE_BIT (gdbarch_double_bit (current_gdbarch))
 #endif
 #endif
@@ -159,20 +151,20 @@ extern void set_gdbarch_double_bit (struct gdbarch *gdbarch, int double_bit);
 extern int gdbarch_long_double_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_double_bit);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_LONG_DOUBLE_BIT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_LONG_DOUBLE_BIT)
 #define TARGET_LONG_DOUBLE_BIT (gdbarch_long_double_bit (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (IEEE_FLOAT)
+#if (!GDB_MULTI_ARCH) && !defined (IEEE_FLOAT)
 #define IEEE_FLOAT (0)
 #endif
 
 extern int gdbarch_ieee_float (struct gdbarch *gdbarch);
 extern void set_gdbarch_ieee_float (struct gdbarch *gdbarch, int ieee_float);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (IEEE_FLOAT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (IEEE_FLOAT)
 #define IEEE_FLOAT (gdbarch_ieee_float (current_gdbarch))
 #endif
 #endif
@@ -181,7 +173,7 @@ typedef CORE_ADDR (gdbarch_read_pc_ftype) (int pid);
 extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, int pid);
 extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype *read_pc);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_READ_PC)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_PC)
 #define TARGET_READ_PC(pid) (gdbarch_read_pc (current_gdbarch, pid))
 #endif
 #endif
@@ -190,7 +182,7 @@ typedef void (gdbarch_write_pc_ftype) (CORE_ADDR val, int pid);
 extern void gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, int pid);
 extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftype *write_pc);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_WRITE_PC)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_PC)
 #define TARGET_WRITE_PC(val, pid) (gdbarch_write_pc (current_gdbarch, val, pid))
 #endif
 #endif
@@ -199,7 +191,7 @@ typedef CORE_ADDR (gdbarch_read_fp_ftype) (void);
 extern CORE_ADDR gdbarch_read_fp (struct gdbarch *gdbarch);
 extern void set_gdbarch_read_fp (struct gdbarch *gdbarch, gdbarch_read_fp_ftype *read_fp);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_READ_FP)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_FP)
 #define TARGET_READ_FP() (gdbarch_read_fp (current_gdbarch))
 #endif
 #endif
@@ -208,7 +200,7 @@ typedef void (gdbarch_write_fp_ftype) (CORE_ADDR val);
 extern void gdbarch_write_fp (struct gdbarch *gdbarch, CORE_ADDR val);
 extern void set_gdbarch_write_fp (struct gdbarch *gdbarch, gdbarch_write_fp_ftype *write_fp);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_WRITE_FP)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_FP)
 #define TARGET_WRITE_FP(val) (gdbarch_write_fp (current_gdbarch, val))
 #endif
 #endif
@@ -217,7 +209,7 @@ typedef CORE_ADDR (gdbarch_read_sp_ftype) (void);
 extern CORE_ADDR gdbarch_read_sp (struct gdbarch *gdbarch);
 extern void set_gdbarch_read_sp (struct gdbarch *gdbarch, gdbarch_read_sp_ftype *read_sp);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_READ_SP)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_SP)
 #define TARGET_READ_SP() (gdbarch_read_sp (current_gdbarch))
 #endif
 #endif
@@ -226,7 +218,7 @@ typedef void (gdbarch_write_sp_ftype) (CORE_ADDR val);
 extern void gdbarch_write_sp (struct gdbarch *gdbarch, CORE_ADDR val);
 extern void set_gdbarch_write_sp (struct gdbarch *gdbarch, gdbarch_write_sp_ftype *write_sp);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_WRITE_SP)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_SP)
 #define TARGET_WRITE_SP(val) (gdbarch_write_sp (current_gdbarch, val))
 #endif
 #endif
@@ -234,20 +226,20 @@ extern void set_gdbarch_write_sp (struct gdbarch *gdbarch, gdbarch_write_sp_ftyp
 extern int gdbarch_num_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (NUM_REGS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NUM_REGS)
 #define NUM_REGS (gdbarch_num_regs (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (NUM_PSEUDO_REGS)
+#if (!GDB_MULTI_ARCH) && !defined (NUM_PSEUDO_REGS)
 #define NUM_PSEUDO_REGS (0)
 #endif
 
 extern int gdbarch_num_pseudo_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo_regs);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (NUM_PSEUDO_REGS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NUM_PSEUDO_REGS)
 #define NUM_PSEUDO_REGS (gdbarch_num_pseudo_regs (current_gdbarch))
 #endif
 #endif
@@ -255,7 +247,7 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 extern int gdbarch_sp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (SP_REGNUM)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SP_REGNUM)
 #define SP_REGNUM (gdbarch_sp_regnum (current_gdbarch))
 #endif
 #endif
@@ -263,7 +255,7 @@ extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 extern int gdbarch_fp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_fp_regnum (struct gdbarch *gdbarch, int fp_regnum);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FP_REGNUM)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FP_REGNUM)
 #define FP_REGNUM (gdbarch_fp_regnum (current_gdbarch))
 #endif
 #endif
@@ -271,52 +263,52 @@ extern void set_gdbarch_fp_regnum (struct gdbarch *gdbarch, int fp_regnum);
 extern int gdbarch_pc_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (PC_REGNUM)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_REGNUM)
 #define PC_REGNUM (gdbarch_pc_regnum (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (FP0_REGNUM)
+#if (!GDB_MULTI_ARCH) && !defined (FP0_REGNUM)
 #define FP0_REGNUM (-1)
 #endif
 
 extern int gdbarch_fp0_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FP0_REGNUM)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FP0_REGNUM)
 #define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (NPC_REGNUM)
+#if (!GDB_MULTI_ARCH) && !defined (NPC_REGNUM)
 #define NPC_REGNUM (-1)
 #endif
 
 extern int gdbarch_npc_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_npc_regnum (struct gdbarch *gdbarch, int npc_regnum);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (NPC_REGNUM)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NPC_REGNUM)
 #define NPC_REGNUM (gdbarch_npc_regnum (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (NNPC_REGNUM)
+#if (!GDB_MULTI_ARCH) && !defined (NNPC_REGNUM)
 #define NNPC_REGNUM (-1)
 #endif
 
 extern int gdbarch_nnpc_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch, int nnpc_regnum);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (NNPC_REGNUM)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NNPC_REGNUM)
 #define NNPC_REGNUM (gdbarch_nnpc_regnum (current_gdbarch))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REGISTER_NAME)
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_NAME)
 #define REGISTER_NAME(regnr) (legacy_register_name (regnr))
 #endif
 
@@ -324,7 +316,7 @@ typedef char * (gdbarch_register_name_ftype) (int regnr);
 extern char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_NAME)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_NAME)
 #define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
 #endif
 #endif
@@ -332,7 +324,7 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 extern int gdbarch_register_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_register_size (struct gdbarch *gdbarch, int register_size);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_SIZE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_SIZE)
 #define REGISTER_SIZE (gdbarch_register_size (current_gdbarch))
 #endif
 #endif
@@ -340,7 +332,7 @@ extern void set_gdbarch_register_size (struct gdbarch *gdbarch, int register_siz
 extern int gdbarch_register_bytes (struct gdbarch *gdbarch);
 extern void set_gdbarch_register_bytes (struct gdbarch *gdbarch, int register_bytes);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_BYTES)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTES)
 #define REGISTER_BYTES (gdbarch_register_bytes (current_gdbarch))
 #endif
 #endif
@@ -349,7 +341,7 @@ typedef int (gdbarch_register_byte_ftype) (int reg_nr);
 extern int gdbarch_register_byte (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_byte (struct gdbarch *gdbarch, gdbarch_register_byte_ftype *register_byte);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_BYTE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTE)
 #define REGISTER_BYTE(reg_nr) (gdbarch_register_byte (current_gdbarch, reg_nr))
 #endif
 #endif
@@ -358,7 +350,7 @@ typedef int (gdbarch_register_raw_size_ftype) (int reg_nr);
 extern int gdbarch_register_raw_size (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_register_raw_size_ftype *register_raw_size);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_RAW_SIZE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_RAW_SIZE)
 #define REGISTER_RAW_SIZE(reg_nr) (gdbarch_register_raw_size (current_gdbarch, reg_nr))
 #endif
 #endif
@@ -366,7 +358,7 @@ extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_regi
 extern int gdbarch_max_register_raw_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch, int max_register_raw_size);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (MAX_REGISTER_RAW_SIZE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_RAW_SIZE)
 #define MAX_REGISTER_RAW_SIZE (gdbarch_max_register_raw_size (current_gdbarch))
 #endif
 #endif
@@ -375,7 +367,7 @@ typedef int (gdbarch_register_virtual_size_ftype) (int reg_nr);
 extern int gdbarch_register_virtual_size (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_register_virtual_size_ftype *register_virtual_size);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_VIRTUAL_SIZE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_SIZE)
 #define REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_register_virtual_size (current_gdbarch, reg_nr))
 #endif
 #endif
@@ -383,7 +375,7 @@ extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_
 extern int gdbarch_max_register_virtual_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch, int max_register_virtual_size);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (MAX_REGISTER_VIRTUAL_SIZE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_VIRTUAL_SIZE)
 #define MAX_REGISTER_VIRTUAL_SIZE (gdbarch_max_register_virtual_size (current_gdbarch))
 #endif
 #endif
@@ -392,7 +384,7 @@ typedef struct type * (gdbarch_register_virtual_type_ftype) (int reg_nr);
 extern struct type * gdbarch_register_virtual_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_register_virtual_type_ftype *register_virtual_type);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_VIRTUAL_TYPE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE)
 #define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_register_virtual_type (current_gdbarch, reg_nr))
 #endif
 #endif
@@ -400,7 +392,7 @@ extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_
 extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (USE_GENERIC_DUMMY_FRAMES)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (USE_GENERIC_DUMMY_FRAMES)
 #define USE_GENERIC_DUMMY_FRAMES (gdbarch_use_generic_dummy_frames (current_gdbarch))
 #endif
 #endif
@@ -408,7 +400,7 @@ extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int u
 extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_dummy_location);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_LOCATION)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
 #endif
@@ -417,7 +409,7 @@ typedef CORE_ADDR (gdbarch_call_dummy_address_ftype) (void);
 extern CORE_ADDR gdbarch_call_dummy_address (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_address (struct gdbarch *gdbarch, gdbarch_call_dummy_address_ftype *call_dummy_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_ADDRESS)
 #define CALL_DUMMY_ADDRESS() (gdbarch_call_dummy_address (current_gdbarch))
 #endif
 #endif
@@ -425,7 +417,7 @@ extern void set_gdbarch_call_dummy_address (struct gdbarch *gdbarch, gdbarch_cal
 extern CORE_ADDR gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch, CORE_ADDR call_dummy_start_offset);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_START_OFFSET)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_START_OFFSET)
 #define CALL_DUMMY_START_OFFSET (gdbarch_call_dummy_start_offset (current_gdbarch))
 #endif
 #endif
@@ -433,7 +425,7 @@ extern void set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch, CORE_A
 extern CORE_ADDR gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch, CORE_ADDR call_dummy_breakpoint_offset);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (gdbarch_call_dummy_breakpoint_offset (current_gdbarch))
 #endif
 #endif
@@ -441,7 +433,7 @@ extern void set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch, C
 extern int gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch, int call_dummy_breakpoint_offset_p);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_BREAKPOINT_OFFSET_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_BREAKPOINT_OFFSET_P)
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (gdbarch_call_dummy_breakpoint_offset_p (current_gdbarch))
 #endif
 #endif
@@ -449,7 +441,7 @@ extern void set_gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch,
 extern int gdbarch_call_dummy_length (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_length (struct gdbarch *gdbarch, int call_dummy_length);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_LENGTH)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_LENGTH)
 #define CALL_DUMMY_LENGTH (gdbarch_call_dummy_length (current_gdbarch))
 #endif
 #endif
@@ -458,7 +450,7 @@ typedef int (gdbarch_pc_in_call_dummy_ftype) (CORE_ADDR pc, CORE_ADDR sp, CORE_A
 extern int gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
 extern void set_gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, gdbarch_pc_in_call_dummy_ftype *pc_in_call_dummy);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (PC_IN_CALL_DUMMY)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_IN_CALL_DUMMY)
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) (gdbarch_pc_in_call_dummy (current_gdbarch, pc, sp, frame_address))
 #endif
 #endif
@@ -466,33 +458,33 @@ extern void set_gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, gdbarch_pc_in
 extern int gdbarch_call_dummy_p (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_p (struct gdbarch *gdbarch, int call_dummy_p);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_P)
 #define CALL_DUMMY_P (gdbarch_call_dummy_p (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (CALL_DUMMY_WORDS)
+#if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_WORDS)
 #define CALL_DUMMY_WORDS (legacy_call_dummy_words)
 #endif
 
 extern LONGEST * gdbarch_call_dummy_words (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_words (struct gdbarch *gdbarch, LONGEST * call_dummy_words);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_WORDS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_WORDS)
 #define CALL_DUMMY_WORDS (gdbarch_call_dummy_words (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (SIZEOF_CALL_DUMMY_WORDS)
+#if (!GDB_MULTI_ARCH) && !defined (SIZEOF_CALL_DUMMY_WORDS)
 #define SIZEOF_CALL_DUMMY_WORDS (legacy_sizeof_call_dummy_words)
 #endif
 
 extern int gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch);
 extern void set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch, int sizeof_call_dummy_words);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (SIZEOF_CALL_DUMMY_WORDS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIZEOF_CALL_DUMMY_WORDS)
 #define SIZEOF_CALL_DUMMY_WORDS (gdbarch_sizeof_call_dummy_words (current_gdbarch))
 #endif
 #endif
@@ -500,7 +492,7 @@ extern void set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch, int si
 extern int gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch, int call_dummy_stack_adjust_p);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_STACK_ADJUST_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_STACK_ADJUST_P)
 #define CALL_DUMMY_STACK_ADJUST_P (gdbarch_call_dummy_stack_adjust_p (current_gdbarch))
 #endif
 #endif
@@ -508,7 +500,7 @@ extern void set_gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch, int 
 extern int gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch, int call_dummy_stack_adjust);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (CALL_DUMMY_STACK_ADJUST)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_STACK_ADJUST)
 #define CALL_DUMMY_STACK_ADJUST (gdbarch_call_dummy_stack_adjust (current_gdbarch))
 #endif
 #endif
@@ -517,7 +509,7 @@ typedef void (gdbarch_fix_call_dummy_ftype) (char *dummy, CORE_ADDR pc, CORE_ADD
 extern void gdbarch_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p);
 extern void set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch, gdbarch_fix_call_dummy_ftype *fix_call_dummy);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FIX_CALL_DUMMY)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FIX_CALL_DUMMY)
 #define FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p) (gdbarch_fix_call_dummy (current_gdbarch, dummy, pc, fun, nargs, args, type, gcc_p))
 #endif
 #endif
@@ -525,7 +517,7 @@ extern void set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch, gdbarch_fix_cal
 extern int gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch);
 extern void set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch, int believe_pcc_promotion);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (BELIEVE_PCC_PROMOTION)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (BELIEVE_PCC_PROMOTION)
 #define BELIEVE_PCC_PROMOTION (gdbarch_believe_pcc_promotion (current_gdbarch))
 #endif
 #endif
@@ -533,13 +525,13 @@ extern void set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch, int beli
 extern int gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch);
 extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int believe_pcc_promotion_type);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (BELIEVE_PCC_PROMOTION_TYPE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (BELIEVE_PCC_PROMOTION_TYPE)
 #define BELIEVE_PCC_PROMOTION_TYPE (gdbarch_believe_pcc_promotion_type (current_gdbarch))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (COERCE_FLOAT_TO_DOUBLE)
+#if (!GDB_MULTI_ARCH) && !defined (COERCE_FLOAT_TO_DOUBLE)
 #define COERCE_FLOAT_TO_DOUBLE(formal, actual) (default_coerce_float_to_double (formal, actual))
 #endif
 
@@ -547,7 +539,7 @@ typedef int (gdbarch_coerce_float_to_double_ftype) (struct type *formal, struct 
 extern int gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual);
 extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch_coerce_float_to_double_ftype *coerce_float_to_double);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (COERCE_FLOAT_TO_DOUBLE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (COERCE_FLOAT_TO_DOUBLE)
 #define COERCE_FLOAT_TO_DOUBLE(formal, actual) (gdbarch_coerce_float_to_double (current_gdbarch, formal, actual))
 #endif
 #endif
@@ -556,13 +548,13 @@ typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimize
 extern void gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void set_gdbarch_get_saved_register (struct gdbarch *gdbarch, gdbarch_get_saved_register_ftype *get_saved_register);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (GET_SAVED_REGISTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER)
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REGISTER_CONVERTIBLE)
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERTIBLE)
 #define REGISTER_CONVERTIBLE(nr) (generic_register_convertible_not (nr))
 #endif
 
@@ -570,13 +562,13 @@ typedef int (gdbarch_register_convertible_ftype) (int nr);
 extern int gdbarch_register_convertible (struct gdbarch *gdbarch, int nr);
 extern void set_gdbarch_register_convertible (struct gdbarch *gdbarch, gdbarch_register_convertible_ftype *register_convertible);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_CONVERTIBLE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_CONVERTIBLE)
 #define REGISTER_CONVERTIBLE(nr) (gdbarch_register_convertible (current_gdbarch, nr))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REGISTER_CONVERT_TO_VIRTUAL)
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_VIRTUAL)
 #define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error ("REGISTER_CONVERT_TO_VIRTUAL"), 0)
 #endif
 
@@ -584,13 +576,13 @@ typedef void (gdbarch_register_convert_to_virtual_ftype) (int regnum, struct typ
 extern void gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
 extern void set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_CONVERT_TO_VIRTUAL)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_CONVERT_TO_VIRTUAL)
 #define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REGISTER_CONVERT_TO_RAW)
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_RAW)
 #define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error ("REGISTER_CONVERT_TO_RAW"), 0)
 #endif
 
@@ -598,13 +590,13 @@ typedef void (gdbarch_register_convert_to_raw_ftype) (struct type *type, int reg
 extern void gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to);
 extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_register_convert_to_raw_ftype *register_convert_to_raw);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_CONVERT_TO_RAW)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_CONVERT_TO_RAW)
 #define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (FETCH_PSEUDO_REGISTER)
+#if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER)
 #define FETCH_PSEUDO_REGISTER(regnum) (internal_error ("FETCH_PSEUDO_REGISTER"), 0)
 #endif
 
@@ -612,13 +604,13 @@ typedef void (gdbarch_fetch_pseudo_register_ftype) (int regnum);
 extern void gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, gdbarch_fetch_pseudo_register_ftype *fetch_pseudo_register);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FETCH_PSEUDO_REGISTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FETCH_PSEUDO_REGISTER)
 #define FETCH_PSEUDO_REGISTER(regnum) (gdbarch_fetch_pseudo_register (current_gdbarch, regnum))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (STORE_PSEUDO_REGISTER)
+#if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER)
 #define STORE_PSEUDO_REGISTER(regnum) (internal_error ("STORE_PSEUDO_REGISTER"), 0)
 #endif
 
@@ -626,13 +618,13 @@ typedef void (gdbarch_store_pseudo_register_ftype) (int regnum);
 extern void gdbarch_store_pseudo_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_store_pseudo_register (struct gdbarch *gdbarch, gdbarch_store_pseudo_register_ftype *store_pseudo_register);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (STORE_PSEUDO_REGISTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_PSEUDO_REGISTER)
 #define STORE_PSEUDO_REGISTER(regnum) (gdbarch_store_pseudo_register (current_gdbarch, regnum))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (POINTER_TO_ADDRESS)
+#if (!GDB_MULTI_ARCH) && !defined (POINTER_TO_ADDRESS)
 #define POINTER_TO_ADDRESS(type, buf) (unsigned_pointer_to_address (type, buf))
 #endif
 
@@ -640,13 +632,13 @@ typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, void *b
 extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (POINTER_TO_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (POINTER_TO_ADDRESS)
 #define POINTER_TO_ADDRESS(type, buf) (gdbarch_pointer_to_address (current_gdbarch, type, buf))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (ADDRESS_TO_POINTER)
+#if (!GDB_MULTI_ARCH) && !defined (ADDRESS_TO_POINTER)
 #define ADDRESS_TO_POINTER(type, buf, addr) (unsigned_address_to_pointer (type, buf, addr))
 #endif
 
@@ -654,13 +646,13 @@ typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, void *buf, C
 extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, void *buf, CORE_ADDR addr);
 extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (ADDRESS_TO_POINTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ADDRESS_TO_POINTER)
 #define ADDRESS_TO_POINTER(type, buf, addr) (gdbarch_address_to_pointer (current_gdbarch, type, buf, addr))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (RETURN_VALUE_ON_STACK)
+#if (!GDB_MULTI_ARCH) && !defined (RETURN_VALUE_ON_STACK)
 #define RETURN_VALUE_ON_STACK(type) (generic_return_value_on_stack_not (type))
 #endif
 
@@ -668,7 +660,7 @@ typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
 extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
 extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (RETURN_VALUE_ON_STACK)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (RETURN_VALUE_ON_STACK)
 #define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
 #endif
 #endif
@@ -677,7 +669,7 @@ typedef void (gdbarch_extract_return_value_ftype) (struct type *type, char *regb
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (EXTRACT_RETURN_VALUE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (EXTRACT_RETURN_VALUE)
 #define EXTRACT_RETURN_VALUE(type, regbuf, valbuf) (gdbarch_extract_return_value (current_gdbarch, type, regbuf, valbuf))
 #endif
 #endif
@@ -686,7 +678,7 @@ typedef CORE_ADDR (gdbarch_push_arguments_ftype) (int nargs, struct value **args
 extern CORE_ADDR gdbarch_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr);
 extern void set_gdbarch_push_arguments (struct gdbarch *gdbarch, gdbarch_push_arguments_ftype *push_arguments);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (PUSH_ARGUMENTS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PUSH_ARGUMENTS)
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) (gdbarch_push_arguments (current_gdbarch, nargs, args, sp, struct_return, struct_addr))
 #endif
 #endif
@@ -695,7 +687,7 @@ typedef void (gdbarch_push_dummy_frame_ftype) (void);
 extern void gdbarch_push_dummy_frame (struct gdbarch *gdbarch);
 extern void set_gdbarch_push_dummy_frame (struct gdbarch *gdbarch, gdbarch_push_dummy_frame_ftype *push_dummy_frame);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (PUSH_DUMMY_FRAME)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PUSH_DUMMY_FRAME)
 #define PUSH_DUMMY_FRAME (gdbarch_push_dummy_frame (current_gdbarch))
 #endif
 #endif
@@ -704,7 +696,7 @@ typedef CORE_ADDR (gdbarch_push_return_address_ftype) (CORE_ADDR pc, CORE_ADDR s
 extern CORE_ADDR gdbarch_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp);
 extern void set_gdbarch_push_return_address (struct gdbarch *gdbarch, gdbarch_push_return_address_ftype *push_return_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (PUSH_RETURN_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PUSH_RETURN_ADDRESS)
 #define PUSH_RETURN_ADDRESS(pc, sp) (gdbarch_push_return_address (current_gdbarch, pc, sp))
 #endif
 #endif
@@ -713,13 +705,13 @@ typedef void (gdbarch_pop_frame_ftype) (void);
 extern void gdbarch_pop_frame (struct gdbarch *gdbarch);
 extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ftype *pop_frame);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (POP_FRAME)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (POP_FRAME)
 #define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (D10V_MAKE_DADDR)
+#if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_DADDR)
 #define D10V_MAKE_DADDR(x) (internal_error ("D10V_MAKE_DADDR"), 0)
 #endif
 
@@ -727,13 +719,13 @@ typedef CORE_ADDR (gdbarch_d10v_make_daddr_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, gdbarch_d10v_make_daddr_ftype *d10v_make_daddr);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (D10V_MAKE_DADDR)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_MAKE_DADDR)
 #define D10V_MAKE_DADDR(x) (gdbarch_d10v_make_daddr (current_gdbarch, x))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (D10V_MAKE_IADDR)
+#if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_IADDR)
 #define D10V_MAKE_IADDR(x) (internal_error ("D10V_MAKE_IADDR"), 0)
 #endif
 
@@ -741,13 +733,13 @@ typedef CORE_ADDR (gdbarch_d10v_make_iaddr_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, gdbarch_d10v_make_iaddr_ftype *d10v_make_iaddr);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (D10V_MAKE_IADDR)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_MAKE_IADDR)
 #define D10V_MAKE_IADDR(x) (gdbarch_d10v_make_iaddr (current_gdbarch, x))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (D10V_DADDR_P)
+#if (!GDB_MULTI_ARCH) && !defined (D10V_DADDR_P)
 #define D10V_DADDR_P(x) (internal_error ("D10V_DADDR_P"), 0)
 #endif
 
@@ -755,13 +747,13 @@ typedef int (gdbarch_d10v_daddr_p_ftype) (CORE_ADDR x);
 extern int gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, gdbarch_d10v_daddr_p_ftype *d10v_daddr_p);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (D10V_DADDR_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_DADDR_P)
 #define D10V_DADDR_P(x) (gdbarch_d10v_daddr_p (current_gdbarch, x))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (D10V_IADDR_P)
+#if (!GDB_MULTI_ARCH) && !defined (D10V_IADDR_P)
 #define D10V_IADDR_P(x) (internal_error ("D10V_IADDR_P"), 0)
 #endif
 
@@ -769,13 +761,13 @@ typedef int (gdbarch_d10v_iaddr_p_ftype) (CORE_ADDR x);
 extern int gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, gdbarch_d10v_iaddr_p_ftype *d10v_iaddr_p);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (D10V_IADDR_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_IADDR_P)
 #define D10V_IADDR_P(x) (gdbarch_d10v_iaddr_p (current_gdbarch, x))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (D10V_CONVERT_DADDR_TO_RAW)
+#if (!GDB_MULTI_ARCH) && !defined (D10V_CONVERT_DADDR_TO_RAW)
 #define D10V_CONVERT_DADDR_TO_RAW(x) (internal_error ("D10V_CONVERT_DADDR_TO_RAW"), 0)
 #endif
 
@@ -783,13 +775,13 @@ typedef CORE_ADDR (gdbarch_d10v_convert_daddr_to_raw_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, gdbarch_d10v_convert_daddr_to_raw_ftype *d10v_convert_daddr_to_raw);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (D10V_CONVERT_DADDR_TO_RAW)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_CONVERT_DADDR_TO_RAW)
 #define D10V_CONVERT_DADDR_TO_RAW(x) (gdbarch_d10v_convert_daddr_to_raw (current_gdbarch, x))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (D10V_CONVERT_IADDR_TO_RAW)
+#if (!GDB_MULTI_ARCH) && !defined (D10V_CONVERT_IADDR_TO_RAW)
 #define D10V_CONVERT_IADDR_TO_RAW(x) (internal_error ("D10V_CONVERT_IADDR_TO_RAW"), 0)
 #endif
 
@@ -797,7 +789,7 @@ typedef CORE_ADDR (gdbarch_d10v_convert_iaddr_to_raw_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, gdbarch_d10v_convert_iaddr_to_raw_ftype *d10v_convert_iaddr_to_raw);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (D10V_CONVERT_IADDR_TO_RAW)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_CONVERT_IADDR_TO_RAW)
 #define D10V_CONVERT_IADDR_TO_RAW(x) (gdbarch_d10v_convert_iaddr_to_raw (current_gdbarch, x))
 #endif
 #endif
@@ -806,7 +798,7 @@ typedef void (gdbarch_store_struct_return_ftype) (CORE_ADDR addr, CORE_ADDR sp);
 extern void gdbarch_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp);
 extern void set_gdbarch_store_struct_return (struct gdbarch *gdbarch, gdbarch_store_struct_return_ftype *store_struct_return);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (STORE_STRUCT_RETURN)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_STRUCT_RETURN)
 #define STORE_STRUCT_RETURN(addr, sp) (gdbarch_store_struct_return (current_gdbarch, addr, sp))
 #endif
 #endif
@@ -815,7 +807,7 @@ typedef void (gdbarch_store_return_value_ftype) (struct type *type, char *valbuf
 extern void gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, char *valbuf);
 extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_store_return_value_ftype *store_return_value);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (STORE_RETURN_VALUE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_RETURN_VALUE)
 #define STORE_RETURN_VALUE(type, valbuf) (gdbarch_store_return_value (current_gdbarch, type, valbuf))
 #endif
 #endif
@@ -824,7 +816,7 @@ typedef CORE_ADDR (gdbarch_extract_struct_value_address_ftype) (char *regbuf);
 extern CORE_ADDR gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf);
 extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_extract_struct_value_address_ftype *extract_struct_value_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (EXTRACT_STRUCT_VALUE_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (EXTRACT_STRUCT_VALUE_ADDRESS)
 #define EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (gdbarch_extract_struct_value_address (current_gdbarch, regbuf))
 #endif
 #endif
@@ -833,7 +825,7 @@ typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value
 extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
 extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (USE_STRUCT_CONVENTION)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (USE_STRUCT_CONVENTION)
 #define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 #endif
@@ -842,7 +834,7 @@ typedef void (gdbarch_frame_init_saved_regs_ftype) (struct frame_info *frame);
 extern void gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_INIT_SAVED_REGS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS)
 #define FRAME_INIT_SAVED_REGS(frame) (gdbarch_frame_init_saved_regs (current_gdbarch, frame))
 #endif
 #endif
@@ -851,7 +843,7 @@ typedef void (gdbarch_init_extra_frame_info_ftype) (int fromleaf, struct frame_i
 extern void gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame);
 extern void set_gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, gdbarch_init_extra_frame_info_ftype *init_extra_frame_info);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (INIT_EXTRA_FRAME_INFO)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INIT_EXTRA_FRAME_INFO)
 #define INIT_EXTRA_FRAME_INFO(fromleaf, frame) (gdbarch_init_extra_frame_info (current_gdbarch, fromleaf, frame))
 #endif
 #endif
@@ -860,13 +852,13 @@ typedef CORE_ADDR (gdbarch_skip_prologue_ftype) (CORE_ADDR ip);
 extern CORE_ADDR gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_skip_prologue (struct gdbarch *gdbarch, gdbarch_skip_prologue_ftype *skip_prologue);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (SKIP_PROLOGUE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SKIP_PROLOGUE)
 #define SKIP_PROLOGUE(ip) (gdbarch_skip_prologue (current_gdbarch, ip))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (PROLOGUE_FRAMELESS_P)
+#if (!GDB_MULTI_ARCH) && !defined (PROLOGUE_FRAMELESS_P)
 #define PROLOGUE_FRAMELESS_P(ip) (generic_prologue_frameless_p (ip))
 #endif
 
@@ -874,7 +866,7 @@ typedef int (gdbarch_prologue_frameless_p_ftype) (CORE_ADDR ip);
 extern int gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, gdbarch_prologue_frameless_p_ftype *prologue_frameless_p);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (PROLOGUE_FRAMELESS_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PROLOGUE_FRAMELESS_P)
 #define PROLOGUE_FRAMELESS_P(ip) (gdbarch_prologue_frameless_p (current_gdbarch, ip))
 #endif
 #endif
@@ -883,13 +875,13 @@ typedef int (gdbarch_inner_than_ftype) (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs);
 extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_ftype *inner_than);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (INNER_THAN)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INNER_THAN)
 #define INNER_THAN(lhs, rhs) (gdbarch_inner_than (current_gdbarch, lhs, rhs))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (BREAKPOINT_FROM_PC)
+#if (!GDB_MULTI_ARCH) && !defined (BREAKPOINT_FROM_PC)
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) (legacy_breakpoint_from_pc (pcptr, lenptr))
 #endif
 
@@ -897,13 +889,13 @@ typedef unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, in
 extern unsigned char * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (BREAKPOINT_FROM_PC)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (BREAKPOINT_FROM_PC)
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) (gdbarch_breakpoint_from_pc (current_gdbarch, pcptr, lenptr))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (MEMORY_INSERT_BREAKPOINT)
+#if (!GDB_MULTI_ARCH) && !defined (MEMORY_INSERT_BREAKPOINT)
 #define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) (default_memory_insert_breakpoint (addr, contents_cache))
 #endif
 
@@ -911,13 +903,13 @@ typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, char *cont
 extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache);
 extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (MEMORY_INSERT_BREAKPOINT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MEMORY_INSERT_BREAKPOINT)
 #define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) (gdbarch_memory_insert_breakpoint (current_gdbarch, addr, contents_cache))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (MEMORY_REMOVE_BREAKPOINT)
+#if (!GDB_MULTI_ARCH) && !defined (MEMORY_REMOVE_BREAKPOINT)
 #define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) (default_memory_remove_breakpoint (addr, contents_cache))
 #endif
 
@@ -925,7 +917,7 @@ typedef int (gdbarch_memory_remove_breakpoint_ftype) (CORE_ADDR addr, char *cont
 extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache);
 extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (MEMORY_REMOVE_BREAKPOINT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MEMORY_REMOVE_BREAKPOINT)
 #define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) (gdbarch_memory_remove_breakpoint (current_gdbarch, addr, contents_cache))
 #endif
 #endif
@@ -933,7 +925,7 @@ extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbar
 extern CORE_ADDR gdbarch_decr_pc_after_break (struct gdbarch *gdbarch);
 extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR decr_pc_after_break);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (DECR_PC_AFTER_BREAK)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DECR_PC_AFTER_BREAK)
 #define DECR_PC_AFTER_BREAK (gdbarch_decr_pc_after_break (current_gdbarch))
 #endif
 #endif
@@ -941,13 +933,13 @@ extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR 
 extern CORE_ADDR gdbarch_function_start_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_function_start_offset (struct gdbarch *gdbarch, CORE_ADDR function_start_offset);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FUNCTION_START_OFFSET)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FUNCTION_START_OFFSET)
 #define FUNCTION_START_OFFSET (gdbarch_function_start_offset (current_gdbarch))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REMOTE_TRANSLATE_XFER_ADDRESS)
+#if (!GDB_MULTI_ARCH) && !defined (REMOTE_TRANSLATE_XFER_ADDRESS)
 #define REMOTE_TRANSLATE_XFER_ADDRESS(gdb_addr, gdb_len, rem_addr, rem_len) (generic_remote_translate_xfer_address (gdb_addr, gdb_len, rem_addr, rem_len))
 #endif
 
@@ -955,7 +947,7 @@ typedef void (gdbarch_remote_translate_xfer_address_ftype) (CORE_ADDR gdb_addr, 
 extern void gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len);
 extern void set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REMOTE_TRANSLATE_XFER_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REMOTE_TRANSLATE_XFER_ADDRESS)
 #define REMOTE_TRANSLATE_XFER_ADDRESS(gdb_addr, gdb_len, rem_addr, rem_len) (gdbarch_remote_translate_xfer_address (current_gdbarch, gdb_addr, gdb_len, rem_addr, rem_len))
 #endif
 #endif
@@ -963,13 +955,13 @@ extern void set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, 
 extern CORE_ADDR gdbarch_frame_args_skip (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_args_skip (struct gdbarch *gdbarch, CORE_ADDR frame_args_skip);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_ARGS_SKIP)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_ARGS_SKIP)
 #define FRAME_ARGS_SKIP (gdbarch_frame_args_skip (current_gdbarch))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (FRAMELESS_FUNCTION_INVOCATION)
+#if (!GDB_MULTI_ARCH) && !defined (FRAMELESS_FUNCTION_INVOCATION)
 #define FRAMELESS_FUNCTION_INVOCATION(fi) (generic_frameless_function_invocation_not (fi))
 #endif
 
@@ -977,7 +969,7 @@ typedef int (gdbarch_frameless_function_invocation_ftype) (struct frame_info *fi
 extern int gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_info *fi);
 extern void set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, gdbarch_frameless_function_invocation_ftype *frameless_function_invocation);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAMELESS_FUNCTION_INVOCATION)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAMELESS_FUNCTION_INVOCATION)
 #define FRAMELESS_FUNCTION_INVOCATION(fi) (gdbarch_frameless_function_invocation (current_gdbarch, fi))
 #endif
 #endif
@@ -986,7 +978,7 @@ typedef CORE_ADDR (gdbarch_frame_chain_ftype) (struct frame_info *frame);
 extern CORE_ADDR gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chain_ftype *frame_chain);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_CHAIN)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN)
 #define FRAME_CHAIN(frame) (gdbarch_frame_chain (current_gdbarch, frame))
 #endif
 #endif
@@ -995,7 +987,7 @@ typedef int (gdbarch_frame_chain_valid_ftype) (CORE_ADDR chain, struct frame_inf
 extern int gdbarch_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe);
 extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_frame_chain_valid_ftype *frame_chain_valid);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_CHAIN_VALID)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID)
 #define FRAME_CHAIN_VALID(chain, thisframe) (gdbarch_frame_chain_valid (current_gdbarch, chain, thisframe))
 #endif
 #endif
@@ -1004,7 +996,7 @@ typedef CORE_ADDR (gdbarch_frame_saved_pc_ftype) (struct frame_info *fi);
 extern CORE_ADDR gdbarch_frame_saved_pc (struct gdbarch *gdbarch, struct frame_info *fi);
 extern void set_gdbarch_frame_saved_pc (struct gdbarch *gdbarch, gdbarch_frame_saved_pc_ftype *frame_saved_pc);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_SAVED_PC)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_SAVED_PC)
 #define FRAME_SAVED_PC(fi) (gdbarch_frame_saved_pc (current_gdbarch, fi))
 #endif
 #endif
@@ -1013,7 +1005,7 @@ typedef CORE_ADDR (gdbarch_frame_args_address_ftype) (struct frame_info *fi);
 extern CORE_ADDR gdbarch_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi);
 extern void set_gdbarch_frame_args_address (struct gdbarch *gdbarch, gdbarch_frame_args_address_ftype *frame_args_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_ARGS_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_ARGS_ADDRESS)
 #define FRAME_ARGS_ADDRESS(fi) (gdbarch_frame_args_address (current_gdbarch, fi))
 #endif
 #endif
@@ -1022,7 +1014,7 @@ typedef CORE_ADDR (gdbarch_frame_locals_address_ftype) (struct frame_info *fi);
 extern CORE_ADDR gdbarch_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi);
 extern void set_gdbarch_frame_locals_address (struct gdbarch *gdbarch, gdbarch_frame_locals_address_ftype *frame_locals_address);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_LOCALS_ADDRESS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_LOCALS_ADDRESS)
 #define FRAME_LOCALS_ADDRESS(fi) (gdbarch_frame_locals_address (current_gdbarch, fi))
 #endif
 #endif
@@ -1031,7 +1023,7 @@ typedef CORE_ADDR (gdbarch_saved_pc_after_call_ftype) (struct frame_info *frame)
 extern CORE_ADDR gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, gdbarch_saved_pc_after_call_ftype *saved_pc_after_call);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (SAVED_PC_AFTER_CALL)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVED_PC_AFTER_CALL)
 #define SAVED_PC_AFTER_CALL(frame) (gdbarch_saved_pc_after_call (current_gdbarch, frame))
 #endif
 #endif
@@ -1040,7 +1032,7 @@ typedef int (gdbarch_frame_num_args_ftype) (struct frame_info *frame);
 extern int gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_num_args_ftype *frame_num_args);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (FRAME_NUM_ARGS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_NUM_ARGS)
 #define FRAME_NUM_ARGS(frame) (gdbarch_frame_num_args (current_gdbarch, frame))
 #endif
 #endif
@@ -1051,17 +1043,17 @@ extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_n
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (GDB_MULTI_ARCH == 0) && !defined (STACK_ALIGN_P)
+#if (!GDB_MULTI_ARCH) && !defined (STACK_ALIGN_P)
 #define STACK_ALIGN_P() (0)
 #endif
 
 extern int gdbarch_stack_align_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > 1) || !defined (STACK_ALIGN_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STACK_ALIGN_P)
 #define STACK_ALIGN_P() (gdbarch_stack_align_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (STACK_ALIGN)
+#if (!GDB_MULTI_ARCH) && !defined (STACK_ALIGN)
 #define STACK_ALIGN(sp) (internal_error ("STACK_ALIGN"), 0)
 #endif
 
@@ -1069,7 +1061,7 @@ typedef CORE_ADDR (gdbarch_stack_align_ftype) (CORE_ADDR sp);
 extern CORE_ADDR gdbarch_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp);
 extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_align_ftype *stack_align);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (STACK_ALIGN)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STACK_ALIGN)
 #define STACK_ALIGN(sp) (gdbarch_stack_align (current_gdbarch, sp))
 #endif
 #endif
@@ -1080,17 +1072,17 @@ extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_alig
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REG_STRUCT_HAS_ADDR_P)
+#if (!GDB_MULTI_ARCH) && !defined (REG_STRUCT_HAS_ADDR_P)
 #define REG_STRUCT_HAS_ADDR_P() (0)
 #endif
 
 extern int gdbarch_reg_struct_has_addr_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > 1) || !defined (REG_STRUCT_HAS_ADDR_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REG_STRUCT_HAS_ADDR_P)
 #define REG_STRUCT_HAS_ADDR_P() (gdbarch_reg_struct_has_addr_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (REG_STRUCT_HAS_ADDR)
+#if (!GDB_MULTI_ARCH) && !defined (REG_STRUCT_HAS_ADDR)
 #define REG_STRUCT_HAS_ADDR(gcc_p, type) (internal_error ("REG_STRUCT_HAS_ADDR"), 0)
 #endif
 
@@ -1098,7 +1090,7 @@ typedef int (gdbarch_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
 extern int gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type);
 extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (REG_STRUCT_HAS_ADDR)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REG_STRUCT_HAS_ADDR)
 #define REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
 #endif
@@ -1109,17 +1101,17 @@ extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_re
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (GDB_MULTI_ARCH == 0) && !defined (SAVE_DUMMY_FRAME_TOS_P)
+#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS_P)
 #define SAVE_DUMMY_FRAME_TOS_P() (0)
 #endif
 
 extern int gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > 1) || !defined (SAVE_DUMMY_FRAME_TOS_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVE_DUMMY_FRAME_TOS_P)
 #define SAVE_DUMMY_FRAME_TOS_P() (gdbarch_save_dummy_frame_tos_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (SAVE_DUMMY_FRAME_TOS)
+#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS)
 #define SAVE_DUMMY_FRAME_TOS(sp) (internal_error ("SAVE_DUMMY_FRAME_TOS"), 0)
 #endif
 
@@ -1127,46 +1119,46 @@ typedef void (gdbarch_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
 extern void gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
 extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (SAVE_DUMMY_FRAME_TOS)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVE_DUMMY_FRAME_TOS)
 #define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_FLOAT_FORMAT)
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_FLOAT_FORMAT)
 #define TARGET_FLOAT_FORMAT (default_float_format (current_gdbarch))
 #endif
 
 extern const struct floatformat * gdbarch_float_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_float_format (struct gdbarch *gdbarch, const struct floatformat * float_format);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_FLOAT_FORMAT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_FLOAT_FORMAT)
 #define TARGET_FLOAT_FORMAT (gdbarch_float_format (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_DOUBLE_FORMAT)
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_DOUBLE_FORMAT)
 #define TARGET_DOUBLE_FORMAT (default_double_format (current_gdbarch))
 #endif
 
 extern const struct floatformat * gdbarch_double_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_double_format (struct gdbarch *gdbarch, const struct floatformat * double_format);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_DOUBLE_FORMAT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_DOUBLE_FORMAT)
 #define TARGET_DOUBLE_FORMAT (gdbarch_double_format (current_gdbarch))
 #endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
-#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_LONG_DOUBLE_FORMAT)
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_LONG_DOUBLE_FORMAT)
 #define TARGET_LONG_DOUBLE_FORMAT (&floatformat_unknown)
 #endif
 
 extern const struct floatformat * gdbarch_long_double_format (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat * long_double_format);
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_LONG_DOUBLE_FORMAT)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_LONG_DOUBLE_FORMAT)
 #define TARGET_LONG_DOUBLE_FORMAT (gdbarch_long_double_format (current_gdbarch))
 #endif
 #endif

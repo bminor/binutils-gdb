@@ -498,15 +498,7 @@ struct frame_info;
 struct value;
 
 
-#ifndef GDB_MULTI_ARCH
-#define GDB_MULTI_ARCH 0
-#endif
-
 extern struct gdbarch *current_gdbarch;
-
-
-/* See gdb/doc/gdbint.texi for a discussion of the GDB_MULTI_ARCH
-   macro */
 
 
 /* If any of the following are defined, the target wasn't correctly
@@ -537,7 +529,7 @@ do
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "/* set_gdbarch_${function}() - not applicable - pre-initialized. */"
 	echo "#if GDB_MULTI_ARCH"
-	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
+	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})"
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
 	echo "#endif"
@@ -555,17 +547,17 @@ do
 	echo ""
 	echo "#if defined (${macro})"
 	echo "/* Legacy for systems yet to multi-arch ${macro} */"
-#	echo "#if (GDB_MULTI_ARCH <= 2) && defined (${macro})"
+#	echo "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})"
 	echo "#define ${macro}_P() (1)"
 	echo "#endif"
 	echo ""
 	echo "/* Default predicate for non- multi-arch targets. */"
-	echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro}_P)"
+	echo "#if (!GDB_MULTI_ARCH) && !defined (${macro}_P)"
 	echo "#define ${macro}_P() (0)"
 	echo "#endif"
 	echo ""
 	echo "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);"
-	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro}_P)"
+	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)"
 	echo "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))"
 	echo "#endif"
     fi
@@ -575,7 +567,7 @@ do
 	then
 	    echo ""
 	    echo "/* Default (value) for non- multi-arch platforms. */"
-	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
+	    echo "#if (!GDB_MULTI_ARCH) && !defined (${macro})"
 	    echo "#define ${macro} (${fallbackdefault})" \
 		| sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
 	    echo "#endif"
@@ -584,7 +576,7 @@ do
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});"
 	echo "#if GDB_MULTI_ARCH"
-	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
+	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})"
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
 	echo "#endif"
@@ -595,7 +587,7 @@ do
 	then
 	    echo ""
 	    echo "/* Default (function) for non- multi-arch platforms. */"
-	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
+	    echo "#if (!GDB_MULTI_ARCH) && !defined (${macro})"
 	    if [ "${fallbackdefault}" = "0" ]
 	    then
 		echo "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)"
@@ -616,7 +608,7 @@ do
 	fi
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});"
 	echo "#if GDB_MULTI_ARCH"
-	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
+	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})"
 	if [ "${actual}" = "" ]
 	then
 	  echo "#define ${macro}() (gdbarch_${function} (current_gdbarch))"
@@ -1171,7 +1163,7 @@ static void
 verify_gdbarch (struct gdbarch *gdbarch)
 {
   /* Only perform sanity checks on a multi-arch target. */
-  if (GDB_MULTI_ARCH <= 0)
+  if (!GDB_MULTI_ARCH)
     return;
   /* fundamental */
   if (gdbarch->byte_order == 0)

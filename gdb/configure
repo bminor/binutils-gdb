@@ -7482,6 +7482,10 @@ targetfile=`sed -n '
 s/TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
+GDB_MULTI_ARCH=`sed -n '
+s/GDB_MULTI_ARCH[ 	]*=[ 	]*\([^ 	]*\)[ 	]*/\1/p
+' ${target_makefile_frag}`
+
 # these really aren't orthogonal true/false values of the same condition,
 # but shells are slow enough that I like to reuse the test conditions
 # whenever possible
@@ -7493,6 +7497,36 @@ s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 # GDBserver is only useful in a "native" enviroment
 # configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
+
+
+# New targets should just set gdb_multi_arch=yes in configure.tgt.
+# Old targets being converted can either do that or set GDB_MULTI_ARCH
+# in the target specific makefile frag.  Eventually gdb_multi_arch=yes
+# will be the default.
+if test x"${GDB_MULTI_ARCH}" = x ; then
+    case "${gdb_multi_arch}" in
+    yes ) GDB_MULTI_ARCH=GDB_MULTI_ARCH_PURE ;;
+    no ) GDB_MULTI_ARCH=0 ;;
+    0|1|2 ) GDB_MULTI_ARCH=${gdb_multi_arch} ;;
+    esac
+fi
+if test x"${GDB_MULTI_ARCH}" != x ; then
+    cat >> confdefs.h <<EOF
+#define GDB_MULTI_ARCH ${GDB_MULTI_ARCH}
+EOF
+
+fi
+# Warn the user when they use an old pratice
+case "${GDB_MULTI_ARCH}" in
+    "" ) ;;
+    0 | GDB_MULTI_ARCH_PARTIAL | 1 | GDB_MULTI_ARCH_TM | 2 )
+	echo "configure: warning: "GDB: Target is not pure multi-arch"" 1>&2 ;;
+    GDB_MULTI_ARCH_PURE )
+	if test x"${targetfile}" != x ; then
+	    echo "configure: warning: "GDB: Ingoring TM_FILE in ${target_makefile_frag}"" 1>&2
+	fi ;;
+    *)  { echo "configure: error: "GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}"" 1>&2; exit 1; };;
+esac
 
 
 SUBDIRS="doc testsuite nlm"
@@ -7530,7 +7564,7 @@ files="${files} config/nm-empty.h"
 links="${links} nm.h"
 fi
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:7534: checking whether ln -s works" >&5
+echo "configure:7568: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7554,12 +7588,12 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:7558: checking for Cygwin environment" >&5
+echo "configure:7592: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7563 "configure"
+#line 7597 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -7570,7 +7604,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:7574: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7608: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -7587,19 +7621,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:7591: checking for mingw32 environment" >&5
+echo "configure:7625: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7596 "configure"
+#line 7630 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:7603: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7637: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -7618,7 +7652,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:7622: checking for executable suffix" >&5
+echo "configure:7656: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7628,7 +7662,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:7632: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:7666: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;

@@ -65,6 +65,26 @@
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
+
+/* The target is partially multi-arched.  Both "tm.h" and the
+   multi-arch vector provide definitions.  "tm.h" normally overrides
+   the multi-arch vector (but there are a few exceptions).  */
+
+#define GDB_MULTI_ARCH_PARTIAL 1
+
+/* The target is multi-arched.  The MULTI-ARCH vector provides all
+   definitions.  "tm.h" is included and may provide definitions of
+   non- multi-arch macros..  */
+
+#define GDB_MULTI_ARCH_TM 2
+
+/* The target is pure multi-arch.  The MULTI-ARCH vector provides all
+   definitions.  "tm.h" is NOT included. */
+
+#define GDB_MULTI_ARCH_PURE 3
+
+
+
 /* An address in the program being debugged.  Host byte order.  Rather
    than duplicate all the logic in BFD which figures out what type
    this is (long, long long, etc.) and whether it needs to be 64
@@ -703,7 +723,21 @@ enum val_prettyprint
 /* Target machine definition.  This will be a symlink to one of the
    tm-*.h files, built by the `configure' script.  */
 
+#if (GDB_MULTI_ARCH < GDB_MULTI_ARCH_PURE)
 #include "tm.h"
+#endif
+
+/* GDB_MULTI_ARCH is normally set by configure.in using information
+   from configure.tgt or the config/%/%.mt Makefile fragment.  Since
+   some targets have defined it in their tm.h file, don't provide a
+   default until after "tm.h" has been included.  (In the above #if,
+   GDB_MULTI_ARCH will be interpreted as zero if it is not
+   defined). */
+
+#ifndef GDB_MULTI_ARCH
+#define GDB_MULTI_ARCH 0
+#endif
+
 
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text

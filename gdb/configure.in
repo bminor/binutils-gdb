@@ -1003,6 +1003,10 @@ targetfile=`sed -n '
 s/TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
+GDB_MULTI_ARCH=`sed -n '
+s/GDB_MULTI_ARCH[ 	]*=[ 	]*\([^ 	]*\)[ 	]*/\1/p
+' ${target_makefile_frag}`
+
 # these really aren't orthogonal true/false values of the same condition,
 # but shells are slow enough that I like to reuse the test conditions
 # whenever possible
@@ -1015,6 +1019,33 @@ s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 # configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 changequote([,])
+
+# New targets should just set gdb_multi_arch=yes in configure.tgt.
+# Old targets being converted can either do that or set GDB_MULTI_ARCH
+# in the target specific makefile frag.  Eventually gdb_multi_arch=yes
+# will be the default.
+if test x"${GDB_MULTI_ARCH}" = x ; then
+    case "${gdb_multi_arch}" in
+    yes ) GDB_MULTI_ARCH=GDB_MULTI_ARCH_PURE ;;
+    no ) GDB_MULTI_ARCH=0 ;;
+    0|1|2 ) GDB_MULTI_ARCH=${gdb_multi_arch} ;;
+    esac
+fi
+if test x"${GDB_MULTI_ARCH}" != x ; then
+    AC_DEFINE_UNQUOTED(GDB_MULTI_ARCH, ${GDB_MULTI_ARCH})
+fi
+# Warn the user when they use an old pratice
+case "${GDB_MULTI_ARCH}" in
+    "" ) ;;
+    0 | GDB_MULTI_ARCH_PARTIAL | 1 | GDB_MULTI_ARCH_TM | 2 )
+	AC_MSG_WARN("GDB: Target is not pure multi-arch") ;;
+    GDB_MULTI_ARCH_PURE )
+	if test x"${targetfile}" != x ; then
+	    AC_MSG_WARN("GDB: Ingoring TM_FILE in ${target_makefile_frag}")
+	fi ;;
+    *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
+esac
+
 
 SUBDIRS="doc testsuite nlm"
 if test "${enable_multi_ice}" = "yes"; then

@@ -1,3 +1,19 @@
+Wed Jul 26 17:22:53 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (GDB_MULTI_ARCH): Define from configure.tgt
+ 	or makefile fragment.
+	* acconfig.h (GDB_MULTI_ARCH): Add.
+	* config.in, configure: Regenerate.
+	
+	* gdbarch.sh (GDB_MULTI_ARCH): Delete definition, moved to
+ 	configure.in and defs.h.  Use GDB_MULTI_ARCH_TM,
+ 	GDB_MULTI_ARCH_PARTIAL and GDB_MULTI_ARCH_PURE in tests.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* defs.h (GDB_MULTI_ARCH_PARTIAL, GDB_MULTI_ARCH_TM, ,
+ 	GDB_MULTI_ARCH_PURE): Define.  Only include "tm.h" when the target
+ 	is less than pure multi-arch.
+
 2000-07-26  Jimmy Guo       <guo@cup.hp.com>
 
 	* config/convex/tm-convex.h: Remove stray control characters.

@@ -121,3 +121,7 @@
 
 /* BFD's default target vector. */
 #undef DEFAULT_BFD_VEC
+
+/* Multi-arch enabled. */
+#undef GDB_MULTI_ARCH
+

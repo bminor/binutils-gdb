@@ -430,7 +430,7 @@ static void
 verify_gdbarch (struct gdbarch *gdbarch)
 {
   /* Only perform sanity checks on a multi-arch target. */
-  if (GDB_MULTI_ARCH <= 0)
+  if (!GDB_MULTI_ARCH)
     return;
   /* fundamental */
   if (gdbarch->byte_order == 0)
