@@ -1,3 +1,13 @@
+Fri Jul  2 09:08:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t20/{classes,inherit}.exp: If a class which doesn't use any
+	C++ features prints as "struct", make it a pass, not an xfail.
+
+Thu Jul  1 22:03:33 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t22/virtfunc.exp: Remove a bunch of xfails.
+	Don't require VA to print as "class" rather than "struct".
+
 Thu Jul  1 18:27:40 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.t06/twice.exp: Don't care about the file name GDB prints.
