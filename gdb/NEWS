@@ -44,6 +44,7 @@ H8/500 simulator 			h8500-hitachi-hms or h8500hms
 HP/PA running BSD				hppa*-*-bsd*
 HP/PA running OSF/1				hppa*-*-osf*
 HP/PA Pro target				hppa*-*-pro*
+PMAX (MIPS) running Mach 3.0			mips*-*-mach3*
 
 * REMOVED configurations and files
 

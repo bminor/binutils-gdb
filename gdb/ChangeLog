@@ -1,5 +1,19 @@
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
+	Obsolete mips*-*-mach3*.
+	* NEWS: Mention that mips*-*-mach3* is obsolete.
+	* m3-nat.c: Obsolete file.
+	* config/nm-m3.h: Obsolete file.
+	* config/mips/tm-mipsm3.h: Obsolete file.
+	* config/mips/mipsm3.mt: Obsolete file.
+	* config/mips/mipsm3.mh: Obsolete file.
+	* config/mips/xm-mipsm3.h: Obsolete file.
+	* mipsm3-nat.c: Obsolete file.
+	* configure.host: Obsolete mips-dec-mach3*.
+	* configure.tgt: Obsolete mips*-*-mach3*.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
 	* doublest.h: Update copyright.
 	(deprecated_store_floating, deprecated_extract_floating): Rename
 	store_floating and extract_floating.  Update comments.

@@ -172,7 +172,7 @@ mips*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 mips*-*-netbsd*)	gdb_target=nbsd ;;
-mips*-*-mach3*)		gdb_target=mipsm3 ;;
+# OBSOLETE mips*-*-mach3*)		gdb_target=mipsm3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;

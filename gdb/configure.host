@@ -94,7 +94,7 @@ m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 m68*-sun-*)		gdb_host=sun3os4 ;;
 
-mips-dec-mach3*)	gdb_host=mipsm3 ;;
+# OBSOLETE mips-dec-mach3*)	gdb_host=mipsm3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3*)	gdb_host=irix3 ;;
