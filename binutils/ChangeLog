@@ -1,5 +1,7 @@
 2002-10-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* bucomm.c (list_supported_targets): Use bfd_target_list.
+
 	* objcopy.c (copy_file): Report ambiguous bfd_object matches, and
 	other object errors in preference to bfd_core errors.
 
