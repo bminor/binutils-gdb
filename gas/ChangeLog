@@ -1,3 +1,11 @@
+2004-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-coff.c (c_dot_file_symbol): Add "app" param.
+	(coff_adjust_symtab): Adjust call.
+	(crawl_symbols): Likewise.
+	* config/obj-coff.h (c_dot_file_symbol): Add "app" param.
+	(obj_app_file): Adjust.
+
 2004-11-18  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 
 	* configure.in: Enable bfd_assember for the MAXQ port.

@@ -335,8 +335,7 @@ c_symbol_merge (debug, normal)
 }
 
 void
-c_dot_file_symbol (filename)
-     const char *filename;
+c_dot_file_symbol (const char *filename, int appfile ATTRIBUTE_UNUSED)
 {
   symbolS *symbolP;
 
@@ -1687,7 +1686,7 @@ coff_adjust_symtab ()
 {
   if (symbol_rootP == NULL
       || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
-    c_dot_file_symbol ("fake");
+    c_dot_file_symbol ("fake", 0);
 }
 
 void
@@ -3404,7 +3403,7 @@ crawl_symbols (h, abfd)
   /* Is there a .file symbol ? If not insert one at the beginning.  */
   if (symbol_rootP == NULL
       || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
-    c_dot_file_symbol ("fake");
+    c_dot_file_symbol ("fake", 0);
 
   /* Build up static symbols for the sections, they are filled in later.  */
 
@@ -4005,8 +4004,7 @@ c_line_new (symbol, paddr, line_number, frag)
 }
 
 void
-c_dot_file_symbol (filename)
-     char *filename;
+c_dot_file_symbol (const char *filename, int appfile ATTRIBUTE_UNUSED)
 {
   symbolS *symbolP;
 
