@@ -1,6 +1,7 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -828,12 +829,6 @@ static int
 is_media_pseudo (int rn)
 {
   return (rn >= DR0_REGNUM && rn <= FV_LAST_REGNUM);
-}
-
-static int
-sh64_get_gdb_regnum (int gcc_regnum, CORE_ADDR pc)
-{
-  return translate_insn_rn (gcc_regnum, pc_is_isa32 (pc));
 }
 
 static int

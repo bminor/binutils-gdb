@@ -1,7 +1,7 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -198,20 +198,6 @@ int auto_solib_add = 1;
 
 int auto_solib_limit;
 
-
-/* Since this function is called from within qsort, in an ANSI environment
-   it must conform to the prototype for qsort, which specifies that the
-   comparison function takes two "void *" pointers. */
-
-static int
-compare_symbols (const void *s1p, const void *s2p)
-{
-  struct symbol **s1, **s2;
-
-  s1 = (struct symbol **) s1p;
-  s2 = (struct symbol **) s2p;
-  return (strcmp (SYMBOL_NATURAL_NAME (*s1), SYMBOL_NATURAL_NAME (*s2)));
-}
 
 /* This compares two partial symbols by names, using strcmp_iw_ordered
    for the comparison.  */

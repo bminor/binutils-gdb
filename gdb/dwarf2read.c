@@ -612,13 +612,6 @@ dwarf2_complex_location_expr_complaint (void)
 }
 
 static void
-dwarf2_unsupported_at_frame_base_complaint (const char *arg1)
-{
-  complaint (&symfile_complaints,
-	     "unsupported DW_AT_frame_base for function '%s'", arg1);
-}
-
-static void
 dwarf2_const_value_length_mismatch_complaint (const char *arg1, int arg2,
 					      int arg3)
 {
