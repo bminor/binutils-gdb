@@ -1,5 +1,10 @@
 Thu Jul 28 12:54:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): Use newlib if it is
+	  there and we are using the gcc from the tree.
+
+	* gdb.base/types.c: Removed.
+
 	* gdb.base/configure.in: Look for makefile fragments in ../config.
 	  Recognize i386-*-netware.
 	* gdb.c++/configure.in: Likewise.

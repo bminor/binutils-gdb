@@ -82,7 +82,11 @@ RUNTEST_FOR_TARGET = `\
 
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/../../gcc/xgcc ] ; then \
-    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+    if [ -f $${rootme}/../../newlib/Makefile ]; then \
+      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc; \
+    else \
+      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+    fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
@@ -94,7 +98,11 @@ CC_FOR_TARGET = ` \
 CXX = gcc
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/../../gcc/xgcc ] ; then \
-    echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+    if [ -f $${rootme}/../../newlib/Makefile ]; then
+      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc; \
+    else \
+      echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
+    fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
