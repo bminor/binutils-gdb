@@ -1,3 +1,8 @@
+Fri Mar  1 09:42:59 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Don't set SEC_LOAD flag
+	for .sbss section.
+
 Wed Feb 28 11:25:47 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* libhppa.h (hppa_reloc_field_selector_type): Add R_HPPA_NLSEL
