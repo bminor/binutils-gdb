@@ -1,3 +1,14 @@
+2003-02-24  Kris Warkentin  <kewarken@qnx.com>
+
+	* target.h: (HAVE_CONTINUABLE_WATCHPOINT): Define.
+	(target_ops): Add to_have_continuable_watchpoint.
+	* target.c (update_current_target): Add INHERIT line for
+	to_have_continuable_watchpoint.
+	* infrun.c: Remove HAVE_CONTINUABLE_WATCHPOINT defines.
+	* config/i386/nm-i386.h, config/i386/nm-i386sco5.h,
+	config/i386/nm-i386sol2.h, config/s390/nm-linux.h,
+	config/sparc/nm-sun4sol2.h: HAVE_CONTINUABLE_WATCHPOINT defined as 1.
+
 2003-02-24  Elena Zannoni  <ezannoni@redhat.com>
 
 	* MAINTAINERS (Core): Drop main.c and top.c. Clarify event loop

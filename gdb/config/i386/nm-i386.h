@@ -93,7 +93,7 @@ extern int  i386_remove_hw_breakpoint (CORE_ADDR addr, void *shadow);
    one that caused the trap.  Therefore we don't need to step over it.
    But we do need to reset the status register to avoid another trap.  */
 
-#define HAVE_CONTINUABLE_WATCHPOINT
+#define HAVE_CONTINUABLE_WATCHPOINT 1
 
 #define STOPPED_BY_WATCHPOINT(W)       (i386_stopped_data_address () != 0)
 
