@@ -1,3 +1,19 @@
+2002-11-14  Egor Duda  <deo@logos-m.ru>
+
+	* ldmain.c (main): Make runtime relocs disabled by default. Remove
+	assignment which has no effect.
+	* pe-dll.h (pe_create_import_fixup): Change prototype.
+	* pe-dll.c (make_runtime_pseudo_reloc): New function.
+	(pe_create_runtime_relocator_reference): Ditto.
+	(pe_create_import_fixup): Handle relocations with non-zero addends.
+	* emultempl/pe.em: Add options --enable-runtime-pseudo-reloc and
+	--disable-runtime-pseudo-reloc.
+	(make_import_fixup): Handle relocations with non-zero addends. Create
+	an external reference to _pei386_runtime_relocator symbol if at least
+	one pseudo reloc was created.
+	* ld.texinfo: Document --enable-runtime-pseudo-reloc and
+	--disable-runtime-pseudo-reloc options.
+
 2002-11-12  Earl Chew <earl_chew@agilent.com>
 
 	* ldlang.c (lang_add_section): Discard debugging sections that have

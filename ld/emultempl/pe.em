@@ -12,19 +12,19 @@ cat >>e${EMULATION_NAME}.c <<EOF
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* For WINDOWS_NT */
 /* The original file generated returned different default scripts depending
@@ -174,6 +174,7 @@ gld_${EMULATION_NAME}_before_parse()
   config.dynamic_link = true;
   config.has_shared = 1;
   link_info.pei386_auto_import = -1;
+  link_info.pei386_runtime_pseudo_reloc = false;
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
@@ -222,6 +223,10 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_DLL_DISABLE_AUTO_IMPORT	(OPTION_DLL_ENABLE_AUTO_IMPORT + 1)
 #define OPTION_ENABLE_EXTRA_PE_DEBUG	(OPTION_DLL_DISABLE_AUTO_IMPORT + 1)
 #define OPTION_EXCLUDE_LIBS		(OPTION_ENABLE_EXTRA_PE_DEBUG + 1)
+#define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC	\
+					(OPTION_EXCLUDE_LIBS + 1)
+#define OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC	\
+					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
 
 static struct option longopts[] = {
   /* PE options */
@@ -263,6 +268,8 @@ static struct option longopts[] = {
   {"enable-auto-import", no_argument, NULL, OPTION_DLL_ENABLE_AUTO_IMPORT},
   {"disable-auto-import", no_argument, NULL, OPTION_DLL_DISABLE_AUTO_IMPORT},
   {"enable-extra-pe-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
+  {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
+  {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -352,6 +359,10 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to \n\
                                        __imp_sym for DATA references\n"));
   fprintf (file, _("  --disable-auto-import              Do not auto-import DATA items from DLLs\n"));
+  fprintf (file, _("  --enable-runtime-pseudo-reloc      Work around auto-import limitations by\n\
+                                       adding pseudo-relocations resolved at runtime.\n"));
+  fprintf (file, _("  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n\
+                                       auto-imported DATA.\n"));
   fprintf (file, _("  --enable-extra-pe-debug            Enable verbose debug output when building\n\
                                        or linking to DLLs (esp. auto-import)\n"));
 #endif
@@ -633,6 +644,12 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_DLL_DISABLE_AUTO_IMPORT:
       link_info.pei386_auto_import = 0;
       break;
+    case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC:
+      link_info.pei386_runtime_pseudo_reloc = 1;
+      break;
+    case OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC:
+      link_info.pei386_runtime_pseudo_reloc = 0;
+      break;
     case OPTION_ENABLE_EXTRA_PE_DEBUG:
       pe_dll_extra_pe_debug = 1;
       break;
@@ -877,14 +894,7 @@ make_import_fixup (rel, s)
     einfo (_("%C: Cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
-  if (addend == 0)
-    pe_create_import_fixup (rel);
-  else
-    {
-      einfo (_("%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
-	     s->owner, s, rel->address, sym->name);
-      einfo ("%X");
-    }
+  pe_create_import_fixup (rel, s, addend);
 
   return 1;
 }

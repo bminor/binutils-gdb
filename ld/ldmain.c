@@ -4,22 +4,22 @@
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
-This file is part of GLD, the Gnu Linker.
+   This file is part of GLD, the Gnu Linker.
 
-GLD is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GLD is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GLD is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GLD is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GLD; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -261,8 +261,8 @@ main (argc, argv)
   link_info.eh_frame_hdr = false;
   link_info.flags = (bfd_vma) 0;
   link_info.flags_1 = (bfd_vma) 0;
-  link_info.pei386_auto_import = false;
   link_info.pei386_auto_import = -1;
+  link_info.pei386_runtime_pseudo_reloc = false;
   link_info.combreloc = true;
   link_info.spare_dynamic_tags = 5;
   link_info.common_skip_ar_aymbols = bfd_link_common_skip_none;

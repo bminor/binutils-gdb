@@ -141,6 +141,7 @@ static bfd *filler_bfd;
 static struct sec *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
 static size_t edata_sz, reloc_sz;
+static int runtime_pseudo_relocs_created = 0;
 
 typedef struct
   {
@@ -305,6 +306,10 @@ static bfd *make_singleton_name_thunk PARAMS ((const char *, bfd *));
 static char *make_import_fixup_mark PARAMS ((arelent *));
 static bfd *make_import_fixup_entry
   PARAMS ((const char *, const char *, const char *, bfd *));
+static bfd *make_runtime_pseudo_reloc
+  PARAMS ((const char *, const char *, int, bfd *));
+static bfd *pe_create_runtime_relocator_reference
+  PARAMS ((bfd *));
 static unsigned int pe_get16 PARAMS ((bfd *, int));
 static unsigned int pe_get32 PARAMS ((bfd *, int));
 static unsigned int pe_as32 PARAMS ((void *));
@@ -2094,15 +2099,112 @@ make_import_fixup_entry (name, fixup_name, dll_symname, parent)
   return abfd;
 }
 
+/*	.section	.rdata_runtime_pseudo_reloc
+ 	.long		addend
+ 	.rva		__fuNN_SYM (pointer to reference (address) in text)  */
+
+static bfd *
+make_runtime_pseudo_reloc (name, fixup_name, addend, parent)
+     const char *name ATTRIBUTE_UNUSED;
+     const char *fixup_name;
+     int addend;
+     bfd *parent;
+{
+  asection *rt_rel;
+  unsigned char *rt_rel_d;
+  char *oname;
+  bfd *abfd;
+
+  oname = (char *) xmalloc (20);
+  sprintf (oname, "rtr%06d.o", tmp_seq);
+  tmp_seq++;
+
+  abfd = bfd_create (oname, parent);
+  bfd_find_target (pe_details->object_target, abfd);
+  bfd_make_writable (abfd);
+
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
+
+  symptr = 0;
+  symtab = (asymbol **) xmalloc (2 * sizeof (asymbol *));
+  rt_rel = quick_section (abfd, ".rdata_runtime_pseudo_reloc", SEC_HAS_CONTENTS, 2);
+
+  quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
+
+  bfd_set_section_size (abfd, rt_rel, 8);
+  rt_rel_d = (unsigned char *) xmalloc (8);
+  rt_rel->contents = rt_rel_d;
+  memset (rt_rel_d, 0, 8);
+  bfd_put_32 (abfd, addend, rt_rel_d);
+
+  quick_reloc (abfd, 4, BFD_RELOC_RVA, 1);
+  save_relocs (rt_rel);
+
+  bfd_set_symtab (abfd, symtab, symptr);
+
+  bfd_set_section_contents (abfd, rt_rel, rt_rel_d, 0, 8);
+
+  bfd_make_readable (abfd);
+  return abfd;
+}
+
+/*	.section	.rdata
+ 	.rva		__pei386_runtime_relocator */
+
+static bfd *
+pe_create_runtime_relocator_reference (parent)
+     bfd *parent;
+{
+  asection *extern_rt_rel;
+  unsigned char *extern_rt_rel_d;
+  char *oname;
+  bfd *abfd;
+
+  oname = (char *) xmalloc (20);
+  sprintf (oname, "ertr%06d.o", tmp_seq);
+  tmp_seq++;
+
+  abfd = bfd_create (oname, parent);
+  bfd_find_target (pe_details->object_target, abfd);
+  bfd_make_writable (abfd);
+
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
+
+  symptr = 0;
+  symtab = (asymbol **) xmalloc (2 * sizeof (asymbol *));
+  extern_rt_rel = quick_section (abfd, ".rdata", SEC_HAS_CONTENTS, 2);
+
+  quick_symbol (abfd, "", "__pei386_runtime_relocator", "", UNDSEC, BSF_NO_FLAGS, 0);
+
+  bfd_set_section_size (abfd, extern_rt_rel, 4);
+  extern_rt_rel_d = (unsigned char *) xmalloc (4);
+  extern_rt_rel->contents = extern_rt_rel_d;
+
+  quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);
+  save_relocs (extern_rt_rel);
+
+  bfd_set_symtab (abfd, symtab, symptr);
+
+  bfd_set_section_contents (abfd, extern_rt_rel, extern_rt_rel_d, 0, 4);
+
+  bfd_make_readable (abfd);
+  return abfd;
+}
+
 void
-pe_create_import_fixup (rel)
+pe_create_import_fixup (rel, s, addend)
      arelent *rel;
+     asection *s;
+     int addend;
 {
   char buf[300];
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
   struct bfd_link_hash_entry *name_thunk_sym;
   const char *name = sym->name;
   char *fixup_name = make_import_fixup_mark (rel);
+  bfd *b;
 
   sprintf (buf, U ("_nm_thnk_%s"), name);
 
@@ -2117,14 +2219,39 @@ pe_create_import_fixup (rel)
       config.text_read_only = false;
     }
 
-  {
-    extern char * pe_data_import_dll;
-    char * dll_symname = pe_data_import_dll ? pe_data_import_dll : "unknown";
+  if (addend == 0 || link_info.pei386_runtime_pseudo_reloc)
+    {
+      extern char * pe_data_import_dll;
+      char * dll_symname = pe_data_import_dll ? pe_data_import_dll : "unknown";
 
-    bfd *b = make_import_fixup_entry (name, fixup_name, dll_symname,
-				      output_bfd);
-    add_bfd_to_link (b, b->filename, &link_info);
-  }
+      b = make_import_fixup_entry (name, fixup_name, dll_symname, output_bfd);
+      add_bfd_to_link (b, b->filename, &link_info);
+    }
+
+  if (addend != 0)
+    {
+      if (link_info.pei386_runtime_pseudo_reloc)
+	{
+	  if (pe_dll_extra_pe_debug)
+	    printf ("creating runtime pseudo-reloc entry for %s (addend=%d)\n",
+		   fixup_name, addend);
+	  b = make_runtime_pseudo_reloc (name, fixup_name, addend, output_bfd);
+	  add_bfd_to_link (b, b->filename, &link_info);
+
+	  if (runtime_pseudo_relocs_created == 0)
+	    {
+	      b = pe_create_runtime_relocator_reference (output_bfd);
+	      add_bfd_to_link (b, b->filename, &link_info);
+	    }
+	  runtime_pseudo_relocs_created++;
+	} 
+      else
+	{
+	  einfo (_("%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
+		 s->owner, s, rel->address, sym->name);
+	  einfo ("%X");
+	}
+    }
 }
 
 

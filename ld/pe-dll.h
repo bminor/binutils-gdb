@@ -50,5 +50,5 @@ extern void pe_walk_relocs_of_symbol PARAMS ((struct bfd_link_info * info,
 					      const char *name,
 					      int (*cb) (arelent *, asection *)));
 
-extern void pe_create_import_fixup PARAMS ((arelent * rel));
+extern void pe_create_import_fixup PARAMS ((arelent * rel, asection *, int));
 #endif /* PE_DLL_H */

@@ -1808,7 +1808,11 @@ the warning, and exit.
 There are several ways to address this difficulty, regardless of the
 data type of the exported variable:
 
-One solution is to force one of the 'constants' to be a variable -- 
+One way is to use --enable-runtime-pseudo-reloc switch. This leaves the task
+of adjusting references in your client code for runtime environment, so
+this method works only when runtime environtment supports this feature.
+
+A second solution is to force one of the 'constants' to be a variable -- 
 that is, unknown and un-optimizable at compile time.  For arrays, 
 there are two possibilities: a) make the indexee (the array's address) 
 a variable, or b) make the 'constant' index a variable.  Thus:
@@ -1844,7 +1848,7 @@ extern_ll -->
   @{ volatile long long * local_ll=&extern_ll; *local_ll @}
 @end example
 
-A second method of dealing with this difficulty is to abandon
+A third method of dealing with this difficulty is to abandon
 'auto-import' for the offending symbol and mark it with 
 @code{__declspec(dllimport)}.  However, in practice that
 requires using compile-time #defines to indicate whether you are
@@ -1895,7 +1899,7 @@ void main(int argc, char **argv)@{
 @}
 @end example
 
-A third way to avoid this problem is to re-code your 
+A fourth way to avoid this problem is to re-code your 
 library to use a functional interface rather than a data interface
 for the offending variables (e.g. set_foo() and get_foo() accessor
 functions).
@@ -1904,6 +1908,18 @@ functions).
 @item --disable-auto-import
 Do not attempt to do sophisticalted linking of @code{_symbol} to 
 @code{__imp__symbol} for DATA imports from DLLs.
+
+@kindex --enable-runtime-pseudo-reloc
+@item --enable-runtime-pseudo-reloc
+If your code contains expressions described in --enable-auto-import section,
+that is, DATA imports from DLL with non-zero offset, this switch will create
+a vector of 'runtime pseudo relocations' which can be used by runtime
+environment to adjust references to such data in your client code. 
+
+@kindex --disable-runtime-pseudo-reloc
+@item --disable-runtime-pseudo-reloc
+Do not create pseudo relocations for non-zero offset DATA imports from
+DLLs.  This is the default.
 
 @kindex --enable-extra-pe-debug
 @item --enable-extra-pe-debug
