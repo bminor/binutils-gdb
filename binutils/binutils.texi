@@ -841,7 +841,7 @@ output target of @samp{binary} (e.g., use @samp{-O binary}).  When
 @code{objcopy} generates a raw binary file, it will essentially produce
 a memory dump of the contents of the input object file.  All symbols and
 relocation information will be discarded.  The memory dump will start at
-the virtual address of the lowest section copied into the output file.
+the load address of the lowest section copied into the output file.
 
 When generating an S-record or a raw binary file, it may be helpful to
 use @samp{-S} to remove sections containing debugging information.  In

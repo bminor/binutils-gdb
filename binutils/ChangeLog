@@ -1,3 +1,15 @@
+Wed Jun 19 14:46:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils.texi: Document change to binary format: file position
+	based on load address, not section VMA.
+
+	* bucomm.h: Define SEEK_SET, SEEK_CUR, and SEEK_END if they are
+	not already defined.
+
+Tue Jun 18 18:25:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (DISTSTUFF): Add deflex.c.
+
 Tue Jun 18 15:03:44 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* config.h-vms, makefile.vms: New files.
