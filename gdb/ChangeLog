@@ -1,3 +1,8 @@
+2004-02-12  Fred Fish  <fnf@redhat.com>
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Remove duplicate call to
+	 set_gdbarch_store_return_value.
+
 2004-02-12  Andrew Cagney  <cagney@redhat.com>
 
 	* remote-rdi.c (arm_rdi_start_remote): Delete unused function.
