@@ -31,9 +31,6 @@
    same functionality in all their libraries!  */
 
 #include "defs.h"
-#include <dlfcn.h>
-#include <elf.h>
-#include <elf_hp.h>
 #include "symtab.h"
 #include "bfd.h"
 #include "symfile.h"
@@ -50,6 +47,11 @@
 
 /* If we are building for a SOM-only target, then we don't need this.  */
 #ifndef PA_SOM_ONLY
+
+/* FIXME: kettenis/20041213: These includes should be eliminated.  */
+#include <dlfcn.h>
+#include <elf.h>
+#include <elf_hp.h>
 
 struct lm_info {
   struct load_module_desc desc;

@@ -1,5 +1,8 @@
 2004-12-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-pa64.c: Only include <dlfcn.h>, <elf.h> and <elf_hp.h> if
+	PA_SOM_ONLY isn't defined.
+
 	* somread.c: Include "solib-som.h".
 	(som_symfile_init, som_new_init, som_symfile_read,
 	som_symfile_finish, som_symtab_read, som_symfile_offsets): Remove
