@@ -1,3 +1,14 @@
+Thu Jun  6 11:50:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (main): Don't close and unlink the file on error, since
+	remove_output will do it anyhow.
+	* ldlang.c (open_output): Set boolean variable to true, not 1.
+
+Wed Jun  5 18:34:14 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* emulparams/{elf32b4300.sh,elf32l4300.sh} (SCRIPT_NAME): Use
+	elfmips instead of elf.
+
 Tue Jun  4 18:43:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldcref.c: New file.
