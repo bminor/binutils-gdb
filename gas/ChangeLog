@@ -1,3 +1,9 @@
+Fri Aug 21 18:43:48 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (md_assemble): Copy previous opcode over
+	current opcode after writing the first insturction of a reverse
+	sequential pair. 
+	
 Fri Aug 21 07:30:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* read.h (generate_lineno_debug): Add prototype.
