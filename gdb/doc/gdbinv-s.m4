@@ -35,9 +35,9 @@ session.  @xref{Target Commands}.
 @end itemize
 
 @menu
-* Nindy Startup::		Startup with Nindy
-* Nindy Options::		Options for Nindy
-* Nindy reset::			Nindy Reset Command
+* Nindy Startup::               Startup with Nindy
+* Nindy Options::               Options for Nindy
+* Nindy reset::                 Nindy Reset Command
 @end menu
 
 @node Nindy Startup, Nindy Options, i960-Nindy Remote, i960-Nindy Remote
@@ -132,9 +132,9 @@ you've hooked the cable between the PC's @file{COM1} port and
 @file{/dev/ttya} on the Unix system.
 
 @menu
-* Comms (EB29K)::		Communications Setup
-* _GDBP__-EB29K::			EB29K cross-debugging
-* Remote Log::			Remote Log
+* Comms (EB29K)::               Communications Setup
+* _GDBP__-EB29K::                   EB29K cross-debugging
+* Remote Log::                  Remote Log
 @end menu
 
 @node Comms (EB29K), _GDBP__-EB29K, EB29K Remote, EB29K Remote
@@ -332,9 +332,9 @@ _GDBN__ will come up showing the prompt:
 @end smallexample
 
 @menu
-* VxWorks connection::		Connecting to VxWorks
-* VxWorks download::		VxWorks Download
-* VxWorks attach::		Running Tasks
+* VxWorks connection::          Connecting to VxWorks
+* VxWorks download::            VxWorks Download
+* VxWorks attach::              Running Tasks
 @end menu
 
 @node VxWorks connection, VxWorks download, VxWorks Remote, VxWorks Remote
