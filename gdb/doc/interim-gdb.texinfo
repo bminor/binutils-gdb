@@ -31,7 +31,7 @@ _include__(gdbVN.m4)
 @c
 @syncodeindex ky cp
 @c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
-@c Thu Aug 22 14:05:47 1991  Stu Grossman  (grossman at cygint.cygnus.com)
+@c Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
 @c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 @ifinfo
 This file documents the GNU debugger _GDBN__.
@@ -277,6 +277,7 @@ Altering Execution
 * Signaling::                   Giving the Program a Signal
 * Returning::                   Returning from a Function
 * Calling::                     Calling your Program's Functions
+* Patching::                    Patching your Program
 
 _GDBN__'s Files
 
@@ -445,7 +446,8 @@ support for the Gould NP1 and Gould Powernode.  Pace Willison
 contributed Intel 386 support.  Jay Vosburgh contributed Symmetry
 support.
 
-Rich Schaefer helped with support of SunOS shared libraries.
+Rich Schaefer and Peter Schauer helped with support of SunOS shared
+libraries.
 
 Jay Fenlason and Roland McGrath ensured that GDB and GAS agree about
 several machine instruction sets.
@@ -598,7 +600,10 @@ Let's use _GDBN__ to try to see what's going on.
 
 @smallexample
 $ @i{_GDBP__ m4}
-Reading symbol data from m4...done.
+GDB is free software and you are welcome to distribute copies of it
+ under certain conditions; type "info copying" to see the conditions.
+There is absolutely no warranty for GDB; type "info warranty" for details.
+GDB _GDB_VN__, Copyright 1991 Free Software Foundation, Inc...
 (_GDBP__) 
 @end smallexample
 
@@ -924,8 +929,7 @@ Files}.
 @item -quiet
 @itemx -q
 ``Quiet''.  Do not print the introductory and copyright messages.  These
-messages are also suppressed in batch mode, or if an executable file name is
-specified on the _GDBN__ command line.
+messages are also suppressed in batch mode.
 
 @item -batch
 Run in batch mode.  Exit with status @code{0} after processing all the command
@@ -1733,7 +1737,7 @@ breakpoints on overloaded functions that are not members of any special
 classes.
 
 @kindex info breakpoints
-@kindex $_
+@cindex @code{$_} and @code{info breakpoints}
 @item info breakpoints @r{[}@var{n}@r{]}
 @item info break @r{[}@var{n}@r{]}
 Print a list of all breakpoints (but not watchpoints) set and not
@@ -2209,6 +2213,9 @@ Use the "delete" command to delete unwanted breakpoints.
 
 @c FIXME: "cannot insert breakpoints" error, v unclear.  
 @c        Q in pending mail to Gilmore. ---pesch@cygnus.com, 26mar91
+@c        some light may be shed by looking at instances of 
+@c        ONE_PROCESS_WRITETEXT.  But error seems possible otherwise
+@c        too.  pesch, 20sep91
 Under some operating systems, breakpoints cannot be used in a program if
 any other process is running that program.  In this situation,
 attempting to run or continue a program with a breakpoint causes _GDBN__
@@ -2791,22 +2798,37 @@ Here are the forms of the @code{list} command most commonly used:
 
 @table @code
 @item list @var{linenum}
-Print ten lines centered around line number @var{linenum} in the
+Print lines centered around line number @var{linenum} in the
 current source file.
 
 @item list @var{function}
-Print ten lines centered around the beginning of function
+Print lines centered around the beginning of function
 @var{function}.
 
 @item list
-Print ten more lines.  If the last lines printed were printed with a
-@code{list} command, this prints ten lines following the last lines
+Print more lines.  If the last lines printed were printed with a
+@code{list} command, this prints lines following the last lines
 printed; however, if the last line printed was a solitary line printed
-as part of displaying a stack frame (@pxref{Stack}), this prints ten
+as part of displaying a stack frame (@pxref{Stack}), this prints 
 lines centered around that line.
 
 @item list -
-Print ten lines just before the lines last printed.
+Print lines just before the lines last printed.
+@end table
+
+By default, _GDBN__ prints ten source lines with any of these forms of
+the @code{list} command.  You can change this using @code{set listsize}:
+
+@table @code
+@item set listsize @var{count}
+@kindex set listsize
+Make the @code{list} command display @var{count} source lines (unless
+the @code{list} argument explicitly specifies some other number).
+
+@item show listsize
+@kindex show listsize
+Display the number of lines that @code{list} will currently display by
+default. 
 @end table
 
 Repeating a @code{list} command with @key{RET} discards the argument,
@@ -2823,23 +2845,23 @@ Here is a complete description of the possible arguments for @code{list}:
 
 @table @code
 @item list @var{linespec}
-Print ten lines centered around the line specified by @var{linespec}.
+Print lines centered around the line specified by @var{linespec}.
 
 @item list @var{first},@var{last}
 Print lines from @var{first} to @var{last}.  Both arguments are
 linespecs.
 
 @item list ,@var{last}
-Print ten lines ending with @var{last}.
+Print lines ending with @var{last}.
 
 @item list @var{first},
-Print ten lines starting with @var{first}.
+Print lines starting with @var{first}.
 
 @item list +
-Print ten lines just after the lines last printed.
+Print lines just after the lines last printed.
 
 @item list -
-Print ten lines just before the lines last printed.
+Print lines just before the lines last printed.
 
 @item list
 As described in the preceding table.
@@ -3005,7 +3027,7 @@ We can also inquire (using @code{*@var{addr}} as the form for
 Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
 @end smallexample
 
-@kindex $_
+@cindex @code{$_} and @code{info line}
 After @code{info line}, the default address for the @code{x}
 command is changed to the starting address of the line, so that
 @samp{x/i} is sufficient to begin examining the machine code
@@ -3441,8 +3463,7 @@ x/7
 @noindent
 ---where the format and address are allowed to default.
 
-@kindex $_
-@kindex $__
+@cindex @code{$_}, @code{$__}, and value history
 The addresses and contents printed by the @code{x} command are not put
 in the value history because there is often too much of them and they
 would get in the way.  Instead, _GDBN__ makes these values available for
@@ -3897,14 +3918,16 @@ values likely to be useful.
 
 @table @code
 @item $_
+@kindex $_
 The variable @code{$_} is automatically set by the @code{x} command to
 the last address examined (@pxref{Memory}).  Other commands which
 provide a default address for @code{x} to examine also set @code{$_}
 to that address; these commands include @code{info line} and @code{info
-breakpoint}.  @code{$_}'s type is @code{void *} except when set by the
+breakpoint}.  The type of @code{$_} is @code{void *} except when set by the
 @code{x} command, in which case it is a pointer to the type of @code{$__}.
 
 @item $__
+@kindex $__
 The variable @code{$__} is automatically set by the @code{x} command
 to the value found in the last address examined.  Its type is chosen
 to match the format in which the data was printed.
@@ -4065,10 +4088,8 @@ defaults to setting the language automatically.
 
 @kindex set language
 To set the language, issue the command @samp{set language @var{lang}},
-where @var{lang} is the name of a language, such as @code{c} or
-@code{m2}, or the extension of a filename written in that language, such
-as @file{.c} or @file{.mod}.  For a list of the supported
-languages, type @samp{set language}.
+where @var{lang} is the name of a language: @code{c} or @code{modula-2}.
+For a list of the supported languages, type @samp{set language}.
 
 Setting the language manually prevents _GDBN__ from updating the working
 language automatically.  This can lead to confusion if you try
@@ -5320,6 +5341,7 @@ or even return prematurely from a function to its caller.
 * Signaling::                   Giving the Program a Signal
 * Returning::                   Returning from a Function
 * Calling::                     Calling your Program's Functions
+* Patching::                    Patching your Program
 @end menu
 
 @node Assignment, Jumping, Altering, Altering
@@ -5486,7 +5508,7 @@ returned.  In contrast, the @code{finish} command (@pxref{Continuing and
 Stepping}) resumes execution until the selected stack frame returns
 naturally.@refill
 
-@node     Calling,  , Returning, Altering
+@node     Calling, Patching, Returning, Altering
 @section Calling your Program's Functions
 
 @cindex calling functions
@@ -5501,6 +5523,39 @@ You can use this variant of the @code{print} command if you want to
 execute a function from your program, but without cluttering the output
 with @code{void} returned values.  The result is printed and saved in
 the value history, if it is not void.
+
+@node Patching,  , Calling, Altering
+@section Patching your Program
+@cindex patching binaries
+@cindex writing into executables
+@cindex writing into corefiles
+By default, _GDBN__ opens the file containing your program's executable
+code (or the corefile) read-only.  This prevents accidental alterations
+to machine code; but it also prevents you from intentionally patching
+your program's binary.
+
+If you'd like to be able to patch the binary, you can specify that
+explicitly with the @code{set write} command.  For example, you might
+want to turn on internal debugging flags, or even to make emergency
+repairs. 
+
+@table @code
+@item set write on
+@itemx set write off
+@kindex set write
+If you specify @samp{set write on}, _GDBN__ will open executable and
+core files for both reading and writing; if you specify @samp{set write
+off} (the default), _GDBN__ will open them read-only.
+
+If you've already loaded a file, you must load it
+again (using the @code{exec-file} or @code{core-file} command) after
+changing @code{set write}, for your new setting to take effect.
+
+@item show write
+Display whether executable files and core files will be opened for
+writing as well as reading.
+
+@end table
 
 @node _GDBN__ Files, Targets, Altering, Top
 @chapter _GDBN__'s Files
@@ -5672,37 +5727,35 @@ All file-specifying commands allow both absolute and relative file names
 as arguments.  _GDBN__ always converts the file name to an absolute path
 name and remembers it that way.
 
-@kindex sharedlibrary
-@kindex share
 @cindex shared libraries
 
-_GDBN__ supports the SunOS shared library format.  Symbols from a shared
-library cannot be referenced before the shared library has been linked
-with the program.  (That is to say, until after you type @code{run} and 
-the function @code{main} has been entered; or when examining core
-files.)  Once the shared library has been linked in, you can use the
-following commands:
+_GDBN__ supports the SunOS shared library format.  _GDBN__ automatically
+loads symbol definitions from shared libraries when you use the
+@code{run} command, or when you examine a core file.  (Before you issue
+the @code{run} command, _GDBN__ won't understand references to a
+function in a shared library, however---unless you're debugging a core
+file).
+@c FIXME: next _GDBN__ release should permit some refs to undef
+@c FIXME...symbols---eg in a break cmd---assuming they're from a shared lib
 
 @table @code
-@item sharedlibrary @var{regex}
-@itemx share @var{regex}
-Load shared object library symbols for files matching a UNIX regular
-expression.  
-
-@item share
-@itemx sharedlibrary
-Load symbols for all shared libraries.
-
 @item info share
 @itemx info sharedlibrary
 @kindex info sharedlibrary
 @kindex info share
-Print the names of the shared libraries which you have loaded with the
-@code{sharedlibrary} command.
-@end table
+Print the names of the shared libraries which are currently loaded.
 
-@code{sharedlibrary} does not repeat automatically when you press
-@key{RET} after using it once.
+@item sharedlibrary @var{regex}
+@itemx share @var{regex}
+@kindex sharedlibrary
+@kindex share
+This is an obsolescent command; you can use it to explicitly
+load shared object library symbols for files matching a UNIX regular
+expression, but as with files loaded automatically, it will only load
+shared libraries required by your program for a core file or after
+typing @code{run}.  If @var{regex} is omitted all shared libraries
+required by your program are loaded.
+@end table
 
 @node Symbol Errors,  , Files, _GDBN__ Files
 @section Errors Reading Symbol Files
@@ -7176,30 +7229,36 @@ prefix'' column ending in a @samp{*} may be followed by a release number.
 ARCHITECTURE  VENDOR        OS prefix
 ------------+-------------+-------------
             |             |
- a29k       | altos       | aix*
- alliant    | aout        | aout
- arm        | apollo      | bout
- c1         | att         | bsd*
- c2         | bout        | coff
- i386       | coff        | ctix*
- i860       | convergent  | dynix*
- i960       | convex      | esix*
- m68000     | dec         | hpux*
- m68k       | encore      | isc*
- m88k       | gould       | mach*
- mips       | hp          | newsos*
- ns32k      | ibm         | nindy*
- pyramid    | intel       | none
- rs6000     | isi         | osf*
- rtpc       | little      | sco*    
- sparc      | mips        | sunos*  
- tahoe      | motorola    | sysv*   
- tron       | ncr         | ultrix* 
- vax        | next        | unos*   
-            | none        | v88r*   
-            | sco         | vms*    
-            | sequent     | vxworks*
-            | sgi         | 
+ 580        | altos       | aix*
+ a29k       | amdahl      | amigados
+ alliant    | aout        | aout    
+ arm        | apollo      | bout    
+ c1         | att         | bsd*    
+ c2         | bull        | coff    
+ cray2      | bcs         | ctix*   
+ h8300      | bout        | dynix*  
+ i386       | cbm         | esix*   
+ i860       | coff        | hpux*   
+ i960       | convergent  | irix*   
+ m68000     | convex      | isc*    
+ m68k       | cray        | kern    
+ m88k       | dec         | mach*   
+ mips       | encore      | newsos* 
+ ns32k      | gould       | nindy*  
+ pyramid    | hp          | none    
+ romp       | ibm         | osf*    
+ rs6000     | intel       | sco*    
+ rtpc       | isi         | sunos*  
+ sparc      | little      | svr4    
+ tahoe      | mips        | sym*    
+ tron       | motorola    | sysv*   
+ vax        | ncr         | ultrix* 
+ xmp        | next        | unicos  
+ ymp        | none        | unos*   
+            | nyu         | uts     
+            | sco         | v88r*   
+            | sequent     | vms*    
+            | sgi         | vxworks*
             | sony        |
             | sun         |
             | unicom      |
@@ -7208,47 +7267,53 @@ ARCHITECTURE  VENDOR        OS prefix
 
 @end example
 @end ifinfo
+@c FIXME: this table is probably screwed in @smallbook.  Try setting
+@c FIXME...smallbook fonts?
 @tex
-\vskip \parskip\vskip \baselineskip
-\halign{\hskip\parindent\tt #\hfil &\qquad#&\tt #\hfil &\qquad#&\tt #\hfil\cr
+%\vskip\parskip
+\vskip \baselineskip
+\halign{\hskip\parindent\tt #\hfil &\qquad#&\tt #\hfil &\qquad#&\tt
+#\hfil &\qquad\qquad\it #\hfil\cr
 {\bf Architecture} &&{\bf Vendor} &&{\bf OS prefix}\cr
-\noalign{\hrule}
+\multispan5\hrulefill\cr
 \cr
- a29k       &&altos       &&aix*\cr
- alliant    &&aout        &&aout\cr
- arm        &&apollo      &&bout\cr
- c1         &&att         &&bsd*\cr
- c2         &&bout        &&coff\cr
- i386       &&coff        &&ctix*\cr
- i860       &&convergent  &&dynix*\cr
- i960       &&convex      &&esix*\cr
- m68000     &&dec         &&hpux*\cr
- m68k       &&encore      &&isc*\cr
- m88k       &&gould       &&mach*\cr
- mips       &&hp          &&newsos*\cr
- ns32k      &&ibm         &&nindy*\cr
- pyramid    &&intel       &&none\cr
- rs6000     &&isi         &&osf*\cr
- rtpc       &&little      &&sco*\cr      
- sparc      &&mips        &&sunos*\cr    
- tahoe      &&motorola    &&sysv*\cr     
- tron       &&ncr         &&ultrix*\cr   
- vax        &&next        &&unos*\cr     
-            &&none        &&v88r*\cr     
-            &&sco         &&vms*\cr      
-            &&sequent     &&vxworks*\cr  
-            &&sgi         \cr            
-            &&sony        \cr            
-            &&sun         \cr            
-            &&unicom      \cr            
-            &&utek        \cr            
-            &&wrs         \cr
+ 580        && altos       && aix*    \cr
+ a29k       && amdahl      && amigados\cr
+ alliant    && aout        && aout    \cr
+ arm        && apollo      && bout    \cr
+ c1         && att         && bsd*    \cr
+ c2         && bull        && coff    \cr
+ cray2      && bcs         && ctix*   \cr
+ h8300      && bout        && dynix*  \cr
+ i386       && cbm         && esix*   \cr
+ i860       && coff        && hpux*   &Warning: Many combinations \cr
+ i960       && convergent  && irix*   &of architecture, vendor    \cr
+ m68000     && convex      && isc*    &and OS are untested.       \cr
+ m68k       && cray        && kern    \cr
+ m88k       && dec         && mach*   \cr
+ mips       && encore      && newsos* \cr
+ ns32k      && gould       && nindy*  \cr
+ pyramid    && hp          && none    \cr
+ romp       && ibm         && osf*    \cr
+ rs6000     && intel       && sco*    \cr
+ rtpc       && isi         && sunos*  \cr
+ sparc      && little      && svr4    \cr
+ tahoe      && mips        && sym*    \cr
+ tron       && motorola    && sysv*   \cr
+ vax        && ncr         && ultrix* \cr
+ xmp        && next        && unicos  \cr
+ ymp        && none        && unos*   \cr
+            && nyu         && uts     \cr
+            && sco         && v88r*   \cr
+            && sequent     && vms*    \cr
+            && sgi         && vxworks*\cr
+            && sony        &&\cr
+            && sun         &&\cr
+            && unicom      &&\cr
+            && utek        &&\cr
+            && wrs         &&\cr
 }
 @end tex
-@quotation
-@emph{Warning:} Many combinations of architecture, vendor, and OS are
-untested. 
-@end quotation
 
 The @code{configure} script accompanying _GDBN__ _GDB_VN__ does not provide
 any query facility to list all supported host and target names or
