@@ -5,6 +5,8 @@ Thu Sep 16 11:21:13 1999  Catherine Moore  <clm@cygnus.com>
 
 Thu Sep 16 10:48:17 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* elf-hppa.h (elf_hppa_final_write_processing): Turn on TRAPNIL.
+
 	* elf-hppa.h (elf_hppa_final_link): If unable to find __gp in the
 	symbol table, then just compute a suitable value (but do not
 	create a __gp symbol).

@@ -656,7 +656,13 @@ elf_hppa_final_write_processing (abfd, linker)
   else if (mach == 20)
     elf_elfheader (abfd)->e_flags |= EFA_PARISC_2_0;
   else if (mach == 25)
-    elf_elfheader (abfd)->e_flags |= EF_PARISC_WIDE | EFA_PARISC_2_0;
+    elf_elfheader (abfd)->e_flags |= (EF_PARISC_WIDE
+				      | EFA_PARISC_2_0
+				      /* The GNU tools have trapped without
+					 option since 1993, so need to take
+					 a step backwards with the ELF
+					 based toolchains.  */
+				      | EF_PARISC_TRAPNIL);
 }
 
 /* Return true if SYM represents a local label symbol.  */
