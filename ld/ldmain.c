@@ -159,9 +159,9 @@ main (argc, argv)
   command_line.force_common_definition = false;
 
   init_bfd_error_vector();
-ldsym_init();  
+  ldsym_init();  
   ldfile_add_arch("");
-  ldfile_add_library_path("./");
+
   config.make_executable = true;
   force_make_executable = false;
 
@@ -176,7 +176,7 @@ ldsym_init();
   config.text_read_only = true;
   config.make_executable = true;
   if (emulation == (char *)NULL) {
-      emulation= DEFAULT_EMULATION;
+      emulation=  DEFAULT_EMULATION;
     }
 
   ldemul_choose_mode(emulation);
@@ -237,18 +237,31 @@ ldsym_init();
       ldwrite();
       bfd_close(output_bfd);
     }
-  else {
-      output_bfd->flags |= EXEC_P;
 
-      ldwrite();
+  else
+  {
 
-      if (config.make_executable == false && force_make_executable ==false) {
+    output_bfd->flags |= EXEC_P;
 
-	  unlink(output_filename);
-	}
-      else {    bfd_close(output_bfd); };
-      exit (!config.make_executable);
+    ldwrite();
+
+
+    if (config.make_executable == false && force_make_executable ==false) 
+    {
+      printf("Link errors found, deleting executable %s\n",
+	     output_filename);
+      if (output_bfd->iostream)
+       fclose(output_bfd->iostream);
+
+      unlink(output_filename);
+      exit(1);
     }
+    else {  
+	bfd_close(output_bfd); 
+      }
+  }	
+
+
 
   exit(0);
 }				/* main() */
@@ -391,10 +404,10 @@ Q_enter_global_ref (nlist_p)
 	asymbol ** stat_symbols = stat ? stat->asymbols:0;
       
 	multiple_def_count++;
-	einfo("%C: multiple definition of `%T'\n",
+	einfo("%X%C: multiple definition of `%T'\n",
 	      sym->the_bfd, sym->section, stat1_symbols, sym->value, sym);
 	   
-	einfo("%C: first seen here\n",
+	einfo("%X%C: first seen here\n",
 	      sy->the_bfd, sy->section, stat_symbols, sy->value);
       }
       else {
