@@ -782,8 +782,4 @@ sim_core_xor_write_buffer (SIM_DESC sd,
 #include "sim-n-core.h"
 #undef N
 
-#define N word
-#include "sim-n-core.h"
-#undef N
-
 #endif

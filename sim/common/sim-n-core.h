@@ -44,6 +44,7 @@
 STATIC_SIM_CORE(void)
 sim_core_trace_N (sim_cpu *cpu,
 		  sim_cia cia,
+		  int line_nr,
 		  char *transfer,
 		  sim_core_maps map,
 		  address_word addr,
@@ -52,7 +53,7 @@ sim_core_trace_N (sim_cpu *cpu,
 #if (N == 16)
   trace_printf (CPU_STATE (cpu), cpu,
 		"sim-n-core.h:%d: %s-%d %s:0x%08lx -> 0x%08lx%08lx%08lx%08lx\n",
-		__LINE__,
+		line_nr,
 		transfer, sizeof (unsigned_N),
 		sim_core_map_to_str (map),
 		(unsigned long) addr,
@@ -64,7 +65,7 @@ sim_core_trace_N (sim_cpu *cpu,
 #if (N == 8)
   trace_printf (CPU_STATE (cpu), cpu,
 		"sim-n-core.h:%d: %s-%d %s:0x%08lx -> 0x%08lx%08lx\n",
-		__LINE__,
+		line_nr,
 		transfer, sizeof (unsigned_N),
 		sim_core_map_to_str (map),
 		(unsigned long) addr,
@@ -74,7 +75,7 @@ sim_core_trace_N (sim_cpu *cpu,
 #if (N == 4)
   trace_printf (CPU_STATE (cpu), cpu,
 		"sim-n-core.h:%d: %s-%d %s:0x%08lx -> 0x%0*lx\n",
-		__LINE__,
+		line_nr,
 		transfer, sizeof (unsigned_N),
 		sim_core_map_to_str (map),
 		(unsigned long) addr,
@@ -127,7 +128,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
     val = T2H_N (*(unsigned_N*) sim_core_translate (mapping, addr));
   PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
-    sim_core_trace_N (cpu, __LINE__, "read", map, addr, val);
+    sim_core_trace_N (cpu, cia, __LINE__, "read", map, addr, val);
   return val;
 }
 
@@ -224,7 +225,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
     *(unsigned_N*) sim_core_translate (mapping, addr) = H2T_N (val);
   PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
-    sim_core_trace_N (cpu, __LINE__, "write", map, addr, val);
+    sim_core_trace_N (cpu, cia, __LINE__, "write", map, addr, val);
 }
 
 /* TAGS: sim_core_write_unaligned_1 sim_core_write_unaligned_2 */

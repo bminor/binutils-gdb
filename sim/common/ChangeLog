@@ -1,3 +1,15 @@
+Tue Oct 28 12:29:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.c: Do not generate sim_core_*_word.
+
+	* sim-n-core.h (sim_core_trace_N): Add line_nr argument.
+	(sim_core_write_aligned_N, sim_core_read_aligned_N): Update.
+
+	* sim-core.h (sim_core_read_unaligned_word,
+ 	sim_core_read_aligned_word, sim_core_read_word,
+ 	sim_core_write_unaligned_word, sim_core_write_aligned_word,
+ 	sim_core_write_word): Change to macros that map onto sim_core_*_N.
+
 Mon Oct 27 11:25:10 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-n-endian.h: Add TAGS entrys for 16 byte versions.
