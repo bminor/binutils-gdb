@@ -1,3 +1,8 @@
+2000-05-30  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-i960.c (scan_960_mach): Accept 80960KA, 80960KB,
+	80960CA, 80960MC as valid machine names.
+
 2000-05-30  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Clear the

@@ -34,28 +34,44 @@ scan_960_mach (ap, string)
      const char *string;
 {
   unsigned long machine;
+  int i;
+  int fail_because_not_80960 = false;
+  
+  for (i = 0; i < strlen (string); i ++)
+    string[i] = tolower (string[i]);
 
-  /* Look for the string i960, or somesuch at the front of the string  */
+  /* Look for the string i960 at the front of the string.  */
+  if (strncmp ("i960", string, 4) == 0)
+    {
+      string += 4;
 
-  if (strncmp("i960",string,4) == 0) {
-    string+=4;
-  }
-  else {
-    /* no match, can be us */
-    return false;
-  }
-  if (string[0] == 0) {
-    /* i960 on it's own means core to us*/
-    if (ap->mach == bfd_mach_i960_core) return true;
-    return false;
-  }
+      /* i960 on it's own means core to us.  */
+      if (* string == 0)
+	return ap->mach == bfd_mach_i960_core;
+      
+      /* "i960:*" is valid, anything else is not.  */
+      if (* string != ':')
+	return false;
 
-  if (string[0] != ':') {
+      string ++;
+    }
+  /* In some bfds the cpu-id is written as "80960KA", "80960KB",
+     "80960CA" or "80960MC".  */
+  else if (strncmp ("80960", string, 5) == 0)
+    {
+      string += 5;
+
+      /* Sett his to true here.  If a correct matching postfix
+	 is detected below it will be reset to false.  */
+      fail_because_not_80960 = true;
+    }
+  /* No match, can't be us.  */
+  else
     return false;
-  }
-  string++;
-  if (string[0] == '\0')
+  
+  if (* string == '\0')
     return false;
+  
   if (string[0] == 'c' && string[1] == 'o' && string[2] == 'r' &&
       string[3] == 'e' && string[4] == '\0')
     machine = bfd_mach_i960_core;
@@ -63,20 +79,20 @@ scan_960_mach (ap, string)
     machine = bfd_mach_i960_ka_sa;
   else if (strcmp (string, "kb_sb") == 0)
     machine = bfd_mach_i960_kb_sb;
-  else if (string[1] == '\0' || string[2] != '\0') /* rest are 2-char */
+  else if (string[1] == '\0' || string[2] != '\0') /* rest are 2-char.  */
     return false;
   else if (string[0] == 'k' && string[1] == 'b')
-    machine = bfd_mach_i960_kb_sb;
+    { machine = bfd_mach_i960_kb_sb; fail_because_not_80960 = false; }
   else if (string[0] == 's' && string[1] == 'b')
     machine = bfd_mach_i960_kb_sb;
   else if (string[0] == 'm' && string[1] == 'c')
-    machine = bfd_mach_i960_mc;
+    { machine = bfd_mach_i960_mc; fail_because_not_80960 = false; }
   else if (string[0] == 'x' && string[1] == 'a')
     machine = bfd_mach_i960_xa;
   else if (string[0] == 'c' && string[1] == 'a')
-    machine = bfd_mach_i960_ca;
+    { machine = bfd_mach_i960_ca; fail_because_not_80960 = false; }
   else if (string[0] == 'k' && string[1] == 'a')
-    machine = bfd_mach_i960_ka_sa;
+    { machine = bfd_mach_i960_ka_sa; fail_because_not_80960 = false; }
   else if (string[0] == 's' && string[1] == 'a')
     machine = bfd_mach_i960_ka_sa;
   else if (string[0] == 'j' && string[1] == 'x')
@@ -85,7 +101,13 @@ scan_960_mach (ap, string)
     machine = bfd_mach_i960_hx;
   else
     return false;
-  if (machine == ap->mach)   return true;
+
+  if (fail_because_not_80960)
+    return false;
+  
+  if (machine == ap->mach)
+    return true;
+  
   return false;
 }
 
