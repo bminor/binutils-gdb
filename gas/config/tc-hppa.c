@@ -4422,7 +4422,7 @@ md_apply_fix (fixP, valp)
 	  CHECK_FIELD (new_val, 1048576, -1048576, 0);
 	  val = new_val;
 
-	  insn = re_assemble_21 (insn, val);
+	  insn = re_assemble_21 (insn & ~ 0x1fffff, val);
 	  break;
 
 	/* Handle all the opcodes with the 'i' operand type.  */
@@ -4438,7 +4438,7 @@ md_apply_fix (fixP, valp)
 	  CHECK_FIELD (new_val, 8199, -8184, 0);
 	  val = new_val;
 
-	  insn = re_assemble_12 (insn, (val - 8) >> 2);
+	  insn = re_assemble_12 (insn & ~ 0x1ffd, (val - 8) >> 2);
 	  break;
 
 	/* Handle some of the opcodes with the 'W' operand type.  */
@@ -4455,7 +4455,7 @@ md_apply_fix (fixP, valp)
 	    CHECK_FIELD (new_val, 262143, -262144, 0);
 	    val = new_val;
 
-	    insn = re_assemble_17 (insn, (val - 8) >> 2);
+	    insn = re_assemble_17 (insn & ~ 0x1f1ffd, (val - 8) >> 2);
 	    break;
 	  }
 
@@ -4472,7 +4472,7 @@ md_apply_fix (fixP, valp)
 	    CHECK_FIELD (new_val, 8388607, -8388608, 0);
 	    val = new_val;
 
-	    insn = re_assemble_22 (insn, (val - 8) >> 2);
+	    insn = re_assemble_22 (insn & ~ 0x3ff1ffd, (val - 8) >> 2);
 	    break;
 	  }
 
