@@ -1,5 +1,8 @@
 Wed Aug 16 12:24:12 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/mri/mri.exp: Change hppa*-*-* expected failures to only
+	expect failure for targets which use SOM.
+
 	* lib/gas-defs.exp (run_dump_test): If the program to run does not
         exist, mark the test as untested.
 
