@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
 	  goto record_it;
 
+	case N_BSS:
 	case N_BSS | N_EXT:
 	case N_NBBSS | N_EXT:
         case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
@@ -108,30 +109,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		past_first_source_file = 1;
 	      last_o_file_start = CUR_SYMBOL_VALUE;
 	    }
+	  else
+	    goto record_it;
 #endif /* DBXREAD_ONLY */
 	  continue;
 
 	case N_DATA:
-#ifdef DBXREAD_ONLY
 	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
-	  SET_NAMESTRING ();
-	  /* Check for __DYNAMIC, which is used by Sun shared libraries. 
-	     Record it even if it's local, not global, so we can find it.
-	     FIXME:  this might want to check for _DYNAMIC and the current
-		     symbol_leading_char.  */
-	  if (namestring[8] == 'C' && STREQ ("__DYNAMIC", namestring))
-	    goto record_it;
-
-	  /* Same with virtual function tables, both global and static.  */
-	  {
-	    char *tempstring = namestring;
-	    if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
-	      tempstring++;
-	    if (VTBL_PREFIX_P ((tempstring)))
-	      goto record_it;
-	  }
-#endif /* DBXREAD_ONLY */
-	  continue;
+	  goto record_it;
 
 	case N_UNDF | N_EXT:
 #ifdef DBXREAD_ONLY
@@ -175,7 +160,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    /* Lots of symbol types we can just ignore.  */
 
 	case N_ABS:
-	case N_BSS:
 	case N_NBDATA:
 	case N_NBBSS:
 	  continue;

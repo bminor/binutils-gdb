@@ -1,5 +1,10 @@
 Mon Jul 19 11:48:57 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* symtab.h (enum minimal_symbol_type): Add mst_file_*.
+	* partial-stab.h [DBXREAD_ONLY]: Record statics in miminal symbols.
+	* dbxread.c (record_minimal_symbol): Deal with statics.
+	* minsyms.c (lookup_minimal_symbol): Prefer externals to statics.
+
 	* config/i386/xm-i386sco.h: Define HAVE_TERMIOS.
 
 	* printcmd.c, config/pa/xm-pa.h, config/alpha/xm-alpha.h: Make it so

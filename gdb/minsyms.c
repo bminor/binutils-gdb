@@ -95,6 +95,7 @@ lookup_minimal_symbol (name, objf)
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
+  struct minimal_symbol *found_file_symbol = NULL;
 #ifdef IBM6000_TARGET
   struct minimal_symbol *trampoline_symbol = NULL;
 #endif
@@ -112,40 +113,68 @@ lookup_minimal_symbol (name, objf)
 	    {
 	      if (SYMBOL_MATCHES_NAME (msymbol, name))
 		{
-#ifdef IBM6000_TARGET
-		  /* I *think* all platforms using shared libraries (and
-		     trampoline code) will suffer this problem. Consider a
-		     case where there are 5 shared libraries, each referencing
-		     `foo' with a trampoline entry. When someone wants to put
-		     a breakpoint on `foo' and the only info we have is minimal
-		     symbol vector, we want to use the real `foo', rather than
-		     one of those trampoline entries. MGO */
-		  /* If a trampoline symbol is found, we prefer to keep looking
-		     for the *real* symbol. If the actual symbol not found,
-		     then we'll use the trampoline entry. Sorry for the machine
-		     dependent code here, but I hope this will benefit other
-		     platforms as well. For trampoline entries, we used
-		     mst_unknown earlier. Perhaps we should define a
-		     `mst_trampoline' type?? */
+		  switch (MSYMBOL_TYPE (msymbol))
+		    {
+		    case mst_file_text:
+		    case mst_file_data:
+		    case mst_file_bss:
+		      /* It is file-local.  If we find more than one, just
+			 return the latest one (the user can't expect
+			 useful behavior in that case).  */
+		      found_file_symbol = msymbol;
+		      break;
 
-		  if (MSYMBOL_TYPE (msymbol) != mst_unknown)
-		    found_symbol = msymbol;
-	          else if (MSYMBOL_TYPE (msymbol) == mst_unknown &&
-			   !trampoline_symbol)
-		    trampoline_symbol = msymbol;
-		     
+		    case mst_unknown:
+#ifdef IBM6000_TARGET
+		      /* I *think* all platforms using shared
+			 libraries (and trampoline code) will suffer
+			 this problem. Consider a case where there are
+			 5 shared libraries, each referencing `foo'
+			 with a trampoline entry. When someone wants
+			 to put a breakpoint on `foo' and the only
+			 info we have is minimal symbol vector, we
+			 want to use the real `foo', rather than one
+			 of those trampoline entries. MGO */
+
+		      /* If a trampoline symbol is found, we prefer to
+			 keep looking for the *real* symbol. If the
+			 actual symbol not found, then we'll use the
+			 trampoline entry. Sorry for the machine
+			 dependent code here, but I hope this will
+			 benefit other platforms as well. For
+			 trampoline entries, we used mst_unknown
+			 earlier. Perhaps we should define a
+			 `mst_trampoline' type?? */
+
+		      if (trampoline_symbol == NULL)
+			trampoline_symbol = msymbol;
+		      break;
 #else
-		  found_symbol = msymbol;
+		      /* FALLTHROUGH */
 #endif
+		    default:
+		      found_symbol = msymbol;
+		      break;
+		    }
 		}
 	    }
 	}
     }
+  /* External symbols are best.  */
+  if (found_symbol)
+    return found_symbol;
+
+  /* File-local symbols are next best.  */
+  if (found_file_symbol)
+    return found_file_symbol;
+
+  /* Symbols for IBM shared library trampolines are next best.  */
 #ifdef IBM6000_TARGET
-  return found_symbol ? found_symbol : trampoline_symbol;
+  if (trampoline_symbol)
+    return trampoline_symbol;
 #endif
 
-  return (found_symbol);
+  return NULL;
 }
 
 
