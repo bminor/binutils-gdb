@@ -1,3 +1,8 @@
+Fri Apr 18 11:51:35 1997  Niklas Hallqvist  <niklas@appli.se>
+
+	* configure.in (alpha*-*-openbsd*): New target.
+	* configure: Rebuild.
+
 Thu Apr 17 13:59:47 1997  Per Fogelstrom  <pefo@openbsd.org>
 
 	* configure.in (mips-*-openbsd*): New target.

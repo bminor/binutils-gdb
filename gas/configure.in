@@ -118,6 +118,7 @@ changequote([,])dnl
 
       alpha-*-*vms*)	    fmt=evax ;;
       alpha-*-netware*)     fmt=ecoff ;;
+      alpha-*-openbsd*)     fmt=ecoff ;;
       alpha-*-osf*)         fmt=ecoff ;;
       alpha-*-linuxecoff*)  fmt=ecoff ;;
       alpha-*-linux*)       fmt=elf em=linux ;;
