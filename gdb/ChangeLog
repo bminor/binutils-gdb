@@ -1,3 +1,15 @@
+Tue Jan 16 18:00:35 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* remote-mips.c (pmon_opn, pmon_wait, pmon_makeb64, pmon_zeroset,
+ 	pmon_checkset, pmon_make_fastrec, pmon_check_ack,
+	pmon_load_fast): New functions. Support for the PMON monitor world.
+	(common_open): New function to merge support for different monitors.
+	(mips_open): Use common_open().
+	(mips_send_command): New function.
+	(mips_send_packet): Scan out-of-sequence packets.
+	(mips_enter_debug, mips_exit_debug): New functions.
+	(pmon_ops): New target definition structure.
+	
 Fri Jan 12 21:41:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* symtab.c (find_pc_symtab): Don't lose if OBJF_REORDERED
