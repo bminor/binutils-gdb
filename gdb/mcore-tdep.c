@@ -756,7 +756,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = fi->next)
     {
-      if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
 	return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
       else if (fi->saved_regs[regnum] != 0)
 	return read_memory_integer (fi->saved_regs[regnum],
@@ -772,7 +772,7 @@ CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return mcore_find_callers_reg (fi, PR_REGNUM);
@@ -789,7 +789,7 @@ mcore_pop_frame (void)
   int rn;
   struct frame_info *fi = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -1047,7 +1047,7 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->status = 0;
   fi->extra_info->framesize = 0;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */

@@ -3675,10 +3675,6 @@ them.
 @findex PCC_SOL_BROKEN
 (Used only in the Convex target.)
 
-@item PC_IN_CALL_DUMMY
-@findex PC_IN_CALL_DUMMY
-See @file{inferior.h}.
-
 @item PC_IN_SIGTRAMP (@var{pc}, @var{name})
 @findex PC_IN_SIGTRAMP
 @cindex sigtramp

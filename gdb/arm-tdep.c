@@ -215,7 +215,7 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
      frame location (true if we have not pushed large data structures or
      gone too many levels deep) and that our 1024 is not enough to consider
      code regions as part of the stack (true for most practical purposes).  */
-  if (PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
     return caller_is_thumb;
   else
     return 0;
@@ -410,7 +410,7 @@ arm_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we're in a dummy frame, don't even try to skip the prologue.  */
-  if (PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
     return pc;
 
   /* See what the symbol table says.  */
@@ -536,7 +536,7 @@ thumb_scan_prologue (struct frame_info *fi)
 
   /* Don't try to scan dummy frames.  */
   if (fi != NULL
-      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+      && DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return;
 
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
@@ -990,7 +990,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
      function could be called directly.  */
   for (; fi; fi = fi->next)
     {
-      if (PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
 	{
 	  return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
 	}
@@ -1019,7 +1019,7 @@ arm_frame_chain (struct frame_info *fi)
   CORE_ADDR caller_pc;
   int framereg = fi->extra_info->framereg;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     /* A generic call dummy's frame is the same as caller's.  */
     return fi->frame;
 
@@ -1102,7 +1102,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      the sigtramp and call dummy cases.  */
   if (!fi->next)
     sp = read_sp();
-  else if (PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
     sp = deprecated_read_register_dummy (fi->next->pc, fi->next->frame,
@@ -1150,7 +1150,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       if (!fi->next)
 	/* This is the innermost frame?  */
 	fi->frame = read_register (fi->extra_info->framereg);
-      else if (PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
 	fi->frame = fi->next->frame;
@@ -1191,10 +1191,10 @@ static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return deprecated_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
 			fi->frame))
     {
       return read_memory_integer (fi->saved_regs[ARM_PC_REGNUM],
@@ -1520,7 +1520,7 @@ arm_pop_frame (void)
   CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
 		      + frame->extra_info->framesize);
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();

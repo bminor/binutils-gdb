@@ -958,7 +958,7 @@ rs6000_pop_frame (void)
   pc = read_pc ();
   sp = get_frame_base (frame);
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();
@@ -1514,7 +1514,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
   if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     return read_memory_addr (fi->frame + SIG_FRAME_PC_OFFSET, wordsize);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
 
   func_start = get_pc_function_start (fi->pc);
@@ -1531,7 +1531,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
       if ((get_frame_type (fi->next) == SIGTRAMP_FRAME))
 	return read_memory_addr (fi->next->frame + SIG_FRAME_LR_OFFSET,
 				 wordsize);
-      else if (PC_IN_CALL_DUMMY (get_next_frame (fi)->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_next_frame (fi)->pc, 0, 0))
 	/* The link register wasn't saved by this frame and the next
            (inner, newer) frame is a dummy.  Get the link register
            value by unwinding it from that [dummy] frame.  */
@@ -1744,7 +1744,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
   CORE_ADDR fp, fpp, lr;
   int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
 
-  if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
     /* A dummy frame always correctly chains back to the previous
        frame.  */
     return read_memory_addr ((thisframe)->frame, wordsize);

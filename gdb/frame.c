@@ -718,11 +718,9 @@ set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
       *unwind_register = frame_saved_regs_register_unwind;
       *unwind_pc = frame_saved_regs_pc_unwind;
     }
-  /* FIXME: cagney/2002-11-24: Can't yet directly call
-     pc_in_dummy_frame() as some architectures don't set
-     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
-     latter is implemented by simply calling pc_in_dummy_frame).  */
-  else if (PC_IN_CALL_DUMMY (pc, 0, 0))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+	   ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
+	   : pc_in_dummy_frame (pc))
     {
       *unwind_register = dummy_frame_register_unwind;
       *unwind_pc = dummy_frame_pc_unwind;
@@ -760,11 +758,10 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      has previously set it.  This is really somewhat bogus.  The
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
-  /* FIXME: cagney/2002-11-24: Can't yet directly call
-     pc_in_dummy_frame() as some architectures don't set
-     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
-     latter is implemented by simply calling pc_in_dummy_frame).  */
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES && PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+	  ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
+	  : pc_in_dummy_frame (pc)))
     /* NOTE: cagney/2002-11-11: Does this even occure?  */
     type = DUMMY_FRAME;
   else
@@ -1045,12 +1042,10 @@ get_prev_frame (struct frame_info *next_frame)
      has previously set it.  This is really somewhat bogus.  The
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
-  /* FIXME: cagney/2002-11-24: Can't yet directly call
-     pc_in_dummy_frame() as some architectures don't set
-     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
-     latter is implemented by simply calling pc_in_dummy_frame).  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (prev->pc, 0, 0))
+      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+	  ? DEPRECATED_PC_IN_CALL_DUMMY (prev->pc, 0, 0)
+	  : pc_in_dummy_frame (prev->pc)))
     prev->type = DUMMY_FRAME;
   else
     {

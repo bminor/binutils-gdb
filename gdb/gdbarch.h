@@ -1058,20 +1058,46 @@ extern void set_gdbarch_call_dummy_length (struct gdbarch *gdbarch, int call_dum
 #endif
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (PC_IN_CALL_DUMMY)
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) (generic_pc_in_call_dummy (pc, sp, frame_address))
+/* NOTE: cagney/2002-11-24: This function with predicate has a valid
+   (callable) initial value.  As a consequence, even when the predicate
+   is false, the corresponding function works.  This simplifies the
+   migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
+   doesn't need to be modified. */
+
+#if defined (DEPRECATED_PC_IN_CALL_DUMMY)
+/* Legacy for systems yet to multi-arch DEPRECATED_PC_IN_CALL_DUMMY */
+#if !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
+#define DEPRECATED_PC_IN_CALL_DUMMY_P() (1)
+#endif
 #endif
 
-typedef int (gdbarch_pc_in_call_dummy_ftype) (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
-extern int gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
-extern void set_gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, gdbarch_pc_in_call_dummy_ftype *pc_in_call_dummy);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (PC_IN_CALL_DUMMY)
-#error "Non multi-arch definition of PC_IN_CALL_DUMMY"
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
+#define DEPRECATED_PC_IN_CALL_DUMMY_P() (0)
+#endif
+
+extern int gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
+#error "Non multi-arch definition of DEPRECATED_PC_IN_CALL_DUMMY"
+#endif
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
+#define DEPRECATED_PC_IN_CALL_DUMMY_P() (gdbarch_deprecated_pc_in_call_dummy_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PC_IN_CALL_DUMMY)
+#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) (generic_pc_in_call_dummy (pc, sp, frame_address))
+#endif
+
+typedef int (gdbarch_deprecated_pc_in_call_dummy_ftype) (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
+extern int gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
+extern void set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy);
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY)
+#error "Non multi-arch definition of DEPRECATED_PC_IN_CALL_DUMMY"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (PC_IN_CALL_DUMMY)
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) (gdbarch_pc_in_call_dummy (current_gdbarch, pc, sp, frame_address))
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY)
+#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) (gdbarch_deprecated_pc_in_call_dummy (current_gdbarch, pc, sp, frame_address))
 #endif
 #endif
 

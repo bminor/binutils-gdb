@@ -115,19 +115,25 @@ EOF
 	    test "${fmt}" || fmt="%ld"
 	    test "${print}" || print="(long) ${macro}"
 
-	    case "${invalid_p}" in
-		0 ) valid_p=1 ;;
+	    case "${class}" in
+	    F | V | M )
+		case "${invalid_p}" in
 		"" )
-		    if [ -n "${predefault}" ]
+		    if test -n "${predefault}" -a "${predefault}" != "0"
 		    then
 			#invalid_p="gdbarch->${function} == ${predefault}"
-			valid_p="gdbarch->${function} != ${predefault}"
+			predicate="gdbarch->${function} != ${predefault}"
 		    else
-			#invalid_p="gdbarch->${function} == 0"
-			valid_p="gdbarch->${function} != 0"
+			# filled in later
+			predicate=""
 		    fi
 		    ;;
-		* ) valid_p="!(${invalid_p})"
+		* )
+		    echo "Predicate function ${function} with invalid_p."
+		    kill $$
+		    exit 1
+		    ;;
+		esac
 	    esac
 
 	    # PREDEFAULT is a valid fallback definition of MEMBER when
@@ -495,7 +501,12 @@ v:2:CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset::::0:-1::gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1:0x%08lx::CALL_DUMMY_BREAKPOINT_OFFSET_P
 v:1:CALL_DUMMY_BREAKPOINT_OFFSET_P:int:call_dummy_breakpoint_offset_p::::0:-1
 v:2:CALL_DUMMY_LENGTH:int:call_dummy_length::::0:-1:::::CALL_DUMMY_LOCATION == BEFORE_TEXT_END || CALL_DUMMY_LOCATION == AFTER_TEXT_END
-f:1:PC_IN_CALL_DUMMY:int:pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address:::generic_pc_in_call_dummy::0
+# NOTE: cagney/2002-11-24: This function with predicate has a valid
+# (callable) initial value.  As a consequence, even when the predicate
+# is false, the corresponding function works.  This simplifies the
+# migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
+# doesn't need to be modified.
+F:1:DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
 v:1:CALL_DUMMY_P:int:call_dummy_p::::0:-1
 v:2:CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0:0x%08lx
@@ -686,9 +697,6 @@ EOF
     do
 	eval echo \"\ \ \ \ ${r}=\${${r}}\"
     done
-#    #fallbackdefault=${fallbackdefault}
-#    #valid_p=${valid_p}
-#EOF
     if class_is_predicate_p && fallback_default_p
     then
 	echo "Error: predicate function ${macro} can not have a non- multi-arch default" 1>&2
@@ -1650,11 +1658,11 @@ do
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
-	if [ -n "${valid_p}" ]
+	if [ -n "${predicate}" ]
 	then
-	    printf "  return ${valid_p};\n"
+	    printf "  return ${predicate};\n"
 	else
-	    printf "#error \"gdbarch_${function}_p: not defined\"\n"
+	    printf "  return gdbarch->${function} != 0;\n"
 	fi
 	printf "}\n"
     fi
@@ -1673,6 +1681,11 @@ do
         printf "  if (gdbarch->${function} == 0)\n"
         printf "    internal_error (__FILE__, __LINE__,\n"
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
+	if class_is_predicate_p && test -n "${predicate}"
+	then
+	    # Allow a call to a function with a predicate.
+	    printf "  /* Ignore predicate (${predicate}).  */\n"
+	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
 	if [ "x${actual}" = "x-" -o "x${actual}" = "x" ]

@@ -3197,7 +3197,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* 32-bit machine types: */
 
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
-      set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
@@ -3248,7 +3248,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
 #else
-      set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);
@@ -3295,7 +3295,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     default:	/* Any new machine type is likely to be 64-bit.  */
 
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
-      set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
       set_gdbarch_call_dummy_length (gdbarch, 192);
@@ -3303,7 +3303,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_start_offset (gdbarch, 148);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_64);
 #else
-      set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);

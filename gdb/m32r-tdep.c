@@ -386,7 +386,7 @@ m32r_init_extra_frame_info (struct frame_info *fi)
 
   memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -462,7 +462,7 @@ CORE_ADDR
 m32r_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
-    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else if (fi->fsr.regs[regnum] != 0)
       return read_memory_integer (fi->fsr.regs[regnum],
@@ -482,13 +482,13 @@ m32r_frame_chain (struct frame_info *fi)
   CORE_ADDR fn_start, callers_pc, fp;
 
   /* is this a dummy frame? */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return fi->frame;		/* dummy frame same as caller's frame */
 
   /* is caller-of-this a dummy frame? */
   callers_pc = FRAME_SAVED_PC (fi);	/* find out who called us: */
   fp = m32r_find_callers_reg (fi, FP_REGNUM);
-  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (callers_pc, fp, fp))
     return fp;			/* dummy frame's frame may bear no relation to ours */
 
   if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
@@ -527,7 +527,7 @@ m32r_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -554,7 +554,7 @@ m32r_pop_frame (struct frame_info *frame)
 CORE_ADDR
 m32r_frame_saved_pc (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return m32r_find_callers_reg (fi, RP_REGNUM);

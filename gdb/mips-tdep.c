@@ -1704,7 +1704,7 @@ mips_frame_saved_pc (struct frame_info *frame)
   int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
   : (proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
 
-  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     {
       LONGEST tmp;
       frame_unwind_signed_register (frame, PC_REGNUM, &tmp);
@@ -2187,7 +2187,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
   struct obj_section *sec;
   struct mips_objfile_private *priv;
 
-  if (PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
     return NULL;
 
   find_pc_partial_function (pc, NULL, &startaddr, NULL);
@@ -2427,7 +2427,7 @@ mips_frame_chain (struct frame_info *frame)
   if ((tmp = SKIP_TRAMPOLINE_CODE (saved_pc)) != 0)
     saved_pc = tmp;
 
-  if (PC_IN_CALL_DUMMY (saved_pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (saved_pc, 0, 0))
     {
       /* A dummy frame, uses SP not FP.  Get the old SP value.  If all
          is well, frame->frame the bottom of the current frame will
@@ -2452,7 +2452,7 @@ mips_frame_chain (struct frame_info *frame)
       && !(get_frame_type (frame) == SIGTRAMP_FRAME)
       /* For a generic dummy frame, let get_frame_pointer() unwind a
          register value saved as part of the dummy frame call.  */
-      && !(PC_IN_CALL_DUMMY (frame->pc, 0, 0)))
+      && !(DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0)))
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
@@ -2482,7 +2482,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
       if (fci->pc == PROC_LOW_ADDR (proc_desc)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
 	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
-      else if (PC_IN_CALL_DUMMY (fci->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (fci->pc, 0, 0))
 	/* Do not ``fix'' fci->frame.  It will have the value of the
            generic dummy frame's top-of-stack (since the draft
            fci->frame is obtained by returning the unwound stack
@@ -3812,7 +3812,7 @@ mips_pop_frame (void)
   CORE_ADDR new_sp = get_frame_base (frame);
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();

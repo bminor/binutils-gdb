@@ -533,7 +533,7 @@ extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
  */
 #if !defined(CALL_DUMMY_HAS_COMPLETED)
 #define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
-  PC_IN_CALL_DUMMY((pc), (sp), (frame_address))
+  DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address))
 #endif
 
 /* If STARTUP_WITH_SHELL is set, GDB's "run"

@@ -188,7 +188,7 @@ struct gdbarch
   CORE_ADDR call_dummy_breakpoint_offset;
   int call_dummy_breakpoint_offset_p;
   int call_dummy_length;
-  gdbarch_pc_in_call_dummy_ftype *pc_in_call_dummy;
+  gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy;
   int call_dummy_p;
   LONGEST * call_dummy_words;
   int sizeof_call_dummy_words;
@@ -352,7 +352,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
+  generic_pc_in_call_dummy,
   0,
   0,
   0,
@@ -528,7 +528,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_breakpoint_offset = -1;
   current_gdbarch->call_dummy_breakpoint_offset_p = -1;
   current_gdbarch->call_dummy_length = -1;
-  current_gdbarch->pc_in_call_dummy = generic_pc_in_call_dummy;
+  current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
   current_gdbarch->call_dummy_p = -1;
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
@@ -697,7 +697,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_length == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_length");
-  /* Skip verify of pc_in_call_dummy, invalid_p == 0 */
+  /* Skip verify of deprecated_pc_in_call_dummy, has predicate */
   if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_p == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_p");
@@ -1145,6 +1145,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef DEPRECATED_PC_IN_CALL_DUMMY
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address)",
+                      XSTRING (DEPRECATED_PC_IN_CALL_DUMMY (pc, sp, frame_address)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_PC_IN_CALL_DUMMY = 0x%08lx\n",
+                        (long) current_gdbarch->deprecated_pc_in_call_dummy
+                        /*DEPRECATED_PC_IN_CALL_DUMMY ()*/);
 #endif
 #ifdef DEPRECATED_STORE_RETURN_VALUE
 #if GDB_MULTI_ARCH
@@ -1595,17 +1606,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: PARM_BOUNDARY = %d\n",
                       PARM_BOUNDARY);
-#endif
-#ifdef PC_IN_CALL_DUMMY
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PC_IN_CALL_DUMMY(pc, sp, frame_address)",
-                      XSTRING (PC_IN_CALL_DUMMY (pc, sp, frame_address)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: PC_IN_CALL_DUMMY = 0x%08lx\n",
-                        (long) current_gdbarch->pc_in_call_dummy
-                        /*PC_IN_CALL_DUMMY ()*/);
 #endif
 #ifdef PC_IN_SIGTRAMP
   fprintf_unfiltered (file,
@@ -3450,22 +3450,30 @@ set_gdbarch_call_dummy_length (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
+gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->pc_in_call_dummy == 0)
+  return gdbarch->deprecated_pc_in_call_dummy != generic_pc_in_call_dummy;
+}
+
+int
+gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_pc_in_call_dummy == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_pc_in_call_dummy invalid");
+                    "gdbarch: gdbarch_deprecated_pc_in_call_dummy invalid");
+  /* Ignore predicate (gdbarch->deprecated_pc_in_call_dummy != generic_pc_in_call_dummy).  */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_pc_in_call_dummy called\n");
-  return gdbarch->pc_in_call_dummy (pc, sp, frame_address);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_pc_in_call_dummy called\n");
+  return gdbarch->deprecated_pc_in_call_dummy (pc, sp, frame_address);
 }
 
 void
-set_gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch,
-                              gdbarch_pc_in_call_dummy_ftype pc_in_call_dummy)
+set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch,
+                                         gdbarch_deprecated_pc_in_call_dummy_ftype deprecated_pc_in_call_dummy)
 {
-  gdbarch->pc_in_call_dummy = pc_in_call_dummy;
+  gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
 }
 
 int

@@ -2052,7 +2052,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  = !(bpstat_explains_signal (stop_bpstat)
 	      || trap_expected
 	      || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-		  && PC_IN_CALL_DUMMY (stop_pc, read_sp (),
+		  && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
 				       get_frame_base (get_current_frame ())))
 	      || (step_range_end && step_resume_breakpoint == NULL));
 
@@ -2063,7 +2063,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 				    news) give another signal besides SIGTRAP, so
 				    check here as well as above.  */
 				 || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-				     && PC_IN_CALL_DUMMY (stop_pc, read_sp (),
+				     && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
 							  get_frame_base
 							  (get_current_frame
 							   ()))));

@@ -434,7 +434,7 @@ m68hc11_pop_frame (void)
   register CORE_ADDR fp, sp;
   register int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -812,7 +812,7 @@ m68hc11_frame_chain (struct frame_info *frame)
 {
   CORE_ADDR addr;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
 
   if (frame->extra_info->return_pc == 0

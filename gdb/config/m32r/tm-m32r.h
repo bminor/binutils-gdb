@@ -191,7 +191,7 @@ extern use_struct_convention_fn m32r_use_struct_convention;
 /* generic dummy frame stuff */
 
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
+#define DEPRECATED_PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 
 /* target-specific dummy_frame stuff */

@@ -135,13 +135,13 @@ extern void find_frame_sal (struct frame_info *frame,
    *FRAME* macros, a frame address has no defined meaning other than
    as a magic cookie which identifies a frame over calls to the
    inferior (um, SEE NOTE BELOW).  The only known exception is
-   inferior.h (PC_IN_CALL_DUMMY) [ON_STACK]; see comments there.  You
-   cannot assume that a frame address contains enough information to
-   reconstruct the frame; if you want more than just to identify the
-   frame (e.g. be able to fetch variables relative to that frame),
-   then save the whole struct frame_info (and the next struct
-   frame_info, since the latter is used for fetching variables on some
-   machines) (um, again SEE NOTE BELOW).
+   inferior.h (DEPRECATED_PC_IN_CALL_DUMMY) [ON_STACK]; see comments
+   there.  You cannot assume that a frame address contains enough
+   information to reconstruct the frame; if you want more than just to
+   identify the frame (e.g. be able to fetch variables relative to
+   that frame), then save the whole struct frame_info (and the next
+   struct frame_info, since the latter is used for fetching variables
+   on some machines) (um, again SEE NOTE BELOW).
 
    NOTE: cagney/2002-11-18: Actually, the frame address isn't
    sufficient for identifying a frame, and the counter examples are
@@ -156,12 +156,13 @@ extern void find_frame_sal (struct frame_info *frame,
    comparing both the frame's base and the frame's enclosing function
    (frame_find_by_id() is going to be modified to perform this test). 
 
-   The generic dummy frame version of PC_IN_CALL_DUMMY() is able to
-   identify a dummy frame using only the PC value.  So the frame
-   address is not needed.  In fact, most PC_IN_CALL_DUMMY() calls now
-   pass zero as the frame/sp values as the caller knows that those
-   values won't be used.  Once all architectures are using generic
-   dummy frames, PC_IN_CALL_DUMMY() can drop the sp/frame parameters.
+   The generic dummy frame version of DEPRECATED_PC_IN_CALL_DUMMY() is
+   able to identify a dummy frame using only the PC value.  So the
+   frame address is not needed.  In fact, most
+   DEPRECATED_PC_IN_CALL_DUMMY() calls now pass zero as the frame/sp
+   values as the caller knows that those values won't be used.  Once
+   all architectures are using generic dummy frames,
+   DEPRECATED_PC_IN_CALL_DUMMY() can drop the sp/frame parameters.
    When it comes to finding a dummy frame, the next frame's frame ID
    (with out duing an unwind) can be used (ok, could if it wasn't for
    the need to change the way the PPC defined frame base in a strange
@@ -201,13 +202,14 @@ extern enum frame_type get_frame_type (struct frame_info *);
 
 /* FIXME: cagney/2002-11-10: Some targets want to directly mark a
    frame as being of a specific type.  This shouldn't be necessary.
-   PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and PC_IN_CALL_DUMMY()
-   indicates a DUMMY_FRAME.  I suspect the real problem here is that
-   get_prev_frame() only sets initialized after INIT_EXTRA_FRAME_INFO
-   as been called.  Consequently, some targets found that the frame's
-   type was wrong and tried to fix it.  The correct fix is to modify
-   get_prev_frame() so that it initializes the frame's type before
-   calling any other functions.  */
+   PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and
+   DEPRECATED_PC_IN_CALL_DUMMY() indicates a DUMMY_FRAME.  I suspect
+   the real problem here is that get_prev_frame() only sets
+   initialized after INIT_EXTRA_FRAME_INFO as been called.
+   Consequently, some targets found that the frame's type was wrong
+   and tried to fix it.  The correct fix is to modify get_prev_frame()
+   so that it initializes the frame's type before calling any other
+   functions.  */
 extern void deprecated_set_frame_type (struct frame_info *,
 				       enum frame_type type);
 

@@ -1,3 +1,19 @@
+2002-12-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_PC_IN_CALL_DUMMY): Rename
+	PC_IN_CALL_DUMMY.  Change to predicate.  Always allow call.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* config/sparc/tm-sparc.h, config/sparc/tm-sp64.h: Update.
+	* config/mn10200/tm-mn10200.h, config/h8500/tm-h8500.h: Update.
+	* config/pa/tm-hppa.h, frame.h: Update.
+	* x86-64-tdep.c, vax-tdep.c, sparc-tdep.c: Update.
+	* s390-tdep.c, ns32k-tdep.c, mn10300-tdep.c: Update.
+	* m68k-tdep.c, i386-tdep.c, frv-tdep.c: Update.
+	* cris-tdep.c, alpha-tdep.c: Update.
+	* frame.c (set_unwind_by_pc, create_new_frame): Use either
+	DEPRECATED_PC_IN_CALL_DUMMY or pc_in_dummy_frame.
+	(get_prev_frame): Ditto.
+
 2002-11-30  Andrew Cagney  <cagney@redhat.com>
 
 	* exec.c (xfer_memory): Replace boolean with int.

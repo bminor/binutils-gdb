@@ -29,7 +29,7 @@
 /* NOTE: cagney/2002-11-24: This is a guess.  */
 #define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0
 #define CALL_DUMMY_LOCATION ON_STACK
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
+#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 
 /* Forward declarations of some types we use in prototypes */
 
@@ -516,7 +516,7 @@ extern void hppa_pop_frame (void);
    we'll consider that to mean that we've reached the call dummy's
    end after its successful completion. */
 #define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
-  (PC_IN_CALL_DUMMY((pc), (sp), (frame_address)) && \
+  (DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address)) && \
    (read_memory_integer((pc), 4) == BREAKPOINT32))
 
 /*

@@ -705,7 +705,7 @@ ia64_frame_chain (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, sp_regnum);
-  else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;
   else
     {
@@ -722,7 +722,7 @@ ia64_frame_saved_pc (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, pc_regnum);
-  else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame, pc_regnum);
   else
     {
@@ -1233,7 +1233,7 @@ ia64_get_saved_register (char *raw_buffer,
   if (lval != NULL)
     *lval = not_lval;
 
-  is_dummy_frame = PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame);
+  is_dummy_frame = DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame);
 
   if (regnum == SP_REGNUM && frame->next)
     {
@@ -1481,7 +1481,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
   int next_frame_is_call_dummy = ((frame->next != NULL)
-    && PC_IN_CALL_DUMMY (frame->next->pc, frame->next->frame,
+    && DEPRECATED_PC_IN_CALL_DUMMY (frame->next->pc, frame->next->frame,
                                           frame->next->frame));
 
   frame->extra_info = (struct frame_extra_info *)
@@ -1518,7 +1518,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       else if (frn->next && (get_frame_type (frn->next) == SIGTRAMP_FRAME))
 	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
       else if (frn->next
-               && PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
+               && DEPRECATED_PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
 	                                           frn->next->frame))
 	cfm = deprecated_read_register_dummy (frn->next->pc, frn->next->frame,
 					      IA64_PFS_REGNUM);

@@ -750,7 +750,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   avr_scan_prologue (fi);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -833,7 +833,7 @@ avr_pop_frame (void)
   CORE_ADDR saddr;
   struct frame_info *frame = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -866,7 +866,7 @@ avr_pop_frame (void)
 static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame,
 					   AVR_PC_REGNUM);
   else
@@ -1030,7 +1030,7 @@ avr_frame_address (struct frame_info *fi)
 static CORE_ADDR
 avr_frame_chain (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       /* initialize the return_pc now */
       frame->extra_info->return_pc

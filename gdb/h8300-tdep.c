@@ -492,7 +492,7 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_chain (struct frame_info *thisframe)
 {
-  if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
     {				/* initialize the from_pc now */
       thisframe->extra_info->from_pc =
 	deprecated_read_register_dummy (thisframe->pc, thisframe->frame,
@@ -510,7 +510,7 @@ h8300_frame_chain (struct frame_info *thisframe)
 static CORE_ADDR
 h8300_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame,
 					   E_PC_REGNUM);
   else
@@ -540,7 +540,7 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_locals_address (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
   return fi->extra_info->locals_pointer;
 }
@@ -551,7 +551,7 @@ h8300_frame_locals_address (struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_args_address (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
   return fi->extra_info->args_pointer;
 }
@@ -746,7 +746,7 @@ h8300_pop_frame (void)
   unsigned regno;
   struct frame_info *frame = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
     }

@@ -92,7 +92,7 @@ inside_entry_file (CORE_ADDR addr)
       /* Do not stop backtracing if the pc is in the call dummy
          at the entry point.  */
       /* FIXME: Won't always work with zeros for the last two arguments */
-      if (PC_IN_CALL_DUMMY (addr, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (addr, 0, 0))
 	return 0;
     }
   return (addr >= symfile_objfile->ei.entry_file_lowpc &&
@@ -157,7 +157,7 @@ inside_entry_func (CORE_ADDR pc)
       /* Do not stop backtracing if the pc is in the call dummy
          at the entry point.  */
       /* FIXME: Won't always work with zeros for the last two arguments */
-      if (PC_IN_CALL_DUMMY (pc, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
 	return 0;
     }
   return (symfile_objfile->ei.entry_func_lowpc <= pc &&
@@ -665,7 +665,7 @@ deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
    have that meaning, but the 29k doesn't use ON_STACK.  This could be
    fixed by generalizing this scheme, perhaps by passing in a frame
    and adding a few fields, at least on machines which need them for
-   PC_IN_CALL_DUMMY.
+   DEPRECATED_PC_IN_CALL_DUMMY.
 
    Something simpler, like checking for the stack segment, doesn't work,
    since various programs (threads implementations, gcc nested function
@@ -697,7 +697,7 @@ deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 int
 generic_file_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (frame_pc_unwind (fi), fp, fp))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame_pc_unwind (fi), fp, fp))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
@@ -709,7 +709,7 @@ int
 generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY ((fi)->pc, 0, 0))
+      && DEPRECATED_PC_IN_CALL_DUMMY ((fi)->pc, 0, 0))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0

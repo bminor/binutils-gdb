@@ -800,7 +800,7 @@ CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
-    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else if (fi->saved_regs[regnum] != 0)
       return read_memory_unsigned_integer (fi->saved_regs[regnum],
@@ -826,7 +826,7 @@ v850_frame_chain (struct frame_info *fi)
   callers_pc = FRAME_SAVED_PC (fi);
   /* If caller is a call-dummy, then our FP bears no relation to his FP! */
   fp = v850_find_callers_reg (fi, E_FP_RAW_REGNUM);
-  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (callers_pc, fp, fp))
     return fp;			/* caller is call-dummy: return oldest value of FP */
 
   /* Caller is NOT a call-dummy, so everything else should just work.
@@ -883,7 +883,7 @@ v850_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -1009,7 +1009,7 @@ v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return deprecated_read_register_dummy (fi->pc, fi->frame, E_PC_REGNUM);
   else
     return v850_find_callers_reg (fi, E_RP_REGNUM);
@@ -1111,7 +1111,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
       /* The call dummy doesn't save any registers on the stack, so we
          can return now.  */
-      if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
 	return;
 
       /* Find the beginning of this function, so we can analyze its

@@ -509,7 +509,7 @@ i386_frameless_signal_p (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     return frame->frame;
 
   if (get_frame_type (frame) == SIGTRAMP_FRAME
@@ -566,7 +566,7 @@ i386_sigtramp_saved_sp (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     {
       ULONGEST pc;
 
@@ -1594,7 +1594,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					   i386_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
-  set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
 
   /* "An argument's size is increased, if necessary, to make it a
      multiple of [32-bit] words.  This may require tail padding,

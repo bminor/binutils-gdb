@@ -1213,7 +1213,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->return_pc = 0;
   fi->extra_info->leaf_function = 0;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {    
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -1254,7 +1254,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 CORE_ADDR
 cris_frame_chain (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       return fi->frame;
     }
@@ -1512,7 +1512,7 @@ cris_pop_frame (void)
   register int regno;
   register int stack_offset = 0;
   
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* This happens when we hit a breakpoint set at the entry point,
          when returning from a dummy frame.  */
@@ -4259,7 +4259,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Read all about dummy frames in blockframe.c.  */
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   
   /* Defined to 1 to indicate that the target supports inferior function 
      calls.  */
