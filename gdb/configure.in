@@ -298,6 +298,7 @@ if test x$want_mmalloc = xtrue; then
 fi
 
 # start-sanitize-gdbtk
+# start-sanitize-ide
 ENABLE_IDE=
 AC_ARG_ENABLE(ide, [  --enable-ide            Enable IDE support])
 if test "$enable_ide" = yes; then
@@ -351,6 +352,7 @@ AC_SUBST(IDE_X)
 AC_SUBST(LIBIDETCL)
 AC_SUBST(LIBIDE)
 AC_SUBST(IDE_DEPS)
+# end-sanitize-ide
 
 ENABLE_GDBTK=
 

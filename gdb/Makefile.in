@@ -163,30 +163,20 @@ WIN32LDAPP = @WIN32LDAPP@
 WIN32LIBS = @WIN32LIBS@
 
 ENABLE_GDBTK= @ENABLE_GDBTK@
+#start-sanitize-ide
 ENABLE_IDE= @ENABLE_IDE@
 
-LIBGUI = ../libgui/src/libgui.a
-
-GUI_CFLAGS_X = -I$(srcdir)/../libgui/src
-
-IDE_CFLAGS_X = -I$(srcdir)/../libidetcl/src -I$(srcdir)/../libide/src \
-  `if [ x"$(ENABLE_IDE)" != x ] ; then \
-    echo -DIDE -I$(srcdir)/../ilu/runtime/mainloop;\
-  fi`
-
-LIBIDETCL = ../libidetcl/src/libidetcl.a
-LIBIDE = ../libide/src/libide.a
-
-IDE_X = ` \
-  if [ x"$(ENABLE_IDE)" != x ] ; then \
-    echo -L../ilu/runtime/mainloop -lilu-Tk -L../ilu/runtime/c -lilu-c -L../ilu/runtime/kernel -lilu;\
-  fi`
-
-IDE_DEPS = ../ilu/runtime/mainloop/libilu-Tk.a \
-	../ilu/runtime/c/libilu-c.a ../ilu/runtime/kernel/libilu.a
-
+FOUNDRY_LIB_BASE= @FOUNDRY_LIB_BASE@
+LIBGUI = @LIBGUI@
+GUI_CFLAGS_X = @GUI_CFLAGS_X@
+IDE_CFLAGS_X = @IDE_CFLAGS_X@
+IDE_X = @IDE_X@
+LIBIDETCL = @LIBIDETCL@
+LIBIDE = @LIBIDE@
+IDE_DEPS = @IDE_DEPS@
 IDE=$(IDE_X) 
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+#end-sanitize-ide
 #end-sanitize-gdbtk
 
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
@@ -463,6 +453,7 @@ defs_h =	defs.h xm.h tm.h nm.h config.status config.h
 
 inferior_h =	inferior.h $(breakpoint_h)
 tracepoint_h =	tracepoint.h
+ax_h = 		ax.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -1198,6 +1189,13 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	language.h gdb_string.h $(readline_headers)
 # end-sanitize-gdbtk
 
+v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
+	$(frame_h) $(breakpoint_h) $(gdbcore_h) $(value_h) symfile.h \
+	gdb_string.h target.h objfiles.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+		$(srcdir)/v850ice.c
+
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
 	$(value_h) gdb_string.h
@@ -1582,7 +1580,7 @@ stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	language.h target.h gdb_string.h
 
-ax-general.o: ax-general.c $(ax_h)
+ax-general.o: ax-general.c $(ax_h) $(defs_h)
 ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) symfile.h $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(command_h) $(ax_h) $(gdbcmd_h) ax-gdb.h
 
