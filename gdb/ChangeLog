@@ -1,3 +1,11 @@
+2003-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (gdb_print_insn_mips): Set the disassembler's
+	flavour and disassembler options.
+	(_initialize_mips_tdep): Do not set deprecated_tm_print_insn.
+	(mips_gdbarch_init): Set "print_insn".  Delete initialization of
+	deprecated_tm_print_insn_info.
+	
 2003-08-27  Andrew Cagney  <cagney@redhat.com>
 
 	* s390-tdep.c (s390_readinstruction): Delete "info" parameter.

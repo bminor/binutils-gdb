@@ -5258,6 +5258,7 @@ reinit_frame_cache_sfunc (char *args, int from_tty,
 int
 gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   mips_extra_func_info_t proc_desc;
 
   /* Search for the function containing this address.  Set the low bit
@@ -5289,6 +5290,26 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
+
+  /* Set the disassembler options.  */
+  if (tdep->mips_abi == MIPS_ABI_N32
+      || tdep->mips_abi == MIPS_ABI_N64)
+    {
+      /* Set up the disassembler info, so that we get the right
+	 register names from libopcodes.  */
+      if (tdep->mips_abi == MIPS_ABI_N32)
+	info->disassembler_options = "gpr-names=n32";
+      else
+	info->disassembler_options = "gpr-names=64";
+      info->flavour = bfd_target_elf_flavour;
+    }
+  else
+    /* This string is not recognized explicitly by the disassembler,
+       but it tells the disassembler to not try to guess the ABI from
+       the bfd elf headers, such that, if the user overrides the ABI
+       of a program linked as NewABI, the disassembly will follow the
+       register naming conventions specified by the user.  */
+    info->disassembler_options = "gpr-names=32";
 
   /* Call the appropriate disassembler based on the target endian-ness.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -5726,12 +5747,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   enum mips_abi mips_abi, found_abi, wanted_abi;
   int num_regs;
 
-  /* Reset the disassembly info, in case it was set to something
-     non-default.  */
-  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  deprecated_tm_print_insn_info.arch = bfd_arch_unknown;
-  deprecated_tm_print_insn_info.mach = 0;
-
   elf_flags = 0;
 
   if (info.abfd)
@@ -5810,34 +5825,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   wanted_abi = global_mips_abi ();
   if (wanted_abi != MIPS_ABI_UNKNOWN)
     mips_abi = wanted_abi;
-
-  /* We have to set deprecated_tm_print_insn_info before looking for a
-     pre-existing architecture, otherwise we may return before we get
-     a chance to set it up.  */
-  if (mips_abi == MIPS_ABI_N32 || mips_abi == MIPS_ABI_N64)
-    {
-      /* Set up the disassembler info, so that we get the right
-	 register names from libopcodes.  */
-      if (mips_abi == MIPS_ABI_N32)
-	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=n32";
-      else
-	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=64";
-      deprecated_tm_print_insn_info.flavour = bfd_target_elf_flavour;
-      deprecated_tm_print_insn_info.arch = bfd_arch_mips;
-      if (info.bfd_arch_info != NULL
-	  && info.bfd_arch_info->arch == bfd_arch_mips
-	  && info.bfd_arch_info->mach)
-	deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
-      else
-	deprecated_tm_print_insn_info.mach = bfd_mach_mips8000;
-    }
-  else
-    /* This string is not recognized explicitly by the disassembler,
-       but it tells the disassembler to not try to guess the ABI from
-       the bfd elf headers, such that, if the user overrides the ABI
-       of a program linked as NewABI, the disassembly will follow the
-       register naming conventions specified by the user.  */
-    deprecated_tm_print_insn_info.disassembler_options = "gpr-names=32";
 
   if (gdbarch_debug)
     {
@@ -6130,6 +6117,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
+
+  set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -6545,8 +6534,6 @@ _initialize_mips_tdep (void)
     internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
-  if (!deprecated_tm_print_insn)	 /* Someone may have already set it */
-    deprecated_tm_print_insn = gdb_print_insn_mips;
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,
