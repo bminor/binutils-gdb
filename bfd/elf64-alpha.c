@@ -2467,8 +2467,13 @@ elf64_alpha_create_got_section(abfd, info)
 {
   asection *s;
 
-  if (bfd_get_section_by_name (abfd, ".got"))
-    return TRUE;
+  if ((s = bfd_get_section_by_name (abfd, ".got")))
+    {
+      /* Check for a non-linker created .got?  */
+      if (alpha_elf_tdata (abfd)->got == NULL)
+	alpha_elf_tdata (abfd)->got = s;
+      return TRUE;
+    }
 
   s = bfd_make_section (abfd, ".got");
   if (s == NULL

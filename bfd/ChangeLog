@@ -1,3 +1,8 @@
+2003-09-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf64-alpha.c (elf64_alpha_create_got_section): Initialize
+	->got if the section already exists.
+
 2003-09-19  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* dwarf2.c (decode_line_info): Cope with an initially empty
