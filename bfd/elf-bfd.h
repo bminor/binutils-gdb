@@ -1419,7 +1419,7 @@ extern bfd_boolean _bfd_elf_link_hash_table_init
    struct bfd_hash_entry *(*)
      (struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 extern bfd_boolean _bfd_elf_slurp_version_tables
-  (bfd *);
+  (bfd *, bfd_boolean);
 extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_is_group_section

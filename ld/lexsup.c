@@ -136,6 +136,7 @@ enum option_values
   OPTION_ALLOW_MULTIPLE_DEFINITION,
   OPTION_NO_UNDEFINED_VERSION,
   OPTION_DEFAULT_SYMVER,
+  OPTION_DEFAULT_IMPORTED_SYMVER,
   OPTION_DISCARD_NONE,
   OPTION_SPARE_DYNAMIC_TAGS,
   OPTION_NO_DEFINE_COMMON,
@@ -397,6 +398,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Disallow undefined version"), TWO_DASHES },
   { {"default-symver", no_argument, NULL, OPTION_DEFAULT_SYMVER},
     '\0', NULL, N_("Create default symbol version"), TWO_DASHES },
+  { {"default-imported-symver", no_argument, NULL,
+      OPTION_DEFAULT_IMPORTED_SYMVER},
+    '\0', NULL, N_("Create default symbol version for imported symbols"),
+    TWO_DASHES },
   { {"no-warn-mismatch", no_argument, NULL, OPTION_NO_WARN_MISMATCH},
     '\0', NULL, N_("Don't warn about mismatched input files"), TWO_DASHES},
   { {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
@@ -908,6 +913,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_DEFAULT_SYMVER:
 	  link_info.create_default_symver = TRUE;
+	  break;
+	case OPTION_DEFAULT_IMPORTED_SYMVER:
+	  link_info.default_imported_symver = TRUE;
 	  break;
 	case OPTION_NO_WARN_MISMATCH:
 	  command_line.warn_mismatch = FALSE;

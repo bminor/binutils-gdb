@@ -1237,7 +1237,12 @@ will be issued instead.
 @kindex --default-symver
 @item --default-symver
 Create and use a default symbol version (the soname) for unversioned
-symbols.
+exported symbols.
+
+@kindex --default-imported-symver
+@item --default-imported-symver
+Create and use a default symbol version (the soname) for unversioned
+imported symbols.
 
 @kindex --no-warn-mismatch
 @item --no-warn-mismatch

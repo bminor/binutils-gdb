@@ -1,3 +1,14 @@
+2004-11-04  Paul Brook  <paul@codesourcery.com>
+
+	* elf-bfd.h (_bfd_elf_slurp_version_tables): Update prototype.
+	* elf.c (_bfd_elf_print_private_bfd_data): Pass extra argument.
+	(_bfd_elf_slurp_version_tables): Add extra argument.  Create extra
+	default version definition for unversioned symbols.
+	* elfcode.h (elf_slurp_symbol_table): Pass extra argument.
+	* elflink.c (elf_link_add_object_symbols): Pass extra argument to
+	_bfd_elf_slurp_version_tables.  Set default version for unversioned
+	imported symbols.
+
 2004-11-15  Paul Brook  <paul@codesourcery.com>
 
 	* elflink.c (elf_link_add_object_symbols): Don't assume version

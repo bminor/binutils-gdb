@@ -3347,7 +3347,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   if (dynamic)
     {
       /* Read in any version definitions.  */
-      if (! _bfd_elf_slurp_version_tables (abfd))
+      if (!_bfd_elf_slurp_version_tables (abfd,
+					  info->default_imported_symver))
 	goto error_free_sym;
 
       /* Read in the symbol versions, but don't bother to convert them
@@ -3499,102 +3500,109 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  unsigned int vernum = 0;
 	  bfd_boolean skip;
 
-	  if (ever != NULL)
+	  if (ever == NULL)
 	    {
-	      _bfd_elf_swap_versym_in (abfd, ever, &iver);
-	      vernum = iver.vs_vers & VERSYM_VERSION;
+	      if (info->default_imported_symver)
+		/* Use the default symbol version created earlier.  */
+		iver.vs_vers = elf_tdata (abfd)->cverdefs;
+	      else
+		iver.vs_vers = 0;
+	    }
+	  else
+	    _bfd_elf_swap_versym_in (abfd, ever, &iver);
 
-	      /* If this is a hidden symbol, or if it is not version
-		 1, we append the version name to the symbol name.
-		 However, we do not modify a non-hidden absolute
-		 symbol, because it might be the version symbol
-		 itself.  FIXME: What if it isn't?  */
-	      if ((iver.vs_vers & VERSYM_HIDDEN) != 0
-		  || (vernum > 1 && ! bfd_is_abs_section (sec)))
+	  vernum = iver.vs_vers & VERSYM_VERSION;
+
+	  /* If this is a hidden symbol, or if it is not version
+	     1, we append the version name to the symbol name.
+	     However, we do not modify a non-hidden absolute
+	     symbol, because it might be the version symbol
+	     itself.  FIXME: What if it isn't?  */
+	  if ((iver.vs_vers & VERSYM_HIDDEN) != 0
+	      || (vernum > 1 && ! bfd_is_abs_section (sec)))
+	    {
+	      const char *verstr;
+	      size_t namelen, verlen, newlen;
+	      char *newname, *p;
+
+	      if (isym->st_shndx != SHN_UNDEF)
 		{
-		  const char *verstr;
-		  size_t namelen, verlen, newlen;
-		  char *newname, *p;
-
-		  if (isym->st_shndx != SHN_UNDEF)
-		    {
-		      if (vernum > elf_tdata (abfd)->cverdefs)
-			verstr = NULL;
-		      else if (vernum > 1)
-			verstr =
-			  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
-		      else
-			verstr = "";
-
-		      if (verstr == NULL)
-			{
-			  (*_bfd_error_handler)
-			    (_("%B: %s: invalid version %u (max %d)"),
-			     abfd, name, vernum,
-			     elf_tdata (abfd)->cverdefs);
-			  bfd_set_error (bfd_error_bad_value);
-			  goto error_free_vers;
-			}
-		    }
+		  if (vernum > elf_tdata (abfd)->cverdefs)
+		    verstr = NULL;
+		  else if (vernum > 1)
+		    verstr =
+		      elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
 		  else
+		    verstr = "";
+
+		  if (verstr == NULL)
 		    {
-		      /* We cannot simply test for the number of
-			 entries in the VERNEED section since the
-			 numbers for the needed versions do not start
-			 at 0.  */
-		      Elf_Internal_Verneed *t;
-
-		      verstr = NULL;
-		      for (t = elf_tdata (abfd)->verref;
-			   t != NULL;
-			   t = t->vn_nextref)
-			{
-			  Elf_Internal_Vernaux *a;
-
-			  for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
-			    {
-			      if (a->vna_other == vernum)
-				{
-				  verstr = a->vna_nodename;
-				  break;
-				}
-			    }
-			  if (a != NULL)
-			    break;
-			}
-		      if (verstr == NULL)
-			{
-			  (*_bfd_error_handler)
-			    (_("%B: %s: invalid needed version %d"),
-			     abfd, name, vernum);
-			  bfd_set_error (bfd_error_bad_value);
-			  goto error_free_vers;
-			}
+		      (*_bfd_error_handler)
+			(_("%B: %s: invalid version %u (max %d)"),
+			 abfd, name, vernum,
+			 elf_tdata (abfd)->cverdefs);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_free_vers;
 		    }
-
-		  namelen = strlen (name);
-		  verlen = strlen (verstr);
-		  newlen = namelen + verlen + 2;
-		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
-		      && isym->st_shndx != SHN_UNDEF)
-		    ++newlen;
-
-		  newname = bfd_alloc (abfd, newlen);
-		  if (newname == NULL)
-		    goto error_free_vers;
-		  memcpy (newname, name, namelen);
-		  p = newname + namelen;
-		  *p++ = ELF_VER_CHR;
-		  /* If this is a defined non-hidden version symbol,
-		     we add another @ to the name.  This indicates the
-		     default version of the symbol.  */
-		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
-		      && isym->st_shndx != SHN_UNDEF)
-		    *p++ = ELF_VER_CHR;
-		  memcpy (p, verstr, verlen + 1);
-
-		  name = newname;
 		}
+	      else
+		{
+		  /* We cannot simply test for the number of
+		     entries in the VERNEED section since the
+		     numbers for the needed versions do not start
+		     at 0.  */
+		  Elf_Internal_Verneed *t;
+
+		  verstr = NULL;
+		  for (t = elf_tdata (abfd)->verref;
+		       t != NULL;
+		       t = t->vn_nextref)
+		    {
+		      Elf_Internal_Vernaux *a;
+
+		      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+			{
+			  if (a->vna_other == vernum)
+			    {
+			      verstr = a->vna_nodename;
+			      break;
+			    }
+			}
+		      if (a != NULL)
+			break;
+		    }
+		  if (verstr == NULL)
+		    {
+		      (*_bfd_error_handler)
+			(_("%B: %s: invalid needed version %d"),
+			 abfd, name, vernum);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_free_vers;
+		    }
+		}
+
+	      namelen = strlen (name);
+	      verlen = strlen (verstr);
+	      newlen = namelen + verlen + 2;
+	      if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+		  && isym->st_shndx != SHN_UNDEF)
+		++newlen;
+
+	      newname = bfd_alloc (abfd, newlen);
+	      if (newname == NULL)
+		goto error_free_vers;
+	      memcpy (newname, name, namelen);
+	      p = newname + namelen;
+	      *p++ = ELF_VER_CHR;
+	      /* If this is a defined non-hidden version symbol,
+		 we add another @ to the name.  This indicates the
+		 default version of the symbol.  */
+	      if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+		  && isym->st_shndx != SHN_UNDEF)
+		*p++ = ELF_VER_CHR;
+	      memcpy (p, verstr, verlen + 1);
+
+	      name = newname;
 	    }
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
