@@ -1,3 +1,9 @@
+Wed Aug  2 13:06:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-udi.c (udi_xfer_inferior_memory, udi_files_info,
+ 	udi_kill): Update function signatures so that match target vector.
+	* MAINTAINERS: Update.
+
 Wed Aug  2 11:04:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Updates.

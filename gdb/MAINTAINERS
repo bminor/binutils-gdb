@@ -30,7 +30,7 @@ variants.  *-tdep.c. The Target/Architecture maintainer works with the
 host maintainer when resolving build issues.  The Target/Architecture
 maintainer works with the native maintainer when resolving API issues.
 
-	a29k		maintenance only (a29k-amd-udi)
+	a29k		maintenance only (a29k-amd-udi -Werror)
 	alpha		maintenance only (alpha-dec-osf4.0a)
 	arc		maintenance only (arc-elf)
 

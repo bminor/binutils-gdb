@@ -922,7 +922,8 @@ translate_addr (CORE_ADDR addr)
 /************************************************* UDI_XFER_INFERIOR_MEMORY */
 /* FIXME!  Merge these two.  */
 static int
-udi_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+udi_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+			  struct target_ops * target)
 {
 
   memaddr = translate_addr (memaddr);
@@ -935,7 +936,7 @@ udi_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 
 /********************************************************** UDI_FILES_INFO */
 static void
-udi_files_info (void)
+udi_files_info (struct target_ops *target)
 {
   printf_unfiltered ("\tAttached to UDI socket to %s", udi_config_id);
   if (prog_name != NULL)
@@ -998,7 +999,7 @@ udi_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 }
 
 static void
-udi_kill (char *arg, int from_tty)
+udi_kill (void)
 {
 
 #if 0
