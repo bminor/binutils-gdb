@@ -1,0 +1,1841 @@
+#--------CUT---------CUT---------CUT---------CUT--------#
+#########################################################
+#                                                       #
+# This is a shell archive file.  To extract files:      #
+#                                                       #
+#    1)	Make a directory for the files.                 #
+#    2) Write a file, such as "file.shar", containing   #
+#       this archive file into the directory.           #
+#    3) Type "sh file.shar".  Do not use csh.           #
+#                                                       #
+#########################################################
+#
+#
+echo Extracting ChangeLog:
+sed 's/^Z//' >ChangeLog <<\STUNKYFLUFF
+ZThu Jul 11 18:15:04 1991  Roland McGrath  (roland@churchy.gnu.ai.mit.edu)
+Z
+Z	* Merged with C library version, which now has its own subdir.
+Z	* malloc.h, *.c: Use ansideclisms and #ifdefs for portability both
+Z	in and out of the C library.
+Z	* Makefile: New makefile for malloc subdir in libc.
+Z	Has targets to create malloc.tar{,.Z} by ansidecl processing on srcs.
+Z	* malloc/Makefile: New file; Makefile for standalone distribution.
+Z	* malloc/README: New file; info for same.
+Z
+ZFri Apr  6 00:18:36 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+Z
+Z	* Makefile: Add comments.
+Z
+ZThu Apr  5 23:08:14 1990  Mike Haertel  (mike at albert.ai.mit.edu)
+Z
+Z	* mcheck.c (mcheck, checkhdr):  Support user-supplied abort()
+Z	function.
+Z	* malloc.h:  Declare __free().
+Z	* Makefile:  New target libmalloc.a.
+Z
+ZThu Apr  5 21:56:03 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+Z
+Z	* free.c (free):  Split into free and __free.
+Z	* malloc.c (morecore):  Call __free on oldinfo.
+Z
+ZLocal Variables:
+Zmode: indented-text
+Zleft-margin: 8
+Zfill-column: 76
+Zversion-control: never
+ZEnd:
+STUNKYFLUFF
+set `sum ChangeLog`
+if test 21008 != $1
+then
+echo ChangeLog: Checksum error. Is: $1, should be: 21008.
+fi
+#
+#
+echo Extracting Makefile:
+sed 's/^Z//' >Makefile <<\STUNKYFLUFF
+Z# Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+Z# This file is part of the GNU C Library.
+Z
+Z# The GNU C Library is free software; you can redistribute it and/or
+Z# modify it under the terms of the GNU Library General Public License as
+Z# published by the Free Software Foundation; either version 2 of the
+Z# License, or (at your option) any later version.
+Z
+Z# The GNU C Library is distributed in the hope that it will be useful,
+Z# but WITHOUT ANY WARRANTY; without even the implied warranty of
+Z# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Z# Library General Public License for more details.
+Z
+Z# You should have received a copy of the GNU Library General Public
+Z# License along with the GNU C Library; see the file COPYING.LIB.  If
+Z# not, write to the Free Software Foundation, Inc., 675 Mass Ave,
+Z# Cambridge, MA 02139, USA.
+Z
+Z#
+Z#	Makefile for malloc routines
+Z#
+Zsubdir	:= malloc
+Z
+Zall: 
+Z
+Zheaders	:= malloc.h
+Z
+Zroutines := malloc free cfree realloc calloc morecore \
+Z	    valloc memalign mcheck mtrace mstats
+Znodist	:= cfree
+Z
+Zinstall-lib := libmcheck.a
+Z
+Zdistribute := mcheck-init.c ChangeLog TODO \
+Z	      malloc/gmalloc-head.c dist-README dist-Makefile \
+Z	      mtrace.awk
+Z
+Z
+Zinclude ../Rules
+Z
+Z$(objpfx)libmcheck.a: $(objpfx)mcheck-init.o
+Z	ln $< $@
+Z
+Z# Make the standalone malloc distribution.
+Zdist-routines := $(filter-out $(nodist),$(routines))
+Zmalloc-dist := README COPYING.LIB Makefile ChangeLog \
+Z	       $(addsuffix .c,$(dist-routines)) $(headers) gmalloc.c \
+Z	       gmalloc-head.c mtrace.awk
+Z%.uu: %
+Z	uuencode $< < $< > $@-tmp
+Z	mv $@-tmp $@
+Z%.Z: %
+Z	compress -c $< > $@-tmp
+Z	mv $@-tmp $@
+Zmalloc.tar: $(addprefix malloc/,$(malloc-dist))
+Z	tar ch$(verbose)f $@ $^
+Zmalloc/%.c: %.c malloc/
+Z	$(..)ansidecl -trad $< | indent -stdin -gnu > $@-tmp
+Z	mv $@-tmp $@
+Zmalloc/%.h: %.h malloc/
+Z	$(..)ansidecl -trad $< | indent -stdin -gnu > $@-tmp
+Z	mv $@-tmp $@
+Zmalloc/Makefile: dist-Makefile
+Z	sed -e 's,<DIST-SOURCES>,$(addsuffix .c,$(dist-routines)),' \
+Z	    -e 's,<DIST-OBJECTS>,$(addsuffix .o,$(dist-routines)),' \
+Z	    -e 's,<DIST-HEADERS>,$(headers),' < $< > $@-tmp
+Z	mv $@-tmp $@
+Zmalloc/gmalloc.c: malloc/Makefile
+Z	$(MAKE) -C malloc gmalloc.c
+Zmalloc/README: dist-README
+Z	@rm -f $@
+Z	cp $< $@
+Zmalloc/%: %
+Z	@rm -f $@
+Z	cp $< $@
+STUNKYFLUFF
+set `sum Makefile`
+if test 48180 != $1
+then
+echo Makefile: Checksum error. Is: $1, should be: 48180.
+fi
+#
+#
+echo Extracting TODO:
+sed 's/^Z//' >TODO <<\STUNKYFLUFF
+Z0.  Access data structures with accessor macros, then turn the heapinfo
+Zinto several arrays for faster access on machines with addressing modes.
+ZAlso, this eventually raises the possibility of maintaining multiple
+Zheaps.
+Z1.  Possible heuristic to catch multiple frees.  Introduce an extra word
+Zof heapinfo that says whether the remaining info is for something
+Zbusy or something free.  Then we can catch attempts to free already-free
+Zlarge blocks, as well as things not belonging to malloc at all.  In the
+Zcase of a fragment, we can check if the fragment looks like it *already*
+Zbelongs to the fragment list, by comparing it with the "first" fragment
+Zof the block, or checking its "prev" pointer to see if it points into
+Zthe block.  Then if it looks like it might we can exhaustively search
+Zthe block's free list to see if the fragment is there or not.  Extending
+Zthe heapinfo structure would have the benefit of making it a power of
+Ztwo and thus making array indexing faster, perhaps.  Suitably adapted,
+Zthis heuristic could also catch invalid pointers passed to realloc.
+Z
+ZAll of these additional features require the inclusion of <malloc.h>.
+Z3.  indirect reference allocator: ialloc(), ifree(), irealloc().
+Z4.  garbage collecting allocator: galloc(), garbage(), gfree(), grealloc().
+STUNKYFLUFF
+set `sum TODO`
+if test 51437 != $1
+then
+echo TODO: Checksum error. Is: $1, should be: 51437.
+fi
+#
+#
+echo Extracting calloc.c:
+sed 's/^Z//' >calloc.c <<\STUNKYFLUFF
+Z/* Copyright (C) 1991 Free Software Foundation, Inc.
+ZThis file is part of the GNU C Library.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.  */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z/* @) */
+Z#include <malloc.h>
+Z
+Z#if	defined(__GNU_LIBRARY__) || defined(STDC_HEADERS) || defined(USG)
+Z#include <string.h>
+Z#else
+Z#define	memset(s, zero, n)	bzero ((s), (n))
+Z#endif
+Z
+Z/* Allocate an array of NMEMB elements each SIZE bytes long.
+Z   The entire array is initialized to zeros.  */
+ZPTR
+ZDEFUN(calloc, (nmemb, size), register size_t nmemb AND register size_t size)
+Z{
+Z  register PTR result = malloc (nmemb * size);
+Z
+Z  if (result != NULL)
+Z    (void) memset (result, 0, nmemb * size);
+Z
+Z  return result;
+Z}
+STUNKYFLUFF
+set `sum calloc.c`
+if test 48371 != $1
+then
+echo calloc.c: Checksum error. Is: $1, should be: 48371.
+fi
+#
+#
+echo Extracting cfree.c:
+sed 's/^Z//' >cfree.c <<\STUNKYFLUFF
+Z/* Copyright (C) 1991 Free Software Foundation, Inc.
+ZThis file is part of the GNU C Library.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.  */
+Z
+Z#include <ansidecl.h>
+Z#include <stdlib.h>
+Z
+Z#undef	cfree
+Z
+Z#include <gnu-stabs.h>
+Z
+Zfunction_alias(cfree, free, void, (ptr),
+Z	       DEFUN(cfree, (ptr), PTR ptr))
+STUNKYFLUFF
+set `sum cfree.c`
+if test 17488 != $1
+then
+echo cfree.c: Checksum error. Is: $1, should be: 17488.
+fi
+#
+#
+echo Extracting dist-Makefile:
+sed 's/^Z//' >dist-Makefile <<\STUNKYFLUFF
+Z# Copyright (C) 1991 Free Software Foundation, Inc.
+Z# This file is part of the GNU C Library.
+Z
+Z# The GNU C Library is free software; you can redistribute it and/or
+Z# modify it under the terms of the GNU Library General Public License
+Z# as published by the Free Software Foundation; either version 2 of
+Z# the License, or (at your option) any later version.
+Z
+Z# The GNU C Library is distributed in the hope that it will be useful,
+Z# but WITHOUT ANY WARRANTY; without even the implied warranty of
+Z# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Z# Library General Public License for more details.
+Z
+Z# You should have received a copy of the GNU Library General Public
+Z# License along with the GNU C Library; see the file COPYING.LIB.  If
+Z# not, write to the Free Software Foundation, Inc., 675 Mass Ave,
+Z# Cambridge, MA 02139, USA.
+Z
+Z# Makefile for standalone distribution of malloc.
+Z
+Z# Use this on System V.
+Z#CPPFLAGS = -DUSG
+Z
+Z.PHONY: all
+Zall: libmalloc.a gmalloc.o
+Z
+Zsources = <DIST-SOURCES>
+Zobjects = <DIST-OBJECTS>
+Zheaders = <DIST-HEADERS>
+Z
+Zlibmalloc.a: $(objects)
+Z	ar crv $@ $(objects)
+Z	ranlib $@
+Z
+Z$(objects): $(headers)
+Z
+Zgmalloc.c: gmalloc-head.c $(headers) $(sources)
+Z	cat gmalloc-head.c $(headers) $(sources) > $@
+Z
+Z.c.o:
+Z	$(CC) $(CFLAGS) $(CPPFLAGS) -I. -c $< $(OUTPUT_OPTION)
+Z
+Z.PHONY: clean realclean malloc-clean malloc-realclean
+Zclean malloc-clean:
+Z	-rm -f libmalloc.a *.o core
+Zrealclean malloc-realclean: clean
+Z	-rm -f TAGS tags *~
+Z
+Z# For inside the C library.
+Zmalloc.tar malloc.tar.Z:
+Z	$(MAKE) -C .. $@
+STUNKYFLUFF
+set `sum dist-Makefile`
+if test 58822 != $1
+then
+echo dist-Makefile: Checksum error. Is: $1, should be: 58822.
+fi
+#
+#
+echo Extracting dist-README:
+sed 's/^Z//' >dist-README <<\STUNKYFLUFF
+ZThis is the standalone distribution of GNU malloc.
+ZGNU malloc is part of the GNU C Library, but is also distributed separately.
+Z
+ZIf you find bugs in GNU malloc, send reports to bug-glibc@prep.ai.mit.edu.
+Z
+ZGNU malloc is free software.  See the file COPYING.LIB for copying conditions.
+Z
+ZThe makefile builds libmalloc.a and gmalloc.o.  If you are using GNU malloc
+Zto replace your system's existing malloc package, it is important to make
+Zsure you get all GNU functions, not some of the GNU functions and some from
+Zthe system library.  gmalloc.o has all the functions in one file, so using
+Zthat will make sure you don't accidentally mix the two malloc packages.
+STUNKYFLUFF
+set `sum dist-README`
+if test 59167 != $1
+then
+echo dist-README: Checksum error. Is: $1, should be: 59167.
+fi
+#
+#
+echo Extracting free.c:
+sed 's/^Z//' >free.c <<\STUNKYFLUFF
+Z/* Free a block of memory allocated by `malloc'.
+Z   Copyright 1990, 1991 Free Software Foundation
+Z		  Written May 1989 by Mike Haertel.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.
+Z
+Z   The author may be reached (Email) at the address mike@ai.mit.edu,
+Z   or (US mail) as Mike Haertel c/o Free Software Foundation. */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stddef.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#define _MALLOC_INTERNAL
+Z#include <malloc.h>
+Z
+Z/* Debugging hook for free.  */
+Zvoid EXFUN((*__free_hook), (PTR __ptr));
+Z
+Z/* List of blocks allocated by memalign.  */
+Zstruct alignlist *_aligned_blocks = NULL;
+Z
+Z/* Return memory to the heap.
+Z   Like `free' but don't call a __free_hook if there is one.  */
+Zvoid
+ZDEFUN(__free, (ptr), PTR ptr)
+Z{
+Z  int type;
+Z  size_t block, blocks;
+Z  register size_t i;
+Z  struct list *prev, *next;
+Z
+Z  block = BLOCK(ptr);
+Z
+Z  type = _heapinfo[block].busy.type;
+Z  switch (type)
+Z    {
+Z    case 0:
+Z      /* Get as many statistics as early as we can.  */
+Z      --_chunks_used;
+Z      _bytes_used -= _heapinfo[block].busy.info.size * BLOCKSIZE;
+Z      _bytes_free += _heapinfo[block].busy.info.size * BLOCKSIZE;
+Z
+Z      /* Find the free cluster previous to this one in the free list.
+Z	 Start searching at the last block referenced; this may benefit
+Z	 programs with locality of allocation.  */
+Z      i = _heapindex;
+Z      if (i > block)
+Z	while (i > block)
+Z	  i = _heapinfo[i].free.prev;
+Z      else
+Z	{
+Z	  do
+Z	    i = _heapinfo[i].free.next;
+Z	  while (i > 0 && i < block);
+Z	  i = _heapinfo[i].free.prev;
+Z	}
+Z
+Z      /* Determine how to link this block into the free list.  */
+Z      if (block == i + _heapinfo[i].free.size)
+Z	{
+Z	  /* Coalesce this block with its predecessor.  */
+Z	  _heapinfo[i].free.size += _heapinfo[block].busy.info.size;
+Z	  block = i;
+Z	}
+Z      else
+Z	{
+Z	  /* Really link this block back into the free list.  */
+Z	  _heapinfo[block].free.size = _heapinfo[block].busy.info.size;
+Z	  _heapinfo[block].free.next = _heapinfo[i].free.next;
+Z	  _heapinfo[block].free.prev = i;
+Z	  _heapinfo[i].free.next = block;
+Z	  _heapinfo[_heapinfo[block].free.next].free.prev = block;
+Z	  ++_chunks_free;
+Z	}
+Z
+Z      /* Now that the block is linked in, see if we can coalesce it
+Z	 with its successor (by deleting its successor from the list
+Z	 and adding in its size).  */
+Z      if (block + _heapinfo[block].free.size == _heapinfo[block].free.next)
+Z	{
+Z	  _heapinfo[block].free.size
+Z	    += _heapinfo[_heapinfo[block].free.next].free.size;
+Z	  _heapinfo[block].free.next
+Z	    = _heapinfo[_heapinfo[block].free.next].free.next;
+Z	  _heapinfo[_heapinfo[block].free.next].free.prev = block;
+Z	  --_chunks_free;
+Z	}
+Z
+Z      /* Now see if we can return stuff to the system.  */
+Z      blocks = _heapinfo[block].free.size;
+Z      if (blocks >= FINAL_FREE_BLOCKS && block + blocks == _heaplimit
+Z	  && (*__morecore)(0) == ADDRESS(block + blocks))
+Z	{
+Z	  register size_t bytes = blocks * BLOCKSIZE;
+Z	  _heaplimit -= blocks;
+Z	  (*__morecore)(- bytes);
+Z	  _heapinfo[_heapinfo[block].free.prev].free.next
+Z	    = _heapinfo[block].free.next;
+Z	  _heapinfo[_heapinfo[block].free.next].free.prev
+Z	    = _heapinfo[block].free.prev;
+Z	  block = _heapinfo[block].free.prev;
+Z	  --_chunks_free;
+Z	  _bytes_free -= bytes;
+Z	}
+Z
+Z      /* Set the next search to begin at this block.  */
+Z      _heapindex = block;
+Z      break;
+Z
+Z    default:
+Z      /* Do some of the statistics.  */
+Z      --_chunks_used;
+Z      _bytes_used -= 1 << type;
+Z      ++_chunks_free;
+Z      _bytes_free += 1 << type;
+Z
+Z      /* Get the address of the first free fragment in this block.  */
+Z      prev = (struct list *) ((char *) ADDRESS(block) +
+Z			      (_heapinfo[block].busy.info.frag.first << type));
+Z
+Z      if (_heapinfo[block].busy.info.frag.nfree == (BLOCKSIZE >> type) - 1)
+Z	{
+Z	  /* If all fragments of this block are free, remove them
+Z	     from the fragment list and free the whole block.  */
+Z	  next = prev;
+Z	  for (i = 1; i < (size_t) (BLOCKSIZE >> type); ++i)
+Z	    next = next->next;
+Z	  prev->prev->next = next;
+Z	  if (next != NULL)
+Z	    next->prev = prev->prev;
+Z	  _heapinfo[block].busy.type = 0;
+Z	  _heapinfo[block].busy.info.size = 1;
+Z
+Z	  /* Keep the statistics accurate.  */
+Z	  ++_chunks_used;
+Z	  _bytes_used += BLOCKSIZE;
+Z	  _chunks_free -= BLOCKSIZE >> type;
+Z	  _bytes_free -= BLOCKSIZE;
+Z
+Z	  free(ADDRESS(block));
+Z	}
+Z      else if (_heapinfo[block].busy.info.frag.nfree != 0)
+Z	{
+Z	  /* If some fragments of this block are free, link this
+Z	     fragment into the fragment list after the first free
+Z	     fragment of this block. */
+Z	  next = (struct list *) ptr;
+Z	  next->next = prev->next;
+Z	  next->prev = prev;
+Z	  prev->next = next;
+Z	  if (next->next != NULL)
+Z	    next->next->prev = next;
+Z	  ++_heapinfo[block].busy.info.frag.nfree;
+Z	}
+Z      else
+Z	{
+Z	  /* No fragments of this block are free, so link this
+Z	     fragment into the fragment list and announce that
+Z	     it is the first free fragment of this block. */
+Z	  prev = (struct list *) ptr;
+Z	  _heapinfo[block].busy.info.frag.nfree = 1;
+Z	  _heapinfo[block].busy.info.frag.first = (unsigned long int)
+Z	    ((unsigned long int) ((char *) ptr - (char *) NULL)
+Z	     % BLOCKSIZE >> type);
+Z	  prev->next = _fraghead[type].next;
+Z	  prev->prev = &_fraghead[type];
+Z	  prev->prev->next = prev;
+Z	  if (prev->next != NULL)
+Z	    prev->next->prev = prev;
+Z	}
+Z      break;
+Z    }
+Z}
+Z
+Z/* Return memory to the heap.  */
+Zvoid
+ZDEFUN(free, (ptr), PTR ptr)
+Z{
+Z  register struct alignlist *l;
+Z
+Z  if (ptr == NULL)
+Z    return;
+Z
+Z  for (l = _aligned_blocks; l != NULL; l = l->next)
+Z    if (l->aligned == ptr)
+Z      {
+Z	l->aligned = NULL;	/* Mark the slot in the list as free.  */
+Z	ptr = l->exact;
+Z	break;
+Z      }
+Z
+Z  if (__free_hook != NULL)
+Z    (*__free_hook) (ptr);
+Z  else
+Z    __free (ptr);
+Z}
+STUNKYFLUFF
+set `sum free.c`
+if test 53143 != $1
+then
+echo free.c: Checksum error. Is: $1, should be: 53143.
+fi
+#
+#
+echo Extracting gmalloc-head.c:
+sed 's/^Z//' >gmalloc-head.c <<\STUNKYFLUFF
+Z/* DO NOT EDIT THIS FILE -- it is automagically generated.  -*- C -*- */
+Z
+Z#define SKELETON
+Z
+Z#if	defined(__GNU_LIBRARY__) || defined(STDC_HEADERS) || defined(USG)
+Z#include <string.h>
+Z#else
+Z#define	memset(s, zero, n)	bzero ((s), (n))
+Z#define	memcpy(d, s, n)		bcopy ((s), (d), (n))
+Z#define memmove(d, s, n)	bcopy ((s), (d), (n))
+Z#endif
+Z
+Z#define _MALLOC_INTERNAL
+Z
+Z/* The malloc headers and source files from the C library follow here.  */
+STUNKYFLUFF
+set `sum gmalloc-head.c`
+if test 33445 != $1
+then
+echo gmalloc-head.c: Checksum error. Is: $1, should be: 33445.
+fi
+#
+#
+echo Extracting malloc.c:
+sed 's/^Z//' >malloc.c <<\STUNKYFLUFF
+Z/* Memory allocator `malloc'.
+Z   Copyright 1990, 1991 Free Software Foundation
+Z		  Written May 1989 by Mike Haertel.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.
+Z
+Z   The author may be reached (Email) at the address mike@ai.mit.edu,
+Z   or (US mail) as Mike Haertel c/o Free Software Foundation. */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stddef.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#define _MALLOC_INTERNAL
+Z#include <malloc.h>
+Z
+Z#if	defined(__GNU_LIBRARY__) || defined(STDC_HEADERS) || defined(USG)
+Z#include <string.h>
+Z#else
+Z#define	memset(s, zero, n)	bzero ((s), (n))
+Z#define	memcpy(d, s, n)		bcopy ((s), (d), (n))
+Z#endif
+Z
+Z
+Z/* How to really get more memory.  */
+ZPTR EXFUN((*__morecore), (ptrdiff_t __size)) = __default_morecore;
+Z
+Z/* Debugging hook for `malloc'.  */
+ZPTR EXFUN((*__malloc_hook), (size_t __size));
+Z
+Z/* Pointer to the base of the first block.  */
+Zchar *_heapbase;
+Z
+Z/* Block information table.  Allocated with align/__free (not malloc/free).  */
+Zmalloc_info *_heapinfo;
+Z
+Z/* Number of info entries.  */
+Zstatic size_t heapsize;
+Z
+Z/* Search index in the info table.  */
+Zsize_t _heapindex;
+Z
+Z/* Limit of valid info table indices.  */
+Zsize_t _heaplimit;
+Z
+Z/* Free lists for each fragment size.  */
+Zstruct list _fraghead[BLOCKLOG];
+Z
+Z/* Instrumentation.  */
+Zsize_t _chunks_used;
+Zsize_t _bytes_used;
+Zsize_t _chunks_free;
+Zsize_t _bytes_free;
+Z
+Z/* Are you experienced?  */
+Zint __malloc_initialized;
+Z
+Z/* Aligned allocation.  */
+Zstatic PTR
+ZDEFUN(align, (size), size_t size)
+Z{
+Z  PTR result;
+Z  unsigned long int adj;
+Z
+Z  result = (*__morecore)(size);
+Z  adj = (unsigned long int) ((unsigned long int) ((char *) result -
+Z						  (char *) NULL)) % BLOCKSIZE;
+Z  if (adj != 0)
+Z    {
+Z      adj = BLOCKSIZE - adj;
+Z      (void) (*__morecore)(adj);
+Z      result = (char *) result + adj;
+Z    }
+Z  return result;
+Z}
+Z
+Z/* Set everything up and remember that we have.  */
+Zstatic int
+ZDEFUN_VOID(initialize)
+Z{
+Z  heapsize = HEAP / BLOCKSIZE;
+Z  _heapinfo = (malloc_info *) align(heapsize * sizeof(malloc_info));
+Z  if (_heapinfo == NULL)
+Z    return 0;
+Z  memset(_heapinfo, 0, heapsize * sizeof(malloc_info));
+Z  _heapinfo[0].free.size = 0;
+Z  _heapinfo[0].free.next = _heapinfo[0].free.prev = 0;
+Z  _heapindex = 0;
+Z  _heapbase = (char *) _heapinfo;
+Z  __malloc_initialized = 1;
+Z  return 1;
+Z}
+Z
+Z/* Get neatly aligned memory, initializing or
+Z   growing the heap info table as necessary. */
+Zstatic PTR
+ZDEFUN(morecore, (size), size_t size)
+Z{
+Z  PTR result;
+Z  malloc_info *newinfo, *oldinfo;
+Z  size_t newsize;
+Z
+Z  result = align(size);
+Z  if (result == NULL)
+Z    return NULL;
+Z
+Z  /* Check if we need to grow the info table.  */
+Z  if ((size_t) BLOCK((char *) result + size) > heapsize)
+Z    {
+Z      newsize = heapsize;
+Z      while ((size_t) BLOCK((char *) result + size) > newsize)
+Z	newsize *= 2;
+Z      newinfo = (malloc_info *) align(newsize * sizeof(malloc_info));
+Z      if (newinfo == NULL)
+Z	{
+Z	  (*__morecore)(- size);
+Z	  return NULL;
+Z	}
+Z      memset(newinfo, 0, newsize * sizeof(malloc_info));
+Z      memcpy(newinfo, _heapinfo, heapsize * sizeof(malloc_info));
+Z      oldinfo = _heapinfo;
+Z      newinfo[BLOCK(oldinfo)].busy.type = 0;
+Z      newinfo[BLOCK(oldinfo)].busy.info.size
+Z	= BLOCKIFY(heapsize * sizeof(malloc_info));
+Z      _heapinfo = newinfo;
+Z      __free(oldinfo);
+Z      heapsize = newsize;
+Z    }
+Z
+Z  _heaplimit = BLOCK((char *) result + size);
+Z  return result;
+Z}
+Z
+Z/* Allocate memory from the heap.  */
+ZPTR
+ZDEFUN(malloc, (size), size_t size)
+Z{
+Z  PTR result;
+Z  size_t block, blocks, lastblocks, start;
+Z  register size_t i;
+Z  struct list *next;
+Z
+Z  if (size == 0)
+Z    return NULL;
+Z
+Z  if (__malloc_hook != NULL)
+Z    return (*__malloc_hook)(size);
+Z
+Z  if (!__malloc_initialized)
+Z    if (!initialize())
+Z      return NULL;
+Z
+Z  if (size < sizeof(struct list))
+Z    size = sizeof(struct list);
+Z
+Z  /* Determine the allocation policy based on the request size.  */
+Z  if (size <= BLOCKSIZE / 2)
+Z    {
+Z      /* Small allocation to receive a fragment of a block.
+Z	 Determine the logarithm to base two of the fragment size. */
+Z      register size_t log = 1;
+Z      --size;
+Z      while ((size /= 2) != 0)
+Z	++log;
+Z
+Z      /* Look in the fragment lists for a
+Z	 free fragment of the desired size. */
+Z      next = _fraghead[log].next;
+Z      if (next != NULL)
+Z	{
+Z	  /* There are free fragments of this size.
+Z	     Pop a fragment out of the fragment list and return it.
+Z	     Update the block's nfree and first counters. */
+Z	  result = (PTR) next;
+Z	  next->prev->next = next->next;
+Z	  if (next->next != NULL)
+Z	    next->next->prev = next->prev;
+Z	  block = BLOCK(result);
+Z	  if (--_heapinfo[block].busy.info.frag.nfree != 0)
+Z	    _heapinfo[block].busy.info.frag.first = (unsigned long int)
+Z	      ((unsigned long int) ((char *) next->next - (char *) NULL)
+Z	       % BLOCKSIZE) >> log;
+Z
+Z	  /* Update the statistics.  */
+Z	  ++_chunks_used;
+Z	  _bytes_used += 1 << log;
+Z	  --_chunks_free;
+Z	  _bytes_free -= 1 << log;
+Z	}
+Z      else
+Z	{
+Z	  /* No free fragments of the desired size, so get a new block
+Z	     and break it into fragments, returning the first.  */
+Z	  result = malloc(BLOCKSIZE);
+Z	  if (result == NULL)
+Z	    return NULL;
+Z
+Z	  /* Link all fragments but the first into the free list.  */
+Z	  for (i = 1; i < (size_t) (BLOCKSIZE >> log); ++i)
+Z	    {
+Z	      next = (struct list *) ((char *) result + (i << log));
+Z	      next->next = _fraghead[log].next;
+Z	      next->prev = &_fraghead[log];
+Z	      next->prev->next = next;
+Z	      if (next->next != NULL)
+Z		next->next->prev = next;
+Z	    }
+Z
+Z	  /* Initialize the nfree and first counters for this block.  */
+Z	  block = BLOCK(result);
+Z	  _heapinfo[block].busy.type = log;
+Z	  _heapinfo[block].busy.info.frag.nfree = i - 1;
+Z	  _heapinfo[block].busy.info.frag.first = i - 1;
+Z
+Z	  _chunks_free += (BLOCKSIZE >> log) - 1;
+Z	  _bytes_free += BLOCKSIZE - (1 << log);
+Z 	  _bytes_used -= BLOCKSIZE - (1 << log);
+Z	}
+Z    }
+Z  else
+Z    {
+Z      /* Large allocation to receive one or more blocks.
+Z	 Search the free list in a circle starting at the last place visited.
+Z	 If we loop completely around without finding a large enough
+Z	 space we will have to get more memory from the system.  */
+Z      blocks = BLOCKIFY(size);
+Z      start = block = MALLOC_SEARCH_START;
+Z      while (_heapinfo[block].free.size < blocks)
+Z	{
+Z	  block = _heapinfo[block].free.next;
+Z	  if (block == start)
+Z	    {
+Z	      /* Need to get more from the system.  Check to see if
+Z		 the new core will be contiguous with the final free
+Z		 block; if so we don't need to get as much.  */
+Z	      block = _heapinfo[0].free.prev;
+Z	      lastblocks = _heapinfo[block].free.size;
+Z	      if (_heaplimit != 0 && block + lastblocks == _heaplimit &&
+Z		  (*__morecore)(0) == ADDRESS(block + lastblocks) &&
+Z		  (morecore((blocks - lastblocks) * BLOCKSIZE)) != NULL)
+Z		{
+Z		  _heapinfo[block].free.size = blocks;
+Z		  _bytes_free += (blocks - lastblocks) * BLOCKSIZE;
+Z		  continue;
+Z		}
+Z	      result = morecore(blocks * BLOCKSIZE);
+Z	      if (result == NULL)
+Z		return NULL;
+Z	      block = BLOCK(result);
+Z	      _heapinfo[block].busy.type = 0;
+Z	      _heapinfo[block].busy.info.size = blocks;
+Z	      ++_chunks_used;
+Z	      _bytes_used += blocks * BLOCKSIZE;
+Z	      return result;
+Z	    }
+Z	}
+Z
+Z      /* At this point we have found a suitable free list entry.
+Z	 Figure out how to remove what we need from the list. */
+Z      result = ADDRESS(block);
+Z      if (_heapinfo[block].free.size > blocks)
+Z	{
+Z	  /* The block we found has a bit left over,
+Z	     so relink the tail end back into the free list. */
+Z	  _heapinfo[block + blocks].free.size
+Z	    = _heapinfo[block].free.size - blocks;
+Z	  _heapinfo[block + blocks].free.next
+Z	    = _heapinfo[block].free.next;
+Z	  _heapinfo[block + blocks].free.prev
+Z	    = _heapinfo[block].free.prev;
+Z	  _heapinfo[_heapinfo[block].free.prev].free.next
+Z	    = _heapinfo[_heapinfo[block].free.next].free.prev
+Z	      = _heapindex = block + blocks;
+Z	}
+Z      else
+Z	{
+Z	  /* The block exactly matches our requirements,
+Z	     so just remove it from the list. */
+Z	  _heapinfo[_heapinfo[block].free.next].free.prev
+Z	    = _heapinfo[block].free.prev;
+Z	  _heapinfo[_heapinfo[block].free.prev].free.next
+Z	    = _heapindex = _heapinfo[block].free.next;
+Z	  --_chunks_free;
+Z	}
+Z
+Z      _heapinfo[block].busy.type = 0;
+Z      _heapinfo[block].busy.info.size = blocks;
+Z      ++_chunks_used;
+Z      _bytes_used += blocks * BLOCKSIZE;
+Z      _bytes_free -= blocks * BLOCKSIZE;
+Z    }
+Z
+Z  return result;
+Z}
+STUNKYFLUFF
+set `sum malloc.c`
+if test 64456 != $1
+then
+echo malloc.c: Checksum error. Is: $1, should be: 64456.
+fi
+#
+#
+echo Extracting malloc.h:
+sed 's/^Z//' >malloc.h <<\STUNKYFLUFF
+Z/* Declarations for `malloc' and friends.
+Z   Copyright 1990, 1991 Free Software Foundation
+Z		  Written May 1989 by Mike Haertel.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.
+Z
+Z   The author may be reached (Email) at the address mike@ai.mit.edu,
+Z   or (US mail) as Mike Haertel c/o Free Software Foundation. */
+Z
+Z#ifndef _MALLOC_H
+Z
+Z#define _MALLOC_H	1
+Z
+Z/* IGNORE(@ */
+Z#include <features.h>
+Z#define	__need_NULL
+Z#define	__need_size_t
+Z#define __need_ptrdiff_t
+Z#include <stddef.h>
+Z/* @) */
+Z
+Z#ifndef	NULL
+Z#define	NULL	0
+Z#endif
+Z
+Z#ifdef	__STDC__
+Z#include <stddef.h>
+Z#else
+Z#undef	size_t
+Z#define	size_t	unsigned int
+Z#endif
+Z
+Z
+Z/* Allocate SIZE bytes of memory.  */
+Zextern PTR EXFUN(malloc, (size_t __size));
+Z/* Re-allocate the previously allocated block
+Z   in PTR, making the new block SIZE bytes long.  */
+Zextern PTR EXFUN(realloc, (PTR __ptr, size_t __size));
+Z/* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
+Zextern PTR EXFUN(calloc, (size_t __nmemb, size_t __size));
+Z/* Free a block allocated by `malloc', `realloc' or `calloc'.  */
+Zextern void EXFUN(free, (PTR __ptr));	
+Z
+Z/* Allocate SIZE bytes allocated to ALIGNMENT bytes.  */
+Zextern PTR EXFUN(memalign, (size_t __alignment, size_t __size));
+Z
+Z/* Allocate SIZE bytes on a page boundary.  */
+Zextern PTR EXFUN(valloc, (size_t __size));
+Z
+Z
+Z#ifdef _MALLOC_INTERNAL
+Z
+Z#if	defined(__GNU_LIBRARY__) || defined(__STDC__)
+Z#include <limits.h>
+Z#else
+Z#define	CHAR_BIT	8
+Z#endif
+Z
+Z/* The allocator divides the heap into blocks of fixed size; large
+Z   requests receive one or more whole blocks, and small requests
+Z   receive a fragment of a block.  Fragment sizes are powers of two,
+Z   and all fragments of a block are the same size.  When all the
+Z   fragments in a block have been freed, the block itself is freed.  */
+Z#define INT_BIT		(CHAR_BIT * sizeof(int))
+Z#define BLOCKLOG	(INT_BIT > 16 ? 12 : 9)
+Z#define BLOCKSIZE	(1 << BLOCKLOG)
+Z#define BLOCKIFY(SIZE)	(((SIZE) + BLOCKSIZE - 1) / BLOCKSIZE)
+Z
+Z/* Determine the amount of memory spanned by the initial heap table
+Z   (not an absolute limit).  */
+Z#define HEAP		(INT_BIT > 16 ? 4194304 : 65536)
+Z
+Z/* Number of contiguous free blocks allowed to build up at the end of
+Z   memory before they will be returned to the system.  */
+Z#define FINAL_FREE_BLOCKS	8
+Z
+Z/* Where to start searching the free list when looking for new memory.
+Z   The two possible values are 0 and _heapindex.  Starting at 0 seems
+Z   to reduce total memory usage, while starting at _heapindex seems to
+Z   run faster.  */
+Z#define MALLOC_SEARCH_START	_heapindex
+Z
+Z/* Data structure giving per-block information.  */
+Ztypedef union
+Z  {
+Z    /* Heap information for a busy block.  */
+Z    struct
+Z      {
+Z	/* Zero for a large block, or positive giving the
+Z	   logarithm to the base two of the fragment size.  */
+Z	int type;
+Z	union
+Z	  {
+Z	    struct
+Z	      {
+Z		size_t nfree;	/* Free fragments in a fragmented block.  */
+Z		size_t first;	/* First free fragment of the block.  */
+Z	      } frag;
+Z	    /* Size (in blocks) of a large cluster.  */
+Z	    size_t size;
+Z	  } info;
+Z      } busy;
+Z    /* Heap information for a free block (that may be the first of
+Z       a free cluster).  */
+Z    struct
+Z      {
+Z	size_t size;		/* Size (in blocks) of a free cluster.  */
+Z	size_t next;		/* Index of next free cluster.  */
+Z	size_t prev;		/* Index of previous free cluster.  */
+Z      } free;
+Z  } malloc_info;
+Z
+Z/* Pointer to first block of the heap.  */
+Zextern char *_heapbase;
+Z
+Z/* Table indexed by block number giving per-block information.  */
+Zextern malloc_info *_heapinfo;
+Z
+Z/* Address to block number and vice versa.  */
+Z#define BLOCK(A) (((char *) (A) - _heapbase) / BLOCKSIZE + 1)
+Z/* The following line MUST be split!  m4 will not process it otherwise.  */
+Z#define ADDRESS(B) \
+Z  ((PTR) (((B) - 1) * BLOCKSIZE + _heapbase))
+Z
+Z/* Current search index for the heap table.  */
+Zextern size_t _heapindex;
+Z
+Z/* Limit of valid info table indices.  */
+Zextern size_t _heaplimit;
+Z
+Z/* Doubly linked lists of free fragments.  */
+Zstruct list
+Z  {
+Z    struct list *next;
+Z    struct list *prev;
+Z  };
+Z
+Z/* Free list headers for each fragment size.  */
+Zextern struct list _fraghead[];
+Z
+Z/* List of blocks allocated with `memalign' (or `valloc').  */
+Zstruct alignlist
+Z  {
+Z    struct alignlist *next;
+Z    PTR aligned;		/* The address that memaligned returned.  */
+Z    PTR exact;			/* The address that malloc returned.  */
+Z  };
+Zextern struct alignlist *_aligned_blocks;
+Z
+Z/* Instrumentation.  */
+Zextern size_t _chunks_used;
+Zextern size_t _bytes_used;
+Zextern size_t _chunks_free;
+Zextern size_t _bytes_free;
+Z
+Z/* Internal version of `free' used in `morecore'. */
+Zextern void EXFUN(__free, (PTR __ptr));
+Z
+Z#endif  /* _MALLOC_INTERNAL.  */
+Z
+Z/* Underlying allocation function; successive calls should
+Z   return contiguous pieces of memory.  */
+Zextern PTR EXFUN((*__morecore), (ptrdiff_t __size));
+Z
+Z/* Default value of `__morecore'.  */
+Zextern PTR EXFUN(__default_morecore, (ptrdiff_t __size));
+Z
+Z/* Nonzero if `malloc' has been called and done its initialization.  */
+Zextern int __malloc_initialized;
+Z
+Z/* Hooks for debugging versions.  */
+Zextern void EXFUN((*__free_hook), (PTR __ptr));
+Zextern PTR EXFUN((*__malloc_hook), (size_t __size));
+Zextern PTR EXFUN((*__realloc_hook), (PTR __ptr, size_t __size));
+Z
+Z/* Activate a standard collection of debugging hooks.  */
+Zextern void EXFUN(mcheck, (void EXFUN((*__func), (void))));
+Z
+Z/* Statistics available to the user.  */
+Zstruct mstats
+Z  {
+Z    size_t bytes_total;		/* Total size of the heap. */
+Z    size_t chunks_used;		/* Chunks allocated by the user. */
+Z    size_t bytes_used;		/* Byte total of user-allocated chunks. */
+Z    size_t chunks_free;		/* Chunks in the free list. */
+Z    size_t bytes_free;		/* Byte total of chunks in the free list. */
+Z  };
+Z
+Z/* Pick up the current statistics. */
+Zextern struct mstats EXFUN(mstats, (NOARGS));
+Z
+Z#endif /* malloc.h  */
+STUNKYFLUFF
+set `sum malloc.h`
+if test 10676 != $1
+then
+echo malloc.h: Checksum error. Is: $1, should be: 10676.
+fi
+#
+#
+echo Extracting mcheck-init.c:
+sed 's/^Z//' >mcheck-init.c <<\STUNKYFLUFF
+Z/* Copyright (C) 1991 Free Software Foundation, Inc.
+ZThis file is part of the GNU C Library.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.  */
+Z
+Z/* The object of this file should be installed as libmcheck.a,
+Z   so one can do -lmcheck to turn on mcheck.  */
+Z
+Z#ifdef	__GNU_STAB__
+Z
+Z#include <ansidecl.h>
+Z#include <malloc.h>
+Z#include <gnu-stabs.h>
+Z
+Zstatic void
+ZDEFUN_VOID (turn_on_mcheck)
+Z{
+Z  mcheck (NULL);
+Z}
+Z
+Ztext_set_element (__libc_subinit, turn_on_mcheck);
+Z
+Z#endif
+STUNKYFLUFF
+set `sum mcheck-init.c`
+if test 31836 != $1
+then
+echo mcheck-init.c: Checksum error. Is: $1, should be: 31836.
+fi
+#
+#
+echo Extracting mcheck.c:
+sed 's/^Z//' >mcheck.c <<\STUNKYFLUFF
+Z/* Standard debugging hooks for `malloc'.
+Z   Copyright 1990, 1991 Free Software Foundation
+Z   Written May 1989 by Mike Haertel.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.
+Z
+Z The author may be reached (Email) at the address mike@ai.mit.edu,
+Z or (US mail) as Mike Haertel c/o Free Software Foundation. */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#include <malloc.h>
+Z
+Z/* Old hook values.  */
+Zstatic void EXFUN((*old_free_hook), (PTR ptr));
+Zstatic PTR EXFUN((*old_malloc_hook), (size_t size));
+Zstatic PTR EXFUN((*old_realloc_hook), (PTR ptr, size_t size));
+Z
+Z/* Function to call when something awful happens.  */
+Zextern void EXFUN(abort, (NOARGS));
+Zstatic void EXFUN((*abortfunc), (NOARGS)) = (void EXFUN((*), (NOARGS))) abort;
+Z
+Z/* Arbitrary magical numbers.  */
+Z#define MAGICWORD	0xfedabeeb
+Z#define MAGICBYTE	((char) 0xd7)
+Z
+Zstruct hdr
+Z  {
+Z    size_t size;		/* Exact size requested by user.  */
+Z    unsigned long int magic;	/* Magic number to check header integrity.  */
+Z  };
+Z
+Zstatic void
+ZDEFUN(checkhdr, (hdr), CONST struct hdr *hdr)
+Z{
+Z  if (hdr->magic != MAGICWORD || ((char *) &hdr[1])[hdr->size] != MAGICBYTE)
+Z    (*abortfunc)();
+Z}
+Z
+Zstatic void
+ZDEFUN(freehook, (ptr), PTR ptr)
+Z{
+Z  struct hdr *hdr = ((struct hdr *) ptr) - 1;
+Z  checkhdr(hdr);
+Z  hdr->magic = 0;
+Z  __free_hook = old_free_hook;
+Z  free(hdr);
+Z  __free_hook = freehook;
+Z}
+Z
+Zstatic PTR
+ZDEFUN(mallochook, (size), size_t size)
+Z{
+Z  struct hdr *hdr;
+Z
+Z  __malloc_hook = old_malloc_hook;
+Z  hdr = (struct hdr *) malloc (sizeof(struct hdr) + size + 1);
+Z  __malloc_hook = mallochook;
+Z  if (hdr == NULL)
+Z    return NULL;
+Z
+Z  hdr->size = size;
+Z  hdr->magic = MAGICWORD;
+Z  ((char *) &hdr[1])[size] = MAGICBYTE;
+Z  return (PTR) (hdr + 1);
+Z}
+Z
+Zstatic PTR
+ZDEFUN(reallochook, (ptr, size), PTR ptr AND size_t size)
+Z{
+Z  struct hdr *hdr = ((struct hdr *) ptr) - 1;
+Z
+Z  checkhdr(hdr);
+Z  __free_hook = old_free_hook;
+Z  __malloc_hook = old_malloc_hook;
+Z  __realloc_hook = old_realloc_hook;
+Z  hdr = (struct hdr *) realloc((PTR) hdr, sizeof(struct hdr) + size + 1);
+Z  __free_hook = freehook;
+Z  __malloc_hook = mallochook;
+Z  __realloc_hook = reallochook;
+Z  if (hdr == NULL)
+Z    return NULL;
+Z
+Z  hdr->size = size;
+Z  ((char *) &hdr[1])[size] = MAGICBYTE;
+Z  return (PTR) (hdr + 1);
+Z}
+Z
+Zvoid
+ZDEFUN(mcheck, (func), void EXFUN((*func), (void)))
+Z{
+Z  static int mcheck_used = 0;
+Z
+Z  if (func != NULL)
+Z    abortfunc = func;
+Z
+Z  /* These hooks may not be safely inserted if malloc is already in use.  */
+Z  if (!__malloc_initialized && !mcheck_used)
+Z    {
+Z      old_free_hook = __free_hook;
+Z      __free_hook = freehook;
+Z      old_malloc_hook = __malloc_hook;
+Z      __malloc_hook = mallochook;
+Z      old_realloc_hook = __realloc_hook;
+Z      __realloc_hook = reallochook;
+Z      mcheck_used = 1;
+Z    }
+Z}
+STUNKYFLUFF
+set `sum mcheck.c`
+if test 15283 != $1
+then
+echo mcheck.c: Checksum error. Is: $1, should be: 15283.
+fi
+#
+#
+echo Extracting memalign.c:
+sed 's/^Z//' >memalign.c <<\STUNKYFLUFF
+Z/* Copyright (C) 1991 Free Software Foundation, Inc.
+ZThis file is part of the GNU C Library.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.  */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#define _MALLOC_INTERNAL
+Z#include <malloc.h>
+Z
+ZPTR
+ZDEFUN(memalign, (alignment, size),
+Z      size_t alignment AND size_t size)
+Z{
+Z  PTR result;
+Z  unsigned long int adj;
+Z
+Z  size = ((size + alignment - 1) / alignment) * alignment;
+Z
+Z  result = malloc (size);
+Z  if (result == NULL)
+Z    return NULL;
+Z  adj = (unsigned long int) ((unsigned long int) ((char *) result -
+Z						  (char *) NULL)) % alignment;
+Z  if (adj != 0)
+Z    {
+Z      struct alignlist *l;
+Z      for (l = _aligned_blocks; l != NULL; l = l->next)
+Z	if (l->aligned == NULL)
+Z	  /* This slot is free.  Use it.  */
+Z	  break;
+Z      if (l == NULL)
+Z	{
+Z	  l = (struct alignlist *) malloc (sizeof (struct alignlist));
+Z	  if (l == NULL)
+Z	    {
+Z	      free (result);
+Z	      return NULL;
+Z	    }
+Z	}
+Z      l->exact = result;
+Z      result = l->aligned = (char *) result + alignment - adj;
+Z      l->next = _aligned_blocks;
+Z      _aligned_blocks = l;
+Z    }
+Z
+Z  return result;
+Z}
+STUNKYFLUFF
+set `sum memalign.c`
+if test 11691 != $1
+then
+echo memalign.c: Checksum error. Is: $1, should be: 11691.
+fi
+#
+#
+echo Extracting mstats.c:
+sed 's/^Z//' >mstats.c <<\STUNKYFLUFF
+Z/* Access the statistics maintained by `malloc'.
+Z   Copyright 1990, 1991 Free Software Foundation
+Z		  Written May 1989 by Mike Haertel.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.
+Z
+Z   The author may be reached (Email) at the address mike@ai.mit.edu,
+Z   or (US mail) as Mike Haertel c/o Free Software Foundation. */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z/* @) */
+Z
+Z#define _MALLOC_INTERNAL
+Z#include <malloc.h>
+Z
+Zstruct mstats
+ZDEFUN_VOID(mstats)
+Z{
+Z  struct mstats result;
+Z
+Z  result.bytes_total = (char *) (*__morecore)(0) - _heapbase;
+Z  result.chunks_used = _chunks_used;
+Z  result.bytes_used = _bytes_used;
+Z  result.chunks_free = _chunks_free;
+Z  result.bytes_free = _bytes_free;
+Z  return result;
+Z}
+STUNKYFLUFF
+set `sum mstats.c`
+if test 51328 != $1
+then
+echo mstats.c: Checksum error. Is: $1, should be: 51328.
+fi
+#
+#
+echo Extracting mtrace.awk:
+sed 's/^Z//' >mtrace.awk <<\STUNKYFLUFF
+Z#
+Z#  Awk program to analyze mtrace.c output.
+Z#
+Z$1 == "+"	{ if (allocated[$2] != "")
+Z		    print "+", $2, "Alloc", NR, "duplicate:", allocated[$2];
+Z		  else
+Z		    allocated[$2] = $3;
+Z		}
+Z$1 == "-"	{ if (allocated[$2] != "") {
+Z		    allocated[$2] = "";
+Z		    if (allocated[$2] != "")
+Z			print "DELETE FAILED", $2, allocated[$2];
+Z		  } else
+Z		    print "-", $2, "Free", NR, "was never alloc'd";
+Z		}
+Z$1 == "<"	{ if (allocated[$2] != "")
+Z		    allocated[$2] = "";
+Z		  else
+Z		    print "-", $2, "Realloc", NR, "was never alloc'd";
+Z		}
+Z$1 == ">"	{ if (allocated[$2] != "")
+Z		    print "+", $2, "Realloc", NR, "duplicate:", allocated[$2];
+Z		  else
+Z		    allocated[$2] = $3;
+Z		}
+Z
+Z# Ignore "= Start"
+Z$1 == "="	{ }
+Z# Ignore failed realloc attempts for now
+Z$1 == "!"	{ }
+Z
+Z
+ZEND		{ for (x in allocated) 
+Z		    if (allocated[x] != "")
+Z		      print "+", x, allocated[x];
+Z		}
+STUNKYFLUFF
+set `sum mtrace.awk`
+if test 57510 != $1
+then
+echo mtrace.awk: Checksum error. Is: $1, should be: 57510.
+fi
+#
+#
+echo Extracting mtrace.c:
+sed 's/^Z//' >mtrace.c <<\STUNKYFLUFF
+Z/* More debugging hooks for `malloc'.
+Z   Copyright 1991 Free Software Foundation
+Z		  Written April 2, 1991 by John Gilmore of Cygnus Support
+Z		  Based on mcheck.c by Mike Haertel.
+Z
+ZThis program is free software; you can redistribute it and/or modify
+Zit under the terms of the GNU General Public License as published by
+Zthe Free Software Foundation; either version 2 of the License, or
+Z(at your option) any later version.
+Z
+ZThis program is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ZGNU General Public License for more details.
+Z
+ZYou should have received a copy of the GNU General Public License
+Zalong with this program; if not, write to the Free Software
+ZFoundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#include <stdio.h>
+Z#include <malloc.h>
+Z
+Z#ifndef	__GNU_LIBRARY__
+Zextern char *getenv ();
+Z#endif
+Z
+Zstatic FILE *mallstream;
+Zstatic char mallenv[] = "MALLOC_TRACE";
+Zstatic char mallbuf[BUFSIZ];	/* Buffer for the output.  */
+Z
+Z/* Address to breakpoint on accesses to... */
+ZPTR mallwatch;
+Z
+Z/* Old hook values.  */
+Zstatic void EXFUN((*old_free_hook), (PTR ptr));
+Zstatic PTR EXFUN((*old_malloc_hook), (size_t size));
+Zstatic PTR EXFUN((*old_realloc_hook), (PTR ptr, size_t size));
+Z
+Z/* This function is called when the block being alloc'd, realloc'd, or
+Z   freed has an address matching the variable "mallwatch".  In a debugger,
+Z   set "mallwatch" to the address of interest, then put a breakpoint on
+Z   tr_break.  */
+Z
+Zvoid
+ZDEFUN_VOID(tr_break)
+Z{
+Z}
+Z
+Zstatic void
+ZDEFUN(tr_freehook, (ptr), PTR ptr)
+Z{
+Z  fprintf(mallstream, "- %p\n", ptr);	/* Be sure to print it first.  */
+Z  if (ptr == mallwatch)
+Z    tr_break ();
+Z  __free_hook = old_free_hook;
+Z  free (ptr);
+Z  __free_hook = tr_freehook;
+Z}
+Z
+Zstatic PTR
+ZDEFUN(tr_mallochook, (size), size_t size)
+Z{
+Z  PTR hdr;
+Z
+Z  __malloc_hook = old_malloc_hook;
+Z  hdr = (PTR) malloc (size);
+Z  __malloc_hook = tr_mallochook;
+Z
+Z  /* We could be printing a NULL here; that's OK.  */
+Z  fprintf (mallstream, "+ %p %x\n", hdr, size);
+Z
+Z  if (hdr == mallwatch)
+Z    tr_break ();
+Z
+Z  return hdr;
+Z}
+Z
+Zstatic PTR
+ZDEFUN(tr_reallochook, (ptr, size), PTR ptr AND size_t size)
+Z{
+Z  PTR hdr;
+Z
+Z  if (ptr == mallwatch)
+Z    tr_break ();
+Z
+Z  __free_hook = old_free_hook;
+Z  __malloc_hook = old_malloc_hook;
+Z  __realloc_hook = old_realloc_hook;
+Z  hdr = (PTR) realloc (ptr, size);
+Z  __free_hook = tr_freehook;
+Z  __malloc_hook = tr_mallochook;
+Z  __realloc_hook = tr_reallochook;
+Z  if (hdr == NULL)
+Z    /* Failed realloc.  */
+Z    fprintf (mallstream, "! %p %x\n", ptr, size);
+Z  else
+Z    fprintf (mallstream, "< %p\n> %p %x\n", ptr, hdr, size);
+Z
+Z  if (hdr == mallwatch)
+Z    tr_break ();
+Z
+Z  return hdr;
+Z}
+Z
+Z/* We enable tracing if either the environment variable MALLOC_TRACE
+Z   is set, or if the variable mallwatch has been patched to an address
+Z   that the debugging user wants us to stop on.  When patching mallwatch,
+Z   don't forget to set a breakpoint on tr_break!  */
+Z
+Zvoid
+ZDEFUN_VOID(mtrace)
+Z{
+Z  char *mallfile;
+Z  
+Z  mallfile = getenv (mallenv);
+Z  if (mallfile  != NULL || mallwatch != NULL)
+Z    {
+Z      mallstream = fopen (mallfile != NULL ? mallfile : "/dev/null", "w");
+Z      if (mallstream != NULL)
+Z	{
+Z	  /* Be sure it doesn't malloc its buffer!  */
+Z	  setbuf (mallstream, mallbuf);
+Z	  fprintf (mallstream, "= Start\n");
+Z	  old_free_hook = __free_hook;
+Z	  __free_hook = tr_freehook;
+Z	  old_malloc_hook = __malloc_hook;
+Z	  __malloc_hook = tr_mallochook;
+Z	  old_realloc_hook = __realloc_hook;
+Z	  __realloc_hook = tr_reallochook;
+Z	}
+Z    }
+Z}
+STUNKYFLUFF
+set `sum mtrace.c`
+if test 38600 != $1
+then
+echo mtrace.c: Checksum error. Is: $1, should be: 38600.
+fi
+#
+#
+echo Extracting realloc.c:
+sed 's/^Z//' >realloc.c <<\STUNKYFLUFF
+Z/* Change the size of a block allocated by `malloc'.
+Z   Copyright 1990, 1991 Free Software Foundation
+Z		  Written May 1989 by Mike Haertel.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.
+Z
+Z   The author may be reached (Email) at the address mike@ai.mit.edu,
+Z   or (US mail) as Mike Haertel c/o Free Software Foundation. */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#if	defined(__GNU_LIBRARY__) || defined(STDC_HEADERS) || defined(USG)
+Z#include <string.h>
+Z#else
+Z#define	memcpy(d, s, n)		bcopy((s), (d), (n))
+Z#endif
+Z
+Z#define _MALLOC_INTERNAL
+Z#include <malloc.h>
+Z
+Z#define MIN(A, B) ((A) < (B) ? (A) : (B))
+Z
+Z/* Debugging hook for realloc.  */
+ZPTR EXFUN((*__realloc_hook), (PTR __ptr, size_t __size));
+Z
+Z/* Resize the given region to the new size, returning a pointer
+Z   to the (possibly moved) region.  This is optimized for speed;
+Z   some benchmarks seem to indicate that greater compactness is
+Z   achieved by unconditionally allocating and copying to a
+Z   new region.  This module has incestuous knowledge of the
+Z   internals of both free and malloc. */
+ZPTR
+ZDEFUN(realloc, (ptr, size), PTR ptr AND size_t size)
+Z{
+Z  PTR result;
+Z  int type;
+Z  size_t block, blocks, oldlimit;
+Z
+Z  if (size == 0)
+Z    {
+Z      free(ptr);
+Z      return malloc(0);
+Z    }
+Z  else if (ptr == NULL)
+Z    return malloc(size);
+Z
+Z  if (__realloc_hook != NULL)
+Z    return (*__realloc_hook)(ptr, size);
+Z
+Z  block = BLOCK(ptr);
+Z
+Z  type = _heapinfo[block].busy.type;
+Z  switch (type)
+Z    {
+Z    case 0:
+Z      /* Maybe reallocate a large block to a small fragment.  */
+Z      if (size <= BLOCKSIZE / 2)
+Z	{
+Z	  result = malloc(size);
+Z	  if (result != NULL)
+Z	    {
+Z	      memcpy(result, ptr, size);
+Z	      free(ptr);
+Z	      return result;
+Z	    }
+Z	}
+Z
+Z      /* The new size is a large allocation as well;
+Z	 see if we can hold it in place. */
+Z      blocks = BLOCKIFY(size);
+Z      if (blocks < _heapinfo[block].busy.info.size)
+Z	{
+Z	  /* The new size is smaller; return
+Z	     excess memory to the free list. */
+Z	  _heapinfo[block + blocks].busy.type = 0;
+Z	  _heapinfo[block + blocks].busy.info.size
+Z	    = _heapinfo[block].busy.info.size - blocks;
+Z	  _heapinfo[block].busy.info.size = blocks;
+Z	  free(ADDRESS(block + blocks));
+Z	  result = ptr;
+Z	}
+Z      else if (blocks == _heapinfo[block].busy.info.size)
+Z	/* No size change necessary.  */
+Z	result = ptr;
+Z      else
+Z	{
+Z	  /* Won't fit, so allocate a new region that will.
+Z	     Free the old region first in case there is sufficient
+Z	     adjacent free space to grow without moving. */
+Z	  blocks = _heapinfo[block].busy.info.size;
+Z	  /* Prevent free from actually returning memory to the system.  */
+Z	  oldlimit = _heaplimit;
+Z	  _heaplimit = 0;
+Z	  free(ptr);
+Z	  _heaplimit = oldlimit;
+Z	  result = malloc(size);
+Z	  if (result == NULL)
+Z	    {
+Z	      (void) malloc(blocks * BLOCKSIZE);
+Z	      return NULL;
+Z	    }
+Z	  if (ptr != result)
+Z	    memmove(result, ptr, blocks * BLOCKSIZE);
+Z	}
+Z      break;
+Z
+Z    default:
+Z      /* Old size is a fragment; type is logarithm
+Z	 to base two of the fragment size.  */
+Z      if (size > (size_t) (1 << (type - 1)) && size <= (size_t) (1 << type))
+Z	/* The new size is the same kind of fragment.  */
+Z	result = ptr;
+Z      else
+Z	{
+Z	  /* The new size is different; allocate a new space,
+Z	     and copy the lesser of the new size and the old. */
+Z	  result = malloc(size);
+Z	  if (result == NULL)
+Z	    return NULL;
+Z	  memcpy(result, ptr, MIN(size, (size_t) 1 << type));
+Z	  free(ptr);
+Z	}
+Z      break;
+Z    }
+Z
+Z  return result;
+Z}
+STUNKYFLUFF
+set `sum realloc.c`
+if test 3391 != $1
+then
+echo realloc.c: Checksum error. Is: $1, should be: 3391.
+fi
+#
+#
+echo Extracting valloc.c:
+sed 's/^Z//' >valloc.c <<\STUNKYFLUFF
+Z/* Allocate memory on a page boundary.
+Z   Copyright (C) 1991 Free Software Foundation, Inc.
+Z
+ZThe GNU C Library is free software; you can redistribute it and/or
+Zmodify it under the terms of the GNU Library General Public License as
+Zpublished by the Free Software Foundation; either version 2 of the
+ZLicense, or (at your option) any later version.
+Z
+ZThe GNU C Library is distributed in the hope that it will be useful,
+Zbut WITHOUT ANY WARRANTY; without even the implied warranty of
+ZMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ZLibrary General Public License for more details.
+Z
+ZYou should have received a copy of the GNU Library General Public
+ZLicense along with the GNU C Library; see the file COPYING.LIB.  If
+Znot, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ZCambridge, MA 02139, USA.  */
+Z
+Z/* IGNORE(@ */
+Z#include <ansidecl.h>
+Z#include <stdlib.h>
+Z/* @) */
+Z
+Z#include <malloc.h>
+Z
+Z#ifdef	__GNU_LIBRARY__
+Zextern size_t EXFUN(__getpagesize, (NOARGS));
+Z#else
+Z#ifndef	USG
+Zextern size_t EXFUN(getpagesize, (NOARGS));
+Z#define	__getpagesize()	getpagesize()
+Z#else
+Z#include <sys/param.h>
+Z#ifdef	EXEC_PAGESIZE
+Z#define	__getpagesize()	EXEC_PAGESIZE
+Z#else	/* No EXEC_PAGESIZE.  */
+Z#ifdef	NBPG
+Z#ifndef	CLSIZE
+Z#define	CLSIZE	1
+Z#endif	/* No CLSIZE.  */
+Z#define	__getpagesize()	(NBPG * CLSIZE)
+Z#else	/* No NBPG.  */
+Z#define	__getpagesize()	NBPC
+Z#endif	/* NBPG.  */
+Z#endif	/* EXEC_PAGESIZE.  */
+Z#endif	/* USG.  */
+Z#endif
+Z
+Zstatic size_t pagesize;
+Z
+ZPTR
+ZDEFUN(valloc, (size), size_t size)
+Z{
+Z  if (pagesize == 0)
+Z    pagesize = __getpagesize();
+Z
+Z  return memalign (pagesize, size);
+Z}
+STUNKYFLUFF
+set `sum valloc.c`
+if test 63930 != $1
+then
+echo valloc.c: Checksum error. Is: $1, should be: 63930.
+fi
+echo ALL DONE BUNKY!
+exit 0
