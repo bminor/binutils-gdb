@@ -1,3 +1,11 @@
+Thu Apr 23 12:52:21 1998  Philippe De Muyter  <phdm@macqel.be>
+
+        * configure.in (strerror): Check if function must be declared.
+        * acconfig.h (NEED_DECLARATION_STRERROR): New define slot.
+        * gdb_string.h (strerror): Function declaration issued if
+        NEED_DECLARATION_STRERROR.
+        * configure, config.in : Files regenerated.
+
 Thu Apr 23 12:27:43 1998  Philippe De Muyter  <phdm@macqel.be>
 
         * symfile.c (simple_overlay_update_1): Do not prefix array address

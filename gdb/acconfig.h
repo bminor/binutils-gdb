@@ -7,6 +7,9 @@
 
 /* Whether free must be declared even if <stdlib.h> is included.  */
 #undef NEED_DECLARATION_FREE
+
+/* Whether strerror must be declared even if <string.h> is included.  */
+#undef NEED_DECLARATION_STRERROR
 @TOP@
 
 /* Define if fpregset_t type is available. */

@@ -200,6 +200,8 @@ BFD_NEED_DECLARATION(malloc)
 BFD_NEED_DECLARATION(realloc)
 BFD_NEED_DECLARATION(free)
 
+BFD_NEED_DECLARATION(strerror)
+
 dnl See if thread_db library is around for Solaris thread debugging.  Note that
 dnl we must explicitly test for version 1 of the library because version 0
 dnl (present on Solaris 2.4 or earlier) doesn't have the same API.

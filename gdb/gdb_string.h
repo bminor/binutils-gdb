@@ -45,10 +45,6 @@ extern char *strstr PARAMS ((const char *, const char *));	/* X3.159-1989  4.11.
 extern char *strtok PARAMS ((char *, const char *));	/* X3.159-1989  4.11.5.8 */
 #endif
 
-#ifndef strerror
-extern char *strerror PARAMS ((int));	/* X3.159-1989  4.11.6.2 */
-#endif
-
 # ifdef HAVE_MEMORY_H
 #   include <memory.h>
 # else
@@ -57,6 +53,12 @@ extern void *memcpy();
 extern void *memmove();
 extern int   memcmp();
 # endif
+#endif /* STDC_HEADERS */
+
+#ifdef NEED_DECLARATION_STRERROR
+#ifndef strerror
+extern char *strerror PARAMS ((int));	/* X3.159-1989  4.11.6.2 */
+#endif
 #endif
 
 #ifndef strdup
