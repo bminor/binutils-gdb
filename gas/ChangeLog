@@ -1,3 +1,10 @@
+Wed Mar 25 13:44:18 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* expr.h (expr_build_uconstant): Add prototype.
+	(expr_build_unary,expr_build_binary): Add prototypes.
+	* expr.c (expr_build_uconstant): New function.
+	(expr_build_unary,expr_build_binary): New functions.
+
 Wed Mar 25 13:10:42 1998  Bruno Haible  <bruno@linuix.mathematik.uni-karlsruhe.de>
 
         * gasp.c (IS*): Cast argument to unsigned char, not unsigned int.
