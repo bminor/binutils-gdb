@@ -1,3 +1,13 @@
+2003-10-31  Nick Clifton  <nickc@redhat.com>
+
+        * ldlang.c (lookup_name): When looking for a previously loaded
+        file compare the local_sym_name not the filename, as the
+        filename might have been transformed via the search directory
+        path lookup.
+        If the sought-for file has not been found in the input file
+        chain then create a new node with the search_dirs_flag set so
+        that the entire set of directory paths will be scanned for it.
+
 2003-10-30  Andrew Cagney  <cagney@redhat.com>
 
 	* emultempl/pe.em, pe-dll.c: Replace "struct symbol_cache_entry"

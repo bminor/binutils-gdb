@@ -1320,16 +1320,21 @@ lookup_name (const char *name)
        search != NULL;
        search = (lang_input_statement_type *) search->next_real_file)
     {
-      if (search->filename == NULL && name == NULL)
+      /* Use the local_sym_name as the name of the file that has
+	 already been loaded as filename might have been transformed
+	 via the search directory lookup mechanism.  */
+      const char * filename = search->local_sym_name;
+
+      if (filename == NULL && name == NULL)
 	return search;
-      if (search->filename != NULL
+      if (filename != NULL
 	  && name != NULL
-	  && strcmp (search->filename, name) == 0)
+	  && strcmp (filename, name) == 0)
 	break;
     }
 
   if (search == NULL)
-    search = new_afile (name, lang_input_file_is_file_enum, default_target,
+    search = new_afile (name, lang_input_file_is_search_file_enum, default_target,
 			FALSE);
 
   /* If we have already added this file, or this file is not real
