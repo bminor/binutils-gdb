@@ -1,0 +1,5 @@
+description "GDB debugger stub"
+version 1,2
+debug
+module aio, aiocomx
+screenname "System Console"

@@ -16,6 +16,12 @@ Wed Aug 17 23:08:53 1994  Stu Grossman  (grossman@cygnus.com)
 	* nlm/prelude.c:  Don't include libhooks.h, get rid of call to
 	register library.
 	* nlm/prelude.o:  What was this doing here?
+	* config/alpha/gdbserve.mt:  Defs for alpha nlm stub.
+	* config/powerpc/gdbserve.mt: Defs for PowerPC nlm stub.
+	* config/powerpc/ppc-nw.mt:  Defs for PowerPC target for GDB.
+	* config/powerpc/tm-ppc-nw.h:  Ditto.
+
+	* nlmstub.def:  New file, contains imports for 386 nlm stub.
 
 Wed Aug 17 23:17:33 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
