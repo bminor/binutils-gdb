@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* uw-thread.c: Whitespace tweaks.
 	* utils.c: Whitespace tweaks.
 	* tracepoint.[ch]: Whitespace tweaks.
 	* solist.h: Whitespace tweaks.
