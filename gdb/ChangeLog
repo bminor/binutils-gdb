@@ -1,3 +1,9 @@
+Fri Oct 11 14:23:50 1996  Fred Fish  <fnf@cygnus.com>
+
+	* dbxread.c (process_one_symbol): Check for null string directly
+	rather than using strcmp against "".
+	* partial-stab.h: Ditto.
+
 Fri Oct 11 12:18:32 1996  Mark Alexander  <marka@cygnus.com>
 
 	* gdbserver/{gdbreplay.c,low-linux.c,remote-utils.c,utils.c}:

@@ -382,7 +382,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef DBXREAD_ONLY
 	  /* See if this is an end of function stab.  */
-	  if (CUR_SYMBOL_TYPE == N_FUN && ! strcmp (namestring, ""))
+	  if (CUR_SYMBOL_TYPE == N_FUN && *namestring == '\000')
 	    {
 	      unsigned long valu;
 
