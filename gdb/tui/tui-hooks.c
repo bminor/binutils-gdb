@@ -46,9 +46,13 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "event-loop.h"
+#include "event-top.h"
 #include "frame.h"
 #include "breakpoint.h"
 #include "gdb-events.h"
+#include "ui-out.h"
+#include "top.h"
+#include <readline/readline.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -66,6 +70,8 @@ int tui_target_has_run = 0;
 
 static void (* tui_target_new_objfile_chain) (struct objfile*);
 extern void (*selected_frame_level_changed_hook) (int);
+static void tui_event_loop (void);
+static void tui_command_loop (void);
 
 static void
 tui_new_objfile_hook (struct objfile* objfile)
@@ -329,6 +335,86 @@ tui_exit (void)
   tui_disable ();
 }
 
+/* Initialize all the necessary variables, start the event loop,
+   register readline, and stdin, start the loop. */
+static void
+tui_command_loop (void)
+{
+  int length;
+  char *a_prompt;
+  char *gdb_prompt = get_prompt ();
+
+  /* If we are using readline, set things up and display the first
+     prompt, otherwise just print the prompt. */
+  if (async_command_editing_p)
+    {
+      /* Tell readline what the prompt to display is and what function it
+         will need to call after a whole line is read. This also displays
+         the first prompt. */
+      length = strlen (PREFIX (0)) + strlen (gdb_prompt) + strlen (SUFFIX (0)) + 1;
+      a_prompt = (char *) xmalloc (length);
+      strcpy (a_prompt, PREFIX (0));
+      strcat (a_prompt, gdb_prompt);
+      strcat (a_prompt, SUFFIX (0));
+      rl_callback_handler_install (a_prompt, input_handler);
+    }
+  else
+    display_gdb_prompt (0);
+
+  /* Now it's time to start the event loop. */
+  tui_event_loop ();
+}
+
+/* Start up the event loop. This is the entry point to the event loop
+   from the command loop. */
+
+static void
+tui_event_loop (void)
+{
+  /* Loop until there is nothing to do. This is the entry point to the
+     event loop engine. gdb_do_one_event, called via catch_errors()
+     will process one event for each invocation.  It blocks waits for
+     an event and then processes it.  >0 when an event is processed, 0
+     when catch_errors() caught an error and <0 when there are no
+     longer any event sources registered. */
+  while (1)
+    {
+      int result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
+      if (result < 0)
+	break;
+
+      /* Update gdb output according to TUI mode.  Since catch_errors
+         preserves the uiout from changing, this must be done at top
+         level of event loop.  */
+      if (tui_active)
+        uiout = tui_out;
+      else
+        uiout = tui_old_uiout;
+      
+      if (result == 0)
+	{
+	  /* FIXME: this should really be a call to a hook that is
+	     interface specific, because interfaces can display the
+	     prompt in their own way. */
+	  display_gdb_prompt (0);
+	  /* This call looks bizarre, but it is required.  If the user
+	     entered a command that caused an error,
+	     after_char_processing_hook won't be called from
+	     rl_callback_read_char_wrapper.  Using a cleanup there
+	     won't work, since we want this function to be called
+	     after a new prompt is printed.  */
+	  if (after_char_processing_hook)
+	    (*after_char_processing_hook) ();
+	  /* Maybe better to set a flag to be checked somewhere as to
+	     whether display the prompt or not. */
+	}
+    }
+
+  /* We are done with the event loop. There are no more event sources
+     to listen to.  So we exit GDB. */
+  return;
+}
+
 /* Initialize the tui by installing several gdb hooks, initializing
    the tui IO and preparing the readline with the kind binding.  */
 static void
@@ -345,6 +431,9 @@ tui_init_hook (char *argv0)
 
   tui_initialize_io ();
   tui_initialize_readline ();
+
+  /* Tell gdb to use the tui_command_loop as the main loop. */
+  command_loop_hook = tui_command_loop;
 
   /* Decide in which mode to start using GDB (based on -tui).  */
   if (tui_version)

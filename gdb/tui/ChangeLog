@@ -1,3 +1,13 @@
+2002-09-10  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-hooks.c (tui_event_loop): New function.
+	(tui_command_loop): New function to override gdb loop and make sure
+	uiout is set according to TUI mode.
+	(tui_command_loop): Install the specific TUI command hook.
+	* tuiIO.c (tui_initialize_io): Initialize tui_old_uiout.
+	(tui_uiout, tui_old_uiout): Make public.
+	* tuiIO.h (tui_uiout, tui_old_uiout): Declare.
+
 2002-09-04  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tuiIO.c (tui_putc): New function to print one character.
