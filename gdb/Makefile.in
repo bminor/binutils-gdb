@@ -59,6 +59,7 @@ AR_FLAGS = qv
 RANLIB = @RANLIB@
 DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
+MIG = @MIG@
 
 # If the user configured GDB to include the TUI, the name of the tui
 # library goes here.
