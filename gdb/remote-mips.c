@@ -301,18 +301,19 @@ enum mips_monitor_type {
 };
 static enum mips_monitor_type mips_monitor = MON_LAST;
 
-/* The default monitor prompt text: */
+/* The monitor prompt text.  If the user sets the PMON prompt
+   to some new value, the GDB `set monitor-prompt' command must also
+   be used to inform GDB about the expected prompt.  Otherwise, GDB
+   will not be able to connect to PMON in mips_initialize().
+   If the `set monitor-prompt' command is not used, the expected
+   default prompt will be set according the target:
+	target		prompt
+	-----		-----
+	pmon		PMON> 
+	ddb		NEC010>
+	lsi		PMON>
+*/
 static char *mips_monitor_prompt;
-;
-/* For the Cogent PMON world this is still not ideal. The default
-   prompt is "PMON> ", unfortunately the user can change the prompt
-   and the new prompt will survive over a power-cycle (EEPROM). This
-   means that the code should really force the monitor prompt to a
-   known value as the very first action, and that the
-   "mips_monitor_prompt" support is not needed... since the prompt
-   could be explicitly set to TARGET_MONITOR_PROMPT (even though it
-   may be the prompt for a different monitor). However, this will
-   require changing the mips_initialize reset sequence. (TODO) */
 
 /* Set to 1 if the target is open.  */
 static int mips_is_open;

@@ -1,3 +1,8 @@
+Thu Mar 27 14:21:46 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c: Clean up comment and extraneous semicolon
+	for mips_monitor_prompt variable.
+
 Thu Mar 27 12:46:58 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c: Add `set monitor-prompt' command.
