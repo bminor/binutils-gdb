@@ -3861,12 +3861,19 @@ load_address (int reg, expressionS *ep, int *used_at)
 	   daddiu	$reg,<sym>		(BFD_RELOC_HI16_S)
 	   dsll		$reg,16
 	   daddiu	$reg,<sym>		(BFD_RELOC_LO16)
-       */
+
+	 For GP relative symbols in 64bit address space we can use
+	 the same sequence as in 32bit address space.  */
       if (HAVE_64BIT_ADDRESSES)
 	{
-	  /* ??? We don't provide a GP-relative alternative for these macros.
-	     It used not to be possible with the original relaxation code,
-	     but it could be done now.  */
+	  if ((valueT) ep->X_add_number <= MAX_GPREL_OFFSET
+	      && !nopic_need_relax (ep->X_add_symbol, 1))
+	    {
+	      relax_start (ep->X_add_symbol);
+	      macro_build (ep, ADDRESS_ADDI_INSN, "t,r,j", reg,
+			   mips_gp_register, BFD_RELOC_GPREL16);
+	      relax_switch ();
+	    }
 
 	  if (*used_at == 0 && !mips_opts.noat)
 	    {
@@ -3889,11 +3896,14 @@ load_address (int reg, expressionS *ep, int *used_at)
 	      macro_build (NULL, "dsll", "d,w,<", reg, reg, 16);
 	      macro_build (ep, "daddiu", "t,r,j", reg, reg, BFD_RELOC_LO16);
 	    }
+
+	  if (mips_relax.sequence)
+	    relax_end ();
 	}
       else
 	{
 	  if ((valueT) ep->X_add_number <= MAX_GPREL_OFFSET
-	      && ! nopic_need_relax (ep->X_add_symbol, 1))
+	      && !nopic_need_relax (ep->X_add_symbol, 1))
 	    {
 	      relax_start (ep->X_add_symbol);
 	      macro_build (ep, ADDRESS_ADDI_INSN, "t,r,j", reg,
@@ -4950,28 +4960,35 @@ macro (struct mips_cl_insn *ip)
 	     If we have a constant, we need two instructions anyhow,
 	     so we may as well always use the latter form.
 
-	    With 64bit address space and a usable $at we want
-	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
-	      lui	$at,<sym>		(BFD_RELOC_HI16_S)
-	      daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
-	      daddiu	$at,<sym>		(BFD_RELOC_LO16)
-	      dsll32	$tempreg,0
-	      daddu	$tempreg,$tempreg,$at
+	     With 64bit address space and a usable $at we want
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	       lui	$at,<sym>		(BFD_RELOC_HI16_S)
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	       daddiu	$at,<sym>		(BFD_RELOC_LO16)
+	       dsll32	$tempreg,0
+	       daddu	$tempreg,$tempreg,$at
 
-	    If $at is already in use, we use a path which is suboptimal
-	    on superscalar processors.
-	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
-	      daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
-	      dsll	$tempreg,16
-	      daddiu	$tempreg,<sym>		(BFD_RELOC_HI16_S)
-	      dsll	$tempreg,16
-	      daddiu	$tempreg,<sym>		(BFD_RELOC_LO16)
-	  */
+	     If $at is already in use, we use a path which is suboptimal
+	     on superscalar processors.
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	       dsll	$tempreg,16
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_HI16_S)
+	       dsll	$tempreg,16
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_LO16)
+
+	     For GP relative symbols in 64bit address space we can use
+	     the same sequence as in 32bit address space.  */
 	  if (HAVE_64BIT_ADDRESSES)
 	    {
-	      /* ??? We don't provide a GP-relative alternative for
-		 these macros.  It used not to be possible with the
-		 original relaxation code, but it could be done now.  */
+	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
+		{
+		  relax_start (offset_expr.X_add_symbol);
+		  macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
+			       tempreg, mips_gp_register, BFD_RELOC_GPREL16);
+		  relax_switch ();
+		}
 
 	      if (used_at == 0 && !mips_opts.noat)
 		{
@@ -5000,11 +5017,14 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (&offset_expr, "daddiu", "t,r,j",
 			       tempreg, tempreg, BFD_RELOC_LO16);
 		}
+
+	      if (mips_relax.sequence)
+		relax_end ();
 	    }
 	  else
 	    {
 	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
-		  && ! nopic_need_relax (offset_expr.X_add_symbol, 1))
+		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
 		{
 		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
@@ -5943,6 +5963,9 @@ macro (struct mips_cl_insn *ip)
 	       daddu	$tempreg,$tempreg,$breg
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
 
+	     For GP relative symbols in 64bit address space we can use
+	     the same sequence as in 32bit address space.
+
 	     If we have 64-bit addresses, as an optimization, for
 	     addresses which are 32-bit constants (e.g. kseg0/kseg1
 	     addresses) we fall back to the 32-bit address generation
@@ -5975,9 +5998,25 @@ macro (struct mips_cl_insn *ip)
 		  && offset_expr.X_op == O_constant
 		  && ! IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)))
 	    {
-	      /* ??? We don't provide a GP-relative alternative for
-		 these macros.  It used not to be possible with the
-		 original relaxation code, but it could be done now.  */
+	      if (offset_expr.X_op == O_symbol
+		  && (valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
+		{
+		  relax_start (offset_expr.X_add_symbol);
+		  if (breg == 0)
+		    {
+		      macro_build (&offset_expr, s, fmt, treg,
+				   BFD_RELOC_GPREL16, mips_gp_register);
+		    }
+		  else
+		    {
+		      macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
+				   tempreg, breg, mips_gp_register);
+		      macro_build (&offset_expr, s, fmt, treg,
+				   BFD_RELOC_GPREL16, tempreg);
+		    }
+		  relax_switch ();
+		}
 
 	      if (used_at == 0 && !mips_opts.noat)
 		{
@@ -6011,6 +6050,9 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (&offset_expr, s, fmt, treg,
 			       BFD_RELOC_LO16, tempreg);
 		}
+
+	      if (mips_relax.sequence)
+		relax_end ();
 	      break;
 	    }
 
@@ -6021,7 +6063,7 @@ macro (struct mips_cl_insn *ip)
 	  if (breg == 0)
 	    {
 	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
-		  && ! nopic_need_relax (offset_expr.X_add_symbol, 1))
+		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
 		{
 		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_GPREL16,
@@ -6037,7 +6079,7 @@ macro (struct mips_cl_insn *ip)
 	  else
 	    {
 	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
-		  && ! nopic_need_relax (offset_expr.X_add_symbol, 1))
+		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
 		{
 		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
@@ -6498,10 +6540,8 @@ macro (struct mips_cl_insn *ip)
 	     If there is a base register, we add it to $at after the
 	     lui instruction.  If there is a constant, we always use
 	     the last case.  */
-	  if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
-	      || nopic_need_relax (offset_expr.X_add_symbol, 1))
-	    used_at = 1;
-	  else
+	  if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+	      && !nopic_need_relax (offset_expr.X_add_symbol, 1))
 	    {
 	      relax_start (offset_expr.X_add_symbol);
 	      if (breg == 0)
@@ -10464,14 +10504,13 @@ md_parse_option (int c, char *arg)
 #endif /* OBJ_ELF */
 
     case 'G':
-      if (mips_pic == SVR4_PIC)
+      g_switch_value = atoi (arg);
+      g_switch_seen = 1;
+      if (mips_pic == SVR4_PIC && g_switch_value != 0)
 	{
 	  as_bad (_("-G may not be used with SVR4 PIC code"));
 	  return 0;
 	}
-      else
-	g_switch_value = atoi (arg);
-      g_switch_seen = 1;
       break;
 
 #ifdef OBJ_ELF
@@ -10618,10 +10657,9 @@ mips_after_parse_args (void)
   const struct mips_cpu_info *tune_info = 0;
 
   /* GP relative stuff not working for PE */
-  if (strncmp (TARGET_OS, "pe", 2) == 0
-      && g_switch_value != 0)
+  if (strncmp (TARGET_OS, "pe", 2) == 0)
     {
-      if (g_switch_seen)
+      if (g_switch_seen && g_switch_value != 0)
 	as_bad (_("-G not supported in this configuration."));
       g_switch_value = 0;
     }

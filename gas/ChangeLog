@@ -1,3 +1,11 @@
+2005-03-03  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (load_address): Implement GP optimization
+	for 64bit address space non-PIC. Fix formatting.
+	(macro): Likewise. Simplify code.
+	(md_parse_option): Don't bail out if -G 0 is set for PIC code.
+	(mips_after_parse_args): Simplify code.
+
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* expr.c (operand): Remove redundant code enclosed by #ifdef
