@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Fri Aug  9 13:21:59 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c (d10v_opcodes): Correct 'mv' unit entry to EITHER.
+
+end-sanitize-d10v	
 Thu Aug  8 12:43:52 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Update for alpha-opc changes.
@@ -10,7 +16,7 @@ Wed Aug  7 11:55:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 start-sanitize-d10v
 Fri Aug  2 17:47:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* d10v-opc.c (d10v_operands): Added 2 accumulator sub instructions.
+	* d10v-opc.c (d10v_opcodes): Added 2 accumulator sub instructions.
 	Changed subi operand type to treat 0 as 16.
 
 end-sanitize-d10v

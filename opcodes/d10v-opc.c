@@ -220,7 +220,7 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "mulx", SHORT_2, 1, IU, PAR, 0x2c00, 0x7e00, { ADST0, RSRC2, RSRC } },
   { "mulxsu", SHORT_2, 1, IU, PAR, 0x1c00, 0x7e00, { ADST0, RSRC2, RSRC } },
   { "mulxu", SHORT_2, 1, IU, PAR, 0x3c00, 0x7e00, { ADST0, RSRC2, RSRC } },
-  { "mv", SHORT_2, 1, IU, PAR, 0x4000, 0x7e01, { RDST, RSRC } },
+  { "mv", SHORT_2, 1, EITHER, PAR, 0x4000, 0x7e01, { RDST, RSRC } },
   { "mv2w", SHORT_2, 1, IU, PAR, 0x5000, 0x7e23, { RDSTE, RSRCE } },
   { "mv2wfac", SHORT_2, 1, IU, PAR, 0x3e00, 0x7e2f, { RDSTE, ASRC } },
   { "mv2wtac", SHORT_2, 1, IU, PAR, 0x3e01, 0x7ee3, { RSRCE, ADST } },
