@@ -1,3 +1,59 @@
+Wed Mar 23 14:58:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Clean up the relaxing code for the new linker.
+	* targets.c (_bfd_relax_section): Take boolean *again argument
+	rather than asymbol list.
+	* bfd.c (bfd_relax_section): Change name of fourth argument from
+	symbols to again.
+	* reloc.c (bfd_generic_relax_section): Take boolean *again
+	argument rather than asymbol list.  Always return true.
+	* bout.c: Include genlink.h.
+	(aligncode, perform_slip): Declare.
+	(perform_slip): Take BFD argument rather than asymbol list.
+	Changed all callers.  Get the symbols from the BFD.  Change the
+	hash table entry value as well as the symbol value.
+	(abs32code): Take BFD argument rather than asymbol list.  Changed
+	all callers.
+	(aligncode): Likewise.
+	(b_out_relax_section): Take boolean *again argument rather than
+	asymbol list.  Only return false if an error occurred.  Set *again
+	to false.  Get symbols from BFD.
+	* reloc16.c: Include genlink.h.
+	(bfd_perform_slip): Take BFD argument rather than asymbol list.
+	Get the symbols from the BFD.  Change the hash table entry value
+	as well as the symbol value.
+	(bfd_coff_reloc16_relax_section): Take boolean *again argument
+	rather than asymbol list.  Only return false if an error occurred.
+	Set *again to false.  Get symbols from BFD.
+	* coffcode.h (bfd_coff_backend_data): Change
+	_bfd_coff_reloc16_estimate to take BFD argument rather than
+	asymbol list.
+	(bfd_coff_reloc16_estimate): Corresponding change.
+	(dummy_reloc16_estimate): Corresponding change.
+	* libcoff-in.h (bfd_coff_reloc16_relax_section): Change
+	declaration to take boolean * rather than asymbol list.
+	(bfd_perform_slip): Change declaration to take BFD rather than
+	asymbol list.
+	* coff-h8300.c (h300_reloc16_estimate): Take BFD argument rather
+	than asymbol list.  Changed calls to bfd_perform_slip.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+	* libcoff.h: Rebuilt.
+	* Makefile.in: Rebuilt dependencies.
+
+	* genlink.h (_bfd_generic_link_get_symbols): Define.
+	(_bfd_generic_link_get_symcount): Define.
+	* linker.c (generic_link_read_symbols): New function.
+	(generic_link_add_object_symbols): Use it.  Use
+	_bfd_generic_link_get_symbols and _bfd_generic_link_get_symcount
+	to get the symbols from the BFD.
+	(generic_link_check_archive_element): Likewise.
+	(_bfd_generic_final_link): Likewise.
+	(_bfd_generic_link_output_symbols): Likewise.
+	(default_indirect_link_order): Likewise.
+	(generic_link_add_symbol_list): Store pointer to hash table entry
+	in asymbol udata field.
+
 Tue Mar 22 13:09:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-mips.c (mips_howto_table): Add entry for new MIPS_R_PCREL16
