@@ -1,3 +1,10 @@
+2002-10-14  Daniel Jacobowitz  <drow@mvista.com>  
+ 
+	* config/mips/nm-irix4.h (HAVE_NONSTEPPABLE_WATCHPOINT): Define to 1.
+	* config/mips/nm-irix5.h (HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+	* config/mips/tm-embed.h (HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+	* config/pa/nm-hppah.h (HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+
 2002-10-13  Adam Fedor  <fedor@gnu.org>
 
 	* source.c (print_source_lines): Update comments.
