@@ -276,9 +276,9 @@ sh_opcode_info sh_table[] = {
 
 /* 0100nnnn1xxx0111 ldc.l <REG_N>,Rn_BANK */{"ldc.l",{A_INC_N,A_REG_B},{HEX_4,REG_N,REG_B,HEX_7}, arch_sh3_up},
 
-/* 10001110i8p4.... ldre @(<disp>,PC)	*/{"ldre",{A_DISP_PC},{HEX_8,HEX_E,PCRELIMM_8BY2}, arch_sh_dsp_up},
+/* 10001110i8p2.... ldre @(<disp>,PC)	*/{"ldre",{A_BDISP8},{HEX_8,HEX_E,BRANCH_8}, arch_sh_dsp_up},
 
-/* 10001100i8p4.... ldrs @(<disp>,PC)	*/{"ldre",{A_DISP_PC},{HEX_8,HEX_C,PCRELIMM_8BY2}, arch_sh_dsp_up},
+/* 10001100i8p2.... ldrs @(<disp>,PC)	*/{"ldrs",{A_BDISP8},{HEX_8,HEX_C,BRANCH_8}, arch_sh_dsp_up},
 
 /* 0100nnnn00001010 lds <REG_N>,MACH    */{"lds",{A_REG_N,A_MACH},{HEX_4,REG_N,HEX_0,HEX_A}, arch_sh1_up},
 

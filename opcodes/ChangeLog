@@ -1,3 +1,7 @@
+Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* sh-opc.h (sh_table): ldre and ldrs have a *signed* displacement.
+
 2000-03-02  J"orn Rennecke <amylaar@cygnus.co.uk>
 
         * d30v-dis.c (print_insn): Remove d*i hacks.  Use per-operand
