@@ -1,5 +1,5 @@
-/* Cadillac interface routines.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Energize (formerly known as Cadillac) interface routines.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -34,6 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ttyconn.h>
 #include <varargs.h>
 #include <sys/stat.h>
+#ifdef USG
+#include <sys/file.h>
+#endif
 #include <fcntl.h>
 #include <sys/filio.h>
 #include <setjmp.h>
@@ -41,6 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/errno.h>
 #include <termios.h>
 #include <strings.h>
+
+/* Non-zero means that we're doing the cadillac interface. */
+int cadillac = 0;
 
 /* Connection block for debugger<=>kernel communications. */
 static Connection *conn = 0;
@@ -63,8 +69,6 @@ extern int pgrp_inferior;
 
 extern char *source_path;
 
-extern int cadillac;
-
 char **pprompt;			/* Pointer to pointer to prompt */
 
 /* Tell cadillac_command_line_input() where to get its text from */
@@ -79,21 +83,15 @@ static int command_line_length = 0;
 #define PTY_EVENT 2
 
 
-static void
-prompt()
-{
-  fputs_filtered(*pprompt, stdout);
-}
-
 /* This routine redirects the output of fputs_filtered to the kernel so that
    the user can see what's going on in his debugger window. */
 
 void
 cadillac_fputs(ptr)
-     char *ptr;
+     const char *ptr;
 {
   if (conn)
-    CVWriteTranscriptInfo (conn, instance_id, ptr);
+    CVWriteTranscriptInfo (conn, instance_id, (char *)ptr);
   else
     fputs (ptr, stdout);
 }
@@ -195,9 +193,24 @@ full_filename(symtab)
   if (!symtab)
     return NULL;
 
-  pathlen = strlen(symtab->dirname) + strlen(symtab->filename);
+  if (symtab->fullname)
+    return savestring(symtab->fullname, strlen(symtab->fullname));
+
+  if (symtab->dirname)
+    pathlen = strlen(symtab->dirname);
+  else
+    pathlen = 0;
+  if (symtab->filename)
+    pathlen += strlen(symtab->filename);
+
   filename = xmalloc(pathlen+1);
-  sprintf(filename, "%s%s", symtab->dirname, symtab->filename);
+
+  if (symtab->dirname)
+    strcpy(filename, symtab->dirname);
+  else
+    *filename = '\000';
+  if (symtab->filename)
+    strcat(filename, symtab->filename);
 
   return filename;
 }
@@ -532,6 +545,7 @@ go_busy()
 }
 
 
+void
 cadillac_symbol_file(objfile)
      struct objfile *objfile;
 {
@@ -757,8 +771,8 @@ cadillac_ignore_breakpoint(b)
 
 /* Open up a pty and its associated tty.  Return the fd of the tty. */
 
-char *
-cadillac_getpty()
+static void
+getpty()
 {
   int n, ptyfd, ttyfd;
   static char dev[30];
@@ -766,9 +780,6 @@ cadillac_getpty()
   struct termios termios;
 
 #define HIGHPTY (('z' - 'p') * 16 - 1)
-
-  if (inferior_pty >= 0)		/* Only do this once */
-    return dev;
 
   for (n = 0; n <= HIGHPTY; n++)
     {
@@ -795,7 +806,7 @@ cadillac_getpty()
 
       inferior_pty = ptyfd;
       inferior_tty = ttyfd;
-      return dev;
+      return;
     }
 
   error ("getpty: can't get a pty\n");
@@ -974,7 +985,7 @@ kernel_dispatch(queue)
 	    if (*text != '\000')
 	      execute_command_1(0, queue, "%s", text);
 	    else
-	      prompt();	/* User just typed a blank line */
+	      print_prompt();	/* User just typed a blank line */
 	  }
 	  break;
 	case QueryResponseRType:
@@ -1336,6 +1347,11 @@ cadillac_initialize(cadillac_id, execarg)
 
   /* Tell the rest of the world that Cadillac is now set up. */
   cadillac = 1;
+
+  getpty();			/* Setup the pty */
+  dup2(inferior_tty, 0);	/* Attach all GDB I/O to the pty */
+  dup2(inferior_tty, 1);
+  dup2(inferior_tty, 2);
 }
 
 /* This is called from execute_command, and provides a wrapper around
@@ -1359,7 +1375,7 @@ cadillac_call_command(cmdblk, arg, from_tty)
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
 
-  prompt();
+  print_prompt();
 }
 
 void
@@ -1411,13 +1427,10 @@ null_routine(arg)
 /* All requests from the Cadillac kernel eventually end up here. */
 
 void
-cadillac_main_loop(pp)
-     char **pp;
+cadillac_main_loop()
 {
   CTtyRequest *req;
   struct cleanup *old_chain;
-
-  pprompt = pp;
 
   doing_breakcommands_message = 0;
 
@@ -1426,7 +1439,7 @@ cadillac_main_loop(pp)
 
   send_status();
 
-  prompt();
+  print_prompt();
 
   /* The actual event loop! */
 
