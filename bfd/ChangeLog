@@ -1,3 +1,13 @@
+start-sanitize-vr4xxx
+1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* archures.c,bfd-in2.h (bfd_mach_mips4111): New.
+	* cpu-mips.c: Add support for and independent 4111.
+	* elf32-mips.c (elf_mips_mach): E_MIPS_MACH_4111 -> bfd_mach_mips4111.
+	(_bfd_mips_elf_final_write_processing): 
+	bfd_mach_mips4111 -> E_MIPS_ARCH_3 | E_MIPS_MACH_4111.
+
+end-sanitize-vr4xxx
 1998-12-15  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* elf32-mips.c (elf_mips_abi_name): New.
