@@ -1,3 +1,22 @@
+start-sanitize-d30v
+Sun Nov 16 20:16:45 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* emulparams/d30velf.sh ({DATA,EMEM}_START_ADDR): Define as start
+	of internal data area and external memory on chip.
+
+	* scripttempl/elfd30v.sc: Define a MEMORY region that describes
+	the 3 regions of memory on the chip.  Put .text/.init/.fini into
+	the text memory region, put other segments into the data memory
+	region.  Add more of the standard elf sections.  Default __stack
+	to be 0x20008000, which is 1 byte beyond end of the internal data
+	region.
+
+end-sanitize-d30v
+Thu Nov 13 13:45:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.tgt (targ_extra_emuls): Make FreeBSD a i386bsd
+ 	variant.
+
 Sun Nov  2 14:51:36 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* configure.host (alpha*-*-linux*): Correct HOSTING_CRT0.  Set
