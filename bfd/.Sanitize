@@ -43,6 +43,7 @@ bout.c
 cache.c
 ctor.c
 coff-a29k.c
+coff-h8300.c
 coff-i386.c
 coff-i960.c
 coff-m68k.c
@@ -116,7 +117,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.31  1991/11/22 05:00:08  bothner
+# Revision 1.32  1991/11/27 16:58:22  sac
+# Added h8
+#
+# Revision 1.31  1991/11/22  05:00:08  bothner
 # 	Moved bfd_stab_name() and bfd_stab_names[]
 # 	from syms.c to new file stab-syms.c.
 # 	Renamed to  aout_stab_name() and aout_stab_names[].
