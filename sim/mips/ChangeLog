@@ -1,5 +1,11 @@
 2002-02-28  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (DSRA32, DSRAV): Fix order of arguments in
+	instruction-printing string.
+	(LWU): Use '64' as the filter flag.
+
+2002-02-28  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (SDXC1): Fix instruction-printing string.
 
 2002-02-28  Chris Demetriou  <cgd@broadcom.com>

@@ -1248,7 +1248,7 @@
 
 
 000000,00000,5.RT,5.RD,5.SHIFT,111111:SPECIAL:64::DSRA32
-"dsra32 r<RT>, r<RD>, <SHIFT>"
+"dsra32 r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
 *mipsV:
@@ -1270,7 +1270,7 @@
 }
 
 000000,5.RS,5.RT,5.RD,00000,010111:SPECIAL:64::DSRAV
-"dsrav r<RT>, r<RD>, r<RS>"
+"dsrav r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
 *mipsV:
@@ -1824,7 +1824,7 @@
 }
 
 
-100111,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWU
+100111,5.BASE,5.RT,16.OFFSET:NORMAL:64::LWU
 "lwu r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
