@@ -131,7 +131,7 @@ d10v_skip_prologue (pc)
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       sal = find_pc_line (func_addr, 0);
-      if (sal.end < func_end)
+      if ( sal.end && sal.end < func_end)
 	return sal.end;
     }
   
