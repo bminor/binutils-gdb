@@ -230,7 +230,7 @@ sh_sh4_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-static unsigned char *
+static const unsigned char *
 sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   /* 0xc3c3 is trapa #c3, and it works in big and little endian modes */

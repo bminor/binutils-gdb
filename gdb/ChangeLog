@@ -1,3 +1,7 @@
+2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c (sh_breakpoint_from_pc): Add 'const' to return type.
+
 2002-05-10 Daniel Jacobowitz  <drow@mvista.com>
 
 	* linespec.c (decode_line_1): Check for a double quote after
