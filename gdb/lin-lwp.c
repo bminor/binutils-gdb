@@ -610,6 +610,15 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		                - DECR_PC_AFTER_BREAK,
 			      pid_to_ptid (pid));
 	    }
+	  else if (WSTOPSIG (status) == SIGINT &&
+		   signal_pass_state (SIGINT) == 0)
+	    {
+	      /* Since SIGINT gets forwarded to the entire process group
+		 (in the case where ^C/BREAK is typed at the tty/console),
+		 just ignore all SIGINT events from all lwp's except for
+		 the one that was caught by lin_lwp_wait.  */
+	      ;  /* Don't save.  Signal will disappear into oblivion. */
+	    }
 	  else
 	    {
 	      if (debug_lin_lwp)
@@ -618,7 +627,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				    strsignal (WSTOPSIG (status)), pid);
 
 	      /* The thread was stopped with a signal other than
-		 SIGSTOP, and didn't accidentiliy trip a breakpoint.
+		 SIGSTOP, and didn't accidentally trip a breakpoint.
 		 Record the wait status.  */
 	      lp->status = status;
 	    }
