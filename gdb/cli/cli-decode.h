@@ -19,7 +19,7 @@
 #if !defined (CLI_DECODE_H)
 #define CLI_DECODE_H 1
 
-#include "gnu-regex.h"   /* Needed by apropos_cmd. */
+#include "gdb_regex.h"		/* Needed by apropos_cmd.  */
 
 /* Command classes are top-level categories into which commands are broken
    down for "help" purposes.  

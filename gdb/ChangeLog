@@ -1,5 +1,8 @@
 2001-08-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* cli/cli-decode.h: Include "gdb_regex.h" instead of
+	"gnu-regex.h".
+
 	* NEWS: Update.
 
 2001-08-02  Eli Zaretskii  <eliz@is.elta.co.il>
