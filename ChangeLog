@@ -1,3 +1,8 @@
+Fri Jul 12 09:52:52 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (CONFIGURE_TARGET_MODULES): Set r environment
+	variable that CC_FOR_TARGET needs.
+
 Thu Jul 11 10:09:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (CONFIGURE_TARGET_MODULES): Determine if the multlib

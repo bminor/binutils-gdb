@@ -1014,6 +1014,7 @@ $(INSTALL_MODULES): install-dirs
 $(CONFIGURE_TARGET_MODULES):
 	@dir=`echo $@ | sed -e 's/configure-target-//'`; \
 	if [ -d $(TARGET_SUBDIR)/$${dir} ]; then \
+	  r=`pwd`; export r; \
 	  $(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/$${dir}/tmpmulti.out; \
 	  if [ -f $(TARGET_SUBDIR)/$${dir}/multilib.out ]; then \
 	    if cmp $(TARGET_SUBDIR)/$${dir}/multilib.out $(TARGET_SUBDIR)/$${dir}/tmpmulti.out > /dev/null; then \
