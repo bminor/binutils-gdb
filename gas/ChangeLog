@@ -1,3 +1,13 @@
+2004-04-01  Dave Korn  <dk@artimi.com>
+
+	* config/tc-dlx.c (md_assemble): set fx_no_overflow flag for
+	hi16 and lo16 fixS structs.
+	(md_assemble): generate bit_fixS for RELOC_DLX_LO16 in
+	exactly the same way as for RELOC_DLX_REL16.
+	(machine_ip): properly respect LO flag in the_insn and
+	output RELOC_DLX_LO16 rather than RELOC_DLX_16.
+	(md_apply_fix3): apply RELOC_DLX_LO16.
+
 2004-03-30  Stan Shebs  <shebs@apple.com>
 
 	Remove long-obsolete MPW support.

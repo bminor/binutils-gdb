@@ -1,5 +1,5 @@
 /* tc-ldx.c -- Assemble for the DLX
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -397,6 +397,18 @@ md_assemble (str)
 			  the_insn.size, & the_insn.exp, the_insn.pcrel,
 			  the_insn.reloc);
 
+      /* Turn off complaints that the addend is
+	 too large for things like foo+100000@ha.  */
+      switch (the_insn.reloc)
+	{
+	case RELOC_DLX_HI16:
+	case RELOC_DLX_LO16:
+	  fixP->fx_no_overflow = 1;
+	  break;
+	default:
+	  break;
+	}
+
       switch (fixP->fx_r_type)
 	{
 	case RELOC_DLX_REL26:
@@ -410,6 +422,7 @@ md_assemble (str)
 	  bitP->fx_bit_add = 0x03FFFFFF;
 	  fixP->fx_bit_fixP = bitP;
 	  break;
+	case RELOC_DLX_LO16:
 	case RELOC_DLX_REL16:
 	  bitP = malloc (sizeof (bit_fixS));
 	  bitP->fx_bit_size = 16;
@@ -955,7 +968,8 @@ machine_ip (str)
 	      continue;
 	    }
 
-	  the_insn.reloc        = (the_insn.HI) ? RELOC_DLX_HI16 : RELOC_DLX_16;
+	  the_insn.reloc        = (the_insn.HI) ? RELOC_DLX_HI16 
+	    : (the_insn.LO ? RELOC_DLX_LO16 : RELOC_DLX_16);
 	  the_insn.reloc_offset = 2;
 	  the_insn.size         = 2;
 	  the_insn.pcrel        = 0;
@@ -1164,6 +1178,7 @@ md_apply_fix3 (fixP, valP, seg)
 
   switch (fixP->fx_r_type)
     {
+    case RELOC_DLX_LO16:
     case RELOC_DLX_REL16:
       if (fixP->fx_bit_fixP != (bit_fixS *) NULL)
 	{
