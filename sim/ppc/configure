@@ -1040,9 +1040,11 @@ rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 
-if test x"$enable_sim_inline" != x"" -a x"$enable_sim_inline" != x"no"; then
+if test x"$enable_sim_inline" != x""; then
   flags=""
   case "$enable_sim_inline" in
+    no)		flags="";;
+    0)		flags="-DDEFAULT_INLINE=0";;
     yes | 2)	flags="-DDEFAULT_INLINE=2";;
     1)		flags="-DDEFAULT_INLINE=1";;
     *) for x in `echo "$enable_sim_inline" | sed -e "s/,/ /g"`; do
@@ -1057,7 +1059,7 @@ if test x"$enable_sim_inline" != x"" -a x"$enable_sim_inline" != x"no"; then
   if test x"$flags" != x""; then
     mv Makefile Makefile.tem
     echo "Setting INLINE_CFLAGS=$flags" 1>&6
-    sed -e "s/^INLINE_CFLAGS.*=.*\$/INLINE_CFLAGS = $flags/" \
+    sed -e "s/^INLINE_CFLAGS.*=.*\$/INLINE_CFLAGS =$flags/" \
       < Makefile.tem > Makefile
     rm -f Makefile.tem
   fi
@@ -1073,11 +1075,11 @@ fi
 
 if test x"$enable_sim_cflags" != x"" -a x"$enable_sim_cflags" != x"no"; then
   if test "$enable_sim_cflags" = "yes"; then
-    enable_sim_cflags="-fomit-frame-pointer -O2"
+    enable_sim_cflags="-fomit-frame-pointer,-O2"
   fi
   mv Makefile Makefile.tem
   echo "Setting SIM_CFLAGS=$enable_sim_cflags"
-  sed -e "s/^SIM_CFLAGS.*=.*\$/SIM_CFLAGS = $enable_sim_cflags/" \
+  sed -e "s/^SIM_CFLAGS.*=.*\$/SIM_CFLAGS = $enable_sim_cflags/" -e "s/,/ /g"\
     < Makefile.tem > Makefile
   rm -f Makefile.tem
 fi
@@ -1111,7 +1113,7 @@ if test x"$enable_sim_filter" = x"no"; then
   rm -f Makefile.tem
 
 else
-  if test x"$enable_sim_filter" != x"yes"; then
+  if test x"$enable_sim_filter" != x"yes" -a x"$enable_sim_filter" != x""; then
     mv Makefile Makefile.tem
     echo "Setting IGEN_FILTER= -f $enable_sim_filter" 1>&6
     sed -e "s/^IGEN_FILTER.*=.*\$/IGEN_FILTER = -f $enable_sim_filter/" \

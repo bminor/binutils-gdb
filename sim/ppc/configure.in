@@ -104,7 +104,7 @@ if test x"$enable_sim_filter" = x"no"; then
   rm -f Makefile.tem
 
 else
-  if test x"$enable_sim_filter" != x"yes"; then
+  if test x"$enable_sim_filter" != x"yes" -a x"$enable_sim_filter" != x""; then
     mv Makefile Makefile.tem
     echo "Setting IGEN_FILTER= -f $enable_sim_filter" 1>&6
     sed -e "s/^IGEN_FILTER.*=.*\$/IGEN_FILTER = -f $enable_sim_filter/" \
