@@ -1,5 +1,10 @@
 2004-01-24  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/local.exp: Rewrite "ptype Local".  Add "ptype l".
+	Provide arms for current output in all my configurations.
+
+2004-01-24  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* lib/compiler.c: Add hp_cc_compiler and hp_aCC_compiler.
 	* lib/compiler.cc: Likewise.
 	* lib/gdb.exp (get_compiler_info): Always call gdb_compile to
