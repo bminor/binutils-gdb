@@ -1,5 +1,9 @@
 2003-06-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb.base/readline.exp: Add tests for operate-and-get-next with a
+	fully filled history list.
+	* gdb.base/gdb_history: New file.
+
 	* gdb.base/signals.exp: XFAIL "continue to func1" on
 	i*86-*-freebsd*.
 
