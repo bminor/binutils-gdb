@@ -1068,7 +1068,7 @@ OP_6000 ()
 void
 OP_31000000 ()
 {
-  trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
+  trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   State.regs[OP[0]] = RW (OP[1] + State.regs[OP[2]]);
   State.regs[OP[0]+1] = RW (OP[1] + State.regs[OP[2]] + 2);
   trace_output (OP_DREG);
