@@ -501,7 +501,7 @@ md_assemble (str)
   struct v850_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex;
-  unsigned long insn, size;
+  unsigned long insn, insn_size;
   char *f;
   int i;
   int match;
@@ -749,11 +749,11 @@ md_assemble (str)
 
      Four byte insns have an opcode with the two high bits on.  */ 
   if ((insn & 0x0600) == 0x0600)
-    size = 4;
+    insn_size = 4;
   else
-    size = 2;
-  f = frag_more (size);
-  md_number_to_chars (f, insn, size);
+    insn_size = 2;
+  f = frag_more (insn_size);
+  md_number_to_chars (f, insn, insn_size);
 
   /* Create any fixups.  At this point we do not use a
      bfd_reloc_code_real_type, but instead just use the
@@ -777,11 +777,16 @@ md_assemble (str)
 	    abort();
 	  
 	  size = bfd_get_reloc_size (reloc_howto);
-	  offset = 4 - size;
+
+	  /* The "size" of a TDA_OFFSET reloc varies depending
+	     on what kind of instruction it's used in!  */
+	  if (reloc_howto->type == 11 && insn_size > 2)
+	    size = 2;
 
 	  if (size < 1 || size > 4)
 	    abort();
 
+	  offset = 4 - size;
 	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
 			      &fixups[i].exp, 
 			      reloc_howto->pc_relative,

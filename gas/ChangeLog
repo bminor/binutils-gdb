@@ -1,3 +1,10 @@
+start-sanitize-v850
+Tue Oct 22 22:01:25 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_assemble): Handle TDAOFF relocs
+	differently for movea & sst/sld insns.
+
+end-sanitize-v850
 Tue Oct 22 17:09:32 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Don't allow illegal combinations
