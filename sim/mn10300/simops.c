@@ -173,9 +173,12 @@ void OP_FCB40000 ()
 {
 }
 
-/* mov */
+/* mov (di,am), dn */
 void OP_F300 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30) >> 8)]
+    = load_mem ((State.regs[REG_A0 + (insn & 0x3)]
+		 + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 4);
 }
 
 /* mov (abs16), dn */
@@ -228,9 +231,12 @@ void OP_FCB00000 ()
 {
 }
 
-/* mov */
+/* mov (di,am), an*/
 void OP_F380 ()
 {
+  State.regs[REG_A0 + ((insn & 0x30) >> 8)]
+    = load_mem ((State.regs[REG_A0 + (insn & 0x3)]
+		 + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 4);
 }
 
 /* mov */
@@ -287,9 +293,12 @@ void OP_FC910000 ()
 {
 }
 
-/* mov */
+/* mov dm, (di,an) */
 void OP_F340 ()
 {
+  store_mem ((State.regs[REG_A0 + (insn & 0x3)]
+	      + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 4,
+	     State.regs[REG_D0 + ((insn & 0x30) >> 8)]);
 }
 
 /* mov dm, (abs16) */
@@ -342,9 +351,12 @@ void OP_FC900000 ()
 {
 }
 
-/* mov */
+/* mov am, (di,an) */
 void OP_F3C0 ()
 {
+  store_mem ((State.regs[REG_A0 + (insn & 0x3)]
+	      + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 4,
+	     State.regs[REG_A0 + ((insn & 0x30) >> 8)]);
 }
 
 /* mov */
@@ -431,9 +443,12 @@ void OP_FCB80000 ()
 {
 }
 
-/* movbu */
+/* movbu (di,am), dn */
 void OP_F400 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30) >> 8)]
+    = load_mem ((State.regs[REG_A0 + (insn & 0x3)]
+		 + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 1);
 }
 
 /* movbu (abs16), dn */
@@ -484,9 +499,12 @@ void OP_FC920000 ()
 {
 }
 
-/* movbu */
+/* movbu dm, (di,an) */
 void OP_F440 ()
 {
+  store_mem ((State.regs[REG_A0 + (insn & 0x3)]
+	      + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 1,
+	     State.regs[REG_D0 + ((insn & 0x30) >> 8)]);
 }
 
 /* movbu dm, (abs16) */
@@ -537,9 +555,12 @@ void OP_FCBC0000 ()
 {
 }
 
-/* movhu */
+/* movhu (di,am), dn */
 void OP_F480 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30) >> 8)]
+    = load_mem ((State.regs[REG_A0 + (insn & 0x3)]
+		 + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 2);
 }
 
 /* movhu (abs16), dn */
@@ -590,9 +611,12 @@ void OP_FC930000 ()
 {
 }
 
-/* movhu */
+/* movhu dm, (di,an) */
 void OP_F4C0 ()
 {
+  store_mem ((State.regs[REG_A0 + (insn & 0x3)]
+	      + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 2,
+	     State.regs[REG_D0 + ((insn & 0x30) >> 8)]);
 }
 
 /* movhu dm, (abs16) */
@@ -1802,7 +1826,7 @@ void OP_F280 ()
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
 
-/* beq */
+/* beq label:8 */
 void OP_C800 ()
 {
   /* The dispatching code will add 2 after we return, so
@@ -1811,7 +1835,7 @@ void OP_C800 ()
     State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bne */
+/* bne label:8 */
 void OP_C900 ()
 {
   /* The dispatching code will add 2 after we return, so
@@ -1820,129 +1844,194 @@ void OP_C900 ()
     State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bgt */
+/* bgt label:8 */
 void OP_C100 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!((PSW & PSW_Z)
+        || (((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0)))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bge */
+/* bge label:8 */
 void OP_C200 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!(((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* ble */
+/* ble label:8 */
 void OP_C300 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if ((PSW & PSW_Z)
+       || (((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* blt */
+/* blt label:8 */
 void OP_C000 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0)
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bhi */
+/* bhi label:8 */
 void OP_C500 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!(((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bcc */
+/* bcc label:8 */
 void OP_C600 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!(PSW & PSW_C))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bls */
+/* bls label:8 */
 void OP_C700 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0)
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bcs */
+/* bcs label:8 */
 void OP_C400 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (PSW & PSW_C)
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
-/* bvc */
+/* bvc label:8 */
 void OP_F8E800 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if (!(PSW & PSW_V))
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
-/* bvs */
+/* bvs label:8 */
 void OP_F8E900 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if (PSW & PSW_V)
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
-/* bnc */
+/* bnc label:8 */
 void OP_F8EA00 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if (!(PSW & PSW_N))
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
-/* bns */
+/* bns label:8 */
 void OP_F8EB00 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if (PSW & PSW_N)
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
-/* bra */
+/* bra label:8 */
 void OP_CA00 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* leq */
 void OP_D8 ()
 {
+ abort ();
 }
 
 /* lne */
 void OP_D9 ()
 {
+ abort ();
 }
 
 /* lgt */
 void OP_D1 ()
 {
+ abort ();
 }
 
 /* lge */
 void OP_D2 ()
 {
+ abort ();
 }
 
 /* lle */
 void OP_D3 ()
 {
+ abort ();
 }
 
 /* llt */
 void OP_D0 ()
 {
+ abort ();
 }
 
 /* lhi */
 void OP_D5 ()
 {
+ abort ();
 }
 
 /* lcc */
 void OP_D6 ()
 {
+ abort ();
 }
 
 /* lls */
 void OP_D7 ()
 {
+ abort ();
 }
 
 /* lcs */
 void OP_D4 ()
 {
+ abort ();
 }
 
 /* lra */
 void OP_DA ()
 {
+ abort ();
 }
 
 /* setlb */
 void OP_DB ()
 {
+ abort ();
 }
 
 /* jmp (an) */
@@ -2267,16 +2356,19 @@ void OP_F0FC ()
 /* rti */
 void OP_F0FD ()
 {
+  abort ();
 }
 
 /* trap */
 void OP_F0FE ()
 {
+ abort ();
 }
 
 /* rtm */
 void OP_F0FF ()
 {
+ abort ();
 }
 
 /* nop */
