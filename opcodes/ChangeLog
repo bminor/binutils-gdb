@@ -1,3 +1,7 @@
+2004-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* sparc-dis.c (print_insn_sparc): Update getword prototype.
+
 2004-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	Apply the following patches from mainline
