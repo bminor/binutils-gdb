@@ -1,3 +1,28 @@
+Thu Mar 11 10:52:57 1993  Fred Fish  (fnf@cygnus.com)
+
+	* demangle.h (DMGL_NO_OPTS):  Add define (set to 0) to use
+	in place of bare 0, for readability reasons.
+
+Tue Mar  2 17:50:11 1993  Fred Fish  (fnf@cygnus.com)
+
+	* demangle.h:  Replace all references to cfront with ARM.
+
+Tue Feb 23 12:21:14 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* bfd.h: Update for new elements in JUMP_TABLE.
+
+Tue Feb 16 00:51:30 1993  John Gilmore  (gnu@cygnus.com)
+
+	* bfd.h:  Update for BFD_VERSION 2.1.
+
+Tue Jan 26 11:49:20 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* bfd.h: Update for SEC_IS_COMMON flag.
+
+Tue Jan 19 12:25:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfd.h: Update for bfd_asymbol_value bug fix.
+
 Fri Jan  8 16:37:18 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd.h: Update to include ECOFF tdata and target_flavour.
