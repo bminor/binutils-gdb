@@ -34,7 +34,7 @@ typedef long code_t (void);
 static volatile data_t *data[10];
 static volatile code_t *code[10];
 
-jmp_buf env;
+sigjmp_buf env;
 
 extern void
 keeper (int sig)
