@@ -6529,6 +6529,7 @@ get_AT_name (attribute)
     case DW_AT_src_coords:           return "DW_AT_src_coords";
     case DW_AT_body_begin:           return "DW_AT_body_begin";
     case DW_AT_body_end:             return "DW_AT_body_end";
+    case DW_AT_GNU_vector:           return "DW_AT_GNU_vector";
     default:
       {
 	static char buffer [100];
