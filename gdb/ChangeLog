@@ -1,3 +1,8 @@
+Wed May 20 15:29:41 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips/tm-tx39.h (MIPS_DEFAULT_FPU_TYPE) : Defined as MIPS_FPU_NONE.
+	* mips/tm-tx39l.h : Same.
+
 Wed May 20 10:12:11 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* m32r-tdep.c: (decode_prologue): Handle frames compiled with -Os.
