@@ -253,7 +253,7 @@ gdb_expect {
 
 # Template Foo<T>
 
-setup_xfail hppa2.0w-*-* CLLbs16092
+setup_xfail hppa64-*-* CLLbs16092
 # g++ can't do the template instantiation in debug info trick, so we
 # fail this because it's not a real type.
 if {!$hp_aCC_compiler} { setup_xfail *-*-* }
@@ -303,7 +303,7 @@ gdb_expect {
 
 # Template Bar<T, int>
 
-setup_xfail hppa2.0w-*-* CLLbs16092
+setup_xfail hppa64-*-* CLLbs16092
 # same as Foo for g++
 if {!$hp_aCC_compiler} { setup_xfail *-*-* }
 send_gdb "ptype Bar\n"   
@@ -339,7 +339,7 @@ gdb_expect {
 
 # Template Baz<T, char>
 
-setup_xfail hppa2.0w-*-* CLLbs16092
+setup_xfail hppa64-*-* CLLbs16092
 # Same as Foo, for g++
 if {!$hp_aCC_compiler} { setup_xfail *-*-* }
 send_gdb "ptype Baz\n"   
@@ -402,7 +402,7 @@ gdb_expect {
 
 # Template Spec<T1, T2>
 
-setup_xfail hppa2.0w-*-* CLLbs16092
+setup_xfail hppa64-*-* CLLbs16092
 # Same as Foo for g++
 if {!$hp_aCC_compiler} { setup_xfail *-*-* }
 send_gdb "ptype Spec\n"   
