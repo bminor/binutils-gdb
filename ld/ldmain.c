@@ -325,12 +325,12 @@ main (argc, argv)
 
       if (saved_script_handle)
 	{
-	  static const int BSIZE = 8192;
+	  static const int BufferSize = 8192;
 	  size_t n;
-	  char *buf = xmalloc (BSIZE);
+	  char *buf = xmalloc (BufferSize);
 
 	  rewind (saved_script_handle);
-	  while ((n = fread (buf, 1, BSIZE - 1, saved_script_handle)) > 0)
+	  while ((n = fread (buf, 1, BufferSize - 1, saved_script_handle)) > 0)
 	    {
 	      buf [n] = 0;
 	      info_msg (buf);
