@@ -29,9 +29,7 @@ else
 	fi
 fi
 
-# mswin gdb is not really gdbtk, but is close enough for now.
-
-gdbtk_files="README.GDBTK gdbtk.c gdbtk.tcl mswin"
+gdbtk_files="README.GDBTK gdbtk.c gdbtk.tcl"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	lose_these_too="${gdbtk_files} ${lose_these_too}"
@@ -42,6 +40,23 @@ else
 	keep_these_too="${gdbtk_files} ${keep_these_too}"
 	if [ -n "${verbose}" ] ; then
 		echo Keeping ${gdbtk_files}
+	fi
+fi
+
+# WinGDB files are not really ready to be part of FSF releases, but
+# keep them for progressives and such.
+
+mswin_files="mswin"
+
+if ( echo $* | grep lose\-mswin > /dev/null ) ; then
+	lose_these_too="${mswin_files} ${lose_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${mswin_files}
+	fi
+else
+	keep_these_too="${mswin_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${mswin_files}
 	fi
 fi
 
@@ -77,7 +92,6 @@ annotate.h
 arm-convert.s
 arm-tdep.c
 arm-xdep.c
-array-rom.c
 blockframe.c
 breakpoint.c
 breakpoint.h
@@ -288,7 +302,6 @@ sparc-stub.c
 sparc-tdep.c
 sparcl-stub.c
 sparcl-tdep.c
-sparclite
 stabsread.c
 stabsread.h
 stack.c
