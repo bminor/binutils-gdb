@@ -1312,7 +1312,7 @@ mips_exit_debug ()
     mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
                   mips_receive_wait, NULL);
 
-  if (mips_monitor == MON_IDT && !mips_expect ("Exiting remote debug mode"))
+  if (mips_monitor == MON_IDT && !mips_expect ("Exiting remote debug"))
     return -1;
     
   if (mips_monitor == MON_DDB)
