@@ -1,5 +1,16 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (emit_one_bundle): Snapshot manual bundling state
+	before actually using it. Don't generate an error in manual bundling
+	mode when looking at an insn requiring slot 2 but not yet at slot 2.
+	Don't generate an error in manual bundling mode when looking at an
+	insn required to be last in its group but the required slot hasn't
+	been reached, yet. Allow conversion from MII to MI;I for bundle
+	consisting of only 2 insns with the stop between them. Suppress
+	various meaningless errors resulting from detecting earlier ones.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (parse_operands): Also handle alloc without first
 	input being ar.pfs.
 

@@ -6157,8 +6157,7 @@ build_insn (slot, insnp)
 static void
 emit_one_bundle ()
 {
-  unsigned int manual_bundling_on = 0, manual_bundling_off = 0;
-  unsigned int manual_bundling = 0;
+  int manual_bundling_off = 0, manual_bundling = 0;
   enum ia64_unit required_unit, insn_unit = 0;
   enum ia64_insn_type type[3], insn_type;
   unsigned int template, orig_template;
@@ -6253,13 +6252,25 @@ emit_one_bundle ()
 	    }
 	}
 
+      manual_bundling_off = md.slot[curr].manual_bundling_off;
+      if (md.slot[curr].manual_bundling_on)
+	{
+	  if (curr == first)
+	    manual_bundling = 1;
+	  else
+	  break; /* Need to start a new bundle.  */
+	}
+
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
-	  if (manual_bundling && i != 2)
-	    as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			  "`%s' must be last in bundle", idesc->name);
-	  else
-	    i = 2;
+	  if (manual_bundling && !manual_bundling_off)
+	    {
+	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+			    "`%s' must be last in bundle", idesc->name);
+	      if (i < 2)
+		manual_bundling = -1; /* Suppress meaningless post-loop errors.  */
+	    }
+	  i = 2;
 	}
       if (idesc->flags & IA64_OPCODE_LAST)
 	{
@@ -6292,10 +6303,19 @@ emit_one_bundle ()
 	      required_slot = i;
 	      break;
 	    }
-	  if (manual_bundling && i != required_slot)
-	    as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			  "`%s' must be last in instruction group",
-			  idesc->name);
+	  if (manual_bundling
+	      && (i > required_slot
+		  || (required_slot == 2 && !manual_bundling_off)
+		  || (user_template >= 0
+		      /* Changing from MMI to M;MI is OK.  */
+		      && (template ^ required_template) > 1)))
+	    {
+	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+			    "`%s' must be last in instruction group",
+			    idesc->name);
+	      if (i < 2 && required_slot == 2 && !manual_bundling_off)
+		manual_bundling = -1; /* Suppress meaningless post-loop errors.  */
+	    }
 	  if (required_slot < i)
 	    /* Can't fit this instruction.  */
 	    break;
@@ -6314,22 +6334,14 @@ emit_one_bundle ()
 	}
       if (curr != first && md.slot[curr].label_fixups)
 	{
-	  if (manual_bundling_on)
-	    as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+	  if (manual_bundling)
+	    {
+	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 			  "Label must be first in a bundle");
+	      manual_bundling = -1; /* Suppress meaningless post-loop errors.  */
+	    }
 	  /* This insn must go into the first slot of a bundle.  */
 	  break;
-	}
-
-      manual_bundling_on = md.slot[curr].manual_bundling_on;
-      manual_bundling_off = md.slot[curr].manual_bundling_off;
-
-      if (manual_bundling_on)
-	{
-	  if (curr == first)
-	    manual_bundling = 1;
-	  else
-	    break;			/* need to start a new bundle */
 	}
 
       if (end_of_insn_group && md.num_slots_in_use >= 1)
@@ -6359,12 +6371,17 @@ emit_one_bundle ()
 		      reason we have to check for this is that otherwise we
 		      may end up generating "MI;;I M.." which has the deadly
 		      effect that the second M instruction is no longer the
-		      first in the bundle! --davidm 99/12/16  */
+		      first in the group! --davidm 99/12/16  */
 		   && (idesc->flags & IA64_OPCODE_FIRST) == 0)
 	    {
 	      template = 1;
 	      end_of_insn_group = 0;
 	    }
+	  else if (i == 1
+		   && user_template == 0
+		   && !(idesc->flags & IA64_OPCODE_FIRST))
+	    /* Use the next slot.  */
+	    continue;
 	  else if (curr != first)
 	    /* can't fit this insn */
 	    break;
@@ -6542,7 +6559,7 @@ emit_one_bundle ()
       curr = (curr + 1) % NUM_SLOTS;
       idesc = md.slot[curr].idesc;
     }
-  if (manual_bundling)
+  if (manual_bundling > 0)
     {
       if (md.num_slots_in_use > 0)
 	{

@@ -61,4 +61,9 @@ if [istarget "ia64-*"] then {
 	run_dump_test "alias"
 	run_dump_test "group-1"
     }
+
+    run_dump_test "bundling"
+    run_list_test "label" ""
+    run_list_test "last" ""
+    run_list_test "slot2" ""
 }
