@@ -1,3 +1,7 @@
+2000-12-09  Nick Clifton  <nickc@redhat.com>
+
+	* gas/m68k/pcrel.d: Update to match latest assembler output.
+
 2000-12-02  Chris Demetriou  <cgd@sibyte.com>
 
         * gas/mips/elf_e_flags.s: Add padding to the end of the
