@@ -1,3 +1,9 @@
+Thu May 15 10:00:53 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_begin): If no cpu type is specified on the
+	command line then the ARM7 is now chosen by default when setting
+	the BFD machine and architecture.
+
 Wed May 14 09:54:53 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (global variables): Added 'uses_apcs_26' flag to
