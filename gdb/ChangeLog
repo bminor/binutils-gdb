@@ -1,3 +1,8 @@
+2001-08-08  Don Howard  <dhoward@redhat.com>
+
+	* stabsread.c (read_type): Add support for const and volatile
+	modifiers.
+
 2001-08-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* core-regset.c (fetch_core_registers):  Remove HAVE_GREGSET_T
