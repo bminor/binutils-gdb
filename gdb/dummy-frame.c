@@ -402,6 +402,7 @@ dummy_frame_this_id (struct frame_info *next_frame,
 
 static struct frame_unwind dummy_frame_unwind =
 {
+  DUMMY_FRAME,
   dummy_frame_this_id,
   dummy_frame_prev_register
 };

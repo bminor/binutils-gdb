@@ -819,6 +819,8 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
 }
 	
 const struct frame_unwind legacy_saved_regs_unwinder = {
+  /* Not really.  It gets overridden by legacy_get_prev_frame.  */
+  UNKNOWN_FRAME,
   legacy_saved_regs_this_id,
   legacy_saved_regs_prev_register
 };
@@ -960,15 +962,20 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi = frame_obstack_zalloc (sizeof (struct frame_info));
 
   fi->next = create_sentinel_frame (current_regcache);
-  fi->type = frame_type_from_pc (pc);
+
+  /* Select/initialize both the unwind function and the frame's type
+     based on the PC.  */
+  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
+  if (fi->unwind->type != UNKNOWN_FRAME)
+    fi->type = fi->unwind->type;
+  else
+    fi->type = frame_type_from_pc (pc);
+
   deprecated_update_frame_base_hack (fi, addr);
   deprecated_update_frame_pc_hack (fi, pc);
 
   if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
     DEPRECATED_INIT_EXTRA_FRAME_INFO (0, fi);
-
-  /* Select/initialize an unwind function.  */
-  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, get_frame_pc (fi));
 
   return fi;
 }
@@ -1047,7 +1054,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      Unfortunatly those same work-arounds rely on the type defaulting
      to NORMAL_FRAME.  Ulgh!  The new frame code does not have this
      problem.  */
-  prev->type = NORMAL_FRAME;
+  prev->type = UNKNOWN_FRAME;
 
   /* A legacy frame's ID is always computed here.  Mark it as valid.  */
   prev->id_p = 1;
@@ -1083,11 +1090,14 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 				"Outermost frame - unwound PC zero\n");
 	  return NULL;
 	}
-      prev->type = frame_type_from_pc (get_frame_pc (prev));
 
-      /* Set the unwind functions based on that identified PC.  */
-      prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					      get_frame_pc (prev));
+      /* Set the unwind functions based on that identified PC.  Ditto
+         for the "type" but strongly prefer the unwinder's frame type.  */
+      prev->unwind = frame_unwind_find_by_pc (current_gdbarch, prev->pc);
+      if (prev->unwind->type == UNKNOWN_FRAME)
+	prev->type = frame_type_from_pc (prev->pc);
+      else
+	prev->type = prev->unwind->type;
 
       /* Find the prev's frame's ID.  */
       if (prev->type == DUMMY_FRAME
@@ -1336,6 +1346,14 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
 					  get_frame_pc (prev));
 
+  /* If the unwinder provides a frame type, use it.  Otherwize
+     continue on to that heuristic mess.  */
+  if (prev->unwind->type != UNKNOWN_FRAME)
+    {
+      prev->type = prev->unwind->type;
+      return prev;
+    }
+
   /* NOTE: cagney/2002-11-18: The code segments, found in
      create_new_frame and get_prev_frame(), that initializes the
      frames type is subtly different.  The latter only updates ->type
@@ -1574,11 +1592,21 @@ get_prev_frame (struct frame_info *this_frame)
 			    "Outermost frame - unwound PC zero\n");
       return NULL;
     }
-  prev_frame->type = frame_type_from_pc (prev_frame->pc);
 
   /* Set the unwind functions based on that identified PC.  */
   prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
 						prev_frame->pc);
+
+  /* FIXME: cagney/2003-04-02: Rather than storing the frame's type in
+     the frame, the unwinder's type should be returned directly.
+     Unfortunatly, legacy code, called by legacy_get_prev_frame,
+     explicitly set the frames type using the method
+     deprecated_set_frame_type().  */
+  gdb_assert (prev_frame->unwind->type != UNKNOWN_FRAME);
+  prev_frame->type = prev_frame->unwind->type;
+
+  /* Can the frame's type and unwinder be computed on demand?  That
+     would make a frame's creation really really lite!  */
 
   /* The prev's frame's ID is computed by demand in get_frame_id().  */
 
@@ -1649,7 +1677,7 @@ get_frame_base (struct frame_info *fi)
 CORE_ADDR
 get_frame_base_address (struct frame_info *fi)
 {
-  if (fi->type != NORMAL_FRAME)
+  if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   if (fi->base == NULL)
     fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
@@ -1664,7 +1692,7 @@ CORE_ADDR
 get_frame_locals_address (struct frame_info *fi)
 {
   void **cache;
-  if (fi->type != NORMAL_FRAME)
+  if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
@@ -1682,7 +1710,7 @@ CORE_ADDR
 get_frame_args_address (struct frame_info *fi)
 {
   void **cache;
-  if (fi->type != NORMAL_FRAME)
+  if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
@@ -1716,7 +1744,10 @@ get_frame_type (struct frame_info *frame)
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
-  return frame->type;
+  if (frame->type == UNKNOWN_FRAME)
+    return NORMAL_FRAME;
+  else
+    return frame->type;
 }
 
 void

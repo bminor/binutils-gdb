@@ -1,5 +1,26 @@
 2003-04-04  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): Do not call frame_type_from_pc.  Set
+	the frame's type from the unwinder.
+	(get_frame_type): Map UNKNOWN_FRAME onto NORMAL_FRAME.
+	(create_new_frame, legacy_get_prev_frame): When the unwinder's
+	type isn't UNKNOWN_FRAME, initalize "type" from the unwinder.
+	(get_frame_base_address): Use get_frame_type.
+	(get_frame_locals_address, get_frame_args_address): Ditto.
+	(legacy_saved_regs_unwinder): Set the type to UNKNOWN_TYPE.
+	* frame.h (enum frame_type): Add UNKNOWN_FRAME.
+	(struct frame_info): Add comment explaining why the frame contains
+	a "type" field.
+	* dummy-frame.c (dummy_frame_unwind): Set the type to DUMMY_FRAME.
+	* d10v-tdep.c (d10v_frame_unwind): Set the type to NORMAL_FRAME.
+	* sentinel-frame.c (sentinel_frame_unwinder): Set the type to
+	NORMAL_FRAME.
+	* frame-unwind.h: Include "frame.h".
+	(struct frame_unwind): Add "type" field.
+	* Makefile.in (frame_unwind_h): Add $(frame_h).
+	
+2003-04-04  Andrew Cagney  <cagney@redhat.com>
+
 	* x86-64-tdep.c (x86_64_unwind_dummy_id): Use frame_id_build.
 	* dummy-frame.c (dummy_frame_this_id): Use frame_id_build.
 	* d10v-tdep.c (d10v_frame_this_id): Use get_frame_pc and

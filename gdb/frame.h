@@ -225,6 +225,11 @@ extern int frame_relative_level (struct frame_info *fi);
 
 enum frame_type
 {
+  /* The frame's type hasn't yet been defined.  This is a catch-all
+     for legacy code that uses really strange technicques, such as
+     deprecated_set_frame_type, to set the frame's type.  New code
+     should not use this value.  */
+  UNKNOWN_FRAME,
   /* A true stack frame, created by the target program during normal
      execution.  */
   NORMAL_FRAME,
@@ -367,6 +372,10 @@ struct frame_info
     int level;
 
     /* The frame's type.  */
+    /* FIXME: cagney/2003-04-02: Should instead be returning
+       ->unwind->type.  Unfortunatly, legacy code is still explicitly
+       setting the type using the method deprecated_set_frame_type.
+       Eliminate that method and this field can be eliminated.  */
     enum frame_type type;
 
     /* For each register, address of where it was saved on entry to

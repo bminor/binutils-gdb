@@ -1553,6 +1553,7 @@ d10v_frame_prev_register (struct frame_info *next_frame,
 }
 
 static const struct frame_unwind d10v_frame_unwind = {
+  NORMAL_FRAME,
   d10v_frame_this_id,
   d10v_frame_prev_register
 };
