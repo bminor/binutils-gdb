@@ -37,14 +37,14 @@ proc all_integer_memory_tests { } {
     send "x/8i integer_memory_tests\n"
     expect {
 	-re ".*
-.*ldw 0\(sr0,r4\),arg0\r\n\
-.*ldh 0\(sr0,r4\),arg0\r\n\
-.*ldb 0\(sr0,r4\),arg0\r\n\
-.*stw arg0,0\(sr0,r4\)\r\n\
-.*sth arg0,0\(sr0,r4\)\r\n\
-.*stb arg0,0\(sr0,r4\)\r\n\
-.*ldwm 0\(sr0,r4\),arg0\r\n\
-.*stwm arg0,0\(sr0,r4\)\r\n\
+.*ldw 0\\(sr0,r4\\),arg0.*
+.*ldh 0\\(sr0,r4\\),arg0.*
+.*ldb 0\\(sr0,r4\\),arg0.*
+.*stw arg0,0\\(sr0,r4\\).*
+.*sth arg0,0\\(sr0,r4\\).*
+.*stb arg0,0\\(sr0,r4\\).*
+.*ldwm 0\\(sr0,r4\\),arg0.*
+.*stwm arg0,0\\(sr0,r4\\).*
 .*$prompt $" { pass "integer_memory_tests" }
 	-re "$prompt $" { fail "integer_memory_tests" }
 	timeout { fail "(timeout) integer memory_tests" }
@@ -53,26 +53,26 @@ proc all_integer_memory_tests { } {
     send "x/20i integer_indexing_load\n"
     expect {
 	-re ".*
-.*ldwx r5\(sr0,r4\),arg0\r\n\
-.*ldwx,s r5\(sr0,r4\),arg0\r\n\
-.*ldwx,m r5\(sr0,r4\),arg0\r\n\
-.*ldwx,sm r5\(sr0,r4\),arg0\r\n\
-.*ldhx r5\(sr0,r4\),arg0\r\n\
-.*ldhx,s r5\(sr0,r4\),arg0\r\n\
-.*ldhx,m r5\(sr0,r4\),arg0\r\n\
-.*ldhx,sm r5\(sr0,r4\),arg0\r\n\
-.*ldbx r5\(sr0,r4\),arg0\r\n\
-.*ldbx,s r5\(sr0,r4\),arg0\r\n\
-.*ldbx,m r5\(sr0,r4\),arg0\r\n\
-.*ldbx,sm r5\(sr0,r4\),arg0\r\n\
-.*ldwax r5\(r4\),arg0\r\n\
-.*ldwax,s r5\(r4\),arg0\r\n\
-.*ldwax,m r5\(r4\),arg0\r\n\
-.*ldwax,sm r5\(r4\),arg0\r\n\
-.*ldcwx r5\(sr0,r4\),arg0\r\n\
-.*ldcwx,s r5\(sr0,r4\),arg0\r\n\
-.*ldcwx,m r5\(sr0,r4\),arg0\r\n\
-.*ldcwx,sm r5\(sr0,r4\),arg0\r\n\
+.*ldwx r5\\(sr0,r4\\),arg0.*
+.*ldwx,s r5\\(sr0,r4\\),arg0.*
+.*ldwx,m r5\\(sr0,r4\\),arg0.*
+.*ldwx,sm r5\\(sr0,r4\\),arg0.*
+.*ldhx r5\\(sr0,r4\\),arg0.*
+.*ldhx,s r5\\(sr0,r4\\),arg0.*
+.*ldhx,m r5\\(sr0,r4\\),arg0.*
+.*ldhx,sm r5\\(sr0,r4\\),arg0.*
+.*ldbx r5\\(sr0,r4\\),arg0.*
+.*ldbx,s r5\\(sr0,r4\\),arg0.*
+.*ldbx,m r5\\(sr0,r4\\),arg0.*
+.*ldbx,sm r5\\(sr0,r4\\),arg0.*
+.*ldwax r5\\(r4\\),arg0.*
+.*ldwax,s r5\\(r4\\),arg0.*
+.*ldwax,m r5\\(r4\\),arg0.*
+.*ldwax,sm r5\\(r4\\),arg0.*
+.*ldcwx r5\\(sr0,r4\\),arg0.*
+.*ldcwx,s r5\\(sr0,r4\\),arg0.*
+.*ldcwx,m r5\\(sr0,r4\\),arg0.*
+.*ldcwx,sm r5\\(sr0,r4\\),arg0.*
 .*$prompt $" { pass "integer_indexing_load" }
 	-re "$prompt $" { fail "integer_indexing_load" }
 	timeout { fail "(timeout) integer_indexing" }
@@ -81,21 +81,21 @@ proc all_integer_memory_tests { } {
     send "x/15i integer_load_short_memory\n"
     expect {
 	-re ".*
-.*ldws 0\(sr0,r4\),arg0\r\n\
-.*ldws,mb 0\(sr0,r4\),arg0\r\n\
-.*ldws,ma 0\(sr0,r4\),arg0\r\n\
-.*ldhs 0\(sr0,r4\),arg0\r\n\
-.*ldhs,mb 0\(sr0,r4\),arg0\r\n\
-.*ldhs,ma 0\(sr0,r4\),arg0\r\n\
-.*ldbs 0\(sr0,r4\),arg0\r\n\
-.*ldbs,mb 0\(sr0,r4\),arg0\r\n\
-.*ldbs,ma 0\(sr0,r4\),arg0\r\n\
-.*ldwas 0\(r4\),arg0\r\n\
-.*ldwas,mb 0\(r4\),arg0\r\n\
-.*ldwas,ma 0\(r4\),arg0\r\n\
-.*ldcws 0\(sr0,r4\),arg0\r\n\
-.*ldcws,mb 0\(sr0,r4\),arg0\r\n\
-.*ldcws,ma 0\(sr0,r4\),arg0\r\n\
+.*ldws 0\\(sr0,r4\\),arg0.*
+.*ldws,mb 0\\(sr0,r4\\),arg0.*
+.*ldws,ma 0\\(sr0,r4\\),arg0.*
+.*ldhs 0\\(sr0,r4\\),arg0.*
+.*ldhs,mb 0\\(sr0,r4\\),arg0.*
+.*ldhs,ma 0\\(sr0,r4\\),arg0.*
+.*ldbs 0\\(sr0,r4\\),arg0.*
+.*ldbs,mb 0\\(sr0,r4\\),arg0.*
+.*ldbs,ma 0\\(sr0,r4\\),arg0.*
+.*ldwas 0\\(r4\\),arg0.*
+.*ldwas,mb 0\\(r4\\),arg0.*
+.*ldwas,ma 0\\(r4\\),arg0.*
+.*ldcws 0\\(sr0,r4\\),arg0.*
+.*ldcws,mb 0\\(sr0,r4\\),arg0.*
+.*ldcws,ma 0\\(sr0,r4\\),arg0.*
 .*$prompt $" { pass "integer_load_short_memory" }
 	-re "$prompt $" { fail "integer_load_short_memory" }
 	timeout { fail "(timeout) integer_load_short_memory " }
@@ -105,23 +105,23 @@ proc all_integer_memory_tests { } {
     send "x/17i integer_store_short_memory\n"
     expect {
 	-re ".*
-.*stws arg0,0\(sr0,r4\)\r\n\
-.*stws,mb arg0,0\(sr0,r4\)\r\n\
-.*stws,ma arg0,0\(sr0,r4\)\r\n\
-.*sths arg0,0\(sr0,r4\)\r\n\
-.*sths,mb arg0,0\(sr0,r4\)\r\n\
-.*sths,ma arg0,0\(sr0,r4\)\r\n\
-.*stbs arg0,0\(sr0,r4\)\r\n\
-.*stbs,mb arg0,0\(sr0,r4\)\r\n\
-.*stbs,ma arg0,0\(sr0,r4\)\r\n\
-.*stwas arg0,0\(r4\)\r\n\
-.*stwas,mb arg0,0\(r4\)\r\n\
-.*stwas,ma arg0,0\(r4\)\r\n\
-.*stbys arg0,0\(sr0,r4\)\r\n\
-.*stbys arg0,0\(sr0,r4\)\r\n\
-.*stbys,e arg0,0\(sr0,r4\)\r\n\
-.*stbys,b,m arg0,0\(sr0,r4\)\r\n\
-.*stbys,e,m arg0,0\(sr0,r4\)\r\n\
+.*stws arg0,0\\(sr0,r4\\).*
+.*stws,mb arg0,0\\(sr0,r4\\).*
+.*stws,ma arg0,0\\(sr0,r4\\).*
+.*sths arg0,0\\(sr0,r4\\).*
+.*sths,mb arg0,0\\(sr0,r4\\).*
+.*sths,ma arg0,0\\(sr0,r4\\).*
+.*stbs arg0,0\\(sr0,r4\\).*
+.*stbs,mb arg0,0\\(sr0,r4\\).*
+.*stbs,ma arg0,0\\(sr0,r4\\).*
+.*stwas arg0,0\\(r4\\).*
+.*stwas,mb arg0,0\\(r4\\).*
+.*stwas,ma arg0,0\\(r4\\).*
+.*stbys arg0,0\\(sr0,r4\\).*
+.*stbys arg0,0\\(sr0,r4\\).*
+.*stbys,e arg0,0\\(sr0,r4\\).*
+.*stbys,b,m arg0,0\\(sr0,r4\\).*
+.*stbys,e,m arg0,0\\(sr0,r4\\).*
 .*$prompt $" { pass "integer_store_short_memory" }
 	-re "$prompt $" { fail "integer_store_short_memory" }
 	timeout { fail "(timeout) integer_short_memory " }
@@ -136,9 +136,9 @@ proc all_immediate_tests { } {
     send "x/3i immediate_tests\n"
     expect {
 	-re ".*
-.*ldo 5\(arg0\),arg0\r\n\
-.*ldil -21524800,arg0\r\n\
-.*addil -21524800,r5\r\n\
+.*ldo 5\\(arg0\\),arg0.*
+.*ldil -21524800,arg0.*
+.*addil -21524800,r5.*
 .*$prompt $" { pass "immedate_tests" }
 	-re "$prompt $" { fail "immedate_tests" }
 	timeout { fail "(timeout) immedate_tests " }
@@ -153,22 +153,22 @@ proc all_branch_tests { } {
     send "x/16i branch_tests\n"
     expect {
 	-re ".*
-.*bl.*<main>,rp\r\n\
-.*bl,n.*<main>,rp\r\n\
-.*b.*<main>\r\n\
-.*b,n.*<main>\r\n\
-.*gate.*<main>,rp\r\n\
-.*gate,n.*<main>,rp\r\n\
-.*blr r4,rp\r\n\
-.*blr,n r4,rp\r\n\
-.*blr r4,r0\r\n\
-.*blr,n r4,r0\r\n\
-.*bv r0\(rp\)\r\n\
-.*bv,n r0\(rp\)\r\n\
-.*be 1234\(sr1,rp\)\r\n\
-.*be,n 1234\(sr1,rp\)\r\n\
-.*ble 1234\(sr1,rp\)\r\n\
-.*ble,n 1234\(sr1,rp\)\r\n\
+.*bl.*<main>,rp.*
+.*bl,n.*<main>,rp.*
+.*b.*<main>.*
+.*b,n.*<main>.*
+.*gate.*<main>,rp.*
+.*gate,n.*<main>,rp.*
+.*blr r4,rp.*
+.*blr,n r4,rp.*
+.*blr r4,r0.*
+.*blr,n r4,r0.*
+.*bv r0\\(rp\\).*
+.*bv,n r0\\(rp\\).*
+.*be 1234\\(sr1,rp\\).*
+.*be,n 1234\\(sr1,rp\\).*
+.*ble 1234\\(sr1,rp\\).*
+.*ble,n 1234\\(sr1,rp\\).*
 .*$prompt $" { pass "branch_tests" }
 	-re "$prompt $" { fail "branch_tests" }
 	timeout { fail "(timeout) branch_tests " }
@@ -178,14 +178,14 @@ proc all_branch_tests { } {
     send "x/8i movb_tests\n"
     expect {
 	-re ".*
-.*movb r4,arg0,.* <movb_tests>\r\n\
-.*movb,= r4,arg0,.* <movb_tests>\r\n\
-.*movb,< r4,arg0,.* <movb_tests>\r\n\
-.*movb,od r4,arg0,.* <movb_tests>\r\n\
-.*movb,tr r4,arg0,.* <movb_tests>\r\n\
-.*movb,<> r4,arg0,.* <movb_tests>\r\n\
-.*movb,>= r4,arg0,.* <movb_tests>\r\n\
-.*movb,ev r4,arg0,.* <movb_tests>\r\n\
+.*movb r4,arg0,.* <movb_tests>.*
+.*movb,= r4,arg0,.* <movb_tests>.*
+.*movb,< r4,arg0,.* <movb_tests>.*
+.*movb,od r4,arg0,.* <movb_tests>.*
+.*movb,tr r4,arg0,.* <movb_tests>.*
+.*movb,<> r4,arg0,.* <movb_tests>.*
+.*movb,>= r4,arg0,.* <movb_tests>.*
+.*movb,ev r4,arg0,.* <movb_tests>.*
 .*$prompt $" { pass "movb_tests" }
 	-re "$prompt $" { fail "movb_tests" }
 	timeout { fail "(timeout) movb_tests " }
@@ -194,14 +194,14 @@ proc all_branch_tests { } {
     send "x/8i movb_nullified_tests\n"
     expect {
 	-re ".*
-.*movb,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,=,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,<,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,od,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,tr,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,<>,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,>=,n.*r4,arg0,.* <movb_tests>\r\n\
-.*movb,ev,n.*r4,arg0,.* <movb_tests>\r\n\
+.*movb,n.*r4,arg0,.* <movb_tests>.*
+.*movb,=,n.*r4,arg0,.* <movb_tests>.*
+.*movb,<,n.*r4,arg0,.* <movb_tests>.*
+.*movb,od,n.*r4,arg0,.* <movb_tests>.*
+.*movb,tr,n.*r4,arg0,.* <movb_tests>.*
+.*movb,<>,n.*r4,arg0,.* <movb_tests>.*
+.*movb,>=,n.*r4,arg0,.* <movb_tests>.*
+.*movb,ev,n.*r4,arg0,.* <movb_tests>.*
 .*$prompt $" { pass "movb_nullified_tests" }
 	-re "$prompt $" { fail "movb_nullified_tests" }
 	timeout { fail "(timeout) movb_nullified_tests " }
@@ -210,14 +210,14 @@ proc all_branch_tests { } {
     send "x/8i movib_tests\n"
     expect {
 	-re ".*
-.*movib 5,arg0,.* <movib_tests>\r\n\
-.*movib,= 5,arg0,.* <movib_tests>\r\n\
-.*movib,< 5,arg0,.* <movib_tests>\r\n\
-.*movib,od 5,arg0,.* <movib_tests>\r\n\
-.*movib,tr 5,arg0,.* <movib_tests>\r\n\
-.*movib,<> 5,arg0,.* <movib_tests>\r\n\
-.*movib,>= 5,arg0,.* <movib_tests>\r\n\
-.*movib,ev 5,arg0,.* <movib_tests>\r\n\
+.*movib 5,arg0,.* <movib_tests>.*
+.*movib,= 5,arg0,.* <movib_tests>.*
+.*movib,< 5,arg0,.* <movib_tests>.*
+.*movib,od 5,arg0,.* <movib_tests>.*
+.*movib,tr 5,arg0,.* <movib_tests>.*
+.*movib,<> 5,arg0,.* <movib_tests>.*
+.*movib,>= 5,arg0,.* <movib_tests>.*
+.*movib,ev 5,arg0,.* <movib_tests>.*
 .*$prompt $" { pass "movib_tests" }
 	-re "$prompt $" { fail "movib_tests" }
 	timeout { fail "(timeout) movib_tests " }
@@ -226,118 +226,110 @@ proc all_branch_tests { } {
     send "x/8i movib_nullified_tests\n"
     expect {
 	-re ".*
-.*movib,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,=,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,<,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,od,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,tr,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,<>,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,>=,n.*5,arg0,.* <movib_tests>\r\n\
-.*movib,ev,n.*5,arg0,.* <movib_tests>\r\n\
+.*movib,n.*5,arg0,.* <movib_tests>.*
+.*movib,=,n.*5,arg0,.* <movib_tests>.*
+.*movib,<,n.*5,arg0,.* <movib_tests>.*
+.*movib,od,n.*5,arg0,.* <movib_tests>.*
+.*movib,tr,n.*5,arg0,.* <movib_tests>.*
+.*movib,<>,n.*5,arg0,.* <movib_tests>.*
+.*movib,>=,n.*5,arg0,.* <movib_tests>.*
+.*movib,ev,n.*5,arg0,.* <movib_tests>.*
 .*$prompt $" { pass "movib_nullified_tests" }
 	-re "$prompt $" { fail "movib_nullified_tests" }
 	timeout { fail "(timeout) movib_nullified_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i comb_tests\n"
     expect {
 	-re ".*
-.*combt r0,arg0,.* <comb_tests>\r\n\
-.*combt,= r0,arg0,.* <comb_tests>\r\n\
-.*combt,< r0,arg0,.* <comb_tests>\r\n\
-.*combt,<= r0,arg0,.* <comb_tests>\r\n\
-.*combt,<< r0,arg0,.* <comb_tests>\r\n\
-.*combt,<<= r0,arg0,.* <comb_tests>\r\n\
-.*combt,sv r0,arg0,.* <comb_tests>\r\n\
-.*combt,od r0,arg0,.* <comb_tests>\r\n\
-.*combf r0,arg0,.* <comb_tests>\r\n\
-.*combf,= r0,arg0,.* <comb_tests>\r\n\
-.*combf,< r0,arg0,.* <comb_tests>\r\n\
-.*combf,<= r0,arg0,.* <comb_tests>\r\n\
-.*combf,<< r0,arg0,.* <comb_tests>\r\n\
-.*combf,<<= r0,arg0,.* <comb_tests>\r\n\
-.*combf,sv r0,arg0,.* <comb_tests>\r\n\
-.*combf,od r0,arg0,.* <comb_tests>\r\n\
+.*comb r0,r4,.* <comb_tests>.*
+.*comb,= r0,r4,.* <comb_tests>.*
+.*comb,< r0,r4,.* <comb_tests>.*
+.*comb,<= r0,r4,.* <comb_tests>.*
+.*comb,<< r0,r4,.* <comb_tests>.*
+.*comb,<<= r0,r4,.* <comb_tests>.*
+.*comb,sv r0,r4,.* <comb_tests>.*
+.*comb,od r0,r4,.* <comb_tests>.*
+.*combf r0,r4,.* <comb_tests>.*
+.*combf,= r0,r4,.* <comb_tests>.*
+.*combf,< r0,r4,.* <comb_tests>.*
+.*combf,<= r0,r4,.* <comb_tests>.*
+.*combf,<< r0,r4,.* <comb_tests>.*
+.*combf,<<= r0,r4,.* <comb_tests>.*
+.*combf,sv r0,r4,.* <comb_tests>.*
+.*combf,od r0,r4,.* <comb_tests>.*
 .*$prompt $" { pass "comb_tests" }
 	-re "$prompt $" { fail "comb_tests" }
 	timeout { fail "(timeout) comb_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i comb_nullified_tests\n"
     expect {
 	-re ".*
-.*combt,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,=,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,<,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,<=,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,<<,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,<<=,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,sv,n r0,arg0,.* <comb_tests>\r\n\
-.*combt,od,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,=,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,<,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,<=,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,<<,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,<<=,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,sv,n r0,arg0,.* <comb_tests>\r\n\
-.*combf,od,n r0,arg0,.* <comb_tests>\r\n\
+.*comb,n r0,r4,.* <comb_tests>.*
+.*comb,=,n r0,r4,.* <comb_tests>.*
+.*comb,<,n r0,r4,.* <comb_tests>.*
+.*comb,<=,n r0,r4,.* <comb_tests>.*
+.*comb,<<,n r0,r4,.* <comb_tests>.*
+.*comb,<<=,n r0,r4,.* <comb_tests>.*
+.*comb,sv,n r0,r4,.* <comb_tests>.*
+.*comb,od,n r0,r4,.* <comb_tests>.*
+.*combf,n r0,r4,.* <comb_tests>.*
+.*combf,=,n r0,r4,.* <comb_tests>.*
+.*combf,<,n r0,r4,.* <comb_tests>.*
+.*combf,<=,n r0,r4,.* <comb_tests>.*
+.*combf,<<,n r0,r4,.* <comb_tests>.*
+.*combf,<<=,n r0,r4,.* <comb_tests>.*
+.*combf,sv,n r0,r4,.* <comb_tests>.*
+.*combf,od,n r0,r4,.* <comb_tests>.*
 .*$prompt $" { pass "comb_nullified_tests" }
 	-re "$prompt $" { fail "comb_nullified_tests" }
 	timeout { fail "(timeout) comb_nullified_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i comib_tests\n"
     expect {
 	-re ".*
-.*comib 0,arg0,.* <comib_tests>\r\n\
-.*comib,= 0,arg0,.* <comib_tests>\r\n\
-.*comib,< 0,arg0,.* <comib_tests>\r\n\
-.*comib,<= 0,arg0,.* <comib_tests>\r\n\
-.*comib,<< 0,arg0,.* <comib_tests>\r\n\
-.*comib,<<= 0,arg0,.* <comib_tests>\r\n\
-.*comibt,sv 0,arg0,.* <comib_tests>\r\n\
-.*comibt,od 0,arg0,.* <comib_tests>\r\n\
-.*comibt 0,arg0,.* <comib_tests>\r\n\
-.*comibt,= 0,arg0,.* <comib_tests>\r\n\
-.*comibt,< 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<= 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<< 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<<= 0,arg0,.* <comib_tests>\r\n\
-.*comibf,sv 0,arg0,.* <comib_tests>\r\n\
-.*comibf,od 0,arg0,.* <comib_tests>\r\n\
+.*comib 0,r4,.* <comib_tests>.*
+.*comib,= 0,r4,.* <comib_tests>.*
+.*comib,< 0,r4,.* <comib_tests>.*
+.*comib,<= 0,r4,.* <comib_tests>.*
+.*comib,<< 0,r4,.* <comib_tests>.*
+.*comib,<<= 0,r4,.* <comib_tests>.*
+.*comib,sv 0,r4,.* <comib_tests>.*
+.*comib,od 0,r4,.* <comib_tests>.*
+.*comibf 0,r4,.* <comib_tests>.*
+.*comibf,= 0,r4,.* <comib_tests>.*
+.*comibf,< 0,r4,.* <comib_tests>.*
+.*comibf,<= 0,r4,.* <comib_tests>.*
+.*comibf,<< 0,r4,.* <comib_tests>.*
+.*comibf,<<= 0,r4,.* <comib_tests>.*
+.*comibf,sv 0,r4,.* <comib_tests>.*
+.*comibf,od 0,r4,.* <comib_tests>.*
 .*$prompt $" { pass "comib_tests" }
 	-re "$prompt $" { fail "comib_tests" }
 	timeout { fail "(timeout) comib_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i comib_nullified_tests\n"
     expect {
 	-re ".*
-.*comibt,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,=,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<=,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<<,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,<<=,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,sv,n 0,arg0,.* <comib_tests>\r\n\
-.*comibt,od,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,=,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,<,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,<=,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,<<,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,<<=,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,sv,n 0,arg0,.* <comib_tests>\r\n\
-.*comibf,od,n 0,arg0,.* <comib_tests>\r\n\
+.*comib,n 0,r4,.* <comib_tests>.*
+.*comib,=,n 0,r4,.* <comib_tests>.*
+.*comib,<,n 0,r4,.* <comib_tests>.*
+.*comib,<=,n 0,r4,.* <comib_tests>.*
+.*comib,<<,n 0,r4,.* <comib_tests>.*
+.*comib,<<=,n 0,r4,.* <comib_tests>.*
+.*comib,sv,n 0,r4,.* <comib_tests>.*
+.*comib,od,n 0,r4,.* <comib_tests>.*
+.*comibf,n 0,r4,.* <comib_tests>.*
+.*comibf,=,n 0,r4,.* <comib_tests>.*
+.*comibf,<,n 0,r4,.* <comib_tests>.*
+.*comibf,<=,n 0,r4,.* <comib_tests>.*
+.*comibf,<<,n 0,r4,.* <comib_tests>.*
+.*comibf,<<=,n 0,r4,.* <comib_tests>.*
+.*comibf,sv,n 0,r4,.* <comib_tests>.*
+.*comibf,od,n 0,r4,.* <comib_tests>.*
 .*$prompt $" { pass "comib_nullified_tests" }
 	-re "$prompt $" { fail "comib_nullified_tests" }
 	timeout { fail "(timeout) comib_nullified_tests " }
@@ -346,22 +338,22 @@ proc all_branch_tests { } {
     send "x/16i addb_tests\n"
     expect {
 	-re ".*
-.*addb r1,r4,.* <addb_tests>\r\n\
-.*addb,= r1,r4,.* <addb_tests>\r\n\
-.*addb,< r1,r4,.* <addb_tests>\r\n\
-.*addb,<= r1,r4,.* <addb_tests>\r\n\
-.*addb,nuv r1,r4,.* <addb_tests>\r\n\
-.*addb,znv r1,r4,.* <addb_tests>\r\n\
-.*addb,sv r1,r4,.* <addb_tests>\r\n\
-.*addb,od r1,r4,.* <addb_tests>\r\n\
-.*addbf r1,r4,.* <addb_tests>\r\n\
-.*addbf,= r1,r4,.* <addb_tests>\r\n\
-.*addbf,< r1,r4,.* <addb_tests>\r\n\
-.*addbf,<= r1,r4,.* <addb_tests>\r\n\
-.*addbf,nuv r1,r4,.* <addb_tests>\r\n\
-.*addbf,znv r1,r4,.* <addb_tests>\r\n\
-.*addbf,sv r1,r4,.* <addb_tests>\r\n\
-.*addbf,od r1,r4,.* <addb_tests>\r\n\
+.*addb r1,r4,.* <addb_tests>.*
+.*addb,= r1,r4,.* <addb_tests>.*
+.*addb,< r1,r4,.* <addb_tests>.*
+.*addb,<= r1,r4,.* <addb_tests>.*
+.*addb,nuv r1,r4,.* <addb_tests>.*
+.*addb,znv r1,r4,.* <addb_tests>.*
+.*addb,sv r1,r4,.* <addb_tests>.*
+.*addb,od r1,r4,.* <addb_tests>.*
+.*addbf r1,r4,.* <addb_tests>.*
+.*addbf,= r1,r4,.* <addb_tests>.*
+.*addbf,< r1,r4,.* <addb_tests>.*
+.*addbf,<= r1,r4,.* <addb_tests>.*
+.*addbf,nuv r1,r4,.* <addb_tests>.*
+.*addbf,znv r1,r4,.* <addb_tests>.*
+.*addbf,sv r1,r4,.* <addb_tests>.*
+.*addbf,od r1,r4,.* <addb_tests>.*
 .*$prompt $" { pass "addb_tests" }
 	-re "$prompt $" { fail "addb_tests" }
 	timeout { fail "(timeout) addb_tests " }
@@ -370,22 +362,22 @@ proc all_branch_tests { } {
     send "x/16i addb_nullified_tests\n"
     expect {
 	-re ".*
-.*addb,n r1,r4,.* <addb_tests>\r\n\
-.*addb,=,n r1,r4,.* <addb_tests>\r\n\
-.*addb,<,n r1,r4,.* <addb_tests>\r\n\
-.*addb,<=,n r1,r4,.* <addb_tests>\r\n\
-.*addb,nuv,n r1,r4,.* <addb_tests>\r\n\
-.*addb,znv,n r1,r4,.* <addb_tests>\r\n\
-.*addb,sv,n r1,r4,.* <addb_tests>\r\n\
-.*addb,od,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,=,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,<,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,<=,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,nuv,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,znv,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,sv,n r1,r4,.* <addb_tests>\r\n\
-.*addbf,od,n r1,r4,.* <addb_tests>\r\n\
+.*addb,n r1,r4,.* <addb_tests>.*
+.*addb,=,n r1,r4,.* <addb_tests>.*
+.*addb,<,n r1,r4,.* <addb_tests>.*
+.*addb,<=,n r1,r4,.* <addb_tests>.*
+.*addb,nuv,n r1,r4,.* <addb_tests>.*
+.*addb,znv,n r1,r4,.* <addb_tests>.*
+.*addb,sv,n r1,r4,.* <addb_tests>.*
+.*addb,od,n r1,r4,.* <addb_tests>.*
+.*addbf,n r1,r4,.* <addb_tests>.*
+.*addbf,=,n r1,r4,.* <addb_tests>.*
+.*addbf,<,n r1,r4,.* <addb_tests>.*
+.*addbf,<=,n r1,r4,.* <addb_tests>.*
+.*addbf,nuv,n r1,r4,.* <addb_tests>.*
+.*addbf,znv,n r1,r4,.* <addb_tests>.*
+.*addbf,sv,n r1,r4,.* <addb_tests>.*
+.*addbf,od,n r1,r4,.* <addb_tests>.*
 .*$prompt $" { pass "addb_nullified_tests" }
 	-re "$prompt $" { fail "addb_nullified_tests" }
 	timeout { fail "(timeout) addb_nullified_tests " }
@@ -394,22 +386,22 @@ proc all_branch_tests { } {
     send "x/16i addib_tests\n"
     expect {
 	-re ".*
-.*addib -1,r4,.* <addib_tests>\r\n\
-.*addib,= -1,r4,.* <addib_tests>\r\n\
-.*addib,< -1,r4,.* <addib_tests>\r\n\
-.*addib,<= -1,r4,.* <addib_tests>\r\n\
-.*addib,nuv -1,r4,.* <addib_tests>\r\n\
-.*addib,znv -1,r4,.* <addib_tests>\r\n\
-.*addib,sv -1,r4,.* <addib_tests>\r\n\
-.*addib,od -1,r4,.* <addib_tests>\r\n\
-.*addibf -1,r4,.* <addib_tests>\r\n\
-.*addibf,= -1,r4,.* <addib_tests>\r\n\
-.*addibf,< -1,r4,.* <addib_tests>\r\n\
-.*addibf,<= -1,r4,.* <addib_tests>\r\n\
-.*addibf,nuv -1,r4,.* <addib_tests>\r\n\
-.*addibf,znv -1,r4,.* <addib_tests>\r\n\
-.*addibf,sv -1,r4,.* <addib_tests>\r\n\
-.*addibf,od -1,r4,.* <addib_tests>\r\n\
+.*addib -1,r4,.* <addib_tests>.*
+.*addib,= -1,r4,.* <addib_tests>.*
+.*addib,< -1,r4,.* <addib_tests>.*
+.*addib,<= -1,r4,.* <addib_tests>.*
+.*addib,nuv -1,r4,.* <addib_tests>.*
+.*addib,znv -1,r4,.* <addib_tests>.*
+.*addib,sv -1,r4,.* <addib_tests>.*
+.*addib,od -1,r4,.* <addib_tests>.*
+.*addibf -1,r4,.* <addib_tests>.*
+.*addibf,= -1,r4,.* <addib_tests>.*
+.*addibf,< -1,r4,.* <addib_tests>.*
+.*addibf,<= -1,r4,.* <addib_tests>.*
+.*addibf,nuv -1,r4,.* <addib_tests>.*
+.*addibf,znv -1,r4,.* <addib_tests>.*
+.*addibf,sv -1,r4,.* <addib_tests>.*
+.*addibf,od -1,r4,.* <addib_tests>.*
 .*$prompt $" { pass "addib_tests" }
 	-re "$prompt $" { fail "addib_tests" }
 	timeout { fail "(timeout) addib_tests " }
@@ -418,22 +410,22 @@ proc all_branch_tests { } {
     send "x/16i addib_nullified_tests\n"
     expect {
 	-re ".*
-.*addib,n -1,r4,.* <addib_tests>\r\n\
-.*addib,=,n -1,r4,.* <addib_tests>\r\n\
-.*addib,<,n -1,r4,.* <addib_tests>\r\n\
-.*addib,<=,n -1,r4,.* <addib_tests>\r\n\
-.*addib,nuv,n -1,r4,.* <addib_tests>\r\n\
-.*addib,znv,n -1,r4,.* <addib_tests>\r\n\
-.*addib,sv,n -1,r4,.* <addib_tests>\r\n\
-.*addib,od,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,=,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,<,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,<=,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,nuv,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,znv,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,sv,n -1,r4,.* <addib_tests>\r\n\
-.*addibf,od,n -1,r4,.* <addib_tests>\r\n\
+.*addib,n -1,r4,.* <addib_tests>.*
+.*addib,=,n -1,r4,.* <addib_tests>.*
+.*addib,<,n -1,r4,.* <addib_tests>.*
+.*addib,<=,n -1,r4,.* <addib_tests>.*
+.*addib,nuv,n -1,r4,.* <addib_tests>.*
+.*addib,znv,n -1,r4,.* <addib_tests>.*
+.*addib,sv,n -1,r4,.* <addib_tests>.*
+.*addib,od,n -1,r4,.* <addib_tests>.*
+.*addibf,n -1,r4,.* <addib_tests>.*
+.*addibf,=,n -1,r4,.* <addib_tests>.*
+.*addibf,<,n -1,r4,.* <addib_tests>.*
+.*addibf,<=,n -1,r4,.* <addib_tests>.*
+.*addibf,nuv,n -1,r4,.* <addib_tests>.*
+.*addibf,znv,n -1,r4,.* <addib_tests>.*
+.*addibf,sv,n -1,r4,.* <addib_tests>.*
+.*addibf,od,n -1,r4,.* <addib_tests>.*
 .*$prompt $" { pass "addb_nullified_tests" }
 	-re "$prompt $" { fail "addb_nullified_tests" }
 	timeout { fail "(timeout) addb_nullified_tests " }
@@ -442,14 +434,14 @@ proc all_branch_tests { } {
     send "x/8i bb_tests\n"
     expect {
 	-re ".*
-.*bvb,< r4,.* <bb_tests>\r\n\
-.*bvb,>= r4,.* <bb_tests>\r\n\
-.*bvb,<,n r4,.* <bb_tests>\r\n\
-.*bvb,>=,n r4,.* <bb_tests>\r\n\
-.*bb,< r4,5,.* <bb_tests>\r\n\
-.*bb,>= r4,5,.* <bb_tests>\r\n\
-.*bb,<,n r4,5,.* <bb_tests>\r\n\
-.*bb,>=,n r4,5,.* <bb_tests>\r\n\
+.*bvb,< r4,.* <bb_tests>.*
+.*bvb,>= r4,.* <bb_tests>.*
+.*bvb,<,n r4,.* <bb_tests>.*
+.*bvb,>=,n r4,.* <bb_tests>.*
+.*bb,< r4,5,.* <bb_tests>.*
+.*bb,>= r4,5,.* <bb_tests>.*
+.*bb,<,n r4,5,.* <bb_tests>.*
+.*bb,>=,n r4,5,.* <bb_tests>.*
 .*$prompt $" { pass "bb_tests" }
 	-re "$prompt $" { fail "bb_tests" }
 	timeout { fail "(timeout) bb_tests " }
@@ -470,22 +462,22 @@ proc all_integer_computational_tests { } {
 	send "x/16i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,r5,r6\r\n\
-.*$i,= r4,r5,r6\r\n\
-.*$i,< r4,r5,r6\r\n\
-.*$i,<= r4,r5,r6\r\n\
-.*$i,nuv r4,r5,r6\r\n\
-.*$i,znv r4,r5,r6\r\n\
-.*$i,sv r4,r5,r6\r\n\
-.*$i,od r4,r5,r6\r\n\
-.*$i,tr r4,r5,r6\r\n\
-.*$i,<> r4,r5,r6\r\n\
-.*$i,>= r4,r5,r6\r\n\
-.*$i,> r4,r5,r6\r\n\
-.*$i,uv r4,r5,r6\r\n\
-.*$i,vnz r4,r5,r6\r\n\
-.*$i,nsv r4,r5,r6\r\n\
-.*$i,ev r4,r5,r6\r\n\
+.*$i r4,r5,r6.*
+.*$i,= r4,r5,r6.*
+.*$i,< r4,r5,r6.*
+.*$i,<= r4,r5,r6.*
+.*$i,nuv r4,r5,r6.*
+.*$i,znv r4,r5,r6.*
+.*$i,sv r4,r5,r6.*
+.*$i,od r4,r5,r6.*
+.*$i,tr r4,r5,r6.*
+.*$i,<> r4,r5,r6.*
+.*$i,>= r4,r5,r6.*
+.*$i,> r4,r5,r6.*
+.*$i,uv r4,r5,r6.*
+.*$i,vnz r4,r5,r6.*
+.*$i,nsv r4,r5,r6.*
+.*$i,ev r4,r5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -499,22 +491,22 @@ proc all_integer_computational_tests { } {
 	send "x/16i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,r5,r6\r\n\
-.*$i,= r4,r5,r6\r\n\
-.*$i,< r4,r5,r6\r\n\
-.*$i,<= r4,r5,r6\r\n\
-.*$i,<< r4,r5,r6\r\n\
-.*$i,<<= r4,r5,r6\r\n\
-.*$i,sv r4,r5,r6\r\n\
-.*$i,od r4,r5,r6\r\n\
-.*$i,tr r4,r5,r6\r\n\
-.*$i,<> r4,r5,r6\r\n\
-.*$i,>= r4,r5,r6\r\n\
-.*$i,> r4,r5,r6\r\n\
-.*$i,>>= r4,r5,r6\r\n\
-.*$i,>> r4,r5,r6\r\n\
-.*$i,nsv r4,r5,r6\r\n\
-.*$i,ev r4,r5,r6\r\n\
+.*$i r4,r5,r6.*
+.*$i,= r4,r5,r6.*
+.*$i,< r4,r5,r6.*
+.*$i,<= r4,r5,r6.*
+.*$i,<< r4,r5,r6.*
+.*$i,<<= r4,r5,r6.*
+.*$i,sv r4,r5,r6.*
+.*$i,od r4,r5,r6.*
+.*$i,tr r4,r5,r6.*
+.*$i,<> r4,r5,r6.*
+.*$i,>= r4,r5,r6.*
+.*$i,> r4,r5,r6.*
+.*$i,>>= r4,r5,r6.*
+.*$i,>> r4,r5,r6.*
+.*$i,nsv r4,r5,r6.*
+.*$i,ev r4,r5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -527,16 +519,16 @@ proc all_integer_computational_tests { } {
 	send "x/10i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,r5,r6\r\n\
-.*$i,= r4,r5,r6\r\n\
-.*$i,< r4,r5,r6\r\n\
-.*$i,<= r4,r5,r6\r\n\
-.*$i,od r4,r5,r6\r\n\
-.*$i,tr r4,r5,r6\r\n\
-.*$i,<> r4,r5,r6\r\n\
-.*$i,>= r4,r5,r6\r\n\
-.*$i,> r4,r5,r6\r\n\
-.*$i,ev r4,r5,r6\r\n\
+.*$i r4,r5,r6.*
+.*$i,= r4,r5,r6.*
+.*$i,< r4,r5,r6.*
+.*$i,<= r4,r5,r6.*
+.*$i,od r4,r5,r6.*
+.*$i,tr r4,r5,r6.*
+.*$i,<> r4,r5,r6.*
+.*$i,>= r4,r5,r6.*
+.*$i,> r4,r5,r6.*
+.*$i,ev r4,r5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -549,18 +541,18 @@ proc all_integer_computational_tests { } {
 	send "x/12i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,r5,r6\r\n\
-.*$i,sbz r4,r5,r6\r\n\
-.*$i,shz r4,r5,r6\r\n\
-.*$i,sdc r4,r5,r6\r\n\
-.*$i,sbc r4,r5,r6\r\n\
-.*$i,shc r4,r5,r6\r\n\
-.*$i,tr r4,r5,r6\r\n\
-.*$i,nbz r4,r5,r6\r\n\
-.*$i,nhz r4,r5,r6\r\n\
-.*$i,ndc r4,r5,r6\r\n\
-.*$i,nbc r4,r5,r6\r\n\
-.*$i,nhc r4,r5,r6\r\n\
+.*$i r4,r5,r6.*
+.*$i,sbz r4,r5,r6.*
+.*$i,shz r4,r5,r6.*
+.*$i,sdc r4,r5,r6.*
+.*$i,sbc r4,r5,r6.*
+.*$i,shc r4,r5,r6.*
+.*$i,tr r4,r5,r6.*
+.*$i,nbz r4,r5,r6.*
+.*$i,nhz r4,r5,r6.*
+.*$i,ndc r4,r5,r6.*
+.*$i,nbc r4,r5,r6.*
+.*$i,nhc r4,r5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -573,18 +565,18 @@ proc all_integer_computational_tests { } {
 	send "x/12i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,r5\r\n\
-.*$i,sbz r4,r5\r\n\
-.*$i,shz r4,r5\r\n\
-.*$i,sdc r4,r5\r\n\
-.*$i,sbc r4,r5\r\n\
-.*$i,shc r4,r5\r\n\
-.*$i,tr r4,r5\r\n\
-.*$i,nbz r4,r5\r\n\
-.*$i,nhz r4,r5\r\n\
-.*$i,ndc r4,r5\r\n\
-.*$i,nbc r4,r5\r\n\
-.*$i,nhc r4,r5\r\n\
+.*$i r4,r5.*
+.*$i,sbz r4,r5.*
+.*$i,shz r4,r5.*
+.*$i,sdc r4,r5.*
+.*$i,sbc r4,r5.*
+.*$i,shc r4,r5.*
+.*$i,tr r4,r5.*
+.*$i,nbz r4,r5.*
+.*$i,nhz r4,r5.*
+.*$i,ndc r4,r5.*
+.*$i,nbc r4,r5.*
+.*$i,nhc r4,r5.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -597,22 +589,22 @@ proc all_integer_computational_tests { } {
 	send "x/16i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i 7b,r5,r6\r\n\
-.*$i,= 7b,r5,r6\r\n\
-.*$i,< 7b,r5,r6\r\n\
-.*$i,<= 7b,r5,r6\r\n\
-.*$i,nuv 7b,r5,r6\r\n\
-.*$i,znv 7b,r5,r6\r\n\
-.*$i,sv 7b,r5,r6\r\n\
-.*$i,od 7b,r5,r6\r\n\
-.*$i,tr 7b,r5,r6\r\n\
-.*$i,<> 7b,r5,r6\r\n\
-.*$i,>= 7b,r5,r6\r\n\
-.*$i,> 7b,r5,r6\r\n\
-.*$i,uv 7b,r5,r6\r\n\
-.*$i,vnz 7b,r5,r6\r\n\
-.*$i,nsv 7b,r5,r6\r\n\
-.*$i,ev 7b,r5,r6\r\n\
+.*$i 7b,r5,r6.*
+.*$i,= 7b,r5,r6.*
+.*$i,< 7b,r5,r6.*
+.*$i,<= 7b,r5,r6.*
+.*$i,nuv 7b,r5,r6.*
+.*$i,znv 7b,r5,r6.*
+.*$i,sv 7b,r5,r6.*
+.*$i,od 7b,r5,r6.*
+.*$i,tr 7b,r5,r6.*
+.*$i,<> 7b,r5,r6.*
+.*$i,>= 7b,r5,r6.*
+.*$i,> 7b,r5,r6.*
+.*$i,uv 7b,r5,r6.*
+.*$i,vnz 7b,r5,r6.*
+.*$i,nsv 7b,r5,r6.*
+.*$i,ev 7b,r5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -625,22 +617,22 @@ proc all_integer_computational_tests { } {
 	send "x/16i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i 7b,r5,r6\r\n\
-.*$i,= 7b,r5,r6\r\n\
-.*$i,< 7b,r5,r6\r\n\
-.*$i,<= 7b,r5,r6\r\n\
-.*$i,<< 7b,r5,r6\r\n\
-.*$i,<<= 7b,r5,r6\r\n\
-.*$i,sv 7b,r5,r6\r\n\
-.*$i,od 7b,r5,r6\r\n\
-.*$i,tr 7b,r5,r6\r\n\
-.*$i,<> 7b,r5,r6\r\n\
-.*$i,>= 7b,r5,r6\r\n\
-.*$i,> 7b,r5,r6\r\n\
-.*$i,>>= 7b,r5,r6\r\n\
-.*$i,>> 7b,r5,r6\r\n\
-.*$i,nsv 7b,r5,r6\r\n\
-.*$i,ev 7b,r5,r6\r\n\
+.*$i 7b,r5,r6.*
+.*$i,= 7b,r5,r6.*
+.*$i,< 7b,r5,r6.*
+.*$i,<= 7b,r5,r6.*
+.*$i,<< 7b,r5,r6.*
+.*$i,<<= 7b,r5,r6.*
+.*$i,sv 7b,r5,r6.*
+.*$i,od 7b,r5,r6.*
+.*$i,tr 7b,r5,r6.*
+.*$i,<> 7b,r5,r6.*
+.*$i,>= 7b,r5,r6.*
+.*$i,> 7b,r5,r6.*
+.*$i,>>= 7b,r5,r6.*
+.*$i,>> 7b,r5,r6.*
+.*$i,nsv 7b,r5,r6.*
+.*$i,ev 7b,r5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -650,14 +642,14 @@ proc all_integer_computational_tests { } {
     send "x/8i vshd_tests\n"
     expect {
 	-re ".*
-.*vshd r4,r5,r6\r\n\
-.*vshd,= r4,r5,r6\r\n\
-.*vshd,< r4,r5,r6\r\n\
-.*vshd,od r4,r5,r6\r\n\
-.*vshd,tr r4,r5,r6\r\n\
-.*vshd,<> r4,r5,r6\r\n\
-.*vshd,>= r4,r5,r6\r\n\
-.*vshd,ev r4,r5,r6\r\n\
+.*vshd r4,r5,r6.*
+.*vshd,= r4,r5,r6.*
+.*vshd,< r4,r5,r6.*
+.*vshd,od r4,r5,r6.*
+.*vshd,tr r4,r5,r6.*
+.*vshd,<> r4,r5,r6.*
+.*vshd,>= r4,r5,r6.*
+.*vshd,ev r4,r5,r6.*
 .*$prompt $" { pass "vshd tests" }
 	    -re "$prompt $" { fail "vshd tests" }
 	    timeout { fail "(timeout) "vshd tests" }
@@ -666,14 +658,14 @@ proc all_integer_computational_tests { } {
     send "x/8i shd_tests\n"
     expect {
 	-re ".*
-.*shd r4,r5,5,r6\r\n\
-.*shd,= r4,r5,5,r6\r\n\
-.*shd,< r4,r5,5,r6\r\n\
-.*shd,od r4,r5,5,r6\r\n\
-.*shd,tr r4,r5,5,r6\r\n\
-.*shd,<> r4,r5,5,r6\r\n\
-.*shd,>= r4,r5,5,r6\r\n\
-.*shd,ev r4,r5,5,r6\r\n\
+.*shd r4,r5,5,r6.*
+.*shd,= r4,r5,5,r6.*
+.*shd,< r4,r5,5,r6.*
+.*shd,od r4,r5,5,r6.*
+.*shd,tr r4,r5,5,r6.*
+.*shd,<> r4,r5,5,r6.*
+.*shd,>= r4,r5,5,r6.*
+.*shd,ev r4,r5,5,r6.*
 .*$prompt $" { pass "shd tests" }
 	    -re "$prompt $" { fail "shd tests" }
 	    timeout { fail "(timeout) "shd tests" }
@@ -685,14 +677,14 @@ proc all_integer_computational_tests { } {
 	send "x/8i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,5,10,r6\r\n\
-.*$i,= r4,5,10,r6\r\n\
-.*$i,< r4,5,10,r6\r\n\
-.*$i,od r4,5,10,r6\r\n\
-.*$i,tr r4,5,10,r6\r\n\
-.*$i,<> r4,5,10,r6\r\n\
-.*$i,>= r4,5,10,r6\r\n\
-.*$i,ev r4,5,10,r6\r\n\
+.*$i r4,5,10,r6.*
+.*$i,= r4,5,10,r6.*
+.*$i,< r4,5,10,r6.*
+.*$i,od r4,5,10,r6.*
+.*$i,tr r4,5,10,r6.*
+.*$i,<> r4,5,10,r6.*
+.*$i,>= r4,5,10,r6.*
+.*$i,ev r4,5,10,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -705,14 +697,14 @@ proc all_integer_computational_tests { } {
 	send "x/8i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i r4,5,r6\r\n\
-.*$i,= r4,5,r6\r\n\
-.*$i,< r4,5,r6\r\n\
-.*$i,od r4,5,r6\r\n\
-.*$i,tr r4,5,r6\r\n\
-.*$i,<> r4,5,r6\r\n\
-.*$i,>= r4,5,r6\r\n\
-.*$i,ev r4,5,r6\r\n\
+.*$i r4,5,r6.*
+.*$i,= r4,5,r6.*
+.*$i,< r4,5,r6.*
+.*$i,od r4,5,r6.*
+.*$i,tr r4,5,r6.*
+.*$i,<> r4,5,r6.*
+.*$i,>= r4,5,r6.*
+.*$i,ev r4,5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -725,14 +717,14 @@ proc all_integer_computational_tests { } {
 	send "x/8i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i -1,5,r6\r\n\
-.*$i,= -1,5,r6\r\n\
-.*$i,< -1,5,r6\r\n\
-.*$i,od -1,5,r6\r\n\
-.*$i,tr -1,5,r6\r\n\
-.*$i,<> -1,5,r6\r\n\
-.*$i,>= -1,5,r6\r\n\
-.*$i,ev -1,5,r6\r\n\
+.*$i -1,5,r6.*
+.*$i,= -1,5,r6.*
+.*$i,< -1,5,r6.*
+.*$i,od -1,5,r6.*
+.*$i,tr -1,5,r6.*
+.*$i,<> -1,5,r6.*
+.*$i,>= -1,5,r6.*
+.*$i,ev -1,5,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -745,14 +737,14 @@ proc all_integer_computational_tests { } {
 	send "x/8i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i -1,4,10,r6\r\n\
-.*$i,= -1,4,10,r6\r\n\
-.*$i,< -1,4,10,r6\r\n\
-.*$i,od -1,4,10,r6\r\n\
-.*$i,tr -1,4,10,r6\r\n\
-.*$i,<> -1,4,10,r6\r\n\
-.*$i,>= -1,4,10,r6\r\n\
-.*$i,ev -1,4,10,r6\r\n\
+.*$i -1,4,10,r6.*
+.*$i,= -1,4,10,r6.*
+.*$i,< -1,4,10,r6.*
+.*$i,od -1,4,10,r6.*
+.*$i,tr -1,4,10,r6.*
+.*$i,<> -1,4,10,r6.*
+.*$i,>= -1,4,10,r6.*
+.*$i,ev -1,4,10,r6.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -768,19 +760,19 @@ proc all_system_control_tests { } {
     send "x/13i system_control_tests\n"
     expect {
 	-re ".*
-.*break 5,c\r\n\
-.*rfi\r\n\
-.*rfir\r\n\
-.*ssm 5,r4\r\n\
-.*rsm 5,r4\r\n\
-.*mtsm r4\r\n\
-.*ldsid \(sr0,r5\),r4\r\n\
-.*mtsp r4,sr0\r\n\
-.*mtctl r4,ccr\r\n\
-.*mfsp sr0,r4\r\n\
-.*mfctl ccr,r4\r\n\
-.*sync\r\n\
-.*diag 9a4\r\n\
+.*break 5,c.*
+.*rfi.*
+.*rfir.*
+.*ssm 5,r4.*
+.*rsm 5,r4.*
+.*mtsm r4.*
+.*ldsid \\(sr0,r5\\),r4.*
+.*mtsp r4,sr0.*
+.*mtctl r4,ccr.*
+.*mfsp sr0,r4.*
+.*mfctl ccr,r4.*
+.*sync.*
+.*diag 9a4.*
 .*$prompt $" { pass "system_constrol_tests" }
 	-re "$prompt $" { fail "system_control_tests" }
 	timeout { file "(timeout) system_control_tests" }
@@ -789,10 +781,10 @@ proc all_system_control_tests { } {
     send "x/4i probe_tests\n"
     expect {
 	-re ".*
-.*prober \(sr0,r5\),r6,r7\r\n\
-.*proberi \(sr0,r5\),1,r7\r\n\
-.*probew \(sr0,r5\),r6,r7\r\n\
-.*probewi \(sr0,r5\),1,r7\r\n\
+.*prober \\(sr0,r5\\),r6,r7.*
+.*proberi \\(sr0,r5\\),1,r7.*
+.*probew \\(sr0,r5\\),r6,r7.*
+.*probewi \\(sr0,r5\\),1,r7.*
 .*$prompt $" { pass "probe_tests" }
 	-re "$prompt $" { fail "probe_tests" }
 	timeout { file "(timeout) probe_tests" }
@@ -801,10 +793,10 @@ proc all_system_control_tests { } {
     send "x/4i lpa_tests\n"
     expect {
 	-re ".*
-.*lpa r4\(sr0,r5\),r6\r\n\
-.*lpa,m r4\(sr0,r5\),r6\r\n\
-.*lha r4\(sr0,r5\),r6\r\n\
-.*lha,m r4\(sr0,r5\),r6\r\n\
+.*lpa r4\\(sr0,r5\\),r6.*
+.*lpa,m r4\\(sr0,r5\\),r6.*
+.*lha r4\\(sr0,r5\\),r6.*
+.*lha,m r4\\(sr0,r5\\),r6.*
 .*$prompt $" { pass "lpa_tests" }
 	-re "$prompt $" { fail "lpa_tests" }
 	timeout { file "(timeout) lpa_tests" }
@@ -813,24 +805,24 @@ proc all_system_control_tests { } {
     send "x/18i purge_tests\n"
     expect {
 	-re ".*
-.*pdtlb r4\(sr0,r5\)\r\n\
-.*pdtlb,m r4\(sr0,r5\)\r\n\
-.*pitlb r4\(sr0,r5\)\r\n\
-.*pitlb,m r4\(sr0,r5\)\r\n\
-.*pdtlbe r4\(sr0,r5\)\r\n\
-.*pdtlbe,m r4\(sr0,r5\)\r\n\
-.*pitlbe r4\(sr0,r5\)\r\n\
-.*pitlbe,m r4\(sr0,r5\)\r\n\
-.*pdc r4\(sr0,r5\)\r\n\
-.*pdc,m r4\(sr0,r5\)\r\n\
-.*fdc r4\(sr0,r5\)\r\n\
-.*fdc,m r4\(sr0,r5\)\r\n\
-.*fic r4\(sr0,r5\)\r\n\
-.*fic,m r4\(sr0,r5\)\r\n\
-.*fdce r4\(sr0,r5\)\r\n\
-.*fdce,m r4\(sr0,r5\)\r\n\
-.*fice r4\(sr0,r5\)\r\n\
-.*fice,m r4\(sr0,r5\)\r\n\
+.*pdtlb r4\\(sr0,r5\\).*
+.*pdtlb,m r4\\(sr0,r5\\).*
+.*pitlb r4\\(sr0,r5\\).*
+.*pitlb,m r4\\(sr0,r5\\).*
+.*pdtlbe r4\\(sr0,r5\\).*
+.*pdtlbe,m r4\\(sr0,r5\\).*
+.*pitlbe r4\\(sr0,r5\\).*
+.*pitlbe,m r4\\(sr0,r5\\).*
+.*pdc r4\\(sr0,r5\\).*
+.*pdc,m r4\\(sr0,r5\\).*
+.*fdc r4\\(sr0,r5\\).*
+.*fdc,m r4\\(sr0,r5\\).*
+.*fic r4\\(sr0,r5\\).*
+.*fic,m r4\\(sr0,r5\\).*
+.*fdce r4\\(sr0,r5\\).*
+.*fdce,m r4\\(sr0,r5\\).*
+.*fice r4\\(sr0,r5\\).*
+.*fice,m r4\\(sr0,r5\\).*
 .*$prompt $" { pass "purge_tests" }
 	-re "$prompt $" { fail "purge_tests" }
 	timeout { file "(timeout) purge_tests" }
@@ -839,10 +831,10 @@ proc all_system_control_tests { } {
     send "x/4i insert_tests\n"
     expect {
 	-re ".*
-.*idtlba r4,\(sr0,r5\)\r\n\
-.*iitlba r4,\(sr0,r5\)\r\n\
-.*idtlbp r4,\(sr0,r5\)\r\n\
-.*iitlbp r4,\(sr0,r5\)\r\n\
+.*idtlba r4,\\(sr0,r5\\).*
+.*iitlba r4,\\(sr0,r5\\).*
+.*idtlbp r4,\\(sr0,r5\\).*
+.*iitlbp r4,\\(sr0,r5\\).*
 .*$prompt $" { pass "insert_tests" }
 	-re "$prompt $" { fail "insert_tests" }
 	timeout { file "(timeout) insert_tests" }
@@ -858,26 +850,26 @@ proc all_fpu_memory_tests { } {
     send "x/20i fpu_memory_indexing_tests\n"
     expect {
 	-re ".*
-.*fldwx r4\(sr0,r5\),fr6\r\n\
-.*fldwx,s r4\(sr0,r5\),fr6\r\n\
-.*fldwx,m r4\(sr0,r5\),fr6\r\n\
-.*fldwx,sm r4\(sr0,r5\),fr6\r\n\
-.*flddx r4\(sr0,r5\),fr6\r\n\
-.*flddx,s r4\(sr0,r5\),fr6\r\n\
-.*flddx,m r4\(sr0,r5\),fr6\r\n\
-.*flddx,sm r4\(sr0,r5\),fr6\r\n\
-.*fstwx fr6,r4\(sr0,r5\)\r\n\
-.*fstwx,s fr6,r4\(sr0,r5\)\r\n\
-.*fstwx,m fr6,r4\(sr0,r5\)\r\n\
-.*fstwx,sm fr6,r4\(sr0,r5\)\r\n\
-.*fstdx fr6,r4\(sr0,r5\)\r\n\
-.*fstdx,s fr6,r4\(sr0,r5\)\r\n\
-.*fstdx,m fr6,r4\(sr0,r5\)\r\n\
-.*fstdx,sm fr6,r4\(sr0,r5\)\r\n\
-.*fstqx fr6,r4\(sr0,r5\)\r\n\
-.*fstqx,s fr6,r4\(sr0,r5\)\r\n\
-.*fstqx,m fr6,r4\(sr0,r5\)\r\n\
-.*fstqx,sm fr6,r4\(sr0,r5\)\r\n\
+.*fldwx r4\\(sr0,r5\\),fr6.*
+.*fldwx,s r4\\(sr0,r5\\),fr6.*
+.*fldwx,m r4\\(sr0,r5\\),fr6.*
+.*fldwx,sm r4\\(sr0,r5\\),fr6.*
+.*flddx r4\\(sr0,r5\\),fr6.*
+.*flddx,s r4\\(sr0,r5\\),fr6.*
+.*flddx,m r4\\(sr0,r5\\),fr6.*
+.*flddx,sm r4\\(sr0,r5\\),fr6.*
+.*fstwx fr6,r4\\(sr0,r5\\).*
+.*fstwx,s fr6,r4\\(sr0,r5\\).*
+.*fstwx,m fr6,r4\\(sr0,r5\\).*
+.*fstwx,sm fr6,r4\\(sr0,r5\\).*
+.*fstdx fr6,r4\\(sr0,r5\\).*
+.*fstdx,s fr6,r4\\(sr0,r5\\).*
+.*fstdx,m fr6,r4\\(sr0,r5\\).*
+.*fstdx,sm fr6,r4\\(sr0,r5\\).*
+.*fstqx fr6,r4\\(sr0,r5\\).*
+.*fstqx,s fr6,r4\\(sr0,r5\\).*
+.*fstqx,m fr6,r4\\(sr0,r5\\).*
+.*fstqx,sm fr6,r4\\(sr0,r5\\).*
 .*$prompt $" { pass "fpu_memory_indexing_tests" }
 	-re "$prompt $" { fail "fpu_memory_indexing_tests" }
 	timeout { file "(timeout) fpu_memory_indexing_tests" }
@@ -886,21 +878,21 @@ proc all_fpu_memory_tests { } {
     send "x/15i fpu_short_memory_tests\n"
     expect {
 	-re ".*
-.*fldws 0\(sr0,r5\),fr6\r\n\
-.*fldws,mb 0\(sr0,r5\),fr6\r\n\
-.*fldws,ma 0\(sr0,r5\),fr6\r\n\
-.*fldds 0\(sr0,r5\),fr6\r\n\
-.*fldds,mb 0\(sr0,r5\),fr6\r\n\
-.*fldds,ma 0\(sr0,r5\),fr6\r\n\
-.*fstws fr6,0\(sr0,r5\)\r\n\
-.*fstws,mb fr6,0\(sr0,r5\)\r\n\
-.*fstws,ma fr6,0\(sr0,r5\)\r\n\
-.*fstds fr6,0\(sr0,r5\)\r\n\
-.*fstds,mb fr6,0\(sr0,r5\)\r\n\
-.*fstds,ma fr6,0\(sr0,r5\)\r\n\
-.*fstqs fr6,0\(sr0,r5\)\r\n\
-.*fstqs,mb fr6,0\(sr0,r5\)\r\n\
-.*fstqs,ma fr6,0\(sr0,r5\)\r\n\
+.*fldws 0\\(sr0,r5\\),fr6.*
+.*fldws,mb 0\\(sr0,r5\\),fr6.*
+.*fldws,ma 0\\(sr0,r5\\),fr6.*
+.*fldds 0\\(sr0,r5\\),fr6.*
+.*fldds,mb 0\\(sr0,r5\\),fr6.*
+.*fldds,ma 0\\(sr0,r5\\),fr6.*
+.*fstws fr6,0\\(sr0,r5\\).*
+.*fstws,mb fr6,0\\(sr0,r5\\).*
+.*fstws,ma fr6,0\\(sr0,r5\\).*
+.*fstds fr6,0\\(sr0,r5\\).*
+.*fstds,mb fr6,0\\(sr0,r5\\).*
+.*fstds,ma fr6,0\\(sr0,r5\\).*
+.*fstqs fr6,0\\(sr0,r5\\).*
+.*fstqs,mb fr6,0\\(sr0,r5\\).*
+.*fstqs,ma fr6,0\\(sr0,r5\\).*
 .*$prompt $" { pass "fpu_short_memory_tests" }
 	-re "$prompt $" { fail "fpu_short_memory_tests" }
 	timeout { file "(timeout) fpu_short_memory_tests" }
@@ -916,7 +908,7 @@ proc all_fpu_computational_tests { } {
     send "x/1i fpu_misc_tests\n"
     expect {
 	-re ".*
-.*ftest\r\n\
+.*ftest.*
 .*$prompt $" { pass "fpu_misc_tests" }
 	-re "$prompt $" { fail "fpu_misc_tests" }
 	timeout { file "(timeout) fpu_misc_tests" }
@@ -928,11 +920,11 @@ proc all_fpu_computational_tests { } {
 	send "x/5i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i,sgl fr5,fr10\r\n\
-.*$i,dbl fr5,fr10\r\n\
-.*$i,quad fr5,fr10\r\n\
-.*$i,sgl fr20,fr24\r\n\
-.*$i,dbl fr20,fr24\r\n\
+.*$i,sgl fr5,fr10.*
+.*$i,dbl fr5,fr10.*
+.*$i,quad fr5,fr10.*
+.*$i,sgl fr20,fr24.*
+.*$i,dbl fr20,fr24.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -945,24 +937,24 @@ proc all_fpu_computational_tests { } {
 	send "x/18i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i,sgl,sgl fr5,fr10\r\n\
-.*$i,sgl,dbl fr5,fr10\r\n\
-.*$i,sgl,quad fr5,fr10\r\n\
-.*$i,dbl,sgl fr5,fr10\r\n\
-.*$i,dbl,dbl fr5,fr10\r\n\
-.*$i,dbl,quad fr5,fr10\r\n\
-.*$i,quad,sgl fr5,fr10\r\n\
-.*$i,quad,dbl fr5,fr10\r\n\
-.*$i,quad,quad fr5,fr10\r\n\
-.*$i,sgl,sgl fr20,fr24\r\n\
-.*$i,sgl,dbl fr20,fr24\r\n\
-.*$i,sgl,quad fr20,fr24\r\n\
-.*$i,dbl,sgl fr20,fr24\r\n\
-.*$i,dbl,dbl fr20,fr24\r\n\
-.*$i,dbl,quad fr20,fr24\r\n\
-.*$i,quad,sgl fr20,fr24\r\n\
-.*$i,quad,dbl fr20,fr24\r\n\
-.*$i,quad,quad fr20,fr24\r\n\
+.*$i,sgl,sgl fr5,fr10.*
+.*$i,sgl,dbl fr5,fr10.*
+.*$i,sgl,quad fr5,fr10.*
+.*$i,dbl,sgl fr5,fr10.*
+.*$i,dbl,dbl fr5,fr10.*
+.*$i,dbl,quad fr5,fr10.*
+.*$i,quad,sgl fr5,fr10.*
+.*$i,quad,dbl fr5,fr10.*
+.*$i,quad,quad fr5,fr10.*
+.*$i,sgl,sgl fr20,fr24.*
+.*$i,sgl,dbl fr20,fr24.*
+.*$i,sgl,quad fr20,fr24.*
+.*$i,dbl,sgl fr20,fr24.*
+.*$i,dbl,dbl fr20,fr24.*
+.*$i,dbl,quad fr20,fr24.*
+.*$i,quad,sgl fr20,fr24.*
+.*$i,quad,dbl fr20,fr24.*
+.*$i,quad,quad fr20,fr24.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -975,12 +967,12 @@ proc all_fpu_computational_tests { } {
 	send "x/6i $i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*$i,sgl fr4,fr8,fr12\r\n\
-.*$i,dbl fr4,fr8,fr12\r\n\
-.*$i,quad fr4,fr8,fr12\r\n\
-.*$i,sgl fr20,fr24,fr28\r\n\
-.*$i,dbl fr20,fr24,fr28\r\n\
-.*$i,quad fr20,fr24,fr28\r\n\
+.*$i,sgl fr4,fr8,fr12.*
+.*$i,dbl fr4,fr8,fr12.*
+.*$i,quad fr4,fr8,fr12.*
+.*$i,sgl fr20,fr24,fr28.*
+.*$i,dbl fr20,fr24,fr28.*
+.*$i,quad fr20,fr24,fr28.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "$i tests" }
 	    timeout { fail "(timeout) $i tests" }
@@ -990,10 +982,10 @@ proc all_fpu_computational_tests { } {
     send "x/4i fmpy_addsub_tests\n"
     expect {
 	-re ".*
-.*fmpyadd,sgl fr16,fr17,fr18,fr19,fr20\r\n\
-.*fmpyadd,dbl fr16,fr17,fr18,fr19,fr20\r\n\
-.*fmpysub,sgl fr16,fr17,fr18,fr19,fr20\r\n\
-.*fmpysub,dbl fr16,fr17,fr18,fr19,fr20\r\n\
+.*fmpyadd,sgl fr16,fr17,fr18,fr19,fr20.*
+.*fmpyadd,dbl fr16,fr17,fr18,fr19,fr20.*
+.*fmpysub,sgl fr16,fr17,fr18,fr19,fr20.*
+.*fmpysub,dbl fr16,fr17,fr18,fr19,fr20.*
 .*$prompt $" { pass "fmpy_addsub_tests" }
 	-re "$prompt $" { fail "fmpy_addsub_tests" }
 	timeout { fail "(timeout) fmpy_addsub_tests" }
@@ -1002,7 +994,7 @@ proc all_fpu_computational_tests { } {
     send "x/i xmpyu_tests\n"
     expect {
 	-re ".*
-.*xmpyu fr4,fr5,fr6\r\n\
+.*xmpyu fr4,fr5,fr6.*
 .*$prompt $" {pass "xmpyu_tests" }
 	-re "$prompt $" {fail "xmpyu_tests" }
 	timeout { fail "(timeout) xmpyu_tests" }
@@ -1021,38 +1013,38 @@ proc all_fpu_comparison_tests { } {
 	send "x/32i fcmp_$i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*fcmp,$i,false\? fr4,fr5\r\n\
-.*fcmp,$i,false fr4,fr5\r\n\
-.*fcmp,$i,\? fr4,fr5\r\n\
-.*fcmp,$i,!<=> fr4,fr5\r\n\
-.*fcmp,$i,= fr4,fr5\r\n\
-.*fcmp,$i,=t fr4,fr5\r\n\
-.*fcmp,$i,\?= fr4,fr5\r\n\
-.*fcmp,$i,!<> fr4,fr5\r\n\
-.*fcmp,$i,!\?>= fr4,fr5\r\n\
-.*fcmp,$i,< fr4,fr5\r\n\
-.*fcmp,$i,\?< fr4,fr5\r\n\
-.*fcmp,$i,!>= fr4,fr5\r\n\
-.*fcmp,$i,!\?> fr4,fr5\r\n\
-.*fcmp,$i,<= fr4,fr5\r\n\
-.*fcmp,$i,\?<= fr4,fr5\r\n\
-.*fcmp,$i,!> fr4,fr5\r\n\
-.*fcmp,$i,!\?<= fr4,fr5\r\n\
-.*fcmp,$i,> fr4,fr5\r\n\
-.*fcmp,$i,\?> fr4,fr5\r\n\
-.*fcmp,$i,!<= fr4,fr5\r\n\
-.*fcmp,$i,!\?< fr4,fr5\r\n\
-.*fcmp,$i,>= fr4,fr5\r\n\
-.*fcmp,$i,\?>= fr4,fr5\r\n\
-.*fcmp,$i,!< fr4,fr5\r\n\
-.*fcmp,$i,!\?= fr4,fr5\r\n\
-.*fcmp,$i,<> fr4,fr5\r\n\
-.*fcmp,$i,!= fr4,fr5\r\n\
-.*fcmp,$i,!=t fr4,fr5\r\n\
-.*fcmp,$i,!\? fr4,fr5\r\n\
-.*fcmp,$i,<=> fr4,fr5\r\n\
-.*fcmp,$i,true\? fr4,fr5\r\n\
-.*fcmp,$i,true fr4,fr5\r\n\
+.*fcmp,$i,false\\? fr4,fr5.*
+.*fcmp,$i,false fr4,fr5.*
+.*fcmp,$i,\\? fr4,fr5.*
+.*fcmp,$i,!<=> fr4,fr5.*
+.*fcmp,$i,= fr4,fr5.*
+.*fcmp,$i,=t fr4,fr5.*
+.*fcmp,$i,\\?= fr4,fr5.*
+.*fcmp,$i,!<> fr4,fr5.*
+.*fcmp,$i,!\\?>= fr4,fr5.*
+.*fcmp,$i,< fr4,fr5.*
+.*fcmp,$i,\\?< fr4,fr5.*
+.*fcmp,$i,!>= fr4,fr5.*
+.*fcmp,$i,!\\?> fr4,fr5.*
+.*fcmp,$i,<= fr4,fr5.*
+.*fcmp,$i,\\?<= fr4,fr5.*
+.*fcmp,$i,!> fr4,fr5.*
+.*fcmp,$i,!\\?<= fr4,fr5.*
+.*fcmp,$i,> fr4,fr5.*
+.*fcmp,$i,\\?> fr4,fr5.*
+.*fcmp,$i,!<= fr4,fr5.*
+.*fcmp,$i,!\\?< fr4,fr5.*
+.*fcmp,$i,>= fr4,fr5.*
+.*fcmp,$i,\\?>= fr4,fr5.*
+.*fcmp,$i,!< fr4,fr5.*
+.*fcmp,$i,!\\?= fr4,fr5.*
+.*fcmp,$i,<> fr4,fr5.*
+.*fcmp,$i,!= fr4,fr5.*
+.*fcmp,$i,!=t fr4,fr5.*
+.*fcmp,$i,!\\? fr4,fr5.*
+.*fcmp,$i,<=> fr4,fr5.*
+.*fcmp,$i,true\\? fr4,fr5.*
+.*fcmp,$i,true fr4,fr5.*
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "fcmp_$i tests" }
 	    timeout { fail "(timeout) fcmp_$i tests" }
@@ -1068,10 +1060,10 @@ proc all_special_tests { } {
     send "x/4i special_tests\n"
     expect {
 	-re ".*
-.*gfw r4\(sr0,r5\)\r\n\
-.*gfw,m r4\(sr0,r5\)\r\n\
-.*gfr r4\(sr0,r5\)\r\n\
-.*gfr,m r4\(sr0,r5\)\r\n\
+.*gfw r4\\(sr0,r5\\).*
+.*gfw,m r4\\(sr0,r5\\).*
+.*gfr r4\\(sr0,r5\\).*
+.*gfr,m r4\\(sr0,r5\\).*
 .*$prompt $" { pass "special tests" }
 	-re "$prompt $" { fail "special tests" }
 	timeout { fail "(timeout) special tests " }
@@ -1087,22 +1079,22 @@ proc all_sfu_tests { } {
     send "x/16i sfu_tests\n"
     expect {
 	-re ".*
-.*spop0,4,5\r\n\
-.*spop0,4,73\r\n\
-.*spop0,4,5,n\r\n\
-.*spop0,4,73,n\r\n\
-.*spop1,4,5 r5\r\n\
-.*spop1,4,73 r5\r\n\
-.*spop1,4,5,n r5\r\n\
-.*spop1,4,73,n r5\r\n\
-.*spop2,4,5 r5\r\n\
-.*spop2,4,73 r5\r\n\
-.*spop2,4,5,n r5\r\n\
-.*spop2,4,73,n r5\r\n\
-.*spop3,4,5 r5,r6\r\n\
-.*spop3,4,73 r5,r6\r\n\
-.*spop3,4,5,n r5,r6\r\n\
-.*spop3,4,73,n r5,r6\r\n\
+.*spop0,4,5.*
+.*spop0,4,73.*
+.*spop0,4,5,n.*
+.*spop0,4,73,n.*
+.*spop1,4,5 r5.*
+.*spop1,4,73 r5.*
+.*spop1,4,5,n r5.*
+.*spop1,4,73,n r5.*
+.*spop2,4,5 r5.*
+.*spop2,4,73 r5.*
+.*spop2,4,5,n r5.*
+.*spop2,4,73,n r5.*
+.*spop3,4,5 r5,r6.*
+.*spop3,4,73 r5,r6.*
+.*spop3,4,5,n r5,r6.*
+.*spop3,4,73,n r5,r6.*
 .*$prompt $" { pass "sfu tests" }
 	-re "$prompt $" { fail "sfu tests" }
 	timeout { fail "(timeout) sfu tests " }
@@ -1117,10 +1109,10 @@ proc all_copr_tests { } {
     send "x/4i copr_tests\n"
     expect {
 	-re ".*
-.*copr,4,5\r\n\
-.*copr,4,73\r\n\
-.*copr,4,5,n\r\n\
-.*copr,4,73,n\r\n\
+.*copr,4,5.*
+.*copr,4,73.*
+.*copr,4,5,n.*
+.*copr,4,73,n.*
 .*$prompt $" { pass "copr tests" }
 	-re "$prompt $" { fail "copr tests" }
 	timeout { fail "(timeout) copr tests " }
@@ -1135,14 +1127,14 @@ proc all_copr_mem_tests { } {
     send "x/8i copr_indexing_load\n"
     expect {
 	-re ".*
-.*cldwx,4 r5\(sr0,r4\),arg0\r\n\
-.*cldwx,4,s r5\(sr0,r4\),arg0\r\n\
-.*cldwx,4,m r5\(sr0,r4\),arg0\r\n\
-.*cldwx,4,sm r5\(sr0,r4\),arg0\r\n\
-.*clddx,4 r5\(sr0,r4\),arg0\r\n\
-.*clddx,4,s r5\(sr0,r4\),arg0\r\n\
-.*clddx,4,m r5\(sr0,r4\),arg0\r\n\
-.*clddx,4,sm r5\(sr0,r4\),arg0\r\n\
+.*cldwx,4 r5\\(sr0,r4\\),arg0.*
+.*cldwx,4,s r5\\(sr0,r4\\),arg0.*
+.*cldwx,4,m r5\\(sr0,r4\\),arg0.*
+.*cldwx,4,sm r5\\(sr0,r4\\),arg0.*
+.*clddx,4 r5\\(sr0,r4\\),arg0.*
+.*clddx,4,s r5\\(sr0,r4\\),arg0.*
+.*clddx,4,m r5\\(sr0,r4\\),arg0.*
+.*clddx,4,sm r5\\(sr0,r4\\),arg0.*
 .*$prompt $" { pass "copr indexed load tests" }
 	-re "$prompt $" { fail "copr indexed load tests" }
 	timeout { fail "(timeout) copr indexed load tests " }
@@ -1151,14 +1143,14 @@ proc all_copr_mem_tests { } {
     send "x/8i copr_indexing_store\n"
     expect {
 	-re ".*
-.*cstwx,4 arg0,r5\(sr0,r4\)\r\n\
-.*cstwx,4,s arg0,r5\(sr0,r4\)\r\n\
-.*cstwx,4,m arg0,r5\(sr0,r4\)\r\n\
-.*cstwx,4,sm arg0,r5\(sr0,r4\)\r\n\
-.*cstdx,4 arg0,r5\(sr0,r4\)\r\n\
-.*cstdx,4,s arg0,r5\(sr0,r4\)\r\n\
-.*cstdx,4,m arg0,r5\(sr0,r4\)\r\n\
-.*cstdx,4,sm arg0,r5\(sr0,r4\)\r\n\
+.*cstwx,4 arg0,r5\\(sr0,r4\\).*
+.*cstwx,4,s arg0,r5\\(sr0,r4\\).*
+.*cstwx,4,m arg0,r5\\(sr0,r4\\).*
+.*cstwx,4,sm arg0,r5\\(sr0,r4\\).*
+.*cstdx,4 arg0,r5\\(sr0,r4\\).*
+.*cstdx,4,s arg0,r5\\(sr0,r4\\).*
+.*cstdx,4,m arg0,r5\\(sr0,r4\\).*
+.*cstdx,4,sm arg0,r5\\(sr0,r4\\).*
 .*$prompt $" { pass "copr indexed store tests" }
 	-re "$prompt $" { fail "copr indexed store tests" }
 	timeout { fail "(timeout) copr indexed load tests " }
@@ -1167,21 +1159,59 @@ proc all_copr_mem_tests { } {
     send "x/12i copr_short_memory\n"
     expect {
 	-re ".*
-.*cldws,4 0\(sr0,r4\),arg0\r\n\
-.*cldws,4,mb 0\(sr0,r4\),arg0\r\n\
-.*cldws,4,ma 0\(sr0,r4\),arg0\r\n\
-.*cldds,4 0\(sr0,r4\),arg0\r\n\
-.*cldds,4,mb 0\(sr0,r4\),arg0\r\n\
-.*cldds,4,ma 0\(sr0,r4\),arg0\r\n\
-.*cstws,4 arg0,0\(sr0,r4\)\r\n\
-.*cstws,4,mb arg0,0\(sr0,r4\)\r\n\
-.*cstws,4,ma arg0,0\(sr0,r4\)\r\n\
-.*cstds,4 arg0,0\(sr0,r4\)\r\n\
-.*cstds,4,mb arg0,0\(sr0,r4\)\r\n\
-.*cstds,4,ma arg0,0\(sr0,r4\)\r\n\
+.*cldws,4 0\\(sr0,r4\\),arg0.*
+.*cldws,4,mb 0\\(sr0,r4\\),arg0.*
+.*cldws,4,ma 0\\(sr0,r4\\),arg0.*
+.*cldds,4 0\\(sr0,r4\\),arg0.*
+.*cldds,4,mb 0\\(sr0,r4\\),arg0.*
+.*cldds,4,ma 0\\(sr0,r4\\),arg0.*
+.*cstws,4 arg0,0\\(sr0,r4\\).*
+.*cstws,4,mb arg0,0\\(sr0,r4\\).*
+.*cstws,4,ma arg0,0\\(sr0,r4\\).*
+.*cstds,4 arg0,0\\(sr0,r4\\).*
+.*cstds,4,mb arg0,0\\(sr0,r4\\).*
+.*cstds,4,ma arg0,0\\(sr0,r4\\).*
 .*$prompt $" { pass "copr short memory tests" }
 	-re "$prompt $" { fail "copr short memory tests" }
 	timeout { fail "(timeout) copr short memory tests " }
+    }
+}
+
+proc fmemLRbug_tests { } {
+    global prompt
+    global hex
+    global decimal
+
+    send "x/24i fmemLRbug_tests\n"
+    expect {
+	-re ".*
+.*fstws fr6R,0\\(sr0,arg0\\).*
+.*fstws fr6,4\\(sr0,arg0\\).*
+.*fstws fr6,8\\(sr0,arg0\\).*
+.*fstds fr6,0\\(sr0,arg0\\).*
+.*fstds fr6,4\\(sr0,arg0\\).*
+.*fstds fr6,8\\(sr0,arg0\\).*
+.*fldws 0\\(sr0,arg0\\),fr6R.*
+.*fldws 4\\(sr0,arg0\\),fr6.*
+.*fldws 8\\(sr0,arg0\\),fr6.*
+.*fldds 0\\(sr0,arg0\\),fr6.*
+.*fldds 4\\(sr0,arg0\\),fr6.*
+.*fldds 8\\(sr0,arg0\\),fr6.*
+.*fstws fr6R,0\\(sr0,arg0\\).*
+.*fstws fr6,4\\(sr0,arg0\\).*
+.*fstws fr6,8\\(sr0,arg0\\).*
+.*fstds fr6,0\\(sr0,arg0\\).*
+.*fstds fr6,4\\(sr0,arg0\\).*
+.*fstds fr6,8\\(sr0,arg0\\).*
+.*fldws 0\\(sr0,arg0\\),fr6R.*
+.*fldws 4\\(sr0,arg0\\),fr6.*
+.*fldws 8\\(sr0,arg0\\),fr6.*
+.*fldds 0\\(sr0,arg0\\),fr6.*
+.*fldds 4\\(sr0,arg0\\),fr6.*
+.*fldds 8\\(sr0,arg0\\),fr6.*
+.*$prompt $" { pass "fmem LR register selector tests" }
+	-re "$prompt $" { fail "fmem LR register selector tests" }
+	timeout { fail "(timeout) fmem LR register selector tests " }
     }
 }
 
@@ -1209,4 +1239,7 @@ if ![file exists $objdir/$subdir/$binfile] then {
     all_sfu_tests
     all_copr_tests
     all_copr_mem_tests
+
+    # Regression test for a bug Tege found.
+    fmemLRbug_tests
 }

@@ -1,5 +1,8 @@
 Tue Apr  5 15:16:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gdb.disasm/hppa.exp: Rework escape sequences and end-of-line
+	conditions to work with latest dejagnu/expect.
+
 	* gdb.t15/funcargs.exp (finish from indirect call): No longer
 	expected to fail on the PA.
 	(backtrace in call with trampolines): Explicitly require main
