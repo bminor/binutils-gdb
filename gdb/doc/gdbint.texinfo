@@ -4494,23 +4494,6 @@ root directory.
 Define this to be able to, when a breakpoint insertion fails, warn the
 user that another process may be running with the same executable.
 
-@item PREPARE_TO_PROCEED (@var{select_it})
-@findex PREPARE_TO_PROCEED
-This (ugly) macro allows a native configuration to customize the way the
-@code{proceed} function in @file{infrun.c} deals with switching between
-threads.
-
-In a multi-threaded task we may select another thread and then continue
-or step.  But if the old thread was stopped at a breakpoint, it will
-immediately cause another breakpoint stop without any execution (i.e. it
-will report a breakpoint hit incorrectly).  So @value{GDBN} must step over it
-first.
-
-If defined, @code{PREPARE_TO_PROCEED} should check the current thread
-against the thread that reported the most recent event.  If a step-over
-is required, it returns TRUE.  If @var{select_it} is non-zero, it should
-reselect the old thread.
-
 @item PROC_NAME_FMT
 @findex PROC_NAME_FMT
 Defines the format for the name of a @file{/proc} device.  Should be

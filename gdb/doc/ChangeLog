@@ -1,3 +1,7 @@
+2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (Native Conditionals): Remove PREPARE_TO_PROCEED.
+
 2003-06-18  Daniel Jacobowitz  <drow@mvista.com>
 
         * gdb.texinfo (Remote Debugging): New section "Connecting to a
