@@ -3,7 +3,7 @@
 	* ld-bootstrap/bootstrap.exp: Rebuild tmpdir/ld2 with tmpdir/ld3
 	on Linux/mips.
 
-	* ld-elfvers/vers.exp: Also run on istarget Linux/mips.
+	* ld-elfvers/vers.exp: Also run on Linux/mips.
 	* ld-elfvsb/elfvsb.exp: Likewise.
 	* ld-shared/shared.exp: Likewise.
 
