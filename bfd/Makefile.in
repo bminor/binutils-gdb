@@ -984,12 +984,14 @@ elf.lo: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elfarm-oabi.lo: elfarm-oabi.c elf32-arm.h elf-bfd.h $(INCDIR)/elf/common.h \
+elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm-oabi.h \
+  $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elfarm-nabi.lo: elfrm-nabi.c elf32-arm.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
+  elf32-arm.h elf32-target.h
+elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-arm.h \
+  elf32-target.h
 elf32-d10v.lo: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
@@ -1222,7 +1224,6 @@ irix-core.lo: irix-core.c
 lynx-core.lo: lynx-core.c
 osf-core.lo: osf-core.c
 sco5-core.lo: sco5-core.c libaout.h $(INCDIR)/bfdlink.h
-trad-core.lo: trad-core.c libaout.h $(INCDIR)/bfdlink.h
 cisco-core.lo: cisco-core.c
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
