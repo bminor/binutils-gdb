@@ -1,3 +1,12 @@
+2003-05-11  Jason Eckhardt  <jle@rice.edu>
+
+	* elf32-i860.c (elf32_i860_relocate_highadj): Properly
+	adjust upper bits.
+	(elf32_i860_relocate_splitn): Obtain upper 5 bits from the
+	proper place.
+	(elf32_i860_relocate_pc16): Obtain upper 5 bits from the
+	proper place.
+
 2003-05-11  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_relocate_section): Replace ugly

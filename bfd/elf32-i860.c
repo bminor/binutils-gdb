@@ -718,7 +718,7 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
   value += rello->r_addend;
 
   /* Separate the fields and insert.  */
-  value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
+  value = (((value & 0xf800) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
   bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
@@ -750,7 +750,7 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
   value += rello->r_addend;
 
   /* Separate the fields and insert.  */
-  value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
+  value = (((value & 0xf800) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
   bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
@@ -802,8 +802,8 @@ elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
 
   insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
-  value += ((rel->r_addend & 0x8000) << 1);
   value += rel->r_addend;
+  value += (value & 0x8000) << 1; 
   value = ((value >> 16) & 0xffff);
 
   insn = (insn & 0xffff0000) | value;
