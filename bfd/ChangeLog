@@ -1,3 +1,11 @@
+Mon Aug 21 11:10:32 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (link_action): If an undefined reference follows an
+	undefined weak reference, change the type to undefined.
+	* elflink.h (elf_link_add_archive_symbols): Don't record an
+	undefined weak reference as defined, in case it turns into a real
+	undefined reference later in the same archive.
+
 Thu Aug 17 16:29:09 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* coff-sh.c (sh_relax_section): Cast value for used_by_bfd field

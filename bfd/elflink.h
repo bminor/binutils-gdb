@@ -155,7 +155,8 @@ elf_link_add_archive_symbols (abfd, info)
 	    continue;
 	  if (h->root.type != bfd_link_hash_undefined)
 	    {
-	      defined[i] = true;
+	      if (h->root.type != bfd_link_hash_undefweak)
+		defined[i] = true;
 	      continue;
 	    }
 
