@@ -1032,7 +1032,7 @@ Show the version number for @code{strip}.
 @item -v
 @itemx --verbose
 Verbose output: list all object files modified.  In the case of
-archives, @samp{strip -V} lists all members of the archive.
+archives, @samp{strip -v} lists all members of the archive.
 @end table
 
 @node Index,  , strip, Top
