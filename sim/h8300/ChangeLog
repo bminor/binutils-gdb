@@ -1,3 +1,15 @@
+2003-07-18  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (decode): Enhancements for mova.
+	Initialize cst, reg, and rdisp inside the loop, for each
+	new instruction.  Defer correction of the disp2 values until
+	later, and then adjust them by the size of the first operand,
+	rather than the size of the instruction.
+	(sim_resume): For mova, adjust the size of the second operand
+	according to the type of the first operand (INDEXB vs. INDEXW).
+	In cases where there is only one operand, the other two must
+	both be composed on the fly.
+
 2003-07-22  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_resume): Revert 6-24 change, it does not
