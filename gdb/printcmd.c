@@ -19,6 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include <string.h>
+#include <varargs.h>
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -318,7 +319,7 @@ print_formatted (val, format, size)
 	 I'm not completely sure what that means, I suspect most print_insn
 	 now do use _filtered, so I guess it's obsolete.  */
       /* We often wrap here if there are long symbolic names.  */
-      wrap_here ("\t");
+      wrap_here ("    ");
       next_address = VALUE_ADDRESS (val)
 	+ print_insn (VALUE_ADDRESS (val), stdout);
       break;
@@ -1611,6 +1612,86 @@ print_frame_nameless_args (fi, start, num, first, stream)
     }
 }
 
+/* Make makeva* work on an __INT_VARARGS_H machine.  */
+
+#if defined (__INT_VARARGS_H)
+/* This is used on an 88k.  Not sure whether it is used by anything else.  */
+#define MAKEVA_END(list) \
+  va_list retval; \
+  retval.__va_arg = 0; \
+  retval.__va_stk = (int *) (list)->arg_bytes; \
+  retval.__va_reg = (int *) (list)->arg_bytes; \
+  return retval;
+#endif
+
+/* This is an interface which allows to us make a va_list.  */
+typedef struct {
+  unsigned int nargs;
+  unsigned int max_arg_size;
+
+  /* Current position in bytes.  */
+  unsigned int argindex;
+
+  char arg_bytes[1];
+} makeva_list;
+
+/* Tell the caller how many bytes to allocate for a makeva_list with NARGS
+   arguments and whose largest argument is MAX_ARG_SIZE bytes.  This
+   way the caller can use alloca, malloc, or some other allocator.  */
+unsigned int
+makeva_size (nargs, max_arg_size)
+     unsigned int nargs;
+     unsigned int max_arg_size;
+{
+  return sizeof (makeva_list) + nargs * max_arg_size;
+}
+
+/* Start working on LIST with NARGS arguments and whose largest
+   argument is MAX_ARG_SIZE bytes.  */
+void
+makeva_start (list, nargs, max_arg_size)
+     makeva_list *list;
+     unsigned int nargs;
+     unsigned int max_arg_size;
+{
+  list->nargs = nargs;
+  list->max_arg_size = max_arg_size;
+#if defined (MAKEVA_START)
+  MAKEVA_START (list);
+#else
+  list->argindex = 0;
+#endif
+}
+
+/* Add ARG to LIST.  */
+void
+makeva_arg (list, argaddr, argsize)
+     makeva_list *list;
+     PTR argaddr;
+     unsigned int argsize;
+{
+#if defined (MAKEVA_ARG)
+  MAKEVA_ARG (list, argaddr, argsize);
+#else
+  memcpy (&list->arg_bytes[list->argindex], argaddr, argsize);
+  list->argindex += argsize;
+#endif
+}
+
+/* From LIST, for which makeva_arg has been called for each arg,
+   return a va_list containing the args.  */
+va_list
+makeva_end (list)
+     makeva_list *list;
+{
+#if defined (MAKEVA_END)
+  MAKEVA_END (list);
+#else
+  /* This works if a va_list is just a pointer to the arguments.  */
+  return (va_list) list->arg_bytes;
+#endif
+}
+
 /* ARGSUSED */
 static void
 printf_command (arg, from_tty)
@@ -1623,7 +1704,7 @@ printf_command (arg, from_tty)
   value *val_args;
   int nargs = 0;
   int allocated_args = 20;
-  char *arg_bytes;
+  va_list args_to_vprintf;
 
   val_args = (value *) xmalloc (allocated_args * sizeof (value));
 
@@ -1698,10 +1779,10 @@ printf_command (arg, from_tty)
     enum argclass {int_arg, string_arg, double_arg, long_long_arg};
     enum argclass *argclass;
     int nargs_wanted;
-    int argindex;
     int lcount;
     int i;
- 
+    makeva_list *args_makeva;
+
     argclass = (enum argclass *) alloca (strlen (s) * sizeof *argclass);
     nargs_wanted = 0;
     f = string;
@@ -1757,12 +1838,13 @@ printf_command (arg, from_tty)
  
     if (nargs != nargs_wanted)
       error ("Wrong number of arguments for specified format-string");
- 
+
     /* Now lay out an argument-list containing the arguments
        as doubles, integers and C pointers.  */
- 
-    arg_bytes = (char *) alloca (sizeof (double) * nargs);
-    argindex = 0;
+
+    args_makeva = (makeva_list *)
+      alloca (makeva_size (nargs, sizeof (double)));
+    makeva_start (args_makeva, nargs, sizeof (double));
     for (i = 0; i < nargs; i++)
       {
 	if (argclass[i] == string_arg)
@@ -1788,49 +1870,38 @@ printf_command (arg, from_tty)
 	    str[j] = 0;
  
 	    /* Pass address of internal copy as the arg to vprintf.  */
-	    *((int *) &arg_bytes[argindex]) = (int) str;
-	    argindex += sizeof (int);
+	    makeva_arg (args_makeva, &str, sizeof (str));
 	  }
 	else if (VALUE_TYPE (val_args[i])->code == TYPE_CODE_FLT)
 	  {
-	    *((double *) &arg_bytes[argindex]) = value_as_double (val_args[i]);
-	    argindex += sizeof (double);
+	    double val = value_as_double (val_args[i]);
+	    makeva_arg (args_makeva, &val, sizeof (val));
 	  }
 	else
 #ifdef CC_HAS_LONG_LONG
 	  if (argclass[i] == long_long_arg)
 	    {
-	      *(LONGEST *) &arg_bytes[argindex] = value_as_long (val_args[i]);
-	      argindex += sizeof (LONGEST);
+	      long long val = value_as_long (val_args[i]);
+	      makeva_arg (args_makeva, &val, sizeof (val));
 	    }
 	  else
 #endif
 	    {
-	      *((long *) &arg_bytes[argindex]) = value_as_long (val_args[i]);
-	      argindex += sizeof (long);
+	      long val = value_as_long (val_args[i]);
+	      makeva_arg (args_makeva, &val, sizeof (val));
 	    }
       }
+    args_to_vprintf = makeva_end (args_makeva);
   }
 
-  /* There is not a standard way to make a va_list, so we need
-     to do various things for different systems.  */
-#if defined (__INT_VARARGS_H)
-  /* This is defined by an 88k using gcc1.  Do other machines use it?  */
-  {
-    va_list list;
+  /* FIXME: We should be using vprintf_filtered, but as long as it has an
+     arbitrary limit that is unacceptable.  Correct fix is for vprintf_filtered
+     to scan down the format string so it knows how big a buffer it needs.
 
-    list.__va_arg = 0;
-    list.__va_stk = (int *) arg_bytes;
-    list.__va_reg = (int *) arg_bytes;
-    vprintf (string, list);
-  }
-#else /* No __INT_VARARGS_H.  */
-#ifdef VPRINTF
-  VPRINTF (string, arg_bytes);
-#else /* No VPRINTF.  */
-  vprintf (string, (PTR) arg_bytes);
-#endif /* No VPRINTF.  */
-#endif /* No __INT_VARARGS_H.  */
+     But for now, just force out any pending output, so at least the output
+     appears in the correct order.  */
+  wrap_here ((char *)NULL);
+  vprintf (string, args_to_vprintf);
 }
 
 /* Helper function for asdump_command.  Finds the bounds of a function

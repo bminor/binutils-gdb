@@ -1,5 +1,8 @@
 Fri Jul  9 12:36:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* utils.c: Clean up comments about wrap buffer and wrap_here.
+	* printcmd.c (printf_command): Call wrap_here before vprintf.
+
 	* mipsread.c (cross_ref): Set the name to unknown for "struct *" case.
 	Patch from ptf@delcam.co.uk (Paul Flinders).
 
