@@ -1,6 +1,9 @@
 Thu Aug 29 16:44:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (i[345]86): Recognize i686 for pentium pro.
+	(i[3456]86-*-dgux*): Use config/mh-sysv for the host configuration
+	file.
+
 	* config.guess (i[345]86): Ditto.
 
 start-sanitize-d10v
