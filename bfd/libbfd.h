@@ -1247,6 +1247,9 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_XSTORMY16_REL_12",
   "BFD_RELOC_XSTORMY16_24",
   "BFD_RELOC_XSTORMY16_FPTR16",
+  "BFD_RELOC_VAX_GLOB_DAT",
+  "BFD_RELOC_VAX_JMP_SLOT",
+  "BFD_RELOC_VAX_RELATIVE",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
