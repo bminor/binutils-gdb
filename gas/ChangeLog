@@ -1,3 +1,9 @@
+2001-07-17  matthew green  <mrg@eterna.com.au>
+
+	* config/tc-i386.c (comment_chars): Don't use '/' as comment start if
+	TE_NetBSD.
+	(line_comment_chars): Set to '/' if TE_NetBSD.
+
 2001-07-14  matthew green  <mrg@eterna.com.au>
 
 	* configure.in (i386-*-netbsdelf*): New target.
