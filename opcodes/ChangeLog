@@ -1,3 +1,13 @@
+Mon Oct 23 11:11:34 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* mips-opc.c: Added shorthand (V1) for INSN_4100 manifest. Added
+ 	the VR4100 specific instructions to the mips_opcodes structure.
+
+Thu Oct 19 11:05:23 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in, mpw-make.sed: Remove ugly workaround for
+	ugly Metrowerks bug in CW6, is fixed in CW7.
+
 Mon Oct 16 12:59:01 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-opc.c (whole file): Add flags for common/any support.
