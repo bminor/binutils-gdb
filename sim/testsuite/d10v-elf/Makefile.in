@@ -39,7 +39,8 @@ RPATH_ENVVAR = @RPATH_ENVVAR@
 
 TESTS = \
 	exit47.ko \
-	hello.hi
+	hello.hi \
+	t-rachi.ok
 
 AS_FOR_TARGET = `\
   if [ -x ../../../gas/as-new ]; then \
@@ -56,8 +57,8 @@ LD_FOR_TARGET = `\
   fi`
 
 RUN_FOR_TARGET = `\
-  if [ -x ../../../sim/v850/run ]; then \
-    echo ../../../sim/v850/run ; \
+  if [ -x ../../../sim/d10v/run ]; then \
+    echo ../../../sim/d10v/run ; \
   else \
     echo $(target_alias)-run ; \
   fi`

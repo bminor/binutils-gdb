@@ -1,0 +1,8 @@
+Mon Nov 10 19:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-macros.i (_start): New file.
+	* t-rachi.s: New file.
+
+	* Makefile.in (RUN_FOR_TARGET): Look for simulator in d10v
+ 	directory.
+
