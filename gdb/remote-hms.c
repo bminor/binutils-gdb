@@ -456,6 +456,9 @@ hms_load (args, fromtty)
   sprintf (buffer, "r PC=%x", abfd->start_address);
   hms_write_cr (buffer);
   expect_prompt ();
+  /* Turn off all breakpoints */
+  hms_write_cr ("b -");
+  expect_prompt ();
 }
 
 /* This is called not only when we first attach, but also when the
@@ -587,7 +590,7 @@ hms_open (name, from_tty)
 
   SERIAL_RAW (desc);
   is_open = 1;
-
+  push_target (&hms_ops);
   dcache_init ();
 
   /* Hello?  Are you there?  */
@@ -597,7 +600,7 @@ hms_open (name, from_tty)
   /* Clear any break points */
   hms_clear_breakpoints ();
 
-  printf_filtered ("Connected to remote H8/300 HMS system.\n");
+  printf_filtered ("Connected to remote board running HMS monitor.\n");
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -768,7 +771,7 @@ hms_wait (pid, status)
   else
     {
       status->kind = TARGET_WAITKIND_EXITED;
-      status->value.integer = 0;
+      status->value.integer = TARGET_SIGNAL_STOP;
     }
 
   timeout = old_timeout;
@@ -863,6 +866,127 @@ hms_write_cr (s)
   hms_write ("\r", 1);
 }
 
+#ifdef GDB_TARGET_IS_H8500
+
+/* H8/500 monitor reg dump looks like:
+
+HMS>r
+PC:8000 SR:070C .7NZ.. CP:00 DP:00 EP:00 TP:00 BR:00
+R0-R7: FF5A 0001 F4FE F500 0000 F528 F528 F4EE
+HMS>
+
+
+*/
+
+supply_val(n, size, ptr, segptr)
+int n;
+int size;
+char *ptr;
+char *segptr;
+{
+  int ok;
+  char raw[4];
+  switch (size) 
+    {
+    case 2:
+      raw[0] = gethex(2, ptr, &ok);
+      raw[1] = gethex(2, ptr+2, &ok);
+      supply_register (n, raw);
+      break;
+    case 1:
+      raw[0] = gethex(2,ptr,&ok);
+      supply_register (n, raw);
+      break;
+    case 4:
+      {
+	int v = gethex (4, ptr, &ok);
+	v |= gethex (2, segptr, &ok) << 16;
+	raw[0] = 0;
+	raw[1] = (v>>16) & 0xff ;
+	raw[2] = (v>>8) & 0xff ;
+	raw[3] = (v>>0) & 0xff ;
+	supply_register (n, raw);
+      }
+    }
+
+}
+static void
+hms_fetch_register (dummy)
+     int dummy;
+{
+#define REGREPLY_SIZE 108
+  char linebuf[REGREPLY_SIZE + 1];
+  int i;
+  int s;
+  int gottok;
+
+  REGISTER_TYPE reg[NUM_REGS];
+  int foo[NUM_REGS];
+  check_open ();
+
+  do
+    {
+
+      hms_write_cr ("r");
+      expect("r");
+      s = timed_read (linebuf+1, REGREPLY_SIZE, 1);
+
+      linebuf[REGREPLY_SIZE] = 0;
+      gottok = 0;
+      if (linebuf[3] == 'P' &&
+	  linebuf[4] == 'C' &&
+	  linebuf[5] == ':' &&
+	  linebuf[105] == 'H' &&
+	  linebuf[106] == 'M' &&
+	  linebuf[107] == 'S')
+	{
+
+	  /*
+	    012
+	    r**
+	    -------1---------2---------3---------4---------5-----
+	    345678901234567890123456789012345678901234567890123456
+	    PC:8000 SR:070C .7NZ.. CP:00 DP:00 EP:00 TP:00 BR:00**
+	    ---6---------7---------8---------9--------10----
+	    789012345678901234567890123456789012345678901234
+	    R0-R7: FF5A 0001 F4FE F500 0000 F528 F528 F4EE**
+	    
+	    56789
+	    HMS>
+	    */
+	  gottok = 1;
+
+	  
+	  supply_val(PC_REGNUM, 4, linebuf+6, linebuf+29);
+
+	  supply_val(CCR_REGNUM, 2, linebuf+14);
+	  supply_val(SEG_C_REGNUM, 1, linebuf+29);
+	  supply_val(SEG_D_REGNUM, 1, linebuf+35);
+	  supply_val(SEG_E_REGNUM, 1, linebuf+41);
+	  supply_val(SEG_T_REGNUM, 1, linebuf+47);
+	  for (i = 0; i < 8; i++)
+	    {
+	      static int sr[8] = { 35,35,35,35,
+				     41,41,47,47};
+
+	      char raw[4];
+	      char *src = linebuf + 64 + 5 * i;
+	      char *segsrc = linebuf + sr[i];
+	      supply_val(R0_REGNUM + i, 2, src);
+	      supply_val(PR0_REGNUM + i, 4, src, segsrc);
+	    }
+	}
+      if (!gottok)
+	{
+	        hms_write_cr ("");
+		expect("HMS>");
+	}
+    }
+  while (!gottok);
+}
+#endif
+
+#ifdef GDB_TARGET_IS_H8300
 static void
 hms_fetch_register (dummy)
      int dummy;
@@ -920,7 +1044,7 @@ hms_fetch_register (dummy)
       supply_register (i, swapped);
     }
 }
-
+#endif
 /* Store register REGNO, or all if REGNO == -1.
    Return errno value.  */
 static void
@@ -938,12 +1062,15 @@ hms_store_register (regno)
     {
       char *name = get_reg_name (regno);
       char buffer[100];
-
+      /* Regs starting pr<foo> don't really exist */
+      if (!(name[0] == 'p' && name[1] == 'r') ) {
       sprintf (buffer, "r %s=%x", name, read_register (regno));
       hms_write_cr (buffer);
       expect_prompt ();
     }
+    }
 }
+
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -1205,12 +1332,18 @@ hms_read_inferior_memory (memaddr, myaddr, len)
 
 	}
     }
+#ifdef TARGET_IS_H8500
+    expect ("ore>");
+#endif
+#ifdef TARGET_IS_H8300
   expect ("emory>");
+#endif
   hms_write_cr (" ");
   expect_prompt ();
   return len;
 }
 
+#if 0
 /* This routine is run as a hook, just before the main command loop is
    entered.  If gdb is configured for the H8, but has not had its
    target specified yet, this will loop prompting the user to do so.
@@ -1224,6 +1357,8 @@ hms_before_main_loop ()
 
   push_target (&hms_ops);
 }
+#endif
+
 
 #define MAX_BREAKS	16
 static int num_brkpts = 0;

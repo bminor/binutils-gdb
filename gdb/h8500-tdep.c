@@ -34,6 +34,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 ;
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
+int code_size = 2;
+int data_size = 2;
 
 /* Shape of an H8/500 frame :
 
@@ -420,7 +422,14 @@ saved_pc_after_call (frame)
 {
   int x;
   int a = read_register (SP_REGNUM);
-  x = read_memory_integer (a, PTR_SIZE);
+  x = read_memory_integer (a, code_size);
+  if (code_size == 2)
+    {
+      /* Stick current code segement onto top */
+      x &= 0xffff;
+      x |= read_register (SEG_C_REGNUM) << 16;
+    }
+  x &= 0xffffff;
   return x;
 }
 
@@ -480,21 +489,12 @@ h8500_set_pointer_size (newsize)
 struct cmd_list_element *setmemorylist;
 
 
-static void
-segmented_command (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  h8500_set_pointer_size (32);
-}
+#define C(name,a,b,c) name () { h8500_set_pointer_size(a); code_size = b; data_size = c; }
 
-static void
-unsegmented_command (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  h8500_set_pointer_size (16);
-}
+C(large_command, 32,4,4);
+C(medium_command, 32, 4,2);
+C(compact_command, 32,2,4);
+C(small_command, 16,2,2);
 
 static void
 set_memory (args, from_tty)
@@ -632,10 +632,18 @@ _initialize_h8500_tdep ()
   add_prefix_cmd ("memory", no_class, set_memory,
 		  "set the memory model", &setmemorylist, "set memory ", 0,
 		  &setlist);
-  add_cmd ("segmented", class_support, segmented_command,
-	   "Set segmented memory model.", &setmemorylist);
-  add_cmd ("unsegmented", class_support, unsegmented_command,
-	   "Set unsegmented memory model.", &setmemorylist);
+
+  add_cmd ("small", class_support, small_command,
+	   "Set small memory model. (16 bit code, 16 bit data)", &setmemorylist);
+
+  add_cmd ("large", class_support, large_command,
+	   "Set large memory model. (32 bit code, 32 bit data)", &setmemorylist);
+
+  add_cmd ("medium", class_support, medium_command,
+	   "Set medium memory model. (32 bit code, 16 bit data)", &setmemorylist);
+
+  add_cmd ("compact", class_support, compact_command,
+	   "Set compact memory model. (16 bit code, 32 bit data)", &setmemorylist);
 
 }
 

@@ -1,6 +1,8 @@
-/* Remote debugging interface for Hitachi E7000 ICE, for GDB.
+/* Remote debugging interface for Hitachi E7000 ICE, for GDB
    Copyright 1993 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.  Written by Steve Chamberlain for Cygnus.
+   Contributed by Cygnus Support. 
+
+   Written by Steve Chamberlain for Cygnus Support.
 
    This file is part of GDB.
 
@@ -52,7 +54,7 @@ extern struct target_ops e7000_ops;	/* Forward declaration */
 char *ENQSTRING = "\005";
 
 int echo;
-static int echo_index;
+int ctrl_c;
 static void e7000_close ();
 static void e7000_fetch_register ();
 static void e7000_store_register ();
@@ -66,7 +68,7 @@ static serial_t e7000_desc;
 
 
 /* Send data to e7000debug.  Works just like printf. */
-
+#if 0
 static void
 printf_e7000debug (va_alist)
      va_dcl
@@ -80,6 +82,14 @@ printf_e7000debug (va_alist)
   pattern = va_arg (args, char *);
 
   vsprintf (buf, pattern, args);
+#else
+
+static void
+printf_e7000debug(a,b,c,d,e)
+  {
+    char buf[200];
+    sprintf(buf, a,b,c,d,e);
+#endif
   if (SERIAL_WRITE (e7000_desc, buf, strlen (buf)))
     fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
 
@@ -125,6 +135,7 @@ readchar (timeout)
   return c;
 }
 
+
 /* Scan input from the remote system, until STRING is found.  If DISCARD is
    non-zero, then discard non-matching input, else print it out.
    Let the user break out immediately.  */
@@ -135,16 +146,29 @@ expect (string)
   char *p = string;
   int c;
 
-  immediate_quit = 1;
   while (1)
 
     {
       c = readchar (timeout);
+
+      notice_quit ();
+      if (quit_flag == 1) 
+	{
+	  if (ctrl_c) {
+	    putchar_e7000(CTRLC);
+	    ctrl_c -- ;
+	  }
+	  else 
+	    {
+	      quit();
+	    }
+	}
+      
       if (c == SERIAL_ERROR)
 	{
 	  error ("Serial communication error");
 	}
-      if (echo_index)
+      if (echo)
 	{
 	  if (c != '\r')
 	    putchar (c);
@@ -154,7 +178,6 @@ expect (string)
 	{
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
 	      return;
 	    }
 	}
@@ -182,21 +205,11 @@ expect (string)
 static void
 expect_prompt ()
 {
-#if defined (LOG_FILE)
-  /* This is a convenient place to do this.  The idea is to do it often
-     enough that we never lose much data if we terminate abnormally.  */
-  fflush (log_file);
-#endif
   expect (":");
 }
 static void
 expect_full_prompt ()
 {
-#if defined (LOG_FILE)
-  /* This is a convenient place to do this.  The idea is to do it often
-     enough that we never lose much data if we terminate abnormally.  */
-  fflush (log_file);
-#endif
   expect ("\n:");
 }
 
@@ -363,7 +376,6 @@ e7000_ftp (args, from_tty)
 {
   int oldtimeout = timeout;
   timeout = 10;
-  echo_index++;
   printf_e7000debug ("ftp %s\r", machine);
   expect (" Username : ");
   printf_e7000debug ("%s\r", user);
@@ -378,7 +390,6 @@ e7000_ftp (args, from_tty)
   expect ("FTP>");
   printf_e7000debug ("bye\r");
   expect (":");
-  echo_index--;
   timeout = oldtimeout;
 }
 
@@ -420,6 +431,7 @@ or \t\ttarget e7000 <host>[:<port>]\n");
 
   /* Hello?  Are you there?  */
   sync = 0;
+  putchar_e7000 (CTRLC);
   while (!sync)
     {
       int c;
@@ -454,6 +466,9 @@ or \t\ttarget e7000 <host>[:<port>]\n");
     printf_filtered ("Remote %s connected to %s\n", target_shortname,
 		     dev_name);
 
+#ifdef GDB_TARGET_IS_H8300
+  h8300hmode = 1;
+#endif
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -499,25 +514,35 @@ e7000_resume (pid, step, sig)
 
 /* Read the remote registers into the block REGS.  
 
-   A reg dump looks like:
+   For the H8/300 a register dump looks like:
 
+
+ PC=00021A  CCR=80:I*******
+ ER0 - ER3  0000000A 0000002E 0000002E 00000000
+ ER4 - ER7  00000000 00000000 00000000 00FFEFF6
+ 000218           MOV.B     R1L,R2L
+ STEP NORMAL END or
+ BREAK POINT
  */
 
 #ifdef GDB_TARGET_IS_H8300
 char *want = "\n\
  PC=%p CCR=%c\n\
  ER0 - ER3  %0 %1 %2 %3\n\
- ER4 - ER7  %4 %5 %6 %7\n\
-:";
+ ER4 - ER7  %4 %5 %6 %7\n";
+
+char *want_nopc = "%p CCR=%c\n\
+ ER0 - ER3  %0 %1 %2 %3\n\
+ ER4 - ER7  %4 %5 %6 %7";
+
 
 #endif
 #ifdef GDB_TARGET_IS_SH
-char *want = "\n\PC=%16 SR=%22\n\
+char *want = "\n PC=%16 SR=%22\n\
  PR=%17 GBR=%18 VBR=%19\n\
  MACH=%20 MACL=%21\n\
  R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
- R8-15 %8 %9 %10 %11 %12 %13 %14 %15\n\
-:";
+ R8-15 %8 %9 %10 %11 %12 %13 %14 %15\n";
 
 char *want_nopc = "%16 SR=%22\n\
  PR=%17 GBR=%18 VBR=%19\n\
@@ -577,7 +602,7 @@ fetch_regs_from_dump (nextchar, want)
 	  break;
 
 	case ' ':
-	  while (thischar == ' ' || thischar == '\t')
+	  while (thischar == ' ' || thischar == '\t' || thischar == '\r' || thischar == '\n')
 	    thischar = nextchar();
 	  want++;
 	  break;
@@ -856,14 +881,14 @@ write_large (memaddr, myaddr, len)
      int len;
 {
   int i;
+  int c;
 #define maxstride  128
   int stride;
 
-  printf_e7000debug ("il ;s:s\r");
+  printf_e7000debug ("IL ;S:FK\r");
   expect (ENQSTRING);
   putchar_e7000 (ACK);
-  expect ("LO s\r");
-
+  expect ("LO FK\r");
   for (i = 0; i < len; i += stride)
     {
       char compose[maxstride * 2 + 50];
@@ -888,8 +913,8 @@ write_large (memaddr, myaddr, len)
 	}
       else
 	alen = 2;
-      compose[where++] = alen - 1 + '0';	/* insert type */
-      check_sum += stickbyte (compose + where, alen + stride + 1);	/* Insert length */
+      compose[where++] = alen - 1 + '0'; /* insert type */
+      check_sum += stickbyte (compose + where, alen + stride + 1); /* Insert length */
       where += 2;
       while (alen > 0)
 	{
@@ -908,23 +933,34 @@ write_large (memaddr, myaddr, len)
 
       where += 2;
       compose[where++] = '\r';
-      SERIAL_WRITE (e7000_desc, compose, where);
-      j = SERIAL_READCHAR (e7000_desc, 0);
-      if (j == SERIAL_TIMEOUT)
+      compose[where++] = '\n';
+      compose[where++] = 0;
+      {
+	char *z;
+	for (z = compose; *z; z++) ;
 	{
-	  /* This is ok - nothing there */
+	  SERIAL_WRITE (e7000_desc, compose, where);
+	  j = SERIAL_READCHAR (e7000_desc, 0);
+	  if (j == SERIAL_TIMEOUT)
+	    {
+	      /* This is ok - nothing there */
+	    }
+	  else if (j == ENQ)
+	    {
+	      /* Hmm, it's trying to tell us something */
+	      expect (":");
+	      error ("Error writing memory");
+	    }
+	  else
+	    {
+	      printf ("@%d}@", j);
+	      while ((j = SERIAL_READCHAR(e7000_desc,0)) > 0) 
+		{
+		  printf ("@{%d}@",j);
+		}
+	    }
 	}
-      else if (j == ENQ)
-	{
-	  /* Hmm, it's trying to tell us something */
-	  expect (":");
-	  error ("Error writing memory");
-	}
-      else
-	{
-	  printf ("Whats this %d\n", j);
-	}
-
+      }
     }
   /* Send the trailer record */
   write_e7000 ("S70500000000FA\r");
@@ -956,13 +992,6 @@ e7000_write_inferior_memory (memaddr, myaddr, len)
       return write_large (memaddr, myaddr, len);
     }
 }
-
-/* Read LEN bytes from inferior memory at MEMADDR.  Put the result
-   at debugger address MYADDR.  Returns length moved. 
-
-   Done by requesting an srecord dump from the E7000.
- */
-
 
 
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
@@ -1257,8 +1286,7 @@ e7000_insert_breakpoint (addr, shadow)
      unsigned char *shadow;
 {
   int i;
-  static char nop[2] =
-    {0x20, 0x0b};
+  static char nop[2] = NOP;
 
   for (i = 0; i <= MAX_E7000DEBUG_BREAKPOINTS; i++)
     if (breakaddr[i] == 0)
@@ -1318,9 +1346,11 @@ e7000_command (args, fromtty)
     {
       printf_e7000debug ("%s\r", args);
     }
-  echo_index++;
+  echo++;
+  ctrl_c = 2;
   expect_full_prompt ();
-  echo_index--;
+  echo--;
+  ctrl_c = 0;
   printf_unfiltered ("\n");
 }
 
@@ -1329,7 +1359,7 @@ e7000_load (args, fromtty)
      char *args;
      int fromtty;
 {
-  load_target_image (args, fromtty);
+  gr_load_image (args, fromtty);
 }
 
 static void
@@ -1339,9 +1369,15 @@ e7000_drain (args, fromtty)
 
 {
   int c;
-
-  while ((c = SERIAL_READCHAR (e7000_desc, 2) != SERIAL_TIMEOUT))
+  printf_e7000debug("end\r");
+  putchar_e7000 (CTRLC);
+  while ((c = SERIAL_READCHAR (e7000_desc, 1) != SERIAL_TIMEOUT))
     {
+      if(quit_flag)
+	{
+	  putchar_e7000(CTRLC);
+	  quit_flag = 0;
+	}
       if (c > ' ' && c < 127)
 	printf ("%c", c & 0xff);
       else
@@ -1352,7 +1388,151 @@ e7000_drain (args, fromtty)
 e7000_noecho ()
 {
   echo = !echo;
+  if (echo)
+    printf_filtered ("Snoop enabled\n");
+  else
+    printf_filtered ("Snoop disabled\n");
+
 }
+
+#define NITEMS 3
+static int
+why_stop ()
+{
+  static  char *strings[NITEMS] = 
+    {
+      "STEP NORMAL",
+      "BREAK POINT",
+      "BREAK KEY",
+    };
+  char *p[NITEMS];
+  int c;
+  p[0] = strings[0];
+  p[1] = strings[1];
+  p[2] = strings[2];
+  
+  c = gch();
+  while (1)
+    {
+      int i;
+      for (i = 0; i < NITEMS; i++)
+	{
+	  if (c == *(p[i])) 
+	    {
+	      p[i]++;
+	      if (*(p[i]) == 0) 
+		{ 
+		  /* found one of the choices */
+		  return i;
+		}
+	    }
+	  else {
+	    p[i] = strings[i];
+	  }
+	}
+
+      c = gch();
+    }
+}
+/* Suck characters, if a string match, then return the strings index
+   otherwise echo them */
+int
+expect_n ( strings)
+char **strings;
+{
+  char *(ptr[10]);
+  int n; 
+  int c;
+  char saveaway[100];
+  char *buffer = saveaway;
+  /* Count number of expect strings  */
+
+  for (n =0; strings[n]; n++) 
+    {
+      ptr[n] = strings[n];
+    }
+
+  while (1) {
+    int i;
+    int gotone = 0;
+
+    c = SERIAL_READCHAR (e7000_desc, 1);
+    if (c == SERIAL_TIMEOUT) {
+      printf_unfiltered ("[waiting for e7000...]\n");
+    }
+#ifdef __GO32__
+    if (kbhit())
+      {
+	int k = getkey();
+	if (k == 1)
+	  quit_flag = 1;
+      }
+#endif
+
+    if (quit_flag)
+      {
+	putchar_e7000 (CTRLC);	/* interrupt the running program */
+	quit_flag = 0;
+      }
+
+    for (i = 0; i < n; i++)
+      {
+	if (c == ptr[i][0]) 
+	  {
+	    ptr[i]++;
+	    if (ptr[i][0] == 0)
+	      {
+		/* Gone all the way */
+		return i;
+	      }
+	    gotone = 1;
+	  }
+	else 
+	  {
+	    ptr[i] = strings[i];
+	  }
+      }
+
+    
+    if (gotone)
+      {
+	/* Save it up incase we find that there was no match */
+	*buffer ++ = c;
+      }
+    else
+      {
+	if (buffer != saveaway) 
+	  {
+	    *buffer++ = 0;
+	    printf(buffer);
+	    buffer = saveaway;
+	  }
+	if (c != SERIAL_TIMEOUT) {
+	  putchar (c);
+	  fflush(stdout);
+	}
+      }
+  }
+}
+
+/* We subtract two from the pc here rather than use DECR_PC_AFTER_BREAK
+   since the e7000 doesn't always add two to the pc, and the simulators never do. */
+
+static void
+sub2_from_pc()
+{
+  char buf[4];
+  store_signed_integer (buf,
+			REGISTER_RAW_SIZE(PC_REGNUM), 
+			read_register (PC_REGNUM) -2);
+  supply_register (PC_REGNUM, buf);
+  printf_e7000debug (".PC %x\r", read_register (PC_REGNUM));
+}
+#define WAS_SLEEP 0
+#define WAS_INT 1
+#define WAS_RUNNING 2
+#define WAS_OTHER 3
+static char *estrings[] = { "** SLEEP", "BREAK !", "** PC", "PC", 0};
 
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
@@ -1363,8 +1543,12 @@ e7000_wait (pid, status)
      WAITTYPE *status;
 {
   int c;
+  int reset_pc;
   int regno;
+  int running_count = 0;
+  int had_sleep = 0;
   int loop = 1;
+  char *reg;
   int time = 0;
   WSETSTOP ((*status), 0);
   /* Then echo chars until PC= string seen */
@@ -1372,51 +1556,32 @@ e7000_wait (pid, status)
   gch ();			/* and space */
   while (loop)
     {
-      c = SERIAL_READCHAR (e7000_desc, 1);
-      if (c < 0)
-	{
-	  time++;
-	  if (time == 5)
+      switch (expect_n(estrings))
+	{	 
+	case WAS_OTHER:
+	  /* how did this happen ? */
+	  loop =0;
+	  break;
+	case WAS_SLEEP:
+	  had_sleep = 1;
+	  putchar_e7000 (CTRLC);
+	  loop = 0;
+	  break;
+	case WAS_INT:
+	  loop = 0;
+	  break;
+	case WAS_RUNNING:
+	  running_count++;
+	  if (running_count == 20)
 	    {
-	      printf_unfiltered ("[waiting for e7000..]\n");
-	      time = 0;
+	      printf_unfiltered ("[running...]\n");
+	      running_count = 0;
 	    }
-	}
-      if (quit_flag)
-	{
-	  quit_flag = 0;
-	  putchar_e7000 (CTRLC);		/* interrupt the running program */
-	}
-      if (c == 'P')
-	{
-	  c = SERIAL_READCHAR (e7000_desc, 1);
-	  if (c == 'C')
-	    {
-	      c = SERIAL_READCHAR (e7000_desc, 1);
-	      if (c == '=')
-		{
-		  /* Got break */
-		  loop = 0;
-		}
-	      else
-		{
-		  printf ("PC");
-		}
-	    }
-	  else
-	    {
-	      printf ("P");
-	    }
-	}
-      else
-	{
-	  if (c > 0)
-	    {
-	      putchar (c);
-	      fflush (stdout);
-	    }
+	  break;
 	}
     }
+  /* Skip till the PC=*/
+  expect("=");
   fetch_regs_from_dump (gch, want_nopc);
 
   /* And supply the extra ones the simulator uses */
@@ -1426,9 +1591,32 @@ e7000_wait (pid, status)
       supply_register (regno, (char *) &buf);
     }
 
+  reset_pc = why_stop ();
   expect_full_prompt ();
-  WSETSTOP ((*status), SIGTRAP);
 
+  switch (reset_pc)
+    {
+    case 1:			/* Breakpoint */
+  
+      WSETSTOP ((*status), SIGTRAP);
+      break;
+    case 0:
+      /* Single step */
+      WSETSTOP ((*status), SIGTRAP);
+      break;
+    case 2:
+      /* Interrupt */
+      if (had_sleep)
+	{
+	  sub2_from_pc();
+	  WSETSTOP ((*status), SIGTRAP);
+	}
+      else
+	{
+	  WSETSTOP ((*status), SIGINT);
+	}
+      break;
+    }
   return 0;
 }
 
@@ -1456,7 +1644,7 @@ target e7000 foobar",
   e7000_prepare_to_store,
   e7000_xfer_inferior_memory,
   e7000_files_info,
-  e7000_insert_breakpoint,
+0,0,/*  e7000_insert_breakpoint,
   e7000_remove_breakpoint,	/* Breakpoints */
   0,
   0,
@@ -1497,6 +1685,5 @@ _initialize_remote_e7000 ()
 
   add_com ("drain", class_obscure, e7000_drain,
 	   "Drain pending e7000 text buffers.");
-  add_com ("echo", class_obscure, e7000_noecho, "Toggle monitor echo.");
-
+  add_com ("snoop",  class_obscure, e7000_noecho, "Toggle monitor echo.");
 }
