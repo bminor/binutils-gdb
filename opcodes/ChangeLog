@@ -1,3 +1,8 @@
+Wed Oct 27 11:48:01 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c (dsll, dsra, dsrl): Added '>' cases for shift counts
+	larger than 32.  Moved dsxx32 variants first for disassembler.
+
 Mon Oct 25 11:33:14 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* z8kgen.c, z8k-opc.h: Add full lda information.
