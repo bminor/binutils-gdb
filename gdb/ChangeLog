@@ -1,3 +1,15 @@
+2002-05-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdbtypes.c (init_vector_type): New function.
+	(build_builtin_type_vec128): Simplify the representation of SIMD
+	registers.
+	(build_gdbtypes): Initialize new builtin vector types.
+	(_initialize_gdbtypes): Register new vector types with gdbarch.
+	(builtin_type_v4_float, builtin_type_v4_int32,
+	builtin_type_v8_int16, builtin_type_v16_int8,
+	builtin_type_v2_int32, builtin_type_v4_int16,
+	builtin_type_v8_int8): New (renamed) SIMD types.
+
 2002-05-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-nat.c (i387_fill_fsave): Use regcache_collect.

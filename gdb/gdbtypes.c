@@ -71,6 +71,17 @@ struct type *builtin_type_uint64;
 struct type *builtin_type_int128;
 struct type *builtin_type_uint128;
 struct type *builtin_type_bool;
+
+/* 128 bit long vector types */
+struct type *builtin_type_v4_float;
+struct type *builtin_type_v4_int32;
+struct type *builtin_type_v8_int16;
+struct type *builtin_type_v16_int8;
+/* 64 bit long vector types */
+struct type *builtin_type_v2_int32;
+struct type *builtin_type_v4_int16;
+struct type *builtin_type_v8_int8;
+
 struct type *builtin_type_v4sf;
 struct type *builtin_type_v4si;
 struct type *builtin_type_v16qi;
@@ -810,18 +821,30 @@ init_simd_type (char *name,
 }
 
 static struct type *
+init_vector_type (struct type *elt_type, int n)
+{
+  struct type *array_type;
+ 
+  array_type = create_array_type (0, elt_type,
+				  create_range_type (0, builtin_type_int,
+						     0, n-1));
+  TYPE_FLAGS (array_type) |= TYPE_FLAG_VECTOR;
+  return array_type;
+}
+
+static struct type *
 build_builtin_type_vec128 (void)
 {
   /* Construct a type for the 128 bit registers.  The type we're
      building is this: */
 #if 0
-  union __gdb_builtin_type_vec128
+ union __gdb_builtin_type_vec128 
   {
-    struct __builtin_v16qi v16qi;
-    struct __builtin_v8hi v8hi;
-    struct __builtin_v4si v4si;
-    struct __builtin_v4sf v4sf;
-    uint128_t uint128;
+    int128_t uint128;
+    float v4_float[4];
+    int32_t v4_int32[4];
+    int16_t v8_int16[8];
+    int8_t v16_int8[16];
   };
 #endif
 
@@ -829,10 +852,10 @@ build_builtin_type_vec128 (void)
 
   t = init_composite_type ("__gdb_builtin_type_vec128", TYPE_CODE_UNION);
   append_composite_type_field (t, "uint128", builtin_type_int128);
-  append_composite_type_field (t, "v4sf", builtin_type_v4sf);
-  append_composite_type_field (t, "v4si", builtin_type_v4si);
-  append_composite_type_field (t, "v8hi", builtin_type_v8hi);
-  append_composite_type_field (t, "v16qi", builtin_type_v16qi);
+  append_composite_type_field (t, "v4_float", builtin_type_v4_float);
+  append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
+  append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
+  append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
 
   return t;
 }
@@ -3288,9 +3311,18 @@ build_gdbtypes (void)
   builtin_type_v2si
     = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
 
+  /* 128 bit vectors.  */
+  builtin_type_v4_float = init_vector_type (builtin_type_float, 4);
+  builtin_type_v4_int32 = init_vector_type (builtin_type_int32, 4);
+  builtin_type_v8_int16 = init_vector_type (builtin_type_int16, 8);
+  builtin_type_v16_int8 = init_vector_type (builtin_type_int8, 16);
+  /* 64 bit vectors.  */
+  builtin_type_v2_int32 = init_vector_type (builtin_type_int32, 2);
+  builtin_type_v4_int16 = init_vector_type (builtin_type_int16, 4);
+  builtin_type_v8_int8 = init_vector_type (builtin_type_int8, 8);
+
   /* Vector types. */
-  builtin_type_vec128
-    = build_builtin_type_vec128 ();
+  builtin_type_vec128 = build_builtin_type_vec128 ();
 
   /* Pointer/Address types. */
 
@@ -3379,6 +3411,13 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v8hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4_float, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4_int32, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v8_int16, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v16_int8, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v2_int32, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v8_int8, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4_int16, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_vec128, sizeof (struct type *), NULL);
   REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
