@@ -358,8 +358,11 @@ bfd_h8_disassemble (addr, info, mode)
 
 			else if (x & CCR)
 			  {
-
 			    fprintf (stream, "ccr");
+			  }
+			else if (x & EXR)
+			  {
+			    fprintf (stream, "exr");
 			  }
 
 			else
