@@ -545,6 +545,11 @@ extern boolean bfd_sunos_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, struct sec **, struct sec **,
 	   struct sec **));
 
+/* Linux shared library support routines for the linker.  */
+
+extern boolean bfd_linux_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));
