@@ -1,0 +1,4 @@
+/---------------START FROM/,/---------------END FROM/d
+/\/\* FROM libbfd.c\*\//r libbfd.ip
+/\/\* FROM cache.c\*\//r cache.ip
+/\/\* FROM reloc.c\*\//r reloc.ip

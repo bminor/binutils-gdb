@@ -1,0 +1,12 @@
+/---------------START FROM/,/---------------END FROM/d
+/\/\* FROM archive.c\*\//r archive.p
+/\/\* FROM archures.c\*\//r archures.p
+/\/\* FROM bfd.c\*\//r bfd.p
+/\/\* FROM core.c\*\//r core.p
+/\/\* FROM format.c\*\//r format.p
+/\/\* FROM libbfd.c\*\//r libbfd.p
+/\/\* FROM opncls.c\*\//r opncls.p
+/\/\* FROM reloc.c\*\//r reloc.p
+/\/\* FROM section.c\*\//r section.p
+/\/\* FROM syms.c\*\//r syms.p
+/\/\* FROM targets.c\*\//r targets.p
