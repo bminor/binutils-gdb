@@ -1,3 +1,8 @@
+2000-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (install-info): Make sure $(infodir) exists.  Run
+	install-info program on the installed Info files.
+
 2000-03-20  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.in (install): Append "n", not ".n" to libmmalloc.a,
