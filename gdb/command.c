@@ -585,6 +585,20 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
     }
 }
 
+/* All this hair to move the space to the front of cmdtype */
+
+void
+undef_cmd_error (cmdtype, q)
+     char *cmdtype, *q;
+{
+  error ("Undefined %scommand: \"%s\".  Try \"help%s%.*s\".",
+    cmdtype,
+    q,
+    *cmdtype? " ": "",
+    strlen(cmdtype)-1,
+    cmdtype);
+}
+
 /* Look up the contents of *LINE as a command in the command list LIST.
    LIST is a chain of struct cmd_list_element's.
    If it is found, return the struct cmd_list_element for that command
@@ -633,8 +647,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
 	      q = (char *) alloca (p - *line + 1);
 	      strncpy (q, *line, p - *line);
 	      q[p-*line] = '\0';
-	      
-	      error ("Undefined %scommand: \"%s\".", cmdtype, q);
+	      undef_cmd_error (cmdtype, q);
 	    }
 	}
       else
@@ -698,7 +711,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
 	(*line)++;
 
       if (c->prefixlist && **line && !c->allow_unknown)
-	error ("Undefined %scommand: \"%s\".", c->prefixname, *line);
+	undef_cmd_error (c->prefixname, *line);
 
       /* Seems to be what he wants.  Return it.  */
       return c;

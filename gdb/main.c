@@ -76,6 +76,10 @@ char gdbinit[] = GDBINIT_FILENAME;
 
 extern char *version;
 
+/* Message to be printed before the error message, when an error occurs.  */
+
+extern char *error_pre_print;
+
 /* Flag for whether we want all the "from_tty" gubbish printed.  */
 
 int caution = 1;			/* Default is yes, sigh. */
@@ -170,6 +174,7 @@ static void quit_command ();
 void command_loop ();
 static void source_command ();
 static void print_gdb_version ();
+static void print_gnu_advertisement ();
 static void float_handler ();
 static void cd_command ();
 static void read_command_file ();
@@ -225,8 +230,8 @@ return_to_top_level ()
 
 /* Call FUNC with arg ARGS, catching any errors.
    If there is no error, return the value returned by FUNC.
-   If there is an error, return zero after printing ERRSTRING
-    (which is in addition to the specific error message already printed).  */
+   If there is an error, print ERRSTRING, print the specific error message,
+		         then return zero.  */
 
 int
 catch_errors (func, args, errstring)
@@ -237,22 +242,22 @@ catch_errors (func, args, errstring)
   jmp_buf saved;
   int val;
   struct cleanup *saved_cleanup_chain;
+  char *saved_error_pre_print;
 
   saved_cleanup_chain = save_cleanups ();
+  saved_error_pre_print = error_pre_print;
 
   bcopy (to_top_level, saved, sizeof (jmp_buf));
+  error_pre_print = errstring;
 
   if (setjmp (to_top_level) == 0)
     val = (*func) (args);
   else
-    {
-      if (errstring)
-	fprintf (stderr, "%s\n", errstring);
-      val = 0;
-    }
+    val = 0;
 
   restore_cleanups (saved_cleanup_chain);
 
+  error_pre_print = saved_error_pre_print;
   bcopy (saved, to_top_level, sizeof (jmp_buf));
   return val;
 }
@@ -531,15 +536,17 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 
   if (!quiet)
     {
-      /* Print all the junk in one place, with a blank line after it
-	 to separate it from important stuff like "no such file".  
- 	 Also, we skip most of the noise, like Emacs, if started with
-	 a file name rather than with no arguments.  */
-      if (execarg == 0) {
-	print_gdb_version (1);
-	printf ("Type \"help\" for a list of commands.\n\n");
-      }
+      /* Print all the junk at the top, with trailing "..." if we are about
+	 to read a symbol file (possibly slowly).  */
+      print_gnu_advertisement ();
+      print_gdb_version ();
+      if (symarg)
+	printf_filtered ("..");
+      wrap_here();
+      fflush (stdout);		/* Force to screen during slow operations */
     }
+
+  error_pre_print = "\n\n";
 
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
@@ -567,7 +574,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       if (!setjmp (to_top_level))
 	{
 	  exec_file_command (execarg, !batch);
-	  symbol_file_command (symarg, !batch);
+	  symbol_file_command (symarg, 0);
 	}
     }
   else
@@ -577,9 +584,15 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	  exec_file_command (execarg, !batch);
       if (symarg != NULL)
 	if (!setjmp (to_top_level))
-	  symbol_file_command (symarg, !batch);
+	  symbol_file_command (symarg, 0);
     }
   do_cleanups (ALL_CLEANUPS);
+
+  /* After the symbol file has been read, print a newline to get us
+     beyond the copyright line...  But errors should still set off
+     the error message with a (single) blank line.  */
+  printf_filtered ("\n");
+  error_pre_print = "\n";
 
   if (corearg != NULL)
     if (!setjmp (to_top_level))
@@ -596,6 +609,9 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 #ifdef ADDITIONAL_OPTION_HANDLER
   ADDITIONAL_OPTION_HANDLER;
 #endif
+
+  /* Error messages should no longer be distinguished with extra output. */
+  error_pre_print = 0;
 
   {
     struct stat homebuf, cwdbuf;
@@ -1516,16 +1532,21 @@ End with a line saying just \"end\".\n", comname);
 }
 
 static void
-print_gdb_version (shout)
-     int shout;
+print_gnu_advertisement()
 {
-  printf ("GDB %s, Copyright (C) 1991 Free Software Foundation, Inc.\n",
-	  version);
-  if (shout)
     printf ("\
-There is ABSOLUTELY NO WARRANTY for GDB; type \"info warranty\" for details.\n\
 GDB is free software and you are welcome to distribute copies of it\n\
- under certain conditions; type \"info copying\" to see the conditions.\n");
+ under certain conditions; type \"info copying\" to see the conditions.\n\
+There is absolutely no warranty for GDB; type \"info warranty\" for details.\n\
+");
+}
+
+static void
+print_gdb_version ()
+{
+  printf_filtered ("\
+GDB %s, Copyright 1991 Free Software Foundation, Inc.",
+	  version);
 }
 
 /* ARGSUSED */
@@ -1535,7 +1556,9 @@ show_version (args, from_tty)
      int from_tty;
 {
   immediate_quit++;
-  print_gdb_version (0);
+  print_gnu_advertisement ();
+  print_gdb_version ();
+  printf_filtered ("\n");
   immediate_quit--;
 }
 

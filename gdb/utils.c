@@ -101,6 +101,10 @@ int asm_demangle = 0;
    international character, and the terminal or window can cope.)  */
 
 int sevenbit_strings = 0;
+
+/* String to be printed before error messages, if any.  */
+
+char *error_pre_print;
 
 /* Add a new cleanup to the cleanup_chain,
    and return the previous chain pointer
@@ -203,6 +207,8 @@ error (va_alist)
   va_start (args);
   target_terminal_ours ();
   fflush (stdout);
+  if (error_pre_print)
+    fprintf (stderr, error_pre_print);
   string = va_arg (args, char *);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");

@@ -1,3 +1,25 @@
+Mon Sep  9 13:45:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* breakpoint.c (insert_breakpoints):  Restore warning about
+	the program might be running in another process, but only for
+	systems with this brain death (#ifdef ONE_PROCESS_WRITETEXT).
+	* xm-hp300bsd.h, xm-mips.h, xm-vax.h:  Define it.
+
+	* utils.c (error):  if error_pre_print is set, print the string
+	first.
+	* main.c (main, print_gnu_advertisement, print_gdb_version):
+	Reformat legalese so it always prints, but acts as an "I'm here"
+	message while symbols are being read.  If any errors occur,
+	print a few newlines to set off the message and start it at the
+	left margin.  Remove mention of "help" command, and don't yak
+	about symbol reading.
+	(catch_errors):  Error string is now printed first in case of
+	error, not last.
+	* command.c (undef_cmd_error, lookup_cmd):  On undefined command,
+	suggest the "help" command.
+
+	* Makefile.in (VERSION):  Set to 4.0.2.
+
 Thu Sep  5 23:49:48 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* .gdbinit:  Remove useless "rr" command.  Set complaints
