@@ -567,6 +567,64 @@ extend_psymbol_list(listp)
   listp->size = new_size;
 }
 
+#ifdef DEBUG
+
+/* The work performed by this function is normally done by the macro
+   ADD_PSYMBOL_TO_LIST defined in symfile.h.  When debugging gdb, this
+   function makes things easier. */
+
+void
+add_psymbol_to_list (name, namelength, namespace, class, listp, psymval)
+     char *name;
+     int namelength;
+     enum namespace namespace;
+     enum address_class class;
+     struct psymbol_allocation_list *listp;
+     unsigned long psymval;
+{
+  register struct partial_symbol *psym;
+
+  if (listp -> next >= listp -> list + listp -> size)
+    extend_psymbol_list (listp);
+  psym = listp -> next++;
+  SYMBOL_NAME (psym) = (char *) obstack_alloc (psymbol_obstack,
+					       namelength + 1);
+  memcpy (SYMBOL_NAME (psym), name, namelength);
+  SYMBOL_NAME (psym)[namelength] = '\0';
+  SYMBOL_NAMESPACE (psym) = namespace;
+  SYMBOL_CLASS (psym) = class;
+  SYMBOL_VALUE (psym) = psymval;
+}
+
+/* The work performed by this function is normally done by the macro
+   ADD_PSYMBOL_ADDR_TO_LIST defined in symfile.h.  When debugging gdb, this
+   function makes things easier. */
+
+void
+add_psymbol_addr_to_list (name, namelength, namespace, class, listp, psymval)
+     char *name;
+     int namelength;
+     enum namespace namespace;
+     enum address_class class;
+     struct psymbol_allocation_list *listp;
+     CORE_ADDR psymval;
+{
+  register struct partial_symbol *psym;
+
+  if (listp -> next >= listp -> list + listp -> size)
+    extend_psymbol_list (listp);
+  psym = listp -> next++;
+  SYMBOL_NAME (psym) = (char *) obstack_alloc (psymbol_obstack,
+					       namelength + 1);
+  memcpy (SYMBOL_NAME (psym), name, namelength);
+  SYMBOL_NAME (psym)[namelength] = '\0';
+  SYMBOL_NAMESPACE (psym) = namespace;
+  SYMBOL_CLASS (psym) = class;
+  SYMBOL_VALUE_ADDRESS (psym) = psymval;
+}
+
+#endif /* DEBUG */
+
 void
 _initialize_symmisc ()
 {

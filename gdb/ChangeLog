@@ -1,3 +1,21 @@
+Thu Dec 26 19:52:01 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dbxread.c, symmisc.c:  Move add_psymbol_to_plist() from
+	dbxread.c to symmisc and change name to add_psymbol_to_list.
+	Ditto for add_psymbol_addr_to_plist().  Also expand their
+	body to not use ADD_PSYMBOL_VT_TO_LIST.
+
+	* dwarfread.c:  Remove add_psymbol_to_list() and convert usages
+	to the ADD_PSYMBOL_TO_LIST macro.
+
+	* ieee-float.c:  Change "#ifdef DEBUG" to "#ifdef IEEE_DEBUG"
+	to avoid collision with the DEBUG for ADD_PSYMBOL_VT_TO_LIST.
+
+	* partial-stab.h, symfile.h:  Move definitions of the macros
+	ADD_PSYMBOL_TO_LIST and ADD_PSYMBOL_ADDR_TO_LIST from
+	partial-stab.h to symfile.h.  They aren't stab specific.
+	Change ADD_PSYMBOL_VT_TO_LIST to use memcpy rather than strncpy.
+
 Tue Dec 24 11:38:08 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Roll VERSION to 4.3.2.

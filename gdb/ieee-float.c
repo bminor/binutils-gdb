@@ -123,7 +123,7 @@ double_to_ieee_extended (ext_format, from, to)
 }
 
 
-#ifdef DEBUG
+#ifdef IEEE_DEBUG
 
 /* Test some numbers to see that extended/double conversion works for them.  */
 

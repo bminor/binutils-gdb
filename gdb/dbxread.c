@@ -660,37 +660,6 @@ free_bincl_list ()
   bincls_allocated = 0;
 }
 
-#ifdef DEBUG
-/* This is normally a macro defined in read_dbx_symtab, but this
-   is a lot easier to debug.  */
-
-void
-add_psymbol_to_plist(name, namelength, namespace, class, plist, value)
-     char *name;
-     int namelength;
-     enum namespace namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *plist;
-     unsigned long value;
-{
-    ADD_PSYMBOL_VT_TO_LIST(name, namelength, namespace,
-			   class, *plist, value, SYMBOL_VALUE);
-}
-
-void
-add_psymbol_addr_to_plist(name, namelength, namespace, class, plist, value)
-     char *name;
-     int namelength;
-     enum namespace namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *plist;
-     CORE_ADDR value;
-{
-    ADD_PSYMBOL_VT_TO_LIST(name, namelength, namespace,
-			   class, *plist, value, SYMBOL_VALUE_ADDRESS);
-}
-#endif /* DEBUG */
-
 /* Given pointers to an a.out symbol table in core containing dbx
    style data, setup partial_symtab's describing each source file for
    which debugging information is available.  NLISTLEN is the number

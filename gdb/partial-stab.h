@@ -23,22 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    CUR_SYMBOL_VALUE --Value field of current symbol.  May be adjusted here.
  */
 
-#ifdef DEBUG
-/* Since one arg is a struct, we have to pass in a ptr and deref it (sigh) */
-#define	ADD_PSYMBOL_TO_LIST(NAME, NAMELENGTH, NAMESPACE, CLASS,  LIST, VALUE) \
-       add_psymbol_to_plist(NAME, NAMELENGTH, NAMESPACE, CLASS, &LIST, VALUE)
-#define	ADD_PSYMBOL_ADDR_TO_LIST(NAME, NAMELENGTH, NAMESPACE, CLASS,  LIST, VALUE) \
-       add_psymbol_to_plist(NAME, NAMELENGTH, NAMESPACE, CLASS, &LIST, VALUE)
-#else
-/* Add a symbol with an integer value to a psymtab. */
-#define ADD_PSYMBOL_TO_LIST(NAME, NAMELENGTH, NAMESPACE, CLASS, LIST, VALUE) \
-  ADD_PSYMBOL_VT_TO_LIST(NAME, NAMELENGTH, NAMESPACE, CLASS, LIST, VALUE, SYMBOL_VALUE)
-
-/* Add a symbol with a CORE_ADDR value to a psymtab. */
-#define	ADD_PSYMBOL_ADDR_TO_LIST(NAME,NAMELENGTH, NAMESPACE,CLASS, LIST,VALUE)\
-  ADD_PSYMBOL_VT_TO_LIST(NAME, NAMELENGTH, NAMESPACE, CLASS, LIST, VALUE, SYMBOL_VALUE_ADDRESS)
-#endif
-
 /* End of macro definitions, now let's handle them symbols!  */
 
       switch (CUR_SYMBOL_TYPE)

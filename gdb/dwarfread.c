@@ -331,25 +331,6 @@ EXFUN(start_psymtab, (struct objfile *objfile AND CORE_ADDR addr
 static void
 EXFUN(add_partial_symbol, (struct dieinfo *dip));
 
-#ifdef DEBUG
-static void
-DEFUN(add_psymbol_to_list,
-      (listp, name, space, class, value),
-      struct psymbol_allocation_list *listp AND
-      char *name AND
-      enum namespace space AND
-      enum address_class class AND
-      CORE_ADDR value)
-{
-    ADD_PSYMBOL_VT_TO_LIST(name, strlen(name), space, class,
-			   listp, value, SYMBOL_VALUE);
-}
-#else
-#define add_psymbol_to_list(listp, name, space, class, value) \
-    ADD_PSYMBOL_VT_TO_LIST(name, strlen(name), space, class, \
-			   *(listp), value, SYMBOL_VALUE)
-#endif
-
 static void
 EXFUN(init_psymbol_list, (int total_symbols));
 
@@ -2665,50 +2646,6 @@ DEFUN(start_psymtab,
   return result;
 }
 
-#if 0
-/*
-
-LOCAL FUNCTION
-
-	add_psymbol_to_list -- add a partial symbol to given list
-
-DESCRIPTION
-
-	Add a partial symbol to one of the partial symbol vectors (pointed to
-	by listp).  The vector is grown as necessary.
-
- */
-
-static void
-DEFUN(add_psymbol_to_list,
-      (listp, name, space, class, value),
-      struct psymbol_allocation_list *listp AND
-      char *name AND
-      enum namespace space AND
-      enum address_class class AND
-      CORE_ADDR value)
-{
-  struct partial_symbol *psym;
-  int newsize;
-  
-  if (listp -> next >= listp -> list + listp -> size)
-    {
-      newsize = listp -> size * 2;
-      listp -> list = (struct partial_symbol *)
-	xrealloc (listp -> list, (newsize * sizeof (struct partial_symbol)));
-      /* Next assumes we only went one over.  Should be good if program works
-	 correctly */
-      listp -> next = listp -> list + listp -> size;
-      listp -> size = newsize;
-    }
-  psym = listp -> next++;
-  SYMBOL_NAME (psym) = create_name (name, psymbol_obstack);
-  SYMBOL_NAMESPACE (psym) = space;
-  SYMBOL_CLASS (psym) = class;
-  SYMBOL_VALUE (psym) = value;
-}
-#endif
-
 /*
 
 LOCAL FUNCTION
@@ -2747,8 +2684,8 @@ DEFUN(add_enum_psymbol, (dip), struct dieinfo *dip)
       while (scan < listend)
 	{
 	  scan += sizeof (long);
-	  add_psymbol_to_list (&static_psymbols, scan, VAR_NAMESPACE,
-			       LOC_CONST, 0);
+	  ADD_PSYMBOL_TO_LIST (scan, strlen (scan), VAR_NAMESPACE, LOC_CONST,
+			       static_psymbols, 0);
 	  scan += strlen (scan) + 1;
 	}
     }
@@ -2775,37 +2712,44 @@ DEFUN(add_partial_symbol, (dip), struct dieinfo *dip)
     {
     case TAG_global_subroutine:
       record_misc_function (dip -> at_name, dip -> at_low_pc, mf_text);
-      add_psymbol_to_list (&global_psymbols, dip -> at_name, VAR_NAMESPACE,
-			   LOC_BLOCK, dip -> at_low_pc);
+      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			   VAR_NAMESPACE, LOC_BLOCK, global_psymbols,
+			   dip -> at_low_pc);
       break;
     case TAG_global_variable:
       record_misc_function (dip -> at_name, locval (dip -> at_location),
 			    mf_data);
-      add_psymbol_to_list (&global_psymbols, dip -> at_name, VAR_NAMESPACE,
-			   LOC_STATIC, 0);
+      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			   VAR_NAMESPACE, LOC_STATIC, global_psymbols,
+			   0);
       break;
     case TAG_subroutine:
-      add_psymbol_to_list (&static_psymbols, dip -> at_name, VAR_NAMESPACE,
-			   LOC_BLOCK, dip -> at_low_pc);
+      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			   VAR_NAMESPACE, LOC_BLOCK, static_psymbols,
+			   dip -> at_low_pc);
       break;
     case TAG_local_variable:
-      add_psymbol_to_list (&static_psymbols, dip -> at_name, VAR_NAMESPACE,
-			   LOC_STATIC, 0);
+      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			   VAR_NAMESPACE, LOC_STATIC, static_psymbols,
+			   0);
       break;
     case TAG_typedef:
-      add_psymbol_to_list (&static_psymbols, dip -> at_name, VAR_NAMESPACE,
-			   LOC_TYPEDEF, 0);
+      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			   VAR_NAMESPACE, LOC_TYPEDEF, static_psymbols,
+			   0);
       break;
     case TAG_structure_type:
     case TAG_union_type:
-      add_psymbol_to_list (&static_psymbols, dip -> at_name, STRUCT_NAMESPACE,
-			   LOC_TYPEDEF, 0);
+      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			   STRUCT_NAMESPACE, LOC_TYPEDEF, static_psymbols,
+			   0);
       break;
     case TAG_enumeration_type:
       if (dip -> at_name)
 	{
-	  add_psymbol_to_list (&static_psymbols, dip -> at_name,
-			       STRUCT_NAMESPACE, LOC_TYPEDEF, 0);
+	  ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+			       STRUCT_NAMESPACE, LOC_TYPEDEF, static_psymbols,
+			       0);
 	}
       add_enum_psymbol (dip);
       break;
