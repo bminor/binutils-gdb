@@ -1,3 +1,8 @@
+1999-02-14  Ken Raeburn  <raeburn@raeburn.org>
+
+	* config/tc-alpha.c (md_show_usage): Put \ before newline in
+	strings always.
+
 Sat Feb 13 14:10:10 1999  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (cpu_types): Enable EV6 PALcode with -m21264.
