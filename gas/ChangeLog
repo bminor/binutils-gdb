@@ -1,3 +1,8 @@
+2001-12-20  matthew green  <mrg@redhat.com>
+
+	* config/tc-ppc.c (md_parse_option): Make -maltivec default
+	to generating PowerPC instructions.
+
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (mips-dec-netbsd*): Delete.
