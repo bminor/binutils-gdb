@@ -1,3 +1,16 @@
+2001-11-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote.c (struct packet_reg): Declare.
+	(struct remote_state): Add fields sizeof_g_packet and g_packet.
+	(init_remote_state): Initialize sizeof_g_packet and g_packet.
+	(free_remote_state): Free g_packet.
+	(packet_reg_from_pnum, packet_reg_by_regnum): New functions.
+	(remote_wait): Use above instead of gdbarch methods
+	REGISTER_RAW_SIZE and REGISTER_BYTES.
+	(remote_async_wait): Ditto.
+	(remote_fetch_registers, remote_store_registers): Ditto.
+	(store_register_using_P): Ditto.
+	
 2001-11-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (_initialize_remote): Don't multi-arch swap tty_input.

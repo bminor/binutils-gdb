@@ -217,8 +217,21 @@ void _initialize_remote (void);
    the moment keep the information in the target's architecture
    object.  Sigh..  */
 
+struct packet_reg
+{
+  long offset; /* Offset into G packet.  */
+  long regnum; /* GDB's internal register number.  */
+  LONGEST pnum; /* Remote protocol register number.  */
+  /* long size in bytes;  == REGISTER_RAW_SIZE (regnum); at present.  */
+  /* char *name; == REGISTER_NAME (regnum); at present.  */
+};
+
 struct remote_state
 {
+  /* Description of the remote protocol registers.  */
+  long sizeof_g_packet;
+  struct packet_reg *g_packet; /* NULL terminated.  */
+
   /* This is the size (in chars) of the first response to the ``g''
      packet.  It is used as a heuristic when determining the maximum
      size of memory-read and memory-write packets.  A target will
@@ -247,6 +260,24 @@ init_remote_state (struct gdbarch *gdbarch)
   int regnum;
   struct remote_state *rs = xmalloc (sizeof (struct remote_state));
 
+  /* Start out by having the remote protocol mimic the existing
+     behavour - just copy in the description of the register cache.  */
+  rs->sizeof_g_packet = REGISTER_BYTES; /* OK use.   */
+
+  /* Since, for the moment, the regcache is still being direct mapped,
+     there are exactly NUM_REGS.  Zero allocate a buffer adding space
+     for a sentinal.  */
+  rs->g_packet = xcalloc (NUM_REGS + 1, sizeof (struct packet_reg));
+  rs->g_packet[NUM_REGS].offset = -1;
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
+    {
+      rs->g_packet[regnum].pnum = regnum;
+      rs->g_packet[regnum].regnum = regnum;
+      rs->g_packet[regnum].offset = REGISTER_BYTE (regnum);
+      /* ...size = REGISTER_RAW_SIZE (regnum); */
+      /* ...name = REGISTER_NAME (regnum); */
+    }
+
   /* Default maximum number of characters in a packet body. Many
      remote stubs have a hardwired buffer size of 400 bytes
      (c.f. BUFMAX in m68k-stub.c and i386-stub.c).  BUFMAX-1 is used
@@ -256,14 +287,14 @@ init_remote_state (struct gdbarch *gdbarch)
      already a full buffer (As of 1999-12-04 that was most stubs. */
   rs->remote_packet_size = 400 - 1;
 
-  /* Should REGISTER_BYTES needs more space than the default, adjust
-     the size accordingly. Remember that each byte is encoded as two
-     characters. 32 is the overhead for the packet header /
-     footer. NOTE: cagney/1999-10-26: I suspect that 8
+  /* Should rs->sizeof_g_packet needs more space than the
+     default, adjust the size accordingly. Remember that each byte is
+     encoded as two characters. 32 is the overhead for the packet
+     header / footer. NOTE: cagney/1999-10-26: I suspect that 8
      (``$NN:G...#NN'') is a better guess, the below has been padded a
      little. */
-  if (REGISTER_BYTES > ((rs->remote_packet_size - 32) / 2))
-    rs->remote_packet_size = (REGISTER_BYTES * 2 + 32);
+  if (rs->sizeof_g_packet > ((rs->remote_packet_size - 32) / 2))
+    rs->remote_packet_size = (rs->sizeof_g_packet * 2 + 32);
   
   /* This one is filled in when a ``g'' packet is received. */
   rs->actual_register_packet_size = 0;
@@ -274,8 +305,33 @@ init_remote_state (struct gdbarch *gdbarch)
 static void
 free_remote_state (struct gdbarch *gdbarch, void *pointer)
 {
-  struct remote_state *state = pointer;
-  xfree (state);
+  struct remote_state *data = pointer;
+  xfree (data->g_packet);
+  xfree (data);
+}
+
+static struct packet_reg *
+packet_reg_from_regnum (struct remote_state *rs, long regnum)
+{
+  struct packet_reg *reg;
+  for (reg = rs->g_packet; reg->offset >= 0; reg++)
+    {
+      if (reg->regnum == regnum)
+	return reg;
+    }
+  return NULL;
+}
+
+static struct packet_reg *
+packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
+{
+  struct packet_reg *reg;
+  for (reg = rs->g_packet; reg->offset >= 0; reg++)
+    {
+      if (reg->pnum == pnum)
+	return reg;
+    }
+  return NULL;
 }
 
 /* */
@@ -336,12 +392,12 @@ static int remote_async_terminal_ours_p;
 
 
 /* User configurable variables for the number of characters in a
-   memory read/write packet.  MIN ((rs->remote_packet_size), g-packet-size) is the
-   default.  Some targets need smaller values (fifo overruns, et.al.)
-   and some users need larger values (speed up transfers).  The
-   variables ``preferred_*'' (the user request), ``current_*'' (what
-   was actually set) and ``forced_*'' (Positive - a soft limit,
-   negative - a hard limit). */
+   memory read/write packet.  MIN ((rs->remote_packet_size),
+   rs->sizeof_g_packet) is the default.  Some targets need smaller
+   values (fifo overruns, et.al.)  and some users need larger values
+   (speed up transfers).  The variables ``preferred_*'' (the user
+   request), ``current_*'' (what was actually set) and ``forced_*''
+   (Positive - a soft limit, negative - a hard limit). */
 
 struct memory_packet_config
 {
@@ -2927,7 +2983,6 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
-	    long regno;
 	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
@@ -2944,8 +2999,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 		char *p_temp;
 		int fieldsize;
 
-		/* Read the register number */
-		regno = strtol ((const char *) p, &p_temp, 16);
+		/* Read the ``P'' register number.  */
+		LONGEST pnum = strtol ((const char *) p, &p_temp, 16);
 		p1 = (unsigned char *) p_temp;
 
 		if (p1 == p)	/* No register number present here */
@@ -2964,6 +3019,7 @@ Packet: '%s'\n",
 		  }
 		else
 		  {
+		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
 		    p = p1;
 
 		    if (*p++ != ':')
@@ -2971,16 +3027,16 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       p, buf);
 
-		    if (regno >= NUM_REGS)
-		      warning ("Remote sent bad register number %ld: %s\n\
+		    if (reg == NULL)
+		      warning ("Remote sent bad register number %s: %s\n\
 Packet: '%s'\n",
-			       regno, p, buf);
+			       phex_nz (pnum, 0), p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
+		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (regno))
+		    if (fieldsize < REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
-		    supply_register (regno, regs);
+		    supply_register (reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
@@ -3147,7 +3203,6 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
-	    long regno;
 	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
@@ -3165,7 +3220,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		int fieldsize;
 
 		/* Read the register number */
-		regno = strtol ((const char *) p, &p_temp, 16);
+		long pnum = strtol ((const char *) p, &p_temp, 16);
 		p1 = (unsigned char *) p_temp;
 
 		if (p1 == p)	/* No register number present here */
@@ -3184,23 +3239,23 @@ Packet: '%s'\n",
 		  }
 		else
 		  {
+		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
 		    p = p1;
-
 		    if (*p++ != ':')
 		      warning ("Malformed packet(b) (missing colon): %s\n\
 Packet: '%s'\n",
 			       p, buf);
 
-		    if (regno >= NUM_REGS)
+		    if (reg == NULL)
 		      warning ("Remote sent bad register number %ld: %s\n\
 Packet: '%s'\n",
-			       regno, p, buf);
+			       pnum, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
+		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (regno))
+		    if (fieldsize < REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
-		    supply_register (regno, regs);
+		    supply_register (reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
@@ -3337,17 +3392,17 @@ got_status:
 static int register_bytes_found;
 
 /* Read the remote registers into the block REGS.  */
-/* Currently we just read all the registers, so we don't use regno.  */
+/* Currently we just read all the registers, so we don't use regnum.  */
 
 /* ARGSUSED */
 static void
-remote_fetch_registers (int regno)
+remote_fetch_registers (int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
   int i;
   char *p;
-  char *regs = alloca (REGISTER_BYTES);
+  char *regs = alloca (rs->sizeof_g_packet);
 
   set_thread (PIDGET (inferior_ptid), 1);
 
@@ -3361,7 +3416,7 @@ remote_fetch_registers (int regno)
     (rs->actual_register_packet_size) = strlen (buf);
 
   /* Unimplemented registers read as all bits zero.  */
-  memset (regs, 0, REGISTER_BYTES);
+  memset (regs, 0, rs->sizeof_g_packet);
 
   /* We can get out of synch in various cases.  If the first character
      in the buffer is not a hex character, assume that has happened
@@ -3381,7 +3436,7 @@ remote_fetch_registers (int regno)
      register cacheing/storage mechanism.  */
 
   p = buf;
-  for (i = 0; i < REGISTER_BYTES; i++)
+  for (i = 0; i < rs->sizeof_g_packet; i++)
     {
       if (p[0] == 0)
 	break;
@@ -3408,12 +3463,15 @@ remote_fetch_registers (int regno)
     }
 
 supply_them:
-  for (i = 0; i < NUM_REGS; i++)
-    {
-      supply_register (i, &regs[REGISTER_BYTE (i)]);
-      if (buf[REGISTER_BYTE (i) * 2] == 'x')
-	set_register_cached (i, -1);
-    }
+  {
+    struct packet_reg *g;
+    for (g = rs->g_packet; g->offset >= 0; g++)
+      {
+	supply_register (g->regnum, regs + g->offset);
+	if (buf[g->offset * 2] == 'x')
+	  set_register_cached (i, -1);
+      }
+  }
 }
 
 /* Prepare to store registers.  Since we may send them all (using a
@@ -3428,41 +3486,45 @@ remote_prepare_to_store (void)
     {
     case PACKET_DISABLE:
     case PACKET_SUPPORT_UNKNOWN:
-      read_register_bytes (0, (char *) NULL, REGISTER_BYTES);
+      /* NOTE: This isn't rs->sizeof_g_packet because here, we are
+         forcing the register cache to read its and not the target
+         registers.  */
+      read_register_bytes (0, (char *) NULL, REGISTER_BYTES); /* OK use.  */
       break;
     case PACKET_ENABLE:
       break;
     }
 }
 
-/* Helper: Attempt to store REGNO using the P packet.  Return fail IFF
+/* Helper: Attempt to store REGNUM using the P packet.  Return fail IFF
    packet was not recognized. */
 
 static int
-store_register_using_P (int regno)
+store_register_using_P (int regnum)
 {
   struct remote_state *rs = get_remote_state ();
+  struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
   char *regp = alloca (MAX_REGISTER_RAW_SIZE);
   char *p;
   int i;
 
-  sprintf (buf, "P%x=", regno);
+  sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
-  regcache_collect (regno, regp);
-  bin2hex (regp, p, REGISTER_RAW_SIZE (regno));
-  remote_send (buf, (rs->remote_packet_size));
+  regcache_collect (reg->regnum, regp);
+  bin2hex (regp, p, REGISTER_RAW_SIZE (reg->regnum));
+  remote_send (buf, rs->remote_packet_size);
 
   return buf[0] != '\0';
 }
 
 
-/* Store register REGNO, or all registers if REGNO == -1, from the contents
+/* Store register REGNUM, or all registers if REGNUM == -1, from the contents
    of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-remote_store_registers (int regno)
+remote_store_registers (int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
@@ -3472,19 +3534,19 @@ remote_store_registers (int regno)
 
   set_thread (PIDGET (inferior_ptid), 1);
 
-  if (regno >= 0)
+  if (regnum >= 0)
     {
       switch (remote_protocol_P.support)
 	{
 	case PACKET_DISABLE:
 	  break;
 	case PACKET_ENABLE:
-	  if (store_register_using_P (regno))
+	  if (store_register_using_P (regnum))
 	    return;
 	  else
 	    error ("Protocol error: P packet not recognized by stub");
 	case PACKET_SUPPORT_UNKNOWN:
-	  if (store_register_using_P (regno))
+	  if (store_register_using_P (regnum))
 	    {
 	      /* The stub recognized the 'P' packet.  Remember this.  */
 	      remote_protocol_P.support = PACKET_ENABLE;
@@ -3504,12 +3566,12 @@ remote_store_registers (int regno)
   /* Extract all the registers in the regcache copying them into a
      local buffer.  */
   {
-    int i;
-    regs = alloca (REGISTER_BYTES);
-    memset (regs, REGISTER_BYTES, 0);
-    for (i = 0; i < NUM_REGS; i++)
+    struct packet_reg *g;
+    regs = alloca (rs->sizeof_g_packet);
+    memset (regs, rs->sizeof_g_packet, 0);
+    for (g = rs->g_packet; g->offset >= 0; g++)
       {
-	regcache_collect (i, regs + REGISTER_BYTE (i));
+	regcache_collect (g->regnum, regs + g->offset);
       }
   }
 
