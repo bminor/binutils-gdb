@@ -176,7 +176,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 "R_XSTORMY16_REL_12",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x0fff,		/* dst_mask */
+	 0x0ffe,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* A 24-bit absolute relocation suitable for the jump instructions.  */
