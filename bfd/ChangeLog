@@ -1,3 +1,16 @@
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add epoc-arm-pe target.
+	* Makefile.in: Regenerate.
+	* pe-arm.c: Only redefine interworking function names if they have
+	not already been redefined.
+	* pei-arm.c: Only redefine interworking function names if they have
+	not already been redefined.
+	* epoc-pe-arm.c: Redefine interworking function names to avoid a
+	name space clash.
+	* epoc-pei-arm.c: Redefine interworking function names to avoid a
+	name space clash.
+
 1999-06-03  Nick Clifton  <nickc@cygnus.com>
 
 	* elfxx-target.h (ELF_MAXPAGESIZE): Default to 0x1000 not 1.
