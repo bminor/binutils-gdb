@@ -1,3 +1,14 @@
+Tue Jul  4 12:55:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (global_needed): New static variable.
+	(global_found): Likewise.
+	(gld${EMULATION_NAME}_after_open): New static function.
+	(gld${EMULATION_NAME}_search_needed): Likewise.
+	(gld${EMULATION_NAME}_try_needed): Likewise.
+	(gld${EMULATION_NAME}_check_needed): Likewise.
+	(ld_${EMULATION_NAME}_emulation): Replace after_open_default with
+	gld${EMULATION_NAME}_after_open.
+
 Mon Jul  3 14:26:37 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i386-*-win32): New target.

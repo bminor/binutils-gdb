@@ -46,6 +46,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static boolean gld${EMULATION_NAME}_open_dynamic_archive
   PARAMS ((const char *, lang_input_statement_type *));
+static void gld${EMULATION_NAME}_after_open PARAMS ((void));
+static void gld${EMULATION_NAME}_check_needed
+  PARAMS ((lang_input_statement_type *));
+static boolean gld${EMULATION_NAME}_search_needed
+  PARAMS ((const char *, const char *));
+static boolean gld${EMULATION_NAME}_try_needed PARAMS ((const char *));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void gld${EMULATION_NAME}_find_statement_assignment
   PARAMS ((lang_statement_union_type *));
@@ -105,6 +111,174 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, entry)
     }
 
   return true;
+}
+
+/* These variables are required to pass information back and forth
+   between after_open and check_needed.  */
+
+static struct bfd_elf_link_needed_list *global_needed;
+static boolean global_found;
+
+/* This is called after all the input files have been opened.  */
+
+static void
+gld${EMULATION_NAME}_after_open ()
+{
+  struct bfd_elf_link_needed_list *needed, *l;
+
+  /* Get the list of files which appear in DT_NEEDED entries in
+     dynamic objects included in the link (often there will be none).
+     For each such file, we want to track down the corresponding
+     library, and include the symbol table in the link.  This is what
+     the runtime dynamic linker will do.  Tracking the files down here
+     permits one dynamic object to include another without requiring
+     special action by the person doing the link.  Note that the
+     needed list can actually grow while we are stepping through this
+     loop.  */
+  needed = bfd_elf_get_needed_list (output_bfd, &link_info);
+  for (l = needed; l != NULL; l = l->next)
+    {
+      struct bfd_elf_link_needed_list *ll;
+      const char *lib_path;
+      size_t len;
+      search_dirs_type *search;
+
+      /* If we've already seen this file, skip it.  */
+      for (ll = needed; ll != l; ll = ll->next)
+	if (strcmp (ll->name, l->name) == 0)
+	  break;
+      if (ll != l)
+	continue;
+
+      /* See if this file was included in the link explicitly.  */
+      global_needed = l;
+      global_found = false;
+      lang_for_each_input_file (gld${EMULATION_NAME}_check_needed);
+      if (global_found)
+	continue;
+
+      /* We need to find this file and include the symbol table.  We
+	 want to search for the file in the same way that the dynamic
+	 linker will search.  That means that we want to use rpath,
+	 then the environment variable LD_LIBRARY_PATH, then the
+	 linker script LIB_SEARCH_DIRS.  We do not search using the -L
+	 arguments.  */
+      if (gld${EMULATION_NAME}_search_needed (command_line.rpath, l->name))
+	continue;
+      lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
+      if (gld${EMULATION_NAME}_search_needed (lib_path, l->name))
+	continue;
+      len = strlen (l->name);
+      for (search = search_head; search != NULL; search = search->next)
+	{
+	  char *filename;
+
+	  if (search->cmdline)
+	    continue;
+	  filename = (char *) xmalloc (strlen (search->name) + len + 2);
+	  sprintf (filename, "%s/%s", search->name, l->name);
+	  if (gld${EMULATION_NAME}_try_needed (filename))
+	    break;
+	  free (filename);
+	}
+      if (search != NULL)
+	continue;
+
+      einfo ("%P: warning: %s, needed by %B, not found\n",
+	     l->name, l->by);
+    }
+}
+
+/* Search for a needed file in a path.  */
+
+static boolean
+gld${EMULATION_NAME}_search_needed (path, name)
+     const char *path;
+     const char *name;
+{
+  const char *s;
+  size_t len;
+
+  if (path == NULL || *path == '\0')
+    return false;
+  len = strlen (name);
+  while (1)
+    {
+      char *filename, *sset;
+
+      s = strchr (path, ':');
+      if (s == NULL)
+	s = path + strlen (path);
+
+      filename = (char *) xmalloc (s - path + len + 2);
+      if (s == path)
+	sset = filename;
+      else
+	{
+	  memcpy (filename, path, s - path);
+	  filename[s - path] = '/';
+	  sset = filename + (s - path) + 1;
+	}
+      strcpy (sset, name);
+
+      if (gld${EMULATION_NAME}_try_needed (filename))
+	return true;
+
+      free (filename);
+
+      if (*s == '\0')
+	break;
+      path = s + 1;
+    }
+
+  return false;	  
+}
+
+/* This function is called for each possible name for a dynamic object
+   named by a DT_NEEDED entry.  */
+
+static boolean
+gld${EMULATION_NAME}_try_needed (name)
+     const char *name;
+{
+  bfd *abfd;
+
+  abfd = bfd_openr (name, bfd_get_target (output_bfd));
+  if (abfd == NULL)
+    return false;
+  if (! bfd_check_format (abfd, bfd_object))
+    {
+      (void) bfd_close (abfd);
+      return false;
+    }
+  if ((bfd_get_file_flags (abfd) & DYNAMIC) == 0)
+    {
+      (void) bfd_close (abfd);
+      return false;
+    }
+
+  /* We've found a dynamic object matching the DT_NEEDED entry.  */
+
+  /* Tell the ELF backend that don't want the output file to have a
+     DT_NEEDED entry for this file.  */
+  bfd_elf_set_dt_needed_name (abfd, "");
+
+  /* Add this file into the symbol table.  */
+  if (! bfd_link_add_symbols (abfd, &link_info))
+    einfo ("%F%B: could not read symbols: %E\n", abfd);
+
+  return true;
+}
+
+/* See if an input file matches a DT_NEEDED entry.  */
+
+static void
+gld${EMULATION_NAME}_check_needed (s)
+     lang_input_statement_type *s;
+{
+  if (s->filename != NULL
+      && strcmp (s->filename, global_needed->name) == 0)
+    global_found = true;
 }
 
 /* This is called after the sections have been attached to output
@@ -173,6 +347,37 @@ gld${EMULATION_NAME}_before_allocation ()
 	s->_raw_size = 0;
       }
   }
+
+#if defined (TARGET_IS_elf32bmip) || defined (TARGET_IS_elf32lmip)
+  /* For MIPS ELF the .reginfo section requires special handling.
+     Each input section is 24 bytes, and the final output section must
+     also be 24 bytes.  We handle this by clobbering all but the first
+     input section size to 0.  The .reginfo section is handled
+     specially by the backend code anyhow.  */
+  {
+    boolean found = false;
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	asection *s;
+
+	if (is->just_syms_flag)
+	  continue;
+
+	s = bfd_get_section_by_name (is->the_bfd, ".reginfo");
+	if (s == NULL)
+	  continue;
+
+	if (! found)
+	  {
+	    found = true;
+	    continue;
+	  }
+
+	s->_raw_size = 0;
+	s->_cooked_size = 0;
+      }
+  }
+#endif
 }
 
 /* This is called by the before_allocation routine via
@@ -235,6 +440,7 @@ static lang_output_section_statement_type *hold_use;
 static lang_output_section_statement_type *hold_text;
 static lang_output_section_statement_type *hold_data;
 static lang_output_section_statement_type *hold_bss;
+static lang_output_section_statement_type *hold_rel;
 
 /*ARGSUSED*/
 static boolean
@@ -265,8 +471,10 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       return true;
     }
 
+  secname = bfd_get_section_name (s->owner, s);
+
   /* Decide which segment the section should go in based on the
-     section flags.  */
+     section name and section flags.  */
   place = NULL;
   if ((s->flags & SEC_HAS_CONTENTS) == 0
       && hold_bss != NULL)
@@ -274,37 +482,29 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   else if ((s->flags & SEC_READONLY) == 0
 	   && hold_data != NULL)
     place = hold_data;
+  else if (strncmp (secname, ".rel", 4) == 0
+	   && hold_rel != NULL)
+    place = hold_rel;
   else if ((s->flags & SEC_READONLY) != 0
 	   && hold_text != NULL)
     place = hold_text;
   if (place == NULL)
     return false;
 
-  secname = bfd_get_section_name (s->owner, s);
-
-  /* When generating an object which is to be dynamically linked, we
-     do not support orphaned reloc sections.  This is because all the
-     reloc sections must be contiguous in order to generate correct
-     DT_REL entries.  When this case arises, you can just add the
-     appropriate reloc sections to the linker script.  Note that the
-     .rel.plt section must always be the last reloc section.  FIXME:
-     This should simply be handled correctly here.  */
-  ASSERT (strncmp (secname, ".rel", 4) != 0
-	  || bfd_get_section_by_name (output_bfd, ".dynamic") == NULL);
-
   /* Create the section in the output file, and put it in the right
-     place.  This shuffling to make the output file look neater, and
-     also means that the BFD backend does not have to sort the
-     sections in order by address.  */
+     place.  This shuffling is to make the output file look neater.  */
   snew = bfd_make_section (output_bfd, secname);
   if (snew == NULL)
       einfo ("%P%F: output format %s cannot represent section called %s\n",
 	     output_bfd->xvec->name, secname);
-  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
-    ;
-  *pps = snew->next;
-  snew->next = place->bfd_section->next;
-  place->bfd_section->next = snew;
+  if (place->bfd_section != NULL)
+    {
+      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
+	;
+      *pps = snew->next;
+      snew->next = place->bfd_section->next;
+      place->bfd_section->next = snew;
+    }
 
   /* Start building a list of statements for this section.  */
   old = stat_ptr;
@@ -382,6 +582,9 @@ gld${EMULATION_NAME}_place_section (s)
     hold_data = os;
   else if (strcmp (os->name, ".bss") == 0)
     hold_bss = os;
+  else if (hold_rel == NULL
+	   && strncmp (os->name, ".rel", 4) == 0)
+    hold_rel = os;
 }
 
 static char *
@@ -451,7 +654,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   syslib_default,
   hll_default,
   after_parse_default,
-  after_open_default,
+  gld${EMULATION_NAME}_after_open,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,
