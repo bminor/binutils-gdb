@@ -1,3 +1,17 @@
+1999-02-05  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904sio.c (tx3904sio_tickle): After a polled I/O from the
+ 	CPU, start periodic background I/O polls.
+	(tx3904sio_poll): New function: periodic I/O poller. 
+
+start-sanitize-sky
+1999-01-04  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim-main.h (SIM_CPU_EXCEPTION_*): #undef hooks for TARGET_SKY.
+	* interp.c (signal_exception): Add BreakPoint handling case.
+	Remove inactive SIM_CPU_EXCEPTION_TRIGGER call.
+
+end-sanitize-sky
 1998-12-30  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips.igen (BREAK): Call signal_exception instead of sim_engine_halt.
@@ -62,8 +76,10 @@ end-sanitize-vr4xxx
 	* Makefile.in (SIM_HACK_OBJ,HACK_OBJS,HACK_GEN_SRCS,libhack.a,
 	tmp-hack,tmp-m32-hack,tmp-m16-hack,tmp-itable-hack,
 	tmp-run-hack) : New.
+start-sanitize-vr4xxx
 	* configure.in (mips64vr4xxx): Switch to using the HACK
 	generator.  Set TARGET_ENABLE_FR.
+end-sanitize-vr4xxx
 	* m16.igen (LD,DADDIU,DADDUI5,DADJSP,DADDIUSP,DADDI,DADDU,DSUBU,
 	DSLL,DSRL,DSRA,DSLLV,DSRAV,DMULT,DMULTU,DDIV,DDIVU,JALX32,JALX): 
 	Drop the "64" qualifier to get the HACK generator working.
@@ -77,11 +93,15 @@ end-sanitize-vr4xxx
 	(DSRA): Use do_dsra.
 	(DSRL): Use do_dsrl.
 	(DSRLV): Use do_dsrlv.
-	(BC1): Move *vr4100,*vr4111, and *vr4121 to get the HACK 
-	generator working.
+	(BC1): Move *vr4100 to get the HACK generator working.
+start-sanitize-vr4xxx
+	(BC1): Move *vr4121 to get the HACK generator working.
+end-sanitize-vr4xxx
 	(CxC1, DMxC1, MxC1,MACCU,MACCHI,MACCHIU): Rename to 
 	get the HACK generator working.
+start-sanitize-vr4320
 	* vr.igen: Add *vr4320 where missing.
+end-sanitize-vr4320
 	(MACC) Rename to get the HACK generator working.
 	(DMACC,MACCS,DMACCS): Add the 64.
 	
@@ -91,12 +111,12 @@ start-sanitize-vr4320
 	* vr.igen (Low32Bits): Add vr4320.
 
 end-sanitize-vr4320
+start-sanitize-vr4xxx
 1998-12-14  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* configure.in: Add support for 5xxx and "el".
 	* configure: Rebuild.
 
-start-sanitize-vr4xxx
 1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* configure.in,mips.igen,vr.igen: Add vr4121.
