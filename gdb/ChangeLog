@@ -1,3 +1,8 @@
+Wed Feb  7 22:39:26 2001  Andrew Cagney  <cagney@redhat.com>
+
+	From Dean Luick <luick@cray.com>:
+	* defs.h (continuation): Remove unused global variable.
+
 Wed Feb  7 22:28:31 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.tgt: Remove references to convex, pyramid, altos and

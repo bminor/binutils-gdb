@@ -673,7 +673,6 @@ struct continuation
     struct continuation_arg *arg_list;
     struct continuation *next;
   };
-struct continuation continuation;
 
 /* In infrun.c. */
 extern struct continuation *cmd_continuation;
