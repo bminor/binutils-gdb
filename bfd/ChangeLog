@@ -1,6 +1,19 @@
+Tue Feb 13 14:35:15 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (get_symbol): Set the section to bfd_abs_section.
+	(do_with_relocs): If EXEC_P is set and there are no relocs, use a
+	simple number for the section address, rather than an expression.
+	Limit the number of bytes between relocs to MAXRUN.
+	(ieee_write_me_part): Set me_record to the file offset after the
+	start address.
+	(ieee_write_processor): New static function.
+	(ieee_write_object_contents): Use ieee_write_processor.
+
 Fri Feb  9 10:53:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* coff-aux.c: Change include of aux.h was to aux-coff.h.
+	* configure.host: Use ${CC-gcc} when testing for -rpath on SunOS.
+
+	* coff-aux.c: Change include of aux.h to aux-coff.h.
 
 Thu Feb  8 14:01:03 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
