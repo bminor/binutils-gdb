@@ -1,3 +1,11 @@
+2005-01-05  Fred Fish  <fnf@specifixinc.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add info_ptr_unit member.
+	(find_abstract_instance_name): New function.
+	(scan_unit_for_functions): Handle DW_TAG_inlined_subroutine.
+	(scan_unit_for_functions): Handle DW_AT_abstract_origin.
+	(_bfd_dwarf2_find_nearest_line): Initialize info_ptr_unit.
+
 2004-12-31  Paul Brook  <paul@copdesourcery.com>
 
 	* elf32-arm.c (elf32_arm_symbian_plt_entry): Fix comment typo.

@@ -84,6 +84,10 @@ struct dwarf2_debug
      into a buffer yet.  */
   char* info_ptr;
 
+  /* Preserve the original value of info_ptr for the current
+     comp_unit so we can find a given entry by its reference. */
+  char* info_ptr_unit;
+
   /* Pointer to the end of the .debug_info section memory buffer.  */
   char* info_ptr_end;
 
@@ -1318,6 +1322,42 @@ lookup_address_in_function_table (struct funcinfo *table,
   return FALSE;
 }
 
+static char *
+find_abstract_instance_name (struct comp_unit *unit, bfd_uint64_t die_ref)
+{
+  bfd *abfd = unit->abfd;
+  char *info_ptr;
+  unsigned int abbrev_number, bytes_read, i;
+  struct abbrev_info *abbrev;
+  struct attribute attr;
+  char *name = 0;
+
+  info_ptr = unit->stash->info_ptr_unit + die_ref;
+  abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+  info_ptr += bytes_read;
+
+  if (abbrev_number)
+    {
+      abbrev = lookup_abbrev (abbrev_number, unit->abbrevs);
+      if (! abbrev)
+	{
+	  (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %u."),
+				 abbrev_number);
+	  bfd_set_error (bfd_error_bad_value);
+	}
+      else
+	{
+	  for (i = 0; i < abbrev->num_attrs && !name; ++i)
+	    {
+	      info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr);
+	      if (attr.name == DW_AT_name)
+		name = attr.u.str;
+	    }
+	}
+    }
+  return (name);
+}
+
 /* DWARF2 Compilation unit functions.  */
 
 /* Scan over each die in a comp. unit looking for functions to add
@@ -1356,7 +1396,8 @@ scan_unit_for_functions (struct comp_unit *unit)
 	  return FALSE;
 	}
 
-      if (abbrev->tag == DW_TAG_subprogram)
+      if (abbrev->tag == DW_TAG_subprogram
+	  || abbrev->tag == DW_TAG_inlined_subroutine)
 	{
 	  bfd_size_type amt = sizeof (struct funcinfo);
 	  func = bfd_zalloc (abfd, amt);
@@ -1374,6 +1415,10 @@ scan_unit_for_functions (struct comp_unit *unit)
 	    {
 	      switch (attr.name)
 		{
+		case DW_AT_abstract_origin:
+		  func->name = find_abstract_instance_name (unit, attr.u.val);
+		  break;
+
 		case DW_AT_name:
 
 		  name = attr.u.str;
@@ -1758,6 +1803,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       if (stash->info_ptr == NULL)
 	return FALSE;
 
+      stash->info_ptr_unit = stash->info_ptr;
       stash->info_ptr_end = stash->info_ptr;
 
       for (msec = find_debug_info (abfd, NULL);
