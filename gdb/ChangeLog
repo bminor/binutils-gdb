@@ -1,5 +1,7 @@
 Tue Jul 20 12:53:47 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* config/rs6000/tm-rs6000.h: Remove call to insert_step_breakpoint.
+
 	* symtab.c (find_line_symtab): New function, to deal with multiple
 	symtabs with the same name.
 	(find_line_pc{,_range}): Use it.
