@@ -278,11 +278,11 @@ struct eh_cie_fde
   unsigned char fde_encoding;
   unsigned char lsda_encoding;
   unsigned char lsda_offset;
-  unsigned char cie : 1;
-  unsigned char removed : 1;
-  unsigned char make_relative : 1;
-  unsigned char make_lsda_relative : 1;
-  unsigned char per_encoding_relative : 1;
+  unsigned int cie : 1;
+  unsigned int removed : 1;
+  unsigned int make_relative : 1;
+  unsigned int make_lsda_relative : 1;
+  unsigned int per_encoding_relative : 1;
 };
 
 struct eh_frame_sec_info
