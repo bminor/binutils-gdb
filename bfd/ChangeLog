@@ -1,5 +1,7 @@
 2001-07-03  Mark Elbrecht  <snowball3@softhome.net>
 
+	* bfd.c (bfd_get_sign_extend_vma): Support DJGPP COFF targets.
+
 	* cofflink.c (_bfd_coff_link_input_bfd): Skip section symbols from
 	sections being discarded.
 

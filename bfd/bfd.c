@@ -752,8 +752,20 @@ int
 bfd_get_sign_extend_vma (abfd)
      bfd *abfd;
 {
+  char *name;
+
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     return (get_elf_backend_data (abfd)->sign_extend_vma);
+
+  name = bfd_get_target (abfd);
+
+  /* Return a proper value for DJGPP COFF (an x86 COFF variant).
+     This function is required for DWARF2 support, but there is
+     no place to store this information in the COFF back end.
+     Should enough other COFF targets add support for DWARF2,
+     a place will have to be found.  Until then, this hack will do.  */
+  if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0)
+    return 1;
 
   bfd_set_error (bfd_error_wrong_format);
   return -1;
