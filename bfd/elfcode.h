@@ -871,7 +871,8 @@ write_relocs (abfd, sec, data)
 	      last_sym_idx = n;
 	    }
 
-	  if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+	  if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
+	      && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
 	      && ! _bfd_elf_validate_reloc (abfd, ptr))
 	    {
 	      *failedp = true;

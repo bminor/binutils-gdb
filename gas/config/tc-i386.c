@@ -2085,6 +2085,16 @@ md_assemble (line)
       i.imm_operands = 0;
     }
 
+  if ((i.tm.opcode_modifier & (Jump | JumpByte | JumpDword))
+      && i.disps[0]->X_op == O_constant)
+    {
+      /* Convert "jmp constant" (and "call constant") to a jump (call) to
+	 the absolute address given by the constant.  Since ix86 jumps and
+	 calls are pc relative, we need to generate a reloc.  */
+      i.disps[0]->X_add_symbol = &abs_symbol;
+      i.disps[0]->X_op = O_symbol;
+    }
+
   /* We are ready to output the insn. */
   {
     register char *p;
@@ -2115,77 +2125,28 @@ md_assemble (line)
 	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
-	if (i.disps[0]->X_op == O_constant)
-	  {
-	    long n = (long) i.disps[0]->X_add_number;
-
-	    if (fits_in_signed_byte (n))
-	      {
-		insn_size += 2;
-		p = frag_more (2);
-		p[0] = i.tm.base_opcode;
-		p[1] = n;
-	      }
-	    else
-	      {
-		/* Use 16-bit jumps only for 16-bit code,
-		   because text segments are limited to 64K anyway;
-		   Use 32-bit jumps for 32-bit code, because they're faster,
-		   and a 16-bit jump will clear the top 16 bits of %eip.  */
-		if (code16 && !fits_in_signed_word (n))
-		  {
-		    as_bad (_("16-bit jump out of range"));
-		    return;
-		  }
-
-		if (i.tm.base_opcode == JUMP_PC_RELATIVE)
-		  {		/* pace */
-		    /* unconditional jump */
-		    insn_size += prefix + 1 + size;
-		    p = frag_more (prefix + 1 + size);
-		    if (prefix)
-		      *p++ = DATA_PREFIX_OPCODE;
-		    *p++ = (char) 0xe9;
-		    md_number_to_chars (p, (valueT) n, size);
-		  }
-		else
-		  {
-		    /* conditional jump */
-		    insn_size += prefix + 2 + size;
-		    p = frag_more (prefix + 2 + size);
-		    if (prefix)
-		      *p++ = DATA_PREFIX_OPCODE;
-		    *p++ = TWO_BYTE_OPCODE_ESCAPE;
-		    *p++ = i.tm.base_opcode + 0x10;
-		    md_number_to_chars (p, (valueT) n, size);
-		  }
-	      }
-	  }
-	else
-	  {
-	    /* It's a symbol;  End frag & setup for relax.
-	       Make sure there is enough room in this frag for the largest
-	       instruction we may generate in md_convert_frag.  This is 2
-	       bytes for the opcode and room for the prefix and largest
-	       displacement.  */
-	    frag_grow (prefix + 2 + size);
-	    insn_size += prefix + 1;
-	    /* Prefix and 1 opcode byte go in fr_fix.  */
-	    p = frag_more (prefix + 1);
-	    if (prefix)
-	      *p++ = DATA_PREFIX_OPCODE;
-	    *p = i.tm.base_opcode;
-	    /* 1 possible extra opcode + displacement go in fr_var */
-	    frag_var (rs_machine_dependent,
-		      1 + size,
-		      1,
-		      ((unsigned char) *p == JUMP_PC_RELATIVE
-		       ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
-		       : ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16),
-		      i.disps[0]->X_add_symbol,
-		      i.disps[0]->X_add_number,
-		      p);
-	  }
+	/* It's always a symbol;  End frag & setup for relax.
+	   Make sure there is enough room in this frag for the largest
+	   instruction we may generate in md_convert_frag.  This is 2
+	   bytes for the opcode and room for the prefix and largest
+	   displacement.  */
+	frag_grow (prefix + 2 + size);
+	insn_size += prefix + 1;
+	/* Prefix and 1 opcode byte go in fr_fix.  */
+	p = frag_more (prefix + 1);
+	if (prefix)
+	  *p++ = DATA_PREFIX_OPCODE;
+	*p = i.tm.base_opcode;
+	/* 1 possible extra opcode + displacement go in fr_var.  */
+	frag_var (rs_machine_dependent,
+		  1 + size,
+		  1,
+		  ((unsigned char) *p == JUMP_PC_RELATIVE
+		   ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
+		   : ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16),
+		  i.disps[0]->X_add_symbol,
+		  i.disps[0]->X_add_number,
+		  p);
       }
     else if (i.tm.opcode_modifier & (JumpByte | JumpDword))
       {
@@ -2240,28 +2201,8 @@ md_assemble (line)
 	  }
 	*p++ = i.tm.base_opcode & 0xff;
 
-	if (i.disps[0]->X_op == O_constant)
-	  {
-	    long n = (long) i.disps[0]->X_add_number;
-
-	    if (size == 1 && !fits_in_signed_byte (n))
-	      {
-		as_bad (_("`%s' only takes byte displacement; %ld shortened to %d"),
-			i.tm.name, n, *p);
-	      }
-	    else if (size == 2 && !fits_in_signed_word (n))
-	      {
-		as_bad (_("16-bit jump out of range"));
-		return;
-	      }
-	    md_number_to_chars (p, (valueT) n, size);
-	  }
-	else
-	  {
-	    fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-			 i.disps[0], 1, reloc (size, 1, i.disp_reloc[0]));
-
-	  }
+	fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+		     i.disps[0], 1, reloc (size, 1, i.disp_reloc[0]));
       }
     else if (i.tm.opcode_modifier & JumpInterSegment)
       {
@@ -3912,19 +3853,24 @@ md_apply_fix3 (fixP, valp, seg)
 	value += fixP->fx_where + fixP->fx_frag->fr_address;
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	      || symbol_section_p (fixP->fx_addsy))
-	  && ! S_IS_EXTERNAL (fixP->fx_addsy)
-	  && ! S_IS_WEAK (fixP->fx_addsy)
-	  && S_IS_DEFINED (fixP->fx_addsy)
-	  && ! S_IS_COMMON (fixP->fx_addsy))
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	{
-	  /* Yes, we add the values in twice.  This is because
-	     bfd_perform_relocation subtracts them out again.  I think
-	     bfd_perform_relocation is broken, but I don't dare change
-	     it.  FIXME.  */
-	  value += fixP->fx_where + fixP->fx_frag->fr_address;
+	  segT fseg = S_GET_SEGMENT (fixP->fx_addsy);
+
+	  if ((fseg == seg
+	       || (symbol_section_p (fixP->fx_addsy)
+		   && fseg != absolute_section))
+	      && ! S_IS_EXTERNAL (fixP->fx_addsy)
+	      && ! S_IS_WEAK (fixP->fx_addsy)
+	      && S_IS_DEFINED (fixP->fx_addsy)
+	      && ! S_IS_COMMON (fixP->fx_addsy))
+	    {
+	      /* Yes, we add the values in twice.  This is because
+		 bfd_perform_relocation subtracts them out again.  I think
+		 bfd_perform_relocation is broken, but I don't dare change
+		 it.  FIXME.  */
+	      value += fixP->fx_where + fixP->fx_frag->fr_address;
+	    }
 	}
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)

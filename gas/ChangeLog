@@ -1,5 +1,10 @@
 1999-09-13  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
+	* config/tc-i386.c (md_assemble): Handle "jmp/call constant" as a
+	pc-relative jmp/call to an absolute symbol.
+	(md_apply_fix3): When OBJ_ELF, don't add the values in twice for
+	absolute section symbols.
+
 	* config/tc-i386.c (md_assemble): Correct frag_var size.  Tidy
 	jump handling code and comments.
 

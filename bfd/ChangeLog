@@ -1,3 +1,8 @@
+1999-09-13  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* elfcode.h (write_relocs): Check for the_bfd NULL when handling
+	an absolute symbol in REL relocs.
+
 Sun Sep 12 23:47:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_final_link_relocate): Handle SECREL32.
