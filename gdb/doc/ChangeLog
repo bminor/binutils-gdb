@@ -1,3 +1,7 @@
+Wed Feb 10 23:59:19 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Eliminate IBM6000_HOST, document IBM6000_TARGET.
+
 Tue Feb  9 18:26:21 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, gdbinv-s.texi: misc updates

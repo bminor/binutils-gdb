@@ -82,6 +82,7 @@ GDB as you discover it (or as you design changes to GDB).
 * Wrapping::			Wrapping Output Lines
 * Frames::			Keeping track of function calls
 * Remote Stubs::		Code that runs in targets and talks to GDB
+* Longjmp Support::		Stepping through longjmp's in the target
 * Coding Style::		Strunk and White for GDB maintainers
 * Clean Design::		Frank Lloyd Wright for GDB maintainers
 * Submitting Patches::		How to get your changes into GDB releases
@@ -1073,6 +1074,21 @@ for the proper operation of the debugger/stub.
 From reading the stub, it's probably not obvious how breakpoints work.  They
 are simply done by deposit/examine operations from GDB.
 
+@node Longjmp Support
+@chapter Longjmp Support
+
+GDB has support for figuring out that the target is doing a
+@code{longjmp} and for stopping at the target of the jump, if we are
+stepping.  This is done with a few specialized internal breakpoints,
+which are visible in the @code{maint info breakpoint} command.
+
+To make this work, you need to define a macro called
+@code{GET_LONGJMP_TARGET}, which will examine the @code{jmp_buf}
+structure and extract the longjmp target address.  Since @code{jmp_buf}
+is target specific, you will need to define it in the appropriate
+@file{tm-xxx.h} file.  Look in @file{tm-sun4os4.h} and
+@file{sparc-tdep.c} for examples of how to do this.
+
 @node Coding Style
 @chapter Coding Style
 
@@ -1511,10 +1527,6 @@ hp300ux-xdep.c
 infrun.c
 @item I80960
 remote-vx.c
-@item IBM6000_HOST
-breakpoint.c
-@item IBM6000_TARGET
-buildsym.c
 @item IEEE_DEBUG
 ieee-float.c
 @item IEEE_FLOAT
@@ -2134,10 +2146,10 @@ hp300ux-xdep.c
 infrun.c
 @item I80960
 remote-vx.c
-@item IBM6000_HOST
-breakpoint.c
 @item IBM6000_TARGET
-buildsym.c
+Shows that we are configured for an IBM RS/6000 target.  This conditional
+should be eliminated (FIXME) and replaced by feature-specific macros.
+It was introduced in haste and we are repenting at leisure.
 @item IEEE_DEBUG
 ieee-float.c
 @item IEEE_FLOAT
