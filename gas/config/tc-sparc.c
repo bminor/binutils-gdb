@@ -64,6 +64,9 @@ static enum sparc_opcode_arch_val max_architecture;
 
 /* Either 32 or 64, selects file format.  */
 static int sparc_arch_size;
+/* Initial (default) value, recorded separately in case a user option
+   changes the value before md_show_usage is called.  */
+static int default_arch_size;
 
 static int architecture_requested;
 static int warn_on_bump;
@@ -183,19 +186,24 @@ static void output_insn
 static struct sparc_arch {
   char *name;
   char *opcode_arch;
-  int arch_size;
+  /* Default word size, as specified during configuration.
+     A value of zero means can't be used to specify default architecture.  */
+  int default_arch_size;
+  /* Allowable arg to -A?  */
+  int user_option_p;
 } sparc_arch_table[] = {
-  { "v6", "v6", 32 },
-  { "v7", "v7", 32 },
-  { "v8", "v8", 32 },
-  { "sparclet", "sparclet", 32 },
-  { "sparclite", "sparclite", 32 },
-  { "v8plus", "v9", 32 },
-  { "v8plusa", "v9a", 32 },
-#ifdef BFD64
-  { "v9", "v9", 64 },
-  { "v9a", "v9a", 64 },
-#endif
+  { "v6", "v6", 0, 1 },
+  { "v7", "v7", 0, 1 },
+  { "v8", "v8", 32, 1 },
+  { "sparclet", "sparclet", 32, 1 },
+  { "sparclite", "sparclite", 32, 1 },
+  { "v8plus", "v9", 0, 1 },
+  { "v8plusa", "v9a", 0, 1 },
+  { "v9", "v9", 0, 1 },
+  { "v9a", "v9a", 0, 1 },
+  /* This exists to allow configure.in/Makefile.in to pass one
+     value to specify both the default machine and default word size.  */
+  { "v9-64", "v9", 64, 0 },
   { NULL, NULL, 0 }
 };
 
@@ -221,13 +229,14 @@ init_default_arch ()
 {
   struct sparc_arch *sa = lookup_arch (default_arch);
 
-  if (sa == NULL)
+  if (sa == NULL
+      || sa->default_arch_size == 0)
     as_fatal ("Invalid default architecture, broken assembler.");
 
   max_architecture = sparc_opcode_lookup_arch (sa->opcode_arch);
   if (max_architecture == SPARC_OPCODE_ARCH_BAD)
     as_fatal ("Bad opcode table, broken assembler.");
-  sparc_arch_size = sa->arch_size;
+  default_arch_size = sparc_arch_size = sa->default_arch_size;
   default_init_p = 1;
 }
 
@@ -285,7 +294,11 @@ sparc_target_format ()
  *	-Av8plus, -Av8plusa
  *		Sparc64 in a 32 bit world.
  *	-Av9, -Av9a
- *		Sparc64 in a 64 bit world.
+ *		Sparc64 in either a 32 or 64 bit world (-32/-64 says which).
+ *		This used to only mean 64 bits, but properly specifying it
+ *		complicated gcc's ASM_SPECs, so now opcode selection is
+ *		specified orthogonally to word size (except when specifying
+ *		the default, but that is an internal implementation detail).
  *	-xarch=v8plus, -xarch=v8plusa
  *		Same as -Av8plus{,a}, for compatibility with Sun's assembler.
  *
@@ -335,13 +348,19 @@ struct option md_longopts[] = {
   {"sparc", no_argument, NULL, OPTION_SPARC},
 #define OPTION_XARCH (OPTION_MD_BASE + 2)
   {"xarch", required_argument, NULL, OPTION_XARCH},
+#ifdef OBJ_ELF
+#define OPTION_32 (OPTION_MD_BASE + 3)
+  {"32", no_argument, NULL, OPTION_32},
+#define OPTION_64 (OPTION_MD_BASE + 4)
+  {"64", no_argument, NULL, OPTION_64},
+#endif
 #ifdef SPARC_BIENDIAN
-#define OPTION_LITTLE_ENDIAN (OPTION_MD_BASE + 3)
+#define OPTION_LITTLE_ENDIAN (OPTION_MD_BASE + 5)
   {"EL", no_argument, NULL, OPTION_LITTLE_ENDIAN},
-#define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 4)
+#define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 6)
   {"EB", no_argument, NULL, OPTION_BIG_ENDIAN},
 #endif
-#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 5)
+#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 7)
   {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
   {NULL, no_argument, NULL, 0}
 };
@@ -381,7 +400,8 @@ md_parse_option (c, arg)
 	enum sparc_opcode_arch_val opcode_arch;
 
 	sa = lookup_arch (arg);
-	if (sa == NULL)
+	if (sa == NULL
+	    || ! sa->user_option_p)
 	  {
 	    as_bad ("invalid architecture -A%s", arg);
 	    return 0;
@@ -392,7 +412,6 @@ md_parse_option (c, arg)
 	  as_fatal ("Bad opcode table, broken assembler.");
 
 	max_architecture = opcode_arch;
-	sparc_arch_size = sa->arch_size;
 	architecture_requested = 1;
       }
       break;
@@ -421,6 +440,33 @@ md_parse_option (c, arg)
 #endif
 
 #ifdef OBJ_ELF
+    case OPTION_32:
+    case OPTION_64:
+      {
+	const char **list, **l;
+
+	sparc_arch_size = c == OPTION_32 ? 32 : 64;
+	list = bfd_target_list ();
+	for (l = list; *l != NULL; l++)
+	  {
+	    if (sparc_arch_size == 32)
+	      {
+		if (strcmp (*l, "elf32-sparc") == 0)
+		  break;
+	      }
+	    else
+	      {
+		if (strcmp (*l, "elf64-sparc") == 0)
+		  break;
+	      }
+	  }
+	if (*l == NULL)
+	  as_fatal ("No compiled in support for %d bit object file format",
+		    sparc_arch_size);
+	free (list);
+      }
+      break;
+
     case 'V':
       print_version_id ();
       break;
@@ -459,12 +505,18 @@ md_show_usage (stream)
 {
   const struct sparc_arch *arch;
 
+  /* We don't get a chance to initialize anything before we're called,
+     so handle that now.  */
+  if (! default_init_p)
+    init_default_arch ();
+
   fprintf(stream, "SPARC options:\n");
   for (arch = &sparc_arch_table[0]; arch->name; arch++)
     {
       if (arch != &sparc_arch_table[0])
 	fprintf (stream, " | ");
-      fprintf (stream, "-A%s", arch->name);
+      if (arch->user_option_p)
+	fprintf (stream, "-A%s", arch->name);
     }
   fprintf (stream, "\n-xarch=v8plus | -xarch=v8plusa\n");
   fprintf (stream, "\
@@ -477,6 +529,11 @@ md_show_usage (stream)
 -k			generate PIC\n");
 #endif
 #ifdef OBJ_ELF
+  fprintf (stream, "\
+-32			create 32 bit object file\n\
+-64			create 64 bit object file\n");
+  fprintf (stream, "\
+			[default is %d]\n", default_arch_size);
   fprintf (stream, "\
 -KPIC			generate PIC\n\
 -V			print assembler version number\n\
