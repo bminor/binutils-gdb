@@ -1,3 +1,8 @@
+2001-12-05  Tom Rix  <trix@redhat.com>
+
+	* Makefile.am: Remove eaixppc64.
+	* Makefile.in: Regenerate.	
+
 2001-12-04  Tom Rix  <trix@redhat.com>
 
 	* emultempl/aix.em (choose_target): Change default target to 
