@@ -1,3 +1,8 @@
+2004-08-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Host Definition): Delete description of
+	FCLOSE_PROVIDED and GETENV_PROVIDED.
+
 2004-08-05  Mark Kettenis  <kettenis@chello.nl>
 
 	* gdbint.texinfo (Host Definition): Delete description of

@@ -2165,18 +2165,8 @@ The default value of the prompt string (normally @code{"(gdb) "}).
 @cindex terminal device
 The name of the generic TTY device, defaults to @code{"/dev/tty"}.
 
-@item FCLOSE_PROVIDED
-Define this if the system declares @code{fclose} in the headers included
-in @code{defs.h}.  This isn't needed unless your compiler is unusually
-anal.
-
 @item FOPEN_RB
 Define this if binary files are opened the same way as text files.
-
-@item GETENV_PROVIDED
-Define this if the system declares @code{getenv} in its headers included
-in @code{defs.h}.  This isn't needed unless your compiler is unusually
-anal.
 
 @item HAVE_MMAP
 @findex mmap
