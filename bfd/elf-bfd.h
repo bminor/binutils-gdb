@@ -104,40 +104,6 @@ struct elf_link_hash_entry
      not visible outside this DSO.  */
   long dynindx;
 
-  /* String table index in .dynstr if this is a dynamic symbol.  */
-  unsigned long dynstr_index;
-
-  /* Hash value of the name computed using the ELF hash function.  */
-  unsigned long elf_hash_value;
-
-  /* If this is a weak defined symbol from a dynamic object, this
-     field points to a defined symbol with the same value, if there is
-     one.  Otherwise it is NULL.  */
-  struct elf_link_hash_entry *weakdef;
-
-  /* Version information.  */
-  union
-  {
-    /* This field is used for a symbol which is not defined in a
-       regular object.  It points to the version information read in
-       from the dynamic object.  */
-    Elf_Internal_Verdef *verdef;
-    /* This field is used for a symbol which is defined in a regular
-       object.  It is set up in size_dynamic_sections.  It points to
-       the version information we should write out for this symbol.  */
-    struct bfd_elf_version_tree *vertree;
-  } verinfo;
-
-  /* Virtual table entry use information.  This array is nominally of size
-     size/sizeof(target_void_pointer), though we have to be able to assume
-     and track a size while the symbol is still undefined.  It is indexed
-     via offset/sizeof(target_void_pointer).  */
-  size_t vtable_entries_size;
-  bfd_boolean *vtable_entries_used;
-
-  /* Virtual table derivation info.  */
-  struct elf_link_hash_entry *vtable_parent;
-
   /* If this symbol requires an entry in the global offset table, the
      processor specific backend uses this field to track usage and
      final offset.  Two schemes are supported:  The first assumes that
@@ -194,13 +160,57 @@ struct elf_link_hash_entry
   /* Symbol is referenced by a non-GOT/non-PLT relocation.  This is
      not currently set by all the backends.  */
   unsigned int non_got_ref : 1;
-  /* Symbol has a definition in a shared object.  */
+  /* Symbol has a definition in a shared object.
+     FIXME: There is no real need for this field if def_dynamic is never
+     cleared and all places that test def_dynamic also test def_regular.  */
   unsigned int dynamic_def : 1;
   /* Symbol is weak in all shared objects.  */
   unsigned int dynamic_weak : 1;
   /* Symbol is referenced with a relocation where C/C++ pointer equality
      matters.  */
   unsigned int pointer_equality_needed : 1;
+
+  /* String table index in .dynstr if this is a dynamic symbol.  */
+  unsigned long dynstr_index;
+
+  union
+  {
+    /* If this is a weak defined symbol from a dynamic object, this
+       field points to a defined symbol with the same value, if there is
+       one.  Otherwise it is NULL.  */
+    struct elf_link_hash_entry *weakdef;
+
+    /* Hash value of the name computed using the ELF hash function.
+       Used part way through size_dynamic_sections, after we've finished
+       with weakdefs.  */
+    unsigned long elf_hash_value;
+  } u;
+
+  /* Version information.  */
+  union
+  {
+    /* This field is used for a symbol which is not defined in a
+       regular object.  It points to the version information read in
+       from the dynamic object.  */
+    Elf_Internal_Verdef *verdef;
+    /* This field is used for a symbol which is defined in a regular
+       object.  It is set up in size_dynamic_sections.  It points to
+       the version information we should write out for this symbol.  */
+    struct bfd_elf_version_tree *vertree;
+  } verinfo;
+
+  struct
+  {
+    /* Virtual table entry use information.  This array is nominally of size
+       size/sizeof(target_void_pointer), though we have to be able to assume
+       and track a size while the symbol is still undefined.  It is indexed
+       via offset/sizeof(target_void_pointer).  */
+    size_t size;
+    bfd_boolean *used;
+
+    /* Virtual table derivation info.  */
+    struct elf_link_hash_entry *parent;
+  } *vtable;
 };
 
 /* Will references to this symbol always reference the symbol

@@ -4063,22 +4063,22 @@ ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
 	  if (h->type != bfd_link_hash_undefined
 	      && h->type != bfd_link_hash_common)
 	    {
-	      *pun = h->und_next;
-	      h->und_next = NULL;
+	      *pun = h->u.undef.next;
+	      h->u.undef.next = NULL;
 	      if (h == htab->elf.root.undefs_tail)
 		{
 		  if (pun == &htab->elf.root.undefs)
 		    htab->elf.root.undefs_tail = NULL;
 		  else
-		    /* pun points at an und_next field.  Go back to
+		    /* pun points at an u.undef.next field.  Go back to
 		       the start of the link_hash_entry.  */
 		    htab->elf.root.undefs_tail = (struct bfd_link_hash_entry *)
-		      ((char *) pun - ((char *) &h->und_next - (char *) h));
+		      ((char *) pun - ((char *) &h->u.undef.next - (char *) h));
 		  break;
 		}
 	    }
 	  else
-	    pun = &h->und_next;
+	    pun = &h->u.undef.next;
 	}
 
       htab->twiddled_syms = 0;
@@ -5498,14 +5498,14 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
-      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
-		  || h->weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->weakdef->root.u.def.section;
-      h->root.u.def.value = h->weakdef->root.u.def.value;
+      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
+		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->u.weakdef->root.u.def.section;
+      h->root.u.def.value = h->u.weakdef->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS)
-	h->non_got_ref = h->weakdef->non_got_ref;
+	h->non_got_ref = h->u.weakdef->non_got_ref;
       return TRUE;
     }
 

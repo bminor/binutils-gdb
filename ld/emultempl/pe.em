@@ -773,7 +773,7 @@ pe_fixup_stdcalls (void)
   if (pe_dll_extra_pe_debug)
     printf ("%s\n", __FUNCTION__);
 
-  for (undef = link_info.hash->undefs; undef; undef=undef->und_next)
+  for (undef = link_info.hash->undefs; undef; undef=undef->u.undef.next)
     if (undef->type == bfd_link_hash_undefined)
       {
 	char* at = strchr (undef->root.string, '@');
@@ -865,7 +865,7 @@ pe_find_data_imports (void)
   if (link_info.pei386_auto_import == 0)
     return;
 
-  for (undef = link_info.hash->undefs; undef; undef=undef->und_next)
+  for (undef = link_info.hash->undefs; undef; undef=undef->u.undef.next)
     {
       if (undef->type == bfd_link_hash_undefined)
         {
@@ -945,7 +945,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
       printf ("%s()\n", __FUNCTION__);
 
-      for (sym = link_info.hash->undefs; sym; sym=sym->und_next)
+      for (sym = link_info.hash->undefs; sym; sym=sym->u.undef.next)
         printf ("-%s\n", sym->root.string);
       bfd_hash_traverse (&link_info.hash->table, pr_sym, NULL);
 
@@ -1066,7 +1066,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		    relocs = (arelent **) xmalloc ((size_t) relsize);
 		    nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
-							  relocs, symbols);
+						      relocs, symbols);
 		    if (nrelocs < 0)
 		      {
 			free (relocs);

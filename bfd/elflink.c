@@ -472,10 +472,10 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* If this is a weak defined symbol, and we know a corresponding
 	 real symbol from the same dynamic object, make sure the real
 	 symbol is also made into a dynamic symbol.  */
-      if (h->weakdef != NULL
-	  && h->weakdef->dynindx == -1)
+      if (h->u.weakdef != NULL
+	  && h->u.weakdef->dynindx == -1)
 	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h->weakdef))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h->u.weakdef))
 	    return FALSE;
 	}
     }
@@ -890,17 +890,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
       if ((*sym_hash)->root.type == bfd_link_hash_indirect)
 	h = *sym_hash;
 
-      if ((h->root.und_next || info->hash->undefs_tail == &h->root)
+      if ((h->root.u.undef.next || info->hash->undefs_tail == &h->root)
 	  && bfd_is_und_section (sec))
 	{
 	  /* If the new symbol is undefined and the old symbol was
 	     also undefined before, we need to make sure
 	     _bfd_generic_link_add_one_symbol doesn't mess
-	     up the linker hash table undefs list. Since the old
+	     up the linker hash table undefs list.  Since the old
 	     definition came from a dynamic object, it is still on the
 	     undefs list.  */
 	  h->root.type = bfd_link_hash_undefined;
-	  /* FIXME: What if the new symbol is weak undefined?  */
 	  h->root.u.undef.abfd = abfd;
 	}
       else
@@ -2193,11 +2192,11 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
   /* If this is a weak defined symbol in a dynamic object, and we know
      the real definition in the dynamic object, copy interesting flags
      over to the real definition.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
       struct elf_link_hash_entry *weakdef;
 
-      weakdef = h->weakdef;
+      weakdef = h->u.weakdef;
       if (h->root.type == bfd_link_hash_indirect)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
@@ -2211,7 +2210,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	 don't do anything special.  See the longer description in
 	 _bfd_elf_adjust_dynamic_symbol, below.  */
       if (weakdef->def_regular)
-	h->weakdef = NULL;
+	h->u.weakdef = NULL;
       else
 	{
 	  const struct elf_backend_data *bed;
@@ -2268,7 +2267,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
       && (h->def_regular
 	  || !h->def_dynamic
 	  || (!h->ref_regular
-	      && (h->weakdef == NULL || h->weakdef->dynindx == -1))))
+	      && (h->u.weakdef == NULL || h->u.weakdef->dynindx == -1))))
     {
       h->plt = elf_hash_table (eif->info)->init_offset;
       return TRUE;
@@ -2313,15 +2312,15 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
      wind up at different memory locations.  The tzset call will set
      _timezone, leaving timezone unchanged.  */
 
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
       /* If we get to this point, we know there is an implicit
 	 reference by a regular object file via the weak symbol H.
 	 FIXME: Is this really true?  What if the traversal finds
-	 H->WEAKDEF before it finds H?  */
-      h->weakdef->ref_regular = 1;
+	 H->U.WEAKDEF before it finds H?  */
+      h->u.weakdef->ref_regular = 1;
 
-      if (! _bfd_elf_adjust_dynamic_symbol (h->weakdef, eif))
+      if (! _bfd_elf_adjust_dynamic_symbol (h->u.weakdef, eif))
 	return FALSE;
     }
 
@@ -3594,7 +3593,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && (flags & BSF_WEAK) != 0
 	  && ELF_ST_TYPE (isym->st_info) != STT_FUNC
 	  && is_elf_hash_table (hash_table)
-	  && h->weakdef == NULL)
+	  && h->u.weakdef == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
 	     a dynamic object, using the weakdef field.  Later in this
@@ -3608,7 +3607,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	     dynamic object, and we will be using that previous
 	     definition anyhow.  */
 
-	  h->weakdef = weaks;
+	  h->u.weakdef = weaks;
 	  weaks = h;
 	  new_weakdef = TRUE;
 	}
@@ -3773,9 +3772,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		h->def_dynamic = 1;
 	      if (h->def_regular
 		  || h->ref_regular
-		  || (h->weakdef != NULL
+		  || (h->u.weakdef != NULL
 		      && ! new_weakdef
-		      && h->weakdef->dynindx != -1))
+		      && h->u.weakdef->dynindx != -1))
 		dynsym = TRUE;
 	    }
 
@@ -3808,11 +3807,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		goto error_free_vers;
-	      if (h->weakdef != NULL
+	      if (h->u.weakdef != NULL
 		  && ! new_weakdef
-		  && h->weakdef->dynindx == -1)
+		  && h->u.weakdef->dynindx == -1)
 		{
-		  if (! bfd_elf_link_record_dynamic_symbol (info, h->weakdef))
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h->u.weakdef))
 		    goto error_free_vers;
 		}
 	    }
@@ -3977,8 +3976,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  size_t i, j, idx;
 
 	  hlook = weaks;
-	  weaks = hlook->weakdef;
-	  hlook->weakdef = NULL;
+	  weaks = hlook->u.weakdef;
+	  hlook->u.weakdef = NULL;
 
 	  BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
 		      || hlook->root.type == bfd_link_hash_defweak
@@ -4029,7 +4028,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		break;
 	      else if (h != hlook)
 		{
-		  hlook->weakdef = h;
+		  hlook->u.weakdef = h;
 
 		  /* If the weak definition is in the list of dynamic
 		     symbols, make sure the real definition is put
@@ -4472,7 +4471,7 @@ elf_collect_hash_codes (struct elf_link_hash_entry *h, void *data)
 
   /* And store it in the struct so that we can put it in the hash table
      later.  */
-  h->elf_hash_value = ha;
+  h->u.elf_hash_value = ha;
 
   if (alc != NULL)
     free (alc);
@@ -6230,7 +6229,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
       bed->s->swap_symbol_out (finfo->output_bfd, &sym, esym, 0);
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
-      bucket = h->elf_hash_value % bucketcount;
+      bucket = h->u.elf_hash_value % bucketcount;
       hash_entry_size
 	= elf_section_data (finfo->hash_sec)->this_hdr.sh_entsize;
       bucketpos = ((bfd_byte *) finfo->hash_sec->contents
@@ -8565,26 +8564,26 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* Those that are not vtables.  */
-  if (h->vtable_parent == NULL)
+  if (h->vtable == NULL || h->vtable->parent == NULL)
     return TRUE;
 
   /* Those vtables that do not have parents, we cannot merge.  */
-  if (h->vtable_parent == (struct elf_link_hash_entry *) -1)
+  if (h->vtable->parent == (struct elf_link_hash_entry *) -1)
     return TRUE;
 
   /* If we've already been done, exit.  */
-  if (h->vtable_entries_used && h->vtable_entries_used[-1])
+  if (h->vtable->used && h->vtable->used[-1])
     return TRUE;
 
   /* Make sure the parent's table is up to date.  */
-  elf_gc_propagate_vtable_entries_used (h->vtable_parent, okp);
+  elf_gc_propagate_vtable_entries_used (h->vtable->parent, okp);
 
-  if (h->vtable_entries_used == NULL)
+  if (h->vtable->used == NULL)
     {
       /* None of this table's entries were referenced.  Re-use the
 	 parent's table.  */
-      h->vtable_entries_used = h->vtable_parent->vtable_entries_used;
-      h->vtable_entries_size = h->vtable_parent->vtable_entries_size;
+      h->vtable->used = h->vtable->parent->vtable->used;
+      h->vtable->size = h->vtable->parent->vtable->size;
     }
   else
     {
@@ -8592,9 +8591,9 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
       bfd_boolean *cu, *pu;
 
       /* Or the parent's entries into ours.  */
-      cu = h->vtable_entries_used;
+      cu = h->vtable->used;
       cu[-1] = TRUE;
-      pu = h->vtable_parent->vtable_entries_used;
+      pu = h->vtable->parent->vtable->used;
       if (pu != NULL)
 	{
 	  const struct elf_backend_data *bed;
@@ -8602,7 +8601,7 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
 
 	  bed = get_elf_backend_data (h->root.u.def.section->owner);
 	  log_file_align = bed->s->log_file_align;
-	  n = h->vtable_parent->vtable_entries_size >> log_file_align;
+	  n = h->vtable->parent->vtable->size >> log_file_align;
 	  while (n--)
 	    {
 	      if (*pu)
@@ -8630,7 +8629,7 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
 
   /* Take care of both those symbols that do not describe vtables as
      well as those that are not loaded.  */
-  if (h->vtable_parent == NULL)
+  if (h->vtable == NULL || h->vtable->parent == NULL)
     return TRUE;
 
   BFD_ASSERT (h->root.type == bfd_link_hash_defined
@@ -8652,11 +8651,11 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
     if (rel->r_offset >= hstart && rel->r_offset < hend)
       {
 	/* If the entry is in use, do nothing.  */
-	if (h->vtable_entries_used
-	    && (rel->r_offset - hstart) < h->vtable_entries_size)
+	if (h->vtable->used
+	    && (rel->r_offset - hstart) < h->vtable->size)
 	  {
 	    bfd_vma entry = (rel->r_offset - hstart) >> log_file_align;
-	    if (h->vtable_entries_used[entry])
+	    if (h->vtable->used[entry])
 	      continue;
 	  }
 	/* Otherwise, kill it.  */
@@ -8799,6 +8798,12 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
   return FALSE;
 
  win:
+  if (!child->vtable)
+    {
+      child->vtable = bfd_zalloc (abfd, sizeof (*child->vtable));
+      if (!child->vtable)
+	return FALSE;
+    }
   if (!h)
     {
       /* This *should* only be the absolute section.  It could potentially
@@ -8806,10 +8811,10 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
 	 would be bad.  It isn't worth paging in the local symbols to be
 	 sure though; that case should simply be handled by the assembler.  */
 
-      child->vtable_parent = (struct elf_link_hash_entry *) -1;
+      child->vtable->parent = (struct elf_link_hash_entry *) -1;
     }
   else
-    child->vtable_parent = h;
+    child->vtable->parent = h;
 
   return TRUE;
 }
@@ -8825,10 +8830,17 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
 
-  if (addend >= h->vtable_entries_size)
+  if (!h->vtable)
+    {
+      h->vtable = bfd_zalloc (abfd, sizeof (*h->vtable));
+      if (!h->vtable)
+	return FALSE;
+    }
+
+  if (addend >= h->vtable->size)
     {
       size_t size, bytes, file_align;
-      bfd_boolean *ptr = h->vtable_entries_used;
+      bfd_boolean *ptr = h->vtable->used;
 
       /* While the symbol is undefined, we have to be prepared to handle
 	 a zero size.  */
@@ -8859,7 +8871,7 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      size_t oldbytes;
 
-	      oldbytes = (((h->vtable_entries_size >> log_file_align) + 1)
+	      oldbytes = (((h->vtable->size >> log_file_align) + 1)
 			  * sizeof (bfd_boolean));
 	      memset (((char *) ptr) + oldbytes, 0, bytes - oldbytes);
 	    }
@@ -8871,11 +8883,11 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 	return FALSE;
 
       /* And arrange for that done flag to be at index -1.  */
-      h->vtable_entries_used = ptr + 1;
-      h->vtable_entries_size = size;
+      h->vtable->used = ptr + 1;
+      h->vtable->size = size;
     }
 
-  h->vtable_entries_used[addend >> log_file_align] = TRUE;
+  h->vtable->used[addend >> log_file_align] = TRUE;
 
   return TRUE;
 }

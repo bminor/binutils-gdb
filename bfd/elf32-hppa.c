@@ -1671,15 +1671,15 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
-      if (h->weakdef->root.type != bfd_link_hash_defined
-	  && h->weakdef->root.type != bfd_link_hash_defweak)
+      if (h->u.weakdef->root.type != bfd_link_hash_defined
+	  && h->u.weakdef->root.type != bfd_link_hash_defweak)
 	abort ();
-      h->root.u.def.section = h->weakdef->root.u.def.section;
-      h->root.u.def.value = h->weakdef->root.u.def.value;
+      h->root.u.def.section = h->u.weakdef->root.u.def.section;
+      h->root.u.def.value = h->u.weakdef->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS)
-	h->non_got_ref = h->weakdef->non_got_ref;
+	h->non_got_ref = h->u.weakdef->non_got_ref;
       return TRUE;
     }
 

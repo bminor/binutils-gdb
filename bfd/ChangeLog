@@ -1,5 +1,48 @@
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* ecoff.c: Update u.undef.next refs.
+	* elf64-ppc.c: Likewise.
+	* elflink.c: Likewise.
+	* linker.c: Likewise.
+	* xcofflink.c: Likewise.
+
+	* elf-bfd.h (struct elf_link_hash_entry): Rearrange.  Add FIXME to
+	dynamic_def.  Combine weakdef and elf_hash_value.  Move vtable
+	fields to indirect struct.
+	* elf-m10300.c: Update u.weakdef refs.
+	* elf32-arm.h: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elflink.c: Likewise.  Also u.elf_hash_value.
+	(elf_gc_propagate_vtable_entries_used): Update for h->vtable
+	indirection.
+	(elf_gc_smash_unused_vtentry_relocs): Likewise.
+	(bfd_elf_gc_record_vtinherit): Alloc vtable.
+	(bfd_elf_gc_record_vtentry): Likewise.
+	* elf.c (_bfd_elf_link_hash_newfunc): Use memset.
+
+2004-09-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* bfd-in2.h: Regenerate.

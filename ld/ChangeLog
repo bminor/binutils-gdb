@@ -1,5 +1,11 @@
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (fold_name): Update u.undef.next refs.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+
+2004-09-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* config.in: Regenerate.

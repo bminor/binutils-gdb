@@ -1391,38 +1391,14 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       /* Set local fields.  */
       ret->indx = -1;
       ret->dynindx = -1;
-      ret->dynstr_index = 0;
-      ret->elf_hash_value = 0;
-      ret->weakdef = NULL;
-      ret->verinfo.verdef = NULL;
-      ret->vtable_entries_size = 0;
-      ret->vtable_entries_used = NULL;
-      ret->vtable_parent = NULL;
-      ret->got = htab->init_refcount;
-      ret->plt = htab->init_refcount;
-      ret->size = 0;
-      ret->type = STT_NOTYPE;
-      ret->other = 0;
+      ret->got = ret->plt = htab->init_refcount;
+      memset (&ret->size, 0, (sizeof (struct elf_link_hash_entry)
+			      - offsetof (struct elf_link_hash_entry, size)));
       /* Assume that we have been called by a non-ELF symbol reader.
          This flag is then reset by the code which reads an ELF input
          file.  This ensures that a symbol created by a non-ELF symbol
          reader will have the flag set correctly.  */
-      ret->ref_regular = 0;
-      ret->def_regular = 0;
-      ret->ref_dynamic = 0;
-      ret->def_dynamic = 0;
-      ret->ref_regular_nonweak = 0;
-      ret->dynamic_adjusted = 0;
-      ret->needs_copy = 0;
-      ret->needs_plt = 0;
       ret->non_elf = 1;
-      ret->hidden = 0;
-      ret->forced_local = 0;
-      ret->mark = 0;
-      ret->non_got_ref = 0;
-      ret->dynamic_def = 0;
-      ret->dynamic_weak = 0;
-      ret->pointer_equality_needed = 0;
     }
 
   return entry;
