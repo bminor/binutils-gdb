@@ -1,3 +1,12 @@
+2003-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't allow _savef* and
+	_restf* to be satisfied by shared libs, and always force them local.
+	(toc_adjusting_stub_needed): Avoid scanning linker created sections.
+	Correct test for "bl".
+	(ppc64_elf_relocate_section <R_PPC64_TLS>): Correct test for
+	primary opcode 31.
+
 2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (s390_elf_ldisp_reloc): New prototype.

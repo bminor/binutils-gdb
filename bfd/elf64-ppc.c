@@ -4287,7 +4287,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
       sym[8] = i % 10 + '0';
       h = elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
       if (h != NULL
-	  && h->root.type == bfd_link_hash_undefined)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  if (lowest_savef > i)
 	    lowest_savef = i;
@@ -4296,7 +4296,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 	  h->root.u.def.value = (i - lowest_savef) * 4;
 	  h->type = STT_FUNC;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-	  _bfd_elf_link_hash_hide_symbol (info, h, info->shared);
+	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
 	}
     }
 
@@ -4307,7 +4307,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
       sym[8] = i % 10 + '0';
       h = elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
       if (h != NULL
-	  && h->root.type == bfd_link_hash_undefined)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  if (lowest_restf > i)
 	    lowest_restf = i;
@@ -4317,7 +4317,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 				 + (i - lowest_restf) * 4);
 	  h->type = STT_FUNC;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-	  _bfd_elf_link_hash_hide_symbol (info, h, info->shared);
+	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
 	}
     }
 
@@ -6374,6 +6374,10 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
   int ret;
   int branch_ok;
 
+  /* We know none of our code bearing sections will need toc stubs.  */
+  if ((isec->flags & SEC_LINKER_CREATED) != 0)
+    return 0;
+
   /* Hack for linux kernel.  .fixup contains branches, but only back to
      the function that hit an exception.  */
   branch_ok = strcmp (isec->name, ".fixup") == 0;
@@ -6401,7 +6405,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
     {
       unsigned long insn = bfd_get_32 (isec->owner, contents + i);
       /* Is this a branch?  */
-      if ((insn & (0x1f << 26)) == (18 << 26)
+      if ((insn & (0x3f << 26)) == (18 << 26)
 	  /* If branch and link, it's a function call.  */
 	  && ((insn & 1) != 0
 	      /* Sibling calls use a plain branch.  I don't know a way
@@ -7318,10 +7322,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_vma insn, rtra;
 	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset);
-	      if ((insn & ((31 << 26) | (31 << 11)))
+	      if ((insn & ((0x3f << 26) | (31 << 11)))
 		  == ((31 << 26) | (13 << 11)))
 		rtra = insn & ((1 << 26) - (1 << 16));
-	      else if ((insn & ((31 << 26) | (31 << 16)))
+	      else if ((insn & ((0x3f << 26) | (31 << 16)))
 		       == ((31 << 26) | (13 << 16)))
 		rtra = (insn & (31 << 21)) | ((insn & (31 << 11)) << 5);
 	      else
