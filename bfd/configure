@@ -16,6 +16,10 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-targets        alternative target configurations"
 ac_help="$ac_help
+  --enable-shared         build shared BFD library"
+ac_help="$ac_help
+  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library"
+ac_help="$ac_help
   --with-mmap             try using mmap for BFD input files if available"
 
 # Initialize some variables set by options.
@@ -543,6 +547,24 @@ if test "${enable_targets+set}" = set; then
   *)        enable_targets=$enableval ;;
 esac
 fi
+# Check whether --enable-shared or --disable-shared was given.
+if test "${enable_shared+set}" = set; then
+  enableval="$enable_shared"
+  case "${enableval}" in
+  yes) shared=true ;;
+  no)  shared=false ;;
+  *)   { echo "configure: error: bad value ${enableval} for BFD shared option" 1>&2; exit 1; } ;;
+esac
+fi
+# Check whether --enable-commonbfdlib or --disable-commonbfdlib was given.
+if test "${enable_commonbfdlib+set}" = set; then
+  enableval="$enable_commonbfdlib"
+  case "${enableval}" in
+  yes) commonbfdlib=true ;;
+  no)  commonbfdlib=false ;;
+  *)   { echo "configure: error: bad value ${enableval} for BFD commonbfdlib option" 1>&2; exit 1; } ;;
+esac
+fi
 # Check whether --with-mmap or --without-mmap was given.
 if test "${with_mmap+set}" = set; then
   withval="$with_mmap"
@@ -689,6 +711,21 @@ host64=false
 target64=false
 
 # host stuff:
+
+ALLLIBS='$(TARGETLIB)'
+PICFLAG=
+SHLIB=
+SHLINK=
+if test "${shared}" = "true"; then
+  PICFLAG=-fpic
+  if test "${commonbfdlib}" = "true"; then
+    ALLLIBS='$(TARGETLIB)'
+  else
+    ALLLIBS='$(TARGETLIB) $(SHLIB) $(SHLINK)'
+    SHLIB=libbfd.so.`sed -e 's/[^0-9]*\([0-9.]*\).*/\1/' ${srcdir}/VERSION`
+    SHLINK=libbfd.so
+  fi
+fi
 
 # Permit host specific settings.
 . ${srcdir}/configure.host
@@ -886,6 +923,31 @@ test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
+if test "${shared}" = "true"; then
+  if test "${GCC}" != "yes" && test "${shared_non_gcc}" != "yes"; then
+    echo "configure: warning: BFD --enable-shared only supported when using gcc" 1>&2
+    shared=false
+    PICFLAG=
+    SHLIB=
+  fi
+fi
+
+
+
+
+
+
+if test "${commonbfdlib}" = "true"; then
+  COMMON_SHLIB=yes
+  PICLIST=piclist
+else
+  COMMON_SHLIB=
+  PICLIST=
+fi
+
+
+
+
 HOST_64BIT_LONG=0
 if test "x${HOST_64BIT_TYPE}" = "xlong"; then
   HOST_64BIT_LONG=1
@@ -901,7 +963,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 905 "configure"
+#line 967 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -943,7 +1005,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 947 "configure"
+#line 1009 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -957,7 +1019,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 961 "configure"
+#line 1023 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -990,7 +1052,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 994 "configure"
+#line 1056 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1026,7 +1088,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1030 "configure"
+#line 1092 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1061,7 +1123,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1065 "configure"
+#line 1127 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1108,7 +1170,7 @@ done
 
 
 case "${host}" in
-i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-win32)
+i[345]86-*-msdos* | i[345]86-*-go32* | *-*-cygwin32)
   cat >> confdefs.h <<\EOF
 #define USE_BINARY_FOPEN 1
 EOF
@@ -1120,7 +1182,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1124 "configure"
+#line 1186 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1160,7 +1222,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1164 "configure"
+#line 1226 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1460,7 +1522,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1464 "configure"
+#line 1526 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
@@ -1747,7 +1809,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1751 "configure"
+#line 1813 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1799,7 +1861,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1803 "configure"
+#line 1865 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1893,7 +1955,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1897 "configure"
+#line 1959 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2083,6 +2145,14 @@ s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
 s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
+s%@ALLLIBS@%$ALLLIBS%g
+s%@PICFLAG@%$PICFLAG%g
+s%@SHLIB@%$SHLIB%g
+s%@SHLIB_CC@%$SHLIB_CC%g
+s%@SHLIB_CFLAGS@%$SHLIB_CFLAGS%g
+s%@COMMON_SHLIB@%$COMMON_SHLIB%g
+s%@PICLIST@%$PICLIST%g
+s%@SHLINK@%$SHLINK%g
 s%@HOST_64BIT_LONG@%$HOST_64BIT_LONG%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@CPP@%$CPP%g

@@ -57,6 +57,15 @@ CFLAGS = @CFLAGS@
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
 
+ALLLIBS = @ALLLIBS@
+
+PICFLAG = @PICFLAG@
+SHLIB = @SHLIB@
+SHLIB_CC = @SHLIB_CC@
+SHLIB_CFLAGS = @SHLIB_CFLAGS@
+COMMON_SHLIB = @COMMON_SHLIB@
+SHLINK = @SHLINK@
+
 CC_FOR_BUILD = @CC_FOR_BUILD@
 
 INCDIR = $(srcdir)/../include
@@ -392,6 +401,9 @@ FLAGS_TO_PASS = \
 
 ALL_CFLAGS=@HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) $(CFLAGS)
 .c.o:
+	if [ -n "$(PICFLAG)" ]; then \
+	  $(CC) -c $(PICFLAG) $(ALL_CFLAGS) $< -o pic/$@; \
+	else true; fi
 	$(CC) -c $(ALL_CFLAGS) $<
 
 bfd_libs_here =
@@ -415,9 +427,7 @@ HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
 	 libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h libnlm.h \
 	 liboasys.h nlm-target.h nlmcode.h som.h genlink.h netbsd.h
 
-STAGESTUFF = $(TARGETLIB) $(OFILES)
-
-all: Makefile $(TARGETLIB) 
+all: Makefile $(ALLLIBS) @PICLIST@
 	@$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 .NOEXPORT:
@@ -448,8 +458,8 @@ diststuff: info
 # COREFILE	Core file routines for a native configuration
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@
 
-ofiles : Makefile
-	rm -f ofiles
+stamp-ofiles: Makefile
+	rm -f tofiles
 	f=""; \
 	for i in $(OFILES) ; do \
 	  case " $$f " in \
@@ -457,7 +467,11 @@ ofiles : Makefile
 	    *) f="$$f $$i" ;; \
 	  esac ; \
 	done ; \
-	echo $$f > ofiles
+	echo $$f > tofiles
+	$(srcdir)/../move-if-change tofiles ofiles
+	touch stamp-ofiles
+
+ofiles: stamp-ofiles ; @true
 
 $(TARGETLIB): $(OFILES) ofiles
 	rm -f $(TARGETLIB)
@@ -465,14 +479,40 @@ $(TARGETLIB): $(OFILES) ofiles
 	$(AR) $(AR_FLAGS) $(TARGETLIB) `cat ofiles`
 	$(RANLIB) $(TARGETLIB)
 
+stamp-piclist: ofiles
+	rm -f tpiclist
+	if [ -n "$(PICFLAG)" ]; then \
+	  sed -e 's,\([^ ][^ ]*\),pic/\1,g' ofiles > tpiclist; \
+	else \
+	  cp ofiles tpiclist; \
+	fi
+	$(srcdir)/../move-if-change tpiclist piclist
+	touch stamp-piclist
+
+piclist: stamp-piclist ; @true
+
+$(SHLIB): stamp-picdir $(OFILES) piclist
+	rm -f $(SHLIB)
+	$(SHLIB_CC) $(SHLIB_CFLAGS) -o $(SHLIB) `cat piclist`
+
+$(SHLINK): $(SHLIB)
+	rm -f $(SHLINK)
+	ln -sf $(SHLIB) $(SHLINK)
+
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.
 
 targets.o: targets.c Makefile
-	$(CC) -c $(ALL_CFLAGS) $(TDEFAULTS) $<
+	if [ -n "$(PICFLAG)" ]; then \
+	  $(CC) -c $(PICFLAG) $(TDEFAULTS) $(ALL_CFLAGS) $(srcdir)/targets.c -o pic/targets.o; \
+	else true; fi
+	$(CC) -c $(TDEFAULTS) $(ALL_CFLAGS) $(srcdir)/targets.c
 
 archures.o: archures.c Makefile
-	$(CC) -c $(ALL_CFLAGS) $(TDEFAULTS) $<
+	if [ -n "$(PICFLAG)" ]; then \
+	  $(CC) -c $(PICFLAG) $(TDEFAULTS) $(ALL_CFLAGS) $(srcdir)/archures.c -o pic/archures.o; \
+	else true; fi
+	$(CC) -c $(TDEFAULTS) $(ALL_CFLAGS) $(srcdir)/archures.c
 
 elf32-target.h : elfxx-target.h
 	rm -f elf32-target.h
@@ -499,13 +539,15 @@ TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
 do_mostlyclean:
-	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout config.log
+	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout config.log \
+		pic/*.o
 do_clean: do_mostlyclean
-	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles \
-		elf32-target.h elf64-target.h
+	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles stamp-ofiles \
+		elf32-target.h elf64-target.h $(SHLIB) $(SHLINK) \
+		piclist stamp-piclist
 do_distclean: do_clean
 	rm -f Makefile config.status config.cache config.h stamp-h
-
+	rm -rf pic stamp-picdir
 do_maintainer_clean: do_distclean
 	rm -f $(srcdir)/bfd-in2.h $(srcdir)/libbfd.h $(srcdir)/libcoff.h
 
@@ -581,9 +623,19 @@ roll:
 #
 force:
 
-install:
-	$(INSTALL_DATA) libbfd.a $(libdir)/libbfd.a
-	$(RANLIB) $(libdir)/libbfd.a
+install: $(ALLLIBS)
+	for f in $(ALLLIBS); do \
+	  rm -f $(libdir)/$$f; \
+	  if [ "$$f" = "$(SHLINK)" ]; then \
+	    ln -sf $(SHLIB) $(libdir)/$$f; \
+	  elif [ "$$f" = "$(SHLIB)" ]; then \
+	    $(INSTALL_PROGRAM) $$f $(libdir)/$$f; \
+	  else \
+	    $(INSTALL_DATA) $$f $(libdir)/$$f; \
+	    $(RANLIB) $(libdir)/$$f; \
+	    chmod a-x $(libdir)/$$f; \
+	  fi; \
+	done
 # Install BFD include file, and others that it needs.  Install them
 # both in GCC's include directory, and in the system include dir
 # if configured as $(oldincludedir) -- which it usually isnt.
@@ -682,15 +734,15 @@ headers:
 # The rules for the generated header files are here so that people can
 # type `make bfd-in2.h' if they remove it.  They are not run by default.
 bfd-in2.h:
-	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
+	(cd $(docdir); $(MAKE) bfd.h $(FLAGS_TO_PASS))
 	cp $(docdir)/bfd.h bfd-in2.h-new
 	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 libbfd.h:
-	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
+	(cd $(docdir); $(MAKE) libbfd.h $(FLAGS_TO_PASS))
 	cp $(docdir)/libbfd.h libbfd.h-new
 	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
 libcoff.h:
-	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
+	(cd $(docdir); $(MAKE) libcoff.h $(FLAGS_TO_PASS))
 	cp $(docdir)/libcoff.h libcoff.h-new
 	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 
@@ -708,6 +760,14 @@ elf32-arc.o: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h elf32-target.h
 end-sanitize-arc:
+
+$(OFILES): stamp-picdir
+
+stamp-picdir:
+	if [ -n "$(PICFLAG)" ] && [ ! -d pic ]; then \
+	  mkdir pic; \
+	else true; fi
+	touch stamp-picdir
 
 # What appears below is generated by a hacked mkdep using gcc -MM.
 

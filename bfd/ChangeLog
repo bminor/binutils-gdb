@@ -1,5 +1,36 @@
 Mon Feb  5 10:38:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	Support for building as a shared library, based on patches from
+	Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* configure.in: Add AC_ARG_ENABLE for shared and commonbfdlib.
+	New substitutions: ALLLIBS, PICFLAG, SHLIB, SHLIB_CC,
+	SHLIB_CFLAGS, COMMON_SHLIB, PICLIST, SHLINK.
+	* configure: Rebuild.
+	* configure.host: If --enable-shared, adjust shared library stuff
+	based on the host.  If the host is SunOS, and the linker supports
+	-rpath, set HLDFLAGS to use it.
+	* Makefile.in (ALLLIBS): New variable.
+	(PICFLAG, SHLIB, SHLIB_CC, SHLIB_CFLAGS): New variables.
+	(COMMON_SHLIB, SHLINK): New variables.
+	(.c.o): If PICFLAG is set, compile twice, once PIC, once normal.
+	(STAGESTUFF): Remove variable.
+	(all): Depend upon $(ALLLIBS) and @PICLIST@ rather than
+	$(TARGETLIB).
+	(stamp-ofiles): New target, like old ofiles target, but build
+	using a temporary file and move-if-change, and touch stamp-ofiles
+	when done.
+	(ofiles): Just depend upon stamp-ofiles.
+	(stamp-piclist, piclist): New targets.
+	($(SHLIB), $(SHLINK)): New targets.
+	(targets.o, archures.o): Build twice if PICFLAG is set.
+	(do_mostlyclean): Remove pic/*.o.
+	(do_clean): Remove stamp-ofiles, $(SHLIB), $(SHLINK), piclist, and
+	stamp-piclist.
+	(do_distclean): Remove pic and stamp-picdir.
+	(install): Install shared libraries.
+	($(OFILES)): Depend upon stamp-picdir.
+	(stamp-picdir): New target.
+
 	* libcoff-in.h: Add comment reminding people that libcoff.h is a
 	generated file.
 	* libcoff.h: Rebuild.
