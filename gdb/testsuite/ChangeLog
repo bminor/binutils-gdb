@@ -1,3 +1,8 @@
+Fri Jun 11 13:12:27 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.t16/printcmd.exp: Print a variable before running program
+	(with xfail for AIX).
+
 Thu Jun 10 11:04:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.t06/{signals.exp,signals.c,Makefile.in}: New test.
