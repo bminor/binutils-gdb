@@ -482,8 +482,9 @@ if test "${enable_netrom}" = "yes"; then
 fi
 
 
-build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
+default_build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
 -Wformat -Wparentheses -Wpointer-arith"
+build_warnings=""
 # Not yet: -Wall -Wpointer-arith -Wstrict-prototypes
 # -Wmissing-prototypes -Wmissing-declarations
 AC_ARG_ENABLE(build-warnings,
@@ -492,9 +493,9 @@ AC_ARG_ENABLE(build-warnings,
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+        build_warnings="${default_build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+        build_warnings="${t} ${default_build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
