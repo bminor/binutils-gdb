@@ -25,7 +25,7 @@
 #include "value.h"
 #include "gdbcmd.h"
 #include "regcache.h"
-#include "symfile.h"
+#include "objfiles.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "arch-utils.h"

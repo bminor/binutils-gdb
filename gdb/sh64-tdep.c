@@ -28,7 +28,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "symtab.h"
-#include "symfile.h"
+#include "objfiles.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"

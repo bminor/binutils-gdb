@@ -21,7 +21,6 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include "symfile.h"		/* for entry_point_address */
 #include "gdbcore.h"
 #include "arch-utils.h"
 #include "floatformat.h"

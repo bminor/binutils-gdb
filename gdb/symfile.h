@@ -180,8 +180,6 @@ extern void fill_in_vptr_fieldno (struct type *);
 
 extern void add_symtab_fns (struct sym_fns *);
 
-extern void init_entry_point_info (struct objfile *);
-
 extern void syms_from_objfile (struct objfile *,
 			       struct section_addr_info *,
 			       struct section_offsets *, int, int, int);
@@ -253,8 +251,6 @@ extern int auto_solib_add;
 extern int auto_solib_limit;
 
 /* From symfile.c */
-
-extern CORE_ADDR entry_point_address (void);
 
 extern struct partial_symtab *allocate_psymtab (char *, struct objfile *);
 

@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -31,7 +31,6 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "tm.h"
 #include "../bfd/bfd.h"

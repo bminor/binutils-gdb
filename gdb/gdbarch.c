@@ -49,7 +49,6 @@
 #include "gdb-events.h"
 #include "reggroups.h"
 #include "osabi.h"
-#include "symfile.h"		/* For entry_point_address.  */
 #include "gdb_obstack.h"
 
 /* Static function declarations */

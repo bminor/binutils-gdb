@@ -28,7 +28,7 @@
 #include "bfd.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
-#include "symfile.h"
+#include "objfiles.h"
 #include "regcache.h"
 #include "arch-utils.h"
 #include "gdb_assert.h"

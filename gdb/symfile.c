@@ -294,41 +294,6 @@ psymtab_to_symtab (struct partial_symtab *pst)
   return pst->symtab;
 }
 
-/* Initialize entry point information for this objfile. */
-
-void
-init_entry_point_info (struct objfile *objfile)
-{
-  /* Save startup file's range of PC addresses to help blockframe.c
-     decide where the bottom of the stack is.  */
-
-  if (bfd_get_file_flags (objfile->obfd) & EXEC_P)
-    {
-      /* Executable file -- record its entry point so we'll recognize
-         the startup file because it contains the entry point.  */
-      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
-    }
-  else
-    {
-      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      objfile->ei.entry_point = INVALID_ENTRY_POINT;
-    }
-  objfile->ei.deprecated_entry_file_lowpc = INVALID_ENTRY_LOWPC;
-  objfile->ei.deprecated_entry_file_highpc = INVALID_ENTRY_HIGHPC;
-  objfile->ei.entry_func_lowpc = INVALID_ENTRY_LOWPC;
-  objfile->ei.entry_func_highpc = INVALID_ENTRY_HIGHPC;
-  objfile->ei.main_func_lowpc = INVALID_ENTRY_LOWPC;
-  objfile->ei.main_func_highpc = INVALID_ENTRY_HIGHPC;
-}
-
-/* Get current entry point address.  */
-
-CORE_ADDR
-entry_point_address (void)
-{
-  return symfile_objfile ? symfile_objfile->ei.entry_point : 0;
-}
-
 /* Remember the lowest-addressed loadable section we've seen.  
    This function is called via bfd_map_over_sections. 
 

@@ -1,5 +1,5 @@
 /* Shared library support for IRIX.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2004
    Free Software Foundation, Inc.
 
    This file was created using portions of irix5-nat.c originally
@@ -26,6 +26,8 @@
 
 #include "symtab.h"
 #include "bfd.h"
+/* FIXME: ezannoni/2004-02-13 Verify that the include below is
+   really needed.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcore.h"
@@ -355,10 +357,10 @@ static int
 enable_break (void)
 {
   if (symfile_objfile != NULL
-      && target_insert_breakpoint (symfile_objfile->ei.entry_point,
+      && target_insert_breakpoint (entry_point_address (),
 				   shadow_contents) == 0)
     {
-      breakpoint_addr = symfile_objfile->ei.entry_point;
+      breakpoint_addr = entry_point_address ();
       return 1;
     }
 

@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_assert.h"
 
 /* To get entry_point_address.  */
-#include "symfile.h"
+#include "objfiles.h"
 
 #include "solib.h"              /* Support for shared libraries. */
 #include "solib-svr4.h"         /* For struct link_map_offsets.  */

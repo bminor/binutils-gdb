@@ -102,7 +102,6 @@
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "elf/dwarf.h"
 #include "buildsym.h"

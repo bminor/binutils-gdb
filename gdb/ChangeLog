@@ -1,3 +1,45 @@
+2004-02-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symfile.c (init_entry_point_info, entry_point_address): Move
+	from here...  
+	* objfiles.c (init_entry_point_info, entry_point_address):..to
+	here.
+	* symfile.h (init_entry_point_info, entry_point_address): Remove
+	prototypes.
+	* objfiles.h (init_entry_point_info, entry_point_address):Add
+	prototypes.  
+	* cris-tdep.c: Remove include of symfile.h. Add include of
+	objfiles.h.
+	* infcall.c: Ditto.
+	* mcore-tdep.c: Ditto.
+	* mn10300-tdep.c: Ditto.
+	* sh64-tdep.c: Ditto.
+ 	* v850-tdep.c: Ditto.
+	* arm-tdep.c: Remove include of symfile.h.
+	* blockframe.c: Ditto.
+	* coffread.c: Ditto.
+	* dbxread.c: Ditto.
+	* dwarf2read.c: Ditto.
+	* dwarfread.c: Ditto.
+	* frv-tdep.c: Ditto.	
+	* ia64-tdep.c: Ditto.
+	* mdebugread.c: Ditto.
+	* mipsread.c: Ditto.
+	* rs6000-tdep.c: Ditto.	
+	* s390-tdep.c: Ditto.
+	* sh-tdep.c: Ditto.
+	* xstormy16-tdep.c: Ditto. 
+	* gdbarch.sh: Remove include of symfile.h.
+	* gdbarch.c: Regenerate.
+	* solib-irix.c (enable_break): Use entry_point_address().
+	Add comment about include file.
+	* xcoffread.c: Add comment about include file.
+	* Makefile.in (arm-tdep.o, blockframe.o, coffread.o, cris-tdep.o) 
+	(dbxread.o, dwarf2read.o, dwarfread.o, frv-tdep.o, gdbarch.o) 
+	(ia64-tdep.o, infcall.o, mcore-tdep.o, mdebugread.o, mipsread.o) 
+	(mn10300-tdep.o, rs6000-nat.o, s390-tdep.o, sh64-tdep.o) 
+	(sh-tdep.o, v850-tdep.o, xstormy16-tdep.o): Update dependencies.
+
 2004-02-13  Andrew Cagney  <cagney@redhat.com>
 
 	* corelow.c (core_xfer_partial): Use "struct bfd_section".

@@ -28,7 +28,6 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "arch-utils.h"
 #include "regcache.h"

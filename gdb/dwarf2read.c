@@ -31,7 +31,6 @@
 #include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "elf/dwarf2.h"
 #include "buildsym.h"

@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "value.h"
 #include "inferior.h"
-#include "symfile.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "gdbcore.h"
