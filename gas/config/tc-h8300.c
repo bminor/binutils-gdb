@@ -953,7 +953,7 @@ build_bytes (this_try, operand)
 		       operand->exp.X_add_number);
 	    }
 
-	  oeprand[i].exp.X_add_number =
+	  operand[i].exp.X_add_number =
 	    (char) (operand[i].exp.X_add_number - 1);
 	  fix_new_exp (frag_now,
 		       output - frag_now->fr_literal + where,
@@ -990,7 +990,7 @@ build_bytes (this_try, operand)
 	      as_warn ("branch operand has odd offset (%x)\n",
 		       operand->exp.X_add_number);
 	    }
-	  operand[i].exp = (short) operand[i].exp.X_add_number;
+	  operand[i].exp.X_add_number = (short) operand[i].exp.X_add_number;
 	  fix_new_exp (frag_now,
 		       output - frag_now->fr_literal,
 		       4,
