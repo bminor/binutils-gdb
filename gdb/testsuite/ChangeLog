@@ -1,3 +1,8 @@
+2001-07-03  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.c++/classes.exp: Accept both "foo(void)" and "foo()" in
+	the output of the ptype command.
+
 2001-07-02  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/corefile.exp: Quote the curly braces in regexp.
