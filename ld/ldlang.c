@@ -862,9 +862,11 @@ exp_init_os (exp)
 /* Sections marked with the SEC_LINK_ONCE flag should only be linked
    once into the output.  This routine checks each sections, and
    arranges to discard it if a section of the same name has already
-   been linked.  This code assumes that all relevant sections have the
-   SEC_LINK_ONCE flag set; that is, it does not depend solely upon the
-   section name.  This is called via bfd_map_over_sections.  */
+   been linked.  If the section has COMDAT information, then it uses
+   that to decide whether the section should be included.  This code
+   assumes that all relevant sections have the SEC_LINK_ONCE flag set;
+   that is, it does not depend solely upon the section name.  This is
+   called via bfd_map_over_sections.  */
 
 /*ARGSUSED*/
 static void
@@ -919,7 +921,10 @@ section_already_linked (abfd, sec, data)
 
   for (l = sec_link_once_list; l != NULL; l = l->next)
     {
-      if (strcmp (name, bfd_get_section_name (l->sec->owner, l->sec)) == 0)
+      if (strcmp (name, bfd_get_section_name (l->sec->owner, l->sec)) == 0
+	  && (sec->comdat == NULL
+	      || l->sec->comdat == NULL
+	      || strcmp (sec->comdat->name, l->sec->comdat->name) == 0))
 	{
 	  /* The section has already been linked.  See if we should
              issue a warning.  */
@@ -932,8 +937,12 @@ section_already_linked (abfd, sec, data)
 	      break;
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
-	      einfo (_("%P: %B: warning: ignoring duplicate section `%s'\n"),
-		     abfd, name);
+	      if (sec->comdat == NULL)
+		einfo (_("%P: %B: warning: ignoring duplicate section `%s'\n"),
+		       abfd, name);
+	      else
+		einfo (_("%P: %B: warning: ignoring duplicate `%s' section symbol `%s'\n"),
+		       abfd, name, sec->comdat->name);
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
@@ -952,8 +961,13 @@ section_already_linked (abfd, sec, data)
 	    }
 
 	  /* Set the output_section field so that wild_doit does not
-	     create a lang_input_section structure for this section.  */
+	     create a lang_input_section structure for this section.
+	     Since there might be a symbol in the section being
+	     discarded, we must retain a pointer to the section which
+	     we are really going to use.  */
 	  sec->output_section = bfd_abs_section_ptr;
+	  if (sec->comdat != NULL)
+	    sec->comdat->sec = l->sec;
 
 	  return;
 	}

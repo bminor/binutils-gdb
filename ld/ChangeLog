@@ -23,6 +23,9 @@
 
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* ldlang.c (section_already_linked): Use comdat information if it
+	is available.
+
 	* emultempl/pe.em (PE_DEF_SECTION_ALIGNMENT): If
 	OVERRIDE_SECTION_ALIGNMENT is defined, change to that.
 	(gld_${EMULATION_NAME}_before_parse): Use EXECUTABLE_NAME if it is
