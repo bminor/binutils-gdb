@@ -1099,11 +1099,12 @@ alpha_extract_return_value (valtype, regbuf, valbuf)
     char regbuf[REGISTER_BYTES];
     char *valbuf;
 {
-  int regnum;
-  
-  regnum = TYPE_CODE (valtype) == TYPE_CODE_FLT ? FP0_REGNUM : V0_REGNUM;
-
-  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum), TYPE_LENGTH (valtype));
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+    alpha_register_convert_to_virtual (FP0_REGNUM, valtype,
+				       regbuf + REGISTER_BYTE (FP0_REGNUM),
+				       valbuf);
+  else
+    memcpy (valbuf, regbuf + REGISTER_BYTE (V0_REGNUM), TYPE_LENGTH (valtype));
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
@@ -1114,13 +1115,20 @@ alpha_store_return_value (valtype, valbuf)
     struct type *valtype;
     char *valbuf;
 {
-  int regnum;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  int regnum = V0_REGNUM;
+  int length = TYPE_LENGTH (valtype);
   
-  regnum = TYPE_CODE (valtype) == TYPE_CODE_FLT ? FP0_REGNUM : V0_REGNUM;
-  memcpy(raw_buffer, valbuf, TYPE_LENGTH (valtype));
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+    {
+      regnum = FP0_REGNUM;
+      length = REGISTER_RAW_SIZE (regnum);
+      alpha_register_convert_to_raw (valtype, regnum, valbuf, raw_buffer);
+    }
+  else
+    memcpy (raw_buffer, valbuf, length);
 
-  write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
+  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, length);
 }
 
 /* Just like reinit_frame_cache, but with the right arguments to be

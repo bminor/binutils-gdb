@@ -1227,6 +1227,7 @@ mips_extract_return_value (valtype, regbuf, valbuf)
     char *valbuf;
 {
   int regnum;
+  int offset = 0;
   
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
@@ -1234,7 +1235,13 @@ mips_extract_return_value (valtype, regbuf, valbuf)
 	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4)))
     regnum = FP0_REGNUM;
 
-  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum), TYPE_LENGTH (valtype));
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN
+      && TYPE_CODE (valtype) != TYPE_CODE_FLT
+      && TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (regnum))
+    offset = REGISTER_RAW_SIZE (regnum) - TYPE_LENGTH (valtype);
+
+  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum) + offset,
+	  TYPE_LENGTH (valtype));
 #ifdef REGISTER_CONVERT_TO_TYPE
   REGISTER_CONVERT_TO_TYPE(regnum, valtype, valbuf);
 #endif

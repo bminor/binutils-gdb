@@ -1,3 +1,12 @@
+Tue Aug  1 02:08:30 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-tdep.c (mips_extract_return_value):  Fix returning of
+	values whose length is less than the register size for big endian
+	targets.
+	* alpha-tdep.c (alpha_extract_return_value,
+	alpha_store_return_value):  Use alpha_convert_register_to_*
+	to handle functions returning "float" correctly.
+
 Mon Jul 31 19:12:48 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* h8500-tdep.c: General linting and cleanup.
