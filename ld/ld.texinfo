@@ -1143,6 +1143,18 @@ full debugging information by over 30 percent.  Unfortunately, the SunOS
 trouble).  The @samp{--traditional-format} switch tells @code{ld} to not
 combine duplicate entries.
 
+@kindex --section-start @var{sectionname}=@var{org}
+@item --section-start @var{sectionname}=@var{org}
+Locate a section in the output file at the absolute
+address given by @var{org}.  You may use this option as many
+times as necessary to locate multiple sections in the command
+line.
+@var{org} must be a single hexadecimal integer;
+for compatibility with other linkers, you may omit the leading
+@samp{0x} usually associated with hexadecimal values.  @emph{Note:} there
+should be no white space between @var{sectionname}, the equals
+sign (``@key{=}''), and @var{org}.
+
 @kindex -Tbss @var{org}
 @kindex -Tdata @var{org}
 @kindex -Ttext @var{org}

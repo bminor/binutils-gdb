@@ -2,6 +2,9 @@
 
 Changes in version 2.10:
 
+* Added command line switch --section-start to set the start address of any
+  specified section. 
+
 * Added ability to emit full relocation information in linked executables,
   enabled by --emit-relocs.  Some post-linkage optimization tools need
   this information in order to be able to correctly identify and perform

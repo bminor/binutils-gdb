@@ -1,3 +1,15 @@
+2000-05-22  Thomas de Lellis  <tdel@windriver.com>
+
+        * ld.1: Add documentation for new command line option:
+               --section-start <sectionname>=<sectionorg>
+        This is a generic version of -Ttext etc. which accepts
+        any section name as a parameter instead of just text/data/
+	bss. 
+        * ld.texinfo: More docs.
+        * NEWS: More docs.
+        * lexsup.c: (parse_args): Recognize new command line option.
+	(ld_options): Add new option.
+	
 2000-05-18  H.J. Lu  <hjl@gnu.org>
 
 	* lexsup.c (parse_args): `i' == `r', not `q'.

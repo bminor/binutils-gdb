@@ -39,7 +39,7 @@ ld \- the GNU linker
 .br
 .RB "[\|" "\-defsym\ "\c
 .I symbol\c
-\& = \c
+\&=\c
 .I expression\c
 \&\|]
 .RB "[\|" \-\-demangle "\|]"
@@ -122,6 +122,11 @@ ld \- the GNU linker
 .RB "[\|" "\-T\ "\c
 .I commandfile\c
 \&\|]  
+.RB "[\|" "\-\-section\-start\ "\c
+.I sectionname\c
+\&=\c
+.I sectionorg\c
+\&\|]
 .RB "[\|" "\-Ttext\ "\c
 .I textorg\c
 \&\|] 
@@ -253,8 +258,9 @@ The exceptions\(em\&which may meaningfully be used more than once\(em\&are
 .B \-format\c
 \&), \c
 .B \-defsym\c
-\&,
-\c
+\&, \c
+.B \-\-section\-start\c
+\&, \c
 .B \-L\c
 \&, \c
 .B \-l\c
@@ -454,7 +460,7 @@ specified (\c
 \& has the same effect.
 
 .TP
-.BI "-defsym " "symbol" "\fR = \fP" expression
+.BI "-defsym " "symbol" "\fR=\fP" expression
 Create a global symbol in the output file, containing the absolute
 address given by \c
 .I expression\c
@@ -888,6 +894,20 @@ relocations one output section will contain that many relocations.
 Similar to
 .B \-split\-by\-reloc
 but creates a new output section for each input file.
+
+.TP
+.BI "--section-start " "sectionname" "\fR=\fP"org
+Locate a section in the output file at the absolute
+address given by \c
+.I org\c
+\&.  \c
+\c
+.I org\c
+\& must be a hexadecimal integer.
+You may use this option as many
+times as necessary to locate multiple sections in the command
+line.  If you need more elaborate expressions, consider
+using the linker command language from a script.
 
 .TP
 .BI "\-Tbss " "org"\c

@@ -123,6 +123,7 @@ int parsing_defsym = 0;
 #define OPTION_NO_UNDEFINED		(OPTION_MPC860C0 + 1)
 #define OPTION_INIT                     (OPTION_NO_UNDEFINED + 1)
 #define OPTION_FINI                     (OPTION_INIT + 1)
+#define OPTION_SECTION_START		(OPTION_FINI + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -336,6 +337,8 @@ static const struct ld_option ld_options[] =
       '\0', N_("SYMBOL"), N_("Do task level linking"), TWO_DASHES },
   { {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
       '\0', NULL, N_("Use same format as native linker"), TWO_DASHES },
+  { {"section-start", required_argument, NULL, OPTION_SECTION_START},
+      '\0', N_("SECTION=ADDRESS"), N_("Set address of named section"), TWO_DASHES },
   { {"Tbss", required_argument, NULL, OPTION_TBSS},
       '\0', N_("ADDRESS"), N_("Set address of .bss section"), ONE_DASH },
   { {"Tdata", required_argument, NULL, OPTION_TDATA},
@@ -840,6 +843,39 @@ parse_args (argc, argv)
 	  ldfile_open_command_file (optarg);
 	  parser_input = input_script;
 	  yyparse ();
+	  break;
+	case OPTION_SECTION_START:
+	  {
+	    char *optarg2;
+
+	    /* Check for <something>=<somthing>...  */
+	    optarg2 = strchr (optarg, '=');
+	    if (optarg2 == NULL)
+	      {
+		fprintf (stderr,
+			 _("%s: Invalid argument to option \"--section-start\"\n"),
+			 program_name);
+		xexit (1);
+	      }
+
+	    optarg2 ++;
+	    
+	    /* So far so good.  Are all the args present?  */
+	    if ((*optarg == '\0') || (*optarg2 == '\0'))
+	      {
+		fprintf (stderr,
+			 _("%s: Missing argument(s) to option \"--section-start\"\n"),
+			 program_name);
+		xexit (1);
+	      }
+
+	    optarg2[-1] = '\0';
+
+	    /* Then set it...  */
+	    set_section_start (optarg, optarg2);
+	    
+	    optarg2[-1] = '=';
+	  }
 	  break;
 	case OPTION_TBSS:
 	  set_section_start (".bss", optarg);
