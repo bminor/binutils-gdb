@@ -3,6 +3,7 @@
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't use SYMBOL_REFERENCES_LOCAL
 	here as it's too early to reliably determine locality.
 	(ppc_elf_gc_sweep_hook): Likewise.
+	(SYMBOL_REFERENCES_LOCAL): Expand comment.
 
 2003-04-02  Bob Wilson  <bob.wilson@acm.org>
 
