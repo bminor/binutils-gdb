@@ -36,7 +36,9 @@
 
    Each dictionary starts with a 'virtual function table' that
    contains the functions that actually implement the various
-   operations that dictionaries provide.
+   operations that dictionaries provide.  (Note, however, that, for
+   the sake of client code, we also provide some functions that can be
+   implemented generically in terms of the functions in the vtable.)
 
    To add a new dictionary implementation <impl>, what you should do
    is:
@@ -117,14 +119,13 @@ struct dict_vtbl
   enum dict_type type;
   /* The function to free a dictionary.  */
   void (*free) (struct dictionary *dict);
-  /* The symbol lookup function.  */
-  struct symbol *(*lookup) (const struct dictionary *dict,
-			    const char *name);
+  /* Add a symbol to a dictionary, if possible.  */
+  void (*add_symbol) (struct dictionary *dict, struct symbol *sym);
   /* Iterator functions.  */
   struct symbol *(*iterator_first) (const struct dictionary *dict,
 				    struct dict_iterator *iterator);
   struct symbol *(*iterator_next) (struct dict_iterator *iterator);
-  void (*add_symbol) (struct dictionary *dict, struct symbol *sym);
+  /* Functions to iterate over symbols with a given name.  */
   struct symbol *(*iter_name_first) (const struct dictionary *dict,
 				     const char *name,
 				     struct dict_iterator *iterator);
@@ -231,9 +232,6 @@ static void free_obstack (struct dictionary *dict);
 
 /* Functions for DICT_HASHED dictionaries.  */
 
-static struct symbol *lookup_hashed (const struct dictionary *dict,
-				     const char *name);
-
 static struct symbol *iterator_first_hashed (const struct dictionary *dict,
 					     struct dict_iterator *iterator);
 
@@ -248,9 +246,6 @@ static struct symbol *iter_name_next_hashed (const char *name,
 
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE
    dictionaries.  */
-
-static struct symbol *lookup_linear (const struct dictionary *dict,
-				     const char *name);
 
 static struct symbol *iterator_first_linear (const struct dictionary *dict,
 					     struct dict_iterator *iterator);
@@ -276,24 +271,24 @@ static void add_symbol_linear_expandable (struct dictionary *dict,
 
 static const struct dict_vtbl dict_hashed_vtbl =
   {
-    DICT_HASHED, free_obstack, lookup_hashed, iterator_first_hashed,
-    iterator_next_hashed, add_symbol_nonexpandable, iter_name_first_hashed,
-    iter_name_next_hashed,
+    DICT_HASHED, free_obstack, add_symbol_nonexpandable,
+    iterator_first_hashed, iterator_next_hashed,
+    iter_name_first_hashed, iter_name_next_hashed,
   };
 
 static const struct dict_vtbl dict_linear_vtbl =
   {
-    DICT_LINEAR, free_obstack, lookup_linear, iterator_first_linear,
-    iterator_next_linear, add_symbol_nonexpandable, iter_name_first_linear,
-    iter_name_next_linear,
+    DICT_LINEAR, free_obstack,  add_symbol_nonexpandable,
+    iterator_first_linear, iterator_next_linear,
+    iter_name_first_linear, iter_name_next_linear,
   };
 
 static const struct dict_vtbl dict_linear_expandable_vtbl =
   {
-    DICT_LINEAR_EXPANDABLE, free_linear_expandable, lookup_linear,
+    DICT_LINEAR_EXPANDABLE, free_linear_expandable,
+    add_symbol_linear_expandable, 
     iterator_first_linear, iterator_next_linear,
-    add_symbol_linear_expandable, iter_name_first_linear,
-    iter_name_next_linear,
+    iter_name_first_linear, iter_name_next_linear,
   };
 
 /* The creation functions.  */
@@ -429,20 +424,12 @@ dict_free (struct dictionary *dict)
   (DICT_VTBL (dict))->free (dict);
 }
 
-/* Search DICT for symbol NAME in NAMESPACE.
+/* Add SYM to DICT.  DICT had better be expandable.  */
 
-   If MANGLED_NAME is non-NULL, verify that any symbol we find has this
-   particular mangled name.
-*/
-
-/* FIXME: carlton/2002-09-23: namespace_enum is a typedef in
-   symtab.h...  */
-
-struct symbol *
-dict_lookup (const struct dictionary *dict,
-	     const char *name)
+void
+dict_add_symbol (struct dictionary *dict, struct symbol *sym)
 {
-  return (DICT_VTBL (dict))->lookup (dict, name);
+  (DICT_VTBL (dict))->add_symbol (dict, sym);
 }
 
 /* Initialize ITERATOR to point at the first symbol in DICT, and
@@ -465,26 +452,6 @@ dict_iterator_next (struct dict_iterator *iterator)
     ->iterator_next (iterator);
 }
 
-/* Test to see if DICT is empty.  I could put this in the vtable, but
-   it's easy enough to do generically and doesn't get called a
-   lot.  */
-
-int
-dict_empty (struct dictionary *dict)
-{
-  struct dict_iterator iter;
-
-  return (dict_iterator_first (dict, &iter) == NULL);
-}
-
-/* Add SYM to DICT.  DICT had better be expandable.  */
-
-void
-dict_add_symbol (struct dictionary *dict, struct symbol *sym)
-{
-  (DICT_VTBL (dict))->add_symbol (dict, sym);
-}
-
 struct symbol *
 dict_iter_name_first (const struct dictionary *dict,
 		      const char *name,
@@ -500,6 +467,29 @@ dict_iter_name_next (const char *name, struct dict_iterator *iterator)
     ->iter_name_next (name, iterator);
 }
  
+/* These are functions that are implemented generically by means of
+   the vtable.  Typically, they're rarely used.  */
+
+/* Lookup NAME in DICT.  */
+
+struct symbol *
+dict_lookup (const struct dictionary *dict,
+	     const char *name)
+{
+  struct dict_iterator iter;
+
+  return dict_iter_name_first (dict, name, &iter);
+}
+
+/* Test to see if DICT is empty.  */
+
+int
+dict_empty (struct dictionary *dict)
+{
+  struct dict_iterator iter;
+
+  return (dict_iterator_first (dict, &iter) == NULL);
+}
 
 
 /* The functions implementing the dictionary interface.  */
@@ -520,26 +510,6 @@ add_symbol_nonexpandable (struct dictionary *dict, struct symbol *sym)
 }
 
 /* Functions for DICT_HASHED.  */
-
-static struct symbol *
-lookup_hashed (const struct dictionary *dict,
-	       const char *name)
-{
-  unsigned int hash_index
-    = msymbol_hash_iw (name) % DICT_HASHED_NBUCKETS (dict);
-  struct symbol *sym;
-  
-  for (sym = DICT_HASHED_BUCKET (dict, hash_index);
-       sym;
-       sym = sym->hash_next)
-    {
-      /* Warning: the order of arguments to strcmp_iw matters!  */
-      if (strcmp_iw (SYMBOL_BEST_NAME (sym), name) == 0)
-	return sym;
-    }
-  
-  return NULL;
-}
 
 static struct symbol *
 iterator_first_hashed (const struct dictionary *dict,
@@ -597,10 +567,30 @@ iter_name_first_hashed (const struct dictionary *dict,
 			const char *name,
 			struct dict_iterator *iterator)
 {
-  DICT_ITERATOR_DICT (iterator) = dict;
-  DICT_ITERATOR_CURRENT (iterator) = lookup_hashed (dict, name);
+  unsigned int hash_index
+    = msymbol_hash_iw (name) % DICT_HASHED_NBUCKETS (dict);
+  struct symbol *sym;
 
-  return DICT_ITERATOR_CURRENT (iterator);
+  DICT_ITERATOR_DICT (iterator) = dict;
+
+  /* Loop through the symbols in the given bucket, breaking when SYM
+     first matches.  If SYM never matches, it will be set to NULL;
+     either way, we have the right return value.  */
+  
+  for (sym = DICT_HASHED_BUCKET (dict, hash_index);
+       sym;
+       sym = sym->hash_next)
+    {
+      /* Warning: the order of arguments to strcmp_iw matters!  */
+      if (strcmp_iw (SYMBOL_BEST_NAME (sym), name) == 0)
+	{
+	  break;
+	}
+	
+    }
+
+  DICT_ITERATOR_CURRENT (iterator) = sym;
+  return sym;
 }
 
 static struct symbol *
@@ -621,17 +611,6 @@ iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
 }
 
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE.  */
-
-static struct symbol *
-lookup_linear (const struct dictionary *dict, const char *name)
-{
-  /* NOTE: carlton/2002-09-26: I don't expect this to get called much,
-     so let's just use iter_name_first_linear.  */
-
-  struct dict_iterator iter;
-
-  return iter_name_first_linear (dict, name, &iter);
-}
 
 static struct symbol *
 iterator_first_linear (const struct dictionary *dict,

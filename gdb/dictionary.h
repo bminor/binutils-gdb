@@ -69,14 +69,16 @@ extern struct dictionary *dict_create_linear_expandable (void);
 
 /* The functions providing the interface to dictionaries.  */
 
-/* Search DICT for symbol whose SYMBOL_BEST_NAME is NAME, as tested
+/* Search DICT for a symbol whose SYMBOL_BEST_NAME is NAME, as tested
    using strcmp_iw.  Returns NULL if there is no such symbol.  If
    there might be multiple such symbols, use dict_iter_name_first and
    dict_iter_name_next.  */
 
 /* FIXME: carlton/2002-09-26: Given the presence of
    dict_iter_name_first and dict_iter_name_next, should this function
-   go away?  Currently, it's never called.  */
+   go away?  Currently, it's never called, because all uses need the
+   additional flexibility provided by dict_iter_name_first and
+   dict_iter_name_next.  */
 
 extern struct symbol *dict_lookup (const struct dictionary *dict,
 				   const char *name);

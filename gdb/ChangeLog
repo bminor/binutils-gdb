@@ -1,3 +1,79 @@
+2002-09-30  David Carlton  <carlton@math.stanford.edu>
+
+	* dictionary.h: Augment comment above dict_lookup.
+	* dictionary.c (struct dict_vtbl): Delete 'lookup' member, and
+	move add_symbol to precede the iterators.
+	Make corresponding changes to dict_hashed_vtbl, dict_linear_vtbl,
+	dict_linear_expandable_vtbl.
+	(dict_lookup): Implement by means of dict_iterator_name_first.
+	(iter_name_first_hashed): Don't use lookup_hashed to implement.
+	(lookup_hashed): Delete.
+	(lookup_linear): Delete.
+	* symtab.c (lookup_symbol_aux_global_symtabs): Delete 'block'
+	argument, rename local variable 'b' to 'block', and make it point
+	to a const struct block.
+	(lookup_symbol_aux_minsym_non_hpuxhppa): Ditto.
+	(lookup_symbol_aux_global_psymtabs): Ditto.
+	(lookup_symbol_aux_static_symtabs): Ditto.
+	(lookup_symbol_aux_static_psymtabs): Ditto.
+	(lookup_symbol_aux_minsym_hpuxhppa): Ditto.
+	(lookup_symbol_aux): Correct calls to above functions.
+	(lookup_symbol_aux_minsym_non_hpuxhppa): When recursively calling
+	lookup_symbol_aux, pass 'NULL' as block argument.
+	(lookup_symbol_aux_minsym_hpuxhppa): Ditto.
+	(lookup_symbol_aux_global_symtabs): Don't initialize objfile and
+	s.
+	(lookup_symbol_aux_minsym_non_hpuxhppa): Don't initialize s.
+	(lookup_symbol_aux_global_psymtabs): Ditto.
+	(lookup_symbol_aux_static_symtabs): Ditto.
+	(lookup_symbol_aux_static_psymtabs): Ditto.
+	(lookup_symbol_aux_minsym_hpuxhppa): Ditto.
+	(lookup_symbol_aux_global_psymtabs): Don't initialize objfile.
+	(lookup_symbol_aux_static_symtabs): Ditto.
+	(lookup_symbol_aux_static_psymtabs): Ditto.
+	(lookup_symbol_aux_minsym_hpuxhppa): Delete local variable
+	objfile.
+	(lookup_symbol_aux_static_symtabs): Delete, to be replaced by
+	lookup_symbol_aux_symtabs.
+	(lookup_symbol_aux_global_symtabs): Ditto.
+	(lookup_symbol_aux_symtabs): New function.
+	(lookup_symbol_aux_psymtabs): New function.
+	(lookup_symbol_aux_global_psymtabs): Delete, to be replaced by
+	lookup_symbol_aux_psymtabs.
+	(lookup_symbol_aux_static_psymtabs): Ditto.
+	(lookup_symbol_aux_minsym_hpuxhppa): Delete, to be replaced by
+	lookup_symbol_aux_minsyms.
+	(lookup_symbol_aux_minsym_non_hpuxhppa): Ditto.
+	(lookup_symbol_aux_minsyms): New function.
+	(lookup_symbol_aux): Replace function calls by calls to functions
+	with new names.
+	(lookup_symbol_aux): Search global psymtabs before minimal
+	symbols.
+	* Makefile.in (ppc-sysv-tdep.o): Depend on gdb_string_h.
+	* ppc-sysv-tdep.c: #include "gdb_string.h".
+
+2002-09-27  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c: Run through gdb_indent.sh.
+	(lookup_symbol_aux): Delete code that isn't called.
+	(lookup_symbol_aux): Don't declare variables 'register'.
+	(lookup_symbol_aux): Move each chunk of code into its own
+	function.
+	(lookup_symbol_aux_local): New function.
+	(lookup_symbol_aux_global_symtabs): New function.
+	(lookup_symbol_aux_minsym_non_hpuxhppa): New function.
+	(lookup_symbol_aux_global_psymtabs): New function.
+	(lookup_symbol_aux_static_symtabs): New function.
+	(lookup_symbol_aux_static_psymtabs): New function.
+	(lookup_symbol_aux_minsym_hpuxhppa): New function.
+	(lookup_symbol_aux_global_psymtabs): Remove embedded newlines from
+	strings because CC mode can't deal with them.
+	(lookup_symbol_aux_static_psymtabs): Ditto.
+	(lookup_symbol_aux): Delete local variables that are now
+	obsolete.
+	* remote-sds.c (getmessage): Add semicolon after 'retry' label to
+	pacify GCC.
+
 2002-09-27  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (cris-tdep.o): Depend on gdb_string_h.
