@@ -1,3 +1,8 @@
+2004-09-02  Alexandre Oliva  <aoliva@redhat.com>
+
+	* MAINTAINERS: Add self as co-maintainer of FR-V.
+	* readelf.c (get_machine_flags): Print FR-V cpu types.
+
 2004-08-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* nm.c (show_synthetic): New var.

@@ -1872,6 +1872,46 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  decode_ARM_machine_flags (e_flags, buf);
 	  break;
 
+	case EM_CYGNUS_FRV:
+	  switch (e_flags & EF_FRV_CPU_MASK)
+	    {
+	    case EF_FRV_CPU_GENERIC:
+	      break;
+
+	    default:
+	      strcat (buf, ", fr???");
+	      break;
+	      
+	    case EF_FRV_CPU_FR300:
+	      strcat (buf, ", fr300");
+	      break;
+
+	    case EF_FRV_CPU_FR400:
+	      strcat (buf, ", fr400");
+	      break;
+	    case EF_FRV_CPU_FR405:
+	      strcat (buf, ", fr405");
+	      break;
+
+	    case EF_FRV_CPU_FR450:
+	      strcat (buf, ", fr450");
+	      break;
+
+	    case EF_FRV_CPU_FR500:
+	      strcat (buf, ", fr500");
+	      break;
+	    case EF_FRV_CPU_FR550:
+	      strcat (buf, ", fr550");
+	      break;
+
+	    case EF_FRV_CPU_SIMPLE:
+	      strcat (buf, ", simple");
+	      break;
+	    case EF_FRV_CPU_TOMCAT:
+	      strcat (buf, ", tomcat");
+	      break;
+	    }
+
 	case EM_68K:
 	  if (e_flags & EF_CPU32)
 	    strcat (buf, ", cpu32");
