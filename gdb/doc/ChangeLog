@@ -1,3 +1,8 @@
+2001-12-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Host Definition): Delete documentation on
+	HOST_BYTE_ORDER.
+
 2001-11-30  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Overlays): New chapter, documenting GDB's

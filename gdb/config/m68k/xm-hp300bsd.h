@@ -25,8 +25,6 @@
  * Problems to hpbsd-bugs@cs.utah.edu
  */
 
-#define	HOST_BYTE_ORDER	BIG_ENDIAN
-
 #include <sys/param.h>		/* For INT_MIN */
 
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */

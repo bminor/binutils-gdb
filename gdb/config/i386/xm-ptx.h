@@ -36,5 +36,3 @@
 #define USG
 
 #define USE_O_NOCTTY
-
-#define HOST_BYTE_ORDER LITTLE_ENDIAN

@@ -23,8 +23,6 @@
  * July 1988
  */
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
 /* I'm running gdb 3.4 under 386/ix 2.0.2, which is a derivative of AT&T's
    Sys V/386 3.2.
 

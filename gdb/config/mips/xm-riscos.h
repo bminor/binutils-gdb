@@ -19,10 +19,6 @@
 
 #define HAVE_TERMIO
 
-#if !defined (HOST_BYTE_ORDER)
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#endif
-
 #define USG 1
 
 /* setjmp.h requires uid_t.  */

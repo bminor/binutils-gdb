@@ -44,6 +44,7 @@
    For Vxworks, the breakpoint is set and deleted by calls to
    CALL_DUMMY_BREAK_SET and CALL_DUMMY_BREAK_DELETE.  */
 
+#error "This file is broken.  GDB does not define HOST_BYTE_ORDER."
 #if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
 #define CALL_DUMMY {0x0400870f,\
 		0x36008200|(MSP_HW_REGNUM), \

@@ -21,8 +21,6 @@
 #ifndef XM_RS6000LYNX_H
 #define XM_RS6000LYNX_H
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
 /* Get generic LynxOS host definitions. */
 
 #include "xm-lynx.h"

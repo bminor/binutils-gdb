@@ -37,8 +37,6 @@
 
 /* Big end is at the low address */
 
-#define	HOST_BYTE_ORDER	BIG_ENDIAN
-
 /* At least as of AIX 3.2, we have termios.  */
 #define	HAVE_TERMIOS 1
 /* #define HAVE_TERMIO 1 */

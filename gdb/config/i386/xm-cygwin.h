@@ -18,9 +18,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-
 #include "fopen-bin.h"
+
+#define GDBINIT_FILENAME "gdb.ini"
 
 /* Define this if source files use \r\n rather than just \n.  */
 #define CRLF_SOURCE_FILES

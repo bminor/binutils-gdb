@@ -22,12 +22,5 @@
    define on some systems. */
 #include <sys/param.h>
 
-#include <machine/endian.h>
-#if BYTE_ORDER == BIG_ENDIAN
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#else
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
-
 /* NetBSD has termios facilities. */
 #define HAVE_TERMIOS

@@ -20,10 +20,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#if !defined (HOST_BYTE_ORDER)
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
-
 #define KERNEL_U_ADDR 0		/* Not needed. */
 
 /* Only used for core files on DECstations. */

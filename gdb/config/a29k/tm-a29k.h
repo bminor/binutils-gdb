@@ -1,6 +1,6 @@
 /* Parameters for target machine AMD 29000, for GDB, the GNU debugger.
-   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
    This file is part of GDB.
@@ -617,6 +617,7 @@ extern void pop_frame ();
    asneq 0x50,gr1,gr1  ; breakpoint     (replaced by local breakpoint insn)
  */
 
+#error "This file is broken.  GDB does not define HOST_BYTE_ORDER."
 #if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
 #define BS(const)	const
 #else

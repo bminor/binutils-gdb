@@ -21,8 +21,6 @@
 
 #include "m88k/xm-m88k.h"
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
 #if !defined (USG)
 #define USG 1
 #endif

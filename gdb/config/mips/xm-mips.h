@@ -21,10 +21,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#if !defined (HOST_BYTE_ORDER)
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
-
 #ifdef ultrix
 /* Needed for DECstation core files.  */
 #include <machine/param.h>

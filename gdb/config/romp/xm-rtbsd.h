@@ -19,9 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* This machine is most significant byte first */
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
 /* This OS has the wait structure */
 #define HAVE_WAIT_STRUCT
 

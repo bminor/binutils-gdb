@@ -1,5 +1,39 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h: Update comment on HOST_BYTE_ORDER.
+	* config/xm-aix4.h: Delete definition of HOST_BYTE_ORDER.
+	* config/xm-nbsd.h, config/alpha/xm-alphalinux.h: Ditto.
+	* config/alpha/xm-alphaosf.h, config/alpha/xm-fbsd.h: Ditto.
+	* config/arm/xm-linux.h, config/i386/xm-cygwin.h: Ditto.
+	* config/i386/xm-i386bsd.h, config/i386/xm-i386gnu.h: Ditto.
+	* config/i386/xm-i386lynx.h, config/i386/xm-i386m3.h: Ditto.
+	* config/i386/xm-i386mach.h, config/i386/xm-i386v.h: Ditto.
+	* config/i386/xm-ptx.h, config/i386/xm-symmetry.h: Ditto.
+	* config/ia64/xm-aix.h, config/ia64/xm-linux.h: Ditto.
+	* config/m68k/xm-3b1.h, config/m68k/xm-apollo68b.h: Ditto.
+	* config/m68k/xm-apollo68v.h, config/m68k/xm-delta68.h: Ditto.
+	* config/m68k/xm-dpx2.h, config/m68k/xm-hp300bsd.h: Ditto.
+	* config/m68k/xm-hp300hpux.h, config/m68k/xm-m68k.h: Ditto.
+	* config/m68k/xm-m68klynx.h, config/m68k/xm-sun2.h: Ditto.
+	* config/m68k/xm-sun3.h, config/m88k/xm-dgux.h: Ditto.
+	* config/m88k/xm-m88k.h, config/mips/xm-irix3.h: Ditto.
+	* config/mips/xm-irix5.h, config/mips/xm-linux.h: Ditto.
+	* config/mips/xm-mips.h, config/mips/xm-mipsm3.h: Ditto.
+	* config/mips/xm-mipsv4.h, config/mips/xm-news-mips.h: Ditto.
+	* config/mips/xm-riscos.h, config/pa/xm-hppab.h: Ditto.
+	* config/pa/xm-hppah.h, config/powerpc/xm-linux.h: Ditto.
+	* config/romp/xm-rtbsd.h, config/rs6000/xm-rs6000.h: Ditto.
+	* config/rs6000/xm-rs6000ly.h, config/s390/xm-linux.h: Ditto.
+	* config/sparc/xm-sparc.h, config/sparc/xm-sparclynx.h: Ditto.
+	* config/vax/xm-vax.h: Ditto.
+
+	* config/a29k/tm-vx29k.h: Add #error as file depends on
+	HOST_BYTE_ORDER.
+	* config/a29k/tm-a29k.h: Ditto.
+	* MAINTAINERS (a29k-amd-udi): Document as broken.
+
+2001-12-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (tm-news.h, tm-isi.h, xm-news1000.h): Delete.
 	(ALLDEPFILES): Delete news-xdep.c.
 	(news-xdep.o): Delete.

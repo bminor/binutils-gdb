@@ -21,13 +21,4 @@
 #ifndef XM_MIPSLINUX_H
 #define XM_MIPSLINUX_H
 
-#ifndef HOST_BYTE_ORDER
-#include <endian.h>
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#else
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
-#endif
-
 #endif /* XM_MIPSLINUX_H */

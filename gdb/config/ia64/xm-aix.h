@@ -21,8 +21,6 @@
 #ifndef XM_AIX_H
 #define XM_AIX_H
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-
 /* Pick up more stuff from the generic SVR4 host include file. */
 
 #include "xm-sysv4.h"

@@ -1237,7 +1237,8 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
-/* HOST_BYTE_ORDER must be defined to one of these.  */
+/* Get a definition of BIG_ENDIAN and LITTLE_ENDIAN.  */
+/* FIXME: cagney/2001-10-31: GDB should just use BFD's definitions.  */
 
 #ifdef HAVE_ENDIAN_H
 #include <endian.h>

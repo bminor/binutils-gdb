@@ -21,8 +21,4 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* This is a big-endian host.  */
-
-#define	HOST_BYTE_ORDER	BIG_ENDIAN
-
 #include "pa/xm-pa.h"

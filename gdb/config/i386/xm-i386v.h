@@ -19,8 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-
 /* I'm running gdb 3.4 under 386/ix 2.0.2, which is a derivative of AT&T's
    Sys V/386 3.2.
 

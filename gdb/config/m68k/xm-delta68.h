@@ -18,8 +18,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
 /* I'm running gdb 4.9 under sysV68 R3V7.1.
 
    On some machines, gdb crashes when it's starting up while calling the

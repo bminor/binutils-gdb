@@ -19,8 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
 
 /* Do implement the attach and detach commands.  */

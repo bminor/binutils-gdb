@@ -21,8 +21,6 @@
 
 #include "xm-sysv4.h"
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
 /* Override register locations in upage for SGI machines */
 #undef REGISTER_U_ADDR
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
