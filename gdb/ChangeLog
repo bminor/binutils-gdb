@@ -1,3 +1,7 @@
+Mon Jan  3 11:57:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (frame_in_dummy): Check PC as well as frame.
+
 Mon Jan  3 02:47:03 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (psymtab_to_symtab_1):  Only pass N_STAB symbols
