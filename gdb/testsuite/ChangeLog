@@ -1,3 +1,10 @@
+Fri Jan 31 13:09:12 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/crossload.exp: Don't use execute_anywhere, use
+	remote_exec instead.
+	* gdb.base/corefile.exp: Don't be ridiculous.
+	* gdb.base/*.c: Add missing stub invocations.
+
 Thu Jan 30 16:49:25 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/slite.exp: Miscellaneous fixes.

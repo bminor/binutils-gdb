@@ -13,8 +13,8 @@
    definition made with 'set" to see if one already exists, and if so
    warn about conflicts if it is being set to something else.  */
 
-/* This needs to be kept in sync with whatis.c.  If this proves to end up
-   being hairy, we could use a common header file.  */
+/* This needs to be kept in sync with whatis.c and gdb.exp(get_compiler_info).
+   If this ends up being hairy, we could use a common header file.  */
 
 #if defined (__STDC__) || defined (_AIX)
 set signed_keyword_not_used 0

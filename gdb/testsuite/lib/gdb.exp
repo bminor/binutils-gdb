@@ -654,8 +654,7 @@ proc gdb_file_cmd { arg } {
                     return 0
                 }
                 timeout {
-                    perror "(timeout) Couldn't load $arg, other program already l
-oaded."
+                    perror "(timeout) Couldn't load $arg, other program already loaded."
                     return -1
                 }
             }

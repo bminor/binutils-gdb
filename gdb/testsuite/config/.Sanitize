@@ -17,7 +17,7 @@
 
 Do-first:
 
-m32r_files="m32r.exp"
+m32r_files="m32r.exp m32r-stub.exp"
 
 if ( echo $* | grep keep\-m32r > /dev/null ) ; then
 	keep_these_too="${m32r_files} ${keep_these_too}"
@@ -39,7 +39,8 @@ est.exp
 gdbserver.exp
 hmsirom.exp
 hppro.exp
-mips-gdb.exp
+mips.exp
+mips-idt.exp
 monitor.exp
 mt-a29k-udi
 mt-i386-aout
@@ -53,18 +54,21 @@ mt-sparc-aout
 mt-unix
 mt-vxworks
 netware.exp
-nind-gdb.exp
+nind.exp
 rom68k.exp
-sim-gdb.exp
-slite-gdb.exp
-udi-gdb.exp
-unix-gdb.exp
+sim.exp
+slite.exp
+udi.exp
+unix.exp
 unknown.exp
-vx-gdb.exp
+vx.exp
 vxworks29k.exp
 
 Things-to-lose:
 
+d10v.exp
+sparclet-old.exp
+sparclet.exp
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is

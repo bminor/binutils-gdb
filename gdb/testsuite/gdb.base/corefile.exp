@@ -57,7 +57,7 @@ if [get_compiler_info ${binfile}] {
 # the name of the program to "core".
 set found 0
 catch "system \"(cd ${objdir}/${subdir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1\""
-#      remote_exec "${binfile}"
+#      remote_exec host "${binfile}"
 foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
     if [remote_file build exists $i] {
 	remote_exec build "mv $i ${objdir}/${subdir}/corefile"
@@ -68,13 +68,12 @@ if { $found == 0 } {
     # The braindamaged HPUX shell quits after the ulimit -c above
     # without executing ${binfile}.  So we try again without the
     # ulimit here if we didn't find a core file above.
+    # Oh, I should mention that any "braindamaged" non-Unix system has
+    # the same problem. I like the cd bit too, it's really neat'n stuff.
     catch "system \"(cd ${objdir}/${subdir}; ${binfile}; true) >/dev/null 2>&1\""
     foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
-	set exec_output [execute_anywhere "ls $i"]
-	if [ regexp "No such file or directory|not found" ${exec_output} ] {
-	    continue
-	} else {
-	    execute_anywhere "mv $i ${objdir}/${subdir}/corefile"
+	if [remote_file build exists $i] {
+	    remote_exec build "mv $i ${objdir}/${subdir}/corefile"
 	    set found 1
 	}
     }
