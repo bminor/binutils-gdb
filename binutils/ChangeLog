@@ -1,3 +1,7 @@
+Fri Apr  9 11:21:00 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* objdump.c: Removed useless fprintf declaration.
+
 Wed Apr  7 22:22:50 1993  Rob Savoye  (rob@cygnus.com)
 
 	* Makefile.in: Changed check target to use DejaGnu.

@@ -43,7 +43,6 @@ extern Elf_Internal_Shdr *bfd_elf_find_section();
 #endif	/* ELF_STAB_DISPLAY */
 
 extern char *xmalloc ();
-extern int fprintf PARAMS ((FILE *, CONST char *, ...));
 
 char *default_target = NULL;	/* default at runtime */
 
@@ -209,9 +208,9 @@ comp (ap, bp)
 
 /* Print the supplied address symbolically if possible */
 void
-print_address (vma, stream)
+objdump_print_address (vma, info)
      bfd_vma vma;
-     FILE *stream;
+     struct disassemble_info *info;
 {
   /* Perform a binary search looking for the closest symbol to
      the required value */
@@ -226,7 +225,7 @@ print_address (vma, stream)
 
   if (symcount == 0)
     {
-      fprintf_vma (stream, vma);
+      fprintf_vma (info->stream, vma);
     }
   else
     {
@@ -267,8 +266,8 @@ print_address (vma, stream)
 		  && syms[thisplace + 1]->value == vma)
 		match_name = syms[thisplace + 1]->name;
 	      /* Totally awesome! the exact right symbol */
-	      fprintf_vma (stream, vma);
-	      fprintf (stream, " (%s+)0000", syms[thisplace]->name);
+	      fprintf_vma (info->stream, vma);
+	      fprintf (info->stream, " (%s+)0000", syms[thisplace]->name);
 	      return;
 	    }
 	}
@@ -285,16 +284,16 @@ print_address (vma, stream)
 	    }
 	}
 
-      fprintf_vma (stream, vma);
+      fprintf_vma (info->stream, vma);
       if (syms[thisplace]->value > vma)
 	{
-	  fprintf (stream, " (%s-)", syms[thisplace]->name);
-	  fprintf (stream, "%04x", syms[thisplace]->value - vma);
+	  fprintf (info->stream, " (%s-)", syms[thisplace]->name);
+	  fprintf (info->stream, "%04x", syms[thisplace]->value - vma);
 	}
       else
 	{
-	  fprintf (stream, " (%s+)", syms[thisplace]->name);
-	  fprintf (stream, "%04x", vma - syms[thisplace]->value);
+	  fprintf (info->stream, " (%s+)", syms[thisplace]->name);
+	  fprintf (info->stream, "%04x", vma - syms[thisplace]->value);
 	}
     }
 }
@@ -309,8 +308,6 @@ disassemble_data (abfd)
   bfd_size_type i;
   unsigned int (*print) ()= 0; /* Old style */
   disassembler_ftype disassemble = 0; /* New style */
-  unsigned int print_insn_a29k ();
-  unsigned int print_insn_i960 ();
   unsigned int print_insn_h8300 ();
   enum bfd_architecture a;
   struct disassemble_info disasm_info;
@@ -324,6 +321,7 @@ disassemble_data (abfd)
   boolean done_dot = false;
 
   INIT_DISASSEMBLE_INFO(disasm_info, stdout);
+  disasm_info.print_address_func = objdump_print_address;
 
   for (i = 0; i < symcount; i++)
     {
@@ -395,10 +393,11 @@ disassemble_data (abfd)
 	  disassemble = print_insn_m68k;
 	  break;
 	case bfd_arch_a29k:
-	  print = print_insn_a29k;
+	  /* As far as I know we only handle big-endian 29k objects.  */
+	  disassemble = print_insn_big_a29k;
 	  break;
 	case bfd_arch_i960:
-	  print = print_insn_i960;
+	  disassemble = print_insn_i960;
 	  break;
 	case bfd_arch_mips:
 	  if (abfd->xvec->byteorder_big_p)
@@ -488,7 +487,7 @@ disassemble_data (abfd)
 			    }
 			}
 		    }
-		  print_address (section->vma + i, stdout);
+		  objdump_print_address (section->vma + i, &disasm_info);
 		  printf (" ");
 
 		  if (disassemble) /* New style */
