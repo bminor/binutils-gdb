@@ -502,9 +502,12 @@ rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
 	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texinfo
 	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texinfo
 
+# Be sure to not create a bad gdb-all.texinfo if ${M4} is missing or aborts...
 gdb-all.texinfo: ${SFILES_DOCDIR}
+	rm -f gdb-all.texinfo foobus.texinfo
 	( cd $(srcdir)/doc; \
-		${M4} pretex.m4 none.m4 all.m4 gdb.texinfo ) >gdb-all.texinfo
+		${M4} pretex.m4 none.m4 all.m4 gdb.texinfo ) >foobus.texinfo
+	mv foobus.texinfo gdb-all.texinfo
 
 gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
