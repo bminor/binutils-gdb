@@ -1,3 +1,13 @@
+Tue Apr 28 12:16:30 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-hppa.c: Change all calls to bzero to use memset.
+	(pa_ip): Add cast to avoid warning.
+	(tc_gen_reloc, md_apply_fix): Likewise.
+	(pa_find_space_by_number): Likewise.
+	(hppa_force_relocation): Likewise.
+	(pa_block): Change i to unsigned int.
+	* config/obj-som.h (obj_som_copyright): Declare.
+
 Mon Apr 27 15:58:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change version number to 2.9.4
