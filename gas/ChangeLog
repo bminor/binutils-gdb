@@ -1,3 +1,10 @@
+2001-01-06  Jan Hubicka <jh@suse.cz>, Andreas Jaeger  <aj@suse.de>
+
+	* doc/as.texinfo: Document '#' as comment character for i386 and
+	x86_64. Add AMD x86-64 into menu of machine dependent information.
+
+	* doc/c-i386.texi: Document x86_64 extensions.
+
 Fri Jan  5 13:26:42 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* tc-i386.c (md_assemble): Handle third byte of the opcode as prefix.
@@ -187,7 +194,7 @@ Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 2000-12-15  Diego Novillo  <dnovillo@redhat.com>
 
 	* config/tc-i386.c (intel_e09_1): Only flag as a memory operand if
-	it's not an offset expression. 
+	it's not an offset expression.
 	(intel_e10_1): Ditto. Also, if the operand is an offset expression,
 	keep the braces '[' and ']' in the output string.
 	(intel_e11): Ditto. Also remove comparison intel_parser.op_modifier
@@ -252,7 +259,7 @@ Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* macro.c: Fix formatting.
 	* config/tc-mips.c: Fix formatting.
 	* doc/c-mips.texi: Fix formatting.
-	
+
 Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 	* tc-i386.c (md_assemble): Refuse 's' and 'l' suffixes in the intel

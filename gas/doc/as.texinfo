@@ -1667,6 +1667,9 @@ is considered a comment and is ignored.  The line comment character is
 @ifset HPPA
 @samp{;} for the HPPA;
 @end ifset
+@ifset I80386
+@samp{#} on the i386 and x86-64;
+@end ifset
 @ifset I960
 @samp{#} on the i960;
 @end ifset
@@ -1698,7 +1701,7 @@ is considered a comment and is ignored.  The line comment character is
 @samp{#} on the V850;
 @end ifset
 see @ref{Machine Dependencies}.  @refill
-@c FIXME What about i386, m88k, i860?
+@c FIXME What about m88k, i860?
 
 @ifset GENERIC
 On some machines there are two different line comment characters.  One
@@ -5244,7 +5247,7 @@ subject, see the hardware manufacturer's manual.
 * ESA/390-Dependent::           IBM ESA/390 Dependent Features
 @end ifset
 @ifset I80386
-* i386-Dependent::              Intel 80386 Dependent Features
+* i386-Dependent::              Intel 80386 and AMD x86-64 Dependent Features
 @end ifset
 @ifset I860
 * i860-Dependent::              Intel 80860 Dependent Features
