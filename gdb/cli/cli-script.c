@@ -476,7 +476,7 @@ arg_cleanup (void *ignore)
   struct user_args *oargs = user_args;
   if (!user_args)
     internal_error (__FILE__, __LINE__,
-		    "arg_cleanup called with no user args.\n");
+		    _("arg_cleanup called with no user args.\n"));
 
   user_args = user_args->next;
   xfree (oargs);
@@ -1046,7 +1046,7 @@ validate_comname (char *comname)
   char *p;
 
   if (comname == 0)
-    error_no_arg ("name of command to define");
+    error_no_arg (_("name of command to define"));
 
   p = comname;
   while (*p)
@@ -1097,9 +1097,9 @@ define_command (char *comname, int from_tty)
     {
       int q;
       if (c->class == class_user || c->class == class_alias)
-	q = query ("Redefine command \"%s\"? ", c->name);
+	q = query (_("Redefine command \"%s\"? "), c->name);
       else
-	q = query ("Really redefine built-in command \"%s\"? ", c->name);
+	q = query (_("Really redefine built-in command \"%s\"? "), c->name);
       if (!q)
 	error (_("Command \"%s\" not redefined."), c->name);
     }
@@ -1170,7 +1170,7 @@ define_command (char *comname, int from_tty)
           break;
         default:
           /* Should never come here as hookc would be 0. */
-	  internal_error (__FILE__, __LINE__, "bad switch");
+	  internal_error (__FILE__, __LINE__, _("bad switch"));
         }
     }
 }
@@ -1260,9 +1260,7 @@ script_from_file (FILE *stream, char *file)
   int needed_length;
 
   if (stream == NULL)
-    {
-      internal_error (__FILE__, __LINE__, "called with NULL file pointer!");
-    }
+    internal_error (__FILE__, __LINE__, _("called with NULL file pointer!"));
 
   old_cleanups = make_cleanup (do_fclose_cleanup, stream);
 
@@ -1291,7 +1289,7 @@ script_from_file (FILE *stream, char *file)
 	throw_error (e.error, "%s:%d: Error in sourced command file:\n%s",
 		     source_file_name, source_line_number, e.message);
       default:
-	internal_error (__FILE__, __LINE__, "bad reason");
+	internal_error (__FILE__, __LINE__, _("bad reason"));
       }
   }
 

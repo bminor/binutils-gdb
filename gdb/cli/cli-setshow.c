@@ -156,7 +156,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  break;
 	case var_filename:
 	  if (arg == NULL)
-	    error_no_arg ("filename to set it to.");
+	    error_no_arg (_("filename to set it to."));
 	  if (*(char **) c->var != NULL)
 	    xfree (*(char **) c->var);
 	  *(char **) c->var = tilde_expand (arg);
@@ -169,7 +169,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  break;
 	case var_uinteger:
 	  if (arg == NULL)
-	    error_no_arg ("integer to set it to.");
+	    error_no_arg (_("integer to set it to."));
 	  *(unsigned int *) c->var = parse_and_eval_long (arg);
 	  if (*(unsigned int *) c->var == 0)
 	    *(unsigned int *) c->var = UINT_MAX;
@@ -178,7 +178,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  {
 	    unsigned int val;
 	    if (arg == NULL)
-	      error_no_arg ("integer to set it to.");
+	      error_no_arg (_("integer to set it to."));
 	    val = parse_and_eval_long (arg);
 	    if (val == 0)
 	      *(int *) c->var = INT_MAX;
@@ -190,7 +190,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  }
 	case var_zinteger:
 	  if (arg == NULL)
-	    error_no_arg ("integer to set it to.");
+	    error_no_arg (_("integer to set it to."));
 	  *(int *) c->var = parse_and_eval_long (arg);
 	  break;
 	case var_enum:
@@ -302,7 +302,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      "do_setshow_command: invalid var_auto_boolean");
+			      _("do_setshow_command: invalid var_auto_boolean"));
 	      break;
 	    }
 	  break;

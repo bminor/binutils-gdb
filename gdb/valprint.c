@@ -252,7 +252,7 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
     case 'o':
       val = int_string (val_long, 8, 0, 0, use_c_format); break;
     default:
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
     } 
   fputs_filtered (val, stream);
 }

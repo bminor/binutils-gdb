@@ -276,7 +276,7 @@ sh3_open (char *args, int from_tty)
       parallel = serial_open (parallel_port_name);
 
       if (!parallel)
-	perror_with_name ("Unable to open parallel port.");
+	perror_with_name (_("Unable to open parallel port."));
 
       parallel_in_use = 1;
     }
@@ -330,7 +330,7 @@ sh3e_open (char *args, int from_tty)
       parallel = serial_open (parallel_port_name);
 
       if (!parallel)
-	perror_with_name ("Unable to open parallel port.");
+	perror_with_name (_("Unable to open parallel port."));
 
       parallel_in_use = 1;
     }

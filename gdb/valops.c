@@ -1121,7 +1121,7 @@ typecmp (int staticp, int varargs, int nargs,
   int i;
 
   if (t2 == 0)
-    internal_error (__FILE__, __LINE__, "typecmp: no argument list");
+    internal_error (__FILE__, __LINE__, _("typecmp: no argument list"));
 
   /* Skip ``this'' argument if applicable.  T2 will always include THIS.  */
   if (staticp)
@@ -2358,7 +2358,7 @@ value_aggregate_elt (struct type *curtype,
       return value_namespace_elt (curtype, name, noside);
     default:
       internal_error (__FILE__, __LINE__,
-		      "non-aggregate type in value_aggregate_elt");
+		      _("non-aggregate type in value_aggregate_elt"));
     }
 }
 

@@ -273,8 +273,8 @@ select_source_symtab (struct symtab *s)
       if (cs_pst->readin)
 	{
 	  internal_error (__FILE__, __LINE__,
-			  "select_source_symtab: "
-			  "readin pst found and no symtabs.");
+			  _("select_source_symtab: "
+			  "readin pst found and no symtabs."));
 	}
       else
 	{
@@ -358,7 +358,7 @@ directory_command (char *dirname, int from_tty)
   /* FIXME, this goes to "delete dir"... */
   if (dirname == 0)
     {
-      if (from_tty && query ("Reinitialize source path to empty? "))
+      if (from_tty && query (_("Reinitialize source path to empty? ")))
 	{
 	  xfree (source_path);
 	  init_source_path ();

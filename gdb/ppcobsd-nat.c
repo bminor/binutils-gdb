@@ -44,7 +44,7 @@ fetch_inferior_registers (int regnum)
 
   if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   ppcobsd_supply_gregset (&ppcobsd_gregset, current_regcache, -1,
 			  &regs, sizeof regs);
@@ -60,14 +60,14 @@ store_inferior_registers (int regnum)
 
   if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   ppcobsd_collect_gregset (&ppcobsd_gregset, current_regcache,
 			   regnum, &regs, sizeof regs);
 
   if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-    perror_with_name ("Couldn't write registers");
+    perror_with_name (_("Couldn't write registers"));
 }
 
 

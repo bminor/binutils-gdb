@@ -1857,7 +1857,7 @@ rs6000_register_type (struct gdbarch *gdbarch, int n)
 	  return builtin_type_vec128;
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__, "Register %d size %d unknown",
+	  internal_error (__FILE__, __LINE__, _("Register %d size %d unknown"),
 			  n, size);
 	}
     }
@@ -2025,8 +2025,8 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     e500_move_ev_register (regcache_raw_read, regcache, reg_nr, buffer);
   else
     internal_error (__FILE__, __LINE__,
-                    "e500_pseudo_register_read: "
-                    "called on unexpected register '%s' (%d)",
+                    _("e500_pseudo_register_read: "
+                    "called on unexpected register '%s' (%d)"),
                     gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
 
@@ -2046,8 +2046,8 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
                            regcache, reg_nr, (void *) buffer);
   else
     internal_error (__FILE__, __LINE__,
-                    "e500_pseudo_register_read: "
-                    "called on unexpected register '%s' (%d)",
+                    _("e500_pseudo_register_read: "
+                    "called on unexpected register '%s' (%d)"),
                     gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
 
@@ -2183,8 +2183,8 @@ rs6000_store_return_value (struct type *type,
         regnum = tdep->ppc_vr0_regnum + 2;
       else
         internal_error (__FILE__, __LINE__,
-                        "rs6000_store_return_value: "
-                        "unexpected array return type");
+                        _("rs6000_store_return_value: "
+                        "unexpected array return type"));
     }
   else
     /* Everything else is returned in GPR3 and up.  */
@@ -3254,8 +3254,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       }   
   else
     internal_error (__FILE__, __LINE__,
-                    "rs6000_gdbarch_init: "
-                    "received unexpected BFD 'arch' value");
+                    _("rs6000_gdbarch_init: "
+                    "received unexpected BFD 'arch' value"));
 
   /* Sanity check on registers.  */
   gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);

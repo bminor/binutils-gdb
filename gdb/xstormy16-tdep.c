@@ -116,7 +116,7 @@ xstormy16_register_name (int regnum)
 
   if (regnum < 0 || regnum >= E_NUM_REGS)
     internal_error (__FILE__, __LINE__,
-		    "xstormy16_register_name: illegal register number %d",
+		    _("xstormy16_register_name: illegal register number %d"),
 		    regnum);
   else
     return register_names[regnum];

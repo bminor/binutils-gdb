@@ -125,7 +125,7 @@ m68k_register_name (int regnum)
   if (regnum < 0 ||
       regnum >= sizeof (register_names) / sizeof (register_names[0]))
     internal_error (__FILE__, __LINE__,
-		    "m68k_register_name: illegal register number %d", regnum);
+		    _("m68k_register_name: illegal register number %d"), regnum);
   else
     return register_names[regnum];
 }
@@ -239,7 +239,7 @@ m68k_extract_return_value (struct type *type, struct regcache *regcache,
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "Cannot extract return value of %d bytes long.", len);
+		    _("Cannot extract return value of %d bytes long."), len);
 }
 
 static void
@@ -279,7 +279,7 @@ m68k_store_return_value (struct type *type, struct regcache *regcache,
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "Cannot store return value of %d bytes long.", len);
+		    _("Cannot store return value of %d bytes long."), len);
 }
 
 static void
@@ -1061,7 +1061,7 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
   if (tdep->jb_pc < 0)
     {
       internal_error (__FILE__, __LINE__,
-		      "m68k_get_longjmp_target: not implemented");
+		      _("m68k_get_longjmp_target: not implemented"));
       return 0;
     }
 

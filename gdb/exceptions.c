@@ -133,7 +133,7 @@ exceptions_state_mc (enum catcher_action action)
 	  current_catcher->state = CATCHER_RUNNING;
 	  return 1;
 	default:
-	  internal_error (__FILE__, __LINE__, "bad state");
+	  internal_error (__FILE__, __LINE__, _("bad state"));
 	}
     case CATCHER_RUNNING:
       switch (action)
@@ -150,7 +150,7 @@ exceptions_state_mc (enum catcher_action action)
 	  /* See also throw_exception.  */
 	  return 1;
 	default:
-	  internal_error (__FILE__, __LINE__, "bad switch");
+	  internal_error (__FILE__, __LINE__, _("bad switch"));
 	}
     case CATCHER_RUNNING_1:
       switch (action)
@@ -167,7 +167,7 @@ exceptions_state_mc (enum catcher_action action)
 	  /* See also throw_exception.  */
 	  return 1;
 	default:
-	  internal_error (__FILE__, __LINE__, "bad switch");
+	  internal_error (__FILE__, __LINE__, _("bad switch"));
 	}
     case CATCHER_ABORTING:
       switch (action)
@@ -190,10 +190,10 @@ exceptions_state_mc (enum catcher_action action)
 	    throw_exception (exception);
 	  }
 	default:
-	  internal_error (__FILE__, __LINE__, "bad state");
+	  internal_error (__FILE__, __LINE__, _("bad state"));
 	}
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 }
 
@@ -253,7 +253,7 @@ deprecated_throw_reason (enum return_reason reason)
       exception.error = GENERIC_ERROR;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   
   throw_exception (exception);

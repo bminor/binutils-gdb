@@ -215,8 +215,8 @@ bdm_ppc_fetch_registers (int regno)
     }
   else
     internal_error (__FILE__, __LINE__,
-                    "ppc_bdm_fetch_registers: "
-                    "'all registers' case not implemented");
+                    _("ppc_bdm_fetch_registers: "
+                    "'all registers' case not implemented"));
 
 #endif
 #if 0

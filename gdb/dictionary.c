@@ -563,7 +563,7 @@ static void
 add_symbol_nonexpandable (struct dictionary *dict, struct symbol *sym)
 {
   internal_error (__FILE__, __LINE__,
-		  "dict_add_symbol: non-expandable dictionary");
+		  _("dict_add_symbol: non-expandable dictionary"));
 }
 
 /* Functions for DICT_HASHED and DICT_HASHED_EXPANDABLE.  */

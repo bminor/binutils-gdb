@@ -215,7 +215,7 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 		type = "internal";
 		break;
 	      default:
-		internal_error (__FILE__, __LINE__, "bad switch");
+		internal_error (__FILE__, __LINE__, _("bad switch"));
 	      }
 	  }
 	fprintf_unfiltered (file, " %-10s", type);
@@ -240,7 +240,7 @@ maintenance_print_reggroups (char *args, int from_tty)
     {
       struct ui_file *file = gdb_fopen (args, "w");
       if (file == NULL)
-	perror_with_name ("maintenance print reggroups");
+	perror_with_name (_("maintenance print reggroups"));
       reggroups_dump (current_gdbarch, file);    
       ui_file_delete (file);
     }

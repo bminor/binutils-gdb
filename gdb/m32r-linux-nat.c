@@ -108,7 +108,7 @@ fetch_regs (int tid)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   supply_gregset (&regs);
 }
@@ -156,12 +156,12 @@ store_regs (int tid, int regno)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   fill_gregset (&regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name ("Couldn't write registers");
+    perror_with_name (_("Couldn't write registers"));
 }
 
 
@@ -207,7 +207,7 @@ fetch_inferior_registers (int regno)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "Got request for bad register number %d.", regno);
+		  _("Got request for bad register number %d."), regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -231,5 +231,5 @@ store_inferior_registers (int regno)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "Got request to store bad register number %d.", regno);
+		  _("Got request to store bad register number %d."), regno);
 }

@@ -242,7 +242,7 @@ decode_format (char **string_ptr, int oformat, int osize)
 	  val.size = osize ? 'h' : osize;
 	else
 	  /* Bad value for TARGET_PTR_BIT */
-	  internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	  internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 	break;
       case 'f':
 	/* Floating point has to be word or giantword.  */
@@ -445,7 +445,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     case 0:
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
     case 't':
       /* Binary; 't' stands for "two".  */
@@ -1001,7 +1001,7 @@ sym_info (char *arg, int from_tty)
   unsigned int offset;
 
   if (!arg)
-    error_no_arg ("address");
+    error_no_arg (_("address"));
 
   addr = parse_and_eval_address (arg);
   ALL_OBJSECTIONS (objfile, osect)
@@ -1731,7 +1731,7 @@ printf_command (char *arg, int from_tty)
   old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
-    error_no_arg ("format-control string and values to print");
+    error_no_arg (_("format-control string and values to print"));
 
   /* Skip white space before format string */
   while (*s == ' ' || *s == '\t')

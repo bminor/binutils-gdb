@@ -1250,7 +1250,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   ecs->infwait_state = infwait_normal_state;
 
@@ -2904,7 +2904,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "print_stop_reason: unrecognized enum value");
+		      _("print_stop_reason: unrecognized enum value"));
       break;
     }
 }
@@ -3045,7 +3045,7 @@ normal_stop (void)
 	      do_frame_printing = 0;
 	      break;
 	    default:
-	      internal_error (__FILE__, __LINE__, "Unknown value.");
+	      internal_error (__FILE__, __LINE__, _("Unknown value."));
 	    }
 	  /* For mi, have the same behavior every time we stop:
 	     print everything but the source line. */
@@ -3182,7 +3182,7 @@ handle_command (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error_no_arg ("signal to handle");
+      error_no_arg (_("signal to handle"));
     }
 
   /* Allocate and zero an array of flags for which signals to handle. */

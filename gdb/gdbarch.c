@@ -613,7 +613,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
     internal_error (__FILE__, __LINE__,
-                    "verify_gdbarch: the following are invalid ...%s",
+                    _("verify_gdbarch: the following are invalid ...%s"),
                     buf);
   do_cleanups (cleanups);
 }
@@ -3940,7 +3940,7 @@ gdbarch_printable_names (void)
       ap = bfd_lookup_arch (rego->bfd_architecture, 0);
       if (ap == NULL)
         internal_error (__FILE__, __LINE__,
-                        "gdbarch_architecture_names: multi-arch unknown");
+                        _("gdbarch_architecture_names: multi-arch unknown"));
       do
         {
           append_name (&arches, &nr_arches, ap->printable_name);

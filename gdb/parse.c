@@ -1025,7 +1025,7 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   comma_terminates = comma;
 
   if (lexptr == 0 || *lexptr == 0)
-    error_no_arg ("expression to compute");
+    error_no_arg (_("expression to compute"));
 
   old_chain = make_cleanup (free_funcalls, 0 /*ignore*/);
   funcall_chain = 0;

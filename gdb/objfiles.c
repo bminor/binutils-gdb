@@ -305,7 +305,7 @@ put_objfile_before (struct objfile *objfile, struct objfile *before_this)
     }
   
   internal_error (__FILE__, __LINE__,
-		  "put_objfile_before: before objfile not in list");
+		  _("put_objfile_before: before objfile not in list"));
 }
 
 /* Put OBJFILE at the front of the list.  */
@@ -357,7 +357,7 @@ unlink_objfile (struct objfile *objfile)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "unlink_objfile: objfile already unlinked");
+		  _("unlink_objfile: objfile already unlinked"));
 }
 
 

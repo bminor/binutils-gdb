@@ -2013,7 +2013,7 @@ sh_print_pseudo_register (struct gdbarch *gdbarch, struct ui_file *file,
 {
   if (regnum < NUM_REGS || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     internal_error (__FILE__, __LINE__,
-		    "Invalid pseudo register number %d\n", regnum);
+		    _("Invalid pseudo register number %d\n"), regnum);
   else if (regnum == PSEUDO_BANK_REGNUM)
     do_bank_register_info (gdbarch, file);
   else if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
@@ -2088,7 +2088,7 @@ sh_print_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
 {
   if (regnum < 0 || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     internal_error (__FILE__, __LINE__,
-		    "Invalid register number %d\n", regnum);
+		    _("Invalid register number %d\n"), regnum);
 
   else if (regnum >= 0 && regnum < NUM_REGS)
     {

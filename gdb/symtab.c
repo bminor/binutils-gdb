@@ -1562,7 +1562,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  center = bottom + (top - bottom) / 2;
 	  if (!(center < top))
-	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 	  if (!do_linear_search
 	      && (SYMBOL_LANGUAGE (*center) == language_java))
 	    {
@@ -1578,7 +1578,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    }
 	}
       if (!(top == bottom))
-	internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
       while (top <= real_top
 	     && (linkage_name != NULL

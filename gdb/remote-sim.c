@@ -364,7 +364,7 @@ gdbsim_store_register (int regno)
 				     tmp, register_size (current_gdbarch, regno));
       if (nr_bytes > 0 && nr_bytes != register_size (current_gdbarch, regno))
 	internal_error (__FILE__, __LINE__,
-			"Register size different to expected");
+			_("Register size different to expected"));
       /* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
 	 indicating that GDB and the SIM have different ideas about
 	 which registers are fetchable.  */

@@ -254,7 +254,7 @@ make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
     addr_size = 4;
   else
     internal_error (__FILE__, __LINE__,
-		    "make_srec:  Bad address (0x%s), or bad flags (0x%x).",
+		    _("make_srec:  Bad address (0x%s), or bad flags (0x%x)."),
 		    paddr (targ_addr), flags);
 
   /* Now that we know the address size, we can figure out how much

@@ -75,7 +75,7 @@ i386fbsd_resume (ptid_t ptid, int step, enum target_signal signal)
      written a new PC value to the child.)  */
   if (ptrace (request, pid, (caddr_t) 1,
 	      target_signal_to_host (signal)) == -1)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
 }
 
 

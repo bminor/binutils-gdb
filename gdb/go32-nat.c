@@ -472,7 +472,7 @@ fetch_register (int regno)
     i387_supply_fsave (current_regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
-		    "Invalid register no. %d in fetch_register.", regno);
+		    _("Invalid register no. %d in fetch_register."), regno);
 }
 
 static void
@@ -498,7 +498,7 @@ store_register (int regno)
     i387_fill_fsave ((char *) &npx, regno);
   else
     internal_error (__FILE__, __LINE__,
-		    "Invalid register no. %d in store_register.", regno);
+		    _("Invalid register no. %d in store_register."), regno);
 }
 
 static void
@@ -604,7 +604,7 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   /* Init command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
     internal_error (__FILE__, __LINE__,
-		    "Cannot allocate redirection storage: not enough memory.\n");
+		    _("Cannot allocate redirection storage: not enough memory.\n"));
 
   /* Parse the command line and create redirections.  */
   if (strpbrk (args, "<>"))
@@ -695,7 +695,7 @@ go32_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
     internal_error (__FILE__, __LINE__, 
-		    "Invalid register %d in go32_set_dr.\n", i);
+		    _("Invalid register %d in go32_set_dr.\n"), i);
   D_REGS[i] = addr;
 }
 
@@ -890,7 +890,7 @@ init_go32_ops (void)
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
     internal_error (__FILE__, __LINE__,
-		    "Cannot allocate redirection storage: not enough memory.\n");
+		    _("Cannot allocate redirection storage: not enough memory.\n"));
 
   /* We are always processing GCC-compiled programs.  */
   processing_gcc_compilation = 2;
@@ -1875,7 +1875,7 @@ go32_pte_for_address (char *arg, int from_tty)
 	addr = parse_and_eval_address (arg);
     }
   if (!addr)
-    error_no_arg ("linear address");
+    error_no_arg (_("linear address"));
 
   pdbr = get_cr3 ();
   if (!pdbr)

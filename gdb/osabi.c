@@ -117,9 +117,9 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
     {
       internal_error
 	(__FILE__, __LINE__,
-	 "gdbarch_register_osabi: An attempt to register a handler for "
+	 _("gdbarch_register_osabi: An attempt to register a handler for "
          "OS ABI \"%s\" for architecture %s was made.  The handler will "
-	 "not be registered",
+	 "not be registered"),
 	 gdbarch_osabi_name (osabi),
 	 bfd_printable_arch_mach (arch, machine));
       return;
@@ -135,8 +135,8 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
 	{
 	  internal_error
 	    (__FILE__, __LINE__,
-	     "gdbarch_register_osabi: A handler for OS ABI \"%s\" "
-	     "has already been registered for architecture %s",
+	     _("gdbarch_register_osabi: A handler for OS ABI \"%s\" "
+	     "has already been registered for architecture %s"),
 	     gdbarch_osabi_name (osabi),
 	     arch_info->printable_name);
 	  /* If user wants to continue, override previous definition.  */
@@ -233,8 +233,8 @@ gdbarch_lookup_osabi (bfd *abfd)
 	    {
 	      internal_error
 		(__FILE__, __LINE__,
-		 "gdbarch_lookup_osabi: invalid OS ABI (%d) from sniffer "
-		 "for architecture %s flavour %d",
+		 _("gdbarch_lookup_osabi: invalid OS ABI (%d) from sniffer "
+		 "for architecture %s flavour %d"),
 		 (int) osabi,
 		 bfd_printable_arch_mach (bfd_get_arch (abfd), 0),
 		 (int) bfd_get_flavour (abfd));
@@ -252,9 +252,9 @@ gdbarch_lookup_osabi (bfd *abfd)
 		    {
 		      internal_error
 		        (__FILE__, __LINE__,
-		         "gdbarch_lookup_osabi: multiple %sspecific OS ABI "
+		         _("gdbarch_lookup_osabi: multiple %sspecific OS ABI "
 			 "match for architecture %s flavour %d: first "
-			 "match \"%s\", second match \"%s\"",
+			 "match \"%s\", second match \"%s\""),
 			 match_specific ? "" : "non-",
 		         bfd_printable_arch_mach (bfd_get_arch (abfd), 0),
 		         (int) bfd_get_flavour (abfd),
@@ -447,8 +447,8 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      break;
 
 	    default:
-	      internal_error (__FILE__, __LINE__, "\
-generic_elf_osabi_sniff_abi_tag_sections: unknown OS number %d",
+	      internal_error (__FILE__, __LINE__, _("\
+generic_elf_osabi_sniff_abi_tag_sections: unknown OS number %d"),
 			      abi_tag);
 	    }
 	  return;
@@ -585,7 +585,7 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
 	  }
       if (i == GDB_OSABI_INVALID)
 	internal_error (__FILE__, __LINE__,
-			"Invalid OS ABI \"%s\" passed to command handler.",
+			_("Invalid OS ABI \"%s\" passed to command handler."),
 			set_osabi_string);
     }
 
@@ -593,7 +593,7 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
      graceful here.  */
   gdbarch_info_init (&info);
   if (! gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, "Updating OS ABI failed.");
+    internal_error (__FILE__, __LINE__, _("Updating OS ABI failed."));
 }
 
 static void
@@ -621,7 +621,7 @@ _initialize_gdb_osabi (void)
   if (strcmp (gdb_osabi_names[GDB_OSABI_INVALID], "<invalid>") != 0)
     internal_error
       (__FILE__, __LINE__,
-       "_initialize_gdb_osabi: gdb_osabi_names[] is inconsistent");
+       _("_initialize_gdb_osabi: gdb_osabi_names[] is inconsistent"));
 
   /* Register a generic sniffer for ELF flavoured files.  */
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,

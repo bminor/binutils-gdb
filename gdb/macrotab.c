@@ -445,7 +445,7 @@ macro_include (struct macro_source_file *source,
 
          First, squawk.  */
       complaint (&symfile_complaints,
-		 "both `%s' and `%s' allegedly #included at %s:%d", included,
+		 _("both `%s' and `%s' allegedly #included at %s:%d"), included,
 		 (*link)->filename, source->filename, line);
 
       /* Now, choose a new, unoccupied line number for this
@@ -704,7 +704,7 @@ check_for_redefinition (struct macro_source_file *source, int line,
       if (! same)
         {
 	  complaint (&symfile_complaints,
-		     "macro `%s' redefined at %s:%d; original definition at %s:%d",
+		     _("macro `%s' redefined at %s:%d; original definition at %s:%d"),
 		     name, source->filename, line,
 		     found_key->start_file->filename, found_key->start_line);
         }
@@ -793,7 +793,7 @@ macro_undef (struct macro_source_file *source, int line,
       if (key->end_file)
         {
 	  complaint (&symfile_complaints,
-		     "macro '%s' is #undefined twice, at %s:%d and %s:%d", name,
+		     _("macro '%s' is #undefined twice, at %s:%d and %s:%d"), name,
 		     source->filename, line, key->end_file->filename,
 		     key->end_line);
         }
@@ -810,7 +810,7 @@ macro_undef (struct macro_source_file *source, int line,
          ignore it too.  */
 #if 0
       complaint (&symfile_complaints,
-		 "no definition for macro `%s' in scope to #undef at %s:%d",
+		 _("no definition for macro `%s' in scope to #undef at %s:%d"),
 		 name, source->filename, line);
 #endif
     }

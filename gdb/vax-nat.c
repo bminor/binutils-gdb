@@ -79,7 +79,7 @@ vax_register_u_offset (int regnum)
   pid = PIDGET (inferior_ptid);
   u_ar0 = ptrace (PT_READ_U, pid, u_ar0_offset, 0);
   if (errno)
-    perror_with_name ("Unable to determine location of registers");
+    perror_with_name (_("Unable to determine location of registers"));
 
   return vax_register_u_addr (u_ar0, regnum) - vax_kernel_u_addr;
 }

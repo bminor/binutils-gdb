@@ -1353,7 +1353,7 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
 static void
 stub_noname_complaint (void)
 {
-  complaint (&symfile_complaints, "stub type has NULL name");
+  complaint (&symfile_complaints, _("stub type has NULL name"));
 }
 
 /* Added by Bryan Boreham, Kewill, Sun Sep 17 18:07:17 1989.

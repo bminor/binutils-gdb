@@ -477,8 +477,8 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
   /* Extra checks?  */
   if (fixed_p && !config->fixed_p)
     {
-      if (! query ("The target may not be able to correctly handle a %s\n"
-		   "of %ld bytes. Change the packet size? ",
+      if (! query (_("The target may not be able to correctly handle a %s\n"
+		   "of %ld bytes. Change the packet size? "),
 		   config->name, size))
 	error (_("Packet size not changed."));
     }
@@ -693,7 +693,7 @@ packet_ok (const char *buf, struct packet_config *config)
 	  break;
 	case PACKET_DISABLE:
 	  internal_error (__FILE__, __LINE__,
-			  "packet_ok: attempt to use a disabled packet");
+			  _("packet_ok: attempt to use a disabled packet"));
 	  break;
 	case PACKET_ENABLE:
 	  break;
@@ -1847,7 +1847,7 @@ remote_threads_extra_info (struct thread_info *tp)
 
   if (remote_desc == 0)		/* paranoia */
     internal_error (__FILE__, __LINE__,
-		    "remote_threads_extra_info");
+		    _("remote_threads_extra_info"));
 
   if (use_threadextra_query)
     {
@@ -3262,8 +3262,8 @@ remote_fetch_registers (int regnum)
       gdb_assert (reg != NULL);
       if (!reg->in_g_packet)
 	internal_error (__FILE__, __LINE__,
-			"Attempt to fetch a non G-packet register when this "
-			"remote.c does not support the p-packet.");
+			_("Attempt to fetch a non G-packet register when this "
+			"remote.c does not support the p-packet."));
     }
       switch (remote_protocol_p.support)
 	{
@@ -3664,9 +3664,9 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
-		      "remote_write_bytes: bad internal state");
+		      _("remote_write_bytes: bad internal state"));
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   /* Append "<memaddr>".  */
@@ -3731,9 +3731,9 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
-		      "remote_write_bytes: bad internal state");
+		      _("remote_write_bytes: bad internal state"));
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   putpkt_binary (buf, (int) (p - buf));
@@ -3893,7 +3893,7 @@ readchar (int timeout)
       error (_("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
-      perror_with_name ("Remote communication error");
+      perror_with_name (_("Remote communication error"));
       /* no return */
     case SERIAL_TIMEOUT:
       break;
@@ -3982,7 +3982,7 @@ putpkt_binary (char *buf, int cnt)
 	  gdb_flush (gdb_stdlog);
 	}
       if (serial_write (remote_desc, buf2, p - buf2))
-	perror_with_name ("putpkt: write failed");
+	perror_with_name (_("putpkt: write failed"));
 
       /* Read until either a timeout occurs (-2) or '+' is read.  */
       while (1)
@@ -4576,7 +4576,7 @@ watchpoint_to_Z_packet (int type)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "hw_bp_to_z: bad watchpoint type %d", type);
+		      _("hw_bp_to_z: bad watchpoint type %d"), type);
     }
 }
 
@@ -4611,7 +4611,7 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
       return 0;
     }
   internal_error (__FILE__, __LINE__,
-		  "remote_insert_watchpoint: reached end of function");
+		  _("remote_insert_watchpoint: reached end of function"));
 }
 
 
@@ -4645,7 +4645,7 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
       return 0;
     }
   internal_error (__FILE__, __LINE__,
-		  "remote_remove_watchpoint: reached end of function");
+		  _("remote_remove_watchpoint: reached end of function"));
 }
 
 
@@ -4739,7 +4739,7 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, char *shadow)
       return 0;
     }
   internal_error (__FILE__, __LINE__,
-		  "remote_insert_hw_breakpoint: reached end of function");
+		  _("remote_insert_hw_breakpoint: reached end of function"));
 }
 
 
@@ -4781,7 +4781,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, char *shadow)
       return 0;
     }
   internal_error (__FILE__, __LINE__,
-		  "remote_remove_hw_breakpoint: reached end of function");
+		  _("remote_remove_hw_breakpoint: reached end of function"));
 }
 
 /* Some targets are only capable of doing downloads, and afterwards
@@ -5398,7 +5398,7 @@ remote_async (void (*callback) (enum inferior_event_type event_type,
 {
   if (current_target.to_async_mask_value == 0)
     internal_error (__FILE__, __LINE__,
-		    "Calling remote_async when async is masked");
+		    _("Calling remote_async when async is masked"));
 
   if (callback != NULL)
     {

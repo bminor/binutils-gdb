@@ -282,7 +282,7 @@ sr_write (char *a, int l)
   int i;
 
   if (serial_write (sr_get_desc (), a, l) != 0)
-    perror_with_name ("sr_write: Error writing to remote");
+    perror_with_name (_("sr_write: Error writing to remote"));
 
   if (sr_get_debug () > 0)
     for (i = 0; i < l; i++)

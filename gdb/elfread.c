@@ -383,7 +383,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			      if (filesym == NULL)
 				{
 				  complaint (&symfile_complaints,
-					     "elf/stab section information %s without a preceding file symbol",
+					     _("elf/stab section information %s without a preceding file symbol"),
 					     sym->name);
 				}
 			      else
@@ -394,7 +394,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			    }
 			  if (sectinfo->sections[special_local_sect] != 0)
 			    complaint (&symfile_complaints,
-				       "duplicated elf/stab section information for %s",
+				       _("duplicated elf/stab section information for %s"),
 				       sectinfo->filename);
 			  /* BFD symbols are section relative.  */
 			  symaddr = sym->value + sym->section->vma;
@@ -704,7 +704,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   if (maybe == 0 && questionable != 0)
     {
       complaint (&symfile_complaints,
-		 "elf/stab section information questionable for %s", filename);
+		 _("elf/stab section information questionable for %s"), filename);
       maybe = questionable;
     }
 
@@ -723,7 +723,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   /* We were unable to find any offsets for this file.  Complain.  */
   if (dbx->stab_section_info)	/* If there *is* any info, */
     complaint (&symfile_complaints,
-	       "elf/stab section information missing for %s", filename);
+	       _("elf/stab section information missing for %s"), filename);
 }
 
 /* Register that we are able to handle ELF object file formats.  */

@@ -291,7 +291,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
     pid = vfork ();
 
   if (pid < 0)
-    perror_with_name ("vfork");
+    perror_with_name (("vfork"));
 
   if (pid == 0)
     {

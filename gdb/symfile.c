@@ -2520,17 +2520,15 @@ again2:
 	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
 	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)))
 	{
-	  complaint (&symfile_complaints, "Replacing old symbols for `%s'",
+	  complaint (&symfile_complaints, _("Replacing old symbols for `%s'"),
 		     name);
 	  clear_symtab_users_queued++;
 	  make_cleanup (clear_symtab_users_once, 0);
 	  blewit = 1;
 	}
       else
-	{
-	  complaint (&symfile_complaints, "Empty symbol table found for `%s'",
-		     name);
-	}
+	complaint (&symfile_complaints, _("Empty symbol table found for `%s'"),
+		   name);
 
       free_symtab (s);
     }

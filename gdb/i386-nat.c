@@ -310,8 +310,8 @@ i386_length_and_rw_bits (int len, enum target_hw_bp_type type)
 	break;
 #endif
       default:
-	internal_error (__FILE__, __LINE__, "\
-Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n",
+	internal_error (__FILE__, __LINE__, _("\
+Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n"),
 			(int) type);
     }
 
@@ -327,8 +327,8 @@ Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n",
         if (TARGET_HAS_DR_LEN_8)
  	  return (DR_LEN_8 | rw);
       default:
-	internal_error (__FILE__, __LINE__, "\
-Invalid hardware breakpoint length %d in i386_length_and_rw_bits.\n", len);
+	internal_error (__FILE__, __LINE__, _("\
+Invalid hardware breakpoint length %d in i386_length_and_rw_bits.\n"), len);
     }
 }
 
@@ -478,8 +478,8 @@ i386_handle_nonaligned_watchpoint (i386_wp_op_t what, CORE_ADDR addr, int len,
 	  else if (what == WP_REMOVE)
 	    status = i386_remove_aligned_watchpoint (addr, len_rw);
 	  else
-	    internal_error (__FILE__, __LINE__, "\
-Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n",
+	    internal_error (__FILE__, __LINE__, _("\
+Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
 			    (int)what);
 	  /* We keep the loop going even after a failure, because some
 	     of the other aligned watchpoints might still succeed

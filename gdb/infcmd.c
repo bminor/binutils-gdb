@@ -371,7 +371,7 @@ void
 tty_command (char *file, int from_tty)
 {
   if (file == 0)
-    error_no_arg ("terminal name for running target process");
+    error_no_arg (_("terminal name for running target process"));
 
   inferior_io_terminal = savestring (file, strlen (file));
 }
@@ -841,7 +841,7 @@ jump_command (char *arg, int from_tty)
     }
 
   if (!arg)
-    error_no_arg ("starting address");
+    error_no_arg (_("starting address"));
 
   sals = decode_line_spec_1 (arg, 1);
   if (sals.nelts != 1)
@@ -923,7 +923,7 @@ signal_command (char *signum_exp, int from_tty)
   ERROR_NO_INFERIOR;
 
   if (!signum_exp)
-    error_no_arg ("signal number");
+    error_no_arg (_("signal number"));
 
   /* It would be even slicker to make signal names be valid expressions,
      (the type could be "enum $signal" or some such), then the user could
@@ -1051,7 +1051,7 @@ advance_command (char *arg, int from_tty)
     error (_("The program is not running."));
 
   if (arg == NULL)
-    error_no_arg ("a location");
+    error_no_arg (_("a location"));
 
   /* Find out whether we must run in the background.  */
   if (arg != NULL)
@@ -1105,7 +1105,7 @@ print_return_value (int struct_return, struct type *value_type)
       value = NULL;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   if (value)
@@ -1161,7 +1161,7 @@ finish_command_continuation (struct continuation_arg *arg)
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (!value_type)
 	internal_error (__FILE__, __LINE__,
-			"finish_command: function has no target type");
+			_("finish_command: function has no target type"));
 
       if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	{
@@ -1286,7 +1286,7 @@ finish_command (char *arg, int from_tty)
 	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
 	  if (!value_type)
 	    internal_error (__FILE__, __LINE__,
-			    "finish_command: function has no target type");
+			    _("finish_command: function has no target type"));
 
 	  /* FIXME: Shouldn't we do the cleanups before returning?  */
 	  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
@@ -1389,7 +1389,7 @@ set_environment_command (char *arg, int from_tty)
   int nullset = 0;
 
   if (arg == 0)
-    error_no_arg ("environment variable and value");
+    error_no_arg (_("environment variable and value"));
 
   /* Find seperation between variable name and value */
   p = (char *) strchr (arg, '=');
@@ -1413,7 +1413,7 @@ set_environment_command (char *arg, int from_tty)
     p = val;
 
   if (p == arg)
-    error_no_arg ("environment variable to set");
+    error_no_arg (_("environment variable to set"));
 
   if (p == 0 || p[1] == 0)
     {
@@ -1451,7 +1451,7 @@ unset_environment_command (char *var, int from_tty)
     {
       /* If there is no argument, delete all environment variables.
          Ask for confirmation if reading from the terminal.  */
-      if (!from_tty || query ("Delete all environment variables? "))
+      if (!from_tty || query (_("Delete all environment variables? ")))
 	{
 	  free_environ (inferior_environ);
 	  inferior_environ = make_environ ();

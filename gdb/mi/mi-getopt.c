@@ -34,7 +34,7 @@ mi_getopt (const char *prefix,
   /* We assume that argv/argc are ok. */
   if (*optind > argc || *optind < 0)
     internal_error (__FILE__, __LINE__,
-		    "mi_getopt_long: optind out of bounds");
+		    _("mi_getopt_long: optind out of bounds"));
   if (*optind == argc)
     return -1;
   arg = argv[*optind];

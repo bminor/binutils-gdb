@@ -336,7 +336,7 @@ cd_command (char *dir, int from_tty)
   dont_repeat ();
 
   if (dir == 0)
-    error_no_arg ("new working directory");
+    error_no_arg (_("new working directory"));
 
   dir = tilde_expand (dir);
   make_cleanup (xfree, dir);

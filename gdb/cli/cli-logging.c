@@ -74,14 +74,14 @@ handle_redirections (int from_tty)
 
   output = gdb_fopen (logging_filename, logging_overwrite ? "w" : "a");
   if (output == NULL)
-    perror_with_name ("set logging");
+    perror_with_name (_("set logging"));
 
   /* Redirects everything to gdb_stdout while this is running.  */
   if (!logging_redirect)
     {
       output = tee_file_new (gdb_stdout, 0, output, 1);
       if (output == NULL)
-	perror_with_name ("set logging");
+	perror_with_name (_("set logging"));
       if (from_tty)
 	fprintf_unfiltered (gdb_stdout, "Copying output to %s.\n",
 			    logging_filename);

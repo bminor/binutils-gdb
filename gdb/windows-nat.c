@@ -1578,7 +1578,7 @@ child_attach (char *args, int from_tty)
   DWORD pid;
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   if (set_process_privilege (SE_DEBUG_NAME, TRUE) < 0)
     {
@@ -2196,7 +2196,7 @@ cygwin_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
     internal_error (__FILE__, __LINE__,
-		    "Invalid register %d in cygwin_set_dr.\n", i);
+		    _("Invalid register %d in cygwin_set_dr.\n"), i);
   dr[i] = (unsigned) addr;
   debug_registers_changed = 1;
   debug_registers_used = 1;

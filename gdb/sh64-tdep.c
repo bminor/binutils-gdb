@@ -2574,7 +2574,7 @@ sh64_do_pseudo_register (int regnum)
   if (regnum < NUM_REGS 
       || regnum >= NUM_REGS + NUM_PSEUDO_REGS_SH_MEDIA + NUM_PSEUDO_REGS_SH_COMPACT)
     internal_error (__FILE__, __LINE__,
-		    "Invalid pseudo register number %d\n", regnum);
+		    _("Invalid pseudo register number %d\n"), regnum);
 
   else if ((regnum >= DR0_REGNUM
 	    && regnum <= DR_LAST_REGNUM))
@@ -2634,7 +2634,7 @@ sh_print_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
 {
   if (regnum < 0 || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     internal_error (__FILE__, __LINE__,
-		    "Invalid register number %d\n", regnum);
+		    _("Invalid register number %d\n"), regnum);
 
   else if (regnum >= 0 && regnum < NUM_REGS)
     {

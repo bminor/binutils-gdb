@@ -1,5 +1,44 @@
-2005-02-10  Andrew Cagney  <cagney@gnu.org>
+2005-02-11  Andrew Cagney  <cagney@gnu.org>
 
+	Mark up error_no_arg, query, perror_with_name, complaint, and
+	internal_error.
+	* breakpoint.c, cp-abi.c, cp-namespace.c, cp-support.c: Update.
+	* cris-tdep.c, dbxread.c, dictionary.c, dsrec.c: Update.
+	* dummy-frame.c, dve3900-rom.c, dwarf2-frame.c, dwarf2expr.c: Update.
+	* dwarf2read.c, dwarfread.c, elfread.c, event-loop.c: Update.
+	* exceptions.c, exec.c, f-lang.c, findvar.c, fork-child.c: Update.
+	* frame-unwind.c, frame.c, frv-linux-tdep.c, frv-tdep.c: Update.
+	* gdb_assert.h, gdbarch.c, gdbtypes.c, gnu-nat.c: Update.
+	* go32-nat.c, hppa-tdep.c, hppabsd-nat.c, hpread.c: Update.
+	* i386-linux-nat.c, i386-nat.c, i386-tdep.c, i386bsd-nat.c: Update.
+	* i386fbsd-nat.c, inf-ptrace.c, inf-ttrace.c, infcall.c: Update.
+	* infcmd.c, inflow.c, infptrace.c, infrun.c, inftarg.c: Update.
+	* interps.c, language.c, linespec.c, linux-nat.c: Update.
+	* m32r-linux-nat.c, m68k-tdep.c, m68kbsd-nat.c: Update.
+	* m68klinux-nat.c, m88kbsd-nat.c, macroexp.c, macroscope.c: Update.
+	* macrotab.c, maint.c, mdebugread.c, memattr.c: Update.
+	* mips-linux-tdep.c, mips-tdep.c, mips64obsd-nat.c: Update.
+	* mipsnbsd-nat.c, mn10300-tdep.c, monitor.c, nto-procfs.c: Update.
+	* objc-lang.c, objfiles.c, objfiles.h, ocd.c, osabi.c: Update.
+	* parse.c, ppc-bdm.c, ppc-linux-nat.c, ppc-sysv-tdep.c: Update.
+	* ppcnbsd-nat.c, ppcobsd-nat.c, printcmd.c, procfs.c: Update.
+	* regcache.c, reggroups.c, remote-e7000.c, remote-mips.c: Update.
+	* remote-rdp.c, remote-sds.c, remote-sim.c, remote-st.c: Update.
+	* remote-utils.c, remote.c, rs6000-nat.c, rs6000-tdep.c: Update.
+	* s390-nat.c, s390-tdep.c, sentinel-frame.c, serial.c: Update.
+	* sh-tdep.c, sh3-rom.c, sh64-tdep.c, shnbsd-nat.c: Update.
+	* solib-aix5.c, solib-svr4.c, solib.c, source.c: Update.
+	* sparc-nat.c, stabsread.c, stack.c, symfile.c, symtab.c: Update.
+	* symtab.h, target.c, tracepoint.c, ui-file.c, ui-out.c: Update.
+	* utils.c, valops.c, valprint.c, vax-nat.c, vaxbsd-nat.c: Update.
+	* win32-nat.c, xcoffread.c, xstormy16-tdep.c: Update.
+	* cli/cli-cmds.c, cli/cli-logging.c, cli/cli-script.c: Update.
+	* cli/cli-setshow.c, mi/mi-cmd-break.c, mi/mi-cmds.c: Update.
+	* mi/mi-console.c, mi/mi-getopt.c, mi/mi-out.c: Update.
+	* tui/tui-file.c, tui/tui-interp.c: Update.
+
+2005-02-10  Andrew Cagney  <cagney@gnu.org>
+	
 	Mark up all error and warning messages.
 	* ada-lang.c, amd64-tdep.c, arch-utils.c, breakpoint.c: Update.
 	* bsd-kvm.c, bsd-uthread.c, coff-solib.h, coffread.c: Update.

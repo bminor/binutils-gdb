@@ -525,7 +525,7 @@ condition_command (char *arg, int from_tty)
   int bnum;
 
   if (arg == 0)
-    error_no_arg ("breakpoint number");
+    error_no_arg (_("breakpoint number"));
 
   p = arg;
   bnum = get_number (&p);
@@ -727,7 +727,7 @@ insert_catchpoint (struct ui_out *uo, void *args)
       target_insert_exec_catchpoint (PIDGET (inferior_ptid));
       break;
     default:
-      internal_error (__FILE__, __LINE__, "unknown breakpoint type");
+      internal_error (__FILE__, __LINE__, _("unknown breakpoint type"));
       break;
     }
 }
@@ -995,7 +995,7 @@ insert_bp_location (struct bp_location *bpt,
 	}
       else
 	{
-	  printf_filtered ("Hardware watchpoint %d deleted ", bpt->owner->number);
+	  printf_filtered (_("Hardware watchpoint %d deleted "), bpt->owner->number);
 	  printf_filtered ("because the program has left the block \n");
 	  printf_filtered ("in which its expression is valid.\n");
 	  if (bpt->owner->related_breakpoint)
@@ -2353,7 +2353,7 @@ print_bp_stop_message (bpstat bs)
 
     default:
       internal_error (__FILE__, __LINE__,
-		      "print_bp_stop_message: unrecognized enum value");
+		      _("print_bp_stop_message: unrecognized enum value"));
       break;
     }
 }
@@ -3313,7 +3313,7 @@ print_one_breakpoint (struct breakpoint *b,
   if (((int) b->type > (sizeof (bptypes) / sizeof (bptypes[0])))
       || ((int) b->type != bptypes[(int) b->type].type))
     internal_error (__FILE__, __LINE__,
-		    "bptypes table does not describe type #%d.",
+		    _("bptypes table does not describe type #%d."),
 		    (int) b->type);
   ui_out_field_string (uiout, "type", bptypes[(int) b->type].description);
 
@@ -3343,7 +3343,7 @@ print_one_breakpoint (struct breakpoint *b,
       {
       case bp_none:
 	internal_error (__FILE__, __LINE__,
-			"print_one_breakpoint: bp_none encountered\n");
+			_("print_one_breakpoint: bp_none encountered\n"));
 	break;
 
       case bp_watchpoint:
@@ -3873,8 +3873,8 @@ check_duplicates (struct breakpoint *bpt)
       /* Permanent breakpoint should always be inserted.  */
       if (! perm_bp->inserted)
 	internal_error (__FILE__, __LINE__,
-			"allegedly permanent breakpoint is not "
-			"actually inserted");
+			_("allegedly permanent breakpoint is not "
+			"actually inserted"));
 
       ALL_BP_LOCATIONS (b)
 	if (b != perm_bp)
@@ -3889,8 +3889,8 @@ check_duplicates (struct breakpoint *bpt)
 	      {
 		if (b->inserted)
 		  internal_error (__FILE__, __LINE__,
-				  "another breakpoint was inserted on top of "
-				  "a permanent breakpoint");
+				  _("another breakpoint was inserted on top of "
+				  "a permanent breakpoint"));
 
 		b->duplicate = 1;
 	      }
@@ -4005,7 +4005,7 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
       loc->loc_type = bp_loc_other;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "unknown breakpoint type");
+      internal_error (__FILE__, __LINE__, _("unknown breakpoint type"));
     }
 
   /* Add this breakpoint to the end of the chain.  */
@@ -6793,8 +6793,8 @@ delete_breakpoint (struct breakpoint *bpt)
 	     always be the only one inserted.  */
 	  if (b->enable_state == bp_permanent)
 	    internal_error (__FILE__, __LINE__,
-			    "another breakpoint was inserted on top of "
-			    "a permanent breakpoint");
+			    _("another breakpoint was inserted on top of "
+			    "a permanent breakpoint"));
 
 	  if (b->type == bp_hardware_breakpoint)
 	    val = target_insert_hw_breakpoint (b->loc->address, b->loc->shadow_contents);
@@ -6917,7 +6917,7 @@ delete_command (char *arg, int from_tty)
 
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
-	  || (breaks_to_delete && query ("Delete all breakpoints? ")))
+	  || (breaks_to_delete && query (_("Delete all breakpoints? "))))
 	{
 	  ALL_BREAKPOINTS_SAFE (b, temp)
 	  {
@@ -7279,7 +7279,7 @@ ignore_command (char *args, int from_tty)
   int num;
 
   if (p == 0)
-    error_no_arg ("a breakpoint number");
+    error_no_arg (_("a breakpoint number"));
 
   num = get_number (&p);
   if (num == 0)
@@ -7307,7 +7307,7 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
   int match;
 
   if (p == 0)
-    error_no_arg ("one or more breakpoint numbers");
+    error_no_arg (_("one or more breakpoint numbers"));
 
   while (*p)
     {

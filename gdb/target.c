@@ -664,7 +664,7 @@ push_target (struct target_ops *t)
       fprintf_unfiltered (gdb_stderr,
 			  "Magic number of %s target struct wrong\n",
 			  t->to_shortname);
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
     }
 
   /* Find the proper stratum to install this target in.  */
@@ -749,7 +749,7 @@ pop_target (void)
   fprintf_unfiltered (gdb_stderr,
 		      "pop_target couldn't find target %s\n",
 		      current_target.to_shortname);
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
+  internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 }
 
 #undef	MIN
@@ -1419,7 +1419,7 @@ target_preopen (int from_tty)
   if (target_has_execution)
     {
       if (!from_tty
-          || query ("A program is being debugged already.  Kill it? "))
+          || query (_("A program is being debugged already.  Kill it? ")))
 	target_kill ();
       else
 	error (_("Program not killed."));

@@ -272,7 +272,7 @@ fetch_regs (int tid)
 	  return;
 	}
 
-      perror_with_name ("Couldn't get registers");
+      perror_with_name (_("Couldn't get registers"));
     }
 
   supply_gregset (&regs);
@@ -287,12 +287,12 @@ store_regs (int tid, int regno)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   fill_gregset (&regs, regno);
   
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
-    perror_with_name ("Couldn't write registers");
+    perror_with_name (_("Couldn't write registers"));
 }
 
 #else
@@ -335,7 +335,7 @@ fetch_fpregs (int tid)
   elf_fpregset_t fpregs;
 
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
-    perror_with_name ("Couldn't get floating point status");
+    perror_with_name (_("Couldn't get floating point status"));
 
   supply_fpregset (&fpregs);
 }
@@ -349,12 +349,12 @@ store_fpregs (int tid, int regno)
   elf_fpregset_t fpregs;
 
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
-    perror_with_name ("Couldn't get floating point status");
+    perror_with_name (_("Couldn't get floating point status"));
 
   fill_fpregset (&fpregs, regno);
 
   if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
-    perror_with_name ("Couldn't write floating point status");
+    perror_with_name (_("Couldn't write floating point status"));
 }
 
 #else
@@ -408,7 +408,7 @@ fetch_fpxregs (int tid)
 	  return 0;
 	}
 
-      perror_with_name ("Couldn't read floating-point and SSE registers");
+      perror_with_name (_("Couldn't read floating-point and SSE registers"));
     }
 
   supply_fpxregset (&fpxregs);
@@ -435,13 +435,13 @@ store_fpxregs (int tid, int regno)
 	  return 0;
 	}
 
-      perror_with_name ("Couldn't read floating-point and SSE registers");
+      perror_with_name (_("Couldn't read floating-point and SSE registers"));
     }
 
   fill_fpxregset (&fpxregs, regno);
 
   if (ptrace (PTRACE_SETFPXREGS, tid, 0, &fpxregs) == -1)
-    perror_with_name ("Couldn't write floating-point and SSE registers");
+    perror_with_name (_("Couldn't write floating-point and SSE registers"));
 
   return 1;
 }
@@ -545,7 +545,7 @@ fetch_inferior_registers (int regno)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "Got request for bad register number %d.", regno);
+		  _("Got request for bad register number %d."), regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -605,7 +605,7 @@ store_inferior_registers (int regno)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "Got request to store bad register number %d.", regno);
+		  _("Got request to store bad register number %d."), regno);
 }
 
 
@@ -632,7 +632,7 @@ i386_linux_dr_get (int regnum)
 		  offsetof (struct user, u_debugreg[regnum]), 0);
   if (errno != 0)
 #if 0
-    perror_with_name ("Couldn't read debug register");
+    perror_with_name (_("Couldn't read debug register"));
 #else
     return 0;
 #endif
@@ -654,7 +654,7 @@ i386_linux_dr_set (int regnum, unsigned long value)
   ptrace (PTRACE_POKEUSER, tid,
 	  offsetof (struct user, u_debugreg[regnum]), value);
   if (errno != 0)
-    perror_with_name ("Couldn't write debug register");
+    perror_with_name (_("Couldn't write debug register"));
 }
 
 void
@@ -810,7 +810,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
     }
 
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
 }
 
 void

@@ -131,7 +131,7 @@ mn10300_type_align (struct type *type)
       return mn10300_type_align (check_typedef (type));
 
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 }
 
@@ -204,7 +204,7 @@ mn10300_store_return_value (struct type *type,
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "Cannot store return value %d bytes long.", len);
+		    _("Cannot store return value %d bytes long."), len);
 }
 
 /* MVS note deprecated.  */
@@ -238,7 +238,7 @@ mn10300_extract_return_value (struct type *type,
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "Cannot extract return value %d bytes long.", len);
+		    _("Cannot extract return value %d bytes long."), len);
 }
 
 static char *
@@ -481,7 +481,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "mn10300_gdbarch_init: Unknown mn10300 variant");
+		      _("mn10300_gdbarch_init: Unknown mn10300 variant"));
       break;
     }
 

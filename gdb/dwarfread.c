@@ -135,7 +135,7 @@ static void
 bad_die_ref_complaint (int arg1, const char *arg2, int arg3)
 {
   complaint (&symfile_complaints,
-	     "DIE @ 0x%x \"%s\", reference to DIE (0x%x) outside compilation unit",
+	     _("DIE @ 0x%x \"%s\", reference to DIE (0x%x) outside compilation unit"),
 	     arg1, arg2, arg3);
 }
 
@@ -143,7 +143,7 @@ static void
 unknown_attribute_form_complaint (int arg1, const char *arg2, int arg3)
 {
   complaint (&symfile_complaints,
-	     "DIE @ 0x%x \"%s\", unknown attribute form (0x%x)", arg1, arg2,
+	     _("DIE @ 0x%x \"%s\", unknown attribute form (0x%x)"), arg1, arg2,
 	     arg3);
 }
 
@@ -151,7 +151,7 @@ static void
 dup_user_type_definition_complaint (int arg1, const char *arg2)
 {
   complaint (&symfile_complaints,
-	     "DIE @ 0x%x \"%s\", internal error: duplicate user type definition",
+	     _("DIE @ 0x%x \"%s\", internal error: duplicate user type definition"),
 	     arg1, arg2);
 }
 
@@ -159,7 +159,7 @@ static void
 bad_array_element_type_complaint (int arg1, const char *arg2, int arg3)
 {
   complaint (&symfile_complaints,
-	     "DIE @ 0x%x \"%s\", bad array element type attribute 0x%x", arg1,
+	     _("DIE @ 0x%x \"%s\", bad array element type attribute 0x%x"), arg1,
 	     arg2, arg3);
 }
 
@@ -818,7 +818,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
     {
       utypep = *typep;
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", internal error: duplicate user type allocation",
+		 _("DIE @ 0x%x \"%s\", internal error: duplicate user type allocation"),
 		 DIE_ID, DIE_NAME);
     }
   else
@@ -967,7 +967,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
       /* Should never happen */
       TYPE_CODE (type) = TYPE_CODE_UNDEF;
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", missing class, structure, or union tag",
+		 _("DIE @ 0x%x \"%s\", missing class, structure, or union tag"),
 		 DIE_ID, DIE_NAME);
       break;
     }
@@ -1306,7 +1306,7 @@ decode_subscript_data_item (char *scan, char *end)
 	{
 	  /* Munged subscript data or other problem, fake it. */
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", can't decode subscript data items",
+		     _("DIE @ 0x%x \"%s\", can't decode subscript data items"),
 		     DIE_ID, DIE_NAME);
 	  nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	}
@@ -1322,7 +1322,7 @@ decode_subscript_data_item (char *scan, char *end)
     case FMT_UT_X_C:
     case FMT_UT_X_X:
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", array subscript format 0x%x not handled yet",
+		 _("DIE @ 0x%x \"%s\", array subscript format 0x%x not handled yet"),
 		 DIE_ID, DIE_NAME, format);
       nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       rangetype = create_range_type ((struct type *) NULL, nexttype, 0, 0);
@@ -1330,7 +1330,7 @@ decode_subscript_data_item (char *scan, char *end)
       break;
     default:
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", unknown array subscript format %x", DIE_ID,
+		 _("DIE @ 0x%x \"%s\", unknown array subscript format %x"), DIE_ID,
 		 DIE_NAME, format);
       nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       rangetype = create_range_type ((struct type *) NULL, nexttype, 0, 0);
@@ -1370,7 +1370,7 @@ dwarf_read_array_type (struct dieinfo *dip)
     {
       /* FIXME:  Can gdb even handle column major arrays? */
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", array not row major; not handled correctly",
+		 _("DIE @ 0x%x \"%s\", array not row major; not handled correctly"),
 		 DIE_ID, DIE_NAME);
     }
   sub = dip->at_subscr_data;
@@ -1787,7 +1787,7 @@ read_func_scope (struct dieinfo *dip, char *thisdie, char *enddie,
      FIXME: Add code to handle AT_abstract_origin tags properly.  */
   if (dip->at_name == NULL)
     {
-      complaint (&symfile_complaints, "DIE @ 0x%x, AT_name tag missing",
+      complaint (&symfile_complaints, _("DIE @ 0x%x, AT_name tag missing"),
 		 DIE_ID);
       return;
     }
@@ -2210,12 +2210,12 @@ locval (struct dieinfo *dip)
 	case OP_DEREF2:
 	  /* pop, deref and push 2 bytes (as a long) */
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", OP_DEREF2 address 0x%lx not handled",
+		     _("DIE @ 0x%x \"%s\", OP_DEREF2 address 0x%lx not handled"),
 		     DIE_ID, DIE_NAME, stack[stacki]);
 	  break;
 	case OP_DEREF4:	/* pop, deref and push 4 bytes (as a long) */
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", OP_DEREF4 address 0x%lx not handled",
+		     _("DIE @ 0x%x \"%s\", OP_DEREF4 address 0x%lx not handled"),
 		     DIE_ID, DIE_NAME, stack[stacki]);
 	  break;
 	case OP_ADD:		/* pop top 2 items, add, push result */
@@ -3185,7 +3185,7 @@ decode_modified_type (char *modifiers, unsigned int modcount, int mtype)
 	  break;
 	default:
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", botched modified type decoding (mtype 0x%x)",
+		     _("DIE @ 0x%x \"%s\", botched modified type decoding (mtype 0x%x)"),
 		     DIE_ID, DIE_NAME, mtype);
 	  typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	  break;
@@ -3205,12 +3205,12 @@ decode_modified_type (char *modifiers, unsigned int modcount, int mtype)
 	  break;
 	case MOD_const:
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", type modifier 'const' ignored", DIE_ID,
+		     _("DIE @ 0x%x \"%s\", type modifier 'const' ignored"), DIE_ID,
 		     DIE_NAME);	/* FIXME */
 	  break;
 	case MOD_volatile:
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", type modifier 'volatile' ignored",
+		     _("DIE @ 0x%x \"%s\", type modifier 'volatile' ignored"),
 		     DIE_ID, DIE_NAME);	/* FIXME */
 	  break;
 	default:
@@ -3222,7 +3222,7 @@ decode_modified_type (char *modifiers, unsigned int modcount, int mtype)
 #endif
 	    {
 	      complaint (&symfile_complaints,
-			 "DIE @ 0x%x \"%s\", unknown type modifier %u", DIE_ID,
+			 _("DIE @ 0x%x \"%s\", unknown type modifier %u"), DIE_ID,
 			 DIE_NAME, modifier);
 	    }
 	  break;
@@ -3366,7 +3366,7 @@ decode_fund_type (unsigned int fundtype)
       if (!(FT_lo_user <= fundtype && fundtype <= FT_hi_user))
 	{
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", unexpected fundamental type 0x%x",
+		     _("DIE @ 0x%x \"%s\", unexpected fundamental type 0x%x"),
 		     DIE_ID, DIE_NAME, fundtype);
 	}
     }
@@ -3466,7 +3466,7 @@ basicdieinfo (struct dieinfo *dip, char *diep, struct objfile *objfile)
       ((diep + dip->die_length) > (dbbase + dbsize)))
     {
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", malformed DIE, bad length (%ld bytes)",
+		 _("DIE @ 0x%x \"%s\", malformed DIE, bad length (%ld bytes)"),
 		 DIE_ID, DIE_NAME, dip->die_length);
       dip->die_length = 0;
     }
@@ -3535,7 +3535,7 @@ completedieinfo (struct dieinfo *dip, struct objfile *objfile)
       if (nbytes == -1)
 	{
 	  complaint (&symfile_complaints,
-		     "DIE @ 0x%x \"%s\", unknown attribute length, skipped remaining attributes",
+		     _("DIE @ 0x%x \"%s\", unknown attribute length, skipped remaining attributes"),
 		     DIE_ID, DIE_NAME);
 	  diep = end;
 	  continue;
@@ -3751,7 +3751,7 @@ target_to_host (char *from, int nbytes, int signextend,	/* FIXME:  Unused */
       break;
     default:
       complaint (&symfile_complaints,
-		 "DIE @ 0x%x \"%s\", no bfd support for %d byte data object",
+		 _("DIE @ 0x%x \"%s\", no bfd support for %d byte data object"),
 		 DIE_ID, DIE_NAME, nbytes);
       rtnval = 0;
       break;

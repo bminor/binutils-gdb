@@ -2113,7 +2113,7 @@ gnu_attach (char *args, int from_tty)
   struct inf *inf = cur_inf ();
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   pid = atoi (args);
 

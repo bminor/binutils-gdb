@@ -411,7 +411,7 @@ free_current_contents (void *ptr)
   void **location = ptr;
   if (location == NULL)
     internal_error (__FILE__, __LINE__,
-		    "free_current_contents: NULL pointer");
+		    _("free_current_contents: NULL pointer"));
   if (*location != NULL)
     {
       xfree (*location);
@@ -716,7 +716,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
          this lessens the likelhood of GDB going into an infinate
          loop.  */
-      quit_p = query ("%s\nQuit this debugging session? ", reason);
+      quit_p = query (_("%s\nQuit this debugging session? "), reason);
       break;
     case AUTO_BOOLEAN_TRUE:
       quit_p = 1;
@@ -725,7 +725,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
       quit_p = 0;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   switch (problem->should_dump_core)
@@ -734,7 +734,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
       /* Default (yes/batch case) is to dump core.  This leaves a GDB
          `dropping' so that it is easier to see that something went
          wrong in GDB.  */
-      dump_core_p = query ("%s\nCreate a core file of GDB? ", reason);
+      dump_core_p = query (_("%s\nCreate a core file of GDB? "), reason);
       break;
       break;
     case AUTO_BOOLEAN_TRUE:
@@ -744,7 +744,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
       dump_core_p = 0;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   if (quit_p)
@@ -912,12 +912,12 @@ nomem (long size)
   if (size > 0)
     {
       internal_error (__FILE__, __LINE__,
-		      "virtual memory exhausted: can't allocate %ld bytes.",
+		      _("virtual memory exhausted: can't allocate %ld bytes."),
 		      size);
     }
   else
     {
-      internal_error (__FILE__, __LINE__, "virtual memory exhausted.");
+      internal_error (__FILE__, __LINE__, _("virtual memory exhausted."));
     }
 }
 
@@ -1042,7 +1042,7 @@ xstrvprintf (const char *format, va_list ap)
      should never happen, but just to be sure.  */
   if (status < 0)
     internal_error (__FILE__, __LINE__,
-		    "vasprintf call failed (errno %d)", errno);
+		    _("vasprintf call failed (errno %d)"), errno);
   return ret;
 }
 
@@ -1747,7 +1747,7 @@ wrap_here (char *indent)
 {
   /* This should have been allocated, but be paranoid anyway. */
   if (!wrap_buffer)
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
   if (wrap_buffer[0])
     {
@@ -2560,7 +2560,7 @@ decimal2str (char *paddr_str, char *sign, ULONGEST addr, int width)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "failed internal consistency check");
+		      _("failed internal consistency check"));
     }
 }
 
@@ -2597,7 +2597,7 @@ octal2str (char *paddr_str, ULONGEST addr, int width)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "failed internal consistency check");
+		      _("failed internal consistency check"));
     }
 }
 
@@ -2707,7 +2707,7 @@ hex_string_custom (LONGEST num, int width)
     width = hex_len;
   if (width + 2 >= CELLSIZE)
     internal_error (__FILE__, __LINE__,
-		    "hex_string_custom: insufficient space to store result");
+		    _("hex_string_custom: insufficient space to store result"));
 
   strcpy (result_end - width - 2, "0x");
   memset (result_end - width, '0', width);
@@ -2759,7 +2759,7 @@ int_string (LONGEST val, int radix, int is_signed, int width,
       }
     default:
       internal_error (__FILE__, __LINE__,
-		      "failed internal consistency check");
+		      _("failed internal consistency check"));
     }
 }	
 
@@ -2798,7 +2798,7 @@ string_to_core_addr (const char *my_string)
 	  else if (isxdigit (my_string[i]))
 	    addr = (tolower (my_string[i]) - 'a' + 0xa) + (addr * 16);
 	  else
-	    internal_error (__FILE__, __LINE__, "invalid hex");
+	    internal_error (__FILE__, __LINE__, _("invalid hex"));
 	}
     }
   else
@@ -2810,7 +2810,7 @@ string_to_core_addr (const char *my_string)
 	  if (isdigit (my_string[i]))
 	    addr = (my_string[i] - '0') + (addr * 10);
 	  else
-	    internal_error (__FILE__, __LINE__, "invalid decimal");
+	    internal_error (__FILE__, __LINE__, _("invalid decimal"));
 	}
     }
   return addr;

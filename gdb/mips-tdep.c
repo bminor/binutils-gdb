@@ -270,7 +270,7 @@ mips_abi_regsize (struct gdbarch *gdbarch)
       case MIPS_ABI_UNKNOWN:
       case MIPS_ABI_LAST:
       default:
-	internal_error (__FILE__, __LINE__, "bad switch");
+	internal_error (__FILE__, __LINE__, _("bad switch"));
       }
   else if (mips_abi_regsize_string == size_64)
     return 8;
@@ -331,7 +331,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
       reg_offset = 0;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   if (mips_debug)
     fprintf_unfiltered (gdb_stderr,
@@ -522,7 +522,7 @@ mips_register_name (int regno)
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "mips_register_name: bad register number %d", rawnum);
+		    _("mips_register_name: bad register number %d"), rawnum);
 }
 
 /* Return the groups that a MIPS register can be categorised into.  */
@@ -584,7 +584,7 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	regcache_raw_read_part (regcache, rawnum, 4, 4, buf);
     }
   else
-    internal_error (__FILE__, __LINE__, "bad register size");
+    internal_error (__FILE__, __LINE__, _("bad register size"));
 }
 
 static void
@@ -606,7 +606,7 @@ mips_pseudo_register_write (struct gdbarch *gdbarch,
 	regcache_raw_write_part (regcache, rawnum, 4, 4, buf);
     }
   else
-    internal_error (__FILE__, __LINE__, "bad register size");
+    internal_error (__FILE__, __LINE__, _("bad register size"));
 }
 
 /* Table to translate MIPS16 register field to actual register number.  */
@@ -694,7 +694,7 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
 	    return builtin_type_ieee_double_little;
 	case BFD_ENDIAN_UNKNOWN:
 	default:
-	  internal_error (__FILE__, __LINE__, "bad switch");
+	  internal_error (__FILE__, __LINE__, _("bad switch"));
 	}
     }
   else if (regnum < NUM_REGS)
@@ -755,7 +755,7 @@ mips_mask_address_p (struct gdbarch_tdep *tdep)
     case AUTO_BOOLEAN_AUTO:
       return tdep->default_mask_address_p;
     default:
-      internal_error (__FILE__, __LINE__, "mips_mask_address_p: bad switch");
+      internal_error (__FILE__, __LINE__, _("mips_mask_address_p: bad switch"));
       return -1;
     }
 }
@@ -778,7 +778,7 @@ show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 	 mips_mask_address_p (tdep) ? "enabled" : "disabled");
       break;
     default:
-      internal_error (__FILE__, __LINE__, "show_mask_address: bad switch");
+      internal_error (__FILE__, __LINE__, _("show_mask_address: bad switch"));
       break;
     }
 }
@@ -1188,7 +1188,7 @@ unpack_mips16 (CORE_ADDR pc,
 	break;
       }
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   upk->offset = offset;
   upk->regx = regx;
@@ -3352,7 +3352,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 			      0, 4, TARGET_BYTE_ORDER, readbuf, writebuf, 4);
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__, "bad switch");
+	  internal_error (__FILE__, __LINE__, _("bad switch"));
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3863,8 +3863,8 @@ mips_read_fp_register_double (struct frame_info *frame, int regno,
     {
       if ((regno - mips_regnum (current_gdbarch)->fp0) & 1)
 	internal_error (__FILE__, __LINE__,
-			"mips_read_fp_register_double: bad access to "
-			"odd-numbered FP register");
+			_("mips_read_fp_register_double: bad access to "
+			"odd-numbered FP register"));
 
       /* mips_read_fp_register_single will find the correct 32 bits from
          each register.  */
@@ -4228,7 +4228,7 @@ show_mipsfpu_command (char *args, int from_tty)
       fpu = "absent (none)";
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   if (mips_fpu_type_auto)
     printf_unfiltered
@@ -4259,7 +4259,7 @@ set_mipsfpu_single_command (char *args, int from_tty)
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, "set mipsfpu failed");
+    internal_error (__FILE__, __LINE__, _("set mipsfpu failed"));
 }
 
 static void
@@ -4273,7 +4273,7 @@ set_mipsfpu_double_command (char *args, int from_tty)
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, "set mipsfpu failed");
+    internal_error (__FILE__, __LINE__, _("set mipsfpu failed"));
 }
 
 static void
@@ -4287,7 +4287,7 @@ set_mipsfpu_none_command (char *args, int from_tty)
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, "set mipsfpu failed");
+    internal_error (__FILE__, __LINE__, _("set mipsfpu failed"));
 }
 
 static void
@@ -4643,7 +4643,7 @@ global_mips_abi (void)
     if (mips_abi_strings[i] == mips_abi_string)
       return (enum mips_abi) i;
 
-  internal_error (__FILE__, __LINE__, "unknown ABI string");
+  internal_error (__FILE__, __LINE__, _("unknown ABI string"));
 }
 
 static struct gdbarch *
@@ -4943,7 +4943,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                       &floatformat_n32n64_long_double_big);
       break;
     default:
-      internal_error (__FILE__, __LINE__, "unknown ABI in switch");
+      internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));
     }
 
   /* FIXME: jlarmour/2000-04-07: There *is* a flag EF_MIPS_32BIT_MODE
@@ -5162,7 +5162,7 @@ _initialize_mips_tdep (void)
   mips_abi_string = mips_abi_strings[MIPS_ABI_UNKNOWN];
   if (MIPS_ABI_LAST + 1
       != sizeof (mips_abi_strings) / sizeof (mips_abi_strings[0]))
-    internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
+    internal_error (__FILE__, __LINE__, _("mips_abi_strings out of sync"));
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
 

@@ -788,7 +788,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
   int thischar = nextchar ();
 
   if (want == NULL)
-    internal_error (__FILE__, __LINE__, "Register set not selected.");
+    internal_error (__FILE__, __LINE__, _("Register set not selected."));
 
   while (*want)
     {
@@ -877,7 +877,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 		}
 
 	      else
-		internal_error (__FILE__, __LINE__, "failed internal consistency check");
+		internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 	    }
 	  store_signed_integer (buf,
 				register_size (current_gdbarch, regno),
@@ -2112,7 +2112,7 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
       break;
     default:
       /* Get the user's attention - this should never happen. */
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
     }
 
   return inferior_ptid;

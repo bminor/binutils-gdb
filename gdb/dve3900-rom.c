@@ -461,7 +461,7 @@ fetch_bitmapped_register (int regno, struct bit_field *bf)
 
   if (regno >= sizeof (r3900_regnames) / sizeof (r3900_regnames[0]))
     internal_error (__FILE__, __LINE__,
-                    "fetch_bitmapped_register: regno out of bounds");
+                    _("fetch_bitmapped_register: regno out of bounds"));
   else
     regname = r3900_regnames[regno];
 
@@ -508,7 +508,7 @@ store_bitmapped_register (int regno, struct bit_field *bf)
 
   if (regno >= sizeof (r3900_regnames) / sizeof (r3900_regnames[0]))
     internal_error (__FILE__, __LINE__,
-                    "fetch_bitmapped_register: regno out of bounds");
+                    _("fetch_bitmapped_register: regno out of bounds"));
   else
     regname = r3900_regnames[regno];
 

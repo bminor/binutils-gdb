@@ -186,7 +186,7 @@ interp_set (struct interp *interp)
     {
       if (old_interp == NULL || !interp_set (old_interp))
 	internal_error (__FILE__, __LINE__,
-			"Failed to initialize new interp \"%s\" %s",
+			_("Failed to initialize new interp \"%s\" %s"),
 			interp->name, "and could not restore old interp!\n");
       return 0;
     }

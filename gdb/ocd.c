@@ -746,7 +746,7 @@ readchar (int timeout)
     case SERIAL_EOF:
       error (_("Remote connection closed"));
     case SERIAL_ERROR:
-      perror_with_name ("Remote communication error");
+      perror_with_name (_("Remote communication error"));
     case SERIAL_TIMEOUT:
     default:
       return ch;
@@ -786,7 +786,7 @@ ocd_put_packet (unsigned char *buf, int len)
 
   *packet_ptr++ = -checksum;
   if (serial_write (ocd_desc, packet, packet_ptr - packet))
-    perror_with_name ("output_packet: write failed");
+    perror_with_name (_("output_packet: write failed"));
 }
 
 /* Get a packet from the OCD device.  Timeout is only enforced for the

@@ -1866,10 +1866,10 @@ If you continue, the return value that you specified will be ignored.\n";
     {
       int confirmed;
       if (thisfun == NULL)
-	confirmed = query ("%sMake selected stack frame return now? ",
+	confirmed = query (_("%sMake selected stack frame return now? "),
 			   query_prefix);
       else
-	confirmed = query ("%sMake %s return now? ", query_prefix,
+	confirmed = query (_("%sMake %s return now? "), query_prefix,
 			   SYMBOL_PRINT_NAME (thisfun));
       if (!confirmed)
 	error (_("Not confirmed"));

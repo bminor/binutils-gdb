@@ -318,7 +318,7 @@ mi_open (struct ui_out *uiout,
       fputc_unfiltered ('[', data->buffer);
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 }
 
@@ -336,7 +336,7 @@ mi_close (struct ui_out *uiout,
       fputc_unfiltered (']', data->buffer);
       break;
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   data->suppress_field_separator = 0;
 }

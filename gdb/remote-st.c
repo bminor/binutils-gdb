@@ -108,7 +108,7 @@ readchar (int timeout)
       error (_("Timeout reading from remote system."));
     }
 
-  perror_with_name ("remote-st2000");
+  perror_with_name (_("remote-st2000"));
 }
 
 /* Scan input from the remote system, until STRING is found.  If DISCARD is
@@ -302,7 +302,7 @@ or target st2000 <host> <port>\n"));
 #if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
   if (log_file == NULL)
-    perror_with_name (LOG_FILE);
+    perror_with_name ((LOG_FILE));
 #endif
 
   /* Hello?  Are you there?  */
@@ -710,13 +710,13 @@ connect_command (char *args, int fromtty)
       while (numfds == 0);
 
       if (numfds < 0)
-	perror_with_name ("select");
+	perror_with_name (("select"));
 
       if (FD_ISSET (0, &readfds))
 	{			/* tty input, send to stdebug */
 	  c = getchar ();
 	  if (c < 0)
-	    perror_with_name ("connect");
+	    perror_with_name (("connect"));
 
 	  printf_stdebug ("%c", c);
 	  switch (cur_esc)

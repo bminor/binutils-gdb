@@ -47,11 +47,11 @@
    want to continue, dump core, or just exit.  */
 #if defined (ASSERT_FUNCTION)
 #define gdb_assert_fail(assertion, file, line, function)                      \
-  internal_error (file, line, "%s: Assertion `%s' failed.",                   \
+  internal_error (file, line, _("%s: Assertion `%s' failed."),                   \
 		  function, assertion)
 #else
 #define gdb_assert_fail(assertion, file, line, function)                      \
-  internal_error (file, line, "Assertion `%s' failed.",                       \
+  internal_error (file, line, _("Assertion `%s' failed."),                       \
 		  assertion)
 #endif
 

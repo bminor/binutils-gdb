@@ -106,7 +106,7 @@ frame_unwind_find_by_frame (struct frame_info *next_frame, void **this_cache)
 	    return entry->unwinder;
 	}
     }
-  internal_error (__FILE__, __LINE__, "frame_unwind_find_by_frame failed");
+  internal_error (__FILE__, __LINE__, _("frame_unwind_find_by_frame failed"));
 }
 
 extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes */

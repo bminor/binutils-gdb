@@ -182,7 +182,7 @@ child_attach (char *args, int from_tty)
   char *dummy;
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   dummy = args;
   pid = strtol (args, &dummy, 0);

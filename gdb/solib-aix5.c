@@ -839,7 +839,7 @@ aix5_relocate_section_addresses (struct so_list *so,
 
       if (idx >= so->lm_info->nmappings)
 	internal_error (__FILE__, __LINE__,
-	  "aix_relocate_section_addresses: Can't find mapping for section %s",
+	  _("aix_relocate_section_addresses: Can't find mapping for section %s"),
 	  bfd_get_section_name (sec->bfd, sec->the_bfd_section));
       
       addr = so->lm_info->mapping[idx].addr;

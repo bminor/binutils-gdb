@@ -160,7 +160,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 #endif
     default:
       internal_error (__FILE__, __LINE__,
-		      "mi_cmd_break_insert: Bad switch.");
+		      _("mi_cmd_break_insert: Bad switch."));
     }
   deprecated_set_gdb_event_hooks (old_hooks);
 

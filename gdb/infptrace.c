@@ -144,7 +144,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
   errno = 0;
   ptrace (request, pid, (PTRACE_TYPE_ARG3)1, target_signal_to_host (signal));
   if (errno != 0)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
 }
 #endif /* DEPRECATED_CHILD_RESUME */
 
@@ -158,7 +158,7 @@ attach (int pid)
   errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
   if (errno != 0)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
   attach_flag = 1;
   return pid;
 #else
@@ -178,7 +178,7 @@ detach (int signal)
   errno = 0;
   ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, signal);
   if (errno != 0)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
   attach_flag = 0;
 #else
   error (_("This system does not support detaching from a process"));

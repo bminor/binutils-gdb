@@ -926,7 +926,7 @@ get_bf_for_fcn (long the_function)
 
   if (saved_bf_list == NULL)
     internal_error (__FILE__, __LINE__,
-		    "cannot get .bf node off empty list");
+		    _("cannot get .bf node off empty list"));
 
   if (current_head_bf_list != NULL)
     if (current_head_bf_list->symnum_fcn == the_function)

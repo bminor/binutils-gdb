@@ -227,7 +227,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "invalid regnum");
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
 }
 
@@ -254,7 +254,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "invalid regnum");
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
 }
 
@@ -276,7 +276,7 @@ s390x_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "invalid regnum");
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
 }
 
@@ -300,7 +300,7 @@ s390x_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "invalid regnum");
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
 }
 
@@ -2628,7 +2628,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      }
 	  }
 	else
-	  internal_error (__FILE__, __LINE__, "unknown argument type");
+	  internal_error (__FILE__, __LINE__, _("unknown argument type"));
       }
   }
 
@@ -2729,7 +2729,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 				     (const char *)in + word_size);
 	    }
 	  else
-	    internal_error (__FILE__, __LINE__, "invalid return type");
+	    internal_error (__FILE__, __LINE__, _("invalid return type"));
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:
@@ -2762,7 +2762,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 				    (char *)out + word_size);
 	    }
 	  else
-	    internal_error (__FILE__, __LINE__, "invalid return type");
+	    internal_error (__FILE__, __LINE__, _("invalid return type"));
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:

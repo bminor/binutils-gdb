@@ -163,21 +163,21 @@ static int has_line_numbers;
 static void
 unknown_symtype_complaint (const char *arg1)
 {
-  complaint (&symfile_complaints, "unknown symbol type %s", arg1);
+  complaint (&symfile_complaints, _("unknown symbol type %s"), arg1);
 }
 
 static void
 lbrac_mismatch_complaint (int arg1)
 {
   complaint (&symfile_complaints,
-	     "N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", arg1);
+	     _("N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d"), arg1);
 }
 
 static void
 repeated_header_complaint (const char *arg1, int arg2)
 {
   complaint (&symfile_complaints,
-	     "\"repeated\" header file %s not previously seen, at symtab pos %d",
+	     _("\"repeated\" header file %s not previously seen, at symtab pos %d"),
 	     arg1, arg2);
 }
 
@@ -966,7 +966,7 @@ set_namestring (struct objfile *objfile, struct internal_nlist nlist)
   if (((unsigned) nlist.n_strx + file_string_table_offset) >=
       DBX_STRINGTAB_SIZE (objfile))
     {
-      complaint (&symfile_complaints, "bad string table offset in symbol %d",
+      complaint (&symfile_complaints, _("bad string table offset in symbol %d"),
 		 symnum);
       namestring = "<bad string table offset>";
     } 
@@ -1168,7 +1168,7 @@ static void
 function_outside_compilation_unit_complaint (const char *arg1)
 {
   complaint (&symfile_complaints,
-	     "function `%s' appears to be defined outside of all compilation units",
+	     _("function `%s' appears to be defined outside of all compilation units"),
 	     arg1);
 }
 
@@ -1564,7 +1564,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      /* FIXME: we should not get here without a PST to work on.
 		 Attempt to recover.  */
 	      complaint (&symfile_complaints,
-			 "N_BINCL %s not in entries for any file, at symtab pos %d",
+			 _("N_BINCL %s not in entries for any file, at symtab pos %d"),
 			 namestring, symnum);
 	      continue;
 	    }
@@ -1982,7 +1982,7 @@ read_dbx_symtab (struct objfile *objfile)
 	       time searching to the end of every string looking for
 	       a backslash.  */
 
-	    complaint (&symfile_complaints, "unknown symbol descriptor `%c'",
+	    complaint (&symfile_complaints, _("unknown symbol descriptor `%c'"),
 		       p[1]);
 
 	    /* Ignore it; perhaps it is an extension that we don't
@@ -2811,9 +2811,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		 symbols within an LBRAC/RBRAC block; this complaint
 		 might also help sort out problems in which
 		 VARIABLES_INSIDE_BLOCK is incorrectly defined.  */
-	      complaint (&symfile_complaints, "\
+	      complaint (&symfile_complaints, _("\
 misplaced N_LBRAC entry; discarding local symbols which have \
-no enclosing block");
+no enclosing block"));
 	    }
 	  local_symbols = new->locals;
 	}
@@ -2835,7 +2835,7 @@ no enclosing block");
 	      if (new->start_addr > valu)
 		{
 		  complaint (&symfile_complaints,
-			     "block start larger than block end");
+			     _("block start larger than block end"));
 		  new->start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
@@ -3025,7 +3025,7 @@ no enclosing block");
 	    goto case_N_ROSYM;
 	  default:
 	    internal_error (__FILE__, __LINE__,
-			    "failed internal consistency check");
+			    _("failed internal consistency check"));
 	  }
       }
 
@@ -3130,7 +3130,7 @@ no enclosing block");
 	      if (context_stack_depth > 1)
 		{
 		  complaint (&symfile_complaints,
-			     "unmatched N_LBRAC before symtab pos %d", symnum);
+			     _("unmatched N_LBRAC before symtab pos %d"), symnum);
 		  break;
 		}
 

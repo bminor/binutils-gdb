@@ -1036,10 +1036,8 @@ set_host_arch (int pid)
   info.abfd = exec_bfd;
 
   if (!gdbarch_update_p (info))
-    {
-      internal_error (__FILE__, __LINE__,
-		      "set_host_arch: failed to select architecture");
-    }
+    internal_error (__FILE__, __LINE__,
+		    _("set_host_arch: failed to select architecture"));
 }
 
 
@@ -1079,7 +1077,7 @@ xcoff_relocate_symtab (unsigned int pid)
           if (errno == ENOMEM)
             load_segs *= 2;
           else
-            perror_with_name ("ptrace ldinfo");
+            perror_with_name (_("ptrace ldinfo"));
         }
       else
 	{

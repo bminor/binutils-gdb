@@ -227,14 +227,14 @@ static void
 no_get_frame_base (void *baton, unsigned char **start, size_t *length)
 {
   internal_error (__FILE__, __LINE__,
-		  "Support for DW_OP_fbreg is unimplemented");
+		  _("Support for DW_OP_fbreg is unimplemented"));
 }
 
 static CORE_ADDR
 no_get_tls_address (void *baton, CORE_ADDR offset)
 {
   internal_error (__FILE__, __LINE__,
-		  "Support for DW_OP_GNU_push_tls_address is unimplemented");
+		  _("Support for DW_OP_GNU_push_tls_address is unimplemented"));
 }
 
 static CORE_ADDR
@@ -374,8 +374,8 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 
 		if (old_rs == NULL)
 		  {
-		    complaint (&symfile_complaints, "\
-bad CFI data; mismatched DW_CFA_restore_state at 0x%s", paddr (fs->pc));
+		    complaint (&symfile_complaints, _("\
+bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 		  }
 		else
 		  {
@@ -451,7 +451,7 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s", paddr (fs->pc));
 	      break;
 
 	    default:
-	      internal_error (__FILE__, __LINE__, "Unknown CFI encountered.");
+	      internal_error (__FILE__, __LINE__, _("Unknown CFI encountered."));
 	    }
 	}
     }
@@ -663,7 +663,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "Unknown CFA rule.");
+      internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
     }
 
   /* Initialize the register state.  */
@@ -707,8 +707,8 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 	if (fs->regs.reg[column].how == DWARF2_FRAME_REG_UNSPECIFIED)
 	  {
 	    if (cache->reg[regnum].how == DWARF2_FRAME_REG_UNSPECIFIED)
-	      complaint (&symfile_complaints, "\
-incomplete CFI data; unspecified registers (e.g., %s) at 0x%s",
+	      complaint (&symfile_complaints, _("\
+incomplete CFI data; unspecified registers (e.g., %s) at 0x%s"),
 			 gdbarch_register_name (gdbarch, regnum),
 			 paddr_nz (fs->pc));
 	  }
@@ -865,7 +865,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "Unknown register rule.");
+      internal_error (__FILE__, __LINE__, _("Unknown register rule."));
     }
 }
 
@@ -1090,7 +1090,7 @@ encoding_for_size (unsigned int size)
     case 8:
       return DW_EH_PE_udata8;
     default:
-      internal_error (__FILE__, __LINE__, "Unsupported address size");
+      internal_error (__FILE__, __LINE__, _("Unsupported address size"));
     }
 }
 
@@ -1111,7 +1111,7 @@ size_of_encoded_value (unsigned char encoding)
     case DW_EH_PE_udata8:
       return 8;
     default:
-      internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
+      internal_error (__FILE__, __LINE__, _("Invalid or unsupported encoding"));
     }
 }
 
@@ -1127,7 +1127,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
      FDE's.  */
   if (encoding & DW_EH_PE_indirect)
     internal_error (__FILE__, __LINE__, 
-		    "Unsupported encoding: DW_EH_PE_indirect");
+		    _("Unsupported encoding: DW_EH_PE_indirect"));
 
   *bytes_read_ptr = 0;
 
@@ -1164,7 +1164,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
 	}
       break;
     default:
-      internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
+      internal_error (__FILE__, __LINE__, _("Invalid or unsupported encoding"));
     }
 
   if ((encoding & 0x07) == 0x00)
@@ -1205,7 +1205,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       *bytes_read_ptr += 8;
       return (base + bfd_get_signed_64 (unit->abfd, (bfd_byte *) buf));
     default:
-      internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
+      internal_error (__FILE__, __LINE__, _("Invalid or unsupported encoding"));
     }
 }
 
@@ -1587,21 +1587,21 @@ decode_frame_entry (struct comp_unit *unit, char *start, int eh_frame_p)
 
     case ALIGN4:
       complaint (&symfile_complaints,
-		 "Corrupt data in %s:%s; align 4 workaround apparently succeeded",
+		 _("Corrupt data in %s:%s; align 4 workaround apparently succeeded"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;
 
     case ALIGN8:
       complaint (&symfile_complaints,
-		 "Corrupt data in %s:%s; align 8 workaround apparently succeeded",
+		 _("Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;
 
     default:
       complaint (&symfile_complaints,
-		 "Corrupt data in %s:%s",
+		 _("Corrupt data in %s:%s"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;

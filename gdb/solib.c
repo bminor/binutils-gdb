@@ -667,7 +667,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   else
     {
       internal_error (__FILE__, __LINE__,
-		      "TARGET_PTR_BIT returned unknown size %d",
+		      _("TARGET_PTR_BIT returned unknown size %d"),
 		      TARGET_PTR_BIT);
     }
 

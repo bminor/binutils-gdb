@@ -118,7 +118,7 @@ struct symloc
 static void
 lbrac_unmatched_complaint (int arg1)
 {
-  complaint (&symfile_complaints, "unmatched N_LBRAC before symtab pos %d",
+  complaint (&symfile_complaints, _("unmatched N_LBRAC before symtab pos %d"),
 	     arg1);
 }
 
@@ -126,7 +126,7 @@ static void
 lbrac_mismatch_complaint (int arg1)
 {
   complaint (&symfile_complaints,
-	     "N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", arg1);
+	     _("N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d"), arg1);
 }
 
 /* To generate dumping code, uncomment this define.  The dumping
@@ -303,7 +303,7 @@ set_namestring (union dnttentry *sym, char **namep, struct objfile *objfile)
     *namep = "";
   else if ((unsigned) sym->dsfile.name >= VT_SIZE (objfile))
     {
-      complaint (&symfile_complaints, "bad string table offset in symbol %d",
+      complaint (&symfile_complaints, _("bad string table offset in symbol %d"),
 		 symnum);
       *namep = "";
     }
@@ -4769,7 +4769,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	  dn_bufp = hpread_get_lntt (dn_bufp->dtype.type.dnttp.index, objfile);
 	else
 	  {
-	    complaint (&symfile_complaints, "error in hpread_type_lookup().");
+	    complaint (&symfile_complaints, _("error in hpread_type_lookup()."));
 	    return NULL;
 	  }
 
@@ -5633,7 +5633,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	case DNTT_TYPE_COMMON:
 	  /* End a FORTRAN common block. We don't currently handle these */
 	  complaint (&symfile_complaints,
-		     "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n");
+		     _("unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n"));
 	  break;
 
 	case DNTT_TYPE_CLASS_SCOPE:
@@ -5661,7 +5661,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
 	default:
 	  complaint (&symfile_complaints,
-		     "internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind.");
+		     _("internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind."));
 	  break;
 	}
       break;
@@ -5882,7 +5882,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	  dn_bufp = hpread_get_lntt (dn_bufp->dtag.type.dnttp.index, objfile);
 	else
 	  {
-	    complaint (&symfile_complaints, "error processing class tagdef");
+	    complaint (&symfile_complaints, _("error processing class tagdef"));
 	    return;
 	  }
 	if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS ||
@@ -5991,7 +5991,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
     case DNTT_TYPE_COMMON:
       /* FORTRAN common. Not yet handled. */
       complaint (&symfile_complaints,
-		 "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON.");
+		 _("unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON."));
       break;
 
       /* DNTT_TYPE_COBSTRUCT is not handled by GDB.  */
@@ -6004,7 +6004,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
        * Anyway, not yet handled.
        */
       complaint (&symfile_complaints,
-		 "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA.");
+		 _("unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA."));
       break;
 
     case DNTT_TYPE_CLASS_SCOPE:

@@ -1301,8 +1301,8 @@ legacy_fetch_link_map_offsets (void)
   else
     {
       internal_error (__FILE__, __LINE__,
-                      "legacy_fetch_link_map_offsets called without legacy "
-		      "link_map support enabled.");
+                      _("legacy_fetch_link_map_offsets called without legacy "
+		      "link_map support enabled."));
       return 0;
     }
 }
@@ -1319,8 +1319,8 @@ svr4_fetch_link_map_offsets (void)
   if (flmo == NULL)
     {
       internal_error (__FILE__, __LINE__, 
-                      "svr4_fetch_link_map_offsets: fetch_link_map_offsets "
-		      "method not defined for this architecture.");
+                      _("svr4_fetch_link_map_offsets: fetch_link_map_offsets "
+		      "method not defined for this architecture."));
       return 0;
     }
   else

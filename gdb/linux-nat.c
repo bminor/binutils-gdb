@@ -193,14 +193,14 @@ linux_test_for_tracefork (int original_pid)
 
   child_pid = fork ();
   if (child_pid == -1)
-    perror_with_name ("linux_test_for_tracefork: fork");
+    perror_with_name (("fork"));
 
   if (child_pid == 0)
     linux_tracefork_child ();
 
   ret = my_waitpid (child_pid, &status, 0);
   if (ret == -1)
-    perror_with_name ("linux_test_for_tracefork: waitpid");
+    perror_with_name (("waitpid"));
   else if (ret != child_pid)
     error (_("linux_test_for_tracefork: waitpid: unexpected result %d."), ret);
   if (! WIFSTOPPED (status))
@@ -479,13 +479,13 @@ linux_handle_extended_wait (int pid, int status,
 			   (event == PTRACE_EVENT_CLONE) ? __WCLONE : 0);
 	  } while (ret == -1 && errno == EINTR);
 	  if (ret == -1)
-	    perror_with_name ("waiting for new child");
+	    perror_with_name (_("waiting for new child"));
 	  else if (ret != new_pid)
 	    internal_error (__FILE__, __LINE__,
-			    "wait returned unexpected PID %d", ret);
+			    _("wait returned unexpected PID %d"), ret);
 	  else if (!WIFSTOPPED (status) || WSTOPSIG (status) != SIGSTOP)
 	    internal_error (__FILE__, __LINE__,
-			    "wait returned unexpected status 0x%x", status);
+			    _("wait returned unexpected status 0x%x"), status);
 	}
 
       if (event == PTRACE_EVENT_FORK)
@@ -517,7 +517,7 @@ linux_handle_extended_wait (int pid, int status,
     }
 
   internal_error (__FILE__, __LINE__,
-		  "unknown ptrace event %d", event);
+		  _("unknown ptrace event %d"), event);
 }
 
 

@@ -481,7 +481,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	break;
       }
     default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   if (nargs < TYPE_NFIELDS (ftype))
@@ -825,7 +825,7 @@ the function call)."), name);
 	}
 
       /* The above code errors out, so ...  */
-      internal_error (__FILE__, __LINE__, "... should not be here");
+      internal_error (__FILE__, __LINE__, _("... should not be here"));
     }
 
   /* If we get here the called FUNCTION run to completion. */

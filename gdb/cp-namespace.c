@@ -552,7 +552,7 @@ cp_lookup_nested_type (struct type *parent_type,
       }
     default:
       internal_error (__FILE__, __LINE__,
-		      "cp_lookup_nested_type called on a non-aggregate type.");
+		      _("cp_lookup_nested_type called on a non-aggregate type."));
     }
 }
 

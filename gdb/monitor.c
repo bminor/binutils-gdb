@@ -346,7 +346,7 @@ monitor_printf_noecho (char *pattern,...)
 
   len = strlen (sndbuf);
   if (len + 1 > sizeof sndbuf)
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
   if (monitor_debug_p)
     {
@@ -374,7 +374,7 @@ monitor_printf (char *pattern,...)
 
   len = strlen (sndbuf);
   if (len + 1 > sizeof sndbuf)
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
   if (monitor_debug_p)
     {
@@ -431,7 +431,7 @@ monitor_readchar (void)
   if (c == SERIAL_TIMEOUT)
     error (_("Timeout reading from remote system."));
 
-  perror_with_name ("remote-monitor");
+  perror_with_name (_("remote-monitor"));
 }
 
 
@@ -506,7 +506,7 @@ readchar (int timeout)
 #endif
       error (_("Timeout reading from remote system."));
 
-  perror_with_name ("remote-monitor");
+  perror_with_name (_("remote-monitor"));
 }
 
 /* Scan input from the remote system, until STRING is found.  If BUF is non-
@@ -1300,7 +1300,7 @@ monitor_dump_regs (void)
       parse_register_dump (buf, resp_len);
     }
   else
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");			/* Need some way to read registers */
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));			/* Need some way to read registers */
 }
 
 static void

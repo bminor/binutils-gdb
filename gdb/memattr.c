@@ -140,7 +140,7 @@ mem_command (char *args, int from_tty)
   struct mem_attrib attrib;
 
   if (!args)
-    error_no_arg ("No mem");
+    error_no_arg (_("No mem"));
 
   tok = strtok (args, " \t");
   if (!tok)

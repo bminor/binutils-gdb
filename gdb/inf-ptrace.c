@@ -95,7 +95,7 @@ inf_ptrace_resume (ptid_t ptid, int step, enum target_signal signal)
   errno = 0;
   ptrace (request, pid, (PTRACE_TYPE_ARG3) 1, target_signal_to_host (signal));
   if (errno != 0)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
 }
 
 /* Wait for child to do something.  Return pid of child, or -1 in case
@@ -186,7 +186,7 @@ inf_ptrace_attach (char *args, int from_tty)
   char *dummy;
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   dummy = args;
   pid = strtol (args, &dummy, 0);
@@ -215,7 +215,7 @@ inf_ptrace_attach (char *args, int from_tty)
   errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
   if (errno != 0)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
   attach_flag = 1;
 #else
   error (_("This system does not support attaching to a process"));
@@ -265,7 +265,7 @@ inf_ptrace_detach (char *args, int from_tty)
   errno = 0;
   ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, sig);
   if (errno != 0)
-    perror_with_name ("ptrace");
+    perror_with_name (("ptrace"));
   attach_flag = 0;
 #else
   error (_("This system does not support detaching from a process"));

@@ -452,7 +452,7 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
 	use_poll = 0;
 #else
       internal_error (__FILE__, __LINE__,
-		      "use_poll without HAVE_POLL");
+		      _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
     }
   if (use_poll)
@@ -461,7 +461,7 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
       create_file_handler (fd, POLLIN, proc, client_data);
 #else
       internal_error (__FILE__, __LINE__,
-		      "use_poll without HAVE_POLL");
+		      _("use_poll without HAVE_POLL"));
 #endif
     }
   else
@@ -519,7 +519,7 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
 #else
 	  internal_error (__FILE__, __LINE__,
-			  "use_poll without HAVE_POLL");
+			  _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
 	}
       else
@@ -597,7 +597,7 @@ delete_file_handler (int fd)
       gdb_notifier.num_fds--;
 #else
       internal_error (__FILE__, __LINE__,
-		      "use_poll without HAVE_POLL");
+		      _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
     }
   else
@@ -699,7 +699,7 @@ handle_file_event (int event_file_desc)
 		file_ptr->error = 0;
 #else
 	      internal_error (__FILE__, __LINE__,
-			      "use_poll without HAVE_POLL");
+			      _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
 	    }
 	  else
@@ -758,10 +758,10 @@ gdb_wait_for_event (void)
       /* Don't print anything if we get out of poll because of a
          signal. */
       if (num_found == -1 && errno != EINTR)
-	perror_with_name ("Poll");
+	perror_with_name (("poll"));
 #else
       internal_error (__FILE__, __LINE__,
-		      "use_poll without HAVE_POLL");
+		      _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
     }
   else
@@ -784,7 +784,7 @@ gdb_wait_for_event (void)
 	  FD_ZERO (&gdb_notifier.ready_masks[2]);
 	  /* Dont print anything is we got a signal, let gdb handle it. */
 	  if (errno != EINTR)
-	    perror_with_name ("Select");
+	    perror_with_name (("select"));
 	}
     }
 
@@ -823,7 +823,7 @@ gdb_wait_for_event (void)
 	}
 #else
       internal_error (__FILE__, __LINE__,
-		      "use_poll without HAVE_POLL");
+		      _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
     }
   else
@@ -1144,7 +1144,7 @@ poll_timers (void)
 	  gdb_notifier.poll_timeout = delta.tv_sec * 1000;
 #else
 	  internal_error (__FILE__, __LINE__,
-			  "use_poll without HAVE_POLL");
+			  _("use_poll without HAVE_POLL"));
 #endif /* HAVE_POLL */
 	}
       else

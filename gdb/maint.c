@@ -412,7 +412,7 @@ maintenance_print_architecture (char *args, int from_tty)
     {
       struct ui_file *file = gdb_fopen (args, "w");
       if (file == NULL)
-	perror_with_name ("maintenance print architecture");
+	perror_with_name (_("maintenance print architecture"));
       gdbarch_dump (current_gdbarch, file);    
       ui_file_delete (file);
     }

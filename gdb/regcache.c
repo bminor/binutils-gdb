@@ -1076,7 +1076,7 @@ read_pc_pid (ptid_t ptid)
       pc_val = ADDR_BITS_REMOVE (raw_val);
     }
   else
-    internal_error (__FILE__, __LINE__, "read_pc_pid: Unable to find PC");
+    internal_error (__FILE__, __LINE__, _("read_pc_pid: Unable to find PC"));
 
   inferior_ptid = saved_inferior_ptid;
   return pc_val;
@@ -1095,7 +1095,7 @@ generic_target_write_pc (CORE_ADDR pc, ptid_t ptid)
     write_register_pid (PC_REGNUM, pc, ptid);
   else
     internal_error (__FILE__, __LINE__,
-		    "generic_target_write_pc");
+		    _("generic_target_write_pc"));
 }
 
 void
@@ -1131,7 +1131,7 @@ read_sp (void)
     /* Try SP_REGNUM last: this makes all sorts of [wrong] assumptions
        about the architecture so put it at the end.  */
     return read_register (SP_REGNUM);
-  internal_error (__FILE__, __LINE__, "read_sp: Unable to find SP");
+  internal_error (__FILE__, __LINE__, _("read_sp: Unable to find SP"));
 }
 
 static void
@@ -1166,7 +1166,7 @@ dump_endian_bytes (struct ui_file *file, enum bfd_endian endian,
 	fprintf_unfiltered (file, "%02x", buf[i]);
       break;
     default:
-      internal_error (__FILE__, __LINE__, "Bad switch");
+      internal_error (__FILE__, __LINE__, _("Bad switch"));
     }
 }
 
@@ -1373,7 +1373,7 @@ regcache_print (char *args, enum regcache_dump_what what_to_dump)
     {
       struct ui_file *file = gdb_fopen (args, "w");
       if (file == NULL)
-	perror_with_name ("maintenance print architecture");
+	perror_with_name (_("maintenance print architecture"));
       regcache_dump (current_regcache, file, what_to_dump);    
       ui_file_delete (file);
     }

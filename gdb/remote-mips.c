@@ -1213,7 +1213,7 @@ mips_request (int cmd,
     {
       if (mips_need_reply)
 	internal_error (__FILE__, __LINE__,
-			"mips_request: Trying to send command before reply");
+			_("mips_request: Trying to send command before reply"));
       sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr_nz (addr), paddr_nz (data));
       mips_send_packet (buff, 1);
       mips_need_reply = 1;
@@ -1224,7 +1224,7 @@ mips_request (int cmd,
 
   if (!mips_need_reply)
     internal_error (__FILE__, __LINE__,
-		    "mips_request: Trying to get reply before command");
+		    _("mips_request: Trying to get reply before command"));
 
   mips_need_reply = 0;
 
@@ -2540,7 +2540,7 @@ common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 	      flags = "f";
 	      break;
 	    default:
-	      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 	    }
 
 	  cmd = 'B';

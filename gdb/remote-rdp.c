@@ -495,13 +495,13 @@ send_rdp (char *template,...)
 	  *pi = get_byte ();
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	  internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 	}
     }
   va_end (alist);
 
   if (dst != buf)
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 }
 
 
@@ -1126,7 +1126,7 @@ remote_rdp_open (char *args, int from_tty)
   int not_icebreaker;
 
   if (!args)
-    error_no_arg ("serial port device name");
+    error_no_arg (_("serial port device name"));
 
   baud_rate = 9600;
 

@@ -241,7 +241,7 @@ build_table (struct mi_cmd *commands)
       struct mi_cmd **entry = lookup_table (command->name);
       if (*entry)
 	internal_error (__FILE__, __LINE__,
-			"command `%s' appears to be duplicated",
+			_("command `%s' appears to be duplicated"),
 			command->name);
       *entry = command;
       if (0)

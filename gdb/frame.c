@@ -421,7 +421,7 @@ frame_pc_unwind (struct frame_info *this_frame)
 	  pc = gdbarch_unwind_pc (current_gdbarch, this_frame);
 	}
       else
-	internal_error (__FILE__, __LINE__, "No unwind_pc method");
+	internal_error (__FILE__, __LINE__, _("No unwind_pc method"));
       this_frame->prev_pc.value = pc;
       this_frame->prev_pc.p = 1;
       if (frame_debug)
@@ -1511,7 +1511,7 @@ frame_sp_unwind (struct frame_info *next_frame)
       frame_unwind_unsigned_register (next_frame, SP_REGNUM, &sp);
       return sp;
     }
-  internal_error (__FILE__, __LINE__, "Missing unwind SP method");
+  internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
 }
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */

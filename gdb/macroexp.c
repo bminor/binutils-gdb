@@ -616,7 +616,7 @@ append_tokens_without_splicing (struct macro_buffer *dest,
   /* As far as I know, there's no case where inserting a space isn't
      enough to prevent a splice.  */
   internal_error (__FILE__, __LINE__,
-                  "unable to avoid splicing tokens during macro expansion");
+                  _("unable to avoid splicing tokens during macro expansion"));
 }
 
 
@@ -991,7 +991,7 @@ expand (const char *id,
       return 1;
     }
   else
-    internal_error (__FILE__, __LINE__, "bad macro definition kind");
+    internal_error (__FILE__, __LINE__, _("bad macro definition kind"));
 }
 
 

@@ -934,7 +934,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else if (len > (2 * 4))
         {
 	  /* FIXME */
-	  internal_error (__FILE__, __LINE__, "We don't do this");
+	  internal_error (__FILE__, __LINE__, _("We don't do this"));
         }
       else
         {
@@ -3962,7 +3962,7 @@ set_cris_version (char *ignore_args, int from_tty,
   gdbarch_info_init (&info);
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, 
-		    "cris_gdbarch_update: failed to update architecture.");
+		    _("cris_gdbarch_update: failed to update architecture."));
 }
 
 static void
@@ -3975,7 +3975,7 @@ set_cris_dwarf2_cfi (char *ignore_args, int from_tty,
   gdbarch_info_init (&info);
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, 
-		    "cris_gdbarch_update: failed to update architecture.");
+		    _("cris_gdbarch_update: failed to update architecture."));
 }
 
 static struct gdbarch *
@@ -4031,11 +4031,11 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case BFD_ENDIAN_BIG:
-      internal_error (__FILE__, __LINE__, "cris_gdbarch_init: big endian byte order in info");
+      internal_error (__FILE__, __LINE__, _("cris_gdbarch_init: big endian byte order in info"));
       break;
     
     default:
-      internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown byte order in info");
+      internal_error (__FILE__, __LINE__, _("cris_gdbarch_init: unknown byte order in info"));
     }
 
   set_gdbarch_return_value (gdbarch, cris_return_value);
@@ -4068,7 +4068,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case 9:
       /* Old versions; not supported.  */
       internal_error (__FILE__, __LINE__, 
-		      "cris_gdbarch_init: unsupported CRIS version");
+		      _("cris_gdbarch_init: unsupported CRIS version"));
       break;
 
     case 10:
@@ -4110,7 +4110,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     default:
       internal_error (__FILE__, __LINE__, 
-		      "cris_gdbarch_init: unknown CRIS version");
+		      _("cris_gdbarch_init: unknown CRIS version"));
     }
 
   /* Dummy frame functions (shared between CRISv10 and CRISv32 since they

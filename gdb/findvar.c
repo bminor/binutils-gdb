@@ -169,8 +169,8 @@ extract_typed_address (const void *buf, struct type *type)
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)
     internal_error (__FILE__, __LINE__,
-		    "extract_typed_address: "
-		    "type is not a pointer or reference");
+		    _("extract_typed_address: "
+		    "type is not a pointer or reference"));
 
   return POINTER_TO_ADDRESS (type, buf);
 }
@@ -238,8 +238,8 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)
     internal_error (__FILE__, __LINE__,
-		    "store_typed_address: "
-		    "type is not a pointer or reference");
+		    _("store_typed_address: "
+		    "type is not a pointer or reference"));
 
   ADDRESS_TO_POINTER (type, buf, addr);
 }

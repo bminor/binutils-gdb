@@ -366,7 +366,7 @@ build_section_table (struct bfd *some_bfd, struct section_table **start,
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
   if (*end > *start + count)
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
   /* We could realloc the table, but it probably loses for most files.  */
   return 0;
 }
@@ -455,7 +455,7 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   asection *section = NULL;
 
   if (len <= 0)
-    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
   if (overlay_debugging)
     {

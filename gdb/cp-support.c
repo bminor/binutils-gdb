@@ -456,7 +456,7 @@ remove_params (const char *demangled_name)
     }
   if (depth != 0)
     internal_error (__FILE__, __LINE__,
-		    "bad demangled name %s\n", demangled_name);
+		    _("bad demangled name %s\n"), demangled_name);
   while (argp[-1] == ' ' && argp > demangled_name)
     argp --;
 

@@ -3512,7 +3512,7 @@ procfs_attach (char *args, int from_tty)
   int   pid;
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   pid = atoi (args);
   if (pid == getpid ())
@@ -3648,7 +3648,7 @@ do_detach (int signo)
 
   if (signo || (proc_flags (pi) & (PR_STOPPED | PR_ISTOP)))
     if (signo || !(pi->was_stopped) ||
-	query ("Was stopped when attached, make it runnable again? "))
+	query (_("Was stopped when attached, make it runnable again? ")))
       {
 	/* Clear any pending signal.  */
 	if (!proc_clear_current_fault (pi))
@@ -4912,7 +4912,7 @@ procfs_set_exec_trap (void)
   sysset_t *exitset;
 
   if ((pi = create_procinfo (getpid (), 0)) == NULL)
-    perror_with_name ("procfs: create_procinfo failed in child.");
+    perror_with_name (_("procfs: create_procinfo failed in child."));
 
   if (open_procinfo_files (pi, FD_CTL) == 0)
     {
@@ -5927,7 +5927,7 @@ proc_trace_syscalls (char *args, int from_tty, int entry_or_exit, int mode)
     error (_("you must be debugging a process to use this command."));
 
   if (args == NULL || args[0] == 0)
-    error_no_arg ("system call to trace");
+    error_no_arg (_("system call to trace"));
 
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
   if (isdigit (args[0]))

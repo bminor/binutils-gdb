@@ -225,7 +225,7 @@ unsigned_address_type (void)
       return builtin_type_uint64;
     default:
       internal_error (__FILE__, __LINE__,
-		      "Unsupported address size.\n");
+		      _("Unsupported address size.\n"));
     }
 }
 
@@ -244,7 +244,7 @@ signed_address_type (void)
       return builtin_type_int64;
     default:
       internal_error (__FILE__, __LINE__,
-		      "Unsupported address size.\n");
+		      _("Unsupported address size.\n"));
     }
 }
 
@@ -650,7 +650,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 		break;
 	      default:
 		internal_error (__FILE__, __LINE__,
-				"Can't be reached.");
+				_("Can't be reached."));
 	      }
 	    result = value_as_long (value_binop (val1, val2, binop));
 	  }

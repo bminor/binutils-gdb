@@ -518,7 +518,7 @@ procfs_attach (char *args, int from_tty)
   int pid;
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg (_("process-id to attach"));
 
   pid = atoi (args);
 

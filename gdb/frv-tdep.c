@@ -421,7 +421,7 @@ frv_register_sim_regno (int reg)
 	return SIM_FRV_SPR0_REGNUM + spr_reg_offset;
     }
 
-  internal_error (__FILE__, __LINE__, "Bad register number %d", reg);
+  internal_error (__FILE__, __LINE__, _("Bad register number %d"), reg);
 }
 
 static const unsigned char *
@@ -1050,7 +1050,7 @@ frv_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, regval);
     }
   else
-    internal_error (__FILE__, __LINE__, "Illegal return value length: %d", len);
+    internal_error (__FILE__, __LINE__, _("Illegal return value length: %d"), len);
 }
 
 static CORE_ADDR
@@ -1258,7 +1258,7 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
     }
   else
     internal_error (__FILE__, __LINE__,
-                    "Don't know how to return a %d-byte value.", len);
+                    _("Don't know how to return a %d-byte value."), len);
 }
 
 

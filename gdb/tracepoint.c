@@ -616,7 +616,7 @@ get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
       if (optional_p)
 	tpnum = tracepoint_count;
       else
-	error_no_arg ("tracepoint number");
+	error_no_arg (_("tracepoint number"));
     }
   else
     tpnum = multi_p ? get_number_or_range (arg) : get_number (arg);

@@ -142,7 +142,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			  memtype = builtin_type_ieee_double_little;
 			  break;
 			default:
-			  internal_error (__FILE__, __LINE__, "bad switch");
+			  internal_error (__FILE__, __LINE__, _("bad switch"));
 			}
 		      convert_typed_floating (val, type, memval, memtype);
 		      write_memory (sp + argoffset, val, len);

@@ -117,7 +117,7 @@ register_cp_abi (struct cp_abi_ops *abi)
 {
   if (num_cp_abis == CP_ABI_MAX)
     internal_error (__FILE__, __LINE__,
-		    "Too many C++ ABIs, please increase CP_ABI_MAX in cp-abi.c");
+		    _("Too many C++ ABIs, please increase CP_ABI_MAX in cp-abi.c"));
 
   cp_abis[num_cp_abis++] = abi;
 
@@ -134,7 +134,7 @@ set_cp_abi_as_auto_default (const char *short_name)
 
   if (abi == NULL)
     internal_error (__FILE__, __LINE__,
-		    "Cannot find C++ ABI \"%s\" to set it as auto default.",
+		    _("Cannot find C++ ABI \"%s\" to set it as auto default."),
 		    short_name);
 
   if (auto_cp_abi.longname != NULL)

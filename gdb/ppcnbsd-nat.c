@@ -84,7 +84,7 @@ ppcnbsd_fetch_inferior_registers (int regno)
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-        perror_with_name ("Couldn't get registers");
+        perror_with_name (_("Couldn't get registers"));
 
       ppcnbsd_supply_reg ((char *) &regs, regno);
       if (regno != -1)
@@ -97,7 +97,7 @@ ppcnbsd_fetch_inferior_registers (int regno)
 
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't get FP registers");
+	perror_with_name (_("Couldn't get FP registers"));
 
       ppcnbsd_supply_fpreg ((char *) &fpregs, regno);
       if (regno != -1)
@@ -114,13 +114,13 @@ ppcnbsd_store_inferior_registers (int regno)
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name ("Couldn't get registers");
+	perror_with_name (_("Couldn't get registers"));
 
       ppcnbsd_fill_reg ((char *) &regs, regno);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name ("Couldn't write registers");
+	perror_with_name (_("Couldn't write registers"));
 
       if (regno != -1)
 	return;
@@ -132,13 +132,13 @@ ppcnbsd_store_inferior_registers (int regno)
 
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't get FP registers");
+	perror_with_name (_("Couldn't get FP registers"));
 
       ppcnbsd_fill_fpreg ((char *) &fpregs, regno);
       
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't set FP registers");
+	perror_with_name (_("Couldn't set FP registers"));
     }
 }
 

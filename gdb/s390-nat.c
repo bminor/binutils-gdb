@@ -136,7 +136,7 @@ fetch_regs (int tid)
   parea.process_addr = (addr_t) &regs;
   parea.kernel_addr = offsetof (struct user_regs_struct, psw);
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   supply_gregset (&regs);
 }
@@ -153,12 +153,12 @@ store_regs (int tid, int regnum)
   parea.process_addr = (addr_t) &regs;
   parea.kernel_addr = offsetof (struct user_regs_struct, psw);
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
-    perror_with_name ("Couldn't get registers");
+    perror_with_name (_("Couldn't get registers"));
 
   fill_gregset (&regs, regnum);
 
   if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
-    perror_with_name ("Couldn't write registers");
+    perror_with_name (_("Couldn't write registers"));
 }
 
 /* Fetch all floating-point registers from process/thread TID and store
@@ -173,7 +173,7 @@ fetch_fpregs (int tid)
   parea.process_addr = (addr_t) &fpregs;
   parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
-    perror_with_name ("Couldn't get floating point status");
+    perror_with_name (_("Couldn't get floating point status"));
 
   supply_fpregset (&fpregs);
 }
@@ -190,12 +190,12 @@ store_fpregs (int tid, int regnum)
   parea.process_addr = (addr_t) &fpregs;
   parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
-    perror_with_name ("Couldn't get floating point status");
+    perror_with_name (_("Couldn't get floating point status"));
 
   fill_fpregset (&fpregs, regnum);
 
   if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
-    perror_with_name ("Couldn't write floating point status");
+    perror_with_name (_("Couldn't write floating point status"));
 }
 
 /* Fetch register REGNUM from the child process.  If REGNUM is -1, do
@@ -262,7 +262,7 @@ s390_stopped_by_watchpoint (void)
   parea.process_addr = (addr_t) & per_lowcore;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info.lowcore);
   if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea) < 0)
-    perror_with_name ("Couldn't retrieve watchpoint status");
+    perror_with_name (_("Couldn't retrieve watchpoint status"));
 
   return per_lowcore.perc_storage_alteration == 1
 	 && per_lowcore.perc_store_real_address == 0;
@@ -289,7 +289,7 @@ s390_fix_watch_points (void)
   parea.process_addr = (addr_t) & per_info;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
   if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea) < 0)
-    perror_with_name ("Couldn't retrieve watchpoint status");
+    perror_with_name (_("Couldn't retrieve watchpoint status"));
 
   if (watch_base)
     {
@@ -305,7 +305,7 @@ s390_fix_watch_points (void)
   per_info.ending_addr = watch_hi_addr;
 
   if (ptrace (PTRACE_POKEUSR_AREA, tid, &parea) < 0)
-    perror_with_name ("Couldn't modify watchpoint status");
+    perror_with_name (_("Couldn't modify watchpoint status"));
 }
 
 int

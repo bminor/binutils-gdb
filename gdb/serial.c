@@ -347,7 +347,7 @@ serial_readchar (struct serial *scb, int timeout)
      code is finished. */
   if (0 && serial_is_async_p (scb) && timeout < 0)
     internal_error (__FILE__, __LINE__,
-		    "serial_readchar: blocking read in async mode");
+		    _("serial_readchar: blocking read in async mode"));
 
   ch = scb->ops->readchar (scb, timeout);
   if (serial_logfp != NULL)
@@ -507,7 +507,7 @@ deprecated_serial_fd (struct serial *scb)
   if (scb->fd < 0)
     {
       internal_error (__FILE__, __LINE__,
-		      "serial: FD not valid");
+		      _("serial: FD not valid"));
     }
   return scb->fd; /* sigh */
 }
@@ -597,7 +597,7 @@ connect_command (char *args, int fromtty)
 		break;
 
 	      if (c < 0)
-		perror_with_name ("connect");
+		perror_with_name (_("connect"));
 
 	      cx = c;
 	      serial_write (port_desc, &cx, 1);
@@ -635,7 +635,7 @@ connect_command (char *args, int fromtty)
 		break;
 
 	      if (c < 0)
-		perror_with_name ("connect");
+		perror_with_name (_("connect"));
 
 	      cx = c;
 

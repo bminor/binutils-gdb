@@ -1320,7 +1320,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else
 	internal_error (__FILE__, __LINE__,
-			"Cannot extract return value of %d bytes long.", len);
+			_("Cannot extract return value of %d bytes long."), len);
     }
 }
 
@@ -1388,7 +1388,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else
 	internal_error (__FILE__, __LINE__,
-			"Cannot store return value of %d bytes long.", len);
+			_("Cannot store return value of %d bytes long."), len);
     }
 
 #undef I387_ST0_REGNUM

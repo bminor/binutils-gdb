@@ -248,7 +248,7 @@ fetch_altivec_register (int tid, int regno)
           have_ptrace_getvrregs = 0;
           return;
         }
-      perror_with_name ("Unable to fetch AltiVec register");
+      perror_with_name (_("Unable to fetch AltiVec register"));
     }
  
   /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
@@ -285,7 +285,7 @@ get_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
             have_ptrace_getsetevrregs = 0;
           else
             /* Anything else needs to be reported.  */
-            perror_with_name ("Unable to fetch SPE registers");
+            perror_with_name (_("Unable to fetch SPE registers"));
         }
     }
 
@@ -411,7 +411,7 @@ fetch_register (int tid, int regno)
     }
   else 
     internal_error (__FILE__, __LINE__,
-                    "fetch_register: unexpected byte order: %d",
+                    _("fetch_register: unexpected byte order: %d"),
                     gdbarch_byte_order (current_gdbarch));
 }
 
@@ -453,7 +453,7 @@ fetch_altivec_registers (int tid)
           have_ptrace_getvrregs = 0;
 	  return;
 	}
-      perror_with_name ("Unable to fetch AltiVec registers");
+      perror_with_name (_("Unable to fetch AltiVec registers"));
     }
   supply_vrregset (&regs);
 }
@@ -528,7 +528,7 @@ store_altivec_register (int tid, int regno)
           have_ptrace_getvrregs = 0;
           return;
         }
-      perror_with_name ("Unable to fetch AltiVec register");
+      perror_with_name (_("Unable to fetch AltiVec register"));
     }
 
   /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
@@ -541,7 +541,7 @@ store_altivec_register (int tid, int regno)
 
   ret = ptrace (PTRACE_SETVRREGS, tid, 0, &regs);
   if (ret < 0)
-    perror_with_name ("Unable to store AltiVec register");
+    perror_with_name (_("Unable to store AltiVec register"));
 }
 
 /* Assuming TID referrs to an SPE process, set the top halves of TID's
@@ -568,7 +568,7 @@ set_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
             have_ptrace_getsetevrregs = 0;
           else
             /* Anything else needs to be reported.  */
-            perror_with_name ("Unable to set SPE registers");
+            perror_with_name (_("Unable to set SPE registers"));
         }
     }
 }
@@ -733,13 +733,13 @@ store_altivec_registers (int tid)
           have_ptrace_getvrregs = 0;
           return;
         }
-      perror_with_name ("Couldn't get AltiVec registers");
+      perror_with_name (_("Couldn't get AltiVec registers"));
     }
 
   fill_vrregset (&regs);
   
   if (ptrace (PTRACE_SETVRREGS, tid, 0, &regs) < 0)
-    perror_with_name ("Couldn't write AltiVec registers");
+    perror_with_name (_("Couldn't write AltiVec registers"));
 }
 
 static void
