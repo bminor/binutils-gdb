@@ -494,20 +494,20 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		and change its target to the jump's target.  The jump/bra
 		can then be deleted.				   2 bytes
 
-	- mov abs24 -> mov abs16	2 byte savings
+	* mov abs24 -> mov abs16	2 byte savings
 
-	- Most instructions which accept imm24 can relax to imm16  2 bytes
+	* Most instructions which accept imm24 can relax to imm16  2 bytes
 	- Most instructions which accept imm16 can relax to imm8   1 byte
 
-	- Most instructions which accept d24 can relax to d16	   2 bytes
+	* Most instructions which accept d24 can relax to d16	   2 bytes
 	- Most instructions which accept d16 can relax to d8	   1 byte
 
 	abs24, imm24, d24 all look the same at the reloc level.  It
 	might make the code simpler if we had different relocs for
 	the various relaxable operand types.
    
-  A '*' indicates a case this code can handle.  */
-
+	We don't handle imm16->imm8 or d16->d8 as they're very rare
+	and somewhat more difficult to support.  */
 
 static boolean 
 mn10200_elf_relax_section (abfd, sec, link_info, again)
