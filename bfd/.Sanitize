@@ -50,6 +50,7 @@ coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
+coff-msym.c
 coff-rs6000.c
 coffcode.h
 config
@@ -124,7 +125,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.39  1992/03/02 06:39:32  bothner
+# Revision 1.40  1992/03/06 08:42:41  gnu
+# Add rule for coff-msym.
+#
+# Revision 1.39  1992/03/02  06:39:32  bothner
 # New file: rs6000-core.c.
 #
 # Revision 1.38  1992/02/27  03:52:15  sac
