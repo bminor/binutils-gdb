@@ -150,7 +150,7 @@ maintainer works with the native maintainer when resolving API issues.
 	x86-64		--target=x86_64-linux-gnu ,-Werror
 			Maintenance only
 
-	xstormy16	--target=xstormy16-elf broken
+	xstormy16	--target=xstormy16-elf
 			Corinna Vinschen	vinschen@redhat.com
 
 	z8k		Deleted.

@@ -1,3 +1,36 @@
+2004-09-23  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Remove "broken" from XStormy16 entry.
+	* xstormy16-tdep.c: Convert XStormy16 target to latest GDB methods.
+	(struct gdbarch_tdep): Remove.
+	(struct xstormy16_frame_cache): New frame cache structure.
+	(xstormy16_register_byte, xstormy16_register_raw_size)
+	(xstormy16_reg_virtual_type, xstormy16_register_type)
+	(xstormy16_push_arguments, xstormy16_push_return_address)
+	(xstormy16_pop_frame, xstormy16_store_struct_return)
+	(xstormy16_store_return_value, xstormy16_extract_struct_value_address)
+	(xstormy16_frame_saved_register, xstormy16_get_saved_register)
+	(xstormy16_scan_prologue, xstormy16_frame_init_saved_regs)
+	(xstormy16_frame_saved_pc, xstormy16_init_extra_frame_info)
+	(xstormy16_frame_chain, xstormy16_frame_chain_valid,
+	(xstormy16_saved_pc_after_call, xstormy16_save_dummy_frame_to): Remove.
+	(xstormy16_use_struct_convention): Drop gcc_p parameter.
+	(xstormy16_extract_return_value, xstormy16_store_return_value):
+	Regcachify.  Drop useless struct convention handling.
+	(xstormy16_register_type, xstormy16_return_value)
+	(xstormy16_push_dummy_call, xstormy16_analyze_prologue)
+	(xstormy16_alloc_frame_cache, xstormy16_frame_cache)
+	(xstormy16_frame_prev_register, xstormy16_frame_this_id)
+	(xstormy16_frame_base_address, xstormy16_frame_sniffer)
+	(xstormy16_unwind_sp, xstormy16_unwind_pc)
+	(xstormy16_unwind_dummy_id) : New functions.
+	(xstormy16_skip_prologue): Call xstormy16_analyze_prologue instead
+	of xstormy16_scan_prologue.
+	(xstormy16_frame_unwind): New frame_unwind structure.
+	(xstormy16_frame_base): New frame_base structure.
+	(xstormy16_gdbarch_init): Accomodate all of the above changes.
+	Reshuffle for better readability.  Also add dwarf2_frame_sniffer.
+
 2004-09-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* language.c (language_gdbarch_post_init): Fix off-by one error.
