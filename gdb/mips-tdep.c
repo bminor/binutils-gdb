@@ -634,36 +634,33 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 	    TYPE_LENGTH (virtual_type));
 }
 
-void
-mips_register_convert_to_type (int regnum, struct type *type, char *buffer)
+static int
+mips_convert_register_p (int regnum, struct type *type)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-      && REGISTER_RAW_SIZE (regnum) == 4
-      && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
-      && TYPE_CODE(type) == TYPE_CODE_FLT
-      && TYPE_LENGTH(type) == 8) 
-    {
-      char temp[4];
-      memcpy (temp, ((char *)(buffer))+4, 4);
-      memcpy (((char *)(buffer))+4, (buffer), 4);
-      memcpy (((char *)(buffer)), temp, 4); 
-    }
+  return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+	  && REGISTER_RAW_SIZE (regnum) == 4
+	  && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
+	  && TYPE_CODE(type) == TYPE_CODE_FLT
+	  && TYPE_LENGTH(type) == 8);
 }
 
 void
-mips_register_convert_from_type (int regnum, struct type *type, char *buffer)
+mips_register_to_value (struct frame_info *frame, int regnum,
+			struct value *v)
 {
-if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-    && REGISTER_RAW_SIZE (regnum) == 4
-    && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
-    && TYPE_CODE(type) == TYPE_CODE_FLT
-    && TYPE_LENGTH(type) == 8) 
-  {
-    char temp[4];
-    memcpy (temp, ((char *)(buffer))+4, 4);
-    memcpy (((char *)(buffer))+4, (buffer), 4);
-    memcpy (((char *)(buffer)), temp, 4);
-  }
+  frame_read_register (frame, regnum + 0, VALUE_CONTENTS_RAW (v) + 4);
+  frame_read_register (frame, regnum + 1, VALUE_CONTENTS_RAW (v) + 0);
+  VALUE_LVAL (v) = lval_reg_frame_relative;
+  VALUE_FRAME_ID (v) = get_frame_id (frame);
+  VALUE_FRAME_REGNUM (v) = regnum;
+}
+
+void
+mips_value_to_register (struct frame_info *frame, struct value *v)
+{
+  int regnum = VALUE_FRAME_REGNUM (v);
+  put_frame_register (frame, regnum + 0, VALUE_CONTENTS (v) + 4);
+  put_frame_register (frame, regnum + 1, VALUE_CONTENTS (v) + 0);
 }
 
 /* Return the GDB type object for the "standard" data type
@@ -5966,6 +5963,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 					   mips_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, 
 				       mips_register_convert_to_raw);
+  set_gdbarch_convert_register_p (gdbarch, mips_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch, mips_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, mips_value_to_register);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 

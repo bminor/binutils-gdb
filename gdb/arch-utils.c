@@ -47,6 +47,7 @@
 #include "version.h"
 
 #include "floatformat.h"
+#include "gdbcore.h"
 
 /* Implementation of extract return value that grubs around in the
    register cache.  */
@@ -440,23 +441,54 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 int
-legacy_convert_register_p (int regnum)
+legacy_convert_register_p (int regnum, struct type *type)
 {
   return REGISTER_CONVERTIBLE (regnum);
 }
 
 void
-legacy_register_to_value (int regnum, struct type *type,
-			  char *from, char *to)
+legacy_register_to_value (struct frame_info *frame, int regnum,
+			  struct value *v)
 {
-  REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
+  char from[MAX_REGISTER_SIZE];
+  int realnum;
+  int optim;
+  enum lval_type lval;
+  CORE_ADDR addr;
+  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, from);
+  REGISTER_CONVERT_TO_VIRTUAL (regnum, VALUE_TYPE (v), from,
+			       VALUE_CONTENTS_RAW (v));
+  VALUE_LVAL (v) = lval;
+  VALUE_REGNO (v) = realnum;
+  VALUE_ADDRESS (v) = addr;
+  /* Note: This function is just trying to keep old code alive, don't
+     let it handle anything other than a few obvious cases.  */
+  gdb_assert (lval == lval_register || lval == lval_memory);
+  VALUE_OPTIMIZED_OUT (v) = optim;
 }
 
 void
-legacy_value_to_register (struct type *type, int regnum,
-			  char *from, char *to)
+legacy_value_to_register (struct frame_info *frame, struct value *v)
 {
-  REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  char to[MAX_REGISTER_SIZE];
+  REGISTER_CONVERT_TO_RAW (VALUE_TYPE (v), VALUE_REGNO (v),
+			   VALUE_CONTENTS (v), to);
+  switch (VALUE_LVAL (v))
+    {
+    case lval_register:
+      /* FIXME: How to get from the frame to the, several levels
+         inner, regcache?  */
+      regcache_cooked_write (current_regcache, VALUE_REGNO (v), to);
+      break;
+    case lval_memory:
+      write_memory (VALUE_ADDRESS (v), to,
+		    register_size (gdbarch, (VALUE_REGNO (v))));
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "Unhandled lval %d",
+		      (int) VALUE_LVAL (v));
+    }
 }
 
 
