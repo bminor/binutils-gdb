@@ -141,8 +141,7 @@ static void reset_memory_regions PARAMS ((void));
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
-lang_statement_list_type file_chain =
-{0};
+lang_statement_list_type file_chain = { 0 };
 static const char *entry_symbol = 0;
 boolean lang_has_input_file = false;
 boolean had_output_filename = false;
@@ -389,25 +388,7 @@ lang_add_input_file (name, file_type, target)
      lang_input_file_enum_type file_type;
      CONST char *target;
 {
-  /* Look it up or build a new one */
   lang_has_input_file = true;
-
-#if 0
-  lang_input_statement_type *p;
-
-  for (p = (lang_input_statement_type *) input_file_chain.head;
-       p != (lang_input_statement_type *) NULL;
-       p = (lang_input_statement_type *) (p->next_real_file))
-    {
-      /* Sometimes we have incomplete entries in here */
-      if (p->filename != (char *) NULL)
-	{
-	  if (strcmp (name, p->filename) == 0)
-	    return p;
-	}
-
-    }
-#endif
   return new_afile (name, file_type, target, true);
 }
 
@@ -2320,7 +2301,24 @@ lang_set_flags (ptr, flags)
     }
 }
 
+/* Call a function on each input file.  This function will be called
+   on an archive, but not on the elements.  */
 
+void
+lang_for_each_input_file (func)
+     void (*func) PARAMS ((lang_input_statement_type *));
+{
+  lang_input_statement_type *f;
+
+  for (f = (lang_input_statement_type *) input_file_chain.head;
+       f != NULL;
+       f = (lang_input_statement_type *) f->next_real_file)
+    func (f);
+}
+
+/* Call a function on each file.  The function will be called on all
+   the elements of an archive which are included in the link, but will
+   not be called on the archive file itself.  */
 
 void
 lang_for_each_file (func)
