@@ -4,4 +4,5 @@ if [istarget txvu-*-*] {
     run_dump_test "basic-1"
     run_dump_test "br-1"
     run_dump_test "upper-1"
+    run_dump_test "lower-1"
 }
