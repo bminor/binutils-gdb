@@ -301,7 +301,8 @@ sparc_target_format ()
     return "a.out-sunos-big";
   else if (default_arch_type == sparc86x && target_little_endian_data)
     return "a.out-sunos-big";
-  else return "a.out-sparc-little";
+  else
+    return "a.out-sparc-little";
 #else
   return "a.out-sunos-big";
 #endif
@@ -686,10 +687,10 @@ struct
 /* sparc64 priviledged registers.  */
 
 struct priv_reg_entry
-  {
-    char *name;
-    int regnum;
-  };
+{
+  char *name;
+  int regnum;
+};
 
 struct priv_reg_entry priv_reg_table[] =
 {
@@ -785,8 +786,9 @@ md_begin ()
   for (i = 0; native_op_table[i].name; i++)
     {
       const struct sparc_opcode *insn;
-      char *name = sparc_arch_size == 32 ? native_op_table[i].name32 :
-			native_op_table[i].name64;
+      char *name = sparc_arch_size == (32
+				       ? native_op_table[i].name32
+				       : native_op_table[i].name64);
       insn = (struct sparc_opcode *) hash_find (op_hash, name);
       if (insn == NULL)
 	{
@@ -1005,10 +1007,10 @@ synthetize_setuw (insn)
     {
       the_insn.opcode = (SETHI_INSN | RD (rd)
 			 | ((the_insn.exp.X_add_number >> 10)
-			    & (the_insn.exp.X_op == O_constant ? 0x3fffff : 0)));
+			    & (the_insn.exp.X_op == O_constant
+			       ? 0x3fffff : 0)));
       the_insn.reloc = (the_insn.exp.X_op != O_constant
-			? BFD_RELOC_HI22
-			: BFD_RELOC_NONE);
+			? BFD_RELOC_HI22 : BFD_RELOC_NONE);
       output_insn (insn, &the_insn);
       need_hi22_p = 1;
     }
@@ -1021,11 +1023,10 @@ synthetize_setuw (insn)
       the_insn.opcode = (OR_INSN | (need_hi22_p ? RS1 (rd) : 0)
 			 | RD (rd) | IMMED
 			 | (the_insn.exp.X_add_number
-			    & (the_insn.exp.X_op != O_constant ? 0 :
-			       need_hi22_p ? 0x3ff : 0x1fff)));
+			    & (the_insn.exp.X_op != O_constant
+			       ? 0 : need_hi22_p ? 0x3ff : 0x1fff)));
       the_insn.reloc = (the_insn.exp.X_op != O_constant
-			? BFD_RELOC_LO10
-			: BFD_RELOC_NONE);
+			? BFD_RELOC_LO10 : BFD_RELOC_NONE);
       output_insn (insn, &the_insn);
     }
 }
@@ -1122,7 +1123,8 @@ synthetize_setx (insn)
 	  return;
 	}
       need_hh22_p = need_hm10_p = need_hi22_p = need_lo10_p = 1;
-      lower32 = 0; upper32 = 0;
+      lower32 = 0;
+      upper32 = 0;
     }
   else
     {
@@ -1188,7 +1190,7 @@ synthetize_setx (insn)
     {
       the_insn.opcode = (SETHI_INSN | RD (dstreg)
 			 | (((need_xor10_p ? ~lower32 : lower32)
-			    >> 10) & 0x3fffff));
+			     >> 10) & 0x3fffff));
       the_insn.reloc = (the_insn.exp.X_op != O_constant
 			? BFD_RELOC_SPARC_LM22 : BFD_RELOC_NONE);
       output_insn (insn, &the_insn);
@@ -2008,7 +2010,7 @@ sparc_ip (str, pinsn)
 		else
 		  {
 		    break;
-		  }	/* if not an 'f' register. */
+		  }	/* if not an 'f' register.  */
 
 		switch (*args)
 		  {
@@ -2029,11 +2031,11 @@ sparc_ip (str, pinsn)
 		  case 'J':
 		    opcode |= RD (mask);
 		    continue;
-		  }		/* pack it in. */
+		  }		/* Pack it in.  */
 
 		know (0);
 		break;
-	      }			/* float arg */
+	      }			/* float arg  */
 
 	    case 'F':
 	      if (strncmp (s, "%fsr", 4) == 0)
@@ -2043,26 +2045,26 @@ sparc_ip (str, pinsn)
 		}
 	      break;
 
-	    case '0':		/* 64 bit immediate (set, setsw, setx insn) */
-	      the_insn.reloc = BFD_RELOC_NONE; /* reloc handled elsewhere */
+	    case '0':		/* 64 bit immediate (set, setsw, setx insn)  */
+	      the_insn.reloc = BFD_RELOC_NONE; /* reloc handled elsewhere  */
 	      goto immediate;
 
-	    case 'l':		/* 22 bit PC relative immediate */
+	    case 'l':		/* 22 bit PC relative immediate  */
 	      the_insn.reloc = BFD_RELOC_SPARC_WDISP22;
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
-	    case 'L':		/* 30 bit immediate */
+	    case 'L':		/* 30 bit immediate  */
 	      the_insn.reloc = BFD_RELOC_32_PCREL_S2;
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
 	    case 'h':
-	    case 'n':		/* 22 bit immediate */
+	    case 'n':		/* 22 bit immediate  */
 	      the_insn.reloc = BFD_RELOC_SPARC22;
 	      goto immediate;
 
-	    case 'i':		/* 13 bit immediate */
+	    case 'i':		/* 13 bit immediate  */
 	      the_insn.reloc = BFD_RELOC_SPARC13;
 
 	      /* fallthrough */
@@ -2261,7 +2263,7 @@ sparc_ip (str, pinsn)
 			    break;
 
 			  case BFD_RELOC_SPARC_HIX22:
-			    val = ~ val;
+			    val = ~val;
 			    val = (val >> 10) & 0x3fffff;
 			    break;
 
@@ -2511,8 +2513,8 @@ sparc_ip (str, pinsn)
 
 	  if (v9_arg_p)
 	    {
-	      needed_arch_mask &= ~ ((1 << SPARC_OPCODE_ARCH_V9)
-				     | (1 << SPARC_OPCODE_ARCH_V9A));
+	      needed_arch_mask &= ~((1 << SPARC_OPCODE_ARCH_V9)
+				    | (1 << SPARC_OPCODE_ARCH_V9A));
 	      needed_arch_mask |= (1 << SPARC_OPCODE_ARCH_V9);
 	    }
 
@@ -2772,7 +2774,8 @@ md_atof (type, litP, sizeP)
     {
       for (i = 0; i < prec; i++)
 	{
-	  md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	  md_number_to_chars (litP, (valueT) words[i],
+			      sizeof (LITTLENUM_TYPE));
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }
@@ -2780,7 +2783,8 @@ md_atof (type, litP, sizeP)
     {
       for (i = prec - 1; i >= 0; i--)
 	{
-	  md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	  md_number_to_chars (litP, (valueT) words[i],
+			      sizeof (LITTLENUM_TYPE));
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }
@@ -3004,7 +3008,7 @@ md_apply_fix3 (fixP, value, segment)
 		  else
 		    setter = bfd_getl32 ((unsigned char *) buf - 4);
 		  if ((setter & (0xffffffff ^ RD (~0)))
-		       != (INSN_OR | RS1 (O7) | RS2 (G0)))
+		      != (INSN_OR | RS1 (O7) | RS2 (G0)))
 		    break;
 		  /* The sequence was
 		     or %o7, %g0, %rN
@@ -3164,7 +3168,7 @@ md_apply_fix3 (fixP, value, segment)
 	case BFD_RELOC_SPARC_HIX22:
 	  if (!fixP->fx_addsy)
 	    {
-	      val ^= ~ (offsetT) 0;
+	      val ^= ~(offsetT) 0;
 	      insn |= (val >> 10) & 0x3fffff;
 	    }
 	  break;
@@ -3355,7 +3359,8 @@ tc_gen_reloc (section, fixp)
       relocs[2] = NULL;
 
       reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-      *reloc->sym_ptr_ptr = symbol_get_bfdsym (section_symbol (absolute_section));
+      *reloc->sym_ptr_ptr
+	= symbol_get_bfdsym (section_symbol (absolute_section));
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
       reloc->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_SPARC13);
       reloc->addend = fixp->tc_fix_data;
@@ -3557,7 +3562,7 @@ s_reserve (ignore)
 	    frag_align (align, 0, 0);
 
 	  /* Detach from old frag.  */
-	  if (S_GET_SEGMENT(symbolP) == bss_section)
+	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbol_get_frag (symbolP)->fr_symbol = NULL;
 
 	  symbol_set_frag (symbolP, frag_now);
@@ -3576,8 +3581,8 @@ s_reserve (ignore)
     }
   else
     {
-      as_warn("Ignoring attempt to re-define symbol %s",
-	      S_GET_NAME (symbolP));
+      as_warn ("Ignoring attempt to re-define symbol %s",
+	       S_GET_NAME (symbolP));
     }				/* if not redefining.  */
 
   demand_empty_rest_of_line ();
@@ -3889,7 +3894,7 @@ s_register (ignore)
       c = get_symbol_end ();
       if (strcmp (regname, "scratch") && strcmp (regname, "ignore"))
 	as_bad (_("register syntax is .register %%g[2367],{#scratch|symbolname|#ignore}"));
-      if (regname [0] == 'i')
+      if (regname[0] == 'i')
 	regname = NULL;
       else
 	regname = "";
@@ -4033,7 +4038,8 @@ sparc_handle_align (fragp)
     as_bad_where (fragp->fr_file, fragp->fr_line, _("misaligned data"));
   if (fragp->fr_type == rs_align_code && fragp->fr_subtype == 1024)
     {
-      int count = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+      int count =
+	fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
 
       if (count >= 4
 	  && !(count & 3)

@@ -1760,10 +1760,9 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 			     We break out to check the final ']'.  */
 			  break;
 			}
-		      else
-			/* It wasn't an idirection.  Check if it's a
-			   register.  */
-			if (get_gen_reg (cPP, &index_reg_number))
+		      /* It wasn't an indirection.  Check if it's a
+			 register.  */
+		      else if (get_gen_reg (cPP, &index_reg_number))
 			  {
 			    int size_bits;
 
@@ -1784,9 +1783,8 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 				break;
 			      }
 			  }
-			else
-			  /* Not a register.  Then this must be "[rN+I]".  */
-			  if (cris_get_expression (cPP, &prefixp->expr))
+		      /* Not a register.  Then this must be "[rN+I]".  */
+			else if (cris_get_expression (cPP, &prefixp->expr))
 			    {
 			      /* We've got offset with assign mode.  Fill
 				 in the blanks and break out to match the
@@ -1799,9 +1797,8 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 			       this can't be a match.  */
 			    return 0;
 		    }
-		  else
-		    /* Not "[rN+" but perhaps "[rN-"? */
-		    if (**cPP == '-')
+		  /* Not "[rN+" but perhaps "[rN-"? */
+		  else if (**cPP == '-')
 		      {
 			/* We must have an offset with assign mode.  */
 			if (! cris_get_expression (cPP, &prefixp->expr))
@@ -1838,9 +1835,8 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 	  return 1;
 	}
     }
-  else
-    /* No indirection.	Perhaps a constant?  */
-    if (cris_get_expression (cPP, imm_exprP))
+  /* No indirection.	Perhaps a constant?  */
+  else if (cris_get_expression (cPP, imm_exprP))
       {
 	/* Expression found, this is immediate mode.  */
 	prefixp->kind = PREFIX_NONE;
@@ -1873,12 +1869,11 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
      char **cPP;
      struct cris_prefix *prefixp;
 {
+  int reg_number;
+
   if (**cPP != '[')
     /* We must have a '[' or it's a clean failure.  */
     return 0;
-  else
-    {
-      int reg_number;
 
       /* Eat the first '['.  */
       (*cPP)++;
@@ -1915,10 +1910,9 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 	  /* Eat the first ']', so we'll be looking at a second ']'.  */
 	  (*cPP)++;
 	}
-      else
-	/* No second '['.  Then we should have a register here, making
-	   it "[rN".  */
-	if (get_gen_reg (cPP, &prefixp->base_reg_number))
+      /* No second '['.  Then we should have a register here, making
+	 it "[rN".  */
+      else if (get_gen_reg (cPP, &prefixp->base_reg_number))
 	  {
 	    /* This must be indexed or offset mode: "[rN+I]" or
 	       "[rN+rM.S]" or "[rN+[rM].S]" or "[rN+[rM+].S]".	*/
@@ -1973,10 +1967,9 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 		       expect a final ']', which we'll do in a common
 		       closing session.  */
 		  }
-		else
-		  /* Seen "[rN+", but not a '[', so check if we have a
-		     register.	*/
-		  if (get_gen_reg (cPP, &index_reg_number))
+		/* Seen "[rN+", but not a '[', so check if we have a
+		   register.	*/
+		else if (get_gen_reg (cPP, &index_reg_number))
 		    {
 		      /* This is indexed mode: "[rN+rM.S]" or
 			 "[rN+rM.S+]".	*/
@@ -1996,10 +1989,9 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 			     the common checking of the closing ']'.  */
 			  prefixp->opcode |= size_bits << 4;
 		    }
-		  else
-		    /* Seen "[rN+", but not a '[' or a register, so then
-		       it must be a constant "I".  */
-		    if (cris_get_expression (cPP, &prefixp->expr))
+		/* Seen "[rN+", but not a '[' or a register, so then
+		   it must be a constant "I".  */
+		  else if (cris_get_expression (cPP, &prefixp->expr))
 		      {
 			/* Expression found, so fill in the bits of offset
 			   mode and drop down to check the closing ']'.  */
@@ -2009,9 +2001,8 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 		      /* Nothing valid here: lose.  */
 		      return 0;
 	      }
-	    else
 	      /* Seen "[rN" but no '+', so check if it's a '-'.  */
-	      if (**cPP == '-')
+	    else if (**cPP == '-')
 		{
 		  /* Yep, we must have offset mode.  */
 		  if (! cris_get_expression (cPP, &prefixp->expr))
@@ -2042,12 +2033,10 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 		  prefixp->kind = PREFIX_BDAP_IMM;
 		}
 	  }
-	else
-	  {
-	    /* A '[', but no second '[', and no register.  Check if we
-	       have an expression, making this "[I]" for a double-indirect
-	       prefix.	*/
-	    if (cris_get_expression (cPP, &prefixp->expr))
+      /* A '[', but no second '[', and no register.  Check if we
+	 have an expression, making this "[I]" for a double-indirect
+	 prefix.	*/
+	else if (cris_get_expression (cPP, &prefixp->expr))
 	      {
 		/* Expression found, the so called absolute mode for a
 		   double-indirect prefix on PC.  */
@@ -2059,8 +2048,6 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 	    else
 	      /* Neither '[' nor register nor expression.  We lose.  */
 	      return 0;
-	  }
-    }
 
   /* We get here as a closing ceremony to a successful match.  We just
      need to check the closing ']'.  */
@@ -2779,7 +2766,6 @@ tc_cris_check_adjusted_broken_word (new_offset, brokwP)
 		  _("Adjusted signed .word (%ld) overflows: `switch'-statement too large."),
 		  (long) new_offset);
 }
-
 
 /*
  * Local variables:

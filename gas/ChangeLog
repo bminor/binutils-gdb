@@ -1,3 +1,10 @@
+2000-08-04  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-cris.c: Rearrange code for readability.
+	* config/tc-d10v.c: Fix formatting.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+
 2000-08-02  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Call ia64_free_opcode

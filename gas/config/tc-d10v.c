@@ -100,7 +100,8 @@ struct option md_longopts[] =
   {"nowarnswap", no_argument, NULL, OPTION_NOWARNSWAP},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+
+size_t md_longopts_size = sizeof (md_longopts);
 
 static void d10v_dot_word PARAMS ((int));
 
@@ -547,7 +548,8 @@ d10v_insert_operand (insn, op_type, value, left, fix)
 
   /* Truncate to the proper number of bits.  */
   if (check_range (value, bits, d10v_operands[op_type].flags))
-    as_bad_where (fix->fx_file, fix->fx_line, _("operand out of range: %d"), value);
+    as_bad_where (fix->fx_file, fix->fx_line,
+		  _("operand out of range: %d"), value);
 
   value &= 0x7FFFFFFF >> (31 - bits);
   insn |= (value << shift);
