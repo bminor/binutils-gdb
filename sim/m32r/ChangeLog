@@ -1,3 +1,16 @@
+2000-08-28  Dave Brolley  <brolley@redhat.com>
+
+	* Makefile.in: Use of @true confuses VPATH. Remove it.
+	* cpu.h: Regenerated.
+	* cpux.h: Regenerated.
+	* decode.c: Regenerated.
+	* decodex.c: Regenerated.
+	* model.c: Regenerated.
+	* modelx.c: Regenerated.
+	* sem-switch.c: Regenerated.
+	* sem.c: Regenerated.
+	* semx-switch.c: Regenerated.
+
 2000-08-21  Frank Ch. Eigler  <fche@redhat.com>
 
 	* Makefile.in (m32r-clean): Add stamp-arch, stamp-cpu.
