@@ -1,5 +1,9 @@
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-mn10200.c (tc_gen_reloc): Handle the case where the
+	reloc is the difference of two symbols defined in the same
+	section.
+
 	* config/tc-iq2000.c (line_comment_chars): Include the # character
 	as otherwise this breaks #APP/#NO_APP processing.
 
