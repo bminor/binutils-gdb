@@ -2152,7 +2152,7 @@ m32r-linux-nat.o: m32r-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 m32r-linux-tdep.o: m32r-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
 	$(gdb_string_h) $(glibc_tdep_h) $(solib_svr4_h) $(trad_frame_h) \
-	$(frame_unwind_h) $(m32r_tdep_h)
+	$(frame_unwind_h) $(regs_h) $(m32r_tdep_h)
 m32r-rom.o: m32r-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(symtab_h) $(command_h) $(gdbcmd_h) $(symfile_h) \
 	$(gdb_string_h) $(objfiles_h) $(inferior_h) $(regcache_h)

@@ -1,3 +1,11 @@
+2004-11-12  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* Makefile.in (m32r-linux-tdep.o): Update dependencies.
+	* m32r-linux-tdep.c (m32r_linux_init_abi): Call
+	set_gdbarch_regset_from_core_section for core file support.
+	(m32r_linux_supply_gregset, m32r_linux_regset_from_core_section):
+	New functions.
+
 2004-11-08  Andrew Cagney  <cagney@gnu.org>
 
 	GDB 6.3 released.
