@@ -164,21 +164,7 @@ insns_match_pattern (CORE_ADDR pc,
 static int
 hppa_linux_in_dyncall (CORE_ADDR pc)
 {
-  static CORE_ADDR dyncall = 0;
-
-  /* FIXME: if we switch exec files, dyncall should be reinitialized */
-  if (!dyncall)
-    {
-      struct minimal_symbol *minsym;
-
-      minsym = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
-      if (minsym)
-	dyncall = SYMBOL_VALUE_ADDRESS (minsym);
-      else
-	dyncall = -1;
-    }
-
-  return pc == dyncall;
+  return pc == hppa_symbol_address("$$dyncall");
 }
 
 /* There are several kinds of "trampolines" that we need to deal with:

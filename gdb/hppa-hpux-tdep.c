@@ -61,32 +61,10 @@ hppa32_hpux_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
   struct minimal_symbol *minsym;
   struct unwind_table_entry *u;
-  static CORE_ADDR dyncall = 0;
-  static CORE_ADDR sr4export = 0;
-
-  /* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
-     new exec file */
 
   /* First see if PC is in one of the two C-library trampolines.  */
-  if (!dyncall)
-    {
-      minsym = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
-      if (minsym)
-	dyncall = SYMBOL_VALUE_ADDRESS (minsym);
-      else
-	dyncall = -1;
-    }
-
-  if (!sr4export)
-    {
-      minsym = lookup_minimal_symbol ("_sr4export", NULL, NULL);
-      if (minsym)
-	sr4export = SYMBOL_VALUE_ADDRESS (minsym);
-      else
-	sr4export = -1;
-    }
-
-  if (pc == dyncall || pc == sr4export)
+  if (pc == hppa_symbol_address("$$dyncall") 
+      || pc == hppa_symbol_address("_sr4export"))
     return 1;
 
   minsym = lookup_minimal_symbol_by_pc (pc);
@@ -295,45 +273,12 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 {
   long orig_pc = pc;
   long prev_inst, curr_inst, loc;
-  static CORE_ADDR dyncall = 0;
-  static CORE_ADDR dyncall_external = 0;
-  static CORE_ADDR sr4export = 0;
   struct minimal_symbol *msym;
   struct unwind_table_entry *u;
 
-  /* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
-     new exec file */
-
-  if (!dyncall)
-    {
-      msym = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
-      if (msym)
-	dyncall = SYMBOL_VALUE_ADDRESS (msym);
-      else
-	dyncall = -1;
-    }
-
-  if (!dyncall_external)
-    {
-      msym = lookup_minimal_symbol ("$$dyncall_external", NULL, NULL);
-      if (msym)
-	dyncall_external = SYMBOL_VALUE_ADDRESS (msym);
-      else
-	dyncall_external = -1;
-    }
-
-  if (!sr4export)
-    {
-      msym = lookup_minimal_symbol ("_sr4export", NULL, NULL);
-      if (msym)
-	sr4export = SYMBOL_VALUE_ADDRESS (msym);
-      else
-	sr4export = -1;
-    }
-
   /* Addresses passed to dyncall may *NOT* be the actual address
      of the function.  So we may have to do something special.  */
-  if (pc == dyncall)
+  if (pc == hppa_symbol_address("$$dyncall"))
     {
       pc = (CORE_ADDR) read_register (22);
 
@@ -343,12 +288,12 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
       if (pc & 0x2)
 	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
     }
-  if (pc == dyncall_external)
+  if (pc == hppa_symbol_address("$$dyncall_external"))
     {
       pc = (CORE_ADDR) read_register (22);
       pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
     }
-  else if (pc == sr4export)
+  else if (pc == hppa_symbol_address("_sr4export"))
     pc = (CORE_ADDR) (read_register (22));
 
   /* Get the unwind descriptor corresponding to PC, return zero

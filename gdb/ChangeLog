@@ -1,5 +1,13 @@
 2004-06-06  Randolph Chung  <tausq@debian.org>
 
+	* hppa-hpux-tdep.c (hppa32_hpux_in_solib_call_trampoline) 
+	(hppa_hpux_skip_trampoline_code): Don't cache symbol values.
+	* hppa-linux-tdep.c (hppa_linux_in_dyncall): Likewise.
+	* hppa-tdep.c (hppa_symbol_address): New function definition.
+	* hppa-tdep.h (hppa_symbol_address): New function declaration.
+
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.h (struct value): Forward declaration.
 	(gdbarch_tdep): Define tdep find_global_pointer method.
 	* hppa-tdep.c (hppa32_push_dummy_call): Find the global pointer

@@ -262,6 +262,18 @@ hppa_extract_17 (unsigned word)
 		      hppa_get_field (word, 11, 15) << 11 |
 		      (word & 0x1) << 16, 17) << 2;
 }
+
+CORE_ADDR 
+hppa_symbol_address(const char *sym)
+{
+  struct minimal_symbol *minsym;
+
+  minsym = lookup_minimal_symbol (sym, NULL, NULL);
+  if (minsym)
+    return SYMBOL_VALUE_ADDRESS (minsym);
+  else
+    return (CORE_ADDR)-1;
+}
 
 
 /* Compare the start address for two unwind entries returning 1 if 

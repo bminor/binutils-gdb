@@ -194,6 +194,7 @@ int hppa_extract_21 (unsigned);
 int hppa_extract_14 (unsigned);
 int hppa_low_sign_extend (unsigned int, unsigned int);
 int hppa_sign_extend (unsigned int, unsigned int);
+CORE_ADDR hppa_symbol_address(const char *sym);
 
 void
 hppa_frame_prev_register_helper (struct frame_info *next_frame,
