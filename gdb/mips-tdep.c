@@ -1399,8 +1399,9 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
 		  /* A non-floating-point argument being passed in a 
 		     general register.  If a struct or union, and if
-		     small enough for a single register, we have to 
-		     adjust the alignment.
+		     the remaining length is smaller than the register
+		     size, we have to adjust the register value on
+		     big endian targets.
 
 		     It does not seem to be necessary to do the
 		     same for integral types.
@@ -1408,7 +1409,8 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		     Also don't do this adjustment on EABI targets.  */
 
 		  if (!MIPS_EABI &&
-		      TYPE_LENGTH (arg_type) < MIPS_REGSIZE &&
+		      TARGET_BYTE_ORDER == BIG_ENDIAN &&
+		      partial_len < MIPS_REGSIZE &&
 		      (typecode == TYPE_CODE_STRUCT ||
 		       typecode == TYPE_CODE_UNION))
 		    regval <<= ((MIPS_REGSIZE - partial_len) * 
@@ -2625,8 +2627,18 @@ normal floating point support.",
   c = add_show_from_set (c, &showlist);
   c->function.sfunc = mips_show_fpu_command;
 
+#ifndef MIPS_DEFAULT_FPU_TYPE
   mips_fpu = MIPS_FPU_DOUBLE;
   mips_fpu_string = strsave ("double");
+#else
+  mips_fpu = MIPS_DEFAULT_FPU_TYPE;
+  switch (mips_fpu) 
+  {
+    case MIPS_FPU_DOUBLE:  mips_fpu_string = strsave ("double");  break;
+    case MIPS_FPU_SINGLE:  mips_fpu_string = strsave ("single");  break;
+    case MIPS_FPU_NONE:    mips_fpu_string = strsave ("none");    break;
+  }    
+#endif
 
   c = add_set_cmd ("processor", class_support, var_string_noescape,
 		   (char *) &tmp_mips_processor_type,

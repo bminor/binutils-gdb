@@ -1,3 +1,13 @@
+Fri Sep 26 12:40:51 1997  Jeffrey A Law  (law@cygnus.com)
+                          Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+start-sanitize-r5900
+	* configure.tgt: Set gdb_target to r5900.
+	* config/mips/tm-r5900.h, config/mips/r5900.mt: New files
+end-sanitize-r5900
+	* mips-tdep.c (_initialize_mips_tdep): Allow target files to
+	override default FPU type.
+
 Fri Sep 26 10:33:54 1997  Felix Lee  <flee@cygnus.com>
 
 	* configure.tgt (v850-*-*): necmsg.lib instead of v850.lib.
