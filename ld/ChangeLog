@@ -1,3 +1,8 @@
+2003-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em: Convert to C90 function definitions, remove
+	unnecessary prototypes and casts.
+
 2003-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Dump out

@@ -49,30 +49,12 @@ static int emit_stub_syms = 0;
 
 static asection *toc_section = 0;
 
-static void ppc_create_output_section_statements
-  PARAMS ((void));
-static void ppc_after_open
-  PARAMS ((void));
-static void ppc_before_allocation
-  PARAMS ((void));
-static asection *ppc_add_stub_section
-  PARAMS ((const char *, asection *));
-static void ppc_layout_sections_again
-  PARAMS ((void));
-static void gld${EMULATION_NAME}_after_allocation
-  PARAMS ((void));
-static void build_toc_list
-  PARAMS ((lang_statement_union_type *));
-static void build_section_lists
-  PARAMS ((lang_statement_union_type *));
-static struct bfd_elf_version_expr *gld${EMULATION_NAME}_new_vers_pattern
-  PARAMS ((struct bfd_elf_version_expr *));
 
 /* This is called before the input files are opened.  We create a new
    fake input file to hold the stub sections.  */
 
 static void
-ppc_create_output_section_statements ()
+ppc_create_output_section_statements (void)
 {
   extern const bfd_target bfd_elf64_powerpc_vec;
   extern const bfd_target bfd_elf64_powerpcle_vec;
@@ -98,7 +80,7 @@ ppc_create_output_section_statements ()
 }
 
 static void
-ppc_after_open ()
+ppc_after_open (void)
 {
   if (!ppc64_elf_mark_entry_syms (&link_info))
     {
@@ -110,7 +92,7 @@ ppc_after_open ()
 }
 
 static void
-ppc_before_allocation ()
+ppc_before_allocation (void)
 {
   if (stub_file != NULL)
     {
@@ -125,7 +107,7 @@ ppc_before_allocation ()
 	  /* Size the sections.  This is premature, but we want to know the
 	     TLS segment layout so that certain optimizations can be done.  */
 	  lang_size_sections (stat_ptr->head, abs_output_section,
-			      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
+			      &stat_ptr->head, 0, 0, NULL, TRUE);
 
 	  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
 	    {
@@ -148,13 +130,8 @@ struct hook_stub_info
 
 /* Traverse the linker tree to find the spot where the stub goes.  */
 
-static bfd_boolean hook_in_stub
-  PARAMS ((struct hook_stub_info *, lang_statement_union_type **));
-
 static bfd_boolean
-hook_in_stub (info, lp)
-     struct hook_stub_info *info;
-     lang_statement_union_type **lp;
+hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 {
   lang_statement_union_type *l;
   bfd_boolean ret;
@@ -226,9 +203,7 @@ hook_in_stub (info, lp)
    immediately before INPUT_SECTION.  */
 
 static asection *
-ppc_add_stub_section (stub_sec_name, input_section)
-     const char *stub_sec_name;
-     asection *input_section;
+ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
 {
   asection *stub_sec;
   flagword flags;
@@ -269,7 +244,7 @@ ppc_add_stub_section (stub_sec_name, input_section)
 /* Another call-back for ppc64_elf_size_stubs.  */
 
 static void
-ppc_layout_sections_again ()
+ppc_layout_sections_again (void)
 {
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
@@ -280,21 +255,20 @@ ppc_layout_sections_again ()
 
   /* Resize the sections.  */
   lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
+		      &stat_ptr->head, 0, 0, NULL, TRUE);
 
   /* Recalculate TOC base.  */
   ldemul_after_allocation ();
 
   /* Do the assignments again.  */
-  lang_do_assignments (stat_ptr->head, abs_output_section,
-		       (fill_type *) 0, (bfd_vma) 0);
+  lang_do_assignments (stat_ptr->head, abs_output_section, NULL, 0);
 }
 
 
 /* Call the back-end function to set TOC base after we have placed all
    the sections.  */
 static void
-gld${EMULATION_NAME}_after_allocation ()
+gld${EMULATION_NAME}_after_allocation (void)
 {
   if (!link_info.relocateable)
     _bfd_set_gp_value (output_bfd, ppc64_elf_toc (output_bfd));
@@ -302,21 +276,17 @@ gld${EMULATION_NAME}_after_allocation ()
 
 
 static void
-build_toc_list (statement)
-     lang_statement_union_type *statement;
+build_toc_list (lang_statement_union_type *statement)
 {
   if (statement->header.type == lang_input_section_enum
       && !statement->input_section.ifile->just_syms_flag
       && statement->input_section.section->output_section == toc_section)
-    {
-      ppc64_elf_next_toc_section (&link_info, statement->input_section.section);
-    }
+    ppc64_elf_next_toc_section (&link_info, statement->input_section.section);
 }
 
 
 static void
-build_section_lists (statement)
-     lang_statement_union_type *statement;
+build_section_lists (lang_statement_union_type *statement)
 {
   if (statement->header.type == lang_input_section_enum
       && !statement->input_section.ifile->just_syms_flag
@@ -333,7 +303,7 @@ build_section_lists (statement)
 /* Final emulation specific call.  */
 
 static void
-gld${EMULATION_NAME}_finish ()
+gld${EMULATION_NAME}_finish (void)
 {
   /* e_entry on PowerPC64 points to the function descriptor for
      _start.  If _start is missing, default to the first function
@@ -425,9 +395,8 @@ gld${EMULATION_NAME}_finish ()
    exported.  Lack of an exported function code sym may cause a
    definition to be pulled in from a static library.  */
 
-struct bfd_elf_version_expr *
-gld${EMULATION_NAME}_new_vers_pattern (entry)
-     struct bfd_elf_version_expr *entry;
+static struct bfd_elf_version_expr *
+gld${EMULATION_NAME}_new_vers_pattern (struct bfd_elf_version_expr *entry)
 {
   struct bfd_elf_version_expr *dot_entry;
   struct bfd_elf_version_expr *next;
@@ -466,7 +435,7 @@ gld${EMULATION_NAME}_new_vers_pattern (entry)
 	return entry;
     }
 
-  dot_entry = (struct bfd_elf_version_expr *) xmalloc (sizeof *dot_entry);
+  dot_entry = xmalloc (sizeof *dot_entry);
   dot_entry->next = entry;
   len = strlen (entry->pattern) + 2;
   dot_pat = xmalloc (len);
@@ -481,23 +450,16 @@ gld${EMULATION_NAME}_new_vers_pattern (entry)
 /* Avoid processing the fake stub_file in vercheck, stat_needed and
    check_needed routines.  */
 
-static void ppc_for_each_input_file_wrapper
-  PARAMS ((lang_input_statement_type *));
-static void ppc_lang_for_each_input_file
-  PARAMS ((void (*) (lang_input_statement_type *)));
+static void (*real_func) (lang_input_statement_type *);
 
-static void (*real_func) PARAMS ((lang_input_statement_type *));
-
-static void ppc_for_each_input_file_wrapper (l)
-     lang_input_statement_type *l;
+static void ppc_for_each_input_file_wrapper (lang_input_statement_type *l)
 {
   if (l != stub_file)
     (*real_func) (l);
 }
 
 static void
-ppc_lang_for_each_input_file (func)
-     void (*func) PARAMS ((lang_input_statement_type *));
+ppc_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
 {
   real_func = func;
   lang_for_each_input_file (&ppc_for_each_input_file_wrapper);
