@@ -40,11 +40,6 @@
 
 #include "config/tm-linux.h"
 
-/* There's an E_MIPS_ABI_O32 flag in e_flags, but we don't use it - in
-   fact, using it may violate the o32 ABI.  */
-
-#define MIPS_DEFAULT_ABI MIPS_ABI_O32
-
 /* Use target_specific function to define link map offsets.  */
 
 extern struct link_map_offsets *mips_linux_svr4_fetch_link_map_offsets (void);

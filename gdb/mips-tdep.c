@@ -5509,11 +5509,6 @@ mips_gdbarch_init (struct gdbarch_info info,
 	}
     }
 
-#ifdef MIPS_DEFAULT_ABI
-  if (mips_abi == MIPS_ABI_UNKNOWN)
-    mips_abi = MIPS_DEFAULT_ABI;
-#endif
-
   if (mips_abi == MIPS_ABI_UNKNOWN)
     mips_abi = MIPS_ABI_O32;
 

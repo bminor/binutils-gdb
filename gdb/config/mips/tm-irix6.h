@@ -88,10 +88,6 @@
       ((N) - FP0_REGNUM) * sizeof(double) : \
       32 * sizeof(double) + ((N) - 32) * MIPS_REGSIZE)
 
-/* Force N32 ABI as the default. */
-#define MIPS_DEFAULT_ABI MIPS_ABI_N32
-
-
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))
