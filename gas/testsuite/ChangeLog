@@ -1,3 +1,28 @@
+Fri Dec 30 18:08:20 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/i386/pushw.l: Fixed whitespace to match current listing
+	style.
+
+	* gas/all/gas.exp: Mark test p1480.s expected to pass, even with
+	listings enabled.
+
+Thu Dec 15 18:14:27 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (AS_FOR_TARGET, OBJDUMP_FOR_TARGET): Don't set.
+	(uninstall): Don't set OBJDUMP and OBJDUMPFLAGS in site.exp.
+	* config/default.exp: Default OBJDUMP and OBJDUMPFLAGS.  Use
+	findfile and transform procedures to determine objdump program
+	name.
+
+	* gas/mips/abs.s, gas/mips/div.s: Force some padding at the end,
+	in case the format doesn't automatically require it.
+	* gas/mips/beq.d, gas/mips/jal.d: Handle MIPS_JMP as an alternate
+	name for the reloc type.
+
+	* lib/gas-defs.exp (file_contents, verbose_eval): New procs.
+	(run_dump_test): If verbosity level is over 3, print out dump
+	command and its output.
+
 Tue Dec 13 18:21:09 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* gas/mips/jal-svr4pic.d: Fix 0-strings to work with 64-bit hosted
