@@ -1,3 +1,12 @@
+1999-07-14  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (elf_mips16_gprel_howto): Adjust src_mask and
+	dst_mask to match reality.
+	(_bfd_mips_elf_calculate_relocation): Handle R_MIPS16_GPREL.
+	(mips_elf_obtain_contents): Use bfd_get.
+	(mips_elf_perform_relocation): Handle R_MIPS16_GPREL.
+	(mips_elf_relocate_section): Likewise.
+
 1999-07-13  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Handle R_MIPS16_26.

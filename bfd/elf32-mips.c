@@ -923,10 +923,7 @@ static reloc_howto_type elf_mips16_jump_howto =
 	 0x3ffffff,		/* dst_mask */
 	 false);		/* pcrel_offset */
 
-/* The reloc used for the mips16 gprel instruction.  The src_mask and
-   dsk_mask for this howto do not reflect the actual instruction, in
-   which the value is not contiguous; the masks are for the
-   convenience of the relocate_section routine.  */
+/* The reloc used for the mips16 gprel instruction.  */
 static reloc_howto_type elf_mips16_gprel_howto =
   HOWTO (R_MIPS16_GPREL,	/* type */
 	 0,			/* rightshift */
@@ -938,8 +935,8 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 mips16_gprel_reloc,	/* special_function */
 	 "R_MIPS16_GPREL",	/* name */
 	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0x07ff001f,		/* src_mask */
+	 0x07ff001f,	        /* dst_mask */
 	 false);		/* pcrel_offset */
 
 
@@ -5944,6 +5941,11 @@ mips_elf_calculate_relocation (abfd,
 
       /* Fall through.  */
 
+    case R_MIPS16_GPREL:
+      /* The R_MIPS16_GPREL performs the same calculation as
+	 R_MIPS_GPREL16, but stores the relocated bits in a different
+	 order.  We don't need to do anything special here; the
+	 differences are handled in mips_elf_perform_relocation.  */
     case R_MIPS_GPREL16:
       if (local_p)
 	value = mips_elf_sign_extend (addend, 16) + symbol + gp0 - gp;
@@ -6044,11 +6046,6 @@ mips_elf_calculate_relocation (abfd,
       /* We don't do anything with these at present.  */
       return bfd_reloc_continue;
 
-    case R_MIPS16_GPREL:
-      /* These relocations, used for MIPS16, are not clearly
-	 documented anywhere.  What do they do?  */
-      return bfd_reloc_notsupported;
-
     default:
       /* An unrecognized relocation type.  */
       return bfd_reloc_notsupported;
@@ -6071,36 +6068,8 @@ mips_elf_obtain_contents (howto, relocation, input_bfd, contents)
   bfd_vma x;
   bfd_byte *location = contents + relocation->r_offset;
 
-  switch (bfd_get_reloc_size (howto))
-    {
-    case 0:
-      x = 0;
-      break;
-
-    case 1:
-      x = bfd_get_8 (input_bfd, location);
-      break;
-
-    case 2:
-      x = bfd_get_16 (input_bfd, location);
-      break;
-
-    case 4:
-      x = bfd_get_32 (input_bfd, location);
-      break;
-
-    case 8:
-#ifdef BFD64
-      x = bfd_get_64 (input_bfd, location);
-#else
-      abort ();
-#endif
-      break;
-
-    default:
-      abort ();
-      break;
-    }
+  /* Obtain the bytes.  */
+  x = bfd_get (8 * bfd_get_reloc_size (howto), input_bfd, location);
 
   return x;
 }
@@ -6216,6 +6185,29 @@ mips_elf_perform_relocation (info, howto, relocation, value,
       bfd_put_32 (input_bfd, x, location);
       return;
     }
+  else if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_GPREL)
+    {
+      /* R_MIPS16_GPREL is used for GP-relative addressing in mips16
+	 mode.  A typical instruction will have a format like this:
+
+	 +--------------+--------------------------------+
+	 !    EXTEND    !     Imm 10:5    !   Imm 15:11  !
+	 +--------------+--------------------------------+
+	 !    Major     !   rx   !   ry   !   Imm  4:0   !
+	 +--------------+--------------------------------+
+	 
+	 EXTEND is the five bit value 11110.  Major is the instruction
+	 opcode.
+	 
+	 This is handled exactly like R_MIPS_GPREL16, except that the
+	 addend is retrieved and stored as shown in this diagram; that
+	 is, the Imm fields above replace the V-rel16 field.  
+
+         All we need to do here is shuffle the bits appropriately.  */
+      value = (((value & 0x7e0) << 16)
+	       | ((value & 0xf800) << 5)
+	       | (value & 0x1f));
+    }
 
   /* Set the field.  */
   x |= (value & howto->dst_mask);
@@ -6320,6 +6312,15 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (!last_hi16_addend_valid_p)
 		    return false;
 		  addend |= last_hi16_addend;
+		}
+	      else if (r_type == R_MIPS16_GPREL)
+		{
+		  /* The addend is scrambled in the object file.  See
+		     mips_elf_perform_relocation for details on the
+		     format.  */
+		  addend = (((addend & 0x1f0000) >> 5)
+			    | ((addend & 0x7e00000) >> 16)
+			    | (addend & 0x1f));
 		}
 	    }
 	  else
