@@ -1,3 +1,8 @@
+2001-10-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_reloc_type_lookup): Change loop to use
+	unsigned, increasing index.
+
 2001-10-23  H.J. Lu <hjl@gnu.org>
 
 	* elf32-mips.c (_bfd_mips_elf_modify_segment_map): Check
@@ -43,7 +48,8 @@
 
 2001-10-21  H.J. Lu <hjl@gnu.org>
 
-	* elf32-cris.c (cris_reloc_type_lookup): Use int for index.
+	* elf32-cris.c (cris_reloc_type_lookup): Use int for index.  Cover
+	index 0.
 
 2001-10-20  H.J. Lu <hjl@gnu.org>
 
