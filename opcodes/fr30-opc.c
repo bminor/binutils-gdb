@@ -668,12 +668,9 @@ static const CGEN_OPERAND_INSTANCE fmt_mov2dr_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_int_ops[] = {
-  { INPUT, "h_dr_2", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 2, 0 },
-  { INPUT, "ps", & HW_ENT (HW_H_PS), CGEN_MODE_USI, 0, 0, 0 },
-  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
+  { INPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },
   { INPUT, "u8", & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (U8), 0, 0 },
   { OUTPUT, "h_dr_2", & HW_ENT (HW_H_DR), CGEN_MODE_USI, 0, 2, 0 },
-  { OUTPUT, "h_memory_reg__VM_h_dr_2", & HW_ENT (HW_H_MEMORY), CGEN_MODE_USI, 0, 0, 0 },
   { OUTPUT, "ibit", & HW_ENT (HW_H_IBIT), CGEN_MODE_BI, 0, 0, 0 },
   { OUTPUT, "sbit", & HW_ENT (HW_H_SBIT), CGEN_MODE_BI, 0, 0, 0 },
   { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0, 0 },

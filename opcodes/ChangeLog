@@ -1,4 +1,8 @@
 start-sanitize-fr30
+1998-11-20  Doug Evans  <devans@tobor.to.cygnus.com>
+
+	* fr30-opc.c: Regenerated.
+
 Thu Nov 19 16:02:46 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-opc.c: Regenerated.
