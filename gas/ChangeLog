@@ -1,3 +1,10 @@
+start-sanitize-fr30
+Tue Nov 24 17:21:52 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-fr30.c (md_pcrel_from_section): Fix calculation of
+	pcrel point.
+
+end-sanitize-fr30
 start-sanitize-vr4xxx
 1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
 

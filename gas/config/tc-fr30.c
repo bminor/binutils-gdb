@@ -26,16 +26,6 @@
 #include "cgen-opc.h"
 #include "cgen.h"
 
-/* Linked list of symbols that are debugging symbols to be
-   defined as the beginning of the current instruction.  */
-typedef struct sym_link
-{
-  struct sym_link * next;
-  symbolS *         symbol;
-} sym_linkS;
-
-static sym_linkS *  debug_sym_link = (sym_linkS *) NULL;
-  
 /* Structure to hold all of the different components describing
    an individual instruction.  */
 typedef struct
@@ -55,7 +45,6 @@ typedef struct
   int                   num_fixups;
   fixS *                fixups [GAS_CGEN_MAX_FIXUPS];
   int                   indices [MAX_OPERAND_INSTANCES];
-  sym_linkS *           debug_sym_link;
 }
 fr30_insn;
 
@@ -129,9 +118,6 @@ md_assemble (str)
 
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
-
-  insn.debug_sym_link = debug_sym_link;
-  debug_sym_link = (sym_linkS *)0;
 
   insn.insn = fr30_cgen_assemble_insn
     (gas_cgen_opcode_desc, str, & insn.fields, insn.buffer, & errmsg);
@@ -438,7 +424,7 @@ md_pcrel_from_section (fixP, sec)
       return 0;
     }
 
-  return (fixP->fx_frag->fr_address + fixP->fx_where) & -4L;
+  return (fixP->fx_frag->fr_address + fixP->fx_where + 2) & ~1;
 }
 
 /* Return the bfd reloc type for OPERAND of INSN at fixup FIXP.
@@ -460,9 +446,9 @@ md_cgen_lookup_reloc (insn, operand, fixP)
     case FR30_OPERAND_DISP8:   return BFD_RELOC_FR30_8_IN_8;
     case FR30_OPERAND_UDISP6:  return BFD_RELOC_FR30_6_IN_4;
     case FR30_OPERAND_I8:      return BFD_RELOC_8;
-      /* waiting for these to be defined by Dave....
+    case FR30_OPERAND_I32:     return BFD_RELOC_32;
+      /* waiting for this to be defined by Dave....
     case FR30_OPERAND_I20:     return BFD_RELOC_FR30_20;
-    case FR30_OPERAND_I30:     return BFD_RELOC_32;
     */
     default : /* avoid -Wall warning */
       break;
@@ -561,6 +547,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
+/* Worker function for fr30_is_colon_insn().  */
 static char
 restore_colon (advance_i_l_p_by)
      int advance_i_l_p_by;
@@ -581,7 +568,7 @@ restore_colon (advance_i_l_p_by)
    a colon that was at the location pointed to by INPUT_LINE_POINTER
    (but which has now been replaced bu a NUL) is in fact an
    LDI:8, LDI:20, LDI:32, CALL:D. JMP:D, RET:D or Bcc:D instruction.
-   If it is, then it restores the colon, adbvances INPUT_LINE_POINTER
+   If it is, then it restores the colon, advances INPUT_LINE_POINTER
    to the real end of the instruction/symbol, and returns the character
    that really terminated the symbol.  Otherwise it returns 0.  */
 char
