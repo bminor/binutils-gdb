@@ -1481,7 +1481,7 @@ _bfd_coff_get_external_symbols (abfd)
 
   size = obj_raw_syment_count (abfd) * symesz;
 
-  syms = malloc (size);
+  syms = (PTR) malloc (size);
   if (syms == NULL && size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1539,7 +1539,16 @@ _bfd_coff_read_string_table (abfd)
 #endif
     }
 
-  strings = malloc (strsize);
+  if (strsize < STRING_SIZE_SIZE)
+    {
+      (*_bfd_error_handler)
+	("%s: bad string table size %lu", bfd_get_filename (abfd),
+	 (unsigned long) strsize);
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
+
+  strings = (char *) malloc (strsize);
   if (strings == NULL)
     {
       bfd_set_error (bfd_error_no_memory);

@@ -1,3 +1,8 @@
+Sat Nov 18 18:01:41 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (_bfd_coff_get_external_symbols): Cast malloc return.
+	(_bfd_coff_read_string_table): Likewise.
+
 Sat Nov 18 19:43:04 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
 
 	* pe-arm.c: Fix typos.
