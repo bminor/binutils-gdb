@@ -1,5 +1,8 @@
 2001-09-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-x86-64.c (elf64_x86_64_reloc_type_lookup): Don't map bfd
+	reloc code using x86_64_reloc_map.
+
 	* elf32-hppa.c (elf32_hppa_check_relocs): Update comment since we
 	no longer allocate here.  Localise some vars to blocks where they
 	are used.

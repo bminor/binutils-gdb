@@ -167,8 +167,7 @@ elf64_x86_64_reloc_type_lookup (abfd, code)
        i++)
     {
       if (x86_64_reloc_map[i].bfd_reloc_val == code)
-	return &x86_64_elf_howto_table[(int)
-				       x86_64_reloc_map[i].elf_reloc_val];
+	return &x86_64_elf_howto_table[i];
     }
   return 0;
 }
