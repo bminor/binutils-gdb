@@ -61,6 +61,7 @@ i386-aout.mt
 i386-bsd.mt
 i386-coff.mt
 i386-elf.mt
+i386-gnu.mt
 i386-go32.mt
 i386-linux.mt
 i386-lynx.mt

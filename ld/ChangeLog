@@ -1,3 +1,18 @@
+Mon Jan 23 13:58:13 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* configure.in (i[345]86-*-gnu*): Set ld_target to i386-gnu.
+	* config/i386-gnu.mt: New file.  Include ELF support.
+
+Thu Jan 19 16:22:11 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): If
+	there are any input sections named .gnu.warning, treat them as
+	containing a warning message to be printed by the linker, and
+	clobber the size so that the message is not copied into the output
+	file.
+	* scripttempl/elf.sc: Put .gnu.warning sections into the .text
+	section.
+
 Sun Jan 15 16:45:00 1995  Steve Chamberlain  <sac@splat>
 
 	* configure.in (w65-*-*): New target.

@@ -40,6 +40,9 @@ do
 
 case "${targ}" in
 
+# start-sanitize-arc
+  arc-*-elf*)		ld_target=arc-elf ;;
+# end-sanitize-arc
   sparc-sun-sunos4*) 	ld_target=sun4 ;;
   sparclite*-*-coff)	ld_target=coff-sparc ;;
   sparclite*-fujitsu-*) ld_target=sun4 ;;
@@ -79,7 +82,7 @@ case "${targ}" in
   i[345]86-*-elf*)	ld_target=i386-elf ;;
   i[345]86-*-sysv*)	ld_target=i386-coff ;;
   i[345]86-*-mach*)	ld_target=i386-mach ;;
-  i[345]86-*-gnu*)	ld_target=i386-mach ;;
+  i[345]86-*-gnu*)	ld_target=i386-gnu ;;
   m8*-*-*)		ld_target=m88k-bcs ;;
   a29k-*-udi)		ld_target=sa29200 ;;
   a29k-*-ebmon)		ld_target=ebmon29k ;;
@@ -90,7 +93,7 @@ case "${targ}" in
   h8500-*-hms)		ld_target=coff-h8500 ;;
   sh-*-*)		ld_target=coff-sh ;;
 # start-sanitize-rce
-  rce-*-*)		ld_target=rce-aout ;;
+  rce-*-aout)		ld_target=rce-aout ;;
 # end-sanitize-rce
   m68k-sony-*)		ld_target=news ;;
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
@@ -119,6 +122,7 @@ case "${targ}" in
   ns32k-pc532-netbsd*)  ld_target=ns32k-nbsd ;;
   powerpc-*-elf*)	ld_target=ppc-elf32 ;;
   powerpc-*-netware*)	ld_target=ppc-nw ;;
+  w65-*-*)              ld_target=coff-w65 ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-netware)		ld_target=${target_cpu}-nw ;;
