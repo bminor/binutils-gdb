@@ -1,3 +1,16 @@
+Wed Sep 25 16:31:41 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_{6E01,6A01,6E1F,6A00}): Print both words being
+	stored if tracing.
+
+Mon Sep 23 17:55:30 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (op_types): Add OP_{CONSTANT8,R2,R3}.
+	(trace_input_func): Add support for  OP_{CONSTANT8,R2,R3}.
+	(OP_{4900,24800000,4800,4A00,4B00,4D00,4C00}): Add OP_R2 and OP_R3
+	to call/subroutine returns to trace the first two arguments and
+	the return value.  For small jumps, use CONSTANT8, not CONSTANT16.
+
 Fri Sep 20 15:36:45 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* interp.c (sim_create_inferior): Reinitialize State every time 

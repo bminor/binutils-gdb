@@ -24,13 +24,16 @@ enum op_types {
   OP_FLAG,
   OP_FLAG_OUTPUT,
   OP_CONSTANT16,
+  OP_CONSTANT8,
   OP_CONSTANT3,
   OP_CONSTANT4,
   OP_MEMREF,
   OP_MEMREF2,
   OP_POSTDEC,
   OP_POSTINC,
-  OP_PREDEC
+  OP_PREDEC,
+  OP_R2,
+  OP_R3
 };
 
 #ifdef DEBUG
@@ -188,6 +191,8 @@ trace_input_func (name, in1, in2, in3)
       switch (in[i])
 	{
 	case OP_VOID:
+	case OP_R2:
+	case OP_R3:
 	  break;
 
 	case OP_REG:
@@ -217,6 +222,12 @@ trace_input_func (name, in1, in2, in3)
 
 	case OP_CONSTANT16:
 	  sprintf (p, "%s%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
+	case OP_CONSTANT8:
+	  sprintf (p, "%s%d", comma, SEXT8(OP[i]));
 	  p += strlen (p);
 	  comma = ",";
 	  break;
@@ -346,6 +357,11 @@ trace_input_func (name, in1, in2, in3)
 						 (uint16)SEXT4(OP[i]));
 	      break;
 
+	    case OP_CONSTANT8:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)SEXT8(OP[i]));
+	      break;
+
 	    case OP_CONSTANT3:
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)SEXT3(OP[i]));
@@ -371,6 +387,16 @@ trace_input_func (name, in1, in2, in3)
 						 (uint16)OP[i]);
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)State.regs[OP[++i]]);
+	      break;
+
+	    case OP_R2:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[2]);
+	      break;
+
+	    case OP_R3:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[3]);
 	      break;
 	    }
 	}
@@ -719,7 +745,7 @@ OP_C01 ()
 void
 OP_4900 ()
 {
-  trace_input ("bl.s", OP_CONSTANT16, OP_VOID, OP_VOID);
+  trace_input ("bl.s", OP_CONSTANT8, OP_R2, OP_R3);
   State.regs[13] = PC+1;
   PC += SEXT8 (OP[0]);
   trace_output (OP_VOID);
@@ -729,7 +755,7 @@ OP_4900 ()
 void
 OP_24800000 ()
 {
-  trace_input ("bl.l", OP_CONSTANT16, OP_VOID, OP_VOID);
+  trace_input ("bl.l", OP_CONSTANT16, OP_R2, OP_R3);
   State.regs[13] = PC+1;
   PC += OP[0];
   trace_output (OP_VOID);
@@ -748,7 +774,7 @@ OP_A01 ()
 void
 OP_4800 ()
 {
-  trace_input ("bra.s", OP_CONSTANT16, OP_VOID, OP_VOID);
+  trace_input ("bra.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   PC += SEXT8 (OP[0]);
   trace_output (OP_VOID);
 }
@@ -766,7 +792,7 @@ OP_24000000 ()
 void
 OP_4A00 ()
 {
-  trace_input ("brf0f.s", OP_CONSTANT16, OP_VOID, OP_VOID);
+  trace_input ("brf0f.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   if (State.F0 == 0)
     PC += SEXT8 (OP[0]);
   trace_output (OP_FLAG);
@@ -786,7 +812,7 @@ OP_25000000 ()
 void
 OP_4B00 ()
 {
-  trace_input ("brf0t.s", OP_CONSTANT16, OP_VOID, OP_VOID);
+  trace_input ("brf0t.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   if (State.F0)
     PC += SEXT8 (OP[0]);
   trace_output (OP_FLAG);
@@ -1108,7 +1134,7 @@ OP_15002A02 ()
 void
 OP_4D00 ()
 {
-  trace_input ("jl", OP_REG, OP_VOID, OP_VOID);
+  trace_input ("jl", OP_REG, OP_R2, OP_R3);
   State.regs[13] = PC+1;
   PC = State.regs[OP[0]]; 
   trace_output (OP_VOID);
@@ -1118,7 +1144,10 @@ OP_4D00 ()
 void
 OP_4C00 ()
 {
-  trace_input ("jmp", OP_REG, OP_VOID, OP_VOID);
+  trace_input ("jmp", OP_REG,
+	       (OP[0] == 13) ? OP_R2 : OP_VOID,
+	       (OP[0] == 13) ? OP_R3 : OP_VOID);
+
   PC = State.regs[OP[0]]; 
   trace_output (OP_VOID);
 }
@@ -2257,7 +2286,7 @@ OP_35000000 ()
 void
 OP_6A00 ()
 {
-  trace_input ("st2w", OP_REG, OP_MEMREF, OP_VOID);
+  trace_input ("st2w", OP_DREG, OP_MEMREF, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   trace_output (OP_VOID);
@@ -2267,7 +2296,7 @@ OP_6A00 ()
 void
 OP_6E1F ()
 {
-  trace_input ("st2w", OP_REG, OP_PREDEC, OP_VOID);
+  trace_input ("st2w", OP_DREG, OP_PREDEC, OP_VOID);
   if ( OP[1] != 15 )
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
@@ -2284,7 +2313,7 @@ OP_6E1F ()
 void
 OP_6A01 ()
 {
-  trace_input ("st2w", OP_REG, OP_POSTDEC, OP_VOID);
+  trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],4);
@@ -2295,7 +2324,7 @@ OP_6A01 ()
 void
 OP_6E01 ()
 {
-  trace_input ("st2w", OP_REG, OP_POSTINC, OP_VOID);
+  trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],-4);
