@@ -165,7 +165,7 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
       i = !staticp;		/* skip the class variable */
       while (1)
 	{
-	  type_print (args[i++], "", stream, 0);
+	  type_print (args[i++], "", stream, -1);
 	  if (!args[i]) 
 	    {
 	      fprintf_filtered (stream, " ...");
