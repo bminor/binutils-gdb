@@ -19,10 +19,12 @@
 */
 
 #include <signal.h>
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "remote-sim.h"
 
+#include "callback.h"
 /* This file is local - if newlib changes, then so should this.  */
 #include "syscall.h"
 
@@ -102,10 +104,14 @@ static void parse_and_set_memory_size PARAMS ((char *str));
 
 static int IOMEM PARAMS ((int addr, int write, int value));
 
+
+static host_callback *callback = &default_callback;
 /* These variables are at file scope so that functions other than
    sim_resume can use the fetch/store macros */
 
 static int  little_endian;
+
+
 
 #if 1
 static int maskl = ~0;
@@ -477,10 +483,10 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	    regs[0] = fork ();
 	    break;
 	  case SYS_execve:
-	    regs[0] = execve (ptr (regs[5]), ptr (regs[6]), ptr (regs[7]));
+	    regs[0] = execve (ptr (regs[5]), (char **)ptr (regs[6]), (char **)ptr (regs[7]));
 	    break;
 	  case SYS_execv:
-	    regs[0] = execve (ptr (regs[5]), ptr (regs[6]), 0);
+	    regs[0] = execve (ptr (regs[5]),(char **) ptr (regs[6]), 0);
 	    break;
 	  case SYS_pipe:
 	    {
@@ -503,22 +509,22 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 #endif
 
 	  case SYS_read:
-	    regs[0] = read (regs[5], ptr (regs[6]), regs[7]);
+	    regs[0] = callback->read (callback, regs[5], ptr (regs[6]), regs[7]);
 	    break;
 	  case SYS_write:
 	    if (regs[5] == 1)
-	      regs[0] = sim_callback_write_stdout (ptr(regs[6]), regs[7]);
+	      regs[0] = (int)callback->write_stdout (callback, ptr(regs[6]), regs[7]);
 	    else
-	      regs[0] = write (regs[5], ptr (regs[6]), regs[7]);
+	      regs[0] = (int)callback->write (callback, regs[5], ptr (regs[6]), regs[7]);
 	    break;
 	  case SYS_lseek:
-	    regs[0] = lseek (regs[5], regs[6], regs[7]);
+	    regs[0] = callback->lseek (callback,regs[5], regs[6], regs[7]);
 	    break;
 	  case SYS_close:
-	    regs[0] = close (regs[5]);
+	    regs[0] = callback->close (callback,regs[5]);
 	    break;
 	  case SYS_open:
-	    regs[0] = open (ptr (regs[5]), regs[6]);
+	    regs[0] = callback->open (callback,ptr (regs[5]), regs[6]);
 	    break;
 	  case SYS_exit:
 	    /* EXIT - caller can look in r5 to work out the 
@@ -1116,19 +1122,24 @@ sim_info (verbose)
   double timetaken = (double) saved_state.asregs.ticks / (double) now_persec ();
   double virttime = saved_state.asregs.cycles / 36.0e6;
 
-  printf_filtered ("\n\n# instructions executed  %10d\n", saved_state.asregs.insts);
-  printf_filtered ("# cycles                 %10d\n", saved_state.asregs.cycles);
-  printf_filtered ("# pipeline stalls        %10d\n", saved_state.asregs.stalls);
-  printf_filtered ("# real time taken        %10.4f\n", timetaken);
-  printf_filtered ("# virtual time taken     %10.4f\n", virttime);
-  printf_filtered ("# profiling size         %10d\n", sim_profile_size);
-  printf_filtered ("# profiling frequency    %10d\n", saved_state.asregs.profile);
-  printf_filtered ("# profile maxpc          %10x\n", (1 << sim_profile_size) << PROFILE_SHIFT);
+  callback->printf_filtered (callback, 
+			      "\n\n# instructions executed  %10d\n", 
+			      saved_state.asregs.insts);
+  callback->  printf_filtered (callback, "# cycles                 %10d\n", saved_state.asregs.cycles);
+  callback->  printf_filtered (callback, "# pipeline stalls        %10d\n", saved_state.asregs.stalls);
+  callback->  printf_filtered (callback, "# real time taken        %10.4f\n", timetaken);
+  callback->  printf_filtered (callback, "# virtual time taken     %10.4f\n", virttime);
+  callback->  printf_filtered (callback, "# profiling size         %10d\n", sim_profile_size);
+  callback->  printf_filtered (callback, "# profiling frequency    %10d\n", saved_state.asregs.profile);
+  callback->  printf_filtered (callback, "# profile maxpc          %10x\n",
+			       (1 << sim_profile_size) << PROFILE_SHIFT);
 
   if (timetaken != 0)
     {
-      printf_filtered ("# cycles/second          %10d\n", (int) (saved_state.asregs.cycles / timetaken));
-      printf_filtered ("# simulation ratio       %10.4f\n", virttime / timetaken);
+      callback->printf_filtered (callback, "# cycles/second          %10d\n", 
+				 (int) (saved_state.asregs.cycles / timetaken));
+      callback->printf_filtered (callback, "# simulation ratio       %10.4f\n", 
+				 virttime / timetaken);
     }
 }
 
@@ -1170,7 +1181,7 @@ parse_and_set_memory_size (str)
   if (n > 0 && n <= 24)
     sim_memory_size = n;
   else
-    printf_filtered ("Bad memory size %d; must be 1 to 24, inclusive\n", n);
+    callback->printf_filtered (callback, "Bad memory size %d; must be 1 to 24, inclusive\n", n);
 }
 
 void
@@ -1217,11 +1228,27 @@ sim_do_command (cmd)
 
   else if (strcmp (cmd, "help") == 0)
     {
-	printf_filtered ("List of SH simulator commands:\n\n");
-	printf_filtered ("set-memory-size <n> -- Set the number of address bits to use\n");
-	printf_filtered ("\n");
+      callback->printf_filtered (callback,"List of SH simulator commands:\n\n");
+      callback->printf_filtered (callback,"set-memory-size <n> -- Set the number of address bits to use\n");
+      callback->printf_filtered (callback,"\n");
     }
   else
     fprintf (stderr, "Error: \"%s\" is not a valid SH simulator command.\n",
 	     cmd);
+}
+
+
+int
+sim_get_quit_code()
+{
+  return saved_state.asregs.regs[5];
+}
+
+
+
+void
+sim_set_callbacks(p)
+     host_callback *p;
+{
+  callback = p;
 }

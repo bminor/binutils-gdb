@@ -1,3 +1,13 @@
+Thu Oct  5 14:13:29 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* interp.c (callback): Initialize to default callback.
+
+Thu Sep 28 15:26:59 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* run.c: Moved to ../common.
+	* interp.c (trap): Use gdb's callback interface.
+	* Makefile.in: Updated.
+
 Wed Sep 20 13:35:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New synonym for realclean.
