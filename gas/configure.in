@@ -44,7 +44,7 @@ esac])dnl
 
 using_cgen=no
 
-build_warnings="-W -Wall"
+build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 AC_ARG_ENABLE(build-warnings,
 [  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
 [case "${enableval}" in

@@ -2269,7 +2269,7 @@ else
   want_mmap=false
 fi
 
-build_warnings="-W -Wall"
+build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 # Check whether --enable-build-warnings or --disable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then
   enableval="$enable_build_warnings"

@@ -1,3 +1,9 @@
+2001-08-10  Andreas Jaeger  <aj@suse.de>
+
+	* configure.in: Add -Wstrict-prototypes and -Wmissing-prototypes
+	to build warnings.
+	* configure: Regenerate.
+
 2001-08-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (bfd_elf_sprintf_vma): Add ATTRIBUTE_UNUSED to quiet
