@@ -1,3 +1,8 @@
+Thu Dec 24 14:08:38 1992 david d`zoo' zuhn  (zoo@cygnus.com)
+
+	* Makefile.in: get rid of earlier definitions for *clean,
+	also handle the recursive info rule better
+
 Thu Dec 24 12:40:21 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in (mostlyclean, distclean, realclean):  Fix to

@@ -225,12 +225,12 @@ TARGET_FLAGS_TO_PASS = \
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
 
-.PHONY: all info install-info dvi clean-info
+.PHONY: all info install-info 
 .NOEXPORT:
 
-info check clean-info dvi distclean mostlyclean realclean:	
+info check dvi:	
 	@rootme=`pwd` ; export rootme ; \
-	  $(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
+	  $(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 install-info: install-info-dirs force
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
