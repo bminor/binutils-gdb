@@ -1,5 +1,8 @@
 2000-12-05  Ben Elliston  <bje@redhat.com>
 
+	* Make-common.in (cgen-defs): New target.
+	(cgen-decode): Pass $(EXTRAFILES).
+
 	* genmloop.sh: Use @prefix@, not @cpu@ throughout. Add -prefix and
 	-outfile-suffix options.
 
