@@ -1,3 +1,10 @@
+start-sanitize-tic80
+Wed Mar 26 10:38:25 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (tic80-*-*): Remove G++ libraries and libgloss from
+	noconfigdirs.
+
+end-sanitize-tic80
 Mon Mar 24 15:02:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (install-dirs): Don't crash if prefix, and hence
