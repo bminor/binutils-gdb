@@ -1,3 +1,13 @@
+Fri Mar 13 16:31:38 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* depend.c (quote_string_for_make): New function.
+	(wrap_output): Use it.
+
+Thu Mar 12 18:28:22 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_section): Set bss flag in seg_info
+	structure if type is SHT_NOBITS.  [Bug fix courtesy of rth]
+
 start-sanitize-sky
 Thu Mar 12 16:13:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
