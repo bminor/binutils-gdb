@@ -1,3 +1,11 @@
+2003-09-25  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention the new backtrace mechanism, DWARF 2 CFI, hosted
+	file I/O, multi-arch, TLS and NPTL, DWARF 2 Location Expressions,
+	and Java.
+	* PROBLEMS: Mention that mips*-*-*, powerpc*-*-*, sparc*-*-* and
+	arm*-*-* do not use the new frame code.
+
 2003-09-22  Jeff Johnston  <jjohnstn@redhat.com>
 
 	Merge from mainline:

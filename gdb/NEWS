@@ -3,6 +3,63 @@
 
 *** Changes in GDB 6.0:
 
+* New backtrace mechanism (includes DWARF 2 Call Frame Information).
+
+DWARF 2's Call Frame Information makes available compiler generated
+information that more exactly describes the program's run-time stack.
+By using this information, GDB is able to provide more robust stack
+backtraces.
+
+The i386, amd64 (nee, x86-64), Alpha, m68hc11, ia64, and m32r targets
+have been updated to use a new backtrace mechanism which includes
+DWARF 2 CFI support.
+
+* Hosted file I/O.
+
+GDB's remote protocol has been extended to include support for hosted
+file I/O (where the remote target uses GDB's file system).  See GDB's
+remote protocol documentation for details.
+
+* All targets using the new architecture framework.
+
+All of GDB's targets have been updated to use the new internal
+architecture framework.  The way is now open for future GDB releases
+to include cross-architecture native debugging support (i386 on amd64,
+ppc32 on ppc64).
+
+* GNU/Linux's Thread Local Storage (TLS)
+
+GDB now includes support for for the GNU/Linux implementation of
+per-thread variables.
+
+* GNU/Linux's Native POSIX Thread Library (NPTL)
+
+GDB's thread code has been updated to work with either the new
+GNU/Linux NPTL thread library or the older "LinuxThreads" library.
+
+* Separate debug info.
+
+GDB, in conjunction with BINUTILS, now supports a mechanism for
+automatically loading debug information from a separate file.  Instead
+of shipping full debug and non-debug versions of system libraries,
+system integrators can now instead ship just the stripped libraries
+and optional debug files.
+
+* DWARF 2 Location Expressions
+
+DWARF 2 Location Expressions allow the compiler to more completely
+describe the location of variables (even in optimized code) to the
+debugger.
+
+GDB now includes preliminary support for location expressions (support
+for DW_OP_piece is still missing).
+
+* Java
+
+A number of long standing bugs that caused GDB to die while starting a
+Java application have been fixed.  GDB's Java support is now
+considered "useable".
+
 * GNU/Linux support for fork, vfork, and exec.
 
 The "catch fork", "catch exec", "catch vfork", and "set follow-fork-mode"
