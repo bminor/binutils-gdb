@@ -49,6 +49,13 @@ if  { [gdb_compile "${binfile}0.o ${binfile}1.o" ${binfile} executable {debug}] 
     return -1
 }
 
+
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+if {[skip_hp_tests $gcc_compiled]} then { continue }
+
+
 global GDBFLAGS
 set saved_gdbflags $GDBFLAGS
 set GDBFLAGS "$GDBFLAGS --xdb"

@@ -23,6 +23,7 @@ if $tracelevel then {
         strace $tracelevel
         }
 
+
 global usestubs
 
 #
@@ -37,6 +38,11 @@ set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
+
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+if {[skip_hp_tests $gcc_compiled]} then { continue }
 
 global GDBFLAGS
 set saved_gdbflags $GDBFLAGS

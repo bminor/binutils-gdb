@@ -35,6 +35,22 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 }
 
+# are we on a target board
+if ![isnative] then {
+    return
+}
+
+if {![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"]} {
+    #setup_xfail "*-*.*"
+    return 0
+}
+
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+if {[skip_hp_tests $gcc_compiled]} then { continue }
+
+
 gdb_exit
 gdb_start
 delete_breakpoints
@@ -136,6 +152,9 @@ proc watchpoint_command_test {} {
 }
 
 watchpoint_command_test
+
+
+
 
 
 

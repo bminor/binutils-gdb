@@ -22,6 +22,7 @@ if $tracelevel then {
         strace $tracelevel
 }
 
+
 set testfile1 "average"
 set testfile2 "sum"
 set testfile "dbx-test"
@@ -43,6 +44,10 @@ if  { [gdb_compile "${binfile1}.o ${binfile2}.o" ${binfile} executable {debug}] 
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+if {[skip_hp_tests $gcc_compiled]} then { continue }
 
 proc dbx_reinitialize_dir { subdir } {
     global gdb_prompt

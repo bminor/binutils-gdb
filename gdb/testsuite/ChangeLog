@@ -1,3 +1,16 @@
+Fri Jan 15 14:04:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.hp/watch-cmd.exp: do not execute unless on hppa-hpux platform 
+	and compiled w/o GCC. 
+
+	* gdb.hp/watch-hp.exp: ditto.
+
+	* gdb.hp/xdb1.exp: ditto.
+
+	* gdb.hp/xdb2.exp: ditto.
+
+	* gdb.hp/dbx.exp: ditto.
+
 Thu Jan 14 18:36:48 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* constvars.c: Remove C++-isms.
