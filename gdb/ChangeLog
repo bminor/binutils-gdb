@@ -1,3 +1,14 @@
+Thu Aug 26 14:32:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (restore_inferior_status): Use catch_errors when
+	restoring selected frame.
+
+Wed Aug 25 21:52:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (save_inferior_status, restore_inferior_status):
+	Save and restore the registers too.
+	* inferior.h (struct inferior_status): Add "registers".
+
 Tue Aug 24 00:36:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c (end_psymtab): Clean up comment.
