@@ -38,7 +38,7 @@ extern CORE_ADDR pa64_solib_get_got_by_pc (CORE_ADDR);
    which they are linked, and sufficient information to read in their symbols
    at a later time.  */
 
-#define SOLIB_CREATE_INFERIOR_HOOK(PID)	pa64_solib_create_inferior_hook()
+#define SOLIB_CREATE_INFERIOR_HOOK(PID)	pa64_solib_create_inferior_hook ()
 
 extern void pa64_solib_create_inferior_hook (void);
 
@@ -46,14 +46,14 @@ extern void pa64_solib_create_inferior_hook (void);
    dynamic linker that was established by SOLIB_CREATE_INFERIOR_HOOK.
    (This operation does not remove shared library information from
    the debugger, as CLEAR_SOLIB does.)  */
-#define SOLIB_REMOVE_INFERIOR_HOOK(PID) pa64_solib_remove_inferior_hook(PID)
+#define SOLIB_REMOVE_INFERIOR_HOOK(PID) pa64_solib_remove_inferior_hook (PID)
 
 extern void pa64_solib_remove_inferior_hook (int);
 
 /* This function is called by the "catch load" command.  It allows
    the debugger to be notified by the dynamic linker when a specified
    library file (or any library file, if filename is NULL) is loaded.  */
-#define SOLIB_CREATE_CATCH_LOAD_HOOK(pid,tempflag, filename,cond_string) \
+#define SOLIB_CREATE_CATCH_LOAD_HOOK(pid, tempflag, filename, cond_string) \
    pa64_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
 
 extern void pa64_solib_create_catch_load_hook (int, int, char *, char *);
@@ -61,7 +61,7 @@ extern void pa64_solib_create_catch_load_hook (int, int, char *, char *);
 /* This function is called by the "catch unload" command.  It allows
    the debugger to be notified by the dynamic linker when a specified
    library file (or any library file, if filename is NULL) is unloaded.  */
-#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid,tempflag,filename, cond_string) \
+#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid, tempflag, filename, cond_string) \
    pa64_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
 
 extern void pa64_solib_create_catch_unload_hook (int, int, char *, char *);

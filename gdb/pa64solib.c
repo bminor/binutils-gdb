@@ -403,9 +403,9 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target, int r
      We need to first determine if we're dealing with a dynamically
      linked executable.  If not, then return without an error or warning.
 
-     We also need to examine __dld_flags to determine if the shared library
-     list is valid and to determine if the libraries have been privately
-     mapped.  */
+     We also need to examine __dld_flags to determine if the shared
+     library list is valid and to determine if the libraries have been
+     privately mapped.  */
   if (symfile_objfile == NULL)
     return;
 
@@ -462,8 +462,8 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target, int r
      DT_HP_DEBUG_PRIVATE to indicate that shared libraries should be
      mapped private.
 
-     DT_HP_DEBUG_CALLBACK to indicate that we want the dynamic linker to
-     call the breakpoint routine for significant events.  */
+     DT_HP_DEBUG_CALLBACK to indicate that we want the dynamic linker
+     to call the breakpoint routine for significant events.  */
 
 void
 pa64_solib_create_inferior_hook (void)
@@ -592,8 +592,8 @@ get_out:
    shared library events.  To resume notifications, GDB must call
    pa64_solib_create_inferior_hook.
 
-   This operation does not remove any knowledge of shared libraries which
-   GDB may already have been notified of.  */
+   This operation does not remove any knowledge of shared libraries
+   of which GDB may already have been notified.  */
 
 void
 pa64_solib_remove_inferior_hook (int pid)
