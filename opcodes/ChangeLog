@@ -1,6 +1,15 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-dis.c (disassemble): Handle insertion of ',', '[' and
+	']' characters into the output stream.
+	* v850-opc.c (v850_opcodes: Remove size field from all opcodes.
+	Add "memop" field to all opcodes (for the disassembler).
+	Reorder opcodes so that "nop" comes before "mov" and "jr"
+	comes before "jarl".
+
+	* v850-dis.c (print_insn_v850): Fix typo in last change.
+
 	* v850-dis.c (print_insn_v850): Properly handle disassembling
 	a two byte insn at the end of a memory region when the memory
 	region's size is only two byte aligned.
