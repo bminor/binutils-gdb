@@ -474,7 +474,12 @@ f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
 v::REGISTER_SIZE:int:register_size
 v::REGISTER_BYTES:int:register_bytes
-f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte::0
+# NOTE: cagney/2002-05-02: This function with predicate has a valid
+# (callable) initial value.  As a consequence, even when the predicate
+# is false, the corresponding function works.  This simplifies the
+# migration process - old code, calling REGISTER_BYTE, doesn't need to
+# be modified.
+F::REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
 # The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
 # MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
 # REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced

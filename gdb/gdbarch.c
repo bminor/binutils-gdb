@@ -643,7 +643,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of register_name, invalid_p == 0 */
-  /* Skip verify of register_byte, invalid_p == 0 */
+  /* Skip verify of register_byte, has predicate */
   /* Skip verify of register_raw_size, invalid_p == 0 */
   /* Skip verify of deprecated_max_register_raw_size, has predicate */
   /* Skip verify of register_virtual_size, invalid_p == 0 */
@@ -1975,6 +1975,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: push_dummy_code = 0x%08lx\n",
                         (long) current_gdbarch->push_dummy_code);
+#ifdef REGISTER_BYTE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_BYTE_P()",
+                      XSTRING (REGISTER_BYTE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_BYTE_P() = %d\n",
+                      REGISTER_BYTE_P ());
+#endif
 #ifdef REGISTER_BYTE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3318,12 +3327,20 @@ set_gdbarch_register_bytes (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_register_byte_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->register_byte != generic_register_byte;
+}
+
+int
 gdbarch_register_byte (struct gdbarch *gdbarch, int reg_nr)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->register_byte == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_register_byte invalid");
+  /* Ignore predicate (gdbarch->register_byte != generic_register_byte).  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_byte called\n");
   return gdbarch->register_byte (reg_nr);

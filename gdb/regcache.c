@@ -187,6 +187,12 @@ init_regcache_descr (struct gdbarch *gdbarch)
       && !gdbarch_pseudo_register_write_p (gdbarch)
       && !gdbarch_register_type_p (gdbarch))
     {
+      /* NOTE: cagney/2003-05-02: Don't add a test for REGISTER_BYTE_P
+	 to the above.  Doing that would cause all the existing
+	 architectures to revert back to the legacy regcache
+	 mechanisms, and that is not a good thing.  Instead just,
+	 later, check that the register cache's layout is consistent
+	 with REGISTER_BYTE.  */
       descr->legacy_p = 1;
       init_legacy_regcache_descr (gdbarch, descr);
       return descr;
@@ -233,21 +239,19 @@ init_regcache_descr (struct gdbarch *gdbarch)
      buffer.  Ulgh!  */
   descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 
-#if 0
-  /* Sanity check.  Confirm that the assumptions about gdbarch are
-     true.  The REGCACHE_DESCR_HANDLE is set before doing the checks
-     so that targets using the generic methods supplied by regcache
-     don't go into infinite recursion trying to, again, create the
-     regcache.  */
-  set_gdbarch_data (gdbarch, regcache_descr_handle, descr);
+  /* Sanity check.  Confirm that there is agreement between the
+     regcache and the target's redundant REGISTER_BYTE (new targets
+     should not even be defining it).  */
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
+      if (REGISTER_BYTE_P ())
+	gdb_assert (descr->register_offset[i] == REGISTER_BYTE (i));
+#if 0
       gdb_assert (descr->sizeof_register[i] == REGISTER_RAW_SIZE (i));
       gdb_assert (descr->sizeof_register[i] == REGISTER_VIRTUAL_SIZE (i));
-      gdb_assert (descr->register_offset[i] == REGISTER_BYTE (i));
+#endif
     }
   /* gdb_assert (descr->sizeof_raw_registers == REGISTER_BYTES (i));  */
-#endif
 
   return descr;
 }

@@ -1,3 +1,12 @@
+2003-05-04  Andrew Cagney  <cagney@redhat.com>
+
+	* sentinel-frame.c (sentinel_frame_prev_register): Replace
+	REGISTER_BYTE with register_offset_hack.
+	* regcache.c (init_regcache_descr): When REGISTER_BYTE_P, check
+	that REGISTER_BYTE is consistent with the regcache.
+	* gdbarch.sh (REGISTER_BYTE): Add a predicate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (fxsave_offset): Add entries for %xmm8-%xmm15.

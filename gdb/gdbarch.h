@@ -739,6 +739,32 @@ extern void set_gdbarch_register_bytes (struct gdbarch *gdbarch, int register_by
 #define REGISTER_BYTES (gdbarch_register_bytes (current_gdbarch))
 #endif
 
+/* NOTE: cagney/2002-05-02: This function with predicate has a valid
+   (callable) initial value.  As a consequence, even when the predicate
+   is false, the corresponding function works.  This simplifies the
+   migration process - old code, calling REGISTER_BYTE, doesn't need to
+   be modified. */
+
+#if defined (REGISTER_BYTE)
+/* Legacy for systems yet to multi-arch REGISTER_BYTE */
+#if !defined (REGISTER_BYTE_P)
+#define REGISTER_BYTE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_BYTE_P)
+#define REGISTER_BYTE_P() (0)
+#endif
+
+extern int gdbarch_register_byte_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE_P)
+#error "Non multi-arch definition of REGISTER_BYTE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTE_P)
+#define REGISTER_BYTE_P() (gdbarch_register_byte_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_BYTE)
 #define REGISTER_BYTE(reg_nr) (generic_register_byte (reg_nr))
