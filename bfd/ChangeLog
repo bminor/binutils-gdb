@@ -1,3 +1,9 @@
+Mon Feb  7 15:02:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (bfd_section_from_shdr): Get vma and alignment_power
+	of an SHT_STRTAB section from sh_addr and sh_addralign, rather
+	than just setting them to zero.
+
 Sun Feb  6 20:04:10 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* elfcode.h (prep_headers, swap_out_syms): Check for NULL return
