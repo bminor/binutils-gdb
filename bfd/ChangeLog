@@ -15,7 +15,7 @@ Mon Aug 21 17:49:28 1995  steve chamberlain  <sac@slash.cygnus.com>
 	coff_data->link_info.
 	* coffswap.h (coff_swap_[aout|filehdr]_out): Use indirect PE pointer.
 	(coff_swap_scnhdr_out): Use real imagebase.
-	* libcoff (coff_data_type.link_info): New field.
+	* libcoff-in.h (coff_data_type.link_info): New field.
 
 Mon Aug 21 11:10:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
