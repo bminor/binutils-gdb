@@ -1,5 +1,11 @@
 Fri Apr  3 00:56:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Put the tdirs in a file and use AC_SUBST_FILE,
+	rather than in a shell variable and using AC_SUBST.
+	* Makefile.am (DISTCLEANFILES): Remove ldscripts.  Add tdirs.
+ 	(distclean-local): New target.
+	* configure, Makefile.in: Rebuild.
+
 	* ld.texinfo: Completely rewrite linker script documentation.
 
 Mon Mar 30 12:47:33 1998  Ian Lance Taylor  <ian@cygnus.com>
