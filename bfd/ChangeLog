@@ -5,6 +5,9 @@ Sun Nov  5 21:44:13 1995  Ken Raeburn  <raeburn@cygnus.com>
 	(.dep1): Put mkdep output in a separate file.
 	Rebuilt dependencies.
 
+	* ecoff.c (_bfd_ecoff_slurp_armap): Cast _bfd_read_ar_hdr return
+	value.
+
 Sat Nov  4 12:23:26 1995  Fred Fish  <fnf@cygnus.com>
 
 	* core.c: Renamed to corefile.c
