@@ -951,6 +951,11 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
 	goto got_system_call_error;
       elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
       elf_elfsections(abfd)[shindex] = i_shdrp + shindex;
+
+      /* If this is a .dynamic section, mark the object file as being
+	 dynamically linked.  */
+      if (i_shdrp[shindex].sh_type == SHT_DYNAMIC)
+	abfd->flags |= DYNAMIC;
     }
   if (i_ehdrp->e_shstrndx)
     {
@@ -1123,7 +1128,7 @@ write_relocs (abfd, sec, xxx)
   int idx;
   int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
   asymbol *last_sym = 0;
-  int last_sym_idx;
+  int last_sym_idx = 9999999;	/* should always be written before use */
 
   if ((sec->flags & SEC_RELOC) == 0)
     return;
@@ -2125,7 +2130,7 @@ swap_out_syms (abfd)
 	  }
 
 	if (bfd_is_com_section (syms[idx]->section))
-	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
 	else if (syms[idx]->section == &bfd_und_section)
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
 	else if (syms[idx]->flags & BSF_SECTION_SYM)
@@ -2261,6 +2266,15 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
   Elf_Internal_Ehdr *i_ehdrp;
   Elf_Internal_Shdr **i_shdrp;
   int count;
+
+  /* We don't know how to write dynamic objects.  Specifically, we
+     don't know how to construct the program header.  */
+  if ((abfd->flags & DYNAMIC) != 0)
+    {
+      fprintf (stderr, "Writing ELF dynamic objects is not supported\n");
+      bfd_error = wrong_format;
+      return false;
+    }
 
   if (abfd->output_has_begun == false)
     {
@@ -2473,10 +2487,6 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
      to be prepared to read both (and merge them) or ensure that we
      only read the full symbol table.  Currently we only get called to
      read the full symbol table.  -fnf */
-  if (bfd_get_outsymbols (abfd) != NULL)
-    {
-      return true;
-    }
 
   /* Read each raw ELF symbol, converting from external ELF form to
      internal ELF form, and then using the information to create a
@@ -2608,6 +2618,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
       *symptrs = 0;		/* Final null pointer */
     }
 
+  free ((PTR) x_symp);
   return true;
 }
 

@@ -1,3 +1,16 @@
+Fri Jan 14 16:45:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (elf_object_p): If there is a SHT_DYNAMIC section, set
+	the DYNAMIC flag for the BFD.
+	(NAME(bfd_elf,write_object_contents)): Don't try to write out a
+	BFD with the DYNAMIC flag set, since we don't generate the program
+	header table correctly.
+
+Fri Jan 14 01:04:36 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elfcode.h (elf_slurp_symbol_table):  Free x_symp at the end
+	of the function to avoid storage leak.
+
 Thu Jan 13 23:07:32 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_link_write_external): An ifd can be -1.
