@@ -1,5 +1,8 @@
 Fri Apr  4 13:26:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c: Protect uses of STO_MIPS16 with an ifdef of
+	OBJ_ELF, rather than of S_GET_OTHER.
+
 	* Makefile.in (DISTCLEAN_HERE): Add site.exp and site.bak.
 
 Thu Apr  3 13:16:18 1997  Ian Lance Taylor  <ian@cygnus.com>
