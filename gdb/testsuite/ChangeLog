@@ -1,4 +1,31 @@
+Thu Jun 10 11:04:04 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.t16/printcmd.exp: Don't print variables before running program.
+
+	* gdb.t06/break.exp: Don't require envp argument to main.
+
+	* gdb.t0{2,3,4,5}/gdbme.c [_AIX]: Use signed keyword.
+
+	* gdb.t02/whatis.exp, gdb.t11/list.exp:
+	Add xfails for rs6000.
+
+	* gdb.t02/whatis.exp: Re-write other tests
+	not to re-test something we already tested.
+
+	* gdb.t{03,15,16}/gdbme.c: Reference all variables and make sure
+	each type used has a variable of that type.
+
+Tue Jun  8 16:45:20 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* gdb.t20/{inherit.exp,gdbme.cc}: Test tagless structure.
+
+Fri Jun  4 11:07:19 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: change srctrigger to be a file, not a directory
+
 Fri Jun  4 08:23:57 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (mips-idt-ecoff*): Added trailing '*'.
 
 	* gdb.t11/list.exp: Fixed a couple of typos.
 
