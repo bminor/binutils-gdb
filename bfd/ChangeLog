@@ -1,3 +1,9 @@
+2000-02-09  Timothy Wall  <twall@cygnus.com>
+
+	* coffgen.c (coff_real_object_p): Set arch/mach info prior to
+	swapping in sections, so that the swapping routines have access to
+	the arch/mach info.
+
 2000-02-08 Mark Elbrecht <snowball3@bigfoot.com>
 	
 	* coff-go32.c: Update comment. Update copyright.

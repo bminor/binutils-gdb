@@ -1,5 +1,5 @@
 /* Support for the generic parts of COFF, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -211,6 +211,11 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   if (bfd_read ((PTR) external_sections, 1, readsize, abfd) != readsize)
     goto fail;
 
+  /* Set the arch/mach *before* swapping in sections; section header swapping
+     may depend on arch/mach info. */
+  if (bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f) == false)
+    goto fail;
+
   /* Now copy data as required; construct all asections etc */
   if (nscns != 0)
     {
@@ -227,9 +232,6 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
     }
 
   /*  make_abs_section (abfd); */
-
-  if (bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f) == false)
-    goto fail;
 
   return abfd->xvec;
 
