@@ -1,3 +1,8 @@
+Fri Dec 29 16:30:58 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* symfile.c (find_sym_fns): Add PowerMac to xcoff file recognition
+	kludge.
+
 start-sanitize-gdbtk
 Thu Dec 28 15:10:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
