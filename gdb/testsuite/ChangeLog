@@ -1,4 +1,12 @@
+Mon Mar 29 17:37:25 1993  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (subdirs):  Put back gdb.t17 which mysteriously
+	disappeared.
+
 Thu Mar 25 21:05:16 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t10/crossload.exp:  Disable the i860-elf test until such
+	time as i860 support works.
 
 	* gdb.t15/funcargs.exp:  Fix expected outputs to include 
 	"backtrace 100\r" rather than just "backtrace\r", to match last
