@@ -1,3 +1,9 @@
+2003-07-04  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* emulparams/shelf32.sh (STACK_ADDR): Don't define.
+	(OTHER_SECTIONS): Include .stack.
+	* emulparams/shelf64.sh (OTHER_SECTIONS): Likewise.
+
 2003-07-02  Jakub Jelinek  <jakub@redhat.com>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Don't include

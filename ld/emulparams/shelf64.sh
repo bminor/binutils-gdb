@@ -6,4 +6,11 @@ EXTRA_EM_FILE=
 . ${srcdir}/emulparams/shelf32.sh
 
 # We do not need .cranges
-OTHER_SECTIONS=''
+OTHER_SECTIONS="
+ .stack ${RELOCATING-0}${RELOCATING+(DEFINED(_stack) ? _stack : ALIGN (0x40000) + 0x40000)} :
+  {
+    ${RELOCATING+_stack = .;}
+    *(.stack)
+    LONG(0xdeaddead)
+  }
+"
