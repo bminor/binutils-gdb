@@ -105,7 +105,7 @@ BFD_H = bfd.h
 # need two copies of the executable, one to download and one for the
 # debugger}.
 BFD_LIBS = \Option-d
-	"{o}"archive.c.o "{o}"archures.c.o "{o}"bfd.c.o "{o}"cache.c.o "{o}"coffgen.c.o "{o}"core.c.o "{o}"ctor.c.o \Option-d
+	"{o}"archive.c.o "{o}"archures.c.o "{o}"bfd.c.o "{o}"cache.c.o "{o}"coffgen.c.o "{o}"core.c.o \Option-d
 	"{o}"format.c.o "{o}"init.c.o "{o}"libbfd.c.o "{o}"opncls.c.o "{o}"reloc.c.o \Option-d
 	"{o}"section.c.o "{o}"syms.c.o "{o}"targets.c.o "{o}"hash.c.o "{o}"linker.c.o \Option-d
 	"{o}"elf.c.o "{o}"srec.c.o
@@ -237,7 +237,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \Option-d
 	 coff-i960.c srec.c tekhex.c oasys.c ieee.c \Option-d
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \Option-d
 	 coff-a29k.c coff-rs6000.c coffgen.c format.c \Option-d
-	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \Option-d
+	 section.c core.c syms.c stab-syms.c reloc.c init.c \Option-d
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \Option-d
 	 i386aout.c i386linux.c netbsd386.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \Option-d
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \Option-d
@@ -414,7 +414,6 @@ saber \Option-f
   {INCDIR}:aout:stab.def
 "{o}"reloc.c.o  \Option-f "{s}"reloc.c
 "{o}"init.c.o  \Option-f "{s}"init.c
-"{o}"ctor.c.o  \Option-f "{s}"ctor.c
 "{o}"coff-m88k.c.o  \Option-f "{s}"coff-m88k.c {INCDIR}:coff:m88k.h {INCDIR}:coff:internal.h \Option-d
   "{s}"libcoff.h coffcode.h "{s}"coffswap.h
 "{o}"coff-mips.c.o  \Option-f "{s}"coff-mips.c {INCDIR}:coff:internal.h \Option-d

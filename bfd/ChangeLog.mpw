@@ -1,3 +1,9 @@
+Mon Sep 12 16:49:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (ctor.c): Remove references.
+	* hosts/mpw.h [BFD_TRUE_FALSE]: Remove macro redefinitions of true
+	and false.
+
 Wed Jun 29 17:15:28 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* ecoffswap.h (ecoff_swap_pdr_in, ecoff_swap_pdr_in) [MPW_C]:

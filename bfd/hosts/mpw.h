@@ -76,17 +76,6 @@ void mpw_abort ();
 #define fseek mpw_fseek
 #define abort mpw_abort
 
-/* Define as macros so as to mask the previous enum. */
-
-#ifndef BFD_TRUE_FALSE
-#ifndef false
-#define false ffalse
-#endif
-#ifndef true
-#define true ttrue
-#endif
-#endif
-
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
