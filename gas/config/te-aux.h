@@ -4,7 +4,7 @@
    This internal_lineno crap is to stop namespace pollution from the
    bfd internal coff headerfile. */
 #define internal_lineno bfd_internal_lineno
-#include "coff/aux.h"	/* override bits in coff/internal.h */
+#include "coff/aux-coff.h"	/* override bits in coff/internal.h */
 #undef internal_lineno
 
 #define COFF_NOLOAD_PROBLEM
