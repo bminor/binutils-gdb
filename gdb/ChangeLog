@@ -1,5 +1,8 @@
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* frame.c: Update copyright year.
+	(get_prev_frame): Improve comment.
+
 	* sparc64fbsd-tdep.c: Include "regset.h".
 	(sparc64fbsd_sizeof_struct_reg, sparc64fbsd_sizeof_struct_fpreg):
 	Remove variables.

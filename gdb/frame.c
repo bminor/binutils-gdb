@@ -1,7 +1,7 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1726,7 +1726,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
 /* Return a structure containing various interesting information
    about the frame that called THIS_FRAME.  Returns NULL
-   if there is no such frame.  */
+   if there is no such frame.
+
+   This function tests some target-independent conditions that should
+   terminate the frame chain, such as unwinding past main().  It
+   should not contain any target-dependent tests, such as checking
+   whether the program-counter is zero.  */
 
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
