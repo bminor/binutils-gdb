@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Tue Oct 29 12:53:46 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* elf32-d10v.c (elf_d10v_howto_table): Don't complain on
+	overflows for R_D10V_16 and R_D10V_18.
+
+end-sanitize-d10v
 Tue Oct 29 13:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_write_section_part): Use LMA rather than VMA.
