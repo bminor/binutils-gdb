@@ -1974,12 +1974,14 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
+	  /* fall through */
 
 	case R_PPC_REL14:
 	case R_PPC_REL14_BRTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	  if (h == NULL)
 	    break;
+	  /* fall through */
 
 	default:
 	  if (info->shared
@@ -2047,7 +2049,7 @@ ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **secp;
      bfd_vma *valp;
 {
-  if (sym->st_shndx == SHN_COMMON && sym->st_size <= bfd_get_gp_size (abfd))
+  if (sym->st_shndx == SHN_COMMON && !info->relocateable && sym->st_size <= bfd_get_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are automatically
 	 put into .sdata.  */

@@ -1,3 +1,8 @@
+Fri May 24 14:28:38 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Do not put small common
+	symbols into .sbss if this is a relocatable link.
+
 Thu May 23 12:26:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Warn about
