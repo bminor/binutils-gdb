@@ -1,3 +1,100 @@
+2003-07-07  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (m68k-tdep.o, m68klinux-tdep.o): Update
+	dependencies.
+	* m68k-tdep.c (NUM_FREGS): Delete.
+	(SIG_PC_FP_OFFSET): Delete.
+	(TARGET_M68K): Delete.
+	(P_MOVEAL_SP_FP, P_ADDAW_SP, P_ADDAL_SP, P_SUBQW_SP,
+	P_SUBQL_SP, P_LEA_SP_SP, P_LEA_PC_A5, P_FMOVEMX_SP,
+	P_MOVEL_SP, P_MOVEML_SP): Define.
+	(P_MOVL_SP_FP, P_MOVL, P_JSR, P_BSR, P_LEAL, P_MOVML, P_FMOVM,
+	P_TRAP): Delete.
+        (m68k_register_raw_size): Delete.
+	(m68k_register_virtual_size): Delete.
+	(m68k_register_type): Renamed from m68k_register_virtual_type and
+	add gdbarch argument.
+	(m68k_store_struct_return): Delete.
+	(m68k_deprecated_extract_return_value): Delete.
+	(m68k_deprecated_extract_struct_value_address): Delete.
+	(m68k_frame_chain): Delete.
+	(m68k_frame_saved_pc): Delete.
+	(m68k_fix_call_dummy): Delete.
+	(m68k_push_dummy_frame): Delete.
+	(m68k_pop_frame): Delete.
+	(m68k_extract_return_value): New function.
+	(m68k_store_return_value): Rewrite using regcache.
+	(m68k_extract_struct_value_address): Rewrite using regcache.
+	(m68k_push_dummy_call): New function.
+	(struct m68k_frame_cache): Define.
+	(m68k_alloc_frame_cache): New function.
+	(m68k_analyze_frame_setup): New function.
+	(m68k_analyze_register_saves): New function.
+	(m68k_analyze_prologue): New function.
+	(m68k_skip_prologue): Rewrite using above functions.
+	(m68k_unwind_pc): New function.
+	(m68k_frame_cache): New function.
+	(m68k_frame_this_id): New function.
+	(m68k_frame_prev_register): New function.
+	(m68k_frame_unwind): New variable.
+	(m68k_frame_p): New function.
+	(m68k_sigtramp_frame_cache): New function.
+	(m68k_sigtramp_frame_this_id): New function.
+	(m68k_sigtramp_frame_prev_register): New function.
+	(m68k_sigtramp_frame_unwind): New variable.
+	(m68k_sigtramp_frame_p): New function.
+	(m68k_frame_base_address): New function.
+	(m68k_frame_base): New function.
+	(m68k_unwind_dummy_id): New function.
+	(fill_gregset): Use regcache_collect.
+	(fill_fpregset): Likewise.
+	(m68k_saved_pc_after_call): Only define if SYSCALL_TRAP is
+	defined.
+	(m68k_gdbarch_init): Don't define call_dummy_words.  Don't set
+	deprecated_init_frame_pc, deprecated_store_struct_return,
+	deprecated_extract_return_value, deprecated_store_return_value,
+	deprecated_frame_chain, deprecated_frame_saved_pc,
+	deprecated_frame_init_saved_regs, deprecated_register_raw_size,
+	deprecated_register_virtual_size,
+	deprecated_max_register_raw_size,
+	deprecated_max_register_virtual_size,
+	deprecated_register_virtual_type, deprecated_register_size,
+	deprecated_register_byte, deprecated_register_bytes,
+	deprecated_fp_regnum, deprecated_use_generic_dummy_frames,
+	call_dummy_location, deprecated_call_dummy_breakpoint_offset,
+	deprecated_pc_in_call_dummy, deprecated_call_dummy_length,
+	deprecated_call_dummy_start_offset, deprecated_call_dummy_words,
+	deprecated_sizeof_call_dummy_words, deprecated_fix_call_dummy,
+	deprecated_push_dummy_frame, deprecated_pop_frame,
+	deprecated_dummy_write_sp.  Set deprecated_saved_pc_after_call
+	only if SYSCALL_TRAP is defined.  Set extract_return_value,
+	store_return_value, extract_struct_value_address, register_type,
+	push_dummy_call, unwind_dummy_id, unwind_pc.  Add two frame unwind
+	predicates.
+	* m68k-tdep.h (M68K_D1_REGNUM, M68K_NUM_REGS,
+	M68K_MAX_REGISTER_SIZE): Define.
+	(struct m68k_sigtramp_info): Define.
+	(struct gdbarch_tdep): Add get_sigtramp_info.
+	* m68klinux-nat.c (fetch_register): Use register_size instead of
+	REGISTER_RAW_SIZE.  Don't put assignment in if.
+	(store_register): Likewise.
+	(fetch_inferior_registers): Likewise.
+	(store_inferior_registers): Likewise.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_saved_pc): Delete.
+	(m68k_linux_frame_saved_pc): Delete.
+	(m68k_linux_sigcontext_reg_offset,
+	m68k_linux_ucontext_reg_offset): Define.
+	(m68k_linux_get_sigtramp_info): New function.
+	(m68k_linux_extract_return_value): Rewrite using regcache.
+	(m68k_linux_store_return_value): Likewise.
+	(m68k_linux_extract_struct_value_address): Likewise.
+	(m68k_linux_init_abi): Set get_sigtramp_info in tdep structure.
+	Don't set deprecated_frame_saved_pc,
+	deprecated_extract_return_value, deprecated_store_return_value,
+	deprecated_extract_struct_value_address.  Set
+	extract_return_value, store_return_value,
+	extract_struct_value_address.
+
 2003-07-06  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (solib_symbols_add): Use one variable for all section
