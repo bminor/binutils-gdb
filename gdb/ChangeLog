@@ -1,3 +1,8 @@
+2003-08-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Delete all #if not GDB_MULTI_ARCH code.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2003-08-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/nm-fbsd.h (SVR4_SHARED_LIBS): Remove define.

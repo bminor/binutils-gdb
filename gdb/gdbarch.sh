@@ -834,11 +834,6 @@ cat <<EOF
 #define GDBARCH_H
 
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
-#if !GDB_MULTI_ARCH
-/* Pull in function declarations refered to, indirectly, via macros.  */
-#include "inferior.h"		/* For unsigned_address_to_pointer().  */
-#include "symfile.h"		/* For entry_point_address().  */
-#endif
 
 struct floatformat;
 struct ui_file;
@@ -912,11 +907,6 @@ do
 	    printf "#endif\n"
 	    printf "#endif\n"
 	    printf "\n"
-	    printf "/* Default predicate for non- multi-arch targets. */\n"
-	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro}_P)\n"
-	    printf "#define ${macro}_P() (0)\n"
-	    printf "#endif\n"
-	    printf "\n"
 	    printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
 	    printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro}_P)\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
@@ -928,15 +918,6 @@ do
     fi
     if class_is_variable_p
     then
-	if fallback_default_p || class_is_predicate_p
-	then
-	    printf "\n"
-	    printf "/* Default (value) for non- multi-arch platforms. */\n"
-	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
-	    echo "#define ${macro} (${fallbackdefault})" \
-		| sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
-	    printf "#endif\n"
-	fi
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
@@ -949,27 +930,6 @@ do
     fi
     if class_is_function_p
     then
-	if class_is_multiarch_p ; then :
-	elif fallback_default_p || class_is_predicate_p
-	then
-	    printf "\n"
-	    printf "/* Default (function) for non- multi-arch platforms. */\n"
-	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
-	    if [ "x${fallbackdefault}" = "x0" ]
-	    then
-		if [ "x${actual}" = "x-" ]
-		then
-		    printf "#define ${macro} (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
-		else
-		    printf "#define ${macro}(${actual}) (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
-		fi
-	    else
-		# FIXME: Should be passing current_gdbarch through!
-		echo "#define ${macro}(${actual}) (${fallbackdefault} (${actual}))" \
-		    | sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
-	    fi
-	    printf "#endif\n"
-	fi
 	printf "\n"
 	if [ "x${formal}" = "xvoid" ] && class_is_multiarch_p
 	then
@@ -1291,27 +1251,8 @@ cat <<EOF
 #include "defs.h"
 #include "arch-utils.h"
 
-#if GDB_MULTI_ARCH
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
-#else
-/* Just include everything in sight so that the every old definition
-   of macro is visible. */
-#include "gdb_string.h"
-#include <ctype.h>
-#include "symtab.h"
-#include "frame.h"
-#include "inferior.h"
-#include "breakpoint.h"
-#include "gdb_wait.h"
-#include "gdbcore.h"
-#include "gdbcmd.h"
-#include "target.h"
-#include "gdbthread.h"
-#include "annotate.h"
-#include "symfile.h"		/* for overlay functions */
-#include "value.h"		/* For old tm.h/nm.h macros.  */
-#endif
 #include "symcat.h"
 
 #include "floatformat.h"
@@ -1575,9 +1516,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   struct cleanup *cleanups;
   long dummy;
   char *buf;
-  /* Only perform sanity checks on a multi-arch target. */
-  if (!GDB_MULTI_ARCH)
-    return;
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
@@ -1660,10 +1598,9 @@ do
     then
 	if class_is_multiarch_p
 	then
-	    printf "  if (GDB_MULTI_ARCH)\n"
-	    printf "    fprintf_unfiltered (file,\n"
-	    printf "                        \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
-	    printf "                        gdbarch_${function}_p (current_gdbarch));\n"
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
+	    printf "                      gdbarch_${function}_p (current_gdbarch));\n"
 	else
 	    printf "#ifdef ${macro}_P\n"
 	    printf "  fprintf_unfiltered (file,\n"
@@ -1679,19 +1616,13 @@ do
     # multiarch functions don't have macros.
     if class_is_multiarch_p
     then
-	printf "  if (GDB_MULTI_ARCH)\n"
-	printf "    fprintf_unfiltered (file,\n"
-	printf "                        \"gdbarch_dump: ${function} = 0x%%08lx\\\\n\",\n"
-	printf "                        (long) current_gdbarch->${function});\n"
+	printf "  fprintf_unfiltered (file,\n"
+	printf "                      \"gdbarch_dump: ${function} = 0x%%08lx\\\\n\",\n"
+	printf "                      (long) current_gdbarch->${function});\n"
 	continue
     fi
     # Print the macro definition.
     printf "#ifdef ${macro}\n"
-    if [ "x${returntype}" = "xvoid" ]
-    then
-	printf "#if GDB_MULTI_ARCH\n"
-	printf "  /* Macro might contain \`[{}]' when not multi-arch */\n"
-    fi
     if class_is_function_p
     then
 	printf "  fprintf_unfiltered (file,\n"
@@ -1702,11 +1633,6 @@ do
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
 	printf "                      XSTRING (${macro}));\n"
-    fi
-    # Print the architecture vector value
-    if [ "x${returntype}" = "xvoid" ]
-    then
-	printf "#endif\n"
     fi
     if [ "x${print_p}" = "x()" ]
     then
@@ -1722,11 +1648,10 @@ do
 	printf "                        ${print});\n"
     elif class_is_function_p
     then
-	printf "  if (GDB_MULTI_ARCH)\n"
-	printf "    fprintf_unfiltered (file,\n"
-	printf "                        \"gdbarch_dump: ${macro} = <0x%%08lx>\\\\n\",\n"
-	printf "                        (long) current_gdbarch->${function}\n"
-	printf "                        /*${macro} ()*/);\n"
+	printf "  fprintf_unfiltered (file,\n"
+	printf "                      \"gdbarch_dump: ${macro} = <0x%%08lx>\\\\n\",\n"
+	printf "                      (long) current_gdbarch->${function}\n"
+	printf "                      /*${macro} ()*/);\n"
     else
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: ${macro} = %s\\\\n\",\n" "${fmt}"
@@ -2080,37 +2005,30 @@ append_name (const char ***buf, int *nr, const char *name)
 const char **
 gdbarch_printable_names (void)
 {
-  if (GDB_MULTI_ARCH)
+  /* Accumulate a list of names based on the registed list of
+     architectures. */
+  enum bfd_architecture a;
+  int nr_arches = 0;
+  const char **arches = NULL;
+  struct gdbarch_registration *rego;
+  for (rego = gdbarch_registry;
+       rego != NULL;
+       rego = rego->next)
     {
-      /* Accumulate a list of names based on the registed list of
-         architectures. */
-      enum bfd_architecture a;
-      int nr_arches = 0;
-      const char **arches = NULL;
-      struct gdbarch_registration *rego;
-      for (rego = gdbarch_registry;
-	   rego != NULL;
-	   rego = rego->next)
-	{
-	  const struct bfd_arch_info *ap;
-	  ap = bfd_lookup_arch (rego->bfd_architecture, 0);
-	  if (ap == NULL)
-	    internal_error (__FILE__, __LINE__,
-                            "gdbarch_architecture_names: multi-arch unknown");
-	  do
-	    {
-	      append_name (&arches, &nr_arches, ap->printable_name);
-	      ap = ap->next;
-	    }
-	  while (ap != NULL);
-	}
-      append_name (&arches, &nr_arches, NULL);
-      return arches;
+      const struct bfd_arch_info *ap;
+      ap = bfd_lookup_arch (rego->bfd_architecture, 0);
+      if (ap == NULL)
+        internal_error (__FILE__, __LINE__,
+                        "gdbarch_architecture_names: multi-arch unknown");
+      do
+        {
+          append_name (&arches, &nr_arches, ap->printable_name);
+          ap = ap->next;
+        }
+      while (ap != NULL);
     }
-  else
-    /* Just return all the architectures that BFD knows.  Assume that
-       the legacy architecture framework supports them. */
-    return bfd_arch_list ();
+  append_name (&arches, &nr_arches, NULL);
+  return arches;
 }
 
 
@@ -2151,12 +2069,6 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   (*curr)->dump_tdep = dump_tdep;
   (*curr)->arches = NULL;
   (*curr)->next = NULL;
-  /* When non- multi-arch, install whatever target dump routine we've
-     been provided - hopefully that routine has been written correctly
-     and works regardless of multi-arch. */
-  if (!GDB_MULTI_ARCH && dump_tdep != NULL
-      && startup_gdbarch.dump_tdep == NULL)
-    startup_gdbarch.dump_tdep = dump_tdep;
 }
 
 void
