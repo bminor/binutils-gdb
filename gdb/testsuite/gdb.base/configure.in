@@ -17,8 +17,8 @@ target_makefile_frag=../config/mt-unix
 	# this section is for all targets
 case "${target}" in
        hppa*-*-hpux*)  target_makefile_frag=../config/mt-hpux ;;
-       i386-*-aout)    target_makefile_frag=../config/mt-i386-aout ;;
-       i386-*-netware) target_makefile_frag=../config/mt-i386-netware ;;
+       i[345]86-*-aout) target_makefile_frag=../config/mt-i386-aout ;;
+       i[345]86-*-netware) target_makefile_frag=../config/mt-i386-netware ;;
        *-*-lynx)       target_makefile_frag=../config/mt-lynx ;;
        *-*-vxworks)    target_makefile_frag=../config/mt-vxworks ;;
        m68k-*-*)       target_makefile_frag=../config/mt-m68k ;;
