@@ -36,8 +36,6 @@ extern volatile void return_to_top_level ();
 extern volatile void exit ();
 extern char *gdb_readline ();
 extern char *getenv();
-extern char *malloc();
-extern char *realloc();
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
@@ -166,6 +164,21 @@ free_current_contents (location)
 {
   free (*location);
 }
+
+/* Provide a known function that does nothing, to use as a base for
+   for a possibly long chain of cleanups.  This is useful where we
+   use the cleanup chain for handling normal cleanups as well as dealing
+   with cleanups that need to be done as a result of a call to error().
+   In such cases, we may not be certain where the first cleanup is, unless
+   we have a do-nothing one to always use as the base. */
+
+/* ARGSUSED */
+void
+null_cleanup (arg)
+    char **arg;
+{
+}
+
 
 /* Provide a hook for modules wishing to print their own warning messages
    to set up the terminal state in a compatible way, without them having
@@ -417,13 +430,14 @@ quit ()
 /* Control C comes here */
 
 void
-request_quit ()
+request_quit (signo)
+     int signo;
 {
   quit_flag = 1;
 
 #ifdef USG
   /* Restore the signal handler.  */
-  signal (SIGINT, request_quit);
+  signal (signo, request_quit);
 #endif
 
   if (immediate_quit)
@@ -461,7 +475,7 @@ myread (desc, addr, len)
 
 char *
 savestring (ptr, size)
-     char *ptr;
+     const char *ptr;
      int size;
 {
   register char *p = (char *) xmalloc (size + 1);
@@ -619,16 +633,15 @@ parse_escape (string_ptr)
     }
 }
 
-/* Print the character CH on STREAM as part of the contents
+/* Print the character C on STREAM as part of the contents
    of a literal string whose delimiter is QUOTER.  */
 
 void
-printchar (ch, stream, quoter)
-     unsigned char ch;
+printchar (c, stream, quoter)
+     register int c;
      FILE *stream;
      int quoter;
 {
-  register int c = ch;
 
   if (c < 040 || (sevenbit_strings && c >= 0177)) {
     switch (c)
@@ -788,7 +801,7 @@ wrap_here(indent)
 
 void
 fputs_filtered (linebuffer, stream)
-     char *linebuffer;
+     const char *linebuffer;
      FILE *stream;
 {
   char *lineptr;

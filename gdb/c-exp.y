@@ -142,7 +142,7 @@ int yyparse ();
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
-%token SIGNED LONG SHORT INT_KEYWORD
+%token SIGNED_KEYWORD LONG SHORT INT_KEYWORD
 
 %token <lval> LAST REGNAME
 
@@ -157,8 +157,8 @@ int yyparse ();
 %left ABOVE_COMMA
 %right '=' ASSIGN_MODIFY
 %right '?'
-%left OR
-%left AND
+%left OROR
+%left ANDAND
 %left '|'
 %left '^'
 %left '&'
@@ -362,11 +362,11 @@ exp	:	exp '|' exp
 			{ write_exp_elt_opcode (BINOP_LOGIOR); }
 	;
 
-exp	:	exp AND exp
+exp	:	exp ANDAND exp
 			{ write_exp_elt_opcode (BINOP_AND); }
 	;
 
-exp	:	exp OR exp
+exp	:	exp OROR exp
 			{ write_exp_elt_opcode (BINOP_OR); }
 	;
 
@@ -830,9 +830,9 @@ typebase
 			{ $$ = lookup_unsigned_typename (TYPE_NAME($2.type)); }
 	|	UNSIGNED
 			{ $$ = builtin_type_unsigned_int; }
-	|	SIGNED typename
+	|	SIGNED_KEYWORD typename
 			{ $$ = $2.type; }
-	|	SIGNED
+	|	SIGNED_KEYWORD
 			{ $$ = builtin_type_int; }
 	|	TEMPLATE name '<' type '>'
 			{ $$ = lookup_template_type(copy_name($2), $4,
@@ -1028,8 +1028,8 @@ const static struct token tokentab2[] =
     {"++", INCREMENT, BINOP_END},
     {"--", DECREMENT, BINOP_END},
     {"->", ARROW, BINOP_END},
-    {"&&", AND, BINOP_END},
-    {"||", OR, BINOP_END},
+    {"&&", ANDAND, BINOP_END},
+    {"||", OROR, BINOP_END},
     {"::", COLONCOLON, BINOP_END},
     {"<<", LSH, BINOP_END},
     {">>", RSH, BINOP_END},
@@ -1305,7 +1305,7 @@ yylex ()
       if (!strncmp (tokstart, "struct", 6))
 	return STRUCT;
       if (!strncmp (tokstart, "signed", 6))
-	return SIGNED;
+	return SIGNED_KEYWORD;
       if (!strncmp (tokstart, "sizeof", 6))      
 	return SIZEOF;
       break;

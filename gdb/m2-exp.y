@@ -128,7 +128,7 @@ char *make_qualname();
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
 %token <sval> STRING
-%token <sval> NAME BLOCKNAME IDENT CONST VARNAME
+%token <sval> NAME BLOCKNAME IDENT VARNAME
 %token <sval> TYPENAME
 
 %token SIZE CAP ORD HIGH ABS MIN_FUNC MAX_FUNC FLOAT_FUNC VAL CHR ODD TRUNC
@@ -146,8 +146,8 @@ char *make_qualname();
 %left ABOVE_COMMA
 %nonassoc ASSIGN
 %left '<' '>' LEQ GEQ '=' NOTEQUAL '#' IN
-%left OR
-%left AND '&'
+%left OROR
+%left ANDAND '&'
 %left '@'
 %left '+' '-'
 %left '*' '/' DIV MOD
@@ -415,7 +415,7 @@ exp	:	exp '>' exp
 			{ write_exp_elt_opcode (BINOP_GTR); }
 	;
 
-exp	:	exp AND exp
+exp	:	exp ANDAND exp
 			{ write_exp_elt_opcode (BINOP_AND); }
 	;
 
@@ -423,7 +423,7 @@ exp	:	exp '&'	exp
 			{ write_exp_elt_opcode (BINOP_AND); }
 	;
 
-exp	:	exp OR exp
+exp	:	exp OROR exp
 			{ write_exp_elt_opcode (BINOP_OR); }
 	;
 
@@ -790,9 +790,9 @@ struct keyword {
 
 static struct keyword keytab[] =
 {
-    {"OR" ,   OR	 },
+    {"OR" ,   OROR	 },
     {"IN",    IN         },/* Note space after IN */
-    {"AND",   AND        },
+    {"AND",   ANDAND     },
     {"ABS",   ABS	 },
     {"CHR",   CHR	 },
     {"DEC",   DEC	 },

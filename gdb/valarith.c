@@ -1,38 +1,40 @@
 /* Perform arithmetic and other operations on values, for GDB.
-   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include <stdio.h>
 
 #include "defs.h"
-#include "param.h"
 #include "value.h"
+#include "symtab.h"
 #include "expression.h"
 #include "target.h"
 #include <string.h>
 
-
-value value_x_binop ();
-value value_subscripted_rvalue ();
+static value
+value_subscripted_rvalue PARAMS ((value, value));
 
+
 value
 value_add (arg1, arg2)
 	value arg1, arg2;
 {
-  register value val, valint, valptr;
+  register value valint, valptr;
   register int len;
 
   COERCE_ARRAY (arg1);
@@ -57,11 +59,9 @@ value_add (arg1, arg2)
 	}
       len = TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (valptr)));
       if (len == 0) len = 1;	/* For (void *) */
-      val = value_from_long (builtin_type_long,
-			     value_as_long (valptr)
-			     + (len * value_as_long (valint)));
-      VALUE_TYPE (val) = VALUE_TYPE (valptr);
-      return val;
+      return value_from_longest (VALUE_TYPE (valptr),
+			      value_as_long (valptr)
+			      + (len * value_as_long (valint)));
     }
 
   return value_binop (arg1, arg2, BINOP_ADD);
@@ -71,7 +71,6 @@ value
 value_sub (arg1, arg2)
 	value arg1, arg2;
 {
-  register value val;
 
   COERCE_ARRAY (arg1);
   COERCE_ARRAY (arg2);
@@ -81,22 +80,19 @@ value_sub (arg1, arg2)
       if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_INT)
 	{
 	  /* pointer - integer.  */
-	  val = value_from_long
-	    (builtin_type_long,
+	  return value_from_longest
+	    (VALUE_TYPE (arg1),
 	     value_as_long (arg1)
 	     - (TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)))
 		* value_as_long (arg2)));
-	  VALUE_TYPE (val) = VALUE_TYPE (arg1);
-	  return val;
 	}
       else if (VALUE_TYPE (arg1) == VALUE_TYPE (arg2))
 	{
 	  /* pointer to <type x> - pointer to <type x>.  */
-	  val = value_from_long
-	    (builtin_type_long,
+	  return value_from_longest
+	    (builtin_type_long,		/* FIXME -- should be ptrdiff_t */
 	     (value_as_long (arg1) - value_as_long (arg2))
 	     / TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))));
-	  return val;
 	}
       else
 	{
@@ -126,13 +122,13 @@ value_subscript (array, idx)
    (eg, a vector register).  This routine used to promote floats
    to doubles, but no longer does.  */
 
-value
+static value
 value_subscripted_rvalue (array, idx)
      value array, idx;
 {
   struct type *elt_type = TYPE_TARGET_TYPE (VALUE_TYPE (array));
   int elt_size = TYPE_LENGTH (elt_type);
-  int elt_offs = elt_size * value_as_long (idx);
+  int elt_offs = elt_size * longest_to_int (value_as_long (idx));
   value v;
 
   if (elt_offs >= TYPE_LENGTH (VALUE_TYPE (array)))
@@ -192,7 +188,11 @@ int unop_user_defined_p (op, arg1)
 /* We know either arg1 or arg2 is a structure, so try to find the right
    user defined function.  Create an argument vector that calls 
    arg1.operator @ (arg1,arg2) and return that value (where '@' is any
-   binary operator which is legal for GNU C++).  */
+   binary operator which is legal for GNU C++).
+
+   OP is the operatore, and if it is BINOP_ASSIGN_MODIFY, then OTHEROP
+   is the opcode saying how to modify it.  Otherwise, OTHEROP is
+   unused.  */
 
 value
 value_x_binop (arg1, arg2, op, otherop)
@@ -204,6 +204,8 @@ value_x_binop (arg1, arg2, op, otherop)
   char tstr[13];
   int static_memfuncp;
 
+  COERCE_REF (arg1);
+  COERCE_REF (arg2);
   COERCE_ENUM (arg1);
   COERCE_ENUM (arg2);
 
@@ -343,7 +345,7 @@ value_x_unop (arg1, op)
 value
 value_binop (arg1, arg2, op)
      value arg1, arg2;
-     int op;
+     enum exp_opcode op;
 {
   register value val;
 
@@ -595,9 +597,14 @@ value_equal (arg1, arg2)
   else if ((code1 == TYPE_CODE_FLT || code1 == TYPE_CODE_INT)
 	   && (code2 == TYPE_CODE_FLT || code2 == TYPE_CODE_INT))
     return value_as_double (arg1) == value_as_double (arg2);
-  else if ((code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_INT)
-	   || (code2 == TYPE_CODE_PTR && code1 == TYPE_CODE_INT))
-    return (char *) value_as_long (arg1) == (char *) value_as_long (arg2);
+
+  /* FIXME: Need to promote to either CORE_ADDR or LONGEST, whichever
+     is bigger.  */
+  else if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_INT)
+    return value_as_pointer (arg1) == (CORE_ADDR) value_as_long (arg2);
+  else if (code2 == TYPE_CODE_PTR && code1 == TYPE_CODE_INT)
+    return (CORE_ADDR) value_as_long (arg1) == value_as_pointer (arg2);
+
   else if (code1 == code2
 	   && ((len = TYPE_LENGTH (VALUE_TYPE (arg1)))
 	       == TYPE_LENGTH (VALUE_TYPE (arg2))))
@@ -638,19 +645,24 @@ value_less (arg1, arg2)
     {
       if (TYPE_UNSIGNED (VALUE_TYPE (arg1))
        || TYPE_UNSIGNED (VALUE_TYPE (arg2)))
-	return (unsigned)value_as_long (arg1) < (unsigned)value_as_long (arg2);
+	return ((unsigned LONGEST) value_as_long (arg1)
+		< (unsigned LONGEST) value_as_long (arg2));
       else
 	return value_as_long (arg1) < value_as_long (arg2);
     }
   else if ((code1 == TYPE_CODE_FLT || code1 == TYPE_CODE_INT)
 	   && (code2 == TYPE_CODE_FLT || code2 == TYPE_CODE_INT))
     return value_as_double (arg1) < value_as_double (arg2);
-  else if ((code1 == TYPE_CODE_PTR || code1 == TYPE_CODE_INT)
-	   && (code2 == TYPE_CODE_PTR || code2 == TYPE_CODE_INT))
-    {
-      /* FIXME, this assumes that host and target char *'s are the same! */
-      return (char *) value_as_long (arg1) < (char *) value_as_long (arg2);
-    }
+  else if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
+    return value_as_pointer (arg1) < value_as_pointer (arg2);
+
+  /* FIXME: Need to promote to either CORE_ADDR or LONGEST, whichever
+     is bigger.  */
+  else if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_INT)
+    return value_as_pointer (arg1) < (CORE_ADDR) value_as_long (arg2);
+  else if (code2 == TYPE_CODE_PTR && code1 == TYPE_CODE_INT)
+    return (CORE_ADDR) value_as_long (arg1) < value_as_pointer (arg2);
+
   else
     {
       error ("Invalid type combination in ordering comparison.");
@@ -673,7 +685,7 @@ value_neg (arg1)
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return value_from_double (type, - value_as_double (arg1));
   else if (TYPE_CODE (type) == TYPE_CODE_INT)
-    return value_from_long (type, - value_as_long (arg1));
+    return value_from_longest (type, - value_as_long (arg1));
   else {
     error ("Argument to negate operation not a number.");
     return 0;  /* For lint -- never reached */
@@ -689,6 +701,6 @@ value_lognot (arg1)
   if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_INT)
     error ("Argument to complement operation not an integer.");
 
-  return value_from_long (VALUE_TYPE (arg1), ~ value_as_long (arg1));
+  return value_from_longest (VALUE_TYPE (arg1), ~ value_as_long (arg1));
 }
 

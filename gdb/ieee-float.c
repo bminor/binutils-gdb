@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
+
 #include "defs.h"
 #include "ieee-float.h"
 #include <math.h>		/* ldexp */
@@ -27,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 void
 ieee_extended_to_double (ext_format, from, to)
-     struct ext_format *ext_format;
+     const struct ext_format *ext_format;
      char *from;
      double *to;
 {
@@ -35,8 +37,8 @@ ieee_extended_to_double (ext_format, from, to)
   double dto;
   unsigned long mant0, mant1, exponent;
   
-  bcopy (&from[MANBYTE_H], &mant0, 4);
-  bcopy (&from[MANBYTE_L], &mant1, 4);
+  memcpy (&mant0, &from[MANBYTE_H], 4);
+  memcpy (&mant1, &from[MANBYTE_L], 4);
   exponent = ((ufrom[EXPBYTE_H] & (unsigned char)~SIGNMASK) << 8) | ufrom[EXPBYTE_L];
 
 #if 0
@@ -68,7 +70,7 @@ ieee_extended_to_double (ext_format, from, to)
 
 void
 double_to_ieee_extended (ext_format, from, to)
-     struct ext_format *ext_format;
+     const struct ext_format *ext_format;
      double *from;
      char *to;
 {
@@ -93,8 +95,8 @@ double_to_ieee_extended (ext_format, from, to)
 
   /* The following code assumes that the host has IEEE doubles.  FIXME-someday.
      It also assumes longs are 32 bits!  FIXME-someday.  */
-  bcopy (from, twolongs, 8);
-  bcopy (from, tobytes, 8);
+  memcpy (twolongs, from, 8);
+  memcpy (tobytes, from, 8);
 #if HOST_BYTE_ORDER == BIG_ENDIAN
   exponent = ((tobytes[1] & 0xF0) >> 4) | (tobytes[0] & 0x7F) << 4;
   mant0 = (twolongs[0] << 11) | twolongs[1] >> 21;
@@ -118,8 +120,8 @@ double_to_ieee_extended (ext_format, from, to)
   to[EXPBYTE_H] |= (unsigned char)(exponent >> 8);	/* Retain sign */
   to[EXPBYTE_L] =  (unsigned char) exponent;
   
-  bcopy (&mant0, &to[MANBYTE_H], 4);
-  bcopy (&mant1, &to[MANBYTE_L], 4);
+  memcpy (&to[MANBYTE_H], &mant0, 4);
+  memcpy (&to[MANBYTE_L], &mant1, 4);
 }
 
 

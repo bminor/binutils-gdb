@@ -1,3 +1,16 @@
+Thu Feb 20 09:04:18 1992  John Gilmore  (gnu at cygnus.com)
+
+	* defs.h:  Include ansidecl.h and PARAMS macro.  Use PARAMS
+	to make prototypes for all functions declared here.
+	* cplus-dem.c:  Avoid declaring xmalloc and xrealloc.
+	* c-exp.y:  Rename SIGNED, OR, and AND to avoid conflict.
+	* environ.c:  Include <stdio.h> before defs.h.  Minor cleanup.
+	* ieee-float.h:  Use PARAMS for prototypes; make some params const.
+	* ieee-float.c, valarith.c:  Include <stdio.h>.  Lint.  b*=>mem*.
+	* m2-exp.y:  Remove unused CONST; Rename OR and AND.
+	* utils.c:  Avoid declaring malloc and realloc.  Lint.
+	(request_quit):  Accept signal-number parameter.
+
 Mon Feb 17 07:13:27 1992  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread.c (process_dies):  Add case to handle TAG_pointer_type

@@ -86,8 +86,8 @@ extern char *cplus_demangle ();
 #ifdef __STDC__
 /* GDB prototypes these as void* in defs.h, so we better too, at least
    as long as we're including defs.h.  */
-extern void *xmalloc (int);
-extern void *xrealloc (char *, int);
+/* FIXME extern void *xmalloc (int);
+         extern void *xrealloc (char *, int); */
 extern void free (void *);
 #else
 extern char *xmalloc ();

@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if !defined (IEEE_FLOAT_H)
+#define IEEE_FLOAT_H 1
+
 /* Parameters for extended float format:  */
 
 struct ext_format {
@@ -49,18 +52,12 @@ struct ext_format {
    Store the double in *TO.  */
 
 extern void
-ieee_extended_to_double (
-#ifdef __STDC__
-	struct ext_format *ext_format, char *from, double *to
-#endif
-);
+ieee_extended_to_double PARAMS ((const struct ext_format *, char *, double *));
 
 /* The converse: convert the double *FROM to an extended float
    and store where TO points.  */
 
-void
-double_to_ieee_extended (
-#ifdef __STDC__
-	struct ext_format *ext_format, double *from, char *to
-#endif
-);
+extern void
+double_to_ieee_extended PARAMS ((const struct ext_format *, double *, char *));
+
+#endif	/* defined (IEEE_FLOAT_H) */
