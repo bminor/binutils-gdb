@@ -407,21 +407,14 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
  
-#ifdef PUSH_RETURN_ADDRESS
 CORE_ADDR
 v850_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
-#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
-  pc = pc - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
-#else
-  pc = CALL_DUMMY_ADDRESS ();
-#endif /* CALL_DUMMY_LOCATION */
-  write_register (RP_REGNUM, pc);
+  write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
-#endif /* PUSH_RETURN_ADDRESS */
  
 /* Function: frame_saved_pc 
    Find the caller of this frame.  We do this by seeing if RP_REGNUM
@@ -472,22 +465,8 @@ v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
      int gcc_p;
 {
   long offset24;
-  CORE_ADDR call_dummy_start;
-#ifdef NEED_TEXT_START_END
-  extern CORE_ADDR text_end;
-#endif
 
-#if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-  call_dummy_start = entry_point_address ();
-#elif (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
-  call_dummy_start = text_end;
-#elif (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
-  call_dummy_start = (text_end - CALL_DUMMY_LENGTH) & ~3;
-#elif (CALL_DUMMY_LOCATION == ON_STACK)
-  call_dummy_start = sp;
-#endif
-
-  offset24 = (long) fun - (long) call_dummy_start;
+  offset24 = (long) fun - (long) entry_point_address ();
   offset24 &= 0x3fffff;
   offset24 |= 0xff800000;	/* jarl <offset24>, r31 */
 

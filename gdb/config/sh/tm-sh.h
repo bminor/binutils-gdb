@@ -248,36 +248,6 @@ extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
 					    unsigned char struct_return,
 					    CORE_ADDR struct_addr));
 
-#if 0
-/* Use these defines if, for whatever reason, you want to use a 
-   genuine call_dummy sequence (A sequence of machine instructions 
-   that GDB will write into the target address space, usually on the
-   stack, for calling a function in the inferior):
-
-   This sequence of words defines the instructions:
-
-	mov.w @(2,PC), R8
-	jsr   @R8
-	nop
-	trap
-	<destination>
-
-   Note that the destination address is actually written into a word
-   8 bytes after the start of the CALL_DUMMY.  The first instruction
-   loads it from here using PC-relative addressing.  Note also the 
-   NOP that must follow the jsr instruction to fill up the delay slot.
-*/
-
-#define CALL_DUMMY                   { 0xd801480b, 0x0009c3c3, 0x32323232, }
-#define CALL_DUMMY_LENGTH            (12)
-#define CALL_DUMMY_START_OFFSET      (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (6)
-#define FIX_CALL_DUMMY(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) \
-    sh_fix_call_dummy(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
-#define CALL_DUMMY_LOCATION          ON_STACK
-
-#else	/* These defines write NO instructions into the inferior process, 
-	   and are therefore preferred because they make target calls faster. */
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)
@@ -287,7 +257,7 @@ extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  sh_push_return_address (PC, SP)
-#endif
+
 
 #define FRAME_CHAIN(FRAME)           sh_frame_chain(FRAME)
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()

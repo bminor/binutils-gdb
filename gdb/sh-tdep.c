@@ -482,7 +482,7 @@ sh_push_arguments (nargs, args, sp, struct_return, struct_addr)
       while (len > 0)
 	{
 	  if (argreg > ARGLAST_REGNUM || odd_sized_struct)
-	    { 					/* must go on the stack */
+	    {				/* must go on the stack */
 	      write_memory (sp + stack_offset, val, 4);
 	      stack_offset += 4;
 	    }
@@ -490,7 +490,7 @@ sh_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	     That's because some *&^%$ things get passed on the stack
 	     AND in the registers!   */
 	  if (argreg <= ARGLAST_REGNUM)
-	    {					/* there's room in a register */
+	    {				/* there's room in a register */
 	      regval = extract_address (val, REGISTER_RAW_SIZE(argreg));
 	      write_register (argreg++, regval);
 	    }
@@ -513,12 +513,7 @@ sh_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
-#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
-  pc = pc - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
-#else
-  pc = CALL_DUMMY_ADDRESS ();
-#endif /* CALL_DUMMY_LOCATION */
-  write_register (PR_REGNUM, pc);
+  write_register (PR_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
 

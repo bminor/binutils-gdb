@@ -613,13 +613,8 @@ h8300_push_return_address (pc, sp)
   else
     wordsize = 2;
 
-#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
-  pc = pc - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
-#else
-  pc = CALL_DUMMY_ADDRESS ();
-#endif /* CALL_DUMMY_LOCATION */
   sp -= wordsize;
-  store_unsigned_integer (buf, wordsize, pc);
+  store_unsigned_integer (buf, wordsize, CALL_DUMMY_ADDRESS ());
   write_memory (sp, buf, wordsize);
   return sp;
 }

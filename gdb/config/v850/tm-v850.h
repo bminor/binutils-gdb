@@ -113,27 +113,6 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 extern void v850_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME v850_pop_frame (get_current_frame ())
 
-#if 0
-/* Use these defines if, for whatever reason, you want to use a
-   genuine call_dummy sequence (A sequence of machine instructions
-   that GDB will write into the target address space, usually on the
-   stack, for calling a function in the inferior):
- 
-   This sequence of words defines the instructions:
-
-	jarl <offset24>, r31
-	trap
-*/
-#define CALL_DUMMY                   { 0x0000ff80, 0xffffffff }
-#define CALL_DUMMY_LENGTH            (8)
-#define CALL_DUMMY_START_OFFSET      (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (4)
-#define CALL_DUMMY_LOCATION          ON_STACK
-#define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP) \
-	v850_fix_call_dummy (DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP);
-
-#else   /* These defines write NO instructions into the inferior process,
-           and are therefore preferred because they make target calls faster. */
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -142,7 +121,7 @@ extern void v850_pop_frame PARAMS ((struct frame_info *frame));
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 extern CORE_ADDR v850_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  v850_push_return_address (PC, SP)
-#endif
+
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 

@@ -222,7 +222,6 @@ extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER
 
-#if 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)
@@ -230,27 +229,3 @@ extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
 #define FIX_CALL_DUMMY(DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
-
-#else
-/*
-/* Use these defines if, for whatever reason, you want to use a 
-   genuine call_dummy sequence (A sequence of machine instructions 
-   that GDB will write into the target address space, usually on the
-   stack, for calling a function in the inferior):
-
-   This sequence of words defines the instructions:
-
-        ld24  R8, <destination>
-        jl    R8
-	nop
-  	trap
-*/
-#define CALL_DUMMY                   { 0xe8000000, 0x1ec87000, 0x10f110f1 }
-#define CALL_DUMMY_LENGTH            (12)
-#define CALL_DUMMY_START_OFFSET      (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (8)
-#define FIX_CALL_DUMMY(DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) \
-     m32r_fix_call_dummy (DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
-#define CALL_DUMMY_LOCATION          ON_STACK
-#define NEED_TEXT_START_END
-#endif
