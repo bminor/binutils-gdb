@@ -101,6 +101,11 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 /* end-sanitize-tx49 */               \
                  )
 
+#define G3 (I4             \
+/* start-sanitize-tx49 */  \
+            | T4           \
+/* end-sanitize-tx49 */    \
+            )
 
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
@@ -370,9 +375,13 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"dmulou",  "d,v,t",	3,    (int) M_DMULOU,	INSN_MACRO	},
 {"dmulou",  "d,v,I",	3,    (int) M_DMULOU_I,	INSN_MACRO	},
 {"dmult",   "s,t",	0x0000001c, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I3},
+  /* start-sanitize-tx49 */
 {"dmult",   "d,s,t",	0x0000001c, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T4},
+  /* end-sanitize-tx49 */
 {"dmultu",  "s,t",	0x0000001d, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,      I3},
+  /* start-sanitize-tx49 */
 {"dmultu",  "d,s,t",	0x0000001d, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T4},
+  /* end-sanitize-tx49 */
 {"dneg",    "d,w",	0x0000002e, 0xffe007ff,	WR_d|RD_t,	I3	}, /* dsub 0 */
 {"dnegu",   "d,w",	0x0000002f, 0xffe007ff,	WR_d|RD_t,	I3	}, /* dsubu 0*/
 {"drem",    "z,s,t",	0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO,	I3	},
@@ -782,7 +791,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"pxor",   "d,v,t",	0x700004c9, 0xfc0007ff,	WR_d|RD_s|RD_t,	T5	},
   /* end-sanitize-r5900 */
 
-{"pref",    "k,o(b)",	0xcc000000, 0xfc000000, RD_b,	I4|T4	},
+{"pref",    "k,o(b)",	0xcc000000, 0xfc000000, RD_b,		G3	},
 {"prefx",   "h,t(b)",	0x4c00000f, 0xfc0007ff, RD_b|RD_t,	I4	},
 
   /* start-sanitize-r5900 */
