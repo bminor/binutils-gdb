@@ -38,6 +38,11 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#elif defined (HAVE_STRINGS_H)
+#include <strings.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -67,6 +72,10 @@
 /* FIXME: for now, need to consider target word size.  */
 #define TWORD long
 #define TADDR unsigned long
+
+/* Path to be prepended to syscalls with absolute paths, and to be
+   chdir:ed at startup, if not empty.  */
+char *simulator_sysroot = "";
 
 /* Utility of cb_syscall to fetch a path name or other string from the target.
    The result is 0 for success or a host errno value.  */
@@ -101,7 +110,8 @@ get_string (cb, sc, buf, buflen, addr)
 
 /* Utility of cb_syscall to fetch a path name.
    The buffer is malloc'd and the address is stored in BUFP.
-   The result is that of get_string.
+   The result is that of get_string, but prepended with
+   simulator_sysroot if the string starts with '/'.
    If an error occurs, no buffer is left malloc'd.  */
 
 static int
@@ -113,10 +123,27 @@ get_path (cb, sc, addr, bufp)
 {
   char *buf = xmalloc (MAX_PATH_LEN);
   int result;
+  int sysroot_len = strlen (simulator_sysroot);
 
-  result = get_string (cb, sc, buf, MAX_PATH_LEN, addr);
+  result = get_string (cb, sc, buf, MAX_PATH_LEN - sysroot_len, addr);
   if (result == 0)
-    *bufp = buf;
+    {
+      /* Prepend absolute paths with simulator_sysroot.  Relative paths
+	 are supposed to be relative to a chdir within that path, but at
+	 this point unknown where.  */
+      if (simulator_sysroot[0] != '\0' && *buf == '/')
+	{
+	  /* Considering expected rareness of syscalls with absolute
+	     file paths (compared to relative file paths and insn
+	     execution), it does not seem worthwhile to rearrange things
+	     to get rid of the string moves here; we'd need at least an
+	     extra call to check the initial '/' in the path.  */
+	  memmove (buf + sysroot_len, buf, sysroot_len);
+	  memcpy (buf, simulator_sysroot, sysroot_len);
+	}
+
+      *bufp = buf;
+    }
   else
     free (buf);
   return result;

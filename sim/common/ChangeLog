@@ -1,5 +1,17 @@
 2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
 
+	* run.1: Document --sysroot=filepath.
+	* sim-options.c (STANDARD_OPTIONS): New member OPTION_SYSROOT.
+	(standard_options): Support --sysroot=<path>.
+	(standard_option_handler): Handle OPTION_SYSROOT.
+	* syscall.c (simulator_sysroot): Define, initialized empty.
+	(get_path): Prepend simulator_sysroot to absolute file path.
+	[HAVE_STRING_H]: Include string.h.
+	[!HAVE_STRING_H && HAVE_STRINGS_H]: Include strings.h.
+	* nrun.c [HAVE_UNISTD_H]: Include unistd.h.
+	(main): If simulator_sysroot is not empty, chdir there.
+	* sim-config.h (simulator_sysroot): Declare.
+
 	* aclocal.m4 (SIM_AC_OUTPUT): Substitute @cgen_breaks@ for "break
 	cgen_rtx_error" in a CGEN-generated simulator.
 	* gdbinit.in: Break on sim_core_signal too.  Have autoconf

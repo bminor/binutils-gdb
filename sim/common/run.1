@@ -1,4 +1,4 @@
-.\" Copyright (c) 1993 Free Software Foundation
+.\" Copyright (c) 1993, 2004 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
 .TH run 1 "13oct1993" "GNU Tools" "GNU Tools"
 .de BP
@@ -21,6 +21,8 @@ run\(em\&Simulator front-end
 .IR freq "\|]"
 .RB "[\|" \-m
 .IR memory "\|]"
+.RB "[\|" \--sysroot
+.IR filepath "\|]"
 .I program
 .ad b
 .hy 1
@@ -70,6 +72,16 @@ is the profiling frequency.  Write the profiling information to a file called
 Set the memory size for the emulated machine to two to the power
 .IR memory .
 The default value is 19, emulating a board with 524288 bytes of memory.
+
+.TP
+.BI \--sysroot " filepath"
+Prepend
+.IR filepath
+to all simulator system calls that pass absolute file paths.
+Change working directory to
+.IR filepath
+at program start.  Not all simulators support this option; those
+that don't, will ignore it.
 
 .PP
 

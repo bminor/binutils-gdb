@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2004 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -371,6 +371,9 @@ enum sim_environment {
 			     ? WITH_ENVIRONMENT \
 			     : USER_ENVIRONMENT)
 
+/* To be prepended to simulator calls with absolute file paths and
+   chdir:ed at startup.  */
+extern char *simulator_sysroot;
 
 /* Callback & Modulo Memory.
 
