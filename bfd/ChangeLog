@@ -1,3 +1,32 @@
+2000-09-18  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (elf32_hppa_stub_hash_entry): Rename input_section
+	to id_sec.
+	(stub_hash_newfunc): Here too.
+	(hppa_add_stub): And here.
+	(elf32_hppa_link_hash_table): Remove stub_section_created,
+	reloc_section_created, first_init_sec and first_fini_sec.  Add
+	stub_group.
+	(elf32_hppa_link_hash_table_create): Init to suit.
+	(hppa_get_stub_entry): Add support for grouping stub sections.
+	(hppa_add_stub): Likewise.  Remove sec_count param and init/fini
+	section code.  Index stub vars by section->id.
+	(elf32_hppa_size_stubs): Likewise.  Remove duplicated function
+	exit paths.  Zap allocation of above removed vars.  Refine
+	link-once test.
+
+	* elf32-hppa.h (elf32_hppa_size_stubs): Add output_bfd param.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Likewise.
+	(hppa_get_stub_entry): Pass in pointer to elf32_hppa_link_hash_table
+	rather than pointer to bfd_link_info.
+	(hppa_add_stub): Likewise.
+	(final_link_relocate): Likewise.
+
+2000-09-17  David Huggins-Daines  <dhd@linuxcare.com>
+
+	(elf32_hppa_size_stubs): Don't try to build stubs for discarded
+	link-once sections.
+
 2000-09-16  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c (ELF_MAXPAGESIZE): Define to 128, to match

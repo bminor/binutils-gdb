@@ -181,8 +181,9 @@ struct elf32_hppa_stub_hash_entry {
   /* The symbol table entry, if any, that this was derived from.  */
   struct elf32_hppa_link_hash_entry *h;
 
-  /* Where this stub is being called from.  */
-  asection *input_section;
+  /* Where this stub is being called from, or, in the case of combined
+     stub sections, the first input section in the group.  */
+  asection *id_sec;
 };
 
 
@@ -246,13 +247,19 @@ struct elf32_hppa_link_hash_table {
   asection * (*add_stub_section) PARAMS ((const char *, asection *));
   void (*layout_sections_again) PARAMS ((void));
 
-  /* Arrays to keep track of which stub sections have been created.  */
-  asection **stub_section_created;
+  /* Array to keep track of which stub sections have been created, and
+     information on stub grouping.  */
+  struct map_stub {
+    /* This is the section to which stubs in the group will be
+       attached.  */
+    asection *link_sec;
+    /* The stub section.  */
+    asection *stub_sec;
 #if ! LONG_BRANCH_PIC_IN_SHLIB
-  asection **reloc_section_created;
+    /* The stub section's reloc section.  */
+    asection *reloc_sec;
 #endif
-  int first_init_sec;
-  int first_fini_sec;
+  } *stub_group;
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
@@ -291,11 +298,11 @@ static char *hppa_stub_name
 static struct elf32_hppa_stub_hash_entry *hppa_get_stub_entry
   PARAMS ((const asection *, const asection *,
 	   struct elf32_hppa_link_hash_entry *,
-	   const Elf_Internal_Rela *, struct bfd_link_info *));
+	   const Elf_Internal_Rela *,
+	   struct elf32_hppa_link_hash_table *));
 
 static struct elf32_hppa_stub_hash_entry *hppa_add_stub
-  PARAMS ((const char *, asection *, unsigned int,
-	   struct bfd_link_info *));
+  PARAMS ((const char *, asection *, struct elf32_hppa_link_hash_table *));
 
 static enum elf32_hppa_stub_type hppa_type_of_stub
   PARAMS ((asection *, const Elf_Internal_Rela *,
@@ -353,7 +360,7 @@ static boolean elf32_hppa_size_dynamic_sections
 
 static bfd_reloc_status_type final_link_relocate
   PARAMS ((asection *, bfd_byte *, const Elf_Internal_Rela *,
-	   bfd_vma, struct bfd_link_info *, asection *,
+	   bfd_vma, struct elf32_hppa_link_hash_table *, asection *,
 	   struct elf32_hppa_link_hash_entry *));
 
 static boolean elf32_hppa_relocate_section
@@ -412,7 +419,7 @@ stub_hash_newfunc (entry, table, string)
       ret->target_section = NULL;
       ret->stub_type = hppa_stub_long_branch;
       ret->h = NULL;
-      ret->input_section = NULL;
+      ret->id_sec = NULL;
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -494,12 +501,7 @@ elf32_hppa_link_hash_table_create (abfd)
   ret->multi_subspace = 0;
   ret->add_stub_section = NULL;
   ret->layout_sections_again = NULL;
-  ret->stub_section_created = NULL;
-#if ! LONG_BRANCH_PIC_IN_SHLIB
-  ret->reloc_section_created = NULL;
-#endif
-  ret->first_init_sec = 0;
-  ret->first_fini_sec = 0;
+  ret->stub_group = NULL;
   ret->sgot = NULL;
   ret->srelgot = NULL;
   ret->splt = NULL;
@@ -556,34 +558,39 @@ hppa_stub_name (input_section, sym_sec, hash, rel)
    creating the stub name takes a bit of time.  */
 
 static struct elf32_hppa_stub_hash_entry *
-hppa_get_stub_entry (input_section, sym_sec, hash, rel, info)
+hppa_get_stub_entry (input_section, sym_sec, hash, rel, hplink)
      const asection *input_section;
      const asection *sym_sec;
      struct elf32_hppa_link_hash_entry *hash;
      const Elf_Internal_Rela *rel;
-     struct bfd_link_info *info;
+     struct elf32_hppa_link_hash_table *hplink;
 {
   struct elf32_hppa_stub_hash_entry *stub_entry;
+  const asection *id_sec;
+
+  /* If this input section is part of a group of sections sharing one
+     stub section, then use the id of the first section in the group.
+     Stub names need to include a section id, as there may well be
+     more than one stub used to reach say, printf, and we need to
+     distinguish between them.  */
+  id_sec = hplink->stub_group[input_section->id].link_sec;
 
   if (hash != NULL && hash->stub_cache != NULL
       && hash->stub_cache->h == hash
-      && hash->stub_cache->input_section == input_section)
+      && hash->stub_cache->id_sec == id_sec)
     {
       stub_entry = hash->stub_cache;
     }
   else
     {
-      struct bfd_hash_table *stub_hash_table;
       char *stub_name;
 
-      stub_name = hppa_stub_name (input_section, sym_sec, hash, rel);
+      stub_name = hppa_stub_name (id_sec, sym_sec, hash, rel);
       if (stub_name == NULL)
 	return NULL;
 
-      stub_hash_table = &hppa_link_hash_table (info)->stub_hash_table;
-
-      stub_entry = hppa_stub_hash_lookup (stub_hash_table, stub_name,
-					  false, false);
+      stub_entry = hppa_stub_hash_lookup (&hplink->stub_hash_table,
+					  stub_name, false, false);
       if (stub_entry == NULL)
 	{
 	  if (hash == NULL || hash->elf.root.type != bfd_link_hash_undefweak)
@@ -610,42 +617,38 @@ hppa_get_stub_entry (input_section, sym_sec, hash, rel, info)
    stub entry are initialised.  */
 
 static struct elf32_hppa_stub_hash_entry *
-hppa_add_stub (stub_name, section, sec_count, info)
+hppa_add_stub (stub_name, section, hplink)
      const char *stub_name;
      asection *section;
-     unsigned int sec_count;
-     struct bfd_link_info *info;
+     struct elf32_hppa_link_hash_table *hplink;
 {
+  asection *link_sec;
   asection *stub_sec;
   struct elf32_hppa_stub_hash_entry *stub_entry;
-  struct elf32_hppa_link_hash_table *hplink;
 
-  hplink = hppa_link_hash_table (info);
-  stub_sec = hplink->stub_section_created[sec_count];
+  link_sec = hplink->stub_group[section->id].link_sec;
+  stub_sec = hplink->stub_group[section->id].stub_sec;
   if (stub_sec == NULL)
     {
-      if (strncmp (section->name, ".init", 5) == 0)
-	stub_sec = hplink->stub_section_created[hplink->first_init_sec - 1];
-      else if (strncmp (section->name, ".fini", 5) == 0)
-	stub_sec = hplink->stub_section_created[hplink->first_fini_sec - 1];
-
+      stub_sec = hplink->stub_group[link_sec->id].stub_sec;
       if (stub_sec == NULL)
 	{
 	  size_t len;
 	  char *s_name;
 
-	  len = strlen (section->name) + sizeof (STUB_SUFFIX);
+	  len = strlen (link_sec->name) + sizeof (STUB_SUFFIX);
 	  s_name = bfd_alloc (hplink->stub_bfd, len);
 	  if (s_name == NULL)
 	    return NULL;
 
-	  strcpy (s_name, section->name);
+	  strcpy (s_name, link_sec->name);
 	  strcpy (s_name + len - sizeof (STUB_SUFFIX), STUB_SUFFIX);
-	  stub_sec = (*hplink->add_stub_section) (s_name, section);
+	  stub_sec = (*hplink->add_stub_section) (s_name, link_sec);
 	  if (stub_sec == NULL)
 	    return NULL;
+	  hplink->stub_group[link_sec->id].stub_sec = stub_sec;
 	}
-      hplink->stub_section_created[sec_count] = stub_sec;
+      hplink->stub_group[section->id].stub_sec = stub_sec;
     }
 
   /* Enter this entry into the linker stub hash table.  */
@@ -661,10 +664,10 @@ hppa_add_stub (stub_name, section, sec_count, info)
 
   stub_entry->stub_sec = stub_sec;
 #if ! LONG_BRANCH_PIC_IN_SHLIB
-  stub_entry->reloc_sec = hplink->reloc_section_created[sec_count];
+  stub_entry->reloc_sec = hplink->stub_group[section->id].reloc_sec;
 #endif
   stub_entry->stub_offset = 0;
-  stub_entry->input_section = section;
+  stub_entry->id_sec = link_sec;
   return stub_entry;
 }
 
@@ -722,7 +725,7 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
     {
       max_branch_offset = (1 << (12-1)) << 2;
     }
-  else /* R_PARISC_PCREL22F  */
+  else /* R_PARISC_PCREL22F.  */
     {
       max_branch_offset = (1 << (22-1)) << 2;
     }
@@ -1371,7 +1374,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
       if (need_entry & NEED_GOT)
 	{
 	  /* Allocate space for a GOT entry, as well as a dynamic
-             relocation for this entry.  */
+	     relocation for this entry.  */
 	  if (dynobj == NULL)
 	    hplink->root.dynobj = dynobj = abfd;
 
@@ -2118,11 +2121,10 @@ clobber_millicode_symbols (h, info)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
 {
+  /* Note!  We only want to remove these from the dynamic symbol
+     table.  Therefore we do not set ELF_LINK_FORCED_LOCAL.  */
   if (h->type == STT_PARISC_MILLI)
-    {
-      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-      elf32_hppa_hide_symbol(info, h);
-    }
+    elf32_hppa_hide_symbol(info, h);
   return true;
 }
 
@@ -2185,7 +2187,7 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
 		      /* Make an entry in the .plt section.  We know
 			 the function doesn't have a plabel by the
-			 refcount  */
+			 refcount.  */
 		      s = hplink->splt;
 		      h->plt.offset = s->_raw_size;
 		      s->_raw_size += PLT_ENTRY_SIZE;
@@ -2412,20 +2414,24 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
    instruction.  */
 
 boolean
-elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
+elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 		       add_stub_section, layout_sections_again)
+     bfd *output_bfd;
      bfd *stub_bfd;
-     boolean multi_subspace;
      struct bfd_link_info *info;
+     boolean multi_subspace;
      asection * (*add_stub_section) PARAMS ((const char *, asection *));
      void (*layout_sections_again) PARAMS ((void));
 {
   bfd *input_bfd;
   asection *section;
+  asection **input_list, **list;
   Elf_Internal_Sym *local_syms, **all_local_syms;
-  unsigned int i, indx, bfd_count, sec_count;
+  unsigned int bfd_indx, bfd_count;
+  int top_id, top_index;
   struct elf32_hppa_link_hash_table *hplink;
   boolean stub_changed = 0;
+  boolean ret = 0;
 
   hplink = hppa_link_hash_table (info);
 
@@ -2435,26 +2441,125 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
   hplink->add_stub_section = add_stub_section;
   hplink->layout_sections_again = layout_sections_again;
 
-  /* Count the number of input BFDs and the total number of input sections.  */
-  for (input_bfd = info->input_bfds, bfd_count = 0, sec_count = 0;
+  /* Count the number of input BFDs and find the top section id.  */
+  for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next)
     {
       bfd_count += 1;
-      sec_count += input_bfd->section_count;
+      for (section = input_bfd->sections;
+	   section != NULL;
+	   section = section->next)
+	{
+	  if (top_id < section->id)
+	    top_id = section->id;
+	}
     }
 
-  hplink->stub_section_created
-    = (asection **) bfd_zmalloc (sizeof (asection *) * sec_count);
-  if (hplink->stub_section_created == NULL)
+  hplink->stub_group
+    = (struct map_stub *) bfd_zmalloc (sizeof (struct map_stub) * (top_id + 1));
+  if (hplink->stub_group == NULL)
     return false;
 
-#if ! LONG_BRANCH_PIC_IN_SHLIB
-  hplink->reloc_section_created
-    = (asection **) bfd_zmalloc (sizeof (asection *) * sec_count);
-  if (hplink->reloc_section_created == NULL)
-    goto error_ret_free_stub;
-#endif
+  /* Now make a list of input sections for each output section.
+     We can't use output_bfd->section_count here as some sections may
+     have been removed, and _bfd_strip_section_from_output doesn't
+     renumber the indices.  Sections may also be re-ordered, so the
+     last section index isn't necessarily the biggest.  */
+  for (section = output_bfd->sections, top_index = 0;
+       section != NULL;
+       section = section->next)
+    {
+      if (top_index < section->index)
+	top_index = section->index;
+    }
+  input_list
+    = (asection **) bfd_zmalloc (sizeof (asection *) * (top_index + 1));
+  if (input_list == NULL)
+    return false;
+
+  for (input_bfd = info->input_bfds;
+       input_bfd != NULL;
+       input_bfd = input_bfd->link_next)
+    {
+      for (section = input_bfd->sections;
+	   section != NULL;
+	   section = section->next)
+	{
+	  if (section->output_section != NULL
+	      && section->output_section->owner == output_bfd)
+	    {
+	      list = input_list + section->output_section->index;
+	      /* Steal the link_sec pointer for our list.  */
+#define PREV_SEC(sec) (hplink->stub_group[(sec)->id].link_sec)
+	      /* This happens to make the list in reverse order, which
+		 is what we want.  */
+	      PREV_SEC (section) = *list;
+	      *list = section;
+	    }
+	}
+    }
+
+  /* See whether we can group stub sections together.  Grouping stub
+     sections may result in fewer stubs.  More importantly, we need to
+     put all .init* and .fini* stubs at the beginning of the .init or
+     .fini output sections respectively, because glibc splits the
+     _init and _fini functions into multiple parts.  Putting a stub in
+     the middle of a function is not a good idea.  */
+  list = input_list + output_bfd->section_count;
+  while (list-- != input_list)
+    {
+      asection *tail = *list;
+      while (tail != NULL)
+	{
+	  asection *curr;
+	  asection *prev;
+	  bfd_size_type total;
+
+	  curr = tail;
+	  if (tail->_cooked_size)
+	    total = tail->_cooked_size;
+	  else
+	    total = tail->_raw_size;
+	  while ((prev = PREV_SEC (curr)) != NULL
+		 && ((total += curr->output_offset - prev->output_offset)
+		     < 250000))
+	    curr = prev;
+
+	  /* OK, the size from the start of CURR to the end is less
+	     than 250000 bytes and thus can be handled by one stub
+	     section.  (or the tail section is itself larger than
+	     250000 bytes, in which case we may be toast.)
+	     We should really be keeping track of the total size of
+	     stubs added here, as stubs contribute to the final output
+	     section size.  That's a little tricky, and this way will
+	     only break if stubs added total more than 12144 bytes, or
+	     1518 long branch stubs.  It seems unlikely for more than
+	     1518 different functions to be called, especially from
+	     code only 250000 bytes long.  */
+	  do
+	    {
+	      prev = PREV_SEC (tail);
+	      /* Set up this stub group.  */
+	      hplink->stub_group[tail->id].link_sec = curr;
+	    }
+	  while (tail != curr && (tail = prev) != NULL);
+
+	  /* But wait, there's more!  Input sections up to 250000
+	     bytes before the stub section can be handled by it too.  */
+	  total = 0;
+	  while (prev != NULL
+		 && ((total += tail->output_offset - prev->output_offset)
+		     < 250000))
+	    {
+	      tail = prev;
+	      prev = PREV_SEC (tail);
+	      hplink->stub_group[tail->id].link_sec = curr;
+	    }
+	  tail = prev;
+	}
+    }
+  free (input_list);
 
   /* We want to read in symbol extension records only once.  To do this
      we need to read in the local symbols in parallel and save them for
@@ -2463,18 +2568,18 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
     = (Elf_Internal_Sym **) bfd_zmalloc (sizeof (Elf_Internal_Sym *)
 					 * bfd_count);
   if (all_local_syms == NULL)
-    goto error_ret_free_reloc;
+    return false;
 
   /* Walk over all the input BFDs, swapping in local symbols.
      If we are creating a shared library, create hash entries for the
      export stubs.  */
-  for (input_bfd = info->input_bfds, indx = 0, sec_count = 0;
+  for (input_bfd = info->input_bfds, bfd_indx = 0;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next, indx++)
+       input_bfd = input_bfd->link_next, bfd_indx++)
     {
       Elf_Internal_Shdr *symtab_hdr;
       Elf_Internal_Sym *isym;
-      Elf32_External_Sym *ext_syms, *esym;
+      Elf32_External_Sym *ext_syms, *esym, *end_sy;
 
       /* We'll need the symbol table in a second.  */
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -2489,7 +2594,7 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 	{
 	  goto error_ret_free_local;
 	}
-      all_local_syms[indx] = local_syms;
+      all_local_syms[bfd_indx] = local_syms;
       ext_syms = (Elf32_External_Sym *)
 	bfd_malloc (symtab_hdr->sh_info * sizeof (Elf32_External_Sym));
       if (ext_syms == NULL)
@@ -2510,72 +2615,52 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
       /* Swap the local symbols in.  */
       isym = local_syms;
       esym = ext_syms;
-      for (i = 0; i < symtab_hdr->sh_info; i++, esym++, isym++)
+      for (end_sy = esym + symtab_hdr->sh_info; esym < end_sy; esym++, isym++)
 	bfd_elf32_swap_symbol_in (input_bfd, esym, isym);
 
       /* Now we can free the external symbols.  */
       free (ext_syms);
 
-      /* Go looking for .init and .fini sections.  We only want one
-	 stub section for each of .init* and .fini* because glibc
-	 splits the _init and _fini functions into multiple parts, and
-	 putting a stub in the middle of a function is not a good idea.
-	 It would be better to merge all the stub sections for an
-	 output section if the output section + stubs is small enough.
-	 This would fix the .init and .fini case and also allow stubs
-	 to be merged.  It's more linker work though.  */
-      for (section = input_bfd->sections;
-	   section != NULL;
-	   section = section->next, sec_count++)
-	{
-	  if (hplink->first_init_sec == 0)
-	    {
-	      if (strncmp (section->name, ".init", 5) == 0)
-		hplink->first_init_sec = sec_count + 1;
-	    }
-	  if (hplink->first_fini_sec == 0)
-	    {
-	      if (strncmp (section->name, ".fini", 5) == 0)
-		hplink->first_fini_sec = sec_count + 1;
-	    }
-
 #if ! LONG_BRANCH_PIC_IN_SHLIB
-	  /* If this is a shared link, find all the stub reloc
-	     sections.  */
-	  if (info->shared)
-	    {
-	      char *name;
-	      asection *reloc_sec;
+      /* If this is a shared link, find all the stub reloc sections.  */
+      if (info->shared)
+	for (section = input_bfd->sections;
+	     section != NULL;
+	     section = section->next)
+	  {
+	    char *name;
+	    asection *reloc_sec;
 
-	      name = bfd_malloc (strlen (section->name)
-				 + sizeof STUB_SUFFIX
-				 + 5);
-	      if (name == NULL)
-		return false;
-	      sprintf (name, ".rela%s%s", section->name, STUB_SUFFIX);
-	      reloc_sec = bfd_get_section_by_name (hplink->root.dynobj, name);
-	      hplink->reloc_section_created[sec_count] = reloc_sec;
-	      free (name);
-	    }
+	    name = bfd_malloc (strlen (section->name)
+			       + sizeof STUB_SUFFIX
+			       + 5);
+	    if (name == NULL)
+	      return false;
+	    sprintf (name, ".rela%s%s", section->name, STUB_SUFFIX);
+	    reloc_sec = bfd_get_section_by_name (hplink->root.dynobj, name);
+	    hplink->stub_group[section->id].reloc_sec = reloc_sec;
+	    free (name);
+	  }
 #endif
-	}
 
       if (info->shared && hplink->multi_subspace)
 	{
-	  unsigned int symndx;
+	  struct elf_link_hash_entry **sym_hashes;
+	  struct elf_link_hash_entry **end_hashes;
 	  unsigned int symcount;
 
 	  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
 		      - symtab_hdr->sh_info);
+	  sym_hashes = elf_sym_hashes (input_bfd);
+	  end_hashes = sym_hashes + symcount;
 
 	  /* Look through the global syms for functions;  We need to
 	     build export stubs for all globally visible functions.  */
-	  for (symndx = 0; symndx < symcount; symndx++)
+	  for (; sym_hashes < end_hashes; sym_hashes++)
 	    {
 	      struct elf32_hppa_link_hash_entry *hash;
 
-	      hash = ((struct elf32_hppa_link_hash_entry *)
-		      elf_sym_hashes (input_bfd)[symndx]);
+	      hash = (struct elf32_hppa_link_hash_entry *) *sym_hashes;
 
 	      while (hash->elf.root.type == bfd_link_hash_indirect
 		     || hash->elf.root.type == bfd_link_hash_warning)
@@ -2589,6 +2674,8 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		   || hash->elf.root.type == bfd_link_hash_defweak)
 		  && hash->elf.type == STT_FUNC
 		  && hash->elf.root.u.def.section->output_section != NULL
+		  && (hash->elf.root.u.def.section->output_section->owner
+		      == output_bfd)
 		  && hash->elf.root.u.def.section->owner == input_bfd
 		  && (hash->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		  && !(hash->elf.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL)
@@ -2605,11 +2692,7 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 						      false, false);
 		  if (stub_entry == NULL)
 		    {
-		      stub_entry = hppa_add_stub (stub_name,
-						  sec,
-						  (sec_count + sec->index
-						   - input_bfd->section_count),
-						  info);
+		      stub_entry = hppa_add_stub (stub_name, sec, hplink);
 		      if (!stub_entry)
 			goto error_ret_free_local;
 
@@ -2634,9 +2717,9 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
     {
       asection *stub_sec;
 
-      for (input_bfd = info->input_bfds, indx = 0, sec_count = 0;
+      for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link_next, indx++)
+	   input_bfd = input_bfd->link_next, bfd_indx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 
@@ -2645,12 +2728,12 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 	  if (symtab_hdr->sh_info == 0)
 	    continue;
 
-	  local_syms = all_local_syms[indx];
+	  local_syms = all_local_syms[bfd_indx];
 
 	  /* Walk over each section attached to the input bfd.  */
 	  for (section = input_bfd->sections;
 	       section != NULL;
-	       section = section->next, sec_count++)
+	       section = section->next)
 	    {
 	      Elf_Internal_Shdr *input_rel_hdr;
 	      Elf32_External_Rela *external_relocs, *erelaend, *erela;
@@ -2660,6 +2743,12 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		 to do.  */
 	      if ((section->flags & SEC_RELOC) == 0
 		  || section->reloc_count == 0)
+		continue;
+
+	      /* If this section is a link-once section that will be
+		 discarded, then don't create any stubs.  */
+	      if (section->output_section == NULL
+		  || section->output_section->owner != output_bfd)
 		continue;
 
 	      /* Allocate space for the external relocations.  */
@@ -2718,6 +2807,7 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		  bfd_vma destination;
 		  struct elf32_hppa_link_hash_entry *hash;
 		  char *stub_name;
+		  const asection *id_sec;
 
 		  r_type = ELF32_R_TYPE (irela->r_info);
 		  r_indx = ELF32_R_SYM (irela->r_info);
@@ -2805,8 +2895,11 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		  if (stub_type == hppa_stub_none)
 		    continue;
 
+		  /* Support for grouping stub sections.  */
+		  id_sec = hplink->stub_group[section->id].link_sec;
+
 		  /* Get the name of this stub.  */
-		  stub_name = hppa_stub_name (section, sym_sec, hash, irela);
+		  stub_name = hppa_stub_name (id_sec, sym_sec, hash, irela);
 		  if (!stub_name)
 		    goto error_ret_free_internal;
 
@@ -2820,8 +2913,7 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		      continue;
 		    }
 
-		  stub_entry = hppa_add_stub (stub_name, section,
-					      sec_count, info);
+		  stub_entry = hppa_add_stub (stub_name, section, hplink);
 		  if (stub_entry == NULL)
 		    {
 		      free (stub_name);
@@ -2861,15 +2953,20 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 	  stub_sec->_cooked_size = 0;
 	}
 #if ! LONG_BRANCH_PIC_IN_SHLIB
-      for (i = 0; i < sec_count; i++)
-	{
-	  stub_sec = hplink->reloc_section_created[i];
-	  if (stub_sec != NULL)
-	    {
-	      stub_sec->_raw_size = 0;
-	      stub_sec->_cooked_size = 0;
-	    }
-	}
+      {
+	int i;
+
+	for (i = top_id; i >= 0; --i)
+	  {
+	    /* This will probably hit the same section many times..  */
+	    stub_sec = hplink->stub_group[i].reloc_sec;
+	    if (stub_sec != NULL)
+	      {
+		stub_sec->_raw_size = 0;
+		stub_sec->_cooked_size = 0;
+	      }
+	  }
+      }
 #endif
 
       bfd_hash_traverse (&hplink->stub_hash_table,
@@ -2881,30 +2978,15 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
       stub_changed = 0;
     }
 
-  /* We're done with the local symbols, free them.  */
-  for (i = 0; i < bfd_count; i++)
-    if (all_local_syms[i])
-      free (all_local_syms[i]);
-  free (all_local_syms);
-#if ! LONG_BRANCH_PIC_IN_SHLIB
-  free (hplink->reloc_section_created);
-#endif
-  free (hplink->stub_section_created);
-  return true;
+  ret = 1;
 
  error_ret_free_local:
-  for (i = 0; i < bfd_count; i++)
-    if (all_local_syms[i])
-      free (all_local_syms[i]);
+  while (bfd_count-- > 0)
+    if (all_local_syms[bfd_count])
+      free (all_local_syms[bfd_count]);
   free (all_local_syms);
 
- error_ret_free_reloc:
-#if ! LONG_BRANCH_PIC_IN_SHLIB
-  free (hplink->reloc_section_created);
- error_ret_free_stub:
-#endif
-  free (hplink->stub_section_created);
-  return false;
+  return ret;
 }
 
 
@@ -3020,12 +3102,12 @@ elf32_hppa_build_stubs (info)
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
-final_link_relocate (input_section, contents, rel, value, info, sym_sec, h)
+final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
      asection *input_section;
      bfd_byte *contents;
      const Elf_Internal_Rela *rel;
      bfd_vma value;
-     struct bfd_link_info *info;
+     struct elf32_hppa_link_hash_table *hplink;
      asection *sym_sec;
      struct elf32_hppa_link_hash_entry *h;
 {
@@ -3072,7 +3154,7 @@ final_link_relocate (input_section, contents, rel, value, info, sym_sec, h)
 		   && h->elf.plt.offset != (bfd_vma) -1))))
 	{
 	  stub_entry = hppa_get_stub_entry (input_section, sym_sec,
-					    h, rel, info);
+					    h, rel, hplink);
 	  if (stub_entry != NULL)
 	    {
 	      value = (stub_entry->stub_offset
@@ -3207,7 +3289,7 @@ final_link_relocate (input_section, contents, rel, value, info, sym_sec, h)
       if (value + addend + max_branch_offset >= 2*max_branch_offset)
 	{
 	  stub_entry = hppa_get_stub_entry (input_section, sym_sec,
-					    h, rel, info);
+					    h, rel, hplink);
 	  if (stub_entry == NULL)
 	    return bfd_reloc_notsupported;
 
@@ -3402,8 +3484,8 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       /* Do any required modifications to the relocation value, and
-         determine what types of dynamic info we need to output, if
-         any.  */
+	 determine what types of dynamic info we need to output, if
+	 any.  */
       plabel = 0;
       switch (r_type)
 	{
@@ -3702,7 +3784,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       r = final_link_relocate (input_section, contents, rel, relocation,
-			       info, sym_sec, h);
+			       hplink, sym_sec, h);
 
       if (r == bfd_reloc_ok)
 	continue;

@@ -211,8 +211,8 @@ hook_in_stub (info, lp)
    immediately before INPUT_SECTION.  */
 
 static asection *
-hppaelf_add_stub_section (stub_name, input_section)
-     const char *stub_name;
+hppaelf_add_stub_section (stub_sec_name, input_section)
+     const char *stub_sec_name;
      asection *input_section;
 {
   asection *stub_sec;
@@ -222,7 +222,7 @@ hppaelf_add_stub_section (stub_name, input_section)
   lang_output_section_statement_type *os;
   struct hook_stub_info info;
 
-  stub_sec = bfd_make_section_anyway (stub_file->the_bfd, stub_name);
+  stub_sec = bfd_make_section_anyway (stub_file->the_bfd, stub_sec_name);
   if (stub_sec == NULL)
     goto err_ret;
 
@@ -288,9 +288,10 @@ hppaelf_finish ()
     return;
 
   /* Call into the BFD backend to do the real work.  */
-  if (! elf32_hppa_size_stubs (stub_file->the_bfd,
-			       multi_subspace,
+  if (! elf32_hppa_size_stubs (output_bfd,
+			       stub_file->the_bfd,
 			       &link_info,
+			       multi_subspace,
 			       &hppaelf_add_stub_section,
 			       &hppaelf_layaout_sections_again))
     {

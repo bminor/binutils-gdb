@@ -37,7 +37,7 @@
 #include "elf/hppa.h"
 
 boolean elf32_hppa_size_stubs
-  PARAMS ((bfd *, boolean, struct bfd_link_info *,
+  PARAMS ((bfd *, bfd *, struct bfd_link_info *, boolean,
 	   asection * (*) PARAMS ((const char *, asection *)),
 	   void (*) PARAMS ((void))));
 

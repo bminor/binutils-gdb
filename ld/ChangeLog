@@ -1,3 +1,9 @@
+2000-09-18  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/hppaelf.em (hppaelf_add_stub_section): Rename
+	stub_name param to stub_sec_name.
+	(hppaelf_finish): Modify call to elf32_hppa_size_stubs.
+
 2000-09-10  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* emultempl/m68kelf.em: New file.
