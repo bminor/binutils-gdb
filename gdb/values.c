@@ -1306,58 +1306,6 @@ using_struct_return (struct type *value_type, int gcc_p)
 	  == RETURN_VALUE_STRUCT_CONVENTION);
 }
 
-/* Store VAL so it will be returned if a function returns now.
-   Does not verify that VAL's type matches what the current
-   function wants to return.  */
-
-void
-set_return_value (struct value *val)
-{
-  struct type *type = check_typedef (VALUE_TYPE (val));
-  enum type_code code = TYPE_CODE (type);
-
-  if (code == TYPE_CODE_ERROR)
-    error ("Function return type unknown.");
-
-  if (gdbarch_return_value_p (current_gdbarch))
-    {
-      switch (gdbarch_return_value (current_gdbarch, type, NULL, NULL, NULL))
-	{
-	case RETURN_VALUE_REGISTER_CONVENTION:
-	  /* Success.  The architecture can deal with it, write it to
-             the regcache.  */
-	  gdbarch_return_value (current_gdbarch, type, current_regcache,
-				VALUE_CONTENTS (val), NULL);
-	  return;
-	case RETURN_VALUE_STRUCT_CONVENTION:
-	  /* Failure.  For the moment, assume that it is not possible
-             to find the location, on the stack, at which the "struct
-             return" value should be stored.  Only a warning because
-             an error aborts the "return" command leaving GDB in a
-             weird state.  */
-	  warning ("Location of return value unknown");
-	  return;
-	}
-    }
-
-
-  if (code == TYPE_CODE_STRUCT
-      || code == TYPE_CODE_UNION)	/* FIXME, implement struct return.  */
-    /* FIXME: cagney/2003-10-20: This should be an internal-warning.
-       The problem is that while GDB's core supports "struct return"
-       using "register convention", many architectures haven't been
-       updated to implement the mechanisms needed to make it work.
-       It's a warning, and not an error, as otherwize it will jump out
-       of the "return" command leaving both GDB and the user in a very
-       confused state.  */
-    {
-      warning ("This architecture does not support specifying a struct or union return-value.");
-      return;
-    }
-
-  STORE_RETURN_VALUE (type, current_regcache, VALUE_CONTENTS (val));
-}
-
 void
 _initialize_values (void)
 {

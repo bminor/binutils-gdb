@@ -1,3 +1,13 @@
+2003-10-23  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (stack.o): Add $(regcache_h).
+	* stack.c: Include "regcache.h"
+	(return_command): Rewrite.  Use get_frame_id and
+	get_selected_frame.  Eliminate "deprecated_selected_frame".  Warn
+	about unhandled return-values.
+	* value.h (set_return_value): Delete declaration.
+	* values.c (set_return_value): Delete function.
+
 2003-10-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c: (ia64_frame_cache): Add new prev_cfm field.
