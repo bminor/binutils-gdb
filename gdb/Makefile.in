@@ -344,7 +344,7 @@ rapp: $(RAPP_OBS)
 # and includes the body of Makefile.in as well as configuration
 # settings.  We add alldeps.mak and depend to get Makefile.
 # See also "make-depend:", where we also rebuild Makefile after making depend.
-Makefiles= Makefile.conf ${srcdir}/alldeps.mak depend
+Makefiles= Makefile.conf alldeps.mak depend
 
 make-Makefile: $(Makefiles) depend
 	cat ${Makefiles} > ./Makefile
@@ -514,11 +514,11 @@ gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 	mv gdb-all.dvi gdb.dvi
 	rm -f gdb-all.?? gdb-all.???
 
-# This should work eventually, but we're using texinfo2, and many makeinfo's 
+# We're using texinfo2, and many makeinfo's 
 # can't cope with all the markup.  In the meantime, we distribute the info
 # files as formatted by the elisp texinfo2 code.
-#gdb.info: gdb-all.texinfo
-#	makeinfo gdb-all.texinfo
+gdb.info: gdb-all.texinfo
+	makeinfo gdb-all.texinfo
 
 # Make copying.c from COPYING
 copying.c : COPYING copying.awk
