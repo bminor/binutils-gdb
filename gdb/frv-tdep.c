@@ -48,9 +48,6 @@ static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 
-static LONGEST frv_call_dummy_words[] =
-{0};
-
 
 struct frv_unwind_cache		/* was struct frame_extra_info */
   {
@@ -64,7 +61,6 @@ struct frv_unwind_cache		/* was struct frame_extra_info */
     /* Table indicating the location of each and every register.  */
     struct trad_frame_saved_reg *saved_regs;
   };
-
 
 /* A structure describing a particular variant of the FRV.
    We allocate and initialize one of these structures when we create
@@ -925,7 +921,6 @@ frv_frame_unwind_cache (struct frame_info *next_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   CORE_ADDR pc;
-  ULONGEST prev_sp;
   ULONGEST this_base;
   struct frv_unwind_cache *info;
 
