@@ -1,3 +1,8 @@
+Mon Aug 23 18:33:55 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* snapshots.readme:  Update policy for daily full snapshots and
+	daily diffs.  General reformatting of paragraphs.
+
 Sun Aug 22 12:15:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (XCOFF-differences): Remove references to
