@@ -1,5 +1,10 @@
 2003-03-18  J. Brobecker  <brobecker@gnat.com>
 
+	* hppa-tdep.c (hppa_push_dummy_frame): Remove hack which does not
+	appear to be working in any case.
+
+2003-03-18  J. Brobecker  <brobecker@gnat.com>
+
 	* observer.c (observer_test_first_observer): New static variable.
 	(observer_test_second_observer): Likewise.
 	(observer_test_third_observer): Likewise.

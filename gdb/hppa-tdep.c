@@ -1440,31 +1440,15 @@ hppa_push_dummy_frame (struct inferior_status *inf_status)
   CORE_ADDR int_buffer;
   double freg_buffer;
 
-  /* Oh, what a hack.  If we're trying to perform an inferior call
-     while the inferior is asleep, we have to make sure to clear
-     the "in system call" bit in the flag register (the call will
-     start after the syscall returns, so we're no longer in the system
-     call!)  This state is kept in "inf_status", change it there.
-
-     We also need a number of horrid hacks to deal with lossage in the
-     PC queue registers (apparently they're not valid when the in syscall
-     bit is set).  */
   pc = hppa_target_read_pc (inferior_ptid);
   int_buffer = read_register (FLAGS_REGNUM);
   if (int_buffer & 0x2)
     {
-      unsigned int sid;
-      int_buffer &= ~0x2;
-      write_inferior_status_register (inf_status, 0, int_buffer);
-      write_inferior_status_register (inf_status, PCOQ_HEAD_REGNUM, pc + 0);
-      write_inferior_status_register (inf_status, PCOQ_TAIL_REGNUM, pc + 4);
-      sid = (pc >> 30) & 0x3;
+      const unsigned int sid = (pc >> 30) & 0x3;
       if (sid == 0)
 	pcspace = read_register (SR4_REGNUM);
       else
 	pcspace = read_register (SR4_REGNUM + 4 + sid);
-      write_inferior_status_register (inf_status, PCSQ_HEAD_REGNUM, pcspace);
-      write_inferior_status_register (inf_status, PCSQ_TAIL_REGNUM, pcspace);
     }
   else
     pcspace = read_register (PCSQ_HEAD_REGNUM);
