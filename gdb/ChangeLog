@@ -1,3 +1,9 @@
+2000-05-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib.c (bfd_lookup_symbol): Fall back on the dynamic symbol
+	table if the symbol couldn't be found in the normal symbol table
+	(i.e. if the shared object in question was stripped).
+
 2000-08-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* ch-exp.c (parse_opt_name_string): Protoize.  [Thanks to Eli

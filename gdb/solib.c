@@ -1,5 +1,5 @@
 /* Handle SunOS and SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 98, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -528,7 +528,35 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
 	}
       do_cleanups (back_to);
     }
-  return (symaddr);
+
+  if (symaddr)
+    return symaddr;
+
+  /* On FreeBSD, the dynamic linker is stripped by default.  So we'll
+     have to check the dynamic string table too.  */
+
+  storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
+
+  if (storage_needed > 0)
+    {
+      symbol_table = (asymbol **) xmalloc (storage_needed);
+      back_to = make_cleanup (free, (PTR) symbol_table);
+      number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd, symbol_table);
+
+      for (i = 0; i < number_of_symbols; i++)
+	{
+	  sym = *symbol_table++;
+	  if (STREQ (sym->name, symname))
+	    {
+	      /* Bfd symbols are section relative. */
+	      symaddr = sym->value + sym->section->vma;
+	      break;
+	    }
+	}
+      do_cleanups (back_to);
+    }
+
+  return symaddr;
 }
 
 #ifdef HANDLE_SVR4_EXEC_EMULATORS
