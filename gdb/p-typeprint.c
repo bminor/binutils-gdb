@@ -170,11 +170,9 @@ pascal_type_print_method_args (physname, methodname, stream)
       char *argname;
       fputs_filtered (" (", stream);
       /* we must demangle this */
-      while isdigit
-	(physname[0])
+      while (isdigit (physname[0]))
 	{
-	  while isdigit
-	    (physname[len])
+	  while (isdigit (physname[len]))
 	    {
 	      len++;
 	    }
