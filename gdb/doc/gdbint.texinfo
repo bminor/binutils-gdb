@@ -88,3 +88,58 @@ after changing Makefile.dist, alldeps.mak, etc.
 
 Check the README file, it often has useful information that does not
 appear anywhere else in the directory.
+
+
+
+
+  Defining a new host or target architecture
+
+
+When building support for a new host and/or target, this will help you
+organize where to put the various parts.  ARCH stands for the
+architecture involved.
+
+Object files needed when the host system is an ARCH are listed in the file
+xconfig/ARCH, in the Makefile macro "XDEPFILES = ...".  You can also
+define XXXXXX in there.
+
+There are some "generic" versions of routines that can be used by
+various host systems.  If these routines work for the ARCH host, you
+can just include the generic file's name (with .o, not .c) in
+XDEPFILES.  Otherwise, you will need to write routines that perform the
+same functions as the generic file, put them into ARCH-xdep.c, and put
+ARCH-xdep.o into XDEPFILES.  These generic host support files include:
+
+	coredep.c, coredep.o
+
+fetch_core_registers():
+Support for reading registers out of a core file.  This routine calls
+register_addr(), see below.
+
+register_addr():
+If your xm-ARCH.h file defines the macro REGISTER_U_ADDR(reg) to be the
+offset within the "user" struct of a register (represented as a GDB
+register number), coredep.c will define the register_addr() function
+and use the macro in it.  If you do not define REGISTER_U_ADDR, but
+you are using the standard fetch_core_registers, you
+will need to define your own version of register_addr, put it into
+your ARCH-xdep.c file, and be sure ARCH-xdep.o is in the XDEPFILES list.
+If you have your own fetch_core_registers, you only need to define
+register_addr if your fetch_core_registers calls it.  Many custom
+fetch_core_registers implementations simply locate the registers
+themselves.
+
+
+Files needed when the target system is an ARCH are listed in the file
+tconfig/ARCH, in the Makefile macro "TDEPFILES = ...".  You can also
+define XXXXXX in there.
+
+Similar generic support files for target systems are:
+
+	exec.c, exec.o:
+
+This file defines functions for accessing files that are executable
+on the target system.  These functions open and examine an exec file,
+extract data from one, write data to one, print information about one,
+etc.  Now that executable files are handled with BFD, every architecture
+should be able to use the generic exec.c rather than its own custom code.
