@@ -1,3 +1,9 @@
+Wed Nov 30 19:43:14 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.s: Break the large branching tests into smaller
+	tests so as not to overflow expect's input buffers.
+	* gdb.disasm/hppa.exp: Corresponding changes.
+
 Fri Nov 25 13:37:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Beginnings of template debugging tests.
