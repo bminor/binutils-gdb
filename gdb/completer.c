@@ -27,8 +27,8 @@
 
 #include "cli/cli-decode.h"
 
-/* FIXME: This is needed because of lookup_cmd_1().
-   We should be calling a hook instead so we eliminate the CLI dependency. */
+/* FIXME: This is needed because of lookup_cmd_1 ().  We should be
+   calling a hook instead so we eliminate the CLI dependency.  */
 #include "gdbcmd.h"
 
 /* Needed for rl_completer_word_break_characters() and for
@@ -42,7 +42,8 @@
 
 /* Prototypes for local functions */
 static
-char *line_completion_function (const char *text, int matches, char *line_buffer,
+char *line_completion_function (const char *text, int matches, 
+				char *line_buffer,
 				int point);
 
 /* readline uses the word breaks for two things:
