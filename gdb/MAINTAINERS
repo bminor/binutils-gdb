@@ -174,12 +174,15 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 			OBSOLETE candidate, not multi-arch
 
-All maintainers can make arbitrary changes to OBSOLETE targets.
+All developers recognized by this file can make arbitrary changes to
+OBSOLETE targets.
 
-All maintainers can make mechanical (params, spelling, indentation,
-multi-arch, -W..., ....) changes to ``maintenance only'' targets.
-Please sanity check the change by compiling with one of the listed
-targets.
+All maintainers can test and thence approve non-trivial changes to
+``maintenance only'' targets submitted by recognized developers.
+
+All recognized developers can make mechanical changes (by virtue of
+the obvious fix rule) to ``maintenance only'' targets.  The change
+shall be sanity checked by compiling with one of the listed targets.
 
 The GAWK segment:
 

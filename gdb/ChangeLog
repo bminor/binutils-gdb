@@ -1,3 +1,9 @@
+2002-01-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Update target maintainer rules so that any
+	Maintainer can approve a tested patch for a maintenance-only
+	target.
+
 2002-01-09  Richard Earnshaw  <rearnsha@arm.com>
 
 	* MAINTAINERS (write-after-approval): Add myself.
