@@ -1,3 +1,14 @@
+Thu Jan 29 16:04:21 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* ldfile.c (slash): Set to backslash if _WIN32 but not
+	__CYGWIN32__.
+	(ldfile_open_file_search): If __MSDOS__ or _WIN32, accept a
+	leading backslash or a leading x: as an absolute path.
+	(ldfile_find_command_file): Use slash rather than / when
+	generating name to try.
+	* lexsup.c (PATH_SEPARATOR): Define.
+	(set_default_dirlist): Use PATH_SEPARATOR rather than ':'.
+
 Wed Jan 28 14:06:30 1998  Richard Henderson  <rth@cygnus.com>
 
 	* emulparams/elf64_sparc.sh (ELFSIZE): 64
