@@ -560,7 +560,7 @@ coff_arm_bfd_print_private_bfd_data (abfd, ptr)
    the COFF filehdr structure, which contains important,
    target specific information.                       */
 
-static boolean
+boolean
 coff_arm_bfd_set_private_flags (abfd, flags)
 	bfd *	   abfd;
 	flagword   flags;

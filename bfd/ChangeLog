@@ -1,3 +1,8 @@
+Tue May 27 14:34:08 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (coff_arm_bfd_set_private_flags): Make global.  It is
+	called directly by gas/config/tc-arm.c.
+	
 Tue May 27 15:58:53 1997  Richard Henderson  <rth@tamu.edu>
 
 	* elf64-alpha.c (PLT_ENTRY_*): Use a new thread-safe format.
