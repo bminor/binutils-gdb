@@ -429,9 +429,19 @@ GDB or its supporting libraries.
 Host/target specific installation notes
 =======================================
 
-solaris??-64-???
+hppa2.0-hp-hpux10.20
 
-Something goes here on how to set up a 64 bit build.
+Due to a problem with libiberty/regex.c, GDB does not build on HP/UX
+10.20 when using the HP supplied compiler.
+
+Due to bit rot problems, GDB does not work on HP/UX 10.20 when built
+with GCC.
+
+
+hppa2.0w-hp-hpux11.00
+
+Due to a problem with ltconfig and long argument lines, GDB does not
+configure on HP/UX 11.00.
 
 
 Remote debugging
