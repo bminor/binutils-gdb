@@ -18,14 +18,6 @@
    the Free Software Foundation, 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  This file is work in progress and was copied from m32r/tc-m32r.c in 
-  order to all gas/configure to run with the target fr30-unknown-elf.
-  Other than changing all occurances for m32r to fr30, this file has not
-  been customized for fr30 in any way.
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
 #include <stdio.h>
 #include <ctype.h>
 #include "as.h"
@@ -34,8 +26,8 @@
 #include "cgen-opc.h"
 #include "cgen.h"
 
-/* Linked list of symbols that are debugging symbols to be defined as the
-   beginning of the current instruction.  */
+/* Linked list of symbols that are debugging symbols to be
+   defined as the beginning of the current instruction.  */
 typedef struct sym_link
 {
   struct sym_link * next;
@@ -67,92 +59,17 @@ typedef struct
 }
 fr30_insn;
 
-/* prev_insn.insn is non-null if last insn was a 16 bit insn on a 32 bit
-   boundary (i.e. was the first of two 16 bit insns).  */
-static fr30_insn	prev_insn;
-
-/* Non-zero if we've seen a relaxable insn since the last 32 bit
-   alignment request.  */
-static int seen_relaxable_p = 0;
-
-/* Non-zero if -relax specified, in which case sufficient relocs are output
-   for the linker to do relaxing.
-   We do simple forms of relaxing internally, but they are always done.
-   This flag does not apply to them.  */
-static int fr30_relax;
-
-#if 0 /* not supported yet */
-/* If non-NULL, pointer to cpu description file to read.
-   This allows runtime additions to the assembler.  */
-static const char * fr30_cpu_desc;
-#endif
-
-/* Non-zero if warn when a high/shigh reloc has no matching low reloc.
-   Each high/shigh reloc must be paired with it's low cousin in order to
-   properly calculate the addend in a relocatable link (since there is a
-   potential carry from the low to the high/shigh).
-   This option is off by default though for user-written assembler code it
-   might make sense to make the default be on (i.e. have gcc pass a flag
-   to turn it off).  This warning must not be on for GCC created code as
-   optimization may delete the low but not the high/shigh (at least we
-   shouldn't assume or require it to).  */
-static int warn_unmatched_high = 0;
-
-/* stuff for .scomm symbols.  */
-static segT     sbss_section;
-static asection scom_section;
-static asymbol  scom_symbol;
-
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = "";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
-
-/* Relocations against symbols are done in two
-   parts, with a HI relocation and a LO relocation.  Each relocation
-   has only 16 bits of space to store an addend.  This means that in
-   order for the linker to handle carries correctly, it must be able
-   to locate both the HI and the LO relocation.  This means that the
-   relocations must appear in order in the relocation table.
-
-   In order to implement this, we keep track of each unmatched HI
-   relocation.  We then sort them so that they immediately precede the
-   corresponding LO relocation. */
-
-struct fr30_hi_fixup
-{
-  struct fr30_hi_fixup * next;  /* Next HI fixup.  */
-  fixS *                 fixp;  /* This fixup.  */
-  segT                   seg;   /* The section this fixup is in.  */
-
-};
-
-/* The list of unmatched HI relocs.  */
-
-static struct fr30_hi_fixup * fr30_hi_fixup_list;
-
 
 #define FR30_SHORTOPTS ""
 const char * md_shortopts = FR30_SHORTOPTS;
 
 struct option md_longopts[] =
 {
-  /* Sigh.  I guess all warnings must now have both variants.  */
-#define OPTION_WARN_UNMATCHED (OPTION_MD_BASE + 4)
-  {"warn-unmatched-high", OPTION_WARN_UNMATCHED},
-  {"Wuh", OPTION_WARN_UNMATCHED},
-#define OPTION_NO_WARN_UNMATCHED (OPTION_MD_BASE + 5)
-  {"no-warn-unmatched-high", OPTION_WARN_UNMATCHED},
-  {"Wnuh", OPTION_WARN_UNMATCHED},
-
-#if 0 /* not supported yet */
-#define OPTION_RELAX  (OPTION_MD_BASE + 6)
-  {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_CPU_DESC (OPTION_MD_BASE + 7)
-  {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
-#endif
-
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -164,23 +81,6 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
-    case OPTION_WARN_UNMATCHED:
-      warn_unmatched_high = 1;
-      break;
-
-    case OPTION_NO_WARN_UNMATCHED:
-      warn_unmatched_high = 0;
-      break;
-      
-#if 0 /* not supported yet */
-    case OPTION_RELAX:
-      fr30_relax = 1;
-      break;
-    case OPTION_CPU_DESC:
-      fr30_cpu_desc = arg;
-      break;
-#endif
-
     default:
       return 0;
     }
@@ -192,214 +92,15 @@ md_show_usage (stream)
   FILE * stream;
 {
   fprintf (stream, _(" FR30 specific command line options:\n"));
-
-  fprintf (stream, _("\
-  -warn-unmatched-high    warn when an (s)high reloc has no matching low reloc\n"));
-  fprintf (stream, _("\
-  -no-warn-unmatched-high do not warn about missing low relocs\n"));
-  fprintf (stream, _("\
-  -Wuh                    synonym for -warn-unmatched-high\n"));
-  fprintf (stream, _("\
-  -Wnuh                   synonym for -no-warn-unmatched-high\n"));
-
-#if 0
-  fprintf (stream, _("\
-  -relax                 create linker relaxable code\n"));
-  fprintf (stream, _("\
-  -cpu-desc              provide runtime cpu description file\n"));
-#endif
 } 
-
-static void fill_insn PARAMS ((int));
-static void fr30_scomm PARAMS ((int));
-static void debug_sym PARAMS ((int));
-static void expand_debug_syms PARAMS ((sym_linkS *, int));
-
-/* Set by md_assemble for use by fr30_fill_insn.  */
-static subsegT prev_subseg;
-static segT prev_seg;
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
   { "word",	cons,		4 },
-  { "fillinsn", fill_insn,	0 },
-  { "scomm",	fr30_scomm,	0 },
-  { "debugsym",	debug_sym,	0 },
-  { NULL, NULL, 0 }
+  { NULL, 	NULL, 		0 }
 };
 
-/* FIXME: Should be machine generated.  */
-#define NOP_INSN 0x7000
-#define PAR_NOP_INSN 0xf000 /* can only be used in 2nd slot */
-
-/* When we align the .text section, insert the correct NOP pattern.
-   N is the power of 2 alignment.  LEN is the length of pattern FILL.
-   MAX is the maximum number of characters to skip when doing the alignment,
-   or 0 if there is no maximum.  */
-
-int
-fr30_do_align (n, fill, len, max)
-     int          n;
-     const char * fill;
-     int          len;
-     int          max;
-{
-  /* Only do this if the fill pattern wasn't specified.  */
-  if (fill == NULL
-      && (now_seg->flags & SEC_CODE) != 0
-      /* Only do this special handling if aligning to at least a
-	 4 byte boundary.  */
-      && n > 1
-     /* Only do this special handling if we're allowed to emit at
-	 least two bytes.  */
-      && (max == 0 || max > 1))
-    {
-      static const unsigned char nop_pattern[] = { 0xf0, 0x00 };
-
-#if 0
-      /* First align to a 2 byte boundary, in case there is an odd .byte.  */
-      /* FIXME: How much memory will cause gas to use when assembling a big
-	 program?  Perhaps we can avoid the frag_align call?  */
-      frag_align (1, 0, 0);
-#endif
-      /* Next align to a 4 byte boundary (we know n >= 2) using a parallel
-	 nop.  */
-      frag_align_pattern (2, nop_pattern, sizeof nop_pattern, 0);
-      /* If doing larger alignments use a repeating sequence of appropriate
-	 nops.  */
-      if (n > 2)
-	{
-	  static const unsigned char multi_nop_pattern[] =
-	  { 0x70, 0x00, 0xf0, 0x00 };
-	  frag_align_pattern (n, multi_nop_pattern, sizeof multi_nop_pattern,
-			      max ? max - 2 : 0);
-	}
-      
-      prev_insn.insn = NULL;
-      return 1;
-    }
-
-  return 0;
-}
-
-/* If the last instruction was the first of 2 16 bit insns,
-   output a nop to move the PC to a 32 bit boundary.
-
-   This is done via an alignment specification since branch relaxing
-   may make it unnecessary.
-
-   Internally, we need to output one of these each time a 32 bit insn is
-   seen after an insn that is relaxable.  */
-
-static void
-fill_insn (ignore)
-     int ignore;
-{
-  (void) fr30_do_align (2, NULL, 0, 0);
-  prev_insn.insn = NULL;
-  seen_relaxable_p = 0;
-}
-
-/* Record the symbol so that when we output the insn, we can create
-   a symbol that is at the start of the instruction.  This is used
-   to emit the label for the start of a breakpoint without causing
-   the assembler to emit a NOP if the previous instruction was a
-   16 bit instruction.  */
-
-static void
-debug_sym (ignore)
-     int ignore;
-{
-  register char *name;
-  register char delim;
-  register char *end_name;
-  register symbolS *symbolP;
-  register sym_linkS *link;
-
-  name = input_line_pointer;
-  delim = get_symbol_end ();
-  end_name = input_line_pointer;
- 
-  if ((symbolP = symbol_find (name)) == NULL
-      && (symbolP = md_undefined_symbol (name)) == NULL)
-    {
-      symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
-    }
-
-  symbol_table_insert (symbolP);
-  if (S_IS_DEFINED (symbolP) && S_GET_SEGMENT (symbolP) != reg_section)
-    /* xgettext:c-format */
-    as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
-
-  else
-    {
-      link = (sym_linkS *) xmalloc (sizeof (sym_linkS));
-      link->symbol = symbolP;
-      link->next = debug_sym_link;
-      debug_sym_link = link;
-      symbolP->local = 1;
-    }
-
-  *end_name = delim;
-  demand_empty_rest_of_line ();
-}
-
-/* Second pass to expanding the debug symbols, go through linked
-   list of symbols and reassign the address.  */
-
-static void
-expand_debug_syms (syms, align)
-     sym_linkS *syms;
-     int align;
-{
-  char *save_input_line = input_line_pointer;
-  sym_linkS *next_syms;
-
-  if (!syms)
-    return;
-
-  (void) fr30_do_align (align, NULL, 0, 0);
-  for (; syms != (sym_linkS *)0; syms = next_syms)
-    {
-      symbolS *symbolP = syms->symbol;
-      next_syms = syms->next;
-      input_line_pointer = ".\n";
-      pseudo_set (symbolP);
-      free ((char *)syms);
-    }
-
-  input_line_pointer = save_input_line;
-}
-
-/* Cover function to fill_insn called after a label and at end of assembly.
-   The result is always 1: we're called in a conditional to see if the
-   current line is a label.  */
-
-int
-fr30_fill_insn (done)
-     int done;
-{
-  if (prev_seg != NULL)
-    {
-      segT    seg    = now_seg;
-      subsegT subseg = now_subseg;
-
-      subseg_set (prev_seg, prev_subseg);
-      
-      fill_insn (0);
-
-      subseg_set (seg, subseg);
-    }
-
-  if (done && debug_sym_link)
-    {
-      expand_debug_syms (debug_sym_link, 1);
-      debug_sym_link = (sym_linkS *)0;
-    }
-
-  return 1;
-}
 
 void
 md_begin ()
@@ -411,62 +112,17 @@ md_begin ()
   /* Initialize the `cgen' interface.  */
   
   /* Set the machine number and endian.  */
-  gas_cgen_opcode_desc = fr30_cgen_opcode_open (0 /* mach number */,
-						target_big_endian ?
-						CGEN_ENDIAN_BIG
-						: CGEN_ENDIAN_LITTLE);
+  gas_cgen_opcode_desc = fr30_cgen_opcode_open (bfd_mach_fr30, CGEN_ENDIAN_BIG);
   fr30_cgen_init_asm (gas_cgen_opcode_desc);
 
   /* This is a callback from cgen to gas to parse operands.  */
   cgen_set_parse_operand_fn (gas_cgen_opcode_desc, gas_cgen_parse_operand);
-
-#if 0 /* not supported yet */
-  /* If a runtime cpu description file was provided, parse it.  */
-  if (fr30_cpu_desc != NULL)
-    {
-      const char * errmsg;
-
-      errmsg = cgen_read_cpu_file (gas_cgen_opcode_desc, fr30_cpu_desc);
-      if (errmsg != NULL)
-	as_bad ("%s: %s", fr30_cpu_desc, errmsg);
-    }
-#endif
-
-  /* Save the current subseg so we can restore it [it's the default one and
-     we don't want the initial section to be .sbss].  */
-  seg    = now_seg;
-  subseg = now_subseg;
-
-  /* The sbss section is for local .scomm symbols.  */
-  sbss_section = subseg_new (".sbss", 0);
-  
-  /* This is copied from perform_an_assembly_pass.  */
-  applicable = bfd_applicable_section_flags (stdoutput);
-  bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
-  
-#if 0 /* What does this do? [see perform_an_assembly_pass]  */
-  seg_info (bss_section)->bss = 1;
-#endif
-
-  subseg_set (seg, subseg);
-
-  /* We must construct a fake section similar to bfd_com_section
-     but with the name .scommon.  */
-  scom_section                = bfd_com_section;
-  scom_section.name           = ".scommon";
-  scom_section.output_section = & scom_section;
-  scom_section.symbol         = & scom_symbol;
-  scom_section.symbol_ptr_ptr = & scom_section.symbol;
-  scom_symbol                 = * bfd_com_section.symbol;
-  scom_symbol.name            = ".scommon";
-  scom_symbol.section         = & scom_section;
 }
 
 void
 md_assemble (str)
      char * str;
 {
-#if 0
   fr30_insn insn;
   char *    errmsg;
   char *    str2 = NULL;
@@ -486,79 +142,9 @@ md_assemble (str)
       return;
     }
 
-  if (CGEN_INSN_BITSIZE (insn.insn) == 32)
-    {
-      /* 32 bit insns must live on 32 bit boundaries.  */
-      if (prev_insn.insn || seen_relaxable_p)
-	{
-	  /* ??? If calling fill_insn too many times turns us into a memory
-	     pig, can we call a fn to assemble a nop instead of
-	     !seen_relaxable_p?  */
-	  fill_insn (0);
-	}
-
-      expand_debug_syms (insn.debug_sym_link, 2);
-
-      /* Doesn't really matter what we pass for RELAX_P here.  */
-      gas_cgen_finish_insn (insn.insn, insn.buffer,
-			    CGEN_FIELDS_BITSIZE (& insn.fields), 1, NULL);
-    }
-  else
-    {
-      int on_32bit_boundary_p;
-
-      if (CGEN_INSN_BITSIZE (insn.insn) != 16)
-	abort();
-
-      insn.orig_insn = insn.insn;
-
-      /* Compute whether we're on a 32 bit boundary or not.
-	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
-      on_32bit_boundary_p = prev_insn.insn == NULL;
-
-      expand_debug_syms (insn.debug_sym_link, 1);
-
-      {
-	int i;
-	finished_insnS fi;
-
-	/* Ensure each pair of 16 bit insns is in the same frag.  */
-	frag_grow (4);
-
-	gas_cgen_finish_insn (insn.orig_insn, insn.buffer,
-			      CGEN_FIELDS_BITSIZE (& insn.fields),
-			      1 /*relax_p*/, &fi);
-	insn.addr = fi.addr;
-	insn.frag = fi.frag;
-	insn.num_fixups = fi.num_fixups;
-	for (i = 0; i < fi.num_fixups; ++i)
-	  insn.fixups[i] = fi.fixups[i];
-      }
-
-      /* Keep track of whether we've seen a pair of 16 bit insns.
-	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
-      if (on_32bit_boundary_p)
-	prev_insn = insn;
-      else
-	prev_insn.insn = NULL;
-      
-      /* If the insn needs the following one to be on a 32 bit boundary
-	 (e.g. subroutine calls), fill this insn's slot.  */
-      if (on_32bit_boundary_p
-	  && CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_FILL_SLOT) != 0)
-	fill_insn (0);
-
-      /* If this is a relaxable insn (can be replaced with a larger version)
-	 mark the fact so that we can emit an alignment directive for a
-	 following 32 bit insn if we see one.   */
-      if (CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_RELAXABLE) != 0)
-	seen_relaxable_p = 1;
-    }
-
-  /* Set these so fr30_fill_insn can use them.  */
-  prev_seg    = now_seg;
-  prev_subseg = now_subseg;
-#endif
+  /* Doesn't really matter what we pass for RELAX_P here.  */
+  gas_cgen_finish_insn (insn.insn, insn.buffer,
+			CGEN_FIELDS_BITSIZE (& insn.fields), 1, NULL);
 }
 
 /* The syntax in the manual says constants begin with '#'.
@@ -589,137 +175,6 @@ md_undefined_symbol (name)
   char * name;
 {
   return 0;
-}
-
-/* .scomm pseudo-op handler.
-
-   This is a new pseudo-op to handle putting objects in .scommon.
-   By doing this the linker won't need to do any work and more importantly
-   it removes the implicit -G arg necessary to correctly link the object file.
-*/
-
-static void
-fr30_scomm (ignore)
-     int ignore;
-{
-  register char *    name;
-  register char      c;
-  register char *    p;
-  offsetT            size;
-  register symbolS * symbolP;
-  offsetT            align;
-  int                align2;
-
-  name = input_line_pointer;
-  c = get_symbol_end ();
-
-  /* just after name is now '\0' */
-  p = input_line_pointer;
-  * p = c;
-  SKIP_WHITESPACE ();
-  if (* input_line_pointer != ',')
-    {
-      as_bad (_("Expected comma after symbol-name: rest of line ignored."));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  input_line_pointer ++;		/* skip ',' */
-  if ((size = get_absolute_expression ()) < 0)
-    {
-      /* xgettext:c-format */
-      as_warn (_(".SCOMMon length (%ld.) <0! Ignored."), (long) size);
-      ignore_rest_of_line ();
-      return;
-    }
-
-  /* The third argument to .scomm is the alignment.  */
-  if (* input_line_pointer != ',')
-    align = 8;
-  else
-    {
-      ++ input_line_pointer;
-      align = get_absolute_expression ();
-      if (align <= 0)
-	{
-	  as_warn (_("ignoring bad alignment"));
-	  align = 8;
-	}
-    }
-  /* Convert to a power of 2 alignment.  */
-  if (align)
-    {
-      for (align2 = 0; (align & 1) == 0; align >>= 1, ++ align2)
-	continue;
-      if (align != 1)
-	{
-	  as_bad (_("Common alignment not a power of 2"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-    }
-  else
-    align2 = 0;
-
-  * p = 0;
-  symbolP = symbol_find_or_make (name);
-  * p = c;
-
-  if (S_IS_DEFINED (symbolP))
-    {
-      /* xgettext:c-format */
-      as_bad (_("Ignoring attempt to re-define symbol `%s'."),
-	      S_GET_NAME (symbolP));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  if (S_GET_VALUE (symbolP) && S_GET_VALUE (symbolP) != (valueT) size)
-    {
-      /* xgettext:c-format */
-      as_bad (_("Length of .scomm \"%s\" is already %ld. Not changed to %ld."),
-	      S_GET_NAME (symbolP),
-	      (long) S_GET_VALUE (symbolP),
-	      (long) size);
-
-      ignore_rest_of_line ();
-      return;
-    }
-
-  if (symbolP->local)
-    {
-      segT   old_sec    = now_seg;
-      int    old_subsec = now_subseg;
-      char * pfrag;
-
-      record_alignment (sbss_section, align2);
-      subseg_set (sbss_section, 0);
-      
-      if (align2)
-	frag_align (align2, 0, 0);
-      
-      if (S_GET_SEGMENT (symbolP) == sbss_section)
-	symbolP->sy_frag->fr_symbol = 0;
-      
-      symbolP->sy_frag = frag_now;
-      
-      pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-			(char *) 0);
-      * pfrag = 0;
-      S_SET_SIZE (symbolP, size);
-      S_SET_SEGMENT (symbolP, sbss_section);
-      S_CLEAR_EXTERNAL (symbolP);
-      subseg_set (old_sec, old_subsec);
-    }
-  else
-    {
-      S_SET_VALUE (symbolP, (valueT) size);
-      S_SET_ALIGN (symbolP, align2);
-      S_SET_EXTERNAL (symbolP);
-      S_SET_SEGMENT (symbolP, & scom_section);
-    }
-
-  demand_empty_rest_of_line ();
 }
 
 /* Interface to relax_segment.  */
@@ -996,24 +451,19 @@ md_cgen_lookup_reloc (insn, operand, fixP)
      const CGEN_OPERAND * operand;
      fixS *               fixP;
 {
-#if 0
   switch (CGEN_OPERAND_TYPE (operand))
     {
-    case FR30_OPERAND_DISP8 : return  BFD_RELOC_FR30_10_PCREL;
-    case FR30_OPERAND_DISP16 : return BFD_RELOC_FR30_18_PCREL;
-    case FR30_OPERAND_DISP24 : return BFD_RELOC_FR30_26_PCREL;
-    case FR30_OPERAND_UIMM24 : return BFD_RELOC_FR30_24;
-    case FR30_OPERAND_HI16 :
-    case FR30_OPERAND_SLO16 :
-    case FR30_OPERAND_ULO16 :
-      /* If low/high/shigh/sda was used, it is recorded in `opinfo'.  */
-      if (fixP->tc_fix_data.opinfo != 0)
-	return fixP->tc_fix_data.opinfo;
-      break;
+    case FR30_OPERAND_PC :   return BFD_RELOC_FR30_12_PCREL;
+    case FR30_OPERAND_RI :   
+    case FR30_OPERAND_RJ :   
+    case FR30_OPERAND_NBIT : 
+    case FR30_OPERAND_VBIT :
+    case FR30_OPERAND_ZBIT :
+    case FR30_OPERAND_CBIT :
     default : /* avoid -Wall warning */
       break;
     }
-#endif
+
   return BFD_RELOC_NONE;
 }
 
@@ -1035,11 +485,7 @@ fr30_force_relocation (fix)
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  if (! fr30_relax)
-    return 0;
-
-  return (fix->fx_pcrel
-	  || 0 /* ??? */);
+  return fix->fx_pcrel;
 }
 
 /* Write a value out to the object file, using the appropriate endianness.  */
@@ -1050,10 +496,7 @@ md_number_to_chars (buf, val, n)
      valueT val;
      int    n;
 {
-  if (target_big_endian)
-    number_to_chars_bigendian (buf, val, n);
-  else
-    number_to_chars_littleendian (buf, val, n);
+  number_to_chars_bigendian (buf, val, n);
 }
 
 /* Turn a string in input_line_pointer into a floating point constant of type
@@ -1066,9 +509,9 @@ md_number_to_chars (buf, val, n)
 
 char *
 md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+     char   type;
+     char * litP;
+     int *  sizeP;
 {
   int              i;
   int              prec;
@@ -1104,23 +547,11 @@ md_atof (type, litP, sizeP)
     input_line_pointer = t;
   * sizeP = prec * sizeof (LITTLENUM_TYPE);
 
-  if (target_big_endian)
+  for (i = 0; i < prec; i++)
     {
-      for (i = 0; i < prec; i++)
-	{
-	  md_number_to_chars (litP, (valueT) words[i],
-			      sizeof (LITTLENUM_TYPE));
-	  litP += sizeof (LITTLENUM_TYPE);
-	}
-    }
-  else
-    {
-      for (i = prec - 1; i >= 0; i--)
-	{
-	  md_number_to_chars (litP, (valueT) words[i],
-			      sizeof (LITTLENUM_TYPE));
-	  litP += sizeof (LITTLENUM_TYPE);
-	}
+      md_number_to_chars (litP, (valueT) words[i],
+			  sizeof (LITTLENUM_TYPE));
+      litP += sizeof (LITTLENUM_TYPE);
     }
      
   return 0;
