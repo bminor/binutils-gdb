@@ -21,9 +21,9 @@
 # when specifying the start address of the next.
 #
 
-# We use a start address of __start for Irix 5, _start for other
-# targets.  This is for compatibility with Irix 5, and with old MIPS
-# ELF toolchains.
+# We use a start address of __start for Irix 5 and GNU/Linux/MIPS,
+# _start for other targets.  This is for compatibility with Irix 5,
+# and with old MIPS ELF toolchains.
 if [ -z "$ENTRY" ]; then
   case "${target}" in
   mips*-*-irix5*) ENTRY=__start ;;
