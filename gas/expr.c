@@ -122,7 +122,7 @@ integer_constant (radix, expressionP)
      int radix;
      expressionS *expressionP;
 {
-  char *digit_2;	/*->2nd digit of number. */
+  char *start;		/* start of number. */
   char c;
 
   valueT number;	/* offset or (absolute) value */
@@ -167,20 +167,19 @@ integer_constant (radix, expressionP)
       break;
     case 8:
       maxdig = radix = 8;
-      too_many_digits = (valuesize + 2) / 3;
+      too_many_digits = (valuesize + 2) / 3 + 1;
       break;
     case 16:
       maxdig = radix = 16;
-      too_many_digits = (valuesize + 3) / 4;
+      too_many_digits = (valuesize + 3) / 4 + 1;
       break;
     case 10:
       maxdig = radix = 10;
       too_many_digits = (valuesize + 12) / 4; /* very rough */
     }
 #undef valuesize
-  c = *input_line_pointer;
-  input_line_pointer++;
-  digit_2 = input_line_pointer;
+  start = input_line_pointer;
+  c = *input_line_pointer++;
   for (number = 0;
        (digit = hex_value[(unsigned char) c]) < maxdig;
        c = *input_line_pointer++)
@@ -189,7 +188,7 @@ integer_constant (radix, expressionP)
     }
   /* c contains character after number. */
   /* input_line_pointer->char after c. */
-  small = input_line_pointer - digit_2 < too_many_digits;
+  small = (input_line_pointer - start - 1) < too_many_digits;
   if (!small)
     {
       /*
@@ -202,8 +201,7 @@ integer_constant (radix, expressionP)
       leader = generic_bignum;
       generic_bignum[0] = 0;
       generic_bignum[1] = 0;
-      /* we could just use digit_2, but lets be mnemonic. */
-      input_line_pointer = --digit_2;	/*->1st digit. */
+      input_line_pointer = start;	/*->1st digit. */
       c = *input_line_pointer++;
       for (;
 	   (carry = hex_value[(unsigned char) c]) < maxdig;
@@ -230,7 +228,7 @@ integer_constant (radix, expressionP)
       /* again, c is char after number, */
       /* input_line_pointer->after c. */
       know (LITTLENUM_NUMBER_OF_BITS == 16);
-      if (leader < generic_bignum + sizeof (valueT) / 2)
+      if (leader < generic_bignum + 2)
 	{			/* will fit into 32 bits. */
 	  number =
 	    ((generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
@@ -359,13 +357,12 @@ integer_constant (radix, expressionP)
 
 	}			/* switch on char following the number */
 
-
     }
   else
     {
       /* not a small number */
       expressionP->X_op = O_big;
-      expressionP->X_add_number = number;
+      expressionP->X_add_number = number;	/* number of littlenums */
       input_line_pointer--;	/*->char following number. */
     }
 }
@@ -443,6 +440,7 @@ operand (expressionP)
 	    {
 	      input_line_pointer++;
 	      floating_constant (expressionP);
+	      expressionP->X_add_number = -(isupper (c) ? tolower (c) : c);
 	    }
 	  else
 	    {
@@ -461,12 +459,12 @@ operand (expressionP)
 
 	case 'b':
 #ifdef LOCAL_LABELS_FB
-	  /* FIXME: This seems to be nonsense.  At this point we know
-	     for sure that *input_line_pointer is 'b'.  So why are we
-	     checking it?  What is this code supposed to do?  */
-	  if (!*input_line_pointer
-	      || (!strchr ("+-.0123456789", *input_line_pointer)
-		  && !strchr (EXP_CHARS, *input_line_pointer)))
+	  if (!input_line_pointer[1]
+	      /* Strictly speaking, we should only need to check for
+		 "+-01", since that's all you'd normally have in a
+		 binary constant.  But some of our code does permit
+		 digits greater than the base we're expecting.  */
+	      || !strchr ("+-0123456789", input_line_pointer[1]))
 	    {
 	      input_line_pointer--;
 	      integer_constant (10, expressionP);
@@ -494,13 +492,10 @@ operand (expressionP)
 	  /* if it says '0f' and the line ends or it doesn't look like
 	     a floating point #, its a local label ref.  dtrt */
 	  /* likewise for the b's.  xoxorich. */
-	  /* FIXME: As in the 'b' case, we know that the
-	     *input_line_pointer is 'f'.  What is this code really
-	     trying to do?  */
 	  if (c == 'f'
-	      && (!*input_line_pointer ||
-		  (!strchr ("+-.0123456789", *input_line_pointer) &&
-		   !strchr (EXP_CHARS, *input_line_pointer))))
+	      && (!input_line_pointer[1]
+		  || (!strchr ("+-.0123456789", input_line_pointer[1])
+		      && !strchr (EXP_CHARS, input_line_pointer[1]))))
 	    {
 	      input_line_pointer -= 1;
 	      integer_constant (10, expressionP);
