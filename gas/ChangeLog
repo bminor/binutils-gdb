@@ -1,3 +1,14 @@
+Sat Aug  6 01:15:02 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* as.h: If FOPEN_WB is not defined, do the right thing in a go32
+	environment.
+
+Mon Jul 11 11:34:52 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/tc-h8300.c (pint): New function for handling varying
+	size of int pseudo op.
+	* doc/as.texinfo: Fix typo describing .h8300h pseduop.
+
 Mon Aug  1 02:40:43 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (create_new_space): Initialize sd_subspaces
@@ -255,7 +266,7 @@ Sat Jul  9 00:05:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Fri Jul  8 15:22:07 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
-	* (process_pseudo_op): Pass right are do do_aif.
+	* gasp.c (process_pseudo_op): Pass right args to do do_aif.
 	(get_any_string): New arg 'pretend_quote'.
 	(get_and_process, do_formals, macro_expand, do_sdata,
 	process_pseudo_op): Use new arg.
