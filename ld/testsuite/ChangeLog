@@ -1,5 +1,9 @@
 2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* ld-mips-elf/mips-elf.exp: Use is_elf_format.
+
+2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* ld-mips-elf/mips-elf-flags.exp: Use -melf32bsmip for IRIX6.
 
 2003-06-25  Alan Modra  <amodra@bigpond.net.au>
