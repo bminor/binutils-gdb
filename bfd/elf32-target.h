@@ -129,7 +129,7 @@ bfd_target TARGET_BIG_SYM =
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    bfd_elf32_mkobject,
+    bfd_elf_mkobject,
     _bfd_generic_mkarchive,
     bfd_false
   },
@@ -211,7 +211,7 @@ bfd_target TARGET_LITTLE_SYM =
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    bfd_elf32_mkobject,
+    bfd_elf_mkobject,
     _bfd_generic_mkarchive,
     bfd_false
   },

@@ -37,10 +37,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define CAT4(a,b,c,d)	a/**/b/**/c/**/d
 #endif
 
+/* If size isn't specified as 64 or 32, NAME macro should fail.  */
 #ifndef NAME
 #if ARCH_SIZE==64
 #define NAME(x,y) CAT4(x,64,_,y)
-#else /* ARCH_SIZE==32 */
+#endif
+#if ARCH_SIZE==32
 #define NAME(x,y) CAT4(x,32,_,y)
 #endif
 #endif
@@ -62,10 +64,25 @@ typedef struct
       PTR any;
     }
   tc_data;
-  ElfNAME (External_Sym) native_elf_sym;
-}
+  Elf32_External_Sym native_elf_sym;
+} elf32_symbol_type;
 
-elfNAME (symbol_type);
+typedef struct
+{
+  asymbol symbol;
+  Elf_Internal_Sym internal_elf_sym;
+  /* these are used for the generation of .stabX symbols (?) */
+  short desc;
+  unsigned char type;
+  char other;
+  union
+    {
+      unsigned int hppa_arg_reloc;
+      PTR any;
+    }
+  tc_data;
+  Elf64_External_Sym native_elf_sym;
+} elf64_symbol_type;
 
 /* Lacking nested functions and nested types, set up for mapping over
    BFD sections to produce ELF sections.  */
@@ -93,12 +110,14 @@ struct elf_backend_data
      that would be considered global, e.g., if you've got a program
      reading and writing many BFDs.  My hunch is that it's specific to
      the output BFD.  If not, put a comment here explaining why.  */
-  elfNAME (symbol_type) * global_sym;
+  /* @@ Was pointer to elfNAME(symbol_type).  This makes it size-
+     independent.  */
+  PTR global_sym;
 };
 
 extern bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
 extern bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
-extern boolean bfd_elf32_mkobject PARAMS ((bfd *));
+extern boolean bfd_elf_mkobject PARAMS ((bfd *));
 extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
 extern char *bfd_elf32_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf32_core_file_failing_signal PARAMS ((bfd *));
@@ -149,5 +168,45 @@ struct strtab
 extern struct elf32_internal_shdr *
 bfd_elf_locate_sh PARAMS ((bfd *, struct strtab *,
 			   struct elf32_internal_shdr *, CONST char *));
+
+/* Some private data is stashed away for future use using the tdata pointer
+   in the bfd structure.  */
+
+struct elf_obj_tdata
+{
+  Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
+  Elf_Internal_Shdr *elf_sect_ptr;
+  struct strtab *strtab_ptr;
+  int symtab_section;
+  int num_locals;
+  int num_globals;
+  int *symtab_map;
+  void *prstatus;		/* The raw /proc prstatus structure */
+  void *prpsinfo;		/* The raw /proc prpsinfo structure */
+  PTR raw_syms;			/* Elf_External_Sym* */
+  Elf_Internal_Sym *internal_syms;
+  PTR symbols;			/* elf_symbol_type */
+};
+
+#define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
+#define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
+#define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
+#define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
+#define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
+#define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
+#define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
+#define elf_symtab_map(bfd)	(elf_tdata(bfd) -> symtab_map)
+#define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
+#define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
+#define obj_symbols(bfd)	((elf_symbol_type*)(elf_tdata(bfd) -> symbols))
+#define obj_raw_syms(bfd)	((Elf_External_Sym*)(elf_tdata(bfd) -> raw_syms))
+#define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
+
+extern char * elf_string_from_elf_section ();
+extern char * elf_get_str_section ();
+
+#define bfd_elf32_mkobject	bfd_elf_mkobject
+#define bfd_elf64_mkobject	bfd_elf_mkobject
+#define elf_mkobject		bfd_elf_mkobject
 
 #endif /* _LIBELF_H_ */
