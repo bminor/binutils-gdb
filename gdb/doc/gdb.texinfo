@@ -1204,6 +1204,13 @@ Any text from a @kbd{#} to the end of the line is a comment; it does
 nothing.  This is useful mainly in command files (@pxref{Command
 Files,,Command files}).
 
+@cindex repeating command sequences
+@kindex C-o @r{(operate-and-get-next)}
+The @kbd{C-o} binding is useful for repeating a complex sequence of
+commands.  This command accepts the current line, like @kbd{RET}, and
+then fetches the next line relative to the current line from the history
+for editing.
+
 @node Completion
 @section Command completion
 
