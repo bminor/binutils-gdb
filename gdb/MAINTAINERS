@@ -190,21 +190,36 @@ All recognized developers can make mechanical changes (by virtue of
 the obvious fix rule) to ``maintenance only'' targets.  The change
 shall be sanity checked by compiling with one of the listed targets.
 
-The GAWK segment:
+The Bourne shell script:
 
-  awk < "${maintainers}" '
-  $2 ~ /--target=.*/ {
-    targets = gensub (/^.*--target=/, "", 1, $2)
-    warnings = gensub (/[)]*$/, "", 1, $3)
-    split (targets, targ, /,/)
-    for (i in targ) {
-	print targ[i], warnings
-    }
-  }'
+cat MAINTAINERS | tr -s '[\t]' '[ ]' | sed -n '
+/^[ ]*[-a-z0-9\.]*[ ]*[(]*--target=.*/ !d
+s/^.*--target=//
+s/).*$//
+h
+:loop
+  g
+  /^[^ ]*,/ !b end
+  s/,[^ ]*//
+  p
+  g
+  s/^[^,]*,//
+  h
+b loop
+:end
+p
+'
 
-can be used to generate a full list of --target=
---enable-gdb-build-warnings= pairs.
+can be used to generate a complete list of --target=
+--enable-gdb-build-warnings= pairs of the form:
 
+	arc-elf ,-Werror
+	...
+	hppa1.1-hp-proelf broken
+	...
+
+While the ``broken'' targets are included in the listing, the are not
+expected to build.
 
 
 Host/Native:

@@ -1,3 +1,9 @@
+2002-05-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (--enable-gdb-build-warnings): Rewrite script to use
+	`tr' and `sed'.  Mention that `broken' targets are not expected to
+	build.
+
 2002-05-27  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_skip_prologue): Remove obsolete note.
