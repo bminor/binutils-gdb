@@ -1,5 +1,9 @@
 Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_begin_writing): Fix braino (one call to align
+	space/subspace data was done unconditionally rather than
+	just for executables.)
+
 	* som.c (som_begin_writing): Align text in all executables to
 	make HPUX kernel happy.  Fixes strip/objcopy for shared
 	executables.

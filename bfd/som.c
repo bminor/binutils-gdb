@@ -3077,7 +3077,8 @@ som_begin_writing (abfd)
       while (!som_is_space (section))
 	section = section->next;
 
-      current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
+      if (abfd->flags & EXEC_P)
+	current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
 
       /* Now look for all its subspaces.  */
       for (subsection = abfd->sections;
