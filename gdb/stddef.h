@@ -7,7 +7,9 @@ typedef long ptrdiff_t;
 
 /* Unsigned type of `sizeof' something.  */
 
-#ifndef _SIZE_T	/* in case <sys/types.h> has defined it. */
+/* in case <sys/types.h> has defined it. */
+/* DECstation uses _SIZE_T_.  */
+#if !defined (_SIZE_T) && !defined (_SIZE_T_)
 #define _SIZE_T
 typedef unsigned long size_t;
 #endif /* _SIZE_T */
