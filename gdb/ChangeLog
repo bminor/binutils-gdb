@@ -1,3 +1,11 @@
+2002-05-22  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (frame_state_for): Added safety check for a valid
+	fde->cie_ptr.
+	(dwarf2_build_frame_info): Corrected handling of eh_frame.
+	(dwarf2_build_frame_info): Add offset to fde->initial_location 
+	so that frames of shared libraries are mapped correctly.
+	
 2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/alpha/tm-nbsd.h: Include solib.h.
