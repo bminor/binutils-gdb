@@ -1,3 +1,19 @@
+Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (MIPS_DEFAULT_STACK_ARGSIZE): Fix typo.
+
+	* config/mips/tm-irix5.h (GDB_MULTI_ARCH): Add
+ 	definition. Disable.  Document known problems.
+	(MIPS_DEFAULT_ABI): Define.
+
+	* mips-tdep.c (enum mips_abi): Define.
+	(struct gdbarch_tdep): Replace mips_eabi with mips_abi.
+	(MIPS_EABI): Update.
+	(mips_gdbarch_init): Add preliminary support for IRIX N32 ABI.
+  	Determine ABI from either ELF_FLAGS or MIPS_DEFAULT_ABI. When
+ 	looking for a matching architecture require a matching MIPS_ABI.
+	(mips_gdbarch_init): Cleanup arch_debug information.
+
 2000-05-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * solib.c (symbol_add_stub): Remember the index and the name of
@@ -8,6 +24,7 @@
 	where the symbol lives to get the index, instead of guessing.
 
 2000-05-10  Michael Snyder  <msnyder@seadog.cygnus.com>
+
 	Make Sparc a Multi-Arch target.  Discard PARAMS macro (require ANSI).
 	* sparc-tdep.c: include arch-utils.h.
 	(SPARC_HAS_FPU, FP_REGISTER_BYTES, FP_MAX_REG NUM, SPARC_INTREG_SIZE,
