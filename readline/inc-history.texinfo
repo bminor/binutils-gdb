@@ -101,7 +101,7 @@ history list.
 
 @item @code{!}
 Start a history subsititution, except when followed by a space, tab, or
-the end of the line... @key{=} or @key{(}.
+the end of the line... @kbd{=} or @kbd{(}.
 
 @item @code{!!}
 Refer to the previous command.  This is a synonym for @code{!-1}.
@@ -123,9 +123,9 @@ Refer to the most recent command containing @var{string}.
 @node Word Designators, Modifiers, Event Designators, History Interaction
 @appendixsubsec Word Designators
 
-A @key{:} separates the event specification from the word designator.  It
-can be omitted if the word designator begins with a @key{^}, @key{$},
-@key{*} or @key{%}.  Words are numbered from the beginning of the line,
+A @kbd{:} separates the event specification from the word designator.  It
+can be omitted if the word designator begins with a @kbd{^}, @kbd{$},
+@kbd{*} or @kbd{%}.  Words are numbered from the beginning of the line,
 with the first word being denoted by a 0 (zero).
 
 @table @code
@@ -150,7 +150,7 @@ A range of words; @code{-@var{y}} Abbreviates @code{0-@var{y}}.
 
 @item *
 All of the words, excepting the zero'th.  This is a synonym for @code{1-$}.
-It is not an error to use @key{*} if there is just one word in the event.
+It is not an error to use @kbd{*} if there is just one word in the event.
 The empty string is returned in that case.
 
 @end table
@@ -159,7 +159,7 @@ The empty string is returned in that case.
 @appendixsubsec Modifiers
 
 After the optional word designator, you can add a sequence of one or more
-of the following modifiers, each preceded by a @key{:}.
+of the following modifiers, each preceded by a @kbd{:}.
 
 @table @code
 
