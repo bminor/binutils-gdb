@@ -178,7 +178,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.12.2
+VERSION = 4.12.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -328,12 +328,15 @@ SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # "system" headers.  Using these in dependencies is a rather personal
-# choice.  By default, we do not depend on these files.
-#getopt_h =	$(INCLUDE_DIR)/getopt.h
-#ieee-float_h =	$(INCLUDE_DIR)/ieee-float.h
-#bfd_h =		$(BFD_DIR)/bfd.h
-#wait_h =	$(INCLUDE_DIR)/wait.h
-#dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
+# choice. (-rich, summer 1993)
+# (Why would we not want to depend on them?  If one of these changes in a 
+# non-binary-compatible way, it is a real pain to remake the right stuff
+# without these dependencies -kingdon, 13 Mar 1994)
+getopt_h =	$(INCLUDE_DIR)/getopt.h
+floatformat_h =	$(INCLUDE_DIR)/floatformat.h
+bfd_h =		$(BFD_DIR)/bfd.h
+wait_h =	$(INCLUDE_DIR)/wait.h
+dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 
 dcache_h = dcache.h
 remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h remote-sim.h
@@ -1212,17 +1215,17 @@ i386ly-nat.o: i386ly-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(inferior_h) target.h
 i386mach-nat.o: i386mach-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
-i386v-nat.o: i386v-nat.c $(ieee-float_h) $(defs_h) $(gdbcore_h) \
+i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h
 
 i386v4-nat.o: i386v4-nat.c $(defs_h)
 
-i387-tdep.o: i387-tdep.c $(ieee-float_h) $(defs_h) $(gdbcore_h) \
+i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) language.h
 
 i960-pinsn.o: i960-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
-i960-tdep.o: i960-tdep.c $(ieee-float_h) $(defs_h) $(expression_h) \
+i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h)
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
@@ -1368,7 +1371,7 @@ remote-mm.o: remote-mm.c $(bfd_h) $(wait_h) $(defs_h) $(inferior_h) \
 remote-mon.o: remote-mon.c $(wait_h) $(command_h) $(defs_h) \
 	$(gdbcore_h) monitor.h serial.h target.h
 
-remote-nindy.o: remote-nindy.c $(ieee-float_h) $(wait_h) $(command_h) \
+remote-nindy.o: remote-nindy.c $(floatformat_h) $(wait_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \
 	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
 	symfile.h
@@ -1421,7 +1424,7 @@ source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 sparc-pinsn.o: sparc-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
-sparc-tdep.o: sparc-tdep.c $(ieee-float_h) $(defs_h) $(gdbcore_h) \
+sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) objfiles.h symfile.h target.h
 
 stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \

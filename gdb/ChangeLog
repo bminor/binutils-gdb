@@ -1,5 +1,10 @@
 Sun Mar 13 09:45:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Version 4.12.3.
+
+	* Makefile.in: Enable commented out getopt_h, bfd_h, etc.  Change
+	ieee-float.h to floatformat.h.
+
 	* valprint.c (val_print_string): Ignore error if the error
 	happened after a terminating '\0'.
 
