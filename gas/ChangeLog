@@ -1,3 +1,14 @@
+Fri Oct 24 11:19:22 1997  Jakub Jelinek  <jj@sunsite.mff.cuni.cz>
+
+	* config/tc-sparc.c (sparc_memory_model): New variable.
+	(md_longopts): Add -TSO/-PSO/-RMO options.
+	(md_parse_options): Handle them.
+	(sparc_elf_final_processing): For 64 ELF, set required
+	memory ordering in e_flags. Default to RMO and let the user
+	override it through command line.
+
+	* config/tc-sparc.h (elf_tc_final_processing): Add.
+
 Wed Oct 22 17:42:12 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-sparc.c (v9a_asr_table): New variable.

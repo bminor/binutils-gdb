@@ -26,6 +26,8 @@
 
 #include "opcode/sparc.h"
 
+#include "elf/sparc.h"
+
 static struct sparc_arch *lookup_arch PARAMS ((char *));
 static void init_default_arch PARAMS ((void));
 static void sparc_ip PARAMS ((char *, const struct sparc_opcode **));
@@ -64,6 +66,7 @@ static enum sparc_opcode_arch_val max_architecture;
 
 /* Either 32 or 64, selects file format.  */
 static int sparc_arch_size;
+static enum { MM_TSO, MM_PSO, MM_RMO } sparc_memory_model = MM_RMO;
 /* Initial (default) value, recorded separately in case a user option
    changes the value before md_show_usage is called.  */
 static int default_arch_size;
@@ -353,14 +356,20 @@ struct option md_longopts[] = {
   {"32", no_argument, NULL, OPTION_32},
 #define OPTION_64 (OPTION_MD_BASE + 4)
   {"64", no_argument, NULL, OPTION_64},
+#define OPTION_TSO (OPTION_MD_BASE + 5)
+  {"TSO", no_argument, NULL, OPTION_TSO},
+#define OPTION_PSO (OPTION_MD_BASE + 6)
+  {"PSO", no_argument, NULL, OPTION_PSO},
+#define OPTION_RMO (OPTION_MD_BASE + 7)
+  {"RMO", no_argument, NULL, OPTION_RMO},
 #endif
 #ifdef SPARC_BIENDIAN
-#define OPTION_LITTLE_ENDIAN (OPTION_MD_BASE + 5)
+#define OPTION_LITTLE_ENDIAN (OPTION_MD_BASE + 8)
   {"EL", no_argument, NULL, OPTION_LITTLE_ENDIAN},
-#define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 6)
+#define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 9)
   {"EB", no_argument, NULL, OPTION_BIG_ENDIAN},
 #endif
-#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 7)
+#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 10)
   {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
   {NULL, no_argument, NULL, 0}
 };
@@ -467,6 +476,18 @@ md_parse_option (c, arg)
       }
       break;
 
+    case OPTION_TSO:
+      sparc_memory_model = MM_TSO;
+      break;
+
+    case OPTION_PSO:
+      sparc_memory_model = MM_PSO;
+      break;
+
+    case OPTION_RMO:
+      sparc_memory_model = MM_RMO;
+      break;
+
     case 'V':
       print_version_id ();
       break;
@@ -534,6 +555,12 @@ md_show_usage (stream)
 -64			create 64 bit object file\n");
   fprintf (stream, "\
 			[default is %d]\n", default_arch_size);
+  fprintf (stream, "\
+-TSO			use Total Store Ordering\n\
+-PSO			use Partial Store Ordering\n\
+-RMO			use Relaxed Memory Ordering\n");
+  fprintf (stream, "\
+			[default is %s]\n", (default_arch_size == 64) ? "RMO" : "TSO");
   fprintf (stream, "\
 -KPIC			generate PIC\n\
 -V			print assembler version number\n\
@@ -3301,3 +3328,28 @@ sparc_handle_align (fragp)
         }
     }
 }
+
+#ifdef OBJ_ELF
+/* Some special processing for a Sparc ELF file.  */
+
+void
+sparc_elf_final_processing ()
+{
+  /* Set the Sparc ELF flag bits.  FIXME: There should probably be some
+     sort of BFD interface for this.  */
+  if (sparc_arch_size == 64)
+    switch (sparc_memory_model)
+      {
+      case MM_RMO:
+        elf_elfheader (stdoutput)->e_flags |= EF_SPARCV9_RMO;
+        break;
+      case MM_PSO:
+        elf_elfheader (stdoutput)->e_flags |= EF_SPARCV9_PSO;
+        break;
+      }
+  else if (current_architecture >= SPARC_OPCODE_ARCH_V9)
+    elf_elfheader (stdoutput)->e_flags |= EF_SPARC_32PLUS;
+  if (current_architecture == SPARC_OPCODE_ARCH_V9A)
+    elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1;
+}
+#endif
