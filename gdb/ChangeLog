@@ -1,5 +1,12 @@
 Wed May 26 10:28:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (define_symbol, case 't'): Only set the name if it
+	is not a pointer type.
+
+	* stabsread.c (define_symbol): Clean up logic; move the read_type
+	calls to inside the switch statement (this improves the error
+	handling).
+
 	* mipsread.c (parse_symbol, parse_partial_symbols): Deal with Fortran
 	common blocks.
 

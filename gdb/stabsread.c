@@ -142,6 +142,11 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 #define BELIEVE_PCC_PROMOTION 0
 #endif
 
+#if 0
+/* I think this can go away, all current uses have been removed.
+   GCC emits a few crazy types which can only be distinguished by the
+   name (complex, long long on some machines), but I'd say fix GCC.  */
+
 /* During some calls to read_type (and thus to read_range_type), this
    contains the name of the type being defined.  Range types are only
    used in C as basic types.  We use the name to distinguish the otherwise
@@ -149,6 +154,7 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
    FIXME, this should disappear with better type management.  */
 
 static char *long_kludge_name;
+#endif
 
 #if 0
 struct complaint dbx_class_complaint =
@@ -209,6 +215,9 @@ static int undef_types_length;
   } while (0)
 
 
+/* This is used by other symbol readers besides stabs, so for cleanliness
+   should probably be in buildsym.c.  */
+
 int
 hashname (name)
      char *name;
@@ -607,14 +616,15 @@ define_symbol (valu, string, desc, type, objfile)
   else
     deftype = *p++;
 
-  /* c is a special case, not followed by a type-number.
-     SYMBOL:c=iVALUE for an integer constant symbol.
-     SYMBOL:c=rVALUE for a floating constant symbol.
-     SYMBOL:c=eTYPE,INTVALUE for an enum constant symbol.
-        e.g. "b:c=e6,0" for "const b = blob1"
-	(where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
-  if (deftype == 'c')
+  switch (deftype)
     {
+    case 'c':
+      /* c is a special case, not followed by a type-number.
+	 SYMBOL:c=iVALUE for an integer constant symbol.
+	 SYMBOL:c=rVALUE for a floating constant symbol.
+	 SYMBOL:c=eTYPE,INTVALUE for an enum constant symbol.
+	 e.g. "b:c=e6,0" for "const b = blob1"
+	 (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
       if (*p != '=')
 	{
 	  SYMBOL_CLASS (sym) = LOC_CONST;
@@ -715,52 +725,10 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &file_symbols);
       return sym;
-    }
 
-  /* Now usually comes a number that says which data type,
-     and possibly more stuff to define the type
-     (all of which is handled by read_type)  */
-
-  if (deftype == 'p' && *p == 'F')
-    /* pF is a two-letter code that means a function parameter in Fortran.
-       The type-number specifies the type of the return value.
-       Translate it into a pointer-to-function type.  */
-    {
-      p++;
-      SYMBOL_TYPE (sym)
-	= lookup_pointer_type (lookup_function_type (read_type (&p, objfile)));
-    }
-  else
-    {
-      /* The symbol class letter is followed by a type (typically the
-	 type of the symbol, or its return-type, or etc).  Read it.  */
-
-      synonym = *p == 't';
-
-      if (synonym)
-	{
-	  p++;
-	  type_synonym_name = obsavestring (SYMBOL_NAME (sym),
-					    strlen (SYMBOL_NAME (sym)),
-					    &objfile -> symbol_obstack);
-	}
-
-      /* Here we save the name of the symbol for read_range_type, which
-	 ends up reading in the basic types.  In stabs, unfortunately there
-	 is no distinction between "int" and "long" types except their
-	 names.  Until we work out a saner type policy (eliminating most
-	 builtin types and using the names specified in the files), we
-	 save away the name so that far away from here in read_range_type,
-	 we can examine it to decide between "int" and "long".  FIXME.  */
-      long_kludge_name = SYMBOL_NAME (sym);
-
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
-    }
-
-  switch (deftype)
-    {
     case 'C':
       /* The name of a caught exception.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LABEL;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
@@ -769,6 +737,7 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'f':
       /* A static function definition.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &file_symbols);
@@ -811,6 +780,7 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'F':
       /* A global function definition.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &global_symbols);
@@ -821,6 +791,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 value is not correct.  It is necessary to search for the
 	 corresponding linker definition to find the value.
 	 These definitions appear at the end of the namelist.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       i = hashname (SYMBOL_NAME (sym));
       SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
       global_sym_chain[i] = sym;
@@ -833,6 +804,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 when there is no code letter in the dbx data.
 	 Dbx data never actually contains 'l'.  */
     case 'l':
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -840,11 +812,25 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 'p':
+      if (*p == 'F')
+	/* pF is a two-letter code that means a function parameter in Fortran.
+	   The type-number specifies the type of the return value.
+	   Translate it into a pointer-to-function type.  */
+	{
+	  p++;
+	  SYMBOL_TYPE (sym)
+	    = lookup_pointer_type
+	      (lookup_function_type (read_type (&p, objfile)));
+	}
+      else
+	SYMBOL_TYPE (sym) = read_type (&p, objfile);
+
       /* Normally this is a parameter, a LOC_ARG.  On the i960, it
 	 can also be a LOC_LOCAL_ARG depending on symbol type.  */
 #ifndef DBX_PARM_SYMBOL_CLASS
 #define	DBX_PARM_SYMBOL_CLASS(type)	LOC_ARG
 #endif
+
       SYMBOL_CLASS (sym) = DBX_PARM_SYMBOL_CLASS (type);
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -940,11 +926,15 @@ define_symbol (valu, string, desc, type, objfile)
          are referenced by this file.  gdb is not prepared to deal
          with this extra information.  FIXME, it ought to.  */
       if (type == N_FUN)
-	goto process_prototype_types;
+	{
+	  read_type (&p, objfile);
+	  goto process_prototype_types;
+	}
       /*FALLTHROUGH*/
 
     case 'R':
       /* Parameter which is in a register.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
@@ -958,6 +948,7 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'r':
       /* Register variable (either global or local).  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGISTER;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
@@ -998,6 +989,7 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'S':
       /* Static symbol at top level of file */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1005,6 +997,19 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 't':
+#if 0
+      /* See comment where long_kludge_name is declared.  */
+      /* Here we save the name of the symbol for read_range_type, which
+	 ends up reading in the basic types.  In stabs, unfortunately there
+	 is no distinction between "int" and "long" types except their
+	 names.  Until we work out a saner type policy (eliminating most
+	 builtin types and using the names specified in the files), we
+	 save away the name so that far away from here in read_range_type,
+	 we can examine it to decide between "int" and "long".  FIXME.  */
+      long_kludge_name = SYMBOL_NAME (sym);
+#endif
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+
       /* For a nameless type, we don't want a create a symbol, thus we
 	 did not use `sym'. Return without further processing. */
       if (nameless) return NULL;
@@ -1013,28 +1018,65 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       /* C++ vagaries: we may have a type which is derived from
-	a base type which did not have its name defined when the
-	derived class was output.  We fill in the derived class's
-	base part member's name here in that case.  */
+	 a base type which did not have its name defined when the
+	 derived class was output.  We fill in the derived class's
+	 base part member's name here in that case.  */
       if (TYPE_NAME (SYMBOL_TYPE (sym)) != NULL)
-        if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-		 || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
-		&& TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
-	 {
-	   int j;
-	   for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
-	     if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
-	       TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
-		 type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
-	 }
+	if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
+	     || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+	    && TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
+	  {
+	    int j;
+	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
+	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
+		TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
+		  type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
+	  }
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
-	TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);
+	{
+	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR)
+	    {
+	      /* If we are giving a name to a type such as "pointer
+		 to foo", we better not set the TYPE_NAME.  If the
+		 program contains "typedef char *caddr_t;", we don't
+		 want all variables of type char * to print as
+		 caddr_t.  This is not just a consequence of GDB's
+		 type management; PCC and GCC (at least through
+		 version 2.4) both output variables of either type
+		 char * or caddr_t with the type number defined in
+		 the 't' symbol for caddr_t.  If a future compiler
+		 cleans this up it GDB is not ready for it yet, but
+		 if it becomes ready we somehow need to disable this
+		 check (without breaking the PCC/GCC2.4 case).
+
+		 Sigh.
+
+		 Fortunately, this check seems not to be necessary
+		 for anything except pointers.  */
+	    }
+	  else
+	    TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);
+	}
 
       add_symbol_to_list (sym, &file_symbols);
       break;
 
     case 'T':
+      /* Struct, union, or enum tag.  For GNU C++, this can be be followed
+	 by 't' which means we are typedef'ing it as well.  */
+      synonym = *p == 't';
+
+      if (synonym)
+	{
+	  p++;
+	  type_synonym_name = obsavestring (SYMBOL_NAME (sym),
+					    strlen (SYMBOL_NAME (sym)),
+					    &objfile -> symbol_obstack);
+	}
+
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+
       /* For a nameless type, we don't want a create a symbol, thus we
 	 did not use `sym'. Return without further processing. */
       if (nameless) return NULL;
@@ -1067,6 +1109,7 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'V':
       /* Static symbol of local scope */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1075,6 +1118,7 @@ define_symbol (valu, string, desc, type, objfile)
 
     case 'v':
       /* Reference parameter */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REF_ARG;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1086,6 +1130,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 Sun claims ("dbx and dbxtool interfaces", 2nd ed)
 	 that Pascal uses it too, but when I tried it Pascal used
 	 "x:3" (local symbol) instead.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1093,9 +1138,9 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     default:
+      SYMBOL_TYPE (sym) = error_type (&p);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_VALUE (sym) = 0;
-      SYMBOL_TYPE (sym) = error_type (&p);
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &file_symbols);
       break;
@@ -1177,13 +1222,11 @@ error_type (pp)
 }
 
 
-/* Read a dbx type reference or definition;
-   return the type that is meant.
-   This can be just a number, in which case it references
-   a type already defined and placed in type_vector.
-   Or the number can be followed by an =, in which case
-   it means to define a new type according to the text that
-   follows the =.  */
+/* Read type information or a type definition; return the type.  Even
+   though this routine accepts either type information or a type
+   definition, the distinction is relevant--some parts of stabsread.c
+   assume that type information starts with a digit, '-', or '(' in
+   deciding whether to call read_type.  */
 
 struct type *
 read_type (pp, objfile)
