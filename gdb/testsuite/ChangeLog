@@ -1,5 +1,8 @@
 Mon Feb 10 11:26:59 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.base/exprs.exp: Delete bogus/incorrect (and probably
+	redundant) test.
+
 	* gdb.base/recurse.exp: Relax final value test for 'b' so that
 	it doesn't lose for 16bit integer systems.
 
