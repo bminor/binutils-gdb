@@ -324,6 +324,8 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
       gdb_assert (pid == GET_LWP (ptid)
 		  && WIFSTOPPED (status) && WSTOPSIG (status));
 
+      child_post_attach (pid);
+
       lp->stopped = 1;
 
       if (debug_lin_lwp)
@@ -1067,6 +1069,10 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       return minus_one_ptid;
     }
 
+  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+    return linux_handle_extended_wait (pid, status, ourstatus);
+
   store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
 }
@@ -1488,6 +1494,14 @@ retry:
   else
     trap_ptid = null_ptid;
 
+  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+    {
+      linux_handle_extended_wait (ptid_get_pid (trap_ptid),
+				  status, ourstatus);
+      return trap_ptid;
+    }
+
   store_waitstatus (ourstatus, status);
   return (threaded ? lp->ptid : pid_to_ptid (GET_LWP (lp->ptid)));
 }
@@ -1657,6 +1671,12 @@ init_lin_lwp_ops (void)
   lin_lwp_ops.to_mourn_inferior = lin_lwp_mourn_inferior;
   lin_lwp_ops.to_thread_alive = lin_lwp_thread_alive;
   lin_lwp_ops.to_pid_to_str = lin_lwp_pid_to_str;
+  lin_lwp_ops.to_post_startup_inferior = child_post_startup_inferior;
+  lin_lwp_ops.to_post_attach = child_post_attach;
+  lin_lwp_ops.to_insert_fork_catchpoint = child_insert_fork_catchpoint;
+  lin_lwp_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
+  lin_lwp_ops.to_insert_exec_catchpoint = child_insert_exec_catchpoint;
+
   lin_lwp_ops.to_stratum = thread_stratum;
   lin_lwp_ops.to_has_thread_control = tc_schedlock;
   lin_lwp_ops.to_magic = OPS_MAGIC;
