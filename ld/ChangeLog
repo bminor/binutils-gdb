@@ -1,3 +1,7 @@
+2004-08-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld.texinfo (Top): Document specific options of 68HC11 and 68HC12.
+
 2004-08-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* scripttempl/elfm68hc12.sc: Align text, rodata and data section

@@ -152,6 +152,9 @@ section entitled ``GNU Free Documentation License''.
 @ifset HPPA
 * HPPA ELF32::                  ld and HPPA 32-bit ELF
 @end ifset
+@ifset M68HC11
+* M68HC11/68HC12::              ld and the Motorola 68HC11 and 68HC12 families
+@end ifset
 @ifset TICOFF
 * TI COFF::                     ld and the TI COFF
 @end ifset
@@ -1302,6 +1305,9 @@ This option is only supported on a few targets.
 @ifset XTENSA
 @xref{Xtensa,, @command{ld} and Xtensa Processors}.
 @end ifset
+@ifset M68HC11
+@xref{M68HC11/68HC12,,@command{ld} and the 68HC11 and 68HC12}.
+@end ifset
 
 On some platforms, the @samp{--relax} option performs global
 optimizations that become possible when the linker resolves addressing
@@ -2172,6 +2178,34 @@ subsystem version also.
 @end table
 
 @c man end
+
+@ifset M68HC11
+@subsection Options specific to Motorola 68HC11 and 68HC12 targets
+
+@c man begin OPTIONS
+
+The 68HC11 and 68HC12 linkers support specific options to control the
+memory bank switching mapping and trampoline code generation.
+
+@table @gcctabopt
+
+@kindex --no-trampoline
+@item --no-trampoline
+This option disables the generation of trampoline. By default a trampoline
+is generated for each far function which is called using a @code{jsr}
+instruction (this happens when a pointer to a far function is taken).
+
+@kindex --bank-window
+@item --bank-window @var{name}
+This option indicates to the linker the name of the memory region in
+the @samp{MEMORY} specification that describes the memory bank window.
+The definition of such region is then used by the linker to compute
+paging and addresses within the memory window.
+
+@end table
+
+@c man end
+@end ifset
 
 @ifset UsesEnvVars
 @node Environment
@@ -4648,6 +4682,9 @@ functionality are not listed.
 @ifset MSP430
 * MSP430::			@command{ld} and MSP430
 @end ifset
+@ifset M68HC11
+* M68HC11/68HC12::		@code{ld} and the Motorola 68HC11 and 68HC12 families
+@end ifset
 @ifset TICOFF
 * TI COFF::                     @command{ld} and TI COFF
 @end ifset
@@ -4787,6 +4824,57 @@ not itself call any subroutines).
 @ifclear GENERIC
 @raisesections
 @end ifclear
+
+@ifset M68HC11
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node M68HC11/68HC12
+@section @command{ld} and the Motorola 68HC11 and 68HC12 families
+
+@cindex M68HC11 and 68HC12 support
+
+@subsection Linker Relaxation
+
+For the Motorola 68HC11, @command{ld} can perform these global
+optimizations when you specify the @samp{--relax} command-line option.
+
+@table @emph
+@cindex relaxing on M68HC11
+@item relaxing address modes
+@command{ld} finds all @code{jsr} and @code{jmp} instructions whose
+targets are within eight bits, and turns them into eight-bit
+program-counter relative @code{bsr} and @code{bra} instructions,
+respectively.
+
+@command{ld} also looks at all 16-bit extended addressing modes and
+transforms them in a direct addressing mode when the address is in
+page 0 (between 0 and 0x0ff).
+
+@item relaxing gcc instruction group
+When @command{gcc} is called with @option{-mrelax}, it can emit group
+of instructions that the linker can optimize to use a 68HC11 direct
+addressing mode. These instructions consists of @code{bclr} or
+@code{bset} instructions.
+
+@end table
+
+@subsection Trampoline Generation
+
+@cindex trampoline generation on M68HC11
+@cindex trampoline generation on M68HC12
+For 68HC11 and 68HC12, @command{ld} can generate trampoline code to
+call a far function using a normal @code{jsr} instruction. The linker
+will also change the relocation to some far function to use the 
+trampoline address instead of the function address. This is typically the
+case when a pointer to a function is taken. The pointer will in fact
+point to the function trampoline.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
 
 @node ARM
 @section @command{ld}'s Support for Interworking Between ARM and Thumb Code
