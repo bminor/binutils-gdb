@@ -1,3 +1,8 @@
+Wed Feb 22 21:12:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (append_insn): If listing_prev_line is called,
+	call frag_grow to make sure there is still room for a variant.
+
 Fri Feb 17 14:50:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_pseudo_table): Add 2byte, 4byte and 8byte

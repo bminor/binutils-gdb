@@ -966,7 +966,18 @@ append_insn (place, ip, address_expr, reloc_type)
 	  for (i = 0; i < nops; i++)
 	    emit_nop ();
 	  if (listing)
-	    listing_prev_line ();
+	    {
+	      listing_prev_line ();
+	      /* We may be at the start of a variant frag.  In case we
+                 are, make sure there is enough space for the frag
+                 after the frags created by listing_prev_line.  The
+                 argument to frag_grow here must be at least as large
+                 as the argument to all other calls to frag_grow in
+                 this file.  We don't have to worry about being in the
+                 middle of a variant frag, because the variants insert
+                 all needed nop instructions themselves.  */
+	      frag_grow (40);
+	    }
 	  if (insn_label != NULL)
 	    {
 	      assert (S_GET_SEGMENT (insn_label) == now_seg);
