@@ -2604,9 +2604,8 @@ process_operands ()
   else if (i.tm.opcode_modifier & Modrm)
     {
       /* The opcode is completed (modulo i.tm.extension_opcode which
-	 must be put into the modrm byte).
-	 Now, we make the modrm & index base bytes based on all the
-	 info we've collected.  */
+	 must be put into the modrm byte).  Now, we make the modrm and
+	 index base bytes based on all the info we've collected.  */
 
       default_seg = build_modrm_byte ();
     }
@@ -2633,12 +2632,14 @@ process_operands ()
       default_seg = &ds;
     }
 
-  /* If a segment was explicitly specified,
-     and the specified segment is not the default,
-     use an opcode prefix to select it.
-     If we never figured out what the default segment is,
-     then default_seg will be zero at this point,
-     and the specified segment prefix will always be used.  */
+  if (i.tm.base_opcode == 0x8d /* lea */ && i.seg[0] && !quiet_warnings)
+    as_warn (_("segment override on `lea' is ineffectual"));
+
+  /* If a segment was explicitly specified, and the specified segment
+     is not the default, use an opcode prefix to select it.  If we
+     never figured out what the default segment is, then default_seg
+     will be zero at this point, and the specified segment prefix will
+     always be used.  */
   if ((i.seg[0]) && (i.seg[0] != default_seg))
     {
       if (!add_prefix (i.seg[0]->seg_prefix))

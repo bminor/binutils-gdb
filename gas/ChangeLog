@@ -1,3 +1,8 @@
+2002-09-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (process_operands): Warn about "lea" segment
+	overrides.
+
 2002-09-22  Mark Elbrecht  <snowball3@softhome.net>
 
 	* write.c: Delete set_segment_vma and prototype. Update all callers.
