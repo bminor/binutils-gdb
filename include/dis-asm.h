@@ -51,6 +51,9 @@ typedef struct disassemble_info {
   unsigned long mach;
   /* Endianness (for bi-endian cpus).  Mono-endian cpus can ignore this.  */
   enum bfd_endian endian;
+  /* The symbol at the start of the function being disassembled.  This
+     is not set reliably, but if it is not NULL, it is correct.  */
+  asymbol *symbol;
 
   /* For use by the disassembler.
      The top 16 bits are reserved for public use (and are documented here).
@@ -78,10 +81,34 @@ typedef struct disassemble_info {
   void (*print_address_func)
     PARAMS ((bfd_vma addr, struct disassemble_info *info));
 
+  /* Function called to determine if there is a symbol at the given ADDR.
+     If there is, the function returns 1, otherwise it returns 0.
+     This is used by ports which support an overlay manager where
+     the overlay number is held in the top part of an address.  In
+     some circumstances we want to include the overlay number in the
+     address, (normally because there is a symbol associated with
+     that address), but sometimes we want to mask out the overlay bits.  */
+  int (* symbol_at_address_func)
+    PARAMS ((bfd_vma addr, struct disassemble_info * info));
+
   /* These are for buffer_read_memory.  */
   bfd_byte *buffer;
   bfd_vma buffer_vma;
   int buffer_length;
+
+  /* This variable may be set by the instruction decoder.  It suggests
+      the number of bytes objdump should display on a single line.  If
+      the instruction decoder sets this, it should always set it to
+      the same value in order to get reasonable looking output.  */
+  int bytes_per_line;
+
+  /* the next two variables control the way objdump displays the raw data */
+  /* For example, if bytes_per_line is 8 and bytes_per_chunk is 4, the */
+  /* output will look like this:
+     00:   00000000 00000000
+     with the chunks displayed according to "display_endian". */
+  int bytes_per_chunk;
+  enum bfd_endian display_endian;
 
   /* Results from instruction decoders.  Not all decoders yet support
      this information.  This info is set each time an instruction is
@@ -118,9 +145,7 @@ extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300s		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
-/* start-sanitize-arc */
 extern disassembler_ftype arc_get_disassembler PARAMS ((int, int));
-/* end-sanitize-arc */
 extern int print_insn_big_arm		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_arm	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc		PARAMS ((bfd_vma, disassemble_info*));
@@ -130,9 +155,7 @@ extern int print_insn_i960		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sh		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_shl		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_hppa		PARAMS ((bfd_vma, disassemble_info*));
-/* start-sanitize-m32r */
 extern int print_insn_m32r		PARAMS ((bfd_vma, disassemble_info*));
-/* end-sanitize-m32r */
 extern int print_insn_m88k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_mn10200		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_mn10300		PARAMS ((bfd_vma, disassemble_info*));
@@ -141,12 +164,14 @@ extern int print_insn_big_powerpc	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_powerpc	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_rs6000		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_w65		PARAMS ((bfd_vma, disassemble_info*));
-/* start-sanitize-d10v */
 extern int print_insn_d10v		PARAMS ((bfd_vma, disassemble_info*));
-/* end-sanitize-d10v */
-/* start-sanitize-v850 */
+/* start-sanitize-d30v */
+extern int print_insn_d30v		PARAMS ((bfd_vma, disassemble_info*));
+/* end-sanitize-d30v */
 extern int print_insn_v850		PARAMS ((bfd_vma, disassemble_info*));
-/* end-sanitize-v850 */
+/* start-sanitize-tic80 */
+extern int print_insn_tic80		PARAMS ((bfd_vma, disassemble_info*));
+/* end-sanitize-tic80 */
 
 /* Fetch the disassembler for a given BFD, if that support is available.  */
 extern disassembler_ftype disassembler	PARAMS ((bfd *));
@@ -171,6 +196,13 @@ extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
 extern void generic_print_address
   PARAMS ((bfd_vma, struct disassemble_info *));
 
+/* Always true.  */
+extern int generic_symbol_at_address
+  PARAMS ((bfd_vma, struct disassemble_info *));
+
+/* Pass through the symbol associated with the address being disassembled:  */
+extern void disasm_symaddr PARAMS ((asymbol *sym, disassemble_info *info));
+
 /* Macro to initialize a disassemble_info struct.  This should be called
    by all applications creating such a struct.  */
 #define INIT_DISASSEMBLE_INFO(INFO, STREAM, FPRINTF_FUNC) \
@@ -188,13 +220,18 @@ extern void generic_print_address
 #define INIT_DISASSEMBLE_INFO_NO_ARCH(INFO, STREAM, FPRINTF_FUNC) \
   (INFO).fprintf_func = (FPRINTF_FUNC), \
   (INFO).stream = (STREAM), \
+  (INFO).symbol = NULL, \
   (INFO).buffer = NULL, \
   (INFO).buffer_vma = 0, \
   (INFO).buffer_length = 0, \
   (INFO).read_memory_func = buffer_read_memory, \
   (INFO).memory_error_func = perror_memory, \
   (INFO).print_address_func = generic_print_address, \
+  (INFO).symbol_at_address_func = generic_symbol_at_address, \
   (INFO).flags = 0, \
+  (INFO).bytes_per_line = 0, \
+  (INFO).bytes_per_chunk = 0, \
+  (INFO).display_endian = BFD_ENDIAN_UNKNOWN, \
   (INFO).insn_info_valid = 0
 
 #endif /* ! defined (DIS_ASM_H) */

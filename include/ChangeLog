@@ -1,3 +1,7 @@
+Tue Dec  2 10:20:53 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* dis-asm.h (disasm_symaddr): New prototype.
+
 Mon Dec  1 20:24:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* coff/sh.h (R_SH_SWITCH8): New.
