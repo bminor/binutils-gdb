@@ -236,9 +236,8 @@ vfinfo (fp, fmt, arg)
 	    case 'C':
 	    case 'D':
 	    case 'G':
-	      /* Clever filename:linenumber with function name if possible,
-		 or section name as a last resort.  The arguments are a BFD,
-		 a section, and an offset.  */
+	      /* Clever filename:linenumber with function name if possible.
+		 The arguments are a BFD, a section, and an offset.  */
 	      {
 		static bfd *last_bfd;
 		static char *last_file = NULL;
@@ -280,68 +279,54 @@ vfinfo (fp, fmt, arg)
 		      }
 		  }
 
+		lfinfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
+
 		discard_last = true;
 		if (bfd_find_nearest_line (abfd, section, asymbols, offset,
 					   &filename, &functionname,
 					   &linenumber))
 		  {
-		    if (functionname != NULL && fmt[-1] == 'G')
-		      {
-			lfinfo (fp, "%B:", abfd);
-			if (filename != NULL
-			    && strcmp (filename, bfd_get_filename (abfd)) != 0)
-			  fprintf (fp, "%s:", filename);
-			lfinfo (fp, "%T", functionname);
-		      }
-		    else if (functionname != NULL && fmt[-1] == 'C')
-		      {
-			if (filename == (char *) NULL)
-			  filename = abfd->filename;
+		    boolean need_colon = true;
 
+		    if (functionname != NULL && fmt[-1] == 'C')
+		      {
 			if (last_bfd == NULL
 			    || last_file == NULL
 			    || last_function == NULL
 			    || last_bfd != abfd
-			    || strcmp (last_file, filename) != 0
+			    || (filename != NULL
+				&& strcmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
-			    /* We use abfd->filename in this initial line,
-			       in case filename is a .h file or something
-			       similarly unhelpful.  */
-			    lfinfo (fp, _("%B: In function `%T':\n"),
-				    abfd, functionname);
+			    lfinfo (fp, _(": In function `%T':\n"),
+				    functionname);
+			    need_colon = false;
 
 			    last_bfd = abfd;
 			    if (last_file != NULL)
 			      free (last_file);
-			    last_file = xstrdup (filename);
+			    last_file = NULL;
+			    if (filename)
+			      last_file = xstrdup (filename);
 			    if (last_function != NULL)
 			      free (last_function);
 			    last_function = xstrdup (functionname);
 			  }
 			discard_last = false;
-			if (linenumber != 0)
-			  fprintf (fp, "%s:%u", filename, linenumber);
-			else
-			  lfinfo (fp, "%s(%s+0x%v)", filename, section->name,
-				  offset);
 		      }
-		    else if (filename == NULL
-			     || strcmp (filename, abfd->filename) == 0)
+
+		    if (filename != NULL)
 		      {
-			lfinfo (fp, "%B(%s+0x%v)", abfd, section->name,
-				offset);
-			if (linenumber != 0)
-			  lfinfo (fp, ":%u", linenumber);
+			if (need_colon)
+			  putc (':', fp);
+			fputs (filename, fp);
 		      }
-		    else if (linenumber != 0)
-		      lfinfo (fp, "%B:%s:%u", abfd, filename, linenumber);
-		    else
-		      lfinfo (fp, "%B(%s+0x%v):%s", abfd, section->name,
-			      offset, filename);
+
+		    if (functionname != NULL && fmt[-1] == 'G')
+		      lfinfo (fp, ":%T", functionname);
+		    else if (filename != NULL && linenumber != 0)
+		      fprintf (fp, ":%u", linenumber);
 		  }
-		else
-		  lfinfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
 
 		if (discard_last)
 		  {

@@ -1,3 +1,7 @@
+2002-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmisc.c (vfinfo <%C,%D,%G>): Always output bfd, section and offset.
+
 2002-09-17  Stan Cox  <scox@redhat.com>
 
 	* emulparams/elf32bmipn32-defs.sh: New file.
