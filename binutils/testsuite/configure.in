@@ -15,7 +15,7 @@ configdirs="binutils.all"
 	# this section is for all targets
 case "${target}" in
        i386-*-aout)    target_makefile_frag=config/mt-i386-aout ;;
-       *-*-lynx)       target_makefile_frag=config/mt-lynx ;;
+       *-*-lynx*)      target_makefile_frag=config/mt-lynx ;;
        *-*-vxworks)    target_makefile_frag=config/mt-vxworks ;;
        m68k-*-*)       target_makefile_frag=config/mt-m68k ;;
        i960-*-nindy)   target_makefile_frag=config/mt-i960-nindy ;;
