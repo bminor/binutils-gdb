@@ -1965,7 +1965,11 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
       struct elfNN_ia64_local_hash_entry *loc_h;
 
       loc_h = get_local_sym_hash (ia64_info, abfd, rel, create);
-      BFD_ASSERT (loc_h);
+      if (!loc_h)
+	{
+	  BFD_ASSERT (!create);
+	  return NULL;
+	}
 
       pp = &loc_h->info;
     }

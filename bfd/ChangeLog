@@ -1,3 +1,8 @@
+2003-03-18  Richard Henderson  <rth@redhat.com>
+
+        * elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
+        local symbols that have no dyninfo.
+
 2003-03-14  Gene Smith  <gene.smith@siemens.com>
 
 	* ieee.c (ieee_write_expression): Handle the case where symbol is
