@@ -1,5 +1,13 @@
 2002-09-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* cpu-pj.c (scan_mach, compatible, arch_info_struct): Remove.
+	(bfd_pj_arch): Use bfd_default_scan.
+	* cpu-v850.c (scan): Remove.
+	(N): Use bfd_default_scan.
+	* cpu-z8k.c (scan_mach): Remove.
+	(arch_info_struct, bfd_z8k_arch): Reorganize so that the default is
+	first.  Use bfd_default_scan.
+
 	* ecoff.c (_bfd_ecoff_set_arch_mach_hook): Don't use hard-coded
 	bfd_mach constants.
 	(ecoff_get_magic): Likewise.
