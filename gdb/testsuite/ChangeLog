@@ -1,3 +1,9 @@
+2003-08-30  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/selftest.exp: Remove support for m68k*-*-hpux.
+	* gdb.gdb/observer.exp: Ditto.
+	* gdb.gdb/xfullpath.exp: Ditto.
+
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/interrupt.exp: XFAIL "call function when asleep" for
