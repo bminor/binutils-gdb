@@ -1,3 +1,9 @@
+2003-08-07  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):
+	Change second (cmdline) arg to lang_add_entry to FALSE.
+	(set_pe_subsystem): Change second arg to lang_add_entry to TRUE.
+
 2003-08-05  Christian Groessler  <chris@groessler.org>
             Jason Eckhardt  <jle@rice.edu>
 
@@ -702,7 +708,7 @@
 
 2003-03-18  Danny Smith  <dannysmith@users.sourceforge.net>
 
-	* defilep.y (opt_base): If no number given, set to default
+	* deffilep.y (opt_base): If no number given, set to default
 	(-1), not 0.
 
 2003-03-13  Danny Smith  <dannysmith@users.sourceforge.net>

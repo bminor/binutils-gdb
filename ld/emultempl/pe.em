@@ -141,9 +141,9 @@ gld_${EMULATION_NAME}_before_parse (void)
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
-  lang_add_entry ("WinMainCRTStartup", 1);
+  lang_add_entry ("WinMainCRTStartup", FALSE);
 #else
-  lang_add_entry ("_WinMainCRTStartup", 1);
+  lang_add_entry ("_WinMainCRTStartup", FALSE);
 #endif
 #endif
 #endif
@@ -439,7 +439,7 @@ set_pe_subsystem (void)
 	      entry = alc_entry;
 	    }
 
-	  lang_add_entry (entry, 0);
+	  lang_add_entry (entry, TRUE);
 
 	  return;
 	}
