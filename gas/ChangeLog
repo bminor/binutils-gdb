@@ -1,3 +1,7 @@
+2005-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_fix_adjustable <ELF>): Remove bogus checks.
+
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
 	* as.c (main): Use unlink_if_ordinary instead of unlink.
@@ -1861,7 +1865,7 @@
 	(set_section, add_unwind_adjustsp, flush_pending_unwind,
 	finish_unwind_opcodes, start_unwind_section, create_unwind_entry,
 	require_hashconst, add_unwind_opcode): New functions.
-	* doc/tc-arm.text: Document unwinding opcodes.
+	* doc/c-arm.texi: Document unwinding opcodes.
 	* NEWS: Mention the new feature.
 
 2004-10-04  Eric Christopher  <echristo@redhat.com>
@@ -2887,7 +2891,7 @@
 	(md_begin): Set flags for EABI v3.
 	(arm_eabis): Add.
 	(arm_long_opts): Add meabi.
-	* doc/as.texinf <ARM>: Document -meabi.
+	* doc/as.texinfo <ARM>: Document -meabi.
 	* doc/c-arm.texi: Ditto.
 
 2004-03-22  Bob Wilson  <bob.wilson@acm.org>

@@ -5485,12 +5485,7 @@ ppc_fix_adjustable (fix)
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_INHERIT
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_ENTRY
 	  && !(fix->fx_r_type >= BFD_RELOC_PPC_TLS
-	       && fix->fx_r_type <= BFD_RELOC_PPC64_DTPREL16_HIGHESTA)
-	  && (fix->fx_pcrel
-	      || (fix->fx_subsy != NULL
-		  && (S_GET_SEGMENT (fix->fx_subsy)
-		      == S_GET_SEGMENT (fix->fx_addsy)))
-	      || S_IS_LOCAL (fix->fx_addsy)));
+	       && fix->fx_r_type <= BFD_RELOC_PPC64_DTPREL16_HIGHESTA));
 }
 #endif
 
