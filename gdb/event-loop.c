@@ -96,7 +96,7 @@ typedef void (event_handler_func) (int);
    ready. The procedure PROC associated with each event is always the
    same (handle_file_event).  Its duty is to invoke the handler
    associated with the file descriptor whose state change generated
-   the event, plus doing other cleanups adn such. */
+   the event, plus doing other cleanups and such. */
 
 struct gdb_event
   {
@@ -248,7 +248,7 @@ static struct
   }
 sighandler_list;
 
-/* Is any of the handlers ready?  Check this variable using
+/* Are any of the handlers ready?  Check this variable using
    check_async_ready. This is used by process_event, to determine
    whether or not to invoke the invoke_async_signal_handler
    function. */
@@ -392,7 +392,7 @@ process_event (void)
    wait for something to happen (via gdb_wait_for_event), then process
    it.  Returns >0 if something was done otherwise returns <0 (this
    can happen if there are no event sources to wait for).  If an error
-   occures catch_errors() which calls this function returns zero. */
+   occurs catch_errors() which calls this function returns zero. */
 
 static int
 gdb_do_one_event (void *data)
