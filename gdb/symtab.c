@@ -959,6 +959,13 @@ find_pc_symtab (pc)
    range, we must search all symtabs associated with this compilation unit, and
    find the one whose first PC is closer than that of the next line in this
    symtab.
+
+   FIXME:  We used to complain here about zero length or negative length line
+   tables, but there are two problems with this: (1) some symtabs may not have
+   any line numbers due to gcc -g1 compilation, and (2) this function is called
+   during single stepping, when we don't own the terminal and thus can't
+   produce any output.  One solution might be to implement a mechanism whereby
+   complaints can be queued until we regain control of the terminal.  -fnf
  */
 
 struct symtab_and_line
@@ -1023,10 +1030,8 @@ find_pc_line (pc, notcurrent)
       if (!l)
         continue;
       len = l->nitems;
-      if (len <= 0)
+      if (len <= 0)		  /* See FIXME above. */
 	{
-	  fprintf (stderr, "Inconsistent line number info for %s\n",
-		   s->filename);
 	  continue;
 	}
 
@@ -2405,8 +2410,7 @@ static char **return_val;
 #define COMPLETION_LIST_ADD_SYMBOL(symbol, text, len) \
   do { \
     completion_list_add_name (SYMBOL_NAME (symbol), text, len); \
-      if (SYMBOL_LANGUAGE (symbol) == language_cplus && \
-	  SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
+      if (SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
       completion_list_add_name (SYMBOL_DEMANGLED_NAME (symbol), text, len); \
   } while (0)
 

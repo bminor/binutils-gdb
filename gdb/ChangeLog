@@ -1,3 +1,32 @@
+Wed Mar 10 17:37:11 1993  Fred Fish  (fnf@cygnus.com)
+
+	* main.c (source_command):  Require an explicit pathname of file
+	to source, since previous behavior of defaulting to gdb init file
+	was troublesome and undocumented.
+	* printcmd.c (disassemble_command):  Add missing '{}' pair to
+	else with two statements.  Bug reported by Stephane Tsacas
+	<slt@isoft.fr>.
+	* symtab.c (find_pc_line):  Don't complain about zero length or
+	negative length line numbers for the moment, since we may not own
+	the terminal when called, such as when single stepping.  (FIXME)
+	* language.h (CAST_IS_CONVERSION):  True if current language is
+	C++ as well as C.  Fix from Peter Schauer.
+	* environ.c (get_in_environ, set_in_environ, unset_in_environ):
+	Use STREQN macro rather than bare '!strncmp()'.
+	* environ.c (unset_in_environ):  Avoid use of memcpy on
+	overlapping memory regions, as suggested by Paul Eggert
+	<eggert@twinsun.com>.
+	* c-exp.y (%union struct):  Remove unused ulval as suggested
+	by Paul Eggert <eggert@twinsun.com>.
+
+Mon Mar  8 19:03:06 1993  Fred Fish  (fnf@cygnus.com)
+
+	* main.c (gdbinit):  Make static.
+	* main.c (inhibit_gdbinit):  Move to file scope.
+	* main.c (main):  Remove local inhibit_gdbinit.
+	* main.c (source_command):  Don't source '.gdbinit' file by
+	default if gdb has been told to ignore it.
+
 Sun Mar  7 21:58:53 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (MAKEOVERRIDES): Define to be empty for GNU Make

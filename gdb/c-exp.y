@@ -102,7 +102,6 @@ yyerror PARAMS ((char *));
 %union
   {
     LONGEST lval;
-    unsigned LONGEST ulval;
     struct {
       LONGEST val;
       struct type *type;

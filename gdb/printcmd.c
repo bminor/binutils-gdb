@@ -62,8 +62,13 @@ static CORE_ADDR last_examine_address;
 
 static value last_examine_value;
 
+/* Largest offset between a symbolic value and an address, that will be
+   printed as `0x1234 <symbol+offset>'.  */
+
+static unsigned int max_symbolic_offset = UINT_MAX;
+
 /* Number of auto-display expression currently being displayed.
-   So that we can deleted it if we get an error or a signal within it.
+   So that we can disable it if we get an error or a signal within it.
    -1 when not doing one.  */
 
 int current_display_number;
@@ -119,7 +124,8 @@ static void
 printf_command PARAMS ((char *, int));
 
 static void
-print_frame_nameless_args PARAMS ((CORE_ADDR, long, int, int, FILE *));
+print_frame_nameless_args PARAMS ((struct frame_info *, long, int, int,
+				   FILE *));
 
 static void
 display_info PARAMS ((char *, int));
@@ -560,12 +566,25 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
      int do_demangle;
      char *leadin;
 {
-  int name_location;
+  CORE_ADDR name_location;
   register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (addr);
 
   /* If nothing comes out, don't print anything symbolic.  */
   
   if (msymbol == NULL)
+    return;
+
+  /* If the nearest symbol is too far away, ditto.  */
+
+  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
+
+  /* For when CORE_ADDR is larger than unsigned int, we do math in
+     CORE_ADDR.  But when we detect unsigned wraparound in the
+     CORE_ADDR math, we ignore this test and print the offset,
+     because addr+max_symbolic_offset has wrapped through the end
+     of the address space back to the beginning, giving bogus comparison.  */
+  if (addr > name_location + max_symbolic_offset
+      && name_location + max_symbolic_offset > name_location)
     return;
 
   fputs_filtered (leadin, stream);
@@ -574,9 +593,8 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
     fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
   else
     fputs_filtered (SYMBOL_LINKAGE_NAME (msymbol), stream);
-  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
-  if (addr - name_location)
-    fprintf_filtered (stream, "+%d>", addr - name_location);
+  if (addr != name_location)
+    fprintf_filtered (stream, "+%d>", (int)(addr - name_location));
   else
     fputs_filtered (">", stream);
 }
@@ -1881,8 +1899,10 @@ disassemble_command (arg, from_tty)
       printf_filtered ("for function %s:\n", name);
     }
   else
-    printf_filtered ("from %s ", local_hex_string(low));
-    printf_filtered ("to %s:\n", local_hex_string(high));
+    {
+      printf_filtered ("from %s ", local_hex_string(low));
+      printf_filtered ("to %s:\n", local_hex_string(high));
+    }
 
   /* Dump the specified range.  */
   for (pc = low; pc < high; )
@@ -2030,4 +2050,11 @@ but no count or size letter (see \"x\" command).", NULL));
   add_com ("inspect", class_vars, inspect_command,
 "Same as \"print\" command, except that if you are running in the epoch\n\
 environment, the value is printed in its own window.");
+
+  add_show_from_set (
+      add_set_cmd ("max-symbolic-offset", no_class, var_uinteger,
+		   (char *)&max_symbolic_offset,
+	"Set the largest offset that will be printed in <symbol+1234> form.",
+		   &setprintlist),
+      &showprintlist);
 }
