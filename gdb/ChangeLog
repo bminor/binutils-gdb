@@ -1,3 +1,10 @@
+2002-05-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-nat.c (i387_supply_register, i387_fill_fsave,
+	i387_supply_fxsave, i387_fill_fxsave): Rewrite in order to do the
+	right thing on architectures with different endianness and/or
+	integer sizes.
+
 2002-05-10  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	From Christian Limpach <chris@Pin.LU>

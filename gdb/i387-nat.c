@@ -1,5 +1,5 @@
 /* Native-dependent code for the i387.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -71,15 +71,13 @@ i387_supply_register (int regnum, char *fsave)
   if (regnum >= FPC_REGNUM
       && regnum != FIOFF_REGNUM && regnum != FOOFF_REGNUM)
     {
-      unsigned int val = *(unsigned short *) (FSAVE_ADDR (fsave, regnum));
+      unsigned char val[4];
 
+      memcpy (val, FSAVE_ADDR (fsave, regnum), 2);
+      val[2] = val[3] = 0;
       if (regnum == FOP_REGNUM)
-	{
-	  val &= ((1 << 11) - 1);
-	  supply_register (regnum, (char *) &val);
-	}
-      else
-	supply_register (regnum, (char *) &val);
+	val[1] &= ((1 << 3) - 1);
+      supply_register (regnum, val);
     }
   else
     supply_register (regnum, FSAVE_ADDR (fsave, regnum));
@@ -116,23 +114,18 @@ i387_fill_fsave (char *fsave, int regnum)
 	if (i >= FPC_REGNUM
 	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	  {
-	    char buf[4];
+	    unsigned char buf[4];
 
 	    regcache_collect (i, buf);
 
 	    if (i == FOP_REGNUM)
 	      {
-		unsigned short oldval, newval;
-
-		/* The opcode occupies only 11 bits.  */
-		oldval = (*(unsigned short *) (FSAVE_ADDR (fsave, i)));
-		newval = *(unsigned short *) buf;
-		newval &= ((1 << 11) - 1);
-		newval |= oldval & ~((1 << 11) - 1);
-		memcpy (FSAVE_ADDR (fsave, i), &newval, 2);
+		/* The opcode occupies only 11 bits.  Make sure we
+                   don't touch the other bits.  */
+		buf[1] &= ((1 << 3) - 1);
+		buf[1] |= ((FSAVE_ADDR (fsave, i))[1] & ~((1 << 3) - 1));
 	      }
-	    else
-	      memcpy (FSAVE_ADDR (fsave, i), buf, 2);
+	    memcpy (FSAVE_ADDR (fsave, i), buf, 2);
 	  }
 	else
 	  regcache_collect (i, FSAVE_ADDR (fsave, i));
@@ -195,13 +188,12 @@ i387_supply_fxsave (char *fxsave)
       if (i >= FPC_REGNUM && i < XMM0_REGNUM
 	  && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	{
-	  unsigned long val = *(unsigned short *) (FXSAVE_ADDR (fxsave, i));
+	  unsigned char val[4];
 
+	  memcpy (val, FXSAVE_ADDR (fxsave, i), 2);
+	  val[2] = val[3] = 0;
 	  if (i == FOP_REGNUM)
-	    {
-	      val &= ((1 << 11) - 1);
-	      supply_register (i, (char *) &val);
-	    }
+	    val[1] &= ((1 << 3) - 1);
 	  else if (i== FTAG_REGNUM)
 	    {
 	      /* The fxsave area contains a simplified version of the
@@ -209,18 +201,16 @@ i387_supply_fxsave (char *fxsave)
                  data to recreate the traditional i387 tag word.  */
 
 	      unsigned long ftag = 0;
-	      unsigned long fstat;
 	      int fpreg;
 	      int top;
 
-	      fstat = *(unsigned short *) (FXSAVE_ADDR (fxsave, FSTAT_REGNUM));
-	      top = ((fstat >> 11) & 0x7);
+	      top = (((FXSAVE_ADDR (fxsave, FSTAT_REGNUM))[1] >> 3) & 0x7);
 
 	      for (fpreg = 7; fpreg >= 0; fpreg--)
 		{
 		  int tag;
 
-		  if (val & (1 << fpreg))
+		  if (val[0] & (1 << fpreg))
 		    {
 		      int regnum = (fpreg + 8 - top) % 8 + FP0_REGNUM;
 		      tag = i387_tag (FXSAVE_ADDR (fxsave, regnum));
@@ -230,10 +220,10 @@ i387_supply_fxsave (char *fxsave)
 
 		  ftag |= tag << (2 * fpreg);
 		}
-	      supply_register (i, (char *) &ftag);
+	      val[0] = ftag & 0xff;
+	      val[1] = (ftag >> 8) & 0xff;
 	    }
-	  else
-	    supply_register (i, (char *) &val);
+	  supply_register (i, val);
 	}
       else
 	supply_register (i, FXSAVE_ADDR (fxsave, i));
@@ -258,43 +248,37 @@ i387_fill_fxsave (char *fxsave, int regnum)
 	if (i >= FPC_REGNUM && i < XMM0_REGNUM
 	    && i != FIOFF_REGNUM && i != FDOFF_REGNUM)
 	  {
-	    char buf[4];
+	    unsigned char buf[4];
 
 	    regcache_collect (i, buf);
 
 	    if (i == FOP_REGNUM)
 	      {
-		unsigned short oldval, newval;
-
-		/* The opcode occupies only 11 bits.  */
-		oldval = (*(unsigned short *) (FXSAVE_ADDR (fxsave, i)));
-		newval = *(unsigned short *) buf;
-		newval &= ((1 << 11) - 1);
-		newval |= oldval & ~((1 << 11) - 1);
-		memcpy (FXSAVE_ADDR (fxsave, i), &newval, 2);
+		/* The opcode occupies only 11 bits.  Make sure we
+                   don't touch the other bits.  */
+		buf[1] &= ((1 << 3) - 1);
+		buf[1] |= ((FXSAVE_ADDR (fxsave, i))[1] & ~((1 << 3) - 1));
 	      }
 	    else if (i == FTAG_REGNUM)
 	      {
 		/* Converting back is much easier.  */
 
-		unsigned short val = 0;
 		unsigned short ftag;
 		int fpreg;
 
-		ftag = *(unsigned short *) buf;
+		ftag = (buf[1] << 8) | buf[0];
+		buf[0] = 0;
+		buf[1] = 0;
 
 		for (fpreg = 7; fpreg >= 0; fpreg--)
 		  {
 		    int tag = (ftag >> (fpreg * 2)) & 3;
 
 		    if (tag != 3)
-		      val |= (1 << fpreg);
+		      buf[0] |= (1 << fpreg);
 		  }
-
-		memcpy (FXSAVE_ADDR (fxsave, i), &val, 2);
 	      }
-	    else
-	      memcpy (FXSAVE_ADDR (fxsave, i), buf, 2);
+	    memcpy (FXSAVE_ADDR (fxsave, i), buf, 2);
 	  }
 	else
 	  regcache_collect (i, FXSAVE_ADDR (fxsave, i));
