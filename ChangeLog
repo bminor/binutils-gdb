@@ -1,3 +1,22 @@
+Fri May 13 13:28:34 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* Makefile.in (Move HOST_PREFIX_1 and friends up so
+	they can be overriden by templates.
+
+Sat May  7 16:46:44 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* configure.in (target==go32): Don't build gdb.
+	* dosrel: New directory.
+
+Fri May  6 14:19:25 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* configure.in (host==go32): Configure dosrel too.
+	* Makefile.in (INTALL_TARGET): Call INSTALL_LAST last.
+	(HOST_CC, HOST_PREFIX, HOST_PREFIX_1): Undefine, they should
+	be set by incoming names or templates.
+	(INSTALL_LAST): New rule.
+	* config/mh-go32: New fragment.
+
 Thu May  5 17:35:05 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config.sub (sparclitefrw, sparclitefrwcompat): Don't set the os.

@@ -55,6 +55,13 @@ AR = ar
 AR_FLAGS = rc
 CC = cc
 
+# If any variables are added here, they must be added to do-*, below.
+# The HOST_* variables are a special case, which are used for the gcc
+# cross-building scheme.
+HOST_CC = $(CC_FOR_BUILD)
+HOST_PREFIX = 
+HOST_PREFIX_1 = loser-
+
 # We don't specify -g -O because many compilers don't support -g -O,
 # and/or -O is broken in and of itself.
 CFLAGS = -g
@@ -66,7 +73,7 @@ CHILL_LIB = -lchill
 CXX = gcc
 
 # Use -O to stress test the compiler.
-CXXFLAGS = -g -O
+CXXFLAGS = -g -O -fexternal-templates
 
 RANLIB = ranlib
 NM = nm
@@ -121,16 +128,22 @@ INSTALL_TARGET = install-dirs \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
-	install-gcc
+	install-gcc \
+	$(INSTALL_LAST)
+
 
 CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
-    echo $$r/gcc/xgcc -B$$r/gcc/; \
+    if [ -f $$r/newlib/Makefile ] ; then \
+      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/gcc/xgcc -B$$r/gcc/; \
+    fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
     fi; \
   fi`
 
@@ -142,7 +155,7 @@ CHILL_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
     fi; \
   fi`
 
@@ -150,12 +163,16 @@ CHILL_FOR_TARGET = ` \
 
 CXX_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
-    echo $$r/gcc/xgcc -B$$r/gcc/; \
+    if [ -f $$r/newlib/Makefile ] ; then \
+      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/gcc/xgcc -B$$r/gcc/; \
+    fi; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
     fi; \
   fi`
 
@@ -166,7 +183,7 @@ AS_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AS); \
     else \
-       t='$(program_transform_name)'; echo as | sed -e '' $$t ; \
+       t='$(program_transform_name)'; echo as | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
   fi`
 
@@ -177,7 +194,7 @@ AR_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AR); \
     else \
-       t='$(program_transform_name)'; echo ar | sed -e '' $$t ; \
+       t='$(program_transform_name)'; echo ar | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
   fi`
 
@@ -188,31 +205,19 @@ RANLIB_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(RANLIB); \
     else \
-       t='$(program_transform_name)'; echo ranlib | sed -e '' $$t ; \
+       t='$(program_transform_name)'; echo ranlib | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
   fi`
 
 NM_FOR_TARGET = ` \
   if [ -f $$r/binutils/Makefile ] ; then \
-    echo $$r/binutils/nm ; \
+    echo $$r/binutils/nm.new ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
     else \
-       t='$(program_transform_name)'; echo nm | sed -e '' $$t ; \
+       t='$(program_transform_name)'; echo nm | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
-  fi`
-
-# FIXME: This is badly named.
-XTRAFLAGS = ` \
-  if [ -f $$r/gcc/Makefile ] ; then \
-    if [ -f $$r/newlib/Makefile ] ; then \
-      echo -I$$r/newlib/targ-include -I$${srcroot}/newlib/libc/include -I$$r/gcc/include -nostdinc ; \
-    else \
-      echo -I$$r/gcc/include ; \
-    fi ; \
-  else \
-     echo ; \
   fi`
 
 #### host and target specific makefile fragments come in here.
@@ -251,7 +256,6 @@ BASE_FLAGS_TO_PASS = \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
-	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"YACC=$(BISON)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
@@ -266,8 +270,7 @@ EXTRA_HOST_FLAGS = \
 	'CC=$(CC)' \
 	'CXX=$(CXX)' \
 	'NM=$(NM)' \
-	'RANLIB=$(RANLIB)' \
-	'XTRAFLAGS='
+	'RANLIB=$(RANLIB)'
 
 FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
 
@@ -288,20 +291,14 @@ EXTRA_TARGET_FLAGS = \
 	'CC=$$(CC_FOR_TARGET)' \
 	'CXX=$$(CXX_FOR_TARGET)' \
 	'NM=$$(NM_FOR_TARGET)' \
-	'RANLIB=$$(RANLIB_FOR_TARGET)' \
-	'XTRAFLAGS=$$(XTRAFLAGS_FOR_TARGET)'
+	'RANLIB=$$(RANLIB_FOR_TARGET)'
 
 TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 
 # Flags to pass down to gcc.  gcc builds a library, libgcc.a, so it
 # unfortunately needs the native compiler and the target ar and
 # ranlib.
-# If any variables are added here, they must be added to do-*, below.
-# The HOST_* variables are a special case, which are used for the gcc
-# cross-building scheme.
-HOST_CC = $(CC_FOR_BUILD)
-HOST_PREFIX = 
-HOST_PREFIX_1 = loser-
+
 EXTRA_GCC_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$(AS)' \
@@ -311,8 +308,7 @@ EXTRA_GCC_FLAGS = \
 	'HOST_PREFIX=$(HOST_PREFIX)' \
 	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
-	'RANLIB=$$(RANLIB_FOR_TARGET)' \
-	'XTRAFLAGS='
+	'RANLIB=$$(RANLIB_FOR_TARGET)'
 
 GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
@@ -364,7 +360,8 @@ ALL_MODULES = \
 	all-tgas \
 	all-time \
 	all-uudecode \
-	all-wdiff
+	all-wdiff 
+
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(FLAGS_TO_PASS).
@@ -424,6 +421,7 @@ INSTALL_MODULES = \
 	install-cvs \
 	install-dejagnu \
 	install-diff \
+	install-dosutils \
 	install-etc \
 	install-fileutils \
 	install-find \
@@ -557,7 +555,8 @@ DO_X = \
 	do-install-info \
 	do-installcheck \
 	do-mostlyclean \
-	do-realclean
+	do-realclean \
+	do-TAGS
 .PHONY: $(DO_X)
 $(DO_X):
 	@target=`echo $@ | sed -e 's/^do-//'`; \
@@ -582,11 +581,11 @@ $(DO_X):
 	      done; \
 	      ;; \
 	    esac ; \
-	    export AR AS CC CXX NM RANLIB XTRAFLAGS; \
+	    export AR AS CC CXX NM RANLIB; \
 	    if (cd ./$$i; \
 	        $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
 			"CC=$${CC}" "CXX=$${CXX}" "NM=$${NM}" \
-			"RANLIB=$${RANLIB}" "XTRAFLAGS=$${XTRAFLAGS}" \
+			"RANLIB=$${RANLIB}" \
 			$${target}); \
 	    then true; else exit 1; fi; \
 	  else true; fi; \
@@ -670,7 +669,7 @@ gcc-no-fixedincludes:
 	  mv gcc/include gcc/tmp-include 2>/dev/null; \
 	  mkdir gcc/include; \
 	  cp $(srcdir)/gcc/gsyslimits.h gcc/include/syslimits.h; \
-	  touch gcc/stmp-fixinc gcc/stmp-fixproto; \
+	  touch gcc/stmp-fixinc gcc/include/fixed; \
 	  rm -f gcc/stmp-headers gcc/stmp-int-hdrs; \
 	  r=`pwd`; export r; \
 	  srcroot=`cd $(srcdir); pwd` ; export srcroot; \
@@ -833,6 +832,22 @@ install-gcc:
 	  true; \
 	fi
 
+
+# EXPERIMENTAL STUFF
+# This rule is used to install the modules which use FLAGS_TO_PASS.
+# To build a target install-X means to cd to X and make install.
+.PHONY: $(INSTALL_LAST)
+$(INSTALL_LAST): install-dirs
+	@dir=`echo $@ | sed -e 's/install-//'`; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) install); \
+	else \
+	  true; \
+	fi
+
+
 # This is a list of inter-dependencies among modules.
 all-autoconf: all-m4
 all-bfd:
@@ -930,21 +945,13 @@ dist:
 
 etags tags: TAGS
 
-TAGS:
-	etags `$(MAKE) ls`
-
-ls:
-	@echo Makefile
-	@for i in $(SUBDIRS); \
-	do \
-		(cd $$i; \
-			pwd=`pwd`; \
-			wd=`basename $$pwd`; \
-			for j in `$(MAKE) ls`; \
-			do \
-				echo $$wd/$$j; \
-			done) \
-	done
+# Right now this just builds TAGS in each subdirectory.  emacs19 has the
+# ability to use several tags files at once, so there is probably no need
+# to combine them into one big TAGS file (like CVS 1.3 does).  We could
+# (if we felt like it) have this Makefile write a piece of elisp which
+# the user could load to tell emacs19 where all the TAGS files we just
+# built are.
+TAGS: do-TAGS
 
 # with the gnu make, this is done automatically.
 
