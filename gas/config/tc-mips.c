@@ -622,7 +622,7 @@ static const unsigned int mips16_to_32_reg_map[] =
   16, 17, 2, 3, 4, 5, 6, 7
 };
 
-static int mips_fix_4122_bugs;
+static int mips_fix_vr4120;
 
 /* We don't relax branches by default, since this causes us to expand
    `la .l2 - .l1' if there's a branch between .l1 and .l2, because we
@@ -1863,11 +1863,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       if (prev_prev_nop && nops == 0)
 	++nops;
 
-      if (mips_fix_4122_bugs && prev_insn.insn_mo->name)
+      if (mips_fix_vr4120 && prev_insn.insn_mo->name)
 	{
 	  /* We're out of bits in pinfo, so we must resort to string
 	     ops here.  Shortcuts are selected based on opcodes being
-	     limited to the VR4122 instruction set.  */
+	     limited to the VR4120 instruction set.  */
 	  int min_nops = 0;
 	  const char *pn = prev_insn.insn_mo->name;
 	  const char *tn = ip->insn_mo->name;
@@ -2841,7 +2841,7 @@ mips_emit_delays (bfd_boolean insns)
 	    ++nops;
 	}
 
-      if (mips_fix_4122_bugs && prev_insn.insn_mo->name)
+      if (mips_fix_vr4120 && prev_insn.insn_mo->name)
 	{
 	  int min_nops = 0;
 	  const char *pn = prev_insn.insn_mo->name;
@@ -10254,10 +10254,10 @@ struct option md_longopts[] =
 #define OPTION_MNO_7000_HILO_FIX (OPTION_FIX_BASE + 1)
   {"no-fix-7000", no_argument, NULL, OPTION_MNO_7000_HILO_FIX},
   {"mno-fix7000", no_argument, NULL, OPTION_MNO_7000_HILO_FIX},
-#define OPTION_FIX_VR4122 (OPTION_FIX_BASE + 2)
-#define OPTION_NO_FIX_VR4122 (OPTION_FIX_BASE + 3)
-  {"mfix-vr4122-bugs",    no_argument, NULL, OPTION_FIX_VR4122},
-  {"no-mfix-vr4122-bugs", no_argument, NULL, OPTION_NO_FIX_VR4122},
+#define OPTION_FIX_VR4120 (OPTION_FIX_BASE + 2)
+#define OPTION_NO_FIX_VR4120 (OPTION_FIX_BASE + 3)
+  {"mfix-vr4120",    no_argument, NULL, OPTION_FIX_VR4120},
+  {"mno-fix-vr4120", no_argument, NULL, OPTION_NO_FIX_VR4120},
 
   /* Miscellaneous options.  */
 #define OPTION_MISC_BASE (OPTION_FIX_BASE + 4)
@@ -10499,12 +10499,12 @@ md_parse_option (int c, char *arg)
       g_switch_value = 0x7fffffff;
       break;
 
-    case OPTION_FIX_VR4122:
-      mips_fix_4122_bugs = 1;
+    case OPTION_FIX_VR4120:
+      mips_fix_vr4120 = 1;
       break;
 
-    case OPTION_NO_FIX_VR4122:
-      mips_fix_4122_bugs = 0;
+    case OPTION_NO_FIX_VR4120:
+      mips_fix_vr4120 = 0;
       break;
 
     case OPTION_RELAX_BRANCH:
@@ -14373,6 +14373,7 @@ MIPS options:\n\
 -mips16			generate mips16 instructions\n\
 -no-mips16		do not generate mips16 instructions\n"));
   fprintf (stream, _("\
+-mfix-vr4120		work around certain VR4120 errata\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
 -O0			remove unneeded NOPs, do not swap branches\n\
