@@ -39,10 +39,8 @@ static void elf32_i860_info_to_howto_rela
 static bfd_reloc_status_type elf32_i860_relocate_splitn
   PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 
-#if 0
 static bfd_reloc_status_type elf32_i860_relocate_pc16
-  PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
-#endif
+  PARAMS ((bfd *,  asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 
 static bfd_reloc_status_type elf32_i860_relocate_highadj
   PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
@@ -733,19 +731,43 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
 }
 
 
-#if 0
 /* Specialized relocation handler for R_860_PC16.  This relocation
    involves a 16-bit, PC-relative field that is split into two contiguous
    parts.  */
 static bfd_reloc_status_type
-elf32_i860_relocate_pc16 (input_bfd, rello, contents, value)
+elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
      bfd *input_bfd;
+     asection *input_section;
      Elf_Internal_Rela *rello;
      bfd_byte *contents;
      bfd_vma value;
 {
+  bfd_vma insn, t;
+  reloc_howto_type *howto;
+  howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
+  insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
+
+  /* Adjust for PC-relative relocation.  */
+  value -= (input_section->output_section->vma
+	    + input_section->output_offset);
+  value -= rello->r_offset;
+
+  /* Remove encode bits and intervening bits.  Then concatenate the
+     two fields into one 16-bit quantity.  */
+  t = (insn & howto->src_mask);
+  t = ((t >> 5) & 0xf8) | (t & 0x7ff);
+
+  /* Relocate.  */
+  value += (rello->r_addend + t);
+
+  /* Separate the fields and re-insert.  */
+  value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
+  insn = (insn & ~howto->dst_mask) | value;
+
+  bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
+  return bfd_reloc_ok;
+
 }
-#endif
 
 
 /* Specialized relocation handler for R_860_HIGHADJ.  */
@@ -948,12 +970,10 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 					   relocation);
 	  break;
 
-#if 0
 	case R_860_PC16:
-	  r = elf32_i860_relocate_pc16 (input_bfd, rel, contents,
-					relocation);
+	  r = elf32_i860_relocate_pc16 (input_bfd, input_section, rel,
+					contents, relocation);
 	  break;
-#endif
 
 	case R_860_SPLIT0:
 	case R_860_SPLIT1:
