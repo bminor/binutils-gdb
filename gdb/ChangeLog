@@ -1,3 +1,55 @@
+2002-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.h: Update copyright.
+	(struct regcache, struct gdbarch): Add opaque declarations.
+	(current_regcache): Declare global variable.
+	(regcache_read, regcache_write): Add gdbarch parameter.
+	(regcache_save, regcache_save_no_passthrough)
+	(regcache_restore, regcache_restore_no_passthrough)
+	(regcache_dup, regcache_dup_no_passthrough)
+	(regcache_cpy, regcache_cpy_no_passthrough)
+	(deprecated_grub_regcache_for_registers)
+	(deprecated_grub_regcache_for_register_valid)
+	(regcache_valid_p): Add function declarations.
+	
+	* regcache.c: Update copyright.
+	(regcache_descr_handle): New global variable.
+	(struct regcache_descr): Define.
+	(init_legacy_regcache_descr, init_regcache_descr): New functions.
+	(regcache_descr, xfree_regcache_descr): New functions.
+	(struct regcache): Define.
+	(regcache_xmalloc, regcache_xfree): New functions.
+	(regcache_cpy, regcache_cpy_no_passthrough): New functions.
+	(regcache_dup, regcache_dup_no_passthrough): New functions.
+	(regcache_valid_p, regcache_read_as_address): New functions.
+	(deprecated_grub_regcache_for_registers): New function.
+	(deprecated_grub_regcache_for_register_valid): New function.
+	(current_regcache): New global variable.
+	(register_buffer): Add regcache parameter.  Update calls.
+	(regcache_read, regcache_write): Add regcache parameter.  Rewrite.
+	(read_register_gen, write_register_gen): Update register_buffer
+	call.  Test for legacy_p instead of gdbarch_register_read_p or
+	gdbarch_register_write_p.
+	(regcache_collect): Update register_buffer call.
+	(build_regcache): Rewrite.  Use deprecated grub functions.
+	(regcache_save, regcache_save_no_passthrough): New functions.
+	(regcache_restore, regcache_restore_no_passthrough): New
+	functions.
+	(_initialize_regcache): Create the regcache_data_handle. Swap
+	current_regcache global variable.
+	
+	* sh-tdep.c (sh_pseudo_register_read): Add current_regcache
+	parameter to regcache_read and regcache_write calls.
+	(sh4_register_read): Ditto.
+	(sh64_pseudo_register_read): Ditto.
+	(sh64_register_read): Ditto.
+	(sh_pseudo_register_write): Ditto.
+	(sh4_register_write): Ditto.
+	(sh64_pseudo_register_write): Ditto.
+	(sh64_register_write): Ditto.
+
+	* defs.h (XCALLOC): Define.
+
 2002-06-19  Grace Sainsbury  <graces@redhat.com>
 
 	* config/m68k/tm-m68k.h (GDB_MULTI_ARCH): Added (set to 0).
