@@ -1,3 +1,52 @@
+Fri May 10 16:58:53 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Merge Per Bothner's changes to modularize BFD a.out a bit.
+
+	* libbfd.h, libbfd.c (bfd_generic_get_section_contents):  Add.
+	* ieee.c:  Cast enums to int before comparing them, for brain-
+	dead compilers.
+	* coff-code.h:  Remove coff_get_section_contents, and use the
+	generic one instead.
+
+	* aout.c:  Derive new module from sunos.c, containing generic
+	support code for all kinds of a.out files.
+
+	* sunos.c: Remove all code that goes in aout.c.  Split out
+	machine dependent followup in sunos4_object_p into
+	sunos4_callback.  Use JUMP_TABLE(aout) for the transver vector,
+	and redefine only the names we CHANGE, not all the names.  Drop
+	the little-endian vector, and rename the vector as sunos4 rather
+	than generic.
+
+	* b.out.c:  Use aout.c routines for most of the work.  Slight
+	changes for the new regime.  Remove close_and_cleanup and
+	get_section_contents in favor of generics.  New transfer vector
+	regime.
+
+	* newsos.c:  New support for Sony NEWS, another a.out format.
+
+	* ecoff.c:  Remove close_and_cleanup.  New tvec regime.
+	* icoff.c, m88k-bcs.c:  Add write_contents to tvec.
+	* ieee.c, oasys.c:  Remove close_and_cleanup, add write_contents
+	to tvec. 
+	* opncls.c (bfd_close):  Call format-dependent write_contents
+	routine, if writing, before calling target-dependent
+	close_and_cleanup routine (which is now always generic, I think).
+	* srec.c:  Use bfd_alloc instead of malloc.  Remove
+	close_and_cleanup and move code from it to
+	srec_write_object_contents.  Add write_contents to tvec.
+	* targets.c:  Remove a.out little vector, replace a.out big
+	vector with SunOS vector.  FIXME:  Need Vax support again now.
+
+	* libbfd.h:  Add write_contents format-dependent-vector to the
+	bfd_target vector.  Supply a generic close_and_cleanup routine.
+	* liba.out.h:  Handle the new aout.c split.  Add prototypes for
+	all routines defined in aout.c.  Rename "sunos" things to "aout"
+	things.  Add a few fields where needed for various formats.
+	* Makefile.in:  Add aout.c and newsos.c.
+
+	* archive.c, ieee.c, oasys.c:  Lint.
+
 Fri May 10 12:34:48 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* ../include/bfd.h
@@ -19,7 +68,6 @@ Fri May 10 12:34:48 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	all the code in coffswap.c, since it should be done using the target
 	swap routines now.
 
-
 Thu May  9 11:00:45 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* ieee.c (do_one, ieee_slurp_section_data): now supports the load
@@ -34,6 +82,33 @@ Sat May  4 15:49:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	Clean up types and such (saber C problems).
 	* ecoff.c:  Clean up types and such.  Remove routines that are
 	not used.  Fix up reading and swapping of shorts from files.
+
+   Notes on bfd-0.5.2-patch1a, from Per Bothner:
+
+	* a.out.vax.c: Remove two bogus "static" from prototypes.
+
+	* ecoff.c: Got rid of lots of non-working junk (that had
+	been copied directly from coff-code.h).
+	Updated to be consistent with updates to icoff.c and coff-code.h.
+
+	* libbfd.h: Added definitions for S_IXUSR, S_IXGRP, and S_IXOTH
+	if they're missing (as they are in (BDS-4.3-based) NewsOS-3).
+
+	* sunos.c (n_txtoff): (Re-)Add support for sony. This is a kludge,
+	but until the target_vector is automatically generated,
+	it's as good as any. Note that the text offset is the only
+	difference between NewsOS and SunOs (including magic numbers).
+	(Most of the sunos_* routines should to renamed bsd_*
+	and move to a bsd.c file. Then (and when the target_vector
+	is automatically generated) it might make sense to create
+	a separate Sony target.)
+
+	* sysdep.h: Don't declare fread and fwrite. Causes trouble
+	on some systems, and doesn't help on others.
+	Similarly, only define X_OK if not already defined.
+
+	* trad-core.c: Don't include sys/stat.h - at least
+	on NewsOS 3, it has already been included.
 
 Tue Mar  5 01:47:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
