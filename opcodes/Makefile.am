@@ -16,6 +16,9 @@ lib_LTLIBRARIES = libopcodes.la
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
 
+# This is where libiberty lives.
+LIBIBERTY = ../libiberty/libiberty.a
+
 # Header files.
 HFILES = \
 	arm-opc.h \
