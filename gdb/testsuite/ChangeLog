@@ -115,21 +115,17 @@ Wed Mar 24 14:43:38 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 
 Wed Mar 24 09:48:03 1993  Fred Fish  (fnf@cygnus.com)
 
-	**** start-sanitize-chill ****
 	* gdb.t31/gdbme.ch:  Re-enable code that previously caused
 	compiler to coredump.
 	* gdb.t31/chillvars.exp:  Re-enable tests that depend on that
 	code.
-	**** end-sanitize-chill ****
 
 Tue Mar 23 08:53:42 1993  Fred Fish  (fnf@cygnus.com)
 
-	**** start-sanitize-chill ****
 	* gdb.t31/gdbme.ch:  Comment out code that causes chill compiler
 	coredump.
 	* gdb.t31/chillvars.exp:  Comment out tests that depend on that
 	code.
-	**** end-sanitize-chill ****
 
 Sun Mar 21 17:56:47 1993  Rob Savoye  (rob at darkstar.cygnus.com)
 
@@ -159,12 +155,9 @@ Tue Mar 16 15:37:11 1993  Fred Fish  (fnf@cygnus.com)
 	setting sevenbit-strings.
 	* gdb.t04/setvar.exp, gdb.t13/bitfields.exp:  Make commands
 	to set sevenbit-strings consistent across tests.
-	**** start-sanitize-chill ****
 	gdb.t30/chexp.exp, gdb.t31/chillvars.exp:  Make commands to
 	set sevenbit-strings consistent across tests.
-	**** end-sanitize-chill ****
 
->>>>>>> 1.16
 Fri Mar 12 08:47:20 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t21/demangle.exp (proc demangle):  Adjust quotes in an
@@ -253,7 +246,6 @@ Wed Feb 24 08:05:38 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 Wed Feb 24 08:03:38 1993  Fred Fish  (fnf@cygnus.com)
 
-	**** start-sanitize-chill ****
 	* gdb.t31/chillvars.exp (test_structs):  New proc to test printing
 	of Chill STRUCT types and STRUCT values.
 	* gdb.t31/chillvars.exp (test_strings):  Expect "CHAR" now, rather
@@ -261,7 +253,6 @@ Wed Feb 24 08:03:38 1993  Fred Fish  (fnf@cygnus.com)
 	* gdb.t31/in-gdbme.ch (simple_struct, nested_struct, struct1,
 	struct2):  New struct definitions and initializations to test 
 	simple Chill STRUCT types.
-	**** end-sanitize-chill ****
 
 Tue Feb 23 11:55:06 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -282,11 +273,9 @@ Tue Feb 23 11:55:06 1993  Fred Fish  (fnf@cygnus.com)
 	* gdb.t21/demangle.exp:  Add many new test strings to demangle,
 	and fix a whole bunch that had incorrect expected output but were
 	passing anyway because of the bug in "proc demangle".
-	**** start-sanitize-chill ****
 	* gdb.t31/chillvars.exp:  Remove setup_xfail for printing string
 	type.
 	* gdb.t31/in-gdbme.ch:  Uncomment string4, now compiles.
-	**** end-sanitize-chill ****
 
 Mon Feb 22 07:54:03 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 

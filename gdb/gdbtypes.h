@@ -503,7 +503,6 @@ extern struct type *builtin_type_m2_card;
 extern struct type *builtin_type_m2_real;
 extern struct type *builtin_type_m2_bool;
 
-/* start-sanitize-chill */
 /* Chill types */
 
 extern struct type *builtin_type_chill_bool;
@@ -511,7 +510,6 @@ extern struct type *builtin_type_chill_char;
 extern struct type *builtin_type_chill_long;
 extern struct type *builtin_type_chill_ulong;
 extern struct type *builtin_type_chill_real;
-/* end-sanitize-chill */
 
 /* LONG_LONG is defined if the host has "long long".  */
 

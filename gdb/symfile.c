@@ -442,6 +442,34 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   section_offsets = (*objfile -> sf -> sym_offsets) (objfile, addr);
   objfile->section_offsets = section_offsets;
 
+  /* This is a hack.  As far as I can tell, section offsets are not
+     target dependent.  They are all set to addr with a couple of
+     exceptions.  The exceptions are sysvr4 shared libraries, whose
+     offsets are kept in solib structures anyway and rs6000 xcoff
+     which handles shared libraries in a completely unique way.
+
+     Section offsets are built similarly, except that they are built
+     by adding addr in all cases because there is no clear mapping
+     from section_offsets into actual sections.  Note that solib.c
+     has a different algorythm for finding section offsets.
+
+     These should probably all be collapsed into some target
+     independent form of shared library support.  FIXME.  */
+
+  if (addr)
+    {
+      struct obj_section *s;
+
+      for (s = objfile->sections; s < objfile->sections_end; ++s)
+	{
+	  s->addr -= s->offset;
+	  s->addr += addr;
+	  s->endaddr -= s->offset;
+	  s->endaddr += addr;
+	  s->offset += addr;
+	}
+    }
+
   (*objfile -> sf -> sym_read) (objfile, section_offsets, mainline);
 
   /* Don't allow char * to have a typename (else would get caddr_t.)  */
@@ -942,10 +970,8 @@ deduce_language_from_filename (filename)
     return language_c;
   else if(STREQ(c,".cc") || STREQ(c,".C"))
     return language_cplus;
-  /* start-sanitize-chill */
   else if(STREQ(c,".ch") || STREQ(c,".c186") || STREQ(c,".c286"))
     return language_chill;
-  /* end-sanitize-chill */
 
   return language_unknown;		/* default */
 }
@@ -1330,21 +1356,6 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
 }
 
 #endif /* !INLINE_ADD_PSYMBOL */
-
-/* Returns a section whose range includes PC or NULL if none found. */
-
-struct section_table *
-find_pc_section(pc)
-     CORE_ADDR pc;
-{
-  struct section_table *s;
-
-  s = find_pc_section_from_targets(pc);
-  if (s == NULL)
-    s = find_pc_section_from_so_list(pc);
-
-  return(s);
-}
 
 
 void

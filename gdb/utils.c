@@ -1348,11 +1348,9 @@ fprintf_symbol_filtered (stream, name, lang, arg_mode)
 	    case language_cplus:
 	      demangled = cplus_demangle (name, arg_mode);
 	      break;
-	      /* start-sanitize-chill */
 	    case language_chill:
 	      demangled = chill_demangle (name);
 	      break;
-	      /* end-sanitize-chill */
 	    default:
 	      demangled = NULL;
 	      break;

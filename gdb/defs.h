@@ -83,9 +83,7 @@ enum language
    language_auto,		/* Placeholder for automatic setting */
    language_c, 			/* C */
    language_cplus, 		/* C++ */
-				/* start-sanitize-chill */
    language_chill,		/* Chill */
-				/* end-sanitize-chill */
    language_m2			/* Modula-2 */
 };
 
@@ -117,12 +115,10 @@ inside_entry_file PARAMS ((CORE_ADDR addr));
 extern int
 inside_main_func PARAMS ((CORE_ADDR pc));
 
-/* start-sanitize-chill */
 /* From ch-lang.c, for the moment. (FIXME) */
 
 extern char *
 chill_demangle PARAMS ((const char *));
-/* end-sanitize-chill */
 
 /* From libiberty.a */
 
@@ -261,10 +257,7 @@ extern void
 gdb_printchar PARAMS ((int, FILE *, int));
 
 extern void
-fprint_symbol PARAMS ((FILE *, char *));
-
-extern void
-fputs_demangled PARAMS ((char *, FILE *, int, enum language));
+fprintf_symbol_filtered PARAMS ((FILE *, char *, enum language, int));
 
 extern void
 perror_with_name PARAMS ((char *));

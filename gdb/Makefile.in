@@ -185,11 +185,9 @@ FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
-$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL=$(CHILL)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
-$(end-sanitize-chill)\
 	"CXX=$(CXX)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"RANLIB=$(RANLIB)" \
@@ -227,7 +225,6 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
-$(start-sanitize-chill)
 CHILLFLAGS = $(CFLAGS)
 CHILL = gcc
 CHILL_FOR_TARGET = ` \
@@ -242,8 +239,6 @@ CHILL_FOR_TARGET = ` \
   fi`
 CHILL_LIB = -lchill
 
-$(end-sanitize-chill)
-
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
 TARGET_FLAGS_TO_PASS = \
@@ -253,12 +248,10 @@ TARGET_FLAGS_TO_PASS = \
 	'CC=$$(CC_FOR_TARGET)' \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
-$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	'CHILL=$$(CHILL_FOR_TARGET)' \
 	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
-$(end-sanitize-chill)\
 	'CXX=$$(CXX_FOR_TARGET)' \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
@@ -738,7 +731,6 @@ c-exp.tab.c: $(srcdir)/c-exp.y $(srcdir)/Makefile.in
 	  < y.tab.c > ././c-exp.tab.c
 	-rm y.tab.c
 
-# start-sanitize-chill
 # ch-exp.tab.c is generated in target dir from ch-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to ch-exp.tab.o.
 # Remove bogus decls for malloc/realloc/free which conflict with everything
@@ -755,7 +747,6 @@ ch-exp.tab.c: $(srcdir)/ch-exp.y $(srcdir)/Makefile.in
 	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > ././ch-exp.tab.c
 	-rm y.tab.c
-# end-sanitize-chill
 
 # m2-exp.tab.c is generated in target dir from m2-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to m2-exp.tab.o.
@@ -857,12 +848,10 @@ force_update:
 # will remove them.
 MAKEOVERRIDES=
 
-$(start-sanitize-chill)
 ## This is ugly, but I don't want GNU make to put these variables in
 ## the environment.  Older makes will see this as a set of targets
 ## with no dependencies and no actions.
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-$(end-sanitize-chill)
 
 # This is the end of "Makefile.in".  When built into "Makefile"
 # by the configure script, two things are added below this point:

@@ -30,11 +30,9 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
 CFLAGS = -g
-$(start-sanitize-chill)
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
-$(end-sanitize-chill)
-CXXFLAGS = -g -O
+CXXFLAGS = -g
 
 LINK=		ln -s
 SUBDIRS=
@@ -52,7 +50,6 @@ CC = ` \
     fi; \
   fi`
 
-$(start-sanitize-chill)
 CHILL = ` \
   if [ -f $${rootme}../../gcc/Makefile ] ; then \
     echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/ -L$${rootme}../../chillrt/; \
@@ -63,7 +60,6 @@ CHILL = ` \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
-$(end-sanitize-chill)
 
 CXX = ` \
   if [ -f $${rootme}../../gcc/Makefile ] ; then \
@@ -96,11 +92,9 @@ FLAGS_TO_PASS = \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
-	$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL=$(CHILL)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
-	$(end-sanitize-chill)\
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -120,24 +114,8 @@ install-info:
 dvi:
 
 install:
-	-parent=`echo $(datadir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
-	-parent=`echo $(targetdir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(targetdir) ] ; then true ; else mkdir $(targetdir) ; fi
-	-for file in ./lib/*.exp; \
-	do \
-		$(INSTALL_DATA) $$file $(datadir) ; \
-	done
-	-for file in ./*-init.exp; \
-	do \
-		$(INSTALL_DATA) $$file $(targetdir) ; \
-	done
 
 uninstall: force
-#	-rm -f $(datadir)/*.exp
-	-rm -fr $(targetdir)
 
 site.exp: ./config.status
 	@echo "Making a new config file..."
@@ -165,8 +143,8 @@ site.exp: ./config.status
 	@rm -f ./tmp1 ./tmp0
 
 installcheck:
-check: all site.exp
-	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB)
+check: all
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir)
 
 subdir_do: force
 	@for i in $(DODIRS); do \

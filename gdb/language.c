@@ -165,9 +165,7 @@ set_language_command (ignore, from_tty)
     printf ("local or auto    Automatic setting based on source file\n");
     printf ("c                Use the C language\n");
     printf ("c++              Use the C++ language\n");
-    /* start-sanitize-chill */
     printf ("chill            Use the Chill language\n");
-    /* end-sanitize-chill */
     printf ("modula-2         Use the Modula-2 language\n");
     /* Restore the silly string. */
     set_language(current_language->la_language);
@@ -460,10 +458,8 @@ binop_result_type(v1,v2)
 	 not needed. */
       return l1 > l2 ? VALUE_TYPE(v1) : VALUE_TYPE(v2);
       break;
-    /* start-sanitize-chill */
-    case language_chill:
+   case language_chill:
       error ("Missing Chill support in function binop_result_check.");/*FIXME*/
-    /* end-sanitize-chill */
    }
    abort();
    return (struct type *)0;	/* For lint */
@@ -634,10 +630,8 @@ integral_type (type)
 	 (TYPE_CODE(type) != TYPE_CODE_ENUM) ? 0 : 1;
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_INT ? 0 : 1;
-    /* start-sanitize-chill */
    case language_chill:
       error ("Missing Chill support in function integral_type.");  /*FIXME*/
-    /* end-sanitize-chill */
    default:
       error ("Language not supported.");
    }
@@ -665,9 +659,7 @@ character_type (type)
 {
    switch(current_language->la_language)
    {
-    /* start-sanitize-chill */
    case language_chill:
-    /* end-sanitize-chill */
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_CHAR ? 0 : 1;
 
@@ -688,9 +680,7 @@ string_type (type)
 {
    switch(current_language->la_language)
    {
-    /* start-sanitize-chill */
    case language_chill:
-    /* end-sanitize-chill */
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_STRING ? 0 : 1;
 
@@ -710,9 +700,7 @@ boolean_type (type)
 {
    switch(current_language->la_language)
    {
-   /* start-sanitize-chill */
    case language_chill:
-   /* end-sanitize-chill */
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_BOOL ? 0 : 1;
 
@@ -757,10 +745,8 @@ structured_type(type)
       return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
 	 (TYPE_CODE(type) == TYPE_CODE_SET) ||
 	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
-    /* start-sanitize-chill */
    case language_chill:
       error ("Missing Chill support in function structured_type.");  /*FIXME*/
-    /* end-sanitize-chill */
    default:
       return (0);
    }
@@ -805,10 +791,8 @@ value_true(val)
       return 0;		/* BOOLEAN with value FALSE */
     break;
 
-  /* start-sanitize-chill */
   case language_chill:
     error ("Missing Chill support in function value_type.");  /*FIXME*/
-  /* end-sanitize-chill */
 
   default:
     error ("Language not supported.");
@@ -979,12 +963,10 @@ binop_type_check(arg1,arg2,op)
 	 }
 #endif
 
-/* start-sanitize-chill */
 #ifdef _LANG_chill
        case language_chill:
 	 error ("Missing Chill support in function binop_type_check.");/*FIXME*/
 #endif
-/* end-sanitize-chill */
 
       }
    }

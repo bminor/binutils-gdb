@@ -197,11 +197,9 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #define LCC_PRODUCER "NCR C/C++"
 #endif
 
-/* start-sanitize-chill */
 #ifndef CHILL_PRODUCER
 #define CHILL_PRODUCER "GNU Chill "
 #endif
-/* end-sanitize-chill */
 
 /* Flags to target_to_host() that tell whether or not the data object is
    expected to be signed.  Used, for example, when fetching a signed
@@ -674,11 +672,9 @@ set_cu_language (dip)
       case LANG_C_PLUS_PLUS:
 	cu_language = language_cplus;
 	break;
-      /* start-sanitize-chill */
       case LANG_CHILL:
 	cu_language = language_chill;
 	break;
-      /* end-sanitize-chill */
       case LANG_MODULA2:
 	cu_language = language_m2;
 	break;
@@ -1903,9 +1899,7 @@ handle_producer (producer)
 
   processing_gcc_compilation =
     STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER))
-      /* start-sanitize-chill */
       || STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER))
-      /* end-sanitize-chill */
       || STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER));
 
   /* Select a demangling style if we can identify the producer and if

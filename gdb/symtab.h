@@ -91,13 +91,11 @@ struct general_symbol_info
 	    {
 	      char *demangled_name;
 	    } cplus_specific;
-	  /* start-sanitize-chill */
 	  /* For Chill */
 	  struct chill_specific
 	    {
 	      char *demangled_name;
 	    } chill_specific;
-	  /* end-sanitize-chill */
 	} lang_u;
     } lang_specific;
 
@@ -134,12 +132,10 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
       {									\
 	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
       }									\
-    /* start-sanitize-chill */						\
     else if (SYMBOL_LANGUAGE (symbol) == language_chill)		\
       {									\
 	SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL;			\
       }									\
-    /* end-sanitize-chill */						\
     else								\
       {									\
 	memset (&(symbol)->ginfo.lang_specific.lang_u, 0,		\
@@ -176,7 +172,6 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
       }									\
-    /* start-sanitize-chill */						\
     if (demangled == NULL						\
 	&& (SYMBOL_LANGUAGE (symbol) == language_chill			\
 	    || SYMBOL_LANGUAGE (symbol) == language_auto))		\
@@ -195,7 +190,6 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
 	    SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
       }									\
-    /* end-sanitize-chill */						\
     if (SYMBOL_LANGUAGE (symbol) == language_auto)			\
       {									\
 	SYMBOL_LANGUAGE (symbol) = language_unknown;			\
@@ -208,25 +202,12 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
 #define SYMBOL_DEMANGLED_NAME(symbol)					\
   (SYMBOL_LANGUAGE (symbol) == language_cplus				\
    ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
-   : NULL)
-
-/* start-sanitize-chill */
-
-#define SYMBOL_CHILL_DEMANGLED_NAME(symbol)				\
-  (symbol)->ginfo.lang_specific.lang_u.chill_specific.demangled_name
-
-/* Redefine SYMBOL_DEMANGLED_NAME.  This is simplier than trying to
-   devise a macro for which part of it can be cleanly sanitized away. */
-
-#undef SYMBOL_DEMANGLED_NAME
-#define SYMBOL_DEMANGLED_NAME(symbol)					\
-  (SYMBOL_LANGUAGE (symbol) == language_cplus				\
-   ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
    : (SYMBOL_LANGUAGE (symbol) == language_chill			\
       ? SYMBOL_CHILL_DEMANGLED_NAME (symbol)				\
       : NULL))
 
-/* end-sanitize-chill */
+#define SYMBOL_CHILL_DEMANGLED_NAME(symbol)				\
+  (symbol)->ginfo.lang_specific.lang_u.chill_specific.demangled_name
 
 /* Macro that returns the "natural source name" of a symbol.  In C++ this is
    the "demangled" form of the name if demangle is on and the "mangled" form

@@ -87,12 +87,10 @@ c_typedef_print (type, new, stream)
       type_print(type,"",stream,0);
       break;
 #endif
-/* start-sanitize-chill */
 #ifdef _LANG_chill
    case language_chill:
       error ("Missing Chill support in function c_typedef_print."); /*FIXME*/
 #endif
-/* end-sanitize-chill */
    default:
       error("Language not supported.");
    }
