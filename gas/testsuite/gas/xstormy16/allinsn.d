@@ -1068,158 +1068,167 @@ Disassembly of section \.text:
 0000082c <div>:
  82c:	c0 00       	div
 
-0000082e <nop>:
- 82e:	00 00       	nop
- 830:	03 00       	ret
+0000082e <sdiv>:
+ 82e:	c8 00       	sdiv
 
-00000832 <halt>:
- 832:	08 00       	halt
+00000830 <divlh>:
+ 830:	e8 00       	divlh
 
-00000834 <hold>:
- 834:	0a 00       	hold
+00000832 <sdivlh>:
+ 832:	e0 00       	sdivlh
 
-00000836 <holdx>:
- 836:	0b 00       	holdx
+00000834 <nop>:
+ 834:	00 00       	nop
+ 836:	03 00       	ret
 
-00000838 <brk>:
- 838:	05 00       	brk
+00000838 <halt>:
+ 838:	08 00       	halt
 
-0000083a <bccgrgr>:
- 83a:	00 0d 00 00 	bge r0,r0,0x83e
- 83e:	ff 0d ff ff 	bz r15,r15,0x841
- 842:	88 0d 00 88 	bpl r8,r8,0x46
- 846:	77 0d ff 77 	bls r7,r7,0x1049
- 84a:	11 0d 01 10 	bnc r1,r1,0x84f
- 84e:	d3 0d 07 37 	bc r3,r13,0xf59
- 852:	a1 0d 1d 08 	bge r1,r10,0x73
- 856:	50 0d 94 fb 	bz r0,r5,0x3ee
+0000083a <hold>:
+ 83a:	0a 00       	hold
 
-0000085a <bccgrimm8>:
- 85a:	00 20 00 00 	bge r0,#0x0,0x85e
- 85e:	ff 2e ff ff 	bz r7,#0xff,0x861
- 862:	80 28 00 88 	bpl r4,#0x80,0x66
- 866:	7f 26 ff 77 	bls r3,#0x7f,0x1069
- 86a:	01 22 01 10 	bnc r1,#0x1,0x86f
- 86e:	08 26 c1 15 	bnc r3,#0x8,0xe33
- 872:	cb 2a 53 c6 	bnz\.b r5,#0xcb,0xec9
- 876:	e1 2e d2 33 	bc r7,#0xe1,0xc4c
+0000083c <holdx>:
+ 83c:	0b 00       	holdx
 
-0000087a <bccimm16>:
- 87a:	00 c0 00 00 	bge Rx,#0x0,0x87e
- 87e:	ff cf ff ff 	bz Rx,#0xffff,0x881
- 882:	80 c8 00 80 	bpl Rx,#0x8000,0x806
- 886:	7f c7 ff 7f 	bls Rx,#0x7fff,0x909
- 88a:	01 c1 01 00 	bnc Rx,#0x1,0x88f
- 88e:	04 ce fb 77 	bz\.b Rx,#0x77fb,0x896
- 892:	f3 c9 3a f3 	bnv Rx,#0xf33a,0x889
- 896:	6c c9 32 bc 	bnv Rx,#0xbc32,0x906
+0000083e <brk>:
+ 83e:	05 00       	brk
 
-0000089a <bngrimm4>:
- 89a:	00 04 00 00 	bn r0,#0x0,0x89e
- 89e:	ff 04 ff 0f 	bn r15,#0xf,0x8a1
- 8a2:	88 04 00 08 	bn r8,#0x8,0xa6
- 8a6:	77 04 ff 07 	bn r7,#0x7,0x10a9
- 8aa:	11 04 01 00 	bn r1,#0x1,0x8af
- 8ae:	3b 04 49 08 	bn r11,#0x3,0xfb
- 8b2:	4f 04 4b 0b 	bn r15,#0x4,0x401
- 8b6:	8a 04 9b 06 	bn r10,#0x8,0xf55
+00000840 <bccgrgr>:
+ 840:	00 0d 00 00 	bge r0,r0,0x844
+ 844:	ff 0d ff ff 	bz r15,r15,0x847
+ 848:	88 0d 00 88 	bpl r8,r8,0x4c
+ 84c:	77 0d ff 77 	bls r7,r7,0x104f
+ 850:	11 0d 01 10 	bnc r1,r1,0x855
+ 854:	d3 0d 07 37 	bc r3,r13,0xf5f
+ 858:	a1 0d 1d 08 	bge r1,r10,0x79
+ 85c:	50 0d 94 fb 	bz r0,r5,0x3f4
 
-000008ba <bngrgr>:
- 8ba:	00 06 00 00 	bn r0,r0,0x8be
- 8be:	ff 06 ff 0f 	bn r15,r15,0x8c1
- 8c2:	88 06 00 08 	bn r8,r8,0xc6
- 8c6:	77 06 ff 07 	bn r7,r7,0x10c9
- 8ca:	11 06 01 00 	bn r1,r1,0x8cf
- 8ce:	34 06 9d 04 	bn r4,r3,0xd6f
- 8d2:	25 06 4d 00 	bn r5,r2,0x923
- 8d6:	73 06 77 02 	bn r3,r7,0xb51
+00000860 <bccgrimm8>:
+ 860:	00 20 00 00 	bge r0,#0x0,0x864
+ 864:	ff 2e ff ff 	bz r7,#0xff,0x867
+ 868:	80 28 00 88 	bpl r4,#0x80,0x6c
+ 86c:	7f 26 ff 77 	bls r3,#0x7f,0x106f
+ 870:	01 22 01 10 	bnc r1,#0x1,0x875
+ 874:	08 26 c1 15 	bnc r3,#0x8,0xe39
+ 878:	cb 2a 53 c6 	bnz\.b r5,#0xcb,0xecf
+ 87c:	e1 2e d2 33 	bc r7,#0xe1,0xc52
 
-000008da <bnlmemimm>:
- 8da:	00 7c 00 00 	bn 0x0,#0x0,0x8de
- 8de:	ff 7c ff 7f 	bn 0xff,#0x7,0x8e1
- 8e2:	80 7c 00 48 	bn 0x80,#0x4,0xe6
- 8e6:	7f 7c ff 37 	bn 0x7f,#0x3,0x10e9
- 8ea:	01 7c 01 10 	bn 0x1,#0x1,0x8ef
- 8ee:	99 7c b1 7c 	bn 0x99,#0x7,0x5a3
- 8f2:	cc 7c a7 08 	bn 0xcc,#0x0,0x19d
- 8f6:	f2 7c 74 75 	bn 0xf2,#0x7,0xe6e
+00000880 <bccimm16>:
+ 880:	00 c0 00 00 	bge Rx,#0x0,0x884
+ 884:	ff cf ff ff 	bz Rx,#0xffff,0x887
+ 888:	80 c8 00 80 	bpl Rx,#0x8000,0x80c
+ 88c:	7f c7 ff 7f 	bls Rx,#0x7fff,0x90f
+ 890:	01 c1 01 00 	bnc Rx,#0x1,0x895
+ 894:	04 ce fb 77 	bz\.b Rx,#0x77fb,0x89c
+ 898:	f3 c9 3a f3 	bnv Rx,#0xf33a,0x88f
+ 89c:	6c c9 32 bc 	bnv Rx,#0xbc32,0x90c
 
-000008fa <bnhmemimm>:
- 8fa:	00 7e 00 00 	bn 0x7f00,#0x0,0x8fe
- 8fe:	ff 7e ff 7f 	bn 0x7fff,#0x7,0x901
- 902:	80 7e 00 48 	bn 0x7f80,#0x4,0x106
- 906:	7f 7e ff 37 	bn 0x7f7f,#0x3,0x1109
- 90a:	01 7e 01 10 	bn 0x7f01,#0x1,0x90f
- 90e:	b9 7e 9a 3d 	bn 0x7fb9,#0x3,0x6ac
- 912:	69 7e 64 1d 	bn 0x7f69,#0x1,0x67a
- 916:	4f 7e 20 75 	bn 0x7f4f,#0x7,0xe3a
+000008a0 <bngrimm4>:
+ 8a0:	00 04 00 00 	bn r0,#0x0,0x8a4
+ 8a4:	ff 04 ff 0f 	bn r15,#0xf,0x8a7
+ 8a8:	88 04 00 08 	bn r8,#0x8,0xac
+ 8ac:	77 04 ff 07 	bn r7,#0x7,0x10af
+ 8b0:	11 04 01 00 	bn r1,#0x1,0x8b5
+ 8b4:	3b 04 49 08 	bn r11,#0x3,0x101
+ 8b8:	4f 04 4b 0b 	bn r15,#0x4,0x407
+ 8bc:	8a 04 9b 06 	bn r10,#0x8,0xf5b
 
-0000091a <bpgrimm4>:
- 91a:	00 05 00 00 	bp r0,#0x0,0x91e
- 91e:	ff 05 ff 0f 	bp r15,#0xf,0x921
- 922:	88 05 00 08 	bp r8,#0x8,0x126
- 926:	77 05 ff 07 	bp r7,#0x7,0x1129
- 92a:	11 05 01 00 	bp r1,#0x1,0x92f
- 92e:	c0 05 33 04 	bp r0,#0xc,0xd65
- 932:	51 05 27 02 	bp r1,#0x5,0xb5d
- 936:	86 05 34 06 	bp r6,#0x8,0xf6e
+000008c0 <bngrgr>:
+ 8c0:	00 06 00 00 	bn r0,r0,0x8c4
+ 8c4:	ff 06 ff 0f 	bn r15,r15,0x8c7
+ 8c8:	88 06 00 08 	bn r8,r8,0xcc
+ 8cc:	77 06 ff 07 	bn r7,r7,0x10cf
+ 8d0:	11 06 01 00 	bn r1,r1,0x8d5
+ 8d4:	34 06 9d 04 	bn r4,r3,0xd75
+ 8d8:	25 06 4d 00 	bn r5,r2,0x929
+ 8dc:	73 06 77 02 	bn r3,r7,0xb57
 
-0000093a <bpgrgr>:
- 93a:	00 07 00 00 	bp r0,r0,0x93e
- 93e:	ff 07 ff 0f 	bp r15,r15,0x941
- 942:	88 07 00 08 	bp r8,r8,0x146
- 946:	77 07 ff 07 	bp r7,r7,0x1149
- 94a:	11 07 01 00 	bp r1,r1,0x94f
- 94e:	94 07 9a 0d 	bp r4,r9,0x6ec
- 952:	a9 07 b0 0a 	bp r9,r10,0x406
- 956:	14 07 97 01 	bp r4,r1,0xaf1
+000008e0 <bnlmemimm>:
+ 8e0:	00 7c 00 00 	bn 0x0,#0x0,0x8e4
+ 8e4:	ff 7c ff 7f 	bn 0xff,#0x7,0x8e7
+ 8e8:	80 7c 00 48 	bn 0x80,#0x4,0xec
+ 8ec:	7f 7c ff 37 	bn 0x7f,#0x3,0x10ef
+ 8f0:	01 7c 01 10 	bn 0x1,#0x1,0x8f5
+ 8f4:	99 7c b1 7c 	bn 0x99,#0x7,0x5a9
+ 8f8:	cc 7c a7 08 	bn 0xcc,#0x0,0x1a3
+ 8fc:	f2 7c 74 75 	bn 0xf2,#0x7,0xe74
 
-0000095a <bplmemimm>:
- 95a:	00 7d 00 00 	bp 0x0,#0x0,0x95e
- 95e:	ff 7d ff 7f 	bp 0xff,#0x7,0x961
- 962:	80 7d 00 48 	bp 0x80,#0x4,0x166
- 966:	7f 7d ff 37 	bp 0x7f,#0x3,0x1169
- 96a:	01 7d 01 10 	bp 0x1,#0x1,0x96f
- 96e:	c1 7d 72 3e 	bp 0xc1,#0x3,0x7e4
- 972:	fa 7d ef 29 	bp 0xfa,#0x2,0x365
- 976:	b4 7d 43 62 	bp 0xb4,#0x6,0xbbd
+00000900 <bnhmemimm>:
+ 900:	00 7e 00 00 	bn 0x7f00,#0x0,0x904
+ 904:	ff 7e ff 7f 	bn 0x7fff,#0x7,0x907
+ 908:	80 7e 00 48 	bn 0x7f80,#0x4,0x10c
+ 90c:	7f 7e ff 37 	bn 0x7f7f,#0x3,0x110f
+ 910:	01 7e 01 10 	bn 0x7f01,#0x1,0x915
+ 914:	b9 7e 9a 3d 	bn 0x7fb9,#0x3,0x6b2
+ 918:	69 7e 64 1d 	bn 0x7f69,#0x1,0x680
+ 91c:	4f 7e 20 75 	bn 0x7f4f,#0x7,0xe40
 
-0000097a <bphmemimm>:
- 97a:	00 7f 00 00 	bp 0x7f00,#0x0,0x97e
- 97e:	ff 7f ff 7f 	bp 0x7fff,#0x7,0x981
- 982:	80 7f 00 48 	bp 0x7f80,#0x4,0x186
- 986:	7f 7f ff 37 	bp 0x7f7f,#0x3,0x1189
- 98a:	01 7f 01 10 	bp 0x7f01,#0x1,0x98f
- 98e:	c3 7f 50 1e 	bp 0x7fc3,#0x1,0x7e2
- 992:	81 7f 1c 5a 	bp 0x7f81,#0x5,0x3b2
- 996:	38 7f bb 36 	bp 0x7f38,#0x3,0x1055
+00000920 <bpgrimm4>:
+ 920:	00 05 00 00 	bp r0,#0x0,0x924
+ 924:	ff 05 ff 0f 	bp r15,#0xf,0x927
+ 928:	88 05 00 08 	bp r8,#0x8,0x12c
+ 92c:	77 05 ff 07 	bp r7,#0x7,0x112f
+ 930:	11 05 01 00 	bp r1,#0x1,0x935
+ 934:	c0 05 33 04 	bp r0,#0xc,0xd6b
+ 938:	51 05 27 02 	bp r1,#0x5,0xb63
+ 93c:	86 05 34 06 	bp r6,#0x8,0xf74
 
-0000099a <bcc>:
- 99a:	00 d0       	bge 0x99c
- 99c:	ff df       	bz 0x99d
- 99e:	80 d8       	bpl 0x920
- 9a0:	7f d7       	bls 0xa21
- 9a2:	01 d1       	bnc 0x9a5
- 9a4:	30 dc       	bnz\.b 0x9d6
- 9a6:	f9 d1       	bnc 0x9a1
- 9a8:	4a dc       	bnz\.b 0x9f4
+00000940 <bpgrgr>:
+ 940:	00 07 00 00 	bp r0,r0,0x944
+ 944:	ff 07 ff 0f 	bp r15,r15,0x947
+ 948:	88 07 00 08 	bp r8,r8,0x14c
+ 94c:	77 07 ff 07 	bp r7,r7,0x114f
+ 950:	11 07 01 00 	bp r1,r1,0x955
+ 954:	94 07 9a 0d 	bp r4,r9,0x6f2
+ 958:	a9 07 b0 0a 	bp r9,r10,0x40c
+ 95c:	14 07 97 01 	bp r4,r1,0xaf7
 
-000009aa <br>:
- 9aa:	00 10       	br 0x9ac
- 9ac:	fe 1f       	br 0x9ac
- 9ae:	00 18       	br 0x1b0
- 9b0:	fe 17       	br 0x11b0
- 9b2:	00 10       	br 0x9b4
- 9b4:	c0 15       	br 0xf76
- 9b6:	52 16       	br 0x100a
- 9b8:	d2 13       	br 0xd8c
+00000960 <bplmemimm>:
+ 960:	00 7d 00 00 	bp 0x0,#0x0,0x964
+ 964:	ff 7d ff 7f 	bp 0xff,#0x7,0x967
+ 968:	80 7d 00 48 	bp 0x80,#0x4,0x16c
+ 96c:	7f 7d ff 37 	bp 0x7f,#0x3,0x116f
+ 970:	01 7d 01 10 	bp 0x1,#0x1,0x975
+ 974:	c1 7d 72 3e 	bp 0xc1,#0x3,0x7ea
+ 978:	fa 7d ef 29 	bp 0xfa,#0x2,0x36b
+ 97c:	b4 7d 43 62 	bp 0xb4,#0x6,0xbc3
 
-000009ba <callrimm>:
- 9ba:	01 10       	callr 0x9bc
- 9bc:	ff 1f       	callr 0x9bc
- 9be:	01 18       	callr 0x1c0
- 9c0:	ff 17       	callr 0x11c0
- 9c2:	01 10       	callr 0x9c4
- 9c4:	c1 15       	callr 0xf86
- 9c6:	53 16       	callr 0x101a
- 9c8:	d3 13       	callr 0xd9c
+00000980 <bphmemimm>:
+ 980:	00 7f 00 00 	bp 0x7f00,#0x0,0x984
+ 984:	ff 7f ff 7f 	bp 0x7fff,#0x7,0x987
+ 988:	80 7f 00 48 	bp 0x7f80,#0x4,0x18c
+ 98c:	7f 7f ff 37 	bp 0x7f7f,#0x3,0x118f
+ 990:	01 7f 01 10 	bp 0x7f01,#0x1,0x995
+ 994:	c3 7f 50 1e 	bp 0x7fc3,#0x1,0x7e8
+ 998:	81 7f 1c 5a 	bp 0x7f81,#0x5,0x3b8
+ 99c:	38 7f bb 36 	bp 0x7f38,#0x3,0x105b
+
+000009a0 <bcc>:
+ 9a0:	00 d0       	bge 0x9a2
+ 9a2:	ff df       	bz 0x9a3
+ 9a4:	80 d8       	bpl 0x926
+ 9a6:	7f d7       	bls 0xa27
+ 9a8:	01 d1       	bnc 0x9ab
+ 9aa:	30 dc       	bnz\.b 0x9dc
+ 9ac:	f9 d1       	bnc 0x9a7
+ 9ae:	4a dc       	bnz\.b 0x9fa
+
+000009b0 <br>:
+ 9b0:	00 10       	br 0x9b2
+ 9b2:	fe 1f       	br 0x9b2
+ 9b4:	00 18       	br 0x1b6
+ 9b6:	fe 17       	br 0x11b6
+ 9b8:	00 10       	br 0x9ba
+ 9ba:	c0 15       	br 0xf7c
+ 9bc:	52 16       	br 0x1010
+ 9be:	d2 13       	br 0xd92
+
+000009c0 <callrimm>:
+ 9c0:	01 10       	callr 0x9c2
+ 9c2:	ff 1f       	callr 0x9c2
+ 9c4:	01 18       	callr 0x1c6
+ 9c6:	ff 17       	callr 0x11c6
+ 9c8:	01 10       	callr 0x9ca
+ 9ca:	c1 15       	callr 0xf8c
+ 9cc:	53 16       	callr 0x1020
+ 9ce:	d3 13       	callr 0xda2

@@ -1174,6 +1174,18 @@ mul:
 div:
 	div
 	.text
+	.global sdiv
+sdiv:
+	sdiv
+	.text
+	.global divlh
+divlh:
+	divlh
+	.text
+	.global sdivlh
+sdivlh:
+	sdivlh
+	.text
 	.global nop
 nop:
 	nop

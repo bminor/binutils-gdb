@@ -1,3 +1,9 @@
+2002-11-19  DJ Delorie  <dj@redhat.com>
+
+	* gas/xstormy16/allinsn.sh: Add sdiv, divlh, and sdivlh.
+	* gas/xstormy16/allinsn.d: Regenerate.
+	* gas/xstormy16/allinsn.s: Regenerate.
+	
 2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* gas/all/gas.exp: Setup for tic4x testcase
