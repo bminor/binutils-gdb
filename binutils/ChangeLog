@@ -1,5 +1,13 @@
 Tue Oct 18 11:12:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* objcopy.c (copy_object): If the output file format is `binary',
+	and the start address was not set using --set-start, default the
+	start address to zero.  This hack is because the `binary' output
+	file format uses the start address to set the virtual address of
+	the first byte in the file.
+	* binutils.texi, objcopy.1: Add some notes on generating S-records
+	and binary files.
+
 	* nm.c (print_symdef_entry): Call print_symname to print the
 	symbol name, so that --demangle works.
 

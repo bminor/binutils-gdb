@@ -55,6 +55,34 @@ uses BFD to do all its translation work; it knows about all the
 formats BFD knows about, and thus is able to recognize most formats
 without being told explicitly.
 .PP
+.B objcopy
+can be used to generate S-records by using an output target of
+.B srec
+(e.g., use
+.B -O srec).
+.PP
+.B objcopy
+can be used to generate a raw binary file by using an output target of
+.B binary
+(e.g., use
+.B -O binary).
+When
+.B objcopy
+generates a raw binary file, it will essentially produce a memory dump
+of the contents of the input object file.  All symbols and relocation
+information will be discarded.  By default, the memory dump will start
+at virtual address zero; the
+.B --set-start
+option may be used to specify a different starting point.
+.PP
+When generating an S-record or a raw binary file, it may be helpful to
+use
+.B -S
+to remove sections containing debugging information.  In some cases
+.B -R
+will be useful to remove sections which contain information which is
+not needed by the binary file.
+.PP
 .I infile
 and
 .I outfile
@@ -112,7 +140,9 @@ The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
 .TP
 .B \fB\-\-set\-start=\fIval
 Set the start address of the new file to \fIval\fP.  Not all object
-file formats support setting the start address.
+file formats support setting the start address.  When using the
+\fBbinary\fP output file format, the start address sets the virtual
+address of the first byte in the binary output file.
 .TP
 .B \fB\-\-adjust\-start=\fIincr
 Adjust the start address by adding \fIincr\fP.  Not all object file

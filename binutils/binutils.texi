@@ -767,6 +767,22 @@ translation work; it has access to all the formats described in @sc{bfd}
 and thus is able to recognize most formats without being told
 explicitly.  @xref{BFD,,BFD,ld.info,Using LD}.
 
+@code{objcopy} can be used to generate S-records by using an output
+target of @samp{srec} (e.g., use @samp{-O srec}).
+
+@code{objcopy} can be used to generate a raw binary file by using an
+output target of @samp{binary} (e.g., use @samp{-O binary}).  When
+@code{objcopy} generates a raw binary file, it will essentially produce
+a memory dump of the contents of the input object file.  All symbols and
+relocation information will be discarded.  By default, the memory dump
+will start at virtual address zero; the @samp{--set-start} option may be
+used to specify a different starting point.
+
+When generating an S-record or a raw binary file, it may be helpful to
+use @samp{-S} to remove sections containing debugging information.  In
+some cases @samp{-R} will be useful to remove sections which contain
+information which is not needed by the binary file.
+
 @table @code
 @item @var{infile}
 @itemx @var{outfile}
@@ -833,7 +849,9 @@ copy with the @var{-b} or @samp{--byte} option.  The default is 4.
 
 @item --set-start @var{val}
 Set the address of the new file to @var{val}.  Not all object file
-formats support setting the start address.
+formats support setting the start address.  When using the @samp{binary}
+output file format, the start address sets the virtual address of the
+first byte in the binary output file.
 
 @item --adjust-start @var{incr}
 Adjust the start address by adding @var{incr}.  Not all object file
