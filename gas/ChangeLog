@@ -1,3 +1,17 @@
+Mon Oct 25 10:20:31 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* doc/Makefile.in (install-info): Use "$<*" so VPATH will find
+	as.info* even if they're in $(srcdir) (e.g., for FSF
+	distributions).
+
+	* write.c (write_relocs): For relocs that are pc_relative and
+	pcrel_offset and not partial_inplace, adjust reloc->addend to
+	compensate for a bfd_perform_relocation bug.
+
+	* config/tc-sparc.h: Removed remaining non-BFD_ASSEMBLER code.
+	* config/tc-sparc.c: Ditto.
+	(tc_gen_reloc): Include fx_offset for pcrel fixups.
+
 Sun Oct 24 16:49:00 1993  Jim Wilson  (wilson@x1.cygnus.com)
 
 	* tc-mips.c (md_pseudo_table): Add dword pseudo op.
