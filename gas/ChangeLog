@@ -1,3 +1,12 @@
+Sat Apr 18 01:19:01 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-mips.c (mips_ip): Note when we use get match on
+        the full instruction name.
+start-sanitize-r5900
+        (mips_ip): For '&' DEST completer handling, if we got a full match
+        then the DEST completer is implicitly .wxyz.
+end-sanitize-r5900
+
 start-sanitize-sky
 Thu Apr 16 11:48:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
