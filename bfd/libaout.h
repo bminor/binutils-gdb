@@ -216,6 +216,10 @@ PROTO (void,	NAME(aout,swap_exec_header_in), (bfd *abfd,
 PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *execp,
 			 struct external_exec *raw_bytes));
 
+/* Prototypes for functions in stab-syms.c. */
+
+PROTO(char *, aout_stab_name, (int code));
+
 /* A.out uses the generic versions of these routines... */
 
 #define	aout_32_get_section_contents	bfd_generic_get_section_contents

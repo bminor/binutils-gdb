@@ -1631,7 +1631,7 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
       if (section_code == '?')
 	{
 	  int type_code = aout_symbol(symbol)->type  & 0xff;
-	  char *stab_name = bfd_stab_name(type_code);
+	  char *stab_name = aout_stab_name(type_code);
 	  char buf[10];
 	  if (stab_name == NULL)
 	    {

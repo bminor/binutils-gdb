@@ -23,7 +23,7 @@
 srcdir = .
 ddestdir = /usr/local
 libdir = $(ddestdir)/lib
-docdir = $(srcdir)/doc
+docdir = $(srcdir)$(subdir)/doc
 includedir= $(ddestdir)/include
 RANLIB = ranlib
 AR = ar
@@ -38,6 +38,10 @@ SUBDIRS = doc
 #### host and target dependent Makefile fragments come in here.
 ###
 
+# Change this (to MINIMIZE=1) to save space in executables.
+# Currently, all this does is control the target_vector in targets.c.
+MINIMIZE=0
+
 TARGETLIB = libbfd.a
 CFLAGS = $(MINUS_G) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 
@@ -48,7 +52,7 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o
 
-BFD_BACKENDS = oasys.o ieee.o srec.o elf.o \
+BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
 	coff-mips.o coff-rs6000.o
@@ -61,7 +65,7 @@ BFD_H=$(INCDIR)/bfd.h
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 coff-i386.c aout64.c aout32.c sunos.c demo64.c coff-i960.c srec.c \
 	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c \
-	 format.c section.c core.c syms.c reloc.c init.c ctor.c \
+	 format.c section.c core.c syms.c stabs-syms.c reloc.c init.c ctor.c \
 	 coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
 	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
  	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c 
@@ -87,7 +91,7 @@ $(TARGETLIB): $(OFILES)
 
 # When compiling targets.c, supply the default target info from configure.
 targets.o: targets.c
-	$(CC) $(CFLAGS) -c $(TDEFAULTS) $<
+	$(CC) $(CFLAGS) -c -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
 
 subdir_do: force
 	for i in $(DODIRS); do \
@@ -308,6 +312,7 @@ core.o : core.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 syms.o : syms.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
+syms.o : stab-syms.c
 reloc.o : reloc.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 coff-m88k.o : coff-m88k.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \

@@ -418,28 +418,3 @@ asymbol *symbol)
  
   return '?';
 }
-
-/* Create a table of debugging stab-codes and corresponding names.  */
-
-#define __define_stab(NAME, CODE, STRING) {NAME, STRING},
-struct {enum __stab_debug_code code; char *string;} bfd_stab_names[]
-  = {
-#include "stab.def"
-    };
-#undef __define_stab
-
-/*proto* bfd_stab_name
-Returns a string for the stab with the given code, or NULL if not found.
-
-*; PROTO(char *, bfd_stab_name, (int code));
-*/
-char *
-DEFUN(bfd_stab_name,(code),
-int code)
-{
-  register int i;
-  for (i = sizeof(bfd_stab_names) / sizeof(bfd_stab_names[0]) - 1; i >= 0; i--)
-    if (bfd_stab_names[i].code == (enum __stab_debug_code) code)
-      return bfd_stab_names[i].string;
-  return NULL;
-}

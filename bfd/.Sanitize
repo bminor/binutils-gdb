@@ -86,6 +86,7 @@ opncls.c
 reloc.c
 section.c
 srec.c
+stab-syms.c
 sunos.c
 syms.c
 targets.c
@@ -115,7 +116,14 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.30  1991/11/21 01:56:17  gnu
+# Revision 1.31  1991/11/22 05:00:08  bothner
+# 	Moved bfd_stab_name() and bfd_stab_names[]
+# 	from syms.c to new file stab-syms.c.
+# 	Renamed to  aout_stab_name() and aout_stab_names[].
+# 	Also, since GNU extended type codes such as N_SETT are no longer
+# 	in ../include/stab.def, include them manually.
+#
+# Revision 1.30  1991/11/21  01:56:17  gnu
 # Avoid duplicate echo.
 #
 # Revision 1.29  1991/11/17  21:38:05  bothner
