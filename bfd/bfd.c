@@ -531,7 +531,9 @@ _bfd_default_error_handler (const char *fmt, ...)
 		    }
 		  while (--trim != 0);
 		  *q = '\0';
+		  avail = extra;
 		}
+	      avail -= extra;
 
 	      /* Now double all '%' chars, shuffling the string as we go.  */
 	      while (extra != 0)

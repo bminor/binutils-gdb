@@ -1,5 +1,10 @@
 2004-08-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd.c (_bfd_default_error_handler): Account for doubled '%' in
+	free space available.
+
+2004-08-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* pdp11.c (struct pdp11_aout_reloc_external): Delete.  Replace
 	occurrences with bfd_btye * thoughout file.
 
