@@ -73,6 +73,43 @@
 ::model:601:ppc601:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
 
 # Flags for model.h
+::model-macro:::
+	#define PPC_INSN_INT(OUT_MASK, IN_MASK, RC) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_int(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, (RC) ? (1 << 0) : 0)
+
+	#define PPC_INSN_INT_CR(OUT_MASK, IN_MASK, CR_MASK) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_int(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, CR_MASK)
+
+	#define PPC_INSN_CR(OUT_MASK, IN_MASK) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_cr(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK)
+
+	#define PPC_INSN_FLOAT(OUT_MASK, IN_MASK, RC) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_float(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, (RC) ? (1 << 1) : 0)
+
+	#define PPC_INSN_FLOAT_CR(OUT_MASK, IN_MASK, CR_MASK) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_float(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, CR_MASK)
+
+	#define PPC_INSN_INT_FLOAT(OUT_INT_MASK, OUT_FP_MASK, IN_INT_MASK, IN_FP_MASK) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_int_float(my_index, processor, cpu_model(processor), OUT_INT_MASK, OUT_FP_MASK, IN_INT_MASK, IN_FP_MASK)
+
+	#define PPC_INSN_FROM_SPR(INT_MASK, SPR) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_from_spr(my_index, processor, cpu_model(processor), INT_MASK, SPR)
+
+	#define PPC_INSN_TO_SPR(INT_MASK, SPR) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_to_spr(my_index, processor, cpu_model(processor), INT_MASK, SPR)
+
+	#define PPC_INSN_MFCR(INT_MASK) \
+		if (WITH_MODEL_ISSUE) \
+		  ppc_insn_mfcr(my_index, processor, cpu_model(processor), INT_MASK)
+
 ::model-data:::
 	typedef enum _ppc_function_unit {
 	  PPC_UNIT_BAD,				/* unknown function unit */
@@ -217,6 +254,31 @@ void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
 	if (busy->spr_busy != PPC_NO_SPR)
 	  TRACE(trace_model, ("Register %s is now available.\n", spr_name(busy->spr_busy)));
 
+# Trace making registers busy
+void::model-static::model_trace_make_busy:model_data *model_ptr, unsigned32 int_mask, unsigned32 fp_mask, unsigned32 cr_mask
+	int i;
+	if (int_mask) {
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & int_mask) != 0) {
+	      TRACE(trace_model, ("Register r%d is now busy.\n", i));
+	    }
+	  }
+	}
+	if (fp_mask) {
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & fp_mask) != 0) {
+	      TRACE(trace_model, ("Register f%d is now busy.\n", i));
+	    }
+	  }
+	}
+	if (cr_mask) {
+	  for(i = 0; i < 8; i++) {
+	    if (((1 << i) & cr_mask) != 0) {
+	      TRACE(trace_model, ("Register cr%d is now busy.\n", i));
+	    }
+	  }
+	}
+
 # Trace waiting for registers to become available
 void::model-static::model_trace_busy_p:model_data *model_ptr, unsigned32 int_busy, unsigned32 fp_busy, unsigned32 cr_or_fpscr_busy, int spr_busy
 	int i;
@@ -318,29 +380,11 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	model_ptr->nr_units[unit]++;
 	return busy;
 
-# Make a given integer register busy
-void::model-internal::model_make_int_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
-	TRACE(trace_model,("Marking register r%d as busy\n", regno));
-	busy_ptr->int_busy |= (1 << regno);
-	model_ptr->int_busy |= (1 << regno);
-
-# Make a given floating point register busy
-void::model-internal::model_make_fp_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
-	TRACE(trace_model,("Marking register f%d as busy\n", regno));
-	busy_ptr->fp_busy |= (1 << regno);
-	model_ptr->fp_busy |= (1 << regno);
-
 # Make a given CR register busy
 void::model-internal::model_make_cr_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
 	TRACE(trace_model,("Marking register cr%d as busy\n", regno));
 	busy_ptr->cr_fpscr_busy |= (1 << regno);
 	model_ptr->cr_fpscr_busy |= (1 << regno);
-
-# Make a given SPR register busy
-void::model-internal::model_make_spr_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
-	TRACE(trace_model,("Marking register %s as busy\n", spr_name(regno)));
-	busy_ptr->spr_busy = regno;
-	model_ptr->spr_busy[regno] = 1;
 
 
 # Wait until a function unit is non-busy, and then allocate a busy pointer & return the pointer
@@ -393,19 +437,12 @@ void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
 	  model_new_cycle(model_ptr);
 	}
 
-# Schedule an instruction that takes 2 integer input registers and produces an output register & possibly sets CR0
-void::model-function::ppc_insn_int2:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, signed_word *rB, unsigned Rc
-	registers *cpu_regs = cpu_registers(processor);
-	const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
-	const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RD);
+# Schedule an instruction that takes integer input registers and produces output registers & possibly sets some CR registers
+void::model-function::ppc_insn_int:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
+	const unsigned32 int_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else if (!Rc) {
+	if (!cr_mask) {
 	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
@@ -419,13 +456,14 @@ void::model-function::ppc_insn_int2:itable_index index, cpu *processor, model_da
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_ptr->int_busy |= out_mask;
+	  busy_ptr->int_busy |= out_mask;
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_make_busy(model_ptr, out_mask, 0, 0);
 	  return;
 	}
 
 	else {
-	  const unsigned32 cr_mask = (1 << 0);
-
 	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
@@ -439,29 +477,28 @@ void::model-function::ppc_insn_int2:itable_index index, cpu *processor, model_da
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, 0);
+	  model_ptr->int_busy |= out_mask;
+	  busy_ptr->int_busy |= out_mask;
+	  model_ptr->cr_fpscr_busy |= cr_mask;
+	  busy_ptr->cr_fpscr_busy |= cr_mask;
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_make_busy(model_ptr, out_mask, 0, cr_mask);
 	  return;
 	}
 
-# Schedule an instruction that takes 1 integer input registers and produces an output register & possibly sets CR0
-void::model-function::ppc_insn_int1:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, unsigned Rc
-	registers *cpu_regs = cpu_registers(processor);
-	const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RD);
+
+# Schedule an instruction that takes floating point input registers and produces output fp registers & possibly sets some CR regs
+void::model-function::ppc_insn_float:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
+	const unsigned32 fp_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else if (!Rc) {
-	  if ((model_ptr->int_busy & int_mask) != 0) {
+	if (!cr_mask) {
+	  if ((model_ptr->fp_busy & fp_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while ((model_ptr->int_busy & int_mask) != 0) {
+	    while ((model_ptr->fp_busy & fp_mask) != 0) {
 	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
 
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
@@ -469,19 +506,20 @@ void::model-function::ppc_insn_int1:itable_index index, cpu *processor, model_da
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_ptr->fp_busy |= out_mask;
+	  busy_ptr->fp_busy |= out_mask;
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_make_busy(model_ptr, 0, out_mask, 0);
 	  return;
 	}
 
 	else {
-	  const unsigned32 cr_mask = (1 << 0);
-
-	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
 	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
 
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
@@ -489,543 +527,96 @@ void::model-function::ppc_insn_int1:itable_index index, cpu *processor, model_da
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, 0);
+	  model_ptr->fp_busy |= out_mask;
+	  busy_ptr->fp_busy |= out_mask;
+	  model_ptr->cr_fpscr_busy |= cr_mask;
+	  busy_ptr->cr_fpscr_busy |= cr_mask;
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_make_busy(model_ptr, 0, out_mask, cr_mask);
 	  return;
 	}
 
-# Schedule an instruction that takes no integer input registers and produces an output register & possibly sets CR0
-void::model-function::ppc_insn_int0:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, unsigned Rc
-	registers *cpu_regs = cpu_registers(processor);
-	const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	const unsigned32 int_mask = (1 << ppc_RD);
+
+# Schedule an instruction that takes both int/float input registers and produces output int/float registers
+void::model-function::ppc_insn_int_float:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 out_int_mask, const unsigned32 out_fp_mask, const unsigned32 in_int_mask, const unsigned32 in_fp_mask
+	const unsigned32 int_mask = out_int_mask | in_int_mask;
+	const unsigned32 fp_mask = out_fp_mask | in_fp_mask;
 	model_busy *busy_ptr;
 
-	if (!WITH_MODEL_ISSUE)
-	  return;
+	if ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
+	  model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	else if (!Rc) {
-	  while ((model_ptr->int_busy & int_mask) != 0) {
+	  while ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
 	    if (WITH_TRACE && ppc_trace[trace_model])
-	      model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+	      model_trace_busy_p(model_ptr, int_mask, fp_mask, 0, PPC_NO_SPR);
 
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_ptr->int_busy |= out_int_mask;
+	  busy_ptr->int_busy |= out_int_mask;
+	  model_ptr->fp_busy |= out_fp_mask;
+	  busy_ptr->fp_busy |= out_fp_mask;
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_make_busy(model_ptr, out_int_mask, out_fp_mask, 0);
 	  return;
-	}
-
-	else {
-	  const unsigned32 cr_mask = (1 << 0);
-
-	  while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, 0);
-	  return;
-	}
-
-# Schedule an instruction that takes 2 integer input registers and produces an output register & updates a second register
-void::model-function::ppc_insn_int2_update:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, signed_word *rB
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RD);
-	  model_busy *busy_ptr;
-
-	  if ((model_ptr->int_busy & int_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	}
-
-# Schedule an instruction that takes 1 integer input registers and produces an output register & updates the other register
-void::model-function::ppc_insn_int1_update:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RD);
-	  model_busy *busy_ptr;
-
-	  if ((model_ptr->int_busy & int_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	}
-
-# Schedule an instruction that takes 2 integer input registers and produces no output register
-void::model-function::ppc_insn_int2_noout:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rA, signed_word *rB
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB);
-
-	  if ((model_ptr->int_busy & int_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  (void) model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	}
-
-# Schedule an instruction that takes 1 integer input registers and produces no output register
-void::model-function::ppc_insn_int1_noout:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rA
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RA);
-
-	  if ((model_ptr->int_busy & int_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  (void) model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	}
-
-# Schedule an instruction that takes no input registers and produces no output
-void::model-function::ppc_insn_int0_noout:itable_index index, cpu *processor, model_data *model_ptr
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  (void) model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	}
-
-# Schedule an instruction that takes 2 integer input registers and produces a CR output register
-void::model-function::ppc_insn_int2_cr:itable_index index, cpu *processor, model_data *model_ptr, unsigned CRD, signed_word *rA, signed_word *rB
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB);
-	  const unsigned32 cr_mask = (1 << CRD);
-	  model_busy *busy_ptr;
-
-	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, CRD);
-	}
-
-# Schedule an instruction that takes 1 integer input register and produces a CR output register
-void::model-function::ppc_insn_int1_cr:itable_index index, cpu *processor, model_data *model_ptr, unsigned CRD, signed_word *rA
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RA);
-	  const unsigned32 cr_mask = (1 << CRD);
-	  model_busy *busy_ptr;
-
-	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, CRD);
-	}
-
-# Schedule an instruction that takes 3 floating point input registers and produces an output register & possibly sets CR1
-void::model-function::ppc_insn_fp3:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, unsigned64 *rA, unsigned64 *rB, unsigned64 *rC, unsigned Rc
-	registers *cpu_regs = cpu_registers(processor);
-	const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
-	const unsigned ppc_RB = (rB - &cpu_regs->fpr[0]);
-	const unsigned ppc_RC = (rC - &cpu_regs->fpr[0]);
-	const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
-	const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RC) | (1 << ppc_RD);
-	model_busy *busy_ptr;
-
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else if (!Rc) {
-	  if ((model_ptr->fp_busy & fp_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->fp_busy & fp_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  return;
-	}
-
-	else {
-	  const unsigned32 cr_mask = (1 << 1);
-	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, 1);
-	  return;
-	}
-
-# Schedule an instruction that takes 2 floating point input registers and produces an output register & possibly sets CR1
-void::model-function::ppc_insn_fp2:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, unsigned64 *rA, unsigned64 *rB, unsigned Rc
-	registers *cpu_regs = cpu_registers(processor);
-	const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
-	const unsigned ppc_RB = (rB - &cpu_regs->fpr[0]);
-	const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
-	const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RD);
-	model_busy *busy_ptr;
-
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else if (!Rc) {
-	  if ((model_ptr->fp_busy & fp_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->fp_busy & fp_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	}
-
-	else {
-	  const unsigned32 cr_mask = (1 << 1);
-
-	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, 1);
-	}
-
-# Schedule an instruction that takes 1 floating point input registers and produces an output register & possibly sets CR1
-void::model-function::ppc_insn_fp1:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, unsigned64 *rA, unsigned Rc
-	registers *cpu_regs = cpu_registers(processor);
-	const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
-	const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
-	const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RD);
-	model_busy *busy_ptr;
-
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else if (!Rc) {
-	  if ((model_ptr->fp_busy & fp_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->fp_busy & fp_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	}
-
-	else {
-	  const unsigned32 cr_mask = (1 << 1);
-
-	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, 1);
-	}
-
-# Schedule an instruction that takes 1 floating point input register & 2 integer registers and does not produce an output
-# (or takes 2 integer registers and produces an output in the floating point register)
-void::model-function::ppc_insn_int2_fp1:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, signed_word *rA, signed_word *rB, int RD_is_output, int RA_is_update
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
-	  const unsigned32 int_mask =  (1 << ppc_RB) | ((ppc_RA == 0) ? 0 : (1 << ppc_RA));
-	  const unsigned32 fp_mask = (1 << ppc_RD);
-	  model_busy *busy_ptr;
-
-	  if ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, fp_mask, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  if (RD_is_output)
-	    model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-
-	  if (RA_is_update)
-	    model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
-	}
-
-# Schedule an instruction that takes 1 floating point input register & 1 integer register and does not produce an output
-# (or takes 1 integer register and produces an output in the floating point register)
-void::model-function::ppc_insn_int1_fp1:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, signed_word *rA, int RD_is_output, int RA_is_update
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
-	  const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
-	  const unsigned32 int_mask = ((ppc_RA == 0) ? 0 : (1 << ppc_RA));
-	  const unsigned32 fp_mask = (1 << ppc_RD);
-	  model_busy *busy_ptr;
-
-	  if ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, fp_mask, 0, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  if (RD_is_output)
-	    model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
-
-	  if (RA_is_update)
-	    model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
-	}
-
-# Schedule an instruction that takes 2 floating input registers and produces a CR output register
-void::model-function::ppc_insn_fp2_cr:itable_index index, cpu *processor, model_data *model_ptr, unsigned CRD, unsigned64 *rA, unsigned64 *rB
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
-	  const unsigned ppc_RB = (rB - &cpu_regs->fpr[0]);
-	  const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RB);
-	  const unsigned32 cr_mask = (1 << CRD);
-	  model_busy *busy_ptr;
-
-	  if (((model_ptr->fp_busy & fp_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
-
-	    while (((model_ptr->fp_busy & fp_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
-
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, CRD);
 	}
 
 # Schedule an MFSPR instruction that takes 1 special purpose register and produces an integer output register
-void::model-function::ppc_insn_from_spr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, unsigned nSPR
-	if (!WITH_MODEL_ISSUE)
-	  return;
+void::model-function::ppc_insn_from_spr:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
+	model_busy *busy_ptr;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RD);
-	  model_busy *busy_ptr;
+	while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_busy_p(model_ptr, int_mask, 0, 0, nSPR);
 
-	  while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-	      model_trace_busy_p(model_ptr, int_mask, 0, 0, nSPR);
-
-	    model_ptr->nr_stalls_data++;
-	    model_new_cycle(model_ptr);
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_ptr->nr_stalls_data++;
+	  model_new_cycle(model_ptr);
 	}
+
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->int_busy |= int_mask;
+	busy_ptr->int_busy |= int_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, int_mask, 0, 0);
 
 # Schedule an MTSPR instruction that takes 1 integer register and produces a special purpose output register
-void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_data *model_ptr, unsigned nSPR, signed_word *rS
-	if (!WITH_MODEL_ISSUE)
-	  return;
+void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
+	model_busy *busy_ptr;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RS = (rS - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RS);
-	  model_busy *busy_ptr;
+	while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_busy_p(model_ptr, int_mask, 0, 0, nSPR);
 
-	  while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-	      model_trace_busy_p(model_ptr, int_mask, 0, 0, nSPR);
-
-	    model_ptr->nr_stalls_data++;
-	    model_new_cycle(model_ptr);
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_spr_reg_busy(model_ptr, busy_ptr, nSPR);
+	  model_ptr->nr_stalls_data++;
+	  model_new_cycle(model_ptr);
 	}
+
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	busy_ptr->spr_busy = nSPR;
+	model_ptr->spr_busy[nSPR] = 1;
+	TRACE(trace_model,("Making register %s busy.\n", spr_name(nSPR)));
 
 # Schedule a MFCR instruction that moves the CR into an integer regsiter
-void::model-function::ppc_insn_mfcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD
-	if (!WITH_MODEL_ISSUE)
-	  return;
+void::model-function::ppc_insn_mfcr:itable_index index, cpu *processor, model_data *model_ptr, unsigned32 int_mask
+	const unsigned32 cr_mask = 0xff;
+	model_busy *busy_ptr;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RD);
-	  const unsigned32 cr_mask = 0xff;
-	  model_busy *busy_ptr;
+	while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
 
-	  while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
-
-	    model_ptr->nr_stalls_data++;
-	    model_new_cycle(model_ptr);
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_ptr->nr_stalls_data++;
+	  model_new_cycle(model_ptr);
 	}
+
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->int_busy |= int_mask;
+	busy_ptr->int_busy |= int_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, int_mask, 0, 0);
 
 # Schedule a MTCR instruction that moves an integer register into the CR
 void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rT, unsigned FXM
@@ -1040,7 +631,6 @@ void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_da
 	  const model_time *normal_time = &model_ptr->timing[index];
 	  static const model_time ppc604_1bit_time = { PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0 };
 	  model_busy *busy_ptr;
-	  int i;
 
 	  while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
 	    if (WITH_TRACE && ppc_trace[trace_model])
@@ -1056,9 +646,10 @@ void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_da
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, normal_time);
-	  for (i = 0; i < 8; i++) {
-	    model_make_cr_reg_busy(model_ptr, busy_ptr, i);
-	  }
+	  busy_ptr->cr_fpscr_busy |= cr_mask;
+	  model_ptr->cr_fpscr_busy |= cr_mask;
+	  if (WITH_TRACE && ppc_trace[trace_model])
+	    model_trace_make_busy(model_ptr, 0, 0, cr_mask);
 	}
 
 # Convert a BIT32(x) number back into the original number
@@ -1931,10 +1522,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(unsigned, EA, 1);
-	if (RA == 0)
-	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
-	else
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 
 0.31,6.RT,11.RA,16.RB,21.87,31./:X:::Load Byte and Zero Indexed
@@ -1948,10 +1536,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(unsigned, EA, 1);
-	if (RA == 0)
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
-	else
-	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.35,6.RT,11.RA,16.D:D:::Load Byte and Zero with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -1965,7 +1550,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*rT = MEM(unsigned, EA, 1);
 	*rA = EA;
-	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK, 0);
 
 0.31,6.RT,11.RA,16.RB,21.119,31./:X:::Load Byte and Zero with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -1979,7 +1564,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(unsigned, EA, 1);
 	*rA = EA;
-	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK | RB_BITMASK, 0);
 
 0.40,6.RT,11.RA,16.D:D:::Load Halfword and Zero
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -1992,10 +1577,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(unsigned, EA, 2);
-	if (RA == 0)
-	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
-	else
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.RT,11.RA,16.RB,21.279,31./:X:::Load Halfword and Zero Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2008,10 +1590,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(unsigned, EA, 2);
-	if (RA == 0)
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
-	else
-	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.41,6.RT,11.RA,16.D:D:::Load Halfword and Zero with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2025,7 +1604,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*rT = MEM(unsigned, EA, 2);
 	*rA = EA;
-	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK, 0);
 
 0.31,6.RT,11.RA,16.RB,21.311,31./:X:::Load Halfword and Zero with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2039,7 +1618,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(unsigned, EA, 2);
 	*rA = EA;
-	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK | RB_BITMASK, 0);
 
 0.42,6.RT,11.RA,16.D:D:::Load Halfword Algebraic
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2052,10 +1631,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(signed, EA, 2);
-	if (RA == 0)
-	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
-	else
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.RT,11.RA,16.RB,21.343,31./:X:::Load Halfword Algebraic Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2068,10 +1644,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(signed, EA, 2);
-	if (RA == 0)
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
-	else
-	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.43,6.RT,11.RA,16.D:D:::Load Halfword Algebraic with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2084,7 +1657,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	                    illegal_instruction_program_interrupt);
 	EA = *rA + EXTS(D);
 	*rT = MEM(signed, EA, 2);
-	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK, 0);
 
 0.31,6.RT,11.RA,16.RB,21.375,31./:X:::Load Halfword Algebraic with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2098,7 +1671,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(signed, EA, 2);
 	*rA = EA;
-	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK | RB_BITMASK, 0);
 
 0.32,6.RT,11.RA,16.D:D:::Load Word and Zero
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2111,10 +1684,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(unsigned, EA, 4);
-	if (RA == 0)
-	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
-	else
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.RT,11.RA,16.RB,21.23,31./:X:::Load Word and Zero Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2127,10 +1697,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(unsigned, EA, 4);
-	if (RA == 0)
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
-	else
-	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.33,6.RT,11.RA,16.D:D:::Load Word and Zero with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2144,7 +1711,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*rT = MEM(unsigned, EA, 4);
 	*rA = EA;
-	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK, 0);
 
 0.31,6.RT,11.RA,16.RB,21.55,31./:X:::Load Word and Zero with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
@@ -2158,7 +1725,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(unsigned, EA, 4);
 	*rA = EA;
-	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
+	PPC_INSN_INT(RT_BITMASK | RA_BITMASK, RA_BITMASK | RB_BITMASK, 0);
 
 0.58,6.RT,11.RA,16.DS,30.2:DS:64::Load Word Algebraic
 #	unsigned_word b;
@@ -2236,10 +1803,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 1, *rS);
-	if (RA == 0)
-	  ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
-	else
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rA);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.215,31./:X:::Store Byte Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2252,10 +1816,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 1, *rS);
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 0);
 
 0.39,6.RS,11.RA,16.D:D:::Store Byte with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2269,7 +1830,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 1, *rS);
 	*rA = EA;
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rA, 0/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RA_BITMASK | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.247,31./:X:::Store Byte with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2283,7 +1844,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 1, *rS);
 	*rA = EA;
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RA_BITMASK | RB_BITMASK | RS_BITMASK, 0);
 
 0.44,6.RS,11.RA,16.D:D:::Store Half Word
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2296,10 +1857,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 2, *rS);
-	if (RA == 0)
-	  ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
-	else
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rA);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.407,31./:X:::Store Half Word Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2312,10 +1870,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 2, *rS);
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 0);
 
 0.45,6.RS,11.RA,16.D:D:::Store Half Word with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2329,7 +1884,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 2, *rS);
 	*rA = EA;
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rA, 0/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RA_BITMASK | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.439,31./:X:::Store Half Word with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2343,7 +1898,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 2, *rS);
 	*rA = EA;
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RA_BITMASK | RB_BITMASK | RS_BITMASK, 0);
 
 0.36,6.RS,11.RA,16.D:D:::Store Word
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2356,10 +1911,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 4, *rS);
-	if (RA == 0)
-	  ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
-	else
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rA);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.151,31./:X:::Store Word Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2372,10 +1924,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 4, *rS);
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 0);
 
 0.37,6.RS,11.RA,16.D:D:::Store Word with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2389,7 +1938,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 4, *rS);
 	*rA = EA;
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rA, 0/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RA_BITMASK | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.183,31./:X:::Store Word with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2403,7 +1952,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 4, *rS);
 	*rA = EA;
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RA_BITMASK | RB_BITMASK | RS_BITMASK, 0);
 
 0.62,6.RS,11.RA,16.DS,30.0:DS:64::Store Doubleword
 #	unsigned_word b;
@@ -2452,10 +2001,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = SWAP_2(MEM(unsigned, EA, 2));
-	if (RA == 0)
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
-	else
-	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.31,6.RT,11.RA,16.RB,21.534,31./:X:::Load Word Byte-Reverse Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2468,10 +2014,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = SWAP_4(MEM(unsigned, EA, 4));
-	if (RA == 0)
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
-	else
-	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.918,31./:X:::Store Half Word Byte-Reversed Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2484,10 +2027,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 2, SWAP_2(*rS));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.662,31./:X:::Store Word Byte-Reversed Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2500,10 +2040,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 4, SWAP_4(*rS));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 0);
 
 
 #
@@ -2550,6 +2087,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	RESERVE_ADDR = real_addr(EA, 1/*is-read?*/);
 	RESERVE_DATA = MEM(unsigned, EA, 4);
 	*rT = RESERVE_DATA;
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.31,6.RT,11.RA,16.RB,21.84,31./:X:64::Load Doubleword And Reserve Indexed
 	unsigned_word b;
@@ -2561,6 +2099,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	RESERVE_ADDR = real_addr(EA, 1/*is-read?*/);
 	RESERVE_DATA = MEM(unsigned, EA, 8);
 	*rT = RESERVE_DATA;
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.31,6.RS,11.RA,16.RB,21.150,31.1:X:::Store Word Conditional Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2587,6 +2126,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else {
 	  CR_SET_XER_SO(0, 0);
 	}
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 1/*Rc*/);
+
 0.31,6.RS,11.RA,16.RB,21.214,31.1:X:64::Store Doubleword Conditional Indexed
 	unsigned_word b;
 	unsigned_word EA;
@@ -2608,6 +2149,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else {
 	  CR_SET_XER_SO(0, 0);
 	}
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 1/*Rc*/);
 
 0.31,6./,11./,16./,21.598,31./:X::sync:Synchronize
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2626,28 +2168,18 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-	if (RA_is_0) {
-	  *rT = EXTS(SI);
-	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
-	}
-	else {
-	  *rT = *rA + EXTS(SI);
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
-	}
+	if (RA_is_0)	*rT = EXTS(SI);
+	else		*rT = *rA + EXTS(SI);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.15,6.RT,11.RA,16.SI:D:::Add Immediate Shifted
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-	if (RA_is_0) {
-	  *rT = EXTS(SI) << 16;
-	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
-	}
-	else {
-	  *rT = *rA + (EXTS(SI) << 16);
-	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
-	}
+	if (RA_is_0)	*rT = EXTS(SI) << 16;
+	else		*rT = *rA + (EXTS(SI) << 16);
+	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.266,31.Rc:XO:::Add
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2657,7 +2189,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_END(*rT, 0/*CA*/, OE, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.40,31.Rc:XO:::Subtract From
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2669,7 +2201,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_ADD(*rB);
 	ALU_ADD(1);
 	ALU_END(*rT, 0/*CA*/, OE, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.12,6.RT,11.RA,16.SI:D:::Add Immediate Carrying
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2679,7 +2211,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_BEGIN(*rA);
 	ALU_ADD(EXTS(SI));
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 0/*Rc*/);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, 0/*Rc*/);
 
 0.13,6.RT,11.RA,16.SI:D:::Add Immediate Carrying and Record
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2689,7 +2221,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_BEGIN(*rA);
 	ALU_ADD(EXTS(SI));
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 1/*Rc*/);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 1/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, 1/*Rc*/);
 
 0.8,6.RT,11.RA,16.SI:D:::Subtract From Immediate Carrying
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2701,7 +2233,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_ADD(EXTS(SI));
 	ALU_ADD(1);
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 0/*Rc*/);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.10,31.Rc:XO:::Add Carrying
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2711,7 +2243,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.8,31.Rc:XO:::Subtract From Carrying
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2724,7 +2256,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_ADD(*rB);
 	ALU_ADD(1);
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.138,31.Rc:XO:::Add Extended
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2735,7 +2267,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_ADD(*rB);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.136,31.Rc:XO:::Subtract From Extended
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2747,7 +2279,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_ADD(*rB);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.234,31.Rc:XO:::Add to Minus One Extended
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2778,7 +2310,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_BEGIN(*rA);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.200,31.Rc:XO:::Subtract from Zero Extended
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2789,7 +2321,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_NOT;
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.104,31.Rc:XO:::Negate
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2800,7 +2332,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ALU_NOT;
 	ALU_ADD(1);
 	ALU_END(*rT,0/*CA*/,OE,Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, Rc);
 
 0.7,6.RT,11.RA,16.SI:D::mulli:Multiply Low Immediate
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
@@ -2809,7 +2341,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	signed_word prod = *rA * EXTS(SI);
 	*rT = prod;
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.233,31.Rc:D:64::Multiply Low Doubleword
 
@@ -2826,7 +2358,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (t != prod && OE)
 	  XER |= (xer_overflow | xer_summary_overflow);
 	CR0_COMPARE(t, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21./,22.73,31.Rc:XO:64::Multiply High Doubleword
 
@@ -2841,7 +2373,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21./,22.9,31.Rc:XO:64::Multiply High Doubleword Unsigned
 
@@ -2856,7 +2388,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.489,31.Rc:XO:64::Divide Doubleword
 
@@ -2878,7 +2410,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *rT = quotent;
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.457,31.Rc:XO:64::Divide Doubleword Unsigned
 
@@ -2899,7 +2431,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *rT = quotent;
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK | RB_BITMASK, Rc);
 
 
 #
@@ -2923,7 +2455,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    a = *rA;
 	  CR_COMPARE(BF, a, b);
 	}
-	ppc_insn_int1_cr(my_index, processor, cpu_model(processor), BF, rA);
+	PPC_INSN_INT_CR(0, RA_BITMASK, BF_BITMASK);
 
 0.31,6.BF,9./,10.L,11.RA,16.RB,21.0,31./:X:::Compare
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2946,7 +2478,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR_COMPARE(BF, a, b);
 	}
-	ppc_insn_int2_cr(my_index, processor, cpu_model(processor), BF, rA, rB);
+	PPC_INSN_INT_CR(0, RA_BITMASK | RB_BITMASK, BF_BITMASK);
 
 0.10,6.BF,9./,10.L,11.RA,16.UI:D:::Compare Logical Immediate
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2965,7 +2497,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    a = *rA;
 	  CR_COMPARE(BF, a, b);
 	}
-	ppc_insn_int1_cr(my_index, processor, cpu_model(processor), BF, rA);
+	PPC_INSN_INT_CR(0, RA_BITMASK, BF_BITMASK);
 
 0.31,6.BF,9./,10.L,11.RA,16.RB,21.32,31./:X:::Compare Logical
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2988,7 +2520,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR_COMPARE(BF, a, b);
 	}
-	ppc_insn_int2_cr(my_index, processor, cpu_model(processor), BF, rA, rB);
+	PPC_INSN_INT_CR(0, RA_BITMASK | RB_BITMASK, BF_BITMASK);
 
 
 #
@@ -3076,7 +2608,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & UI;
 	CR0_COMPARE(*rA, 0, 1/*Rc*/);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 1/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 1/*Rc*/);
 
 0.29,6.RS,11.RA,16.UI:D:::AND Immediate Shifted
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3085,7 +2617,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & (UI << 16);
 	CR0_COMPARE(*rA, 0, 1/*Rc*/);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 1/*Rc*/);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 1/*Rc*/);
 
 0.24,6.RS,11.RA,16.UI:D:::OR Immediate
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3093,7 +2625,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | UI;
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.25,6.RS,11.RA,16.UI:D:::OR Immediate Shifted
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3101,7 +2633,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | (UI << 16);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.26,6.RS,11.RA,16.UI:D:::XOR Immediate
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3109,7 +2641,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ UI;
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.27,6.RS,11.RA,16.UI:D:::XOR Immediate Shifted
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3117,7 +2649,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ (UI << 16);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.31,6.RS,11.RA,16.RB,21.28,31.Rc:X:::AND
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3126,7 +2658,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & *rB;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.444,31.Rc:X:::OR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3135,7 +2667,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | *rB;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.316,31.Rc:X:::XOR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3144,7 +2676,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ *rB;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.476,31.Rc:X:::NAND
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3153,7 +2685,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = ~(*rS & *rB);
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.124,31.Rc:X:::NOR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3162,7 +2694,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = ~(*rS | *rB);
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.284,31.Rc:X:::Equivalent
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3179,7 +2711,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & ~*rB;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.412,31.Rc:X:::OR with Complement
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3188,7 +2720,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | ~*rB;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16./,21.954,31.Rc:X::extsb:Extend Sign Byte
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3197,7 +2729,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = (signed_word)(signed8)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16./,21.922,31.Rc:X::extsh:Extend Sign Half Word
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3206,7 +2738,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = (signed_word)(signed16)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16./,21.986,31.Rc:X:64::Extend Sign Word
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3287,9 +2819,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = result;
 	CR0_COMPARE(result, 0, Rc);
 	ITRACE(trace_alu,
-	       ("n=%d, s=0x%x, r=0x%x, m=0x%x, result=0x%x, cr=0x%x\n",
-	        n, s, r, m, result, CR));
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	       ("n=%ld, s=0x%lx, r=0x%lx, m=0x%lx, result=0x%lx, cr=0x%lx\n",
+	        n, (unsigned long)s, (unsigned long)r, (unsigned long)m,
+		(unsigned long)result, (unsigned long)CR));
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.30,6.RS,11.RA,16.RB,21.mb,27.8,31.Rc:MDS:64::Rotate Left Doubleword then Clear Left
 #	long n = MASKED(*rB, 58, 63);
@@ -3336,10 +2869,11 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	unsigned32 m = MASK(MB+32, ME+32);
 	signed_word result = (r & m) | (*rA & ~m);
 	*rA = result;
-	ITRACE(trace_alu, (": n=%d *rS=0x%x r=0x%x m=0x%x result=0x%x\n",
-	                   n, *rS, r, m, result));
+	ITRACE(trace_alu, (": n=%ld *rS=0x%lx r=0x%lx m=0x%lx result=0x%lx\n",
+	                   n, (unsigned long)*rS, (unsigned long)r, (unsigned long)m,
+			   (unsigned long)result));
 	CR0_COMPARE(result, 0, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 
 0.31,6.RS,11.RA,16.RB,21.27,31.Rc:X:64::Shift Left Doubleword
@@ -3359,9 +2893,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = shifted;
 	CR0_COMPARE(shifted, 0, Rc);
 	ITRACE(trace_alu,
-	       ("n=%d, source=0x%x, shifted=0x%x\n",
-	        n, source, shifted));
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	       ("n=%d, source=0x%lx, shifted=0x%lx\n",
+	        n, (unsigned long)source, (unsigned long)shifted));
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.539,31.Rc:X:64::Shift Right Doubleword
 
@@ -3380,9 +2914,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = shifted;
 	CR0_COMPARE(shifted, 0, Rc);
 	ITRACE(trace_alu, \
-	       ("n=%d, source=0x%x, shifted=0x%x\n",
-	        n, source, shifted));
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	       ("n=%d, source=0x%lx, shifted=0x%lx\n",
+	        n, (unsigned long)source, (unsigned long)shifted));
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.sh_0_4,21.413,30.sh_5,31.Rc:XS:64::Shift Right Algebraic Doubleword Immediate
 
@@ -3402,7 +2936,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  XER &= ~xer_carry;
 	CR0_COMPARE(shifted, 0, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.794,31.Rc:X:64::Shift Right Algebraic Doubleword
 
@@ -3422,7 +2956,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  XER &= ~xer_carry;
 	CR0_COMPARE(shifted, 0, Rc);
-	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 #
 # I.3.3.14 Move to/from System Register Instructions
@@ -3447,7 +2981,6 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 			   : MASKED(*rS, 32, 63));
 	  /* HACK - time base registers need to be updated immediatly */
 	  if (WITH_TIME_BASE) {
-	    signed64 time_base;
 	    switch (n) {
 	    case spr_tbu:
 	      cpu_set_time_base(processor,
@@ -3471,7 +3004,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    SPREG(n) = new_val;
 	  }
 	}
-	ppc_insn_to_spr(my_index, processor, cpu_model(processor), n, rS);
+	PPC_INSN_TO_SPR(RS_BITMASK, n);
 
 0.31,6.RT,11.spr,21.339,31./:XFX::mfspr %RT, %SPR:Move from Special Purpose Register
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3489,7 +3022,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  /* HACK - some SPR's need to get their value extracted specially */
 	  *rT = SPREG(n);
 	}
-	ppc_insn_from_spr(my_index, processor, cpu_model(processor), rT, n);
+	PPC_INSN_FROM_SPR(RT_BITMASK, n);
 
 0.31,6.RS,11./,12.FXM,20./,21.144,31./:XFX::mtfcr:Move to Condition Register Fields
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
@@ -3518,7 +3051,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	*rT = (unsigned32)CR;
-	ppc_insn_mfcr(my_index, processor, cpu_model(processor), rT);
+	PPC_INSN_MFCR(RT_BITMASK);
 
 #
 # I.4.6.2 Floating-Point Load Instructions
@@ -3535,7 +3068,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, FRT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.FRT,11.RA,16.RB,21.535,31./:X:f::Load Floating-Point Single Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3548,7 +3081,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, FRT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.49,6.FRT,11.RA,16.D:D:f::Load Floating-Point Single with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3562,7 +3095,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
 	*rA = EA;
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, FRT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.FRT,11.RA,16.RB,21.576,31./:X:f::Load Floating-Point Single with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3576,7 +3109,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
 	*rA = EA;
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, FRT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.50,6.FRT,11.RA,16.D:D:f::Load Floating-Point Double
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3589,7 +3122,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*frT = MEM(unsigned, EA, 8);
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, FRT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.FRT,11.RA,16.RB,21.599,31./:X:f::Load Floating-Point Double Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3602,7 +3135,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*frT = MEM(unsigned, EA, 8);
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, FRT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.51,6.FRT,11.RA,16.D:D:f::Load Floating-Point Double with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3616,7 +3149,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*frT = MEM(unsigned, EA, 8);
 	*rA = EA;
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, FRT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.FRT,11.RA,16.RB,21.631,31./:X:f::Load Floating-Point Double with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3630,7 +3163,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*frT = MEM(unsigned, EA, 8);
 	*rA = EA;
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, FRT_BITMASK, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 
 #
@@ -3648,7 +3181,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 4, SINGLE(*frS));
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, 0, (RA_BITMASK & ~1), FRS_BITMASK);
 
 0.31,6.FRS,11.RA,16.RB,21.663,31./:X:f::Store Floating-Point Single Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3661,7 +3194,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 4, SINGLE(*frS));
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, 0, (RA_BITMASK & ~1) | RB_BITMASK, FRS_BITMASK);
 
 0.53,6.FRS,11.RA,16.D:D:f::Store Floating-Point Single with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3675,7 +3208,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 4, SINGLE(*frS));
 	*rA = EA;
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, 0, (RA_BITMASK & ~1), FRS_BITMASK);
 
 0.31,6.FRS,11.RA,16.RB,21.695,31./:X:f::Store Floating-Point Single with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3689,7 +3222,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 4, SINGLE(*frS));
 	*rA = EA;
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, 0, (RA_BITMASK & ~1) | RB_BITMASK, FRS_BITMASK);
 
 0.54,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3702,7 +3235,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 8, *frS);
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, 0, (RA_BITMASK & ~1), FRS_BITMASK);
 
 0.31,6.FRS,11.RA,16.RB,21.727,31./:X:f::Store Floating-Point Double Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3715,7 +3248,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 8, *frS);
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 0/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(0, 0, (RA_BITMASK & ~1) | RB_BITMASK, FRS_BITMASK);
 
 0.55,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3729,7 +3262,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 8, *frS);
 	*rA = EA;
-	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, 0, (RA_BITMASK & ~1), FRS_BITMASK);
 
 0.31,6.FRS,11.RA,16.RB,21.759,31./:X:f::Store Floating-Point Double with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3743,7 +3276,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 8, *frS);
 	*rA = EA;
-	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 1/*RA_is_update*/);
+	PPC_INSN_INT_FLOAT(RA_BITMASK, 0, (RA_BITMASK & ~1) | RB_BITMASK, FRS_BITMASK);
 
 
 #
@@ -3757,7 +3290,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB;
 	CR1_UPDATE(Rc);
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.40,31.Rc:X:f::Floating Negate
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3766,7 +3299,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB ^ BIT64(0);
 	CR1_UPDATE(Rc);
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.264,31.Rc:X:f::Floating Absolute Value
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3775,7 +3308,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB & ~BIT64(0);
 	CR1_UPDATE(Rc);
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.136,31.Rc:X:f::Floating Negative Absolute Value
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3784,8 +3317,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB | BIT64(0);
 	CR1_UPDATE(Rc);
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
-
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 
 #
@@ -3816,7 +3348,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.21,31.Rc:A:f:fadds:Floating Add Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3842,7 +3374,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.20,31.Rc:A:f:fsub:Floating Subtract
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3868,7 +3400,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.20,31.Rc:A:f:fsubs:Floating Subtract Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3893,8 +3425,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  float s = *(double*)frA - *(double*)frB;
 	  *(double*)frT = s;
 	}
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 	FPSCR_END(Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16./,21.FRC,26.25,31.Rc:A:f:fmul:Floating Multiply
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
@@ -3920,7 +3452,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRC_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16./,21.FRC,26.25,31.Rc:A:f:fmuls:Floating Multiply Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3946,7 +3478,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRC_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.18,31.Rc:A:f:fdiv:Floating Divide
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   31, 31, 0
@@ -3972,7 +3504,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.18,31.Rc:A:f:fdivs:Floating Divide Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   17, 17, 0
@@ -3998,7 +3530,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.29,31.Rc:A:f:fmadd:Floating Multiply-Add
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
@@ -4043,7 +3575,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.29,31.Rc:A:f::Floating Multiply-Add Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -4088,7 +3620,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = (double)s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.28,31.Rc:A:f::Floating Multiply-Subtract
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
@@ -4133,7 +3665,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.28,31.Rc:A:f::Floating Multiply-Subtract Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -4178,7 +3710,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = (double)s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.31,31.Rc:A:f::Floating Negative Multiply-Add
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
@@ -4223,7 +3755,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.31,31.Rc:A:f::Floating Negative Multiply-Add Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -4268,7 +3800,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = (double)s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.30,31.Rc:A:f::Floating Negative Multiply-Subtract
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
@@ -4313,7 +3845,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.30,31.Rc:A:f::Floating Negative Multiply-Subtract Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -4358,7 +3890,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = (double)s;
 	}
 	FPSCR_END(Rc);
-	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
 
 
 #
@@ -4404,7 +3936,6 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    exp = EXTRACTED64(*frB, 1, 11) - 1023;
 	    frac_grx = BIT64(0) | INSERTED64(EXTRACTED64(*frB, 12, 63), 1, 52);
 	  }
-	  Denormalize_Operand:
 	    /* G|R|X == zero from above */
 	    while (exp < -126) {
 	      exp = exp - 1;
@@ -4571,7 +4102,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  if (sign == 1) FPSCR_SET_FPRF(fpscr_rf_neg_normal_number);
 	  goto Done;
 	Done:
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.814,31.Rc:X:64,f::Floating Convert To Integer Doubleword
 
@@ -4589,7 +4120,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	                   frT, *frB,
 	                   fpscr_rn_round_towards_zero, 32);
 	FPSCR_END(Rc);
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.846,31.Rc:X:64,f::Floating Convert from Integer Doubleword
 	int sign = EXTRACTED64(*frB, 0, 0);
@@ -4618,7 +4149,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  goto Done;
 	/**/
 	Done:
-	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
+	PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
 
 #
 # I.4.6.7 Floating-Point Compare Instructions
@@ -4644,7 +4175,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (is_SNaN(*frA, 0) || is_SNaN(*frB, 0))
 	  FPSCR_OR_VX(fpscr_vxsnan);
 	FPSCR_END(0);
-	ppc_insn_fp2_cr(my_index, processor, cpu_model(processor), BF, frA, frB);
+	PPC_INSN_FLOAT_CR(0, FRA_BITMASK | FRB_BITMASK, BF_BITMASK);
 
 0.63,6.BF,9./,11.FRA,16.FRB,21.32,31./:X:f:fcmpo:Floating Compare Ordered
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -4672,7 +4203,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  FPSCR_OR_VX(fpscr_vxvc);
 	}
 	FPSCR_END(0);
-	ppc_insn_fp2_cr(my_index, processor, cpu_model(processor), BF, frA, frB);
+	PPC_INSN_FLOAT_CR(0, FRA_BITMASK | FRB_BITMASK, BF_BITMASK);
 
 
 #
@@ -4729,10 +4260,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	#if WITH_IDECODE_CACHE_SIZE
 	cpu_flush_icache(processor);
 	#endif
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK, 0);
 
 0.19,6./,11./,16./,21.150,31./:XL::isync:Instruction Synchronize
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4740,7 +4268,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	cpu_synchronize_context(processor);
-	ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
+	PPC_INSN_INT(0, 0, 0);
 
 
 #
@@ -4753,10 +4281,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Touch\n"));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK, 0/*Rc*/);
 
 0.31,6./,11.RA,16.RB,21.246,31./:X:::Data Cache Block Touch for Store
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4764,10 +4289,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	TRACE(trace_tbd,("Data Cache Block Touch for Store\n"));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK, 0/*Rc*/);
 
 0.31,6./,11.RA,16.RB,21.1014,31./:X:::Data Cache Block set to Zero
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4775,10 +4297,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   10, 10, 0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	TRACE(trace_tbd,("Data Cache Block set to Zero\n"));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK, 0/*Rc*/);
 
 0.31,6./,11.RA,16.RB,21.54,31./:X:::Data Cache Block Store
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4786,10 +4305,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Store\n"));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK, 0/*Rc*/);
 
 0.31,6./,11.RA,16.RB,21.86,31./:X:::Data Cache Block Flush
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4797,10 +4313,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Flush\n"));
-	if (RA == 0)
-	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
-	else
-	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
+	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK, 0/*Rc*/);
 
 #
 # II.3.3 Enforce In-order Execution of I/O Instruction

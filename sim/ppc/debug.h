@@ -51,6 +51,7 @@ typedef enum {
   trace_idecode,
   trace_alu,
   trace_load_store,
+  trace_model,
   /**/
   trace_vm,
   trace_core,
@@ -58,6 +59,7 @@ typedef enum {
   trace_device_init,
   trace_cpu,
   trace_breakpoint,
+  trace_opts,
   nr_trace_options
 } trace_options;
 
@@ -77,7 +79,7 @@ do { \
 #define ITRACE(OBJECT, ARGS) \
 do { \
   if (ppc_trace[OBJECT]) { \
-    printf_filtered("%s:%d:0x%x", my_prefix, cpu_nr(processor) + 1, cia); \
+    printf_filtered("%s:%d:0x%lx", my_prefix, (int)(cpu_nr(processor) + 1), (unsigned long)cia); \
     printf_filtered ARGS; \
   } \
 } while (0)

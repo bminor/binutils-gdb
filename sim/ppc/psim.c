@@ -97,7 +97,6 @@ int current_host_byte_order;
 int current_environment;
 int current_alignment;
 int current_floating_point;
-ppc_model current_ppc_model = WITH_DEFAULT_PPC_MODEL;
 model_enum current_model = WITH_DEFAULT_MODEL;
 
 
@@ -850,8 +849,8 @@ psim_read_register(psim *system,
     break;
 
   default:
-    printf_filtered("psim_read_register(processor=0x%x,buf=0x%x,reg=%s) %s\n",
-		    processor, buf, reg,
+    printf_filtered("psim_read_register(processor=0x%lx,buf=0x%lx,reg=%s) %s\n",
+		    (unsigned long)processor, (unsigned long)buf, reg,
 		    "read of this register unimplemented");
     break;
 
@@ -877,7 +876,7 @@ psim_read_register(psim *system,
     }
   }
   else {
-    bcopy(cooked_buf, buf, description.size);
+    memcpy(buf/*dest*/, cooked_buf/*src*/, description.size);
   }
 
 }
@@ -934,7 +933,7 @@ psim_write_register(psim *system,
     }
   }
   else {
-    bcopy(buf, cooked_buf, description.size);
+    memcpy(cooked_buf/*dest*/, buf/*src*/, description.size);
   }
 
   /* put the cooked value into the register */
@@ -969,8 +968,8 @@ psim_write_register(psim *system,
     break;
 
   default:
-    printf_filtered("psim_write_register(processor=0x%x,cooked_buf=0x%x,reg=%s) %s\n",
-		    processor, cooked_buf, reg,
+    printf_filtered("psim_write_register(processor=0x%lx,cooked_buf=0x%lx,reg=%s) %s\n",
+		    (unsigned long)processor, (unsigned long)cooked_buf, reg,
 		    "read of this register unimplemented");
     break;
 

@@ -1316,13 +1316,13 @@ lf_print_my_prefix(lf *file,
 		   table_entry *file_entry,
 		   int idecode)
 {
-  lf_printf(file, "const char *const my_prefix = \n");
+  lf_printf(file, "const char *const my_prefix __attribute__((__unused__)) = \n");
   lf_printf(file, "  \"%s:%s:%s:%d\";\n",
 	    filter_filename (file_entry->file_name),
 	    (idecode ? "idecode" : "semantics"),
 	    file_entry->fields[insn_name],
 	    file_entry->line_nr);
-  lf_printf(file, "const itable_index my_index = ");
+  lf_printf(file, "const itable_index my_index __attribute__((__unused__)) = ");
   lf_print_function_name(file,
 			 file_entry->fields[insn_name],
 			 NULL,
@@ -1804,7 +1804,7 @@ lf_print_c_extraction(lf *file,
     ASSERT(bits->field == cur_field);
     ASSERT(field_type == NULL);
     table_entry_lf_c_line_nr(file, instruction->file_entry);
-    lf_printf(file, "const unsigned %s = ",
+    lf_printf(file, "const unsigned %s __attribute__((__unused__)) = ",
 	      field_name);
     if (bits->opcode->last < bits->field->last)
       lf_printf(file, "%d;\n",
@@ -1815,7 +1815,7 @@ lf_print_c_extraction(lf *file,
   else {
     /* put the field in the local variable */
     table_entry_lf_c_line_nr(file, instruction->file_entry);
-    lf_printf(file, "%s const %s = ",
+    lf_printf(file, "%s const %s __attribute__((__unused__)) = ",
 	      field_type == NULL ? "unsigned" : field_type,
 	      field_name);
     /* getting it from the cache */
@@ -1919,7 +1919,7 @@ lf_print_c_extractions(lf *file,
 	    if (strncmp(is_0_ptr - field_len, field_name, field_len) == 0
 		&& !isalpha(is_0_ptr[ - field_len - 1])) {
 	      table_entry_lf_c_line_nr(file, instruction->file_entry);
-	      lf_printf(file, "const unsigned %s_is_0 = (", field_name);
+	      lf_printf(file, "const unsigned %s_is_0 __attribute__((__unused__)) = (", field_name);
 	      if (bits != NULL)
 		lf_printf(file, "%d", bits->value);
 	      else

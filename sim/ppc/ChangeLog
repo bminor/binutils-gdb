@@ -1,3 +1,22 @@
+Fri Nov 24 11:24:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* debug.h (ITRACE): Make printf_filtered arguments type correct.
+	* idecode_expression.h (CR0_COMPARE): Ditto.
+	* psim.c (psim_read_register): Ditto.
+
+	* igen.c (lf_print_my_prefix): Use __attribute__((__unused__)) to
+	silence compiler warnings about unused automatically generated
+	variables.
+	(lf_print_c_extraction): Ditto.
+	* idecode_expression.h (FPSCR_BEGIN): Ditto.
+
+	* ppc-cache-rules: Define rules for making a bitmask for all
+	registers.
+
+	* ppc-instructions: Rewrite model specific functions to use the
+	bitmask of the register number, instead of using the register
+	pointer to get the register number, and then making the bitmask.
+
 Wed Nov 22 15:24:27 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-instructions (model_branches): Add conditional argument to
