@@ -1,3 +1,11 @@
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-valprint.c (c_value_print): Add VALUE_OFFSET to the address
+	argument of val_print.
+	* cp-valprint.c (cp_print_value): Don't add the offset parameter
+	to the address argument of baseclass_offset or target_read_memory.
+	Do add it to the argument of cp_print_value_fields.
+
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c: Include "reggroups.h" and "sim-regno.h".

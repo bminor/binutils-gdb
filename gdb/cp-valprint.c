@@ -554,7 +554,7 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 	{
 	  boffset = baseclass_offset (type, i,
 				      valaddr + offset,
-				      address + offset);
+				      address);
 	  skip = ((boffset == -1) || (boffset + offset) < 0) ? 1 : -1;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -569,9 +569,10 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 		{
 		  /* FIXME (alloca): unsafe if baseclass is really really large. */
 		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (address + offset + boffset, base_valaddr,
+		  if (target_read_memory (address + boffset, base_valaddr,
 					  TYPE_LENGTH (baseclass)) != 0)
 		    skip = 1;
+		  address = address + boffset;
 		  thisoffset = 0;
 		  boffset = 0;
 		  thistype = baseclass;
@@ -600,7 +601,8 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 	fprintf_filtered (stream, "<invalid address>");
       else
 	cp_print_value_fields (baseclass, thistype, base_valaddr,
-			       thisoffset + boffset, address, stream, format,
+			       thisoffset + boffset, address + boffset,
+			       stream, format,
 			       recurse, pretty,
 			       ((struct type **)
 				obstack_base (&dont_print_vb_obstack)),
