@@ -1,5 +1,12 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (deprecated_set_value_type): Declare.
+	* value.c (deprecated_set_value_type): Define.
+	* hpacc-abi.c, gnu-v2-abi.c, cp-valprint.c: Update.
+	* c-valprint.c, jv-lang.c, objc-lang.c, ada-lang.c: Update.
+	* infcall.c, printcmd.c, valops.c, eval.c, p-exp.y: Update.
+	* ax-gdb.c, tracepoint.c: Update.
+
 	* value.h (deprecated_value_lval_hack)
 	(deprecated_value_address_hack) 
 	(deprecated_value_internalvar_hack) 

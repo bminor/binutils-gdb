@@ -1424,7 +1424,7 @@ gen_repeat (union exp_element **pc, struct agent_expr *ax,
 
     if (!v)
       error (_("Right operand of `@' must be a constant, in agent expressions."));
-    if (TYPE_CODE (v->type) != TYPE_CODE_INT)
+    if (TYPE_CODE (value_type (v)) != TYPE_CODE_INT)
       error (_("Right operand of `@' must be an integer."));
     length = value_as_long (v);
     if (length <= 0)

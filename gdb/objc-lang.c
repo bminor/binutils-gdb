@@ -204,7 +204,7 @@ value_nsstring (char *ptr, int len)
   else
     error ("NSString: internal error -- no way to create new NSString");
 
-  nsstringValue->type = type;
+  deprecated_set_value_type (nsstringValue, type);
   return nsstringValue;
 }
 

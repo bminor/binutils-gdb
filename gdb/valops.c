@@ -240,8 +240,8 @@ value_cast (struct type *type, struct value *arg2)
 					  TYPE_TARGET_TYPE (range_type),
 					  low_bound,
 					  new_length + low_bound - 1);
-	  arg2->type = create_array_type ((struct type *) NULL,
-					  element_type, range_type);
+	  deprecated_set_value_type (arg2, create_array_type ((struct type *) NULL,
+							      element_type, range_type));
 	  return arg2;
 	}
     }
@@ -282,7 +282,7 @@ value_cast (struct type *type, struct value *arg2)
 					 arg2, 0, type2, 1);
       if (v)
 	{
-	  v->type = type;
+	  deprecated_set_value_type (v, type);
 	  return v;
 	}
     }
@@ -380,7 +380,7 @@ value_cast (struct type *type, struct value *arg2)
 		  if (v)
 		    {
 		      v = value_addr (v);
-		      v->type = type;
+		      deprecated_set_value_type (v, type);
 		      return v;
 		    }
 		}
@@ -405,7 +405,7 @@ value_cast (struct type *type, struct value *arg2)
 	    }
 	  /* No superclass found, just fall through to change ptr type.  */
 	}
-      arg2->type = type;
+      deprecated_set_value_type (arg2, type);
       arg2 = value_change_enclosing_type (arg2, type);
       set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
       return arg2;
@@ -730,7 +730,7 @@ value_assign (struct value *toval, struct value *fromval)
   val = value_copy (toval);
   memcpy (value_contents_raw (val), value_contents (fromval),
 	  TYPE_LENGTH (type));
-  val->type = type;
+  deprecated_set_value_type (val, type);
   val = value_change_enclosing_type (val, value_enclosing_type (fromval));
   set_value_embedded_offset (val, value_embedded_offset (fromval));
   set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
@@ -855,7 +855,7 @@ value_addr (struct value *arg1)
          We keep the same location information, which is efficient,
          and allows &(&X) to get the location containing the reference. */
       arg2 = value_copy (arg1);
-      arg2->type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+      deprecated_set_value_type (arg2, lookup_pointer_type (TYPE_TARGET_TYPE (type)));
       return arg2;
     }
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -911,7 +911,7 @@ value_ind (struct value *arg1)
       arg2 = value_at_lazy (enc_type, (value_as_address (arg1)
 				       - value_pointed_to_offset (arg1)));
       /* Re-adjust type */
-      arg2->type = TYPE_TARGET_TYPE (base_type);
+      deprecated_set_value_type (arg2, TYPE_TARGET_TYPE (base_type));
       /* Add embedding info */
       arg2 = value_change_enclosing_type (arg2, enc_type);
       set_value_embedded_offset (arg2, value_pointed_to_offset (arg1));
@@ -2625,7 +2625,7 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
      used for its computation. */
   new_val = value_at_lazy (real_type, VALUE_ADDRESS (argp) - top +
 			   (using_enc ? 0 : value_embedded_offset (argp)));
-  new_val->type = value_type (argp);
+  deprecated_set_value_type (new_val, value_type (argp));
   set_value_embedded_offset (new_val, (using_enc
 				       ? top + value_embedded_offset (argp)
 				       : top));

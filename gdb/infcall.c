@@ -96,7 +96,7 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 	  && TYPE_CODE (arg_type) != TYPE_CODE_PTR)
 	{
 	  arg = value_addr (arg);
-	  arg->type = param_type;
+	  deprecated_set_value_type (arg, param_type);
 	  return arg;
 	}
       break;

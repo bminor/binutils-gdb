@@ -168,7 +168,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* Wrap this addr in a value and return pointer */
   vp = allocate_value (ftype);
-  vp->type = ftype;
+  deprecated_set_value_type (vp, ftype);
   VALUE_ADDRESS (vp) = coreptr;
 
   /* pai: (temp) do we need the value_ind stuff in value_fn_field? */

@@ -1547,7 +1547,7 @@ ada_coerce_to_simple_array_type (struct type *type)
   struct value *mark = value_mark ();
   struct value *dummy = value_from_longest (builtin_type_long, 0);
   struct type *result;
-  dummy->type = type;
+  deprecated_set_value_type (dummy, type);
   result = ada_type_of_array (dummy, 0);
   value_free_to_mark (mark);
   return result;
@@ -2041,7 +2041,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       val = value_copy (toval);
       memcpy (value_contents_raw (val), value_contents (fromval),
               TYPE_LENGTH (type));
-      val->type = type;
+      deprecated_set_value_type (val, type);
 
       return val;
     }
@@ -7047,7 +7047,7 @@ coerce_for_assign (struct type *type, struct value *val)
           || TYPE_LENGTH (TYPE_TARGET_TYPE (type2))
           != TYPE_LENGTH (TYPE_TARGET_TYPE (type2)))
         error (_("Incompatible types in assignment"));
-      val->type = type;
+      deprecated_set_value_type (val, type);
     }
   return val;
 }

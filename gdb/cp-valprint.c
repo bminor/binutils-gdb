@@ -786,7 +786,8 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 	  /* adjust by offset */
 	  vf->aligner.contents[0] += 4 * (HP_ACC_VFUNC_START + vx);
 	  vf = value_ind (vf);	/* get the entry */
-	  vf->type = value_type (v);	/* make it a pointer */
+	  /* make it a pointer */
+	  deprecated_set_value_type (vf, value_type (v));
 
 	  /* print out the entry */
 	  val_print (value_type (vf), value_contents (vf), 0, 0,

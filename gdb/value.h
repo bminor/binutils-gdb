@@ -80,7 +80,11 @@ struct value
   struct frame_id frame_id;
 
   /* Type of the value.  */
+#ifdef VALUE_C
   struct type *type;
+#else
+  struct type *xtype;
+#endif
 
   /* If a value represents a C++ object, then the `type' field gives
      the object's compile-time type.  If the object actually belongs
@@ -174,6 +178,11 @@ struct value
 
 
 extern struct type *value_type (struct value *);
+/* This is being used to change the type of an existing value, that
+   code should instead be creating a new value with the changed type
+   (but possibly shared content).  */
+extern void deprecated_set_value_type (struct value *value,
+				       struct type *type);
 extern int value_bitsize (struct value *);
 extern int value_bitpos (struct value *);
 extern int value_offset (struct value *);

@@ -296,7 +296,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       func_string = create_array_type (func_string,
 				       builtin_type_char, func_range);
       func_val = allocate_value (func_string);
-      func_val->type = func_string;
+      deprecated_set_value_type (func_val, func_string);
       memcpy (value_contents_raw (func_val),
 	      DEPRECATED_SYMBOL_NAME (traceframe_fun),
 	      len);
@@ -318,7 +318,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       file_string = create_array_type (file_string,
 				       builtin_type_char, file_range);
       file_val = allocate_value (file_string);
-      file_val->type = file_string;
+      deprecated_set_value_type (file_val, file_string);
       memcpy (value_contents_raw (file_val),
 	      traceframe_sal.symtab->filename,
 	      len);

@@ -21,6 +21,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+/* Hack so that value.h can detect when it's being included by
+   value.c.  */
+#define VALUE_C
+
 #include "defs.h"
 #include "gdb_string.h"
 #include "symtab.h"
@@ -127,6 +131,11 @@ struct type *
 value_type (struct value *value)
 {
   return value->type;
+}
+void
+deprecated_set_value_type (struct value *value, struct type *type)
+{
+  value->type = type;
 }
 
 int

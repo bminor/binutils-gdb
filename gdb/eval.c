@@ -945,8 +945,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (gnu_runtime && (method != NULL))
 	  {
 	    /* Function objc_msg_lookup returns a pointer.  */
-	    argvec[0]->type
-	      = lookup_function_type (lookup_pointer_type (value_type (argvec[0])));
+	    deprecated_set_value_type (argvec[0],
+				       lookup_function_type (lookup_pointer_type (value_type (argvec[0]))));
 	    argvec[0] = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
 	  }
 
@@ -1030,7 +1030,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	  else
 	    {
-	      arg1->type = lookup_pointer_type (TYPE_TARGET_TYPE (value_type (arg1)));
+	      deprecated_set_value_type (arg1, lookup_pointer_type (TYPE_TARGET_TYPE (value_type (arg1))));
 	    }
 	got_it:
 
@@ -1688,7 +1688,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	   type, this will ensure that value_subscript()
 	   returns the correct type value */
 
-	arg1->type = tmp_type;
+	deprecated_set_value_type (arg1, tmp_type);
 	return value_ind (value_add (value_coerce_array (arg1), arg2));
       }
 

@@ -320,7 +320,7 @@ type_from_class (struct value *clas)
       temp = clas;
       /* Set array element type. */
       temp = value_struct_elt (&temp, NULL, "methods", NULL, "structure");
-      temp->type = lookup_pointer_type (value_type (clas));
+      deprecated_set_value_type (temp, lookup_pointer_type (value_type (clas)));
       TYPE_TARGET_TYPE (type) = type_from_class (temp);
     }
 
@@ -890,7 +890,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  /* Get CLASS_ELEMENT_TYPE of the array type. */
 	  temp = value_struct_elt (&temp, NULL, "methods",
 				   NULL, "structure");
-	  temp->type = value_type (clas);
+	  deprecated_set_value_type (temp, value_type (clas));
 	  el_type = type_from_class (temp);
 	  if (TYPE_CODE (el_type) == TYPE_CODE_STRUCT)
 	    el_type = lookup_pointer_type (el_type);

@@ -1904,9 +1904,9 @@ printf_command (char *arg, int from_tty)
 	  {
 	    struct type *type = value_type (val_args[nargs]);
 	    if (TYPE_LENGTH (type) == sizeof (float))
-	      val_args[nargs]->type = builtin_type_float;
+	      deprecated_set_value_type (val_args[nargs], builtin_type_float);
 	    if (TYPE_LENGTH (type) == sizeof (double))
-	      val_args[nargs]->type = builtin_type_double;
+	      deprecated_set_value_type (val_args[nargs], builtin_type_double);
 	  }
 	nargs++;
 	s = s1;

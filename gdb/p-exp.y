@@ -521,7 +521,7 @@ exp	:	THIS
 			  /* we need type of this */
 			  this_val = value_of_this (0); 
 			  if (this_val)
-			    this_type = this_val->type;
+			    this_type = value_type (this_val);
 			  else
 			    this_type = NULL;
 			  if (this_type)
@@ -672,7 +672,7 @@ variable:	name_not_typename
 			      /* we need type of this */
 			      this_val = value_of_this (0); 
 			      if (this_val)
-				this_type = this_val->type;
+				this_type = value_type (this_val);
 			      else
 				this_type = NULL;
 			      if (this_type)

@@ -531,7 +531,7 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	       */
 	      struct value *temparg;
 	      temparg=value_copy(val);
-	      temparg->type = lookup_pointer_type (TYPE_TARGET_TYPE(type));
+	      deprecated_set_value_type (temparg, lookup_pointer_type (TYPE_TARGET_TYPE(type)));
 	      val=temparg;
 	    }
 	  /* Pointer to class, check real type of object */
