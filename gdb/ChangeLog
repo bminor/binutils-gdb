@@ -1,5 +1,26 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* frv-linux-tdep.c: Include "trad-frame.h" and "frame-unwind.h".
+	(frv_linux_sigtramp_frame_cache)
+	(frv_linux_sigtramp_frame_this_id)
+	(frv_linux_sigtramp_frame_prev_register)
+	(frv_linux_sigtramp_frame_unwind)
+	(frv_linux_sigtramp_frame_sniffer): Copied from frv-tdep.c,
+	include "linux" in function and variable names, directly call
+	frv_linux_pc_in_sigtramp and frv_linux_sigcontext_reg_addr, use
+	the latest trad-frame code.
+	(frv_linux_init_abi): Append frv_linux_sigtramp_frame_sniffer, do
+	not set frv_sigcontext_reg_addr or deprecated_pc_in_sigtramp
+	* Makefile.in (frv-linux-tdep.o): Update dependencies.
+	* frv-tdep.h (frv_set_sigcontext_reg_addr): Delete declaration.
+	* frv-tdep.c (frv_sigtramp_frame_cache)
+	(frv_sigtramp_frame_this_id, frv_sigtramp_frame_prev_register)
+	(frv_sigtramp_frame_unwind, frv_sigtramp_frame_sniffer): Moved to
+	frv-linux-tdep.c.
+	(frv_gdbarch_init): Do not append a sigtramp sniffer.
+	(struct gdbarch_tdep): Delete sigcontext_reg_addr.
+	(frv_set_sigcontext_reg_addr): Delete function.
+
 	* gdbarch.sh (DEPRECATED_SIGTRAMP_START)
 	(DEPRECATED_SIGTRAMP_END): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
