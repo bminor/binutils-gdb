@@ -37,6 +37,7 @@ mcalloc.c
 mfree.c
 mmalloc.c
 mmalloc.h
+mmalloc.texi
 mmap-sup.c
 mmcheck.c
 mmemalign.c
