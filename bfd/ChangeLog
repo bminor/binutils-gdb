@@ -1,3 +1,8 @@
+Tue Nov  7 13:48:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4 (BFD_CC_FOR_BUILD): Don't define CC_FOR_BUILD if it
+	is defined in the environment.
+
 Tue Nov  7 10:57:24 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_get_section_contents_in_window): Define to use
