@@ -1,3 +1,8 @@
+Tue Jun 15 12:26:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* remote-vx.c: include gdbcmd.h for setlist.
+	  (_initialize_vx): make rpcTimeout user settable.
+
 Mon Jun 14 09:23:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* main.c, gdbcmd.h: Add function filename_completer.

@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "symtab.h"
 #include "complaints.h"
+#include "gdbcmd.h"
 
 #include <string.h>
 #include <errno.h>
@@ -1309,6 +1310,14 @@ struct target_ops vx_run_ops = {
 void
 _initialize_vx ()
 {
-  add_target (&vx_ops);
+  
+ add_show_from_set
+    (add_set_cmd ("rpcTimeout", class_support, var_uinteger,
+		  (char *) &rpcTimeout.tv_sec,
+		  "Set seconds to wait for rpc calls to return.\n\
+Set the number of seconds to wait for rpc calls to return.", &setlist),
+     &showlist);
+
+   add_target (&vx_ops);
   add_target (&vx_run_ops);
 }
