@@ -1,3 +1,7 @@
+2002-04-18  GDB Administrator  <gdbadmin@sourceware.cygnus.com>
+
+	* version.in: Bump to version 5.1.91.
+
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Mention hppa2.0-hp-hpux10.20 compile problems.
