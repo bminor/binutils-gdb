@@ -247,6 +247,9 @@ struct language_defn
     /* Return demangled language symbol, or NULL.  */
     char *(*la_demangle) (const char *mangled, int options);
 
+    /* Return class name of a mangled method name or NULL.  */
+    char *(*la_class_name_from_physname) (const char *physname);
+
     /* Base 2 (binary) formats. */
 
     struct language_format_info la_binary_format;
@@ -515,6 +518,10 @@ extern CORE_ADDR skip_language_trampoline (CORE_ADDR pc);
 /* Return demangled language symbol, or NULL.  */
 extern char *language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options);
+
+/* Return class name from physname, or NULL.  */
+extern char *language_class_name_from_physname (const struct language_defn *,
+					        const char *physname);
 
 /* Splitting strings into words.  */
 extern char *default_word_break_characters (void);

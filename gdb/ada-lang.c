@@ -10144,6 +10144,7 @@ const struct language_defn ada_language_defn = {
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
   basic_lookup_transparent_type,        /* lookup_transparent_type */
   ada_la_decode,                /* Language specific symbol demangler */
+  NULL,                         /* Language specific class_name_from_physname */
   {"", "", "", ""},             /* Binary format info */
 #if 0
   {"8#%lo#", "8#", "o", "#"},   /* Octal format info */

@@ -1840,7 +1840,8 @@ guess_structure_name (struct partial_die_info *struct_pdi,
 	  if (child_pdi->tag == DW_TAG_subprogram)
 	    {
 	      char *actual_class_name
-		= class_name_from_physname (child_pdi->name);
+		= language_class_name_from_physname (cu->language_defn,
+						     child_pdi->name);
 	      if (actual_class_name != NULL)
 		{
 		  struct_pdi->name
@@ -3557,7 +3558,9 @@ determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  if (child->tag == DW_TAG_subprogram)
 	    {
-	      new_prefix = class_name_from_physname (dwarf2_linkage_name
+	      new_prefix 
+		= language_class_name_from_physname (cu->language_defn,
+						     dwarf2_linkage_name
 						     (child, cu));
 
 	      if (new_prefix != NULL)

@@ -1,3 +1,34 @@
+2004-07-06  Jeff Johnston <jjohnstn@redhat.com>
+
+	* language.h (struct_language_defn): Add new function pointer:
+	la_class_name_from_physname.  Also add new prototype for
+	language_class_name_from_physname.
+	* language.c (language_class_name_from_physname): New function.
+	(unk_lang_class_name): Ditto.
+	(unknown_language_defn, auto_language_defn): Change
+	to add unk_lang_class_name function pointer for
+	la_class_name_from_physname.
+	(local_language_defn): Ditto.
+	* dwarf2read.c (guess_structure_name): Change to call
+	language_class_name_from_physname.
+	(determine_class_name): Ditto.
+	* cp-support.c (class_name_from_physname): Renamed.
+	(cp_class_name_from_physname): New name of function.
+	* cp-support.h: Ditto.
+	* c-lang.c (c_language_defn): Change to add NULL
+	for class_name_from_physname function pointer.
+	(cplus_language_defn): Change to add cp_class_name_from_physname.
+	* jv-lang.c (java_class_name_physname): New function.
+	(java_find_last_component): New static routine.
+	(java_language_defn): Add java_class_name_from_physname pointer.
+	* ada-lang.c (ada_language_defn): Change to add NULL
+	for class_name_from_physname function pointer.
+	* f-lang.c (f_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+	* objc-lang.c (objc_language_defn): Ditto.
+	* p-lang.c (pascal_language_defn): Ditto.
+	* scm-lang.c (scm_language_defn): Ditto. 
+
 2004-07-06  Andrew Cagney  <cagney@gnu.org>
 
 	Patch from Bart Robinson.

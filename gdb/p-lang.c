@@ -467,6 +467,7 @@ const struct language_defn pascal_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "%", "b", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
