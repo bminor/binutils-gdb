@@ -155,6 +155,10 @@ check_range (num, bits, flags)
   long min, max, bit1;
   int retval=0;
 
+  /* don't bother checking 16-bit values */
+  if (bits == 16)
+    return 0;
+
   if (flags & OPERAND_SHIFT)
     {
       /* all special shift operands are unsigned */
@@ -167,14 +171,7 @@ check_range (num, bits, flags)
 
   if (flags & OPERAND_SIGNED)
     {
-      bit1 = (1 << (bits - 1)); 
-      max = bit1 -1;
-      if (num & max)
-	{
-	  /* sign-extend */
-	  num = ((num & (bit1 | max))^(~max))+bit1;
-	}
-
+      max = (1 << (bits - 1))-1; 
       min = - (1 << (bits - 1));  
       if (((long)num > max) || ((long)num < min))
 	retval = 1;
@@ -186,7 +183,6 @@ check_range (num, bits, flags)
       if ((num > max) || (num < min))
 	retval = 1;
     }
-
   return retval;
 }
 
