@@ -1,3 +1,13 @@
+2002-07-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (rs6000-nat.o): Update dependencies.
+
+	From Nicholas Duffek:
+	* Makefile.in (ALLDEPFILES): Add aix-thread.c.
+	(aix-thread.o): New rule.
+	* configure.host (gdb_host): Set to aix432 on AIX 4.3.2+.
+	* config/powerpc/aix432.mh: New file.
+
 2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ppc-linux-tdep.c (ELF_NGREG, ELF_NFPREG, ELF_NVRREG)

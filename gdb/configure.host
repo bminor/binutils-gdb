@@ -129,7 +129,10 @@ none-*-*)		gdb_host=none ;;
 
 ns32k-*-netbsd*)	gdb_host=nbsdaout ;;
 
-powerpc-*-aix*)		gdb_host=aix ;;
+powerpc-*-aix3*)	gdb_host=aix ;;
+powerpc-*-aix4.[0-2]*)	gdb_host=aix ;;
+powerpc-*-aix4.3.[0-1]*)	gdb_host=aix ;;
+powerpc-*-aix*)		gdb_host=aix432 ;;
 powerpc-*-linux*)	gdb_host=linux ;;
 powerpc-*-netbsd*)	gdb_host=nbsd ;;
 

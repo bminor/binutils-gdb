@@ -1215,6 +1215,7 @@ MAKEOVERRIDES=
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
 ALLDEPFILES = a68v-nat.c \
+	aix-thread.c \
 	alpha-nat.c alphabsd-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c \
@@ -1274,6 +1275,10 @@ ALLDEPFILES = a68v-nat.c \
 
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h)
+
+aix-thread.o: aix-thread.c $(defs_h) $(gdbcore_h) $(gdbthread_h) \
+	$(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h) $(gdb_assert_h) \
+	$(ppc_tdep_h) $(language_h)
 
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(regcache_h) $(alpha_tdep_h)
@@ -2082,7 +2087,8 @@ rom68k-rom.o: rom68k-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 
 rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(xcoffsolib_h) $(symfile_h) $(objfiles_h) \
-	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h)
+	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h) $(language_h) \
+	$(ppc_tdep_h)
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) $(ppc_tdep_h) $(regcache_h) $(value_h) $(parser_defs_h)
