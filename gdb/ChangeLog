@@ -1,5 +1,7 @@
 Wed Oct 14 18:56:28 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* remote-vx.c: remove redundant include of sys/time.h.
+
 	* infrun.c: include ctype.h.  Otherwise some machines result in
 	  undefined for isdigit.
 

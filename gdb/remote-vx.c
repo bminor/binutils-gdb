@@ -33,7 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/socket.h>
 #define malloc bogon_malloc	/* Sun claims "char *malloc()" not void * */
 #define free bogon_free		/* Sun claims "int free()" not void */
