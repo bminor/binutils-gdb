@@ -1,4 +1,17 @@
+Mon Dec 22 21:51:53 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c (_initialize_remote_mips): Fix DDB doc string.
+
 start-sanitize-d30v
+Sun Dec 21 17:00:06 1997  David Taylor  <taylor@texas.cygnus.com>
+
+	* d30v-tdep.c (d30v_frame_find_saved_regs): split most of
+	function off into d30v_frame_find_saved_regs_offsets;
+	(d30v_frame_find_saved_regs_offsets): new function.  Got
+	backtrace working when calling from framefull (unoptimized)
+	routines (.e.g, main) into frameless (optimized) routines
+	(e.g., printf).
+
 Fri Dec 19 09:49:49 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* d30v-tdep.c (d30v_frame_chain): test end_of_stack

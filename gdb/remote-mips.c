@@ -3564,8 +3564,8 @@ Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
 line. The first argument is the device it is connected to or, if it contains\n\
 a colon, HOST:PORT to access a board over a network.  The optional second\n\
 parameter is the temporary file in the form HOST:FILENAME to be used for\n\
-TFTP downloads to the board.  The optional third parameter is the local\n\
-of the TFTP temporary file, if it differs from the filename seen by the board";
+TFTP downloads to the board.  The optional third parameter is the local name\n\
+of the TFTP temporary file, if it differs from the filename seen by the board.";
   ddb_ops.to_open = ddb_open;
   ddb_ops.to_wait = mips_wait;
 
