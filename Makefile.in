@@ -49,6 +49,10 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+# Directory in which the compiler finds executables, libraries, etc.
+libsubdir = $(libdir)/gcc-lib/$(target_alias)/$(gcc_version)
 GDB_NLM_DEPS = 
 
 SHELL = /bin/sh
@@ -86,10 +90,8 @@ LIBCFLAGS_FOR_TARGET = $(CFLAGS_FOR_TARGET)
 PICFLAG = 
 PICFLAG_FOR_TARGET = 
 
-# start-sanitize-chill
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
-# end-sanitize-chill
 CXX = c++
 
 # Use -O2 to stress test the compiler.
@@ -112,6 +114,7 @@ GZIPPROG = gzip
 # These values are substituted by configure.
 DEFAULT_YACC = yacc
 DEFAULT_LEX = lex
+DEFAULT_M4 = m4
 
 BISON = `if [ -f $$r/bison/bison ] ; then \
 	    echo $$r/bison/bison -L $$s/bison/ ; \
@@ -133,7 +136,7 @@ LEX = `if [ -f $$r/flex/flex ] ; \
 
 M4 = `if [ -f $$r/m4/m4 ] ; \
 	then echo $$r/m4/m4 ; \
-	else echo m4 ; fi`
+	else echo ${DEFAULT_M4} ; fi`
 
 MAKEINFO = `if [ -f $$r/texinfo/makeinfo/Makefile ] ; \
 	then echo $$r/texinfo/makeinfo/makeinfo ; \
@@ -198,6 +201,13 @@ INSTALL_TARGET = installdirs \
 	$(INSTALL_X11_MODULES) \
 	$(INSTALL_DOSREL)
 
+INSTALL_TARGET_CROSS = installdirs \
+	install-gcc-cross \
+	$(INSTALL_MODULES) \
+	$(INSTALL_TARGET_MODULES) \
+	$(INSTALL_X11_MODULES) \
+	$(INSTALL_DOSREL)
+
 CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
@@ -223,7 +233,6 @@ CC_FOR_TARGET = ` \
 # overridden on the command line.
 GCC_FOR_TARGET = $$r/gcc/xgcc -B$$r/gcc/
 
-# start-sanitize-chill
 CHILL_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
     echo $$r/gcc/xgcc -B$$r/gcc/ -L$$r/gcc/ch/runtime/; \
@@ -234,8 +243,6 @@ CHILL_FOR_TARGET = ` \
       t='$(program_transform_name)'; echo gcc | sed -e 's/x/x/' $$t; \
     fi; \
   fi`
-
-# end-sanitize-chill
 
 CXX_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
@@ -359,11 +366,9 @@ BASE_FLAGS_TO_PASS = \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
 	"CFLAGS_FOR_TARGET=$(CFLAGS_FOR_TARGET)" \
-	$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
-	$(end-sanitize-chill)\
 	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CXXFLAGS_FOR_TARGET=$(CXXFLAGS_FOR_TARGET)" \
@@ -384,14 +389,13 @@ BASE_FLAGS_TO_PASS = \
 	"MAKE=$(MAKE)" \
 	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
-	"PICFLAG=$(PICFLAG)" \
-	"PICFLAG_FOR_TARGET=$(PICFLAG_FOR_TARGET)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"RPATH_ENVVAR=$(RPATH_ENVVAR)" \
 	"SHELL=$(SHELL)" \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+	"TARGET_SUBDIR=$(TARGET_SUBDIR)" \
 	"WINDRES_FOR_TARGET=$(WINDRES_FOR_TARGET)" \
 	"YACC=$(YACC)" \
 	"bindir=$(bindir)" \
@@ -409,7 +413,12 @@ BASE_FLAGS_TO_PASS = \
 	"sbindir=$(sbindir)" \
 	"sharedstatedir=$(sharedstatedir)" \
 	"sysconfdir=$(sysconfdir)" \
-	"tooldir=$(tooldir)"
+	"tooldir=$(tooldir)" \
+	"gxx_include_dir=$(gxx_include_dir)" \
+	"gcc_version=$(gcc_version)" \
+	"gcc_version_trigger=$(gcc_version_trigger)" \
+	"target_alias=$(target_alias)" \
+	"libsubdir=$(libsubdir)"
 
 # Flags to pass down to most sub-makes, in which we're building with
 # the host environment.
@@ -455,7 +464,6 @@ EXTRA_TARGET_FLAGS = \
 	'LIBCFLAGS=$$(LIBCFLAGS_FOR_TARGET)' \
 	'LIBCXXFLAGS=$$(LIBCXXFLAGS_FOR_TARGET)' \
 	'NM=$$(NM_FOR_TARGET)' \
-	'PICFLAG=$$(PICFLAG_FOR_TARGET)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
 	'WINDRES=$$(WINDRES_FOR_TARGET)'
 
@@ -504,6 +512,7 @@ ALL_MODULES = \
 	all-binutils \
 	all-bison \
 	all-byacc \
+	all-bzip2 \
 	$(start-sanitize-cygnus) \
 	all-cgen \
 	$(end-sanitize-cygnus) \
@@ -598,6 +607,7 @@ CROSS_CHECK_MODULES = \
 	check-bash \
 	check-bfd \
 	check-binutils \
+	check-bzip2 \
 	check-cvssrc \
 	check-db \
 	check-dejagnu \
@@ -682,6 +692,7 @@ INSTALL_MODULES = \
 	install-automake \
 	install-bash \
 	install-bfd \
+	install-bzip2 \
 	install-opcodes \
 	install-binutils \
 	install-bison \
@@ -892,6 +903,7 @@ CLEAN_MODULES = \
 	clean-binutils \
 	clean-bison \
 	clean-byacc \
+	clean-bzip2 \
 	$(start-sanitize-cygnus) \
 	clean-cgen \
 	$(end-sanitize-cygnus) \
@@ -1095,10 +1107,10 @@ install-info: do-install-info dir.info
 	else true ; fi
 
 local-clean:
-	-rm -f *.a TEMP errs core *.o *~ \#* TAGS *.E
+	-rm -f *.a TEMP errs core *.o *~ \#* TAGS *.E *.log
 
 local-distclean:
-	-rm -f Makefile config.status config.cache
+	-rm -f Makefile config.status config.cache mh-frag mt-frag
 	-if [ "$(TARGET_SUBDIR)" != "." ]; then \
 	  rm -rf $(TARGET_SUBDIR); \
 	else true; fi
@@ -1150,10 +1162,32 @@ check: $(CHECK_MODULES) \
 	$(CHECK_X11_MODULES) \
 	check-gcc
 
+# Automated reporting of test results.
+
+warning.log: build.log
+	$(srcdir)/contrib/warn_summary build.log > $@
+
+mail-report.log:
+	if test x'$(BOOT_CFLAGS)' != x''; then \
+	    BOOT_CFLAGS='$(BOOT_CFLAGS)'; export BOOT_CFLAGS; \
+	fi; \
+	$(srcdir)/contrib/test_summary -t >$@
+	chmod +x $@
+	echo If you really want to send e-mail, run ./$@ now
+
+mail-report-with-warnings.log: warning.log
+	if test x'$(BOOT_CFLAGS)' != x''; then \
+	    BOOT_CFLAGS='$(BOOT_CFLAGS)'; export BOOT_CFLAGS; \
+	fi; \
+	$(srcdir)/contrib/test_summary -t -i warning.log >$@
+	chmod +x $@
+	echo If you really want to send e-mail, run ./$@ now
+
 # Installation targets.
 
-.PHONY: install uninstall source-vault binary-vault vault-install
+.PHONY: install install-cross uninstall source-vault binary-vault vault-install
 install: $(INSTALL_TARGET) 
+install-cross: $(INSTALL_TARGET_CROSS) 
 
 uninstall:
 	@echo "the uninstall target is not supported in this tree"
@@ -1323,11 +1357,6 @@ $(CONFIGURE_TARGET_MODULES):
 		mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
 	      fi; \
 	    else \
-	      if echo '.;' | cmp - $(TARGET_SUBDIR)/$${dir}/tmpmulti.out >/dev/null 2>&1; then \
-		true; \
-	      else \
-		rm -f $(TARGET_SUBDIR)/$${dir}/Makefile; \
-	      fi; \
 	      mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
 	    fi; \
 	  fi; \
@@ -1391,11 +1420,13 @@ $(CONFIGURE_TARGET_MODULES):
 	      libsrcdir="$$s/$${dir}"; \
 	    fi; \
 	    if [ -f $${libsrcdir}/configure ] ; then \
-	      $(SHELL) $${libsrcdir}/configure \
+	      rm -f no-such-file; \
+	      CONFIG_SITE=no-such-file $(SHELL) $${libsrcdir}/configure \
 		$(CONFIG_ARGUMENTS) $${srcdiroption} \
 		--with-target-subdir="$(TARGET_SUBDIR)"; \
 	    else \
-	      $(SHELL) $$s/configure \
+	      rm -f no-such-file; \
+	      CONFIG_SITE=no-such-file $(SHELL) $$s/configure \
 		$(CONFIG_ARGUMENTS) $${srcdiroption} \
 		--with-target-subdir="$(TARGET_SUBDIR)"; \
 	    fi; \
@@ -1507,16 +1538,57 @@ all-gcc:
 	  true; \
 	fi
 
-.PHONY: all-bootstrap
-all-bootstrap:
-	@if [ -f ./gcc/Makefile ] ; then \
-	  r=`pwd`; export r; \
-	  s=`cd $(srcdir); pwd`; export s; \
-	  $(SET_LIB_PATH) \
-	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) bootstrap); \
-	else \
-	  true; \
-	fi
+# Building GCC uses some tools for rebuilding "source" files
+# like texinfo, bison/byacc, etc.  So we must depend on those.
+#
+# While building GCC, it may be necessary to run various target
+# programs like the assembler, linker, etc.  So we depend on
+# those too.
+#
+# In theory, on an SMP all those dependencies can be resolved
+# in parallel.
+#
+.PHONY: bootstrap bootstrap-lean bootstrap2 bootstrap2-lean bootstrap3 bootstrap3-lean bootstrap4 bootstrap4-lean
+bootstrap bootstrap-lean bootstrap2 bootstrap2-lean bootstrap3 bootstrap3-lean bootstrap4 bootstrap4-lean: all-texinfo all-bison all-byacc all-binutils all-gas all-ld
+	@r=`pwd`; export r; \
+	s=`cd $(srcdir); pwd`; export s; \
+	$(SET_LIB_PATH) \
+	echo "Bootstrapping the compiler"; \
+	cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) $@
+	@r=`pwd`; export r; \
+	s=`cd $(srcdir); pwd`; export s; \
+	case "$@" in \
+	  *bootstrap4-lean ) \
+			msg="Comparing stage3 and stage4 of the compiler"; \
+	  		compare=compare3-lean ;; \
+	  *bootstrap4 ) msg="Comparing stage3 and stage4 of the compiler"; \
+	  		compare=compare3 ;; \
+	  *-lean )	msg="Comparing stage2 and stage3 of the compiler"; \
+	  		compare=compare-lean ;; \
+	  * )		msg="Comparing stage2 and stage3 of the compiler"; \
+	  		compare=compare ;; \
+	esac; \
+	$(SET_LIB_PATH) \
+	echo "$$msg"; \
+	cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) $$compare
+	@r=`pwd`; export r; \
+	s=`cd $(srcdir); pwd` ; export s; \
+	$(SET_LIB_PATH) \
+	echo "Building runtime libraries"; \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) all
+
+.PHONY: cross
+cross: all-texinfo all-bison all-byacc all-binutils all-gas all-ld
+	@r=`pwd`; export r; \
+	s=`cd $(srcdir); pwd`; export s; \
+	$(SET_LIB_PATH) \
+	echo "Building the C and C++ compiler"; \
+	cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) LANGUAGES="c c++"
+	@r=`pwd`; export r; \
+	s=`cd $(srcdir); pwd` ; export s; \
+	$(SET_LIB_PATH) \
+	echo "Building runtime libraries"; \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) all LANGUAGES="c c++"
 
 .PHONY: check-gcc
 check-gcc:
@@ -1540,7 +1612,16 @@ install-gcc:
 	  true; \
 	fi
 
-
+.PHONY: install-gcc-cross
+install-gcc-cross:
+	@if [ -f ./gcc/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  s=`cd $(srcdir); pwd`; export s; \
+	  $(SET_LIB_PATH) \
+	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) LANGUAGES="c c++" install); \
+	else \
+	  true; \
+	fi
 # EXPERIMENTAL STUFF
 # This rule is used to install the modules which use FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
@@ -1572,8 +1653,9 @@ all-bison: all-texinfo
 all-target-boehm-gc: configure-target-boehm-gc
 # end-sanitize-java
 all-byacc:
+all-bzip2:
 # start-sanitize-cygnus
-all-cgen:
+all-cgen: all-libiberty
 # These two have dependencies on cgen, and while this section is alphabetically
 # sorted, I wish to keep these together until things settle.
 all-opcodes: all-cgen
@@ -1736,7 +1818,7 @@ TAGS: do-TAGS
 
 # with the gnu make, this is done automatically.
 
-Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag) $(gcc_version_trigger)
 	$(SHELL) ./config.status
 
 #
@@ -1746,7 +1828,7 @@ Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 # ChangeLog omitted because it may refer to files which are not in this
 # distribution (perhaps it would be better to include it anyway).
 DEVO_SUPPORT= README Makefile.in configure configure.in \
-	config.guess config.sub config move-if-change \
+	config.guess config.if config.sub config move-if-change \
 	mpw-README mpw-build.in mpw-config.in mpw-configure mpw-install \
 	COPYING COPYING.LIB install-sh config-ml.in symlink-tree \
 	mkinstalldirs ltconfig ltmain.sh missing ylwrap
@@ -1893,12 +1975,5 @@ newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
 
 .NOEXPORT:
 MAKEOVERRIDES=
-
-# start-sanitize-chill
-## This is ugly, but I don't want GNU make to put these variables in
-## the environment.  Older makes will see this as a set of targets
-## with no dependencies and no actions.
-unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-# end-sanitize-chill
 
 # end of Makefile.in
