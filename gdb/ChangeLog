@@ -1,3 +1,9 @@
+Fri Nov  4 13:11:54 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* remote.c (remote_kill): Use catch_errors when calling putpkt.
+	(putpkt): Return int, not void, to match catch_errors calling
+	convention.
+
 Fri Nov  4 10:52:38 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* rs6000-tdep.c (pop_frame): Correct a variable name.
