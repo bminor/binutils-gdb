@@ -1,5 +1,9 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (S_SET_EXTERNAL): Warn if symbol is weak.
+	(S_CLEAR_EXTERNAL): Likewise.
+	(S_SET_WEAK): Warn if symbol is global.
+
 	* config/obj-aout.c (obj_aout_frob_symbol): Warn about an attempt
 	to put an undefined symbol into a set.
 
