@@ -760,7 +760,7 @@ BSR (val, amount)
 }
 
 /* Parse an argument that can be expressed as a keyword.
-   (eg: #StoreStore).
+   (eg: #StoreStore or %ccfr).
    The result is a boolean indicating success.
    If successful, INPUT_POINTER is updated.  */
 
@@ -774,7 +774,7 @@ parse_keyword_arg (lookup_fn, input_pointerP, valueP)
   char c, *p, *q;
 
   p = *input_pointerP;
-  for (q = p + (*p == '#'); isalpha (*q) || *q == '_'; ++q)
+  for (q = p + (*p == '#' || *p == '%'); isalpha (*q) || *q == '_'; ++q)
     continue;
   c = *q;
   *q = 0;
@@ -1008,11 +1008,22 @@ sparc_ip (str)
 			  ++s;
 			}
 
-		      if (num < 16 || 31 < num)
+		      if (current_architecture >= SPARC_OPCODE_ARCH_V9)
 			{
-			  error_message = ": asr number must be between 15 and 31";
-			  goto error;
-			}	/* out of range */
+			  if (num < 16 || 31 < num)
+			    {
+			      error_message = ": asr number must be between 16 and 31";
+			      goto error;
+			    }
+			}
+		      else
+			{
+			  if (num < 1 || 31 < num)
+			    {
+			      error_message = ": asr number must be between 1 and 31";
+			      goto error;
+			    }
+			}
 
 		      opcode |= (*args == 'M' ? RS1 (num) : RD (num));
 		      continue;
@@ -1021,9 +1032,8 @@ sparc_ip (str)
 		    {
 		      error_message = ": expecting %asrN";
 		      goto error;
-		    }		/* if %asr followed by a number. */
-
-		}		/* if %asr */
+		    }
+		} /* if %asr */
 	      break;
 
 	    case 'I':
@@ -1743,6 +1753,20 @@ sparc_ip (str)
 		break;
 	      s += 2;
 	      continue;
+
+	    case 'u':
+	    case 'U':
+	      {
+		/* Parse a sparclet cpreg.  */
+		int cpreg;
+		if (! parse_keyword_arg (sparc_encode_sparclet_cpreg, &s, &cpreg))
+		  {
+		    error_message = ": invalid cpreg name";
+		    goto error;
+		  }
+		opcode |= (*args == 'U' ? RS1 (cpreg) : RD (cpreg));
+		continue;
+	      }
 
 	    default:
 	      as_fatal ("failed sanity check.");
