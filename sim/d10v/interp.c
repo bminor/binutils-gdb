@@ -317,11 +317,7 @@ sim_resume (step, siggnal)
 
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
 
- if (step)
-   State.exception = SIGTRAP;
- else
-   State.exception = 0;
- 
+  State.exception = 0;
  do
    {
      uint32 byte_pc = ((uint32)PC) << 2;
@@ -369,7 +365,10 @@ sim_resume (step, siggnal)
 	   PC++;
        }
    } 
- while (!State.exception);
+ while ( !State.exception && !step);
+
+ if (step && !State.exception)
+   State.exception = SIGTRAP;
 }
 
 int

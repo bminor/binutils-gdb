@@ -1,3 +1,8 @@
+Mon Oct 21 16:16:26 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* interp.c (sim_resume): Change the way single-stepping and exceptions
+ 	are handled so single-stepping works again.
+
 Thu Oct 17 12:24:16 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* endian.c: Optimize simulated loads/stores on x86, AIX, and big
