@@ -1,3 +1,22 @@
+1999-12-13n Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/watchpoint.exp: Add missing "(timeout)" to test message.
+
+1999-12-13n Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/break.exp: Add missing anchor to reg exp on "finish from
+	outermost frame disallowed".
+
+1999-12-09  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/setvar.exp: New tests for setting the value of a struct
+	with a constant list.
+
+1999-12-08  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/setvar.exp: Remove pair os tests that expected gdb to
+	require the user to type a cast before setting the value of a struct.
+
 1999-12-06  Jim Blandy  <jimb@cygnus.com>
 
 	* gdb.base/default.exp: Expect the new 'info float' command on

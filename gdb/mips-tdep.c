@@ -3825,7 +3825,7 @@ mips_gdbarch_init (info, arches)
   set_gdbarch_push_arguments (gdbarch, mips_push_arguments);
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
 
-  set_gdbarch_frame_chain_valid (gdbarch, default_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_get_saved_register (gdbarch, default_get_saved_register);
 
   if (gdbarch_debug)

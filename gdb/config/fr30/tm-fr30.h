@@ -198,7 +198,7 @@ extern int fr30_frameless_function_invocation PARAMS ((struct frame_info * frame
 extern void fr30_init_extra_frame_info PARAMS ((struct frame_info * fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) fr30_init_extra_frame_info (fi)
 
-#define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
+#define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR
   fr30_push_arguments PARAMS ((int nargs, struct value ** args, CORE_ADDR sp,

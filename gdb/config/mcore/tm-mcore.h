@@ -81,7 +81,7 @@ extern void mcore_init_extra_frame_info (struct frame_info *fi);
 
 extern CORE_ADDR mcore_frame_chain (struct frame_info *fi);
 #define FRAME_CHAIN(FI) mcore_frame_chain ((FI))
-#define FRAME_CHAIN_VALID(FP, FI) generic_frame_chain_valid ((FP), (FI))
+#define FRAME_CHAIN_VALID(FP, FI) generic_file_frame_chain_valid ((FP), (FI))
 
 extern CORE_ADDR mcore_frame_saved_pc (struct frame_info *);
 #define FRAME_SAVED_PC(FI) (mcore_frame_saved_pc ((FI)))

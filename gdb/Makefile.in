@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19991207
+VERSION = 19991213
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1158,12 +1158,9 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
 
-# Due to several ``enum enabled'' declaration clashes it is difficult
-# to fix breakpoint.c's compiler warnings.
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
 	language.h gdb_string.h $(readline_headers) $(remote_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 

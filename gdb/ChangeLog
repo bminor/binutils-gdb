@@ -1,3 +1,200 @@
+1999-12-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.h (enum bptype): add new BP type bp_thread_event.
+	This will be used when a target needs to set an invisible 
+	breakpoint to detect events such as thread creation.
+	* breakpoint.c (interlan_breakpoint_number): remove ifdefs.
+	(create_thread_event_breakpoint): new function.
+	(remove_thread_event_breakpoints): new function.
+	(bpstat_what): don't stop at invisible thread_event breakpoints.
+	(update_breakpoints_after_exec): if bp_thread_event breakpoins
+	still exist after an exec, delete them.  They'll need to be 
+	found and installed anew anyway.
+	(print_it_typical): don't announce bp_thread_event breakpoints.
+	(print_one_breakpoint): account for new breakpoint type.
+	(mention): don't mention invisible bp_thread_event breakpoints.
+	(delete_command): don't delete invisible bp_thread_event bp's.
+	(breakpoint_re_set_one): don't touch bp_thread_event bp's.
+	
+Mon Dec 13 11:10:59 1999  Jimmy Guo	<guo@cup.hp.com>
+
+	* language.h (longest_raw_hex_string, longest_local_hex_string,
+	longest_local_hex_string_custom): Declare.
+	* language.c: New functions, and misc. fixes.
+	(longest_raw_hex_string, longest_local_hex_string,
+	longest_local_hex_string_custom): New functions.
+
+	* c-typeprint.c
+	(c_type_print_varspec_prefix,c_type_print_varpsec_suffix): Add
+	TYPE_CODE_TEMPLATE case and default case.
+	(c_type_print_base): Revise how demangled_no_class is found;
+	print '}' before printing local file:line info.
+	* c-valprint.c (c_value_print): print reference type to class.
+
+	* valarith.c (value_binop): Add support for exponentiation,
+	equal, not equal.
+	(my_strcmp): New function.
+	(value_equal,value_less): Add string equality comparison support.
+
+	* m2-exp.y (lex): add default case statement to capture
+	unhandled token and call error().
+
+1999-12-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* main.c (main): Remove unused variable.
+
+	From Hubert VERSTRAETE (hubertV@bigfoot.com):
+	* main.c (captured_main): Disambiguate command line option '-d' by
+ 	preferring --directory over --dbx.
+
+	* top.c (return_to_top_level): Do not do exec cleanups if the
+ 	target is executing. Those cleanups are supposed to be done when
+ 	the target has stopped.
+
+Mon Dec 13 20:52:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.c (do_captured_breakpoint_query,
+ 	gdb_breakpoint_query): New functions.  Implement a breakpoint
+ 	query.
+
+	* defs.h (enum gdb_rc): Declare.
+	(gdb_breakpoint_query): Declare.
+
+Mon Dec 13 14:18:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb-events.h: Fix typo in description of breakpoint events.
+	* gdb-events.sh: Update.
+
+Mon Dec 13 13:57:26 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.c (ep_type_description_t): Delete.
+	(print_one_breakpoint): Add local declaration of struct
+ 	ep_type_description.
+
+Mon Dec 13 12:38:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.h: Delete #include <setjmp.h>.  Moved to top.c.
+	(SIGJMP_BUF, SIGSETJMP, SIGLONGJMP, SIGJMP_BUF, SIGSETJMP,
+ 	SIGLONGJMP): Delete.  Moved to top.c
+	(error_return, quit_return): Delete extern declarations.
+
+	* top.c: #include <setjmp.h>.
+ 	(error_return, quit_return): Make static.
+	(SIGJMP_BUF, SIGSETJMP, SIGLONGJMP, SIGJMP_BUF, SIGSETJMP,
+ 	SIGLONGJMP): Define.
+
+Mon Dec 13 11:54:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tracepoint.c (trace_start_command, tracepoints_info): Print
+ 	step_count using %ld.
+	* Makefile.in (tracepoint.o): Compile tracepoint.o with -Werror.
+
+1999-12-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* target.h (enum target_waitkind): Add new enumeration value
+ 	TARGET_WAITKIND_IGNORE. For inferior events that we should do
+ 	nothing about.
+
+	* remote.c (remote_async_wait): After each character of console
+ 	output from the inferior, return to the event loop with an event
+ 	kind of TARGET_WAITKIND_IGNORE instead of looping here.
+
+	* infrun.c (handle_inferior_event): In case of
+ 	TARGET_WAITKIND_IGNORE, return immediately, and set things up so
+ 	that we are still waiting for the inferior.
+
+1999-12-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (handle_timer_event): When calling the timer
+ 	procedure, use the saved_timer data, not the timer_ptr data,
+ 	because the latter has been already freed.
+
+Fri Dec 10 12:01:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* eval.c (evaluate_subexp): Only inline when GNUC and not STDC.
+
+Sat Dec 11 17:52:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.c (print_one_breakpoint): New function.  Move
+ 	breakpoint print code to here.
+	(breakpoint_1): From here.
+
+Mon Dec  6 20:31:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Replace field init_p with invalid_p.
+	(TARGET_BFD_VMA_BIT): New architecture vector method.  Defaults to
+ 	architecture bits_per_address.
+	* gdbarch.h, gdbarch.c: Update.
+	* defs.h (TARGET_BFD_VMA_BIT): Provide default of TARGET_PTR_BIT
+ 	for non- multi-arch case.
+
+	* gdbtypes.h (builtin_type_bfd_vma, builtin_type_ptr,
+ 	builtin_type_CORE_ADDR): New GDB specific address types.
+	* gdbtypes.c (_initialize_gdbtypes, build_gdbtypes): Initialize
+ 	new builtin types.
+
+Wed Dec  8 17:48:56 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/sparc/nm-nbsd.h (FETCH_INFERIOR_REGISTERS): Delete
+ 	definition.  Already defined in config/nm-nbsd.h.  Include the
+ 	more explicit config/nm-nbsd.h.
+
+	* config/sparc/nbsd.mt (TDEPFILES): Move solib.o from here.
+	* config/sparc/nbsd.mh (NATDEPFILES): To here.
+	* config/xm-nbsd.h: #include <sys/param.h> to get definition of
+ 	NGROUPS needed by <limits.h> and missing on some systems.
+	* config/nm-nbsd.h: Only macro's that match NetBSD definitions
+ 	with what is expected by solib.c when not SVR4_SHARED_LIBS.
+
+	* configure.host: Add patterns for sparc-*-netbsdaout* and
+ 	sparc-*-netbsdelf*.
+	* config/sparc/nm-nbsdelf.h: New file.
+	* config/sparc/nbsdelf.mh: New file.
+
+Wed Dec  8 19:56:48 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* frame.h, blockframe.c: Rename default_frame_chain_valid to
+ 	file_frame_chain_valid.  Rename alternate_frame_chain_valid to
+ 	func_frame_chain_valid.
+
+	* config/sparc/tm-sparclite.h, config/mips/tm-mipsv4.h,
+ 	config/m88k/tm-delta88v4.h, config/m68k/tm-m68kv4.h,
+ 	config/m68k/tm-monitor.h, config/i386/tm-i386nw.h,
+ 	config/i386/tm-i386v4.h, config/h8300/tm-h8300.h: Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	
+Wed Dec  8 19:12:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* blockframe.c (generic_file_frame_chain_valid): Rename
+ 	generic_file_frame_chain_valid.
+	* frame.h: Update.
+	* config/fr30/tm-fr30.h, config/m32r/tm-m32r.h,
+ 	config/mn10200/tm-mn10200.h, config/mn10300/tm-mn10300.h,
+ 	config/sh/tm-sh.h, config/v850/tm-v850.h, config/mcore/tm-mcore.h:
+ 	Update.
+
+	* blockframe.c (generic_func_frame_chain_valid): New function.
+  	Implement dummy-frame equivalent of function based frame chain
+ 	valid.
+	* frame.h (generic_func_frame_chain_valid): Declare.
+
+Wed Dec  8 16:26:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* blockframe.c (alternate_frame_chain_valid,
+ 	default_frame_chain_valid): Swap implementations.  The change Mon
+ 	Nov 30 11:18:48 1998 Andrew Cagney <cagney@chook> which converted
+ 	several macros to functions was backwards.
+
+	* mips-tdep.c (mips_gdbarch_init): Update.  Call
+ 	alternate_frame_chain_valid and not default_frame_chain_valid.
+
+Wed Dec  8 15:29:48 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* infptrace.c: Simplify handling of <sys/wait.h>. Always include
+ 	"wait.h" from the ../include/wait.h directory.  #include
+ 	<sys/wait.h> was added as part of Mon Nov 29 12:14:10 1999 Andrew
+ 	Cagney <cagney@b1.cygnus.com> but the ChangeLog was omitted.
+
 1999-12-07  Jim Blandy  <jimb@cygnus.com>
 
 	Add support for SSE registers in core files.

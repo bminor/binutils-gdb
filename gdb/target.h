@@ -104,7 +104,18 @@ enum target_waitkind
     /* Nothing happened, but we stopped anyway.  This perhaps should be handled
        within target_wait, but I'm not sure target_wait should be resuming the
        inferior.  */
-    TARGET_WAITKIND_SPURIOUS
+    TARGET_WAITKIND_SPURIOUS,
+
+    /* This is used for target async and extended-async
+       only. Remote_async_wait() returns this when there is an event
+       on the inferior, but the rest of the world is not interested in
+       it. The inferior has not stopped, but has just sent some output
+       to the console, for instance. In this case, we want to go back
+       to the event loop and wait there for another event from the
+       inferior, rather than being stuck in the remote_async_wait()
+       function. This way the event loop is responsive to other events,
+       like for instance the user typing. */
+    TARGET_WAITKIND_IGNORE
   };
 
 /* The numbering of these signals is chosen to match traditional unix

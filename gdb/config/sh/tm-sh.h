@@ -249,7 +249,7 @@ extern CORE_ADDR sh_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 extern CORE_ADDR sh_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN(FRAME)           sh_frame_chain(FRAME)
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
-#define FRAME_CHAIN_VALID(FP, FRAME) generic_frame_chain_valid (FP, FRAME)
+#define FRAME_CHAIN_VALID(FP, FRAME) generic_file_frame_chain_valid (FP, FRAME)
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
     (sh_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))

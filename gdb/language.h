@@ -360,15 +360,27 @@ extern char *
 extern char *
   local_hex_format_custom PARAMS ((char *));	/* language.c */
 
+/* Return a string that contains the hex digits of the number.  No preceeding
+   "0x" */
+
+extern char *
+  longest_raw_hex_string PARAMS ((LONGEST));
+
 /* Return a string that contains a number formatted in one of the local
    (language-specific) formats.  Result is static and is overwritten by
-   the next call.  Takes printf options like "08" or "l".  */
+   the next call.  Takes printf options like "08l" or "l".  */
 
 extern char *
   local_hex_string PARAMS ((unsigned long));	/* language.c */
 
 extern char *
+  longest_local_hex_string PARAMS ((LONGEST));	/* language.c */
+
+extern char *
   local_hex_string_custom PARAMS ((unsigned long, char *));	/* language.c */
+
+extern char *
+  longest_local_hex_string_custom PARAMS ((LONGEST, char *));	/* language.c */
 
 /* Type predicates */
 

@@ -25,7 +25,7 @@
 
 /* Stop backtracing when we wander into main.  */
 
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 
 /* Offsets (in target ints) into jmp_buf.  Not defined in any system header

@@ -385,29 +385,33 @@ gdb_test "print v_struct1" \
 v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
   "set print structure #1"
 
-# This should be an error.  GCC extensions for structure constants require
-# the type of the structure to be specified, as in
+# Some believe that the following  should be an error.  GCC extensions for
+# structure constants require the type of the structure to be specified, as in
 # v_struct1 = (struct t_struct) {32, 33, 34, 35, 36, 37}
-# GDB should do the same if it wants to provide this feature.
-# However, for HP's aCC this is OK, so we skip the tests for aCC
-if {! $hp_aCC_compiler} {
-if [target_info exists gdb,cannot_call_functions] {
-    setup_xfail "*-*-*" 2416
-    fail "set variable v_struct1 = {32, 33, 34, 35, 36, 37}"
-    continue
-}
+# The argument is that GDB should do the same if it wants to provide this
+# feature, i.e., require the cast.
+# We decided that we don't want the debugger to be as picky as a
+# compiler and make us type complex casts.
+
 # We need to up this because this can be really slow on some boards.
 # (malloc() is called as part of the test).
 set timeout 60;
-gdb_test "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" "Invalid.*"
 
-# And after the error the structure should be unchanged.
-gdb_test "print v_struct1" \
+# Change the values
+test_set "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" \
+  "print v_struct1" \
+  ".*.\[0-9\]* = \{.*v_char_member = 32 \' \',.*v_short_member = 33,\
+.*v_int_member = 34,.*\
+v_long_member = 35,.*v_float_member = 36,.*v_double_member = 37.*\}" \
+  "set print structure #2"
+
+# Change them back
+test_set "set variable v_struct1 = {'h', 1, 2, 3, 4.0, 5.0}" \
+  "print v_struct1" \
   ".*.\[0-9\]* = \{.*v_char_member = 104 \'h\',.*v_short_member = 1,\
 .*v_int_member = 2,.*\
 v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
-  "set print structure #2"
-}
+  "set print structure #3"
 
 # Test printing of enumeration bitfields.
 # GNU C supports them, some other compilers don't.

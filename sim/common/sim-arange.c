@@ -29,6 +29,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #endif
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 #define DEFINE_INLINE_P (! defined (SIM_ARANGE_C_INCLUDED))
 #define DEFINE_NON_INLINE_P defined (SIM_ARANGE_C_INCLUDED)
 

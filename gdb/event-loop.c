@@ -1082,7 +1082,7 @@ handle_timer_event (int dummy)
       saved_timer = timer_ptr;
       timer_ptr = timer_ptr->next;
       /* Call the procedure associated with that timer. */
-      (*saved_timer->proc) (timer_ptr->client_data);
+      (*saved_timer->proc) (saved_timer->client_data);
       free (saved_timer);
     }
 

@@ -1,5 +1,5 @@
 /* Native-dependent definitions for NetBSD.
-   Copyright 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,6 +32,11 @@
 #define ATTACH_DETACH
 
 #include "solib.h"		/* Support for shared libraries. */
+#if defined (SVR4_SHARED_LIBS)
+#include "elf/common.h"		/* Additional ELF shared library info. */
+#endif
+
+#if !defined (SVR4_SHARED_LIBS)
 
 /* make structure definitions match up with those expected in solib.c */
 #define link_object	sod
@@ -85,3 +90,5 @@
 #define ldd		d_debug
 #define ld_un		d_un
 #define ld_2		d_sdt
+
+#endif

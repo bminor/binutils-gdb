@@ -1050,6 +1050,10 @@ yylex ()
        case LOC_LABEL:
        case LOC_UNRESOLVED:
 	  error("internal:  Unforseen case in m2lex()");
+
+       default:
+	  error ("unhandled token in m2lex()");
+	  break;
        }
     }
     else

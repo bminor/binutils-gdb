@@ -24,7 +24,7 @@
 #include "tm-sysv4.h"
 
 /* If we don't define this, backtraces go on forever.  */
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 #define IN_SIGTRAMP(pc, name) ((name) && (STREQ ("signalhandler", (name)) \
                                           || STREQ("sigacthandler", (name))))

@@ -59,7 +59,7 @@ static LONGEST
   init_array_element PARAMS ((value_ptr, value_ptr, struct expression *,
 			      int *, enum noside, LONGEST, LONGEST));
 
-#ifdef __GNUC__
+#if defined (__GNUC__) && !__STDC__
 inline
 #endif
 static value_ptr

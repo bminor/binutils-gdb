@@ -31,7 +31,7 @@
 
 /* Use the alternate method of determining valid frame chains. */
 
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 #include "tm-sysv4.h"
 #include "m68k/tm-m68k.h"

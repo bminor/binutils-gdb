@@ -709,7 +709,7 @@ print_help (SIM_DESC sd, sim_cpu *cpu, const struct option_list *ol, int is_comm
 		  {
 		    if (o->opt.has_arg == optional_argument)
 		      {
-			sim_io_printf (sd, " [%s]", o->arg);
+			sim_io_printf (sd, "[=%s]", o->arg);
 			len += 2 + strlen (o->arg) + 1;
 		      }
 		    else

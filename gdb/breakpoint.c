@@ -260,9 +260,7 @@ void set_breakpoint_count PARAMS ((int));
 
 extern int addressprint;	/* Print machine addresses? */
 
-#if defined (GET_LONGJMP_TARGET) || defined (SOLIB_ADD)
 static int internal_breakpoint_number = -1;
-#endif
 
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
@@ -1128,6 +1126,13 @@ update_breakpoints_after_exec ()
 	continue;
       }
 
+    /* Thread event breakpoints must be set anew after an exec().  */
+    if (b->type == bp_thread_event)
+      {
+	delete_breakpoint (b);
+	continue;
+      }
+
     /* Step-resume breakpoints are meaningless after an exec(). */
     if (b->type == bp_step_resume)
       {
@@ -1904,6 +1909,13 @@ print_it_typical (bs)
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
       printf_filtered ("Stopped due to shared library event\n");
+      return PRINT_NOTHING;
+      break;
+
+    case bp_thread_event:
+      /* Not sure how we will get here. 
+	 GDB should not stop for these breakpoints.  */
+      printf_filtered ("Thread Event Breakpoint: gdb should not stop!\n");
       return PRINT_NOTHING;
       break;
 
@@ -2832,6 +2844,9 @@ bpstat_what (bs)
 	case bp_shlib_event:
 	  bs_class = shlib_event;
 	  break;
+	case bp_thread_event:
+	  bs_class = bp_nostop;
+	  break;
 	case bp_catch_load:
 	case bp_catch_unload:
 	  /* Only if this catchpoint triggered should we cause the
@@ -2975,28 +2990,19 @@ bpstat_get_triggered_catchpoints (ep_list, cp_list)
   *cp_list = bs;
 }
 
-/* Print information on breakpoint number BNUM, or -1 if all.
-   If WATCHPOINTS is zero, process only breakpoints; if WATCHPOINTS
-   is nonzero, process only watchpoints.  */
-
-typedef struct
-{
-  enum bptype type;
-  char *description;
-}
-ep_type_description_t;
-
+/* Print B to gdb_stdout. */
 static void
-breakpoint_1 (bnum, allflag)
-     int bnum;
-     int allflag;
+print_one_breakpoint (struct breakpoint *b,
+		      CORE_ADDR *last_addr)
 {
-  register struct breakpoint *b;
   register struct command_line *l;
   register struct symbol *sym;
-  CORE_ADDR last_addr = (CORE_ADDR) -1;
-  int found_a_breakpoint = 0;
-  static ep_type_description_t bptypes[] =
+  struct ep_type_description
+    {
+      enum bptype type;
+      char *description;
+    };
+  static struct ep_type_description bptypes[] =
   {
     {bp_none, "?deleted?"},
     {bp_breakpoint, "breakpoint"},
@@ -3014,6 +3020,7 @@ breakpoint_1 (bnum, allflag)
     {bp_watchpoint_scope, "watchpoint scope"},
     {bp_call_dummy, "call dummy"},
     {bp_shlib_event, "shlib events"},
+    {bp_thread_event, "thread events"},
     {bp_catch_load, "catch load"},
     {bp_catch_unload, "catch unload"},
     {bp_catch_fork, "catch fork"},
@@ -3022,235 +3029,293 @@ breakpoint_1 (bnum, allflag)
     {bp_catch_catch, "catch catch"},
     {bp_catch_throw, "catch throw"}
   };
-
+  
   static char *bpdisps[] =
   {"del", "dstp", "dis", "keep"};
   static char bpenables[] = "nynny";
   char wrap_indent[80];
 
+  annotate_record ();
 
+  /* 1 */
+  annotate_field (0);
+  printf_filtered ("%-3d ", b->number);
 
+  /* 2 */
+  annotate_field (1);
+  if (((int) b->type > (sizeof (bptypes) / sizeof (bptypes[0])))
+      || ((int) b->type != bptypes[(int) b->type].type))
+    internal_error ("bptypes table does not describe type #%d.",
+		    (int) b->type);
+  printf_filtered ("%-14s ", bptypes[(int) b->type].description);
+
+  /* 3 */
+  annotate_field (2);
+  printf_filtered ("%-4s ", bpdisps[(int) b->disposition]);
+
+  /* 4 */
+  annotate_field (3);
+  printf_filtered ("%-3c ", bpenables[(int) b->enable]);
+  
+  /* 5 and 6 */
+  strcpy (wrap_indent, "                           ");
+  if (addressprint)
+    strcat (wrap_indent, "           ");
+  switch (b->type)
+    {
+    case bp_none:
+      internal_error ("print_one_breakpoint: bp_none encountered\n");
+      break;
+
+    case bp_watchpoint:
+    case bp_hardware_watchpoint:
+    case bp_read_watchpoint:
+    case bp_access_watchpoint:
+      /* Field 4, the address, is omitted (which makes the columns
+	 not line up too nicely with the headers, but the effect
+	 is relatively readable).  */
+      annotate_field (5);
+      print_expression (b->exp, gdb_stdout);
+      break;
+      
+    case bp_catch_load:
+    case bp_catch_unload:
+      /* Field 4, the address, is omitted (which makes the columns
+	 not line up too nicely with the headers, but the effect
+	 is relatively readable).  */
+      annotate_field (5);
+      if (b->dll_pathname == NULL)
+	printf_filtered ("<any library> ");
+      else
+	printf_filtered ("library \"%s\" ", b->dll_pathname);
+      break;
+      
+    case bp_catch_fork:
+    case bp_catch_vfork:
+      /* Field 4, the address, is omitted (which makes the columns
+	 not line up too nicely with the headers, but the effect
+	 is relatively readable).  */
+      annotate_field (5);
+      if (b->forked_inferior_pid != 0)
+	printf_filtered ("process %d ", b->forked_inferior_pid);
+      break;
+      
+    case bp_catch_exec:
+      /* Field 4, the address, is omitted (which makes the columns
+	 not line up too nicely with the headers, but the effect
+	 is relatively readable).  */
+      annotate_field (5);
+      if (b->exec_pathname != NULL)
+	printf_filtered ("program \"%s\" ", b->exec_pathname);
+      break;
+
+    case bp_catch_catch:
+      /* Field 4, the address, is omitted (which makes the columns
+	 not line up too nicely with the headers, but the effect
+	 is relatively readable).  */
+      annotate_field (5);
+      printf_filtered ("exception catch ");
+      break;
+
+    case bp_catch_throw:
+      /* Field 4, the address, is omitted (which makes the columns
+	 not line up too nicely with the headers, but the effect
+	 is relatively readable).  */
+      annotate_field (5);
+      printf_filtered ("exception throw ");
+      break;
+      
+    case bp_breakpoint:
+    case bp_hardware_breakpoint:
+    case bp_until:
+    case bp_finish:
+    case bp_longjmp:
+    case bp_longjmp_resume:
+    case bp_step_resume:
+    case bp_through_sigtramp:
+    case bp_watchpoint_scope:
+    case bp_call_dummy:
+    case bp_shlib_event:
+    case bp_thread_event:
+      if (addressprint)
+	{
+	  annotate_field (4);
+	  /* FIXME-32x64: need a print_address_numeric with
+	     field width */
+	  printf_filtered
+	    ("%s ",
+	     local_hex_string_custom
+	     ((unsigned long) b->address, "08l"));
+	}
+      annotate_field (5);
+      *last_addr = b->address;
+      if (b->source_file)
+	{
+	  sym = find_pc_sect_function (b->address, b->section);
+	  if (sym)
+	    {
+	      fputs_filtered ("in ", gdb_stdout);
+	      fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	      wrap_here (wrap_indent);
+	      fputs_filtered (" at ", gdb_stdout);
+	    }
+	  fputs_filtered (b->source_file, gdb_stdout);
+	  printf_filtered (":%d", b->line_number);
+	}
+      else
+	print_address_symbolic (b->address, gdb_stdout, demangle, " ");
+      break;
+    }
+  
+  if (b->thread != -1)
+    {
+      printf_filtered (" thread %d", b->thread);
+    }
+  
+  printf_filtered ("\n");
+  
+  if (b->frame)
+    {
+      annotate_field (6);
+      printf_filtered ("\tstop only in stack frame at ");
+      print_address_numeric (b->frame, 1, gdb_stdout);
+      printf_filtered ("\n");
+    }
+  
+  if (b->cond)
+    {
+      annotate_field (7);
+      printf_filtered ("\tstop only if ");
+      print_expression (b->cond, gdb_stdout);
+      printf_filtered ("\n");
+    }
+  
+  if (b->thread != -1)
+    {
+      /* FIXME should make an annotation for this */
+      printf_filtered ("\tstop only in thread %d\n", b->thread);
+    }
+  
+  if (show_breakpoint_hit_counts && b->hit_count)
+    {
+      /* FIXME should make an annotation for this */
+      if (ep_is_catchpoint (b))
+	printf_filtered ("\tcatchpoint");
+      else
+	printf_filtered ("\tbreakpoint");
+      printf_filtered (" already hit %d time%s\n",
+		       b->hit_count, (b->hit_count == 1 ? "" : "s"));
+    }
+  
+  if (b->ignore_count)
+    {
+      annotate_field (8);
+      printf_filtered ("\tignore next %d hits\n", b->ignore_count);
+    }
+  
+  if ((l = b->commands))
+    {
+      annotate_field (9);
+      while (l)
+	{
+	  print_command_line (l, 4, gdb_stdout);
+	  l = l->next;
+	}
+    }
+}
+
+struct captured_breakpoint_query_args
+  {
+    int bnum;
+  };
+
+static int
+do_captured_breakpoint_query (void *data)
+{
+  struct captured_breakpoint_query_args *args = data;
+  register struct breakpoint *b;
+  CORE_ADDR dummy_addr = 0;
+  ALL_BREAKPOINTS (b)
+    {
+      if (args->bnum == b->number)
+	{
+	  print_one_breakpoint (b, &dummy_addr);
+	  return GDB_RC_OK;
+	}
+    }
+  return GDB_RC_NONE;
+}
+
+enum gdb_rc
+gdb_breakpoint_query (/* output object, */ int bnum)
+{
+  struct captured_breakpoint_query_args args;
+  args.bnum = bnum;
+  /* For the moment we don't trust print_one_breakpoint() to not throw
+     an error. */
+  return catch_errors (do_captured_breakpoint_query, &args,
+		       NULL, RETURN_MASK_ALL);
+}
+
+/* Print information on breakpoint number BNUM, or -1 if all.
+   If WATCHPOINTS is zero, process only breakpoints; if WATCHPOINTS
+   is nonzero, process only watchpoints.  */
+
+static void
+breakpoint_1 (bnum, allflag)
+     int bnum;
+     int allflag;
+{
+  register struct breakpoint *b;
+  CORE_ADDR last_addr = (CORE_ADDR) -1;
+  int found_a_breakpoint = 0;
+  
   ALL_BREAKPOINTS (b)
     if (bnum == -1
 	|| bnum == b->number)
-    {
-/*  We only print out user settable breakpoints unless the allflag is set. */
-      if (!allflag
-	  && b->type != bp_breakpoint
-	  && b->type != bp_catch_load
-	  && b->type != bp_catch_unload
-	  && b->type != bp_catch_fork
-	  && b->type != bp_catch_vfork
-	  && b->type != bp_catch_exec
-	  && b->type != bp_catch_catch
-	  && b->type != bp_catch_throw
-	  && b->type != bp_hardware_breakpoint
-	  && b->type != bp_watchpoint
-	  && b->type != bp_read_watchpoint
-	  && b->type != bp_access_watchpoint
-	  && b->type != bp_hardware_watchpoint)
-	continue;
-
-      if (!found_a_breakpoint++)
-	{
-	  annotate_breakpoints_headers ();
-
-	  annotate_field (0);
-	  printf_filtered ("Num ");
-	  annotate_field (1);
-	  printf_filtered ("Type           ");
-	  annotate_field (2);
-	  printf_filtered ("Disp ");
-	  annotate_field (3);
-	  printf_filtered ("Enb ");
-	  if (addressprint)
-	    {
-	      annotate_field (4);
-	      printf_filtered ("Address    ");
-	    }
-	  annotate_field (5);
-	  printf_filtered ("What\n");
-
-	  annotate_breakpoints_table ();
-	}
-
-      annotate_record ();
-      annotate_field (0);
-      printf_filtered ("%-3d ", b->number);
-      annotate_field (1);
-      if ((int) b->type > (sizeof (bptypes) / sizeof (bptypes[0])))
-	error ("bptypes table does not describe type #%d.", (int) b->type);
-      if ((int) b->type != bptypes[(int) b->type].type)
-	error ("bptypes table does not describe type #%d?", (int) b->type);
-      printf_filtered ("%-14s ", bptypes[(int) b->type].description);
-      annotate_field (2);
-      printf_filtered ("%-4s ", bpdisps[(int) b->disposition]);
-      annotate_field (3);
-      printf_filtered ("%-3c ", bpenables[(int) b->enable]);
-
-      strcpy (wrap_indent, "                           ");
-      if (addressprint)
-	strcat (wrap_indent, "           ");
-      switch (b->type)
-	{
-	case bp_watchpoint:
-	case bp_hardware_watchpoint:
-	case bp_read_watchpoint:
-	case bp_access_watchpoint:
-	  /* Field 4, the address, is omitted (which makes the columns
-	     not line up too nicely with the headers, but the effect
-	     is relatively readable).  */
-	  annotate_field (5);
-	  print_expression (b->exp, gdb_stdout);
-	  break;
-
-	case bp_catch_load:
-	case bp_catch_unload:
-	  /* Field 4, the address, is omitted (which makes the columns
-	     not line up too nicely with the headers, but the effect
-	     is relatively readable).  */
-	  annotate_field (5);
-	  if (b->dll_pathname == NULL)
-	    printf_filtered ("<any library> ");
-	  else
-	    printf_filtered ("library \"%s\" ", b->dll_pathname);
-	  break;
-
-	case bp_catch_fork:
-	case bp_catch_vfork:
-	  /* Field 4, the address, is omitted (which makes the columns
-	     not line up too nicely with the headers, but the effect
-	     is relatively readable).  */
-	  annotate_field (5);
-	  if (b->forked_inferior_pid != 0)
-	    printf_filtered ("process %d ", b->forked_inferior_pid);
-	  break;
-
-	case bp_catch_exec:
-	  /* Field 4, the address, is omitted (which makes the columns
-	     not line up too nicely with the headers, but the effect
-	     is relatively readable).  */
-	  annotate_field (5);
-	  if (b->exec_pathname != NULL)
-	    printf_filtered ("program \"%s\" ", b->exec_pathname);
-	  break;
-	case bp_catch_catch:
-	  /* Field 4, the address, is omitted (which makes the columns
-	     not line up too nicely with the headers, but the effect
-	     is relatively readable).  */
-	  annotate_field (5);
-	  printf_filtered ("exception catch ");
-	  break;
-	case bp_catch_throw:
-	  /* Field 4, the address, is omitted (which makes the columns
-	     not line up too nicely with the headers, but the effect
-	     is relatively readable).  */
-	  annotate_field (5);
-	  printf_filtered ("exception throw ");
-	  break;
-
-	case bp_breakpoint:
-	case bp_hardware_breakpoint:
-	case bp_until:
-	case bp_finish:
-	case bp_longjmp:
-	case bp_longjmp_resume:
-	case bp_step_resume:
-	case bp_through_sigtramp:
-	case bp_watchpoint_scope:
-	case bp_call_dummy:
-	case bp_shlib_event:
-	  if (addressprint)
-	    {
-	      annotate_field (4);
-	      /* FIXME-32x64: need a print_address_numeric with
-	         field width */
-	      printf_filtered
-		("%s ",
-		 local_hex_string_custom
-		 ((unsigned long) b->address, "08l"));
-	    }
-
-	  annotate_field (5);
-
-	  last_addr = b->address;
-	  if (b->source_file)
-	    {
-	      sym = find_pc_sect_function (b->address, b->section);
-	      if (sym)
-		{
-		  fputs_filtered ("in ", gdb_stdout);
-		  fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
-		  wrap_here (wrap_indent);
-		  fputs_filtered (" at ", gdb_stdout);
-		}
-	      fputs_filtered (b->source_file, gdb_stdout);
-	      printf_filtered (":%d", b->line_number);
-	    }
-	  else
-	    print_address_symbolic (b->address, gdb_stdout, demangle, " ");
-	  break;
-	}
-
-      if (b->thread != -1)
-	printf_filtered (" thread %d", b->thread);
-
-      printf_filtered ("\n");
-
-      if (b->frame)
-	{
-	  annotate_field (6);
-
-	  printf_filtered ("\tstop only in stack frame at ");
-	  print_address_numeric (b->frame, 1, gdb_stdout);
-	  printf_filtered ("\n");
-	}
-
-      if (b->cond)
-	{
-	  annotate_field (7);
-
-	  printf_filtered ("\tstop only if ");
-	  print_expression (b->cond, gdb_stdout);
-	  printf_filtered ("\n");
-	}
-
-      if (b->thread != -1)
-	{
-	  /* FIXME should make an annotation for this */
-	  printf_filtered ("\tstop only in thread %d\n", b->thread);
-	}
-
-      if (show_breakpoint_hit_counts && b->hit_count)
-	{
-	  /* FIXME should make an annotation for this */
-	  if (ep_is_catchpoint (b))
-	    printf_filtered ("\tcatchpoint");
-	  else
-	    printf_filtered ("\tbreakpoint");
-	  printf_filtered (" already hit %d time%s\n",
-			   b->hit_count, (b->hit_count == 1 ? "" : "s"));
-	}
-
-      if (b->ignore_count)
-	{
-	  annotate_field (8);
-
-	  printf_filtered ("\tignore next %d hits\n", b->ignore_count);
-	}
-
-      if ((l = b->commands))
-	{
-	  annotate_field (9);
-
-	  while (l)
-	    {
-	      print_command_line (l, 4, gdb_stdout);
-	      l = l->next;
-	    }
-	}
-    }
-
+      {
+	/* We only print out user settable breakpoints unless the
+	   allflag is set. */
+	if (!allflag
+	    && b->type != bp_breakpoint
+	    && b->type != bp_catch_load
+	    && b->type != bp_catch_unload
+	    && b->type != bp_catch_fork
+	    && b->type != bp_catch_vfork
+	    && b->type != bp_catch_exec
+	    && b->type != bp_catch_catch
+	    && b->type != bp_catch_throw
+	    && b->type != bp_hardware_breakpoint
+	    && b->type != bp_watchpoint
+	    && b->type != bp_read_watchpoint
+	    && b->type != bp_access_watchpoint
+	    && b->type != bp_hardware_watchpoint)
+	  continue;
+	
+	if (!found_a_breakpoint++)
+	  {
+	    annotate_breakpoints_headers ();
+	    annotate_field (0);
+	    printf_filtered ("Num ");
+	    annotate_field (1);
+	    printf_filtered ("Type           ");
+	    annotate_field (2);
+	    printf_filtered ("Disp ");
+	    annotate_field (3);
+	    printf_filtered ("Enb ");
+	    if (addressprint)
+	      {
+		annotate_field (4);
+		printf_filtered ("Address    ");
+	      }
+	    annotate_field (5);
+	    printf_filtered ("What\n");
+	    annotate_breakpoints_table ();
+	  }
+	
+	print_one_breakpoint (b, &last_addr);
+      }
+  
   if (!found_a_breakpoint)
     {
       if (bnum == -1)
@@ -3259,11 +3324,15 @@ breakpoint_1 (bnum, allflag)
 	printf_filtered ("No breakpoint or watchpoint number %d.\n", bnum);
     }
   else
-    /* Compare against (CORE_ADDR)-1 in case some compiler decides
-       that a comparison of an unsigned with -1 is always false.  */
-  if (last_addr != (CORE_ADDR) -1)
-    set_next_address (last_addr);
+    {
+      /* Compare against (CORE_ADDR)-1 in case some compiler decides
+	 that a comparison of an unsigned with -1 is always false.  */
+      if (last_addr != (CORE_ADDR) -1)
+	set_next_address (last_addr);
+    }
 
+  /* FIXME? Should this be moved up so that it is only called when
+     there have been breakpoints? */
   annotate_breakpoints_table_end ();
 }
 
@@ -3554,6 +3623,42 @@ disable_longjmp_breakpoint ()
       b->enable = disabled;
       check_duplicates (b->address, b->section);
     }
+}
+
+struct breakpoint *
+create_thread_event_breakpoint (address)
+     CORE_ADDR address;
+{
+  struct breakpoint *b;
+  struct symtab_and_line sal;
+  char addr_string[80];		/* Surely an addr can't be longer than that. */
+
+  INIT_SAL (&sal);		/* initialize to zeroes */
+  sal.pc = address;
+  sal.section = find_pc_overlay (sal.pc);
+  if ((b = set_raw_breakpoint (sal)) == NULL)
+    return NULL;
+  
+  b->number = internal_breakpoint_number--;
+  b->disposition = donttouch;
+  b->type = bp_thread_event;	/* XXX: do we need a new type? 
+				   bp_thread_event */
+  b->enable = enabled;
+  /* addr_string has to be used or breakpoint_re_set will delete me.  */
+  sprintf (addr_string, "*0x%s", paddr (b->address));
+  b->addr_string = strsave (addr_string);
+
+  return b;
+}
+
+void
+remove_thread_event_breakpoints (void)
+{
+  struct breakpoint *b, *temp;
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    if (b->type == bp_thread_event)
+      delete_breakpoint (b);
 }
 
 #ifdef SOLIB_ADD
@@ -4040,6 +4145,7 @@ mention (b)
     case bp_call_dummy:
     case bp_watchpoint_scope:
     case bp_shlib_event:
+    case bp_thread_event:
       break;
     }
   if (say_where)
@@ -6280,6 +6386,7 @@ delete_command (arg, from_tty)
       {
 	if (b->type != bp_call_dummy &&
 	    b->type != bp_shlib_event &&
+	    b->type != bp_thread_event &&
 	    b->number >= 0)
 	  breaks_to_delete = 1;
       }
@@ -6292,6 +6399,7 @@ delete_command (arg, from_tty)
 	  {
 	    if (b->type != bp_call_dummy &&
 		b->type != bp_shlib_event &&
+		b->type != bp_thread_event &&
 		b->number >= 0)
 	      delete_breakpoint (b);
 	  }
@@ -6464,6 +6572,10 @@ breakpoint_re_set_one (bint)
       /* This breakpoint is special, it's set up when the inferior
          starts and we really don't want to touch it.  */
     case bp_shlib_event:
+
+      /* Like bp_shlib_event, this breakpoint type is special.
+	 Once it is set up, we do not want to touch it.  */
+    case bp_thread_event:
 
       /* Keep temporary breakpoints, which can be encountered when we step
          over a dlopen call and SOLIB_ADD is resetting the breakpoints.

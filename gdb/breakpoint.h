@@ -94,6 +94,16 @@ enum bptype
        dynamic libraries.  */
     bp_shlib_event,
 
+    /* Some multi-threaded systems can arrange for a location in the 
+       inferior to be executed when certain thread-related events occur
+       (such as thread creation or thread death).
+
+       By placing a breakpoint at one of these locations, GDB will get
+       control when these events occur.  GDB can then update its thread
+       lists etc.  */
+
+    bp_thread_event,
+
     /* These breakpoints are used to implement the "catch load" command
        on platforms whose dynamic linkers support such functionality.  */
     bp_catch_load,
@@ -641,7 +651,11 @@ extern void make_breakpoint_permanent PARAMS ((struct breakpoint *));
 
 extern struct breakpoint *create_solib_event_breakpoint PARAMS ((CORE_ADDR));
 
+extern struct breakpoint *create_thread_event_breakpoint PARAMS ((CORE_ADDR));
+
 extern void remove_solib_event_breakpoints PARAMS ((void));
+
+extern void remove_thread_event_breakpoints PARAMS ((void));
 
 extern void disable_breakpoints_in_shlibs PARAMS ((int silent));
 

@@ -338,8 +338,12 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
+    case TYPE_CODE_TEMPLATE:
       /* These types need no prefix.  They are listed here so that
          gcc -Wall will reveal any types that haven't been handled.  */
+      break;
+    default:
+      error ("type not handled in c_type_print_varspec_prefix()");
       break;
     }
 }
@@ -530,8 +534,12 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
+    case TYPE_CODE_TEMPLATE:
       /* These types do not need a suffix.  They are listed so that
          gcc -Wall will report types that may not have been considered.  */
+      break;
+    default:
+      error ("type not handled in c_type_print_varspec_suffix()");
       break;
     }
 }
@@ -766,7 +774,6 @@ c_type_print_base (type, stream, show, level)
 	      if (TYPE_HAS_VTABLE (type) && (STREQN (TYPE_FIELD_NAME (type, i), "__vfp", 5)))
 		continue;
 	      /* Other compilers */
-	      /* pai:: FIXME : check for has_vtable < 0 */
 	      if (STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
@@ -924,13 +931,13 @@ c_type_print_base (type, stream, show, level)
 		  else
 		    {
 		      char *p;
-		      char *demangled_no_class = demangled_name;
+		      char *demangled_no_class = strrchr (demangled_name, ':');
 
-		      while ((p = strchr (demangled_no_class, ':')))
-			{
-			  demangled_no_class = p;
-			  if (*++demangled_no_class == ':')
-			    ++demangled_no_class;
+                      if (demangled_no_class == NULL)
+                        demangled_no_class = demangled_name;
+                      else
+                        {
+                          ++demangled_no_class; /* skip over last ':' */
 			}
 		      /* get rid of the static word appended by the demangler */
 		      p = strstr (demangled_no_class, " static");
@@ -955,12 +962,12 @@ c_type_print_base (type, stream, show, level)
 		}
 	    }
 
+	  fprintfi_filtered (level, stream, "}");
+
 	  if (TYPE_LOCALTYPE_PTR (type) && show >= 0)
 	    fprintfi_filtered (level, stream, " (Local at %s:%d)\n",
 			       TYPE_LOCALTYPE_FILE (type),
 			       TYPE_LOCALTYPE_LINE (type));
-
-	  fprintfi_filtered (level, stream, "}");
 	}
       if (TYPE_CODE (type) == TYPE_CODE_TEMPLATE)
 	goto go_back;

@@ -67,8 +67,8 @@ struct gdb_events
 
 
 /* Interface into events functions.
-   Where a *_p() predicate is present, it must called before calling
-   the hook proper. */
+   Where a *_p() predicate is present, it must be called before
+   calling the hook proper. */
 extern void breakpoint_create_event (int b);
 extern void breakpoint_delete_event (int b);
 extern void breakpoint_modify_event (int b);

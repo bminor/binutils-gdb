@@ -1,5 +1,10 @@
+Wed Dec  8 21:47:13 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-arange.c: Include <string.h>
+
 1999-12-07  Dave Brolley  <brolley@cygnus.com>
 
+	* sim-options.c (print_help): '=' required before optional argument.
 	* cgen-par.h (CGEN_FN_MEM_QI_WRITE): New enumerator.
 	(CGEN_FN_MEM_HI_WRITE): New enumerator.
 	(CGEN_FN_MEM_SI_WRITE): New enumerator.

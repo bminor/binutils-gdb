@@ -40,6 +40,6 @@
 /* Need to do this for ELF targets, where we can't figure out the boundaries of
    the entry file.  This method stops the backtrace when we reach main.  */
 
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 /* FIXME, should do GET_LONGJMP_TARGET for newlib.  */

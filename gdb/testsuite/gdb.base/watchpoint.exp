@@ -420,7 +420,7 @@ proc test_stepping {} {
 	    -re ".*$gdb_prompt $" {
 		fail "finish from marker1"
 	    }
-	    default { fail "finish from marker1" ; return }
+	    default { fail "finish from marker1 (timeout)" ; return }
 	}
 
 	gdb_test "next" "for \\(count = 0.*" "next to `for' in watchpoint.exp"
@@ -448,7 +448,7 @@ proc test_stepping {} {
 	    -re ".*$gdb_prompt $" {
 		fail "until out of loop"
 	    }
-	    default { fail "until out of loop" ; return }
+	    default { fail "until out of loop (timeout)" ; return }
 	}
 
 	gdb_test "step" "ival2 = count.*" "step to ival2 assignment"

@@ -39,7 +39,7 @@
 
 #define DECR_PC_AFTER_HW_BREAK 4
 
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 #undef NUM_REGS
 #define NUM_REGS 80

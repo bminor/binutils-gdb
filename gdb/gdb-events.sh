@@ -213,8 +213,8 @@ echo ""
 echo ""
 cat <<EOF
 /* Interface into events functions.
-   Where a *_p() predicate is present, it must called before calling
-   the hook proper. */
+   Where a *_p() predicate is present, it must be called before
+   calling the hook proper. */
 EOF
 function_list | while eval read $read
 do

@@ -483,20 +483,24 @@ c_value_print (val, stream, format, pretty)
 	{
 	  /* Pointer to class, check real type of object */
 	  fprintf_filtered (stream, "(");
-	  type = value_rtti_target_type (val, &full, &top, &using_enc);
-	  if (type)
+          real_type = value_rtti_target_type (val, &full, &top, &using_enc);
+          if (real_type)
 	    {
 	      /* RTTI entry found */
-	      type = lookup_pointer_type (type);
-	      type_print (type, "", stream, -1);
-	    }
-	  else
-	    {
-	      /* No RTTI fields, do whatever we can */
-	      type = VALUE_ENCLOSING_TYPE (val);
-	      type_print (type, "", stream, -1);
-	      fprintf_filtered (stream, " ?");
-	    }
+              if (TYPE_CODE (type) == TYPE_CODE_PTR)
+                {
+                  /* create a pointer type pointing to the real type */
+                  type = lookup_pointer_type (real_type);
+                }
+              else
+                {
+                  /* create a reference type referencing the real type */
+                  type = lookup_reference_type (real_type);
+                }
+              /* Note: When we look up RTTI entries, we don't get any 
+                 information on const or volatile attributes */
+            }
+          type_print (type, "", stream, -1);
 	  fprintf_filtered (stream, ") ");
 	}
       else
@@ -521,6 +525,8 @@ c_value_print (val, stream, format, pretty)
 	  /* Print out object: enclosing type is same as real_type if full */
 	  return val_print (VALUE_ENCLOSING_TYPE (val), VALUE_CONTENTS_ALL (val), 0,
 			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
+          /* Note: When we look up RTTI entries, we don't get any information on
+             const or volatile attributes */
 	}
       else if (type != VALUE_ENCLOSING_TYPE (val))
 	{

@@ -205,7 +205,7 @@ CORE_ADDR h8300_frame_chain PARAMS ((struct frame_info *));
    the frame chain or following frames back into the startup code.
    See the comments in objfile.h */
 
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 /* Define other aspects of the stack frame.  */
 

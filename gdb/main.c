@@ -249,6 +249,7 @@ captured_main (void *data)
       {"version", no_argument, &print_version, 1},
       {"x", required_argument, 0, 'x'},
       {"directory", required_argument, 0, 'd'},
+      {"d", required_argument, 0, 'd'},
       {"cd", required_argument, 0, 11},
       {"tty", required_argument, 0, 't'},
       {"baud", required_argument, 0, 'b'},
@@ -693,7 +694,6 @@ captured_main (void *data)
 int
 main (int argc, char **argv)
 {
-  int top_level_val;
   struct captured_main_args args;
   args.argc = argc;
   args.argv = argv;

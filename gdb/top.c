@@ -45,6 +45,7 @@
 
 #include <sys/types.h>
 
+#include <setjmp.h>
 
 #include "event-top.h"
 #include "gdb_string.h"
@@ -464,10 +465,22 @@ NORETURN void (*error_hook)
 PARAMS ((void)) ATTR_NORETURN;
 
 
+/* Generally one should use catch_errors rather than manipulating these
+   directly.  The exception is main().  */
+#if defined(HAVE_SIGSETJMP)
+#define SIGJMP_BUF		sigjmp_buf
+#define SIGSETJMP(buf)		sigsetjmp(buf, 1)
+#define SIGLONGJMP(buf,val)	siglongjmp(buf,val)
+#else
+#define SIGJMP_BUF		jmp_buf
+#define SIGSETJMP(buf)		setjmp(buf)
+#define SIGLONGJMP(buf,val)	longjmp(buf,val)
+#endif
+
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
-     SIGJMP_BUF error_return;
+static SIGJMP_BUF error_return;
 /* Where to go for return_to_top_level (RETURN_QUIT).  */
-     SIGJMP_BUF quit_return;
+static SIGJMP_BUF quit_return;
 
 /* Return for reason REASON.  This generally gets back to the command
    loop, but can be caught via catch_errors.  */
@@ -485,7 +498,7 @@ return_to_top_level (reason)
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
-  if (event_loop_p && target_can_async_p ())
+  if (event_loop_p && target_can_async_p () && !target_executing)
     do_exec_cleanups (ALL_CLEANUPS);
   if (event_loop_p && sync_execution)
     do_exec_error_cleanups (ALL_CLEANUPS);

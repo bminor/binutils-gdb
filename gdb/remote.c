@@ -2886,7 +2886,10 @@ Packet Dropped");
 	  goto got_status;
 	case 'O':		/* Console output */
 	  remote_console_output (buf + 1);
-	  continue;
+	  /* Return immediately to the event loop. The event loop will
+             still be waiting on the inferior afterwards. */
+          status->kind = TARGET_WAITKIND_IGNORE;
+          goto got_status;
 	case '\0':
 	  if (last_sent_signal != TARGET_SIGNAL_0)
 	    {

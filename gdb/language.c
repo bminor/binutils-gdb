@@ -288,6 +288,10 @@ set_type_command (ignore, from_tty)
          did it in set_type_range. */
       return;
     }
+  else
+    {
+      warning ("Unrecognized type check setting: \"%s\"", type);
+    }
   set_type_str ();
   show_type_command ((char *) NULL, from_tty);
 }
@@ -333,6 +337,10 @@ set_range_command (ignore, from_tty)
       /* Avoid hitting the set_range_str call below.  We
          did it in set_type_range. */
       return;
+    }
+  else
+    {
+      warning ("Unrecognized range check setting: \"%s\"", range);
     }
   set_range_str ();
   show_range_command ((char *) 0, from_tty);
@@ -398,7 +406,7 @@ set_lang_str ()
 static void
 set_type_str ()
 {
-  char *tmp, *prefix = "";
+  char *tmp = NULL, *prefix = "";
 
   free (type);
   if (type_mode == type_mode_auto)
@@ -427,7 +435,6 @@ set_range_str ()
 {
   char *tmp, *pref = "";
 
-  free (range);
   if (range_mode == range_mode_auto)
     pref = "auto; currently ";
 
@@ -446,6 +453,7 @@ set_range_str ()
       error ("Unrecognized range check setting.");
     }
 
+  free (range);
   range = concat (pref, tmp, NULL);
 }
 
@@ -539,6 +547,24 @@ local_hex_format_custom (pre)
   return form;
 }
 
+/* Converts a number to hexadecimal (without leading "0x") and stores it in a
+   static string.  Returns a pointer to this string. */
+
+char *
+longest_raw_hex_string (num)
+     LONGEST num;
+{
+  static char res_longest_raw_hex_string[50];
+  long long ll = num;		/* MERGEBUG ?? see below */
+  res_longest_raw_hex_string[0] = 0;
+  /* MERGEBUG ?? As a quick fix I am replacing this with sprintf 
+     strcat_address_numeric (num, 0, res_longest_raw_hex_string, 50); 
+   */
+
+  sprintf (res_longest_raw_hex_string, "%llx", ll);
+  return res_longest_raw_hex_string;
+}
+
 /* Converts a number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
@@ -549,6 +575,15 @@ local_hex_string (num)
 
   sprintf (res, local_hex_format (), num);
   return res;
+}
+
+/* Converts a LONGEST number to hexadecimal and stores it in a static
+   string.  Returns a pointer to this string. */
+char *
+longest_local_hex_string (num)
+     LONGEST num;
+{
+  return longest_local_hex_string_custom (num, "l");
 }
 
 /* Converts a number to custom hexadecimal and stores it in a static
@@ -563,6 +598,107 @@ local_hex_string_custom (num, pre)
   sprintf (res, local_hex_format_custom (pre), num);
   return res;
 }
+
+/* Converts a LONGEST number to custom hexadecimal and stores it in a static
+   string.  Returns a pointer to this string. Note that the width parameter
+   should end with "l", e.g. "08l" as with calls to local_hex_string_custom */
+
+char *
+longest_local_hex_string_custom (num, width)
+     LONGEST num;
+     char *width;
+{
+#define RESULT_BUF_LEN 50
+  static char res2[RESULT_BUF_LEN];
+  char format[RESULT_BUF_LEN];
+#if !defined (PRINTF_HAS_LONG_LONG)
+  int field_width;
+  int num_len;
+  int num_pad_chars;
+  char *pad_char;		/* string with one character */
+  int pad_on_left;
+  char *parse_ptr;
+  char temp_nbr_buf[RESULT_BUF_LEN];
+#endif
+
+#ifndef CC_HAS_LONG_LONG
+  /* If there is no long long, then LONGEST should be just long and we
+     can use local_hex_string_custom 
+   */
+  return local_hex_string_custom ((unsigned long) num, width);
+#endif
+
+#if defined (PRINTF_HAS_LONG_LONG)
+  /* Just use printf.  */
+  strcpy (format, local_hex_format_prefix ());	/* 0x */
+  strcat (format, "%");
+  strcat (format, width);	/* e.g. "08l" */
+  strcat (format, "l");		/* need "ll" for long long */
+  strcat (format, local_hex_format_specifier ());	/* "x" */
+  strcat (format, local_hex_format_suffix ());	/* "" */
+  sprintf (res2, format, num);
+  return res2;
+#else /* !defined (PRINTF_HAS_LONG_LONG) */
+  /* Use strcat_address_numeric to print the number into a string, then
+     build the result string from local_hex_format_prefix, padding and 
+     the hex representation as indicated by "width".  */
+
+  temp_nbr_buf[0] = 0;
+  /* With use_local == 0, we don't get the leading "0x" prefix. */
+  /* MERGEBUG ?? As a quick fix I am replacing this call to
+     strcat_address_numeric with sprintf
+     strcat_address_numeric(num, 0, temp_nbr_buf, RESULT_BUF_LEN);
+   */
+
+  {
+    long long ll = num;
+    sprintf (temp_nbr_buf, "%llx", ll);
+  }
+  /* parse width */
+  parse_ptr = width;
+  pad_on_left = 1;
+  pad_char = " ";
+  if (*parse_ptr == '-')
+    {
+      parse_ptr++;
+      pad_on_left = 0;
+    }
+  if (*parse_ptr == '0')
+    {
+      parse_ptr++;
+      if (pad_on_left)
+	pad_char = "0";		/* If padding is on the right, it is blank */
+    }
+  field_width = atoi (parse_ptr);
+  num_len = strlen (temp_nbr_buf);
+  num_pad_chars = field_width - strlen (temp_nbr_buf);	/* possibly negative */
+
+  if (strlen (local_hex_format_prefix ()) + num_len + num_pad_chars
+      < RESULT_BUF_LEN)		/* paranoia */
+    internal_error ("longest_local_hex_string_custom: insufficient space to store result");
+
+  strcpy (res2, local_hex_format_prefix ());
+  if (pad_on_left)
+    {
+      while (num_pad_chars > 0)
+	{
+	  strcat (res2, pad_char);
+	  num_pad_chars--;
+	}
+    }
+  strcat (res2, temp_nbr_buf);
+  if (!pad_on_left)
+    {
+      while (num_pad_chars > 0)
+	{
+	  strcat (res2, pad_char);
+	  num_pad_chars--;
+	}
+    }
+  return res2;
+#endif
+
+}				/* longest_local_hex_string_custom */
 
 /* Returns the appropriate printf format for octal
    numbers. */

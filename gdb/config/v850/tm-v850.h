@@ -108,7 +108,7 @@ extern void v850_frame_find_saved_regs PARAMS ((struct frame_info * fi, struct f
 
 extern CORE_ADDR v850_frame_chain PARAMS ((struct frame_info * fi));
 #define FRAME_CHAIN(fi) v850_frame_chain (fi)
-#define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
+#define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR v850_find_callers_reg PARAMS ((struct frame_info * fi, int regnum));
 extern CORE_ADDR v850_frame_saved_pc PARAMS ((struct frame_info *));

@@ -24,13 +24,10 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
-#ifdef HAVE_WAIT_H
-#include <wait.h>
-#else
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#endif
+#include "wait.h" /* NOTE: This is ../include/wait.h */
 #include "command.h"
 
 #ifdef USG

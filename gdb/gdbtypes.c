@@ -70,6 +70,9 @@ struct type *builtin_type_v4si;
 struct type *builtin_type_v8qi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
+struct type *builtin_type_ptr;
+struct type *builtin_type_CORE_ADDR;
+struct type *builtin_type_bfd_vma;
 
 int opaque_type_resolution = 1;
 
@@ -2980,6 +2983,23 @@ build_gdbtypes ()
     = init_simd_type ("__builtin_v4hi", builtin_type_int16, "f", 4);
   builtin_type_v2si
     = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
+
+  /* Pointer/Address types. */
+  /* NOTE: At present there is no way of differentiating between at
+     target address and the target C language pointer type type even
+     though the two can be different (cf d10v) */
+  builtin_type_ptr =
+    init_type (TYPE_CODE_INT, TARGET_PTR_BIT / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "__ptr", (struct objfile *) NULL);
+  builtin_type_CORE_ADDR =
+    init_type (TYPE_CODE_INT, TARGET_PTR_BIT / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "__CORE_ADDR", (struct objfile *) NULL);
+  builtin_type_bfd_vma =
+    init_type (TYPE_CODE_INT, TARGET_BFD_VMA_BIT / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "__bfd_vma", (struct objfile *) NULL);
 }
 
 
@@ -3023,5 +3043,8 @@ _initialize_gdbtypes ()
   register_gdbarch_swap (&builtin_type_v8qi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
+  REGISTER_GDBARCH_SWAP (builtin_type_ptr);
+  REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
+  REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
 }

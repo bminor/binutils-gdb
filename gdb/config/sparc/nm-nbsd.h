@@ -24,9 +24,7 @@
 
 /* Get generic NetBSD native definitions. */
 
-#include "nm-nbsd.h"
-
-#define FETCH_INFERIOR_REGISTERS
+#include "config/nm-nbsd.h"
 
 /* Before storing, we need to read all the registers.  */
 

@@ -846,7 +846,18 @@ extern struct type *builtin_type_double_complex;
 extern struct type *builtin_type_string;
 extern struct type *builtin_type_bool;
 
-/* Explicit sizes - see <intypes.h> for naming schema */
+/* Address/pointer types: */
+/* (C) Language pointer type. Some target platforms use an implicitly
+   {sign,zero} -extended 32 bit C language pointer on a 64 bit ISA. */
+extern struct type *builtin_type_ptr;
+/* The target CPU's address type.  This is the ISA address size. */
+extern struct type *builtin_type_CORE_ADDR;
+/* The symbol table address type.  Some object file formats have a 32
+   bit address type even though the TARGET has a 64 bit pointer type
+   (cf MIPS). */
+extern struct type *builtin_type_bfd_vma;
+
+/* Explicit sizes - see C9X <intypes.h> for naming scheme */
 extern struct type *builtin_type_int8;
 extern struct type *builtin_type_uint8;
 extern struct type *builtin_type_int16;

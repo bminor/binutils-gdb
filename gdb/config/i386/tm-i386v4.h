@@ -32,7 +32,7 @@
 
 /* Use the alternate method of determining valid frame chains. */
 
-#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
+#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 /* Offsets (in target ints) into jmp_buf.  Not defined in any system header
    file, so we have to step through setjmp/longjmp with a debugger and figure

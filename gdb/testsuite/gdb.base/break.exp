@@ -619,7 +619,7 @@ send_gdb "finish\n"
 gdb_expect {
   -re "\"finish\" not meaningful in the outermost frame.\r\n$gdb_prompt $"\
           {pass "finish from outermost frame disallowed"}
-  -re "Run till exit from.*" {
+  -re "Run till exit from.*\r\n$gdb_prompt $" {
      pass "finish from outermost frame disallowed"
   }
   -re "$gdb_prompt $"\

@@ -99,6 +99,14 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 
 /* The following are initialized by the target dependant code. */
 
+extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_BFD_VMA_BIT)
+#define TARGET_BFD_VMA_BIT (gdbarch_bfd_vma_bit (current_gdbarch))
+#endif
+#endif
+
 extern int gdbarch_ptr_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 #if GDB_MULTI_ARCH

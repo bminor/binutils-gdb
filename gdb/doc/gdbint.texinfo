@@ -1381,13 +1381,17 @@ Presently only defined for HP PA.
 @item FRAME_CHAIN_VALID(chain,thisframe)
 
 Define this to be an expression that returns zero if the given frame is
-an outermost frame, with no caller, and nonzero otherwise.  Three common
-definitions are available. @code{default_frame_chain_valid} (the
-default) is nonzero if the chain pointer is nonzero and given frame's PC
-is not inside the startup file (such as @file{crt0.o}).
-@code{alternate_frame_chain_valid} is nonzero if the chain pointer is
-nonzero and the given frame's PC is not in @code{main()} or a known
-entry point function (such as @code{_start()}).
+an outermost frame, with no caller, and nonzero otherwise.  Several
+common definitions are available. 
+
+@code{file_frame_chain_valid} is nonzero if the chain pointer is nonzero
+and given frame's PC is not inside the startup file (such as
+@file{crt0.o}).  @code{func_frame_chain_valid} is nonzero if the chain
+pointer is nonzero and the given frame's PC is not in @code{main()} or a
+known entry point function (such as @code{_start()}).
+@code{generic_file_frame_chain_valid} and
+@code{generic_func_frame_chain_valid} are equivalent implementations for
+targets using generic dummy frames.
 
 @item FRAME_INIT_SAVED_REGS(frame)
 See @file{frame.h}.  Determines the address of all registers in the

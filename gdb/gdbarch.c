@@ -125,6 +125,7 @@ struct gdbarch
 
      */
 
+  int bfd_vma_bit;
   int ptr_bit;
   int short_bit;
   int int_bit;
@@ -223,6 +224,7 @@ struct gdbarch default_gdbarch = {
   /*per-architecture data-pointers and swap regions */
   0, NULL, NULL,
   /* Multi-arch values */
+  8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (short),
   8 * sizeof (int),
@@ -325,6 +327,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->byte_order = info->byte_order;
 
   /* Force the explicit initialization of these. */
+  gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
   gdbarch->num_regs = -1;
   gdbarch->sp_regnum = -1;
   gdbarch->fp_regnum = -1;
@@ -365,6 +368,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->bfd_arch_info == NULL)
     internal_error ("verify_gdbarch: bfd_arch_info unset");
   /* Check those that need to be defined for the given multi-arch level. */
+  if ((GDB_MULTI_ARCH >= 1)
+      && (0))
+    internal_error ("gdbarch: verify_gdbarch: bfd_vma_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->ptr_bit == 0))
     internal_error ("gdbarch: verify_gdbarch: ptr_bit invalid");
@@ -611,6 +617,9 @@ gdbarch_dump (void)
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_BYTE_ORDER = %ld\n",
                       (long) TARGET_BYTE_ORDER);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: TARGET_BFD_VMA_BIT = %ld\n",
+                      (long) TARGET_BFD_VMA_BIT);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_PTR_BIT = %ld\n",
                       (long) TARGET_PTR_BIT);
@@ -937,6 +946,24 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_byte_order called\n");
   return gdbarch->byte_order;
+}
+
+int
+gdbarch_bfd_vma_bit (struct gdbarch *gdbarch)
+{
+  if (0)
+    internal_error ("gdbarch: gdbarch_bfd_vma_bit invalid");
+  if (gdbarch_debug >= 2)
+    /* FIXME: gdb_std??? */
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfd_vma_bit called\n");
+  return gdbarch->bfd_vma_bit;
+}
+
+void
+set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch,
+                         int bfd_vma_bit)
+{
+  gdbarch->bfd_vma_bit = bfd_vma_bit;
 }
 
 int

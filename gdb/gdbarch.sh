@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-read="class level macro returntype function formal actual attrib default init init_p fmt print print_p description"
+read="class level macro returntype function formal actual attrib default init invalid_p fmt print print_p description"
 
 # dump out/verify the doco
 for field in ${read}
@@ -27,6 +27,7 @@ do
   case ${field} in
 
     class ) : ;;
+
       # # -> line disable
       # f -> function
       #   hiding a function
@@ -39,7 +40,7 @@ do
 
       # See GDB_MULTI_ARCH description.  Having GDB_MULTI_ARCH >=
       # LEVEL is a predicate on checking that a given method is
-      # initialized (using INIT_P).
+      # initialized (using INVALID_P).
 
     macro ) : ;;
 
@@ -76,20 +77,21 @@ do
     default ) : ;;
 
       # To help with the GDB startup a default static gdbarch object
-      # is created.  DEFAULT is the value to insert into that
-      # array. It defaults to ZERO.
+      # is created.  DEFAULT is the value to insert into the static
+      # gdbarch object. If empty ZERO is used.
 
     init ) : ;;
 
-      # Any initial value to assign to the member after it is been
-      # MALLOCed.  Defaults to zero.  
+      # Any initial value to assign to a new gdbarch object after it
+      # as been malloc()ed.  Zero is used by default.
 
-    init_p ) : ;;
+    invalid_p ) : ;;
 
-      # A predicate equation that tests to see if the code creating
-      # the new architecture has correctly updated this
-      # MEMBER. Default is to check that the value is no longer equal
-      # to INIT.
+      # A predicate equation that validates MEMBER. Non-zero is returned
+      # if the code creating the new architecture failed to initialize
+      # the MEMBER or initialized the member to something invalid.
+      # By default, a check that the value is no longer equal to INIT
+      # is performed.  The equation ``0'' disables the invalid_p check.
 
     fmt ) : ;;
 
@@ -129,6 +131,7 @@ i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_defau
 #
 i:2:TARGET_BYTE_ORDER:int:byte_order::::BIG_ENDIAN
 #
+v:1:TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address:0
 v:1:TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):0
 #v:1:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):0
 v:1:TARGET_SHORT_BIT:int:short_bit::::8 * sizeof (short):0
@@ -242,7 +245,7 @@ ${class} ${macro}(${actual})
     level=${level}
     default=${default}
     init=${init}
-    init_p=${init_p}
+    invalid_p=${invalid_p}
     fmt=${fmt}
     print=${print}
     print_p=${print_p}
@@ -968,10 +971,10 @@ function_list | while eval read $read
 do
   case "${class}" in
     "f" | "v" )
-	if [ "${init_p}" ]
+ 	if [ "${invalid_p}" ]
 	then
 	  echo "  if ((GDB_MULTI_ARCH >= ${level})"
-	  echo "      && (${init_p}))"
+	  echo "      && (${invalid_p}))"
 	  echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
 	elif [ "${init}" ]
 	then
@@ -1084,9 +1087,9 @@ do
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
 	echo "{"
-	if [ "${init_p}" ]
+	if [ "${invalid_p}" ]
 	then
-	  echo "  if (${init_p})"
+	  echo "  if (${invalid_p})"
 	  echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	elif [ "${init}" ]
 	then

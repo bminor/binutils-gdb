@@ -41,13 +41,12 @@ void _initialize_blockframe (void);
    frame is the outermost one and has no caller. */
 
 int
-default_frame_chain_valid (chain, thisframe)
+file_frame_chain_valid (chain, thisframe)
      CORE_ADDR chain;
      struct frame_info *thisframe;
 {
   return ((chain) != 0
-	  && !inside_main_func ((thisframe)->pc)
-	  && !inside_entry_func ((thisframe)->pc));
+	  && !inside_entry_file (FRAME_SAVED_PC (thisframe)));
 }
 
 /* Use the alternate method of avoiding running up off the end of the
@@ -55,12 +54,13 @@ default_frame_chain_valid (chain, thisframe)
    the comments in objfiles.h. */
 
 int
-alternate_frame_chain_valid (chain, thisframe)
+func_frame_chain_valid (chain, thisframe)
      CORE_ADDR chain;
      struct frame_info *thisframe;
 {
   return ((chain) != 0
-	  && !inside_entry_file (FRAME_SAVED_PC (thisframe)));
+	  && !inside_main_func ((thisframe)->pc)
+	  && !inside_entry_func ((thisframe)->pc));
 }
 
 /* A very simple method of determining a valid frame */
@@ -1104,7 +1104,7 @@ pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
  * zero, and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember
  * to define PUSH_RETURN_ADDRESS, because no call instruction will be
  * being executed by the target.  Also FRAME_CHAIN_VALID as
- * generic_frame_chain_valid and FIX_CALL_DUMMY as
+ * generic_{file,func}_frame_chain_valid and FIX_CALL_DUMMY as
  * generic_fix_call_dummy.  */
 
 /* Dummy frame.  This saves the processor state just prior to setting
@@ -1270,7 +1270,7 @@ generic_pop_dummy_frame ()
    and false for the CRT0 start-up frame.  Purpose is to terminate backtrace */
 
 int
-generic_frame_chain_valid (fp, fi)
+generic_file_frame_chain_valid (fp, fi)
      CORE_ADDR fp;
      struct frame_info *fi;
 {
@@ -1280,6 +1280,20 @@ generic_frame_chain_valid (fp, fi)
     return (fp != 0
 	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
 	    && !inside_entry_file (FRAME_SAVED_PC (fi)));
+}
+
+int
+generic_func_frame_chain_valid (fp, fi)
+     CORE_ADDR fp;
+     struct frame_info *fi;
+{
+  if (PC_IN_CALL_DUMMY ((fi)->pc, fp, fp))
+    return 1;			/* don't prune CALL_DUMMY frames */
+  else				/* fall back to default algorithm (see frame.h) */
+    return (fp != 0
+	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
+	    && !inside_main_func ((fi)->pc)
+	    && !inside_entry_func ((fi)->pc));
 }
 
 /* Function: fix_call_dummy

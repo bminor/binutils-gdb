@@ -1755,6 +1755,17 @@ handle_inferior_event (struct execution_control_state *ecs)
       case TARGET_WAITKIND_STOPPED:
 	stop_signal = ecs->ws.value.sig;
 	break;
+
+	/* We had an event in the inferior, but we are not interested
+	   in handling it at this level. The lower layers have already
+	   done what needs to be done, if anything. This case can
+	   occur only when the target is async or extended-async. One
+	   of the circumstamces for this to happen is when the
+	   inferior produces output for the console. The inferior has
+	   not stopped, and we are ignoring the event. */
+      case TARGET_WAITKIND_IGNORE:
+	ecs->wait_some_more = 1;
+	return;
       }
 
     /* We may want to consider not doing a resume here in order to give

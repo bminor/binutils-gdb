@@ -499,7 +499,7 @@ tracepoints_info (tpnum_exp, from_tty)
 	printf_filtered ("%s ",
 			 local_hex_string_custom ((unsigned long) t->address,
 						  "08l"));
-      printf_filtered ("%-5d %-5d ", t->pass_count, t->step_count);
+      printf_filtered ("%-5d %-5ld ", t->pass_count, t->step_count);
 
       if (t->source_file)
 	{
@@ -1773,7 +1773,7 @@ trace_start_command (args, from_tty)
 	char tmp[40];
 
 	sprintf_vma (tmp, t->address);
-	sprintf (buf, "QTDP:%x:%s:%c:%x:%x", t->number, tmp, /* address */
+	sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, tmp, /* address */
 		 t->enabled == enabled ? 'E' : 'D',
 		 t->step_count, t->pass_count);
 

@@ -28,6 +28,7 @@
 #include "language.h"
 #include "demangle.h"
 #include "gdb_string.h"
+#include <math.h>
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). */
@@ -573,7 +574,7 @@ value_ptr
 value_concat (arg1, arg2)
      value_ptr arg1, arg2;
 {
-  register value_ptr inval1, inval2, outval;
+  register value_ptr inval1, inval2, outval = NULL;
   int inval1len, inval2len;
   int count, idx;
   char *ptr;
@@ -738,7 +739,7 @@ value_binop (arg1, arg2, op)
       /* FIXME-if-picky-about-floating-accuracy: Should be doing this
          in target format.  real.c in GCC probably has the necessary
          code.  */
-      DOUBLEST v1, v2, v;
+      DOUBLEST v1, v2, v = 0;
       v1 = value_as_double (arg1);
       v2 = value_as_double (arg2);
       switch (op)
@@ -758,6 +759,12 @@ value_binop (arg1, arg2, op)
 	case BINOP_DIV:
 	  v = v1 / v2;
 	  break;
+
+        case BINOP_EXP:
+          v = pow (v1, v2);
+          if (errno)
+            error ("Cannot perform exponentiation: %s", strerror (errno));
+          break;
 
 	default:
 	  error ("Integer-only operation on floating point number.");
@@ -779,7 +786,7 @@ value_binop (arg1, arg2, op)
 	   &&
 	   TYPE_CODE (type2) == TYPE_CODE_BOOL)
     {
-      LONGEST v1, v2, v;
+      LONGEST v1, v2, v = 0;
       v1 = value_as_long (arg1);
       v2 = value_as_long (arg2);
 
@@ -795,6 +802,14 @@ value_binop (arg1, arg2, op)
 
 	case BINOP_BITWISE_XOR:
 	  v = v1 ^ v2;
+          break;
+              
+        case BINOP_EQUAL:
+          v = v1 == v2;
+          break;
+          
+        case BINOP_NOTEQUAL:
+          v = v1 != v2;
 	  break;
 
 	default:
@@ -855,7 +870,7 @@ value_binop (arg1, arg2, op)
 
       if (unsigned_operation)
 	{
-	  ULONGEST v1, v2, v;
+	  ULONGEST v1, v2, v = 0;
 	  v1 = (ULONGEST) value_as_long (arg1);
 	  v2 = (ULONGEST) value_as_long (arg2);
 
@@ -883,6 +898,12 @@ value_binop (arg1, arg2, op)
 	    case BINOP_DIV:
 	      v = v1 / v2;
 	      break;
+
+            case BINOP_EXP:
+              v = pow (v1, v2);
+              if (errno)
+                error ("Cannot perform exponentiation: %s", strerror (errno));
+              break;
 
 	    case BINOP_REM:
 	      v = v1 % v2;
@@ -949,6 +970,10 @@ value_binop (arg1, arg2, op)
 	      v = v1 == v2;
 	      break;
 
+            case BINOP_NOTEQUAL:
+              v = v1 != v2;
+              break;
+
 	    case BINOP_LESS:
 	      v = v1 < v2;
 	      break;
@@ -976,7 +1001,7 @@ value_binop (arg1, arg2, op)
 	}
       else
 	{
-	  LONGEST v1, v2, v;
+	  LONGEST v1, v2, v = 0;
 	  v1 = value_as_long (arg1);
 	  v2 = value_as_long (arg2);
 
@@ -996,6 +1021,12 @@ value_binop (arg1, arg2, op)
 
 	    case BINOP_DIV:
 	      v = v1 / v2;
+              break;
+
+            case BINOP_EXP:
+              v = pow (v1, v2);
+              if (errno)
+                error ("Cannot perform exponentiation: %s", strerror (errno));
 	      break;
 
 	    case BINOP_REM:
@@ -1125,6 +1156,37 @@ value_logical_not (arg1)
   return len < 0;
 }
 
+/* Perform a comparison on two string values (whose content are not
+   necessarily null terminated) based on their length */
+
+static int
+value_strcmp (arg1, arg2)
+     register value_ptr arg1, arg2;
+{
+  int len1 = TYPE_LENGTH (VALUE_TYPE (arg1));
+  int len2 = TYPE_LENGTH (VALUE_TYPE (arg2));
+  char *s1 = VALUE_CONTENTS (arg1);
+  char *s2 = VALUE_CONTENTS (arg2);
+  int i, len = len1 < len2 ? len1 : len2;
+
+  for (i = 0; i < len; i++)
+    {
+      if (s1[i] < s2[i])
+        return -1;
+      else if (s1[i] > s2[i])
+        return 1;
+      else
+        continue;
+    }
+
+  if (len1 < len2)
+    return -1;
+  else if (len1 > len2)
+    return 1;
+  else
+    return 0;
+}
+
 /* Simulate the C operator == by returning a 1
    iff ARG1 and ARG2 have equal contents.  */
 
@@ -1175,6 +1237,10 @@ value_equal (arg1, arg2)
 	}
       return len < 0;
     }
+  else if (code1 == TYPE_CODE_STRING && code2 == TYPE_CODE_STRING)
+    {
+      return value_strcmp (arg1, arg2) == 0;
+    }
   else
     {
       error ("Invalid type combination in equality test.");
@@ -1217,7 +1283,8 @@ value_less (arg1, arg2)
     return value_as_pointer (arg1) < (CORE_ADDR) value_as_long (arg2);
   else if (code2 == TYPE_CODE_PTR && (code1 == TYPE_CODE_INT || code1 == TYPE_CODE_BOOL))
     return (CORE_ADDR) value_as_long (arg1) < value_as_pointer (arg2);
-
+  else if (code1 == TYPE_CODE_STRING && code2 == TYPE_CODE_STRING)
+    return value_strcmp (arg1, arg2) < 0;
   else
     {
       error ("Invalid type combination in ordering comparison.");

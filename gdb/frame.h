@@ -129,22 +129,24 @@ extern void frame_saved_regs_zalloc PARAMS ((struct frame_info *));
    the definition here by providing one in the tm file.
 
    XXXX - both default and alternate frame_chain_valid functions are
-   deprecated.  New code should use generic dummy frames. */
+   deprecated.  New code should use dummy frames and one of the
+   generic functions. */
 
-extern int default_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
-extern int alternate_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int file_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern int nonnull_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
-extern int generic_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern void generic_save_dummy_frame_tos PARAMS ((CORE_ADDR sp));
 
 #if !defined (FRAME_CHAIN_VALID)
 #if !defined (FRAME_CHAIN_VALID_ALTERNATE)
-#define FRAME_CHAIN_VALID(chain, thisframe) default_frame_chain_valid (chain, thisframe)
+#define FRAME_CHAIN_VALID(chain, thisframe) file_frame_chain_valid (chain, thisframe)
 #else
 /* Use the alternate method of avoiding running up off the end of the frame
    chain or following frames back into the startup code.  See the comments
    in objfiles.h. */
-#define FRAME_CHAIN_VALID(chain, thisframe) alternate_frame_chain_valid (chain,thisframe)
+#define FRAME_CHAIN_VALID(chain, thisframe) func_frame_chain_valid (chain,thisframe)
 #endif /* FRAME_CHAIN_VALID_ALTERNATE */
 #endif /* FRAME_CHAIN_VALID */
 
