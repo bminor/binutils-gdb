@@ -18,6 +18,17 @@ if {![istarget mips*-*-*] || ![is_elf_format]} {
     return
 }
 
+global ldemul
+if {[istarget mips*-*-irix6*]} {
+    set ldemul "-melf32bmip"
+} elseif {[istarget mips*el-*-linux*]} {
+    set ldemul "-melf32ltsmip"
+} elseif {[istarget mips*-*-linux*]} {
+    set ldemul "-melf32btsmip"
+} else {
+    set ldemul ""
+}
+
 # Assemble jr.s using each of the argument lists in ARGLIST.  Return the
 # list of object files on success and an empty list on failure.
 proc assemble_for_flags {arglist} {
@@ -41,7 +52,7 @@ proc assemble_for_flags {arglist} {
 # the objects can be linked together and that the readelf output
 # includes each flag named in FLAGS.
 proc good_combination {arglist flags} {
-    global ld READELF
+    global ld ldemul READELF
 
     set finalobj "tmpdir/mips-flags.o"
     set testname "MIPS compatible objects: $arglist"
@@ -49,7 +60,7 @@ proc good_combination {arglist flags} {
 
     if {$objs == ""} {
 	unresolved $testname
-    } elseif {![ld_simple_link $ld $finalobj "-r $objs"]} {
+    } elseif {![ld_simple_link "$ld $ldemul" $finalobj "-r $objs"]} {
 	fail $testname
     } else {
 	catch "exec $READELF --headers $finalobj" output
@@ -80,7 +91,7 @@ proc good_combination {arglist flags} {
 # Like good_combination, but check that the objects can't be linked
 # together successfully and that the output includes MESSAGE.
 proc bad_combination {arglist message} {
-    global link_output ld
+    global link_output ld ldemul
 
     set finalobj "tmpdir/mips-flags.o"
     set testname "MIPS incompatible objects: $arglist"
@@ -88,7 +99,7 @@ proc bad_combination {arglist message} {
 
     if {$objs == ""} {
 	unresolved $testname
-    } elseif {[ld_simple_link $ld $finalobj "-r $objs"]
+    } elseif {[ld_simple_link "$ld $ldemul" $finalobj "-r $objs"]
 	      || [string first $message $link_output] < 0} {
 	fail $testname
     } else {
@@ -116,31 +127,31 @@ proc regsize_conflict {arglist} {
 abi_conflict { "-mabi=eabi -mgp32" "-mips4 -mabi=32" } EABI32 O32
 abi_conflict { "-mips4 -mabi=o64" "-mips3 -mabi=eabi" } O64 EABI64
 
-isa_conflict { "-march=vr5500" "-march=sb1" } 5500 sb1
-isa_conflict { "-march=vr5400" "-march=4120" } 5400 4120
-isa_conflict { "-march=r3900" "-march=r6000" } 3900 6000
-isa_conflict { "-march=r4010" "-march=r4650" } 4010 4650
-isa_conflict { "-mips3 -mgp32" "-mips32" } 4000 isa32
-isa_conflict { "-march=sb1 -mgp32" "-mips32r2" } sb1 isa32r2
+isa_conflict { "-march=vr5500 -32" "-march=sb1 -32" } 5500 sb1
+isa_conflict { "-march=vr5400 -32" "-march=4120 -32" } 5400 4120
+isa_conflict { "-march=r3900 -32" "-march=r6000 -32" } 3900 6000
+isa_conflict { "-march=r4010 -32" "-march=r4650 -32" } 4010 4650
+isa_conflict { "-mips3 -mgp32 -32" "-mips32 -32" } 4000 isa32
+isa_conflict { "-march=sb1 -mgp32 -32" "-mips32r2 -32" } sb1 isa32r2
 
-regsize_conflict { "-mips4 -mgp64" "-mips2" }
+regsize_conflict { "-mips4 -mgp64 -mabi=o64" "-mips2 -32" }
 regsize_conflict { "-mips4 -mabi=o64" "-mips4 -mabi=32" }
 regsize_conflict { "-mips4 -mabi=eabi -mgp32" "-mips4 -mabi=eabi -mgp64" }
-regsize_conflict { "-march=vr5000 -mgp64" "-march=vr5000 -mgp32" }
-regsize_conflict { "-mips32" "-mips64" }
-regsize_conflict { "-mips32r2" "-mips64" }
+regsize_conflict { "-march=vr5000 -mgp64 -mabi=o64" "-march=vr5000 -mgp32 -32" }
+regsize_conflict { "-mips32 -32" "-mips64 -mabi=o64" }
+regsize_conflict { "-mips32r2 -32" "-mips64 -mabi=o64" }
 
-good_combination { "-mips4 -mgp32" "-mips2" } { mips4 32bitmode }
-good_combination { "-mips4 -mabi=32" "-mips2" } { mips4 o32 }
-good_combination { "-mips2" "-mips4 -mabi=32" } { mips4 o32 }
-good_combination { "-mips2" "-mips4 -mabi=eabi -mgp32" } { mips4 eabi32 }
-good_combination { "-mips2" "-mips32" "-mips32r2" } { mips32r2 }
-good_combination { "-mips1" "-mips32r2" "-mips32" } { mips32r2 }
+good_combination { "-mips4 -mgp32 -32" "-mips2 -32" } { mips4 o32 }
+good_combination { "-mips4 -mabi=32" "-mips2 -32" } { mips4 o32 }
+good_combination { "-mips2 -32" "-mips4 -mabi=32" } { mips4 o32 }
+good_combination { "-mips2 -mabi=eabi" "-mips4 -mabi=eabi -mgp32" } { mips4 eabi32 }
+good_combination { "-mips2 -32" "-mips32 -32" "-mips32r2 -32" } { mips32r2 }
+good_combination { "-mips1 -32" "-mips32r2 -32" "-mips32 -32" } { mips32r2 }
 
-good_combination { "-march=vr4100" "-march=vr4120" } { 4120 }
-good_combination { "-march=vr5400" "-march=vr5500" "-mips4" } { 5500 }
-good_combination { "-mips3" "-mips4" "-march=sb1" "-mips5" } { sb1 }
-good_combination { "-mips1" "-march=3900" } { 3900 }
+good_combination { "-march=vr4100 -32" "-march=vr4120 -32" } { 4120 }
+good_combination { "-march=vr5400 -32" "-march=vr5500 -32" "-mips4 -32" } { 5500 }
+good_combination { "-mips3 -32" "-mips4 -32" "-march=sb1 -32" "-mips5 -32" } { sb1 }
+good_combination { "-mips1 -32" "-march=3900 -32" } { 3900 }
 
 good_combination { "-march=vr4120 -mabi=32" "-mips3 -mabi=32" } { 4120 o32 }
-good_combination { "-march=sb1 -mgp32" "-march=4000 -mgp32" } { sb1 32bitmode }
+good_combination { "-march=sb1 -mgp32 -32" "-march=4000 -mgp32 -32" } { sb1 o32 }

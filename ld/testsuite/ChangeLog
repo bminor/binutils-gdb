@@ -1,3 +1,80 @@
+2003-05-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+
+	2003-05-13  H.J. Lu <hongjiu.lu@intel.com>
+	* ld-elfweak/elfweak.exp: Fix typo.
+
+	2003-05-13  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+	* ld-elfvers/vers.exp: Run on sh[34]*-*-linux*.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+
+	2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+	* ld-elfvsb/elf-offset.ld: Add .rel.eh_frame and .rela.eh_frame
+	to linker script.
+	* ld-elfvsb/elfvsb.exp (visibility_run): Add setup_xfails for s390x.
+	* ld-selective/selective.exp: Disable for s390 and s390x.
+	* ld-shared/elf-offset.ld: Add .rel.eh_frame and .rela.eh_frame
+	to linker script.
+	* ld-shared/shared.exp (shared_test): Add setup_xfails for s390x.
+	* ld-undefined/undefined.exp (checkund): Remove setup_xfail for s390x.
+
+	2003-05-08  H.J. Lu <hongjiu.lu@intel.com>
+	* ld-elfvers/vers.exp: Add vers27d4 and vers27d5 to test
+	versioned reference for hidden symbol.
+
+	* ld-elfvers/vers27d4.dsym: New file.
+	* ld-elfvers/vers27d4.ver: Likewise.
+
+	2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+	* ld-elfvers/vers27d3.c (__start): New.
+	(start): New.
+
+	2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+	* ld-elfvers/vers.exp (build_binary): Support build exeutable.
+	(build_binary): Renamed from ...
+	(build_vers_lib): This.
+	(build_vers_lib_no_pic): Updated.
+	(build_vers_lib_pic): Likewise.
+	Add vers27d1, vers27d2 and vers27d3 to test versioned
+	definition for hidden symbol referenced by a DSO.
+
+	* ld-elfvers/vers27d.dsym: New file.
+	* ld-elfvers/vers27d.sym: Likewise.
+	* ld-elfvers/vers27d.ver: Likewise.
+	* ld-elfvers/vers27d1.c: Likewise.
+	* ld-elfvers/vers27d2.c: Likewise.
+	* ld-elfvers/vers27d3.c: Likewise.
+
+	2003-05-07  Andreas Schwab  <schwab@suse.de>
+	* ld-elfvsb/elfvsb.exp: Run dump tests even when cross
+	compiling.
+
+	2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
+	* config/default.exp (gcc_gas_flags): Force ABI to n32 on
+	mips64-linux.
+	* ld-elf/merge.d: Xfail on mips64*-linux-gnu*.
+	* ld-mips-elf/mips-elf-flags.exp (ldemul): Set to o32-compatible
+	on mips-sgi-irix6*, mips64-linux-gnu and mips64el-linux-gnu.
+	(good_combination, bad_combination): Use it.
+	Add -32 or -mabi=o64 wherever the ABI was formerly implied.
+
+	2003-05-06  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp (objdump_versionstuff): Support comment
+	in expected version file.
+
+	* ld-elfvers/vers25b.c: Add a line of comment.
+	* ld-elfvers/vers25b.dsym: Likwise.
+	* ld-elfvers/vers25b.ver: Likwise.
+	* ld-elfvers/vers26b.dsym: Likwise.
+	* ld-elfvers/vers26b.ver: Likwise.
+	* ld-elfvers/vers27b.dsym: Likwise.
+	* ld-elfvers/vers27b.ver: Likwise.
+	* ld-elfvers/vers27c.c: Likwise.
+	* ld-elfvers/vers27c.dsym: Likwise.
+	* ld-elfvers/vers27c.ver: Likwise.
+
 2003-05-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-m68hc11/link-hcs12.d: New test.
