@@ -1,3 +1,9 @@
+Wed Feb 28 22:32:18 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
+	* remote.c (remote_detach): Send a command 'D' to the target
+	when detaching, update the function's comments.
+
 Wed Feb 28 15:50:12 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (VERSION): Bump version to 4.15.2 to establish
