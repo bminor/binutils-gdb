@@ -1,5 +1,7 @@
 Mon Oct 25 13:35:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t06/signals.exp: Skip whole file with xfail for HPPA.
+
 	* gdb.t24/demangle.exp: Remove "3220" from the one remaining xfail.
 	It is not from PR 3220.
 
