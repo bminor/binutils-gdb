@@ -1,3 +1,9 @@
+Fri Jun 18 03:22:10 1993  John Gilmore  (gnu@cygnus.com)
+
+	* oasys.h:  Eliminate "int8_type", "int16_type", "int32_type", and
+	their variants.  These changes are coordinated with corresponding
+	changes in ../bfd/oasys.c.
+
 Wed Jun 16 10:43:08 1993  Fred Fish  (fnf@cygnus.com)
 
 	* bfd.h:  Note that it has been removed.
