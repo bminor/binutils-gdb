@@ -1,5 +1,7 @@
 Tue Apr  6 09:54:29 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* values.c (USE_STRUCT_RETURN): Only use gcc wierdness for gcc1.
+
 	* xcoffread.c (read_xcoff_symtab): Deal correctly with symbols of
 	exactly 8 characters.
 

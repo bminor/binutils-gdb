@@ -1484,13 +1484,21 @@ value_being_returned (valtype, retbuf, struct_return)
 
    On most machines, the struct convention is used unless we are
    using gcc and the type is of a special size.  */
+/* As of about 31 Mar 93, GCC was changed to be compatible with the
+   native compiler.  GCC 2.3.3 was the last release that did it the
+   old way.  Since gcc2_compiled was not changed, we have no
+   way to correctly win in all cases, so we just do the right thing
+   for gcc1 and for gcc2 after this change.  Thus it loses for gcc
+   2.0-2.3.3.  This is somewhat unfortunate, but changing gcc2_compiled
+   would cause more chaos than dealing with some struct returns being
+   handled wrong.  */
 #if !defined (USE_STRUCT_CONVENTION)
 #define USE_STRUCT_CONVENTION(gcc_p, type)\
-  (!((gcc_p) && (TYPE_LENGTH (value_type) == 1                \
-		 || TYPE_LENGTH (value_type) == 2             \
-	         || TYPE_LENGTH (value_type) == 4             \
-		 || TYPE_LENGTH (value_type) == 8             \
-		 )                                            \
+  (!((gcc_p == 1) && (TYPE_LENGTH (value_type) == 1                \
+		      || TYPE_LENGTH (value_type) == 2             \
+		      || TYPE_LENGTH (value_type) == 4             \
+		      || TYPE_LENGTH (value_type) == 8             \
+		      )                                            \
      ))
 #endif
 
