@@ -301,7 +301,7 @@ check:
 
 config.status: configure
 	if [ -r config.status ]; then \
-	  sh $(srcdir)/config.status --recheck ; \
+	  sh ./config.status --recheck ; \
 	else \
 	  echo You must configure gas.  Look at the INSTALL file for details. ; \
 	  exit 1 ; \
@@ -547,5 +547,5 @@ de-stage3: force
 force:
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag) \
-		$(srcdir)/configure.in
+		$(srcdir)/configure.in config.status
 	$(SHELL) ./config.status
