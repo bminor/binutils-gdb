@@ -1,3 +1,35 @@
+Fri Jun  6 17:35:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-elfvers/vers6.ver: Update for recent elflink.h patch to
+	version handling.
+
+Wed Jun  4 12:06:48 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: Define ___get_dynamic_handler_chain as well.
+
+Fri May 30 12:21:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: Define __get_dynamic_handler_chain when
+	linking.
+
+Mon May 12 11:17:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/default.exp: Use $base_dir rather than $objdir when
+	setting ld.  From John David Anglin <dave@hiauly1.hia.nrc.ca>.
+
+Fri Apr 25 09:07:00 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* ld-srec/srec.exp: Define various out of line prologue/epilogue
+	functions for the mn10200 to avoid needing libgcc.a.
+
+Wed Mar 26 13:56:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: Don't expect failures on mips*-*-elf*.
+
+Mon Mar 17 19:27:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-elfvers/vers.exp: Don't run on SunOS or AIX.
+
 Wed Mar 12 21:44:19 1997  Eric Youngdale  <eric@andante.jic.com>
 
 	* ld-elfvers/vers.exp, *: New tests for symbol versioning.
