@@ -1,3 +1,21 @@
+2000-11-13  H.J. Lu  <hjl@gnu.org>
+
+	* gas/symver/symver.exp: New for symver test.
+	* gas/symver/symver0.d: Likewise.
+	* gas/symver/symver0.s: Likewise.
+	* gas/symver/symver1.d: Likewise.
+	* gas/symver/symver1.s: Likewise.
+	* gas/symver/symver2.l: Likewise.
+	* gas/symver/symver2.s: Likewise.
+	* gas/symver/symver3.l: Likewise.
+	* gas/symver/symver3.s: Likewise.
+	* gas/symver/symver4.l: Likewise.
+	* gas/symver/symver4.s: Likewise.
+	* gas/symver/symver5.l: Likewise.
+	* gas/symver/symver5.s: Likewise.
+	* gas/symver/symver6.l: Likewise.
+	* gas/symver/symver6.s: Likewise.
+
 2000-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/macros/macros.exp: Mark strings test xfail for sh.
