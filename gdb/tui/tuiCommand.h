@@ -37,10 +37,6 @@
 ******************************************/
 
 extern unsigned int tuiDispatchCtrlChar (unsigned int);
-extern int tuiIncrCommandCharCountBy (int);
-extern int tuiDecrCommandCharCountBy (int);
-extern int tuiSetCommandCharCountTo (int);
-extern int tuiClearCommandCharCount (void);
 
 #endif
 /*_TUI_COMMAND_H*/

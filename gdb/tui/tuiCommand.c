@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <ctype.h>
 #include "tui.h"
 #include "tuiData.h"
 #include "tuiWin.h"
@@ -44,6 +45,7 @@ unsigned int
 tuiDispatchCtrlChar (unsigned int ch)
 {
   TuiWinInfoPtr winInfo = tuiWinWithFocus ();
+  WINDOW *w = cmdWin->generic.handle;
 
   /*
      ** If the command window has the logical focus, or no-one does
@@ -72,13 +74,21 @@ tuiDispatchCtrlChar (unsigned int ch)
 	  tmpChar = 0;
 	  while (!m_isEndSequence (tmpChar))
 	    {
-	      tmpChar = (int) wgetch (cmdWin->generic.handle);
+	      tmpChar = (int) wgetch (w);
+	      if (tmpChar == ERR)
+		{
+		  return ch;
+		}
 	      if (!tmpChar)
 		break;
 	      if (tmpChar == 53)
 		pageCh = KEY_PPAGE;
 	      else if (tmpChar == 54)
 		pageCh = KEY_NPAGE;
+	      else
+		{
+		  return 0;
+		}
 	    }
 	  chCopy = pageCh;
 	}
@@ -114,89 +124,4 @@ tuiDispatchCtrlChar (unsigned int ch)
 	}
       return c;
     }
-}				/* tuiDispatchCtrlChar */
-
-
-/*
-   ** tuiIncrCommandCharCountBy()
-   **     Increment the current character count in the command window,
-   **     checking for overflow.  Returns the new value of the char count.
- */
-int
-tuiIncrCommandCharCountBy (int count)
-{
-  if (tui_version)
-    {
-      if ((count + cmdWin->detail.commandInfo.curch) >= cmdWin->generic.width)
-	cmdWin->detail.commandInfo.curch =
-	  (count + cmdWin->detail.commandInfo.curch) - cmdWin->generic.width;
-      else
-	cmdWin->detail.commandInfo.curch += count;
-    }
-
-  return cmdWin->detail.commandInfo.curch;
-}				/* tuiIncrCommandCharCountBy */
-
-
-/*
-   ** tuiDecrCommandCharCountBy()
-   **     Decrement the current character count in the command window,
-   **     checking for overflow.  Returns the new value of the char count.
- */
-int
-tuiDecrCommandCharCountBy (int count)
-{
-  if (tui_version)
-    {
-      if ((cmdWin->detail.commandInfo.curch - count) < 0)
-	cmdWin->detail.commandInfo.curch =
-	  cmdWin->generic.width + (cmdWin->detail.commandInfo.curch - count);
-      else
-	cmdWin->detail.commandInfo.curch -= count;
-    }
-
-  return cmdWin->detail.commandInfo.curch;
-}				/* tuiDecrCommandCharCountBy */
-
-
-/*
-   ** tuiSetCommandCharCountTo()
-   **     Set the character count to count.
- */
-int
-tuiSetCommandCharCountTo (int count)
-{
-  if (tui_version)
-    {
-      if (count > cmdWin->generic.width - 1)
-	{
-	  cmdWin->detail.commandInfo.curch = 0;
-	  tuiIncrCommandCharCountBy (count);
-	}
-      else
-	cmdWin->detail.commandInfo.curch -= count;
-    }
-
-  return cmdWin->detail.commandInfo.curch;
-}				/* tuiSetCommandCharCountTo */
-
-
-
-/*
-   ** tuiClearCommandCharCount()
-   **     Clear the character count to count.
- */
-int
-tuiClearCommandCharCount (void)
-{
-  if (tui_version)
-    cmdWin->detail.commandInfo.curch = 0;
-
-  return cmdWin->detail.commandInfo.curch;
-}				/* tuiClearCommandCharCount */
-
-
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS                 **
-******************************************/
+}
