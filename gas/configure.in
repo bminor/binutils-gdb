@@ -53,9 +53,9 @@ case "${host}" in
   m68k-sun-sunos*)		gas_host=sun3		;;
   m68*-*-hpux)			gas_host=hpux		;;
 
-  mips-dec-ultrix*)		gas_host=decstatn	;;
-  mips-*-bsd*)			gas_host=mipsbsd	;;
-  mips-sgi-irix*)		gas_host=irix		;;
+  mips*-dec-ultrix*)		gas_host=decstatn	;;
+  mips*-*-bsd*)			gas_host=mipsbsd	;;
+  mips*-sgi-irix*)		gas_host=irix		;;
 
   rs6000-*-*)			gas_host=rs6000		;;
 
@@ -65,7 +65,7 @@ case "${host}" in
   vax-*-vms*)			gas_host=vms		;;
   vax-*-bsd*)			gas_host=vax		;;
 
-  *-*-sysv4*)			gas_host=sysv		;;
+  *-*-sysv4* | *-*-unixware)	gas_host=sysv		;;
 
   *-*-ansi | *-*-ultrix | *-*-hpux | *-*-sysv*)
 				gas_host=${host_os}	;;
@@ -96,6 +96,9 @@ esac
 # assign cpu type
 emulation=generic
 
+# default is big
+endian=big
+
 # check for architecture variants
 case ${target_cpu} in
   h8300h)	cpu_type=h8300 ;;
@@ -107,6 +110,7 @@ case ${target_cpu} in
   m68008)	cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
   m8*)		cpu_type=m88k ;;
+  mips*el)	cpu_type=mips endian=little;;
   mips*)	cpu_type=mips ;;
   sparc64)	cpu_type=sparc64 obj_format=elf ;; # v9
   sparclite*)   cpu_type=sparc ;;
@@ -127,6 +131,7 @@ case ${generic_target} in
 
   hppa-*-osf)		obj_format=elf emulation=hppa dev=yes ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
+  hppa-*-bsd*)		obj_format=som emulation=hppa ;;
 
   h8300-*-coff)		obj_format=coffbfd ;;
 
@@ -162,13 +167,24 @@ case ${generic_target} in
   # don't change emulation like *-*-bsd does
   mips-*-bsd*)		bfd_gas=yes obj_format=aout gas_target=mips-lit ;;
   mips-*-ultrix*)	obj_format=ecoff gas_target=mips-lit ;;
-  mips-*-ecoffl*)	obj_format=ecoff gas_target=mips-lit ;;
+  mips-*-ecoff*)	obj_format=ecoff 
+			if [ $endian = big ] ; then
+			  gas_target=mips-big
+			else
+			  gas_target=mips-lit
+			fi 
+			;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-irix*)		obj_format=ecoff gas_target=mips-big emulation=irix ;;
   mips-*-riscos*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-sysv*)		obj_format=ecoff gas_target=mips-big ;;
-  mips-*-elfl*)		obj_format=elf gas_target=mips-lit ;;
-  mips-*-elf*)		obj_format=elf gas_target=mips-big ;;
+  mips-*-elf*)		obj_format=elf 
+			if [ $endian = big ] ; then
+			  gas_target=mips-big
+			else
+			  gas_target=mips-lit
+			fi
+			;;
 
   sparc*-*-sunos4*)	obj_format=aout emulation=sun3 bfd_gas=yes ;;
   sparc*-*-aout | sparc*-*-vxworks)
@@ -205,6 +221,7 @@ case ${generic_target} in
 			esac
 			;;
   *-*-vxworks)		obj_format=aout ;;
+  *-*-netware)		obj_format=elf ;;
 esac
 
 # Assign floating point type.  Most processors with FP support
@@ -241,6 +258,7 @@ case ${bfd_gas}-${obj_format} in
   no-coffbfd)	need_bfd=yes ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
+  *-som)	bfd_gas=yes ;;
   *)		;;
 esac
 
