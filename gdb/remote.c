@@ -624,7 +624,7 @@ add_packet_config_cmd (config, name, title, set_func, show_func,
   asprintf (&full_name, "%s-packet", name);
   c = add_set_enum_cmd (full_name,
 			class_obscure, packet_support_enums,
-			(char *) &config->state,
+			&config->state,
 			set_doc, setlist);
   c->function.sfunc = set_func;
   add_cmd (full_name, class_obscure, show_func, show_doc, showlist);

@@ -194,7 +194,7 @@ struct cmd_list_element
 
     /* Pointer to variable affected by "set" and "show".  Doesn't matter
        if type is not_set.  */
-    char *var;
+    void *var;
 
     /* What kind of variable is *VAR?  */
     var_types var_type;
@@ -284,13 +284,18 @@ extern void help_list (struct cmd_list_element *, char *,
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
-extern struct cmd_list_element *
-  add_set_cmd PARAMS ((char *, enum command_class, var_types, char *, char *,
-		       struct cmd_list_element **));
+extern struct cmd_list_element *add_set_cmd (char *name, enum
+					     command_class class,
+					     var_types var_type, void *var,
+					     char *doc,
+					     struct cmd_list_element **list);
 
-extern struct cmd_list_element *
-  add_set_enum_cmd PARAMS ((char *name, enum command_class, char *list[],
-		       char *var, char *doc, struct cmd_list_element ** c));
+extern struct cmd_list_element *add_set_enum_cmd (char *name,
+						  enum command_class class,
+						  char *enumlist[],
+						  char **var,
+						  char *doc,
+						  struct cmd_list_element **list);
 
 extern struct cmd_list_element *
   add_show_from_set PARAMS ((struct cmd_list_element *,

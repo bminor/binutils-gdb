@@ -285,13 +285,12 @@ empty_sfunc (args, from_tty, c)
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_cmd (name, class, var_type, var, doc, list)
-     char *name;
-     enum command_class class;
-     var_types var_type;
-     char *var;
-     char *doc;
-     struct cmd_list_element **list;
+add_set_cmd (char *name,
+	     enum command_class class,
+	     var_types var_type,
+	     void *var,
+	     char *doc,
+	     struct cmd_list_element **list)
 {
   struct cmd_list_element *c
   = add_cmd (name, class, NO_FUNCTION, doc, list);
@@ -314,13 +313,12 @@ add_set_cmd (name, class, var_type, var, doc, list)
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_enum_cmd (name, class, enumlist, var, doc, list)
-     char *name;
-     enum command_class class;
-     char *enumlist[];
-     char *var;
-     char *doc;
-     struct cmd_list_element **list;
+add_set_enum_cmd (char *name,
+		  enum command_class class,
+		  char *enumlist[],
+		  char **var,
+		  char *doc,
+		  struct cmd_list_element **list)
 {
   struct cmd_list_element *c
   = add_set_cmd (name, class, var_enum, var, doc, list);

@@ -4267,7 +4267,7 @@ to the user would be loading/unloading of a new library.\n",
   c = add_set_enum_cmd ("follow-fork-mode",
 			class_run,
 			follow_fork_mode_kind_names,
-			(char *) &follow_fork_mode_string,
+			&follow_fork_mode_string,
 /* ??rehrauer:  The "both" option is broken, by what may be a 10.20
    kernel problem.  It's also not terribly useful without a GUI to
    help the user drive two debuggers.  So for now, I'm disabling
@@ -4302,7 +4302,7 @@ By default, the debugger will follow the parent process.",
 
   c = add_set_enum_cmd ("scheduler-locking", class_run,
 			scheduler_enums,	/* array of string names */
-			(char *) &scheduler_mode,	/* current mode  */
+			&scheduler_mode,	/* current mode  */
 			"Set mode for locking scheduler during execution.\n\
 off  == no locking (threads may preempt at any time)\n\
 on   == full locking (no thread except the current thread may run)\n\

@@ -938,7 +938,7 @@ _initialize_i386_tdep ()
 
     new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
 				valid_flavors,
-				(char *) &disassembly_flavor,
+				&disassembly_flavor,
 				"Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
 and the default value is \"att\".",
 				&setlist);

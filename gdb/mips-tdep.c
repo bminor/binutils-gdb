@@ -4153,9 +4153,9 @@ _initialize_mips_tdep ()
 
   /* Allow the user to override the saved register size. */
   add_show_from_set (add_set_enum_cmd ("saved-gpreg-size",
-				  class_obscure,
-			          size_enums,
-				  (char *) &mips_saved_regsize_string, "\
+				       class_obscure,
+				       size_enums,
+				       &mips_saved_regsize_string, "\
 Set size of general purpose registers saved on the stack.\n\
 This option can be set to one of:\n\
   32    - Force GDB to treat saved GP registers as 32-bit\n\
@@ -4163,14 +4163,14 @@ This option can be set to one of:\n\
   auto  - Allow GDB to use the target's default setting or autodetect the\n\
           saved GP register size from information contained in the executable.\n\
           (default: auto)",
-				  &setmipscmdlist),
+				       &setmipscmdlist),
 		     &showmipscmdlist);
 
   /* Allow the user to override the argument stack size. */
   add_show_from_set (add_set_enum_cmd ("stack-arg-size",
 				       class_obscure,
 				       size_enums,
-				       (char *) &mips_stack_argsize_string, "\
+				       &mips_stack_argsize_string, "\
 Set the amount of stack space reserved for each argument.\n\
 This option can be set to one of:\n\
   32    - Force GDB to allocate 32-bit chunks per argument\n\

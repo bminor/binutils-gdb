@@ -1,3 +1,15 @@
+Mon May 15 09:32:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* command.h (add_set_cmd): Change VAR parameter to void pointer.
+	(add_set_enum_cmd): Change VAR parameter to char pointer pointer.
+	(struct command): Change member VAR to void pointer.
+	* command.c (add_set_cmd, add_set_enum_cmd): Update.
+	
+	* remote.c (add_packet_config_cmd), mips-tdep.c
+ 	(_initialize_mips_tdep), infrun.c (_initialize_infrun),
+ 	i386-tdep.c (_initialize_i386_tdep), arm-tdep.c
+ 	(_initialize_arm_tdep): Update VAR parameter to add_set_enum_cmd.
+
 Tue May 16 12:46:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* wrapper.h (wrap_value_subscript): Delete declaration.
