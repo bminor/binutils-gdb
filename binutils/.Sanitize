@@ -50,13 +50,13 @@ arsup.h
 binutils.texi
 bucomm.c
 bucomm.h
-c++filt.1
 coffdump.c
 coffgrok.c
 coffgrok.h
 config
 configure.bat
 configure.in
+cxxfilt.man
 filemode.c
 gmalloc.c
 is-ranlib.c
