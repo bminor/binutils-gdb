@@ -1,3 +1,7 @@
+2002-04-29  GDB Administrator  <gdbadmin@sourceware.cygnus.com>
+
+	* version.in: Bump to version 5.2.0-0000-00-00-cvs.
+
 2002-04-26  GDB Administrator  <gdbadmin@sourceware.cygnus.com>
 
 	GDB 5.2 Released.
