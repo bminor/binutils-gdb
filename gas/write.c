@@ -780,11 +780,11 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    goto done;
 	  }
 
-	/* Don't try to reduce relocs which refer to .linkonce
-           sections.  It can lead to confusion when a debugging
-           section refers to a .linkonce section.  I hope this will
-           always be correct.  */
-	if (symsec != sec)
+	/* Don't try to reduce relocs which refer to non-local symbols
+           in .linkonce sections.  It can lead to confusion when a
+           debugging section refers to a .linkonce section.  I hope
+           this will always be correct.  */
+	if (symsec != sec && ! S_IS_LOCAL (sym))
 	  {
 	    boolean linkonce;
 

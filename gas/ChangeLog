@@ -1,3 +1,9 @@
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (adjust_reloc_syms): Rather than never reducing reloc
+	which refer to symbols in linkonce sections, permit reducing the
+	relocs if the symbol is local.
+
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* subsegs.c (subseg_text_p): New function.
