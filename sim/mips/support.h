@@ -30,10 +30,15 @@
    architectures if desired. */
 
 /* Control via a build boolean for the moment */
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__WIN32__)
 
+#ifdef __WIN32__
+typedef signed __int64 word64;
+typedef unsigned __int64 uword64;
+#else
 typedef long long word64;
 typedef unsigned long long uword64;
+#endif
 
 #define WORD64LO(t)     (unsigned int)((t)&0xFFFFFFFF)
 #define WORD64HI(t)     (unsigned int)(((uword64)(t))>>32)
@@ -43,13 +48,13 @@ typedef unsigned long long uword64;
 /* Sign-extend the given value (e) as a value (b) bits long. We cannot
    assume the HI32bits of the operand are zero, so we must perform a
    mask to ensure we can use the simple subtraction to sign-extend. */
-#define SIGNEXTEND(e,b) (((e) & ((unsigned long long)1 << ((b) - 1))) ? (((e) & (((unsigned long long)1 << (b)) - 1)) - ((unsigned long long)1 << (b))) : (e))
+#define SIGNEXTEND(e,b) (((e) & ((uword64)1 << ((b) - 1))) ? (((e) & (((uword64)1 << (b)) - 1)) - ((uword64)1 << (b))) : (e))
 
 /* Check if a value will fit within a word (unsigned int): */
-#define NOTWORDVALUE(v) ((((((unsigned long long)(v)>>32) == 0) && !((v) & ((unsigned)1 << 31))) || ((((unsigned long long)(v)>>32) == 0xFFFFFFFF) && ((v) & ((unsigned)1 << 31)))) ? (1 == 0) : (1 == 1))
+#define NOTWORDVALUE(v) ((((((uword64)(v)>>32) == 0) && !((v) & ((unsigned)1 << 31))) || ((((uword64)(v)>>32) == 0xFFFFFFFF) && ((v) & ((unsigned)1 << 31)))) ? (1 == 0) : (1 == 1))
 
 /* Check if a value will fit within a halfword: */
-#define NOTHALFWORDVALUE(v) ((((((unsigned long long)(v)>>16) == 0) && !((v) & ((unsigned)1 << 15))) || (((((unsigned long long)(v)>>32) == 0xFFFFFFFF) && ((((unsigned long long)(v)>>16) & 0xFFFF) == 0xFFFF)) && ((v) & ((unsigned)1 << 15)))) ? (1 == 0) : (1 == 1))
+#define NOTHALFWORDVALUE(v) ((((((uword64)(v)>>16) == 0) && !((v) & ((unsigned)1 << 15))) || (((((uword64)(v)>>32) == 0xFFFFFFFF) && ((((uword64)(v)>>16) & 0xFFFF) == 0xFFFF)) && ((v) & ((unsigned)1 << 15)))) ? (1 == 0) : (1 == 1))
 
 /* The following should be executed once at the start of day in the
    main emulator control function. The simulator assumes char is
@@ -57,8 +62,8 @@ typedef unsigned long long uword64;
 #define CHECKSIM() {\
                      if (sizeof(int) != (4 * sizeof(char)))\
                       SignalException(SimulatorFault,"sizeof(int) != 4");\
-                     if (sizeof(long long) != (8 * sizeof(char)))\
-                      SignalException(SimulatorFault,"sizeof(long long) != 8");\
+                     if (sizeof(word64) != (8 * sizeof(char)))\
+                      SignalException(SimulatorFault,"sizeof(word64) != 8");\
                    }
 
 #else /* non-GCC build */

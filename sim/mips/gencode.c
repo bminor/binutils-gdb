@@ -1017,13 +1017,17 @@ process_instructions(doarch,features)
        case ADD:
        case SUB:
         {
-          char *basetype = "unknown";
+          char *signed_basetype = "unknown";
+          char *unsigned_basetype = "unknown";
+
           switch (GETDATASIZE()) {
             case WORD :
-             basetype = "int";
+             signed_basetype = "signed int";
+             unsigned_basetype = "unsigned int";
              break;
             case DOUBLEWORD :
-             basetype = "long long";
+             signed_basetype = "word64";
+             unsigned_basetype = "uword64";
              break;
             default :
              fprintf(stderr,"Opcode table error: size of ADD/SUB operands not known (%d)\n",GETDATASIZE());
@@ -1031,8 +1035,8 @@ process_instructions(doarch,features)
           }
 
           if ((MIPS_DECODE[loop].type) == ADD) {
-            printf("   unsigned %s temp = (unsigned %s)(op1 + op2);\n",basetype,basetype);
-            printf("   signed %s tempS = (signed %s)temp;\n",basetype,basetype);
+            printf("   %s temp = (%s)(op1 + op2);\n", unsigned_basetype, unsigned_basetype);
+            printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
             if (MIPS_DECODE[loop].flags & OVERFLOW) {
               printf("   if (((op1 < 0) == (op2 < 0)) && ((tempS < 0) != (op1 < 0)))\n");
               printf("    SignalException(IntegerOverflow);\n");
@@ -1043,8 +1047,8 @@ process_instructions(doarch,features)
             else /* only sign-extend when placing 32bit result in 64bit processor */
              printf("   GPR[destreg] = SIGNEXTEND(((%s)temp),32);\n",regtype);
           } else { /* SUB */
-            printf("   unsigned %s temp = (unsigned %s)(op1 - op2);\n",basetype,basetype);
-            printf("   signed %s tempS = (signed %s)temp;\n",basetype,basetype);
+            printf("   %s temp = (%s)(op1 - op2);\n", unsigned_basetype, unsigned_basetype);
+            printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
             if (MIPS_DECODE[loop].flags & OVERFLOW) { /* different signs => overflow if result_sign != arg_sign */
               printf("   if (((op1 < 0) != (op2 < 0)) && ((tempS < 0) == (op1 < 0)))\n");
               printf("    SignalException(IntegerOverflow);\n");
