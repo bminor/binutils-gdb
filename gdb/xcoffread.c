@@ -1905,13 +1905,13 @@ process_xcoff_symbol (cs, objfile)
 	  return sym;
 	}
 	else {
-	  complain (rsym_complaint, name);
+	  complain (&rsym_complaint, name);
 	  return NULL;
 	}
 #endif
 
     default	:
-      complain (storclass_complaint, cs->c_sclass);
+      complain (&storclass_complaint, cs->c_sclass);
       return NULL;
     }
   }
@@ -1949,7 +1949,7 @@ read_symbol_lineno (symtable, symno)
     symno += symbol->n_numaux+1;
   }
 
-  complain (bf_notfound_complaint);
+  complain (&bf_notfound_complaint);
   return 0;
 
 gotit:
