@@ -2129,7 +2129,7 @@ typedef struct literal_pool
   symbolS *      symbol;
   segT           section;
   subsegT        sub_section;
-  struct literal_pool * next;  
+  struct literal_pool * next;
 } literal_pool;
 
 /* Pointer to a linked list of literal pools.  */
@@ -2196,7 +2196,7 @@ find_or_make_literal_pool ()
 static int
 add_to_lit_pool ()
 {
-  literal_pool * pool;  
+  literal_pool * pool;
   unsigned int entry;
 
   pool = find_or_make_literal_pool ();
@@ -5796,7 +5796,7 @@ do_ldmstm (str)
 	    as_warn (_("if writeback register is in list, it must be the lowest reg in the list"));
 	}
     }
-  
+
   inst.instruction |= range;
   end_of_line (str);
   return;
@@ -10294,7 +10294,7 @@ tc_gen_reloc (section, fixp)
       /* If this is called then the a literal has
 	 been referenced across a section boundary.  */
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("literal referenced across section boundary"));	
+		    _("literal referenced across section boundary"));
       return NULL;
 
 #ifdef OBJ_ELF
@@ -11525,6 +11525,11 @@ arm_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
       || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
     return 1;
+
+  /* Resolve these relocations even if the symbol is extern or weak.  */
+  if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
+    return 0;
 
   return S_FORCE_RELOC (fixp->fx_addsy);
 }

@@ -1,3 +1,8 @@
+2002-12-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-arm.c (arm_force_relocation): Return 0 for ARM_IMMEDIATE
+	and ARM_ADRL_IMMEDIATE.
+
 2002-12-02  Nick Clifton  <nickc@redhat.com>
 
 	* gasp.c: Delete.  It has been deprecated.
