@@ -442,6 +442,7 @@ static void set_literal_pool_location (segT, fragS *);
 static void xtensa_set_frag_assembly_state (fragS *);
 static void finish_vinsn (vliw_insn *);
 static bfd_boolean emit_single_op (TInsn *);
+static int total_frag_text_expansion (fragS *);
 
 /* Alignment Functions.  */
 
@@ -5706,7 +5707,7 @@ md_atof (int type, char *litP, int *sizeP)
 int
 md_estimate_size_before_relax (fragS *fragP, segT seg ATTRIBUTE_UNUSED)
 {
-  return fragP->tc_frag_data.text_expansion[0];
+  return total_frag_text_expansion (fragP);
 }
 
 
@@ -6759,6 +6760,19 @@ emit_single_op (TInsn *orig_insn)
 	}
     }
   return FALSE;
+}
+
+
+static int
+total_frag_text_expansion (fragS *fragP)
+{
+  int slot;
+  int total_expansion = 0;
+
+  for (slot = 0; slot < MAX_SLOTS; slot++)
+    total_expansion += fragP->tc_frag_data.text_expansion[slot];
+
+  return total_expansion;
 }
 
 
@@ -8641,8 +8655,7 @@ find_address_of_next_align_frag (fragS **fragPP,
 		  (*widens)++;
 		  break;
 		}
-	      /* FIXME: shouldn't this add the expansion of all slots?  */
-	      address += fragP->tc_frag_data.text_expansion[0];
+	      address += total_frag_text_expansion (fragP);;
 	      break;
 
 	    case RELAX_IMMED:

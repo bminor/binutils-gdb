@@ -1,3 +1,9 @@
+2004-11-05  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (total_frag_text_expansion): New.
+	(md_estimate_size_before_relax): Use it.
+	(find_address_of_next_align_frag): Likewise.
+
 2004-11-05  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c: Rename argument types.
