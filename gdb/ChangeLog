@@ -1,5 +1,10 @@
 Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
 
+	* Makefile.in (clean, distclean, realclean):  Recursively apply
+	to subdirs first, rather than last.  This avoids, for example,
+	Makefile being removed in a parent directory before the recursive
+	make is run.
+
 	* alldeps.mak, depend:  Update for below changes.
 
 	* config/m68k/tm-m68k.h:  Renamed from config/m68k/tm-68k.h.
