@@ -257,8 +257,7 @@ elf32_hppa_args_hash_newfunc
 static boolean
 elf32_hppa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
-	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **,
-	   char *));
+	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
 static boolean
 elf32_hppa_stub_hash_table_init
@@ -762,8 +761,7 @@ hppa_elf_relocate_insn (abfd, input_sect, insn, address, sym_value,
 
 static boolean
 elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
-			     contents, relocs, local_syms, local_sections,
-			     output_names)
+			     contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -772,7 +770,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Rela *relocs;
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
-     char *output_names;
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
@@ -865,7 +862,9 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	sym_name = h->root.root.string;
       else
 	{
-	  sym_name = output_names + sym->st_name;
+	  sym_name = elf_string_from_elf_section (input_bfd,
+						  symtab_hdr->sh_link,
+						  sym->st_name);
 	  if (sym_name == NULL)
 	    return false;
 	  if (*sym_name == '\0')

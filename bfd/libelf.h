@@ -137,7 +137,7 @@ struct elf_link_hash_table
   size_t dynsymcount;
   /* The string table of dynamic symbols, which becomes the .dynstr
      section.  */
-  struct strtab *dynstr;
+  struct bfd_strtab_hash *dynstr;
   /* The number of buckets in the hash table in the .hash section.
      This is based on the number of dynamic symbols.  */
   size_t bucketcount;
@@ -357,7 +357,7 @@ struct elf_backend_data
     PARAMS ((bfd *output_bfd, struct bfd_link_info *info,
 	     bfd *input_bfd, asection *input_section, bfd_byte *contents,
 	     Elf_Internal_Rela *relocs, Elf_Internal_Sym *local_syms,
-	     asection **local_sections, char *output_names));
+	     asection **local_sections));
 
   /* The FINISH_DYNAMIC_SYMBOL function is called by the ELF backend
      linker just before it writes a symbol out to the .dynsym section.
@@ -429,13 +429,6 @@ struct bfd_elf_section_data {
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
 
-struct strtab
-{
-  char *tab;
-  int nentries;
-  int length;
-};
-
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -444,7 +437,7 @@ struct elf_obj_tdata
   Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
   Elf_Internal_Shdr **elf_sect_ptr;
   Elf_Internal_Phdr *phdr;
-  struct strtab *strtab_ptr;
+  struct bfd_strtab_hash *strtab_ptr;
   int num_locals;
   int num_globals;
   Elf_Sym_Extra *sym_extra;

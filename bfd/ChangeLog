@@ -1,5 +1,44 @@
 Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	Use a hash table when writing out ELF symbol names.
+	* elfcode.h (elf_stringtab_init): New static function.
+	(bfd_new_strtab, bfd_add_to_strtab, bfd_add_2_to_strtab): Remove.
+	Change all callers to use elf_stringtab_init or
+	_bfd_stringtab_add, and get stringtab lengths using
+	_bfd_stringtab_size.
+	(elf_fake_sections): Change ignored argument to pointer to
+	boolean, and set the boolean to true if an error occurs.  If an
+	error has already occurred, don't do anything.
+	(assign_section_numbers): Just set sh_size, not contents.
+	(elf_compute_section_file_positions): Pass the address of a
+	boolean to elf_fake_sections.  Pass the address of a
+	bfd_strtab_hash to swap_out_syms.  Write out the .strtab section.
+	(prep_headers): Change shstrtab to bfd_strtab_hash.
+	(swap_out_syms): Take a pointer to a bfd_strtab_hash as an
+	argument.  Set it to the symbol names.
+	(NAME(bfd_elf,write_object_contents)): Write out the section
+	header names using _bfd_stringtab_emit.
+	(elf_debug_section): Remove first argument; get the section name
+	via the bfd_section pointer.  Change caller.
+	(elf_bfd_final_link): Write out the symbol names using
+	_bfd_stringtab_emit.  Likewise for the .dynstr section contents.
+	Free the symbol names at the end of the function.
+	(elf_link_input_bfd): Remove the last argument, output_names,
+	from relocate_section.  Save the old symbol contents before
+	calling elf_link_output_sym, and restore them afterward.
+	* libelf.h (struct elf_link_hash_table): Change dynstr field to
+	struct bfd_strtab_hash.
+	(struct elf_backend_data): Remove last argument, output_names,
+	from elf_backend_relocate_section field.
+	(struct strtab): Don't define.
+	(struct elf_obj_tdata): Change strtab_ptr field to struct
+	bfd_strtab_hash.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Remove last
+	argument, output_names.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
 	* libbfd-in.h (DEFAULT_STRING_SPACE_SIZE): Don't define.
 	(bfd_add_to_string_table): Don't declare.
 	* libbfd.h: Rebuild.

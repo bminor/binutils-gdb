@@ -140,8 +140,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Forward declarations of static functions */
 
-static unsigned long bfd_add_to_strtab
-  PARAMS ((bfd *, struct strtab *, const char *));
+static struct bfd_strtab_hash *elf_stringtab_init PARAMS ((void));
 static asection *section_from_elf_index PARAMS ((bfd *, unsigned int));
 
 static int elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
@@ -168,12 +167,12 @@ static file_ptr map_program_segments
   PARAMS ((bfd *, file_ptr, Elf_Internal_Shdr *, bfd_size_type));
 
 static boolean elf_map_symbols PARAMS ((bfd *));
-static boolean swap_out_syms PARAMS ((bfd *));
+static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **));
 
 static boolean bfd_section_from_shdr PARAMS ((bfd *, unsigned int shindex));
 
 #ifdef DEBUG
-static void elf_debug_section PARAMS ((char *, int, Elf_Internal_Shdr *));
+static void elf_debug_section PARAMS ((int, Elf_Internal_Shdr *));
 static void elf_debug_file PARAMS ((Elf_Internal_Ehdr *));
 #endif
 
@@ -427,85 +426,27 @@ elf_swap_dyn_out (abfd, src, dst)
   put_word (abfd, src->d_un.d_val, dst->d_un.d_val);
 }
 
-/* String table creation/manipulation routines */
+/* Allocate an ELF string table--force the first byte to be zero.  */
 
-static struct strtab *
-bfd_new_strtab (abfd)
-     bfd *abfd;
+static struct bfd_strtab_hash *
+elf_stringtab_init ()
 {
-  struct strtab *ss;
+  struct bfd_strtab_hash *ret;
 
-  ss = (struct strtab *) malloc (sizeof (struct strtab));
-  if (!ss)
+  ret = _bfd_stringtab_init ();
+  if (ret != NULL)
     {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
+      bfd_size_type loc;
+
+      loc = _bfd_stringtab_add (ret, "", true, false);
+      BFD_ASSERT (loc == 0 || loc == (bfd_size_type) -1);
+      if (loc == (bfd_size_type) -1)
+	{
+	  _bfd_stringtab_free (ret);
+	  ret = NULL;
+	}
     }
-  ss->tab = malloc (1);
-  if (!ss->tab)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-  *ss->tab = 0;
-  ss->nentries = 0;
-  ss->length = 1;
-
-  return ss;
-}
-
-static unsigned long
-bfd_add_to_strtab (abfd, ss, str)
-     bfd *abfd;
-     struct strtab *ss;
-     const char *str;
-{
-  /* should search first, but for now: */
-  /* include the trailing NUL */
-  int ln = strlen (str) + 1;
-
-  /* FIXME: This is slow.  Also, we could combine this with the a.out
-     string table building and use a hash table, although it might not
-     be worth it since ELF symbols don't include debugging information
-     and thus have much less overlap.  */
-  ss->tab = realloc (ss->tab, ss->length + ln);
-  if (ss->tab == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (unsigned long) -1;
-    }
-
-  strcpy (ss->tab + ss->length, str);
-  ss->nentries++;
-  ss->length += ln;
-
-  return ss->length - ln;
-}
-
-static int
-bfd_add_2_to_strtab (abfd, ss, str, str2)
-     bfd *abfd;
-     struct strtab *ss;
-     char *str;
-     CONST char *str2;
-{
-  /* should search first, but for now: */
-  /* include the trailing NUL */
-  int ln = strlen (str) + strlen (str2) + 1;
-
-  /* should this be using obstacks? */
-  if (ss->length)
-    ss->tab = realloc (ss->tab, ss->length + ln);
-  else
-    ss->tab = malloc (ln);
-
-  BFD_ASSERT (ss->tab != 0);	/* FIXME */
-  strcpy (ss->tab + ss->length, str);
-  strcpy (ss->tab + ss->length + strlen (str), str2);
-  ss->nentries++;
-  ss->length += ln;
-
-  return ss->length - ln;
+  return ret;
 }
 
 /* ELF .o/exec file reading */
@@ -1160,19 +1101,31 @@ write_relocs (abfd, sec, xxx)
 
 /*ARGSUSED*/
 static void
-elf_fake_sections (abfd, asect, ignore)
+elf_fake_sections (abfd, asect, failedptrarg)
      bfd *abfd;
      asection *asect;
-     PTR ignore;
+     PTR failedptrarg;
 {
+  boolean *failedptr = (boolean *) failedptrarg;
   Elf_Internal_Shdr *this_hdr;
+
+  if (*failedptr)
+    {
+      /* We already failed; just get out of the bfd_map_over_sections
+         loop.  */
+      return;
+    }
 
   this_hdr = &elf_section_data (asect)->this_hdr;
 
-  this_hdr->sh_name = bfd_add_to_strtab (abfd, elf_shstrtab (abfd),
-					 asect->name);
+  this_hdr->sh_name = (unsigned long) _bfd_stringtab_add (elf_shstrtab (abfd),
+							  asect->name,
+							  true, false);
   if (this_hdr->sh_name == (unsigned long) -1)
-    abort (); /* FIXME */
+    {
+      *failedptr = true;
+      return;
+    }
 
   this_hdr->sh_flags = 0;
   if ((asect->flags & SEC_ALLOC) != 0)
@@ -1261,12 +1214,25 @@ elf_fake_sections (abfd, asect, ignore)
     {
       Elf_Internal_Shdr *rela_hdr;
       int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+      char *name;
 
       rela_hdr = &elf_section_data (asect)->rel_hdr;
+      name = bfd_alloc (abfd, sizeof ".rela" + strlen (asect->name));
+      if (name == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  *failedptr = true;
+	  return;
+	}
+      sprintf (name, "%s%s", use_rela_p ? ".rela" : ".rel", asect->name);
       rela_hdr->sh_name =
-	bfd_add_2_to_strtab (abfd, elf_shstrtab (abfd),
-			     use_rela_p ? ".rela" : ".rel",
-			     asect->name);
+	(unsigned int) _bfd_stringtab_add (elf_shstrtab (abfd), name,
+					   true, false);
+      if (rela_hdr->sh_name == (unsigned int) -1)
+	{
+	  *failedptr = true;
+	  return;
+	}
       rela_hdr->sh_type = use_rela_p ? SHT_RELA : SHT_REL;
       rela_hdr->sh_entsize = (use_rela_p
 			      ? sizeof (Elf_External_Rela)
@@ -1307,8 +1273,7 @@ assign_section_numbers (abfd)
 
   t->shstrtab_section = section_number++;
   elf_elfheader (abfd)->e_shstrndx = t->shstrtab_section;
-  t->shstrtab_hdr.sh_size = elf_shstrtab (abfd)->length;
-  t->shstrtab_hdr.contents = (PTR) elf_shstrtab (abfd)->tab;
+  t->shstrtab_hdr.sh_size = _bfd_stringtab_size (elf_shstrtab (abfd));
 
   if (abfd->symcount > 0)
     {
@@ -1645,6 +1610,8 @@ elf_compute_section_file_positions (abfd, link_info)
      struct bfd_link_info *link_info;
 {
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  boolean failed;
+  struct bfd_strtab_hash *strtab;
   Elf_Internal_Shdr *shstrtab_hdr;
 
   if (abfd->output_has_begun)
@@ -1657,7 +1624,10 @@ elf_compute_section_file_positions (abfd, link_info)
   if (! prep_headers (abfd))
     return false;
 
-  bfd_map_over_sections (abfd, elf_fake_sections, 0);
+  failed = false;
+  bfd_map_over_sections (abfd, elf_fake_sections, &failed);
+  if (failed)
+    return false;
 
   if (!assign_section_numbers (abfd))
     return false;
@@ -1665,7 +1635,7 @@ elf_compute_section_file_positions (abfd, link_info)
   /* The backend linker builds symbol table information itself.  */
   if (link_info == NULL)
     {
-      if (! swap_out_syms (abfd))
+      if (! swap_out_syms (abfd, &strtab))
 	return false;
     }
 
@@ -1674,17 +1644,27 @@ elf_compute_section_file_positions (abfd, link_info)
   shstrtab_hdr->sh_type = SHT_STRTAB;
   shstrtab_hdr->sh_flags = 0;
   shstrtab_hdr->sh_addr = 0;
-  shstrtab_hdr->sh_size = elf_shstrtab (abfd)->length;
+  shstrtab_hdr->sh_size = _bfd_stringtab_size (elf_shstrtab (abfd));
   shstrtab_hdr->sh_entsize = 0;
   shstrtab_hdr->sh_link = 0;
   shstrtab_hdr->sh_info = 0;
   /* sh_offset is set in assign_file_positions_for_symtabs_and_strtabs.  */
   shstrtab_hdr->sh_addralign = 1;
-  shstrtab_hdr->contents = (PTR) elf_shstrtab (abfd)->tab;
 
   if (!assign_file_positions_except_relocs (abfd,
 					    link_info == NULL ? true : false))
     return false;
+
+  if (link_info == NULL)
+    {
+      /* Now that we know where the .strtab section goes, write it
+         out.  */
+      if ((bfd_seek (abfd, elf_tdata (abfd)->strtab_hdr.sh_offset, SEEK_SET)
+	   != 0)
+	  || ! _bfd_stringtab_emit (abfd, strtab))
+	return false;
+      _bfd_stringtab_free (strtab);
+    }
 
   abfd->output_has_begun = true;
 
@@ -2144,13 +2124,13 @@ prep_headers (abfd)
   Elf_Internal_Phdr *i_phdrp = 0;	/* Program header table, internal form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   int count;
-  struct strtab *shstrtab;
+  struct bfd_strtab_hash *shstrtab;
 
   i_ehdrp = elf_elfheader (abfd);
   i_shdrp = elf_elfsections (abfd);
 
-  shstrtab = bfd_new_strtab (abfd);
-  if (!shstrtab)
+  shstrtab = elf_stringtab_init ();
+  if (shstrtab == NULL)
     return false;
 
   elf_shstrtab (abfd) = shstrtab;
@@ -2245,12 +2225,12 @@ prep_headers (abfd)
       i_ehdrp->e_phoff = 0;
     }
 
-  elf_tdata (abfd)->symtab_hdr.sh_name = bfd_add_to_strtab (abfd, shstrtab,
-							    ".symtab");
-  elf_tdata (abfd)->strtab_hdr.sh_name = bfd_add_to_strtab (abfd, shstrtab,
-							    ".strtab");
-  elf_tdata (abfd)->shstrtab_hdr.sh_name = bfd_add_to_strtab (abfd, shstrtab,
-							      ".shstrtab");
+  elf_tdata (abfd)->symtab_hdr.sh_name =
+    (unsigned int) _bfd_stringtab_add (shstrtab, ".symtab", true, false);
+  elf_tdata (abfd)->strtab_hdr.sh_name =
+    (unsigned int) _bfd_stringtab_add (shstrtab, ".strtab", true, false);
+  elf_tdata (abfd)->shstrtab_hdr.sh_name =
+    (unsigned int) _bfd_stringtab_add (shstrtab, ".shstrtab", true, false);
   if (elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
       || elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
       || elf_tdata (abfd)->shstrtab_hdr.sh_name == (unsigned int) -1)
@@ -2260,8 +2240,9 @@ prep_headers (abfd)
 }
 
 static boolean
-swap_out_syms (abfd)
+swap_out_syms (abfd, sttp)
      bfd *abfd;
+     struct bfd_strtab_hash **sttp;
 {
   if (!elf_map_symbols (abfd))
     return false;
@@ -2270,14 +2251,16 @@ swap_out_syms (abfd)
   {
     int symcount = bfd_get_symcount (abfd);
     asymbol **syms = bfd_get_outsymbols (abfd);
-    struct strtab *stt = bfd_new_strtab (abfd);
+    struct bfd_strtab_hash *stt;
     Elf_Internal_Shdr *symtab_hdr;
     Elf_Internal_Shdr *symstrtab_hdr;
     Elf_External_Sym *outbound_syms;
     int idx;
 
-    if (!stt)
+    stt = elf_stringtab_init ();
+    if (stt == NULL)
       return false;
+
     symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
     symtab_hdr->sh_type = SHT_SYMTAB;
     symtab_hdr->sh_entsize = sizeof (Elf_External_Sym);
@@ -2318,7 +2301,9 @@ swap_out_syms (abfd)
 	  sym.st_name = 0;
 	else
 	  {
-	    sym.st_name = bfd_add_to_strtab (abfd, stt, syms[idx]->name);
+	    sym.st_name = (unsigned long) _bfd_stringtab_add (stt,
+							      syms[idx]->name,
+							      true, false);
 	    if (sym.st_name == (unsigned long) -1)
 	      return false;
 	  }
@@ -2406,8 +2391,9 @@ swap_out_syms (abfd)
       }
 
     symtab_hdr->contents = (PTR) outbound_syms;
-    symstrtab_hdr->contents = (PTR) stt->tab;
-    symstrtab_hdr->sh_size = stt->length;
+
+    *sttp = stt;
+    symstrtab_hdr->sh_size = _bfd_stringtab_size (stt);
     symstrtab_hdr->sh_type = SHT_STRTAB;
 
     symstrtab_hdr->sh_flags = 0;
@@ -2430,11 +2416,9 @@ write_shdrs_and_ehdr (abfd)
   Elf_External_Shdr *x_shdrp;	/* Section header table, external form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   unsigned int count;
-  struct strtab *shstrtab;
 
   i_ehdrp = elf_elfheader (abfd);
   i_shdrp = elf_elfsections (abfd);
-  shstrtab = elf_shstrtab (abfd);
 
   /* swap the header before spitting it out... */
 
@@ -2459,8 +2443,7 @@ write_shdrs_and_ehdr (abfd)
   for (count = 0; count < i_ehdrp->e_shnum; count++)
     {
 #if DEBUG & 2
-      elf_debug_section (shstrtab->tab + i_shdrp[count]->sh_name, count,
-			 i_shdrp[count]);
+      elf_debug_section (count, i_shdrp[count]);
 #endif
       elf_swap_shdr_out (abfd, i_shdrp[count], x_shdrp + count);
     }
@@ -2536,6 +2519,11 @@ NAME(bfd_elf,write_object_contents) (abfd)
 	    return false;
 	}
     }
+
+  /* Write out the section header names.  */
+  if (bfd_seek (abfd, elf_tdata (abfd)->shstrtab_hdr.sh_offset, SEEK_SET) != 0
+      || ! _bfd_stringtab_emit (abfd, elf_shstrtab (abfd)))
+    return false;
 
   if (bed->elf_backend_final_write_processing)
     (*bed->elf_backend_final_write_processing) (abfd,
@@ -3001,12 +2989,13 @@ elf_slurp_reloc_table (abfd, asect, symbols)
 
 #ifdef DEBUG
 static void
-elf_debug_section (str, num, hdr)
-     char *str;
+elf_debug_section (num, hdr)
      int num;
      Elf_Internal_Shdr *hdr;
 {
-  fprintf (stderr, "\nSection#%d '%s' 0x%.8lx\n", num, str, (long) hdr);
+  fprintf (stderr, "\nSection#%d '%s' 0x%.8lx\n", num,
+	   hdr->bfd_section != NULL ? hfd->bfd_section->name : "",
+	   (long) hdr);
   fprintf (stderr,
 	   "sh_name      = %ld\tsh_type      = %ld\tsh_flags     = %ld\n",
 	   (long) hdr->sh_name,
@@ -3895,9 +3884,10 @@ elf_link_record_dynamic_symbol (info, h)
     {
       h->dynindx = elf_hash_table (info)->dynsymcount;
       ++elf_hash_table (info)->dynsymcount;
-      h->dynstr_index = bfd_add_to_strtab (elf_hash_table (info)->dynobj,
-					   elf_hash_table (info)->dynstr,
-					   h->root.root.string);
+      h->dynstr_index =
+	(unsigned long) _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					    h->root.root.string,
+					    true, false);
       if (h->dynstr_index == (unsigned long) -1)
 	return false;
     }
@@ -4002,7 +3992,7 @@ elf_link_add_object_symbols (abfd, info)
     {
       asection *s;
       const char *name;
-      unsigned long strindex;
+      bfd_size_type strindex;
 
       dynamic = true;
 
@@ -4091,10 +4081,9 @@ elf_link_add_object_symbols (abfd, info)
 	}
 
       /* Add a DT_NEEDED entry for this dynamic object.  */
-      strindex = bfd_add_to_strtab (abfd,
-				    elf_hash_table (info)->dynstr,
-				    name);
-      if (strindex == (unsigned long) -1)
+      strindex = _bfd_stringtab_add (elf_hash_table (info)->dynstr, name,
+				     true, false);
+      if (strindex == (bfd_size_type) -1)
 	goto error_return;
       if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
 	goto error_return;
@@ -4525,7 +4514,7 @@ elf_link_create_dynamic_sections (abfd, info)
     return false;
 
   /* Create a strtab to hold the dynamic symbol names.  */
-  elf_hash_table (info)->dynstr = bfd_new_strtab (abfd);
+  elf_hash_table (info)->dynstr = elf_stringtab_init ();
   if (elf_hash_table (info)->dynstr == NULL)
     return false;
 
@@ -4864,28 +4853,29 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
 
   if (soname != NULL)
     {
-      unsigned long indx;
+      bfd_size_type indx;
 
-      indx = bfd_add_to_strtab (dynobj, elf_hash_table (info)->dynstr, soname);
-      if (indx == (unsigned long) -1
+      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, soname,
+				 true, true);
+      if (indx == (bfd_size_type) -1
 	  || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
 	return false;
     }      
 
   if (rpath != NULL)
     {
-      unsigned long indx;
+      bfd_size_type indx;
 
-      indx = bfd_add_to_strtab (dynobj, elf_hash_table (info)->dynstr, rpath);
-      if (indx == (unsigned long) -1
+      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
+				 true, true);
+      if (indx == (bfd_size_type) -1
 	  || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
 	return false;
     }
 
   s = bfd_get_section_by_name (dynobj, ".dynstr");
   BFD_ASSERT (s != NULL);
-  s->_raw_size = elf_hash_table (info)->dynstr->length;
-  s->contents = (unsigned char *) elf_hash_table (info)->dynstr->tab;
+  s->_raw_size = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
 
   /* Find all symbols which were defined in a dynamic object and make
      the backend pick a reasonable value for them.  */
@@ -4910,7 +4900,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
       || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
       || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
       || ! elf_add_dynamic_entry (info, DT_STRSZ,
-				  elf_hash_table (info)->dynstr->length)
+				  _bfd_stringtab_size (elf_hash_table (info)
+						       ->dynstr))
       || ! elf_add_dynamic_entry (info, DT_SYMENT,
 				  sizeof (Elf_External_Sym)))
     return false;
@@ -5032,7 +5023,7 @@ struct elf_final_link_info
   /* Output BFD.  */
   bfd *output_bfd;
   /* Symbol string table.  */
-  struct strtab *symstrtab;
+  struct bfd_strtab_hash *symstrtab;
   /* .dynsym section.  */
   asection *dynsym_sec;
   /* .hash section.  */
@@ -5106,7 +5097,7 @@ elf_bfd_final_link (abfd, info)
 
   finfo.info = info;
   finfo.output_bfd = abfd;
-  finfo.symstrtab = bfd_new_strtab (abfd);
+  finfo.symstrtab = elf_stringtab_init ();
   if (finfo.symstrtab == NULL)
     return false;
   if (dynobj == NULL)
@@ -5443,22 +5434,26 @@ elf_bfd_final_link (abfd, info)
   /* Now we know the size of the symtab section.  */
   off += symtab_hdr->sh_size;
 
-  /* Finish up the symbol string table (.strtab) section.  */
+  /* Finish up and write out the symbol string table (.strtab)
+     section.  */
   symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
   /* sh_name was set in prep_headers.  */
   symstrtab_hdr->sh_type = SHT_STRTAB;
   symstrtab_hdr->sh_flags = 0;
   symstrtab_hdr->sh_addr = 0;
-  symstrtab_hdr->sh_size = finfo.symstrtab->length;
+  symstrtab_hdr->sh_size = _bfd_stringtab_size (finfo.symstrtab);
   symstrtab_hdr->sh_entsize = 0;
   symstrtab_hdr->sh_link = 0;
   symstrtab_hdr->sh_info = 0;
   /* sh_offset is set just below.  */
   symstrtab_hdr->sh_addralign = 1;
-  symstrtab_hdr->contents = (PTR) finfo.symstrtab->tab;
 
   off = assign_file_position_for_section (symstrtab_hdr, off, true);
   elf_tdata (abfd)->next_file_pos = off;
+
+  if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
+      || ! _bfd_stringtab_emit (abfd, finfo.symstrtab))
+    return false;
 
   /* Adjust the relocs to have the correct symbol indices.  */
   for (o = abfd->sections; o != NULL; o = o->next)
@@ -5602,13 +5597,32 @@ elf_bfd_final_link (abfd, info)
                  This test is fragile.  */
 	      continue;
 	    }
-	  if (! bfd_set_section_contents (abfd, o->output_section,
-					  o->contents, o->output_offset,
-					  o->_raw_size))
-	    goto error_return;
+	  if ((elf_section_data (o->output_section)->this_hdr.sh_type
+	       != SHT_STRTAB)
+	      || strcmp (bfd_get_section_name (abfd, o), ".dynstr") != 0)
+	    {
+	      if (! bfd_set_section_contents (abfd, o->output_section,
+					      o->contents, o->output_offset,
+					      o->_raw_size))
+		goto error_return;
+	    }
+	  else
+	    {
+	      file_ptr off;
+
+	      /* The contents of the .dynstr section are actually in a
+                 stringtab.  */
+	      off = elf_section_data (o->output_section)->this_hdr.sh_offset;
+	      if (bfd_seek (abfd, off, SEEK_SET) != 0
+		  || ! _bfd_stringtab_emit (abfd,
+					    elf_hash_table (info)->dynstr))
+		goto error_return;
+	    }
 	}
     }
 
+  if (finfo.symstrtab != NULL)
+    _bfd_stringtab_free (finfo.symstrtab);
   if (finfo.contents != NULL)
     free (finfo.contents);
   if (finfo.external_relocs != NULL)
@@ -5637,6 +5651,8 @@ elf_bfd_final_link (abfd, info)
   return true;
 
  error_return:
+  if (finfo.symstrtab != NULL)
+    _bfd_stringtab_free (finfo.symstrtab);
   if (finfo.contents != NULL)
     free (finfo.contents);
   if (finfo.external_relocs != NULL)
@@ -5691,8 +5707,9 @@ elf_link_output_sym (finfo, name, elfsym, input_sec)
     elfsym->st_name = 0;
   else
     {
-      elfsym->st_name = bfd_add_to_strtab (finfo->output_bfd,
-					   finfo->symstrtab, name);
+      elfsym->st_name = (unsigned long) _bfd_stringtab_add (finfo->symstrtab,
+							    name, true,
+							    false);
       if (elfsym->st_name == (unsigned long) -1)
 	return false;
     }
@@ -5802,12 +5819,12 @@ elf_link_output_extsym (h, data)
 
     case bfd_link_hash_defined:
       {
-
 	input_sec = h->root.u.def.section;
 	if (input_sec->output_section != NULL)
 	  {
-	    sym.st_shndx = elf_section_from_bfd_section (finfo->output_bfd,
-							 input_sec->output_section);
+	    sym.st_shndx =
+	      elf_section_from_bfd_section (finfo->output_bfd,
+					    input_sec->output_section);
 	    if (sym.st_shndx == (unsigned short) -1)
 	      {
 		/* FIXME: No way to handle errors.  */
@@ -5912,8 +5929,7 @@ elf_link_input_bfd (finfo, input_bfd)
   boolean (*relocate_section) PARAMS ((bfd *, struct bfd_link_info *,
 				       bfd *, asection *, bfd_byte *,
 				       Elf_Internal_Rela *,
-				       Elf_Internal_Sym *,
-				       asection **, char *));
+				       Elf_Internal_Sym *, asection **));
   bfd *output_bfd;
   Elf_Internal_Shdr *symtab_hdr;
   size_t locsymcount;
@@ -5966,7 +5982,7 @@ elf_link_input_bfd (finfo, input_bfd)
     {
       asection *isec;
       const char *name;
-      bfd_vma oldval;
+      Elf_Internal_Sym osym;
 
       elf_swap_symbol_in (input_bfd, esym, isym);
       *pindex = -1;
@@ -6035,10 +6051,12 @@ elf_link_input_bfd (finfo, input_bfd)
 
       /* If we get here, we are going to output this symbol.  */
 
+      osym = *isym;
+
       /* Adjust the section index for the output file.  */
-      isym->st_shndx = elf_section_from_bfd_section (output_bfd,
-						     isec->output_section);
-      if (isym->st_shndx == (unsigned short) -1)
+      osym.st_shndx = elf_section_from_bfd_section (output_bfd,
+						    isec->output_section);
+      if (osym.st_shndx == (unsigned short) -1)
 	return false;
 
       *pindex = output_bfd->symcount;
@@ -6050,16 +6068,12 @@ elf_link_input_bfd (finfo, input_bfd)
 	 we assume that they also have a reasonable value for
 	 output_section.  Any special sections must be set up to meet
 	 these requirements.  */
-      oldval = isym->st_value;
-      isym->st_value += isec->output_offset;
+      osym.st_value += isec->output_offset;
       if (! finfo->info->relocateable)
-	isym->st_value += isec->output_section->vma;
+	osym.st_value += isec->output_section->vma;
 
-      if (! elf_link_output_sym (finfo, name, isym, isec))
+      if (! elf_link_output_sym (finfo, name, &osym, isec))
 	return false;
-
-      /* Restore the old value for reloc handling.  */
-      isym->st_value = oldval;
     }
 
   /* Relocate the contents of each section.  */
@@ -6119,8 +6133,7 @@ elf_link_input_bfd (finfo, input_bfd)
 				     finfo->contents,
 				     internal_relocs,
 				     finfo->internal_syms,
-				     finfo->sections,
-				     finfo->symstrtab->tab))
+				     finfo->sections))
 	    return false;
 
 	  if (finfo->info->relocateable)
