@@ -1,3 +1,21 @@
+Fri Jun 19 17:08:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_size_dynamic_sections): Only strip a
+	linker created empty input section if the output section has the
+	same name.
+
+	* elflink.h (elf_link_output_extsym): Print an error message if
+	_bfd_elf_section_from_bfd_section fails.
+
+	* elf.c (_bfd_elf_section_from_bfd_section): Call bfd_set_error on
+	failure.
+
+Tue Jun 16 11:55:55 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (copy_private_bfd_data): Improve handling of Solaris
+ 	native linker output.  Avoid putting an empty section in more than
+ 	one segment.
+
 Fri Jun 12 13:30:17 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
