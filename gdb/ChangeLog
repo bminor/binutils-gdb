@@ -1,3 +1,9 @@
+Wed Sep  2 20:45:31 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* utils.c (strcmp_iw):  Add a hack to allow "FOO(ARGS)" to
+	match "FOO".  This allows 'break Foo' to work when Foo is
+	a mangled C++ function.  (See comment before function.)
+
 Wed Sep  2 13:45:27 1992  John Gilmore  (gnu@cygnus.com)
 
 	* config/rs6000.mh (MH_CFLAGS):  Circumvent IBM <rpc/rpc.h> bug,

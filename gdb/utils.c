@@ -699,6 +699,8 @@ query (va_alist)
 
   while (1)
     {
+      wrap_here ("");		/* Flush any buffered output */
+      fflush (stdout);
       va_start (args);
       ctlstr = va_arg (args, char *);
       vfprintf_filtered (stdout, ctlstr, args);
@@ -1215,13 +1217,38 @@ void
 fprintf_filtered (va_alist)
      va_dcl
 {
+  va_list args;
   FILE *stream;
   char *format;
-  va_list args;
 
   va_start (args);
   stream = va_arg (args, FILE *);
   format = va_arg (args, char *);
+
+  /* This won't blow up if the restrictions described above are
+     followed.   */
+  vfprintf_filtered (stream, format, args);
+  va_end (args);
+}
+
+/* Like fprintf_filtered, but prints it's result indent.
+   Called as fprintfi_filtered (spaces, format, arg1, arg2, ...); */
+
+/* VARARGS */
+void
+fprintfi_filtered (va_alist)
+     va_dcl
+{
+  va_list args;
+  int spaces;
+  FILE *stream;
+  char *format;
+
+  va_start (args);
+  spaces = va_arg (args, int);
+  stream = va_arg (args, FILE *);
+  format = va_arg (args, char *);
+  print_spaces_filtered (spaces, stream);
 
   /* This won't blow up if the restrictions described above are
      followed.   */
@@ -1240,6 +1267,26 @@ printf_filtered (va_alist)
   va_start (args);
   format = va_arg (args, char *);
 
+  vfprintf_filtered (stdout, format, args);
+  va_end (args);
+}
+
+/* Like printf_filtered, but prints it's result indented.
+   Called as printfi_filtered (spaces, format, arg1, arg2, ...); */
+
+/* VARARGS */
+void
+printfi_filtered (va_alist)
+     va_dcl
+{
+  va_list args;
+  int spaces;
+  char *format;
+
+  va_start (args);
+  spaces = va_arg (args, int);
+  format = va_arg (args, char *);
+  print_spaces_filtered (spaces, stdout);
   vfprintf_filtered (stdout, format, args);
   va_end (args);
 }
@@ -1325,9 +1372,14 @@ fprint_symbol (stream, name)
 
 /* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
    differences in whitespace.  Returns 0 if they match, non-zero if they
-   don't (slightly different than strcmp()'s range of return values). */
+   don't (slightly different than strcmp()'s range of return values).
+   
+   As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
+   This "feature" is useful for demangle_and_match(), which is used
+   when searching for matching C++ function names (such as if the
+   user types 'break FOO', where FOO is a mangled C++ function). */
 
-int
+static int
 strcmp_iw (string1, string2)
      const char *string1;
      const char *string2;
@@ -1352,7 +1404,7 @@ strcmp_iw (string1, string2)
 	  string2++;
 	}
     }
-  return (!((*string1 == '\0') && (*string2 == '\0')));
+  return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
 }
 
 /* Demangle NAME and compare the result with LOOKFOR, ignoring any differences
