@@ -1,3 +1,8 @@
+Mon Jan 31 17:55:14 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* as.c (statistics_flag): Renamed from quiet_flag.
+	(main): Get statistics with --statistics instead of -noquiet.
+
 Mon Jan 31 07:19:30 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* Makefile.in: Support for Gnu ASsembler Preprocessor.
