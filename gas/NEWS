@@ -3,6 +3,8 @@ GASP now correctly parses floating point numbers. Unless the base is explicitly
 specified, they are interpreted as decimal numbers regardless of the currently
 specified base.
 
+Support for Don Knuth's MMIX, by Hans-Peter Nilsson.
+
 Support for the OpenRISC 32-bit embedded processor by OpenCores.
 
 The ARM assembler now accepts -march=..., -mcpu=... and -mfpu=... for
