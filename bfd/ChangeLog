@@ -1,4 +1,9 @@
 start-sanitize-v850
+Wed Oct 16 11:24:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (bfd_elf32_v850_reloc): Mask out bits we
+	no longer want in pc-relative relocs.
+
 Tue Oct 15 22:17:37 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (bfd_elf32_v850_reloc): Don't silently

@@ -314,6 +314,7 @@ bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	    return bfd_reloc_dangerous;
 
 	  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
+	  insn &= ~0xfffe003f;
 	  insn |= (((relocation & 0xfffe) << 16)
 		   | ((relocation & 0x3f0000) >> 16));
 	  bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
@@ -328,6 +329,7 @@ bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	    return bfd_reloc_dangerous;
 
 	  insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+	  insn &= 0xf870;
 	  insn |= ((relocation & 0x1f0) << 7) | ((relocation & 0x0e) << 3);
 	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
 	  return bfd_reloc_ok;
