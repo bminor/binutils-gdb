@@ -1,3 +1,8 @@
+2004-12-01  Paul Brook  <paul@codesourcery.com>
+
+	* ld-elf/group1.d: New test.
+	* ld-elf/group.ld, ld-elf/group1a.s, ld-elf/group1b.s: New test.
+
 2004-12-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-selective/selective.exp: Use -print-libgcc-file-name for

@@ -3425,6 +3425,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  if (sec == NULL)
 	    sec = bfd_abs_section_ptr;
+	  else if (sec->kept_section)
+	    {
+	      /* Symbols from discarded section are undefined.  */
+	      sec = bfd_und_section_ptr;
+	      isym->st_shndx = SHN_UNDEF;
+	    }
 	  else if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
 	    value -= sec->vma;
 	}

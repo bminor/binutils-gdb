@@ -1,3 +1,8 @@
+2004-12-01  Paul Brook  <paul@codesourcery.com>
+
+	* elflink.c (elf_link_add_object_symbols): Make symbols from discarded
+	sections undefined.
+
 2004-11-30  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (struct elf32_arm_link_hash_table): Remove
