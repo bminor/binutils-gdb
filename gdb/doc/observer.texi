@@ -73,3 +73,7 @@ The following observable events are defined:
 @deftypefun void normal_stop (struct bpstats *@var{bs})
 The inferior has stopped for real.
 @end deftypefun
+
+@deftypefun void target_changed (struct target_ops *@var{target})
+The target's register contents has changed.
+@end deftypefun
