@@ -1,3 +1,7 @@
+2000-05-18  H.J. Lu  <hjl@gnu.org>
+
+	* lexsup.c (parse_args): `i' == `r', not `q'.
+
 Thu May 18 10:47:57 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.tgt (hppa*64*-*-*): Enable PA64 target.

@@ -718,10 +718,10 @@ parse_args (argc, argv)
 	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, (char *) NULL, (char *) NULL, 0);
 	  break;
-	case 'i':
 	case 'q':
 	  link_info.emitrelocations = true;
 	  break;
+	case 'i':
 	case 'r':
 	  link_info.relocateable = true;
 	  config.build_constructors = false;
