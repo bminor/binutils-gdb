@@ -1,3 +1,12 @@
+2002-05-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (C Preprocessor Macros): New chapter.
+	Include it in the main menu.
+	(Contributors): Credit Jim Blandy with macro support.
+	(Compilation): Explain how to get macro information into the
+	executable.
+	(Expressions): Note that preprocessor macros are expanded.
+
 2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Debug Session): Document new `udp:' and `tcp:'

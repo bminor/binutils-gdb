@@ -128,6 +128,7 @@ Copyright (C) 1988-2002 Free Software Foundation, Inc.
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
+* Macros::                      Preprocessor Macros
 * Tracepoints::                 Debugging remote targets non-intrusively
 * Overlays::                    Debugging programs that use overlays
 
@@ -462,6 +463,8 @@ Romig-Koch, Rob Savoye, Jamie Smith, Mike Stump, Ian Taylor, Angela
 Thomas, Michael Tiemann, Tom Tromey, Ron Unrau, Jim Wilson, and David
 Zuhn have made contributions both large and small.
 
+Jim Blandy added support for preprocessor macros, while working for Red
+Hat.
 
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
@@ -1608,6 +1611,16 @@ and addresses in the executable code.
 
 To request debugging information, specify the @samp{-g} option when you run
 the compiler.
+
+Most compilers do not include information about preprocessor macros in
+the debugging information if you specify the @option{-g} flag alone,
+because this information is rather large.  Version 3.1 of @value{NGCC},
+the @sc{gnu} C compiler, provides macro information if you specify the
+options @option{-gdwarf-2} and @option{-g3}; the former option requests
+debugging information in the Dwarf 2 format, and the latter requests
+``extra information''.  In the future, we hope to find more compact ways
+to represent macro information, so that it can be included with
+@option{-g} alone.
 
 Many C compilers are unable to handle the @samp{-g} and @samp{-O}
 options together.  Using those compilers, you cannot generate optimized
@@ -4414,9 +4427,10 @@ Table}.
 @code{print} and many other @value{GDBN} commands accept an expression and
 compute its value.  Any kind of constant, variable or operator defined
 by the programming language you are using is valid in an expression in
-@value{GDBN}.  This includes conditional expressions, function calls, casts
-and string constants.  It unfortunately does not include symbols defined
-by preprocessor @code{#define} commands.
+@value{GDBN}.  This includes conditional expressions, function calls,
+casts, and string constants.  It also includes preprocessor macros, if
+you compiled your program to include this information; see
+@ref{Compilation}.
 
 @value{GDBN} supports array constants in expressions input by
 the user.  The syntax is @{@var{element}, @var{element}@dots{}@}.  For example,
@@ -5773,6 +5787,230 @@ These offsets are relative to the addresses in the file, before
 the @var{bias} argument is applied.
 
 @end table
+
+@node Macros
+@chapter C Preprocessor Macros
+
+Some languages, such as C and C++, provide a way to define and invoke
+``preprocessor macros'' which expand into strings of tokens.
+@value{GDBN} can evaluate expressions containing macro invocations, show
+the result of macro expansion, and show a macro's definition, including
+where it was defined.
+
+You may need to compile your program specially to provide @value{GDBN}
+with information about preprocessor macros.  Most compilers do not
+include macros in their debugging information, even when you compile
+with the @option{-g} flag.  @xref{Compilation}.
+
+A program may define a macro at one point, remove that definition later,
+and then provide a different definition after that.  Thus, at different
+points in the program, a macro may have different definitions, or have
+no definition at all.  If there is a current stack frame, @value{GDBN}
+uses the macros in scope at that frame's source code line.  Otherwise,
+@value{GDBN} uses the macros in scope at the current listing location;
+see @ref{List}.
+
+At the moment, @value{GDBN} does not support the @code{##}
+token-splicing operator, the @code{#} stringification operator, or
+variable-arity macros.
+
+Whenever @value{GDBN} evaluates an expression, it always expands any
+macro invocations present in the expression.  @value{GDBN} also provides
+the following commands for working with macros explicitly.
+
+@table @code
+
+@kindex macro expand
+@cindex macro expansion, showing the results of preprocessor
+@cindex preprocessor macro expansion, showing the results of
+@cindex expanding preprocessor macros
+@item macro expand @var{expression}
+@itemx macro exp @var{expression}
+Show the results of expanding all preprocessor macro invocations in
+@var{expression}.  Since @value{GDBN} simply expands macros, but does
+not parse the result, @var{expression} need not be a valid expression;
+it can be any string of tokens.
+
+@kindex macro expand-once
+@item macro expand-once @var{expression}
+@itemx macro exp1 @var{expression}
+@i{(This command is not yet implemented.)}  Show the results of
+expanding those preprocessor macro invocations that appear explicitly in
+@var{expression}.  Macro invocations appearing in that expansion are
+left unchanged.  This command allows you to see the effect of a
+particular macro more clearly, without being confused by further
+expansions.  Since @value{GDBN} simply expands macros, but does not
+parse the result, @var{expression} need not be a valid expression; it
+can be any string of tokens.
+
+@kindex show macro
+@cindex macro definition, showing
+@cindex definition, showing a macro's
+@item show macro @var{macro}
+Show the definition of the macro named @var{macro}, and describe the
+source location where that definition was established.
+
+@kindex macro define
+@cindex user-defined macros
+@cindex defining macros interactively
+@cindex macros, user-defined
+@item macro define @var{macro} @var{replacement-list}
+@itemx macro define @var{macro}(@var{arglist}) @var{replacement-list}
+@i{(This command is not yet implemented.)}  Introduce a definition for a
+preprocessor macro named @var{macro}, invocations of which are replaced
+by the tokens given in @var{replacement-list}.  The first form of this
+command defines an ``object-like'' macro, which takes no arguments; the
+second form defines a ``function-like'' macro, which takes the arguments
+given in @var{arglist}.
+
+A definition introduced by this command is in scope in every expression
+evaluated in @value{GDBN}, until it is removed with the @command{macro
+undef} command, described below.  The definition overrides all
+definitions for @var{macro} present in the program being debugged, as
+well as any previous user-supplied definition.
+
+@kindex macro undef
+@item macro undef @var{macro}
+@i{(This command is not yet implemented.)}  Remove any user-supplied
+definition for the macro named @var{macro}.  This command only affects
+definitions provided with the @command{macro define} command, described
+above; it cannot remove definitions present in the program being
+debugged.
+
+@end table
+
+@cindex macros, example of debugging with
+Here is a transcript showing the above commands in action.  First, we
+show our source files:
+
+@smallexample
+$ cat sample.c
+#include <stdio.h>
+#include "sample.h"
+
+#define M 42
+#define ADD(x) (M + x)
+
+main ()
+@{
+#define N 28
+  printf ("Hello, world!\n");
+#undef N
+  printf ("We're so creative.\n");
+#define N 1729
+  printf ("Goodbye, world!\n");
+@}
+$ cat sample.h
+#define Q <
+$
+@end smallexample
+
+Now, we compile the program using the @sc{gnu} C compiler, @value{NGCC}.
+We pass the @option{-gdwarf-2} and @option{-g3} flags to ensure the
+compiler includes information about preprocessor macros in the debugging
+information.
+
+@smallexample
+$ gcc -gdwarf-2 -g3 sample.c -o sample
+$
+@end smallexample
+
+Now, we start @value{GDBN} on our sample program:
+
+@smallexample
+$ gdb -nw sample
+GNU gdb 2002-05-06-cvs
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, @dots{}
+(gdb)
+@end smallexample
+
+We can expand macros and examine their definitions, even when the
+program is not running.  @value{GDBN} uses the current listing position
+to decide which macro definitions are in scope:
+
+@smallexample
+(gdb) list main
+3
+4       #define M 42
+5       #define ADD(x) (M + x)
+6
+7       main ()
+8       @{
+9       #define N 28
+10        printf ("Hello, world!\n");
+11      #undef N
+12        printf ("We're so creative.\n");
+(gdb) show macro ADD
+Defined at /home/jimb/gdb/macros/play/sample.c:5
+#define ADD(x) (M + x)
+(gdb) show macro Q
+Defined at /home/jimb/gdb/macros/play/sample.h:1
+  included at /home/jimb/gdb/macros/play/sample.c:2
+#define Q <
+(gdb) macro expand ADD(1)
+expands to: (42 + 1)
+(gdb) macro expand-once ADD(1)
+expands to: once (M + 1)
+(gdb) 
+@end smallexample
+
+In the example above, note that @command{macro expand-once} expands only
+the macro invocation explicit in the original text --- the invocation of
+@code{ADD} --- but does not expand the invocation of the macro @code{M},
+which was introduced by @code{ADD}.
+
+Once the program is running, GDB uses the macro definitions in force at
+the source line of the current stack frame:
+
+@smallexample
+(gdb) break main
+Breakpoint 1 at 0x8048370: file sample.c, line 10.
+(gdb) run
+Starting program: /home/jimb/gdb/macros/play/sample 
+
+Breakpoint 1, main () at sample.c:10
+10        printf ("Hello, world!\n");
+(gdb) 
+@end smallexample
+
+At line 10, the definition of the macro @code{N} at line 9 is in force:
+
+@smallexample
+(gdb) show macro N
+Defined at /home/jimb/gdb/macros/play/sample.c:9
+#define N 28
+(gdb) macro expand N Q M
+expands to: 28 < 42
+(gdb) print N Q M
+$1 = 1
+(gdb) 
+@end smallexample
+
+As we step over directives that remove @code{N}'s definition, and then
+give it a new definition, @value{GDBN} finds the definition (or lack
+thereof) in force at each point:
+
+@smallexample
+(gdb) next
+Hello, world!
+12        printf ("We're so creative.\n");
+(gdb) show macro N
+The symbol `N' has no definition as a C/C++ preprocessor macro
+at /home/jimb/gdb/macros/play/sample.c:12
+(gdb) next
+We're so creative.
+14        printf ("Goodbye, world!\n");
+(gdb) show macro N
+Defined at /home/jimb/gdb/macros/play/sample.c:13
+#define N 1729
+(gdb) macro expand N Q M
+expands to: 1729 < 42
+(gdb) print N Q M
+$2 = 0
+(gdb) 
+@end smallexample
+
 
 @node Tracepoints
 @chapter Tracepoints
