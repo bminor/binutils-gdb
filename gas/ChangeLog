@@ -1,3 +1,9 @@
+Mon Mar 28 12:35:00 1994  David Edelsohn  (edelsohn@npac.syr.edu)
+
+	* config/tc-ppc.c (md_parse_option): Add -mpwrx (POWER/2 aka
+	RIOS2), -mpwr (POWER aka RIOS1), -mppc (PowerPC aka MPC603/604),
+	and -many (all architectures).
+
 Sun Mar 27 14:04:19 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * config/tc-hppa.c (tc_gen_reloc): Set addend for relocation
