@@ -125,7 +125,7 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
 # -I${srcdir}/config for more generic config files.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config -I$(INCLUDE_DIR) -I$(BFD_DIR) -I$(READLINE_DIR)
+INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config -I$(INCLUDE_DIR)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -150,7 +150,7 @@ LIBIBERTY = ./../libiberty${subdir}/libiberty.a
 OPCODES = ./../opcodes${subdir}/libopcodes.a
 
 # The config/mh-* file must define REGEX and REGEX1 on USG machines.
-# If your sysyem is missing alloca(), or, more likely, it's there but
+# If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, define ALLOCA & ALLOCA1 too.
 
 # Libraries and corresponding dependencies for compiling gdb.
@@ -531,40 +531,52 @@ alldeps.mak: force
 	echo '# End of "alldeps.mak" definitions' >>alldeps.mak;
 	rm -f alldeps*.tmp allparam*.tmp allconfig*.tmp
 
-# The sed script makes everything which depends on {x,t}m.h depend on
-# config.status as well, in case someone reconfigures gdb out from
-# under an already compiled gdb.
 depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
 	@echo Also ignore any errors in arm-convert.s.
-	-$(GCC) -MM -nostdinc -I/usr/include $(INTERNAL_CFLAGS) \
+	-$(GCC) -MM -nostdinc -I/usr/include -I${BFD_DIR} \
+	  -I${READLINE_DIR} $(INTERNAL_CFLAGS) \
 	  `ls $(SOURCES) | grep -v '\.[hy]$$' | \
 	  sort -u` >depend.tmp
+#BEGIN COMMENTED OUT CODE -- this should now be taken care of below.
 # If running in srcdir, translate "./foo.c" into "$srcdir/foo.c" except
 # for xm.h, tm.h and nm.h.  This allows the same "depend" file to be used
 # by the various subdirectories.
-	if [ "${srcdir}" = "." ] ; then \
-	  <depend.tmp sed \
-	    -e 's; ./xm.h; xm.h;g'  \
-	    -e 's; ./tm.h; tm.h;g'  \
-	    -e 's; ./nm.h; nm.h;g'  \
-	    -e 's; \./; $${srcdir}/;g'  \
-	    -e 's; vx-share/; $${srcdir}/vx-share/;g'  \
-	    -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
-	    -e 's; 29k-share/; $${srcdir}/29k-share/;g'  \
-	    >depend.tm2; \
-	  rm depend.tmp; \
-	  mv depend.tm2 depend.tmp; \
-	fi
+#	if [ "${srcdir}" = "." ] ; then \
+#	  <depend.tmp sed \
+#	    -e 's; ./xm.h; xm.h;g'  \
+#	    -e 's; ./tm.h; tm.h;g'  \
+#	    -e 's; ./nm.h; nm.h;g'  \
+#	    -e 's; \./; $${srcdir}/;g'  \
+#	    -e 's; vx-share/; $${srcdir}/vx-share/;g'  \
+#	    -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
+#	    -e 's; 29k-share/; $${srcdir}/29k-share/;g'  \
+#	    >depend.tm2; \
+#	  rm depend.tmp; \
+#	  mv depend.tm2 depend.tmp; \
+#	fi
+#END COMMENTED OUT CODE
+# Make everything which depends on {x,t,n}m.h depend on config.status as
+# well, in case someone reconfigures gdb out from under an already
+# compiled gdb.
+#
+# Translate SRCDIR/foo.c to $srcdir/foo.c.  This allows this "depend" file
+# to be used by any dir, or included in a distribution.  It's possible
+# we should write the generated copy into SRCDIR like "make headers" does
+# in bfd.  We do not try to quote the regexp, so if SRCDIR/ is "./" it will
+# also match any single character followed by "/".  This is OK.
 	<depend.tmp sed \
-	  -e 's; [xt]m.h;& config.status;g'  \
 	  -e 's; $(INCLUDE_DIR)/; $(INCLUDE_DEP)/;g'  \
 	  -e 's; $(READLINE_DIR)/; $(READLINE_DEP)/;g'  \
 	  -e 's; [a-z0-9./]*bfd/; $(BFD_DEP)/;g'  \
-	  -e 's; ./xm.h; xm.h config.status;g'  \
-	  -e 's; ./tm.h; tm.h config.status;g'  \
-	  -e 's; ./nm.h; nm.h config.status;g'  \
+	  -e 's; \./xm.h; xm.h config.status;g'  \
+	  -e 's; \./tm.h; tm.h config.status;g'  \
+	  -e 's; \./nm.h; nm.h config.status;g'  \
+	  -e 's; ${srcdir}/; $${srcdir}/;g' \
+	  -e 's; vx-share/; $${srcdir}/vx-share/;g'  \
+	  -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
+	  -e 's; 29k-share/; $${srcdir}/29k-share/;g'  \
 	  >depend.tm3;
 # OK, get your sed manual out.  This script makes the rules in
 # depend explicitly state the rule, rather than relying on VPATH
@@ -572,6 +584,10 @@ depend: $(SOURCES) Makefile.in
 # be portable to any make worthy of the name.
 # There is one exception: the *.tab.c files can exist either in srcdir
 # or in ., so make sure not to use an explicit rule for them.
+#
+# Adding -I${BFD_DIR} is required for all the files which use BFD internals
+# Adding -I${READLINE_DIR} is required because the readline header files
+# are in readline not in include.  They probably should be moved.
 	<depend.tm3 sed \
 	  -e '/:/h' \
 	  -e '/\\$$/b end' \
@@ -579,10 +595,19 @@ depend: $(SOURCES) Makefile.in
 	  -e 'g' \
 	  -e '/:.*\.tab\.c/d' \
 	  -e 's/.*:\(.*\.c\).*/	$${CC} -c $${INTERNAL_CFLAGS} \1/' \
+	  -e 's;$${srcdir}/xcoffexec.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/xcoffread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/stabsread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/dwarfread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/elfread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/mipsread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/coffread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/dbxread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/main.c;-I$${READLINE_DIR} &;' \
 	  -e ': end' \
 	  >depend.tm4;
 	mv depend.tm4 depend
-	rm depend.tm?
+#	rm depend.tm?
 
 config.status:
 	@echo "You must configure gdb.  Look at the README file for details."

@@ -1,3 +1,11 @@
+Tue May 18 14:08:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (depend):  Put "${srcdir}" in generated dependencies
+	if srcdir is not ".".
+	Also put in -I${BFD_DIR} or -I${READLINE_DIR} for files which need it.
+	(INCLUDE_CFLAGS):  Remove BFD_DIR and READLINE_DIR.
+	* depend:  Update to latest automatically built version.
+
 Tue May 18 08:10:45 1993  Fred Fish  (fnf@cygnus.com)
 
 	* ChangeLog, ChangeLog-92:  Split ChangeLog at 1993.
