@@ -1,3 +1,16 @@
+2000-09-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* lin-lwp.c (normal_mask, blocked_mask): New variables.
+	(lin_lwp_wait): Block SIGCHLD here if it isn't already blocked.
+	(lin_lwp_mourn_inferior): Restore the origional signal mask, and
+	reset the mask of blocked signals.
+	(_initialize_lin_lwp): Don't block SIGCHLD here, but do initialize
+	suspend_mask and blocked_mask.  This makes us pass
+	gdb.base/sigall.exp for Linux/x86 now.
+	(lin_thread_get_thread_signals): Treat the LinuxThreads "cancel"
+	signal similarly to SIGCHLD in the generic code.  Avoids GDB being
+	terminated by a Real-time signal.
+
 2000-09-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* infptrace.c, infttrace.c (child_xfer_memory): Protoize.

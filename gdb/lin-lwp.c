@@ -55,9 +55,11 @@ extern const char *strsignal (int sig);
    code:
 
    - In general one should specify the __WCLONE flag to waitpid in
-     order to make it report events for any of the cloned processes.
-     However, if a cloned process has exited the exit status is only
-     reported if the __WCLONE flag is absent.
+     order to make it report events for any of the cloned processes
+     (and leave it out for the initial process).  However, if a cloned
+     process has exited the exit status is only reported if the
+     __WCLONE flag is absent.  Linux 2.4 has a __WALL flag, but we
+     cannot use it since GDB must work on older systems too.
 
    - When a traced, cloned process exits and is waited for by the
      debugger, the kernel reassigns it to the origional parent and
@@ -126,9 +128,26 @@ static struct target_ops lin_lwp_ops;
 /* The standard child operations.  */
 extern struct target_ops child_ops;
 
+/* Since we cannot wait (in lin_lwp_wait) for the initial process and
+   any cloned processes with a single call to waitpid, we have to use
+   use the WNOHANG flag and call waitpid in a loop.  To optimize
+   things a bit we use `sigsuspend' to wake us up when a process has
+   something to report (it will send us a SIGCHLD if it has).  To make
+   this work we have to juggle with the signal mask.  We save the
+   origional signal mask such that we can restore it before creating a
+   new process in order to avoid blocking certain signals in the
+   inferior.  We then block SIGCHLD during the waitpid/sigsuspend
+   loop.  */
+
+/* Origional signal mask.  */
+static sigset_t normal_mask;
+
 /* Signal mask for use with sigsuspend in lin_lwp_wait, initialized in
    _initialize_lin_lwp.  */
 static sigset_t suspend_mask;
+
+/* Signals to block to make that sigsuspend work.  */
+static sigset_t blocked_mask;
 
 
 /* Prototypes for local functions.  */
@@ -479,7 +498,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		     is_cloned (lp->pid) ? __WCLONE : 0);
       if (pid == -1 && errno == ECHILD)
 	/* OK, the proccess has disappeared.  We'll catch the actual
-           exit event in lin_lwp_wait.  */
+	   exit event in lin_lwp_wait.  */
 	return 0;
 
       gdb_assert (pid == GET_LWP (lp->pid));
@@ -575,6 +594,13 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
   int options = 0;
   int status = 0;
 
+  /* Make sure SIGCHLD is blocked.  */
+  if (! sigismember (&blocked_mask, SIGCHLD))
+    {
+      sigaddset (&blocked_mask, SIGCHLD);
+      sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
+    }
+
  retry:
 
   /* First check if there is a LWP with a wait status pending.  */
@@ -659,7 +685,8 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
 	      lp = add_lwp (BUILD_LWP (lwpid, inferior_pid));
 	      if (threaded)
 		{
-		  gdb_assert (WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP);
+		  gdb_assert (WIFSTOPPED (status)
+			      && WSTOPSIG (status) == SIGSTOP);
 		  lp->signalled = 1;
 
 		  if (! in_thread_list (inferior_pid))
@@ -863,6 +890,10 @@ lin_lwp_mourn_inferior (void)
 
   trap_pid = 0;
 
+  /* Restore the origional signal mask.  */
+  sigprocmask (SIG_SETMASK, &normal_mask, NULL);
+  sigemptyset (&blocked_mask);
+
 #if 0
   target_beneath = find_target_beneath (&lin_lwp_ops);
 #else
@@ -978,7 +1009,6 @@ void
 _initialize_lin_lwp (void)
 {
   struct sigaction action;
-  sigset_t mask;
 
   extern void thread_db_init (struct target_ops *);
 
@@ -986,18 +1016,19 @@ _initialize_lin_lwp (void)
   add_target (&lin_lwp_ops);
   thread_db_init (&lin_lwp_ops);
 
+  /* Save the origional signal mask.  */
+  sigprocmask (SIG_SETMASK, NULL, &normal_mask);
+
   action.sa_handler = sigchld_handler;
   sigemptyset (&action.sa_mask);
   action.sa_flags = 0;
   sigaction (SIGCHLD, &action, NULL);
 
-  /* We block SIGCHLD throughout this code ...  */
-  sigemptyset (&mask);
-  sigaddset (&mask, SIGCHLD);
-  sigprocmask (SIG_BLOCK, &mask, &suspend_mask);
-
-  /* ... except during a sigsuspend.  */
+  /* Make sure we don't block SIGCHLD during a sigsuspend.  */
+  sigprocmask (SIG_SETMASK, NULL, &suspend_mask);
   sigdelset (&suspend_mask, SIGCHLD);
+
+  sigemptyset (&blocked_mask);
 }
 
 
@@ -1030,8 +1061,8 @@ get_signo (const char *name)
 void
 lin_thread_get_thread_signals (sigset_t *set)
 {
-  int restart;
-  int cancel;
+  struct sigaction action;
+  int restart, cancel;
 
   sigemptyset (set);
 
@@ -1045,4 +1076,21 @@ lin_thread_get_thread_signals (sigset_t *set)
 
   sigaddset (set, restart);
   sigaddset (set, cancel);
+
+  /* The LinuxThreads library makes terminating threads send a special
+     "cancel" signal instead of SIGCHLD.  Make sure we catch those (to
+     prevent them from terminating GDB itself, which is likely to be
+     their default action) and treat them the same way as SIGCHLD.  */
+
+  action.sa_handler = sigchld_handler;
+  sigemptyset (&action.sa_mask);
+  action.sa_flags = 0;
+  sigaction (cancel, &action, NULL);
+
+  /* We block the "cancel" signal throughout this code ...  */
+  sigaddset (&blocked_mask, cancel);
+  sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
+
+  /* ... except during a sigsuspend.  */
+  sigdelset (&suspend_mask, cancel);
 }
