@@ -27,21 +27,23 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #define MASK_CHAR ((int)(unsigned char)-1)
 #endif
 
-#define MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT (16)
-/* This is the largest known floating point */
-/* format (for now). It will grow when we */
-/* do 4361 style flonums. */
+/* This is the largest known floating point format (for now). It will
+   grow when we do 4361 style flonums. */
 
+#define MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT (16)
 
 /* Routines that read assembler source text to build spagetti in memory.
    Another group of these functions is in the expr.c module.  */
 
+/* for isdigit() */
 #include <ctype.h>
 
 #include "as.h"
+#ifdef BFD_ASSEMBLER
+#include "subsegs.h"
+#endif
 
 #include "obstack.h"
-#include "listing.h"
 
 /* The NOP_OPCODE is for the alignment fill value.
  * fill it a nop instruction so that the disassembler does not choke
@@ -118,7 +120,7 @@ static char *bignum_high;	/* Highest char of bignum. */
 /* May point to (bignum_start-1). */
 /* Never >= bignum_limit. */
 
-static char *old_buffer = 0;	/* JF a hack */
+static char *old_buffer;	/* JF a hack */
 static char *old_input;
 static char *old_limit;
 
@@ -131,7 +133,7 @@ int include_dir_maxlen = 1;/* Length of longest in list */
 
 #ifndef WORKING_DOT_WORD
 struct broken_word *broken_words;
-int new_broken_words = 0;
+int new_broken_words;
 #endif
 
 static char *demand_copy_string PARAMS ((int *lenP));
@@ -196,14 +198,6 @@ static const pseudo_typeS potable[] =
   {"file", s_app_file, 0},
   {"fill", s_fill, 0},
   {"float", float_cons, 'f'},
-#ifdef DONTDEF
-  {"gdbbeg", s_gdbbeg, 0},
-  {"gdbblock", s_gdbblock, 0},
-  {"gdbend", s_gdbend, 0},
-  {"gdbsym", s_gdbsym, 0},
-  {"gdbline", s_gdbline, 0},
-  {"gdblinetab", s_gdblinetab, 0},
-#endif
   {"global", s_globl, 0},
   {"globl", s_globl, 0},
   {"hword", cons, 2},
@@ -338,10 +332,12 @@ read_a_source_file (name)
   while ((buffer_limit = input_scrub_next_buffer (&input_line_pointer)) != 0)
     {				/* We have another line to parse. */
       know (buffer_limit[-1] == '\n');	/* Must have a sentinel. */
-    contin:			/* JF this goto is my fault I admit it.  Someone brave please re-write
-	       the whole input section here?  Pleeze??? */
+    contin:			/* JF this goto is my fault I admit it.
+				   Someone brave please re-write the whole
+				   input section here?  Pleeze???  */
       while (input_line_pointer < buffer_limit)
-	{			/* We have more of this buffer to parse. */
+	{
+	  /* We have more of this buffer to parse. */
 
 	  /*
 	   * We now have input_line_pointer->1st char of next line.
@@ -365,10 +361,7 @@ read_a_source_file (name)
 
 		}
 #endif
-	    }			/* just passed a newline */
-
-
-
+	    }
 
 
 	  /*
@@ -385,7 +378,10 @@ read_a_source_file (name)
 	   * (And communicating via (linear) files is silly!
 	   * If you must pass stuff, please pass a tree!)
 	   */
-	  if ((c = *input_line_pointer++) == '\t' || c == ' ' || c == '\f' || c == 0)
+	  if ((c = *input_line_pointer++) == '\t'
+	      || c == ' '
+	      || c == '\f'
+	      || c == 0)
 	    {
 	      c = *input_line_pointer++;
 	    }
@@ -431,12 +427,12 @@ read_a_source_file (name)
 		  if (*s == '.')
 		    {
 		      /*
-			   * PSEUDO - OP.
-			   *
-			   * WARNING: c has next char, which may be end-of-line.
-			   * We lookup the pseudo-op table with s+1 because we
-			   * already know that the pseudo-op begins with a '.'.
-			   */
+		       * PSEUDO - OP.
+		       *
+		       * WARNING: c has next char, which may be end-of-line.
+		       * We lookup the pseudo-op table with s+1 because we
+		       * already know that the pseudo-op begins with a '.'.
+		       */
 
 		      pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
 
@@ -458,10 +454,10 @@ read_a_source_file (name)
 			  input_line_pointer++;
 			}	/* Skip seperator after keyword. */
 		      /*
-			   * Input_line is restored.
-			   * Input_line_pointer->1st non-blank char
-			   * after pseudo-operation.
-			   */
+		       * Input_line is restored.
+		       * Input_line_pointer->1st non-blank char
+		       * after pseudo-operation.
+		       */
 		      if (!pop)
 			{
 			  ignore_rest_of_line ();
@@ -708,7 +704,7 @@ s_align_bytes (arg)
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
     }
-  else if (now_seg != SEG_DATA && now_seg != SEG_BSS)
+  else if (now_seg != data_section && now_seg != bss_section)
     temp_fill = NOP_OPCODE;
   else
     temp_fill = 0;
@@ -740,7 +736,8 @@ s_align_ptwo ()
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
     }
-  else if (now_seg != SEG_DATA && now_seg != SEG_BSS)
+  /* @@ Fix this right for BFD!  */
+  else if (now_seg != data_section && now_seg != bss_section)
     temp_fill = NOP_OPCODE;
   else
     temp_fill = 0;
@@ -803,10 +800,10 @@ s_comm ()
       S_SET_VALUE (symbolP, temp);
       S_SET_EXTERNAL (symbolP);
     }
-#ifdef VMS
-  if (!temp)
-    symbolP->sy_other = const_flag;
-#endif
+#ifdef OBJ_VMS
+	if ( (!temp) || !flagseen['1'])
+		S_GET_OTHER(symbolP)  = const_flag;
+#endif /* not OBJ_VMS */
   know (symbolP->sy_frag == &zero_address_frag);
   demand_empty_rest_of_line ();
 }				/* s_comm() */
@@ -820,10 +817,10 @@ s_data ()
 #ifdef BFD_ASSEMBLER
   subseg_set (data_section, (subsegT) temp);
 #else
-  subseg_change (data_section, (subsegT) temp);
+  subseg_new (data_section, (subsegT) temp);
 #endif
 
-#ifdef VMS
+#ifdef OBJ_VMS
   const_flag = 0;
 #endif
   demand_empty_rest_of_line ();
@@ -1021,7 +1018,11 @@ s_lcomm (needs_align)
       segT current_seg = now_seg;
       subsegT current_subseg = now_subseg;
 
+#ifdef BFD_ASSEMBLER
+      subseg_set (bss_section, 1);
+#else
       subseg_new (bss_section, 1);
+#endif
 
       if (align)
 	frag_align (align, 0);
@@ -1045,7 +1046,11 @@ s_lcomm (needs_align)
 	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
 	}
 #endif /* OBJ_COFF */
+#ifdef BFD_ASSEMBLER
+      subseg_set (current_seg, current_subseg);
+#else
       subseg_new (current_seg, current_subseg);
+#endif
     }
   else
     {
@@ -1094,15 +1099,9 @@ s_lsym ()
     }
   input_line_pointer++;
   segment = expression (&exp);
-  if (segment != SEG_ABSOLUTE
-#ifdef MANY_SEGMENTS
-      && !(segment >= SEG_E0 && segment <= SEG_UNKNOWN)
-#else
-      && segment != SEG_DATA
-      && segment != SEG_TEXT
-      && segment != SEG_BSS
-#endif
-      && segment != SEG_REGISTER)
+  if (segment != absolute_section
+      && segment != reg_section
+      && ! SEG_NORMAL (segment))
     {
       as_bad ("Bad expression: %s", segment_name (segment));
       ignore_rest_of_line ();
@@ -1118,7 +1117,7 @@ s_lsym ()
      introduced a bug. As recently as 1.37 didn't have this test
      anyway.  xoxorich. */
 
-  if (S_GET_SEGMENT (symbolP) == SEG_UNKNOWN
+  if (S_GET_SEGMENT (symbolP) == undefined_section
       && S_GET_VALUE (symbolP) == 0)
     {
       /* The name might be an undefined .global symbol; be sure to
@@ -1141,21 +1140,18 @@ s_org ()
   expressionS exp;
   register long temp_fill;
   register char *p;
-  /*
- * Don't believe the documentation of BSD 4.2 AS.
- * There is no such thing as a sub-segment-relative origin.
- * Any absolute origin is given a warning, then assumed to be segment-relative.
- * Any segmented origin expression ("foo+42") had better be in the right
- * segment or the .org is ignored.
- *
- * BSD 4.2 AS warns if you try to .org backwards. We cannot because we
- * never know sub-segment sizes when we are reading code.
- * BSD will crash trying to emit -ve numbers of filler bytes in certain
- * .orgs. We don't crash, but see as-write for that code.
- */
-  /*
- * Don't make frag if need_pass_2==1.
- */
+  /* Don't believe the documentation of BSD 4.2 AS.  There is no such
+     thing as a sub-segment-relative origin.  Any absolute origin is
+     given a warning, then assumed to be segment-relative.  Any
+     segmented origin expression ("foo+42") had better be in the right
+     segment or the .org is ignored.
+
+     BSD 4.2 AS warns if you try to .org backwards. We cannot because
+     we never know sub-segment sizes when we are reading code.  BSD
+     will crash trying to emit negative numbers of filler bytes in
+     certain .orgs. We don't crash, but see as-write for that code.
+
+     Don't make frag if need_pass_2==1.  */
   segment = get_known_segmented_expression (&exp);
   if (*input_line_pointer == ',')
     {
@@ -1166,7 +1162,7 @@ s_org ()
     temp_fill = 0;
   if (!need_pass_2)
     {
-      if (segment != now_seg && segment != SEG_ABSOLUTE)
+      if (segment != now_seg && segment != absolute_section)
 	as_bad ("Invalid segment \"%s\". Segment \"%s\" assumed.",
 		segment_name (segment), segment_name (now_seg));
       p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp.X_add_symbol,
@@ -1218,7 +1214,7 @@ s_set ()
 
       if (!need_pass_2)
 	{
-	  if (segment != now_seg && segment != SEG_ABSOLUTE)
+	  if (segment != now_seg && segment != absolute_section)
 	    as_bad ("Invalid segment \"%s\". Segment \"%s\" assumed.",
 		    segment_name (segment),
 		    segment_name (now_seg));
@@ -1234,10 +1230,7 @@ s_set ()
   if ((symbolP = symbol_find (name)) == NULL
       && (symbolP = md_undefined_symbol (name)) == NULL)
     {
-      symbolP = symbol_new (name,
-			    SEG_UNKNOWN,
-			    0,
-			    &zero_address_frag);
+      symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
 #ifdef OBJ_COFF
       /* "set" symbols are local unless otherwise specified. */
       SF_SET_LOCAL (symbolP);
@@ -1295,16 +1288,14 @@ s_text ()
   register int temp;
 
   temp = get_absolute_expression ();
-#ifdef MANY_SEGMENTS
-  subseg_new (SEG_E0, (subsegT) temp);
+#ifdef BFD_ASSEMBLER
+  subseg_set (text_section, (subsegT) temp);
 #else
-  subseg_new (SEG_TEXT, (subsegT) temp);
+  subseg_new (text_section, (subsegT) temp);
 #endif
   demand_empty_rest_of_line ();
 }				/* s_text() */
 
-
-/*(JF was static, but can't be if machine dependent pseudo-ops are to use it */
 
 void 
 demand_empty_rest_of_line ()
@@ -1365,48 +1356,50 @@ pseudo_set (symbolP)
 
   know (symbolP);		/* NULL pointer is logic error. */
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+  /* @@ Fix this right for BFD.  */
   ext = S_IS_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
-  if ((segment = expression (&exp)) == SEG_ABSENT)
+  if ((segment = expression (&exp)) == absent_section)
     {
       as_bad ("Missing expression: absolute 0 assumed");
-      exp.X_seg = SEG_ABSOLUTE;
+      exp.X_seg = absolute_section;
       exp.X_add_number = 0;
     }
 
-  switch (segment)
+  if (segment == reg_section)
     {
-    case SEG_REGISTER:
-      S_SET_SEGMENT (symbolP, SEG_REGISTER);
+      S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, exp.X_add_number);
       symbolP->sy_frag = &zero_address_frag;
-      break;
-
-    case SEG_BIG:
+    }
+  else if (segment == big_section)
+    {
       as_bad ("%s number invalid. Absolute 0 assumed.",
 	      exp.X_add_number > 0 ? "Bignum" : "Floating-Point");
-      S_SET_SEGMENT (symbolP, SEG_ABSOLUTE);
+      S_SET_SEGMENT (symbolP, absolute_section);
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+      /* @@ Fix this right for BFD.  */
       ext ? S_SET_EXTERNAL (symbolP) :
 	S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, 0);
       symbolP->sy_frag = &zero_address_frag;
-      break;
-
-    case SEG_ABSENT:
+    }
+  else if (segment == absent_section)
+    {
       as_warn ("No expression:  Using absolute 0");
-      S_SET_SEGMENT (symbolP, SEG_ABSOLUTE);
+      S_SET_SEGMENT (symbolP, absolute_section);
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+      /* @@ Fix this right for BFD.  */
       ext ? S_SET_EXTERNAL (symbolP) :
 	S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, 0);
       symbolP->sy_frag = &zero_address_frag;
-      break;
-
-    case SEG_DIFFERENCE:
+    }
+  else if (segment == diff_section)
+    {
       if (exp.X_add_symbol && exp.X_subtract_symbol
 	  && (S_GET_SEGMENT (exp.X_add_symbol) ==
 	      S_GET_SEGMENT (exp.X_subtract_symbol)))
@@ -1422,37 +1415,49 @@ pseudo_set (symbolP)
 	}
       else
 	as_bad ("Complex expression. Absolute segment assumed.");
-    case SEG_ABSOLUTE:
-      S_SET_SEGMENT (symbolP, SEG_ABSOLUTE);
+      goto abs;
+    }
+  else if (segment == absolute_section)
+    {
+    abs:
+      S_SET_SEGMENT (symbolP, absolute_section);
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+      /* @@ Fix this right for BFD.  */
       ext ? S_SET_EXTERNAL (symbolP) :
 	S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, exp.X_add_number);
       symbolP->sy_frag = &zero_address_frag;
-      break;
-
-    default:
-#ifdef MANY_SEGMENTS
-      S_SET_SEGMENT (symbolP, segment);
-#else
+    }
+  else if (segment == pass1_section)
+    {
+      symbolP->sy_forward = exp.X_add_symbol;
+      as_bad ("Unknown expression");
+      know (need_pass_2 == 1);
+    }
+  else if (segment == undefined_section)
+    {
+      symbolP->sy_forward = exp.X_add_symbol;
+    }
+  else
+    {
+#ifndef BFD_ASSEMBLER
+#ifndef MANY_SEGMENTS
       switch (segment)
 	{
 	case SEG_DATA:
-	  S_SET_SEGMENT (symbolP, SEG_DATA);
-	  break;
 	case SEG_TEXT:
-	  S_SET_SEGMENT (symbolP, SEG_TEXT);
-	  break;
 	case SEG_BSS:
-	  S_SET_SEGMENT (symbolP, SEG_BSS);
 	  break;
 
 	default:
 	  as_fatal ("failed sanity check.");
 	}			/* switch on segment */
 #endif
+#endif
+      S_SET_SEGMENT (symbolP, segment);
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+      /* @@ Fix this right for BFD!  */
       if (ext)
 	{
 	  S_SET_EXTERNAL (symbolP);
@@ -1465,22 +1470,6 @@ pseudo_set (symbolP)
 
       S_SET_VALUE (symbolP, exp.X_add_number + S_GET_VALUE (exp.X_add_symbol));
       symbolP->sy_frag = exp.X_add_symbol->sy_frag;
-      break;
-
-    case SEG_PASS1:		/* Not an error. Just try another pass. */
-      symbolP->sy_forward = exp.X_add_symbol;
-      as_bad ("Unknown expression");
-      know (need_pass_2 == 1);
-      break;
-
-    case SEG_UNKNOWN:
-      symbolP->sy_forward = exp.X_add_symbol;
-      /* as_warn("unknown symbol"); */
-      /* need_pass_2 = 1; */
-      break;
-
-
-
     }
 }
 
@@ -1595,7 +1584,7 @@ cons (nbytes)
 	  /* Create correct expression */
 	  exp.X_add_symbol = 0;
 	  exp.X_add_number = result;
-	  exp.X_seg = segment = SEG_ABSOLUTE;
+	  exp.X_seg = segment = absolute_section;
 	  /* Fake it so that we can read the next char too */
 	  if (input_line_pointer[0] != '\'' ||
 	   (input_line_pointer[0] == '\'' && input_line_pointer[1] == '\''))
@@ -1664,14 +1653,14 @@ cons (nbytes)
 		 you can use a previous .set or
 		 .equ type symbol.  xoxorich. */
 
-	      if (segment == SEG_ABSENT)
+	      if (segment == absent_section)
 		{
 		  as_warn ("Using a bit field width of zero.");
 		  exp.X_add_number = 0;
-		  segment = SEG_ABSOLUTE;
+		  segment = absolute_section;
 		}		/* implied zero width bitfield */
 
-	      if (segment != SEG_ABSOLUTE)
+	      if (segment != absolute_section)
 		{
 		  *input_line_pointer = '\0';
 		  as_bad ("Field width \"%s\" too complex for a bitfield.\n", hold);
@@ -1698,7 +1687,7 @@ cons (nbytes)
 
 	      hold = ++input_line_pointer;	/* skip ':' */
 
-	      if ((segment = expression (&exp)) != SEG_ABSOLUTE)
+	      if ((segment = expression (&exp)) != absolute_section)
 		{
 		  char cache = *input_line_pointer;
 
@@ -1724,7 +1713,7 @@ cons (nbytes)
 	    }			/* forever loop */
 
 	  exp.X_add_number = value;
-	  segment = SEG_ABSOLUTE;
+	  segment = absolute_section;
 	}			/* if looks like a bitfield */
 #endif /* WANT_BITFIELDS */
 
@@ -1732,31 +1721,33 @@ cons (nbytes)
 	{			/* Still worthwhile making frags. */
 
 	  /* Don't call this if we are going to junk this pass anyway! */
-	  know (segment != SEG_PASS1);
+	  know (segment != pass1_section);
 
-	  if (segment == SEG_DIFFERENCE && exp.X_add_symbol == NULL)
+	  if (segment == diff_section && exp.X_add_symbol == NULL)
 	    {
 	      as_bad ("Subtracting symbol \"%s\"(segment\"%s\") is too hard. Absolute segment assumed.",
 		      S_GET_NAME (exp.X_subtract_symbol),
 		      segment_name (S_GET_SEGMENT (exp.X_subtract_symbol)));
-	      segment = SEG_ABSOLUTE;
+	      segment = absolute_section;
 	      /* Leave exp . X_add_number alone. */
 	    }
 	  p = frag_more (nbytes);
-	  switch (segment)
+	  if (segment == big_section)
 	    {
-	    case SEG_BIG:
 	      as_bad ("%s number invalid. Absolute 0 assumed.",
 		      exp.X_add_number > 0 ? "Bignum" : "Floating-Point");
 	      md_number_to_chars (p, (long) 0, nbytes);
-	      break;
-
-	    case SEG_ABSENT:
+	    }
+	  else if (segment == absent_section)
+	    {
 	      as_warn ("0 assumed for missing expression");
 	      exp.X_add_number = 0;
 	      know (exp.X_add_symbol == NULL);
-	      /* fall into SEG_ABSOLUTE */
-	    case SEG_ABSOLUTE:
+	      goto abs_sec;
+	    }
+	  else if (segment == absolute_section)
+	    {
+	    abs_sec:
 	      get = exp.X_add_number;
 	      use = get & unmask;
 	      if ((get & mask) && (get & mask) != mask)
@@ -1764,9 +1755,9 @@ cons (nbytes)
 		  as_warn ("Value 0x%x truncated to 0x%x.", get, use);
 		}
 	      md_number_to_chars (p, use, nbytes);	/* put bytes in right order. */
-	      break;
-
-	    case SEG_DIFFERENCE:
+	    }
+	  else if (segment == diff_section)
+	    {
 #ifndef WORKING_DOT_WORD
 	      if (nbytes == 2)
 		{
@@ -1783,28 +1774,38 @@ cons (nbytes)
 		  x->addnum = exp.X_add_number;
 		  x->added = 0;
 		  new_broken_words++;
-		  break;
+		  goto after_switch;
 		}
-	      /* Else Fall through into. . . */
 #endif
-	    default:
-	    case SEG_UNKNOWN:
+	      goto defalt;
+	    }
+	  else
+	    /* undefined_section, others */
+	    {
+	    defalt:
+#ifdef BFD_ASSEMBLER
+	      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
+		       exp.X_add_symbol, exp.X_subtract_symbol,
+		       exp.X_add_number, 0,
+		       /* @@ Should look at CPU word size.  */
+		       BFD_RELOC_32);
+#else
 #ifdef TC_NS32K
 	      fix_new_ns32k (frag_now, p - frag_now->fr_literal, nbytes,
 			     exp.X_add_symbol, exp.X_subtract_symbol,
 			     exp.X_add_number, 0, 0, 2, 0, 0);
 #else
-# if defined(TC_SPARC) || defined(TC_A29K)
+#if defined(TC_SPARC) || defined(TC_A29K)
 	      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
 		       exp.X_add_symbol, exp.X_subtract_symbol,
 		       exp.X_add_number, 0, RELOC_32);
-# else
-#  if defined(TC_H8300)
+#else
+#if defined(TC_H8300)
 	      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
 		       exp.X_add_symbol, exp.X_subtract_symbol,
 		       exp.X_add_number, 0, R_RELWORD);
 
-#  else
+#else
 #ifdef NO_RELOC
 	      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
 		       exp.X_add_symbol, exp.X_subtract_symbol,
@@ -1814,11 +1815,13 @@ cons (nbytes)
 		       exp.X_add_symbol, exp.X_subtract_symbol,
 		       exp.X_add_number, 0, 0);
 #endif /* NO_RELOC */
-#  endif			/* tc_h8300 */
-# endif				/* tc_sparc|tc_a29k */
+#endif /* tc_h8300 */
+#endif /* tc_sparc|tc_a29k */
 #endif /* TC_NS32K */
-	      break;
+#endif /* BFD_ASSEMBLER */
 	    }			/* switch(segment) */
+	after_switch:
+	  ;
 	}			/* if (!need_pass_2) */
       c = *input_line_pointer++;
     }				/* while(c==',') */
@@ -1863,7 +1866,7 @@ big_cons (nbytes)
   register int work;		/* For multi-precision arithmetic. */
   register char *p;		/* For multi-precision arithmetic. */
 
-  extern char hex_value[];	/* In hex_value.c. */
+  extern const char hex_value[];	/* In hex_value.c. */
 
   /*
    * The following awkward logic is to parse ZERO or more strings,
@@ -2076,11 +2079,6 @@ stringer (append_zero)		/* Worker to do .ascii etc statements. */
      /* Checks end-of-line. */
      register int append_zero;	/* 0: don't append '\0', else 1 */
 {
-  /* register char *	p; JF unused */
-  /* register int length; JF unused *//* Length of string we read, excluding */
-  /* trailing '\0' implied by closing quote. */
-  /* register char *	where; JF unused */
-  /* register fragS *	fragP; JF unused */
   register unsigned int c;
 
   /*
@@ -2239,10 +2237,13 @@ get_segmented_expression (expP)
 {
   register segT retval;
 
-  if ((retval = expression (expP)) == SEG_PASS1 || retval == SEG_ABSENT || retval == SEG_BIG)
+  retval = expression (expP);
+  if (retval == pass1_section
+      || retval == absent_section
+      || retval == big_section)
     {
       as_bad ("Expected address expression: absolute 0 assumed");
-      retval = expP->X_seg = SEG_ABSOLUTE;
+      retval = expP->X_seg = absolute_section;
       expP->X_add_number = 0;
       expP->X_add_symbol = expP->X_subtract_symbol = 0;
     }
@@ -2254,10 +2255,10 @@ get_known_segmented_expression (expP)
      register expressionS *expP;
 {
   register segT retval;
-  register char *name1;
-  register char *name2;
+  register CONST char *name1;
+  register CONST char *name2;
 
-  if ((retval = get_segmented_expression (expP)) == SEG_UNKNOWN)
+  if ((retval = get_segmented_expression (expP)) == undefined_section)
     {
       name1 = expP->X_add_symbol ? S_GET_NAME (expP->X_add_symbol) : "";
       name2 = expP->X_subtract_symbol ?
@@ -2273,13 +2274,13 @@ get_known_segmented_expression (expP)
 	  as_warn ("Symbol \"%s\" undefined: absolute 0 assumed.",
 		   name1 ? name1 : name2);
 	}
-      retval = expP->X_seg = SEG_ABSOLUTE;
+      retval = expP->X_seg = absolute_section;
       expP->X_add_number = 0;
       expP->X_add_symbol = expP->X_subtract_symbol = NULL;
     }
-#ifndef MANY_SEGMENTS
-  know (retval == SEG_ABSOLUTE || retval == SEG_DATA || retval == SEG_TEXT || retval == SEG_BSS || retval == SEG_DIFFERENCE);
-#endif
+  know (retval == absolute_section
+	|| retval == diff_section
+	|| SEG_NORMAL (retval));
   return (retval);
 
 }				/* get_known_segmented_expression() */
@@ -2292,9 +2293,9 @@ get_absolute_expression ()
   expressionS exp;
   register segT s;
 
-  if ((s = expression (&exp)) != SEG_ABSOLUTE)
+  if ((s = expression (&exp)) != absolute_section)
     {
-      if (s != SEG_ABSENT)
+      if (s != absent_section)
 	{
 	  as_bad ("Bad Absolute Expression, absolute 0 assumed.");
 	}
@@ -2422,7 +2423,7 @@ equals (sym_name)
       segment = get_known_segmented_expression (&exp);
       if (!need_pass_2)
 	{
-	  if (segment != now_seg && segment != SEG_ABSOLUTE)
+	  if (segment != now_seg && segment != absolute_section)
 	    as_warn ("Illegal segment \"%s\". Segment \"%s\" assumed.",
 		     segment_name (segment),
 		     segment_name (now_seg));
