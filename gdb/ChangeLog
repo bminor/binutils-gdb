@@ -1,3 +1,9 @@
+Tue Jun  8 17:54:09 1993  Rob Savoye  (rob@rtl.cygnus.com)
+
+	* serial.c (serial_close): If scb is NULL, don't try to close
+	it. 
+	* configure.in: Add support for rom68k and bug boot monitors.
+
 Tue Jun  8 17:39:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* coffread.c (init_stringtab): Fix bug where sizeof(long) != 4.

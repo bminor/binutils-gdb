@@ -116,9 +116,11 @@ serial_close(scb)
 {
   last_serial_opened = NULL;
 
-  scb->ops->close(scb);
-
-  free(scb);
+  if (scb != NULL)
+    {
+      scb->ops->close(scb);
+      free(scb);
+    }
 }
 
 #if 0
