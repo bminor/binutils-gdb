@@ -1,5 +1,16 @@
 Mon Apr 29 13:22:51 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* Move BROKEN_LARGE_ALLOCA from tm-sun386.h to xm-sun386.h.
+
+	* sun386-xdep.c [!GDB_TARGET_IS_SUN386]: Just provide empty
+	functions which don't do anything.
+	tm-sun386.h: Define GDB_TARGET_IS_SUN386.
+
+	* Makefile.dist: Add comment about tm-sun3os4.h: tm-sun3.h, etc.
+
+	* sun3-xdep.c, tm-sun3.h, tm-68k.h: Change TARGET_SUN3 to
+	GDB_TARGET_IS_SUN3.
+
 	* infrun.c: Don't include sys/user.h and friends (wrong for
 	cross-debugging and not necessary anymore (see IN_SIGTRAMP in
 	xm-vax.h)).
