@@ -2,3 +2,7 @@
 SYSV = -DSYSV
 RANLIB = true
 INSTALL = cp
+
+# X11 
+X11_INCLUDE_FLAGS = -I/usr/include/X11R4
+X11_LIB_FLAGS = -L/usr/lib/X11R4

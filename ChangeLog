@@ -3,6 +3,9 @@ Fri Nov 27 18:35:54 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 	* Makefile.in: define flags for X11 include files and library file
 	locations, pass them down to the programs that need this info
 
+	* config/{mh-hpux,mh-solaris}: define the "standard" locations for
+	the vendor supplied X11 headers and libraries
+
 Sun Nov 22 18:59:13 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: start building libg++ for HP-UX targets
