@@ -219,11 +219,11 @@ expr_build_dot ()
 LITTLENUM_TYPE generic_bignum[SIZE_OF_LARGE_NUMBER + 6];
 FLONUM_TYPE generic_floating_point_number =
 {
-  &generic_bignum[6],		/* Low.  (JF: Was 0)  */
-  &generic_bignum[SIZE_OF_LARGE_NUMBER + 6 - 1], /* High.  JF: (added +6)  */
-  0,				/* Leader.  */
-  0,				/* Exponent.  */
-  0				/* Sign.  */
+  &generic_bignum[6],		/* low.  (JF: Was 0)  */
+  &generic_bignum[SIZE_OF_LARGE_NUMBER + 6 - 1], /* high.  JF: (added +6)  */
+  0,				/* leader.  */
+  0,				/* exponent.  */
+  0				/* sign.  */
 };
 
 /* If nonzero, we've been asked to assemble nan, +inf or -inf.  */
@@ -632,12 +632,12 @@ integer_constant (radix, expressionP)
 	  number |= (-(number >> (TARGET_WORD_SIZE - 1))) << (TARGET_WORD_SIZE - 1);
 #endif
 	  expressionP->X_add_number = number;
-	  input_line_pointer--;	/* Rstore following character.  */
+	  input_line_pointer--;	/* Restore following character.  */
 	}			/* Really just a number.  */
     }
   else
     {
-      /* not a small number */
+      /* Not a small number.  */
       expressionP->X_op = O_big;
       expressionP->X_add_number = number;	/* Number of littlenums.  */
       input_line_pointer--;	/* -> char following number.  */
@@ -785,7 +785,7 @@ operand (expressionP)
   /* Digits, assume it is a bignum.  */
 
   SKIP_WHITESPACE ();		/* Leading whitespace is part of operand.  */
-  c = *input_line_pointer++;	/* input_line_pointer->past char in c.  */
+  c = *input_line_pointer++;	/* input_line_pointer -> past char in c.  */
 
   if (is_end_of_line[(unsigned char) c])
     goto eol;

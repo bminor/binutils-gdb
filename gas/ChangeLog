@@ -1,3 +1,7 @@
+2000-08-11  Kazu Hirata  <kazu@hxi.com>
+
+	* expr.c: Fix formatting.
+
 2000-08-10  Jason Eckhardt  <jle@cygnus.com>
 
 	* doc/c-i860.texi: Flesh out the i860 section more.
