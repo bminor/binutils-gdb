@@ -1,3 +1,15 @@
+Thu Oct 17 12:24:16 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* endian.c: Optimize simulated loads/stores on x86, AIX, and big
+	endian hosts.
+
+	* configure.in (--enable-sim-bswap): New switch to enable using
+	the BSWAP instruction on x86's.
+	* configure: Regenerate.
+
+	* Makefile.in ({SWAP,CONFIG}_CFLAGS): Add --enable-sim-bswap
+	support.
+
 Wed Oct 16 13:50:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* endian.c: New file.  Move endian functions here from interp.c.
