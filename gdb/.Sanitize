@@ -307,6 +307,7 @@ objfiles.c
 objfiles.h
 op50-rom.c
 os9kread.c
+osf-share
 osfsolib.c
 parse.c
 parser-defs.h
