@@ -1,3 +1,13 @@
+start-sanitize-r5900
+Fri Apr 24 11:25:07 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * mips-tdep.c (mips32_decode_reg_save): Handle 128bit wide
+        GPR loads/stores generated on the r5900.
+        (mips_find_saved_regs, mips32_skip_prologue): Likewise.
+        * mips/tm-r5900.h (R5900_128BIT_GPR_HACK): Define.
+        * mips/tm-txvu.h (R5900_128BIT_GPR_HACK): Likewise.
+
+end-sanitize-r5900
 Thu Apr 23 16:37:20 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * README:  Minor changes for 4.17 release.
