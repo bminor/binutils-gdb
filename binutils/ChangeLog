@@ -1,3 +1,15 @@
+Tue Oct 25 16:19:25 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* objcopy.c (gap_fill): Explicitly initialize, for clarity.
+	(pad_to_set, pad_to): New static variables.
+	(copy_options): Accept --pad-to.
+	(copy_usage): Mention --pad-to.
+	(copy_object): Support --pad-to.
+	(compare_section_vma): Sort non loadable sections to the front.
+	Sort sections with the same VMA by size.
+	(copy_main): Handle --pad-to.
+	* binutils.texi, objcopy.1: Document --pad-to.
+
 Thu Oct 20 13:51:31 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objcopy.c (gap_fill_set, gap_fill): New static variables.

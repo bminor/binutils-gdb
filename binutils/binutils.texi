@@ -747,8 +747,9 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -b @var{byte} | --byte=@var{byte} ]
         [ -i @var{interleave} | --interleave=@var{interleave} ]
         [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
-        [ --gap-fill=@var{val} ] [ --set-start=@var{val} ]
-        [ --adjust-start=@var{incr} ] [ --adjust-vma=@var{incr} ]
+        [ --gap-fill=@var{val} ] [ --pad-to=@var{address} ]
+        [ --set-start=@var{val} ] [ --adjust-start=@var{incr} ]
+        [ --adjust-vma=@var{incr} ]
         [ --adjust-section-vma=@var{section}@{=,+,-@}@var{val} ]
         [ --adjust-warnings ] [ --no-adjust-warnings ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
@@ -850,6 +851,11 @@ copy with the @var{-b} or @samp{--byte} option.  The default is 4.
 Fill gaps between sections with @var{val}.  This is done by increasing
 the size of the section with the lower address, and filling in the extra
 space created with @var{val}.
+
+@item --pad-to @var{address}
+Pad the output file up to the virtual address @var{address}.  This is
+done by increasing the size of the last section.  The extra space is
+filled in with the value specified by @samp{--gap-fill} (default zero).
 
 @item --set-start @var{val}
 Set the address of the new file to @var{val}.  Not all object file

@@ -23,15 +23,16 @@ objcopy \- copy and translate object files
 .RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
 .RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
 .RB "[\|" \-X\ |\ \-\-discard\-locals\fR "\|]" 
-.RB "[\|" \-b\ \fIbyte\fP |\ \-\-byte=\fIbyte\fP "\|]" 
-.RB "[\|" \-i\ \fIinterleave\fP |\ \-\-interleave=\fIinterleave\fP "\|]" 
-.RB "[\|" \-\-gap\-fill=\fIval\fP "\|]"
-.RB "[\|" \-\-set\-start=\fIval\fP "\|]"
-.RB "[\|" \-\-adjust\-start=\fIincr\fP "\|]"
-.RB "[\|" \-\-adjust\-vma=\fIincr\fP "\|]"
-.RB "[\|" \-\-adjust\-section\-vma=\fIsection{=,+,-}val\fP "\|]"
-.RB "[\|" \-\-adjust\-warnings "\|]"
-.RB "[\|" \-\-no\-adjust\-warnings "\|]"
+.RB "[\|" \-b\ \fIbyte\fR\ |\ \fB\-\-byte=\fIbyte\fR "\|]" 
+.RB "[\|" \-i\ \fIinterleave\fR\ |\ \fB\-\-interleave=\fIinterleave\fR "\|]" 
+.RB "[\|" \-\-gap\-fill=\fIval\fR "\|]"
+.RB "[\|" \-\-pad\-to=\fIaddress\fR "\|]"
+.RB "[\|" \-\-set\-start=\fIval\fR "\|]"
+.RB "[\|" \-\-adjust\-start=\fIincr\fR "\|]"
+.RB "[\|" \-\-adjust\-vma=\fIincr\fR "\|]"
+.RB "[\|" \-\-adjust\-section\-vma=\fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-adjust\-warnings\fR "\|]"
+.RB "[\|" \-\-no\-adjust\-warnings\fR "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
 .RB "[\|" \-\-help\fR "\|]" 
@@ -141,6 +142,12 @@ The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
 Fill gaps between sections with \fIval\fP.  This is done by increasing
 the size of the section with the lower address, and filling in the extra
 space created with \fIval\fP.
+.TP
+.B \-\-pad\-to=\fIaddress
+Pad the output file up to the virtual address \fIaddress\fP.  This is
+done by increasing the size of the last section.  The extra space is
+filled in with the value specified by \fB\-\-gap\-fill\fP (default
+zero).
 .TP
 .B \fB\-\-set\-start=\fIval
 Set the start address of the new file to \fIval\fP.  Not all object
