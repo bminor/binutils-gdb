@@ -18,18 +18,16 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-#include "event-loop.h"
-#include <readline/readline.h>
-#include <setjmp.h>
-#include "top.h"
-
-/* For config.h which may define HAVE_POLL */
 #include "defs.h"
-
+#include "top.h"
+#include "event-loop.h"
 #ifdef HAVE_POLL
-#include <sys/poll.h>
+#include <poll.h>
+#else
+#include <sys/types.h>
 #endif
 #include <errno.h>
+#include <setjmp.h>
 
 /* Event queue:  
    - the first event in the queue is the head of the queue. 
@@ -337,9 +335,13 @@ create_file_handler (fd, mask, proc, client_data)
 #ifdef HAVE_POLL
 
   gdb_notifier.num_fds++;
-  gdb_notifier.poll_fds =
-    (struct pollfd *) realloc (gdb_notifier.poll_fds,
-			   (gdb_notifier.num_fds) * sizeof (struct pollfd));
+  if (gdb_notifier.poll_fds)
+    gdb_notifier.poll_fds =
+      (struct pollfd *) realloc (gdb_notifier.poll_fds,
+				 (gdb_notifier.num_fds) * sizeof (struct pollfd));
+  else
+     gdb_notifier.poll_fds = 
+       (struct pollfd *) xmalloc (sizeof (struct pollfd));
   (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->fd = fd;
   (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
   (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
@@ -463,7 +465,7 @@ delete_file_handler (fd)
   else
     {
       for (prev_ptr = gdb_notifier.first_file_handler;
-	   prev_ptr->next_file == file_ptr;
+	   prev_ptr->next_file != file_ptr;
 	   prev_ptr = prev_ptr->next_file)
 	;
       prev_ptr->next_file = file_ptr->next_file;

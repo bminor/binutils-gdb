@@ -2474,6 +2474,7 @@ any system-independent file would (hooks, #if defined, etc.), and
 machines which are radically different don't need to use infptrace.c at
 all.
 
+Don't put debugging printfs in the code.
 
 @node Porting GDB
 
@@ -2682,9 +2683,8 @@ GDB users.  In general we like to get well designed enhancements.
 Thanks also for checking in advance about the best way to transfer the
 changes.
 
-The GDB maintainers will only install ``cleanly designed'' patches.  You
-may not always agree on what is clean design.
-@c @pxref{Coding Style}, @pxref{Clean Design}.
+The GDB maintainers will only install ``cleanly designed'' patches.
+This manual summarizes what we believe to be clean design for GDB.
 
 If the maintainers don't have time to put the patch in when it arrives,
 or if there is any question about a patch, it goes into a large queue
@@ -2693,55 +2693,51 @@ with everyone else's patches and bug reports.
 The legal issue is that to incorporate substantial changes requires a
 copyright assignment from you and/or your employer, granting ownership
 of the changes to the Free Software Foundation.  You can get the
-standard document for doing this by sending mail to
-@code{gnu@@prep.ai.mit.edu} and asking for it.  I recommend that people
-write in "All programs owned by the Free Software Foundation" as "NAME
-OF PROGRAM", so that changes in many programs (not just GDB, but GAS,
-Emacs, GCC, etc) can be contributed with only one piece of legalese
-pushed through the bureacracy and filed with the FSF.  I can't start
-merging changes until this paperwork is received by the FSF (their
-rules, which I follow since I maintain it for them).
+standard documents for doing this by sending mail to @code{gnu@@gnu.org}
+and asking for it.  We recommend that people write in "All programs
+owned by the Free Software Foundation" as "NAME OF PROGRAM", so that
+changes in many programs (not just GDB, but GAS, Emacs, GCC, etc) can be
+contributed with only one piece of legalese pushed through the
+bureacracy and filed with the FSF.  We can't start merging changes until
+this paperwork is received by the FSF (their rules, which we follow
+since we maintain it for them).
 
 Technically, the easiest way to receive changes is to receive each
-feature as a small context diff or unidiff, suitable for "patch".
-Each message sent to me should include the changes to C code and
-header files for a single feature, plus ChangeLog entries for each
-directory where files were modified, and diffs for any changes needed
-to the manuals (gdb/doc/gdb.texi or gdb/doc/gdbint.texi).  If there
-are a lot of changes for a single feature, they can be split down
-into multiple messages.
+feature as a small context diff or unidiff, suitable for "patch".  Each
+message sent to me should include the changes to C code and header files
+for a single feature, plus ChangeLog entries for each directory where
+files were modified, and diffs for any changes needed to the manuals
+(gdb/doc/gdb.texinfo or gdb/doc/gdbint.texinfo).  If there are a lot of
+changes for a single feature, they can be split down into multiple
+messages.
 
-In this way, if I read and like the feature, I can add it to the
+In this way, if we read and like the feature, we can add it to the
 sources with a single patch command, do some testing, and check it in.
-If you leave out the ChangeLog, I have to write one.  If you leave
-out the doc, I have to puzzle out what needs documenting.  Etc.
+If you leave out the ChangeLog, we have to write one.  If you leave
+out the doc, we have to puzzle out what needs documenting.  Etc.
 
-The reason to send each change in a separate message is that I will
-not install some of the changes.  They'll be returned to you with
-questions or comments.  If I'm doing my job, my message back to you
+The reason to send each change in a separate message is that we will not
+install some of the changes.  They'll be returned to you with questions
+or comments.  If we're doing our job correctly, the message back to you
 will say what you have to fix in order to make the change acceptable.
-The reason to have separate messages for separate features is so
-that other changes (which I @emph{am} willing to accept) can be installed
-while one or more changes are being reworked.  If multiple features
-are sent in a single message, I tend to not put in the effort to sort
-out the acceptable changes from the unacceptable, so none of the
-features get installed until all are acceptable.
+The reason to have separate messages for separate features is so that
+the acceptable changes can be installed while one or more changes are
+being reworked.  If multiple features are sent in a single message, we
+tend to not put in the effort to sort out the acceptable changes from
+the unacceptable, so none of the features get installed until all are
+acceptable.
 
-If this sounds painful or authoritarian, well, it is.  But I get a lot
-of bug reports and a lot of patches, and most of them don't get
-installed because I don't have the time to finish the job that the bug
+If this sounds painful or authoritarian, well, it is.  But we get a lot
+of bug reports and a lot of patches, and many of them don't get
+installed because we don't have the time to finish the job that the bug
 reporter or the contributor could have done.  Patches that arrive
 complete, working, and well designed, tend to get installed on the day
-they arrive.  The others go into a queue and get installed if and when
-I scan back over the queue -- which can literally take months
-sometimes.  It's in both our interests to make patch installation easy
--- you get your changes installed, and I make some forward progress on
-GDB in a normal 12-hour day (instead of them having to wait until I
-have a 14-hour or 16-hour day to spend cleaning up patches before I
-can install them).
+they arrive.  The others go into a queue and get installed as time
+permits, which, since the maintainers have many demands to meet, may not
+be for quite some time.
 
 Please send patches directly to the GDB maintainers at
-@code{gdb-patches@@cygnus.com}.
+@code{gdb-patches@@sourceware.cygnus.com}.
 
 @section Obsolete Conditionals
 

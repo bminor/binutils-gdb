@@ -1,3 +1,24 @@
+1999-06-18  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.c++/overload.exp: XFAIL everything if using G++, add a
+	simpler match case for the ptype of the big class.
+
+1999-06-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.exp: Fix test for gdb_prompt existence.
+
+1999-06-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.exp (gdb_test): Add fail after calls to perror.
+
+1999-06-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.exp (gdb_test): Accept variations of Undefined command messages.
+
+1999-06-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.exp (gdb_test): Fix anchors on gdb_expect statement.
+
 Fri Jun 11 12:56:50 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/call-strs.c (link_malloc): New function.  Ensure that

@@ -442,8 +442,8 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       break;
 
     case 'c':
-      value_print (value_from_longest (builtin_type_char, val_long), stream, 0,
-		   Val_pretty_default);
+      value_print (value_from_longest (builtin_type_true_char, val_long),
+		   stream, 0, Val_pretty_default);
       break;
 
     case 'f':

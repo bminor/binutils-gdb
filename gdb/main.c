@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "top.h"
-#include "event-loop.h"
 #include "target.h"
 #include "inferior.h"
 #include "call-cmds.h"
@@ -35,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 
 #include "gdb_string.h"
+#include "event-loop.h"
 
 /* If nonzero, display time usage both at startup and for each command.  */
 

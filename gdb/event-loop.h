@@ -18,17 +18,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <signal.h>
-#include <unistd.h>
-#include <fcntl.h>
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#include "defs.h"
-
 /* An event loop listens for events from multiple event sources. When
    an event arrives, it is queued and processed by calling the
    appropriate event handler. The event loop then continues to listen

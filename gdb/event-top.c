@@ -19,13 +19,14 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "defs.h"
-#include "event-loop.h"
 #include "top.h"
 #ifdef HAVE_POLL
-#include <sys/poll.h>
+#include <poll.h>
 #endif
 #include "inferior.h"
 #include "terminal.h" /* for job_control*/
+#include <signal.h>
+#include "event-loop.h"
 
 /* readline include files */
 #include <readline/readline.h>
@@ -34,7 +35,7 @@
 /* readline defines this.  */
 #undef savestring
 
-extern void _initialize_event_loop (void);
+extern void _initialize_event_loop PARAMS ((void));
 
 static void command_line_handler PARAMS ((char *));
 static void gdb_readline2 PARAMS ((void));
@@ -165,6 +166,7 @@ start_event_loop ()
 {
   int length;
   char *a_prompt;
+  char *gdb_prompt = get_prompt ();
 
   /* If we are using readline, set things up and display the first
      prompt, otherwise just print the prompt. */
@@ -173,10 +175,10 @@ start_event_loop ()
       /* Tell readline what the prompt to display is and what function it
 	 will need to call after a whole line is read. This also displays
 	 the first prompt.*/
-      length = strlen (PREFIX (0)) + strlen (PROMPT (0)) + strlen (SUFFIX (0)) + 1;
+      length = strlen (PREFIX (0)) + strlen (gdb_prompt) + strlen (SUFFIX (0)) + 1;
       a_prompt = (char *) xmalloc (length);
       strcpy (a_prompt, PREFIX (0));
-      strcat (a_prompt, PROMPT (0));
+      strcat (a_prompt, gdb_prompt);
       strcat (a_prompt, SUFFIX (0));
       rl_callback_handler_install (a_prompt, input_handler);
     }
@@ -251,19 +253,20 @@ display_gdb_prompt (new_prompt)
      char *new_prompt;
 {
   int prompt_length = 0;
+  char *gdb_prompt  = get_prompt ();
 
   if (!new_prompt)
     {
       /* Just use the top of the prompt stack. */
       prompt_length = strlen (PREFIX (0)) +
 	strlen (SUFFIX (0)) +
-	strlen (PROMPT (0)) + 1;
+	strlen (gdb_prompt) + 1;
 
       new_prompt = (char *) alloca (prompt_length);
 
       /* Prefix needs to have new line at end. */
       strcpy (new_prompt, PREFIX (0));
-      strcat (new_prompt, PROMPT (0));
+      strcat (new_prompt, gdb_prompt);
       /* Suffix needs to have a new line at end and \032 \032 at
          beginning. */
       strcat (new_prompt, SUFFIX (0));
@@ -894,7 +897,7 @@ static void
 async_stop_sig (arg)
      gdb_client_data arg;
 {
- char *prompt = PROMPT (0);
+ char *prompt = get_prompt ();
 #if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
   sigsetmask (0);
@@ -983,34 +986,38 @@ set_async_prompt (args, from_tty, c)
 void
 _initialize_event_loop ()
 {
-  /* When a character is detected on instream by select or poll, readline
-     will be invoked via this callback function. */
-  call_readline = rl_callback_read_char;
+  if (async_p)
+    {
+      /* When a character is detected on instream by select or poll,
+	 readline will be invoked via this callback function. */
+      call_readline = rl_callback_read_char;
 
-  /* When readline has read an end-of-line character, it passes the
-     complete line to gdb for processing. command_line_handler is the
-     function that does this. */
-  input_handler = command_line_handler;
+      /* When readline has read an end-of-line character, it passes
+	 the complete line to gdb for processing. command_line_handler
+	 is the function that does this. */
+      input_handler = command_line_handler;
 
-  /* Tell readline to use the same input stream that gdb uses. */
-  rl_instream = instream;
+      /* Tell readline to use the same input stream that gdb uses. */
+      rl_instream = instream;
 
-  /* Get a file descriptor for the input stream, so that we can
-     register it with the event loop. */
-  input_fd = fileno (instream);
+      /* Get a file descriptor for the input stream, so that we can
+	 register it with the event loop. */
+      input_fd = fileno (instream);
 
-  /* Now we need to create the event sources for the input file descriptor. */
-  /* At this point in time, this is the only event source that we
-     register with the even loop. Another source is going to be the
-     target program (inferior), but that must be registered only when
-     it actually exists (I.e. after we say 'run' or after we connect
-     to a remote target. */
+      /* Now we need to create the event sources for the input file
+         descriptor. */
+      /* At this point in time, this is the only event source that we
+	 register with the even loop. Another source is going to be
+	 the target program (inferior), but that must be registered
+	 only when it actually exists (I.e. after we say 'run' or
+	 after we connect to a remote target. */
 #ifdef HAVE_POLL
-  create_file_handler (input_fd, POLLIN,
-		       (file_handler_func *) call_readline, 0);
+      create_file_handler (input_fd, POLLIN,
+			   (file_handler_func *) call_readline, 0);
 #else
-  create_file_handler (input_fd, GDB_READABLE,
-		       (file_handler_func *) call_readline, 0);
+      create_file_handler (input_fd, GDB_READABLE,
+			   (file_handler_func *) call_readline, 0);
 #endif
+    }
 }
 

@@ -899,7 +899,7 @@ yylex ()
 	error ("Empty character constant.");
 
       yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = builtin_type_char;
+      yylval.typed_val_int.type = java_char_type;
 
       c = *lexptr++;
       if (c != '\'')

@@ -994,7 +994,6 @@ print_source_lines_base (s, line, stopline, noerror)
   current_source_line = line;
   first_line_listed = line;
 
-
   /* Only prints "No such file or directory" once */
   if ((s != last_source_visited) || (! last_source_error))
     {

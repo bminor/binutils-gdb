@@ -219,7 +219,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990614
+VERSION = 19990621
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -436,6 +436,7 @@ gdbcmd_h =	gdbcmd.h $(command_h)
 
 defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h
 
+top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
 tracepoint_h =	tracepoint.h
 ax_h = 		ax.h
@@ -1108,10 +1109,10 @@ eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
 	gdb_string.h
 
-event-loop.o: event-loop.c $(event_loop_h)
+event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h)
 
 event-top.o: event-top.c top.h $(readline_headers) \
-      $(defs_h) $(inferior_h) $(event_loop_h)
+      $(defs_h) $(inferior_h) $(event_loop_h) terminal.h
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	target.h language.h gdb_string.h

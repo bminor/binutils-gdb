@@ -1114,6 +1114,15 @@ alpha_pop_frame()
 
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
 
+  /* we need proc_desc to know how to restore the registers;
+     if it is NULL, construct (a temporary) one */
+  if (proc_desc == NULL)
+    proc_desc = find_proc_desc(frame->pc, frame->next);
+
+  /* Question: should we copy this proc_desc and save it in
+     frame->proc_desc?  If we do, who will free it?
+     For now, we don't save a copy... */
+
   write_register (PC_REGNUM, FRAME_SAVED_PC(frame));
   if (frame->saved_regs == NULL)
     alpha_find_saved_regs (frame);

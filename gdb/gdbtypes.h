@@ -844,6 +844,11 @@ extern struct type *builtin_type_uint32;
 extern struct type *builtin_type_int64;
 extern struct type *builtin_type_uint64;
 
+/* We use this for the '/c' print format, because builtin_type_char is
+   just a one-byte integral type, which languages less laid back than
+   C will print as ... well, a one-byte integral type.  */
+extern struct type *builtin_type_true_char;
+
 /* This type represents a type that was unrecognized in symbol
    read-in.  */
 

@@ -1,3 +1,61 @@
+1999-06-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c: Move include of event-loop.h, to avoid redefinition of
+ 	NFDBITS.
+
+	* event-loop.c (create_file_handler): Do not do a realloc of the
+ 	pollfd structure of the notifier, unless there is already one.
+	Include <sys/types.h> for platforms that have no poll.
+	
+	* event-top.c: Fix prototype for _initialize_event_loop.
+	(_initialize_event_loop): Do something only if running in async
+ 	mode.
+
+1999-06-17  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Make the '/c' print format use a true character type.  This is
+	more appropriate than builtin_type_char for languages other than
+	C, and C tolerates it.
+	* gdbtypes.c (builtin_type_true_char): New variable.
+	(build_gdbtypes): Initialize it.
+	* gdbtypes.h (builtin_type_true_char): New declaration.
+	* printcmd.c (print_scalar_formatted): When the format is 'c',
+	extract the value as a builtin_type_true_char.
+
+	* jv-exp.y (yylex): Say character literals are java_char_type, not
+	builtin_type_char.  Java treats the latter like `byte'.
+
+1999-06-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* Makefile.in (top_h): Define.
+	(event-loop.o): Add dependencies on top.h and defs.h.
+	(event-top.o): Add dependency on terminal.h.
+	* event-loop.c: Get rid of #include <readline.h>.
+
+	* event-loop.h: Get rid of nested #include's. 
+	* event-loop.c: Rearrange includes to accomodate change in
+ 	event-loop.h. Include poll.h, not sys/poll.h.
+	* event-top.c: Ditto.
+	* main.c: Ditto.
+	
+1999-06-16  David Taylor  <taylor@louisiana.cygnus.com>
+
+	* alpha-tdep.c (alpha_pop_frame): if frame->proc_desc
+	is NULL, call find_proc_desc so we know how to restore
+	the registers.
+
+1999-06-15  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* event-top.c (start_event_loop): call get_prompt.
+	(display_gdb_prompt): call get_prompt.
+	(async_stop_sig): call get_prompt.
+
+1999-06-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (delete_file_handler): When positioning prev_ptr,
+ 	keep looping while the one after is not equal to file_ptr, instead
+ 	of equal.
+
 1999-06-14  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* MAINTAINERS: Add Jimmy Guo and Jim Blandy as HP testsuite and
@@ -12,7 +70,6 @@
 	(read_command_lines): rename "prompt" to prompt_arg for clarity.
 	(stop_sig): call get_prompt instead of reading prompt string directly.
 	(command_loop): ditto.
-	(simplified_command_loop): ditto.
 	(gdb_prompt_escape): New variable.  Esc char for prompt parameters.
 	(get_prompt_1): New function, workhorse for get_prompt.
 	(get_prompt): Completely rewrite.  Add functionality for a 

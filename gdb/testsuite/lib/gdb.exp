@@ -56,10 +56,10 @@ if ![info exists GDBFLAGS] {
 }
 verbose "using GDBFLAGS = $GDBFLAGS" 2
 
-# The variable prompt is a regexp which matches the gdb prompt.  Set it if it
-# is not already set.
+# The variable gdb_prompt is a regexp which matches the gdb prompt.
+# Set it if it is not already set.
 global gdb_prompt
-if ![info exists prompt] then {
+if ![info exists gdb_prompt] then {
     set gdb_prompt "\[(\]gdb\[)\]"
 }
 
@@ -414,7 +414,7 @@ proc gdb_test { args } {
 	     gdb_suppress_entire_file "GDB died";
 	     return -1;
 	 }
-	 -re "Ending remote debugging.*$gdb_prompt$" {
+	 -re "Ending remote debugging.*$gdb_prompt $" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
 	    }
@@ -432,12 +432,14 @@ proc gdb_test { args } {
 	    send_gdb "$response_string\n";
 	    exp_continue;
 	}
-	 -re "Undefined command:.*$gdb_prompt" {
+	 -re "Undefined\[a-z\]* command:.*$gdb_prompt $" {
 	    perror "Undefined command \"$command\"."
+            fail "$message"
 	    set result 1
 	}
 	 -re "Ambiguous command.*$gdb_prompt $" {
 	    perror "\"$command\" is not a unique command name."
+            fail "$message"
 	    set result 1
 	}
 	 -re "Program exited with code \[0-9\]+.*$gdb_prompt $" {
@@ -467,10 +469,12 @@ proc gdb_test { args } {
 	 "<return>" {
 	    send_gdb "\n"
 	    perror "Window too small."
+            fail "$message"
 	}
 	 -re "\\(y or n\\) " {
 	    send_gdb "n\n"
 	    perror "Got interactive prompt."
+            fail "$message"
 	}
 	 eof {
 	     perror "Process no longer exists"
@@ -481,6 +485,7 @@ proc gdb_test { args } {
 	}
 	 full_buffer {
 	    perror "internal buffer is full."
+            fail "$message"
 	}
 	timeout	{
 	    if ![string match "" $message] then {
