@@ -1,5 +1,8 @@
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_get_frame_info): Give orig_sp a reasonable
+	value, even when fextra_info->stack_bought can't be trusted,
+
 	* s390-tdep.c (s390_readinstruction): Don't call
 	info->read_memory_func to read zero bytes.  Some targets'
 	xfer_memory functions can't cope with that.
