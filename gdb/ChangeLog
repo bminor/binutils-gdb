@@ -1,3 +1,7 @@
+Wed Jan  4 09:18:27 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* top.c (locate_arg): Call strchr not index.
+
 Tue Jan  3 16:52:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* ch-exp.y (literal):  Recognize NULL.

@@ -993,7 +993,7 @@ static char *
 locate_arg (p)
      char *p;
 {
-  while (p = index (p, '$'))
+  while (p = strchr (p, '$'))
     {
       if (strncmp (p, "$arg", 4) == 0 && isdigit (p[4]))
 	return p;
