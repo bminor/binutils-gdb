@@ -1,3 +1,8 @@
+2004-03-15  Matt Thomas  <matt@3am-software.com>
+
+	* config.bfd: Add x86-64 vector to NetBSD/i386 if 64bit BFD is
+	selected.
+
 2004-03-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* config.bfd: Add x86_64-*-openbsd*.
@@ -7,7 +12,7 @@
 
 2004-03-12  Nick Clifton  <nickc@redhat.com>
 	    Dave Murphy  <wintermute2k4@ntlworld.com>
-	
+
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Skip most checks
 	if the input bfd does not contain any code.
 
@@ -189,7 +194,7 @@
 	* configure: Regenerate.
 
 2004-02-17  Daniel Jacobowitz  <drow@mvista.com>
-            Richard Sandiford  <rsandifo@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Use
 	_bfd_elf_symbol_refs_local_p to decide whether to decay
@@ -239,7 +244,7 @@
 	fseeko and fseeko64.  Determine bfd_file_ptr.
 	* configure: Re-generate.
 	* config.in: Re-generate.
-	
+
 2004-02-09  Anil Paranjpe  <anilp1@KPITCummins.com>
 
 	* coff-h8300.c: Added comments about relaxation for ldc.w and stc.w.
