@@ -23,6 +23,7 @@ Mon Oct  2 11:46:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* main.c (main): Add comment saying to update sim_calls.c when
 	adding switches.  Add -I to call psim_print_info when done.
+	(usage): Update usage message.
 
 Sun Oct  1 13:52:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

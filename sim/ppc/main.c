@@ -68,7 +68,7 @@ zfree(void *chunk)
 static void
 usage(void)
 {
-  error ("Usage: psim [ -a -p -c -C -s -i -t ] <image> [ <image-args> ... ]\n");
+  error ("Usage: psim [ -a -p -c -C -s -i -I -t ] <image> [ <image-args> ... ]\n");
 }
 
 int
