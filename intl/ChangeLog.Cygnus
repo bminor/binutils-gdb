@@ -1,5 +1,7 @@
 Wed Mar 25 15:00:14 1998  Tom Tromey  <tromey@cygnus.com>
 
+	* config.h.in: New file.
+
 	* configure.in, configure, acconfig.h, aclocal.m4: New files.
 	* Makefile.in (OBJECTS): Depend on config.h, not ../config.h.
 	(Makefile): Rebuild Makefile here, not in `..'.
