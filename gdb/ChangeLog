@@ -1,5 +1,16 @@
 2003-11-09  Andrew Cagney  <cagney@redhat.com>
 
+	* config/mips/irix6.mh (NAT_FILE): Set to "nm-irix5.h".
+	* config/mips/nm-irix6.h: Delete file.
+	* config/mips/nm-linux.h: Update copyright.
+	(MIPS_GNULINUX_TARGET): Delete macro.
+	* config/mips/irix6.mh (XM_FILE): Set to "xm-irix5.h".
+	* config/mips/xm-irix6.h: Delete file.
+	* config/mips/linux.mh (XM_FILE): Delete definition.
+	* config/mips/xm-linux.h: Delete file.
+
+2003-11-09  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c (d10v_return_value): New function.
 	(d10v_use_struct_convention): Delete function.
 	(d10v_store_return_value): Delete function.
