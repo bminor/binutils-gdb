@@ -283,12 +283,18 @@ coff_link_add_symbols (abfd, info)
      struct bfd_link_info *info;
 {
   boolean (*sym_is_global) PARAMS ((bfd *, struct internal_syment *));
+  boolean keep_syms;
   boolean default_copy;
   bfd_size_type symcount;
   struct coff_link_hash_entry **sym_hash;
   bfd_size_type symesz;
   bfd_byte *esym;
   bfd_byte *esym_end;
+
+  /* Keep the symbols during this function, in case the linker needs
+     to read the generic symbols in order to report an error message.  */
+  keep_syms = obj_coff_keep_syms (abfd);
+  obj_coff_keep_syms (abfd) = true;
 
   sym_is_global = coff_backend_info (abfd)->_bfd_coff_sym_is_global;
 
@@ -306,7 +312,7 @@ coff_link_add_symbols (abfd, info)
 			 ((size_t) symcount
 			  * sizeof (struct coff_link_hash_entry *))));
   if (sym_hash == NULL && symcount != 0)
-    return false;
+    goto error_return;
   obj_coff_sym_hashes (abfd) = sym_hash;
   memset (sym_hash, 0,
 	  (size_t) symcount * sizeof (struct coff_link_hash_entry *));
@@ -335,7 +341,7 @@ coff_link_add_symbols (abfd, info)
 
 	  name = _bfd_coff_internal_syment_name (abfd, &sym, buf);
 	  if (name == NULL)
-	    return false;
+	    goto error_return;
 
 	  /* We must copy the name into memory if we got it from the
              syment itself, rather than the string table.  */
@@ -370,7 +376,7 @@ coff_link_add_symbols (abfd, info)
 		 (info, abfd, name, flags, section, value,
 		  (const char *) NULL, copy, false,
 		  (struct bfd_link_hash_entry **) sym_hash)))
-	    return false;
+	    goto error_return;
 
 	  if (info->hash->creator->flavour == bfd_get_flavour (abfd))
 	    {
@@ -405,7 +411,7 @@ coff_link_add_symbols (abfd, info)
 						  (sym.n_numaux
 						   * sizeof (*alloc))));
 		      if (alloc == NULL)
-			return false;
+			goto error_return;
 		      for (i = 0, eaux = esym + symesz, iaux = alloc;
 			   i < sym.n_numaux;
 			   i++, eaux += symesz, iaux++)
@@ -448,7 +454,7 @@ coff_link_add_symbols (abfd, info)
 		    (PTR) bfd_zalloc (abfd,
 				      sizeof (struct coff_section_tdata));
 		  if (stab->used_by_bfd == NULL)
-		    return false;
+		    goto error_return;
 		  secdata = coff_section_data (abfd, stab);
 		}
 
@@ -457,12 +463,18 @@ coff_link_add_symbols (abfd, info)
 	      if (! _bfd_link_section_stabs (abfd, &table->stab_info,
 					     stab, stabstr,
 					     &secdata->stab_info))
-		return false;
+		goto error_return;
 	    }
 	}
     }
 
+  obj_coff_keep_syms (abfd) = keep_syms;
+
   return true;
+
+ error_return:
+  obj_coff_keep_syms (abfd) = keep_syms;
+  return false;
 }
 
 /* Do the final link step.  */
@@ -826,7 +838,7 @@ _bfd_coff_final_link (abfd, info)
       finfo.outsyms = NULL;
     }
 
-  if (info->relocateable)
+  if (info->relocateable && max_output_reloc_count > 0)
     {
       /* Now that we have written out all the global symbols, we know
 	 the symbol indices to use for relocs against them, and we can

@@ -1,3 +1,9 @@
+Mon Dec  2 12:13:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_final_link): If there aren't any relocs in
+	a relocateable link, don't try to process them.  From Heinz Wrobel
+	<wrobel@lpr.e-technik.tu-muenchen.de>.
+
 Mon Dec  2 00:39:24 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10300.c (mn10300_info_howto): Renamed from
