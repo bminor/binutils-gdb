@@ -1,3 +1,7 @@
+2001-07-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Re-generate using autoconf 2.13.
+
 1999-03-17  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* do-flags.S: Added new test for non-lkr status of MVTSYS.
