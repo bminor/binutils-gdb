@@ -1,3 +1,8 @@
+2004-02-27  Eli Zaretskii  <eliz@elta.co.il>
+
+	* coffread.c (enter_linenos): Don't let rawptr reference memory
+	outside linetab[]'s limits.
+
 2004-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* hppa-tdep.c (hppa32_push_dummy_call): Fix code reserving
