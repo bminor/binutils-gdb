@@ -1,7 +1,32 @@
 start-sanitize-v850
-Sun Sep 01 15:23:06 1996  Mark Alexander  <marka@cygnus.com>
+Tue Sep  3 00:57:02 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* .Sanitize: Remove reloc.c from v850_files.
+	* elf32-v850.c (bfd_elf3_v850_reloc): New function for
+	handling V850 specific relocs.
+	(elf_v850_howto_table): Use the new function for some
+	relocations.  Twiddle masks & shifts for some relocs.
+	Set partial_inplace where needed.
+
+end-sanitize-v850
+Mon Sep  2 12:12:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cpu-mips.c: Add an explicit mips:3000 entry, and change the
+	default architecture to a machine number of 0.
+	* elf32-mips.c (_bfd_mips_elf_object_p): Set the machine number
+	for E_MIPS_ARCH_1.
+	(_bfd_mips_elf_merge_private_bfd_data): If the machine number of
+	the output BFD is the default, set it from the first input BFD.
+
+start-sanitize-v850
+Sun Sep  1 18:38:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (elf_v850_howto_table): All the 16bit relocs
+	insert at bitpos zero.  The HI16 relocs are shifted right
+	by 16 bits.  Fix src_mask for all relocs.
+	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME): Define.  The V850 is
+	little endian!
+	(TARGET_BIG_SYM, TARGET_BIG_NAME): Remove.  The V850 is little
+	endian!
 
 end-sanitize-v850
 Sun Sep  1 15:41:08 1996  Ian Lance Taylor  <ian@cygnus.com>
