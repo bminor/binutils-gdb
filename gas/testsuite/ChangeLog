@@ -1,3 +1,25 @@
+2003-04-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/ulh.d: Adjust for ulh and ulhu macro assembly changes.
+
+	* gas/mips/mips.exp: Define new "gpr_ilocks" architecture
+	property, and add it to mips2 (and later) chips and r3900.
+	* gas/mips/uld2.s: New test source file.
+	* gas/mips/ulh2.s: Likewise.
+	* gas/mips/ulw2.s: Likewise.
+	* gas/mips/uld2.l: New test stderr listing.
+	* gas/mips/ulh2.l: Likewise.
+	* gas/mips/ulw2.l: Likewise.
+	* gas/mips/uld2-eb.d: New test.
+	* gas/mips/uld2-el.d: Likewise.
+	* gas/mips/ulh2-eb.d: Likewise.
+	* gas/mips/ulh2-el.d: Likewise.
+	* gas/mips/ulw2-eb-ilocks.d: Likewise.
+	* gas/mips/ulw2-eb.d: Likewise.
+	* gas/mips/ulw2-el-ilocks.d: Likewise.
+	* gas/mips/ulw2-el.d: Likewise.
+	* gas/mips/mips.exp: Run new tests for appropriate architectures.
+
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
         * gas/xtensa/all.exp: New file.

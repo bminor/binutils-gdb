@@ -1,3 +1,10 @@
+2003-04-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (macro2): Adjust implementation of
+	M_ULH, M_ULHU, M_ULW, and M_ULD so that they work properly
+	in the case where the source and destination registers
+	are the same.
+
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
         * Makefile.am (CPU_TYPES): Add xtensa.

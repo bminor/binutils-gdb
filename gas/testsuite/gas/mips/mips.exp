@@ -55,6 +55,10 @@
 #		The architecture includes the instructions defined
 #		by that MIPS ISA.
 #
+#	gpr_ilocks
+#		The architecture interlocks GPRs accesses.  (That is,
+#		there are no load delay slots.)
+#
 #	mips3d	The architecture includes the MIPS-3D ASE.
 #
 #	ror	The architecture includes hardware rotate instructions.
@@ -332,7 +336,7 @@ proc run_list_test_arches { name opts arch_list } {
 # to any architecture.
 mips_arch_create mips1 	32	{}	{} \
 			{ -march=mips1 -mtune=mips1 } { -mmips:3000 }
-mips_arch_create mips2 	32	mips1	{} \
+mips_arch_create mips2 	32	mips1	{ gpr_ilocks } \
 		        { -march=mips2 -mtune=mips2 } { -mmips:6000 }
 mips_arch_create mips3 	64	mips2	{} \
 			{ -march=mips3 -mtune=mips3 } { -mmips:4000 }
@@ -352,7 +356,7 @@ mips_arch_create mips64	64	mips5	{ mips32 } \
 			{ mipsisa64-*-* mipsisa64el-*-* }
 mips_arch_create r3000 	32	mips1	{} \
 			{ -march=r3000 -mtune=r3000 } { -mmips:3000 }
-mips_arch_create r3900 	32	mips1	{} \
+mips_arch_create r3900 	32	mips1	{ gpr_ilocks } \
 			{ -march=r3900 -mtune=r3900 } { -mmips:3900 } \
 			{ mipstx39-*-* mipstx39el-*-* }
 mips_arch_create r4000 	64	mips3	{} \
@@ -492,6 +496,8 @@ if { [istarget mips*-*-*] } then {
     if !$aout { run_dump_test "sb" }
     run_dump_test "trunc"
     if !$aout { run_dump_test "ulh" }
+    run_dump_test_arches "ulh2-eb"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "ulh2-el"	[mips_arch_list_matching mips1]
     if $elf { run_dump_test "ulh-svr4pic" }
     if $elf { run_dump_test "ulh-xgot" }
     if $ecoff { run_dump_test "ulh-empic" }
@@ -502,6 +508,14 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "usw"
 	run_dump_test "usd"
     }
+    run_dump_test_arches "ulw2-eb"	[mips_arch_list_matching !gpr_ilocks]
+    run_dump_test_arches "ulw2-eb-ilocks" [mips_arch_list_matching gpr_ilocks]
+    run_dump_test_arches "ulw2-el"	[mips_arch_list_matching !gpr_ilocks]
+    run_dump_test_arches "ulw2-el-ilocks" [mips_arch_list_matching gpr_ilocks]
+
+    run_dump_test_arches "uld2-eb" [mips_arch_list_matching mips3]
+    run_dump_test_arches "uld2-el" [mips_arch_list_matching mips3]
+
     # The mips16 test can only be run on ELF, because only ELF
     # supports the necessary mips16 reloc.
     if { $elf && !$no_mips16 } {

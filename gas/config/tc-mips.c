@@ -7554,19 +7554,18 @@ macro2 (ip)
     ulh:
       if (offset_expr.X_add_number >= 0x7fff)
 	as_bad (_("operand overflow"));
-      /* avoid load delay */
       if (! target_big_endian)
 	++offset_expr.X_add_number;
-      macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
+      macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, breg);
       if (! target_big_endian)
 	--offset_expr.X_add_number;
       else
 	++offset_expr.X_add_number;
-      macro_build ((char *) NULL, &icnt, &offset_expr, "lbu", "t,o(b)", AT,
+      macro_build ((char *) NULL, &icnt, &offset_expr, "lbu", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
-		   treg, treg, 8);
+		   AT, AT, 8);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
 		   treg, treg, AT);
       break;
@@ -7583,17 +7582,29 @@ macro2 (ip)
     ulw:
       if (offset_expr.X_add_number >= 0x8000 - off)
 	as_bad (_("operand overflow"));
+      if (treg != breg)
+	tempreg = treg;
+      else
+	tempreg = AT;
       if (! target_big_endian)
 	offset_expr.X_add_number += off;
-      macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
+      macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", tempreg,
 		   (int) BFD_RELOC_LO16, breg);
       if (! target_big_endian)
 	offset_expr.X_add_number -= off;
       else
 	offset_expr.X_add_number += off;
-      macro_build ((char *) NULL, &icnt, &offset_expr, s2, "t,o(b)", treg,
+      macro_build ((char *) NULL, &icnt, &offset_expr, s2, "t,o(b)", tempreg,
 		   (int) BFD_RELOC_LO16, breg);
-      return;
+
+      /* If necessary, move the result in tempreg the final destination.  */
+      if (treg == tempreg)
+        return;
+      /* Protect second load's delay slot.  */
+      if (!gpr_interlocks)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
+      move_register (&icnt, treg, tempreg);
+      break;
 
     case M_ULD_A:
       s = "ldl";
