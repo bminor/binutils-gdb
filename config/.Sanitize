@@ -61,6 +61,7 @@ mpw-mh-mpw
 mt-m68kpic
 mt-netware
 mt-papic
+mt-ppc
 mt-sparcpic
 mt-v810
 mt-x86pic
