@@ -286,6 +286,8 @@ static int ishex PARAMS ((int ch, int *val));
 
 static int stubhex PARAMS ((int ch));
 
+static int remote_query PARAMS ((char, char *, char *, int *));
+
 static int hexnumstr PARAMS ((char *, ULONGEST));
 
 static CORE_ADDR remote_address_masked PARAMS ((CORE_ADDR));
@@ -2969,6 +2971,75 @@ the loaded file\n");
     printf_filtered ("No loaded section named '%s'.\n", args);
 }
 
+static int
+remote_query (query_type, buf, outbuf, bufsiz)
+     char query_type;
+     char *buf;
+     char *outbuf;
+     int *bufsiz;
+{
+  int i;
+  char buf2[PBUFSIZ];
+  char *p2 = &buf2[0];
+  char *p = buf;
+
+  if (! bufsiz)
+    error ("null pointer to remote bufer size specified");
+
+  /* minimum outbuf size is PBUFSIZE - if bufsiz is not large enough let 
+     the caller know and return what the minimum size is   */
+  /* Note: a zero bufsiz can be used to query the minimum buffer size */
+  if ( *bufsiz < PBUFSIZ )
+    {
+      *bufsiz = PBUFSIZ;
+      return -1;
+    }
+
+  /* except for querying the minimum buffer size, target must be open */
+  if (! remote_desc)
+    error ("remote query is only available after target open");
+
+  /* we only take uppercase letters as query types, at least for now */
+  if ( (query_type < 'A') || (query_type > 'Z') )
+    error ("invalid remote query type");
+
+  if (! buf)
+    error ("null remote query specified");
+
+  if (! outbuf)
+    error ("remote query requires a buffer to receive data");
+
+  outbuf[0] = '\0';
+
+  *p2++ = 'q';
+  *p2++ = query_type;
+
+  /* we used one buffer char for the remote protocol q command and another
+     for the query type.  As the remote protocol encapsulation uses 4 chars
+     we have PBUFZIZ -6 left to pack the query string */
+  i = 0;
+  while ( buf[i] && (i < (PBUFSIZ - 7)) )
+    {
+      /* bad caller may have sent forbidden characters */
+      if ( (!isprint(buf[i])) || (buf[i] == '$') || (buf[i] == '#') )
+        error ("illegal characters in query string");
+
+      *p2++ = buf[i];
+      i++;
+    }
+  *p2 = buf[i];
+
+  if ( buf[i] )
+    error ("query larger than avaiable buffer");
+
+  i = putpkt (buf2);
+  if ( i < 0 ) return i;
+
+  getpkt (outbuf, 0);
+
+  return 0;
+}
+
 static void
 packet_command (args, from_tty)
      char *args;
@@ -3179,6 +3250,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_stop = remote_stop;
+  remote_ops.to_query = remote_query;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;	
   remote_ops.to_has_memory = 1;	
