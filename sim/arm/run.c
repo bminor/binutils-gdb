@@ -117,11 +117,11 @@ main (ac, av)
 	    sim_info (0);
 
 	  /* Assume we left through the exit system call,
-	     in which case r5 has the exit code */
+	     in which case r0 has the exit code */
 	  {
 	    unsigned char b[4];
-	    sim_fetch_register (5, b);
-	    return b[3];
+	    sim_fetch_register (0, b);
+	    return b[0];
 	  }
 
 	}

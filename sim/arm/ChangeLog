@@ -1,0 +1,9 @@
+Thu Jun  8 14:37:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* run.c (main): Grab return value from right register.
+
+Wed May 24 14:37:31 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* New.
+
+
