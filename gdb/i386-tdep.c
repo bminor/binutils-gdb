@@ -41,7 +41,6 @@
 #include "symtab.h"
 #include "target.h"
 #include "value.h"
-#include "trad-frame.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -249,10 +248,8 @@ struct i386_frame_cache
   CORE_ADDR sp_offset;
   CORE_ADDR pc;
 
-  /* Saved registers.  While trad-frame allocates space for the full
-     NUM_REGS + NUM_PSEUDOREGS, some of the code below cheats and
-     allocates space for only I386_NUM_SAVED_REGS.  */
-  struct trad_frame_saved_reg *saved_regs;
+  /* Saved registers.  */
+  CORE_ADDR saved_regs[I386_NUM_SAVED_REGS];
   CORE_ADDR saved_sp;
   int pc_in_eax;
 
@@ -263,7 +260,7 @@ struct i386_frame_cache
 /* Allocate and initialize a frame cache.  */
 
 static struct i386_frame_cache *
-i386_alloc_frame_cache (struct frame_info *next_frame)
+i386_alloc_frame_cache (void)
 {
   struct i386_frame_cache *cache;
   int i;
@@ -275,7 +272,10 @@ i386_alloc_frame_cache (struct frame_info *next_frame)
   cache->sp_offset = -4;
   cache->pc = 0;
 
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  /* Saved registers.  We initialize these to -1 since zero is a valid
+     offset (that's where %ebp is supposed to be stored).  */
+  for (i = 0; i < I386_NUM_SAVED_REGS; i++)
+    cache->saved_regs[i] = -1;
   cache->saved_sp = 0;
   cache->pc_in_eax = 0;
 
@@ -449,7 +449,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
     {
       /* Take into account that we've executed the `pushl %ebp' that
 	 starts this instruction sequence.  */
-      cache->saved_regs[I386_EBP_REGNUM].addr = 0;
+      cache->saved_regs[I386_EBP_REGNUM] = 0;
       cache->sp_offset += 4;
 
       /* If that's all, return now.  */
@@ -547,7 +547,7 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
 	  if (op < 0x50 || op > 0x57)
 	    break;
 
-	  cache->saved_regs[op - 0x50].addr = offset;
+	  cache->saved_regs[op - 0x50] = offset;
 	  offset -= 4;
 	  pc++;
 	}
@@ -608,11 +608,6 @@ i386_skip_prologue (CORE_ADDR start_pc)
   CORE_ADDR pc;
   unsigned char op;
   int i;
-
-  /* Allocate space for the maximum number of saved registers.  This
-     should include all registers mentioned above, and %eip.  */
-  cache.saved_regs = alloca (I386_NUM_SAVED_REGS
-			     * sizeof (cache.saved_regs[0]));
 
   cache.locals = -1;
   pc = i386_analyze_prologue (start_pc, 0xffffffff, &cache);
@@ -695,7 +690,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  cache = i386_alloc_frame_cache (next_frame);
+  cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
   /* In principle, for normal frames, %ebp holds the frame pointer,
@@ -713,7 +708,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
     return cache;
 
   /* For normal frames, %eip is stored at 4(%ebp).  */
-  cache->saved_regs[I386_EIP_REGNUM].addr = 4;
+  cache->saved_regs[I386_EIP_REGNUM] = 4;
 
   cache->pc = frame_func_unwind (next_frame);
   if (cache->pc != 0)
@@ -740,9 +735,8 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
   for (i = 0; i < I386_NUM_SAVED_REGS; i++)
-    if (cache->saved_regs[i].realnum >= 0
-	&& cache->saved_regs[i].addr != -1)
-      cache->saved_regs[i].addr += cache->base;
+    if (cache->saved_regs[i] != -1)
+      cache->saved_regs[i] += cache->base;
 
   return cache;
 }
@@ -830,8 +824,23 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
-  trad_frame_prev_register (next_frame, cache->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  if (regnum < I386_NUM_SAVED_REGS && cache->saved_regs[regnum] != -1)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_memory;
+      *addrp = cache->saved_regs[regnum];
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Read the value in from memory.  */
+	  read_memory (*addrp, valuep,
+		       register_size (current_gdbarch, regnum));
+	}
+      return;
+    }
+
+  frame_register_unwind (next_frame, regnum,
+			 optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind i386_frame_unwind =
@@ -861,7 +870,7 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  cache = i386_alloc_frame_cache (next_frame);
+  cache = i386_alloc_frame_cache ();
 
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4) - 4;
@@ -875,12 +884,12 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 
       for (i = 0; i < tdep->sc_num_regs; i++)
 	if (tdep->sc_reg_offset[i] != -1)
-	  cache->saved_regs[i].addr = addr + tdep->sc_reg_offset[i];
+	  cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
     }
   else
     {
-      cache->saved_regs[I386_EIP_REGNUM].addr = addr + tdep->sc_pc_offset;
-      cache->saved_regs[I386_ESP_REGNUM].addr = addr + tdep->sc_sp_offset;
+      cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
+      cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
     }
 
   *this_cache = cache;
