@@ -31,6 +31,7 @@ nm-sun4os4.h
 nm-sysv4.h
 sp64.mt
 sp64sim.mt
+sp64sol2.mt
 sparc-em.mt
 sparclite.mt
 sparclynx.mh
