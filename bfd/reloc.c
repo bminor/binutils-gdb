@@ -964,7 +964,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   const reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
   asymbol *symbol;
-  PTR data;
+  bfd_byte *data;
 
   symbol = *(reloc_entry->sym_ptr_ptr);
   if (bfd_is_abs_section (symbol->section))
@@ -1682,6 +1682,8 @@ ENUMX
 ENUMX
   BFD_RELOC_16_PCREL
 ENUMX
+  BFD_RELOC_12_PCREL
+ENUMX
   BFD_RELOC_8_PCREL
 ENUMDOC
   PC-relative relocations.  Sometimes these are relative to the address
@@ -1711,11 +1713,12 @@ ENUMX
 ENUMX
   BFD_RELOC_23_PCREL_S2
 ENUMDOC
-  These PC-relative relocations are stored as word displacements -- i.e.,
-byte displacements shifted right two bits.  The 30-bit word displacement
-(<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the SPARC.  The signed
-16-bit displacement is used on the MIPS, and the 23-bit displacement is
-used on the Alpha.
+  These PC-relative relocations are stored as word displacements --
+i.e., byte displacements shifted right two bits.  The 30-bit word
+displacement (<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the
+SPARC.  (SPARC tools generally refer to this as <<WDISP30>>.)  The
+signed 16-bit displacement is used on the MIPS, and the 23-bit
+displacement is used on the Alpha.
 
 ENUM
   BFD_RELOC_HI22

@@ -545,11 +545,11 @@ extern boolean bfd_elf32_record_link_assignment
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_elf32_size_dynamic_sections
-  PARAMS ((bfd *, const char *, const char *, struct bfd_link_info *,
-	   struct sec **));
+  PARAMS ((bfd *, const char *, const char *, boolean,
+	   struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
-  PARAMS ((bfd *, const char *, const char *, struct bfd_link_info *,
-	   struct sec **));
+  PARAMS ((bfd *, const char *, const char *, boolean,
+	   struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 
 /* SunOS shared library support routines for the linker.  */
@@ -1277,6 +1277,15 @@ bfd_perform_relocation
     bfd *output_bfd,
     char **error_message));
 
+bfd_reloc_status_type
+
+bfd_install_relocation
+ PARAMS ((bfd *abfd,
+    arelent *reloc_entry,
+    PTR data, bfd_vma data_start,
+    asection *input_section,
+    char **error_message));
+
 enum bfd_reloc_code_real {
   _dummy_first_bfd_reloc_code_real,
 
@@ -1298,6 +1307,7 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_32_PCREL,
   BFD_RELOC_24_PCREL,
   BFD_RELOC_16_PCREL,
+  BFD_RELOC_12_PCREL,
   BFD_RELOC_8_PCREL,
 
 /* Linkage-table relative. */
@@ -1308,11 +1318,12 @@ The 24-bit relocation is used in some Intel 960 configurations. */
 /* Absolute 8-bit relocation, but used to form an address like 0xFFnn. */
   BFD_RELOC_8_FFnn,
 
-/* These PC-relative relocations are stored as word displacements -- i.e.,
-byte displacements shifted right two bits.  The 30-bit word displacement
-(<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the SPARC.  The signed
-16-bit displacement is used on the MIPS, and the 23-bit displacement is
-used on the Alpha. */
+/* These PC-relative relocations are stored as word displacements --
+i.e., byte displacements shifted right two bits.  The 30-bit word
+displacement (<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the
+SPARC.  (SPARC tools generally refer to this as <<WDISP30>>.)  The
+signed 16-bit displacement is used on the MIPS, and the 23-bit
+displacement is used on the Alpha. */
   BFD_RELOC_32_PCREL_S2,
   BFD_RELOC_16_PCREL_S2,
   BFD_RELOC_23_PCREL_S2,
@@ -1609,12 +1620,15 @@ typedef struct symbol_cache_entry
 
 	 /* A pointer to the section to which this symbol is
 	   relative.  This will always be non NULL, there are special
-          sections for undefined and absolute symbols */
+          sections for undefined and absolute symbols.  */
   struct sec *section;
 
-	 /* Back end special data. This is being phased out in favour
-	   of making this a union. */
-  PTR udata;
+	 /* Back end special data.  */
+  union
+    {
+      PTR p;
+      bfd_vma i;
+    } udata;
 
 } asymbol;
 #define bfd_get_symtab_upper_bound(abfd) \
@@ -2057,6 +2071,7 @@ CAT(NAME,_core_file_matches_executable_p)
 #define BFD_JUMP_TABLE_ARCHIVE(NAME)\
 CAT(NAME,_slurp_armap),\
 CAT(NAME,_slurp_extended_name_table),\
+CAT(NAME,_construct_extended_name_table),\
 CAT(NAME,_truncate_arname),\
 CAT(NAME,_write_armap),\
 CAT(NAME,_openr_next_archived_file),\
@@ -2064,6 +2079,8 @@ CAT(NAME,_generic_stat_arch_elt),\
 CAT(NAME,_update_armap_timestamp)
   boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
   boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
+  boolean  (*_bfd_construct_extended_name_table)
+             PARAMS ((bfd *, char **, bfd_size_type *, const char **));
   void     (*_bfd_truncate_arname) PARAMS ((bfd *, CONST char *, char *));
   boolean  (*write_armap) PARAMS ((bfd *arch, 
                               unsigned int elength,

@@ -95,14 +95,11 @@ boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
 #define bfd_slurp_bsd_armap bfd_slurp_armap
 #define bfd_slurp_coff_armap bfd_slurp_armap
 boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
+extern boolean _bfd_construct_extended_name_table
+  PARAMS ((bfd *, boolean, char **, bfd_size_type *));
 boolean	_bfd_write_archive_contents PARAMS ((bfd *abfd));
 bfd *_bfd_get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
 bfd * _bfd_new_bfd PARAMS ((void));
-
-#define DEFAULT_STRING_SPACE_SIZE 0x2000
-boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
-					 unsigned int *table_length,
-					 char **free_ptr));
 
 boolean	bfd_false PARAMS ((bfd *ignore));
 boolean	bfd_true PARAMS ((bfd *ignore));
@@ -167,6 +164,9 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
 
 #define _bfd_noarchive_slurp_armap bfd_false
 #define _bfd_noarchive_slurp_extended_name_table bfd_false
+#define _bfd_noarchive_construct_extended_name_table \
+  ((boolean (*) PARAMS ((bfd *, char **, bfd_size_type *, const char **))) \
+   bfd_false)
 #define _bfd_noarchive_truncate_arname \
   ((void (*) PARAMS ((bfd *, const char *, char *))) bfd_void)
 #define _bfd_noarchive_write_armap \
@@ -184,6 +184,8 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
 #define _bfd_archive_bsd_slurp_armap bfd_slurp_bsd_armap
 #define _bfd_archive_bsd_slurp_extended_name_table \
   _bfd_slurp_extended_name_table
+extern boolean _bfd_archive_bsd_construct_extended_name_table
+  PARAMS ((bfd *, char **, bfd_size_type *, const char **));
 #define _bfd_archive_bsd_truncate_arname bfd_bsd_truncate_arname
 #define _bfd_archive_bsd_write_armap bsd_write_armap
 #define _bfd_archive_bsd_openr_next_archived_file \
@@ -198,6 +200,8 @@ extern boolean _bfd_archive_bsd_update_armap_timestamp PARAMS ((bfd *));
 #define _bfd_archive_coff_slurp_armap bfd_slurp_coff_armap
 #define _bfd_archive_coff_slurp_extended_name_table \
   _bfd_slurp_extended_name_table
+extern boolean _bfd_archive_coff_construct_extended_name_table
+  PARAMS ((bfd *, char **, bfd_size_type *, const char **));
 #define _bfd_archive_coff_truncate_arname bfd_dont_truncate_arname
 #define _bfd_archive_coff_write_armap coff_write_armap
 #define _bfd_archive_coff_openr_next_archived_file \
@@ -446,11 +450,6 @@ bfd_open_file PARAMS ((bfd *abfd));
 FILE *
 bfd_cache_lookup_worker PARAMS ((bfd *abfd));
 
-boolean 
-bfd_constructor_entry PARAMS ((bfd *abfd, 
-    asymbol **symbol_ptr_ptr,
-    CONST char*type));
-
 #ifdef _BFD_MAKE_TABLE_bfd_reloc_code_real
 
 static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
@@ -465,6 +464,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_32_PCREL",
   "BFD_RELOC_24_PCREL",
   "BFD_RELOC_16_PCREL",
+  "BFD_RELOC_12_PCREL",
   "BFD_RELOC_8_PCREL",
   "BFD_RELOC_32_BASEREL",
   "BFD_RELOC_16_BASEREL",
@@ -546,6 +546,13 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_PPC_BA26",
   "BFD_RELOC_PPC_TOC16",
   "BFD_RELOC_CTOR",
+  "BFD_RELOC_ARM_PCREL_BRANCH",
+  "BFD_RELOC_ARM_IMMEDIATE",
+  "BFD_RELOC_ARM_OFFSET_IMM",
+  "BFD_RELOC_ARM_SHIFT_IMM",
+  "BFD_RELOC_ARM_SWI",
+  "BFD_RELOC_ARM_MULTI",
+  "BFD_RELOC_ARM_CP_OFF_IMM",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
