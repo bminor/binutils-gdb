@@ -1803,15 +1803,17 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 int (*target_activity_function) (void);
 int target_activity_fd;
 
-/* Convert a normal process ID to a string.  Returns the string in a static
-   buffer.  */
+/* Convert a normal process ID to a string.  Returns the string in a
+   static buffer.  */
 
 char *
 normal_pid_to_str (ptid_t ptid)
 {
-  static char buf[30];
+  static char buf[32];
+  int size;
 
-  sprintf (buf, "process %d", PIDGET (ptid));
+  size = snprintf (buf, sizeof buf, "process %d", ptid_get_pid (ptid));
+  gdb_assert (size < sizeof buf);
   return buf;
 }
 

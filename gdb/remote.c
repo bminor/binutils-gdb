@@ -5322,9 +5322,11 @@ Fetch and print the remote list of thread identifiers, one pkt only"));
 static char *
 remote_pid_to_str (ptid_t ptid)
 {
-  static char buf[30];
+  static char buf[32];
+  int size;
 
-  sprintf (buf, "Thread %d", PIDGET (ptid));
+  size = snprintf (buf, sizeof buf, "thread %d", ptid_get_pid (ptid));
+  gdb_assert (size < sizeof buf);
   return buf;
 }
 

@@ -1,4 +1,11 @@
-2005-03-13  Mark Kettenis  <kettenis@gnu.org>
+2005-03-13  Mark Kettenis  <kettenis@elgar.gnu.org>
+
+	* inf-ttrace.c (inf_ttrace_pid_to_str): Use snprintf instead of
+	sprintf.
+	* target.c (normal_pid_to_str): Likewise.
+	* remote.c (remote_pid_to_str): Use snprint instead of sprintf.
+	Change capitalization of "thread".  Use ptid_get_pid instead of
+	GETPID.
 
 	* cp-abi.c (set_cp_abi_as_auto_default): Use xasprintf instead of
 	a combination of xmalloc and sprintf.
