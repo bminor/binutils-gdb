@@ -1,5 +1,9 @@
 2004-06-27  Joel Brobecker  <brobecker@gnat.com>
 
+	* ada-lang.c: Re-indent file.
+
+2004-06-27  Joel Brobecker  <brobecker@gnat.com>
+
 	* ada-lang.c (symtab_symbol_info): Remove unused declaration.
 	(no_symtab_msg): Likewise.
 
