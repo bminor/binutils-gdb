@@ -1,3 +1,7 @@
+2002-03-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* MAINTAINERS: Record self as maintainer of m68hc11 simulator.
+
 2002-03-01  Frank Ch. Eigler  <fche@redhat.com>
 
 	* MAINTAINERS: Record self as a co-maintainer of just common/.
