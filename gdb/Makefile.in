@@ -168,15 +168,20 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
-# Select demangler to use.
-DEMANGLER=cplus-dem
+# Select the default C++ demangling style to use.  The default is "auto",
+# which allows gdb to attempt to pick an appropriate demangling style for
+# the executable it has loaded.  It can be set to a specific style ("gnu",
+# "lucid", "cfront", etc) in which case gdb will never attempt to do auto
+# selection of the style unless you do an explicit "set demangle auto".
+# To select one of these as the default, set DEMANGLING_STYLE in the
+# appropriate target dependent makefile fragment.
+DEMANGLING_STYLE = "auto"
 
-# Select options to use when compiling ${DEMANGLER}.c.  The default is no
-# options, which is correct for most targets, and also defaults to g++ style
-# demangling.  For other demangling styles, such as the Annotated C++
-# Reference Manual (section 7.2.1c) style, set this define in the target-
-# dependent makefile fragment.
-DEMANGLE_OPTS=
+# Select demangler to use.
+DEMANGLER = cplus-dem
+
+# Select options to use when compiling ${DEMANGLER}.c.
+DEMANGLE_OPTS = -DDEMANGLING_STYLE=${DEMANGLING_STYLE}
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -186,7 +191,7 @@ DEMANGLE_OPTS=
 # Files which are included via a config/* Makefile fragment
 # should *not* be specified here; they're in "ALLDEPFILES".
 SFILES_MAINDIR = \
-	 blockframe.c breakpoint.c command.c core.c \
+	 blockframe.c breakpoint.c command.c core.c demangle.c \
 	 environ.c eval.c expprint.c findvar.c infcmd.c inflow.c infrun.c \
 	 main.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
@@ -280,7 +285,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-    buildsym.o objfiles.o minsyms.o maint.o \
+    buildsym.o objfiles.o minsyms.o maint.o demangle.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)

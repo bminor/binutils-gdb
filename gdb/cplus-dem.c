@@ -32,10 +32,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#if !defined (GNU_DEMANGLING) && !defined (ARM_DEMANGLING)
-# define GNU_DEMANGLING 1
-#endif
-
 /* This is '$' on systems where the assembler can deal with that.
    Where the assembler can't, it's '.' (but on many systems '.' is
    used for other things).  */
@@ -91,11 +87,8 @@ static const struct optable
   "ami",	  "-=",		DMGL_ANSI,	/* ansi */
   "mult",	  "*",		0,		/* old */
   "ml",		  "*",		DMGL_ANSI,	/* ansi */
-#ifdef ARM_DEMANGLING
-  "amu",	  "*=",		DMGL_ANSI,	/* ansi */
-#else
-  "aml",	  "*=",		DMGL_ANSI,	/* ansi */
-#endif
+  "amu",	  "*=",		DMGL_ANSI,	/* ansi (ARM/Lucid) */
+  "aml",	  "*=",		DMGL_ANSI,	/* ansi (GNU/g++) */
   "convert",	  "+",		0,		/* old (unary +) */
   "negate",	  "-",		0,		/* old (unary -) */
   "trunc_mod",	  "%",		0,		/* old */
@@ -134,11 +127,8 @@ static const struct optable
   "rs",		  ">>",		DMGL_ANSI,	/* ansi */
   "ars",	  ">>=",	DMGL_ANSI,	/* ansi */
   "component",	  "->",		0,		/* old */
-#ifdef LUCID_DEMANGLING
   "pt",		  "->",		DMGL_ANSI,	/* ansi; Lucid C++ form */
-#else
-  "rf",		  "->",		DMGL_ANSI,	/* ansi */
-#endif
+  "rf",		  "->",		DMGL_ANSI,	/* ansi; ARM/GNU form */
   "indirect",	  "*",		0,		/* old */
   "method_call",  "->()",	0,		/* old */
   "addr",	  "&",		0,		/* old (unary &) */
@@ -434,9 +424,7 @@ demangle_signature (declp, mangled, work)
 {
   int success = 1;
   int func_done = 0;
-#ifdef GNU_DEMANGLING
   int expect_func = 0;
-#endif
 #ifndef LONGERNAMES
   const char *premangle;
 #endif
@@ -451,9 +439,11 @@ demangle_signature (declp, mangled, work)
 	{
 	  case 'Q':
 	    success = demangle_qualified (declp, mangled, work);
-#ifdef GNU_DEMANGLING
-	    expect_func = 1;
-#endif
+	    if (current_demangling_style == auto_demangling ||
+		current_demangling_style == gnu_demangling)
+	      {
+		expect_func = 1;
+	      }
 	    break;
 	  
 	  case 'S':
@@ -477,9 +467,11 @@ demangle_signature (declp, mangled, work)
 		remember_type (premangle, *mangled - premangle, work);
 	      }
 #endif
-#ifdef GNU_DEMANGLING
-	    expect_func = 1;
-#endif
+	    if (current_demangling_style == auto_demangling ||
+		current_demangling_style == gnu_demangling)
+	      {
+		expect_func = 1;
+	      }
 	    break;
 	  
 	  case 'F':
@@ -508,39 +500,47 @@ demangle_signature (declp, mangled, work)
 	    break;
 
 	  default:
-#ifdef GNU_DEMANGLING
-	    /* Assume we have stumbled onto the first outermost function
-	       argument token, and start processing args. */
-	    func_done = 1;
-	    success = demangle_args (declp, mangled, work);
-#else
-	    /* Non-GNU demanglers use a specific token to mark the start
-	       of the outermost function argument tokens.  Typically 'F',
-	       for ARM-demangling, for example.  So if we find something
-	       we are not prepared for, it must be an error. */
-	    success = 0;
-#endif
+	    if (current_demangling_style == auto_demangling ||
+		current_demangling_style == gnu_demangling)
+	      {
+		/* Assume we have stumbled onto the first outermost function
+		   argument token, and start processing args. */
+		func_done = 1;
+		success = demangle_args (declp, mangled, work);
+	      }
+	    else
+	      {
+		/* Non-GNU demanglers use a specific token to mark the start
+		   of the outermost function argument tokens.  Typically 'F',
+		   for ARM-demangling, for example.  So if we find something
+		   we are not prepared for, it must be an error. */
+		success = 0;
+	      }
 	    break;
 	}
-#ifdef GNU_DEMANGLING
-      if (success && expect_func)
+      if (current_demangling_style == auto_demangling ||
+	  current_demangling_style == gnu_demangling)
 	{
-	  func_done = 1;
-	  success = demangle_args (declp, mangled, work);
+	  if (success && expect_func)
+	    {
+	      func_done = 1;
+	      success = demangle_args (declp, mangled, work);
+	    }
 	}
-#endif
     }
   if (success && !func_done)
     {
-#ifdef GNU_DEMANGLING
-      /* With GNU style demangling, bar__3foo is 'foo::bar(void)', and
-	 bar__3fooi is 'foo::bar(int)'.  We get here when we find the
-	 first case, and need to ensure that the '(void)' gets added to
-	 the current declp.  Note that with ARM_DEMANGLING, the first
-	 case represents the name of a static data member 'foo::bar',
-	 which is in the current declp, so we leave it alone. */
-      success = demangle_args (declp, mangled, work);
-#endif
+      if (current_demangling_style == auto_demangling ||
+	  current_demangling_style == gnu_demangling)
+	{
+	  /* With GNU style demangling, bar__3foo is 'foo::bar(void)', and
+	     bar__3fooi is 'foo::bar(int)'.  We get here when we find the
+	     first case, and need to ensure that the '(void)' gets added to
+	     the current declp.  Note that with ARM, the first case
+	     represents the name of a static data member 'foo::bar',
+	     which is in the current declp, so we leave it alone. */
+	  success = demangle_args (declp, mangled, work);
+	}
     }
   if (success && work -> static_type && PRINT_ARG_TYPES)
     {
@@ -895,9 +895,18 @@ demangle_prefix (declp, mangled, work)
   int success = 1;
   const char *scan;
 
-  if ((scan = strstr (*mangled, "__")) == NULL)
+  scan = strstr (*mangled, "__");
+  if (scan == NULL)
     {
-      success = gnu_special (declp, mangled, work);
+      if (current_demangling_style == auto_demangling ||
+	  current_demangling_style == gnu_demangling)
+	{
+	  success = gnu_special (declp, mangled, work);
+	}
+      else
+	{
+	  success = 0;
+	}
     }
   else if (work -> static_type)
     {
@@ -1575,9 +1584,11 @@ demangle_args (declp, type, work)
 	    {
 	      return (0);
 	    }
-#ifdef ARM_DEMANGLING
-	  t--;
-#endif
+	  if (current_demangling_style == lucid_demangling ||
+	      current_demangling_style == cfront_demangling)
+	    {
+	      t--;
+	    }
 	  /* Validate the type index.  Protect against illegal indices from
 	     malformed type strings. */
 	  if ((t < 0) || (t >= work -> ntypes))
@@ -1664,27 +1675,28 @@ demangle_function_name (declp, mangled, work, scan)
 
   (*mangled) = scan + 2;
 
-#ifdef ARM_DEMANGLING
-
-  /* See if we have an ARM style constructor or destructor operator.
-     If so, then just record it, clear the decl, and return.
-     We can't build the actual constructor/destructor decl until later,
-     when we recover the class name from the signature. */
-
-  if (strcmp (declp -> b, "__ct") == 0)
+  if (current_demangling_style == lucid_demangling ||
+      current_demangling_style == cfront_demangling)
     {
-      work -> constructor = 1;
-      string_clear (declp);
-      return;
-    }
-  else if (strcmp (declp -> b, "__dt") == 0)
-    {
-      work -> destructor = 1;
-      string_clear (declp);
-      return;
-    }
 
-#endif
+      /* See if we have an ARM style constructor or destructor operator.
+	 If so, then just record it, clear the decl, and return.
+	 We can't build the actual constructor/destructor decl until later,
+	 when we recover the class name from the signature. */
+
+      if (strcmp (declp -> b, "__ct") == 0)
+	{
+	  work -> constructor = 1;
+	  string_clear (declp);
+	  return;
+	}
+      else if (strcmp (declp -> b, "__dt") == 0)
+	{
+	  work -> destructor = 1;
+	  string_clear (declp);
+	  return;
+	}
+    }
 
   if (declp->p - declp->b >= 3 
       && declp->b[0] == 'o'
@@ -1996,20 +2008,56 @@ xrealloc (oldmem, size)
   return (newmem);
 }
 
+#include <stdio.h>
+
+enum demangling_styles current_demangling_style = gnu_demangling;
+
 main (argc, argv)
   int argc;
   char **argv;
 {
   char mangled_name[128];
   char *result;
-  
-  if (argc > 1)
+  int c;
+  extern char *optarg;
+  extern int optind;
+
+  while ((c = getopt (argc, argv, "s:?")) != EOF)
     {
-      argc--;
-      argv++;
-      while (argc-- > 0)
+      switch (c)
 	{
-	  demangle_it (*argv);
+	  case '?':
+	    fprintf (stderr, "usage: demangle [-s style] [arg1 [arg2]] ...\n");
+	    fprintf (stderr, "style = { gnu, lucid, cfront }\n");
+	    fprintf (stderr, "reads args from stdin if none supplied\n");
+	    exit (0);
+	    break;
+	  case 's':
+	    if (strcmp (optarg, "gnu") == 0)
+	      {
+		current_demangling_style = gnu_demangling;
+	      }
+	    else if (strcmp (optarg, "lucid") == 0)
+	      {
+		current_demangling_style = lucid_demangling;
+	      }
+	    else if (strcmp (optarg, "cfront") == 0)
+	      {
+		current_demangling_style = cfront_demangling;
+	      }
+	    else
+	      {
+		fprintf (stderr, "unknown demangling style `%s'\n", optarg);
+		exit (1);
+	      }
+	    break;
+	}
+    }
+  if (optind < argc)
+    {
+      for ( ; optind < argc; optind++)
+	{
+	  demangle_it (argv[optind]);
 	}
     }
   else
@@ -2021,4 +2069,4 @@ main (argc, argv)
     }
 }
 
-#endif
+#endif	/* main */

@@ -71,6 +71,7 @@ cplus-dem.c
 createtags
 dbxread.c
 defs.h
+demangle.c
 demangle.h
 depend
 doc

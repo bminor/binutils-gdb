@@ -1,4 +1,4 @@
-/* Demangler defs for GNU C++ style demangling.
+/* Defs for interface to demanglers.
    Copyright 1992 Free Software Foundation, Inc.
    
    This program is free software; you can redistribute it and/or modify
@@ -18,3 +18,20 @@
 
 #define DMGL_PARAMS	(1 << 0)	/* Include function args */
 #define DMGL_ANSI	(1 << 1)	/* Include const, volatile, etc */
+
+extern enum demangling_styles
+{
+  unknown_demangling = 0,
+  auto_demangling,
+  gnu_demangling,
+  lucid_demangling,
+  cfront_demangling
+} current_demangling_style;
+
+#define GNU_DEMANGLING_STYLE_STRING	"gnu"
+#define LUCID_DEMANGLING_STYLE_STRING	"lucid"
+#define CFRONT_DEMANGLING_STYLE_STRING	"cfront"
+#define AUTO_DEMANGLING_STYLE_STRING	"auto"
+
+extern void
+set_demangling_style PARAMS ((char *));

@@ -53,6 +53,7 @@ other things to work on, if you get bored. :-)
 #include "libbfd.h"	/* FIXME Secret Internal BFD stuff (bfd_read) */
 #include "elf/dwarf.h"
 #include "buildsym.h"
+#include "demangle.h"
 
 #ifdef MAINTENANCE	/* Define to 1 to compile in some maintenance stuff */
 #define SQUAWK(stuff) dwarfwarn stuff
@@ -68,6 +69,18 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 
 #ifndef GCC_PRODUCER
 #define GCC_PRODUCER "GNU C "
+#endif
+
+#ifndef GPLUS_PRODUCER
+#define GPLUS_PRODUCER "GNU C++ "
+#endif
+
+#ifndef LCC_PRODUCER
+#define LCC_PRODUCER "LUCID C++ "
+#endif
+
+#ifndef CFRONT_PRODUCER
+#define CFRONT_PRODUCER "CFRONT "	/* A wild a** guess... */
 #endif
 
 #define STREQ(a,b)		(strcmp(a,b)==0)
@@ -300,6 +313,9 @@ target_to_host PARAMS ((char *, int, int, struct objfile *));
 
 static void
 add_enum_psymbol PARAMS ((struct dieinfo *, struct objfile *));
+
+static void
+handle_producer PARAMS ((char *));
 
 static void
 read_file_scope PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
@@ -1530,6 +1546,57 @@ read_func_scope (dip, thisdie, enddie, objfile)
   list_in_scope = &file_symbols;
 }
 
+
+/*
+
+LOCAL FUNCTION
+
+	handle_producer -- process the AT_producer attribute
+
+DESCRIPTION
+
+	Perform any operations that depend on finding a particular
+	AT_producer attribute.
+
+ */
+
+static void
+handle_producer (producer)
+     char *producer;
+{
+
+  /* If this compilation unit was compiled with g++ or gcc, then set the
+     processing_gcc_compilation flag. */
+
+  processing_gcc_compilation =
+    STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER))
+      || STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER));
+
+  /* Select a demangling style if we can identify the producer and if
+     the current style is auto.  We leave the current style alone if it
+     is not auto.  We also leave the demangling style alone if we find a
+     gcc (cc1) producer, as opposed to a g++ (cc1plus) producer. */
+
+#if 0 /* Works, but is disabled for now.  -fnf */
+  if (current_demangling_style == auto_demangling)
+    {
+      if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
+	{
+	  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+	}
+      else if (STREQN (producer, LCC_PRODUCER, strlen (LCC_PRODUCER)))
+	{
+	  set_demangling_style (LUCID_DEMANGLING_STYLE_STRING);
+	}
+      else if (STREQN (producer, CFRONT_PRODUCER, strlen (CFRONT_PRODUCER)))
+	{
+	  set_demangling_style (CFRONT_DEMANGLING_STYLE_STRING);
+	}
+    }
+#endif
+}
+
+
 /*
 
 LOCAL FUNCTION
@@ -1570,8 +1637,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
     }
   if (dip -> at_producer != NULL)
     {
-      processing_gcc_compilation =
-	STREQN (dip -> at_producer, GCC_PRODUCER, strlen (GCC_PRODUCER));
+      handle_producer (dip -> at_producer);
     }
   numutypes = (enddie - thisdie) / 4;
   utypes = (struct type **) xmalloc (numutypes * sizeof (struct type *));

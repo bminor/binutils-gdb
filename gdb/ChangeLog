@@ -1,3 +1,32 @@
+Mon Jul 13 19:06:54 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (DEMANGLING_STYLE):  New define to set default
+	demangling style for C++.  Defaults to "auto".
+	* Makefile.in (DEMANGLE_OPTS):  Use DEMANGLING_STYLE.
+	* Makefile.in (SFILES_MAINDIR):  Add demangle.c
+	* Makefile.in (OBS):  Add demangle.o
+	* cplus-dem.c (GNU_DEMANGLING, ARM_DEMANGLING, LUCID_DEMANGLING):
+	Remove compile time decisions about demangling style and replace
+	with runtime decisions using current_demangling_style.
+	* cplus-dem.c (main):  Expand code included during building of
+	standalone demangler to recognize demangling style options.
+	* dbxread.c (demangle.h):  Include.
+	* dbxread.c (read_ofile_symtab, process_one_symbol):  Set GNU C++
+	demangling style if processing g++ code and current demangling style
+	is auto (Note: this feature currently disabled.)
+	* demangle.c:  New file, generic demangling control.
+	* demangle.h (demangling_styles):  New enumeration to select one
+	of several demangling styles.  Also define string names for each
+	style.
+	* demangle.h (set_demangling_style):  Add prototype.
+	* dwarfread.c (demangle.h):  Include.
+	* dwarfread.c (GPLUS_PRODUCER, LCC_PRODUCER, CFRONT_PRODUCER):
+	New producer string prefixes to recognize.
+	* dwarfread.c (handle_producer):  Consolidate actions for specific
+	producers.  Set demangling style based on producer string if
+	current style is auto.  (Note: this feature currently disabled.)
+	* config/ncr3000.mt (DEMANGLE_OPTS):  Remove.
+
 Sat Jul 11 18:23:58 1992  John Gilmore  (gnu at cygnus.com)
 
 	* config/sun4sol2.mh:  Remove -xs flag, default INSTALL to cp.
