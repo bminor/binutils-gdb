@@ -347,6 +347,8 @@ tuiDisplayRegistersFrom (int startElementNo)
 		  makeWindow (dataItemWin, DONT_BOX_WINDOW);
                   scrollok (dataItemWin->handle, FALSE);
 		}
+              touchwin (dataItemWin->handle);
+
 	      /*
 	         ** Get the printable representation of the register
 	         ** and display it
@@ -603,6 +605,7 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
   char *name;
   struct cleanup *cleanups;
   char *p;
+  int pos;
 
   name = REGISTER_NAME (regNum);
   if (name == 0)
@@ -619,7 +622,23 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
   do_registers_info (regNum, 0);
 
   /* Save formatted output in the buffer.  */
-  strncpy (buf, tui_file_get_strbuf (stream), bufLen);
+  p = tui_file_get_strbuf (stream);
+  pos = 0;
+  while (*p && *p == *name++ && bufLen)
+    {
+      *buf++ = *p++;
+      bufLen--;
+      pos++;
+    }
+  while (*p == ' ')
+    p++;
+  while (pos < 8 && bufLen)
+    {
+      *buf++ = ' ';
+      bufLen--;
+      pos++;
+    }
+  strncpy (buf, p, bufLen);
 
   /* Remove the possible \n.  */
   p = strchr (buf, '\n');

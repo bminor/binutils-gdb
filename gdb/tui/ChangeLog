@@ -1,5 +1,10 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiRegs.c (tuiDisplayRegistersFrom): Call touchwin.
+	(_tuiRegisterFormat): Reduce size of format result.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiGeneralWin.c (boxWin): Use the tui configuration variables.
 	* tuiWin.h: Declare the new variables.
 	* tuiWin.c (_initialize_tuiWin): Create TUI configuration variables.
