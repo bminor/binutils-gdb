@@ -50,7 +50,7 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-VERSION=cygnus-2.2.1
+VERSION=cygnus-2.2.90
 
 SHELL = /bin/sh
 
@@ -457,7 +457,7 @@ install:
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/as; \
-	  ln $(bindir)/$$n $(tooldir)/bin/as \
+	  ln $(bindir)/$$n $(tooldir)/bin/as >/dev/null 2>/dev/null \
 	   || $(INSTALL_PROGRAM) as.new $(tooldir)/bin/as; \
 	else true; fi
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
@@ -466,8 +466,8 @@ install:
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/gasp; \
-	  ln $(bindir)/$$n $(tooldir)/bin/gasp \
-	   || $(INSTALL_PROGRAM) gasp $(tooldir)/bin/gasp; \
+	  ln $(bindir)/$$n $(tooldir)/bin/gasp >/dev/null 2>/dev/null \
+	   || $(INSTALL_PROGRAM) gasp.new $(tooldir)/bin/gasp; \
 	else true; fi
 
 # Cancel installation by deleting the installed files.
@@ -482,22 +482,22 @@ uninstall:
 
 tags TAGS: force
 	etags $(REAL_HEADERS) $(REAL_SOURCES) $(srcdir)/config/*.[hc] $(srcdir)/README $(srcdir)/Makefile.in
-	
+
 bootstrap: as.new force
 	$(MAKE) stage1
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) comparison against=stage2
 
 bootstrap2: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) comparison against=stage2
 
 bootstrap3: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) comparison against=stage2
 
 # Copy the object files from a particular stage into a subdirectory.
