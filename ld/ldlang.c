@@ -4393,6 +4393,14 @@ lang_process ()
 			      abs_output_section,
 			      &statement_list.head, 0, (bfd_vma) 0,
 			      &relax_again, FALSE);
+
+	  /* If the normal relax is done and the relax finalize pass
+	     is not performed yet, we perform another relax pass.  */
+	  if (!relax_again && !link_info.relax_finalizing)
+	    {
+	      link_info.relax_finalizing = TRUE;
+	      relax_again = TRUE;
+	    }
 	}
       while (relax_again);
 
