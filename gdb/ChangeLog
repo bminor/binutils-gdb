@@ -1,5 +1,7 @@
 2004-11-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* MAINTAINERS: Add myself to write after approval section.
+
 	* hppa-hpux-nat.c (child_suppress_run): Add variable to allow
 	hpux-thread.c to suppress children from running.
 	(hppa_hpux_child_can_run): New function.
