@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_SIZE 0
 #include "elf-bfd.h"
 #include "safe-ctype.h"
+#include "libiberty.h"
 
 bfd_boolean
 _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)

@@ -1,3 +1,9 @@
+2004-04-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elflink.c: Include libiberty.h.
+	* Makefile.am (elflink.lo): Depend on libiberty.h.
+	* Makefile.in: Regenerate.
+
 2004-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	Apply from mainline.
