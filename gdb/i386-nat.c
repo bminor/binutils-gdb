@@ -60,6 +60,11 @@
 
 #ifdef I386_USE_GENERIC_WATCHPOINTS
 
+/* Support for 8-byte wide hw watchpoints.  */
+#ifndef TARGET_HAS_DR_LEN_8
+#define TARGET_HAS_DR_LEN_8 0
+#endif
+
 /* Debug registers' indices.  */
 #define DR_NADDR		4  /* the number of debug address registers */
 #define DR_STATUS		6  /* index of debug status register (DR6) */
@@ -89,6 +94,7 @@
 #define DR_LEN_1		(0x0 << 2) /* 1-byte region watch or breakpt */
 #define DR_LEN_2		(0x1 << 2) /* 2-byte region watch */
 #define DR_LEN_4		(0x3 << 2) /* 4-byte region watch */
+#define DR_LEN_8		(0x2 << 2) /* 8-byte region watch (x86-64) */
 
 /* Local and Global Enable flags in DR7.
 
@@ -252,9 +258,9 @@ i386_show_dr (const char *func, CORE_ADDR addr,
 		     dr_control_mirror, dr_status_mirror);
   ALL_DEBUG_REGISTERS(i)
     {
-      printf_unfiltered ("\tDR%d: addr=%08lx, ref.count=%d  DR%d: addr=%08lx, ref.count=%d\n",
-			 i, dr_mirror[i], dr_ref_count[i],
-			 i+1, dr_mirror[i+1], dr_ref_count[i+1]);
+      printf_unfiltered ("\tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
+			 i, paddr(dr_mirror[i]), dr_ref_count[i],
+			 i+1, paddr(dr_mirror[i+1]), dr_ref_count[i+1]);
       i++;
     }
 }
@@ -291,12 +297,15 @@ Invalid hw breakpoint type %d in i386_length_and_rw_bits.\n", (int)type);
 
   switch (len)
     {
-      case 4:
-	return (DR_LEN_4 | rw);
-      case 2:
-	return (DR_LEN_2 | rw);
       case 1:
 	return (DR_LEN_1 | rw);
+      case 2:
+	return (DR_LEN_2 | rw);
+      case 4:
+	return (DR_LEN_4 | rw);
+      case 8:
+        if (TARGET_HAS_DR_LEN_8)
+ 	  return (DR_LEN_8 | rw);
       default:
 	internal_error (__FILE__, __LINE__, "\
 Invalid hw breakpoint length %d in i386_length_and_rw_bits.\n", len);
@@ -407,20 +416,26 @@ i386_handle_nonaligned_watchpoint (i386_wp_op_t what, CORE_ADDR addr, int len,
   int align;
   int size;
   int rv = 0, status = 0;
+  int max_wp_len = TARGET_HAS_DR_LEN_8 ? 8 : 4;
 
-  static int size_try_array[4][4] =
+  static int size_try_array[8][8] =
   {
-    { 1, 1, 1, 1 },		/* trying size one */
-    { 2, 1, 2, 1 },		/* trying size two */
-    { 2, 1, 2, 1 },		/* trying size three */
-    { 4, 1, 2, 1 }		/* trying size four */
+    {1, 1, 1, 1, 1, 1, 1, 1},	/* trying size one */
+    {2, 1, 2, 1, 2, 1, 2, 1},	/* trying size two */
+    {2, 1, 2, 1, 2, 1, 2, 1},	/* trying size three */
+    {4, 1, 2, 1, 4, 1, 2, 1},	/* trying size four */
+    {4, 1, 2, 1, 4, 1, 2, 1},	/* trying size five */
+    {4, 1, 2, 1, 4, 1, 2, 1},	/* trying size six */
+    {4, 1, 2, 1, 4, 1, 2, 1},	/* trying size seven */
+    {8, 1, 2, 1, 4, 1, 2, 1},	/* trying size eight */
   };
 
   while (len > 0)
     {
-      align = addr % 4;
-      /* Four is the maximum length an x86 debug register can watch.  */
-      size = size_try_array[len > 4 ? 3 : len - 1][align];
+      align = addr % max_wp_len;
+      /* Four(eigth on x86_64) is the maximum length an x86 debug register
+	 can watch.  */
+      size = size_try_array[len > max_wp_len ? (max_wp_len - 1) : len - 1][align];
       if (what == WP_COUNT)
 	/* size_try_array[] is defined so that each iteration through
 	   the loop is guaranteed to produce an address and a size
@@ -466,7 +481,8 @@ i386_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int retval;
 
-  if (len == 3 || len > 4 || addr % len != 0)
+  if (((len != 1 && len !=2 && len !=4) && !(TARGET_HAS_DR_LEN_8 && len == 8))
+      || addr % len != 0)
     retval = i386_handle_nonaligned_watchpoint (WP_INSERT, addr, len, type);
   else
     {
@@ -489,7 +505,8 @@ i386_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int retval;
 
-  if (len == 3 || len > 4 || addr % len != 0)
+  if (((len != 1 && len !=2 && len !=4) && !(TARGET_HAS_DR_LEN_8 && len == 8))
+      || addr % len != 0)
     retval = i386_handle_nonaligned_watchpoint (WP_REMOVE, addr, len, type);
   else
     {
