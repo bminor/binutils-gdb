@@ -858,7 +858,7 @@ i386_pop_frame (void)
 int
 get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char *buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   CORE_ADDR sp, jb_addr;
 
   sp = read_register (SP_REGNUM);
