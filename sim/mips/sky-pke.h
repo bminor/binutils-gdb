@@ -330,10 +330,11 @@ do { \
        BIT_MASK_SET(((me)->regs[PKE_REG_##reg][0]), \
 		    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E, \
 		    (value)); \
-       if((me)->fifo_trace_file != NULL) \
+       if( indebug (me->dev.name)) \
 	 { \
-	   if(old != (value)) \
-	     fprintf((me)->fifo_trace_file, "# Reg %s:%s = 0x%x\n", #reg, #flag, (unsigned)(value)); \
+	   if (old != (value)) \
+        fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
+                 "# Reg %s:%s = 0x%x\n", #reg, #flag, (unsigned)(value)); \
 	 } \
      } while(0)
 
@@ -402,6 +403,7 @@ struct pke_device
   /* FIFO - private: use only pke_fifo_* routines to access */
   struct pke_fifo fifo;  /* array of FIFO quadword pointers */
   FILE* fifo_trace_file; /* stdio stream open in append mode, or 0 for no trace */
+  char* fifo_trace_file_name; /* user defined debug trace file name  */
 
   /* FIFO cache -- curry last search pke_pcrel_fifo results */
   unsigned_4 last_fifo_pc;
@@ -413,6 +415,11 @@ struct pke_device
   /* PC */
   int fifo_pc;  /* 0 .. (fifo_num_elements-1): quadword index of next instruction */
   int qw_pc;    /* 0 .. 3:                     word index of next instruction */
+
+  /* Disassembly - file name and descriptor  */
+  FILE *trace_file;
+  char *trace_file_name;
+  
 };
 
 extern struct pke_device pke0_device;
@@ -429,7 +436,7 @@ int read_pke_pcx (struct pke_device *device, void *buf);
 #define PKE_FLAG_NONE        0x00
 #define PKE_FLAG_PENDING_PSS 0x01 /* PSS bit written-to; set STAT:PSS after current instruction */
 #define PKE_FLAG_INT_NOLOOP  0x02 /* INT PKEcode received; INT/PIS set; suppress loop after resumption */
-
+#define PKE_FLAG_TRACE_ON    0x04 /* Trace file request from command line  */                                      
 
 /* Kludge alert */
 
@@ -448,19 +455,30 @@ int read_pke_pcx (struct pke_device *device, void *buf);
          memcpy((void*) & value, (unsigned_##size*)(data), size); \
          sim_core_write_aligned_##size(cpu, CIA_GET(cpu), write_map, \
 				       (SIM_ADDR)(addr), value); \
-         if((me)->fifo_trace_file != NULL) \
+         if (indebug (me->dev.name)) \
 	   { \
 	     int i; \
 	     unsigned_##size value_te; \
 	     value_te = H2T_##size(value); \
-	     fprintf((me)->fifo_trace_file, "# Write %2d bytes  to  ", size); \
-	     fprintf((me)->fifo_trace_file, "0x%08lx: ", (unsigned long)(addr)); \
+	     fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
+                 "# Write %2d bytes  to  ", size); \
+        fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
+                  "0x%08lx: ", (unsigned long)(addr)); \
 	     for(i=0; i<size; i++) \
-	       fprintf((me)->fifo_trace_file, " %02x", ((unsigned_1*)(& value_te))[i]); \
- 	     fprintf((me)->fifo_trace_file, "\n"); \
+          fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
+	                " %02x", ((unsigned_1*)(& value_te))[i]); \
+          fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
+ 	                "\n"); \
 	   } \
         } while(0)      
 
 
+/* Disassembly file definitions  */
+void pke_options (struct pke_device *device, unsigned_4 option, char *option_string);
+#define PKE_OPT_DEBUG_NAME       1
+#define PKE_OPT_TRACE_ON         2
+#define PKE_OPT_TRACE_OFF        3
+#define PKE_OPT_TRACE_NAME       4
+#define PKE_OPT_CLOSE            5
 
 #endif /* H_PKE_H */

@@ -77,27 +77,29 @@ void pke_fifo_old(struct pke_fifo*, unsigned_4 qwnum);
 
 struct pke_device pke0_device = 
 { 
-  { "pke0", &pke_io_read_buffer, &pke_io_write_buffer }, /* device */
+  { "vif0", &pke_io_read_buffer, &pke_io_write_buffer }, /* device */
   0, 0,        /* ID, flags */
   {},          /* regs */
-  {}, 0,      /* FIFO write buffer */
+  {}, 0,       /* FIFO write buffer */
   { NULL, 0, 0, 0 }, /* FIFO */
-  NULL,           /* FIFO trace file */
+  NULL, NULL,   /* FIFO trace file descriptor and name */
   -1, -1, 0, 0, 0, /* invalid FIFO cache */
-  0, 0            /* pc */
+  0, 0,        /* pc */
+  NULL, NULL   /* disassembly trace file descriptor and name  */
 };
 
 
 struct pke_device pke1_device = 
 { 
-  { "pke1", &pke_io_read_buffer, &pke_io_write_buffer }, /* device */
+  { "vif1", &pke_io_read_buffer, &pke_io_write_buffer }, /* device */
   1, 0,        /* ID, flags */
   {},          /* regs */
   {}, 0,       /* FIFO write buffer */
   { NULL, 0, 0, 0 }, /* FIFO */
-  NULL,           /* FIFO trace file */
+  NULL, NULL,  /* FIFO trace file descriptor and name  */
   -1, -1, 0, 0, 0, /* invalid FIFO cache */
-  0, 0         /* pc */
+  0, 0,        /* pc */
+  NULL, NULL   /* disassembly trace file descriptor and name  */
 };
 
 
@@ -178,23 +180,6 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
                    0 /*modulo*/,
                    NULL,
                    NULL /*buffer*/);
-
-
-  /* attach to trace file if appropriate */
-  {
-    char trace_envvar[80];
-    char* trace_filename = NULL;
-    sprintf(trace_envvar, "VIF%d_TRACE_FILE", me->pke_number);
-    trace_filename = getenv(trace_envvar);
-    if(trace_filename != NULL)
-      {
-	me->fifo_trace_file = fopen(trace_filename, "w");
-	if(me->fifo_trace_file == NULL)
-	    perror("VIF FIFO trace error on fopen");
-	else
-	  setvbuf(me->fifo_trace_file, NULL, _IOLBF, 0);
-      }
-  }
 }
 
 
@@ -556,7 +541,13 @@ pke_reset(struct pke_device* me)
   /* clear registers, flag, other state */
   memset(me->regs, 0, sizeof(me->regs));
   me->fifo_qw_done = 0;
-  me->flags = 0;
+  if ( me->trace_file != NULL ) 
+    {
+      fclose (me->trace_file);
+      me->trace_file = NULL;
+    }
+  /* Command options will remain alive over the reset.  */
+  me->flags &= PKE_FLAG_TRACE_ON;
 }
 
 
@@ -901,24 +892,29 @@ pke_pc_advance(struct pke_device* me, int num_words)
 	  
 	  /* trace the consumption of the FIFO quadword we just skipped over */
 	  /* fq still points to it */
-	  if(me->fifo_trace_file != NULL)
-	    {
-	      /* assert complete classification */
+	  if ( indebug (me->dev.name)) 
+       {
+         if (( me->fifo_trace_file == NULL) &&
+             ( me->fifo_trace_file_name != NULL ))
+           sky_open_file (&me->fifo_trace_file, me->fifo_trace_file_name,
+                         (char *) NULL);
+
+         /* assert complete classification */
 	      ASSERT(fq->word_class[3] != wc_unknown);
 	      ASSERT(fq->word_class[2] != wc_unknown);
 	      ASSERT(fq->word_class[1] != wc_unknown);
 	      ASSERT(fq->word_class[0] != wc_unknown);
 	      
 	      /* print trace record */
-	      fprintf(me->fifo_trace_file,
-		      "%d 0x%08x_%08x_%08x_%08x 0x%08x %c%c%c%c\n",
-		      (me->pke_number == 0 ? 0 : 1),
-		      (unsigned) fq->data[3], (unsigned) fq->data[2],
-		      (unsigned) fq->data[1], (unsigned) fq->data[0],
-		      (unsigned) fq->source_address,
-		      fq->word_class[3], fq->word_class[2],
-		      fq->word_class[1], fq->word_class[0]);
-	    }
+         fprintf((me->fifo_trace_file != NULL) ? me->fifo_trace_file : stdout,
+		        "%d 0x%08x_%08x_%08x_%08x 0x%08x %c%c%c%c\n",
+		        (me->pke_number == 0 ? 0 : 1),
+		        (unsigned) fq->data[3], (unsigned) fq->data[2],
+		        (unsigned) fq->data[1], (unsigned) fq->data[0],
+		        (unsigned) fq->source_address,
+		        fq->word_class[3], fq->word_class[2],
+		        fq->word_class[1], fq->word_class[0]);
+       }
 	} /* next quadword */
     }
 
@@ -2168,4 +2164,52 @@ pke_code_error(struct pke_device* me, unsigned_4 pkecode)
 
   /* advance over faulty word */
   pke_pc_advance(me, 1);
+}
+
+void
+pke_options(struct pke_device *me, unsigned_4 option, char *option_string)  
+{
+  switch (option) 
+    {
+    case PKE_OPT_DEBUG_NAME:
+      if ( me->fifo_trace_file != NULL ) 
+        {
+          fclose (me->fifo_trace_file);
+          me->fifo_trace_file = NULL;
+        }
+      sky_store_file_name (&me->fifo_trace_file_name, option_string);
+      break;
+
+    case PKE_OPT_TRACE_ON:
+      me->flags |= PKE_FLAG_TRACE_ON;
+      break;
+
+    case PKE_OPT_TRACE_OFF:
+    case PKE_OPT_TRACE_NAME:
+      if ( me->trace_file != NULL ) 
+        {
+          fclose (me->trace_file);
+          me->trace_file = NULL;
+        }
+      
+      if ( option == PKE_OPT_TRACE_OFF ) 
+        me->flags &= ~PKE_FLAG_TRACE_ON;
+      else
+        sky_store_file_name (&me->trace_file_name, option_string);
+      
+      break;
+   
+    case PKE_OPT_CLOSE:
+      if (me->trace_file != NULL) 
+        fclose (me->trace_file);
+      if (me->fifo_trace_file != NULL ) 
+        fclose (me->fifo_trace_file);
+      break;
+
+    default: 
+      ASSERT (0);
+      break;
+    }
+
+  return;
 }
