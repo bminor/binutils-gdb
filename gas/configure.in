@@ -193,6 +193,7 @@ changequote([,])dnl
       arm-*-linux*aout*)	        fmt=aout em=linux ;;
       arm*-*-linux-gnu* | arm*-*-uclinux*)	
 					fmt=elf  em=linux ;;
+      arm-*-netbsdelf*)                 fmt=elf  em=nbsd ;;
       arm-*-netbsd* | arm-*-openbsd*)   fmt=aout em=nbsd ;;
       arm-*-oabi | thumb-*-oabi)        fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)      fmt=coff em=epoc-pe ;;
