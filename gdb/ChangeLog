@@ -1,3 +1,7 @@
+2000-06-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* copying.awk: Eliminate use of PARAMS from this file.
+
 Fri Jun 23 20:47:03 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): Use the variable stack_used_p
