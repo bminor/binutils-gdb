@@ -1,3 +1,8 @@
+Tue Apr 27 10:01:33 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* README: Move most stuff about hacking GDB to doc/gdbint.texinfo.
+	(Known bugs): Remove AIX bugs, revise SPARC struct bug description.
+
 Tue Apr 27 13:44:19 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* expprint.c (print_subexp): Fix bug with OP_SCOPE operator output.
