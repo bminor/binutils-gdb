@@ -702,10 +702,14 @@ gcc-no-fixedincludes:
 .PHONY: $(ALL_MODULES) all-glob all-gui
 $(ALL_MODULES) all-glob all-gui all-libproc:
 	@dir=`echo $@ | sed -e 's/all-//'`; \
-	if [ -f ./$${dir}/Makefile ] ; then \
-	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
+	if [ -d ./$${dir} ] ; then \
+	  if [ -f ./$${dir}/Makefile ] ; then \
+	    r=`pwd`; export r; \
+	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	    (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
+	  else \
+	    true ; \
+	  fi; \
 	else \
 	  true; \
 	fi
@@ -715,14 +719,16 @@ $(ALL_MODULES) all-glob all-gui all-libproc:
 
 .PHONY: $(CHECK_MODULES) $(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 $(NATIVE_CHECK_MODULES):
-	if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-	  @dir=`echo $@ | sed -e 's/check-//'`; \
-	  if [ -f ./$${dir}/Makefile ] ; then \
-	    r=`pwd`; export r; \
-	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	    (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
-	  else \
-	    true; \
+	@if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+	  dir=`echo $@ | sed -e 's/check-//'`; \
+	  if [ -d ./$${dir} ] ; then \
+	    if [ -f ./$${dir}/Makefile ] ; then \
+	      r=`pwd`; export r; \
+	      srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	      (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
+	    else \
+	      true; \
+	    fi ; \
 	  fi; \
 	fi
 
