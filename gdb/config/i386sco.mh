@@ -2,7 +2,6 @@
 XDEPFILES= infptrace.o coredep.o i386-xdep.o i387-tdep.o
 XM_FILE= xm-i386sco.h
 XM_CLIBS= -lPW
-XM_FLAGS=-DHAVE_STRSTR
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o

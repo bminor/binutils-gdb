@@ -1,5 +1,3 @@
 # Host: Sun 3, running SunOS 4
-#msg If you are compiling on SunOS 4.0 through 4.0.3c, delete the line
-#msg in xm-sun3os4 that says `#define HAVE_STRSTR'.
 XDEPFILES= infptrace.o sun3-xdep.o
 XM_FILE= xm-sun3os4.h
