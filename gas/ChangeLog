@@ -1,3 +1,9 @@
+start-sanitize-sky
+Mon Jun  8 15:41:43 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (dvp_relax_frag): Adjust target address by stretch.
+
+end-sanitize-sky
 Mon Jun  8 12:20:30 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c: REPNE renamed to REPNE_PREFIX_OPCODE, and

@@ -1612,6 +1612,7 @@ md_estimate_size_before_relax (fragP, segment)
 } 
 
 /* Perform the relaxation.
+   STRETCH is the amount the start of the frag has already been shifted by.
    All we have to do is figure out how many bytes we need to insert to
    get to the recorded symbol (which is at the required alignment).
    This function is also called for machine dependent vu insn frags.
@@ -1645,6 +1646,10 @@ dvp_relax_frag (fragP, stretch)
 
   if (fragP->fr_subtype == RELAX_MPG)
     {
+      /* The frag the symbol is in hasn't been relaxed yet so any .org
+	 adjustments haven't been applied to it.  We know the symbol
+	 is the address of the next frag so adjust target by stretch.  */
+      target += stretch;
       growth = target - address;
       if (growth < 0)
 	as_fatal ("internal error: bad mpg alignment handling");
@@ -1654,6 +1659,10 @@ dvp_relax_frag (fragP, stretch)
 
   if (fragP->fr_subtype == RELAX_DIRECT)
     {
+      /* The frag the symbol is in hasn't been relaxed yet so any .org
+	 adjustments haven't been applied to it.  We know the symbol
+	 is the address of the next frag so adjust target by stretch.  */
+      target += stretch;
       growth = target - address;
       if (growth < 0)
 	as_fatal ("internal error: bad direct alignment handling");
