@@ -202,16 +202,29 @@ const struct predefined_symbol tic80_predefined_symbols[] =
 
 const int tic80_num_predefined_symbols = sizeof (tic80_predefined_symbols) / sizeof (struct predefined_symbol);
 
-/* This function takes a predefined symbol name in NAME and translates
-   it to a numeric value, which it returns.  If no translation is
-   possible, it returns -1, a value not used by any predefined
-   symbol. Note that the predefined symbol array is presorted case
-   independently by name. */
+/* This function takes a predefined symbol name in NAME, symbol class
+   in CLASS, and translates it to a numeric value, which it returns.
+
+   If CLASS is zero, any symbol that matches NAME is translated.  If
+   CLASS is non-zero, then only a symbol that has class CLASS is
+   matched.
+
+   If no translation is possible, it returns -1, a value not used by
+   any predefined symbol. Note that the predefined symbol array is
+   presorted case independently by name.
+
+   This function is implemented with the assumption that there are no
+   duplicate names in the predefined symbol array, which happens to be
+   true at the moment.
+
+ */
 
 int
-tic80_symbol_to_value (name)
+tic80_symbol_to_value (name, class)
      char *name;
+     int class;
 {
+  const struct predefined_symbol *pdsp;
   int low = 0;
   int middle;
   int high = tic80_num_predefined_symbols - 1;
@@ -232,7 +245,12 @@ tic80_symbol_to_value (name)
 	}
       else 
 	{
-	  rtnval = tic80_predefined_symbols[middle].value;
+	  pdsp = &tic80_predefined_symbols[middle];
+	  if ((class == 0) || (class & pdsp -> value))
+	    {
+	      rtnval = pdsp -> value;
+	    }
+	  /* For now we assume that there are no duplicate names */
 	  break;
 	}
     }
