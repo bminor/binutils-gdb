@@ -241,6 +241,8 @@ static autofilter_entry_type autofilter_objlist[] =
   { "crt2.o", 6 },
   { "dllcrt1.o", 9 },
   { "dllcrt2.o", 9 },
+  { "gcrt1.o", 7 },
+  { "gcrt2.o", 7 },  
   { NULL, 0 }
 };
 
@@ -418,7 +420,7 @@ auto_export (abfd, d, n)
 
   if (pe_dll_do_default_excludes)
     {
-      char * p;
+      const char * p;
       int    len;
 
       if (pe_dll_extra_pe_debug)
@@ -440,16 +442,16 @@ auto_export (abfd, d, n)
 	}
 
       /* Next, exclude symbols from certain startup objects.  */
-      afptr = autofilter_objlist;
 
+      if (abfd && (p = lbasename (abfd->filename)) )
+	{
+          afptr = autofilter_objlist;
       while (afptr->name)
 	{
-	  if (abfd && 
-	      (p = strstr (abfd->filename, afptr->name)) &&
-	      (*(p + afptr->len - 1) == 0))
+	      if ( strcmp (p, afptr->name) == 0 )
 	    return 0;
-
 	  afptr ++;
+	    }
 	}
 
       /* Don't try to blindly exclude all symbols

@@ -1,3 +1,11 @@
+2001-10-18  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+
+	* pe-dll.c (autofilter_objectlist):  Add startup objects
+	for profiling.
+	(auto-export): Constify char * p.
+	Extract file basename and use strcmp rather than ststr 
+	for object lookup.
+
 2001-10-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* ldmain.c (get_emulation): Improve comment about the handling
