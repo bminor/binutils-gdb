@@ -1,5 +1,12 @@
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (REGISTER_CONVERTIBLE): Don't require when
+	multi-arch partial.
+	(PUSH_ARGUMENTS): Switch to using predefault.
+	* gdbarch.c: Regenerate.
+
+2002-02-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* valops.c (PUSH_ARGUMENTS): Delete definition.
 	* gdbarch.sh (PUSH_ARGUMENTS): Don't require when multi-arch
 	partial.  Default to default_push_arguments.
