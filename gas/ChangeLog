@@ -1,3 +1,7 @@
+2003-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/as.texinfo (Align): Correct list of byte targets.
+
 2003-10-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro_build_ldst_constoffset,load_register,macro):
@@ -16,7 +20,7 @@
 2003-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c: Convert to ISO C90.  Remove unnecessary
-        prototypes and casts.
+	prototypes and casts.
 	* config/tc-sh.h: Likewise.
 	* config/tc-sh64.c: Likewise.
 	* config/tc-sh64.h: Likewise.
@@ -35,7 +39,7 @@
 
 2003-10-08  Philippe De Muyter  <phdm@macqel.be>
 
-	* as.c (use_gnu_debug_info_extensions) : New variable. 
+	* as.c (use_gnu_debug_info_extensions) : New variable.
 	(parse_args) : Accept new --gstabs+ option, and set
 	`use_gnu_debug_info_extensions'.
 	(show_usage) : Document --gstabs+ option.
@@ -46,21 +50,21 @@
 	* doc/as.texinfo : Document --gstabs+ option.
 	* NEWS: Mention new feature.
 
-2003-10-06      Matt Thomas <matt@3am-software.com>
+2003-10-06  Matt Thomas  <matt@3am-software.com>
 
-         Switch NetBSD/hppa to use Linux PA-RISC ELF ABI and
-         assembler syntax.
+	Switch NetBSD/hppa to use Linux PA-RISC ELF ABI and
+	assembler syntax.
 
-         tc-hppa.c: Add "%farg[0-3]", "%fret", "%t[1-4]", "%tf[1-4]"
-         register names.  Change all "defined (TE_LINUX)" to
-         "(defined (TE_LINUX) || defined (TE_NETBSD))".
+	* tc-hppa.c: Add "%farg[0-3]", "%fret", "%t[1-4]", "%tf[1-4]"
+	register names.  Change all "defined (TE_LINUX)" to
+	"(defined (TE_LINUX) || defined (TE_NETBSD))".
 
-         tc-hppa.h: Make NetBSD use "elfXX-hppa-linux" bfd target.
-         Remove NetBSD's use of LABELS_WITHOUT_COLONS.
+	* tc-hppa.h: Make NetBSD use "elfXX-hppa-linux" bfd target.
+	Remove NetBSD's use of LABELS_WITHOUT_COLONS.
 
 2003-10-06  Robert Millan  <robertmh@gnu.org>
 
-	* configure.in: Match GNU/KNetBSD with new knetbsd*-gnu	triplet.
+	* configure.in: Match GNU/KNetBSD with new knetbsd*-gnu triplet.
 	* configure: Regenerate.
 
 2003-10-05  Nick Clifton  <nickc@redhat.com>
