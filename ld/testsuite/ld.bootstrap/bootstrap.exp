@@ -1,0 +1,91 @@
+#
+# Expect script for LD Bootstrap Tests
+#   Copyright (C) 1993 Free Software Foundation
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+#
+#	$Id$
+#
+# Written by Jeffrey Wheat (cassidy@cygnus.com)
+#
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set tmpdir /tmp
+
+set stage 0
+# link the target with itself
+ld_start $objdir/ld.new $tmpdir/ld.$stage
+
+#
+# main test loop
+#
+for { set stage 0 } { $stage < 9 } { incr stage } {
+    
+    global OFILES
+    global BFDLIB
+    global LIBIBERTY
+    global HOSTING_EMU
+    global HOSTING_CRT0
+    global HOSTING_LIBS
+    
+    set status -1
+    
+    set tmpstage $stage 
+    set ld_old $tmpdir/ld.$stage
+    set ld_new $tmpdir/ld.[incr tmpstage]
+ 
+    verbose "### Running test $target\n" 1
+    verbose "### stage is now $stage\n" 1
+    
+    # link the target with itself
+    ld_start $ld_old $ld_new
+    
+    # load (compare) the target 	
+    if ![file exists $ld_old] then {
+	unresolved "$ld_old doesn't exist." 
+    }
+    
+    if ![file exists $ld_new] then {
+	unresolved "$ld_new doesn't exist." 
+    }
+    
+    # compare the old and new targets
+    set status [ eval ld_load "$ld_old $ld_new" ]
+    case $status in {
+	"0" { 
+	    pass "$ld_old == $ld_new"
+	}
+	"1" {
+	    fail "$tmptarget aborted" 
+	}
+	"-1" { 
+	    error "Couldn't load $tmptarget." 
+	}
+    }
+
+# remove generated targets
+verbose "### EXEC exec rm -f $ld_old"
+catch "exec rm -f $ld_old" result
+}
+
+# remove last generated targets
+verbose "### EXEC rm -f $ld_old $ld_new"
+catch "exec rm -f $ld_old $ld_new" result
+ld_exit
+
+

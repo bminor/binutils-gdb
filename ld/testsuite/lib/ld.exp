@@ -1,0 +1,48 @@
+#
+# default_ld_version 
+#	extract and print the version number of ld
+#
+proc default_ld_version { ld } {
+    if { [file exists $ld] == 0 } then {
+	error "$ld does not exist"
+	exit 1
+    }
+ 
+    set tmp [exec $ld --version]
+    regexp "version.*$" $tmp version
+    
+    if [info exists version] then {
+	clone_output "$ld $version\n"
+    }
+}
+
+#
+# default_ld_start 
+#	link a program using ld
+#
+proc default_ld_start { ld target } {
+
+    global OFILES
+    global BFDLIB
+    global LIBIBERTY
+    global HOSTING_EMU
+    global HOSTING_CRT0
+    global HOSTING_LIBS
+
+    set objects "$HOSTING_CRT0 $OFILES"
+    set library "$BFDLIB $LIBIBERTY $HOSTING_LIBS"
+       
+    if { [file exists $ld] == 0 } then {
+	error "$ld does not exist"
+	exit 1
+    }
+
+    send_log "### EXEC \"$ld $HOSTING_EMU -o $target $objects $library\"\n"
+    verbose "### EXEC \"$ld $HOSTING_EMU -o $target $objects $library\"" 1
+    
+    catch "exec $ld $HOSTING_EMU -o $target $objects $library" ld_output
+    if ![string match "" $ld_output] then {
+	send_log "$ld_output\n"
+	verbose "$ld_output" 1
+    }
+}
