@@ -1,3 +1,11 @@
+Sat Dec 28 11:30:26 1991  Per Bothner  (bothner at cygnus.com)
+
+	* dwarfread.c, coffread.c:  Use INIT_CPLUS_SPECIFIC.
+	* symtab.c (gdb_mangle_name):  Recognize and handle
+	constructors specially.
+	* symtab.c (check_stub_method):  Test for failure from
+	cplus-demangle by calling error() instead of seg-faulting ...
+
 Fri Dec 27 22:21:30 1991  Fred Fish  (fnf at cygnus.com)
 
 	* defs.h:  Add definition of null_cleanup()

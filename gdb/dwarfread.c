@@ -907,7 +907,7 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
       /* No forward references created an empty type, so install one now */
       type = alloc_utype (dip -> dieref, NULL);
     }
-  TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+  INIT_CPLUS_SPECIFIC(type);
   switch (dip -> dietag)
     {
       case TAG_structure_type:
