@@ -1,4 +1,6 @@
-/* Copyright (C) 1991, 92, 93, 94, 95, 98, 99, 2000 Free Software Foundation, Inc.
+/* Linker file opening and searching.
+   Copyright (C) 1991, 92, 93, 94, 95, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -129,15 +131,18 @@ ldfile_try_open_bfd (attempt, entry)
       else
 	check = entry->the_bfd;
 
-      if (! bfd_check_format (check, bfd_object))
-	return true;
-      if (bfd_arch_get_compatible (check, output_bfd) == NULL)
+      if (check != NULL)
 	{
-	  einfo (_("%P: skipping incompatible %s when searching for %s"),
-		 attempt, entry->local_sym_name);
-	  bfd_close (entry->the_bfd);
-	  entry->the_bfd = NULL;
-	  return false;
+	  if (! bfd_check_format (check, bfd_object))
+	    return true;
+	  if (bfd_arch_get_compatible (check, output_bfd) == NULL)
+	    {
+	      einfo (_("%P: skipping incompatible %s when searching for %s"),
+		     attempt, entry->local_sym_name);
+	      bfd_close (entry->the_bfd);
+	      entry->the_bfd = NULL;
+	      return false;
+	    }
 	}
     }
 

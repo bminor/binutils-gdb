@@ -1,3 +1,8 @@
+2000-03-06  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldfile.c (ldfile_try_open_bfd): Don't crash if we see an empty
+	archive.
+
 2000-03-02  H.J. Lu  <hjl@gnu.org>
 
 	* emulparams/elf32mcore.sh: Include "getopt.h".
