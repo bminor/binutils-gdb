@@ -166,8 +166,21 @@ static void
 print_i387_value (char *raw)
 {
   DOUBLEST value;
-  
-  floatformat_to_doublest (&floatformat_i387_ext, raw, &value);
+
+  /* Avoid call to floatformat_to_doublest if possible to preserve as
+     much information as possible.  */
+
+#ifdef HAVE_LONG_DOUBLE
+  if (sizeof (value) == sizeof (long double)
+      && HOST_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
+    {
+      /* Copy straight over, but take care of the padding.  */
+      memcpy (&value, raw, FPU_REG_RAW_SIZE);
+      memset (&value + FPU_REG_RAW_SIZE, 0, sizeof (value) - FPU_REG_RAW_SIZE);
+    }
+  else
+#endif
+    floatformat_to_doublest (&floatformat_i387_ext, raw, &value);
 
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room

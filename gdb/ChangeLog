@@ -1,3 +1,9 @@
+2000-04-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (print_i387_value): Avoid call to
+	floatformat_to_doublest if long double type is the same on host
+	and target.
+
 2000-04-10  Fernando Nasser  <fnasser@cygnus.com>
 
 	From 2000-04-10 Rodney Brown <rdb@redhat.com>:
