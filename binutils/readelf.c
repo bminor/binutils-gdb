@@ -68,7 +68,7 @@ int 			do_header;
 int 			do_dump;
 int 			do_version;
 
-static unsigned long int (* byte_get)(unsigned char *, int);
+static unsigned long int (* byte_get) PARAMS ((unsigned char *, int));
 
 #define NUM_DUMP_SECTS	100
 char 			dump_sects [NUM_DUMP_SECTS];
@@ -191,6 +191,7 @@ warn (const char * message, ...)
 #else
 static void
 error (va_alist)
+     va_dcl
 {
   char * message;
   va_list args;
@@ -205,7 +206,7 @@ error (va_alist)
 
 static void
 warn (va_alist)
-     va_dcl;
+     va_dcl
 {
   char * message;
   va_list args;
@@ -2011,7 +2012,8 @@ process_dynamic_segment (file)
 }
 
 static char *
-get_ver_flags (unsigned short flags)
+get_ver_flags (flags)
+     unsigned short flags;
 {
   static char buff [32];
 

@@ -1,3 +1,10 @@
+Tue Jul  7 21:48:54 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* readelf.c (byte_get): Use PARAMS in prototype.
+	(error): Make it work with non-ANSI compilers.
+	(warn): Likewise.
+	(get_ver_flags): Don't use an ANSI prototype in the definition.
+
 Tue Jul  7 13:26:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (filter_bytes): Set size correctly if the size of the
