@@ -1,5 +1,8 @@
 Mon Apr  5 09:41:58 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/tc-mips.c (gp_reference): Certain magic symbols can never
+	be referenced off the GP register.
+
 	* app.c (do_scrub_next_char): Handle states 9 and 10 correctly
 	when dealing with characters of type LEX_IS_TWOCHAR_COMMENT_1ST,
 	LEX_IS_STRINGQUOTE, and LEX_IS_ONECHAR_QUOTE.
