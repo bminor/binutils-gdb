@@ -3328,7 +3328,6 @@ elf_bfd_final_link (abfd, info)
      outputting relocs.  */
   if (info->strip != strip_all || info->relocateable)
     {
-      elfsym.st_value = 0;
       elfsym.st_size = 0;
       elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
       elfsym.st_other = 0;
@@ -3338,6 +3337,10 @@ elf_bfd_final_link (abfd, info)
 	  if (o != NULL)
 	    o->target_index = abfd->symcount;
 	  elfsym.st_shndx = i;
+	  if (info->relocateable || o == NULL)
+	    elfsym.st_value = 0;
+	  else
+	    elfsym.st_value = o->vma;
 	  if (! elf_link_output_sym (&finfo, (const char *) NULL,
 				     &elfsym, o))
 	    goto error_return;

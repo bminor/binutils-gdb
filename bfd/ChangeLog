@@ -1,3 +1,14 @@
+Thu Mar 20 12:39:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_bfd_final_link): Set the value of a section
+	symbol to the section address unless doing a relocateable link.
+
+Tue Mar 18 23:03:17 1997  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't create
+	.plt entry if we've taken the function's address.
+	(elf64_alpha_merge_gots): Merge collected flags info as well.
+
 Tue Mar 18 22:40:09 1997  H.J. Lu  <hjl@lucon.org>
 
 	* Many files: Add function prototypes.
