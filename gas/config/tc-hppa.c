@@ -178,7 +178,7 @@ typedef enum
   }
 pa_symbol_type;
 
-/* This structure contains information needed to assemble 
+/* This structure contains information needed to assemble
    individual instructions.  */
 struct pa_it
   {
@@ -283,7 +283,7 @@ typedef struct subspace_dictionary_chain ssd_chain_struct;
 
 struct space_dictionary_chain
   {
-    /* Nonzero if this space has been defined by the user code or 
+    /* Nonzero if this space has been defined by the user code or
        as a default space.  */
     unsigned int sd_defined;
 
@@ -421,9 +421,6 @@ struct hppa_fix_struct
     /* Argument relocation bits.  */
     long fx_arg_reloc;
 
-    /* The unwind descriptor associated with this fixup.  */
-    char fx_unwind[8];
-
     /* The segment this fixup appears in.  */
     segT segment;
   };
@@ -529,7 +526,7 @@ static void fix_new_hppa PARAMS ((fragS *, int, int, symbolS *,
 				  long, expressionS *, int,
 				  bfd_reloc_code_real_type,
 				  enum hppa_reloc_field_selector_type,
-				  int, long, char *));
+				  int, long, int *));
 static int is_end_of_statement PARAMS ((void));
 static int reg_name_search PARAMS ((char *));
 static int pa_chk_field_selector PARAMS ((char **));
@@ -652,9 +649,9 @@ const char line_separator_chars[] = "!";
 const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant.
-   As in 0f12.456 or 0d1.2345e12. 
+   As in 0f12.456 or 0d1.2345e12.
 
-   Be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be 
+   Be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
    changed in read.c.  Ideally it shouldn't hae to know abou it at
    all, but nothing is ideal around here.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
@@ -691,10 +688,10 @@ static int print_errors = 1;
 /* List of registers that are pre-defined:
 
    Each general register has one predefined name of the form
-   %r<REGNUM> which has the value <REGNUM>.  
+   %r<REGNUM> which has the value <REGNUM>.
 
    Space and control registers are handled in a similar manner,
-   but use %sr<REGNUM> and %cr<REGNUM> as their predefined names. 
+   but use %sr<REGNUM> and %cr<REGNUM> as their predefined names.
 
    Likewise for the floating point registers, but of the form
    %fr<REGNUM>.  Floating point registers have additional predefined
@@ -710,7 +707,7 @@ static int print_errors = 1;
    %r2  has %rp as a synonym
 
    Almost every control register has a synonym; they are not listed
-   here for brevity.  
+   here for brevity.
 
    The table is sorted. Suitable for searching by a binary search. */
 
@@ -915,7 +912,7 @@ static const struct pd_reg pre_defined_registers[] =
 };
 
 /* This table is sorted by order of the length of the string. This is
-   so we check for <> before we check for <. If we had a <> and checked 
+   so we check for <> before we check for <. If we had a <> and checked
    for < first, we would get a false match.  */
 static const struct fp_cond_map fp_cond_map[] =
 {
@@ -1030,7 +1027,7 @@ static struct default_space_dict pa_def_spaces[] =
     continue; \
   }
 
-/* Simple range checking for FIELD againt HIGH and LOW bounds.  
+/* Simple range checking for FIELD againt HIGH and LOW bounds.
    IGNORE is used to suppress the error message.  */
 
 #define CHECK_FIELD(FIELD, HIGH, LOW, IGNORE) \
@@ -1140,12 +1137,12 @@ pa_undefine_label ()
    code needs to keep track of some extra stuff.  Each call to fix_new_hppa
    results in the creation of an instance of an hppa_fix_struct.  An
    hppa_fix_struct stores the extra information along with a pointer to the
-   original fixS.  This is attached to the original fixup via the 
+   original fixS.  This is attached to the original fixup via the
    tc_fix_data field.  */
 
 static void
 fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
-	      r_type, r_field, r_format, arg_reloc, unwind_desc)
+	      r_type, r_field, r_format, arg_reloc, unwind_bits)
      fragS *frag;
      int where;
      int size;
@@ -1157,7 +1154,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
      enum hppa_reloc_field_selector_type r_field;
      int r_format;
      long arg_reloc;
-     char *unwind_desc;
+     int* unwind_bits;
 {
   fixS *new_fix;
 
@@ -1174,17 +1171,10 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
   hppa_fix->fx_r_format = r_format;
   hppa_fix->fx_arg_reloc = arg_reloc;
   hppa_fix->segment = now_seg;
-  if (unwind_desc)
-    {
-      bcopy (unwind_desc, hppa_fix->fx_unwind, 8);
-
-      /* If necessary call BFD backend function to attach the
-         unwind bits to the target dependent parts of a BFD symbol.
-         Yuk.  */
-#ifdef obj_attach_unwind_info
-      obj_attach_unwind_info (add_symbol->bsym, unwind_desc);
+#ifdef OBJ_SOM
+  if (r_type == R_ENTRY || r_type == R_EXIT)
+    new_fix->fx_addnumber = *unwind_bits;
 #endif
-    }
 
   /* foo-$global$ is used to access non-automatic storage.  $global$
      is really just a marker and has served its purpose, so eliminate
@@ -1230,7 +1220,7 @@ cons_fix_new_hppa (frag, where, size, exp)
 
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
-		hppa_field_selector, 32, 0, (char *) 0);
+		hppa_field_selector, 32, 0, NULL);
 
   /* Reset field selector to its default state.  */
   hppa_field_selector = 0;
@@ -1307,7 +1297,7 @@ md_assemble (str)
 
   /* If we are within a procedure definition, make sure we've
      defined a label for the procedure; handle case where the
-     label was defined after the .PROC directive. 
+     label was defined after the .PROC directive.
 
      Note there's not need to diddle with the segment or fragment
      for the label symbol in this case.  We have already switched
@@ -1330,9 +1320,9 @@ md_assemble (str)
 		  char *where = frag_more (0);
 
 		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-				last_call_info->start_symbol, (offsetT) 0, NULL,
+				NULL, (offsetT) 0, NULL,
 				0, R_HPPA_ENTRY, e_fsel, 0, 0,
-				(char *) &last_call_info->ci_unwind.descriptor);
+				(int *)&last_call_info->ci_unwind.descriptor);
 		}
 #endif
 	    }
@@ -1931,7 +1921,7 @@ pa_ip (str)
 		    cmpltr = 6;
 		  else if (strcasecmp (name, "ev") == 0)
 		    cmpltr = 7;
-		  /* Handle movb,n.  Put things back the way they were.  
+		  /* Handle movb,n.  Put things back the way they were.
 		     This includes moving s back to where it started.  */
 		  else if (strcasecmp (name, "n") == 0 && *args == '|')
 		    {
@@ -2329,7 +2319,7 @@ pa_ip (str)
 	    case '4':
 	      {
 		struct pa_89_fp_reg_struct result;
-		
+
 		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		if (the_insn.fpof1 == SGL)
@@ -2646,7 +2636,7 @@ tc_gen_reloc (section, fixp)
 	     relocation should be either 0 (no static link) or 2
 	     (static link required).
 
-	     FIXME: We always assume no static link! 
+	     FIXME: We always assume no static link!
 
 	     We also slam a zero addend into the DLT relative relocs;
 	     it doesn't make a lot of sense to use any addend since
@@ -2658,13 +2648,19 @@ tc_gen_reloc (section, fixp)
 	case R_S_MODE:
 	case R_D_MODE:
 	case R_R_MODE:
-	case R_EXIT:
 	case R_FSEL:
 	case R_LSEL:
 	case R_RSEL:
 	  /* There is no symbol or addend associated with these fixups.  */
 	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
 	  relocs[i]->addend = 0;
+	  break;
+
+	case R_ENTRY:
+	case R_EXIT:
+	  /* There is no symbol associated with these fixups.  */
+	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
+	  relocs[i]->addend = fixp->fx_addnumber;
 	  break;
 
 	default:
@@ -2819,7 +2815,7 @@ md_apply_fix (fixP, valp)
   valueT val = *valp;
 
   hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
-  /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can 
+  /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can
      never be "applied" (they are just markers).  */
 #ifdef OBJ_SOM
   if (fixP->fx_r_type == R_HPPA_ENTRY
@@ -2989,7 +2985,7 @@ md_pcrel_from (fixP)
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
-/* Return nonzero if the input line pointer is at the end of 
+/* Return nonzero if the input line pointer is at the end of
    a statement.  */
 
 static int
@@ -3095,7 +3091,7 @@ pa_parse_number (s, result)
       p++;
       c = *p;
       /* Tege hack: Special case for general registers as the general
-         code makes a binary search with case translation, and is VERY 
+         code makes a binary search with case translation, and is VERY
          slow. */
       if (c == 'r')
 	{
@@ -3437,7 +3433,7 @@ pa_get_absolute_expression (insn, strp)
   return evaluate_absolute (insn);
 }
 
-/* Evaluate an absolute expression EXP which may be modified by 
+/* Evaluate an absolute expression EXP which may be modified by
    the selector FIELD_SELECTOR.  Return the value of the expression.  */
 static int
 evaluate_absolute (insn)
@@ -4003,7 +3999,7 @@ is_same_frag (frag1, frag2)
 }
 
 #ifdef OBJ_ELF
-/* Build an entry in the UNWIND subspace from the given function 
+/* Build an entry in the UNWIND subspace from the given function
    attributes in CALL_INFO.  This is not needed for SOM as using
    R_ENTRY and R_EXIT relocations allow the linker to handle building
    of the unwind spaces.  */
@@ -4043,16 +4039,14 @@ pa_build_unwind_subspace (call_info)
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0,
-		(char *) 0);
+		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
 
   p = frag_more (4);
 
   /* Relocation info. for end offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0,
-		(char *) 0);
+		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
 
   /* Dump it. */
   unwind = (char *) &call_info->ci_unwind;
@@ -4118,7 +4112,7 @@ pa_callinfo (unused)
 	  input_line_pointer++;
 	  temp = get_absolute_expression ();
 	  /* The HP assembler accepts 19 as the high bound for ENTRY_GR
-	     even though %r19 is caller saved.  I think this is a bug in 
+	     even though %r19 is caller saved.  I think this is a bug in
 	     the HP assembler, and we are not going to emulate it.  */
 	  if (temp < 3 || temp > 18)
 	    as_bad ("Value for ENTRY_GR must be in the range 3..18\n");
@@ -4130,7 +4124,7 @@ pa_callinfo (unused)
 	  *p = c;
 	  input_line_pointer++;
 	  temp = get_absolute_expression ();
-	  /* Similarly the HP assembler takes 31 as the high bound even 
+	  /* Similarly the HP assembler takes 31 as the high bound even
 	     though %fr21 is the last callee saved floating point register.  */
 	  if (temp < 12 || temp > 21)
 	    as_bad ("Value for ENTRY_FR must be in the range 12..21\n");
@@ -4217,7 +4211,7 @@ pa_code (unused)
 {
   sd_chain_struct *sdchain;
 
-  /* First time through it might be necessary to create the 
+  /* First time through it might be necessary to create the
      $TEXT$ space.  */
   if ((sdchain = is_defined_space ("$TEXT$")) == NULL)
     {
@@ -4263,9 +4257,9 @@ pa_comm (unused)
 
   if (symbol)
     {
-      /* It is incorrect to check S_IS_DEFINED at this point as 
-         the symbol will *always* be defined.  FIXME.  How to 
-         correctly determine when this label really as been 
+      /* It is incorrect to check S_IS_DEFINED at this point as
+         the symbol will *always* be defined.  FIXME.  How to
+         correctly determine when this label really as been
          defined before.  */
       if (S_GET_VALUE (symbol))
 	{
@@ -4279,7 +4273,7 @@ pa_comm (unused)
       else
 	{
 	  S_SET_VALUE (symbol, size);
-	  S_SET_SEGMENT (symbol, &bfd_und_section);
+	  S_SET_SEGMENT (symbol, bfd_und_section_ptr);
 	  S_SET_EXTERNAL (symbol);
 
 	  /* colon() has already set the frag to the current location in the
@@ -4339,9 +4333,9 @@ pa_entry (unused)
       char *where = frag_more (0);
 
       fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		    last_call_info->start_symbol, (offsetT) 0, NULL,
+		    NULL, (offsetT) 0, NULL,
 		    0, R_HPPA_ENTRY, e_fsel, 0, 0,
-		    (char *) &last_call_info->ci_unwind.descriptor);
+		    (int *) &last_call_info->ci_unwind.descriptor);
     }
 #endif
 }
@@ -4362,7 +4356,7 @@ pa_equ (reg)
 	S_SET_VALUE (symbol, pa_parse_number (&input_line_pointer, 0));
       else
 	S_SET_VALUE (symbol, (unsigned int) get_absolute_expression ());
-      S_SET_SEGMENT (symbol, &bfd_abs_section);
+      S_SET_SEGMENT (symbol, bfd_abs_section_ptr);
     }
   else
     {
@@ -4404,8 +4398,9 @@ process_exit ()
      if we split the unwind bits up between the relocations which
      denote the entry and exit points.  */
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		last_call_info->start_symbol, (offsetT) 0,
-		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0, NULL);
+		NULL, (offsetT) 0,
+		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0,
+		(int *) &last_call_info->ci_unwind.descriptor + 1);
 #endif
 }
 
@@ -4436,7 +4431,7 @@ pa_exit (unused)
 }
 
 /* Process a .EXPORT directive.  This makes functions external
-   and provides information such as argument relocation entries 
+   and provides information such as argument relocation entries
    to callers.  */
 
 static void
@@ -4489,7 +4484,7 @@ pa_type_args (symbolP, is_export)
     {
       input_line_pointer += 8;
       symbolP->bsym->flags &= ~BSF_FUNCTION;
-      S_SET_SEGMENT (symbolP, &bfd_abs_section);
+      S_SET_SEGMENT (symbolP, bfd_abs_section_ptr);
       type = SYMBOL_TYPE_ABSOLUTE;
     }
   else if (strncasecmp (input_line_pointer, "code", 4) == 0)
@@ -4645,7 +4640,7 @@ pa_import (unused)
       else
 	{
 	  /* Sigh.  To be compatable with the HP assembler and to help
-	     poorly written assembly code, we assign a type based on 
+	     poorly written assembly code, we assign a type based on
 	     the the current segment.  Note only BSF_FUNCTION really
 	     matters, we do not need to set the full SYMBOL_TYPE_* info.  */
 	  if (now_seg == text_section)
@@ -4653,7 +4648,7 @@ pa_import (unused)
 
 	  /* If the section is undefined, then the symbol is undefined
 	     Since this is an import, leave the section undefined.  */
-	  S_SET_SEGMENT (symbol, &bfd_und_section);
+	  S_SET_SEGMENT (symbol, bfd_und_section_ptr);
 	}
     }
   else
@@ -4782,11 +4777,11 @@ pa_proc (unused)
       seg = subseg_force_new ("$CODE$", 0);
 
       /* Now set the flags.  */
-      bfd_set_section_flags (stdoutput, seg, 
+      bfd_set_section_flags (stdoutput, seg,
 			     bfd_get_section_flags (abfd, text_section));
 
       /* Record any alignment request for this section.  */
-      record_alignment (seg, 
+      record_alignment (seg,
 			bfd_get_section_alignment (stdoutput, text_section));
 
       /* Change the "text_section" to be our new $CODE$ subspace.  */
@@ -4862,7 +4857,7 @@ pa_proc (unused)
   demand_empty_rest_of_line ();
 }
 
-/* Process the syntatical end of a procedure.  Make sure all the 
+/* Process the syntatical end of a procedure.  Make sure all the
    appropriate pseudo-ops were found within the procedure.  */
 
 static void
@@ -4872,7 +4867,7 @@ pa_procend (unused)
 
   /* If we are within a procedure definition, make sure we've
      defined a label for the procedure; handle case where the
-     label was defined after the .PROC directive. 
+     label was defined after the .PROC directive.
 
      Note there's not need to diddle with the segment or fragment
      for the label symbol in this case.  We have already switched
@@ -4895,9 +4890,9 @@ pa_procend (unused)
 		  char *where = frag_more (0);
 
 		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-				last_call_info->start_symbol, (offsetT) 0, NULL,
+				NULL, (offsetT) 0, NULL,
 				0, R_HPPA_ENTRY, e_fsel, 0, 0,
-				(char *) &last_call_info->ci_unwind.descriptor);
+				(int *) &last_call_info->ci_unwind.descriptor);
 		}
 #endif
 	    }
@@ -4971,7 +4966,7 @@ pa_parse_space_stmt (space_name, create_flag)
       print_errors = FALSE;
       ptemp = input_line_pointer + 1;
       /* First see if the space was specified as a number rather than
-         as a name.  According to the PA assembly manual the rest of 
+         as a name.  According to the PA assembly manual the rest of
          the line should be ignored.  */
       temp = pa_parse_number (&ptemp, 0);
       if (temp >= 0)
@@ -5029,7 +5024,7 @@ pa_parse_space_stmt (space_name, create_flag)
     seg = subseg_new (space_name, 0);
 
   /* If create_flag is nonzero, then create the new space with
-     the attributes computed above.  Else set the values in 
+     the attributes computed above.  Else set the values in
      an already existing space -- this can only happen for
      the first occurence of a built-in space.  */
   if (create_flag)
@@ -5196,7 +5191,7 @@ pa_spnum (unused)
   demand_empty_rest_of_line ();
 }
 
-/* If VALUE is an exact power of two between zero and 2^31, then 
+/* If VALUE is an exact power of two between zero and 2^31, then
    return log2 (VALUE).  Else return -1.  */
 
 static int
@@ -5215,9 +5210,9 @@ log2 (value)
 }
 
 /* Handle a .SUBSPACE pseudo-op; this switches the current subspace to the
-   given subspace, creating the new subspace if necessary. 
+   given subspace, creating the new subspace if necessary.
 
-   FIXME.  Should mirror pa_space more closely, in particular how 
+   FIXME.  Should mirror pa_space more closely, in particular how
    they're broken up into subroutines.  */
 
 static void
@@ -5386,7 +5381,7 @@ pa_subspace (unused)
       flags |= SEC_RELOC | SEC_HAS_CONTENTS;
       applicable &= flags;
 
-      /* If this is an existing subspace, then we want to use the 
+      /* If this is an existing subspace, then we want to use the
          segment already associated with the subspace.
 
          FIXME NOW!  ELF BFD doesn't appear to be ready to deal with
@@ -5781,7 +5776,7 @@ is_defined_space (name)
   return NULL;
 }
 
-/* Find and return the space associated with the given seg.  If no mapping 
+/* Find and return the space associated with the given seg.  If no mapping
    from the given seg to a space is found, then return NULL.
 
    Unlike subspaces, the number of spaces is not expected to grow much,
@@ -5840,7 +5835,7 @@ is_defined_subspace (name)
 /* Find and return the subspace associated with the given seg.  If no
    mapping from the given seg to a subspace is found, then return NULL.
 
-   If we ever put each procedure/function within its own subspace 
+   If we ever put each procedure/function within its own subspace
    (to make life easier on the compiler and linker), then this will have
    to become more efficient.  */
 
@@ -5873,7 +5868,7 @@ pa_subsegment_to_subspace (seg, subseg)
   return NULL;
 }
 
-/* Given a number, try and find a space with the name number.  
+/* Given a number, try and find a space with the name number.
 
    Return a pointer to a space dictionary chain entry for the space
    that was found or NULL on failure.  */
@@ -5924,7 +5919,7 @@ pa_next_subseg (space)
   return space->sd_last_subseg;
 }
 
-/* Helper function for pa_stringer.  Used to find the end of 
+/* Helper function for pa_stringer.  Used to find the end of
    a string.  */
 
 static unsigned int
@@ -5954,7 +5949,7 @@ pa_stringer (append_zero)
   int i;
 
   /* Preprocess the string to handle PA-specific escape sequences.
-     For example, \xDD where DD is a hexidecimal number should be 
+     For example, \xDD where DD is a hexidecimal number should be
      changed to \OOO where OOO is an octal number.  */
 
   /* Skip the opening quote.  */
@@ -6101,7 +6096,7 @@ pa_lsym (unused)
   pa_undefine_label ();
 }
 
-/* Switch to the text space.  Like s_text, but delete our 
+/* Switch to the text space.  Like s_text, but delete our
    label when finished.  */
 static void
 pa_text (unused)
@@ -6111,7 +6106,7 @@ pa_text (unused)
   pa_undefine_label ();
 }
 
-/* On the PA relocations which involve function symbols must not be 
+/* On the PA relocations which involve function symbols must not be
    adjusted.  This so that the linker can know when/how to create argument
    relocation stubs for indirect calls and calls to static functions.
 
@@ -6212,10 +6207,10 @@ hppa_elf_mark_end_of_function ()
   if (name)
     {
       symbolS *symbolP;
-      
+
       strcpy (name, "L$\001end_");
       strcat (name, S_GET_NAME (last_call_info->start_symbol));
-      
+
       /* If we have a .exit followed by a .procend, then the
 	 symbol will have already been defined.  */
       symbolP = symbol_find (name);
@@ -6223,7 +6218,7 @@ hppa_elf_mark_end_of_function ()
 	{
 	  /* The symbol has already been defined!  This can
 	     happen if we have a .exit followed by a .procend.
-	     
+
 	     This is *not* an error.  All we want to do is free
 	     the memory we just allocated for the name and continue.  */
 	  xfree (name);
@@ -6236,7 +6231,7 @@ hppa_elf_mark_end_of_function ()
 				(valueT) (obstack_next_free (&frags)
 					  - frag_now->fr_literal - 4),
 				frag_now);
-	  
+
 	  assert (symbolP);
 	  symbolP->bsym->flags = BSF_LOCAL;
 	  symbol_table_insert (symbolP);
@@ -6246,11 +6241,11 @@ hppa_elf_mark_end_of_function ()
 	last_call_info->end_symbol = symbolP;
       else
 	as_bad ("Symbol '%s' could not be created.", name);
-      
+
     }
   else
     as_bad ("No memory for symbol name.");
-  
+
 }
 
 /* For ELF, this function serves one purpose:  to setup the st_size

@@ -1,3 +1,22 @@
+Tue Sep 13 20:05:47 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/obj-som.h (S_SET_OTHER, S_SET_TYPE): Delete a.out crud.
+	(S_SET_DESC, S_GET_OTHER, S_GET_TYPE, S_GET_DESC): Likewise.
+	(obj_attach_unwind_info): Do not define.  Not needed anymore.
+	* config/tc-hppa.c: Delete whitespace at EOL.
+	(struct hppa_fix_struct): Delete fx_unwind field and all references.
+	(fix_new_hppa): Last arg is now a pointer to an int.  Do not
+	call obj_attach_unwind_info anymore.  For SOM R_ENTRY and R_EXIT
+	fixups, store 32bits of unwind information in the fx_addnumber
+	field of the fixup.
+	(md_assemble, pa_entry, process_exit, pa_procend): For SOM R_ENTRY
+	and R_EXIT fixups, pass a NULL pointer to fix_new_hppa, and a
+	pointer to 32 bits of unwind info. 
+	(tc_gen_reloc): For SOM R_ENTRY and R_EXIT fixups, set the symbol
+	pointer to the dummy symbol; set the addend field to fx_addnumber.
+	(pa_comm, pa_equ, pa_type_args, pa_import): Use bfd_XXX_section_ptr
+	rather than &bfd_XXX_section.
+
 Tue Sep 13 21:15:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-i386.c (md_apply_fix_1): For GOTPC relocs, decrement
