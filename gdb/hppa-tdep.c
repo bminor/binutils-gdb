@@ -121,17 +121,8 @@ static void internalize_unwinds (struct objfile *,
 static void record_text_segment_lowaddr (bfd *, asection *, void *);
 /* FIXME: brobecker 2002-11-07: We will likely be able to make the
    following functions static, once we hppa is partially multiarched.  */
-int hppa_reg_struct_has_addr (int gcc_p, struct type *type);
-CORE_ADDR hppa_skip_prologue (CORE_ADDR pc);
-CORE_ADDR hppa_skip_trampoline_code (CORE_ADDR pc);
-int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
-int hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 int hppa_instruction_nullified (void);
-int hppa_cannot_store_register (int regnum);
-CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
-CORE_ADDR hppa_target_read_pc (ptid_t ptid);
-void hppa_target_write_pc (CORE_ADDR v, ptid_t ptid);
 
 /* Handle 32/64-bit struct return conventions.  */
 
@@ -1024,7 +1015,7 @@ hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 /* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
    bits.  */
 
-CORE_ADDR
+static CORE_ADDR
 hppa_target_read_pc (ptid_t ptid)
 {
   int flags = read_register_pid (FLAGS_REGNUM, ptid);
@@ -1041,7 +1032,7 @@ hppa_target_read_pc (ptid_t ptid)
 /* Write out the PC.  If currently in a syscall, then also write the new
    PC value into %r31.  */
 
-void
+static void
 hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
 {
   int flags = read_register_pid (FLAGS_REGNUM, ptid);
@@ -1098,7 +1089,7 @@ hppa_alignof (struct type *type)
    Note we return one for *any* call trampoline (long-call, arg-reloc), not
    just shared library trampolines (import, export).  */
 
-int
+static int
 hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
   struct minimal_symbol *minsym;
@@ -1259,7 +1250,7 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
    Note we return one for *any* call trampoline (long-call, arg-reloc), not
    just shared library trampolines (import, export).  */
 
-int
+static int
 hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   struct unwind_table_entry *u;
@@ -1332,7 +1323,7 @@ hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name)
    calling an argument relocation stub.  It even handles some stubs
    used in dynamic executables.  */
 
-CORE_ADDR
+static CORE_ADDR
 hppa_skip_trampoline_code (CORE_ADDR pc)
 {
   long orig_pc = pc;
@@ -2014,7 +2005,7 @@ after_prologue (CORE_ADDR pc)
    Currently we must not skip more on the alpha, but we might the lenient
    stuff some day.  */
 
-CORE_ADDR
+static CORE_ADDR
 hppa_skip_prologue (CORE_ADDR pc)
 {
   unsigned long inst;
@@ -2459,14 +2450,6 @@ hppa_skip_permanent_breakpoint (void)
 }
 
 int
-hppa_reg_struct_has_addr (int gcc_p, struct type *type)
-{
-  /* On the PA, any pass-by-value structure > 8 bytes is actually passed
-     via a pointer regardless of its type or the compiler used.  */
-  return (TYPE_LENGTH (type) > 8);
-}
-
-int
 hppa_pc_requires_run_before_use (CORE_ADDR pc)
 {
   /* Sometimes we may pluck out a minimal symbol that has a negative address.
@@ -2533,7 +2516,7 @@ hppa64_register_type (struct gdbarch *gdbarch, int reg_nr)
 /* Return True if REGNUM is not a register available to the user
    through ptrace().  */
 
-int
+static int
 hppa_cannot_store_register (int regnum)
 {
   return (regnum == 0
@@ -2543,7 +2526,7 @@ hppa_cannot_store_register (int regnum)
 
 }
 
-CORE_ADDR
+static CORE_ADDR
 hppa_smash_text_address (CORE_ADDR addr)
 {
   /* The low two bits of the PC on the PA contain the privilege level.

@@ -1,3 +1,12 @@
+2004-04-17  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_reg_struct_has_addr, hppa_skip_prologue)
+	(hppa_skip_trampoline_code, hppa_in_solib_call_trampoline)
+	(hppa_in_solib_return_trampoline, hppa_cannot_store_register)
+	(hppa_smash_text_address, hppa_target_read_pc, hppa_target_write_pc):
+	Remove forward declaration and make static.
+	(hppa_reg_struct_has_addr): Remove.
+
 2004-04-16  Joel Brobecker  <brobecker@gnat.com>
 
 	* observer.sh: Move comments in sed command to first column.
