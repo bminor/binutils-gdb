@@ -55,16 +55,10 @@ static bfd_reloc_status_type ppc64_elf_toc64_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static void ppc64_elf_get_symbol_info
-  PARAMS ((bfd *, asymbol *, symbol_info *));
 static boolean ppc64_elf_object_p
   PARAMS ((bfd *));
-static boolean ppc64_elf_set_private_flags
-  PARAMS ((bfd *, flagword));
 static boolean ppc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
-static boolean ppc64_elf_section_from_shdr
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, const char *));
 
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -1634,22 +1628,6 @@ ppc64_elf_unhandled_reloc (abfd, reloc_entry, symbol, data,
   return bfd_reloc_dangerous;
 }
 
-/* Return symbol info as per usual for ELF targets, except that
-   symbols in .opd are given 'd' or 'D' for type.  */
-
-static void
-ppc64_elf_get_symbol_info (abfd, symbol, ret)
-     bfd *abfd;
-     asymbol *symbol;
-     symbol_info *ret;
-{
-  _bfd_elf_get_symbol_info (abfd, symbol, ret);
-  if (ret->type == '?'
-      && (symbol->flags & (BSF_GLOBAL | BSF_LOCAL)) != 0
-      && strcmp (symbol->section->name, ".opd") == 0)
-    ret->type = (symbol->flags & BSF_GLOBAL) != 0 ? 'D' : 'd';
-}
-
 /* Fix bad default arch selected for a 64 bit input bfd when the
    default is 32 bit.  */
 
@@ -1671,32 +1649,14 @@ ppc64_elf_object_p (abfd)
   return true;
 }
 
-/* Function to set whether a module needs the -mrelocatable bit set.  */
-
-static boolean
-ppc64_elf_set_private_flags (abfd, flags)
-     bfd *abfd;
-     flagword flags;
-{
-  BFD_ASSERT (!elf_flags_init (abfd)
-	      || elf_elfheader (abfd)->e_flags == flags);
-
-  elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = true;
-  return true;
-}
-
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
+
 static boolean
 ppc64_elf_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
-  flagword old_flags;
-  flagword new_flags;
-  boolean error;
-
   /* Check if we have the same endianess.  */
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
@@ -1714,106 +1674,6 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
       return false;
     }
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  old_flags = elf_elfheader (obfd)->e_flags;
-  if (!elf_flags_init (obfd))
-    {
-      /* First call, no flags set.  */
-      elf_flags_init (obfd) = true;
-      elf_elfheader (obfd)->e_flags = new_flags;
-    }
-
-  else if (new_flags == old_flags)
-    /* Compatible flags are ok.  */
-    ;
-
-  else
-    {
-      /* Incompatible flags.  Warn about -mrelocatable mismatch.
-	 Allow -mrelocatable-lib to be linked with either.  */
-      error = false;
-      if ((new_flags & EF_PPC_RELOCATABLE) != 0
-	  && (old_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0)
-	{
-	  error = true;
-	  (*_bfd_error_handler)
-	    (_("%s: compiled with -mrelocatable and linked with modules compiled normally"),
-	     bfd_archive_filename (ibfd));
-	}
-      else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
-	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
-	{
-	  error = true;
-	  (*_bfd_error_handler)
-	    (_("%s: compiled normally and linked with modules compiled with -mrelocatable"),
-	     bfd_archive_filename (ibfd));
-	}
-
-      /* The output is -mrelocatable-lib iff both the input files are.  */
-      if (! (new_flags & EF_PPC_RELOCATABLE_LIB))
-	elf_elfheader (obfd)->e_flags &= ~EF_PPC_RELOCATABLE_LIB;
-
-      /* The output is -mrelocatable iff it can't be -mrelocatable-lib,
-	 but each input file is either -mrelocatable or -mrelocatable-lib.  */
-      if (! (elf_elfheader (obfd)->e_flags & EF_PPC_RELOCATABLE_LIB)
-	  && (new_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE))
-	  && (old_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE)))
-	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE;
-
-      /* Do not warn about eabi vs. V.4 mismatch, just or in the bit
-	 if any module uses it.  */
-      elf_elfheader (obfd)->e_flags |= (new_flags & EF_PPC_EMB);
-
-      new_flags &= ~(EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
-      old_flags &= ~(EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
-
-      /* Warn about any other mismatches.  */
-      if (new_flags != old_flags)
-	{
-	  error = true;
-	  (*_bfd_error_handler)
-	    (_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	     bfd_archive_filename (ibfd), (long) new_flags, (long) old_flags);
-	}
-
-      if (error)
-	{
-	  bfd_set_error (bfd_error_bad_value);
-	  return false;
-	}
-    }
-
-  return true;
-}
-
-/* Handle a PowerPC specific section when reading an object file.  This
-   is called when elfcode.h finds a section with an unknown type.  */
-
-static boolean
-ppc64_elf_section_from_shdr (abfd, hdr, name)
-     bfd *abfd;
-     Elf64_Internal_Shdr *hdr;
-     const char *name;
-{
-  asection *newsect;
-  flagword flags;
-
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
-    return false;
-
-  newsect = hdr->bfd_section;
-  flags = bfd_get_section_flags (abfd, newsect);
-  if (hdr->sh_flags & SHF_EXCLUDE)
-    flags |= SEC_EXCLUDE;
-
-  if (hdr->sh_type == SHT_ORDERED)
-    flags |= SEC_SORT_ENTRIES;
-
-  bfd_set_section_flags (abfd, newsect, flags);
   return true;
 }
 
@@ -2132,8 +1992,6 @@ static boolean ppc_size_one_stub
   PARAMS ((struct bfd_hash_entry *, PTR));
 static void group_sections
   PARAMS ((struct ppc_link_hash_table *, bfd_size_type, boolean));
-static boolean ppc64_elf_fake_sections
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, asection *));
 static boolean ppc64_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *info, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *relocs, Elf_Internal_Sym *local_syms,
@@ -5322,23 +5180,6 @@ ppc64_elf_build_stubs (info)
   return !htab->stub_error;
 }
 
-/* Set up any other section flags and such that may be necessary.  */
-
-static boolean
-ppc64_elf_fake_sections (abfd, shdr, asect)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     Elf64_Internal_Shdr *shdr;
-     asection *asect;
-{
-  if ((asect->flags & SEC_EXCLUDE) != 0)
-    shdr->sh_flags |= SHF_EXCLUDE;
-
-  if ((asect->flags & SEC_SORT_ENTRIES) != 0)
-    shdr->sh_type = SHT_ORDERED;
-
-  return true;
-}
-
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -6418,14 +6259,11 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_rela_normal 1
 
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
-#define bfd_elf64_bfd_set_private_flags	      ppc64_elf_set_private_flags
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
-#define bfd_elf64_get_symbol_info	      ppc64_elf_get_symbol_info
 
 #define elf_backend_object_p		      ppc64_elf_object_p
-#define elf_backend_section_from_shdr	      ppc64_elf_section_from_shdr
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
@@ -6435,7 +6273,6 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
 #define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
 #define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
-#define elf_backend_fake_sections	      ppc64_elf_fake_sections
 #define elf_backend_relocate_section	      ppc64_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class

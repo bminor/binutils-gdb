@@ -1,3 +1,15 @@
+2002-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_get_symbol_info): Delete.
+	(ppc64_elf_set_private_flags): Delete.
+	(ppc64_elf_section_from_shdr): Delete.
+	(ppc64_elf_merge_private_bfd_data): Remove flag checking/merging code.
+	(ppc64_elf_fake_sections): Delete.
+	(bfd_elf64_bfd_set_private_flags): Don't define.
+	(bfd_elf64_get_symbol_info): Likewise.
+	(elf_backend_section_from_shdr): Likewise.
+	(elf_backend_fake_sections): Likewise.
+
 2002-07-10  Marco Walther  <Marco.Walther@sun.com>
 
 	* elf.c: (assign_section_numbers) Set sh_entsize for .stab only
