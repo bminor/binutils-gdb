@@ -1,3 +1,7 @@
+Wed Apr 24 17:06:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/op68000.d: Add statements now caught by gas.
+
 Mon Apr 22 16:45:12 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/splet.[ds]: New tests for sparclet extensions.
