@@ -737,7 +737,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "TARGET_READ_PC(pid)",
                       XSTRING (TARGET_READ_PC (pid)));
 #endif
-#ifdef TARGET_WRITE_PC
+#if defined (TARGET_WRITE_PC) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_WRITE_PC(val, pid)",
@@ -749,7 +750,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "TARGET_READ_FP()",
                       XSTRING (TARGET_READ_FP ()));
 #endif
-#ifdef TARGET_WRITE_FP
+#if defined (TARGET_WRITE_FP) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_WRITE_FP(val)",
@@ -761,7 +763,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "TARGET_READ_SP()",
                       XSTRING (TARGET_READ_SP ()));
 #endif
-#ifdef TARGET_WRITE_SP
+#if defined (TARGET_WRITE_SP) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_WRITE_SP(val)",
@@ -919,7 +922,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: CALL_DUMMY_STACK_ADJUST # %s\n",
                       XSTRING (CALL_DUMMY_STACK_ADJUST));
 #endif
-#ifdef FIX_CALL_DUMMY
+#if defined (FIX_CALL_DUMMY) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
@@ -941,7 +945,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "COERCE_FLOAT_TO_DOUBLE(formal, actual)",
                       XSTRING (COERCE_FLOAT_TO_DOUBLE (formal, actual)));
 #endif
-#ifdef GET_SAVED_REGISTER
+#if defined (GET_SAVED_REGISTER) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval)",
@@ -953,13 +958,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "REGISTER_CONVERTIBLE(nr)",
                       XSTRING (REGISTER_CONVERTIBLE (nr)));
 #endif
-#ifdef REGISTER_CONVERT_TO_VIRTUAL
+#if defined (REGISTER_CONVERT_TO_VIRTUAL) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to)",
                       XSTRING (REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to)));
 #endif
-#ifdef REGISTER_CONVERT_TO_RAW
+#if defined (REGISTER_CONVERT_TO_RAW) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_CONVERT_TO_RAW(type, regnum, from, to)",
@@ -971,7 +978,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "POINTER_TO_ADDRESS(type, buf)",
                       XSTRING (POINTER_TO_ADDRESS (type, buf)));
 #endif
-#ifdef ADDRESS_TO_POINTER
+#if defined (ADDRESS_TO_POINTER) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "ADDRESS_TO_POINTER(type, buf, addr)",
@@ -983,7 +991,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "RETURN_VALUE_ON_STACK(type)",
                       XSTRING (RETURN_VALUE_ON_STACK (type)));
 #endif
-#ifdef EXTRACT_RETURN_VALUE
+#if defined (EXTRACT_RETURN_VALUE) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "EXTRACT_RETURN_VALUE(type, regbuf, valbuf)",
@@ -995,7 +1004,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr)",
                       XSTRING (PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)));
 #endif
-#ifdef PUSH_DUMMY_FRAME
+#if defined (PUSH_DUMMY_FRAME) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "PUSH_DUMMY_FRAME(-)",
@@ -1007,7 +1017,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "PUSH_RETURN_ADDRESS(pc, sp)",
                       XSTRING (PUSH_RETURN_ADDRESS (pc, sp)));
 #endif
-#ifdef POP_FRAME
+#if defined (POP_FRAME) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "POP_FRAME(-)",
@@ -1049,13 +1060,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "D10V_CONVERT_IADDR_TO_RAW(x)",
                       XSTRING (D10V_CONVERT_IADDR_TO_RAW (x)));
 #endif
-#ifdef STORE_STRUCT_RETURN
+#if defined (STORE_STRUCT_RETURN) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "STORE_STRUCT_RETURN(addr, sp)",
                       XSTRING (STORE_STRUCT_RETURN (addr, sp)));
 #endif
-#ifdef STORE_RETURN_VALUE
+#if defined (STORE_RETURN_VALUE) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "STORE_RETURN_VALUE(type, valbuf)",
@@ -1073,13 +1086,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "USE_STRUCT_CONVENTION(gcc_p, value_type)",
                       XSTRING (USE_STRUCT_CONVENTION (gcc_p, value_type)));
 #endif
-#ifdef FRAME_INIT_SAVED_REGS
+#if defined (FRAME_INIT_SAVED_REGS) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "FRAME_INIT_SAVED_REGS(frame)",
                       XSTRING (FRAME_INIT_SAVED_REGS (frame)));
 #endif
-#ifdef INIT_EXTRA_FRAME_INFO
+#if defined (INIT_EXTRA_FRAME_INFO) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
@@ -1131,7 +1146,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: FUNCTION_START_OFFSET # %s\n",
                       XSTRING (FUNCTION_START_OFFSET));
 #endif
-#ifdef REMOTE_TRANSLATE_XFER_ADDRESS
+#if defined (REMOTE_TRANSLATE_XFER_ADDRESS) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "REMOTE_TRANSLATE_XFER_ADDRESS(gdb_addr, gdb_len, rem_addr, rem_len)",
@@ -1202,7 +1218,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "REG_STRUCT_HAS_ADDR(gcc_p, type)",
                       XSTRING (REG_STRUCT_HAS_ADDR (gcc_p, type)));
 #endif
-#ifdef SAVE_DUMMY_FRAME_TOS
+#if defined (SAVE_DUMMY_FRAME_TOS) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
                       "SAVE_DUMMY_FRAME_TOS(sp)",

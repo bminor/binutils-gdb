@@ -1228,7 +1228,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 EOF
 function_list | while do_read
 do
-    echo "#ifdef ${macro}"
+    if [ ${returntype} == "void" ]
+    then
+	echo "#if defined (${macro}) && GDB_MULTI_ARCH"
+	echo "  /* Macro might contain \`[{}]' when not multi-arch */"
+    else
+	echo "#ifdef ${macro}"
+    fi
     if class_is_function_p
     then
 	echo "  fprintf_unfiltered (file,"

@@ -1,3 +1,8 @@
+Mon Jun 12 10:21:24 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (gdbarch_dump): When non multi-arch skip macros that
+ 	return void.
+
 Sun Jun 11 12:06:21 2000  Christopher Faylor <cgf@cygnus.com>
 
 	* exec.c (exec_file_attach): Add .exe extension when __CYGWIN__.
