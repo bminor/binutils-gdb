@@ -1,3 +1,8 @@
+2002-11-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-hooks.c (tui_init_hook): Don't enable the TUI if a specific
+	interpreter is installed.
+
 2002-11-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
