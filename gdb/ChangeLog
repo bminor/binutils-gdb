@@ -1,3 +1,13 @@
+Mon Nov 29 16:48:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	gcc -Wall -O lint:
+	* mips-tdep.c (heuristic_proc_desc): Initialize reg30 to avoid
+	warning.  Unnest comment.
+	(init_extra_frame_info): Remove unused variable mask.
+	(MASK): Fully parenthesize.
+	(mips_push_dummy_frame): Remove unused variable val.
+	(mips_skip_prologue): Remove unused variables f and b.
+
 Mon Nov 29 12:23:25 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c (parse_symbol, parse_partial_symbols):  Do not create
