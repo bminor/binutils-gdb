@@ -7774,7 +7774,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
   bfd *dynobj;
   asection *s;
   boolean reltext;
-  struct mips_got_info *g;
+  struct mips_got_info *g = NULL;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -8044,7 +8044,8 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
       if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_UNREFEXTNO, 0))
 	return false;
 
-      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_GOTSYM, 0))
+      if (g != NULL && g->global_gotsym != NULL
+	  && ! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_GOTSYM, 0))
 	return false;
 
       if (IRIX_COMPAT (dynobj) == ict_irix5
@@ -8459,10 +8460,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 	      break;
 
 	    case DT_MIPS_GOTSYM:
-	      if (g->global_gotsym != NULL)
-		dyn.d_un.d_val = g->global_gotsym->dynindx;
-	      else
-		dyn.d_un.d_val = 0;
+	      dyn.d_un.d_val = g->global_gotsym->dynindx;
 	      break;
 
 	    case DT_MIPS_HIPAGENO:
