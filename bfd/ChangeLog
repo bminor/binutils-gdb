@@ -6,6 +6,10 @@ Fri Feb 17 12:34:36 1995  Michael Meissner  <meissner@cygnus.com>
 
 Fri Feb 17 11:45:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* hosts/sysv4.h: Include <unistd.h>, <stdlib.h>, and <time.h>.
+	Only define SEEK_SET and SEEK_CUR if they are not already defined.
+	Remove all external function declarations.
+
 	* syms.c (bfd_decode_symclass): Return 'W' for a weak symbol.
 
 	* coffgen.c (coff_real_object_p): Set start address and flags

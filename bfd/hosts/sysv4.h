@@ -11,12 +11,19 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
 #ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
+#ifndef SEEK_SET
 #define SEEK_SET 0
+#endif
+#ifndef SEEK_CUR
 #define SEEK_CUR 1
+#endif
 
 #define POSIX_UTIME
 
@@ -26,31 +33,5 @@
    HAVE_PROCFS in BFD but not GDB.  */
 
 #define HAVE_PROCFS	/* This host has /proc support */
-
-extern void	abort	PARAMS ((void));
-extern int	close	PARAMS ((int));
-extern void	exit	PARAMS ((int));
-extern int	fclose	PARAMS ((FILE*));
-extern void	free	PARAMS ((PTR));
-extern int	fseek	PARAMS ((FILE*, long, int));
-extern int	getgid	PARAMS (());
-extern int	getuid	PARAMS (());
-extern PTR	malloc	PARAMS ((unsigned));
-extern void	perror	PARAMS ((CONST char *));
-extern PTR	realloc	PARAMS ((PTR, unsigned));
-
-extern char *getenv();
-extern int chmod();
-extern int fstat();
-extern int stat();
-
-extern char *ctime();
-extern int _flsbuf();
-extern int fclose();
-extern int utimes();
-extern int vfprintf();
-extern long atol();
-extern int fputc();
-extern int unlink();
 
 #include "fopen-same.h"
