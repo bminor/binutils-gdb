@@ -1,3 +1,11 @@
+Tue Dec  1 17:45:43 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbint.texinfo: Add some info about symbol readers.
+	(CHILL_PRODUCER, etc): Comment out descriptions, not useful.
+	(IN_SOLIB_CALL_TRAMPOLINE): Rename info from IN_SOLIB_TRAMPOLINE.
+	(IN_SOLIB_RETURN_TRAMPOLINE): Describe.
+	(KERNEL_DEBUGGING, MIPSEL): No info about these, remove.
+
 Mon Nov 30 11:32:21 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbint.texinfo (FRAME_CHAIN_VALID_ALTERNATE): 
