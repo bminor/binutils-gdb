@@ -1,4 +1,4 @@
-HDEFINES=-DHOST_SYS=SUN4_SYS  -DHOST_64_BIT="long long"
+HDEFINES=-DHOST_64_BIT="long long"
 YACC=yacc -tvd
 CC=/usr/latest/bin/gcc -Wall -ansi
 #stuff for self hosting

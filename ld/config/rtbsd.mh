@@ -2,6 +2,6 @@
 # environment.  If you don't have gcc, I was able to get 'hc -Hnocpp -ma'
 # to compile most of the modules, but didn't try running anything.
 YACC = yacc -d
-HDEFINES = -DHOST_SYS=RTBSD_SYS  -DNO_VARARGS
+HDEFINES = -DNO_VARARGS
 LDFLAGS = 
 CC=gcc		# hc/pcc just can't cut it

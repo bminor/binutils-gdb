@@ -1,4 +1,3 @@
-CDEFINES=-DHOST_SYS=NEWSOS3_SYS
 #CC=gcc -ansi -Wall
 CC=cc
 YACC=yacc -d

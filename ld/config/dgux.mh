@@ -1,4 +1,4 @@
-HDEFINES = -DHOST_SYS=DGUX_SYS -D__using_DGUX
+HDEFINES = -D__using_DGUX
 
 CC = gcc -Wall -ansi
 YACC=yacc -tvd

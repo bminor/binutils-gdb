@@ -1,4 +1,3 @@
-HDEFINES=-DHOST_SYS=SUN4_SYS  
 YACC=yacc -tvd
 #CC=gcc -Wall -ansi
 #stuff for self hosting
