@@ -86,10 +86,10 @@ static int debug_registers_used = 0;
 #define CYGWIN_SIGNAL_STRING "cygwin: signal"
 
 #define CHECK(x)	check (x, __FILE__,__LINE__)
-#define DEBUG_EXEC(x)	if (debug_exec)		printf x
-#define DEBUG_EVENTS(x)	if (debug_events)	printf x
-#define DEBUG_MEM(x)	if (debug_memory)	printf x
-#define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf x
+#define DEBUG_EXEC(x)	if (debug_exec)		printf_unfiltered x 
+#define DEBUG_EVENTS(x)	if (debug_events)	printf_unfiltered x
+#define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
+#define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
 /* Forward declaration */
 extern struct target_ops child_ops;
@@ -785,7 +785,7 @@ info_dll_command (char *ignore, int from_tty)
   if (!so->next)
     return;
 
-  printf ("%*s  Load Address\n", -max_dll_name_len, "DLL Name");
+  printf_filtered ("%*s  Load Address\n", -max_dll_name_len, "DLL Name"); 
   while ((so = so->next) != NULL)
     printf_filtered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
 
@@ -826,7 +826,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 }
 
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
-  printf ("gdb: Target exception %s at 0x%08lx\n", x, \
+  printf_unfiltered ("gdb: Target exception %s at 0x%08lx\n", x, \
   (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress)
 
 static int
@@ -1763,9 +1763,9 @@ cygwin_pid_to_str (ptid_t ptid)
   int pid = PIDGET (ptid);
 
   if ((DWORD) pid == current_event.dwProcessId)
-    sprintf (buf, "process %d", pid);
+    xaprintf (buf, "process %d", pid);
   else
-    sprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
+    xasprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
   return buf;
 }
 
@@ -2009,7 +2009,7 @@ _initialize_check_for_gdb_ini (void)
 	{
 	  int len = strlen (oldini);
 	  char *newini = alloca (len + 1);
-	  sprintf (newini, "%.*s.gdbinit", 
+	  xasprintf (newini, "%.*s.gdbinit", 
 	    (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
 	  warning ("obsolete '%s' found. Rename to '%s'.", oldini, newini);
 	}

@@ -1,3 +1,7 @@
+2002-02-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c: Remove use of printf and sprintf functions.
+
 2002-02-08  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (arm_frame_chain_valid): Make static.
