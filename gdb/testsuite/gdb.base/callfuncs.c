@@ -237,12 +237,13 @@ long long_arg1, long_arg2;
   return ((long_arg1 == long_val1) && (long_arg2 == long_val2));
 }
 
-#ifdef PROTOTYPES
-int t_float_values (float float_arg1, float float_arg2)
-#else
+/* NOTE: THIS FUNCTION MUST NOT BE PROTOTYPED!!!!!
+   There must be one version of "t_float_values" (this one)
+   that is not prototyped, and one (if supported) that is (following).
+   That way GDB can be tested against both cases.  */
+   
 int t_float_values (float_arg1, float_arg2)
 float float_arg1, float_arg2;
-#endif
 {
   return ((float_arg1 - float_val1) < DELTA
 	  && (float_arg1 - float_val1) > -DELTA
@@ -251,13 +252,13 @@ float float_arg1, float_arg2;
 }
 
 int
-#ifdef PROTOTYPES
-t_float_values2 (float float_arg1, float float_arg2)
-#else
+#ifdef NO_PROTOTYPES
 /* In this case we are just duplicating t_float_values, but that is the
    easiest way to deal with either ANSI or non-ANSI.  */
 t_float_values2 (float_arg1, float_arg2)
      float float_arg1, float_arg2;
+#else
+t_float_values2 (float float_arg1, float float_arg2)
 #endif
 {
   return ((float_arg1 - float_val1) < DELTA

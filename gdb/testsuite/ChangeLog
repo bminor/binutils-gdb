@@ -1,5 +1,11 @@
 2001-11-07  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/callfuncs.c (t_float_values): This function must
+	_not_ be prototyped, and the following function (t_float_values2)
+	must be prototyped (if the compiler supports it), so that GDB 
+	can be tested against both cases.  Usually one case involves
+	promotion of float to double, while the other does not.
+	* gdb.base/callfwmall.c: Ditto.
 	* gdb.asm/asm-source.exp (bt ALL in foo2): Accept a backtrace that
 	includes a stack frame for "start".
 
