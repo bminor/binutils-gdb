@@ -2,12 +2,16 @@
 
 Changes in 2.10:
 
-Support for the Motorolla MCore 210 processor added.
+picoJava architecture support added.
 
-A new pseudo-op .intel_syntax has been implemented to allow gas to parse i386 assembly
-programs with intel syntax.
+Motorola MCore 210 processor support added.
+
+A new pseudo-op .intel_syntax has been implemented to allow gas to parse i386
+assembly programs with intel syntax.
 
 New pseudo-ops .func,.endfunc to aid in debugging user-written assembler code.
+
+Added -gdwarf2 option to generate DWARF 2 debugging information.
 
 Full 16-bit mode support for i386.
 

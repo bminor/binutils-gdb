@@ -32,19 +32,20 @@
 @set D30V
 @set H8/300
 @set H8/500
-@set SH
+@set HPPA
 @set I80386
 @set I960
-@set MCORE
-@set MIPS
 @set M32R
 @set M680X0
-@set Z8000
+@set MCORE
+@set MIPS
+@set PJ
+@set SH
 @set SPARC
+@set V850
 @set VAX
 @set VXWORKS
-@set HPPA
-@set V850
+@set Z8000
 
 @c Does this version of the assembler use the difference-table kluge?
 @set DIFF-TBL-KLUGE

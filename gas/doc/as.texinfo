@@ -239,6 +239,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset HPPA
 @c HPPA has no machine-dependent assembler options (yet).
 @end ifset
+@ifset PJ
+ [ -mb | -me ]
+@end ifset
 @ifset SPARC
 @c The order here is important.  See c-sparc.texi.
  [ -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite
@@ -503,6 +506,26 @@ unit coprocessor.  The default is to assume an MMU for 68020 and up.
 
 @end table
 @end ifset
+
+@ifset PJ
+The following options are available when @value{AS} is configured for
+a picoJava processor.
+
+@table @code
+
+@cindex PJ endianness
+@cindex endianness, PJ
+@cindex big endian output, PJ
+@item -mb
+Generate ``big endian'' format output.
+
+@cindex little endian output, PJ
+@item -ml
+Generate ``little endian'' format output.
+
+@end table
+@end ifset
+
 
 @ifset SPARC
 The following options are available when @code{@value{AS}} is configured
@@ -1522,6 +1545,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset I960
 @samp{#} on the i960;
+@end ifset
+@ifset PJ
+@samp{;} for picoJava;
 @end ifset
 @ifset SH
 @samp{!} for the Hitachi SH;
@@ -4844,6 +4870,9 @@ subject, see the hardware manufacturer's manual.
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
 @end ifset
+@ifset PJ
+* PJ-Dependent::                picoJava Dependent Features
+@end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
@@ -5012,6 +5041,10 @@ family.
 
 @ifset NS32K
 @include c-ns32k.texi
+@end ifset
+
+@ifset PJ
+@include c-pj.texi
 @end ifset
 
 @ifset SH

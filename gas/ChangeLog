@@ -1,3 +1,19 @@
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* config/tc-pj.c: New file, supports picoJava in ELF.
+	* config/tc-pj.h: Ditto.
+	* configure.in (pjl*, pj*): New targets.
+	* Makefile.am: Rebuild dependencies.
+	(CPU_TYPES): Add pj.
+	(TARGET_CPU_CFILES): Add config/tc-pj.c.
+	(TARGET_CPU_HFILES): Add config/tc-pj.h.
+	* doc/c-pj.texi: New file.
+	* doc/as.texinfo: Add some PJ specifics.
+	* doc/all.texi: Add PJ to the list of all architectures, sort them
+	all alphabetically.
+	* doc/Makefile.in (CPU_DOCS): Add c-pj.texi.
+	* configure, Makefile.in, doc/Makefile.in: Rebuild.
+
 1999-09-02  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/obj-multi.h: Include obj-elf.h if OBJ_MAYBE_ELF. Reformat.
