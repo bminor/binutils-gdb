@@ -1,5 +1,5 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -397,6 +397,11 @@ start_event_loop (void)
       gdb_result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
       if (gdb_result < 0)
 	break;
+
+      /* If we long-jumped out of do_one_event, we probably
+         didn't get around to resetting the prompt, which leaves
+         readline in a messed-up state.  Reset it here. */
+
       if (gdb_result == 0)
 	{
 	  /* FIXME: this should really be a call to a hook that is

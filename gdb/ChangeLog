@@ -1,3 +1,8 @@
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-loop.c (start_event_loop): Add comment.
+	Update copyright.
+
 2002-11-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* infcmd.c (default_print_registers_info): Do not call
