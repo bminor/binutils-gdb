@@ -1,3 +1,11 @@
+Thu Jul 11 10:09:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (CONFIGURE_TARGET_MODULES): Determine if the multlib
+	options have changed since the last time the subdirectory was
+	configured, and if it has, reconfigure.
+	(CLEAN_TARGET_MODULES): Delete multilib.out and tmpmulti.out, which
+	CONFIGURE_TARGET_MODULES uses to remember the old multilib options.
+
 Wed Jul 10 18:56:59 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (ALL_MODULES,CROSS_CHECK_MODULES,INSTALL_MODULES,
