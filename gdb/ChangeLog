@@ -1,3 +1,7 @@
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
+	* symtab.c (lookup_symbol_aux): Delete #if 0 hunk.
+
 2003-05-19  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_dwarf2gdb_regno_map): Fix
