@@ -31,7 +31,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
+infodir = $(datadir)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
@@ -44,6 +44,10 @@ INSTALL_DATA = $(INSTALL)
 AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
+
+# Flags that describe where you can find the termcap library.
+# This can be overridden in the host Makefile fragment file.
+TERMCAP = -ltermcap
 
 #### Host, target, and site specific Makefile fragments come in here.
 ###
@@ -139,10 +143,6 @@ LDFLAGS = $(CFLAGS)
 # Where is the "-liberty" library, containing getopt and obstack?
 LIBIBERTY_DIR = ${srcdir}/../libiberty
 LIBIBERTY = $(unsubdir)/../libiberty${subdir}/libiberty.a
-
-# Flags that describe where you can find the termcap library.
-# You may need to make other arrangements for USG.
-TERMCAP = -ltermcap
 
 # The config/mh-* file must define REGEX and REGEX1 on USG machines.
 # If your sysyem is missing alloca(), or, more likely, it's there but

@@ -301,7 +301,7 @@ FIXME
 static CORE_ADDR
 locate_base ()
 {
-  CORE_ADDR address;
+  CORE_ADDR address = 0;
 
 #ifdef sun
 
