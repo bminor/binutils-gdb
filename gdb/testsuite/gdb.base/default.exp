@@ -428,6 +428,9 @@ No executable file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
+No executable specified, use .target exec.\..*$gdb_prompt $"\
+			{ pass "run \"r\" abbreviation" }
+	    -re "Starting program:  .*
 No image loaded into target.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
@@ -455,6 +458,9 @@ You must specify a function name to run, and arguments if any"
 	    -re "Starting program:  .*
 No executable file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
+			{ pass "run" }
+	    -re "Starting program:  .*
+No executable specified, use .target exec.\..*$gdb_prompt $"\
 			{ pass "run" }
 	    -re "Starting program:  .*
 No image loaded into target.*$gdb_prompt $"\

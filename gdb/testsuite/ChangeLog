@@ -1,5 +1,10 @@
 2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
 
+	* gdb.base/default.exp: Check for win32 specific message when calling
+	"run" without executable.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
 	* gdb.base/args.exp: Expect .exe in output.
 
 2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
