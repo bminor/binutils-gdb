@@ -89,6 +89,10 @@ die horribly;
 #define LEX_QM 0
 #endif
 
+#ifndef LEX_HASH
+#define LEX_HASH 0
+#endif
+
 #ifndef LEX_DOLLAR
 /* The a29k assembler does not permits labels to start with $.  */
 #define LEX_DOLLAR 3
@@ -104,7 +108,7 @@ char lex_type[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
-  0, 0, 0, 0, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
+  0, 0, 0, LEX_HASH, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, LEX_QM,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
@@ -1789,9 +1793,11 @@ s_globl (ignore)
       name = input_line_pointer;
       c = get_symbol_end ();
       symbolP = symbol_find_or_make (name);
+      S_SET_EXTERNAL (symbolP);
+
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
-      S_SET_EXTERNAL (symbolP);
+      c = *input_line_pointer;
       if (c == ',')
 	{
 	  input_line_pointer++;

@@ -1,3 +1,20 @@
+1999-06-05  Richard Henderson  <rth@cygnus.com>
+
+	* dwarf2dbg.c (*): Convert to K&R + prototypes.
+	(dwarf2_gen_line_info): Kill unused variables.
+	(dwarf2_finish): Likewise.
+	(dwarf2_where): Likewise.
+	(dwarf2_directive_file): If we've only got a string,
+	hand off to s_app_file.
+	* ecoff.c: Move the include of ecoff.h.
+	* symbols.h (S_IS_FUNCTION): Prototype.
+
+	* read.c (LEX_HASH): Supply a default.
+	(lex_type): Use it.
+	(s_globl): Update `c' after skipping whitespace.
+	* read.h (LEX_END_NAME, is_name_ender): New.
+	* expr.c (get_symbol_end): Respect it.
+
 1999-06-04  Mark Klein <mklein@dis.com>
 
 	* config/tc-hppa.c (md_begin): Convert local symbol dummy_symbol

@@ -1863,9 +1863,13 @@ get_symbol_end ()
   /* We accept \001 in a name in case this is being called with a
      constructed string.  */
   if (is_name_beginner (c = *input_line_pointer++) || c == '\001')
-    while (is_part_of_name (c = *input_line_pointer++)
-	   || c == '\001')
-      ;
+    {
+      while (is_part_of_name (c = *input_line_pointer++)
+	     || c == '\001')
+	;
+      if (is_name_ender (c))
+	c = *input_line_pointer++;
+    }
   *--input_line_pointer = 0;
   return (c);
 }

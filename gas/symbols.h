@@ -84,6 +84,7 @@ extern valueT S_GET_VALUE PARAMS ((symbolS *));
 extern void S_SET_VALUE PARAMS ((symbolS *, valueT));
 
 #ifdef BFD_ASSEMBLER
+extern int S_IS_FUNCTION PARAMS ((symbolS *));
 extern int S_IS_EXTERNAL PARAMS ((symbolS *));
 extern int S_IS_WEAK PARAMS ((symbolS *));
 extern int S_IS_COMMON PARAMS ((symbolS *));

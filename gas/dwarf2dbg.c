@@ -146,12 +146,27 @@ ls =
     },
   };
 
+
+/* Function prototypes: */
+static void out_uleb128 PARAMS ((bfd_vma));
+static void out_sleb128 PARAMS ((bfd_signed_vma));
+static void gen_addr_line PARAMS ((int, bfd_vma));
+static void reset_state_machine PARAMS ((void));
+static void out_set_addr PARAMS ((bfd_vma));
+static void out_end_sequence PARAMS ((void));
+static int get_filenum PARAMS ((int, char *));
+static void gen_dir_list PARAMS ((void));
+static void gen_file_list PARAMS ((void));
+static void print_stats PARAMS ((unsigned long));
+
+
 #define out_byte(byte)	FRAG_APPEND_1_CHAR(byte)
 #define out_opcode(opc)	(out_byte ((opc)), ++ls.opcode_hist[(opc) & 0xff])
 
 /* Output an unsigned "little-endian base 128" number.  */
 static void
-out_uleb128 (bfd_vma value)
+out_uleb128 (value)
+     bfd_vma value;
 {
   unsigned char byte, more = 0x80;
 
@@ -168,7 +183,8 @@ out_uleb128 (bfd_vma value)
 
 /* Output a signed "little-endian base 128" number.  */
 static void
-out_sleb128 (bfd_signed_vma value)
+out_sleb128 (value)
+     bfd_signed_vma value;
 {
   unsigned char byte, more = 0x80;
 
@@ -188,7 +204,9 @@ out_sleb128 (bfd_signed_vma value)
    Note that the line skip is signed, whereas the address skip is
    unsigned.  */
 static void
-gen_addr_line (int line_delta, bfd_vma addr_delta)
+gen_addr_line (line_delta, addr_delta)
+     int line_delta;
+     bfd_vma addr_delta;
 {
   unsigned int tmp, opcode;
 
@@ -231,7 +249,7 @@ gen_addr_line (int line_delta, bfd_vma addr_delta)
 }
 
 static void
-reset_state_machine (void)
+reset_state_machine ()
 {
   static const struct dwarf2_sm initial_state = { INITIAL_STATE };
 
@@ -240,7 +258,8 @@ reset_state_machine (void)
 
 /* Set an absolute address (may results in a relocation entry): */
 static void
-out_set_addr (bfd_vma addr)
+out_set_addr (addr)
+     bfd_vma addr;
 {
   subsegT saved_subseg;
   segT saved_seg;
@@ -268,7 +287,7 @@ out_set_addr (bfd_vma addr)
 /* Emit DW_LNS_end_sequence and reset state machine.  Does not
    preserve the current segment/sub-segment!  */
 static void
-out_end_sequence (void)
+out_end_sequence ()
 {
   bfd_vma addr, delta;
 
@@ -308,7 +327,9 @@ out_end_sequence (void)
    precedence.  If the filename cannot be found, it is added to the
    filetable the filenumber for the new entry is returned.  */
 static int
-get_filenum (int filenum, char *file)
+get_filenum (filenum, file)
+     int filenum;
+     char *file;
 {
   int i, last = filenum - 1;
   char char0 = file[0];
@@ -344,16 +365,17 @@ get_filenum (int filenum, char *file)
 }
 
 void
-dwarf2_gen_line_info (bfd_vma addr, struct dwarf2_line_info *l)
+dwarf2_gen_line_info (addr, l)
+     bfd_vma addr;
+     struct dwarf2_line_info *l;
 {
   unsigned int filenum = l->filenum;
   unsigned int any_output = 0;
   subsegT saved_subseg;
   segT saved_seg;
-  char *frag;
 
   if (flag_debug)
-    fprintf (stderr, "line: addr %llx file `%s' line %u col %u flags %lx\n",
+    fprintf (stderr, "line: addr %llx file `%s' line %u col %u flags %x\n",
 	     (long long) addr, l->filename, l->line, l->column, l->flags);
 
   if (filenum > 0 && !l->filename)
@@ -452,7 +474,7 @@ dwarf2_gen_line_info (bfd_vma addr, struct dwarf2_line_info *l)
 }
 
 static void
-gen_dir_list (void)
+gen_dir_list ()
 {
   char *str, *slash, *dir_list, *dp, *cp;
   int i, j, num_dirs;
@@ -492,7 +514,7 @@ gen_dir_list (void)
 }
 
 static void
-gen_file_list (void)
+gen_file_list ()
 {
   size_t size;
   char *cp;
@@ -511,8 +533,9 @@ gen_file_list (void)
   out_byte (0);		/* terminate filename list */
 }
 
-void
-print_stats (unsigned long total_size)
+static void
+print_stats (total_size)
+     unsigned long total_size;
 {
   static const char *opc_name[] =
     {
@@ -554,10 +577,10 @@ print_stats (unsigned long total_size)
 }
 
 void
-dwarf2_finish (void)
+dwarf2_finish ()
 {
-  bfd_vma addr, body_size, total_size, prolog_size;
-  subsegT saved_subseg, line_prolog;
+  bfd_vma body_size, total_size, prolog_size;
+  subsegT saved_subseg;
   segT saved_seg;
   char *cp;
 
@@ -614,9 +637,18 @@ dwarf2_finish (void)
 }
 
 void
-dwarf2_directive_file (int dummy)
+dwarf2_directive_file (dummy)
+     int dummy;
 {
   int len;
+
+  /* Continue to accept a bare string and pass it off.  */
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '"')
+    {
+      s_app_file (0);
+      return;
+    }
 
   ls.any_dwarf2_directives = 1;
 
@@ -632,7 +664,8 @@ dwarf2_directive_file (int dummy)
 }
 
 void
-dwarf2_directive_loc (int dummy)
+dwarf2_directive_loc (dummy)
+     int dummy;
 {
   ls.any_dwarf2_directives = 1;
 
@@ -652,14 +685,13 @@ dwarf2_directive_loc (int dummy)
 }
 
 void
-dwarf2_where (struct dwarf2_line_info *line)
+dwarf2_where (line)
+     struct dwarf2_line_info *line;
 {
   if (ls.any_dwarf2_directives)
     *line = ls.current;
   else
     {
-      char *filename;
-
       as_where (&line->filename, &line->line);
       line->filenum = 0;
       line->column = 0;

@@ -28,11 +28,12 @@
    ECOFF debugging information (e.g., MIPS ECOFF, MIPS ELF, Alpha
    ECOFF).  */
 
+#include "ecoff.h"
+
 #ifdef ECOFF_DEBUGGING
 
 #include "coff/internal.h"
 #include "coff/symconst.h"
-#include "ecoff.h"
 #include "aout/stab_gnu.h"
 
 #include <ctype.h>
