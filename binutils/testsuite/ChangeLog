@@ -1,7 +1,7 @@
 Wed Nov  1 15:09:57 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* binutils-all/objcopy.exp: Add setup_xfails for
-	m68*-motorola-sysv3* and m88*-motorola-sysv3*.
+	m68*-motorola-sysv* and m88*-motorola-sysv*.
 
 Wed Oct  4 14:38:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
