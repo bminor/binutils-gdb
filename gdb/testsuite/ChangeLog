@@ -1,3 +1,12 @@
+2004-07-26  Nick Clifton  <nickc@redhat.com>
+
+	* gdb.asm/asm-source.exp (debug-flags): New variable.  If a known
+	good default value for a specific architecture is available then
+	set it to that value.  Otherwise default to the -gstabs switch.
+	Remove the -g... switches from the asm-flags variable.  Allow the
+	target board info to override the value if it wants to.  Pass the
+	switch on the assembler command line.
+
 2004-07-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-prologue.exp: Add testcase for PR backtrace/1718.
