@@ -28,17 +28,55 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "m88k-bcs.h"
 #include "libcoff.h"
 
+/* Provided the symbol, returns the value reffed */
+#define HOWTO_PREPARE(relocation, symbol) 	\
+  {						\
+  if (symbol != (asymbol *)NULL) {		\
+    if (symbol->flags & BSF_FORT_COMM) {	\
+      relocation = 0;				\
+    }						\
+    else {					\
+      relocation = symbol->value;		\
+    }						\
+  }						\
+  if (symbol->section != (asection *)NULL) {	\
+    relocation += symbol->section->output_section->vma +	\
+      symbol->section->output_offset;		\
+  }						\
+}			
+ 
+
+
+static bfd_reloc_status_enum_type 
+DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data, input_section),
+bfd *abfd AND
+arelent *reloc_entry AND
+asymbol *symbol_in AND
+unsigned char *data AND
+asection *ignore_input_section)
+{
+  long relocation;
+  bfd_vma addr = reloc_entry->address;
+  long x = bfd_getshort(abfd, (bfd_byte *)data + addr);
+
+  HOWTO_PREPARE(relocation, symbol_in);
+
+  x = (x + relocation + reloc_entry->addend) >> 16;
+
+  bfd_putshort(abfd, x, (bfd_byte *)data + addr);
+  return bfd_reloc_ok;
+}
+
 
 
 static reloc_howto_type howto_table[] = 
 {
-/* 	type 	rtshift size	bitsize	pc_rel	bitpos abs ovff sf  name partial inplace mask*/ 
-	R_PCR16L, 2,	1, 	16, 	true,	0, false, true, 0,"PCR16L", false, 0x0000ffff,0x0000ffff,
-	R_PCR26L, 2,	2,	26,	true,	0, false, true, 0,"PCR26L", false, 0x03ffffff,0x03ffffff,
-	R_VRT16, 0,	1,	16,	false,	0, false, true, 0,"VRT16", false, 0x0000ffff,0x0000ffff,
-	R_HVRT16,16,	1,	16,	false,	0, false, true, 0,"HVRT16", false, 0x0000ffff,0x0000ffff,
-	R_LVRT16, 0,	1,	16,	false,	0, false, true, 0,"LVRT16", false, 0x0000ffff,0x0000ffff,
-	R_VRT32,  0,	2,	32,	false,	0, false, true, 0,"VRT32", false, 0xffffffff,0xffffffff,
+  HOWTO(R_PCR16L,02,1,16,true, 0,false,true,0,"PCR16L",false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_PCR26L,02,2,16,true, 0,false,true,0,"PCR26L",false,0x03ffffff,0x03ffffff,true),
+  HOWTO(R_VRT16, 00,1,16,false,0,false,true,0,"VRT16", false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_HVRT16,16,1,16,false,0,false,true,howto_hvrt16,"HVRT16",false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_LVRT16,00,1,16,false,0,false,true,0,"LVRT16",false,0x0000ffff,0x0000ffff,true),
+  HOWTO(R_VRT32, 00,2,32,false,0,false,true,0,"VRT32", false,0xffffffff,0xffffffff,true),
 };
 
 
@@ -67,7 +105,7 @@ bfd_target m88k_bcs_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
+  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */

@@ -421,12 +421,11 @@ CONST      char *section_name = symbol->section == (asection *)NULL ?
 */
 static reloc_howto_type howto_table[]= 
 {
-/* T rs size bsz pcrel bitpos abs ovr sf name partial inplace mask */
 
-{  0, 0,  1,   16, false,0,   true,true,0,"abs16",true,0x0000ffff, 0x0000ffff},
-{  0, 0,  2,   32, false,0,   true,true,0,"abs32",true,0xffffffff, 0xffffffff},
-{  0, 0,  1,   16, true,0,   true,true,0,"pcrel16",true,0x0000ffff, 0x0000ffff},
-{  0, 0,  2,   32, true,0,   true,true,0,"pcrel32",true,0xffffffff, 0xffffffff}
+HOWTO(  0, 0,  1,   16, false,0,   true,true,0,"abs16",true,0x0000ffff, 0x0000ffff,false),
+HOWTO(  0, 0,  2,   32, false,0,   true,true,0,"abs32",true,0xffffffff, 0xffffffff,false),
+HOWTO(  0, 0,  1,   16, true,0,   true,true,0,"pcrel16",true,0x0000ffff, 0x0000ffff,false),
+HOWTO(  0, 0,  2,   32, true,0,   true,true,0,"pcrel32",true,0xffffffff, 0xffffffff,false)
 };
 
 /* Read in all the section data and relocation stuff too */

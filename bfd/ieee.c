@@ -314,10 +314,10 @@ typedef struct
 
 static 
 reloc_howto_type abs32_howto 
- = {1,0,2,32,0,0,0,true,0,"abs32",false,0xffffffff, 0xffffffff};
+ = HOWTO(1,0,2,32,0,0,0,true,0,"abs32",false,0xffffffff, 0xffffffff,false);
 static
 reloc_howto_type abs16_howto 
- = {1,0,1,16,0,0,0,true,0,"abs16",false,0x0000ffff, 0x0000ffff};
+ = HOWTO(1,0,1,16,0,0,0,true,0,"abs16",false,0x0000ffff, 0x0000ffff,false);
 
 static ieee_symbol_index_type NOSYMBOL = {  0, 0};
 

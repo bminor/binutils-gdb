@@ -53,7 +53,10 @@ struct arch_print {
 	{bfd_arch_convex,	"convex",	prt_num_mach,	scan_num_mach},
 	{bfd_arch_m88k,		"m88k",		prt_num_mach,	scan_num_mach},
 	{bfd_arch_pyramid,	"pyramid",	prt_num_mach,	scan_num_mach},
-	{bfd_arch_unknown,	(char *)0,	prt_num_mach,	scan_num_mach},
+	{bfd_arch_h8_300,       "H8/300",       prt_num_mach,   scan_num_mach},
+	{bfd_arch_unknown,	(char *)0,	prt_num_mach,   scan_num_mach},
+
+
 };
 
 /* Return a printable string representing the architecture and machine
@@ -92,10 +95,10 @@ prt_num_mach (ap, machine)
    combination.  */
 
 boolean
-bfd_scan_arch_mach (string, archp, machinep)
-     char *string;
-     enum bfd_architecture *archp;
-     unsigned long *machinep;
+DEFUN(bfd_scan_arch_mach,(string, archp, machinep),
+      CONST char *string AND
+      enum bfd_architecture *archp AND
+      unsigned long *machinep)
 {
   struct arch_print *ap;
   int len;

@@ -760,11 +760,22 @@ bfd *output_bfd;
       {
 	/*
 	  Anything which started out as pc relative should end up that
-	  way too 
+	  way too. 
+
+	  There are two ways we can see a pcrel instruction. Sometimes
+	  the pcrel displacement has been partially calculated, it
+	  includes the distance from the start of the section to the
+	  instruction in it (eg sun3), and sometimes the field is
+	  totally blank - eg m88kbcs.
 	  */
 
+	
 	relocation -= 
 	  output_base +   input_section->output_offset;
+
+	if (howto->pcrel_offset == true) {
+	  relocation -= reloc_entry->address;
+	}
 
       }
 

@@ -24,11 +24,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "libbfd.h"
 #include "obstack.h"
+#include "intel-coff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
 
 
-#include "intel-coff.h"
+
 
 #define CALLS	 0x66003800	/* Template for 'calls' instruction	*/
 #define BAL	 0x0b000000	/* Template for 'bal' instruction	*/

@@ -234,6 +234,10 @@ DEFUN(coff_new_section_hook,(abfd_ignore, section_ignore),
       bfd            *abfd_ignore AND
       asection       *section_ignore)
 {
+#ifdef MC88MAGIC
+  /* Align to at least 16 bytes */
+  section_ignore->alignment_power = 4;
+#endif
   return true;
 }
 /* actually it makes itself and its children from the file headers */
@@ -309,7 +313,6 @@ DEFUN(coff_mkobject,(abfd),
     (coff_data_type*)bfd_alloc(abfd,sizeof(coff_data_type));
   coff = coff_data(abfd);
   coff->relocbase = 0;
-  coff->hdr   = (AOUTHDR*) bfd_alloc(abfd, sizeof(AOUTHDR));
   return true;
 
 }
@@ -433,10 +436,10 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
     abfd->flags |= HAS_SYMS;
 
   coff->sym_filepos = filehdr->f_symptr;
-  swap_aouthdr(abfd, coff->hdr);
+  swap_aouthdr(abfd, &coff->hdr);
 
   coff->symbols = (coff_symbol_type *) NULL;
-  bfd_get_start_address(abfd) = opthdr ? exec_hdr(abfd)->entry : 0;
+  bfd_get_start_address(abfd) = opthdr ? exec_hdr(abfd).entry : 0;
 
   return abfd->xvec;
  fail:
@@ -1199,8 +1202,14 @@ coff_compute_section_file_positions(abfd)
 
     sofar += abfd->section_count * SCNHSZ;
 
-    for (current = abfd->sections; current != NULL; current = current->next) {
+    for (current = abfd->sections; current != NULL; current =
+	 current->next) {
+#ifdef MC88MAGIC
+      sofar =   current->filepos = ALIGN(sofar, 1<<
+					 current->alignment_power);
+#else
 	current->filepos = sofar;
+#endif
 	/* Only add sections which have contents */
 	if (current->flags & SEC_HAS_CONTENTS)
 	    sofar += current->size;
@@ -1232,28 +1241,35 @@ coff_write_object_contents(abfd)
   asection       *data_sec = NULL;
   asection       *bss_sec = NULL;
   unsigned        magic,
+  
   flags;
+
+  struct icofdata *coff = obj_icof(abfd);
+
+
   bfd_error = system_call_error;
 
 
   if(abfd->output_has_begun == false) {
     coff_compute_section_file_positions(abfd);
   }
-  scn_base = (file_ptr) (sizeof(struct filehdr)
-			 + ((abfd->flags & EXEC_P) ? sizeof(AOUTHDR) : 0));
 
+  if (abfd->sections != (asection *)NULL) {
+    scn_base = abfd->sections->filepos;
+  }
+  else {
+    scn_base = 0;
+  }
   if (bfd_seek(abfd, scn_base, SEEK_SET) != 0)
     return false;
   reloc_base = obj_relocbase(abfd);
 
 
-      
-
 
   /*
-     Make a pass through the symbol table to count line number entries and
-     put them into the correct asections
-     */
+    Make a pass through the symbol table to count line number entries and
+    put them into the correct asections
+    */
   coff_count_linenumbers(abfd);
   data_base = scn_base;
   /* Work out the size of the reloc and linno areas */
@@ -1294,81 +1310,81 @@ coff_write_object_contents(abfd)
 	   (file_ptr) ((abfd->flags & EXEC_P) ?
 		       (FILHSZ + AOUTSZ) : FILHSZ),
 	   SEEK_SET);
-  {
+    {
 #if 0
-    unsigned int    pad = abfd->flags & D_PAGED ? data_base : 0;
+      unsigned int    pad = abfd->flags & D_PAGED ? data_base : 0;
 #endif
-    unsigned int    pad = 0;
-    for (current = abfd->sections; current != NULL; current = current->next) {
-      SCNHDR          section;
-      strncpy(&(section.s_name[0]), current->name, 8);
-      section.s_vaddr = current->vma + pad;
-      section.s_paddr = current->vma + pad;
-      section.s_size = current->size - pad;
-      /*
-	 If this section has no size or is unloadable then the scnptr
-	 will be 0 too
-	 */
-      if (current->size - pad == 0 ||
-	  (current->flags & SEC_LOAD) == 0) {
-	section.s_scnptr = 0;
+      unsigned int    pad = 0;
+      for (current = abfd->sections; current != NULL; current = current->next) {
+	SCNHDR          section;
+	strncpy(&(section.s_name[0]), current->name, 8);
+	section.s_vaddr = current->vma + pad;
+	section.s_paddr = current->vma + pad;
+	section.s_size = current->size - pad;
+	/*
+	  If this section has no size or is unloadable then the scnptr
+	  will be 0 too
+	  */
+	if (current->size - pad == 0 ||
+	    (current->flags & SEC_LOAD) == 0) {
+	  section.s_scnptr = 0;
 
-      }
-      else {
-	section.s_scnptr = current->filepos;
-      }
-      section.s_relptr = current->rel_filepos;
-      section.s_lnnoptr = current->line_filepos;
-      section.s_nreloc = current->reloc_count;
-      section.s_nlnno = current->lineno_count;
-      if (current->reloc_count != 0)
-	hasrelocs = true;
-      if (current->lineno_count != 0)
-	haslinno = true;
-
-      if (!strcmp(current->name, _TEXT)) {
-	text_sec = current;
-	section.s_flags = STYP_TEXT; /* kind stupid optimisation */
-      }
-      else {
-
-	if (!strcmp(current->name, _DATA)) {
-	  data_sec = current;
-	  section.s_flags = STYP_DATA; /* kind stupid
-					  optimisation */
 	}
-	else if (!strcmp(current->name, _BSS)) {
-	  bss_sec = current;
-	  section.s_flags = STYP_BSS; /* kind stupid optimisation */
+	else {
+	  section.s_scnptr = current->filepos;
 	}
-      }
+	section.s_relptr = current->rel_filepos;
+	section.s_lnnoptr = current->line_filepos;
+	section.s_nreloc = current->reloc_count;
+	section.s_nlnno = current->lineno_count;
+	if (current->reloc_count != 0)
+	  hasrelocs = true;
+	if (current->lineno_count != 0)
+	  haslinno = true;
+
+	if (!strcmp(current->name, _TEXT)) {
+	  text_sec = current;
+	  section.s_flags = STYP_TEXT; /* kind stupid optimisation */
+	}
+	else {
+
+	  if (!strcmp(current->name, _DATA)) {
+	    data_sec = current;
+	    section.s_flags = STYP_DATA; /* kind stupid
+					    optimisation */
+	  }
+	  else if (!strcmp(current->name, _BSS)) {
+	    bss_sec = current;
+	    section.s_flags = STYP_BSS; /* kind stupid optimisation */
+	  }
+	}
 
 
 #ifdef I960
-      section.s_align = (current->alignment_power
-			 ? 1 << current->alignment_power
-			 : 0);
+	section.s_align = (current->alignment_power
+			   ? 1 << current->alignment_power
+			   : 0);
 
 #endif
-      swap_scnhdr(abfd, &section);
-      bfd_write((PTR) (&section), 1, SCNHSZ, abfd);
-      pad = 0;
-    }
+	swap_scnhdr(abfd, &section);
+	bfd_write((PTR) (&section), 1, SCNHSZ, abfd);
+	pad = 0;
+      }
 
-  }
+    }
   /* OK, now set up the filehdr... */
 
   bfd_h_put_x(abfd, abfd->section_count, &file_header.f_nscns);
   /*
-     We will NOT put a fucking timestamp in the header here. Every time you
-     put it back, I will come in and take it out again. I'm sorry. This
-     field does not belong here.  We fill it with a 0 so it compares the
-     same but is not a reasonable time. -- gnu@cygnus.com
-     */
+    We will NOT put a fucking timestamp in the header here. Every time you
+    put it back, I will come in and take it out again. I'm sorry. This
+    field does not belong here.  We fill it with a 0 so it compares the
+    same but is not a reasonable time. -- gnu@cygnus.com
+    */
   /*
-     Well, I like it, so I'm conditionally compiling it in.
-     steve@cygnus.com
-     */
+    Well, I like it, so I'm conditionally compiling it in.
+    steve@cygnus.com
+    */
 #ifdef COFF_TIMESTAMP
   bfd_h_put_x(abfd, time(0), &file_header.f_timdat);
 #else
@@ -1395,12 +1411,16 @@ coff_write_object_contents(abfd)
     file_header.f_flags |= F_LSYMS;
   if (abfd->flags & EXEC_P)
     file_header.f_flags |= F_EXEC;
+#if M88
+  file_header.f_flags |= F_AR32W;
+#else
   if (!abfd->xvec->byteorder_big_p)
     file_header.f_flags |= F_AR32WR;
+#endif
   /*
-     FIXME, should do something about the other byte orders and
-     architectures.
-     */
+    FIXME, should do something about the other byte orders and
+    architectures.
+    */
 
   /* Set up architecture-dependent stuff */
 
@@ -1415,10 +1435,10 @@ coff_write_object_contents(abfd)
   /* ...and the "opt"hdr... */
 #ifdef I960
   bfd_h_put_x(abfd, (magic == I960ROMAGIC ? NMAGIC : OMAGIC),
-	      &(exec_hdr(abfd)->magic));
+	      &(exec_hdr(abfd).magic));
 #endif
 #if M88
-  exec_hdr(abfd)->magic = PAGEMAGIC3;
+  exec_hdr(abfd).magic = PAGEMAGICBCS;
 #endif
 
   /* Now should write relocs, strings, syms */
@@ -1431,21 +1451,21 @@ coff_write_object_contents(abfd)
     coff_write_relocs(abfd);
   }
   if (text_sec) {
-    bfd_h_put_x(abfd, text_sec->size, &exec_hdr(abfd)->tsize);
+    bfd_h_put_x(abfd, text_sec->size, &coff->hdr.tsize);
     bfd_h_put_x(abfd,
 		text_sec->size ? text_sec->vma : 0,
-		&exec_hdr(abfd)->text_start);
+		&exec_hdr(abfd).text_start);
   }
   if (data_sec) {
-    bfd_h_put_x(abfd, data_sec->size, &exec_hdr(abfd)->dsize);
+    bfd_h_put_x(abfd, data_sec->size, &coff->hdr.dsize);
     bfd_h_put_x(abfd,
 		data_sec->size ? data_sec->vma : 0,
-		&exec_hdr(abfd)->data_start);
+		&exec_hdr(abfd).data_start);
   }
   if (bss_sec) {
-    bfd_h_put_x(abfd, bss_sec->size, &exec_hdr(abfd)->bsize);
+    bfd_h_put_x(abfd, bss_sec->size, &coff->hdr.bsize);
   }
-  bfd_h_put_x(abfd, bfd_get_start_address(abfd), &exec_hdr(abfd)->entry);
+  bfd_h_put_x(abfd, bfd_get_start_address(abfd), &coff->hdr.entry);
 
 
   /* now write them */
@@ -1457,7 +1477,7 @@ coff_write_object_contents(abfd)
 
   if (abfd->flags & EXEC_P) {
 
-    bfd_write((PTR) exec_hdr(abfd), 1, AOUTSZ, abfd);
+    bfd_write((PTR) &coff->hdr, 1, AOUTSZ, abfd);
   }
   return true;
 }
@@ -2272,6 +2292,7 @@ coff_slurp_reloc_table(abfd, asect, symbols)
 #if M88
       if (src->r_type >= R_PCR16L && src->r_type <= R_VRT32) {
 	cache_ptr->howto = howto_table + src->r_type - R_PCR16L;
+	cache_ptr->addend += src->r_offset << 16;
       }
       else {
 	BFD_ASSERT(0);
@@ -2468,6 +2489,24 @@ return obj_sym_filepos(abfd);
 }
 #endif
 
+
+static int 
+DEFUN(coff_sizeof_headers,(abfd, reloc),
+      bfd *abfd AND
+      boolean reloc)
+{
+  size_t size;
+
+  if (reloc == false) {
+    size = sizeof(struct filehdr) + sizeof(AOUTHDR);
+  }
+  else {
+    size = sizeof(struct filehdr);
+  }
+
+  size +=  abfd->section_count * SCNHSZ;
+  return size;
+}
 
 
 #define coff_core_file_failing_command _bfd_dummy_core_file_failing_command
