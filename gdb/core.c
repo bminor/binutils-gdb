@@ -43,8 +43,6 @@ extern char registers[];
 
 void (*exec_file_display_hook) () = NULL;
 
-struct section_table *core_sections, *core_sections_end;
-
 /* Binary file diddling handle for the core file.  */
 
 bfd *core_bfd = NULL;
@@ -68,6 +66,11 @@ core_close (quitting)
 #ifdef CLEAR_SOLIB
     CLEAR_SOLIB ();
 #endif
+    if (core_ops.sections) {
+      free (core_ops.sections);
+      core_ops.sections = NULL;
+      core_ops.sections_end = NULL;
+    }
   }
 }
 
@@ -123,12 +126,13 @@ core_open (filename, from_tty)
   validate_files ();
 
   /* Find the data section */
-  if (build_section_table (core_bfd, &core_sections, &core_sections_end))
+  if (build_section_table (core_bfd, &core_ops.sections,
+			   &core_ops.sections_end))
     error ("Can't find sections in `%s': %s", bfd_get_filename(core_bfd),
 	   bfd_errmsg (bfd_error));
 
   ontop = !push_target (&core_ops);
-  make_cleanup (unpush_target, &core_ops);
+  discard_cleanups (old_chain);
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
@@ -142,9 +146,9 @@ core_open (filename, from_tty)
   if (ontop) {
     /* Fetch all registers from core file */
     target_fetch_registers (-1);
-    /* Add symbols for any shared libraries that were in use */
+    /* Add symbols and section mappings for any shared libraries */
 #ifdef SOLIB_ADD
-    SOLIB_ADD (NULL, from_tty);
+    SOLIB_ADD (NULL, from_tty, &core_ops);
 #endif
     /* Now, set up the frame cache, and print the top of stack */
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
@@ -156,8 +160,6 @@ core_open (filename, from_tty)
 "Warning: you won't be able to access this core file until you terminate\n\
 your %s; do ``info files''\n", current_target->to_longname);
   }
-
-  discard_cleanups (old_chain);
 }
 
 void
@@ -220,9 +222,7 @@ reopen_exec_file ()
 }
 
 /* If we have both a core file and an exec file,
-   print a warning if they don't go together.
-   This should really check that the core file came
-   from that exec file, but I don't know how to do it.  */
+   print a warning if they don't go together.  */
 
 void
 validate_files ()
@@ -253,16 +253,24 @@ Use the \"file\" or \"exec-file\" command.");
 }
 
 static void
-core_files_info ()
+core_files_info (t)
+  struct target_ops *t;
 {
   struct section_table *p;
 
   printf ("\tCore file `%s'.\n", bfd_get_filename(core_bfd));
 
-  for (p = core_sections; p < core_sections_end; p++)
-    printf("\tcore file  from 0x%08x to 0x%08x is %s\n",
-	p->addr, p->endaddr,
-	bfd_section_name (core_bfd, p->sec_ptr));
+  for (p = t->sections; p < t->sections_end; p++)
+    if (p->bfd == core_bfd)
+      printf("\tcore file  from 0x%08x to 0x%08x is %s\n",
+	  p->addr, p->endaddr,
+	  bfd_section_name (p->bfd, p->sec_ptr));
+    else {
+      printf("\tshared lib from 0x%08x to 0x%08x is %s in %s\n",
+	  p->addr, p->endaddr,
+	  bfd_section_name (p->bfd, p->sec_ptr),
+	  bfd_get_filename (p->bfd));
+    }
 }
 
 void
@@ -354,41 +362,6 @@ read_memory_integer (memaddr, len)
   return -1;	/* for lint */
 }
 
-/* Read or write the core file.
-
-   Args are address within core file, address within gdb address-space,
-   length, and a flag indicating whether to read or write.
-
-   Result is a length:
-
-	0:    We cannot handle this address and length.
-	> 0:  We have handled N bytes starting at this address.
-	      (If N == length, we did it all.)  We might be able
-	      to handle more bytes beyond this length, but no
-	      promises.
-	< 0:  We cannot handle this address, but if somebody
-	      else handles (-N) bytes, we can start from there.
-
-   The actual work is done by xfer_memory in exec.c, which we share
-   in common with exec_xfer_memory().  */
-
-static int
-core_xfer_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-{
-  int res;
-  res = xfer_memory (memaddr, myaddr, len, write,
-		      core_bfd, core_sections, core_sections_end);
-#ifdef SOLIB_XFER_MEMORY
-  if (res == 0)
-    res = SOLIB_XFER_MEMORY (memaddr, myaddr, len, write);
-#endif
-  return res;
-}
-
 /* Get the registers out of a core file.  This is the machine-
    independent part.  Fetch_core_registers is the machine-dependent
    part, typically implemented in the xm-file for each architecture.  */
@@ -443,13 +416,14 @@ struct target_ops core_ops = {
 	child_attach, core_detach, 0, 0, /* resume, wait */
 	get_core_registers, 
 	0, 0, 0, 0, /* store_regs, prepare_to_store, conv_to, conv_from */
-	core_xfer_memory, core_files_info,
+	xfer_memory, core_files_info,
 	0, 0, /* core_insert_breakpoint, core_remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
-	0, 0, 0, 0, 0, /* kill, load, add_syms, call fn, lookup sym */
+	0, 0, 0, 0, /* kill, load, call fn, lookup sym */
 	child_create_inferior, 0, /* mourn_inferior */
 	core_stratum, 0, /* next */
 	0, 1, 1, 1, 0,	/* all mem, mem, stack, regs, exec */
+	0, 0,			/* section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
 
