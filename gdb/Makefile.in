@@ -387,7 +387,7 @@ POSSLIBS = regex.c regex.h
 
 # Subdirectories of gdb, which should be included in their entirety in
 # gdb-xxx.tar.Z:
-TARDIRS = doc sparclite
+TARDIRS = doc gdbserver sparclite
 
 # {X,T,NAT}DEPFILES are something of a pain in that it's hard to
 # default their values the way we do for SER_HARDWIRE; in the future
@@ -803,14 +803,15 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c altos-xdep.c arm-convert.s \
-	arm-pinsn.c arm-tdep.c arm-xdep.c convex-pinsn.c convex-tdep.c \
+	arm-pinsn.c arm-tdep.c arm-xdep.c coff-solib.c convex-pinsn.c
+	convex-tdep.c \
 	convex-xdep.c core-svr4.c coredep.c corelow.c dcache.c delta68-nat.c \
 	dpx2-nat.c exec.c fork-child.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
-	i386aix-nat.c i386v4-nat.c i386lynx-nat.c i387-tdep.c i960-pinsn.c \
-	i960-tdep.c \
+	i386aix-nat.c i386v4-nat.c i386lynx-nat.c i386lynx-tdep.c i387-tdep.c \
+	i960-pinsn.c i960-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
 	mips-tdep.c news-xdep.c nindy-share/Onindy.c nindy-share/nindy.c \
@@ -987,6 +988,8 @@ ch-typeprint.o: ch-typeprint.c ch-lang.h $(defs_h) $(expression_h) \
 ch-valprint.o: ch-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(symtab_h) valprint.h $(value_h)
 
+coff-solib.o: coff-solib.c $(defs_h)
+
 coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	complaints.h $(defs_h) $(expression_h) $(gdbtypes_h) objfiles.h \
 	symfile.h $(symtab_h)
@@ -1082,6 +1085,8 @@ hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 i386-pinsn.o: i386-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 i386b-nat.o: i386b-nat.c $(defs_h) 
+i386lynx-nat.o: i386lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
+i386lynx-tdep.o: i386lynx-tdep.c $(defs_h) $(inferior_h) target.h
 i386mach-nat.o: i386mach-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
 i386v-nat.o: i386v-nat.c $(ieee-float_h) $(defs_h) $(gdbcore_h) \

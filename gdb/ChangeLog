@@ -1,3 +1,8 @@
+Sat Oct  2 16:05:22 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in, coff-solib.c, coff-solib.h, i386lynx.mt,
+	tm-i386lynx.h:  Add support for SVR3 COFF shared libraries.
+
 Sat Oct  2 15:50:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* m88k-nat.c (store_inferior_registers): When writing all registers,

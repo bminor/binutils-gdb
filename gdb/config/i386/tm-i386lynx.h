@@ -31,4 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SAVED_PC_AFTER_CALL i386lynx_saved_pc_after_call
 CORE_ADDR i386lynx_saved_pc_after_call ();
 
+#include "coff-solib.h"		/* COFF shared library support */
+
 #endif /* TM_I386LYNX_H */

@@ -63,6 +63,8 @@ ch-lang.c
 ch-lang.h
 ch-typeprint.c
 ch-valprint.c
+coff-solib.c
+coff-solib.h
 coffread.c
 command.c
 command.h
