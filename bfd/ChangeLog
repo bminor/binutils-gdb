@@ -1,11 +1,22 @@
+Wed Aug 12 14:48:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libaout.h: Remove nested comment to avoid warning.
+
+start-sanitize-armelf
+Wed Aug 12 08:10:11 1998 Catherine Moore  <clm@cygnus.com>
+
+       * elf32-arm.c (elf32_arm_final_link_relocate):  Rework
+       R_ARM_PC24 relocation.
+
+end-sanitize-armelf
 start-sanitize-armelf
 Tue Aug 11 14:42:26 1998  Catherine Moore  <clm@cygnus.com>
 
        * elf32-arm.c (elf32_arm_final_link_relocate):  Remove unused
-         argument is_local.  Add argument sym_flags.  Check sym_flags
-         in R_ARM_ABS32 case.  Include addend for R_ARM_THM_PC22 case.
-         (elf32_arm_relocate_section):  Don't pass local sym and pass
-         sym_flags to elf32_arm_final_link_relocate. 
+       argument is_local.  Add argument sym_flags.  Check sym_flags
+       in R_ARM_ABS32 case.  Include addend for R_ARM_THM_PC22 case.
+       (elf32_arm_relocate_section):  Don't pass local sym and pass
+       sym_flags to elf32_arm_final_link_relocate. 
 
 end-sanitize-armelf
 Mon Aug 10 20:38:39 1998  Richard Henderson  <rth@cygnus.com>
