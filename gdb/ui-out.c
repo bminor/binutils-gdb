@@ -497,9 +497,9 @@ ui_out_field_core_addr (struct ui_out *uiout,
      based on TARGET_ADDR_BIT.  */
   /* print_address_numeric (address, 1, local_stream); */
   if (TARGET_ADDR_BIT <= 32)
-    strcpy (addstr, local_hex_string_custom ((unsigned long) address, "08l"));
+    strcpy (addstr, local_hex_string_custom (address, "08l"));
   else
-    strcpy (addstr, local_hex_string_custom ((unsigned long) address, "016l"));
+    strcpy (addstr, local_hex_string_custom (address, "016l"));
 
   ui_out_field_string (uiout, fldname, addstr);
 }

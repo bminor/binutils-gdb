@@ -1,5 +1,10 @@
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* ui-out.c (ui_out_field_core_addr): Remove unnecessary cast in
+	calls to local_hex_string_custom().
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
 	* irix5-nat.c: Move IRIX shared library support from here...
 	* solib-irix.c: ...to here.  Revised substantially to work with
 	generic solib framework.
