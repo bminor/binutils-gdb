@@ -56,12 +56,17 @@ struct stab_link_includes_table
 };
 
 /* A linked list of totals that we have found for a particular header
-   file.  */
+   file.  A total is the sum of all the STABS characters for a particular
+   file and the number of these charactes.  It is used to identify
+   duplicate files which can be excluded.  XXX: A better method would be to
+   compute an MD5 checksum, but that is coding left for another day.
+   The bfd_vma type is used because it is a very large unsigned type.  */
 
 struct stab_link_includes_totals
 {
   struct stab_link_includes_totals *next;
-  bfd_vma total;
+  bfd_vma sum_chars;  /* Accumulated sum of STABS characters.  */
+  bfd_vma num_chars;  /* Number of STABS characters.  */
 };
 
 /* An entry in the header file hash table.  */
@@ -340,14 +345,15 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	 first number after an open parenthesis).  */
       if (type == (int) N_BINCL)
 	{
-	  bfd_vma val;
+	  bfd_vma sum_chars;
+	  bfd_vma num_chars;
 	  int nest;
 	  bfd_byte *incl_sym;
 	  struct stab_link_includes_entry *incl_entry;
 	  struct stab_link_includes_totals *t;
 	  struct stab_excl_list *ne;
 
-	  val = 0;
+	  sum_chars = num_chars = 0;
 	  nest = 0;
 	  for (incl_sym = sym + STABSIZE;
 	       incl_sym < symend;
@@ -377,7 +383,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 			 + bfd_get_32 (abfd, incl_sym + STRDXOFF));
 		  for (; *str != '\0'; str++)
 		    {
-		      val += *str;
+		      sum_chars += *str;
+		      num_chars ++;
 		      if (*str == '(')
 			{
 			  /* Skip the file number.  */
@@ -398,7 +405,7 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	    goto error_return;
 
 	  for (t = incl_entry->totals; t != NULL; t = t->next)
-	    if (t->total == val)
+	    if (t->sum_chars == sum_chars && t->num_chars == num_chars)
 	      break;
 
 	  /* Record this symbol, so that we can set the value
@@ -408,7 +415,7 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	  if (ne == NULL)
 	    goto error_return;
 	  ne->offset = sym - stabbuf;
-	  ne->val = val;
+	  ne->val = sum_chars;
 	  ne->type = (int) N_BINCL;
 	  ne->next = secinfo->excls;
 	  secinfo->excls = ne;
@@ -421,7 +428,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 		   bfd_hash_allocate (&sinfo->includes.root, sizeof *t));
 	      if (t == NULL)
 		goto error_return;
-	      t->total = val;
+	      t->sum_chars = sum_chars;
+	      t->num_chars = num_chars;
 	      t->next = incl_entry->totals;
 	      incl_entry->totals = t;
 	    }

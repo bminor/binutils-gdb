@@ -1,3 +1,13 @@
+2004-03-31  Andy Chittenden <achittenden@bluearc.com>
+
+	* stabs.c (struct stab_link_includes_totals): Rename field 'total'
+	to 'sum_chars' and add field 'num_chars'.
+	(_bfd_link_section_stabs): When computing the sum of the
+	characters in a B_INCL..B_EINCL range also keep a count of the
+	number of characters.  Use this information to help distinguish
+	between include sections when have the same sum but which
+	nevertheless are still unique.
+
 2004-03-31  Mattias Engdegård  <mattias@virtutech.se>
 
 	* stabs.c (_bfd_link_section_stabs): Do not skip N_EXCL stabs.
