@@ -36,6 +36,10 @@
 #define S_IXOTH 0001	/* Execute by others.  */
 #endif
 
+/* Counter used to initialize the bfd identifier.  */
+
+static unsigned int _bfd_id_counter = 0;
+
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
 
@@ -49,6 +53,8 @@ _bfd_new_bfd ()
   nbfd = (bfd *) bfd_zmalloc ((bfd_size_type) sizeof (bfd));
   if (nbfd == NULL)
     return NULL;
+
+  nbfd->id = _bfd_id_counter++;
 
   nbfd->memory = (PTR) objalloc_create ();
   if (nbfd->memory == NULL)

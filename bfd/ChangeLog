@@ -1,3 +1,10 @@
+2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* bfd.c (struct _bfd): Added id field.
+	* opncls.c (_bfd_id_counter): New static variable.
+	(_bfd_new_bfd): Use it.
+	* bfd-in2.h: Rebuilt.
+
 2003-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-sparc.c (bfd_elf32_new_section_hook): Define.

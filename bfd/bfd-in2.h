@@ -3536,6 +3536,9 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
 /* Extracted from bfd.c.  */
 struct _bfd
 {
+  /* A unique identifier of the BFD  */
+  unsigned int id;
+
   /* The filename the application opened the BFD with.  */
   const char *filename;
 
