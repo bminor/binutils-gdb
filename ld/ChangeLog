@@ -12,6 +12,11 @@ Tue May  7 10:56:11 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 Tue May  7 11:35:46 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* scripttempl/h8300.sc: Place ".tiny" sections right
+	after ".data" sections.
+	* scripttempl/h8300h.sc: Place ".tiny" sections into
+	the "tiny" memory region, 0xff8000 through 0xffff00.
+
 	* scripttempl/h8300.sc: Set the entry point to the value of
 	"_start" rather than the start of the text segment.
 	* scripttempl/h8300h.sc: Likewise.

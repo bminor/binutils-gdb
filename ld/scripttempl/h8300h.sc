@@ -16,8 +16,10 @@ MEMORY
 	ram    : o = 0x0100, l = 0x3fefc
 	/* The stack starts at the top of main ram.  */
 	topram : o = 0x3fffc, l = 0x4
+	/* This holds variables in the "tiny" sections.  */
+	tiny   : o = 0xff8000, l = 7f00
 	/* At the very top of the address space is the 8-bit area.  */
-	eight : o = 0xffff00, l = 0x100
+	eight  : o = 0xffff00, l = 0x100
 }
 
 SECTIONS 				
@@ -58,6 +60,9 @@ SECTIONS
 	${RELOCATING+ _stack = . ; }
 	*(.stack)
 	} ${RELOCATING+ > topram}
+.data : {
+	*(.tiny)
+	} ${RELOCATING+ > tiny}
 .eight : {
 	*(.eight)
 	} ${RELOCATING+ > eight}
