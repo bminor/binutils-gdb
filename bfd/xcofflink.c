@@ -1062,6 +1062,13 @@ xcoff_link_add_symbols (abfd, info)
 			    break;
 			}
 		      csect->lineno_count += (linp - linpstart) / linesz;
+		      /* The setting of line_filepos will only be
+                         useful if all the line number entries for a
+                         csect are contiguous; this only matters for
+                         error reporting.  */
+		      if (csect->line_filepos == 0)
+			csect->line_filepos =
+			  auxlin.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		    }
 		}
 	    }
@@ -2014,7 +2021,10 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
       || hentry == NULL
       || (hentry->root.type != bfd_link_hash_defined
 	  && hentry->root.type != bfd_link_hash_defweak))
-    xcoff_hash_table (info)->gc = false;
+    {
+      gc = false;
+      xcoff_hash_table (info)->gc = false;
+    }
   else
     {
       if (! xcoff_mark (info, hentry->root.u.def.section))
