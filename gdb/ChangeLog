@@ -1,3 +1,8 @@
+2001-07-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (go32_create_inferior): Support command lines longer
+	than 126 characters.
+
 2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* NEWS: New target 68HC11/68HC12.

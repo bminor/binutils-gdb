@@ -588,6 +588,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
   jmp_buf start_state;
   char *cmdline;
   char **env_save = environ;
+  size_t cmdlen;
 
   /* If no exec file handed to us, get it from the exec-file command -- with
      a good, common error message if none is specified.  */
@@ -622,10 +623,24 @@ go32_create_inferior (char *exec_file, char *args, char **env)
   else
     child_cmd.command = xstrdup (args);
 
-  cmdline = (char *) alloca (strlen (args) + 4);
-  cmdline[0] = strlen (args);
+  cmdlen = strlen (args);
+  /* v2loadimage passes command lines via DOS memory, so it cannot
+     possibly handle commands longer than 1MB.  */
+  if (cmdlen > 1024*1024)
+    error ("Command line too long.");
+
+  cmdline = xmalloc (cmdlen + 4);
   strcpy (cmdline + 1, args);
-  cmdline[strlen (args) + 1] = 13;
+  /* If the command-line length fits into DOS 126-char limits, use the
+     DOS command tail format; otherwise, tell v2loadimage to pass it
+     through a buffer in conventional memory.  */
+  if (cmdlen < 127)
+    {
+      cmdline[0] = strlen (args);
+      cmdline[cmdlen + 1] = 13;
+    }
+  else
+    cmdline[0] = 0xff;	/* signal v2loadimage it's a long command */
 
   environ = env;
 
@@ -636,6 +651,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
       exit (1);
     }
   environ = env_save;
+  free (cmdline);
 
   edi_init (start_state);
 #if __DJGPP_MINOR__ < 3
