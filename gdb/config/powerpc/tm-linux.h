@@ -67,4 +67,9 @@ extern int ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
    to be relocated. */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
+/* used for ppc64 only, but added here because code is common between ppc and ppc64 */
+struct link_map_offsets *ppc64_linux_svr4_fetch_link_map_offsets (void);
+extern CORE_ADDR ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr);
+
+
 #endif  /* #ifndef TM_LINUX_H */

@@ -141,6 +141,12 @@ record_minimal_symbol_and_info (char *name, CORE_ADDR address,
   if (ms_type == mst_text || ms_type == mst_file_text)
     address = SMASH_TEXT_ADDRESS (address);
 
+#ifdef DROP_TEXT_NAME_PREFIX_CHAR
+  if ((ms_type == mst_text || ms_type == mst_file_text)
+      && name[0] == DROP_TEXT_NAME_PREFIX_CHAR)
+    ++name;
+#endif /* DROP_TEXT_NAME_PREFIX_CHAR */
+
   return prim_record_minimal_symbol_and_info
     (name, address, ms_type, info, bfd_section->index, bfd_section, objfile);
 }
@@ -363,6 +369,10 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		    {
 		      if (sym->section->flags & SEC_LOAD)
 			{
+#ifdef SKIP_DATA_IN_OPD
+			  if (strcmp(sym->section->name, ".opd") == 0)
+			    continue;
+#endif /* SKIP_DATA_IN_OPD */
 			  ms_type = mst_data;
 			}
 		      else
@@ -444,6 +454,10 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		         symbol processing. */
 		      if (sym->section->flags & SEC_LOAD)
 			{
+#ifdef SKIP_DATA_IN_OPD
+			  if (strcmp(sym->section->name, ".opd") == 0)
+			    continue;
+#endif /* SKIP_DATA_IN_OPD */
 			  ms_type = mst_file_data;
 			}
 		      else

@@ -529,13 +529,13 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
-	  lr_reg = (op & 0x03e00000) | 0x90010000;
+	  lr_reg = (op & 0x03e00000);
 	  continue;
 
 	}
       else if ((op & 0xfc1fffff) == 0x7c000026)
 	{			/* mfcr Rx */
-	  cr_reg = (op & 0x03e00000) | 0x90010000;
+	  cr_reg = (op & 0x03e00000);
 	  continue;
 
 	}
@@ -561,7 +561,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	    {
 	      fdata->saved_gpr = reg;
 	      if ((op & 0xfc1f0003) == 0xf8010000)
-		op = (op >> 1) << 1;
+		op &= ~3UL;
 	      fdata->gpr_offset = SIGNED_SHORT (op) + offset;
 	    }
 	  continue;
@@ -593,19 +593,49 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (lr_reg != -1 && (op & 0xffff0000) == lr_reg)
-	{			/* st Rx,NUM(r1) 
-				   where Rx == lr */
-	  fdata->lr_offset = SIGNED_SHORT (op) + offset;
+      else if (lr_reg != -1 &&
+	       /* std Rx || stdu Rx */
+	       (((op & 0xffff0000) == (lr_reg | 0xf8010000)) ||
+		/* stw Rx */
+		((op & 0xffff0000) == (lr_reg | 0x90010000)) ||
+		/* stwu Rx */
+		((op & 0xffff0000) == (lr_reg | 0x94010000))))
+	{	/* where Rx == lr */
+	  fdata->lr_offset = offset;
 	  fdata->nosavedpc = 0;
 	  lr_reg = 0;
+	  if ((op & 0xfc000003) == 0xf8000000 ||	/* std Rx */
+	      (op & 0xfc000000) == 0x90000000)		/* stw Rx */
+	    {
+	      /* does not update r1 add d to lr_offset */
+	      fdata->lr_offset = SIGNED_SHORT (op);
+	    }
 	  continue;
 
 	}
-      else if (cr_reg != -1 && (op & 0xffff0000) == cr_reg)
-	{			/* st Rx,NUM(r1) 
+      else if (cr_reg != -1 &&
+	       /* std Rx || stdu Rx */
+	       (((op & 0xffff0000) == (cr_reg | 0xf8010000)) ||
+		/* stw Rx */
+		((op & 0xffff0000) == (cr_reg | 0x90010000)) ||
+		/* stwu Rx */
+		((op & 0xffff0000) == (cr_reg | 0x94010000))))
+	{	/* where Rx == cr */
+	  fdata->cr_offset = offset;
+	  cr_reg = 0;
+	  if ((op & 0xfc000003) == 0xf8000000 ||
+	      (op & 0xfc000000) == 0x90000000)
+	    {
+	      /* does not update r1 add d to cr_offset */
+	      fdata->cr_offset += SIGNED_SHORT (op);
+	    }
+	  continue;
+
+	}
+      else if (cr_reg != -1 && (op & 0xffff0003) == cr_reg)
+	{			/* std Rx,NUM(r1) || stdu Rx,NUM(r1) 
 				   where Rx == cr */
-	  fdata->cr_offset = SIGNED_SHORT (op) + offset;
+	  fdata->cr_offset = SIGNED_SHORT (op & ~3UL) + offset;
 	  cr_reg = 0;
 	  continue;
 
@@ -650,30 +680,41 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 				   this branch */
 	  continue;
 
-	  /* update stack pointer */
 	}
-      else if ((op & 0xffff0000) == 0x94210000 ||	/* stu r1,NUM(r1) */
-	       (op & 0xffff0003) == 0xf8210001)		/* stdu r1,NUM(r1) */
-	{
+      /* update stack pointer */
+      else if ((op & 0xfc1f0000) == 0x94010000)
+	{		/* stu rX,NUM(r1) ||  stwu rX,NUM(r1) */
 	  fdata->frameless = 0;
-	  if ((op & 0xffff0003) == 0xf8210001)
-	    op = (op >> 1) << 1;
 	  fdata->offset = SIGNED_SHORT (op);
 	  offset = fdata->offset;
 	  continue;
-
 	}
-      else if (op == 0x7c21016e)
-	{			/* stwux 1,1,0 */
+      else if ((op & 0xfc1f016a) == 0x7c01016e)
+	{			/* stwux rX,r1,rY */
+	  /* no way to figure out what r1 is going to be */
 	  fdata->frameless = 0;
 	  offset = fdata->offset;
 	  continue;
-
-	  /* Load up minimal toc pointer */
 	}
-      else if ((op >> 22) == 0x20f
+      else if ((op & 0xfc1f0003) == 0xf8010001)
+	{			/* stdu rX,NUM(r1) */
+	  fdata->frameless = 0;
+	  fdata->offset = SIGNED_SHORT (op & ~3UL);
+	  offset = fdata->offset;
+	  continue;
+	}
+      else if ((op & 0xfc1f016a) == 0x7c01016a)
+	{			/* stdux rX,r1,rY */
+	  /* no way to figure out what r1 is going to be */
+	  fdata->frameless = 0;
+	  offset = fdata->offset;
+	  continue;
+	}
+      /* Load up minimal toc pointer */
+      else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,... */
+	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,... */
 	       && !minimal_toc_loaded)
-	{			/* l r31,... or l r30,... */
+	{
 	  minimal_toc_loaded = 1;
 	  continue;
 
@@ -2456,6 +2497,44 @@ static const struct reg registers_7400[] =
   /* FIXME? Add more registers? */
 };
 
+
+/* PowerPC UISA - a PPC64 processor as viewed by user-level code. */
+/* Should be able to use the common registers_powerpc[] here, however
+   it does not define an fpscr, though both linux and aix get one from
+   ptrace(). Can only assume that there is a 32-bit core our there
+   that does not have an fpscr.  I think we can assert that all 64-bit
+   cores do. */
+static const struct reg registers_powerpc64[] =
+{
+  COMMON_UISA_REGS,
+  /* SPRs */
+  /*  66 */ R4(cr), R(lr), R(ctr), R4(xer),
+  /*  70 */ R4(fpscr), R0 /* mq? */
+};
+
+static const struct reg registers_a35[] =
+{
+  COMMON_UISA_REGS,
+  /* SPRs */
+  /*  66 */ R4(cr), R(lr), R(ctr), R4(xer),
+  /*  70 */ R4(fpscr), R0 /* mq? */,
+  /*  72 */ R(dabr), R(iabr), R4(dsisr),
+  /*  75 */ R(dar), R4(dec), R(sdr1), R(srr0), R(srr1),
+  /*  80 */ R(sprg0), R(sprg1), R(sprg2), R(sprg3),
+  /*  84 */ R64(asr), R4(ear), R4(tbl), R4(tbu),
+  /*  88 */ R(ibat0u), R(ibat0l), R(ibat1u), R(ibat1l),
+  /*  92 */ R(ibat2u), R(ibat2l), R(ibat3u), R(ibat3l),
+  /*  96 */ R(dbat0u), R(dbat0l), R(dbat1u), R(dbat1l),
+  /* 100 */ R(dbat2u), R(dbat2l), R(dbat3u), R(dbat3l),
+  /* 104 */ R(pir), R4(mmcr0),
+  /* 106..121 segment regs 0..15 */ 
+  /* 106 */ R(sr0), R(sr1), R(sr2), R(sr3),
+  /* 110 */ R(sr4), R(sr5), R(sr6), R(sr7),
+  /* 114 */ R(sr8), R(sr9), R(sr10), R(sr11),
+  /* 118 */ R(sr12), R(sr13), R(sr14), R(sr15),
+  /* 122 */ R4(pvr) /* processor version register */
+};
+
 /* Motorola e500.  */
 static const struct reg registers_e500[] =
 {
@@ -2956,6 +3035,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          descriptors).  */
       set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 	rs6000_convert_from_func_ptr_addr);
+
+      /* wordsize 8, ppc64 linux  functions */
+      if (osabi == ELFOSABI_LINUX)
+      {
+	  set_solib_svr4_fetch_link_map_offsets
+	    (gdbarch, ppc64_linux_svr4_fetch_link_map_offsets);
+	  set_gdbarch_convert_from_func_ptr_addr
+            (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
+      }
     }
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);

@@ -63,6 +63,8 @@
    offsetof(struct sigcontext_struct, handler) == 0x14 */
 #define PPC_LINUX_HANDLER_PTR_OFFSET (PPC_LINUX_SIGNAL_FRAMESIZE + 0x14)
 
+#define TDEP	gdbarch_tdep (current_gdbarch)
+	
 /* From <asm/ptrace.h>, values for PT_NIP, PT_R1, and PT_LNK */
 #define PPC_LINUX_PT_R0		0
 #define PPC_LINUX_PT_R1		1
@@ -754,4 +756,65 @@ _initialize_ppc_linux_tdep (void)
   gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_LINUX,
 			  ppc_linux_init_abi);
   add_core_fns (&ppc_linux_regset_core_fns);
+}
+
+struct link_map_offsets *
+	ppc64_linux_svr4_fetch_link_map_offsets (void)
+{
+    static struct link_map_offsets lmo;
+    static struct link_map_offsets *lmp = NULL;
+
+    if (lmp == NULL)
+    {
+	lmp = &lmo;
+
+	lmo.r_debug_size = 16;/* The actual size is xx bytes, but
+					   this is all we need.  */
+	lmo.r_map_offset = 8;
+	lmo.r_map_size   = 8; 
+	lmo.link_map_size = 40;  /* The actual size is xxx bytes, but
+					   this is all we need.  */
+	lmo.l_addr_offset = 0;
+	lmo.l_addr_size   = 8;
+	lmo.l_name_offset = 8; 
+	lmo.l_name_size   = 8;
+	lmo.l_next_offset = 24;
+	lmo.l_next_size   = 8;
+	lmo.l_prev_offset = 32;
+	lmo.l_prev_size   = 8;
+    }
+
+    return lmp;
+}
+
+
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR).
+	   Duplicate of RS6000 function, except ppc64_linux requires relocated address. */
+static CORE_ADDR
+read_memory_addr (CORE_ADDR memaddr, int len)
+{
+    return read_memory_unsigned_integer (memaddr, len);
+}
+	
+	
+CORE_ADDR
+ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
+{
+    long long my_adder;
+    struct obj_section *s;
+    CORE_ADDR retval;
+    extern struct obj_section *find_pc_section(CORE_ADDR);
+
+	/* this should be the base address that the object (containing the func_ptr_addr) is loaded at. */
+    my_adder = 0x7fe0000000; 
+
+    s = find_pc_section (my_adder + addr);
+    if (s && s->the_bfd_section->flags & SEC_CODE)
+	return addr;
+
+	  /* ADDR is in the data space, so it's a special function pointer. */
+    retval = read_memory_addr (my_adder + addr, TDEP->wordsize);
+	/*  printf("reading 0x%lx ",my_adder+addr); */
+	/*  printf("ppc64...convert_func_ptr addr:0x%lx  new:0x%lx\n",addr,retval); */
+    return retval;
 }

@@ -76,6 +76,9 @@ struct lm_info
 
 static char *solib_break_names[] =
 {
+#if defined (SOLIB_BREAK_NAME)
+  SOLIB_BREAK_NAME,
+#endif
   "r_debug_state",
   "_r_debug_state",
   "_dl_debug_state",
@@ -1015,7 +1018,7 @@ enable_break (void)
 	 the current pc (which should point at the entry point for the
 	 dynamic linker) and subtracting the offset of the entry point.  */
       if (!load_addr_found)
-	load_addr = read_pc () - tmp_bfd->start_address;
+	load_addr = read_pc () - CONVERT_FROM_FUNC_PTR_ADDR(tmp_bfd->start_address);
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */

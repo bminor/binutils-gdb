@@ -1,3 +1,52 @@
+2003-05-12  Will Schmidt <willschm@us.ibm.com>
+
+        These changes enable support of PPC64 architecture.
+	* config/powerpc/ppc64linux.mh: New file.
+	* config/powerpc/ppc64linux.mt: New file.
+	* config/powerpc/tm-ppc64linux.h: New file.
+	* ppc64-linux-tdep.c: New file.
+	* configure.host: Add clause for powerpc64-*-linux*
+	* configure.tgt: Add clause for powerpc64-*-linux*
+	* elfread.c (record_minimal_symbol_and_info): If
+	DROP_TEXT_NAME_PREFIX_CHAR is #defined, then drop a leading
+	instance of that char from the names of text symbols.
+	(elf_symtab_read): If SKIP_DATA_IN_OPD is #defined, ignore data
+	symbols in the .opd section.
+	* ppc-linux-nat.c (PTRACE_XFER_TYPE): Change the default for this
+	to 'long'.
+	(PPC_PTRACE_POKEUSR_3264, PPC_PTRACE_PEEKUSR_3264,
+	PPC_PTRACE_POKEDATA_3264, PPC_PTRACE_PEEKDATA_3264): Provide
+	default definitions for these.
+	(ARCH64): New macro.
+	(ppc_wordsize_pid): New function.
+	(kernel_u_size): Handle 64-bit case.
+	(ppc_register_u_addr): Same.
+	(fetch_register): Use the *_3264 requests when
+	debugging a 64-bit process from a 32-bit GDB.
+	(store_register): Same.
+	(GDB_MAX_ALLOCA, child_xfer_memory, udot_info): Copied from
+	infptrace.c.
+	(_initialize_ppc_linux_nat): New function, to register our copy of
+	the udot_info command.
+	* ppc-linux-tdep.c (TDEP): New macro.
+	(ppc64_linux_svr4_fetch_link_map_offsets): New function.
+	(read_memory_addr): Copied from rs6000-tdep.c.
+	(ppc64_linux_convert_from_func_ptr_addr): New function.
+	* rs6000-tdep.c (skip_prologue): Recognize more instructions for
+	saving the 'lr' and 'cr' registers; don't just pre-emptively mask
+	in the 'st' opcode as soon as we see an 'mflr' or 'mfcr' opcode.
+	Recognize more instructions for updating the stack pointer, and
+	loading the TOC pointer.
+	(registers_powerpc64, registers_a35): New register tables.
+	(rs6000_gdbarch_init): Register the 64-bit solib functions.
+	* solib-svr4.c (solib_break_names): If SOLIB_BREAK_NAME is
+	#defined, include an entry for it.
+	(enable_break): Call CONVERT_FROM_FUNC_PTR_ADDR when trying to
+	guess the linker's base address.
+	* config/powerpc/tm-linux.h
+	(ppc64_linux_svr4_fetch_link_map_offsets,
+	ppc64_linux_convert_from_func_ptr_addr): New declarations.
+
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.h (max_register_size): Delete declaration.

@@ -48,10 +48,107 @@
 #define PT_WRITE_U PTRACE_POKEUSR
 #endif
 
-/* Default the type of the ptrace transfer to int.  */
+/* Default the type of the ptrace transfer to long.  */
 #ifndef PTRACE_XFER_TYPE
-#define PTRACE_XFER_TYPE int
+#define PTRACE_XFER_TYPE long
 #endif
+
+/* Write DATA into location ADDR within the "user area" on a 64-bit
+   process from a 32-bit process. */
+#ifndef PPC_PTRACE_POKEUSR_3264
+#define PPC_PTRACE_POKEUSR_3264   0x90 
+#endif
+
+/* Read a register (specified by ADDR) out of the "user area" on a
+   64-bit process from a 32-bit process. */
+#ifndef PPC_PTRACE_PEEKUSR_3264
+#define PPC_PTRACE_PEEKUSR_3264   0x91
+#endif
+
+/* Write word at location ADDR on a 64-bit process from a 32-bit process. */
+#ifndef PPC_PTRACE_POKEDATA_3264
+#define PPC_PTRACE_POKEDATA_3264   0x92
+#endif
+
+/* Read word at location ADDR on a 64-bit process from a 32-bit
+   process. */
+#ifndef PPC_PTRACE_PEEKDATA_3264
+#define PPC_PTRACE_PEEKDATA_3264   0x94
+#endif
+
+#define ARCH64() (REGISTER_RAW_SIZE (0) == 8)
+
+/* REALLY SHAMELESS HACK:
+
+   32 bit programs can exec 64 bit programs and so forth. GDB launches
+   the inferior process by lauching ${SHELL} -c <program and args>.
+   Fortunately, we know that it only tries to get the PC so we only
+   have to hack that.. I THINK.
+
+   At this time we are not ready to unify ppc32 and ppc64 as
+   rs/6000-aix is. and there is know easy way to find out if a process
+   is running 32 or 64 bits so we have this little hack.
+
+   EVEN MORE SHAMELESS HACK: rs6000-nat.c solves this problem by
+   expecting the first few ptracex() calls to fail.
+
+*/
+#include <sys/stat.h>
+#include "bfd/elf-bfd.h"
+static int
+ppc_wordsize_pid(pid_t pid)
+{
+  static ino_t fino = 0;
+  static int last = 0;
+  struct stat sb;
+  const char fmt[] = "/proc/%u/exe";
+  FILE *file;
+  char *fname = alloca (sizeof(fmt) + 10); /* 10 digit pid.. why not */
+  Elf_Internal_Ehdr elfh;
+
+  if ((gdbarch_tdep (current_gdbarch))->wordsize == 4)
+    return 4;
+
+  sprintf (fname, fmt, pid);
+
+  if (stat(fname, &sb) == -1)
+    {
+      internal_error (__FILE__, __LINE__,
+		      "could not stat executable from /proc.");
+      return 0;
+    }
+
+  if (fino == sb.st_ino)
+      return last;
+
+  fino = sb.st_ino;
+
+  /* FIXME: could stat the file and check if inode changed. */
+  file = fopen (fname, "rb");
+  if (file == NULL)
+    {
+      internal_error (__FILE__, __LINE__,
+		      "could not open executable from /proc.");
+      return 0;
+    }
+
+  if (fread (elfh.e_ident, EI_NIDENT, 1, file) == 1)
+    {
+      if (elfh.e_ident [EI_CLASS] == ELFCLASS64)
+	last = 8;
+      else
+	last = 4;
+    }
+  else
+    {
+      last = 0;
+      internal_error (__FILE__, __LINE__,
+		      "could not read executable from /proc.");
+    }
+  fclose (file);
+  
+  return last;
+}
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -106,7 +203,15 @@ int have_ptrace_getvrregs = 1;
 int
 kernel_u_size (void)
 {
-  return (sizeof (struct user));
+  if ((gdbarch_tdep (current_gdbarch))->wordsize == sizeof (PTRACE_XFER_TYPE))
+    return (sizeof (struct user));
+  else
+    {
+      /* with a 64-bit kernel, all members of struct user go from 32
+         to 64 bit except for the u_comm character array so we can
+         double everything and subtract sizeof u_comm. */
+      return ((sizeof (struct user) * 2) - sizeof (((struct user*)0)->u_comm));
+    }
 }
 
 /* *INDENT-OFF* */
@@ -127,32 +232,33 @@ ppc_register_u_addr (int regno)
 {
   int u_addr = -1;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int wordsize = tdep->wordsize;
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
-    u_addr =  ((PT_R0 + regno) * 4);
+    u_addr =  ((PT_R0 + regno) * wordsize);
 
   /* Floating point regs: 2 slots each */
   if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
-    u_addr = ((PT_FPR0 + (regno - FP0_REGNUM) * 2) * 4);
+    u_addr = ((PT_FPR0 + (regno - FP0_REGNUM) * 2) * wordsize);
 
   /* UISA special purpose registers: 1 slot each */
   if (regno == PC_REGNUM)
-    u_addr = PT_NIP * 4;
+    u_addr = PT_NIP * wordsize;
   if (regno == tdep->ppc_lr_regnum)
-    u_addr = PT_LNK * 4;
+    u_addr = PT_LNK * wordsize;
   if (regno == tdep->ppc_cr_regnum)
-    u_addr = PT_CCR * 4;
+    u_addr = PT_CCR * wordsize;
   if (regno == tdep->ppc_xer_regnum)
-    u_addr = PT_XER * 4;
+    u_addr = PT_XER * wordsize;
   if (regno == tdep->ppc_ctr_regnum)
-    u_addr = PT_CTR * 4;
+    u_addr = PT_CTR * wordsize;
   if (regno == tdep->ppc_mq_regnum)
-    u_addr = PT_MQ * 4;
+    u_addr = PT_MQ * wordsize;
   if (regno == tdep->ppc_ps_regnum)
-    u_addr = PT_MSR * 4;
+    u_addr = PT_MSR * wordsize;
   if (regno == tdep->ppc_fpscr_regnum)
-    u_addr = PT_FPSCR * 4;
+    u_addr = PT_FPSCR * wordsize;
 
   return u_addr;
 }
@@ -206,6 +312,16 @@ fetch_register (int tid, int regno)
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
+  int wordsize = (gdbarch_tdep (current_gdbarch))->wordsize;
+
+  /* Do the easy thing for now which is to silently succeed if we are
+     attached to a 32-bit process when we are expecting 64-bits */
+  if (wordsize != ppc_wordsize_pid(tid))
+    {
+      /* supplying garbage.. but that's ok */
+      supply_register (regno, buf);
+      return;
+    }
 
   if (altivec_register_p (regno))
     {
@@ -233,8 +349,19 @@ fetch_register (int tid, int regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
-					       (PTRACE_ARG3_TYPE) regaddr, 0);
+      if (wordsize != sizeof (PTRACE_XFER_TYPE))
+	{
+	  PTRACE_XFER_TYPE reg;
+	  ptrace (PPC_PTRACE_PEEKUSR_3264, tid,
+		  (PTRACE_ARG3_TYPE) regaddr, &reg);
+	  *(PTRACE_XFER_TYPE *) & buf[i] = reg;
+	}
+      else
+      {
+	  *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
+						   (PTRACE_ARG3_TYPE) regaddr, 0);
+      }
+
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -365,6 +492,7 @@ store_register (int tid, int regno)
   register int i;
   unsigned int offset;         /* Offset of registers within the u area.  */
   char buf[MAX_REGISTER_SIZE];
+  int wordsize = (gdbarch_tdep (current_gdbarch))->wordsize;
 
   if (altivec_register_p (regno))
     {
@@ -379,8 +507,18 @@ store_register (int tid, int regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
-	      *(PTRACE_XFER_TYPE *) & buf[i]);
+      if (wordsize != sizeof (PTRACE_XFER_TYPE))
+	{
+	  PTRACE_XFER_TYPE reg;
+	  ptrace (PPC_PTRACE_POKEUSR_3264, tid, (PTRACE_ARG3_TYPE) regaddr,
+		  *(PTRACE_XFER_TYPE *) & buf[i]);
+	}
+      else
+      {
+	  ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
+		  *(PTRACE_XFER_TYPE *) & buf[i]);
+      }
+
       regaddr += sizeof (PTRACE_XFER_TYPE);
 
       if (errno == EIO 
@@ -533,4 +671,244 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
     }
   if ((regno == -1) || regno == tdep->ppc_fpscr_regnum)
     regcache_collect (tdep->ppc_fpscr_regnum, (char *) (*fpregsetp + regi));
+}
+
+
+#ifdef CHILD_XFER_MEMORY
+
+/* this is a complete rip off from infptrace.c */
+
+#ifndef GDB_MAX_ALLOCA
+#define GDB_MAX_ALLOCA 0x1000
+#endif /* GDB_MAX_ALLOCA */
+
+/* Copy LEN bytes to or from inferior's memory starting at MEMADDR to
+   debugger memory starting at MYADDR.  Copy to inferior if WRITE is
+   nonzero.  TARGET is ignored.
+
+   Returns the length copied, which is either the LEN argument or
+   zero.  This xfer function does not do partial moves, since
+   child_ops doesn't allow memory operations to cross below us in the
+   target stack anyway.  */
+
+int
+child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct mem_attrib *attrib, struct target_ops *target)
+{
+    int i;
+  /* Round starting address down to longword boundary.  */
+    CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
+  /* Round ending address up; get number of longwords that makes.  */
+    int count = ((((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
+		 / sizeof (PTRACE_XFER_TYPE));
+    int alloc = count * sizeof (PTRACE_XFER_TYPE);
+    PTRACE_XFER_TYPE *buffer;
+    struct cleanup *old_chain = NULL;
+    int wordsize = (gdbarch_tdep (current_gdbarch))->wordsize;
+    int arch64 = ARCH64();
+
+  /* Allocate buffer of that many longwords.  */
+    if (len < GDB_MAX_ALLOCA)
+    {
+	buffer = (PTRACE_XFER_TYPE *) alloca (alloc);
+    }
+    else
+    {
+	buffer = (PTRACE_XFER_TYPE *) xmalloc (alloc);
+	old_chain = make_cleanup (xfree, buffer);
+    }
+
+  /* WARNING: from kernel source: "when I and D space are separate,
+     these will need to be fixed." */
+    if (write)
+    {
+      /* Fill start and end extra bytes of buffer with existing memory
+	 data.  */
+	if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
+	{
+	  /* Need part of initial word -- fetch it.  */
+	    if (wordsize == sizeof (PTRACE_XFER_TYPE) && (!arch64))
+	    {
+		buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_ptid), 
+				    (PTRACE_ARG3_TYPE) addr, 0);
+	    }
+	    else
+	    {
+		if (arch64) {
+		    buffer[0] = ptrace (PTRACE_PEEKDATA, PIDGET (inferior_ptid), 
+					(unsigned long) addr, 0);
+		}
+		else 
+		{
+		    ptrace (PPC_PTRACE_PEEKDATA_3264, PIDGET (inferior_ptid), 
+			    (PTRACE_ARG3_TYPE) &addr, buffer);
+		}
+	    }
+	}
+	if (count > 1)		/* FIXME, avoid if even boundary.  */
+	{
+	    CORE_ADDR a64 = (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE));
+	    if (wordsize == sizeof (PTRACE_XFER_TYPE) && (!arch64))
+	    {
+		buffer[count - 1] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+					    (PTRACE_ARG3_TYPE) a64, 0);
+	    }
+	    else
+		if (arch64) {
+		    buffer[count-1] = ptrace (PTRACE_PEEKDATA, PIDGET (inferior_ptid),
+					      (PTRACE_ARG3_TYPE) &a64, 0);
+		}
+		else
+		{
+		    ptrace (PPC_PTRACE_PEEKDATA_3264, PIDGET (inferior_ptid),
+			    (PTRACE_ARG3_TYPE) &a64, &buffer[count - 1]);
+		}
+	}
+
+      /* Copy data to be written over corresponding part of buffer.  */
+	memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+		myaddr, len);
+
+      /* Write the entire buffer.  */
+	for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
+	{
+	    errno = 0;
+	    if (wordsize == sizeof (PTRACE_XFER_TYPE) && (!arch64))
+	    {
+		ptrace (PT_WRITE_D, PIDGET (inferior_ptid), 
+			(PTRACE_ARG3_TYPE) addr, buffer[i]);
+	    }
+	    else
+		if (arch64) {
+		    ptrace (PT_WRITE_D, PIDGET (inferior_ptid), 
+			    (unsigned long) addr, buffer[i]);  
+		}
+		else 
+		{
+		    ptrace (PPC_PTRACE_POKEDATA_3264, PIDGET (inferior_ptid), 
+			    (PTRACE_ARG3_TYPE) &addr, buffer[i]);
+		}
+	    if (errno)
+	    {
+		errno = 0;
+		if (wordsize == sizeof (PTRACE_XFER_TYPE) && (!arch64))
+		{
+		    ptrace (PT_WRITE_I, PIDGET (inferior_ptid), 
+			    (PTRACE_ARG3_TYPE) addr, buffer[i]);
+		}
+		else
+		    if (arch64) {
+			ptrace (PTRACE_POKEDATA, PIDGET (inferior_ptid),  
+				(PTRACE_ARG3_TYPE) addr, buffer[i]); 
+		    }
+		    else 
+		    {
+			ptrace (PPC_PTRACE_POKEDATA_3264, PIDGET (inferior_ptid), 
+				(PTRACE_ARG3_TYPE) &addr, buffer[i]);
+		    }
+	    }
+	    if (errno)
+		return 0;
+	}
+#ifdef CLEAR_INSN_CACHE
+	    CLEAR_INSN_CACHE ();
+#endif
+    }
+  else
+  {
+      /* Read all the longwords.  */
+      for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
+      {
+	  errno = 0;
+	  if (wordsize == sizeof (PTRACE_XFER_TYPE) && (!arch64))
+	  {
+	      buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+				  (PTRACE_ARG3_TYPE) addr, 0);
+	  }
+	  else
+	  {
+	      if (arch64) {
+		  buffer[i] = ptrace (PTRACE_PEEKDATA, PIDGET (inferior_ptid),
+				      (unsigned long) addr, 0);
+	      }
+	      else
+	      {
+		  ptrace (PPC_PTRACE_PEEKDATA_3264, PIDGET (inferior_ptid),
+			  (PTRACE_ARG3_TYPE) &addr, &buffer[i]);
+	      }
+	      if (errno)
+		  return 0;
+	      QUIT;
+	  }
+
+      /* Copy appropriate bytes out of the buffer.  */
+	  memcpy (myaddr,
+		  (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+		  len);
+      }
+  }
+  if (old_chain != NULL)
+    do_cleanups (old_chain);
+  return len;
+    }
+
+
+/* Did not want to add this originally since the kernel will give us a
+   lot of gargabe (and would probably fail if it wasn't for the
+   FPU's). But at least you can get the other registers in struct
+   pt_regs.  Perhaps we can get the kernels to co-operate. */
+static void
+udot_info (char *dummy1, int dummy2)
+{
+  int udot_off;			/* Offset into user struct */
+  int udot_val;			/* Value from user struct at udot_off */
+  char mess[128];		/* For messages */
+  int wordsize = (gdbarch_tdep (current_gdbarch))->wordsize;
+
+  if (!target_has_execution)
+    {
+      error ("The program is not being run.");
+    }
+
+  for (udot_off = 0; udot_off < KERNEL_U_SIZE; udot_off += sizeof (udot_val))
+    {
+      if ((udot_off % 24) == 0)
+	{
+	  if (udot_off > 0)
+	    {
+	      printf_filtered ("\n");
+	    }
+	  printf_filtered ("%04x:", udot_off);
+	}
+      if (wordsize != sizeof (PTRACE_XFER_TYPE))
+	{
+	  PTRACE_XFER_TYPE reg;
+	  /* ptrace will place contents in "data" pointer */
+	  ptrace (PPC_PTRACE_PEEKUSR_3264, PIDGET (inferior_ptid),
+		  (PTRACE_ARG3_TYPE) udot_off, &reg);
+	  udot_val = reg;
+	}
+      else
+	udot_val = ptrace (PT_READ_U, PIDGET (inferior_ptid),
+			   (PTRACE_ARG3_TYPE) udot_off, 0);
+      if (errno != 0)
+	{
+	  sprintf (mess, "\nreading user struct at offset 0x%x", udot_off);
+	  perror_with_name (mess);
+	}
+      /* Avoid using nonportable (?) "*" in print specs */
+      printf_filtered (sizeof (int) == 4 ? " 0x%08x" : " 0x%16x", udot_val);
+    }
+  printf_filtered ("\n");
+}
+#endif /* CHILD_XFER_MEMORY */
+
+#include "command.h"
+void
+_initialize_ppc_linux_nat (void)
+{
+#ifdef CHILD_XFER_MEMORY
+  add_info ("udot", udot_info,
+	    "Print contents of kernel ``struct user'' for current child.");
+#endif
 }

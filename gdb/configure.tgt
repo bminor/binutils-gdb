@@ -193,6 +193,15 @@ powerpc-*-aix*)		gdb_target=aix ;;
 powerpc-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
+powerpc64-*-linux*)	gdb_target=ppc64linux
+			###HACK -JX
+			case "${host}" in
+			powerpc-*-linux*)
+			  ## This host can treat target as native
+			  nativefile=nm-linux.h
+			  ;;
+			esac
+			;;
 powerpc-*-vxworks*)	gdb_target=vxworks ;;
 powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim
