@@ -28,7 +28,7 @@ extern int memset ();
 #endif
 
 /* #include <sys/stdtypes.h> before <stddef.h> when compiling by GCC.  */
-#include <sys/stdtypes.h>
+/* #include <sys/stdtypes.h> */
 #include <stddef.h>
 #include <ctype.h>
 #include <string.h>
