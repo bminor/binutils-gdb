@@ -1,3 +1,22 @@
+2000-05-23  J.T. Conklin  <jtc@redback.com>
+
+	* config/i386/nbsd.mt (TDEPFILES): Move solib.o from here...
+	* config/i386/nbsd.mh (NATDEPFILES): ...to here.
+	* config/m68k/nbsd.mt (TDEPFILES): Move solib.o from here...
+	* config/m68k/nbsd.mh (NATDEPFILES): ...to here.
+	* config/ns32k/nbsd.mt (TDEPFILES): Move solib.o from here...
+	* config/ns32k/nbsd.mh (NATDEPFILES): ...to here.
+
+	* config/powerpc/nbsd.mt (GDBSERVER_DEPFILES): Add low-nbsd.o.
+	* configure.tgt (powerpc-*-netbsd*): add gdbserver to configdirs.
+	* gdbserver/low-nbsd.c (initialize_arch): Define for PPC.
+	(fetch_inferior_registers): Likewise.
+	(store_inferior_registers): Likewise.
+
+	* gdbserver/low-nbsd.c (fetch_inferior_registers): Handle X86 
+	floating point registers.
+	(store_inferior_registers): Likewise.
+
 2000-05-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-nat.h, i387-nat.c: New files.
