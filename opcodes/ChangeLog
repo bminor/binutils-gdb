@@ -1,3 +1,7 @@
+2000-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* mcore-dis.c (imsk): Change mask for OC to 0xFE00.
+
 2000-10-06  Dave Brolley  <brolley@redhat.com>
 
 	* fr30-desc.h: Regenerate.
