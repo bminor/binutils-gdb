@@ -1,3 +1,7 @@
+2003-02-10  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c: Reindented.
+
 2003-02-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* interps.c (clear_interpreter_hooks): Convert function definition
