@@ -320,7 +320,7 @@ test_set "set v_short_pointer=v_short_array" "set variable *(v_short_pointer)=12
 gdb_test "set v_signed_short_pointer=v_signed_short_array" ""
 gdb_test "set variable *(v_signed_short_pointer)=123" ""
 gdb_test "set variable *(v_signed_short_pointer+1)=-456" ""
-gdb_test "print v_signed_short_array" ".\[0-9\]* =.*\{123,.*-456\}" \
+gdb_test "print v_signed_short_array" ".\[0-9\]* =.*\\{123,.*-456\\}" \
     "set variable signed short pointer"
 gdb_test "print *(v_signed_short_pointer+1)" ".\[0-9\]*.*=.*-456"
 #
@@ -331,7 +331,7 @@ gdb_test "set variable *(v_unsigned_short_pointer)=123" ""
 gdb_test "set variable *(v_unsigned_short_pointer+1)=-456" ""
 # DTS 10060CLLbs - bad type info from cc
 if {$hp_cc_compiler} {setup_xfail hppa*-*-*11* 10060CLLbs}
-gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\{123,.*65080\}" \
+gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\\{123,.*65080\\}" \
     "set variable unsigned short pointer"
 # DTS 10060CLLbs - bad type info from cc
 if {$hp_cc_compiler} {setup_xfail hppa*-*-*11* 10060CLLbs}
