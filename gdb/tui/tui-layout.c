@@ -248,10 +248,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 	    }
 	  if (regs_populate)
 	    {
-	      layout_def->regs_display_type =
-		(regs_display_type == TUI_UNDEFINED_REGS ?
-		 TUI_GENERAL_REGS : regs_display_type);
-	      tui_show_registers (layout_def->regs_display_type);
+              tui_show_registers (TUI_DATA_WIN->detail.data_display_info.current_group);
 	    }
 	}
     }

@@ -48,6 +48,7 @@ struct reggroup;
 struct regset;
 struct disassemble_info;
 struct target_ops;
+struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -2108,85 +2109,83 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (gdbarch_in_solib_return_trampoline (current_gdbarch, pc, name))
 #endif
 
-/* Sigtramp is a routine that the kernel calls (which then calls the
-   signal handler).  On most machines it is a library routine that is
-   linked into the executable.
-  
-   This macro, given a program counter value and the name of the
-   function in which that PC resides (which can be null if the name is
-   not known), returns nonzero if the PC and name show that we are in
-   sigtramp.
-  
-   On most machines just see if the name is sigtramp (and if we have
-   no name, assume we are not in sigtramp).
-  
-   FIXME: cagney/2002-04-21: The function find_pc_partial_function
-   calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
-   This means PC_IN_SIGTRAMP function can't be implemented by doing its
-   own local NAME lookup.
-  
-   FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
-   Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
-   does not. */
+/* NOTE: cagney/2004-03-23: DEPRECATED_SIGTRAMP_START,
+   DEPRECATED_SIGTRAMP_END, and DEPRECATED_PC_IN_SIGTRAMP have all been
+   superseeded by signal trampoline frame sniffers. */
 
-typedef int (gdbarch_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
-extern int gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
-extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PC_IN_SIGTRAMP)
-#error "Non multi-arch definition of PC_IN_SIGTRAMP"
-#endif
-#if !defined (PC_IN_SIGTRAMP)
-#define PC_IN_SIGTRAMP(pc, name) (gdbarch_pc_in_sigtramp (current_gdbarch, pc, name))
-#endif
-
-#if defined (SIGTRAMP_START)
-/* Legacy for systems yet to multi-arch SIGTRAMP_START */
-#if !defined (SIGTRAMP_START_P)
-#define SIGTRAMP_START_P() (1)
+#if defined (DEPRECATED_PC_IN_SIGTRAMP)
+/* Legacy for systems yet to multi-arch DEPRECATED_PC_IN_SIGTRAMP */
+#if !defined (DEPRECATED_PC_IN_SIGTRAMP_P)
+#define DEPRECATED_PC_IN_SIGTRAMP_P() (1)
 #endif
 #endif
 
-extern int gdbarch_sigtramp_start_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_START_P)
-#error "Non multi-arch definition of SIGTRAMP_START"
+extern int gdbarch_deprecated_pc_in_sigtramp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_SIGTRAMP_P)
+#error "Non multi-arch definition of DEPRECATED_PC_IN_SIGTRAMP"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_START_P)
-#define SIGTRAMP_START_P() (gdbarch_sigtramp_start_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_sigtramp_start_ftype) (CORE_ADDR pc);
-extern CORE_ADDR gdbarch_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc);
-extern void set_gdbarch_sigtramp_start (struct gdbarch *gdbarch, gdbarch_sigtramp_start_ftype *sigtramp_start);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_START)
-#error "Non multi-arch definition of SIGTRAMP_START"
-#endif
-#if !defined (SIGTRAMP_START)
-#define SIGTRAMP_START(pc) (gdbarch_sigtramp_start (current_gdbarch, pc))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_SIGTRAMP_P)
+#define DEPRECATED_PC_IN_SIGTRAMP_P() (gdbarch_deprecated_pc_in_sigtramp_p (current_gdbarch))
 #endif
 
-#if defined (SIGTRAMP_END)
-/* Legacy for systems yet to multi-arch SIGTRAMP_END */
-#if !defined (SIGTRAMP_END_P)
-#define SIGTRAMP_END_P() (1)
+typedef int (gdbarch_deprecated_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
+extern int gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+extern void set_gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_deprecated_pc_in_sigtramp_ftype *deprecated_pc_in_sigtramp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_SIGTRAMP)
+#error "Non multi-arch definition of DEPRECATED_PC_IN_SIGTRAMP"
+#endif
+#if !defined (DEPRECATED_PC_IN_SIGTRAMP)
+#define DEPRECATED_PC_IN_SIGTRAMP(pc, name) (gdbarch_deprecated_pc_in_sigtramp (current_gdbarch, pc, name))
+#endif
+
+#if defined (DEPRECATED_SIGTRAMP_START)
+/* Legacy for systems yet to multi-arch DEPRECATED_SIGTRAMP_START */
+#if !defined (DEPRECATED_SIGTRAMP_START_P)
+#define DEPRECATED_SIGTRAMP_START_P() (1)
 #endif
 #endif
 
-extern int gdbarch_sigtramp_end_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_END_P)
-#error "Non multi-arch definition of SIGTRAMP_END"
+extern int gdbarch_deprecated_sigtramp_start_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_START_P)
+#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_START"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_END_P)
-#define SIGTRAMP_END_P() (gdbarch_sigtramp_end_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SIGTRAMP_START_P)
+#define DEPRECATED_SIGTRAMP_START_P() (gdbarch_deprecated_sigtramp_start_p (current_gdbarch))
 #endif
 
-typedef CORE_ADDR (gdbarch_sigtramp_end_ftype) (CORE_ADDR pc);
-extern CORE_ADDR gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc);
-extern void set_gdbarch_sigtramp_end (struct gdbarch *gdbarch, gdbarch_sigtramp_end_ftype *sigtramp_end);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_END)
-#error "Non multi-arch definition of SIGTRAMP_END"
+typedef CORE_ADDR (gdbarch_deprecated_sigtramp_start_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_deprecated_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_deprecated_sigtramp_start (struct gdbarch *gdbarch, gdbarch_deprecated_sigtramp_start_ftype *deprecated_sigtramp_start);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_START)
+#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_START"
 #endif
-#if !defined (SIGTRAMP_END)
-#define SIGTRAMP_END(pc) (gdbarch_sigtramp_end (current_gdbarch, pc))
+#if !defined (DEPRECATED_SIGTRAMP_START)
+#define DEPRECATED_SIGTRAMP_START(pc) (gdbarch_deprecated_sigtramp_start (current_gdbarch, pc))
+#endif
+
+#if defined (DEPRECATED_SIGTRAMP_END)
+/* Legacy for systems yet to multi-arch DEPRECATED_SIGTRAMP_END */
+#if !defined (DEPRECATED_SIGTRAMP_END_P)
+#define DEPRECATED_SIGTRAMP_END_P() (1)
+#endif
+#endif
+
+extern int gdbarch_deprecated_sigtramp_end_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_END_P)
+#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_END"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SIGTRAMP_END_P)
+#define DEPRECATED_SIGTRAMP_END_P() (gdbarch_deprecated_sigtramp_end_p (current_gdbarch))
+#endif
+
+typedef CORE_ADDR (gdbarch_deprecated_sigtramp_end_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_deprecated_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_deprecated_sigtramp_end (struct gdbarch *gdbarch, gdbarch_deprecated_sigtramp_end_ftype *deprecated_sigtramp_end);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_END)
+#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_END"
+#endif
+#if !defined (DEPRECATED_SIGTRAMP_END)
+#define DEPRECATED_SIGTRAMP_END(pc) (gdbarch_deprecated_sigtramp_end (current_gdbarch, pc))
 #endif
 
 /* A target might have problems with watchpoints as soon as the stack
@@ -2517,10 +2516,6 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
    for the reserved data-pointer is returned.  That identifer should
    be saved in a local static variable.
 
-   The per-architecture data-pointer is either initialized explicitly
-   (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).
-
    Memory for the per-architecture data shall be allocated using
    gdbarch_obstack_zalloc.  That memory will be deleted when the
    corresponding architecture object is deleted.
@@ -2534,11 +2529,13 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
 
 struct gdbarch_data;
 
-typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init);
-extern void set_gdbarch_data (struct gdbarch *gdbarch,
-			      struct gdbarch_data *data,
-			      void *pointer);
+typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
+extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
+typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
+extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
+extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
+                                         struct gdbarch_data *data,
+			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
@@ -2554,7 +2551,7 @@ extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
    Memory regions are swapped / initialized in the order that they are
    registered.  NULL DATA and/or INIT values can be specified.
 
-   New code should use register_gdbarch_data(). */
+   New code should use gdbarch_data_register_*(). */
 
 typedef void (gdbarch_swap_ftype) (void);
 extern void deprecated_register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);

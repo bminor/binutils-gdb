@@ -668,7 +668,7 @@ static void
 set_mips_linux_register_addr (struct gdbarch *gdbarch,
                               CORE_ADDR (*register_addr_ptr) (int, CORE_ADDR))
 {
-  set_gdbarch_data (gdbarch, register_addr_data, register_addr_ptr);
+  deprecated_set_gdbarch_data (gdbarch, register_addr_data, register_addr_ptr);
 }
 
 static void *
@@ -844,7 +844,7 @@ _initialize_mips_linux_tdep (void)
   const struct bfd_arch_info *arch_info;
 
   register_addr_data =
-    register_gdbarch_data (init_register_addr_data);
+    gdbarch_data_register_post_init (init_register_addr_data);
 
   for (arch_info = bfd_lookup_arch (bfd_arch_mips, 0);
        arch_info != NULL;

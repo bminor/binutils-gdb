@@ -860,6 +860,21 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
     case FRV_OPERAND_LI :
       errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LI, &fields->f_LI);
       break;
+    case FRV_OPERAND_LRAD :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAD, &fields->f_LRAD);
+      break;
+    case FRV_OPERAND_LRAE :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAE, &fields->f_LRAE);
+      break;
+    case FRV_OPERAND_LRAS :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAS, &fields->f_LRAS);
+      break;
+    case FRV_OPERAND_TLBPRL :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_TLBPRL, &fields->f_TLBPRL);
+      break;
+    case FRV_OPERAND_TLBPROPX :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_TLBPROPX, &fields->f_TLBPRopx);
+      break;
     case FRV_OPERAND_AE :
       errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_AE, &fields->f_ae);
       break;

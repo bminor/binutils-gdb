@@ -1,6 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -29,11 +30,6 @@ struct regcache;
 struct type;
 
 /* From ppc-linux-tdep.c... */
-CORE_ADDR ppc_linux_frame_saved_pc (struct frame_info *fi);
-void ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *);
-int ppc_linux_frameless_function_invocation (struct frame_info *);
-void ppc_linux_frame_init_saved_regs (struct frame_info *);
-CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
 							struct type *valtype,
 							struct regcache *regcache,
@@ -62,8 +58,12 @@ CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
 						    CORE_ADDR bpaddr);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
-void ppc_linux_supply_gregset (char *buf);
-void ppc_linux_supply_fpregset (char *buf);
+void ppc_linux_supply_gregset (struct regcache *regcache,
+			       int regnum, const void *gregs, size_t size,
+			       int wordsize);
+void ppc_linux_supply_fpregset (const struct regset *regset,
+				struct regcache *regcache,
+				int regnum, const void *gregs, size_t size);
 
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *valtype,
@@ -72,11 +72,6 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 							  const void *writebuf);
 
 /* From rs6000-tdep.c... */
-CORE_ADDR rs6000_frame_saved_pc (struct frame_info *fi);
-void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
-int rs6000_frameless_function_invocation (struct frame_info *);
-void rs6000_frame_init_saved_regs (struct frame_info *);
-CORE_ADDR rs6000_frame_chain (struct frame_info *);
 int altivec_register_p (int regno);
 
 

@@ -195,7 +195,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 7 * 8;
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, amd64obsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, amd64obsd_pc_in_sigtramp);
   tdep->sigcontext_addr = amd64obsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64obsd_sc_reg_offset);

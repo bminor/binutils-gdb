@@ -278,7 +278,7 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386nto_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386nto_pc_in_sigtramp);
   tdep->sigcontext_addr = i386nto_sigcontext_addr;
   tdep->sc_pc_offset = 56;
   tdep->sc_sp_offset = 68;

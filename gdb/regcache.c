@@ -1705,7 +1705,7 @@ extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 void
 _initialize_regcache (void)
 {
-  regcache_descr_handle = register_gdbarch_data (init_regcache_descr);
+  regcache_descr_handle = gdbarch_data_register_post_init (init_regcache_descr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (current_regcache);
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_registers);
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_register_valid);

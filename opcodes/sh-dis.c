@@ -1,5 +1,5 @@
 /* Disassemble SH instructions.
-   Copyright 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003
+   Copyright 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -433,8 +433,10 @@ print_insn_sh (memaddr, info)
     case bfd_mach_sh3e:
       target_arch = arch_sh3e;
       break;
-    case bfd_mach_sh4:
     case bfd_mach_sh4_nofpu:
+      target_arch = arch_sh4_nofpu;
+      break;
+    case bfd_mach_sh4:
       target_arch = arch_sh4;
       break;
     case bfd_mach_sh4a:
@@ -443,6 +445,9 @@ print_insn_sh (memaddr, info)
       break;
     case bfd_mach_sh4al_dsp:
       target_arch = arch_sh4al_dsp;
+      break;
+    case bfd_mach_sh4_nommu_nofpu:
+      target_arch = arch_sh4_nommu_nofpu;
       break;
     case bfd_mach_sh5:
 #ifdef INCLUDE_SHMEDIA

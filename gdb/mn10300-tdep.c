@@ -749,10 +749,13 @@ mn10300_pop_frame_regular (struct frame_info *frame)
 static void
 mn10300_pop_frame (void)
 {
-  /* This function checks for and handles generic dummy frames, and
-     calls back to our function for ordinary frames.  */
-  generic_pop_current_frame (mn10300_pop_frame_regular);
-
+  struct frame_info *frame = get_current_frame ();
+  if (get_frame_type (frame) == DUMMY_FRAME)
+    /* NOTE: cagney/2002-22-23: Does this ever occure?  Surely a dummy
+       frame will have already been poped by the "infrun.c" code.  */
+    deprecated_pop_dummy_frame ();
+  else
+    mn10300_pop_frame_regular (frame);
   /* Throw away any cached frame information.  */
   flush_cached_frames ();
 }
@@ -1185,7 +1188,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Calling functions in the inferior from GDB.  */
   set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mn10300_call_dummy_words));
-  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_deprecated_reg_struct_has_addr
     (gdbarch, mn10300_reg_struct_has_addr);

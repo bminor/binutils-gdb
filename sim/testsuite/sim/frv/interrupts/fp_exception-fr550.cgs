@@ -70,7 +70,7 @@ pack:	fnegs		fr10,fr12
 
 	set_spr_addr	ok1,lr
 	set_gr_immed	4,gr20		; PC increment
-bad:	fmadds      	fr16,fr4,fr1	; unimplemented
+bad:	.word		0x83e502c4	; fmadds fr16,fr4,fr1 (unimplemented)
 	test_gr_immed	4,gr15
 
 	and_spr_immed	0xfbffffff,fsr0		; disable div/0 fp_exception

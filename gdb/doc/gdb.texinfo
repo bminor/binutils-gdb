@@ -13434,7 +13434,9 @@ info.
 @item set debug target
 Turns on or off display of @value{GDBN} target debugging info. This info
 includes what is going on at the target level of GDB, as it happens. The
-default is off.
+default is 0.  Set it to 1 to track events, and to 2 to also track the
+value of large memory transfers.  Changes to this flag do not take effect
+until the next time you connect to a target or use the @code{run} command.
 @kindex show debug target
 @item show debug target
 Displays the current state of displaying @value{GDBN} target debugging

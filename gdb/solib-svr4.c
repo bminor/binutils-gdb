@@ -1004,7 +1004,7 @@ enable_break (void)
       char *buf;
       CORE_ADDR load_addr = 0;
       int load_addr_found = 0;
-      struct so_list *inferior_sos;
+      struct so_list *so;
       bfd *tmp_bfd = NULL;
       struct target_ops *tmp_bfd_target;
       int tmp_fd = -1;
@@ -1047,23 +1047,19 @@ enable_break (void)
          target will also close the underlying bfd.  */
       tmp_bfd_target = target_bfd_reopen (tmp_bfd);
 
-      /* If the entry in _DYNAMIC for the dynamic linker has already
-         been filled in, we can read its base address from there. */
-      inferior_sos = svr4_current_sos ();
-      if (inferior_sos)
+      /* On a running target, we can get the dynamic linker's base
+         address from the shared library table.  */
+      solib_add (NULL, 0, NULL, auto_solib_add);
+      so = master_so_list ();
+      while (so)
 	{
-	  /* Connected to a running target.  Update our shared library table. */
-	  solib_add (NULL, 0, NULL, auto_solib_add);
-	}
-      while (inferior_sos)
-	{
-	  if (strcmp (buf, inferior_sos->so_original_name) == 0)
+	  if (strcmp (buf, so->so_original_name) == 0)
 	    {
 	      load_addr_found = 1;
-	      load_addr = LM_ADDR (inferior_sos);
+	      load_addr = LM_ADDR (so);
 	      break;
 	    }
-	  inferior_sos = inferior_sos->next;
+	  so = so->next;
 	}
 
       /* Otherwise we find the dynamic linker's base address by examining
@@ -1490,7 +1486,7 @@ void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
                                        struct link_map_offsets *(*flmo) (void))
 {
-  set_gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data, flmo);
+  deprecated_set_gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data, flmo);
 }
 
 /* Initialize the architecture-specific link_map_offsets fetcher.
@@ -1588,7 +1584,7 @@ void
 _initialize_svr4_solib (void)
 {
   fetch_link_map_offsets_gdbarch_data =
-    register_gdbarch_data (init_fetch_link_map_offsets);
+    gdbarch_data_register_post_init (init_fetch_link_map_offsets);
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;

@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1537,15 +1537,14 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
      asection **local_sections;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf32_mn10300_link_hash_entry **sym_hashes;
+  struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
   if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  sym_hashes = (struct elf32_mn10300_link_hash_entry **)
-		 (elf_sym_hashes (input_bfd));
+  sym_hashes = elf_sym_hashes (input_bfd);
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -1584,10 +1583,10 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_boolean warned;
 	  struct elf_link_hash_entry *hh;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (hh, (struct elf_link_hash_entry *) sym_hashes,
-				   r_symndx, symtab_hdr, relocation,
-				   sec, unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   hh, sec, relocation,
+				   unresolved_reloc, warned);
 
 	  h = (struct elf32_mn10300_link_hash_entry *) hh;
 

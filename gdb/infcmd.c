@@ -1843,6 +1843,11 @@ attach_command (char *args, int from_tty)
 	  symbol_file_add_main (full_exec_path, from_tty);
 	}
     }
+  else
+    {
+      reopen_exec_file ();
+      reread_symbols ();
+    }
 
 #ifdef SOLIB_ADD
   /* Add shared library symbols from the newly attached process, if any.  */

@@ -289,6 +289,21 @@ frv_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
     case FRV_OPERAND_LI :
       print_normal (cd, info, fields->f_LI, 0, pc, length);
       break;
+    case FRV_OPERAND_LRAD :
+      print_normal (cd, info, fields->f_LRAD, 0, pc, length);
+      break;
+    case FRV_OPERAND_LRAE :
+      print_normal (cd, info, fields->f_LRAE, 0, pc, length);
+      break;
+    case FRV_OPERAND_LRAS :
+      print_normal (cd, info, fields->f_LRAS, 0, pc, length);
+      break;
+    case FRV_OPERAND_TLBPRL :
+      print_normal (cd, info, fields->f_TLBPRL, 0, pc, length);
+      break;
+    case FRV_OPERAND_TLBPROPX :
+      print_normal (cd, info, fields->f_TLBPRopx, 0, pc, length);
+      break;
     case FRV_OPERAND_AE :
       print_normal (cd, info, fields->f_ae, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;

@@ -562,7 +562,7 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc
 # is false, the corresponding function works.  This simplifies the
 # migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
 # doesn't need to be modified.
-F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
+F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::deprecated_pc_in_call_dummy:deprecated_pc_in_call_dummy
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
@@ -723,29 +723,12 @@ f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *na
 # Some systems also have trampoline code for returning from shared libs.
 f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_return_trampoline::0
 
-# Sigtramp is a routine that the kernel calls (which then calls the
-# signal handler).  On most machines it is a library routine that is
-# linked into the executable.
-#
-# This macro, given a program counter value and the name of the
-# function in which that PC resides (which can be null if the name is
-# not known), returns nonzero if the PC and name show that we are in
-# sigtramp.
-#
-# On most machines just see if the name is sigtramp (and if we have
-# no name, assume we are not in sigtramp).
-#
-# FIXME: cagney/2002-04-21: The function find_pc_partial_function
-# calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
-# This means PC_IN_SIGTRAMP function can't be implemented by doing its
-# own local NAME lookup.
-#
-# FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
-# Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
-# does not.
-f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp::0
-F:2:SIGTRAMP_START:CORE_ADDR:sigtramp_start:CORE_ADDR pc:pc
-F:2:SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
+# NOTE: cagney/2004-03-23: DEPRECATED_SIGTRAMP_START,
+# DEPRECATED_SIGTRAMP_END, and DEPRECATED_PC_IN_SIGTRAMP have all been
+# superseeded by signal trampoline frame sniffers.
+F::DEPRECATED_PC_IN_SIGTRAMP:int:deprecated_pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp
+F:2:DEPRECATED_SIGTRAMP_START:CORE_ADDR:deprecated_sigtramp_start:CORE_ADDR pc:pc
+F:2:DEPRECATED_SIGTRAMP_END:CORE_ADDR:deprecated_sigtramp_end:CORE_ADDR pc:pc
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a funtion's epilogue.  in_function_epilogue_p()
@@ -890,6 +873,7 @@ struct reggroup;
 struct regset;
 struct disassemble_info;
 struct target_ops;
+struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -1201,10 +1185,6 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
    for the reserved data-pointer is returned.  That identifer should
    be saved in a local static variable.
 
-   The per-architecture data-pointer is either initialized explicitly
-   (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).
-
    Memory for the per-architecture data shall be allocated using
    gdbarch_obstack_zalloc.  That memory will be deleted when the
    corresponding architecture object is deleted.
@@ -1218,11 +1198,13 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
 
 struct gdbarch_data;
 
-typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init);
-extern void set_gdbarch_data (struct gdbarch *gdbarch,
-			      struct gdbarch_data *data,
-			      void *pointer);
+typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
+extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
+typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
+extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
+extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
+                                         struct gdbarch_data *data,
+			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
@@ -1238,7 +1220,7 @@ extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
    Memory regions are swapped / initialized in the order that they are
    registered.  NULL DATA and/or INIT values can be specified.
 
-   New code should use register_gdbarch_data(). */
+   New code should use gdbarch_data_register_*(). */
 
 typedef void (gdbarch_swap_ftype) (void);
 extern void deprecated_register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
@@ -1811,7 +1793,8 @@ struct gdbarch_data
 {
   unsigned index;
   int init_p;
-  gdbarch_data_init_ftype *init;
+  gdbarch_data_pre_init_ftype *pre_init;
+  gdbarch_data_post_init_ftype *post_init;
 };
 
 struct gdbarch_data_registration
@@ -1831,8 +1814,9 @@ struct gdbarch_data_registry gdbarch_data_registry =
   0, NULL,
 };
 
-struct gdbarch_data *
-register_gdbarch_data (gdbarch_data_init_ftype *init)
+static struct gdbarch_data *
+gdbarch_data_register (gdbarch_data_pre_init_ftype *pre_init,
+		       gdbarch_data_post_init_ftype *post_init)
 {
   struct gdbarch_data_registration **curr;
   /* Append the new registraration.  */
@@ -1843,11 +1827,23 @@ register_gdbarch_data (gdbarch_data_init_ftype *init)
   (*curr)->next = NULL;
   (*curr)->data = XMALLOC (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
-  (*curr)->data->init = init;
+  (*curr)->data->pre_init = pre_init;
+  (*curr)->data->post_init = post_init;
   (*curr)->data->init_p = 1;
   return (*curr)->data;
 }
 
+struct gdbarch_data *
+gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *pre_init)
+{
+  return gdbarch_data_register (pre_init, NULL);
+}
+
+struct gdbarch_data *
+gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *post_init)
+{
+  return gdbarch_data_register (NULL, post_init);
+}
 
 /* Create/delete the gdbarch data vector. */
 
@@ -1863,12 +1859,13 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
    data-pointer. */
 
 void
-set_gdbarch_data (struct gdbarch *gdbarch,
-                  struct gdbarch_data *data,
-                  void *pointer)
+deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
+			     struct gdbarch_data *data,
+			     void *pointer)
 {
   gdb_assert (data->index < gdbarch->nr_data);
   gdb_assert (gdbarch->data[data->index] == NULL);
+  gdb_assert (data->pre_init == NULL);
   gdbarch->data[data->index] = pointer;
 }
 
@@ -1879,18 +1876,33 @@ void *
 gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
   gdb_assert (data->index < gdbarch->nr_data);
-  /* The data-pointer isn't initialized, call init() to get a value but
-     only if the architecture initializaiton has completed.  Otherwise
-     punt - hope that the caller knows what they are doing.  */
-  if (gdbarch->data[data->index] == NULL
-      && gdbarch->initialized_p)
+  if (gdbarch->data[data->index] == NULL)
     {
-      /* Be careful to detect an initialization cycle.  */
-      gdb_assert (data->init_p);
-      data->init_p = 0;
-      gdb_assert (data->init != NULL);
-      gdbarch->data[data->index] = data->init (gdbarch);
-      data->init_p = 1;
+      /* The data-pointer isn't initialized, call init() to get a
+	 value.  */
+      if (data->pre_init != NULL)
+	/* Mid architecture creation: pass just the obstack, and not
+	   the entire architecture, as that way it isn't possible for
+	   pre-init code to refer to undefined architecture
+	   fields.  */
+	gdbarch->data[data->index] = data->pre_init (gdbarch->obstack);
+      else if (gdbarch->initialized_p
+	       && data->post_init != NULL)
+	/* Post architecture creation: pass the entire architecture
+	   (as all fields are valid), but be careful to also detect
+	   recursive references.  */
+	{
+	  gdb_assert (data->init_p);
+	  data->init_p = 0;
+	  gdbarch->data[data->index] = data->post_init (gdbarch);
+	  data->init_p = 1;
+	}
+      else
+	/* The architecture initialization hasn't completed - punt -
+	 hope that the caller knows what they are doing.  Once
+	 deprecated_set_gdbarch_data has been initialized, this can be
+	 changed to an internal error.  */
+	return NULL;
       gdb_assert (gdbarch->data[data->index] != NULL);
     }
   return gdbarch->data[data->index];

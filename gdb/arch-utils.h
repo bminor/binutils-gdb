@@ -114,7 +114,7 @@ extern int generic_register_size (int regnum);
 /* Assume that the world is sane, the registers are all adjacent.  */
 extern int generic_register_byte (int regnum);
 
-/* Prop up old targets that use various IN_SIGTRAMP() macros.  */
+/* Prop up old targets that use various sigtramp macros.  */
 extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
 
 /* The orginal register_convert*() functions were overloaded.  They

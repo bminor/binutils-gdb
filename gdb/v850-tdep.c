@@ -885,7 +885,7 @@ v850_pop_frame (void)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
 				   get_frame_base (frame),
 				   get_frame_base (frame)))
-    generic_pop_dummy_frame ();
+    deprecated_pop_dummy_frame ();
   else
     {
       write_register (E_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));

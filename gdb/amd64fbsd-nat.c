@@ -141,7 +141,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 void
 fill_fpregset (fpregset_t *fpregsetp, int regnum)
 {
-  amd64_fill_fxsave ((char *) fpregsetp, regnum);
+  amd64_collect_fxsave (current_regcache, regnum, fpregsetp);
 }
 
 

@@ -112,11 +112,11 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386bsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386bsd_pc_in_sigtramp);
 
   /* Allow the recognition of sigtramps as a function named <sigtramp>.  */
-  set_gdbarch_sigtramp_start (gdbarch, i386bsd_sigtramp_start);
-  set_gdbarch_sigtramp_end (gdbarch, i386bsd_sigtramp_end);
+  set_gdbarch_deprecated_sigtramp_start (gdbarch, i386bsd_sigtramp_start);
+  set_gdbarch_deprecated_sigtramp_end (gdbarch, i386bsd_sigtramp_end);
 
   /* Assume SunOS-style shared libraries.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch,
@@ -163,8 +163,7 @@ _initialize_i386bsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_aout_flavour,
 				  i386bsd_aout_osabi_sniffer);
 
-  /* BFD doesn't set the architecture for NetBSD style a.out core
-     files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_unknown_flavour,
+  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_unknown_flavour,
 				  i386bsd_core_osabi_sniffer);
 }

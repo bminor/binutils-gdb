@@ -391,6 +391,7 @@ static void
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       simulate_dual_insn_prefetch (current_cpu, vpc, 8);
       break;
     case bfd_mach_frvtomcat:

@@ -343,10 +343,13 @@ clear_pc_function_cache (void)
    If it fails, it sets *NAME, *ADDRESS, and *ENDADDR to zero and
    returns 0.  */
 
+/* Backward compatibility, no section argument.  */
+
 int
-find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
-			       CORE_ADDR *address, CORE_ADDR *endaddr)
+find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
+			  CORE_ADDR *endaddr)
 {
+  struct bfd_section *section;
   struct partial_symtab *pst;
   struct symbol *f;
   struct minimal_symbol *msymbol;
@@ -354,6 +357,21 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
   struct obj_section *osect;
   int i;
   CORE_ADDR mapped_pc;
+
+  /* To ensure that the symbol returned belongs to the correct setion
+     (and that the last [random] symbol from the previous section
+     isn't returned) try to find the section containing PC.  First try
+     the overlay code (which by default returns NULL); and second try
+     the normal section code (which almost always succeeds).  */
+  section = find_pc_overlay (pc);
+  if (section == NULL)
+    {
+      struct obj_section *obj_section = find_pc_section (pc);
+      if (obj_section == NULL)
+	section = NULL;
+      else
+	section = obj_section->the_bfd_section;
+    }
 
   mapped_pc = overlay_mapped_address (pc, section);
 
@@ -364,10 +382,16 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
-  if (SIGTRAMP_START_P () && PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
+  /* NOTE: cagney/2004-03-16: Determining if the PC is in a signal
+     trampoline typically depends on the detailed analysis of dynamic
+     information obtained from the inferior yet this function is
+     expected to work using static information obtained from the
+     symbol table.  */
+  if (DEPRECATED_SIGTRAMP_START_P ()
+      && DEPRECATED_PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
-      cache_pc_function_low = SIGTRAMP_START (mapped_pc);
-      cache_pc_function_high = SIGTRAMP_END (mapped_pc);
+      cache_pc_function_low = DEPRECATED_SIGTRAMP_START (mapped_pc);
+      cache_pc_function_high = DEPRECATED_SIGTRAMP_END (mapped_pc);
       cache_pc_function_name = "<sigtramp>";
       cache_pc_function_section = section;
       goto return_cached_value;
@@ -507,32 +531,6 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
   return 1;
 }
 
-/* Backward compatibility, no section argument.  */
-
-int
-find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
-			  CORE_ADDR *endaddr)
-{
-  struct bfd_section *bfd_section;
-
-  /* To ensure that the symbol returned belongs to the correct setion
-     (and that the last [random] symbol from the previous section
-     isn't returned) try to find the section containing PC.  First try
-     the overlay code (which by default returns NULL); and second try
-     the normal section code (which almost always succeeds).  */
-  bfd_section = find_pc_overlay (pc);
-  if (bfd_section == NULL)
-    {
-      struct obj_section *obj_section = find_pc_section (pc);
-      if (obj_section == NULL)
-	bfd_section = NULL;
-      else
-	bfd_section = obj_section->the_bfd_section;
-    }
-  return find_pc_sect_partial_function (pc, bfd_section, name, address,
-					endaddr);
-}
-
 /* Return the innermost stack frame executing inside of BLOCK,
    or NULL if there is no such frame.  If BLOCK is NULL, just return NULL.  */
 
@@ -591,14 +589,6 @@ deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
   return (INNER_THAN ((sp), (pc))
 	  && (frame_address != 0)
 	  && INNER_THAN ((pc), (frame_address)));
-}
-
-int
-deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address)
-{
-  CORE_ADDR addr = entry_point_address ();
-  return ((pc) >= addr && (pc) <= (addr + DECR_PC_AFTER_BREAK));
 }
 
 /* Returns true for a user frame or a call_function_by_hand dummy

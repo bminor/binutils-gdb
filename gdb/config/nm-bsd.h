@@ -1,8 +1,6 @@
-/* Target-dependent definitions for GNU/Linux x86-64.
+/* Native-dependent definitions for *BSD.
 
-   Copyright 2003, 2004  Free Software Foundation, Inc.
-
-   Contributed by Michal Ludvig, SuSE AG.
+   Copyright 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,18 +19,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef AMD64_LINUX_TDEP_H
-#define AMD64_LINUX_TDEP_H
+/* Type of the third argument to the `ptrace' system call.  */
+#define PTRACE_ARG3_TYPE caddr_t
 
-/* Fill GDB's register array with the general-purpose register values
-   in *GREGSETP.  */
+/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
+#define FETCH_INFERIOR_REGISTERS
 
-void amd64_linux_supply_gregset (char *regp);
-
-/* Fill register REGNO (if it is a general-purpose register) in
-   *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
-   do this for all registers.  */
-
-void amd64_linux_fill_gregset (char *regp, int regno);
-
-#endif /* amd64-linux-tdep.h */
+/* We can attach and detach.  */
+#define ATTACH_DETACH

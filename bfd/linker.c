@@ -1,6 +1,6 @@
 /* linker.c -- BFD linker routines
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -523,10 +523,14 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
   if (info->wrap_hash != NULL)
     {
       const char *l;
+      char prefix = '\0';
 
       l = string;
-      if (*l == bfd_get_symbol_leading_char (abfd))
-	++l;
+      if (*l == bfd_get_symbol_leading_char (abfd) || *l == info->wrap_char)
+	{
+	  prefix = *l;
+	  ++l;
+	}
 
 #undef WRAP
 #define WRAP "__wrap_"
@@ -544,8 +548,7 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 	  if (n == NULL)
 	    return NULL;
 
-	  /* Note that symbol_leading_char may be '\0'.  */
-	  n[0] = bfd_get_symbol_leading_char (abfd);
+	  n[0] = prefix;
 	  n[1] = '\0';
 	  strcat (n, WRAP);
 	  strcat (n, l);
@@ -576,8 +579,7 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 	  if (n == NULL)
 	    return NULL;
 
-	  /* Note that symbol_leading_char may be '\0'.  */
-	  n[0] = bfd_get_symbol_leading_char (abfd);
+	  n[0] = prefix;
 	  n[1] = '\0';
 	  strcat (n, l + sizeof REAL - 1);
 	  h = bfd_link_hash_lookup (info->hash, n, create, TRUE, follow);

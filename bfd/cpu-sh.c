@@ -1,5 +1,5 @@
 /* BFD library support routines for the Renesas / SuperH SH architecture.
-   Copyright 1993, 1994, 1997, 1998, 2000, 2001, 2002, 2003
+   Copyright 1993, 1994, 1997, 1998, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
@@ -34,7 +34,8 @@
 #define SH4A_NEXT    &arch_info_struct[8]
 #define SH4AL_DSP_NEXT &arch_info_struct[9]
 #define SH4_NOFPU_NEXT &arch_info_struct[10]
-#define SH4A_NOFPU_NEXT &arch_info_struct[11]
+#define SH4_NOMMU_NOFPU_NEXT &arch_info_struct[11]
+#define SH4A_NOFPU_NEXT &arch_info_struct[12]
 #define SH64_NEXT    NULL
 
 static const bfd_arch_info_type arch_info_struct[] =
@@ -178,6 +179,20 @@ static const bfd_arch_info_type arch_info_struct[] =
     bfd_default_compatible,
     bfd_default_scan,
     SH4_NOFPU_NEXT
+  },
+  {
+    32,				/* 32 bits in a word */
+    32,				/* 32 bits in an address */
+    8,				/* 8 bits in a byte */
+    bfd_arch_sh,
+    bfd_mach_sh4_nommu_nofpu,
+    "sh",			/* arch_name  */
+    "sh4-nommu-nofpu",		/* printable name */
+    1,
+    FALSE,			/* not the default */
+    bfd_default_compatible,
+    bfd_default_scan,
+    SH4_NOMMU_NOFPU_NEXT
   },
   {
     32,				/* 32 bits in a word */

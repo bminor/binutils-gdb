@@ -1,5 +1,5 @@
 /* ppc-dis.c -- Disassemble PowerPC instructions
-   Copyright 1994, 1995, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
@@ -191,9 +191,10 @@ print_insn_powerpc (bfd_vma memaddr,
 	continue;
 
       /* The instruction is valid.  */
-      (*info->fprintf_func) (info->stream, "%s", opcode->name);
       if (opcode->operands[0] != 0)
-	(*info->fprintf_func) (info->stream, "\t");
+	(*info->fprintf_func) (info->stream, "%-7s ", opcode->name);
+      else
+	(*info->fprintf_func) (info->stream, "%s", opcode->name);
 
       /* Now extract and print the operands.  */
       need_comma = 0;
@@ -235,7 +236,8 @@ print_insn_powerpc (bfd_vma memaddr,
 	    }
 
 	  /* Print the operand as directed by the flags.  */
-	  if ((operand->flags & PPC_OPERAND_GPR) != 0)
+	  if ((operand->flags & PPC_OPERAND_GPR) != 0
+	      || ((operand->flags & PPC_OPERAND_GPR_0) != 0 && value != 0))
 	    (*info->fprintf_func) (info->stream, "r%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_FPR) != 0)
 	    (*info->fprintf_func) (info->stream, "f%ld", value);

@@ -1,5 +1,5 @@
 /* ELF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -68,6 +68,59 @@ sort_symbol (const void *arg1, const void *arg2)
     }
 }
 
+/* Add a DT_NEEDED entry for this dynamic object.  Returns -1 on error,
+   1 if a DT_NEEDED tag already exists, and 0 on success.  */
+
+static int
+add_dt_needed_tag (struct bfd_link_info *info, const char *soname,
+		   bfd_boolean do_it)
+{
+  struct elf_link_hash_table *hash_table;
+  bfd_size_type oldsize;
+  bfd_size_type strindex;
+
+  hash_table = elf_hash_table (info);
+  oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
+  strindex = _bfd_elf_strtab_add (hash_table->dynstr, soname, FALSE);
+  if (strindex == (bfd_size_type) -1)
+    return -1;
+
+  if (oldsize == _bfd_elf_strtab_size (hash_table->dynstr))
+    {
+      asection *sdyn;
+      Elf_External_Dyn *dyncon, *dynconend;
+
+      sdyn = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
+      BFD_ASSERT (sdyn != NULL);
+
+      dyncon = (Elf_External_Dyn *) sdyn->contents;
+      dynconend = (Elf_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      for (; dyncon < dynconend; dyncon++)
+	{
+	  Elf_Internal_Dyn dyn;
+
+	  elf_swap_dyn_in (hash_table->dynobj, dyncon, & dyn);
+	  if (dyn.d_tag == DT_NEEDED
+	      && dyn.d_un.d_val == strindex)
+	    {
+	      _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
+	      return 1;
+	    }
+	}
+    }
+
+  if (do_it)
+    {
+      if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
+	return -1;
+    }
+  else
+    /* We were just checking for existence of the tag.  */
+    _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
+
+  return 0;
+}
+
 /* Add symbols from an ELF object file to the linker hash table.  */
 
 static bfd_boolean
@@ -94,7 +147,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
   const struct elf_backend_data *bed;
-  bfd_boolean dt_needed;
+  bfd_boolean add_needed;
   struct elf_link_hash_table * hash_table;
   bfd_size_type amt;
 
@@ -200,7 +253,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  dt_needed = FALSE;
+  add_needed = TRUE;
   if (! dynamic)
     {
       /* If we are creating a shared library, create all the dynamic
@@ -222,11 +275,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   else
     {
       asection *s;
-      bfd_boolean add_needed;
-      const char *name;
-      bfd_size_type oldsize;
-      bfd_size_type strindex;
+      const char *soname = NULL;
       struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+      int ret;
 
       /* ld --just-symbols and dynamic objects don't mix very well.
 	 Test for --just-symbols by looking at info set up by
@@ -235,26 +286,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && s->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
 	goto error_return;
 
-      /* Find the name to use in a DT_NEEDED entry that refers to this
-	 object.  If the object has a DT_SONAME entry, we use it.
-	 Otherwise, if the generic linker stuck something in
-	 elf_dt_name, we use that.  Otherwise, we just use the file
-	 name.  If the generic linker put a null string into
-	 elf_dt_name, we don't make a DT_NEEDED entry at all, even if
-	 there is a DT_SONAME entry.  */
-      add_needed = TRUE;
-      name = bfd_get_filename (abfd);
-      if (elf_dt_name (abfd) != NULL)
-	{
-	  name = elf_dt_name (abfd);
-	  if (*name == '\0')
-	    {
-	      if (elf_dt_soname (abfd) != NULL)
-		dt_needed = TRUE;
+      /* If this dynamic lib was specified on the command line with
+	 --as-needed in effect, then we don't want to add a DT_NEEDED
+	 tag unless the lib is actually used.  Similary for libs brought
+	 in by another lib's DT_NEEDED.  */
+      add_needed = elf_dyn_lib_class (abfd) == DYN_NORMAL;
 
-	      add_needed = FALSE;
-	    }
-	}
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
 	{
@@ -286,8 +323,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      if (dyn.d_tag == DT_SONAME)
 		{
 		  unsigned int tagv = dyn.d_un.d_val;
-		  name = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
-		  if (name == NULL)
+		  soname = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
+		  if (soname == NULL)
 		    goto error_free_dyn;
 		}
 	      if (dyn.d_tag == DT_NEEDED)
@@ -404,53 +441,31 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	goto error_return;
 
-      if (add_needed)
+      /* Find the name to use in a DT_NEEDED entry that refers to this
+	 object.  If the object has a DT_SONAME entry, we use it.
+	 Otherwise, if the generic linker stuck something in
+	 elf_dt_name, we use that.  Otherwise, we just use the file
+	 name.  */
+      if (soname == NULL || *soname == '\0')
 	{
-	  /* Add a DT_NEEDED entry for this dynamic object.  */
-	  oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
-	  strindex = _bfd_elf_strtab_add (hash_table->dynstr, name, FALSE);
-	  if (strindex == (bfd_size_type) -1)
-	    goto error_return;
-
-	  if (oldsize == _bfd_elf_strtab_size (hash_table->dynstr))
-	    {
-	      asection *sdyn;
-	      Elf_External_Dyn *dyncon, *dynconend;
-
-	      /* The hash table size did not change, which means that
-		 the dynamic object name was already entered.  If we
-		 have already included this dynamic object in the
-		 link, just ignore it.  There is no reason to include
-		 a particular dynamic object more than once.  */
-	      sdyn = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
-	      BFD_ASSERT (sdyn != NULL);
-
-	      dyncon = (Elf_External_Dyn *) sdyn->contents;
-	      dynconend = (Elf_External_Dyn *) (sdyn->contents +
-						sdyn->_raw_size);
-	      for (; dyncon < dynconend; dyncon++)
-		{
-		  Elf_Internal_Dyn dyn;
-
-		  elf_swap_dyn_in (hash_table->dynobj, dyncon, & dyn);
-		  if (dyn.d_tag == DT_NEEDED
-		      && dyn.d_un.d_val == strindex)
-		    {
-		      _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
-		      return TRUE;
-		    }
-		}
-	    }
-
-	  if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
-	    goto error_return;
+	  soname = elf_dt_name (abfd);
+	  if (soname == NULL || *soname == '\0')
+	    soname = bfd_get_filename (abfd);
 	}
 
-      /* Save the SONAME, if there is one, because sometimes the
-	 linker emulation code will need to know it.  */
-      if (*name == '\0')
-	name = basename (bfd_get_filename (abfd));
-      elf_dt_name (abfd) = name;
+      /* Save the SONAME because sometimes the linker emulation code
+	 will need to know it.  */
+      elf_dt_name (abfd) = soname;
+
+      ret = add_dt_needed_tag (info, soname, add_needed);
+      if (ret < 0)
+	goto error_return;
+
+      /* If we have already included this dynamic object in the
+	 link, just ignore it.  There is no reason to include a
+	 particular dynamic object more than once.  */
+      if (ret > 0)
+	return TRUE;
     }
 
   /* If this is a dynamic object, we always link against the .dynsym
@@ -748,8 +763,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
 				      sym_hash, &skip, &override,
-				      &type_change_ok, &size_change_ok,
-				      dt_needed))
+				      &type_change_ok, &size_change_ok))
 	    goto error_free_vers;
 
 	  if (skip)
@@ -778,7 +792,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    case bfd_link_hash_defweak:
 	      old_bfd = h->root.u.def.section->owner;
 	      break;
-	    
+
 	    case bfd_link_hash_common:
 	      old_bfd = h->root.u.c.p->section->owner;
 	      old_alignment = h->root.u.c.p->alignment_power;
@@ -1006,7 +1020,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (definition || h->root.type == bfd_link_hash_common)
 	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
 					      &sec, &value, &dynsym,
-					      override, dt_needed))
+					      override))
 	      goto error_free_vers;
 
 	  if (definition && !dynamic)
@@ -1050,49 +1064,21 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		break;
 	      }
 
-	  if (dt_needed && definition
+	  if (!add_needed && definition
 	      && (h->elf_link_hash_flags
 		  & ELF_LINK_HASH_REF_REGULAR) != 0)
 	    {
-	      bfd_size_type oldsize;
-	      bfd_size_type strindex;
+	      int ret;
 
-	      /* The symbol from a DT_NEEDED object is referenced from
-		 the regular object to create a dynamic executable. We
-		 have to make sure there is a DT_NEEDED entry for it.  */
-
-	      dt_needed = FALSE;
-	      oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
-	      strindex = _bfd_elf_strtab_add (hash_table->dynstr,
-					      elf_dt_soname (abfd), FALSE);
-	      if (strindex == (bfd_size_type) -1)
+	      /* A symbol from a library loaded via DT_NEEDED of some
+		 other library is referenced by a regular object.
+		 Add a DT_NEEDED entry for it.  */
+	      add_needed = TRUE;
+	      ret = add_dt_needed_tag (info, elf_dt_name (abfd), add_needed);
+	      if (ret < 0)
 		goto error_free_vers;
 
-	      if (oldsize == _bfd_elf_strtab_size (hash_table->dynstr))
-		{
-		  asection *sdyn;
-		  Elf_External_Dyn *dyncon, *dynconend;
-
-		  sdyn = bfd_get_section_by_name (hash_table->dynobj,
-						  ".dynamic");
-		  BFD_ASSERT (sdyn != NULL);
-
-		  dyncon = (Elf_External_Dyn *) sdyn->contents;
-		  dynconend = (Elf_External_Dyn *) (sdyn->contents +
-						    sdyn->_raw_size);
-		  for (; dyncon < dynconend; dyncon++)
-		    {
-		      Elf_Internal_Dyn dyn;
-
-		      elf_swap_dyn_in (hash_table->dynobj,
-				       dyncon, &dyn);
-		      BFD_ASSERT (dyn.d_tag != DT_NEEDED ||
-				  dyn.d_un.d_val != strindex);
-		    }
-		}
-
-	      if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
-		goto error_free_vers;
+	      BFD_ASSERT (ret == 0);
 	    }
 	}
     }
@@ -1357,7 +1343,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;
-      
+
       stabstr = bfd_get_section_by_name (abfd, ".stabstr");
       if (stabstr != NULL)
 	{
@@ -1372,7 +1358,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		&& !bfd_is_abs_section (stab->output_section))
 	      {
 		struct bfd_elf_section_data *secdata;
-		
+
 		secdata = elf_section_data (stab);
 		if (! _bfd_link_section_stabs (abfd,
 					       & hash_table->stab_info,
@@ -3949,7 +3935,8 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
     case bfd_link_hash_undefined:
     case bfd_link_hash_undefweak:
       abfd = h->root.u.undef.abfd;
-      if ((abfd->flags & DYNAMIC) == 0 || elf_dt_soname (abfd) == NULL)
+      if ((abfd->flags & DYNAMIC) == 0
+	  || elf_dyn_lib_class (abfd) != DYN_DT_NEEDED)
 	return FALSE;
       break;
 

@@ -134,9 +134,9 @@ struct pdp11_external_nlist
 static bfd_boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 #define MY_text_includes_header 1
 
-bfd_vma		bfd_getp32	   PARAMS ((const bfd_byte *));
-bfd_signed_vma	bfd_getp_signed_32 PARAMS ((const bfd_byte *));
-void		bfd_putp32	   PARAMS ((bfd_vma, bfd_byte *));
+static bfd_vma bfd_getp32 (const void *);
+static bfd_signed_vma bfd_getp_signed_32 (const void *);
+static void bfd_putp32 (bfd_vma, void *);
 
 #define MY_BFD_TARGET
 
@@ -5004,31 +5004,38 @@ aout_link_reloc_link_order (finfo, o, p)
 }
 /* end of modified aoutx.h */
 
-bfd_vma
-bfd_getp32 (addr)
-     const bfd_byte *addr;
+static bfd_vma
+bfd_getp32 (const void *p)
 {
-  return (((((bfd_vma)addr[1] << 8) | addr[0]) << 8)
-	  | addr[3]) << 8 | addr[2];
+  const bfd_byte *addr = p;
+  unsigned long v;
+  v = (unsigned long) addr[1] << 24;
+  v |= (unsigned long) addr[0] << 16;
+  v |= (unsigned long) addr[3] << 8;
+  v |= (unsigned long) addr[2];
+  return v;
 }
 
 #define COERCE32(x) (((bfd_signed_vma) (x) ^ 0x80000000) - 0x80000000)
 
-bfd_signed_vma
-bfd_getp_signed_32 (addr)
-     const bfd_byte *addr;
+static bfd_signed_vma
+bfd_getp_signed_32 (const void *p)
 {
-  return COERCE32((((((bfd_vma)addr[1] << 8) | addr[0]) << 8)
-		   | addr[3]) << 8 | addr[2]);
+  const bfd_byte *addr = p;
+  unsigned long v;
+  v = (unsigned long) addr[1] << 24;
+  v |= (unsigned long) addr[0] << 16;
+  v |= (unsigned long) addr[3] << 8;
+  v |= (unsigned long) addr[2];
+  return COERCE32 (v);
 }
 
-void
-bfd_putp32 (data, addr)
-     bfd_vma data;
-     bfd_byte *addr;
+static void
+bfd_putp32 (bfd_vma data, void *p)
 {
-  addr[0] = (bfd_byte)(data >> 16);
-  addr[1] = (bfd_byte)(data >> 24);
-  addr[2] = (bfd_byte)data;
-  addr[3] = (bfd_byte)(data >>  8);
+  bfd_byte *addr = p;
+  addr[0] = (data >> 16) & 0xff;
+  addr[1] = (data >> 24) & 0xff;
+  addr[2] = (data >> 0) & 0xff;
+  addr[3] = (data >> 8) & 0xff;
 }

@@ -385,6 +385,8 @@ m68hc11_register_name (int reg_nr)
   if (reg_nr >= M68HC11_ALL_REGS)
     return NULL;
 
+  m68hc11_initialize_register_info ();
+
   /* If we don't know the address of a soft register, pretend it
      does not exist.  */
   if (reg_nr > M68HC11_LAST_HARD_REG && soft_regs[reg_nr].name == 0)

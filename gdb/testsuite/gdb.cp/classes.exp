@@ -703,7 +703,7 @@ proc test_enums {} {
     }
 
     # I'll do this test two different ways, because of a parser bug.
-    # See PR gdb/826.
+    # See PR gdb/1588.
 
     gdb_test_multiple "print (ClassWithEnum::PrivEnum) 42" "print (ClassWithEnum::PrivEnum) 42" {
 	-re "\\$\[0-9\]+ = yellow$nl$gdb_prompt $" {
@@ -712,7 +712,7 @@ proc test_enums {} {
 	-re "A (parse|syntax) error in expression, near `42'.$nl$gdb_prompt $" {
 	    # "parse error" is bison 1.35.
 	    # "syntax error" is bison 1.875.
-	    kfail "gdb/826" "print (ClassWithEnum::PrivEnum) 42"
+	    kfail "gdb/1588" "print (ClassWithEnum::PrivEnum) 42"
 	}
     }
 

@@ -36,6 +36,8 @@ static void dummy_frame_this_id (struct frame_info *next_frame,
 				 void **this_prologue_cache,
 				 struct frame_id *this_id);
 
+static int pc_in_dummy_frame (CORE_ADDR pc);
+
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
    on the target stack (but that really slows down function calls).  */
@@ -137,7 +139,7 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
    subtracted out.  */
 
 int
-generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
+deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 {
   return pc_in_dummy_frame (pc);
 }
@@ -155,7 +157,7 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
    !DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET_P yet generic dummy
    targets set DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
 
-int
+static int
 pc_in_dummy_frame (CORE_ADDR pc)
 {
   struct dummy_frame *dummyframe;
@@ -254,21 +256,6 @@ generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
   dummy_frame_stack->call_hi = hi;
 }
 
-/* Restore the machine state from either the saved dummy stack or a
-   real stack frame. */
-
-void
-generic_pop_current_frame (void (*popper) (struct frame_info * frame))
-{
-  struct frame_info *frame = get_current_frame ();
-  if (get_frame_type (frame) == DUMMY_FRAME)
-    /* NOTE: cagney/2002-22-23: Does this ever occure?  Surely a dummy
-       frame will have already been poped by the "infrun.c" code.  */
-    generic_pop_dummy_frame ();
-  else
-    (*popper) (frame);
-}
-
 /* Discard the innermost dummy frame from the dummy frame stack
    (passed in as a parameter).  */
 
@@ -282,7 +269,7 @@ discard_innermost_dummy (struct dummy_frame **stack)
 }
 
 void
-generic_pop_dummy_frame (void)
+deprecated_pop_dummy_frame (void)
 {
   struct dummy_frame *dummy_frame = dummy_frame_stack;
 
@@ -411,9 +398,8 @@ const struct frame_unwind *
 dummy_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-      ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
-      : pc_in_dummy_frame (pc))
+  gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
+  if (pc_in_dummy_frame (pc))
     return &dummy_frame_unwind;
   else
     return NULL;

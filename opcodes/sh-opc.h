@@ -1,5 +1,5 @@
 /* Definitions for SH opcodes.
-   Copyright 1993, 1994, 1995, 1997, 1999, 2000, 2003
+   Copyright 1993, 1994, 1995, 1997, 1999, 2000, 2003, 2004
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -188,12 +188,13 @@ sh_dsp_reg_nums;
 #define arch_sh4al_dsp 0x0400
 #define arch_sh4_nofpu 0x1000
 #define arch_sh4a_nofpu 0x2000
+#define arch_sh4_nommu_nofpu 0x4000  /* no mmu nor fpu */
 
 #define arch_sh1_up  (arch_sh1 | arch_sh2_up)
 #define arch_sh2_up  (arch_sh2 | arch_sh2e_up | arch_sh3_up | arch_sh_dsp)
 #define arch_sh2e_up (arch_sh2e | arch_sh3e_up)
 #define arch_sh3_up  (arch_sh3 | arch_sh3e_up | arch_sh3_dsp_up \
-		      | arch_sh4_nofp_up)
+		      | arch_sh4_nommu_nofpu_up)
 #define arch_sh3e_up (arch_sh3e | arch_sh4_up)
 #define arch_sh4_up  (arch_sh4 | arch_sh4a_up)
 #define arch_sh4a_up (arch_sh4a)
@@ -202,8 +203,13 @@ sh_dsp_reg_nums;
 #define arch_sh3_dsp_up (arch_sh3_dsp | arch_sh4al_dsp_up)
 #define arch_sh4al_dsp_up (arch_sh4al_dsp)
 
+#define arch_sh4_nommu_nofpu_up (arch_sh4_nommu_nofpu | arch_sh4_nofp_up)
+
 #define arch_sh4_nofp_up (arch_sh4_nofpu | arch_sh4_up | arch_sh4a_nofp_up)
 #define arch_sh4a_nofp_up (arch_sh4a_nofpu | arch_sh4a_up | arch_sh4al_dsp_up)
+
+#define arch_sh_any_with_mmu (arch_sh3 | arch_sh3e_up | arch_sh3_dsp_up \
+	| arch_sh4_nofp_up)  /* arch _sh3_up omitting arch_sh4_nommu_nofpu */
 
 typedef struct
 {
@@ -297,6 +303,8 @@ const sh_opcode_info sh_table[] =
 
 /* 0100nnnn00011110 ldc <REG_N>,GBR     */{"ldc",{A_REG_N,A_GBR},{HEX_4,REG_N,HEX_1,HEX_E}, arch_sh1_up},
 
+/* 0100nnnn00111010 ldc <REG_N>,SGR     */{"ldc",{A_REG_N,A_SGR},{HEX_4,REG_N,HEX_3,HEX_A}, arch_sh4_nommu_nofpu_up},
+
 /* 0100nnnn00101110 ldc <REG_N>,VBR     */{"ldc",{A_REG_N,A_VBR},{HEX_4,REG_N,HEX_2,HEX_E}, arch_sh1_up},
 
 /* 0100nnnn01011110 ldc <REG_N>,MOD     */{"ldc",{A_REG_N,A_MOD},{HEX_4,REG_N,HEX_5,HEX_E}, arch_sh_dsp_up},
@@ -309,7 +317,7 @@ const sh_opcode_info sh_table[] =
 
 /* 0100nnnn01001110 ldc <REG_N>,SPC     */{"ldc",{A_REG_N,A_SPC},{HEX_4,REG_N,HEX_4,HEX_E}, arch_sh3_up},
 
-/* 0100nnnn11111010 ldc <REG_N>,DBR     */{"ldc",{A_REG_N,A_DBR},{HEX_4,REG_N,HEX_F,HEX_A}, arch_sh4_nofp_up},
+/* 0100nnnn11111010 ldc <REG_N>,DBR     */{"ldc",{A_REG_N,A_DBR},{HEX_4,REG_N,HEX_F,HEX_A}, arch_sh4_nommu_nofpu_up},
 
 /* 0100nnnn1xxx1110 ldc <REG_N>,Rn_BANK */{"ldc",{A_REG_N,A_REG_B},{HEX_4,REG_N,REG_B,HEX_E}, arch_sh3_up},
 
@@ -318,6 +326,8 @@ const sh_opcode_info sh_table[] =
 /* 0100nnnn00010111 ldc.l @<REG_N>+,GBR */{"ldc.l",{A_INC_N,A_GBR},{HEX_4,REG_N,HEX_1,HEX_7}, arch_sh1_up},
 
 /* 0100nnnn00100111 ldc.l @<REG_N>+,VBR */{"ldc.l",{A_INC_N,A_VBR},{HEX_4,REG_N,HEX_2,HEX_7}, arch_sh1_up},
+
+/* 0100nnnn00110110 ldc.l @<REG_N>+,SGR */{"ldc.l",{A_INC_N,A_SGR},{HEX_4,REG_N,HEX_3,HEX_6}, arch_sh4_nommu_nofpu_up},
 
 /* 0100nnnn01010111 ldc.l @<REG_N>+,MOD */{"ldc.l",{A_INC_N,A_MOD},{HEX_4,REG_N,HEX_5,HEX_7}, arch_sh_dsp_up},
 
@@ -329,7 +339,7 @@ const sh_opcode_info sh_table[] =
 
 /* 0100nnnn01000111 ldc.l @<REG_N>+,SPC */{"ldc.l",{A_INC_N,A_SPC},{HEX_4,REG_N,HEX_4,HEX_7}, arch_sh3_up},
 
-/* 0100nnnn11110110 ldc.l @<REG_N>+,DBR */{"ldc.l",{A_INC_N,A_DBR},{HEX_4,REG_N,HEX_F,HEX_6}, arch_sh4_nofp_up},
+/* 0100nnnn11110110 ldc.l @<REG_N>+,DBR */{"ldc.l",{A_INC_N,A_DBR},{HEX_4,REG_N,HEX_F,HEX_6}, arch_sh4_nommu_nofpu_up},
 
 /* 0100nnnn1xxx0111 ldc.l <REG_N>,Rn_BANK */{"ldc.l",{A_INC_N,A_REG_B},{HEX_4,REG_N,REG_B,HEX_7}, arch_sh3_up},
 
@@ -384,7 +394,7 @@ const sh_opcode_info sh_table[] =
   
 /* 0100nnnn01100110 lds.l @<REG_M>+,FPSCR*/{"lds.l",{A_INC_M,FPSCR_N},{HEX_4,REG_M,HEX_6,HEX_6}, arch_sh2e_up},
 
-/* 0000000000111000 ldtlb               */{"ldtlb",{0},{HEX_0,HEX_0,HEX_3,HEX_8}, arch_sh3_up},
+/* 0000000000111000 ldtlb               */{"ldtlb",{0},{HEX_0,HEX_0,HEX_3,HEX_8}, arch_sh_any_with_mmu},
 
 /* 0100nnnnmmmm1111 mac.w @<REG_M>+,@<REG_N>+*/{"mac.w",{A_INC_M,A_INC_N},{HEX_4,REG_N,REG_M,HEX_F}, arch_sh1_up},
 
@@ -457,7 +467,7 @@ const sh_opcode_info sh_table[] =
 /* 11000001i8*2.... mov.w R0,@(<disp>,GBR)*/{"mov.w",{A_R0,A_DISP_GBR},{HEX_C,HEX_1,IMM1_8BY2}, arch_sh1_up},
 
 /* 11000111i8p4.... mova @(<disp>,PC),R0*/{"mova",{A_DISP_PC,A_R0},{HEX_C,HEX_7,PCRELIMM_8BY4}, arch_sh1_up},
-/* 0000nnnn11000011 movca.l R0,@<REG_N> */{"movca.l",{A_R0,A_IND_N},{HEX_0,REG_N,HEX_C,HEX_3}, arch_sh4_nofp_up},
+/* 0000nnnn11000011 movca.l R0,@<REG_N> */{"movca.l",{A_R0,A_IND_N},{HEX_0,REG_N,HEX_C,HEX_3}, arch_sh4_nommu_nofpu_up},
 
 /* 0000nnnn01110011 movco.l r0,@<REG_N> */{"movco.l",{A_R0,A_IND_N},{HEX_0,REG_N,HEX_7,HEX_3}, arch_sh4a_nofp_up},
 /* 0000mmmm01100011 movli.l @<REG_M>,r0 */{"movli.l",{A_IND_M,A_R0},{HEX_0,REG_M,HEX_6,HEX_3}, arch_sh4a_nofp_up},
@@ -482,11 +492,11 @@ const sh_opcode_info sh_table[] =
 /* 0000000000001001 nop                 */{"nop",{0},{HEX_0,HEX_0,HEX_0,HEX_9}, arch_sh1_up},
 
 /* 0110nnnnmmmm0111 not <REG_M>,<REG_N> */{"not",{ A_REG_M,A_REG_N},{HEX_6,REG_N,REG_M,HEX_7}, arch_sh1_up},
-/* 0000nnnn10010011 ocbi @<REG_N>       */{"ocbi",{A_IND_N},{HEX_0,REG_N,HEX_9,HEX_3}, arch_sh4_nofp_up},
+/* 0000nnnn10010011 ocbi @<REG_N>       */{"ocbi",{A_IND_N},{HEX_0,REG_N,HEX_9,HEX_3}, arch_sh4_nommu_nofpu_up},
 
-/* 0000nnnn10100011 ocbp @<REG_N>       */{"ocbp",{A_IND_N},{HEX_0,REG_N,HEX_A,HEX_3}, arch_sh4_nofp_up},
+/* 0000nnnn10100011 ocbp @<REG_N>       */{"ocbp",{A_IND_N},{HEX_0,REG_N,HEX_A,HEX_3}, arch_sh4_nommu_nofpu_up},
 
-/* 0000nnnn10110011 ocbwb @<REG_N>      */{"ocbwb",{A_IND_N},{HEX_0,REG_N,HEX_B,HEX_3}, arch_sh4_nofp_up},
+/* 0000nnnn10110011 ocbwb @<REG_N>      */{"ocbwb",{A_IND_N},{HEX_0,REG_N,HEX_B,HEX_3}, arch_sh4_nommu_nofpu_up},
 
 
 /* 11001011i8*1.... or #<imm>,R0        */{"or",{A_IMM,A_R0},{HEX_C,HEX_B,IMM0_8}, arch_sh1_up},
@@ -495,7 +505,7 @@ const sh_opcode_info sh_table[] =
 
 /* 11001111i8*1.... or.b #<imm>,@(R0,GBR)*/{"or.b",{A_IMM,A_R0_GBR},{HEX_C,HEX_F,IMM0_8}, arch_sh1_up},
 
-/* 0000nnnn10000011 pref @<REG_N>       */{"pref",{A_IND_N},{HEX_0,REG_N,HEX_8,HEX_3}, arch_sh4_nofp_up},
+/* 0000nnnn10000011 pref @<REG_N>       */{"pref",{A_IND_N},{HEX_0,REG_N,HEX_8,HEX_3}, arch_sh4_nommu_nofpu_up},
 
 /* 0000nnnn11010011 prefi @<REG_N>      */{"prefi",{A_IND_N},{HEX_0,REG_N,HEX_D,HEX_3}, arch_sh4a_nofp_up},
 
@@ -567,9 +577,9 @@ const sh_opcode_info sh_table[] =
 
 /* 0000nnnn01000010 stc SPC,<REG_N>     */{"stc",{A_SPC,A_REG_N},{HEX_0,REG_N,HEX_4,HEX_2}, arch_sh3_up},
 
-/* 0000nnnn00111010 stc SGR,<REG_N>     */{"stc",{A_SGR,A_REG_N},{HEX_0,REG_N,HEX_3,HEX_A}, arch_sh4_nofp_up},
+/* 0000nnnn00111010 stc SGR,<REG_N>     */{"stc",{A_SGR,A_REG_N},{HEX_0,REG_N,HEX_3,HEX_A}, arch_sh4_nommu_nofpu_up},
 
-/* 0000nnnn11111010 stc DBR,<REG_N>     */{"stc",{A_DBR,A_REG_N},{HEX_0,REG_N,HEX_F,HEX_A}, arch_sh4_nofp_up},
+/* 0000nnnn11111010 stc DBR,<REG_N>     */{"stc",{A_DBR,A_REG_N},{HEX_0,REG_N,HEX_F,HEX_A}, arch_sh4_nommu_nofpu_up},
 
 /* 0000nnnn1xxx0010 stc Rn_BANK,<REG_N> */{"stc",{A_REG_B,A_REG_N},{HEX_0,REG_N,REG_B,HEX_2}, arch_sh3_up},
 
@@ -589,9 +599,9 @@ const sh_opcode_info sh_table[] =
 
 /* 0100nnnn00010011 stc.l GBR,@-<REG_N> */{"stc.l",{A_GBR,A_DEC_N},{HEX_4,REG_N,HEX_1,HEX_3}, arch_sh1_up},
 
-/* 0100nnnn00110010 stc.l SGR,@-<REG_N> */{"stc.l",{A_SGR,A_DEC_N},{HEX_4,REG_N,HEX_3,HEX_2}, arch_sh4_nofp_up},
+/* 0100nnnn00110010 stc.l SGR,@-<REG_N> */{"stc.l",{A_SGR,A_DEC_N},{HEX_4,REG_N,HEX_3,HEX_2}, arch_sh4_nommu_nofpu_up},
 
-/* 0100nnnn11110010 stc.l DBR,@-<REG_N> */{"stc.l",{A_DBR,A_DEC_N},{HEX_4,REG_N,HEX_F,HEX_2}, arch_sh4_nofp_up},
+/* 0100nnnn11110010 stc.l DBR,@-<REG_N> */{"stc.l",{A_DBR,A_DEC_N},{HEX_4,REG_N,HEX_F,HEX_2}, arch_sh4_nommu_nofpu_up},
 
 /* 0100nnnn1xxx0011 stc.l Rn_BANK,@-<REG_N> */{"stc.l",{A_REG_B,A_DEC_N},{HEX_4,REG_N,REG_B,HEX_3}, arch_sh3_up},
 

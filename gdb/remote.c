@@ -2164,6 +2164,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (!async_p)
     wait_forever_enabled_p = 1;
 
+  reopen_exec_file ();
+  reread_symbols ();
+
   target_preopen (from_tty);
 
   unpush_target (target);
@@ -5456,7 +5459,7 @@ _initialize_remote (void)
   struct cmd_list_element *tmpcmd;
 
   /* architecture specific data */
-  remote_gdbarch_data_handle = register_gdbarch_data (init_remote_state);
+  remote_gdbarch_data_handle = gdbarch_data_register_post_init (init_remote_state);
 
   /* Old tacky stuff.  NOTE: This comes after the remote protocol so
      that the remote protocol has been initialized.  */

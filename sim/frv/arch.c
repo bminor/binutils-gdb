@@ -43,6 +43,9 @@ const MACH *sim_machs[] =
   & fr400_mach,
 #endif
 #ifdef HAVE_CPU_FRVBF
+  & fr450_mach,
+#endif
+#ifdef HAVE_CPU_FRVBF
   & simple_mach,
 #endif
   0

@@ -1,5 +1,5 @@
 # frv testcase for scutss $FRj,$FRk
-# mach: fr400
+# mach: fr405 fr450
 
 	.include "../testutils.inc"
 
@@ -12,7 +12,7 @@ scutss:
 
 	set_gr_immed	0,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffe7,gr11
+	test_gr_limmed  0xffff,0xffe8,gr11
 
 	set_gr_immed	1,gr10
 	scutss      	gr10,gr11
@@ -28,7 +28,7 @@ scutss:
 
 	set_gr_immed	4,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xfe78,gr11
+	test_gr_limmed  0xffff,0xfe79,gr11
 
 	set_gr_immed	5,gr10
 	scutss      	gr10,gr11
@@ -40,11 +40,11 @@ scutss:
 
 	set_gr_immed	7,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xf3c4,gr11
+	test_gr_limmed  0xffff,0xf3c5,gr11
 
 	set_gr_immed	8,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xe789,gr11
+	test_gr_limmed  0xffff,0xe78a,gr11
 
 	set_gr_immed	9,gr10
 	scutss      	gr10,gr11
@@ -52,7 +52,7 @@ scutss:
 
 	set_gr_immed	10,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0x9e26,gr11
+	test_gr_limmed  0xffff,0x9e27,gr11
 
 	set_gr_immed	11,gr10
 	scutss      	gr10,gr11
@@ -60,7 +60,7 @@ scutss:
 
 	set_gr_immed	12,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfffe,0x789a,gr11
+	test_gr_limmed  0xfffe,0x789b,gr11
 
 	set_gr_immed	13,gr10
 	scutss      	gr10,gr11
@@ -68,19 +68,19 @@ scutss:
 
 	set_gr_immed	14,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfff9,0xe26a,gr11
+	test_gr_limmed  0xfff9,0xe26b,gr11
 
 	set_gr_immed	15,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfff3,0xc4d5,gr11
+	test_gr_limmed  0xfff3,0xc4d6,gr11
 
 	set_gr_immed	16,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffe7,0x89ab,gr11
+	test_gr_limmed  0xffe7,0x89ac,gr11
 
 	set_gr_immed	17,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffcf,0x1357,gr11
+	test_gr_limmed  0xffcf,0x1358,gr11
 
 	set_gr_immed	18,gr10
 	scutss      	gr10,gr11
@@ -92,11 +92,11 @@ scutss:
 
 	set_gr_immed	20,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfe78,0x9abc,gr11
+	test_gr_limmed  0xfe78,0x9abd,gr11
 
 	set_gr_immed	21,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfcf1,0x3579,gr11
+	test_gr_limmed  0xfcf1,0x357a,gr11
 
 	set_gr_immed	22,gr10
 	scutss      	gr10,gr11
@@ -104,19 +104,19 @@ scutss:
 
 	set_gr_immed	23,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xf3c4,0xd5e6,gr11
+	test_gr_limmed  0xf3c4,0xd5e7,gr11
 
 	set_gr_immed	24,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xe789,0xabcd,gr11
+	test_gr_limmed  0xe789,0xabce,gr11
 
 	set_gr_immed	25,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xcf13,0x579b,gr11
+	test_gr_limmed  0xcf13,0x579c,gr11
 
 	set_gr_immed	26,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x9e26,0xaf37,gr11
+	test_gr_limmed  0x9e26,0xaf38,gr11
 
 	set_gr_immed	27,gr10
 	scutss      	gr10,gr11
@@ -268,11 +268,11 @@ scutss:
 
 	set_gr_immed	64,gr10		; same as -64
 	scutss      	gr10,gr11
-	test_gr_immed	-1,gr11
+	test_gr_immed	0,gr11
 
 	set_gr_immed	128,gr10	; same as 0 
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffe7,gr11
+	test_gr_limmed  0xffff,0xffe8,gr11
 
 	.global scutss2
 scutss2:
@@ -281,7 +281,7 @@ scutss2:
 
 	set_gr_limmed	0xffff,0xffff,gr10	; -1
 	scutss      	gr10,gr11
-	test_gr_limmed  0xf3c4,0xd5e6,gr11
+	test_gr_limmed  0xf3c4,0xd5e7,gr11
 
 	set_gr_limmed	0x0000,0x007e,gr10	; -2 (only lower 7 bits matter)
 	scutss      	gr10,gr11
@@ -289,11 +289,11 @@ scutss2:
 
 	set_gr_immed	-3,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfcf1,0x3579,gr11
+	test_gr_limmed  0xfcf1,0x357a,gr11
 
 	set_gr_immed	-4,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfe78,0x9abc,gr11
+	test_gr_limmed  0xfe78,0x9abd,gr11
 
 	set_gr_immed	-5,gr10
 	scutss      	gr10,gr11
@@ -305,19 +305,19 @@ scutss2:
 
 	set_gr_immed	-7,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffcf,0x1357,gr11
+	test_gr_limmed  0xffcf,0x1358,gr11
 
 	set_gr_immed	-8,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffe7,0x89ab,gr11
+	test_gr_limmed  0xffe7,0x89ac,gr11
 
 	set_gr_immed	-9,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfff3,0xc4d5,gr11
+	test_gr_limmed  0xfff3,0xc4d6,gr11
 
 	set_gr_immed	-10,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfff9,0xe26a,gr11
+	test_gr_limmed  0xfff9,0xe26b,gr11
 
 	set_gr_immed	-11,gr10
 	scutss      	gr10,gr11
@@ -325,7 +325,7 @@ scutss2:
 
 	set_gr_immed	-12,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xfffe,0x789a,gr11
+	test_gr_limmed  0xfffe,0x789b,gr11
 
 	set_gr_immed	-13,gr10
 	scutss      	gr10,gr11
@@ -333,7 +333,7 @@ scutss2:
 
 	set_gr_immed	-14,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0x9e26,gr11
+	test_gr_limmed  0xffff,0x9e27,gr11
 
 	set_gr_immed	-15,gr10
 	scutss      	gr10,gr11
@@ -341,11 +341,11 @@ scutss2:
 
 	set_gr_immed	-16,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xe789,gr11
+	test_gr_limmed  0xffff,0xe78a,gr11
 
 	set_gr_immed	-17,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xf3c4,gr11
+	test_gr_limmed  0xffff,0xf3c5,gr11
 
 	set_gr_immed	-18,gr10
 	scutss      	gr10,gr11
@@ -357,7 +357,7 @@ scutss2:
 
 	set_gr_immed	-20,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xfe78,gr11
+	test_gr_limmed  0xffff,0xfe79,gr11
 
 	set_gr_immed	-21,gr10
 	scutss      	gr10,gr11
@@ -373,19 +373,19 @@ scutss2:
 
 	set_gr_immed	-24,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffe7,gr11
+	test_gr_limmed  0xffff,0xffe8,gr11
 
 	set_gr_immed	-25,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xfff3,gr11
+	test_gr_limmed  0xffff,0xfff4,gr11
 
 	set_gr_immed	-26,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xfff9,gr11
+	test_gr_limmed  0xffff,0xfffa,gr11
 
 	set_gr_immed	-27,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xfffc,gr11
+	test_gr_limmed  0xffff,0xfffd,gr11
 
 	set_gr_immed	-28,gr10
 	scutss      	gr10,gr11
@@ -397,26 +397,26 @@ scutss2:
 
 	set_gr_immed	-30,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffff,gr11
+	test_gr_immed   0,gr11
 
 	set_gr_immed	-31,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffff,gr11
+	test_gr_immed   0,gr11
 
 	set_gr_immed	-32,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffff,gr11
+	test_gr_immed   0,gr11
 
 	set_gr_limmed	0,64,gr10	; same as -32 
 	scutss      	gr10,gr11
-	test_gr_limmed  0xffff,0xffff,gr11
+	test_gr_immed   0,gr11
 
 	set_spr_immed   0x6789abcd,iacc0h
 	set_spr_immed   0xefa5a5a5,iacc0l
 
 	set_gr_limmed	0xffff,0xffff,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x33c4,0xd5e6,gr11
+	test_gr_limmed  0x33c4,0xd5e7,gr11
 
 	set_gr_limmed	0x0000,0x007e,gr10	; -2 (only lower 7 bits matter)
 	scutss      	gr10,gr11
@@ -424,11 +424,11 @@ scutss2:
 
 	set_gr_immed	-3,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0cf1,0x3579,gr11
+	test_gr_limmed  0x0cf1,0x357a,gr11
 
 	set_gr_immed	-4,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0678,0x9abc,gr11
+	test_gr_limmed  0x0678,0x9abd,gr11
 
 	set_gr_immed	-5,gr10
 	scutss      	gr10,gr11
@@ -440,19 +440,19 @@ scutss2:
 
 	set_gr_immed	-7,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x00cf,0x1357,gr11
+	test_gr_limmed  0x00cf,0x1358,gr11
 
 	set_gr_immed	-8,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0067,0x89ab,gr11
+	test_gr_limmed  0x0067,0x89ac,gr11
 
 	set_gr_immed	-9,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0033,0xc4d5,gr11
+	test_gr_limmed  0x0033,0xc4d6,gr11
 
 	set_gr_immed	-10,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0019,0xe26a,gr11
+	test_gr_limmed  0x0019,0xe26b,gr11
 
 	set_gr_immed	-11,gr10
 	scutss      	gr10,gr11
@@ -460,7 +460,7 @@ scutss2:
 
 	set_gr_immed	-12,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0006,0x789a,gr11
+	test_gr_limmed  0x0006,0x789b,gr11
 
 	set_gr_immed	-13,gr10
 	scutss      	gr10,gr11
@@ -468,7 +468,7 @@ scutss2:
 
 	set_gr_immed	-14,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0001,0x9e26,gr11
+	test_gr_limmed  0x0001,0x9e27,gr11
 
 	set_gr_immed	-15,gr10
 	scutss      	gr10,gr11
@@ -476,11 +476,11 @@ scutss2:
 
 	set_gr_immed	-16,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x6789,gr11
+	test_gr_limmed  0x0000,0x678a,gr11
 
 	set_gr_immed	-17,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x33c4,gr11
+	test_gr_limmed  0x0000,0x33c5,gr11
 
 	set_gr_immed	-18,gr10
 	scutss      	gr10,gr11
@@ -492,7 +492,7 @@ scutss2:
 
 	set_gr_immed	-20,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x0678,gr11
+	test_gr_limmed  0x0000,0x0679,gr11
 
 	set_gr_immed	-21,gr10
 	scutss      	gr10,gr11
@@ -508,19 +508,19 @@ scutss2:
 
 	set_gr_immed	-24,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x0067,gr11
+	test_gr_limmed  0x0000,0x0068,gr11
 
 	set_gr_immed	-25,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x0033,gr11
+	test_gr_limmed  0x0000,0x0034,gr11
 
 	set_gr_immed	-26,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x0019,gr11
+	test_gr_limmed  0x0000,0x001a,gr11
 
 	set_gr_immed	-27,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x000c,gr11
+	test_gr_limmed  0x0000,0x000d,gr11
 
 	set_gr_immed	-28,gr10
 	scutss      	gr10,gr11
@@ -532,11 +532,11 @@ scutss2:
 
 	set_gr_immed	-30,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x0001,gr11
+	test_gr_limmed  0x0000,0x0002,gr11
 
 	set_gr_immed	-31,gr10
 	scutss      	gr10,gr11
-	test_gr_limmed  0x0000,0x0000,gr11
+	test_gr_limmed  0x0000,0x0001,gr11
 
 	set_gr_immed	-32,gr10
 	scutss      	gr10,gr11
@@ -630,13 +630,35 @@ scutss2:
 
 	set_gr_limmed	0xffff,0xfffc,gr10
 	scutss    	gr10,gr11
-	test_gr_limmed  0xfaf5,0xa5a5,gr11
+	test_gr_limmed  0xfaf5,0xa5a6,gr11
 
 	set_spr_immed   0x2f5a5a5a,iacc0h
 	set_spr_immed   0x5a5a5a5a,iacc0l
 
 	set_gr_limmed	0xffff,0xfff9,gr10
 	scutss    	gr10,gr11
-	test_gr_limmed  0x005e,0xb4b4,gr11
+	test_gr_limmed  0x005e,0xb4b5,gr11
+
+# From the manual
+	.global scutss3
+scutss3:
+	set_spr_immed   0xfffffedc,iacc0h
+	set_spr_immed   0xba987654,iacc0l
+
+	set_gr_immed	16,gr10
+	scutss		gr10,gr11
+	test_gr_limmed	0xfedc,0xba98,gr11
+
+	set_gr_immed	12,gr10
+	scutss		gr10,gr11
+	test_gr_limmed	0xffed,0xcbaa,gr11
+
+	set_gr_immed	-4,gr10
+	scutss		gr10,gr11
+	test_gr_limmed	0xffff,0xffee,gr11
+
+	set_gr_immed	24,gr10
+	scutss		gr10,gr11
+	test_gr_limmed	0x8000,0x0000,gr11
 
 	pass

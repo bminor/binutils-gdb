@@ -178,11 +178,11 @@ invalid_cpp_abbrev_complaint (const char *arg1)
 }
 
 static void
-reg_value_complaint (int arg1, int arg2, const char *arg3)
+reg_value_complaint (int regnum, int num_regs, const char *sym)
 {
   complaint (&symfile_complaints,
-	     "register number %d too large (max %d) in symbol %s", arg1, arg2,
-	     arg3);
+	     "register number %d too large (max %d) in symbol %s",
+             regnum, num_regs - 1, sym);
 }
 
 static void

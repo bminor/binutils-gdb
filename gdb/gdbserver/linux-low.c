@@ -34,6 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 /* ``all_threads'' is keyed by the LWP ID - it should be the thread ID instead,
    however.  This requires changing the ID in place when we go from !using_threads
@@ -68,8 +69,6 @@ struct pending_signals
 #ifdef HAVE_LINUX_REGSETS
 static int use_regsets_p = 1;
 #endif
-
-extern int errno;
 
 int debug_threads = 0;
 
@@ -686,13 +685,17 @@ retry:
 	  fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
 	  *status = 'W';
 	  clear_inferiors ();
+	  free (all_processes.head);
+	  all_processes.head = all_processes.tail = NULL;
 	  return ((unsigned char) WEXITSTATUS (w));
 	}
       else if (!WIFSTOPPED (w))
 	{
 	  fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
-	  clear_inferiors ();
 	  *status = 'X';
+	  clear_inferiors ();
+	  free (all_processes.head);
+	  all_processes.head = all_processes.tail = NULL;
 	  return ((unsigned char) WTERMSIG (w));
 	}
     }

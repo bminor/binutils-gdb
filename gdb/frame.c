@@ -228,7 +228,8 @@ get_frame_id (struct frame_info *fi)
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
 	{
-	  fi->unwind = frame_unwind_find_by_frame (fi->next);
+	  fi->unwind = frame_unwind_find_by_frame (fi->next,
+						   &fi->prologue_cache);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunately, legacy code, called by
@@ -532,7 +533,8 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   /* Find the unwinder.  */
   if (frame->unwind == NULL)
     {
-      frame->unwind = frame_unwind_find_by_frame (frame->next);
+      frame->unwind = frame_unwind_find_by_frame (frame->next,
+						  &frame->prologue_cache);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunately, legacy code, called by
@@ -1152,18 +1154,14 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 static enum frame_type
 frame_type_from_pc (CORE_ADDR pc)
 {
-  /* FIXME: cagney/2002-11-24: Can't yet directly call
-     pc_in_dummy_frame() as some architectures don't set
-     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
-     latter is implemented by simply calling pc_in_dummy_frame).  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+      && deprecated_pc_in_call_dummy (pc, 0, 0))
     return DUMMY_FRAME;
   else
     {
       char *name;
       find_pc_partial_function (pc, &name, NULL, NULL);
-      if (PC_IN_SIGTRAMP (pc, name))
+      if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
 	return SIGTRAMP_FRAME;
       else
 	return NORMAL_FRAME;
@@ -1191,7 +1189,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_frame (fi->next);
+  fi->unwind = frame_unwind_find_by_frame (fi->next, &fi->prologue_cache);
   if (fi->unwind->type != UNKNOWN_FRAME)
     fi->type = fi->unwind->type;
   else
@@ -1344,7 +1342,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
       /* Set the unwind functions based on that identified PC.  Ditto
          for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_frame (prev->next);
+      prev->unwind = frame_unwind_find_by_frame (prev->next,
+						 &prev->prologue_cache);
       if (prev->unwind->type == UNKNOWN_FRAME)
 	prev->type = frame_type_from_pc (get_frame_pc (prev));
       else
@@ -1493,7 +1492,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
              to the new frame code.  Implement FRAME_CHAIN the way the
              new frame will.  */
 	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
+	  prev->unwind = frame_unwind_find_by_frame (this_frame,
+						     &prev->prologue_cache);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunately, legacy code, called by
@@ -1654,7 +1654,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      If there isn't a FRAME_CHAIN, the code above will have already
      done this.  */
   if (prev->unwind == NULL)
-    prev->unwind = frame_unwind_find_by_frame (prev->next);
+    prev->unwind = frame_unwind_find_by_frame (prev->next,
+					       &prev->prologue_cache);
 
   /* If the unwinder provides a frame type, use it.  Otherwize
      continue on to that heuristic mess.  */
@@ -1683,9 +1684,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	  ? DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (prev), 0, 0)
-	  : pc_in_dummy_frame (get_frame_pc (prev))))
+      && deprecated_pc_in_call_dummy (get_frame_pc (prev), 0, 0))
     prev->type = DUMMY_FRAME;
   else
     {
@@ -1697,7 +1696,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	 22).  */
       char *name;
       find_pc_partial_function (get_frame_pc (prev), &name, NULL, NULL);
-      if (PC_IN_SIGTRAMP (get_frame_pc (prev), name))
+      if (DEPRECATED_PC_IN_SIGTRAMP (get_frame_pc (prev), name))
 	prev->type = SIGTRAMP_FRAME;
       /* FIXME: cagney/2002-11-11: Leave prev->type alone.  Some
          architectures are forcing the frame's type in INIT so we
@@ -2124,7 +2123,8 @@ get_frame_type (struct frame_info *frame)
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */
-      frame->unwind = frame_unwind_find_by_frame (frame->next);
+      frame->unwind = frame_unwind_find_by_frame (frame->next, 
+						  &frame->prologue_cache);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunately, legacy code, called by

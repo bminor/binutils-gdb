@@ -98,7 +98,7 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc_offset = 7 * 8;
 
   /* NetBSD has its own convention for signal trampolines.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
   tdep->sigcontext_addr = amd64nbsd_sigcontext_addr;
 
   /* Initialize the array with register offsets in `struct

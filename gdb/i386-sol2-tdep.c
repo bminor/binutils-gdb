@@ -90,7 +90,7 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = tdep->gregset_num_regs;
 
   /* Signal trampolines are slightly different from SVR4.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
 }
 
 
