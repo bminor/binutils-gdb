@@ -497,7 +497,7 @@ proc objdump_versionstuff { objdump object expectfile } {
     }
 }
 
-proc build_vers_lib { pic test source libname other mapfile verexp versymexp symexp } {
+proc build_binary { shared pic test source libname other mapfile verexp versymexp symexp } {
     global ld
     global srcdir
     global subdir
@@ -508,7 +508,6 @@ proc build_vers_lib { pic test source libname other mapfile verexp versymexp sym
     global objdump
     global CC
     global CFLAGS
-    global shared
     global script
 
     if ![ld_compile "$CC -S $pic $CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
@@ -565,13 +564,19 @@ proc build_vers_lib { pic test source libname other mapfile verexp versymexp sym
     
 }
 
+proc build_executable { test source libname other mapfile verexp versymexp symexp } {
+  build_binary "" "" $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+}
+
 proc build_vers_lib_no_pic { test source libname other mapfile verexp versymexp symexp } {
-  build_vers_lib "" $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+  global shared
+  build_binary $shared "" $test $source $libname $other $mapfile $verexp $versymexp $symexp 
 }
 
 proc build_vers_lib_pic { test source libname other mapfile verexp versymexp symexp } {
   global picflag
-  build_vers_lib $picflag $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+  global shared
+  build_binary $shared $picflag $test $source $libname $other $mapfile $verexp $versymexp $symexp 
 }
 
 proc test_ldfail { test flag source execname other mapfile whyfail } {
@@ -929,3 +934,6 @@ build_vers_lib_no_pic "vers27a" vers27a.c vers27a "" vers27a.map vers27a.ver ver
 build_vers_lib_no_pic "vers27b" vers27b.c vers27b "" "" vers27b.ver vers27b.dsym ""
 build_vers_lib_no_pic "vers27c1" vers27c.c vers27c1 "vers27b.o vers27a.so" "" vers27c.ver vers27c.dsym ""
 build_vers_lib_no_pic "vers27c2" vers27c.c vers27c2 "vers27a.so vers27b.o" "" vers27c.ver vers27c.dsym ""
+build_vers_lib_pic "vers27d1" vers27d1.c vers27d1 "" vers27a.map vers27d.ver vers27d.dsym vers27d.sym
+build_vers_lib_pic "vers27d2" vers27d2.c vers27d2 "" "" vers27b.ver vers27b.dsym ""
+build_executable "vers27d3" vers27d3.c vers27d3 "vers27b.o vers27d2.so vers27d1.so" "" vers27b.ver vers27b.dsym ""

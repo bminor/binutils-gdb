@@ -1,3 +1,20 @@
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp (build_binary): Support build exeutable.
+	(build_binary): Renamed from ...
+	(build_vers_lib): This.
+	(build_vers_lib_no_pic): Updated.
+	(build_vers_lib_pic): Likewise.
+	Add vers27d1, vers27d2 and vers27d3 to test versioned
+	definition for hidden symbol referenced by a DSO.
+
+	* ld-elfvers/vers27d.dsym: New file.
+	* ld-elfvers/vers27d.sym: Likewise.
+	* ld-elfvers/vers27d.ver: Likewise.
+	* ld-elfvers/vers27d1.c: Likewise.
+	* ld-elfvers/vers27d2.c: Likewise.
+	* ld-elfvers/vers27d3.c: Likewise.
+
 2003-05-07  Andreas Schwab  <schwab@suse.de>
 
 	* ld-elfvsb/elfvsb.exp: Run dump tests even when cross
