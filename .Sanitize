@@ -271,7 +271,7 @@ else
 fi
 
 if [ -n "${verbose}" ] ; then
-	echo Processing \"m32r\"...
+	echo Processing \"v850\"...
 fi
 
 v850_files="ChangeLog config.sub configure.in"
