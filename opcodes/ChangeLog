@@ -1,3 +1,16 @@
+2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* configure.in: Added bfd_tic4x_arch.
+	* configure: Regenerate.
+	* Makefile.am: Added tic4x-dis.o target.
+	* Makefile.in: Regenerate.
+
+2002-08-28  Michael Hayes <m.hayes@elec.canterbury.ac.nz>
+
+	* disassemble.c: Added tic4x target and c4x
+	disassembler routine.
+	* tic4x-dis.c: New file.
+
 2002-08-16  Christian Groessler <chris@groessler.org>
 
 	* z8k-dis.c (unparse_instr): case CLASS_BA: Designate hex

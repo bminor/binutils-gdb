@@ -273,6 +273,9 @@ bfd_format;
 /* This flag indicates that the BFD contents are actually cached in
    memory.  If this is set, iostream points to a bfd_in_memory struct.  */
 #define BFD_IN_MEMORY 0x800
+ 
+/* The sections in this BFD specify a memory page */
+#define HAS_LOAD_PAGE 0x1000
 
 /* Symbols and relocation.  */
 
@@ -1618,6 +1621,9 @@ enum bfd_architecture
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
+  bfd_arch_tic4x,     /* Texas Instruments TMS320C3X/4X */
+#define bfd_mach_c3x           30
+#define bfd_mach_c4x           40
   bfd_arch_tic54x,    /* Texas Instruments TMS320C54X */
   bfd_arch_tic80,     /* TI TMS320c80 (MVP) */
   bfd_arch_v850,      /* NEC V850 */

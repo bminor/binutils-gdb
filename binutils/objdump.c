@@ -74,7 +74,8 @@ static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
 
 /* Extra info to pass to the disassembler address printing function.  */
-struct objdump_disasm_info {
+struct objdump_disasm_info
+{
   bfd *abfd;
   asection *sec;
   boolean require_sec;
@@ -369,6 +370,8 @@ dump_headers (abfd)
 
   if (wide_output)
     printf (_("  Flags"));
+  if (abfd->flags & HAS_LOAD_PAGE)
+    printf (_("  Pg"));
   printf ("\n");
 
   bfd_map_over_sections (abfd, dump_section_header, (PTR) NULL);
@@ -2002,6 +2005,7 @@ dump_bfd_header (abfd)
   PF (WP_TEXT, "WP_TEXT");
   PF (D_PAGED, "D_PAGED");
   PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
+  PF (HAS_LOAD_PAGE, "HAS_LOAD_PAGE");
   printf (_("\nstart address 0x"));
   bfd_printf_vma (abfd, abfd->start_address);
   printf ("\n");
@@ -2034,8 +2038,6 @@ dump_bfd (abfd)
 	}
     }
 
-  printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
-	  abfd->xvec->name);
   if (dump_ar_hdrs)
     print_arelt_descr (stdout, abfd, true);
   if (dump_file_header)
@@ -2045,14 +2047,12 @@ dump_bfd (abfd)
   putchar ('\n');
   if (dump_section_headers)
     dump_headers (abfd);
+
   if (dump_symtab || dump_reloc_info || disassemble || dump_debugging)
-    {
-      syms = slurp_symtab (abfd);
-    }
+    syms = slurp_symtab (abfd);
   if (dump_dynamic_symtab || dump_dynamic_reloc_info)
-    {
-      dynsyms = slurp_dynamic_symtab (abfd);
-    }
+    dynsyms = slurp_dynamic_symtab (abfd);
+
   if (dump_symtab)
     dump_symbols (abfd, false);
   if (dump_dynamic_symtab)
@@ -2082,11 +2082,13 @@ dump_bfd (abfd)
 	    }
 	}
     }
+
   if (syms)
     {
       free (syms);
       syms = NULL;
     }
+
   if (dynsyms)
     {
       free (dynsyms);

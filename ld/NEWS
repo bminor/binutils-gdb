@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for Texas Instruments TMS320C4x series of microcontrollers
+  contributed by Michael Hayes and Svein E. Seldal.
+  
 * Added --with-lib-path configure switch to specify default value for
   LIB_PATH.
 

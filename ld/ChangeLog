@@ -1,3 +1,18 @@
+2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* Makefile.am: Add etic4xcoff.o in ALL_EMULATIONS list and
+	added makefile targets for this file.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Added tic4x-coff and c4x-coff emulations.
+	* NEWS: Mention new port.
+
+2002-08-28  Michael Hayes <m.hayes@elec.canterbury.ac.nz>
+
+	* emulparams/tic3xcoff.sh: New file.
+	* emulparams/tic4xcoff.sh: New file.
+	* scripttempl/tic3xcoff.sc: New file.
+	* scripttempl/tic4xcoff.sc: New file.
+
 2002-08-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Replace strtoll,

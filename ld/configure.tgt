@@ -498,6 +498,7 @@ rs6000-*-aix5*)		targ_emul=aix5rs6 ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;
 tic30-*-*coff*)		targ_emul=tic30coff ;;
+tic4x-*-* | c4x-*-*)    targ_emul=tic4xcoff ;;
 tic54x-*-* | c54x*-*-*)	targ_emul=tic54xcoff ;;
 tic80-*-*)		targ_emul=tic80coff ;;
 v850-*-*)		targ_emul=v850 ;;

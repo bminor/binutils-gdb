@@ -1,3 +1,22 @@
+2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config.bfd: Add tic4x-*-*coff* and c4x-*-*coff* target.
+	* configure.in: Add tic4x_coff vector files.
+	* configure: Regenerate.
+	* Makefile.am: Add tic4x target.
+	* Makefile.in: Regenerate.
+
+2002-08-27  Michael Hayes <m.hayes@elec.canterbury.ac.nz>
+
+	* archures.c: Add the BFD arch type tic4x.
+	* bfd-in.h: Add BFD_IN_MEMORY flag.
+	* coff-tic4x.c: New file.
+	* coffswap.h (coff_swap_sym_out): Add preadjuster.
+	* cpu-tic4x.c: New file.
+	* targets.c: Added tic4x- in list of xvecs.
+	* ticoff.h: New file.
+	* bfd-in2.h: Regenerate.
+
 2002-08-27  Adam Nemet  <anemet@lnxw.com>
 
 	* elf32-arm.h (elf32_arm_finish_dynamic_sections): Set the last

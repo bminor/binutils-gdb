@@ -741,6 +741,12 @@ do
     sunos_big_vec)		tb="$tb sunos.lo aout32.lo" ;;
     tic30_aout_vec)		tb="$tb aout-tic30.lo" ;;
     tic30_coff_vec)		tb="$tb coff-tic30.lo" ;;
+    tic4x_coff0_vec)            tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff0_beh_vec)        tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff1_vec)            tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff1_beh_vec)        tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff2_vec)            tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff2_beh_vec)        tb="$tb coff-tic4x.lo" ;;
     tic54x_coff0_beh_vec)	tb="$tb coff-tic54x.lo" ;;
     tic54x_coff0_vec)		tb="$tb coff-tic54x.lo" ;;
     tic54x_coff1_beh_vec)	tb="$tb coff-tic54x.lo" ;;

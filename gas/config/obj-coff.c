@@ -4623,8 +4623,8 @@ const pseudo_typeS coff_pseudo_table[] =
 #endif
   {"version", s_ignore, 0},
   {"ABORT", s_abort, 0},
-#ifdef TC_M88K
-  /* The m88k uses sdef instead of def.  */
+#if defined( TC_M88K ) || defined ( TC_TIC4X )
+  /* The m88k and tic4x uses sdef instead of def.  */
   {"sdef", obj_coff_def, 0},
 #endif
   {NULL, NULL, 0}		/* end sentinel */

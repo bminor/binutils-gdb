@@ -140,6 +140,7 @@ CFILES = \
 	sparc-dis.c \
 	sparc-opc.c \
 	tic30-dis.c \
+	tic4x-dis.c \
 	tic54x-dis.c \
 	tic54x-opc.c \
 	tic80-dis.c \
@@ -243,6 +244,7 @@ ALL_MACHINES = \
 	sparc-dis.lo \
 	sparc-opc.lo \
 	tic30-dis.lo \
+	tic4x-dis.lo \
 	tic54x-dis.lo \
 	tic54x-opc.lo \
 	tic80-dis.lo \
@@ -721,6 +723,8 @@ sparc-opc.lo: sparc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h
 tic30-dis.lo: tic30-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/tic30.h
+tic4x-dis.lo: tic4x-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic4x.h
 tic54x-dis.lo: tic54x-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/tic54x.h \
   $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/ti.h

@@ -1,3 +1,17 @@
+2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* configure.in: Add tic4x-coff* and c4x-coff*-coff-coff targets.
+	* configure: Regenerate.
+	* NEWS: Mention new port.
+
+2002-08-28  Michael Hayes <m.hayes@elec.canterbury.ac.nz>
+
+	* config/obj-coff.c: Add sdef definition.
+	* config/obj-coff.h: Add tic4x include file and set
+	target format.
+	* config/tc-tic4x.c: New file.
+	* config/tc-tic4x.h: New file.
+
 2002-08-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (BFD_FAST_SECTION_FILL): Remove unused macro.
