@@ -35,7 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    causing GDB to lose line number information.  Since prior to this
    switch and a other recent tweaks, 64 bit PA hadn't been building
    for some months, this is probably the lesser of several evils.  */
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 #include "pa/tm-hppah.h"
 

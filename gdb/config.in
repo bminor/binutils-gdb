@@ -167,9 +167,6 @@
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
 
-/* Multi-arch enabled. */
-#undef GDB_MULTI_ARCH
-
 /* hostfile */
 #undef GDB_XM_FILE
 

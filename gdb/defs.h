@@ -1086,14 +1086,17 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
+/* Is GDB multi-arch?  If there's a "tm.h" file, it is not.  */
+#ifndef GDB_MULTI_ARCH
+#ifdef GDB_TM_FILE
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+#else
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PURE
+#endif
+#endif
+
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
-#if (GDB_MULTI_ARCH == 0)
-/* Multi-arch targets _should_ be including "arch-utils.h" directly
-   into their *-tdep.c file.  This is a prop to help old non-
-   multi-arch targets to continue to compile. */
-#include "arch-utils.h"
-#endif
 
 /* Maximum size of a register.  Something small, but large enough for
    all known ISAs.  If it turns out to be too small, make it bigger.  */

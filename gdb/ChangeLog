@@ -1,3 +1,30 @@
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h: Do not include "arch-utils.h".
+	(GDB_MULTI_ARCH): If not defined, set to GDB_MULTI_ARCH_PARTIAL or
+	GDB_MULTI_ARCH_PURE.
+	* configure.in (GDB_MULTI_ARCH): Do not define.
+	* configure, config.in: Regenerate.
+	* configure.tgt: Do not set variable "gdb_multi_arch".
+	* config/s390/s390x.mt (GDB_MULTI_ARCH): Delete.
+	* config/s390/s390.mt (GDB_MULTI_ARCH): Delete.
+	* config/i386/x86-64linux.mt (GDB_MULTI_ARCH): Delete.
+	* config/v850/v850.mt (TM_FILE): Delete disabled definition.
+	* config/m68hc11/m68hc11.mt (TM_FILE): Delete definition.
+	* config/vax/tm-vax.h (GDB_MULTI_ARCH): Delete definition.
+	* config/sparc/tm-sparc.h (GDB_MULTI_ARCH): Delete definition.
+	* config/sparc/tm-sun4sol2.h (GDB_MULTI_ARCH): Delete definition.
+	* config/sparc/tm-nbsd.h (GDB_MULTI_ARCH): Delete definition.
+	* config/sparc/tm-linux.h (GDB_MULTI_ARCH): Delete definition.
+	* config/sparc/tm-sp64.h (GDB_MULTI_ARCH): Delete definition.
+	* config/pa/tm-hppa64.h (GDB_MULTI_ARCH): Delete definition.
+	* config/ns32k/tm-ns32k.h (GDB_MULTI_ARCH): Delete definition.
+	* config/m68k/tm-m68k.h (GDB_MULTI_ARCH): Delete definition.
+	* config/i386/tm-i386.h (GDB_MULTI_ARCH): Delete definition.
+	* config/h8300/tm-h8300.h (GDB_MULTI_ARCH): Delete definition.
+	* config/frv/tm-frv.h (GDB_MULTI_ARCH): Delete definition.
+	* config/alpha/tm-alpha.h (GDB_MULTI_ARCH): Delete definition.
+	
 2003-08-30  Michael Chastain  <mec@shout.net>
 
 	* Makefile.in: Remove tm-hp300bsd.h, tm-hp300hpux.h.

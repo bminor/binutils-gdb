@@ -50,8 +50,7 @@ arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
-arm*-*-netbsd*)		gdb_target=nbsd
-			gdb_multi_arch=yes ;;
+arm*-*-netbsd*)		gdb_target=nbsd ;;
 arm-*-nto*)		gdb_target=nto ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
@@ -61,9 +60,7 @@ xscale-*-*)		gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
 
-avr-*-*)		gdb_target=avr
-			gdb_multi_arch=yes
-			;;
+avr-*-*)		gdb_target=avr ;;
 
 cris*)                  gdb_target=cris ;;
 
@@ -131,7 +128,6 @@ m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
 m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-linux*)		gdb_target=linux
-			gdb_multi_arch=1
 			build_gdbserver=yes
 			;;
 m68*-*-lynxos*)		gdb_target=m68klynx ;;
@@ -264,21 +260,6 @@ x86_64-*-linux*)	gdb_target=x86-64linux
 
 # OBSOLETE z8k-*-coff*)		gdb_target=z8k ;;
 
-esac
-
-
-# map GDB target onto multi-arch support
-
-case "${gdb_target}" in
-d10v)		gdb_multi_arch=yes ;;
-fbsd64)		gdb_multi_arch=yes ;;
-m32r)		gdb_multi_arch=yes ;;
-m68hc11)	gdb_multi_arch=yes ;;
-mn10300)	gdb_multi_arch=yes ;;
-x86-64linux)    gdb_multi_arch=yes ;;
-v850)           gdb_multi_arch=yes ;;
-xstormy16)      gdb_multi_arch=yes ;;
-mcore)		gdb_multi_arch=yes ;;
 esac
 
 # map target onto default OS ABI

@@ -25,8 +25,6 @@
 
 struct type;
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 #ifndef GDB_TARGET_IS_SPARC64
 #define GDB_TARGET_IS_SPARC64 1
 #endif
