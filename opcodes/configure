@@ -681,7 +681,7 @@ fi
 
 # host-specific stuff:
 
-ALLIBS='$(TARGETLIB)'
+ALLLIBS='$(TARGETLIB)'
 PICFLAG=
 SHLIB=
 SHLINK=
