@@ -1,3 +1,8 @@
+2000-11-03  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* objfiles.c (objfile_relocate):  Relocate ei.entry_point with
+	its section offset, use SECT_OFF_TEXT only as a fallback.
+
 2000-11-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* symm-nat.c (print_1167_regs): Remove extraneous blank line

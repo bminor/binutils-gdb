@@ -642,6 +642,18 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
       (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
   }
 
+  if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
+    {
+      /* Relocate ei.entry_point with its section offset, use SECT_OFF_TEXT
+	 only as a fallback.  */
+      struct obj_section *s;
+      s = find_pc_section (objfile->ei.entry_point);
+      if (s)
+        objfile->ei.entry_point += ANOFFSET (delta, s->the_bfd_section->index);
+      else
+        objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+    }
+
   {
     struct obj_section *s;
     bfd *abfd;
@@ -656,9 +668,6 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	s->endaddr += ANOFFSET (delta, idx);
       }
   }
-
-  if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
-    objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
 
   if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)
     {
