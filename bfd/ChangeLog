@@ -1,3 +1,9 @@
+1999-08-09  Geoff Keating  <geoffk@cygnus.com>
+
+	* elflink.h (elf_link_output_extsym): Don't output a weak
+	reference to an undefined symbol just because it was defined weak
+	in a shared object.
+
 1999-08-09  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* coffgen.c (coff_find_nearest_line): When looking for file, use

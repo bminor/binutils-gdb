@@ -4840,14 +4840,23 @@ elf_link_output_extsym (h, data)
 
   /* If we are marking the symbol as undefined, and there are no
      non-weak references to this symbol from a regular object, then
-     mark the symbol as weak undefined.  We can't do this earlier,
+     mark the symbol as weak undefined; if there are non-weak
+     references, mark the symbol as strong.  We can't do this earlier,
      because it might not be marked as undefined until the
      finish_dynamic_symbol routine gets through with it.  */
   if (sym.st_shndx == SHN_UNDEF
-      && sym.st_info == ELF_ST_INFO (STB_GLOBAL, h->type)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK) == 0)
-    sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
+      && (ELF_ST_BIND(sym.st_info) == STB_GLOBAL
+	  || ELF_ST_BIND(sym.st_info) == STB_WEAK))
+    {
+      int bindtype;
+
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK) != 0)
+	bindtype = STB_GLOBAL;
+      else
+	bindtype = STB_WEAK;
+      sym.st_info = ELF_ST_INFO (bindtype, ELF_ST_TYPE (sym.st_info));
+    }
 
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We have already know the symbol index.  We also fill
