@@ -1100,9 +1100,6 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   const char *secname;
   char *dollar = NULL;
 
-  if ((s->flags & SEC_ALLOC) == 0)
-    return false;
-
   secname = bfd_get_section_name (s->owner, s);
 
   /* Look through the script to see where to place this section.  */
@@ -1199,8 +1196,8 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
       stat_ptr = &add;
       lang_list_init (stat_ptr);
 
-      if (link_info.relocateable)
-	address = NULL;
+      if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+	address = exp_intop ((bfd_vma) 0);
       else
 	{
 	  /* All sections in an executable must be aligned to a page

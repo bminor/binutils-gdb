@@ -895,9 +895,6 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   const char *outsecname;
   lang_output_section_statement_type *os;
 
-  if ((s->flags & SEC_ALLOC) == 0)
-    return false;
-
   /* Look through the script to see where to place this section.  */
   hold_section = s;
   hold_use = NULL;
@@ -951,7 +948,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	   && hold_text.os != NULL)
     place = &hold_text;
   else
-    return false;
+    place = NULL;
 
   /* Choose a unique name for the section.  This will be needed if the
      same section name appears in the input file with different
@@ -983,7 +980,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   if (snew == NULL)
       einfo ("%P%F: output format %s cannot represent section called %s\n",
 	     output_bfd->xvec->name, outsecname);
-  if (place->os->bfd_section != NULL)
+  if (place != NULL && place->os->bfd_section != NULL)
     {
       /* Unlink it first.  */
       for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
@@ -1018,10 +1015,10 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 							   << s->alignment_power))));
     }
 
-  if (! link_info.relocateable)
-    address = NULL;
-  else
+  if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop ((bfd_vma) 0);
+  else
+    address = NULL;
 
   lang_enter_output_section_statement (outsecname, address, 0,
 				       (bfd_vma) 0,
@@ -1047,20 +1044,22 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 				      exp_nameop (NAME, ".")));
     }
 
-  if (! place->stmt)
+  if (place != NULL)
     {
-      /* Put the new statement list right at the head.  */
-      *add.tail = place->os->header.next;
-      place->os->header.next = add.head;
+      if (! place->stmt)
+	{
+	  /* Put the new statement list right at the head.  */
+	  *add.tail = place->os->header.next;
+	  place->os->header.next = add.head;
+	}
+      else
+	{
+	  /* Put it after the last orphan statement we added.  */
+	  *add.tail = *place->stmt;
+	  *place->stmt = add.head;
+	}
+      place->stmt = add.tail;	/* Save the end of this list.  */
     }
-  else
-    {
-      /* Put it after the last orphan statement we added.  */
-      *add.tail = *place->stmt;
-      *place->stmt = add.head;
-    }
-  place->stmt = add.tail;	/* Save the end of this list.  */
-
   stat_ptr = old;
 
   return true;

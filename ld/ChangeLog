@@ -1,3 +1,11 @@
+2000-04-14  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Process
+	~SEC_ALLOC sections too.  Init start address of debug sections.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_place_section): Ditto.
+	* emultempl/pe.em (gld${EMULATION_NAME}_place_section): Ditto.
+	Also set all relocateable section start addresses.
+
 2000-04-13  Geoff Keating  <geoffk@cygnus.com>
 
 	* scripttempl/elf.sc: Add support for .sbss2 and .sdata2 sections.
@@ -216,11 +224,11 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* ldgram.y: Handle LMA region syntax.
 	* ld.texinfo (Output Section Description): Describe LMA region usage.
 	* emultempl/armelf.em (gld$place_orphan): Add default value for
-	lma region in call to lang_leave_output_statement.
+	lma region in call to lang_leave_output_section_statement.
 	* emultempl/elf32.em (gld$place_orphan): Add default value for
-	lma region in call to lang_leave_output_statement.
+	lma region in call to lang_leave_output_section_statement.
 	* emultempl/pe.em (gld$place_orphan): Add default value for
-	lma region in call to lang_leave_output_statement.
+	lma region in call to lang_leave_output_section_statement.
 	
 	
 2000-02-04  Timothy Wall  <twall@redhat.com>
