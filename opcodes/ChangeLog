@@ -1,3 +1,9 @@
+2003-08-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add nl.
+	* configure: Regenerate.
+	* po/nl.po: New Dutch translation.
+
 2003-07-30  Jason Eckhardt  <jle@rice.edu>
 
         * i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
