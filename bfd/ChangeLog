@@ -1,3 +1,8 @@
+Thu Feb  9 12:02:35 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_bfd_final_link): Add assertion to make sure that
+	dynamic and dynobj are in synch.
+
 Wed Feb  8 17:26:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* linker.c (generic_link_check_archive_element): Allocate common
