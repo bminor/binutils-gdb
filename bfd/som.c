@@ -118,6 +118,11 @@ static unsigned int som_get_symtab_upper_bound PARAMS ((bfd *));
 static unsigned int som_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 						    arelent **, asymbol **));
 static unsigned int som_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+static unsigned int som_set_reloc_info PARAMS ((unsigned char *, unsigned int,
+						arelent *, asection *,
+						asymbol **, boolean));
+static boolean som_slurp_reloc_table PARAMS ((bfd *, asection *,
+					      asymbol **, boolean));
 static unsigned int som_get_symtab PARAMS ((bfd *, asymbol **));
 static asymbol * som_make_empty_symbol PARAMS ((bfd *));
 static void som_print_symbol PARAMS ((bfd *, PTR,
@@ -177,6 +182,438 @@ static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
 static boolean som_begin_writing PARAMS ((bfd *));
 static const reloc_howto_type * som_bfd_reloc_type_lookup
 	PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
+
+/* About the relocation formatting table...
+
+   There are 256 entries in the table, one for each possible
+   relocation opcode available in SOM.  We index the table by
+   the relocation opcode.  The names and operations are those
+   defined by a.out_800 (4).
+
+   Right now this table is only used to count and perform minimal
+   processing on relocation streams so that they can be internalized
+   into BFD and symbolically printed by utilities.  To make actual use 
+   of them would be much more difficult, BFD's concept of relocations
+   is far too simple to handle SOM relocations.  The basic assumption
+   that a relocation can be completely processed independent of other
+   relocations before an object file is written is invalid for SOM.
+
+   The SOM relocations are meant to be processed as a stream, they
+   specify copying of data from the input section to the output section
+   while possibly modifying the data in some manner.  They also can 
+   specify that a variable number of zeros or uninitialized data be
+   inserted on in the output segment at the current offset.  Some
+   relocations specify that some previous relocation be re-applied at
+   the current location in the input/output sections.  And finally a number
+   of relocations have effects on other sections (R_ENTRY, R_EXIT,
+   R_UNWIND_AUX and a variety of others).  There isn't even enough room
+   in the BFD relocation data structure to store enough information to
+   perform all the relocations.
+
+   Each entry in the table has three fields. 
+
+   The first entry is an index into this "class" of relocations.  This
+   index can then be used as a variable within the relocation itself.
+
+   The second field is a format string which actually controls processing
+   of the relocation.  It uses a simple postfix machine to do calculations
+   based on variables/constants found in the string and the relocation
+   stream.  
+
+   The third field specifys whether or not this relocation may use 
+   a constant (V) from the previous R_DATA_OVERRIDE rather than a constant
+   stored in the instruction.
+
+   Variables:  
+  
+   L = input space byte count
+   D = index into class of relocations
+   M = output space byte count
+   N = statement number (unused?)
+   O = stack operation
+   R = parameter relocation bits
+   S = symbol index
+   U = 64 bits of stack unwind and frame size info (we only keep 32 bits)
+   V = a literal constant (usually used in the next relocation)
+   P = a previous relocation
+  
+   Lower case letters (starting with 'b') refer to following 
+   bytes in the relocation stream.  'b' is the next 1 byte,
+   c is the next 2 bytes, d is the next 3 bytes, etc...  
+   This is the variable part of the relocation entries that
+   makes our life a living hell.
+
+   numerical constants are also used in the format string.  Note
+   the constants are represented in decimal. 
+
+   '+', "*" and "=" represents the obvious postfix operators.
+   '<' represents a left shift. 
+
+   Stack Operations:
+
+   Parameter Relocation Bits:
+
+   Unwind Entries:  
+   
+   Previous Relocations:  The index field represents which in the queue
+   of 4 previous fixups should be re-applied.
+
+   Literal Constants:  These are generally used to represent addend
+   parts of relocations when these constants are not stored in the
+   fields of the instructions themselves.  For example the instruction
+   addil foo-$global$-0x1234 would use an override for "0x1234" rather
+   than storing it into the addil itself.  */
+
+struct fixup_format
+{
+  int D;
+  char *format;
+};
+
+static const struct fixup_format som_fixup_formats[256] =
+{
+  /* R_NO_RELOCATION */
+  0,   "LD1+4*=",       /* 0x00 */
+  1,   "LD1+4*=",	/* 0x01 */
+  2,   "LD1+4*=",	/* 0x02 */
+  3,   "LD1+4*=",	/* 0x03 */
+  4,   "LD1+4*=",	/* 0x04 */
+  5,   "LD1+4*=",	/* 0x05 */
+  6,   "LD1+4*=",	/* 0x06 */
+  7,   "LD1+4*=",	/* 0x07 */
+  8,   "LD1+4*=",	/* 0x08 */
+  9,   "LD1+4*=",	/* 0x09 */
+  10,  "LD1+4*=",	/* 0x0a */
+  11,  "LD1+4*=",	/* 0x0b */
+  12,  "LD1+4*=",	/* 0x0c */
+  13,  "LD1+4*=",	/* 0x0d */
+  14,  "LD1+4*=",	/* 0x0e */
+  15,  "LD1+4*=",	/* 0x0f */
+  16,  "LD1+4*=",	/* 0x10 */
+  17,  "LD1+4*=",	/* 0x11 */
+  18,  "LD1+4*=",	/* 0x12 */
+  19,  "LD1+4*=",	/* 0x13 */
+  20,  "LD1+4*=",	/* 0x14 */
+  21,  "LD1+4*=",	/* 0x15 */
+  22,  "LD1+4*=",	/* 0x16 */
+  23,  "LD1+4*=",	/* 0x17 */
+  0,   "LD8<b+1+4*=",	/* 0x18 */
+  1,   "LD8<b+1+4*=",	/* 0x19 */
+  2,   "LD8<b+1+4*=",	/* 0x1a */
+  3,   "LD8<b+1+4*=",	/* 0x1b */
+  0,   "LD16<c+1+4*=",	/* 0x1c */
+  1,   "LD16<c+1+4*=",	/* 0x1d */
+  2,   "LD16<c+1+4*=",	/* 0x1e */
+  0,   "Ld1+=",         /* 0x1f */
+  /* R_ZEROES */
+  0,    "Lb1+4*=",	/* 0x20 */
+  1,    "Ld1+=",	/* 0x21 */
+  /* R_UNINIT */
+  0,    "Lb1+4*=",	/* 0x22 */
+  1,    "Ld1+=",	/* 0x23 */
+  /* R_RELOCATION */
+  0,    "L4=",          /* 0x24 */
+  /* R_DATA_ONE_SYMBOL */
+  0,    "L4=Sb=",	/* 0x25 */
+  1,    "L4=Sd=",	/* 0x26 */
+  /* R_DATA_PLEBEL */
+  0,    "L4=Sb=",	/* 0x27 */
+  1,    "L4=Sd=",	/* 0x28 */
+  /* R_SPACE_REF */
+  0,    "L4=",          /* 0x29 */
+  /* R_REPEATED_INIT */
+  0,    "L4=Mb1+4*=",	/* 0x2a */
+  1,    "Lb4*=Mb1+L*=",	/* 0x2b */
+  2,    "Lb4*=Md1+4*=",	/* 0x2c */
+  3,    "Ld1+=Me1+=",	/* 0x2d */
+  /* R_RESERVED */
+  0,   	"",	        /* 0x2e */
+  0,   	"",	        /* 0x2f */
+  /* R_PCREL_CALL */
+  0,    "L4=RD=Sb=",	/* 0x30 */
+  1,    "L4=RD=Sb=",	/* 0x31 */
+  2,    "L4=RD=Sb=",	/* 0x32 */
+  3,    "L4=RD=Sb=",	/* 0x33 */
+  4,    "L4=RD=Sb=",	/* 0x34 */
+  5,    "L4=RD=Sb=",	/* 0x35 */
+  6,    "L4=RD=Sb=",	/* 0x36 */
+  7,    "L4=RD=Sb=",	/* 0x37 */
+  8,    "L4=RD=Sb=",	/* 0x38 */
+  9,    "L4=RD=Sb=",	/* 0x39 */
+  0,    "L4=RD8<b+=Sb=",/* 0x3a */
+  1,    "L4=RD8<b+=Sb=",/* 0x3b */
+  0,    "L4=RD8<b+=Sd=",/* 0x3c */
+  1,    "L4=RD8<b+=Sd=",/* 0x3d */
+  /* R_RESERVED */
+  0,    "",	        /* 0x3e */
+  0,    "",	        /* 0x3f */
+  /* R_ABS_CALL */
+  0,    "L4=RD=Sb=",	/* 0x40 */
+  1,    "L4=RD=Sb=",	/* 0x41 */
+  2,    "L4=RD=Sb=",	/* 0x42 */
+  3,    "L4=RD=Sb=",	/* 0x43 */
+  4,    "L4=RD=Sb=",	/* 0x44 */
+  5,    "L4=RD=Sb=",	/* 0x45 */
+  6,    "L4=RD=Sb=",	/* 0x46 */
+  7,    "L4=RD=Sb=",	/* 0x47 */
+  8,    "L4=RD=Sb=",	/* 0x48 */
+  9,    "L4=RD=Sb=",	/* 0x49 */
+  0,    "L4=RD8<b+=Sb=",/* 0x4a */
+  1,    "L4=RD8<b+=Sb=",/* 0x4b */
+  0,    "L4=RD8<b+=Sd=",/* 0x4c */
+  1,    "L4=RD8<b+=Sd=",/* 0x4d */
+  /* R_RESERVED */
+  0,     "",	        /* 0x4e */
+  0,     "",	        /* 0x4f */
+  /* R_DP_RELATIVE */
+  0,    "L4=SD=",	/* 0x50 */
+  1,    "L4=SD=",	/* 0x51 */
+  2,    "L4=SD=",	/* 0x52 */
+  3,    "L4=SD=",	/* 0x53 */
+  4,    "L4=SD=",	/* 0x54 */
+  5,    "L4=SD=",	/* 0x55 */
+  6,    "L4=SD=",	/* 0x56 */
+  7,    "L4=SD=",	/* 0x57 */
+  8,    "L4=SD=",	/* 0x58 */
+  9,    "L4=SD=",	/* 0x59 */
+  10,   "L4=SD=",	/* 0x5a */
+  11,   "L4=SD=",	/* 0x5b */
+  12,   "L4=SD=",	/* 0x5c */
+  13,   "L4=SD=",	/* 0x5d */
+  14,   "L4=SD=",	/* 0x5e */
+  15,   "L4=SD=",	/* 0x5f */
+  16,   "L4=SD=",	/* 0x60 */
+  17,   "L4=SD=",	/* 0x61 */
+  18,   "L4=SD=",	/* 0x62 */
+  19,   "L4=SD=",	/* 0x63 */
+  20,   "L4=SD=",	/* 0x64 */
+  21,   "L4=SD=",	/* 0x65 */
+  22,   "L4=SD=",	/* 0x66 */
+  23,   "L4=SD=",	/* 0x67 */
+  24,   "L4=SD=",	/* 0x68 */
+  25,   "L4=SD=",	/* 0x69 */
+  26,   "L4=SD=",	/* 0x6a */
+  27,   "L4=SD=",	/* 0x6b */
+  28,   "L4=SD=",	/* 0x6c */
+  29,   "L4=SD=",	/* 0x6d */
+  30,   "L4=SD=",	/* 0x6e */
+  31,   "L4=SD=",	/* 0x6f */
+  32,   "L4=Sb=",	/* 0x70 */
+  33,   "L4=Sd=",	/* 0x71 */
+  /* R_RESERVED */
+  0,    "",	        /* 0x72 */
+  0,    "",	        /* 0x73 */
+  0,    "",	        /* 0x74 */
+  0,    "",	        /* 0x75 */
+  0,    "",	        /* 0x76 */
+  0,    "",      	/* 0x77 */
+  /* R_DLT_REL */
+  0,    "L4=Sb=",	/* 0x78 */
+  1,    "L4=Sd=",	/* 0x79 */
+  /* R_RESERVED */
+  0,    "",        	/* 0x7a */
+  0,    "",	        /* 0x7b */
+  0,    "",	        /* 0x7c */
+  0,    "",	        /* 0x7d */
+  0,    "",	        /* 0x7e */
+  0,    "",	        /* 0x7f */
+  /* R_CODE_ONE_SYMBOL */
+  0,    "L4=SD=",	/* 0x80 */
+  1,    "L4=SD=",	/* 0x81 */
+  2,    "L4=SD=",	/* 0x82 */
+  3,    "L4=SD=",	/* 0x83 */
+  4,    "L4=SD=",	/* 0x84 */
+  5,    "L4=SD=",	/* 0x85 */
+  6,    "L4=SD=",	/* 0x86 */
+  7,    "L4=SD=",	/* 0x87 */
+  8,    "L4=SD=",	/* 0x88 */
+  9,    "L4=SD=",	/* 0x89 */
+  10,   "L4=SD=",	/* 0x8q */
+  11,   "L4=SD=",	/* 0x8b */
+  12,   "L4=SD=",	/* 0x8c */
+  13,   "L4=SD=",	/* 0x8d */
+  14,   "L4=SD=",	/* 0x8e */
+  15,   "L4=SD=",	/* 0x8f */
+  16,   "L4=SD=",	/* 0x90 */
+  17,   "L4=SD=",	/* 0x91 */
+  18,   "L4=SD=",	/* 0x92 */
+  19,   "L4=SD=",	/* 0x93 */
+  20,   "L4=SD=",	/* 0x94 */
+  21,   "L4=SD=",	/* 0x95 */
+  22,   "L4=SD=",	/* 0x96 */
+  23,   "L4=SD=",	/* 0x97 */
+  24,   "L4=SD=",	/* 0x98 */
+  25,   "L4=SD=",	/* 0x99 */
+  26,   "L4=SD=",	/* 0x9a */
+  27,   "L4=SD=",	/* 0x9b */
+  28,   "L4=SD=",	/* 0x9c */
+  29,   "L4=SD=",	/* 0x9d */
+  30,   "L4=SD=",	/* 0x9e */
+  31,   "L4=SD=",	/* 0x9f */
+  32,   "L4=Sb=",	/* 0xa0 */
+  33,   "L4=Sd=",	/* 0xa1 */
+  /* R_RESERVED */
+  0,    "",	        /* 0xa2 */
+  0,    "",	        /* 0xa3 */
+  0,    "",	        /* 0xa4 */
+  0,    "",	        /* 0xa5 */
+  0,    "",	        /* 0xa6 */
+  0,    "",	        /* 0xa7 */
+  0,    "",	        /* 0xa8 */
+  0,    "",	        /* 0xa9 */
+  0,    "",	        /* 0xaa */
+  0,    "",	        /* 0xab */
+  0,    "",	        /* 0xac */
+  0,    "",	        /* 0xad */
+  /* R_MILLI_REL */
+  0,    "L4=Sb=",	/* 0xae */
+  1,    "L4=Sd=",	/* 0xaf */
+  /* R_CODE_PLABEL */
+  0,    "L4=Sb=",	/* 0xb0 */
+  1,    "L4=Sd=",	/* 0xb1 */
+  /* R_BREAKPOINT */
+  0,    "L4=",	        /* 0xb2 */
+  /* R_ENTRY */
+  0,    "Ui=",	        /* 0xb3 */
+  1,    "Uf=",	        /* 0xb4 */
+  /* R_ALT_ENTRY */
+  0,    "",	        /* 0xb5 */
+  /* R_EXIT */
+  0,    "",		/* 0xb6 */
+  /* R_BEGIN_TRY */
+  0,    "",	        /* 0xb7 */
+  /* R_END_TRY */
+  0,    "R0=",	        /* 0xb8 */
+  1,    "Rb4*=",	/* 0xb9 */
+  2,    "Rd4*=",	/* 0xba */
+  /* R_BEGIN_BRTAB */
+  0,    "",	        /* 0xbb */
+  /* R_END_BRTAB */
+  0,    "",	        /* 0xbc */
+  /* R_STATEMENT */
+  0,    "Nb=",	        /* 0xbd */
+  1,    "Nc=",	        /* 0xbe */
+  2,    "Nd=",	        /* 0xbf */
+  /* R_DATA_EXPR */
+  0,    "L4=",	        /* 0xc0 */
+  /* R_CODE_EXPR */
+  0,    "L4=",	        /* 0xc1 */
+  /* R_FSEL */
+  0,    "",		/* 0xc2 */
+  /* R_LSEL */
+  0,    "",		/* 0xc3 */
+  /* R_RSEL */
+  0,    "",		/* 0xc4 */
+  /* R_N_MODE */
+  0,    "",		/* 0xc5 */
+  /* R_S_MODE */
+  0,    "",		/* 0xc6 */
+  /* R_D_MODE */
+  0,    "",		/* 0xc7 */
+  /* R_R_MODE */
+  0,    "",		/* 0xc8 */
+  /* R_DATA_OVERRIDE */
+  0,    "V0=",	        /* 0xc9 */
+  1,    "Vb=",	        /* 0xca */
+  2,    "Vc=",	        /* 0xcb */
+  3,    "Vd=",	        /* 0xcc */
+  4,    "Ve=",	        /* 0xcd */
+  /* R_TRANSLATED */
+  0,    "",	        /* 0xce */
+  /* R_RESERVED */
+  0,    "",	        /* 0xcf */
+  /* R_COMP1 */
+  0,    "Ob=",	        /* 0xd0 */
+  /* R_COMP2 */
+  0,    "Ob=Sd=",	/* 0xd1 */
+  /* R_COMP3 */
+  0,    "Ob=Ve=",	/* 0xd2 */
+  /* R_PREV_FIXUP */
+  0,    "P",   	        /* 0xd3 */
+  1,    "P",	        /* 0xd4 */
+  2,    "P",	        /* 0xd5 */
+  3,    "P",	        /* 0xd6 */
+  /* R_RESERVED */
+  0,	"",		/* 0xd7 */
+  0,	"",		/* 0xd8 */
+  0,	"",		/* 0xd9 */
+  0,	"",		/* 0xda */
+  0,	"",		/* 0xdb */
+  0,	"",		/* 0xdc */
+  0,	"",		/* 0xdd */
+  0,	"",		/* 0xde */
+  0,	"",		/* 0xdf */
+  0,	"",		/* 0xe0 */
+  0,	"",		/* 0xe1 */
+  0,	"",		/* 0xe2 */
+  0,	"",		/* 0xe3 */
+  0,	"",		/* 0xe4 */
+  0,	"",		/* 0xe5 */
+  0,	"",		/* 0xe6 */
+  0,	"",		/* 0xe7 */
+  0,	"",		/* 0xe8 */
+  0,	"",		/* 0xe9 */
+  0,	"",		/* 0xea */
+  0,	"",		/* 0xeb */
+  0,	"",		/* 0xec */
+  0,	"",		/* 0xed */
+  0,	"",		/* 0xee */
+  0,	"",		/* 0xef */
+  0,	"",		/* 0xf0 */
+  0,	"",		/* 0xf1 */
+  0,	"",		/* 0xf2 */
+  0,	"",		/* 0xf3 */
+  0,	"",		/* 0xf4 */
+  0,	"",		/* 0xf5 */
+  0,	"",		/* 0xf6 */
+  0,	"",		/* 0xf7 */
+  0,	"",		/* 0xf8 */
+  0,	"",		/* 0xf9 */
+  0,	"",		/* 0xfa */
+  0,	"",		/* 0xfb */
+  0,	"",		/* 0xfc */
+  0,	"",		/* 0xfd */
+  0,	"",		/* 0xfe */
+  0,	"",		/* 0xff */
+};
+
+static const int comp1_opcodes[] =
+{
+  0x00,
+  0x40,
+  0x41,
+  0x42,
+  0x43,
+  0x44,
+  0x45,
+  0x46,
+  0x47,
+  0x48,
+  0x49,
+  0x4a,
+  0x4b,
+  0x60,
+  0x80,
+  0xa0,
+  0xc0,
+  -1
+};
+
+static const int comp2_opcodes[] =
+{
+  0x00,
+  0x80,
+  0x82,
+  0xc0,
+  -1
+};
+
+static const int comp3_opcodes[] =
+{
+  0x00,
+  0x02,
+  -1
+};
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -934,43 +1371,9 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
      struct header *file_hdrp;
      struct som_exec_auxhdr *aux_hdrp;
 {
-  asection *text, *data, *bss;
-
   /* som_mkobject will set bfd_error if som_mkobject fails.  */
   if (som_mkobject (abfd) != true)
     return 0;
-
-  /* Make the standard .text, .data, and .bss sections so that tools
-     which assume those names work (size for example).  They will have
-     no contents, but the sizes and such will reflect those of the
-     $CODE$, $DATA$, and $BSS$ subspaces respectively.
-
-     FIXME:  Should check return status from bfd_make_section calls below.  */
-
-  text = bfd_make_section (abfd, ".text");
-  data = bfd_make_section (abfd, ".data");
-  bss = bfd_make_section (abfd, ".bss");
-
-  text->_raw_size = aux_hdrp->exec_tsize;
-  data->_raw_size = aux_hdrp->exec_dsize;
-  bss->_raw_size = aux_hdrp->exec_bsize;
-
-  text->flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_CODE);
-  data->flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS);
-  bss->flags = (SEC_ALLOC | SEC_IS_COMMON);
-
-  /* The virtual memory addresses of the sections */
-  text->vma = aux_hdrp->exec_tmem;
-  data->vma = aux_hdrp->exec_dmem;
-  bss->vma = aux_hdrp->exec_bfill;
-
-  /* The file offsets of the sections */
-  text->filepos = aux_hdrp->exec_tfile;
-  data->filepos = aux_hdrp->exec_dfile;
-
-  /* The file offsets of the relocation info */
-  text->rel_filepos = 0;
-  data->rel_filepos = 0;
 
   /* Set BFD flags based on what information is available in the SOM.  */
   abfd->flags = NO_FLAGS;
@@ -1156,12 +1559,18 @@ setup_sections (abfd, file_hdr)
 	  
 	  if (subspace.dup_common || subspace.is_common) 
 	    subspace_asect->flags |= SEC_IS_COMMON;
-	  else
+	  else if (subspace.subspace_length > 0)
 	    subspace_asect->flags |= SEC_HAS_CONTENTS;
 	  if (subspace.is_loadable)
 	    subspace_asect->flags |= SEC_ALLOC | SEC_LOAD;
 	  if (subspace.code_only)
 	    subspace_asect->flags |= SEC_CODE;
+
+	  /* Both file_loc_init_value and initialization_length will
+	     be zero for a BSS like subspace.  */
+	  if (subspace.file_loc_init_value == 0
+	      && subspace.initialization_length == 0)
+	    subspace_asect->flags &= ~(SEC_DATA | SEC_LOAD);
 
 	  /* This subspace has relocations.
 	     The fixup_request_quantity is a byte count for the number of
@@ -1184,7 +1593,7 @@ setup_sections (abfd, file_hdr)
 
 	  subspace_asect->vma = subspace.subspace_start;
 	  subspace_asect->_cooked_size = subspace.subspace_length;
-	  subspace_asect->_raw_size = subspace.initialization_length;
+	  subspace_asect->_raw_size = subspace.subspace_length;
 	  subspace_asect->alignment_power = log2 (subspace.alignment);
 	  subspace_asect->filepos = subspace.file_loc_init_value;
 	}
@@ -2737,14 +3146,14 @@ som_slurp_symbol_table (abfd)
       switch (bufp->symbol_type)
 	{
 	case ST_ENTRY:
+	case ST_PRI_PROG:
+	case ST_SEC_PROG:
+	case ST_MILLICODE:
 	  sym->symbol.flags |= BSF_FUNCTION;
 	  sym->symbol.value &= ~0x3;
 	  break;
 
-	case ST_PRI_PROG:
-	case ST_SEC_PROG:
 	case ST_STUB:
-	case ST_MILLICODE:
 	case ST_CODE:
 	  sym->symbol.value &= ~0x3;
 
@@ -2783,9 +3192,10 @@ som_slurp_symbol_table (abfd)
 	}
 
       /* Mark symbols left around by the debugger.  */
-      if (strlen (sym->symbol.name) >= 3
+      if (strlen (sym->symbol.name) >= 2
 	  && sym->symbol.name[0] == 'L'
-	  && (sym->symbol.name[2] == '$' || sym->symbol.name[3] == '$'))
+	  && (sym->symbol.name[1] == '$' || sym->symbol.name[2] == '$'
+	      || sym->symbol.name[3] == '$'))
 	sym->symbol.flags |= BSF_DEBUGGING;
 
       /* Note increment at bottom of loop, since we skip some symbols
@@ -2872,16 +3282,345 @@ som_print_symbol (ignore_abfd, afile, symbol, how)
     }
 }
 
+/* Count or process variable-length SOM fixup records.
+
+   To avoid code duplication we use this code both to compute the number
+   of relocations requested by a stream, and to internalize the stream.
+
+   When computing the number of relocations requested by a stream the
+   variables rptr, section, and symbols have no meaning.
+
+   Return the number of relocations requested by the fixup stream.  When
+   not just counting 
+
+   This needs at least two or three more passes to get it cleaned up.  */
+
+static unsigned int
+som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
+     unsigned char *fixup;
+     unsigned int end;
+     arelent *internal_relocs;
+     asection *section;
+     asymbol **symbols;
+     boolean just_count;
+{
+  unsigned int op, varname;
+  unsigned char *end_fixups = &fixup[end];
+  const struct fixup_format *fp;
+  char *cp;
+  unsigned char *save_fixup;
+  int variables[26], stack[20], c, v, count, prev_fixup, *sp;
+  const int *subop;
+  arelent *rptr= internal_relocs;
+  unsigned int offset = just_count ? 0 : section->vma;
+
+#define	var(c)		variables[(c) - 'A']
+#define	push(v)		(*sp++ = (v))
+#define	pop()		(*--sp)
+#define	emptystack()	(sp == stack)
+
+  som_initialize_reloc_queue (reloc_queue);
+  bzero (variables, sizeof (variables));
+  bzero (stack, sizeof (stack));
+  count = 0;
+  prev_fixup = 0;
+  sp = stack;
+
+  while (fixup < end_fixups)
+    {
+
+      /* Save pointer to the start of this fixup.  We'll use
+	 it later to determine if it is necessary to put this fixup
+	 on the queue.  */
+      save_fixup = fixup;
+
+      /* Get the fixup code and its associated format.  */
+      op = *fixup++;
+      fp = &som_fixup_formats[op];
+
+      /* Handle a request for a previous fixup.  */
+      if (*fp->format == 'P')
+	{
+	  /* Get pointer to the beginning of the prev fixup, move
+	     the repeated fixup to the head of the queue.  */
+	  fixup = reloc_queue[fp->D].reloc;
+	  som_reloc_queue_fix (reloc_queue, fp->D);
+	  prev_fixup = 1;
+
+	  /* Get the fixup code and its associated format.  */
+	  op = *fixup++;
+	  fp = &som_fixup_formats[op];
+	}
+
+      /* If we are not just counting, set some reasonable defaults.  */
+      if (! just_count)
+	{
+	  rptr->address = offset;
+	  rptr->howto = &som_hppa_howto_table[op];
+	  rptr->addend = 0;
+	}
+
+      /* Set default input length to 0.  Get the opcode class index
+	 into D.  */
+      var ('L') = 0;
+      var ('D') = fp->D;
+
+      /* Get the opcode format.  */
+      cp = fp->format;
+
+      /* Process the format string.  Parsing happens in two phases,
+	 parse RHS, then assign to LHS.  Repeat until no more 
+	 characters in the format string.  */
+      while (*cp)
+	{
+	  /* The variable this pass is going to compute a value for.  */
+	  varname = *cp++;
+
+	  /* Start processing RHS.  Continue until a NULL or '=' is found.  */
+	  do
+	    {
+	      c = *cp++;
+
+	      /* If this is a variable, push it on the stack.  */
+	      if (isupper (c))
+		push (var (c));
+
+	      /* If this is a lower case letter, then it represents
+		 additional data from the fixup stream to be pushed onto
+		 the stack.  */
+	      else if (islower (c))
+		{
+		  for (v = 0; c > 'a'; --c)
+		    v = (v << 8) | *fixup++;
+		  push (v);
+		}
+
+	      /* A decimal constant.  Push it on the stack.  */
+	      else if (isdigit (c))
+		{
+		  v = c - '0';
+		  while (isdigit (*cp))
+		    v = (v * 10) + (*cp++ - '0');
+		  push (v);
+		}
+	      else
+
+		/* An operator.  Pop two two values from the stack and
+		   use them as operands to the given operation.  Push
+		   the result of the operation back on the stack.  */
+		switch (c)
+		  {
+		  case '+':
+		    v = pop ();
+		    v += pop ();
+		    push (v);
+		    break;
+		  case '*':
+		    v = pop ();
+		    v *= pop ();
+		    push (v);
+		    break;
+		  case '<':
+		    v = pop ();
+		    v = pop () << v;
+		    push (v);
+		    break;
+		  default:
+		    abort ();
+		  }
+	    }
+	  while (*cp && *cp != '=');
+
+	  /* Move over the equal operator.  */
+	  cp++;
+
+	  /* Pop the RHS off the stack.  */
+	  c = pop ();
+
+	  /* Perform the assignment.  */
+	  var (varname) = c;
+
+	  /* Handle side effects. and special 'O' stack cases.  */
+	  switch (varname)
+	    {
+	    /* Consume some bytes from the input space.  */
+	    case 'L':
+	      offset += c;
+	      break;
+	    /* A symbol to use in the relocation.  Make a note
+	       of this if we are not just counting.  */
+	    case 'S':
+	      if (! just_count)
+		rptr->sym_ptr_ptr = &symbols[c];
+	      break;
+	    /* Handle the linker expression stack.  */
+	    case 'O':
+	      switch (op)
+		{
+		case R_COMP1:
+		  subop = comp1_opcodes;
+		  break;
+		case R_COMP2:
+		  subop = comp2_opcodes;
+		  break;
+		case R_COMP3:
+		  subop = comp3_opcodes;
+		  break;
+		default:
+		  abort ();
+		}
+	      while (*subop <= (unsigned char) c)
+		++subop;
+	      --subop;
+	      break;
+	    default:
+	      break;
+	    }
+	}
+
+      /* If we used a previous fixup, clean up after it.  */
+      if (prev_fixup)
+	{
+	  fixup = save_fixup + 1;
+	  prev_fixup = 0;
+	}
+      /* Queue it.  */
+      else if (fixup > save_fixup + 1)
+	som_reloc_queue_insert (save_fixup, fixup - save_fixup, reloc_queue);
+
+      /* We do not pass R_DATA_OVERRIDE or R_NO_RELOCATION 
+	 fixups to BFD.  */
+      if (som_hppa_howto_table[op].type != R_DATA_OVERRIDE
+	  && som_hppa_howto_table[op].type != R_NO_RELOCATION)
+	{
+	  /* Done with a single reloction. Loop back to the top.  */
+	  if (! just_count)
+	    {
+	      rptr->addend = var ('V');
+	      rptr++;
+	    }
+	  count++;
+	  /* Now that we've handled a "full" relocation, reset
+	     some state.  */
+	  bzero (variables, sizeof (variables));
+	  bzero (stack, sizeof (stack));
+	}
+    }
+  return count;
+
+#undef var
+#undef push
+#undef pop
+#undef emptystack
+}
+
+/* Read in the relocs (aka fixups in SOM terms) for a section. 
+
+   som_get_reloc_upper_bound calls this routine with JUST_COUNT 
+   set to true to indicate it only needs a count of the number
+   of actual relocations.  */
+
+static boolean
+som_slurp_reloc_table (abfd, section, symbols, just_count)
+     bfd *abfd;
+     asection *section;
+     asymbol **symbols;
+     boolean just_count;
+{
+  char *external_relocs;
+  unsigned int fixup_stream_size;
+  arelent *internal_relocs;
+  unsigned int num_relocs;
+
+  fixup_stream_size = som_section_data (section)->reloc_size;
+  /* If there were no relocations, then there is nothing to do.  */
+  if (section->reloc_count == 0)
+    return true;
+
+  /* If reloc_count is -1, then the relocation stream has not been 
+     parsed.  We must do so now to know how many relocations exist.  */
+  if (section->reloc_count == -1)
+    {
+      external_relocs = (char *) bfd_zalloc (abfd, fixup_stream_size);
+      if (external_relocs == (char *) NULL)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      /* Read in the external forms. */
+      if (bfd_seek (abfd,
+		    obj_som_reloc_filepos (abfd) + section->rel_filepos,
+		    SEEK_SET)
+	  != 0)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+      if (bfd_read (external_relocs, 1, fixup_stream_size, abfd)
+	  != fixup_stream_size)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+      /* Let callers know how many relocations found.
+	 also save the relocation stream as we will
+	 need it again.  */
+      section->reloc_count = som_set_reloc_info (external_relocs,
+						 fixup_stream_size,
+						 NULL, NULL, NULL, true);
+
+      som_section_data (section)->reloc_stream = external_relocs;
+    }
+
+  /* If the caller only wanted a count, then return now.  */
+  if (just_count)
+    return true;
+
+  num_relocs = section->reloc_count;
+  external_relocs = som_section_data (section)->reloc_stream;
+  /* Return saved information about the relocations if it is available.  */
+  if (section->relocation != (arelent *) NULL)
+    return true;
+
+  internal_relocs = (arelent *) bfd_zalloc (abfd,
+					    num_relocs * sizeof (arelent));
+  if (internal_relocs == (arelent *) NULL)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
+
+  /* Process and internalize the relocations.  */
+  som_set_reloc_info (external_relocs, fixup_stream_size,
+		      internal_relocs, section, symbols, false);
+
+  /* Save our results and return success.  */
+  section->relocation = internal_relocs;
+  return (true);
+}
+
+/* Return the number of bytes required to store the relocation
+   information associated with the given section.  */ 
+
 static unsigned int
 som_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  fprintf (stderr, "som_get_reloc_upper_bound unimplemented\n");
-  fflush (stderr);
-  abort ();
-  return (0);
+  /* If section has relocations, then read in the relocation stream
+     and parse it to determine how many relocations exist.  */
+  if (asect->flags & SEC_RELOC)
+    {
+      if (som_slurp_reloc_table (abfd, asect, NULL, true))
+	return (asect->reloc_count + 1) * sizeof (arelent);
+    }
+  /* Either there are no relocations or an error occurred while 
+     reading and parsing the relocation stream.  */ 
+  return 0;
 }
+
+/* Convert relocations from SOM (external) form into BFD internal
+   form.  Return the number of relocations.  */
 
 static unsigned int
 som_canonicalize_reloc (abfd, section, relptr, symbols)
@@ -2890,9 +3629,22 @@ som_canonicalize_reloc (abfd, section, relptr, symbols)
      arelent **relptr;
      asymbol **symbols;
 {
-  fprintf (stderr, "som_canonicalize_reloc unimplemented\n");
-  fflush (stderr);
-  abort ();
+  arelent *tblptr;
+  int count;
+
+  if (som_slurp_reloc_table (abfd, section, symbols, false) == false)
+    return 0;
+
+  count = section->reloc_count;
+  tblptr = section->relocation;
+  if (tblptr == (arelent *) NULL)
+    return 0;
+
+  while (count--)
+    *relptr++ = tblptr++;
+
+  *relptr = (arelent *) NULL;
+  return section->reloc_count;
 }
 
 extern bfd_target som_vec;

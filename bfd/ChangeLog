@@ -1,3 +1,11 @@
+Mon Nov 22 02:33:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* Minimal support for reading SOM fixup streams.  Allows
+	objdump -r to do something reasonable.
+	* som.c (som_get_reloc_upper_bound): Implement.
+	(som_canonicalize_reloc): Implement.
+	(som_set_reloc_info, som_slurp_reloc_table): New functions.
+
 Fri Nov 19 14:34:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-a29k.c (a29k_reloc): For R_IREL, don't left shift
