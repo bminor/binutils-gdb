@@ -65,7 +65,7 @@ target_tools="examples groff"
 # directories to be built in the native environment only
 #
 native_only="autoconf cvs emacs emacs19 fileutils find grep groff gzip hello
-	     indent ispell m4 rcs recode sed shellutils tar textutils gash tk
+	     indent ispell m4 rcs recode sed shellutils tar textutils gash
 	     uudecode wdiff gprof"
 
 # directories to be built in a cross environment only
