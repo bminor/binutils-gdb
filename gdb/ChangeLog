@@ -1,3 +1,7 @@
+Tue Apr 27 10:01:33 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* remote-vx.c (net_connect): Allow numeric IP address for host.
+
 Mon Apr 26 17:59:38 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/sh/sh.mt, config/sh/tm-sh.h, sh-tdep.c: New files.

@@ -843,15 +843,23 @@ net_connect (host)
 {
   struct sockaddr_in destAddr;
   struct hostent *destHost;
+  unsigned long addr;
+  
+  /* Get the internet address for the given host.  Allow a numeric
+     IP address or a hostname.  */
 
-  /* get the internet address for the given host */
-
-  if ((destHost = (struct hostent *) gethostbyname (host)) == NULL)
-      error ("Invalid hostname.  Couldn't find remote host address.");
+  addr = inet_addr (host);
+  if (addr == -1)
+    {
+      destHost = (struct hostent *) gethostbyname (host);
+      if (destHost == NULL)
+	error ("Invalid hostname.  Couldn't find remote host address.");
+      addr = * (unsigned long *) destHost->h_addr;
+    }
 
   bzero (&destAddr, sizeof (destAddr));
 
-  destAddr.sin_addr.s_addr = * (u_long *) destHost->h_addr;
+  destAddr.sin_addr.s_addr = addr;
   destAddr.sin_family      = AF_INET;
   destAddr.sin_port        = 0;	/* set to actual port that remote
 			           ptrace is listening on.  */
