@@ -1,3 +1,16 @@
+Sun Feb 27 16:05:15 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-configure (prefix, mpw_prefix): Handle it.
+	(ARCHDEFS): Add to makefile editing.
+	(TDEPFILES, TM_FILE, XDEPFILES, XM_FILE, NAT_FILE): Add to
+	makefile if defined.
+	(mpw-edit-prefix): Use during makefile editing.
+	* mpw-config.in (mmalloc, readline): Don't configure.
+	* mpw-build.in (thisscript): Rename to ThisScript.
+	Use mpw-build instead of BuildProgram everywhere.
+	(mmalloc, readline): Don't build.
+	* mpw-README: New file, basic documentation about the MPW port.
+
 Mon Jan 31 16:07:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-configure: Add definition of EMUL to makefiles.
