@@ -606,7 +606,7 @@ const int md_long_jump_size = 4;
 #endif
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "b:l:usm:VQ:";
+CONST char *md_shortopts = "b:l:usm:K:VQ:";
 #else
 CONST char *md_shortopts = "um:";
 #endif
@@ -646,6 +646,18 @@ md_parse_option (c, arg)
 	{
 	  target_big_endian = 1;
 	  set_target_endian = 1;
+	}
+      else
+	return 0;
+
+      break;
+
+    case 'K':
+      /* Recognize -K PIC */
+      if (strcmp (arg, "PIC") == 0)
+	{
+	  mrelocatable = true;
+	  ppc_flags |= EF_PPC_RELOCATABLE_LIB;
 	}
       else
 	return 0;
