@@ -1004,6 +1004,14 @@ find_pc_symtab (pc)
    use the line that ends there.  Otherwise, in that case, the line
    that begins there is used.  */
 
+/* The big complication here is that a line may start in one file, and end just
+   before the start of another file.  This usually occurs when you #include
+   code in the middle of a subroutine.  To properly find the end of a line's PC
+   range, we must search all symtabs associated with this compilation unit, and
+   find the one whose first PC is closer than that of the next line in this
+   symtab.
+ */
+
 struct symtab_and_line
 find_pc_line (pc, notcurrent)
      CORE_ADDR pc;
@@ -1013,13 +1021,13 @@ find_pc_line (pc, notcurrent)
   register struct linetable *l;
   register int len;
   register int i;
-  register struct linetable_entry item;
+  register struct linetable_entry *item;
   struct symtab_and_line val;
   struct blockvector *bv;
 
   /* Info on best line seen so far, and where it starts, and its file.  */
 
-  struct linetable_entry best;
+  struct linetable_entry *best = NULL;
   CORE_ADDR best_end = 0;
   struct symtab *best_symtab = 0;
 
@@ -1028,17 +1036,12 @@ find_pc_line (pc, notcurrent)
      If we don't find a line whose range contains PC,
      we will use a line one less than this,
      with a range from the start of that file to the first line's pc.  */
-  struct linetable_entry alt;
+  struct linetable_entry *alt = NULL;
   struct symtab *alt_symtab = 0;
 
   /* Info on best line seen in this file.  */
 
-  struct linetable_entry prev;
-
-  best.line = 0;
-  best.pc = 0;
-  alt.line = 0;
-  alt.pc = 0;
+  struct linetable_entry *prev;
 
   /* If this pc is not from the current frame,
      it is the address of the end of a call instruction.
@@ -1078,23 +1081,21 @@ find_pc_line (pc, notcurrent)
 	  continue;
 	}
 
-      prev.line = -1;
-      item = l->item[0];	/* Get first line info */
+      prev = NULL;
+      item = l->item;		/* Get first line info */
 
       /* Is this file's first line closer than the first lines of other files?
 	 If so, record this file, and its first line, as best alternate.  */
-      if (item.pc > pc && (alt.pc == 0 || item.pc < alt.pc))
+      if (item->pc > pc && (!alt || item->pc < alt->pc))
 	{
 	  alt = item;
 	  alt_symtab = s;
 	}
 
-      for (i = 0; i < len; i++)
+      for (i = 0; i < len; i++, item++)
 	{
-	  item = l->item[i];
-
 	  /* Return the last line that did not start after PC.  */
-	  if (item.pc > pc)
+	  if (item->pc > pc)
 	    break;
 
 	  prev = item;
@@ -1108,14 +1109,14 @@ find_pc_line (pc, notcurrent)
       /* Is this file's best line closer than the best in the other files?
 	 If so, record this file, and its best line, as best so far.  */
 
-      if (prev.line >= 0 && prev.pc > best.pc)
+      if (prev && (!best || prev->pc > best->pc))
 	{
 	  best = prev;
 	  best_symtab = s;
 	  /* If another line is in the linetable, and its PC is closer
 	     than the best_end we currently have, take it as best_end.  */
-	  if (i < len && (best_end == 0 || best_end > item.pc))
-	    best_end = item.pc;
+	  if (i < len && (best_end == 0 || best_end > item->pc))
+	    best_end = item->pc;
 	}
     }
 
@@ -1132,20 +1133,20 @@ find_pc_line (pc, notcurrent)
       else
 	{
 	  val.symtab = alt_symtab;
-	  val.line = alt.line - 1;
+	  val.line = alt->line - 1;
 	  val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
-	  val.end = alt.pc;
+	  val.end = alt->pc;
 	}
     }
   else
     {
       val.symtab = best_symtab;
-      val.line = best.line;
-      val.pc = best.pc;
-      if (best_end && (alt.pc == 0 || best_end < alt.pc))
+      val.line = best->line;
+      val.pc = best->pc;
+      if (best_end && (!alt || best_end < alt->pc))
 	val.end = best_end;
-      else if (alt.pc)
-	val.end = alt.pc;
+      else if (alt->pc)
+	val.end = alt->pc;
       else
 	val.end = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
     }

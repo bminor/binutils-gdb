@@ -1,3 +1,8 @@
+Mon Nov 16 15:58:07 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* symtab.c (find_pc_line):  Improve code per gnu's suggestions.
+	Improve comments as well.
+
 Sun Nov 15 09:22:09 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.7.2
