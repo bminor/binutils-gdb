@@ -1,5 +1,7 @@
 Wed Mar  8 10:29:33 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* lib/gdb.exp (skip_chill_tests): New procedure.
+
 	* gdb.base/signals.exp (signal_tests_1): xfail for irix.
 
 Mon Mar  6 10:44:06 1995  Jeff Law  (law@snake.cs.utah.edu)
