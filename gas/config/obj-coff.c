@@ -1474,7 +1474,7 @@ obj_coff_section (ignore)
 
 		case 'a': break; /* For compatability with ELF.  */
 		case 'x': flags |= SEC_CODE | SEC_LOAD; break;
-		case 'r': flags |= SEC_READONLY; break;
+		case 'r': flags |= SEC_DATA | SEC_LOAD | SEC_READONLY; break;
 
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */

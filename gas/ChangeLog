@@ -1,3 +1,8 @@
+2003-10-04  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+
+	* config/obj-coff.c (obj_coff_section [BEF_ASSEMBLER]):
+	Make 'r' mean readonly data.
+
 2003-10-01  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro_build_ldst_constoffset,load_register,macro):
