@@ -1797,6 +1797,8 @@
 
 2002-02-13  Michael Snyder  <msnyder@redhat.com>
 
+	* config/i386/i386v42mp.mh: Add gcore.o to NATDEPFILES.
+
 	* gcore.c (gcore_command): Use gcore_default_target instead of NULL.
 	(default_gcore_mach): Just return 0, work around a problem in bfd.
 	(default_gcore_target): OK to return NULL if exec_bfd is null.
