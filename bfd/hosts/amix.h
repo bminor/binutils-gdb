@@ -21,7 +21,7 @@ extern PROTO(int,  abort,(void));
 extern PROTO(int,  close,(int));
 extern PROTO(void, exit,(int));
 extern PROTO(int,  fclose,(FILE*));
-extern PROTO(int,  free,(PTR));
+extern PROTO(void, free,(PTR));
 extern PROTO(int,  fseek,(FILE*, long, int));
 extern PROTO(int,  getgid,());
 extern PROTO(int,  getuid,());
