@@ -1,5 +1,14 @@
 2004-04-29  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_register_type): Re-write, handle 32-bit ABI
+	registers correctly.
+	(print_gp_register_row, mips32_heuristic_proc_desc)
+	(mips_n32n64_push_dummy_call, mips_o32_push_dummy_call)
+	(mips_o64_push_dummy_call, mips_eabi_push_dummy_call): Eliminate
+	references to mips_isa_regsize.
+
+2004-04-29  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (struct gdbarch_tdep): Delete
 	mips_fp_register_double.
 	(FP_REGISTER_DOUBLE): Delete macro, replace with test for

@@ -717,24 +717,38 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
 	  internal_error (__FILE__, __LINE__, "bad switch");
 	}
     }
-  else if (regnum >=
-	   (NUM_REGS + mips_regnum (current_gdbarch)->fp_control_status)
-	   && regnum <= NUM_REGS + LAST_EMBED_REGNUM)
-    /* The pseudo/cooked view of the embedded registers is always
-       32-bit.  The raw view is handled below.  */
-    return builtin_type_int32;
-  else if (regnum >= NUM_REGS && mips_isa_regsize (gdbarch)
-	   && gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
-    /* The target, while using a 64-bit register buffer, is only
-       transfering 32-bits of each integer register.  Reflect this in
-       the cooked/pseudo register value.  */
-    return builtin_type_int32;
-  else if (mips_isa_regsize (gdbarch) == 8)
-    /* 64-bit ISA.  */
-    return builtin_type_int64;
+  else if (regnum < NUM_REGS)
+    {
+      /* The raw or ISA registers.  These are all sized according to
+	 the ISA regsize.  */
+      if (mips_isa_regsize (gdbarch) == 4)
+	return builtin_type_int32;
+      else
+	return builtin_type_int64;
+    }
   else
-    /* 32-bit ISA.  */
-    return builtin_type_int32;
+    {
+      /* The cooked or ABI registers.  These are sized according to
+	 the ABI (with a few complications).  */
+      if (regnum >= (NUM_REGS
+		     + mips_regnum (current_gdbarch)->fp_control_status)
+	  && regnum <= NUM_REGS + LAST_EMBED_REGNUM)
+	/* The pseudo/cooked view of the embedded registers is always
+	   32-bit.  The raw view is handled below.  */
+	return builtin_type_int32;
+      else if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
+	/* The target, while possibly using a 64-bit register buffer,
+	   is only transfering 32-bits of each integer register.
+	   Reflect this in the cooked/pseudo (ABI) register value.  */
+	return builtin_type_int32;
+      else if (mips_abi_regsize (gdbarch) == 4)
+	/* The ABI is restricted to 32-bit registers (the ISA could be
+	   32- or 64-bit).  */
+	return builtin_type_int32;
+      else
+	/* 64-bit ABI.  */
+	return builtin_type_int64;
+    }
 }
 
 /* TARGET_READ_SP -- Remove useless bits from the stack pointer.  */
@@ -2170,12 +2184,10 @@ restart:
 	}
       else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
 	{
-	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra,
-	     but the register size used is only 32 bits. Make the address
-	     for the saved register point to the lower 32 bits.  */
+	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and
+	     $ra.  */
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg,
-			  sp + low_word + 8 - mips_isa_regsize (current_gdbarch));
+	  set_reg_offset (temp_saved_regs, reg, sp + low_word);
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
 	{
@@ -2910,10 +2922,10 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
 	  /* Note: structs whose size is not a multiple of
-	     mips_isa_regsize() are treated specially: Irix cc passes them
-	     in registers where gcc sometimes puts them on the stack.
-	     For maximum compatibility, we will put them in both
-	     places.  */
+	     mips_abi_regsize() are treated specially: Irix cc passes
+	     them in registers where gcc sometimes puts them on the
+	     stack.  For maximum compatibility, we will put them in
+	     both places.  */
 	  int odd_sized_struct = ((len > mips_abi_regsize (gdbarch))
 				  && (len % mips_abi_regsize (gdbarch) != 0));
 
@@ -3171,10 +3183,10 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
 	  /* Note: structs whose size is not a multiple of
-	     mips_isa_regsize() are treated specially: Irix cc passes them
-	     in registers where gcc sometimes puts them on the stack.
-	     For maximum compatibility, we will put them in both
-	     places.  */
+	     mips_abi_regsize() are treated specially: Irix cc passes
+	     them in registers where gcc sometimes puts them on the
+	     stack.  For maximum compatibility, we will put them in
+	     both places.  */
 	  int odd_sized_struct = ((len > mips_abi_regsize (gdbarch))
 				  && (len % mips_abi_regsize (gdbarch) != 0));
 	  /* Note: Floating-point values that didn't fit into an FP
@@ -3568,10 +3580,10 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
 	  /* Note: structs whose size is not a multiple of
-	     mips_isa_regsize() are treated specially: Irix cc passes them
-	     in registers where gcc sometimes puts them on the stack.
-	     For maximum compatibility, we will put them in both
-	     places.  */
+	     mips_abi_regsize() are treated specially: Irix cc passes
+	     them in registers where gcc sometimes puts them on the
+	     stack.  For maximum compatibility, we will put them in
+	     both places.  */
 	  int odd_sized_struct = ((len > mips_abi_regsize (gdbarch))
 				  && (len % mips_abi_regsize (gdbarch) != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
@@ -4021,10 +4033,10 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
 	  /* Note: structs whose size is not a multiple of
-	     mips_isa_regsize() are treated specially: Irix cc passes them
-	     in registers where gcc sometimes puts them on the stack.
-	     For maximum compatibility, we will put them in both
-	     places.  */
+	     mips_abi_regsize() are treated specially: Irix cc passes
+	     them in registers where gcc sometimes puts them on the
+	     stack.  For maximum compatibility, we will put them in
+	     both places.  */
 	  int odd_sized_struct = ((len > mips_abi_regsize (gdbarch))
 				  && (len % mips_abi_regsize (gdbarch) != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
@@ -4475,7 +4487,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
   struct gdbarch *gdbarch = get_frame_arch (frame);
   /* do values for GP (int) regs */
   char raw_buffer[MAX_REGISTER_SIZE];
-  int ncols = (mips_isa_regsize (gdbarch) == 8 ? 4 : 8);	/* display cols per row */
+  int ncols = (mips_abi_regsize (gdbarch) == 8 ? 4 : 8);	/* display cols per row */
   int col, byte;
   int regnum;
 
@@ -4490,7 +4502,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	  TYPE_CODE_FLT)
 	break;			/* end the row: reached FP register */
       fprintf_filtered (file,
-			mips_isa_regsize (current_gdbarch) == 8 ? "%17s" : "%9s",
+			mips_abi_regsize (current_gdbarch) == 8 ? "%17s" : "%9s",
 			REGISTER_NAME (regnum));
       col++;
     }
@@ -4514,7 +4526,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
       for (byte = 0;
-	   byte < (mips_isa_regsize (current_gdbarch)
+	   byte < (mips_abi_regsize (current_gdbarch)
 		   - register_size (current_gdbarch, regnum)); byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
