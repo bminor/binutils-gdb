@@ -1,3 +1,12 @@
+Mon Jul 12 10:42:49 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* reloc.c (enum bfd_reloc_code_real): Move SPARC_BASE13 reloc into
+	sparc-aout-specific list.
+
+	* libelf.h (struct elf_obj_tdata): Add field `thunk'.
+
+	* config/sparc-elf.mt (TARGET_BACKENDS): New make variable.
+
 Thu Jul  1 14:52:47 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
 			  and Jim Kingdon (kingdon@cygnus.com)
 
