@@ -1,5 +1,28 @@
 2004-10-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-nat.c: Include "inf-ptrace.h".
+	(sparc_target): New function.
+	* sparc-nat.h: Update copyright year.
+	(sparc_target): New prototype.
+	* sparcnbsd-nat.c: Don't include "gdbcore.h", include "target.h".
+	(_initialize_sparcnbsd_nat): Construct and add target vector.
+	* sparc64nbsd-nat.c: Include "target.h".
+	(_initialize_sparc64nbsd_nat): Construct and add target vector.
+	* Makefile.in (sparc-nat.o, sparcnbsd-nat.o, sparc64nbsd-nat.o):
+	Update dependencies.
+	* config/sparc/nbsd64.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o, add inf-ptrace.o.
+	* config/sparc/nbsdaout.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o, add inf-ptrace.o and bsd-kvm.o.
+	(NAT_FILE): Set to nm-bsd.h.
+	(LOADLIBES): New variable.
+	* config/sparc/nbsdelf.mh (NATDEPFILES): Remove infptrace.o and
+	infarg.o, add inf-ptrace.o.
+	* config/sparc/nm-nbsdaout.h: Remove file.
+	* config/sparc/fbsd.mh (NATDEPFILES): Add inf-ptrace.o.
+	* config/sparc/linux.mh (NATDEPFILES): Add inf-ptrace.o.
+	* config/sparc/linux64.mh (NATDEPFILES): Add inf-ptrace.o.
+
 	* defs.h [!FOPEN_RB]: Include "fopen-bin.h" instead of
 	"fopen-same.h".  Update comment.
 
