@@ -106,7 +106,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 /* Number of bytes of storage in the program's representation
    for register N.  */   
-#define REGISTER_VIRTUAL_SIZE(N) ( ((N) >= A0_REGNUM) ? 8 : 2 )
+#define REGISTER_VIRTUAL_SIZE(N) ( ((N) >= A0_REGNUM) ? 8 : ( ((N) == PC_REGNUM || (N) == SP_REGNUM) ? 4 : 2 ))
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -120,8 +120,28 @@ extern CORE_ADDR d10v_skip_prologue ();
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) \
-( ((N) < A0_REGNUM ) ? builtin_type_short : builtin_type_long_long)
+( ((N) < A0_REGNUM ) ? ((N) == PC_REGNUM || (N) == SP_REGNUM ? builtin_type_long : builtin_type_short) : builtin_type_long_long)
 
+
+/* convert $pc and $sp to/from virtual addresses */
+#define REGISTER_CONVERTIBLE(N) ((N) == PC_REGNUM || (N) == SP_REGNUM)
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
+{ \
+    ULONGEST x = extract_unsigned_integer ((FROM), REGISTER_RAW_SIZE (REGNUM)); \
+    if (REGNUM == PC_REGNUM) x = (x << 2) | IMEM_START; \
+    else x |= DMEM_START; \
+    store_unsigned_integer ((TO), TYPE_LENGTH(TYPE), x); \
+}
+#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
+{ \
+    ULONGEST x = extract_unsigned_integer ((FROM), TYPE_LENGTH(TYPE)); \
+    x &= 0x3ffff; \
+    if (REGNUM == PC_REGNUM) x >>= 2; \
+    store_unsigned_integer ((TO), 2, x); \
+}
+
+#define D10V_MAKE_DADDR(x) ( (x) & 0x3000000 ? (x) : ((x) | DMEM_START))
+#define D10V_MAKE_IADDR(x) ( (x) & 0x3000000 ? (x) : (((x) << 2) | IMEM_START))
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
