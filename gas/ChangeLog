@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Thu Jul 24 12:13:19 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c (build_insn): Remove "extended" and replace with
+ 	"fx" and "fxfrag".  Add "ffrag".  Change code to initialize and use
+	the right f/ffrag and fx/fxfrag pairs since instruction may be split
+ 	across frags.
+
+end-sanitize-tic80
 Tue Jul 22 18:38:56 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
 	* config/te-go32.h (USE_ALIGN_PTWO): Define.

@@ -553,7 +553,11 @@ find_opcode (opcode, myops)
 }
 
 /* build_insn takes a pointer to the opcode entry in the opcode table
-   and the array of operand expressions and writes out the instruction. */
+   and the array of operand expressions and writes out the instruction.
+
+   Note that the opcode word and extended word may be written to different
+   frags, with the opcode at the end of one frag and the extension at the
+   beginning of the next. */
 
 static void
 build_insn (opcode, opers) 
@@ -563,8 +567,10 @@ build_insn (opcode, opers)
   int expi;				/* Index of current expression to match */
   int opi;				/* Index of current operand to match */
   unsigned long insn[2];		/* Instruction and long immediate (if any) */
-  int extended = 0;			/* Nonzero if instruction is 8 bytes */
-  char *f;				/* Temporary pointer to output location */
+  char *f;				/* Pointer to frag location for insn[0] */
+  fragS *ffrag;				/* Frag containing location f */
+  char *fx = NULL;			/* Pointer to frag location for insn[1] */
+  fragS *fxfrag;			/* Frag containing location fx */
 
   /* Start with the raw opcode bits from the opcode table. */
   insn[0] = opcode -> opcode;
@@ -573,6 +579,7 @@ build_insn (opcode, opers)
      frag now. */
 
   f = frag_more (4);
+  ffrag = frag_now;
 
   /* For each operand expression, insert the appropriate bits into the
      instruction . */
@@ -622,15 +629,16 @@ build_insn (opcode, opers)
 	    }
 	  else
 	    {
-	      extended++;
+	      fx = frag_more (4);
+	      fxfrag = frag_now;
 	      insn[1] = num;
 	    }
 	  break;
 	case O_symbol:
 	  if (flags & TIC80_OPERAND_PCREL)
 	    {
-	      fix_new_exp (frag_now,
-			   f - (frag_now -> fr_literal),
+	      fix_new_exp (ffrag,
+			   f - (ffrag -> fr_literal),
 			   4,			/* FIXME! how is this used? */
 			   &opers[expi],
 			   1,
@@ -638,10 +646,11 @@ build_insn (opcode, opers)
 	    }
 	  else if (bits == 32)	/* was (flags & TIC80_OPERAND_BASEREL) */
 	    {
-	      extended++;
+	      fx = frag_more (4);
+	      fxfrag = frag_now;
 	      insn[1] = 0;
-	      fix_new_exp (frag_now,
-			   (f + 4) - (frag_now -> fr_literal),
+	      fix_new_exp (fxfrag,
+			   fx - (fxfrag -> fr_literal),
 			   4,
 			   &opers[expi], 
 			   0,
@@ -676,7 +685,8 @@ build_insn (opcode, opers)
 	    }
 	  break;
 	case O_big:
-	  extended++;
+	  fx = frag_more (4);
+	  fxfrag = frag_now;
 	  {
 	    int precision = 2;
 	    long exponent_bits = 8L;
@@ -720,10 +730,9 @@ build_insn (opcode, opers)
   /* Write out the instruction, either 4 or 8 bytes.  */
 
   md_number_to_chars (f, insn[0], 4);
-  if (extended)
+  if (fx != NULL)
     {
-      f = frag_more (4);
-      md_number_to_chars (f, insn[1], 4);
+      md_number_to_chars (fx, insn[1], 4);
     }
 }
 
