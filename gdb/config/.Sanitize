@@ -35,7 +35,7 @@ else
 	fi
 fi
 
-d10v_files="tm-magic.h"
+d10v_files="d10v"
 
 if ( echo $* | grep keep\-d10v > /dev/null ) ; then
 	keep_these_too="${d10v_files} ${keep_these_too}"
