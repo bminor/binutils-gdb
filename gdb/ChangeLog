@@ -1,3 +1,12 @@
+Mon Feb  1 17:56:47 1993  John Gilmore  (gnu@cygnus.com)
+
+	* stack.c (parse_frame_specification):  Parse as many arguments
+	as there are (up to MAXARGS).  Pass all of them in argc, argv
+	format to SETUP_ARBITRARY_FRAME.  Put the burden of checking how
+	many there were, onto SETUP_ARBITRARY_FRAME.
+	* tm-mips.h, tm-sparc.h:  Corresponding changes.
+	* mips-tdep.c, sparc-tdep.c:  Ditto.
+
 Mon Feb  1 17:19:37 1993  John Gilmore  (gnu@cygnus.com)
 
 	* hp300ux-nat.c:  Update copyrights.

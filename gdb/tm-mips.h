@@ -1,7 +1,7 @@
 /* Definitions to make GDB run on a mips box under 4.3bsd.
-   Copyright (C) 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Per Bothner (bothner@cs.wisc.edu) at U.Wisconsin
-   and by Alessandro Forin (af@cs.cmu.edu) at CMU.
+   and by Alessandro Forin (af@cs.cmu.edu) at CMU..
 
 This file is part of GDB.
 
@@ -356,7 +356,7 @@ typedef struct mips_extra_func_info {
                                  fi->proc_desc->pdr.frameoffset); \
   }
 
-/* It takes two values to specify a frame (at least!) on the MIPS.  Sigh.
+/* It takes two values to specify a frame on the MIPS.  Sigh.
 
    In fact, at the moment, the *PC* is the primary value that sets up
    a frame.  The PC is looked up to see what function it's in; symbol
@@ -365,6 +365,8 @@ typedef struct mips_extra_func_info {
    (This is usually an offset from SP.)  FIXME -- this should be cleaned
    up so that the primary value is the SP, and the PC is used to disambiguate
    multiple functions with the same SP that are at different stack levels. */
-#define	FRAME_SPECIFICATION_DYADIC
+
+#define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
+extern FRAME setup_arbitrary_frame ();
 
 #define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)

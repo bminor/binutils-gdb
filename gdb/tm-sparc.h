@@ -1,6 +1,6 @@
 /* Target machine sub-parameters for SPARC, for GDB, the GNU debugger.
    This is included by other tm-*.h files to define SPARC cpu-related info.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
 This file is part of GDB.
@@ -186,6 +186,8 @@ extern CORE_ADDR sparc_pc_adjust();
 
 #define REGISTER_IN_WINDOW_P(regnum)	\
   ((regnum) >= 8 && (regnum) < 32)
+
+
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
@@ -546,11 +548,11 @@ arguments.  */
 #define NO_SINGLE_STEP 1
 extern void single_step ();
 
-/* We need two arguments (in general) to the "info frame" command.
-   Note that the definition of this macro implies that there exists a
-   function "setup_arbitrary_frame" in sparc-tdep.c */
+/* We need more arguments in a frame specification for the
+   "frame" or "info frame" command.  */
 
-#define FRAME_SPECIFICATION_DYADIC
+#define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
+extern FRAME setup_arbitrary_frame ();
 
 /* To print every pair of float registers as a double, we use this hook.  */
 
