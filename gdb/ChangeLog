@@ -1,3 +1,13 @@
+Wed May 13 14:42:21 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add AC_FUNC_ALLOCA.
+	* defs.h: Check HAVE_ALLOCA_H rather than sparc.  Add _AIX pragma
+	alloca.
+	* configure: Rebuild.
+
+	* Makefile.in (jv-lang.o, jv-typeprint.o, jv-valprint.o): New
+	targets.
+
 Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sparc/tm-sp64.h (CALL_DUMMY): Store and retrieve
