@@ -1,3 +1,38 @@
+2004-05-06  Randolph Chung  <tausq@debian.org>
+
+	* config/pa/tm-hppa.h (RO_REGNUM, FLAGS_REGNUM, RP_REGNUM)
+	(HPPA_FP_REGNUM, HPPA_SP_REGNUM, SAR_REGNUM, IPSW_REGNUM)
+	(PCOQ_HEAD_REGNUM, PCSQ_HEAD_REGNUM, PCOQ_TAIL_REGNUM, PCSQ_TAIL_REGNUM)
+	(EIEM_REGNUM, IIR_REGNUM, ISR_REGNUM, IOR_REGNUM, SR4_REGNUM)
+	(RCR_REGNUM, PID0_REGNUM, PID1_REGNUM, PID2_REGNUM, PID3_REGNUM)
+	(CCR_REGNUM, TR0_REGNUM, CR27_REGNUM, HPPA_FP0_REGNUM, FP4_REGNUM)
+	(ARG0_REGNUM, ARG1_REGNUM, ARG2_REGNUM, ARG3_REGNUM): Move *_REGNUM 
+	definitions ...
+	* hppa-tdep.h: ... to here, with HPPA_ prefix.
+	* Makefile.in (hppah-nat.o): Add $(hppa_tdep_h)
+	* hppa-hpux-tdep.c (hppa32_hpux_frame_find_saved_regs_in_sig)
+	(hppa64_hpux_frame_find_saved_regs_in_sig)
+	(child_get_current_exception_event): Add HPPA_ prefix to *_REGNUM usage.
+	* hppa-linux-nat.c (GR_REGNUM, TR_REGNUM, greg_map): Likewise.
+	* hppa-linux-tdep.c (hppa_dwarf_reg_to_regnum)
+	(hppa_linux_target_write_pc, hppa_linux_sigtramp_frame_unwind_cache)
+	(hppa_linux_sigtramp_frame_prev_register): Likewise.
+	* hppa-tdep.c (hppa32_return_value, hppa64_return_value)
+	(hppa32_push_dummy_call, hppa64_push_dummy_call, hppa64_frame_align)
+	(hppa_target_read_pc, hppa_target_write_pc, hppa_frame_cache)
+	(hppa_frame_prev_register, hppa_stub_frame_unwind_cache)
+	(hppa_stub_frame_prev_register, hppa_unwind_dummy_id)
+	(hppa_skip_permanent_breakpoint, hppa_instruction_nullified)
+	(hppa32_register_type, hppa_cannot_store_register)
+	(hppa_fetch_pointer_argument, hppa_pseudo_register_read): Likewise.
+	* hppah-nat.c (store_inferior_registers, fetch_register): Likewise.
+	* hpread.c (hpread_process_one_debug_symbol): Likewise.
+	* pa64solib.c (pa64_solib_have_load_event)
+	(pa64_solib_have_unload_event, pa64_solib_loaded_library_pathname)
+	(pa64_solib_unloaded_library_pathname): Likewise.
+	* somsolib.c (som_solib_have_load_event, som_solib_have_unload_event)
+	(som_solib_library_pathname): Likewise.
+
 2004-05-05  Jim Ingham  <jingham@apple.com>
 	
 	* breakpoint.c (create_breakpoints): Copy the ignore count and

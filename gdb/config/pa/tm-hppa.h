@@ -31,46 +31,6 @@
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
 
-/* Register numbers of various important registers.
-   Note that some of these values are "real" register numbers,
-   and correspond to the general registers of the machine,
-   and some are "phony" register numbers which are too large
-   to be actual register numbers as far as the user is concerned
-   but do serve to get the desired values when passed to read_register.  */
-
-#define R0_REGNUM 0		/* Doesn't actually exist, used as base for
-				   other r registers.  */
-#define FLAGS_REGNUM 0		/* Various status flags */
-#define RP_REGNUM 2		/* return pointer */
-#define HPPA_FP_REGNUM 3	/* The ABI's frame pointer, when used */
-#define HPPA_SP_REGNUM 30	/* Stack pointer.  */
-#define SAR_REGNUM 32		/* Shift Amount Register */
-#define IPSW_REGNUM 41		/* Interrupt Processor Status Word */
-#define PCOQ_HEAD_REGNUM 33	/* instruction offset queue head */
-#define PCSQ_HEAD_REGNUM 34	/* instruction space queue head */
-#define PCOQ_TAIL_REGNUM 35	/* instruction offset queue tail */
-#define PCSQ_TAIL_REGNUM 36	/* instruction space queue tail */
-#define EIEM_REGNUM 37		/* External Interrupt Enable Mask */
-#define IIR_REGNUM 38		/* Interrupt Instruction Register */
-#define ISR_REGNUM 39		/* Interrupt Space Register */
-#define IOR_REGNUM 40		/* Interrupt Offset Register */
-#define SR4_REGNUM 43		/* space register 4 */
-#define RCR_REGNUM 51		/* Recover Counter (also known as cr0) */
-#define PID0_REGNUM 52		/* Protection ID */
-#define PID1_REGNUM 53		/* Protection ID */
-#define PID2_REGNUM 55		/* Protection ID */
-#define PID3_REGNUM 56		/* Protection ID */
-#define CCR_REGNUM 54		/* Coprocessor Configuration Register */
-#define TR0_REGNUM 57		/* Temporary Registers (cr24 -> cr31) */
-#define CR27_REGNUM 60		/* Base register for thread-local storage, cr27 */
-#define HPPA_FP0_REGNUM 64	/* First floating-point.  */
-#define FP4_REGNUM 72
-
-#define ARG0_REGNUM 26		/* The first argument of a callee. */
-#define ARG1_REGNUM 25		/* The second argument of a callee. */
-#define ARG2_REGNUM 24		/* The third argument of a callee. */
-#define ARG3_REGNUM 23		/* The fourth argument of a callee. */
-
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
 extern int hppa_instruction_nullified (void);

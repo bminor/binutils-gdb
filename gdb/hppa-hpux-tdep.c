@@ -110,8 +110,8 @@ hppa32_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
 
   for (i = 0; i < NUM_REGS; i++)
     {
-      if (i == SP_REGNUM)
-	fsr[SP_REGNUM] = read_memory_integer (tmp + SP_REGNUM * 4, 4);
+      if (i == HPPA_SP_REGNUM)
+	fsr[HPPA_SP_REGNUM] = read_memory_integer (tmp + HPPA_SP_REGNUM * 4, 4);
       else
 	fsr[i] = tmp + i * 4;
     }
@@ -155,10 +155,10 @@ hppa64_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
 
   for (i = 0; i < NUM_REGS; i++)
     {
-      if (i == SP_REGNUM)
-        fsr[SP_REGNUM] = read_memory_integer (tmp1 + SP_REGNUM * 8, 8);
-      else if (i >= FP0_REGNUM)
-        fsr[i] = tmp2 + (i - FP0_REGNUM) * 8;
+      if (i == HPPA_SP_REGNUM)
+        fsr[HPPA_SP_REGNUM] = read_memory_integer (tmp1 + HPPA_SP_REGNUM * 8, 8);
+      else if (i >= HPPA_FP0_REGNUM)
+        fsr[i] = tmp2 + (i - HPPA_FP0_REGNUM) * 8;
       else
         fsr[i] = tmp1 + i * 8;
     }
@@ -1190,8 +1190,8 @@ child_get_current_exception_event (void)
      1. event kind catch or throw
      2. the target address if known
      3. a flag -- not sure what this is. pai/1997-07-17 */
-  event_kind = read_register (ARG0_REGNUM);
-  catch_addr = read_register (ARG1_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
+  catch_addr = read_register (HPPA_ARG1_REGNUM);
 
   /* Now go down to a user frame */
   /* For a throw, __d_eh_break is called by

@@ -126,7 +126,7 @@ hppa32_return_value (struct gdbarch *gdbarch,
       /* The value always lives in the right hand end of the register
 	 (or register pair)?  */
       int b;
-      int reg = TYPE_CODE (type) == TYPE_CODE_FLT ? FP4_REGNUM : 28;
+      int reg = TYPE_CODE (type) == TYPE_CODE_FLT ? HPPA_FP4_REGNUM : 28;
       int part = TYPE_LENGTH (type) % 4;
       /* The left hand register contains only part of the value,
 	 transfer that first so that the rest can be xfered as entire
@@ -169,19 +169,19 @@ hppa64_return_value (struct gdbarch *gdbarch,
       && TYPE_LENGTH (type) <= 8)
     {
       /* Floats are right aligned?  */
-      int offset = register_size (gdbarch, FP4_REGNUM) - TYPE_LENGTH (type);
+      int offset = register_size (gdbarch, HPPA_FP4_REGNUM) - TYPE_LENGTH (type);
       if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, FP4_REGNUM, offset,
+	regcache_cooked_read_part (regcache, HPPA_FP4_REGNUM, offset,
 				   TYPE_LENGTH (type), readbuf);
       if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, FP4_REGNUM, offset,
+	regcache_cooked_write_part (regcache, HPPA_FP4_REGNUM, offset,
 				    TYPE_LENGTH (type), writebuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_LENGTH (type) <= 8 && is_integral_type (type))
     {
       /* Integrals are right aligned.  */
-      int offset = register_size (gdbarch, FP4_REGNUM) - TYPE_LENGTH (type);
+      int offset = register_size (gdbarch, HPPA_FP4_REGNUM) - TYPE_LENGTH (type);
       if (readbuf != NULL)
 	regcache_cooked_read_part (regcache, 28, offset,
 				   TYPE_LENGTH (type), readbuf);
@@ -889,10 +889,10 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
     write_register (28, struct_addr);
 
   /* Set the return address.  */
-  regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
+  regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
 
   /* Update the Stack Pointer.  */
-  regcache_cooked_write_unsigned (regcache, SP_REGNUM, param_end);
+  regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, param_end);
 
   return param_end;
 }
@@ -1011,10 +1011,10 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
     write_register (28, struct_addr);
 
   /* Set the return address.  */
-  regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
+  regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
 
   /* Update the Stack Pointer.  */
-  regcache_cooked_write_unsigned (regcache, SP_REGNUM, param_end + 64);
+  regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, param_end + 64);
 
   /* The stack will have 32 bytes of additional space for a frame marker.  */
   return param_end + 64;
@@ -1044,7 +1044,7 @@ hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 static CORE_ADDR
 hppa_target_read_pc (ptid_t ptid)
 {
-  int flags = read_register_pid (FLAGS_REGNUM, ptid);
+  int flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
 
   /* The following test does not belong here.  It is OS-specific, and belongs
      in native code.  */
@@ -1052,7 +1052,7 @@ hppa_target_read_pc (ptid_t ptid)
   if (flags & 2)
     return read_register_pid (31, ptid) & ~0x3;
 
-  return read_register_pid (PCOQ_HEAD_REGNUM, ptid) & ~0x3;
+  return read_register_pid (HPPA_PCOQ_HEAD_REGNUM, ptid) & ~0x3;
 }
 
 /* Write out the PC.  If currently in a syscall, then also write the new
@@ -1061,7 +1061,7 @@ hppa_target_read_pc (ptid_t ptid)
 static void
 hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
 {
-  int flags = read_register_pid (FLAGS_REGNUM, ptid);
+  int flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
 
   /* The following test does not belong here.  It is OS-specific, and belongs
      in native code.  */
@@ -1071,8 +1071,8 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
   if (flags & 2)
     write_register_pid (31, v | 0x3, ptid);
 
-  write_register_pid (PCOQ_HEAD_REGNUM, v, ptid);
-  write_register_pid (PCOQ_TAIL_REGNUM, v + 4, ptid);
+  write_register_pid (HPPA_PCOQ_HEAD_REGNUM, v, ptid);
+  write_register_pid (HPPA_PCOQ_TAIL_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -1660,12 +1660,12 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	if (inst == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
-	    cache->saved_regs[RP_REGNUM].addr = -20;
+	    cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
 	  }
 	else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
-	    cache->saved_regs[RP_REGNUM].addr = -16;
+	    cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
 	  }
 	
 	/* Check to see if we saved SP into the stack.  This also
@@ -1736,7 +1736,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 		/* 1st HP CC FP register store.  After this
 		   instruction we've set enough state that the GCC and
 		   HPCC code are both handled in the same manner.  */
-		cache->saved_regs[reg + FP4_REGNUM + 4].addr = 0;
+		cache->saved_regs[reg + HPPA_FP4_REGNUM + 4].addr = 0;
 		fp_loc = 8;
 	      }
 	    else
@@ -1811,22 +1811,22 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
      as the return register while normal code uses "rp".  */
   if (u->Millicode)
     {
-      if (trad_frame_addr_p (cache->saved_regs, RP_REGNUM))
-        cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
+      if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
+        cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
       else
 	{
 	  ULONGEST r31 = frame_unwind_register_unsigned (next_frame, 31);
-	  trad_frame_set_value (cache->saved_regs, PCOQ_HEAD_REGNUM, r31);
+	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, r31);
         }
     }
   else
     {
-      if (trad_frame_addr_p (cache->saved_regs, RP_REGNUM))
-        cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[RP_REGNUM];
+      if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
+        cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[HPPA_RP_REGNUM];
       else
 	{
-	  ULONGEST rp = frame_unwind_register_unsigned (next_frame, RP_REGNUM);
-	  trad_frame_set_value (cache->saved_regs, PCOQ_HEAD_REGNUM, rp);
+	  ULONGEST rp = frame_unwind_register_unsigned (next_frame, HPPA_RP_REGNUM);
+	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
 	}
     }
 
@@ -1863,7 +1863,7 @@ hppa_frame_prev_register (struct frame_info *next_frame,
 {
   struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  if (regnum == PCOQ_TAIL_REGNUM)
+  if (regnum == HPPA_PCOQ_TAIL_REGNUM)
     {
       /* The PCOQ TAIL, or NPC, needs to be computed from the unwound
 	 PC register.  */
@@ -1873,7 +1873,7 @@ hppa_frame_prev_register (struct frame_info *next_frame,
       *realnump = 0;
       if (valuep)
 	{
-	  int regsize = register_size (gdbarch, PCOQ_HEAD_REGNUM);
+	  int regsize = register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM);
 	  CORE_ADDR pc;
 	  int optimized;
 	  enum lval_type lval;
@@ -1881,7 +1881,7 @@ hppa_frame_prev_register (struct frame_info *next_frame,
 	  int realnum;
 	  bfd_byte value[MAX_REGISTER_SIZE];
 	  trad_frame_prev_register (next_frame, info->saved_regs,
-				    PCOQ_HEAD_REGNUM, &optimized, &lval, &addr,
+				    HPPA_PCOQ_HEAD_REGNUM, &optimized, &lval, &addr,
 				    &realnum, &value);
 	  pc = extract_unsigned_integer (&value, regsize);
 	  store_unsigned_integer (valuep, regsize, pc + 4);
@@ -1950,7 +1950,7 @@ hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
   *this_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  info->saved_regs[PCOQ_HEAD_REGNUM].realreg = RP_REGNUM;
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].realreg = HPPA_RP_REGNUM;
   info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
 
   return info;
@@ -1975,12 +1975,12 @@ hppa_stub_frame_prev_register (struct frame_info *next_frame,
 {
   struct hppa_stub_unwind_cache *info
     = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  int pcoqt = (regnum == PCOQ_TAIL_REGNUM);
+  int pcoqt = (regnum == HPPA_PCOQ_TAIL_REGNUM);
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  int regsize = register_size (gdbarch, PCOQ_HEAD_REGNUM);
+  int regsize = register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM);
 
   if (pcoqt)
-    regnum = PCOQ_HEAD_REGNUM;
+    regnum = HPPA_PCOQ_HEAD_REGNUM;
 
   trad_frame_prev_register (next_frame, info->saved_regs, regnum,
                             optimizedp, lvalp, addrp, realnump, bufferp);
@@ -2018,7 +2018,7 @@ hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_signed (next_frame, PCOQ_HEAD_REGNUM) & ~3;
+  return frame_unwind_register_signed (next_frame, HPPA_PCOQ_HEAD_REGNUM) & ~3;
 }
 
 /* Instead of this nasty cast, add a method pvoid() that prints out a
@@ -2111,10 +2111,10 @@ hppa_skip_permanent_breakpoint (void)
      front to the back.  But what do we put in the back?  What
      instruction comes after that one?  Because of the branch delay
      slot, the next insn is always at the back + 4.  */
-  write_register (PCOQ_HEAD_REGNUM, read_register (PCOQ_TAIL_REGNUM));
-  write_register (PCSQ_HEAD_REGNUM, read_register (PCSQ_TAIL_REGNUM));
+  write_register (HPPA_PCOQ_HEAD_REGNUM, read_register (HPPA_PCOQ_TAIL_REGNUM));
+  write_register (HPPA_PCSQ_HEAD_REGNUM, read_register (HPPA_PCSQ_TAIL_REGNUM));
 
-  write_register (PCOQ_TAIL_REGNUM, read_register (PCOQ_TAIL_REGNUM) + 4);
+  write_register (HPPA_PCOQ_TAIL_REGNUM, read_register (HPPA_PCOQ_TAIL_REGNUM) + 4);
   /* We can leave the tail's space the same, since there's no jump.  */
 }
 
@@ -2152,8 +2152,8 @@ hppa_instruction_nullified (void)
   /* brobecker 2002/11/07: Couldn't we use a ULONGEST here? It would
      avoid the type cast.  I'm leaving it as is for now as I'm doing
      semi-mechanical multiarching-related changes.  */
-  const int ipsw = (int) read_register (IPSW_REGNUM);
-  const int flags = (int) read_register (FLAGS_REGNUM);
+  const int ipsw = (int) read_register (HPPA_IPSW_REGNUM);
+  const int flags = (int) read_register (HPPA_FLAGS_REGNUM);
 
   return ((ipsw & 0x00200000) && !(flags & 0x2));
 }
@@ -2164,7 +2164,7 @@ hppa_instruction_nullified (void)
 static struct type *
 hppa32_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-   if (reg_nr < FP4_REGNUM)
+   if (reg_nr < HPPA_FP4_REGNUM)
      return builtin_type_uint32;
    else
      return builtin_type_ieee_single_big;
@@ -2176,7 +2176,7 @@ hppa32_register_type (struct gdbarch *gdbarch, int reg_nr)
 static struct type *
 hppa64_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-   if (reg_nr < FP4_REGNUM)
+   if (reg_nr < HPPA_FP4_REGNUM)
      return builtin_type_uint64;
    else
      return builtin_type_ieee_double_big;
@@ -2189,9 +2189,9 @@ static int
 hppa_cannot_store_register (int regnum)
 {
   return (regnum == 0
-          || regnum == PCSQ_HEAD_REGNUM
-          || (regnum >= PCSQ_TAIL_REGNUM && regnum < IPSW_REGNUM)
-          || (regnum > IPSW_REGNUM && regnum < FP4_REGNUM));
+          || regnum == HPPA_PCSQ_HEAD_REGNUM
+          || (regnum >= HPPA_PCSQ_TAIL_REGNUM && regnum < HPPA_IPSW_REGNUM)
+          || (regnum > HPPA_IPSW_REGNUM && regnum < HPPA_FP4_REGNUM));
 
 }
 
@@ -2214,7 +2214,7 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
 			     struct type *type)
 {
   CORE_ADDR addr;
-  get_frame_register (frame, R0_REGNUM + 26 - argi, &addr);
+  get_frame_register (frame, HPPA_R0_REGNUM + 26 - argi, &addr);
   return addr;
 }
 
@@ -2225,7 +2225,7 @@ hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     ULONGEST tmp;
 
     regcache_raw_read_unsigned (regcache, regnum, &tmp);
-    if (regnum == PCOQ_HEAD_REGNUM || regnum == PCOQ_TAIL_REGNUM)
+    if (regnum == HPPA_PCOQ_HEAD_REGNUM || regnum == HPPA_PCOQ_TAIL_REGNUM)
       tmp &= ~0x3;
     store_unsigned_integer (buf, sizeof(tmp), tmp);
 }

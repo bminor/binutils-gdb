@@ -23,6 +23,48 @@
 
 enum { HPPA_INSTRUCTION_SIZE = 4 };
 
+/* Register numbers of various important registers.
+   Note that some of these values are "real" register numbers,
+   and correspond to the general registers of the machine,
+   and some are "phony" register numbers which are too large
+   to be actual register numbers as far as the user is concerned
+   but do serve to get the desired values when passed to read_register.  */
+
+enum {
+  HPPA_R0_REGNUM = 0,		/* Doesn't actually exist, used as base for
+				   other r registers.  */
+  HPPA_FLAGS_REGNUM = 0,	/* Various status flags */
+  HPPA_RP_REGNUM = 2,		/* return pointer */
+  HPPA_FP_REGNUM = 3,		/* The ABI's frame pointer, when used */
+  HPPA_SP_REGNUM = 30,		/* Stack pointer.  */
+  HPPA_SAR_REGNUM = 32,		/* Shift Amount Register */
+  HPPA_IPSW_REGNUM = 41,	/* Interrupt Processor Status Word */
+  HPPA_PCOQ_HEAD_REGNUM = 33,	/* instruction offset queue head */
+  HPPA_PCSQ_HEAD_REGNUM = 34,	/* instruction space queue head */
+  HPPA_PCOQ_TAIL_REGNUM = 35,	/* instruction offset queue tail */
+  HPPA_PCSQ_TAIL_REGNUM = 36,	/* instruction space queue tail */
+  HPPA_EIEM_REGNUM = 37,	/* External Interrupt Enable Mask */
+  HPPA_IIR_REGNUM = 38,		/* Interrupt Instruction Register */
+  HPPA_ISR_REGNUM = 39,		/* Interrupt Space Register */
+  HPPA_IOR_REGNUM = 40,		/* Interrupt Offset Register */
+  HPPA_SR4_REGNUM = 43,		/* space register 4 */
+  HPPA_RCR_REGNUM = 51,		/* Recover Counter (also known as cr0) */
+  HPPA_PID0_REGNUM = 52,	/* Protection ID */
+  HPPA_PID1_REGNUM = 53,	/* Protection ID */
+  HPPA_PID2_REGNUM = 55,	/* Protection ID */
+  HPPA_PID3_REGNUM = 56,	/* Protection ID */
+  HPPA_CCR_REGNUM = 54,		/* Coprocessor Configuration Register */
+  HPPA_TR0_REGNUM = 57,		/* Temporary Registers (cr24 -> cr31) */
+  HPPA_CR27_REGNUM = 60,	/* Base register for thread-local storage, cr27 */
+  HPPA_FP0_REGNUM = 64,		/* First floating-point.  */
+  HPPA_FP4_REGNUM = 72,
+
+  HPPA_ARG0_REGNUM = 26,	/* The first argument of a callee. */
+  HPPA_ARG1_REGNUM = 25,	/* The second argument of a callee. */
+  HPPA_ARG2_REGNUM = 24,	/* The third argument of a callee. */
+  HPPA_ARG3_REGNUM = 23		/* The fourth argument of a callee. */
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {

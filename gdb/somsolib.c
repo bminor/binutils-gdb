@@ -1137,7 +1137,7 @@ som_solib_have_load_event (int pid)
 {
   CORE_ADDR event_kind;
 
-  event_kind = read_register (ARG0_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
   return (event_kind == SHL_LOAD);
 }
 
@@ -1146,7 +1146,7 @@ som_solib_have_unload_event (int pid)
 {
   CORE_ADDR event_kind;
 
-  event_kind = read_register (ARG0_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
   return (event_kind == SHL_UNLOAD);
 }
 
@@ -1160,7 +1160,7 @@ som_solib_library_pathname (int pid)
   static char dll_pathname[1024];
 
   /* Read the descriptor of this newly-loaded library. */
-  dll_handle_address = read_register (ARG1_REGNUM);
+  dll_handle_address = read_register (HPPA_ARG1_REGNUM);
   read_memory (dll_handle_address, (char *) &dll_descriptor, sizeof (dll_descriptor));
 
   /* We can find a pointer to the dll's pathname within the descriptor. */

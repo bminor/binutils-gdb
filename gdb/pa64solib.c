@@ -649,7 +649,7 @@ pa64_solib_have_load_event (int pid)
 {
   CORE_ADDR event_kind;
 
-  event_kind = read_register (ARG0_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
   return (event_kind == DLD_CB_LOAD);
 }
 
@@ -660,7 +660,7 @@ pa64_solib_have_unload_event (int pid)
 {
   CORE_ADDR event_kind;
 
-  event_kind = read_register (ARG0_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
   return (event_kind == DLD_CB_UNLOAD);
 }
 
@@ -674,7 +674,7 @@ char *
 pa64_solib_loaded_library_pathname (int pid)
 {
   static char dll_path[MAXPATHLEN];
-  CORE_ADDR  dll_path_addr = read_register (ARG3_REGNUM);
+  CORE_ADDR  dll_path_addr = read_register (HPPA_ARG3_REGNUM);
   read_memory_string (dll_path_addr, dll_path, MAXPATHLEN);
   return dll_path;
 }
@@ -689,7 +689,7 @@ char *
 pa64_solib_unloaded_library_pathname (int pid)
 {
   static char dll_path[MAXPATHLEN];
-  CORE_ADDR dll_path_addr = read_register (ARG3_REGNUM);
+  CORE_ADDR dll_path_addr = read_register (HPPA_ARG3_REGNUM);
   read_memory_string (dll_path_addr, dll_path, MAXPATHLEN);
   return dll_path;
 }

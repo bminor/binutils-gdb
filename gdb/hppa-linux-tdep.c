@@ -42,7 +42,7 @@ hppa_dwarf_reg_to_regnum (int reg)
 
   /* dwarf regs 32 to 85 are fpregs 4 - 31 */
   if (reg >= 32 && reg <= 85)
-    return FP4_REGNUM + (reg - 32);
+    return HPPA_FP4_REGNUM + (reg - 32);
 
   warning ("Unmapped DWARF Register #%d encountered\n", reg);
   return -1;
@@ -53,8 +53,8 @@ static void
 hppa_linux_target_write_pc (CORE_ADDR v, ptid_t ptid)
 {
   /* Probably this should be done by the kernel, but it isn't.  */
-  write_register_pid (PCOQ_HEAD_REGNUM, v | 0x3, ptid);
-  write_register_pid (PCOQ_TAIL_REGNUM, (v + 4) | 0x3, ptid);
+  write_register_pid (HPPA_PCOQ_HEAD_REGNUM, v | 0x3, ptid);
+  write_register_pid (HPPA_PCOQ_TAIL_REGNUM, (v + 4) | 0x3, ptid);
 }
 
 /* An instruction to match.  */
@@ -364,7 +364,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   /* General registers.  */
   for (i = 1; i < 32; i++)
     {
-      info->saved_regs[R0_REGNUM + i].addr = scptr;
+      info->saved_regs[HPPA_R0_REGNUM + i].addr = scptr;
       scptr += 4;
     }
 
@@ -383,14 +383,14 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
     }
 
   /* IASQ/IAOQ. */
-  info->saved_regs[PCSQ_HEAD_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCSQ_HEAD_REGNUM].addr = scptr;
   scptr += 4;
-  info->saved_regs[PCSQ_TAIL_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCSQ_TAIL_REGNUM].addr = scptr;
   scptr += 4;
 
-  info->saved_regs[PCOQ_HEAD_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = scptr;
   scptr += 4;
-  info->saved_regs[PCOQ_TAIL_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].addr = scptr;
   scptr += 4;
 
   info->base = read_memory_unsigned_integer (
@@ -419,10 +419,10 @@ hppa_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
 {
   struct hppa_linux_sigtramp_unwind_cache *info
     = hppa_linux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  int pcoqt = (regnum == PCOQ_TAIL_REGNUM);
+  int pcoqt = (regnum == HPPA_PCOQ_TAIL_REGNUM);
 
   if (pcoqt)
-    regnum = PCOQ_HEAD_REGNUM;
+    regnum = HPPA_PCOQ_HEAD_REGNUM;
 
   trad_frame_prev_register (next_frame, info->saved_regs, regnum,
                             optimizedp, lvalp, addrp, realnump, bufferp);

@@ -35,6 +35,7 @@
 #include "infttrace.h"
 #include <signal.h>
 
+#include "hppa-tdep.h"
 
 static CORE_ADDR text_end;
 
@@ -113,9 +114,9 @@ store_inferior_registers (int regno)
 	}
 
       /* Floating-point registers come from the ss_fpblock area.  */
-      else if (regno >= FP0_REGNUM)
+      else if (regno >= HPPA_FP0_REGNUM)
 	addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
-		+ (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (FP0_REGNUM)));
+		+ (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (HPPA_FP0_REGNUM)));
 
       /* Wide registers come from the ss_wide area.
 	 I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
@@ -141,7 +142,7 @@ store_inferior_registers (int regno)
 	 layering will not allow us to perform a 64bit register store.
 
 	 What a crock.  */
-      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM && len == 8)
+      if (regno == HPPA_PCOQ_HEAD_REGNUM || regno == HPPA_PCOQ_TAIL_REGNUM && len == 8)
 	{
 	  CORE_ADDR temp;
 
@@ -169,7 +170,7 @@ store_inferior_registers (int regno)
       /* Another crock.  HPUX complains if you write a nonzero value to
 	 the high part of IPSW.  What will it take for HP to catch a
 	 clue about building sensible interfaces?  */
-     if (regno == IPSW_REGNUM && len == 8)
+     if (regno == HPPA_IPSW_REGNUM && len == 8)
 	*(int *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)] = 0;
 #endif
 
@@ -189,7 +190,7 @@ store_inferior_registers (int regno)
 		        REGISTER_NAME (regno), err);
 	      /* If we fail to write the PC, give a true error instead of
 		 just a warning.  */
-	      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+	      if (regno == HPPA_PCOQ_HEAD_REGNUM || regno == HPPA_PCOQ_TAIL_REGNUM)
 		perror_with_name (msg);
 	      else
 		warning (msg);
@@ -231,9 +232,9 @@ fetch_register (int regno)
     }
 
   /* Floating-point registers come from the ss_fpblock area.  */
-  else if (regno >= FP0_REGNUM)
+  else if (regno >= HPPA_FP0_REGNUM)
     addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
-	    + (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (FP0_REGNUM)));
+	    + (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (HPPA_FP0_REGNUM)));
 
   /* Wide registers come from the ss_wide area.
      I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
@@ -278,7 +279,7 @@ fetch_register (int regno)
   /* If we're reading an address from the instruction address queue,
      mask out the bottom two bits --- they contain the privilege
      level.  */
-  if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+  if (regno == HPPA_PCOQ_HEAD_REGNUM || regno == HPPA_PCOQ_TAIL_REGNUM)
     buf[len - 1] &= ~0x3;
 
   supply_register (regno, buf);
