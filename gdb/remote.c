@@ -210,7 +210,7 @@ static int remote_write_bytes PARAMS ((CORE_ADDR memaddr,
 static int remote_read_bytes PARAMS ((CORE_ADDR memaddr,
 				      char *myaddr, int len));
 
-static void remote_files_info PARAMS ((struct target_ops * ignore));
+static void remote_files_info PARAMS ((struct target_ops *ignore));
 
 static int remote_xfer_memory PARAMS ((CORE_ADDR memaddr, char * myaddr,
 				       int len, int should_write,
@@ -229,7 +229,7 @@ static void remote_open PARAMS ((char *name, int from_tty));
 
 static void extended_remote_open PARAMS ((char *name, int from_tty));
 
-static void remote_open_1 PARAMS ((char *, int, struct target_ops *, 
+static void remote_open_1 PARAMS ((char *, int, struct target_ops *,
 				   int extended_p));
 
 static void remote_close PARAMS ((int quitting));
@@ -282,6 +282,10 @@ static void init_extended_remote_ops PARAMS ((void));
 
 static void remote_stop PARAMS ((void));
 
+static int ishex PARAMS ((int ch, int *val));
+
+static int stubhex PARAMS ((int ch));
+
 static int hexnumstr PARAMS ((char *, ULONGEST));
 
 static CORE_ADDR remote_address_masked PARAMS ((CORE_ADDR));
@@ -293,6 +297,84 @@ static unsigned long crc32 PARAMS ((unsigned char *, int, unsigned int));
 static void compare_sections_command PARAMS ((char *, int));
 
 static void packet_command PARAMS ((char *, int));
+
+static int stub_unpack_int PARAMS ((char *buff, int fieldlength));
+
+char *unpack_varlen_hex PARAMS ((char *buff, int *result));
+
+static char *unpack_nibble PARAMS ((char *buf, int *val));
+
+static char *pack_nibble PARAMS ((char *buf, int nibble));
+
+static char *pack_hex_byte PARAMS ((char *pkt, unsigned char byte));
+
+static char *unpack_byte PARAMS ((char *buf, int *value));
+
+static char *pack_int PARAMS ((char *buf, int value));
+
+static char *unpack_int PARAMS ((char *buf, int *value));
+
+static char *unpack_string PARAMS ((char *src, char *dest, int length));
+
+static char *pack_threadid PARAMS ((char *pkt, threadref *id));
+
+static char *unpack_threadid PARAMS ((char *inbuf, threadref *id));
+
+void int_to_threadref PARAMS ((threadref *id, int value));
+
+static int threadref_to_int PARAMS ((threadref *ref));
+
+static void copy_threadref PARAMS ((threadref *dest, threadref *src));
+
+static int threadmatch PARAMS ((threadref *dest, threadref *src));
+
+static char *pack_threadinfo_request PARAMS ((char *pkt, int mode,
+					      threadref *id));
+
+static int remote_unpack_thread_info_response PARAMS ((char *pkt,
+						       threadref *expectedref,
+						       struct gdb_ext_thread_info *info));
+
+
+static int remote_get_threadinfo PARAMS ((threadref *threadid,
+					  int fieldset,	/*TAG mask */
+					  struct gdb_ext_thread_info *info));
+
+static int adapt_remote_get_threadinfo PARAMS ((gdb_threadref *ref,
+						int selection,
+						struct gdb_ext_thread_info *info));
+
+static char *pack_threadlist_request PARAMS ((char *pkt, int startflag,
+					      int threadcount,
+					      threadref *nextthread));
+
+static int parse_threadlist_response PARAMS ((char *pkt,
+					      int result_limit,
+					      threadref *original_echo,
+					      threadref *resultlist,
+					      int *doneflag));
+
+static int remote_get_threadlist PARAMS ((int startflag,
+					  threadref *nextthread,
+					  int result_limit,
+					  int *done,
+					  int *result_count,
+					  threadref *threadlist));
+
+typedef int (*rmt_thread_action) (threadref *ref, void *context);
+
+static int remote_threadlist_iterator PARAMS ((rmt_thread_action stepfunction,
+					       void *context, int looplimit));
+
+static int remote_newthread_step PARAMS ((threadref *ref, void *context));
+
+static int remote_current_thread PARAMS ((int oldpid));
+
+int remote_find_new_threads PARAMS ((void));
+
+static void record_currthread PARAMS ((int currthread));
+
+static void init_remote_threads PARAMS ((void));
 
 /* exported functions */
 
@@ -315,6 +397,8 @@ void _initialize_remote PARAMS ((void));
 static struct target_ops remote_ops;
 
 static struct target_ops extended_remote_ops;
+
+static struct target_thread_vector remote_thread_vec;
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -401,144 +485,6 @@ void (*target_resume_hook) PARAMS ((void));
 void (*target_wait_loop_hook) PARAMS ((void));
 
 
-/* ------- REMOTE Thread (or) Process support ----------------------- */
-
-
-
-static int
-stub_unpack_int PARAMS ((char *buff, int fieldlength));
-
-char *
-  unpack_varlen_hex PARAMS ((char *buff, int *result));
-
-
-static char *
-  unpack_nibble PARAMS ((char *buf, int *val));
-
-static char *
-  unpack_nibble PARAMS ((char *buf, int *val));
-
-static char *
-  pack_hex_byte PARAMS ((char *pkt, unsigned char byte));
-
-static char *
-  unpack_byte PARAMS ((char *buf, int *value));
-
-static char *
-  pack_int PARAMS ((char *buf, int value));
-
-static char *
-  unpack_int PARAMS ((char *buf, int *value));
-
-static char *
-  pack_string PARAMS ((char *pkt, char *string));
-
-static char *
-  unpack_string PARAMS ((char *src, char *dest, int length));
-
-static char *
-  pack_threadid PARAMS ((char *pkt, threadref * id));
-
-static char *
-  unpack_threadid PARAMS ((char *inbuf, threadref * id));
-
-void
-int_to_threadref PARAMS ((threadref * id, int value));
-
-
-int
-threadref_to_int PARAMS ((threadref * ref));
-
-static void
-copy_threadref PARAMS ((threadref * dest, threadref * src));
-
-static int
-threadmatch PARAMS ((threadref * dest, threadref * src));
-
-
-static char *
-pack_threadinfo_request PARAMS ((char *pkt,
-				 int mode,
-				 threadref * id));
-
-static int
-remote_unpack_thread_info_response PARAMS ((char *pkt,
-					    threadref * expectedref,
-					    struct gdb_ext_thread_info * info
-					    ));
-
-int
-remote_get_threadinfo PARAMS ((threadref * threadid,
-			       int fieldset,	/* TAG mask */
-			       struct gdb_ext_thread_info * info));
-
-int
-adapt_remote_get_threadinfo PARAMS ((gdb_threadref * ref,
-				     int selection,
-				     struct gdb_ext_thread_info * info));
-static char *
-pack_threadlist_request PARAMS ((char *pkt,
-				 int startflag,
-				 int threadcount,
-				 threadref * nextthread));
-
-static int
-parse_threadlist_response PARAMS ((char *pkt,
-				   int result_limit,
-				   threadref * original_echo,
-				   threadref * resultlist,
-				   int *doneflag));
-static int
-remote_get_threadlist PARAMS ((int startflag,
-			       threadref * nextthread,
-			       int result_limit,
-			       int *done,
-			       int *result_count,
-			       threadref * threadlist));
-
-static int
-remote_newthread_step PARAMS ((threadref * ref,
-			       void *context));
-
-int
-remote_find_new_threads PARAMS ((void));
-
-static void
-threadalive_test PARAMS ((char *cmd, int tty));
-
-
-static void
-threadset_test_cmd PARAMS ((char *cmd, int tty));
-
-static void
-threadlist_test_cmd PARAMS ((char *cmd,
-			     int tty));
-
-void
-display_thread_info PARAMS ((struct gdb_ext_thread_info * info));
-
-
-int
-get_and_display_threadinfo PARAMS ((threadref * ref));
-
-
-static void
-threadinfo_test_cmd PARAMS ((char *cmd,
-			     int tty));
-
-static int
-thread_display_step PARAMS ((
-			      threadref * ref,
-			      void *context));
-
-
-static void
-threadlist_update_test_cmd PARAMS ((char *cmd,
-				    int tty));
-
-
-static void
-init_remote_threadtests PARAMS ((void));
 
 /* These are the threads which we last sent to the remote system.
    -1 for all or -2 for not sent yet.  */
@@ -619,25 +565,21 @@ remote_thread_alive (th)
   return (buf[0] == 'O' && buf[1] == 'K');
 }
 
-/*
-  About these extended threadlist and threadinfo packets.
-  They are variable length packets but, the fields within them
-    are often fixed length.
-  They are redundent enough to send over UDP as is the remote protocol
-   in general.
-  There is a matching unit test module in libstub.
- */
-
+/* About these extended threadlist and threadinfo packets.  They are
+   variable length packets but, the fields within them are often fixed
+   length.  They are redundent enough to send over UDP as is the
+   remote protocol in general.  There is a matching unit test module
+   in libstub.  */
 
 #define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES*2)
-/* encode 64 bits in 16 chars of hex */
 
+/* encode 64 bits in 16 chars of hex */
 
 static const char hexchars[] = "0123456789abcdef";
 
 static int
 ishex (ch, val)
-     char ch;
+     int ch;
      int *val;
 {
   if ((ch >= 'a') && (ch <= 'f'))
@@ -660,7 +602,7 @@ ishex (ch, val)
 
 static int
 stubhex (ch)
-     unsigned char ch;
+     int ch;
 {
   if (ch >= 'a' && ch <= 'f')
     return ch - 'a' + 10;
@@ -676,8 +618,9 @@ stub_unpack_int (buff, fieldlength)
      char *buff;
      int fieldlength;
 {
-  int retval = 0;
   int nibble;
+  int retval = 0;
+
   while (fieldlength)
     {
       nibble = stubhex (*buff++);
@@ -695,8 +638,7 @@ unpack_varlen_hex (buff, result)
      int *result;
 {
   int nibble;
-  int retval;
-  retval = 0;
+  int retval = 0;
 
   while (ishex (*buff, &nibble))
     {
@@ -712,7 +654,6 @@ static char *
 unpack_nibble (buf, val)
      char *buf;
      int *val;
-
 {
   ishex (*buf++, val);
   return buf;
@@ -722,7 +663,6 @@ static char *
 pack_nibble (buf, nibble)
      char *buf;
      int nibble;
-
 {
   *buf++ = hexchars[(nibble & 0x0f)];
   return buf;
@@ -747,7 +687,6 @@ unpack_byte (buf, value)
   return buf + 2;
 }
 
-
 static char *
 pack_int (buf, value)
      char *buf;
@@ -760,7 +699,6 @@ pack_int (buf, value)
   return buf;
 }
 
-
 static char *
 unpack_int (buf, value)
      char *buf;
@@ -770,6 +708,8 @@ unpack_int (buf, value)
   return buf + 8;
 }
 
+#if 0 /* currently unused, uncomment when needed */
+static char *pack_string PARAMS ((char *pkt, char *string));
 
 static char *
 pack_string (pkt, string)
@@ -778,6 +718,7 @@ pack_string (pkt, string)
 {
   char ch;
   int len;
+
   len = strlen (string);
   if (len > 200)
     len = 200;			/* Bigger than most GDB packets, junk??? */
@@ -791,6 +732,7 @@ pack_string (pkt, string)
     }
   return pkt;
 }
+#endif /* 0 (unused) */
 
 static char *
 unpack_string (src, dest, length)
@@ -811,6 +753,7 @@ pack_threadid (pkt, id)
 {
   char *limit;
   unsigned char *altid;
+
   altid = (unsigned char *) id;
   limit = pkt + BUF_THREAD_ID_SIZE;
   while (pkt < limit)
@@ -827,6 +770,7 @@ unpack_threadid (inbuf, id)
   char *altref;
   char *limit = inbuf + BUF_THREAD_ID_SIZE;
   int x, y;
+
   altref = (char *) id;
 
   while (inbuf < limit)
@@ -839,10 +783,9 @@ unpack_threadid (inbuf, id)
 }
 
 /* Externally, threadrefs are 64 bits but internally, they are still
-   ints. This is due to a mismatch of specifications.
-   We would like to use 64bit thread references internally.
-   This is an adapter function.
- */
+   ints. This is due to a mismatch of specifications.  We would like
+   to use 64bit thread references internally.  This is an adapter
+   function.  */
 
 void
 int_to_threadref (id, value)
@@ -850,6 +793,7 @@ int_to_threadref (id, value)
      int value;
 {
   unsigned char *scan;
+
   scan = (unsigned char *) id;
   {
     int i = 4;
@@ -862,13 +806,12 @@ int_to_threadref (id, value)
   *scan++ = (value & 0xff);
 }
 
-int
+static int
 threadref_to_int (ref)
      threadref *ref;
 {
-  int value = 0;
+  int i, value = 0;
   unsigned char *scan;
-  int i;
 
   scan = (char *) ref;
   scan += 4;
@@ -885,14 +828,13 @@ copy_threadref (dest, src)
 {
   int i;
   unsigned char *csrc, *cdest;
+
   csrc = (unsigned char *) src;
   cdest = (unsigned char *) dest;
   i = 8;
   while (i--)
     *cdest++ = *csrc++;
 }
-
-
 
 static int
 threadmatch (dest, src)
@@ -914,15 +856,6 @@ threadmatch (dest, src)
   return 1;
 }
 
-#if THREAD_PKT_TRACE
-#define PKT_TRACE(title,packet)  { printf_filtered("%s %s\n", title, packet);}
-#else
-#define PKT_TRACE(a,b) {}
-#endif
-
-
-/* ----- PACK_THREAD_INFO_REQUEST -------------------------------- */
-
 /*
   threadid:1,        # always request threadid
   context_exists:2,
@@ -934,38 +867,30 @@ threadmatch (dest, src)
 /* Encoding:  'Q':8,'P':8,mask:32,threadid:64 */
 
 static char *
-  pack_threadinfo_request PARAMS ((char *pkt,
-				   int mode,
-				   threadref * id));
-
-static char *
 pack_threadinfo_request (pkt, mode, id)
      char *pkt;
      int mode;
      threadref *id;
 {
-  char *base = pkt;
   *pkt++ = 'q';			/* Info Query */
   *pkt++ = 'P';			/* process or thread info */
   pkt = pack_int (pkt, mode);	/* mode */
   pkt = pack_threadid (pkt, id);	/* threadid */
   *pkt = '\0';			/* terminate */
-  PKT_TRACE ("threadinfo-req ", base);
   return pkt;
 }
-
 
 /* These values tag the fields in a thread info response packet */
 /* Tagging the fields allows us to request specific fields and to
    add more fields as time goes by */
+
 #define TAG_THREADID 1      /* Echo the thread identifier */
-#define TAG_EXISTS 2        /* It this process defined enough to
+#define TAG_EXISTS 2        /* Is this process defined enough to
 			       fetch registers and its stack */
 #define TAG_DISPLAY 4       /* A short thing maybe to put on a window */
 #define TAG_THREADNAME 8    /* string, maps 1-to-1 with a thread is */
 #define TAG_MOREDISPLAY 16  /* Whatever the kernel wants to say about 
 			       the process*/
-
 
 static int
 remote_unpack_thread_info_response (pkt, expectedref, info)
@@ -979,8 +904,6 @@ remote_unpack_thread_info_response (pkt, expectedref, info)
   char *limit = pkt + PBUFSIZ;  /* plausable parsing limit */
   int retval = 1;
 
-  PKT_TRACE ("unpack-threadinfo ", pkt);
-
   /* info->threadid = 0; FIXME: implement zero_threadref */
   info->active = 0;
   info->display[0] = '\0';
@@ -992,10 +915,10 @@ remote_unpack_thread_info_response (pkt, expectedref, info)
   pkt = unpack_threadid (pkt, &ref);
 
   if (mask == 0)
-    warning("Incomplete response to threadinfo request\n");
+    warning ("Incomplete response to threadinfo request\n");
   if (!threadmatch (&ref, expectedref))
     {				/* This is an answer to a different request */
-      warning("ERROR RMT Thread info mismatch\n");
+      warning ("ERROR RMT Thread info mismatch\n");
       return 0;
     }
   copy_threadref (&info->threadid, &ref);
@@ -1061,10 +984,7 @@ remote_unpack_thread_info_response (pkt, expectedref, info)
   return retval;
 }
 
-
-/* ------ REMOTE_GET_THREADINFO -------------------------------------- */
-
-int
+static int
 remote_get_threadinfo (threadid, fieldset, info)
      threadref *threadid;
      int fieldset;		/* TAG mask */
@@ -1072,32 +992,30 @@ remote_get_threadinfo (threadid, fieldset, info)
 {
   int result;
   char threadinfo_pkt[PBUFSIZ];
+
   pack_threadinfo_request (threadinfo_pkt, fieldset, threadid);
   putpkt (threadinfo_pkt);
   getpkt (threadinfo_pkt, 0);
-  result = remote_unpack_thread_info_response (threadinfo_pkt + 2, 
-					       threadid, info);
+  result = remote_unpack_thread_info_response (threadinfo_pkt + 2, threadid,
+					       info);
   return result;
 }
 
-/* ------- ADAPT_remote_GET_THREADINFO  - */
-/* Unfortunatly, 61 but thread-ids are bugger than the internal
+/* Unfortunately, 61 bit thread-ids are bigger than the internal
    representation of a threadid.  */
 
-
-int
+static int
 adapt_remote_get_threadinfo (ref, selection, info)
      gdb_threadref *ref;
      int selection;
      struct gdb_ext_thread_info *info;
 {
   threadref lclref;
+
   int_to_threadref (&lclref, *ref);
   return remote_get_threadinfo (&lclref, selection, info);
 }
 
-
-/* -------- PACK_THREADLIST-REQUEST --------------------------------- */
 /*    Format: i'Q':8,i"L":8,initflag:8,batchsize:16,lastthreadid:32   */
 
 static char *
@@ -1116,14 +1034,11 @@ pack_threadlist_request (pkt, startflag, threadcount, nextthread)
   return pkt;
 }
 
-
-/* ---------- PARSE_THREADLIST_RESPONSE -------------------------------- */
 /* Encoding:   'q':8,'M':8,count:16,done:8,argthreadid:64,(threadid:64)* */
 
-
 static int
-parse_threadlist_response (pkt, result_limit, original_echo,
-			   resultlist, doneflag)
+parse_threadlist_response (pkt, result_limit, original_echo, resultlist,
+			   doneflag)
      char *pkt;
      int result_limit;
      threadref *original_echo;
@@ -1132,14 +1047,13 @@ parse_threadlist_response (pkt, result_limit, original_echo,
 {
   char *limit;
   int count, resultcount, done;
-  resultcount = 0;
 
-  /* assume the 'q' and 'M chars have been stripped */
-  PKT_TRACE ("parse-threadlist-response ", pkt);
+  resultcount = 0;
+  /* Assume the 'q' and 'M chars have been stripped.  */
   limit = pkt + (PBUFSIZ - BUF_THREAD_ID_SIZE);	/* done parse past here */
   pkt = unpack_byte (pkt, &count);	/* count field */
   pkt = unpack_nibble (pkt, &done);
-  /* The first threadid is the argument threadid */
+  /* The first threadid is the argument threadid.  */
   pkt = unpack_threadid (pkt, original_echo);	/* should match query packet */
   while ((count-- > 0) && (pkt < limit))
     {
@@ -1149,10 +1063,8 @@ parse_threadlist_response (pkt, result_limit, original_echo,
     }
   if (doneflag)
     *doneflag = done;
-  return resultcount;		/* successvalue */
+  return resultcount;
 }
-
-
 
 static int
 remote_get_threadlist (startflag, nextthread, result_limit,
@@ -1178,11 +1090,11 @@ remote_get_threadlist (startflag, nextthread, result_limit,
 			   startflag, result_limit, nextthread);
   putpkt (threadlist_packet);
   getpkt (t_response, 0);
-  *result_count = parse_threadlist_response (t_response + 2, /* strip header */
-					      result_limit,
-					      &echo_nextthread,
-					      threadlist,
-					      done);
+
+  *result_count =
+    parse_threadlist_response (t_response + 2, result_limit, &echo_nextthread,
+			       threadlist, done);
+
   if (!threadmatch (&echo_nextthread, nextthread))
     {
       /* FIXME: This is a good reason to drop the packet */
@@ -1214,29 +1126,18 @@ remote_get_threadlist (startflag, nextthread, result_limit,
   return result;
 }
 
-
-
 /* This is the interface between remote and threads, remotes upper interface */
-/* remote_find_new_threads retreives the thread list and for each
+
+/* remote_find_new_threads retrieves the thread list and for each
    thread in the list, looks up the thread in GDB's internal list,
-   ading the thread if it does not already exist.
-   This involves getting partial thread lists from the remote target so,
-   polling the quit_flag is required.
-*/
+   ading the thread if it does not already exist.  This involves
+   getting partial thread lists from the remote target so, polling the
+   quit_flag is required.  */
 
-typedef int (*rmt_thread_action) (
-				   threadref * ref,
-				   void *context
-);
 
-/* About this many threadisds fit in a packet */
-#define MAXTHREADLISTRESULTS 32 
+/* About this many threadisds fit in a packet. */
 
-static int
-remote_threadlist_iterator PARAMS ((
-				     rmt_thread_action stepfunction,
-				     void *context,
-				     int looplimit));
+#define MAXTHREADLISTRESULTS 32
 
 static int
 remote_threadlist_iterator (stepfunction, context, looplimit)
@@ -1249,7 +1150,6 @@ remote_threadlist_iterator (stepfunction, context, looplimit)
   int result = 1;
   int loopcount = 0;
   static threadref nextthread;
-  static threadref echo_nextthread;
   static threadref resultthreadlist[MAXTHREADLISTRESULTS];
 
   done = 0;
@@ -1261,21 +1161,17 @@ remote_threadlist_iterator (stepfunction, context, looplimit)
 	  warning ("Remote fetch threadlist -infinite loop-\n");
 	  break;
 	}
-      if (!remote_get_threadlist (startflag,
-				  &nextthread,
-				  MAXTHREADLISTRESULTS,
-				  &done,
-				  &result_count,
-				  resultthreadlist))
+      if (!remote_get_threadlist (startflag, &nextthread, MAXTHREADLISTRESULTS,
+				  &done, &result_count, resultthreadlist))
 	{
 	  result = 0;
 	  break;
 	}
-      startflag = 0;		/* clear for later iterations */
-      /* Setup to resume next batch of thread references , set nestthread */
+      /* clear for later iterations */
+      startflag = 0;
+      /* Setup to resume next batch of thread references, set nextthread.  */
       if (result_count >= 1)
 	copy_threadref (&nextthread, &resultthreadlist[result_count - 1]);
-      /* output_threadid("last-of-batch",&nextthread); */
       i = 0;
       while (result_count--)
 	if (!(result = (*stepfunction) (&resultthreadlist[i++], context)))
@@ -1284,13 +1180,13 @@ remote_threadlist_iterator (stepfunction, context, looplimit)
   return result;
 }
 
-
 static int
 remote_newthread_step (ref, context)
      threadref *ref;
      void *context;
 {
   int pid;
+
   pid = threadref_to_int (ref);
   if (!in_thread_list (pid))
     add_thread (pid);
@@ -1299,8 +1195,9 @@ remote_newthread_step (ref, context)
 
 #define CRAZY_MAX_THREADS 1000
 
-int
-remote_current_thread (int oldpid)
+static int
+remote_current_thread (oldpid)
+     int oldpid;
 {
   char buf[PBUFSIZ];
 
@@ -1313,7 +1210,7 @@ remote_current_thread (int oldpid)
 }
 
 int
-remote_find_new_threads  (void)
+remote_find_new_threads ()
 {
   int ret;
 
@@ -1322,177 +1219,19 @@ remote_find_new_threads  (void)
   if (inferior_pid == MAGIC_NULL_PID)	/* ack ack ack */
     inferior_pid = remote_current_thread (inferior_pid);
   return ret;
-} /* remote_find_new_threads */
-
-int
-remote_update_threads ()
-{
-  /* Right now, this is empty. But it is one of the functions
-     defined for the thread target vector so it gets called.
-     If we were to allow the modification of the registers of
-     a suspended process, this would be implemented. */
-  return 0;
 }
 
-static struct target_thread_vector remote_thread_vec;
-
 /* Initialize the thread vector which is used by threads.c */
-/* The thread stubb is a package, it has an initializer */
-void init_remote_threads ()
+/* The thread stub is a package, it has an initializer */
+
+static void
+init_remote_threads ()
 {
   remote_thread_vec.find_new_threads = remote_find_new_threads;
   remote_thread_vec.get_thread_info = adapt_remote_get_threadinfo;
 }
 
-/* --------- UNIT_TEST for THREAD oriented PACKETS -------------------- */
-
-#define SAMPLE_THREAD  0x05060708  /* Truncated 64 bit threadid */
-
-
-static void
-threadset_test_cmd (cmd, tty)
-     char *cmd;
-     int tty;
-{
-  int sample_thread = SAMPLE_THREAD;
-  printf_filtered ("Remote threadset test\n");
-  set_thread (sample_thread, 1);
-}
-
-
-static void
-threadalive_test (cmd, tty)
-     char *cmd;
-     int tty;
-{
-  int sample_thread = SAMPLE_THREAD;
-  if (remote_thread_alive (sample_thread))
-    printf_filtered ("PASS: Thread alive test\n");
-  else
-    printf_filtered ("FAIL: Thread alive test\n");
-}
-
-void
-output_threadid PARAMS ((char *title, threadref * ref));
-
-void
-output_threadid (title, ref)
-     char *title;
-     threadref *ref;
-{
-  char hexid[20];
-  pack_threadid (&hexid[0], ref);	/* Convert threead id into hex */
-  hexid[16] = 0;
-  printf_filtered ("%s  %s\n", title, (&hexid[0]));
-}
-
-
-static void
-threadlist_test_cmd (cmd, tty)
-     char *cmd;
-     int tty;
-{
-  int startflag = 1;
-  threadref nextthread;
-  int done, result_count;
-  threadref threadlist[3];
-
-  printf_filtered ("Remote Threadlist test\n");
-  if (!remote_get_threadlist (startflag, &nextthread, 3, &done,
-			      &result_count, &threadlist[0]))
-    printf_filtered ("FAIL: threadlist test\n");
-  else
-    {
-      threadref *scan = threadlist;
-      threadref *limit = scan + result_count;
-      while (scan < limit)
-	output_threadid (" thread ", scan++);
-    }
-}
-
-void
-display_thread_info (info)
-     struct gdb_ext_thread_info *info;
-{
-
-  output_threadid ("Threadid: ", &info->threadid);
-  /* short name */
-  printf_filtered ("Name: %s\n ", info->shortname);
-  /* format display state */
-  printf_filtered ("State: %s\n", info->display);
-  /* additional data */
-  printf_filtered ("other: %s\n\n", info->more_display);
-}
-
-int
-get_and_display_threadinfo (ref)
-     threadref *ref;
-{
-  int result;
-  int set;
-  struct gdb_ext_thread_info threadinfo;
-
-  set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
-    | TAG_MOREDISPLAY | TAG_DISPLAY;
-  if (0 != (result = remote_get_threadinfo (ref, set, &threadinfo)))
-    display_thread_info (&threadinfo);
-  return result;
-}
-
-static void
-threadinfo_test_cmd (cmd, tty)
-     char *cmd;
-     int tty;
-{
-  int athread = SAMPLE_THREAD;
-  threadref thread;
-  int set;
-
-  int_to_threadref (&thread, athread);
-  printf_filtered ("Remote Threadinfo test\n");
-  if (!get_and_display_threadinfo (&thread))
-    printf_filtered ("FAIL cannot get thread info\n");
-}
-
-
-static int
-thread_display_step (ref, context)
-     threadref *ref;
-     void *context;
-{
-  /* output_threadid(" threadstep ",ref); *//* simple test */
-  return get_and_display_threadinfo (ref);
-}
-
-
-static void
-threadlist_update_test_cmd (cmd, tty)
-     char *cmd;
-     int tty;
-{
-  printf_filtered ("Remote Threadlist update test\n");
-  remote_threadlist_iterator (thread_display_step, 0, CRAZY_MAX_THREADS);
-}
-
-static void
-init_remote_threadtests (void)
-{
-  add_com ("tlist", class_obscure, threadlist_test_cmd,
-     "Fetch and print the remote list of thread identifiers, one pkt only");
-  add_com ("tinfo", class_obscure, threadinfo_test_cmd,
-	   "Fetch and display info about one thread");
-  add_com ("tset", class_obscure, threadset_test_cmd,
-	   "Test setting to a different thread");
-  add_com ("tupd", class_obscure, threadlist_update_test_cmd,
-	   "Iterate through updating all remote thread info");
-  add_com ("talive", class_obscure, threadalive_test,
-	   " Remote thread alive test ");
-}
-
-#define INIT_REMOTE_THREADTESTS { init_remote_threadtests();}
-/* END OF REMOTE THREAD UNIT TESTS */
 
-
 /*  Restart the remote side; this is an extended protocol operation.  */
 
 static void
@@ -1657,6 +1396,7 @@ extended_remote_open (name, from_tty)
 }
 
 /* Generic code for opening a connection to a remote target.  */
+
 static DCACHE *remote_dcache;
 
 static void
@@ -1703,24 +1443,27 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
       puts_filtered ("\n");
     }
   push_target (target);	/* Switch to using remote target now */
+
   /* The target vector does not have the thread functions in it yet,
      so we use this function to call back into the thread module and
      register the thread vector and its contained functions. */
-  bind_target_thread_vector(&remote_thread_vec);
-  /* Start out by trying the 'P' request to set registers.  We set this each
-     time that we open a new target so that if the user switches from one
-     stub to another, we can (if the target is closed and reopened) cope.  */
+  bind_target_thread_vector (&remote_thread_vec);
+
+  /* Start out by trying the 'P' request to set registers.  We set
+     this each time that we open a new target so that if the user
+     switches from one stub to another, we can (if the target is
+     closed and reopened) cope.  */
   stub_supports_P = 1;
 
   general_thread = -2;
   cont_thread = -2;
 
-  /* Without this, some commands which require an active target (such as kill)
-     won't work.  This variable serves (at least) double duty as both the pid
-     of the target process (if it has such), and as a flag indicating that a
-     target is active.  These functions should be split out into seperate
-     variables, especially since GDB will someday have a notion of debugging
-     several processes.  */
+  /* Without this, some commands which require an active target (such
+     as kill) won't work.  This variable serves (at least) double duty
+     as both the pid of the target process (if it has such), and as a
+     flag indicating that a target is active.  These functions should
+     be split out into seperate variables, especially since GDB will
+     someday have a notion of debugging several processes.  */
 
   inferior_pid = MAGIC_NULL_PID;
   /* Start the remote connection; if error (0), discard this target.
@@ -1730,7 +1473,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
 		     "Couldn't establish connection to remote target\n", 
 		     RETURN_MASK_ALL))
     {
-      pop_target();
+      pop_target ();
       return;
     }
 
@@ -1798,7 +1541,8 @@ tohex (nib)
 /* Tell the remote machine to resume.  */
 
 static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
-int last_sent_step;
+
+static int last_sent_step;
 
 static void
 remote_resume (pid, step, siggnal)
@@ -1837,6 +1581,7 @@ remote_resume (pid, step, siggnal)
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
+
 static void (*ofunc) PARAMS ((int));
 
 static void
@@ -1890,6 +1635,7 @@ Give up (and stop debugging it)? "))
 }
 
 /* If nonzero, ignore the next kill.  */
+
 int kill_kludge;
 
 void
@@ -1911,10 +1657,9 @@ remote_console_output (msg)
     }
 }
 
-/* Wait until the remote machine stops, then return,
-   storing status in STATUS just as `wait' would.
-   Returns "pid" (though it's not clear what, if anything, that
-   means in the case of this target).  */
+/* Wait until the remote machine stops, then return, storing status in
+   STATUS just as `wait' would.  Returns "pid" (though it's not clear
+   what, if anything, that means in the case of this target).  */
 
 static int
 remote_wait (pid, status)
@@ -1978,9 +1723,9 @@ Packet: '%s'\n",
 			       p, buf);
 		    if (strncmp ((const char *) p, "thread", p1 - p) == 0)
 		      {
-			p_temp = unpack_varlen_hex(++p1,&thread_num);
-			record_currthread(thread_num);
-			p = (unsigned char *)p_temp;
+			p_temp = unpack_varlen_hex (++p1, &thread_num);
+			record_currthread (thread_num);
+			p = (unsigned char *) p_temp;
 		      }
 		  }
 		else
@@ -2077,10 +1822,12 @@ Packet: '%s'\n",
 }
 
 /* Number of bytes of registers this stub implements.  */
+
 static int register_bytes_found;
 
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regno.  */
+
 /* ARGSUSED */
 static void
 remote_fetch_registers (regno)
@@ -2223,8 +1970,7 @@ remote_store_registers (regno)
   remote_send (buf);
 }
 
-/* 
-   Use of the data cache *used* to be disabled because it loses for looking
+/* Use of the data cache *used* to be disabled because it loses for looking
    at and changing hardware I/O ports and the like.  Accepting `volatile'
    would perhaps be one way to fix it.  Another idea would be to use the
    executable file for the text segment (for all SEC_CODE sections?
@@ -2233,8 +1979,7 @@ remote_store_registers (regno)
    clobbered memory, user downloaded the wrong thing).  
 
    Because it speeds so much up, it's now enabled, if you're playing
-   with registers you turn it of (set remotecache 0)
-*/
+   with registers you turn it of (set remotecache 0).  */
 
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
@@ -2275,7 +2020,7 @@ hexnumlen (num)
   return max (i, 1);
 }
 
-/* Set BUF to the hex digits representing NUM */
+/* Set BUF to the hex digits representing NUM.  */
 
 static int
 hexnumstr (buf, num)
@@ -2296,7 +2041,7 @@ hexnumstr (buf, num)
   return len;
 }
 
-/* Mask all but the least significant REMOTE_ADDRESS_SIZE bits */
+/* Mask all but the least significant REMOTE_ADDRESS_SIZE bits. */
 
 static CORE_ADDR
 remote_address_masked (addr)
@@ -2466,13 +2211,14 @@ remote_read_bytes (memaddr, myaddr, len)
   return origlen;
 }
 
-/* Read or write LEN bytes from inferior memory at MEMADDR, transferring
-   to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
-   nonzero.  Returns length of data written or read; 0 for error.  */
+/* Read or write LEN bytes from inferior memory at MEMADDR,
+   transferring to or from debugger address MYADDR.  Write to inferior
+   if SHOULD_WRITE is nonzero.  Returns length of data written or
+   read; 0 for error.  */
 
 /* ARGSUSED */
 static int
-remote_xfer_memory(memaddr, myaddr, len, should_write, target)
+remote_xfer_memory (memaddr, myaddr, len, should_write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
@@ -2601,9 +2347,8 @@ readchar (timeout)
     }
 }
 
-/* Send the command in BUF to the remote machine,
-   and read the reply into BUF.
-   Report an error if we get an error reply.  */
+/* Send the command in BUF to the remote machine, and read the reply
+   into BUF.  Report an error if we get an error reply.  */
 
 static void
 remote_send (buf)
@@ -2630,8 +2375,8 @@ print_packet (buf)
 }
 
 
-/* Send a packet to the remote machine, with error checking.
-   The data of the packet is in BUF.  */
+/* Send a packet to the remote machine, with error checking.  The data
+   of the packet is in BUF.  */
 
 int
 putpkt (buf)
@@ -2649,7 +2394,7 @@ putpkt (buf)
      and giving it a checksum.  */
 
   if (cnt > (int) sizeof (buf2) - 5)		/* Prosanity check */
-    abort();
+    abort ();
 
   p = buf2;
   *p++ = '$';
@@ -2673,7 +2418,7 @@ putpkt (buf)
 	{
 	  *p = '\0';
 	  printf_unfiltered ("Sending packet: %s...", buf2);
-	  gdb_flush(gdb_stdout);
+	  gdb_flush (gdb_stdout);
 	}
       if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
@@ -2702,7 +2447,7 @@ putpkt (buf)
 	    {
 	    case '+':
 	      if (remote_debug)
-		printf_unfiltered("Ack\n");
+		printf_unfiltered ("Ack\n");
 	      return 1;
 	    case SERIAL_TIMEOUT:
 	      tcount ++;
@@ -2748,9 +2493,9 @@ putpkt (buf)
     }
 }
 
-/* Come here after finding the start of the frame.  Collect the rest into BUF,
-   verifying the checksum, length, and handling run-length compression.
-   Returns 0 on any error, 1 on success.  */
+/* Come here after finding the start of the frame.  Collect the rest
+   into BUF, verifying the checksum, length, and handling run-length
+   compression.  Returns 0 on any error, 1 on success.  */
 
 static int
 read_frame (buf)
@@ -2836,12 +2581,10 @@ read_frame (buf)
     }
 }
 
-
-
-/* Read a packet from the remote machine, with error checking,
-   and store it in BUF.  BUF is expected to be of size PBUFSIZ.
-   If FOREVER, wait forever rather than timing out; this is used
-   while the target is executing user code.  */
+/* Read a packet from the remote machine, with error checking, and
+   store it in BUF.  BUF is expected to be of size PBUFSIZ.  If
+   FOREVER, wait forever rather than timing out; this is used while
+   the target is executing user code.  */
 
 void
 getpkt (buf, forever)
@@ -3077,16 +2820,15 @@ remote_remove_breakpoint (addr, contents_cache)
 #endif /* REMOTE_BREAKPOINT */
 }
 
-/* Some targets are only capable of doing downloads, and afterwards they switch
-   to the remote serial protocol.  This function provides a clean way to get
-   from the download target to the remote target.  It's basically just a
-   wrapper so that we don't have to expose any of the internal workings of
-   remote.c.
+/* Some targets are only capable of doing downloads, and afterwards
+   they switch to the remote serial protocol.  This function provides
+   a clean way to get from the download target to the remote target.
+   It's basically just a wrapper so that we don't have to expose any
+   of the internal workings of remote.c.
 
-   Prior to calling this routine, you should shutdown the current target code,
-   else you will get the "A program is being debugged already..." message.
-   Usually a call to pop_target() suffices.
-*/
+   Prior to calling this routine, you should shutdown the current
+   target code, else you will get the "A program is being debugged
+   already..." message.  Usually a call to pop_target() suffices.  */
 
 void
 push_remote_target (name, from_tty)
@@ -3113,6 +2855,7 @@ open_remote_target (name, from_tty, target, extended_p)
 }
 
 /* Table used by the crc32 function to calcuate the checksum. */
+
 static unsigned long crc32_table[256] = {0, 0};
 
 static unsigned long
@@ -3249,6 +2992,167 @@ packet_command (args, from_tty)
   puts_filtered ("\n");
 }
 
+#if 0
+/* --------- UNIT_TEST for THREAD oriented PACKETS ------------------------- */
+
+static void display_thread_info PARAMS ((struct gdb_ext_thread_info *info));
+
+static void threadset_test_cmd PARAMS ((char *cmd, int tty));
+
+static void threadalive_test PARAMS ((char *cmd, int tty));
+
+static void threadlist_test_cmd PARAMS ((char *cmd, int tty));
+
+int get_and_display_threadinfo PARAMS ((threadref *ref));
+
+static void threadinfo_test_cmd PARAMS ((char *cmd, int tty));
+
+static int thread_display_step PARAMS ((threadref *ref, void *context));
+
+static void threadlist_update_test_cmd PARAMS ((char *cmd, int tty));
+
+static void init_remote_threadtests PARAMS ((void));
+
+#define SAMPLE_THREAD  0x05060708  /* Truncated 64 bit threadid */
+
+static void
+threadset_test_cmd (cmd, tty)
+     char *cmd;
+     int tty;
+{
+  int sample_thread = SAMPLE_THREAD;
+
+  printf_filtered ("Remote threadset test\n");
+  set_thread (sample_thread, 1);
+}
+
+
+static void
+threadalive_test (cmd, tty)
+     char *cmd;
+     int tty;
+{
+  int sample_thread = SAMPLE_THREAD;
+
+  if (remote_thread_alive (sample_thread))
+    printf_filtered ("PASS: Thread alive test\n");
+  else
+    printf_filtered ("FAIL: Thread alive test\n");
+}
+
+void output_threadid PARAMS ((char *title, threadref * ref));
+
+void
+output_threadid (title, ref)
+     char *title;
+     threadref *ref;
+{
+  char hexid[20];
+
+  pack_threadid (&hexid[0], ref);	/* Convert threead id into hex */
+  hexid[16] = 0;
+  printf_filtered ("%s  %s\n", title, (&hexid[0]));
+}
+
+static void
+threadlist_test_cmd (cmd, tty)
+     char *cmd;
+     int tty;
+{
+  int startflag = 1;
+  threadref nextthread;
+  int done, result_count;
+  threadref threadlist[3];
+
+  printf_filtered ("Remote Threadlist test\n");
+  if (!remote_get_threadlist (startflag, &nextthread, 3, &done,
+			      &result_count, &threadlist[0]))
+    printf_filtered ("FAIL: threadlist test\n");
+  else
+    {
+      threadref *scan = threadlist;
+      threadref *limit = scan + result_count;
+
+      while (scan < limit)
+	output_threadid (" thread ", scan++);
+    }
+}
+
+void
+display_thread_info (info)
+     struct gdb_ext_thread_info *info;
+{
+  output_threadid ("Threadid: ", &info->threadid);
+  printf_filtered ("Name: %s\n ", info->shortname);
+  printf_filtered ("State: %s\n", info->display);
+  printf_filtered ("other: %s\n\n", info->more_display);
+}
+
+int
+get_and_display_threadinfo (ref)
+     threadref *ref;
+{
+  int result;
+  int set;
+  struct gdb_ext_thread_info threadinfo;
+
+  set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
+    | TAG_MOREDISPLAY | TAG_DISPLAY;
+  if (0 != (result = remote_get_threadinfo (ref, set, &threadinfo)))
+    display_thread_info (&threadinfo);
+  return result;
+}
+
+static void
+threadinfo_test_cmd (cmd, tty)
+     char *cmd;
+     int tty;
+{
+  int athread = SAMPLE_THREAD;
+  threadref thread;
+  int set;
+
+  int_to_threadref (&thread, athread);
+  printf_filtered ("Remote Threadinfo test\n");
+  if (!get_and_display_threadinfo (&thread))
+    printf_filtered ("FAIL cannot get thread info\n");
+}
+
+static int
+thread_display_step (ref, context)
+     threadref *ref;
+     void *context;
+{
+  /* output_threadid(" threadstep ",ref); *//* simple test */
+  return get_and_display_threadinfo (ref);
+}
+
+static void
+threadlist_update_test_cmd (cmd, tty)
+     char *cmd;
+     int tty;
+{
+  printf_filtered ("Remote Threadlist update test\n");
+  remote_threadlist_iterator (thread_display_step, 0, CRAZY_MAX_THREADS);
+}
+
+static void
+init_remote_threadtests (void)
+{
+  add_com ("tlist", class_obscure, threadlist_test_cmd,
+     "Fetch and print the remote list of thread identifiers, one pkt only");
+  add_com ("tinfo", class_obscure, threadinfo_test_cmd,
+	   "Fetch and display info about one thread");
+  add_com ("tset", class_obscure, threadset_test_cmd,
+	   "Test setting to a different thread");
+  add_com ("tupd", class_obscure, threadlist_update_test_cmd,
+	   "Iterate through updating all remote thread info");
+  add_com ("talive", class_obscure, threadalive_test,
+	   " Remote thread alive test ");
+}
+
+#endif /* 0 */
+
 static void
 init_remote_ops ()
 {
@@ -3283,6 +3187,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_magic = OPS_MAGIC;	
 }
 
+/* Set up the extended remote vector by making a copy of the standard
+   remote vector and adding to it.  */
+
 static void
 init_extended_remote_ops ()
 {
@@ -3307,8 +3214,10 @@ _initialize_remote ()
 
   init_extended_remote_ops ();
   add_target (&extended_remote_ops);
-  init_remote_threads();
-  INIT_REMOTE_THREADTESTS   /* conditional thread packet unit test */
+  init_remote_threads ();
+#if 0
+  init_remote_threadtests ();
+#endif
 
   add_cmd ("compare-sections", class_obscure, compare_sections_command, 
 	   "Compare section data on target to the exec file.\n\
@@ -3345,8 +3254,6 @@ terminating `#' character and checksum.",
 		  &setlist),
      &showlist);
 
-   
-
   remote_address_size = TARGET_PTR_BIT;
   add_show_from_set 
     (add_set_cmd ("remoteaddresssize", class_obscure,
@@ -3356,4 +3263,3 @@ in a memory packet.\n",
 		  &setlist),
      &showlist);  
 }
-

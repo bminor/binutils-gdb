@@ -1,3 +1,12 @@
+Wed Jan  6 12:05:12 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote.c: Pacify --enable-build-warnings, reformat code
+	to conform to standards, fix spelling errors.
+	(ishex, stubhex, record_currthread, etc): Declare.
+	(ishex, stubhex): Declare char arg as int.
+	(pack_string): Comment out, never used but possibly useful.
+	(threadref_to_int, remote_get_threadinfo, etc): Make static.
+
 Wed Jan  6 11:43:32 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Elena Zannoni
@@ -14,14 +23,16 @@ Wed Jan  6 11:43:32 1999  David Taylor  <taylor@texas.cygnus.com>
 Tue Jan  5 11:13:36 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* remote.c (record_curthread): Must not modify inferior_pid when
-	called from wait_for_inferior.  Instead, if a new thread-id is
-	detected, call add_thread.  (MAGIC_NULL_PID): new macro, use 
-	instead of the magic number "42000".  (remote_find_new_threads):
-	if inferior_pid is unknown, get and use the current thread id.
+ 	called from wait_for_inferior.  Instead, if a new thread-id is
+ 	detected, call add_thread.
+	(MAGIC_NULL_PID): new macro, use instead of the magic number
+ 	"42000".
+	(remote_find_new_threads): if inferior_pid is unknown, get and use
+ 	the current thread id.
 	(remote_start_remote): on connecting, attempt to get the current
-	thread id for inferior_pid.  (remote_resume): If pid == -1, 
-	then resume any-thread (not the current thread specifically).
-	Also some cosmetic fixups.
+ 	thread id for inferior_pid.
+	(remote_resume): If pid == -1, then resume any-thread (not the
+ 	current thread specifically).  Also some cosmetic fixups.
 	
 	* thread.c (info_threads_command): don't initialize current_pid 
 	until after call to FIND_NEW_THREADS (which may change inferior_pid).
