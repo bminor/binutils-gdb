@@ -465,6 +465,26 @@ thread_db_load (void)
   return 1;
 }
 
+static int
+enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
+{
+  td_notify_t notify;
+  int err;
+
+  /* Get the breakpoint address for thread EVENT.  */
+  err = td_ta_event_addr_p (thread_agent, event, &notify);
+  if (err != TD_OK)
+    return 0;
+
+  /* Set up the breakpoint.  */
+  (*bp) = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+					      (CORE_ADDR) notify.u.bptaddr,
+					      &current_target);
+  create_thread_event_breakpoint ((*bp));
+
+  return 1;
+}
+
 static void
 enable_thread_event_reporting (void)
 {
@@ -498,32 +518,24 @@ enable_thread_event_reporting (void)
 
   /* Delete previous thread event breakpoints, if any.  */
   remove_thread_event_breakpoints ();
+  td_create_bp_addr = 0;
+  td_death_bp_addr = 0;
 
-  /* Get address for thread creation breakpoint.  */
-  err = td_ta_event_addr_p (thread_agent, TD_CREATE, &notify);
-  if (err != TD_OK)
+  /* Set up the thread creation event.  */
+  if (!enable_thread_event (thread_agent, TD_CREATE, &td_create_bp_addr))
     {
       warning ("Unable to get location for thread creation breakpoint: %s",
 	       thread_db_err_str (err));
       return;
     }
 
-  /* Set up the breakpoint.  */
-  td_create_bp_addr = (CORE_ADDR) notify.u.bptaddr;
-  create_thread_event_breakpoint (td_create_bp_addr);
-
-  /* Get address for thread death breakpoint.  */
-  err = td_ta_event_addr_p (thread_agent, TD_DEATH, &notify);
-  if (err != TD_OK)
+  /* Set up the thread death event.  */
+  if (!enable_thread_event (thread_agent, TD_DEATH, &td_death_bp_addr))
     {
       warning ("Unable to get location for thread death breakpoint: %s",
 	       thread_db_err_str (err));
       return;
     }
-
-  /* Set up the breakpoint.  */
-  td_death_bp_addr = (CORE_ADDR) notify.u.bptaddr;
-  create_thread_event_breakpoint (td_death_bp_addr);
 }
 
 static void
