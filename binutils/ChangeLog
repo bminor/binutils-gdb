@@ -1,3 +1,11 @@
+Tue Aug 18 20:45:48 1992  Rob Savoye  (rob@cygnus.com)
+
+	* nm.c objdump.c: Added support for a +version (-V)
+	to print the version number.
+
+	* ar.c, copy.c: Added support for a -V option to print
+	the version number.
+
 Tue Aug 18 13:28:44 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/mh-apollo68v: removed -g from CC definition.
