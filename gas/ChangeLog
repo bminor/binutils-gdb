@@ -1,3 +1,7 @@
+2000-07-31  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-d30v.c: Fix formatting.
+
 2000-07-31  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
         * config/tc-m68k.c (flag_keep_pcrel, OPTION_PCREL): Add --pcrel option.
