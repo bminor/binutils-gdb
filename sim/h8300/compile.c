@@ -4715,7 +4715,7 @@ sim_info (SIM_DESC sd, int verbose)
 				    "#real time taken        %10.4f\n",
 				    timetaken);
   (*sim_callback->printf_filtered) (sim_callback,
-				    "#virtual time taked     %10.4f\n",
+				    "#virtual time taken     %10.4f\n",
 				    virttime);
   if (timetaken != 0.0)
     (*sim_callback->printf_filtered) (sim_callback,
