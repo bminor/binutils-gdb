@@ -1,5 +1,8 @@
 2003-11-18  James E Wilson  <wilson@specifixinc.com>
 
+	* ldlang.c (lang_process): Move lang_reset_memory_regions call after
+	lang_do_assignments call.
+
 	* emulparams/elf64_ia64.sh (OTHER_PLT_RELOC_SECTIONS): Include
 	.rela.opd if -pie.
 

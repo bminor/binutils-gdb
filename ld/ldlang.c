@@ -4240,8 +4240,6 @@ lang_process (void)
 
       do
 	{
-	  lang_reset_memory_regions ();
-
 	  relax_again = FALSE;
 
 	  /* Note: pe-dll.c does something like this also.  If you find
@@ -4252,6 +4250,10 @@ lang_process (void)
 	     section sizes.  */
 	  lang_do_assignments (statement_list.head, abs_output_section,
 			       NULL, 0);
+
+	  /* We must do this after lang_do_assignments, because it uses
+	     _raw_size.  */
+	  lang_reset_memory_regions ();
 
 	  /* Perform another relax pass - this time we know where the
 	     globals are, so can make a better guess.  */
@@ -4269,8 +4271,8 @@ lang_process (void)
       while (relax_again);
 
       /* Final extra sizing to report errors.  */
-      lang_reset_memory_regions ();
       lang_do_assignments (statement_list.head, abs_output_section, NULL, 0);
+      lang_reset_memory_regions ();
       lang_size_sections (statement_list.head, abs_output_section,
 			  &statement_list.head, 0, 0, NULL, TRUE);
     }
