@@ -1173,7 +1173,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-vx29k.c \
 	rs6000-nat.c rs6000-tdep.c \
-	ser-go32.c ser-pipe.c ser-ocd.c ser-tcp.c \
+	ser-go32.c ser-pipe.c ser-tcp.c \
 	sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
@@ -1936,8 +1936,6 @@ scm-valprint.o: $(defs_h) $(value_h) parser-defs.h language.h  \
 ser-go32.o: ser-go32.c $(defs_h) serial.h 
 
 ser-mac.o: ser-mac.c $(defs_h) serial.h 
-
-ser-ocd.o: ser-ocd.c $(defs_h) serial.h $(gdb_string_h)
 
 ser-pipe.o: ser-pipe.c $(defs_h) serial.h $(gdb_string_h) ser-unix.h
 

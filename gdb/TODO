@@ -26,10 +26,6 @@ and most likely also:
 
 --
 
-Obsolete ser-ocd.c.
-
---
-
 Wow, three bug reports for the same problem in one day!  We should
 probably make fixing this a real priority :-).
 

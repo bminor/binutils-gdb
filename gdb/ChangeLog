@@ -1,5 +1,13 @@
 2001-06-27  Andrew Cagney  <ac131313@redhat.com>
 
+	* ser-ocd.c: Delete file.
+	* Makefile.in (ALLDEPFILES): Remove ser-ocd.c
+	(ser-ocd.o): Delete target.
+	* TODO: Update.
+	* NEWS: Update.
+
+2001-06-27  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS (Write After Approval): Sort.
 	(Past Maintainers): Daniel Berlin stepped down as C++ maintainer.
 
