@@ -1,3 +1,8 @@
+2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/elf/section2.e-mips: Allow named section symbols.
+	* gas/mips/{,el}empic.d, gas/mips/mips{,el}16-[ef].d: Likewise.
+
 2004-04-13  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* gas/m32r/parallel-2.s: New file: Test	case for parallel code.
