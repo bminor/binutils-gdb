@@ -1,3 +1,8 @@
+2000-08-14  Andreas Schwab  <schwab@suse.de>
+
+	* scripttempl/elf.sc: Fix last change to use correct comment
+ 	syntax.
+
 2000-08-10  Geoff Keating  <geoffk@cygnus.com>
 
 	* scripttempl/elf.sc: Add a comment giving the correspondence
