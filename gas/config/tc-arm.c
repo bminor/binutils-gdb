@@ -1383,7 +1383,11 @@ arm_s_text (ignore)
   if (now_seg != text_section)
     s_ltorg (0);
   
+#ifdef OBJ_ELF
+  obj_elf_text (ignore);
+#else
   s_text (ignore);
+#endif
 }
 
 static void
@@ -1398,7 +1402,11 @@ arm_s_data (ignore)
   else if (now_seg != data_section)
     s_ltorg (0);
   
+#ifdef OBJ_ELF
+  obj_elf_data (ignore);
+#else
   s_data (ignore);
+#endif
 }
 
 #ifdef OBJ_ELF
