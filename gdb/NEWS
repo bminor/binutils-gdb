@@ -14,6 +14,7 @@ WDC 65816					w65-*-*
 PowerPC Solaris					powerpcle-*-solaris*
 PowerPC Windows NT				powerpcle-*-cygwin32
 PowerPC Netware					powerpc-*-netware*
+Harris/CXUX m88k				m88*-harris-cxux*
 
 * Changes to command line processing
 
