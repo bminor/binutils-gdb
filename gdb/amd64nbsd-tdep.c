@@ -34,7 +34,7 @@
 
 /* Support for signal handlers.  */
 
-/* Return whether the frame preciding NEXT_FRAME corresponds to a
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
    NetBSD sigtramp routine.  */
 
 static int

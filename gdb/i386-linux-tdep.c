@@ -217,7 +217,7 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
-/* Return whether the frame preciding NEXT_FRAME corresponds to a
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
    GNU/Linux sigtramp routine.  */
 
 static int

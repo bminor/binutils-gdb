@@ -1741,7 +1741,7 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 }
 
 
-/* Return whether the frame preciding NEXT_FRAME corresponds to a
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
    sigtramp routine.  */
 
 static int
@@ -1780,7 +1780,7 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
 
 /* System V Release 4 (SVR4).  */
 
-/* Return whether the frame preciding NEXT_FRAME corresponds to a SVR4
+/* Return whether the frame preceding NEXT_FRAME corresponds to a SVR4
    sigtramp routine.  */
 
 static int

@@ -1,5 +1,9 @@
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-linux-tdep.c, amd64nbsd-tdep.c, amd64obsd-tdep.c,
+	i386-linux-tdep.c, i386-tdep.c, i386nbsd-tdep.c, i386obsd-tdep.c:
+	Fix typo.
+
 	* amd64-tdep.c (amd64_supply_fxsave): Only fiddle with
 	I387_FISEG_REGNUM and I387_FOSEG_REGNUM in 64-bit mode.
 	(amd64_collect_fxsave): Likewise.

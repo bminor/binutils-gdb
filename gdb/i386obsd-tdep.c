@@ -51,7 +51,7 @@
 /* Default page size.  */
 static const int i386obsd_page_size = 4096;
 
-/* Return whether the frame preciding NEXT_FRAME corresponds to an
+/* Return whether the frame preceding NEXT_FRAME corresponds to an
    OpenBSD sigtramp routine.  */
 
 static int
