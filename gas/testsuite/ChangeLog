@@ -1,3 +1,14 @@
+2002-01-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/empic3_e.d: New file to test -membedded-pic
+	R_MIPS_GNU_REL_HI16 and R_MIPS_GNU_REL_LO16 relocations.
+	* gas/mips/empic3_e.s: Likewise.
+	* gas/mips/empic3_g1.d: Likewise.
+	* gas/mips/empic3_g1.s: Likewise.
+	* gas/mips/empic3_g2.d: Likewise.
+	* gas/mips/empic3_g2.s: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
 2001-12-21  Anders Norlander  <anorland@synergenix.se>
 
 	* gas/all/incbin.dat: New [binary] file.
