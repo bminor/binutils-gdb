@@ -2722,7 +2722,7 @@ bfd            *abfd)
       coff_swap_aux_in(abfd, (char *)(raw_src),
 		       symbol_ptr->u.syment.n_type,
 		       symbol_ptr->u.syment.n_sclass,
-		       internal_ptr->u.auxent);
+		       &(internal_ptr->u.auxent));
 
      coff_pointerize_aux(abfd,
 			  internal,
