@@ -1665,7 +1665,7 @@ exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
 	$(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) $(xcoffsolib_h)
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
-	$(value_h) $(language_h) $(parser_defs_h)
+	$(value_h) $(language_h) $(parser_defs_h) $(target_h) $(gdb_string_h)
 f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(f_lang_h) \
 	$(valprint_h)

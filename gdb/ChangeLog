@@ -1,5 +1,12 @@
 2002-11-18  Adam Fedor  <fedor@gnu.org>
 
+	* expprint.c (print_subexp): Handle OP_OBJC_NSSTRING,
+	OP_OBJC_MSGCALL, and OP_OBJC_SELF.	
+	(op_name): Handle OP_OBJC_SELF.
+	* Makefile.in (expprint.o): Add additional depends.
+
+2002-11-18  Adam Fedor  <fedor@gnu.org>
+
 	* expression.h: Rename ObjC ops to OP_OBJC_MSGCALL,
 	OP_OBJC_SELECTOR, OP_OBJC_NSSTRING, and OP_OBJC_SELF.
 	* parse.c (length_of_subexp, prefixify_subexp): Likewise.
