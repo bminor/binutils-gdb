@@ -1,3 +1,14 @@
+Wed Aug  2 18:39:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c: Remove BREAK_UP_BIG_DECL stuff.
+	(struct m68k_incant): Change m_operands field to be const.
+	(struct m68k_it): Change args field to be const.
+	(m68k_ip): Change local variable s to be const.
+	(opcode_ptr): Remove.
+	(md_begin): Use m68k_numopcodes, not numopcodes.  Use
+	m68k_opcodes, not removed opcode_ptr.  Use m68k_numaliases, not
+	numaliases.
+
 Tue Aug  1 17:35:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (init_table): Add "control", "status", "iaddr",
