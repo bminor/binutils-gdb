@@ -959,7 +959,9 @@ objdump [ -a | --archive-headers ]
         [ -r | --reloc ] [ -R | --dynamic-reloc ]
         [ -s | --full-contents ]  [ --stabs ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
-        [ -w | --wide ] [ --version ]  [ --help ] @var{objfile}@dots{}
+        [ -w | --wide ] [ --start-address=@var{address} ]
+        [ --stop-address=@var{address} ] [ --version ]  [ --help ]
+        @var{objfile}@dots{}
 @end smallexample
 
 @code{objdump} displays information about one or more object files.
@@ -1105,6 +1107,16 @@ ELF file.  This is only useful on systems (such as Solaris 2.0) in which
 section.  In most other file formats, debugging symbol-table entries are
 interleaved with linkage symbols, and are visible in the @samp{--syms}
 output.
+
+@item --start-address=@var{address}
+@cindex start-address
+Start displaying data at the specified address.  This affects the output
+of the @code{-d}, @code{-r} and @code{-s} options.
+
+@item --stop-address=@var{address}
+@cindex stop-address
+Stop displaying data at the specified address.  This affects the output
+of the @code{-d}, @code{-r} and @code{-s} options.
 
 @item -t
 @itemx --syms

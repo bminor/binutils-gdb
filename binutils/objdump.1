@@ -46,6 +46,12 @@ objdump \- display information from object files.
 .RB "[\|" \-t | \-\-syms "\|]" 
 .RB "[\|" \-T | \-\-dynamic\-syms "\|]" 
 .RB "[\|" \-x | \-\-all\-headers "\|]"
+.RB "[\|" "\-\-start\-address="\c
+.I address\c
+\&\|]
+.RB "[\|" "\-\-stop\-address="\c
+.I address\c
+\&\|]
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-\-help "\|]"
 .I objfile\c
@@ -243,6 +249,28 @@ Solaris 2.0) in which .stab debugging symbol-table entries are carried
 in an ELF section.  In most other file formats, debugging symbol-table
 entries are interleaved with linkage symbols, and are visible in the
 \-\-syms output.
+
+.TP
+.BI "\-\-start\-address=" "address"
+Start displaying data at the specified address.  This affects the output
+of the
+.B \-d\c
+,
+.B \-r
+and
+.B \-s
+options.
+
+.TP
+.BI "\-\-stop\-address=" "address"
+Stop displaying data at the specified address.  This affects the output
+of the
+.B \-d\c
+,
+.B \-r
+and
+.B \-s
+options.
 
 .TP
 .B \-t

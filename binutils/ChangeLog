@@ -1,3 +1,19 @@
+Wed Sep 13 18:33:44 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (start_address): New variable.
+	(stop_address): New variable.
+	(usage): Mention --start-address and --stop-address.
+	(OPTION_START_ADDRESS, OPTION_STOP_ADDRESS): Define.
+	(long_options): Add "start-address" and "stop-address".
+	(disassemble_data): Handle start_address and stop_address.
+	(dump_data, dump_reloc_set): Likewise.
+	(main): Don't set seenflag for -l.  Handle OPTION_START_ADDRESS
+	and OPTION_STOP_ADDRESS.
+	* objcopy.c (parse_vma): Move to bucomm.c.
+	* bucomm.c (parse_vma): New function, moved in from objcopy.c.
+	* bucomm.h (parse_vma): Declare.
+	* binutils.texi, objdump.1: Document new objdump options.
+
 Tue Sep 12 12:37:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New target.

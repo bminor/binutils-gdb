@@ -57,6 +57,8 @@ boolean disassemble_all;	/* -D */
 boolean formats_info;		/* -i */
 char *only;			/* -j secname */
 int wide_output;		/* -w */
+bfd_vma start_address = (bfd_vma) -1; /* --start-address */
+bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 
 /* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info {
@@ -129,11 +131,17 @@ Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
   fprintf (stream, "\
        [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
-       [--wide] [--version] [--help] [--private-headers] objfile...\n\
+       [--wide] [--version] [--help] [--private-headers]\n\
+       [--start-address=addr] [--stop-address=addr] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
   exit (status);
 }
+
+/* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+
+#define OPTION_START_ADDRESS (150)
+#define OPTION_STOP_ADDRESS (OPTION_START_ADDRESS + 1)
 
 static struct option long_options[]=
 {
@@ -156,9 +164,11 @@ static struct option long_options[]=
   {"section-headers", no_argument, NULL, 'h'},
   {"source", no_argument, NULL, 'S'},
   {"stabs", no_argument, &dump_stab_section_info, 1},
+  {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
+  {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
   {"syms", no_argument, NULL, 't'},
   {"target", required_argument, NULL, 'b'},
-  {"version", no_argument, &show_version,    1},
+  {"version", no_argument, &show_version, 1},
   {"wide", no_argument, &wide_output, 'w'},
   {0, no_argument, 0, 0}
 };
@@ -773,6 +783,7 @@ disassemble_data (abfd)
       arelent **relbuf = NULL;
       arelent **relpp = NULL;
       arelent **relppend = NULL;
+      long stop;
 
       if ((section->flags & SEC_LOAD) == 0
 	  || (! disassemble_all
@@ -822,8 +833,23 @@ disassemble_data (abfd)
       disasm_info.buffer = data;
       disasm_info.buffer_vma = section->vma;
       disasm_info.buffer_length = datasize;
-      i = 0;
-      while (i < disasm_info.buffer_length)
+      if (start_address == (bfd_vma) -1
+	  || start_address < disasm_info.buffer_vma)
+	i = 0;
+      else
+	i = start_address - disasm_info.buffer_vma;
+      if (stop_address == (bfd_vma) -1)
+	stop = datasize;
+      else
+	{
+	  if (stop_address < disasm_info.buffer_vma)
+	    stop = 0;
+	  else
+	    stop = stop_address - disasm_info.buffer_vma;
+	  if (stop > disasm_info.buffer_length)
+	    stop = disasm_info.buffer_length;
+	}
+      while (i < stop)
 	{
 	  int bytes;
 	  boolean need_nl = false;
@@ -1280,6 +1306,7 @@ dump_data (abfd)
   bfd_byte *data = 0;
   bfd_size_type datasize = 0;
   bfd_size_type i;
+  bfd_size_type start, stop;
 
   for (section = abfd->sections; section != NULL; section =
        section->next)
@@ -1301,14 +1328,30 @@ dump_data (abfd)
 
 	      bfd_get_section_contents (abfd, section, (PTR) data, 0, bfd_section_size (abfd, section));
 
-	      for (i = 0; i < bfd_section_size (abfd, section); i += onaline)
+	      if (start_address == (bfd_vma) -1
+		  || start_address < section->vma)
+		start = 0;
+	      else
+		start = start_address - section->vma;
+	      if (stop_address == (bfd_vma) -1)
+		stop = bfd_section_size (abfd, section);
+	      else
+		{
+		  if (stop_address < section->vma)
+		    stop = 0;
+		  else
+		    stop = stop_address - section->vma;
+		  if (stop > bfd_section_size (abfd, section))
+		    stop = bfd_section_size (abfd, section);
+		}
+	      for (i = start; i < stop; i += onaline)
 		{
 		  bfd_size_type j;
 
 		  printf (" %04lx ", (unsigned long int) (i + section->vma));
 		  for (j = i; j < i + onaline; j++)
 		    {
-		      if (j < bfd_section_size (abfd, section))
+		      if (j < stop)
 			printf ("%02x", (unsigned) (data[j]));
 		      else
 			printf ("  ");
@@ -1319,7 +1362,7 @@ dump_data (abfd)
 		  printf (" ");
 		  for (j = i; j < i + onaline; j++)
 		    {
-		      if (j >= bfd_section_size (abfd, section))
+		      if (j >= stop)
 			printf (" ");
 		      else
 			printf ("%c", isprint (data[j]) ? data[j] : '.');
@@ -1499,6 +1542,13 @@ dump_reloc_set (abfd, relpp, relcount)
       arelent *q = *p;
       CONST char *sym_name;
       CONST char *section_name;
+
+      if (start_address != (bfd_vma) -1
+	  && q->address < start_address)
+	continue;
+      if (stop_address != (bfd_vma) -1
+	  && q->address > stop_address)
+	continue;
 
       if (q->sym_ptr_ptr && *q->sym_ptr_ptr)
 	{
@@ -1723,7 +1773,8 @@ main (argc, argv)
 			   (int *) 0))
 	 != EOF)
     {
-      seenflag = true;
+      if (c != 'l' && c != OPTION_START_ADDRESS && c != OPTION_STOP_ADDRESS)
+	seenflag = true;
       switch (c)
 	{
 	case 0:
@@ -1795,6 +1846,12 @@ main (argc, argv)
 	  break;
 	case 'w':
 	  wide_output = 1;
+	  break;
+	case OPTION_START_ADDRESS:
+	  start_address = parse_vma (optarg, "--start-address");
+	  break;
+	case OPTION_STOP_ADDRESS:
+	  stop_address = parse_vma (optarg, "--stop-address");
 	  break;
 	default:
 	  usage (stderr, 1);
