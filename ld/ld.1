@@ -29,6 +29,7 @@ ld \- the GNU linker
 .I input-format\c
 \&\|] 
 .RB "[\|" \-Bstatic "\|]"  
+.RB "[\|" \-Bgroup "\|]"  
 .RB "[\|" \-Bdynamic "\|]"  
 .RB "[\|" \-Bsymbolic "\|]"  
 .RB "[\|" "\-c\ "\c
@@ -405,6 +406,19 @@ platforms for which shared libraries are supported.
 Link against dynamic libraries.  This is only meaningful on platforms
 for which shared libraries are supported.  This option is normally the
 default on such platforms.
+
+.TP
+.B \-Bgroup
+Set the \c
+.B DF_1_GROUP
+\c
+flag in the \c
+.B DT_FLAGS_1
+\c
+entry in the dynamic section.  This causes the runtime linker to handle
+lookups in this object and its dependencies to be performed only inside
+the group.  No undefined symbols are allowed.  This option is only
+meaningful on ELF platforms which support shared libraries.
 
 .TP
 .B \-Bsymbolic

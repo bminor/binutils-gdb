@@ -1,3 +1,12 @@
+2001-03-17  Ulrich Drepper  <drepper@redhat.com>
+
+	* emultempl/elf32.em (OPTION_GROUP): New macro.
+	Add new option Bgroup to longopts.
+	(gld*_parse_args): Handle GROUP_OPTION and recognize -z defs.
+	(gld*_list_options): Add -Bgroup and -z defs.
+	* ld.1: Document -Bgroup and -z defs.
+	* ld.texinfo: Likewise.
+
 2001-03-07  Michael Meissner  <meissner@redhat.com>
 
 	* scripttempl/elfd10v.sc (.rodata,.rodata1,.data1,.sdata): Deal

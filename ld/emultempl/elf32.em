@@ -1334,6 +1334,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 #define OPTION_DISABLE_NEW_DTAGS	(400)
 #define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
+#define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
 
 static struct option longopts[] =
 {
@@ -1347,6 +1348,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
   {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
   {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
   {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
+  {"Bgroup", no_argument, NULL, OPTION_GROUP},
+  {"Bgroup", no_argument, NULL, OPTION_GROUP},
 EOF
 fi
 
@@ -1405,6 +1408,12 @@ cat >>e${EMULATION_NAME}.c <<EOF
       link_info.new_dtags = true;
       break;
 
+    case OPTION_GROUP:
+      link_info.flags_1 |= (bfd_vma) DF_1_GROUP;
+      /* Groups must be self-contained.  */
+      link_info.no_undefined = true;
+      break;
+
     case 'z':
       if (strcmp (optarg, "initfirst") == 0)
 	link_info.flags_1 |= (bfd_vma) DF_1_INITFIRST;
@@ -1430,6 +1439,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.flags |= (bfd_vma) DF_ORIGIN;
 	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
 	}
+      else if (strcmp (optarg, "defs") == 0)
+	link_info.no_undefined = true;
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF
@@ -1463,8 +1474,10 @@ EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
+  fprintf (file, _("  -Bgroup\t\tSelects group name lookup rules for DSO\n"));
   fprintf (file, _("  --disable-new-dtags\tDisable new dynamic tags\n"));
   fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
+  fprintf (file, _("  -z defs\t\tDisallows undefined symbols\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
