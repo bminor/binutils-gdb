@@ -143,7 +143,6 @@ _GDBN__ can be used to debug programs written in C and C++.  Pascal support
 is being implemented, and Fortran support will be added when a GNU
 Fortran compiler is ready.
 
-@node Free Software,,,
 @unnumberedsec Free Software
 _GDBN__ is Free Software, protected by the GNU General Public License (GPL).
 The GPL gives you the freedom to copy or adapt a licensed
@@ -335,7 +334,7 @@ Value returned is $1 = false
 @noindent
 We're still in the middle of the first line of @code{m4_changequote};
 @samp{finish} just allowed the subroutine call to complete.
-The display beginning ``@code{0x59ec in}@dots'', preceding the
+The display beginning ``@code{0x59ec in}@dots{}'', preceding the
 display of line @code{812}, is a reminder of that situation from
 _GDBN__.
 
@@ -1883,7 +1882,7 @@ print the values of certain expressions, or enable other breakpoints.
 
 @table @code
 @item commands @var{bnum}
-@itemx @dots @var{command-list} @dots
+@itemx @dots{} @var{command-list} @dots{}
 @itemx end
 @kindex commands
 @kindex end
@@ -2662,7 +2661,7 @@ When you start _GDBN__, its source path is empty.
 To add other directories, use the @samp{directory} command.
 
 @table @code
-@item directory @var{dirname} @dots
+@item directory @var{dirname} @dots{}
 Add directory @var{dirname} to the front of the source path.  Several
 directory names may be given to this command, separated by @samp{:} or
 whitespace.  You may specify a directory that is already in the source
@@ -3953,7 +3952,7 @@ the @samp{add-symbol-file} command.
 
 If @samp{load} is not available on your _GDBN__, attempting to execute
 it gets the error message ``@code{You can't do that when your target is
-@dots}'' 
+@dots{}}'' 
 _fi__(_GENERIC__)
 
 _if__(_VXWORKS__) 
