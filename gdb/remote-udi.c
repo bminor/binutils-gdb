@@ -461,7 +461,10 @@ udi_wait (status)
 	{
 	case UDIStdoutReady:
 	  if (UDIGetStdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
-	    error ("UDIGetStdout() failed in udi_wait");
+	    /* This is said to happen if the program tries to output
+	       a whole bunch of output (more than SBUF_MAX, I would
+	       guess).  It doesn't seem to happen with the simulator.  */
+	    warning ("UDIGetStdout() failed in udi_wait");
 	  fwrite (sbuf, 1, CountDone, stdout);
 	  fflush(stdout);
 	  continue;
