@@ -1,3 +1,18 @@
+Wed Jan 14 15:29:43 1998  Richard Henderson  <rth@cygnus.com>
+
+	* srconv.c (sh, h8300): Delete variables.
+	(addrsize, toolname, rnames): New variables.
+	(writeINT): Use addrsize.
+	(wr_un): Use toolname.
+	(wr_hd): Set up addrsize et al properly for h8300[hs].
+	(walk_tree_symbol): Zero dsy.  Use rnames.
+	(wr_un, wr_hd, wr_ob, wr_du): Use proper bfd access macros.
+	* sysdump.c (sh, h8300): Delete variables.
+	(addrsize): New variable.
+	(getINT): Use it.
+	(getone): Initialize it.
+	(getBITS): Range check on MAX.
+
 Mon Dec 29 16:58:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Matthew Bellantoni <matthew@chrysalis.com>:
