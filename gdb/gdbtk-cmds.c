@@ -1357,6 +1357,7 @@ gdb_search (clientData, interp, objc, objv)
           result_ptr->flags |= GDBTK_IN_TCL_RESULT;
           return TCL_ERROR;
         }
+    }
 
       switch ((enum switches_opts) index)
         {
@@ -1412,16 +1413,23 @@ gdb_search (clientData, interp, objc, objv)
       if (static_only && p->block != STATIC_BLOCK)
         continue;
 
-      elem = Tcl_NewListObj (0, NULL);
+      /* Strip off some C++ special symbols, like RTTI and global
+         constructors/destructors. */
+      if ((p->symbol != NULL && !STREQN (SYMBOL_NAME (p->symbol), "__tf", 4)
+           && !STREQN (SYMBOL_NAME (p->symbol), "_GLOBAL_", 8))
+          || p->msymbol != NULL)
+        {
+          elem = Tcl_NewListObj (0, NULL);
 
-      if (p->msymbol == NULL)
-        Tcl_ListObjAppendElement (interp, elem, 
-                                  Tcl_NewStringObj (SYMBOL_SOURCE_NAME (p->symbol), -1));
-      else
-        Tcl_ListObjAppendElement (interp, elem,
-                                  Tcl_NewStringObj (SYMBOL_SOURCE_NAME (p->msymbol), -1));
+          if (p->msymbol == NULL)
+            Tcl_ListObjAppendElement (interp, elem, 
+                                      Tcl_NewStringObj (SYMBOL_SOURCE_NAME (p->symbol), -1));
+          else
+            Tcl_ListObjAppendElement (interp, elem,
+                                      Tcl_NewStringObj (SYMBOL_SOURCE_NAME (p->msymbol), -1));
 
-      Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, elem);
+          Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, elem);
+        }
     }
   
   if (ss != NULL)

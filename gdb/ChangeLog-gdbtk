@@ -1,3 +1,8 @@
+Thu Dec 17 09:00:56 1998  Keith Seitz  <keiths@cygnus.com>
+
+        * gdbtk-cmds.c (gdb_search): Don't mention C++ RTTI and
+        global constructor/destructor symbols.
+
 Tue Dec 15 10:09:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbtk-cmds.c (gdb_disassemble): Fix typo.
