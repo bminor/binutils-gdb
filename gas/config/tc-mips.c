@@ -10892,10 +10892,13 @@ md_apply_fix3 (fixP, valP, seg)
     {
       if (mips_need_elf_addend_fixup (fixP))
 	{
+	  reloc_howto_type *howto;
 	  valueT symval = S_GET_VALUE (fixP->fx_addsy);
 
 	  value -= symval;
-	  if (value != 0 && ! fixP->fx_pcrel)
+
+	  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+	  if (value != 0 && howto->partial_inplace && ! fixP->fx_pcrel)
 	    {
 	      /* In this case, the bfd_install_relocation routine will
 		 incorrectly add the symbol value back in.  We just want
@@ -10913,11 +10916,7 @@ md_apply_fix3 (fixP, valP, seg)
 		     leave the matching HI16 in-place addends as zero.  */
 		  if (fixP->fx_r_type != BFD_RELOC_HI16_S)
 		    {
-		      reloc_howto_type *howto;
 		      bfd_vma contents, mask, field;
-
-		      howto = bfd_reloc_type_lookup (stdoutput,
-						     fixP->fx_r_type);
 
 		      contents = bfd_get_bits (fixP->fx_frag->fr_literal
 					       + fixP->fx_where,
