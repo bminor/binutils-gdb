@@ -1,4 +1,19 @@
+Mon Nov 25 10:45:14 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* write.c: Delete "ifndef md_relax_frag" around is_dnrange.
+	(relax_segment, case rs_org): Move code inside braces.  Move locals
+	target,after inside too.
+	(relax_segment, case rs_machine_dependent): Guts moved to ...
+	(relax_frag): New function.
+	Call md_prepare_relax_scan if defined.
+	* config/tc-m68k.h (md_prepare_relax_scan): Renamed from
+	M68K_AIM_KLUDGE.
+
 Mon Nov 25 08:49:36 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (address_registers): Use '$' as register
+	prefix instead of '%'.
+	(data_registers, other_registers, md_assemble): Likewise.
 
 	* config/tc-mn10300.c (address_registers): Use '%' prefix for regs.
 	(data_registers, other_registers, md_assemble): Likewise.
