@@ -38,6 +38,9 @@ struct mn10300_opcode
      match (and are presumably filled in by operands).  */
   unsigned long mask;
 
+  /* The format of this opcode.  */
+  unsigned char format;
+
   /* An array of operand codes.  Each code is an index into the
      operand table.  They appear in the order which the operands must
      appear in assembly code, and are terminated by a zero.  */
@@ -71,5 +74,17 @@ struct mn10300_operand
 extern const struct mn10300_operand mn10300_operands[];
 
 /* Values defined for the flags field of a struct mn10300_operand.  */
+#define MN10300_OPERAND_DREG 0x1
 
+#define MN10300_OPERAND_AREG 0x2
+
+#define MN10300_OPERAND_SP 0x4
+
+#define MN10300_OPERAND_PSW 0x8
+
+#define MN10300_OPERAND_MDR 0x10
+
+#define MN10300_OPERAND_SIGNED 0x20
+
+#define MN10300_OPERAND_PROMOTE 0x40
 #endif /* MN10300_H */
