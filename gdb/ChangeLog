@@ -1,3 +1,20 @@
+Wed Dec  4 16:34:05 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* config/mn10300/mn10300.mt
+	* config/mn10300/tm-mn10300.h: new config files for mn10300
+	processor
+
+Tue Dec  3 13:02:08 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* infptrace.c (store_inferior_registers): Move some common code out
+	to store_register, like fetch_inferior_registers & fetch_register.
+	(store_register): New function, from store_inferior_registers.
+	(fetch_inferior_registers, fetch_register): Minor code tweaks to
+	make {fetch,store}_inferior_registers and {fetch,store}_register
+	routines as similar in structure as possible.
+	(fetch_inferior_registers, store_inferior_registers): Eliminate
+	local variable numregs and just use ARCH_NUM_REGS directly.
+	
 Tue Dec  3 11:38:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c: add macro USE_GENERIC_DUMMY_FRAMES to enable/disable
