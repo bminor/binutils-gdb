@@ -3680,20 +3680,41 @@ coff_write_object_contents (abfd)
   /* now write them */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return false;
+  
   {
-    char buff[bfd_coff_filhsz (abfd)];
+    char * buff;
+    bfd_size_type amount;
+    
+    buff = bfd_malloc (bfd_coff_filhsz (abfd));
+    if (buff == NULL) 
+      return false;
+    
     coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
-    if (bfd_write ((PTR) buff, 1, bfd_coff_filhsz (abfd), abfd)
-	!= bfd_coff_filhsz (abfd))
+    amount = bfd_write ((PTR) buff, 1, bfd_coff_filhsz (abfd), abfd);
+    
+    free (buff);
+    
+    if (amount != bfd_coff_filhsz (abfd))
       return false;
   }
+  
   if (abfd->flags & EXEC_P)
     {
       /* Note that peicode.h fills in a PEAOUTHDR, not an AOUTHDR. 
 	 include/coff/pe.h sets AOUTSZ == sizeof(PEAOUTHDR)) */
-      char buff[bfd_coff_aoutsz (abfd)];
+      char * buff;
+      bfd_size_type amount;
+
+      buff = bfd_malloc (bfd_coff_aoutsz (abfd));
+      if (buff == NULL) 
+	return false;
+      
       coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) buff);
-      if (bfd_write ((PTR) buff, 1, bfd_coff_aoutsz (abfd), abfd) != bfd_coff_aoutsz (abfd))
+      amount = bfd_write ((PTR) buff, 1, bfd_coff_aoutsz (abfd), abfd);
+      
+      free (buff);
+      
+      if (amount != bfd_coff_aoutsz (abfd))
 	return false;
     }
 #ifdef RS6000COFF_C
