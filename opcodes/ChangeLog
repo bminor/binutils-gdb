@@ -1,3 +1,15 @@
+Thu Apr 28 18:32:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* m68k-dis.c (print_insn_m68k): If F_ALIAS flag is set, skip the
+	opcode being examined.
+
+Thu Apr 21 17:08:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c (powerpc_operands): Added RAL, RAM and RAS.
+	(insert_ral, insert_ram, insert_ras): New functions.
+	(powerpc_opcodes): Use RAL for load with update, RAM for lmw, and
+	RAS for store with update.
+
 Sat Apr 16 23:41:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ppc-opc.c (powerpc_opcodes): Correct fcir.  From David Edelsohn
