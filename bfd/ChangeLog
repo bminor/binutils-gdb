@@ -1,3 +1,7 @@
+2001-05-28  Nicolas Pitre <nico@cam.org>
+
+	* elf32-arm.h: Fix PLT generation for big endian ARM.
+
 2001-05-28  Jeff Sturm  <jsturm@one-point.com>
 
 	* reloc.c: Add BFD_RELOC_SPARC_UA16 and BFD_RELOC_SPARC_UA64.

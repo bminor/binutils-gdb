@@ -80,20 +80,20 @@ static int elf32_thumb_to_arm_stub
    linker first.  */
 static const bfd_byte elf32_arm_plt0_entry [PLT_ENTRY_SIZE] =
 {
-  0x04, 0xe0, 0x2d, 0xe5,	/* str   lr, [sp, #-4]!     */
-  0x10, 0xe0, 0x9f, 0xe5,	/* ldr   lr, [pc, #16]      */
-  0x0e, 0xe0, 0x8f, 0xe0,	/* adr   lr, pc, lr         */
-  0x08, 0xf0, 0xbe, 0xe5	/* ldr   pc, [lr, #8]!      */
+  0xe52de004,	/* str   lr, [sp, #-4]!     */
+  0xe59fe010,	/* ldr   lr, [pc, #16]      */
+  0xe08fe00e,	/* add   lr, pc, lr         */
+  0xe5bef008	/* ldr   pc, [lr, #8]!      */
 };
 
 /* Subsequent entries in a procedure linkage table look like
    this.  */
 static const bfd_byte elf32_arm_plt_entry [PLT_ENTRY_SIZE] =
 {
-  0x04, 0xc0, 0x9f, 0xe5,	/* ldr   ip, [pc, #4]       */
-  0x0c, 0xc0, 0x8f, 0xe0,	/* add   ip, pc, ip         */
-  0x00, 0xf0, 0x9c, 0xe5,	/* ldr   pc, [ip]           */
-  0x00, 0x00, 0x00, 0x00        /* offset to symbol in got  */
+  0xe59fc004,	/* ldr   ip, [pc, #4]       */
+  0xe08fc00c,	/* add   ip, pc, ip         */
+  0xe59cf000,	/* ldr   pc, [ip]           */
+  0x00000000	/* offset to symbol in got  */
 };
 
 /* The ARM linker needs to keep track of the number of relocs that it
@@ -3135,9 +3135,12 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
       got_offset = (plt_index + 3) * 4;
 
       /* Fill in the entry in the procedure linkage table.  */
-      memcpy (splt->contents + h->plt.offset,
-              elf32_arm_plt_entry,
-	      PLT_ENTRY_SIZE);
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[0],
+		  splt->contents + h->plt.offset + 0);
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[1],
+		  splt->contents + h->plt.offset + 4);
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[2],
+		  splt->contents + h->plt.offset + 8);
       bfd_put_32 (output_bfd,
 		      (sgot->output_section->vma
 		       + sgot->output_offset
@@ -3333,7 +3336,12 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 
       /* Fill in the first entry in the procedure linkage table.  */
       if (splt->_raw_size > 0)
-	memcpy (splt->contents, elf32_arm_plt0_entry, PLT_ENTRY_SIZE);
+	{
+	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[0], splt->contents +  0);
+	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[1], splt->contents +  4);
+	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[2], splt->contents +  8);
+	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[3], splt->contents + 12);
+	}
 
       /* UnixWare sets the entsize of .plt to 4, although that doesn't
 	 really seem like the right value.  */
