@@ -1,5 +1,11 @@
 2001-12-09  Fred Fish  <fnf@redhat.com>
 
+	* gdbtypes.c (build_gdbtypes): For builtin_type_char, pass
+	TYPE_FLAG_NOSIGN to init_type() rather than setting it after the
+	type is created.
+
+2001-12-09  Fred Fish  <fnf@redhat.com>
+
 	* gdbtypes.h (TYPE_UNSIGNED, TYPE_NOSIGN, TYPE_CONST,
 	TYPE_VOLATILE, TYPE_INCOMPLETE): Move macros that test the
 	bits to location in file where the bits are defined.
