@@ -1,3 +1,17 @@
+2002-05-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.h (i386_abi): New enum.
+	(struct gdbarch_tdep): Replace os_ident member with abi.
+	(i386_gdbarch_register_os_abi): New prototype.
+	* i386-tdep.c (i386_abi_names): New array.
+	(process_note_abi_tag_sections): Removed.
+	(process_note_sections): New function.
+	(i386_elf_abi_from_note, i386_elf_abi): New functions.
+	(struct i386_abi_handler): New struct.
+	(i386_abi_handler_list): New variable.
+	(i386_gdbarch_register_os_abi): New function.
+	(i386_gdbarch_init): Adapt for the changes given above.
+
 2002-05-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gregset.h: Say "GNU/Linux".
