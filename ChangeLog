@@ -1,3 +1,8 @@
+Thu Jun 22 17:10:53 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (elf/mips.h): Always forward-include, needed
+	for GDB to build.
+
 Wed Jun 21 15:17:30 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* testsuite: New directory for customer acceptance and whole tool
