@@ -41,7 +41,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BFD_VERSION "1.9"
 
 /* forward declaration */
-typedef struct _bfd_struct bfd;
+typedef struct _bfd bfd;
 
 /* General rules: functions which are boolean return true on success
    and false on failure (unless they're a predicate).   -- bfd.doc */
@@ -165,11 +165,11 @@ typedef int bfd_size_type;
  */
 typedef struct symbol_cache_entry 
 {
-  struct _bfd_struct *the_bfd;	/* Just a way to find out host type */
+  struct _bfd *the_bfd;	/* Just a way to find out host type */
   CONST char *name;
   symvalue value;
   flagword flags;
-  struct sec_struct *section;
+  struct sec *section;
   PTR udata;			/* Target-specific stuff */
 } asymbol;
 
@@ -182,7 +182,7 @@ typedef struct symbol_cache_entry
 
 
 /* This is a type pun with struct ranlib on purpose! */
-typedef struct {
+typedef struct carsym {
   char *name;
   file_ptr file_offset;		/* look here to find the file */
 } carsym;			/* to make these you call a carsymogen */
@@ -195,7 +195,7 @@ typedef struct {
    segment origin.  This is because we won't necessarily have a symbol
    which is guaranteed to point to the segment origin. */
 
-typedef enum {
+typedef enum bfd_reloc_status {
   bfd_reloc_ok,
   bfd_reloc_overflow,
   bfd_reloc_outofrange,
@@ -206,7 +206,7 @@ typedef enum {
   bfd_reloc_dangerous}
  bfd_reloc_status_enum_type;
 
-typedef CONST struct rint_struct { 
+typedef CONST struct rint { 
   unsigned int type;
   unsigned int rightshift;
   unsigned int size;
@@ -255,14 +255,14 @@ typedef struct reloc_cache_entry
 
   rawdata_offset address;	/* offset in section */
   bfd_vma addend;		/* addend for relocation value */
-  struct sec_struct *section;   /* if sym is null this is the section */
+  struct sec *section;   /* if sym is null this is the section */
   reloc_howto_type *howto;
 
 } arelent;
 
-typedef struct relent_chain_struct {
+typedef struct relent_chain {
   arelent relent;
-  struct   relent_chain_struct  *next;
+  struct   relent_chain *next;
 } arelent_chain;
   
 /* Used in generating armaps.  Perhaps just a forward definition would do? */
@@ -298,10 +298,10 @@ typedef struct lineno_cache_entry {
 #define SEC_CONSTRUCTOR 0400
 #define SEC_HAS_CONTENTS	(0x200)
 
-typedef struct sec_struct 
+typedef struct sec 
 {
   CONST char *name;
-  struct sec_struct *next;
+  struct sec *next;
   flagword flags;
 
   bfd_vma vma;
@@ -312,7 +312,7 @@ typedef struct sec_struct
      an output section, this value will be 0...
      */
   bfd_vma output_offset;
-  struct sec_struct *output_section;
+  struct sec *output_section;
   unsigned int alignment_power; /* eg 4 aligns to 2^4*/
 
   arelent *relocation;		/* for input files */
@@ -322,14 +322,14 @@ typedef struct sec_struct
   file_ptr filepos;		/* File position of section data */
   file_ptr rel_filepos;		/* File position of relocation info */
   file_ptr line_filepos;
-  struct user_section_struct *userdata;
-  struct lang_output_section_struct *otheruserdata;
+  struct user_section *userdata;
+  struct lang_output_section *otheruserdata;
   int index;			/* Which section is it 0..nth */
   alent *lineno; 
   unsigned int lineno_count;
 
   /* When a section is being output, this value changes as more
-   * linenumbers are written out */
+     linenumbers are written out */
   file_ptr moving_line_filepos;
 
   /* what the section number is in the target world */
@@ -337,8 +337,7 @@ typedef struct sec_struct
 
   PTR used_by_bfd;
 
-  /* If this is a constructor section then here is a list of relents
-   */
+  /* If this is a constructor section then here is a list of relents */
   arelent_chain *constructor_chain;
 } asection;
 
@@ -347,7 +346,7 @@ typedef struct sec_struct
 
 
 
-typedef struct sec_struct *sec_ptr;
+typedef struct sec *sec_ptr;
 
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
 #define bfd_section_size(bfd, ptr) ((ptr)->size)
@@ -374,7 +373,7 @@ typedef enum {no_error = 0, system_call_error, invalid_target,
 
 extern bfd_ec bfd_error;
 
-typedef struct {
+typedef struct bfd_error_vector {
   PROTO(void,(* nonrepresentable_section ),(CONST bfd  *CONST abfd,
 					    CONST char *CONST name));
 } bfd_error_vector_type;
@@ -493,9 +492,8 @@ typedef struct bfd_target
   SDEF (asymbol *, _bfd_make_empty_symbol, (bfd *));
   SDEF (void, _bfd_print_symbol, (bfd *, PTR, asymbol *,
 				  bfd_print_symbol_enum_type));
-  SDEF(alent *, _get_lineno, (bfd *, asymbol *));
+  SDEF (alent *, _get_lineno, (bfd *, asymbol *));
 
-  /* This should perhaps be format-dependent, I don't know yet.  -gnu */
   SDEF (boolean, _bfd_set_arch_mach, (bfd *, enum bfd_architecture,
 				      unsigned long));
 
@@ -584,7 +582,7 @@ extern CONST short _bfd_host_big_endian;
    are "FILE *" and "time_t".  If these had been declared as structs
    rather than typedefs, we wouldn't have this problem.  */
 
-struct _bfd_struct 
+struct _bfd 
 {
 
   CONST char *filename;		/* could be null; filename user opened with */
@@ -592,8 +590,8 @@ struct _bfd_struct
   char *iostream;		/* stdio FILE *, unless an archive element */
 
   boolean cacheable;		/* iostream can be closed if desired */
-  struct _bfd_struct *lru_prev; /* Used for file caching */
-  struct _bfd_struct *lru_next; /* Used for file caching */
+  struct _bfd *lru_prev; /* Used for file caching */
+  struct _bfd *lru_next; /* Used for file caching */
   file_ptr where;		/* Where the file was when closed */
   boolean opened_once;
   boolean mtime_set;		/* Flag indicating mtime is available */
@@ -627,9 +625,9 @@ to 0 for non archive files
   /* Archive stuff.  strictly speaking we don't need all three bfd* vars,
      but doing so would allow recursive archives! */
   PTR arelt_data;		/* needed if this came from an archive */
-  struct _bfd_struct *my_archive; /* if this is an archive element */
-  struct _bfd_struct *next;	/* output chain pointer */
-  struct _bfd_struct *archive_head; /* for output archive */
+  struct _bfd *my_archive; /* if this is an archive element */
+  struct _bfd *next;	/* output chain pointer */
+  struct _bfd *archive_head; /* for output archive */
   boolean has_armap;		/* if an arch; has it an armap? */
   
   PTR tdata;			/* target-specific storage */
@@ -646,15 +644,8 @@ to 0 for non archive files
   struct obstack memory;
 };
 
-PROTO(PTR, bfd_alloc, (bfd *abfd, size_t size));
-PROTO(PTR, bfd_zalloc,(bfd *abfd, size_t size));
-PROTO(PTR, bfd_realloc,(bfd *abfd, PTR orig, size_t new));
-PROTO(size_t, bfd_alloc_size,(bfd *abfd));
-/* FIXME, these are broken!  bfd_free references "Y" which is not a parameter.
-   bfd_release frees the mentioned object AND EVERYTHING AFTER IT IN THE
-   OBSTACK!  -- gnu@cygnus.com */
-#define bfd_free(x) (obstack_free(&(x->memory),y))
-#define bfd_release(x,y) (obstack_free(&(x->memory),y))
+/* The various callable routines */
+PROTO(bfd_size_type, bfd_alloc_size,(bfd *abfd));
 PROTO (char *, bfd_printable_arch_mach,(enum bfd_architecture, unsigned long));
 PROTO (char *, bfd_format_string, (bfd_format format));
 

@@ -16,18 +16,12 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 /* All the system include files boiled into one place. 
 
    One day, everyone will have the same set of include files..
 
    This is ugly, but if you can think of a better way of doing this,
-   tell me. steve@cygnus.com
-
-*/
-
-   
+   tell me.  --steve@cygnus.com */
 
 #ifndef _SYSDEP_H
 #define _SYSDEP_H

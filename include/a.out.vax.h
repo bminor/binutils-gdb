@@ -1,7 +1,7 @@
 /* VAX-specific definitions for a.out file header fields.  */
 
 #define PAGE_SIZE 512			/* aka NBPG in <sys/param.h> */
-#define SEGMENT_SIZE PAGE_SIZE		/* rounding between text/data ??! */
+#define SEGMENT_SIZE PAGE_SIZE		/* rounding between text/data ? */
 #define TEXT_START_ADDR 0		/* Text start address: see
 					   <machine/vmparam.h> USRTEXT.  */
 #define	STACK_END_ADDR	0x80000000-(14+14)*PAGE_SIZE   /* see

@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * This file is a modified version of 'a.out.h'.  It is to be used in all
  * GNU tools modified to support the i80960 (or tools that operate on
  * object files created by such tools).
