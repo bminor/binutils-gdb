@@ -1488,161 +1488,24 @@ elf_hppa_reloc_type_lookup (arch, code)
      bfd_arch_info_type *arch;
      bfd_reloc_code_real_type code;
 {
-	if ( code < R_HPPA_UNIMPLEMENTED ) {
-		return &elf_hppa_howto_table[code];
-	}
+  if (code < R_HPPA_UNIMPLEMENTED)
+    return &elf_hppa_howto_table[code];
 
-	return (reloc_howto_type *)0;
+  return (reloc_howto_type *)0;
+}
+#define elf_bfd_reloc_type_lookup	elf_hppa_reloc_type_lookup
+
+static void
+DEFUN (elf_info_to_howto, (abfd, cache_ptr, dst),
+       bfd *abfd AND
+       arelent *cache_ptr AND
+       Elf_Internal_Rela *dst)
+{
+  abort ();
 }
 
-#include "elfcode.h"
+#define TARGET_BIG_SYM		elf32_hppa_vec
+#define TARGET_BIG_NAME		"elf32-hppa"
+#define ELF_ARCH		bfd_arch_hppa
 
-bfd_target elf_big_vec =
-{
-  /* name: identify kind of target */
-  "elf-big",
-
-  /* flavour: general indication about file */
-  bfd_target_elf_flavour,
-
-  /* byteorder_big_p: data is big endian */
-  true,
-
-  /* header_byteorder_big_p: header is also big endian */
-  true,
-
-  /* object_flags: mask of all file flags */
-  (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
-   DYNAMIC | WP_TEXT),
-  
-  /* section_flags: mask of all section flags */
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
-   SEC_CODE | SEC_DATA), 
-
-  /* ar_pad_char: pad character for filenames within an archive header
-     FIXME:  this really has nothing to do with ELF, this is a characteristic
-     of the archiver and/or os and should be independently tunable */
-  '/',
-
-  /* ar_max_namelen: maximum number of characters in an archive header
-     FIXME:  this really has nothing to do with ELF, this is a characteristic
-     of the archiver and should be independently tunable.  This value is
-     a WAG (wild a** guess) */
-  15,
-
-  /* align_power_min: minimum alignment restriction for any section
-     FIXME:  this value may be target machine dependent */
-  3,
-
-  /* Routines to byte-swap various sized integers from the data sections */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16,
-
-  /* Routines to byte-swap various sized integers from the file headers */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16,
-
-  /* bfd_check_format: check the format of a file being read */
-  { _bfd_dummy_target,		/* unknown format */
-    elf_object_p,		/* assembler/linker output (object file) */
-    bfd_generic_archive_p,	/* an archive */
-    elf_core_file_p		/* a core file */
-  },
-
-  /* bfd_set_format: set the format of a file being written */
-  { bfd_false,
-    elf_mkobject,
-    _bfd_generic_mkarchive,
-    bfd_false
-  },
-
-  /* bfd_write_contents: write cached information into a file being written */
-  { bfd_false,
-    elf_write_object_contents,
-    _bfd_write_archive_contents,
-    bfd_false
-  },
-
-  /* Initialize a jump table with the standard macro.  All names start
-     with "elf" */
-  JUMP_TABLE(elf),
-
-  /* SWAP_TABLE */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  elf_hppa_reloc_type_lookup,
-  NULL,		/* _bfd_make_debug_symbol */
-  (PTR)&elf_hppa_backend_data
-};
-
-bfd_target elf_little_vec =
-{
-  /* name: identify kind of target */
-  "elf-little",
-
-  /* flavour: general indication about file */
-  bfd_target_elf_flavour,
-
-  /* byteorder_big_p: data is big endian */
-  false,		/* Nope -- this one's little endian */
-
-  /* header_byteorder_big_p: header is also big endian */
-  false,		/* Nope -- this one's little endian */
-
-  /* object_flags: mask of all file flags */
-  (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
-   DYNAMIC | WP_TEXT),
-  
-  /* section_flags: mask of all section flags */
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
-   SEC_DATA), 
-
-  /* ar_pad_char: pad character for filenames within an archive header
-     FIXME:  this really has nothing to do with ELF, this is a characteristic
-     of the archiver and/or os and should be independently tunable */
-  '/',
-
-  /* ar_max_namelen: maximum number of characters in an archive header
-     FIXME:  this really has nothing to do with ELF, this is a characteristic
-     of the archiver and should be independently tunable.  This value is
-     a WAG (wild a** guess) */
-  15,
-
-  /* align_power_min: minimum alignment restriction for any section
-     FIXME:  this value may be target machine dependent */
-  3,
-
-  /* Routines to byte-swap various sized integers from the data sections */
-  _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16,
-
-  /* Routines to byte-swap various sized integers from the file headers */
-  _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16,
-
-  /* bfd_check_format: check the format of a file being read */
-  { _bfd_dummy_target,		/* unknown format */
-    elf_object_p,		/* assembler/linker output (object file) */
-    bfd_generic_archive_p,	/* an archive */
-    elf_core_file_p		/* a core file */
-  },
-
-  /* bfd_set_format: set the format of a file being written */
-  { bfd_false,
-    elf_mkobject,
-    _bfd_generic_mkarchive,
-    bfd_false
-  },
-
-  /* bfd_write_contents: write cached information into a file being written */
-  { bfd_false,
-    elf_write_object_contents,
-    _bfd_write_archive_contents,
-    bfd_false
-  },
-
-  /* Initialize a jump table with the standard macro.  All names start
-     with "elf" */
-  JUMP_TABLE(elf),
-
-  /* SWAP_TABLE */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  elf_hppa_reloc_type_lookup,
-  NULL,		/* _bfd_make_debug_symbol */
-  (PTR)&elf_hppa_backend_data
-};
+#include "elf32-target.h"
