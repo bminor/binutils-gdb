@@ -1,3 +1,8 @@
+Tue Mar 31 00:12:12 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10300.c (mn10300_elf_relax_section): Correctly handle
+	absolute symbols.
+
 Mon Mar 30 12:46:15 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set version to 2.9.1.
