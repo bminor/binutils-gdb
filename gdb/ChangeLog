@@ -1,3 +1,9 @@
+Mon Jan 18 11:58:45 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mipsread.c (CODE_MASK, MIPS_IS_STAB, MIPS_MARK_STAB,
+	MIPS_UNMARK_STAB, STABS_SYMBOLS): Removed; now in
+	include/coff/mips.h.
+
 Fri Jan 15 20:26:50 1993  Fred Fish  (fnf@cygnus.com)
 
 	* c-exp.y (exp:STRING):  Convert C strings into array-of-char
