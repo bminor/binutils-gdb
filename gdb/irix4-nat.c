@@ -21,6 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
+#include "inferior.h"
 
 #include <sys/time.h>
 #include <sys/procfs.h>
@@ -61,7 +62,6 @@ fill_gregset (gregsetp, regno)
 {
   int regi;
   register greg_t *regp = (greg_t *)(gregsetp->gp_regs);
-  extern char registers[];
 
   /* same FIXME as above wrt 32*/
   for (regi = 0; regi < 32; regi++)
@@ -111,7 +111,6 @@ fill_fpregset (fpregsetp, regno)
 {
   int regi;
   char *from, *to;
-  extern char registers[];
 
   for (regi = FP0_REGNUM; regi < FP0_REGNUM + 32; regi++)
     {

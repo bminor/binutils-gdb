@@ -1,3 +1,18 @@
+Wed Oct 21 19:08:20 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* i386v-nat.c:  Remove space from front of #endif.
+	* irix4-nat.c:  Remove externs of registers[], include inferior.h
+	instead.
+	* mips-nat.c:  Explicitly initialize zerobuf to 0!
+	* mips-tdep.c (init_extra_frame_info):  Undo John's last change.
+	Always setup fci->frame, even if it's non-zero.  Too many places
+	depend upon this behavior (and I have to get a release out the
+	door)!
+	* mipsread.c (parse_partial_symbols, psymtab_to_symtab_1):  Set
+	processing_gcc_compilation if we find the embedded stabs marker.
+	This fixes several bugs with finding the location of short or char
+	function parameters passed on the stack.
+
 Wed Oct 21 17:46:07 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Native support for sun4sol2.

@@ -159,7 +159,7 @@ i386_float_info ()
 	perror_with_name ("read from core file");
       skip = 0;
     }
- #endif	/* 0 */ 
+#endif	/* 0 */ 
 
   fpstatep = (struct fpstate *)(buf + skip);
   print_387_status (fpstatep->status, (struct env387 *)fpstatep->state);
