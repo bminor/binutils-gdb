@@ -1,3 +1,8 @@
+Wed Sep 29 10:52:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* target.c (target_detach): Call generic_mourn_inferior.
+	* inflow.c (generic_mourn_inferior): Call flush_cached_frames.
+
 Tue Sep 28 23:08:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c, coffread.c, elfread.c: A few changes to comments.

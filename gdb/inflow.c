@@ -78,8 +78,9 @@ static void (*sigquit_ours) ();
 
 static char *inferior_thisrun_terminal;
 
-/* Nonzero if our terminal settings are in effect.
-   Zero if the inferior's settings are in effect.  */
+/* Nonzero if our terminal settings are in effect.  Zero if the
+   inferior's settings are in effect.  Ignored if !gdb_has_a_terminal
+   ().  */
 
 static int terminal_is_ours;
 
@@ -100,7 +101,9 @@ gdb_has_a_terminal ()
 	 all!).  Can't do this in _initialize_inflow because SERIAL_FDOPEN
 	 won't work until the serial_ops_list is initialized.  */
 
+#ifdef F_GETFL
       tflags_ours = fcntl (0, F_GETFL, 0);
+#endif
 
       gdb_has_a_terminal_flag = no;
       stdin_serial = SERIAL_FDOPEN (0);
@@ -130,20 +133,20 @@ static void terminal_ours_1 PARAMS ((int));
 void
 terminal_init_inferior ()
 {
-  /* Make sure that our_ttystate (etc) are initialized.  */
-  gdb_has_a_terminal ();
+  if (gdb_has_a_terminal ())
+    {
+      /* We could just as well copy our_ttystate (if we felt like adding
+	 a new function SERIAL_COPY_TTY_STATE).  */
+      if (inferior_ttystate)
+	free (inferior_ttystate);
+      inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+      SERIAL_SET_PROCESS_GROUP (stdin_serial, inferior_ttystate, inferior_pid);
 
-  /* We could just as well copy our_ttystate (if we felt like adding
-     a new function SERIAL_COPY_TTY_STATE).  */
-  if (inferior_ttystate)
-    free (inferior_ttystate);
-  inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
-  SERIAL_SET_PROCESS_GROUP (stdin_serial, inferior_ttystate, inferior_pid);
-
-  /* Make sure that next time we call terminal_inferior (which will be
-     before the program runs, as it needs to be), we install the new
-     process group.  */
-  terminal_is_ours = 1;
+      /* Make sure that next time we call terminal_inferior (which will be
+	 before the program runs, as it needs to be), we install the new
+	 process group.  */
+      terminal_is_ours = 1;
+    }
 }
 
 /* Put the inferior's terminal settings into effect.
@@ -157,12 +160,14 @@ terminal_inferior ()
     {
       int result;
 
+#ifdef F_GETFL
       /* Is there a reason this is being done twice?  It happens both
 	 places we use F_SETFL, so I'm inclined to think perhaps there
 	 is some reason, however perverse.  Perhaps not though...  */
       result = fcntl (0, F_SETFL, tflags_inferior);
       result = fcntl (0, F_SETFL, tflags_inferior);
       OOPSY ("fcntl F_SETFL");
+#endif
 
       /* Because we were careful to not change in or out of raw mode in
 	 terminal_ours, we will not change in our out of raw mode with
@@ -274,6 +279,7 @@ terminal_ours_1 (output_only)
 	  signal (SIGQUIT, sigquit_ours);
 	}
 
+#ifdef F_GETFL
       tflags_inferior = fcntl (0, F_GETFL, 0);
 
       /* Is there a reason this is being done twice?  It happens both
@@ -281,6 +287,7 @@ terminal_ours_1 (output_only)
 	 is some reason, however perverse.  Perhaps not though...  */
       result = fcntl (0, F_SETFL, tflags_ours);
       result = fcntl (0, F_SETFL, tflags_ours);
+#endif
 
       result = result;	/* lint */
     }
@@ -384,7 +391,6 @@ void
 new_tty ()
 {
   register int tty;
-  void (*osigttou) ();
 
   if (inferior_thisrun_terminal == 0)
     return;
@@ -396,6 +402,8 @@ new_tty ()
   tty = open("/dev/tty", O_RDWR);
   if (tty > 0)
     {
+      void (*osigttou) ();
+
       osigttou = (void (*)()) signal(SIGTTOU, SIG_IGN);
       ioctl(tty, TIOCNOTTY, 0);
       close(tty);
@@ -470,6 +478,7 @@ generic_mourn_inferior ()
 #endif
 
   reopen_exec_file ();
+  flush_cached_frames ();
   if (target_has_stack) {
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					  read_pc ()));

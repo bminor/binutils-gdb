@@ -1,5 +1,5 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright 1990, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -95,6 +95,7 @@ struct target_ops dummy_target = {"None", "None", "",
     find_default_create_inferior, /* create_inferior */
     0,			/* mourn_inferior */
     0,			/* can_run */
+    0,			/* notice_signals */
     dummy_stratum, 0,	/* stratum, next */
     0, 0, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
     0, 0,		/* section pointers */
@@ -335,6 +336,7 @@ cleanup_target (t)
   de_fault (to_create_inferior,		maybe_kill_then_create_inferior);
   de_fault (to_mourn_inferior,		(void (*)())noprocess);
   de_fault (to_can_run,			return_zero);
+  de_fault (to_notice_signals,		(void (*)())ignore);
   de_fault (to_next,			0);
   de_fault (to_has_all_memory,		0);
   de_fault (to_has_memory,		0);
@@ -420,10 +422,16 @@ pop_target ()
 {
   (current_target->to_close)(0);	/* Let it clean up */
   current_target = current_target->to_next;
+#if 0
+  /* This will dump core if ever called--push_target expects current_target
+     to be non-NULL.  But I don't think it's needed; I don't see how the
+     dummy_target could ever be removed from the stack.  */
   if (!current_target)		/* At bottom, push dummy.  */
     push_target (&dummy_target);
+#endif
 }
 
+#undef	MIN
 #define MIN(A, B) (((A) <= (B)) ? (A) : (B))
 
 /* target_read_string -- read a null terminated string from MEMADDR in target.
@@ -466,15 +474,15 @@ target_read_string (memaddr, myaddr, len)
   return origlen;
 }
 
-/* Move memory to or from the targets.  Iterate until all of it has
-   been moved, if necessary.  The top target gets priority; anything
-   it doesn't want, is offered to the next one down, etc.  Note the
-   business with curlen:  if an early target says "no, but I have a
-   boundary overlapping this xfer" then we shorten what we offer to
-   the subsequent targets so the early guy will get a chance at the
-   tail before the subsequent ones do. 
+/* Read LEN bytes of target memory at address MEMADDR, placing the results in
+   GDB's memory at MYADDR.  Returns either 0 for success or an errno value
+   if any error occurs.
 
-   Result is 0 or errno value.  */
+   If an error occurs, no guarantee is made about the contents of the data at
+   MYADDR.  In particular, the caller should not depend upon partial reads
+   filling the buffer with good data.  There is no way for the caller to know
+   how much good data might have been transfered anyway.  Callers that can
+   deal with partial reads should call target_read_memory_partial. */
 
 int
 target_read_memory (memaddr, myaddr, len)
@@ -483,6 +491,48 @@ target_read_memory (memaddr, myaddr, len)
      int len;
 {
   return target_xfer_memory (memaddr, myaddr, len, 0);
+}
+
+/* Read LEN bytes of target memory at address MEMADDR, placing the results
+   in GDB's memory at MYADDR.  Returns a count of the bytes actually read,
+   and optionally an errno value in the location pointed to by ERRNOPTR
+   if ERRNOPTR is non-null. */
+
+int
+target_read_memory_partial (memaddr, myaddr, len, errnoptr)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int *errnoptr;
+{
+  int nread;	/* Number of bytes actually read. */
+  int errcode;	/* Error from last read. */
+
+  /* First try a complete read. */
+  errcode = target_xfer_memory (memaddr, myaddr, len, 0);
+  if (errcode == 0)
+    {
+      /* Got it all. */
+      nread = len;
+    }
+  else
+    {
+      /* Loop, reading one byte at a time until we get as much as we can. */
+      for (errcode = 0, nread = 0; len > 0 && errcode == 0; nread++, len--)
+	{
+	  errcode = target_xfer_memory (memaddr++, myaddr++, 1, 0);
+	}
+      /* If an error, the last read was unsuccessful, so adjust count. */
+      if (errcode != 0)
+	{
+	  nread--;
+	}
+    }
+  if (errnoptr != NULL)
+    {
+      *errnoptr = errcode;
+    }
+  return (nread);
 }
 
 int
@@ -494,6 +544,16 @@ target_write_memory (memaddr, myaddr, len)
   return target_xfer_memory (memaddr, myaddr, len, 1);
 }
  
+/* Move memory to or from the targets.  Iterate until all of it has
+   been moved, if necessary.  The top target gets priority; anything
+   it doesn't want, is offered to the next one down, etc.  Note the
+   business with curlen:  if an early target says "no, but I have a
+   boundary overlapping this xfer" then we shorten what we offer to
+   the subsequent targets so the early guy will get a chance at the
+   tail before the subsequent ones do. 
+
+   Result is 0 or errno value.  */
+
 int
 target_xfer_memory (memaddr, myaddr, len, write)
      CORE_ADDR memaddr;
@@ -504,7 +564,11 @@ target_xfer_memory (memaddr, myaddr, len, write)
   int curlen;
   int res;
   struct target_ops *t;
-  
+
+  /* to_xfer_memory is not guaranteed to set errno, even when it returns
+     0.  */
+  errno = 0;
+
   /* The quick case is that the top target does it all.  */
   res = current_target->to_xfer_memory
 			(memaddr, myaddr, len, write, current_target);
@@ -596,6 +660,25 @@ target_preopen (from_tty)
     }
 }
 
+/* Detach a target after doing deferred register stores.  */
+
+void
+target_detach (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  /* Handle any optimized stores to the inferior.  */
+#ifdef DO_DEFERRED_STORES
+  DO_DEFERRED_STORES;
+#endif
+  (current_target->to_detach) (args, from_tty);
+
+  /* It is correct to do this because the top process can never be as high
+     as process_stratum now.  This is needed at least in the case where
+     we detach a corefile, and thus need to flush the frame cache.  */
+  generic_mourn_inferior ();
+}
+
 /* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.
@@ -607,7 +690,7 @@ find_default_run_target (do_mesg)
      char *do_mesg;
 {
   struct target_ops **t;
-  struct target_ops *runable;
+  struct target_ops *runable = NULL;
   int count;
 
   count = 0;
@@ -657,6 +740,42 @@ static int
 return_zero ()
 {
   return 0;
+}
+
+struct target_ops *
+find_core_target ()
+{
+  struct target_ops **t;
+  struct target_ops *runable = NULL;
+  int count;
+  
+  count = 0;
+  
+  for (t = target_structs; t < target_structs + target_struct_size;
+       ++t)
+    {
+      if ((*t)->to_stratum == core_stratum)
+	{
+	  runable = *t;
+	  ++count;
+	}
+    }
+  
+  return(count == 1 ? runable : NULL);
+}
+  
+/* Convert a normal process ID to a string.  Returns the string in a static
+   buffer.  */
+
+char *
+normal_pid_to_str (pid)
+     int pid;
+{
+  static char buf[30];
+
+  sprintf (buf, "process %d", pid);
+
+  return buf;
 }
 
 static char targ_desc[] = 
