@@ -16,7 +16,7 @@ RANLIB = ranlib
 AR = ar
 AR_FLAGS = cqv
 
-BOOTSTRAPPABLE = getopt bfd binutils ld gas gcc gnulib
+BOOTSTRAPPABLE = libiberty bfd binutils ld gas gcc gnulib
 OTHERS = 
 
 #### host and target specific makefile fragments come in here.
@@ -128,7 +128,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.10  1991/04/24 16:50:53  rich
+# Revision 1.11  1991/05/03 21:30:41  gnu
+# Rename getopt to libiberty.
+#
+# Revision 1.10  1991/04/24  16:50:53  rich
 # Three staging checkpoint.
 #
 # Revision 1.9  1991/04/17  01:34:36  rich
