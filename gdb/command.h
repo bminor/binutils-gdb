@@ -47,12 +47,28 @@ typedef enum cmd_types
   }
 cmd_types;
 
+/* Reasonable values for an AUTO_BOOLEAN variable. */
+enum cmd_auto_boolean
+{
+  CMD_AUTO_BOOLEAN_TRUE,
+  CMD_AUTO_BOOLEAN_FALSE,
+  CMD_AUTO_BOOLEAN_AUTO
+};
+
 /* Types of "set" or "show" command.  */
 typedef enum var_types
   {
     /* "on" or "off".  *VAR is an integer which is nonzero for on,
        zero for off.  */
     var_boolean,
+
+    /* "on" / "true" / "enable" or "off" / "false" / "disable" or
+       "auto.  *VAR is an ``enum cmd_auto_boolean''.  NOTE: In general
+       a custom show command will need to be implemented - one that
+       for "auto" prints both the "auto" and the current auto-selected
+       value. */
+    var_auto_boolean,
+
     /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
        to mean "unlimited", which is stored in *VAR as UINT_MAX.  */
     var_uinteger,
@@ -298,6 +314,12 @@ extern struct cmd_list_element *add_set_enum_cmd (char *name,
 						  const char **var,
 						  char *doc,
 						  struct cmd_list_element **list);
+
+extern struct cmd_list_element *add_set_auto_boolean_cmd (char *name,
+							  enum command_class class,
+							  enum cmd_auto_boolean *var,
+							  char *doc,
+							  struct cmd_list_element **list);
 
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element

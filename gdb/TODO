@@ -1123,6 +1123,36 @@ output / error-messages when things go wrong.
 
 --
 
+do_setshow_command contains a 1024 byte buffer.
+
+The function assumes that there will never be any more than 1024 bytes
+of enum.  It should use mem_file.
+
+--
+
+Should struct cmd_list_element . completer take the command as an
+argument?
+
+--
+
+Should the bulk of top.c:line_completion_function() be moved to
+command.[hc]?  complete_on_cmdlist() and complete_on_enums() could
+then be made private.
+
+--
+
+top.c (execute_command): Should a command being valid when the target
+is running be made an attribute (predicate) to the command rather than
+an explicit set of tests.
+
+--
+
+top.c (execute_command): Should the bulk of this function be moved
+into command.[hc] so that top.c doesn't grub around in the command
+internals?
+
+--
+
 		Architectural Change: Async
 		===========================
 
