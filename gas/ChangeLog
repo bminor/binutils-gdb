@@ -1,5 +1,8 @@
 Fri Oct  3 15:40:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* expr.c (operator): Accept ==.  From Anders Blomdell
+	<anders.blomdell@control.lth.se>.
+
 	* config/atof-ieee.c (gen_to_words): When generating a denormal
 	number, handle an overflow into the smallest normalized number.
 
