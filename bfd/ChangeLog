@@ -1,3 +1,8 @@
+Wed Jan 21 21:16:06 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* coff-m88k.c (GET_SCNDHR_NRELOC): Fix typo in macro name.
+	(GET_SCNDHR_NLNNO): Likewise.
+
 start-sanitize-sky
 Tue Jan 20 15:08:44 1998  Doug Evans  <devans@seba.cygnus.com>
 
