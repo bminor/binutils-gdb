@@ -1,3 +1,8 @@
+2003-10-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-scripts/defined3.d, ld-scripts/defined3.t: New test.
+	* ld-scripts/defined.exp: Run defined3.
+
 2003-10-08  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-scripts/defined2.d, ld-scripts/defined2.t: New test.
