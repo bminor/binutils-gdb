@@ -96,8 +96,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define G3 (I4             \
             )
 
-#define G6      INSN_GP32
-
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -121,7 +119,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"li",      "t,j",      0x24000000, 0xffe00000, WR_t,			I1	}, /* addiu */
 {"li",	    "t,i",	0x34000000, 0xffe00000, WR_t,			I1	}, /* ori */
 {"li",      "t,I",	0,    (int) M_LI,	INSN_MACRO,		I1	},
-{"move",    "d,s",	0x00000025, 0xfc1f07ff,	WR_d|RD_s,		I1|G6	},/* or */
+{"move",    "d,s",	0,    (int) M_MOVE,	INSN_MACRO,		I1	},
 {"move",    "d,s",	0x0000002d, 0xfc1f07ff, WR_d|RD_s,		I3	},/* daddu */
 {"move",    "d,s",	0x00000021, 0xfc1f07ff, WR_d|RD_s,		I1	},/* addu */
 {"move",    "d,s",	0x00000025, 0xfc1f07ff,	WR_d|RD_s,		I1	},/* or */
