@@ -1,5 +1,11 @@
 Mon Oct 12 14:18:40 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* bfd-in2.h (struct reloc_howto_struct): Improve comment to make
+	cleat that the 'bitsize' field is the size of the bitfield AFTER
+	relocation not before.
+	
+	* elf32-m32r.c (R_M32R_18_PCREL): Fix size of bitfield.
+
 	* coff-mips.c (mips_relocate_hi): Cope with missing refhi or reflo
 	relocs.
 
