@@ -32,6 +32,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 #include "ldindr.h"
 #include "ldctor.h"
+
+#define BYTE_SIZE	(1)
+#define SHORT_SIZE	(2)
+#define LONG_SIZE	(4)
+
 /* FORWARDS */
 static void print_statements PARAMS ((void));
 static void print_statement PARAMS ((lang_statement_union_type *,
