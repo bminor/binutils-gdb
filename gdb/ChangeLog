@@ -1,3 +1,7 @@
+2001-05-29  Christopher Faylor  <cgf@redhat.com>
+
+	* partial-stab.h: Consistently guard against pst being NULL.
+
 2001-05-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	* symfile.c (compare_psymbols, compare_symbols): Declare using

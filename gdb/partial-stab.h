@@ -600,10 +600,11 @@ switch (CUR_SYMBOL_TYPE)
 	   the bounds created by N_SO symbols.  If that's the case
 	   use the address of this function as the low bound for
 	   the partial symbol table.  */
-	if (textlow_not_set
-	    || (pst && CUR_SYMBOL_VALUE < pst->textlow
-		&& CUR_SYMBOL_VALUE
-		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))))
+	if (pst
+	    && (textlow_not_set
+		|| (pst && CUR_SYMBOL_VALUE < pst->textlow
+		  && CUR_SYMBOL_VALUE
+		  != ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)))))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
