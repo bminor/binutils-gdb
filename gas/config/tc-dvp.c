@@ -59,8 +59,8 @@ static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
 static symbolS * create_colon_label PARAMS ((int, const char *, const char *));
 static char * unique_name PARAMS ((const char *));
-static char * vuoverlay_section_name PARAMS ((offsetT));
-static void create_vuoverlay_section PARAMS ((const char *, offsetT,
+static char * vuoverlay_section_name PARAMS ((symbolS *));
+static void create_vuoverlay_section PARAMS ((const char *, symbolS *,
 					      symbolS *, symbolS *));
 static symbolS * compute_mpgloc PARAMS ((symbolS *, symbolS *, symbolS *));
 static int compute_nloop PARAMS ((gif_type, int, int));
@@ -667,32 +667,23 @@ assemble_vif (str)
 	     Create an overlay section.  */
 	  {
 	    int mpgloc = vif_get_mpgloc ();
-	    offsetT addr;
 	    const char * section_name;
 
-	    /* Get the value of mpgloc.  */
+	    /* Update $.mpgloc if explicitly set.
+	       Otherwise just use the current value.  */
 	    if (mpgloc != -1)
 	      {
 		/* The value is recorded in bytes, mpgloc is in dwords.  */
 		mpgloc_sym = expr_build_uconstant (mpgloc * 8);
 	      }
-	    else
-	      {
-		/* Use the current value.
-		   ??? Things get complicated if this can't be resolved at this
-		   point.  Not sure what to do.  */
-		resolve_symbol_value (mpgloc_sym, 1);
-	      }
 
-	    addr = S_GET_VALUE (mpgloc_sym);
-	    section_name = vuoverlay_section_name (addr);
-
+	    section_name = vuoverlay_section_name (mpgloc_sym);
 	    vif_data_start = create_colon_label (STO_DVP_VU,
 						 VUOVERLAY_START_PREFIX,
 						 section_name);
 	    insn_frag->fr_symbol = vif_data_start;
 
-	    create_vuoverlay_section (section_name, addr,
+	    create_vuoverlay_section (section_name, mpgloc_sym,
 				      vif_data_start, vif_data_end);
 	  }
 	}
@@ -1977,6 +1968,9 @@ md_apply_fix3 (fixP, valueP, seg)
 	case BFD_RELOC_32:
 	  md_number_to_chars (where, value, 4);
 	  break;
+	case BFD_RELOC_64:
+	  md_number_to_chars (where, value, 8);
+	  break;
 	default:
 	  as_fatal ("internal error: unexpected fixup");
 	}
@@ -2262,7 +2256,7 @@ unique_name (prefix)
 
 static char *
 vuoverlay_section_name (addr)
-     offsetT addr;
+     symbolS *addr;
 {
   char *section_name;
   char *file;
@@ -2274,8 +2268,12 @@ vuoverlay_section_name (addr)
   as_where (&file, &lineno);
   for (fileno = 0; *file; ++file)
     fileno = (fileno << 1) + *file;
-  asprintf (&section_name, "%s0x%x.%u.%u.%d", VUOVERLAY_SECTION_PREFIX,
-	    (int) addr, fileno, lineno, counter);
+  if (addr->sy_value.X_op == O_constant)
+    asprintf (&section_name, "%s.0x%x.%u.%u.%d", VUOVERLAY_SECTION_PREFIX,
+	      (int) S_GET_VALUE (addr), fileno, lineno, counter);
+  else
+    asprintf (&section_name, "%s.unknvma.%u.%u.%d", VUOVERLAY_SECTION_PREFIX,
+	      fileno, lineno, counter);
   ++counter;
   return section_name;
 }
@@ -2287,7 +2285,8 @@ vuoverlay_section_name (addr)
 static void
 create_vuoverlay_section (section_name, addr, start_label, end_label)
      const char *section_name;
-     offsetT addr;
+     /* Remember, expressions are recorded as symbols.  */
+     symbolS *addr;
      symbolS *start_label, *end_label;
 {
   /* Must preserve the current seg/subseg.  */
@@ -2304,7 +2303,8 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
   /* There's no point in setting the section vma as we can't get the linker
      to preserve it.  But what the heck ...  It might be useful to the
      objdump user.  */
-  bfd_set_section_vma (stdoutput, vuoverlay_section, addr);
+  if (addr->sy_value.X_op == O_constant)
+    bfd_set_section_vma (stdoutput, vuoverlay_section, S_GET_VALUE (addr));
   /* The size of the section won't be known until we see the .endmpg,
      but we can compute it from the start and end labels.  */
   /* FIXME: This causes the section to occupy space in the file.  */
@@ -2341,8 +2341,9 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
       emit_expr (&exp, 8);
 
       /* The section's vma.  */
-      exp.X_op = O_constant;
-      exp.X_add_number = addr;
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = addr;
+      exp.X_add_number = 0;
       emit_expr (&exp, 8);
     }
 
@@ -3152,10 +3153,10 @@ s_state (state)
 	 the .vu is issued in.  On the other hand, ".vu" isn't intended
 	 to be supported everywhere.  */
       vif_data_start = expr_build_dot ();
-#if 0
-      create_vuoverlay_section (vuoverlay_section_name (0), 0, NULL, NULL);
-#else
       mpgloc_sym = expr_build_uconstant (0);
+#if 0 /* ??? wip */
+      create_vuoverlay_section (vuoverlay_section_name (NULL), mpgloc_sym,
+				NULL, NULL);
 #endif
     }
 
