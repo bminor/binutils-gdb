@@ -3283,16 +3283,14 @@
 
 
 010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32::MOVN.fmt
+"movn.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
-  {
-    StoreFPR(destreg,format,ValueFPR(fs,format));
-  }
+  if (GPR[RT] != 0)
+    StoreFPR (FD, FMT, ValueFPR (FS, FMT));
+  else
+    StoreFPR (FD, FMT, ValueFPR (FD, FMT));
 }
 
 
@@ -3308,13 +3306,10 @@
 *mipsIV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
-  {
-   StoreFPR(destreg,format,ValueFPR(fs,format));
-  }
+  if (GPR[RT] == 0)
+    StoreFPR (FD, FMT, ValueFPR (FS, FMT));
+  else
+    StoreFPR (FD, FMT, ValueFPR (FD, FMT));
 }
 
 

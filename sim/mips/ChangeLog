@@ -1,3 +1,8 @@
+Mon Jul  3 11:13:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Jason Eckhardt:
+	* mips.igen (MOVZ.fmt, MOVN.fmt): Move conditional on GPR[RT].
+
 Tue Jun 13 20:52:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (MxC1, DMxC1): Fix printf formatting.
