@@ -759,8 +759,9 @@ build_hash_table (table, hash_table, num_opcodes)
      struct opcode_hash **hash_table;
      int num_opcodes;
 {
-  int i;
+  register int i;
   int hash_count[HASH_SIZE];
+  struct opcode_hash *hash_buf;
 
   /* Start at the end of the table and work backwards so that each
      chain is sorted.  */
@@ -768,10 +769,11 @@ build_hash_table (table, hash_table, num_opcodes)
 
   memset (hash_table, 0, HASH_SIZE * sizeof (hash_table[0]));
   memset (hash_count, 0, HASH_SIZE * sizeof (hash_count[0]));
+  hash_buf = (struct opcode_hash *) xmalloc (sizeof (struct opcode_hash) * num_opcodes);
   for (i = num_opcodes - 1; i >= 0; --i)
     {
-      int hash = HASH_INSN (sparc_opcodes[i].match);
-      struct opcode_hash *h = (struct opcode_hash *) xmalloc (sizeof (struct opcode_hash));
+      register int hash = HASH_INSN (sparc_opcodes[i].match);
+      register struct opcode_hash *h = &hash_buf[i];
       h->next = hash_table[hash];
       h->opcode = &sparc_opcodes[i];
       hash_table[hash] = h;
