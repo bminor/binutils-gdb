@@ -1,4 +1,9 @@
 2004-11-04  Kei Sakamoto  <sakamoto.kei@denesas.com>
+	* Makefile.in (m32r-tdep.o): Update dependencies.
+	* m32r-tdep.c (m32r_gdbarch_init): Call gdbarch_init_osabi for
+	ABI-specific overrides.
+
+2004-11-04  Kei Sakamoto  <sakamoto.kei@denesas.com>
 	* m32r-tdep.c (m32r_memory_insert_breakpoint): Remove
 	unnecessary parallel execution bit.
 	(m32r_memory_remove_breakpoint): Ditto.
