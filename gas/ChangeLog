@@ -4,6 +4,8 @@ Mon Jun  9 12:55:45 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 Mon Jun  9 12:52:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sh.c (md_apply_fix): Check for overflow.
+
 	* config/tc-m68k.c (md_section_align): If a.out and BFD, force
 	section size to be aligned.
 
