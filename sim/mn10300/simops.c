@@ -998,7 +998,7 @@ void OP_E0 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1021,7 +1021,7 @@ void OP_F160 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1044,7 +1044,7 @@ void OP_F150 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1067,7 +1067,7 @@ void OP_F170 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1090,7 +1090,7 @@ void OP_2800 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1113,7 +1113,7 @@ void OP_FAC00000 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1136,7 +1136,7 @@ void OP_FCC00000 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1159,7 +1159,7 @@ void OP_2000 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1182,7 +1182,7 @@ void OP_FAD00000 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1205,7 +1205,7 @@ void OP_FCD00000 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1264,7 +1264,7 @@ void OP_F140 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < reg2);
-  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1522,7 +1522,7 @@ void OP_40 (insn, extension)
   z = (value == 0);
   n = (value & 0x80000000);
   c = (reg1 < imm);
-  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+  v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
