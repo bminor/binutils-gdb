@@ -1,5 +1,8 @@
 Wed Aug 11 12:11:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* configure.in: Include coff-m68k.o for m68kcoffun_vec.
+	Include nlm32.o and nlm.o for bfd_nlm32_i386_vec.
+
 	* oasys.c: Make bfd_error_vector extern.
 
 	* configure.in: Include stab-syms.o for a.out/b.out targets
