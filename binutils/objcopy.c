@@ -1,6 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -28,7 +28,6 @@
 #include "budbg.h"
 #include "filenames.h"
 #include "fnmatch.h"
-#include "elf-bfd.h"
 #include <sys/stat.h>
 
 /* A list of symbols to explicitly strip out, or to keep.  A linked
@@ -777,7 +776,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return FALSE;
     }
 
-  return FALSE;
+  return strip_symbols == STRIP_NONDEBUG ? TRUE : FALSE;
 }
 
 /* Choose which symbol entries to copy; put the result in OSYMS.
@@ -1085,10 +1084,26 @@ add_redefine_syms_file (const char *filename)
   free (buf);
 }
 
-/* Copy object file IBFD onto OBFD.
-   Returns TRUE upon success, FALSE otherwise.  */
+/* Keep only every `copy_byte'th byte in MEMHUNK, which is *SIZE bytes long.
+   Adjust *SIZE.  */
 
-static bfd_boolean
+static void
+filter_bytes (char *memhunk, bfd_size_type *size)
+{
+  char *from = memhunk + copy_byte, *to = memhunk, *end = memhunk + *size;
+
+  for (; from < end; from += interleave)
+    *to++ = *from;
+
+  if (*size % interleave > (bfd_size_type) copy_byte)
+    *size = (*size / interleave) + 1;
+  else
+    *size /= interleave;
+}
+
+/* Copy object file IBFD onto OBFD.  */
+
+static void
 copy_object (bfd *ibfd, bfd *obfd)
 {
   bfd_vma start;
@@ -1105,13 +1120,13 @@ copy_object (bfd *ibfd, bfd *obfd)
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    fatal (_("Unable to change endianness of input file(s)"));
+    {
+      fatal (_("Unable to change endianness of input file(s)"));
+      return;
+    }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
-    {
-      bfd_nonfatal (bfd_get_filename (obfd));
-      return FALSE;
-    }
+    RETURN_NONFATAL (bfd_get_filename (obfd));
 
   if (verbose)
     printf (_("copy from %s(%s) to %s(%s)\n"),
@@ -1137,10 +1152,7 @@ copy_object (bfd *ibfd, bfd *obfd)
 
       if (!bfd_set_start_address (obfd, start)
 	  || !bfd_set_file_flags (obfd, flags))
-	{
-	  bfd_nonfatal (bfd_get_filename (ibfd));
-	  return FALSE;
-	}
+	RETURN_NONFATAL (bfd_get_filename (ibfd));
     }
 
   /* Copy architecture of input file to output file.  */
@@ -1158,15 +1170,13 @@ copy_object (bfd *ibfd, bfd *obfd)
 	  non_fatal (_("Warning: Output file cannot represent architecture %s"),
 		     bfd_printable_arch_mach (bfd_get_arch (ibfd),
 					      bfd_get_mach (ibfd)));
-	  return FALSE;
+	  status = 1;
+	  return;
 	}
     }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
-    {
-      bfd_nonfatal (bfd_get_filename (ibfd));
-      return FALSE;
-    }
+    RETURN_NONFATAL (bfd_get_filename (ibfd));
 
   if (isympp)
     free (isympp);
@@ -1192,14 +1202,12 @@ copy_object (bfd *ibfd, bfd *obfd)
 	    {
 	      non_fatal (_("can't create section `%s': %s"),
 		       padd->name, bfd_errmsg (bfd_get_error ()));
-	      return FALSE;
+	      status = 1;
+	      return;
 	    }
 
 	  if (! bfd_set_section_size (obfd, padd->section, padd->size))
-	    {
-	      bfd_nonfatal (bfd_get_filename (obfd));
-	      return FALSE;
-	    }
+	    RETURN_NONFATAL (bfd_get_filename (obfd));
 
 	  pset = find_section_list (padd->name, FALSE);
 	  if (pset != NULL)
@@ -1211,32 +1219,23 @@ copy_object (bfd *ibfd, bfd *obfd)
 	    flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DATA;
 
 	  if (! bfd_set_section_flags (obfd, padd->section, flags))
-	    {
-	      bfd_nonfatal (bfd_get_filename (obfd));
-	      return FALSE;
-	    }
+	    RETURN_NONFATAL (bfd_get_filename (obfd));
 
 	  if (pset != NULL)
 	    {
 	      if (pset->change_vma != CHANGE_IGNORE)
 		if (! bfd_set_section_vma (obfd, padd->section,
 					   pset->vma_val))
-		  {
-		    bfd_nonfatal (bfd_get_filename (obfd));
-		    return FALSE;
-		  }
+		  RETURN_NONFATAL (bfd_get_filename (obfd));
 
 	      if (pset->change_lma != CHANGE_IGNORE)
 		{
 		  padd->section->lma = pset->lma_val;
-
+		  
 		  if (! bfd_set_section_alignment
 		      (obfd, padd->section,
 		       bfd_section_alignment (obfd, padd->section)))
-		    {
-		      bfd_nonfatal (bfd_get_filename (obfd));
-		      return FALSE;
-		    }
+		    RETURN_NONFATAL (bfd_get_filename (obfd));
 		}
 	    }
 	}
@@ -1248,16 +1247,7 @@ copy_object (bfd *ibfd, bfd *obfd)
 	(obfd, gnu_debuglink_filename);
 
       if (gnu_debuglink_section == NULL)
-	{
-	  bfd_nonfatal (gnu_debuglink_filename);
-	  return FALSE;
-	}
-    }
-
-  if (bfd_count_sections (obfd) == 0)
-    {
-      non_fatal (_("there are no sections to be copied!"));
-      return FALSE;
+	RETURN_NONFATAL (gnu_debuglink_filename);
     }
 
   if (gap_fill_set || pad_to_set)
@@ -1347,18 +1337,12 @@ copy_object (bfd *ibfd, bfd *obfd)
   dhandle = NULL;
   symsize = bfd_get_symtab_upper_bound (ibfd);
   if (symsize < 0)
-    {
-      bfd_nonfatal (bfd_get_filename (ibfd));
-      return FALSE;
-    }
+    RETURN_NONFATAL (bfd_get_filename (ibfd));
 
   osympp = isympp = xmalloc (symsize);
   symcount = bfd_canonicalize_symtab (ibfd, isympp);
   if (symcount < 0)
-    {
-      bfd_nonfatal (bfd_get_filename (ibfd));
-      return FALSE;
-    }
+    RETURN_NONFATAL (bfd_get_filename (ibfd));
 
   if (convert_debugging)
     dhandle = read_debugging_info (ibfd, isympp, symcount);
@@ -1403,7 +1387,7 @@ copy_object (bfd *ibfd, bfd *obfd)
       if (! write_debugging_info (obfd, dhandle, &symcount, &osympp))
 	{
 	  status = 1;
-	  return FALSE;
+	  return;
 	}
     }
 
@@ -1420,10 +1404,7 @@ copy_object (bfd *ibfd, bfd *obfd)
 	{
 	  if (! bfd_set_section_contents (obfd, padd->section, padd->contents,
 					  0, padd->size))
-	    {
-	      bfd_nonfatal (bfd_get_filename (obfd));
-	      return FALSE;
-	    }
+	    RETURN_NONFATAL (bfd_get_filename (obfd));
 	}
     }
 
@@ -1431,10 +1412,7 @@ copy_object (bfd *ibfd, bfd *obfd)
     {
       if (! bfd_fill_in_gnu_debuglink_section
 	  (obfd, gnu_debuglink_section, gnu_debuglink_filename))
-	{
-	  bfd_nonfatal (gnu_debuglink_filename);
-	  return FALSE;
-	}
+	RETURN_NONFATAL (gnu_debuglink_filename);
     }
 
   if (gap_fill_set || pad_to_set)
@@ -1470,10 +1448,7 @@ copy_object (bfd *ibfd, bfd *obfd)
 
 		  if (! bfd_set_section_contents (obfd, osections[i], buf,
 						  off, now))
-		    {
-		      bfd_nonfatal (bfd_get_filename (obfd));
-		      return FALSE;
-		    }
+		    RETURN_NONFATAL (bfd_get_filename (obfd));
 
 		  left -= now;
 		  off += now;
@@ -1496,17 +1471,18 @@ copy_object (bfd *ibfd, bfd *obfd)
       non_fatal (_("%s: error copying private BFD data: %s"),
 		 bfd_get_filename (obfd),
 		 bfd_errmsg (bfd_get_error ()));
-      return FALSE;
+      status = 1;
+      return;
     }
 
   /* Switch to the alternate machine code.  We have to do this at the
      very end, because we only initialize the header when we create
      the first section.  */
-  if (use_alt_mach_code != 0
-      && ! bfd_alt_mach_code (obfd, use_alt_mach_code))
-    non_fatal (_("unknown alternate machine code, ignored"));
-
-  return TRUE;
+  if (use_alt_mach_code != 0)
+    {
+      if (!bfd_alt_mach_code (obfd, use_alt_mach_code))
+	non_fatal (_("unknown alternate machine code, ignored"));
+    }
 }
 
 #undef MKDIR
@@ -1553,7 +1529,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
       bfd *last_element;
       struct stat buf;
       int stat_status = 0;
-      bfd_boolean delete = TRUE;
 
       /* Create an output file for this member.  */
       output_name = concat (dir, "/",
@@ -1595,7 +1570,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
 	RETURN_NONFATAL (output_name);
 
       if (bfd_check_format (this_element, bfd_object))
-	delete = ! copy_object (this_element, output_bfd);
+	copy_object (this_element, output_bfd);
 
       if (!bfd_close (output_bfd))
 	{
@@ -1604,30 +1579,22 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
 	  status = 1;
 	}
 
-      if (delete)
-	{
-	  unlink (output_name);
-	  status = 1;
-	}
-      else
-	{
-	  if (preserve_dates && stat_status == 0)
-	    set_times (output_name, &buf);
+      if (preserve_dates && stat_status == 0)
+	set_times (output_name, &buf);
 
-	  /* Open the newly output file and attach to our list.  */
-	  output_bfd = bfd_openr (output_name, output_target);
+      /* Open the newly output file and attach to our list.  */
+      output_bfd = bfd_openr (output_name, output_target);
 
-	  l->obfd = output_bfd;
+      l->obfd = output_bfd;
 
-	  *ptr = output_bfd;
-	  ptr = &output_bfd->next;
+      *ptr = output_bfd;
+      ptr = &output_bfd->next;
 
-	  last_element = this_element;
+      last_element = this_element;
 
-	  this_element = bfd_openr_next_archived_file (ibfd, last_element);
+      this_element = bfd_openr_next_archived_file (ibfd, last_element);
 
-	  bfd_close (last_element);
-	}
+      bfd_close (last_element);
     }
   *ptr = NULL;
 
@@ -1691,9 +1658,7 @@ copy_file (const char *input_filename, const char *output_filename,
   else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
     {
       bfd *obfd;
-      bfd_boolean delete;
     do_copy:
-
       /* bfd_get_target does not return the correct value until
          bfd_check_format succeeds.  */
       if (output_target == NULL)
@@ -1703,19 +1668,13 @@ copy_file (const char *input_filename, const char *output_filename,
       if (obfd == NULL)
 	RETURN_NONFATAL (output_filename);
 
-      delete = ! copy_object (ibfd, obfd);
+      copy_object (ibfd, obfd);
 
       if (!bfd_close (obfd))
 	RETURN_NONFATAL (output_filename);
 
       if (!bfd_close (ibfd))
 	RETURN_NONFATAL (input_filename);
-
-      if (delete)
-	{
-	  unlink (output_filename);
-	  status = 1;
-	}
     }
   else
     {
@@ -1910,13 +1869,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   if (p != NULL && p->set_flags)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
-  else if (strip_symbols == STRIP_NONDEBUG && (flags & SEC_ALLOC) != 0)
-    {
-      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
-      if (obfd->xvec->flavour == bfd_target_elf_flavour)
-	elf_section_type (osection) = SHT_NOBITS;
-    }
-
   if (!bfd_set_section_flags (obfd, osection, flags))
     {
       err = _("flags");
@@ -2037,8 +1989,6 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	}
 
       bfd_set_reloc (obfd, osection, relcount == 0 ? NULL : relpp, relcount);
-      if (relcount == 0)
-	free (relpp);
     }
 
   isection->_cooked_size = isection->_raw_size;
@@ -2053,18 +2003,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	RETURN_NONFATAL (bfd_get_filename (ibfd));
 
       if (copy_byte >= 0)
-	{
-	  /* Keep only every `copy_byte'th byte in MEMHUNK.  */
-	  char *from = memhunk + copy_byte;
-	  char *to = memhunk;
-	  char *end = memhunk + size;
-
-	  for (; from < end; from += interleave)
-	    *to++ = *from;
-
-	  size = (size + interleave - 1 - copy_byte) / interleave;
-	  osection->lma /= interleave;
-	}
+	filter_bytes (memhunk, &size);
 
       if (!bfd_set_section_contents (obfd, osection, memhunk, 0, size))
 	RETURN_NONFATAL (bfd_get_filename (obfd));

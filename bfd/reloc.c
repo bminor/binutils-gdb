@@ -1,6 +1,6 @@
 /* BFD support for handling relocation entries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -2139,34 +2139,6 @@ ENUMX
   BFD_RELOC_FRV_GPRELHI
 ENUMX
   BFD_RELOC_FRV_GPRELLO
-ENUMX
-  BFD_RELOC_FRV_GOT12
-ENUMX
-  BFD_RELOC_FRV_GOTHI
-ENUMX
-  BFD_RELOC_FRV_GOTLO
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOT12
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTHI
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTLO
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_VALUE
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTOFF12
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFHI
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFLO
-ENUMX
-  BFD_RELOC_FRV_GOTOFF12
-ENUMX
-  BFD_RELOC_FRV_GOTOFFHI
-ENUMX
-  BFD_RELOC_FRV_GOTOFFLO
 ENUMDOC
   Fujitsu Frv Relocations.
 COMMENT
@@ -3764,11 +3736,6 @@ ENUMDOC
   This is a 24-bit reloc that represents the address with a 16-bit
   value and a 8-bit page number.  The symbol address is transformed
   to follow the 16K memory bank of 68HC12 (seen as mapped in the window).
-ENUM
-  BFD_RELOC_M68HC12_5B
-ENUMDOC
-  Motorola 68HC12 reloc.
-  This is the 5 bits of a value.
 
 ENUM
   BFD_RELOC_CRIS_BDISP8

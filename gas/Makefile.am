@@ -3,7 +3,7 @@
 ## Work around apparent automake bug.
 INTLLIBS = @INTLLIBS@
 
-AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
+AUTOMAKE_OPTIONS = cygnus dejagnu
 
 SUBDIRS = doc po
 
@@ -456,6 +456,12 @@ po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
+# We want install to imply install-info as per GNU standards, despite the
+# cygnus option.
+install: install-recursive install-info
+install-info: install-info-recursive
+RECURSIVE_TARGETS += install-info-recursive
+
 # Note: GASP is now deprecated and has been removed.  It is still
 # available in the CVS archive or older binutils releases if it is needed.
 noinst_PROGRAMS = as-new
@@ -788,7 +794,7 @@ de-stage3:
 DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES)
 
-CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+Makefile: $(BFDDIR)/configure.in
 
 # Automatic dependency computation.  This is a real pain, because the
 # dependencies change based on target_cpu_type and obj_format.

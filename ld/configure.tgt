@@ -367,7 +367,6 @@ m68k-*-linux-gnu*)	targ_emul=m68kelf
 			targ_extra_emuls=m68klinux
 			tdir_m68klinux=`echo ${targ_alias} | sed -e 's/linux/linuxaout/'`
 			;;
-m68k-*-uclinux*)	targ_emul=m68kelf ;;
 m68*-*-gnu*)		targ_emul=m68kelf ;;
 m68*-*-lynxos*)		targ_emul=m68klynx ;;
 m68*-*-netbsd*4k*)	targ_emul=m68k4knbsd
@@ -544,8 +543,7 @@ v850-*-*)		targ_emul=v850 ;;
 v850e-*-*)		targ_emul=v850 ;;
 v850ea-*-*)		targ_emul=v850 ;;
 iq2000-*-elf)           targ_emul=elf32iq2000 ; targ_extra_emuls="elf32iq10" ;;
-frv-*-*linux*)		targ_emul=elf32frvfd ;;
-frv-*-*)		targ_emul=elf32frv ; targ_extra_emuls="elf32frvfd" ;;
+frv-*-*)		targ_emul=elf32frv ;;
 w65-*-*)		targ_emul=w65 ;;
 xstormy16-*-*)		targ_emul=elf32xstormy16 ;;
 xtensa-*-*)		targ_emul=elf32xtensa;;

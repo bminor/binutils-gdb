@@ -2356,20 +2356,6 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FRV_GPREL32,
   BFD_RELOC_FRV_GPRELHI,
   BFD_RELOC_FRV_GPRELLO,
-  BFD_RELOC_FRV_GOT12,
-  BFD_RELOC_FRV_GOTHI,
-  BFD_RELOC_FRV_GOTLO,
-  BFD_RELOC_FRV_FUNCDESC,
-  BFD_RELOC_FRV_FUNCDESC_GOT12,
-  BFD_RELOC_FRV_FUNCDESC_GOTHI,
-  BFD_RELOC_FRV_FUNCDESC_GOTLO,
-  BFD_RELOC_FRV_FUNCDESC_VALUE,
-  BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFHI,
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
-  BFD_RELOC_FRV_GOTOFF12,
-  BFD_RELOC_FRV_GOTOFFHI,
-  BFD_RELOC_FRV_GOTOFFLO,
 
 
 /* This is a 24bit GOT-relative reloc for the mn10300.  */
@@ -3376,10 +3362,6 @@ This is a 24-bit reloc that represents the address with a 16-bit
 value and a 8-bit page number.  The symbol address is transformed
 to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_M68HC11_24,
-
-/* Motorola 68HC12 reloc.
-This is the 5 bits of a value.  */
-  BFD_RELOC_M68HC12_5B,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

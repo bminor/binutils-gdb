@@ -13,7 +13,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -81,7 +81,15 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_before_parse (void)
 {
-  ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
+  const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
+  if (arch)
+    {
+      ldfile_output_architecture = arch->arch;
+      ldfile_output_machine = arch->mach;
+      ldfile_output_machine_name = arch->printable_name;
+    }
+  else
+    ldfile_output_architecture = bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`;
   config.dynamic_link = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
 }
@@ -1256,6 +1264,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 
   os_tail = lang_output_section_statement.tail;
   os = lang_enter_output_section_statement (secname, address, 0,
+					    (bfd_vma) 0,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL,
 					    load_base);

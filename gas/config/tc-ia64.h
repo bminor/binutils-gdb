@@ -112,7 +112,6 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 extern void ia64_after_parse_args PARAMS ((void));
 extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
 extern void ia64_check_label PARAMS ((symbolS *));
-extern void ia64_convert_frag (fragS *);
 
 #define md_end()       			ia64_end_of_source ()
 #define md_start_line_hook()		ia64_start_line ()
@@ -127,12 +126,12 @@ extern void ia64_convert_frag (fragS *);
 #define TC_FORCE_RELOCATION(f)		ia64_force_relocation (f)
 #define tc_fix_adjustable(f)		ia64_fix_adjustable (f)
 #define MD_APPLY_SYM_VALUE(FIX)		0
-#define md_convert_frag(b,s,f)		ia64_convert_frag (f)
+#define md_convert_frag(b,s,f)		as_fatal ("ia64_convert_frag")
 #define md_create_long_jump(p,f,t,fr,s)	as_fatal ("ia64_create_long_jump")
 #define md_create_short_jump(p,f,t,fr,s) \
 					as_fatal ("ia64_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
-					(f)->fr_var
+			(as_fatal ("ia64_estimate_size_before_relax"), 1)
 #define md_elf_section_letter		ia64_elf_section_letter
 #define md_elf_section_flags		ia64_elf_section_flags
 #define TC_FIX_TYPE			struct ia64_fix

@@ -9,7 +9,7 @@ rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -123,7 +123,15 @@ extern const char *output_filename;
 static void
 gld_${EMULATION_NAME}_before_parse (void)
 {
-  ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
+  const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
+  if (arch)
+    {
+      ldfile_output_architecture = arch->arch;
+      ldfile_output_machine = arch->mach;
+      ldfile_output_machine_name = arch->printable_name;
+    }
+  else
+    ldfile_output_architecture = bfd_arch_${ARCH};
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
   config.dynamic_link = TRUE;
@@ -1647,6 +1655,7 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	}
 
       os = lang_enter_output_section_statement (outsecname, address, 0,
+						(bfd_vma) 0,
 						(etree_type *) NULL,
 						(etree_type *) NULL,
 						(etree_type *) NULL);

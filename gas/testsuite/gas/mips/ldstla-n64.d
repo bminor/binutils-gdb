@@ -1,5 +1,5 @@
 #objdump: -d
-#as: -64
+#as: -n64
 #name: MIPS ld-st-la constants (ABI n64)
 #source: ldstla-n64.s
 

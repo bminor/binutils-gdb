@@ -25,7 +25,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 #include "ldctor.h"
 #include "libbfd.h"
-#include "elf-bfd.h"
 #include "elf64-ppc.h"
 
 /* Fake input file for stubs.  */
@@ -118,8 +117,6 @@ ppc_before_allocation (void)
 	      return;
 	    }
 
-	  /* We must not cache anything from the preliminary sizing.  */
-	  elf_tdata (output_bfd)->program_header_size = 0;
 	  lang_reset_memory_regions ();
 	}
     }

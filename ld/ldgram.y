@@ -328,7 +328,7 @@ ifile_p1:
 	|	OUTPUT_FORMAT '(' NAME ',' NAME ',' NAME ')'
 		  { lang_add_output_format ($3, $5, $7, 1); }
         |	OUTPUT_ARCH '(' NAME ')'
-		  { ldfile_set_output_arch ($3, bfd_arch_unknown); }
+		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION
 		{ command_line.force_common_definition = TRUE ; }
 	|	INHIBIT_COMMON_ALLOCATION
@@ -841,7 +841,7 @@ section:	NAME 		{ ldlex_expression(); }
 			{
 			  lang_enter_output_section_statement($1, $3,
 							      sectype,
-							      0, $5, $4);
+							      0, 0, $5, $4);
 			}
 		statement_list_opt
  		'}' { ldlex_popstate (); ldlex_expression (); }
