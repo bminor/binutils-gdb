@@ -1,5 +1,17 @@
 2004-04-26  Orjan Friberg <orjanf@axis.com>
 
+	* frame.c: Include "observer.h".
+	(frame_observer_target_changed): New function.
+	(_initialize_frame): Attach target_changed observer.
+	* regcache.c: Include "observer.h".
+	(regcache_observer_target_changed): New function.
+	(_initialize_regcache): Attach target_changed observer.
+	* valops.c: Include "observer.h".
+	(value_assign): Notify target_changed event when modifying register.
+	* Makefile.in (frame.o, regcache.o, valops.o): Add $(observer_h).
+
+2004-04-26  Orjan Friberg <orjanf@axis.com>
+
 	From Paul Koning <pkoning@equallogic.com>:
 	* breakpoint.c (free_valchain): New function.
 	(insert_bp_location, delete_breakpoint): Use free_valchain.

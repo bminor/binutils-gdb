@@ -30,6 +30,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
+#include "observer.h"
 
 /*
  * DATA STRUCTURE
@@ -564,6 +565,14 @@ static int
 real_register (int regnum)
 {
   return regnum >= 0 && regnum < NUM_REGS;
+}
+
+/* Observer for the target_changed event.  */
+
+void
+regcache_observer_target_changed (struct target_ops *target)
+{
+  registers_changed ();
 }
 
 /* Low level examining and depositing of registers.
@@ -1696,6 +1705,8 @@ _initialize_regcache (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_registers);
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_register_valid);
   deprecated_register_gdbarch_swap (NULL, 0, build_regcache);
+
+  observer_attach_target_changed (regcache_observer_target_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   "Force gdb to flush its register cache (maintainer command)");

@@ -42,6 +42,7 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include "cp-support.h"
+#include "observer.h"
 
 extern int overload_debug;
 /* Local functions.  */
@@ -701,6 +702,7 @@ value_assign (struct value *toval, struct value *fromval)
 	if (deprecated_register_changed_hook)
 	  deprecated_register_changed_hook (-1);
 	target_changed_event ();
+	observer_notify_target_changed (&current_target);
 	break;
       }
       

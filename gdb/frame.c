@@ -39,6 +39,7 @@
 #include "frame-base.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "observer.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 
@@ -1237,6 +1238,14 @@ get_next_frame (struct frame_info *this_frame)
     return NULL;
 }
 
+/* Observer for the target_changed event.  */
+
+void
+frame_observer_target_changed (struct target_ops *target)
+{
+  flush_cached_frames ();
+}
+
 /* Flush the entire frame cache.  */
 
 void
@@ -2355,6 +2364,8 @@ void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
+
+  observer_attach_target_changed (frame_observer_target_changed);
 
   add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, "\
 Set backtrace specific variables.\n\
