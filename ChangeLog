@@ -1,3 +1,23 @@
+start-sanitize-java
+1998-12-11  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (configure-target-libjava): Depend on
+	configure-target-newlib.
+	(configure-target-boehm-gc): New target.
+	(configure-target-qthreads): New target.
+
+end-sanitize-java
+start-sanitize-vr4xxx
+1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config.sub (mips64vr4xxx,mips64vr4xxxel): New.
+
+end-sanitize-vr4xxx
+Wed Nov 18 18:28:45 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* ltconfig: import from libtool, after changing libtool to
+	account for the cygwin name change.
+
 Wed Nov 18 18:09:14 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: CC_FOR_TARGET and CXX_FOR_TARGET should also

@@ -213,7 +213,7 @@ CC_FOR_TARGET = ` \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       case "$(target_canonical)" in \
         i[3456]86-*-cygwin*) \
-          echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/$(TARGET_SUBDIR)/newlib/ -L$$r/$(TARGET_SUBDIR)/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/winsup/include -idirafter $$s/newlib/libc/include -nostdinc; \
+          echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/$(TARGET_SUBDIR)/newlib/ -L$$r/$(TARGET_SUBDIR)/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/winsup/include -idirafter $$s/newlib/libc/include -idirafter $$s/newlib/libc/sys/cygwin -idirafter $$s/newlib/libc/sys/cygwin32 -nostdinc; \
           ;; \
         *) \
           echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
@@ -252,7 +252,7 @@ CXX_FOR_TARGET = ` \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       case "$(target_canonical)" in \
         i[3456]86-*-cygwin*) \
-          echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/$(TARGET_SUBDIR)/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/winsup/include -idirafter $$s/newlib/libc/include -nostdinc; \
+          echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/$(TARGET_SUBDIR)/newlib/ -L$$r/$(TARGET_SUBDIR)/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/winsup/include -idirafter $$s/newlib/libc/include -idirafter $$s/newlib/libc/sys/cygwin -idirafter $$s/newlib/libc/sys/cygwin32 -nostdinc; \
           ;; \
         *) \
           echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
@@ -1664,6 +1664,7 @@ all-bfd: all-libiberty all-intl
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc all-intl
 all-bison: all-texinfo
 # start-sanitize-java
+configure-target-boehm-gc: configure-target-newlib configure-target-qthreads
 all-target-boehm-gc: configure-target-boehm-gc
 # end-sanitize-java
 all-byacc:
@@ -1745,7 +1746,7 @@ all-libide: all-ilu
 all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
 # start-sanitize-java
-configure-target-libjava: $(ALL_GCC) configure-target-boehm-gc configure-target-qthreads
+configure-target-libjava: $(ALL_GCC) configure-target-boehm-gc configure-target-qthreads configure-target-newlib
 all-target-libjava: configure-target-libjava all-gcc all-zip all-target-newlib all-target-boehm-gc all-target-qthreads
 # end-sanitize-java
 configure-target-librx: $(ALL_GCC) configure-target-newlib
@@ -1765,6 +1766,7 @@ all-patch: all-libiberty
 all-perl:
 all-prms: all-libiberty
 # start-sanitize-java
+configure-target-qthreads: configure-target-newlib
 all-target-qthreads: configure-target-qthreads
 # end-sanitize-java
 all-rcs:
