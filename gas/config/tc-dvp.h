@@ -88,7 +88,7 @@ extern void dvp_frob_file PARAMS ((void));
 #define BSS_SECTION_NAME	".vubss"
 
 /* Other special section names.  */
-#define VUOVERLAY_SECTION_PREFIX	".vuoverlay."
+#define VUOVERLAY_SECTION_PREFIX	".vuoverlay"
 #define VUOVERLAY_TABLE_SECTION_NAME	".vuoverlay_table"
 
 #define ELF_TC_SPECIAL_SECTIONS \
