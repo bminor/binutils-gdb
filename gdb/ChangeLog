@@ -1,3 +1,7 @@
+Fri Dec 20 11:06:03 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* mswin/genmakes:  Don't define _DEBUG.  This breaks wingdb.
+
 start-sanitize-v850
 Thu Dec 19 19:42:44 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
