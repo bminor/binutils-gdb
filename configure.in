@@ -399,7 +399,7 @@ case "${host}" in
 # end-sanitize-ide
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvs autoconf automake bison send-pr gprof rcs guile perl texinfo apache inet"
+     noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
