@@ -1,5 +1,7 @@
 Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/c-mips.texi: Mention ISA level 4, and the -mips16 option.
+
 	* configure.in: Recognize mips-*-linux* target.
 	* configure: Rebuild.
 
