@@ -1292,7 +1292,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 	}
 
       if (rel->r_type >= XCOFF_MAX_CALCULATE_RELOCATION
-	  || ((*xcoff64_calculate_relocation[rel->r_type])
+	  || !((*xcoff64_calculate_relocation[rel->r_type])
 	      (input_bfd, input_section, output_bfd, rel, sym, &howto, val,
 	       addend, &relocation, contents)))
 	return FALSE;

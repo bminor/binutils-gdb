@@ -1,3 +1,7 @@
+2002-12-23  DJ Delorie  <dj@redhat.com>
+
+	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Fix logic reversal.
+
 2002-12-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_output_extsym): Heed strip_discarded.
