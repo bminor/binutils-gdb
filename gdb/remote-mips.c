@@ -58,7 +58,7 @@ static int mips_receive_packet PARAMS ((char *buff, int throw_error,
 
 static int
 mips_request PARAMS ((char cmd, unsigned int addr, unsigned int data,
-		      int *perr, timeout));
+		      int *perr, int timeout));
 
 static void
 mips_initialize PARAMS ((void));
@@ -76,7 +76,7 @@ static void mips_resume PARAMS ((int pid, int step,
 				 enum target_signal siggnal));
 
 static int
-mips_wait PARAMS ((int pid, WAITTYPE *status));
+mips_wait PARAMS ((int pid, struct target_waitstatus *status));
 
 static int
 mips_map_regno PARAMS ((int regno));
