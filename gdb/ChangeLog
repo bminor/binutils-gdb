@@ -1,3 +1,8 @@
+2003-02-26  Kris Warkentin  <kewarken@qnx.com>
+
+	* defs.h (gdb_osabi): Add GDB_OSABI_QNXNTO.
+	* osabi.c (gdb_osabi_names): Add "QNX Neutrino".
+
 2003-02-26  Michael Chastain  <mec@shout.net>
 
 	* configure.in: New variable HAVE_UINTPTR_T.
