@@ -73,6 +73,10 @@ static value last_examine_value;
 
 static unsigned int max_symbolic_offset = UINT_MAX;
 
+/* Append the source filename and linenumber of the symbol when
+   printing a symbolic value as `<symbol at filename:linenum>' if set.  */
+static int print_symbol_filename = 0;
+
 /* Number of auto-display expression currently being displayed.
    So that we can disable it if we get an error or a signal within it.
    -1 when not doing one.  */
@@ -582,9 +586,16 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   fputs_filtered ("<", stream);
   fputs_filtered (name, stream);
   if (addr != name_location)
-    fprintf_filtered (stream, "+%u>", (unsigned int)(addr - name_location));
-  else
-    fputs_filtered (">", stream);
+    fprintf_filtered (stream, "+%u", (unsigned int)(addr - name_location));
+
+  /* Append source filename and line number if desired.  */
+  if (symbol && print_symbol_filename)
+    {
+      struct symtab_and_line sal = find_pc_line (addr, 0);
+      if (sal.symtab)
+	fprintf_filtered (stream, " at %s:%d", sal.symtab->filename, sal.line);
+    }
+  fputs_filtered (">", stream);
 }
 
 /* Print address ADDR symbolically on STREAM.
@@ -2068,6 +2079,12 @@ environment, the value is printed in its own window.");
       add_set_cmd ("max-symbolic-offset", no_class, var_uinteger,
 		   (char *)&max_symbolic_offset,
 	"Set the largest offset that will be printed in <symbol+1234> form.",
+		   &setprintlist),
+      &showprintlist);
+  add_show_from_set (
+      add_set_cmd ("symbol-filename", no_class, var_boolean,
+		   (char *)&print_symbol_filename,
+	"Set printing of source filename and line number with <symbol>.",
 		   &setprintlist),
       &showprintlist);
 }
