@@ -1,3 +1,7 @@
+Fri Jul 24 11:41:37 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-asm.c,m32r-opc.c: Regenerate (-Wall cleanups).
+
 start-sanitize-am33
 Thu Jul 23 09:21:03 1998  Jeffrey A Law  (law@cygnus.com)
 
