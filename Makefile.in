@@ -106,13 +106,13 @@ DEFAULT_YACC = yacc
 DEFAULT_LEX = lex
 
 BISON = `if [ -f $$r/bison/bison ] ; then \
-	    echo $$r/bison/bison ; \
+	    echo $$r/bison/bison -L $$s/bison/ ; \
 	 else \
 	    echo bison ; \
 	 fi`
 
 YACC = `if [ -f $$r/bison/bison ] ; then \
-	    echo $$r/bison/bison -y ; \
+	    echo $$r/bison/bison -y -L $$s/bison/ ; \
 	elif [ -f $$r/byacc/byacc ] ; then \
 	    echo $$r/byacc/byacc ; \
 	else \
@@ -1402,7 +1402,7 @@ all-automake:
 all-bash:
 all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc
-all-bison:
+all-bison: all-texinfo
 all-byacc:
 all-cvs:
 all-db:
@@ -1476,7 +1476,7 @@ all-recode: all-libiberty
 all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
-all-sim: all-libiberty all-bfd all-opcodes
+all-sim: all-libiberty all-bfd all-opcodes all-readline
 all-sn: all-tcl all-tk all-itcl all-db all-grep
 all-tar: all-libiberty
 all-tcl:
