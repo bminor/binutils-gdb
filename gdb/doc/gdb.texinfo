@@ -2590,9 +2590,18 @@ an @code{fo} followed by zero or more @code{o}s.  There is an implicit
 @code{.*} leading and trailing the regular expression you supply, so to
 match only functions that begin with @code{foo}, use @code{^foo}.
 
+@cindex non-member C@t{++} functions, set breakpoint in
 When debugging C@t{++} programs, @code{rbreak} is useful for setting
 breakpoints on overloaded functions that are not members of any special
 classes.
+
+@cindex set breakpoints on all functions
+The @code{rbreak} command can be used to set breakpoints in
+@strong{all} the functions in a program, like this:
+
+@smallexample
+(@value{GDBP}) rbreak .
+@end smallexample
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
@@ -6300,7 +6309,7 @@ $ gdb -nw charset-test
 GNU gdb 2001-12-19-cvs
 Copyright 2001 Free Software Foundation, Inc.
 @dots{}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 We can use the @code{show charset} command to see what character sets
@@ -6308,18 +6317,18 @@ We can use the @code{show charset} command to see what character sets
 strings:
 
 @smallexample
-(gdb) show charset
+(@value{GDBP}) show charset
 The current host and target character set is `ISO-8859-1'.
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 For the sake of printing this manual, let's use @sc{ascii} as our
 initial character set:
 @smallexample
-(gdb) set charset ASCII
-(gdb) show charset
+(@value{GDBP}) set charset ASCII
+(@value{GDBP}) show charset
 The current host and target character set is `ASCII'.
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Let's assume that @sc{ascii} is indeed the correct character set for our
@@ -6329,20 +6338,20 @@ them properly.  Since our current target character set is also
 @sc{ascii}, the contents of @code{ascii_hello} print legibly:
 
 @smallexample
-(gdb) print ascii_hello
+(@value{GDBP}) print ascii_hello
 $1 = 0x401698 "Hello, world!\n"
-(gdb) print ascii_hello[0]
+(@value{GDBP}) print ascii_hello[0]
 $2 = 72 'H'
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @value{GDBN} uses the target character set for character and string
 literals you use in expressions:
 
 @smallexample
-(gdb) print '+'
+(@value{GDBP}) print '+'
 $3 = 43 '+'
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 The @sc{ascii} character set uses the number 43 to encode the @samp{+}
@@ -6353,20 +6362,20 @@ target program uses.  If we print @code{ibm1047_hello} while our target
 character set is still @sc{ascii}, we get jibberish:
 
 @smallexample
-(gdb) print ibm1047_hello
+(@value{GDBP}) print ibm1047_hello
 $4 = 0x4016a8 "\310\205\223\223\226k@@\246\226\231\223\204Z%"
-(gdb) print ibm1047_hello[0]
+(@value{GDBP}) print ibm1047_hello[0]
 $5 = 200 '\310'
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 If we invoke the @code{set target-charset} followed by @key{TAB}@key{TAB},
 @value{GDBN} tells us the character sets it supports:
 
 @smallexample
-(gdb) set target-charset
+(@value{GDBP}) set target-charset
 ASCII       EBCDIC-US   IBM1047     ISO-8859-1
-(gdb) set target-charset
+(@value{GDBP}) set target-charset
 @end smallexample
 
 We can select @sc{ibm1047} as our target character set, and examine the
@@ -6376,28 +6385,28 @@ target character set, @sc{ibm1047}, to the host character set,
 @sc{ascii}, and they display correctly:
 
 @smallexample
-(gdb) set target-charset IBM1047
-(gdb) show charset
+(@value{GDBP}) set target-charset IBM1047
+(@value{GDBP}) show charset
 The current host character set is `ASCII'.
 The current target character set is `IBM1047'.
-(gdb) print ascii_hello
+(@value{GDBP}) print ascii_hello
 $6 = 0x401698 "\110\145%%?\054\040\167?\162%\144\041\012"
-(gdb) print ascii_hello[0]
+(@value{GDBP}) print ascii_hello[0]
 $7 = 72 '\110'
-(gdb) print ibm1047_hello
+(@value{GDBP}) print ibm1047_hello
 $8 = 0x4016a8 "Hello, world!\n"
-(gdb) print ibm1047_hello[0]
+(@value{GDBP}) print ibm1047_hello[0]
 $9 = 200 'H'
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 As above, @value{GDBN} uses the target character set for character and
 string literals you use in expressions:
 
 @smallexample
-(gdb) print '+'
+(@value{GDBP}) print '+'
 $10 = 78 '+'
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
@@ -6538,7 +6547,7 @@ $ gdb -nw sample
 GNU gdb 2002-05-06-cvs
 Copyright 2002 Free Software Foundation, Inc.
 GDB is free software, @dots{}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 We can expand macros and examine their definitions, even when the
@@ -6546,7 +6555,7 @@ program is not running.  @value{GDBN} uses the current listing position
 to decide which macro definitions are in scope:
 
 @smallexample
-(gdb) list main
+(@value{GDBP}) list main
 3
 4       #define M 42
 5       #define ADD(x) (M + x)
@@ -6557,18 +6566,18 @@ to decide which macro definitions are in scope:
 10        printf ("Hello, world!\n");
 11      #undef N
 12        printf ("We're so creative.\n");
-(gdb) info macro ADD
+(@value{GDBP}) info macro ADD
 Defined at /home/jimb/gdb/macros/play/sample.c:5
 #define ADD(x) (M + x)
-(gdb) info macro Q
+(@value{GDBP}) info macro Q
 Defined at /home/jimb/gdb/macros/play/sample.h:1
   included at /home/jimb/gdb/macros/play/sample.c:2
 #define Q <
-(gdb) macro expand ADD(1)
+(@value{GDBP}) macro expand ADD(1)
 expands to: (42 + 1)
-(gdb) macro expand-once ADD(1)
+(@value{GDBP}) macro expand-once ADD(1)
 expands to: once (M + 1)
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 In the example above, note that @command{macro expand-once} expands only
@@ -6580,27 +6589,27 @@ Once the program is running, GDB uses the macro definitions in force at
 the source line of the current stack frame:
 
 @smallexample
-(gdb) break main
+(@value{GDBP}) break main
 Breakpoint 1 at 0x8048370: file sample.c, line 10.
-(gdb) run
+(@value{GDBP}) run
 Starting program: /home/jimb/gdb/macros/play/sample
 
 Breakpoint 1, main () at sample.c:10
 10        printf ("Hello, world!\n");
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 At line 10, the definition of the macro @code{N} at line 9 is in force:
 
 @smallexample
-(gdb) info macro N
+(@value{GDBP}) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:9
 #define N 28
-(gdb) macro expand N Q M
+(@value{GDBP}) macro expand N Q M
 expands to: 28 < 42
-(gdb) print N Q M
+(@value{GDBP}) print N Q M
 $1 = 1
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 As we step over directives that remove @code{N}'s definition, and then
@@ -6608,23 +6617,23 @@ give it a new definition, @value{GDBN} finds the definition (or lack
 thereof) in force at each point:
 
 @smallexample
-(gdb) next
+(@value{GDBP}) next
 Hello, world!
 12        printf ("We're so creative.\n");
-(gdb) info macro N
+(@value{GDBP}) info macro N
 The symbol `N' has no definition as a C/C++ preprocessor macro
 at /home/jimb/gdb/macros/play/sample.c:12
-(gdb) next
+(@value{GDBP}) next
 We're so creative.
 14        printf ("Goodbye, world!\n");
-(gdb) info macro N
+(@value{GDBP}) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:13
 #define N 1729
-(gdb) macro expand N Q M
+(@value{GDBP}) macro expand N Q M
 expands to: 1729 < 42
-(gdb) print N Q M
+(@value{GDBP}) print N Q M
 $2 = 0
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -7480,7 +7489,7 @@ Normally, when @value{GDBN} prints a code address, it includes the name
 of the function the address falls in:
 
 @smallexample
-(gdb) print main
+(@value{GDBP}) print main
 $3 = @{int ()@} 0x11a0 <main>
 @end smallexample
 @noindent
@@ -7490,9 +7499,9 @@ asterisks around them.  For example, if @code{foo} is a function in an
 unmapped overlay, @value{GDBN} prints it this way:
 
 @smallexample
-(gdb) overlay list
+(@value{GDBP}) overlay list
 No sections are mapped.
-(gdb) print foo
+(@value{GDBP}) print foo
 $5 = @{int (int)@} 0x100000 <*foo*>
 @end smallexample
 @noindent
@@ -7500,10 +7509,10 @@ When @code{foo}'s overlay is mapped, @value{GDBN} prints the function's
 name normally:
 
 @smallexample
-(gdb) overlay list
+(@value{GDBP}) overlay list
 Section .ov.foo.text, loaded at 0x100000 - 0x100034,
         mapped at 0x1016 - 0x104a
-(gdb) print foo
+(@value{GDBP}) print foo
 $6 = @{int (int)@} 0x1016 <foo>
 @end smallexample
 
@@ -11756,7 +11765,7 @@ some confusion. If in doubt, try the @code{info functions} and
 @pxref{Symbols}). Here's an example:
 
 @smallexample
-(gdb) info function CreateFileA
+(@value{GDBP}) info function CreateFileA
 All functions matching regular expression "CreateFileA":
 
 Non-debugging symbols:
@@ -11765,7 +11774,7 @@ Non-debugging symbols:
 @end smallexample
 
 @smallexample
-(gdb) info function !
+(@value{GDBP}) info function !
 All functions matching regular expression "!":
 
 Non-debugging symbols:
@@ -11792,28 +11801,28 @@ type information in the command. Here's an example of the type of
 problem:
 
 @smallexample
-(gdb) print 'cygwin1!__argv'
+(@value{GDBP}) print 'cygwin1!__argv'
 $1 = 268572168
 @end smallexample
 
 @smallexample
-(gdb) x 'cygwin1!__argv'
+(@value{GDBP}) x 'cygwin1!__argv'
 0x10021610:      "\230y\""
 @end smallexample
 
 And two possible solutions:
 
 @smallexample
-(gdb) print ((char **)'cygwin1!__argv')[0]
+(@value{GDBP}) print ((char **)'cygwin1!__argv')[0]
 $2 = 0x22fd98 "/cygdrive/c/mydirectory/myprogram"
 @end smallexample
 
 @smallexample
-(gdb) x/2x &'cygwin1!__argv'
+(@value{GDBP}) x/2x &'cygwin1!__argv'
 0x610c0aa8 <cygwin1!__argv>:    0x10021608      0x00000000
-(gdb) x/x 0x10021608
+(@value{GDBP}) x/x 0x10021608
 0x10021608:     0x0022fd98
-(gdb) x/s 0x0022fd98
+(@value{GDBP}) x/s 0x0022fd98
 0x22fd98:        "/cygdrive/c/mydirectory/myprogram"
 @end smallexample
 
@@ -11824,7 +11833,7 @@ function's frame set-up code. You can work around this by using ``*&''
 to set the breakpoint at a raw memory address:
 
 @smallexample
-(gdb) break *&'python22!PyOS_Readline'
+(@value{GDBP}) break *&'python22!PyOS_Readline'
 Breakpoint 1 at 0x1e04eff0
 @end smallexample
 
@@ -14668,7 +14677,7 @@ corresponding output for that command will also be prefixed by that same
 
 @table @code
 @item @var{output} @expansion{}
-@code{( @var{out-of-band-record} )* [ @var{result-record} ] "(gdb)" @var{nl}}
+@code{( @var{out-of-band-record} )* [ @var{result-record} ] "(@value{GDBP})" @var{nl}}
 
 @item @var{result-record} @expansion{}
 @code{ [ @var{token} ] "^" @var{result-class} ( "," @var{result} )* @var{nl}}
@@ -18531,7 +18540,7 @@ for details.
 This GDB was configured as "i386-pc-linux-gnu"
 
 ^Z^Zpre-prompt
-(gdb)
+(@value{GDBP})
 ^Z^Zprompt
 @kbd{quit}
 
@@ -19453,13 +19462,13 @@ either quit @value{GDBN} or create a core file of the current
 @value{GDBN} session.
 
 @smallexample
-(gdb) @kbd{maint internal-error testing, 1, 2}
+(@value{GDBP}) @kbd{maint internal-error testing, 1, 2}
 @dots{}/maint.c:121: internal-error: testing, 1, 2
 A problem internal to GDB has been detected.  Further
 debugging may prove unreliable.
 Quit this debugging session? (y or n) @kbd{n}
 Create a core file? (y or n) @kbd{n}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Takes an optional parameter that is used as the text of the error or
@@ -19471,18 +19480,18 @@ warning message.
 Prints the contents of @value{GDBN}'s internal dummy-frame stack.
 
 @smallexample
-(gdb) @kbd{b add}
+(@value{GDBP}) @kbd{b add}
 @dots{}
-(gdb) @kbd{print add(2,3)}
+(@value{GDBP}) @kbd{print add(2,3)}
 Breakpoint 2, add (a=2, b=3) at @dots{}
 58	  return (a + b);
 The program being debugged stopped while in a function called from GDB.
 @dots{}
-(gdb) @kbd{maint print dummy-frames}
+(@value{GDBP}) @kbd{maint print dummy-frames}
 0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
  top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
  call_lo=0x01014000 call_hi=0x01014001
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Takes an optional file parameter.
@@ -19513,7 +19522,7 @@ Print @value{GDBN}'s internal register group data structures.
 Takes an optional file parameter.
 
 @smallexample
-(gdb) @kbd{maint print reggroups}
+(@value{GDBP}) @kbd{maint print reggroups}
  Group      Type
  general    user
  float      user
@@ -20701,7 +20710,7 @@ previous activity (continue, step).  No additional continue or step
 request from @value{GDBN} is required.
 
 @smallexample
-(gdb) continue
+(@value{GDBP}) continue
   <- target requests 'system call X'
   target is stopped, @value{GDBN} executes system call
   -> GDB returns result
