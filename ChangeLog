@@ -10,6 +10,11 @@ Sun Aug  1 11:36:27 1993  Fred Fish  (fnf@deneb.cygnus.com)
 	* Makefile.in (make-gdb.tar.gz):  Minor changes to move closer
 	to convergence with 'taz' target in Makefile.in.
 
+Fri Jul 30 12:34:57 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* install.sh (dsttmp): use trap to ensure that tmp files go
+	away on error conditions
+
 Wed Jul 28 11:57:36 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* Makefile.in (BASE_FLAGS_TO_PASS): remove LOADLIBES

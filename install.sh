@@ -119,6 +119,7 @@ fi
 ## this sed command emulates the dirname command
 dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
 dsttmp=$dstdir/#inst.$$#
+trap "rm -f ${dsttmp}" 0
 
 # Make sure that the destination directory exists.
 #  this part is taken from Noah Friedman's mkinstalldirs script
