@@ -1,3 +1,8 @@
+2004-06-27  Mark Kettenis  <kettenis@gnu.org>
+
+	From Miod Vallat <miod@online.fr>:
+	* aoutx.h (NAME(aout,machine_type)): Handle bfd_arch_m88k.
+
 2004-06-26  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-m10300.c (struct elf_mn10300_pcrel_relocs_copied): Delete.
