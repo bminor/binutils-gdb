@@ -196,6 +196,9 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 .c.o:
 	${CC_FOR_TARGET} -c ${INTERNAL_CFLAGS} $<
 
+.S.o:
+	${CC_FOR_TARGET} -c ${INTERNAL_CFLAGS} $<
+
 all: gdbserve.nlm
 
 # Traditionally "install" depends on "all".  But it may be useful

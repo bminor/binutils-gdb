@@ -1,3 +1,5 @@
+#ifndef _AIO_H_
+#define _AIO_H_
 
 /*----------------------------------------------------------------------------*
  *									      *
@@ -634,3 +636,4 @@ extern	int  AIOWriteStatus	      ( int   portHandle,
 					WORD  *state
 				      );
  
+#endif /* _AIO_H_ */
