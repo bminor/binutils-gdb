@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file is based on a preliminary PowerPC ELF ABI.  The
    information may not match the final PowerPC ELF ABI.  It includes
@@ -35,7 +35,7 @@ static bfd_reloc_status_type ppc_elf_unsupported_reloc
 static bfd_reloc_status_type ppc_elf_std_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
-static bfd_vma ppc_elf_addr16_ha_inner PARAMS ((asection *, bfd_vma, bfd_vma));
+static bfd_vma ppc_elf_addr16_ha_inner PARAMS ((bfd_vma));
 static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_vma ppc_elf_got16_inner PARAMS ((asection *sec));
@@ -643,16 +643,16 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      small data items.  */
   HOWTO (R_PPC_SDAREL,		/* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */
 	 "R_PPC_SDAREL",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
-	 0xffff,      		/* dst_mask */
+	 0xffff,    		/* dst_mask */
 	 false),                /* pcrel_offset */
 
   /* These next 4 relocations were added by Sun. */
@@ -834,6 +834,7 @@ ppc_elf_reloc_type_lookup (abfd, code)
     case BFD_RELOC_LO16:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_LO ];
     case BFD_RELOC_HI16:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_HI ];
     case BFD_RELOC_HI16_S:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_HA ];
+    case BFD_RELOC_GPREL16:	return ppc_elf_howto_table[ (int) R_PPC_SDAREL ];
     }
 
   return (reloc_howto_type *)NULL;
@@ -931,21 +932,29 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 
   else					/* Incompatible flags */
     {
-      /* Warn about -mrelocatable mismatch */
-      if ((new_flags & EF_PPC_RELOCATABLE) != 0 && (old_flags & EF_PPC_RELOCATABLE) == 0)
+      /* Warn about -mrelocatable mismatch.  Allow -mrelocatable-lib to be linked
+         with either.  */
+      if ((new_flags & EF_PPC_RELOCATABLE) != 0
+	  && (old_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0)
 	{
 	  new_flags &= ~EF_PPC_RELOCATABLE;
 	  fprintf (stderr,
 		   "%s: compiled with -mrelocatable and linked with modules compiled normally\n",
 		   bfd_get_filename (ibfd));
 	}
-      else if ((new_flags & EF_PPC_RELOCATABLE) == 0 && (old_flags & EF_PPC_RELOCATABLE) != 0)
+      else if ((new_flags & EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB) == 0
+	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
 	{
 	  old_flags &= ~EF_PPC_RELOCATABLE;
 	  fprintf (stderr,
 		   "%s: compiled normally and linked with modules compiled with -mrelocatable\n",
 		   bfd_get_filename (ibfd));
 	}
+      else if ((new_flags & EF_PPC_RELOCATABLE_LIB) != 0)
+	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE_LIB;
+
+      new_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB);
+      old_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB);
 
       /* Warn about eabi vs. V.4 mismatch */
       if ((new_flags & EF_PPC_EMB) != 0 && (old_flags & EF_PPC_EMB) == 0)
@@ -1041,21 +1050,14 @@ ppc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 
 /* Internal function to return the adjustment to the addend for relocations
    that return the upper 16 bits after sign extending the lower 16 bits, ie
-   for use with a ORIS instruction followed by a memory reference using the
+   for use with a ADDIS instruction followed by a memory reference using the
    bottom 16 bits.  */
 
 INLINE
 static bfd_vma
-ppc_elf_addr16_ha_inner (sec, value, addend)
-     asection *sec;
-     bfd_vma value;
-     bfd_vma addend;
+ppc_elf_addr16_ha_inner (relocation)
+     bfd_vma relocation;
 {
-  bfd_vma relocation = (value
-			+ sec->output_section->vma
-			+ sec->output_offset
-			+ addend);
-
   return (relocation & 0x8000) << 1;
 }
 
@@ -1073,13 +1075,20 @@ ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
+  bfd_vma relocation;
+  asection *sec;
+
   if (output_bfd != (bfd *) NULL)
     return ppc_elf_std_reloc (abfd, reloc_entry, symbol, data,
 			      input_section, output_bfd, error_message);
 
-  reloc_entry->addend += ppc_elf_addr16_ha_inner (symbol->section,
-						  (bfd_is_com_section (symbol->section)) ? 0 : symbol->value,
-						  reloc_entry->addend);
+  sec = symbol->section;
+  relocation = (((bfd_is_com_section (sec)) ? 0 : symbol->value)
+		+ sec->output_section->vma
+		+ sec->output_offset
+		+ reloc_entry->addend);
+
+  reloc_entry->addend += ppc_elf_addr16_ha_inner (relocation);
   return bfd_reloc_continue;
 }
 
@@ -1093,7 +1102,9 @@ ppc_elf_got16_inner (sec)
 {
   BFD_ASSERT (bfd_is_und_section (sec)
 	      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
-	      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
+	      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0
+	      || strcmp (bfd_get_section_name (abfd, sec), ".sdata") == 0
+	      || strcmp (bfd_get_section_name (abfd, sec), ".sbss") == 0)
 
   return -(sec->output_section->vma + 0x8000);
 }
@@ -1298,13 +1309,14 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_GOT16:		/* GOT16 relocations */
 	case (int)R_PPC_GOT16_LO:
 	case (int)R_PPC_GOT16_HI:
+	case (int)R_PPC_SDAREL:
 	  BFD_ASSERT (sec != (asection *)0);
 	  addend += ppc_elf_got16_inner (sec);
 	  break;
 
 	case (int)R_PPC_ADDR16_HA:	/* arithmetic adjust relocations */
 	  BFD_ASSERT (sec != (asection *)0);
-	  addend += ppc_elf_addr16_ha_inner (sec, relocation, addend);
+	  addend += ppc_elf_addr16_ha_inner (relocation + addend);
 	  break;
 	}
 
