@@ -1,3 +1,23 @@
+2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c: Correct and improve comments.
+	(mmo_write_chunk): Store trailing byte in bfd buffer; don't
+	zero-pad.  Use input to fill up non-empty bfd buffer.
+	(mmo_flush_chunk): New function.
+	(mmo_write_loc_chunk): Add parameter last_vmap, all callers
+	changed.  Don't emit location specifier if VMA is same as
+	*LAST_VMAP after omitting leading zero contents.  Call
+	mmo_flush_chunk before emitting location specifier.
+	(mmo_write_loc_chunk_list): Call mmo_flush_chunk when finished
+	with mmo_write_loc_chunk calls.
+	(mmo_internal_write_section): Call mmo_flush_chunk after
+	mmo_write_chunk.
+	(mmo_write_symbols_and_terminator): Move :Main to first position
+	in symbol array.  Add faked one if it does not exist if there are
+	other symbols.  Don't add it if there are no symbols at all.  Move
+	out test for value of :Main from symbol loop.  Rename table
+	fakemain to maintable and variable mainsym to fakemain.
+
 2002-02-15  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section) [BRSGP]: A target
