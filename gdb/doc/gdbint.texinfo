@@ -1505,7 +1505,7 @@ loop.  A client would need to either plug its self into this loop or,
 implement a new event-loop that GDB would use.
 
 The event-loop will eventually be made re-entrant.  This is so that
-@value{GDB} can better handle the problem of some commands blocking
+@value{GDBN} can better handle the problem of some commands blocking
 instead of returning.
 
 @subheading Library - @file{gdb.h}

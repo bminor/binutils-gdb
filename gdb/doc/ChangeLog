@@ -1,5 +1,9 @@
 2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbint.texinfo (libgdb components): Correct a GDB to GDBN.
+
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.texinfo (Server): Mention pidof.
 
 2003-07-22  Andrew Cagney  <cagney@redhat.com>
