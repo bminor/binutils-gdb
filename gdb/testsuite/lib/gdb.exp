@@ -521,6 +521,15 @@ proc gdb_test { args } {
 	    fail "$errmsg"
 	    return -1
 	}
+	 -re "EXIT code \[0-9\r\n\]+Program exited normally.*$gdb_prompt $" {
+	    if ![string match "" $message] then {
+		set errmsg "$message: the program exited"
+	    } else {
+		set errmsg "$command: the program exited"
+	    }
+	    fail "$errmsg"
+	    return -1
+	}
 	 -re "The program is not being run.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message: the program is no longer running"
@@ -1605,7 +1614,7 @@ proc gdb_continue_to_end {mssg} {
     # Don't bother to check the output of the program, that may be
     # extremely tough for some remote systems.
     gdb_test "continue"\
-      "Continuing.\[\r\n0-9\]+Program exited normally\\..*"\
+      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|)Program exited normally\\..*"\
       "continue until exit at $mssg"
   }
 }

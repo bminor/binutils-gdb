@@ -1,5 +1,10 @@
 2002-05-06  Michael Snyder  <msnyder@redhat.com>
 
+	* lib/gdb.exp (gdb_test): Add case to allow for status wrapper.
+	(gdb_continue_to_end): Accept output from status wrapper.
+	* gdb.base/ending-run.exp: Add case for output from status wrapper.
+	Clean up fail messages to match pass messages.
+
 	Enable the "needs_status_wrapper" testsuite feature.
 	* lib/gdb.exp (gdb_wrapper_init): New procedure.
 	(gdb_compile): Conditionally call gdb_wrapper_init.
