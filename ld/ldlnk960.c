@@ -263,7 +263,7 @@ static char *lnk960_script =
 
 
 static char *lnk960_script_relocateable = 
-#include "ldlnk960r.x"
+#include "ldlnk960.xr"
 ;
 
 static char *lnk960_get_script()
