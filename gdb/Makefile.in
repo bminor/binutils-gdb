@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.0.4
+VERSION = 4.0.95
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -192,8 +192,8 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in tconfig/* or xconfig/* go here.
 HFILES=	breakpoint.h command.h defs.h environ.h \
-	expression.h frame.h gdbcmd.h gdbcore.h \
-	getpagesize.h ieee-float.h inferior.h param-no-tm.h param.h \
+	expression.h frame.h gdbcmd.h gdbcore.h getpagesize.h \
+	ieee-float.h inferior.h minimon.h param-no-tm.h param.h \
 	signals.h signame.h symfile.h symtab.h \
 	target.h tdesc.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
 	language.h parser-defs.h value.h
