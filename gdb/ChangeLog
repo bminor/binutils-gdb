@@ -1,5 +1,12 @@
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
+	* NEWS: Mention that z8k-zilog-none, z8ksim, mn10200-*-*,
+	h8500hms, hppa*-*-bsd*, hppa*-*-osf*, hppa*-*-pro*,
+	mips*-*-mach3*, i[3456]86-sequent-sysv4*, i[3456]86-sequent-sysv*,
+	i[3456]86-sequent-bsd*, sparclet-*-*, sparclite-fujitsu-none, and
+	sparclite were removed.
+	* configure.host, configure.tgt: Remove corresponding tuples.
+
 	* breakpoint.c, breakpoint.h: Remove obsolete code.
 	* buildsym.c, dbxread.c, gdbtypes.c, mdebugread.c: Ditto.
 	* monitor.c, sparc-tdep.c, stabsread.c: Ditto.

@@ -13,6 +13,18 @@ tested, nor mentioned in the NEWS file.
 
 SGI Irix-4.x				mips-sgi-irix4	or iris4
 SGI Iris (MIPS) running Irix V3:  	mips-sgi-irix   or  iris
+Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
+Matsushita MN10200 w/simulator			mn10200-*-*
+H8/500 simulator 			h8500-hitachi-hms or h8500hms
+HP/PA running BSD				hppa*-*-bsd*
+HP/PA running OSF/1				hppa*-*-osf*
+HP/PA Pro target				hppa*-*-pro*
+PMAX (MIPS) running Mach 3.0			mips*-*-mach3*
+Sequent family					i[3456]86-sequent-sysv4*
+						i[3456]86-sequent-sysv*
+						i[3456]86-sequent-bsd*
+Tsqware Sparclet				sparclet-*-*
+Fujitsu SPARClite 			sparclite-fujitsu-none  or  sparclite
 
 *** Changes in GDB 6.0:
 
