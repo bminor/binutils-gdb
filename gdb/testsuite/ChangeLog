@@ -1,9 +1,27 @@
+start-sanitize-m32r
+Wed Oct 30 18:19:16 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/m32r.exp: New file.
+end-sanitize-m32r
+
+Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* testsuite/gdb.base/nodebug.exp:  Whack out -g options by hand so
+	that cflags can contains -gstabs, and work correctly for other tests.
+
 Mon Oct 21 14:00:37 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/setshow.exp: New file, tests show and set.
 	* gdb.base/setshow.c:   New file, tests show and set.
 	* gdb.base/help.exp: Add test for help set|show annotate.
 	* gdb.base/default.exp: Add test for set|show annotate.
+
+Wed Oct 16 19:03:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* testsuite/gdb.base/break.exp:  Make backtrace from factorial
+	errors unique.
+	* testsuite/gdb.base/nodebug.exp:  Whack out all -g options
+	explicitly.
 
 Tue Oct 15 16:45:02 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
