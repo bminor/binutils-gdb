@@ -134,7 +134,6 @@ ALL_EMULATIONS = \
 	egld960coff.o \
 	eelf32fr30.o \
 	eelf32mcore.o \
-	ego32.o \
 	eh8300.o \
 	eh8300h.o \
 	eh8300s.o \
@@ -398,9 +397,6 @@ egld960.c: $(srcdir)/emulparams/gld960.sh \
 egld960coff.c: $(srcdir)/emulparams/gld960coff.sh \
   $(srcdir)/emultempl/gld960c.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} gld960coff "$(tdir_gld960coff)"
-ego32.c: $(srcdir)/emulparams/go32.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} go32 "$(tdir_go32)"
 eh8300.c: $(srcdir)/emulparams/h8300.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300 "$(tdir_h8300)"

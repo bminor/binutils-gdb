@@ -1,3 +1,9 @@
+1999-08-03  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (ALL_EMULATIONS): Remove ego32.o.
+	(ego32.c): Remove.
+	* Makefile.in: Rebuild.
+
 1999-07-22  Philip Blundell  <pb@nexus.co.uk>
 
 	* emulparams/armelf_linux26.sh (DATA_START_SYMBOLS): Define.
