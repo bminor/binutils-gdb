@@ -53,7 +53,7 @@ extern char **sys_errlist;
 extern char **environ;
 extern int errno;
 extern int inferior_pid;
-void error (), quit (), perror_with_name ();
+void quit (), perror_with_name ();
 int query ();
 
 /* Start an inferior process and returns its pid.
