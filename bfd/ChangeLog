@@ -1,3 +1,8 @@
+Fri Jun 18 16:54:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/riscos.m{h,t}: New files.
+	* configure.{host,in}: Use them.
+
 Fri Jun 18 12:55:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* elf32-mips.c: comment change.  This is a mips file, not 88k.
