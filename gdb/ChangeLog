@@ -1,5 +1,10 @@
 Thu Jan 27 15:12:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-typeprint.c (c_type_print_base): Have SHOW == 0 mean to print
+	full details on structure elements without names.  This partially
+	reverts the changes of 1 Jul 1993 and 31 Aug 1993; I think this aspect
+	of those changes was accidental.
+
 	* stack.c (parse_frame_specification): If SETUP_ARBITRARY_FRAME is
 	defined, make it an error to specify a single argument which is not
 	a frame number.
