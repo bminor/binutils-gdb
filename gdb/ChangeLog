@@ -1,5 +1,8 @@
 2003-12-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (i386bsd_core_osabi_sniffer): New function.
+	(_initialize_i386bsd_tdep): Register i386bsd_core_osabi_sniffer.
+
 	* i386-linux-nat.c: Add comment.
 
 2003-12-26  Christopher Faylor  <cgf@redhat.com>
