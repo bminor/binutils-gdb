@@ -1,20 +1,12 @@
 Things that still need to be handled: -*- Text -*-
 
- o - check all the swapping code.
  o - change the memory usage to reflect the message which follows the
      page break.
  o - implement bfd_abort, which should close the bfd but not alter the
      filesystem.
- o - remove the following obsolete functions:
-	 bfd_symbol_value
-	 bfd_symbol_name
-	 bfd_get_first_symbol
-	 bfd_get_next_symbol
-	 bfd_classify_symbol
-	 bfd_symbol_hasclass
  o - update the bfd doc; write a how-to-write-a-backend doc.
  o - change reloc handling as per Steve's suggestion.
-
+     (more details please.....)
 
 Changing the way bfd uses memory.  The new convention is simple: 
 
