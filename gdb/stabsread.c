@@ -1953,6 +1953,27 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	         Fortunately, this check seems not to be necessary
 	         for anything except pointers or functions.  */
+              /* ezannoni: 2000-10-26. This seems to apply for
+		 versions of gcc older than 2.8. This was the original
+		 problem: with the following code gdb would tell that
+		 the type for name1 is caddr_t, and func is char()
+	         typedef char *caddr_t;
+		 char *name2;
+		 struct x
+		 {
+		 char *name1;
+		 } xx;
+		 char *func()
+		 {
+		 }
+		 main () {}
+		 */
+
+	      /* Pascal accepts names for pointer types. */
+	      if (current_subfile->language == language_pascal)
+		{
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);
+          	}
 	    }
 	  else
 	    TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);
