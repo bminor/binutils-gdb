@@ -1,3 +1,9 @@
+2001-02-08  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_check_relocs): Reserve R_386_PC32
+	relocation entries for weak definitions when building DSO with
+	-Bsymbolic.
+
 2001-02-08  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Respect weakness
