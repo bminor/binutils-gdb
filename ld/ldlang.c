@@ -251,6 +251,7 @@ DEFUN(new_afile, (name, file_type, target),
 					  stat_ptr);
   lang_has_input_file = true;
   p->target = target;
+  p->complained = false;
   switch (file_type) {
   case  lang_input_file_is_symbols_only_enum:
     p->filename = name;
@@ -833,7 +834,7 @@ DEFUN_VOID(lang_place_undefineds)
     *def_ptr= def;
     def->name = ptr->name;
     def->section = &bfd_und_section;
-    Q_enter_global_ref(def_ptr);
+    Q_enter_global_ref(def_ptr, ptr->name);
     ptr = ptr->next;
   }
 }
@@ -1080,6 +1081,7 @@ DEFUN(print_input_section,(in),
 	print_nl();
 
 	/* Find all the symbols in this file defined in this section */
+if (in->ifile->symbol_count)
 	  {
 	    asymbol **p;
 	    for (p = in->ifile->asymbols; *p; p++) {
@@ -1372,7 +1374,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
       case lang_output_section_statement_enum:
       {
 	bfd_vma after;
-	lang_output_section_statement_type *os =&(s->output_section_statement);
+	lang_output_section_statement_type *os = &s->output_section_statement;
 
 	if (os->bfd_section == &bfd_abs_section)
 	{
@@ -1506,8 +1508,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
 	{
 	  relaxing = true;
   
-
-	  had_relax |=  relax_section(prev);
+	  had_relax = had_relax || relax_section(prev);
 	  relaxing = false;
   
 	}
@@ -2123,7 +2124,7 @@ DEFUN(create_symbol,(name, flags, section),
   def->section = section;
 
   *def_ptr = def;
-  Q_enter_global_ref(def_ptr);
+  Q_enter_global_ref(def_ptr, name);
   return def;
 }
 
