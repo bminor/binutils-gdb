@@ -1,4 +1,4 @@
-2001-04-05  Hans-Peter Nilsson  <hp@bitrange.com>
+2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* readelf.c (display_debug_lines): Fix typo for "Prologue".
 
