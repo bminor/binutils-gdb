@@ -1,3 +1,12 @@
+2003-02-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiIO.c (tui_prep_terminal): Add one notused parameter.
+	* tui.c (tui_rl_switch_mode): Add two notused parameters.
+	(tui_rl_change_windows, tui_rl_next_keymap): Ditto.
+	(tui_rl_delete_other_windows): Ditto.
+	(tui_rl_change_windows, tui_rl_delete_other_windows): Update
+	calls.
+
 2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
 
        Import of readline 4.3.
