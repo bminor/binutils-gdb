@@ -1,3 +1,8 @@
+2001-06-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.c (breakpoint_1): Always output the breakpoint
+	headings.  Leave it to ui-out to decide which
+
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (print_frame): For ui_out, output a list of arguments.
