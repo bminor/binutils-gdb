@@ -216,7 +216,6 @@ ALL_EMULATIONS = \
 	eelf32lmip.o \
 	eelf32lppc.o \
 	eelf32ppc.o \
-	eelf64alpha.o \
 	eelf64_sparc.o \
 	eelf_i386.o \
 	egld960.o \
@@ -285,6 +284,9 @@ ALL_EMULATIONS = \
 	ew65.o \
 	ez8001.o \
 	ez8002.o
+
+ALL_64_EMULATIONS = \
+	eelf64alpha.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \

@@ -1,3 +1,12 @@
+Fri Oct 18 15:43:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ALL_EMULATIONS): Remove eelf64alpha.o.
+	(ALL_64_EMULATIONS): New variable.
+	* configure.in: Accept --enable-64-bit-bfd option.  If it is set
+	with --enable-targets=all, include ALL_64_EMULATIONS in
+	EMULATION_OFILES.
+	* configure: Rebuild.
+
 start-sanitize-v850
 Fri Oct 18 12:58:35 1996  Jeffrey A Law  (law@cygnus.com)
 
