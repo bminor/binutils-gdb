@@ -88,6 +88,7 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
 #define OPTION_DO_COMMAND	(OPTION_START + 2)
 #define OPTION_ARCHITECTURE     (OPTION_START + 3)
 #define OPTION_TARGET           (OPTION_START + 4)
+#define OPTION_ARCHITECTURE_INFO (OPTION_START + 5)
 
 static const OPTION standard_options[] =
 {
@@ -133,6 +134,12 @@ static const OPTION standard_options[] =
 
   { {"architecture", required_argument, NULL, OPTION_ARCHITECTURE},
       '\0', "MACHINE", "Specify the architecture to use",
+      standard_option_handler },
+  { {"architecture-info", no_argument, NULL, OPTION_ARCHITECTURE_INFO},
+      '\0', NULL, "List supported architectures",
+      standard_option_handler },
+  { {"info-architecture", no_argument, NULL, OPTION_ARCHITECTURE_INFO},
+      '\0', NULL, NULL,
       standard_option_handler },
 
   { {"target", required_argument, NULL, OPTION_TARGET},
@@ -259,6 +266,20 @@ standard_option_handler (sd, opt, arg, is_command)
 	    return SIM_RC_FAIL;
 	  }
 	STATE_ARCHITECTURE (sd) = ap;
+	break;
+      }
+
+    case OPTION_ARCHITECTURE_INFO:
+      {
+	const char **list = bfd_arch_list();
+	const char **lp;
+	if (list == NULL)
+	  abort ();
+	sim_io_printf (sd, "Valid architectures:");
+	for (lp = list; *lp != NULL; lp++)
+	  sim_io_printf (sd, " %s", *lp);
+	sim_io_printf (sd, "\n");
+	free (list);
 	break;
       }
 
