@@ -2691,9 +2691,8 @@ md_number_to_chars (buf, val, n)
 }
 
 /* Translate internal representation of relocation info to BFD target
-   format.  FIXME:  This code is not appropriate for SOM.  */
+   format.  */
 
-#ifdef OBJ_ELF
 arelent **
 tc_gen_reloc (section, fixp)
      asection *section;
@@ -2715,7 +2714,13 @@ tc_gen_reloc (section, fixp)
   assert (hppa_fixp != 0);
   assert (section != 0);
 
-  /* Unwind section relocations are handled in a special way.
+#ifdef OBJ_ELF
+  /* Yuk.  I would really like to push all this ELF specific unwind
+     crud into BFD and the linker.  That's how SOM does it -- and
+     if we could make ELF emulate that then we could share more code
+     in GAS (and potentially a gnu-linker later).
+
+     Unwind section relocations are handled in a special way.
      The relocations for the .unwind section are originally
      built in the usual way.  That is, for each unwind table
      entry there are two relocations:  one for the beginning of
@@ -2759,6 +2764,7 @@ tc_gen_reloc (section, fixp)
 
       return &no_relocs;
     }
+#endif
 
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
   assert (reloc != 0);
@@ -2786,6 +2792,7 @@ tc_gen_reloc (section, fixp)
 
   relocs[n_relocs] = NULL;
 
+#ifdef OBJ_ELF
   switch (fixp->fx_r_type)
     {
     case R_HPPA_COMPLEX:
@@ -2890,23 +2897,45 @@ tc_gen_reloc (section, fixp)
 	}
       break;
     }
+#else /* OBJ_SOM */
+
+  /* Preliminary relocation handling for SOM.  Needs to handle
+     COMPLEX relocations (yes, I've seen them occur) and it will
+     need to handle R_ENTRY/R_EXIT relocations in the very near future
+     (for generating unwinds).  */
+  switch (fixp->fx_r_type)
+    {
+    case R_HPPA_COMPLEX:
+    case R_HPPA_COMPLEX_PCREL_CALL:
+    case R_HPPA_COMPLEX_ABS_CALL:
+      abort();
+      break;
+    default:
+      assert (n_relocs == 1);
+      
+      code = *codes[0];
+      
+      reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where ;
+      reloc->addend = 0;
+
+      switch (code)
+	{
+	case R_PCREL_CALL:
+	case R_ABS_CALL:
+	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
+	  break;
+	default:
+	  reloc->addend = fixp->fx_addnumber;
+	  break;
+	}
+      break;
+    }
+#endif
 
   return relocs;
 }
-
-#else
-/* Translate internal representation of relocation info to BFD target
-   format.  FIXME:  This code is not appropriate for SOM.  */
-arelent **
-tc_gen_reloc (section, fixp)
-     asection *section;
-     fixS *fixp;
-{
-  static arelent *no_relocs = NULL;
-  abort ();
-  return &no_relocs;
-}
-#endif
 
 /* Process any machine dependent frag types.  */
 
