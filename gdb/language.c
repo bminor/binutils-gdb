@@ -37,7 +37,6 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "gdbcmd.h"
-#include "frame.h"
 #include "expression.h"
 #include "language.h"
 #include "target.h"

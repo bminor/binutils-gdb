@@ -328,7 +328,7 @@ init_nrom_ops (void)
   nrom_ops.to_sections = NULL;
   nrom_ops.to_sections_end = NULL;
   nrom_ops.to_magic = OPS_MAGIC;
-};
+}
 
 void
 _initialize_remote_nrom (void)

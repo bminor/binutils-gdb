@@ -18,7 +18,6 @@
 
 #include "defs.h"
 #include "value.h"
-#include "frame.h"
 #include "wrapper.h"
 
 /* Use this struct to pass arguments to wrapper routines. We assume

@@ -46,7 +46,6 @@
 #include "gdb_stat.h"
 #include "symtab.h"
 #include "breakpoint.h"
-#include "command.h"
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */

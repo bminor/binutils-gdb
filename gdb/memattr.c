@@ -34,7 +34,7 @@ static struct mem_region *
 create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 		   const struct mem_attrib *attrib)
 {
-  struct mem_region *n, *p, *new;
+  struct mem_region *n, *new;
 
   if (lo > hi)
     {

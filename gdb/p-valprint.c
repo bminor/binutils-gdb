@@ -31,6 +31,7 @@
 #include "gdbcore.h"
 #include "demangle.h"
 #include "valprint.h"
+#include "typeprint.h"
 #include "language.h"
 #include "target.h"
 #include "annotate.h"

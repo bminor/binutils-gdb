@@ -40,7 +40,6 @@
 #include "annotate.h"
 #include "gdbtypes.h"
 #include "linespec.h"
-#include "completer.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif

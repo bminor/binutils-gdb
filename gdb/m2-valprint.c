@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "valprint.h"
 #include "m2-lang.h"
 
 /* FIXME:  For now, just explicitly declare c_val_print and use it instead */

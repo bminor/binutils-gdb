@@ -20,7 +20,6 @@
 #include "value.h"
 #include "expression.h"
 #include "frame.h"
-#include "valprint.h"
 #include "language.h"
 #include "wrapper.h"
 #include "gdbcmd.h"

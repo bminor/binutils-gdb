@@ -25,21 +25,15 @@
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
-#include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "symtab.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "symfile.h"
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
-#include "language.h"
 #include "gdb_stat.h"
-#include "symfile.h"
-#include "objfiles.h"
-#include "completer.h"
 
 /* Local function declarations.  */
 

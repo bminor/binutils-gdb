@@ -37,7 +37,6 @@
 #include "inferior.h"		/* for write_pc */
 #include "gdb-stabs.h"
 #include "obstack.h"
-#include "completer.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

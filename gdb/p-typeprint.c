@@ -29,8 +29,6 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "command.h"
-#include "gdbcmd.h"
 #include "language.h"
 #include "p-lang.h"
 #include "typeprint.h"

@@ -35,8 +35,6 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "annotate.h"
-#include "symfile.h"
-#include "objfiles.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif

@@ -85,8 +85,6 @@ static int can_use_hardware_watchpoint (struct value *);
 static void break_at_finish_command (char *, int);
 static void break_at_finish_at_depth_command (char *, int);
 
-void tbreak_command (char *, int);
-
 static void tbreak_at_finish_command (char *, int);
 
 static void break_command_1 (char *, int, int);
@@ -210,17 +208,11 @@ static void ep_skip_leading_whitespace (char **s);
 
 /* Prototypes for exported functions. */
 
-static void awatch_command (char *, int);
-
-static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
-
 /* If FALSE, gdb will not use hardware support for watchpoints, even
    if such is available. */
 static int can_use_hw_watchpoints;
 
 void _initialize_breakpoint (void);
-
-void set_breakpoint_count (int);
 
 extern int addressprint;	/* Print machine addresses? */
 
@@ -2980,7 +2972,7 @@ bpstat_should_step (void)
   struct breakpoint *b;
   ALL_BREAKPOINTS (b)
     if (b->enable == enabled && b->type == bp_watchpoint)
-    return 1;
+      return 1;
   return 0;
 }
 
@@ -2995,7 +2987,7 @@ bpstat_have_active_hw_watchpoints (void)
 	((b->type == bp_hardware_watchpoint) ||
 	 (b->type == bp_read_watchpoint) ||
 	 (b->type == bp_access_watchpoint)))
-    return 1;
+      return 1;
   return 0;
 }
 
@@ -3950,7 +3942,7 @@ remove_solib_event_breakpoints (void)
 
   ALL_BREAKPOINTS_SAFE (b, temp)
     if (b->type == bp_shlib_event)
-    delete_breakpoint (b);
+      delete_breakpoint (b);
 }
 
 struct breakpoint *

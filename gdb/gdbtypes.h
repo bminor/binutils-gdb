@@ -1125,8 +1125,4 @@ extern int is_integral_type (struct type *);
 
 extern void maintenance_print_type (char *, int);
 
-/* typeprint.c */
-
-extern void print_type_scalar (struct type *, LONGEST, struct ui_file *);
-
 #endif /* GDBTYPES_H */

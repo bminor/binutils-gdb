@@ -26,7 +26,6 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "gdbcore.h"
-#include "frame.h"
 #include "command.h"
 #include "gdbcmd.h"
 #include "target.h"

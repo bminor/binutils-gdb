@@ -41,7 +41,6 @@
 #endif
 #include "event-top.h"
 #include "parser-defs.h"
-#include "completer.h"
 
 /* Functions exported for general use: */
 

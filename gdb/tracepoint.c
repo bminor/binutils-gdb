@@ -32,7 +32,6 @@
 #include "tracepoint.h"
 #include "remote.h"
 #include "linespec.h"
-#include "completer.h"
 #include "regcache.h"
 
 #include "ax.h"

@@ -25,7 +25,6 @@
 #include "gdb_string.h"
 #include <ctype.h>
 #include <fcntl.h>
-#include "frame.h"
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
@@ -3986,7 +3985,7 @@ getpkt (char *buf,
    executing user code to stop. If FOREVER == 0, this function is
    allowed to time out gracefully and return an indication of this to
    the caller. */
-int
+static int
 getpkt_sane (char *buf,
 	long sizeof_buf,
 	int forever)

@@ -30,12 +30,7 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "command.h"
-#include "gdbcmd.h"
-#include "language.h"
 #include "f-lang.h"
-#include "typeprint.h"
-#include "frame.h"		/* ??? */
 
 #include "gdb_string.h"
 #include <errno.h>

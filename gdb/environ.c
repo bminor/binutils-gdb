@@ -23,7 +23,6 @@
 #include "defs.h"
 #include "environ.h"
 #include "gdb_string.h"
-#include "gdbcore.h"
 
 
 /* Return a new environment object.  */

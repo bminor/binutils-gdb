@@ -35,21 +35,12 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
-#include "gdbthread.h"
 #include "annotate.h"
-#include "symfile.h"		/* for overlay functions */
 #endif
 
 #include "version.h"
 
 #include "floatformat.h"
-
-/* Convenience macro for allocting typesafe memory. */
-
-#ifndef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
-#endif
-
 
 /* Use the program counter to determine the contents and size
    of a breakpoint instruction.  If no target-dependent macro

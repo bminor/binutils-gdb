@@ -1,3 +1,57 @@
+2001-03-19  J.T. Conklin  <jtc@redback.com>
+
+	* arch-utils.c (#include "gdbthread.h"): Removed.
+	(#include "symfile.h"): Removed. 
+	(XMALLOC): Removed unused macro.
+	* breakpoint.c (tbreak_command): Removed local declaration.
+	(awatch_command, do_enable_breakpoint, set_breakpoint_count):
+ 	Remove duplicate declarations.
+	(bpstat_should_step, bpstat_have_active_hw_watchpoints)
+	(remove_solib_event_breakpoints): Fix indentation botch.
+	* c-typeprint.c (#include "command.h"): Removed.
+	(#include "gdbcmd.h"): Removed.
+	* ch-exp.c (ch_terminal_match_float_literal, parse_expr)
+	(parse_primval, parse_untyped_expr, parse_opt_untyped_expr):
+ 	Removed duplicate declarations.
+	* ch-typeprint.c (#include "command.h"): Removed.
+	(#include "gdbcmd.h"): Removed.
+	* corefile.c (#include "frame.h"): Removed
+	(#include "symfile.h"): Removed.
+	(#include "language.h"): Removed.
+	* dbxread.c (#include "command.h"): Removed.
+	* environ.c (#include "gdbcore.h"): Removed.
+	* event-loop.c (#include "top.h"): Removed.
+	* f-typeprint.c (#include "command.h"): Removed.
+	(#include "gdbcmd.h"): Removed.
+	(#include "language.h"): Removed.
+	(#include "typeprint.h"): Removed.
+	(#include "frame.h"): Removed.
+	* gdbtypes.h (print_type_scalar): Removed declaration.
+	* infcmd.c (#include "completer.h"): Removed.
+	* language.c (#include "frame.h"): Removed.
+	* m2-typeprint.c (#include "command.h"): Removed.
+	(#include "gdbcmd.h"): Removed.
+	(#include "language.h"): Removed.
+	* m2-valprint.c (#include "valprint.h"): Removed.
+	* p-typeprint.c (#include "command.h"): Removed.
+	(#include "gdbcmd.h"): Removed.
+	* p-valprint.c (#include "typeprint.h"): Removed.
+	* parse.c (#include "linespec.h"): Removed.
+	* regcache.c (#include "frame.h"): Removed.
+	* remote.c (#include "frame.h"): Removed.
+	(getpkt_sane): Make static.
+	* source.c (#include "completer.h"): Removed.
+	* stack.c (#include "symfile.h"): Removed.
+	(#include "objfiles.h"): Removed.
+	* symfile.c (#include "completer.h"): Removed.
+	* tracepoint.c (#include "completer.h"): Removed.
+	* values.c (#include "frame.h"): Removed.
+	* varobj.c (#include "valprint.h"): Removed.
+	* wrapper.c (#include "frame.h"): Removed.
+	
+	* memattr.c (create_mem_region): Removed unused variable.
+	* remote-nrom.c: Removed spurious semicolon after init_nrom_ops.
+
 2001-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* remote-rdp.c (rdp_set_command_line): Add missing double quote.

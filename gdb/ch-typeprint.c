@@ -28,8 +28,6 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "command.h"
-#include "gdbcmd.h"
 #include "language.h"
 #include "ch-lang.h"
 #include "typeprint.h"
