@@ -1,3 +1,12 @@
+Fri Apr  5 16:55:34 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (ABS8MEM): Renamed from ABSMOV.  Remove ABSMOV
+	from all insns.
+	(ABS8SRC,ABS8DST): Add ABS8MEM.
+	(add.l): Fix reg+reg variant.
+	(eepmov.w): Renamed from eepmovw.
+	(ldc,stc): Fix many cases.
+
 Sun Mar 31 13:30:03 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc.h (SPARC_OPCODE_ARCH_MASK): New macro.
