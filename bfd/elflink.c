@@ -2728,7 +2728,7 @@ elf_sort_symbol (const void *arg1, const void *arg2)
     return vdiff > 0 ? 1 : -1;
   else
     {
-      long sdiff = h1->root.u.def.section - h2->root.u.def.section;
+      long sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
       if (sdiff != 0)
 	return sdiff > 0 ? 1 : -1;
     }
@@ -3982,7 +3982,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		i = idx + 1;
 	      else
 		{
-		  long sdiff = slook - h->root.u.def.section;
+		  long sdiff = slook->id - h->root.u.def.section->id;
 		  if (sdiff < 0)
 		    j = idx;
 		  else if (sdiff > 0)

@@ -1,5 +1,8 @@
 2004-06-09  Alexandre Oliva  <aoliva@redhat.com>
 
+	* elflink.c (elf_sort_symbol): Compare section id, not pointers.
+	(elf_link_add_object_symbols): Likewise.
+
 	* elf-m10300.c (_bfd_mn10300_elf_reloc_type_class): New.
 	(elf_backend_reloc_type_class): New.
 
