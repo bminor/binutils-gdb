@@ -158,24 +158,9 @@ if [istarget "mips-idt-*"] then {
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
-# Set breakpoint on main, where struct foo is incomplete.
-
-send "break main\n"
-expect {
-	-re "Breakpoint.*at.* file .*opaque0.c, line.*$prompt $" {}
-	-re ".*$prompt $"	{ fail "setting breakpoint at main" }
-	timeout 		{ fail "(timeout) setting breakpoint" }
-}
-
-
-# Run until break at main.  Struct foo is opaque in the file containing
-# main().
-
-gdb_run_cmd
-expect {
-	-re "Breakpoint 1.*$prompt $" {}
-	-re ".*$prompt $"	{ fail "run until main()" }
-	timeout			{ fail "(timeout) run until main()" }
+# Run to main, where struct foo is incomplete.
+if ![runto main] {
+    perror "cannot run to breakpoint at main"
 }
 
 
@@ -253,35 +238,17 @@ $prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
 # Now reload the symbols again so we forget about anything we might
 # have learned reading the symbols during the previous tests.
 
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+}
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
-# Disable the breakoint on main().
-# Set breakpoint on getfoo, where struct foo is complete.
-
-send "disable 1\n"
-expect {
-	-re ".*$prompt $"	{}
-	timeout 		{ fail "(timeout) disabling breakpoint" }
-}
-
-
-send "break getfoo\n"
-expect {
-	-re "Breakpoint.*at.* file .*opaque1\.c, line.*$prompt $" {}
-	-re ".*$prompt $"	{ fail "setting breakpoint at getfoo" }
-	timeout 		{ fail "(timeout) setting breakpoint" }
-}
-
-
-# Run until break at getfoo().  Struct foo is defined here.
-# Retry all the tests we we tried at main() where struct foo was opaque.
-
-gdb_run_cmd
-expect {
-	-re "Breakpoint.*$prompt $" {}
-	-re ".*$prompt $"	{ fail "run until getfoo()" }
-	timeout			{ fail "(timeout) run until getfoo()" }
+# Run to getfoo, where struct foo is complete.
+if ![runto getfoo] {
+    perror "cannot run to breakpoint at getfoo"
 }
 
 
