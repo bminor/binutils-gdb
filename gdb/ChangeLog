@@ -1,3 +1,9 @@
+Wed Jan 12 19:32:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* objfiles.h: Fix comments to reflect the fact that the phrase
+	"top of stack" always refers to where the pushing and popping takes
+	place, regardless of whether it is at the highest or lowest address.
+
 Wed Jan 12 13:23:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_symbol):  Do not set TYPE_TAG_NAME for

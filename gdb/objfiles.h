@@ -40,10 +40,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    executable which correspond to the "startup file", I.E. crt0.o in most
    cases.  This file is assumed to be a startup file and frames with pc's
    inside it are treated as nonexistent.  Setting these variables is necessary
-   so that backtraces do not fly off the bottom of the stack (or top, depending
-   upon your stack orientation).
+   so that backtraces do not fly off the bottom of the stack.
 
-   Gdb also supports an alternate method to avoid running off the top/bottom
+   Gdb also supports an alternate method to avoid running off the bottom
    of the stack.
 
    There are two frames that are "special", the frame for the function
