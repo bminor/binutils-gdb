@@ -119,6 +119,7 @@ long archive_file_offset;
 unsigned long archive_file_size;
 unsigned long dynamic_addr;
 bfd_size_type dynamic_size;
+unsigned int dynamic_nent;
 char *dynamic_strings;
 char *string_table;
 unsigned long string_table_length;
@@ -4664,7 +4665,8 @@ get_32bit_dynamic_section (FILE *file)
   if (!edyn)
     return 0;
 
-  dynamic_section = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
+  dynamic_nent = dynamic_size / sizeof (*ext);
+  dynamic_section = malloc (dynamic_nent * sizeof (*entry));
 
   if (dynamic_section == NULL)
     {
@@ -4697,7 +4699,8 @@ get_64bit_dynamic_section (FILE *file)
   if (!edyn)
     return 0;
 
-  dynamic_section = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
+  dynamic_nent = dynamic_size / sizeof (*ext);
+  dynamic_section = malloc (dynamic_nent * sizeof (*entry));
 
   if (dynamic_section == NULL)
     {
@@ -4757,7 +4760,6 @@ static int
 process_dynamic_section (FILE *file)
 {
   Elf_Internal_Dyn *entry;
-  bfd_size_type i;
 
   if (dynamic_size == 0)
     {
@@ -4778,9 +4780,9 @@ process_dynamic_section (FILE *file)
   /* Find the appropriate symbol table.  */
   if (dynamic_symbols == NULL)
     {
-      for (i = 0, entry = dynamic_section;
-	   i < dynamic_size;
-	   ++i, ++entry)
+      for (entry = dynamic_section;
+	   entry < dynamic_section + dynamic_nent;
+	   ++entry)
 	{
 	  Elf_Internal_Shdr section;
 
@@ -4824,9 +4826,9 @@ process_dynamic_section (FILE *file)
   /* Similarly find a string table.  */
   if (dynamic_strings == NULL)
     {
-      for (i = 0, entry = dynamic_section;
-	   i < dynamic_size;
-	   ++i, ++entry)
+      for (entry = dynamic_section;
+	   entry < dynamic_section + dynamic_nent;
+	   ++entry)
 	{
 	  unsigned long offset;
 	  long str_tab_len;
@@ -4870,9 +4872,9 @@ process_dynamic_section (FILE *file)
     {
       unsigned long syminsz = 0;
 
-      for (i = 0, entry = dynamic_section;
-	   i < dynamic_size;
-	   ++i, ++entry)
+      for (entry = dynamic_section;
+	   entry < dynamic_section + dynamic_nent;
+	   ++entry)
 	{
 	  if (entry->d_tag == DT_SYMINENT)
 	    {
@@ -4889,7 +4891,7 @@ process_dynamic_section (FILE *file)
 
       if (dynamic_syminfo_offset != 0 && syminsz != 0)
 	{
-	  Elf_External_Syminfo *extsyminfo;
+	  Elf_External_Syminfo *extsyminfo, *extsym;
 	  Elf_Internal_Syminfo *syminfo;
 
 	  /* There is a syminfo section.  Read the data.  */
@@ -4906,11 +4908,12 @@ process_dynamic_section (FILE *file)
 	    }
 
 	  dynamic_syminfo_nent = syminsz / sizeof (Elf_External_Syminfo);
-	  for (i = 0, syminfo = dynamic_syminfo; i < dynamic_syminfo_nent;
-	       ++i, ++syminfo)
+	  for (syminfo = dynamic_syminfo, extsym = extsyminfo;
+	       syminfo < dynamic_syminfo + dynamic_syminfo_nent;
+	       ++syminfo, ++extsym)
 	    {
-	      syminfo->si_boundto = BYTE_GET (extsyminfo[i].si_boundto);
-	      syminfo->si_flags = BYTE_GET (extsyminfo[i].si_flags);
+	      syminfo->si_boundto = BYTE_GET (extsym->si_boundto);
+	      syminfo->si_flags = BYTE_GET (extsym->si_flags);
 	    }
 
 	  free (extsyminfo);
@@ -4918,14 +4921,14 @@ process_dynamic_section (FILE *file)
     }
 
   if (do_dynamic && dynamic_addr)
-    printf (_("\nDynamic section at offset 0x%lx contains %ld entries:\n"),
-	    dynamic_addr, (long) dynamic_size);
+    printf (_("\nDynamic section at offset 0x%lx contains %u entries:\n"),
+	    dynamic_addr, dynamic_nent);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
 
-  for (i = 0, entry = dynamic_section;
-       i < dynamic_size;
-       i++, entry++)
+  for (entry = dynamic_section;
+       entry < dynamic_section + dynamic_nent;
+       entry++)
     {
       if (do_dynamic)
 	{
@@ -6282,7 +6285,7 @@ process_syminfo (FILE *file ATTRIBUTE_UNUSED)
 	  break;
 	default:
 	  if (dynamic_syminfo[i].si_boundto > 0
-	      && dynamic_syminfo[i].si_boundto < dynamic_size)
+	      && dynamic_syminfo[i].si_boundto < dynamic_nent)
 	    {
 	      print_symbol (10,
 			    dynamic_strings
