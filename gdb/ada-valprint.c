@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct ada_val_print_args
 {
   struct type *type;
-  char *valaddr0;
+  const bfd_byte *valaddr0;
   int embedded_offset;
   CORE_ADDR address;
   struct ui_file *stream;
@@ -49,30 +49,21 @@ struct ada_val_print_args
   enum val_prettyprint pretty;
 };
 
-static void print_record (struct type *, char *, struct ui_file *, int,
-			  int, enum val_prettyprint);
+static void print_record (struct type *, const bfd_byte *, struct ui_file *,
+			  int, int, enum val_prettyprint);
 
-static int print_field_values (struct type *, char *, struct ui_file *,
-			       int, int, enum val_prettyprint,
-			       int, struct type *, char *);
-
-static int print_variant_part (struct type *, int, char *,
+static int print_field_values (struct type *, const bfd_byte *,
 			       struct ui_file *, int, int,
 			       enum val_prettyprint, int, struct type *,
-			       char *);
-
-static void val_print_packed_array_elements (struct type *, char *valaddr,
-					     int, struct ui_file *, int, int,
-					     enum val_prettyprint);
+			       const bfd_byte *);
 
 static void adjust_type_signedness (struct type *);
 
 static int ada_val_print_stub (void *args0);
 
-static int ada_val_print_1 (struct type *, char *, int, CORE_ADDR,
+static int ada_val_print_1 (struct type *, const bfd_byte *, int, CORE_ADDR,
 			    struct ui_file *, int, int, int,
 			    enum val_prettyprint);
-static void ada_print_floating (char *, struct type *, struct ui_file *);
 
 
 /* Make TYPE unsigned if its range of values includes no negatives.  */
@@ -138,7 +129,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type)
     by ada_coerce_to_simple_array).  */
 
 static void
-val_print_packed_array_elements (struct type *type, char *valaddr,
+val_print_packed_array_elements (struct type *type, const bfd_byte *valaddr,
 				 int bitoffset, struct ui_file *stream,
 				 int format, int recurse,
 				 enum val_prettyprint pretty)
@@ -246,7 +237,7 @@ val_print_packed_array_elements (struct type *type, char *valaddr,
 }
 
 static struct type *
-printable_val_type (struct type *type, char *valaddr)
+printable_val_type (struct type *type, const bfd_byte *valaddr)
 {
   return ada_to_fixed_type (ada_aligned_type (type), valaddr, 0, NULL);
 }
@@ -299,7 +290,8 @@ ui_memcpy (void *dest, const char *buffer, long len)
    a decimal point, and at least one digit before and after the
    point.  We use GNAT format for NaNs and infinities.  */
 static void
-ada_print_floating (char *valaddr, struct type *type, struct ui_file *stream)
+ada_print_floating (const bfd_byte *valaddr, struct type *type,
+		    struct ui_file *stream)
 {
   char buffer[64];
   char *s, *result;
@@ -555,9 +547,10 @@ ada_printstr (struct ui_file *stream, const bfd_byte *string,
    arrays.)  */
 
 int
-ada_val_print (struct type *type, char *valaddr0, int embedded_offset,
-	       CORE_ADDR address, struct ui_file *stream, int format,
-	       int deref_ref, int recurse, enum val_prettyprint pretty)
+ada_val_print (struct type *type, const bfd_byte *valaddr0,
+	       int embedded_offset, CORE_ADDR address,
+	       struct ui_file *stream, int format, int deref_ref,
+	       int recurse, enum val_prettyprint pretty)
 {
   struct ada_val_print_args args;
   args.type = type;
@@ -589,8 +582,9 @@ ada_val_print_stub (void *args0)
  * does not catch evaluation errors (leaving that to ada_val_print).  */
 
 static int
-ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
-		 CORE_ADDR address, struct ui_file *stream, int format,
+ada_val_print_1 (struct type *type, const bfd_byte *valaddr0,
+		 int embedded_offset, CORE_ADDR address,
+		 struct ui_file *stream, int format,
 		 int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   unsigned int len;
@@ -598,7 +592,7 @@ ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
   struct type *elttype;
   unsigned int eltlen;
   LONGEST val;
-  char *valaddr = valaddr0 + embedded_offset;
+  const bfd_byte *valaddr = valaddr0 + embedded_offset;
 
   type = ada_check_typedef (type);
 
@@ -879,10 +873,10 @@ ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
 }
 
 static int
-print_variant_part (struct type *type, int field_num, char *valaddr,
+print_variant_part (struct type *type, int field_num, const bfd_byte *valaddr,
 		    struct ui_file *stream, int format, int recurse,
 		    enum val_prettyprint pretty, int comma_needed,
-		    struct type *outer_type, char *outer_valaddr)
+		    struct type *outer_type, const bfd_byte *outer_valaddr)
 {
   struct type *var_type = TYPE_FIELD_TYPE (type, field_num);
   int which = ada_which_variant_applies (var_type, outer_type, outer_valaddr);
@@ -958,8 +952,9 @@ ada_value_print (struct value *val0, struct ui_file *stream, int format,
 }
 
 static void
-print_record (struct type *type, char *valaddr, struct ui_file *stream,
-	      int format, int recurse, enum val_prettyprint pretty)
+print_record (struct type *type, const bfd_byte *valaddr,
+	      struct ui_file *stream, int format, int recurse,
+	      enum val_prettyprint pretty)
 {
   type = ada_check_typedef (type);
 
@@ -990,10 +985,10 @@ print_record (struct type *type, char *valaddr, struct ui_file *stream,
    Returns 1 if COMMA_NEEDED or any fields were printed.  */
 
 static int
-print_field_values (struct type *type, char *valaddr, struct ui_file *stream,
-		    int format, int recurse, enum val_prettyprint pretty,
-		    int comma_needed, struct type *outer_type,
-		    char *outer_valaddr)
+print_field_values (struct type *type, const bfd_byte *valaddr,
+		    struct ui_file *stream, int format, int recurse,
+		    enum val_prettyprint pretty, int comma_needed,
+		    struct type *outer_type, const bfd_byte *outer_valaddr)
 {
   int i, len;
 

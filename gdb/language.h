@@ -208,7 +208,7 @@ struct language_defn
 
     /* Print a value using syntax appropriate for this language. */
 
-    int (*la_val_print) (struct type *, char *, int, CORE_ADDR,
+    int (*la_val_print) (struct type *, const bfd_byte *, int, CORE_ADDR,
 			 struct ui_file *, int, int, int,
 			 enum val_prettyprint);
 

@@ -91,10 +91,6 @@ static struct type *unk_lang_create_fundamental_type (struct objfile *, int);
 static void unk_lang_print_type (struct type *, char *, struct ui_file *,
 				 int, int);
 
-static int unk_lang_val_print (struct type *, char *, int, CORE_ADDR,
-			       struct ui_file *, int, int, int,
-			       enum val_prettyprint);
-
 static int unk_lang_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
 
 static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc);
@@ -1114,8 +1110,9 @@ unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
 }
 
 static int
-unk_lang_val_print (struct type *type, char *valaddr, int embedded_offset,
-		    CORE_ADDR address, struct ui_file *stream, int format,
+unk_lang_val_print (struct type *type, const bfd_byte *valaddr,
+		    int embedded_offset, CORE_ADDR address,
+		    struct ui_file *stream, int format,
 		    int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   error ("internal error - unimplemented function unk_lang_val_print called.");

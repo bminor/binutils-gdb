@@ -1,6 +1,6 @@
 /* Support for printing Java values for GDB, the GNU debugger.
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
    Software Foundation, Inc.
 
    This file is part of GDB.
@@ -35,13 +35,6 @@
 #include "gdb_string.h"
 
 /* Local functions */
-
-static void java_print_value_fields (struct type * type, char *valaddr,
-				     CORE_ADDR address,
-				     struct ui_file *stream, int format,
-				     int recurse,
-				     enum val_prettyprint pretty);
-
 
 int
 java_value_print (struct value *val, struct ui_file *stream, int format,
@@ -253,9 +246,9 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
    should not print, or zero if called from top level.  */
 
 static void
-java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
-			 struct ui_file *stream, int format, int recurse,
-			 enum val_prettyprint pretty)
+java_print_value_fields (struct type *type, const bfd_byte *valaddr,
+			 CORE_ADDR address, struct ui_file *stream,
+			 int format, int recurse, enum val_prettyprint pretty)
 {
   int i, len, n_baseclasses;
 
@@ -274,7 +267,7 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 	  int boffset;
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
 	  char *basename = TYPE_NAME (baseclass);
-	  char *base_valaddr;
+	  const bfd_byte *base_valaddr;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
 	    continue;
@@ -452,9 +445,10 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-java_val_print (struct type *type, char *valaddr, int embedded_offset,
-		CORE_ADDR address, struct ui_file *stream, int format,
-		int deref_ref, int recurse, enum val_prettyprint pretty)
+java_val_print (struct type *type, const bfd_byte *valaddr,
+		int embedded_offset, CORE_ADDR address,
+		struct ui_file *stream, int format, int deref_ref,
+		int recurse, enum val_prettyprint pretty)
 {
   unsigned int i = 0;	/* Number of characters printed */
   struct type *target_type;

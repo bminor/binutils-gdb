@@ -1,5 +1,37 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* language.h (struct language_defn): Make la_val_print's buffer
+	parameter a const bfd_byte.
+	* cp-valprint.c (cp_print_value_fields, cp_print_value): Update.
+	* ada-lang.c (ada_aligned_value_addr)
+	(ada_value_primitive_packed_val, ada_which_variant_applies): Update.
+	* valprint.c (val_print_array_elements): Update.
+	* valprint.h (val_print_array_elements): Update.
+	* ada-lang.h (ada_val_print, ada_aligned_value_addr)
+	(ada_value_primitive_packed_val, ada_which_variant_applies): Update.
+	* ada-valprint.c (ada_val_print, struct ada_val_print_args) 
+	(ada_val_print_1, ada_print_floating, printable_val_type) 
+	(print_record, val_print_packed_array_elements) 
+	(print_field_values, print_variant_part): Update.
+	* c-lang.h (c_val_print, cp_print_value_fields): Update.
+	* c-valprint.c (c_val_print): Update.
+	* f-lang.h (f_val_print): Update.
+	* f-valprint.c (f_val_print, f77_print_array_1)
+	(f77_print_array): Update.
+	* jv-lang.h (java_val_print): Update.
+	* jv-valprint.c (java_print_value_fields, java_val_print): Update.
+	* language.c (unk_lang_val_print): Update.
+	* m2-lang.h (m2_val_print): Update.
+	* m2-valprint.c (m2_val_print): Update.
+	* p-lang.h (pascal_val_print): Update.
+	(pascal_object_print_value_fields): Update.
+	* p-valprint.c (pascal_val_print) 
+	(pascal_object_print_value_fields, pascal_object_print_value) 
+	(pascal_object_print_value): Update.
+	* scm-lang.h (scm_val_print): Update.
+	* scm-valprint.c (scm_val_print): Update.
+	* value.h (val_print): Update.
+
 	* p-lang.h (pascal_object_print_class_member)
 	(pascal_object_print_class_method): Make buffer a const bfd_byte.
 	* p-valprint.c (pascal_object_print_class_method)

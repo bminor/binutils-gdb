@@ -1,6 +1,6 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
 
-   Copyright 1995, 1996, 1998, 1999, 2000, 2003 Free Software
+   Copyright 1995, 1996, 1998, 1999, 2000, 2003, 2005 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -50,7 +50,7 @@ struct value;
 extern int scm_value_print (struct value *, struct ui_file *,
 			    int, enum val_prettyprint);
 
-extern int scm_val_print (struct type *, char *, int, CORE_ADDR,
+extern int scm_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
 			  struct ui_file *, int, int, int,
 			  enum val_prettyprint);
 

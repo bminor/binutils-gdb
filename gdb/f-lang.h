@@ -1,6 +1,8 @@
 /* Fortran language support definitions for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1998, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1995, 1998, 2000, 2005 Free Software
+   Foundation, Inc.
+
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -28,7 +30,7 @@ extern void f_error (char *);	/* Defined in f-exp.y */
 extern void f_print_type (struct type *, char *, struct ui_file *, int,
 			  int);
 
-extern int f_val_print (struct type *, char *, int, CORE_ADDR,
+extern int f_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
 			struct ui_file *, int, int, int,
 			enum val_prettyprint);
 

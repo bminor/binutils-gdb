@@ -1,6 +1,8 @@
 /* Support for printing Fortran values for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003, 2005 Free
+   Software Foundation, Inc.
+
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com), additionally worked over by Stan Shebs.
 
@@ -42,13 +44,6 @@ static int there_is_a_visible_common_named (char *);
 extern void _initialize_f_valprint (void);
 static void info_common_command (char *, int);
 static void list_all_visible_commons (char *);
-static void f77_print_array (struct type *, char *, CORE_ADDR,
-			     struct ui_file *, int, int, int,
-			     enum val_prettyprint);
-static void f77_print_array_1 (int, int, struct type *, char *,
-			       CORE_ADDR, struct ui_file *, int, int, int,
-			       enum val_prettyprint,
-			       int *elts);
 static void f77_create_arrayprint_offset_tbl (struct type *,
 					      struct ui_file *);
 static void f77_get_dynamic_length_of_aggregate (struct type *);
@@ -278,8 +273,9 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
    the superior.  Address == the address in the inferior.  */
 
 static void
-f77_print_array_1 (int nss, int ndimensions, struct type *type, char *valaddr,
-		   CORE_ADDR address, struct ui_file *stream, int format,
+f77_print_array_1 (int nss, int ndimensions, struct type *type,
+		   const bfd_byte *valaddr, CORE_ADDR address,
+		   struct ui_file *stream, int format,
 		   int deref_ref, int recurse, enum val_prettyprint pretty,
 		   int *elts)
 {
@@ -323,8 +319,9 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type, char *valaddr,
    stuff and then immediately call f77_print_array_1() */
 
 static void
-f77_print_array (struct type *type, char *valaddr, CORE_ADDR address,
-		 struct ui_file *stream, int format, int deref_ref, int recurse,
+f77_print_array (struct type *type, const bfd_byte *valaddr,
+		 CORE_ADDR address, struct ui_file *stream,
+		 int format, int deref_ref, int recurse,
 		 enum val_prettyprint pretty)
 {
   int ndimensions;
@@ -361,7 +358,7 @@ f77_print_array (struct type *type, char *valaddr, CORE_ADDR address,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-f_val_print (struct type *type, char *valaddr, int embedded_offset,
+f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int format,
 	     int deref_ref, int recurse, enum val_prettyprint pretty)
 {

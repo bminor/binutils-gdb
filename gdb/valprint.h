@@ -50,9 +50,10 @@ extern int output_format;
 
 extern int stop_print_at_null;	/* Stop printing at null char? */
 
-extern void val_print_array_elements (struct type *, char *, CORE_ADDR,
-				      struct ui_file *, int, int, int,
-				      enum val_prettyprint, unsigned int);
+extern void val_print_array_elements (struct type *, const bfd_byte *,
+				      CORE_ADDR, struct ui_file *, int,
+				      int, int, enum val_prettyprint,
+				      unsigned int);
 
 extern void val_print_type_code_int (struct type *, const bfd_byte *,
 				     struct ui_file *);

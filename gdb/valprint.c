@@ -123,9 +123,9 @@ int addressprint;		/* Controls printing of machine addresses */
 
 
 int
-val_print (struct type *type, char *valaddr, int embedded_offset,
-	   CORE_ADDR address, struct ui_file *stream, int format, int deref_ref,
-	   int recurse, enum val_prettyprint pretty)
+val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
+	   CORE_ADDR address, struct ui_file *stream, int format,
+	   int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   struct type *real_type = check_typedef (type);
   if (pretty == Val_pretty_default)
@@ -761,8 +761,9 @@ print_char_chars (struct ui_file *stream, const bfd_byte *valaddr,
  */
 
 void
-val_print_array_elements (struct type *type, char *valaddr, CORE_ADDR address,
-			  struct ui_file *stream, int format, int deref_ref,
+val_print_array_elements (struct type *type, const bfd_byte *valaddr,
+			  CORE_ADDR address, struct ui_file *stream,
+			  int format, int deref_ref,
 			  int recurse, enum val_prettyprint pretty,
 			  unsigned int i)
 {

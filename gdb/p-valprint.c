@@ -56,9 +56,10 @@
 
 
 int
-pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
-		  CORE_ADDR address, struct ui_file *stream, int format,
-		  int deref_ref, int recurse, enum val_prettyprint pretty)
+pascal_val_print (struct type *type, const bfd_byte *valaddr,
+		  int embedded_offset, CORE_ADDR address,
+		  struct ui_file *stream, int format, int deref_ref,
+		  int recurse, enum val_prettyprint pretty)
 {
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
@@ -586,9 +587,10 @@ static void pascal_object_print_static_field (struct type *, struct value *,
 					      struct ui_file *, int, int,
 					      enum val_prettyprint);
 
-static void
-  pascal_object_print_value (struct type *, char *, CORE_ADDR, struct ui_file *,
-			     int, int, enum val_prettyprint, struct type **);
+static void pascal_object_print_value (struct type *, const bfd_byte *,
+				       CORE_ADDR, struct ui_file *,
+				       int, int, enum val_prettyprint,
+				       struct type **);
 
 void
 pascal_object_print_class_method (const bfd_byte *valaddr, struct type *type,
@@ -720,8 +722,9 @@ pascal_object_is_vtbl_member (struct type *type)
   return 0;
 }
 
-/* Mutually recursive subroutines of pascal_object_print_value and c_val_print to
-   print out a structure's fields: pascal_object_print_value_fields and pascal_object_print_value.
+/* Mutually recursive subroutines of pascal_object_print_value and
+   c_val_print to print out a structure's fields:
+   pascal_object_print_value_fields and pascal_object_print_value.
 
    TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and PRETTY have the
    same meanings as in pascal_object_print_value and c_val_print.
@@ -730,7 +733,7 @@ pascal_object_is_vtbl_member (struct type *type)
    should not print, or zero if called from top level.  */
 
 void
-pascal_object_print_value_fields (struct type *type, char *valaddr,
+pascal_object_print_value_fields (struct type *type, const bfd_byte *valaddr,
 				  CORE_ADDR address, struct ui_file *stream,
 				  int format, int recurse,
 				  enum val_prettyprint pretty,
@@ -903,8 +906,9 @@ pascal_object_print_value_fields (struct type *type, char *valaddr,
    baseclasses.  */
 
 void
-pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
-			   struct ui_file *stream, int format, int recurse,
+pascal_object_print_value (struct type *type, const bfd_byte *valaddr,
+			   CORE_ADDR address, struct ui_file *stream,
+			   int format, int recurse,
 			   enum val_prettyprint pretty,
 			   struct type **dont_print_vb)
 {
@@ -928,7 +932,7 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
       int boffset;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
-      char *base_valaddr;
+      const bfd_byte *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -966,8 +970,9 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
       if (boffset != -1 && (boffset < 0 || boffset >= TYPE_LENGTH (type)))
 	{
 	  /* FIXME (alloc): not safe is baseclass is really really big. */
-	  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-	  if (target_read_memory (address + boffset, base_valaddr,
+	  bfd_byte *buf = alloca (TYPE_LENGTH (baseclass));
+	  base_valaddr = buf;
+	  if (target_read_memory (address + boffset, buf,
 				  TYPE_LENGTH (baseclass)) != 0)
 	    boffset = -1;
 	}

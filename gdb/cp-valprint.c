@@ -1,7 +1,7 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,8 +50,8 @@ static void cp_print_static_field (struct type *, struct value *,
 				   struct ui_file *, int, int,
 				   enum val_prettyprint);
 
-static void cp_print_value (struct type *, struct type *, char *, int,
-			    CORE_ADDR, struct ui_file *, int, int,
+static void cp_print_value (struct type *, struct type *, const bfd_byte *,
+			    int, CORE_ADDR, struct ui_file *, int, int,
 			    enum val_prettyprint, struct type **);
 
 static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
@@ -227,10 +227,11 @@ cp_is_vtbl_member (struct type *type)
    should not print, or zero if called from top level.  */
 
 void
-cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
-		       int offset, CORE_ADDR address, struct ui_file *stream,
-		       int format, int recurse, enum val_prettyprint pretty,
-		       struct type **dont_print_vb, int dont_print_statmem)
+cp_print_value_fields (struct type *type, struct type *real_type,
+		       const bfd_byte *valaddr, int offset, CORE_ADDR address,
+		       struct ui_file *stream, int format, int recurse,
+		       enum val_prettyprint pretty,
+		       struct type **dont_print_vb,int dont_print_statmem)
 {
   int i, len, n_baseclasses;
   struct obstack tmp_obstack;
@@ -489,10 +490,10 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
    baseclasses.  */
 
 static void
-cp_print_value (struct type *type, struct type *real_type, char *valaddr,
-		int offset, CORE_ADDR address, struct ui_file *stream,
-		int format, int recurse, enum val_prettyprint pretty,
-		struct type **dont_print_vb)
+cp_print_value (struct type *type, struct type *real_type,
+		const bfd_byte *valaddr, int offset, CORE_ADDR address,
+		struct ui_file *stream, int format, int recurse,
+		enum val_prettyprint pretty, struct type **dont_print_vb)
 {
   struct obstack tmp_obstack;
   struct type **last_dont_print
@@ -517,7 +518,7 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
       int skip;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
-      char *base_valaddr;
+      const bfd_byte *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -564,8 +565,9 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 		      || (boffset + offset) >= TYPE_LENGTH (type)))
 		{
 		  /* FIXME (alloca): unsafe if baseclass is really really large. */
-		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (address + boffset, base_valaddr,
+		  bfd_byte *buf = alloca (TYPE_LENGTH (baseclass));
+		  base_valaddr = buf;
+		  if (target_read_memory (address + boffset, buf,
 					  TYPE_LENGTH (baseclass)) != 0)
 		    skip = 1;
 		  address = address + boffset;

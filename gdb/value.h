@@ -479,7 +479,7 @@ extern void value_print_array_elements (struct value *val,
 
 extern struct value *value_release_to_mark (struct value *mark);
 
-extern int val_print (struct type *type, char *valaddr,
+extern int val_print (struct type *type, const bfd_byte *valaddr,
 		      int embedded_offset, CORE_ADDR address,
 		      struct ui_file *stream, int format,
 		      int deref_ref, int recurse,

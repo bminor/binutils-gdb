@@ -1783,8 +1783,8 @@ has_negatives (struct type *type)
    Assumes 0 <= BIT_OFFSET < HOST_CHAR_BIT.  */
 
 struct value *
-ada_value_primitive_packed_val (struct value *obj, char *valaddr, long offset,
-                                int bit_offset, int bit_size,
+ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
+				long offset, int bit_offset, int bit_size,
                                 struct type *type)
 {
   struct value *v;
@@ -5705,7 +5705,7 @@ BadName:
 
 int
 ada_which_variant_applies (struct type *var_type, struct type *outer_type,
-                           char *outer_valaddr)
+                           const bfd_byte *outer_valaddr)
 {
   int others_clause;
   int i;
@@ -6854,8 +6854,8 @@ ada_aligned_type (struct type *type)
 /* The address of the aligned value in an object at address VALADDR
    having type TYPE.  Assumes ada_is_aligner_type (TYPE).  */
 
-char *
-ada_aligned_value_addr (struct type *type, char *valaddr)
+const bfd_byte *
+ada_aligned_value_addr (struct type *type, const bfd_byte *valaddr)
 {
   if (ada_is_aligner_type (type))
     return ada_aligned_value_addr (TYPE_FIELD_TYPE (type, 0),

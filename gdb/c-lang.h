@@ -39,7 +39,7 @@ extern void c_error (char *);	/* Defined in c-exp.y */
 extern void c_print_type (struct type *, char *, struct ui_file *, int,
 			  int);
 
-extern int c_val_print (struct type *, char *, int, CORE_ADDR,
+extern int c_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
 			struct ui_file *, int, int, int,
 			enum val_prettyprint);
 
@@ -82,8 +82,9 @@ extern void cp_print_class_member (const bfd_byte *, struct type *,
 extern void cp_print_class_method (const bfd_byte *, struct type *,
 				   struct ui_file *);
 
-extern void cp_print_value_fields (struct type *, struct type *, char *,
-				   int, CORE_ADDR, struct ui_file *, int,
+extern void cp_print_value_fields (struct type *, struct type *,
+				   const bfd_byte *, int, CORE_ADDR,
+				   struct ui_file *, int,
 				   int, enum val_prettyprint,
 				   struct type **, int);
 
