@@ -1,3 +1,7 @@
+Wed Nov 26 11:18:40 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* syscall.c (cb_syscall, cases stat, fstat): Handle -Wall -Werror.
+
 Tue Nov 25 20:12:46 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* sim-io.c (sim_io_syscalls): Disable lseek.

@@ -390,7 +390,10 @@ cb_syscall (cb, sc)
 	    result = -1;
 	    goto FinishSyscall;
 	  }
-	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
+	/* ??? Coercion to unsigned avoids -Wall -Werror failure.
+	   Ya, cb_host_to_target_stat could return an unsigned int,
+	   but that seems worse.  */
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != (unsigned) buflen)
 	  {
 	    free (buf);
 	    errcode = EINVAL;
@@ -422,7 +425,10 @@ cb_syscall (cb, sc)
 	    result = -1;
 	    goto FinishSyscall;
 	  }
-	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
+	/* ??? Coercion to unsigned avoids -Wall -Werror failure.
+	   Ya, cb_host_to_target_stat could return an unsigned int,
+	   but that seems worse.  */
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != (unsigned) buflen)
 	  {
 	    free (buf);
 	    errcode = EINVAL;
