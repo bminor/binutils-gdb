@@ -1,3 +1,8 @@
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cgen-dis.c: Add prototypes for count_decodable_bits
+	and add_insn_to_hash_chain.
+
 2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.in <bfd_sh_arc>: Enable sh64 support on sh-*.
