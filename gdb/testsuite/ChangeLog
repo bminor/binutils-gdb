@@ -1,3 +1,8 @@
+Mon Jun 14 09:09:04 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.t12/{gdbme0.c,scope.exp}: Test for bug where parameters are
+	printed in wrong order due to sorting.
+
 Sat Jun 12 15:03:58 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t00/teststrategy.exp:  Fix expected results for printing
