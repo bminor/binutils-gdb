@@ -1,3 +1,8 @@
+2002-10-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* config.bfd (s390-*-linux*): Add targ64_selvecs.
+	(s390x-*-linux*): Add targ_selvecs.
+
 2002-10-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (BFD32_BACKENDS): Remove elfarmqnx-nabi.lo,

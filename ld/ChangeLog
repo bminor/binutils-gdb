@@ -1,3 +1,12 @@
+2002-10-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* configure.tgt (s390x-*-linux*): Add elf_s390 emulation.
+	(s390-*-linux*): Add elf64_s390 emulation if want64.
+	* emulparams/elf64_sparc.sh (LIB_PATH): Update to match 2002-05-22
+	genscript.sh changes.
+	* emulparams/elf_x86_64.sh (LIB_PATH): Likewise.
+	* emulparams/elf64_s390.sh (LIB_PATH): Set up native 64 bit dirs.
+
 2002-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (load_symbols): Revert last change.
