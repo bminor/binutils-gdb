@@ -1,3 +1,14 @@
+Wed Oct 11 17:25:59 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* Makefile.in (VERSION): Bump version to 4.15.1
+
+Tue Oct 10 15:26:39 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (VERSION): Version 4.15 released.
+	* README: Updated for version 4.15.
+	* README.GDBTK: Updated for version 4.15
+	* NEWS: Updated for 4.15 release.
+	
 Tue Oct 10 13:18:50 1995  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in:  Add AC_PROG_YACC
