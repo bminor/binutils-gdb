@@ -70,7 +70,7 @@ extern const char *m68hc11_arch_format PARAMS ((void));
 #define LISTING_LHS_WIDTH_SECOND 4	/* One word on the second line */
 #define LISTING_LHS_CONT_LINES 4	/* And 4 lines max */
 #define LISTING_HEADER m68hc11_listing_header ()
-extern const char *m68hc11_listing_header PARAMS (());
+extern const char *m68hc11_listing_header PARAMS ((void));
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)

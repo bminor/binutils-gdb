@@ -1,5 +1,9 @@
 2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* config/tc-m68hc11.h (m68hc11_listing_header): Fix warning.
+
+2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* config/tc-m68hc11.h (ELF_TC_SPECIAL_SECTIONS): New sections
 	.softregs and .eeprom.
 
