@@ -1,3 +1,9 @@
+Wed Jun  5 00:09:17 1996  Per Bothner  <bothner@wombat.gnu.ai.mit.edu>
+
+	* config.guess:  Combine mips-mips-riscos cases, and use cpp to
+	distinguish sysv/svr4/bsd variants.
+	Based on a patch from Harlan Stenn <harlan@clark.net>.
+
 Fri Jun  7 14:24:49 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* configure.in: Added copyright notice.
