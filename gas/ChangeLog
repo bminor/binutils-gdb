@@ -1,6 +1,15 @@
 Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patch from Ronald F. Guilmette <rfg@monkeys.com>:
+	* read.c (read_a_source_file): Check for conditional operators
+	before doing an MRI pending alignment.
+	* config/tc-m68k.h (m68k_conditional_pseudoop): Declare.
+	(tc_conditional_pseudop): Define.
+	* config/tc-m68k.c (m68k_conditional_pseudop): New function.
+	* doc/internals.texi (CPU backend): Describe
+	tc_conditional_pseudoop.
+
+	Based on patch from Ronald F. Guilmette <rfg@monkeys.com>:
 	* config/tc-m68k.c (m68k_rel32_from_cmdline): New static
 	variable.
 	(md_begin): Check m68k_rel32_from_cmdline before setting

@@ -1,6 +1,6 @@
 /* This file is tc-m68k.h
 
-   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -26,12 +26,15 @@
 #ifdef OBJ_AOUT
 #ifdef TE_SUN3
 #define TARGET_FORMAT "a.out-sunos-big"
-#else
+#endif
 #ifdef TE_NetBSD
 #define TARGET_FORMAT "a.out-m68k-netbsd"
-#else
-#define TARGET_FORMAT "a.out-zero-big"
 #endif
+#ifdef TE_LINUX
+#define TARGET_FORMAT "a.out-m68k-linux"
+#endif
+#ifndef TARGET_FORMAT
+#define TARGET_FORMAT "a.out-zero-big"
 #endif
 #endif
 
@@ -76,6 +79,9 @@ extern int tc_coff_sizemachdep PARAMS ((struct frag *));
 extern int m68k_aout_machtype;
 #endif
 
+#define tc_comment_chars m68k_comment_chars
+extern const char *m68k_comment_chars;
+
 #define tc_crawl_symbol_chain(a)	{;}	/* not used */
 #define tc_headers_hook(a)		{;}	/* not used */
 #define tc_aout_pre_write_hook(x)	{;}	/* not used */
@@ -85,12 +91,6 @@ extern int m68k_aout_machtype;
 #define LISTING_LHS_WIDTH_SECOND 2	/* One word on the second line */
 #define LISTING_LHS_CONT_LINES 4/* And 4 lines max */
 #define LISTING_HEADER "68K GAS "
-
-/* Copied from write.c */
-#define M68K_AIM_KLUDGE(aim, this_state,this_type) \
-    if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
-					aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
-				    }
 
 #ifndef REGISTER_PREFIX
 #define REGISTER_PREFIX '%'
@@ -118,6 +118,9 @@ extern int m68k_aout_machtype;
 
 extern void m68k_mri_mode_change PARAMS ((int));
 #define MRI_MODE_CHANGE(i) m68k_mri_mode_change (i)
+
+extern int m68k_conditional_pseudoop PARAMS ((pseudo_typeS *));
+#define tc_conditional_pseudoop(pop) m68k_conditional_pseudoop (pop)
 
 #ifdef BFD_ASSEMBLER
 
@@ -162,5 +165,12 @@ extern int m68k_parse_long_option PARAMS ((char *));
 
 extern struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
+
+/* Copied from write.c */
+/* This was formerly called M68K_AIM_KLUDGE.  */
+#define md_prepare_relax_scan(fragP, address, aim, this_state, this_type) \
+  if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
+    aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
+  }
 
 /* end of tc-m68k.h */

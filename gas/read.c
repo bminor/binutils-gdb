@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -692,7 +692,16 @@ read_a_source_file (name)
 			      || ! ((pop->poc_handler == cons
 				     && pop->poc_val == 1)
 				    || (pop->poc_handler == s_space
-					&& pop->poc_val == 1))))
+					&& pop->poc_val == 1)
+#ifdef tc_conditional_pseudoop
+				    || tc_conditional_pseudoop (pop)
+#endif
+				    || pop->poc_handler == s_if
+				    || pop->poc_handler == s_ifdef
+				    || pop->poc_handler == s_ifc
+				    || pop->poc_handler == s_ifeqs
+				    || pop->poc_handler == s_else
+				    || pop->poc_handler == s_endif)))
 			{
 			  do_align (1, (char *) NULL, 0);
 			  mri_pending_align = 0;

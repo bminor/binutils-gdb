@@ -4715,6 +4715,18 @@ s_proc (ignore)
 
 /* Pseudo-ops handled for MRI compatibility.  */
 
+/* This function returns non-zero if the argument is a conditional
+   pseudo-op.  This is called when checking whether a pending
+   alignment is needed.  */
+
+int
+m68k_conditional_pseudoop (pop)
+     pseudo_typeS *pop;
+{
+  return (pop->poc_handler == s_mri_if
+	  || pop->poc_handler == s_mri_else);
+}
+
 /* Handle an MRI style chip specification.  */
 
 static void
