@@ -1,3 +1,8 @@
+2001-10-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_section_type_name): Don't print SHT_ prefix for
+	LOPROC, LOOS and LOUSER.
+
 Thu Oct 11 21:45:17 2001  J"orn Rennecke <amylaar@onetel.net.uk>
 
 	* MAINTAINERS: Update my email address.

@@ -1999,12 +1999,12 @@ get_section_type_name (sh_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "SHT_LOPROC+%x", sh_type - SHT_LOPROC);
+	  sprintf (buff, "LOPROC+%x", sh_type - SHT_LOPROC);
 	}
       else if ((sh_type >= SHT_LOOS) && (sh_type <= SHT_HIOS))
-	sprintf (buff, "SHT_LOOS+%x", sh_type - SHT_LOOS);
+	sprintf (buff, "LOOS+%x", sh_type - SHT_LOOS);
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
-	sprintf (buff, "SHT_LOUSER+%x", sh_type - SHT_LOUSER);
+	sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
       else
 	sprintf (buff, _("<unknown>: %x"), sh_type);
 
