@@ -1,3 +1,19 @@
+2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* archures.c (bfd_mach_s390_esa): Rename to bfd_mach_s390_31.
+	(bfd_mach_s390_esame): Rename to bfd_mach_s390_64.
+	* bfd-in2.h: Regenerate.
+	* cpu-s390.c (arch_info_struct): Use renamed architecture defines.
+	Replace architecture name "s390" with "s390:31-bit" and "s390:esame"
+	with "s390:64-bit".
+	* elf32-s390.c (elf_howto_table): Add 32 bit pc relative relocations.
+	(elf_s390_reloc_type_lookup): Likewise.
+	(elf_s390_check_relocs): Likewise.
+	(elf_s390_gc_sweep_hook): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_object_p): Use renamed architecture define.
+	* elf64-s390.c (elf_s390_object_p): Use renamed architecture define.
+
 2002-02-19  Frank Ch. Eigler  <fche@redhat.com>
 
 	* syms.c (stt[]): Sorted.  Added .init/.fini -> "t" mapping.

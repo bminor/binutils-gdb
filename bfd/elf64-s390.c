@@ -2325,7 +2325,7 @@ static boolean
 elf_s390_object_p (abfd)
      bfd *abfd;
 {
-  return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_esame);
+  return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_64);
 }
 
 /*
