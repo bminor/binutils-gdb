@@ -1,4 +1,10 @@
 start-sanitize-sky
+Tue Jun 16 18:33:37 1998 Jillian Ye <jillian@cygnus.com>
+
+        * sim/sky/sky_sce.exp: Removing sce2* and adding comments. 
+	* sim/sky/sky_sce_fast.exp: Removing diff, sce2, and adding
+	  comments.
+
 Tue Jun 16 15:44:01 1998 Jillian Ye <jillian@cygnus.com>
 
         * sim/sky/sky-defs.tcl: passing timeout option to sim_run
