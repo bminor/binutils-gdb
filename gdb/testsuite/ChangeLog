@@ -1,3 +1,7 @@
+2004-10-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* gdb.base/overlays.exp: Disable if target is Linux.
+
 2004-10-06  Felix Lee  <felix+log1@specifixinc.com>
 
 	* config/gdbserver.exp (gdb_load): Use right filename on remote.

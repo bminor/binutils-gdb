@@ -39,6 +39,11 @@ if [istarget "d10v-*-*"] then {
     return 
 }
 
+if [istarget "*-*-linux*"] then {
+    verbose "Skipping overlay test -- Linux doesn't support overlayed programs."
+    return 
+}
+
 set testfile "overlays"
 set binfile ${objdir}/${subdir}/${testfile}
 set srcfile ${testfile}.c
