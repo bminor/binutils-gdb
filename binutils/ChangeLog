@@ -1,3 +1,8 @@
+Wed Aug 16 16:26:52 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (gen_exp_file): Fix RVA handling.
+	(rva_s, rva_n): Delete.
+
 Fri Aug 11 18:27:18 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* nm.c (main): Ignore -e.

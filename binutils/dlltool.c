@@ -606,19 +606,6 @@ sfunc (a, b)
 }
 
 
-static char *rva_n (long addr)
-{
-  char b[20];
-  sprintf (b, "0x%08x - __rva");
-  return strdup (b);
-}
-
-static char *rva_s (char *s)
-{
-  char b[20];
-  sprintf (b, "0x%08x - __rva");
-  return strdup (b);
-}
 
 static void 
 flush_page (f, need, page_addr, on_page)
@@ -629,9 +616,11 @@ flush_page (f, need, page_addr, on_page)
 {
   int i;
   /* Flush this page */
-  fprintf (f, "\t%s\t%s\t%s Starting RVA for chunk\n",
+  fprintf (f, "\t%s\t%s0x%08x%s\t%s Starting RVA for chunk\n",
 	   ASM_LONG,
-	   rva_n(page_addr),
+	   ASM_RVA_BEFORE,
+	   page_addr,
+	   ASM_RVA_AFTER,
 	   ASM_C);
   fprintf (f, "\t%s\t0x%x\t%s Size of block\n",
 	   ASM_LONG,
@@ -680,7 +669,8 @@ gen_exp_file ()
   fprintf (f, "\t%s	0	%s Allways 0\n", ASM_LONG, ASM_C);
   fprintf (f, "\t%s	%d	%s Time and date\n", ASM_LONG, time (0), ASM_C);
   fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s	name	%s Ptr to name of dll\n", ASM_LONG, ASM_C);
+  fprintf (f, "\t%s	%sname%s%s Ptr to name of dll\n", ASM_LONG, ASM_RVA_BEFORE,
+	   ASM_RVA_AFTER,ASM_C);
   fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_ord, ASM_C);
   fprintf (f, "\t%s The next field is documented as being the number of functions\n", ASM_C);
   fprintf (f, "\t%s yet it doesn't look like that in real PE dlls\n", ASM_C);
@@ -688,9 +678,12 @@ gen_exp_file ()
   fprintf (f, "\t%s always the number of names field\n", ASM_C);
   fprintf (f, "\t%s	%d	%s Number of functions\n", ASM_LONG, d_nfuncs, ASM_C);
   fprintf (f, "\t%s	%d	%s Number of names\n", ASM_LONG, d_nfuncs, ASM_C);
-  fprintf (f, "\t%s	afuncs  %s Address of functions\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s	anames	%s Address of names\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s	anords	%s Address of ordinals\n", ASM_LONG, ASM_C);
+  fprintf (f, "\t%s	%safuncs%s  %s Address of functions\n", ASM_LONG, 
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER,ASM_C);
+  fprintf (f, "\t%s	%sanames%s	%s Address of names\n", ASM_LONG, 
+	   	   ASM_RVA_BEFORE, ASM_RVA_AFTER,ASM_C);
+  fprintf (f, "\t%s	%sanords%s	%s Address of ordinals\n", ASM_LONG, 
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER,ASM_C);
 
   fprintf (f, "name:	%s	\"%s.%s\"\n", ASM_TEXT, outfile_prefix, d_suffix);
 
@@ -709,7 +702,8 @@ gen_exp_file ()
 	  i = exp->ordinal;
 	}
 #endif
-      fprintf (f, "\t%s	%s\t%s %d\n", ASM_LONG, exp->internal_name, ASM_C, exp->ordinal);
+      fprintf (f, "\t%s\t%s%s%s%s %d\n", ASM_LONG, ASM_RVA_BEFORE,
+	       exp->internal_name,ASM_RVA_AFTER, ASM_C, exp->ordinal);
       i++;
     }
 
@@ -724,7 +718,7 @@ gen_exp_file ()
 	}
       else
 	{
-	  fprintf (f, "\t%s	n%d\n", ASM_LONG, i);
+	  fprintf (f, "\t%s	%sn%d%s\n", ASM_LONG, ASM_RVA_BEFORE,i,ASM_RVA_AFTER);
 	}
     }
 
@@ -817,6 +811,8 @@ gen_exp_file ()
 	  need[on_page++] = addr;
 	}
       flush_page (f, need, page_addr, on_page);
+
+      fprintf (f, "\t%s\t0,0\t%s End\n",ASM_LONG, ASM_C);
     }
 
   fclose (f);
