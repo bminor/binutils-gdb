@@ -138,8 +138,8 @@ resource 'SIZE' (-1) {
 	reserved,
 	reserved,
 	reserved,
-	50000,
-	50000
+	4000*1024,
+	4000*1024
 };
 
 resource 'DLOG' (128) {

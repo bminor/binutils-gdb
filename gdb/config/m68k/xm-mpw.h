@@ -61,6 +61,15 @@ void mpw_abort ();
 #define fseek mpw_fseek
 #define abort mpw_abort
 
+#define printf hacked_printf
+#define fprintf hacked_fprintf
+#define vprintf hacked_vfprintf
+#define fputs hacked_fputs
+#define fputc hacked_fputc
+#undef putc
+#define putc hacked_putc
+#define fflush hacked_fflush
+
 /* Define as macros so as to mask the previous enum. */
 
 #ifndef BFD_TRUE_FALSE
@@ -112,3 +121,7 @@ char *strdup (char *s1);
 #ifndef R_OK
 #define R_OK 4
 #endif
+
+extern int StandAlone;
+
+extern int mac_app;

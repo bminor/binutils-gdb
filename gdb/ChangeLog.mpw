@@ -1,3 +1,30 @@
+Thu May 12 17:04:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (INCLUDE_CFLAGS): Add readline source dir.
+	(READLINE_CFLAGS, READLINE_SRC, READLINE_DIR): Uncomment.
+	(TSOBS): Don't compile inflow.c.
+	(all, install): Add MacGDB.
+	* main.c (main): Do Mac-specific init and command loop if a
+	standalone app, skip full option help message if compiling
+	with MPW C.
+	(gdb_readline): If MPW, add a newline after the (gdb) prompt.
+	* utils.c (_initialize_utils): If MPW, don't try to use termcap to
+	compute the window size.
+	* config/m68k/xm-mpw.h (printf, fprintf, fputs, fputc, putc,
+	fflush): Define as macros that expand into hacked_... versions.
+	(StandAlone, mac_app): Declare.
+	* macgdb.r (SIZE): Set the default partition to 4000K.
+	* mac-xdep.c (readline.h, history.h): Include.
+	(terminal.h): Don't include.
+	(mac_app): Define.
+	(gdb_has_a_terminal): Define Mac-specific version.
+	(do_keyboard_command): Simplify search for command string.
+	(readline): Define as gdb_readline.
+	Add other history/readline stubs to make main gdb link.
+	(hacked_fprintf, hacked_printf, hacked_vfprintf, hacked_fputs,
+	hacked_fputc, hacked_fflush): New functions, intercept output to
+	stdout and stderr, send to console window.
+
 Tue Apr 26 17:44:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (MacGDB): New target, standalone Mac-hosted gdb.

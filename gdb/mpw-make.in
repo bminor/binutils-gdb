@@ -112,7 +112,7 @@ CC-LD={CC}
 # This is essentially the header file directory for the library
 # routines in libiberty.
 INCLUDE_DIR = "{srcroot}"include
-INCLUDE_CFLAGS = -i {INCLUDE_DIR} -i {INCLUDE_DIR}:mpw -i ::extra-include -i "{srcroot}"bfd
+INCLUDE_CFLAGS = -i {INCLUDE_DIR} -i {INCLUDE_DIR}:mpw -i ::extra-include -i "{srcroot}"bfd -i "{srcroot}"readline
 # Where is the "-liberty" library, containing getopt and obstack?
 LIBIBERTY = ::libiberty:libiberty.o
 
@@ -133,12 +133,12 @@ BFD_SRC = "{srcdir}"{BFD_DIR}
 BFD_CFLAGS = -i {BFD_DIR} -i {BFD_SRC}
 
 # Where is the READLINE library?  Typically in ::readline.
-#READLINE_DIR = ::readline
+READLINE_DIR = ::readline
 READLINE = {READLINE_DIR}:libreadline.o
-READLINE_DISABLE = -d NO_READLINE
-#READLINE_SRC = "{srcdir}"{READLINE_DIR}
-#READLINE_CFLAGS = -i {READLINE_SRC}
-READLINE_CFLAGS = {READLINE_DISABLE}
+#READLINE_DISABLE = -d NO_READLINE
+READLINE_SRC = "{srcdir}"{READLINE_DIR}
+READLINE_CFLAGS = -i {READLINE_SRC}
+#READLINE_CFLAGS = {READLINE_DISABLE}
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ::opcodes, or they are in a header file
@@ -659,7 +659,7 @@ OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{
 	"{o}"c-valprint.c.o "{o}"cp-valprint.c.o "{o}"ch-valprint.c.o "{o}"m2-valprint.c.o "{o}"nlmread.c.o \Option-d
 	"{o}"serial.c.o "{o}"mdebugread.c.o
 
-TSOBS = "{o}"inflow.c.o
+TSOBS =
 
 NTSOBS = "{o}"standalone.c.o
 
@@ -678,7 +678,7 @@ YYOBJ = c-exp.tab.c.o m2-exp.tab.c.o ch-exp.tab.c.o
 # .c.o \Option-f 
 #	{CC} -c {INTERNAL_CFLAGS} $<
 
-all \Option-f  gdb
+all \Option-f  gdb MacGDB
 #	@{MAKE} {FLAGS_TO_PASS} DO=all "DODIRS=`echo {SUBDIRS} | sed 's:testsuite::'`" subdir_do
 
 # The check target can not use subdir_do, because subdir_do does not
@@ -705,7 +705,8 @@ gdb.z \Option-f gdb.1
 # install-only is intended to address that need.
 install \Option-f  all install-only
 install-only \Option-f  
-	Duplicate -i -y gdb "{bindir}"gdb
+	Duplicate -y gdb "{bindir}":gdb
+	Duplicate -y MacGDB "{bindir}":MacGDB
 
 uninstall \Option-f  force
 	Delete -i -y {bindir}:gdb {man1dir}:gdb.1

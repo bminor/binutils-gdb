@@ -382,6 +382,18 @@ return_to_top_level (reason)
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
+
+  if (annotation_level > 1)
+    switch (reason)
+      {
+      case RETURN_QUIT:
+	printf_unfiltered ("\n\032\032quit\n");
+	break;
+      case RETURN_ERROR:
+	printf_unfiltered ("\n\032\032error\n");
+	break;
+      }
+
   (NORETURN void) longjmp
     (reason == RETURN_ERROR ? error_return : quit_return, 1);
 }
@@ -551,6 +563,16 @@ main (argc, argv)
 
   register int i;
 
+/* start-sanitize-mpw */
+#ifdef MPW
+  /* Drop into MacsBug, but only if the executable is specially named. */
+  if (strcmp(argv[0], "DEBUGGDB") == 0)
+    DebugStr("\pat start of GDB main");
+
+  if (StandAlone)
+    mac_app = mac_init ();
+#endif /* MPW */
+/* end-sanitize-mpw */
   /* This needs to happen before the first use of malloc.  */
   init_malloc ((PTR) NULL);
 
@@ -790,6 +812,12 @@ main (argc, argv)
 
       /* But don't use *_filtered here.  We don't want to prompt for continue
 	 no matter how small the screen or how much we're going to print.  */
+/* start-sanitize-mpw */
+/* For reasons too ugly to describe... */
+#ifdef MPW_C
+      fputs_unfiltered ("This is the GNU debugger.\n", gdb_stdout);
+#else
+/* end-sanitize-mpw */
       fputs_unfiltered ("\
 This is the GNU debugger.  Usage:\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
@@ -812,6 +840,9 @@ Options:\n\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --readnow          Fully read symbol files on first access.\n\
 ", gdb_stdout);
+/* start-sanitize-mpw */
+#endif /* MPW_C */
+/* end-sanitize-mpw */
 #ifdef ADDITIONAL_OPTION_HELP
       fputs_unfiltered (ADDITIONAL_OPTION_HELP, gdb_stdout);
 #endif
@@ -990,6 +1021,17 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       if (!SET_TOP_LEVEL ())
 	{
 	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
+/* start-sanitize-mpw */
+#ifdef MPW
+	  /* If we're being a Mac application, go into a Mac-specific
+	     event-handling loop instead.  We still want to be inside
+	     the outer loop, because that will catch longjmps resulting
+	     from some command executions. */
+	  if (mac_app)
+	    mac_command_loop ();
+	  else
+#endif /* MPW */
+/* start-sanitize-mpw */
 	  command_loop ();
           quit_command ((char *)0, instream == stdin);
 	}
@@ -1119,7 +1161,7 @@ command_loop ()
 	reinitialize_more_filter ();
       old_chain = make_cleanup (command_loop_marker, 0);
       command = command_line_input (instream == stdin ? prompt : (char *) NULL,
-				      instream == stdin);
+				    instream == stdin, "prompt");
       if (command == 0)
 	return;
       execute_command (command, instream == stdin);
@@ -1166,6 +1208,13 @@ gdb_readline (prrompt)
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
       fputs_unfiltered (prrompt, gdb_stdout);
+/* start-sanitize-mpw */
+#ifdef MPW
+      /* Move to a new line so the entered line doesn't have a prompt
+	 on the front of it. */
+      fputs_unfiltered ("\n", gdb_stdout);
+#endif /* MPW */
+/* end-sanitize-mpw */
       gdb_flush (gdb_stdout);
     }
   
@@ -1691,9 +1740,10 @@ init_signals ()
    simple input as the user has requested.  */
 
 char *
-command_line_input (prrompt, repeat)
+command_line_input (prrompt, repeat, annotation_suffix)
      char *prrompt;
      int repeat;
+     char *annotation_suffix;
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
@@ -1705,11 +1755,17 @@ command_line_input (prrompt, repeat)
   char *nline;
   char got_eof = 0;
 
-  if (annotation_level > 1 && prrompt != NULL)
+  if (annotation_level > 1 && instream == stdin)
     {
-      local_prompt = alloca (strlen (prrompt) + 20);
-      strcpy (local_prompt, prrompt);
-      strcat (local_prompt, "\n\032\032prompt\n");
+      local_prompt = alloca ((prrompt == NULL ? 0 : strlen (prrompt))
+			     + strlen (annotation_suffix) + 40);
+      if (prrompt == NULL)
+	local_prompt[0] = '\0';
+      else
+	strcpy (local_prompt, prrompt);
+      strcat (local_prompt, "\n\032\032");
+      strcat (local_prompt, annotation_suffix);
+      strcat (local_prompt, "\n");
     }
 
   if (linebuffer == 0)
@@ -1748,7 +1804,11 @@ command_line_input (prrompt, repeat)
 	}
 
       if (annotation_level > 1 && instream == stdin)
-	printf_unfiltered ("\n\032\032pre-prompt\n");
+	{
+	  printf_unfiltered ("\n\032\032pre-");
+	  printf_unfiltered (annotation_suffix);
+	  printf_unfiltered ("\n");
+	}
 
       /* Don't use fancy stuff if not talking to stdin.  */
       if (command_editing_p && instream == stdin
@@ -1758,7 +1818,11 @@ command_line_input (prrompt, repeat)
 	rl = gdb_readline (local_prompt);
 
       if (annotation_level > 1 && instream == stdin)
-	printf_unfiltered ("\n\032\032post-prompt\n");
+	{
+	  printf_unfiltered ("\n\032\032post-");
+	  printf_unfiltered (annotation_suffix);
+	  printf_unfiltered ("\n");
+	}
 
       if (!rl || rl == (char *) EOF)
 	{
@@ -1827,7 +1891,7 @@ command_line_input (prrompt, repeat)
 	  if (expanded < 0)
 	    {
 	      free (history_value);
-	      return command_line_input (prrompt, repeat);
+	      return command_line_input (prrompt, repeat, annotation_suffix);
 	    }
 	  if (strlen (history_value) > linelength)
 	    {
@@ -1861,7 +1925,7 @@ command_line_input (prrompt, repeat)
       && ISATTY (stdin) && *linebuffer)
     add_history (linebuffer);
 
-  /* Note: lines consisting soley of comments are added to the command
+  /* Note: lines consisting solely of comments are added to the command
      history.  This is useful when you type a command, and then
      realize you don't want to execute it quite yet.  You can comment
      out the command and then later fetch it from the value history
@@ -1928,7 +1992,7 @@ read_command_lines ()
   while (1)
     {
       dont_repeat ();
-      p = command_line_input ((char *) NULL, instream == stdin);
+      p = command_line_input ((char *) NULL, instream == stdin, "commands");
       if (p == NULL)
 	/* Treat end of file like "end".  */
 	break;

@@ -251,7 +251,7 @@ warning (va_alist)
 }
 
 /* Start the printing of an error message.  Way to use this is to call
-   this, output the error message, and then call
+   this, output the error message (use filtered output), and then call
    return_to_top_level (RETURN_ERROR).  error() provides a convenient way to
    do this for the special case that the error message can be formatted with
    a single printf call, but this is more general.  */
@@ -1733,6 +1733,11 @@ _initialize_utils ()
 #else  
   lines_per_page = 24;
   chars_per_line = 80;
+/* start-sanitize-mpw */
+#ifndef MPW
+  /* No termcap under MPW, although might be cool to do something
+     by looking at worksheet or console window sizes. */
+/* end-sanitize-mpw */
   /* Initialize the screen height and width from termcap.  */
   {
     char *termtype = getenv ("TERM");
@@ -1767,6 +1772,9 @@ _initialize_utils ()
 	  }
       }
   }
+/* start-sanitize-mpw */
+#endif /* MPW */
+/* end-sanitize-mpw */
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 

@@ -20,6 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 
+#include "readline.h"
+#include "history.h"
+
 #include <Values.h>
 #include <Types.h>
 #include <Resources.h>
@@ -75,9 +78,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbtypes.h"
 #include "expression.h"
 #include "language.h"
-#include "terminal.h" /* For job_control.  */
 
 #include "mac-defs.h"
+
+int mac_app;
 
 int useWNE;
 
@@ -101,6 +105,10 @@ Rect console_v_scroll_rect;
 TEHandle console_text;
 
 Rect console_text_rect;
+
+/* This will go away eventually. */
+gdb_has_a_terminal () { return 1; }
+
 
 mac_init ()
 {
@@ -154,7 +162,7 @@ mac_init ()
   else
     console_window = GetNewWindow (wConsole, NULL, (WindowPtr) -1L);
 
-  if (1) DebugStr("\pnear beginning");
+  if (0) DebugStr("\pnear beginning");
   SetPort (console_window);
   console_text_rect = console_window->portRect;
   console_text_rect.bottom -= sbarwid - 1;
@@ -526,6 +534,7 @@ do_keyboard_command (key)
 char key;
 {
   int startpos, endpos, i;
+  char *last_newline;
   char buf[10], *text_str, *command;
   CharsHandle text;
 
@@ -544,24 +553,20 @@ char key;
 	}
       else
 	{
-	  for (i = startpos; i > 0; --i)
+	  DebugStr("\plooking for command");
+	  last_newline = strrchr(*text+startpos, '\n');
+	  if (last_newline)
 	    {
-	      strncpy (buf, *text + i, 5);
-	      buf[5] = 0;
-	      if (strncmp (buf, "(gdb)") == 0)
-		break;
-	    }
-	  if (i > 0)
-	    {
-	      strncpy (commandbuf + 1, *text + i + 5, startpos - i);
-	      commandbuf[1 + startpos - i] = '\0';
+	      strncpy (commandbuf + 1,
+		       last_newline,
+		       last_newline - (*text+startpos));
+	      commandbuf[1 + last_newline - (*text+startpos)] = 0;
+	      command = commandbuf + 1;
 	    }
 	  else
 	    {
-	      SysBeep (20);
-	      commandbuf[1] = '\0';
+	      command = "help";
 	    }
-	  command = commandbuf + 1;
 	}
       HUnlock ((Handle) text);
       commandbuf[0] = strlen(command);
@@ -623,8 +628,207 @@ adjust_console_scrollbars ()
   newmax = lines - (((*console_text)->viewRect.bottom - (*console_text)->viewRect.top)
 		    / (*console_text)->lineHeight);
   if (newmax < 0) newmax = 0;
-  SetCtlMax(console_v_scrollbar, newmax);
+  SetCtlMax (console_v_scrollbar, newmax);
   value = ((*console_text)->viewRect.top - (*console_text)->destRect.top)
     / (*console_text)->lineHeight;
-  SetCtlValue(console_v_scrollbar, value);
+  SetCtlValue (console_v_scrollbar, value);
 }
+
+/* Readline substitute. */
+
+char *
+readline (char *prrompt)
+{
+  return gdb_readline (prrompt);
+}
+
+char *rl_completer_word_break_characters;
+
+char *rl_completer_quote_characters;
+
+int (*rl_completion_entry_function) ();
+
+int rl_point;
+
+char *rl_line_buffer;
+
+char *rl_readline_name;
+
+/* History substitute. */
+
+void
+add_history (char *buf)
+{
+}
+
+void
+stifle_history (int n)
+{
+}
+
+int
+unstifle_history ()
+{
+}
+
+int
+read_history (char *name)
+{
+}
+
+int
+write_history (char *name)
+{
+}
+
+int
+history_expand (char *x, char **y)
+{
+}
+
+extern HIST_ENTRY *
+history_get (int xxx)
+{
+  return NULL;
+}
+
+int history_base;
+
+char *
+filename_completion_function (char *text, char *name)
+{
+  return "?";
+}
+
+char *
+tilde_expand (char *str)
+{
+  return strsave (str);
+}
+
+/* Modified versions of standard I/O. */
+
+#include <stdarg.h>
+
+#undef fprintf
+
+int
+hacked_fprintf (FILE *fp, const char *fmt, ...)
+{
+  int ret;
+  va_list ap;
+
+  va_start (ap, fmt);
+  if (mac_app && (fp == stdout || fp == stderr))
+    {
+      char buf[1000];
+
+      ret = vsprintf(buf, fmt, ap);
+      TEInsert (buf, strlen(buf), console_text);
+      TESetSelect (100000, 100000, console_text);
+      draw_console ();
+    }
+  else
+    ret = vfprintf (fp, fmt, ap);
+  va_end (ap);
+  return ret;
+}
+
+#undef printf
+
+int
+hacked_printf (const char *fmt, ...)
+{
+  int ret;
+  va_list ap;
+
+  va_start (ap, fmt);
+  if (mac_app)
+    {
+      ret = hacked_vfprintf(stdout, fmt, ap);
+    }
+  else
+    ret = vfprintf (stdout, fmt, ap);
+  va_end (ap);
+  return ret;
+}
+
+#undef vfprintf
+
+int 
+hacked_vfprintf (FILE *fp, const char *format, va_list args)
+{
+  if (mac_app && (fp == stdout || fp == stderr))
+    {
+      char buf[1000];
+      int ret;
+
+      ret = vsprintf(buf, format, args);
+      TEInsert (buf, strlen(buf), console_text);
+      TESetSelect (100000, 100000, console_text);
+      draw_console ();
+      return ret;
+    }
+  else
+    return vfprintf (fp, format, args);
+}
+
+#undef fputs
+
+hacked_fputs (const char *s, FILE *fp)
+{
+  if (mac_app && (fp == stdout || fp == stderr))
+    {
+      TEInsert (s, strlen(s), console_text);
+      TESetSelect (100000, 100000, console_text);
+      draw_console ();
+      return 0;
+    }
+  else
+    return fputs (s, fp);
+}
+
+#undef fputc
+
+hacked_fputc (const char c, FILE *fp)
+{
+  if (mac_app && (fp == stdout || fp == stderr))
+    {
+      char buf[2];
+
+      buf[0] = c;
+      TEInsert (buf, 1, console_text);
+      TESetSelect (100000, 100000, console_text);
+      draw_console ();
+      return 0;
+    }
+  else
+    return fputc (c, fp);
+}
+
+#undef putc
+
+hacked_putc (const char c, FILE *fp)
+{
+  if (mac_app && (fp == stdout || fp == stderr))
+    {
+      char buf[2];
+
+      buf[0] = c;
+      TEInsert (buf, 1, console_text);
+      TESetSelect (100000, 100000, console_text);
+      draw_console ();
+    }
+  else
+    return fputc (c, fp);
+}
+
+#undef fflush
+
+hacked_fflush (FILE *fp)
+{
+  if (mac_app && (fp == stdout || fp == stderr))
+    return 0;
+  return fflush (fp);
+}
+
