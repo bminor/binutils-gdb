@@ -1,3 +1,8 @@
+Wed Jan 31 11:37:46 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c (elf_m68k_relocate_section): Fix R_68K_GOT*
+	relocation; ignore addend with R_68K_{GOT,PLT}*O relocation.
+
 Tue Jan 30 12:09:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (do_maintainer_clean): Remove $(srcdir)/bfd-in2.h,
