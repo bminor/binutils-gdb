@@ -1,5 +1,10 @@
 2004-04-08  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 47.
+	* ld-cdtest/cdtest.exp: Remove -fgnu-linker.
+
+2004-04-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-scripts/align.exp: Don't run on aix.
 	* ld-scripts/assert.s: Remove comment.
 	* ld-scripts/data.s: Likewise.
