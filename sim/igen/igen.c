@@ -854,40 +854,52 @@ gen_run_c (lf *file,
   lf_printf (file, "                int siggnal)\n");
   lf_printf (file, "{\n");
   lf_indent (file, +2);
-  lf_printf (file, "int mach;\n");
-  lf_printf (file, "if (STATE_ARCHITECTURE (sd) == NULL)\n");
-  lf_printf (file, "  mach = 0;\n");
-  lf_printf (file, "else\n");
-  lf_printf (file, "  mach = STATE_ARCHITECTURE (sd)->mach;\n");
-  lf_printf (file, "switch (mach)\n");
-  lf_printf (file, "  {\n");
-  lf_indent (file, +2);
-  for (entry = gen->tables; entry != NULL; entry = entry->next)
+  if (options.gen.multi_sim)
     {
-      lf_printf (file, "case bfd_mach_%s:\n", entry->processor);
+      lf_printf (file, "int mach;\n");
+      lf_printf (file, "if (STATE_ARCHITECTURE (sd) == NULL)\n");
+      lf_printf (file, "  mach = 0;\n");
+      lf_printf (file, "else\n");
+      lf_printf (file, "  mach = STATE_ARCHITECTURE (sd)->mach;\n");
+      lf_printf (file, "switch (mach)\n");
+      lf_printf (file, "  {\n");
       lf_indent (file, +2);
+      for (entry = gen->tables; entry != NULL; entry = entry->next)
+	{
+	  lf_printf (file, "case bfd_mach_%s:\n", entry->processor);
+	  lf_indent (file, +2);
+	  print_function_name (file,
+			       "run",
+			       NULL, /* format name */
+			       entry->processor,
+			       NULL, /* expanded bits */
+			       function_name_prefix_engine);
+	  lf_printf (file, " (sd, next_cpu_nr, siggnal);\n");
+	  lf_printf (file, "break;\n");
+	  lf_indent (file, -2);
+	}
+      lf_printf (file, "default:\n");
+      lf_indent (file, +2);
+      lf_printf (file, "sim_engine_abort (sd, NULL, NULL_CIA,\n");
+      lf_printf (file, "                  \"sim_engine_run - unknown machine\");\n");
+      lf_printf (file, "break;\n");
+      lf_indent (file, -2);
+      lf_indent (file, -2);
+      lf_printf (file, "  }\n");
+    }
+  else
+    {
       print_function_name (file,
 			   "run",
 			   NULL, /* format name */
-			   entry->processor,
+			   NULL, /* NO processor */
 			   NULL, /* expanded bits */
 			   function_name_prefix_engine);
       lf_printf (file, " (sd, next_cpu_nr, siggnal);\n");
-      lf_printf (file, "break;\n");
-      lf_indent (file, -2);
     }
-  lf_printf (file, "default:\n");
-  lf_indent (file, +2);
-  lf_printf (file, "sim_engine_abort (sd, NULL, NULL_CIA,\n");
-  lf_printf (file, "                  \"sim_engine_run - unknown machine\");\n");
-  lf_printf (file, "break;\n");
-  lf_indent (file, -2);
-  lf_indent (file, -2);
-  lf_printf (file, "  }\n");
   lf_indent (file, -2);
   lf_printf (file, "}\n");
 }
-
 
 /****************************************************************/
 

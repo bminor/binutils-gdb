@@ -1,5 +1,7 @@
 Mon Sep 15 15:47:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* igen.c (gen_run_c): Handle non-multi-sim case.
+
 	* gen-support.c (gen_support_h): Define SD_ - to replace _SD.
   	Define CIA from cia.
 
