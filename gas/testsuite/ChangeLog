@@ -1,5 +1,7 @@
 Wed Oct 15 10:40:14 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/ieee-fp/x930509a.s: Tweak slightly to work on the PA.
+
 	* gas/hppa/unsorted/unsorted.exp: Update for recent disassembler
 	changes.
 
