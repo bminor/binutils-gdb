@@ -243,7 +243,8 @@ DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c
 diststuff: $(DISTSTUFF) info
 
-DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h
+DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
+	site.exp site.bak
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -260,10 +261,12 @@ DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h
 	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
 
 dep.sed: dep-in.sed config.status
+	objdir=`pwd`; \
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
 		-e 's!@INCDIR@!$(INCDIR)!'	\
 		-e 's!@BFDDIR@!$(BFDDIR)!'	\
-		-e 's!@SRCDIR@!$(srcdir)!'
+		-e 's!@SRCDIR@!$(srcdir)!'	\
+		-e "s!@OBJDIR@!$${objdir}!"
 
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
@@ -296,7 +299,10 @@ $(DEMANGLER_PROG).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
 		> $(DEMANGLER_PROG).1
 
-MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1
+MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1 binutils.log binutils.sum \
+	abcdefgh*
+mostlyclean-local:
+	-rm -rf tmpdir
 
 CLEANFILES = dep.sed .dep .dep1
 

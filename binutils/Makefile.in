@@ -238,9 +238,11 @@ windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c
 
-DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h
+DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
+	site.exp site.bak
 
-MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1
+MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1 binutils.log binutils.sum \
+	abcdefgh*
 
 CLEANFILES = dep.sed .dep .dep1
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -866,7 +868,7 @@ maintainer-clean-generic:
 mostlyclean:  mostlyclean-hdr mostlyclean-binPROGRAMS \
 		mostlyclean-noinstPROGRAMS mostlyclean-compile \
 		mostlyclean-libtool mostlyclean-aminfo mostlyclean-tags \
-		mostlyclean-generic
+		mostlyclean-generic mostlyclean-local
 
 clean:  clean-hdr clean-binPROGRAMS clean-noinstPROGRAMS clean-compile \
 		clean-libtool clean-aminfo clean-tags clean-generic \
@@ -1002,10 +1004,12 @@ diststuff: $(DISTSTUFF) info
 	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
 
 dep.sed: dep-in.sed config.status
+	objdir=`pwd`; \
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
 		-e 's!@INCDIR@!$(INCDIR)!'	\
 		-e 's!@BFDDIR@!$(BFDDIR)!'	\
-		-e 's!@SRCDIR@!$(srcdir)!'
+		-e 's!@SRCDIR@!$(srcdir)!'	\
+		-e "s!@OBJDIR@!$${objdir}!"
 
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
@@ -1037,6 +1041,8 @@ binutils.info: $(srcdir)/binutils.texi config.texi
 $(DEMANGLER_PROG).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
 		> $(DEMANGLER_PROG).1
+mostlyclean-local:
+	-rm -rf tmpdir
 
 .PHONY: install-exec-local
 

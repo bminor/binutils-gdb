@@ -1,3 +1,18 @@
+Fri Apr  3 14:48:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (DISTCLEANFILES): Add site.exp and site.bak.
+	(MOSTLYCLEANFILES): Add binutils.log, binutils.sum, and abcdefgh*.
+	(mostlyclean-local): New target.
+	* Makefile.in: Rebuild.
+
+Wed Apr  1 15:54:16 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Zack Weinberg <zack@rabi.phys.columbia.edu> and H.J. Lu
+	<hjl@gnu.org>:
+	* ar.c (usage): Mention S modifier.
+	(main): Add S modifier.
+	* ar.1, binutils.texi: Document S modifier.
+
 Wed Apr  1 13:11:23 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* binutils.texi: Use @itemx for a secondary item in a table.
