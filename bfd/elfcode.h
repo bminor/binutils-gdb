@@ -2562,8 +2562,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
        asymbol ** symptrs)	/* Buffer for generated bfd symbols */
 {
   Elf_Internal_Shdr *hdr = &elf_tdata(abfd)->symtab_hdr;
-  int symcount;			/* Number of external ELF symbols */
-  int i;
+  long symcount;		/* Number of external ELF symbols */
   elf_symbol_type *sym;		/* Pointer to current bfd symbol */
   elf_symbol_type *symbase;	/* Buffer for generated bfd symbols */
   Elf_Internal_Sym i_sym;
@@ -2593,99 +2592,115 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
     }
 
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
-  symbase = (elf_symbol_type *) bfd_zalloc (abfd, symcount * sizeof (elf_symbol_type));
-  sym = symbase;
 
-  /* Temporarily allocate room for the raw ELF symbols.  */
-  x_symp = (Elf_External_Sym *) malloc (symcount * sizeof (Elf_External_Sym));
-  if (!symbase || !x_symp)
+  if (symcount == 0)
+    sym = symbase = NULL;
+  else
     {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+      long i;
 
-  if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
-      != symcount * sizeof (Elf_External_Sym))
-    {
-      free ((PTR) x_symp);
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
-  /* Skip first symbol, which is a null dummy.  */
-  for (i = 1; i < symcount; i++)
-    {
-      elf_swap_symbol_in (abfd, x_symp + i, &i_sym);
-      memcpy (&sym->internal_elf_sym, &i_sym, sizeof (Elf_Internal_Sym));
+      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
+	{
+	  bfd_set_error (bfd_error_system_call);
+	  return false;
+	}
+
+      symbase = ((elf_symbol_type *)
+		 bfd_zalloc (abfd, symcount * sizeof (elf_symbol_type)));
+      if (symbase == (elf_symbol_type *) NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      sym = symbase;
+
+      /* Temporarily allocate room for the raw ELF symbols.  */
+      x_symp = ((Elf_External_Sym *)
+		alloca (symcount * sizeof (Elf_External_Sym)));
+
+      if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
+	  != symcount * sizeof (Elf_External_Sym))
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+      /* Skip first symbol, which is a null dummy.  */
+      for (i = 1; i < symcount; i++)
+	{
+	  elf_swap_symbol_in (abfd, x_symp + i, &i_sym);
+	  memcpy (&sym->internal_elf_sym, &i_sym, sizeof (Elf_Internal_Sym));
 #ifdef ELF_KEEP_EXTSYM
-      memcpy (&sym->native_elf_sym, x_symp + i, sizeof (Elf_External_Sym));
+	  memcpy (&sym->native_elf_sym, x_symp + i, sizeof (Elf_External_Sym));
 #endif
-      sym->symbol.the_bfd = abfd;
+	  sym->symbol.the_bfd = abfd;
 
-      sym->symbol.name = elf_string_from_elf_section (abfd, hdr->sh_link,
-						      i_sym.st_name);
+	  sym->symbol.name = elf_string_from_elf_section (abfd, hdr->sh_link,
+							  i_sym.st_name);
 
-      sym->symbol.value = i_sym.st_value;
+	  sym->symbol.value = i_sym.st_value;
 
-      if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
-	{
-	  sym->symbol.section = section_from_elf_index (abfd, i_sym.st_shndx);
+	  if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
+	    {
+	      sym->symbol.section = section_from_elf_index (abfd,
+							    i_sym.st_shndx);
+	    }
+	  else if (i_sym.st_shndx == SHN_ABS)
+	    {
+	      sym->symbol.section = &bfd_abs_section;
+	    }
+	  else if (i_sym.st_shndx == SHN_COMMON)
+	    {
+	      sym->symbol.section = &bfd_com_section;
+	      /* Elf puts the alignment into the `value' field, and
+		 the size into the `size' field.  BFD wants to see the
+		 size in the value field, and doesn't care (at the
+		 moment) about the alignment.  */
+	      sym->symbol.value = i_sym.st_size;
+	    }
+	  else if (i_sym.st_shndx == SHN_UNDEF)
+	    {
+	      sym->symbol.section = &bfd_und_section;
+	    }
+	  else
+	    sym->symbol.section = &bfd_abs_section;
+
+	  sym->symbol.value -= sym->symbol.section->vma;
+
+	  switch (ELF_ST_BIND (i_sym.st_info))
+	    {
+	    case STB_LOCAL:
+	      sym->symbol.flags |= BSF_LOCAL;
+	      break;
+	    case STB_GLOBAL:
+	      sym->symbol.flags |= BSF_GLOBAL;
+	      break;
+	    case STB_WEAK:
+	      sym->symbol.flags |= BSF_WEAK;
+	      break;
+	    }
+
+	  switch (ELF_ST_TYPE (i_sym.st_info))
+	    {
+	    case STT_SECTION:
+	      sym->symbol.flags |= BSF_SECTION_SYM | BSF_DEBUGGING;
+	      break;
+	    case STT_FILE:
+	      sym->symbol.flags |= BSF_FILE | BSF_DEBUGGING;
+	      break;
+	    case STT_FUNC:
+	      sym->symbol.flags |= BSF_FUNCTION;
+	      break;
+	    }
+
+	  /* Do some backend-specific processing on this symbol.  */
+	  {
+	    struct elf_backend_data *ebd = get_elf_backend_data (abfd);
+	    if (ebd->elf_backend_symbol_processing)
+	      (*ebd->elf_backend_symbol_processing) (abfd, &sym->symbol);
+	  }
+
+	  sym++;
 	}
-      else if (i_sym.st_shndx == SHN_ABS)
-	{
-	  sym->symbol.section = &bfd_abs_section;
-	}
-      else if (i_sym.st_shndx == SHN_COMMON)
-	{
-	  sym->symbol.section = &bfd_com_section;
-	  /* Elf puts the alignment into the `value' field, and the size
-	     into the `size' field.  BFD wants to see the size in the
-	     value field, and doesn't care (at the moment) about the
-	     alignment.  */
-	  sym->symbol.value = i_sym.st_size;
-	}
-      else if (i_sym.st_shndx == SHN_UNDEF)
-	{
-	  sym->symbol.section = &bfd_und_section;
-	}
-      else
-	sym->symbol.section = &bfd_abs_section;
-
-      sym->symbol.value -= sym->symbol.section->vma;
-
-      switch (ELF_ST_BIND (i_sym.st_info))
-	{
-	case STB_LOCAL:
-	  sym->symbol.flags |= BSF_LOCAL;
-	  break;
-	case STB_GLOBAL:
-	  sym->symbol.flags |= BSF_GLOBAL;
-	  break;
-	case STB_WEAK:
-	  sym->symbol.flags |= BSF_WEAK;
-	  break;
-	}
-
-      switch (ELF_ST_TYPE (i_sym.st_info))
-	{
-	case STT_SECTION:
-	  sym->symbol.flags |= BSF_SECTION_SYM | BSF_DEBUGGING;
-	  break;
-	case STT_FILE:
-	  sym->symbol.flags |= BSF_FILE | BSF_DEBUGGING;
-	  break;
-	case STT_FUNC:
-	  sym->symbol.flags |= BSF_FUNCTION;
-	  break;
-	}
-
-      /* Do some backend-specific processing on this symbol.  */
-      {
-	struct elf_backend_data *ebd = get_elf_backend_data (abfd);
-	if (ebd->elf_backend_symbol_processing)
-	  (*ebd->elf_backend_symbol_processing) (abfd, &sym->symbol);
-      }
-
-      sym++;
     }
 
   /* Do some backend-specific processing on this symbol table.  */
@@ -2711,7 +2726,6 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
       *symptrs = 0;		/* Final null pointer */
     }
 
-  free ((PTR) x_symp);
   return true;
 }
 
@@ -3141,12 +3155,12 @@ DEFUN (elf_set_arch_mach, (abfd, arch, machine),
     {
     case bfd_arch_unknown:	/* EM_NONE */
     case bfd_arch_sparc:	/* EM_SPARC */
-    case bfd_arch_i386:	/* EM_386 */
-    case bfd_arch_m68k:	/* EM_68K */
-    case bfd_arch_m88k:	/* EM_88K */
-    case bfd_arch_i860:	/* EM_860 */
-    case bfd_arch_mips:	/* EM_MIPS (MIPS R3000) */
-    case bfd_arch_hppa:	/* EM_HPPA (HP PA_RISC) */
+    case bfd_arch_i386:		/* EM_386 */
+    case bfd_arch_m68k:		/* EM_68K */
+    case bfd_arch_m88k:		/* EM_88K */
+    case bfd_arch_i860:		/* EM_860 */
+    case bfd_arch_mips:		/* EM_MIPS (MIPS R3000) */
+    case bfd_arch_hppa:		/* EM_HPPA (HP PA_RISC) */
       return bfd_default_set_arch_mach (abfd, arch, machine);
     default:
       return false;
