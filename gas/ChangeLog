@@ -1,3 +1,13 @@
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* config/tc-m68hc11.c (elf_flags): Set default ABI to gcc default
+	(32-bit int, 64-bit double).
+	(md_longopts): New options -mshort, -mlong, -mshort-double and
+	-mlong-double to control the ABI.
+	(md_show_usage): Update.
+	(md_parse_option): Handle new options.
+	* doc/as.texinfo (Overview): Document new options for HC11/HC12.
+
 2002-12-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* symbols.c (report_op_error): New function, broken out of ...

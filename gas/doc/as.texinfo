@@ -363,6 +363,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 
 @emph{Target M68HC11 options:}
    [@b{-m68hc11}|@b{-m68hc12}]
+   [@b{-mshort}|@b{-mlong}]
+   [@b{-mshort-double}|@b{-mlong-double}]
    [@b{--force-long-branchs}] [@b{--short-branchs}]
    [@b{--strict-direct-mode}] [@b{--print-insn-syntax}]
    [@b{--print-opcodes}] [@b{--generate-example}]
@@ -801,6 +803,18 @@ Motorola 68HC11 or 68HC12 series.
 @item -m68hc11 | -m68hc12
 Specify what processor is the target.  The default is
 defined by the configuration option when building the assembler.
+
+@item -mshort
+Specify to use the 16-bit integer ABI.
+
+@item -mlong
+Specify to use the 32-bit integer ABI.  
+
+@item -mshort-double
+Specify to use the 32-bit double ABI.  
+
+@item -mlong-double
+Specify to use the 64-bit double ABI.  
 
 @item --force-long-branchs
 Relative branches are turned into absolute ones. This concerns

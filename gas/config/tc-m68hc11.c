@@ -242,7 +242,7 @@ static int num_opcodes;
 static struct m68hc11_opcode *m68hc11_sorted_opcodes;
 
 /* ELF flags to set in the output file header.  */
-static int elf_flags = 0;
+static int elf_flags = E_M68HC11_F64;
 
 /* These are the machine dependent pseudo-ops.  These are included so
    the assembler can work on the output from the SUN C compiler, which
@@ -305,6 +305,18 @@ struct option md_longopts[] = {
 #define OPTION_GENERATE_EXAMPLE  (OPTION_MD_BASE + 5)
   {"generate-example", no_argument, NULL, OPTION_GENERATE_EXAMPLE},
 
+#define OPTION_MSHORT  (OPTION_MD_BASE + 6)
+  {"mshort", no_argument, NULL, OPTION_MSHORT},
+
+#define OPTION_MLONG  (OPTION_MD_BASE + 7)
+  {"mlong", no_argument, NULL, OPTION_MLONG},
+
+#define OPTION_MSHORT_DOUBLE  (OPTION_MD_BASE + 8)
+  {"mshort-double", no_argument, NULL, OPTION_MSHORT_DOUBLE},
+
+#define OPTION_MLONG_DOUBLE  (OPTION_MD_BASE + 9)
+  {"mlong-double", no_argument, NULL, OPTION_MLONG_DOUBLE},
+
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -356,6 +368,10 @@ md_show_usage (stream)
   fprintf (stream, _("\
 Motorola 68HC11/68HC12 options:\n\
   -m68hc11 | -m68hc12     specify the processor [default %s]\n\
+  -mshort                 use 16-bit int ABI (default)\n\
+  -mlong                  use 32-bit int ABI\n\
+  -mshort-double          use 32-bit double ABI\n\
+  -mlong-double           use 64-bit double ABI (default)\n\
   --force-long-branchs    always turn relative branchs into absolute ones\n\
   -S,--short-branchs      do not turn relative branchs into absolute ones\n\
                           when the offset is out of range\n\
@@ -455,6 +471,22 @@ md_parse_option (c, arg)
 
     case OPTION_GENERATE_EXAMPLE:
       flag_print_opcodes = 2;
+      break;
+
+    case OPTION_MSHORT:
+      elf_flags &= ~E_M68HC11_I32;
+      break;
+
+    case OPTION_MLONG:
+      elf_flags |= E_M68HC11_I32;
+      break;
+
+    case OPTION_MSHORT_DOUBLE:
+      elf_flags &= ~E_M68HC11_F64;
+      break;
+
+    case OPTION_MLONG_DOUBLE:
+      elf_flags |= E_M68HC11_F64;
       break;
 
     case 'm':
