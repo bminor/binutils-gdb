@@ -3920,6 +3920,7 @@ s_uacons (bytes)
   /* Tell sparc_cons_align not to align this value.  */
   sparc_no_align_cons = 1;
   cons (bytes);
+  sparc_no_align_cons = 0;
 }
 
 /* This handles the native word allocation pseudo-op .nword.
@@ -4213,8 +4214,7 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
 	case 8: r = BFD_RELOC_SPARC_UA64; break;
 	default: abort ();
 	}
-      sparc_no_align_cons = 0;
-    }
+   }
 
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
 }

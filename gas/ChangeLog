@@ -1,3 +1,10 @@
+2001-08-12  TAKAI Kousuke  <takai@vlsi.kuee.kyoto-u.ac.jp>
+
+	* config/tc-sparc.c (cons_fix_new_sparc): Move
+	`sparc_no_align_cons = 0;' to...
+	(s_uacons): ...here so that sparc_no_align_cons will get
+	cleared properly.
+
 2001-08-11  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-mips.c: Fix a comment typo.
