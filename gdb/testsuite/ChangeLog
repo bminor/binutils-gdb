@@ -1,3 +1,20 @@
+Tue Mar 12 15:00:16 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/return.exp (return_tests): Differentiate between
+	two tests of continuing.
+
+Tue Mar  5 14:33:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* */Makefile.in (maintainer-clean): Remove config.log.
+	* gdb.base/Makefile.in (EXECUTABLES): Replace twice with twice-tmp.
+	* gdb.c++/Makefile.in (PROGS): Add inherit.
+	(clean): Remove *.ci.
+
+Tue Feb 20 16:36:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/misc.cc: Add test code from Mike Stump.
+	* gdb.c++/misc.exp: Add test to print s.a, for Mike Stump.
+
 Sun Feb 18 11:39:12 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/signals.exp: Change setup_xfail for "alpha-*-osf2"
@@ -15,11 +32,6 @@ Sun Feb 18 11:39:12 1996  Fred Fish  <fnf@cygnus.com>
 	to be for gcc only.
 	* lib/gdb.exp: Move verbose statements outside conditionals.
 	
-Tue Feb 20 16:36:10 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdb.c++/misc.cc: Add test code from Mike Stump.
-	* gdb.c++/misc.exp: Add test to print s.a, for Mike Stump.
-
 Sat Feb 17 02:22:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/sigall.exp:  Remove setup_xfail for irix4.  Fixed by
