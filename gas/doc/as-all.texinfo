@@ -8,6 +8,14 @@
 @c @cropmarks
 @c %**end of header
 
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* As: (as).			The GNU assembler.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
 @finalout
 @syncodeindex ky cp
 
