@@ -1,5 +1,8 @@
 Tue Jun 23 13:54:57 1998  Nick Clifton  <nickc@cygnus.com>
-
+start-sanitize-v850e	
+	* config/tc-v850.c (md_begin): Restore text section as the current
+	section after creating call table sections.
+end-sanitize-v850e
 	* config/obj-coff.h (SYM_AUXINFO): New macro to conceal ugly
 	code. 
 

@@ -489,7 +489,8 @@ v850_comm (area)
 		  scommon_section = subseg_new (".scommon", 0);
 		  
 		  bfd_set_section_flags (stdoutput, scommon_section, applicable
-		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA
+			| SEC_HAS_CONTENTS) | SEC_IS_COMMON);
 		}
 	      S_SET_SEGMENT (symbolP, scommon_section);
 	      break;
@@ -504,7 +505,8 @@ v850_comm (area)
 		  zcommon_section = subseg_new (".zcommon", 0);
 		  
 		  bfd_set_section_flags (stdoutput, zcommon_section, applicable
-		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA
+			| SEC_HAS_CONTENTS) | SEC_IS_COMMON);
 		}
 	      S_SET_SEGMENT (symbolP, zcommon_section);
 	      break;
@@ -519,7 +521,8 @@ v850_comm (area)
 		  tcommon_section = subseg_new (".tcommon", 0);
 		  
 		  bfd_set_section_flags (stdoutput, tcommon_section, applicable
-		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA
+			| SEC_HAS_CONTENTS) | SEC_IS_COMMON);
 		}
 	      S_SET_SEGMENT (symbolP, tcommon_section);
 	      break;
@@ -1449,6 +1452,9 @@ md_begin ()
    call_table_text_section = subseg_new (".call_table_text", 0);
    bfd_set_section_flags (stdoutput, call_table_text_section,
                         applicable & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE));
+
+   /* Restore text section as the current default.  */
+   subseg_set (text_section, 0);
  /* end-sanitize-v850e */
 
 }
@@ -2254,7 +2260,7 @@ md_assemble (str)
 	    {
 	      address += 2;
 	    }
-	  
+
 	  fixP = fix_new_exp (frag_now, address, size,
 			      & fixups[i].exp, 
 			      reloc_howto->pc_relative,
@@ -2417,7 +2423,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	{
 	  /* fprintf (stderr, "bits: %d, insn: %x\n", operand->bits, insn); */
 	  
-	  as_bad_where(fixp->fx_file, fixp->fx_line,
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
 		       _("unresolved expression that must be resolved"));
 	  fixp->fx_done = 1;
 	  return 1;
@@ -2429,7 +2435,7 @@ md_apply_fix3 (fixp, valuep, seg)
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
 
       if (fixp->fx_size == 1)
-	*where = value & 0xff;
+	* where = value & 0xff;
       else if (fixp->fx_size == 2)
 	bfd_putl16 (value & 0xffff, (unsigned char *) where);
       else if (fixp->fx_size == 4)
