@@ -70,9 +70,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SETPGRP_ARGS 1
 
-/* Flag for machine-specific stuff in shared files.  FIXME */
-#define IBM6000_HOST
-
 /* /usr/include/stdlib.h always uses void* and void,
    even when __STDC__ isn't defined. */
 #define MALLOC_INCOMPATIBLE
