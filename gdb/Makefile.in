@@ -1200,8 +1200,6 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h linespec.h \
 	$(regcache_h)
 
-# OBSOLETE altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
-
 annotate.o: annotate.c $(defs_h) annotate.h $(value_h) target.h $(gdbtypes_h)
 
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
@@ -1264,16 +1262,7 @@ coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	symfile.h $(symtab_h) gdb-stabs.h stabsread.h target.h \
 	gdb_string.h
 
-# OBSOLETE command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-# OBSOLETE 	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h gdb_wait.h
-
 complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
-
-# OBSOLETE convex-tdep.o: convex-tdep.c gdb_wait.h $(defs_h) $(gdbcmd_h) \
-# OBSOLETE	$(gdbcore_h) $(inferior_h)
-
-# OBSOLETE convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-# OBSOLETE	$(inferior_h)
 
 # Provide explicit rule/dependency - works for more makes.
 copying.o: $(srcdir)/copying.c $(defs_h) $(gdbcmd_h)
@@ -1762,10 +1751,6 @@ sol-thread.o: sol-thread.c $(defs_h) gdbthread.h target.h $(inferior_h) \
 linux-thread.o: linux-thread.c $(breakpoint_h) $(gdbcmd_h) gdb_wait.h \
 	gdbthread.h $(gdbcore_h) $(inferior_h) target.h $(defs_h)
 
-# OBSOLETE pyr-tdep.o: pyr-tdep.c $(defs_h) 
-
-# OBSOLETE pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
-
 gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) gdb_string.h
 
 remote-adapt.o: remote-adapt.c $(defs_h) $(gdbcore_h) \
@@ -1980,9 +1965,6 @@ symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
 	objfiles.h symfile.h completer.h $(symtab_h) \
 	$(INCLUDE_DIR)/demangle.h command.h
-
-# OBSOLETE tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
-# OBSOLETE	$(symtab_h)
 
 tic80-tdep.o: tic80-tdep.c $(defs_h) $(regcache_h)
 
