@@ -1,10 +1,8 @@
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
-	* mi-cmd-stack.c: 
-
-	* mi-cmd-break.c: 
-
-	* mi-main.c: 
+	* mi-cmd-stack.c: Remove #else clause of #ifdef UI_OUT.
+	* mi-cmd-break.c: Ditto.
+	* mi-main.c: Ditto.
 
 2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
 
