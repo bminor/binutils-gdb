@@ -1,5 +1,8 @@
 -*- text -*-
 
+* objcopy and strip can now take wildcard patterns in symbol names specified on
+  the command line provided that the --wildcard switch is used to enable them.
+
 * readelf can now parse archives.
 
 * objdump now accepts --debugging-tags to print the debug information in a

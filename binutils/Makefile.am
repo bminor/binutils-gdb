@@ -440,7 +440,7 @@ not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/progress.h bucomm.h config.h \
   $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  budbg.h $(INCDIR)/filenames.h
+  budbg.h $(INCDIR)/filenames.h $(INCDIR)/fnmatch.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h ../bfd/bfdver.h $(INCDIR)/progress.h \
   bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \

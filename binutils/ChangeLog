@@ -1,3 +1,21 @@
+2003-11-11  Wang Li  <charles@linux.net.cn>
+
+	* objcopy.c (wildcard): New variable.  True if wildcard pattern
+	matching is allowed in symbol names.
+	(strip_options): Add -w option to enable wildcard pattern
+	matching.
+	(copy_options): Likewise.
+	(copy_usage): Mention new switch.
+	(strip_usage): Likewise.
+	(is_specified_symbol): If performing wildcard matches use fnmatch
+	to compare symbol names with entries on the symbol list.
+	(strip_main): Accept -w switch.
+	(copy_main): Likewise.
+	* Makefile.am: Add dependency on fnmatch.h for objcopy.c
+	* Makefile.in: Regenerate.
+	* doc/binutils.texi: Document new switch.
+	* NEWS: Mention new switch.
+
 2003-11-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c: Revert rev 1.81 commit.

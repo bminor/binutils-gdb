@@ -27,6 +27,7 @@
 #include "libiberty.h"
 #include "budbg.h"
 #include "filenames.h"
+#include "fnmatch.h"
 #include <sys/stat.h>
 
 /* A list of symbols to explicitly strip out, or to keep.  A linked
@@ -180,6 +181,9 @@ static bfd_boolean change_leading_char = FALSE;
 /* Whether to remove the leading character from global symbol names.  */
 static bfd_boolean remove_leading_char = FALSE;
 
+/* Whether to permit wildcard in symbol comparasion.  */
+static bfd_boolean wildcard = FALSE;
+
 /* List of symbols to strip, keep, localize, keep-global, weaken,
    or redefine.  */
 static struct symlist *strip_specific_list = NULL;
@@ -261,6 +265,7 @@ static struct option strip_options[] =
   {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, 'V'},
+  {"wildcard", no_argument, 0, 'w'},
   {0, no_argument, 0, 0}
 };
 
@@ -331,6 +336,7 @@ static struct option copy_options[] =
   {"weaken", no_argument, 0, OPTION_WEAKEN},
   {"weaken-symbol", required_argument, 0, 'W'},
   {"weaken-symbols", required_argument, 0, OPTION_WEAKEN_SYMBOLS},
+  {"wildcard", no_argument, 0, 'w'},
   {0, no_argument, 0, 0}
 };
 
@@ -390,6 +396,7 @@ copy_usage (FILE *stream, int exit_status)
   -G --keep-global-symbol <name>   Localize all symbols except <name>\n\
   -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n\
      --weaken                      Force all global symbols to be marked as weak\n\
+  -w --wildcard                    Permit wildcard in symbol comparasion\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
   -i --interleave <number>         Only copy one out of every <number> bytes\n\
@@ -459,6 +466,7 @@ strip_usage (FILE *stream, int exit_status)
      --strip-unneeded              Remove all symbols not needed by relocations\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
   -K --keep-symbol=<name>          Only copy symbol <name>\n\
+  -w --wildcard                    Permit wildcard in symbol comparasion\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
   -v --verbose                     List all object files modified\n\
@@ -696,9 +704,26 @@ is_specified_symbol (const char *name, struct symlist *list)
 {
   struct symlist *tmp_list;
 
-  for (tmp_list = list; tmp_list; tmp_list = tmp_list->next)
-    if (strcmp (name, tmp_list->name) == 0)
-      return TRUE;
+  if (wildcard)
+    {
+      for (tmp_list = list; tmp_list; tmp_list = tmp_list->next)
+	if (*(tmp_list->name) != '!')
+	  {
+	    if (!fnmatch (tmp_list->name, name, 0))
+	      return TRUE;
+	  }
+	else
+	  {
+	    if (fnmatch (tmp_list->name + 1, name, 0))
+	      return TRUE;
+	  }
+    }
+  else
+    {
+      for (tmp_list = list; tmp_list; tmp_list = tmp_list->next)
+	if (strcmp (name, tmp_list->name) == 0)
+	  return TRUE;
+    }
 
   return FALSE;
 }
@@ -2151,7 +2176,7 @@ strip_main (int argc, char *argv[])
   struct section_list *p;
   char *output_file = NULL;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVv",
+  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVvw",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -2213,6 +2238,9 @@ strip_main (int argc, char *argv[])
 	  break;
 	case 0:
 	  /* We've been given a long option.  */
+	  break;
+	case 'w':
+	  wildcard = TRUE;
 	  break;
 	case 'H':
 	case 'h':
@@ -2298,7 +2326,7 @@ copy_main (int argc, char *argv[])
   struct section_list *p;
   struct stat statbuf;
 
-  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:",
+  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:w",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -2391,6 +2419,10 @@ copy_main (int argc, char *argv[])
 
 	case 'p':
 	  preserve_dates = TRUE;
+	  break;
+
+	case 'w':
+	  wildcard = TRUE;
 	  break;
 
 	case 'x':

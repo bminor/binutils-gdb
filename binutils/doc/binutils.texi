@@ -939,6 +939,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
         [@option{-L} @var{symbolname}|@option{--localize-symbol=}@var{symbolname}]
         [@option{-W} @var{symbolname}|@option{--weaken-symbol=}@var{symbolname}]
+        [@option{-w}|@option{--wildcard}]
         [@option{-x}|@option{--discard-all}]
         [@option{-X}|@option{--discard-locals}]
         [@option{-b} @var{byte}|@option{--byte=}@var{byte}]
@@ -1104,6 +1105,22 @@ visible externally.  This option may be given more than once.
 @item -W @var{symbolname}
 @itemx --weaken-symbol=@var{symbolname}
 Make symbol @var{symbolname} weak. This option may be given more than once.
+
+@item -w
+@itemx --wildcard
+Permit regular expressions in @var{symbolname}s used in other command
+line options.  The question mark (?), asterisk (*), backslash (\) and
+square brackets ([]) operators can be used anywhere in the symbol
+name.  If the first character of the symbol name is the exclamation
+point (!) then the sense of the switch is reversed for that symbol.
+For example:
+
+@smallexample
+  -w -W !foo -W fo*
+@end smallexample
+
+would cause objcopy to weaken all symbols that start with ``fo''
+except for the symbol ``foo''.
 
 @item -x
 @itemx --discard-all
@@ -2117,6 +2134,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
       [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname}]
       [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname}]
+      [@option{-w}|@option{--wildcard}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
@@ -2202,6 +2220,22 @@ argument may be specified.
 @item -p
 @itemx --preserve-dates
 Preserve the access and modification dates of the file.
+
+@item -w
+@itemx --wildcard
+Permit regular expressions in @var{symbolname}s used in other command
+line options.  The question mark (?), asterisk (*), backslash (\) and
+square brackets ([]) operators can be used anywhere in the symbol
+name.  If the first character of the symbol name is the exclamation
+point (!) then the sense of the switch is reversed for that symbol.
+For example:
+
+@smallexample
+  -w -K !foo -K fo*
+@end smallexample
+
+would cause strip to only keep symbols that start with the letters
+``fo'', but to discard the symbol ``foo''.
 
 @item -x
 @itemx --discard-all
