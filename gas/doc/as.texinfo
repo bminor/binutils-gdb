@@ -228,7 +228,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset SPARC
 @c The order here is important.  See c-sparc.texi.
- [ -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite | -Av9 | -Av9a ]
+ [ -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite
+   -Av8plus | -Av8plusa | -Av9 | -Av9a ]
  [ -xarch=v8plus | -xarch=v8plusa ] [ -bump ]
 @end ifset
 @ifset Z8000
@@ -455,12 +456,19 @@ The following options are available when @code{@value{AS}} is configured
 for the SPARC architecture:
 
 @table @code
-@item -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite | -Av9 | -Av9a
+@item -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite
+@itemx -Av8plus | -Av8plusa | -Av9 | -Av9a
 Explicitly select a variant of the SPARC architecture.
+
+@samp{-Av8plus} and @samp{-Av8plusa} select a 32 bit environment.
+@samp{-Av9} and @samp{-Av9a} select a 64 bit environment.
+
+@samp{-Av8plusa} and @samp{-Av9a} enable the SPARC V9 instruction set with
+UltraSPARC extensions.
 
 @item -xarch=v8plus | -xarch=v8plusa
 For compatibility with the Solaris v9 assembler.  These options are
-equivalent to -Av9 and -Av9a, respectively.
+equivalent to -Av8plus and -Av8plusa, respectively.
 
 @item -bump
 Warn when the assembler switches to another architecture.
