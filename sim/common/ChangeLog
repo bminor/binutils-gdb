@@ -1,3 +1,51 @@
+Tue Mar  4 09:35:56 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-inline.h: Allow explicit control over which .c files will be
+ 	included by their header.
+
+	* sim-inline.h: Allow explicit control over which .c files use the
+ 	alternative - REGPARM - parameter passing mechanism.
+	
+	* sim-inline.h, sim-inline.c: Don't attempt to include any of
+ 	icache.c, idecode.c, semantics.c or support.c.  Those names are
+ 	not generally applicable.
+	
+Thu Feb 20 18:36:55 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* sim-basics.h: Borrow code from ppc directory.
+	* sim-bits.c: Ditto.
+	* sim-bits.h: Ditto.
+	* sim-config.h: Ditto.
+	* sim-endian-n.h: Ditto.
+	* sim-endian.c: Ditto.
+	* sim-endian.h: Ditto.
+	* sim-inline.c: Ditto.
+	* sim-inline.h: Ditto.
+	* sim-types.h: Ditto.
+
+Wed Feb 19 12:40:50 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* sim-alu.h (ALU_SET16, ALU_SET32, ALU_SET64, etc): Make available
+ 	all the ALU size alternatives and then auto-configure a default.
+	
+	* sim-alu.h: Copy ppc/idecode_expression.h.
+
+Mon Feb 17 10:44:18 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* bits.h, bits.c (SIGN_EXTEND32, SIGN_EXTEND64): New functions,
+ 	sign extend a bit within a value.
+
+	* sim-endian.h, sim-endian-n.h (offset_N): New functions - return
+ 	a pointer into the middle of a host word.
+	* sim-endian.h (MS2W_4, LS2W_4): Use this function.
+	
+Tue Feb 11 13:46:49 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* callback.c: If HAVE_CONFIG_H is defined, include config.h from
+	autoconf.  If HAVE_UNISTD_H is defined, include unistd.h to get
+	appropriate definitions of read, write, etc.  Add prototype for
+	system.
+
 Tue Feb  4 13:24:44 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (libcommon.a): Delete.
