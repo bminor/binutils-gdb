@@ -1,3 +1,13 @@
+2002-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (display_selector): New function. Displays information
+	about the information returned by GetThreadSelectorEntry API function.
+	(display_selectors): New function. Displays the infomation of
+	the selector given as argument, or of CS, DS ans FS selectors
+	if no argument is given.
+	( _initialize_inftarg): Add "w32" as info prefix command.
+	Add "info w32 selector" as command calling display_selectors.
+
 2002-02-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* i386-tdep.c (get_longjmp_target): Fix compilation failure

@@ -820,6 +820,126 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   return gotasig;
 }
 
+static int
+display_selector (HANDLE thread, DWORD sel)
+{
+  LDT_ENTRY info;
+  if (GetThreadSelectorEntry (thread, sel, &info))
+    {
+      int base, limit;
+      printf_filtered ("0x%03lx: ", sel);
+      if (!info.HighWord.Bits.Pres)
+        {
+          puts_filtered ("Segment not present\n");
+          return 0;
+        }
+      base = (info.HighWord.Bits.BaseHi << 24) +
+	     (info.HighWord.Bits.BaseMid << 16)
+	     + info.BaseLow;
+      limit = (info.HighWord.Bits.LimitHi << 16) + info.LimitLow;
+      if (info.HighWord.Bits.Granularity)
+       limit = (limit << 12) | 0xfff;
+      printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
+      if (info.HighWord.Bits.Default_Big)
+        puts_filtered(" 32-bit ");
+      else
+        puts_filtered(" 16-bit ");
+      switch ((info.HighWord.Bits.Type & 0xf) >> 1)
+	{
+	case 0:
+          puts_filtered ("Data (Read-Only, Exp-up");
+          break;
+	case 1:
+          puts_filtered ("Data (Read/Write, Exp-up");
+          break;
+	case 2:
+          puts_filtered ("Unused segment (");
+          break;
+	case 3:
+          puts_filtered ("Data (Read/Write, Exp-down");
+          break;
+	case 4:
+          puts_filtered ("Code (Exec-Only, N.Conf");
+          break;
+	case 5:
+          puts_filtered ("Code (Exec/Read, N.Conf");
+	  break;
+	case 6:
+          puts_filtered ("Code (Exec-Only, Conf");
+	  break;
+	case 7:
+          puts_filtered ("Code (Exec/Read, Conf");
+	  break;
+	default:
+	  printf_filtered ("Unknown type 0x%x",info.HighWord.Bits.Type);
+	}
+      if ((info.HighWord.Bits.Type & 0x1) == 0)
+        puts_filtered(", N.Acc");
+      puts_filtered (")\n");
+      if ((info.HighWord.Bits.Type & 0x10) == 0)
+	puts_filtered("System selector ");
+      printf_filtered ("Priviledge level = %d. ", info.HighWord.Bits.Dpl);
+      if (info.HighWord.Bits.Granularity)
+        puts_filtered ("Page granular.\n");
+      else
+	puts_filtered ("Byte granular.\n");
+      return 1;
+    }
+  else
+    {
+      printf_filtered ("Invalid selector 0x%lx.\n",sel);
+      return 0;
+    }
+}
+
+static void
+display_selectors (char * args, int from_tty)
+{
+  if (!current_thread)
+    {
+      puts_filtered ("Impossible to display selectors now.\n");
+      return;
+    }
+  if (!args)
+    {
+
+      puts_filtered ("Selector $cs\n");
+      display_selector (current_thread->h,
+        current_thread->context.SegCs);
+      puts_filtered ("Selector $ds\n");
+      display_selector (current_thread->h,
+        current_thread->context.SegDs);
+      puts_filtered ("Selector $es\n");
+      display_selector (current_thread->h,
+        current_thread->context.SegEs);
+      puts_filtered ("Selector $ss\n");
+      display_selector (current_thread->h,
+        current_thread->context.SegSs);
+      puts_filtered ("Selector $fs\n");
+      display_selector (current_thread->h,
+	current_thread->context.SegFs);
+      puts_filtered ("Selector $gs\n");
+      display_selector (current_thread->h,
+        current_thread->context.SegGs);
+    }
+  else
+    {
+      int sel;
+      sel = parse_and_eval_long (args);
+      printf_filtered ("Selector \"%s\"\n",args);
+      display_selector (current_thread->h, sel);
+    }
+}
+
+static struct cmd_list_element *info_w32_cmdlist = NULL;
+
+static void
+info_w32_command (char *args, int from_tty)
+{
+  help_list (info_w32_cmdlist, "info w32 ", class_info, gdb_stdout);
+}
+
+
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
   printf_unfiltered ("gdb: Target exception %s at 0x%08lx\n", x, \
   (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress)
@@ -1757,6 +1877,14 @@ _initialize_inftarg (void)
 
   add_info ("dll", info_dll_command, "Status of loaded DLLs.");
   add_info_alias ("sharedlibrary", "dll", 1);
+
+  add_prefix_cmd ("w32", class_info, info_w32_command,
+                  "Print information specific to Win32 debugging.",
+                  &info_w32_cmdlist, "info w32 ", 0, &infolist);
+
+  add_cmd ("selector", class_info, display_selectors,
+           "Display selectors infos.",
+	   &info_w32_cmdlist);
 
   add_target (&child_ops);
 }
