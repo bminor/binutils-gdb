@@ -52,15 +52,6 @@ extern struct obstack dont_print_obstack;
 
 /* END-FIXME */
 
-
-/* BEGIN-FIXME:  Hooks into c-valprint.c */
-
-extern int
-c_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int, int,
-		     enum val_prettyprint));
-/* END-FIXME */
-
-
 void
 cp_print_class_method (valaddr, type, stream)
      char *valaddr;
@@ -305,8 +296,8 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	           v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-                   c_val_print (TYPE_FIELD_TYPE(type, i), VALUE_CONTENTS (v), 0,
-			   stream, format, 0, recurse + 1, pretty);
+                   val_print (TYPE_FIELD_TYPE(type, i), VALUE_CONTENTS (v), 0,
+			      stream, format, 0, recurse + 1, pretty);
 		}
 	    }
 	  else
@@ -317,9 +308,9 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 		}
 	      else
 		{
-	           c_val_print (TYPE_FIELD_TYPE (type, i), 
-			   valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
-			   0, stream, format, 0, recurse + 1, pretty);
+	           val_print (TYPE_FIELD_TYPE (type, i), 
+			      valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+			      0, stream, format, 0, recurse + 1, pretty);
 		}
 	    }
 	}

@@ -1,3 +1,22 @@
+Mon Nov 15 11:38:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbtypes.h: Add TYPE_FLAG_TARGET_STUB.
+	* gdbtypes.c (check_stub_type): On TYPE_FLAG_TARGET_STUB, do
+	what cleanup_undefined_types does for arrays, except we clear
+	TYPE_FLAG_TARGET_STUB if we fix up the type.
+	* stabsread.c (cleanup_undefined_types): Add comments about how
+	doing arrays here is no longer the clean way to do it.
+	(read_array_type): Set TYPE_FLAG_TARGET_STUB as well as calling
+	add_undefined_type.
+	* c-typeprint.c, ch-typeprint.c: Move call to check_stub_type
+	outside switch so it happens for all type codes.
+	* cp-valprint.c (cp_print_value_fields): Recurse to val_print,
+	instead of c_val_print, so that check_stub_type gets called.
+
+	* gdbtypes.h, gdbtypes.c, m2-lang.c, ch-lang.c, c-lang.c: Remove
+	TYPE_FLAG_SIGNED.  It was inconsistently set, never checked
+	(except in recursive_dump_type), and is pointless.
+
 Mon Nov 15 00:40:38 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * paread.c (pa_symfile_init): Look for the $TEXT$ section rather

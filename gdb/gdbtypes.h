@@ -21,9 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (GDBTYPES_H)
 #define GDBTYPES_H 1
 
-/* When gdb creates fundamental types, it uses one of the following
-   type identifiers.  The identifiers are used to index a vector of
-   pointers to any types that are created. */
+/* Codes for `fundamental types'.  This is a monstrosity based on the
+   bogus notion that there are certain compiler-independent
+   `fundamental types'.  None of these is well-defined (how big is
+   FT_SHORT?  Does it depend on the language?  How does the
+   language-specific code know which type to correlate to FT_SHORT?)  */
 
 #define FT_VOID			0
 #define FT_BOOLEAN		1
@@ -114,13 +116,10 @@ enum type_code
 
 /* Some bits for the type's flags word. */
 
-/* Explicitly unsigned integer type */
+/* Unsigned integer type.  If this is not set for a TYPE_CODE_INT, the
+   type is signed.  */
 
 #define TYPE_FLAG_UNSIGNED	(1 << 0)
-
-/* Explicitly signed integer type */
-
-#define TYPE_FLAG_SIGNED	(1 << 1)
 
 /* This appears in a type's flags word if it is a stub type (e.g., if
    someone referenced a type that wasn't defined in a source file
@@ -128,6 +127,12 @@ enum type_code
 
 #define TYPE_FLAG_STUB		(1 << 2)
 
+/* The target type of this type is a stub type, and this type needs to
+   be updated if it gets un-stubbed in check_stub_type.  Currently only
+   used for arrays, in which TYPE_LENGTH of the array gets set based
+   on the TYPE_LENGTH of the target type.  */
+
+#define TYPE_FLAG_TARGET_STUB (1 << 3)
 
 struct type
 {

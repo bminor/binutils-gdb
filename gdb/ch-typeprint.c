@@ -100,6 +100,8 @@ chill_type_print_base (type, stream, show, level)
       return;
     }
 
+  check_stub_type (type);
+
   switch (TYPE_CODE (type))
     {
       case TYPE_CODE_PTR:
@@ -161,7 +163,6 @@ chill_type_print_base (type, stream, show, level)
 	  }
 	else
 	  {
-	    check_stub_type (type);
 	    fprintf_filtered (stream, "(\n");
 	    if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	      {

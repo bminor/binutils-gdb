@@ -790,13 +790,14 @@ fill_in_vptr_fieldno (type)
 
    If this is a stubbed struct (i.e. declared as struct foo *), see if
    we can find a full definition in some other file. If so, copy this
-   definition, so we can use it in future.  If not, set a flag so we 
-   don't waste too much time in future.  (FIXME, this doesn't seem
-   to be happening...)
+   definition, so we can use it in future.  There used to be a comment (but
+   not any code) that if we don't find a full definition, we'd set a flag
+   so we don't spend time in the future checking the same type.  That would
+   be a mistake, though--we might load in more symbols which contain a
+   full definition for the type.
 
    This used to be coded as a macro, but I don't think it is called 
-   often enough to merit such treatment.
-*/
+   often enough to merit such treatment.  */
 
 struct complaint stub_noname_complaint =
   {"stub type has NULL name", 0, 0};
@@ -822,7 +823,31 @@ check_stub_type (type)
 			   (struct symtab **) NULL);
       if (sym)
 	{
-	  memcpy ((char *)type, (char *)SYMBOL_TYPE(sym), sizeof (struct type));
+	  memcpy ((char *)type,
+		  (char *)SYMBOL_TYPE(sym),
+		  sizeof (struct type));
+	}
+    }
+
+  if (TYPE_FLAGS (type) & TYPE_FLAG_TARGET_STUB)
+    {
+      struct type *range_type;
+
+      check_stub_type (TYPE_TARGET_TYPE (type));
+      if (!(TYPE_FLAGS (TYPE_TARGET_TYPE (type)) & TYPE_FLAG_STUB)
+	  && TYPE_CODE (type) == TYPE_CODE_ARRAY
+	  && TYPE_NFIELDS (type) == 1
+	  && (TYPE_CODE (range_type = TYPE_FIELD_TYPE (type, 0))
+	      == TYPE_CODE_RANGE))
+	{
+	  /* Now recompute the length of the array type, based on its
+	     number of elements and the target type's length.  */
+	  TYPE_LENGTH (type) =
+	    ((TYPE_FIELD_BITPOS (range_type, 1)
+	      - TYPE_FIELD_BITPOS (range_type, 0)
+	      + 1)
+	     * TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
 	}
     }
 }
@@ -1295,10 +1320,6 @@ recursive_dump_type (type, spaces)
     {
       puts_filtered (" TYPE_FLAG_UNSIGNED");
     }
-  if (TYPE_FLAGS (type) & TYPE_FLAG_SIGNED)
-    {
-      puts_filtered (" TYPE_FLAG_SIGNED");
-    }
   if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
     {
       puts_filtered (" TYPE_FLAG_STUB");
@@ -1375,7 +1396,7 @@ _initialize_gdbtypes ()
 	       "char", (struct objfile *) NULL);
   builtin_type_signed_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_SIGNED,
+	       0,
 	       "signed char", (struct objfile *) NULL);
   builtin_type_unsigned_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,

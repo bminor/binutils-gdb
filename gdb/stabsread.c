@@ -1346,13 +1346,12 @@ read_type (pp, objfile)
 	  *pp = from + 1;
 	}
 
-	/* Now check to see whether the type has already been declared.  */
-	/* This is necessary at least in the case where the
-	   program says something like
-	     struct foo bar[5];
-	   The compiler puts out a cross-reference; we better find
-	   set the length of the structure correctly so we can
-	   set the length of the array.  */
+	/* Now check to see whether the type has already been
+	   declared.  This was written for arrays of cross-referenced
+	   types before we had TYPE_CODE_TARGET_STUBBED, so I'm pretty
+	   sure it is not necessary anymore.  But it might be a good
+	   idea, to save a little memory.  */
+
 	for (ppt = file_symbols; ppt; ppt = ppt->next)
 	  for (i = 0; i < ppt->nsyms; i++)
 	    {
@@ -1368,7 +1367,7 @@ read_type (pp, objfile)
 		  return type;
 		}
 	    }
-	
+
 	/* Didn't find the type to which this refers, so we must
 	   be dealing with a forward reference.  Allocate a type
 	   structure for it, and keep track of it so we can
@@ -2827,9 +2826,14 @@ read_array_type (pp, type, objfile)
 
   /* If we have an array whose element type is not yet known, but whose
      bounds *are* known, record it to be adjusted at the end of the file.  */
+  /* FIXME: Why check for zero length rather than TYPE_FLAG_STUB?  I think
+     the two have the same effect except that the latter is cleaner and the
+     former would be wrong for types which really are zero-length (if we
+     have any).  */
 
   if (TYPE_LENGTH (element_type) == 0 && !adjustable)
     {
+      TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
       add_undefined_type (type);
     }
 
@@ -3527,7 +3531,10 @@ cleanup_undefined_types ()
 	  case TYPE_CODE_UNION:
 	  case TYPE_CODE_ENUM:
 	  {
-	    /* Check if it has been defined since.  */
+	    /* Check if it has been defined since.  Need to do this here
+	       as well as in check_stub_type to deal with the (legitimate in
+	       C though not C++) case of several types with the same name
+	       in different source files.  */
 	    if (TYPE_FLAGS (*type) & TYPE_FLAG_STUB)
 	      {
 		struct pending *ppt;
@@ -3562,8 +3569,20 @@ cleanup_undefined_types ()
 	  }
 	  break;
 
-	  case TYPE_CODE_ARRAY:
+	case TYPE_CODE_ARRAY:
 	  {
+	    /* This is a kludge which is here for historical reasons
+	       because I suspect that check_stub_type does not get
+	       called everywhere it needs to be called for arrays.  Even
+	       with this kludge, those places are broken for the case
+	       where the stub type is defined in another compilation
+	       unit, but this kludge at least deals with it for the case
+	       in which it is the same compilation unit.
+
+	       Don't try to do this by calling check_stub_type; it might
+	       cause symbols to be read in lookup_symbol, and the symbol
+	       reader is not reentrant.  */
+
 	    struct type *range_type;
 	    int lower, upper;
 
@@ -3581,6 +3600,9 @@ cleanup_undefined_types ()
 	    upper = TYPE_FIELD_BITPOS (range_type, 1);
 	    TYPE_LENGTH (*type) = (upper - lower + 1)
 	      * TYPE_LENGTH (TYPE_TARGET_TYPE (*type));
+
+	    /* If the target type is not a stub, we could be clearing
+	       TYPE_FLAG_TARGET_STUB for *type.  */
 	  }
 	  break;
 
@@ -3594,6 +3616,7 @@ GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};
 	  break;
 	}
     }
+
   undef_types_length = 0;
 }
 

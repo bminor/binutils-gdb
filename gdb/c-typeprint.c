@@ -488,6 +488,8 @@ c_type_print_base (type, stream, show, level)
       return;
     }
 
+  check_stub_type (type);
+	  
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
@@ -529,8 +531,6 @@ c_type_print_base (type, stream, show, level)
 	}
       else if (show > 0)
 	{
-	  check_stub_type (type);
-	  
 	  cp_type_print_derivation_info (stream, type);
 	  
 	  fprintf_filtered (stream, "{\n");
