@@ -450,7 +450,7 @@
 #undef HAVE__ETEXT
 
 /* Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
-   Solaris 2.[78] when using GCC.  */
+   Solaris 2.[789] when using GCC.  */
 #undef _MSE_INT_H
 
 /* Define to 1 if we found this declaration otherwise define to 0. */

@@ -369,15 +369,15 @@ AC_CHECK_HEADERS(sys/wait.h wait.h)
 AC_CHECK_HEADERS(termios.h termio.h sgtty.h)
 AC_CHECK_HEADERS(unistd.h)
 
-# On Solaris 2.[78], we need to define _MSE_INT_H to avoid a clash
+# On Solaris 2.[789], we need to define _MSE_INT_H to avoid a clash
 # between <widec.h> and <wchar.h> that would cause AC_CHECK_HEADERS to
 # think that we don't have <curses.h> if we're using GCC.
 case $host_os in
-  solaris2.[[78]])
+  solaris2.[[789]])
     if test "$GCC" = yes; then
       AC_DEFINE(_MSE_INT_H, 1,
         [[Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
-   Solaris 2.[78] when using GCC. ]])
+   Solaris 2.[789] when using GCC. ]])
     fi ;;
 esac
 AC_CHECK_HEADERS(curses.h ncurses.h term.h)

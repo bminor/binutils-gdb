@@ -1,5 +1,8 @@
 2004-07-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Define _MSE_INT_H on Solaris 9 too.
+	* configure, config.in: Regenerated.
+
 	* vaxbsd-nat.c: Include <sys/types.h>, <machine/pcb.h> and
 	"bsd-kvm.h".
 	(vaxbsd_supply_pcb): New function.
