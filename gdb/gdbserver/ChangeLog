@@ -1,3 +1,9 @@
+2004-02-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote-utils.c (write_enn): Use "E01" instead of "ENN" for the
+	error packet.
+	* server.c, target.h: Update copyright years.
+
 2004-02-25  Roland McGrath  <roland@redhat.com>
 
 	* target.h (struct target_ops): New member `read_auxv'.

@@ -1,6 +1,6 @@
 /* Remote utility routines for the remote server for GDB.
    Copyright 1986, 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002
+   2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -487,9 +487,10 @@ write_ok (char *buf)
 void
 write_enn (char *buf)
 {
+  /* Some day, we should define the meanings of the error codes... */
   buf[0] = 'E';
-  buf[1] = 'N';
-  buf[2] = 'N';
+  buf[1] = '0';
+  buf[2] = '1';
   buf[3] = '\0';
 }
 
