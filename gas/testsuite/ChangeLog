@@ -1,5 +1,11 @@
 2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
 
+	* gas/mips/mips64-mdmx.s: Tweak to more thoroughly cover
+	instruction encodings.
+	* gas/mips/mips64-mdmx.d: Likewise.
+
+2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/mips64-mdmx.s: New file.
 	* gas/mips/mips64-mdmx.d: Likewise.
 	* gas/mips/mips.exp: Run new "mips64-mdmx" test.
