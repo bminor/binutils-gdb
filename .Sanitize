@@ -631,6 +631,34 @@ else
 	done
 fi
 
+armelf_files="ChangeLog configure.in"
+if ( echo $* | grep keep\-armelf > /dev/null ) ; then
+	for i in $armelf_files ; do
+		if test ! -d $i && (grep sanitize-armelf $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping armelf stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-armelf $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"armelf\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-armelf/,/end-\sanitize\-armelf/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 java_files="ChangeLog Makefile.in configure.in"
 if ( echo $* | grep keep\-java > /dev/null ) ; then
 	for i in $java_files ; do
