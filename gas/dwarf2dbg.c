@@ -409,8 +409,8 @@ dwarf2_gen_line_info (addr, l)
   segT saved_seg;
 
   if (flag_debug)
-    fprintf (stderr, "line: addr %llx file `%s' line %u col %u flags %x\n",
-	     (long long) addr, l->filename, l->line, l->column, l->flags);
+    fprintf (stderr, "line: addr %lx file `%s' line %u col %u flags %x\n",
+	     (unsigned long) addr, l->filename, l->line, l->column, l->flags);
 
   if (filenum > 0 && !l->filename)
     {

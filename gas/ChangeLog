@@ -1,3 +1,8 @@
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Don't assume that long long
+	or %llx work.
+
 Thu Jul 15 02:45:30 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (md_pseudo_table): Add ".dword" pseudo-op.
