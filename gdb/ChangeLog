@@ -5,6 +5,7 @@ Thu Apr 21 07:45:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* blockframe.c (find_frame_addr_in_frame_chain): Likewise.
 
 	* printcmd.c (output_command): Annotate things we print here too.
+	* printcmd.c (print_command_1): Add "value-history-value" annotation.
 	* Move declaration of print_value_flags from defs.h to value.h.
 	* main.c (command_line_input): Call wrap_here as well as gdb_flush.
 
