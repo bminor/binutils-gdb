@@ -673,6 +673,9 @@ extern struct type *
 create_string_type PARAMS ((struct type *, struct type *));
 
 extern struct type *
+create_set_type PARAMS ((struct type *, struct type *));
+
+extern struct type *
 lookup_unsigned_typename PARAMS ((char *));
 
 extern struct type *

@@ -1568,6 +1568,13 @@ read_type (pp, objfile)
       type = read_array_type (pp, type, objfile);
       break;
 
+    case 'S':
+      type1 = read_type (pp, objfile);
+      type = create_set_type ((struct type*) NULL, type1);
+      if (typenums[0] != -1)
+	*dbx_lookup_type (typenums) = type;
+      break;
+
     default:
       --*pp;			/* Go back to the symbol in error */
 				/* Particularly important if it was \0! */

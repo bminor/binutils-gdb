@@ -1,3 +1,16 @@
+Mon Dec 13 20:17:39 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	Implement support for Chill POWERSETs.
+	* ch-exp.y (operand_2):  Implement 'Element IN PowerSet'.
+	* ch-typeprint.c (chill_type_print_base):  Handle POWERSETs.
+	* ch-valprint.c (chill_val_print):  Handle TYPE_CODE_SET.
+	* eval.c (evaluate_subexp):  Implement BINOP_IN.
+	* expression.h (enum exp_opcode):  Added BINOP_IN.
+	* gdbtypes.c (create_set_type), gdbtypes.h:  New function.
+	* stabsread.c (read_type):  If 'S', create a set type.
+	* valarith.c (value_bit_index, value_in), value.h:  New functions,
+	for indexing in SETs.
+
 Mon Dec 13 06:42:37 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* paread.c (pa_symfile_init): Check for the existance of stabs

@@ -196,6 +196,51 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       return (i + (print_max && i != print_max));
       break;
 
+    case TYPE_CODE_SET:
+      {
+	struct type *range = TYPE_FIELD_TYPE (type, 0);
+	int low_bound = TYPE_FIELD_BITPOS (range, 0);
+	int high_bound = TYPE_FIELD_BITPOS (range, 1);
+	int i;
+	int is_bitstring = 0;
+	int need_comma = 0;
+	int in_range = 0;
+
+	if (is_bitstring)
+	  fputs_filtered ("B'", stream);
+	else
+	  fputs_filtered ("[", stream);
+	for (i = low_bound; i <= high_bound; i++)
+	  {
+	    int element = value_bit_index (type, valaddr, i);
+	    if (is_bitstring)
+	      fprintf_filtered (stream, "%d", element);
+	    else if (element)
+	      {
+		if (need_comma)
+		  fputs_filtered (", ", stream);
+		print_type_scalar (TYPE_TARGET_TYPE (range), i, stream);
+		need_comma = 1;
+
+		/* Look for a continuous range of true elements. */
+		if (i+1 <= high_bound && value_bit_index (type, valaddr, ++i))
+		  {
+		    int j = i; /* j is the upper bound so far of the range */
+		    fputs_filtered (":", stream);
+		    while (i+1 <= high_bound
+			   && value_bit_index (type, valaddr, ++i))
+		      j = i;
+		    print_type_scalar (TYPE_TARGET_TYPE (range), j, stream);
+		  }
+	      }
+	  }
+	if (is_bitstring)
+	  fputs_filtered ("'", stream);
+	else
+	  fputs_filtered ("]", stream);
+      }
+      break;
+
     case TYPE_CODE_STRUCT:
       chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 				0);
@@ -335,4 +380,3 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
     }
   fprintf_filtered (stream, "]");
 }
-

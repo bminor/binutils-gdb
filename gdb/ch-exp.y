@@ -774,7 +774,7 @@ operand_2	:	operand_3
 			}
 		|	operand_2 IN operand_3
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_IN);
 			}
 		;
 

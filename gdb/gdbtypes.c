@@ -417,6 +417,40 @@ create_string_type (result_type, range_type)
   return (result_type);
 }
 
+struct type *
+create_set_type (result_type, domain_type)
+     struct type *result_type;
+     struct type *domain_type;
+{
+  if (result_type == NULL)
+    {
+      result_type = alloc_type (TYPE_OBJFILE (domain_type));
+    }
+  TYPE_CODE (result_type) = TYPE_CODE_SET;
+  TYPE_NFIELDS (result_type) = 1;
+  TYPE_FIELDS (result_type) = (struct field *)
+    TYPE_ALLOC (result_type, 1 * sizeof (struct field));
+  memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
+  TYPE_FIELD_TYPE (result_type, 0) = domain_type;
+  if (TYPE_CODE (domain_type) != TYPE_CODE_RANGE)
+    TYPE_LENGTH (result_type) = 4;  /* Error? */
+  else
+    {
+      int low_bound = TYPE_FIELD_BITPOS (domain_type, 0);
+      int high_bound = TYPE_FIELD_BITPOS (domain_type, 1);
+      int bit_length = high_bound - low_bound + 1;
+      if (bit_length <= TARGET_CHAR_BIT)
+	TYPE_LENGTH (result_type) = 1;
+      else if (bit_length <= TARGET_SHORT_BIT)
+	TYPE_LENGTH (result_type) = TARGET_SHORT_BIT / TARGET_CHAR_BIT;
+      else
+	TYPE_LENGTH (result_type)
+	  = ((bit_length + TARGET_INT_BIT - 1) / TARGET_INT_BIT)
+	    * TARGET_CHAR_BIT;
+    }
+  return (result_type);
+}
+
 /* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
    A MEMBER is a wierd thing -- it amounts to a typed offset into
    a struct, e.g. "an int at offset 8".  A MEMBER TYPE doesn't
