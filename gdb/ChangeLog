@@ -1,3 +1,11 @@
+2001-03-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-aix5.c (bfd_lookup_symbol, build_so_list_from_mapfile)
+	(aix5_relocate_main_executable, aix5_clear_solib): Replace calls
+	to free() with calls to xfree().
+	(bfd_lookup_symbol): Eliminate use of PTR.
+	(build_so_list_from_mapfile): Use xasprintf() instead of sprintf().
+
 2001-03-15  Martin Hunt  <hunt@redhat.com>
 
 	* linespec.c (decode_line_1): Remove trailing quote

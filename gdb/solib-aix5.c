@@ -118,7 +118,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
@@ -148,7 +148,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
@@ -202,7 +202,7 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
 
     /* Open the map file */
 
-    sprintf (map_pathname, "/proc/%d/map", pid);
+    xasprintf (map_pathname, "/proc/%d/map", pid);
     map_fd = open (map_pathname, O_RDONLY);
     if (map_fd < 0)
       return 0;
@@ -212,7 +212,7 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
       {
 	if (mapbuf)
 	  {
-	    free (mapbuf);
+	    xfree (mapbuf);
 	    mapbuf_allocation_size *= 2;
 	    lseek (map_fd, 0, SEEK_SET);
 	  }
@@ -220,7 +220,7 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
 	mapbuf_size = read (map_fd, mapbuf, mapbuf_allocation_size);
 	if (mapbuf_size < 0)
 	  {
-	    free (mapbuf);
+	    xfree (mapbuf);
 	    /* FIXME: This warrants an error or a warning of some sort */
 	    return 0;
 	  }
@@ -271,17 +271,17 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
       if (sop == NULL)
 	{
 	  sop = xcalloc (sizeof (struct so_list), 1);
-	  make_cleanup (free, sop);
+	  make_cleanup (xfree, sop);
 	  sop->lm_info = xcalloc (sizeof (struct lm_info), 1);
-	  make_cleanup (free, sop->lm_info);
+	  make_cleanup (xfree, sop->lm_info);
 	  sop->lm_info->mapname = xstrdup (mapname);
-	  make_cleanup (free, sop->lm_info->mapname);
+	  make_cleanup (xfree, sop->lm_info->mapname);
 	  /* FIXME: Eliminate the pathname field once length restriction
 	     is lifted on so_name and so_original_name.  */
 	  sop->lm_info->pathname = xstrdup (pathname);
-	  make_cleanup (free, sop->lm_info->pathname);
+	  make_cleanup (xfree, sop->lm_info->pathname);
 	  sop->lm_info->membername = xstrdup (membername);
-	  make_cleanup (free, sop->lm_info->membername);
+	  make_cleanup (xfree, sop->lm_info->membername);
 
 	  strncpy (sop->so_name, pathname, SO_NAME_MAX_PATH_SIZE - 1);
 	  sop->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
@@ -299,7 +299,7 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
       sop->lm_info->mapping[maptype].gp = (CORE_ADDR) prmap->pr_gp;
     }
 
-  free (mapbuf);
+  xfree (mapbuf);
   return sos;
 }
 
@@ -593,7 +593,7 @@ aix5_relocate_main_executable (void)
      relocate by.  Initialize it so it contains the current offsets.  */
   new_offsets = xcalloc (sizeof (struct section_offsets),
                          symfile_objfile->num_sections);
-  make_cleanup (free, new_offsets);
+  make_cleanup (xfree, new_offsets);
   for (i = 0; i < symfile_objfile->num_sections; i++)
     new_offsets->offsets[i] = ANOFFSET (symfile_objfile->section_offsets, i);
 
@@ -686,10 +686,10 @@ aix5_clear_solib (void)
 static void
 aix5_free_so (struct so_list *so)
 {
-  free (so->lm_info->mapname);
-  free (so->lm_info->pathname);
-  free (so->lm_info->membername);
-  free (so->lm_info);
+  xfree (so->lm_info->mapname);
+  xfree (so->lm_info->pathname);
+  xfree (so->lm_info->membername);
+  xfree (so->lm_info);
 }
 
 static void
