@@ -130,20 +130,8 @@ s390*-*-*)		gdb_host=s390 ;;
 
 sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 
-sparc-*-linux*)		gdb_host=linux ;;
-sparc-*-lynxos*)	gdb_host=sparclynx ;;
-sparc-*-netbsdelf*)	gdb_host=nbsdelf ;;
-sparc-*-netbsdaout*)	gdb_host=nbsdaout ;;
-sparc-*-netbsd*)	gdb_host=nbsdaout ;;
-sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
-sparc-*-sunos4*)	gdb_host=sun4os4 ;;
-sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
-sparc-*-*)		gdb_host=sun4os4 ;;
-sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
-			gdb_host=fbsd ;;
-sparc64-*-linux*)	gdb_host=linux ;;
-sparc64-*-netbsd*)	gdb_host=nbsd64 ;;
-sparcv9-*-* | sparc64-*-*) gdb_host=sun4sol2 ;;
+sparc-*-solaris2*)	gdb_host=sol2 ;;
+sparc64-*-freebsd*)	gdb_host=fbsd ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;

@@ -1,3 +1,17 @@
+2003-09-18  Mark Kettenis  <kettenis@gnu.org>
+
+	New SPARC target.
+	* configure.tgt: Remove support for old SPARC targets.
+	* configure.tgt: Remove support for old SPARC hosts.
+	* Makefile.in: Remove support for old SPARC hosts and targets.
+	(sparc-tdep.o): Update dependencies.
+	(sparc-sol2-tdep.o, sparc-sol2-nat.o): New dependencies.
+	* sparc-tdep.c, sparc-tdep.h: New implementation.
+	* sparc-sol2-tdep.c, sparc-sol2-nat.c: New files.
+	* config/sparc/sparc.mt: New files.
+	* config/sparc/sol2.mt, config/sparc/sol2.mh: New files.
+	* config/sparc/tm-sol2.h: New file.
+
 2003-09-17  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.in (dis_asm_h): Note that this #includes "bfd.h".

@@ -202,29 +202,8 @@ sh*-*-netbsdelf*)	gdb_target=nbsd ;;
 sh-*-nto*)		gdb_target=nto ;;
 sh*)			gdb_target=embed ;;
 
-sparc-*-aout*)		gdb_target=sparc-em ;;
-sparc-*-coff*)		gdb_target=sparc-em ;;
-sparc-*-elf*)		gdb_target=sparc-em ;;
-sparc-*-linux*)		gdb_target=linux ;;
-sparc-*-lynxos*)	gdb_target=sparclynx ;;
-sparc-*-netbsd*)	gdb_target=nbsd ;;
-sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
-sparc-*-sunos4*)	gdb_target=sun4os4 ;;
-sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
-sparc-*-vxworks*)	gdb_target=vxsparc ;;
-sparc-*-*)		gdb_target=sun4os4 ;;
-# OBSOLETE sparclet-*-*)		gdb_target=sparclet;;
-# OBSOLETE sparclite-*-*)		gdb_target=sparclite ;;
-# OBSOLETE sparc86x-*-*)		gdb_target=sparclite ;;
-# It's not clear what the right solution for "v8plus" systems is yet.
-# For now, stick with sparc-sun-solaris2 since that's what config.guess
-# should return.  Work is still needed to get gdb to print the 64 bit
-# regs (some of which are usable in v8plus) so sp64sol.mt hasn't been
-# deleted though presumably it should be eventually.
-#sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
-sparc64-*-linux*)	gdb_target=sp64linux ;;
-sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
-sparcv9-*-* | sparc64-*-*) gdb_target=sp64 ;;
+sparc-*-solaris2*)	gdb_target=sol2 ;;
+sparc-*-*)		gdb_target=sparc ;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 

@@ -1,8 +1,6 @@
-/* Target-dependent code for the SPARC for GDB, the GNU debugger.
+/* Target-dependent code for SPARC.
 
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,124 +19,54 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* ??? Support for calling functions from gdb in sparc64 is unfinished.  */
-
 #include "defs.h"
 #include "arch-utils.h"
+#include "dis-asm.h"
 #include "frame.h"
+#include "frame-base.h"
+#include "frame-unwind.h"
+#include "gdbcore.h"
+#include "gdbtypes.h"
 #include "inferior.h"
+#include "symtab.h"
+#include "objfiles.h"
+#include "osabi.h"
+#include "regcache.h"
 #include "target.h"
 #include "value.h"
-#include "bfd.h"
+
+#include "gdb_assert.h"
 #include "gdb_string.h"
-#include "regcache.h"
-#include "osabi.h"
-#include "dis-asm.h"
 
 #include "sparc-tdep.h"
 
-#ifdef	USE_PROC_FS
-#include <sys/procfs.h>
-/* Prototypes for supply_gregset etc. */
-#include "gregset.h"
-#endif
+/* This file implements the The SPARC 32-bit ABI as defined by the
+   section "Low-Level System Information" of the SPARC Compliance
+   Definition (SCD) 2.4.1, which is the 32-bit System V psABI for
+   SPARC.  The SCD lists changes with respect to the origional 32-bit
+   psABI as defined in the "System V ABI, SPARC Processor
+   Supplement".
 
-#include "gdbcore.h"
-#include "gdb_assert.h"
+   Note that if we talk about SunOS, we mean SunOS 4.x, which was
+   BSD-based, which is sometimes (retroactively?) referred to as
+   Solaris 1.x.  If we talk about Solaris we mean Solaris 2.x and
+   above (Solaris 7, 8 and 9 are nothing but Solaris 2.7, 2.8 and 2.9
+   suffering from severe version number inflation).  Solaris 2.x is
+   also known as SunOS 5.x, since that's what uname(1).  Solaris 2.x
+   is SVR4-based.  */
 
-#include "symfile.h" 	/* for 'entry_point_address' */
+/* Please use the sparc32_-prefix for 32-bit specific code, the
+   sparc64_-prefix for 64-bit specific code and the sparc_-prefix for
+   code can handle both.  The 64-bit specific code lives in
+   sparc64-tdep.c; don't add any here.  */
 
-/*
- * Some local macros that have multi-arch and non-multi-arch versions:
- */
+/* The stack pointer is offset from the stack frame by a BIAS of 2047
+   (0x7ff) for 64-bit code.  BIAS is likely to be defined on SPARC
+   hosts, so undefine it first.  */
+#undef BIAS
+#define BIAS 2047
 
-#if 0
-// OBSOLETE /* Does the target have Floating Point registers?  */
-// OBSOLETE #define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
-#endif
-#define SPARC_HAS_FPU 1
-/* Number of bytes devoted to Floating Point registers: */
-#define FP_REGISTER_BYTES (gdbarch_tdep (current_gdbarch)->fp_register_bytes)
-/* Highest numbered Floating Point register.  */
-#define FP_MAX_REGNUM     (gdbarch_tdep (current_gdbarch)->fp_max_regnum)
-/* Size of a general (integer) register: */
-#define SPARC_INTREG_SIZE (gdbarch_tdep (current_gdbarch)->intreg_size)
-/* Offset within the call dummy stack of the saved registers.  */
-#define DUMMY_REG_SAVE_OFFSET (gdbarch_tdep (current_gdbarch)->reg_save_offset)
-
-struct gdbarch_tdep
-  {
-#if 0
-    // OBSOLETE     int has_fpu;
-#endif
-    int fp_register_bytes;
-    int y_regnum;
-    int fp_max_regnum;
-    int intreg_size;
-    int reg_save_offset;
-    int call_dummy_call_offset;
-    int print_insn_mach;
-  };
-
-/* Now make GDB_TARGET_IS_SPARC64 a runtime test.  */
-/* FIXME MVS: or try testing bfd_arch_info.arch and bfd_arch_info.mach ... 
- * define GDB_TARGET_IS_SPARC64 \
- *      (TARGET_ARCHITECTURE->arch == bfd_arch_sparc &&    \
- *      (TARGET_ARCHITECTURE->mach == bfd_mach_sparc_v9 || \
- *       TARGET_ARCHITECTURE->mach == bfd_mach_sparc_v9a))
- */
-
-/* We don't store all registers immediately when requested, since they
-   get sent over in large chunks anyway.  Instead, we accumulate most
-   of the changes and send them over once.  "deferred_stores" keeps
-   track of which sets of registers we have locally-changed copies of,
-   so we only need send the groups that have changed.  */
-
-int deferred_stores = 0;    /* Accumulated stores we want to do eventually. */
-
-
-#if 0
-// OBSOLETE /* Some machines, such as Fujitsu SPARClite 86x, have a bi-endian mode
-// OBSOLETE    where instructions are big-endian and data are little-endian.
-// OBSOLETE    This flag is set when we detect that the target is of this type. */
-// OBSOLETE 
-// OBSOLETE int bi_endian = 0;
-#endif
-
-
-const unsigned char *
-sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
-{
-  static const char breakpoint[] = {0x91, 0xd0, 0x20, 0x01};
-  (*len) = sizeof (breakpoint);
-  return breakpoint;
-}
-
-/* Fetch a single instruction.  Even on bi-endian machines
-   such as sparc86x, instructions are always big-endian.  */
-
-static unsigned long
-fetch_instruction (CORE_ADDR pc)
-{
-  unsigned long retval;
-  int i;
-  unsigned char buf[4];
-
-  read_memory (pc, buf, sizeof (buf));
-
-  /* Start at the most significant end of the integer, and work towards
-     the least significant.  */
-  retval = 0;
-  for (i = 0; i < sizeof (buf); ++i)
-    retval = (retval << 8) | buf[i];
-  return retval;
-}
-
-
-/* Branches with prediction are treated like their non-predicting cousins.  */
-/* FIXME: What about floating point branches?  */
-
-/* Macros to extract fields from sparc instructions.  */
+/* Macros to extract fields from SPARC instructions.  */
 #define X_OP(i) (((i) >> 30) & 0x3)
 #define X_RD(i) (((i) >> 25) & 0x1f)
 #define X_A(i) (((i) >> 29) & 1)
@@ -146,535 +74,416 @@ fetch_instruction (CORE_ADDR pc)
 #define X_OP2(i) (((i) >> 22) & 0x7)
 #define X_IMM22(i) ((i) & 0x3fffff)
 #define X_OP3(i) (((i) >> 19) & 0x3f)
-#define X_RS1(i) (((i) >> 14) & 0x1f)
 #define X_I(i) (((i) >> 13) & 1)
-#define X_IMM13(i) ((i) & 0x1fff)
 /* Sign extension macros.  */
-#define X_SIMM13(i) ((X_IMM13 (i) ^ 0x1000) - 0x1000)
 #define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
-#define X_CC(i) (((i) >> 20) & 3)
-#define X_P(i) (((i) >> 19) & 1)
 #define X_DISP19(i) ((((i) & 0x7ffff) ^ 0x40000) - 0x40000)
-#define X_RCOND(i) (((i) >> 25) & 7)
-#define X_DISP16(i) ((((((i) >> 6) && 0xc000) | ((i) & 0x3fff)) ^ 0x8000) - 0x8000)
-#define X_FCN(i) (((i) >> 25) & 31)
 
-typedef enum
+/* Fetch the instruction at PC.  Instructions are always big-endian
+   even if the processor operates in little-endian mode.  */
+
+static unsigned long
+sparc_fetch_instruction (CORE_ADDR pc)
 {
-  Error, not_branch, bicc, bicca, ba, baa, ticc, ta, done_retry
-} branch_type;
+  unsigned char buf[4];
+  unsigned long insn;
+  int i;
 
-/* Simulate single-step ptrace call for sun4.  Code written by Gary
-   Beihl (beihl@mcc.com).  */
+  read_memory (pc, buf, sizeof (buf));
 
-/* npc4 and next_pc describe the situation at the time that the
-   step-breakpoint was set, not necessary the current value of DEPRECATED_NPC_REGNUM.  */
-static CORE_ADDR next_pc, npc4, target;
-static int brknpc4, brktrg;
-typedef char binsn_quantum[BREAKPOINT_MAX];
-static binsn_quantum break_mem[3];
-
-static branch_type isbranch (long, CORE_ADDR, CORE_ADDR *);
-
-/* single_step() is called just before we want to resume the inferior,
-   if we want to single-step it but there is no hardware or kernel single-step
-   support (as on all SPARCs).  We find all the possible targets of the
-   coming instruction and breakpoint them.
-
-   single_step is also called just after the inferior stops.  If we had
-   set up a simulated single-step, we undo our damage.  */
-
-void
-sparc_software_single_step (enum target_signal ignore,	/* pid, but we don't need it */
-			    int insert_breakpoints_p)
-{
-  branch_type br;
-  CORE_ADDR pc;
-  long pc_instruction;
-
-  if (insert_breakpoints_p)
-    {
-      /* Always set breakpoint for NPC.  */
-      next_pc = read_register (DEPRECATED_NPC_REGNUM);
-      npc4 = next_pc + 4;	/* branch not taken */
-
-      target_insert_breakpoint (next_pc, break_mem[0]);
-      /* printf_unfiltered ("set break at %x\n",next_pc); */
-
-      pc = read_register (PC_REGNUM);
-      pc_instruction = fetch_instruction (pc);
-      br = isbranch (pc_instruction, pc, &target);
-      brknpc4 = brktrg = 0;
-
-      if (br == bicca)
-	{
-	  /* Conditional annulled branch will either end up at
-	     npc (if taken) or at npc+4 (if not taken).
-	     Trap npc+4.  */
-	  brknpc4 = 1;
-	  target_insert_breakpoint (npc4, break_mem[1]);
-	}
-      else if (br == baa && target != next_pc)
-	{
-	  /* Unconditional annulled branch will always end up at
-	     the target.  */
-	  brktrg = 1;
-	  target_insert_breakpoint (target, break_mem[2]);
-	}
-      else if (GDB_TARGET_IS_SPARC64 && br == done_retry)
-	{
-	  brktrg = 1;
-	  target_insert_breakpoint (target, break_mem[2]);
-	}
-    }
-  else
-    {
-      /* Remove breakpoints */
-      target_remove_breakpoint (next_pc, break_mem[0]);
-
-      if (brknpc4)
-	target_remove_breakpoint (npc4, break_mem[1]);
-
-      if (brktrg)
-	target_remove_breakpoint (target, break_mem[2]);
-    }
+  insn = 0;
+  for (i = 0; i < sizeof (buf); i++)
+    insn = (insn << 8) | buf[i];
+  return insn;
 }
 
-struct frame_extra_info 
-{
-  CORE_ADDR bottom;
-  int in_prologue;
-  int flat;
-  /* Following fields only relevant for flat frames.  */
-  CORE_ADDR pc_addr;
-  CORE_ADDR fp_addr;
-  /* Add this to ->frame to get the value of the stack pointer at the 
-     time of the register saves.  */
-  int sp_offset;
-};
-
-/* Call this for each newly created frame.  For SPARC, we need to
-   calculate the bottom of the frame, and do some extra work if the
-   prologue has been generated via the -mflat option to GCC.  In
-   particular, we need to know where the previous fp and the pc have
-   been stashed, since their exact position within the frame may vary.  */
-
-void
-sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
-{
-  char *name;
-  CORE_ADDR prologue_start, prologue_end;
-  int insn;
-
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-  frame_saved_regs_zalloc (fi);
-
-  get_frame_extra_info (fi)->bottom =
-    (get_next_frame (fi)
-     ? (get_frame_base (fi) == get_frame_base (get_next_frame (fi))
-	? get_frame_extra_info (get_next_frame (fi))->bottom
-	: get_frame_base (get_next_frame (fi)))
-     : read_sp ());
-
-  /* If fi->next is NULL, then we already set ->frame by passing
-     deprecated_read_fp() to create_new_frame.  */
-  if (get_next_frame (fi))
-    {
-      char buf[MAX_REGISTER_SIZE];
-
-      /* Compute ->frame as if not flat.  If it is flat, we'll change
-         it later.  */
-      if (get_next_frame (get_next_frame (fi)) != NULL
-	  && ((get_frame_type (get_next_frame (get_next_frame (fi))) == SIGTRAMP_FRAME)
-	      || deprecated_frame_in_dummy (get_next_frame (get_next_frame (fi))))
-	  && frameless_look_for_prologue (get_next_frame (fi)))
-	{
-	  /* A frameless function interrupted by a signal did not change
-	     the frame pointer, fix up frame pointer accordingly.  */
-	  deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
-	  get_frame_extra_info (fi)->bottom =
-	    get_frame_extra_info (get_next_frame (fi))->bottom;
-	}
-      else
-	{
-	  /* Should we adjust for stack bias here? */
-	  ULONGEST tmp;
-	  frame_read_unsigned_register (fi, DEPRECATED_FP_REGNUM, &tmp);
-	  deprecated_update_frame_base_hack (fi, tmp);
-	  if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
-	    deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
-	}
-    }
-
-  /* Decide whether this is a function with a ``flat register window''
-     frame.  For such functions, the frame pointer is actually in %i7.  */
-  get_frame_extra_info (fi)->flat = 0;
-  get_frame_extra_info (fi)->in_prologue = 0;
-  if (find_pc_partial_function (get_frame_pc (fi), &name, &prologue_start, &prologue_end))
-    {
-      /* See if the function starts with an add (which will be of a
-         negative number if a flat frame) to the sp.  FIXME: Does not
-         handle large frames which will need more than one instruction
-         to adjust the sp.  */
-      insn = fetch_instruction (prologue_start);
-      if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0
-	  && X_I (insn) && X_SIMM13 (insn) < 0)
-	{
-	  int offset = X_SIMM13 (insn);
-
-	  /* Then look for a save of %i7 into the frame.  */
-	  insn = fetch_instruction (prologue_start + 4);
-	  if (X_OP (insn) == 3
-	      && X_RD (insn) == 31
-	      && X_OP3 (insn) == 4
-	      && X_RS1 (insn) == 14)
-	    {
-	      char buf[MAX_REGISTER_SIZE];
-
-	      /* We definitely have a flat frame now.  */
-	      get_frame_extra_info (fi)->flat = 1;
-
-	      get_frame_extra_info (fi)->sp_offset = offset;
-
-	      /* Overwrite the frame's address with the value in %i7.  */
-	      {
-		ULONGEST tmp;
-		frame_read_unsigned_register (fi, I7_REGNUM, &tmp);
-		deprecated_update_frame_base_hack (fi, tmp);
-	      }
-
-	      if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
-		deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
-
-	      /* Record where the fp got saved.  */
-	      get_frame_extra_info (fi)->fp_addr = 
-		get_frame_base (fi) + get_frame_extra_info (fi)->sp_offset + X_SIMM13 (insn);
-
-	      /* Also try to collect where the pc got saved to.  */
-	      get_frame_extra_info (fi)->pc_addr = 0;
-	      insn = fetch_instruction (prologue_start + 12);
-	      if (X_OP (insn) == 3
-		  && X_RD (insn) == 15
-		  && X_OP3 (insn) == 4
-		  && X_RS1 (insn) == 14)
-		get_frame_extra_info (fi)->pc_addr = 
-		  get_frame_base (fi) + get_frame_extra_info (fi)->sp_offset + X_SIMM13 (insn);
-	    }
-	}
-      else
-	{
-	  /* Check if the PC is in the function prologue before a SAVE
-	     instruction has been executed yet.  If so, set the frame
-	     to the current value of the stack pointer and set
-	     the in_prologue flag.  */
-	  CORE_ADDR addr;
-	  struct symtab_and_line sal;
-
-	  sal = find_pc_line (prologue_start, 0);
-	  if (sal.line == 0)	/* no line info, use PC */
-	    prologue_end = get_frame_pc (fi);
-	  else if (sal.end < prologue_end)
-	    prologue_end = sal.end;
-	  if (get_frame_pc (fi) < prologue_end)
-	    {
-	      for (addr = prologue_start; addr < get_frame_pc (fi); addr += 4)
-		{
-		  insn = read_memory_integer (addr, 4);
-		  if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
-		    break;	/* SAVE seen, stop searching */
-		}
-	      if (addr >= get_frame_pc (fi))
-		{
-		  get_frame_extra_info (fi)->in_prologue = 1;
-		  deprecated_update_frame_base_hack (fi, read_register (SP_REGNUM));
-		}
-	    }
-	}
-    }
-  if (get_next_frame (fi) && get_frame_base (fi) == 0)
-    {
-      /* Kludge to cause init_prev_frame_info to destroy the new frame.  */
-      deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
-      deprecated_update_frame_pc_hack (fi, get_frame_pc (get_next_frame (fi)));
-    }
-}
-
-CORE_ADDR
-sparc_frame_chain (struct frame_info *frame)
-{
-  /* Value that will cause DEPRECATED_FRAME_CHAIN_VALID to not worry
-     about the chain value.  If it really is zero, we detect it later
-     in sparc_init_prev_frame.
-     
-     Note: kevinb/2003-02-18: The constant 1 used to be returned here,
-     but, after some recent changes to legacy_frame_chain_valid(),
-     this value is no longer suitable for causing
-     legacy_frame_chain_valid() to "not worry about the chain value."
-     The constant ~0 (i.e, 0xfff...) causes the failing test in
-     legacy_frame_chain_valid() to succeed thus preserving the "not
-     worry" property.  I had considered using something like
-     ``get_frame_base (frame) + 1''.  However, I think a constant
-     value is better, because when debugging this problem, I knew that
-     something funny was going on as soon as I saw the constant 1
-     being used as the frame chain elsewhere in GDB.  */
-
-  return ~ (CORE_ADDR) 0;
-}
-
-/* Find the pc saved in frame FRAME.  */
-
-CORE_ADDR
-sparc_frame_saved_pc (struct frame_info *frame)
-{
-  char buf[MAX_REGISTER_SIZE];
-  CORE_ADDR addr;
-
-  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
-    {
-      /* This is the signal trampoline frame.
-         Get the saved PC from the sigcontext structure.  */
-
-#ifndef SIGCONTEXT_PC_OFFSET
-#define SIGCONTEXT_PC_OFFSET 12
-#endif
-
-      CORE_ADDR sigcontext_addr;
-      char *scbuf;
-      int saved_pc_offset = SIGCONTEXT_PC_OFFSET;
-      char *name = NULL;
-
-      scbuf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
-
-      /* Solaris2 ucbsigvechandler passes a pointer to a sigcontext
-         as the third parameter.  The offset to the saved pc is 12.  */
-      find_pc_partial_function (get_frame_pc (frame), &name,
-				(CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-      if (name && STREQ (name, "ucbsigvechandler"))
-	saved_pc_offset = 12;
-
-      /* The sigcontext address is contained in register O2.  */
-      {
-	ULONGEST tmp;
-	frame_read_unsigned_register (frame, O0_REGNUM + 2, &tmp);
-	sigcontext_addr = tmp;
-      }
-
-      /* Don't cause a memory_error when accessing sigcontext in case the
-         stack layout has changed or the stack is corrupt.  */
-      target_read_memory (sigcontext_addr + saved_pc_offset,
-			  scbuf, sizeof (scbuf));
-      return extract_unsigned_integer (scbuf, sizeof (scbuf));
-    }
-  else if (get_frame_extra_info (frame)->in_prologue ||
-	   (get_next_frame (frame) != NULL &&
-	    ((get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME) ||
-	     deprecated_frame_in_dummy (get_next_frame (frame))) &&
-	    frameless_look_for_prologue (frame)))
-    {
-      /* A frameless function interrupted by a signal did not save
-         the PC, it is still in %o7.  */
-      ULONGEST tmp;
-      frame_read_unsigned_register (frame, O7_REGNUM, &tmp);
-      return PC_ADJUST (tmp);
-    }
-  if (get_frame_extra_info (frame)->flat)
-    addr = get_frame_extra_info (frame)->pc_addr;
-  else
-    addr = get_frame_extra_info (frame)->bottom + FRAME_SAVED_I0 +
-      SPARC_INTREG_SIZE * (I7_REGNUM - I0_REGNUM);
-
-  if (addr == 0)
-    /* A flat frame leaf function might not save the PC anywhere,
-       just leave it in %o7.  */
-    return PC_ADJUST (read_register (O7_REGNUM));
-
-  read_memory (addr, buf, SPARC_INTREG_SIZE);
-  return PC_ADJUST (extract_unsigned_integer (buf, SPARC_INTREG_SIZE));
-}
-
-/* Since an individual frame in the frame cache is defined by two
-   arguments (a frame pointer and a stack pointer), we need two
-   arguments to get info for an arbitrary stack frame.  This routine
-   takes two arguments and makes the cached frames look as if these
-   two arguments defined a frame on the cache.  This allows the rest
-   of info frame to extract the important arguments without
-   difficulty.  */
-
-struct frame_info *
-setup_arbitrary_frame (int argc, CORE_ADDR *argv)
-{
-  struct frame_info *frame;
-
-  if (argc != 2)
-    error ("Sparc frame specifications require two arguments: fp and sp");
-
-  frame = create_new_frame (argv[0], 0);
-
-  if (!frame)
-    internal_error (__FILE__, __LINE__,
-		    "create_new_frame returned invalid frame");
-
-  get_frame_extra_info (frame)->bottom = argv[1];
-  deprecated_update_frame_pc_hack (frame, DEPRECATED_FRAME_SAVED_PC (frame));
-  return frame;
-}
-
-/* Given a pc value, skip it forward past the function prologue by
-   disassembling instructions that appear to be a prologue.
-
-   If FRAMELESS_P is set, we are only testing to see if the function
-   is frameless.  This allows a quicker answer.
-
-   This routine should be more specific in its actions; making sure
-   that it uses the same register in the initial prologue section.  */
-
-static CORE_ADDR examine_prologue (CORE_ADDR, int, struct frame_info *,
-				   CORE_ADDR *);
+/* Return the contents if register REGNUM as an address.  */
 
 static CORE_ADDR
-examine_prologue (CORE_ADDR start_pc, int frameless_p, struct frame_info *fi,
-		  CORE_ADDR *saved_regs)
+sparc_address_from_register (int regnum)
 {
-  int insn;
+  ULONGEST addr;
+
+  regcache_cooked_read_unsigned (current_regcache, regnum, &addr);
+  return addr;
+}
+
+
+/* The functions on this page are intended to be used to classify
+   function arguments.  */
+
+/* Check whether TYPE is "Integral or Pointer".  */
+
+static int
+sparc_integral_or_pointer_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_INT:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_RANGE:
+      {
+	/* We have byte, half-word, word and extended-word/doubleword
+           integral types.  The doubleword is an extension to the
+           origional 32-bit ABI by the SCD 2.4.x.  */
+	int len = TYPE_LENGTH (type);
+	return (len == 1 || len == 2 || len == 4 || len == 8);
+      }
+      return 1;
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_REF:
+      {
+	/* Allow either 32-bit or 64-bit pointers.  */
+	int len = TYPE_LENGTH (type);
+	return (len == 4 || len == 8);
+      }
+      return 1;
+    default:
+      break;
+    }
+
+  return 0;
+}
+
+/* Check whether TYPE is "Floating".  */
+
+static int
+sparc_floating_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_FLT:
+      {
+	int len = TYPE_LENGTH (type);
+	return (len == 4 || len == 8 || len == 16);
+      }
+    default:
+      break;
+    }
+
+  return 0;
+}
+
+/* Check whether TYPE is "Structure or Union".  */
+
+static int
+sparc_structure_or_union_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      return 1;
+    default:
+      break;
+    }
+
+  return 0;
+}
+
+/* Register information.  */
+
+static const char *sparc32_register_names[] =
+{
+  "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
+  "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
+  "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
+  "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
+
+  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
+  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
+  "f24", "f25", "f26", "f27", "f28", "f28", "f30", "f31",
+
+  "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr",
+};
+
+/* Total number of registers.  */
+#define SPARC32_NUM_REGS ARRAY_SIZE (sparc32_register_names)
+
+/* Return the name of register REGNUM.  */
+
+static const char *
+sparc32_register_name (int regnum)
+{
+  if (regnum >= 0 && regnum < SPARC32_NUM_REGS)
+    return sparc32_register_names[regnum];
+
+  return NULL;
+}
+
+/* Return the GDB type object for the "standard" data type of data in
+   register REGNUM. */
+
+static struct type *
+sparc32_register_type (struct gdbarch *gdbarch, int regnum)
+{
+  if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
+    return builtin_type_float;
+
+  if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
+    return builtin_type_void_data_ptr;
+
+  if (regnum == SPARC32_PC_REGNUM || regnum == SPARC32_NPC_REGNUM)
+    return builtin_type_void_func_ptr;
+
+  return builtin_type_int32;
+}
+
+static CORE_ADDR
+sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
+			 CORE_ADDR funcaddr, int using_gcc,
+			 struct value **args, int nargs,
+			 struct type *value_type,
+			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  *bp_addr = sp - 4;
+  *real_pc = funcaddr;
+
+  if (using_struct_return (value_type, using_gcc))
+    {
+      char buf[4];
+
+      /* This is an UNIMP instruction.  */
+      store_unsigned_integer (buf, 4, TYPE_LENGTH (value_type) & 0x1fff);
+      write_memory (sp - 8, buf, 4);
+      return sp - 8;
+    }
+
+  return sp - 4;
+}
+
+static CORE_ADDR
+sparc32_store_arguments (struct regcache *regcache, int nargs,
+			 struct value **args, CORE_ADDR sp,
+			 int struct_return, CORE_ADDR struct_addr)
+{
+  /* Number of words in the "parameter array".  */
+  int num_elements = 0;
+  int element = 0;
+  int i;
+
+  for (i = 0; i < nargs; i++)
+    {
+      struct type *type = VALUE_TYPE (args[i]);
+      int len = TYPE_LENGTH (type);
+
+      if (sparc_structure_or_union_p (type)
+	  || (sparc_floating_p (type) && len == 16))
+	{
+	  /* Structure, Union and Quad-Precision Arguments.  */
+	  sp -= len;
+
+	  /* Use doubleword alignment for these values.  That's always
+             correct, and wasting a few bytes shouldn't be a problem.  */
+	  sp &= ~0x7;
+
+	  write_memory (sp, VALUE_CONTENTS (args[i]), len);
+	  args[i] = value_from_pointer (lookup_pointer_type (type), sp);
+	  num_elements++;
+	}
+      else if (sparc_floating_p (type))
+	{
+	  /* Floating arguments.  */
+	  gdb_assert (len == 4 || len == 8);
+	  num_elements += (len / 4);
+	}
+      else
+	{
+	  /* Integral and pointer arguments.  */
+	  gdb_assert (sparc_integral_or_pointer_p (type));
+
+	  if (len < 4)
+	    args[i] = value_cast (builtin_type_int32, args[i]);
+	  num_elements += ((len + 3) / 4);
+	}
+    }
+
+  /* Always allocate at least six words.  */
+  sp -= max (6, num_elements) * 4;
+
+  /* The psABI says that "Software convention requires space for the
+     struct/union return value pointer, even if the word is unused."  */
+  sp -= 4;
+
+  /* The psABI says that "Although software convention and the
+     operating system require every stack frame to be doubleword
+     aligned."  */
+  sp &= ~0x7;
+
+  for (i = 0; i < nargs; i++)
+    {
+      char *valbuf = VALUE_CONTENTS (args[i]);
+      struct type *type = VALUE_TYPE (args[i]);
+      int len = TYPE_LENGTH (type);
+
+      gdb_assert (len == 4 || len == 8);
+
+      if (element < 6)
+	{
+	  int regnum = SPARC_O0_REGNUM + element;
+
+	  regcache_cooked_write (regcache, regnum, valbuf);
+	  if (len > 4 && element < 5)
+	    regcache_cooked_write (regcache, regnum + 1, valbuf + 4);
+	}
+
+      /* Always store the argument in memory.  */
+      write_memory (sp + 4 + element * 4, valbuf, len);
+      element += len / 4;
+    }
+
+  gdb_assert (element == num_elements);
+
+  if (struct_return)
+    {
+      char buf[4];
+
+      store_unsigned_integer (buf, 4, struct_addr);
+      write_memory (sp, buf, 4);
+    }
+
+  return sp;
+}
+
+static CORE_ADDR
+sparc32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			 struct regcache *regcache, CORE_ADDR bp_addr,
+			 int nargs, struct value **args, CORE_ADDR sp,
+			 int struct_return, CORE_ADDR struct_addr)
+{
+  CORE_ADDR call_pc = (struct_return ? (bp_addr - 12) : (bp_addr - 8));
+
+  /* Set return address.  */
+  regcache_cooked_write_unsigned (regcache, SPARC_O7_REGNUM, call_pc);
+
+  /* Set up function arguments.  */
+  sp = sparc32_store_arguments (regcache, nargs, args, sp,
+				struct_return, struct_addr);
+
+  /* Allocate the 16-word window save area.  */
+  sp -= 16 * 4;
+
+  /* Stack should be doubleword aligned at this point.  */
+  gdb_assert (sp % 8 == 0);
+
+  /* Finally, update the stack pointer.  */
+  regcache_cooked_write_unsigned (regcache, SPARC_SP_REGNUM, sp);
+
+  return sp;
+}
+
+
+/* Use the program counter to determine the contents and size of a
+   breakpoint instruction.  Return a pointer to a string of bytes that
+   encode a breakpoint instruction, store the length of the string in
+   *LEN and optionally adjust *PC to point to the correct memory
+   location for inserting the breakpoint.  */
+   
+static const unsigned char *
+sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static unsigned char break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
+
+  *len = sizeof (break_insn);
+  return break_insn;
+}
+
+
+/* Allocate and initialize a frame cache.  */
+
+static struct sparc32_frame_cache *
+sparc32_alloc_frame_cache (void)
+{
+  struct sparc32_frame_cache *cache;
+  int i;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct sparc32_frame_cache);
+
+  /* Base address.  */
+  cache->base = 0;
+  cache->pc = 0;
+
+  /* Frameless until proven otherwise.  */
+  cache->frameless_p = 1;
+
+  cache->struct_return_p = 0;
+
+  return cache;
+}
+
+static CORE_ADDR
+sparc32_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+			  struct sparc32_frame_cache *cache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  unsigned long insn;
+  int offset = 0;
   int dest = -1;
-  CORE_ADDR pc = start_pc;
-  int is_flat = 0;
 
-  insn = fetch_instruction (pc);
+  if (current_pc <= pc)
+    return current_pc;
 
-  /* Recognize the `sethi' insn and record its destination.  */
-  if (X_OP (insn) == 0 && X_OP2 (insn) == 4)
+  /* We have to handle to "Procedure Linkage Table" (PLT) special.  On
+     SPARC the linker usually defines a symbol (typically
+     _PROCEDURE_LINKAGE_TABLE_) at the start of the .plt section.
+     This symbol makes us end up here with PC pointing at the start of
+     the PLT and CURRENT_PC probably pointing at a PLT entry.  If we
+     would do our normal prologue analysis, we would probably conclude
+     that we've got a frame when in reality we don't, since the
+     dynamic linker patches up the first PLT with some code that
+     starts with a SAVE instruction.  Patch up PC such that it points
+     at the start of our PLT entry.  */
+  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc, NULL))
+    pc = current_pc - ((current_pc - pc) % tdep->plt_entry_size);
+
+  insn = sparc_fetch_instruction (pc);
+
+  /* Recognize a SETHI insn and record its destination.  */
+  if (X_OP (insn) == 0 && X_OP2 (insn) == 0x04)
     {
       dest = X_RD (insn);
-      pc += 4;
-      insn = fetch_instruction (pc);
+      offset += 4;
+
+      insn = sparc_fetch_instruction (pc + 4);
     }
 
-  /* Recognize an add immediate value to register to either %g1 or
-     the destination register recorded above.  Actually, this might
-     well recognize several different arithmetic operations.
-     It doesn't check that rs1 == rd because in theory "sub %g0, 5, %g1"
-     followed by "save %sp, %g1, %sp" is a valid prologue (Not that
-     I imagine any compiler really does that, however).  */
-  if (X_OP (insn) == 2
-      && X_I (insn)
+  /* Allow for an arithmetic operation on DEST or %g1.  */
+  if (X_OP (insn) == 2 && X_I (insn)
       && (X_RD (insn) == 1 || X_RD (insn) == dest))
     {
-      pc += 4;
-      insn = fetch_instruction (pc);
+      offset += 4;
+
+      insn = sparc_fetch_instruction (pc + 8);
     }
 
-  /* Recognize any SAVE insn.  */
-  if (X_OP (insn) == 2 && X_OP3 (insn) == 60)
+  /* Check for the SAVE instruction that sets up the frame.  */
+  if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
     {
-      pc += 4;
-      if (frameless_p)		/* If the save is all we care about, */
-	return pc;		/* return before doing more work */
-      insn = fetch_instruction (pc);
-    }
-  /* Recognize add to %sp.  */
-  else if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0)
-    {
-      pc += 4;
-      if (frameless_p)		/* If the add is all we care about, */
-	return pc;		/* return before doing more work */
-      is_flat = 1;
-      insn = fetch_instruction (pc);
-      /* Recognize store of frame pointer (i7).  */
-      if (X_OP (insn) == 3
-	  && X_RD (insn) == 31
-	  && X_OP3 (insn) == 4
-	  && X_RS1 (insn) == 14)
-	{
-	  pc += 4;
-	  insn = fetch_instruction (pc);
-
-	  /* Recognize sub %sp, <anything>, %i7.  */
-	  if (X_OP (insn) == 2
-	      && X_OP3 (insn) == 4
-	      && X_RS1 (insn) == 14
-	      && X_RD (insn) == 31)
-	    {
-	      pc += 4;
-	      insn = fetch_instruction (pc);
-	    }
-	  else
-	    return pc;
-	}
-      else
-	return pc;
-    }
-  else
-    /* Without a save or add instruction, it's not a prologue.  */
-    return start_pc;
-
-  while (1)
-    {
-      /* Recognize stores into the frame from the input registers.
-         This recognizes all non alternate stores of an input register,
-         into a location offset from the frame pointer between
-	 +68 and +92.  */
-
-      /* The above will fail for arguments that are promoted 
-	 (eg. shorts to ints or floats to doubles), because the compiler
-	 will pass them in positive-offset frame space, but the prologue
-	 will save them (after conversion) in negative frame space at an
-	 unpredictable offset.  Therefore I am going to remove the 
-	 restriction on the target-address of the save, on the theory
-	 that any unbroken sequence of saves from input registers must
-	 be part of the prologue.  In un-optimized code (at least), I'm
-	 fairly sure that the compiler would emit SOME other instruction
-	 (eg. a move or add) before emitting another save that is actually
-	 a part of the function body.
-
-	 Besides, the reserved stack space is different for SPARC64 anyway.
-
-	 MVS  4/23/2000  */
-
-      if (X_OP (insn) == 3
-	  && (X_OP3 (insn) & 0x3c)	 == 4	/* Store, non-alternate.  */
-	  && (X_RD (insn) & 0x18) == 0x18	/* Input register.  */
-	  && X_I (insn)				/* Immediate mode.  */
-	  && X_RS1 (insn) == 30)		/* Off of frame pointer.  */
-	; /* empty statement -- fall thru to end of loop */
-      else if (GDB_TARGET_IS_SPARC64
-	       && X_OP (insn) == 3
-	       && (X_OP3 (insn) & 0x3c) == 12	/* store, extended (64-bit) */
-	       && (X_RD (insn) & 0x18) == 0x18	/* input register */
-	       && X_I (insn)			/* immediate mode */
-	       && X_RS1 (insn) == 30)		/* off of frame pointer */
-	; /* empty statement -- fall thru to end of loop */
-      else if (X_OP (insn) == 3
-	       && (X_OP3 (insn) & 0x3c) == 36	/* store, floating-point */
-	       && X_I (insn)			/* immediate mode */
-	       && X_RS1 (insn) == 30)		/* off of frame pointer */
-	; /* empty statement -- fall thru to end of loop */
-      else if (is_flat
-	       && X_OP (insn) == 3
-	       && X_OP3 (insn) == 4		/* store? */
-	       && X_RS1 (insn) == 14)		/* off of frame pointer */
-	{
-	  if (saved_regs && X_I (insn))
-	    saved_regs[X_RD (insn)] =
-	      get_frame_base (fi) + get_frame_extra_info (fi)->sp_offset + X_SIMM13 (insn);
-	}
-      else
-	break;
-      pc += 4;
-      insn = fetch_instruction (pc);
+      cache->frameless_p = 0;
+      return pc + offset + 4;
     }
 
   return pc;
 }
 
-/* Advance PC across any function entry prologue instructions to reach
-   some "real" code.  */
+static CORE_ADDR
+sparc32_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, SPARC32_PC_REGNUM);
+}
 
-CORE_ADDR
-sparc_skip_prologue (CORE_ADDR start_pc)
+/* Return PC of first real instruction of the function starting at
+   START_PC.  */
+
+static CORE_ADDR
+sparc32_skip_prologue (CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_start, func_end;
+  struct sparc32_frame_cache cache;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
@@ -687,1702 +496,265 @@ sparc_skip_prologue (CORE_ADDR start_pc)
 	return sal.end;
     }
 
-  /* Oh well, examine the code by hand.  */
-  return examine_prologue (start_pc, 0, NULL, NULL);
+  return sparc32_analyze_prologue (start_pc, 0xffffffffUL, &cache);
 }
 
-/* Is the prologue at IP frameless?  */
+/* Normal frames.  */
 
-int
-sparc_prologue_frameless_p (CORE_ADDR ip)
+struct sparc32_frame_cache *
+sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
-  return ip == examine_prologue (ip, 1, NULL, NULL);
+  struct sparc32_frame_cache *cache;
+  struct symbol *sym;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = sparc32_alloc_frame_cache ();
+  *this_cache = cache;
+
+  /* In priciple, for normal frames, %fp (%i6) holds the frame
+     pointer, which holds the base address for the current stack
+     frame.  */
+
+  cache->base = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+  if (cache->base == 0)
+    return cache;
+
+  cache->pc = frame_func_unwind (next_frame);
+  if (cache->pc != 0)
+    sparc32_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+
+  if (cache->frameless_p)
+    {
+      /* We didn't find a valid frame, which means that CACHE->base
+	 currently holds the frame pointer for our calling frame.  */
+      cache->base = frame_unwind_register_unsigned (next_frame,
+						    SPARC_SP_REGNUM);
+    }
+
+  sym = find_pc_function (cache->pc);
+  if (sym)
+    {
+      struct type *type = check_typedef (SYMBOL_TYPE (sym));
+      enum type_code code = TYPE_CODE (type);
+
+      if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
+	{
+	  type = check_typedef (TYPE_TARGET_TYPE (type));
+	  if (sparc_structure_or_union_p (type)
+	      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+	    cache->struct_return_p = 1;
+	}
+    }
+
+  return cache;
 }
-
-/* Check instruction at ADDR to see if it is a branch.
-   All non-annulled instructions will go to NPC or will trap.
-   Set *TARGET if we find a candidate branch; set to zero if not.
-
-   This isn't static as it's used by remote-sa.sparc.c.  */
-
-static branch_type
-isbranch (long instruction, CORE_ADDR addr, CORE_ADDR *target)
-{
-  branch_type val = not_branch;
-  long int offset = 0;		/* Must be signed for sign-extend.  */
-
-  *target = 0;
-
-  if (X_OP (instruction) == 0
-      && (X_OP2 (instruction) == 2
-	  || X_OP2 (instruction) == 6
-	  || X_OP2 (instruction) == 1
-	  || X_OP2 (instruction) == 3
-	  || X_OP2 (instruction) == 5
-	  || (GDB_TARGET_IS_SPARC64 && X_OP2 (instruction) == 7)))
-    {
-      if (X_COND (instruction) == 8)
-	val = X_A (instruction) ? baa : ba;
-      else
-	val = X_A (instruction) ? bicca : bicc;
-      switch (X_OP2 (instruction))
-	{
-	case 7:
-	if (!GDB_TARGET_IS_SPARC64)
-	  break;
-	/* else fall thru */
-	case 2:
-	case 6:
-	  offset = 4 * X_DISP22 (instruction);
-	  break;
-	case 1:
-	case 5:
-	  offset = 4 * X_DISP19 (instruction);
-	  break;
-	case 3:
-	  offset = 4 * X_DISP16 (instruction);
-	  break;
-	}
-      *target = addr + offset;
-    }
-  else if (GDB_TARGET_IS_SPARC64
-	   && X_OP (instruction) == 2
-	   && X_OP3 (instruction) == 62)
-    {
-      if (X_FCN (instruction) == 0)
-	{
-	  /* done */
-	  *target = read_register (TNPC_REGNUM);
-	  val = done_retry;
-	}
-      else if (X_FCN (instruction) == 1)
-	{
-	  /* retry */
-	  *target = read_register (TPC_REGNUM);
-	  val = done_retry;
-	}
-    }
-
-  return val;
-}
-
-/* Find register number REGNUM relative to FRAME and put its
-   (raw) contents in *RAW_BUFFER.  Set *OPTIMIZED if the variable
-   was optimized out (and thus can't be fetched).  If the variable
-   was fetched from memory, set *ADDRP to where it was fetched from,
-   otherwise it was fetched from a register.
-
-   The argument RAW_BUFFER must point to aligned memory.  */
-
-void
-sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-			  struct frame_info *frame, int regnum,
-			  enum lval_type *lval)
-{
-  struct frame_info *frame1;
-  CORE_ADDR addr;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  if (optimized)
-    *optimized = 0;
-
-  addr = 0;
-
-  /* FIXME This code extracted from infcmd.c; should put elsewhere! */
-  if (frame == NULL)
-    {
-      /* error ("No selected frame."); */
-      if (!target_has_registers)
-	error ("The program has no registers now.");
-      if (deprecated_selected_frame == NULL)
-	error ("No selected frame.");
-      /* Try to use selected frame */
-      frame = get_prev_frame (deprecated_selected_frame);
-      if (frame == 0)
-	error ("Cmd not meaningful in the outermost frame.");
-    }
-
-
-  frame1 = get_next_frame (frame);
-
-  /* Get saved PC from the frame info if not in innermost frame.  */
-  if (regnum == PC_REGNUM && frame1 != NULL)
-    {
-      if (lval != NULL)
-	*lval = not_lval;
-      if (raw_buffer != NULL)
-	{
-	  /* Put it back in target format.  */
-	  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
-	}
-      if (addrp != NULL)
-	*addrp = 0;
-      return;
-    }
-
-  while (frame1 != NULL)
-    {
-      /* FIXME MVS: wrong test for dummy frame at entry.  */
-
-      if (get_frame_pc (frame1) >= (get_frame_extra_info (frame1)->bottom
-				    ? get_frame_extra_info (frame1)->bottom
-				    : read_sp ())
-	  && get_frame_pc (frame1) <= get_frame_base (frame1))
-	{
-	  /* Dummy frame.  All but the window regs are in there somewhere.
-	     The window registers are saved on the stack, just like in a
-	     normal frame.  */
-	  if (regnum >= G1_REGNUM && regnum < G1_REGNUM + 7)
-	    addr = get_frame_base (frame1) + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
-	      - (FP_REGISTER_BYTES + 8 * SPARC_INTREG_SIZE);
-	  else if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
-	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
-               is safe/cheap - there will always be a prev frame.
-               This is because frame1 is initialized to frame->next
-               (frame1->prev == frame) and is then advanced towards
-               the innermost (next) frame.  */
-	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
-		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
-		    + FRAME_SAVED_I0);
-	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
-	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
-               is safe/cheap - there will always be a prev frame.
-               This is because frame1 is initialized to frame->next
-               (frame1->prev == frame) and is then advanced towards
-               the innermost (next) frame.  */
-	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
-		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
-		    + FRAME_SAVED_L0);
-	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
-	    addr = get_frame_base (frame1) + (regnum - O0_REGNUM) * SPARC_INTREG_SIZE
-	      - (FP_REGISTER_BYTES + 16 * SPARC_INTREG_SIZE);
-	  else if (SPARC_HAS_FPU &&
-		   regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32)
-	    addr = get_frame_base (frame1) + (regnum - FP0_REGNUM) * 4
-	      - (FP_REGISTER_BYTES);
-	  else if (GDB_TARGET_IS_SPARC64 && SPARC_HAS_FPU && 
-		   regnum >= FP0_REGNUM + 32 && regnum < FP_MAX_REGNUM)
-	    addr = get_frame_base (frame1) + 32 * 4 + (regnum - FP0_REGNUM - 32) * 8
-	      - (FP_REGISTER_BYTES);
-	  else if (regnum >= Y_REGNUM && regnum < NUM_REGS)
-	    addr = get_frame_base (frame1) + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
-	      - (FP_REGISTER_BYTES + 24 * SPARC_INTREG_SIZE);
-	}
-      else if (get_frame_extra_info (frame1)->flat)
-	{
-
-	  if (regnum == RP_REGNUM)
-	    addr = get_frame_extra_info (frame1)->pc_addr;
-	  else if (regnum == I7_REGNUM)
-	    addr = get_frame_extra_info (frame1)->fp_addr;
-	  else
-	    {
-	      CORE_ADDR func_start;
-	      CORE_ADDR *regs;
-
-	      regs = alloca (NUM_REGS * sizeof (CORE_ADDR)); 
-	      memset (regs, 0, NUM_REGS * sizeof (CORE_ADDR));
-
-	      find_pc_partial_function (get_frame_pc (frame1), NULL, &func_start, NULL);
-	      examine_prologue (func_start, 0, frame1, regs);
-	      addr = regs[regnum];
-	    }
-	}
-      else
-	{
-	  /* Normal frame.  Local and In registers are saved on stack.  */
-	  if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
-	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
-		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
-		    + FRAME_SAVED_I0);
-	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
-	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
-		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
-		    + FRAME_SAVED_L0);
-	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
-	    {
-	      /* Outs become ins.  */
-	      int realnum;
-	      frame_register (frame1, (regnum - O0_REGNUM + I0_REGNUM),
-			      optimized, lval, addrp, &realnum, raw_buffer);
-	      return;
-	    }
-	}
-      if (addr != 0)
-	break;
-      frame1 = get_next_frame (frame1);
-    }
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = DEPRECATED_REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	deprecated_read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
-}
-
-/* Push an empty stack frame, and record in it the current PC, regs, etc.
-
-   We save the non-windowed registers and the ins.  The locals and outs
-   are new; they don't need to be saved. The i's and l's of
-   the last frame were already saved on the stack.  */
-
-/* Definitely see tm-sparc.h for more doc of the frame format here.  */
-
-/* See tm-sparc.h for how this is calculated.  */
-
-#define DUMMY_STACK_REG_BUF_SIZE \
-     (((8+8+8) * SPARC_INTREG_SIZE) + FP_REGISTER_BYTES)
-#define DUMMY_STACK_SIZE \
-     (DUMMY_STACK_REG_BUF_SIZE + DUMMY_REG_SAVE_OFFSET)
-
-void
-sparc_push_dummy_frame (void)
-{
-  CORE_ADDR sp, old_sp;
-  char *register_temp;
-
-  register_temp = alloca (DUMMY_STACK_SIZE);
-
-  old_sp = sp = read_sp ();
-
-  if (GDB_TARGET_IS_SPARC64)
-    {
-      /* PC, NPC, CCR, FSR, FPRS, Y, ASI */
-      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (PC_REGNUM),
-				      &register_temp[0],
-				      REGISTER_RAW_SIZE (PC_REGNUM) * 7);
-      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (PSTATE_REGNUM), 
-				      &register_temp[7 * SPARC_INTREG_SIZE],
-				      REGISTER_RAW_SIZE (PSTATE_REGNUM));
-      /* FIXME: not sure what needs to be saved here.  */
-    }
-  else
-    {
-      /* Y, PS, WIM, TBR, PC, NPC, FPS, CPS regs */
-      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (Y_REGNUM),
-				      &register_temp[0],
-				      REGISTER_RAW_SIZE (Y_REGNUM) * 8);
-    }
-
-  deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (O0_REGNUM),
-				  &register_temp[8 * SPARC_INTREG_SIZE],
-				  SPARC_INTREG_SIZE * 8);
-
-  deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (G0_REGNUM),
-				  &register_temp[16 * SPARC_INTREG_SIZE],
-				  SPARC_INTREG_SIZE * 8);
-
-  if (SPARC_HAS_FPU)
-    deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM),
-				    &register_temp[24 * SPARC_INTREG_SIZE],
-				    FP_REGISTER_BYTES);
-
-  sp -= DUMMY_STACK_SIZE;
-
-  DEPRECATED_DUMMY_WRITE_SP (sp);
-
-  write_memory (sp + DUMMY_REG_SAVE_OFFSET, &register_temp[0],
-		DUMMY_STACK_REG_BUF_SIZE);
-
-  if (strcmp (target_shortname, "sim") != 0)
-    {
-      /* NOTE: cagney/2002-04-04: The code below originally contained
-         GDB's _only_ call to write_fp().  That call was eliminated by
-         inlining the corresponding code.  For the 64 bit case, the
-         old function (sparc64_write_fp) did the below although I'm
-         not clear why.  The same goes for why this is only done when
-         the underlying target is a simulator.  */
-      if (GDB_TARGET_IS_SPARC64)
-	{
-	  /* Target is a 64 bit SPARC.  */
-	  CORE_ADDR oldfp = read_register (DEPRECATED_FP_REGNUM);
-	  if (oldfp & 1)
-	    write_register (DEPRECATED_FP_REGNUM, old_sp - 2047);
-	  else
-	    write_register (DEPRECATED_FP_REGNUM, old_sp);
-	}
-      else
-	{
-	  /* Target is a 32 bit SPARC.  */
-	  write_register (DEPRECATED_FP_REGNUM, old_sp);
-	}
-      /* Set return address register for the call dummy to the current PC.  */
-      write_register (I7_REGNUM, read_pc () - 8);
-    }
-  else
-    {
-      /* The call dummy will write this value to FP before executing
-         the 'save'.  This ensures that register window flushes work
-         correctly in the simulator.  */
-      write_register (G0_REGNUM + 1, read_register (DEPRECATED_FP_REGNUM));
-
-      /* The call dummy will write this value to FP after executing
-         the 'save'. */
-      write_register (G0_REGNUM + 2, old_sp);
-
-      /* The call dummy will write this value to the return address (%i7) after
-         executing the 'save'. */
-      write_register (G0_REGNUM + 3, read_pc () - 8);
-
-      /* Set the FP that the call dummy will be using after the 'save'.
-         This makes backtraces from an inferior function call work properly.  */
-      write_register (DEPRECATED_FP_REGNUM, old_sp);
-    }
-}
-
-/* sparc_frame_find_saved_regs ().  This function is here only because
-   pop_frame uses it.  Note there is an interesting corner case which
-   I think few ports of GDB get right--if you are popping a frame
-   which does not save some register that *is* saved by a more inner
-   frame (such a frame will never be a dummy frame because dummy
-   frames save all registers).
-
-   NOTE: cagney/2003-03-12: Since pop_frame has been rewritten to use
-   frame_unwind_register() the need for this function is questionable.
-
-   Stores, into an array of CORE_ADDR, 
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.
-
-   Note that on register window machines, we are currently making the
-   assumption that window registers are being saved somewhere in the
-   frame in which they are being used.  If they are stored in an
-   inferior frame, find_saved_register will break.
-
-   On the Sun 4, the only time all registers are saved is when
-   a dummy frame is involved.  Otherwise, the only saved registers
-   are the LOCAL and IN registers which are saved as a result
-   of the "save/restore" opcodes.  This condition is determined
-   by address rather than by value.
-
-   The "pc" is not stored in a frame on the SPARC.  (What is stored
-   is a return address minus 8.)  sparc_pop_frame knows how to
-   deal with that.  Other routines might or might not.
-
-   See tm-sparc.h (PUSH_DUMMY_FRAME and friends) for CRITICAL information
-   about how this works.  */
-
-static void sparc_frame_find_saved_regs (struct frame_info *, CORE_ADDR *);
 
 static void
-sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
+sparc32_frame_this_id (struct frame_info *next_frame, void **this_cache,
+		       struct frame_id *this_id)
 {
-  int regnum;
-  CORE_ADDR frame_addr = get_frame_base (fi);
-
-  gdb_assert (fi != NULL);
-
-  memset (saved_regs_addr, 0, NUM_REGS * sizeof (CORE_ADDR));
-
-  if (get_frame_pc (fi) >= (get_frame_extra_info (fi)->bottom
-			    ? get_frame_extra_info (fi)->bottom
-			    : read_sp ())
-      && get_frame_pc (fi) <= get_frame_base (fi))
-    {
-      /* Dummy frame.  All but the window regs are in there somewhere. */
-      for (regnum = G1_REGNUM; regnum < G1_REGNUM + 7; regnum++)
-	saved_regs_addr[regnum] =
-	  frame_addr + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
-	  - DUMMY_STACK_REG_BUF_SIZE + 16 * SPARC_INTREG_SIZE;
-
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM + 8; regnum++)
-	saved_regs_addr[regnum] =
-	  frame_addr + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
-	  - DUMMY_STACK_REG_BUF_SIZE + 8 * SPARC_INTREG_SIZE;
-
-      if (SPARC_HAS_FPU)
-	for (regnum = FP0_REGNUM; regnum < FP_MAX_REGNUM; regnum++)
-	  saved_regs_addr[regnum] = frame_addr + (regnum - FP0_REGNUM) * 4
-	    - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
-
-      if (GDB_TARGET_IS_SPARC64)
-	{
-	  for (regnum = PC_REGNUM; regnum < PC_REGNUM + 7; regnum++)
-	    {
-	      saved_regs_addr[regnum] =
-		frame_addr + (regnum - PC_REGNUM) * SPARC_INTREG_SIZE
-		- DUMMY_STACK_REG_BUF_SIZE;
-	    }
-	  saved_regs_addr[PSTATE_REGNUM] =
-	    frame_addr + 8 * SPARC_INTREG_SIZE - DUMMY_STACK_REG_BUF_SIZE;
-	}
-      else
-	for (regnum = Y_REGNUM; regnum < NUM_REGS; regnum++)
-	  saved_regs_addr[regnum] =
-	    frame_addr + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
-	    - DUMMY_STACK_REG_BUF_SIZE;
-
-      frame_addr = (get_frame_extra_info (fi)->bottom
-		    ? get_frame_extra_info (fi)->bottom
-		    : read_sp ());
-    }
-  else if (get_frame_extra_info (fi)->flat)
-    {
-      CORE_ADDR func_start;
-      find_pc_partial_function (get_frame_pc (fi), NULL, &func_start, NULL);
-      examine_prologue (func_start, 0, fi, saved_regs_addr);
-
-      /* Flat register window frame.  */
-      saved_regs_addr[RP_REGNUM] = get_frame_extra_info (fi)->pc_addr;
-      saved_regs_addr[I7_REGNUM] = get_frame_extra_info (fi)->fp_addr;
-    }
-  else
-    {
-      /* Normal frame.  Just Local and In registers */
-      frame_addr = (get_frame_extra_info (fi)->bottom
-		    ? get_frame_extra_info (fi)->bottom
-		    : read_sp ());
-      for (regnum = L0_REGNUM; regnum < L0_REGNUM + 8; regnum++)
-	saved_regs_addr[regnum] =
-	  (frame_addr + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
-	   + FRAME_SAVED_L0);
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM + 8; regnum++)
-	saved_regs_addr[regnum] =
-	  (frame_addr + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
-	   + FRAME_SAVED_I0);
-    }
-  if (get_next_frame (fi))
-    {
-      if (get_frame_extra_info (fi)->flat)
-	{
-	  saved_regs_addr[O7_REGNUM] = get_frame_extra_info (fi)->pc_addr;
-	}
-      else
-	{
-	  /* Pull off either the next frame pointer or the stack pointer */
-	  CORE_ADDR next_next_frame_addr =
-	  (get_frame_extra_info (get_next_frame (fi))->bottom
-	   ? get_frame_extra_info (get_next_frame (fi))->bottom
-	   : read_sp ());
-	  for (regnum = O0_REGNUM; regnum < O0_REGNUM + 8; regnum++)
-	    saved_regs_addr[regnum] =
-	      (next_next_frame_addr
-	       + (regnum - O0_REGNUM) * SPARC_INTREG_SIZE
-	       + FRAME_SAVED_I0);
-	}
-    }
-  /* Otherwise, whatever we would get from ptrace(GETREGS) is accurate */
-  /* FIXME -- should this adjust for the sparc64 offset? */
-  saved_regs_addr[SP_REGNUM] = get_frame_base (fi);
-}
-
-/* Discard from the stack the innermost frame, restoring all saved registers.
-
-   Note that the values stored in fsr by
-   deprecated_get_frame_saved_regs are *in the context of the called
-   frame*.  What this means is that the i regs of fsr must be restored
-   into the o regs of the (calling) frame that we pop into.  We don't
-   care about the output regs of the calling frame, since unless it's
-   a dummy frame, it won't have any output regs in it.
-
-   We never have to bother with %l (local) regs, since the called routine's
-   locals get tossed, and the calling routine's locals are already saved
-   on its stack.  */
-
-/* Definitely see tm-sparc.h for more doc of the frame format here.  */
-
-void
-sparc_pop_frame (void)
-{
-  struct frame_info *frame = get_current_frame ();
-  CORE_ADDR pc;
-  CORE_ADDR *fsr;
-  char *raw_buffer;
-  int regnum;
-
-  fsr = alloca (NUM_REGS * sizeof (CORE_ADDR));
-  raw_buffer = alloca (DEPRECATED_REGISTER_BYTES);
-  sparc_frame_find_saved_regs (frame, &fsr[0]);
-  if (SPARC_HAS_FPU)
-    {
-      if (fsr[FP0_REGNUM])
-	{
-	  read_memory (fsr[FP0_REGNUM], raw_buffer, FP_REGISTER_BYTES);
-	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM),
-					   raw_buffer, FP_REGISTER_BYTES);
-	}
-      if (!(GDB_TARGET_IS_SPARC64))
-	{
-	  if (fsr[FPS_REGNUM])
-	    {
-	      read_memory (fsr[FPS_REGNUM], raw_buffer, SPARC_INTREG_SIZE);
-	      deprecated_write_register_gen (FPS_REGNUM, raw_buffer);
-	    }
-	  if (fsr[CPS_REGNUM])
-	    {
-	      read_memory (fsr[CPS_REGNUM], raw_buffer, SPARC_INTREG_SIZE);
-	      deprecated_write_register_gen (CPS_REGNUM, raw_buffer);
-	    }
-	}
-    }
-  if (fsr[G1_REGNUM])
-    {
-      read_memory (fsr[G1_REGNUM], raw_buffer, 7 * SPARC_INTREG_SIZE);
-      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (G1_REGNUM), raw_buffer,
-				       7 * SPARC_INTREG_SIZE);
-    }
-
-  if (get_frame_extra_info (frame)->flat)
-    {
-      /* Each register might or might not have been saved, need to test
-         individually.  */
-      for (regnum = L0_REGNUM; regnum < L0_REGNUM + 8; ++regnum)
-	if (fsr[regnum])
-	  write_register (regnum, read_memory_integer (fsr[regnum],
-						       SPARC_INTREG_SIZE));
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM + 8; ++regnum)
-	if (fsr[regnum])
-	  write_register (regnum, read_memory_integer (fsr[regnum],
-						       SPARC_INTREG_SIZE));
-
-      /* Handle all outs except stack pointer (o0-o5; o7).  */
-      for (regnum = O0_REGNUM; regnum < O0_REGNUM + 6; ++regnum)
-	if (fsr[regnum])
-	  write_register (regnum, read_memory_integer (fsr[regnum],
-						       SPARC_INTREG_SIZE));
-      if (fsr[O0_REGNUM + 7])
-	write_register (O0_REGNUM + 7,
-			read_memory_integer (fsr[O0_REGNUM + 7],
-					     SPARC_INTREG_SIZE));
-
-      DEPRECATED_DUMMY_WRITE_SP (get_frame_base (frame));
-    }
-  else if (fsr[I0_REGNUM])
-    {
-      CORE_ADDR sp;
-
-      char *reg_temp;
-
-      reg_temp = alloca (SPARC_INTREG_SIZE * 16);
-
-      read_memory (fsr[I0_REGNUM], raw_buffer, 8 * SPARC_INTREG_SIZE);
-
-      /* Get the ins and locals which we are about to restore.  Just
-         moving the stack pointer is all that is really needed, except
-         store_inferior_registers is then going to write the ins and
-         locals from the registers array, so we need to muck with the
-         registers array.  */
-      sp = fsr[SP_REGNUM];
- 
-      if (GDB_TARGET_IS_SPARC64 && (sp & 1))
-	sp += 2047;
-
-      read_memory (sp, reg_temp, SPARC_INTREG_SIZE * 16);
-
-      /* Restore the out registers.
-         Among other things this writes the new stack pointer.  */
-      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (O0_REGNUM), raw_buffer,
-				       SPARC_INTREG_SIZE * 8);
-
-      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (L0_REGNUM), reg_temp,
-				       SPARC_INTREG_SIZE * 16);
-    }
-
-  if (!(GDB_TARGET_IS_SPARC64))
-    if (fsr[PS_REGNUM])
-      write_register (PS_REGNUM, 
-		      read_memory_integer (fsr[PS_REGNUM], 
-					   REGISTER_RAW_SIZE (PS_REGNUM)));
-
-  if (fsr[Y_REGNUM])
-    write_register (Y_REGNUM, 
-		    read_memory_integer (fsr[Y_REGNUM], 
-					 REGISTER_RAW_SIZE (Y_REGNUM)));
-  if (fsr[PC_REGNUM])
-    {
-      /* Explicitly specified PC (and maybe NPC) -- just restore them. */
-      write_register (PC_REGNUM, 
-		      read_memory_integer (fsr[PC_REGNUM],
-					   REGISTER_RAW_SIZE (PC_REGNUM)));
-      if (fsr[DEPRECATED_NPC_REGNUM])
-	write_register (DEPRECATED_NPC_REGNUM,
-			read_memory_integer (fsr[DEPRECATED_NPC_REGNUM],
-					     REGISTER_RAW_SIZE (DEPRECATED_NPC_REGNUM)));
-    }
-  else if (get_frame_extra_info (frame)->flat)
-    {
-      if (get_frame_extra_info (frame)->pc_addr)
-	pc = PC_ADJUST ((CORE_ADDR)
-			read_memory_integer (get_frame_extra_info (frame)->pc_addr,
-					     REGISTER_RAW_SIZE (PC_REGNUM)));
-      else
-	{
-	  /* I think this happens only in the innermost frame, if so then
-	     it is a complicated way of saying
-	     "pc = read_register (O7_REGNUM);".  */
-	  ULONGEST tmp;
-	  frame_read_unsigned_register (frame, O7_REGNUM, &tmp);
-	  pc = PC_ADJUST (tmp);
-	}
-
-      write_register (PC_REGNUM, pc);
-      write_register (DEPRECATED_NPC_REGNUM, pc + 4);
-    }
-  else if (fsr[I7_REGNUM])
-    {
-      /* Return address in %i7 -- adjust it, then restore PC and NPC from it */
-      pc = PC_ADJUST ((CORE_ADDR) read_memory_integer (fsr[I7_REGNUM],
-						       SPARC_INTREG_SIZE));
-      write_register (PC_REGNUM, pc);
-      write_register (DEPRECATED_NPC_REGNUM, pc + 4);
-    }
-  flush_cached_frames ();
-}
-
-/* On the Sun 4 under SunOS, the compile will leave a fake insn which
-   encodes the structure size being returned.  If we detect such
-   a fake insn, step past it.  */
-
-CORE_ADDR
-sparc_pc_adjust (CORE_ADDR pc)
-{
-  unsigned long insn;
-  char buf[4];
-  int err;
-
-  err = target_read_memory (pc + 8, buf, 4);
-  insn = extract_unsigned_integer (buf, 4);
-  if ((err == 0) && (insn & 0xffc00000) == 0)
-    return pc + 12;
-  else
-    return pc + 8;
-}
-
-/* If pc is in a shared library trampoline, return its target.
-   The SunOs 4.x linker rewrites the jump table entries for PIC
-   compiled modules in the main executable to bypass the dynamic linker
-   with jumps of the form
-   sethi %hi(addr),%g1
-   jmp %g1+%lo(addr)
-   and removes the corresponding jump table relocation entry in the
-   dynamic relocations.
-   find_solib_trampoline_target relies on the presence of the jump
-   table relocation entry, so we have to detect these jump instructions
-   by hand.  */
-
-CORE_ADDR
-sunos4_skip_trampoline_code (CORE_ADDR pc)
-{
-  unsigned long insn1;
-  char buf[4];
-  int err;
-
-  err = target_read_memory (pc, buf, 4);
-  insn1 = extract_unsigned_integer (buf, 4);
-  if (err == 0 && (insn1 & 0xffc00000) == 0x03000000)
-    {
-      unsigned long insn2;
-
-      err = target_read_memory (pc + 4, buf, 4);
-      insn2 = extract_unsigned_integer (buf, 4);
-      if (err == 0 && (insn2 & 0xffffe000) == 0x81c06000)
-	{
-	  CORE_ADDR target_pc = (insn1 & 0x3fffff) << 10;
-	  int delta = insn2 & 0x1fff;
-
-	  /* Sign extend the displacement.  */
-	  if (delta & 0x1000)
-	    delta |= ~0x1fff;
-	  return target_pc + delta;
-	}
-    }
-  return find_solib_trampoline_target (pc);
-}
-
-#ifdef USE_PROC_FS		/* Target dependent support for /proc */
-/* *INDENT-OFF* */
-/*  The /proc interface divides the target machine's register set up into
-    two different sets, the general register set (gregset) and the floating
-    point register set (fpregset).  For each set, there is an ioctl to get
-    the current register set and another ioctl to set the current values.
-
-    The actual structure passed through the ioctl interface is, of course,
-    naturally machine dependent, and is different for each set of registers.
-    For the sparc for example, the general register set is typically defined
-    by:
-
-	typedef int gregset_t[38];
-
-	#define	R_G0	0
-	...
-	#define	R_TBR	37
-
-    and the floating point set by:
-
-	typedef struct prfpregset {
-		union { 
-			u_long  pr_regs[32]; 
-			double  pr_dregs[16];
-		} pr_fr;
-		void *  pr_filler;
-		u_long  pr_fsr;
-		u_char  pr_qcnt;
-		u_char  pr_q_entrysize;
-		u_char  pr_en;
-		u_long  pr_q[64];
-	} prfpregset_t;
-
-    These routines provide the packing and unpacking of gregset_t and
-    fpregset_t formatted data.
-
- */
-/* *INDENT-ON* */
-
-/* Given a pointer to a general register set in /proc format (gregset_t *),
-   unpack the register contents and supply them as gdb's idea of the current
-   register values. */
-
-void
-supply_gregset (gdb_gregset_t *gregsetp)
-{
-  prgreg_t *regp = (prgreg_t *) gregsetp;
-  int regi, offset = 0;
-
-  /* If the host is 64-bit sparc, but the target is 32-bit sparc, 
-     then the gregset may contain 64-bit ints while supply_register
-     is expecting 32-bit ints.  Compensate.  */
-  if (sizeof (regp[0]) == 8 && SPARC_INTREG_SIZE == 4)
-    offset = 4;
-
-  /* GDB register numbers for Gn, On, Ln, In all match /proc reg numbers.  */
-  /* FIXME MVS: assumes the order of the first 32 elements... */
-  for (regi = G0_REGNUM; regi <= I7_REGNUM; regi++)
-    {
-      supply_register (regi, ((char *) (regp + regi)) + offset);
-    }
-
-  /* These require a bit more care.  */
-  supply_register (PC_REGNUM, ((char *) (regp + R_PC)) + offset);
-  supply_register (DEPRECATED_NPC_REGNUM, ((char *) (regp + R_nPC)) + offset);
-  supply_register (Y_REGNUM, ((char *) (regp + R_Y)) + offset);
-
-  if (GDB_TARGET_IS_SPARC64)
-    {
-#ifdef R_CCR
-      supply_register (CCR_REGNUM, ((char *) (regp + R_CCR)) + offset);
-#else
-      supply_register (CCR_REGNUM, NULL);
-#endif
-#ifdef R_FPRS
-      supply_register (FPRS_REGNUM, ((char *) (regp + R_FPRS)) + offset);
-#else
-      supply_register (FPRS_REGNUM, NULL);
-#endif
-#ifdef R_ASI
-      supply_register (ASI_REGNUM, ((char *) (regp + R_ASI)) + offset);
-#else
-      supply_register (ASI_REGNUM, NULL);
-#endif
-    }
-  else	/* sparc32 */
-    {
-#ifdef R_PS
-      supply_register (PS_REGNUM, ((char *) (regp + R_PS)) + offset);
-#else
-      supply_register (PS_REGNUM, NULL);
-#endif
-
-      /* For 64-bit hosts, R_WIM and R_TBR may not be defined.
-	 Steal R_ASI and R_FPRS, and hope for the best!  */
-
-#if !defined (R_WIM) && defined (R_ASI)
-#define R_WIM R_ASI
-#endif
-
-#if !defined (R_TBR) && defined (R_FPRS)
-#define R_TBR R_FPRS
-#endif
-
-#if defined (R_WIM)
-      supply_register (WIM_REGNUM, ((char *) (regp + R_WIM)) + offset);
-#else
-      supply_register (WIM_REGNUM, NULL);
-#endif
-
-#if defined (R_TBR)
-      supply_register (TBR_REGNUM, ((char *) (regp + R_TBR)) + offset);
-#else
-      supply_register (TBR_REGNUM, NULL);
-#endif
-    }
-
-  /* Fill inaccessible registers with zero.  */
-  if (GDB_TARGET_IS_SPARC64)
-    {
-      /*
-       * don't know how to get value of any of the following:
-       */
-      supply_register (VER_REGNUM, NULL);
-      supply_register (TICK_REGNUM, NULL);
-      supply_register (PIL_REGNUM, NULL);
-      supply_register (PSTATE_REGNUM, NULL);
-      supply_register (TSTATE_REGNUM, NULL);
-      supply_register (TBA_REGNUM, NULL);
-      supply_register (TL_REGNUM, NULL);
-      supply_register (TT_REGNUM, NULL);
-      supply_register (TPC_REGNUM, NULL);
-      supply_register (TNPC_REGNUM, NULL);
-      supply_register (WSTATE_REGNUM, NULL);
-      supply_register (CWP_REGNUM, NULL);
-      supply_register (CANSAVE_REGNUM, NULL);
-      supply_register (CANRESTORE_REGNUM, NULL);
-      supply_register (CLEANWIN_REGNUM, NULL);
-      supply_register (OTHERWIN_REGNUM, NULL);
-      supply_register (ASR16_REGNUM, NULL);
-      supply_register (ASR17_REGNUM, NULL);
-      supply_register (ASR18_REGNUM, NULL);
-      supply_register (ASR19_REGNUM, NULL);
-      supply_register (ASR20_REGNUM, NULL);
-      supply_register (ASR21_REGNUM, NULL);
-      supply_register (ASR22_REGNUM, NULL);
-      supply_register (ASR23_REGNUM, NULL);
-      supply_register (ASR24_REGNUM, NULL);
-      supply_register (ASR25_REGNUM, NULL);
-      supply_register (ASR26_REGNUM, NULL);
-      supply_register (ASR27_REGNUM, NULL);
-      supply_register (ASR28_REGNUM, NULL);
-      supply_register (ASR29_REGNUM, NULL);
-      supply_register (ASR30_REGNUM, NULL);
-      supply_register (ASR31_REGNUM, NULL);
-      supply_register (ICC_REGNUM, NULL);
-      supply_register (XCC_REGNUM, NULL);
-    }
-  else
-    {
-      supply_register (CPS_REGNUM, NULL);
-    }
-}
-
-void
-fill_gregset (gdb_gregset_t *gregsetp, int regno)
-{
-  prgreg_t *regp = (prgreg_t *) gregsetp;
-  int regi, offset = 0;
-
-  /* If the host is 64-bit sparc, but the target is 32-bit sparc, 
-     then the gregset may contain 64-bit ints while supply_register
-     is expecting 32-bit ints.  Compensate.  */
-  if (sizeof (regp[0]) == 8 && SPARC_INTREG_SIZE == 4)
-    offset = 4;
-
-  for (regi = 0; regi <= R_I7; regi++)
-    if ((regno == -1) || (regno == regi))
-      deprecated_read_register_gen (regi, (char *) (regp + regi) + offset);
-
-  if ((regno == -1) || (regno == PC_REGNUM))
-    deprecated_read_register_gen (PC_REGNUM, (char *) (regp + R_PC) + offset);
-
-  if ((regno == -1) || (regno == DEPRECATED_NPC_REGNUM))
-    deprecated_read_register_gen (DEPRECATED_NPC_REGNUM, (char *) (regp + R_nPC) + offset);
-
-  if ((regno == -1) || (regno == Y_REGNUM))
-    deprecated_read_register_gen (Y_REGNUM, (char *) (regp + R_Y) + offset);
-
-  if (GDB_TARGET_IS_SPARC64)
-    {
-#ifdef R_CCR
-      if (regno == -1 || regno == CCR_REGNUM)
-	deprecated_read_register_gen (CCR_REGNUM, ((char *) (regp + R_CCR)) + offset);
-#endif
-#ifdef R_FPRS
-      if (regno == -1 || regno == FPRS_REGNUM)
-	deprecated_read_register_gen (FPRS_REGNUM, ((char *) (regp + R_FPRS)) + offset);
-#endif
-#ifdef R_ASI
-      if (regno == -1 || regno == ASI_REGNUM)
-	deprecated_read_register_gen (ASI_REGNUM, ((char *) (regp + R_ASI)) + offset);
-#endif
-    }
-  else /* sparc32 */
-    {
-#ifdef R_PS
-      if (regno == -1 || regno == PS_REGNUM)
-	deprecated_read_register_gen (PS_REGNUM, ((char *) (regp + R_PS)) + offset);
-#endif
-
-      /* For 64-bit hosts, R_WIM and R_TBR may not be defined.
-	 Steal R_ASI and R_FPRS, and hope for the best!  */
-
-#if !defined (R_WIM) && defined (R_ASI)
-#define R_WIM R_ASI
-#endif
-
-#if !defined (R_TBR) && defined (R_FPRS)
-#define R_TBR R_FPRS
-#endif
-
-#if defined (R_WIM)
-      if (regno == -1 || regno == WIM_REGNUM)
-	deprecated_read_register_gen (WIM_REGNUM, ((char *) (regp + R_WIM)) + offset);
-#else
-      if (regno == -1 || regno == WIM_REGNUM)
-	deprecated_read_register_gen (WIM_REGNUM, NULL);
-#endif
-
-#if defined (R_TBR)
-      if (regno == -1 || regno == TBR_REGNUM)
-	deprecated_read_register_gen (TBR_REGNUM, ((char *) (regp + R_TBR)) + offset);
-#else
-      if (regno == -1 || regno == TBR_REGNUM)
-	deprecated_read_register_gen (TBR_REGNUM, NULL);
-#endif
-    }
-}
-
-/*  Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), unpack the register contents and supply them as gdb's
-   idea of the current floating point register values. */
-
-void
-supply_fpregset (gdb_fpregset_t *fpregsetp)
-{
-  int regi;
-  char *from;
-
-  if (!SPARC_HAS_FPU)
+  struct sparc32_frame_cache *cache =
+    sparc32_frame_cache (next_frame, this_cache);
+
+  /* This marks the outermost frame.  */
+  if (cache->base == 0)
     return;
 
-  for (regi = FP0_REGNUM; regi < FP_MAX_REGNUM; regi++)
-    {
-      from = (char *) &fpregsetp->pr_fr.pr_regs[regi - FP0_REGNUM];
-      supply_register (regi, from);
-    }
-
-  if (GDB_TARGET_IS_SPARC64)
-    {
-      /*
-       * don't know how to get value of the following.  
-       */
-      supply_register (FSR_REGNUM, NULL);	/* zero it out for now */
-      supply_register (FCC0_REGNUM, NULL);
-      supply_register (FCC1_REGNUM, NULL); /* don't know how to get value */
-      supply_register (FCC2_REGNUM, NULL); /* don't know how to get value */
-      supply_register (FCC3_REGNUM, NULL); /* don't know how to get value */
-    }
-  else
-    {
-      supply_register (FPS_REGNUM, (char *) &(fpregsetp->pr_fsr));
-    }
+  (*this_id) = frame_id_build (cache->base, cache->pc);
 }
-
-/*  Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), update the register specified by REGNO from gdb's idea
-   of the current floating point register set.  If REGNO is -1, update
-   them all. */
-/* This will probably need some changes for sparc64.  */
-
-void
-fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
-{
-  int regi;
-  char *to;
-  char *from;
-
-  if (!SPARC_HAS_FPU)
-    return;
-
-  for (regi = FP0_REGNUM; regi < FP_MAX_REGNUM; regi++)
-    {
-      if ((regno == -1) || (regno == regi))
-	{
-	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
-	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi - FP0_REGNUM];
-	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
-	}
-    }
-
-  if (!(GDB_TARGET_IS_SPARC64)) /* FIXME: does Sparc64 have this register? */
-    if ((regno == -1) || (regno == FPS_REGNUM))
-      {
-	from = (char *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)];
-	to = (char *) &fpregsetp->pr_fsr;
-	memcpy (to, from, REGISTER_RAW_SIZE (FPS_REGNUM));
-      }
-}
-
-#endif /* USE_PROC_FS */
-
-/* Because of Multi-arch, GET_LONGJMP_TARGET is always defined.  So test
-   for a definition of JB_PC.  */
-#ifdef JB_PC
-
-/* Figure out where the longjmp will land.  We expect that we have just entered
-   longjmp and haven't yet setup the stack frame, so the args are still in the
-   output regs.  %o0 (O0_REGNUM) points at the jmp_buf structure from which we
-   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
-
-int
-get_longjmp_target (CORE_ADDR *pc)
-{
-  CORE_ADDR jb_addr;
-#define LONGJMP_TARGET_SIZE 4
-  char buf[LONGJMP_TARGET_SIZE];
-
-  jb_addr = read_register (O0_REGNUM);
-
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
-			  LONGJMP_TARGET_SIZE))
-    return 0;
-
-  *pc = extract_unsigned_integer (buf, LONGJMP_TARGET_SIZE);
-
-  return 1;
-}
-#endif /* GET_LONGJMP_TARGET */
-
-#ifdef STATIC_TRANSFORM_NAME
-/* SunPRO (3.0 at least), encodes the static variables.  This is not
-   related to C++ mangling, it is done for C too.  */
-
-char *
-sunpro_static_transform_name (char *name)
-{
-  char *p;
-  if (name[0] == '$')
-    {
-      /* For file-local statics there will be a dollar sign, a bunch
-         of junk (the contents of which match a string given in the
-         N_OPT), a period and the name.  For function-local statics
-         there will be a bunch of junk (which seems to change the
-         second character from 'A' to 'B'), a period, the name of the
-         function, and the name.  So just skip everything before the
-         last period.  */
-      p = strrchr (name, '.');
-      if (p != NULL)
-	name = p + 1;
-    }
-  return name;
-}
-#endif /* STATIC_TRANSFORM_NAME */
-
-
-/* Utilities for printing registers.
-   Page numbers refer to the SPARC Architecture Manual.  */
-
-static void dump_ccreg (char *, int);
 
 static void
-dump_ccreg (char *reg, int val)
+sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
+			     int regnum, int *optimizedp,
+			     enum lval_type *lvalp, CORE_ADDR *addrp,
+			     int *realnump, void *valuep)
 {
-  /* page 41 */
-  printf_unfiltered ("%s:%s,%s,%s,%s", reg,
-		     val & 8 ? "N" : "NN",
-		     val & 4 ? "Z" : "NZ",
-		     val & 2 ? "O" : "NO",
-		     val & 1 ? "C" : "NC");
-}
+  struct sparc32_frame_cache *cache =
+    sparc32_frame_cache (next_frame, this_cache);
 
-static char *
-decode_asi (int val)
-{
-  /* page 72 */
-  switch (val)
+  if (regnum == SPARC32_PC_REGNUM || regnum == SPARC32_NPC_REGNUM)
     {
-    case 4:
-      return "ASI_NUCLEUS";
-    case 0x0c:
-      return "ASI_NUCLEUS_LITTLE";
-    case 0x10:
-      return "ASI_AS_IF_USER_PRIMARY";
-    case 0x11:
-      return "ASI_AS_IF_USER_SECONDARY";
-    case 0x18:
-      return "ASI_AS_IF_USER_PRIMARY_LITTLE";
-    case 0x19:
-      return "ASI_AS_IF_USER_SECONDARY_LITTLE";
-    case 0x80:
-      return "ASI_PRIMARY";
-    case 0x81:
-      return "ASI_SECONDARY";
-    case 0x82:
-      return "ASI_PRIMARY_NOFAULT";
-    case 0x83:
-      return "ASI_SECONDARY_NOFAULT";
-    case 0x88:
-      return "ASI_PRIMARY_LITTLE";
-    case 0x89:
-      return "ASI_SECONDARY_LITTLE";
-    case 0x8a:
-      return "ASI_PRIMARY_NOFAULT_LITTLE";
-    case 0x8b:
-      return "ASI_SECONDARY_NOFAULT_LITTLE";
-    default:
-      return NULL;
-    }
-}
-
-/* Pretty print various registers.  */
-/* FIXME: Would be nice if this did some fancy things for 32 bit sparc.  */
-
-static void
-sparc_print_register_hook (int regno)
-{
-  ULONGEST val;
-
-  /* Handle double/quad versions of lower 32 fp regs.  */
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32
-      && (regno & 1) == 0)
-    {
-      char value[16];
-
-      if (frame_register_read (deprecated_selected_frame, regno, value)
-	  && frame_register_read (deprecated_selected_frame, regno + 1, value + 4))
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
 	{
-	  printf_unfiltered ("\t");
-	  print_floating (value, builtin_type_double, gdb_stdout);
+	  CORE_ADDR pc = (regnum == SPARC32_NPC_REGNUM) ? 4 : 0;
+
+	  /* If this functions has a Structure, Union or
+             Quad-Precision return value, we have to skip the UNIMP
+             instruction that encodes the size of the structure.  */
+	  if (cache->struct_return_p)
+	    pc += 4;
+
+	  regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
+	  pc += frame_unwind_register_unsigned (next_frame, regnum) + 8;
+	  store_unsigned_integer (valuep, 4, pc);
 	}
-#if 0				/* FIXME: gdb doesn't handle long doubles */
-      if ((regno & 3) == 0)
-	{
-	  if (frame_register_read (deprecated_selected_frame, regno + 2, value + 8)
-	      && frame_register_read (deprecated_selected_frame, regno + 3, value + 12))
-	    {
-	      printf_unfiltered ("\t");
-	      print_floating (value, builtin_type_long_double, gdb_stdout);
-	    }
-	}
-#endif
       return;
     }
 
-#if 0				/* FIXME: gdb doesn't handle long doubles */
-  /* Print upper fp regs as long double if appropriate.  */
-  if (regno >= FP0_REGNUM + 32 && regno < FP_MAX_REGNUM
-  /* We test for even numbered regs and not a multiple of 4 because
-     the upper fp regs are recorded as doubles.  */
-      && (regno & 1) == 0)
+  /* The previous frame's `local' and `in' registers have been saved
+     in the register save area.  */
+  if (!cache->frameless_p
+      && regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM)
     {
-      char value[16];
-
-      if (frame_register_read (deprecated_selected_frame, regno, value)
-	  && frame_register_read (deprecated_selected_frame, regno + 1, value + 8))
+      *optimizedp = 0;
+      *lvalp = lval_memory;
+      *addrp = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
+      *realnump = -1;
+      if (valuep)
 	{
-	  printf_unfiltered ("\t");
-	  print_floating (value, builtin_type_long_double, gdb_stdout);
+	  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+
+	  /* Read the value in from memory.  */
+	  read_memory (*addrp, valuep, register_size (gdbarch, regnum));
 	}
       return;
     }
-#endif
 
-  /* FIXME: Some of these are priviledged registers.
-     Not sure how they should be handled.  */
+  /* The previous frame's `out' registers are accessable as the
+     current frame's `in' registers.  */
+  if (!cache->frameless_p
+      && regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
+    regnum += (SPARC_I0_REGNUM - SPARC_O0_REGNUM);
 
-#define BITS(n, mask) ((int) (((val) >> (n)) & (mask)))
-
-  val = read_register (regno);
-
-  /* pages 40 - 60 */
-  if (GDB_TARGET_IS_SPARC64)
-    switch (regno)
-      {
-      case CCR_REGNUM:
-	printf_unfiltered ("\t");
-	dump_ccreg ("xcc", val >> 4);
-	printf_unfiltered (", ");
-	dump_ccreg ("icc", val & 15);
-	break;
-      case FPRS_REGNUM:
-	printf ("\tfef:%d, du:%d, dl:%d",
-		BITS (2, 1), BITS (1, 1), BITS (0, 1));
-	break;
-      case FSR_REGNUM:
-	{
-	  static char *fcc[4] =
-	  {"=", "<", ">", "?"};
-	  static char *rd[4] =
-	  {"N", "0", "+", "-"};
-	  /* Long, but I'd rather leave it as is and use a wide screen.  */
-	  printf_filtered ("\t0:%s, 1:%s, 2:%s, 3:%s, rd:%s, tem:%d, ",
-			   fcc[BITS (10, 3)], fcc[BITS (32, 3)],
-			   fcc[BITS (34, 3)], fcc[BITS (36, 3)],
-			   rd[BITS (30, 3)], BITS (23, 31));
-	  printf_filtered ("ns:%d, ver:%d, ftt:%d, qne:%d, aexc:%d, cexc:%d",
-			   BITS (22, 1), BITS (17, 7), BITS (14, 7), 
-			   BITS (13, 1), BITS (5, 31), BITS (0, 31));
-	  break;
-	}
-      case ASI_REGNUM:
-	{
-	  char *asi = decode_asi (val);
-	  if (asi != NULL)
-	    printf ("\t%s", asi);
-	  break;
-	}
-      case VER_REGNUM:
-	printf ("\tmanuf:%d, impl:%d, mask:%d, maxtl:%d, maxwin:%d",
-		BITS (48, 0xffff), BITS (32, 0xffff),
-		BITS (24, 0xff), BITS (8, 0xff), BITS (0, 31));
-	break;
-      case PSTATE_REGNUM:
-	{
-	  static char *mm[4] =
-	  {"tso", "pso", "rso", "?"};
-	  printf_filtered ("\tcle:%d, tle:%d, mm:%s, red:%d, ",
-			   BITS (9, 1), BITS (8, 1), 
-			   mm[BITS (6, 3)], BITS (5, 1));
-	  printf_filtered ("pef:%d, am:%d, priv:%d, ie:%d, ag:%d",
-			   BITS (4, 1), BITS (3, 1), BITS (2, 1), 
-			   BITS (1, 1), BITS (0, 1));
-	  break;
-	}
-      case TSTATE_REGNUM:
-	/* FIXME: print all 4? */
-	break;
-      case TT_REGNUM:
-	/* FIXME: print all 4? */
-	break;
-      case TPC_REGNUM:
-	/* FIXME: print all 4? */
-	break;
-      case TNPC_REGNUM:
-	/* FIXME: print all 4? */
-	break;
-      case WSTATE_REGNUM:
-	printf ("\tother:%d, normal:%d", BITS (3, 7), BITS (0, 7));
-	break;
-      case CWP_REGNUM:
-	printf ("\t%d", BITS (0, 31));
-	break;
-      case CANSAVE_REGNUM:
-	printf ("\t%-2d before spill", BITS (0, 31));
-	break;
-      case CANRESTORE_REGNUM:
-	printf ("\t%-2d before fill", BITS (0, 31));
-	break;
-      case CLEANWIN_REGNUM:
-	printf ("\t%-2d before clean", BITS (0, 31));
-	break;
-      case OTHERWIN_REGNUM:
-	printf ("\t%d", BITS (0, 31));
-	break;
-      }
-  else	/* Sparc32 */
-    switch (regno) 
-      {
-      case PS_REGNUM:
-	printf ("\ticc:%c%c%c%c, pil:%d, s:%d, ps:%d, et:%d, cwp:%d",
-		BITS (23, 1) ? 'N' : '-', BITS (22, 1) ? 'Z' : '-',
-		BITS (21, 1) ? 'V' : '-', BITS (20, 1) ? 'C' : '-',
-		BITS (8, 15), BITS (7, 1), BITS (6, 1), BITS (5, 1),
-		BITS (0, 31));
-	break;
-      case FPS_REGNUM:
-	{
-	  static char *fcc[4] =
-	  {"=", "<", ">", "?"};
-	  static char *rd[4] =
-	  {"N", "0", "+", "-"};
-	  /* Long, but I'd rather leave it as is and use a wide screen.  */
-	  printf ("\trd:%s, tem:%d, ns:%d, ver:%d, ftt:%d, qne:%d, "
-		  "fcc:%s, aexc:%d, cexc:%d",
-		  rd[BITS (30, 3)], BITS (23, 31), BITS (22, 1), BITS (17, 7),
-		  BITS (14, 7), BITS (13, 1), fcc[BITS (10, 3)], BITS (5, 31),
-		  BITS (0, 31));
-	  break;
-	}
-      }
-
-#undef BITS
+  frame_register_unwind (next_frame, regnum,
+			 optimizedp, lvalp, addrp, realnump, valuep);
 }
 
-static void
-sparc_print_registers (struct gdbarch *gdbarch,
-		       struct ui_file *file,
-		       struct frame_info *frame,
-		       int regnum, int print_all,
-		       void (*print_register_hook) (int))
+static const struct frame_unwind sparc32_frame_unwind =
 {
-  int i;
-  const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char raw_buffer[MAX_REGISTER_SIZE];
-  char virtual_buffer[MAX_REGISTER_SIZE];
+  NORMAL_FRAME,
+  sparc32_frame_this_id,
+  sparc32_frame_prev_register
+};
 
-  for (i = 0; i < numregs; i++)
-    {
-      /* Decide between printing all regs, non-float / vector regs, or
-         specific reg.  */
-      if (regnum == -1)
-	{
-	  if (!print_all)
-	    {
-	      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
-		continue;
-	      if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)))
-		continue;
-	    }
-	}
-      else
-	{
-	  if (i != regnum)
-	    continue;
-	}
-
-      /* If the register name is empty, it is undefined for this
-         processor, so don't display anything.  */
-      if (REGISTER_NAME (i) == NULL || *(REGISTER_NAME (i)) == '\0')
-	continue;
-
-      fputs_filtered (REGISTER_NAME (i), file);
-      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), file);
-
-      /* Get the data in raw format.  */
-      if (! frame_register_read (frame, i, raw_buffer))
-	{
-	  fprintf_filtered (file, "*value not available*\n");
-	  continue;
-	}
-
-      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
-
-      /* If virtual format is floating, print it that way, and in raw
-         hex.  */
-      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
-	{
-	  int j;
-
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		     file, 0, 1, 0, Val_pretty_default);
-
-	  fprintf_filtered (file, "\t(raw 0x");
-	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
-	    {
-	      int idx;
-	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-		idx = j;
-	      else
-		idx = REGISTER_RAW_SIZE (i) - 1 - j;
-	      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
-	    }
-	  fprintf_filtered (file, ")");
-	}
-      else
-	{
-	  /* Print the register in hex.  */
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		     file, 'x', 1, 0, Val_pretty_default);
-          /* If not a vector register, print it also according to its
-             natural format.  */
-	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
-	    {
-	      fprintf_filtered (file, "\t");
-	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-			 file, 0, 1, 0, Val_pretty_default);
-	    }
-	}
-
-      /* Some sparc specific info.  */
-      if (print_register_hook != NULL)
-	print_register_hook (i);
-
-      fprintf_filtered (file, "\n");
-    }
-}
-
-static void
-sparc_print_registers_info (struct gdbarch *gdbarch,
-			    struct ui_file *file,
-			    struct frame_info *frame,
-			    int regnum, int print_all)
+static const struct frame_unwind *
+sparc32_frame_sniffer (struct frame_info *next_frame)
 {
-  sparc_print_registers (gdbarch, file, frame, regnum, print_all,
-			 sparc_print_register_hook);
+  return &sparc32_frame_unwind;
 }
-
-void
-sparc_do_registers_info (int regnum, int all)
-{
-  sparc_print_registers_info (current_gdbarch, gdb_stdout, deprecated_selected_frame,
-			      regnum, all);
-}
-
-#if 0
-// OBSOLETE static void
-// OBSOLETE sparclet_print_registers_info (struct gdbarch *gdbarch,
-// OBSOLETE 			       struct ui_file *file,
-// OBSOLETE 			       struct frame_info *frame,
-// OBSOLETE 			       int regnum, int print_all)
-// OBSOLETE {
-// OBSOLETE   sparc_print_registers (gdbarch, file, frame, regnum, print_all, NULL);
-// OBSOLETE }
-// OBSOLETE 
-// OBSOLETE void
-// OBSOLETE sparclet_do_registers_info (int regnum, int all)
-// OBSOLETE {
-// OBSOLETE   sparclet_print_registers_info (current_gdbarch, gdb_stdout,
-// OBSOLETE 				 deprecated_selected_frame, regnum, all);
-// OBSOLETE }
-#endif
-
-#define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
-#define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
-#define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
-#define SPARC_O1_REGNUM		O1_REGNUM	/* %o1 */
-
-/* Push the arguments onto the stack and into the appropriate registers.  */
+
 
 static CORE_ADDR
-sparc32_do_push_arguments (struct regcache *regcache, int nargs,
-			   struct value **args, CORE_ADDR sp)
+sparc32_frame_base_address (struct frame_info *next_frame, void **this_cache)
 {
-  CORE_ADDR *addr;
-  int size = 0;
-  int i;
+  struct sparc32_frame_cache *cache =
+    sparc32_frame_cache (next_frame, this_cache);
 
-  /* Structure, union and quad-precision arguments are passed by
-     reference.  We allocate space for these arguments on the stack
-     and record their addresses in an array.  Array elements for
-     arguments that are passed by value will be set to zero.*/
-  addr = alloca (nargs * sizeof (CORE_ADDR));
-
-  for (i = nargs - 1; i >= 0; i--)
-    {
-      struct type *type = VALUE_ENCLOSING_TYPE (args[i]);
-      enum type_code code = TYPE_CODE (type);
-      int len = TYPE_LENGTH (type);
-
-      /* Push the contents of structure, union and quad-precision
-	 arguments on the stack.  */
-      if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION || len > 8)
-	{
-	  /* Keep the stack doubleword aligned.  */
-	  sp -= (len + 7) & ~7;
-	  write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
-	  addr[i] = sp;
-	  size += 4;
-	}
-      else
-	{
-	  addr[i] = 0;
-	  size += (len > 4) ? 8 : 4;
-	}
-    }
-
-  /* The needed space for outgoing arguments should be a multiple of 4.  */
-  gdb_assert (size % 4 == 0);
-
-  /* Make sure we reserve space for the first six words of arguments
-     in the stack frame, even if we don't need them.  */
-  if (size < 24)
-    sp -= (24 - size);
-
-  /* Make sure we end up with a doubleword aligned stack in the end.
-     Reserve an extra word if necessary in order to accomplish this.  */
-  if ((sp - size) % 8 == 0)
-    sp -= 4;
-
-  /* Now push the arguments onto the stack.  */
-  for (i = nargs - 1; i >=0; i--)
-    {
-      char buf[8];
-      int len;
-
-      if (addr[i])
-	{
-	  store_unsigned_integer (buf, 4, addr[i]);
-	  len = 4;
-	}
-      else
-	{
-	  struct value *arg = args[i];
-
-	  len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-
-	  /* Expand signed and unsigned bytes and halfwords as needed.  */
-	  if (len < 4)
-	    {
-	      arg = value_cast (builtin_type_long, arg);
-	      len = 4;
-	    }
-	  else if (len > 4 && len < 8)
-	    {
-	      arg = value_cast (builtin_type_long_long, arg);
-	      len = 4;
-	    }
-
-	  gdb_assert (len == 4 || len == 8);
-	  memcpy (buf, VALUE_CONTENTS_ALL (arg), len);
-	}
-
-      /* We always write the argument word on the stack.  */
-      sp -= len;
-      write_memory (sp, buf, len);
-
-      /* If this argument occupies one of the first 6 words, write it
-         into the appropriate register too.  */
-      size -= len;
-      if (size < 24)
-	{
-	  int regnum = SPARC_O0_REGNUM + (size / 4);
-
-	  regcache_cooked_write (regcache, regnum, buf);
-	  if (len == 8 && size < 20)
-	    regcache_cooked_write (regcache, regnum + 1, buf + 4);
-	}
-    }
-
-  /* Reserve space for the struct/union return value pointer.  */
-  sp -= 4;
-
-  /* Stack should be doubleword aligned at this point.  */
-  gdb_assert (sp % 8 == 0);
-
-  /* Return the adjusted stack pointer.  */
-  return sp;
+  return cache->base;
 }
 
-/* The SPARC passes the arguments on the stack; arguments smaller
-   than an int are promoted to an int.  The first 6 words worth of 
-   args are also passed in registers o0 - o5.  */
-
-CORE_ADDR
-sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+static const struct frame_base sparc32_frame_base =
 {
-  sp = sparc32_do_push_arguments (current_regcache, nargs, args, sp);
+  &sparc32_frame_unwind,
+  sparc32_frame_base_address,
+  sparc32_frame_base_address,
+  sparc32_frame_base_address
+};
 
-  /* FIXME: kettenis/20030525: We don't let this function set the
-     struct/union return pointer just yet.  */
-#if 0
-  if (struct_return)
-    {
-      char buf[4];
+static struct frame_id
+sparc_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  CORE_ADDR sp;
 
-      /* The space for the struct/union return value pointer has
-         already been reserved.  */
-      store_unsigned_integer (buf, 4, struct_addr);
-      write (sp, buf, 4);
-    }
-
-  return sp;
-#else
-  return sp + 4;
-#endif
+  sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  return frame_id_build (sp, frame_pc_unwind (next_frame));
 }
+
 
-/* Extract from REGCACHE a function return value of type TYPE and copy
-   that into VALBUF.
+/* Extract from an array REGBUF containing the (raw) register state, a
+   function return value of TYPE, and copy that into VALBUF.  */
 
-   Note that REGCACHE specifies the register values for the frame of
-   the calling function.  This means that we need to fetch the value
-   form %o0 and %o1, which correspond to %i0 and %i1 in the frame of
-   the called function.  */
-
-void
+static void
 sparc32_extract_return_value (struct type *type, struct regcache *regcache,
 			      void *valbuf)
 {
   int len = TYPE_LENGTH (type);
   char buf[8];
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    {
-      if (len == 4 || len == 8)
-	{
-	  regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
-	  regcache_cooked_read (regcache, SPARC_F1_REGNUM, buf + 4);
-	  memcpy (valbuf, buf, len);
-	  return;
-	}
-      else
-	internal_error (__FILE__, __LINE__, "\
-Cannot extract floating-point return value of %d bytes long.", len);
-    }
+  gdb_assert (!sparc_structure_or_union_p (type));
+  gdb_assert (!(sparc_floating_p (type) && len == 16));
 
-  if (len <= 4)
+  if (sparc_floating_p (type))
     {
-      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
-      memcpy (valbuf, buf + 4 - len, len);
-    }
-  else if (len <= 8)
-    {
-      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
-      regcache_cooked_read (regcache, SPARC_O1_REGNUM, buf + 4);
-      memcpy (valbuf, buf + 8 - len, len);
+      /* Floating return values.  */
+      regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
+      if (len > 4)
+	regcache_cooked_read (regcache, SPARC_F1_REGNUM, buf + 4);
+      memcpy (valbuf, buf, len);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    "Cannot extract return value of %d bytes long.", len);
+    {
+      /* Integral and pointer return values.  */
+      gdb_assert (sparc_integral_or_pointer_p (type));
+
+      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      if (len > 4)
+	{
+	  regcache_cooked_read (regcache, SPARC_O1_REGNUM, buf + 4);
+	  gdb_assert (len == 8);
+	  memcpy (valbuf, buf, 8);
+	}
+      else
+	{
+	  /* Just stripping off any unused bytes should preserve the
+	     signed-ness just fine.  */
+	  memcpy (valbuf, buf + 4 - len, len);
+	}
+    }
 }
 
-/* Write into REGBUF a function return value VALBUF of type TYPE.  */
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE.  */
 
-void
+static void
 sparc32_store_return_value (struct type *type, struct regcache *regcache,
 			    const void *valbuf)
 {
   int len = TYPE_LENGTH (type);
   char buf[8];
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    {
-      const char *buf = valbuf;
+  gdb_assert (!sparc_structure_or_union_p (type));
+  gdb_assert (!(sparc_floating_p (type) && len == 16));
 
-      if (len == 4)
-	{
-	  regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
-	  return;
-	}
-      else if (len == 8)
-	{
-	  regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
-	  regcache_cooked_write (regcache, SPARC_F1_REGNUM, buf + 4);
-	  return;
-	}
-      else
-	internal_error (__FILE__, __LINE__, "\
-Cannot extract floating-point return value of %d bytes long.", len);
-    }
-
-  /* Add leading zeros to the value.  */
-  memset (buf, 0, sizeof buf);
-
-  if (len <= 4)
+  if (sparc_floating_p (type))
     {
-      memcpy (buf + 4 - len, valbuf, len);
-      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
-    }
-  else if (len <= 8)
-    {
-      memcpy (buf + 8 - len, valbuf, len);
-      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
-      regcache_cooked_write (regcache, SPARC_O1_REGNUM, buf);
+      /* Floating return values.  */
+      memcpy (buf, valbuf, len);
+      regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
+      if (len > 4)
+	regcache_cooked_write (regcache, SPARC_F1_REGNUM, buf + 4);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    "Cannot extract return value of %d bytes long.", len);
+    {
+      /* Integral and pointer return values.  */
+      gdb_assert (sparc_integral_or_pointer_p (type));
+
+      if (len > 4)
+	{
+	  gdb_assert (len == 8);
+	  memcpy (buf, valbuf, 8);
+	  regcache_cooked_write (regcache, SPARC_O1_REGNUM, buf + 4);
+	}
+      else
+	{
+	  /* ??? Do we need to do any sign-extension here?  */
+	  memcpy (buf + 4 - len, valbuf, len);
+	}
+      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
+    }
 }
 
-/* Extract from REGCACHE the address in which a function should return
-   its structure value.  */
+/* Extract from REGCACHE, which contains the (raw) register state, the
+   address in which a function should return its structure value, as a
+   CORE_ADDR.  */
 
-CORE_ADDR
+static CORE_ADDR
 sparc_extract_struct_value_address (struct regcache *regcache)
 {
   ULONGEST addr;
@@ -2391,1217 +763,319 @@ sparc_extract_struct_value_address (struct regcache *regcache)
   return addr;
 }
 
-/* FIXME: kettenis/2003/05/24: Still used for sparc64.  */
-
-static void
-sparc_store_return_value (struct type *type, char *valbuf)
+static int
+sparc32_use_struct_convention (int gcc_p, struct type *type)
 {
-  int regno;
-  char buffer[MAX_REGISTER_SIZE];
-
-  if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    /* Floating-point values are returned in the register pair */
-    /* formed by %f0 and %f1 (doubles are, anyway).  */
-    regno = FP0_REGNUM;
-  else
-    /* Other values are returned in register %o0.  */
-    regno = O0_REGNUM;
-
-  /* Add leading zeros to the value. */
-  if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE (regno))
-    {
-      memset (buffer, 0, REGISTER_RAW_SIZE (regno));
-      memcpy (buffer + REGISTER_RAW_SIZE (regno) - TYPE_LENGTH (type), valbuf,
-	      TYPE_LENGTH (type));
-      deprecated_write_register_gen (regno, buffer);
-    }
-  else
-    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regno), valbuf,
-				     TYPE_LENGTH (type));
+  gdb_assert (sparc_structure_or_union_p (type));
+  return 1;
 }
 
-#if 0
-// OBSOLETE extern void
-// OBSOLETE sparclet_store_return_value (struct type *type, char *valbuf)
-// OBSOLETE {
-// OBSOLETE   /* Other values are returned in register %o0.  */
-// OBSOLETE   deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), valbuf,
-// OBSOLETE 				   TYPE_LENGTH (type));
-// OBSOLETE }
-#endif
-
-
-#ifndef CALL_DUMMY_CALL_OFFSET
-#define CALL_DUMMY_CALL_OFFSET \
-     (gdbarch_tdep (current_gdbarch)->call_dummy_call_offset)
-#endif /* CALL_DUMMY_CALL_OFFSET */
-
-/* Insert the function address into a call dummy instruction sequence
-   stored at DUMMY.
-
-   For structs and unions, if the function was compiled with Sun cc,
-   it expects 'unimp' after the call.  But gcc doesn't use that
-   (twisted) convention.  So leave a nop there for gcc
-   (DEPRECATED_FIX_CALL_DUMMY can assume it is operating on a pristine
-   CALL_DUMMY, not one that has already been customized for a
-   different function).  */
-
-void
-sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-		      struct type *value_type, int using_gcc)
+static int
+sparc32_return_value_on_stack (struct type *type)
 {
-  int i;
+  gdb_assert (!sparc_structure_or_union_p (type));
+  return (sparc_floating_p (type) && TYPE_LENGTH (type) == 16);
+}
 
-  /* Store the relative adddress of the target function into the
-     'call' instruction. */
-  store_unsigned_integer (dummy + CALL_DUMMY_CALL_OFFSET, 4,
-			  (0x40000000
-			   | (((fun - (pc + CALL_DUMMY_CALL_OFFSET)) >> 2)
-			      & 0x3fffffff)));
+static int
+sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
+{
+  return (sparc_structure_or_union_p (type)
+	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16));
+}
 
-  /* If the called function returns an aggregate value, fill in the UNIMP
-     instruction containing the size of the returned aggregate return value,
-     which follows the call instruction.
-     For details see the SPARC Architecture Manual Version 8, Appendix D.3.
+
+/* The SPARC Architecture doesn't have hardware single-step support,
+   and most operating systems don't implement it either, so we provide
+   software single-step mechanism.  */
 
-     Adjust the call_dummy_breakpoint_offset for the bp_call_dummy breakpoint
-     to the proper address in the call dummy, so that `finish' after a stop
-     in a call dummy works.
+static CORE_ADDR
+sparc_analyze_control_transfer (CORE_ADDR pc, CORE_ADDR *npc)
+{
+  unsigned long insn = sparc_fetch_instruction (pc);
+  int conditional_p = X_COND (insn) & 0x7;
+  int branch_p = 0;
+  long offset = 0;			/* Must be signed for sign-extend.  */
 
-     Tweeking current_gdbarch is not an optimal solution, but the call
-     to sparc_fix_call_dummy is immediately followed by a call to
-     call_function_by_hand, which is the only function where
-     dummy_breakpoint_offset is actually used, if it is non-zero.  */
-  if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
-       || TYPE_CODE (value_type) == TYPE_CODE_UNION)
+  if (X_OP (insn) == 0 && X_OP2 (insn) == 3 && (insn & 0x1000000) == 0)
     {
-      store_unsigned_integer (dummy + CALL_DUMMY_CALL_OFFSET + 8, 4,
-			      TYPE_LENGTH (value_type) & 0x1fff);
-      set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 0x30);
+      /* Branch on Integer Register with Prediction (BPr).  */
+      branch_p = 1;
+      conditional_p = 1;
     }
-  else
-    set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 0x2c);
-
-  if (!(GDB_TARGET_IS_SPARC64))
+  else if (X_OP (insn) == 0 && X_OP2 (insn) == 6)
     {
-      /* If this is not a simulator target, change the first four
-	 instructions of the call dummy to NOPs.  Those instructions
-	 include a 'save' instruction and are designed to work around
-	 problems with register window flushing in the simulator. */
-      
-      if (strcmp (target_shortname, "sim") != 0)
+      /* Branch on Floating-Point Condition Codes (FBfcc).  */
+      branch_p = 1;
+      offset = 4 * X_DISP22 (insn);
+    }
+  else if (X_OP (insn) == 0 && X_OP2 (insn) == 5)
+    {
+      /* Branch on Floating-Point Condition Codes with Prediction
+         (FBPfcc).  */
+      branch_p = 1;
+      offset = 4 * X_DISP19 (insn);
+    }
+  else if (X_OP (insn) == 0 && X_OP2 (insn) == 2)
+    {
+      /* Branch on Integer Condition Codes (Bicc).  */
+      branch_p = 1;
+      offset = 4 * X_DISP22 (insn);
+    }
+  else if (X_OP (insn) == 0 && X_OP2 (insn) == 1)
+    {
+      /* Branch on Integer Condition Codes with Prediction (BPcc).  */
+      branch_p = 1;
+      offset = 4 * X_DISP19 (insn);
+    }
+
+  /* FIXME: Handle DONE and RETRY instructions.  */
+
+  /* FIXME: Handle the Trap instruction.  */
+
+  if (branch_p)
+    {
+      if (conditional_p)
 	{
-	  for (i = 0; i < 4; i++)
-	    store_unsigned_integer (dummy + (i * 4), 4, 0x01000000);
+	  /* For conditional branches, return nPC + 4 iff the annul
+	     bit is 1.  */
+	  return (X_A (insn) ? *npc + 4 : 0);
 	}
-    }
-
-#if 0
-// OBSOLETE   /* If this is a bi-endian target, GDB has written the call dummy
-// OBSOLETE      in little-endian order.  We must byte-swap it back to big-endian. */
-// OBSOLETE   if (bi_endian)
-// OBSOLETE     {
-// OBSOLETE       for (i = 0; i < CALL_DUMMY_LENGTH; i += 4)
-// OBSOLETE 	{
-// OBSOLETE 	  char tmp = dummy[i];
-// OBSOLETE 	  dummy[i] = dummy[i + 3];
-// OBSOLETE 	  dummy[i + 3] = tmp;
-// OBSOLETE 	  tmp = dummy[i + 1];
-// OBSOLETE 	  dummy[i + 1] = dummy[i + 2];
-// OBSOLETE 	  dummy[i + 2] = tmp;
-// OBSOLETE 	}
-// OBSOLETE     }
-#endif
-}
-
-
-#if 0
-// OBSOLETE /* Set target byte order based on machine type. */
-// OBSOLETE 
-// OBSOLETE static int
-// OBSOLETE sparc_target_architecture_hook (const bfd_arch_info_type *ap)
-// OBSOLETE {
-// OBSOLETE   int i, j;
-// OBSOLETE 
-// OBSOLETE   if (ap->mach == bfd_mach_sparc_sparclite_le)
-// OBSOLETE     {
-// OBSOLETE       target_byte_order = BFD_ENDIAN_LITTLE;
-// OBSOLETE       bi_endian = 1;
-// OBSOLETE     }
-// OBSOLETE   else
-// OBSOLETE     bi_endian = 0;
-// OBSOLETE   return 1;
-// OBSOLETE }
-#endif
-
-/*
- * Module "constructor" function. 
- */
-
-static struct gdbarch * sparc_gdbarch_init (struct gdbarch_info info,
-					    struct gdbarch_list *arches);
-static void sparc_dump_tdep (struct gdbarch *, struct ui_file *);
-
-extern initialize_file_ftype _initialize_sparc_tdep; /* -Wmissing-prototypes */
-
-void
-_initialize_sparc_tdep (void)
-{
-  /* Hook us into the gdbarch mechanism.  */
-  gdbarch_register (bfd_arch_sparc, sparc_gdbarch_init, sparc_dump_tdep);
-
-  /* OBSOLETE target_architecture_hook = sparc_target_architecture_hook; */
-}
-
-/* Compensate for stack bias. Note that we currently don't handle
-   mixed 32/64 bit code. */
-
-static CORE_ADDR
-sparc64_read_sp (void)
-{
-  CORE_ADDR sp = read_register (SP_REGNUM);
-
-  if (sp & 1)
-    sp += 2047;
-  return sp;
-}
-
-static CORE_ADDR
-sparc64_read_fp (void)
-{
-  CORE_ADDR fp = read_register (DEPRECATED_FP_REGNUM);
-
-  if (fp & 1)
-    fp += 2047;
-  return fp;
-}
-
-static void
-sparc64_write_sp (CORE_ADDR val)
-{
-  CORE_ADDR oldsp = read_register (SP_REGNUM);
-  if (oldsp & 1)
-    write_register (SP_REGNUM, val - 2047);
-  else
-    write_register (SP_REGNUM, val);
-}
-
-/* The SPARC 64 ABI passes floating-point arguments in FP0 to FP31,
-   and all other arguments in O0 to O5.  They are also copied onto
-   the stack in the correct places.  Apparently (empirically), 
-   structs of less than 16 bytes are passed member-by-member in
-   separate registers, but I am unable to figure out the algorithm.
-   Some members go in floating point regs, but I don't know which.
-
-   FIXME: Handle small structs (less than 16 bytes containing floats).
-
-   The counting regimen for using both integer and FP registers
-   for argument passing is rather odd -- a single counter is used
-   for both; this means that if the arguments alternate between
-   int and float, we will waste every other register of both types.  */
-
-static CORE_ADDR
-sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_retaddr)
-{
-  int i, j, register_counter = 0;
-  CORE_ADDR tempsp;
-  struct type *sparc_intreg_type = 
-    TYPE_LENGTH (builtin_type_long) == SPARC_INTREG_SIZE ?
-    builtin_type_long : builtin_type_long_long;
-
-  sp = (sp & ~(((unsigned long) SPARC_INTREG_SIZE) - 1UL));
-
-  /* Figure out how much space we'll need. */
-  for (i = nargs - 1; i >= 0; i--)
-    {
-      int len = TYPE_LENGTH (check_typedef (VALUE_TYPE (args[i])));
-      struct value *copyarg = args[i];
-      int copylen = len;
-
-      if (copylen < SPARC_INTREG_SIZE)
-	{
-	  copyarg = value_cast (sparc_intreg_type, copyarg);
-	  copylen = SPARC_INTREG_SIZE;
-	}
-      sp -= copylen;
-    }
-
-  /* Round down. */
-  sp = sp & ~7;
-  tempsp = sp;
-
-  /* if STRUCT_RETURN, then first argument is the struct return location. */
-  if (struct_return)
-    write_register (O0_REGNUM + register_counter++, struct_retaddr);
-
-  /* Now write the arguments onto the stack, while writing FP
-     arguments into the FP registers, and other arguments into the
-     first six 'O' registers.  */
-
-  for (i = 0; i < nargs; i++)
-    {
-      int len = TYPE_LENGTH (check_typedef (VALUE_TYPE (args[i])));
-      struct value *copyarg = args[i];
-      enum type_code typecode = TYPE_CODE (VALUE_TYPE (args[i]));
-      int copylen = len;
-
-      if (typecode == TYPE_CODE_INT   ||
-	  typecode == TYPE_CODE_BOOL  ||
-	  typecode == TYPE_CODE_CHAR  ||
-	  typecode == TYPE_CODE_RANGE ||
-	  typecode == TYPE_CODE_ENUM)
-	if (len < SPARC_INTREG_SIZE)
-	  {
-	    /* Small ints will all take up the size of one intreg on
-	       the stack.  */
-	    copyarg = value_cast (sparc_intreg_type, copyarg);
-	    copylen = SPARC_INTREG_SIZE;
-	  }
-
-      write_memory (tempsp, VALUE_CONTENTS (copyarg), copylen);
-      tempsp += copylen;
-
-      /* Corner case: Structs consisting of a single float member are floats.
-       * FIXME!  I don't know about structs containing multiple floats!
-       * Structs containing mixed floats and ints are even more weird.
-       */
-
-
-
-      /* Separate float args from all other args.  */
-      if (typecode == TYPE_CODE_FLT && SPARC_HAS_FPU)
-	{
-	  if (register_counter < 16)
-	    {
-	      /* This arg gets copied into a FP register. */
-	      int fpreg;
-
-	      switch (len) {
-	      case 4:	/* Single-precision (float) */
-		fpreg = FP0_REGNUM + 2 * register_counter + 1;
-		register_counter += 1;
-		break;
-	      case 8:	/* Double-precision (double) */
-		fpreg = FP0_REGNUM + 2 * register_counter;
-		register_counter += 1;
-		break;
-	      case 16:	/* Quad-precision (long double) */
-		fpreg = FP0_REGNUM + 2 * register_counter;
-		register_counter += 2;
-		break;
-	      default:
-		internal_error (__FILE__, __LINE__, "bad switch");
-	      }
-	      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (fpreg),
-					       VALUE_CONTENTS (args[i]),
-					       len);
-	    }
-	}
-      else /* all other args go into the first six 'o' registers */
-        {
-          for (j = 0; 
-	       j < len && register_counter < 6; 
-	       j += SPARC_INTREG_SIZE)
-	    {
-	      int oreg = O0_REGNUM + register_counter;
-
-	      deprecated_write_register_gen (oreg, VALUE_CONTENTS (copyarg) + j);
-	      register_counter += 1;
-	    }
-        }
-    }
-  return sp;
-}
-
-/* Values <= 32 bytes are returned in o0-o3 (floating-point values are
-   returned in f0-f3). */
-
-static void
-sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
-			   int bitoffset)
-{
-  int typelen = TYPE_LENGTH (type);
-  int regsize = REGISTER_RAW_SIZE (O0_REGNUM);
-
-  if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    {
-      memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)], typelen);
-      return;
-    }
-
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      || (TYPE_LENGTH (type) > 32))
-    {
-      memcpy (valbuf,
-	      &regbuf[O0_REGNUM * regsize +
-		      (typelen >= regsize ? 0 : regsize - typelen)],
-	      typelen);
-      return;
-    }
-  else
-    {
-      char *o0 = &regbuf[O0_REGNUM * regsize];
-      char *f0 = &regbuf[FP0_REGNUM * regsize];
-      int x;
-
-      for (x = 0; x < TYPE_NFIELDS (type); x++)
-	{
-	  struct field *f = &TYPE_FIELDS (type)[x];
-	  /* FIXME: We may need to handle static fields here. */
-	  int whichreg = (f->loc.bitpos + bitoffset) / 32;
-	  int remainder = ((f->loc.bitpos + bitoffset) % 32) / 8;
-	  int where = (f->loc.bitpos + bitoffset) / 8;
-	  int size = TYPE_LENGTH (f->type);
-	  int typecode = TYPE_CODE (f->type);
-
-	  if (typecode == TYPE_CODE_STRUCT)
-	    {
-	      sp64_extract_return_value (f->type,
-					 regbuf,
-					 valbuf,
-					 bitoffset + f->loc.bitpos);
-	    }
-	  else if (typecode == TYPE_CODE_FLT && SPARC_HAS_FPU)
-	    {
-	      memcpy (valbuf + where, &f0[whichreg * 4] + remainder, size);
-	    }
-	  else
-	    {
-	      memcpy (valbuf + where, &o0[whichreg * 4] + remainder, size);
-	    }
-	}
-    }
-}
-
-static void
-sparc64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
-{
-  sp64_extract_return_value (type, regbuf, valbuf, 0);
-}
-
-#if 0
-// OBSOLETE extern void 
-// OBSOLETE sparclet_extract_return_value (struct type *type,
-// OBSOLETE 			       char *regbuf, 
-// OBSOLETE 			       char *valbuf)
-// OBSOLETE {
-// OBSOLETE   regbuf += REGISTER_RAW_SIZE (O0_REGNUM) * 8;
-// OBSOLETE   if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE (O0_REGNUM))
-// OBSOLETE     regbuf += REGISTER_RAW_SIZE (O0_REGNUM) - TYPE_LENGTH (type);
-// OBSOLETE 
-// OBSOLETE   memcpy ((void *) valbuf, regbuf, TYPE_LENGTH (type));
-// OBSOLETE }
-#endif
-
-extern CORE_ADDR
-sparc32_stack_align (CORE_ADDR addr)
-{
-  return ((addr + 7) & -8);
-}
-
-static CORE_ADDR
-sparc64_stack_align (CORE_ADDR addr)
-{
-  return ((addr + 15) & -16);
-}
-
-extern void
-sparc_print_extra_frame_info (struct frame_info *fi)
-{
-  if (fi && get_frame_extra_info (fi) && get_frame_extra_info (fi)->flat)
-    printf_filtered (" flat, pc saved at 0x%s, fp saved at 0x%s\n",
-		     paddr_nz (get_frame_extra_info (fi)->pc_addr), 
-		     paddr_nz (get_frame_extra_info (fi)->fp_addr));
-}
-
-/* MULTI_ARCH support */
-
-const char *
-legacy_register_name (int i)
-{
-#ifdef REGISTER_NAMES
-  static char *names[] = REGISTER_NAMES;
-  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
-    return NULL;
-  else
-    return names[i];
-#else
-  internal_error (__FILE__, __LINE__,
-		  "legacy_register_name: called.");
-  return NULL;
-#endif
-}
-
-static const char *
-sparc32_register_name (int regno)
-{
-  static char *register_names[] = 
-  { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-    "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-    "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-    "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-
-    "f0",  "f1",  "f2",  "f3",  "f4",  "f5",  "f6",  "f7",
-    "f8",  "f9",  "f10", "f11", "f12", "f13", "f14", "f15",
-    "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-    "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-
-    "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr"
-  };
-
-  if (regno < 0 ||
-      regno >= (sizeof (register_names) / sizeof (register_names[0])))
-    return NULL;
-  else
-    return register_names[regno];
-}
-
-static const char *
-sparc64_register_name (int regno)
-{
-  static char *register_names[] = 
-  { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-    "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-    "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-    "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-
-    "f0",  "f1",  "f2",  "f3",  "f4",  "f5",  "f6",  "f7",
-    "f8",  "f9",  "f10", "f11", "f12", "f13", "f14", "f15",
-    "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-    "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-    "f32", "f34", "f36", "f38", "f40", "f42", "f44", "f46",
-    "f48", "f50", "f52", "f54", "f56", "f58", "f60", "f62",
-
-    "pc", "npc", "ccr", "fsr", "fprs", "y", "asi", "ver", 
-    "tick", "pil", "pstate", "tstate", "tba", "tl", "tt", "tpc", 
-    "tnpc", "wstate", "cwp", "cansave", "canrestore", "cleanwin", "otherwin",
-    "asr16", "asr17", "asr18", "asr19", "asr20", "asr21", "asr22", "asr23", 
-    "asr24", "asr25", "asr26", "asr27", "asr28", "asr29", "asr30", "asr31",
-    /* These are here at the end to simplify removing them if we have to.  */
-    "icc", "xcc", "fcc0", "fcc1", "fcc2", "fcc3"
-  };
-
-  if (regno < 0 ||
-      regno >= (sizeof (register_names) / sizeof (register_names[0])))
-    return NULL;
-  else
-    return register_names[regno];
-}
-
-#if 0
-// OBSOLETE static const char *
-// OBSOLETE sparclite_register_name (int regno)
-// OBSOLETE {
-// OBSOLETE   static char *register_names[] = 
-// OBSOLETE   { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-// OBSOLETE     "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-// OBSOLETE     "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-// OBSOLETE     "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-// OBSOLETE 
-// OBSOLETE     "f0",  "f1",  "f2",  "f3",  "f4",  "f5",  "f6",  "f7",
-// OBSOLETE     "f8",  "f9",  "f10", "f11", "f12", "f13", "f14", "f15",
-// OBSOLETE     "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-// OBSOLETE     "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-// OBSOLETE 
-// OBSOLETE     "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr",
-// OBSOLETE     "dia1", "dia2", "dda1", "dda2", "ddv1", "ddv2", "dcr", "dsr" 
-// OBSOLETE   };
-// OBSOLETE 
-// OBSOLETE   if (regno < 0 ||
-// OBSOLETE       regno >= (sizeof (register_names) / sizeof (register_names[0])))
-// OBSOLETE     return NULL;
-// OBSOLETE   else
-// OBSOLETE     return register_names[regno];
-// OBSOLETE }
-#endif
-
-#if 0
-// OBSOLETE static const char *
-// OBSOLETE sparclet_register_name (int regno)
-// OBSOLETE {
-// OBSOLETE   static char *register_names[] = 
-// OBSOLETE   { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-// OBSOLETE     "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-// OBSOLETE     "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-// OBSOLETE     "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-// OBSOLETE 
-// OBSOLETE     "", "", "", "", "", "", "", "", /* no floating point registers */
-// OBSOLETE     "", "", "", "", "", "", "", "",
-// OBSOLETE     "", "", "", "", "", "", "", "",
-// OBSOLETE     "", "", "", "", "", "", "", "",
-// OBSOLETE 
-// OBSOLETE     "y", "psr", "wim", "tbr", "pc", "npc", "", "", /* no FPSR or CPSR */
-// OBSOLETE     "ccsr", "ccpr", "cccrcr", "ccor", "ccobr", "ccibr", "ccir", "", 
-// OBSOLETE 
-// OBSOLETE     /*       ASR15                 ASR19 (don't display them) */    
-// OBSOLETE     "asr1",  "", "asr17", "asr18", "", "asr20", "asr21", "asr22"
-// OBSOLETE     /* None of the rest get displayed */
-// OBSOLETE #if 0
-// OBSOLETE     "awr0",  "awr1",  "awr2",  "awr3",  "awr4",  "awr5",  "awr6",  "awr7",  
-// OBSOLETE     "awr8",  "awr9",  "awr10", "awr11", "awr12", "awr13", "awr14", "awr15", 
-// OBSOLETE     "awr16", "awr17", "awr18", "awr19", "awr20", "awr21", "awr22", "awr23", 
-// OBSOLETE     "awr24", "awr25", "awr26", "awr27", "awr28", "awr29", "awr30", "awr31", 
-// OBSOLETE     "apsr"
-// OBSOLETE #endif /* 0 */
-// OBSOLETE   };
-// OBSOLETE 
-// OBSOLETE   if (regno < 0 ||
-// OBSOLETE       regno >= (sizeof (register_names) / sizeof (register_names[0])))
-// OBSOLETE     return NULL;
-// OBSOLETE   else
-// OBSOLETE     return register_names[regno];
-// OBSOLETE }
-#endif
-
-static CORE_ADDR
-sparc_push_return_address (CORE_ADDR pc_unused, CORE_ADDR sp)
-{
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-    {
-      /* The return PC of the dummy_frame is the former 'current' PC
-	 (where we were before we made the target function call).
-	 This is saved in %i7 by push_dummy_frame.
-
-	 We will save the 'call dummy location' (ie. the address
-	 to which the target function will return) in %o7.  
-	 This address will actually be the program's entry point.  
-	 There will be a special call_dummy breakpoint there.  */
-
-      if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
-	write_register (O7_REGNUM, DEPRECATED_CALL_DUMMY_ADDRESS () - 8);
       else
-	write_register (O7_REGNUM, entry_point_address () - 8);
+	{
+	  /* For unconditional branches, return the target if its
+	     specified condition is "always" and return nPC + 4 if the
+	     condition is "never".  If the annul bit is 1, set *NPC to
+	     zero.  */
+	  if (X_COND (insn) == 0x0)
+	    pc = *npc, offset = 4;
+	  if (X_A (insn))
+	    *npc = 0;
+
+	  gdb_assert (offset != 0);
+	  return pc + offset;
+	}
     }
 
-  return sp;
+  return 0;
 }
 
-/* Should call_function allocate stack space for a struct return?  */
-
-static int
-sparc64_use_struct_convention (int gcc_p, struct type *type)
+void
+sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
-  return (TYPE_LENGTH (type) > 32);
-}
+  static CORE_ADDR npc, nnpc;
+  static char npc_save[4], nnpc_save[4];
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function_by_hand.
-   The ultimate mystery is, tho, what is the value "16"?
-
-   MVS: That's the offset from where the sp is now, to where the
-   subroutine is gonna expect to find the struct return address.  */
-
-static void
-sparc32_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  char *val;
-  CORE_ADDR o7;
-
-  val = alloca (SPARC_INTREG_SIZE); 
-  store_unsigned_integer (val, SPARC_INTREG_SIZE, addr);
-  write_memory (sp + (16 * SPARC_INTREG_SIZE), val, SPARC_INTREG_SIZE); 
-
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+  if (insert_breakpoints_p)
     {
-      /* Now adjust the value of the link register, which was previously
-	 stored by push_return_address.  Functions that return structs are
-	 peculiar in that they return to link register + 12, rather than
-	 link register + 8.  */
+      CORE_ADDR pc;
 
-      o7 = read_register (O7_REGNUM);
-      write_register (O7_REGNUM, o7 - 4);
+      gdb_assert (npc == 0);
+      gdb_assert (nnpc == 0);
+
+      pc = sparc_address_from_register (SPARC32_PC_REGNUM);
+      npc = sparc_address_from_register (SPARC32_NPC_REGNUM);
+
+      /* Analyze the instruction at PC.  */
+      nnpc = sparc_analyze_control_transfer (pc, &npc);
+      if (npc != 0)
+	target_insert_breakpoint (npc, npc_save);
+      if (nnpc != 0)
+	target_insert_breakpoint (nnpc, nnpc_save);
+
+      /* Assert that we have set at least one breakpoint.  */
+      gdb_assert (npc != 0 || nnpc != 0);
     }
-}
-
-static void
-sparc64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* FIXME: V9 uses %o0 for this.  */
-  /* FIXME MVS: Only for small enough structs!!! */
-
-  target_write_memory (sp + (16 * SPARC_INTREG_SIZE), 
-		       (char *) &addr, SPARC_INTREG_SIZE); 
-#if 0
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+  else
     {
-      /* Now adjust the value of the link register, which was previously
-	 stored by push_return_address.  Functions that return structs are
-	 peculiar in that they return to link register + 12, rather than
-	 link register + 8.  */
+      if (npc != 0)
+	target_remove_breakpoint (npc, npc_save);
+      if (nnpc != 0)
+	target_remove_breakpoint (nnpc, nnpc_save);
 
-      write_register (O7_REGNUM, read_register (O7_REGNUM) - 4);
+      npc = 0;
+      nnpc = 0;
     }
-#endif
 }
-
-/* Default target data type for register REGNO.  */
-
-static struct type *
-sparc32_register_virtual_type (int regno)
-{
-  if (regno == PC_REGNUM ||
-      regno == DEPRECATED_FP_REGNUM ||
-      regno == SP_REGNUM)
-    return builtin_type_unsigned_int;
-  if (regno < 32)
-    return builtin_type_int;
-  if (regno < 64)
-    return builtin_type_float;
-  return builtin_type_int;
-}
-
-static struct type *
-sparc64_register_virtual_type (int regno)
-{
-  if (regno == PC_REGNUM ||
-      regno == DEPRECATED_FP_REGNUM ||
-      regno == SP_REGNUM)
-    return builtin_type_unsigned_long_long;
-  if (regno < 32)
-    return builtin_type_long_long;
-  if (regno < 64)
-    return builtin_type_float;
-  if (regno < 80)
-    return builtin_type_double;
-  return builtin_type_long_long;
-}
-
-/* Number of bytes of storage in the actual machine representation for
-   register REGNO.  */
-
-static int
-sparc32_register_size (int regno)
-{
-  return 4;
-}
-
-static int
-sparc64_register_size (int regno)
-{
-  return (regno < 32 ? 8 : regno < 64 ? 4 : 8);
-}
-
-/* Index within the `registers' buffer of the first byte of the space
-   for register REGNO.  */
-
-static int
-sparc32_register_byte (int regno)
-{
-  return (regno * 4);
-}
-
-static int
-sparc64_register_byte (int regno)
-{
-  if (regno < 32)
-    return regno * 8;
-  else if (regno < 64)
-    return 32 * 8 + (regno - 32) * 4;
-  else if (regno < 80)
-    return 32 * 8 + 32 * 4 + (regno - 64) * 8;
-  else
-    return 64 * 8 + (regno - 80) * 8;
-}
-
-/* Immediately after a function call, return the saved pc.
-   Can't go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-static CORE_ADDR
-sparc_saved_pc_after_call (struct frame_info *fi)
-{
-  return sparc_pc_adjust (read_register (RP_REGNUM));
-}
-
-/* Init saved regs: nothing to do, just a place-holder function.  */
 
 static void
-sparc_frame_init_saved_regs (struct frame_info *fi_ignored)
-{	/* no-op */
-}
-
-/* gdbarch fix call dummy:
-   All this function does is rearrange the arguments before calling
-   sparc_fix_call_dummy (which does the real work).  */
-
-static void
-sparc_gdbarch_fix_call_dummy (char *dummy, 
-			      CORE_ADDR pc, 
-			      CORE_ADDR fun, 
-			      int nargs, 
-			      struct value **args, 
-			      struct type *type, 
-			      int gcc_p)
+sparc32_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
-  if (CALL_DUMMY_LOCATION == ON_STACK)
-    sparc_fix_call_dummy (dummy, pc, fun, type, gcc_p);
+  write_register_pid (SPARC32_PC_REGNUM, pc, ptid);
+  write_register_pid (SPARC32_NPC_REGNUM, pc + 4, ptid);
 }
-
-/* DEPRECATED_CALL_DUMMY_ADDRESS: fetch the breakpoint address for a
-   call dummy.  */
-
-static CORE_ADDR
-sparc_call_dummy_address (void)
-{
-  return (DEPRECATED_CALL_DUMMY_START_OFFSET) + DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET;
-}
-
-/* Supply the Y register number to those that need it.  */
-
-int
-sparc_y_regnum (void)
-{
-  return gdbarch_tdep (current_gdbarch)->y_regnum;
-}
-
-int
-sparc_reg_struct_has_addr (int gcc_p, struct type *type)
-{
-  if (GDB_TARGET_IS_SPARC64)
-    return (TYPE_LENGTH (type) > 32);
-  else
-    return (gcc_p != 1);
-}
-
-int
-sparc_intreg_size (void)
-{
-  return SPARC_INTREG_SIZE;
-}
-
-static int
-sparc_return_value_on_stack (struct type *type)
-{
-  if (TYPE_CODE (type) == TYPE_CODE_FLT &&
-      TYPE_LENGTH (type) > 8)
-    return 1;
-  else
-    return 0;
-}
-
-/* Get the ith function argument for the current function.  */
-static CORE_ADDR
-sparc_fetch_pointer_argument (struct frame_info *frame, int argi,
-			      struct type *type)
-{
-  CORE_ADDR addr;
-  frame_read_register (frame, O0_REGNUM + argi, &addr);
-  return addr;
-}
-
-/*
- * Gdbarch "constructor" function.
- */
-
-#define SPARC32_CALL_DUMMY_ON_STACK
-
-#define SPARC_SP_REGNUM    14
-#define SPARC_FP_REGNUM    30
-#define SPARC_FP0_REGNUM   32
-#define SPARC32_NPC_REGNUM 69
-#define SPARC32_PC_REGNUM  68
-#define SPARC32_Y_REGNUM   64
-#define SPARC64_PC_REGNUM  80
-#define SPARC64_NPC_REGNUM 81
-#define SPARC64_Y_REGNUM   85
+
 
 static struct gdbarch *
-sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
+  struct gdbarch *gdbarch;
 
-  static LONGEST call_dummy_32[] = 
-    { 0xbc100001, 0x9de38000, 0xbc100002, 0xbe100003,
-      0xda03a058, 0xd803a054, 0xd603a050, 0xd403a04c,
-      0xd203a048, 0x40000000, 0xd003a044, 0x01000000,
-      0x91d02001, 0x01000000
-    };
-  static LONGEST call_dummy_64[] = 
-    { 0x9de3bec0fd3fa7f7LL, 0xf93fa7eff53fa7e7LL,
-      0xf13fa7dfed3fa7d7LL, 0xe93fa7cfe53fa7c7LL,
-      0xe13fa7bfdd3fa7b7LL, 0xd93fa7afd53fa7a7LL,
-      0xd13fa79fcd3fa797LL, 0xc93fa78fc53fa787LL,
-      0xc13fa77fcc3fa777LL, 0xc83fa76fc43fa767LL,
-      0xc03fa75ffc3fa757LL, 0xf83fa74ff43fa747LL,
-      0xf03fa73f01000000LL, 0x0100000001000000LL,
-      0x0100000091580000LL, 0xd027a72b93500000LL,
-      0xd027a72791480000LL, 0xd027a72391400000LL,
-      0xd027a71fda5ba8a7LL, 0xd85ba89fd65ba897LL,
-      0xd45ba88fd25ba887LL, 0x9fc02000d05ba87fLL,
-      0x0100000091d02001LL, 0x0100000001000000LL 
-    };
-  static LONGEST call_dummy_nil[] = {0};
-
-  /* Try to determine the OS ABI of the object we are loading.  */
-
-  if (info.abfd != NULL
-      && info.osabi == GDB_OSABI_UNKNOWN)
-    {
-      /* If it's an ELF file, assume it's Solaris.  */
-      if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-	info.osabi = GDB_OSABI_SOLARIS;
-    }
-
-  /* First see if there is already a gdbarch that can satisfy the request.  */
+  /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  /* None found: is the request for a sparc architecture? */
-  if (info.bfd_arch_info->arch != bfd_arch_sparc)
-    return NULL;	/* No; then it's not for us.  */
-
-  /* Yes: create a new gdbarch for the specified machine type.  */
-  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+  /* Allocate space for the new architecture.  */
+  tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* First set settings that are common for all sparc architectures.  */
-  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+  set_gdbarch_long_double_bit (gdbarch, 128);
+
+  set_gdbarch_num_regs (gdbarch, SPARC32_NUM_REGS);
+  set_gdbarch_register_name (gdbarch, sparc32_register_name);
+  set_gdbarch_register_type (gdbarch, sparc32_register_type);
+
+  /* Register numbers of various important registers.  */
+  set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM); /* %sp */
+  set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM); /* %pc */
+  set_gdbarch_fp0_regnum (gdbarch, SPARC_F0_REGNUM); /* %f0 */
+
+  /* Call dummy code.  */
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_push_dummy_code (gdbarch, sparc32_push_dummy_code);
+  set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
+
+  set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
+  set_gdbarch_extract_struct_value_address
+    (gdbarch, sparc_extract_struct_value_address);
+  set_gdbarch_use_struct_convention (gdbarch, sparc32_use_struct_convention);
+  set_gdbarch_return_value_on_stack (gdbarch, sparc32_return_value_on_stack);
+  set_gdbarch_stabs_argument_has_addr
+    (gdbarch, sparc32_stabs_argument_has_addr);
+
+  set_gdbarch_skip_prologue (gdbarch, sparc32_skip_prologue);
+
+  /* Stack grows downward.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
   set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					   sparc_extract_struct_value_address);
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
-  set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, SPARC_FP_REGNUM);
-  set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
-  set_gdbarch_deprecated_frame_chain (gdbarch, sparc_frame_chain);
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
-  set_gdbarch_frameless_function_invocation (gdbarch, 
-					     frameless_look_for_prologue);
-  set_gdbarch_deprecated_get_saved_register (gdbarch, sparc_get_saved_register);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sparc_init_extra_frame_info);
-  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
-  set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
-  set_gdbarch_deprecated_pop_frame (gdbarch, sparc_pop_frame);
-  set_gdbarch_deprecated_push_return_address (gdbarch, sparc_push_return_address);
-  set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
-  set_gdbarch_deprecated_reg_struct_has_addr
-    (gdbarch, sparc_reg_struct_has_addr);
-  set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
-  set_gdbarch_prologue_frameless_p (gdbarch, sparc_prologue_frameless_p);
-  set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
-  set_gdbarch_skip_prologue (gdbarch, sparc_skip_prologue);
-  set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
-  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
-  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
+  set_gdbarch_function_start_offset (gdbarch, 0);
 
-  /* Helper for function argument information.  */
-  set_gdbarch_fetch_pointer_argument (gdbarch, sparc_fetch_pointer_argument);
-
-  /*
-   * Settings that depend only on 32/64 bit word size 
-   */
-
-  switch (info.bfd_arch_info->mach)
-    {
-    case bfd_mach_sparc:
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclet:
-      // OBSOLETE     case bfd_mach_sparc_sparclite:
-#endif
-    case bfd_mach_sparc_v8plus:
-    case bfd_mach_sparc_v8plusa:
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclite_le:
-#endif
-      /* 32-bit machine types: */
-
-#ifdef SPARC32_CALL_DUMMY_ON_STACK
-      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-      set_gdbarch_deprecated_call_dummy_address (gdbarch, sparc_call_dummy_address);
-      set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 0x30);
-      set_gdbarch_deprecated_call_dummy_length (gdbarch, 0x38);
-
-      /* NOTE: cagney/2003-05-01: Using the just added push_dummy_code
-	 architecture method, it is now possible to implement a
-	 generic dummy frames based inferior function call that stores
-	 the breakpoint (and struct info) on the stack.  Further, by
-	 treating a SIGSEG at a breakpoint as equivalent to a SIGTRAP
-	 it is even possible to make this work when the stack is
-	 no-execute.
-
-	 NOTE: cagney/2002-04-26: Based from info posted by Peter
-	 Schauer around Oct '99.  Briefly, due to aspects of the SPARC
-	 ABI, it isn't possible to use ON_STACK with a strictly
-	 compliant compiler.
-
-	 Peter Schauer writes ...
-
-	 No, any call from GDB to a user function returning a
-	 struct/union will fail miserably. Try this:
-
-	 *NOINDENT*
-	 struct x
-	 {
-           int a[4];
-         };
-
-	 struct x gx;
-
-	 struct x
-	 sret ()
-	 {
-	   return gx;
-	 }
-
-	 main ()
-	 {
-	   int i;
-	   for (i = 0; i < 4; i++)
-	     gx.a[i] = i + 1;
-	   gx = sret ();
-	 }
-	 *INDENT*
-
-	 Set a breakpoint at the gx = sret () statement, run to it and
-	 issue a `print sret()'. It will not succed with your
-	 approach, and I doubt that continuing the program will work
-	 as well.
-
-	 For details of the ABI see the Sparc Architecture Manual.  I
-	 have Version 8 (Prentice Hall ISBN 0-13-825001-4) and the
-	 calling conventions for functions returning aggregate values
-	 are explained in Appendix D.3.  */
-
-      set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_32);
-#else
-      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_nil);
-#endif
-      set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 68);
-      set_gdbarch_frame_args_skip (gdbarch, 68);
-      set_gdbarch_function_start_offset (gdbarch, 0);
-      set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_deprecated_npc_regnum (gdbarch, SPARC32_NPC_REGNUM);
-      set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
-
-      set_gdbarch_deprecated_register_byte (gdbarch, sparc32_register_byte);
-      set_gdbarch_deprecated_register_raw_size (gdbarch, sparc32_register_size);
-      set_gdbarch_deprecated_register_size (gdbarch, 4);
-      set_gdbarch_deprecated_register_virtual_size (gdbarch, sparc32_register_size);
-      set_gdbarch_deprecated_register_virtual_type (gdbarch, sparc32_register_virtual_type);
-#ifdef SPARC32_CALL_DUMMY_ON_STACK
-      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_32));
-#else
-      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
-#endif
-      set_gdbarch_deprecated_stack_align (gdbarch, sparc32_stack_align);
-      set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
-      set_gdbarch_deprecated_store_struct_return (gdbarch, sparc32_store_struct_return);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 generic_use_struct_convention);
-      set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
-      tdep->y_regnum = SPARC32_Y_REGNUM;
-      tdep->fp_max_regnum = SPARC_FP0_REGNUM + 32;
-      tdep->intreg_size = 4;
-      tdep->reg_save_offset = 0x60;
-      tdep->call_dummy_call_offset = 0x24;
-      break;
-
-    case bfd_mach_sparc_v9:
-    case bfd_mach_sparc_v9a:
-      /* 64-bit machine types: */
-    default:	/* Any new machine type is likely to be 64-bit.  */
-
-#ifdef SPARC64_CALL_DUMMY_ON_STACK
-      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-      set_gdbarch_deprecated_call_dummy_address (gdbarch, sparc_call_dummy_address);
-      set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
-      set_gdbarch_deprecated_call_dummy_length (gdbarch, 192);
-      set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-      set_gdbarch_deprecated_call_dummy_start_offset (gdbarch, 148);
-      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_64);
-#else
-      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_nil);
-#endif
-      set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 128);
-      set_gdbarch_frame_args_skip (gdbarch, 136);
-      set_gdbarch_function_start_offset (gdbarch, 0);
-      set_gdbarch_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-      set_gdbarch_deprecated_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
-      set_gdbarch_pc_regnum (gdbarch, SPARC64_PC_REGNUM);
-      set_gdbarch_ptr_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-      set_gdbarch_deprecated_push_arguments (gdbarch, sparc64_push_arguments);
-      /* NOTE different for at_entry */
-      set_gdbarch_deprecated_target_read_fp (gdbarch, sparc64_read_fp);
-      set_gdbarch_read_sp (gdbarch, sparc64_read_sp);
-      /* Some of the registers aren't 64 bits, but it's a lot simpler just
-	 to assume they all are (since most of them are).  */
-      set_gdbarch_deprecated_register_byte (gdbarch, sparc64_register_byte);
-      set_gdbarch_deprecated_register_raw_size (gdbarch, sparc64_register_size);
-      set_gdbarch_deprecated_register_size (gdbarch, 8);
-      set_gdbarch_deprecated_register_virtual_size (gdbarch, sparc64_register_size);
-      set_gdbarch_deprecated_register_virtual_type (gdbarch, sparc64_register_virtual_type);
-#ifdef SPARC64_CALL_DUMMY_ON_STACK
-      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_64));
-#else
-      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
-#endif
-      set_gdbarch_deprecated_stack_align (gdbarch, sparc64_stack_align);
-      set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
-      set_gdbarch_deprecated_store_struct_return (gdbarch, sparc64_store_struct_return);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 sparc64_use_struct_convention);
-      set_gdbarch_deprecated_dummy_write_sp (gdbarch, sparc64_write_sp);
-      tdep->y_regnum = SPARC64_Y_REGNUM;
-      tdep->fp_max_regnum = SPARC_FP0_REGNUM + 48;
-      tdep->intreg_size = 8;
-      tdep->reg_save_offset = 0x90;
-      tdep->call_dummy_call_offset = 148 + 4 * 5;
-      break;
-    }
-
-  /* 
-   * Settings that vary per-architecture:
-   */
-
-  switch (info.bfd_arch_info->mach)
-    {
-    case bfd_mach_sparc:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
-      set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
-      set_gdbarch_register_name (gdbarch, sparc32_register_name);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
-      tdep->fp_register_bytes = 32 * 4;
-      tdep->print_insn_mach = bfd_mach_sparc;
-      break;
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclet:
-      // OBSOLETE       set_gdbarch_deprecated_extract_return_value (gdbarch, sparclet_extract_return_value);
-      // OBSOLETE       set_gdbarch_num_regs (gdbarch, 32 + 32 + 8 + 8 + 8);
-      // OBSOLETE       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4 + 8*4);
-      // OBSOLETE       set_gdbarch_register_name (gdbarch, sparclet_register_name);
-      // OBSOLETE       set_gdbarch_deprecated_store_return_value (gdbarch, sparclet_store_return_value);
-      // OBSOLETE       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
-      // OBSOLETE       tdep->fp_register_bytes = 0;
-      // OBSOLETE       tdep->print_insn_mach = bfd_mach_sparc_sparclet;
-      // OBSOLETE       break;
-#endif
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclite:
-      // OBSOLETE       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      // OBSOLETE       set_gdbarch_num_regs (gdbarch, 80);
-      // OBSOLETE       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
-      // OBSOLETE       set_gdbarch_register_name (gdbarch, sparclite_register_name);
-      // OBSOLETE       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-      // OBSOLETE       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
-      // OBSOLETE       tdep->fp_register_bytes = 0;
-      // OBSOLETE       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
-      // OBSOLETE       break;
-#endif
-    case bfd_mach_sparc_v8plus:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
-      set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
-      set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      tdep->print_insn_mach = bfd_mach_sparc;
-      tdep->fp_register_bytes = 32 * 4;
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
-      break;
-    case bfd_mach_sparc_v8plusa:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
-      set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
-      set_gdbarch_register_name (gdbarch, sparc32_register_name);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
-      tdep->fp_register_bytes = 32 * 4;
-      tdep->print_insn_mach = bfd_mach_sparc;
-      break;
-#if 0
-// OBSOLETE     case bfd_mach_sparc_sparclite_le:
-// OBSOLETE       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-// OBSOLETE       set_gdbarch_num_regs (gdbarch, 80);
-// OBSOLETE       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
-// OBSOLETE       set_gdbarch_register_name (gdbarch, sparclite_register_name);
-// OBSOLETE       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-// OBSOLETE       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
-// OBSOLETE       tdep->fp_register_bytes = 0;
-// OBSOLETE       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
-// OBSOLETE       break;
-#endif
-    case bfd_mach_sparc_v9:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
-      set_gdbarch_num_regs (gdbarch, 125);
-      set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
-      set_gdbarch_register_name (gdbarch, sparc64_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
-      tdep->fp_register_bytes = 64 * 4;
-      tdep->print_insn_mach = bfd_mach_sparc_v9a;
-      break;
-    case bfd_mach_sparc_v9a:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
-      set_gdbarch_num_regs (gdbarch, 125);
-      set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
-      set_gdbarch_register_name (gdbarch, sparc64_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
-      tdep->fp_register_bytes = 64 * 4;
-      tdep->print_insn_mach = bfd_mach_sparc_v9a;
-      break;
-    }
+  set_gdbarch_frame_args_skip (gdbarch, 8);
 
   set_gdbarch_print_insn (gdbarch, print_insn_sparc);
 
-  /* Hook in OS ABI-specific overrides, if they have been registered.  */
+  set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
+
+  set_gdbarch_write_pc (gdbarch, sparc32_write_pc);
+
+  set_gdbarch_unwind_dummy_id (gdbarch, sparc_unwind_dummy_id);
+
+  set_gdbarch_unwind_pc (gdbarch, sparc32_unwind_pc);
+
+  frame_base_set_default (gdbarch, &sparc32_frame_base);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
 
   return gdbarch;
 }
+
+/* Helper functions for dealing with register windows.  */
 
-static void
-sparc_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+void
+sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int offset = 0;
+  char buf[8];
+  int i;
 
-  if (tdep == NULL)
-    return;
+  if (sp & 1)
+    {
+      /* Registers are 64-bit.  */
+      sp += BIAS;
 
-#if 0
-  // OBSOLETE   fprintf_unfiltered (file, "sparc_dump_tdep: has_fpu = %d\n",
-  // OBSOLETE 		      tdep->has_fpu);
-#endif
-  fprintf_unfiltered (file, "sparc_dump_tdep: fp_register_bytes = %d\n",
-		      tdep->fp_register_bytes);
-  fprintf_unfiltered (file, "sparc_dump_tdep: y_regnum = %d\n",
-		      tdep->y_regnum);
-  fprintf_unfiltered (file, "sparc_dump_tdep: fp_max_regnum = %d\n",
-		      tdep->fp_max_regnum);
-  fprintf_unfiltered (file, "sparc_dump_tdep: intreg_size = %d\n",
-		      tdep->intreg_size);
-  fprintf_unfiltered (file, "sparc_dump_tdep: reg_save_offset = %d\n",
-		      tdep->reg_save_offset);
-  fprintf_unfiltered (file, "sparc_dump_tdep: call_dummy_call_offset = %d\n",
-		      tdep->call_dummy_call_offset);
-  fprintf_unfiltered (file, "sparc_dump_tdep: print_insn_match = %d\n",
-		      tdep->print_insn_mach);
+      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    {
+	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 8), buf, 8);
+	      regcache_raw_supply (regcache, i, buf);
+	    }
+	}
+    }
+  else
+    {
+      /* Registers are 32-bit.  Toss any sign-extension of the stack
+	 pointer.  */
+      sp &= 0xffffffffUL;
+
+      /* Clear out the top half of the temporary buffer, and put the
+	 register value in the bottom half if we're in 64-bit mode.  */
+      if (gdbarch_ptr_bit (current_gdbarch) == 64)
+	{
+	  memset (buf, 0, 4);
+	  offset = 4;
+	}
+
+      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    {
+	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
+				  buf + offset, 4);
+	      regcache_raw_supply (regcache, i, buf);
+	    }
+	}
+    }
+}
+
+void
+sparc_collect_rwindow (const struct regcache *regcache,
+		       CORE_ADDR sp, int regnum)
+{
+  int offset = 0;
+  char buf[8];
+  int i;
+
+  if (sp & 1)
+    {
+      /* Registers are 64-bit.  */
+      sp += BIAS;
+
+      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
+	    {
+	      regcache_raw_collect (regcache, i, buf);
+	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 8), buf, 8);
+	    }
+	}
+    }
+  else
+    {
+      /* Registers are 32-bit.  Toss any sign-extension of the stack
+	 pointer.  */
+      sp &= 0xffffffffUL;
+
+      /* Only use the bottom half if we're in 64-bit mode.  */
+      if (gdbarch_ptr_bit (current_gdbarch) == 64)
+	offset = 4;
+
+      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
+	    {
+	      regcache_raw_collect (regcache, i, buf);
+	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
+				   buf + offset, 4);
+	    }
+	}
+    }
+}
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_sparc_tdep (void);
+
+void
+_initialize_sparc_tdep (void)
+{
+  register_gdbarch_init (bfd_arch_sparc, sparc32_gdbarch_init);
 }
