@@ -169,6 +169,7 @@ nm-sysv4.h
 nm-trash.h
 nm-ultra3.h
 nm-umax.h
+nm-vax.h
 ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c

@@ -1,5 +1,5 @@
 /* Common definitions to make GDB run on Vaxen under 4.2bsd and Ultrix.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -27,14 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to get the offset in the core file of the register values.  */
 
 #define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))
-
-#define REGISTER_U_ADDR(addr, blockend, regno)		\
-{ addr = blockend - 0110 + regno * 4;			\
-  if (regno == PC_REGNUM) addr = blockend - 8;		\
-  if (regno == PS_REGNUM) addr = blockend - 4;		\
-  if (regno == FP_REGNUM) addr = blockend - 0120;	\
-  if (regno == AP_REGNUM) addr = blockend - 0124;	\
-  if (regno == SP_REGNUM) addr = blockend - 20; }
 
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT

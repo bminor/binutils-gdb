@@ -1,5 +1,15 @@
 Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	Vax ultrix native support.
+
+	* nm-vax.h: new file.
+	* Makefile.in (HFILES): added nm-vax.h.
+	* config/vaxult.mh (XDEPFILES): infptrace.o inftarg.o fork-child.o
+	  coredep.o corelow.o removed.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* xm-vax.h: updated copyright.
+	  (REGISTER_U_ADDR): removed.
+
 	Apollo native support (untested).
 
 	* Makefile.in (HFILES): added nm-apollo68[bv].h.
