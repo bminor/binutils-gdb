@@ -192,6 +192,11 @@ flush_cached_frames ()
   obstack_init (&frame_cache_obstack);
 
   current_frame = (struct frame_info *) 0; /* Invalidate cache */
+  if (annotation_level > 1)
+    {
+      target_terminal_ours ();
+      printf_unfiltered ("\n\032\032frames-invalid\n");
+    }
 }
 
 /* Flush the frame cache, and start a new one if necessary.  */

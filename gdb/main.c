@@ -308,6 +308,14 @@ static char *prompt;
 char *line;
 int linesize = 100;
 
+/* Nonzero if the current command is modified by "server ".  This
+   affects things like recording into the command history, comamnds
+   repeating on RETURN, etc.  This is so a user interface (emacs, GUI,
+   whatever) can issue its own commands and also send along commands
+   from the user, and have the user not notice that the user interface
+   is issuing commands too.  */
+int server_command;
+
 /* Baud rate specified for talking to serial target systems.  Default
    is left as -1, so targets can choose their own defaults.  */
 /* FIXME: This means that "show remotebaud" and gr_files_info can print -1
@@ -604,8 +612,14 @@ main (argc, argv)
 	{"n", no_argument, &inhibit_gdbinit, 1},
 	{"batch", no_argument, &batch, 1},
 	{"epoch", no_argument, &epoch_interface, 1},
-	{"fullname", no_argument, &frame_file_full_name, 1},
-	{"f", no_argument, &frame_file_full_name, 1},
+
+	/* This is a synonym for "--annotate=1".  --annotate is now preferred,
+	   but keep this here for a long time because people will be running
+	   emacses which use --fullname.  */
+	{"fullname", no_argument, 0, 'f'},
+	{"f", no_argument, 0, 'f'},
+
+	{"annotate", required_argument, 0, 12},
 	{"help", no_argument, &print_help, 1},
 	{"se", required_argument, 0, 10},
 	{"symbols", required_argument, 0, 's'},
@@ -653,6 +667,13 @@ main (argc, argv)
 	    break;
 	  case 11:
 	    cdarg = optarg;
+	    break;
+	  case 12:
+	    /* FIXME: what if the syntax is wrong (e.g. not digits)?  */
+	    annotation_level = atoi (optarg);
+	    break;
+	  case 'f':
+	    annotation_level = 1;
 	    break;
 	  case 's':
 	    symarg = optarg;
@@ -1113,6 +1134,9 @@ command_loop ()
 void
 dont_repeat ()
 {
+  if (server_command)
+    return;
+
   /* If we aren't reading from standard input, we are saving the last
      thing read from stdin in line and don't want to delete it.  Null lines
      won't repeat here in any case.  */
@@ -1681,6 +1705,13 @@ command_line_input (prrompt, repeat)
   char *nline;
   char got_eof = 0;
 
+  if (annotation_level > 1 && prrompt != NULL)
+    {
+      local_prompt = alloca (strlen (prrompt) + 20);
+      strcpy (local_prompt, prrompt);
+      strcat (local_prompt, "\n\032\032prompt\n");
+    }
+
   if (linebuffer == 0)
     {
       linelength = 80;
@@ -1717,12 +1748,18 @@ command_line_input (prrompt, repeat)
 	  error_pre_print = source_error;
 	}
 
+      if (annotation_level > 1 && instream == stdin)
+	printf_unfiltered ("\n\032\032pre-prompt\n");
+
       /* Don't use fancy stuff if not talking to stdin.  */
       if (command_editing_p && instream == stdin
 	  && ISATTY (instream))
 	rl = readline (local_prompt);
       else
 	rl = gdb_readline (local_prompt);
+
+      if (annotation_level > 1 && instream == stdin)
+	printf_unfiltered ("\n\032\032post-prompt\n");
 
       if (!rl || rl == (char *) EOF)
 	{
@@ -1759,6 +1796,19 @@ command_line_input (prrompt, repeat)
 
   if (got_eof)
     return NULL;
+
+#define SERVER_COMMAND_LENGTH 7
+  server_command =
+    (p - linebuffer > SERVER_COMMAND_LENGTH)
+      && STREQN (linebuffer, "server ", SERVER_COMMAND_LENGTH);
+  if (server_command)
+    {
+      /* Note that we don't set `line'.  Between this and the check in
+	 dont_repeat, this insures that repeating will still do the
+	 right thing.  */
+      *p = '\0';
+      return linebuffer + SERVER_COMMAND_LENGTH;
+    }
 
   /* Do history expansion if that is wished.  */
   if (history_expansion_p && instream == stdin
@@ -2245,7 +2295,8 @@ show_version (args, from_tty)
   immediate_quit--;
 }
 
-/* xgdb calls this to reprint the usual GDB prompt.  */
+/* xgdb calls this to reprint the usual GDB prompt.  Obsolete now that xgdb
+   is obsolete.  */
 
 void
 print_prompt ()

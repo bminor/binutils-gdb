@@ -1,3 +1,18 @@
+Mon Apr 11 10:44:35 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* main.c (main): Accept --annotate=N option and make --fullname
+	the same as --annotate=1.
+	(command_line_input): Print annotatation before and after prompt.
+	* blockframe.c (flush_cached_frames): Print annotation.
+	* Rename frame_file_full_name to annotation_level and move it from
+	symtab.h to defs.h.
+	* source.c (identify_source_line): If annotation_level > 1,
+	change output format.
+	* breakpoint.c: Print annotation whenever a breakpoint changes.
+	* main.c: New variable server_command.
+	(command_line_input): Parse "server " and set server_command.
+	(dont_repeat): Check server_command.
+
 Wed Apr 20 08:37:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* xcoffread.c (xcoff_next_symbol_text): Don't return before

@@ -196,6 +196,16 @@ int default_breakpoint_line;
 
 /* Flag indicating extra verbosity for xgdb.  */
 extern int xgdb_verbose;
+
+static void
+breakpoints_changed ()
+{
+  if (annotation_level > 1)
+    {
+      target_terminal_ours ();
+      printf_unfiltered ("\n\032\032breakpoints-invalid\n");
+    }
+}
 
 /* *PP is a string denoting a breakpoint.  Get the number of the breakpoint.
    Advance *PP after the string and any trailing whitespace.
@@ -335,6 +345,7 @@ End with a line saying just \"end\".\n", bnum);
 	l = read_command_lines ();
 	free_command_lines (&b->commands);
 	b->commands = l;
+	breakpoints_changed ();
 	return;
       }
   error ("No breakpoint number %d.", bnum);
@@ -1766,6 +1777,7 @@ set_raw_breakpoint (sal)
     }
 
   check_duplicates (sal.pc);
+  breakpoints_changed ();
 
   return b;
 }
@@ -2771,6 +2783,7 @@ clear_command (arg, from_tty)
 
       if (found->next) from_tty = 1; /* Always report if deleted more than one */
       if (from_tty) printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
+      breakpoints_changed ();
       while (found)
 	{
 	  if (from_tty) printf_unfiltered ("%d ", found->number);
@@ -2854,11 +2867,7 @@ delete_breakpoint (bpt)
   if (bpt->source_file != NULL)
     free (bpt->source_file);
 
-  if (xgdb_verbose && bpt->type == bp_breakpoint)
-    {
-      target_terminal_ours_for_output ();
-      printf_unfiltered ("breakpoint #%d deleted\n", bpt->number);
-    }
+  breakpoints_changed ();
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?
@@ -2962,6 +2971,10 @@ breakpoint_re_set_one (bint)
 	      check_duplicates (b->address);
 
 	      mention (b);
+
+	      /* Might be better to do this just once per breakpoint_re_set,
+		 rather than once for every breakpoint.  */
+	      breakpoints_changed ();
 	    }
 	  b->enable = save_enable;	/* Restore it, this worked. */
 	}
@@ -3067,6 +3080,7 @@ set_ignore_count (bptnum, count, from_tty)
 	else
 	  printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
 		  count, bptnum);
+	breakpoints_changed ();
 	return;
       }
 
@@ -3105,6 +3119,7 @@ ignore_command (args, from_tty)
 		    longest_to_int (value_as_long (parse_and_eval (p))),
 		    from_tty);
   printf_filtered ("\n");
+  breakpoints_changed ();
 }
 
 /* Call FUNCTION on each of the breakpoints
@@ -3153,8 +3168,7 @@ enable_breakpoint (bpt)
   
   bpt->enable = enabled;
 
-  if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf_unfiltered ("breakpoint #%d enabled\n", bpt->number);
+  breakpoints_changed ();
 
   check_duplicates (bpt->address);
   if (bpt->type == bp_watchpoint || bpt->type == bp_hardware_watchpoint)
@@ -3222,8 +3236,7 @@ disable_breakpoint (bpt)
 
   bpt->enable = disabled;
 
-  if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf_filtered ("breakpoint #%d disabled\n", bpt->number);
+  breakpoints_changed ();
 
   check_duplicates (bpt->address);
 }
@@ -3258,6 +3271,7 @@ enable_once_breakpoint (bpt)
   bpt->disposition = disable;
 
   check_duplicates (bpt->address);
+  breakpoints_changed ();
 }
 
 /* ARGSUSED */
@@ -3277,6 +3291,7 @@ enable_delete_breakpoint (bpt)
   bpt->disposition = delete;
 
   check_duplicates (bpt->address);
+  breakpoints_changed ();
 }
 
 /* ARGSUSED */

@@ -215,7 +215,9 @@ myread PARAMS ((int, char *, int));
 
 extern int
 query ();
-
+
+extern int annotation_level; /* in stack.c */
+
 extern void
 begin_line PARAMS ((void));
 
