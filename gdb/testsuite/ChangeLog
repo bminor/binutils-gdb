@@ -1,3 +1,8 @@
+Mon Jun 28 07:21:51 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t20/gdbme.cc (main): Move variable initialization for AIX to
+	get the expected next to inheritance3.
+
 Sun Jun 27 12:29:53 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t00/teststrategy.exp: Remove expected failure for mips-*-*
