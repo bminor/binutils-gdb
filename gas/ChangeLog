@@ -1,3 +1,15 @@
+Thu Sep 16 14:23:08 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* tc.h: Declare tc_gen_reloc differently depending upong
+	RELOC_EXPANSION_POSSIBLE.
+	* config/obj-elf.c (obj_elf_section): Only set flags when first
+	creating the section.
+
+Wed Sep 15 12:15:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (append_insn): Don't swap a trap instruction
+	with a branch.
+
 Tue Sep 14 13:31:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-elf.c (obj_elf_data, obj_elf_text): New functions;

@@ -31,6 +31,8 @@ static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_common PARAMS ((int));
+static void obj_elf_data PARAMS ((int));
+static void obj_elf_text PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -51,6 +53,10 @@ const pseudo_typeS obj_pseudo_table[] =
   {"2byte", cons, 2},
   {"4byte", cons, 4},
   {"8byte", cons, 8},
+
+  /* We need to trap the section changing calls to handle .previous.  */
+  {"data", obj_elf_data, 0},
+  {"text", obj_elf_text, 0},
 
   {NULL}			/* end sentinel */
 };
@@ -280,12 +286,13 @@ obj_elf_section (xxx)
 {
   char *string;
   asection *sec;
+  int new_sec;
 
   /* Initialize this with inclusive-or of all flags that can be cleared
      by attributes, but not set by them.  Also include flags that won't
      get set properly in the assembler, but which the user/compiler
      shouldn't be expected to set.  */
-  flagword flags = SEC_READONLY | SEC_ALLOC | SEC_RELOC;
+  flagword flags = SEC_READONLY | SEC_ALLOC | SEC_RELOC | SEC_LOAD;
   /* Initialize this with the default flags to be used if none are
      specified.  */
   flagword default_flags = 0;
@@ -307,7 +314,8 @@ obj_elf_section (xxx)
       *p = c;
       input_line_pointer = p;
     }
-  if (!strcmp (string, ".rodata"))
+  if (!strcmp (string, ".rodata")
+      || !strcmp (string, ".rodata1"))
     default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_LOAD;
   else if (!strcmp (string, ".init")
 	   || !strcmp (string, ".fini"))
@@ -348,7 +356,7 @@ obj_elf_section (xxx)
 	bit = BIT; inv = NEG; goto match; }
 
       CHECK ("write", SEC_READONLY, 1);
-      CHECK ("alloc", SEC_ALLOC, 0);
+      CHECK ("alloc", SEC_ALLOC | SEC_LOAD, 0);
       CHECK ("execinstr", SEC_CODE, 1);
       CHECK ("progbits", SEC_LOAD, 1);
 #undef CHECK
@@ -376,16 +384,35 @@ obj_elf_section (xxx)
   if (!string)
     return;
 
-  sec = bfd_get_section_by_name (stdoutput, string);
-  if (sec == 0)
-    {
-      sec = subseg_new (string, 0);
-      bfd_set_section_flags (stdoutput, sec, flags);
-      sec->output_section = sec;
-    }
   previous_section = now_seg;
   previous_subsection = now_subseg;
-  subseg_set (sec, 0);
+
+  new_sec = bfd_get_section_by_name (stdoutput, string) == NULL;
+  sec = subseg_new (string, 0);
+  if (new_sec)
+    bfd_set_section_flags (stdoutput, sec, flags);
+}
+
+/* Change to the .data section.  */
+
+static void
+obj_elf_data (i)
+     int i;
+{
+  previous_section = now_seg;
+  previous_subsection = now_subseg;
+  s_data (i);
+}
+
+/* Change to the .text section.  */
+
+static void
+obj_elf_text (i)
+     int i;
+{
+  previous_section = now_seg;
+  previous_subsection = now_subseg;
+  s_text (i);
 }
 
 void
