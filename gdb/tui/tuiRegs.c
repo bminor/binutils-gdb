@@ -30,7 +30,7 @@
 #include "target.h"
 #include "tuiLayout.h"
 #include "tuiWin.h"
-
+#include "tui-file.h"
 
 /*****************************************
 ** LOCAL DEFINITIONS                    **
@@ -43,9 +43,9 @@
 #define SINGLE_FLOAT_LABEL_FMT      "%6.6s: "
 #define SINGLE_FLOAT_VALUE_WIDTH    25	/* min of 8 but may be in sci notation */
 
-#define SINGLE_LABEL_WIDTH    10
+#define SINGLE_LABEL_WIDTH    16
 #define SINGLE_LABEL_FMT      "%10.10s: "
-#define SINGLE_VALUE_WIDTH    14	/* minimum of 8 but may be in sci notation */
+#define SINGLE_VALUE_WIDTH    20 /* minimum of 8 but may be in sci notation */
 
 /* In the code HP gave Cygnus, this was actually a function call to a
    PA-specific function, which was supposed to determine whether the
@@ -344,6 +344,7 @@ tuiDisplayRegistersFrom (int startElementNo)
 		  dataItemWin->origin.x = (itemWinWidth * j) + 1;
 		  dataItemWin->origin.y = curY;
 		  makeWindow (dataItemWin, DONT_BOX_WINDOW);
+                  scrollok (dataItemWin->handle, FALSE);
 		}
 	      /*
 	         ** Get the printable representation of the register
@@ -484,7 +485,10 @@ tuiCheckRegisterValues (struct frame_info *frame)
 		_tuiRegValueHasChanged (dataElementPtr, frame, &rawBuf[0]);
 	      if (dataElementPtr->highlight)
 		{
-		  for (j = 0; j < MAX_REGISTER_RAW_SIZE; j++)
+                  int size;
+
+                  size = REGISTER_RAW_SIZE (dataElementPtr->itemNo);
+		  for (j = 0; j < size; j++)
 		    ((char *) dataElementPtr->value)[j] = rawBuf[j];
 		  _tuiDisplayRegister (
 					dataElementPtr->itemNo,
@@ -573,12 +577,17 @@ registers.\n",
 static char *
 _tuiRegisterName (int regNum)
 {
-  if (reg_names[regNum] != (char *) NULL && *(reg_names[regNum]) != (char) 0)
-    return reg_names[regNum];
-  else
-    return ((char *) NULL);
-}				/* tuiGetRegisterName */
+  return REGISTER_NAME (regNum);
+}
+extern int pagination_enabled;
 
+static void
+tui_restore_gdbout (void *ui)
+{
+  ui_file_delete (gdb_stdout);
+  gdb_stdout = (struct ui_file*) ui;
+  pagination_enabled = 1;
+}
 
 /*
    ** _tuiRegisterFormat
@@ -590,17 +599,36 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
                     TuiDataElementPtr dataElement,
                     enum precision_type precision)
 {
-  char tmpBuf[15];
-  char *fmt;
   struct ui_file *stream;
+  struct ui_file *old_stdout;
+  char *name;
+  struct cleanup *cleanups;
+  char *p;
 
+  name = REGISTER_NAME (regNum);
+  if (name == 0)
+    {
+      strcpy (buf, "");
+      return;
+    }
+  
+  pagination_enabled = 0;
+  old_stdout = gdb_stdout;
   stream = tui_sfileopen (bufLen);
-  pa_do_strcat_registers_info (regNum, 0, stream, precision);
-  strcpy (buf, tui_file_get_strbuf (stream));
-  ui_file_delete (stream);
+  gdb_stdout = stream;
+  cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
+  do_registers_info (regNum, 0);
 
-  return;
-}				/* _tuiRegisterFormat */
+  /* Save formatted output in the buffer.  */
+  strncpy (buf, tui_file_get_strbuf (stream), bufLen);
+
+  /* Remove the possible \n.  */
+  p = strchr (buf, '\n');
+  if (p)
+    *p = 0;
+
+  do_cleanups (cleanups);
+}
 
 
 #define NUM_GENERAL_REGS    32
@@ -620,7 +648,12 @@ _tuiSetGeneralRegsContent (int refreshValuesOnly)
 }				/* _tuiSetGeneralRegsContent */
 
 
+#ifndef PCOQ_HEAD_REGNUM
+#define START_SPECIAL_REGS  0
+#else
 #define START_SPECIAL_REGS    PCOQ_HEAD_REGNUM
+#endif
+
 /*
    ** _tuiSetSpecialRegsContent().
    **      Set the content of the data window to consist of the special registers.
@@ -676,8 +709,7 @@ _tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
    **        Set the content of the data window to consist of the float registers.
  */
 static TuiStatus
-_tuiSetFloatRegsContent (TuiRegisterDisplayType dpyType,
-                         int refreshValuesOnly)
+_tuiSetFloatRegsContent (TuiRegisterDisplayType dpyType, int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
   int i, startRegNum;
@@ -720,11 +752,13 @@ _tuiRegValueHasChanged (TuiDataElementPtr dataElement,
       if (_tuiGetRegisterRawValue (
 			 dataElement->itemNo, rawBuf, frame) == TUI_SUCCESS)
 	{
-	  for (i = 0; (i < MAX_REGISTER_RAW_SIZE && !hasChanged); i++)
+          int size = REGISTER_RAW_SIZE (dataElement->itemNo);
+          
+	  for (i = 0; (i < size && !hasChanged); i++)
 	    hasChanged = (((char *) dataElement->value)[i] != rawBuf[i]);
 	  if (hasChanged && newValue != (char *) NULL)
 	    {
-	      for (i = 0; (i < MAX_REGISTER_RAW_SIZE); i++)
+	      for (i = 0; i < size; i++)
 		newValue[i] = rawBuf[i];
 	    }
 	}
@@ -739,17 +773,19 @@ _tuiRegValueHasChanged (TuiDataElementPtr dataElement,
    **        Get the register raw value.  The raw value is returned in regValue.
  */
 static TuiStatus
-_tuiGetRegisterRawValue (int regNum, char *regValue,
-                         struct frame_info *frame)
+_tuiGetRegisterRawValue (int regNum, char *regValue, struct frame_info *frame)
 {
   TuiStatus ret = TUI_FAILURE;
 
   if (target_has_registers)
     {
-      read_relative_register_raw_bytes_for_frame (regNum, regValue, frame);
-      ret = TUI_SUCCESS;
+      int opt;
+      
+      get_saved_register (regValue, &opt, (CORE_ADDR*) NULL, frame,
+			  regNum, (enum lval_type*) NULL);
+      if (register_cached (regNum) >= 0)
+	ret = TUI_SUCCESS;
     }
-
   return ret;
 }				/* _tuiGetRegisterRawValue */
 
@@ -873,7 +909,8 @@ _tuiDisplayRegister (int regNum,
 {
   if (winInfo->handle != (WINDOW *) NULL)
     {
-      char buf[100];
+      int i;
+      char buf[40];
       int valueCharsWide, labelWidth;
       TuiDataElementPtr dataElementPtr = &((TuiWinContent)
 				    winInfo->content)[0]->whichElement.data;
@@ -905,10 +942,13 @@ _tuiDisplayRegister (int regNum,
 			  regNum,
 			  dataElementPtr,
 			  precision);
+
       if (dataElementPtr->highlight)
 	wstandout (winInfo->handle);
 
-      werase (winInfo->handle);
+      wmove (winInfo->handle, 0, 0);
+      for (i = 1; i < winInfo->width; i++)
+        waddch (winInfo->handle, ' ');
       wmove (winInfo->handle, 0, 0);
       waddstr (winInfo->handle, buf);
 

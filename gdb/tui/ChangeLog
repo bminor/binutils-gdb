@@ -1,3 +1,18 @@
+2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiRegs.c (tuiDisplayRegistersFrom): Set scrollok to FALSE in
+	each register window.
+	(tuiCheckRegisterValues): Use REGISTER_RAW_SIZE to obtain the size
+	of the register to check.
+	(_tuiRegValueHasChanged): Likewise.
+	(_tuiRegisterName): Use REGISTER_NAME.
+	(tui_restore_gdbout): New function.
+	(_tuiRegisterFormat): Use do_registers_info with gdb_stdout redirected
+	to a string.
+	(START_SPECIAL_REGS): Define.
+	(_tuiGetRegisterRawValue): Use get_saved_register.
+	(_tuiDisplayRegister): Fix clearing of register window.
+
 2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tui-file.h (fputs_unfiltered_hook): Remove.
