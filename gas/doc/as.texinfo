@@ -678,7 +678,7 @@ error if necessary.
 
 @ifset IP2K
 The following options are available when @value{AS} is configured for the
-Scenix IP2K series.
+Ubicom IP2K series.
 
 @table @gcctabopt
 

@@ -23,7 +23,7 @@
 @cindex options, IP2K
 @cindex IP2K options
 
-The Scenix IP2K version of @code{@value{AS}} has a few machine
+The Ubicom IP2K version of @code{@value{AS}} has a few machine
 dependent options:
 
 @table @code
