@@ -1,3 +1,14 @@
+1999-06-02  Mark Mitchell  <Mark Mitchell <mark@codesourcery.com>>
+
+	* elf32-mips.c (elf_mips_howto_table): Add R_MIPS_JALR.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Likewise.
+	(mips_elf64_howto_table_rela): Likewise.
+
+	* elfcode.h (elf_slurp_reloc_table_from_section): New function,
+	split out from ...
+	(elf_slurp_reloc_table): Here.  Use it to handle the case where a
+	single section has two associated relocation sections.
+	
 1999-06-02  Mark Salter  <msalter@cygnus.com>
 
 	* coffcode.h (coff_set_alignment_hook): Set lma from s_vaddr if

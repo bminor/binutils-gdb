@@ -1,5 +1,6 @@
 /* ELF executable support for BFD.
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software
+   Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -162,6 +163,9 @@ static void elf_swap_shdr_out
 
 #define section_from_elf_index bfd_section_from_elf_index
 
+static boolean elf_slurp_reloc_table_from_section 
+  PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type,
+	   arelent *, asymbol **, boolean));
 static boolean elf_slurp_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, boolean));
 
@@ -1195,49 +1199,26 @@ error_return:
   return -1;
 }
 
-/* Read in and swap the external relocs.  */
+/* Read  relocations for ASECT from REL_HDR.  There are RELOC_COUNT of 
+   them.  */
 
 static boolean
-elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
+elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
+				    relents, symbols, dynamic)
      bfd *abfd;
      asection *asect;
+     Elf_Internal_Shdr *rel_hdr;
+     bfd_size_type reloc_count;
+     arelent *relents;
      asymbol **symbols;
      boolean dynamic;
 {
   struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
-  struct bfd_elf_section_data * const d = elf_section_data (asect);
-  Elf_Internal_Shdr *rel_hdr;
-  bfd_size_type reloc_count;
   PTR allocated = NULL;
   bfd_byte *native_relocs;
-  arelent *relents;
   arelent *relent;
   unsigned int i;
   int entsize;
-
-  if (asect->relocation != NULL)
-    return true;
-
-  if (! dynamic)
-    {
-      if ((asect->flags & SEC_RELOC) == 0
-	  || asect->reloc_count == 0)
-	return true;
-
-      rel_hdr = &d->rel_hdr;
-      reloc_count = asect->reloc_count;
-
-      BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
-		  && reloc_count == rel_hdr->sh_size / rel_hdr->sh_entsize);
-    }
-  else
-    {
-      if (asect->_raw_size == 0)
-	return true;
-
-      rel_hdr = &d->this_hdr;
-      reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
-    }
 
   allocated = (PTR) bfd_malloc ((size_t) rel_hdr->sh_size);
   if (allocated == NULL)
@@ -1249,10 +1230,6 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
     goto error_return;
 
   native_relocs = (bfd_byte *) allocated;
-
-  relents = (arelent *) bfd_alloc (abfd, reloc_count * sizeof (arelent));
-  if (relents == NULL)
-    goto error_return;
 
   entsize = rel_hdr->sh_entsize;
   BFD_ASSERT (entsize == sizeof (Elf_External_Rel)
@@ -1308,8 +1285,6 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 	(*ebd->elf_info_to_howto_rel) (abfd, relent, &rel);
     }
 
-  asect->relocation = relents;
-
   if (allocated != NULL)
     free (allocated);
 
@@ -1319,6 +1294,76 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
   if (allocated != NULL)
     free (allocated);
   return false;
+}
+
+/* Read in and swap the external relocs.  */
+
+static boolean
+elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
+     bfd *abfd;
+     asection *asect;
+     asymbol **symbols;
+     boolean dynamic;
+{
+  struct bfd_elf_section_data * const d = elf_section_data (asect);
+  Elf_Internal_Shdr *rel_hdr;
+  Elf_Internal_Shdr *rel_hdr2;
+  bfd_size_type reloc_count;
+  bfd_size_type reloc_count2;
+  arelent *relents;
+
+  if (asect->relocation != NULL)
+    return true;
+
+  if (! dynamic)
+    {
+      if ((asect->flags & SEC_RELOC) == 0
+	  || asect->reloc_count == 0)
+	return true;
+
+      rel_hdr = &d->rel_hdr;
+      reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
+      rel_hdr2 = d->rel_hdr2;
+      reloc_count2 = (rel_hdr2 
+		      ? (rel_hdr2->sh_size / rel_hdr2->sh_entsize)
+		      : 0);
+
+      BFD_ASSERT (asect->reloc_count == reloc_count + reloc_count2);
+      BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
+		  || (rel_hdr2 && asect->rel_filepos == rel_hdr2->sh_offset));
+
+    }
+  else
+    {
+      if (asect->_raw_size == 0)
+	return true;
+
+      rel_hdr = &d->this_hdr;
+      reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
+      rel_hdr2 = NULL;
+    }
+
+  relents = (arelent *) bfd_alloc (abfd, 
+				   asect->reloc_count * sizeof (arelent));
+  if (relents == NULL)
+    return false;
+
+  if (!elf_slurp_reloc_table_from_section (abfd, asect,
+					   rel_hdr, reloc_count,
+					   relents,
+					   symbols, dynamic))
+    return false;
+  
+  if (rel_hdr2 
+      && !elf_slurp_reloc_table_from_section (abfd, asect,
+					      rel_hdr2, reloc_count2,
+					      relents + reloc_count,
+					      symbols, dynamic))
+    return false;
+
+  
+  asect->relocation = relents;
+  return true;
 }
 
 #ifdef DEBUG
