@@ -284,7 +284,7 @@ proc gdb_start {} {
 #    "<return>"		   { send "\n"; error "Window too small." }
 #    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
 #    buffer_full		   { error "internal buffer is full." }
-#    eof			   { error "eof -- there is no child process" ; alldone}
+#    eof			   { error "eof -- there is no child process" ; cleanup ; exit $exit_status}
 #    timeout			   { error "timeout." }
 #    "virtual memory exhausted" { error "virtual memory exhausted." }
 #    "Undefined command"	   { error "send string probably wrong." }

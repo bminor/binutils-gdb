@@ -94,6 +94,7 @@ proc gdb_target_udi { } {
     global targetname
     global prompt
     global verbose
+    global exit_status
 
     # set targets hostname
     send "target udi $targetname\n"
@@ -110,7 +111,8 @@ proc gdb_target_udi { } {
 	}
 	timeout { 
 	    error "Couldn't set target for UDI."
-	    alldone
+	    cleanup
+	    exit $exit_status
 	}
     }
     set timeout 10

@@ -1,3 +1,17 @@
+Wed Aug 25 16:48:05 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* configure.in (configdirs):  Restore gdb.t04, which mysteriously
+	disappeared from list.
+	* config/{udi-gdb.exp, gdb-unix.exp}:  Replace calls to obsolete
+	"alldone" proc with call to cleanup and exit.
+	* {gdb.t01/run.exp, gdb.t01/term.exp, gdb.t02/whatis.exp,
+	gdb.t03/ptype.exp, gdb.t04/setvar.exp, gdb.t05/expr.exp,
+	gdb.t06/break.exp, gdb.t07/watchpoint.exp, gdb.t08/opaque.exp,
+	gdb.t09/corefile.exp, gdb.t10/crossload.exp, gdb.t11/list.exp,
+	gdb.t12/scope.exp, gdb.t13/bitfields.exp}:  Replace calls to
+	"alldone" proc with simple returns that suppress remaining
+	tests.  The alldone proc went away many months ago.
+
 Tue Aug 24 11:04:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t10/nodebug.exp: Comment out "maint print msymbols" tests.
