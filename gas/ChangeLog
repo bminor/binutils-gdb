@@ -1,5 +1,17 @@
 2001-12-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (mips_cpreturn_offset): Better comment.
+	(load_register): Better error message. Cast away signedness
+	mismatches. Add casts needed for varargs.
+	(load_address): Replace checks of HAVE_64BIT_ADDRESS with dbl.
+	Remove superfluous casts.
+	(macro): Cast away signedness mismatches. Remove superfluous casts.
+	(s_cpload): Fix wrong comment.
+	(s_mips_weakext): Standardize output message.
+	(get_number): Likewise.
+
+2001-12-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (append_insn): Add jump address range overflow
 	check.
 

@@ -421,7 +421,7 @@ get_char (stream, address, magiccount, magic)
      char **magic;
 {
   int c, i;
-  long r;
+  long r = EOF;
   unsigned char buf[4];
 
   for (i = 0; i < encoding_bytes; i++)

@@ -1,5 +1,9 @@
 2001-12-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* strings.c (get_char): Initialize value.
+
+2001-12-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* arlex.l: Silence compile warnings.
 	* arsup.h: Likewise. Fix formatting.
 

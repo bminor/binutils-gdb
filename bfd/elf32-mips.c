@@ -2094,8 +2094,8 @@ gprel16_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
-  insn = (insn &~ (bfd_vma) 0xffff) | (val & 0xffff);
-  bfd_put_32 (abfd, (bfd_vma) insn, (bfd_byte *) data + reloc_entry->address);
+  insn = (insn & ~0xffff) | (val & 0xffff);
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 
   if (relocateable)
     reloc_entry->address += input_section->output_offset;

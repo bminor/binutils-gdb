@@ -389,7 +389,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec"
     ;;
-#ifdef BFD64    
+#ifdef BFD64
   x86_64-*-freebsd*)
     targ_defvec=bfd_elf64_x86_64_vec
     targ_selvecs="bfd_elf32_i386_vec i386coff_vec bfd_efi_app_ia32_vec"
