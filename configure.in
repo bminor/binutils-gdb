@@ -218,6 +218,11 @@ case "${target}" in
     esac
     # but that's okay since emacs doesn't work anyway
     noconfigdirs="$noconfigdirs emacs"
+
+    # static versions of several key libraries are not available, 
+    # so building our entire toolchain is impossible until 
+    # the GNU linker supports shared libraries
+    noconfigdirs="$noconfigdirs ld"
     ;;
   rs6000-*-*)
     # a gcc built textutils will cause the linker to hang on 'join'
