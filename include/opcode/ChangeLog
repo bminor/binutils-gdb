@@ -1,5 +1,8 @@
 Fri Aug 14 14:20:38 1992  Per Bothner  (bothner@cygnus.com)
 
+	* m68k.h:  Merged in patches (mostly m68040-specific) from
+	Colin Smith <colin@wrs.com>.
+
 	* m68k.h:  Merged m68kmri.h and m68k.h (using the former as a
 	base).  Also cleaned up duplicates, re-ordered instructions for
 	the sake of dis-assembling (so aliases come after standard names).
