@@ -1,4 +1,12 @@
 2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Revert last change.  Move
