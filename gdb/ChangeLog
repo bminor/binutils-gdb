@@ -1,5 +1,14 @@
 2003-03-27  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.c (write_sp): Delete function and references.
+	* inferior.h (write_sp): Delete declaration.
+	* valops.c (hand_function_call): Replace write_sp with
+	TARGET_WRITE_SP.
+	* sparc-tdep.c (sparc_push_dummy_frame): Ditto.
+	(sparc_pop_frame): Ditto.
+	
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
 	* NEWS: Mention removal of support for hppa*-*-bsd* and
 	hppa*-*-osf* natives, and hppa*-*-pro* target.
 	* config/pa/xm-hppah.h: Do not include "pa/xm-pa.h".

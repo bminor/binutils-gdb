@@ -1040,7 +1040,7 @@ sparc_push_dummy_frame (void)
 
   sp -= DUMMY_STACK_SIZE;
 
-  write_sp (sp);
+  TARGET_WRITE_SP (sp);
 
   write_memory (sp + DUMMY_REG_SAVE_OFFSET, &register_temp[0],
 		DUMMY_STACK_REG_BUF_SIZE);
@@ -1310,7 +1310,7 @@ sparc_pop_frame (void)
 			read_memory_integer (fsr[O0_REGNUM + 7],
 					     SPARC_INTREG_SIZE));
 
-      write_sp (get_frame_base (frame));
+      TARGET_WRITE_SP (get_frame_base (frame));
     }
   else if (fsr[I0_REGNUM])
     {
