@@ -3344,35 +3344,38 @@ i386_immediate (imm_start)
   return 1;
 }
 
-static int i386_scale PARAMS ((char *));
+static char *i386_scale PARAMS ((char *));
 
-static int
+static char *
 i386_scale (scale)
      char *scale;
 {
-  if (!isdigit (*scale))
-    goto bad_scale;
+  offsetT val;
+  char *save = input_line_pointer;
 
-  switch (*scale)
+  input_line_pointer = scale;
+  val = get_absolute_expression ();
+
+  switch (val)
     {
-    case '0':
-    case '1':
+    case 0:
+    case 1:
       i.log2_scale_factor = 0;
       break;
-    case '2':
+    case 2:
       i.log2_scale_factor = 1;
       break;
-    case '4':
+    case 4:
       i.log2_scale_factor = 2;
       break;
-    case '8':
+    case 8:
       i.log2_scale_factor = 3;
       break;
     default:
-    bad_scale:
       as_bad (_("expecting scale factor of 1, 2, 4, or 8: got `%s'"),
 	      scale);
-      return 0;
+      input_line_pointer = save;
+      return NULL;
     }
   if (i.log2_scale_factor != 0 && ! i.index_reg)
     {
@@ -3382,7 +3385,9 @@ i386_scale (scale)
       i.log2_scale_factor = 0;
 #endif
     }
-  return 1;
+  scale = input_line_pointer;
+  input_line_pointer = save;
+  return scale;
 }
 
 static int i386_displacement PARAMS ((char *, char *));
@@ -3830,12 +3835,14 @@ i386_operand (operand_string)
 		    }
 
 		  /* Check for scale factor.  */
-		  if (isdigit ((unsigned char) *base_string))
+		  if (*base_string != ')')
 		    {
-		      if (!i386_scale (base_string))
+		      char *end_scale = i386_scale (base_string);
+
+		      if (!end_scale)
 			return 0;
 
-		      ++base_string;
+		      base_string = end_scale;
 		      if (is_space_char (*base_string))
 			++base_string;
 		      if (*base_string != ')')
