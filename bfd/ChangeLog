@@ -1,3 +1,12 @@
+2003-06-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Handle PT_GNU_STACK.
+	(bfd_section_from_phdr): Likewise.
+	(map_sections_to_segments): Create PT_GNU_STACK segment header.
+	(get_program_header_size): Count with PT_GNU_STACK.
+	* elf-bfd.h (struct elf_obj_tdata): Add stack_flags.
+	* elflink.h (bfd_elfNN_size_dynamic_sections): Set stack_flags.
+
 2003-06-03  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elflink.h (elf_link_input_bfd): Call linker error_handler

@@ -1,6 +1,15 @@
+2003-05-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldgram.y (phdr_type): Grok PT_GNU_STACK.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Add
+	-z execstack and -z noexecstack.
+	(gld${EMULATION_NAME}_list_options): Likewise.
+	* scripttempl/elf.sc: If not -r, discard .note.GNU-stack section.
+
 2003-06-03  Michael Snyder  <msnyder@redhat.com>
         and Bernd Schmidt   <bernds@redhat.com>
 	and Alexandre Oliva <aoliva@redhat.com>
+
 	* Makefile.am: Add new emulations for h8300sx.
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add new emulations.

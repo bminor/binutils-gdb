@@ -1070,6 +1070,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case PT_PHDR: pt = "PHDR"; break;
 	    case PT_TLS: pt = "TLS"; break;
 	    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
+	    case PT_GNU_STACK: pt = "STACK"; break;
 	    default: sprintf (buf, "0x%lx", p->p_type); pt = buf; break;
 	    }
 	  fprintf (f, "%8s off    0x", pt);
@@ -2296,6 +2297,9 @@ bfd_section_from_phdr (abfd, hdr, index)
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index,
 					      "eh_frame_hdr");
 
+    case PT_GNU_STACK:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "stack");
+
     default:
       /* Check for any processor-specific program segment types.
          If no handler for them, default to making "segment" sections.  */
@@ -3513,6 +3517,21 @@ map_sections_to_segments (abfd)
       pm = &m->next;
     }
 
+  if (elf_tdata (abfd)->stack_flags)
+    {
+      amt = sizeof (struct elf_segment_map);
+      m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
+      if (m == NULL)
+	goto error_return;
+      m->next = NULL;
+      m->p_type = PT_GNU_STACK;
+      m->p_flags = elf_tdata (abfd)->stack_flags;
+      m->p_flags_valid = 1;
+
+      *pm = m;
+      pm = &m->next;
+    }
+
   free (sections);
   sections = NULL;
 
@@ -4096,6 +4115,12 @@ get_program_header_size (abfd)
   if (elf_tdata (abfd)->eh_frame_hdr)
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->stack_flags)
+    {
+      /* We need a PT_GNU_STACK segment.  */
       ++segs;
     }
 

@@ -1254,6 +1254,9 @@ struct elf_obj_tdata
   /* Number of symbol version references we are about to emit.  */
   unsigned int cverrefs;
 
+  /* Segment flags for the PT_GNU_STACK segment.  */
+  unsigned int stack_flags;  
+
   /* Symbol version definitions in external objects.  */
   Elf_Internal_Verdef *verdef;
 

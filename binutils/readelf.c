@@ -2332,6 +2332,7 @@ get_segment_type (p_type)
 
     case PT_GNU_EH_FRAME:
 			return "GNU_EH_FRAME";
+    case PT_GNU_STACK:	return "STACK";
 
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))

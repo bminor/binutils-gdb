@@ -1684,6 +1684,16 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	link_info.combreloc = FALSE;
       else if (strcmp (optarg, "nocopyreloc") == 0)
         link_info.nocopyreloc = TRUE;
+      else if (strcmp (optarg, "execstack") == 0)
+	{
+	  link_info.execstack = TRUE;
+	  link_info.noexecstack = FALSE;
+	}
+      else if (strcmp (optarg, "noexecstack") == 0)
+	{
+	  link_info.noexecstack = TRUE;
+	  link_info.execstack = FALSE;
+	}
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF
@@ -1722,6 +1732,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  --eh-frame-hdr\tCreate .eh_frame_hdr section\n"));
   fprintf (file, _("  -z combreloc\t\tMerge dynamic relocs into one section and sort\n"));
   fprintf (file, _("  -z defs\t\tDisallows undefined symbols\n"));
+  fprintf (file, _("  -z execstack\t\tMark executable as requiring executable stack\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
@@ -1732,6 +1743,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
   fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
+  fprintf (file, _("  -z noexecstack\t\tMark executable as not requiring executable stack\n"));
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
   fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));

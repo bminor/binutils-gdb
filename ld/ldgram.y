@@ -1006,6 +1006,8 @@ phdr_type:
 			{
 			  if (strcmp (s, "PT_GNU_EH_FRAME") == 0)
 			    $$ = exp_intop (0x6474e550);
+			  else if (strcmp (s, "PT_GNU_STACK") == 0)
+			    $$ = exp_intop (0x6474e551);
 			  else
 			    {
 			      einfo (_("\
