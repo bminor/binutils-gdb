@@ -1,3 +1,7 @@
+2003-01-24  Charles Lepple clepple.ghz.cc
+
+	* aclocal.m4: Fix name of --enable-install-libbfd switch.
+
 2003-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* Add sh2e support:
