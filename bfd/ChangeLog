@@ -1,3 +1,9 @@
+2005-03-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_set_sdata_syms): New function, extracted from..
+	(ppc_elf_set_sdata_syms): ..here.  Expand comment.  Set .sbss start
+	and end syms.
+
 2005-03-21  Nick Clifton  <nickc@redhat.com>
 
 	* coff-arm.c (coff_link_hash_entry): Only define for non WINCE

@@ -4570,22 +4570,46 @@ ppc_elf_relax_section (bfd *abfd,
   return FALSE;
 }
 
-/* Set _SDA_BASE_ and _SDA2_BASE.  */
+/* Set SYM_NAME to VAL if the symbol exists and is undefined.  */
+
+static void
+set_linker_sym (struct ppc_elf_link_hash_table *htab,
+		const char *sym_name,
+		bfd_vma val)
+{
+  struct elf_link_hash_entry *h;
+  h = elf_link_hash_lookup (&htab->elf, sym_name, FALSE, FALSE, FALSE);
+  if (h != NULL && h->root.type == bfd_link_hash_undefined)
+    {
+      h->root.type = bfd_link_hash_defined;
+      h->root.u.def.section = bfd_abs_section_ptr;
+      h->root.u.def.value = val;
+      h->def_regular = 1;
+      h->type = STT_OBJECT;
+      h->other = STV_HIDDEN;
+    }
+}
+
+/* Set _SDA_BASE_, _SDA2_BASE, and sbss start and end syms.  They are
+   set here rather than via PROVIDE in the default linker script,
+   because using PROVIDE inside an output section statement results in
+   unnecessary output sections.  Using PROVIDE outside an output section
+   statement runs the risk of section alignment affecting where the
+   section starts.  */
 
 bfd_boolean
 ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
 {
   struct ppc_elf_link_hash_table *htab;
   unsigned i;
+  asection *s;
+  bfd_vma val;
 
   htab = ppc_elf_hash_table (info);
 
   for (i = 0; i < 2; i++)
     {
       elf_linker_section_t *lsect = &htab->sdata[i];
-      asection *s;
-      bfd_vma val;
-      struct elf_link_hash_entry *h;
 
       s = lsect->section;
       if (s != NULL)
@@ -4600,18 +4624,19 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
 	val = s->vma + 32768;
       lsect->sym_val = val;
 
-      h = elf_link_hash_lookup (&htab->elf, lsect->sym_name,
-				FALSE, FALSE, FALSE);
-      if (h != NULL && h->root.type == bfd_link_hash_undefined)
-	{
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.section = bfd_abs_section_ptr;
-	  h->root.u.def.value = val;
-	  h->def_regular = 1;
-	  h->type = STT_OBJECT;
-	  h->other = STV_HIDDEN;
-	}
+      set_linker_sym (htab, lsect->sym_name, val);
     }
+
+  s = bfd_get_section_by_name (obfd, ".sbss");
+  val = 0;
+  if (s != NULL)
+    val = s->vma;
+  set_linker_sym (htab, "__sbss_start", val);
+  set_linker_sym (htab, "___sbss_start", val);
+  if (s != NULL)
+    val += s->size;
+  set_linker_sym (htab, "__sbss_end", val);
+  set_linker_sym (htab, "___sbss_end", val);
   return TRUE;
 }
 
