@@ -1,6 +1,7 @@
-2000-06-15  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-06-15  Michael Snyder  <msnyder@cygnus.com>
 
 	* valops.c (value_cast): Break up long lines.
+	* utils.c: Fix comment typo.
 
 2000-06-14  Jim Blandy  <jimb@redhat.com>
 
@@ -41,7 +42,7 @@ Tue Jun 13 09:21:23 2000  Jeffrey A Law  (law@cygnus.com)
 	* ia64-linux-nat.c, gdbserver/low-linux.c (u_offsets):  PT_CR_IFS
 	is deprecated.  Use PT_CFM instead.
 
-2000-06-12  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-06-12  Michael Snyder  <msnyder@cygnus.com>
 
 	* breakpoint.c (breakpoint_thread_match): Fix comment.
 
@@ -317,7 +318,7 @@ Wed Jun  7 11:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(i386-tdep.o, sh3-rom.o, sh-tdep.o): Add arch-utils.h to
  	dependency list.
 
-2000-06-06  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-06-06  Michael Snyder  <msnyder@cygnus.com>
 
 	* configure.in: Enable autoconf to find curses.h on Solaris 2.8.
 	* configure: Regenerate.
@@ -533,7 +534,7 @@ Tue May 30 13:31:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define.
 
-2000-06-01  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-06-01  Michael Snyder  <msnyder@cygnus.com>
 
 	* sol-thread.c (rw_common): Circumstances (eg. a bug in Sun's 
 	thread_db library) may cause this function to be called with an
@@ -723,7 +724,7 @@ Mon May 29 15:41:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	xcoffsolib.c, xmodem.h, z8k-tdep.c: Remove PARAMS from function
 	declarations.
 
-2000-05-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-26  Michael Snyder  <msnyder@cygnus.com>
 
 	* gregset.h: New file.  Typedefs for gdb_gregset_t and 
 	gdb_fpregset_t, prototypes for supply_gregset and friends.
@@ -844,7 +845,7 @@ Thu May 25 11:02:24 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/i386/fbsd.mh (NATDEPFILES): Remove i386b-nat.o.  Add
 	core-regset.o i387-nat.o i386bsd-nat.o.
 
-2000-05-24  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-24  Michael Snyder  <msnyder@cygnus.com>
 
 	* findvar.c (value_from_register): Factor code, simplify logic.
 
@@ -903,7 +904,7 @@ Tue May 23 17:44:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update.
 
-2000-05-17  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-17  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/sparc/tm-sun4sol2.h: Turn on multi-arch.
 	* sparc-tdep.c (gdb_print_insn_sparc): Remove temp. multi-arch hack.
@@ -1175,7 +1176,7 @@ Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	value.
 	* mdebugread.c (START_PSYMTAB): Add paren to avoid x=x=x.
 
-2000-05-12  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-12  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/i386/tm-i386sol2.h (COERCE_FLOAT_TO_DOUBLE): Define.
 	
@@ -1252,7 +1253,7 @@ Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         * elfread.c (record_minimal_symbol_and_info): Use the section 
 	where the symbol lives to get the index, instead of guessing.
 
-2000-05-10  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-10  Michael Snyder  <msnyder@cygnus.com>
 
 	Make Sparc a Multi-Arch target.  Discard PARAMS macro (require ANSI).
 	* sparc-tdep.c: include arch-utils.h.
@@ -1326,7 +1327,7 @@ Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	avoid using deprecated REGISTER_NAMES macro.
 	* Makefile.in: Let sparc-tdep.c depend on arch-utils.h.
 
-2000-05-08  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-08  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdbarch.sh: Add FP0_REGNUM to list of multi-arched register numbers.
 	* gdbarch.c, gdbarch.h: Regenerate.
@@ -1385,7 +1386,7 @@ Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* proc-utils.h (PROCFS_NOTE, PROC_PRETTYFPRINT_STATUS): Always
  	define.
 
-2000-05-05  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-05  Michael Snyder  <msnyder@cygnus.com>
 
 	* procfs.c: Cleanup of procfs tracing.  Move defines and 
 	prototypes to proc-utils.h
@@ -1405,7 +1406,7 @@ Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         used must be the index of the section where 'sym' resides,
         not .text.
 
-2000-05-05  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-05  Michael Snyder  <msnyder@cygnus.com>
 
 	* procfs.c (many functions): change int cmd; to long cmd;
 	Solaris /proc API calls this parameter a long, and requires it
@@ -1460,7 +1461,7 @@ Thu May  4 20:54:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	(MIPS_NUM_ARG_REGS), config/mips/tm-mips.h (MIPS_NUM_FP_ARG_REGS):
  	Delete unused macros.
 
-2000-05-03  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-03  Michael Snyder  <msnyder@cygnus.com>
 
 	* solib.c (elf_locate_base, info_sharedlibrary_command):
 	Look at the bfd to determine if it is elf32 or elf64, rather

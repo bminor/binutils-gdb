@@ -1492,7 +1492,7 @@ fputstrn_unfiltered (str, n, quoter, stream)
 
 /* Number of lines per page or UINT_MAX if paging is disabled.  */
 static unsigned int lines_per_page;
-/* Number of chars per line or UNIT_MAX if line folding is disabled.  */
+/* Number of chars per line or UINT_MAX if line folding is disabled.  */
 static unsigned int chars_per_line;
 /* Current count of lines printed on this page, chars on this line.  */
 static unsigned int lines_printed, chars_printed;
