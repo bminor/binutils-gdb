@@ -1,4 +1,9 @@
 start-sanitize-r5900
+Mon May 18 11:49:04 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (validate_mips_insn): Handle ';' opcode completer.
+	(mips_ip): Likewise.
+
 Mon May 18 12:37:38 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/tc-mips.c (macro): For R5900, use "B" operand format for
