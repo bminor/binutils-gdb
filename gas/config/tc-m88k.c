@@ -1,7 +1,7 @@
 /* m88k.c -- Assembler for the Motorola 88000
    Contributed by Devon Bowen of Buffalo University
    and Torbjorn Granlund of the Swedish Institute of Computer Science.
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -1214,9 +1214,9 @@ emit_relocations (fixP, segment_address_in_file)
 	      ri.r_extern = 0;
 	      ri.r_symbolnum = symbolP->sy_type & N_TYPE;
 	    }
-	  if (symbolP && symbolP->sy_frag)
+	  if (symbolP && symbol_get_frag (symbolP))
 	    {
-	      ri.r_addend = symbolP->sy_frag->fr_address;
+	      ri.r_addend = symbol_get_frag (symbolP)->fr_address;
 	    }
 	  ri.r_type = fixP->fx_r_type;
 	  if (fixP->fx_pcrel)
@@ -1294,10 +1294,10 @@ s_bss ()
 	    frag_align (bss_align, 0, 0);
 
 	  /* detach from old frag */
-	  if (symbolP->sy_type == N_BSS && symbolP->sy_frag != NULL)
-	    symbolP->sy_frag->fr_symbol = NULL;
+	  if (symbolP->sy_type == N_BSS && symbol_get_frag (symbolP) != NULL)
+	    symbol_get_frag (symbolP)->fr_symbol = NULL;
 
-	  symbolP->sy_frag  = frag_now;
+	  symbol_set_frag (symbolP, frag_now);
 	  p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
 			(offsetT) temp, (char *)0);
 	  *p = 0;

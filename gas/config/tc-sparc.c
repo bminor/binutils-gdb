@@ -3462,7 +3462,7 @@ s_common (ignore)
       S_SET_EXTERNAL (symbolP);
 #endif
     }
-  know (symbolP->sy_frag == &zero_address_frag);
+  know (symbol_get_frag (symbolP) == &zero_address_frag);
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after common length"));

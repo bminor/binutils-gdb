@@ -1668,7 +1668,7 @@ md_convert_frag (abfd, sec, fragP)
   int targ_addr = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
   
   buffer = (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
-  targ_addr += fragP->fr_symbol->sy_frag->fr_address;
+  targ_addr += symbol_get_frag (fragP->fr_symbol)->fr_address;
 
   switch (fragP->fr_subtype)
     {

@@ -1,5 +1,16 @@
 1999-06-22  Ian Lance Taylor  <ian@zembu.com>
 
+	* config/tc-alpha.c: More use of symbol accessor functions.
+	* config/tc-arc.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-fr30.c: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-m88k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-v850.c: Likewise.
+
 	* config/tc-arc.c (get_arc_exp_reloc_type): Change uses of
 	sy_value with appropriate accessor functions.
 	* config/tc-arm.c (md_apply_fix3): Likewise.

@@ -2028,7 +2028,7 @@ d30v_frob_label (lab)
   d30v_cleanup (false);
 
   /* Update the label's address with the current output pointer.  */
-  lab->sy_frag = frag_now;
+  symbol_set_frag (lab, frag_now);
   S_SET_VALUE (lab, (valueT) frag_now_fix ());
 
   /* Record this label for future adjustment after we find out what
@@ -2110,7 +2110,7 @@ d30v_align (n, pfill, label)
       
       assert (S_GET_SEGMENT (label) == now_seg);
 
-      old_frag  = label->sy_frag;
+      old_frag  = symbol_get_frag (label);
       old_value = S_GET_VALUE (label);
       new_value = (valueT) frag_now_fix ();
       
@@ -2125,15 +2125,16 @@ d30v_align (n, pfill, label)
 	 in the target fragment.  Note, this search is guaranteed to
 	 find at least one match when sym == label, so no special case
 	 code is necessary.  */
-      for (sym = symbol_lastP; sym != NULL; sym = sym->sy_previous)
+      for (sym = symbol_lastP; sym != NULL; sym = symbol_previous (sym))
 	{
-	  if (sym->sy_frag == old_frag && S_GET_VALUE (sym) == old_value)
+	  if (symbol_get_frag (sym) == old_frag
+	      && S_GET_VALUE (sym) == old_value)
 	    {
 	      label_seen = true;
-	      sym->sy_frag = frag_now;
+	      symbol_set_frag (sym, frag_now);
 	      S_SET_VALUE (sym, new_value);
 	    }
-	  else if (label_seen && sym->sy_frag != old_frag)
+	  else if (label_seen && symbol_get_frag (sym) != old_frag)
 	    break;
 	}
     }

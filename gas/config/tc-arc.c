@@ -798,7 +798,7 @@ arc_common (ignore)
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
-  assert (symbolP->sy_frag == &zero_address_frag);
+  assert (symbol_get_frag (symbolP) == &zero_address_frag);
   if (*input_line_pointer != ',')
     {
       as_bad (_("expected comma after common length"));
@@ -831,8 +831,8 @@ arc_common (ignore)
 	  if (align)
 	    frag_align (align, 0, 0);
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = 0;
-	  symbolP->sy_frag = frag_now;
+	    symbol_get_frag (symbolP)->fr_symbol = 0;
+	  symbol_set_frag (symbolP, frag_now);
 	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			(offsetT) size, (char *) 0);
 	  *p = 0;
@@ -967,7 +967,7 @@ arc_rename (ignore)
   new = (char *) xmalloc (strlen (name) + 1);
   strcpy (new, name);
   *input_line_pointer = c;
-  sym->sy_tc.real_name = new;
+  symbol_get_tc (sym)->real_name = new;
 
   demand_empty_rest_of_line ();
 }
@@ -1476,8 +1476,8 @@ int
 arc_frob_symbol (sym)
      symbolS *sym;
 {
-  if (sym->sy_tc.real_name != (char *) NULL)
-    S_SET_NAME (sym, sym->sy_tc.real_name);
+  if (symbol_get_tc (sym)->real_name != (char *) NULL)
+    S_SET_NAME (sym, symbol_get_tc (sym)->real_name);
 
   return 0;
 }

@@ -297,7 +297,7 @@ v850_comm (area)
 	}
     }
   
-  know (symbolP->sy_frag == & zero_address_frag);
+  know (symbol_get_frag (symbolP) == & zero_address_frag);
   
   if (*input_line_pointer != ',')
     have_align = 0;
@@ -421,24 +421,24 @@ v850_comm (area)
 	    {
 	    case AREA_SDA:
 	      if (S_GET_SEGMENT (symbolP) == sbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    case AREA_ZDA:
 	      if (S_GET_SEGMENT (symbolP) == zbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    case AREA_TDA:
 	      if (S_GET_SEGMENT (symbolP) == tbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    default:
 	      abort();
 	    }
 	  
-	  symbolP->sy_frag = frag_now;
+	  symbol_set_frag (symbolP, frag_now);
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			    (offsetT) size, (char *) 0);
 	  *pfrag = 0;

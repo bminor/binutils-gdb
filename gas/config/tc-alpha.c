@@ -2181,7 +2181,7 @@ add_to_link_pool (basesym, sym, addend)
   segment_info_type *seginfo = seg_info (alpha_link_section);
   fixS *fixp;
 
-  offset = -basesym->sy_obj;
+  offset = - *symbol_get_obj (basesym);
 
   /* @@ This assumes all entries in a given section will be of the same
      size...  Probably correct, but unwise to rely on.  */
@@ -3478,7 +3478,7 @@ s_alpha_comm (ignore)
   subseg_set (current_section, current_subsec);
 #endif
 
-  know (symbolP->sy_frag == &zero_address_frag);
+  know (symbol_get_frag (symbolP) == &zero_address_frag);
 
   demand_empty_rest_of_line ();
 }
@@ -3848,7 +3848,8 @@ s_alpha_pdesc (ignore)
       return;
     }
 
-  alpha_evax_proc.symbol->sy_obj = (valueT)seginfo->literal_pool_size;
+  *symbol_get_obj (alpha_evax_proc.symbol) =
+    (valueT) seginfo->literal_pool_size;
 
   expression (&exp);
   if (exp.X_op != O_symbol)
@@ -4294,7 +4295,7 @@ s_alpha_proc (is_static)
       input_line_pointer++;
       temp = get_absolute_expression ();
     }
-  /*  symbolP->sy_other = (signed char) temp; */
+  /*  *symbol_get_obj (symbolP) = (signed char) temp; */
   as_warn (_("unhandled: .proc %s,%d"), name, temp);
   demand_empty_rest_of_line ();
 }
