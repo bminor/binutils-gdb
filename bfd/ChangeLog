@@ -1,3 +1,8 @@
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-m32r.c (m32r_elf_create_dynamic_sections): Fix pointer
+	aliasing warning.  Remove trailing whitespace throughout file.
+
 2004-03-15  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_relocate_section): Pass input_bfd instead of
