@@ -1,3 +1,10 @@
+2002-12-12  Alexandre Oliva  <aoliva@redhat.com>,
+
+	Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-mn10300.h (TC_VALIDATE_FIX_SUB): Define.
+	(TC_LINKRELAX_FIXUP): Add comments.
+
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (set_arch_mach): Change argument type to

@@ -47,7 +47,24 @@ extern int mn10300_force_relocation PARAMS ((struct fix *));
   (! SEG_NORMAL (SEG)				\
    || ((SEG)->flags & SEC_CODE) != 0)
 
-/* Fixup debug sections since we will never relax them.  */
+/* We validate subtract arguments within tc_gen_reloc(), so don't
+   report errors at this point.  */
+#define TC_VALIDATE_FIX_SUB(FIX) 1
+
+/* Fixup debug sections since we will never relax them.  Ideally, we
+   could do away with this and instead check every single fixup with
+   TC_FORCE_RELOCATION and TC_FORCE_RELOCATION_SUB_NAME, verifying
+   that the sections of the referenced symbols (and not the sections
+   in which the fixup appears) may be subject to relaxation.  We'd
+   still have to check the section in which the fixup appears, because
+   we want to do some simplifications in debugging info that might
+   break in real code.
+
+   Using the infrastructure in write.c to simplify subtraction fixups
+   would enable us to remove a lot of code from tc_gen_reloc(), but
+   this is simpler, faster, and produces almost the same effect.
+   Also, in the macros above, we can't check whether the fixup is in a
+   debugging section or not, so we have to use this for now.  */
 #define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
 
 #define md_operand(x)
