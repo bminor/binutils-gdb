@@ -2022,7 +2022,7 @@ Save for a breakpoint set with @code{tbreak} (@pxref{Set Breaks,
 enabled; subsequently, they become disabled or enabled only when you
 use one of the commands above.  (The command @code{until} can set and
 delete a breakpoint of its own, but it will not change the state of
-your other breakpoints; @pxref{Continuing and Stepping, ,Continuing and Stepping}.)
+your other breakpoints; see @ref{Continuing and Stepping, ,Continuing and Stepping}.)
 
 @node Conditions, Break Commands, Disabling, Breakpoints
 @subsection Break Conditions
