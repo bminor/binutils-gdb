@@ -2711,6 +2711,35 @@ print_cplus_stuff (struct type *type, int spaces)
     }
 }
 
+static void
+print_bound_type (int bt)
+{
+  switch (bt)
+    {
+    case BOUND_CANNOT_BE_DETERMINED:
+      printf_filtered ("(BOUND_CANNOT_BE_DETERMINED)");
+      break;
+    case BOUND_BY_REF_ON_STACK:
+      printf_filtered ("(BOUND_BY_REF_ON_STACK)");
+      break;
+    case BOUND_BY_VALUE_ON_STACK:
+      printf_filtered ("(BOUND_BY_VALUE_ON_STACK)");
+      break;
+    case BOUND_BY_REF_IN_REG:
+      printf_filtered ("(BOUND_BY_REF_IN_REG)");
+      break;
+    case BOUND_BY_VALUE_IN_REG:
+      printf_filtered ("(BOUND_BY_VALUE_IN_REG)");
+      break;
+    case BOUND_SIMPLE:
+      printf_filtered ("(BOUND_SIMPLE)");
+      break;
+    default:
+      printf_filtered ("(unknown bound type)");
+      break;
+    }
+}
+
 static struct obstack dont_print_type_obstack;
 
 void
@@ -2751,13 +2780,10 @@ recursive_dump_type (struct type *type, int spaces)
 		    TYPE_NAME (type) ? TYPE_NAME (type) : "<NULL>");
   gdb_print_host_address (TYPE_NAME (type), gdb_stdout);
   printf_filtered (")\n");
-  if (TYPE_TAG_NAME (type) != NULL)
-    {
-      printfi_filtered (spaces, "tagname '%s' (",
-			TYPE_TAG_NAME (type));
-      gdb_print_host_address (TYPE_TAG_NAME (type), gdb_stdout);
-      printf_filtered (")\n");
-    }
+  printfi_filtered (spaces, "tagname '%s' (",
+		    TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) : "<NULL>");
+  gdb_print_host_address (TYPE_TAG_NAME (type), gdb_stdout);
+  printf_filtered (")\n");
   printfi_filtered (spaces, "code 0x%x ", TYPE_CODE (type));
   switch (TYPE_CODE (type))
     {
@@ -2800,6 +2826,9 @@ recursive_dump_type (struct type *type, int spaces)
     case TYPE_CODE_STRING:
       printf_filtered ("(TYPE_CODE_STRING)");
       break;
+    case TYPE_CODE_BITSTRING:
+      printf_filtered ("(TYPE_CODE_BITSTRING)");
+      break;
     case TYPE_CODE_ERROR:
       printf_filtered ("(TYPE_CODE_ERROR)");
       break;
@@ -2818,8 +2847,17 @@ recursive_dump_type (struct type *type, int spaces)
     case TYPE_CODE_BOOL:
       printf_filtered ("(TYPE_CODE_BOOL)");
       break;
+    case TYPE_CODE_COMPLEX:
+      printf_filtered ("(TYPE_CODE_COMPLEX)");
+      break;
     case TYPE_CODE_TYPEDEF:
       printf_filtered ("(TYPE_CODE_TYPEDEF)");
+      break;
+    case TYPE_CODE_TEMPLATE:
+      printf_filtered ("(TYPE_CODE_TEMPLATE)");
+      break;
+    case TYPE_CODE_TEMPLATE_ARG:
+      printf_filtered ("(TYPE_CODE_TEMPLATE_ARG)");
       break;
     default:
       printf_filtered ("(UNKNOWN TYPE CODE)");
@@ -2827,6 +2865,14 @@ recursive_dump_type (struct type *type, int spaces)
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "length %d\n", TYPE_LENGTH (type));
+  printfi_filtered (spaces, "upper_bound_type 0x%x ",
+		    TYPE_ARRAY_UPPER_BOUND_TYPE (type));
+  print_bound_type (TYPE_ARRAY_UPPER_BOUND_TYPE (type));
+  puts_filtered ("\n");
+  printfi_filtered (spaces, "lower_bound_type 0x%x ",
+		    TYPE_ARRAY_LOWER_BOUND_TYPE (type));
+  print_bound_type (TYPE_ARRAY_LOWER_BOUND_TYPE (type));
+  puts_filtered ("\n");
   printfi_filtered (spaces, "objfile ");
   gdb_print_host_address (TYPE_OBJFILE (type), gdb_stdout);
   printf_filtered ("\n");
@@ -2842,6 +2888,12 @@ recursive_dump_type (struct type *type, int spaces)
   printf_filtered ("\n");
   printfi_filtered (spaces, "reference_type ");
   gdb_print_host_address (TYPE_REFERENCE_TYPE (type), gdb_stdout);
+  printf_filtered ("\n");
+  printfi_filtered (spaces, "cv_type ");
+  gdb_print_host_address (TYPE_CV_TYPE (type), gdb_stdout);
+  printf_filtered ("\n");
+  printfi_filtered (spaces, "as_type ");
+  gdb_print_host_address (TYPE_AS_TYPE (type), gdb_stdout);
   printf_filtered ("\n");
   printfi_filtered (spaces, "flags 0x%x", TYPE_FLAGS (type));
   if (TYPE_UNSIGNED (type))

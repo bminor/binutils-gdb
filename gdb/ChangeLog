@@ -1,3 +1,13 @@
+2001-12-11  Fred Fish  <fnf@redhat.com>
+
+	* gdbtypes.c (print_bound_type): New function.
+	(recursive_dump_type): Print type struct code values
+	TYPE_CODE_BITSTRING, TYPE_CODE_COMPLEX, TYPE_CODE_TEMPLATE,
+	and TYPE_CODE_TEMPLATE_ARG.
+	(recursive_dump_type): Print type struct members
+	upper_bound_type, lower_bound_type, cv_type, and as_type.
+	Also always print the tagname member, even when it is NULL.
+
 2001-12-11  Michael Snyder  <msnyder@redhat.com>
 
 	* d10v-tdep.c (d10v_register_virtual_size): Delete.

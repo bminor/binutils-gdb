@@ -1,3 +1,7 @@
+2001-12-10  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/maint.exp: Update to match changes in type dumping code.
+
 2001-12-10  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.asm/asm-source.exp (info symbol): Anchor the pattern
