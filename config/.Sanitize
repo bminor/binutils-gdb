@@ -34,6 +34,7 @@ mh-hpux
 mh-irix4
 mh-linux
 mh-ncr3000
+mh-riscos
 mh-sco
 mh-solaris
 mh-sun
