@@ -1417,8 +1417,8 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	  int detach = 0;
 
-	  if (ui_loop_hook != NULL)
-	    detach = ui_loop_hook (0);
+	  if (deprecated_ui_loop_hook != NULL)
+	    detach = deprecated_ui_loop_hook (0);
 
 	  if (detach)
 	    child_kill_inferior ();

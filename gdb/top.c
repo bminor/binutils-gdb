@@ -199,7 +199,7 @@ void (*deprecated_init_ui_hook) (char *argv0);
    steal control from a real user interface's event loop. It returns
    non-zero if the user is requesting a detach, zero otherwise. */
 
-int (*ui_loop_hook) (int);
+int (*deprecated_ui_loop_hook) (int);
 
 /* Called instead of command_loop at top level.  Can be invoked via
    throw_exception().  */

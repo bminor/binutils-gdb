@@ -632,8 +632,8 @@ gdbsim_stop (void)
 static int
 gdb_os_poll_quit (host_callback *p)
 {
-  if (ui_loop_hook != NULL)
-    ui_loop_hook (0);
+  if (deprecated_ui_loop_hook != NULL)
+    deprecated_ui_loop_hook (0);
 
   if (quit_flag)		/* gdb's idea of quit */
     {

@@ -1,3 +1,17 @@
+2004-06-25  Andrew Cagney  <cagney@gnu.org>
+
+	* defs.h (deprecated_ui_loop_hook): Deprecated.
+	* wince.c (child_wait): Update.
+	* win32-nat.c (child_wait): Update.
+	* v850ice.c (v850ice_wait): Update.
+	* top.c (deprecated_ui_loop_hook): Update.
+	* serial.h: Update.
+	* ser-unix.c (do_hardwire_readchar, do_hardwire_readchar) 
+	(do_unix_readchar): Update.
+	* ser-tcp.c (net_open): Update.
+	* remote-sim.c (gdb_os_poll_quit): Update.
+	* rdi-share/ardi.c (angel_RDI_ExecuteOrStep): Update.
+
 2004-06-24  Andrew Cagney  <cagney@gnu.org>
 
 	* defs.h (deprecated_pre_add_symbol_hook)
