@@ -1,3 +1,8 @@
+Fri Feb 13 14:53:02 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Define.
+	* configure, Makefile.in, aclocal.m4: Rebuild with automake 1.2e.
+
 Fri Feb 13 10:21:09 1998  Mark Alexander  <marka@cygnus.com>
 
 	* m10300-dis.c (print_insn_mn10300): Recognize break instruction.

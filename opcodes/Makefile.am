@@ -1,5 +1,7 @@
 ## Process this file with automake to generate Makefile.in
 
+AUTOMAKE_OPTIONS = cygnus
+
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
 DEP = mkdep
