@@ -1,4 +1,13 @@
-Maintiners for particular sims:
+		SIM Maintainers
+
+The simulator is part of the GDB project, so see the file
+gdb/MAINTAINERS for general information about maintaining these files.
+
+If you are considering contributing a patch, please see the file
+gdb/CONTRIBUTE.  Patches to these files should be posted to:
+gdb-patches@sources.redhat.com 
+	
+	Maintiners for particular sims:
 
 arm	        Nick Clifton <nickc@redhat.com>
 ppc		Andrew Cagney <ac131313@redhat.com>
@@ -6,5 +15,3 @@ ppc		Geoff Keating <geoffk@redhat.com>
 mips		Andrew Cagney <ac131313@redhat.com>
 mips		Chris Demetriou <cgd@broadcom.com>
 common		Ben Elliston <bje@redhat.com>
-
-The remainder of this file is intentionally left blank.

@@ -1,3 +1,8 @@
+2002-02-07  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* MAINTAINERS: Point to GDB files describing overall maintaince
+	and check-in procedures.
+
 2002-01-10  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* MAINTAINERS: Add myself for ARM portions.
