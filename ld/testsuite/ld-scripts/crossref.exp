@@ -1,0 +1,33 @@
+# Test NOCROSSREFS in a linker script.
+# By Ian Lance Taylor, Cygnus Support.
+
+set testname "NOCROSSREFS"
+
+if { [which $CC] == 0 } {
+    untested $testname
+    return
+}
+
+if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
+     || ![ld_compile $CC "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
+    unresolved $testname
+    return
+}
+
+verbose -log "$ld -o tmpdir/crossref -T $srcdir/$subdir/crossref.t tmpdir/cross1.o tmpdir/cross2.o"
+
+catch "exec $ld -o tmpdir/crossref -T $srcdir/$subdir/crossref.t tmpdir/cross1.o tmpdir/cross2.o" exec_output
+set exec_output [prune_system_crud $host_triplet $exec_output]
+
+regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
+if [string match "" $exec_output] then {
+    fail $testname
+} else {
+    verbose -log "$exec_output"
+    if [regexp "prohibited cross reference from .* to `foo' in" $exec_output] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+}

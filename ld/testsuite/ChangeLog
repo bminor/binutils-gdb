@@ -1,3 +1,18 @@
+Thu Aug  1 14:10:27 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/crossref.exp: New test.
+	* ld-scripts/cross1.c, ld-scripts/cross2.c: New files.
+	* ld-scripts/crossref.t: New file.
+
+Sat Jun 29 13:40:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-sh/sh.exp: Fix debugging messages.
+	* ld-sh/sh1.s: Use .align 4.
+
+Wed May  1 16:45:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-sh/sh.exp: Use -O when compiling with -mrelax.
+
 Mon Apr 29 10:33:10 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* ld-shared/shared.exp: Run the shared library tests on
