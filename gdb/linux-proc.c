@@ -404,35 +404,52 @@ linux_info_proc_cmd (char *args, int from_tty)
 	{
 	  long long addr, endaddr, size, offset, inode;
 	  char permissions[8], device[8], filename[MAXPATHLEN];
-	  char *header_fmt_string, *data_fmt_string;
-
-	  if (TARGET_ADDR_BIT == 32)
-	    {
-	      header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
-	      data_fmt_string = "\t%#10lx %#10lx %#10x %#10x %7s\n";
-	    }
-	  else
-	    {
-	      header_fmt_string = "  %18s %18s %10s %10s %7s\n";
-	      data_fmt_string = "  %#18lx %#18lx %#10x %#10x %7s\n";
-	    }
 
 	  printf_filtered ("Mapped address spaces:\n\n");
-	  printf_filtered (header_fmt_string,
+	  if (TARGET_ADDR_BIT == 32)
+	    {
+	      printf_filtered ("\t%10s %10s %10s %10s %7s\n",
 			   "Start Addr",
 			   "  End Addr",
 			   "      Size", "    Offset", "objfile");
+            }
+	  else
+            {
+	      printf_filtered ("  %18s %18s %10s %10s %7s\n",
+			   "Start Addr",
+			   "  End Addr",
+			   "      Size", "    Offset", "objfile");
+	    }
 
 	  while (read_mapping (procfile, &addr, &endaddr, &permissions[0],
 			       &offset, &device[0], &inode, &filename[0]))
 	    {
 	      size = endaddr - addr;
-	      printf_filtered (data_fmt_string, (unsigned long) addr,	/* FIXME: pr_addr */
+
+	      /* FIXME: carlton/2003-08-27: Maybe the printf_filtered
+		 calls here (and possibly above) should be abstracted
+		 out into their own functions?  Andrew suggests using
+		 a generic local_address_string instead to print out
+		 the addresses; that makes sense to me, too.  */
+
+	      if (TARGET_ADDR_BIT == 32)
+	        {
+	          printf_filtered ("\t%#10lx %#10lx %#10x %#10x %7s\n",
+			       (unsigned long) addr,	/* FIXME: pr_addr */
 			       (unsigned long) endaddr,
 			       (int) size,
 			       (unsigned int) offset,
 			       filename[0] ? filename : "");
-
+		}
+	      else
+	        {
+	          printf_filtered ("  %#18lx %#18lx %#10x %#10x %7s\n",
+			       (unsigned long) addr,	/* FIXME: pr_addr */
+			       (unsigned long) endaddr,
+			       (int) size,
+			       (unsigned int) offset,
+			       filename[0] ? filename : "");
+	        }
 	    }
 
 	  fclose (procfile);

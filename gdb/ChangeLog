@@ -1,3 +1,9 @@
+2003-08-27  David Carlton  <carlton@kealia.com>
+
+	From Randolph Chung  <tausq@debian.org>:
+	* linux-proc.c (linux_info_proc_cmd): rework the code so that it
+	compiles with -Wformat-nonliteral -Werror.
+
 2003-08-26  Jim Blandy  <jimb@redhat.com>
 
 	* solib-svr4.c (bfd_lookup_symbol): New SECT_FLAGS argument.
