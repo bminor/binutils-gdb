@@ -1,3 +1,10 @@
+2001-11-23  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* binutils/Makefile.am (check-DEJAGNU): Pass CC_FOR_TARGET and
+	CFLAGS_FOR_TARGET to runtest in environment.
+	* Makefile.in: Rebuild.
+	* doc/Makefile.in: Rebuild.
+
 2001-11-28  Mike Stump  <mrs@wrs.com>
 
 	* objcopy.c (setup_section): Preserve SEC_RELOC when

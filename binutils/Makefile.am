@@ -139,9 +139,9 @@ check-DEJAGNU: site.exp
 	fi; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
-	  $$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \
-		CC_FOR_TARGET="$(CC_FOR_TARGET)" \
-		CFLAGS_FOR_TARGET="$(CFLAGS)" $(RUNTESTFLAGS); \
+	  CC_FOR_TARGET="$(CC_FOR_TARGET)" CFLAGS_FOR_TARGET="$(CFLAGS)" \
+		$$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \
+			$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
