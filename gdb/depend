@@ -238,6 +238,10 @@ remote-eb.o : remote-eb.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   tm-29k.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h \
   gdbcore.h 
+remote-es1800.o : remote-es1800.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
+  tm.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
+  gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h \
+  gdbcore.h 
 remote-hms.o : remote-hms.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
   tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h \

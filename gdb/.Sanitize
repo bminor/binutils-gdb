@@ -32,6 +32,7 @@ ChangeLog-3.x
 ChangeLog-9091
 Convex.notes
 Makefile.in
+NEWS
 Projects
 README
 TODO
@@ -162,6 +163,7 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-eb.c
+remote-es1800.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
@@ -171,6 +173,9 @@ rs6000-pinsn.c
 rs6000-tdep.c
 rs6000-xdep.c
 saber.suppress
+ser-go32.c
+ser-termios.c
+serial.h
 signals.h
 solib.c
 solib.h
@@ -181,9 +186,6 @@ sparc-xdep.c
 stack.c
 standalone.c
 stuff.c
-serial.h
-ser-termios.c
-ser-go32.c
 sun3-xdep.c
 sun386-xdep.c
 symfile.c
@@ -207,6 +209,7 @@ tm-arm.h
 tm-bigmips.h
 tm-convex.h
 tm-delta88.h
+tm-es1800.h
 tm-h8300.h
 tm-hp300bsd.h
 tm-hp300hpux.h
@@ -279,8 +282,8 @@ xm-hppahpux.h
 xm-i386mach.h
 xm-i386sco.h
 xm-i386v.h
-xm-i386v4.h
 xm-i386v32.h
+xm-i386v4.h
 xm-irix3.h
 xm-irix4.h
 xm-isi.h

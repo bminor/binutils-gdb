@@ -229,6 +229,7 @@ m68000)
 		*)	gdb_target=sun2 ;;
 		esac
 		;;
+	ericsson) gdb_target=es1800 ;;
 	wrs)	gdb_target=vxworks68 ;;
 	esac
 	;;

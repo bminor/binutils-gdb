@@ -1,3 +1,16 @@
+<<<<<<< ChangeLog
+Wed Jul 22 04:23:03 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* es1800.c: use FREAD|FWRITE rather than _FREAD|_FWRITE.
+	include <sgtty.h> on USG.  (from sef).
+
+	* depend: es1800 dependency needed here.
+
+Mon Jul 20 11:25:18 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* configure.in: es1800 ok for 68000 too.
+
+=======
 Wed Jul 22 21:39:33 1992  Fred Fish  (fnf@cygnus.com)
 
 	* lmode_inferior_valid, lmode_ours_valid:  New static vars.
@@ -25,6 +38,7 @@ Mon Jul 20 21:09:53 1992  Fred Fish  (fnf@cygnus.com)
 	messages for C++ classes with no data members.  Also use new
 	fprintfi_filtered function.
 
+>>>>>>> 1.651
 Sat Jul 18 15:48:58 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: echo error messages to stderr, not stdout

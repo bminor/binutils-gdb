@@ -25,6 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Kludge... */
 #include "tm-sun3.h"
 
+#undef SAVED_PC_AFTER_CALL
+#define SAVED_PC_AFTER_CALL(frame) \
+	read_memory_integer (read_register (SP_REGNUM), 4)
+
 /* We have more complex, useful breakpoints on the target.  */
 #undef DECR_PC_AFTER_BREAK
 #define	DECR_PC_AFTER_BREAK	0

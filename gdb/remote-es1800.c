@@ -109,6 +109,7 @@ STP
 
 #ifdef USG
 #include <sys/types.h>
+#include <sgtty.h>
 #endif
 
 #include <signal.h>
@@ -255,8 +256,8 @@ es1800_init_break PARAMS ((char *, int));
 static FILE *log_file;
 #endif
 
-static struct target_ops es1800_ops;		/* Forward decl */
-static struct target_ops es1800_child_ops;	/* Forward decl */
+extern struct target_ops es1800_ops;		/* Forward decl */
+extern struct target_ops es1800_child_ops;	/* Forward decl */
 
 static int kiodebug;
 static int timeout = 100; 
@@ -399,7 +400,7 @@ es1800_open (name, from_tty)
     }
   es1800_fc_save = fcflag;
 
-  fcflag = (fcflag & (_FREAD | _FWRITE)); /* mask out any funny stuff */
+  fcflag = (fcflag & (FREAD | FWRITE)); /* mask out any funny stuff */
   if (fcntl (es1800_desc, F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
