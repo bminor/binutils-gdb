@@ -1,3 +1,13 @@
+Mon Apr 13 20:59:21 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (target_to_host):  New function similar to previous
+	swapin function.
+	* dwarfread.c (SWAPIN, swapin):  Remove macro and support function.
+	Extensive changes to convert all previous usages to use new
+	target_to_host() function.
+	* dwarfread.c (struct dieinfo):  Change types of most integral
+	members to be unsigned.
+
 Mon Apr 13 15:59:10 1992  John Gilmore  (gnu at cygnus.com)
 
 	* WHATS.NEW:  Revise -mapped doc.
