@@ -234,6 +234,8 @@ bfd_h8_disassemble (addr, info, mode)
 		    case 0:
 		      abs = 1;
 		      break;
+		    default:
+		      goto fail;
 		    }
 		}
 	      else if (looking_for & L_8)
