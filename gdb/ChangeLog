@@ -1,3 +1,11 @@
+2002-01-10  Michael Snyder  <msnyder@redhat.com>
+
+	* main.c (captured_main): Add new command line option "--pid".
+	If the second command line argument (following the symbol-file)
+	begins with a digit, try to attach to it before trying to open
+	it as a corefile.
+	(print_gdb_help): Document the "--pid" argument.
+
 2002-01-10  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* completer.c (command_completer): New function.

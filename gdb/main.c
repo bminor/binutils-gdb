@@ -1,6 +1,7 @@
 /* Top level stuff for GDB, the GNU debugger.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -239,6 +240,8 @@ captured_main (void *data)
       {"e", required_argument, 0, 'e'},
       {"core", required_argument, 0, 'c'},
       {"c", required_argument, 0, 'c'},
+      {"pid", required_argument, 0, 'p'},
+      {"p", required_argument, 0, 'p'},
       {"command", required_argument, 0, 'x'},
       {"version", no_argument, &print_version, 1},
       {"x", required_argument, 0, 'x'},
@@ -318,6 +321,10 @@ captured_main (void *data)
 	    execarg = optarg;
 	    break;
 	  case 'c':
+	    corearg = optarg;
+	    break;
+	  case 'p':
+	    /* "corearg" is shared by "--core" and "--pid" */
 	    corearg = optarg;
 	    break;
 	  case 'x':
@@ -463,8 +470,8 @@ extern int gdbtk_test (char *);
 	      execarg = argv[optind];
 	      break;
 	    case 2:
-	      /* FIXME: The documentation says this can be a
-		 "ProcID". as well.  */
+	      /* The documentation says this can be a "ProcID" as well. 
+	         We will try it as both a corefile and a pid.  */
 	      corearg = argv[optind];
 	      break;
 	    case 3:
@@ -586,12 +593,20 @@ extern int gdbtk_test (char *);
 
   if (corearg != NULL)
     {
-      if (catch_command_errors (core_file_command, corearg, !batch, RETURN_MASK_ALL) == 0)
+      /* corearg may be either a corefile or a pid.
+	 If its first character is a digit, try attach first
+	 and then corefile.  Otherwise try corefile first. */
+
+      if (isdigit (corearg[0]))
 	{
-	  /* See if the core file is really a PID. */
-	  if (isdigit (corearg[0]))
-	    catch_command_errors (attach_command, corearg, !batch, RETURN_MASK_ALL);
+	  if (catch_command_errors (attach_command, corearg, 
+				    !batch, RETURN_MASK_ALL) == 0)
+	    catch_command_errors (core_file_command, corearg, 
+				  !batch, RETURN_MASK_ALL);
 	}
+      else /* Can't be a pid, better be a corefile. */
+	catch_command_errors (core_file_command, corearg, 
+			      !batch, RETURN_MASK_ALL);
     }
 
   if (ttyarg != NULL)
@@ -752,6 +767,7 @@ Options:\n\n\
   --cd=DIR           Change current directory to DIR.\n\
   --command=FILE     Execute GDB commands from FILE.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
+  --pid=PID          Attach to running process PID.\n\
 ", stream);
   fputs_unfiltered ("\
   --dbx              DBX compatibility mode.\n\
