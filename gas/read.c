@@ -2675,7 +2675,7 @@ get_stab_string_offset (string, stabstr_secname)
 	  *p = 0;
 	  retval = seg_info (seg)->stabu.stab_string_size = 1;
 #ifdef BFD_ASSEMBLER
-	  bfd_set_section_flags (stdoutput, seg, SEC_READONLY);
+	  bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_DEBUGGING);
 #else
 	  free (newsecname);
 #endif
@@ -2787,7 +2787,8 @@ s_stab_generic (what, stab_secname, stabstr_secname)
     if (! seg_info (seg)->hadone)
       {
 #ifdef BFD_ASSEMBLER
-	bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_RELOC);
+	bfd_set_section_flags (stdoutput, seg,
+			       SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
 #endif
 #ifdef INIT_STAB_SECTION
 	INIT_STAB_SECTION (seg);
