@@ -1,3 +1,7 @@
+2003-04-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* mips-dis.c (mips_gpr_names_newabi): $12-$15 are named $t4-$t7.
+
 2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* tic4x-dis.c: Namespace cleanup. Replace s/c4x/tic4x and
