@@ -200,10 +200,12 @@ ALL_EMULATIONS = \
 	eh8300elf.o \
 	eh8300hn.o \
 	eh8300sn.o \
+	eh8300sx.o \
 	eh8300helf.o \
 	eh8300self.o \
 	eh8300hnelf.o \
 	eh8300snelf.o \
+	eh8300sxelf.o \
 	eh8500.o \
 	eh8500b.o \
 	eh8500c.o \
@@ -842,6 +844,9 @@ eh8300hn.c: $(srcdir)/emulparams/h8300hn.sh \
 eh8300sn.c: $(srcdir)/emulparams/h8300sn.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300sn.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300sn "$(tdir_h8300sn)"
+eh8300sx.c: $(srcdir)/emulparams/h8300sx.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300sx.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8300sx "$(tdir_h8300sx)"
 eh8300elf.c: $(srcdir)/emulparams/h8300elf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300elf "$(tdir_h8300elf)"
@@ -861,6 +866,10 @@ eh8300snelf.c: $(srcdir)/emulparams/h8300snelf.sh \
   $(srcdir)/emulparams/h8300elf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300snelf "$(tdir_h8300snelf)"
+eh8300sxelf.c: $(srcdir)/emulparams/h8300sxelf.sh \
+  $(srcdir)/emulparams/h8300elf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8300sxelf "$(tdir_h8300sxelf)"
 eh8500.c: $(srcdir)/emulparams/h8500.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8500 "$(tdir_h8500)"

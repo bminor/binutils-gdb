@@ -1,3 +1,13 @@
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+        and Bernd Schmidt   <bernds@redhat.com>
+	and Alexandre Oliva <aoliva@redhat.com>
+	* Makefile.am: Add new emulations for h8300sx.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add new emulations.
+	* emulparams/h8300sx.sh: New emulation.
+	* emulparams/h8300sxelf.sh: Ditto.
+	* scripttempl/h8300sx.sc: Ditto.
+
 2003-06-03  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ldmisc.c: Include "bfdlink.h".
