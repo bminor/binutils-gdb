@@ -1,3 +1,8 @@
+Tue Dec 29 16:03:53 1998  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* configure.in, configure (mips64vr5*-*-*): Added missing ;; in
+ 	case statement.
+
 1998-12-29  Frank Ch. Eigler  <fche@cygnus.com>
 	
 	* interp.c (sim_open): Allocate jm3904 memory in smaller chunks. 

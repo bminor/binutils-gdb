@@ -166,8 +166,8 @@ case "${target}" in
 			sim_igen_machine="-M vr5000"
 # start-sanitize-cygnus
 			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5000"
-			;;
 # end-sanitize-cygnus
+			;;
 # start-sanitize-vr4xxx
   mips64vr4xxx*-*-*)	sim_gen=HACK
 			sim_igen_filter="32,64,f"
