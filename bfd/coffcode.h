@@ -1787,7 +1787,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
 #endif
 
 #ifdef ARM
-  /* Set the flags field from the COFF header read in */
+  /* Set the flags field from the COFF header read in.  */
   if (! _bfd_coff_arm_set_private_flags (abfd, internal_f->f_flags))
     coff->flags = 0;
 #endif
@@ -1871,7 +1871,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
         case F_ARM_3M: machine = bfd_mach_arm_3M; break;
         case F_ARM_4:  machine = bfd_mach_arm_4;  break;
         case F_ARM_4T: machine = bfd_mach_arm_4T; break;
-        case F_ARM_5:  machine = bfd_mach_arm_5;  break;
+	  /* The COFF header does not have enough bits available
+	     to cover all the different ARM architectures.  So
+	     we interpret F_ARM_5, the highest flag value to mean
+	     "the highest ARM architecture known to BFD" which is
+	     currently the XScale.  */
+        case F_ARM_5:  machine = bfd_mach_arm_XScale;  break;
 	}
       break;
 #endif
@@ -2624,7 +2629,8 @@ coff_set_flags (abfd, magicp, flagsp)
 	case bfd_mach_arm_4:  * flagsp |= F_ARM_4;  break;
 	case bfd_mach_arm_4T: * flagsp |= F_ARM_4T; break;
 	case bfd_mach_arm_5:  * flagsp |= F_ARM_5;  break;
-	  /* FIXME: we do not have F_ARM vaues greater than F_ARM_5.  */
+	  /* FIXME: we do not have F_ARM vaues greater than F_ARM_5.
+	     See also the comment in coff_set_arch_mach_hook().  */
 	case bfd_mach_arm_5T: * flagsp |= F_ARM_5;  break;
 	case bfd_mach_arm_5TE: * flagsp |= F_ARM_5; break;
 	case bfd_mach_arm_XScale: * flagsp |= F_ARM_5; break;

@@ -1,3 +1,9 @@
+2002-02-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coffcode.h (coff_set_arch_mach_hook): Select the highest known
+	ARM architecture when an F_ARM_5 flag is detected, since we cannot
+	be sure exactly which architecture this represents.
+
 2002-02-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated translation.
