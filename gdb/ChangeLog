@@ -1,5 +1,8 @@
 Mon Nov  8 10:42:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in: Remove unused variable GCC.  Remove "#CC=cc" line
+	which doesn't really relate to anything.
+
 	* Makefile.in (CC_FOR_TARGET): Test for existence of gcc/xgcc, not
 	for existence of gcc/Makefile.
 

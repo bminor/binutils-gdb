@@ -63,9 +63,7 @@ TERMCAP = -ltermcap
 # -traditional flag.  Otherwise the ioctl calls in inflow.c
 # will be incorrectly compiled.  The "fixincludes" script in the gcc
 # distribution will fix your include files up.
-#CC=cc
 #CC=gcc -traditional
-GCC=gcc
 
 # Directory containing source files.  Don't clean up the spacing,
 # this exact string is matched for by the "configure" script.
