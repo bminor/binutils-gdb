@@ -95,7 +95,7 @@ if ![file exists $binfile] then {
 
 	# This test is not as obscure as it might look.  `p getenv ("TERM")'
 	# is a real-world example, at least on many systems.
-	test_print_accept {p/c array_index("abcdef",2)} "= 99 'c'"
+	gdb_test {p/c array_index("abcdef",2)} " = 99 'c'"
 
 	# Now, try that we can give names of file-local symbols which happen
 	# to be unique, and have it still work
