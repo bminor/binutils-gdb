@@ -1,3 +1,13 @@
+2000-05-04  Timothy Wall  <twall@cygnus.com>
+
+	* tic54x-opc.c: New.
+	* tic54x-dis.c: New.
+	* disassemble.c (disassembler): Add ARCH_tic54x.
+	* configure.in: Added tic54x target.
+	* configure: Ditto.
+	* Makefile.am: Add tic54x dependencies.
+	* Makefile.in: Ditto. 
+
 2000-05-03  J.T. Conklin  <jtc@redback.com>
 
 	* ppc-opc.c (VA, VB, VC, VD, VS, SIMM, UIMM, SHB): New macros, for

@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_sh
 #define ARCH_sparc
 #define ARCH_tic30
+#define ARCH_tic54x
 #define ARCH_tic80
 #define ARCH_v850
 #define ARCH_vax
@@ -238,6 +239,11 @@ disassembler (abfd)
 #ifdef ARCH_tic30
     case bfd_arch_tic30:
       disassemble = print_insn_tic30;
+      break;
+#endif
+#ifdef ARCH_tic54x
+    case bfd_arch_tic54x:
+      disassemble = print_insn_tic54x;
       break;
 #endif
 #ifdef ARCH_tic80

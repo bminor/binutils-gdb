@@ -3963,6 +3963,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;
 	bfd_tic30_arch)		ta="$ta tic30-dis.lo" ;;
+	bfd_tic54x_arch)	ta="$ta tic54x-dis.lo tic54x-opc.lo" ;;
 	bfd_tic80_arch)		ta="$ta tic80-dis.lo tic80-opc.lo" ;;
 	bfd_v850_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
 	bfd_v850e_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
