@@ -1,5 +1,9 @@
 2002-05-17  Andrey Volkov  (avolkov@transas.com)
 
+	* compile.c: Add absented opcodes: LDC, STC, EEPMOV, TAS.
+	
+2002-05-17  Andrey Volkov  (avolkov@transas.com)
+
 	* compile.c: Add support of EXR register
 	* inst.h: Ditto.
 	

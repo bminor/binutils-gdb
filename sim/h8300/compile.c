@@ -942,6 +942,28 @@ sim_stop (sd)
   return 1;
 }
 
+#define R0_REGNUM	0
+#define R1_REGNUM	1
+#define R2_REGNUM	2
+#define R3_REGNUM	3
+#define R4_REGNUM	4
+#define R5_REGNUM	5
+#define R6_REGNUM	6
+#define R7_REGNUM	7
+
+#define SP_REGNUM       R7_REGNUM	/* Contains address of top of stack */
+#define FP_REGNUM       R6_REGNUM	/* Contains address of executing
+					 * stack frame */
+
+#define CCR_REGNUM      8	/* Contains processor status */
+#define PC_REGNUM       9	/* Contains program counter */
+
+#define CYCLE_REGNUM    10
+
+#define EXR_REGNUM	11
+#define INST_REGNUM     12
+#define TICK_REGNUM     13
+
 void
 sim_resume (sd, step, siggnal)
      SIM_DESC sd;
@@ -1115,6 +1137,37 @@ sim_resume (sd, step, siggnal)
 	  SET_L_REG (code->dst.reg, res);
 	  goto just_flags_log32;
 
+	case O (O_EEPMOV, SB):
+	case O (O_EEPMOV, SW):
+		 if(h8300hmode||h8300smode)
+	          {
+		    register unsigned char *_src,*_dst;
+		    unsigned int count = (code->opcode==O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
+									 cpu.regs[R4_REGNUM]&0xff;
+
+		   _src = cpu.regs[R5_REGNUM] < memory_size ? cpu.memory+cpu.regs[R5_REGNUM] :
+	           				       	      cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff);
+		   if((_src+count)>=(cpu.memory+memory_size))
+		   {
+			   if((_src+count)>=(cpu.eightbit+0x100))
+			      goto illegal;
+		   }
+		   _dst = cpu.regs[R6_REGNUM] < memory_size ? cpu.memory+cpu.regs[R6_REGNUM] :
+	           				       	      cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff);
+		   if((_dst+count)>=(cpu.memory+memory_size))
+		   {
+			   if((_dst+count)>=(cpu.eightbit+0x100))
+			      goto illegal;
+		   }
+		   memcpy(_dst,_src,count);
+
+		   cpu.regs[R5_REGNUM]+=count;
+		   cpu.regs[R6_REGNUM]+=count;
+		   cpu.regs[R4_REGNUM]&=(code->opcode==O(O_EEPMOV, SW))?(~0xffff):(~0xff);
+		   cycles += 2*count;
+	           goto next;
+	     }
+	    goto illegal;
 
 	case O (O_ADDS, SL):
 	  SET_L_REG (code->dst.reg,
@@ -1194,9 +1247,27 @@ sim_resume (sd, step, siggnal)
 	  SET_L_REG (code->dst.reg, res);
 	  goto just_flags_inc32;
 
-
 #define GET_CCR(x) BUILDSR();x = cpu.ccr
 #define GET_EXR(x) BUILDEXR();x = cpu.exr
+
+	case O (O_LDC, SB):
+	case O (O_LDC, SW):
+	  res = fetch(&code->src);
+	  goto setc;
+	case O (O_STC, SB):
+	case O (O_STC, SW):
+          if(code->src.type==OP_CCR)
+          {
+	     GET_CCR(res);
+          }
+          else if(code->src.type==OP_EXR && h8300smode)
+          {
+	     GET_EXR(res);
+          }
+          else
+	    goto illegal;
+	  store (&code->dst, res);
+	  goto next;
 
 	case O (O_ANDC, SB):
           if(code->dst.type==OP_CCR)
@@ -1462,6 +1533,22 @@ sim_resume (sd, step, siggnal)
 	  MOP (0, 0);
 	  break;
 
+	case O (O_TAS, SB):
+          if( !h8300smode || code->src.type != X (OP_REG, SL) )
+          	goto illegal;
+          switch(code->src.reg)
+          {
+           case R0_REGNUM:
+           case R1_REGNUM:
+           case R4_REGNUM:
+           case R5_REGNUM:
+           	break;
+           default:
+             goto illegal;
+          }
+          res =  fetch (&code->src);
+          store (&code->src,res|0x80);
+	  goto just_flags_log8;
 
 	case O (O_DIVU, SB):
 	  {
@@ -1840,28 +1927,6 @@ sim_read (sd, addr, buffer, size)
     memcpy (buffer, cpu.eightbit + (addr & 0xff), size);
   return size;
 }
-
-
-#define R0_REGNUM	0
-#define R1_REGNUM	1
-#define R2_REGNUM	2
-#define R3_REGNUM	3
-#define R4_REGNUM	4
-#define R5_REGNUM	5
-#define R6_REGNUM	6
-#define R7_REGNUM	7
-
-#define SP_REGNUM       R7_REGNUM	/* Contains address of top of stack */
-#define FP_REGNUM       R6_REGNUM	/* Contains address of executing
-					 * stack frame */
-
-#define CCR_REGNUM      8	/* Contains processor status */
-#define PC_REGNUM       9	/* Contains program counter */
-
-#define CYCLE_REGNUM    10
-#define EXR_REGNUM	11      /* Contains extended processor status */
-#define INST_REGNUM     11
-#define TICK_REGNUM     12
 
 
 int
