@@ -6,6 +6,9 @@ INTLLIBS = @INTLLIBS@
 AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
 
 SUBDIRS = doc po
+# Automake should figure this out on its own.  It doesn't, because
+# of the "cygnus" option.  But distclean still wants it.
+DIST_SUBDIRS = $(SUBDIRS)
 
 tooldir = $(exec_prefix)/$(target_alias)
 
