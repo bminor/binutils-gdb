@@ -67,6 +67,7 @@
 #include "elf/fr30.h"
 #include "elf/mcore.h"
 #include "elf/i960.h"
+#include "elf/pj.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -740,6 +741,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_PARISC:
 	  rtype = elf_hppa_reloc_type (type);
 	  break;
+
+	case EM_PJ:
+	  rtype = elf_pj_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1032,7 +1037,7 @@ get_machine_name (e_machine)
     case EM_CYGNUS_MN10300:	return "mn10300";
     case EM_CYGNUS_MN10200:	return "mn10200";
     case EM_CYGNUS_FR30:	return "Fujitsu FR30";
-
+    case EM_PJ:                 return "picoJava";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
@@ -1145,6 +1150,14 @@ get_machine_flags (e_flags, e_machine)
 
 	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_RMO)
 	    strcat (buf, ", rmo");
+	  break;
+
+	case EM_PJ:
+	  if ((e_flags & EF_PICOJAVA_NEWCALLS) == EF_PICOJAVA_NEWCALLS)
+	    strcat (buf, ", new calling convention");
+
+	  if ((e_flags & EF_PICOJAVA_GNUCALLS) == EF_PICOJAVA_GNUCALLS)
+	    strcat (buf, ", gnu calling convention");
 	  break;
 	}
     }

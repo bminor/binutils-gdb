@@ -1,3 +1,10 @@
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* readelf.c: Include "elf/pj.h".
+	(dump_relocations): Handle EM_PJ.
+	(get_machine_name): Likewise.
+	(get_machine_flags): Likewise.
+
 1999-08-31  Scott Bambrough <scottb@netwinder.org>
 
 	* readelf.c (get_note_type): New function:  Decode the e_type
