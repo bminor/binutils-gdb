@@ -1,5 +1,16 @@
 2004-01-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h: Update copyright year.
+	(sparc_fetch_instruction): New prototype.
+	* sparc-tdep.c: Update copyright year.
+	(sparc_fetch_instruction): Make global.
+	* sparc64-tdep.c: Update copyright year.
+	(sparc_fetch_instruction): Remove function.
+	(X_OP, X_RD, X_A, X_COND, X_OP2, X_IMM22, X_OP3, X_I, X_DISP22)
+	(X_DISP19): Really remove macros.
+	* sparc64-sol2-tdep.c: Update copyright year.
+	* sparc64fbsd-tdep.c: Likewise.
+
 	* sparc64-tdep.c (BIAS): Remove define.
 	* sparc64-sol2-tdep.c (BIAS): Remove define.
 	* sparc64fbsd-tdep.c: Likewise.

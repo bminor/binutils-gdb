@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -135,6 +135,9 @@ struct sparc_frame_cache
   /* Table of saved registers.  */
   struct trad_frame_saved_reg *saved_regs;
 };
+
+/* Fetch the instruction at PC.  */
+extern unsigned long sparc_fetch_instruction (CORE_ADDR pc);
 
 extern CORE_ADDR sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 					 struct sparc_frame_cache *cache);

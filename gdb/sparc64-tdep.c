@@ -1,6 +1,6 @@
 /* Target-dependent code for UltraSPARC.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,37 +48,6 @@
 /* Please use the sparc32_-prefix for 32-bit specific code, the
    sparc64_-prefix for 64-bit specific code and the sparc_-prefix for
    code can handle both.  */
-
-/* Macros to extract fields from SPARC instructions.  */
-#define X_OP(i) (((i) >> 30) & 0x3)
-#define X_RD(i) (((i) >> 25) & 0x1f)
-#define X_A(i) (((i) >> 29) & 1)
-#define X_COND(i) (((i) >> 25) & 0xf)
-#define X_OP2(i) (((i) >> 22) & 0x7)
-#define X_IMM22(i) ((i) & 0x3fffff)
-#define X_OP3(i) (((i) >> 19) & 0x3f)
-#define X_I(i) (((i) >> 13) & 1)
-/* Sign extension macros.  */
-#define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
-#define X_DISP19(i) ((((i) & 0x7ffff) ^ 0x40000) - 0x40000)
-
-/* Fetch the instruction at PC.  Instructions are always big-endian
-   even if the processor operates in little-endian mode.  */
-
-static unsigned long
-sparc_fetch_instruction (CORE_ADDR pc)
-{
-  unsigned char buf[4];
-  unsigned long insn;
-  int i;
-
-  read_memory (pc, buf, sizeof (buf));
-
-  insn = 0;
-  for (i = 0; i < sizeof (buf); i++)
-    insn = (insn << 8) | buf[i];
-  return insn;
-}
 
 /* The functions on this page are intended to be used to classify
    function arguments.  */
