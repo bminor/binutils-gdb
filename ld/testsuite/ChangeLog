@@ -1,3 +1,9 @@
+2002-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ld-discard/extern.s, ld-discard/start.s, ld-discard/static.s,
+	ld-sh/refdbg.s: Add leading 0 to .debug_info to prevent parsing it
+	for error messages.
+
 2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-mips-elf/elf-rel-got-n32.d,
