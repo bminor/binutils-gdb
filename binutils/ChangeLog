@@ -1,3 +1,8 @@
+1999-09-09  Andreas Schwab  <schwab@suse.de>
+
+	* binutils.texi: Add info dir entries for all programs described
+	here.  Fix arguments of @var to not contain punctuation.
+
 1999-09-06  Donn Terry  <donn@interix.com>
 
 	* nm.c (print_symbol_info_bsd): Check for 'w' as well as 'U'.

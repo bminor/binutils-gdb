@@ -5,9 +5,22 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Binutils: (binutils).         The GNU binary utilities "ar", "objcopy",
-				"objdump", "nm", "nlmconv", "size", "readelf"
-                                "strings", "strip", "ranlib" and "dlltool".
+* Binutils: (binutils).         The GNU binary utilities.
+* ar: (binutils)ar.               Create, modify, and extract from archives
+* nm: (binutils)nm.               List symbols from object files
+* objcopy: (binutils)objcopy.	  Copy and translate object files
+* objdump: (binutils)objdump.     Display information from object files
+* ranlib: (binutils)ranlib.       Generate index to archive contents
+* readelf: (binutils)readelf.	  Display the contents of ELF format files.
+* size: (binutils)size.           List section sizes and total size
+* strings: (binutils)strings.     List printable strings from files
+* strip: (binutils)strip.         Discard symbols
+* c++filt: (binutils)c++filt.	  Filter to demangle encoded C++ symbols
+* cxxfilt: (binutils)c++filt.     MS-DOS name for c++filt
+* addr2line: (binutils)addr2line. Convert addresses to file and line
+* nlmconv: (binutils)nlmconv.     Converts object code into an NLM
+* windres: (binutils)windres.	  Manipulate Windows resources
+* dlltool: (binutils)dlltool.	  Create files needed to build and use DLLs
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -2078,7 +2091,7 @@ option.  @code{windres} will also search this directory when looking for
 files named in the @code{rc} file.
 
 @item -D @var{target}
-@itemx --define @var{sym[=val]}
+@itemx --define @var{sym}[=@var{val}]
 Specify a @code{-D} option to pass to the preprocessor when reading an
 @code{rc} file.
 
