@@ -3629,14 +3629,12 @@ mmix_frob_file ()
       if (bfd_get_section_flags (stdoutput, real_reg_section) & SEC_HAS_CONTENTS)
 	as_fatal (_("register section has contents\n"));
 
-      /* FIXME: This does not seem like the proper way to kill a section,
-	 but it's the way it's done elsewhere, like elf64-alpha.c.  */
       /* Really remove the section.  */
       for (secpp = &stdoutput->sections;
 	   *secpp != real_reg_section;
 	   secpp = &(*secpp)->next)
 	;
-      *secpp = (*secpp)->next;
+      bfd_section_list_remove (stdoutput, secpp);
       --stdoutput->section_count;
     }
 

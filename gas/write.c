@@ -1507,22 +1507,18 @@ write_object_file ()
 #ifdef BFD_ASSEMBLER
   /* Remove the sections created by gas for its own purposes.  */
   {
-    asection **seclist, *sec;
+    asection **seclist;
     int i;
 
     seclist = &stdoutput->sections;
-    while (seclist && *seclist)
+    while (*seclist)
       {
-	sec = *seclist;
-	while (sec == reg_section || sec == expr_section)
+	if (*seclist == reg_section || *seclist == expr_section)
 	  {
-	    sec = sec->next;
-	    *seclist = sec;
+	    bfd_section_list_remove (stdoutput, seclist);
 	    stdoutput->section_count--;
-	    if (!sec)
-	      break;
 	  }
-	if (*seclist)
+	else
 	  seclist = &(*seclist)->next;
       }
     i = 0;
