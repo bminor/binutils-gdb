@@ -1,3 +1,11 @@
+2002-12-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-h8300.c: Include libiberty.h.
+	(h8300_reloc16_extra_cases): Check the hash table creator before
+	referencing h8300 specific fields.  Stash the hash table pointer
+	in a local var.  Comment typo fixes.
+	(h8300_bfd_link_add_symbols): Likewise.
+
 2002-12-17  Roger Sayle  <roger@eyesopen.com>
 
 	* configure.host (ia64-*-hpux*): Support 64 bit targets using

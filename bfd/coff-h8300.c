@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/h8300.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "libiberty.h"
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
@@ -1083,7 +1084,25 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	const char *name;
 	struct funcvec_hash_table *ftab;
 	struct funcvec_hash_entry *h;
-	asection *vectors_sec = h8300_coff_hash_table (link_info)->vectors_sec;
+	struct h8300_coff_link_hash_table *htab;
+	asection *vectors_sec;
+
+	if (link_info->hash->creator != abfd->xvec)
+	  {
+	    (*_bfd_error_handler)
+	      (_("cannot handle R_MEM_INDIRECT reloc when using %s output"),
+	       link_info->hash->creator->name);
+
+	    /* What else can we do?  This function doesn't allow return
+	       of an error, and we don't want to call abort as that
+	       indicates an internal error.  */
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+	    xexit (EXIT_FAILURE);
+	  }
+	htab = h8300_coff_hash_table (link_info);
+	vectors_sec = htab->vectors_sec;
 
 	/* First see if this is a reloc against the absolute symbol
 	   or against a symbol with a nonnegative value <= 0xff.  */
@@ -1132,12 +1151,12 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	    name = new_name;
 	  }
 
-	ftab = h8300_coff_hash_table (link_info)->funcvec_hash_table;
+	ftab = htab->funcvec_hash_table;
 	h = funcvec_hash_lookup (ftab, name, false, false);
 
 	/* This shouldn't ever happen.  If it does that means we've got
 	   data corruption of some kind.  Aborting seems like a reasonable
-	   think to do here.  */
+	   thing to do here.  */
 	if (h == NULL || vectors_sec == NULL)
 	  abort ();
 
@@ -1206,24 +1225,30 @@ h8300_bfd_link_add_symbols (abfd, info)
   asection *sec;
   struct funcvec_hash_table *funcvec_hash_table;
   bfd_size_type amt;
+  struct h8300_coff_link_hash_table *htab;
+
+  /* Add the symbols using the generic code.  */
+  _bfd_generic_link_add_symbols (abfd, info);
+
+  if (info->hash->creator != abfd->xvec)
+    return true;
+
+  htab = h8300_coff_hash_table (info);
 
   /* If we haven't created a vectors section, do so now.  */
-  if (!h8300_coff_hash_table (info)->vectors_sec)
+  if (!htab->vectors_sec)
     {
       flagword flags;
 
       /* Make sure the appropriate flags are set, including SEC_IN_MEMORY.  */
       flags = (SEC_ALLOC | SEC_LOAD
 	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY);
-      h8300_coff_hash_table (info)->vectors_sec = bfd_make_section (abfd,
-								    ".vectors");
+      htab->vectors_sec = bfd_make_section (abfd, ".vectors");
 
       /* If the section wasn't created, or we couldn't set the flags,
-	 quit quickly now, rather than dieing a painful death later.  */
-      if (! h8300_coff_hash_table (info)->vectors_sec
-	  || ! bfd_set_section_flags (abfd,
-				      h8300_coff_hash_table(info)->vectors_sec,
-				      flags))
+	 quit quickly now, rather than dying a painful death later.  */
+      if (! htab->vectors_sec
+	  || ! bfd_set_section_flags (abfd, htab->vectors_sec, flags))
 	return false;
 
       /* Also create the vector hash table.  */
@@ -1242,14 +1267,11 @@ h8300_bfd_link_add_symbols (abfd, info)
 	}
 
       /* Store away a pointer to the funcvec hash table.  */
-      h8300_coff_hash_table (info)->funcvec_hash_table = funcvec_hash_table;
+      htab->funcvec_hash_table = funcvec_hash_table;
     }
 
   /* Load up the function vector hash table.  */
-  funcvec_hash_table = h8300_coff_hash_table (info)->funcvec_hash_table;
-
-  /* Add the symbols using the generic code.  */
-  _bfd_generic_link_add_symbols (abfd, info);
+  funcvec_hash_table = htab->funcvec_hash_table;
 
   /* Now scan the relocs for all the sections in this bfd; create
      additional space in the .vectors section as needed.  */
@@ -1314,7 +1336,7 @@ h8300_bfd_link_add_symbols (abfd, info)
 		}
 
 	      /* Look this symbol up in the function vector hash table.  */
-	      ftab = h8300_coff_hash_table (info)->funcvec_hash_table;
+	      ftab = htab->funcvec_hash_table;
 	      h = funcvec_hash_lookup (ftab, name, false, false);
 
 	      /* If this symbol isn't already in the hash table, add
@@ -1331,10 +1353,10 @@ h8300_bfd_link_add_symbols (abfd, info)
 		  /* Bump the size of the vectors section.  Each vector
 		     takes 2 bytes on the h8300 and 4 bytes on the h8300h.  */
 		  if (bfd_get_mach (abfd) == bfd_mach_h8300)
-		    h8300_coff_hash_table (info)->vectors_sec->_raw_size += 2;
+		    htab->vectors_sec->_raw_size += 2;
 		  else if (bfd_get_mach (abfd) == bfd_mach_h8300h
 			   || bfd_get_mach (abfd) == bfd_mach_h8300s)
-		    h8300_coff_hash_table (info)->vectors_sec->_raw_size += 4;
+		    htab->vectors_sec->_raw_size += 4;
 		}
 	    }
 	}
@@ -1345,7 +1367,7 @@ h8300_bfd_link_add_symbols (abfd, info)
 
   /* Now actually allocate some space for the function vector.  It's
      wasteful to do this more than once, but this is easier.  */
-  sec = h8300_coff_hash_table (info)->vectors_sec;
+  sec = htab->vectors_sec;
   if (sec->_raw_size != 0)
     {
       /* Free the old contents.  */
