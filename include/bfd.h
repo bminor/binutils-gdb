@@ -824,7 +824,7 @@ typedef CONST struct reloc_howto_struct
   unsigned int rightshift;
 
         /*  The size of the item to be relocated - 0, is one byte, 1 is 2
-           bytes, 3 is four bytes.  A negative value indicates that the
+           bytes, 2 is four bytes.  A negative value indicates that the
 	    result is to be subtracted from the data.  */
   int size;
 
@@ -979,6 +979,23 @@ typedef enum bfd_reloc_code_real
 
    /* this one is a.out specific? */
   BFD_RELOC_SPARC_BASE22,
+
+        /* Bits 27..2 of the relocation address shifted right 2 bits;
+         simple reloc otherwise.  */
+  BFD_RELOC_MIPS_JMP,
+
+        /* signed 16-bit pc-relative, shifted right 2 bits (e.g. for MIPS) */
+  BFD_RELOC_16_PCREL_S2,
+
+        /* High 16 bits of 32-bit value; simple reloc.  */
+  BFD_RELOC_HI16,
+        /* High 16 bits of 32-bit value but the low 16 bits will be sign
+          extended and added to form the final result.  If the low 16
+          bits form a negative number, we need to add one to the high value
+          to compensate for the borrow when the low bits are added.  */
+  BFD_RELOC_HI16_S,
+        /* Low 16 bits.  */
+  BFD_RELOC_LO16,
 
    /* this must be the highest numeric value */
   BFD_RELOC_UNUSED
