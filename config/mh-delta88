@@ -3,7 +3,9 @@ SYSV = -DSYSV
 RANLIB = echo >/dev/null
 
 # We want a gas ..
-ALL = all.normal fakegas
+
+
+all: all.normal fakegas
 
 fakegas: $(unsubdir)/gas$(subdir)/as.new
 	- mkdir $(unsubdir)/gas
