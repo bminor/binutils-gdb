@@ -19,8 +19,6 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
-
 #include "as.h"
 #include "subsegs.h"     
 #include "symcat.h"

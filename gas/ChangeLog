@@ -1,3 +1,11 @@
+2003-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ip2k.c: Remove inclusion of <ctype.h>
+	* config/tc-tic4x.c: Replace inclusion of <ctype.h> with
+	"safe-ctype.h" and update use of macros.
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Regenerate.
+
 2003-07-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/gas.pot: Regenerate.

@@ -46,8 +46,7 @@
 */
 
 #include <stdio.h>
-#include <ctype.h>
-
+#include "safe-ctype.h"
 #include "as.h"
 #include "opcode/tic4x.h"
 #include "subsegs.h"
@@ -737,7 +736,7 @@ tic4x_insert_reg (regname, regnum)
   symbol_table_insert (symbol_new (regname, reg_section, (valueT) regnum,
 				   &zero_address_frag));
   for (i = 0; regname[i]; i++)
-    buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
+    buf[i] = islower (regname[i]) ? TOUPPER (regname[i]) : regname[i];
   buf[i] = '\0';
 
   symbol_table_insert (symbol_new (buf, reg_section, (valueT) regnum,
@@ -1556,7 +1555,7 @@ tic4x_indirect_parse (operand, indirect)
 	  if (*s == '%')
 	    s++;
 #endif
-	  while (isalnum (*s))
+	  while (ISALNUM (*s))
 	    *b++ = *s++;
 	  *b++ = '\0';
 	  if (!(symbolP = symbol_find (name)))
@@ -1623,7 +1622,7 @@ tic4x_indirect_parse (operand, indirect)
 	  break;
 
 	default:
-	  if (tolower (*s) != *n)
+	  if (TOLOWER (*s) != *n)
 	    return 0;
 	  s++;
 	}
@@ -2869,7 +2868,7 @@ md_parse_option (c, arg)
   switch (c)
     {
     case OPTION_CPU:             /* cpu brand */
-      if (tolower (*arg) == 'c')
+      if (TOLOWER (*arg) == 'c')
 	arg++;
       tic4x_cpu = atoi (arg);
       if (!IS_CPU_TIC3X (tic4x_cpu) && !IS_CPU_TIC4X (tic4x_cpu))
@@ -2959,14 +2958,14 @@ tic4x_unrecognized_line (c)
   int lab;
   char *s;
 
-  if (c != '$' || !isdigit (input_line_pointer[0]))
+  if (c != '$' || ! ISDIGIT (input_line_pointer[0]))
     return 0;
 
   s = input_line_pointer;
 
   /* Let's allow multiple digit local labels.  */
   lab = 0;
-  while (isdigit (*s))
+  while (ISDIGIT (*s))
     {
       lab = lab * 10 + *s - '0';
       s++;
@@ -2991,13 +2990,13 @@ md_undefined_symbol (name)
      char *name;
 {
   /* Look for local labels of the form $n.  */
-  if (name[0] == '$' && isdigit (name[1]))
+  if (name[0] == '$' && ISDIGIT (name[1]))
     {
       symbolS *symbolP;
       char *s = name + 1;
       int lab = 0;
 
-      while (isdigit ((unsigned char) *s))
+      while (ISDIGIT ((unsigned char) *s))
 	{
 	  lab = lab * 10 + *s - '0';
 	  s++;
