@@ -446,7 +446,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     }
     
     # get a stack trace
-    setup_xfail "i486-*-sysv4"
+    setup_xfail "i*86-*-sysv4" "i*86-*-linux*"
     set description "backtrace through signal handler"
     send "backtrace\n"
     expect {

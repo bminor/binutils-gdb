@@ -75,6 +75,8 @@ if ![set_lang_chill] then {
     gdb_test "print OTto" " = 42"
     gdb_test "print NULL" " = NULL" "print emptiness literal"
 
+    # Linux thinks this is at line 6, but is otherwise ok.
+    setup_xfail "i*86-*-linux*"
     gdb_test "info line" \
 	{Line 5 of .*misc.ch.* at address H'[0-9a-fA-F]+.*}\
 	"info about current line"
