@@ -619,7 +619,7 @@ parse_integer_property(device *current,
     for (i = 0; i < nr_entries; i++) {
       H2BE(words[i]);
     }
-    /* perhaphs integer array property is better */
+    /* perhaps integer array property is better */
     device_add_array_property(current, property_name, words,
                               sizeof(words[0]) * nr_entries);
   }
