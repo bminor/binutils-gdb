@@ -156,20 +156,10 @@ bdm_ppc_fetch_registers (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
-  unsigned char *regs, *beginregs, *endregs, *almostregs;
-  unsigned char midregs[32];
-  unsigned char mqreg[1];
+  unsigned char *regs;
   int first_regno, last_regno;
   int first_bdm_regno, last_bdm_regno;
-  int reglen, beginreglen, endreglen;
-
-#if 1
-  for (i = 0; i < ppc_num_fprs; i++)
-    {
-      midregs[i] = -1;
-    }
-  mqreg[0] = -1;
-#endif
+  int reglen;
 
   if (regno == -1)
     {
@@ -224,20 +214,9 @@ bdm_ppc_fetch_registers (int regno)
 	}
     }
   else
-    /* want all regs */
-    {
-/*      printf("Asking for registers %d to %d\n", first_regno, last_regno); */
-      beginregs = ocd_read_bdm_registers (first_bdm_regno,
-					  tdep->ppc_fp0_regnum - 1,
-                                          &beginreglen);
-      endregs
-        = (strcat (midregs,
-                   ocd_read_bdm_registers (tdep->ppc_fp0_regnum + ppc_num_fprs,
-                                           last_bdm_regno - 1, &endreglen)));
-      almostregs = (strcat (beginregs, endregs));
-      regs = (strcat (almostregs, mqreg));
-      reglen = beginreglen + 32 + endreglen + 1;
-    }
+    internal_error (__FILE__, __LINE__,
+                    "ppc_bdm_fetch_registers: "
+                    "'all registers' case not implemented");
 
 #endif
 #if 0

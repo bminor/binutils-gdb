@@ -1,5 +1,8 @@
 2004-05-10  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-bdm.c (bdm_ppc_fetch_registers): Replace utterly broken code
+	with a call to internal_error.
+
 	* ppc-tdep.h (struct gdbarch_tdep): Change definition of
 	ppc_fp0_regnum and ppc_fpscr_regnum: if they are -1, then this
 	processor variant lacks those registers.
