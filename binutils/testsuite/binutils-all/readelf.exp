@@ -125,7 +125,7 @@ proc regexp_diff { file_1 file_2 } {
 # Readelf's output is captured and then compared against the contents
 # of the regexp_file.
 
-proc readelf_test { options binary_file regexp_file } {
+proc readelf_test { options binary_file regexp_file xfails } {
 
     global READELF
     global READELFFLAGS
@@ -133,6 +133,10 @@ proc readelf_test { options binary_file regexp_file } {
     send_log "exec $READELF $READELFFLAGS $options $binary_file > readelf.out"
     catch "exec $READELF $READELFFLAGS $options $binary_file > readelf.out" got
 
+    if { [llength $xfails] != 0 } then {
+	setup_xfail $xfails
+    }
+    
     if ![string match "" $got] then {
 	send_log $got
 	fail "readelf $options"
@@ -184,7 +188,10 @@ if ![is_remote host] {
 }
 
 # Run the tests
-readelf_test -h $tempfile $srcdir/$subdir/readelf.h
-readelf_test -S $tempfile $srcdir/$subdir/readelf.s
-readelf_test -s $tempfile $srcdir/$subdir/readelf.ss
-readelf_test -r $tempfile $srcdir/$subdir/readelf.r
+readelf_test -h $tempfile $srcdir/$subdir/readelf.h  {}
+# The v850 fails the next two tests because it creates two special
+# sections of its own: .call_table_data and .call_table_text
+# The regexp scripts are not expecting these sections...
+readelf_test -S $tempfile $srcdir/$subdir/readelf.s  {v850*-*}
+readelf_test -s $tempfile $srcdir/$subdir/readelf.ss {v850*-*}
+readelf_test -r $tempfile $srcdir/$subdir/readelf.r  {}
