@@ -1,3 +1,8 @@
+Sat Jan 28 12:48:57 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_object_setup): New heuristic to determine if the
+	entry and flags fields are switched in the exec header.
+
 Sat Jan 28 00:16:01 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (elf_link_add_object_symbols): Use *sym_hash instead

@@ -226,7 +226,7 @@ static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
 						 asymbol **, unsigned int,
 						 unsigned *));
 static boolean som_begin_writing PARAMS ((bfd *));
-static const reloc_howto_type * som_bfd_reloc_type_lookup
+static reloc_howto_type * som_bfd_reloc_type_lookup
 	PARAMS ((bfd *, bfd_reloc_code_real_type));
 static char som_section_type PARAMS ((const char *));
 static int som_decode_symclass PARAMS ((asymbol *));
@@ -1548,7 +1548,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
    howto table.  */
 
 /*ARGSUSED*/
-static const reloc_howto_type *
+static reloc_howto_type *
 som_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -1618,10 +1618,16 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
 
   /* The braindamaged OSF1 linker switched exec_flags and exec_entry!
 
-     It seems rather backward that the OSF1 linker which is much
-     older than any HPUX linker I've got uses a newer SOM version
-     id...  But that's what I've found by experimentation.  */
-  if (file_hdrp->version_id == NEW_VERSION_ID)
+     We used to identify OSF1 binaries based on NEW_VERSION_ID, but
+     apparently the latest HPUX linker is using NEW_VERSION_ID now.
+
+     It's about time, OSF has used the new id since at least 1992;
+     HPUX didn't start till nearly 1995!.
+    
+     The new approach examines the entry field.  If it's zero or not 4
+     byte aligned then it's not a proper code address and we guess it's
+     really the executable flags.  */
+  if (aux_hdrp->exec_entry == 0 || (aux_hdrp->exec_entry & 0x3) != 0)
     {
       bfd_get_start_address (abfd) = aux_hdrp->exec_flags;
       obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_entry;
