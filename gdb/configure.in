@@ -102,7 +102,7 @@ AC_CHECK_HEADERS(ctype.h curses.h endian.h link.h thread_db.h proc_service.h \
 	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
-	time.h sys/ioctl.h)
+	time.h sys/ioctl.h sys/user.h)
 AC_HEADER_STAT
 
 AC_C_CONST

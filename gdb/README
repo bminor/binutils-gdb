@@ -531,6 +531,9 @@ Known bugs:
     subsystem that is on the IDO CD, otherwise you will get complaints
     that certain files such as `/usr/include/syms.h' cannot be found.
 
+  * Under Irix 6 you must build with GCC.  The vendor compiler reports
+    as errors certain assignments that GCC considers to be warnings.
+
   * Notes for BSD/386:
     To compile gdb-4.18 on BSD/386, you must run the configure script and
     its subscripts with bash.  Here is an easy way to do this:
@@ -539,6 +542,8 @@ Known bugs:
 
     (configure will report i386-unknown-bsd).  Then, compile with the
     standard "make" command.
+  
+  * See, also the file TODO for other minor problems.
 
 GDB can produce warnings about symbols that it does not understand.  By
 default, these warnings are disabled.  You can enable them by executing

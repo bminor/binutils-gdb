@@ -15,16 +15,12 @@ release.
 
 --
 
-GDB doesn't build under IRIX6.4
+GDB requires GCC to build under IRIX
 
-Benjamin Gamsa wrote:
+IRIX, being more pedantic than GCC reports as errors certain
+assignments that GCC treats as warnings.
 
-Has anyone successfully built the latest (from cvs) gdb on IRIX6.4 or
-later?  The first problem I hit is that proc-api.c includes
-sys/user.h, which no longer exists under IRIX6.4.  If I comment out
-that include, the next problem I hit is that PIOCGETPR and PIOCGETU
-are no longer defined in IRIX6.4 (presumably related to the
-disappearance of user.h).
+This can be worked around by building GDB with the GCC compiler.
 
 --
 

@@ -1,3 +1,13 @@
+Mon May  8 14:49:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Michael Paddon <mmpp@esec.com.au>:
+	* configure.in (AC_CHECK_HEADERS): Check for <sys/user.h>.
+	* configure: Re-generate.
+	* proc-api.c: Only include <sys/user.h> when available.
+	(ioctl_table): Check that PIOCGETPR and PIOCGETU are defined.
+
+	* TODO, README: Update.  Mention that GDB 5 needs GCC on IRIX.
+
 2000-05-08  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/djconfig.sh: Use more warning switches.
