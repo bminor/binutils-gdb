@@ -15,19 +15,18 @@ arm-*-pe)		targ_emul=armpe ;;
 # start-sanitize-arc
 arc-*-elf*)		targ_emul=arcelf ;;
 # end-sanitize-arc
-sparc64-*-aout*)	targ_emul=sun4 ;;
+sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
-sparc64-*-solaris2*)	targ_emul=elf32_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
 sparclite*-*-coff)	targ_emul=coff_sparc ;;
-sparclite*-fujitsu-*)	targ_emul=sun4 ;;
-sparc*-*-aout)		targ_emul=sun4 ;;
+sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
+sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
 sparc*-*-lynxos*)	targ_emul=sparclynx ;;
 sparc*-*-netbsd*)	targ_emul=sparcnbsd ;;
 sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;
-sparc*-wrs-vxworks*)	targ_emul=sun4 ;;
+sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
 i960-wrs-vxworks5.0*)	targ_emul=gld960 ;;
 i960-wrs-vxworks5*)	targ_emul=gld960coff ;;
 i960-wrs-vxworks*)	targ_emul=gld960 ;;
@@ -94,6 +93,14 @@ m68*-*-aout)		targ_emul=m68kaout ;;
 m68*-*-coff)		targ_emul=m68kcoff ;;
 m68*-*-elf)		targ_emul=m68kelf ;;
 m68*-*-hpux*)		targ_emul=hp3hpux ;;
+m68k-*-linuxaout*)	targ_emul=m68klinux
+			targ_extra_emuls=m68kelf
+			tdir_m68kelf=`echo ${targ_alias} | sed -e 's/aout//'`
+			;;
+m68k-*-linux*)		targ_emul=m68kelf
+			targ_extra_emuls=m68klinux
+			tdir_m68klinux=`echo ${targ_alias} | sed -e 's/linux/linuxaout/'`
+			;;
 m68*-*-lynxos*)		targ_emul=m68klynx ;;
 m68*-hp*-netbsd*)	targ_emul=m68k4knbsd ;;
 m68*-*-netbsd*)		targ_emul=m68knbsd ;;
