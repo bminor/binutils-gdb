@@ -3871,7 +3871,7 @@ mips_gdbarch_init (info, arches)
       mips_abi = MIPS_ABI_EABI32;
       break;
     case E_MIPS_ABI_EABI64:
-      mips_abi = MIPS_ABI_EABI32;
+      mips_abi = MIPS_ABI_EABI64;
       break;
     default:
       mips_abi = MIPS_ABI_UNKNOWN;

@@ -1,3 +1,8 @@
+Sat Jun 17 15:39:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): When the object file header
+ 	specifies EABI64, select EABI64 and not EABI32.
+
 2000-06-16  Nicholas Duffek  <nsd@redhat.com>
 
 	* rs6000-tdep.c: Changes throughout for multi-arch 64-bit
