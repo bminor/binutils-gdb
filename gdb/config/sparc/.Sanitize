@@ -14,7 +14,8 @@
 Do-first:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	keep_these_too="sp64sim.mt tm-sp64.h tm-sp64sim.h"
+	# sp64sim.h tm-sp64sim.h not currently used.  Left in for now.
+	keep_these_too="sp64.mt tm-sp64.h sp64sim.h tm-sp64sim.h"
 fi
 
 # All files listed between the "Things-to-keep:" line and the

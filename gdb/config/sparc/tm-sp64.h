@@ -129,6 +129,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 #endif
 
+#define FP_MAX_REGNUM 80	/* 1 + last fp reg number */
+
 /* #undef v8 misc. regs */
 
 #undef Y_REGNUM
@@ -177,7 +179,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FCC2_REGNUM (C0_REGNUM + 45)		/* floating point condition code reg 1 */
 #define FCC3_REGNUM (C0_REGNUM + 46)		/* floating point condition code reg 2 */
 
-/* KLUDGE ALERT: PS_REGNUM is for a priviledged v8 register which doesn't exist
+/* FIXME: PS_REGNUM is for a priviledged v8 register which doesn't exist
    in v9 (in the same form).  We use bits of sparc-tdep.c which requires
    PS_REGNUM.  So define it here to be an unused ASR reg so sparc-tdep.c will
    compile.  What we really want to do is put some conditionals in sparc-tdep.c
@@ -198,8 +200,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define REGISTER_BYTE(N) \
   ((N) < 32 ? (N)*8				\
    : (N) < 64 ? 32*8 + ((N)-32)*4		\
-   : (N) < 80 ? 32*8 + 32*4 + ((N)-64)*8	\
-   : 64*8 + ((N)-80)*8)
+   : (N) < C0_REGNUM ? 32*8 + 32*4 + ((N)-64)*8	\
+   : 64*8 + ((N)-C0_REGNUM)*8)
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
@@ -292,25 +294,6 @@ extern int target_ptr_bit;
 
 extern CORE_ADDR
 sparc64_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
-
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer. */
-/* FIXME: This won't be needed when sparc_frame_chain() is upgraded to
-   handle us and them (a trivial thing to do).  */
-
-#undef  FRAME_CHAIN
-#define FRAME_CHAIN(thisframe) (sparc64_frame_chain (thisframe))
-extern CORE_ADDR
-sparc64_frame_chain ();
-
-/* Where is the PC for a specific frame */
-/* FIXME: This won't be needed when [sparc_]frame_saved_pc() is upgraded
-   to handle us and them (a trivial thing to do).  */
-
-#undef  FRAME_SAVED_PC
-#define FRAME_SAVED_PC(FRAME) sparc64_frame_saved_pc (FRAME)
-extern CORE_ADDR
-sparc64_frame_saved_pc ();
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -331,15 +314,37 @@ extern void single_step ();
 #undef  FRAME_SPECIFICATION_DYADIC
 #define FRAME_SPECIFICATION_DYADIC
 
-/* To print every pair of float registers as a double, we use this hook.  */
+/* To print every pair of float registers as a double, we use this hook.
+   We also print the condition code registers in a readable format
+   (FIXME: can expand this to all control regs).  */
 
 #undef 	PRINT_REGISTER_HOOK
 #define	PRINT_REGISTER_HOOK(regno)	\
-  if (((unsigned) (regno) - FP0_REGNUM < 64)			\
-       && ((regno) & 1) == 0) {					\
-    char doublereg[8];		/* two float regs */		\
-    if (!read_relative_register_raw_bytes (i, doublereg)) {	\
-      printf("\t");						\
-      print_floating (doublereg, builtin_type_double, stdout);	\
-    }								\
-  }
+  sparc_print_register_hook (regno)
+
+/* Offsets into jmp_buf.
+   FIXME: This was borrowed from the v8 stuff and will probably have to change
+   for v9.  */
+
+#define JB_ELEMENT_SIZE 8	/* Size of each element in jmp_buf */
+
+#define JB_ONSSTACK 0
+#define JB_SIGMASK 1
+#define JB_SP 2
+#define JB_PC 3
+#define JB_NPC 4
+#define JB_PSR 5
+#define JB_G1 6
+#define JB_O0 7
+#define JB_WBCNT 8
+
+/* Figure out where the longjmp will land.  We expect that we have just entered
+   longjmp and haven't yet setup the stack frame, so the args are still in the
+   output regs.  %o0 (O0_REGNUM) points at the jmp_buf structure from which we
+   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+extern int
+get_longjmp_target PARAMS ((CORE_ADDR *));
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
