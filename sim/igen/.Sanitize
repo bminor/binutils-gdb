@@ -25,6 +25,9 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+config.in
+configure
+configure.in
 filter.c
 filter.h
 filter_host.c
