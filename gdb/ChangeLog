@@ -2,6 +2,11 @@ Tue Dec  2 10:15:57 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt: Add support for Thumb target.
 
+Tue Dec  2 10:14:15 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c: move prototype of validate_actionline(), and
+	make it consistent with the function declaration.
+
 Mon Dec  1 10:19:44 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c: move include of "guitcl.h" back out of IDE ifdef
@@ -85,6 +90,15 @@ Wed Nov 26 09:59:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	(dwarf2_build_psymtabs_hard): Verify length and offset read from
  	.debug_info section.
 
+Mon Nov 24 19:36:34 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c, tracepoint.h: new module, implements tracing,
+	which is a new functionality somewhat like breakpoints except
+	that a tracepoint stops the inferior only long enough to collect
+	and cache selected buffers and memory locations, then allows 
+	the inferior to continue; the cached trace data can then be 
+	examined later.
+
 Mon Nov 24 14:17:02 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* infcmd.c: export registers_info, for use by other modules.
@@ -93,6 +107,7 @@ Mon Nov 24 14:17:02 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	* remote.c: export getpkt, putpkt, and fromhex for external use.
 	  Make fromhex case-insensative.  New function "remote_console_output"
 	  abstracts the acceptance of "O" packets from target.
+	  Make all "remotedebug" output go to stdout, not stderr.
 
 Mon Nov 24 08:59:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

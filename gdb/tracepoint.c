@@ -716,7 +716,6 @@ trace_pass_command (args, from_tty)
 /* Prototypes for action-parsing utility commands  */
 static void  read_actions PARAMS((struct tracepoint *));
 static void  free_actions PARAMS((struct tracepoint *));
-static int   validate_actionline PARAMS((char *, struct tracepoint *));
 static char *parse_and_eval_memrange PARAMS ((char *,
 					      CORE_ADDR, 
 					      long *,
@@ -787,6 +786,9 @@ enum actionline_type
   END      =  1,
   STEPPING =  2,
 };
+
+static enum actionline_type validate_actionline PARAMS((char *, 
+							struct tracepoint *));
 
 /* worker function */
 static void
