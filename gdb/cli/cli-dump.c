@@ -527,11 +527,11 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 		   (unsigned long) sec_end);
 
   if (data->load_offset != 0 || data->load_start != 0 || data->load_end != 0)
-    printf_filtered (" into memory (0x%lx to 0x%lx)\n", 
-		     (unsigned long) sec_start 
-		     + sec_offset + data->load_offset, 
-		     (unsigned long) sec_start + sec_offset 
-		       + data->load_offset + sec_load_count);
+    printf_filtered (" into memory (0x%s to 0x%s)\n", 
+		     paddr_nz ((unsigned long) sec_start 
+			       + sec_offset + data->load_offset), 
+		     paddr_nz ((unsigned long) sec_start + sec_offset 
+		       + data->load_offset + sec_load_count));
   else
     puts_filtered ("\n");
 

@@ -1,3 +1,7 @@
+2002-04-05  Michael Snyder  <msnyder@redhat.com>
+
+	* cli/cli-dump.c (restore_section_callback): Use paddr_nz.
+
 2002-04-05  H.J. Lu  (hjl@gnu.org)
 
 	* solib-svr4.c (bkpt_names): Add "__start".
