@@ -1531,6 +1531,8 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
   unsigned long val;
   unsigned int i;
   Elf_Internal_Shdr **hdrpp;
+  const char *name;
+  asection *sec;
 
   switch (bfd_get_mach (abfd))
     {
@@ -1563,11 +1565,15 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
        i < elf_elfheader (abfd)->e_shnum;
        i++, hdrpp++)
     {
-      if ((*hdrpp)->sh_type == SHT_MIPS_GPTAB)
+      switch ((*hdrpp)->sh_type)
 	{
-	  const char *name;
-	  asection *sec;
+	case SHT_MIPS_LIBLIST:
+	  sec = bfd_get_section_by_name (abfd, ".dynstr");
+	  if (sec != NULL)
+	    (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	  break;
 
+	case SHT_MIPS_GPTAB:
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL
@@ -1575,6 +1581,47 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 	  sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
 	  BFD_ASSERT (sec != NULL);
 	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	  break;
+
+	case SHT_MIPS_CONTENT:
+	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
+	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
+	  BFD_ASSERT (name != NULL
+		      && strncmp (name, ".MIPS.content",
+				  sizeof ".MIPS.content" - 1) == 0);
+	  sec = bfd_get_section_by_name (abfd,
+					 name + sizeof ".MIPS.content" - 1);
+	  BFD_ASSERT (sec != NULL);
+	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	  break;
+
+	case SHT_MIPS_SYMBOL_LIB:
+	  sec = bfd_get_section_by_name (abfd, ".dynsym");
+	  if (sec != NULL)
+	    (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	  sec = bfd_get_section_by_name (abfd, ".liblist");
+	  if (sec != NULL)
+	    (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	  break;
+
+	case SHT_MIPS_EVENTS:
+	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
+	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
+	  BFD_ASSERT (name != NULL);
+	  if (strncmp (name, ".MIPS.events", sizeof ".MIPS.events" - 1) == 0)
+	    sec = bfd_get_section_by_name (abfd,
+					   name + sizeof ".MIPS.events" - 1);
+	  else
+	    {
+	      BFD_ASSERT (strncmp (name, ".MIPS.post_rel",
+				   sizeof ".MIPS.post_rel" - 1) == 0);
+	      sec = bfd_get_section_by_name (abfd,
+					     (name
+					      + sizeof ".MIPS.post_rel" - 1));
+	    }
+	  BFD_ASSERT (sec != NULL);
+	  (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	  break;
 	}
     }
 }
@@ -1742,6 +1789,14 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 	  || hdr->sh_size != sizeof (Elf32_External_RegInfo))
 	return false;
       break;
+    case SHT_MIPS_IFACE:
+      if (strcmp (name, ".MIPS.interfaces") != 0)
+	return false;
+      break;
+    case SHT_MIPS_CONTENT:
+      if (strncmp (name, ".MIPS.content", sizeof ".MIPS.contents" - 1) != 0)
+	return false;
+      break;
     case SHT_MIPS_OPTIONS:
       if (strcmp (name, ".options") != 0
 	  && strcmp (name, ".MIPS.options") != 0)
@@ -1751,8 +1806,14 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
       if (strncmp (name, ".debug_", sizeof ".debug_" - 1) != 0)
 	return false;
       break;
+    case SHT_MIPS_SYMBOL_LIB:
+      if (strcmp (name, ".MIPS.symlib") != 0)
+	return false;
+      break;
     case SHT_MIPS_EVENTS:
-      if (strncmp (name, ".MIPS.events.", sizeof ".MIPS.events." - 1) != 0)
+      if (strncmp (name, ".MIPS.events", sizeof ".MIPS.events" - 1) != 0
+	  && strncmp (name, ".MIPS.post_rel",
+		      sizeof ".MIPS.post_rel" - 1) != 0)
 	return false;
       break;
     default:
@@ -1865,7 +1926,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
     {
       hdr->sh_type = SHT_MIPS_LIBLIST;
       hdr->sh_info = sec->_raw_size / sizeof (Elf32_Lib);
-      /* FIXME: Set the sh_link field.  */
+      /* The sh_link field is set in final_write_processing.  */
     }
   else if (strcmp (name, ".msym") == 0)
     {
@@ -1922,16 +1983,39 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 	   || strcmp (name, ".lit4") == 0
 	   || strcmp (name, ".lit8") == 0)
     hdr->sh_flags |= SHF_MIPS_GPREL;
+  else if (strcmp (name, ".MIPS.interfaces") == 0)
+    {
+      hdr->sh_type = SHT_MIPS_IFACE;
+      hdr->sh_flags |= SHF_MIPS_NOSTRIP;
+    }
+  else if (strcmp (name, ".MIPS.content") == 0)
+    {
+      hdr->sh_type = SHT_MIPS_CONTENT;
+      /* The sh_info field is set in final_write_processing.  */
+    }
   else if (strcmp (name, ".options") == 0
 	   || strcmp (name, ".MIPS.options") == 0)
     {
       hdr->sh_type = SHT_MIPS_OPTIONS;
       hdr->sh_entsize = 1;
+      hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
   else if (strncmp (name, ".debug_", sizeof ".debug_" - 1) == 0)
     hdr->sh_type = SHT_MIPS_DWARF;
-  else if (strncmp (name, ".MIPS.events.", sizeof ".MIPS.events." - 1) == 0)
-    hdr->sh_type = SHT_MIPS_EVENTS;
+  else if (strcmp (name, ".MIPS.symlib") == 0)
+    {
+      hdr->sh_type = SHT_MIPS_SYMBOL_LIB;
+      /* The sh_link and sh_info fields are set in
+         final_write_processing.  */
+    }
+  else if (strncmp (name, ".MIPS.events", sizeof ".MIPS.events" - 1) == 0
+	   || strncmp (name, ".MIPS.post_rel",
+		       sizeof ".MIPS.post_rel" - 1) == 0)
+    {
+      hdr->sh_type = SHT_MIPS_EVENTS;
+      hdr->sh_flags |= SHF_MIPS_NOSTRIP;
+      /* The sh_link field is set in final_write_processing.  */
+    }
 
   return true;
 }
