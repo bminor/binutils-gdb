@@ -1,3 +1,13 @@
+Sun Apr 25 02:32:16 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* valops.c (value_cast): A cast might also change the object
+	representation in C++.
+	* dbxread.c (end_psymtab): Copy subpst read_symtab function from pst
+	to get the proper read_symtab function when called from mipsread.c.
+	* mipsread.c (mipscoff_psymtab_to_symtab, psymtab_to_symtab_1):
+	Set cur_bfd in psymtab_to_symtab_1 as CURBFD(pst) is invalid
+	for dummy psymtabs, inhibit processing of dummy psymtabs.
+
 Sat Apr 24 19:59:54 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Changes from (or inspired by) AMD:
