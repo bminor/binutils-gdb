@@ -1,3 +1,7 @@
+Wed Oct  2 15:49:16 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Bump version date.
+
 Tue Oct  1 15:00:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* version.c (print_version): New function.
