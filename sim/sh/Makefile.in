@@ -48,9 +48,11 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
+INSTALL = $(srcroot)/install.sh -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 AR = @AR@
 AR_FLAGS = rc
@@ -59,6 +61,7 @@ CFLAGS = @CFLAGS@
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
+CC_FOR_BUILD = @CC_FOR_BUILD@
 
 HDEFINES = @HDEFINES@
 TDEFINES =
@@ -97,7 +100,7 @@ table.c:gencode
 #	indent table.c
 
 gencode:gencode.c
-	$(CC) -o gencode $(srcdir)/gencode.c
+	$(CC_FOR_BUILD) -o gencode $(srcdir)/gencode.c
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
@@ -127,12 +130,7 @@ force:
 
 # Copy the files into directories where they will be run.
 install:
-	srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	n=`t='$(program_transform_name)'; echo run | sed -e "" $$t`; \
-	$(INSTALL_PROGRAM) run $(bindir)/$$n ;  \
-	rm -f $(tooldir)/bin/run; \
-	ln $(bindir)/$$n $(tooldir)/bin/run \
-		|| (INSTALL_PROGRAM) run $(tooldir)/bin/run; \
+	$(INSTALL_XFORM) run $(bindir)/run
 
 install-man: run.1
 	$(INSTALL_XFORM1) $(srcdir)/run.1 $(man1dir)/run.1

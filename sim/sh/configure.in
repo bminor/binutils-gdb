@@ -14,6 +14,14 @@ AC_SUBST(HDEFINES)
 AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
-AC_PROG_INSTALL
+
+# Put a plausible default for CC_FOR_BUILD in Makefile.
+AC_C_CROSS
+if test "x$cross_compiling" = "xno"; then
+  CC_FOR_BUILD='$(CC)'
+else
+  CC_FOR_BUILD=gcc
+fi
+AC_SUBST(CC_FOR_BUILD)
 
 AC_OUTPUT(Makefile)

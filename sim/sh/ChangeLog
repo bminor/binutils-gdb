@@ -1,3 +1,14 @@
+Fri Sep  8 14:18:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Define CC_FOR_BUILD.  Don't call AC_PROG_INSTALL.
+	* configure: Rebuild.
+	* Makefile.in (INSTALL): Revert to using install.sh.
+	(INSTALL_PROGRAM, INSTALL_DATA): Set to $(INSTALL).
+	(INSTALL_XFORM, INSTALL_XFORM1): Restore.
+	(CC_FOR_BUILD): Restore.
+	(gencode): Build using $(CC_FOR_BUILD).
+	(install): Don't install in $(tooldir).
+
 Thu Sep  7 15:02:31 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	(Try to) Update to new bfd autoconf scheme.
