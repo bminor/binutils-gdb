@@ -88,7 +88,7 @@ tooldir = $(exec_prefix)/$(target_alias)
 CC_FOR_BUILD = @CC_FOR_BUILD@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
 
-YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
+YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L$(srcdir)/../bison/ ; else echo bison -y ; fi`
 YFLAGS = -d
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
@@ -128,7 +128,8 @@ bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_
 
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 
-EXTRA_PROGRAMS = $(NLMCONV_PROG) $(SRCONV_PROG) $(DLLTOOL_PROG) $(WINDRES_PROG)
+EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) \
+	$(WINDRES_PROG)	
 
 # Stuff that goes in tooldir/ if appropriate
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool
@@ -266,24 +267,18 @@ nlmconv_OBJECTS =  nlmconv.o nlmheader.o bucomm.o version.o filemode.o
 nlmconv_LDADD = $(LDADD)
 nlmconv_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 nlmconv_LDFLAGS = 
-srconv__EXEEXT__SOURCES = srconv$(EXEEXT).c
-srconv__EXEEXT__OBJECTS =  srconv$(EXEEXT).o
-srconv__EXEEXT__LDADD = $(LDADD)
-srconv__EXEEXT__DEPENDENCIES =  ../bfd/libbfd.la \
-../libiberty/libiberty.a
-srconv__EXEEXT__LDFLAGS = 
-sysdump__EXEEXT__SOURCES = sysdump$(EXEEXT).c
-sysdump__EXEEXT__OBJECTS =  sysdump$(EXEEXT).o
-sysdump__EXEEXT__LDADD = $(LDADD)
-sysdump__EXEEXT__DEPENDENCIES =  ../bfd/libbfd.la \
-../libiberty/libiberty.a
-sysdump__EXEEXT__LDFLAGS = 
-coffdump__EXEEXT__SOURCES = coffdump$(EXEEXT).c
-coffdump__EXEEXT__OBJECTS =  coffdump$(EXEEXT).o
-coffdump__EXEEXT__LDADD = $(LDADD)
-coffdump__EXEEXT__DEPENDENCIES =  ../bfd/libbfd.la \
-../libiberty/libiberty.a
-coffdump__EXEEXT__LDFLAGS = 
+srconv_OBJECTS =  srconv.o coffgrok.o bucomm.o version.o filemode.o
+srconv_LDADD = $(LDADD)
+srconv_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
+srconv_LDFLAGS = 
+sysdump_OBJECTS =  sysdump.o bucomm.o version.o filemode.o
+sysdump_LDADD = $(LDADD)
+sysdump_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
+sysdump_LDFLAGS = 
+coffdump_OBJECTS =  coffdump.o coffgrok.o bucomm.o version.o filemode.o
+coffdump_LDADD = $(LDADD)
+coffdump_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
+coffdump_LDFLAGS = 
 dlltool_OBJECTS =  dlltool.o defparse.o deflex.o bucomm.o version.o \
 filemode.o
 dlltool_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
@@ -365,8 +360,8 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP = --best
-SOURCES = $(nlmconv_SOURCES) srconv$(EXEEXT).c sysdump$(EXEEXT).c coffdump$(EXEEXT).c $(dlltool_SOURCES) $(windres_SOURCES) $(size_SOURCES) $(objdump_SOURCES) $(ar_SOURCES) $(strings_SOURCES) $(ranlib_SOURCES) $(c__filt_SOURCES) $(objcopy_SOURCES) $(addr2line_SOURCES) $(nm_new_SOURCES) $(strip_new_SOURCES)
-OBJECTS = $(nlmconv_OBJECTS) srconv$(EXEEXT).o sysdump$(EXEEXT).o coffdump$(EXEEXT).o $(dlltool_OBJECTS) $(windres_OBJECTS) $(size_OBJECTS) $(objdump_OBJECTS) $(ar_OBJECTS) $(strings_OBJECTS) $(ranlib_OBJECTS) $(c__filt_OBJECTS) $(objcopy_OBJECTS) $(addr2line_OBJECTS) $(nm_new_OBJECTS) $(strip_new_OBJECTS)
+SOURCES = $(nlmconv_SOURCES) $(srconv_SOURCES) $(sysdump_SOURCES) $(coffdump_SOURCES) $(dlltool_SOURCES) $(windres_SOURCES) $(size_SOURCES) $(objdump_SOURCES) $(ar_SOURCES) $(strings_SOURCES) $(ranlib_SOURCES) $(c__filt_SOURCES) $(objcopy_SOURCES) $(addr2line_SOURCES) $(nm_new_SOURCES) $(strip_new_SOURCES)
+OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJECTS) $(dlltool_OBJECTS) $(windres_OBJECTS) $(size_OBJECTS) $(objdump_OBJECTS) $(ar_OBJECTS) $(strings_OBJECTS) $(ranlib_OBJECTS) $(c__filt_OBJECTS) $(objcopy_OBJECTS) $(addr2line_OBJECTS) $(nm_new_OBJECTS) $(strip_new_OBJECTS)
 
 all: all-recursive-am all-am
 
@@ -484,17 +479,17 @@ nlmconv$(EXEEXT): $(nlmconv_OBJECTS) $(nlmconv_DEPENDENCIES)
 	@rm -f nlmconv$(EXEEXT)
 	$(LINK) $(nlmconv_LDFLAGS) $(nlmconv_OBJECTS) $(nlmconv_LDADD) $(LIBS)
 
-srconv1002 1002 0EXEEXT)$(EXEEXT): $(srconv__EXEEXT__OBJECTS) $(srconv__EXEEXT__DEPENDENCIES)
-	@rm -f srconv1002 1002 0EXEEXT)$(EXEEXT)
-	$(LINK) $(srconv__EXEEXT__LDFLAGS) $(srconv__EXEEXT__OBJECTS) $(srconv__EXEEXT__LDADD) $(LIBS)
+srconv$(EXEEXT): $(srconv_OBJECTS) $(srconv_DEPENDENCIES)
+	@rm -f srconv$(EXEEXT)
+	$(LINK) $(srconv_LDFLAGS) $(srconv_OBJECTS) $(srconv_LDADD) $(LIBS)
 
-sysdump1002 1002 0EXEEXT)$(EXEEXT): $(sysdump__EXEEXT__OBJECTS) $(sysdump__EXEEXT__DEPENDENCIES)
-	@rm -f sysdump1002 1002 0EXEEXT)$(EXEEXT)
-	$(LINK) $(sysdump__EXEEXT__LDFLAGS) $(sysdump__EXEEXT__OBJECTS) $(sysdump__EXEEXT__LDADD) $(LIBS)
+sysdump$(EXEEXT): $(sysdump_OBJECTS) $(sysdump_DEPENDENCIES)
+	@rm -f sysdump$(EXEEXT)
+	$(LINK) $(sysdump_LDFLAGS) $(sysdump_OBJECTS) $(sysdump_LDADD) $(LIBS)
 
-coffdump1002 1002 0EXEEXT)$(EXEEXT): $(coffdump__EXEEXT__OBJECTS) $(coffdump__EXEEXT__DEPENDENCIES)
-	@rm -f coffdump1002 1002 0EXEEXT)$(EXEEXT)
-	$(LINK) $(coffdump__EXEEXT__LDFLAGS) $(coffdump__EXEEXT__OBJECTS) $(coffdump__EXEEXT__LDADD) $(LIBS)
+coffdump$(EXEEXT): $(coffdump_OBJECTS) $(coffdump_DEPENDENCIES)
+	@rm -f coffdump$(EXEEXT)
+	$(LINK) $(coffdump_LDFLAGS) $(coffdump_OBJECTS) $(coffdump_LDADD) $(LIBS)
 
 dlltool$(EXEEXT): $(dlltool_OBJECTS) $(dlltool_DEPENDENCIES)
 	@rm -f dlltool$(EXEEXT)

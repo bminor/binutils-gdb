@@ -1,5 +1,8 @@
 Wed Jun  3 19:31:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (YACC): Correct bison -L option.
+	* Makefile.in: Rebuild.
+
 	* binutils.texi, objdump.1: Document -p/--private-headers.
 
 Wed Jun  3 12:09:40 1998  Nick Clifton  <nickc@cygnus.com>

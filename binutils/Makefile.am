@@ -15,7 +15,7 @@ tooldir = $(exec_prefix)/$(target_alias)
 CC_FOR_BUILD = @CC_FOR_BUILD@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
 
-YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
+YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L$(srcdir)/../bison/ ; else echo bison -y ; fi`
 YFLAGS = -d
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
@@ -56,7 +56,8 @@ bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_
 ## We need a special rule to install the programs which are built with -new
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 
-EXTRA_PROGRAMS = $(NLMCONV_PROG) $(SRCONV_PROG) $(DLLTOOL_PROG) $(WINDRES_PROG)
+EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) \
+	$(WINDRES_PROG)	
 
 # Stuff that goes in tooldir/ if appropriate
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool
