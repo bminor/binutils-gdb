@@ -391,7 +391,7 @@ sec_to_styp_flags (sec_name, sec_flags)
     }
 
 #ifdef STYP_NOLOAD
-  if (sec_flags & SEC_NEVER_LOAD)
+  if ((sec_flags & (SEC_NEVER_LOAD | SEC_COFF_SHARED_LIBRARY)) != 0)
     styp_flags |= STYP_NOLOAD;
 #endif
 
@@ -425,14 +425,14 @@ styp_to_sec_flags (abfd, hdr)
   if (styp_flags & STYP_TEXT)
     {
       if (sec_flags & SEC_NEVER_LOAD)
-	sec_flags |= SEC_CODE | SEC_SHARED_LIBRARY;
+	sec_flags |= SEC_CODE | SEC_COFF_SHARED_LIBRARY;
       else
 	sec_flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
     }
   else if (styp_flags & STYP_DATA)
     {
       if (sec_flags & SEC_NEVER_LOAD)
-	sec_flags |= SEC_DATA | SEC_SHARED_LIBRARY;
+	sec_flags |= SEC_DATA | SEC_COFF_SHARED_LIBRARY;
       else
 	sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC;
     }
@@ -440,7 +440,7 @@ styp_to_sec_flags (abfd, hdr)
     {
 #ifdef BSS_NOLOAD_IS_SHARED_LIBRARY
       if (sec_flags & SEC_NEVER_LOAD)
-	sec_flags |= SEC_ALLOC | SEC_SHARED_LIBRARY;
+	sec_flags |= SEC_ALLOC | SEC_COFF_SHARED_LIBRARY;
       else
 #endif
 	sec_flags |= SEC_ALLOC;
@@ -755,6 +755,14 @@ coff_new_section_hook (abfd, section)
   coffsymbol (section->symbol)->native =
     (combined_entry_type *) bfd_zalloc (abfd,
 					sizeof (combined_entry_type) * 10);
+
+#ifdef COFF_SPARC
+  /* This is to allow double-word operations on addresses in data or bss. */
+  if (strcmp (section->name, ".data") == 0
+      || strcmp (section->name, ".bss") == 0)
+    section->alignment_power = 3;
+#endif /* COFF_SPARC */
+
   return true;
 }
 
@@ -982,8 +990,8 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
-#ifdef SHMAGIC
-    case SHMAGIC:
+#ifdef SH_ARCH_MAGIC
+    case SH_ARCH_MAGIC:
       arch = bfd_arch_sh;
       machine = 0;
       break;
@@ -998,6 +1006,9 @@ coff_set_arch_mach_hook (abfd, filehdr)
 
 #ifdef SPARCMAGIC
     case SPARCMAGIC:
+#ifdef LYNXCOFFMAGIC
+    case LYNXCOFFMAGIC:
+#endif
       arch = bfd_arch_sparc;
       machine = 0;
       break;
@@ -1220,9 +1231,9 @@ coff_set_flags (abfd, magicp, flagsp)
       break;
 #endif
 
-#ifdef SHMAGIC
+#ifdef SH_ARCH_MAGIC
     case bfd_arch_sh:
-      *magicp = SHMAGIC;
+      *magicp = SH_ARCH_MAGIC;
       return true;
       break;
 #endif
@@ -1287,11 +1298,14 @@ coff_set_arch_mach (abfd, arch, machine)
 {
   unsigned dummy1;
   unsigned short dummy2;
-  bfd_default_set_arch_mach (abfd, arch, machine);
+
+  if (! bfd_default_set_arch_mach (abfd, arch, machine))
+    return false;
 
   if (arch != bfd_arch_unknown &&
       coff_set_flags (abfd, &dummy1, &dummy2) != true)
     return false;		/* We can't represent this type */
+
   return true;			/* We're easy ... */
 }
 

@@ -1,3 +1,13 @@
+Tue May 10 14:23:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* section.c (SEC_COFF_SHARED_LIBRARY): Renamed from
+	SEC_SHARED_LIBRARY for clarity.  Changed all uses.
+	* bfd-in2.h: Rebuilt.
+	* coffcode.h (sec_to_styp_flags): If SEC_COFF_SHARED_LIBRARY is
+	set, set STYP_NOLOAD.
+	* coffgen.c (coff_section_from_bfd_index): Don't get an assertion
+	failure because of a bad shared library.
+
 Mon May  9 18:53:40 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* linker.c: Add missing comment terminator.

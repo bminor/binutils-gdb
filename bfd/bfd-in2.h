@@ -463,8 +463,9 @@ void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
+
+/* Externally visible ECOFF routines.  */
 
-/* ECOFF linking routines.  */
 #if defined(__STDC__) || defined(ALMOST_STDC)
 struct ecoff_debug_info;
 struct ecoff_debug_swap;
@@ -472,6 +473,11 @@ struct ecoff_extr;
 struct symbol_cache_entry;
 struct bfd_link_info;
 #endif
+extern bfd_vma bfd_ecoff_get_gp_value PARAMS ((bfd * abfd));
+extern boolean bfd_ecoff_set_gp_value PARAMS ((bfd *abfd, bfd_vma gp_value));
+extern boolean bfd_ecoff_set_regmasks
+  PARAMS ((bfd *abfd, unsigned long gprmask, unsigned long fprmask,
+	   unsigned long *cprmask));
 extern PTR bfd_ecoff_debug_init
   PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
 	   const struct ecoff_debug_swap *output_swap,
@@ -693,13 +699,19 @@ typedef struct sec
 #define SEC_HAS_CONTENTS 0x200
 
          /* An instruction to the linker to not output the section
-          even if it has information which would normally be written. */
+           even if it has information which would normally be written. */
 #define SEC_NEVER_LOAD 0x400
 
-         /* The section is a shared library section.  The linker must leave
-           these completely alone, as the vma and size are used when
-           the executable is loaded. */
-#define SEC_SHARED_LIBRARY 0x800
+         /* The section is a COFF shared library section.  This flag is
+           only for the linker.  If this type of section appears in
+           the input file, the linker must copy it to the output file
+           without changing the vma or size.  FIXME: Although this
+           was originally intended to be general, it really is COFF
+           specific (and the flag was renamed to indicate this).  It
+           might be cleaner to have some more general mechanism to
+           allow the back end to control what the linker does with
+           sections. */
+#define SEC_COFF_SHARED_LIBRARY 0x800
 
          /* The section is a common section (symbols may be defined
            multiple times, the value of a symbol is the amount of

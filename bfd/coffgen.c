@@ -105,7 +105,7 @@ make_a_section_from_file (abfd, hdr, target_index)
 
   /* At least on i386-coff, the line number count for a shared library
      section must be ignored.  */
-  if ((return_section->flags & SEC_SHARED_LIBRARY) != 0)
+  if ((return_section->flags & SEC_COFF_SHARED_LIBRARY) != 0)
     return_section->lineno_count = 0;
 
   if (hdr->s_nreloc != 0)
@@ -240,7 +240,9 @@ coff_object_p (abfd)
   }
 
   /* Seek past the opt hdr stuff */
-  bfd_seek(abfd, (file_ptr) (internal_f.f_opthdr + filhsz), SEEK_SET);
+  if (bfd_seek(abfd, (file_ptr) (internal_f.f_opthdr + filhsz), SEEK_SET)
+      != 0)
+    return NULL;
 
   return coff_real_object_p(abfd, nscns, &internal_f,
 			    (internal_f.f_opthdr != 0
@@ -276,8 +278,10 @@ coff_section_from_bfd_index (abfd, index)
        return answer;
       answer = answer->next;
     }
-  BFD_ASSERT(0);
-  return &bfd_und_section;	/* For gcc -W and lint.  Never executed. */
+
+  /* We should not reach this point, but the SCO 3.2v4 /lib/libc_s.a
+     has a bad symbol table in biglitpow.o.  */
+  return &bfd_und_section;
 }
 
 /* Get the upper bound of a COFF symbol table.  */
@@ -916,7 +920,8 @@ coff_write_symbols (abfd)
      bfd_byte buffer[4];
 
      bfd_h_put_32 (abfd, size, buffer);
-     bfd_write ((PTR) buffer, 1, sizeof (buffer), abfd);
+     if (bfd_write ((PTR) buffer, 1, sizeof (buffer), abfd) != sizeof (buffer))
+       return false;
      for (p = abfd->outsymbols, i = 0;
 	  i < limit;
 	  i++, p++)
@@ -1005,7 +1010,8 @@ coff_write_linenumbers (abfd)
   for (s = abfd->sections; s != (asection *) NULL; s = s->next) {
     if (s->lineno_count) {
       asymbol       **q = abfd->outsymbols;
-      bfd_seek(abfd, s->line_filepos, SEEK_SET);
+      if (bfd_seek(abfd, s->line_filepos, SEEK_SET) != 0)
+	return false;
       /* Find all the linenumbers in this section */
       while (*q) {
 	asymbol        *p = *q;
@@ -1019,13 +1025,15 @@ coff_write_linenumbers (abfd)
 	    out.l_lnno = 0;
 	    out.l_addr.l_symndx = l->u.offset;
 	    bfd_coff_swap_lineno_out(abfd, &out, buff);
-	    bfd_write(buff, 1, linesz, abfd);
+	    if (bfd_write(buff, 1, linesz, abfd) != linesz)
+	      return false;
 	    l++;
 	    while (l->line_number) {
 	      out.l_lnno = l->line_number;
 	      out.l_addr.l_symndx = l->u.offset;
 	      bfd_coff_swap_lineno_out(abfd, &out, buff);
-	      bfd_write(buff, 1, linesz, abfd);
+	      if (bfd_write(buff, 1, linesz, abfd) != linesz)
+		return false;
 	      l++;
 	    }
 	  }
@@ -1180,12 +1188,12 @@ build_debug_section (abfd)
      Then read debug section and reset the file pointer.  */
 
   position = bfd_tell (abfd);
-  bfd_seek (abfd, sect->filepos, SEEK_SET);
-  if (bfd_read (debug_section, 
-		bfd_get_section_size_before_reloc (sect), 1, abfd)
-      != bfd_get_section_size_before_reloc(sect))
+  if (bfd_seek (abfd, sect->filepos, SEEK_SET) != 0
+      || (bfd_read (debug_section, 
+		    bfd_get_section_size_before_reloc (sect), 1, abfd)
+	  != bfd_get_section_size_before_reloc(sect))
+      || bfd_seek (abfd, position, SEEK_SET) != 0)
     return NULL;
-  bfd_seek (abfd, position, SEEK_SET);
   return debug_section;
 }
 

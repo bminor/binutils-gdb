@@ -174,7 +174,7 @@ ecoff_new_section_hook (abfd, section)
   else if (strcmp (section->name, _LIB) == 0)
     {
       /* An Irix 4 shared libary.  */
-      section->flags |= SEC_SHARED_LIBRARY;
+      section->flags |= SEC_COFF_SHARED_LIBRARY;
     }
 
   /* Probably any other section name is SEC_NEVER_LOAD, but I'm
@@ -356,7 +356,7 @@ ecoff_styp_to_sec_flags (abfd, hdr)
       || (styp_flags & STYP_ECOFF_FINI))
     {
       if (sec_flags & SEC_NEVER_LOAD)
-	sec_flags |= SEC_CODE | SEC_SHARED_LIBRARY;
+	sec_flags |= SEC_CODE | SEC_COFF_SHARED_LIBRARY;
       else
 	sec_flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
     }
@@ -367,7 +367,7 @@ ecoff_styp_to_sec_flags (abfd, hdr)
 	   || styp_flags == STYP_XDATA)
     {
       if (sec_flags & SEC_NEVER_LOAD)
-	sec_flags |= SEC_DATA | SEC_SHARED_LIBRARY;
+	sec_flags |= SEC_DATA | SEC_COFF_SHARED_LIBRARY;
       else
 	sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC;
       if ((styp_flags & STYP_RDATA)
@@ -391,7 +391,7 @@ ecoff_styp_to_sec_flags (abfd, hdr)
     }
   else if (styp_flags & STYP_ECOFF_LIB)
     {
-      sec_flags |= SEC_SHARED_LIBRARY;
+      sec_flags |= SEC_COFF_SHARED_LIBRARY;
     }
   else
     {
