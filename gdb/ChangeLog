@@ -1,5 +1,8 @@
 Wed Dec 29 12:32:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symfile.c (generic_load): If no arguments, get file name
+	from get_exec_file.
+
 	* c-exp.y: Revert Kung's change.  "..." is not a type, and the
 	change caused "p (...)0" to dump core.
 	* gdbtypes.c (check_stub_method): Don't pass "..." to
