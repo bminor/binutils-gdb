@@ -2425,8 +2425,38 @@ OP_5F00 ()
   switch (OP[0])
     {
     default:
+#if 0
       (*d10v_callback->printf_filtered) (d10v_callback, "Unknown trap code %d\n", OP[0]);
       State.exception = SIGILL;
+#else
+      /* Use any other traps for batch debugging. */
+      {
+	int i;
+	static int first_time = 1;
+
+	if (first_time)
+	  {
+	    first_time = 0;
+	    (*d10v_callback->printf_filtered) (d10v_callback, "Trap  #     PC ");
+	    for (i = 0; i < 16; i++)
+	      (*d10v_callback->printf_filtered) (d10v_callback, "  %sr%d", (i > 9) ? "" : " ", i);
+	    (*d10v_callback->printf_filtered) (d10v_callback, "         a0         a1 f0 f1 c\n");
+	  }
+
+      (*d10v_callback->printf_filtered) (d10v_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
+
+      for (i = 0; i < 16; i++)
+	(*d10v_callback->printf_filtered) (d10v_callback, " %.4x", (int) State.regs[i]);
+
+      for (i = 0; i < 2; i++)
+	(*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
+					   ((int)(State.a[OP[i]] >> 32) & 0xff),
+					   ((unsigned long)State.a[OP[i]]) & 0xffffffff);
+
+      (*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
+					 State.F0 != 0, State.F1 != 0, State.C != 0);
+      break;
+#endif
 
     case 0:
       /* Trap 0 is used for simulating low-level I/O */
@@ -2588,6 +2618,7 @@ OP_5F00 ()
       /* Trap 3 writes a character */
       putchar (State.regs[2]);
       break;
+      }
     }
 }
 

@@ -1,3 +1,8 @@
+Fri Sep 13 22:35:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_5F00): Use unknown traps to print all GPRs,
+	accumulators, PC, and F0/F1/C flags.
+
 Thu Sep 12 12:50:11 1996  Mark Alexander  <marka@cygnus.com>
 
 	* simops.c (OP_5F00): Fix problems with system calls.
