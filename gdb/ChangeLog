@@ -1,5 +1,8 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/djgpp/fnchange.lst: Rename bfd/elf32-sh64.c.  Tweak other
+	renamed SH files to be consistent.
+
 	* symtab.c (sort_search_symbols): Use xfree.
 
 2002-02-23  Richard Earnshaw  <rearnsha@arm.com>

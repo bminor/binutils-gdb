@@ -14,8 +14,9 @@
 @V@/bfd/elf32-m68hc11.c @V@/bfd/em68hc11.c
 @V@/bfd/elf32-m68hc12.c @V@/bfd/em68hc12.c
 @V@/bfd/elf32-m68k.c @V@/bfd/em68k.c
-@V@/bfd/elf32-sh-lin.c @V@/bfd/elf32-slin.c
-@V@/bfd/elf32-sh-nbsd.c @V@/bfd/elf32-snb.c
+@V@/bfd/elf32-sh-lin.c @V@/bfd/elf32shlin.c
+@V@/bfd/elf32-sh-nbsd.c @V@/bfd/elf32shnb.c
+@V@/bfd/elf32-sh64.c @V@/bfd/elf32sh64.c
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp
 @V@/dejagnu/baseboards/mn10200-sim.exp @V@/dejagnu/baseboards/mn10200sim.exp
 @V@/dejagnu/baseboards/mn10300-cygmon.exp @V@/dejagnu/baseboards/mn10300cygmon.exp
