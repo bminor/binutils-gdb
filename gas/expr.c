@@ -1,6 +1,6 @@
 /* expr.c -operands, expressions-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001
+   1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1375,9 +1375,7 @@ clean_up_expression (expressionP)
       if (expressionP->X_op_symbol == expressionP->X_add_symbol
 	  || ((symbol_get_frag (expressionP->X_op_symbol)
 	       == symbol_get_frag (expressionP->X_add_symbol))
-	      && SEG_NORMAL (S_GET_SEGMENT (expressionP->X_add_symbol))
-	      && (S_GET_VALUE (expressionP->X_op_symbol)
-		  == S_GET_VALUE (expressionP->X_add_symbol))))
+	      && SEG_NORMAL (S_GET_SEGMENT (expressionP->X_add_symbol))))
 	{
 	  addressT diff = (S_GET_VALUE (expressionP->X_add_symbol)
 			   - S_GET_VALUE (expressionP->X_op_symbol));

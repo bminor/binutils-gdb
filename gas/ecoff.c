@@ -3376,7 +3376,7 @@ mark_stabs (ignore)
 /* For TC_MIPS use the version in tc-mips.c.  */
 void
 ecoff_directive_weakext (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;

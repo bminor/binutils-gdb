@@ -1,5 +1,5 @@
 /* b.out object file format
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1996, 2000, 2001
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -78,7 +78,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"ABORT", s_ignore, 0},
   {"ident", s_ignore, 0},
 
-  {NULL}			/* End sentinel.  */
+  {NULL, NULL, 0}		/* End sentinel.  */
 };
 
 /* Relocation.  */

@@ -1,3 +1,14 @@
+2002-08-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2dbg.c: Always include dwarf2dbg.h.
+	(dwarf2_directive_file): Adjust dummy version args.
+	* ecoff.c (ecoff_directive_weakext): Add ATTRIBUTE_UNUSED.
+	* expr.c (clean_up_expression <O_subtract>): Allow subtraction
+	when symbol values differ.
+	* read.c (do_align): Add ATTRIBUTE_UNUSED to label.
+	(pseudo_set <O_subtract>): Remove unnecessary segment test.
+	* config/obj-bout.c (obj_pseudo_table): Warning fix.
+
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-w65.c (md_section_align): Fix typo.
@@ -25,15 +36,15 @@
 
 2002-08-21  Elena Zannoni  <ezannoni@redhat.com>
 
-        * config/tc-ppc.c (ppc_cleanup): Do something only if format
-        is ELF.
-        (ppc_apuinfo_section_add): Define only if format is ELF.
-        (md_assemble): Emit APUinfo section only if format is ELF.
-        Fix formatting.
+	* config/tc-ppc.c (ppc_cleanup): Do something only if format
+	is ELF.
+	(ppc_apuinfo_section_add): Define only if format is ELF.
+	(md_assemble): Emit APUinfo section only if format is ELF.
+	Fix formatting.
 
 2002-08-21  Alan Modra  <amodra@bigpond.net.au>
 
-	* config/tc-arc.c (md_pseudo_table <dwarf2_directive_file>): Cast. 
+	* config/tc-arc.c (md_pseudo_table <dwarf2_directive_file>): Cast.
 	* config/tc-frv.c: Likewise.
 	* config/tc-hppa.c: Likewise.
 	* config/tc-ia64.c: Likewise.
@@ -53,28 +64,28 @@
 
 2002-08-19  Elena Zannoni  <ezannoni@redhat.com>
 
-        From matthew green  <mrg@redhat.com>
+	From matthew green  <mrg@redhat.com>
 
-        * config/tc-ppc.c (PPC_OPCODE_CLASSIC): Enable this everywhere
-        PPC_OPCODE_PPC is, except for BookE architectures.
-        (md_parse_option): Add support for -mspe.
-        (md_show_usage): Add -mspe.
-        (md_parse_option): Add support for -me500 and
-        -me500x2 to generate code for Motorola e500 core complex.
-        (md_show_usage): Add -me500 and -me500x2.
+	* config/tc-ppc.c (PPC_OPCODE_CLASSIC): Enable this everywhere
+	PPC_OPCODE_PPC is, except for BookE architectures.
+	(md_parse_option): Add support for -mspe.
+	(md_show_usage): Add -mspe.
+	(md_parse_option): Add support for -me500 and
+	-me500x2 to generate code for Motorola e500 core complex.
+	(md_show_usage): Add -me500 and -me500x2.
 
-        (PPC_APUINFO_ISEL, PPC_APUINFO_PMR, PPC_APUINFO_RFMCI,
-        PPC_APUINFO_CACHELCK, PPC_APUINFO_SPE, PPC_APUINFO_EFS,
-        PPC_APUINFO_BRLOCK): New macros.
+	(PPC_APUINFO_ISEL, PPC_APUINFO_PMR, PPC_APUINFO_RFMCI,
+	PPC_APUINFO_CACHELCK, PPC_APUINFO_SPE, PPC_APUINFO_EFS,
+	PPC_APUINFO_BRLOCK): New macros.
 
-        (ppc_cleanup): New function.
-        (ppc_apuinfo_section_add): New function.
-        (APUID): New macro.
-        (md_assemble): Collect info and write the APUinfo section.
+	(ppc_cleanup): New function.
+	(ppc_apuinfo_section_add): New function.
+	(APUID): New macro.
+	(md_assemble): Collect info and write the APUinfo section.
 
-        * config/tc-ppc.h (md_cleanup): Define.
-        (ppc_cleanup): Export.
-        (ELF_TC_SPECIAL_SECTIONS): Add .PPC.EMB.apuinfo section.
+	* config/tc-ppc.h (md_cleanup): Define.
+	(ppc_cleanup): Export.
+	(ELF_TC_SPECIAL_SECTIONS): Add .PPC.EMB.apuinfo section.
 
 2002-08-17  Stan Cox  <scox@redhat.com>
 
@@ -112,12 +123,12 @@
 
 	* config/tc-m68hc11.c (md_pseudo_table): Add relax command.
 	(s_m68hc11_relax): New function for relax group.
-	(build_insn, build_jump_insn): Emit a M68HC11_RL_JUMP reloc at 
+	(build_insn, build_jump_insn): Emit a M68HC11_RL_JUMP reloc at
 	beginning of jump instruction.
 	(md_pcrel_from): Rename from md_pcrel_from_section and fix
 	address computation.
 	(tc-gen_reloc): Update.
-	(md_estimate_size_before_relax): Create the BFD_RELOC_16_PCREL as 
+	(md_estimate_size_before_relax): Create the BFD_RELOC_16_PCREL as
 	PC-relative fixup.
 	(tc_m68hc11_force_relocation): New function, handle new relocs.
 	(tc_m68hc11_fix_adjustable): New to make sure there are enough
@@ -170,7 +181,7 @@
 
 	* configure.in: Add support for ppc-*-nto* target.
 	* configure: Regenerate.
-	
+
 2002-08-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.h: Reorganize.
@@ -255,7 +266,7 @@
 	(md_create_long_jump, md_create_short_jump,
 	md_undefined_symbol_name, md_section_align, tc_gen_reloc): Note
 	unused parameters.
-	
+
 2002-07-31  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Retroactively add entry for Lars Brinkhoff's contribution
@@ -293,7 +304,7 @@
 
 	* configure.in: Add support for arm-*-nto target.
 	* configure: Regenerate.
-	
+
 2002-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (struct literal_pool): Add fields to allow

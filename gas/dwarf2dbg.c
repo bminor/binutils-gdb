@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -41,9 +41,10 @@
 #endif
 #endif
 
+#include "dwarf2dbg.h"
+
 #ifdef BFD_ASSEMBLER
 
-#include "dwarf2dbg.h"
 #include "subsegs.h"
 
 #include "elf/dwarf2.h"
@@ -1340,11 +1341,12 @@ dwarf2_emit_insn (size)
 {
 }
 
-void
+char *
 dwarf2_directive_file (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   s_app_file (0);
+  return NULL;
 }
 
 void

@@ -1,6 +1,6 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -1197,7 +1197,7 @@ do_align (n, fill, len, max)
     }
 
 #ifdef md_do_align
- just_record_alignment:
+ just_record_alignment: ATTRIBUTE_UNUSED
 #endif
 
   record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
@@ -3232,8 +3232,6 @@ pseudo_set (symbolP)
 	as_bad (_("floating point number invalid"));
     }
   else if (exp.X_op == O_subtract
-	   && (S_GET_SEGMENT (exp.X_add_symbol)
-	       == S_GET_SEGMENT (exp.X_op_symbol))
 	   && SEG_NORMAL (S_GET_SEGMENT (exp.X_add_symbol))
 	   && (symbol_get_frag (exp.X_add_symbol)
 	       == symbol_get_frag (exp.X_op_symbol)))
