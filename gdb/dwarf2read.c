@@ -677,6 +677,22 @@ static char *scan_partial_symbols (char *, struct objfile *,
 static void add_partial_symbol (struct partial_die_info *, struct objfile *,
 				const struct comp_unit_head *);
 
+static char *add_partial_namespace (struct partial_die_info *pdi,
+				    char *info_ptr,
+				    struct objfile *objfile,
+				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
+				    const struct comp_unit_head *cu_header);
+
+static char *add_partial_enumeration (struct partial_die_info *enum_pdi,
+				      char *info_ptr,
+				      struct objfile *objfile,
+				      const struct comp_unit_head *cu_header);
+
+static char *locate_pdi_sibling (struct partial_die_info *orig_pdi,
+				 char *info_ptr,
+				 bfd *abfd,
+				 const struct comp_unit_head *cu_header);
+
 static void dwarf2_psymtab_to_symtab (struct partial_symtab *);
 
 static void psymtab_to_symtab_1 (struct partial_symtab *);
@@ -1321,9 +1337,17 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
          If not, there's no more debug_info for this comp unit. */
       if (comp_unit_die.has_children)
 	{
+	  lowpc = ((CORE_ADDR) -1);
+	  highpc = ((CORE_ADDR) 0);
+
 	  info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc,
 					   &cu_header);
 
+	  /* If we didn't find a lowpc, set it to highpc to avoid
+	     complaints from `maint check'.  */
+	  if (lowpc == ((CORE_ADDR) -1))
+	    lowpc = highpc;
+	  
 	  /* If the compilation unit didn't have an explicit address range,
 	     then use the information extracted from its child dies.  */
 	  if (! comp_unit_die.has_pc_info)
@@ -1352,7 +1376,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   do_cleanups (back_to);
 }
 
-/* Read in all interesting dies to the end of the compilation unit.  */
+/* Read in all interesting dies to the end of the compilation unit or
+   to the end of the current namespace.  */
 
 static char *
 scan_partial_symbols (char *info_ptr, struct objfile *objfile,
@@ -1362,35 +1387,24 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
   bfd *abfd = objfile->obfd;
   struct partial_die_info pdi;
 
-  /* This function is called after we've read in the comp_unit_die in
-     order to read its children.  We start the nesting level at 1 since
-     we have pushed 1 level down in order to read the comp unit's children.
-     The comp unit itself is at level 0, so we stop reading when we pop
-     back to that level. */
+  /* Now, march along the PDI's, descending into ones which have
+     interesting children but skipping the children of the other ones,
+     until we reach the end of the compilation unit.  */
 
-  int nesting_level = 1;
-
-  /* We only want to read in symbols corresponding to variables or
-     other similar objects that are global or static.  Normally, these
-     are all children of the DW_TAG_compile_unit die, so are all at
-     level 1.  But C++ namespaces give ries to DW_TAG_namespace dies
-     whose children are global objects.  So we keep track of what
-     level we currently think of as referring to file scope; this
-     should always equal 1 plus the number of namespaces that we are
-     currently nested within.  */
-  
-  int file_scope_level = 1;
-
-  *lowpc = ((CORE_ADDR) -1);
-  *highpc = ((CORE_ADDR) 0);
-
-  while (nesting_level)
+  while (1)
     {
+      /* This flag tells whether or not info_ptr has gotten updated
+	 inside the loop.  */
+      int info_ptr_updated = 0;
+
       info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
 
-      /* Anonymous namespaces have no name but are interesting.  */
+      /* Anonymous namespaces have no name but have interesting
+	 children, so we need to look at them.  Ditto for anonymous
+	 enums.  */
 
-      if (pdi.name != NULL || pdi.tag == DW_TAG_namespace)
+      if (pdi.name != NULL || pdi.tag == DW_TAG_namespace
+	  || pdi.tag == DW_TAG_enumeration_type)
 	{
 	  switch (pdi.tag)
 	    {
@@ -1405,8 +1419,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 		    {
 		      *highpc = pdi.highpc;
 		    }
-		  if ((pdi.is_external || nesting_level == file_scope_level)
-		      && !pdi.is_declaration)
+		  if (!pdi.is_declaration)
 		    {
 		      add_partial_symbol (&pdi, objfile, cu_header);
 		    }
@@ -1414,76 +1427,52 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	      break;
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
+	    case DW_TAG_union_type:
 	    case DW_TAG_class_type:
 	    case DW_TAG_structure_type:
-	    case DW_TAG_union_type:
-	    case DW_TAG_enumeration_type:
-	      if ((pdi.is_external || nesting_level == file_scope_level)
-		  && !pdi.is_declaration)
+	      if (!pdi.is_declaration)
 		{
 		  add_partial_symbol (&pdi, objfile, cu_header);
 		}
 	      break;
-	    case DW_TAG_enumerator:
-	      /* File scope enumerators are added to the partial
-	         symbol table.  They're children of the enumeration
-	         type die, so they occur at a level one higher than we
-	         normally look for.  */
-	      if (nesting_level == file_scope_level + 1)
-		add_partial_symbol (&pdi, objfile, cu_header);
+	    case DW_TAG_enumeration_type:
+	      if (!pdi.is_declaration)
+		{
+		  info_ptr = add_partial_enumeration (&pdi, info_ptr,
+						      objfile, cu_header);
+		  info_ptr_updated = 1;
+		}
 	      break;
 	    case DW_TAG_base_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      if (nesting_level == file_scope_level)
-		add_partial_symbol (&pdi, objfile, cu_header);
+	      add_partial_symbol (&pdi, objfile, cu_header);
 	      break;
 	    case DW_TAG_namespace:
-	      /* FIXME: carlton/2002-10-16: we're not yet doing
-		 anything useful with this, but for now make sure that
-		 these tags at least don't cause us to miss any
-		 important symbols.  */
-	      if (pdi.has_children)
-		file_scope_level++;
+	      info_ptr = add_partial_namespace (&pdi, info_ptr, objfile,
+						lowpc, highpc, cu_header);
+	      info_ptr_updated = 1;
+	      break;
 	    default:
 	      break;
 	    }
 	}
 
-      /* If the die has a sibling, skip to the sibling.  Do not skip
-         enumeration types, we want to record their enumerators.  Do
-         not skip namespaces, we want to record symbols inside
-         them.  */
-      if (pdi.sibling
-	  && pdi.tag != DW_TAG_enumeration_type
-	  && pdi.tag != DW_TAG_namespace)
-	{
-	  info_ptr = pdi.sibling;
-	}
-      else if (pdi.has_children)
-	{
-	  /* Die has children, but either the optional DW_AT_sibling
-	     attribute is missing or we want to look at them.  */
-	  nesting_level++;
-	}
-
       if (pdi.tag == 0)
-	{
-	  nesting_level--;
-	  /* If this is the end of a DW_TAG_namespace entry, then
-	     decrease the file_scope_level, too.  */
-	  if (nesting_level < file_scope_level)
-	    {
-	      file_scope_level--;
-	      gdb_assert (nesting_level == file_scope_level);
-	    }
-	}
+	break;
+
+      /* If the die has a sibling, skip to the sibling, unless another
+	 function has already updated info_ptr for us.  */
+
+      /* NOTE: carlton/2003-06-16: This is a bit hackish, but whether
+	 or not we want to update this depends on enough stuff (not
+	 only pdi.tag but also whether or not pdi.name is NULL) that
+	 this seems like the easiest way to handle the issue.  */
+
+      if (!info_ptr_updated)
+	  info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu_header);
     }
 
-  /* If we didn't find a lowpc, set it to highpc to avoid complaints
-     from `maint check'.  */
-  if (*lowpc == ((CORE_ADDR) -1))
-    *lowpc = *highpc;
   return info_ptr;
 }
 
@@ -1590,6 +1579,85 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
       break;
     default:
       break;
+    }
+}
+
+/* Read a partial die corresponding to a namespace.  For now, we don't
+   do anything with the fact that we're in a namespace; we just read
+   the symbols inside of it.  */
+
+static char *
+add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
+		       struct objfile *objfile,
+		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
+		       const struct comp_unit_head *cu_header)
+{
+  if (pdi->has_children)
+    info_ptr = scan_partial_symbols (info_ptr, objfile,
+				     lowpc, highpc,
+				     cu_header);
+
+  return info_ptr;
+}
+
+/* Read a partial die corresponding to an enumeration type.  */
+
+static char *
+add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
+			 struct objfile *objfile,
+			 const struct comp_unit_head *cu_header)
+{
+  bfd *abfd = objfile->obfd;
+  struct partial_die_info pdi;
+
+  if (enum_pdi->name != NULL)
+    add_partial_symbol (enum_pdi, objfile, cu_header);
+  
+  while (1)
+    {
+      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
+      if (pdi.tag == 0)
+	break;
+      if (pdi.tag != DW_TAG_enumerator || pdi.name == NULL)
+	complaint (&symfile_complaints, "malformed enumerator DIE ignored");
+      else
+	add_partial_symbol (&pdi, objfile, cu_header);
+    }
+
+  return info_ptr;
+}
+
+/* Locate ORIG_PDI's sibling; INFO_PTR should point to the next DIE
+   after ORIG_PDI.  */
+
+static char *
+locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
+		    bfd *abfd, const struct comp_unit_head *cu_header)
+{
+  /* Do we know the sibling already?  */
+  
+  if (orig_pdi->sibling)
+    return orig_pdi->sibling;
+
+  /* Are there any children to deal with?  */
+
+  if (!orig_pdi->has_children)
+    return info_ptr;
+
+  /* Okay, we don't know the sibling, but we have children that we
+     want to skip.  So read children until we run into one without a
+     tag; return whatever follows it.  */
+
+  while (1)
+    {
+      struct partial_die_info pdi;
+      
+      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
+
+      if (pdi.tag == 0)
+	return info_ptr;
+      else
+	info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu_header);
     }
 }
 

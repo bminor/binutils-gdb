@@ -1,3 +1,13 @@
+2003-09-09  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Move lowpc and
+	highpc initialization here out of scan_partial_symbols.
+	(scan_partial_symbols): Restructure into a recursive version,
+	calling add_partial_namespace and add_partial_enumeration when
+	appropriate.
+	(add_partial_namespace): New.
+	(add_partial_enumeration, locate_pdi_sibling): Ditto.
+
 2003-09-09  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (ppc_push_return_address): Delete function.
