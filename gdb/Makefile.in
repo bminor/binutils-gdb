@@ -196,7 +196,7 @@ HFILES=	breakpoint.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h getpagesize.h \
 	ieee-float.h inferior.h minimon.h param-no-tm.h param.h \
 	signals.h signame.h symfile.h symtab.h \
-	target.h tdesc.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
+	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
 	language.h parser-defs.h value.h
 
 # Header files for machine opcode tables.
@@ -222,14 +222,12 @@ POSSLIBS = $(POSSLIBS_MAINDIR)
 
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
-# tdesc-lib cannot be named simply tdesc, because if it were, GNU make
-# would try to make it from tdesc.c.
 OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
 	 ChangeLog ChangeLog-3.x refcard.ps \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING $(YYFILES) \
 	 copying.c Convex.notes copying.awk \
-	 saber.suppress standalone.c stuff.c tdesc-lib kdb-start.c \
+	 saber.suppress standalone.c stuff.c kdb-start.c \
 	 putenv.c
 
 # Subdirectories of gdb, which should be included in their entirety in
@@ -282,7 +280,7 @@ all: gdb
 all-info: force
 	$(MAKE) subdir_do DO=all-info "DODIRS=$(SUBDIRS)"
 install-info: force
-	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
+	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 
 gdb.z:gdb.1
 	nroff -man gdb.1 | col -b > gdb.t 
@@ -438,15 +436,15 @@ config.status:
 # for some machines.
 # But these rules don't do what we want; we want to hack the foo.o: tm.h
 # dependency to do the right thing.
-tm-isi.h tm-sun3.h tm-news.h tm-hp300bsd.h tm-altos.h : tm-68k.h
-tm-hp300hpux.h tm-sun2.h tm-3b1.h : tm-68k.h
-xm-news1000.h : xm-news.h
-xm-i386-sv32.h : xm-i386.h
+tm-isi.h tm-sun3.h tm-news.h tm-hp300bsd.h tm-altos.h: tm-68k.h
+tm-hp300hpux.h tm-sun2.h tm-3b1.h: tm-68k.h
+xm-news1000.h: xm-news.h
+xm-i386-sv32.h: xm-i386.h
 tm-i386gas.h: tm-i386.h
-xm-sun4os4.h : xm-sparc.h
-tm-sun4os4.h : tm-sparc.h
+xm-sun4os4.h: xm-sparc.h
+tm-sun4os4.h: tm-sparc.h
 
-kdb : $(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
+kdb: $(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
 	rm -f init.c
 	$(srcdir)/munch ${MUNCH_DEFINE} $(OBS) $(NTSOBS) > init.c
 	$(CC) $(LDFLAGS) -c init.c $(CLIBS) 
@@ -596,17 +594,17 @@ force:
 
 # Documentation!
 # GDB QUICK REFERENCE (TeX dvi file, CM fonts)
-refcard.dvi : $(srcdir)/doc/refcard.tex
+refcard.dvi: $(srcdir)/doc/refcard.tex
 	( cd $(srcdir)/doc; $(MAKE) refcard.dvi )
 	mv $(srcdir)/doc/refcard.dvi .
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts)
-refcard.ps : $(srcdir)/doc/refcard.tex
+refcard.ps: $(srcdir)/doc/refcard.tex
 	( cd $(srcdir)/doc; $(MAKE) refcard.ps )
 	mv $(srcdir)/doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi : $(srcdir)/doc/gdb-all.texi $(srcdir)/doc/rdl-apps.texi
+gdb.dvi: $(srcdir)/doc/gdb-all.texi $(srcdir)/doc/rdl-apps.texi
 	( cd $(srcdir)/doc; $(MAKE) M4=$(M4) gdb.dvi )
 	mv $(srcdir)/doc/gdb.dvi .
 
@@ -624,7 +622,7 @@ $(srcdir)/doc/rdl-apps.texi:
 copying.c: ${srcdir}/COPYING ${srcdir}/copying.awk
 	awk -f ${srcdir}/copying.awk < ${srcdir}/COPYING > copying.c
 
-version.c : Makefile.in
+version.c: Makefile.in
 	echo 'char *version = "$(VERSION)";' >version.c
 
 # c-exp.tab.c is generated in target dir from c-exp.y if it doesn't exist
@@ -687,18 +685,6 @@ ttybreak.o: ${srcdir}/nindy-share/ttybreak.c
 ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
 	${CC} -c ${CFLAGS} ${srcdir}/nindy-share/ttyflush.c
 
-disasm.o: $(srcdir)/tdesc-lib/disasm.c
-	$(CC) -c $(CFLAGS) $(srcdir)/tdesc-lib/disasm.c
-
-classify.o: $(srcdir)/tdesc-lib/classify.c
-	$(CC) -c $(CFLAGS) $(srcdir)/tdesc-lib/classify.c
-
-fcns.o:	 $(srcdir)/tdesc-lib/fcns.c
-	$(CC) -c $(CFLAGS) $(srcdir)/tdesc-lib/fcns.c
-
-table.o: $(TABHDRS) $(srcdir)/tdesc-lib/table.c
-	$(CC) -c $(CFLAGS) $(srcdir)/tdesc-lib/table.c
-
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
 	   `echo ${DEPFILES} | sed 's/\.o /\.c /g'
@@ -706,13 +692,13 @@ lint: $(LINTFILES)
 gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref
 
-force_update :
+force_update:
 
 # When used with GDB, the demangler should never look for leading
 # underscores because GDB strips them off during symbol read-in.  Thus
 # -Dnounderscore.  
 
-cplus-dem.o : cplus-dem.c
+cplus-dem.o: cplus-dem.c
 	${CC} -c ${CFLAGS} -Dnounderscore \
 	  `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`
 

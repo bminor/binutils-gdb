@@ -18,8 +18,9 @@ Mon Nov 18 17:45:18 1991  Fred Fish  (fnf at cygnus.com)
 
 Mon Nov 18 15:12:45 1991  John Gilmore  (gnu at cygnus.com)
 
+	* Makefile.in:  Remove tdesc stuff, and extra blanks before colons.
 	* blockframe.c:  Remove tdesc-related code.  Default
-	FRAME_CHAIN_COMBINE if not defined.
+	FRAME_CHAIN_COMBINE.
 	* infrun.c:  Remove tdesc-related code.
 	* m88k-tdep.c (frame_chain_combine, init_frame_pc):  Remove copies
 	of defaultable things.
