@@ -309,7 +309,7 @@ aout_adobe_write_object_contents (abfd)
 
   aout_adobe_swap_exec_header_out (abfd, exec_hdr (abfd), &swapped_hdr);
 
-  bfd_seek (abfd, 0L, SEEK_SET);
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
   bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd);
 
   /* Now write out the section information.  Text first, data next, rest
@@ -337,12 +337,11 @@ aout_adobe_write_object_contents (abfd)
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0) 
     {
-      bfd_seek (abfd,
-		(long)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
+      bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
 
       aout_32_write_syms (abfd);
 
-      bfd_seek (abfd, (long)(N_TRELOFF(*exec_hdr(abfd))), SEEK_SET);
+      bfd_seek (abfd, (file_ptr)(N_TRELOFF(*exec_hdr(abfd))), SEEK_SET);
 
       for (sect = abfd->sections; sect; sect = sect->next) {
         if (sect->flags & SEC_CODE)	{
@@ -351,7 +350,7 @@ aout_adobe_write_object_contents (abfd)
         }
       }
 
-      bfd_seek (abfd, (long)(N_DRELOFF(*exec_hdr(abfd))), SEEK_SET);
+      bfd_seek (abfd, (file_ptr)(N_DRELOFF(*exec_hdr(abfd))), SEEK_SET);
 
       for (sect = abfd->sections; sect; sect = sect->next) {
         if (sect->flags & SEC_DATA)	{

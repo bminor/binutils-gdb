@@ -290,21 +290,20 @@ PROTO(char *, aout_stab_name, (int code));
 			   obj_reloc_entry_size (abfd));		      \
 	NAME(aout,swap_exec_header_out) (abfd, execp, &exec_bytes);	      \
 									      \
-	bfd_seek (abfd, 0L, false);					      \
+	bfd_seek (abfd, (file_ptr) 0, SEEK_SET);			      \
 	bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd);	      \
 	/* Now write out reloc info, followed by syms and strings */	      \
   									      \
 	if (bfd_get_symcount (abfd) != 0) 				      \
 	    {								      \
-	      bfd_seek (abfd,						      \
-			(long)(N_SYMOFF(*execp)), false);		      \
+	      bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET);	      \
 									      \
 	      NAME(aout,write_syms)(abfd);				      \
 									      \
-	      bfd_seek (abfd,	(long)(N_TRELOFF(*execp)), false);	      \
+	      bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET);	      \
 									      \
 	      if (!NAME(aout,squirt_out_relocs) (abfd, obj_textsec (abfd))) return false; \
-	      bfd_seek (abfd, (long)(N_DRELOFF(*execp)), false);	      \
+	      bfd_seek (abfd, (file_ptr)(N_DRELOFF(*execp)), SEEK_SET);	      \
 									      \
 	      if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd))) return false; \
 	    }								      \

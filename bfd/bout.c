@@ -238,21 +238,20 @@ b_out_write_object_contents (abfd)
 
   bout_swap_exec_header_out (abfd, exec_hdr (abfd), &swapped_hdr);
 
-  bfd_seek (abfd, 0L, SEEK_SET);
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
   bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd);
 
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0) 
     {
-      bfd_seek (abfd,
-		(long)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
+      bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
 
       aout_32_write_syms (abfd);
 
-      bfd_seek (abfd,	(long)(N_TROFF(*exec_hdr(abfd))), SEEK_SET);
+      bfd_seek (abfd, (file_ptr)(N_TROFF(*exec_hdr(abfd))), SEEK_SET);
 
       if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-      bfd_seek (abfd, (long)(N_DROFF(*exec_hdr(abfd))), SEEK_SET);
+      bfd_seek (abfd, (file_ptr)(N_DROFF(*exec_hdr(abfd))), SEEK_SET);
 
       if (!b_out_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
     }
@@ -459,7 +458,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   return false;
 
  doit:
-  bfd_seek (abfd, (long)(asect->rel_filepos),  SEEK_SET);
+  bfd_seek (abfd, (file_ptr)(asect->rel_filepos),  SEEK_SET);
   count = reloc_size / sizeof (struct relocation_info);
 
   relocs = (struct relocation_info *) bfd_xmalloc (reloc_size);

@@ -562,7 +562,7 @@ bfd_slurp_bsd_armap (abfd)
        but fail for any other size... */
     if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
 	    /* The archive has at least 16 bytes in it */
-	    bfd_seek (abfd, -16L, SEEK_CUR);
+	    bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
 
 	    /* This should be using RANLIBMAG, but at least it can be grepped for
 	       in this comment.  */
@@ -637,7 +637,7 @@ bfd_slurp_coff_armap (abfd)
   bfd_vma (*swap)();
   
   result = bfd_read ((PTR)&nextname, 1, 1, abfd);
-  bfd_seek (abfd, -1L, SEEK_CUR);
+  bfd_seek (abfd, (file_ptr) -1, SEEK_CUR);
 
   if (result != 1 || nextname != '/') {
     /* Actually I think this is an error for a COFF archive */
@@ -755,7 +755,7 @@ _bfd_slurp_extended_name_table (abfd)
      we probably don't want to return true.  */
   if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
 
-    bfd_seek (abfd, -16L, SEEK_CUR);
+    bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
 
     if (strncmp (nextname, "ARFILENAMES/    ", 16) != 0 &&
 	strncmp (nextname, "//              ", 16) != 0) 
@@ -1172,7 +1172,7 @@ _bfd_write_archive_contents (arch)
   if (!bfd_construct_extended_name_table (arch, &etable, &elength))
     return false;
 
-  bfd_seek (arch, 0, SEEK_SET);
+  bfd_seek (arch, (file_ptr) 0, SEEK_SET);
 #ifdef GNU960
   bfd_write (BFD_GNU960_ARMAG(arch), 1, SARMAG, arch);
 #else
@@ -1212,7 +1212,7 @@ _bfd_write_archive_contents (arch)
 	bfd_error = system_call_error;
 	return false;
       }
-    if (bfd_seek (current, 0L, SEEK_SET) != 0L) goto syserr;
+    if (bfd_seek (current, (file_ptr) 0, SEEK_SET) != 0) goto syserr;
     while (remaining) 
 	{
 	  unsigned int amt = DEFAULT_BUFFERSIZE;

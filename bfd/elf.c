@@ -947,7 +947,7 @@ DEFUN(elf_corefile_note, (abfd, hdr),
 
   if (hdr -> p_filesz > 0
       && (buf = (char *) bfd_xmalloc (hdr -> p_filesz)) != NULL
-      && bfd_seek (abfd, hdr -> p_offset, SEEK_SET) != -1L
+      && bfd_seek (abfd, hdr -> p_offset, SEEK_SET) != -1
       && bfd_read ((PTR) buf, hdr -> p_filesz, 1, abfd) == hdr -> p_filesz)
     {
       x_note_p = (Elf_External_Note *) buf;
@@ -1788,7 +1788,7 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
 
   /* swap the header before spitting it out... */
   elf_swap_ehdr_out (abfd, i_ehdrp, &x_ehdr);
-  bfd_seek (abfd, 0L, SEEK_SET);
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
   bfd_write ((PTR) &x_ehdr, sizeof(x_ehdr), 1, abfd);
 
   outbase += i_ehdrp->e_shentsize * i_ehdrp->e_shnum;
@@ -1828,7 +1828,7 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
     }
   
   /* sample use of bfd:
-   * bfd_seek (abfd, 0L, false);
+   * bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
    * bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
    * if (bfd_seek(abfd, scn_base, SEEK_SET) != 0)
    * return false;

@@ -282,7 +282,7 @@ DEFUN(oasys_archive_p,(abfd),
 
       filepos = header.mod_tbl_offset;
       for (i = 0; i < header.mod_count; i++) {
-        bfd_seek(abfd , filepos, SEEK_SET);
+        bfd_seek(abfd, filepos, SEEK_SET);
 
 	/* There are two ways of specifying the archive header */
 

@@ -393,7 +393,7 @@ DEFUN(sunos4_core_file_p,(abfd),
   if (core_size > 20000)
     return 0;
 
-  if (bfd_seek (abfd, 0L, false) < 0) return 0;
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) < 0) return 0;
 
   mergem = (struct mergem *)bfd_zalloc (abfd, core_size + sizeof (struct mergem));
   if (mergem == NULL) {

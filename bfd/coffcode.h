@@ -1230,7 +1230,7 @@ DEFUN(coff_object_p,(abfd),
   }
 
   /* Seek past the opt hdr stuff */
-  bfd_seek(abfd, internal_f.f_opthdr + FILHSZ, SEEK_SET);
+  bfd_seek(abfd, (file_ptr) (internal_f.f_opthdr + FILHSZ), SEEK_SET);
 
   /* if the optional header is NULL or not the correct size then
      quit; the only difference I can see between m88k dgux headers (MC88DMAGIC)
@@ -2263,15 +2263,10 @@ coff_section_symbol (abfd, name)
      bfd *abfd;
      char *name;
 {
-  asection *sec = bfd_get_section_by_name (abfd, name);
+  asection *sec = bfd_make_section_old_way (abfd, name);
   asymbol *sym;
   combined_entry_type *csym;
 
-  if (!sec)
-    {
-      /* create empty symbol */
-      abort ();
-    }
   sym = sec->symbol;
   if (coff_symbol_from (abfd, sym))
     csym = coff_symbol_from (abfd, sym)->native;
@@ -2409,10 +2404,6 @@ DEFUN(coff_write_object_contents,(abfd),
       current->target_index = count;
       count++;
   }
-  
-    
-
-
 
   if(abfd->output_has_begun == false) {
       coff_compute_section_file_positions(abfd);
@@ -2696,7 +2687,7 @@ DEFUN(coff_write_object_contents,(abfd),
   internal_f.f_nsyms =  bfd_get_symcount(abfd);
 
   /* now write them */
-  if (bfd_seek(abfd, 0L, SEEK_SET) != 0)
+  if (bfd_seek(abfd, (file_ptr) 0, SEEK_SET) != 0)
    return false;
 {
   FILHDR buff;

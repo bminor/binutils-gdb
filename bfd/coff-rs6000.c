@@ -171,7 +171,7 @@ rs6000coff_get_elt_at_filepos (archive, filepos)
   n_nfd = look_for_bfd_in_cache (archive, filepos);
   if (n_nfd) return n_nfd;
 
-  if (0 > bfd_seek (archive, filepos, SEEK_SET)) {
+  if (0 != bfd_seek (archive, filepos, SEEK_SET)) {
     bfd_error = system_call_error;
     return NULL;
   }

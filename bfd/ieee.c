@@ -992,7 +992,7 @@ DEFUN(ieee_archive_p,(abfd),
   unsigned int i;
 uint8e_type buffer[512];
   struct obstack ob;
-  int buffer_offset = 0;
+  file_ptr buffer_offset = 0;
   ieee_ar_data_type *save = abfd->tdata.ieee_ar_data;
   ieee_ar_data_type *ieee ;
   abfd->tdata.ieee_ar_data = (ieee_ar_data_type *)bfd_alloc(abfd, sizeof(ieee_ar_data_type));
@@ -1113,7 +1113,7 @@ DEFUN(ieee_object_p,(abfd),
   ieee_mkobject(abfd);
   
   ieee = IEEE_DATA(abfd);
-  bfd_seek(abfd, 0, 0);
+  bfd_seek(abfd, (file_ptr) 0, SEEK_SET);
   /* Read the first few bytes in to see if it makes sense */
   bfd_read((PTR)buffer, 1, sizeof(buffer), abfd);
 
@@ -1185,7 +1185,7 @@ DEFUN(ieee_object_p,(abfd),
 
   IEEE_DATA(abfd)->h.first_byte = (uint8e_type *) bfd_alloc(ieee->h.abfd, ieee->w.r.me_record
 					    + 50);
-  bfd_seek(abfd, 0, 0);
+  bfd_seek(abfd, (file_ptr) 0, SEEK_SET);
   bfd_read((PTR)(IEEE_DATA(abfd)->h.first_byte), 1,   ieee->w.r.me_record+50,  abfd);
 
   ieee_slurp_sections(abfd);
@@ -2706,19 +2706,13 @@ DEFUN(ieee_write_object_contents,(abfd),
   unsigned int i;
   file_ptr   old;
   /* Fast forward over the header area */
-  bfd_seek(abfd, 0, 0);
+  bfd_seek(abfd, (file_ptr) 0, SEEK_SET);
   ieee_write_byte(abfd, ieee_module_beginning_enum);
 
   ieee_write_id(abfd, bfd_printable_name(abfd));
   ieee_write_id(abfd, abfd->filename);
 
-
-
-
   /* Fast forward over the variable bits */	
-
-
-
   ieee_write_byte(abfd, ieee_address_descriptor_enum);
 
   /* Bits per MAU */
@@ -2727,10 +2721,8 @@ DEFUN(ieee_write_object_contents,(abfd),
   ieee_write_byte(abfd, bfd_arch_bits_per_address(abfd)  /
 		  bfd_arch_bits_per_byte(abfd));
 
-
   old = bfd_tell(abfd);
-  bfd_seek(abfd, 8 * N_W_VARIABLES, 1);
-
+  bfd_seek(abfd, (file_ptr) (8 * N_W_VARIABLES), SEEK_CUR);
 
   ieee->w.r.extension_record = bfd_tell(abfd);
   bfd_write((char *)exten, 1, sizeof(exten), abfd);
@@ -2776,7 +2768,7 @@ DEFUN(ieee_write_object_contents,(abfd),
 
 
   /* Generate the header */
-  bfd_seek(abfd, old, false);
+  bfd_seek(abfd, old, SEEK_SET);
 
   for (i= 0; i < N_W_VARIABLES; i++) {
     ieee_write_2bytes(abfd,ieee_assign_value_to_variable_enum);
