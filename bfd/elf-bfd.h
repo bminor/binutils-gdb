@@ -286,9 +286,10 @@ struct cie
 
 struct eh_cie_fde
 {
-  unsigned int offset;
+  /* For FDEs, this points to the CIE used.  */
+  struct eh_cie_fde *cie_inf;
   unsigned int size;
-  asection *sec;
+  unsigned int offset;
   unsigned int new_offset;
   unsigned char fde_encoding;
   unsigned char lsda_encoding;
@@ -319,8 +320,8 @@ struct eh_frame_hdr_info
 {
   struct cie last_cie;
   asection *last_cie_sec;
+  struct eh_cie_fde *last_cie_inf;
   asection *hdr_sec;
-  unsigned int last_cie_offset;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
