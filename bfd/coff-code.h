@@ -214,53 +214,6 @@ set_index(symbol, idx)
     symbol->value = idx;
 }
 
-#if 0
-/* move the section with the specified name to the front of the bfd */
-static void
-coff_section_to_front(bfd_ptr, move_section_with_this_name)
-bfd *bfd_ptr;
-char *move_section_with_this_name;
-{
-  asection **section_ptr_ptr = &(bfd_ptr->sections);
-  while (*section_ptr_ptr != (asection *)NULL) 
-    {
-      asection *section_ptr = *section_ptr_ptr;
-      if (strcmp(section_ptr->name, move_section_with_this_name) == 0) 
-	{
-
-	  *section_ptr_ptr = section_ptr->next;
-	  section_ptr->next = bfd_ptr->sections;
-	  bfd_ptr->sections = section_ptr;
-	  
-	  /* Now run through them all and patch the indexes */
-	  {
-	    unsigned int index = 0;
-	    section_ptr = bfd_ptr->sections;
-
-	    while (section_ptr != (asection *)NULL) {
-	      section_ptr->index = index;
-	      index++;
-	      section_ptr = section_ptr->next;
-	    }
-	  }
-	  return;
-
-	}
-      section_ptr_ptr = &(section_ptr->next);
-    }
-}
-
-/* Reorder the sections to .text, .data, .bss */
-static 
-void 
-coff_section_reorder(abfd)
-bfd *abfd;
-{
-  coff_section_to_front(abfd,".bss");
-  coff_section_to_front(abfd,".data");
-  coff_section_to_front(abfd,".text");
-}
-#endif
 /*
    initialize a section structure with information peculiar to this
    particular implementation of coff
@@ -271,7 +224,6 @@ coff_new_section_hook(abfd_ignore, section_ignore)
     bfd            *abfd_ignore;
     asection       *section_ignore;
 {
-
   return true;
 }
 /* actually it makes itself and its children from the file headers */
@@ -1329,249 +1281,249 @@ static          boolean
 coff_write_object_contents(abfd)
     bfd            *abfd;
 {
-    struct filehdr  file_header;
-    asection       *current;
-    boolean         hasrelocs = false;
-    boolean         haslinno = false;
-    file_ptr        reloc_base;
-    file_ptr        lineno_base;
-    file_ptr        sym_base;
-    file_ptr        scn_base;
-    file_ptr        data_base;
-    unsigned long   reloc_size = 0;
-    unsigned long   lnno_size = 0;
-    asection       *text_sec = NULL;
-    asection       *data_sec = NULL;
-    asection       *bss_sec = NULL;
-    unsigned        magic,
-    flags;
-    bfd_error = system_call_error;
+  struct filehdr  file_header;
+  asection       *current;
+  boolean         hasrelocs = false;
+  boolean         haslinno = false;
+  file_ptr        reloc_base;
+  file_ptr        lineno_base;
+  file_ptr        sym_base;
+  file_ptr        scn_base;
+  file_ptr        data_base;
+  unsigned long   reloc_size = 0;
+  unsigned long   lnno_size = 0;
+  asection       *text_sec = NULL;
+  asection       *data_sec = NULL;
+  asection       *bss_sec = NULL;
+  unsigned        magic,
+  flags;
+  bfd_error = system_call_error;
 
 
-    if(abfd->output_has_begun == false) {
-	coff_compute_section_file_positions(abfd);
-    }
-    scn_base = (file_ptr) (sizeof(struct filehdr)
-			   + ((abfd->flags & EXEC_P) ? sizeof(AOUTHDR) : 0));
+  if(abfd->output_has_begun == false) {
+    coff_compute_section_file_positions(abfd);
+  }
+  scn_base = (file_ptr) (sizeof(struct filehdr)
+			 + ((abfd->flags & EXEC_P) ? sizeof(AOUTHDR) : 0));
 
-    if (bfd_seek(abfd, scn_base, SEEK_SET) != 0)
-	return false;
-    reloc_base = obj_relocbase(abfd);
+  if (bfd_seek(abfd, scn_base, SEEK_SET) != 0)
+    return false;
+  reloc_base = obj_relocbase(abfd);
 
 
       
 
 
-    /*
-      Make a pass through the symbol table to count line number entries and
-      put them into the correct asections
-      */
-    coff_count_linenumbers(abfd);
-    data_base = scn_base;
-    /* Work out the size of the reloc and linno areas */
+  /*
+     Make a pass through the symbol table to count line number entries and
+     put them into the correct asections
+     */
+  coff_count_linenumbers(abfd);
+  data_base = scn_base;
+  /* Work out the size of the reloc and linno areas */
 
-    for (current = abfd->sections; current != NULL; current = current->next) {
-	reloc_size += current->reloc_count * sizeof(struct reloc);
-	lnno_size += current->lineno_count * sizeof(struct lineno);
-	data_base += sizeof(struct scnhdr);
+  for (current = abfd->sections; current != NULL; current = current->next) {
+    reloc_size += current->reloc_count * sizeof(struct reloc);
+    lnno_size += current->lineno_count * sizeof(struct lineno);
+    data_base += sizeof(struct scnhdr);
+  }
+
+
+  lineno_base = reloc_base + reloc_size;
+  sym_base = lineno_base + lnno_size;
+
+  /* Indicate in each section->line_filepos its actual file address */
+  for (current = abfd->sections; current != NULL; current = current->next) {
+    if (current->lineno_count) {
+      current->line_filepos = lineno_base;
+      current->moving_line_filepos = lineno_base;
+      lineno_base += current->lineno_count * sizeof(struct lineno);
+
     }
-
-
-    lineno_base = reloc_base + reloc_size;
-    sym_base = lineno_base + lnno_size;
-
-    /* Indicate in each section->line_filepos its actual file address */
-    for (current = abfd->sections; current != NULL; current = current->next) {
-	if (current->lineno_count) {
-	    current->line_filepos = lineno_base;
-	    current->moving_line_filepos = lineno_base;
-	    lineno_base += current->lineno_count * sizeof(struct lineno);
-
-	}
-	else {
-	    current->line_filepos = 0;
-	}
-	if (current->reloc_count) {
-	    current->rel_filepos = reloc_base;
-	    reloc_base += current->reloc_count * sizeof(struct reloc);
-	}
-	else {
-	    current->rel_filepos = 0;
-	}
+    else {
+      current->line_filepos = 0;
     }
+    if (current->reloc_count) {
+      current->rel_filepos = reloc_base;
+      reloc_base += current->reloc_count * sizeof(struct reloc);
+    }
+    else {
+      current->rel_filepos = 0;
+    }
+  }
 
 
 
-    bfd_seek(abfd,
-	     (file_ptr) ((abfd->flags & EXEC_P) ?
-			 (FILHSZ + AOUTSZ) : FILHSZ),
-	     SEEK_SET);
-    {
+  bfd_seek(abfd,
+	   (file_ptr) ((abfd->flags & EXEC_P) ?
+		       (FILHSZ + AOUTSZ) : FILHSZ),
+	   SEEK_SET);
+  {
 #if 0
-	unsigned int    pad = abfd->flags & D_PAGED ? data_base : 0;
+    unsigned int    pad = abfd->flags & D_PAGED ? data_base : 0;
 #endif
-	unsigned int    pad = 0;
-	for (current = abfd->sections; current != NULL; current = current->next) {
-	    SCNHDR          section;
-	    strncpy(&(section.s_name[0]), current->name, 8);
-	    section.s_vaddr = current->vma + pad;
-	    section.s_paddr = current->vma + pad;
-	    section.s_size = current->size - pad;
-	    /*
-	      If this section has no size or is unloadable then the scnptr
-	      will be 0 too
-	      */
-	    if (current->size - pad == 0 ||
-		(current->flags & SEC_LOAD) == 0) {
-		section.s_scnptr = 0;
+    unsigned int    pad = 0;
+    for (current = abfd->sections; current != NULL; current = current->next) {
+      SCNHDR          section;
+      strncpy(&(section.s_name[0]), current->name, 8);
+      section.s_vaddr = current->vma + pad;
+      section.s_paddr = current->vma + pad;
+      section.s_size = current->size - pad;
+      /*
+	 If this section has no size or is unloadable then the scnptr
+	 will be 0 too
+	 */
+      if (current->size - pad == 0 ||
+	  (current->flags & SEC_LOAD) == 0) {
+	section.s_scnptr = 0;
 
-	    }
-	    else {
-		section.s_scnptr = current->filepos;
-	    }
-	    section.s_relptr = current->rel_filepos;
-	    section.s_lnnoptr = current->line_filepos;
-	    section.s_nreloc = current->reloc_count;
-	    section.s_nlnno = current->lineno_count;
-	    if (current->reloc_count != 0)
-		hasrelocs = true;
-	    if (current->lineno_count != 0)
-		haslinno = true;
+      }
+      else {
+	section.s_scnptr = current->filepos;
+      }
+      section.s_relptr = current->rel_filepos;
+      section.s_lnnoptr = current->line_filepos;
+      section.s_nreloc = current->reloc_count;
+      section.s_nlnno = current->lineno_count;
+      if (current->reloc_count != 0)
+	hasrelocs = true;
+      if (current->lineno_count != 0)
+	haslinno = true;
 
-	    if (!strcmp(current->name, _TEXT)) {
-		text_sec = current;
-		section.s_flags = STYP_TEXT; /* kind stupid optimisation */
-	    }
-	    else {
+      if (!strcmp(current->name, _TEXT)) {
+	text_sec = current;
+	section.s_flags = STYP_TEXT; /* kind stupid optimisation */
+      }
+      else {
 
-		if (!strcmp(current->name, _DATA)) {
-		    data_sec = current;
-		    section.s_flags = STYP_DATA; /* kind stupid
-						    optimisation */
-		}
-		else if (!strcmp(current->name, _BSS)) {
-		    bss_sec = current;
-		    section.s_flags = STYP_BSS;	/* kind stupid optimisation */
-		}
-	    }
-
-
-#ifdef I960
-	    section.s_align = (current->alignment_power
-			       ? 1 << current->alignment_power
-			       : 0);
-
-#endif
-	    swap_scnhdr(abfd, &section);
-	    bfd_write((void *) (&section), 1, SCNHSZ, abfd);
-	    pad = 0;
+	if (!strcmp(current->name, _DATA)) {
+	  data_sec = current;
+	  section.s_flags = STYP_DATA; /* kind stupid
+					  optimisation */
 	}
+	else if (!strcmp(current->name, _BSS)) {
+	  bss_sec = current;
+	  section.s_flags = STYP_BSS; /* kind stupid optimisation */
+	}
+      }
 
+
+#ifdef I960
+      section.s_align = (current->alignment_power
+			 ? 1 << current->alignment_power
+			 : 0);
+
+#endif
+      swap_scnhdr(abfd, &section);
+      bfd_write((void *) (&section), 1, SCNHSZ, abfd);
+      pad = 0;
     }
-    /* OK, now set up the filehdr... */
 
-    bfd_h_put_x(abfd, abfd->section_count, &file_header.f_nscns);
-    /*
-      We will NOT put a fucking timestamp in the header here. Every time you
-      put it back, I will come in and take it out again. I'm sorry. This
-      field does not belong here.  We fill it with a 0 so it compares the
-      same but is not a reasonable time. -- gnu@cygnus.com
-      */
-    /*
-      Well, I like it, so I'm conditionally compiling it in.
-      steve@cygnus.com
-      */
+  }
+  /* OK, now set up the filehdr... */
+
+  bfd_h_put_x(abfd, abfd->section_count, &file_header.f_nscns);
+  /*
+     We will NOT put a fucking timestamp in the header here. Every time you
+     put it back, I will come in and take it out again. I'm sorry. This
+     field does not belong here.  We fill it with a 0 so it compares the
+     same but is not a reasonable time. -- gnu@cygnus.com
+     */
+  /*
+     Well, I like it, so I'm conditionally compiling it in.
+     steve@cygnus.com
+     */
 #ifdef COFF_TIMESTAMP
-    bfd_h_put_x(abfd, time(0), &file_header.f_timdat);
+  bfd_h_put_x(abfd, time(0), &file_header.f_timdat);
 #else
-    bfd_h_put_x(abfd, 0, &file_header.f_timdat);
+  bfd_h_put_x(abfd, 0, &file_header.f_timdat);
 #endif
 
-    if (bfd_get_symcount(abfd) != 0)
-	bfd_h_put_x(abfd, sym_base, &file_header.f_symptr);
-    else
-	bfd_h_put_x(abfd, 0, &file_header.f_symptr);
+  if (bfd_get_symcount(abfd) != 0)
+    bfd_h_put_x(abfd, sym_base, &file_header.f_symptr);
+  else
+    bfd_h_put_x(abfd, 0, &file_header.f_symptr);
 
-    file_header.f_flags = 0;
+  file_header.f_flags = 0;
 
-    if (abfd->flags & EXEC_P)
-	bfd_h_put_x(abfd, sizeof(AOUTHDR), &file_header.f_opthdr);
-    else
-	bfd_h_put_x(abfd, 0, &file_header.f_opthdr);
+  if (abfd->flags & EXEC_P)
+    bfd_h_put_x(abfd, sizeof(AOUTHDR), &file_header.f_opthdr);
+  else
+    bfd_h_put_x(abfd, 0, &file_header.f_opthdr);
 
-    if (!hasrelocs)
-	file_header.f_flags |= F_RELFLG;
-    if (!haslinno)
-	file_header.f_flags |= F_LNNO;
-    if (0 == bfd_get_symcount(abfd))
-	file_header.f_flags |= F_LSYMS;
-    if (abfd->flags & EXEC_P)
-	file_header.f_flags |= F_EXEC;
-    if (!abfd->xvec->byteorder_big_p)
-	file_header.f_flags |= F_AR32WR;
-    /*
-      FIXME, should do something about the other byte orders and
-      architectures.
-      */
+  if (!hasrelocs)
+    file_header.f_flags |= F_RELFLG;
+  if (!haslinno)
+    file_header.f_flags |= F_LNNO;
+  if (0 == bfd_get_symcount(abfd))
+    file_header.f_flags |= F_LSYMS;
+  if (abfd->flags & EXEC_P)
+    file_header.f_flags |= F_EXEC;
+  if (!abfd->xvec->byteorder_big_p)
+    file_header.f_flags |= F_AR32WR;
+  /*
+     FIXME, should do something about the other byte orders and
+     architectures.
+     */
 
-    /* Set up architecture-dependent stuff */
+  /* Set up architecture-dependent stuff */
 
-    magic = 0;
-    flags = 0;
-    coff_set_flags(abfd, &magic, &flags);
-    file_header.f_flags |= flags;
+  magic = 0;
+  flags = 0;
+  coff_set_flags(abfd, &magic, &flags);
+  file_header.f_flags |= flags;
 
-    bfd_h_put_x(abfd, magic, &file_header.f_magic);
-    bfd_h_put_x(abfd, file_header.f_flags, &file_header.f_flags);
+  bfd_h_put_x(abfd, magic, &file_header.f_magic);
+  bfd_h_put_x(abfd, file_header.f_flags, &file_header.f_flags);
 
-    /* ...and the "opt"hdr... */
+  /* ...and the "opt"hdr... */
 #ifdef I960
-    bfd_h_put_x(abfd, (magic == I960ROMAGIC ? NMAGIC : OMAGIC),
-		&(exec_hdr(abfd)->magic));
+  bfd_h_put_x(abfd, (magic == I960ROMAGIC ? NMAGIC : OMAGIC),
+	      &(exec_hdr(abfd)->magic));
 #endif
 #if M88
-    exec_hdr(abfd)->magic = PAGEMAGIC3;
+  exec_hdr(abfd)->magic = PAGEMAGIC3;
 #endif
 
-    /* Now should write relocs, strings, syms */
-    obj_sym_filepos(abfd) = sym_base;
+  /* Now should write relocs, strings, syms */
+  obj_sym_filepos(abfd) = sym_base;
 
-    if (bfd_get_symcount(abfd) != 0) {
-	coff_mangle_symbols(abfd);
-	coff_write_symbols(abfd);
-	coff_write_linenumbers(abfd);
-	coff_write_relocs(abfd);
-    }
-    if (text_sec) {
-	bfd_h_put_x(abfd, text_sec->size, &exec_hdr(abfd)->tsize);
-	bfd_h_put_x(abfd,
-		    text_sec->size ? text_sec->vma : 0,
-		    &exec_hdr(abfd)->text_start);
-    }
-    if (data_sec) {
-	bfd_h_put_x(abfd, data_sec->size, &exec_hdr(abfd)->dsize);
-	bfd_h_put_x(abfd,
-		    data_sec->size ? data_sec->vma : 0,
-		    &exec_hdr(abfd)->data_start);
-    }
-    if (bss_sec) {
-	bfd_h_put_x(abfd, bss_sec->size, &exec_hdr(abfd)->bsize);
-    }
-    bfd_h_put_x(abfd, bfd_get_start_address(abfd), &exec_hdr(abfd)->entry);
+  if (bfd_get_symcount(abfd) != 0) {
+    coff_mangle_symbols(abfd);
+    coff_write_symbols(abfd);
+    coff_write_linenumbers(abfd);
+    coff_write_relocs(abfd);
+  }
+  if (text_sec) {
+    bfd_h_put_x(abfd, text_sec->size, &exec_hdr(abfd)->tsize);
+    bfd_h_put_x(abfd,
+		text_sec->size ? text_sec->vma : 0,
+		&exec_hdr(abfd)->text_start);
+  }
+  if (data_sec) {
+    bfd_h_put_x(abfd, data_sec->size, &exec_hdr(abfd)->dsize);
+    bfd_h_put_x(abfd,
+		data_sec->size ? data_sec->vma : 0,
+		&exec_hdr(abfd)->data_start);
+  }
+  if (bss_sec) {
+    bfd_h_put_x(abfd, bss_sec->size, &exec_hdr(abfd)->bsize);
+  }
+  bfd_h_put_x(abfd, bfd_get_start_address(abfd), &exec_hdr(abfd)->entry);
 
 
-    /* now write them */
-    bfd_h_put_x(abfd, bfd_get_symcount(abfd), &file_header.f_nsyms);
-    if (bfd_seek(abfd, 0L, SEEK_SET) != 0)
-	return false;
+  /* now write them */
+  bfd_h_put_x(abfd, bfd_get_symcount(abfd), &file_header.f_nsyms);
+  if (bfd_seek(abfd, 0L, SEEK_SET) != 0)
+    return false;
 
-    bfd_write((void *) &file_header, 1, FILHSZ, abfd);
+  bfd_write((void *) &file_header, 1, FILHSZ, abfd);
 
-    if (abfd->flags & EXEC_P) {
+  if (abfd->flags & EXEC_P) {
 
-	bfd_write((void *) exec_hdr(abfd), 1, AOUTSZ, abfd);
-    }
-    return true;
+    bfd_write((void *) exec_hdr(abfd), 1, AOUTSZ, abfd);
+  }
+  return true;
 }
 
 
@@ -1616,29 +1568,29 @@ static          boolean
 coff_close_and_cleanup(abfd)
     bfd            *abfd;
 {
-    if (!bfd_read_p(abfd))
-	switch (abfd->format) {
-	case bfd_archive:
-	    if (!_bfd_write_archive_contents(abfd))
-		return false;
-	    break;
-	case bfd_object:
-	    if (!coff_write_object_contents(abfd))
-		return false;
-	    break;
-	default:
-	    bfd_error = invalid_operation;
-	    return false;
-	}
+  if (!bfd_read_p(abfd))
+    switch (abfd->format) {
+    case bfd_archive:
+      if (!_bfd_write_archive_contents(abfd))
+	return false;
+      break;
+    case bfd_object:
+      if (!coff_write_object_contents(abfd))
+	return false;
+      break;
+    default:
+      bfd_error = invalid_operation;
+      return false;
+    }
 
 #define cleaner(ptr) if (abfd->ptr) free (abfd->ptr)
-    cleaner(tdata);
+  cleaner(tdata);
 
-    if (abfd->my_archive)
-	cleaner(filename);
+  if (abfd->my_archive)
+    cleaner(filename);
 
 #undef cleaner
-    return true;
+  return true;
 }
 
 
@@ -2385,11 +2337,11 @@ coff_get_reloc_upper_bound(abfd, asect)
     bfd            *abfd;
     sec_ptr         asect;
 {
-    if (bfd_get_format(abfd) != bfd_object) {
-	bfd_error = invalid_operation;
-	return 0;
-    }
-    return (asect->reloc_count + 1) * sizeof(arelent *);
+  if (bfd_get_format(abfd) != bfd_object) {
+    bfd_error = invalid_operation;
+    return 0;
+  }
+  return (asect->reloc_count + 1) * sizeof(arelent *);
 }
 
 
@@ -2399,81 +2351,81 @@ coff_slurp_reloc_table(abfd, asect, symbols)
     sec_ptr         asect;
     asymbol       **symbols;
 {
-    struct reloc   *native_relocs;
-    arelent        *reloc_cache;
-    if (asect->relocation)
-	return true;
-    if (asect->reloc_count == 0)
-	return true;
-    if (!coff_slurp_symbol_table(abfd))
-	return false;
-    native_relocs =
-	(struct reloc *) buy_and_read(abfd,
-				      asect->rel_filepos,
-				      SEEK_SET,
-				      (size_t) (sizeof(struct reloc) *
-						asect->reloc_count));
-    reloc_cache = (arelent *)
-	malloc((size_t) (asect->reloc_count * sizeof(arelent)));
+  struct reloc   *native_relocs;
+  arelent        *reloc_cache;
+  if (asect->relocation)
+    return true;
+  if (asect->reloc_count == 0)
+    return true;
+  if (!coff_slurp_symbol_table(abfd))
+    return false;
+  native_relocs =
+    (struct reloc *) buy_and_read(abfd,
+				  asect->rel_filepos,
+				  SEEK_SET,
+				  (size_t) (sizeof(struct reloc) *
+					    asect->reloc_count));
+  reloc_cache = (arelent *)
+    malloc((size_t) (asect->reloc_count * sizeof(arelent)));
 
-    if (reloc_cache == NULL) {
-	bfd_error = no_memory;
-	return (BFD_FAILURE);
-    } {				/* on error */
-	arelent        *cache_ptr;
-	struct reloc   *src;
-	for (cache_ptr = reloc_cache,
-	     src = native_relocs;
-	     cache_ptr < reloc_cache + asect->reloc_count;
-	     cache_ptr++,
-	     src++) {
-	    asymbol        *ptr;
-	    swap_reloc(abfd, src);
-	    src->r_symndx += obj_symbol_slew(abfd);
-	    cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[src->r_symndx];
+  if (reloc_cache == NULL) {
+    bfd_error = no_memory;
+    return (BFD_FAILURE);
+  } {				/* on error */
+    arelent        *cache_ptr;
+    struct reloc   *src;
+    for (cache_ptr = reloc_cache,
+	 src = native_relocs;
+	 cache_ptr < reloc_cache + asect->reloc_count;
+	 cache_ptr++,
+	 src++) {
+      asymbol        *ptr;
+      swap_reloc(abfd, src);
+      src->r_symndx += obj_symbol_slew(abfd);
+      cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[src->r_symndx];
 
-	    ptr = *(cache_ptr->sym_ptr_ptr);
-	    cache_ptr->address = src->r_vaddr;
-	    /*
-	       The symbols definitions that we have read in have been
-	       relocated as if their sections started at 0. But the offsets
-	       refering to the symbols in the raw data have not been
-	       modified, so we have to have a negative addend to compensate.
-	    */
+      ptr = *(cache_ptr->sym_ptr_ptr);
+      cache_ptr->address = src->r_vaddr;
+      /*
+	 The symbols definitions that we have read in have been
+	 relocated as if their sections started at 0. But the offsets
+	 refering to the symbols in the raw data have not been
+	 modified, so we have to have a negative addend to compensate.
+	 */
 
-	    if (ptr->the_bfd == abfd && ptr->section != (asection *) NULL) {
-		cache_ptr->addend = -ptr->section->vma;
-	    }
-	    else {
-		cache_ptr->addend = 0;
-	    }
+      if (ptr->the_bfd == abfd && ptr->section != (asection *) NULL) {
+	cache_ptr->addend = -ptr->section->vma;
+      }
+      else {
+	cache_ptr->addend = 0;
+      }
 
-	    cache_ptr->address -= asect->vma;
+      cache_ptr->address -= asect->vma;
 
-	    cache_ptr->section = (asection *) NULL;
+      cache_ptr->section = (asection *) NULL;
 
 #if I960
-	    cache_ptr->howto = howto_table + src->r_type;
+      cache_ptr->howto = howto_table + src->r_type;
 #endif
 #if M88
-	    if (src->r_type >= R_PCR16L && src->r_type <= R_VRT32) {
-		cache_ptr->howto = howto_table + src->r_type - R_PCR16L;
-	    }
-	    else {
-		BFD_ASSERT(0);
-	    }
+      if (src->r_type >= R_PCR16L && src->r_type <= R_VRT32) {
+	cache_ptr->howto = howto_table + src->r_type - R_PCR16L;
+      }
+      else {
+	BFD_ASSERT(0);
+      }
 #endif
 #if M68
-	    cache_ptr->howto = howto_table + src->r_type;
+      cache_ptr->howto = howto_table + src->r_type;
 #endif
-
-	}
 
     }
 
-    free(native_relocs);
-    asect->relocation = reloc_cache;
-    return true;
+  }
+
+  free(native_relocs);
+  asect->relocation = reloc_cache;
+  return true;
 }
 
 
