@@ -1,3 +1,7 @@
+Mon Dec 27 13:55:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Document S type attribute.
+
 Sun Dec 26 20:46:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* stabs.texinfo: Add notes about stabs-in-som where appropriate.

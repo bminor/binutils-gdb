@@ -250,10 +250,6 @@ those from the C++ type descriptor @samp{@@}.  The attributes are:
 @var{boundary} is an integer specifying the alignment.  I assume it
 applies to all variables of this type.
 
-@item s@var{size}
-Size in bits of a variable of this type.  This is fully supported by GDB
-4.11 and later.
-
 @item p@var{integer}
 Pointer class (for checking).  Not sure what this means, or how
 @var{integer} is interpreted.
@@ -262,6 +258,16 @@ Pointer class (for checking).  Not sure what this means, or how
 Indicate this is a packed type, meaning that structure fields or array
 elements are placed more closely in memory, to save memory at the
 expense of speed.
+
+@item s@var{size}
+Size in bits of a variable of this type.  This is fully supported by GDB
+4.11 and later.
+
+@item S
+Indicate that this type is a string instead of an array of characters,
+or a bitstring instead of a set.  It doesn't change the layout of the
+data being represented, but does enable the debugger to know which type
+it is.
 @end table
 
 All of this can make the string field quite long.  All versions of GDB,
@@ -1625,6 +1631,9 @@ Pascal set type.  @var{type-information} must be a small type such as an
 enumeration or a subrange, and the type is a bitmask whose length is
 specified by the number of elements in @var{type-information}.
 
+In CHILL, if it is a bitstring instead of a set, also use the @samp{S}
+type attribute (@pxref{String Field}).
+
 @item * @var{type-information}
 Pointer to @var{type-information}.
 @end table
@@ -1821,6 +1830,10 @@ string.  I don't know the difference.
 @item N
 Pascal Stringptr.  What is this?  This is an AIX feature.
 @end table
+
+Languages, such as CHILL which have a string type which is basically
+just an array of characters use the @samp{S} type attribute
+(@pxref{String Field}).
 
 @node Enumerations
 @section Enumerations
