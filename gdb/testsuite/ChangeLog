@@ -1,3 +1,9 @@
+Thu Oct 14 11:40:30 1993  Jeffrey Law  (law@cs.uah.edu)
+
+	* configure.in (configdirs): Add gdb.disasm
+	* gdb.disasm: New directory for GDB disassembler tests.
+	* gdb.disasm/hppa.{exp,s,mt}: Disassembly tests for the HPPA.
+
 Thu Oct 14 11:40:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/help.exp: Don't test "help set".
