@@ -1,3 +1,10 @@
+Wed Apr 22 09:36:08 1992  Fred Fish  (fnf@cygnus.com)
+
+	* tekhex.c (struct data_struct):  Convert from typedef that
+	typedefs nothing to a normal structure declaration.
+	* tekhex.c (pass_over):  Prototype args for function that 
+	second arg points to.
+
 Mon Apr 20 22:22:51 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: remove old style staging.  Do not print recursion
