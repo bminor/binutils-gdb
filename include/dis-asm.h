@@ -51,9 +51,15 @@ typedef struct disassemble_info {
   unsigned long mach;
   /* Endianness (for bi-endian cpus).  Mono-endian cpus can ignore this.  */
   enum bfd_endian endian;
-  /* The symbol at the start of the function being disassembled.  This
-     is not set reliably, but if it is not NULL, it is correct.  */
-  asymbol *symbol;
+
+  /* An array of pointers to symbols either at the location being disassembled
+     or at the start of the function being disassembled.  The array is sorted
+     so that the first symbol is intended to be the one used.  The others are
+     present for any misc. purposes.  This is not set reliably, but if it is
+     not NULL, it is correct.  */
+  asymbol **symbols;
+  /* Number of symbols in array.  */
+  int num_symbols;
 
   /* For use by the disassembler.
      The top 16 bits are reserved for public use (and are documented here).
@@ -166,10 +172,10 @@ extern int print_insn_little_powerpc	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_rs6000		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_w65		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_d10v		PARAMS ((bfd_vma, disassemble_info*));
-/* start-sanitize-d30v */
 extern int print_insn_d30v		PARAMS ((bfd_vma, disassemble_info*));
-/* end-sanitize-d30v */
 extern int print_insn_v850		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_tic30		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_vax		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-tic80 */
 extern int print_insn_tic80		PARAMS ((bfd_vma, disassemble_info*));
 /* end-sanitize-tic80 */
@@ -222,7 +228,8 @@ extern int generic_symbol_at_address
 #define INIT_DISASSEMBLE_INFO_NO_ARCH(INFO, STREAM, FPRINTF_FUNC) \
   (INFO).fprintf_func = (FPRINTF_FUNC), \
   (INFO).stream = (STREAM), \
-  (INFO).symbol = NULL, \
+  (INFO).symbols = NULL, \
+  (INFO).num_symbols = 0, \
   (INFO).buffer = NULL, \
   (INFO).buffer_vma = 0, \
   (INFO).buffer_length = 0, \
