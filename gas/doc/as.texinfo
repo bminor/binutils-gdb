@@ -7112,48 +7112,110 @@ set addr(rd),imm4       subl rrd,addr(rs)
 @node Machine Dependencies
 @chapter MIPS Dependent Features
 @end ifclear
-The MIPS @value{AS} supports the MIPS R2000 and R3000 processors.
 
-It ignores the @samp{-nocpp} option.
+@cindex MIPS R2000
+@cindex MIPS R3000
+@sc{gnu} @code{@value{AS}} for @sc{mips} architectures supports the @sc{mips}
+@sc{r2000} and @sc{r3000} processors.  For information about the @sc{mips}
+instruction set, see @cite{MIPS RISC Architecture}, by Kane and Heindrich
+(Prentice-Hall).
 
-Not all traditional MIPS macro instructions are currently supported.
-Specifically, @code{li.d} and @code{li.s} are not currently supported.
+@menu
+* MIPS Opts::	Assembler options
+* MIPS Object::	ECOFF object code
+* MIPS Stabs::	Directives for debugging information
+* MIPS Missing::	Missing instructions
+@end menu
 
-Assembling for a MIPS ECOFF target supports some additional sections
+@node MIPS Opts
+@section Assembler options
+
+The @sc{mips} configurations of @sc{gnu} @code{@value{AS}} support three
+special options, and accept one other for command-line compatibility.
+
+@table @code
+@cindex @code{-G} option (MIPS)
+@item -G @var{num}
+This option sets the largest size of an object that can be referenced
+implicitly with the @code{gp} register.  It is only accepted for targets
+that use @sc{ecoff} format.  The default value is 8.
+
+@cindex @code{-EB} option (MIPS)
+@cindex @code{-EL} option (MIPS)
+@cindex MIPS big-endian output
+@cindex MIPS little-endian output
+@cindex big-endian output, MIPS
+@cindex little-endian output, MIPS
+@item -EB
+@itemx -EL
+Any @sc{mips} configuration of @code{@value{AS}} can select big-endian or
+little-endian output at run time (unlike the other @sc{gnu} development
+tools, which must be configured for one or the other).  Use @samp{-EB}
+to select big-endian output, and @samp{-EL} for little-endian.
+
+@cindex @code{-nocpp} ignored (MIPS)
+@item -nocpp
+This option is ignored.  It is accepted for command-line compatibility with
+other assemblers, which use it to turn off C style preprocessing.  With
+@sc{gnu} @code{@value{AS}}, there is no need for @samp{-nocpp}, because the
+@sc{gnu} assembler itself never runs the C preprocessor.
+@end table
+
+@node MIPS Object
+@section MIPS ECOFF object code
+
+@cindex ECOFF sections
+@cindex MIPS ECOFF sections
+Assembling for a @sc{mips} @sc{ecoff} target supports some additional sections
 besides the usual @code{.text}, @code{.data} and @code{.bss}.  The
 additional sections are @code{.rdata}, used for read-only data,
 @code{.sdata}, used for small data, and @code{.sbss}, used for small
 common objects.
 
-When assembling for ECOFF, the assembler automatically uses the @code{$gp}
-(@code{$28}) register when forming the address of a small object.  Any object
-in the @code{.sdata} or @code{.sbss} sections is considered ``small''.  For
-external objects or objects in the @code{.bss} section, you may use the
-@samp{-G} option to control the size of objects for which the @code{$gp}
-register is used; the default value is 8, meaning that a reference to any
-object eight bytes or smaller uses @code{$gp}.  Passing @samp{-G 0} to
-@value{AS} prevents it from using the @code{$gp} register at all.  The size of
-an object in the @code{.bss} section is set by the @code{.comm} or
-@code{.lcomm} directive that defines it.  The size of an external object may be
-set using the @code{.extern} directive.  For example, @samp{.extern sym,4}
-declares that the object at @code{sym} is 4 bytes in length, while leaving
-@code{sym} otherwise undefined.
+@cindex small objects, MIPS ECOFF
+@cindex @code{gp} register, MIPS
+When assembling for @sc{ecoff}, the assembler uses the @code{$gp} (@code{$28})
+register to form the address of a ``small object''.  Any object in the
+@code{.sdata} or @code{.sbss} sections is considered ``small'' in this sense.
+For external objects, or for objects in the @code{.bss} section, you can use
+the @sc{gcc} @samp{-G} option to control the size of objects addressed via
+@code{$gp}; the default value is 8, meaning that a reference to any object
+eight bytes or smaller uses @code{$gp}.  Passing @samp{-G 0} to
+@code{@value{AS}} prevents it from using the @code{$gp} register on the basis
+of object size (but the assembler uses @code{$gp} for objects in @code{.sdata}
+or @code{sbss} in any case).  The size of an object in the @code{.bss} section
+is set by the @code{.comm} or @code{.lcomm} directive that defines it.  The
+size of an external object may be set with the @code{.extern} directive.  For
+example, @samp{.extern sym,4} declares that the object at @code{sym} is 4 bytes
+in length, whie leaving @code{sym} otherwise undefined.
 
-Using small ECOFF objects requires linker support, and assumes that the
-@code{$gp} register was initialized correctly (normally done automatically
-by the startup code).  MIPS ECOFF assembly code must avoid modifying the
+Using small @sc{ecoff} objects requires linker support, and assumes that the
+@code{$gp} register is correctly initialized (normally done automatically by
+the startup code).  @sc{mips} @sc{ecoff} assembly code must not modify the
 @code{$gp} register.
 
-MIPS ECOFF @code{@value{AS}} supports several directives used for generating
-debugging information which are not support by traditional MIPS
-assemblers.  These are @code{.def}, @code{.endef}, @code{.dim},
-@code{.file}, @code{.scl}, @code{.size}, @code{.tag}, @code{.type},
-@code{.val}, @code{.stabd}, @code{.stabn}, and @code{.stabs}.  The
-debugging information generated by the three @code{.stab} directives can
-only be read by GDB, not by traditional MIPS debuggers (this enhancement
-is required to fully support C++ debugging).  These directives are
-primarily used by compilers, not assembly language programmers, and are
-described elsewhere in this manual.
+@node MIPS Stabs
+@section Directives for debugging information
+
+@cindex MIPS debugging directives
+@sc{mips} @sc{ecoff} @code{@value{AS}} supports several directives used for
+generating debugging information which are not support by traditional @sc{mips}
+assemblers.  These are @code{.def}, @code{.endef}, @code{.dim}, @code{.file},
+@code{.scl}, @code{.size}, @code{.tag}, @code{.type}, @code{.val},
+@code{.stabd}, @code{.stabn}, and @code{.stabs}.  The debugging information
+generated by the three @code{.stab} directives can only be read by @sc{gdb},
+not by traditional @sc{mips} debuggers (this enhancement is required to fully
+support C++ debugging).  These directives are primarily used by compilers, not
+assembly language programmers!
+
+@node MIPS Missing
+@section Missing instructions
+
+@cindex MIPS missing instructions
+@cindex missing instructions, MIPS
+Not all traditional @sc{mips} instructions are currently supported.
+Specifically, @code{li.d} and @code{li.s} are not currently supported.
+
 @end ifset
 
 @ifset GENERIC
