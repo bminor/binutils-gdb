@@ -120,7 +120,9 @@ typedef unsigned       char  unsigned8;
 #  if defined(_MFC_VER) || defined(__CC_NORCROFT) /* When using MS Visual C/C++ v4.2 */
 #    define bool _bool /* avoids "'bool' is reserved word" warning      */
 #  else
-     typedef _bool bool;
+#    ifndef bool
+       typedef _bool bool;
+#    endif
 #  endif
 #  define true _true
 #  define false _false

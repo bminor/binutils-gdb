@@ -1,3 +1,8 @@
+2002-02-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* rdi-share/host.h: Only provide a typedef for bool if it is not
+	defined.
+
 2002-02-04  Michael Snyder  <msnyder@redhat.com>
 
 	* breakpoint.h (enum bptype): Add new overlay event bp type.
