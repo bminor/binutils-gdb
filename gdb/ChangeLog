@@ -1,5 +1,8 @@
 Wed Nov  3 09:20:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* findvar.c (value_of_register): Rename val to reg_val to avoid
+	name conflict with some (e.g. tm-m68k.h) REGISTER_CONVERT_TO_VIRTUAL.
+
 	* main.c: Add variables source_line_number, source_file_name,
 	source_error, source_error_allocated, and source_pre_error.
 	(command_line_input): If source_file_name set, increment
