@@ -520,8 +520,6 @@ Special entry points for gas to swap coff parts
 .
 .} bfd_coff_backend_data;
 .
-.extern bfd_coff_backend_data bfd_coff_std_swap_table;
-.
 .#define coff_backend_info(abfd) ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
 .
 .#define bfd_coff_swap_aux_in(a,e,t,c,i) \
@@ -4326,7 +4324,7 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
 }
 
 #if !defined (NO_COFF_SYMBOLS) && !defined (NO_COFF_LINENOS)
-bfd_coff_backend_data bfd_coff_std_swap_table = {
+static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
  coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
  coff_swap_aux_out, coff_swap_sym_out,
  coff_swap_lineno_out, coff_swap_reloc_out,
