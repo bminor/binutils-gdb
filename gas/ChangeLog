@@ -1,3 +1,18 @@
+2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (all error messages): Normalize capitalization of messages.
+
+	* tc-arm.h (md_operand): Delete define.
+	* tc-arm.c (in_my_get_expression): New static variable.
+	(my_get_expression): Set and clear it.
+	(md_operand): New function.  If called from my_get_expression
+	put the error in inst.error.
+	(output_inst): Now takes argument of instruction being assembled.
+	Print it out with any error message.
+	(do_ldst, do_ldstv4, thumb_load_store): Fault attempt to use a store
+	with '=' syntax.
+	(end_of_line): Don't update inst.error if it is already set.
+
 2002-01-11  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c ((do_ldst): Fix handling an immediate expression pseudo

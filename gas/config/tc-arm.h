@@ -169,8 +169,6 @@ void armelf_frob_symbol PARAMS ((symbolS *, int *));
 
 #define OPTIONAL_REGISTER_PREFIX '%'
 
-#define md_operand(x)
-
 #define LOCAL_LABEL(name) (name[0] == '.' && (name[1] == 'L'))
 #define LOCAL_LABELS_FB   1
 #ifdef OBJ_ELF

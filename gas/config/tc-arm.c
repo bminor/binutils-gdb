@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -592,8 +592,8 @@ struct reg_map
 struct reg_map all_reg_maps[] =
 {
   {rn_table,        15, NULL, N_("ARM register expected")},
-  {cp_table,        15, NULL, N_("Bad or missing co-processor number")},
-  {cn_table,        15, NULL, N_("Co-processor register expected")},
+  {cp_table,        15, NULL, N_("bad or missing co-processor number")},
+  {cn_table,        15, NULL, N_("co-processor register expected")},
   {fn_table,         7, NULL, N_("FPA register expected")},
   {mav_mvf_table,   15, NULL, N_("Maverick MVF register expected")},
   {mav_mvd_table,   15, NULL, N_("Maverick MVD register expected")},
@@ -800,7 +800,7 @@ static valueT md_chars_to_number	PARAMS ((char *, int));
 static void build_reg_hsh	PARAMS ((struct reg_map *));
 static void insert_reg_alias	PARAMS ((char *, int, struct hash_control *));
 static int create_register_alias	PARAMS ((char *, char *));
-static void output_inst		PARAMS ((void));
+static void output_inst		PARAMS ((const char *));
 static int accum0_required_here PARAMS ((char **));
 static int ld_mode_required_here PARAMS ((char **));
 static void do_branch25         PARAMS ((char *));
@@ -1788,9 +1788,9 @@ static const struct thumb_opcode tinsns[] =
   {"bkpt",	0xbe00,		2,	ARM_EXT_V5T, do_t_bkpt},
 };
 
-#define BAD_ARGS 	_("Bad arguments to instruction")
+#define BAD_ARGS 	_("bad arguments to instruction")
 #define BAD_PC 		_("r15 not allowed here")
-#define BAD_COND 	_("Instruction is not conditional")
+#define BAD_COND 	_("instruction is not conditional")
 #define ERR_NO_ACCUM	_("acc0 expected")
 
 static struct hash_control * arm_ops_hsh   = NULL;
@@ -1930,7 +1930,7 @@ add_to_lit_pool ()
     {
       if (next_literal_pool_place >= MAX_LITERAL_POOL_SIZE)
 	{
-	  inst.error = _("Literal Pool Overflow");
+	  inst.error = _("literal pool overflow");
 	  return FAIL;
 	}
 
@@ -2072,7 +2072,7 @@ static void
 s_req (a)
      int a ATTRIBUTE_UNUSED;
 {
-  as_bad (_("Invalid syntax for .req directive."));
+  as_bad (_("invalid syntax for .req directive"));
 }
 
 static void
@@ -2147,10 +2147,10 @@ s_align (unused)
 
   temp = get_absolute_expression ();
   if (temp > max_alignment)
-    as_bad (_("Alignment too large: %d. assumed."), temp = max_alignment);
+    as_bad (_("alignment too large: %d assumed"), temp = max_alignment);
   else if (temp < 0)
     {
-      as_bad (_("Alignment negative. 0 assumed."));
+      as_bad (_("alignment negative. 0 assumed."));
       temp = 0;
     }
 
@@ -2234,7 +2234,7 @@ s_thumb_set (equiv)
   if (*input_line_pointer != ',')
     {
       *end_name = 0;
-      as_bad (_("Expected comma after name \"%s\""), name);
+      as_bad (_("expected comma after name \"%s\""), name);
       *end_name = delim;
       ignore_rest_of_line ();
       return;
@@ -2421,12 +2421,12 @@ s_code (unused)
 
 static void
 end_of_line (str)
-     char * str;
+     char *str;
 {
   skip_whitespace (str);
 
-  if (* str != '\0')
-    inst.error = _("Garbage following instruction");
+  if (*str != '\0' && !inst.error)
+    inst.error = _("garbage following instruction");
 }
 
 static int
@@ -2476,7 +2476,7 @@ reg_required_here (str, shift)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  sprintf (buff, _("Register expected, not '%.100s'"), start);
+  sprintf (buff, _("register expected, not '%.100s'"), start);
   inst.error = buff;
 
   return FAIL;
@@ -2582,14 +2582,14 @@ co_proc_number (str)
 	      processor = processor * 10 + *(*str)++ - '0';
 	      if (processor > 15)
 		{
-		  inst.error = _("Illegal co-processor number");
+		  inst.error = _("illegal co-processor number");
 		  return FAIL;
 		}
 	    }
 	}
       else
 	{
-	  inst.error = _("Bad or missing co-processor number");
+	  inst.error = _("bad or missing co-processor number");
 	  return FAIL;
 	}
     }
@@ -2644,7 +2644,7 @@ cp_reg_required_here (str, where)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  inst.error = _("Co-processor register expected");
+  inst.error = _("co-processor register expected");
 
   /* Restore the start point.  */
   *str = start;
@@ -2667,7 +2667,7 @@ fp_reg_required_here (str, where)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  inst.error = _("Floating point register expected");
+  inst.error = _("floating point register expected");
 
   /* Restore the start point.  */
   *str = start;
@@ -2863,7 +2863,7 @@ do_mrs (str)
     skip = 8;
   else
     {
-      inst.error = _("{C|S}PSR expected");
+      inst.error = _("CPSR or SPSR expected");
       return;
     }
 
@@ -2944,7 +2944,7 @@ do_msr (str)
 
       if (value == (unsigned) FAIL)
 	{
-	  inst.error = _("Invalid constant");
+	  inst.error = _("invalid constant");
 	  return;
 	}
 
@@ -3434,7 +3434,7 @@ do_co_reg2c (str)
   /* Unpredictable result if rd or rn is R15.  */
   if (rd == REG_PC || rn == REG_PC)
     as_tsktsk
-      (_("Warning: Instruction unpredictable when using r15"));
+      (_("Warning: instruction unpredictable when using r15"));
 
   if (skip_past_comma (& str) == FAIL
       || cp_reg_required_here (& str, 0) == FAIL)
@@ -4064,7 +4064,7 @@ do_ldrd (str)
   /* inst.instruction has now been zapped with Rd and the addressing mode.  */
   if (rd & 1)		/* Unpredictable result if Rd is odd.  */
     {
-      inst.error = _("Destination register must be even");
+      inst.error = _("destination register must be even");
       return;
     }
 
@@ -4182,6 +4182,8 @@ walk_no_bignums (sp)
   return 0;
 }
 
+static int in_my_get_expression = 0;
+
 static int
 my_get_expression (ep, str)
      expressionS * ep;
@@ -4192,7 +4194,17 @@ my_get_expression (ep, str)
 
   save_in = input_line_pointer;
   input_line_pointer = *str;
+  in_my_get_expression = 1;
   seg = expression (ep);
+  in_my_get_expression = 0;
+
+  if (ep->X_op == O_illegal)
+    {
+      /* We found a bad expression in md_operand().  */
+      *str = input_line_pointer;
+      input_line_pointer = save_in;
+      return 1;
+    }
 
 #ifdef OBJ_AOUT
   if (seg != absolute_section
@@ -4217,7 +4229,7 @@ my_get_expression (ep, str)
 	      || (ep->X_op_symbol
 		  && walk_no_bignums (ep->X_op_symbol)))))
     {
-      inst.error = _("Invalid constant");
+      inst.error = _("invalid constant");
       *str = input_line_pointer;
       input_line_pointer = save_in;
       return 1;
@@ -4226,6 +4238,20 @@ my_get_expression (ep, str)
   *str = input_line_pointer;
   input_line_pointer = save_in;
   return 0;
+}
+
+/* We handle all bad expressions here, so that we can report the faulty 
+   instruction in the error message.  */
+void
+md_operand(expr)
+     expressionS *expr;
+{
+  if (in_my_get_expression)
+    {
+      expr->X_op = O_illegal;
+      if (inst.error == NULL)
+	inst.error = _("bad expression");
+    }
 }
 
 /* UNRESTRICT should be one if <shift> <register> is permitted for this
@@ -4247,7 +4273,7 @@ decode_shift (str, unrestrict)
 
   if (p == * str)
     {
-      inst.error = _("Shift expression expected");
+      inst.error = _("shift expression expected");
       return FAIL;
     }
 
@@ -4258,7 +4284,7 @@ decode_shift (str, unrestrict)
 
   if (shift == NULL)
     {
-      inst.error = _("Shift expression expected");
+      inst.error = _("shift expression expected");
       return FAIL;
     }
 
@@ -4313,13 +4339,13 @@ decode_shift (str, unrestrict)
 	     about this though.  */
 	  if (num == 0)
 	    {
-	      as_warn (_("Shift of 0 ignored."));
+	      as_warn (_("shift of 0 ignored."));
 	      shift = & shift_names[0];
 	      assert (shift->properties->index == SHIFT_LSL);
 	    }
 	  else
 	    {
-	      inst.error = _("Invalid immediate shift");
+	      inst.error = _("invalid immediate shift");
 	      return FAIL;
 	    }
 	}
@@ -4474,7 +4500,7 @@ data_op2 (str)
 
 		  if (expr.X_op != O_constant)
 		    {
-		      inst.error = _("Constant expression expected");
+		      inst.error = _("constant expression expected");
 		      return FAIL;
 		    }
 
@@ -4483,7 +4509,7 @@ data_op2 (str)
 		      || (expr.X_add_number & 1) != 0
 		      || ((unsigned) inst.reloc.exp.X_add_number) > 255)
 		    {
-		      inst.error = _("Invalid constant");
+		      inst.error = _("invalid constant");
 		      return FAIL;
 		    }
 		  inst.instruction |= INST_IMMEDIATE;
@@ -4503,7 +4529,7 @@ data_op2 (str)
 					       inst.reloc.exp.X_add_number))
 		      == FAIL)
 		    {
-		      inst.error = _("Invalid constant");
+		      inst.error = _("invalid constant");
 		      return FAIL;
 		    }
 		}
@@ -4516,7 +4542,7 @@ data_op2 (str)
 	}
 
       (*str)++;
-      inst.error = _("Register or shift expression expected");
+      inst.error = _("register or shift expression expected");
       return FAIL;
     }
 }
@@ -4569,11 +4595,11 @@ fp_op2 (str)
 	      return SUCCESS;
 	    }
 
-	  inst.error = _("Invalid floating point immediate expression");
+	  inst.error = _("invalid floating point immediate expression");
 	  return FAIL;
 	}
       inst.error =
-	_("Floating point register or immediate expression expected");
+	_("floating point register or immediate expression expected");
       return FAIL;
     }
 }
@@ -4785,7 +4811,7 @@ do_ldst (str)
 
   if (skip_past_comma (&str) == FAIL)
     {
-      inst.error = _("Address expected");
+      inst.error = _("address expected");
       return;
     }
 
@@ -4874,6 +4900,12 @@ do_ldst (str)
     }
   else if (*str == '=')
     {
+      if ((inst.instruction & LOAD_BIT) == 0)
+	{
+	  inst.error = _("invalid pseudo operation");
+	  return;
+	}
+
       /* Parse an "ldr Rd, =expr" instruction; this is another pseudo op.  */
       str++;
 
@@ -4885,7 +4917,7 @@ do_ldst (str)
       if (inst.reloc.exp.X_op != O_constant
 	  && inst.reloc.exp.X_op != O_symbol)
 	{
-	  inst.error = _("Constant expression expected");
+	  inst.error = _("constant expression expected");
 	  return;
 	}
 
@@ -4969,7 +5001,7 @@ do_ldstt (str)
 
   if (skip_past_comma (& str) == FAIL)
     {
-      inst.error = _("Address expected");
+      inst.error = _("address expected");
       return;
     }
 
@@ -5111,7 +5143,7 @@ do_ldstv4 (str)
 
   if (skip_past_comma (& str) == FAIL)
     {
-      inst.error = _("Address expected");
+      inst.error = _("address expected");
       return;
     }
 
@@ -5202,6 +5234,12 @@ do_ldstv4 (str)
     }
   else if (*str == '=')
     {
+      if ((inst.instruction & LOAD_BIT) == 0)
+	{
+	  inst.error = _("invalid pseudo operation");
+	  return;
+	}
+
       /* XXX Does this work correctly for half-word/byte ops?  */
       /* Parse an "ldr Rd, =expr" instruction; this is another pseudo op.  */
       str++;
@@ -5214,7 +5252,7 @@ do_ldstv4 (str)
       if (inst.reloc.exp.X_op != O_constant
 	  && inst.reloc.exp.X_op != O_symbol)
 	{
-	  inst.error = _("Constant expression expected");
+	  inst.error = _("constant expression expected");
 	  return;
 	}
 
@@ -5315,7 +5353,7 @@ reg_list (strp)
 
 		  if (reg <= cur_reg)
 		    {
-		      inst.error = _("Bad range in register list");
+		      inst.error = _("bad range in register list");
 		      return FAIL;
 		    }
 
@@ -5323,7 +5361,7 @@ reg_list (strp)
 		    {
 		      if (range & (1 << i))
 			as_tsktsk
-			  (_("Warning: Duplicated register (r%d) in register list"),
+			  (_("Warning: duplicated register (r%d) in register list"),
 			   i);
 		      else
 			range |= 1 << i;
@@ -5332,10 +5370,10 @@ reg_list (strp)
 		}
 
 	      if (range & (1 << reg))
-		as_tsktsk (_("Warning: Duplicated register (r%d) in register list"),
+		as_tsktsk (_("Warning: duplicated register (r%d) in register list"),
 			   reg);
 	      else if (reg <= cur_reg)
-		as_tsktsk (_("Warning: Register range not in ascending order"));
+		as_tsktsk (_("Warning: register range not in ascending order"));
 
 	      range |= 1 << reg;
 	      cur_reg = reg;
@@ -5347,7 +5385,7 @@ reg_list (strp)
 
 	  if (*str++ != '}')
 	    {
-	      inst.error = _("Missing `}'");
+	      inst.error = _("missing `}'");
 	      return FAIL;
 	    }
 	}
@@ -5374,7 +5412,7 @@ reg_list (strp)
 		  regno &= -regno;
 		  regno = (1 << regno) - 1;
 		  as_tsktsk
-		    (_("Warning: Duplicated register (r%d) in register list"),
+		    (_("Warning: duplicated register (r%d) in register list"),
 		     regno);
 		}
 
@@ -5595,7 +5633,7 @@ do_bx (str)
 
   /* Note - it is not illegal to do a "bx pc".  Useless, but not illegal.  */
   if (reg == REG_PC)
-    as_tsktsk (_("Use of r15 in bx in ARM mode is not really useful"));
+    as_tsktsk (_("use of r15 in bx in ARM mode is not really useful"));
 
   end_of_line (str);
 }
@@ -5829,7 +5867,7 @@ do_fpa_ldmstm (str)
 
   if (inst.reloc.exp.X_op != O_constant)
     {
-      inst.error = _("Constant value required for number of registers");
+      inst.error = _("constant value required for number of registers");
       return;
     }
 
@@ -5898,7 +5936,7 @@ do_fpa_ldmstm (str)
 	  if (reg == REG_PC)
 	    {
 	      inst.error =
-		_("R15 not allowed as base register with write-back");
+		_("r15 not allowed as base register with write-back");
 	      return;
 	    }
 	}
@@ -6373,7 +6411,7 @@ thumb_shift (str, shift)
 
 	  if (shift_value > 32 || (shift_value == 32 && shift == THUMB_LSL))
 	    {
-	      inst.error = _("Invalid immediate for shift");
+	      inst.error = _("invalid immediate for shift");
 	      return;
 	    }
 
@@ -6532,6 +6570,12 @@ thumb_load_store (str, load_store, size)
     }
   else if (*str == '=')
     {
+      if (load_store != THUMB_LOAD)
+	{
+	  inst.error = _("invalid pseudo operation");
+	  return;
+	}
+
       /* Parse an "ldr Rd, =expr" instruction; this is another pseudo op.  */
       str++;
 
@@ -6597,12 +6641,12 @@ thumb_load_store (str, load_store, size)
 	}
       else if (Rb == REG_PC && load_store != THUMB_LOAD)
 	{
-	  inst.error = _("R15 based store not allowed");
+	  inst.error = _("r15 based store not allowed");
 	  return;
 	}
       else if (Ro != FAIL)
 	{
-	  inst.error = _("Invalid base register for register offset");
+	  inst.error = _("invalid base register for register offset");
 	  return;
 	}
 
@@ -6655,7 +6699,7 @@ thumb_load_store (str, load_store, size)
 
 	  if (offset & ~(0x1f << size))
 	    {
-	      inst.error = _("Invalid offset");
+	      inst.error = _("invalid offset");
 	      return;
 	    }
 	  inst.instruction |= (offset >> size) << 6;
@@ -7522,7 +7566,7 @@ do_t_ldmstm (str)
     return;
 
   if (*str != '!')
-    as_warn (_("Inserted missing '!': load/store multiple always writes back base register"));
+    as_warn (_("inserted missing '!': load/store multiple always writes back base register"));
   else
     str++;
 
@@ -7538,7 +7582,7 @@ do_t_ldmstm (str)
     {
       /* This really doesn't seem worth it.  */
       inst.reloc.type = BFD_RELOC_NONE;
-      inst.error = _("Expression too complex");
+      inst.error = _("expression too complex");
       return;
     }
 
@@ -7590,7 +7634,7 @@ do_t_lds (str)
       || *str++ != ']')
     {
       if (! inst.error)
-	inst.error = _("Syntax: ldrs[b] Rd, [Rb, Ro]");
+	inst.error = _("syntax: ldrs[b] Rd, [Rb, Ro]");
       return;
     }
 
@@ -7638,7 +7682,7 @@ do_t_push_pop (str)
     {
       /* This really doesn't seem worth it.  */
       inst.reloc.type = BFD_RELOC_NONE;
-      inst.error = _("Expression too complex");
+      inst.error = _("expression too complex");
       return;
     }
 
@@ -7766,7 +7810,7 @@ build_reg_hsh (map)
   const struct reg_entry *r;
 
   if ((map->htab = hash_new ()) == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+    as_fatal (_("virtual memory exhausted"));
 
   for (r = map->names; r->name != NULL; r++)
     insert_reg (r, map->htab);
@@ -7944,7 +7988,7 @@ md_begin ()
       || (arm_cond_hsh = hash_new ()) == NULL
       || (arm_shift_hsh = hash_new ()) == NULL
       || (arm_psr_hsh = hash_new ()) == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+    as_fatal (_("virtual memory exhausted"));
 
   build_arm_ops_hsh ();
   for (i = 0; i < sizeof (tinsns) / sizeof (struct thumb_opcode); i++)
@@ -8139,7 +8183,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return _("Bad call to MD_ATOF()");
+      return _("bad call to MD_ATOF()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -8398,7 +8442,7 @@ md_apply_fix3 (fixP, valP, seg)
 	    else
 	      {
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("Unable to compute ADRL instructions for PC offset of 0x%lx"),
+			      _("unable to compute ADRL instructions for PC offset of 0x%lx"),
 			      value);
 		break;
 	      }
@@ -8508,7 +8552,7 @@ md_apply_fix3 (fixP, valP, seg)
 	{
 	  if (((unsigned long) value) > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid swi expression"));
+			  _("invalid swi expression"));
 	  newval = md_chars_to_number (buf, THUMB_SIZE) & 0xff00;
 	  newval |= value;
 	  md_number_to_chars (buf, newval, THUMB_SIZE);
@@ -8517,7 +8561,7 @@ md_apply_fix3 (fixP, valP, seg)
 	{
 	  if (((unsigned long) value) > 0x00ffffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid swi expression"));
+			  _("invalid swi expression"));
 	  newval = md_chars_to_number (buf, INSN_SIZE) & 0xff000000;
 	  newval |= value;
 	  md_number_to_chars (buf, newval, INSN_SIZE);
@@ -8527,7 +8571,7 @@ md_apply_fix3 (fixP, valP, seg)
     case BFD_RELOC_ARM_MULTI:
       if (((unsigned long) value) > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Invalid expression in load/store multiple"));
+		      _("invalid expression in load/store multiple"));
       newval = value | md_chars_to_number (buf, INSN_SIZE);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
@@ -8580,7 +8624,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  if (! fixP->fx_done)
 #endif
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("gas can't handle same-section branch dest >= 0x04000000"));
+			  _("GAS can't handle same-section branch dest >= 0x04000000"));
 	}
 
       value >>= 2;
@@ -8622,7 +8666,7 @@ md_apply_fix3 (fixP, valP, seg)
 	value += diff;
 	if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("Branch out of range"));
+			_("branch out of range"));
 	newval = (newval & 0xff00) | ((value & 0x1ff) >> 1);
       }
       md_number_to_chars (buf, newval, THUMB_SIZE);
@@ -8638,7 +8682,7 @@ md_apply_fix3 (fixP, valP, seg)
 	value += diff;
 	if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("Branch out of range"));
+			_("branch out of range"));
 	newval = (newval & 0xf800) | ((value & 0xfff) >> 1);
       }
       md_number_to_chars (buf, newval, THUMB_SIZE);
@@ -8661,7 +8705,7 @@ md_apply_fix3 (fixP, valP, seg)
 	value += diff;
 	if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("Branch with link out of range"));
+			_("branch with link out of range"));
 
 	newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
 	newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
@@ -8737,7 +8781,7 @@ md_apply_fix3 (fixP, valP, seg)
       sign = value >= 0;
       if (value < -1023 || value > 1023 || (value & 3))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Illegal value for co-processor offset"));
+		      _("illegal value for co-processor offset"));
       if (value < 0)
 	value = -value;
       newval = md_chars_to_number (buf, INSN_SIZE) & 0xff7fff00;
@@ -8761,13 +8805,13 @@ md_apply_fix3 (fixP, valP, seg)
 
 	  if ((fixP->fx_frag->fr_address + fixP->fx_where + value) & 3)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, target not word aligned (0x%08X)"),
+			  _("invalid offset, target not word aligned (0x%08X)"),
 			  (unsigned int) (fixP->fx_frag->fr_address
 					  + fixP->fx_where + value));
 
 	  if ((value + 2) & ~0x3fe)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"), value);
 
 	  /* Round up, since pc will be rounded down.  */
 	  newval |= (value + 2) >> 2;
@@ -8776,28 +8820,28 @@ md_apply_fix3 (fixP, valP, seg)
 	case 9: /* SP load/store.  */
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value >> 2;
 	  break;
 
 	case 6: /* Word load/store.  */
 	  if (value & ~0x7c)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value << 4; /* 6 - 2.  */
 	  break;
 
 	case 7: /* Byte load/store.  */
 	  if (value & ~0x1f)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value << 6;
 	  break;
 
 	case 8: /* Halfword load/store.  */
 	  if (value & ~0x3e)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value << 5; /* 6 - 1.  */
 	  break;
 
@@ -8836,7 +8880,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  {
 	    if (value & ~0x1fc)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("Invalid immediate for stack address calculation"));
+			    _("invalid immediate for stack address calculation"));
 	    newval = subtract ? T_OPCODE_SUB_ST : T_OPCODE_ADD_ST;
 	    newval |= value >> 2;
 	  }
@@ -8845,7 +8889,7 @@ md_apply_fix3 (fixP, valP, seg)
 	    if (subtract ||
 		value & ~0x3fc)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("Invalid immediate for address calculation (value = 0x%08lX)"),
+			    _("invalid immediate for address calculation (value = 0x%08lX)"),
 			    (unsigned long) value);
 	    newval = (rs == REG_PC ? T_OPCODE_ADD_PC : T_OPCODE_ADD_SP);
 	    newval |= rd << 8;
@@ -8855,7 +8899,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  {
 	    if (value & ~0xff)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("Invalid 8bit immediate"));
+			    _("invalid 8bit immediate"));
 	    newval = subtract ? T_OPCODE_SUB_I8 : T_OPCODE_ADD_I8;
 	    newval |= (rd << 8) | value;
 	  }
@@ -8863,7 +8907,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  {
 	    if (value & ~0x7)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("Invalid 3bit immediate"));
+			    _("invalid 3bit immediate"));
 	    newval = subtract ? T_OPCODE_SUB_I3 : T_OPCODE_ADD_I3;
 	    newval |= rd | (rs << 3) | (value << 6);
 	  }
@@ -8879,7 +8923,7 @@ md_apply_fix3 (fixP, valP, seg)
 	case 0x05: /* 8bit immediate CMP.  */
 	  if (value < 0 || value > 255)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid immediate: %ld is too large"),
+			  _("invalid immediate: %ld is too large"),
 			  (long) value);
 	  newval |= value;
 	  break;
@@ -8894,7 +8938,7 @@ md_apply_fix3 (fixP, valP, seg)
       /* 5bit shift value (0..31).  */
       if (value < 0 || value > 31)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Illegal Thumb shift value: %ld"), (long) value);
+		      _("illegal Thumb shift value: %ld"), (long) value);
       newval = md_chars_to_number (buf, THUMB_SIZE) & 0xf03f;
       newval |= value << 6;
       md_number_to_chars (buf, newval, THUMB_SIZE);
@@ -8908,7 +8952,7 @@ md_apply_fix3 (fixP, valP, seg)
     case BFD_RELOC_NONE:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    _("Bad relocation fixup type (%d)"), fixP->fx_r_type);
+		    _("bad relocation fixup type (%d)"), fixP->fx_r_type);
     }
 }
 
@@ -8979,7 +9023,7 @@ tc_gen_reloc (section, fixp)
       /* If this is called then the a literal has been referenced across
 	 a section boundary - possibly due to an implicit dump.  */
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Literal referenced across section boundary (Implicit dump?)"));
+		    _("literal referenced across section boundary (Implicit dump?)"));
       return NULL;
 
 #ifdef OBJ_ELF
@@ -8992,7 +9036,7 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_IMMEDIATE:
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Internal_relocation (type %d) not fixed up (IMMEDIATE)"),
+		    _("internal relocation (type %d) not fixed up (IMMEDIATE)"),
 		    fixp->fx_r_type);
       return NULL;
 
@@ -9003,7 +9047,7 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_OFFSET_IMM:
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Internal_relocation (type %d) not fixed up (OFFSET_IMM)"),
+		    _("internal_relocation (type %d) not fixed up (OFFSET_IMM)"),
 		    fixp->fx_r_type);
       return NULL;
 
@@ -9027,7 +9071,7 @@ tc_gen_reloc (section, fixp)
 	  default:                         type = _("<unknown>"); break;
 	  }
 	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      _("Cannot represent %s relocation in this object file format"),
+		      _("cannot represent %s relocation in this object file format"),
 		      type);
 	return NULL;
       }
@@ -9048,7 +9092,7 @@ tc_gen_reloc (section, fixp)
   if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Can not represent %s relocation in this object file format"),
+		    _("cannot represent %s relocation in this object file format"),
 		    bfd_get_reloc_code_name (code));
       return NULL;
     }
@@ -9071,13 +9115,14 @@ md_estimate_size_before_relax (fragP, segtype)
 }
 
 static void
-output_inst PARAMS ((void))
+output_inst (str)
+     const char *str;
 {
   char * to = NULL;
 
   if (inst.error)
     {
-      as_bad (inst.error);
+      as_bad ("%s -- `%s'", inst.error, str);
       return;
     }
 
@@ -9144,7 +9189,7 @@ md_assemble (str)
 
   if (p == str)
     {
-      as_bad (_("No operator -- statement `%s'\n"), str);
+      as_bad (_("no operator -- statement `%s'\n"), str);
       return;
     }
 
@@ -9162,14 +9207,14 @@ md_assemble (str)
 	  /* Check that this instruction is supported for this CPU.  */
 	  if (thumb_mode == 1 && (opcode->variant & cpu_variant) == 0)
 	    {
-	      as_bad (_("selected processor does not support this opcode"));
+	      as_bad (_("selected processor does not support `%s'"), str);
 	      return;
 	    }
 
 	  inst.instruction = opcode->value;
 	  inst.size = opcode->size;
 	  (*opcode->parms) (p);
-	  output_inst ();
+	  output_inst (str);
 	  return;
 	}
     }
@@ -9187,14 +9232,14 @@ md_assemble (str)
 	  /* Check that this instruction is supported for this CPU.  */
 	  if ((opcode->variant & cpu_variant) == 0)
 	    {
-	      as_bad (_("selected processor does not support this opcode"));
+	      as_bad (_("selected processor does not support `%s'"), str);
 	      return;
 	    }
 
 	  inst.instruction = opcode->value;
 	  inst.size = INSN_SIZE;
 	  (*opcode->parms) (p);
-	  output_inst ();
+	  output_inst (str);
 	  return;
 	}
     }
@@ -9378,7 +9423,7 @@ md_parse_option (c, arg)
 		  return 1;
 		}
 
-	      as_bad (_("Unrecognised APCS switch -m%s"), arg);
+	      as_bad (_("unrecognised APCS switch -m%s"), arg);
 	      return 0;
 	    }
 
@@ -9539,7 +9584,7 @@ md_parse_option (c, arg)
 		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_2;
 		      break;
 		    default:
-		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      as_bad (_("invalid architecture variant -m%s"), arg);
 		      break;
 		    }
 		  break;
@@ -9552,7 +9597,7 @@ md_parse_option (c, arg)
 		    case 'm': cpu_variant |= ARM_EXT_V3M; break;
 		    case 0:   break;
 		    default:
-		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      as_bad (_("invalid architecture variant -m%s"), arg);
 		      break;
 		    }
 		  break;
@@ -9565,7 +9610,7 @@ md_parse_option (c, arg)
 		    case 't': cpu_variant |= ARM_EXT_V4T; break;
 		    case 0:   break;
 		    default:
-		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      as_bad (_("invalid architecture variant -m%s"), arg);
 		      break;
 		    }
 		  break;
@@ -9578,20 +9623,20 @@ md_parse_option (c, arg)
 		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
 		    default:
-		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      as_bad (_("invalid architecture variant -m%s"), arg);
 		      break;
 		    }
 		  break;
 
 		default:
-		  as_bad (_("Invalid architecture variant -m%s"), arg);
+		  as_bad (_("invalid architecture variant -m%s"), arg);
 		  break;
 		}
 	      break;
 
 	    default:
 	    bad:
-	      as_bad (_("Invalid processor variant -m%s"), arg);
+	      as_bad (_("invalid processor variant -m%s"), arg);
 	      return 0;
 	    }
 	}
