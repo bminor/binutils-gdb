@@ -1,3 +1,7 @@
+2001-12-19  Andreas Jaeger  <aj@suse.de>
+
+	* ld.texinfo (VERSION): Fix markup.
+
 2001-12-18  matthew green  <mrg@eterna.com.au>
 
 	* Makefile.am (ALL_EMULATIONS): Add m68kelfnbsd.o.
@@ -101,7 +105,7 @@
 	statements describing a single option with a single, newline
 	escaped fprintf.  This allows better translation into other
 	languages.
-	
+
 	* ldmain.c (add_archive_element): Combine multiple strings
 	into a single string to permit better translation into other
 	languages.
@@ -109,17 +113,17 @@
 2001-12-05  Tom Rix  <trix@redhat.com>
 
 	* Makefile.am: Remove eaixppc64.
-	* Makefile.in: Regenerate.	
+	* Makefile.in: Regenerate.
 
 2001-12-04  Tom Rix  <trix@redhat.com>
 
-	* emultempl/aix.em (choose_target): Change default target to 
+	* emultempl/aix.em (choose_target): Change default target to
 	OUTPUT_FORMAT for ppcmacos.  Add braces to remove compiler
 	warning.
 	(gld*_read_file):  Fix typo.
 	(change_symbol_mode): Add prototype.
 	(is_syscall): Same.
-	
+
 	* emulparams/aixppc.sh (SYSCALL_MASK, SYMBOL_MODE_MASK): Delete.
 	* emulparams/aixrs6.sh : Same.
 	* emulparams/ppcmacos.sh : Same.

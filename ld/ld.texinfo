@@ -3692,7 +3692,7 @@ won't.
 
 @smallexample
 @{ global: foo; bar; local: *; @}
-#end smallexample
+@end smallexample
 
 When you link an application against a shared library that has versioned
 symbols, the application itself knows which version of each symbol it
