@@ -22,4 +22,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern char *malloc();
 extern int free();
 
+#if !defined(__GNUC__)
+#define know(x)
+#endif /* not gcc */
+
 /* end of ho-pmax.h */
