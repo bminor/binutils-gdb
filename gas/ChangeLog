@@ -1,3 +1,7 @@
+2000-06-25  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-h8300.c (build_bytes): Assemble ldmac correctly.
+
 2000-06-24  DJ Delorie  <dj@cygnus.com>
 
 	* config/tc-i386.c (md_estimate_size_before_relax): Revert

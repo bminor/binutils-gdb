@@ -1026,7 +1026,12 @@ build_bytes (this_try, operand)
 
 	  if (c & MACREG)
 	    {
-	      nib = 2 + operand[d].reg;
+	      if (operand[0].mode == MACREG)
+		/* stmac has mac[hl] as the first operand.  */
+		nib = 2 + operand[0].reg;
+	      else
+		/* ldmac has mac[hl] as the second operand.  */
+		nib = 2 + operand[1].reg;
 	    }
 	}
       nibble_count++;
