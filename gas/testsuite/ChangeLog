@@ -1,3 +1,14 @@
+2005-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/astest.d: Adjust for relocs reduced to section sym.
+	* gas/ppc/astest2.d: Likewise.
+	* gas/ppc/astest2_64.d: Likewise.
+	* ppc/astest64.d: Likewise.
+	* ppc/booke.d: Likewise.
+	* ppc/power4.d: Likewise.
+	* ppc/test1elf32.d: Likewise.
+	* ppc/test1elf64.d: Likewise.
+
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/cr-err.[ls]: New.
@@ -30,7 +41,7 @@
 	destination address rather than an offset from the start of the
 	section.
 	* gas/arm/pic.d: Likewise.
-	
+
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/mcf-emac.d: Allow for 64-bit addresses.
@@ -810,8 +821,8 @@
 	* gas/all/altmac2.[sd]: ... to here.
 	* gas/all/excl.s: New.
 	* gas/all/gas.exp: Suppress both tests for a few targets known to
-	  break. Run the new (split out) test only when the target doesn't
-	  use '!' as a comment character.
+	break. Run the new (split out) test only when the target doesn't
+	use '!' as a comment character.
 
 2004-08-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
@@ -1229,10 +1240,10 @@
 
 	* gas/dlx/alltests.exp: Execute new lohi test.
 	* gas/dlx/lohi.s: New test for spurious lo16/hi16
-	  reloc overflow checking.
+	reloc overflow checking.
 	* gas/dlx/lohi.d: New file: expected output.
 	* gas/dlx/lhi.d: Updated to properly expect lo16
-	  relocations where asked for.
+	relocations where asked for.
 	* gas/dlx/itype.d: Likewise.
 	* gas/dlx/lhi.d: Corrected cut+paste error in test name.
 

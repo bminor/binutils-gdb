@@ -35,13 +35,13 @@ Disassembly of section \.text:
 
 0+ <\.text>:
  +0:	e0 83 00 00 	lq      r4,0\(r3\)
-			2: R_PPC64_ADDR16_LO_DS	dsym0
+			2: R_PPC64_ADDR16_LO_DS	\.data
  +4:	e0 83 00 00 	lq      r4,0\(r3\)
-			6: R_PPC64_ADDR16_LO_DS	dsym1
+			6: R_PPC64_ADDR16_LO_DS	\.data\+0x8
  +8:	e0 83 00 00 	lq      r4,0\(r3\)
-			a: R_PPC64_ADDR16_LO_DS	usym0
- +c:	e0 83 00 00 	lq      r4,0\(r3\)
-			e: R_PPC64_ADDR16_LO_DS	usym1
+			a: R_PPC64_ADDR16_LO_DS	\.data\+0x8
+ +c:	e0 83 00 10 	lq      r4,16\(r3\)
+			e: R_PPC64_ADDR16_LO_DS	\.data\+0x10
  +10:	e0 83 00 00 	lq      r4,0\(r3\)
 			12: R_PPC64_ADDR16_LO_DS	esym0
  +14:	e0 83 00 00 	lq      r4,0\(r3\)
@@ -63,15 +63,15 @@ Disassembly of section \.text:
  +34:	e0 80 00 00 	lq      r4,0\(0\)
 			36: R_PPC64_ADDR16_LO_DS	\.text
  +38:	e0 c3 00 00 	lq      r6,0\(r3\)
-			3a: R_PPC64_GOT16_DS	dsym0
+			3a: R_PPC64_GOT16_DS	\.data
  +3c:	e0 c3 00 00 	lq      r6,0\(r3\)
-			3e: R_PPC64_GOT16_LO_DS	dsym0
+			3e: R_PPC64_GOT16_LO_DS	\.data
  +40:	e0 c3 00 00 	lq      r6,0\(r3\)
-			42: R_PPC64_PLT16_LO_DS	dsym0
+			42: R_PPC64_PLT16_LO_DS	\.data
  +44:	e0 c3 00 00 	lq      r6,0\(r3\)
-			46: R_PPC64_SECTOFF_DS	dsym1
+			46: R_PPC64_SECTOFF_DS	\.data\+0x8
  +48:	e0 c3 00 00 	lq      r6,0\(r3\)
-			4a: R_PPC64_SECTOFF_LO_DS	dsym1
+			4a: R_PPC64_SECTOFF_LO_DS	\.data\+0x8
  +4c:	e0 c4 00 10 	lq      r6,16\(r4\)
  +50:	f8 c7 00 02 	stq     r6,0\(r7\)
  +54:	f8 c7 00 12 	stq     r6,16\(r7\)
