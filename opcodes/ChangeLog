@@ -1,5 +1,7 @@
 Mon Mar 24 13:22:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sh-opc.h: Add bf/s and bt/s as synonyms for bf.s and bt.s.
+
 	* mips-opc.c: Add dctr and dctw.
 
 start-sanitize-d30v
