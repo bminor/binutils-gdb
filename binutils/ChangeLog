@@ -1,3 +1,45 @@
+Mon Mar  6 13:46:12 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bucomm.c (list_supported_targets): New function.
+	* bucomm.h (list_supported_targets): Declare.
+	* ar.c (usage): Call list_supported_targets.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage, strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* size.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+
+Tue Feb 28 15:13:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bucomm.c (print_arelt_descr): Cast st_size to long before
+	passing it to fprintf.
+
+Fri Feb 17 13:36:45 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (struct section_list): Add fields remove, set_flags,
+	and flags.  Change adjust from boolean to enum.
+	(remove_sections): Remove static variable.
+	(sections_removed): New static variable.
+	(copy_options): Add --set-section-flags.
+	(copy_usage): Mention --set-section-flags.
+	(parse_flags): New static function.
+	(find_section_list): New static function.
+	(is_strip_symbol): Change return type from int to boolean.
+	(is_strip_section): New static function.
+	(filter_symbols): Call is_strip_section.
+	(copy_object): When adding sections, check for specified flags or
+	VMA.  Call filter_symbols if any sections are being removed.
+	(setup_section): Use find_section_list function rather than
+	looking through remove_sections and adjust_sections.  Handle
+	--set-section-flags.
+	(copy_section): Use find_section_list rather than looking through
+	remove_sections.
+	(strip_main): Use find_section_list instead of adding items to
+	sections_removed.
+	(copy_main): Use find_section_list instead of adding items to
+	sections_removed and adjust_sections.  Handle --set-section-flags.
+	* binutils.texi, objcopy.1: Document --set-section-flags.
+
 Tue Feb 14 18:03:03 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (with_source_code): New global variable.

@@ -232,6 +232,7 @@ Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [--strip-symbol symbol] [-N symbol] [--verbose]\n\
        [--version] [--help]\n\
        in-file [out-file]\n");
+  list_supported_targets (program_name, stream);
   exit (exit_status);
 }
 
@@ -247,6 +248,7 @@ Usage: %s [-vVsSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
        [--strip-symbol symbol] [-N symbol]\n\
        [--remove-section=section] [--verbose] [--version] [--help] file...\n",
 	   program_name);
+  list_supported_targets (program_name, stream);
   exit (exit_status);
 }
 
@@ -416,6 +418,12 @@ is_strip_section (abfd, sec)
      asection *sec;
 {
   struct section_list *p;
+
+  if ((bfd_get_section_flags (abfd, sec) & SEC_DEBUGGING) != 0
+      && (strip_symbols == strip_debug
+	  || strip_symbols == strip_all
+	  || discard_locals == locals_all))
+    return true;
 
   if (! sections_removed)
     return false;
