@@ -30,9 +30,5 @@
    lexical context are listed after the beginning LBRAC instead of
    before in the executables list of symbols.  */
 #define VARIABLES_INSIDE_BLOCK(desc, gcc_p) (!(gcc_p))
-
-/* XXX This is NOT multi-arch compatible.  */
-#define CALL_DUMMY_BREAKPOINT_OFFSET arm_call_dummy_breakpoint_offset()
-extern int arm_call_dummy_breakpoint_offset (void);
 
 #endif /* TM_ARM_H */

@@ -1,3 +1,11 @@
+2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_set_call_dummy_breakpoint_offset): New function.
+	(arm_fix_call_dummy): Call it.
+	(arm_call_dummy_breakpoint_offset): Delete.
+	(arm_gdbarch_init): Initialize call_dummy_breakpoint_offset.
+	* config/arm/tm-arm.h (CALL_DUMMY_BREAKPOINT_OFFSET): Delete.
+
 2002-02-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (FRAME_CHAIN_VALID): Only require at level 2.

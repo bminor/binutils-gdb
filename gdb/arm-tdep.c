@@ -1263,6 +1263,25 @@ static LONGEST arm_call_dummy_words[] =
   0xe1a0e00f, 0xe1a0f004, 0xe7ffdefe
 };
 
+/* Adjust the call_dummy_breakpoint_offset for the bp_call_dummy
+   breakpoint to the proper address in the call dummy, so that
+   `finish' after a stop in a call dummy works.
+
+   XXX Tweeking current_gdbarch is not an optimal solution, but the
+   call to arm_fix_call_dummy is immediately followed by a call to
+   run_stack_dummy, which is the only function where
+   call_dummy_breakpoint_offset is actually used.  */
+
+
+static void
+arm_set_call_dummy_breakpoint_offset (void)
+{
+  if (caller_is_thumb)
+    set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 4);
+  else
+    set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 8);
+}
+
 /* Fix up the call dummy, based on whether the processor is currently
    in Thumb or ARM mode, and whether the target function is Thumb or
    ARM.  There are three different situations requiring three
@@ -1292,6 +1311,7 @@ arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 
   /* Set flag indicating whether the current PC is in a Thumb function. */
   caller_is_thumb = arm_pc_is_thumb (read_pc ());
+  arm_set_call_dummy_breakpoint_offset ();
 
   /* If the target function is Thumb, set the low bit of the function
      address.  And if the CPU is currently in ARM mode, patch the
@@ -1324,22 +1344,6 @@ arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   /* Put the target address in r4; the call dummy will copy this to
      the PC. */
   write_register (4, fun);
-}
-
-/* Return the offset in the call dummy of the instruction that needs
-   to have a breakpoint placed on it.  This is the offset of the 'swi
-   24' instruction, which is no longer actually used, but simply acts
-   as a place-holder now.
-
-   This implements the CALL_DUMMY_BREAK_OFFSET macro.  */
-
-int
-arm_call_dummy_breakpoint_offset (void)
-{
-  if (caller_is_thumb)
-    return 4;
-  else
-    return 8;
 }
 
 /* Note: ScottB
@@ -2801,6 +2805,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy code.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  /* We have to give this a value now, even though we will re-set it 
+     during each call to arm_fix_call_dummy.  */
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
