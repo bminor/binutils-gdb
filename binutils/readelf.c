@@ -127,6 +127,7 @@ int                     do_debug_frames;
 int                     do_debug_frames_interp;
 int			do_debug_macinfo;
 int			do_debug_str;
+int                     do_debug_loc;
 int                     do_arch;
 int                     do_notes;
 int			is_32bit_elf;
@@ -227,10 +228,14 @@ static int                display_debug_aranges       PARAMS ((Elf32_Internal_Sh
 static int                display_debug_frames        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_macinfo       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_str           PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                display_debug_loc           PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
 static void               load_debug_str              PARAMS ((FILE *));
 static void               free_debug_str              PARAMS ((void));
 static const char *       fetch_indirect_string       PARAMS ((unsigned long));
+static void               load_debug_loc              PARAMS ((FILE *));
+static void               free_debug_loc              PARAMS ((void));
+static const char *       fetch_location_list         PARAMS ((unsigned long));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
 static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
 static void               reset_state_machine         PARAMS ((int));
@@ -2248,7 +2253,7 @@ usage ()
   -A --arch-specific     Display architecture specific information (if any).\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
   -x --hex-dump=<number> Dump the contents of section <number>\n\
-  -w --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]\n\
+  -w --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str,=loc]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("\
@@ -2435,6 +2440,11 @@ parse_args (argc, argv)
 		    do_debug_str = 1;
 		    break;
 
+		  case 'o':
+		  case 'O':
+		    do_debug_loc = 1;
+		    break;
+		    
 		  default:
 		    warn (_("Unrecognized debug option '%s'\n"), optarg);
 		    break;
@@ -3301,7 +3311,8 @@ process_section_headers (file)
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
-		|| do_debug_frames || do_debug_macinfo || do_debug_str)
+		|| do_debug_frames || do_debug_macinfo || do_debug_str
+		|| do_debug_loc)
 	       && strncmp (name, ".debug_", 7) == 0)
 	{
 	  name += 7;
@@ -3315,6 +3326,7 @@ process_section_headers (file)
 	      || (do_debug_frames   && (strcmp (name, "frame") == 0))
 	      || (do_debug_macinfo  && (strcmp (name, "macinfo") == 0))
 	      || (do_debug_str      && (strcmp (name, "str") == 0))
+	      || (do_debug_loc      && (strcmp (name, "loc") == 0))
 	      )
 	    request_dump (i, DEBUG_DUMP);
 	}
@@ -7187,6 +7199,123 @@ decode_location_expression (data, pointer_size, length)
     }
 }
 
+static const char * debug_loc_contents;
+static bfd_vma      debug_loc_size;
+
+static void
+load_debug_loc (file)
+     FILE * file;
+{
+  Elf32_Internal_Shdr * sec;
+  unsigned int          i;
+
+  /* If it is already loaded, do nothing.  */
+  if (debug_loc_contents != NULL)
+    return;
+
+  /* Locate the .debug_loc section.  */
+  for (i = 0, sec = section_headers;
+       i < elf_header.e_shnum;
+       i ++, sec ++)
+    if (strcmp (SECTION_NAME (sec), ".debug_loc") == 0)
+      break;
+
+  if (i == elf_header.e_shnum || sec->sh_size == 0)
+    return;
+
+  debug_loc_size = sec->sh_size;
+
+  debug_loc_contents = ((char *)
+			get_data (NULL, file, sec->sh_offset, sec->sh_size,
+				  _("debug_loc section data")));
+}
+
+static void
+free_debug_loc ()
+{
+  if (debug_loc_contents == NULL)
+    return;
+
+  free ((char *) debug_loc_contents);
+  debug_loc_contents = NULL;
+  debug_loc_size = 0;
+}
+
+static const char *
+fetch_location_list (offset)
+     unsigned long offset;
+{
+  if (debug_loc_contents == NULL)
+    return _("<no .debug_loc section>");
+
+  if (offset > debug_loc_size)
+    return _("<offset is too big>");
+
+  return debug_loc_contents + offset;
+}
+static int
+display_debug_loc (section, start, file)
+     Elf32_Internal_Shdr * section;
+     unsigned char * start;
+     FILE * file ATTRIBUTE_UNUSED;
+{
+  unsigned char *section_end;
+  unsigned long bytes;
+  unsigned char *section_begin = start;
+  bfd_vma addr;
+  
+  addr = section->sh_addr;
+  bytes = section->sh_size;
+  section_end = start + bytes;
+  if (bytes == 0)
+    {
+      printf (_("\nThe .debug_loc section is empty.\n"));
+      return 0;
+    }
+  printf (_("Contents of the .debug_loc section:\n\n"));
+  printf (_("\n    Offset   Begin    End      Expression\n"));
+  while (start < section_end)
+    {
+      unsigned long begin;
+      unsigned long end;
+      unsigned short length;
+      unsigned long offset;
+
+      offset = start - section_begin;
+
+      while (1)
+	{
+          /* Normally, the lists in  the debug_loc section are related to a
+	     given compilation unit, and thus, we would use the
+	     pointer size of that compilation unit.  However, since we are
+	     displaying it seperately here, we either have to store
+	     pointer sizes of all compilation units, or assume they don't
+	     change.   We assume, like the debug_line display, that
+	     it doesn't change.  */
+	  begin = byte_get (start, debug_line_pointer_size);
+	  start += debug_line_pointer_size;
+	  end = byte_get (start, debug_line_pointer_size);
+	  start += debug_line_pointer_size;
+	  
+	  if (begin == 0 && end == 0)
+	    break;
+	  
+	  begin += addr;
+	  end += addr;
+	  
+	  length = byte_get (start, 2);
+	  start += 2;
+	  
+	  printf ("    %8.8lx %8.8lx %8.8lx (", offset, begin, end);
+	  decode_location_expression (start, debug_line_pointer_size, length);
+	  printf (")\n");
+	  
+	  start += length;
+	}
+      printf ("\n");
+    }
+  return 1;
+}
 
 static const char * debug_str_contents;
 static bfd_vma      debug_str_size;
@@ -7591,6 +7720,12 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 	  decode_location_expression (block_start, pointer_size, uvalue);
 	  printf (")");
 	}
+      else if (form == DW_FORM_data4)
+	{
+	  printf ("(");
+	  printf ("location list");
+	  printf (")");
+	}
       break;
 
     default:
@@ -7627,6 +7762,7 @@ display_debug_info (section, start, file)
   printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
 
   load_debug_str (file);
+  load_debug_loc (file);
 
   while (start < end)
     {
@@ -7811,6 +7947,7 @@ display_debug_info (section, start, file)
     }
 
   free_debug_str ();
+  free_debug_loc ();
 
   printf ("\n");
 
@@ -8622,7 +8759,7 @@ debug_displays[] =
   { ".eh_frame",          display_debug_frames, NULL },
   { ".debug_macinfo",     display_debug_macinfo, NULL },
   { ".debug_str",         display_debug_str, NULL },
-  
+  { ".debug_loc",         display_debug_loc, NULL },
   { ".debug_pubtypes",    display_debug_not_supported, NULL },
   { ".debug_ranges",      display_debug_not_supported, NULL },
   { ".debug_static_func", display_debug_not_supported, NULL },
