@@ -1,7 +1,9 @@
+start-sanitize-armelf
 Wed Aug 19 11:59:19 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-srec/srec.exp: Add arm/thumb-elf expected failures.
-
+end-sanitize-armelf
+	
 Thu Aug 13 12:41:58 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-bootstrap/bootstrap.exp: Don't run the --static bootstrap
