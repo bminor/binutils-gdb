@@ -1,3 +1,11 @@
+Thu Aug 15 16:40:30 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* reloc.c: (BFD_RELOC_ARM_THUMB_ADD, BFD_RELOC_ARM_THUMB_IMM,
+	BFD_RELOC_ARM_THUMB_SHIFT, BFD_RELOC_ARM_THUMB_OFFSET):
+ 	Added, for internal use by the ARM gas.
+	* libbfd.h: Rebuilt
+	* bfd-in2.h: Rebuilt
+
 Wed Aug 14 17:02:09 1996  Richard Henderson  <rth@tamu.edu>
 
 	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Correct typo
