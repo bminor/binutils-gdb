@@ -1556,9 +1556,8 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
     {
       /* The HP debug format represents char foo[]; as an array with
 	 length 0x7fffffff.  Internally GDB wants to represent this
-	 as a pointer.  Ugh.  */
-     TYPE_CODE (type) = TYPE_CODE_PTR;
-     TYPE_LENGTH (type) = 4;
+	 as an array of length zero.  */
+     TYPE_LENGTH (type) = 0;
     }
   else
     TYPE_LENGTH (type) = dn_bufp->darray.arraylength / 8;
