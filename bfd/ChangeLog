@@ -1,3 +1,8 @@
+Thu Dec 10 10:58:38 1998  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* targets.c (bfd_target_vector): Remove duplicate entry for
+	tekhex_vec.
+
 1998-12-09  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-fr30.c (fr30_elf_howto_table): Set src_mask fields to 0
