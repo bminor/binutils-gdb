@@ -1,7 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -168,8 +167,19 @@ static const enum m68k_register m68060_control_regs[] = {
   0
 };
 static const enum m68k_register mcf_control_regs[] = {
-  CACR, TC, ITT0, ITT1, DTT0, DTT1, VBR, ROMBAR,
+  CACR, TC, ACR0, ACR1, ACR2, ACR3, VBR, ROMBAR,
   RAMBAR0, RAMBAR1, MBAR,
+  0
+};
+static const enum m68k_register mcf528x_control_regs[] = {
+  CACR, ACR0, ACR1, VBR, FLASHBAR, RAMBAR,
+  0
+};
+static const enum m68k_register mcfv4e_control_regs[] = {
+  CACR, TC, ITT0, ITT1, DTT0, DTT1, BUSCR, VBR, PC, ROMBAR,
+  ROMBAR1, RAMBAR0, RAMBAR1, MPCR, EDRAMBAR, SECMBAR, MBAR, MBAR0, MBAR1,
+  PCR1U0, PCR1L0, PCR1U1, PCR1L1, PCR2U0, PCR2L0, PCR2U1, PCR2L1,
+  PCR3U0, PCR3L0, PCR3U1, PCR3L1,
   0
 };
 #define cpu32_control_regs m68010_control_regs
@@ -225,13 +235,14 @@ struct m68k_it
   reloc[5];			/* Five is enough???  */
 };
 
-#define cpu_of_arch(x)		((x) & (m68000up|mcf))
+#define cpu_of_arch(x)		((x) & (m68000up | mcf))
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
-#define arch_coldfire_p(x)	(((x) & mcf) != 0)
+#define arch_coldfire_p(x)	((x) & mcf)
+#define arch_coldfire_v4e_p(x)	((x) & mcfv4e)
 
 /* Macros for determining if cpu supports a specific addressing mode.  */
-#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|mcf5407))
+#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|mcf5407|mcfv4e))
 
 static struct m68k_it the_ins;	/* The instruction being assembled.  */
 
@@ -360,19 +371,21 @@ struct m68k_cpu
 
 static const struct m68k_cpu archs[] =
   {
-    { m68000, "68000", 0 },
-    { m68010, "68010", 0 },
-    { m68020, "68020", 0 },
-    { m68030, "68030", 0 },
-    { m68040, "68040", 0 },
-    { m68060, "68060", 0 },
-    { cpu32,  "cpu32", 0 },
-    { m68881, "68881", 0 },
-    { m68851, "68851", 0 },
-    { mcf5200, "5200", 0 },
-    { mcf5206e, "5206e", 0 },
-    { mcf5307, "5307", 0},
-    { mcf5407, "5407", 0},
+    { m68000,  "68000", 0 },
+    { m68010,  "68010", 0 },
+    { m68020,  "68020", 0 },
+    { m68030,  "68030", 0 },
+    { m68040,  "68040", 0 },
+    { m68060,  "68060", 0 },
+    { cpu32,   "cpu32", 0 },
+    { m68881,  "68881", 0 },
+    { m68851,  "68851", 0 },
+    { mcf5200, "5200",  0 },
+    { mcf5206e,"5206e", 0 },
+    { mcf528x, "528x",  0 },
+    { mcf5307, "5307",  0 },
+    { mcf5407, "5407",  0 },
+    { mcfv4e,  "cfv4e", 0 },
     /* Aliases (effectively, so far as gas is concerned) for the above
        cpus.  */
     { m68020, "68k", 1 },
@@ -403,6 +416,7 @@ static const struct m68k_cpu archs[] =
     { mcf5200, "5202", 1 },
     { mcf5200, "5204", 1 },
     { mcf5200, "5206", 1 },
+    { mcf5407, "cfv4", 1 },
   };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
@@ -1498,6 +1512,24 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
+                case 'b':
+                  switch (opP->mode)
+                    {
+                    case IMMED:
+                    case ABSL:
+                    case AREG:
+                    case FPREG:
+                    case CONTROL:
+                    case POST:
+                    case PRE:
+                    case REGLST:
+		      losing++;
+		      break;
+		    default:
+		      break;
+                    }
+                  break;
+
 		case 'C':
 		  if (opP->mode != CONTROL || opP->reg != CCR)
 		    losing++;
@@ -1702,6 +1734,16 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
+		case 'x':
+		  if (opP->mode != IMMED)
+		    losing++;
+		  else if (opP->disp.exp.X_op != O_constant
+			   || opP->disp.exp.X_add_number < -1
+                           || opP->disp.exp.X_add_number > 7
+                           || opP->disp.exp.X_add_number == 0)
+		    losing++;
+		  break;
+
 		  /* JF these are out of order.  We could put them
 		     in order if we were willing to put up with
 		     bunches of #ifdef m68851s in the code.
@@ -1763,6 +1805,25 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
+		case 'w':
+		  switch (opP->mode)
+		    {
+		      case IMMED:
+		      case ABSL:
+		      case AREG:
+		      case DREG:
+		      case FPREG:
+		      case CONTROL:
+		      case POST:
+		      case PRE:
+		      case REGLST:
+			losing++;
+			break;
+		      default:
+			break;
+		    }
+		  break;
+
 		case 'X':
 		  if (opP->mode != CONTROL
 		      || (!(opP->reg >= BAD && opP->reg <= BAD + 7)
@@ -1807,6 +1868,18 @@ m68k_ip (instring)
 		    opP->mode = AREG;
 		  break;
 
+		 case 'y':
+		   if (!(opP->mode == AINDR
+			 || (opP->mode == DISP && !(opP->reg == PC ||
+						    opP->reg == ZPC))))
+		     losing++;
+		   break;
+
+		 case 'z':
+		   if (!(opP->mode == AINDR || opP->mode == DISP))
+		     losing++;
+		   break;
+
 		default:
 		  abort ();
 		}
@@ -1833,6 +1906,9 @@ m68k_ip (instring)
 	      cp = buf + strlen (buf);
 	      switch (ok_arch)
 		{
+		case cfloat:
+		  strcpy (cp, _("ColdFire fpu (cfv4e)"));
+		  break;
 		case mfloat:
 		  strcpy (cp, _("fpu (68040, 68060 or 68881/68882)"));
 		  break;
@@ -1908,12 +1984,16 @@ m68k_ip (instring)
 	case '/':
 	case '<':
 	case '>':
+	case 'b':
 	case 'm':
 	case 'n':
 	case 'o':
 	case 'p':
 	case 'q':
 	case 'v':
+	case 'w':
+	case 'y':
+	case 'z':
 #ifndef NO_68851
 	case '|':
 #endif
@@ -1922,7 +2002,7 @@ m68k_ip (instring)
 	    case IMMED:
 	      tmpreg = 0x3c;	/* 7.4 */
 	      if (strchr ("bwl", s[1]))
-		nextword = get_num (&opP->disp, 80);
+		nextword = get_num (&opP->disp, 90);
 	      else
 		nextword = get_num (&opP->disp, 0);
 	      if (isvar (&opP->disp))
@@ -2034,7 +2114,7 @@ m68k_ip (instring)
 	      break;
 	    case DISP:
 
-	      nextword = get_num (&opP->disp, 80);
+	      nextword = get_num (&opP->disp, 90);
 
 	      if (opP->reg == PC
 		  && ! isvar (&opP->disp)
@@ -2130,9 +2210,9 @@ m68k_ip (instring)
 	    case PRE:
 	    case BASE:
 	      nextword = 0;
-	      baseo = get_num (&opP->disp, 80);
+	      baseo = get_num (&opP->disp, 90);
 	      if (opP->mode == POST || opP->mode == PRE)
-		outro = get_num (&opP->odisp, 80);
+		outro = get_num (&opP->odisp, 90);
 	      /* Figure out the `addressing mode'.
 		 Also turn on the BASE_DISABLE bit, if needed.  */
 	      if (opP->reg == PC || opP->reg == ZPC)
@@ -2175,7 +2255,8 @@ m68k_ip (instring)
 		  if ((opP->index.scale != 1
 		       && cpu_of_arch (current_architecture) < m68020)
 		      || (opP->index.scale == 8
-			  && arch_coldfire_p (current_architecture)))
+			  && (arch_coldfire_p (current_architecture)
+                              && !arch_coldfire_v4e_p(current_architecture))))
 		    {
 		      opP->error =
 			_("scale factor invalid on this architecture; needs cpu32 or 68020 or higher");
@@ -2380,7 +2461,7 @@ m68k_ip (instring)
 	      break;
 
 	    case ABSL:
-	      nextword = get_num (&opP->disp, 80);
+	      nextword = get_num (&opP->disp, 90);
 	      switch (opP->disp.size)
 		{
 		default:
@@ -2456,7 +2537,7 @@ m68k_ip (instring)
 	      break;
 	    case '3':
 	    default:
-	      tmpreg = 80;
+	      tmpreg = 90;
 	      break;
 	    }
 	  tmpreg = get_num (&opP->disp, tmpreg);
@@ -2523,7 +2604,7 @@ m68k_ip (instring)
 	  break;
 
 	case 'B':
-	  tmpreg = get_num (&opP->disp, 80);
+	  tmpreg = get_num (&opP->disp, 90);
 	  switch (s[1])
 	    {
 	    case 'B':
@@ -2643,7 +2724,7 @@ m68k_ip (instring)
 
 	case 'd':		/* JF this is a kludge.  */
 	  install_operand ('s', opP->reg - ADDR);
-	  tmpreg = get_num (&opP->disp, 80);
+	  tmpreg = get_num (&opP->disp, 90);
 	  if (!issword (tmpreg))
 	    {
 	      as_warn (_("Expression out of range, using 0"));
@@ -2687,15 +2768,19 @@ m68k_ip (instring)
 	    case TC:
 	      tmpreg = 0x003;
 	      break;
+	    case ACR0:
 	    case ITT0:
 	      tmpreg = 0x004;
 	      break;
+	    case ACR1:
 	    case ITT1:
 	      tmpreg = 0x005;
 	      break;
+	    case ACR2:
 	    case DTT0:
 	      tmpreg = 0x006;
 	      break;
+	    case ACR3:
 	    case DTT1:
 	      tmpreg = 0x007;
 	      break;
@@ -2733,15 +2818,67 @@ m68k_ip (instring)
             case ROMBAR:
 	      tmpreg = 0xC00;
 	      break;
+            case ROMBAR1:
+              tmpreg = 0xC01;
+              break;
+	    case FLASHBAR:
 	    case RAMBAR0:
 	      tmpreg = 0xC04;
 	      break;
+	    case RAMBAR:
 	    case RAMBAR1:
 	      tmpreg = 0xC05;
 	      break;
+            case MPCR:
+              tmpreg = 0xC0C;
+              break;
+            case EDRAMBAR:
+              tmpreg = 0xC0D;
+              break;
+            case MBAR0:
+            case SECMBAR:
+              tmpreg = 0xC0E;
+              break;
+            case MBAR1:
 	    case MBAR:
 	      tmpreg = 0xC0F;
 	      break;
+            case PCR1U0:
+              tmpreg = 0xD02;
+              break;
+            case PCR1L0:
+              tmpreg = 0xD03;
+              break;
+            case PCR2U0:
+              tmpreg = 0xD04;
+              break;
+            case PCR2L0:
+              tmpreg = 0xD05;
+              break;
+            case PCR3U0:
+              tmpreg = 0xD06;
+              break;
+            case PCR3L0:
+              tmpreg = 0xD07;
+              break;
+            case PCR1L1:
+              tmpreg = 0xD0A;
+              break;
+            case PCR1U1:
+              tmpreg = 0xD0B;
+              break;
+            case PCR2L1:
+              tmpreg = 0xD0C;
+              break;
+            case PCR2U1:
+              tmpreg = 0xD0D;
+              break;
+            case PCR3L1:
+              tmpreg = 0xD0E;
+              break;
+            case PCR3U1:
+              tmpreg = 0xD0F;
+              break;
 	    default:
 	      abort ();
 	    }
@@ -2990,7 +3127,7 @@ m68k_ip (instring)
 	case '_':	/* used only for move16 absolute 32-bit address.  */
 	  if (isvar (&opP->disp))
 	    add_fix ('l', &opP->disp, 0, 0);
-	  tmpreg = get_num (&opP->disp, 80);
+	  tmpreg = get_num (&opP->disp, 90);
 	  addword (tmpreg >> 16);
 	  addword (tmpreg & 0xFFFF);
 	  break;
@@ -2998,6 +3135,12 @@ m68k_ip (instring)
 	  install_operand (s[1], opP->reg - DATA0L);
 	  opP->reg -= (DATA0L);
 	  opP->reg &= 0x0F;	/* remove upper/lower bit.  */
+	  break;
+	case 'x':
+	  tmpreg = get_num (&opP->disp, 80);
+	  if (tmpreg == -1)
+	    tmpreg = 0;
+	  install_operand (s[1], tmpreg);
 	  break;
 	default:
 	  abort ();
@@ -3394,10 +3537,10 @@ static const struct init_entry init_table[] =
   /* mcf5200 versions of same.  The ColdFire programmer's reference
      manual indicated that the order is 2,3,0,1, but Ken Rose
      <rose@netcom.com> says that 0,1,2,3 is the correct order.  */
-  { "acr0", ITT0 },		/* Access Control Unit 0.  */
-  { "acr1", ITT1 },		/* Access Control Unit 1.  */
-  { "acr2", DTT0 },		/* Access Control Unit 2.  */
-  { "acr3", DTT1 },		/* Access Control Unit 3.  */
+  { "acr0", ACR0 },		/* Access Control Unit 0.  */
+  { "acr1", ACR1 },		/* Access Control Unit 1.  */
+  { "acr2", ACR2 },		/* Access Control Unit 2.  */
+  { "acr3", ACR3 },		/* Access Control Unit 3.  */
 
   { "tc", TC },			/* MMU Translation Control Register.  */
   { "tcr", TC },
@@ -3413,6 +3556,31 @@ static const struct init_entry init_table[] =
   { "rambar0", RAMBAR0 },	/* ROM Base Address Register.  */
   { "rambar1", RAMBAR1 },	/* ROM Base Address Register.  */
   { "mbar", MBAR },		/* Module Base Address Register.  */
+
+  { "mbar0",    MBAR0 },	/* mcfv4e registers.  */
+  { "mbar1",    MBAR1 },	/* mcfv4e registers.  */
+  { "rombar0",  ROMBAR },	/* mcfv4e registers.  */
+  { "rombar1",  ROMBAR1 },	/* mcfv4e registers.  */
+  { "mpcr",     MPCR },		/* mcfv4e registers.  */
+  { "edrambar", EDRAMBAR },	/* mcfv4e registers.  */
+  { "secmbar",  SECMBAR },	/* mcfv4e registers.  */
+  { "asid",     TC },		/* mcfv4e registers.  */
+  { "mmubar",   BUSCR },	/* mcfv4e registers.  */
+  { "pcr1u0",   PCR1U0 },	/* mcfv4e registers.  */
+  { "pcr1l0",   PCR1L0 },	/* mcfv4e registers.  */
+  { "pcr2u0",   PCR2U0 },	/* mcfv4e registers.  */
+  { "pcr2l0",   PCR2L0 },	/* mcfv4e registers.  */
+  { "pcr3u0",   PCR3U0 },	/* mcfv4e registers.  */
+  { "pcr3l0",   PCR3L0 },	/* mcfv4e registers.  */
+  { "pcr1u1",   PCR1U1 },	/* mcfv4e registers.  */
+  { "pcr1l1",   PCR1L1 },	/* mcfv4e registers.  */
+  { "pcr2u1",   PCR2U1 },	/* mcfv4e registers.  */
+  { "pcr2l1",   PCR2L1 },	/* mcfv4e registers.  */
+  { "pcr3u1",   PCR3U1 },	/* mcfv4e registers.  */
+  { "pcr3l1",   PCR3L1 },	/* mcfv4e registers.  */
+
+  { "flashbar", FLASHBAR }, 	/* mcf528x registers.  */
+  { "rambar",   RAMBAR },  	/* mcf528x registers.  */
   /* End of control registers.  */
 
   { "ac", AC },
@@ -3969,6 +4137,12 @@ select_control_regs ()
     case mcf5307:
     case mcf5407:
       control_regs = mcf_control_regs;
+      break;
+    case mcf528x:
+      control_regs = mcf528x_control_regs;
+      break;
+    case mcfv4e:
+      control_regs = mcfv4e_control_regs;
       break;
     default:
       abort ();
@@ -4808,17 +4982,16 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
    aren't OK are an error (what a shock, no?)
 
    0:  Everything is OK
-   10:  Absolute 1:8	only
-   20:  Absolute 0:7	only
-   30:  absolute 0:15	only
-   40:  Absolute 0:31	only
-   50:  absolute 0:127	only
+   10:  Absolute 1:8	   only
+   20:  Absolute 0:7	   only
+   30:  absolute 0:15	   only
+   40:  Absolute 0:31	   only
+   50:  absolute 0:127	   only
    55:  absolute -64:63    only
-   60:  absolute -128:127	only
-   70:  absolute 0:4095	only
-   80:  No bignums
-
-   */
+   60:  absolute -128:127  only
+   70:  absolute 0:4095	   only
+   80:  absolute -1, 1:7   only
+   90:  No bignums.          */
 
 static int
 get_num (exp, ok)
@@ -4881,6 +5054,15 @@ get_num (exp, ok)
 	      offs (exp) = 0;
 	    }
 	  break;
+	case 80:
+	  if (offs (exp) < -1
+              || offs (exp) > 7
+              || offs (exp) == 0)
+	    {
+	      as_warn (_("expression out of range: defaulting to 1"));
+	      offs (exp) = 1;
+	    }
+	  break;
 	default:
 	  break;
 	}
@@ -4888,7 +5070,7 @@ get_num (exp, ok)
   else if (exp->exp.X_op == O_big)
     {
       if (offs (exp) <= 0	/* flonum.  */
-	  && (ok == 80		/* no bignums.  */
+	  && (ok == 90		/* no bignums */
 	      || (ok > 10	/* Small-int ranges including 0 ok.  */
 		  /* If we have a flonum zero, a zero integer should
 		     do as well (e.g., in moveq).  */
@@ -4916,7 +5098,7 @@ get_num (exp, ok)
     }
   else
     {
-      if (ok >= 10 && ok <= 70)
+      if (ok >= 10 && ok <= 80)
 	{
 	  op (exp) = O_constant;
 	  adds (exp) = 0;
@@ -6951,7 +7133,8 @@ md_show_usage (stream)
 -l			use 1 word for refs to undefined symbols [default 2]\n\
 -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060 |\n\
 -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -m68360 | -mcpu32 |\n\
--m5200  | -m5202  | -m5204  | -m5206  | -m5206e | -m5307  | -m5407\n\
+-m5200  | -m5202  | -m5204  | -m5206  | -m5206e | -m528x  | -m5307  |\n\
+-m5407  | -mcfv4  | -mcfv4e\n\
 			specify variant of 680X0 architecture [default %s]\n\
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\

@@ -1,3 +1,15 @@
+2003-10-21  Thorsten Brehm  <brehm@gmx.net>
+
+	* archures.c (bfd_default_scan): Add support for mcf528x.
+	* ieee.c (ieee_write_processor): Likewise.
+
+2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
+            Bernardo Innocenti  <bernie@develer.com>
+
+	* archures.c: Add MCF528x (MCFv4) support.
+	* bfd/cpu-m68k.c (arch_info_struct): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2003-10-20  Andrew Cagney  <cagney@redhat.com>
 
 	* targets.c: Replace "struct sec" with "struct bfd_section"

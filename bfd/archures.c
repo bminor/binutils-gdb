@@ -84,6 +84,7 @@ DESCRIPTION
 .#define bfd_mach_mcf5206e 10
 .#define bfd_mach_mcf5307  11
 .#define bfd_mach_mcf5407  12
+.#define bfd_mach_mcf528x  13
 .  bfd_arch_vax,       {* DEC Vax *}
 .  bfd_arch_i960,      {* Intel 960 *}
 .    {* The order of the following is important.
@@ -958,6 +959,10 @@ bfd_default_scan (const bfd_arch_info_type *info, const char *string)
     case 5407:
       arch = bfd_arch_m68k;
       number = bfd_mach_mcf5407;
+      break;
+    case 5282:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_mcf528x;
       break;
 
     case 32000:

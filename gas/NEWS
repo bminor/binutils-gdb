@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for Motorola ColdFire MCF528x added.
+
 * Added --gstabs+ switch to enable the generation of STABS debug format
   information with GNU extensions.
  
