@@ -776,10 +776,16 @@ static void set_cu_language (unsigned int, struct dwarf2_cu *);
 static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 				      struct dwarf2_cu *);
 
+static struct attribute *dwarf2_attr_with_cu (struct die_info *,
+					      unsigned int,
+					      struct dwarf2_cu *,
+					      struct dwarf2_cu **);
+
 static int die_is_declaration (struct die_info *, struct dwarf2_cu *cu);
 
 static struct die_info *die_specification (struct die_info *die,
-					   struct dwarf2_cu *);
+					   struct dwarf2_cu *,
+					   struct dwarf2_cu **);
 
 static void free_line_header (struct line_header *lh);
 
@@ -910,7 +916,8 @@ static char *dwarf2_linkage_name (struct die_info *, struct dwarf2_cu *);
 static char *dwarf2_name (struct die_info *die, struct dwarf2_cu *);
 
 static struct die_info *dwarf2_extension (struct die_info *die,
-					  struct dwarf2_cu *);
+					  struct dwarf2_cu *,
+					  struct dwarf2_cu **);
 
 static char *dwarf_tag_name (unsigned int);
 
@@ -945,7 +952,9 @@ static unsigned int dwarf2_get_ref_die_offset (struct attribute *,
 
 static int dwarf2_get_attr_constant_value (struct attribute *, int);
 
-static struct die_info *follow_die_ref (unsigned int);
+static struct die_info *follow_die_ref (struct attribute *,
+					struct dwarf2_cu *,
+					struct dwarf2_cu **);
 
 static struct type *dwarf2_fundamental_type (struct objfile *, int,
 					     struct dwarf2_cu *);
@@ -2625,7 +2634,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   if (cu->language == language_cplus)
     {
-      struct die_info *spec_die = die_specification (die, cu);
+      struct dwarf2_cu *spec_cu;
+      struct die_info *spec_die = die_specification (die, cu, &spec_cu);
 
       /* NOTE: carlton/2004-01-23: We have to be careful in the
          presence of DW_AT_specification.  For example, with GCC 3.4,
@@ -2651,7 +2661,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	
       if (spec_die != NULL)
 	{
-	  char *specification_prefix = determine_prefix (spec_die, cu);
+	  char *specification_prefix = determine_prefix (spec_die, spec_cu);
 	  processing_current_prefix = specification_prefix;
 	  back_to = make_cleanup (xfree, specification_prefix);
 	}
@@ -3258,6 +3268,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   char *fieldname;
   char *physname;
   struct nextfnfield *new_fnfield;
+  struct dwarf2_cu *spec_cu;
 
   /* Get name of member function.  */
   attr = dwarf2_attr (die, DW_AT_name, cu);
@@ -3337,7 +3348,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	       physname);
 
   /* Get fcontext from DW_AT_containing_type if present.  */
-  if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
+  if (dwarf2_attr_with_cu (die, DW_AT_containing_type, cu, &spec_cu) != NULL)
     fnp->fcontext = die_containing_type (die, cu);
 
   /* dwarf2 doesn't have stubbed physical names, so the setting of is_const
@@ -3458,11 +3469,13 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       if (cu->language == language_cplus)
 	{
-	  struct die_info *spec_die = die_specification (die, cu);
+	  struct dwarf2_cu *spec_cu;
+	  struct die_info *spec_die = die_specification (die, cu, &spec_cu);
 
 	  if (spec_die != NULL)
 	    {
-	      char *specification_prefix = determine_prefix (spec_die, cu);
+	      char *specification_prefix = determine_prefix (spec_die,
+							     spec_cu);
 	      processing_current_prefix = specification_prefix;
 	      back_to = make_cleanup (xfree, specification_prefix);
 	    }
@@ -3601,13 +3614,16 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	dwarf2_attach_fields_to_type (&fi, type, cu);
       if (fi.nfnfields)
 	{
+	  struct dwarf2_cu *spec_cu;
+
 	  dwarf2_attach_fn_fields_to_type (&fi, type, cu);
 
 	  /* Get the type which refers to the base class (possibly this
 	     class itself) which contains the vtable pointer for the current
 	     class from the DW_AT_containing_type attribute.  */
 
-	  if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
+	  if (dwarf2_attr_with_cu (die, DW_AT_containing_type,
+				   cu, &spec_cu) != NULL)
 	    {
 	      struct type *t = die_containing_type (die, cu);
 
@@ -3913,6 +3929,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
   const char *name;
   int is_anonymous;
   struct die_info *current_die;
+  struct dwarf2_cu *spec_cu;
 
   name = namespace_name (die, &is_anonymous, cu);
 
@@ -3939,7 +3956,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
      before.  Also, add a using directive if it's an anonymous
      namespace.  */
 
-  if (dwarf2_extension (die, cu) == NULL)
+  if (dwarf2_extension (die, cu, &spec_cu) == NULL)
     {
       struct type *type;
 
@@ -3981,14 +3998,15 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
 {
   struct die_info *current_die;
   const char *name = NULL;
+  struct dwarf2_cu *spec_cu;
 
   /* Loop through the extensions until we find a name.  */
 
-  for (current_die = die;
+  for (current_die = die, spec_cu = cu;
        current_die != NULL;
-       current_die = dwarf2_extension (die, cu))
+       current_die = dwarf2_extension (die, spec_cu, &spec_cu))
     {
-      name = dwarf2_name (current_die, cu);
+      name = dwarf2_name (current_die, spec_cu);
       if (name != NULL)
 	break;
     }
@@ -5679,7 +5697,8 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
 /* Return the named attribute or NULL if not there.  */
 
 static struct attribute *
-dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
+dwarf2_attr_with_cu (struct die_info *die, unsigned int name,
+		     struct dwarf2_cu *cu, struct dwarf2_cu **spec_cu)
 {
   unsigned int i;
   struct attribute *spec = NULL;
@@ -5688,6 +5707,20 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
     {
       if (die->attrs[i].name == name)
 	{
+	  if (spec_cu == NULL
+	      && (die->attrs[i].form == DW_FORM_ref_addr
+		  || die->attrs[i].form == DW_FORM_ref1
+		  || die->attrs[i].form == DW_FORM_ref2
+		  || die->attrs[i].form == DW_FORM_ref4
+		  || die->attrs[i].form == DW_FORM_ref8
+		  || die->attrs[i].form == DW_FORM_ref_udata))
+	    internal_error (__FILE__, __LINE__,
+			    "attempt to follow a dwarf2 DIE reference "
+			    "discards compilation unit");
+
+	  if (spec_cu != NULL)
+	    *spec_cu = cu;
+
 	  return &die->attrs[i];
 	}
       if (die->attrs[i].name == DW_AT_specification
@@ -5696,35 +5729,45 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
     }
   if (spec)
     {
-      struct die_info *ref_die =
-      follow_die_ref (dwarf2_get_ref_die_offset (spec, cu));
+      struct dwarf2_cu *ref_cu;
+      struct die_info *ref_die = follow_die_ref (spec, cu, &ref_cu);
 
-      if (ref_die)
-	return dwarf2_attr (ref_die, name, cu);
+      return dwarf2_attr_with_cu (ref_die, name, ref_cu, spec_cu);
     }
 
   return NULL;
 }
 
+/* Return the named attribute or NULL if not there.  */
+
+static struct attribute *
+dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
+{
+  return dwarf2_attr_with_cu (die, name, cu, NULL);
+}
+
 static int
 die_is_declaration (struct die_info *die, struct dwarf2_cu *cu)
 {
+  struct dwarf2_cu *spec_cu;
   return (dwarf2_attr (die, DW_AT_declaration, cu)
-	  && ! dwarf2_attr (die, DW_AT_specification, cu));
+	  && ! dwarf2_attr_with_cu (die, DW_AT_specification, cu, &spec_cu));
 }
 
 /* Return the die giving the specification for DIE, if there is
    one.  */
 
 static struct die_info *
-die_specification (struct die_info *die, struct dwarf2_cu *cu)
+die_specification (struct die_info *die, struct dwarf2_cu *cu,
+		   struct dwarf2_cu **spec_cu)
 {
-  struct attribute *spec_attr = dwarf2_attr (die, DW_AT_specification, cu);
+  struct attribute *spec_attr
+    = dwarf2_attr_with_cu (die, DW_AT_specification, cu, spec_cu);
 
   if (spec_attr == NULL)
     return NULL;
   else
-    return follow_die_ref (dwarf2_get_ref_die_offset (spec_attr, cu));
+    return follow_die_ref (spec_attr, *spec_cu, spec_cu);
 }
 
 /* Free the line_header structure *LH, and any arrays and strings it
@@ -6334,6 +6377,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    }
 	  else
 	    {
+	      struct dwarf2_cu *spec_cu;
+
 	      /* We do not know the address of this symbol.
 	         If it is an external symbol and we have type information
 	         for it, enter the symbol as a LOC_UNRESOLVED symbol.
@@ -6342,7 +6387,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	         referenced.  */
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	      if (attr2 && (DW_UNSND (attr2) != 0)
-		  && dwarf2_attr (die, DW_AT_type, cu) != NULL)
+		  && dwarf2_attr_with_cu (die, DW_AT_type,
+					  cu, &spec_cu) != NULL)
 		{
 		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
 		  add_symbol_to_list (sym, &global_symbols);
@@ -6608,9 +6654,9 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *type_attr;
   struct die_info *type_die;
-  unsigned int ref;
+  struct dwarf2_cu *spec_cu;
 
-  type_attr = dwarf2_attr (die, DW_AT_type, cu);
+  type_attr = dwarf2_attr_with_cu (die, DW_AT_type, cu, &spec_cu);
   if (!type_attr)
     {
       /* A missing DW_AT_type represents a void type.  */
@@ -6618,16 +6664,16 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     {
-      ref = dwarf2_get_ref_die_offset (type_attr, cu);
-      type_die = follow_die_ref (ref);
+      type_die = follow_die_ref (type_attr, spec_cu, &spec_cu);
       if (!type_die)
 	{
-	  error ("Dwarf Error: Cannot find referent at offset %d [in module %s]", 
-			  ref, cu->objfile->name);
+	  error ("Dwarf Error: Cannot find referent from DIE "
+		 "at offset %d [in module %s]",
+		 die->offset, cu->objfile->name);
 	  return NULL;
 	}
     }
-  type = tag_type_to_type (type_die, cu);
+  type = tag_type_to_type (type_die, spec_cu);
   if (!type)
     {
       dump_die (type_die);
@@ -6646,20 +6692,19 @@ die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type = NULL;
   struct attribute *type_attr;
   struct die_info *type_die = NULL;
-  unsigned int ref;
+  struct dwarf2_cu *spec_cu;
 
-  type_attr = dwarf2_attr (die, DW_AT_containing_type, cu);
+  type_attr = dwarf2_attr_with_cu (die, DW_AT_containing_type, cu, &spec_cu);
   if (type_attr)
     {
-      ref = dwarf2_get_ref_die_offset (type_attr, cu);
-      type_die = follow_die_ref (ref);
+      type_die = follow_die_ref (type_attr, spec_cu, &spec_cu);
       if (!type_die)
 	{
-	  error ("Dwarf Error: Cannot find referent at offset %d [in module %s]", ref, 
-			  cu->objfile->name);
+	  error ("Dwarf Error: Cannot find referent from DIE at offset %d "
+		 "[in module %s]", die->offset, cu->objfile->name);
 	  return NULL;
 	}
-      type = tag_type_to_type (type_die, cu);
+      type = tag_type_to_type (type_die, spec_cu);
     }
   if (!type)
     {
@@ -7043,21 +7088,21 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
    is none.  */
 
 static struct die_info *
-dwarf2_extension (struct die_info *die, struct dwarf2_cu *cu)
+dwarf2_extension (struct die_info *die, struct dwarf2_cu *cu,
+		  struct dwarf2_cu **spec_cu)
 {
   struct attribute *attr;
   struct die_info *extension_die;
-  unsigned int ref;
 
-  attr = dwarf2_attr (die, DW_AT_extension, cu);
+  attr = dwarf2_attr_with_cu (die, DW_AT_extension, cu, spec_cu);
   if (attr == NULL)
     return NULL;
 
-  ref = dwarf2_get_ref_die_offset (attr, cu);
-  extension_die = follow_die_ref (ref);
+  extension_die = follow_die_ref (attr, *spec_cu, spec_cu);
   if (!extension_die)
     {
-      error ("Dwarf Error: Cannot find referent at offset %d.", ref);
+      error ("Dwarf Error: Cannot find referent from DIE at offset %d.",
+	     die->offset);
     }
 
   return extension_die;
@@ -8013,10 +8058,14 @@ dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
 }
 
 static struct die_info *
-follow_die_ref (unsigned int offset)
+follow_die_ref (struct attribute *attr, struct dwarf2_cu *cu,
+		struct dwarf2_cu **spec_cu)
 {
   struct die_info *die;
+  unsigned int offset;
   int h;
+
+  offset = dwarf2_get_ref_die_offset (attr, cu);
 
   h = (offset % REF_HASH_SIZE);
   die = die_ref_table[h];
@@ -8024,6 +8073,7 @@ follow_die_ref (unsigned int offset)
     {
       if (die->offset == offset)
 	{
+	  *spec_cu = cu;
 	  return die;
 	}
       die = die->next_ref;

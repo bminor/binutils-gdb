@@ -1,5 +1,30 @@
 2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (dwarf2_attr_with_cu): New function, renamed
+	from dwarf2_attr.  Also return the compilation unit associated
+	with the attribute if we have followed a reference.  Complain
+	if we return a reference attribute and the caller does not want
+	the target compilation unit.
+	(dwarf2_attr): Call dwarf2_attr_with_cu.
+	(die_specification, dwarf2_extension): Also return a compilation
+	unit.
+	(follow_die_ref): Take attribute and compilation unit arguments.
+	Call dwarf2_get_ref_die_offset.  Also return the target
+	compilation unit.
+	(read_func_scope, read_structure_scope): Update calls to
+	die_specification.  Use the result.
+	(read_namespace): Update call to dwarf2_extension.
+	(namespace_name): Likewise.  Use the result.
+	(new_symbol): Call dwarf2_attr_with_cu to check for DIE type.
+	(die_type): Likewise.  Update call to follow_die_ref.  Use the
+	results.
+	(dwarf2_add_member_fn, read_structure_scope): Likewise for
+	DW_AT_containing_type.
+	(die_containing_type): Likewise.
+	(die_is_declaration): Likewise for DW_AT_specification.
+
+2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (MAX_CACHE_AGE): Define.
 	(struct dwarf2_cu): Add last_used counter.
 	(free_comp_units_worker): New function, based on
