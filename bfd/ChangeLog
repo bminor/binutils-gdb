@@ -1,3 +1,20 @@
+2000-05-08  Alan Modra  <alan@linuxcare.com.au>
+
+	* peigen.c (_bfd_pei_swap_aouthdr_out): Pass ImageBase to
+	add_data_entry.  DataDirectory virtual address is relative.
+	(pe_print_idata): Account for relative DataDirectory virtual
+	addresses.  Don't trash datasize inside POWERPC_LE_PE code.
+	(pe_print_edata): Similarly.
+
+	From Szabolcs Szakacsits <szaka@F-Secure.com>
+	* peigen.c (dir_names): Add Delay Import Directory.
+	(pe_print_idata):  Always search for bfd section containing
+	idata address rather than looking up section name.  Print this
+	section name rather than .idata.
+	(pe_print_edata): Similarly.  Also print some fields as %08lx.
+	(_bfd_pe_print_private_bfd_data_common): Print Reserved1 field as
+	Win32Version.
+
 2000-05-03  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* bfd/coff-go32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add entry for
