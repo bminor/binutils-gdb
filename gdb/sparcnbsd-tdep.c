@@ -298,7 +298,7 @@ sparc32nbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   sparc32nbsd_init_abi (info, gdbarch);
 
   set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 static enum gdb_osabi

@@ -31,7 +31,6 @@
 #include "gdb_assert.h"
 
 #include "sparc-tdep.h"
-#include "nbsd-tdep.h"
 
 /* Signal trampolines.  */
 
@@ -155,7 +154,7 @@ sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, sparc32obsd_sigtramp_frame_sniffer);
 
   set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 

@@ -1,3 +1,13 @@
+2004-09-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c (sparc32nbsd_elf_init_abi): Set
+	solib_svr4_fetch_link_map_offsets to
+	svr4_ilp32_fetch_link_map_offsets.
+	* sparcobsd-tdep.c: Don't include "nbsd-tdep.h".
+	(sparc32obsd_init_abi): Set solib_svr4_fetch_link_map_offsets to
+	svr4_ilp32_fetch_link_map_offsets.
+	* Makefile.in (sparcobsd-tdep.o): Update dependencies.
+
 2004-09-07  Jim Blandy  <jimb@redhat.com>
 
 	* frame.h (frame_register): Doc fix.
