@@ -1,3 +1,11 @@
+start-sanitize-v850
+Thu Aug 22 16:29:28 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (ev850.c): New target.
+	* configure.tgt (v850-*-*): New target.
+	* emulparams/v850.sh: New file.
+
+end-sanitize-v850
 Thu Aug 22 11:16:02 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Add @DASH_C_FLAG@ to compiler edit.

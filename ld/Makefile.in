@@ -382,7 +382,7 @@ ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
 # start-sanitize-d10v
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} d10velf "$(tdir_arcelf)"
+	${GENSCRIPTS} d10velf "$(tdir_d10v)"
 # end-sanitize-d10v
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
@@ -609,6 +609,11 @@ evax.c: $(srcdir)/emulparams/vax.sh \
 evsta.c: $(srcdir)/emulparams/vsta.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vsta "$(tdir_vsta)"
+# start-sanitize-v850
+ev850.c: $(srcdir)/emulparams/v850.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} v850 "$(tdir_v850)"
+# end-sanitize-v850
 ew65.c: $(srcdir)/emulparams/w65.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/w65.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} w65 "$(tdir_w65)"
@@ -1043,7 +1048,7 @@ mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
 ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h ldmain.h \
-  ldmisc.h
+  ldmisc.h ldexp.h ldlang.h
 fnmatch.o: fnmatch.c
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
