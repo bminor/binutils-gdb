@@ -1,3 +1,9 @@
+2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.objc/nondebug.exp: Match and KFAIL the output that comes
+	from current versions of gdb.  Clean up regular expressions.
+	Delete redundant timeout case.
+
 2003-12-01  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Partial fix for PR testsuite/1456.

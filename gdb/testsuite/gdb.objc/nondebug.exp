@@ -63,12 +63,15 @@ do_objc_tests
 set name "break on non-debuggable method"
 gdb_test_multiple "break someMethod" $name \
 {
-    -re "\\\[0\\\] cancel.*\\\[1\\\] all.*\\\[2\\\]\[ \]+-.NonDebug someMethod.*\\\[3\\\]\[ \]+-.NonDebug2 someMethod.*" {
+    -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\]\[ \]+-.NonDebug someMethod.*\\\[3\\\]\[ \]+-.NonDebug2 someMethod.*" {
 	send_gdb "2\n"
 	exp_continue
     }
-    -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+.*" { pass $name }
+    -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n> " {
+	gdb_test "0" "" ""
+	kfail "gdb/1236" $name
+    }
+    -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+.*$gdb_prompt $" { pass $name }
     -re ".*$gdb_prompt $"   { kfail "gdb/1236" $name }
-    timeout                 { fail "$name (timeout)" }
 }
 
