@@ -29,8 +29,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Internal headers for the ELF .stab-dump code - sorry.  */
 #define	BYTES_IN_WORD	32
 #include "aout/aout64.h"
-#include "elf/internal.h"
-extern Elf_Internal_Shdr *bfd_elf_find_section();
 
 #ifndef FPRINTF_ALREADY_DECLARED
 extern int fprintf PARAMS ((FILE *, CONST char *, ...));
@@ -666,74 +664,50 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
      char *stabsect_name;
      char *strsect_name;
 {
-  Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
   asection *stabsect, *stabstrsect;
-  int is_elf = (0 == strncmp ("elf", abfd->xvec->name, 3));
 
-  if (is_elf)
-    stab_hdr = bfd_elf_find_section (abfd, stabsect_name);
-  else
-    stabsect = bfd_get_section_by_name (abfd, stabsect_name);
-
-  if (is_elf ? (0 == stab_hdr) : (0 == stabsect))
+  stabsect = bfd_get_section_by_name (abfd, stabsect_name);
+  if (0 == stabsect)
     {
       printf ("No %s section present\n\n", stabsect_name);
       return false;
     }
 
-  if (is_elf)
-    stabstr_hdr = bfd_elf_find_section (abfd, strsect_name);
-  else
-    stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
-
-  if (is_elf ? (0 == stabstr_hdr) : (0 == stabstrsect))
+  stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
+  if (0 == stabstrsect)
     {
       fprintf (stderr, "%s: %s has no %s section\n", program_name,
 	       bfd_get_filename (abfd), strsect_name);
       return false;
     }
  
-  stab_size    = (is_elf ? stab_hdr   ->sh_size : bfd_section_size (abfd, stabsect));
-  stabstr_size = (is_elf ? stabstr_hdr->sh_size : bfd_section_size (abfd, stabstrsect));
+  stab_size    = bfd_section_size (abfd, stabsect);
+  stabstr_size = bfd_section_size (abfd, stabstrsect);
 
   stabs  = (struct internal_nlist *) xmalloc (stab_size);
   strtab = (char *) xmalloc (stabstr_size);
   
-  if (is_elf) 
+  if (! bfd_get_section_contents (abfd, stabsect, (PTR) stabs, 0, stab_size))
     {
-      if (bfd_seek (abfd, stab_hdr->sh_offset, SEEK_SET) < 0 ||
-	  stab_size != bfd_read ((PTR) stabs, stab_size, 1, abfd))
-	{
-	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
-		   program_name, stabsect_name, 
-		   bfd_get_filename (abfd));
-	  free (stabs);
-	  free (strtab);
-	  return false;
-	}
-    }
-  else
-    {
-      bfd_get_section_contents (abfd, stabsect, (PTR) stabs, 0, stab_size);
+      fprintf (stderr, "%s: Reading %s section of %s failed: %s\n",
+	       program_name, stabsect_name, bfd_get_filename (abfd),
+	       bfd_errmsg (bfd_get_error ()));
+      free (stabs);
+      free (strtab);
+      return false;
     }
 
-  if (is_elf) 
+  if (! bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0,
+				  stabstr_size))
     {
-      if (bfd_seek (abfd, stabstr_hdr->sh_offset, SEEK_SET) < 0 ||
-	  stabstr_size != bfd_read ((PTR) strtab, stabstr_size, 1, abfd))
-	{
-	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
-		   program_name, strsect_name,
-		   bfd_get_filename (abfd));
-	  free (stabs);
-	  free (strtab);
-	  return false;
-	}
+      fprintf (stderr, "%s: Reading %s section of %s failed: %s\n",
+	       program_name, strsect_name, bfd_get_filename (abfd),
+	       bfd_errmsg (bfd_get_error ()));
+      free (stabs);
+      free (strtab);
+      return false;
     }
-  else
-    {
-      bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0, stabstr_size);
-    }
+
   return true;
 }
 

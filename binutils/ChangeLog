@@ -1,3 +1,10 @@
+Mon Jun 20 16:29:54 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* objdump.c: Don't include elf/internal.h.
+	(bfd_elf_find_section): Don't declare.
+	(read_section_stabs): No special handling for ELF.  Always read
+	using BFD sections.
+
 Thu Jun 16 17:25:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Set UNDERSCORE in Makefile based on result of
