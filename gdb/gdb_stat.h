@@ -66,4 +66,9 @@
 #define S_ISNWK(m) (((m) & S_IFMT) == S_IFNWK)
 #endif
 
+/* Microsoft C's stat.h doesn't define all the POSIX file modes.  */
+#ifndef S_IROTH
+#define S_IROTH	S_IREAD
+#endif
+
 #endif /* !defined(GDB_STAT_H) */

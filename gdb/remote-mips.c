@@ -31,17 +31,9 @@
 #include "target.h"
 #include "remote-utils.h"
 #include "gdb_string.h"
+#include "gdb_stat.h"
 #include "regcache.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <ctype.h>
-
-/* Microsoft C's stat.h doesn't define all the POSIX file modes.  */
-#ifndef S_IROTH
-#define S_IROTH S_IREAD
-#endif
-
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch

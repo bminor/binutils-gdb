@@ -1,5 +1,8 @@
 2001-04-02  J.T. Conklin  <jtc@redback.com>
 
+	* remote-mips.c (S_IROTH): Moved definition from here.
+	* gdb_stat.h (S_IROTH): to here.
+
 	* remote.c (remote_protocol_e, remote_protocol_E): Define.
 	(set_remote_protocol_e_packet_cmd)
 	(set_remote_protocol_E_packet_cmd)
