@@ -103,6 +103,7 @@ i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[3456]86-*-lynxos*)	gdb_target=i386lynx
 		configdirs="${configdirs} gdbserver" ;;
+i[3456]86-*-openbsd*)	gdb_target=obsd ;;
 i[3456]86-*-solaris*)	gdb_target=i386sol2 ;;
 # OBSOLETE i[3456]86-*-sunos*)	gdb_target=sun386 ;;
 i[3456]86-*-sysv4.2*)	gdb_target=i386v42mp ;;

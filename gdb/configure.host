@@ -65,6 +65,7 @@ i[3456]86-*-lynxos*)	gdb_host=i386lynx ;;
 i[3456]86-*-mach3*)	gdb_host=i386m3 ;;
 i[3456]86-*-mach*)	gdb_host=i386mach ;;
 i[3456]86-*-gnu*)	gdb_host=i386gnu ;;
+i[3456]86-*-openbsd*)	gdb_host=obsd ;;
 i[3456]86-*-osf1mk*)	gdb_host=i386mk ;;
 i[3456]86-*-sco3.2v5*)	gdb_host=i386sco5 ;;
 i[3456]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
