@@ -1,3 +1,8 @@
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-engine.c (sim_engine_halt): If jmpbuf is invalid, abort.
+	(sim_engine_vabort): Ditto.
+
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* sim-utils.h (sim_analyze_program, sim_load_file): Rename _bfd to bfd.
