@@ -1,3 +1,8 @@
+2002-03-12  Andreas Jaeger  <aj@suse.de>
+
+	* cpu-i386.c (i386_compatible): New.  Use it instead of
+	bfd_default_compatible.
+
 2002-03-07  H.J. Lu  (hjl@gnu.org)
 
 	* coff-sh.c (shcoff_reloc_map): Use bfd_reloc_code_real_type
