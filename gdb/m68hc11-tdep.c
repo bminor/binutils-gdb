@@ -128,6 +128,10 @@ enum insn_return_kind {
 
 #define M68HC11_REG_SIZE    (2)
 
+#define M68HC12_NUM_REGS        (9)
+#define M68HC12_NUM_PSEUDO_REGS ((M68HC11_MAX_SOFT_REGS+5)+1-1)
+#define M68HC12_HARD_PC_REGNUM  (SOFT_D32_REGNUM+1)
+
 struct insn_sequence;
 struct gdbarch_tdep
   {
@@ -280,6 +284,24 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regno, void *buf)
 {
+  /* The PC is a pseudo reg only for 68HC12 with the memory bank
+     addressing mode.  */
+  if (regno == M68HC12_HARD_PC_REGNUM)
+    {
+      const int regsize = TYPE_LENGTH (builtin_type_uint32);
+      CORE_ADDR pc = read_register (HARD_PC_REGNUM);
+      int page = read_register (HARD_PAGE_REGNUM);
+
+      if (pc >= 0x8000 && pc < 0xc000)
+        {
+          pc -= 0x8000;
+          pc += (page << 14);
+          pc += 0x1000000;
+        }
+      store_unsigned_integer (buf, regsize, pc);
+      return;
+    }
+
   m68hc11_initialize_register_info ();
   
   /* Fetch a soft register: translate into a memory read.  */
@@ -300,6 +322,28 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
 			       int regno, const void *buf)
 {
+  /* The PC is a pseudo reg only for 68HC12 with the memory bank
+     addressing mode.  */
+  if (regno == M68HC12_HARD_PC_REGNUM)
+    {
+      const int regsize = TYPE_LENGTH (builtin_type_uint32);
+      char *tmp = alloca (regsize);
+      CORE_ADDR pc;
+
+      memcpy (tmp, buf, regsize);
+      pc = extract_unsigned_integer (tmp, regsize);
+      if (pc >= 0x1000000)
+        {
+          pc -= 0x1000000;
+          write_register (HARD_PAGE_REGNUM, (pc >> 14) & 0x0ff);
+          pc &= 0x03fff;
+          write_register (HARD_PC_REGNUM, pc + 0x8000);
+        }
+      else
+        write_register (HARD_PC_REGNUM, pc);
+      return;
+    }
+  
   m68hc11_initialize_register_info ();
 
   /* Store a soft register: translate into a memory write.  */
@@ -315,6 +359,11 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 static const char *
 m68hc11_register_name (int reg_nr)
 {
+  if (reg_nr == M68HC12_HARD_PC_REGNUM && USE_PAGE_REGISTER)
+    return "pc";
+  if (reg_nr == HARD_PC_REGNUM && USE_PAGE_REGISTER)
+    return "ppc";
+  
   if (reg_nr < 0)
     return NULL;
   if (reg_nr >= M68HC11_ALL_REGS)
@@ -1011,6 +1060,9 @@ m68hc11_register_virtual_type (int reg_nr)
     case HARD_CCR_REGNUM:
       return builtin_type_uint8;
 
+    case M68HC12_HARD_PC_REGNUM:
+      return builtin_type_uint32;
+
     default:
       return builtin_type_uint16;
     }
@@ -1144,6 +1196,9 @@ m68hc11_register_raw_size (int reg_nr)
     case HARD_CCR_REGNUM:
       return 1;
 
+    case M68HC12_HARD_PC_REGNUM:
+      return 4;
+
     default:
       return M68HC11_REG_SIZE;
     }
@@ -1214,12 +1269,25 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
       tdep->stack_correction = 1;
       tdep->use_page_register = 0;
       tdep->prologue = m6811_prologue;
+      set_gdbarch_addr_bit (gdbarch, 16);
+      set_gdbarch_num_pseudo_regs (gdbarch, M68HC11_NUM_PSEUDO_REGS);
+      set_gdbarch_pc_regnum (gdbarch, HARD_PC_REGNUM);
+      set_gdbarch_num_regs (gdbarch, M68HC11_NUM_REGS);
       break;
 
     case bfd_arch_m68hc12:
       tdep->stack_correction = 0;
       tdep->use_page_register = elf_flags & E_M68HC12_BANKS;
       tdep->prologue = m6812_prologue;
+      set_gdbarch_addr_bit (gdbarch, elf_flags & E_M68HC12_BANKS ? 32 : 16);
+      set_gdbarch_num_pseudo_regs (gdbarch,
+                                   elf_flags & E_M68HC12_BANKS
+                                   ? M68HC12_NUM_PSEUDO_REGS
+                                   : M68HC11_NUM_PSEUDO_REGS);
+      set_gdbarch_pc_regnum (gdbarch, elf_flags & E_M68HC12_BANKS
+                             ? M68HC12_HARD_PC_REGNUM : HARD_PC_REGNUM);
+      set_gdbarch_num_regs (gdbarch, elf_flags & E_M68HC12_BANKS
+                            ? M68HC12_NUM_REGS : M68HC11_NUM_REGS);
       break;
 
     default:
@@ -1255,11 +1323,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_num_regs (gdbarch, M68HC11_NUM_REGS);
-  set_gdbarch_num_pseudo_regs (gdbarch, M68HC11_NUM_PSEUDO_REGS);
   set_gdbarch_sp_regnum (gdbarch, HARD_SP_REGNUM);
   set_gdbarch_fp_regnum (gdbarch, SOFT_FP_REGNUM);
-  set_gdbarch_pc_regnum (gdbarch, HARD_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, m68hc11_register_name);
   set_gdbarch_register_size (gdbarch, 2);
   set_gdbarch_register_bytes (gdbarch, M68HC11_ALL_REGS * 2);

@@ -1,5 +1,18 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (M68HC12_NUM_PSEUDO_REGS): New define.
+	(M68HC12_HARD_PC_REGNUM): Define specific PC for 68HC12 (pseudo reg).
+	(m68hc11_pseudo_register_read): Compute the 68HC12 PC using the
+	real PC and the page number (if it's within the memory bank window).
+	(m68hc11_pseudo_register_write): Likewise when saving.
+	(m68hc11_register_name): Name the virtual pc 'pc' and the real one ppc.
+	(m68hc11_register_virtual_type): Return uint32 for virtual pc.
+	(m68hc11_register_raw_size): And use 32-bit for it.
+	(m68hc11_gdbarch_init): Use 32-bit address for 68HC12 if the
+	16K memory bank is used by the prog; also use the virtual pc.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (m68hc11_elf_make_msymbol_special): New function.
 	(m68hc11_gdbarch_init): Install it in gdbarch.
 	(MSYMBOL_SET_RTC, MSYMBOL_SET_RTI): New to set symbol specific flags.
