@@ -10275,6 +10275,7 @@ process_archive (char *file_name, FILE *file)
   char *longnames = NULL;
   unsigned long longnames_size = 0;
   size_t file_name_size;
+  int ret;
 
   show_name = 1;
 
@@ -10326,6 +10327,7 @@ process_archive (char *file_name, FILE *file)
 
       if (fread (longnames, longnames_size, 1, file) != 1)
 	{
+	  free (longnames);
 	  error(_("%s: failed to read string table\n"), file_name);
 	  return 1;
 	}
@@ -10336,6 +10338,8 @@ process_archive (char *file_name, FILE *file)
       got = fread (&arhdr, 1, sizeof arhdr, file);
       if (got != sizeof arhdr)
 	{
+	  free (longnames);
+
 	  if (got == 0)
 	    return 0;
 
@@ -10345,6 +10349,7 @@ process_archive (char *file_name, FILE *file)
     }
 
   file_name_size = strlen (file_name);
+  ret = 0;
 
   while (1)
     {
@@ -10360,7 +10365,8 @@ process_archive (char *file_name, FILE *file)
 	  if (off >= longnames_size)
 	    {
 	      error (_("%s: invalid archive string table offset %lu\n"), off);
-	      return 1;
+	      ret = 1;
+	      break;
 	    }
 
 	  name = longnames + off;
@@ -10375,14 +10381,16 @@ process_archive (char *file_name, FILE *file)
       if (nameend == NULL)
 	{
 	  error (_("%s: bad archive file name\n"));
-	  return 1;
+	  ret = 1;
+	  break;
 	}
 
       namealc = malloc (file_name_size + (nameend - name) + 3);
       if (namealc == NULL)
 	{
 	  error (_("Out of memory\n"));
-	  return 1;
+	  ret = 1;
+	  break;
 	}
 
       memcpy (namealc, file_name, file_name_size);
@@ -10394,7 +10402,7 @@ process_archive (char *file_name, FILE *file)
       archive_file_offset = ftell (file);
       archive_file_size = strtoul (arhdr.ar_size, NULL, 10);
 
-      process_object (namealc, file);
+      ret |= process_object (namealc, file);
 
       free (namealc);
 
@@ -10405,24 +10413,26 @@ process_archive (char *file_name, FILE *file)
 		 SEEK_SET) != 0)
 	{
 	  error (_("%s: failed to seek to next archive header\n"), file_name);
-	  return 1;
+	  ret = 1;
+	  break;
 	}
 
       got = fread (&arhdr, 1, sizeof arhdr, file);
       if (got != sizeof arhdr)
 	{
 	  if (got == 0)
-	    return 0;
+	    break;
 
 	  error (_("%s: failed to read archive header\n"), file_name);
-	  return 1;
+	  ret = 1;
+	  break;
 	}
     }
 
   if (longnames != 0)
     free (longnames);
 
-  return 0;
+  return ret;
 }
 
 static int

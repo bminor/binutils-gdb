@@ -1,4 +1,7 @@
-2003-08-11  Ian Lance Taylor <ian@airs.com>
+2003-08-11  Ian Lance Taylor  <ian@airs.com>
+
+	* readelf.c (process_archive): Fix error handling.  Remove memory
+	leak.
 
 	* readelf.c: Add ability to read archives.
 	(archive_file_offset): New variable.
