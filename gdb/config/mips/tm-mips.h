@@ -115,10 +115,16 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define BIG_ENDIAN 4321
 
-/* Old-style breakpoint macros.  */
+/* Old-style breakpoint macros.
+   The IDT board uses an unusual breakpoint value, and sometimes gets
+   confused when it sees the usual MIPS breakpoint instruction.  */
 
 #define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
 #define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
+#define PMON_BIG_BREAKPOINT {0, 0, 0, 0xd}
+#define PMON_LITTLE_BREAKPOINT {0xd, 0, 0, 0}
+#define IDT_BIG_BREAKPOINT {0, 0, 0x0a, 0xd}
+#define IDT_LITTLE_BREAKPOINT {0xd, 0x0a, 0, 0}
 #define MIPS16_BIG_BREAKPOINT {0xe8, 0xa5}
 #define MIPS16_LITTLE_BREAKPOINT {0xa5, 0xe8}
 
@@ -518,5 +524,17 @@ extern int mips_ignore_helper PARAMS ((CORE_ADDR pc));
 #ifndef TARGET_MIPS
 #define TARGET_MIPS
 #endif
+
+/* Definitions and declarations used by mips-tdep.c and remote-mips.c  */
+#define MIPS_INSTLEN 4		/* Length of an instruction */
+#define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16*/
+#define MIPS_NUMREGS 32		/* Number of integer or float registers */
+typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
+
+/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
+   macros to test, set, or clear bit 0 of addresses.  */
+#define IS_MIPS16_ADDR(addr)	 ((addr) & 1)
+#define MAKE_MIPS16_ADDR(addr)	 ((addr) | 1)
+#define UNMAKE_MIPS16_ADDR(addr) ((addr) & ~1)
 
 #endif	/* TM_MIPS_H */

@@ -1,3 +1,18 @@
+Mon Jun 16 18:38:28 1997  Mark Alexander  <marka@cygnus.com>
+
+	* infrun.c (wait_for_inferior): Mark registers as invalid when
+	stepping over an instruction that triggered a watchpoint.
+	* remote-mips.c: Numerous changes to support hardware breakpoints
+	and watchpoints on LSI MiniRISC and TinyRISC boards.
+	* mips-tdep.c: Move MIPS16-related macros to config/mips/tm-mips.h.
+	(mips_breakpoint_from_pc): Account for different breakpoint
+	instructions used by PMON and IDT monitor.
+	* config/mips/tm-embed.h: Enable hardware breakpoints on embedded
+	MIPS targets.
+	* config/mips/tm-mips.h: Define breakpoint instructions for
+	PMON and IDT monitor.  Move MIPS16-related macros here from
+	mips-tdep.c.
+	
 Fri Jun 13 13:44:47 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* config/mips/tm-tx39[l].h, tx39[l].mt: change r3900 target to tx39.

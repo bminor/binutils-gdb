@@ -41,18 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* FIXME: Put this declaration in frame.h.  */
 extern struct obstack frame_cache_obstack;
 
-/* FIXME! this code assumes 4-byte instructions.  */
-#define MIPS_INSTLEN 4		/* Length of an instruction */
-#define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16*/
-#define MIPS_NUMREGS 32		/* Number of integer or float registers */
-typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
-
-/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
-   macros to test, set, or clear bit 0 of addresses.  */
-#define IS_MIPS16_ADDR(addr)	 ((addr) & 1)
-#define MAKE_MIPS16_ADDR(addr)	 ((addr) | 1)
-#define UNMAKE_MIPS16_ADDR(addr) ((addr) & ~1)
-
 #if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
@@ -545,9 +533,9 @@ mips_addr_bits_remove (addr)
 {
 #if GDB_TARGET_IS_MIPS64
   if ((addr >> 32 == (CORE_ADDR)0xffffffff)
-      && (strcmp(target_shortname,"pmon")==0
-	 || strcmp(target_shortname,"ddb")==0
-	 || strcmp(target_shortname,"sim")==0))
+      && (strcmp (target_shortname,"pmon")==0
+	 || strcmp (target_shortname,"ddb")==0
+	 || strcmp (target_shortname,"sim")==0))
     {
       /* This hack is a work-around for existing boards using PMON,
 	 the simulator, and any other 64-bit targets that doesn't have
@@ -573,6 +561,20 @@ mips_addr_bits_remove (addr)
 
   return addr;
 }
+
+void
+mips_init_frame_pc_first (fromleaf, prev)
+     int fromleaf;
+     struct frame_info *prev;
+{
+  CORE_ADDR pc, tmp;
+
+  pc = ((fromleaf) ? SAVED_PC_AFTER_CALL (prev->next) :
+        prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+  tmp = mips_skip_stub (pc);
+  prev->pc =  tmp ? tmp : pc;
+}
+
 
 CORE_ADDR
 mips_frame_saved_pc(frame)
@@ -637,7 +639,7 @@ heuristic_proc_start(pc)
 		else
 		  warning("Hit heuristic-fence-post without finding");
 		
-		warning("enclosing function for address 0x%s", paddr (pc));
+		warning("enclosing function for address 0x%s", paddr_nz (pc));
 		if (!blurb_printed)
 		  {
 		    printf_filtered ("\
@@ -1096,29 +1098,36 @@ CORE_ADDR
 mips_frame_chain(frame)
     struct frame_info *frame;
 {
-    mips_extra_func_info_t proc_desc;
-    CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
+  mips_extra_func_info_t proc_desc;
+  CORE_ADDR tmp;
+  CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
 
-    if (saved_pc == 0 || inside_entry_file (saved_pc))
-      return 0;
+  if (saved_pc == 0 || inside_entry_file (saved_pc))
+    return 0;
 
-    proc_desc = find_proc_desc(saved_pc, frame);
-    if (!proc_desc)
-      return 0;
+  /* Check if the PC is inside a call stub.  If it is, fetch the
+     PC of the caller of that stub.  */
+  if ((tmp = mips_skip_stub (saved_pc)) != 0)
+    saved_pc = tmp;
 
-    cached_proc_desc = proc_desc;
+  /* Look up the procedure descriptor for this PC.  */
+  proc_desc = find_proc_desc(saved_pc, frame);
+  if (!proc_desc)
+    return 0;
 
-    /* If no frame pointer and frame size is zero, we must be at end
-       of stack (or otherwise hosed).  If we don't check frame size,
-       we loop forever if we see a zero size frame.  */
-    if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
-	&& PROC_FRAME_OFFSET (proc_desc) == 0
-	/* The previous frame from a sigtramp frame might be frameless
-	   and have frame size zero.  */
-	&& !frame->signal_handler_caller)
-      return 0;
-    else
-      return get_frame_pointer (frame, proc_desc);
+  cached_proc_desc = proc_desc;
+
+  /* If no frame pointer and frame size is zero, we must be at end
+     of stack (or otherwise hosed).  If we don't check frame size,
+     we loop forever if we see a zero size frame.  */
+  if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
+      && PROC_FRAME_OFFSET (proc_desc) == 0
+      /* The previous frame from a sigtramp frame might be frameless
+	 and have frame size zero.  */
+      && !frame->signal_handler_caller)
+    return 0;
+  else
+    return get_frame_pointer (frame, proc_desc);
 }
 
 void
@@ -1540,12 +1549,11 @@ mips_print_register (regnum, all)
   if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+MIPS_NUMREGS
       && !((regnum-FP0_REGNUM) & 1))
     {
-      char dbuffer[MAX_REGISTER_RAW_SIZE]; 
+      char dbuffer[2 * MAX_REGISTER_RAW_SIZE]; 
 
-      /* MIPS doubles are stored in a register pair with the least
-         signficant register in the lower-numbered register.  */
-      read_relative_register_raw_bytes (regnum+1, dbuffer);
-      read_relative_register_raw_bytes (regnum, dbuffer+MIPS_REGSIZE);
+      read_relative_register_raw_bytes (regnum, dbuffer);
+      read_relative_register_raw_bytes (regnum+1, dbuffer+MIPS_REGSIZE);
+      REGISTER_CONVERT_TO_TYPE (regnum, builtin_type_double, dbuffer);
 
       printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
       val_print (builtin_type_double, dbuffer, 0,
@@ -1901,19 +1909,7 @@ mips_extract_return_value (valtype, regbuf, valbuf)
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
        && (mips_fpu == MIPS_FPU_DOUBLE
 	   || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
-    {
-      regnum = FP0_REGNUM;
-
-      /* If this is a double, the odd-numbered register (FP1) contains the
-         high word of the result.  Copy that to the buffer before
-	 copying the low word in FP0.  */
-      if (len > MIPS_REGSIZE)
-	{
-	  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum+1), MIPS_REGSIZE);
-	  len -= MIPS_REGSIZE;
-	  valbuf += MIPS_REGSIZE;
-	}
-    }
+    regnum = FP0_REGNUM;
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN
       && TYPE_CODE (valtype) != TYPE_CODE_FLT
@@ -1921,6 +1917,7 @@ mips_extract_return_value (valtype, regbuf, valbuf)
     offset = REGISTER_RAW_SIZE (regnum) - len;
     
   memcpy (valbuf, regbuf + REGISTER_BYTE (regnum) + offset, len);
+  REGISTER_CONVERT_TO_TYPE (regnum, valtype, valbuf);
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
@@ -1940,10 +1937,7 @@ mips_store_return_value (valtype, valbuf)
     regnum = FP0_REGNUM;
 
   memcpy(raw_buffer, valbuf, TYPE_LENGTH (valtype));
-
-#ifdef REGISTER_CONVERT_FROM_TYPE
   REGISTER_CONVERT_FROM_TYPE(regnum, valtype, raw_buffer);
-#endif
 
   write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
 }
@@ -2173,8 +2167,19 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
       else
 	{
 	  static char big_breakpoint[] = BIG_BREAKPOINT;
+	  static char pmon_big_breakpoint[] = PMON_BIG_BREAKPOINT;
+	  static char idt_big_breakpoint[] = IDT_BIG_BREAKPOINT;
+
 	  *lenptr = sizeof(big_breakpoint);
-	  return big_breakpoint;
+
+	  if (strcmp (target_shortname, "mips") == 0)
+	    return idt_big_breakpoint;
+	  else if (strcmp (target_shortname, "ddb") == 0
+		   || strcmp (target_shortname, "pmon") == 0
+		   || strcmp (target_shortname, "lsi") == 0)
+	    return pmon_big_breakpoint;
+	  else
+	    return big_breakpoint;
 	}
     }
   else
@@ -2189,8 +2194,19 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
       else
 	{
 	  static char little_breakpoint[] = LITTLE_BREAKPOINT;
+	  static char pmon_little_breakpoint[] = PMON_LITTLE_BREAKPOINT;
+	  static char idt_little_breakpoint[] = IDT_LITTLE_BREAKPOINT;
+
 	  *lenptr = sizeof(little_breakpoint);
-	  return little_breakpoint;
+
+	  if (strcmp (target_shortname, "mips") == 0)
+	    return idt_little_breakpoint;
+	  else if (strcmp (target_shortname, "ddb") == 0
+		   || strcmp (target_shortname, "pmon") == 0
+		   || strcmp (target_shortname, "lsi") == 0)
+	    return pmon_little_breakpoint;
+	  else
+	    return little_breakpoint;
 	}
     }
 }
@@ -2212,6 +2228,186 @@ mips_about_to_return (pc)
     return mips_fetch_instruction (pc) == 0xe820;	/* jr $ra */
   else
     return mips_fetch_instruction (pc) == 0x3e00008;	/* jr $ra */
+}
+
+
+/* If PC is in a mips16 call or return stub, return the address of the target
+   PC, which is either the callee or the caller.  There are several
+   cases which must be handled:
+
+   * If the PC is in __mips16_ret_{d,s}f, this is a return stub and the
+     target PC is in $31 ($ra).
+   * If the PC is in __mips16_call_stub_{1..10}, this is a call stub
+     and the target PC is in $2.
+   * If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
+     before the jal instruction, this is effectively a call stub
+     and the the target PC is in $2.  Otherwise this is effectively
+     a return stub and the target PC is in $18.
+
+   See the source code for the stubs in gcc/config/mips/mips16.S for
+   gory details.
+
+   This function implements the SKIP_TRAMPOLINE_CODE macro.
+*/
+
+CORE_ADDR
+mips_skip_stub (pc)
+     CORE_ADDR pc;
+{
+  char *name;
+  CORE_ADDR start_addr;
+
+  /* Find the starting address and name of the function containing the PC.  */
+  if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0)
+    return 0;
+
+  /* If the PC is in __mips16_ret_{d,s}f, this is a return stub and the
+     target PC is in $31 ($ra).  */
+  if (strcmp (name, "__mips16_ret_sf") == 0
+      || strcmp (name, "__mips16_ret_df") == 0)
+    return read_register (RA_REGNUM);
+
+  if (strncmp (name, "__mips16_call_stub_", 19) == 0)
+    {
+      /* If the PC is in __mips16_call_stub_{1..10}, this is a call stub
+         and the target PC is in $2.  */
+      if (name[19] >= '0' && name[19] <= '9')
+	return read_register (2);
+
+      /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
+	 before the jal instruction, this is effectively a call stub
+	 and the the target PC is in $2.  Otherwise this is effectively
+	 a return stub and the target PC is in $18.  */
+      else if (name[19] == 's' || name[19] == 'd')
+	{
+	  if (pc == start_addr)
+	    {
+	      /* Check if the target of the stub is a compiler-generated
+		 stub.  Such a stub for a function bar might have a name
+		 like __fn_stub_bar, and might look like this:
+		      mfc1    $4,$f13
+		      mfc1    $5,$f12
+		      mfc1    $6,$f15
+		      mfc1    $7,$f14
+		      la      $1,bar   (becomes a lui/addiu pair)
+		      jr      $1
+		 So scan down to the lui/addi and extract the target
+		 address from those two instructions.  */
+
+	      CORE_ADDR target_pc = read_register (2);
+	      t_inst inst;
+	      int i;
+
+	      /* See if the name of the target function is  __fn_stub_*.  */
+	      if (find_pc_partial_function (target_pc, &name, NULL, NULL) == 0)
+		return target_pc;
+	      if (strncmp (name, "__fn_stub_", 10) != 0
+		  && strcmp (name, "etext") != 0
+		  && strcmp (name, "_etext") != 0)
+		return target_pc;
+
+	      /* Scan through this _fn_stub_ code for the lui/addiu pair.
+		 The limit on the search is arbitrarily set to 20
+		 instructions.  FIXME.  */
+	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS_INSTLEN)
+		{
+		   inst = mips_fetch_instruction (target_pc);
+		   if ((inst & 0xffff0000) == 0x3c010000)	/* lui $at */
+		      pc = (inst << 16) & 0xffff0000;		/* high word */
+		   else if ((inst & 0xffff0000) == 0x24210000)	/* addiu $at */
+		      return pc | (inst & 0xffff);		/* low word */
+		}
+
+	      /* Couldn't find the lui/addui pair, so return stub address.  */
+	      return target_pc;
+	    }
+	  else
+	    /* This is the 'return' part of a call stub.  The return
+	       address is in $r18.  */
+	    return read_register (18);
+	}
+    }
+  return 0;	/* not a stub */
+}
+
+
+/* Return non-zero if the PC is inside a call thunk (aka stub or trampoline).
+   This implements the IN_SOLIB_CALL_TRAMPOLINE macro.  */
+
+int
+mips_in_call_stub (pc, name)
+     CORE_ADDR pc;
+     char *name;
+{
+  CORE_ADDR start_addr;
+
+  /* Find the starting address of the function containing the PC.  If the
+     caller didn't give us a name, look it up at the same time.  */
+  if (find_pc_partial_function (pc, name ? NULL : &name, &start_addr, NULL) == 0)
+    return 0;
+
+  if (strncmp (name, "__mips16_call_stub_", 19) == 0)
+    {
+      /* If the PC is in __mips16_call_stub_{1..10}, this is a call stub.  */
+      if (name[19] >= '0' && name[19] <= '9')
+	return 1;
+      /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
+	 before the jal instruction, this is effectively a call stub.  */
+      else if (name[19] == 's' || name[19] == 'd')
+	return pc == start_addr;
+    }
+
+  return 0;	/* not a stub */
+}
+
+
+/* Return non-zero if the PC is inside a return thunk (aka stub or trampoline).
+   This implements the IN_SOLIB_RETURN_TRAMPOLINE macro.  */
+
+int
+mips_in_return_stub (pc, name)
+     CORE_ADDR pc;
+     char *name;
+{
+  CORE_ADDR start_addr;
+
+  /* Find the starting address of the function containing the PC.  */
+  if (find_pc_partial_function (pc, NULL, &start_addr, NULL) == 0)
+    return 0;
+
+  /* If the PC is in __mips16_ret_{d,s}f, this is a return stub.  */
+  if (strcmp (name, "__mips16_ret_sf") == 0
+      || strcmp (name, "__mips16_ret_df") == 0)
+    return 1;
+
+  /* If the PC is in __mips16_call_stub_{s,d}f_{0..10} but not at the start,
+      i.e. after the jal instruction, this is effectively a return stub.  */
+  if (strncmp (name, "__mips16_call_stub_", 19) == 0
+      && (name[19] == 's' || name[19] == 'd')
+      && pc != start_addr)
+    return 1;
+
+  return 0;	/* not a stub */
+}
+
+
+/* Return non-zero if the PC is in a library helper function that should
+   be ignored.  This implements the IGNORE_HELPER_CALL macro.  */
+
+int
+mips_ignore_helper (pc)
+     CORE_ADDR pc;
+{
+  char *name;
+
+  /* Find the starting address and name of the function containing the PC.  */
+  if (find_pc_partial_function (pc, &name, NULL, NULL) == 0)
+    return 0;
+
+  /* If the PC is in __mips16_ret_{d,s}f, this is a library helper function
+     that we want to ignore.  */
+  return (strcmp (name, "__mips16_ret_sf") == 0
+	  || strcmp (name, "__mips16_ret_df") == 0);
 }
 
 

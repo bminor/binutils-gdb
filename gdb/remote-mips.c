@@ -48,6 +48,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern void mips_set_processor_type_command PARAMS ((char *, int));
 
 
+/* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
+   types passed by breakpoint.c to target_insert_watchpoint.
+   Value 3 is our own invention, and is used for ordinary instruction
+   breakpoints.  Value 4 is used to mark an unused watchpoint in tables.  */
+enum break_type {
+  BREAK_WRITE,	/* 0 */
+  BREAK_READ,	/* 1 */
+  BREAK_ACCESS,	/* 2 */
+  BREAK_FETCH,	/* 3 */
+  BREAK_UNUSED	/* 4 */
+};
+
 /* Prototypes for local functions.  */
 
 static int mips_readchar PARAMS ((int timeout));
@@ -91,8 +103,6 @@ static void mips_resume PARAMS ((int pid, int step,
 				 enum target_signal siggnal));
 
 static int mips_wait PARAMS ((int pid, struct target_waitstatus *status));
-
-static int pmon_wait PARAMS ((int pid, struct target_waitstatus *status));
 
 static int mips_map_regno PARAMS ((int regno));
 
@@ -143,8 +153,14 @@ static void mips_load PARAMS ((char *file, int from_tty));
 static int mips_make_srec PARAMS ((char *buffer, int type, CORE_ADDR memaddr,
 				   unsigned char *myaddr, int len));
 
-static int common_breakpoint PARAMS ((int cmd, CORE_ADDR addr, CORE_ADDR mask,
-				      char *flags));
+static int set_breakpoint PARAMS ((CORE_ADDR addr, int len,
+				   enum break_type type));
+
+static int clear_breakpoint PARAMS ((CORE_ADDR addr, int len,
+				     enum break_type type));
+
+static int common_breakpoint PARAMS ((int set, CORE_ADDR addr, int len,
+				      enum break_type type));
 
 /* Forward declarations.  */
 extern struct target_ops mips_ops;
@@ -289,6 +305,12 @@ extern struct target_ops ddb_ops;
 #define LOAD_CMD	"load -b -s tty0\r"
 #define LOAD_CMD_UDP	"load -b -s udp\r"
 
+/* The target vectors for the four different remote MIPS targets.
+   These are initialized with code in _initialize_remote_mips instead
+   of static initializers, to make it easier to extend the target_ops
+   vector later.  */
+struct target_ops mips_ops, pmon_ops, ddb_ops, lsi_ops;
+
 enum mips_monitor_type {
   /* IDT/SIM monitor being used: */
   MON_IDT,
@@ -382,6 +404,62 @@ static DCACHE *mips_dcache;
 
 /* Non-zero means that we've just hit a read or write watchpoint */
 static int hit_watchpoint;
+
+/* Table of breakpoints/watchpoints (used only on LSI PMON target).
+   The table is indexed by a breakpoint number, which is an integer
+   from 0 to 255 returned by the LSI PMON when a breakpoint is set.
+*/
+#define MAX_LSI_BREAKPOINTS 256
+struct lsi_breakpoint_info
+{
+  enum break_type type;		/* type of breakpoint */
+  CORE_ADDR addr;		/* address of breakpoint */
+  int len;			/* length of region being watched */
+  unsigned long value;		/* value to watch */
+} lsi_breakpoints [MAX_LSI_BREAKPOINTS];
+
+/* Error/warning codes returned by LSI PMON for breakpoint commands.
+   Warning values may be ORed together; error values may not.  */
+#define W_WARN	0x100	/* This bit is set if the error code is a warning */
+#define W_MSK   0x101	/* warning: Range feature is supported via mask */
+#define W_VAL   0x102	/* warning: Value check is not supported in hardware */
+#define W_QAL   0x104	/* warning: Requested qualifiers are not supported in hardware */
+
+#define E_ERR	0x200	/* This bit is set if the error code is an error */
+#define E_BPT   0x200	/* error: No such breakpoint number */
+#define E_RGE   0x201	/* error: Range is not supported */
+#define E_QAL   0x202	/* error: The requested qualifiers can not be used */
+#define E_OUT   0x203	/* error: Out of hardware resources */
+#define E_NON   0x204	/* error: Hardware breakpoint not supported */
+
+struct lsi_error
+{
+  int code;		/* error code */
+  char *string;		/* string associated with this code */
+};
+
+struct lsi_error lsi_warning_table[] =
+{
+  { W_MSK,	"Range feature is supported via mask" },
+  { W_VAL,	"Value check is not supported in hardware" },
+  { W_QAL,	"Requested qualifiers are not supported in hardware" },
+  { 0,		NULL }
+};
+
+struct lsi_error lsi_error_table[] =
+{  
+  { E_BPT,	"No such breakpoint number" },
+  { E_RGE,	"Range is not supported" },
+  { E_QAL,	"The requested qualifiers can not be used" },
+  { E_OUT,	"Out of hardware resources" },
+  { E_NON,	"Hardware breakpoint not supported" },
+  { 0,		NULL }
+};
+
+/* Set to 1 with the 'set monitor-warnings' command to enable printing
+   of warnings returned by PMON when hardware breakpoints are used.  */
+static int monitor_warnings;
+
 
 static void
 close_ports()
@@ -1440,7 +1518,9 @@ mips_initialize ()
   mips_enter_debug ();
 
   /* Clear all breakpoints: */
-  if (mips_monitor == MON_IDT && common_breakpoint ('b', -1, 0, NULL) == 0)
+  if ((mips_monitor == MON_IDT
+       && clear_breakpoint (BREAK_UNUSED, -1, 0) == 0)
+      || mips_monitor == MON_LSI)
     monitor_supports_breakpoints = 1;
   else
     monitor_supports_breakpoints = 0;
@@ -1616,7 +1696,13 @@ lsi_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  common_open (&ddb_ops, name, from_tty, MON_LSI, "PMON> ");
+  int i;
+
+  /* Clear the LSI breakpoint table.  */
+  for (i = 0; i < MAX_LSI_BREAKPOINTS; i++)
+    lsi_breakpoints[i].type = BREAK_UNUSED;
+  
+  common_open (&lsi_ops, name, from_tty, MON_LSI, "PMON> ");
 }
 
 /* Close a connection to the remote board.  */
@@ -1653,7 +1739,8 @@ mips_detach (args, from_tty)
 }
 
 /* Tell the target board to resume.  This does not wait for a reply
-   from the board.  */
+   from the board, except in the case of single-stepping on LSI boards,
+   where PMON does return a reply.  */
 
 static void
 mips_resume (pid, step, siggnal)
@@ -1713,6 +1800,7 @@ mips_wait (pid, status)
   int rpc, rfp, rsp;
   char flags[20];
   int nfields;
+  int i;
 
   interrupt_count = 0;
   hit_watchpoint = 0;
@@ -1735,12 +1823,25 @@ mips_wait (pid, status)
   if (err)
     mips_error ("Remote failure: %s", safe_strerror (errno));
 
-  nfields = sscanf (buff, "0x%*x %*c 0x%*x 0x%*x 0x%x 0x%x 0x%x 0x%*x %s",
-		    &rpc, &rfp, &rsp, flags);
+  /* On returning from a continue, the PMON monitor seems to start
+     echoing back the messages we send prior to sending back the
+     ACK. The code can cope with this, but to try and avoid the
+     unnecessary serial traffic, and "spurious" characters displayed
+     to the user, we cheat and reset the debug protocol. The problems
+     seems to be caused by a check on the number of arguments, and the
+     command length, within the monitor causing it to echo the command
+     as a bad packet. */
+  if (mips_monitor == MON_PMON)
+    {
+      mips_exit_debug ();
+      mips_enter_debug ();
+    }
 
   /* See if we got back extended status.  If so, pick out the pc, fp, sp, etc... */
 
-  if (nfields == 7 || nfields == 9) 
+  nfields = sscanf (buff, "0x%*x %*c 0x%*x 0x%*x 0x%x 0x%x 0x%x 0x%*x %s",
+		    &rpc, &rfp, &rsp, flags);
+  if (nfields >= 3)
     {
       char buf[MAX_REGISTER_RAW_SIZE];
 
@@ -1768,59 +1869,37 @@ mips_wait (pid, status)
 	}
     }
 
-  /* Translate a MIPS waitstatus.  We use constants here rather than WTERMSIG
-     and so on, because the constants we want here are determined by the
-     MIPS protocol and have nothing to do with what host we are running on.  */
-  if ((rstatus & 0377) == 0)
+  if (strcmp (target_shortname, "lsi") == 0)
     {
-      status->kind = TARGET_WAITKIND_EXITED;
-      status->value.integer = (((rstatus) >> 8) & 0377);
+#if 0
+      /* If this is an LSI PMON target, see if we just hit a hardrdware watchpoint.
+	 Right now, PMON doesn't give us enough information to determine which
+	 breakpoint we hit.  So we have to look up the PC in our own table
+	 of breakpoints, and if found, assume it's just a normal instruction
+	 fetch breakpoint, not a data watchpoint.  FIXME when PMON
+	 provides some way to tell us what type of breakpoint it is.  */
+      int i;
+      CORE_ADDR pc = read_pc();
+
+      hit_watchpoint = 1;
+      for (i = 0; i < MAX_LSI_BREAKPOINTS; i++)
+	{
+	  if (lsi_breakpoints[i].addr == pc
+	      && lsi_breakpoints[i].type == BREAK_FETCH)
+	    {
+	      hit_watchpoint = 0;
+	      break;
+	    }
+	}
+#else
+      /* If a data breakpoint was hit, PMON returns the following packet:
+	     0x1 c 0x0 0x57f 0x1
+	 The return packet from an ordinary breakpoint doesn't have the
+	 extra 0x01 field tacked onto the end.  */
+      if (nfields == 1 && rpc == 1)
+	hit_watchpoint = 1;
+#endif
     }
-  else if ((rstatus & 0377) == 0177)
-    {
-      status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = mips_signal_from_protocol (((rstatus) >> 8) & 0377);
-    }
-  else
-    {
-      status->kind = TARGET_WAITKIND_SIGNALLED;
-      status->value.sig = mips_signal_from_protocol (rstatus & 0177);
-    }
-
-  return 0;
-}
-
-static int
-pmon_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
-{
-  int rstatus;
-  int err;
-  char buff[DATA_MAXLEN];
-
-  interrupt_count = 0;
-  hit_watchpoint = 0;
-
-  /* If we have not sent a single step or continue command, then the
-     board is waiting for us to do something.  Return a status
-     indicating that it is stopped.  */
-  if (! mips_need_reply)
-    {
-      status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = TARGET_SIGNAL_TRAP;
-      return 0;
-    }
-
-  /* Sit, polling the serial until the target decides to talk to
-     us. NOTE: the timeout value we use is used not just for the
-     first character, but for all the characters. */
-  mips_wait_flag = 1;
-  rstatus = mips_request ('\000', (unsigned int) 0, (unsigned int) 0, &err, -1,
-			  buff);
-  mips_wait_flag = 0;
-  if (err)
-    mips_error ("Remote failure: %s", safe_strerror (errno));
 
   /* NOTE: The following (sig) numbers are defined by PMON:
      	SPP_SIGTRAP     5       breakpoint
@@ -1831,37 +1910,38 @@ pmon_wait (pid, status)
         SPP_SIGFPE      8
         SPP_SIGTERM     15 */
 
-  /* On returning from a continue, the PMON monitor seems to start
-     echoing back the messages we send prior to sending back the
-     ACK. The code can cope with this, but to try and avoid the
-     unnecessary serial traffic, and "spurious" characters displayed
-     to the user, we cheat and reset the debug protocol. The problems
-     seems to be caused by a check on the number of arguments, and the
-     command length, within the monitor causing it to echo the command
-     as a bad packet. */
-  if (mips_monitor != MON_DDB && mips_monitor != MON_LSI)
-    {
-      mips_exit_debug ();
-      mips_enter_debug ();
-    }
-
   /* Translate a MIPS waitstatus.  We use constants here rather than WTERMSIG
      and so on, because the constants we want here are determined by the
      MIPS protocol and have nothing to do with what host we are running on.  */
-  if ((rstatus & 0377) == 0)
+  if ((rstatus & 0xff) == 0)
     {
       status->kind = TARGET_WAITKIND_EXITED;
-      status->value.integer = (((rstatus) >> 8) & 0377);
+      status->value.integer = (((rstatus) >> 8) & 0xff);
     }
-  else if ((rstatus & 0377) == 0177)
+  else if ((rstatus & 0xff) == 0x7f)
     {
       status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = mips_signal_from_protocol (((rstatus) >> 8) & 0377);
+      status->value.sig = mips_signal_from_protocol (((rstatus) >> 8) & 0xff);
+
+      /* If the stop PC is in the _exit function, assume
+         we hit the 'break 0x3ff' instruction in _exit, so this
+	 is not a normal breakpoint.  */
+      if (strcmp (target_shortname, "lsi") == 0)
+	{
+	  char *func_name;
+	  CORE_ADDR func_start;
+	  CORE_ADDR pc = read_pc();
+
+	  find_pc_partial_function (pc, &func_name, &func_start, NULL);
+	  if (func_name != NULL && strcmp (func_name, "_exit") == 0
+	      && func_start == pc)
+	    status->kind = TARGET_WAITKIND_EXITED;
+	}
     }
   else
     {
       status->kind = TARGET_WAITKIND_SIGNALLED;
-      status->value.sig = mips_signal_from_protocol (rstatus & 0177);
+      status->value.sig = mips_signal_from_protocol (rstatus & 0x7f);
     }
 
   return 0;
@@ -2242,14 +2322,8 @@ mips_mourn_inferior ()
 /* We can write a breakpoint and read the shadow contents in one
    operation.  */
 
-/* The IDT board uses an unusual breakpoint value, and sometimes gets
-   confused when it sees the usual MIPS breakpoint instruction.  */
-
-#define BREAK_INSN (0x00000a0d)
-#define BREAK_INSN_SIZE (4)
-
-/* Insert a breakpoint on targets that don't have any better breakpoint
-   support.  We read the contents of the target location and stash it,
+/* Insert a breakpoint.  On targets that don't have built-in breakpoint
+   support, we read the contents of the target location and stash it,
    then overwrite it with a breakpoint instruction.  ADDR is the target
    location in the target machine.  CONTENTS_CACHE is a pointer to 
    memory allocated for saving the target contents.  It is guaranteed
@@ -2262,9 +2336,9 @@ mips_insert_breakpoint (addr, contents_cache)
      char *contents_cache;
 {
   if (monitor_supports_breakpoints)
-    return common_breakpoint ('B', addr, 0x3, "f");
-
-  return mips_store_word (addr, BREAK_INSN, contents_cache);
+    return set_breakpoint (addr, MIPS_INSTLEN, BREAK_FETCH);
+  else
+    return memory_insert_breakpoint (addr, contents_cache);
 }
 
 static int
@@ -2273,9 +2347,9 @@ mips_remove_breakpoint (addr, contents_cache)
      char *contents_cache;
 {
   if (monitor_supports_breakpoints)
-    return common_breakpoint ('b', addr, 0, NULL);
-
-  return target_write_memory (addr, contents_cache, BREAK_INSN_SIZE);
+    return clear_breakpoint (addr, MIPS_INSTLEN, BREAK_FETCH);
+  else
+    return memory_remove_breakpoint (addr, contents_cache);
 }
 
 #if 0 /* currently not used */
@@ -2401,6 +2475,19 @@ pmon_remove_breakpoint (addr, contents_cache)
 }
 #endif
 
+
+/* Tell whether this target can support a hardware breakpoint.  CNT
+   is the number of hardware breakpoints already installed.  This
+   implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
+
+int
+remote_mips_can_use_hardware_watchpoint (cnt)
+     int cnt;
+{
+    return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
+}
+
+
 /* Compute a don't care mask for the region bounding ADDR and ADDR + LEN - 1.
    This is used for memory ref breakpoints.  */
 
@@ -2425,8 +2512,9 @@ calculate_mask (addr, len)
   return mask;
 }
 
-/* Set a data watchpoint.  ADDR and LEN should be obvious.  TYPE is either 1
-   for a read watchpoint, or 2 for a read/write watchpoint. */
+/* Set a data watchpoint.  ADDR and LEN should be obvious.  TYPE is 0
+   for a write watchpoint, 1 for a read watchpoint, or 2 for a read/write
+   watchpoint. */
 
 int
 remote_mips_set_watchpoint (addr, len, type)
@@ -2434,30 +2522,7 @@ remote_mips_set_watchpoint (addr, len, type)
      int len;
      int type;
 {
-  CORE_ADDR first_addr;
-  unsigned long mask;
-  char *flags;
-
-  mask = calculate_mask (addr, len);
-
-  first_addr = addr & ~mask;
-
-  switch (type)
-    {
-    case 0:			/* write */
-      flags = "w";
-      break;
-    case 1:			/* read */
-      flags = "r";
-      break;
-    case 2:			/* read/write */
-      flags = "rw";
-      break;
-    default:
-      abort ();
-    }
-
-  if (common_breakpoint ('B', first_addr, mask, flags))
+  if (set_breakpoint (addr, len, type))
     return -1;
 
   return 0;
@@ -2469,14 +2534,7 @@ remote_mips_remove_watchpoint (addr, len, type)
      int len;
      int type;
 {
-  CORE_ADDR first_addr;
-  unsigned long mask;
-
-  mask = calculate_mask (addr, len);
-
-  first_addr = addr & ~mask;
-
-  if (common_breakpoint ('b', first_addr, 0, NULL))
+  if (clear_breakpoint (addr, len, type))
     return -1;
 
   return 0;
@@ -2488,59 +2546,289 @@ remote_mips_stopped_by_watchpoint ()
   return hit_watchpoint;
 }
 
-/* This routine generates the a breakpoint command of the form:
 
-   0x0 <CMD> <ADDR> <MASK> <FLAGS>
+/* Insert a breakpoint.  */
 
-   Where <CMD> is one of: `B' to set, or `b' to clear a breakpoint.  <ADDR> is
-   the address of the breakpoint.  <MASK> is a don't care mask for addresses.
-   <FLAGS> is any combination of `r', `w', or `f' for read/write/or fetch.
+static int
+set_breakpoint (addr, len, type)
+     CORE_ADDR addr;
+     int len;
+     enum break_type type;
+{
+  return common_breakpoint (1, addr, len, type);
+}
+
+
+/* Clear a breakpoint.  */
+
+static int
+clear_breakpoint (addr, len, type)
+     CORE_ADDR addr;
+     int len;
+     enum break_type type;
+{
+  return common_breakpoint (0, addr, len, type);
+}
+
+
+/* Check the error code from the return packet for an LSI breakpoint
+   command.  If there's no error, just return 0.  If it's a warning,
+   print the warning text and return 0.  If it's an error, print
+   the error text and return 1.  <ADDR> is the address of the breakpoint
+   that was being set.  <RERRFLG> is the error code returned by PMON. 
+   This is a helper function for common_breakpoint.  */
+
+static int
+check_lsi_error (addr, rerrflg)
+     CORE_ADDR addr;
+     int rerrflg;
+{
+  struct lsi_error *err;
+  char *saddr = paddr_nz (addr);	/* printable address string */
+
+  if (rerrflg == 0)		/* no error */
+    return 0;
+
+  /* Warnings can be ORed together, so check them all.  */
+  if (rerrflg & W_WARN)
+    {
+      if (monitor_warnings)
+	{
+	  int found = 0;
+	  for (err = lsi_warning_table; err->code != 0; err++)
+	    {
+	      if ((err->code & rerrflg) == err->code)
+		{
+		  found = 1;
+		  fprintf_unfiltered (stderr,
+				      "common_breakpoint (0x%s): Warning: %s\n",
+				      saddr,
+				      err->string);
+		}
+	    }
+	  if (!found)
+	    fprintf_unfiltered (stderr,
+				"common_breakpoint (0x%s): Unknown warning: 0x%x\n",
+				saddr,
+				rerrflg);
+	}
+      return 0;
+    }
+
+  /* Errors are unique, i.e. can't be ORed together.  */
+  for (err = lsi_error_table; err->code != 0; err++)
+    {
+      if ((err->code & rerrflg) == err->code)
+	{
+	  fprintf_unfiltered (stderr,
+			      "common_breakpoint (0x%s): Error: %s\n",
+			      saddr,
+			      err->string);
+	  return 1;
+	}
+    }
+  fprintf_unfiltered (stderr,
+		      "common_breakpoint (0x%s): Unknown error: 0x%x\n",
+		      saddr,
+		      rerrflg);
+  return 1;
+}
+
+
+/* This routine sends a breakpoint command to the remote target.
+
+   <SET> is 1 if setting a breakpoint, or 0 if clearing a breakpoint.
+   <ADDR> is the address of the breakpoint.
+   <LEN> the length of the region to break on.
+   <TYPE> is the type of breakpoint:
+     0 = write			(BREAK_WRITE)
+     1 = read			(BREAK_READ)
+     2 = read/write		(BREAK_ACCESS)
+     3 = instruction fetch	(BREAK_FETCH)
 
    Return 0 if successful; otherwise 1.  */
 
 static int
-common_breakpoint (cmd, addr, mask, flags)
-     int cmd;
+common_breakpoint (set, addr, len, type)
+     int set;
      CORE_ADDR addr;
-     CORE_ADDR mask;
-     char *flags;
+     int len;
+     enum break_type type;
 {
-  int len;
   char buf[DATA_MAXLEN + 1];
-  char rcmd;
-  int rpid, rerrflg, rresponse;
+  char cmd, rcmd;
+  int rpid, rerrflg, rresponse, rlen;
   int nfields;
 
   addr = ADDR_BITS_REMOVE (addr);
-  if (flags)
-    sprintf (buf, "0x0 %c 0x%s 0x%s %s", cmd, paddr_nz (addr), paddr_nz (mask),
-	     flags);
-  else
-    sprintf (buf, "0x0 %c 0x%s", cmd, paddr_nz (addr));
 
-  mips_send_packet (buf, 1);
-
-  len = mips_receive_packet (buf, 1, mips_receive_wait);
-  buf[len] = '\0';
-
-  nfields = sscanf (buf, "0x%x %c 0x%x 0x%x", &rpid, &rcmd, &rerrflg, &rresponse);
-
-  if (nfields != 4
-      || rcmd != cmd)
-    mips_error ("common_breakpoint: Bad response from remote board: %s", buf);
-
-  if (rerrflg != 0)
+  if (mips_monitor == MON_LSI)
     {
-      /* Ddb returns "0x0 b 0x16 0x0\000", whereas
-         Cogent returns "0x0 b 0xffffffff 0x16\000": */
-      if (mips_monitor == MON_DDB)
-        rresponse = rerrflg;
-      if (rresponse != 22) /* invalid argument */
-	fprintf_unfiltered (stderr, "common_breakpoint (0x%s):  Got error: 0x%x\n",
-			    paddr_nz (addr), rresponse);
-      return 1;
-    }
+      if (set == 0)	/* clear breakpoint */
+	{
+	  /* The LSI PMON "clear breakpoint" has this form:
+	       <pid> 'b' <bptn> 0x0
+	       reply:
+	       <pid> 'b' 0x0 <code>
 
+	     <bptn> is a breakpoint number returned by an earlier 'B' command.
+	     Possible return codes: OK, E_BPT.  */
+
+	  int i;
+
+	  /* Search for the breakpoint in the table.  */
+	  for (i = 0; i < MAX_LSI_BREAKPOINTS; i++)
+	    if (lsi_breakpoints[i].type == type
+		&& lsi_breakpoints[i].addr == addr
+		&& lsi_breakpoints[i].len == len)
+	      break;
+
+	  /* Clear the table entry and tell PMON to clear the breakpoint.  */
+	  if (i == MAX_LSI_BREAKPOINTS)
+	    {
+	      warning ("common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
+		       paddr_nz (addr));
+	      return 1;
+	    }
+
+	  lsi_breakpoints[i].type = BREAK_UNUSED;
+	  sprintf (buf, "0x0 b 0x%x 0x0", i);
+	  mips_send_packet (buf, 1);
+
+	  rlen = mips_receive_packet (buf, 1, mips_receive_wait);
+	  buf[rlen] = '\0';
+
+	  nfields = sscanf (buf, "0x%x b 0x0 0x%x", &rpid, &rerrflg);
+	  if (nfields != 2)
+	    mips_error ("common_breakpoint: Bad response from remote board: %s", buf);
+
+	  return (check_lsi_error (addr, rerrflg));
+	}
+      else	/* set a breakpoint */
+	{
+	  /* The LSI PMON "set breakpoint" command has this form:
+	       <pid> 'B' <addr> 0x0
+	       reply:
+	       <pid> 'B' <bptn> <code>
+
+	     The "set data breakpoint" command has this form:
+
+	        <pid> 'A' <addr1> <type> [<addr2>  [<value>]]
+
+		where: type= "0x1" = read
+	             "0x2" = write
+	             "0x3" = access (read or write)
+
+	     The reply returns two values:
+		     bptn - a breakpoint number, which is a small integer with
+			    possible values of zero through 255.
+		     code - an error return code, a value of zero indicates a
+			    succesful completion, other values indicate various
+			    errors and warnings.
+	      
+	     Possible return codes: OK, W_QAL, E_QAL, E_OUT, E_NON.  
+
+	  */
+
+	  if (type == BREAK_FETCH)	/* instruction breakpoint */
+	    {
+	      cmd = 'B';
+	      sprintf (buf, "0x0 B 0x%s 0x0", paddr_nz (addr));
+	    }
+	  else				/* watchpoint */
+	    {
+	      cmd = 'A';
+	      sprintf (buf, "0x0 A 0x%s 0x%x 0x%s", paddr_nz (addr),
+		       type == BREAK_READ ? 1 : (type == BREAK_WRITE ? 2 : 3),
+		       paddr_nz (addr + len - 1));
+	    }
+	  mips_send_packet (buf, 1);
+
+	  rlen = mips_receive_packet (buf, 1, mips_receive_wait);
+	  buf[rlen] = '\0';
+
+	  nfields = sscanf (buf, "0x%x %c 0x%x 0x%x",
+			    &rpid, &rcmd, &rresponse, &rerrflg);
+	  if (nfields != 4 || rcmd != cmd || rresponse > 255)
+	    mips_error ("common_breakpoint: Bad response from remote board: %s", buf);
+
+	  if (rerrflg != 0)
+	    if (check_lsi_error (addr, rerrflg))
+	      return 1;
+
+	  /* rresponse contains PMON's breakpoint number.  Record the
+	     information for this breakpoint so we can clear it later.  */
+	  lsi_breakpoints[rresponse].type = type;
+	  lsi_breakpoints[rresponse].addr = addr;
+	  lsi_breakpoints[rresponse].len =  len;
+
+	  return 0;
+	}
+    }
+  else
+    {
+      /* On non-LSI targets, the breakpoint command has this form:
+	   0x0 <CMD> <ADDR> <MASK> <FLAGS>
+	 <MASK> is a don't care mask for addresses.
+	 <FLAGS> is any combination of `r', `w', or `f' for read/write/fetch.
+       */
+      unsigned long mask;
+
+      mask = calculate_mask (addr, len);
+      addr &= ~mask;
+
+      if (set)		/* set a breakpoint */
+        {
+	  char *flags;
+	  switch (type)
+	    {
+	    case BREAK_WRITE:		/* write */
+	      flags = "w";
+	      break;
+	    case BREAK_READ:		/* read */
+	      flags = "r";
+	      break;
+	    case BREAK_ACCESS:		/* read/write */
+	      flags = "rw";
+	      break;
+	    default:
+	      abort ();
+	    }
+
+	  cmd = 'B';
+	  sprintf (buf, "0x0 B 0x%s 0x%s %s", paddr_nz (addr),
+		   paddr_nz (mask), flags);
+	}
+      else
+	{
+	  cmd = 'b';
+	  sprintf (buf, "0x0 b 0x%s", paddr_nz (addr));
+	}
+
+      mips_send_packet (buf, 1);
+
+      rlen = mips_receive_packet (buf, 1, mips_receive_wait);
+      buf[rlen] = '\0';
+
+      nfields = sscanf (buf, "0x%x %c 0x%x 0x%x",
+			&rpid, &rcmd, &rerrflg, &rresponse);
+
+      if (nfields != 4 || rcmd != cmd)
+	mips_error ("common_breakpoint: Bad response from remote board: %s",
+		    buf);
+
+      if (rerrflg != 0)
+	{
+	  /* Ddb returns "0x0 b 0x16 0x0\000", whereas
+	     Cogent returns "0x0 b 0xffffffff 0x16\000": */
+	  if (mips_monitor == MON_DDB)
+	    rresponse = rerrflg;
+	  if (rresponse != 22) /* invalid argument */
+	    fprintf_unfiltered (stderr, "common_breakpoint (0x%s):  Got error: 0x%x\n",
+				paddr_nz (addr), rresponse);
+	  return 1;
+	}
+    }
   return 0;
 }
 
@@ -3215,214 +3503,91 @@ mips_load (file, from_tty)
 
   clear_symtab_users ();
 }
-
-/* The target vector.  */
 
-struct target_ops mips_ops =
+
+/* Pass the command argument as a packet to PMON verbatim.  */
+
+static void
+pmon_command (args, from_tty)
+     char *args;
+     int from_tty;
 {
-  "mips",			/* to_shortname */
-  "Remote MIPS debugging over serial line",	/* to_longname */
-  "\
-Debug a board using the MIPS remote debugging protocol over a serial line.\n\
-The argument is the device it is connected to or, if it contains a colon,\n\
-HOST:PORT to access a board over a network",  /* to_doc */
-  mips_open,			/* to_open */
-  mips_close,			/* to_close */
-  NULL,				/* to_attach */
-  mips_detach,			/* to_detach */
-  mips_resume,			/* to_resume */
-  mips_wait,			/* to_wait */
-  mips_fetch_registers,		/* to_fetch_registers */
-  mips_store_registers,		/* to_store_registers */
-  mips_prepare_to_store,	/* to_prepare_to_store */
-  mips_xfer_memory,		/* to_xfer_memory */
-  mips_files_info,		/* to_files_info */
-  mips_insert_breakpoint,	/* to_insert_breakpoint */
-  mips_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  mips_kill,			/* to_kill */
-  mips_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  mips_create_inferior,		/* to_create_inferior */
-  mips_mourn_inferior,		/* to_mourn_inferior */
-  NULL,				/* to_can_run */
-  NULL,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
-
-/* An alternative target vector: */
-struct target_ops pmon_ops =
-{
-  "pmon",			/* to_shortname */
-  "Remote MIPS debugging over serial line",	/* to_longname */
-  "\
-Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
-line. The argument is the device it is connected to or, if it contains a\n\
-colon, HOST:PORT to access a board over a network",  /* to_doc */
-  pmon_open,			/* to_open */
-  mips_close,			/* to_close */
-  NULL,				/* to_attach */
-  mips_detach,			/* to_detach */
-  mips_resume,			/* to_resume */
-  pmon_wait,			/* to_wait */
-  mips_fetch_registers,		/* to_fetch_registers */
-  mips_store_registers,		/* to_store_registers */
-  mips_prepare_to_store,	/* to_prepare_to_store */
-  mips_xfer_memory,		/* to_xfer_memory */
-  mips_files_info,		/* to_files_info */
-  mips_insert_breakpoint,	/* to_insert_breakpoint */
-  mips_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  mips_kill,			/* to_kill */
-  mips_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  mips_create_inferior,		/* to_create_inferior */
-  mips_mourn_inferior,		/* to_mourn_inferior */
-  NULL,				/* to_can_run */
-  NULL,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
-
-/* Another alternative target vector. This is a PMON system, but with
-   a different monitor prompt, aswell as some other operational
-   differences: */
-struct target_ops ddb_ops =
-{
-  "ddb",			/* to_shortname */
-  "Remote MIPS debugging over serial line",	/* to_longname */
-  "\
-Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
-line. The first argument is the device it is connected to or, if it contains\n\
-a colon, HOST:PORT to access a board over a network.  The optional second\n\
-parameter is the temporary file in the form HOST:FILENAME to be used for\n\
-TFTP downloads to the board.  The optional third parameter is the local\n\
-of the TFTP temporary file, if it differs from the filename seen by the board",
-				/* to_doc */
-  ddb_open,			/* to_open */
-  mips_close,			/* to_close */
-  NULL,				/* to_attach */
-  mips_detach,			/* to_detach */
-  mips_resume,			/* to_resume */
-  pmon_wait,			/* to_wait */
-  mips_fetch_registers,		/* to_fetch_registers */
-  mips_store_registers,		/* to_store_registers */
-  mips_prepare_to_store,	/* to_prepare_to_store */
-  mips_xfer_memory,		/* to_xfer_memory */
-  mips_files_info,		/* to_files_info */
-  mips_insert_breakpoint,	/* to_insert_breakpoint */
-  mips_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  mips_kill,			/* to_kill */
-  mips_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  mips_create_inferior,		/* to_create_inferior */
-  mips_mourn_inferior,		/* to_mourn_inferior */
-  NULL,				/* to_can_run */
-  NULL,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
-
-/* Another alternative target vector for LSI Logic MiniRISC boards.
-   This is a PMON system, but with some other operational differences.  */
-struct target_ops lsi_ops =
-{
-  "lsi",			/* to_shortname */
-  "Remote MIPS debugging over serial line",	/* to_longname */
-  "\
-Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
-line. The first argument is the device it is connected to or, if it contains\n\
-a colon, HOST:PORT to access a board over a network.  The optional second\n\
-parameter is the temporary file in the form HOST:FILENAME to be used for\n\
-TFTP downloads to the board.  The optional third parameter is the local\n\
-of the TFTP temporary file, if it differs from the filename seen by the board",
-				/* to_doc */
-  lsi_open,			/* to_open */
-  mips_close,			/* to_close */
-  NULL,				/* to_attach */
-  mips_detach,			/* to_detach */
-  mips_resume,			/* to_resume */
-  pmon_wait,			/* to_wait */
-  mips_fetch_registers,		/* to_fetch_registers */
-  mips_store_registers,		/* to_store_registers */
-  mips_prepare_to_store,	/* to_prepare_to_store */
-  mips_xfer_memory,		/* to_xfer_memory */
-  mips_files_info,		/* to_files_info */
-  mips_insert_breakpoint,	/* to_insert_breakpoint */
-  mips_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  mips_kill,			/* to_kill */
-  mips_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  mips_create_inferior,		/* to_create_inferior */
-  mips_mourn_inferior,		/* to_mourn_inferior */
-  NULL,				/* to_can_run */
-  NULL,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+  char buf[DATA_MAXLEN + 1];
+  int rlen;
+
+  sprintf (buf, "0x0 %s", args);
+  mips_send_packet (buf, 1);
+  printf_filtered ("Send packet: %s\n", buf);
+
+  rlen = mips_receive_packet (buf, 1, mips_receive_wait);
+  buf[rlen] = '\0';
+  printf_filtered ("Received packet: %s\n", buf);
+}
 
 void
 _initialize_remote_mips ()
 {
+  /* Initialize the fields in mips_ops that are common to all four targets.  */
+  mips_ops.to_longname = "Remote MIPS debugging over serial line";
+  mips_ops.to_close = mips_close;
+  mips_ops.to_detach = mips_detach;
+  mips_ops.to_resume = mips_resume;
+  mips_ops.to_fetch_registers = mips_fetch_registers;
+  mips_ops.to_store_registers = mips_store_registers;
+  mips_ops.to_prepare_to_store = mips_prepare_to_store;
+  mips_ops.to_xfer_memory = mips_xfer_memory;
+  mips_ops.to_files_info = mips_files_info;
+  mips_ops.to_insert_breakpoint = mips_insert_breakpoint;
+  mips_ops.to_remove_breakpoint = mips_remove_breakpoint;
+  mips_ops.to_kill = mips_kill;
+  mips_ops.to_load = mips_load;
+  mips_ops.to_create_inferior = mips_create_inferior;
+  mips_ops.to_mourn_inferior = mips_mourn_inferior;
+  mips_ops.to_stratum = process_stratum;
+  mips_ops.to_has_all_memory = 1;
+  mips_ops.to_has_memory = 1;
+  mips_ops.to_has_stack = 1;
+  mips_ops.to_has_registers = 1;
+  mips_ops.to_has_execution = 1;
+  mips_ops.to_magic = OPS_MAGIC;
+
+  /* Copy the common fields to all four target vectors.  */
+  pmon_ops = ddb_ops = lsi_ops = mips_ops;
+
+  /* Initialize target-specific fields in the target vectors.  */
+  mips_ops.to_shortname = "mips";
+  mips_ops.to_doc = "\
+Debug a board using the MIPS remote debugging protocol over a serial line.\n\
+The argument is the device it is connected to or, if it contains a colon,\n\
+HOST:PORT to access a board over a network";
+  mips_ops.to_open = mips_open;
+  mips_ops.to_wait = mips_wait;
+
+  pmon_ops.to_shortname = "pmon";
+  pmon_ops.to_doc =   "\
+Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
+line. The argument is the device it is connected to or, if it contains a\n\
+colon, HOST:PORT to access a board over a network";
+  pmon_ops.to_open = pmon_open;
+  pmon_ops.to_wait = mips_wait;
+
+  ddb_ops.to_shortname = "ddb";
+  ddb_ops.to_doc = "\
+Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
+line. The first argument is the device it is connected to or, if it contains\n\
+a colon, HOST:PORT to access a board over a network.  The optional second\n\
+parameter is the temporary file in the form HOST:FILENAME to be used for\n\
+TFTP downloads to the board.  The optional third parameter is the local\n\
+of the TFTP temporary file, if it differs from the filename seen by the board";
+  ddb_ops.to_open = ddb_open;
+  ddb_ops.to_wait = mips_wait;
+
+  lsi_ops.to_shortname = "lsi";
+  lsi_ops.to_doc = pmon_ops.to_doc;
+  lsi_ops.to_open = lsi_open;
+  lsi_ops.to_wait = mips_wait;
+
+  /* Add the targets.  */
   add_target (&mips_ops);
   add_target (&pmon_ops);
   add_target (&ddb_ops);
@@ -3459,4 +3624,16 @@ synchronize with the remote system.  A value of -1 means that there is no limit\
 		  "Set the prompt that GDB expects from the monitor.",
 		  &setlist),
      &showlist);
+
+  add_show_from_set (
+    add_set_cmd ("monitor-warnings", class_obscure, var_zinteger,
+		 (char *)&monitor_warnings,
+		 "Set printing of monitor warnings.\n"
+		 "When enabled, monitor warnings about hardware breakpoints "
+		 "will be displayed.",
+		 &setlist),
+		     &showlist);
+
+  add_com ("pmon <command>", class_obscure, pmon_command,
+	   "Send a packet to PMON (must be in debug mode)."); 
 }
