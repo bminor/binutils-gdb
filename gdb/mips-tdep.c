@@ -1778,8 +1778,12 @@ mips_mdebug_frame_base_sniffer (struct frame_info *next_frame)
     return NULL;
 }
 
+/* Heuristic unwinder for 16-bit MIPS instruction set (aka MIPS16).
+   Procedures that use the 32-bit instruction set are handled by the
+   mips_insn32 unwinder.  */
+
 static struct mips_frame_cache *
-mips16_frame_cache (struct frame_info *next_frame, void **this_cache)
+mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   mips_extra_func_info_t proc_desc;
   struct mips_frame_cache *cache;
@@ -1963,71 +1967,76 @@ mips16_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-mips16_frame_this_id (struct frame_info *next_frame, void **this_cache,
+mips_insn16_frame_this_id (struct frame_info *next_frame, void **this_cache,
 			   struct frame_id *this_id)
 {
-  struct mips_frame_cache *info = mips16_frame_cache (next_frame,
+  struct mips_frame_cache *info = mips_insn16_frame_cache (next_frame,
 							   this_cache);
   (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
 }
 
 static void
-mips16_frame_prev_register (struct frame_info *next_frame,
+mips_insn16_frame_prev_register (struct frame_info *next_frame,
 				 void **this_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
 				 int *realnump, void *valuep)
 {
-  struct mips_frame_cache *info = mips16_frame_cache (next_frame,
+  struct mips_frame_cache *info = mips_insn16_frame_cache (next_frame,
 							   this_cache);
   trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
 				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
-static const struct frame_unwind mips16_frame_unwind =
+static const struct frame_unwind mips_insn16_frame_unwind =
 {
   NORMAL_FRAME,
-  mips16_frame_this_id,
-  mips16_frame_prev_register
+  mips_insn16_frame_this_id,
+  mips_insn16_frame_prev_register
 };
 
 static const struct frame_unwind *
-mips16_frame_sniffer (struct frame_info *next_frame)
+mips_insn16_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (pc_is_mips16 (pc))
-    return &mips16_frame_unwind;
+    return &mips_insn16_frame_unwind;
   return NULL;
 }
 
 static CORE_ADDR
-mips16_frame_base_address (struct frame_info *next_frame,
+mips_insn16_frame_base_address (struct frame_info *next_frame,
 				void **this_cache)
 {
-  struct mips_frame_cache *info = mips16_frame_cache (next_frame,
+  struct mips_frame_cache *info = mips_insn16_frame_cache (next_frame,
 							   this_cache);
   return info->base;
 }
 
-static const struct frame_base mips16_frame_base =
+static const struct frame_base mips_insn16_frame_base =
 {
-  &mips16_frame_unwind,
-  mips16_frame_base_address,
-  mips16_frame_base_address,
-  mips16_frame_base_address
+  &mips_insn16_frame_unwind,
+  mips_insn16_frame_base_address,
+  mips_insn16_frame_base_address,
+  mips_insn16_frame_base_address
 };
 
 static const struct frame_base *
-mips16_frame_base_sniffer (struct frame_info *next_frame)
+mips_insn16_frame_base_sniffer (struct frame_info *next_frame)
 {
-  if (mips16_frame_sniffer (next_frame) != NULL)
-    return &mips16_frame_base;
+  if (mips_insn16_frame_sniffer (next_frame) != NULL)
+    return &mips_insn16_frame_base;
   else
     return NULL;
 }
 
+/* Heuristic unwinder for procedures using 32-bit instructions (covers
+   both 32-bit and 64-bit MIPS ISAs).  Procedures using 16-bit
+   instructions (a.k.a. MIPS16) are handled by the mips_insn16
+   unwinder.  */
+
 static struct mips_frame_cache *
-mips32_frame_cache (struct frame_info *next_frame, void **this_cache)
+mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   mips_extra_func_info_t proc_desc;
   struct mips_frame_cache *cache;
@@ -2211,65 +2220,65 @@ mips32_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-mips32_frame_this_id (struct frame_info *next_frame, void **this_cache,
+mips_insn32_frame_this_id (struct frame_info *next_frame, void **this_cache,
 			   struct frame_id *this_id)
 {
-  struct mips_frame_cache *info = mips32_frame_cache (next_frame,
+  struct mips_frame_cache *info = mips_insn32_frame_cache (next_frame,
 							   this_cache);
   (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
 }
 
 static void
-mips32_frame_prev_register (struct frame_info *next_frame,
+mips_insn32_frame_prev_register (struct frame_info *next_frame,
 				 void **this_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
 				 int *realnump, void *valuep)
 {
-  struct mips_frame_cache *info = mips32_frame_cache (next_frame,
+  struct mips_frame_cache *info = mips_insn32_frame_cache (next_frame,
 							   this_cache);
   trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
 				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
-static const struct frame_unwind mips32_frame_unwind =
+static const struct frame_unwind mips_insn32_frame_unwind =
 {
   NORMAL_FRAME,
-  mips32_frame_this_id,
-  mips32_frame_prev_register
+  mips_insn32_frame_this_id,
+  mips_insn32_frame_prev_register
 };
 
 static const struct frame_unwind *
-mips32_frame_sniffer (struct frame_info *next_frame)
+mips_insn32_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (! pc_is_mips16 (pc))
-    return &mips32_frame_unwind;
+    return &mips_insn32_frame_unwind;
   return NULL;
 }
 
 static CORE_ADDR
-mips32_frame_base_address (struct frame_info *next_frame,
+mips_insn32_frame_base_address (struct frame_info *next_frame,
 				void **this_cache)
 {
-  struct mips_frame_cache *info = mips32_frame_cache (next_frame,
+  struct mips_frame_cache *info = mips_insn32_frame_cache (next_frame,
 							   this_cache);
   return info->base;
 }
 
-static const struct frame_base mips32_frame_base =
+static const struct frame_base mips_insn32_frame_base =
 {
-  &mips32_frame_unwind,
-  mips32_frame_base_address,
-  mips32_frame_base_address,
-  mips32_frame_base_address
+  &mips_insn32_frame_unwind,
+  mips_insn32_frame_base_address,
+  mips_insn32_frame_base_address,
+  mips_insn32_frame_base_address
 };
 
 static const struct frame_base *
-mips32_frame_base_sniffer (struct frame_info *next_frame)
+mips_insn32_frame_base_sniffer (struct frame_info *next_frame)
 {
-  if (mips32_frame_sniffer (next_frame) != NULL)
-    return &mips32_frame_base;
+  if (mips_insn32_frame_sniffer (next_frame) != NULL)
+    return &mips_insn32_frame_base;
   else
     return NULL;
 }
@@ -6427,12 +6436,12 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Unwind the frame.  */
   frame_unwind_append_sniffer (gdbarch, mips_stub_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, mips_mdebug_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, mips16_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, mips32_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, mips_insn16_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, mips_insn32_frame_sniffer);
   frame_base_append_sniffer (gdbarch, mips_stub_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_mdebug_frame_base_sniffer);
-  frame_base_append_sniffer (gdbarch, mips16_frame_base_sniffer);
-  frame_base_append_sniffer (gdbarch, mips32_frame_base_sniffer);
+  frame_base_append_sniffer (gdbarch, mips_insn16_frame_base_sniffer);
+  frame_base_append_sniffer (gdbarch, mips_insn32_frame_base_sniffer);
 
   return gdbarch;
 }

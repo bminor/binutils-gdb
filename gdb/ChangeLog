@@ -1,5 +1,16 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (mips_gdbarch_init, mips_insn16_frame_cache)
+	(mips_insn16_frame_this_id, mips_insn16_frame_prev_register)
+	(mips_insn16_frame_unwind, mips_insn16_frame_sniffer)
+	(mips_insn16_frame_base_address, mips_insn16_frame_base)
+	(mips_insn16_frame_base_sniffer, mips_insn32_frame_cache)
+	(mips_insn32_frame_this_id, mips_insn32_frame_prev_register)
+	(mips_insn32_frame_unwind, mips_insn32_frame_sniffer)
+	(mips_insn32_frame_base_address, mips_insn32_frame_base)
+	(mips_insn32_frame_base_sniffer): Replace mips16 / mips32 prefix
+	with mips_insn16 and mips_insn32.
+
 	Replace DEPRECATED_REGISTER_RAW_SIZE with register_size.
 	* rs6000-tdep.c (rs6000_push_dummy_call)
 	(rs6000_extract_return_value): Use register_size.
