@@ -83,7 +83,7 @@ find_saved_register (struct frame_info *frame, int regnum)
   while (1)
     {
       QUIT;
-      frame1 = get_prev_frame (frame1);
+      frame1 = get_next_frame (frame1);
       if (frame1 == 0 || frame1 == frame)
 	break;
       FRAME_INIT_SAVED_REGS (frame1);

@@ -1,5 +1,11 @@
 2002-04-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (find_saved_register): Find saved registers in the next
+	not prev frame.
+	Fix PR gdb/365.
+
+2002-04-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (LANG): Set to ``c''.
 
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
