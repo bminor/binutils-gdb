@@ -21,8 +21,9 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 # And rewritten by Michael Chastain <mec.gnu@mindspring.com>.
 
-set ws "\[\r\n\t \]+"
-set nl "\[\r\n\]+"
+set wsopt	"\[\r\n\t \]*"
+set ws		"\[\r\n\t \]+"
+set nl		"\[\r\n\]+"
 
 if $tracelevel then {
     strace $tracelevel
@@ -38,7 +39,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-# Test ptype of class objects.
+# Test ptype of a class.
 #
 # Different C++ compilers produce different output.  I build up regular
 # expressions piece by piece to accommodate all the compilers that I
@@ -52,7 +53,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++
 #       V * _vb$V;			// re_vbptr
 #       int a;				// re_fields
 #
-#     public:
+#     public:				// re_access_methods
 #       A & operator=(A const &);	// re_synth_gcc_2
 #       A(int, A const &);		// ...
 #       A(int);				// ...
@@ -66,8 +67,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++
 #   class ... { private: ... };
 #   class ... { ... };
 #
-# RE_VBPTR matches the virtual base declarations.  gcc 2.95.3 emits
-# these, but gcc 3.X.Y does not.  The name depends on the debug format.
+# RE_VBPTR matches the virtual base declarations.  gcc 2.95.3 sometimes
+# emits these, but gcc 3.X.Y never emits these.  The name depends on the
+# debug format.
 #
 # RE_FIELDS matches the data fields of the class.
 # RE_METHODS matches the methods explicitly declared for the class.
@@ -76,354 +78,529 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++
 # of the class.  gcc -gstabs+ emits these methods, and gcc -gdwarf-2
 # does not.
 #
-# RE_ALL_METHODS combines RE_METHODS and the optional synthetic methods.
-# Up to gcc 3.3.X, gcc defaults to gcc ABI 1, with synthetic methods at
-# the beginning.  Starting with gcc 3.4.X, gcc defaults to gcc ABI 2,
-# with synthetic methods at the end.
+# RE_ACCESS_METHODS is an access specifier after RE_FIELDS and before
+# the methods (explicit methods and/or synthetic methods).
+# There is also an RE_ACCESS_FIELDS.
 #
-# So the possible choices for RE_ALL_METHODS are:
-#
-#   RE_METHODS			// any gcc with dwarf-2
-#   RE_SYNTH_GCC_2|RE_METHODS	// gcc 2.95.3, stabs+
-#   RE_SYNTH_GCC_3|RE_METHODS	// gcc 3.3.2, stabs+
-#   RE_METHODS|RE_SYNTH_GCC_3	// gcc 3.4.0, stabs+
-#
-# When I get HP-UX aCC, I hope that I can just add RE_SYNTH_ACC_FOO
-# and enlarge RE_ALL_METHODS.
+# When I get HP-UX aCC, I hope that I can just add RE_SYNTH_ACC_NNN.
 #
 # Yet another twist: with gcc v2, ctor and dtor methods have a hidden
 # argument in front, the "in-charge" flag.  With gcc v3, there is no
 # hidden argument; instead, there are multiple object functions for
 # each ctor and dtor.
 #
-# I use gdb_test_multiple with only one arm.  I could use gdb_test,
-# but gdb_test_multiple makes it easier to add KFAIL arms as needed.
-#
-# -- chastain 2003-12-31
+# -- chastain 2004-01-01
+
+# compatibility kludges
+set kk0 ""
+set kk1 ""
+set kk2 ""
+set kk3 ""
+set kk4 ""
+set kk5 ""
+set fk5 ""
+
+proc kk_debug { } {
+    global kk0
+    global kk1
+    global kk2
+    global kk3
+    global kk4
+    global kk5
+    global fk5
+    set kk0 " (0)"
+    set kk1 " (1)"
+    set kk2 " (2)"
+    set kk3 " (3)"
+    set kk4 " (4)"
+    set kk5 " (5)"
+    set fk5 ""
+}
+
+proc test_one_ptype { command testname re_class re_vbptr re_access_fields re_fields re_access_methods re_methods re_synth_gcc_2 re_synth_gcc_3 re_star } {
+    global gdb_prompt
+    global wsopt
+    global ws
+    global nl
+
+    global kk0
+    global kk1
+    global kk2
+    global kk3
+    global kk4
+    global kk5
+    global fk5
+
+    gdb_test_multiple "$command" "$testname" {
+	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
+	    # gcc 2.95.3, dwarf-2, no vbptr
+	    # gcc 3.X, abi 1, dwarf-2
+	    # gcc 3.X, abi 2, dwarf-2
+	    pass "$testname$kk0"
+	}
+	-re "type = $re_class${wsopt}$re_vbptr${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
+	    # gcc 2.95.3, dwarf-2, vbptr
+	    # TODO: drow says the vbptr is a bug
+	    pass "$testname$kk1"
+	}
+	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_synth_gcc_2${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
+	    # gcc 2.95.3, stabs+, no vbptr
+	    pass "$testname$kk2"
+	}
+	-re "type = $re_class${wsopt}$re_vbptr${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_synth_gcc_2${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
+	    # gcc 2.95.3, stabs+, vbptr
+	    # TODO: drow says the vbptr is a bug
+	    pass "$testname$kk3"
+	}
+	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_synth_gcc_3${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
+	    # gcc 3.X, abi 1, stabs+
+	    pass "$testname$kk4"
+	}
+	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods${wsopt}$re_synth_gcc_3$nl\}$re_star$nl$gdb_prompt $" {
+	    # gcc 3.X, abi 2, stabs+
+	    if { "$fk5" == "fail" } {
+		fail "$testname$kk5"
+	    } else {
+		pass "$testname$kk5"
+	    }
+	}
+    }
+
+    set kk0 ""
+    set kk1 ""
+    set kk2 ""
+    set kk3 ""
+    set kk4 ""
+    set kk5 ""
+    set fk5 ""
+}
 
 proc test_ptype_of_classes {} {
     global gdb_prompt
     global ws
     global nl
 
+    global kk0
+    global kk1
+    global kk2
+    global kk3
+    global kk4
+    global kk5
+    global fk5
+
     # class VA
 
-    set re_class	"((struct|class) VA \{${ws}public:|struct VA \{)"
-    set re_fields	"int va;"
-    set re_synth_gcc_23	"VA & operator=\\(VA const ?&\\);${ws}VA\\(VA const ?&\\);${ws}VA\\((void|)\\);"
-    set re_all_methods	"(|$re_synth_gcc_23)"
-
-    gdb_test_multiple "ptype VA" "ptype VA" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\}$nl$gdb_prompt $" {
-	    pass "ptype VA"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype VA" "ptype VA" \
+	"((struct|class) VA \{${ws}public:|struct VA \{)" \
+	"" \
+	"" "int va;" \
+	"" "" \
+	"VA & operator=\\(VA const ?&\\);${ws}VA\\(VA const ?&\\);${ws}VA\\((void|)\\);" \
+	"VA & operator=\\(VA const ?&\\);${ws}VA\\(VA const ?&\\);${ws}VA\\((void|)\\);" \
+	""
 
     # class VB
 
-    set re_class	"((struct|class) VB \{${ws}public:|struct VB \{)"
-    set re_fields	"int vb;"
-    set re_methods	"int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);"
-    set re_synth_gcc_23	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);"
-    set re_all_methods	"($re_methods|$re_methods${ws}$re_synth_gcc_23|$re_synth_gcc_23${ws}$re_methods)"
-
-    gdb_test_multiple "ptype VB" "ptype VB" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\}$nl$gdb_prompt $" {
-	    pass "ptype VB"
-	}
-    }
-
-    # An instance of VB
-
-    gdb_test_multiple "ptype vb" "ptype vb" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\}$nl$gdb_prompt $" {
-	    pass "ptype vb"
-	}
-    }
-
-    # An instance of VB *
-
-    gdb_test_multiple "ptype pVB" "ptype pVB" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pVB"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype VB" "ptype VB" \
+	"((struct|class) VB \{${ws}public:|struct VB \{)" \
+	"" \
+	"" "int vb;" \
+	"" "int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);" \
+	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);" \
+	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);" \
+	""
 
     # class V
 
-    set re_class	"class V : public VA, public VB \{${ws}public:"
-    set re_fields	"int w;"
-    set re_methods	"int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);"
-    set re_synth_gcc_23	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);"
-    set re_all_methods	"($re_methods|$re_methods${ws}$re_synth_gcc_23|$re_synth_gcc_23${ws}$re_methods)"
-
-    gdb_test_multiple "ptype V" "ptype V" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\}$nl$gdb_prompt $" {
-	    pass "ptype V"
-	}
-    }
-
-    # An instance of V
-
-    gdb_test_multiple "ptype v" "ptype v" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\}$nl$gdb_prompt $" {
-	    pass "ptype v"
-	}
-    }
-
-    # An instance of V *
-
-    gdb_test_multiple "ptype pVa" "ptype pVa" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pVa"
-	}
-    }
-
-    # An instance of V *
-
-    gdb_test_multiple "ptype pVv" "ptype pVv" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pVv"
-	}
-    }
-
-    # An instance of V *
-
-    gdb_test_multiple "ptype pVe" "ptype pVe" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pVe"
-	}
-    }
-
-    # An instance of V *
-
-    gdb_test_multiple "ptype pVd" "ptype pVd" {
-	-re "type = $re_class${ws}$re_fields${ws}(public:${ws}|)$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pVd"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype V" "ptype V" \
+	"class V : public VA, public VB \{${ws}public:" \
+	"" \
+	"" "int w;" \
+	"" "int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	""
 
     # class A
 
-    set re_class	"class A : public virtual V \{(${ws}private:|)"
-    set re_vbptr 	"V \\*(_vb.1V|_vb.V);"
-    set re_fields	"int a;"
-    set re_methods	"virtual int f\\((void|)\\);"
-    # gcc 2 adds an "in-charge" arg to the ctor.
-    set re_synth_gcc_2	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);"
-    set re_synth_gcc_3	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);"
-    set re_all_methods	"($re_methods|$re_synth_gcc_2${ws}$re_methods|$re_synth_gcc_3${ws}$re_methods|$re_methods${ws}$re_synth_gcc_3)"
-
-    gdb_test_multiple "ptype A" "ptype A" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype A"
-	}
-    }
-
-    # An instance of A
-
-    gdb_test_multiple "ptype a" "ptype a" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype a"
-	}
-    }
-
-    # An instance of A *
-
-    gdb_test_multiple "ptype pAa" "ptype pAa" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pAa"
-	}
-    }
-
-    # An instance of A *
-
-    gdb_test_multiple "ptype pAe" "ptype pAe" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pAe"
-	}
-    }
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype A" "ptype A" \
+	"class A : public virtual V \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int a;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	""
 
     # class B
 
-    set re_class	"class B : public A \{(${ws}private:|)"
-    set re_vbptr	"V \\*(_vb.1V|_vb.V);"
-    set re_fields	"int b;"
-    set re_methods	"virtual int f\\((void|)\\);"
-    set re_synth_gcc_2	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);"
-    set re_synth_gcc_3	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);"
-    set re_all_methods	"($re_methods|$re_synth_gcc_2${ws}$re_methods|$re_synth_gcc_3${ws}$re_methods|$re_methods${ws}$re_synth_gcc_3)"
-
-    gdb_test_multiple "ptype B" "ptype B" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype B"
-	}
-    }
-
-    # An instance of B
-
-    gdb_test_multiple "ptype b" "ptype b" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype b"
-	}
-    }
-
-    # An instance of B *
-
-    gdb_test_multiple "ptype pBe" "ptype pBe" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)${re_fields}${ws}public:${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pBe"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype B" "ptype B" \
+	"class B : public A \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int b;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);" \
+	""
 
     # class C
 
-    set re_class	"class C : public virtual V \{(${ws}private:|)"
-    set re_vbptr	"V \\*(_vb.1V|_vb.V);"
-    set re_fields	"int c;"
-    set re_synth_gcc_2	"C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);"
-    set re_synth_gcc_3	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\(\\);"
-    set re_all_methods	"(|$re_synth_gcc_2|$re_synth_gcc_3)"
-
-    gdb_test_multiple "ptype C" "ptype C" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}(public:${ws}|)${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype C"
-	}
-    }
-
-    # An instance of C
-
-    gdb_test_multiple "ptype c" "ptype c" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}(public:${ws}|)${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype c"
-	}
-    }
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype C" "ptype C" \
+	"class C : public virtual V \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"public:" "int c;" \
+	"" "" \
+	"C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);" \
+	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\(\\);" \
+	""
 
     # class AD
 
-    set re_class	"((struct|class) AD \{${ws}public:|struct AD \{)"
-    set re_methods	"virtual int vg\\((void|)\\);"
-    set re_synth_gcc_23	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);"
-    set re_all_methods	"($re_methods|$re_methods${ws}$re_synth_gcc_23|$re_synth_gcc_23${ws}$re_methods)"
-
-    gdb_test_multiple "ptype AD" "ptype AD" {
-	-re "type = $re_class${ws}$re_all_methods$nl\}$nl$gdb_prompt $" {
-	    pass "ptype AD"
-	}
-    }
-
-    # An instance of AD *
-    # TODO: this should be named pADd, not pAd.
-
-    gdb_test_multiple "ptype pAd" "ptype pAd" {
-	-re "type = $re_class${ws}$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pAd"
-	}
-    }
-
-    # An instance of a AD *
-
-    gdb_test_multiple "ptype pADe" "ptype pADe" {
-	-re "type = $re_class${ws}$re_all_methods$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pADe"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype AD" "ptype AD" \
+	"((struct|class) AD \{${ws}public:|struct AD \{)" \
+	"" \
+	"" "" \
+    	"" "virtual int vg\\((void|)\\);" \
+	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);" \
+	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);" \
+	""
 
     # class D
-    #
-    # I wrote this differently from the others to avoid a problem with
-    # the sourceware version of expect, which dates from 1998.
-    # The bug manifests as ERROR/UNRESOLVED results after an "eof"
-    # in gdb_test_multiple.
-    #
-    # -- chastain 2004-01-01
 
-    set re_class	"class D : public AD, public virtual V \{(${ws}private:|)"
-    set re_vbptr	"V \\*(_vb.1V|_vb.V);"
-    set re_fields	"int d;"
-    set re_methods_2	"static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);"
-    set re_methods_3	"static void s\\(\\);${ws}virtual int vg\\(\\);${ws}virtual int vd\\(\\);${ws}int fd\\(\\);"
-    set re_synth_gcc_2	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);"
-    set re_synth_gcc_3	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);"
-    set re_all_methods	"($re_methods_2|$re_methods_3|$re_synth_gcc_2${ws}$re_methods_2|$re_synth_gcc_3${ws}$re_methods_3|$re_methods${ws}$re_synth_gcc_3)"
-
-    gdb_test_multiple "ptype D" "ptype D" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype D"
-	}
-    }
-
-    # An instance of D
-
-    gdb_test_multiple "ptype d" "ptype d" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype d"
-	}
-    }
-
-    # An instance of D
-
-    gdb_test_multiple "ptype dd" "ptype dd" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype dd"
-	}
-    }
-
-    # An instance of D *
-
-    gdb_test_multiple "ptype ppd" "ptype ppd" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype ppd"
-	}
-    }
-
-    # An instance of D *
-
-    gdb_test_multiple "ptype pDd" "ptype pDd" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pDd"
-	}
-    }
-
-    # An instance of D *
-
-    gdb_test_multiple "ptype pDe" "ptype pDe" {
-	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pDe"
-	}
-    }
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype D" "ptype D" \
+	"class D : public AD, public virtual V \{(${ws}private:|)" \
+    	"V \\*(_vb.1V|_vb.V);" \
+    	"public:" "int d;" \
+	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	""
 
     # class E
     # TODO: E does not show a vbptr for V.  That seems strange.
 
-    set re_class	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)"
-    set re_fields	"int e;"
-    set re_methods	"virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);"
-    set re_synth_gcc_2	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);"
-    set re_synth_gcc_3	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);"
-    set re_all_methods	"($re_methods|$re_synth_gcc_2${ws}$re_methods|$re_synth_gcc_3${ws}$re_methods|$re_methods${ws}$re_synth_gcc_3)"
+    set kk0 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype E" "ptype E" \
+	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
+	"" \
+	"public:" "int e;" \
+	"" "virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);" \
+	""
 
-    gdb_test_multiple "ptype E" "ptype E" {
-	-re "type = ${re_class}${ws}public:${ws}${re_fields}${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype E"
-	}
-    }
+    # An instance of D
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype dd" "ptype dd" \
+	"class D : public AD, public virtual V \{(${ws}private:|)" \
+    	"V \\*(_vb.1V|_vb.V);" \
+    	"public:" "int d;" \
+	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	""
+
+    # An instance of D *
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype ppd" "ptype ppd" \
+	"class D : public AD, public virtual V \{(${ws}private:|)" \
+    	"V \\*(_vb.1V|_vb.V);" \
+    	"public:" "int d;" \
+	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	" ?\\*"
+
+    # An instance of AD *
+    # TODO: this should be named pADd, not pAd.
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pAd" "ptype pAd" \
+	"((struct|class) AD \{${ws}public:|struct AD \{)" \
+	"" \
+	"" "" \
+    	"" "virtual int vg\\((void|)\\);" \
+	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);" \
+	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);" \
+	" ?\\*"
+
+    # An instance of A
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype a" "ptype a" \
+	"class A : public virtual V \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int a;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	""
+
+    # An instance of B
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype b" "ptype b" \
+	"class B : public A \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int b;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);" \
+	""
+
+    # An instance of C
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype c" "ptype c" \
+	"class C : public virtual V \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"public:" "int c;" \
+	"" "" \
+	"C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);" \
+	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\(\\);" \
+	""
+
+    # An instance of D
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype d" "ptype d" \
+	"class D : public AD, public virtual V \{(${ws}private:|)" \
+    	"V \\*(_vb.1V|_vb.V);" \
+    	"public:" "int d;" \
+	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	""
 
     # An instance of E
 
-    gdb_test_multiple "ptype e" "ptype e" {
-	-re "type = ${re_class}${ws}public:${ws}${re_fields}${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
-	    pass "ptype e"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype e" "ptype e" \
+	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
+	"" \
+	"public:" "int e;" \
+	"" "virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);" \
+	""
+
+    # An instance of V
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype v" "ptype v" \
+	"class V : public VA, public VB \{${ws}public:" \
+	"" \
+	"" "int w;" \
+	"" "int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	""
+
+    # An instance of VB
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype vb" "ptype vb" \
+	"((struct|class) VB \{${ws}public:|struct VB \{)" \
+	"" \
+	"" "int vb;" \
+	"" "int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);" \
+	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);" \
+	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);" \
+	""
+
+    # An instance of A *
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype pAa" "ptype pAa" \
+	"class A : public virtual V \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int a;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	" ?\\*"
+
+    # An instance of A *
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype pAe" "ptype pAe" \
+	"class A : public virtual V \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int a;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	" ?\\*"
+
+    # An instance of B *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype pBe" "ptype pBe" \
+	"class B : public A \{(${ws}private:|)" \
+	"V \\*(_vb.1V|_vb.V);" \
+	"" "int b;" \
+	"public:" "virtual int f\\((void|)\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);" \
+	" ?\\*"
+
+    # An instance of D *
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype pDd" "ptype pDd" \
+	"class D : public AD, public virtual V \{(${ws}private:|)" \
+    	"V \\*(_vb.1V|_vb.V);" \
+    	"public:" "int d;" \
+	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	" ?\\*"
+
+    # An instance of D *
+
+    set kk0 " (aCC)"
+    set kk1 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype pDe" "ptype pDe" \
+	"class D : public AD, public virtual V \{(${ws}private:|)" \
+    	"V \\*(_vb.1V|_vb.V);" \
+    	"public:" "int d;" \
+	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	" ?\\*"
+
+    # An instance of V *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pVa" "ptype pVa" \
+	"class V : public VA, public VB \{${ws}public:" \
+	"" \
+	"" "int w;" \
+	"" "int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	" ?\\*"
+
+    # An instance of V *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pVv" "ptype pVv" \
+	"class V : public VA, public VB \{${ws}public:" \
+	"" \
+	"" "int w;" \
+	"" "int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	" ?\\*"
+
+    # An instance of V *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pVe" "ptype pVe" \
+	"class V : public VA, public VB \{${ws}public:" \
+	"" \
+	"" "int w;" \
+	"" "int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	" ?\\*"
+
+    # An instance of V *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pVd" "ptype pVd" \
+	"class V : public VA, public VB \{${ws}public:" \
+	"" \
+	"" "int w;" \
+	"" "int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	"V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);" \
+	" ?\\*"
+
+    # An instance of AD *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pADe" "ptype pADe" \
+	"((struct|class) AD \{${ws}public:|struct AD \{)" \
+	"" \
+	"" "" \
+    	"" "virtual int vg\\((void|)\\);" \
+	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);" \
+	"AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);" \
+	" ?\\*"
 
     # An instance of E *
 
-    gdb_test_multiple "ptype pEe" "ptype pEe" {
-	-re "type = ${re_class}${ws}public:${ws}${re_fields}${ws}${re_all_methods}$nl\} \\*$nl$gdb_prompt $" {
-	    pass "ptype pEe"
-	}
-    }
+    set kk0 " (obsolescent gcc or gdb)"
+    set fk5 "fail"
+    test_one_ptype "ptype pEe" "ptype pEe" \
+	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
+	"" \
+	"public:" "int e;" \
+	"" "virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);" \
+	" ?\\*"
+
+    # An instance of VB *
+
+    set kk0 " (obsolescent gcc or gdb)"
+    set kk5 " (obsolescent gcc or gdb)"
+    test_one_ptype "ptype pVB" "ptype pVB" \
+	"((struct|class) VB \{${ws}public:|struct VB \{)" \
+	"" \
+	"" "int vb;" \
+	"" "int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);" \
+	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);" \
+	"VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);" \
+	" ?\\*"
 }
 
 # Call virtual functions.

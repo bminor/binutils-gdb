@@ -1,5 +1,5 @@
 # Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-# 2003 Free Software Foundation, Inc.
+# 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -264,7 +264,8 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    pass "ptype class B"
+	    # TODO: this is not obsolescent!
+	    pass "ptype class B (obsolescent gcc or gdb)"
 	}
 	-re "type = class B : public A \{${ws}public:${ws}int b;${ws}int x;${ws}B ?& ?operator ?=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -281,7 +282,8 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    pass "ptype class C"
+	    # TODO: this is not obsolescent!
+	    pass "ptype class C (obsolescent gcc or gdb)"
 	}
 	-re "type = class C : public A \{${ws}public:${ws}int c;${ws}int x;${ws}C ?& ?operator ?=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -298,7 +300,8 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    pass "ptype class D"
+	    # TODO: this is not obsolescent!
+	    pass "ptype class D (obsolescent gcc or gdb)"
 	}
 	-re "type = class D : public B, public C \{${ws}public:${ws}int d;${ws}int x;${ws}D ?& ?operator ?=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -344,7 +347,8 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Static \{${ws}public:${ws}static void ii\\(int, int\\);${ws}Static ?& ?operator ?=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    pass "ptype class Static"
+	    # TODO: this is okay.  It is just ABI 2.
+	    fail "ptype class Static"
 	}
     }
 
@@ -365,14 +369,15 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    # Accept the virtual base pointer if gdb wants to print it.
-    # Those cases will go away when gcc 2 dies.
+    # With gcc 2, gdb prints the virtual base pointer.
     # With gcc 3, gdb does not print the virtual base pointer.
+    # drow considers it a gdb bug if gdb prints the vbptr.
 
     gdb_test_multiple "ptype class vB" "ptype class vB" {
 	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.2vA;${ws}public:${ws}int vb;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    pass "ptype class vB"
+	    # TODO: kfail this
+	    fail "ptype class vB"
 	}
 	-re "type = class vB : public virtual vA \{${ws}public:${ws}int vb;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
@@ -382,7 +387,9 @@ proc test_ptype_class_objects {} {
 	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.vA;${ws}public:${ws}int vb;${ws}int vx;${ws}vB ?& ?operator ?=\\(vB const ?&\\);${ws}vB\\(int, ?vB const ?&\\);${ws}vB\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
-	    pass "ptype class vB"
+	    # TODO: kfail this
+	    setup_xfail "*-*-*"
+	    fail "ptype class vB (FIXME: non-portable virtual table constructs)"
 	}
 	-re "type = class vB : public virtual vA \{${ws}public:${ws}int vb;${ws}int vx;${ws}vB ?& ?operator ?=\\(vB const ?&\\);${ws}vB\\(vB const ?&\\);${ws}vB\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -396,7 +403,8 @@ proc test_ptype_class_objects {} {
     gdb_test_multiple "ptype class vC" "ptype class vC" {
 	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.2vA;${ws}public:${ws}int vc;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    pass "ptype class vC"
+	    # TODO: kfail
+	    fail "ptype class vC"
 	}
 	-re "type = class vC : public virtual vA \{${ws}public:${ws}int vc;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
@@ -406,7 +414,9 @@ proc test_ptype_class_objects {} {
 	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.vA;${ws}public:${ws}int vc;${ws}int vx;${ws}vC ?& ?operator ?=\\(vC const ?&\\);${ws}vC\\(int, ?vC const ?&\\);${ws}vC\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
-	    pass "ptype class vC"
+	    # TODO: kfail
+	    setup_xfail "*-*-*"
+	    fail "ptype class vC (FIXME: non-portable virtual table constructs)"
 	}
 	-re "type = class vC : public virtual vA \{${ws}public:${ws}int vc;${ws}int vx;${ws}vC ?& ?operator ?=\\(vC const ?&\\);${ws}vC\\(vC const ?&\\);${ws}vC\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -420,7 +430,8 @@ proc test_ptype_class_objects {} {
     gdb_test_multiple "ptype class vD" "ptype class vD" {
 	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC ?\\* ?_vb.2vC;${ws}vB ?\\* ?_vb.2vB;${ws}public:${ws}int vd;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    pass "ptype class vD"
+	    # TODO: kfail
+	    fail "ptype class vD"
 	}
 	-re "type = class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
@@ -430,7 +441,9 @@ proc test_ptype_class_objects {} {
 	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC ?\\* ?_vb.vC;${ws}vB ?\\* ?_vb.vB;${ws}public:${ws}int vd;${ws}int vx;${ws}vD ?& ?operator ?=\\(vD const ?&\\);${ws}vD\\(int, ?vD const ?&\\);${ws}vD\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
-	    pass "ptype class vD"
+	    # TODO: kfail
+	    setup_xfail "*-*-*"
+	    fail "ptype class vD (FIXME: non-portable virtual table constructs)"
 	}
 	-re "type = class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;${ws}vD ?& ?operator ?=\\(vD const ?&\\);${ws}vD\\(vD const ?&\\);${ws}vD\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -444,7 +457,8 @@ proc test_ptype_class_objects {} {
     gdb_test_multiple "ptype class vE" "ptype class vE" {
 	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD ?\\* ?_vb.2vD;${ws}public:${ws}int ve;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    pass "ptype class vE"
+	    # TODO: kfail
+	    fail "ptype class vE"
 	}
 	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
@@ -454,7 +468,9 @@ proc test_ptype_class_objects {} {
 	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD ?\\* ?_vb.vD;${ws}public:${ws}int ve;${ws}int vx;${ws}vE ?& ?operator ?=\\(vE const ?&\\);${ws}vE\\(int, ?vE const ?&\\);${ws}vE\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
-	    pass "ptype class vE"
+	    # TODO: kfail
+	    setup_xfail "*-*-*"
+	    fail "ptype class vE (FIXME: non-portable virtual table constructs)"
 	}
 	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;${ws}vE ?& ?operator ?=\\(vE const ?&\\);${ws}vE\\(vE const ?&\\);${ws}vE\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -479,7 +495,8 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Base1 \{${ws}public:${ws}int x;${ws}Base1\\(int\\);${ws}Base1 ?& ?operator ?=\\(Base1 const ?&\\);${ws}Base1\\(Base1 const ?&\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    pass "ptype class Base1"
+	    # TODO: this is not obsolescent!
+	    pass "ptype class Base1 (obsolescent gcc or gdb)"
 	}
     }
 
@@ -494,8 +511,10 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo ?& ?operator ?=\\(Foo const ?&\\);${ws}Foo\\(Foo const ?&\\);${ws}Foo\\(int, int\\);${ws}int operator ?!\\((void|)\\);${ws}int operator int\\((void|)\\);${ws}int times\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
-	    # "int operator int()" is a bug
-	    kfail "gdb/1497" "ptype class Foo"
+	    # TODO: "int operator int()" is a bug
+	    # TODO: this is not obsolescent!
+	    # kfail "gdb/1497" "ptype class Foo"
+	    pass "ptype class Foo (obsolescent gcc or gdb)"
 	}
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo ?& ?operator ?=\\(Foo const ?&\\);${ws}Foo\\(Foo const ?&\\);${ws}Foo\\(int, int\\);${ws}int operator ?!\\((void|)\\);${ws}operator int\\((void|)\\);${ws}int times\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -503,7 +522,8 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo\\(int, int\\);${ws}int operator ?!\\((void|)\\);${ws}operator int\\((void|)\\);${ws}int times\\(int\\);${ws}Foo ?& ?operator ?=\\(Foo const ?&\\);${ws}Foo\\(Foo const ?&\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    pass "ptype class Foo"
+	    # TODO: this is okay, just the new ABI
+	    fail "ptype class Foo"
 	}
     }
 
@@ -514,7 +534,8 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    pass "ptype class Bar"
+	    # TODO: this is not obsolescent!
+	    pass "ptype class Bar (obsolescent gcc or gdb)"
 	}
 	-re "type = class Bar : public Base1, public Foo \{${ws}public:${ws}int z;${ws}Bar ?& ?operator ?=\\(Bar const ?&\\);${ws}Bar\\(Bar const ?&\\);${ws}Bar\\(int, int, int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -523,7 +544,8 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Bar : public Base1, public Foo \{${ws}public:${ws}int z;${ws}Bar\\(int, int, int\\);${ws}Bar ?& ?operator ?=\\(Bar const ?&\\);${ws}Bar\\(Bar const ?&\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    pass "ptype class Bar"
+	    # TODO: this is not obsolescent!
+	    pass "ptype class Bar (obsolescent gcc or gdb)"
 	}
     }
 }
@@ -693,7 +715,7 @@ proc test_enums {} {
 	    #
 	    # gcc 3.3.2 -gstabs+
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    pass "ptype obj_with_enum"
+	    fail "ptype obj_with_enum"
 	}
     }
 
@@ -736,6 +758,13 @@ proc test_pointers_to_class_members {} {
     gdb_test "print &Foo::x" "\\$\[0-9\]+ = \\(int ?\\( ?Foo::\\* ?\\) ?\\) ?&Foo::x"
     gdb_test "print (int)&Foo::x" "\\$\[0-9\]+ = 0"
     gdb_test "print (int)&Bar::y == 2*sizeof(int)" "\\$\[0-9\]+ = true"
+
+    # TODO: this is a bogus test.  It's looking at a variable that
+    # has not even been declared yet, so it's accessing random junk
+    # on the stack and comparing that it's NOT equal to a specific
+    # value.  It's been like this since gdb 4.10 in 1993!
+    # -- chastain 2004-01-01
+    gdb_test "print (int)pmi == sizeof(int)" ".* = false"
 }
 
 # Test static members.
@@ -745,7 +774,7 @@ proc test_static_members {} {
     global hex
 
     gdb_test "print Foo::st" "\\$\[0-9\]+ = 100"
-    gdb_test "set foo.st = 200" ""
+    gdb_test "set foo.st = 200" "" ""
     gdb_test "print bar.st" "\\$\[0-9\]+ = 200"
     gdb_test "print &foo.st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
     gdb_test "print &Bar::st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
@@ -796,9 +825,6 @@ proc do_tests {} {
 	return
     }
 
-    test_pointers_to_class_members
-    test_static_members
-
     gdb_breakpoint inheritance2
     gdb_test "continue" ".*Breakpoint .* inheritance2.*" ""
 
@@ -809,9 +835,13 @@ proc do_tests {} {
     test_method_param_class
 
     gdb_breakpoint enums2
-    gdb_test "continue" ".*Breakpoint .* enums2.*" ""
+    gdb_test "continue" ".*Breakpoint .* enums2.*" "continue to enums2(\\(\\)|)"
     gdb_test "finish" "" ""
     test_enums
+
+    gdb_test "finish" "" ""
+    test_pointers_to_class_members
+    test_static_members
 
     # Now some random tests that were just thrown in here.
 
@@ -847,6 +877,11 @@ proc do_tests {} {
 	    fail "calling method for small class"
 	}
     }
+
+    # This is a random v2 demangling test.
+    # This is redundant with existing tests in demangle.exp.
+    # TODO: Just remove this.
+    gdb_test "maint demangle inheritance1__Fv" "inheritance1\\(void\\)" "demangle"
 }
 
 do_tests

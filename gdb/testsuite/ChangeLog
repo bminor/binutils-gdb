@@ -1,5 +1,12 @@
 2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/classes.exp: Generate identical results as old version.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/virtfunc.exp: Modify some patterns to avoid a
 	mysterious bug with sourceware version of expect.
 
