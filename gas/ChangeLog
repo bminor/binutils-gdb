@@ -1,3 +1,16 @@
+Thu Sep 28 19:25:04 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Translate "powerpc" into "ppc", remove gen of
+	VERSION, move gen of "conf" here from makefile.
+	* mpw-make.sed: New file, sed commands to translate Unix makefile
+	into MPW syntax.
+	* mpw-make.in: Remove.
+	* mac-as.r: New file, Mac resource file.
+	* as.h (inline): Don't decide about defining if __MWERKS__,
+	remove redundant conditional and definition.
+
+	* stabs.c (s_stab_generic): Fix syntax for OBJ_PROCESS_STAB.
+
 Thu Sep 28 15:43:15 1995  Kim Knuttila  <krk@nellie>
 
 	* config/tc-ppc.c (md_apply_fix3): Removed some TE_PE specific 
