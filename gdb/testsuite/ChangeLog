@@ -1,3 +1,8 @@
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/mi-support.exp (mi_run_cmd): Expect an MI response to
+	000-exec-continue.
+
 2003-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/attach.exp: Use -1 for the ID of a nonexistent process
