@@ -242,7 +242,9 @@ threads			Michael Snyder		msnyder@cygnus.com
 breakpoints		Michael Snyder		msnyder@cygnus.com
 			Jim Blandy		jimb@cygnus.com
 language support	David Taylor		taylor@cygnus.com
-  Java support		Anthony Green 		green@cygnus.com
+  Java support (devolved)
+			Per Bothner		per@bothner.com
+			Anthony Green 		green@cygnus.com
   Objective-C/C++	Klee Dienes		kdienes@apple.com
 			Jim Ingham		jimgham@apple.com
   Pascal support	Pierre Muller		muller@sourceware.cygnus.com

@@ -1,5 +1,9 @@
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Add Per Bothner to Java maintainers.
+
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* rdi-share/unixcomm.c (SERIAL_PREFIX): Always provide a default.
 	* rdi-share/hostchan.h (__unix): Hack, provide a default value.
 	* rdi-share/host.h (__unix): Hack, define when __NetBSD__.
