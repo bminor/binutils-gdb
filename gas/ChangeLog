@@ -1,3 +1,16 @@
+Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (evaluate_absolute): Support e_rrsel and
+	e_rlsel field selectors.
+
+Fri Dec  3 18:33:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-elf.h: If ECOFF_DEBUGGING, undef
+	SEPARATE_STAB_SECTIONS and INIT_STAB_SECTION, and define
+	OBJ_PROCESS_STAB to call ecoff_stab.
+	* config/obj-elf.c: Don't compile obj_elf_init_stab_section if
+	INIT_STAB_SECTION is not defined.
+
 Fri Dec  3 10:56:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_apply_fix): Delete old wrapper function.

@@ -2771,9 +2771,8 @@ tc_gen_reloc (section, fixp)
 	     relocation should be either 0 (no static link) or 2
 	     (static link required).
 
-	     FIXME: assume that fx_addnumber contains this
-	     information */
-	  reloc->addend = fixp->fx_addnumber;
+	     FIXME: We always assume no static link!  */
+	  reloc->addend = 0;
 	  break;
 
 	case R_HPPA_ABS_CALL_11:
@@ -3627,8 +3626,6 @@ evaluate_absolute (insn)
     /* Add 0x800 and arithmetic shift right 11 bits.  */
     case e_ldsel:
       value += 0x800;
-
-
       value = (value & 0xfffff800) >> 11;
       break;
 
@@ -3637,11 +3634,15 @@ evaluate_absolute (insn)
       value |= 0xfffff800;
       break;
 
-    /* This had better get fixed.  It looks like we're quickly moving
-       to LR/RR.  FIXME.  */
+#define RSEL_ROUND(c)  (((c) + 0x1000) & ~0x1fff)
     case e_rrsel:
+      value = (RSEL_ROUND (value) & 0x7ff) + (value - RSEL_ROUND (value));
+      break;
+
     case e_lrsel:
-      abort ();
+      value = (RSEL_ROUND (value) >> 11) & 0x1fffff;
+      break;
+#undef RSEL_ROUND
 
     default:
       BAD_CASE (field_selector);
