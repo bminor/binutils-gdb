@@ -31,6 +31,8 @@ branch.s
 branch.d
 flag.s
 flag.d
+insn3.s
+insn3.d
 j.s
 j.d
 math.s
