@@ -4296,6 +4296,8 @@ s_opt (ignore)
 		  *input_line_pointer = c;
 		  *o->pvar = t ? o->arg : o->notarg;
 		}
+	      else
+		*input_line_pointer = c;
 	      break;
 	    }
 	}
