@@ -52,9 +52,9 @@ static char *myname;
    by gdb.  */
 void sim_set_simcache_size PARAMS ((int));
 
-#define X(op, size)  op*4+size
+#define X(op, size)  op * 4 + size
 
-#define SP (h8300hmode ? SL:SW)
+#define SP (h8300hmode ? SL : SW)
 #define SB 0
 #define SW 1
 #define SL 2
@@ -78,10 +78,10 @@ void sim_set_simcache_size PARAMS ((int));
 #define POLL_QUIT_INTERVAL 0x80000
 
 #define LOW_BYTE(x) ((x) & 0xff)
-#define HIGH_BYTE(x) (((x)>>8) & 0xff)
-#define P(X,Y) ((X<<8) | Y)
+#define HIGH_BYTE(x) (((x) >> 8) & 0xff)
+#define P(X,Y) ((X << 8) | Y)
 
-#define BUILDSR()   cpu.ccr = (N << 3) | (Z << 2) | (V<<1) | C;
+#define BUILDSR()   cpu.ccr = (N << 3) | (Z << 2) | (V << 1) | C;
 
 #define GETSR()		    \
   c = (cpu.ccr >> 0) & 1;\
@@ -90,7 +90,7 @@ void sim_set_simcache_size PARAMS ((int));
   n = (cpu.ccr >> 3) & 1;
 
 #ifdef __CHAR_IS_SIGNED__
-#define SEXTCHAR(x) ((char)(x))
+#define SEXTCHAR(x) ((char) (x))
 #endif
 
 #ifndef SEXTCHAR
@@ -99,7 +99,7 @@ void sim_set_simcache_size PARAMS ((int));
 
 #define UEXTCHAR(x) ((x) & 0xff)
 #define UEXTSHORT(x) ((x) & 0xffff)
-#define SEXTSHORT(x) ((short)(x))
+#define SEXTSHORT(x) ((short) (x))
 
 static cpu_state_type cpu;
 
@@ -614,8 +614,7 @@ fetch (arg, n)
 }
 
 
-static
-void
+static void
 store (arg, n)
      ea_type *arg;
      int n;
@@ -691,8 +690,7 @@ static union
 
 littleendian;
 
-static
-void
+static void
 init_pointers ()
 {
   static int init;
@@ -825,8 +823,9 @@ mop (code, bsize, sign)
     {
       SET_L_REG (code->dst.reg, result);
     }
-/*  return ((n==1) << 1) | (nz==1); */
-
+#if 0
+  return ((n == 1) << 1) | (nz == 1);
+#endif
 }
 
 #define ONOT(name, how) \
@@ -1390,8 +1389,9 @@ sim_resume (sd, step, siggnal)
 	  OBITOP (O_BXOR, 1, 0, c = (ea & m) != C);
 	  OBITOP (O_BIXOR, 1, 0, c = !(ea & m) != C);
 
-
-#define MOP(bsize, signed) mop(code, bsize,signed); goto next;
+#define MOP(bsize, signed)			\
+  mop (code, bsize, signed);			\
+  goto next;
 
 	case O (O_MULS, SB):
 	  MOP (1, 1);
@@ -1413,8 +1413,8 @@ sim_resume (sd, step, siggnal)
 	    ea = GET_B_REG (code->src.reg);
 	    if (ea)
 	      {
-		tmp = (unsigned)rd % ea;
-		rd = (unsigned)rd / ea;
+		tmp = (unsigned) rd % ea;
+		rd = (unsigned) rd / ea;
 	      }
 	    SET_W_REG (code->dst.reg, (rd & 0xff) | (tmp << 8));
 	    n = ea & 0x80;
@@ -1430,8 +1430,8 @@ sim_resume (sd, step, siggnal)
 	    nz = ea & 0xffff;
 	    if (ea)
 	      {
-		tmp = (unsigned)rd % ea;
-		rd = (unsigned)rd / ea;
+		tmp = (unsigned) rd % ea;
+		rd = (unsigned) rd / ea;
 	      }
 	    SET_L_REG (code->dst.reg, (rd & 0xffff) | (tmp << 16));
 	    goto next;
@@ -1697,7 +1697,10 @@ sim_resume (sd, step, siggnal)
 
     end:
       ;
-      /*      if (cpu.regs[8] ) abort(); */
+#if 0
+      if (cpu.regs[8])
+	abort ();
+#endif
 
       if (--poll_count < 0)
 	{
@@ -1712,7 +1715,7 @@ sim_resume (sd, step, siggnal)
   cpu.ticks += get_now () - tick_start;
   cpu.cycles += cycles;
   cpu.insts += insts;
-  
+
   cpu.pc = pc;
   BUILDSR ();
   cpu.mask = oldmask;
@@ -2053,7 +2056,7 @@ sim_load (sd, prog, abfd, from_tty)
     {
       /* Set the cpu type.  We ignore failure from bfd_check_format
 	 and bfd_openr as sim_load_file checks too.  */
-      if (bfd_check_format (prog_bfd, bfd_object)) 
+      if (bfd_check_format (prog_bfd, bfd_object))
 	{
 	  unsigned long mach = bfd_get_mach (prog_bfd);
 	  set_h8300h (mach == bfd_mach_h8300h

@@ -1,5 +1,9 @@
 2001-12-20  Kazu Hirata  <kazu@hxi.com>
 
+	* compile.c: Fix formatting.
+
+2001-12-20  Kazu Hirata  <kazu@hxi.com>
+
 	* compile.c: Fix comment typos.
 
 2000-08-10  Kazu Hirata  <kazu@hxi.com>
