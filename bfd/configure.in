@@ -334,11 +334,18 @@ changequote([,])dnl
 	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
 	;;
 changequote(,)dnl
-  rs6000-*-aix4.[4-9]* | powerpc-*-aix4.[4-9]* | \
-  rs6000-*-aix4.3.[3-9]* | powerpc-*-aix4.3.[3-9]*)
+  rs6000-*-aix4.[3-9]* | powerpc-*-aix4.[3-9]*)
 changequote([,])dnl
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_CORE_DUMPX_CORE"
+	# Not all versions of AIX with -DAIX_CORE_DUMPX_CORE
+	# have c_impl as a member of struct core_dumpx
+	AC_MSG_CHECKING([for c_impl in struct core_dumpx])
+	AC_TRY_COMPILE([#include <core.h>],
+	  [struct core_dumpx c; c.c_impl = 0;],
+	  [AC_DEFINE(HAVE_ST_C_IMPL, 1,
+	    [Define if struct core_dumpx has member c_impl])
+	  AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 	;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
   rs6000-*-*)		COREFILE=rs6000-core.lo ;;
