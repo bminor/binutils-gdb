@@ -1894,7 +1894,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    default:
 	      strcat (buf, ", fr???");
 	      break;
-	      
+
 	    case EF_FRV_CPU_FR300:
 	      strcat (buf, ", fr300");
 	      break;
@@ -2071,7 +2071,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    }
 
 	  break;
-	  
+
 	case EM_SPARCV9:
 	  if (e_flags & EF_SPARC_32PLUS)
 	    strcat (buf, ", v8+");
@@ -4171,7 +4171,7 @@ process_relocs (FILE *file)
 		  unsigned long nsyms;
 		  unsigned long strtablen;
 		  char *strtab = NULL;
-		  
+
 		  symsec = SECTION_HEADER (section->sh_link);
 		  nsyms = symsec->sh_size / symsec->sh_entsize;
 		  symtab = GET_ELF_SYMBOLS (file, symsec);
@@ -4206,6 +4206,8 @@ process_relocs (FILE *file)
   return 1;
 }
 
+/* Process the unwind section.  */
+
 #include "unwind-ia64.h"
 
 /* An absolute address consists of a section and an offset.  If the
@@ -4218,9 +4220,9 @@ struct absaddr
     bfd_vma offset;
   };
 
-struct unw_aux_info
+struct ia64_unw_aux_info
   {
-    struct unw_table_entry
+    struct ia64_unw_table_entry
       {
 	struct absaddr start;
 	struct absaddr end;
@@ -4239,7 +4241,10 @@ struct unw_aux_info
   };
 
 static void
-find_symbol_for_address (struct unw_aux_info *aux,
+find_symbol_for_address (Elf_Internal_Sym *symtab,
+			 unsigned long nsyms,
+			 const char *strtab,
+			 unsigned long strtab_size,
 			 struct absaddr addr,
 			 const char **symname,
 			 bfd_vma *offset)
@@ -4248,7 +4253,7 @@ find_symbol_for_address (struct unw_aux_info *aux,
   Elf_Internal_Sym *sym, *best = NULL;
   unsigned long i;
 
-  for (i = 0, sym = aux->symtab; i < aux->nsyms; ++i, ++sym)
+  for (i = 0, sym = symtab; i < nsyms; ++i, ++sym)
     {
       if (ELF_ST_TYPE (sym->st_info) == STT_FUNC
 	  && sym->st_name != 0
@@ -4264,8 +4269,8 @@ find_symbol_for_address (struct unw_aux_info *aux,
     }
   if (best)
     {
-      *symname = (best->st_name >= aux->strtab_size
-		  ? "<corrupt>" : aux->strtab + best->st_name);
+      *symname = (best->st_name >= strtab_size
+		  ? "<corrupt>" : strtab + best->st_name);
       *offset = dist;
       return;
     }
@@ -4274,10 +4279,10 @@ find_symbol_for_address (struct unw_aux_info *aux,
 }
 
 static void
-dump_ia64_unwind (struct unw_aux_info *aux)
+dump_ia64_unwind (struct ia64_unw_aux_info *aux)
 {
   bfd_vma addr_size;
-  struct unw_table_entry *tp;
+  struct ia64_unw_table_entry *tp;
   int in_body;
 
   addr_size = is_32bit_elf ? 4 : 8;
@@ -4290,7 +4295,8 @@ dump_ia64_unwind (struct unw_aux_info *aux)
       const unsigned char *head;
       const char *procname;
 
-      find_symbol_for_address (aux, tp->start, &procname, &offset);
+      find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
+			       aux->strtab_size, tp->start, &procname, &offset);
 
       fputs ("\n<", stdout);
 
@@ -4333,12 +4339,12 @@ dump_ia64_unwind (struct unw_aux_info *aux)
 
 static int
 slurp_ia64_unwind_table (FILE *file,
-			 struct unw_aux_info *aux,
+			 struct ia64_unw_aux_info *aux,
 			 Elf_Internal_Shdr *sec)
 {
   unsigned long size, addr_size, nrelas, i;
   Elf_Internal_Phdr *seg;
-  struct unw_table_entry *tep;
+  struct ia64_unw_table_entry *tep;
   Elf_Internal_Shdr *relsec;
   Elf_Internal_Rela *rela, *rp;
   unsigned char *table, *tp;
@@ -4463,20 +4469,11 @@ slurp_ia64_unwind_table (FILE *file,
 }
 
 static int
-process_unwind (FILE *file)
+ia64_process_unwind (FILE *file)
 {
   Elf_Internal_Shdr *sec, *unwsec = NULL, *strsec;
   unsigned long i, addr_size, unwcount = 0, unwstart = 0;
-  struct unw_aux_info aux;
-
-  if (!do_unwind)
-    return 1;
-
-  if (elf_header.e_machine != EM_IA_64)
-    {
-      printf (_("\nThere are no unwind sections in this file.\n"));
-      return 1;
-    }
+  struct ia64_unw_aux_info aux;
 
   memset (& aux, 0, sizeof (aux));
 
@@ -4527,7 +4524,7 @@ process_unwind (FILE *file)
 	      sec = SECTION_HEADER (g->section_index);
 	      if (strcmp (SECTION_NAME (sec),
 			  ELF_STRING_ia64_unwind_info) == 0)
-		  break;
+		break;
 	    }
 
 	  if (g == NULL)
@@ -4610,6 +4607,375 @@ process_unwind (FILE *file)
   if (aux.strtab)
     free ((char *) aux.strtab);
 
+  return 1;
+}
+
+struct hppa_unw_aux_info
+  {
+    struct hppa_unw_table_entry
+      {
+	struct absaddr start;
+	struct absaddr end;
+	unsigned int Cannot_unwind:1;			/* 0 */
+	unsigned int Millicode:1;			/* 1 */
+	unsigned int Millicode_save_sr0:1;		/* 2 */
+	unsigned int Region_description:2;		/* 3..4 */
+	unsigned int reserved1:1;			/* 5 */
+	unsigned int Entry_SR:1;			/* 6 */
+	unsigned int Entry_FR:4;     /* number saved */	/* 7..10 */
+	unsigned int Entry_GR:5;     /* number saved */	/* 11..15 */
+	unsigned int Args_stored:1;			/* 16 */
+	unsigned int Variable_Frame:1;			/* 17 */
+	unsigned int Separate_Package_Body:1;		/* 18 */
+	unsigned int Frame_Extension_Millicode:1;	/* 19 */
+	unsigned int Stack_Overflow_Check:1;		/* 20 */
+	unsigned int Two_Instruction_SP_Increment:1;	/* 21 */
+	unsigned int Ada_Region:1;			/* 22 */
+	unsigned int cxx_info:1;			/* 23 */
+	unsigned int cxx_try_catch:1;			/* 24 */
+	unsigned int sched_entry_seq:1;			/* 25 */
+	unsigned int reserved2:1;			/* 26 */
+	unsigned int Save_SP:1;				/* 27 */
+	unsigned int Save_RP:1;				/* 28 */
+	unsigned int Save_MRP_in_frame:1;		/* 29 */
+	unsigned int extn_ptr_defined:1;		/* 30 */
+	unsigned int Cleanup_defined:1;			/* 31 */
+
+	unsigned int MPE_XL_interrupt_marker:1;		/* 0 */
+	unsigned int HP_UX_interrupt_marker:1;		/* 1 */
+	unsigned int Large_frame:1;			/* 2 */
+	unsigned int Pseudo_SP_Set:1;			/* 3 */
+	unsigned int reserved4:1;			/* 4 */
+	unsigned int Total_frame_size:27;		/* 5..31 */
+      }
+    *table;			/* Unwind table.  */
+    unsigned long table_len;	/* Length of unwind table.  */
+    bfd_vma seg_base;		/* Starting address of segment.  */
+    Elf_Internal_Sym *symtab;	/* The symbol table.  */
+    unsigned long nsyms;	/* Number of symbols.  */
+    char *strtab;		/* The string table.  */
+    unsigned long strtab_size;	/* Size of string table.  */
+  };
+
+static void
+dump_hppa_unwind (struct hppa_unw_aux_info *aux)
+{
+  bfd_vma addr_size;
+  struct hppa_unw_table_entry *tp;
+
+  addr_size = is_32bit_elf ? 4 : 8;
+  for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
+    {
+      bfd_vma offset;
+      const char *procname;
+
+      find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
+			       aux->strtab_size, tp->start, &procname,
+			       &offset);
+
+      fputs ("\n<", stdout);
+
+      if (procname)
+	{
+	  fputs (procname, stdout);
+
+	  if (offset)
+	    printf ("+%lx", (unsigned long) offset);
+	}
+
+      fputs (">: [", stdout);
+      print_vma (tp->start.offset, PREFIX_HEX);
+      fputc ('-', stdout);
+      print_vma (tp->end.offset, PREFIX_HEX);
+      printf ("]\n\t");
+
+#define PF(_m) if (tp->_m) printf(#_m " ");
+#define PV(_m) if (tp->_m) printf(#_m "=%d ", tp->_m);
+      PF(Cannot_unwind);
+      PF(Millicode);
+      PF(Millicode_save_sr0);
+      /* PV(Region_description); */
+      PF(Entry_SR);
+      PV(Entry_FR);
+      PV(Entry_GR);
+      PF(Args_stored);
+      PF(Variable_Frame);
+      PF(Separate_Package_Body);
+      PF(Frame_Extension_Millicode);
+      PF(Stack_Overflow_Check);
+      PF(Two_Instruction_SP_Increment);
+      PF(Ada_Region);
+      PF(cxx_info);
+      PF(cxx_try_catch);
+      PF(sched_entry_seq);
+      PF(Save_SP);
+      PF(Save_RP);
+      PF(Save_MRP_in_frame);
+      PF(extn_ptr_defined);
+      PF(Cleanup_defined);
+      PF(MPE_XL_interrupt_marker);
+      PF(HP_UX_interrupt_marker);
+      PF(Large_frame);
+      PF(Pseudo_SP_Set);
+      PV(Total_frame_size);
+#undef PF
+#undef PV
+    }
+
+  printf("\n");
+}
+
+static int
+slurp_hppa_unwind_table (FILE *file,
+			 struct hppa_unw_aux_info *aux,
+			 Elf_Internal_Shdr *sec)
+{
+  unsigned long size, unw_ent_size, addr_size, nrelas, i;
+  Elf_Internal_Phdr *seg;
+  struct hppa_unw_table_entry *tep;
+  Elf_Internal_Shdr *relsec;
+  Elf_Internal_Rela *rela, *rp;
+  unsigned char *table, *tp;
+  Elf_Internal_Sym *sym;
+  const char *relname;
+
+  addr_size = is_32bit_elf ? 4 : 8;
+
+  /* First, find the starting address of the segment that includes
+     this section.  */
+
+  if (elf_header.e_phnum)
+    {
+      if (! get_program_headers (file))
+	return 0;
+
+      for (seg = program_headers;
+	   seg < program_headers + elf_header.e_phnum;
+	   ++seg)
+	{
+	  if (seg->p_type != PT_LOAD)
+	    continue;
+
+	  if (sec->sh_addr >= seg->p_vaddr
+	      && (sec->sh_addr + sec->sh_size <= seg->p_vaddr + seg->p_memsz))
+	    {
+	      aux->seg_base = seg->p_vaddr;
+	      break;
+	    }
+	}
+    }
+
+  /* Second, build the unwind table from the contents of the unwind
+     section.  */
+  size = sec->sh_size;
+  table = get_data (NULL, file, sec->sh_offset, size, _("unwind table"));
+  if (!table)
+    return 0;
+
+  unw_ent_size = 2 * addr_size + 8;
+
+  tep = aux->table = xmalloc (size / unw_ent_size * sizeof (aux->table[0]));
+
+  for (tp = table; tp < table + size; tp += (2 * addr_size + 8), ++tep)
+    {
+      unsigned int tmp1, tmp2;
+
+      tep->start.section = SHN_UNDEF;
+      tep->end.section   = SHN_UNDEF;
+
+      if (is_32bit_elf)
+	{
+	  tep->start.offset = byte_get ((unsigned char *) tp + 0, 4);
+	  tep->end.offset = byte_get ((unsigned char *) tp + 4, 4);
+	  tmp1 = byte_get ((unsigned char *) tp + 8, 4);
+	  tmp2 = byte_get ((unsigned char *) tp + 12, 4);
+	}
+      else
+	{
+	  tep->start.offset = BYTE_GET8 ((unsigned char *) tp + 0);
+	  tep->end.offset = BYTE_GET8 ((unsigned char *) tp + 8);
+	  tmp1 = byte_get ((unsigned char *) tp + 16, 4);
+	  tmp2 = byte_get ((unsigned char *) tp + 20, 4);
+	}
+
+      tep->Cannot_unwind = (tmp1 >> 31) & 0x1;
+      tep->Millicode = (tmp1 >> 30) & 0x1;
+      tep->Millicode_save_sr0 = (tmp1 >> 29) & 0x1;
+      tep->Region_description = (tmp1 >> 27) & 0x3;
+      tep->reserved1 = (tmp1 >> 26) & 0x1;
+      tep->Entry_SR = (tmp1 >> 25) & 0x1;
+      tep->Entry_FR = (tmp1 >> 21) & 0xf;
+      tep->Entry_GR = (tmp1 >> 16) & 0x1f;
+      tep->Args_stored = (tmp1 >> 15) & 0x1;
+      tep->Variable_Frame = (tmp1 >> 14) & 0x1;
+      tep->Separate_Package_Body = (tmp1 >> 13) & 0x1;
+      tep->Frame_Extension_Millicode = (tmp1 >> 12) & 0x1;
+      tep->Stack_Overflow_Check = (tmp1 >> 11) & 0x1;
+      tep->Two_Instruction_SP_Increment = (tmp1 >> 10) & 0x1;
+      tep->Ada_Region = (tmp1 >> 9) & 0x1;
+      tep->cxx_info = (tmp1 >> 8) & 0x1;
+      tep->cxx_try_catch = (tmp1 >> 7) & 0x1;
+      tep->sched_entry_seq = (tmp1 >> 6) & 0x1;
+      tep->reserved2 = (tmp1 >> 5) & 0x1;
+      tep->Save_SP = (tmp1 >> 4) & 0x1;
+      tep->Save_RP = (tmp1 >> 3) & 0x1;
+      tep->Save_MRP_in_frame = (tmp1 >> 2) & 0x1;
+      tep->extn_ptr_defined = (tmp1 >> 1) & 0x1;
+      tep->Cleanup_defined = tmp1 & 0x1;
+
+      tep->MPE_XL_interrupt_marker = (tmp2 >> 31) & 0x1;
+      tep->HP_UX_interrupt_marker = (tmp2 >> 30) & 0x1;
+      tep->Large_frame = (tmp2 >> 29) & 0x1;
+      tep->Pseudo_SP_Set = (tmp2 >> 28) & 0x1;
+      tep->reserved4 = (tmp2 >> 27) & 0x1;
+      tep->Total_frame_size = tmp2 & 0x7ffffff;
+
+      tep->start.offset += aux->seg_base;
+      tep->end.offset   += aux->seg_base;
+    }
+  free (table);
+
+  /* Third, apply any relocations to the unwind table.  */
+
+  for (relsec = section_headers;
+       relsec < section_headers + elf_header.e_shnum;
+       ++relsec)
+    {
+      if (relsec->sh_type != SHT_RELA
+	  || SECTION_HEADER (relsec->sh_info) != sec)
+	continue;
+
+      if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
+			      & rela, & nrelas))
+	return 0;
+
+      for (rp = rela; rp < rela + nrelas; ++rp)
+	{
+	  if (is_32bit_elf)
+	    {
+	      relname = elf_hppa_reloc_type (ELF32_R_TYPE (rp->r_info));
+	      sym = aux->symtab + ELF32_R_SYM (rp->r_info);
+	    }
+	  else
+	    {
+	      relname = elf_hppa_reloc_type (ELF64_R_TYPE (rp->r_info));
+	      sym = aux->symtab + ELF64_R_SYM (rp->r_info);
+	    }
+
+	  /* R_PARISC_SEGREL32 or R_PARISC_SEGREL64.  */
+	  if (strncmp (relname, "R_PARISC_SEGREL", 15) != 0)
+	    {
+	      warn (_("Skipping unexpected relocation type %s\n"), relname);
+	      continue;
+	    }
+
+	  i = rp->r_offset / unw_ent_size;
+
+	  switch ((rp->r_offset % unw_ent_size) / addr_size)
+	    {
+	    case 0:
+	      aux->table[i].start.section = sym->st_shndx;
+	      aux->table[i].start.offset += sym->st_value + rp->r_addend;
+	      break;
+	    case 1:
+	      aux->table[i].end.section   = sym->st_shndx;
+	      aux->table[i].end.offset   += sym->st_value + rp->r_addend;
+	      break;
+	    default:
+	      break;
+	    }
+	}
+
+      free (rela);
+    }
+
+  aux->table_len = size / unw_ent_size;
+
+  return 1;
+}
+
+static int
+hppa_process_unwind (FILE *file)
+{
+  Elf_Internal_Shdr *sec, *unwsec = NULL, *strsec;
+  unsigned long i, addr_size;
+  struct hppa_unw_aux_info aux;
+
+  memset (& aux, 0, sizeof (aux));
+
+  assert (string_table != NULL);
+  addr_size = is_32bit_elf ? 4 : 8;
+
+  for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
+    {
+      if (sec->sh_type == SHT_SYMTAB)
+	{
+	  aux.nsyms = sec->sh_size / sec->sh_entsize;
+	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
+
+	  strsec = SECTION_HEADER (sec->sh_link);
+	  aux.strtab_size = strsec->sh_size;
+	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
+				 aux.strtab_size, _("string table"));
+	}
+      else if (strcmp (SECTION_NAME(sec), ".PARISC.unwind") == 0)
+	unwsec = sec;
+    }
+
+  if (!unwsec)
+    printf (_("\nThere are no unwind sections in this file.\n"));
+
+  for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
+    {
+      if (strcmp (SECTION_NAME(sec), ".PARISC.unwind") == 0)
+	{
+
+	  printf (_("\nUnwind section "));
+	  printf (_("'%s'"), SECTION_NAME (sec));
+
+	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
+		  (unsigned long) sec->sh_offset,
+		  (unsigned long) (sec->sh_size / (2 * addr_size + 8)));
+
+          slurp_hppa_unwind_table (file, &aux, sec);
+	  if (aux.table_len > 0)
+	    dump_hppa_unwind (&aux);
+
+	  if (aux.table)
+	    free ((char *) aux.table);
+	  aux.table = NULL;
+	}
+    }
+
+  if (aux.symtab)
+    free (aux.symtab);
+  if (aux.strtab)
+    free ((char *) aux.strtab);
+
+  return 1;
+}
+
+static int
+process_unwind (FILE *file)
+{
+  struct unwind_handler {
+    int machtype;
+    int (*handler)(FILE *file);
+  } handlers[] = {
+    { EM_IA_64, ia64_process_unwind },
+    { EM_PARISC, hppa_process_unwind },
+    { 0, 0 }
+  };
+  int i;
+
+  if (!do_unwind)
+    return 1;
+
+  for (i = 0; handlers[i].handler != NULL; i++)
+    if (elf_header.e_machine == handlers[i].machtype)
+      return handlers[i].handler(file);
+
+  printf (_("\nThere are no unwind sections in this file.\n"));
   return 1;
 }
 
@@ -10351,29 +10717,29 @@ get_note_type (unsigned e_type)
   if (elf_header.e_type == ET_CORE)
     switch (e_type)
       {
-      case NT_AUXV: 	
+      case NT_AUXV:
 	return _("NT_AUXV (auxiliary vector)");
-      case NT_PRSTATUS:	
+      case NT_PRSTATUS:
 	return _("NT_PRSTATUS (prstatus structure)");
-      case NT_FPREGSET:	
+      case NT_FPREGSET:
 	return _("NT_FPREGSET (floating point registers)");
-      case NT_PRPSINFO:	
+      case NT_PRPSINFO:
 	return _("NT_PRPSINFO (prpsinfo structure)");
-      case NT_TASKSTRUCT:	
+      case NT_TASKSTRUCT:
 	return _("NT_TASKSTRUCT (task structure)");
-      case NT_PRXFPREG:	
+      case NT_PRXFPREG:
 	return _("NT_PRXFPREG (user_xfpregs structure)");
-      case NT_PSTATUS:	
+      case NT_PSTATUS:
 	return _("NT_PSTATUS (pstatus structure)");
-      case NT_FPREGS:	
+      case NT_FPREGS:
 	return _("NT_FPREGS (floating point registers)");
-      case NT_PSINFO:	
+      case NT_PSINFO:
 	return _("NT_PSINFO (psinfo structure)");
-      case NT_LWPSTATUS:	
+      case NT_LWPSTATUS:
 	return _("NT_LWPSTATUS (lwpstatus_t structure)");
-      case NT_LWPSINFO:	
+      case NT_LWPSINFO:
 	return _("NT_LWPSINFO (lwpsinfo_t structure)");
-      case NT_WIN32PSTATUS: 
+      case NT_WIN32PSTATUS:
 	return _("NT_WIN32PSTATUS (win32_pstatus structure)");
       default:
 	break;

@@ -1,3 +1,19 @@
+2004-11-03  Randolph Chung  <tausq@debian.org>
+
+	* readelf.c (ia64_unw_aux_info, ia64_unw_table_entry): Rename from
+	unw_aux_info and unw_table_entry.
+	(find_symbol_for_address): Pass symtab and strtab info explicitly.
+	(dump_ia64_unwind): Rename unw_{aux_info,table_entry} with ia64_
+	prefix.
+	(slurp_ia64_unwind_table): Likewise.
+	(ia64_process_unwind): Rename from old process_unwind.
+	(hppa_unw_aux_info): New.
+	(dump_hppa_unwind): New.
+	(slurp_hppa_unwind_table): New.
+	(hppa_process_unwind): New.
+	(process_unwind): Factor out common unwinding checks; dispatch to
+	unwind handler based on machine type.
+
 2004-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (display_debug_lines): Fix typo in error message.
