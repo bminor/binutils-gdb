@@ -1,5 +1,12 @@
 2001-09-04  Jeff Law <law@redhat.com>
 
+	* elf32-h8300.c (elf32_h8_relax_section): New function.
+	(elf32_h8_relax_delete_bytes): Likewise.
+	(elf32_h8_symbol_address_p): Likewise.
+	(elf32_h8_get_relocated_section_contents): Likewise.
+	(bfd_elf32_bfd_relax_section): Define.
+	(bfd_elf32_bfd_get_relocated_section_contents): Likewise.
+
 	* elf32-h8300.c (special): New function.
 	(h8_elf_howto_table): Use it for SPECIAL_FUNCTION field in
 	all relocations.
