@@ -327,7 +327,7 @@ as_bad_internal (file, line, buffer)
    file(s).  Please us when there is no recovery, but we want to
    continue processing but not produce an object file.
    Please explain in string (which may have '\n's) what recovery was
-   done. */
+   done.  */
 
 #ifdef USE_STDARG
 void

@@ -280,7 +280,7 @@ check_eh_frame (exp, pnbytes)
     int saw_advance_loc4;
     int loc4_fix;
   };
-  
+
   static struct frame_data eh_frame_data;
   static struct frame_data debug_frame_data;
   struct frame_data *d;

@@ -507,11 +507,11 @@ generate_asm_file (type, file)
   char *tmp = file;
   char *endp = file + strlen (file);
   char *bufp = buf;
-  
+
   if (last_file != NULL
       && strcmp (last_file, file) == 0)
     return;
-  
+
   /* Rather than try to do this in some efficient fashion, we just
      generate a string and then parse it again.  That lets us use the
      existing stabs hook, which expect to see a string, rather than
@@ -525,19 +525,19 @@ generate_asm_file (type, file)
      doubled up backslashes), the symbol name, and the other characters
      that make up a stabs file directive.  */
   bufp = buf = xmalloc (2 * strlen (file) + strlen (sym) + 12);
-  
+
   *bufp++ = '"';
 
   while (tmp < endp)
     {
       char *bslash = strchr (tmp, '\\');
       int len = (bslash ? (bslash - tmp + 1) : strlen (tmp));
-      
+
       /* Double all backslashes, since demand_copy_C_string (used by
 	 s_stab to extract the part in quotes) will try to replace them as
 	 escape sequences.  backslash may appear in a filespec.  */
       strncpy (bufp, tmp, len);
-      
+
       tmp += len;
       bufp += len;
 
@@ -554,7 +554,7 @@ generate_asm_file (type, file)
   if (last_file != NULL)
     free (last_file);
   last_file = xstrdup (file);
-  
+
   free (buf);
 
   input_line_pointer = hold;

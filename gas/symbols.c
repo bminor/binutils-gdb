@@ -1532,12 +1532,12 @@ decode_local_label_name (s)
   char *type;
   const char *message_format = _("\"%d\" (instance number %d of a %s label)");
   int index = 0;
-  
+
 #ifdef LOCAL_LABEL_PREFIX
   if (s[index] == LOCAL_LABEL_PREFIX)
     ++index;
 #endif
-  
+
   if (s[index] != 'L')
     return s;
 
