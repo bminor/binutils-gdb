@@ -2847,7 +2847,7 @@ struct option md_longopts[] = {
 #define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 4)
   {"EB", no_argument, NULL, OPTION_BIG_ENDIAN},
 #endif
-  #define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 5)
+#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 5)
   {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
   {NULL, no_argument, NULL, 0}
 };
