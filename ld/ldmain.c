@@ -173,7 +173,7 @@ remove_output (void)
       if (output_bfd)
 	bfd_cache_close (output_bfd);
       if (delete_output_file_on_failure)
-	unlink (output_filename);
+	unlink_if_ordinary (output_filename);
     }
 }
 

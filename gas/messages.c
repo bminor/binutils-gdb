@@ -412,7 +412,7 @@ as_fatal (const char *format, ...)
   /* Delete the output file, if it exists.  This will prevent make from
      thinking that a file was created and hence does not need rebuilding.  */
   if (out_file_name != NULL)
-    unlink (out_file_name);
+    unlink_if_ordinary (out_file_name);
   xexit (EXIT_FAILURE);
 }
 #else

@@ -2225,7 +2225,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
     if (!ISALNUM (dll_symname[i]))
       dll_symname[i] = '_';
 
-  unlink (impfilename);
+  unlink_if_ordinary (impfilename);
 
   outarch = bfd_openw (impfilename, 0);
 

@@ -323,7 +323,7 @@ remove_output (void)
 	bfd_cache_close (output_bfd);
       if (output_file != NULL)
 	fclose (output_file);
-      unlink (output_filename);
+      unlink_if_ordinary (output_filename);
     }
 }
 

@@ -1205,7 +1205,7 @@ main (int argc, char ** argv)
     keep_it = 0;
 
   if (!keep_it)
-    unlink (out_file_name);
+    unlink_if_ordinary (out_file_name);
 
   input_scrub_end ();
 

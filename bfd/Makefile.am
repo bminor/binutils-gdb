@@ -903,7 +903,7 @@ bfd.lo: bfd.c bfdver.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/elf/external.h
 bfdio.lo: bfdio.c $(INCDIR)/filenames.h
 bfdwin.lo: bfdwin.c $(INCDIR)/filenames.h
-cache.lo: cache.c $(INCDIR)/filenames.h
+cache.lo: cache.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
 coffgen.lo: coffgen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h
 corefile.lo: corefile.c $(INCDIR)/filenames.h

@@ -1731,7 +1731,7 @@ copy_file (const char *input_filename, const char *output_filename,
 
       if (delete)
 	{
-	  unlink (output_filename);
+	  unlink_if_ordinary (output_filename);
 	  status = 1;
 	}
     }
@@ -2438,7 +2438,7 @@ strip_main (int argc, char *argv[])
 	  status = hold_status;
 	}
       else
-	unlink (tmpname);
+	unlink_if_ordinary (tmpname);
       if (output_file == NULL)
 	free (tmpname);
     }

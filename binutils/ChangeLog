@@ -1,3 +1,9 @@
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
+	* ar.c (remove_output): Use unlink_if_ordinary instead of unlink.
+	* objcopy.c (copy_file): Likewise.
+	(strip_main): Likewise.
+
 2005-03-01  Stig Petter Olsroed  <stigpo@users.sourceforge.net>
 	    Nick Clifton  <nickc@redhat.com>
 

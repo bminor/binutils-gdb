@@ -41,6 +41,7 @@ SECTION
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "libiberty.h"
 
 static bfd_boolean bfd_cache_delete (bfd *);
 
@@ -436,7 +437,7 @@ bfd_open_file (bfd *abfd)
 	  struct stat s;
 
 	  if (stat (abfd->filename, &s) == 0 && s.st_size != 0)
-	    unlink (abfd->filename);
+	    unlink_if_ordinary (abfd->filename);
 #endif
 	  abfd->iostream = (PTR) fopen (abfd->filename, FOPEN_WUB);
 	  abfd->opened_once = TRUE;

@@ -1,5 +1,10 @@
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
+	* as.c (main): Use unlink_if_ordinary instead of unlink.
+	* messages.c (as_fatal): Likewise.
+
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (build_modrm_byte): Add lock prefix for cr8...15
 	accesses.
 	(parse_register): Allow cr8...15 in all modes.

@@ -1,3 +1,9 @@
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
+	* Makefile.am: Add dependency of cache.o on libiberty.h.
+	* cache.c: Include libiberty.h.
+	(bfd_open_file): Use unlink_if_ordinary instead of unlink.
+
 2005-03-01  Zack Weinberg  <zack@codesourcery.com>
 
 	* elf.c (bfd_section_from_shdr <default case>): Call
