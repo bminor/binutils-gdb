@@ -1,3 +1,10 @@
+Wed Oct 19 13:28:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* coffgen.c (coff_print_symbol): Make names for section number and
+	storage class slightly more verbose.  It's not clear how many
+	characters I can justify using up, but before this change they
+	both were abbreviated "sc" which is (IMHO) clearly unacceptable.
+
 Wed Oct 19 01:26:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* binary.c (binary_set_section_contents): Set the base file
