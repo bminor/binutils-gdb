@@ -1,3 +1,8 @@
+2002-08-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* elf.c (bfd_elf_get_elf_syms): Change type of `esym' to
+ 	`bfd_byte'.
+
 2002-08-17  Stan Cox  <scox@redhat.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Use the
