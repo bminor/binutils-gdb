@@ -88,7 +88,6 @@ extern CORE_ADDR h8500_skip_prologue ();
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-int regoff[];
 #define REGISTER_BYTE(N)  (regoff[N])
 
 /* Number of bytes of storage in the actual machine representation
@@ -300,3 +299,25 @@ struct value * h8500_value_of_trapped_internalvar (/* struct internalvar *var */
 
 void h8500_set_trapped_internalvar (/* struct internalvar *var, value newval, int bitpos, int bitsize, int offset */);
 #define SET_TRAPPED_INTERNALVAR h8500_set_trapped_internalvar
+
+
+
+int regoff[NUM_REGS];
+
+CORE_ADDR target_read_sp();
+void target_write_sp PARAMS ((CORE_ADDR ));
+
+CORE_ADDR target_read_fp();
+void target_write_fp PARAMS ((CORE_ADDR ));
+
+CORE_ADDR target_read_pc();
+void target_write_pc PARAMS ((CORE_ADDR ));
+
+
+#define TARGET_READ_SP() target_read_sp()
+#define TARGET_WRITE_SP(x) target_write_sp(x)
+#define TARGET_READ_PC() target_read_pc()
+#define TARGET_WRITE_PC(x) target_write_pc(x)
+
+#define TARGET_READ_FP() target_read_fp()
+#define TARGET_WRITE_FP(x) target_write_fp(x)
