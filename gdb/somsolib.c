@@ -33,6 +33,7 @@ and by Cygnus Support.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "inferior.h"
+#include "gdb-stabs.h"
 
 /* TODO:
 
@@ -584,8 +585,11 @@ som_solib_section_offsets (objfile, offsets)
 	  asection *private_section;
 
 	  /* The text offset is easy.  */
-	  ANOFFSET (offsets, 0) = (so_list->som_solib.text_addr
-				   - so_list->som_solib.text_link_addr);
+	  ANOFFSET (offsets, SECT_OFF_TEXT)
+	    = (so_list->som_solib.text_addr
+	       - so_list->som_solib.text_link_addr);
+	  ANOFFSET (offsets, SECT_OFF_RODATA)
+	    = ANOFFSET (offsets, SECT_OFF_TEXT);
 
 	  /* We should look at presumed_dp in the SOM header, but
 	     that's not easily available.  This should be OK though.  */
@@ -594,11 +598,14 @@ som_solib_section_offsets (objfile, offsets)
 	  if (!private_section)
 	    {
 	      warning ("Unable to find $PRIVATE$ in shared library!");
-	      ANOFFSET (offsets, 1) = 0;
+	      ANOFFSET (offsets, SECT_OFF_DATA) = 0;
+	      ANOFFSET (offsets, SECT_OFF_BSS) = 0;
 	      return 1;
 	    }
-	  ANOFFSET (offsets, 1) = (so_list->som_solib.data_start
-				   - private_section->vma);
+	  ANOFFSET (offsets, SECT_OFF_DATA)
+	    = (so_list->som_solib.data_start - private_section->vma);
+	  ANOFFSET (offsets, SECT_OFF_BSS)
+	    = ANOFFSET (offsets, SECT_OFF_DATA);
 	  return 1;
 	}
       so_list = so_list->next;
