@@ -1,3 +1,8 @@
+Fri Dec  8 21:02:24 1995  Fred Fish  <fnf@cygnus.com>
+
+	* coffread.c, dbxread.c, dstread.c, objfiles.c, os9kread.c,
+	symfile.c, symtab.c:  Use "obstack.h" rather than <obstack.h>.
+
 Wed Dec  6 16:16:18 1995  Stu Grossman  (grossman@cirdan.cygnus.com)
 
 	* remote-mips.c (mips_receive_header):  Allow mips_syn_garbage to be
