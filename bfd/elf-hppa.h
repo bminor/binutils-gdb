@@ -96,7 +96,6 @@ static unsigned int elf_hppa_relocate_insn
   PARAMS ((unsigned int, unsigned int, unsigned int));
 #endif
 
-
 /* ELF/PA relocation howto entries.  */
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
@@ -760,7 +759,6 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	}
       break;
 
-
     case R_HPPA_GOTOFF:
       switch (format)
 	{
@@ -802,7 +800,6 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	  return NULL;
 	}
       break;
-
 
     case R_HPPA_PCREL_CALL:
       switch (format)
@@ -1093,7 +1090,6 @@ elf_hppa_unmark_useless_dynamic_symbols (h, data)
   return true;
 }
 
-
 static boolean
 elf_hppa_remark_useless_dynamic_symbols (h, data)
      struct elf_link_hash_entry *h;
@@ -1137,7 +1133,7 @@ elf_hppa_record_segment_addrs (abfd, section, data)
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   bfd_vma value;
- 
+
   hppa_info = (struct elf64_hppa_link_hash_table *)data;
 
   value = section->vma - section->filepos;
@@ -1193,7 +1189,6 @@ elf_hppa_final_link (abfd, info)
       else
 	{
 	  asection *sec;
-  
 
 	  /* First look for a .plt section.  If found, then __gp is the
 	     address of the .plt + gp_offset.
@@ -1461,15 +1456,14 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-
 /* Compute the value for a relocation (REL) during a final link stage,
-   then insert the value into the proper location in CONTENTS. 
+   then insert the value into the proper location in CONTENTS.
 
    VALUE is a tentative value for the relocation and may be overridden
    and modified here based on the specific relocation to be performed.
 
    For example we do conversions for PC-relative branches in this routine
-   or redirection of calls to external routines to stubs. 
+   or redirection of calls to external routines to stubs.
 
    The work of actually applying the relocation is left to a helper
    routine in an attempt to reduce the complexity and size of this
@@ -1527,7 +1521,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (sym_sec == NULL || sym_sec->output_section == NULL)
 	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
 		   + hppa_info->stub_sec->output_section->vma);
-  
+
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
@@ -1561,7 +1555,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (sym_sec == NULL || sym_sec->output_section == NULL)
 	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
 		   + hppa_info->stub_sec->output_section->vma);
-  
+
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
@@ -1611,7 +1605,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   to the local symbol's value).
 
 	   So, if this is a local symbol (h == NULL), then we need to
-	   fill in its DLT entry. 
+	   fill in its DLT entry.
 
 	   Similarly we may still need to set up an entry in .opd for
 	   a local function which had its address taken.  */
@@ -1895,7 +1889,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (sym_sec == NULL || sym_sec->output_section == NULL)
 	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
 		   + hppa_info->stub_sec->output_section->vma);
-  
+
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
@@ -1914,8 +1908,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (sym_sec == NULL || sym_sec->output_section == NULL)
 	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
 		   + hppa_info->stub_sec->output_section->vma);
-  
-  
+
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
@@ -1925,7 +1918,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
-
 
     case R_PARISC_FPTR64:
       {
@@ -1953,7 +1945,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	value = (dyn_h->opd_offset
 		 + hppa_info->opd_sec->output_offset
 		 + hppa_info->opd_sec->output_section->vma);
-	       
+
 	bfd_put_64 (input_bfd, value + addend, hit_data);
 	return bfd_reloc_ok;
       }
@@ -1992,7 +1984,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  bfd_put_64 (input_bfd, value, hit_data);
         return bfd_reloc_ok;
       }
-      
 
     /* Something we don't know how to handle.  */
     default:

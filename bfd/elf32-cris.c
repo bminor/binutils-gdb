@@ -29,10 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type * cris_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
-static void cris_info_to_howto_rela 
+static void cris_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 
-static boolean cris_elf_relocate_section 
+static boolean cris_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
@@ -226,7 +226,7 @@ cris_reloc_type_lookup (abfd, code)
        --i;)
     if (cris_reloc_map [i].bfd_reloc_val == code)
       return & cris_elf_howto_table [cris_reloc_map[i].cris_reloc_val];
-  
+
   return NULL;
 }
 
@@ -305,13 +305,13 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type        r;
       const char *                 name = NULL;
       int                          r_type;
-      
+
       r_type = ELF32_R_TYPE (rel->r_info);
-      
+
       if (   r_type == R_CRIS_GNU_VTINHERIT
 	  || r_type == R_CRIS_GNU_VTENTRY)
 	continue;
-      
+
       r_symndx = ELF32_R_SYM (rel->r_info);
 
       if (info->relocateable)
@@ -323,7 +323,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (r_symndx < symtab_hdr->sh_info)
 	    {
 	      sym = local_syms + r_symndx;
-	      
+
 	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
 		  sec = local_sections [r_symndx];
@@ -339,7 +339,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
-      
+
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -347,7 +347,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
-	  
+
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
@@ -361,13 +361,13 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
-	  
+
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  name = h->root.root.string;
-	  
+
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -405,7 +405,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      relocation = 0;
 	    }
 	}
-      
+
       r = cris_final_link_relocate (howto, input_bfd, input_section,
 				     contents, rel, relocation);
 
@@ -420,13 +420,13 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		(info, name, howto->name, (bfd_vma) 0,
 		 input_bfd, input_section, rel->r_offset);
 	      break;
-	      
+
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
 		(info, name, input_bfd, input_section, rel->r_offset,
 		 true);
 	      break;
-	      
+
 	    case bfd_reloc_outofrange:
 	      msg = _("internal error: out of range error");
 	      break;
@@ -519,7 +519,7 @@ cris_elf_gc_sweep_hook (abfd, info, sec, relocs)
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
- 
+
 static boolean
 cris_elf_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
@@ -531,28 +531,28 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
- 
+
   if (info->relocateable)
     return true;
- 
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof (Elf32_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
- 
+
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
- 
+
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
- 
+
       switch (ELF32_R_TYPE (rel->r_info))
         {
         /* This relocation describes the C++ object vtable hierarchy.
@@ -561,7 +561,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return false;
           break;
- 
+
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_CRIS_GNU_VTENTRY:
@@ -570,7 +570,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
           break;
         }
     }
- 
+
   return true;
 }
 

@@ -1,3 +1,14 @@
+2000-12-03  Kazu Hirata  <kazu@hxi.com>
+
+	* elf32-arm.h: Fix formatting.
+	* elf32-avr.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-d30v.c: Likewise.
+	* elf-hppa.h: Likewise.
+	* elf-m10200.c: Likewise.
+	* elf-m10300.c: Likewise.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
         * aoutx.h (NAME(aout,machine_type)): Add bfd_mach_mips32 and

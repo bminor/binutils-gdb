@@ -17,7 +17,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
@@ -158,7 +157,6 @@ struct elf32_arm_link_hash_table
      length should be applied by the linker.  */
   int no_pipeline_knowledge;
 };
-
 
 /* Create an entry in an ARM ELF linker hash table.  */
 
@@ -682,7 +680,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 		}
 	    }
 
-	  /* If the relocation is not against a symbol it cannot concern us. */
+	  /* If the relocation is not against a symbol it cannot concern us.  */
 	  h = NULL;
 
 	  /* We don't care about local symbols.  */
@@ -1479,7 +1477,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       				       (bfd_vma) 0);
 
     case R_ARM_GOTPC:
-      /* Use global offset table as symbol value. */
+      /* Use global offset table as symbol value.  */
       BFD_ASSERT (sgot != NULL);
 
       if (sgot == NULL)
@@ -2621,7 +2619,6 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
-
 /* Find the nearest line to a particular section and offset, for error
    reporting.   This code is a duplicate of the code in elf.c, except
    that it also accepts STT_ARM_TFUNC as a symbol that names a function.  */
@@ -3366,11 +3363,9 @@ elf32_arm_post_process_headers (abfd, link_info)
   i_ehdrp->e_ident[EI_ABIVERSION] = ARM_ELF_ABI_VERSION;
 }
 
-
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGESIZE			0x8000
-
 
 #define bfd_elf32_bfd_copy_private_bfd_data 	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data 	elf32_arm_merge_private_bfd_data

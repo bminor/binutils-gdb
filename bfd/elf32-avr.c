@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -46,7 +45,6 @@ static boolean elf32_avr_relocate_section
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static void bfd_elf_avr_final_write_processing PARAMS ((bfd *, boolean));
 static boolean elf32_avr_object_p PARAMS ((bfd *));
-
 
 /* Use RELA instead of REL */
 #undef USE_REL
@@ -472,7 +470,7 @@ elf32_avr_check_relocs (abfd, info, sec, relocs)
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof (Elf32_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
 
@@ -516,7 +514,7 @@ avr_final_link_relocate (howto, input_bfd, input_section,
       srel = (bfd_signed_vma) relocation;
       srel += rel->r_addend;
       srel -= rel->r_offset;
-      srel -= 2;	/* Branch instructions add 2 to the PC... */
+      srel -= 2;	/* Branch instructions add 2 to the PC...  */
       srel -= (input_section->output_section->vma +
 	       input_section->output_offset);
 
@@ -534,7 +532,7 @@ avr_final_link_relocate (howto, input_bfd, input_section,
       srel = (bfd_signed_vma) relocation;
       srel += rel->r_addend;
       srel -= rel->r_offset;
-      srel -= 2;	/* Branch instructions add 2 to the PC... */
+      srel -= 2;	/* Branch instructions add 2 to the PC...  */
       srel -= (input_section->output_section->vma +
 	       input_section->output_offset);
 
@@ -947,7 +945,6 @@ elf32_avr_object_p (abfd)
 				    e_set);
 }
 
-
 #define ELF_ARCH		bfd_arch_avr
 #define ELF_MACHINE_CODE	EM_AVR
 #define ELF_MAXPAGESIZE		1
@@ -965,6 +962,5 @@ elf32_avr_object_p (abfd)
 #define elf_backend_final_write_processing \
 					bfd_elf_avr_final_write_processing
 #define elf_backend_object_p		elf32_avr_object_p
-
 
 #include "elf32-target.h"

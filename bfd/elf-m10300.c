@@ -119,7 +119,6 @@ static void compute_function_info
    does absolutely nothing.  */
 #define USE_RELA
 
-
 static reloc_howto_type elf_mn10300_howto_table[] =
 {
   /* Dummy relocation.  Does nothing.  */
@@ -342,7 +341,7 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof (Elf32_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
 
@@ -767,7 +766,6 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
 		This is only done if the resulting code is no larger
 		than the original code.
 
-
 	* jmp:32 -> jmp:16					   2 bytes
 	* jmp:16 -> bra:8					   1 byte
 
@@ -930,7 +928,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			    sym_sec = bfd_abs_section_ptr;
 			  else if (isym.st_shndx == SHN_COMMON)
 			    sym_sec = bfd_com_section_ptr;
-			  
+
 			  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 							   symtab_hdr->sh_link,
 							   isym.st_name);
@@ -992,7 +990,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 		  shndx = _bfd_elf_section_from_bfd_section (input_bfd,
 							     section);
-
 
 		  /* Look at each function defined in this section and
 		     update info for that function.  */
@@ -1182,7 +1179,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    goto error_return;
 		}
 
-
 	      shndx = _bfd_elf_section_from_bfd_section (input_bfd, section);
 
 	      /* Now look for any function in this section which needs
@@ -1213,7 +1209,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    sym_sec = bfd_com_section_ptr;
 		  else
 		    abort ();
-		  
+
 		  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 							symtab_hdr->sh_link,
 							isym.st_name);
@@ -1370,7 +1366,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	}
     }
 
-
   /* (Re)initialize for the basic instruction shortening/relaxing pass.  */
   contents = NULL;
   extsyms = NULL;
@@ -1482,7 +1477,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    sym_sec = bfd_com_section_ptr;
 	  else
 	    abort ();
-	  
+
 	  symval = (isym.st_value
 		    + sym_sec->output_section->vma
 		    + sym_sec->output_offset);
@@ -1770,7 +1765,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    bCC lab1		bCC' lab2
 	    bra lab2
 	   lab1:	       lab1:
-
 
 	 This happens when the bCC can't reach lab2 at assembly time,
 	 but due to other relaxations it can reach at link time.  */
@@ -2642,7 +2636,7 @@ mn10300_elf_symbol_address_p (abfd, sec, extsyms, addr)
 	return true;
     }
 
-  sym_hash = (struct elf32_mn10300_link_hash_entry **)(elf_sym_hashes (abfd));
+  sym_hash = (struct elf32_mn10300_link_hash_entry **) (elf_sym_hashes (abfd));
   sym_hash_end = (sym_hash
 		  + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
 		     - symtab_hdr->sh_info));
@@ -2948,7 +2942,6 @@ _bfd_mn10300_elf_merge_private_bfd_data (ibfd, obfd)
   return true;
 }
 
-
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
@@ -2976,6 +2969,5 @@ _bfd_mn10300_elf_merge_private_bfd_data (ibfd, obfd)
 
 #define bfd_elf32_bfd_merge_private_bfd_data \
                                         _bfd_mn10300_elf_merge_private_bfd_data
-
 
 #include "elf32-target.h"
