@@ -26,6 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "value.h"
 #include "inferior.h"
 #include "dis-asm.h"  
+#include "symfile.h"
+#include "objfiles.h"
 
 void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *fsr));
 
@@ -42,7 +44,6 @@ d10v_pop_frame ()
   char raw_buffer[8];
 
   fp = FRAME_FP (frame);
-
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   get_frame_saved_regs (frame, &fsr);
@@ -153,7 +154,16 @@ d10v_frame_chain (frame)
      struct frame_info *frame;
 {
   struct frame_saved_regs fsr;
+
+  if (inside_entry_file (frame->pc))
+    return 0;
+
   d10v_frame_find_saved_regs (frame, &fsr);
+
+  if (!fsr.regs[FP_REGNUM])
+    {
+      return (CORE_ADDR)fsr.regs[SP_REGNUM];
+    }
   return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2);
 }  
 
@@ -198,7 +208,7 @@ prologue_find_regs (op, fsr, addr)
 
   /* mv  r11, sp */
   if (op == 0x417E)
-    return 1;
+      return 1;
 
   /* nop */
   if (op == 0x5E00)
@@ -288,7 +298,7 @@ d10v_frame_find_saved_regs (fi, fsr)
   
   fi->size = -next_addr;
 
-  for (i=0; i<NUM_REGS; i++)
+  for (i=0; i<NUM_REGS-1; i++)
     if (fsr->regs[i])
       {
 	fsr->regs[i] = fp - (next_addr - fsr->regs[i]); 
@@ -299,8 +309,16 @@ d10v_frame_find_saved_regs (fi, fsr)
   else
     fi->return_pc = (read_register(13) - 1)  << 2;
 
+  /* th SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
-    fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
+    {
+      /* if the FP was saved, that means the current FP is valid, */
+      /* otherwise, it isn't being used, so we use the SP instead */
+      if (fsr->regs[FP_REGNUM])
+	fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
+      else
+	fsr->regs[SP_REGNUM] = read_register(SP_REGNUM) + fi->size;
+    }
 }
 
 void
@@ -310,10 +328,15 @@ d10v_init_extra_frame_info (fromleaf, fi)
 {
   struct frame_saved_regs dummy;
 
-  if (fi->next && (fi->pc == 0))
+  if (fi->next && (fi->pc == 0)) 
     fi->pc = fi->next->return_pc; 
 
   d10v_frame_find_saved_regs (fi, &dummy); 
+  if (!dummy.regs[FP_REGNUM])
+    {
+      fi->frame = dummy.regs[SP_REGNUM] - fi->size;
+      d10v_frame_find_saved_regs (fi, &dummy); 
+    }      
 }
 
 static void
@@ -395,4 +418,116 @@ d10v_write_register_pid (regno, val, pid)
   inferior_pid = pid;
   write_register (regno, val);
   inferior_pid = save_pid;
+}
+
+
+void
+d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
+     char *dummyname;
+     CORE_ADDR start_sp;
+     CORE_ADDR fun;
+     int nargs;
+     value_ptr *args;
+     struct type *type;
+     int gcc_p;
+{
+  int regnum, i;
+  CORE_ADDR sp;
+  char buffer[MAX_REGISTER_RAW_SIZE];
+
+  sp = start_sp;
+  for (regnum = 0; regnum < NUM_REGS-1; regnum++)
+    {
+      store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
+      write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
+      sp -= REGISTER_RAW_SIZE(regnum);
+    }
+  write_register (SP_REGNUM, (LONGEST)sp);  
+  /* now we need to load PC with the return address */
+  write_register (PC_REGNUM, (LONGEST)d10v_call_dummy_address()>>2);  
+  write_register (LR_REGNUM, (LONGEST)d10v_call_dummy_address()>>2);  
+  target_store_registers (-1);
+  flush_cached_frames ();
+}
+
+CORE_ADDR
+d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
+     int nargs;
+     value_ptr *args;
+     CORE_ADDR sp;
+     int struct_return;
+     CORE_ADDR struct_addr;
+{
+  int i, len, regnum=2;
+  char *contents;
+
+  for (i = 0; i < nargs; i++)
+    {
+      value_ptr arg = args[i];
+      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      switch (TYPE_CODE (arg_type))
+	{
+	case TYPE_CODE_INT:
+	case TYPE_CODE_BOOL:
+	case TYPE_CODE_CHAR:
+	case TYPE_CODE_RANGE:
+	case TYPE_CODE_ENUM:
+	  break;
+	default:
+	  break;
+	}
+      len = TYPE_LENGTH (arg_type);
+      contents = VALUE_CONTENTS(arg);
+      switch (len)
+	{
+	case 1:
+	  write_register (regnum++, (LONGEST)(*contents));   
+	  break;
+	case 2:
+	  write_register (regnum++, (LONGEST)(*(short *)contents));   
+	  break;
+	case 4:
+	  {
+	    LONGEST val = *(long *)contents;
+	    write_register (regnum++, val >> 16 );
+	    write_register (regnum++, val & 0xFFFF );
+	  }
+	break;
+	default:
+	}
+    }
+}
+
+CORE_ADDR
+d10v_call_dummy_address ()
+{
+  CORE_ADDR entry, retval;
+  struct minimal_symbol *sym;
+
+  entry = entry_point_address ();
+
+  if (entry != 0)
+    {
+      return entry;
+    }
+
+  sym = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
+
+  if (!sym || MSYMBOL_TYPE (sym) != mst_text)
+    retval = 0;
+  else
+    retval =  SYMBOL_VALUE_ADDRESS (sym);
+  return retval;
+}
+
+/* Given a return value in `regbuf' with a type `valtype', 
+   extract and copy its value into `valbuf'.  */
+
+void
+d10v_extract_return_value (valtype, regbuf, valbuf)
+     struct type *valtype;
+     char regbuf[REGISTER_BYTES];
+     char *valbuf;
+{
+  memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
 }
