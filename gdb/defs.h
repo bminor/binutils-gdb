@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef DEFS_H
 #define DEFS_H
@@ -143,7 +143,7 @@ struct cleanup
 
 #ifndef NORETURN
 # if defined(__GNUC__) \
-     && (__GNUC__ == 1 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5))
+     && (__GNUC__ == 1 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7))
 #  define NORETURN volatile
 # else
 #  define NORETURN /* nothing */
@@ -151,10 +151,12 @@ struct cleanup
 #endif
 
 /* GCC 2.5 and later versions define a function attribute "noreturn",
-   which is the preferred way to declare that a function never returns.  */
+   which is the preferred way to declare that a function never returns.
+   However GCC 2.7 appears to be the first version in which this fully
+   works everywhere we use it. */
 
 #ifndef ATTR_NORETURN
-# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 5
+# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
 #  define ATTR_NORETURN __attribute__ ((noreturn))
 # else
 #  define ATTR_NORETURN /* nothing */
@@ -162,7 +164,7 @@ struct cleanup
 #endif
 
 #ifndef ATTR_FORMAT
-# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4
+# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4 && defined (__ANSI_PROTOTYPES)
 #  define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
 # else
 #  define ATTR_FORMAT(type, x, y) /* nothing */
@@ -859,6 +861,7 @@ extern void (*flush_hook) PARAMS ((FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*modify_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+extern void (*target_output_hook) PARAMS ((char *));
 extern void (*interactive_hook) PARAMS ((void));
 extern void (*registers_changed_hook) PARAMS ((void));
 
@@ -868,7 +871,7 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
 
-extern NORETURN void (*error_hook) PARAMS (());
+extern NORETURN void (*error_hook) PARAMS (()) ATTR_NORETURN;
 
 
 
@@ -885,15 +888,27 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_P
+#if defined(__GO32__)||defined(WIN32)
+#define SLASH_P(X) ((X)=='\\')
+#else
 #define SLASH_P(X) ((X)=='/')
+#endif
 #endif
 
 #ifndef SLASH_CHAR
+#if defined(__GO32__)||defined(WIN32)
+#define SLASH_CHAR '\\'
+#else
 #define SLASH_CHAR '/'
+#endif
 #endif
 
 #ifndef SLASH_STRING
+#if defined(__GO32__)||defined(WIN32)
+#define SLASH_STRING "\\"
+#else
 #define SLASH_STRING "/"
+#endif
 #endif
 
 #ifndef ROOTED_P
