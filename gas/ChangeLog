@@ -1,3 +1,8 @@
+2002-05-31  Shrinivas Atre <ShrinivasA@kpit.com>
+
+	* config/tc-h8300.c (get_operand): Allow stm.l and ldm.l insns to
+	accept parentheses enclosed register lists.
+
 2002-05-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
