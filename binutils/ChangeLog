@@ -1,3 +1,19 @@
+2001-07-31  Nick Clifton  <nickc@cambridge.redhat.com>
+
+        * objcopy.c: Fix formatting.
+        (section_rename): New structure.
+        (OPTION_RENAME_SECTION): New switch.
+        (copy_usage): Document new switch.
+        (add_section_rename): New function: Add a node to the section
+        rename list.
+        (find_section_rename): New function: Find the new name and
+        flags for a section.
+        (setup_section): Call find_section_name to determine the name
+        of the output section.
+        (copy_main): Handle OPTION_RENAME_SECTION.
+        * binutils.texi: Document new switch.
+	* NEWS: Mention new switch.
+
 2001-07-30  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* README: Rename bug-gnu-utils@gcc.org to bug-binutils@gcc.org.

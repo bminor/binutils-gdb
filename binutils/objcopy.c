@@ -48,6 +48,18 @@ struct redefine_node
   struct redefine_node *next;
 };
 
+typedef struct section_rename
+{
+  const char *            old_name;
+  const char *            new_name;
+  flagword                flags;
+  struct section_rename * next;
+}
+section_rename;
+
+/* List of sections to be renamed.  */
+static section_rename * section_rename_list;
+
 static void copy_usage PARAMS ((FILE *, int));
 static void strip_usage PARAMS ((FILE *, int));
 static flagword parse_flags PARAMS ((const char *));
@@ -73,6 +85,8 @@ static int strip_main PARAMS ((int, char **));
 static int copy_main PARAMS ((int, char **));
 static const char *lookup_sym_redefinition PARAMS((const char *));
 static void redefine_list_append PARAMS ((const char *, const char *));
+static const char * find_section_rename PARAMS ((bfd *, sec_ptr, flagword *));
+static void add_section_rename PARAMS ((const char *, const char *, flagword));
 
 #define RETURN_NONFATAL(s) {bfd_nonfatal (s); status = 1; return;}
 
@@ -134,7 +148,11 @@ struct section_list
 };
 
 static struct section_list *change_sections;
+
+/* True if some sections are to be removed.  */
 static boolean sections_removed;
+
+/* True if only some sections are to be copied.  */
 static boolean sections_copied;
 
 /* Changes to the start address.  */
@@ -154,7 +172,6 @@ static boolean pad_to_set = false;
 static bfd_vma pad_to;
 
 /* List of sections to add.  */
-
 struct section_add
 {
   /* Next section to add.  */
@@ -171,23 +188,20 @@ struct section_add
   asection *section;
 };
 
+/* List of sections to add to the output BFD.  */
 static struct section_add *add_sections;
 
 /* Whether to convert debugging information.  */
-
 static boolean convert_debugging = false;
 
 /* Whether to change the leading character in symbol names.  */
-
 static boolean change_leading_char = false;
 
 /* Whether to remove the leading character from global symbol names.  */
-
 static boolean remove_leading_char = false;
 
 /* List of symbols to strip, keep, localize, keep-global, weaken,
    or redefine.  */
-
 static struct symlist *strip_specific_list = NULL;
 static struct symlist *keep_specific_list = NULL;
 static struct symlist *localize_specific_list = NULL;
@@ -196,7 +210,6 @@ static struct symlist *weaken_specific_list = NULL;
 static struct redefine_node *redefine_sym_list = NULL;
 
 /* If this is true, we weaken global symbols (set BSF_WEAK).  */
-
 static boolean weaken = false;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
@@ -226,6 +239,7 @@ static boolean weaken = false;
 #define OPTION_LOCALIZE_SYMBOLS (OPTION_KEEP_SYMBOLS + 1)
 #define OPTION_KEEPGLOBAL_SYMBOLS (OPTION_LOCALIZE_SYMBOLS + 1)
 #define OPTION_WEAKEN_SYMBOLS (OPTION_KEEPGLOBAL_SYMBOLS + 1)
+#define OPTION_RENAME_SECTION (OPTION_WEAKEN_SYMBOLS + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -292,6 +306,7 @@ static struct option copy_options[] =
   {"keep-global-symbol", required_argument, 0, 'G'},
   {"remove-leading-char", no_argument, 0, OPTION_REMOVE_LEADING_CHAR},
   {"remove-section", required_argument, 0, 'R'},
+  {"rename-section", required_argument, 0, OPTION_RENAME_SECTION},
   {"set-section-flags", required_argument, 0, OPTION_SET_SECTION_FLAGS},
   {"set-start", required_argument, 0, OPTION_SET_START},
   {"strip-all", no_argument, 0, 'S'},
@@ -334,6 +349,7 @@ extern boolean S3Forced;
 /* Defined in bfd/binary.c.  Used to set architecture of input binary files.  */
 extern enum bfd_architecture bfd_external_binary_architecture;
 
+
 static void
 copy_usage (stream, exit_status)
      FILE *stream;
@@ -381,6 +397,7 @@ copy_usage (stream, exit_status)
      --set-section-flags <name>=<flags>\n\
                                    Set section <name>'s properties to <flags>\n\
      --add-section <name>=<file>   Add section <name> found in <file> to output\n\
+     --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n\
      --change-leading-char         Force output format's leading character style\n\
      --remove-leading-char         Remove leading character from global symbols\n\
      --redefine-sym <old>=<new>    Redefine symbol name <old> to <new>\n\
@@ -666,10 +683,9 @@ is_specified_symbol (name, list)
   struct symlist *tmp_list;
 
   for (tmp_list = list; tmp_list; tmp_list = tmp_list->next)
-    {
-      if (strcmp (name, tmp_list->name) == 0)
-	return true;
-    }
+    if (strcmp (name, tmp_list->name) == 0)
+      return true;
+
   return false;
 }
 
@@ -832,27 +848,22 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
   return dst_count;
 }
 
+/* Find the redefined name of symbol SOURCE.  */
+
 static const char *
 lookup_sym_redefinition (source)
      const char *source;
 {
-  const char *result;
   struct redefine_node *list;
 
-  result = source;
-
   for (list = redefine_sym_list; list != NULL; list = list->next)
-    {
-      if (strcmp (source, list->source) == 0)
-	{
-	  result = list->target;
-	  break;
-	}
-    }
-  return result;
+    if (strcmp (source, list->source) == 0)
+      return list->target;
+
+  return source;
 }
 
-/* Add a node to a symbol redefine list */
+/* Add a node to a symbol redefine list.  */
 
 static void
 redefine_list_append (source, target)
@@ -866,18 +877,14 @@ redefine_list_append (source, target)
   for (p = &redefine_sym_list; (list = *p) != NULL; p = &list->next)
     {
       if (strcmp (source, list->source) == 0)
-	{
-	  fatal (_("%s: Multiple redefinition of symbol \"%s\""),
-		 "--redefine-sym",
-		  source);
-	}
+	fatal (_("%s: Multiple redefinition of symbol \"%s\""),
+	       "--redefine-sym",
+	       source);
 
       if (strcmp (target, list->target) == 0)
-	{
-	  fatal (_("%s: Symbol \"%s\" is target of more than one redefinition"),
-		 "--redefine-sym",
-		  target);
-	}
+	fatal (_("%s: Symbol \"%s\" is target of more than one redefinition"),
+	       "--redefine-sym",
+	       target);
     }
 
   new_node = (struct redefine_node *) xmalloc (sizeof (struct redefine_node));
@@ -888,7 +895,6 @@ redefine_list_append (source, target)
 
   *p = new_node;
 }
-
 
 /* Keep only every `copy_byte'th byte in MEMHUNK, which is *SIZE bytes long.
    Adjust *SIZE.  */
@@ -902,6 +908,7 @@ filter_bytes (memhunk, size)
 
   for (; from < end; from += interleave)
     *to++ = *from;
+
   if (*size % interleave > (bfd_size_type) copy_byte)
     *size = (*size / interleave) + 1;
   else
@@ -951,7 +958,7 @@ copy_object (ibfd, obfd)
 			       & bfd_applicable_file_flags (obfd))))
     RETURN_NONFATAL (bfd_get_filename (ibfd));
 
-  /* Copy architecture of input file to output file */
+  /* Copy architecture of input file to output file.  */
   if (!bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
 			  bfd_get_mach (ibfd)))
     non_fatal (_("Warning: Output file cannot represent architecture %s"),
@@ -1107,8 +1114,8 @@ copy_object (ibfd, obfd)
 	}
     }
 
-  /* Symbol filtering must happen after the output sections have
-     been created, but before their contents are set.  */
+  /* Symbol filtering must happen after the output sections
+     have been created, but before their contents are set.  */
   dhandle = NULL;
   symsize = bfd_get_symtab_upper_bound (ibfd);
   if (symsize < 0)
@@ -1189,7 +1196,6 @@ copy_object (ibfd, obfd)
       int c, i;
 
       /* Fill in the gaps.  */
-
       if (max_gap > 8192)
 	max_gap = 8192;
       buf = (bfd_byte *) xmalloc (max_gap);
@@ -1205,6 +1211,7 @@ copy_object (ibfd, obfd)
 
 	      left = gaps[i];
 	      off = bfd_section_size (obfd, osections[i]) - left;
+
 	      while (left > 0)
 		{
 		  bfd_size_type now;
@@ -1229,7 +1236,7 @@ copy_object (ibfd, obfd)
      from the input BFD to the output BFD.  This is done last to
      permit the routine to look at the filtered symbol table, which is
      important for the ECOFF code at least.  */
-  if (!bfd_copy_private_bfd_data (ibfd, obfd))
+  if (! bfd_copy_private_bfd_data (ibfd, obfd))
     {
       non_fatal (_("%s: error copying private BFD data: %s"),
 		 bfd_get_filename (obfd),
@@ -1273,6 +1280,7 @@ copy_archive (ibfd, obfd, output_target)
   list = NULL;
 
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
+
   while (!status && this_element != (bfd *) NULL)
     {
       /* Create an output file for this member.  */
@@ -1286,6 +1294,7 @@ copy_archive (ibfd, obfd, output_target)
       if (preserve_dates)
 	{
 	  stat_status = bfd_stat_arch_elt (this_element, &buf);
+
 	  if (stat_status != 0)
 	    non_fatal (_("internal stat error on %s"),
 		       bfd_get_filename (this_element));
@@ -1360,7 +1369,6 @@ copy_file (input_filename, output_filename, input_target, output_target)
 
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
-
   ibfd = bfd_openr (input_filename, input_target);
   if (ibfd == NULL)
     RETURN_NONFATAL (input_filename);
@@ -1415,8 +1423,68 @@ copy_file (input_filename, output_filename, input_target, output_target)
     }
 }
 
-/* Create a section in OBFD with the same name and attributes
-   as ISECTION in IBFD.  */
+/* Add a name to the section renaming list.  */
+
+static void
+add_section_rename (old_name, new_name, flags)
+     const char * old_name;
+     const char * new_name;
+     flagword flags;
+{
+  section_rename * rename;
+
+  /* Check for conflicts first.  */
+  for (rename = section_rename_list; rename != NULL; rename = rename->next)
+    if (strcmp (rename->old_name, old_name) == 0)
+      {
+	/* Silently ignore duplicate definitions.  */
+	if (strcmp (rename->new_name, new_name) == 0
+	    && rename->flags == flags)
+	  return;
+	
+	fatal (_("Multiple renames of section %s"), old_name);
+      }
+
+  rename = (section_rename *) xmalloc (sizeof (* rename));
+
+  rename->old_name = old_name;
+  rename->new_name = new_name;
+  rename->flags    = flags;
+  rename->next     = section_rename_list;
+  
+  section_rename_list = rename;
+}
+
+/* Check the section rename list for a new name of the input section
+   ISECTION.  Return the new name if one is found.
+   Also set RETURNED_FLAGS to the flags to be used for this section.  */
+
+static const char *
+find_section_rename (ibfd, isection, returned_flags)
+     bfd * ibfd ATTRIBUTE_UNUSED;
+     sec_ptr isection;
+     flagword * returned_flags;
+{
+  const char * old_name = bfd_section_name (ibfd, isection);
+  section_rename * rename;
+
+  /* Default to using the flags of the input section.  */
+  * returned_flags = bfd_get_section_flags (ibfd, isection);
+
+  for (rename = section_rename_list; rename != NULL; rename = rename->next)
+    if (strcmp (rename->old_name, old_name) == 0)
+      {
+	if (rename->flags != (flagword) -1)
+	  * returned_flags = rename->flags;
+
+	return rename->new_name;
+      }
+
+  return old_name;
+}
+
+/* Create a section in OBFD with the same
+   name and attributes as ISECTION in IBFD.  */
 
 static void
 setup_section (ibfd, isection, obfdarg)
@@ -1432,7 +1500,8 @@ setup_section (ibfd, isection, obfdarg)
   bfd_vma lma;
   flagword flags;
   const char *err;
-
+  const char * name;
+  
   if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
       && (strip_symbols == STRIP_DEBUG
 	  || strip_symbols == STRIP_UNNEEDED
@@ -1450,7 +1519,10 @@ setup_section (ibfd, isection, obfdarg)
   if (sections_copied && (p == NULL || ! p->copy))
     return;
 
-  osection = bfd_make_section_anyway (obfd, bfd_section_name (ibfd, isection));
+  /* Get the, possibly new, name of the output section.  */
+  name = find_section_rename (ibfd, isection, & flags);
+  
+  osection = bfd_make_section_anyway (obfd, name);
 
   if (osection == NULL)
     {
@@ -1507,7 +1579,6 @@ setup_section (ibfd, isection, obfdarg)
       goto loser;
     }
 
-  flags = bfd_get_section_flags (ibfd, isection);
   if (p != NULL && p->set_flags)
     flags = p->flags | (flags & SEC_HAS_CONTENTS);
   if (!bfd_set_section_flags (obfd, osection, flags))
@@ -1530,7 +1601,7 @@ setup_section (ibfd, isection, obfdarg)
       goto loser;
     }
 
-  /* All went well */
+  /* All went well.  */
   return;
 
 loser:
@@ -1559,8 +1630,8 @@ copy_section (ibfd, isection, obfdarg)
   bfd_size_type size;
   long relsize;
 
-  /* If we have already failed earlier on, do not keep on generating
-     complaints now.  */
+  /* If we have already failed earlier on,
+     do not keep on generating complaints now.  */
   if (status != 0)
     return;
 
@@ -1901,7 +1972,8 @@ strip_main (argc, argv)
 	  show_version = true;
 	  break;
 	case 0:
-	  break;		/* we've been given a long option */
+	  /* We've been given a long option.  */
+	  break;
 	case 'h':
 	  strip_usage (stdout, 0);
 	default:
@@ -2268,9 +2340,7 @@ copy_main (argc, argv)
 
 	    s = strchr (optarg, '=');
 	    if (s == NULL)
-	      {
-		fatal (_("bad format for %s"), "--redefine-sym");
-	      }
+	      fatal (_("bad format for %s"), "--redefine-sym");
 
 	    len = s - optarg;
 	    source = (char *) xmalloc (len + 1);
@@ -2308,6 +2378,54 @@ copy_main (argc, argv)
 
 	    p->set_flags = true;
 	    p->flags = parse_flags (s + 1);
+	  }
+	  break;
+
+	case OPTION_RENAME_SECTION:
+	  {
+	    flagword flags;
+	    const char * s;
+	    char * old_name;
+	    char * new_name;
+	    unsigned int len;
+
+	    s = strchr (optarg, '=');
+	    if (s == NULL)
+	      fatal (_("bad format for %s"), "--rename-section");
+
+	    len = s - optarg;
+	    if (len == 0)
+	      fatal (_("no old name is %s"), "--rename-section");
+
+	    old_name = (char *) xmalloc (len + 1);
+	    strncpy (old_name, optarg, len);
+	    old_name[len] = 0;
+
+	    s = strchr (optarg + len, ',');
+	    if (s)
+	      {
+		unsigned int new_len;
+
+		flags = parse_flags (s + 1);
+		new_len = s - (optarg + len);
+		if (new_len == 0)
+		  fatal (_("no new name in %s"), "--rename-section");
+		new_name = (char *) xmalloc (new_len + 1);
+		strncpy (new_name, optarg + len, new_len);
+		new_name [new_len] = 0;
+	      }
+	    else
+	      {
+		s = optarg + len;
+		len = strlen (s);
+		if (len == 0)
+		  fatal (_("no new name in %s"), "--rename-section");
+		new_name = (char *) xmalloc (len + 1);
+		strcpy (new_name, s);
+		flags = -1;
+	      }
+
+	    add_section_rename (old_name, new_name, flags);
 	  }
 	  break;
 
@@ -2419,6 +2537,7 @@ copy_main (argc, argv)
   else
     {
       copy_file (input_filename, output_filename, input_target, output_target);
+
       if (status == 0 && preserve_dates)
 	set_times (output_filename, &statbuf);
     }

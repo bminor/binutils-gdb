@@ -941,6 +941,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --change-warnings ] [ --no-change-warnings ]
         [ --set-section-flags @var{section}=@var{flags} ]
         [ --add-section @var{sectionname}=@var{filename} ]
+        [ --rename-section @var{oldname}=@var{newname}[,@var{flags}] ]
         [ --change-leading-char ] [ --remove-leading-char ]
         [ --srec-len=@var{ival} ] [ --srec-forceS3 ]
         [ --redefine-sym @var{old}=@var{new} ] [ --weaken ]
@@ -1209,6 +1210,24 @@ Add a new section named @var{sectionname} while copying the file.  The
 contents of the new section are taken from the file @var{filename}.  The
 size of the section will be the size of the file.  This option only
 works on file formats which can support sections with arbitrary names.
+
+@item --rename-section @var{oldname}=@var{newname}[,@var{flags}]
+Rename a section from @var{oldname} to @var{newname}, optionally
+changing the section's flags to @var{flags} in the process.  This has
+the advantage over usng a linker script to perform the rename in that
+the output stays as an object file and does not become a linked
+executable.
+
+This option is particularly helpful when the input format is binary,
+since this will always create a section called .data.  If for example,
+you wanted instead to create a section called .rodata containing binary
+data you could use the following command line to achieve it:
+
+@smallexample
+  objcopy -I binary -O <output_format> -B <architecture> \
+   --rename-section .data=.rodata,alloc,load,readonly,data,contents \
+   <input_binary_file> <output_object_file>
+@end smallexample
 
 @item --change-leading-char
 Some object file formats use special characters at the start of
