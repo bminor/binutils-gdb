@@ -1841,7 +1841,6 @@ The file @file{mdebugread.c} implements reading for this format.
 DWARF 1 is a debugging format that was originally designed to be
 used with ELF in SVR4 systems.
 
-@c OBSOLETE CHILL_PRODUCER
 @c GCC_PRODUCER
 @c GPLUS_PRODUCER
 @c LCC_PRODUCER
@@ -3781,10 +3780,6 @@ for parameters/results have been allocated on the stack.
 @findex SDB_REG_TO_REGNUM
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
-
-@c OBSOLETE @item SHIFT_INST_REGS
-@c OBSOLETE @findex SHIFT_INST_REGS
-@c OBSOLETE (Only used for m88k targets.)
 
 @item SKIP_PERMANENT_BREAKPOINT
 @findex SKIP_PERMANENT_BREAKPOINT

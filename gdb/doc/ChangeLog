@@ -1,3 +1,9 @@
+2003-01-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* stabs.texinfo: Remove obsolete text.
+	* gdbint.texinfo: Ditto.
+	* gdb.texinfo: Ditto.
+
 2002-12-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Update
