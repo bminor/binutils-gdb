@@ -49,6 +49,7 @@ m88kbcs.sc
 mips.sc
 mipsbsd.sc
 nw.sc
+riscix.sc
 sa29200.sc
 sh.sc
 sparccoff.sc

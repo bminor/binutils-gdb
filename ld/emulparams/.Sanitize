@@ -70,7 +70,9 @@ mipsidtl.sh
 mipslit.sh
 news.sh
 ns32knbsd.sh
+pc532machaout.sh
 ppcnw.sh
+riscix.sh
 sa29200.sh
 sh.sh
 sparclynx.sh

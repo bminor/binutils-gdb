@@ -80,8 +80,10 @@ mips-lit.mt
 news.mt
 ns32k-nbsd.mt
 ose68.mt
+pc532mach.mt
 ppc-elf32.mt
 ppc-nw.mt
+riscix.mt
 rtbsd.mh
 sa29200.mt
 solaris2.mh
