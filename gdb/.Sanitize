@@ -26,7 +26,6 @@ Do-first:
 Things-to-keep:
 
 .gdbinit
-29k-share
 COPYING
 ChangeLog
 ChangeLog-3.x
@@ -155,7 +154,6 @@ remote-eb.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
-remote-udi.c
 remote-vx.c
 remote.c
 rs6000-pinsn.c
