@@ -1,3 +1,13 @@
+start-sanitize-gdbtk
+Tue Jul 22 19:45:37 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* configure.in, aclocal.m4: Another fix to find the
+	correct Tix library name.
+
+	* configure: Rebuilt.
+	
+end-sanitize-gdbtk	
+
 Tue Jul 22 12:11:48 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* config/mips/tm-mips64.h: longs, long longs, and pointers

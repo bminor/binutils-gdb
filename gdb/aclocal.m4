@@ -524,25 +524,6 @@ fi
 if test x"${ac_cv_c_tixh}" != x ; then
      TIXHDIR="-I${ac_cv_c_tixh}"
 fi
-case "${host}" in
-*-*-cygwin32*)
-  for i in ../tix/win/tk4.2/libtix4.1.7.6.a ../tix/win/tk4.2/libtix4176.a ; do
-    if test -f $i ; then
-	TIXLIB=${i}
-      break
-    fi 
-  done 
-  ;;
-*)
-  for i in ../tix/unix/tk4.2/libtix4.1.7.6.a ../tix/unix/tk4.2/libtix4176.a ; do
-    if test -f ${i} ; then
-	TIXLIB=${i}
-      break
-    fi
-  done
-  ;;
-esac 
 AC_SUBST(TIXHDIR)
-AC_SUBST(TIXLIB)
 ])
 

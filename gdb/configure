@@ -3006,27 +3006,25 @@ fi
 if test x"${ac_cv_c_tixh}" != x ; then
      TIXHDIR="-I${ac_cv_c_tixh}"
 fi
-case "${host}" in
-*-*-cygwin32*)
-  for i in ../tix/win/tk4.2/libtix4.1.7.6.a ../tix/win/tk4.2/libtix4176.a ; do
-    if test -f $i ; then
-	TIXLIB=${i}
-      break
-    fi 
-  done 
-  ;;
-*)
-  for i in ../tix/unix/tk4.2/libtix4.1.7.6.a ../tix/unix/tk4.2/libtix4176.a ; do
-    if test -f ${i} ; then
-	TIXLIB=${i}
-      break
-    fi
-  done
-  ;;
-esac 
 
 
 
+	   # now look for tix library stuff
+	   TIXVERSION=4.1.7.6
+	   . ${ac_cv_c_tclconfig}/tclConfig.sh
+	   case "${host}" in
+	   *-*-cygwin32*)
+		tixdir=../tix/win/tcl7.6
+		;;
+	   *)
+		tixdir=../tix/unix/tk4.2
+		;;
+	   esac 
+	   if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
+		TIXLIB="-L${tixdir} -ltix${TIXVERSION}"
+	   else
+		TIXLIB="-L${tixdir} -ltix`echo ${TIXVERSION} | tr -d .`"
+	   fi
 
 	   ENABLE_GDBTK=1
 
@@ -3044,6 +3042,7 @@ esac
 	fi
     fi
 fi
+
 
 
 
@@ -3192,7 +3191,7 @@ links="${links} nm.h"
 fi
 # start-sanitize-gdbtk
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:3196: checking whether ln -s works" >&5
+echo "configure:3195: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3412,11 +3411,11 @@ s%@TKHDIR@%$TKHDIR%g
 s%@ITCLHDIR@%$ITCLHDIR%g
 s%@ITCLLIB@%$ITCLLIB%g
 s%@TIXHDIR@%$TIXHDIR%g
-s%@TIXLIB@%$TIXLIB%g
 s%@ENABLE_GDBTK@%$ENABLE_GDBTK%g
 s%@X_CFLAGS@%$X_CFLAGS%g
 s%@X_LDFLAGS@%$X_LDFLAGS%g
 s%@X_LIBS@%$X_LIBS%g
+s%@TIXLIB@%$TIXLIB%g
 s%@ENABLE_CFLAGS@%$ENABLE_CFLAGS%g
 s%@CONFIG_OBS@%$CONFIG_OBS%g
 s%@HLDFLAGS@%$HLDFLAGS%g
