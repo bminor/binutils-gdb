@@ -1,3 +1,14 @@
+Thu May 14 11:48:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): Fix handling of output redirection.
+	New arg prog_opts.  All callers updated.
+
+Fri May  8 18:10:28 1998  Jillian Ye <jillian@cygnus.com>
+
+	* Makefile.in: Made "check" the target of two
+          dependencies (test1, test2) so that test2 get a chance to 
+          run even when test1 failed if "make -k check" is used.
+
 Fri May  8 14:41:28 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* lib/sim-defs.exp (sim_version): Simplify.
