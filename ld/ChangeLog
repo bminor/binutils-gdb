@@ -1,3 +1,9 @@
+2004-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 459
+	* ldlang.c (load_symbols): Use the same -Bdynamic/-Bstatic
+	option on linker script as the one for linker script.
+
 2004-10-16  Daniel Jacobowitz  <dan@debian.org>
 
 	* ldlang.c (struct excluded_lib, excluded_libs, add_excluded_libs)

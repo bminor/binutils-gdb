@@ -1809,6 +1809,9 @@ load_symbols (lang_input_statement_type *entry,
 
       ldfile_assumed_script = TRUE;
       parser_input = input_script;
+      /* We want to use the same -Bdynamic/-Bstatic as the one for
+	 ENTRY.  */
+      config.dynamic_link = entry->dynamic;
       yyparse ();
       ldfile_assumed_script = FALSE;
 
