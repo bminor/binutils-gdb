@@ -2725,7 +2725,6 @@ thread_list_command()
 	  if (ths.flags & TH_FLAGS_IDLE)
 	    strcat (buf, "I");
 
-	  /* FIXME: May run afloul of arbitrary limit in printf_filtered.  */
 	  printf_filtered (TL_FORMAT,
 			   slot,
 			   mid,
@@ -2753,7 +2752,6 @@ thread_list_command()
 	    continue; /* EMcM */
 #endif
 
-	  /* FIXME: May run afloul of arbitrary limit in printf_filtered.  */
 	  printf_filtered (TL_FORMAT,
 			   "-",
 			   -neworder,	/* Pseudo MID */
@@ -2825,7 +2823,6 @@ thread_list_command()
 	  if (ths.flags & TH_FLAGS_IDLE)
 	    strcat (buf, "I");
 
-	  /* FIXME: May run afloul of arbitrary limit in printf_filtered.  */
 	  printf_filtered (TL_FORMAT,
 			   slot,
 			   mid,
