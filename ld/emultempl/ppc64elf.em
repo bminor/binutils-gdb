@@ -51,6 +51,9 @@ static int emit_stub_syms = 0;
 
 static asection *toc_section = 0;
 
+/* Whether to canonicalize .opd so that there are no overlapping
+   .opd entries.  */
+static int non_overlapping_opd = 0;
 
 /* This is called before the input files are opened.  We create a new
    fake input file to hold the stub sections.  */
@@ -89,7 +92,7 @@ ppc_before_allocation (void)
 {
   if (stub_file != NULL)
     {
-      if (!ppc64_elf_edit_opd (output_bfd, &link_info))
+      if (!ppc64_elf_edit_opd (output_bfd, &link_info, non_overlapping_opd))
 	{
 	  einfo ("%X%P: can not edit opd %E\n");
 	  return;
@@ -463,6 +466,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_DOTSYMS			(OPTION_STUBSYMS + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
+#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_TLS_OPT + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -471,6 +475,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "non-overlapping-opd", no_argument, NULL, OPTION_NON_OVERLAPPING_OPD },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -498,6 +503,10 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n"
 		   ));
+  fprintf (file, _("\
+  --non-overlapping-opd Canonicalize .opd, so that there are no overlapping\n\
+                          .opd entries.\n"
+		   ));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -524,6 +533,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_TLS_OPT:
       notlsopt = 1;
+      break;
+
+    case OPTION_NON_OVERLAPPING_OPD:
+      non_overlapping_opd = 1;
       break;
 '
 

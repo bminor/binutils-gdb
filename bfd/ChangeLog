@@ -1,3 +1,14 @@
+2004-08-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-ppc.c (ppc64_elf_edit_opd): Support 16 byte long .opd
+	entries (where fd_aux overlaps next entry's fd_func).
+	Add non_overlapping argument, use it.
+	(ppc64_elf_check_relocs, ppc64_elf_gc_mark_hook, adjust_opd_syms,
+	ppc64_elf_size_stubs, ppc64_elf_relocate_section,
+	ppc64_elf_output_symbol_hook): Use address / 8 instead of address / 24
+	as indexes into opd_sym_map/opd_adjust array.
+	* elf64-ppc.h (ppc64_elf_edit_opd): Adjust prototype.
+
 2004-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (func_desc_adjust): Give undefined dot-symbols a value

@@ -1,3 +1,11 @@
+2004-08-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* emultempl/ppc64elf.em (non_overlapping_opd): New variable.
+	(ppc_before_allocation): Pass it to ppc64_elf_edit_opd).
+	(OPTION_NON_OVERLAPPING_OPD): Define.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Add
+	--non-overlapping-opd option.
+
 2004-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 338
