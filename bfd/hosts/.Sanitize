@@ -35,6 +35,7 @@ i386sco.h
 m68knbsd.h
 m88kmach3.h
 mipsbsd.h
+mipsnbsd.h
 mipsmach3.h
 nbsd.h
 news-mips.h
