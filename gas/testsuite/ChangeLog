@@ -1,3 +1,13 @@
+Thu Oct 20 00:55:13 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/blebug3.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
+Mon Oct 17 02:33:53 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reduce3.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
 Sun Oct 16 22:25:56 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp (r_no_reloc): Tweak output to match
