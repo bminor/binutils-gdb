@@ -8,6 +8,7 @@ dnl
 dnl
 AC_INIT(as.h)
 dnl
+bfd_gas=no
 AC_ARG_ENABLE(bfd-assembler,
 [    bfd-assembler	use BFD back end for writing object files],
 [case "${enableval}" in

@@ -391,6 +391,7 @@ ac_cpp='${CPP} $CPPFLAGS'
 ac_compile='${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $LIBS 1>&5 2>&5'
 
 
+bfd_gas=no
 # Check whether --enable-bfd-assembler or --disable-bfd-assembler was given.
 enableval="$enable_bfd_assembler"
 if test -n "$enableval"; then

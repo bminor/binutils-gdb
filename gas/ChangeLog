@@ -1,3 +1,10 @@
+Wed Aug 31 11:20:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/obj-coff.h (S_IS_DEFINED): Absolute symbols are defined
+	also.
+
+	* configure.in, configure: Initialize bfd_gas to no.
+
 Tue Aug 30 19:31:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* as.h: Include alloca-conf.h from "libiberty", not
