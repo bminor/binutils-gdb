@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-AC_PREREQ(2.5)
+AC_PREREQ(2.12.1)
 AC_INIT(z8k-dis.c)
 
 AC_CANONICAL_SYSTEM
@@ -163,13 +163,15 @@ if test x${all_targets} = xfalse ; then
 	bfd_convex_arch)	;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;
+# start-sanitize-fr30
 	bfd_fr30_arch)          ta="$ta $cgen_files fr30-opc.lo fr30-asm.lo fr30-dis.lo" ;;
+# end-sanitize-fr30
 	bfd_h8300_arch)		ta="$ta h8300-dis.lo" ;;
 	bfd_h8500_arch)		ta="$ta h8500-dis.lo" ;;
 	bfd_hppa_arch)		ta="$ta hppa-dis.lo" ;;
 	bfd_i386_arch)		ta="$ta i386-dis.lo" ;;
 	bfd_i860_arch)		;;
-	bfd_i960_arch)		ta="$ta i960-dis.lo" ;;
+	bfd_i960_arch)		ta="$ta $cgen_files i960-dis.lo i960c-opc.lo i960c-asm.lo i960c-dis.lo" ;;
 	bfd_m32r_arch)		ta="$ta $cgen_files m32r-opc.lo m32r-asm.lo m32r-dis.lo" ;;
 	bfd_m68k_arch)		ta="$ta m68k-dis.lo m68k-opc.lo" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.lo" ;;
