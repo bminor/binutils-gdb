@@ -1,5 +1,11 @@
 2002-01-30  Daniel Jacobowitz  <drow@mvista.com>
 
+        * gdb.threads/linux-dp.exp: Use 'array unset', not 'array set'.
+        (check_philosopher_stack): Check for manager thread before checking
+        for a just-starting thread.
+
+2002-01-30  Daniel Jacobowitz  <drow@mvista.com>
+
 	From Neil Booth <neil@daikokuya.demon.co.uk>:
 	* gdb.base/bitfields.c: Correct assignments to bitfields to avoid
 	warnings.

@@ -172,6 +172,15 @@ proc check_philosopher_stack {thread seen_name} {
 	    }
 	    set interesting 1
 	}
+	-re ".* in __pthread_manager \\(.*$gdb_prompt $" {
+	    if {$manager_seen == 1} {
+		fail "manager thread is distinct: $thread"
+	    } else {
+		set manager_seen 1
+		pass "manager thread is distinct: $thread"
+	    }
+	    set interesting 1
+	}
 	-re "pthread_start_thread.*\r\n$gdb_prompt $" {
 	    ## Maybe the thread hasn't started yet.
 	    pass $name
@@ -182,15 +191,6 @@ proc check_philosopher_stack {thread seen_name} {
 	    } else {
 		set main_seen 1
 		pass "main is distinct: $thread"
-	    }
-	    set interesting 1
-	}
-	-re ".* in __pthread_manager \\(.*$gdb_prompt $" {
-	    if {$manager_seen == 1} {
-		fail "manager thread is distinct: $thread"
-	    } else {
-		set manager_seen 1
-		pass "manager thread is distinct: $thread"
 	    }
 	    set interesting 1
 	}
@@ -214,7 +214,7 @@ proc check_philosopher_stack {thread seen_name} {
 }
 
 set any_interesting 0
-array set seen {}
+array unset seen
 for {set i 1} {$i <= 7} {incr i} {
     if [check_philosopher_stack $i seen] {
 	set any_interesting 1
