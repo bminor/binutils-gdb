@@ -40,9 +40,6 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 #
 target_libs="libm xiberty newlib libio libg++"
 
-## start-sanitize-chill
-target_libs="${target_libs} chill chillrt"
-## end-sanitize-chill
 
 # these tools are built using the target libs, and are intended to run only
 # in the target environment.  we currently have none.
@@ -184,11 +181,8 @@ case "${target}" in
   h8300*-*-* | \
   h8500-*-*)
     noconfigdirs="$noconfigdirs libg++ libio"
-## start-sanitize-chill
-    noconfigdirs="$noconfigdirs chillrt"
-## end-sanitize-chill
     ;;
-  hppa*-*-osf)
+  hppa*-*-*elf*)
     # Do configure ld/binutils/gas for this case.
     ;;
   hppa*-*-*)
