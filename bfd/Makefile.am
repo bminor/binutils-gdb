@@ -55,6 +55,7 @@ ALL_MACHINES = \
 	cpu-arc.lo \
 	cpu-arm.lo \
 	cpu-avr.lo \
+	cpu-cr16c.lo \
 	cpu-cris.lo \
 	cpu-d10v.lo \
 	cpu-d30v.lo \
@@ -111,6 +112,7 @@ ALL_MACHINES_CFILES = \
 	cpu-arm.c \
 	cpu-avr.c \
 	cpu-cris.c \
+	cpu-cr16c.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
 	cpu-dlx.c \
@@ -213,6 +215,7 @@ BFD32_BACKENDS = \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
 	elf32-avr.lo \
+	elf32-cr16c.lo \
 	elf32-cris.lo \
 	elf32-d10v.lo \
 	elf32-d30v.lo \
@@ -378,6 +381,7 @@ BFD32_BACKENDS_CFILES = \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
 	elf32-avr.c \
+	elf32-cr16c.c \
 	elf32-cris.c \
 	elf32-d10v.c \
 	elf32-d30v.c \
@@ -915,6 +919,7 @@ cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h
 cpu-arc.lo: cpu-arc.c $(INCDIR)/filenames.h
 cpu-arm.lo: cpu-arm.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
 cpu-avr.lo: cpu-avr.c $(INCDIR)/filenames.h
+cpu-cr16c.lo: cpu-cr16c.c $(INCDIR)/filenames.h
 cpu-cris.lo: cpu-cris.c $(INCDIR)/filenames.h
 cpu-d10v.lo: cpu-d10v.c $(INCDIR)/filenames.h
 cpu-d30v.lo: cpu-d30v.c $(INCDIR)/filenames.h
@@ -1136,6 +1141,10 @@ elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
 elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
+elf32-cr16c.lo: elf32-cr16c.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16c.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-cris.lo: elf32-cris.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \

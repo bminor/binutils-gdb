@@ -26,6 +26,7 @@ arm-*-pe)		targ_emul=armpe ;
 arc-*-elf*)		targ_emul=arcelf ;;
 avr-*-*)		targ_emul=avr2
 			targ_extra_emuls="avr1 avr3 avr4 avr5" ;;
+cr16c-*-elf*)           targ_emul=elf32cr16c ;;
 cris-*-*aout*)		targ_emul=crisaout
 			targ_extra_emuls="criself crislinux"
 			targ_extra_libpath=$targ_extra_emuls ;;

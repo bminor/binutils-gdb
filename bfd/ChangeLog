@@ -1,3 +1,45 @@
+2004-03-30  Galit Heller  <Galit.Heller@nsc.com>
+            Tomer Levi    <Tomer.Levi@nsc.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-cr16c.lo.
+	(ALL_MACHINES_CFILES): Add cpu-cr16c.c.
+	(BFD32_BACKENDS): Add elf32-cr16c.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-cr16c.c.
+	(cpu-cr16c.lo): New target.
+	(elf32-cr16c.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_architecture): Add bfd_{arch,mach}_cr16c.
+	(bfd_archures_list): Add bfd_cr16c_arch.
+	* config.bfd: Handle cr16c-*-elf*.
+	* configure.in: Handle bfd_elf32_cr16c_vec.
+	* configure: Regenerate.
+	* reloc.c: Add BFD_RELOC_16C_NUM08, BFD_RELOC_16C_NUM08_C,
+	BFD_RELOC_16C_NUM16, BFD_RELOC_16C_NUM16_C,
+	BFD_RELOC_16C_NUM32, BFD_RELOC_16C_NUM32_C,
+	BFD_RELOC_16C_DISP04, BFD_RELOC_16C_DISP04_C,
+	BFD_RELOC_16C_DISP08, BFD_RELOC_16C_DISP08_C,
+	BFD_RELOC_16C_DISP16, BFD_RELOC_16C_DISP16_C,
+	BFD_RELOC_16C_DISP24, BFD_RELOC_16C_DISP24_C,
+	BFD_RELOC_16C_DISP24a, BFD_RELOC_16C_DISP24a_C,
+	BFD_RELOC_16C_REG04, BFD_RELOC_16C_REG04_C,
+	BFD_RELOC_16C_REG04a, BFD_RELOC_16C_REG04a_C,
+	BFD_RELOC_16C_REG14, BFD_RELOC_16C_REG14_C,
+	BFD_RELOC_16C_REG16, BFD_RELOC_16C_REG16_C,
+	BFD_RELOC_16C_REG20, BFD_RELOC_16C_REG20_C,
+	BFD_RELOC_16C_ABS20, BFD_RELOC_16C_ABS20_C,
+	BFD_RELOC_16C_ABS24, BFD_RELOC_16C_ABS24_C,
+	BFD_RELOC_16C_IMM04, BFD_RELOC_16C_IMM04_C,
+	BFD_RELOC_16C_IMM16, BFD_RELOC_16C_IMM16_C,
+	BFD_RELOC_16C_IMM20, BFD_RELOC_16C_IMM20_C,
+	BFD_RELOC_16C_IMM24, BFD_RELOC_16C_IMM24_C,
+	BFD_RELOC_16C_IMM32, BFD_RELOC_16C_IMM32_C.
+	* targets.c (bfd_elf32_cr16c_vec): Declare.
+	(bfd_target_vector): Add bfd_elf32_cr16c_vec.
+	* cpu-cr16c.c: New file.
+	* elf32-cr16c.c: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
+
 2004-03-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (map_sections_to_segments): Fix handling of .tbss.

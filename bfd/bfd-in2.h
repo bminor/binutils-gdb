@@ -1705,6 +1705,8 @@ enum bfd_architecture
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
+  bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
+#define bfd_mach_cr16c         1
   bfd_arch_cris,      /* Axis CRIS */
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
@@ -3342,6 +3344,48 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
 /* Motorola 68HC12 reloc.
 This is the 5 bits of a value.  */
   BFD_RELOC_M68HC12_5B,
+
+/* NS CR16C Relocations.  */
+  BFD_RELOC_16C_NUM08,
+  BFD_RELOC_16C_NUM08_C,
+  BFD_RELOC_16C_NUM16,
+  BFD_RELOC_16C_NUM16_C,
+  BFD_RELOC_16C_NUM32,
+  BFD_RELOC_16C_NUM32_C,
+  BFD_RELOC_16C_DISP04,
+  BFD_RELOC_16C_DISP04_C,
+  BFD_RELOC_16C_DISP08,
+  BFD_RELOC_16C_DISP08_C,
+  BFD_RELOC_16C_DISP16,
+  BFD_RELOC_16C_DISP16_C,
+  BFD_RELOC_16C_DISP24,
+  BFD_RELOC_16C_DISP24_C,
+  BFD_RELOC_16C_DISP24a,
+  BFD_RELOC_16C_DISP24a_C,
+  BFD_RELOC_16C_REG04,
+  BFD_RELOC_16C_REG04_C,
+  BFD_RELOC_16C_REG04a,
+  BFD_RELOC_16C_REG04a_C,
+  BFD_RELOC_16C_REG14,
+  BFD_RELOC_16C_REG14_C,
+  BFD_RELOC_16C_REG16,
+  BFD_RELOC_16C_REG16_C,
+  BFD_RELOC_16C_REG20,
+  BFD_RELOC_16C_REG20_C,
+  BFD_RELOC_16C_ABS20,
+  BFD_RELOC_16C_ABS20_C,
+  BFD_RELOC_16C_ABS24,
+  BFD_RELOC_16C_ABS24_C,
+  BFD_RELOC_16C_IMM04,
+  BFD_RELOC_16C_IMM04_C,
+  BFD_RELOC_16C_IMM16,
+  BFD_RELOC_16C_IMM16_C,
+  BFD_RELOC_16C_IMM20,
+  BFD_RELOC_16C_IMM20_C,
+  BFD_RELOC_16C_IMM24,
+  BFD_RELOC_16C_IMM24_C,
+  BFD_RELOC_16C_IMM32,
+  BFD_RELOC_16C_IMM32_C,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

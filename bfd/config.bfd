@@ -306,6 +306,11 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+  cr16c-*-elf*)
+    targ_defvec=bfd_elf32_cr16c_vec
+    targ_underscore=yes
+    ;;
+
   cris-*-*)
     targ_defvec=cris_aout_vec
     targ_selvecs="bfd_elf32_us_cris_vec bfd_elf32_cris_vec ieee_vec"

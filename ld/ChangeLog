@@ -1,3 +1,13 @@
+2004-03-30  Galit Heller  <Galit.Heller@nsc.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32cr16c.o.
+	(eelf32cr16c.c): New target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle cr16c-*-elf*.
+	* emulparams/elf32cr16c.sh: New file.
+	* scripttempl/elfcr16c.sc: Likewise
+	* NEWS: Mention support for new target.
+
 2004-03-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
