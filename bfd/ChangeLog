@@ -11,6 +11,13 @@ Tue Mar 28 15:14:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 	through constructor symbols for which udata.p is not set.  If the
 	linker defined the symbol, clear the constructor flag.
 
+Tue Mar 21 10:50:32 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_set_reloc_info): Sign extend constants from
+	R_DATA_OVERRIDE fixups.
+	* libhppa.h (sign_extend): Renamed from sign_ext.  Fix.
+	(low_sign_extend): Likewise.
+
 Mon Mar 20 22:39:10 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_slurp_symbol_table): Tighten test to determine
