@@ -163,7 +163,7 @@ extern ARMword isize;
 #define PATCHR15 state->Reg[15] = ECC | ER15INT | EMODE | R15PC
 #endif
 
-#define GETSPSR(bank) bank>0?state->Spsr[bank]:ECC | EINT | EMODE ;
+#define GETSPSR(bank) (ARMul_GetSPSR (state, EMODE))
 #define SETPSR_F(d,s) d = ((d) & ~PSR_FBITS) | ((s) & PSR_FBITS)
 #define SETPSR_S(d,s) d = ((d) & ~PSR_SBITS) | ((s) & PSR_SBITS)
 #define SETPSR_X(d,s) d = ((d) & ~PSR_XBITS) | ((s) & PSR_XBITS)

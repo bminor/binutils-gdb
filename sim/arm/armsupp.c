@@ -183,7 +183,7 @@ ARMul_SetR15 (ARMul_State * state, ARMword value)
 ARMword
 ARMul_GetCPSR (ARMul_State * state)
 {
-  return (CPSR);
+  return (CPSR | state->Cpsr);
 }
 
 /***************************************************************************\
@@ -205,7 +205,7 @@ ARMul_SetCPSR (ARMul_State * state, ARMword value)
 void
 ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
-  state->Cpsr = CPSR;
+  state->Cpsr = ARMul_GetCPSR (state);
   if (state->Bank != USERBANK)
     {				/* In user mode, only write flags */
       if (BIT (16))
@@ -230,7 +230,7 @@ ARMul_GetSPSR (ARMul_State * state, ARMword mode)
   ARMword bank = ModeToBank (mode & MODEBITS);
 
   if (! BANK_CAN_ACCESS_SPSR (bank))
-    return CPSR;
+    return ARMul_GetCPSR (state);
 
   return state->Spsr[bank];
 }
@@ -290,14 +290,21 @@ ARMul_CPSRAltered (ARMul_State * state)
       
       state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
     }
+  state->Cpsr &= ~MODEBITS;
 
   ASSIGNINT (state->Cpsr & INTBITS);
+  state->Cpsr &= ~INTBITS;
   ASSIGNN ((state->Cpsr & NBIT) != 0);
+  state->Cpsr &= ~NBIT;
   ASSIGNZ ((state->Cpsr & ZBIT) != 0);
+  state->Cpsr &= ~ZBIT;
   ASSIGNC ((state->Cpsr & CBIT) != 0);
+  state->Cpsr &= ~CBIT;
   ASSIGNV ((state->Cpsr & VBIT) != 0);
+  state->Cpsr &= ~VBIT;
 #ifdef MODET
   ASSIGNT ((state->Cpsr & TBIT) != 0);
+  state->Cpsr &= ~TBIT;
 #endif
 
   if (oldmode > SVC26MODE)
