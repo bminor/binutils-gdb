@@ -99,7 +99,7 @@ hash_new ()
   ret->deletions = 0;
 #endif
 
-  return ret;  
+  return ret;
 }
 
 /* Delete a hash table, freeing all allocated memory.  */
@@ -222,7 +222,7 @@ hash_insert (table, key, value)
   ++table->insertions;
 #endif
 
-  p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof(*p));
+  p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof (*p));
   p->string = key;
   p->hash = hash;
   p->data = value;
@@ -262,7 +262,7 @@ hash_jam (table, key, value)
       ++table->insertions;
 #endif
 
-      p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof(*p));
+      p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof (*p));
       p->string = key;
       p->hash = hash;
       p->data = value;
@@ -415,14 +415,23 @@ hash_print_statistics (f, name, table)
 
 /* This test program is left over from the old hash table code.  */
 
-#define TABLES (6)		/* number of hash tables to maintain */
-				/* (at once) in any testing */
-#define STATBUFSIZE (12)	/* we can have 12 statistics */
+/* Number of hash tables to maintain (at once) in any testing.  */
+#define TABLES (6)
 
-int statbuf[STATBUFSIZE];	/* display statistics here */
-char answer[100];		/* human farts here */
-char *hashtable[TABLES];	/* we test many hash tables at once */
-char *h;			/* points to curent hash_control */
+/* We can have 12 statistics.  */
+#define STATBUFSIZE (12)
+
+/* Display statistics here.  */
+int statbuf[STATBUFSIZE];
+
+/* Human farts here.  */
+char answer[100];
+
+/* We test many hash tables at once.  */
+char *hashtable[TABLES];
+
+/* Points to curent hash_control.  */
+char *h;
 char **pp;
 char *p;
 char *name;
@@ -430,8 +439,9 @@ char *value;
 int size;
 int used;
 char command;
-int number;			/* number 0:TABLES-1 of current hashed */
-				/* symbol table */
+
+/* Number 0:TABLES-1 of current hashed symbol table.  */
+int number;
 
 int
 main ()
@@ -450,7 +460,7 @@ main ()
       gets (answer);
       command = answer[0];
       if (isupper (command))
-	command = tolower (command);	/* ecch! */
+	command = tolower (command);	/* Ecch!  */
       switch (command)
 	{
 	case '#':
@@ -460,8 +470,8 @@ main ()
 	case '?':
 	  for (pp = hashtable; pp < hashtable + TABLES; pp++)
 	    {
-	      printf ("address of hash table #%d control block is %xx\n"
-		      ,pp - hashtable, *pp);
+	      printf ("address of hash table #%d control block is %xx\n",
+		      pp - hashtable, *pp);
 	    }
 	  break;
 	case 'a':
@@ -542,7 +552,7 @@ what (description)
 
   printf ("   %s : ", description);
   gets (answer);
-  /* will one day clean up answer here */
+  /* Will one day clean up answer here.  */
   retval = malloc (strlen (answer) + 1);
   if (!retval)
     {
@@ -561,7 +571,6 @@ destroy (string, value)
   free (value);
 }
 
-
 void
 applicatee (string, value)
      char *string;
@@ -570,11 +579,12 @@ applicatee (string, value)
   printf ("%.20s-%.20s\n", string, value);
 }
 
-void
-whattable ()			/* determine number: what hash table to use */
-			        /* also determine h: points to hash_control */
-{
+/* Determine number: what hash table to use.
+   Also determine h: points to hash_control.  */
 
+void
+whattable ()
+{
   for (;;)
     {
       printf ("   what hash table (%d:%d) ?  ", 0, TABLES - 1);
@@ -596,6 +606,4 @@ whattable ()			/* determine number: what hash table to use */
     }
 }
 
-#endif /* #ifdef TEST */
-
-/* end of hash.c */
+#endif /* TEST */

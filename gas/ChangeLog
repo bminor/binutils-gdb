@@ -1,3 +1,7 @@
+2000-08-09  Kazu Hirata  <kazu@hxi.com>
+
+	* hash.c: Fix formatting.
+
 2000-08-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (build_jump_insn): Make sure the
