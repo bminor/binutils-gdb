@@ -493,6 +493,10 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "sat24",	0xf650,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "bsch",	0xf670,		0xfff0,		FMT_D0, {DM1, DN0}},
 
+/* Extension.  We need some instruction to trigger "emulated syscalls"
+   for our simulator.  */
+{ "syscall",    0xf0ff,         0xffff,         FMT_D0, {UNUSED}},
+
 /* Extension.  When talking to the simulator, gdb requires some instruction
    that will trigger a "breakpoint" (really just an instruction that isn't
    otherwise used by the tools.  This instruction must be the same size
