@@ -1,5 +1,13 @@
 2003-02-04  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.h (SYMBOL_LINKAGE_NAME): Delete.
+	* printcmd.c (build_address_symbolic): Replace uses of
+	SYMBOL_LINKAGE_NAME by equivalent uses of SYMBOL_SOURCE_NAME,
+	SYMBOL_NAME, and asm_demangle.
+	Update copyright.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
 	* linespec.c (decode_compound): Extract code into
 	lookup_prefix_sym.
 	(lookup_prefix_sym): New function.

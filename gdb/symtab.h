@@ -178,17 +178,6 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    ? SYMBOL_DEMANGLED_NAME (symbol)					\
    : SYMBOL_NAME (symbol))
 
-/* Macro that returns the "natural assembly name" of a symbol.  In C++ this is
-   the "mangled" form of the name if demangle is off, or if demangle is on and
-   asm_demangle is off.  Otherwise if asm_demangle is on it is the "demangled"
-   form.  In other languages this is just the symbol name.  The result should
-   never be NULL. */
-
-#define SYMBOL_LINKAGE_NAME(symbol)					\
-  (demangle && asm_demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL	\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
-
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
    name if it exists.  Note that whitespace is ignored while attempting to

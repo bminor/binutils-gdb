@@ -1,7 +1,7 @@
 /* Print values for GNU debugger GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -639,10 +639,10 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   if (symbol)
     {
       name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
-      if (do_demangle)
+      if (do_demangle || asm_demangle)
 	name_temp = SYMBOL_SOURCE_NAME (symbol);
       else
-	name_temp = SYMBOL_LINKAGE_NAME (symbol);
+	name_temp = SYMBOL_NAME (symbol);
     }
 
   if (msymbol != NULL)
@@ -654,10 +654,10 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  symbol = 0;
 	  symtab = 0;
 	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
-	  if (do_demangle)
+	  if (do_demangle || asm_demangle)
 	    name_temp = SYMBOL_SOURCE_NAME (msymbol);
 	  else
-	    name_temp = SYMBOL_LINKAGE_NAME (msymbol);
+	    name_temp = SYMBOL_NAME (msymbol);
 	}
     }
   if (symbol == NULL && msymbol == NULL)
