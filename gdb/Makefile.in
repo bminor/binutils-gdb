@@ -589,9 +589,9 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 
 # A Mach 3.0 program to force gdb back to command level
 
-gdb-stop: gdb-stop.o
-	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdb-stop \
-	gdb-stop.o $(CLIBS) $(LOADLIBES)
+stop-gdb: stop-gdb.o
+	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o stop-gdb \
+	stop-gdb.o $(CLIBS) $(LOADLIBES)
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
 # on itself without copying the executable.  So "make gdb1" will make
@@ -994,7 +994,7 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/mips/tm-mipsm3.h config/mips/tm-mipsv4.h \
 	config/mips/xm-irix3.h \
 	config/mips/xm-irix4.h config/mips/xm-irix5.h \
-	config/mips/xm-makeva.h config/mips/xm-mips.h \
+	config/mips/xm-mips.h \
 	config/mips/xm-mipsm3.h config/mips/xm-mipsv4.h \
 	config/mips/xm-riscos.h config/mips/xm-news-mips.h \
 	config/nm-lynx.h config/nm-sysv4.h \

@@ -1,3 +1,12 @@
+Fri Jun 24 08:15:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* README:  Add notes about SPARCworks cc under Solaris 2.x
+	(from Casper H.S. Dik casper@fwi.uva.nl).
+	* config/mips/xm-makeva.h:  Removed, no longer necessary.
+	* Makefile.in, config/mips/xm-irix3.h, config/mips/xm-irix5.h,
+	config/mips/xm-mips.h, config/mips/xm-news-mips.h,
+	config/mips/xm-riscos.h:  Remove references to xm-makeva.h
+
 Wed Jun 22 17:48:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdba.el: Put program input and output in a separate buffer.
