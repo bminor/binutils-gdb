@@ -1,3 +1,9 @@
+2002-09-30  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (selected_thread_changed): New event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+
 2002-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* MAINTAINERS: Add self to Write After Approval list.

@@ -139,6 +139,16 @@ selected_frame_level_changed_event (int level)
   current_event_hooks->selected_frame_level_changed (level);
 }
 
+void
+selected_thread_changed_event (int thread_num)
+{
+  if (gdb_events_debug)
+    fprintf_unfiltered (gdb_stdlog, "selected_thread_changed_event\n");
+  if (!current_event_hooks->selected_thread_changed)
+    return;
+  current_event_hooks->selected_thread_changed (thread_num);
+}
+
 #endif
 
 #if WITH_GDB_EVENTS
@@ -173,6 +183,7 @@ enum gdb_event
   architecture_changed,
   target_changed,
   selected_frame_level_changed,
+  selected_thread_changed,
   nr_gdb_events
 };
 
@@ -211,6 +222,11 @@ struct selected_frame_level_changed
     int level;
   };
 
+struct selected_thread_changed
+  {
+    int thread_num;
+  };
+
 struct event
   {
     enum gdb_event type;
@@ -224,6 +240,7 @@ struct event
 	struct tracepoint_delete tracepoint_delete;
 	struct tracepoint_modify tracepoint_modify;
 	struct selected_frame_level_changed selected_frame_level_changed;
+	struct selected_thread_changed selected_thread_changed;
       }
     data;
   };
@@ -319,6 +336,15 @@ queue_selected_frame_level_changed (int level)
   append (event);
 }
 
+static void
+queue_selected_thread_changed (int thread_num)
+{
+  struct event *event = XMALLOC (struct event);
+  event->type = selected_thread_changed;
+  event->data.selected_thread_changed.thread_num = thread_num;
+  append (event);
+}
+
 void
 gdb_events_deliver (struct gdb_events *vector)
 {
@@ -374,6 +400,10 @@ gdb_events_deliver (struct gdb_events *vector)
 	  vector->selected_frame_level_changed
 	    (event->data.selected_frame_level_changed.level);
 	  break;
+	case selected_thread_changed:
+	  vector->selected_thread_changed
+	    (event->data.selected_thread_changed.thread_num);
+	  break;
 	}
       delivering_events = event->next;
       xfree (event);
@@ -395,6 +425,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.architecture_changed = queue_architecture_changed;
   queue_event_hooks.target_changed = queue_target_changed;
   queue_event_hooks.selected_frame_level_changed = queue_selected_frame_level_changed;
+  queue_event_hooks.selected_thread_changed = queue_selected_thread_changed;
 #endif
 
   c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
