@@ -1,3 +1,8 @@
+Tue Apr  7 16:18:46 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* test41.dvpasm, test42.dvpasm, test43.dvpasm,
+	test44.dvpasm:  Added missing ITOP instructions.
+
 Tue Apr 7 11:20:50 1998 Jillian Ye <jillian@cygnus.com>
         
 	* Added the SCE (feb28) testsuite.

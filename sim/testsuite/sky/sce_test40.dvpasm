@@ -1,18 +1,18 @@
-.include "sce_macros.s"
+.include "../include/macros.s"
 
 .global My_dma_start
 .text
 My_dma_start:
-.DmaPackVif 0
+.DmaPackPke 1
 
 
 DMAref *, data0
 
 .section ".dmadata", "aw"
 .DmaData data0
-STCYCL 4, 4
+STCYCL 4 4
 STMASK 0x00000000
-STMOD direct
+STMOD 0
 .EndDmaData
 
 .text
@@ -20,18 +20,17 @@ DMAref *, data1
 
 .section ".dmadata", "aw"
 .DmaData data1
-MPG *, *
-.include "sce_test40.vuasm" 
-.endmpg
+MPG 0, "test.vubin"
 .EndDmaData
 
 .text
 
 
 
-DMAcnt *
+DMAcnt *, data2
+.DmaData data2
 DIRECT *
-GIFpacked REGS={A_D}, NLOOP=4099, EOP
+GPUIFpacked REG={A_D}, NLOOP=4099, EOP
 iwzyx	0x00000000, 0x00000050, 0x14042580, 0x00000000
 iwzyx	0x00000000, 0x00000052, 0x00000100, 0x00000100
 iwzyx	0x00000000, 0x00000053, 0x00000000, 0x00000000
@@ -4131,12 +4130,12 @@ iwzyx	0x00000000, 0x00000054, 0x00000000, 0x00000000
 iwzyx	0x00000000, 0x00000054, 0x00010000, 0x00000000
 iwzyx	0x00000000, 0x00000054, 0x00000000, 0x0100000d
 iwzyx	0x00000000, 0x00000054, 0x00000000, 0xd00d0000
-.endgif
 .EndDirect
 .EndDmaData
-DMAcnt *
+DMAcnt *, data3
+.DmaData data3
 DIRECT *
-GIFpacked REGS={A_D}, NLOOP=8, EOP
+GPUIFpacked REG={A_D}, NLOOP=8, EOP
 iwzyx	0x00000000, 0x00000050, 0x02012980, 0x00000000
 iwzyx	0x00000000, 0x00000051, 0x00000000, 0x00000000
 iwzyx	0x00000000, 0x00000052, 0x00000002, 0x00000008
@@ -4145,12 +4144,12 @@ iwzyx	0x00000000, 0x00000054, 0x66f77318, 0x73597fbd
 iwzyx	0x00000000, 0x00000054, 0x302030a2, 0x358c5673
 iwzyx	0x00000000, 0x00000054, 0x29ae2149, 0x32d72e32
 iwzyx	0x00000000, 0x00000054, 0x000021ac, 0x7fff437c
-.endgif
 .EndDirect
 .EndDmaData
-DMAcnt *
+DMAcnt *, data4
+.DmaData data4
 DIRECT *
-GIFpacked REGS={A_D}, NLOOP=17, EOP
+GPUIFpacked REG={A_D}, NLOOP=17, EOP
 iwzyx	0x00000000, 0x0000004c, 0x00000000, 0x000a0000
 iwzyx	0x00000000, 0x0000004e, 0x00000000, 0x01000096
 iwzyx	0x00000000, 0x00000046, 0x00000000, 0x00000001
@@ -4168,10 +4167,10 @@ iwzyx	0x00000000, 0x0000003b, 0x00000081, 0x00008080
 iwzyx	0x00000000, 0x00000014, 0x00000000, 0x00000061
 iwzyx	0x00000000, 0x00000049, 0x00000000, 0x00000001
 iwzyx	0x00000000, 0x00000006, 0x20153006, 0x21412580
-.endgif
 .EndDirect
 .EndDmaData
-DMAcnt *
+DMAcnt *, data5
+.DmaData data5
 unpack V4_32, 895, *
 iwzyx 0x00000000, 0x437f0000, 0x437f0000, 0x437f0000
 .EndUnpack
@@ -4219,7 +4218,8 @@ iwzyx 0x00000000, 0xbf7fffef, 0x3ad0cc36, 0x00000000
 iwzyx 0x3f800000, 0x44480000, 0x00000000, 0x00000000
 .EndUnpack
 .EndDmaData
-DMAcnt *
+DMAcnt *, data6
+.DmaData data6
 MSCAL 0
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0x00000000, 0xc33e0000, 0x42780000
@@ -4407,6 +4407,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3dc7ffde, 0x3d400000
 iwzyx 0x3f800000, 0x3f800000, 0x3dc7ffde, 0x3dc00000
 iwzyx 0x3f800000, 0x3f800000, 0x3e47ffde, 0x3d400000
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0x42100000, 0xc3220000, 0x42e00000
@@ -4594,6 +4595,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3e4c0011, 0x3dc7ffde
 iwzyx 0x3f800000, 0x3f800000, 0x3e4c0011, 0x3e13ffef
 iwzyx 0x3f800000, 0x3f800000, 0x3e980000, 0x3dc7ffde
 .EndUnpack
+ITOP 421		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0x42be0000, 0xc2ec0000, 0x43030000
@@ -4781,6 +4783,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3e980000, 0x3e180022
 iwzyx 0x3f800000, 0x3f800000, 0x3e980000, 0x3e47ffde
 iwzyx 0x3f800000, 0x3f800000, 0x3ec9fff8, 0x3e180022
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0x431a0000, 0xc2780000, 0x42e00000
@@ -4968,6 +4971,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3ecc0011, 0x3e4c0011
 iwzyx 0x3f800000, 0x3f800000, 0x3ecc0011, 0x3e7c0011
 iwzyx 0x3f800000, 0x3f800000, 0x3efe0008, 0x3e4c0011
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0x433e0000, 0x00000000, 0x42780000
@@ -5155,6 +5159,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f000000, 0x3e800000
 iwzyx 0x3f800000, 0x3f800000, 0x3f000000, 0x3e980000
 iwzyx 0x3f800000, 0x3f800000, 0x3f18fffc, 0x3e800000
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0x433e0000, 0x42780000, 0x00000000
@@ -5342,6 +5347,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f18fffc, 0x3e980000
 iwzyx 0x3f800000, 0x3f800000, 0x3f18fffc, 0x3eb00000
 iwzyx 0x3f800000, 0x3f800000, 0x3f31fff8, 0x3e980000
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0x431a0000, 0x42ec0000, 0xc2480000
@@ -5529,6 +5535,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f330004, 0x3eb1fff8
 iwzyx 0x3f800000, 0x3f800000, 0x3f330004, 0x3ec9fff8
 iwzyx 0x3f800000, 0x3f800000, 0x3f4c0000, 0x3eb1fff8
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0x42be0000, 0x43220000, 0xc28a0000
@@ -5716,6 +5723,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f4c0000, 0x3ecc0011
 iwzyx 0x3f800000, 0x3f800000, 0x3f4c0000, 0x3ee3ffef
 iwzyx 0x3f800000, 0x3f800000, 0x3f64fffc, 0x3ecc0011
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0x42100000, 0x433e0000, 0xc2480000
@@ -5903,6 +5911,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f660008, 0x3ee60008
 iwzyx 0x3f800000, 0x3f800000, 0x3f660008, 0x3efe0008
 iwzyx 0x3f800000, 0x3f800000, 0x3f7f0004, 0x3ee60008
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0x00000000, 0xc33e0000, 0xc2780000
@@ -6090,6 +6099,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3dc7ffde, 0x3f0c0000
 iwzyx 0x3f800000, 0x3f800000, 0x3dc7ffde, 0x3f180000
 iwzyx 0x3f800000, 0x3f800000, 0x3e47ffde, 0x3f0c0000
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0xc2100000, 0xc3220000, 0xc2e00000
@@ -6277,6 +6287,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3e4c0011, 0x3f18fffc
 iwzyx 0x3f800000, 0x3f800000, 0x3e4c0011, 0x3f24fffc
 iwzyx 0x3f800000, 0x3f800000, 0x3e980000, 0x3f18fffc
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0xc2be0000, 0xc2ec0000, 0xc3030000
@@ -6464,6 +6475,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3e980000, 0x3f260008
 iwzyx 0x3f800000, 0x3f800000, 0x3e980000, 0x3f31fff8
 iwzyx 0x3f800000, 0x3f800000, 0x3ec9fff8, 0x3f260008
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0xc31a0000, 0xc2780000, 0xc2e00000
@@ -6651,6 +6663,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3ecc0011, 0x3f330004
 iwzyx 0x3f800000, 0x3f800000, 0x3ecc0011, 0x3f3f0004
 iwzyx 0x3f800000, 0x3f800000, 0x3efe0008, 0x3f330004
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0xc33e0000, 0x00000000, 0xc2780000
@@ -6838,6 +6851,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f000000, 0x3f400000
 iwzyx 0x3f800000, 0x3f800000, 0x3f000000, 0x3f4c0000
 iwzyx 0x3f800000, 0x3f800000, 0x3f18fffc, 0x3f400000
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0xc33e0000, 0x42780000, 0x00000000
@@ -7025,6 +7039,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f18fffc, 0x3f4c0000
 iwzyx 0x3f800000, 0x3f800000, 0x3f18fffc, 0x3f580000
 iwzyx 0x3f800000, 0x3f800000, 0x3f31fff8, 0x3f4c0000
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0xc31a0000, 0x42ec0000, 0x42480000
@@ -7212,6 +7227,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f330004, 0x3f58fffc
 iwzyx 0x3f800000, 0x3f800000, 0x3f330004, 0x3f64fffc
 iwzyx 0x3f800000, 0x3f800000, 0x3f4c0000, 0x3f58fffc
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 unpack V4_32, 0, *
 iwzyx 0x3f800000, 0xc2be0000, 0x43220000, 0x428a0000
@@ -7399,6 +7415,7 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f4c0000, 0x3f660008
 iwzyx 0x3f800000, 0x3f800000, 0x3f4c0000, 0x3f71fff8
 iwzyx 0x3f800000, 0x3f800000, 0x3f64fffc, 0x3f660008
 .EndUnpack
+ITOP 0			; -=ihc=-
 MSCNT
 unpack V4_32, 421, *
 iwzyx 0x3f800000, 0xc2100000, 0x433e0000, 0x42480000
@@ -7586,6 +7603,6 @@ iwzyx 0x3f800000, 0x3f800000, 0x3f660008, 0x3f730004
 iwzyx 0x3f800000, 0x3f800000, 0x3f660008, 0x3f7f0004
 iwzyx 0x3f800000, 0x3f800000, 0x3f7f0004, 0x3f730004
 .EndUnpack
+ITOP 412		; -=ihc=-
 MSCNT
 .EndDmaData
-DMAend			; ADDED
