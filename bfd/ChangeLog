@@ -1,5 +1,8 @@
 Sat Nov 30 21:19:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
+	* elf.c (elf_corefile_note): cast malloc to avoid warning.
+	* Makefile.in: Fixed dependencies due to file rename
+
 	* aout-encap.c, aoutf1.h, aoutx.h, archive.c, bout.c, coff-a29k.c,
 	coff-h8300.c, coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c,
 	coff-mips.c, coff-rs6000.c, cpu-h300.c, elf.c, i386aout.c,
