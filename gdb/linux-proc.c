@@ -25,6 +25,8 @@
 #include <sys/procfs.h>	/* for elf_gregset etc. */
 #include <sys/stat.h>	/* for struct stat */
 #include <ctype.h>	/* for isdigit */
+#include <unistd.h>	/* for open, pread64 */
+#include <fcntl.h>	/* for O_RDONLY */
 #include "regcache.h"	/* for registers_changed */
 #include "gregset.h"	/* for gregset */
 #include "gdbcore.h"	/* for get_exec_file */
@@ -32,6 +34,10 @@
 #include "elf-bfd.h"	/* for elfcore_write_* */
 #include "cli/cli-decode.h"	/* for add_info */
 #include "gdb_string.h"
+
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
 
 /* Function: child_pid_to_exec_file
  *
@@ -576,4 +582,47 @@ Specify any of the following keywords for detailed info:\n\
   stat     -- list a bunch of random process info.\n\
   status   -- list a different bunch of random process info.\n\
   all      -- list all available /proc info.");
+}
+
+int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
+			    struct mem_attrib *attrib,
+			    struct target_ops *target)
+{
+  int fd, ret;
+  char filename[64];
+
+  if (write)
+    return 0;
+
+  /* Don't bother for one word.  */
+  if (len < 3 * sizeof (long))
+    return 0;
+
+  /* We could keep this file open and cache it - possibly one
+     per thread.  That requires some juggling, but is even faster.  */
+  sprintf (filename, "/proc/%d/mem", PIDGET (inferior_ptid));
+  fd = open (filename, O_RDONLY | O_LARGEFILE);
+  if (fd == -1)
+    return 0;
+
+  /* If pread64 is available, use it.  It's faster if the kernel
+     supports it (only one syscall), and it's 64-bit safe even
+     on 32-bit platforms (for instance, SPARC debugging a SPARC64
+     application).
+
+     We play some autoconf and CFLAGS games to get this declaration
+     exposed: -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE.  And then
+     a -D_BSD_SOURCE to counteract the defaults for _XOPEN_SOURCE.  */
+#ifdef HAVE_PREAD64
+  if (pread64 (fd, myaddr, len, addr) != len)
+#else
+  if (lseek (fd, addr, SEEK_SET) == -1
+      || read (fd, myaddr, len) != len)
+#endif
+    ret = 0;
+  else
+    ret = len;
+
+  close (fd);
+  return ret;
 }

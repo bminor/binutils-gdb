@@ -1,3 +1,13 @@
+2002-11-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	* acconfig.h (HAVE_PREAD64): Add.
+	* configure.in: Check for pread64.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+	* lin-lwp.c (lin_lwp_xfer_memory): Call linux_proc_xfer_memory.
+	* linux-proc.c (linux_proc_xfer_memory): New function.
+	* config/nm-linux.h (linux_proc_xfer_memory): Add prototype.
+
 2002-11-25  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (scan_partial_symbols): Descend into namespace

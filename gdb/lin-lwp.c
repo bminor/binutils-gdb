@@ -1380,7 +1380,9 @@ lin_lwp_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   if (is_lwp (inferior_ptid))
     inferior_ptid = pid_to_ptid (GET_LWP (inferior_ptid));
 
-  xfer = child_xfer_memory (memaddr, myaddr, len, write, attrib, target);
+  xfer = linux_proc_xfer_memory (memaddr, myaddr, len, write, attrib, target);
+  if (xfer == 0)
+    xfer = child_xfer_memory (memaddr, myaddr, len, write, attrib, target);
 
   do_cleanups (old_chain);
   return xfer;

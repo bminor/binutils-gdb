@@ -617,6 +617,23 @@ if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
             [Define if <thread_db.h> has the TD_NOTALLOC error code.])
 fi
 
+dnl linux-proc.c wants to use pread64, which may require special CFLAGS
+dnl -D_BSD_SOURCE is normally assumed but we have to specify it because of
+dnl -D_XOPEN_SOURCE=500.
+if test $host = $target; then
+  case $target in
+    *-linux*)
+      save_CFLAGS=$CFLAGS
+      CFLAGS="$CFLAGS -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE"
+      AC_TRY_LINK([#include <unistd.h>],
+		  [pread64 (0, NULL, 0, 0);],
+		  [ENABLE_CFLAGS="$ENABLE_CFLAGS -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE"
+		   AC_DEFINE(HAVE_PREAD64)], [])
+      CFLAGS=$save_CFLAGS
+      ;;
+  esac
+fi
+
 dnl The CLI cannot be disabled yet, but may be in the future  
 
 dnl Handle CLI sub-directory configury.
