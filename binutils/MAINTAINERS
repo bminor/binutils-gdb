@@ -47,6 +47,8 @@ SH		Hans-Peter Nilsson <hp@bitrange.com>
 SPARC		Jakub Jelinek <jakub@redhat.com>
 68HC11 68HC12   Stephane Carrez <Stephane.Carrez@worldnet.fr>
 DWARF2		Jason Merrill <jason@redhat.com>
+x86_64		Jan Hubicka <jh@suse.cz>
+x86_64		Andreas Jaeger <aj@suse.de>
 
                --------- CGEN Maintainers -------------
 

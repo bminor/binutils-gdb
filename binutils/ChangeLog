@@ -1,3 +1,7 @@
+Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
+
+	* MAINTAINERS: Add myself and Andreas Jaeger as x86_64 maintainer.
+
 2000-12-07  Andrew Haley  <aph@redhat.com>
 
 	* readelf.c (display_debug_frames): Only display columns that are
