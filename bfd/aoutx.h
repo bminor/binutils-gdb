@@ -3035,7 +3035,12 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 
       /* Ignore symbols that are not externally visible.  */
       if ((type & N_EXT) == 0)
-	continue;
+	{
+	  if (type == N_WARNING
+	      || type == N_INDR)
+	    ++p;
+	  continue;
+	}
 
       name = strings + GET_WORD (abfd, p->e_strx);
       h = bfd_link_hash_lookup (info->hash, name, false, false, true);
@@ -3045,9 +3050,17 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
       if (h == (struct bfd_link_hash_entry *) NULL
 	  || (h->type != bfd_link_hash_undefined
 	      && h->type != bfd_link_hash_common))
-	continue;
+	{
+	  if (type == (N_INDR | N_EXT))
+	    ++p;
+	  continue;
+	}
 
-      if ((type & (N_TEXT | N_DATA | N_BSS)) != 0)
+      if (type == (N_TEXT | N_EXT)
+	  || type == (N_DATA | N_EXT)
+	  || type == (N_BSS | N_EXT)
+	  || type == (N_ABS | N_EXT)
+	  || type == (N_INDR | N_EXT))
 	{
 	  /* This object file defines this symbol.  We must link it
 	     in.  This is true regardless of whether the current
@@ -3064,7 +3077,7 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 	  return true;
 	}
 
-      if (type == (N_EXT | N_UNDF))
+      if (type == (N_UNDF | N_EXT))
 	{
 	  bfd_vma value;
 

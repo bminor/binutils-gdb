@@ -1,3 +1,9 @@
+Sat Feb  5 01:14:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (aout_link_check_ar_symbols): Correct test for whether
+	object file defines symbol.  Also, if skipping a symbol, skip the
+	second symbol of a N_WARNING or N_INDR symbol as well.
+
 Fri Feb  4 23:55:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Add basic support for writing RS/6000 XCOFF files.
