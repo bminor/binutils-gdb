@@ -22,11 +22,8 @@
 @syncodeindex ky cp
 
 @c readline appendices use @vindex, @findex and @ftable,
-@c annotate.texi uses @findex.
+@c annotate.texi and gdbmi use @findex.
 @syncodeindex vr cp
-@syncodeindex fn cp
-
-@c gdbmi uses @findex
 @syncodeindex fn cp
 
 @c !!set GDB manual's edition---not the same as GDB version!

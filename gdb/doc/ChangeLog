@@ -1,3 +1,8 @@
+2000-05-24  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo: Remove duplicate @syncodeindex.  From Brian
+        Youmans.
+
 Wed May 24 21:27:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Brian Youmans:
