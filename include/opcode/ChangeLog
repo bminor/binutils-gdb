@@ -1,3 +1,31 @@
+Tue Jan 17 10:55:30 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* mips.h (INSN_ISA, INSN_4650): Define.
+
+start-sanitize-arc
+Mon Dec 19 12:15:52 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h: Misc. cleanup.  Merge "modifiers" into flags field.
+	Support multiply/shift insns.
+end-sanitize-arc
+
+start-sanitize-arc
+Tue Nov 29 17:52:41 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h: New file.
+end-sanitize-arc
+
+Wed Oct 19 13:34:17 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* a29k.h: Add operand type 'I' for `inv' and `iretinv'.  On
+	systems with a separate instruction and data cache, such as the
+	29040, these instructions take an optional argument.
+
+Wed Sep 14 17:44:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mips.h (INSN_STORE_MEMORY): Correct value to not conflict with
+	INSN_TRAP.
+
 Tue Sep  6 11:39:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* mips.h (INSN_STORE_MEMORY): Define.
