@@ -1,3 +1,8 @@
+Mon May  1 17:34:34 2000  Jim Wilson  <wilson@cygnus.com>
+
+	* configure.host: Added HOSTING_CRT0, HOSTING_LIBS for
+	host "ia64-*-linux-gnu*".
+
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* ld.h: Correctly check GCC version.
