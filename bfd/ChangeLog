@@ -1,3 +1,8 @@
+2004-06-16  Daniel Jacobowitz  <dan@debian.org>
+
+	* elf32-ppc.c (ppc_elf_create_linker_section): Create symbols in
+	the pre-existing section.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (struct sec): Remove usused flags.  Reorganize a little.

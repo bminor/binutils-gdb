@@ -2593,7 +2593,7 @@ ppc_elf_create_linker_section (bfd *abfd,
 {
   elf_linker_section_t *lsect;
   struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
-  asection *s;
+  asection *s, *sym_sec;
   bfd_size_type amt;
   flagword flags;
   const char *name;
@@ -2642,13 +2642,15 @@ ppc_elf_create_linker_section (bfd *abfd,
   lsect->sym_offset = sym_offset;
 
   /* See if the sections already exist.  */
-  s = bfd_get_section_by_name (htab->elf.dynobj, name);
+  sym_sec = s = bfd_get_section_by_name (htab->elf.dynobj, name);
   if (s == NULL || (s->flags & flags) != flags)
     {
       s = bfd_make_section_anyway (htab->elf.dynobj, name);
       if (s == NULL
 	  || !bfd_set_section_flags (htab->elf.dynobj, s, flags))
 	return NULL;
+      if (sym_sec == NULL)
+	sym_sec = s;
     }
   lsect->section = s;
 
@@ -2676,7 +2678,7 @@ ppc_elf_create_linker_section (bfd *abfd,
 
       if ((bh == NULL || bh->type == bfd_link_hash_undefined)
 	  && !(_bfd_generic_link_add_one_symbol
-	       (info, abfd, sym_name, BSF_GLOBAL, s, sym_offset, NULL,
+	       (info, abfd, sym_name, BSF_GLOBAL, sym_sec, sym_offset, NULL,
 		FALSE, get_elf_backend_data (abfd)->collect, &bh)))
 	return NULL;
       h = (struct elf_link_hash_entry *) bh;
