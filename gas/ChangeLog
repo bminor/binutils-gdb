@@ -1,3 +1,8 @@
+2001-12-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-d10v.c (get_operands): Mark OPERAND_PLUS after
+	OPERAND_ATSIGN as O_absent.
+
 2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
 	    Richard Henderson  <rth@redhat.com>
 
