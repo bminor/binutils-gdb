@@ -1,3 +1,19 @@
+2002-05-21  H.J. Lu  (hjl@gnu.org)
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_parse_args): Handle
+	"-z muldefs".
+	(gld${EMULATION_NAME}_list_options): Add "-z muldefs".
+
+	* ld.texinfo: Updated for --allow-multiple-definition and
+	"-z muldefs".
+
+	* ldmain.c (main): Initialize the allow_multiple_definition
+	field to false.
+
+	* lexsup.c (OPTION_ALLOW_MULTIPLE_DEFINITION): New.
+	(ld_options): Add --allow-multiple-definition.
+	(parse_args): Support OPTION_ALLOW_MULTIPLE_DEFINITION.
+
 2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add earmelfb_nbsd.o.

@@ -1541,6 +1541,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	}
       else if (strcmp (optarg, "defs") == 0)
 	link_info.no_undefined = true;
+      else if (strcmp (optarg, "muldefs") == 0)
+	link_info.allow_multiple_definition = true;
       else if (strcmp (optarg, "combreloc") == 0)
 	link_info.combreloc = true;
       else if (strcmp (optarg, "nocombreloc") == 0)
@@ -1589,6 +1591,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
+  fprintf (file, _("  -z muldefs\t\tAllow multiple definitions\n"));
   fprintf (file, _("  -z nocombreloc\tDon't merge dynamic relocs into one section\n"));
   fprintf (file, _("  -z nocopyreloc\tDon't create copy relocs\n"));
   fprintf (file, _("  -z nodefaultlib\tMark object not to use default search paths\n"));

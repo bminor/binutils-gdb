@@ -126,7 +126,8 @@ int parsing_defsym = 0;
 #define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
 #define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
 #define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
-#define OPTION_DISCARD_NONE		(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
+#define OPTION_ALLOW_MULTIPLE_DEFINITION (OPTION_ALLOW_SHLIB_UNDEFINED + 1)
+#define OPTION_DISCARD_NONE		(OPTION_ALLOW_MULTIPLE_DEFINITION + 1)
 #define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
 #define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
 #define OPTION_NOSTDLIB			(OPTION_NO_DEFINE_COMMON + 1)
@@ -319,6 +320,8 @@ static const struct ld_option ld_options[] =
      '\0', NULL, N_("Allow no undefined symbols"), TWO_DASHES },
   { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
      '\0', NULL, N_("Allow undefined symbols in shared objects"), TWO_DASHES },
+  { {"allow-multiple-definition", no_argument, NULL, OPTION_ALLOW_MULTIPLE_DEFINITION},
+     '\0', NULL, N_("Allow multiple definitions"), TWO_DASHES },
   { {"no-warn-mismatch", no_argument, NULL, OPTION_NO_WARN_MISMATCH},
       '\0', NULL, N_("Don't warn about mismatched input files"), TWO_DASHES},
   { {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
@@ -760,6 +763,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_ALLOW_SHLIB_UNDEFINED:
 	  link_info.allow_shlib_undefined = true;
+	  break;
+	case OPTION_ALLOW_MULTIPLE_DEFINITION:
+	  link_info.allow_multiple_definition = true;
 	  break;
 	case OPTION_NO_WARN_MISMATCH:
 	  command_line.warn_mismatch = false;

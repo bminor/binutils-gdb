@@ -859,6 +859,7 @@ of this object will ignore any default library search paths.
 @code{now} marks the object with the non-lazy runtime binding.
 @code{origin} marks the object may contain $ORIGIN.
 @code{defs} disallows undefined symbols.
+@code{muldefs} allows multiple definitions.
 @code{combreloc} combines multiple reloc sections and sorts them
 to make dynamic symbol lookup caching possible.
 @code{nocombreloc} disables multiple reloc sections combining.
@@ -1079,6 +1080,14 @@ while linking a large executable.
 Normally when creating a non-symbolic shared library, undefined symbols
 are allowed and left to be resolved by the runtime loader.  These options
 disallows such undefined symbols.
+
+@kindex --allow-multiple-definition
+@kindex -z muldefs
+@item --allow-multiple-definition
+@itemx -z muldefs
+Normally when a symbol is defined multiple times, the linker will
+report a fatal error. These options allow multiple definitions and the
+first definition will be used.
 
 @kindex --allow-shlib-undefined
 @item --allow-shlib-undefined
