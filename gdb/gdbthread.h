@@ -45,7 +45,6 @@ struct thread_info
   /* State from wait_for_inferior */
   CORE_ADDR prev_pc;
   struct breakpoint *step_resume_breakpoint;
-  struct breakpoint *through_sigtramp_breakpoint;
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
   struct frame_id step_frame_id;
@@ -118,7 +117,6 @@ extern void save_infrun_state (ptid_t ptid,
 			       CORE_ADDR prev_pc,
 			       int       trap_expected,
 			       struct breakpoint *step_resume_breakpoint,
-			       struct breakpoint *through_sigtramp_breakpoint,
 			       CORE_ADDR step_range_start,
 			       CORE_ADDR step_range_end,
 			       const struct frame_id *step_frame_id,
@@ -137,7 +135,6 @@ extern void load_infrun_state (ptid_t ptid,
 			       CORE_ADDR *prev_pc,
 			       int       *trap_expected,
 			       struct breakpoint **step_resume_breakpoint,
-			       struct breakpoint **through_sigtramp_breakpoint,
 			       CORE_ADDR *step_range_start,
 			       CORE_ADDR *step_range_end,
 			       struct frame_id *step_frame_id,

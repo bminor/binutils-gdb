@@ -294,7 +294,6 @@ load_infrun_state (ptid_t ptid,
 		   CORE_ADDR *prev_pc,
 		   int *trap_expected,
 		   struct breakpoint **step_resume_breakpoint,
-		   struct breakpoint **through_sigtramp_breakpoint,
 		   CORE_ADDR *step_range_start,
 		   CORE_ADDR *step_range_end,
 		   struct frame_id *step_frame_id,
@@ -317,7 +316,6 @@ load_infrun_state (ptid_t ptid,
   *prev_pc = tp->prev_pc;
   *trap_expected = tp->trap_expected;
   *step_resume_breakpoint = tp->step_resume_breakpoint;
-  *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
   *step_range_start = tp->step_range_start;
   *step_range_end = tp->step_range_end;
   *step_frame_id = tp->step_frame_id;
@@ -340,7 +338,6 @@ save_infrun_state (ptid_t ptid,
 		   CORE_ADDR prev_pc,
 		   int trap_expected,
 		   struct breakpoint *step_resume_breakpoint,
-		   struct breakpoint *through_sigtramp_breakpoint,
 		   CORE_ADDR step_range_start,
 		   CORE_ADDR step_range_end,
 		   const struct frame_id *step_frame_id,
@@ -363,7 +360,6 @@ save_infrun_state (ptid_t ptid,
   tp->prev_pc = prev_pc;
   tp->trap_expected = trap_expected;
   tp->step_resume_breakpoint = step_resume_breakpoint;
-  tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;
   tp->step_range_start = step_range_start;
   tp->step_range_end = step_range_end;
   tp->step_frame_id = (*step_frame_id);

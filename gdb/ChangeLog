@@ -1,3 +1,12 @@
+2004-05-10  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (through_sigtramp_breakpoint): Delete variable.
+	(context_switch): Do not switch through_sigtramp_breakpoint.
+	* gdbthread.h (save_infrun_state, load_infrun_state)
+	(struct thread_info): Delete through_sigtramp_breakpoint parameter
+	and structure member.
+	* thread.c (load_infrun_state, save_infrun_state): Update.
+
 2004-05-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68kbsd-tdep.c (m68kbsd_elf_init_abi): Call m68k_svr4_init_abi.

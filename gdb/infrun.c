@@ -303,9 +303,6 @@ static int breakpoints_failed;
 static int stop_print_frame;
 
 static struct breakpoint *step_resume_breakpoint = NULL;
-/* NOTE: cagney/2004-05-08: This variable needs to be garbage
-   collected, it isn't used.  */
-static struct breakpoint *through_sigtramp_breakpoint = NULL;
 
 /* On some platforms (e.g., HP-UX), hardware watchpoints have bad
    interactions with an inferior that is running a kernel function
@@ -1159,7 +1156,7 @@ context_switch (struct execution_control_state *ecs)
       /* Save infrun state for the old thread.  */
       save_infrun_state (inferior_ptid, prev_pc,
 			 trap_expected, step_resume_breakpoint,
-			 through_sigtramp_breakpoint, step_range_start,
+			 step_range_start,
 			 step_range_end, &step_frame_id,
 			 ecs->handling_longjmp, ecs->another_trap,
 			 ecs->stepping_through_solib_after_catch,
@@ -1170,7 +1167,7 @@ context_switch (struct execution_control_state *ecs)
       /* Load infrun state for the new thread.  */
       load_infrun_state (ecs->ptid, &prev_pc,
 			 &trap_expected, &step_resume_breakpoint,
-			 &through_sigtramp_breakpoint, &step_range_start,
+			 &step_range_start,
 			 &step_range_end, &step_frame_id,
 			 &ecs->handling_longjmp, &ecs->another_trap,
 			 &ecs->stepping_through_solib_after_catch,
