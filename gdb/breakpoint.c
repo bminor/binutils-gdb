@@ -765,7 +765,7 @@ insert_breakpoints (void)
 		   so we must try to set a breakpoint at the LMA.
 		   This will not work for a hardware breakpoint.  */
 		if (b->type == bp_hardware_breakpoint)
-		  warning ("hw breakpoint %d not supported in overlay!\n",
+		  warning ("hardware breakpoint %d not supported in overlay!\n",
 			   b->number);
 		else
 		  {

@@ -1,3 +1,8 @@
+2002-04-05  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.c (insert_breakpoints): Change 'hw' to 'hardware in
+	warning message.
+
 2002-04-05  J. Brobecker  <brobecker@gnat.com>
 
 	* utils.c (xfullpath): New function.
