@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Sun Aug 25 21:42:08 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Sun Aug 25 22:42:31 PDT 1991, by rich@cygint.cygnus.com
 #
 # $Id$
 
@@ -52,6 +52,7 @@ subdir_do: force
 				$(MAKE) \
 					"against=$(against)" \
 					"AR=$(AR)" \
+					"CC=$(CC)" \
 					"AR_FLAGS=$(AR_FLAGS)" \
 					"RANLIB=$(RANLIB)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
@@ -128,18 +129,30 @@ clean:
 install: install-dirs install-fixed-includes
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
 
+# The "else true" stuff is for Ultrix; the shell returns the exit code
+# of the "if" command, if no commands are run in the "then" or "else" part,
+# causing Make to quit.
 install-dirs: force
 	- mkdir $(destdir)
 	- mkdir $(destdir)/bin
 	- mkdir $(destdir)/lib
 	- mkdir $(destdir)/include
+	- mkdir $(destdir)/doc
 	- mkdir $(destdir)/man
 	- mkdir $(destdir)/man/man1
+	- mkdir $(destdir)/man/man2
+	- mkdir $(destdir)/man/man3
+	- mkdir $(destdir)/man/man4
+	- mkdir $(destdir)/man/man5
+	- mkdir $(destdir)/man/man6
+	- mkdir $(destdir)/man/man7
+	- mkdir $(destdir)/man/man8
 	if [ -d $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
                 then echo .$(target) ; fi`$(subdir) ] ; then \
 		(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
 	                then echo .$(target) ; fi`$(subdir) ; \
 				$(MAKE) install-dir) ; \
+	else true; \
 	fi
 
 install-fixed-includes: force
@@ -148,6 +161,7 @@ install-fixed-includes: force
 		(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
 	                then echo .$(target) ; fi`$(subdir) ; \
 				$(MAKE) install-fixed-includes) ; \
+	else true; \
 	fi
 
 etags tags: TAGS
@@ -182,24 +196,60 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
 DEVO_SUPPORT= README README.configure Makefile.in configure configure.in \
-	config.sub 
-GDB_SUPPORT_DIRS= bfd include libiberty readline texinfo/fsf/texinfo.tex
+	config.sub config
+GDB_SUPPORT_DIRS= bfd include libiberty readline
+GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
 
-bfd.ilrt.tar.Z: force_update
+setup-dirs: force_update
 	./configure -template=./configure
 	./configure sun4
 	make clean
 	./configure -rm sun4
+
+bfd.ilrt.tar.Z: setup-dirs
 	rm -f bfd.ilrt.tar.Z
-	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) -print`
-	tar cf - $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) \
+	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
+	tar cf - $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) \
 		| compress -v >bfd.ilrt.tar.Z
+
+gdb.tar.Z: setup-dirs
+	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir)
+	$(MAKE) $(MFLAGS) -f Makefile.in make-gdb.tar.Z
+
+make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
+	rm -rf proto-toplev; mkdir proto-toplev
+	ln -s ../gdb/proto-gdb.dir proto-toplev/gdb
+	(cd proto-toplev; for i in $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS); do \
+		ln -s ../$$i . ; \
+	done)
+	mkdir proto-toplev/texinfo
+	mkdir proto-toplev/texinfo/fsf
+	ln -s ../../../texinfo/fsf/texinfo.tex proto-toplev/texinfo/fsf/
+	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
+		echo "==> Making gdb-$$VER.tar.Z"; \
+		ln -s proto-toplev gdb-$$VER; \
+		tar cfh - gdb-$$VER \
+		| compress -v >gdb-$$VER.tar.Z)
 
 force_update:
 
 #
 # $Log$
-# Revision 1.29  1991/08/26 04:45:57  rich
+# Revision 1.33  1991/09/20 08:41:45  gnu
+# New rules for building distributions.  Normal distribution
+# is built by doing `make -f Makefile.in gdb.tar.Z' in the devo dir.
+#
+# Revision 1.32  1991/09/19  20:56:05  steve
+# More changes for 68k and 386 coff support. (Sorry about the previous
+# log).
+#
+# Revision 1.31  1991/09/03  13:28:38  gnu
+# Add "else true" clauses for really dumb sh's such as Ultrix.
+#
+# Revision 1.30  1991/08/26  06:37:57  rich
+# Correcting configurations and installs.
+#
+# Revision 1.29  1991/08/26  04:45:57  rich
 # Correcting install target when gcc not present.
 #
 # Revision 1.28  1991/08/25  23:40:22  rich
