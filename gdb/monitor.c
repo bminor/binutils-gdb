@@ -46,6 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "inferior.h"
 #include "regex.h"
+#include "dcache.h"
 
 static int readchar PARAMS ((int timeout));
 
@@ -80,6 +81,9 @@ static void monitor_load PARAMS ((char *file, int from_tty));
 static void monitor_mourn_inferior PARAMS ((void));
 static void monitor_stop PARAMS ((void));
 
+static int monitor_read_memory PARAMS ((CORE_ADDR addr, char *myaddr,int len));
+static int monitor_write_memory PARAMS ((CORE_ADDR addr, char *myaddr,int len));
+
 static int from_hex PARAMS ((int a));
 static unsigned long get_hex_word PARAMS ((void));
 
@@ -112,6 +116,8 @@ static char fastmap[256];
 
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
+
+static DCACHE *remote_dcache;
 
 /* monitor_printf_noecho -- Send data to monitor, but don't expect an echo.
    Works just like printf.  */
@@ -194,12 +200,15 @@ monitor_printf (va_alist)
 
       if (c != sndbuf[i])
 	{
+	  /* Don't fail if we sent a ^C, they're never echoed */
+	  if (sndbuf[i] == '\003')
+	    continue;
 #if 0
 	  if (sndbuf[i] == '\r'
 	      && c == '\n')
 	    goto trycr;
 #endif
-	  error ("monitor_printf:  Bad echo.  Sent: \"%s\", Got: \"%.*s%c\".",
+	  warning ("monitor_printf:  Bad echo.  Sent: \"%s\", Got: \"%.*s%c\".",
 		 sndbuf, i, sndbuf, c);
 	}
     }
@@ -459,6 +468,8 @@ monitor_open (args, mon_ops, from_tty)
 
   monitor_printf (current_monitor->line_term);
 
+  remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory);
+
   start_remote ();
 }
 
@@ -520,6 +531,7 @@ monitor_resume (pid, step, sig)
      int pid, step;
      enum target_signal sig;
 {
+  dcache_flush (remote_dcache);
   if (step)
     monitor_printf (STEP_CMD);
   else
@@ -724,7 +736,7 @@ monitor_fetch_register (regno)
 	    continue;
 
 	  error ("monitor_fetch_register (%d):  bad response from monitor: %.*s%c.",
-		 regno, i, regbuf, c);
+	 regno, i, regbuf, c);
 	}
 
       regbuf[i] = c;
@@ -754,18 +766,38 @@ monitor_fetch_register (regno)
 
 /* Read the remote registers into the block regs.  */
 
+static void monitor_dump_regs ()
+{
+  if (current_monitor->dump_registers)
+    {
+      char buf[200];
+      int resp_len;
+      monitor_printf (current_monitor->dump_registers);
+      resp_len = monitor_expect_prompt (buf, sizeof (buf));
+      parse_register_dump (buf, resp_len);
+    }
+  else
+    abort(); /* Need some way to read registers */
+}
+
 static void
 monitor_fetch_registers (regno)
      int regno;
 {
-  if (regno >= 0)
+  if (current_monitor->getreg.cmd) 
     {
-      monitor_fetch_register (regno);
-      return;
-    }
+      if (regno >= 0)
+	{
+	  monitor_fetch_register (regno);
+	  return;
+	}
 
-  for (regno = 0; regno < NUM_REGS; regno++)
-    monitor_fetch_register (regno);
+      for (regno = 0; regno < NUM_REGS; regno++)
+	monitor_fetch_register (regno);
+    }
+  else {
+    monitor_dump_regs ();
+  }
 }
 
 /* Store register REGNO, or all if REGNO == 0.  Return errno value.  */
@@ -1102,10 +1134,7 @@ monitor_xfer_memory (memaddr, myaddr, len, write, target)
      int write;
      struct target_ops *target;		/* ignored */
 {
-  if (write)
-    return monitor_write_memory (memaddr, myaddr, len);
-  else
-    return monitor_read_memory (memaddr, myaddr, len);
+  return dcache_xfer_memory (remote_dcache, memaddr, myaddr, len, write);
 }
 
 static void
@@ -1205,6 +1234,8 @@ monitor_load (file, from_tty)
     char *file;
     int  from_tty;
 {
+  dcache_flush (remote_dcache);
+
   if (current_monitor->load_routine)
     current_monitor->load_routine (monitor_desc, file, hashmark);
   else
@@ -1212,7 +1243,8 @@ monitor_load (file, from_tty)
 
 /* Finally, make the PC point at the start address */
 
-  write_pc (bfd_get_start_address (exec_bfd));
+  if (exec_bfd)
+    write_pc (bfd_get_start_address (exec_bfd));
 
   inferior_pid = 0;		/* No process now */
 
@@ -1288,46 +1320,47 @@ monitor_load_srec (args)
       return;
     }
   
-  monitor_printf (LOAD_CMD); /* tell the monitor to load */
+  monitor_printf (LOAD_CMD);	/* tell the monitor to load */
   if (current_monitor->loadresp)
     monitor_expect (current_monitor->loadresp, NULL, 0);
 
   for (s = abfd->sections; s; s = s->next)
-    if (s->flags & SEC_LOAD)
-      {
-	printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
-			 s->vma + s->_raw_size);
-	gdb_flush (gdb_stdout);
+    {
+      if (s->flags & SEC_LOAD)
+	{
+	  int numbytes;
 
-	for (i = 0; i < s->_raw_size; i += srec_frame)
-	  {
-	    int numbytes;
+	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
+			   s->vma + s->_raw_size);
+	  gdb_flush (gdb_stdout);
 
-	    numbytes = min (srec_frame, s->_raw_size - i);
+	  for (i = 0; i < s->_raw_size; i += numbytes)
+	    {
+	      numbytes = min (srec_frame, s->_raw_size - i);
 
-	    bfd_get_section_contents (abfd, s, buffer, i, numbytes);
+	      bfd_get_section_contents (abfd, s, buffer, i, numbytes);
 
-	    reclen = monitor_make_srec (srec, 3, s->vma + i, buffer, numbytes);
+	      reclen = monitor_make_srec (srec, 'd', s->vma + i, buffer, numbytes);
 
-	    monitor_printf_noecho ("%.*s\r", reclen, srec);
+	      monitor_printf_noecho ("%.*s\r", reclen, srec);
 
-	    if (hashmark)
-	      {
-		putchar_unfiltered ('#');
-		gdb_flush (gdb_stdout);
-	      }
-	  }			/* Per-packet (or S-record) loop */
+	      if (hashmark)
+		{
+		  putchar_unfiltered ('#');
+		  gdb_flush (gdb_stdout);
+		}
+	    } /* Per-packet (or S-record) loop */
 
-	putchar_unfiltered ('\n');
-      }				/* Loadable sections */
-  
+	  putchar_unfiltered ('\n');
+	} /* Loadable sections */
+    }
   if (hashmark) 
     putchar_unfiltered ('\n');
   
   /* Write a type 7 terminator record. no data for a type 7, and there
      is no data, so len is 0.  */
 
-  reclen = monitor_make_srec (srec, 7, abfd->start_address, NULL, 0);
+  reclen = monitor_make_srec (srec, 't', abfd->start_address, NULL, 0);
 
   monitor_printf_noecho ("%.*s\r", reclen, srec);
 
@@ -1393,23 +1426,58 @@ monitor_make_srec (buffer, type, memaddr, myaddr, len)
   unsigned char checksum;
   int i;
   char *buf;
-  static char hextab[] = "0123456789ABCDEF";
-
+  static char hextab[16] = "0123456789ABCDEF";
+  static char data_code_table[] = { 0,0,1,2,3};
+  static char term_code_table[] = { 0,0,9,8,7};
+  int addr_size; /* Number of bytes in the record */
+  int type_code;
   buf = buffer;
 
   checksum = 0;
   
-  /* Create the header for the srec. 4 is the number of bytes in the address,
+  addr_size = 2;
+  if (memaddr >= 0xffffff)
+    addr_size = 4;
+  else if (memaddr >= 0xffffff)
+    addr_size = 3;
+  else
+    addr_size = 2;
+
+  switch (type)
+    {
+    case 't':
+      type_code = term_code_table[addr_size];
+      break;
+    case 'd':
+      type_code = data_code_table[addr_size];
+      break;
+    default:
+      abort();
+    }
+  /* Create the header for the srec. addr_size is the number of bytes in the address,
      and 1 is the number of bytes in the count.  */
 
-  sprintf (buf, "S%d%02X%08X", type, len + 4 + 1, memaddr);
-  buf += 12;
-  
+  switch (addr_size) 
+    {
+    case 4:
+      sprintf (buf, "S%d%02X%08X", type_code, len + addr_size + 1, memaddr);
+      buf += 12;
+      break;
+    case 3:
+      sprintf (buf, "S%d%02X%06X", type_code, len + addr_size + 1, memaddr);
+      buf += 10;
+      break;
+    case 2:
+      sprintf (buf, "S%d%02X%04X", type_code, len + addr_size + 1, memaddr);
+      buf += 8;
+      break;
+    }
+
 /* Note that the checksum is calculated on the raw data, not the hexified
    data.  It includes the length, address and the data portions of the
    packet.  */
 
-  checksum += (len + 4 + 1			/* Packet length */
+  checksum += (len + addr_size + 1		/* Packet length */
 	       + (memaddr & 0xff)		/* Address... */
 	       + ((memaddr >>  8) & 0xff)
 	       + ((memaddr >> 16) & 0xff)

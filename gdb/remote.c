@@ -1,5 +1,5 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1988, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -177,6 +177,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
+#include "thread.h"
 
 #include "dcache.h"
 
@@ -189,71 +190,56 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
-static int
-remote_write_bytes PARAMS ((CORE_ADDR memaddr, unsigned char *myaddr, int len));
+static int remote_write_bytes PARAMS ((CORE_ADDR memaddr,
+				       unsigned char *myaddr, int len));
 
-static int
-remote_read_bytes PARAMS ((CORE_ADDR memaddr, unsigned char *myaddr, int len));
+static int remote_read_bytes PARAMS ((CORE_ADDR memaddr,
+				      unsigned char *myaddr, int len));
 
-static void
-remote_files_info PARAMS ((struct target_ops *ignore));
+static void remote_files_info PARAMS ((struct target_ops *ignore));
 
-static int
-remote_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-			    int should_write, struct target_ops *target));
+static int remote_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
+				       int len, int should_write,
+				       struct target_ops *target));
 
-static void 
-remote_prepare_to_store PARAMS ((void));
+static void remote_prepare_to_store PARAMS ((void));
 
-static void
-remote_fetch_registers PARAMS ((int regno));
+static void remote_fetch_registers PARAMS ((int regno));
 
-static void
-remote_resume PARAMS ((int pid, int step, enum target_signal siggnal));
+static void remote_resume PARAMS ((int pid, int step,
+				   enum target_signal siggnal));
 
-static int
-remote_start_remote PARAMS ((char *dummy));
+static int remote_start_remote PARAMS ((char *dummy));
 
-static void
-remote_open PARAMS ((char *name, int from_tty));
+static void remote_open PARAMS ((char *name, int from_tty));
 
-static void
-remote_close PARAMS ((int quitting));
+static void remote_close PARAMS ((int quitting));
 
-static void
-remote_store_registers PARAMS ((int regno));
+static void remote_store_registers PARAMS ((int regno));
 
-static void
-getpkt PARAMS ((char *buf, int forever));
+static void getpkt PARAMS ((char *buf, int forever));
 
-static int
-putpkt PARAMS ((char *buf));
+static int putpkt PARAMS ((char *buf));
 
-static void
-remote_send PARAMS ((char *buf));
+static void remote_send PARAMS ((char *buf));
 
-static int
-readchar PARAMS ((int timeout));
+static int readchar PARAMS ((int timeout));
 
 static int remote_wait PARAMS ((int pid, struct target_waitstatus *status));
 
-static int
-tohex PARAMS ((int nib));
+static void remote_kill PARAMS ((void));
 
-static int
-fromhex PARAMS ((int a));
+static int tohex PARAMS ((int nib));
 
-static void
-remote_detach PARAMS ((char *args, int from_tty));
+static int fromhex PARAMS ((int a));
 
-static void
-remote_interrupt PARAMS ((int signo));
+static void remote_detach PARAMS ((char *args, int from_tty));
 
-static void
-remote_interrupt_twice PARAMS ((int signo));
+static void remote_interrupt PARAMS ((int signo));
 
-static void
-interrupt_query PARAMS ((void));
+static void remote_interrupt_twice PARAMS ((int signo));
+
+static void interrupt_query PARAMS ((void));
 
 extern struct target_ops remote_ops;	/* Forward decl */
 
@@ -261,11 +247,8 @@ extern struct target_ops remote_ops;	/* Forward decl */
    Unless this is going though some terminal server or multiplexer or
    other form of hairy serial connection, I would think 2 seconds would
    be plenty.  */
-static int remote_timeout = 2;
 
-#if 0
-int icache;
-#endif
+static int remote_timeout = 2;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
@@ -381,12 +364,6 @@ get_offsets ()
 	  + symfile_objfile->num_sections
 	  * sizeof (offs->offsets));
 
-  /* FIXME: This code assumes gdb-stabs.h is being used; it's broken
-     for xcoff, dwarf, sdb-coff, etc.  But there is no simple
-     canonical representation for this stuff.  (Just what does "text"
-     as seen by the stub mean, anyway?  I think it means all sections
-     with SEC_CODE set, but we currently have no way to deal with that).  */
-
   ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
 
   /* This is a temporary kludge to force data and bss to use the same offsets
@@ -408,7 +385,6 @@ remote_start_remote (dummy)
   immediate_quit = 1;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
-
   SERIAL_WRITE (remote_desc, "+", 1);
 
   /* Let the stub know that we want it to return the thread.  */
@@ -420,7 +396,6 @@ remote_start_remote (dummy)
   immediate_quit = 0;
 
   start_remote ();		/* Initialize gdb process mechanisms */
-
   return 1;
 }
 
@@ -435,8 +410,7 @@ remote_open (name, from_tty)
      int from_tty;
 {
   if (name == 0)
-    error (
-"To open a remote debug connection, you need to specify what serial\n\
+    error ("To open a remote debug connection, you need to specify what serial\n\
 device is attached to the remote system (e.g. /dev/ttya).");
 
   target_preopen (from_tty);
@@ -457,6 +431,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 	  perror_with_name (name);
 	}
     }
+
 
   SERIAL_RAW (remote_desc);
 
@@ -488,12 +463,11 @@ device is attached to the remote system (e.g. /dev/ttya).");
      several processes.  */
 
   inferior_pid = 42000;
-
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
   if (!catch_errors (remote_start_remote, (char *)0, 
-	"Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
+		     "Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
 }
 
@@ -676,8 +650,10 @@ remote_wait (pid, status)
 	    while (*p)
 	      {
 		unsigned char *p1;
+		char *p_temp;
 
-		regno = strtol (p, &p1, 16); /* Read the register number */
+		regno = strtol (p, &p_temp, 16); /* Read the register number */
+		p1 = (unsigned char *)p_temp;
 
 		if (p1 == p)
 		  {
@@ -688,8 +664,8 @@ Packet: '%s'\n",
 			       p, buf);
 		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
-			char *p2;
-			thread_num = strtol (++p1, &p, 16);
+			thread_num = strtol (++p1, &p_temp, 16);
+			p = (unsigned char *)p_temp;
 		      }
 		  }
 		else
@@ -918,16 +894,18 @@ remote_store_registers (regno)
   remote_send (buf);
 }
 
-#if 0
-
-/* Use of the data cache is disabled because it loses for looking at
+/* 
+   Use of the data cache *used* to be disabled because it loses for looking at
    and changing hardware I/O ports and the like.  Accepting `volatile'
-   would perhaps be one way to fix it, but a better way which would
-   win for more cases would be to use the executable file for the text
-   segment, like the `icache' code below but done cleanly (in some
-   target-independent place, perhaps in target_xfer_memory, perhaps
-   based on assigning each target a speed or perhaps by some simpler
-   mechanism).  */
+   would perhaps be one way to fix it.  Another idea would be to use the
+   executable file for the text segment (for all SEC_CODE sections?
+   For all SEC_READONLY sections?).  This has problems if you want to
+   actually see what the memory contains (e.g. self-modifying code,
+   clobbered memory, user downloaded the wrong thing).  
+
+   Because it speeds so much up, it's now enabled, if you're playing
+   with registers you turn it of (set remotecache 0)
+*/
 
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
@@ -936,19 +914,6 @@ static int
 remote_fetch_word (addr)
      CORE_ADDR addr;
 {
-#if 0
-  if (icache)
-    {
-      extern CORE_ADDR text_start, text_end;
-
-      if (addr >= text_start && addr < text_end)
-	{
-	  int buffer;
-	  target_read_memory (addr, &buffer, sizeof (int));
-	  return buffer;
-	}
-    }
-#endif
   return dcache_fetch (remote_dcache, addr);
 }
 
@@ -962,7 +927,7 @@ remote_store_word (addr, word)
 {
   dcache_poke (remote_dcache, addr, word);
 }
-#endif /* 0 */
+
 
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
@@ -1078,38 +1043,10 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
      int should_write;
      struct target_ops *target;			/* ignored */
 {
-  int xfersize;
-  int bytes_xferred;
-  int total_xferred = 0;
-
-  set_thread (inferior_pid, 1);
-
-  while (len > 0)
-    {
-      if (len > MAXBUFBYTES)
-	xfersize = MAXBUFBYTES;
-      else
-	xfersize = len;
-
-      if (should_write)
-        bytes_xferred = remote_write_bytes (memaddr,
-					    (unsigned char *)myaddr, xfersize);
-      else
-	bytes_xferred = remote_read_bytes (memaddr,
-					   (unsigned char *)myaddr, xfersize);
-
-      /* If we get an error, we are done xferring.  */
-      if (bytes_xferred == 0)
-	break;
-
-      memaddr += bytes_xferred;
-      myaddr  += bytes_xferred;
-      len     -= bytes_xferred;
-      total_xferred += bytes_xferred;
-    }
-  return total_xferred;
+  return dcache_xfer_memory (remote_dcache, memaddr, myaddr, len, should_write);
 }
 
+   
 #if 0
 /* Enable after 4.12.  */
 
@@ -1225,7 +1162,6 @@ static void
 remote_send (buf)
      char *buf;
 {
-
   putpkt (buf);
   getpkt (buf, 0);
 
@@ -1245,6 +1181,7 @@ putpkt (buf)
   char buf2[PBUFSIZ];
   int cnt = strlen (buf);
   int ch;
+  int tcount = 0;
   char *p;
 
   /* Copy the packet into buffer BUF2, encapsulating it
@@ -1285,7 +1222,7 @@ putpkt (buf)
 	{
 	  ch = readchar (remote_timeout);
 
-	  if (remote_debug)
+ 	  if (remote_debug)
 	    {
 	      switch (ch)
 		{
@@ -1294,7 +1231,7 @@ putpkt (buf)
 		case '$':
 		  if (started_error_output)
 		    {
-		      putc_unfiltered ('\n');
+		      putchar_unfiltered ('\n');
 		      started_error_output = 0;
 		    }
 		}
@@ -1307,6 +1244,9 @@ putpkt (buf)
 		printf_unfiltered("Ack\n");
 	      return 1;
 	    case SERIAL_TIMEOUT:
+	      tcount ++;
+	      if (tcount > 3)
+		return 0;
 	      break;		/* Retransmit buffer */
 	    case '$':
 	      {
@@ -1325,7 +1265,7 @@ putpkt (buf)
 		      started_error_output = 1;
 		      printf_unfiltered ("putpkt: Junk: ");
 		    }
-		  putc_unfiltered (ch & 0177);
+		  putchar_unfiltered (ch & 0177);
 		}
 	      continue;
 	    }
@@ -1451,12 +1391,21 @@ getpkt (buf, forever)
   int timeout;
   int val;
 
+  strcpy (buf,"timeout");
+
   if (forever)
-    timeout = -1;
+    {
+#ifdef MAINTENANCE_CMDS
+      timeout = watchdog > 0 ? watchdog : -1;
+#else
+      timeout = -1;
+#endif
+    }
+
   else
     timeout = remote_timeout;
 
-#define MAX_TRIES 10
+#define MAX_TRIES 3
 
   for (tries = 1; tries <= MAX_TRIES; tries++)
     {
@@ -1474,6 +1423,13 @@ getpkt (buf, forever)
 
 	  if (c == SERIAL_TIMEOUT)
 	    {
+#ifdef MAINTENANCE_CMDS
+	      if (forever)	/* Watchdog went off.  Kill the target. */
+		{
+		  target_mourn_inferior ();
+		  error ("Watchdog has expired.  Target detached.\n");
+		}
+#endif
 	      if (remote_debug)
 		puts_filtered ("Timed out.\n");
 	      goto retry;
@@ -1494,7 +1450,7 @@ getpkt (buf, forever)
 	}
 
       /* Try the whole thing again.  */
-retry:
+    retry:
       SERIAL_WRITE (remote_desc, "-", 1);
     }
 

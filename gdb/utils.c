@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <pwd.h>
 #endif
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -254,7 +254,7 @@ warning_begin ()
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 warning (char *string, ...)
 #else
 warning (va_alist)
@@ -262,7 +262,7 @@ warning (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, string);
 #else
   char *string;
@@ -300,30 +300,38 @@ error_begin ()
    The first argument STRING is the error message, used as a fprintf string,
    and the remaining args are passed as arguments to it.  */
 
-/* VARARGS */
+#ifdef ANSI_PROTOTYPES
 NORETURN void
-#ifdef __STDC__
 error (char *string, ...)
 #else
 error (va_alist)
      va_dcl
 #endif
 {
+#ifdef ANSI_PROTOTYPES
   va_list args;
-#ifdef __STDC__
   va_start (args, string);
 #else
-  char *string;
-
   va_start (args);
-  string = va_arg (args, char *);
 #endif
-  error_begin ();
-  vfprintf_filtered (gdb_stderr, string, args);
-  fprintf_filtered (gdb_stderr, "\n");
-  va_end (args);
-  return_to_top_level (RETURN_ERROR);
+  if (error_hook)
+    error_hook();
+  else 
+    {
+      char *string1;
+      error_begin ();
+#ifdef ANSI_PROTOTYPES
+      vfprintf_filtered (gdb_stderr, string, args);
+#else
+      string1 = va_arg (args, char *);
+      vfprintf_filtered (gdb_stderr, string1, args);
+#endif
+      fprintf_filtered (gdb_stderr, "\n");
+      va_end (args);
+      return_to_top_level (RETURN_ERROR);
+    }
 }
+
 
 /* Print an error message and exit reporting failure.
    This is for a error that we cannot continue from.
@@ -334,7 +342,7 @@ error (va_alist)
 
 /* VARARGS */
 NORETURN void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 fatal (char *string, ...)
 #else
 fatal (va_alist)
@@ -342,11 +350,10 @@ fatal (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, string);
 #else
   char *string;
-
   va_start (args);
   string = va_arg (args, char *);
 #endif
@@ -362,7 +369,7 @@ fatal (va_alist)
 
 /* VARARGS */
 static void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 fatal_dump_core (char *string, ...)
 #else
 fatal_dump_core (va_alist)
@@ -370,7 +377,7 @@ fatal_dump_core (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, string);
 #else
   char *string;
@@ -875,7 +882,7 @@ gdb_print_address (addr, stream)
 
 /* VARARGS */
 int
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 query (char *ctlstr, ...)
 #else
 query (va_alist)
@@ -887,7 +894,7 @@ query (va_alist)
   register int ans2;
   int retval;
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, ctlstr);
 #else
   char *ctlstr;
@@ -1539,7 +1546,7 @@ vprintf_unfiltered (format, args)
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 fprintf_filtered (FILE *stream, char *format, ...)
 #else
 fprintf_filtered (va_alist)
@@ -1547,7 +1554,7 @@ fprintf_filtered (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   FILE *stream;
@@ -1563,7 +1570,7 @@ fprintf_filtered (va_alist)
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 fprintf_unfiltered (FILE *stream, char *format, ...)
 #else
 fprintf_unfiltered (va_alist)
@@ -1571,7 +1578,7 @@ fprintf_unfiltered (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   FILE *stream;
@@ -1590,7 +1597,7 @@ fprintf_unfiltered (va_alist)
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 fprintfi_filtered (int spaces, FILE *stream, char *format, ...)
 #else
 fprintfi_filtered (va_alist)
@@ -1598,7 +1605,7 @@ fprintfi_filtered (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   int spaces;
@@ -1619,7 +1626,7 @@ fprintfi_filtered (va_alist)
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 printf_filtered (char *format, ...)
 #else
 printf_filtered (va_alist)
@@ -1627,7 +1634,7 @@ printf_filtered (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   char *format;
@@ -1642,7 +1649,7 @@ printf_filtered (va_alist)
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 printf_unfiltered (char *format, ...)
 #else
 printf_unfiltered (va_alist)
@@ -1650,7 +1657,7 @@ printf_unfiltered (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   char *format;
@@ -1667,7 +1674,7 @@ printf_unfiltered (va_alist)
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 printfi_filtered (int spaces, char *format, ...)
 #else
 printfi_filtered (va_alist)
@@ -1675,7 +1682,7 @@ printfi_filtered (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   int spaces;

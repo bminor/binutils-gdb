@@ -24,7 +24,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include <sys/types.h>
 #include <sys/time.h>
-#ifndef __GO32__
+
+#if defined(__GO32__) || defined(WIN32)
+#undef HAVE_SOCKETS
+#else
+#define HAVE_SOCKETS
+#endif
+
+
+#ifdef HAVE_SOCKETS	 
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -37,14 +45,14 @@ extern struct target_ops remote_ops;
 static char *remote_target_name = NULL;
 static serial_t remote_desc = NULL;
 static int serial_flag;
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
 static int udp_fd = -1;
 #endif
 
 static serial_t open_tty PARAMS ((char *name));
 static int send_resp PARAMS ((serial_t desc, char c));
 static void close_tty PARAMS ((int ignore));
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
 static int recv_udp_buf PARAMS ((int fd, unsigned char *buf, int len, int timeout));
 static int send_udp_buf PARAMS ((int fd, unsigned char *buf, int len));
 #endif
@@ -60,7 +68,7 @@ static void sparclite_serial_start PARAMS ((bfd_vma entry));
 static void sparclite_serial_write PARAMS ((bfd *from_bfd, asection *from_sec,
 					    file_ptr from_addr,
 					    bfd_vma to_addr, int len));
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
 static unsigned short calc_checksum PARAMS ((unsigned char *buffer,
 					     int count));
 static void sparclite_udp_start PARAMS ((bfd_vma entry));
@@ -324,7 +332,7 @@ close_tty (ignore)
   remote_desc = NULL;
 }
 
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
 static int
 recv_udp_buf (fd, buf, len, timeout)
      int fd, len;
@@ -449,7 +457,7 @@ or: target sparclite udp host");
     }
   else
     {
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
       struct hostent *he;
       struct sockaddr_in sockaddr;
       unsigned char buffer[100];
@@ -503,7 +511,7 @@ sparclite_close (quitting)
 {
   if (serial_flag)
     close_tty (0);
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
   else
     if (udp_fd != -1)
       close (udp_fd);
@@ -684,7 +692,7 @@ sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
     error ("Bad checksum from load command (0x%x)", i);
 }
 
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
 
 static unsigned short
 calc_checksum (buffer, count)
@@ -806,7 +814,7 @@ sparclite_download (filename, from_tty)
      int from_tty;
 {
   if (!serial_flag)
-#ifndef __GO32__
+#ifdef HAVE_SOCKETS
     download (remote_target_name, filename, from_tty, sparclite_udp_write,
 	      sparclite_udp_start);
 #else

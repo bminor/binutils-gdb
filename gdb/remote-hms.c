@@ -131,7 +131,7 @@ static struct monitor_ops hms_cmds =
   "tl\r",			/* download command */
   NULL,				/* load response */
   ">",				/* monitor command prompt */
-  NULL,				/* end-of-command delimitor */
+  "\r",				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
   &hms_ops,			/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */
@@ -202,9 +202,6 @@ static void remove_commands ();
 
 static int quiet = 1;		/* FIXME - can be removed after Dec '94 */
 
-DCACHE *dcache_ptr;
-int remote_dcache;
-serial_t desc;
 
 
 /***********************************************************************
@@ -532,7 +529,6 @@ hms_close (quitting)
       SERIAL_CLOSE (desc);
     }
   is_open = 0;
-  remote_dcache = 0;
 }
 
 /* Terminate the open connection to the remote debugger.  Use this
@@ -561,8 +557,6 @@ hms_resume (pid, step, sig)
      enum target_signal
        sig;
 {
-  dcache_flush (dcache_ptr);
-
   if (step)
     {
       hms_write_cr ("s");
@@ -1034,26 +1028,6 @@ translate_addr (addr)
 
 }
 
-/* Read a word from remote address ADDR and return it.
- * This goes through the data cache.
- */
-int
-hms_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (dcache_ptr, addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
-void
-hms_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (dcache_ptr, addr, word);
-}
 
 int
 hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
@@ -1063,73 +1037,6 @@ hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      int write;
      struct target_ops *target;	/* ignored */
 {
-  register int i;
-
-  /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr;
-
-  /* Round ending address up; get number of longwords that makes.  */
-  register int count;
-
-  /* Allocate buffer of that many longwords.  */
-  register int *buffer;
-
-  memaddr &= 0xffff;
-  addr = memaddr & -sizeof (int);
-  count = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
-
-  buffer = (int *) alloca (count * sizeof (int));
-
-  if (write)
-    {
-      /* Fill start and end extra bytes of buffer with existing memory data.  */
-
-      if (addr != memaddr || len < (int) sizeof (int))
-	{
-	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = hms_fetch_word (addr);
-	}
-
-      if (count > 1)		/* FIXME, avoid if even boundary */
-	{
-	  buffer[count - 1]
-	    = hms_fetch_word (addr + (count - 1) * sizeof (int));
-	}
-
-      /* Copy data to be written over corresponding part of buffer */
-
-      memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
-
-      /* Write the entire buffer.  */
-
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  hms_store_word (addr, buffer[i]);
-	  if (errno)
-	    {
-	      return 0;
-	    }
-
-	}
-    }
-  else
-    {
-      /* Read all the longwords */
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  buffer[i] = hms_fetch_word (addr);
-	  if (errno)
-	    {
-	      return 0;
-	    }
-	  QUIT;
-	}
-
-      /* Copy appropriate bytes out of the buffer.  */
-      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
-    }
 
   return len;
 }

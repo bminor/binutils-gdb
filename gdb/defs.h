@@ -28,6 +28,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "ansidecl.h"
 
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
 #include "libiberty.h"
 
 /* libiberty.h can't declare this one, but evidently we can.  */
@@ -256,10 +262,10 @@ extern void puts_filtered PARAMS ((char *));
 
 extern void puts_unfiltered PARAMS ((char *));
 
-extern void vprintf_filtered PARAMS ((char *, ...))
+extern void vprintf_filtered PARAMS ((char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_filtered PARAMS ((FILE *, char *, ...))
+extern void vfprintf_filtered PARAMS ((FILE *, char *, va_list))
      ATTR_FORMAT(printf, 2, 0);
 
 extern void fprintf_filtered PARAMS ((FILE *, char *, ...))
@@ -274,10 +280,10 @@ extern void printf_filtered PARAMS ((char *, ...))
 extern void printfi_filtered PARAMS ((int, char *, ...))
      ATTR_FORMAT(printf, 2, 3);
 
-extern void vprintf_unfiltered PARAMS ((char *, ...))
+extern void vprintf_unfiltered PARAMS ((char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_unfiltered PARAMS ((FILE *, char *, ...))
+extern void vfprintf_unfiltered PARAMS ((FILE *, char *, va_list))
      ATTR_FORMAT(printf, 2, 0);
 
 extern void fprintf_unfiltered PARAMS ((FILE *, char *, ...))
@@ -631,6 +637,7 @@ extern void free ();
 
 #endif /* MALLOC_INCOMPATIBLE */
 
+#ifndef WIN32
 extern char *strchr ();
 
 extern char *strrchr ();
@@ -640,6 +647,7 @@ extern char *strstr ();
 extern char *strtok ();
 
 extern char *strerror ();
+#endif
 
 /* Various possibilities for alloca.  */
 #ifndef alloca
@@ -815,6 +823,10 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 #define MAINTENANCE_CMDS 1
 #endif
 
+#ifdef MAINTENANCE_CMDS
+extern int watchdog;
+#endif
+
 #include "dis-asm.h"		/* Get defs for disassemble_info */
 
 extern int dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr,
@@ -856,8 +868,36 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
 
+extern NORETURN void (*error_hook) PARAMS (());
+
+
+
 /* Inhibit window interface if non-zero. */
 
 extern int use_windows;
+
+/* Symbolic definitions of filename-related things.  */
+/* FIXME, this doesn't work very well if host and executable
+   filesystems conventions are different.  */
+
+#ifndef DIRNAME_SEPARATOR
+#define DIRNAME_SEPARATOR ':'
+#endif
+
+#ifndef SLASH_P
+#define SLASH_P(X) ((X)=='/')
+#endif
+
+#ifndef SLASH_CHAR
+#define SLASH_CHAR '/'
+#endif
+
+#ifndef SLASH_STRING
+#define SLASH_STRING "/"
+#endif
+
+#ifndef ROOTED_P
+#define ROOTED_P(X) (SLASH_P((X)[0]))
+#endif
 
 #endif /* #ifndef DEFS_H */
