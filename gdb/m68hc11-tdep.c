@@ -36,6 +36,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "target.h"
 #include "opcode/m68hc11.h"
+#include "elf/m68hc11.h"
+#include "elf-bfd.h"
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -89,6 +91,9 @@ struct gdbarch_tdep
 
     /* Description of instructions in the prologue.  */
     struct insn_sequence *prologue;
+
+    /* ELF flags for ABI.  */
+    int elf_flags;
   };
 
 #define M6811_TDEP gdbarch_tdep (current_gdbarch)
@@ -1029,20 +1034,32 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   {0};
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
+  int elf_flags;
 
   soft_reg_initialized = 0;
-  
+
+  /* Extract the elf_flags if available.  */
+  if (info.abfd != NULL
+      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    elf_flags = elf_elfheader (info.abfd)->e_flags;
+  else
+    elf_flags = 0;
+
   /* try to find a pre-existing architecture */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
+      if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
+	continue;
+
       return arches->gdbarch;
     }
 
   /* Need a new architecture. Fill in a target specific vector.  */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->elf_flags = elf_flags;
 
   switch (info.bfd_arch_info->arch)
     {
@@ -1065,10 +1082,10 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
      programs.  The size of these types should normally be set
      according to the dwarf2 debug information.  */
   set_gdbarch_short_bit (gdbarch, 16);
-  set_gdbarch_int_bit (gdbarch, 16);
+  set_gdbarch_int_bit (gdbarch, elf_flags & E_M68HC11_I32 ? 32 : 16);
   set_gdbarch_float_bit (gdbarch, 32);
-  set_gdbarch_double_bit (gdbarch, 64);
-  set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_double_bit (gdbarch, elf_flags & E_M68HC11_F64 ? 64 : 32);
+  set_gdbarch_long_double_bit (gdbarch, elf_flags & E_M68HC11_F64 ? 64 : 32);
   set_gdbarch_long_bit (gdbarch, 32);
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_long_long_bit (gdbarch, 64);

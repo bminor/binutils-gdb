@@ -1,5 +1,11 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Set int, double and long
+	double sizes according to ELF ABI flags.
+	(gdbarch_tdep): Record elf_flags.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (M6812_OP_PSHX, M6812_OP_PSHY): New defines.
 	(m6812_prolog): They can appear in 68HC12 function prologue.
 	(m68hc11_frame_chain): Cleanup.
