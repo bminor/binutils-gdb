@@ -1,6 +1,6 @@
 /* as.c - GAS main program.
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002
+   1999, 2000, 2001, 2002, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -589,7 +589,7 @@ parse_args (int * pargc, char *** pargv)
 #else
 	  printf (_("GNU assembler %s\n"), VERSION);
 #endif
-	  printf (_("Copyright 2002 Free Software Foundation, Inc.\n"));
+	  printf (_("Copyright 2005 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License.  This program has absolutely no warranty.\n"));

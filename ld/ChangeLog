@@ -1,5 +1,9 @@
 2005-01-31  Nick Clifton  <nickc@redhat.com>
 
+	* ldver.c (ldversion): Bump reported copyright date to 2005.
+
+2005-01-31  Nick Clifton  <nickc@redhat.com>
+
 	* configure.tgt: Remove obsolete targets m68k-lynxos and
 	sparc-lynxos.
 
