@@ -25,8 +25,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 
 
 #include "ld.h"

@@ -20,13 +20,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *  Written by Steve Chamberlain steve@cygnus.com
  *
  * $Id$ 
- *
- *
  */
 
-
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 
 #include "config.h"
 #include "ld.h"
@@ -99,7 +96,7 @@ boolean write_map;
 int unix_relocate;
 #ifdef GNU960
 /* Indicates whether output file will be b.out (default) or coff */
-enum target_flavour_enum output_flavor = BFD_BOUT_FORMAT;
+enum target_flavour output_flavor = BFD_BOUT_FORMAT;
 #endif
 
 /* Force the make_executable to be output, even if there are non-fatal

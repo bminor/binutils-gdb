@@ -1,5 +1,5 @@
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "ldsym.h"
 #include "ldwarn.h"
 #include "ldmisc.h"

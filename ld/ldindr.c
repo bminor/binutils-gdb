@@ -12,8 +12,8 @@
 
 
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "ld.h"
 #include "ldsym.h"
 #include "ldmisc.h"

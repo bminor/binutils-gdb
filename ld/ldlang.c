@@ -20,10 +20,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *
 */
 
-
-
-#include "sysdep.h" 
 #include "bfd.h"
+#include "sysdep.h" 
 
 #include "ld.h"
 #include "ldmain.h"
@@ -766,8 +764,8 @@ lang_reasonable_defaults()
  Add the supplied name to the symbol table as an undefined reference.
  Remove items from the chain as we open input bfds
  */
-typedef struct ldlang_undef_chain_list_struct {
-  struct ldlang_undef_chain_list_struct *next;
+typedef struct ldlang_undef_chain_list {
+  struct ldlang_undef_chain_list *next;
   char *name;
 } ldlang_undef_chain_list_type;
 
@@ -1621,10 +1619,6 @@ DEFUN_VOID(lang_relocate_globals)
 	      {
 		produce_warnings(lgs, it);
 	      }
-	  if (lgs->flags & SYM_INDIRECT)
-	      {
-		do_indirect(lgs);
-	      }
 
 	  while (ptr != (asymbol **)NULL) {
 	    asymbol *ref = *ptr;
@@ -1675,9 +1669,8 @@ DEFUN_VOID(lang_check)
   bfd * input_bfd;
   unsigned long input_machine;
   enum bfd_architecture input_architecture;
-CONST  char *out_arch;
-  char *out_arch2;
 
+  CONST  bfd_arch_info_type *compatible;
 
   for (file = file_chain.head;
        file != (lang_statement_union_type *)NULL;
@@ -1688,37 +1681,34 @@ CONST  char *out_arch;
 
  	input_bfd = file->input_statement.the_bfd;
 
- 	input_machine = bfd_get_machine(input_bfd);
-	input_architecture = bfd_get_architecture(input_bfd);  
+ 	input_machine = bfd_get_mach(input_bfd);
+	input_architecture = bfd_get_arch(input_bfd);  
 
  
- 	/* Inspect the architecture and ensure we're linking like with like */
- 	if (!bfd_arch_compatible(input_bfd,
-				 output_bfd,
-				 &ldfile_new_output_architecture,
-				 &ldfile_new_output_machine)) 
+ 	/* Inspect the architecture and ensure we're linking like with
+	   like */
+
+	compatible=bfd_arch_get_compatible(input_bfd,
+					   output_bfd);
+
+ 	if (compatible)  
+	    {
+	      ldfile_output_machine = compatible->mach;
+	      ldfile_output_architecture = compatible->arch;
+	    }				
+	else
 	    {
 
-	      /* Result of bfd_printable_arch_mach is not guaranteed to stick
-		 around after next call, so we have to copy it.  */
-	      out_arch = bfd_printable_arch_mach(ldfile_output_architecture,
-						 ldfile_output_machine);
-	      out_arch2 = ldmalloc (strlen (out_arch)+1);
-	      strcpy (out_arch2, out_arch);
-
 	      info("%P: warning, %s architecture of input file `%B' incompatible with %s output\n",
-		   bfd_printable_arch_mach(input_architecture, input_machine),
-		   input_bfd,
-		   out_arch2);
-	      free (out_arch2);
-
+		   bfd_printable_name(input_bfd), input_bfd,
+		   bfd_printable_name(output_bfd));
 
 	      bfd_set_arch_mach(output_bfd,
 				ldfile_new_output_architecture,
 				ldfile_new_output_machine);
 	    }
-      }
 
+      }
 }
 
 
@@ -2076,6 +2066,7 @@ ldsym_type *name)
   next->sym= name;
   name->flags |= SYM_CONSTRUCTOR;
   constructor_name_list = next;
+
 }
 
 void

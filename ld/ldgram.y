@@ -14,16 +14,19 @@
 */
 
 
+#define DONTDECLARE_MALLOC
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "ld.h"    
 #include "ldexp.h"
 #include "ldver.h"
 #include "ldlang.h"
-#include "ld-emul.h"
+#include "ldemul.h"
 #include "ldfile.h"
 #include "ldmisc.h"
+
+
 #define YYDEBUG 1
 
 boolean option_v;
@@ -46,7 +49,7 @@ lang_output_section_statement_type *lang_output_section_statement_lookup();
 #ifdef __STDC__
 
 void lang_add_data(int type, union etree_union *exp);
-void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, bfd_vma block_value);
+void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, int flags, bfd_vma block_value);
 
 #else
 
@@ -89,7 +92,7 @@ boolean ldgram_had_equals = false;
 }
 
 %type <etree> exp  opt_exp  
-%type <integer> fill_opt opt_block
+%type <integer> fill_opt opt_block opt_type
 %type <name> memspec_opt
 %token <integer> INT  
 %token <name> NAME
@@ -117,10 +120,11 @@ boolean ldgram_had_equals = false;
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token SIZEOF_HEADERS
-%token MEMORY 
+%token MEMORY  
+%token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
-%token OPTION_format  OPTION_F OPTION_u
+%token OPTION_format  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
 %token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT 
@@ -128,7 +132,7 @@ boolean ldgram_had_equals = false;
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
-%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  
+%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
 %type <token> assign_op 
 
 %type <name>  filename
@@ -158,6 +162,7 @@ command_line_option:
 		ifile_list 
 			{ ldgram_in_script = false; }
 		'}'
+        |	OPTION_Bstatic { }
 	|	OPTION_v
 			{	
 			ldversion();
@@ -171,8 +176,11 @@ command_line_option:
 			}
 	|	OPTION_n {
 			config.magic_demand_paged = false;
-			config.make_executable = false;
+			config.text_read_only = true;
 			}
+        |       OPTION_N {
+			config.magic_demand_paged = false;
+	                }
         |       OPTION_s {
 	  		strip_symbols = STRIP_ALL;
 			}
@@ -262,8 +270,8 @@ command_line_option:
         | 	NAME
 		{ lang_add_input_file($1,lang_input_file_is_file_enum,
 				 (char *)NULL); }
-	|	OPTION_c filename script_file
-			{ ldfile_open_command_file($2); }
+	|	OPTION_c filename 
+			{ ldfile_open_command_file($2); } script_file
 	|	OPTION_Tfile 
 			{ ldfile_open_command_file($1); } script_file
 
@@ -325,6 +333,7 @@ ifile_p1:
 	|	low_level_library
 	|	floating_point_support
 	|	statement_anywhere
+        |	 ';'
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
 	|	SEARCH_DIR '(' filename ')'
@@ -405,6 +414,10 @@ statement:
 	|	statement CREATE_OBJECT_SYMBOLS
 		{
  		  lang_add_attribute(lang_object_symbols_statement_enum); }
+        |	statement ';'
+        |	statement CONSTRUCTORS
+		{
+ 		  lang_add_attribute(lang_constructors_statement_enum); }
 
 	|	statement input_section_spec
         |       statement length '(' exp ')'
@@ -629,11 +642,11 @@ exp	:
 			{ $$ = exp_nameop(SIZEOF_HEADERS,0); }
 
 	|	SIZEOF  '('  NAME ')'
-			{ $$ = exp_nameop($1,$3); }
+			{ $$ = exp_nameop(SIZEOF,$3); }
 	|	ADDR '(' NAME ')'
-			{ $$ = exp_nameop($1,$3); }
+			{ $$ = exp_nameop(ADDR,$3); }
 	|	ALIGN_K '(' exp ')'
-			{ $$ = exp_unop($1,$3); }
+			{ $$ = exp_unop(ALIGN_K,$3); }
 	|	NAME
 			{ $$ = exp_nameop(NAME,$1); }
 	;
@@ -641,15 +654,24 @@ exp	:
 
 
 
-section:	NAME opt_exp opt_block ':' opt_things'{' 
+section:	NAME opt_exp opt_type opt_block ':' opt_things'{' 
 		{
-		lang_enter_output_section_statement($1,$2,$3);
+		lang_enter_output_section_statement($1,$2,$3,$4);
 		}
 	       statement 	'}' 	fill_opt memspec_opt
 		{
-		  lang_leave_output_section_statement($10, $11);
+		  lang_leave_output_section_statement($11, $12);
 		}
 
+	;
+
+opt_type:	
+	  '(' NOLOAD ')' { $$ = SEC_NO_FLAGS; }
+	| '(' DSECT ')' { $$ = 0; }
+	| '(' COPY ')' { $$ = 0; }
+	| '(' INFO ')' { $$ = 0; }
+	| '(' OVERLAY ')' { $$ = 0; }
+  	|    { $$ = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
 	;
 
 opt_things: 
