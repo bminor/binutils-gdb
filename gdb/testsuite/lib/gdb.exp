@@ -559,5 +559,6 @@ proc skip_chill_tests {} {
     # For AIX (as of 16 Mar 95), (a) there is no language code for
     # CHILL in output_epilog in gcc/config/rs6000/rs6000.c, (b) collect2
     # does not get along with AIX's too-clever linker.
-    return ![isnative] || [istarget "*-*-aix*"]
+    # On Solaris, static constructors are broken.
+    return {![isnative] || [istarget "*-*-aix*"] || [istarget "*-*-solaris2*"]}
 }
