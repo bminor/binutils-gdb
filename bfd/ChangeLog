@@ -1,6 +1,6 @@
 2000-06-29  Mark Elbrecht  <snowball3@bigfoot.com>
 
-	* syms.c (_bfd_stab_section_find_neares_line): Use IS_ABSOLUTE_PATH.
+	* syms.c (_bfd_stab_section_find_nearest_line): Use IS_ABSOLUTE_PATH.
 
 2000-06-28  Mark Elbrecht  <snowball3@bigfoot.com>
 
