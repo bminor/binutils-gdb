@@ -1,5 +1,9 @@
 2002-11-18  Klee Dienes  <kdienes@apple.com>
 
+	* buildsym.c (pop_context): Add comment.
+	
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
         * buildsym.h (pop_context): Convert to function, defined in
 	buildsym.c.
 	* buildsym.c: Include gdb_assert.h.

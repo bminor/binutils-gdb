@@ -1102,6 +1102,9 @@ push_context (int desc, CORE_ADDR valu)
   return new;
 }
 
+/* Pop a context block.  Returns the address of the context block just
+   popped. */
+
 struct context_stack *
 pop_context (void)
 {
