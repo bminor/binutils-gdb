@@ -1,5 +1,7 @@
 Thu May 23 17:34:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* read.c (potable): Add .skip as a synonym for .space.
+
 	* stabs.c (s_stab_generic): For PowerPC ELF, allow .stabd to take
 	4 arguments, providing the 4th argument is 0, to allow
 	compatibility with the Solaris assembler.

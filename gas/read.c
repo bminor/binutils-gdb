@@ -363,6 +363,7 @@ static const pseudo_typeS potable[] =
   {"single", float_cons, 'f'},
 /* size */
   {"space", s_space, 0},
+  {"skip", s_space, 0},
   {"spc", s_ignore, 0},
   {"stabd", s_stab, 'd'},
   {"stabn", s_stab, 'n'},
@@ -2001,6 +2002,9 @@ static int
 get_line_sb (line)
      sb *line;
 {
+  if (input_line_pointer[-1] == '\n')
+    bump_line_counters ();
+
   if (input_line_pointer >= buffer_limit)
     {
       buffer_limit = input_scrub_next_buffer (&input_line_pointer);
@@ -2013,11 +2017,8 @@ get_line_sb (line)
   while (input_line_pointer < buffer_limit
 	 && is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      if (*input_line_pointer == '\n')
-	{
-	  bump_line_counters ();
-	  LISTING_NEWLINE ();
-	}
+      if (input_line_pointer[-1] == '\n')
+	bump_line_counters ();
       ++input_line_pointer;
     }
   return 1;
@@ -2045,8 +2046,6 @@ s_macro (ignore)
   sb_new (&label);
   if (line_label != NULL)
     sb_add_string (&label, S_GET_NAME (line_label));
-
-  demand_empty_rest_of_line ();
 
   err = define_macro (0, &s, &label, get_line_sb);
   if (err != NULL)
@@ -2495,7 +2494,7 @@ s_space (mult)
      int mult;
 {
   expressionS exp;
-  long temp_fill;
+  expressionS val;
   char *p = 0;
   char *stop = NULL;
   char stopc;
@@ -2507,72 +2506,94 @@ s_space (mult)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
-  /* Just like .fill, but temp_size = 1 */
   expression (&exp);
-  if (exp.X_op == O_constant)
-    {
-      long repeat;
 
-      repeat = exp.X_add_number;
-      if (mult)
-	repeat *= mult;
-      if (repeat <= 0)
-	{
-	  if (! flag_mri || repeat < 0)
-	    as_warn (".space repeat count is %s, ignored",
-		     repeat ? "negative" : "zero");
-	  goto getout;
-	}
-
-      /* If we are in the absolute section, just bump the offset.  */
-      if (now_seg == absolute_section)
-	{
-	  abs_section_offset += repeat;
-	  goto getout;
-	}
-
-      /* If we are secretly in an MRI common section, then creating
-         space just increases the size of the common symbol.  */
-      if (mri_common_symbol != NULL)
-	{
-	  S_SET_VALUE (mri_common_symbol,
-		       S_GET_VALUE (mri_common_symbol) + repeat);
-	  goto getout;
-	}
-
-      if (!need_pass_2)
-	p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
-		      repeat, (char *) 0);
-    }
-  else
-    {
-      if (now_seg == absolute_section)
-	{
-	  as_bad ("space allocation too complex in absolute section");
-	  subseg_set (text_section, 0);
-	}
-      if (mri_common_symbol != NULL)
-	{
-	  as_bad ("space allocation too complex in common section");
-	  mri_common_symbol = NULL;
-	}
-      if (!need_pass_2)
-	p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
-		      make_expr_symbol (&exp), 0L, (char *) 0);
-    }
   SKIP_WHITESPACE ();
   if (*input_line_pointer == ',')
     {
-      input_line_pointer++;
-      temp_fill = get_absolute_expression ();
+      ++input_line_pointer;
+      expression (&val);
     }
   else
     {
-      temp_fill = 0;
+      val.X_op = O_constant;
+      val.X_add_number = 0;
     }
-  if (p)
+
+  if (val.X_op != O_constant
+      || val.X_add_number < - 0x80
+      || val.X_add_number > 0xff
+      || (mult != 0 && mult != 1 && val.X_add_number != 0))
     {
-      *p = temp_fill;
+      if (exp.X_op != O_constant)
+	as_bad ("Unsupported variable size or fill value");
+      else
+	{
+	  offsetT i;
+
+	  if (mult == 0)
+	    mult = 1;
+	  for (i = 0; i < exp.X_add_number; i++)
+	    emit_expr (&val, mult);
+	}
+    }
+  else
+    {
+      if (exp.X_op == O_constant)
+	{
+	  long repeat;
+
+	  repeat = exp.X_add_number;
+	  if (mult)
+	    repeat *= mult;
+	  if (repeat <= 0)
+	    {
+	      if (! flag_mri || repeat < 0)
+		as_warn (".space repeat count is %s, ignored",
+			 repeat ? "negative" : "zero");
+	      goto getout;
+	    }
+
+	  /* If we are in the absolute section, just bump the offset.  */
+	  if (now_seg == absolute_section)
+	    {
+	      abs_section_offset += repeat;
+	      goto getout;
+	    }
+
+	  /* If we are secretly in an MRI common section, then
+	     creating space just increases the size of the common
+	     symbol.  */
+	  if (mri_common_symbol != NULL)
+	    {
+	      S_SET_VALUE (mri_common_symbol,
+			   S_GET_VALUE (mri_common_symbol) + repeat);
+	      goto getout;
+	    }
+
+	  if (!need_pass_2)
+	    p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
+			  repeat, (char *) 0);
+	}
+      else
+	{
+	  if (now_seg == absolute_section)
+	    {
+	      as_bad ("space allocation too complex in absolute section");
+	      subseg_set (text_section, 0);
+	    }
+	  if (mri_common_symbol != NULL)
+	    {
+	      as_bad ("space allocation too complex in common section");
+	      mri_common_symbol = NULL;
+	    }
+	  if (!need_pass_2)
+	    p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
+			  make_expr_symbol (&exp), 0L, (char *) 0);
+	}
+
+      if (p)
+	*p = val.X_add_number;
     }
 
  getout:
