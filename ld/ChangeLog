@@ -1,3 +1,28 @@
+Fri Oct 11 04:24:45 1991  John Gilmore  (gnu at cygnus.com)
+
+	Restructure configuration scheme for bfd, binutils, ld.
+
+	* include/sys/h-*.h:  Move to bfd/hosts/h-*.h.
+	* configure.in:  Revise to symlink sysdep.h to ../bfd/hosts/h-xxx.h.
+	Change some config names to match other dirs.
+	* *.c:  Include bfd.h before sysdep.h, so ansidecl and PROTO()
+	get defined first.
+	* config/:  Rename some config files to match up h-*.h names.
+	Remove all the HOST_SYS definitions from the config files.
+
+Tue Oct  8 16:00:57 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldexp.h, ldlang.h: Change enum boolean -> enum bfd_boolean.
+	* ldtemplate: Remove ldfile_add_library_path calls;
+	just use the SEARCH_DIR commands in the script files.
+	* Makefile.in: Add LIB_PATH macro, which if set is used to replace
+	the SEARCH_DIR commands in the scripts (using ugly sed magic).
+	This is primarily intended for cross-linking, where you would
+	place libaries in a different place than native libraries.
+	Also, emulations made from ldtemplate now use $(srcdir).
+	* ldglda29k.sc:  Change SEARCH_DIR commands to a conventional
+	form; people can use the Makefile's LIB_PATH to override.
+
 Tue Oct  8 14:51:21 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* Makefile.in: fix target ld.dvi, add target ld.info
