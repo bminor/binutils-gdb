@@ -1,3 +1,8 @@
+2003-06-12  David Carlton  <carlton@kealia.com>
+
+	* cp-namespace.c (cp_set_block_scope): Comment out
+	processing_has_namespace_info branch.
+
 2003-06-12  Jim Blandy  <jimb@redhat.com>
 
 	Recognize and skip 64-bit PowerPC Linux linkage functions.
