@@ -39,7 +39,7 @@ struct ui_file *mi_stdtarg;
 struct ui_file *mi_event_channel;
 
 /* This is the interpreter for the mi... */
-struct gdb_interpreter *mi0_interp;
+struct gdb_interpreter *mi2_interp;
 struct gdb_interpreter *mi1_interp;
 struct gdb_interpreter *mi_interp;
 
@@ -63,7 +63,7 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap);
 static char *mi_interp_read_one_line_hook (char *prompt, int repeat,
 					   char *anno);
 
-static void mi0_command_loop (void);
+static void mi2_command_loop (void);
 static void mi1_command_loop (void);
 
 static void mi_insert_notify_hooks (void);
@@ -149,12 +149,12 @@ mi_interpreter_resume (void *data)
   show_load_progress = mi_load_progress;
 
   /* If we're _the_ interpreter, take control. */
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0))
-    command_loop_hook = mi0_command_loop;
+  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2))
+    command_loop_hook = mi2_command_loop;
   else if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
     command_loop_hook = mi1_command_loop;
   else if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI))
-    command_loop_hook = mi1_command_loop;
+    command_loop_hook = mi2_command_loop;
   else
     return 0;
 
@@ -352,15 +352,15 @@ mi_execute_command_wrapper (char *cmd)
 }
 
 static void
-mi0_command_loop (void)
-{
-  mi_command_loop (0);
-}
-
-static void
 mi1_command_loop (void)
 {
   mi_command_loop (1);
+}
+
+static void
+mi2_command_loop (void)
+{
+  mi_command_loop (2);
 }
 
 static void
@@ -437,19 +437,6 @@ _initialize_mi_interp (void)
       mi_interpreter_prompt	/* prompt_proc */
     };
 
-  /* Create MI0 interpreter */
-  if (mi0_interp == NULL)
-    {
-      mi0_interp =
-	gdb_new_interpreter (GDB_INTERPRETER_MI0, NULL, mi_out_new (0),
-			     &procs);
-      if (mi0_interp == NULL)
-	error
-	  ("Couldn't allocate a new interpreter for the mi0 interpreter\n");
-      if (gdb_add_interpreter (mi0_interp) != 1)
-	error ("Couldn't add the mi0 interpreter to gdb.\n");
-    }
-
   /* Create MI1 interpreter */
   if (mi1_interp == NULL)
     {
@@ -464,10 +451,23 @@ _initialize_mi_interp (void)
     }
 
   /* Create MI2 interpreter */
+  if (mi2_interp == NULL)
+    {
+      mi2_interp =
+	gdb_new_interpreter (GDB_INTERPRETER_MI2, NULL, mi_out_new (2),
+			     &procs);
+      if (mi2_interp == NULL)
+	error
+	  ("Couldn't allocate a new interpreter for the mi2 interpreter\n");
+      if (gdb_add_interpreter (mi2_interp) != 1)
+	error ("Couldn't add the mi2 interpreter to gdb.\n");
+    }
+
+  /* Create MI3 interpreter */
   if (mi_interp == NULL)
     {
       mi_interp =
-	gdb_new_interpreter (GDB_INTERPRETER_MI, NULL, mi_out_new (2),
+	gdb_new_interpreter (GDB_INTERPRETER_MI, NULL, mi_out_new (3),
 			     &procs);
       if (mi_interp == NULL)
 	error

@@ -1,3 +1,11 @@
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-interp.c: Increment mi version numbers: 0->1, 1->2,
+	and 2->3. Remove MI0 references.
+	* mi-events.c: Ditto.
+	* mi-main.c: Ditto. Remove erroneously merged code.
+	* mi.h: Ditto.
+	
 2002-08-28  Keith Seitz  <keiths@redhat.com>
 
 	* mi-interp.c (_initialize_mi_interp): Add exec_proc.

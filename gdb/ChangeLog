@@ -1,3 +1,8 @@
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.h (GDB_INTERPRETER_MI2): Define.
+	(GDB_INTERPRETER_MI0): Remove.
+
 2002-10-01  Keith Seitz  <keiths@redhat.com>
 
 	* interps.c (interpreter_exec_cmd): Remove mention of "mi" in

@@ -25,7 +25,7 @@ struct ui_file;
 struct breakpoint;
 struct gdb_interpreter;
 extern struct gdb_interpreter *mi_interp;
-extern struct gdb_interpreter *mi0_interp;
+extern struct gdb_interpreter *mi1_interp;
 
 extern void mi_setup_architecture_data (void);
 extern void mi_register_gdbarch_swap (void);

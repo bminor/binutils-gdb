@@ -1161,8 +1161,8 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
       /* If we changed interpreters, DON'T print out anything. */
       if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI)
-	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
-	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1)
+	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2))
 	{
 	  /* print the result */
 	  /* FIXME: Check for errors here. */
@@ -1411,8 +1411,8 @@ mi_load_progress (const char *section_name,
   int new_section;
 
   if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI)
-      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
-      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1)
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2))
     return;
 
   update_threshold.tv_sec = 0;
@@ -1471,77 +1471,8 @@ mi_load_progress (const char *section_name,
     }
 }
 
-static void
-mi_command_loop (int mi_version)
-{
-  /* HACK: Force stdout/stderr to point at the console.  This avoids
-     any potential side effects caused by legacy code that is still
-     using the TUI / fputs_unfiltered_hook */
-  raw_stdout = stdio_fileopen (stdout);
-  /* Route normal output through the MIx */
-  gdb_stdout = mi_console_file_new (raw_stdout, "~");
-  /* Route error and log output through the MI */
-  gdb_stderr = mi_console_file_new (raw_stdout, "&");
-  gdb_stdlog = gdb_stderr;
-  /* Route target output through the MI. */
-  gdb_stdtarg = mi_console_file_new (raw_stdout, "@");
-
-  /* HACK: Poke the ui_out table directly.  Should we be creating a
-     mi_out object wired up to the above gdb_stdout / gdb_stderr? */
-  uiout = mi_out_new (mi_version);
-
-  /* HACK: Override any other interpreter hooks.  We need to create a
-     real event table and pass in that. */
-  init_ui_hook = 0;
-  /* command_loop_hook = 0; */
-  print_frame_info_listing_hook = 0;
-  query_hook = 0;
-  warning_hook = 0;
-  create_breakpoint_hook = 0;
-  delete_breakpoint_hook = 0;
-  modify_breakpoint_hook = 0;
-  interactive_hook = 0;
-  registers_changed_hook = 0;
-  readline_begin_hook = 0;
-  readline_hook = 0;
-  readline_end_hook = 0;
-  register_changed_hook = 0;
-  memory_changed_hook = 0;
-  context_hook = 0;
-  target_wait_hook = 0;
-  call_command_hook = 0;
-  error_hook = 0;
-  error_begin_hook = 0;
-  show_load_progress = mi_load_progress;
-
-  /* Turn off 8 bit strings in quoted output.  Any character with the
-     high bit set is printed using C's octal format. */
-  sevenbit_strings = 1;
-
-  /* Tell the world that we're alive */
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
-
-  if (!event_loop_p)
-    simplified_command_loop (mi_input, mi_execute_command);
-  else
-    start_event_loop ();
-}
-
-static void
-mi1_command_loop (void)
-{
-  mi_command_loop (1);
-}
-
-static void
-mi2_command_loop (void)
-{
-  mi_command_loop (2);
-}
-
-static void
-setup_architecture_data (void)
+void
+mi_setup_architecture_data (void)
 {
   /* don't trust REGISTER_BYTES to be zero. */
   old_regs = xmalloc (REGISTER_BYTES + 1);
@@ -1551,21 +1482,6 @@ setup_architecture_data (void)
 void
 mi_register_gdbarch_swap (void)
 {
-  if (interpreter_p == NULL)
-    return;
-
-  /* If we're _the_ interpreter, take control. */
-  if (strcmp (interpreter_p, "mi") == 0)
-    command_loop_hook = mi2_command_loop;
-  else if (strcmp (interpreter_p, "mi1") == 0)
-    command_loop_hook = mi1_command_loop;
-  else if (strcmp (interpreter_p, "mi2") == 0)
-    command_loop_hook = mi2_command_loop;
-  else
-    return;
-
-  init_ui_hook = mi_init_ui;
-  setup_architecture_data ();
   register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
   register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }

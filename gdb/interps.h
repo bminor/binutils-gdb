@@ -70,7 +70,7 @@ void clear_interpreter_hooks ();
 
 /* well-known interpreters */
 #define GDB_INTERPRETER_CONSOLE		"console"
-#define GDB_INTERPRETER_MI0		"mi0"
 #define GDB_INTERPRETER_MI1             "mi1"
+#define GDB_INTERPRETER_MI2		"mi2"
 #define GDB_INTERPRETER_MI		"mi"
 #endif /* GDB_INTERPRETER_H */
