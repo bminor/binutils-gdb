@@ -1,3 +1,8 @@
+Tue Apr 12 20:45:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.t15/gdbme.c (t_func_values): Do not compare function pointers
+	directly.  Instead compare the return values from actual calls.
+
 Mon Apr 11 10:31:00 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in (check): Set TCL_LIBRARY for runtest.
