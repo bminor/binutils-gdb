@@ -1,3 +1,8 @@
+Fri Apr 18 13:38:19 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* remote-sim.c (gdbsim_open): Only pass -E to sim_open if
+	TARGET_BYTE ORDER_SELECTABLE.
+
 Fri Apr 18 16:52:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (init_callbacks): Initialize poll_quit and magic

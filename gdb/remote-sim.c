@@ -521,9 +521,14 @@ gdbsim_open (args, from_tty)
 
   len = 7 + 1 + (args ? strlen (args) : 0) + 50;
   arg_buf = (char *) alloca (len);
-  sprintf (arg_buf, "gdbsim%s%s -E %s",
-	   args ? " " : "", args ? args : "",
-	   TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+  sprintf (arg_buf, "gdbsim%s%s",
+	   args ? " " : "", args ? args : "");
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    strcat (arg_buf, " -E big");
+  else
+    strcat (arg_buf, " -E little");
+#endif
   argv = buildargv (arg_buf);
   if (argv == NULL)
     error ("Insufficient memory available to allocate simulator arg list.");
