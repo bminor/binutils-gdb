@@ -268,6 +268,17 @@ floatsisf (CGEN_FPU* fpu, SI x)
   return res;
 }
 
+static DF
+floatsidf (CGEN_FPU* fpu, SI x)
+{
+  sim_fpu ans;
+  unsigned64 res;
+
+  sim_fpu_i32to (&ans, x, sim_fpu_round_near);
+  sim_fpu_to64 (&res, &ans);
+  return res;
+}
+
 static SF
 ufloatsisf (CGEN_FPU* fpu, USI x)
 {
@@ -286,6 +297,17 @@ fixsfsi (CGEN_FPU* fpu, SF x)
   unsigned32 res;
 
   sim_fpu_32to (&op1, x);
+  sim_fpu_to32i (&res, &op1, sim_fpu_round_near);
+  return res;
+}
+
+static SI
+fixdfsi (CGEN_FPU* fpu, DF x)
+{
+  sim_fpu op1;
+  unsigned32 res;
+
+  sim_fpu_64to (&op1, x);
   sim_fpu_to32i (&res, &op1, sim_fpu_round_near);
   return res;
 }
@@ -596,7 +618,9 @@ cgen_init_accurate_fpu (SIM_CPU* cpu, CGEN_FPU* fpu, CGEN_FPU_ERROR_FN* error)
   o->gtdf = gtdf;
   o->gedf = gedf;
   o->floatsisf = floatsisf;
+  o->floatsidf = floatsidf;
   o->ufloatsisf = ufloatsisf;
   o->fixsfsi = fixsfsi;
+  o->fixdfsi = fixdfsi;
   o->ufixsfsi = ufixsfsi;
 }

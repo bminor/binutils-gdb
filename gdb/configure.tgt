@@ -22,7 +22,7 @@ mips*)			gdb_target_cpu=mips ;;
 # OBSOLETE np1)			gdb_target_cpu=gould ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
 # OBSOLETE pn)			gdb_target_cpu=gould ;;
-pyramid)		gdb_target_cpu=pyr ;;
+# OBSOLETE pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
 strongarm*)		gdb_target_cpu=arm ;;
@@ -225,7 +225,7 @@ powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
 			  gdb_target=ppcle-eabi
 			fi ;;
 
-pyramid-*-*)		gdb_target=pyramid ;;
+# OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
 
 rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;

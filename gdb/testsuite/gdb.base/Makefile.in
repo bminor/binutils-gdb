@@ -1,7 +1,7 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = all-types annota1 annota2 bitfields break \
+EXECUTABLES = all-types annota1 bitfields break \
 	call-ar-st call-rt-st call-strs callfuncs callfuncs2 commands \
 	compiler condbreak constvars coremaker display \
 	ending-run exprs funcargs int-type interrupt \

@@ -1182,6 +1182,7 @@ generic_mourn_inferior ()
 
 /* This table must match in order and size the signals in enum target_signal
    in target.h.  */
+/* *INDENT-OFF* */
 static struct {
   char *name;
   char *string;
@@ -1282,6 +1283,7 @@ static struct {
   /* Last entry, used to check whether the table is the right size.  */
   {NULL, "TARGET_SIGNAL_MAGIC"}
 };
+/* *INDENT-ON* */
 
 /* Return the string for a signal.  */
 char *

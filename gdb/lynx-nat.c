@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/fpp.h>
 
 static unsigned long registers_addr PARAMS ((int pid));
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR);
+static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
 
 #define X(ENTRY)(offsetof(struct econtext, ENTRY))
 

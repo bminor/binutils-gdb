@@ -1,3 +1,56 @@
+1999-07-07  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gnu-regex.c, gnu-regex.h: Don't let indent mess with these.
+
+Wed Jul  7 13:06:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c (fputs_readable): Rename puts_readable, add struct
+ 	gdb_file argument.
+	(fputc_readable): Rename putc_readable, add struct gdb_file
+ 	argument.
+
+	* remote-mips.c (mips_expect_timeout, mips_receive_header,
+ 	mips_send_packet, mips_receive_packet), remote-rdp.c (put_byte,
+ 	get_byte, put_word, rdp_init, rdp_init), remote-sds.c
+ 	(sds_interrupt, sds_wait, readchar, putmessage, read_frame,
+ 	getmessage), remote-udi.c (udi_store_registers, fetch_register):
+	(store_register), xmodem.c (readchar), utils.c (puts_debug),
+ 	gnu-nat.h (debug), parse.c (parse_exp_1): Cleanup - send debug/log
+ 	messages to gdb_stdlog.
+
+1999-07-06  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* exec.c: Remove long-#ifed-out section of code that confuses
+	indent.
+	* gdbtypes.c (add_mangled_type): Add some braces to indicate
+	grouping better.
+	* gnu-nat.c: Remove literal newlines embedded in strings,
+	causes indent to weird out.
+	* language.c (binop_result_type): Remove extra paren.
+	* lynx-nat.c: Add a missing paren to fetch_core_registers decl.
+	* nec4102rom.c (vr4102_insert_step): Fix typos.
+	(_initialize_vr4102_rom): Remove literal newline in string.
+	* config/a29k/tm-a29k.h: Suppress formatting of pictures.
+	* config/m68k/xm-3b1.h: Remove excess #endif.
+
+	Declare Pyramid configuration obsolete.
+	* configure.host, configure.tgt: Comment out Pyramid configs.
+	* Makefile.in: Comment out Pyramid-related actions.
+	* pyr-xdep.c, pyr-tdep.c, config/pyr/*: Comment out.
+	* NEWS: Mention obsolete status.
+
+1999-07-06  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* remote.c: Include <sys/time.h> to pick up FD_SET et al defns on
+	some old Linux distributions.
+	* remote-os9k.c, remote-st.c, ser-tcp.c, ser-unix.c,
+	sparcl-tdep.c, remote.c: Back out inclusion of <sys/select.h>.
+	It isn't necessary after all.
+
+1999-07-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c (strip_bg_char): Remove assignment from 'if' condition.
+
 1999-07-05  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* remote.c: Include <sys/select.h> if it exists in order to pick up

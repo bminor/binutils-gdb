@@ -198,8 +198,10 @@ strip_bg_char (args)
      char **args;
 {
   char *p = NULL;
-
-  if (p = strchr (*args, '&'))
+  
+  p = strchr (*args, '&');
+  
+  if (p)
     {
       if (p == (*args + strlen (*args) - 1))
 	{

@@ -1,3 +1,4 @@
+/* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright (C) 1986, 89, 91, 92, 93, 94, 95, 96, 1998
    Free Software Foundation, Inc.
@@ -1224,3 +1225,4 @@ extern int use_windows;
 #endif
 
 #endif /* #ifndef DEFS_H */
+/* *INDENT-ON* */

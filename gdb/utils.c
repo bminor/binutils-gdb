@@ -2251,16 +2251,16 @@ puts_debug (prefix, string, suffix)
      and the new prefix.  */
   if ((return_p || (strcmp(prev_prefix, prefix) != 0)) && !new_line)
     {
-      fputs_unfiltered (prev_suffix, gdb_stderr);
-      fputs_unfiltered ("\n", gdb_stderr);
-      fputs_unfiltered (prefix, gdb_stderr);
+      fputs_unfiltered (prev_suffix, gdb_stdlog);
+      fputs_unfiltered ("\n", gdb_stdlog);
+      fputs_unfiltered (prefix, gdb_stdlog);
     }
 
   /* Print prefix if we printed a newline during the previous call.  */
   if (new_line)
     {
       new_line = 0;
-      fputs_unfiltered (prefix, gdb_stderr);
+      fputs_unfiltered (prefix, gdb_stdlog);
     }
 
   prev_prefix = prefix;
@@ -2273,20 +2273,20 @@ puts_debug (prefix, string, suffix)
         {
 	default:
 	  if (isprint (ch))
-	    fputc_unfiltered (ch, gdb_stderr);
+	    fputc_unfiltered (ch, gdb_stdlog);
 
 	  else
-	    fprintf_unfiltered (gdb_stderr, "\\x%02x", ch & 0xff);
+	    fprintf_unfiltered (gdb_stdlog, "\\x%02x", ch & 0xff);
 	  break;
 
-	case '\\': fputs_unfiltered ("\\\\",  gdb_stderr);	break;
-	case '\b': fputs_unfiltered ("\\b",   gdb_stderr);	break;
-	case '\f': fputs_unfiltered ("\\f",   gdb_stderr);	break;
+	case '\\': fputs_unfiltered ("\\\\",  gdb_stdlog);	break;
+	case '\b': fputs_unfiltered ("\\b",   gdb_stdlog);	break;
+	case '\f': fputs_unfiltered ("\\f",   gdb_stdlog);	break;
 	case '\n': new_line = 1;
-		   fputs_unfiltered ("\\n",   gdb_stderr);	break;
-	case '\r': fputs_unfiltered ("\\r",   gdb_stderr);	break;
-	case '\t': fputs_unfiltered ("\\t",   gdb_stderr);	break;
-	case '\v': fputs_unfiltered ("\\v",   gdb_stderr);	break;
+		   fputs_unfiltered ("\\n",   gdb_stdlog);	break;
+	case '\r': fputs_unfiltered ("\\r",   gdb_stdlog);	break;
+	case '\t': fputs_unfiltered ("\\t",   gdb_stdlog);	break;
+	case '\v': fputs_unfiltered ("\\v",   gdb_stdlog);	break;
         }
 
       return_p = ch == '\r';
@@ -2295,8 +2295,8 @@ puts_debug (prefix, string, suffix)
   /* Print suffix if we printed a newline.  */
   if (new_line)
     {
-      fputs_unfiltered (suffix, gdb_stderr);
-      fputs_unfiltered ("\n", gdb_stderr);
+      fputs_unfiltered (suffix, gdb_stdlog);
+      fputs_unfiltered ("\n", gdb_stdlog);
     }
 }
 

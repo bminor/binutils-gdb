@@ -17,7 +17,7 @@ i[3456]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
 # OBSOLETE np1)			gdb_host_cpu=gould ;;
-pyramid)		gdb_host_cpu=pyr ;;
+# OBSOLETE pyramid)		gdb_host_cpu=pyr ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparc64)		gdb_host_cpu=sparc ;;
 *)			gdb_host_cpu=$host_cpu ;;
@@ -133,9 +133,9 @@ powerpcle-*-cygwin*)	gdb_host=cygwin ;;
 powerpcle-*-solaris*)	gdb_host=solaris ;;
 powerpc-*-linux*)	gdb_host=linux ;;
 
-# OBSOLETE pn-*-*)			gdb_host=pn ;;
+# OBSOLETE pn-*-*)		gdb_host=pn ;;
 
-pyramid-*-*)		gdb_host=pyramid ;;
+# OBSOLETE pyramid-*-*)		gdb_host=pyramid ;;
 
 romp-*-*)		gdb_host=rtbsd ;;
 

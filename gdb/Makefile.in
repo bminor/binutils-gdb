@@ -224,7 +224,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990705
+VERSION = 19990707
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1368,9 +1368,9 @@ printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdb_string.h
 
-pyr-tdep.o: pyr-tdep.c $(defs_h) 
+# OBSOLETE pyr-tdep.o: pyr-tdep.c $(defs_h) 
 
-pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
+# OBSOLETE pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
 gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) gdb_string.h
 

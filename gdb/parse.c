@@ -1168,13 +1168,13 @@ parse_exp_1 (stringptr, block, comma)
      parser, to a prefix form. */
 
   if (expressiondebug)
-    dump_prefix_expression (expout, gdb_stdout,
+    dump_prefix_expression (expout, gdb_stdlog,
 			    "before conversion to prefix form");
 
   prefixify_expression (expout);
 
   if (expressiondebug)
-    dump_postfix_expression (expout, gdb_stdout,
+    dump_postfix_expression (expout, gdb_stdlog,
 			     "after conversion to prefix form");
 
   *stringptr = lexptr;

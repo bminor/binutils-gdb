@@ -2287,7 +2287,7 @@ SEM_FN_NAME (fr30bf,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lduh.f
+#define FLD(f) abuf->fields.fmt_ld.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2308,7 +2308,7 @@ SEM_FN_NAME (fr30bf,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,ldub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldub.f
+#define FLD(f) abuf->fields.fmt_ld.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2350,7 +2350,7 @@ SEM_FN_NAME (fr30bf,ldr13) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,ldr13uh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldr13uh.f
+#define FLD(f) abuf->fields.fmt_ldr13.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2371,7 +2371,7 @@ SEM_FN_NAME (fr30bf,ldr13uh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,ldr13ub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldr13ub.f
+#define FLD(f) abuf->fields.fmt_ldr13.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2587,7 +2587,7 @@ SEM_FN_NAME (fr30bf,st) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,sth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_sth.f
+#define FLD(f) abuf->fields.fmt_st.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2608,7 +2608,7 @@ SEM_FN_NAME (fr30bf,sth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,stb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stb.f
+#define FLD(f) abuf->fields.fmt_st.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2650,7 +2650,7 @@ SEM_FN_NAME (fr30bf,str13) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,str13h) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_str13h.f
+#define FLD(f) abuf->fields.fmt_str13.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -2671,7 +2671,7 @@ SEM_FN_NAME (fr30bf,str13h) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 SEM_PC
 SEM_FN_NAME (fr30bf,str13b) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_str13b.f
+#define FLD(f) abuf->fields.fmt_str13.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -4596,7 +4596,7 @@ do { } while (0); /*nop*/
 SEM_PC
 SEM_FN_NAME (fr30bf,copld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_copld.f
+#define FLD(f) abuf->fields.fmt_copop.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -4613,7 +4613,7 @@ do { } while (0); /*nop*/
 SEM_PC
 SEM_FN_NAME (fr30bf,copst) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_copst.f
+#define FLD(f) abuf->fields.fmt_copop.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -4630,7 +4630,7 @@ do { } while (0); /*nop*/
 SEM_PC
 SEM_FN_NAME (fr30bf,copsv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_copst.f
+#define FLD(f) abuf->fields.fmt_copop.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -4647,7 +4647,7 @@ do { } while (0); /*nop*/
 SEM_PC
 SEM_FN_NAME (fr30bf,nop) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_nop.f
+#define FLD(f) abuf->fields.fmt_bnod.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;

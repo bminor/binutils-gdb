@@ -2524,8 +2524,7 @@ struct cmd_list_element *show_thread_default_cmd_list = NULL;
 static void
 set_thread_cmd (char *args, int from_tty)
 {
-  printf_unfiltered ("\"set thread\" must be followed by the name of a thread
-property, or \"default\".\n");
+  printf_unfiltered ("\"set thread\" must be followed by the name of a thread property, or \"default\".\n");
 }
 
 static void
@@ -2952,8 +2951,7 @@ static void add_task_commands ()
 	   "Set whether new threads are allowed to run (once gdb has noticed them).",
 	   &set_thread_default_cmd_list);
   add_cmd ("run", no_class, show_thread_default_run_cmd,
-	   "Show whether new threads are allowed to run (once gdb has noticed
-them).",
+	   "Show whether new threads are allowed to run (once gdb has noticed them).",
 	   &show_thread_default_cmd_list);
   add_cmd ("detach-suspend-count", class_run, set_thread_default_detach_sc_cmd,
 	   "Set the default detach-suspend-count value for new threads.",

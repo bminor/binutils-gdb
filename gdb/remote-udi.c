@@ -750,10 +750,12 @@ int	regno;
 
   if (remote_debug)
     {
-      printf_unfiltered("Fetching all registers\n");
-      printf_unfiltered("Fetching PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
-	     read_register(NPC_REGNUM), read_register(PC_REGNUM),
-	     read_register(PC2_REGNUM));
+      fprintf_unfiltered (gdb_stdlog, "Fetching all registers\n");
+      fprintf_unfiltered (gdb_stdlog,
+			  "Fetching PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
+			  read_register (NPC_REGNUM),
+			  read_register (PC_REGNUM),
+			  read_register (PC2_REGNUM));
     }
 
   /* There doesn't seem to be any way to get these.  */
@@ -791,9 +793,12 @@ int regno;
 
   if (remote_debug)
     {
-      printf_unfiltered("Storing all registers\n");
-      printf_unfiltered("PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n", read_register(NPC_REGNUM),
-	     read_register(PC_REGNUM), read_register(PC2_REGNUM));
+      fprintf_unfiltered (gdb_stdlog, "Storing all registers\n");
+      fprintf_unfiltered (gdb_stdlog,
+			  "PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
+			  read_register (NPC_REGNUM),
+			  read_register (PC_REGNUM),
+			  read_register (PC2_REGNUM));
     }
 
 /* Gr1/rsp */
@@ -1450,7 +1455,8 @@ fetch_register (regno)
   supply_register(regno, (char *) &To);
 
   if (remote_debug)
-    printf_unfiltered("Fetching register %s = 0x%x\n", REGISTER_NAME (regno), To);
+    fprintf_unfiltered (gdb_stdlog, "Fetching register %s = 0x%x\n",
+			REGISTER_NAME (regno), To);
 }
 /*****************************************************************************/ 
 /* Store a single register indicated by 'regno'. 
@@ -1471,7 +1477,8 @@ store_register (regno)
   From =  read_register (regno);	/* get data value */
 
   if (remote_debug)
-    printf_unfiltered("Storing register %s = 0x%x\n", REGISTER_NAME (regno), From);
+    fprintf_unfiltered (gdb_stdlog, "Storing register %s = 0x%x\n",
+			REGISTER_NAME (regno), From);
 
   if (regno == GR1_REGNUM)
     {

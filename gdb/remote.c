@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* *INDENT-OFF* */
 /* Remote communication protocol.
 
    A debug packet whose contents are <data>
@@ -195,6 +196,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 	So 
 	"0* " means the same as "0000".  */
+/* *INDENT-ON* */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -215,12 +217,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dcache.h"
 
 #include <ctype.h>
+#include <sys/time.h>
 #ifdef USG
 #include <sys/types.h>
-#endif
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
 #endif
 
 #include "event-loop.h"

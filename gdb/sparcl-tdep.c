@@ -1,5 +1,5 @@
 /* Target dependent code for the Fujitsu SPARClite for GDB, the GNU debugger.
-   Copyright 1994, 1995, 1996, 1999  Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,10 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "serial.h"
 #include <sys/types.h>
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
 
 #if (!defined(__GO32__) && !defined(_WIN32)) || defined(__CYGWIN32__)
 #define HAVE_SOCKETS

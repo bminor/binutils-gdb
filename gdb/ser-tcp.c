@@ -1,5 +1,5 @@
 /* Serial interface for raw TCP connections on Un*x like systems
-   Copyright 1992, 1993, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -31,10 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef __CYGWIN32__
 #include <netinet/tcp.h>
-#endif
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
 #endif
 
 #include "signals.h"

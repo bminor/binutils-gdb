@@ -39,7 +39,7 @@ mn10200_use_struct_convention (gcc_p, type)
 }
 
 
-
+/* *INDENT-OFF* */
 /* The main purpose of this file is dealing with prologues to extract
    information about stack frames and saved registers.
 
@@ -102,6 +102,7 @@ mn10200_use_struct_convention (gcc_p, type)
       NO_MORE_FRAMES: Set this if the current frame is "start" or
       if the first instruction looks like mov <imm>,sp.  This tells
       frame chain to not bother trying to unwind past this frame.  */
+/* *INDENT-ON* */
 
 #define MY_FRAME_IN_SP 0x1
 #define MY_FRAME_IN_FP 0x2

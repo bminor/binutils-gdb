@@ -310,6 +310,7 @@ extern use_struct_convention_fn a29k_use_struct_convention;
 			  TYPE_LENGTH (TYPE));				  \
   }
 
+/* *INDENT-OFF* */
 /* The a29k user's guide documents well what the stacks look like.
    But what isn't so clear there is how this interracts with the
    symbols, or with GDB.
@@ -410,6 +411,7 @@ extern use_struct_convention_fn a29k_use_struct_convention;
      computed by adding msize to the saved_msp of the
      next frame.
    * msize is in the frame cache only for high C's sake.  */
+/* *INDENT-ON* */
 
 void read_register_stack ();
 long read_register_stack_integer ();
@@ -513,7 +515,7 @@ void a29k_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADD
       a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Call function stuff.  */
-
+/* *INDENT-OFF* */
 /* The dummy frame looks like this (see also the general frame picture
    above):
 
@@ -563,6 +565,7 @@ void a29k_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADD
    retaddr_sproc:  Contains the PC at the time we call the function.
       set by PUSH_DUMMY_FRAME and read by POP_FRAME.
    retaddr_dummy:  This points to a breakpoint instruction in the dummy.  */
+/* *INDENT-ON* */
 
 /* Rsize for dummy frame, in bytes.  */
 

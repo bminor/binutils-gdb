@@ -186,7 +186,7 @@ get_byte ()
   int c = SERIAL_READCHAR (io, timeout);
 
   if (remote_debug)
-    printf ("[%02x]\n", c);
+    fprintf_unfiltered (gdb_stdlog, "[%02x]\n", c);
 
   if (c == SERIAL_TIMEOUT)
     {
@@ -220,7 +220,7 @@ put_byte (val)
      char val;
 {
   if (remote_debug)
-    printf ("(%02x)\n", val);
+    fprintf_unfiltered (gdb_stdlog, "(%02x)\n", val);
   SERIAL_WRITE (io, &val, 1);
 }
 
@@ -236,7 +236,7 @@ put_word (val)
   b[3] = val >> 24;
 
   if (remote_debug)
-    printf ("(%04x)", val);
+    fprintf_unfiltered (gdb_stdlog, "(%04x)", val);
 
   SERIAL_WRITE (io, b, 4);
 }
@@ -314,7 +314,7 @@ rdp_init (cold, tty)
       while (!sync && (restype = SERIAL_READCHAR (io, 1)) > 0)
 	{
 	  if (remote_debug)
-	    printf_unfiltered ("[%02x]\n", restype);
+	    fprintf_unfiltered (gdb_stdlog, "[%02x]\n", restype);
 
 	  switch (restype)
 	    {
@@ -349,7 +349,7 @@ rdp_init (cold, tty)
 		int resval = SERIAL_READCHAR (io, 1);
 
 		if (remote_debug)
-		  printf_unfiltered ("[%02x]\n", resval);
+		  fprintf_unfiltered (gdb_stdlog, "[%02x]\n", resval);
 
 		switch (resval)
 		  {

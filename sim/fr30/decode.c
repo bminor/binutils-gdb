@@ -323,12 +323,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       switch (val)
       {
       case 0 : itype = FR30BF_INSN_LDR13; goto extract_fmt_ldr13;
-      case 1 : itype = FR30BF_INSN_LDR13UH; goto extract_fmt_ldr13uh;
-      case 2 : itype = FR30BF_INSN_LDR13UB; goto extract_fmt_ldr13ub;
+      case 1 : itype = FR30BF_INSN_LDR13UH; goto extract_fmt_ldr13;
+      case 2 : itype = FR30BF_INSN_LDR13UB; goto extract_fmt_ldr13;
       case 3 : itype = FR30BF_INSN_LDR15; goto extract_fmt_ldr15;
       case 4 : itype = FR30BF_INSN_LD; goto extract_fmt_ld;
-      case 5 : itype = FR30BF_INSN_LDUH; goto extract_fmt_lduh;
-      case 6 : itype = FR30BF_INSN_LDUB; goto extract_fmt_ldub;
+      case 5 : itype = FR30BF_INSN_LDUH; goto extract_fmt_ld;
+      case 6 : itype = FR30BF_INSN_LDUB; goto extract_fmt_ld;
       case 7 :
         {
           unsigned int val = (((insn >> 4) & (15 << 0)));
@@ -350,12 +350,12 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 14 : itype = FR30BF_INSN_DMOV2R13PIB; goto extract_fmt_dmov2r13pib;
       case 15 : itype = FR30BF_INSN_ENTER; goto extract_fmt_enter;
       case 16 : itype = FR30BF_INSN_STR13; goto extract_fmt_str13;
-      case 17 : itype = FR30BF_INSN_STR13H; goto extract_fmt_str13h;
-      case 18 : itype = FR30BF_INSN_STR13B; goto extract_fmt_str13b;
+      case 17 : itype = FR30BF_INSN_STR13H; goto extract_fmt_str13;
+      case 18 : itype = FR30BF_INSN_STR13B; goto extract_fmt_str13;
       case 19 : itype = FR30BF_INSN_STR15; goto extract_fmt_str15;
       case 20 : itype = FR30BF_INSN_ST; goto extract_fmt_st;
-      case 21 : itype = FR30BF_INSN_STH; goto extract_fmt_sth;
-      case 22 : itype = FR30BF_INSN_STB; goto extract_fmt_stb;
+      case 21 : itype = FR30BF_INSN_STH; goto extract_fmt_st;
+      case 22 : itype = FR30BF_INSN_STB; goto extract_fmt_st;
       case 23 :
         {
           unsigned int val = (((insn >> 4) & (15 << 0)));
@@ -535,11 +535,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 7 : itype = FR30BF_INSN_DIV4S; goto extract_fmt_div4s;
           case 8 : itype = FR30BF_INSN_LDI32; goto extract_fmt_ldi32;
           case 9 : itype = FR30BF_INSN_LEAVE; goto extract_fmt_leave;
-          case 10 : itype = FR30BF_INSN_NOP; goto extract_fmt_nop;
+          case 10 : itype = FR30BF_INSN_NOP; goto extract_fmt_bnod;
           case 12 : itype = FR30BF_INSN_COPOP; goto extract_fmt_copop;
-          case 13 : itype = FR30BF_INSN_COPLD; goto extract_fmt_copld;
-          case 14 : itype = FR30BF_INSN_COPST; goto extract_fmt_copst;
-          case 15 : itype = FR30BF_INSN_COPSV; goto extract_fmt_copst;
+          case 13 : itype = FR30BF_INSN_COPLD; goto extract_fmt_copop;
+          case 14 : itype = FR30BF_INSN_COPST; goto extract_fmt_copop;
+          case 15 : itype = FR30BF_INSN_COPSV; goto extract_fmt_copop;
           default : itype = FR30BF_INSN_X_INVALID; goto extract_fmt_empty;
           }
         }
@@ -650,9 +650,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
-  EXTRACT_IFMT_EMPTY_VARS /* */
 
-  EXTRACT_IFMT_EMPTY_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_empty", (char *) 0));
@@ -666,9 +664,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_add.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -693,9 +693,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addi.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_u4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_u4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u4) = f_u4;
@@ -719,9 +721,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_add2.f
-  EXTRACT_IFMT_ADD2_VARS /* f-op1 f-op2 f-m4 f-Ri */
+    SI f_m4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD2_CODE
+    f_m4 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 4)) | (((-1) << (4))));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_m4) = f_m4;
@@ -745,9 +749,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addc.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -772,9 +778,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addn.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -799,9 +807,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addni.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_u4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_u4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u4) = f_u4;
@@ -825,9 +835,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addn2.f
-  EXTRACT_IFMT_ADD2_VARS /* f-op1 f-op2 f-m4 f-Ri */
+    SI f_m4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD2_CODE
+    f_m4 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 4)) | (((-1) << (4))));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_m4) = f_m4;
@@ -851,9 +863,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmp.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -877,9 +891,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmpi.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_u4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_u4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u4) = f_u4;
@@ -902,9 +918,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_cmp2.f
-  EXTRACT_IFMT_ADD2_VARS /* f-op1 f-op2 f-m4 f-Ri */
+    SI f_m4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD2_CODE
+    f_m4 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 4)) | (((-1) << (4))));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_m4) = f_m4;
@@ -927,9 +945,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_and.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -954,9 +974,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andm.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -980,9 +1002,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andh.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1006,9 +1030,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andb.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1032,9 +1058,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_bandl.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_u4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_u4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u4) = f_u4;
@@ -1057,9 +1085,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_btstl.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_u4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_u4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u4) = f_u4;
@@ -1082,9 +1112,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mul.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1108,9 +1140,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulu.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1134,9 +1168,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mulh.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1160,9 +1196,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div0s.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1184,9 +1220,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div0u.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
 
-  EXTRACT_IFMT_DIV0S_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_div0u", (char *) 0));
@@ -1200,9 +1234,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div1.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1224,9 +1258,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div2.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1248,9 +1282,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div3.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_div3", (char *) 0));
@@ -1264,9 +1296,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_div4s.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_div4s", (char *) 0));
@@ -1280,9 +1310,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lsl.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1307,9 +1339,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_lsli.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_u4;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_u4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u4) = f_u4;
@@ -1333,9 +1367,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldi8.f
-  EXTRACT_IFMT_LDI8_VARS /* f-op1 f-i8 f-Ri */
+    UINT f_i8;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDI8_CODE
+    f_i8 = EXTRACT_MSB0_UINT (insn, 16, 4, 8);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_i8) = f_i8;
@@ -1358,9 +1394,20 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldi20.f
-  EXTRACT_IFMT_LDI20_VARS /* f-op1 f-i20 f-op2 f-Ri */
+    UINT f_i20_16;
+    UINT f_i20_4;
+    UINT f_Ri;
+    UINT f_i20;
+    /* Contents of trailing part of insn.  */
+    UINT word_1;
 
-  EXTRACT_IFMT_LDI20_CODE
+  word_1 = GETIMEMUHI (current_cpu, pc + 2);
+    f_i20_16 = (0|(EXTRACT_MSB0_UINT (word_1, 16, 0, 16) << 0));
+    f_i20_4 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
+{
+  f_i20 = ((((f_i20_4) << (16))) | (f_i20_16));
+}
 
   /* Record the fields for the semantic handler.  */
   FLD (f_i20) = f_i20;
@@ -1383,9 +1430,16 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldi32.f
-  EXTRACT_IFMT_LDI32_VARS /* f-op1 f-i32 f-op2 f-op3 f-Ri */
+    UINT f_i32;
+    UINT f_Ri;
+    /* Contents of trailing part of insn.  */
+    UINT word_1;
+    UINT word_2;
 
-  EXTRACT_IFMT_LDI32_CODE
+  word_1 = GETIMEMUHI (current_cpu, pc + 2);
+  word_2 = GETIMEMUHI (current_cpu, pc + 4);
+    f_i32 = (0|(EXTRACT_MSB0_UINT (word_2, 16, 0, 16) << 0)|(EXTRACT_MSB0_UINT (word_1, 16, 0, 16) << 16));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_i32) = f_i32;
@@ -1408,9 +1462,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ld.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Rj) = & CPU (h_gr)[f_Rj];
@@ -1429,66 +1485,16 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_fmt_lduh:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_lduh.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_lduh", "Rj 0x%x", 'x', f_Rj, "Ri 0x%x", 'x', f_Ri, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Rj) = f_Rj;
-      FLD (out_Ri) = f_Ri;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_ldub:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_ldub.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_ldub", "Rj 0x%x", 'x', f_Rj, "Ri 0x%x", 'x', f_Ri, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Rj) = f_Rj;
-      FLD (out_Ri) = f_Ri;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
  extract_fmt_ldr13:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr13.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Rj) = & CPU (h_gr)[f_Rj];
@@ -1508,68 +1514,16 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_fmt_ldr13uh:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_ldr13uh.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_ldr13uh", "Rj 0x%x", 'x', f_Rj, "Ri 0x%x", 'x', f_Ri, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Rj) = f_Rj;
-      FLD (in_h_gr_13) = 13;
-      FLD (out_Ri) = f_Ri;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_ldr13ub:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_ldr13ub.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_ldr13ub", "Rj 0x%x", 'x', f_Rj, "Ri 0x%x", 'x', f_Ri, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Rj) = f_Rj;
-      FLD (in_h_gr_13) = 13;
-      FLD (out_Ri) = f_Ri;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
  extract_fmt_ldr14:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr14.f
-  EXTRACT_IFMT_LDR14_VARS /* f-op1 f-disp10 f-Ri */
+    SI f_disp10;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR14_CODE
+    f_disp10 = ((EXTRACT_MSB0_INT (insn, 16, 4, 8)) << (2));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_disp10) = f_disp10;
@@ -1593,9 +1547,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr14uh.f
-  EXTRACT_IFMT_LDR14UH_VARS /* f-op1 f-disp9 f-Ri */
+    SI f_disp9;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR14UH_CODE
+    f_disp9 = ((EXTRACT_MSB0_INT (insn, 16, 4, 8)) << (1));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_disp9) = f_disp9;
@@ -1619,9 +1575,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr14ub.f
-  EXTRACT_IFMT_LDR14UB_VARS /* f-op1 f-disp8 f-Ri */
+    INT f_disp8;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR14UB_CODE
+    f_disp8 = EXTRACT_MSB0_INT (insn, 16, 4, 8);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_disp8) = f_disp8;
@@ -1645,9 +1603,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15.f
-  EXTRACT_IFMT_LDR15_VARS /* f-op1 f-op2 f-udisp6 f-Ri */
+    USI f_udisp6;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR15_CODE
+    f_udisp6 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 4)) << (2));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_udisp6) = f_udisp6;
@@ -1671,9 +1631,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15gr.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_Ri) = f_Ri;
@@ -1698,9 +1658,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15dr.f
-  EXTRACT_IFMT_LDR15DR_VARS /* f-op1 f-op2 f-op3 f-Rs2 */
+    UINT f_Rs2;
 
-  EXTRACT_IFMT_LDR15DR_CODE
+    f_Rs2 = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_Rs2) = f_Rs2;
@@ -1723,9 +1683,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldr15ps.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_ldr15ps", (char *) 0));
@@ -1747,9 +1705,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_st.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1768,66 +1728,16 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_fmt_sth:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_sth.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_sth", "Ri 0x%x", 'x', f_Ri, "Rj 0x%x", 'x', f_Rj, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Ri) = f_Ri;
-      FLD (in_Rj) = f_Rj;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_stb:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_stb.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_stb", "Ri 0x%x", 'x', f_Ri, "Rj 0x%x", 'x', f_Rj, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Ri) = f_Ri;
-      FLD (in_Rj) = f_Rj;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
  extract_fmt_str13:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str13.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -1847,68 +1757,16 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_fmt_str13h:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_str13h.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_str13h", "Ri 0x%x", 'x', f_Ri, "Rj 0x%x", 'x', f_Rj, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Ri) = f_Ri;
-      FLD (in_Rj) = f_Rj;
-      FLD (in_h_gr_13) = 13;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_str13b:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_str13b.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
-
-  EXTRACT_IFMT_ADD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  FLD (i_Ri) = & CPU (h_gr)[f_Ri];
-  FLD (i_Rj) = & CPU (h_gr)[f_Rj];
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_str13b", "Ri 0x%x", 'x', f_Ri, "Rj 0x%x", 'x', f_Rj, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (in_Ri) = f_Ri;
-      FLD (in_Rj) = f_Rj;
-      FLD (in_h_gr_13) = 13;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
  extract_fmt_str14:
   {
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str14.f
-  EXTRACT_IFMT_LDR14_VARS /* f-op1 f-disp10 f-Ri */
+    SI f_disp10;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR14_CODE
+    f_disp10 = ((EXTRACT_MSB0_INT (insn, 16, 4, 8)) << (2));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_disp10) = f_disp10;
@@ -1932,9 +1790,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str14h.f
-  EXTRACT_IFMT_LDR14UH_VARS /* f-op1 f-disp9 f-Ri */
+    SI f_disp9;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR14UH_CODE
+    f_disp9 = ((EXTRACT_MSB0_INT (insn, 16, 4, 8)) << (1));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_disp9) = f_disp9;
@@ -1958,9 +1818,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str14b.f
-  EXTRACT_IFMT_LDR14UB_VARS /* f-op1 f-disp8 f-Ri */
+    INT f_disp8;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR14UB_CODE
+    f_disp8 = EXTRACT_MSB0_INT (insn, 16, 4, 8);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_disp8) = f_disp8;
@@ -1984,9 +1846,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15.f
-  EXTRACT_IFMT_LDR15_VARS /* f-op1 f-op2 f-udisp6 f-Ri */
+    USI f_udisp6;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_LDR15_CODE
+    f_udisp6 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 4)) << (2));
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_udisp6) = f_udisp6;
@@ -2010,9 +1874,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15gr.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -2036,9 +1900,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15dr.f
-  EXTRACT_IFMT_LDR15DR_VARS /* f-op1 f-op2 f-op3 f-Rs2 */
+    UINT f_Rs2;
 
-  EXTRACT_IFMT_LDR15DR_CODE
+    f_Rs2 = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_Rs2) = f_Rs2;
@@ -2061,9 +1925,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_str15ps.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_str15ps", (char *) 0));
@@ -2085,9 +1947,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mov.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Rj) = & CPU (h_gr)[f_Rj];
@@ -2111,9 +1975,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movdr.f
-  EXTRACT_IFMT_MOVDR_VARS /* f-op1 f-op2 f-Rs1 f-Ri */
+    UINT f_Rs1;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_MOVDR_CODE
+    f_Rs1 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_Rs1) = f_Rs1;
@@ -2136,9 +2002,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_movps.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -2160,9 +2026,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mov2dr.f
-  EXTRACT_IFMT_MOVDR_VARS /* f-op1 f-op2 f-Rs1 f-Ri */
+    UINT f_Rs1;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_MOVDR_CODE
+    f_Rs1 = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_Rs1) = f_Rs1;
@@ -2185,9 +2053,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_mov2ps.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -2209,9 +2077,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -2234,9 +2102,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_callr.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -2259,9 +2127,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_call.f
-  EXTRACT_IFMT_CALL_VARS /* f-op1 f-op5 f-rel12 */
+    SI f_rel12;
 
-  EXTRACT_IFMT_CALL_CODE
+    f_rel12 = ((((EXTRACT_MSB0_INT (insn, 16, 5, 11)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label12) = f_rel12;
@@ -2283,9 +2151,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_ret.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   SEM_BRANCH_INIT_EXTRACT (abuf);
@@ -2306,9 +2172,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_int.f
-  EXTRACT_IFMT_INT_VARS /* f-op1 f-op2 f-u8 */
+    UINT f_u8;
 
-  EXTRACT_IFMT_INT_CODE
+    f_u8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u8) = f_u8;
@@ -2330,9 +2196,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_inte.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   SEM_BRANCH_INIT_EXTRACT (abuf);
@@ -2353,9 +2217,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_reti.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   SEM_BRANCH_INIT_EXTRACT (abuf);
@@ -2376,9 +2238,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_brad.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2400,9 +2262,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_bnod.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
 
-  EXTRACT_IFMT_BRAD_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_bnod", (char *) 0));
@@ -2416,9 +2276,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_beqd.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2440,9 +2300,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bcd.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2464,9 +2324,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bnd.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2488,9 +2348,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bvd.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2512,9 +2372,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bltd.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2536,9 +2396,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_bled.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2560,9 +2420,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.cti.fields.fmt_blsd.f
-  EXTRACT_IFMT_BRAD_VARS /* f-op1 f-cc f-rel9 */
+    SI f_rel9;
 
-  EXTRACT_IFMT_BRAD_CODE
+    f_rel9 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (2))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_label9) = f_rel9;
@@ -2584,9 +2444,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13.f
-  EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
+    USI f_dir10;
 
-  EXTRACT_IFMT_DMOVR13_CODE
+    f_dir10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir10) = f_dir10;
@@ -2608,9 +2468,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13h.f
-  EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
+    USI f_dir9;
 
-  EXTRACT_IFMT_DMOVR13H_CODE
+    f_dir9 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (1));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir9) = f_dir9;
@@ -2632,9 +2492,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13b.f
-  EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
+    UINT f_dir8;
 
-  EXTRACT_IFMT_DMOVR13B_CODE
+    f_dir8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir8) = f_dir8;
@@ -2656,9 +2516,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13pi.f
-  EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
+    USI f_dir10;
 
-  EXTRACT_IFMT_DMOVR13_CODE
+    f_dir10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir10) = f_dir10;
@@ -2681,9 +2541,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13pih.f
-  EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
+    USI f_dir9;
 
-  EXTRACT_IFMT_DMOVR13H_CODE
+    f_dir9 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (1));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir9) = f_dir9;
@@ -2706,9 +2566,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr13pib.f
-  EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
+    UINT f_dir8;
 
-  EXTRACT_IFMT_DMOVR13B_CODE
+    f_dir8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir8) = f_dir8;
@@ -2731,9 +2591,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmovr15pi.f
-  EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
+    USI f_dir10;
 
-  EXTRACT_IFMT_DMOVR13_CODE
+    f_dir10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir10) = f_dir10;
@@ -2756,9 +2616,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13.f
-  EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
+    USI f_dir10;
 
-  EXTRACT_IFMT_DMOVR13_CODE
+    f_dir10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir10) = f_dir10;
@@ -2780,9 +2640,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13h.f
-  EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
+    USI f_dir9;
 
-  EXTRACT_IFMT_DMOVR13H_CODE
+    f_dir9 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (1));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir9) = f_dir9;
@@ -2804,9 +2664,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13b.f
-  EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
+    UINT f_dir8;
 
-  EXTRACT_IFMT_DMOVR13B_CODE
+    f_dir8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir8) = f_dir8;
@@ -2828,9 +2688,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13pi.f
-  EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
+    USI f_dir10;
 
-  EXTRACT_IFMT_DMOVR13_CODE
+    f_dir10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir10) = f_dir10;
@@ -2853,9 +2713,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13pih.f
-  EXTRACT_IFMT_DMOVR13H_VARS /* f-op1 f-op2 f-dir9 */
+    USI f_dir9;
 
-  EXTRACT_IFMT_DMOVR13H_CODE
+    f_dir9 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (1));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir9) = f_dir9;
@@ -2878,9 +2738,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r13pib.f
-  EXTRACT_IFMT_DMOVR13B_VARS /* f-op1 f-op2 f-dir8 */
+    UINT f_dir8;
 
-  EXTRACT_IFMT_DMOVR13B_CODE
+    f_dir8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir8) = f_dir8;
@@ -2903,9 +2763,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_dmov2r15pd.f
-  EXTRACT_IFMT_DMOVR13_VARS /* f-op1 f-op2 f-dir10 */
+    USI f_dir10;
 
-  EXTRACT_IFMT_DMOVR13_CODE
+    f_dir10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_dir10) = f_dir10;
@@ -2928,9 +2788,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldres.f
-  EXTRACT_IFMT_ADDI_VARS /* f-op1 f-op2 f-u4 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADDI_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -2953,60 +2813,13 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_copop.f
-  EXTRACT_IFMT_COPOP_VARS /* f-op1 f-ccc f-op2 f-op3 f-CRj f-u4c f-CRi */
+    /* Contents of trailing part of insn.  */
+    UINT word_1;
 
-  EXTRACT_IFMT_COPOP_CODE
+  word_1 = GETIMEMUHI (current_cpu, pc + 2);
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_copop", (char *) 0));
-
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_copld:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_copld.f
-  EXTRACT_IFMT_COPLD_VARS /* f-op1 f-ccc f-op2 f-op3 f-Rjc f-u4c f-CRi */
-
-  EXTRACT_IFMT_COPLD_CODE
-
-  /* Record the fields for the semantic handler.  */
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_copld", (char *) 0));
-
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_copst:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_copst.f
-  EXTRACT_IFMT_COPST_VARS /* f-op1 f-ccc f-op2 f-op3 f-CRj f-u4c f-Ric */
-
-  EXTRACT_IFMT_COPST_CODE
-
-  /* Record the fields for the semantic handler.  */
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_copst", (char *) 0));
-
-#undef FLD
-    return idesc;
-  }
-
- extract_fmt_nop:
-  {
-    const IDESC *idesc = &fr30bf_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.fmt_nop.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
-
-  EXTRACT_IFMT_DIV3_CODE
-
-  /* Record the fields for the semantic handler.  */
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_nop", (char *) 0));
 
 #undef FLD
     return idesc;
@@ -3017,9 +2830,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_andccr.f
-  EXTRACT_IFMT_INT_VARS /* f-op1 f-op2 f-u8 */
+    UINT f_u8;
 
-  EXTRACT_IFMT_INT_CODE
+    f_u8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u8) = f_u8;
@@ -3034,9 +2847,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stilm.f
-  EXTRACT_IFMT_INT_VARS /* f-op1 f-op2 f-u8 */
+    UINT f_u8;
 
-  EXTRACT_IFMT_INT_CODE
+    f_u8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u8) = f_u8;
@@ -3051,9 +2864,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_addsp.f
-  EXTRACT_IFMT_ADDSP_VARS /* f-op1 f-op2 f-s10 */
+    SI f_s10;
 
-  EXTRACT_IFMT_ADDSP_CODE
+    f_s10 = ((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_s10) = f_s10;
@@ -3076,9 +2889,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extsb.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -3101,9 +2914,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extub.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -3126,9 +2939,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extsh.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -3151,9 +2964,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_extuh.f
-  EXTRACT_IFMT_DIV0S_VARS /* f-op1 f-op2 f-op3 f-Ri */
+    UINT f_Ri;
 
-  EXTRACT_IFMT_DIV0S_CODE
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];
@@ -3176,9 +2989,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldm0.f
-  EXTRACT_IFMT_LDM0_VARS /* f-op1 f-op2 f-reglist_low_ld */
+    UINT f_reglist_low_ld;
 
-  EXTRACT_IFMT_LDM0_CODE
+    f_reglist_low_ld = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_reglist_low_ld) = f_reglist_low_ld;
@@ -3209,9 +3022,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_ldm1.f
-  EXTRACT_IFMT_LDM1_VARS /* f-op1 f-op2 f-reglist_hi_ld */
+    UINT f_reglist_hi_ld;
 
-  EXTRACT_IFMT_LDM1_CODE
+    f_reglist_hi_ld = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_reglist_hi_ld) = f_reglist_hi_ld;
@@ -3241,9 +3054,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stm0.f
-  EXTRACT_IFMT_STM0_VARS /* f-op1 f-op2 f-reglist_low_st */
+    UINT f_reglist_low_st;
 
-  EXTRACT_IFMT_STM0_CODE
+    f_reglist_low_st = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_reglist_low_st) = f_reglist_low_st;
@@ -3274,9 +3087,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_stm1.f
-  EXTRACT_IFMT_STM1_VARS /* f-op1 f-op2 f-reglist_hi_st */
+    UINT f_reglist_hi_st;
 
-  EXTRACT_IFMT_STM1_CODE
+    f_reglist_hi_st = EXTRACT_MSB0_UINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_reglist_hi_st) = f_reglist_hi_st;
@@ -3306,9 +3119,9 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_enter.f
-  EXTRACT_IFMT_ENTER_VARS /* f-op1 f-op2 f-u10 */
+    USI f_u10;
 
-  EXTRACT_IFMT_ENTER_CODE
+    f_u10 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_u10) = f_u10;
@@ -3333,9 +3146,7 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_leave.f
-  EXTRACT_IFMT_DIV3_VARS /* f-op1 f-op2 f-op3 f-op4 */
 
-  EXTRACT_IFMT_DIV3_CODE
 
   /* Record the fields for the semantic handler.  */
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "fmt_leave", (char *) 0));
@@ -3359,9 +3170,11 @@ fr30bf_decode (SIM_CPU *current_cpu, IADDR pc,
     const IDESC *idesc = &fr30bf_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
 #define FLD(f) abuf->fields.fmt_xchb.f
-  EXTRACT_IFMT_ADD_VARS /* f-op1 f-op2 f-Rj f-Ri */
+    UINT f_Rj;
+    UINT f_Ri;
 
-  EXTRACT_IFMT_ADD_CODE
+    f_Rj = EXTRACT_MSB0_UINT (insn, 16, 8, 4);
+    f_Ri = EXTRACT_MSB0_UINT (insn, 16, 12, 4);
 
   /* Record the fields for the semantic handler.  */
   FLD (i_Ri) = & CPU (h_gr)[f_Ri];

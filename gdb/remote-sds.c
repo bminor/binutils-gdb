@@ -394,7 +394,7 @@ sds_interrupt (signo)
   signal (signo, sds_interrupt_twice);
   
   if (remote_debug)
-    printf_unfiltered ("sds_interrupt called\n");
+    fprintf_unfiltered (gdb_stdlog, "sds_interrupt called\n");
 
   buf[0] = 25;
   sds_send (buf, 1);
@@ -471,7 +471,7 @@ sds_wait (pid, status)
 	  retlen = sds_send (buf, 1);
 	  if (remote_debug)
 	    {
-	      fprintf_unfiltered (gdb_stderr, "Signals: %02x%02x %02x %02x\n",
+	      fprintf_unfiltered (gdb_stdlog, "Signals: %02x%02x %02x %02x\n",
 				  buf[0], buf[1],
 				  buf[2], buf[3]);
 	    }
@@ -723,7 +723,7 @@ readchar (timeout)
   ch = SERIAL_READCHAR (sds_desc, timeout);
 
   if (remote_debug > 1 && ch >= 0)
-    printf_unfiltered("%c(%x)", ch, ch);
+    fprintf_unfiltered (gdb_stdlog, "%c(%x)", ch, ch);
 
   switch (ch)
     {
@@ -791,10 +791,10 @@ putmessage (buf, len)
 
   if (remote_debug)
     {
-      fprintf_unfiltered (gdb_stderr, "Message to send: \"");
+      fprintf_unfiltered (gdb_stdlog, "Message to send: \"");
       for (i = 0; i < len; ++i)
-	fprintf_unfiltered (gdb_stderr, "%02x", buf[i]);
-      fprintf_unfiltered (gdb_stderr, "\"\n");
+	fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+      fprintf_unfiltered (gdb_stdlog, "\"\n");
     }
 
   p = buf2;
@@ -835,10 +835,11 @@ putmessage (buf, len)
       if (remote_debug)
 	{
 	  *p = '\0';
-	  printf_unfiltered ("Sending encoded: \"%s\"", buf2);
-	  printf_unfiltered ("  (Checksum %d, id %d, length %d)\n",
-			     header[0], header[1], header[2]);
-	  gdb_flush (gdb_stdout);
+	  fprintf_unfiltered (gdb_stdlog, "Sending encoded: \"%s\"", buf2);
+	  fprintf_unfiltered (gdb_stdlog,
+			      "  (Checksum %d, id %d, length %d)\n",
+			      header[0], header[1], header[2]);
+	  gdb_flush (gdb_stdlog);
 	}
       if (SERIAL_WRITE (sds_desc, buf2, p - buf2))
 	perror_with_name ("putmessage: write failed");
@@ -869,11 +870,12 @@ read_frame (buf)
 	{
 	case SERIAL_TIMEOUT:
 	  if (remote_debug)
-	    puts_filtered ("Timeout in mid-message, retrying\n");
+	    fputs_filtered ("Timeout in mid-message, retrying\n", gdb_stdlog);
 	  return 0;
 	case '$':
 	  if (remote_debug)
-	    puts_filtered ("Saw new packet start in middle of old one\n");
+	    fputs_filtered ("Saw new packet start in middle of old one\n",
+			    gdb_stdlog);
 	  return 0;		/* Start a new packet, count retries */
 	case '\r':
 	  break;
@@ -882,7 +884,7 @@ read_frame (buf)
 	  {
 	    *bp = '\000';
 	    if (remote_debug)
-	      fprintf_unfiltered (gdb_stderr, "Received encoded: \"%s\"\n",
+	      fprintf_unfiltered (gdb_stdlog, "Received encoded: \"%s\"\n",
 				  buf);
 	    return 1;
 	  }
@@ -955,7 +957,7 @@ getmessage (buf, forever)
 		  error ("Watchdog has expired.  Target detached.\n");
 		}
 	      if (remote_debug)
-		puts_filtered ("Timed out.\n");
+		fputs_filtered ("Timed out.\n", gdb_stdlog);
 	      goto retry;
 	    }
 	}
@@ -970,7 +972,7 @@ getmessage (buf, forever)
 	  c2 = readchar (timeout);
 	  c3 = readchar (timeout);
 	  if (remote_debug)
-	    fprintf_unfiltered (gdb_stderr, "Trigraph %c%c%c received\n",
+	    fprintf_unfiltered (gdb_stdlog, "Trigraph %c%c%c received\n",
 				c, c2, c3);
 	  if (c3 == '+')
 	    {
@@ -1004,15 +1006,15 @@ getmessage (buf, forever)
 
 	  if (remote_debug)
 	    {
-	      fprintf_unfiltered (gdb_stderr,
+	      fprintf_unfiltered (gdb_stdlog,
 				  "... (Got checksum %d, id %d, length %d)\n",
 				  header[0], header[1], header[2]);
-	      fprintf_unfiltered (gdb_stderr, "Message received: \"");
+	      fprintf_unfiltered (gdb_stdlog, "Message received: \"");
 	      for (i = 0; i < len; ++i)
 		{
-		  fprintf_unfiltered (gdb_stderr, "%02x", (unsigned char) buf[i]);
+		  fprintf_unfiltered (gdb_stdlog, "%02x", (unsigned char) buf[i]);
 		}
-	      fprintf_unfiltered (gdb_stderr, "\"\n");
+	      fprintf_unfiltered (gdb_stdlog, "\"\n");
 	    }
 
 	  /* no ack required? */

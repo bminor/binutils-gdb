@@ -396,6 +396,9 @@ if [target_info exists gdb,cannot_call_functions] {
     fail "set variable v_struct1 = {32, 33, 34, 35, 36, 37}"
     continue
 }
+# We need to up this because this can be really slow on some boards.
+# (malloc() is called as part of the test).
+set timeout 60;
 gdb_test "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" "Invalid.*"
 
 # And after the error the structure should be unchanged.

@@ -44,7 +44,7 @@ readchar (desc, timeout)
   c = SERIAL_READCHAR (desc, timeout);
 
   if (remote_debug > 0)
-    fputc_unfiltered (c, gdb_stderr);
+    fputc_unfiltered (c, gdb_stdlog);
 
   if (c >= 0)
     return c;

@@ -1,7 +1,7 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-PROGS = anon-union compiler cplusfuncs derivation inherit local \
+PROGS = annota2 anon-union compiler cplusfuncs derivation inherit local \
 	member-ptr method misc \
         overload ovldbreak ref-types ref-types2 templates userdef virtfunc
 

@@ -1,3 +1,18 @@
+Wed Jul  7 00:27:35 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+        * gdb.base/setvar.exp: Increase the time-out on tests indirectly
+ 	calling malloc.
+        * nodebug.exp, printcmds.exp, ptype.exp, setvar.exp: Ditto.
+        * ptype.exp: Move test for get_debug_format to before its first
+ 	use.
+
+1999-07-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/Makefile.in (EXECUTABLES): Remove annota2 executable.
+	* gdb.base/annota2.cc, annota2.exp: Move from here.
+	* gdb.c++/annota2.cc, annota2.exp: To here.
+	* gdb.c++/Makefile.in (PROGS): Add annota2 executable.
+
 Tue Jun 29 11:56:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* lib/gdb.exp (gdb_expect_list): Output one message per pattern in

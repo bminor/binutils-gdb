@@ -255,3 +255,4 @@ extern char *new_async_prompt;
 extern struct prompts the_prompts;
 extern void (*call_readline) PARAMS ((void));
 extern void (*input_handler) PARAMS ((char *));
+extern int input_fd;

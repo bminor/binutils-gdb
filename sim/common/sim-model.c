@@ -197,6 +197,13 @@ sim_model_init (SIM_DESC sd)
       /* Use the default model for the selected machine.
 	 The default model is the first one in the list.  */
       const MACH *mach = sim_mach_lookup_bfd_name (STATE_ARCHITECTURE (sd)->printable_name);
+
+      if (mach == NULL)
+	{
+	  sim_io_eprintf (sd, "unsupported machine `%s'\n",
+			  STATE_ARCHITECTURE (sd)->printable_name);
+	  return SIM_RC_FAIL;
+	}
       sim_model_set (sd, NULL, MACH_MODELS (mach));
     }
   else

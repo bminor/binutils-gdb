@@ -167,6 +167,7 @@ extern struct target_ops mips_ops;
 extern struct target_ops pmon_ops;
 extern struct target_ops ddb_ops;
 
+/* *INDENT-OFF* */
 /* The MIPS remote debugging interface is built on top of a simple
    packet protocol.  Each packet is organized as follows:
 
@@ -230,6 +231,7 @@ extern struct target_ops ddb_ops;
    communicates with ASCII strings.  Because of this, this
    implementation doesn't bother to handle the DLE quoting mechanism,
    since it will never be required.  */
+/* *INDENT-ON* */
 
 /* The SYN character which starts each packet.  */
 #define SYN '\026'
@@ -523,19 +525,20 @@ mips_error (va_alist)
    ^x notation or in hex.  */
 
 static void
-putc_readable (ch)
+fputc_readable (ch, file)
      int ch;
+     struct gdb_file *file;
 {
   if (ch == '\n')
-    putchar_unfiltered ('\n');
+    fputc_unfiltered ('\n', file);
   else if (ch == '\r')
-    printf_unfiltered ("\\r");
+    fprintf_unfiltered (file, "\\r");
   else if (ch < 0x20)	/* ASCII control character */
-    printf_unfiltered ("^%c", ch + '@');
+    fprintf_unfiltered (file, "^%c", ch + '@');
   else if (ch >= 0x7f)	/* non-ASCII characters (rubout or greater) */
-    printf_unfiltered ("[%02x]", ch & 0xff);
+    fprintf_unfiltered (file, "[%02x]", ch & 0xff);
   else
-    putchar_unfiltered (ch);
+    fputc_unfiltered (ch, file);
 }
 
 
@@ -543,13 +546,14 @@ putc_readable (ch)
    ^x notation or in hex.  */
 
 static void
-puts_readable (string)
+fputs_readable (string, file)
      char *string;
+     struct gdb_file *file;
 {
   int c;
 
   while ((c = *string++) != '\0')
-    putc_readable (c);
+    fputc_readable (c, file);
 }
 
 
@@ -566,9 +570,9 @@ mips_expect_timeout (string, timeout)
 
   if (remote_debug)
     {
-      printf_unfiltered ("Expected \"");
-      puts_readable (string);
-      printf_unfiltered ("\", got \"");
+      fprintf_unfiltered (gdb_stdlog, "Expected \"");
+      fputs_readable (string, gdb_stdlog);
+      fprintf_unfiltered (gdb_stdlog, "\", got \"");
     }
 
   immediate_quit = 1;
@@ -584,12 +588,12 @@ mips_expect_timeout (string, timeout)
       if (c == SERIAL_TIMEOUT)
 	{
 	  if (remote_debug)
-	    printf_unfiltered ("\": FAIL\n");
+	    fprintf_unfiltered (gdb_stdlog, "\": FAIL\n");
 	  return 0;
 	}
 
       if (remote_debug)
-	putc_readable (c);
+	fputc_readable (c, gdb_stdlog);
 
       if (c == *p++)
 	{	
@@ -597,7 +601,7 @@ mips_expect_timeout (string, timeout)
 	    {
 	      immediate_quit = 0;
 	      if (remote_debug)
-	      printf_unfiltered ("\": OK\n");
+		fprintf_unfiltered (gdb_stdlog, "\": OK\n");
 	      return 1;
 	    }
 	}
@@ -699,9 +703,9 @@ mips_readchar (timeout)
       /* Don't use _filtered; we can't deal with a QUIT out of
 	 target_wait, and I think this might be called from there.  */
       if (ch != SERIAL_TIMEOUT)
-	printf_unfiltered ("Read '%c' %d 0x%x\n", ch, ch, ch);
+	fprintf_unfiltered (gdb_stdlog, "Read '%c' %d 0x%x\n", ch, ch, ch);
       else
-	printf_unfiltered ("Timed out in read\n");
+	fprintf_unfiltered (gdb_stdlog, "Timed out in read\n");
     }
 
   /* If we have seen mips_monitor_prompt and we either time out, or
@@ -717,7 +721,7 @@ mips_readchar (timeout)
       if (remote_debug > 0)
 	/* Don't use _filtered; we can't deal with a QUIT out of
 	   target_wait, and I think this might be called from there.  */
-	printf_unfiltered ("Reinitializing MIPS debugging mode\n");
+	fprintf_unfiltered (gdb_stdlog, "Reinitializing MIPS debugging mode\n");
 
       mips_need_reply = 0;
       mips_initialize ();
@@ -771,8 +775,8 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		 we can't deal with a QUIT out of target_wait.  */
 	      if (! mips_initializing || remote_debug > 0)
 		{
-		  putc_readable (ch);
-		  gdb_flush (gdb_stdout);
+		  fputc_readable (ch, gdb_stdlog);
+		  gdb_flush (gdb_stdlog);
 		}
 
 	      ++*pgarbage;
@@ -907,7 +911,7 @@ mips_send_packet (s, get_ack)
 	  /* Don't use _filtered; we can't deal with a QUIT out of
 	     target_wait, and I think this might be called from there.  */
 	  packet[HDR_LENGTH + len + TRLR_LENGTH] = '\0';
-	  printf_unfiltered ("Writing \"%s\"\n", packet + 1);
+	  fprintf_unfiltered (gdb_stdlog, "Writing \"%s\"\n", packet + 1);
 	}
 
       if (SERIAL_WRITE (mips_desc, packet,
@@ -997,8 +1001,8 @@ mips_send_packet (s, get_ack)
 	      trlr[TRLR_LENGTH] = '\0';
 	      /* Don't use _filtered; we can't deal with a QUIT out of
 		 target_wait, and I think this might be called from there.  */
-	      printf_unfiltered ("Got ack %d \"%s%s\"\n",
-			       HDR_GET_SEQ (hdr), hdr + 1, trlr);
+	      fprintf_unfiltered (gdb_stdlog, "Got ack %d \"%s%s\"\n",
+				  HDR_GET_SEQ (hdr), hdr + 1, trlr);
 	    }
 
 	  /* If this ack is for the current packet, we're done.  */
@@ -1074,7 +1078,7 @@ mips_receive_packet (buff, throw_error, timeout)
 	  /* Don't use _filtered; we can't deal with a QUIT out of
 	     target_wait, and I think this might be called from there.  */
 	  if (remote_debug > 0)
-	    printf_unfiltered ("Ignoring unexpected ACK\n");
+	    fprintf_unfiltered (gdb_stdlog, "Ignoring unexpected ACK\n");
 	  continue;
 	}
 
@@ -1104,8 +1108,9 @@ mips_receive_packet (buff, throw_error, timeout)
 	  /* Don't use _filtered; we can't deal with a QUIT out of
 	     target_wait, and I think this might be called from there.  */
 	  if (remote_debug > 0)
-	    printf_unfiltered ("Got new SYN after %d chars (wanted %d)\n",
-			     i, len);
+	    fprintf_unfiltered (gdb_stdlog,
+				"Got new SYN after %d chars (wanted %d)\n",
+				i, len);
 	  continue;
 	}
 
@@ -1122,7 +1127,7 @@ mips_receive_packet (buff, throw_error, timeout)
 	  /* Don't use _filtered; we can't deal with a QUIT out of
 	     target_wait, and I think this might be called from there.  */
 	  if (remote_debug > 0)
-	    printf_unfiltered ("Got SYN when wanted trailer\n");
+	    fprintf_unfiltered (gdb_stdlog, "Got SYN when wanted trailer\n");
 	  continue;
 	}
 
@@ -1132,8 +1137,9 @@ mips_receive_packet (buff, throw_error, timeout)
 	  /* Don't use _filtered; we can't deal with a QUIT out of
 	     target_wait, and I think this might be called from there.  */
 	  if (remote_debug > 0)
-	    printf_unfiltered ("Ignoring sequence number %d (want %d)\n",
-			     HDR_GET_SEQ (hdr), mips_receive_seq);
+	    fprintf_unfiltered (gdb_stdlog,
+			       "Ignoring sequence number %d (want %d)\n",
+			       HDR_GET_SEQ (hdr), mips_receive_seq);
 	  continue;
 	}
 

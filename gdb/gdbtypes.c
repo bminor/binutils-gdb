@@ -1211,10 +1211,14 @@ add_mangled_type(pextras,t)
               {
               char* pname;
               if ((pname=strrchr(tname,'l'),pname) && !strcmp(pname,"long"))
-                ADD_EXTRA('l')
-              else
-                ADD_EXTRA('i')
-              }
+	      {
+		ADD_EXTRA ('l');
+	      }
+	    else
+	      {
+		ADD_EXTRA ('i');
+	      }
+	      }
               break;
             default: 
               {

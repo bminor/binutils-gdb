@@ -353,6 +353,7 @@ struct pending_stabs **stabvector;
 #endif
 
 
+/* *INDENT-OFF* */
 /* Linenos are processed on a file-by-file basis.
 
    Two reasons:
@@ -404,6 +405,7 @@ struct pending_stabs **stabvector;
 	on when we come the end of the compilation unit.
 	Include table (inclTable) and process_linenos() handle
 	that.  */
+/* *INDENT-ON* */
 
 /* compare line table entry addresses. */
 

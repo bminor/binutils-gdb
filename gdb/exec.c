@@ -570,20 +570,6 @@ xfer_memory (memaddr, myaddr, len, write, target)
     return - (nextsectaddr - memaddr);	/* Next boundary where we can help */
 }
 
-#ifdef FIXME
-#ifdef REG_STACK_SEGMENT
-/* MOVE TO BFD... */
-    /* Pyramids and AM29000s have an extra segment in the virtual address space
-       for the (control) stack of register-window frames.  The AM29000 folk
-       call it the "register stack" rather than the "memory stack".  */
-    else if (memaddr >= reg_stack_start && memaddr < reg_stack_end)
-      {
-	i = min (len, reg_stack_end - memaddr);
-	fileptr = memaddr - reg_stack_start + reg_stack_offset;
-	wanna_xfer = coredata;
-      }
-#endif				/* REG_STACK_SEGMENT */
-#endif /* FIXME */
 
 void
 print_section_info (t, abfd)

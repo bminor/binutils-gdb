@@ -268,6 +268,7 @@ connected_p (SIM_DESC sd)
   if (numfds <= 0)
     return 0;
 
+  addrlen = sizeof (sockaddr);
   sockser_fd = accept (sockser_listen_fd, &sockaddr, &addrlen);
   if (sockser_fd < 0)
     return 0;

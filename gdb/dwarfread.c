@@ -2658,6 +2658,7 @@ add_partial_symbol (dip, objfile)
     }
 }
 
+/* *INDENT-OFF* */
 /*
 
 LOCAL FUNCTION
@@ -2721,6 +2722,7 @@ NOTES
 	where the actual definition occurs, rather than just a reference
 	to an external.
  */
+/* *INDENT-ON* */
 
 static void
 scan_partial_symbols (thisdie, enddie, objfile)

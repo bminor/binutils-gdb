@@ -131,6 +131,7 @@ gdb_test "ptype boolean" "type = enum (boolean |)\{FALSE, TRUE\}.*" "ptype unnam
 if {!$gcc_compiled && !$hp_aCC_compiler} {
     setup_xfail "rs6000-*-*" "i*86-*-sysv4*" "hppa*-*-*" # CLLbs14773
 }
+get_debug_format
 setup_xfail_format "DWARF 1"
 gdb_test "whatis v_boolean" "type = (enum |)boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
@@ -530,12 +531,15 @@ gdb_test "ptype nested_su.inner_union_instance" "type = union ${outer}inner_unio
 
 if [runto_main] then {
 
-  get_debug_format
   if [target_info exists gdb,cannot_call_functions] {
     setup_xfail "*-*-*" 2416
     fail "This target can not call functions"
     continue
   }
+
+  # We need to up this because this can be really slow on some boards.
+  # (malloc() is called as part of the test).
+  set timeout 60;
 
   gdb_test "ptype \"abc\""	"type = char \\\[4\\\]"
   gdb_test "ptype {'a','b','c'}"	"type = char \\\[3\\\]"

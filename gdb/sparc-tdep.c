@@ -1283,6 +1283,7 @@ sunos4_skip_trampoline_code (pc)
 
 #ifdef USE_PROC_FS	/* Target dependent support for /proc */
 
+/* *INDENT-OFF* */
 /*  The /proc interface divides the target machine's register set up into
     two different sets, the general register set (gregset) and the floating
     point register set (fpregset).  For each set, there is an ioctl to get
@@ -1318,6 +1319,7 @@ sunos4_skip_trampoline_code (pc)
     fpregset_t formatted data.
 
  */
+/* *INDENT-ON* */
 
 /* Given a pointer to a general register set in /proc format (gregset_t *),
    unpack the register contents and supply them as gdb's idea of the current

@@ -598,6 +598,10 @@ proc test_print_string_constants {} {
 	return
     }
 
+    # We need to up this because this can be really slow on some boards.
+    # (Test may involve inferior malloc() calls).
+    set timeout 60;
+
     setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"a string\""		" = \"a string\""
     setup_xfail "a29k-*-udi" 2416
@@ -627,6 +631,10 @@ proc test_print_array_constants {} {
 	fail "This target can not call functions"
 	return
     }
+
+    # We need to up this because this can be really slow on some boards.
+    # (Test may involve inferior malloc() calls).
+    set timeout 60;
 
     setup_xfail "a29k-*-udi" 2416
     gdb_test "print {'a','b','c'}"	" = \"abc\""

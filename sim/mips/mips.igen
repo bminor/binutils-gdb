@@ -1720,6 +1720,7 @@
 
 
 000000,5.RS,5.RT,5.RD,00000011000:SPECIAL:32::MULT
+"mult r<RS>, r<RT>":RD == 0
 "mult r<RD>, r<RS>, r<RT>"
 *vr5000:
 *r3900:
@@ -1751,6 +1752,7 @@
 }
 
 000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
+"multu r<RS>, r<RT>":RD == 0
 "multu r<RD>, r<RS>, r<RT>"
 *vr5000:
 *r3900:
@@ -3793,6 +3795,22 @@
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 *vr5000:
+
+
+010000,00001,5.RT,5.RD,000,0000,0000:COP0:64::DMFC0
+"dmfc0 r<RT>, r<RD>"
+*mipsIII,mipsIV:
+{
+  DecodeCoproc (instruction_0);
+}
+
+
+010000,00101,5.RT,5.RD,000,0000,0000:COP0:64::DMTC0
+"dmtc0 r<RT>, r<RD>"
+*mipsIII,mipsIV:
+{
+  DecodeCoproc (instruction_0);
+}
 
 
 010000,10000,000000000000000,111000:COP0:32::EI

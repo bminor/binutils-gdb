@@ -488,7 +488,7 @@ binop_result_type (v1, v2)
 	 return TYPE_CODE(t2) == TYPE_CODE_FLT && l2 > l1 ?
 	    VALUE_TYPE(v2) : VALUE_TYPE(v1);
       else if (TYPE_CODE(t2)==TYPE_CODE_FLT)
-	 return TYPE_CODE(t1)) == TYPE_CODE_FLT && l1 > l2 ?
+	 return TYPE_CODE(t1) == TYPE_CODE_FLT && l1 > l2 ?
 	    VALUE_TYPE(v1) : VALUE_TYPE(v2);
       else if (TYPE_UNSIGNED(t1) && l1 > l2)
 	 return VALUE_TYPE(v1);

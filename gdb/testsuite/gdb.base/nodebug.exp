@@ -164,6 +164,9 @@ if [runto inner] then {
 		timeout { fail "(timeout) p/c array_index" }
 	    }
 	} else {
+	    # We need to up this because this can be really slow on some boards.
+	    # (malloc() is called as part of the test).
+	    set timeout 60;    
 	    gdb_test {p/c array_index("abcdef",2)} " = 99 'c'"
 	}
     }

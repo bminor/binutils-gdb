@@ -1,3 +1,16 @@
+Wed Jul  7 19:56:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-sockser.c (connected_p): Initialize addrlen.
+
+1999-07-06  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-accfp.c (floatsidf): New function.
+	(fixdfsi): New function.
+
+1999-07-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim-model.c (sim_model_init): Issue error if machine is unsupported.
+
 1999-07-05  Doug Evans  <devans@casey.cygnus.com>
 
 	* Make-common.in (CGEN_MAIN_CPU_DEPS): Add cgen-fpu.h.

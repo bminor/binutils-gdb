@@ -123,6 +123,7 @@ mips_register_name (i)
 }
 
 
+/* *INDENT-OFF* */
 /* Names of IDT R3041 registers.  */
 
 char *mips_r3041_reg_names[] = {
@@ -203,6 +204,7 @@ struct {
   { "lsi33k", mips_lsi33k_reg_names },
   { NULL, NULL }
 };
+/* *INDENT-ON* */
 
 /* Table to translate MIPS16 register field to actual register number.  */
 static int mips16_to_32_reg[8] = { 16, 17, 2, 3, 4, 5, 6, 7 };
