@@ -1,3 +1,11 @@
+2001-07-17  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.c (md_pseudo_table) [OBJ_ELF]: Add .file and
+	.loc.
+	(md_assemble) [OBJ_ELF]: Call dwarf2_emit_insn before emitting
+	insn.
+	* config/tc-m68k.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+
 2001-07-17  matthew green  <mrg@eterna.com.au>
 
 	* config/tc-i386.c (comment_chars): Don't use '/' as comment start if

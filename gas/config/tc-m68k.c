@@ -24,6 +24,7 @@
 #include "as.h"
 #include "obstack.h"
 #include "subsegs.h"
+#include "dwarf2dbg.h"
 
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
@@ -557,6 +558,12 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
   {"extend", float_cons, 'x'},
   {"ldouble", float_cons, 'x'},
+
+#ifdef OBJ_ELF
+  /* Dwarf2 support for Gcc.  */
+  {"file", dwarf2_directive_file, 0},
+  {"loc", dwarf2_directive_loc, 0},
+#endif
 
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"chip", s_chip, 0},
@@ -3611,6 +3618,11 @@ md_assemble (str)
       current_label->text = 1;
       current_label = NULL;
     }
+
+#ifdef OBJ_ELF
+  /* Tie dwarf2 debug info to the address at the start of the insn.  */
+  dwarf2_emit_insn (0);
+#endif
 
   if (the_ins.nfrag == 0)
     {
