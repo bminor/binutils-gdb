@@ -274,7 +274,13 @@ SWIWrite0 (ARMul_State * state, ARMword addr)
   struct OSblock *OSptr = (struct OSblock *) state->OSptr;
 
   while ((temp = ARMul_SafeReadByte (state, addr++)) != 0)
-    (void) sim_callback->write_stdout (sim_callback, (char *) &temp, 1);
+    {
+      char buffer = temp;
+      /* Note - we cannot just cast 'temp' to a (char *) here,
+	 since on a big-endian host the byte value will end
+	 up in the wrong place and a nul character will be printed.  */
+      (void) sim_callback->write_stdout (sim_callback, & buffer, 1);
+    }
 
   OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 }

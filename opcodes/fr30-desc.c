@@ -325,6 +325,7 @@ const CGEN_IFLD fr30_cgen_ifld_table[] =
   { FR30_F_I8, "f-i8", 0, 16, 4, 8, { 0, { (1<<MACH_BASE) } }  },
   { FR30_F_I20_4, "f-i20-4", 0, 16, 8, 4, { 0, { (1<<MACH_BASE) } }  },
   { FR30_F_I20_16, "f-i20-16", 16, 16, 0, 16, { 0, { (1<<MACH_BASE) } }  },
+  { FR30_F_I20, "f-i20", 0, 0, 0, 0,{ 0|A(VIRTUAL), { (1<<MACH_BASE) } }  },
   { FR30_F_I32, "f-i32", 16, 32, 0, 32, { 0|A(SIGN_OPT), { (1<<MACH_BASE) } }  },
   { FR30_F_UDISP6, "f-udisp6", 0, 16, 8, 4, { 0, { (1<<MACH_BASE) } }  },
   { FR30_F_DISP8, "f-disp8", 0, 16, 4, 8, { 0, { (1<<MACH_BASE) } }  },
@@ -357,8 +358,8 @@ const CGEN_MAYBE_MULTI_IFLD FR30_F_I20_MULTI_IFIELD [];
 
 const CGEN_MAYBE_MULTI_IFLD FR30_F_I20_MULTI_IFIELD [] =
 {
-    { 0, { (const PTR) &fr30_cgen_ifld_table[23] } },
-    { 0, { (const PTR) &fr30_cgen_ifld_table[24] } },
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_I20_4] } },
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_I20_16] } },
     { 0, { (const PTR) 0 } }
 };
 
@@ -379,39 +380,39 @@ const CGEN_OPERAND fr30_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", FR30_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[0] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_NIL] } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* Ri: destination register */
   { "Ri", FR30_OPERAND_RI, HW_H_GR, 12, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[10] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_RI] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rj: source register */
   { "Rj", FR30_OPERAND_RJ, HW_H_GR, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[9] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_RJ] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Ric: target register coproc insn */
   { "Ric", FR30_OPERAND_RIC, HW_H_GR, 12, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[14] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_RIC] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rjc: source register coproc insn */
   { "Rjc", FR30_OPERAND_RJC, HW_H_GR, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[13] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_RJC] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRi: coprocessor register */
   { "CRi", FR30_OPERAND_CRI, HW_H_CR, 12, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[16] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_CRI] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* CRj: coprocessor register */
   { "CRj", FR30_OPERAND_CRJ, HW_H_CR, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[15] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_CRJ] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rs1: dedicated register */
   { "Rs1", FR30_OPERAND_RS1, HW_H_DR, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[11] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_RS1] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rs2: dedicated register */
   { "Rs2", FR30_OPERAND_RS2, HW_H_DR, 12, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[12] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_RS2] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* R13: General Register 13 */
   { "R13", FR30_OPERAND_R13, HW_H_R13, 0, 0,
@@ -431,51 +432,51 @@ const CGEN_OPERAND fr30_cgen_operand_table[] =
     { 0, { (1<<MACH_BASE) } }  },
 /* u4: 4  bit unsigned immediate */
   { "u4", FR30_OPERAND_U4, HW_H_UINT, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[17] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_U4] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* u4c: 4  bit unsigned immediate */
   { "u4c", FR30_OPERAND_U4C, HW_H_UINT, 12, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[18] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_U4C] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* u8: 8  bit unsigned immediate */
   { "u8", FR30_OPERAND_U8, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[21] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_U8] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* i8: 8  bit unsigned immediate */
   { "i8", FR30_OPERAND_I8, HW_H_UINT, 4, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[22] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_I8] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* udisp6: 6  bit unsigned immediate */
   { "udisp6", FR30_OPERAND_UDISP6, HW_H_UINT, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[26] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_UDISP6] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* disp8: 8  bit signed   immediate */
   { "disp8", FR30_OPERAND_DISP8, HW_H_SINT, 4, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[27] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_DISP8] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* disp9: 9  bit signed   immediate */
   { "disp9", FR30_OPERAND_DISP9, HW_H_SINT, 4, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[28] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_DISP9] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* disp10: 10 bit signed   immediate */
   { "disp10", FR30_OPERAND_DISP10, HW_H_SINT, 4, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[29] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_DISP10] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* s10: 10 bit signed   immediate */
   { "s10", FR30_OPERAND_S10, HW_H_SINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[30] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_S10] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* u10: 10 bit unsigned immediate */
   { "u10", FR30_OPERAND_U10, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[31] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_U10] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* i32: 32 bit immediate */
   { "i32", FR30_OPERAND_I32, HW_H_UINT, 0, 32,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[25] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_I32] } }, 
     { 0|A(HASH_PREFIX)|A(SIGN_OPT), { (1<<MACH_BASE) } }  },
 /* m4: 4  bit negative immediate */
   { "m4", FR30_OPERAND_M4, HW_H_SINT, 8, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[20] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_M4] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* i20: 20 bit immediate */
   { "i20", FR30_OPERAND_I20, HW_H_UINT, 0, 20,
@@ -483,47 +484,47 @@ const CGEN_OPERAND fr30_cgen_operand_table[] =
     { 0|A(HASH_PREFIX)|A(VIRTUAL), { (1<<MACH_BASE) } }  },
 /* dir8: 8  bit direct address */
   { "dir8", FR30_OPERAND_DIR8, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[33] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_DIR8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* dir9: 9  bit direct address */
   { "dir9", FR30_OPERAND_DIR9, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[34] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_DIR9] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* dir10: 10 bit direct address */
   { "dir10", FR30_OPERAND_DIR10, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[35] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_DIR10] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* label9: 9  bit pc relative address */
   { "label9", FR30_OPERAND_LABEL9, HW_H_IADDR, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[32] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_REL9] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* label12: 12 bit pc relative address */
   { "label12", FR30_OPERAND_LABEL12, HW_H_IADDR, 5, 11,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[36] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_REL12] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* reglist_low_ld: 8 bit low register mask for ldm */
   { "reglist_low_ld", FR30_OPERAND_REGLIST_LOW_LD, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[40] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_REGLIST_LOW_LD] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* reglist_hi_ld: 8 bit high register mask for ldm */
   { "reglist_hi_ld", FR30_OPERAND_REGLIST_HI_LD, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[39] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_REGLIST_HI_LD] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* reglist_low_st: 8 bit low register mask for stm */
   { "reglist_low_st", FR30_OPERAND_REGLIST_LOW_ST, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[38] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_REGLIST_LOW_ST] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* reglist_hi_st: 8 bit high register mask for stm */
   { "reglist_hi_st", FR30_OPERAND_REGLIST_HI_ST, HW_H_UINT, 8, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[37] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_REGLIST_HI_ST] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* cc: condition codes */
   { "cc", FR30_OPERAND_CC, HW_H_UINT, 4, 4,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[7] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_CC] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ccc: coprocessor calc */
   { "ccc", FR30_OPERAND_CCC, HW_H_UINT, 0, 8,
-    { 0, { (const PTR) &fr30_cgen_ifld_table[8] } }, 
+    { 0, { (const PTR) &fr30_cgen_ifld_table[FR30_F_CCC] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* nbit: negative   bit */
   { "nbit", FR30_OPERAND_NBIT, HW_H_NBIT, 0, 0,

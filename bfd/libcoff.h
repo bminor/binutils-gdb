@@ -866,7 +866,8 @@ typedef struct
 #define bfd_coff_set_arch_mach_hook(abfd, filehdr)\
   ((coff_backend_info (abfd)->_bfd_coff_set_arch_mach_hook) (abfd, filehdr))
 #define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
-  ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
+  ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook)\
+   (abfd, filehdr, aouthdr))
 
 #define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name, section, flags_ptr)\
   ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook)\
@@ -891,7 +892,8 @@ typedef struct
   ((coff_backend_info (abfd)->_bfd_coff_print_aux)\
    (abfd, file, base, symbol, aux, indaux))
 
-#define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)\
+#define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order,\
+                                     reloc, data, src_ptr, dst_ptr)\
   ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
    (abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr))
 
@@ -919,7 +921,8 @@ typedef struct
 #define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
   ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
    (obfd, info, ibfd, sec, rel, adjustedp))
-#define bfd_coff_link_add_one_symbol(info,abfd,name,flags,section,value,string,cp,coll,hashp)\
+#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
+                                     value, string, cp, coll, hashp)\
   ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
    (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 

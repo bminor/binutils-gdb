@@ -1,6 +1,6 @@
 /* Generic ECOFF (Extended-COFF) routines.
-   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
+   2002, 2003 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -81,6 +81,10 @@ static asection bfd_debug_section =
   "*DEBUG*", 0,   0,     NULL, 0,     0,            0,
   /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
      0,           0,                0,       0,
+  /* sec_info_type, use_rela_p, has_tls_reloc, flag11, flag12,     */
+     0,		    0,		0,	       0,      0,
+  /* flag13, flag14, flag15, flag16, flag20, flag24,               */
+     0,      0,      0,      0,      0,	     0,
   /* vma, lma, _cooked_size, _raw_size,                            */
      0,   0,   0,            0,
   /* output_offset, output_section, alignment_power,               */

@@ -157,6 +157,28 @@ sh_sh3e_register_name (int reg_nr)
 }
 
 static const char *
+sh_sh2e_register_name (int reg_nr)
+{
+  static char *register_names[] =
+  {
+    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
+    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+    "fpul", "fpscr",
+    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
+    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "",  "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+  };
+  if (reg_nr < 0)
+    return NULL;
+  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+    return NULL;
+  return register_names[reg_nr];
+}
+
+static const char *
 sh_sh_dsp_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -921,8 +943,8 @@ gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -1007,7 +1029,7 @@ sh_find_callers_reg (struct frame_info *fi, int regnum)
 					     get_frame_base (fi), regnum);
     else
       {
-	FRAME_INIT_SAVED_REGS (fi);
+	DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
 	if (!get_frame_pc (fi))
 	  return 0;
 	if (get_frame_saved_regs (fi)[regnum] != 0)
@@ -1031,7 +1053,7 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
 					     get_frame_base (fi), pr_regnum);
     else
       {
-	FRAME_INIT_SAVED_REGS (fi);
+	DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
 	if (!get_frame_pc (fi))
 	  return 0;
 
@@ -1754,7 +1776,7 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
     {
-      FRAME_INIT_SAVED_REGS (fi);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
       get_frame_extra_info (fi)->return_pc = 
 	sh_find_callers_reg (fi, gdbarch_tdep (current_gdbarch)->PR_REGNUM);
     }
@@ -1785,7 +1807,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
     {
-      FRAME_INIT_SAVED_REGS (fi);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
       get_frame_extra_info (fi)->return_pc =
 	sh64_get_saved_pr (fi, gdbarch_tdep (current_gdbarch)->PR_REGNUM);
     }
@@ -1842,7 +1864,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  return;
 	}
 
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
       if (get_frame_saved_regs (frame) != NULL
 	  && get_frame_saved_regs (frame)[regnum] != 0)
 	{
@@ -1931,7 +1953,7 @@ sh_pop_frame (void)
   else
     {
       fp = get_frame_base (frame);
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
@@ -1963,7 +1985,7 @@ sh64_pop_frame (void)
   else
     {
       fp = get_frame_base (frame);
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
@@ -2623,6 +2645,62 @@ sh3_show_regs (void)
 		   (long) read_register (15));
 }
 
+
+static void
+sh2e_show_regs (void)
+{
+  printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
+		   paddr (read_register (PC_REGNUM)),
+		   (long) read_register (SR_REGNUM),
+		   (long) read_register (PR_REGNUM),
+		   (long) read_register (MACH_REGNUM),
+		   (long) read_register (MACL_REGNUM));
+
+  printf_filtered ("GBR=%08lx VBR=%08lx",
+		   (long) read_register (GBR_REGNUM),
+		   (long) read_register (VBR_REGNUM));
+  printf_filtered (" FPUL=%08lx FPSCR=%08lx",
+	  	   (long) read_register (gdbarch_tdep (current_gdbarch)->FPUL_REGNUM),
+                   (long) read_register (gdbarch_tdep (current_gdbarch)->FPSCR_REGNUM));
+
+  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (0),
+		   (long) read_register (1),
+		   (long) read_register (2),
+		   (long) read_register (3),
+		   (long) read_register (4),
+		   (long) read_register (5),
+		   (long) read_register (6),
+		   (long) read_register (7));
+  printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (8),
+		   (long) read_register (9),
+		   (long) read_register (10),
+		   (long) read_register (11),
+		   (long) read_register (12),
+		   (long) read_register (13),
+		   (long) read_register (14),
+		   (long) read_register (15));
+
+  printf_filtered (("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
+		   (long) read_register (FP0_REGNUM + 0),
+		   (long) read_register (FP0_REGNUM + 1),
+		   (long) read_register (FP0_REGNUM + 2),
+		   (long) read_register (FP0_REGNUM + 3),
+		   (long) read_register (FP0_REGNUM + 4),
+		   (long) read_register (FP0_REGNUM + 5),
+		   (long) read_register (FP0_REGNUM + 6),
+		   (long) read_register (FP0_REGNUM + 7));
+  printf_filtered (("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
+		   (long) read_register (FP0_REGNUM + 8),
+		   (long) read_register (FP0_REGNUM + 9),
+		   (long) read_register (FP0_REGNUM + 10),
+		   (long) read_register (FP0_REGNUM + 11),
+		   (long) read_register (FP0_REGNUM + 12),
+		   (long) read_register (FP0_REGNUM + 13),
+		   (long) read_register (FP0_REGNUM + 14),
+		   (long) read_register (FP0_REGNUM + 15));
+}
 
 static void
 sh3e_show_regs (void)
@@ -4281,8 +4359,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_num_regs (gdbarch, SH_DEFAULT_NUM_REGS);
@@ -4295,7 +4373,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
   set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
-  set_gdbarch_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, sh_push_arguments);
   set_gdbarch_store_struct_return (gdbarch, sh_store_struct_return);
@@ -4314,7 +4392,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh_generic_show_regs;
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
@@ -4324,17 +4402,31 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh_generic_show_regs;
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       break;      
+    case bfd_mach_sh2e:
+      sh_register_name = sh_sh2e_register_name;
+      sh_show_regs = sh2e_show_regs;
+      sh_store_return_value = sh3e_sh4_store_return_value;
+      sh_register_virtual_type = sh_sh3e_register_virtual_type;
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_fp0_regnum (gdbarch, 25);
+      tdep->FPUL_REGNUM = 23;
+      tdep->FPSCR_REGNUM = 24;
+      tdep->FP_LAST_REGNUM = 40;
+      break;
     case bfd_mach_sh_dsp:
       sh_register_name = sh_sh_dsp_register_name;
       sh_show_regs = sh_dsp_show_regs;
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
@@ -4359,7 +4451,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh3_show_regs;
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
@@ -4371,7 +4463,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh3e_show_regs;
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh3e_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
@@ -4388,7 +4480,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh3_dsp_show_regs;
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
@@ -4414,15 +4506,15 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh4_show_regs;
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh4_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_register_raw_size (gdbarch, sh_sh4_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_sh4_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_sh4_register_byte);
       set_gdbarch_num_pseudo_regs (gdbarch, 12);
-      set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
-      set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
+      set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4 * 4);
+      set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4 * 4);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
       tdep->FPUL_REGNUM = 23;
@@ -4509,19 +4601,19 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_virtual_size (gdbarch, sh_sh64_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_sh64_register_byte);
       /* This seems awfully wrong!*/
-      /*set_gdbarch_max_register_raw_size (gdbarch, 8);*/
+      /*set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);*/
       /* should include the size of the pseudo regs. */
-      set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
+      set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4 * 4);
       /* Or should that go in the virtual_size? */
-      /*set_gdbarch_max_register_virtual_size (gdbarch, 8);*/
-      set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
+      /*set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);*/
+      set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4 * 4);
       set_gdbarch_pseudo_register_read (gdbarch, sh64_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh64_pseudo_register_write);
 
       set_gdbarch_deprecated_do_registers_info (gdbarch, sh64_do_registers_info);
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh64_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh64_nofp_frame_init_saved_regs);
       set_gdbarch_breakpoint_from_pc (gdbarch, sh_sh64_breakpoint_from_pc);
-      set_gdbarch_init_extra_frame_info (gdbarch, sh64_init_extra_frame_info);
+      set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh64_init_extra_frame_info);
       set_gdbarch_frame_chain (gdbarch, sh64_frame_chain);
       set_gdbarch_get_saved_register (gdbarch, sh64_get_saved_register);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh64_extract_return_value);
@@ -4538,7 +4630,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh_generic_show_regs;
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
-      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
@@ -4572,7 +4664,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, sh_push_return_address);
 
   set_gdbarch_deprecated_store_return_value (gdbarch, sh_store_return_value);

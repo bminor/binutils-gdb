@@ -34,7 +34,7 @@
     case 4:
       return REG_MCVF;
     default:
-      abort ();
+      sim_engine_abort (SD, CPU, cia, "%s:%d: bad switch\n", __FILE__, __LINE__);
     }
 }
 

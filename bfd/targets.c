@@ -763,7 +763,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 #endif
 	&aout0_big_vec,
 #if 0
-	/* We have no way of distinguishing these from other a.out variants */
+	/* We have no way of distinguishing these from other a.out variants.  */
 	&aout_arm_big_vec,
 	&aout_arm_little_vec,
 	/* No one seems to use this.  */
@@ -909,7 +909,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_powerpcle_pei_vec,
 	&cris_aout_vec,
 #ifdef BFD64
-	&demo_64_vec,	/* Only compiled if host has long-long support */
+	&demo_64_vec,	/* Only compiled if host has long-long support.  */
 #endif
 	&ecoff_big_vec,
 	&ecoff_biglittle_vec,
@@ -1011,7 +1011,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 #endif
 	&ppcboot_vec,
 #if 0
-	/* We have no way of distinguishing these from other a.out variants */
+	/* We have no way of distinguishing these from other a.out variants.  */
 	&riscix_vec,
 #endif
 #ifdef BFD64
@@ -1221,7 +1221,7 @@ FUNCTION
 	bfd_find_target
 
 SYNOPSIS
-	const bfd_target *bfd_find_target(const char *target_name, bfd *abfd);
+	const bfd_target *bfd_find_target (const char *target_name, bfd *abfd);
 
 DESCRIPTION
 	Return a pointer to the transfer vector for the object target
@@ -1274,7 +1274,7 @@ FUNCTION
 	bfd_target_list
 
 SYNOPSIS
-	const char **bfd_target_list(void);
+	const char ** bfd_target_list (void);
 
 DESCRIPTION
 	Return a freshly malloced NULL-terminated
@@ -1319,7 +1319,9 @@ FUNCTION
 	bfd_seach_for_target
 
 SYNOPSIS
-	const bfd_target * bfd_search_for_target (int (* search_func) (const bfd_target *, void *), void *);
+	const bfd_target * bfd_search_for_target (int (* search_func)
+						  (const bfd_target *, void *),
+						  void *);
 
 DESCRIPTION
 	Return a pointer to the first transfer vector in the list of

@@ -33,6 +33,8 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "gdb_string.h"
+#include "block.h"
+#include "regcache.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -578,7 +580,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     case LOC_TYPEDEF:
       error ("Cannot compute value of typedef `%s'.",
-	     SYMBOL_SOURCE_NAME (var));
+	     SYMBOL_PRINT_NAME (var));
       break;
 
     case LOC_BLOCK:
@@ -607,9 +609,9 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
     case LOC_UNRESOLVED:
       {
 	struct minimal_symbol *msym
-	= lookup_minimal_symbol (SYMBOL_NAME (var), NULL, NULL);
+	= lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (var), NULL, NULL);
 	if (!msym)
-	  error ("Couldn't resolve symbol `%s'.", SYMBOL_SOURCE_NAME (var));
+	  error ("Couldn't resolve symbol `%s'.", SYMBOL_PRINT_NAME (var));
 
 	/* Push the address of the variable.  */
 	ax_const_l (ax, SYMBOL_VALUE_ADDRESS (msym));
@@ -617,14 +619,19 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       }
       break;
 
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      (*SYMBOL_LOCATION_FUNCS (var)->tracepoint_var_ref) (var, ax, value);
+      break;
+
     case LOC_OPTIMIZED_OUT:
       error ("The variable `%s' has been optimized out.",
-	     SYMBOL_SOURCE_NAME (var));
+	     SYMBOL_PRINT_NAME (var));
       break;
 
     default:
       error ("Cannot find value of botched symbol `%s'.",
-	     SYMBOL_SOURCE_NAME (var));
+	     SYMBOL_PRINT_NAME (var));
       break;
     }
 }
@@ -1589,7 +1596,7 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
 	(*pc) += 3;
 	value->kind = axs_lvalue_register;
 	value->u.reg = reg;
-	value->type = REGISTER_VIRTUAL_TYPE (reg);
+	value->type = register_type (current_gdbarch, reg);
       }
       break;
 

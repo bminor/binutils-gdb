@@ -469,6 +469,9 @@ make_qualified_type (struct type *type, int new_flags,
   /* Now set the instance flags and return the new type.  */
   TYPE_INSTANCE_FLAGS (ntype) = new_flags;
 
+  /* Set length of new type to that of the original type.  */
+  TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
+
   return ntype;
 }
 
@@ -556,9 +559,25 @@ make_cv_type (int cnst, int voltl, struct type *type, struct type **typeptr)
 void
 replace_type (struct type *ntype, struct type *type)
 {
-  struct type *cv_chain, *as_chain, *ptr, *ref;
+  struct type *chain;
 
   *TYPE_MAIN_TYPE (ntype) = *TYPE_MAIN_TYPE (type);
+
+  /* The type length is not a part of the main type.  Update it for each
+     type on the variant chain.  */
+  chain = ntype;
+  do {
+    /* Assert that this element of the chain has no address-class bits
+       set in its flags.  Such type variants might have type lengths
+       which are supposed to be different from the non-address-class
+       variants.  This assertion shouldn't ever be triggered because
+       symbol readers which do construct address-class variants don't
+       call replace_type().  */
+    gdb_assert (TYPE_ADDRESS_CLASS_ALL (chain) == 0);
+
+    TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
+    chain = TYPE_CHAIN (chain);
+  } while (ntype != chain);
 
   /* Assert that the two types have equivalent instance qualifiers.
      This should be true for at least all of our debug readers.  */
@@ -2591,7 +2610,7 @@ rank_one_type (struct type *parm, struct type *arg)
 		  if (TYPE_NOSIGN (arg))	/* plain char -> plain char */
 		    return 0;
 		  else
-		    return INTEGER_COERCION_BADNESS;	/* signed/unsigned char -> plain char */
+		    return INTEGER_CONVERSION_BADNESS;	/* signed/unsigned char -> plain char */
 		}
 	      else if (TYPE_UNSIGNED (parm))
 		{
@@ -2604,13 +2623,13 @@ rank_one_type (struct type *parm, struct type *arg)
 			       && integer_types_same_name_p (TYPE_NAME (parm), "long"))
 			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
 		      else
-			return INTEGER_COERCION_BADNESS;	/* unsigned long -> unsigned int */
+			return INTEGER_CONVERSION_BADNESS;	/* unsigned long -> unsigned int */
 		    }
 		  else
 		    {
 		      if (integer_types_same_name_p (TYPE_NAME (arg), "long")
 			  && integer_types_same_name_p (TYPE_NAME (parm), "int"))
-			return INTEGER_COERCION_BADNESS;	/* signed long -> unsigned int */
+			return INTEGER_CONVERSION_BADNESS;	/* signed long -> unsigned int */
 		      else
 			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
 		    }
@@ -2623,15 +2642,15 @@ rank_one_type (struct type *parm, struct type *arg)
 			   && integer_types_same_name_p (TYPE_NAME (parm), "long"))
 		    return INTEGER_PROMOTION_BADNESS;
 		  else
-		    return INTEGER_COERCION_BADNESS;
+		    return INTEGER_CONVERSION_BADNESS;
 		}
 	      else
-		return INTEGER_COERCION_BADNESS;
+		return INTEGER_CONVERSION_BADNESS;
 	    }
 	  else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
 	    return INTEGER_PROMOTION_BADNESS;
 	  else
-	    return INTEGER_COERCION_BADNESS;
+	    return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
@@ -2653,7 +2672,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
-	  return INTEGER_COERCION_BADNESS;
+	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
 	default:
@@ -2666,12 +2685,12 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
-	  return INTEGER_COERCION_BADNESS;
+	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
 	case TYPE_CODE_INT:
 	  if (TYPE_LENGTH (arg) > TYPE_LENGTH (parm))
-	    return INTEGER_COERCION_BADNESS;
+	    return INTEGER_CONVERSION_BADNESS;
 	  else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
 	    return INTEGER_PROMOTION_BADNESS;
 	  /* >>> !! else fall through !! <<< */
@@ -2683,7 +2702,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	      if (TYPE_NOSIGN (arg))
 		return 0;
 	      else
-		return INTEGER_COERCION_BADNESS;
+		return INTEGER_CONVERSION_BADNESS;
 	    }
 	  else if (TYPE_UNSIGNED (parm))
 	    {
@@ -2695,7 +2714,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 	    return 0;
 	  else
-	    return INTEGER_COERCION_BADNESS;
+	    return INTEGER_CONVERSION_BADNESS;
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
@@ -2708,7 +2727,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
 	case TYPE_CODE_ENUM:
-	  return INTEGER_COERCION_BADNESS;
+	  return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_FLT:
 	  return INT_FLOAT_CONVERSION_BADNESS;
 	default:

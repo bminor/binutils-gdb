@@ -1,5 +1,5 @@
-/* Macro definitions for an Apollo m68k in BSD mode
-   Copyright 1992, 2001 Free Software Foundation, Inc.
+/* Dwarf2 location expression support for GDB.
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,4 +18,22 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define ALIGN_STACK_ON_STARTUP
+#if !defined (DWARF2LOC_H)
+#define DWARF2LOC_H
+
+/* This header is private to the DWARF-2 reader.  It is shared between
+   dwarf2read.c and dwarf2loc.c.  */
+
+/* The symbol location baton type used by the DWARF-2 reader (i.e.
+   SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  */
+
+struct dwarf2_locexpr_baton
+{
+  unsigned char *data;
+  unsigned short size;
+  struct objfile *objfile;
+};
+
+extern struct location_funcs dwarf2_locexpr_funcs;
+
+#endif

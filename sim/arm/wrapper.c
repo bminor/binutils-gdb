@@ -204,7 +204,7 @@ sim_resume (sd, step, siggnal)
 SIM_RC
 sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd ATTRIBUTE_UNUSED;
-     struct _bfd * abfd;
+     struct bfd * abfd;
      char ** argv;
      char ** env;
 {
@@ -610,7 +610,7 @@ SIM_DESC
 sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *ptr;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   sim_kind = kind;

@@ -103,6 +103,8 @@ SHARED_READLINE = libreadline.$(SHLIB_LIBVERSION)
 SHARED_HISTORY = libhistory.$(SHLIB_LIBVERSION)
 SHARED_LIBS = $(SHARED_READLINE) $(SHARED_HISTORY)
 
+WCWIDTH_OBJ = @WCWIDTH_OBJ@
+
 # The C code source files for this library.
 CSOURCES = $(topdir)/readline.c $(topdir)/funmap.c $(topdir)/keymaps.c \
 	   $(topdir)/vi_mode.c $(topdir)/parens.c $(topdir)/rltty.c \
@@ -115,7 +117,7 @@ CSOURCES = $(topdir)/readline.c $(topdir)/funmap.c $(topdir)/keymaps.c \
 	   $(topdir)/histfile.c $(topdir)/nls.c $(topdir)/search.c \
 	   $(topdir)/shell.c $(topdir)/savestring.c $(topdir)/tilde.c \
 	   $(topdir)/text.c $(topdir)/misc.c $(topdir)/compat.c \
-	   $(topdir)/mbutil.c
+	   $(topdir)/mbutil.c $(WCWIDTH_SRC)
 
 # The header files for this library.
 HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
@@ -129,7 +131,7 @@ SHARED_OBJ = readline.so vi_mode.so funmap.so keymaps.so parens.so search.so \
 	  rltty.so complete.so bind.so isearch.so display.so signals.so \
 	  util.so kill.so undo.so macro.so input.so callback.so terminal.so \
 	  text.so nls.so misc.so xmalloc.so $(SHARED_HISTOBJ) $(SHARED_TILDEOBJ) \
-	  compat.so
+	  compat.so $(WCWIDTH_OBJ)
 
 ##########################################################################
 
@@ -152,6 +154,10 @@ $(SHARED_READLINE):	$(SHARED_OBJ)
 $(SHARED_HISTORY):	$(SHARED_HISTOBJ) xmalloc.so
 	$(RM) $@
 	$(SHOBJ_LD) ${SHOBJ_LDFLAGS} ${SHLIB_XLDFLAGS} -o $@ $(SHARED_HISTOBJ) xmalloc.so $(SHLIB_LIBS)
+
+wcwidth.o: $(srcdir)/support/wcwidth.c
+	$(RM) $@
+	$(SHOBJ_CC) -c $(CCFLAGS) $(SHOBJ_FLAGS) $(srcdir)/support/wcwidth.c
 
 # Since tilde.c is shared between readline and bash, make sure we compile 
 # it with the right flags when it's built as part of readline

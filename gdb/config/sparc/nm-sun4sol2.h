@@ -51,7 +51,7 @@
 /* When a hardware watchpoint fires off the PC will be left at the
    instruction following the one which caused the watchpoint.  
    It will *NOT* be necessary for GDB to step over the watchpoint. */
-#define HAVE_CONTINUABLE_WATCHPOINT
+#define HAVE_CONTINUABLE_WATCHPOINT 1
 
 extern int procfs_stopped_by_watchpoint (ptid_t);
 #define STOPPED_BY_WATCHPOINT(W) \

@@ -227,11 +227,11 @@ extern int sparc_intreg_size (void);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE 8
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 8
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
-#define MAX_REGISTER_VIRTUAL_SIZE 8
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -466,9 +466,9 @@ void sparc_get_saved_register (char *raw_buffer,
      sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
 			       FRAME, REGNUM, LVAL)
 
-#define FRAME_INIT_SAVED_REGS(FP)	/*no-op */
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(FP)	/*no-op */
 
-#define INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
      sparc_init_extra_frame_info (FROMLEAF, FCI)
 extern void sparc_init_extra_frame_info (int, struct frame_info *);
 
@@ -509,8 +509,13 @@ extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
      sparc_print_extra_frame_info (FI)
 extern void sparc_print_extra_frame_info (struct frame_info *);
 
-/* INIT_EXTRA_FRAME_INFO needs the PC to detect flat frames.  */
+/* DEPRECATED_INIT_EXTRA_FRAME_INFO needs the PC to detect flat
+   frames.  */
 
+/* NOTE: cagney/2002-12-08: Add local declaration of
+   init_frame_pc_noop() because it isn't possible to include
+   "arch-utils.h" here.  */
+extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 #define	DEPRECATED_INIT_FRAME_PC(FROMLEAF, PREV)	(init_frame_pc_noop (FROMLEAF, PREV))
 #define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
   ((FROMLEAF) ? SAVED_PC_AFTER_CALL ((PREV)->next) : \
@@ -578,18 +583,18 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
  *   I understand everything in this picture except what the space
  * between fp - 0xe0 and fp - 0x140 is used for.  Oh, and I don't
  * understand why there's a large chunk of CALL_DUMMY that never gets
- * executed (its function is superceeded by PUSH_DUMMY_FRAME; they
- * are designed to do the same thing).
+ * executed (its function is superceeded by
+ * DEPRECATED_PUSH_DUMMY_FRAME; they are designed to do the same
+ * thing).
  *
- *   PUSH_DUMMY_FRAME saves the registers above sp' and pushes the
- * register file stack down one.
+ *   DEPRECATED_PUSH_DUMMY_FRAME saves the registers above sp' and
+ * pushes the * register file stack down one.
  *
  *   call_function then writes CALL_DUMMY, pushes the args onto the
  * stack, and adjusts the stack pointer.
  *
  *   run_stack_dummy then starts execution (in the middle of
- * CALL_DUMMY, as directed by call_function).
- */
+ * CALL_DUMMY, as directed by call_function).  */
 
 #ifndef CALL_DUMMY
 /* This sequence of words is the instructions
@@ -677,7 +682,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
-#define PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
+#define DEPRECATED_PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
 #define POP_FRAME		sparc_pop_frame ()
 
 void sparc_push_dummy_frame (void);

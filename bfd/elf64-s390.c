@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -373,7 +373,7 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
 /* A relocation function which doesn't do anything.  */
 static bfd_reloc_status_type
 s390_tls_reloc (abfd, reloc_entry, symbol, data, input_section,
-                      output_bfd, error_message)
+		output_bfd, error_message)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol ATTRIBUTE_UNUSED;
@@ -986,7 +986,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	  /* Fall through */
 
 	case R_390_GOT12:
-        case R_390_GOT16:
+	case R_390_GOT16:
 	case R_390_GOT32:
 	case R_390_GOT64:
 	case R_390_GOTENT:
@@ -1292,9 +1292,6 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  int r_type;
-  struct elf_link_hash_entry *h;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1305,16 +1302,31 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
+
       r_symndx = ELF64_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf_s390_link_hash_entry *eh;
+	  struct elf_s390_dyn_relocs **pp;
+	  struct elf_s390_dyn_relocs *p;
 
-      if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
-      else
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct elf_s390_link_hash_entry *) h;
 
-      r_type = elf_s390_tls_transition (info,
-					ELF64_R_TYPE (rel->r_info),
-					r_symndx >= symtab_hdr->sh_info);
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
+
+      r_type = ELF64_R_TYPE (rel->r_info);
+      r_type = elf_s390_tls_transition (info, r_type, h != NULL);
       switch (r_type)
 	{
 	case R_390_TLS_LDM64:
@@ -1347,14 +1359,7 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	      if (local_got_refcounts[r_symndx] > 0)
 		local_got_refcounts[r_symndx] -= 1;
 	    }
-	  if (r_type != R_390_TLS_IE64)
-	    break;
-	  /* Fall through */
-	  
-	case R_390_TLS_LE64:
-	  if (!info->shared)
-	    break;
-	  /* Fall through */
+	  break;
 
 	case R_390_8:
 	case R_390_12:
@@ -1366,33 +1371,9 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
-	  if (h != NULL)
-	    {
-	      struct elf_s390_link_hash_entry *eh;
-	      struct elf_s390_dyn_relocs **pp;
-	      struct elf_s390_dyn_relocs *p;
-	      
-	      if (!info->shared && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-	      
-	      eh = (struct elf_s390_link_hash_entry *) h;
-	      
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    if (ELF64_R_TYPE (rel->r_info) == R_390_PC16
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC16DBL
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC32
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC32DBL
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC64)
-		      p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
+	  if (info->shared)
+	    break;
+	  /* Fall through */
 
 	case R_390_PLT16DBL:
 	case R_390_PLT32:
@@ -2226,7 +2207,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -2266,14 +2246,14 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		 Current offset - size first entry / entry size.  */
 	      plt_index = (h->plt.offset - PLT_FIRST_ENTRY_SIZE) /
 		PLT_ENTRY_SIZE;
-	      
+
 	      /* Offset in GOT is PLT index plus GOT headers(3) times 4,
 		 addr & GOT addr.  */
 	      relocation = (plt_index + 3) * GOT_ENTRY_SIZE;
 	      unresolved_reloc = FALSE;
 
 	      if (r_type == R_390_GOTPLTENT)
-		relocation += htab->sgot->output_section->vma;	    
+		relocation += htab->sgot->output_section->vma;
 	      break;
 	    }
 	  /* Fall through.  */
@@ -2371,12 +2351,10 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  relocation = htab->sgot->output_offset + off;
 
-	  /*
-	   * For @GOTENT the relocation is against the offset between
-	   * the instruction and the symbols entry in the GOT and not
-	   * between the start of the GOT and the symbols entry. We
-	   * add the vma of the GOT to get the correct value.
-	   */
+	  /* For @GOTENT the relocation is against the offset between
+	     the instruction and the symbols entry in the GOT and not
+	     between the start of the GOT and the symbols entry. We
+	     add the vma of the GOT to get the correct value.  */
 	  if (   r_type == R_390_GOTENT
 	      || r_type == R_390_GOTPLTENT)
 	    relocation += htab->sgot->output_section->vma;
@@ -2429,17 +2407,17 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ htab->splt->output_offset
 			+ h->plt.offset);
 	  unresolved_reloc = FALSE;
-          break;
+	  break;
 
 	case R_390_PLTOFF16:
 	case R_390_PLTOFF32:
 	case R_390_PLTOFF64:
-          /* Relocation is to the entry for this symbol in the
-             procedure linkage table relative to the start of the GOT.  */
+	  /* Relocation is to the entry for this symbol in the
+	     procedure linkage table relative to the start of the GOT.  */
 
 	  /* For local symbols or if we didn't make a PLT entry for
 	     this symbol resolve the symbol directly.  */
-          if (   h == NULL
+	  if (   h == NULL
 	      || h->plt.offset == (bfd_vma) -1
 	      || htab->splt == NULL)
 	    {
@@ -2447,9 +2425,9 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 	    }
 
-          relocation = (htab->splt->output_section->vma
-                        + htab->splt->output_offset
-                        + h->plt.offset
+	  relocation = (htab->splt->output_section->vma
+			+ htab->splt->output_offset
+			+ h->plt.offset
 			- htab->sgot->output_section->vma);
 	  unresolved_reloc = FALSE;
 	  break;
@@ -2500,7 +2478,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.  */
-
 	      skip = FALSE;
 	      relocate = FALSE;
 
@@ -2577,7 +2554,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloc_out (output_bfd, &outrel, loc);
 	    }
-	  /* Fall through */
+	  /* Fall through.  */
 
 	case R_390_TLS_GD64:
 	case R_390_TLS_GOTIE64:
@@ -2621,7 +2598,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
-          else
+	  else
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -2756,7 +2733,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      htab->tls_ldm_got.offset |= 1;
 	    }
 	  relocation = htab->sgot->output_offset + off;
-	  unresolved_reloc = FALSE;	  
+	  unresolved_reloc = FALSE;
 	  break;
 
 	case R_390_TLS_LE64:
@@ -3067,7 +3044,6 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
-
       if (htab->sgot == NULL || htab->srelgot == NULL)
 	abort ();
 
@@ -3278,11 +3254,9 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-/*
- * Why was the hash table entry size definition changed from
- * ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
- * this is the only reason for the s390_elf64_size_info structure.
- */
+/* Why was the hash table entry size definition changed from
+   ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
+   this is the only reason for the s390_elf64_size_info structure.  */
 
 const struct elf_size_info s390_elf64_size_info =
 {
@@ -3294,10 +3268,10 @@ const struct elf_size_info s390_elf64_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
-  8,		/* hash-table entry size */
-  1,		/* internal relocations per external relocations */
-  64,		/* arch_size */
-  8,		/* file_align */
+  8,		/* hash-table entry size.  */
+  1,		/* internal relocations per external relocations.  */
+  64,		/* arch_size.  */
+  8,		/* file_align.  */
   ELFCLASS64, EV_CURRENT,
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,

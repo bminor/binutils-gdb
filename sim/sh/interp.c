@@ -1424,7 +1424,7 @@ sim_size (power)
 
 static void
 init_dsp (abfd)
-     struct _bfd *abfd;
+     struct bfd *abfd;
 {
   int was_dsp = target_dsp;
   unsigned long mach = bfd_get_mach (abfd);
@@ -2140,7 +2140,7 @@ SIM_DESC
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   char **p;
@@ -2239,7 +2239,7 @@ sim_load (sd, prog, abfd, from_tty)
 SIM_RC
 sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *prog_bfd;
+     struct bfd *prog_bfd;
      char **argv;
      char **env;
 {

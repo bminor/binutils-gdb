@@ -100,7 +100,8 @@ static int
 i386_interix_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   /* This is sufficient, where used, but is NOT a complete test; There
-     is more in INIT_EXTRA_FRAME_INFO (a.k.a. interix_back_one_frame).  */
+     is more in DEPRECATED_INIT_EXTRA_FRAME_INFO
+     (a.k.a. interix_back_one_frame).  */
   return ((pc >= tramp_start && pc < tramp_end)
           || (pc >= null_start && pc < null_end));
 }
@@ -330,7 +331,7 @@ i386_interix_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                         i386_interix_in_solib_call_trampoline);
   set_gdbarch_skip_trampoline_code (gdbarch,
                                     i386_interix_skip_trampoline_code);
-  set_gdbarch_init_extra_frame_info (gdbarch, i386_interix_back_one_frame);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, i386_interix_back_one_frame);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_frame_chain_valid (gdbarch, i386_interix_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_interix_frame_saved_pc);

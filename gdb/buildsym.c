@@ -43,6 +43,7 @@
 #include "filenames.h"		/* For DOSish file names */
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
+#include "block.h"
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -136,7 +137,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
     {
       for (j = list->nsyms; --j >= 0;)
 	{
-	  pp = SYMBOL_NAME (list->symbol[j]);
+	  pp = DEPRECATED_SYMBOL_NAME (list->symbol[j]);
 	  if (*pp == *name && strncmp (pp, name, length) == 0 &&
 	      pp[length] == '\0')
 	    {
@@ -265,7 +266,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      unsigned int hash_index;
 	      const char *name = SYMBOL_DEMANGLED_NAME (next->symbol[j]);
 	      if (name == NULL)
-		name = SYMBOL_NAME (next->symbol[j]);
+		name = DEPRECATED_SYMBOL_NAME (next->symbol[j]);
 	      hash_index = msymbol_hash_iw (name);
 	      hash_index = hash_index % BLOCK_BUCKETS (block);
 	      sym = BLOCK_BUCKET (block, hash_index);
@@ -308,6 +309,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_REGPARM_ADDR:
 		case LOC_BASEREG_ARG:
 		case LOC_LOCAL_ARG:
+		case LOC_COMPUTED_ARG:
 		  nparams++;
 		  break;
 		case LOC_UNDEF:
@@ -323,6 +325,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_BASEREG:
 		case LOC_UNRESOLVED:
 		case LOC_OPTIMIZED_OUT:
+		case LOC_COMPUTED:
 		default:
 		  break;
 		}
@@ -344,6 +347,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_REGPARM_ADDR:
 		    case LOC_BASEREG_ARG:
 		    case LOC_LOCAL_ARG:
+		    case LOC_COMPUTED_ARG:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
@@ -361,6 +365,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_BASEREG:
 		    case LOC_UNRESOLVED:
 		    case LOC_OPTIMIZED_OUT:
+		    case LOC_COMPUTED:
 		    default:
 		      break;
 		    }
@@ -394,7 +399,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	{
 	  complaint (&symfile_complaints,
 		     "block end address less than block start address in %s (patched it)",
-		     SYMBOL_SOURCE_NAME (symbol));
+		     SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
@@ -428,7 +433,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		{
 		  complaint (&symfile_complaints,
 			     "inner block not inside outer block in %s",
-			     SYMBOL_SOURCE_NAME (symbol));
+			     SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{

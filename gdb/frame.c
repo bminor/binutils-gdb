@@ -39,6 +39,10 @@
 #include "command.h"
 #include "gdbcmd.h"
 
+/* Flag to control debugging.  */
+
+static int frame_debug;
+
 /* Flag to indicate whether backtraces should stop at main.  */
 
 static int backtrace_below_main;
@@ -307,7 +311,7 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
   frame_unwind_signed_register (frame->next, regnum, val);
 }
 
-static void
+void
 generic_unwind_get_saved_register (char *raw_buffer,
 				   int *optimizedp,
 				   CORE_ADDR *addrp,
@@ -605,12 +609,13 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
   /* Only (older) architectures that implement the
-     FRAME_INIT_SAVED_REGS method should be using this function.  */
-  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+     DEPRECATED_FRAME_INIT_SAVED_REGS method should be using this
+     function.  */
+  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 
   /* Load the saved_regs register cache.  */
   if (get_frame_saved_regs (frame) == NULL)
-    FRAME_INIT_SAVED_REGS (frame);
+    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   if (get_frame_saved_regs (frame) != NULL
       && get_frame_saved_regs (frame)[regnum] != 0)
@@ -791,7 +796,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
   if (!target_has_registers)
     error ("No registers.");
 
-  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 
   /* Normal systems don't optimize out things with register numbers.  */
   if (optimized != NULL)
@@ -827,7 +832,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 	      return;
 	    }
 
-	  FRAME_INIT_SAVED_REGS (frame);
+	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 	  if (get_frame_saved_regs (frame) != NULL
 	      && get_frame_saved_regs (frame)[regnum] != 0)
 	    {
@@ -901,8 +906,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->next = create_sentinel_frame (current_regcache);
   fi->type = frame_type_from_pc (pc);
 
-  if (INIT_EXTRA_FRAME_INFO_P ())
-    INIT_EXTRA_FRAME_INFO (0, fi);
+  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
+    DEPRECATED_INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
   fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
@@ -1033,25 +1038,25 @@ legacy_get_prev_frame (struct frame_info *next_frame)
 
   /* This change should not be needed, FIXME!  We should determine
      whether any targets *need* DEPRECATED_INIT_FRAME_PC to happen
-     after INIT_EXTRA_FRAME_INFO and come up with a simple way to
-     express what goes on here.
+     after DEPRECATED_INIT_EXTRA_FRAME_INFO and come up with a simple
+     way to express what goes on here.
 
-     INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
-     (where the PC is already set up) and here (where it isn't).
-     DEPRECATED_INIT_FRAME_PC is only called from here, always after
-     INIT_EXTRA_FRAME_INFO.
+     DEPRECATED_INIT_EXTRA_FRAME_INFO is called from two places:
+     create_new_frame (where the PC is already set up) and here (where
+     it isn't).  DEPRECATED_INIT_FRAME_PC is only called from here,
+     always after DEPRECATED_INIT_EXTRA_FRAME_INFO.
 
-     The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the
-     PC value (which hasn't been set yet).  Some other machines appear
-     to require INIT_EXTRA_FRAME_INFO before they can do
-     DEPRECATED_INIT_FRAME_PC.  Phoo.
+     The catch is the MIPS, where DEPRECATED_INIT_EXTRA_FRAME_INFO
+     requires the PC value (which hasn't been set yet).  Some other
+     machines appear to require DEPRECATED_INIT_EXTRA_FRAME_INFO
+     before they can do DEPRECATED_INIT_FRAME_PC.  Phoo.
 
      We shouldn't need DEPRECATED_INIT_FRAME_PC_FIRST to add more
      complication to an already overcomplicated part of GDB.
      gnu@cygnus.com, 15Sep92.
 
      Assuming that some machines need DEPRECATED_INIT_FRAME_PC after
-     INIT_EXTRA_FRAME_INFO, one possible scheme:
+     DEPRECATED_INIT_EXTRA_FRAME_INFO, one possible scheme:
 
      SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
      (read_fp ()), read_pc ()).  Machines with extra frame info would
@@ -1061,13 +1066,14 @@ legacy_get_prev_frame (struct frame_info *next_frame)
      create_new_frame would no longer init extra frame info;
      SETUP_ARBITRARY_FRAME would have to do that.
 
-     INIT_PREV_FRAME(fromleaf, prev) Replace INIT_EXTRA_FRAME_INFO and
-     DEPRECATED_INIT_FRAME_PC.  This should also return a flag saying
-     whether to keep the new frame, or whether to discard it, because
-     on some machines (e.g.  mips) it is really awkward to have
-     FRAME_CHAIN_VALID called *before* INIT_EXTRA_FRAME_INFO (there is
-     no good way to get information deduced in FRAME_CHAIN_VALID into
-     the extra fields of the new frame).  std_frame_pc(fromleaf, prev)
+     INIT_PREV_FRAME(fromleaf, prev) Replace
+     DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC.
+     This should also return a flag saying whether to keep the new
+     frame, or whether to discard it, because on some machines (e.g.
+     mips) it is really awkward to have FRAME_CHAIN_VALID called
+     BEFORE DEPRECATED_INIT_EXTRA_FRAME_INFO (there is no good way to
+     get information deduced in FRAME_CHAIN_VALID into the extra
+     fields of the new frame).  std_frame_pc(fromleaf, prev)
 
      This is the default setting for INIT_PREV_FRAME.  It just does
      what the default DEPRECATED_INIT_FRAME_PC does.  Some machines
@@ -1104,8 +1110,8 @@ legacy_get_prev_frame (struct frame_info *next_frame)
   if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
     prev->pc = (DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev));
 
-  if (INIT_EXTRA_FRAME_INFO_P ())
-    INIT_EXTRA_FRAME_INFO (fromleaf, prev);
+  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
+    DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, prev);
 
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out its value (see
@@ -1223,14 +1229,22 @@ get_prev_frame (struct frame_info *next_frame)
        Note, this is done _before_ the frame has been marked as
        previously unwound.  That way if the user later decides to
        allow unwinds past main(), that just happens.  */
-    return NULL;
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - inside main func.\n");
+      return NULL;
+    }
 
   /* Only try to do the unwind once.  */
   if (next_frame->prev_p)
     return next_frame->prev;
   next_frame->prev_p = 1;
 
-  /* If we're inside the entry file, it isn't valid.  */
+  /* If we're inside the entry file, it isn't valid.  Don't apply this
+     test to a dummy frame - dummy frame PC's typically land in the
+     entry file.  Don't apply this test to the sentinel frame.
+     Sentinel frames should always be allowed to unwind.  */
   /* NOTE: drow/2002-12-25: should there be a way to disable this
      check?  It assumes a single small entry file, and the way some
      debug readers (e.g.  dbxread) figure out which object is the
@@ -1238,8 +1252,31 @@ get_prev_frame (struct frame_info *next_frame)
   /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
      then it should probably be moved to before the ->prev_p test,
      above.  */
-  if (inside_entry_file (get_frame_pc (next_frame)))
+  if (next_frame->type != DUMMY_FRAME && next_frame->level >= 0
+      && inside_entry_file (get_frame_pc (next_frame)))
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - inside entry file\n");
       return NULL;
+    }
+
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  Don't apply this test to a dummy frame -
+     dummy frame PC's typically land in the entry func.  Don't apply
+     this test to the sentinel frame.  Sentinel frames should always
+     be allowed to unwind.  */
+  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
+     hard evidence that this is needed.  */
+  if (0
+      && next_frame->type != DUMMY_FRAME && next_frame->level >= 0
+      && inside_entry_func (get_frame_pc (next_frame)))
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - inside entry func\n");
+      return NULL;
+    }
 
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  Just don't try to unwind a
@@ -1247,10 +1284,16 @@ get_prev_frame (struct frame_info *next_frame)
      frames use the new unwind code.  */
   if ((DEPRECATED_INIT_FRAME_PC_P ()
        || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
-       || INIT_EXTRA_FRAME_INFO_P ()
+       || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
        || FRAME_CHAIN_P ())
       && next_frame->level >= 0)
-    return legacy_get_prev_frame (next_frame);
+    {
+      prev_frame = legacy_get_prev_frame (next_frame);
+      if (frame_debug && prev_frame == NULL)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - legacy_get_prev_frame NULL.\n");
+      return prev_frame;
+    }
 
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
@@ -1274,7 +1317,8 @@ get_prev_frame (struct frame_info *next_frame)
      frame chain.  This is ok since, for old targets, both
      frame_pc_unwind (nee, FRAME_SAVED_PC) and FRAME_CHAIN()) assume
      NEXT_FRAME's data structures have already been initialized (using
-     INIT_EXTRA_FRAME_INFO) and hence the call order doesn't matter.
+     DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
+     doesn't matter.
 
      By unwinding the PC first, it becomes possible to, in the case of
      a dummy frame, avoid also unwinding the frame ID.  This is
@@ -1283,9 +1327,14 @@ get_prev_frame (struct frame_info *next_frame)
 
   prev_frame->pc = frame_pc_unwind (next_frame);
   if (prev_frame->pc == 0)
-    /* The allocated PREV_FRAME will be reclaimed when the frame
-       obstack is next purged.  */
-    return NULL;
+    {
+      /* The allocated PREV_FRAME will be reclaimed when the frame
+	 obstack is next purged.  */
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - unwound PC zero\n");
+      return NULL;
+    }
   prev_frame->type = frame_type_from_pc (prev_frame->pc);
 
   /* Set the unwind functions based on that identified PC.  */
@@ -1299,8 +1348,30 @@ get_prev_frame (struct frame_info *next_frame)
     /* FIXME: cagney/2002-12-18: Instead of this hack, should just
        save the frame ID directly.  */
     struct frame_id id = frame_id_unwind (next_frame);
+    /* Check that the unwound ID is valid.  As of 2003-02-24 the
+       x86-64 was returning an invalid frame ID when trying to do an
+       unwind a sentinel frame that belonged to a frame dummy.  */
     if (!frame_id_p (id))
-      return NULL;
+      {
+	if (frame_debug)
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Outermost frame - unwound frame ID invalid\n");
+	return NULL;
+      }
+    /* Check that the new frame isn't inner to (younger, below, next)
+       the old frame.  If that happens the frame unwind is going
+       backwards.  */
+    /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since that
+       doesn't have a valid frame ID.  Should instead set the sentinel
+       frame's frame ID to a `sentinel'.  Leave it until after the
+       switch to storing the frame ID, instead of the frame base, in
+       the frame object.  */
+    if (next_frame->level >= 0
+	&& frame_id_inner (id, get_frame_id (next_frame)))
+      error ("Unwound frame inner-to selected frame (corrupt stack?)");
+    /* Note that, due to frameless functions, the stronger test of the
+       new frame being outer to the old frame can't be used -
+       frameless functions differ by only their PC value.  */
     prev_frame->frame = id.base;
   }
 
@@ -1313,12 +1384,13 @@ get_prev_frame (struct frame_info *next_frame)
      (passed to the unwind functions) to store additional frame info.
      Unfortunatly legacy targets can't use legacy_get_prev_frame() to
      unwind the sentinel frame and, consequently, are forced to take
-     this code path and rely on the below call to INIT_EXTR_FRAME_INFO
-     to initialize the inner-most frame.  */
-  if (INIT_EXTRA_FRAME_INFO_P ())
+     this code path and rely on the below call to
+     DEPRECATED_INIT_EXTRA_FRAME_INFO to initialize the inner-most
+     frame.  */
+  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
     {
       gdb_assert (prev_frame->level == 0);
-      INIT_EXTRA_FRAME_INFO (0, prev_frame);
+      DEPRECATED_INIT_EXTRA_FRAME_INFO (0, prev_frame);
     }
 
   return prev_frame;
@@ -1393,7 +1465,7 @@ deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated.  This is a compatibility function for targets
-   that do not yet implement FRAME_INIT_SAVED_REGS.  */
+   that do not yet implement DEPRECATED_FRAME_INIT_SAVED_REGS.  */
 /* Find the addresses in which registers are saved in FRAME.  */
 
 void
@@ -1536,4 +1608,11 @@ Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.",
 			   NULL, NULL, &setlist, &showlist);
+
+
+  /* Debug this files internals. */
+  add_show_from_set (add_set_cmd ("frame", class_maintenance, var_zinteger,
+				  &frame_debug, "Set frame debugging.\n\
+When non-zero, frame specific internal debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }

@@ -1,5 +1,5 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,7 @@
 #include "c-lang.h"
 #include "jv-lang.h"
 #include "gdbcore.h"
+#include "block.h"
 #include <ctype.h>
 
 struct type *java_int_type;
@@ -67,6 +68,12 @@ static void java_emit_char (int c, struct ui_file * stream, int quoter);
 static struct objfile *dynamics_objfile = NULL;
 
 static struct type *java_link_class_type (struct type *, struct value *);
+
+/* FIXME: carlton/2003-02-04: This is the main or only caller of
+   allocate_objfile with first argument NULL; as a result, this code
+   breaks every so often.  Somebody should write a test case that
+   exercises GDB in various ways (e.g. something involving loading a
+   dynamic library) after this code has been called.  */
 
 static struct objfile *
 get_dynamics_objfile (void)
@@ -157,7 +164,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
     obstack_alloc (&dynamics_objfile->symbol_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_LANGUAGE (sym) = language_java;
-  SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
+  DEPRECATED_SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
   SYMBOL_CLASS (sym) = LOC_TYPEDEF;
   /*  SYMBOL_VALUE (sym) = valu; */
   SYMBOL_TYPE (sym) = type;

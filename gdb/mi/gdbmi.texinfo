@@ -2543,6 +2543,33 @@ information when you start an interactive session.
 (@value{GDBP})
 @end smallexample
 
+@subheading The @code{-interpreter-exec} Command
+@findex -interpreter-exec
+
+@subheading Synopsis
+
+@smallexample
+-interpreter-exec @var{interpreter} @var{command}
+@end smallexample
+
+Execute the specified @var{command} in the given @var{interpreter}.
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{interpreter-exec}.
+
+@subheading Example
+
+@smallexample
+(@value{GDBP})
+-interpreter-exec console "break main"
+&"During symbol reading, couldn't parse type; debugger out of date?.\n"
+&"During symbol reading, bad structure-type format.\n"
+~"Breakpoint 1 at 0x8074fc6: file ../../src/gdb/main.c, line 743.\n"
+^done
+(@value{GDBP})
+@end smallexample
+
 @ignore
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Kod Commands

@@ -1014,7 +1014,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 }
 /* Function: frame_chain Given a GDB frame, determine the address of
    the calling function's frame.  This will be used to create a new
-   GDB frame struct, and then INIT_EXTRA_FRAME_INFO and
+   GDB frame struct, and then DEPRECATED_INIT_EXTRA_FRAME_INFO and
    DEPRECATED_INIT_FRAME_PC will be called for the new frame.  For
    ARM, we save the frame size when we initialize the frame_info.  */
 
@@ -1112,7 +1112,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   /* Determine whether or not we're in a sigtramp frame.
      Unfortunately, it isn't sufficient to test (get_frame_type (fi)
      == SIGTRAMP_FRAME) because this value is sometimes set after
-     invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
+     invoking DEPRECATED_INIT_EXTRA_FRAME_INFO.  So we test *both*
      (get_frame_type (fi) == SIGTRAMP_FRAME) and PC_IN_SIGTRAMP to
      determine if we need to use the sigcontext addresses for the
      saved registers.
@@ -1503,7 +1503,7 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	}
     }
 
-  /* Return the botom of the argument list (pointed to by fp).  */
+  /* Return the bottom of the argument list (pointed to by fp).  */
   return fp;
 }
 
@@ -2101,7 +2101,7 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
       static asymbol *asym;
       static combined_entry_type ce;
       static struct coff_symbol_struct csym;
-      static struct _bfd fake_bfd;
+      static struct bfd fake_bfd;
       static bfd_target fake_target;
 
       if (csym.native == NULL)
@@ -2834,6 +2834,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	default:
 	  /* Leave it as "unknown".  */
+	  break;
 	}
     }
 
@@ -2903,7 +2904,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame handling.  */
   set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);
-  set_gdbarch_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
   set_gdbarch_read_fp (gdbarch, arm_read_fp);
   set_gdbarch_frame_chain (gdbarch, arm_frame_chain);
   set_gdbarch_frameless_function_invocation
@@ -2913,8 +2914,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
   set_gdbarch_pop_frame (gdbarch, arm_pop_frame);
 
   /* Address manipulation.  */
@@ -2950,8 +2950,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_raw_size (gdbarch, arm_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, arm_register_virtual_size);
-  set_gdbarch_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
-  set_gdbarch_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, arm_register_type);
 
   /* Internal <-> external register number maps.  */

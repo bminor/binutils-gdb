@@ -400,14 +400,14 @@ extern void sp64_extract_return_value (struct type *, char[], char *, int);
 /* Largest value REGISTER_RAW_SIZE can have.  */
 /* tm-sparc.h defines this as 8, but play it safe.  */
 
-#undef  MAX_REGISTER_RAW_SIZE
-#define MAX_REGISTER_RAW_SIZE 8
+#undef  DEPRECATED_MAX_REGISTER_RAW_SIZE
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 8
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 /* tm-sparc.h defines this as 8, but play it safe.  */
 
-#undef  MAX_REGISTER_VIRTUAL_SIZE
-#define MAX_REGISTER_VIRTUAL_SIZE 8
+#undef  DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */

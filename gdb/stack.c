@@ -39,6 +39,7 @@
 #include "inferior.h"
 #include "annotate.h"
 #include "ui-out.h"
+#include "block.h"
 
 /* Prototypes for exported functions. */
 
@@ -355,12 +356,12 @@ print_frame (struct frame_info *fi,
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
       else
 	{
-	  /* I'd like to use SYMBOL_SOURCE_NAME() here, to display the
+	  /* I'd like to use SYMBOL_PRINT_NAME() here, to display the
 	     demangled name that we already have stored in the symbol
 	     table, but we stored a version with DMGL_PARAMS turned
 	     on, and here we don't want to display parameters. So call
@@ -372,7 +373,7 @@ print_frame (struct frame_info *fi,
 	     here, while we still have our hands on the function
 	     symbol.) */
 	  char *demangled;
-	  funname = SYMBOL_NAME (func);
+	  funname = DEPRECATED_SYMBOL_NAME (func);
 	  funlang = SYMBOL_LANGUAGE (func);
 	  if (funlang == language_cplus)
 	    {
@@ -381,7 +382,7 @@ print_frame (struct frame_info *fi,
 		/* If the demangler fails, try the demangled name from
 		   the symbol table. This'll have parameters, but
 		   that's preferable to diplaying a mangled name. */
-		funname = SYMBOL_SOURCE_NAME (func);
+		funname = SYMBOL_PRINT_NAME (func);
 	    }
 	}
     }
@@ -390,7 +391,7 @@ print_frame (struct frame_info *fi,
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (frame_address_in_block (fi));
       if (msymbol != NULL)
 	{
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
     }
@@ -638,7 +639,7 @@ frame_info (char *addr_exp, int from_tty)
   s = find_pc_symtab (get_frame_pc (fi));
   if (func)
     {
-      /* I'd like to use SYMBOL_SOURCE_NAME() here, to display
+      /* I'd like to use SYMBOL_PRINT_NAME() here, to display
        * the demangled name that we already have stored in
        * the symbol table, but we stored a version with
        * DMGL_PARAMS turned on, and here we don't want
@@ -652,7 +653,7 @@ frame_info (char *addr_exp, int from_tty)
        * have our hands on the function symbol.)
        */
       char *demangled;
-      funname = SYMBOL_NAME (func);
+      funname = DEPRECATED_SYMBOL_NAME (func);
       funlang = SYMBOL_LANGUAGE (func);
       if (funlang == language_cplus)
 	{
@@ -662,7 +663,7 @@ frame_info (char *addr_exp, int from_tty)
 	   * but that's preferable to diplaying a mangled name.
 	   */
 	  if (demangled == NULL)
-	    funname = SYMBOL_SOURCE_NAME (func);
+	    funname = SYMBOL_PRINT_NAME (func);
 	}
     }
   else
@@ -670,7 +671,7 @@ frame_info (char *addr_exp, int from_tty)
       register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
     }
@@ -781,9 +782,9 @@ frame_info (char *addr_exp, int from_tty)
       }
   }
 
-  if (FRAME_INIT_SAVED_REGS_P ()
+  if (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()
       && get_frame_saved_regs (fi) == NULL)
-    FRAME_INIT_SAVED_REGS (fi);
+    DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
   /* Print as much information as possible on the location of all the
      registers.  */
   {
@@ -1082,10 +1083,11 @@ print_block_frame_locals (struct block *b, register struct frame_info *fi,
 	case LOC_REGISTER:
 	case LOC_STATIC:
 	case LOC_BASEREG:
+	case LOC_COMPUTED:
 	  values_printed = 1;
 	  for (j = 0; j < num_tabs; j++)
 	    fputs_filtered ("\t", stream);
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, fi, stream);
 	  fprintf_filtered (stream, "\n");
@@ -1111,7 +1113,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 
   ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      if (STREQ (SYMBOL_NAME (sym), "default"))
+      if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 	{
 	  if (*have_default)
 	    continue;
@@ -1122,7 +1124,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 	  struct symtab_and_line sal;
 	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
 	  values_printed = 1;
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  if (addressprint)
 	    {
 	      fprintf_filtered (stream, " ");
@@ -1308,8 +1310,9 @@ print_frame_arg_vars (register struct frame_info *fi,
 	case LOC_REGPARM:
 	case LOC_REGPARM_ADDR:
 	case LOC_BASEREG_ARG:
+	case LOC_COMPUTED_ARG:
 	  values_printed = 1;
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 
 	  /* We have to look up the symbol because arguments can have
@@ -1323,7 +1326,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
 	     are not combined in symbol-reading.  */
 
-	  sym2 = lookup_symbol (SYMBOL_NAME (sym),
+	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
 		   b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
 	  print_variable_value (sym2, fi, stream);
 	  fprintf_filtered (stream, "\n");
@@ -1621,7 +1624,7 @@ return_command (char *retval_exp, int from_tty)
     {
       if (thisfun != 0)
 	{
-	  if (!query ("Make %s return now? ", SYMBOL_SOURCE_NAME (thisfun)))
+	  if (!query ("Make %s return now? ", SYMBOL_PRINT_NAME (thisfun)))
 	    {
 	      error ("Not confirmed.");
 	      /* NOTREACHED */

@@ -20,7 +20,7 @@ data, for more informative profiling results.
 
 The default MI (machine interface) syntax, enabled by the command line
 option "-i=mi", has been changed to "mi2".  The previous MI syntax,
-"mi1", can be enabled by sepcifying the option "-i=mi1".
+"mi1", can be enabled by specifying the option "-i=mi1".
 
 Support for the original "mi0" syntax (included in GDB 5.0) has been
 removed.
@@ -36,6 +36,11 @@ Configurations that have been declared obsolete in this release have
 been commented out.  Unless there is activity to revive these
 configurations, the next release of GDB will have their sources
 permanently REMOVED.
+
+Mitsubishi M32R/D w/simulator			m32r-*-elf*
+Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
+Matsushita MN10200 w/simulator			mn10200-*-*
+H8/500 simulator 			h8500-hitachi-hms or h8500hms
 
 * REMOVED configurations and files
 

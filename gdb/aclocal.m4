@@ -271,6 +271,7 @@ dnl not used, don't export to save symbols
     AC_SUBST(TCL_LD_FLAGS)
 dnl don't export, not used outside of configure
     AC_SUBST(TCL_LD_SEARCH_FLAGS)
+    AC_SUBST(TCL_CC_SEARCH_FLAGS)
     AC_SUBST(TCL_COMPAT_OBJS)
     AC_SUBST(TCL_RANLIB)
     AC_SUBST(TCL_BUILD_LIB_SPEC)

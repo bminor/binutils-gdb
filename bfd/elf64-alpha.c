@@ -2184,7 +2184,13 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 	  info.h = NULL;
 	  info.other = isym->st_other;
-	  info.first_gotent = &local_got_entries[r_symndx];
+	  if (local_got_entries)
+	    info.first_gotent = &local_got_entries[r_symndx];
+	  else
+	    {
+	      info.first_gotent = &info.gotent;
+	      info.gotent = NULL;
+	    }
 	}
       else
 	{
@@ -4438,8 +4444,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	     unless it has been done already.  */
 	  if ((sec->flags & SEC_MERGE)
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	      && (elf_section_data (sec)->sec_info_type
-		  == ELF_INFO_TYPE_MERGE)
+	      && sec->sec_info_type == ELF_INFO_TYPE_MERGE
 	      && gotent
 	      && !gotent->reloc_xlated)
 	    {
@@ -4498,7 +4503,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	    ;
@@ -5171,7 +5175,7 @@ elf64_alpha_finish_dynamic_sections (output_bfd, info)
 	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
 
-      /* Initialize the PLT0 entry */
+      /* Initialize the PLT0 entry.  */
       if (splt->_raw_size > 0)
 	{
 	  bfd_put_32 (output_bfd, PLT_HEADER_WORD1, splt->contents);

@@ -1748,6 +1748,37 @@ s390_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   return sp;
 }
 
+static int
+s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
+{
+  if (byte_size == 4)
+    return TYPE_FLAG_ADDRESS_CLASS_1;
+  else
+    return 0;
+}
+
+static const char *
+s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
+{
+  if (type_flags & TYPE_FLAG_ADDRESS_CLASS_1)
+    return "mode32";
+  else
+    return NULL;
+}
+
+int
+s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name,
+				       int *type_flags_ptr)
+{
+  if (strcmp (name, "mode32") == 0)
+    {
+      *type_flags_ptr = TYPE_FLAG_ADDRESS_CLASS_1;
+      return 1;
+    }
+  else
+    return 0;
+}
+
 struct gdbarch *
 s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1778,7 +1809,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
   set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
-  set_gdbarch_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
   set_gdbarch_frame_locals_address (gdbarch, s390_frame_args_address);
   /* We can't do this */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
@@ -1795,11 +1826,11 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Offset from address of function to start of its code.
      Zero on most machines.  */
   set_gdbarch_function_start_offset (gdbarch, 0);
-  set_gdbarch_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_max_register_virtual_size (gdbarch, 8);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_breakpoint_from_pc (gdbarch, s390_breakpoint_from_pc);
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
-  set_gdbarch_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
   set_gdbarch_read_fp (gdbarch, s390_read_fp);
   /* This function that tells us whether the function invocation represented
@@ -1835,7 +1866,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
@@ -1869,6 +1899,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_register_bytes (gdbarch, S390X_REGISTER_BYTES);
+      set_gdbarch_address_class_type_flags (gdbarch,
+                                            s390_address_class_type_flags);
+      set_gdbarch_address_class_type_flags_to_name (gdbarch,
+                                                    s390_address_class_type_flags_to_name);
+      set_gdbarch_address_class_name_to_type_flags (gdbarch,
+                                                    s390_address_class_name_to_type_flags);
       break;
     }
 

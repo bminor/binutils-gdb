@@ -1,6 +1,6 @@
 /* Memory-access and commands for "inferior" process, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -42,6 +42,7 @@
 #include "parser-defs.h"
 #include "regcache.h"
 #include "reggroups.h"
+#include "block.h"
 #include <ctype.h>
 
 /* Functions exported for general use, in inferior.h: */
@@ -854,7 +855,7 @@ jump_command (char *arg, int from_tty)
   if (fn != NULL && sfn != fn)
     {
       if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line,
-		  SYMBOL_SOURCE_NAME (fn)))
+		  SYMBOL_PRINT_NAME (fn)))
 	{
 	  error ("Not confirmed.");
 	  /* NOTREACHED */
@@ -1664,7 +1665,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
       /* Convert raw data to virtual format if necessary.  */
       if (REGISTER_CONVERTIBLE (i))
 	{
-	  REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
+	  REGISTER_CONVERT_TO_VIRTUAL (i, register_type (current_gdbarch, i),
 				       raw_buffer, virtual_buffer);
 	}
       else
@@ -1675,11 +1676,11 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
-      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (register_type (current_gdbarch, i)) == TYPE_CODE_FLT)
 	{
 	  int j;
 
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
@@ -1697,14 +1698,14 @@ default_print_registers_info (struct gdbarch *gdbarch,
       else
 	{
 	  /* Print the register in hex.  */
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
 		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
-	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
+	  if (TYPE_VECTOR (register_type (current_gdbarch, i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
-	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	      val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
 			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}

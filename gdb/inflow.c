@@ -35,22 +35,7 @@
 #include <sys/select.h>
 #endif
 
-#ifdef HAVE_TERMIOS
-#define PROCESS_GROUP_TYPE pid_t
-#endif
-
-#ifdef HAVE_TERMIO
-#define PROCESS_GROUP_TYPE int
-#endif
-
-#ifdef HAVE_SGTTY
-#ifdef SHORT_PGRP
-/* This is only used for the ultra.  Does it have pid_t?  */
-#define PROCESS_GROUP_TYPE short
-#else
-#define PROCESS_GROUP_TYPE int
-#endif
-#endif /* sgtty */
+#include "inflow.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>

@@ -27,6 +27,7 @@
 #include "objfiles.h"
 #include "buildsym.h"
 #include "stabsread.h"
+#include "block.h"
 
 extern void _initialize_nlmread (void);
 
@@ -190,6 +191,12 @@ nlm_symfile_read (struct objfile *objfile, int mainline)
 
   nlm_symtab_read (abfd, offset, objfile);
 
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile. */
+
+  install_minimal_symbols (objfile);
+  do_cleanups (back_to);
+
   stabsect_build_psymtabs (objfile, mainline, ".stab",
 			   ".stabstr", ".text");
 
@@ -204,13 +211,6 @@ nlm_symfile_read (struct objfile *objfile, int mainline)
 
   /* FIXME:  We could locate and read the optional native debugging format
      here and add the symbols to the minimal symbol table. */
-
-  /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. */
-
-  install_minimal_symbols (objfile);
-
-  do_cleanups (back_to);
 }
 
 

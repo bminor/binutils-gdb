@@ -34,6 +34,8 @@
    normally extern, but which get defined in a single module using
    this technique.  */
 
+struct block;
+
 #ifndef EXTERN
 #define	EXTERN extern
 #endif

@@ -52,7 +52,7 @@ struct _mmix_elf_section_data
 };
 
 #define mmix_elf_section_data(sec) \
-  ((struct _mmix_elf_section_data *) (sec)->used_by_bfd)
+  ((struct _mmix_elf_section_data *) elf_section_data (sec))
 
 /* For each section containing a base-plus-offset (BPO) reloc, we attach
    this struct as mmix_elf_section_data (section)->bpo, which is otherwise

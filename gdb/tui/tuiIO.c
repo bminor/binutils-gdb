@@ -262,7 +262,7 @@ tui_redisplay_readline (void)
 /* Readline callback to prepare the terminal.  It is called once
    each time we enter readline.  Terminal is already setup in curses mode.  */
 static void
-tui_prep_terminal (void)
+tui_prep_terminal (int notused1)
 {
   /* Save the prompt registered in readline to correctly display it.
      (we can't use gdb_prompt() due to secondary prompts and can't use

@@ -1,3 +1,513 @@
+2003-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Installed latest translation.
+
+2003-03-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (elf_mips_howto_table_rel): Change definition of
+	R_MIPS_PC16 to rightshift 2.
+	(elf_reloc_map mips_reloc_map): Map to rightshifted BFD reloc.
+	(bfd_elf32_bfd_reloc_type_lookup): Support
+	BFD_RELOC_MIPSEMB_16_PCREL_S2.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Change definition of
+	R_MIPS_PC16 to rightshift 2.
+	(mips_elf64_howto_table_rela): Likewise.
+	(mips_reloc_map): Map to rightshifted BFD reloc.
+	* elfn32-mips.c: The same as in elf64-mips.c.
+	* elfxx-mips.c (mips_elf_got_for_ibfd): Typo in comment.
+	(mips_elf_calculate_relocation): Handle rightshifted addends for
+	R_MIPS_PC16.
+	* reloc.c (BFD_RELOC_MIPSEMB_16_PCREL_S2): New BFD relocation for
+	MIPS Embedded PIC. Remove superfluous empty COMMENT.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2003-02-28  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Correct bounds
+	for ltoff22x relaxation.
+
+2003-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (_bfd): Don't define.
+	* bfd.c: Rename occurrences of "struct _bfd" to "struct bfd".
+	* syms.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2003-02-27  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (struct elfNN_ia64_dyn_sym_info): Add want_gotx;
+	(elfNN_ia64_check_relocs): Set it.
+	(allocate_global_data_got): Check it.
+	(allocate_local_got): Likewise.
+	(allocate_dynrel_entries): Likewise.
+	(elfNN_ia64_relax_ldxmov): New.
+	(elfNN_ia64_relax_section): Handle LTOFF22X, LDXMOV.
+	(elfNN_ia64_choose_gp): Split out from ...
+	(elfNN_ia64_final_link): ... here.
+	
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* bfd.c (struct bfd): Rename "struct _bfd".
+	* bfd-in.h: Update copyright.
+	(struct bfd): Rename "struct _bfd".
+	(_bfd): Define for backward compatibility.
+	* bfd-in2.h: Regenerate.
+
+2003-02-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_bfd_final_link): Apportion reloc counts to rel_hdr
+	and rel_hdr2 when initially counting input relocs rather than after
+	creating output reloc sections.
+	(elf_link_read_relocs_from_section): Don't abort with wrong reloc
+	sizes.
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2003-02-24  Kris Warkentin  <kewarken@qnx.com>
+
+	* elf.c (elfcore_read_notes): Add check for QNX style core file.
+	(elfcore_grog_nto_note): New function.
+	(elfcore_grog_nto_gregs): New function.
+	(elfcore_grog_nto_status): New function.
+
+2003-02-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_create_got_section): Check existing .got
+	section flags before concluding that we've already been called.
+	Don't use register keyword.
+	(_bfd_elf_create_dynamic_sections): Don't use register keyword.
+	(_bfd_elf_create_linker_section): Formatting.
+
+2003-02-20  jmc  <jmc@prioris.mini.pw.edu.pl>
+
+	* coff-h8300.c: Fix typo: intial -> initial.
+	* coff-ppc.c: Likewise.
+
+2003-02-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c: Formatting.
+	(allocate_dynrelocs): LD and GD relocs against the same sym need
+	separate GOT entries.
+	(ppc_elf_relocate_section): Correct GOT handling for multiple GOT
+	entries per symbol.
+
+2003-02-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (elf32_hppa_gc_sweep_hook): Simplify dynamic reloc
+	removal.  Localize vars.  Remove unnecessary dynobj test.
+	* elf32-i386 (WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead
+	of INFO.
+	(allocate_dynrelocs): Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses,
+	and optimize.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_gc_sweep_hook): Simplify dyn reloc removal.  Localize vars.
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	* elf32-sh.c (sh_elf_gc_sweep_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_gc_sweep_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_gc_sweep_hook): Likewise.  Remove
+	local_dynrel for section too.  Don't touch HIPLT22, LOPLT10, PCPLT32
+	or PCPLT10 relocs.  Don't subtract twice on PLT32 relocs.
+	Formatting.
+
+	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Define.
+	(ppc64_elf_check_relocs): Use it.  Correct comment.  Move SEC_ALLOC
+	test.
+	(ppc64_elf_adjust_dynamic_symbol): Use ELIMINATE_COPY_RELOCS.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+	(allocate_dynrelocs): Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses,
+	and optimize.  Use ELIMINATE_COPY_RELOCS.
+	(ppc64_elf_relocate_section): Likewise.
+
+	* elf32-ppc.c (struct ppc_elf_dyn_relocs): Add pc_count field.
+	(ppc_elf_copy_indirect_symbol): Copy pc_count field.
+	(ELIMINATE_COPY_RELOCS): Define.
+	(ppc_elf_adjust_dynamic_symbol): Convert copy relocs to dynamic.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+	(MUST_BE_DYN_RELOC): Define.
+	(allocate_dynrelocs): Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses,
+	and optimize.  Trim dyn_relocs.
+	(ppc_elf_check_relocs): Don't generate dyn_relocs when we know they'll
+	not be used.  Do generate dyn_relocs for copy reloc avoidance.  Keep
+	track of pc_rel dyn relocs.
+	(ppc_elf_relocate_section): Remove "will_become_local".  Adjust
+	WILL_CALL_FINISH_DYNAMIC_SYMBOL use.  Trim dyn relocs as per
+	allocate_dynrelocs.  Don't recalculate "sec".
+
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Remove unnecessary test.
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Decrement tlsld_got.refcount
+	on invalid LD relocs.
+	(allocate_dynrelocs): Invalid LD relocs don't use tlsld_got entry.
+	(ppc64_elf_relocate_section): Unify new handling of LD relocs and
+	tlsld_got entry.  Use IS_PPC64_TLS_RELOC.
+
+	* elf32-ppc.h: New file.
+	* elf32-ppc.c: Include elf32-ppc.h.
+	(NOP, CROR_151515, CROR_313131, TP_OFFSET, DTP_OFFSET): Define.
+	(struct ppc_elf_link_hash_entry): Rename "root" to "elf".  Adjust uses.
+	Add "tls_mask" field.
+	(TLS_GD, TLS_LD, TLS_TPREL, TLS_DTPREL, TLS_TLS, TLS_TPRELGD): Define.
+	(struct ppc_elf_link_hash_table): Rename "root" to "elf".  Adjust uses.
+	Add got, relgot, plt, relplt, dynbss, relbss, dynsbss, relsbss,
+	sdata, sdata2, tls_sec, tls_get_addr, tlsld_got fields.
+	Make use of htab shortcuts throughout file.
+	(ppc_elf_link_hash_newfunc): Init tls_mask field.
+	(ppc_elf_link_hash_table_create): Init new fields.
+	(ppc_elf_copy_indirect_symbol): Copy tls_mask.
+	(ppc_elf_howto_raw): Add tls relocs.
+	(ppc_elf_reloc_type_lookup): Handle them.
+	(ppc_elf_unhandled_reloc): New function.
+	(ppc_elf_create_got): Stash got section pointer in hash table,
+	return status.  Make .rela.got too.
+	(ppc_elf_create_dynamic_sections): Stash section pointers in htab.
+	(ppc_elf_adjust_dynamic_symbol): Only set up copy relocs when
+	NON_GOT_REF set.  Don't allocate space in .plt here..
+	(allocate_dynrelocs): ..do so here instead, properly ref-counting and
+	not allocating plt entries unnecessarily.  Allocate got entries here.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(ppc_elf_size_dynamic_sections): Allocate local got entries.  Pass
+	"info" during allocate_dynrelocs hash traversal.  Use htab section
+	shortcuts rather than searching for named sections.  Get rid of
+	"plt" and "strip" booleans.
+	(update_local_sym_info, bad_shared_reloc): New functions.
+	(ppc_elf_check_relocs): Handle TLS relocs.  Move .rela.got creation to
+	ppc_elf_create_got.  Don't mark got or plt reloc syms dynamic, do so
+	in allocate_dynreloc.  Use update_local_sym_info and bad_shared_reloc.
+	Disallow R_PPC_EMB_RELSDA, R_PPC_EMB_NADDR32, R_PPC_EMB_NADDR16,
+	R_PPC_EMB_NADDR16_LO, R_PPC_EMB_NADDR16_HI and R_PPC_EMB_NADDR16_HA
+	in shared libs.  R_PPC_PLTREL32 is a plt reloc too.  Refcount all
+	relocs that might use a plt entry.  Set NON_GOT_REF too.
+	Enumerate all do-nothing relocs.
+	(ppc_elf_gc_sweep_hook): Simplify removal of dynrelocs.  Handle
+	tls relocs and all plt relocs.
+	(ppc_elf_tls_setup, ppc_elf_tls_optimize): New functions.
+	(ppc_elf_finish_dynamic_symbol): Don't build got entries here.
+	(ppc_elf_finish_dynamic_sections): Rewrite tag code using htab
+	shortcuts.
+	(ppc_elf_relocate_section): Tidy.  Handle TLS relocs.  Use
+	bfd_elf_local_sym_name.  Simplify unresolved reloc code.  Build got
+	entries and got relocs here.  Warn on non-zero got reloc addend.
+	Split out branch taken/not taken reloc code into a separate switch
+	and correct offset calculation. Allow BRTAKEN/BRNTAKEN dynamic relocs.
+	Split out HA reloc adjustments to separate switch statement.  Don't
+	warn on reloc overflow if we've already warned about undefined.
+	Don't rebuild sym name when reporting errors.  Report all possible
+	errors from _bfd_final_link_relocate.
+	(bfd_elf32_bfd_final_link): Don't define.
+
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Don't init "r".  Don't
+	rebuild sym name when reporting errors.
+
+2003-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.h (elf_link_output_extsym): Only check
+	allow_shlib_undefined for shared libraries.
+	* elf32-i386.c (elf_i386_relocate_section): Remove bogus check
+	of allow_shlib_undefined.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf32-vax.c (elf_vax_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-hppa.c (elf64_hppa_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Likewise.
+
+2003-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (SEGMENT_AFTER_SEGMENT): Add third parameter - the
+	address field to use in the comparison.
+	(SEGMENT_OVERLAPS): Check that LMAs overlap as well.
+
+2003-02-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* elfcore.h (elf_core_file_p): Compare alternate machine codes for ELF
+	backends when checking if the generic ELF target should be used.
+
+	* syms.c (_bfd_stab_section_find_nearest_line): For line number stabs
+	outside of functions, treat values as absolute addresses.
+
+	* bfd.c: Change embedded documentation to use consistent indentation
+	and to split up long lines.  Change informal style of description
+	for functions lacking real documentation.
+	* coffcode.h: Break up long lines in embedded documentation.
+	* format.c: Likewise.
+	* targets.c: Likewise.
+	* libcoff.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2003-02-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_link_hash_table_create): Init tls_get_addr.
+	(ppc64_elf_copy_indirect_symbol): Merge tls_mask too.
+	(ppc64_elf_gc_sweep_hook): Simplify removal of dyn_relocs.
+	(allocate_dynrelocs): Don't treat undefined and undefweak specially.
+	(ppc_size_one_stub): Fix warning, and tighten plt entry check.
+	(group_sections): Don't share a stub section if stubs are for a large
+	section.  Adjust comment.
+	(ppc64_elf_size_stubs): Roughly double the size left for stubs if
+	!stubs_always_before_branch.
+	(ppc64_elf_relocate_section): Initialize tlsld GOT entry once.  Don't
+	treat undefined and undefweak specially when processing dyn relocs.
+
+2003-02-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_add_object_symbols): Handle .symver x, x@FOO.
+
+2003-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.h (elf32_thumb_to_arm_stub): Include section VMAs
+	in computation of offset to insert into BL instruction.
+
+2003-02-11  Uwe Stieber  <uwe@wwws.de>
+
+	* config.bfd: Add support for kaOS as cross build target system.
+
+2003-02-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Match versioned
+	.__tls_get_addr too.
+	(ppc64_elf_tls_setup): Ensure cached tls_get_addr is not indirect.
+
+2003-02-10  Kaz kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (elf_sh_dyn_relocs): Add tls_tpoff32 field.
+	(elf_sh_link_hash_entry): Remove tls_tpoff32 field.
+	(sh_elf_link_hash_newfunc): Remove the initialization of
+	tls_tpoff32 field.
+	(allocate_dynrelocs): Keep dyn_relocs if it includes the entry
+	for which tls_tpoff32 flag is set.
+	(sh_elf_relocate_section): Covert to LE only if the dyn_relocs
+	of the symbol includes the entry matched with the input_section
+	and having tls_tpoff32 flag on.  When linking statically, set
+	symbol index of R_SH_TLS_TPOFF32 relocation to zero if the symbol
+	is defined in this executable.
+	(sh_elf_check_relocs): Set tls_tpoff32 flag appropriately.
+
+2003-02-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-s390.c (elf_s390_size_dynamic_sections): Set relocs to TRUE
+	even if there is just non-empty .rela.plt.
+
+2003-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c (bfd_mach_arm_ep9312): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-arm.c (processors[]): Add ep9312.
+	(bfd_arm_arch): Add ep9312.
+	* elf32-arm.h (elf32_arm_merge_private_data): Update error
+	messages and add test for Maverick floating point support.
+	(elf32_arm_print_private_bfd_data): Handle
+	EF_ARM_MAVERICK_FLOAT flag.
+	(elf32_arm_object_p): New function.
+	(elf_backend_object_p): Define.
+
+2003-02-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Rename assorted occurrences of tls_type and similar
+	variables, structure fields or function params to tls_mask or
+	similar to better reflect usage.
+	(struct got_entry): Comment.
+	(struct ppc_link_hash_entry):  Expand comment, and renumber TLS_*.
+	(get_tls_mask): Rename from get_tls_type.
+
+2003-02-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (TLS_GD_LD): Don't define..
+	(TLS_GD): ..define this instead and update all uses.
+	(TLS_TPRELGD): Define.
+	(ppc64_elf_link_hash_table_create): Tweak initialization of
+	init_refcount and init_offset.
+	(ppc64_elf_check_relocs): Add one extra element to t_symndx array.
+	Mark second slot of GD or LD toc entries.
+	(get_tls_type): Return an int.  Distinguish toc GD and LD entries
+	from other tls types.
+	(ppc64_elf_tls_setup): New function, split out from..
+	(ppc64_elf_tls_optimize): ..here.  Don't optimize when symbols are
+	defined in a dynamic object.  Fix LD optimization.  Don't set TLS_TPREL
+	on GD->IE optimization, use TLS_TPRELGD instead.  Use get_tls_type
+	return value to properly decide whether toc GD and LD entries can
+	optimize away __tls_get_addr call.  Check next reloc after DTPMOD64
+	to determine GD or LD rather than looking at TLS_LD flag.  Don't
+	attempt to adjust got entry tls_type here..
+	(allocate_dynrelocs): ..instead, adjust got entry tls_type here, and
+	look for possible merges.
+	(ppc64_elf_size_dynamic_sections): Adjust local got entries for
+	optimization.
+	(ppc64_elf_size_stubs): Tweak __tls_get_addr fudge.
+	(ppc64_elf_relocate_section): Rename some vars to better reflect usage.
+	Make use of return value from get_tls_type to properly detect GD and
+	LD optimizations.  Split tlsld/gd hi/ha from lo/ds case.  Don't
+	handle tls_get_addr removal when looking at REL24 relocs, do it when
+	looking at the previous reloc.  Check reloc after DTPMOD64 to determine
+	GD or LD.
+	* elf64-ppc.h (ppc64_elf_tls_setup): Declare.
+
+2003-02-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (group_sections): Don't share a stub section if
+	stubs are for a large section.
+
+	* elf32-hppa.c (elf32_hppa_size_stubs): Double the size left for
+	stubs if !stubs_always_before_branch.
+
+2003-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (swap_out_syms): Generate an error message if an
+	equivalent output section cannot be found for a symbol.
+
+2003-02-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_section): Don't crash if
+	local_got_entries is NULL.
+
+2003-02-06  Andreas Schwab  <schwab@suse.de>
+
+	* elf-eh-frame.c (get_DW_EH_PE_signed): Define.
+	(read_value): Add parameter is_signed, use signed extraction if
+	the value is signed.
+	(_bfd_elf_write_section_eh_frame): Pass signed flag of the
+	encoding to read_value.
+
+2003-02-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't copy got and
+	plt info when called to transfer weak sym info.
+
+2003-02-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c: Add PPC and PPC64 TLS relocs.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* elf64-ppc.c (TP_OFFSET, DTP_OFFSET): Declare.
+	(ppc64_elf_howto_raw): Add TLS howto's.  Adjust R_PPC64_NONE to be
+	against a 32 bit field.
+	(ppc64_elf_reloc_type_lookup): Handle TLS relocs.
+	(_ppc64_elf_section_data): Add t_symndx and comments.
+	(ppc64_elf_section_data): Use elf_section_data macro.
+	(ppc64_elf_new_section_hook): American spelling.
+	(struct got_entry, struct plt_entry): New.
+	(MUST_BE_DYN_RELOC): Rename from IS_ABSOLUTE_RELOC.
+	(struct ppc_stub_hash_entry): Add "addend" field.
+	(struct ppc_link_hash_entry): Add "tls_type".
+	(TLS_TLS, TLS_GD_LD, TLS_LD, TLS_TPREL, TLS_DTPREL,
+	TLS_EXPLICIT): Define.
+	(struct ppc_link_hash_table): Add tls_sec, tls_get_addr, tlsld_got.
+	(link_hash_newfunc): Init new fields.
+	(ppc64_elf_link_hash_table_create): Likewise.  Set init_refcount and
+	init_offset to NULL.
+	(ppc64_elf_copy_indirect_symbol): Copy got and plt info.  Don't call
+	_bfd_elf_link_hash_copy_indirect, rather insert relevant code from
+	there.
+	(update_local_sym_info, update_plt_info): New functions.
+	(ppc64_elf_check_relocs): Use them.  Handle TLS relocs.  Adjust GOT
+	handling to use got.glist rather than got.refcount.  Likewise for PLT.
+	(ppc64_elf_gc_sweep_hook): Handle TLS relocs, new GOT and PLT lists.
+	(func_desc_adjust): Adjust for new PLT list.
+	(ppc64_elf_adjust_dynamic_symbol): Likewise.
+	(get_sym_h, get_tls_type): New functions.
+	(ppc64_elf_edit_opd): Remove unused variable.  Use get_sym_h.
+	(ppc64_elf_tls_optimize): New function.
+	(allocate_dynrelocs): Adjust for new PLT and GOT lists.  Allocate
+	TLS relocs.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc_type_of_stub): Adjust for new PLT list.
+	(ppc_build_one_stub): Likewise.
+	(ppc64_elf_size_stubs): Likewise.  Use get_sym_h.  Treat __tls_get_addr
+	calls specially.
+	(ppc64_elf_relocate_section): Adjust for new GOT and PLT lists.  Handle
+	TLS relocs.  Report local syms using bfd_elf_local_sym_name.  Don't
+	init GOT entries that have a reloc.  Generate GOT relocs here..
+	(ppc64_elf_finish_dynamic_symbol): ..not here.  Adjust for PLT list.
+	* elf64-ppc.h (ppc64_elf_tls_optimize): Declare.
+
+2003-02-04  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_hash_entry): Define.
+	(elf_m68k_link_hash_traverse): Remove.
+	(elf_m68k_link_hash_newfunc): Use struct bfd_hash_entry and
+	elf_m68k_hash_entry instead of struct elf_m68k_link_hash_entry to
+	reduce casting.
+	(elf_m68k_check_relocs): Use elf_m68k_hash_entry instead of
+	casting.
+	(elf_m68k_size_dynamic_sections): Use elf_link_hash_traverse
+	instead of elf_m68k_link_hash_traverse.
+	(elf_m68k_discard_copies): Change first parameter to pointer to
+	struct elf_link_hash_entry and use elf_m68k_hash_entry when struct
+	elf_m68k_link_hash_entry is needed.
+
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct got_entry, struct plt_entry): Forward declare.
+	(struct elf_link_hash_entry): Add "glist" and "plist" fields to
+	"got" union, and declare as gotplt_union.  Use gotplt_uinion for
+	"plt" field.
+	(struct elf_link_hash_table): Make "init_refcount" a gotplt_union.
+	Add "init_offset" field.
+	(struct elf_obj_tdata <local_got>): Add "struct got_entry **" to union.
+	(elf_local_got_ents): Declare.
+	* elf.c (_bfd_elf_link_hash_newfunc): Adjust initialization of "got"
+	and "plt".
+	(_bfd_elf_link_hash_hide_symbol): Use "init_offset".
+	(_bfd_elf_link_hash_table_init): Set "init_offset".
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set init_refcount
+	from init_offset.
+	(elf_adjust_dynamic_symbol): Set plt and got offsets using init_offset.
+
+	* elf.c (bfd_elf_local_sym_name): Split out from..
+	(group_signature): ..here.
+	* elf-bfd.h (bfd_elf_local_sym_name): Declare.
+
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (enum elf_link_info_type): Remove.
+	(struct bfd_elf_section_data): Move sec_info_type, use_rela_p fields
+	to struct sec.  Remove linkonce_p field.
+	(elf_linkonce_p): Delete.
+	(elf_discarded_section): Update for sec_info_type change.
+	* section.c (struct sec): Add sec_info_type, use_rela_p, has_tls_reloc,
+	flag11, flag12, flag13, flag14, flag15, flag16, flag20, flag24.
+	(ELF_INFO_TYPE_NONE): Define.
+	(ELF_INFO_TYPE_STABS): Define.
+	(ELF_INFO_TYPE_MERGE): Define.
+	(ELF_INFO_TYPE_EH_FRAME): Define.
+	(ELF_INFO_TYPE_JUST_SYMS): Define.
+	(STD_SECTION): Update struct sec initializer.
+	* ecoff.c (bfd_debug_section): Likewise.
+	* elf.c: Likewise.  Update occurrences of sec_info_type and use_rela_p.
+	* elflink.h: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-sparc.c (sec_do_relax): Use elf_section_data macro rather than
+	referring to used_by_bfd.
+	* elf64-sparc.c (sec_do_relax): Likewise.
+	* elf64-mmix.c (mmix_elf_section_data): Likewise.
+	* elfxx-mips.c (mips_elf_section_data): Likewise.
+	* ieee.c (ieee_slurp_section_data): Use ieee_per_section macro.
+	(ieee_get_section_contents): Likewise.
+	(ieee_new_section_hook): Formatting.
+	(ieee_canonicalize_reloc): Remove commented out code.
+	* mmo.c (mmo_section_data): Define.  Use throughout file.
+	* oasys.c (oasys_get_section_contents): Use oasys_per_section macro.
+
 2003-01-31  Graydon Hoare <graydon@redhat.com>
 
 	* Makefile.am (opncls.lo): Add dependency upon libiberty.h.
@@ -263,7 +773,7 @@
 	* elf64-alpha.c (alpha_dynamic_entries_for_reloc): GOTTPREL and
 	TPREL also get a reloc if shared.  Remove SREL support.
 	(elf64_alpha_emit_dynrel): New.
-	(elf64_alpha_relocate_section): Use it.  Resolve dynamic TPREL 
+	(elf64_alpha_relocate_section): Use it.  Resolve dynamic TPREL
 	and GOTTPREL relocs to local symbols against the tp base.
 	(elf64_alpha_finish_dynamic_symbol): Use elf64_alpha_emit_dynrel.
 
@@ -275,15 +785,15 @@
 2003-01-20  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* coffcode.h (coff_set_flags): Added get/set arch hooks.
-	
+
 2003-01-20  Fabio Alemagna  <falemagn@aros.org>
 
 	* elf32-sh.c: Treat elfNN_bed like other macros defined in
 	  elfxx-target.h and #undef it before #define'ing it.
 	* elf32-i386.c: Likewise.
-        * elf32-sh64.c: Likewise.
-        * elf64-alpha.c: Likewise.
-        * elf64-sh64.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-sh64.c: Likewise.
 
 2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
@@ -361,7 +871,7 @@
 	* Makefile.am (ALL_MACHINES): Use cpu-msp430.lo, not cpu-msp430.c.
 	(BFD32_BACKENDS): Use elf32-msp430.lo, not elf32-msp430.c.
 	* Makefile.in: Regenerate.
-	
+
 2003-01-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfn32-mips.c (prev_reloc_section): New.
@@ -398,7 +908,7 @@
 	(bfd_archures_list): Add bfd_iq2000_arch.
 	* configure.in: Handle bfd_elf32_iq2000_vec.
 	* configure: Regenerate.
-	* reloc.c: Add BFD_RELOC_IQ2000_OFFSET_16, BFD_RELOC_IQ2000_OFFSET_21, 
+	* reloc.c: Add BFD_RELOC_IQ2000_OFFSET_16, BFD_RELOC_IQ2000_OFFSET_21,
 	and BFD_RELOC_IQ2000_UHI16.
 	* targets.c (bfd_elf32_iq2000_vec): Declare.
 	(bfd_target_vector): Add bfd_elf32_iq2000_vec.
@@ -488,7 +998,7 @@
 	* archures.c (bfd_arch_get_compatible): Add third parameter
 	'accept_unknowns'.  Only accept unknown format BFDs if
 	accept_unknowns is true, or if the format is "binary".
-        * bfd-in2.h: Regenerate.
+	* bfd-in2.h: Regenerate.
 
 2002-12-21  Nick Clifton  <nickc@redhat.com>
 
@@ -514,7 +1024,7 @@
 	* bfd-in2.h: Regenerate.
 	* elf32-xstormy16.c (xstormy16_elf_howto): Add R_XSTORMY16_12.
 	(xstormy16_reloc_map): Add R_XSTORMY16_12.
-	
+
 2002-12-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* doc/bfdint.texi: Fix typos.

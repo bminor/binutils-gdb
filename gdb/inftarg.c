@@ -36,6 +36,7 @@
 #include <fcntl.h>
 
 #include "gdb_wait.h"
+#include "inflow.h"
 
 extern struct symtab_and_line *child_enable_exception_callback (enum
 								exception_event_kind,
@@ -512,8 +513,6 @@ child_can_run (void)
 static void
 child_stop (void)
 {
-  extern pid_t inferior_process_group;
-
   kill (-inferior_process_group, SIGINT);
 }
 

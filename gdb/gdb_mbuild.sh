@@ -85,7 +85,8 @@ do
 	;;
     -f )
 	# Force a rebuild
-	force=true ; shift ;;
+	force=true ;
+	;;
     -v )
 	# Be more, and more, and more, verbose
 	verbose=`expr ${verbose} + 1`

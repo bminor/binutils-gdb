@@ -6,9 +6,10 @@
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -75,7 +76,7 @@ extern "C" {
 #endif
 
 /* Forward declaration.  */
-typedef struct _bfd bfd;
+typedef struct bfd bfd;
 
 /* Boolean type used in bfd.  Too many systems define their own
    versions of "boolean" for us to safely typedef a "boolean" of
@@ -1261,9 +1262,34 @@ typedef struct sec
   /* A mark flag used by some linker backends for garbage collection.  */
   unsigned int gc_mark : 1;
 
-  /* Used by the ELF code to mark sections which have been allocated
-     to segments.  */
+  /* The following flags are used by the ELF linker. */
+
+  /* Mark sections which have been allocated to segments.  */
   unsigned int segment_mark : 1;
+
+  /* Type of sec_info information.  */
+  unsigned int sec_info_type:3;
+#define ELF_INFO_TYPE_NONE      0
+#define ELF_INFO_TYPE_STABS     1
+#define ELF_INFO_TYPE_MERGE     2
+#define ELF_INFO_TYPE_EH_FRAME  3
+#define ELF_INFO_TYPE_JUST_SYMS 4
+
+  /* Nonzero if this section uses RELA relocations, rather than REL.  */
+  unsigned int use_rela_p:1;
+
+  /* Bits used by various backends.  */
+  unsigned int has_tls_reloc:1;
+
+  /* Usused bits.  */
+  unsigned int flag11:1;
+  unsigned int flag12:1;
+  unsigned int flag13:1;
+  unsigned int flag14:1;
+  unsigned int flag15:1;
+  unsigned int flag16:4;
+  unsigned int flag20:4;
+  unsigned int flag24:8;
 
   /* End of internal packed boolean fields.  */
 
@@ -1664,6 +1690,7 @@ enum bfd_architecture
 #define bfd_mach_arm_5T        8
 #define bfd_mach_arm_5TE       9
 #define bfd_mach_arm_XScale    10
+#define bfd_mach_arm_ep9312    11
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
@@ -2304,6 +2331,9 @@ to compensate for the borrow when the low bits are added.  */
 /* Like BFD_RELOC_LO16, but PC relative.  */
   BFD_RELOC_PCREL_LO16,
 
+/* Like BFD_RELOC_16_PCREL_S2, but for MIPS Embedded PIC.  */
+  BFD_RELOC_MIPSEMB_16_PCREL_S2,
+
 /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
 
@@ -2462,6 +2492,48 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_PPC64_TOC16_LO_DS,
   BFD_RELOC_PPC64_PLTGOT16_DS,
   BFD_RELOC_PPC64_PLTGOT16_LO_DS,
+
+/* PowerPC and PowerPC64 thread-local storage relocations.  */
+  BFD_RELOC_PPC_TLS,
+  BFD_RELOC_PPC_DTPMOD,
+  BFD_RELOC_PPC_TPREL16,
+  BFD_RELOC_PPC_TPREL16_LO,
+  BFD_RELOC_PPC_TPREL16_HI,
+  BFD_RELOC_PPC_TPREL16_HA,
+  BFD_RELOC_PPC_TPREL,
+  BFD_RELOC_PPC_DTPREL16,
+  BFD_RELOC_PPC_DTPREL16_LO,
+  BFD_RELOC_PPC_DTPREL16_HI,
+  BFD_RELOC_PPC_DTPREL16_HA,
+  BFD_RELOC_PPC_DTPREL,
+  BFD_RELOC_PPC_GOT_TLSGD16,
+  BFD_RELOC_PPC_GOT_TLSGD16_LO,
+  BFD_RELOC_PPC_GOT_TLSGD16_HI,
+  BFD_RELOC_PPC_GOT_TLSGD16_HA,
+  BFD_RELOC_PPC_GOT_TLSLD16,
+  BFD_RELOC_PPC_GOT_TLSLD16_LO,
+  BFD_RELOC_PPC_GOT_TLSLD16_HI,
+  BFD_RELOC_PPC_GOT_TLSLD16_HA,
+  BFD_RELOC_PPC_GOT_TPREL16,
+  BFD_RELOC_PPC_GOT_TPREL16_LO,
+  BFD_RELOC_PPC_GOT_TPREL16_HI,
+  BFD_RELOC_PPC_GOT_TPREL16_HA,
+  BFD_RELOC_PPC_GOT_DTPREL16,
+  BFD_RELOC_PPC_GOT_DTPREL16_LO,
+  BFD_RELOC_PPC_GOT_DTPREL16_HI,
+  BFD_RELOC_PPC_GOT_DTPREL16_HA,
+  BFD_RELOC_PPC64_TPREL16_DS,
+  BFD_RELOC_PPC64_TPREL16_LO_DS,
+  BFD_RELOC_PPC64_TPREL16_HIGHER,
+  BFD_RELOC_PPC64_TPREL16_HIGHERA,
+  BFD_RELOC_PPC64_TPREL16_HIGHEST,
+  BFD_RELOC_PPC64_TPREL16_HIGHESTA,
+  BFD_RELOC_PPC64_DTPREL16_DS,
+  BFD_RELOC_PPC64_DTPREL16_LO_DS,
+  BFD_RELOC_PPC64_DTPREL16_HIGHER,
+  BFD_RELOC_PPC64_DTPREL16_HIGHERA,
+  BFD_RELOC_PPC64_DTPREL16_HIGHEST,
+  BFD_RELOC_PPC64_DTPREL16_HIGHESTA,
 
 /* IBM 370/390 relocations  */
   BFD_RELOC_I370_D12,
@@ -3376,7 +3448,7 @@ typedef struct symbol_cache_entry
      instead, except that some symbols point to the global sections
      bfd_{abs,com,und}_section.  This could be fixed by making
      these globals be per-bfd (or per-target-flavor).  FIXME.  */
-  struct _bfd *the_bfd; /* Use bfd_asymbol_bfd(sym) to access this field.  */
+  struct bfd *the_bfd; /* Use bfd_asymbol_bfd(sym) to access this field.  */
 
   /* The text of the symbol. The name is left alone, and not copied; the
      application may not alter it.  */
@@ -3537,7 +3609,7 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
                (ibfd, isymbol, obfd, osymbol))
 
 /* Extracted from bfd.c.  */
-struct _bfd
+struct bfd
 {
   /* A unique identifier of the BFD  */
   unsigned int id;
@@ -3568,7 +3640,7 @@ struct _bfd
 
   /* The caching routines use these to maintain a
      least-recently-used list of BFDs.  */
-  struct _bfd *lru_prev, *lru_next;
+  struct bfd *lru_prev, *lru_next;
 
   /* When a file is closed by the caching routines, BFD retains
      state information on the file here...  */
@@ -3642,13 +3714,13 @@ struct _bfd
 
   /* Stuff only useful for archives.  */
   PTR arelt_data;
-  struct _bfd *my_archive;     /* The containing archive BFD.  */
-  struct _bfd *next;           /* The next BFD in the archive.  */
-  struct _bfd *archive_head;   /* The first BFD in the archive.  */
+  struct bfd *my_archive;      /* The containing archive BFD.  */
+  struct bfd *next;            /* The next BFD in the archive.  */
+  struct bfd *archive_head;    /* The first BFD in the archive.  */
   bfd_boolean has_armap;
 
   /* A chain of BFD structures involved in a link.  */
-  struct _bfd *link_next;
+  struct bfd *link_next;
 
   /* A field used by _bfd_generic_link_add_archive_symbols.  This will
      be used only for archive elements.  */
@@ -3804,33 +3876,31 @@ bfd_boolean
 bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define bfd_set_private_flags(abfd, flags) \
-     BFD_SEND (abfd, _bfd_set_private_flags, \
-               (abfd, flags))
+     BFD_SEND (abfd, _bfd_set_private_flags, (abfd, flags))
 #define bfd_sizeof_headers(abfd, reloc) \
-     BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
+       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
 #define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
-     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
+       BFD_SEND (abfd, _bfd_find_nearest_line, \
+                 (abfd, sec, syms, off, file, func, line))
 
-       /* Do these three do anything useful at all, for any back end?  */
 #define bfd_debug_info_start(abfd) \
-        BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
+       BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 
 #define bfd_debug_info_end(abfd) \
-        BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
+       BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
 
 #define bfd_debug_info_accumulate(abfd, section) \
-        BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
-
+       BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 
 #define bfd_stat_arch_elt(abfd, stat) \
-        BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+       BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 
 #define bfd_update_armap_timestamp(abfd) \
-        BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
+       BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
 
 #define bfd_set_arch_mach(abfd, arch, mach)\
-        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+       BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
 #define bfd_relax_section(abfd, section, link_info, again) \
        BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
@@ -4289,14 +4359,17 @@ const char **
 bfd_target_list PARAMS ((void));
 
 const bfd_target *
-bfd_search_for_target PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
+bfd_search_for_target PARAMS ((int (* search_func)
+       (const bfd_target *, void *),
+    void *));
 
 /* Extracted from format.c.  */
 bfd_boolean
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 
 bfd_boolean
-bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format, char ***matching));
+bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format,
+    char ***matching));
 
 bfd_boolean
 bfd_set_format PARAMS ((bfd *abfd, bfd_format format));

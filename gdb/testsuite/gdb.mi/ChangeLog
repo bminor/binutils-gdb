@@ -1,3 +1,7 @@
+2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* mi-syn-frame.exp: Don't run this test when gdb,nosignals is set.
+
 2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-basics.exp: Change tests for -environment-directory.  Also add

@@ -62,7 +62,7 @@ extern struct gdbarch *current_gdbarch;
 
 #if GDB_MULTI_ARCH
 #if defined (FRAME_FIND_SAVED_REGS)
-#error "FRAME_FIND_SAVED_REGS: replaced by FRAME_INIT_SAVED_REGS"
+#error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
 #endif
 
@@ -721,6 +721,11 @@ extern void set_gdbarch_register_byte (struct gdbarch *gdbarch, gdbarch_register
 #endif
 #endif
 
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
 #define REGISTER_RAW_SIZE(reg_nr) (generic_register_size (reg_nr))
@@ -738,16 +743,51 @@ extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_regi
 #endif
 #endif
 
-extern int gdbarch_max_register_raw_size (struct gdbarch *gdbarch);
-extern void set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch, int max_register_raw_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (MAX_REGISTER_RAW_SIZE)
-#error "Non multi-arch definition of MAX_REGISTER_RAW_SIZE"
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
+
+#if defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_RAW_SIZE */
+#if !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_raw_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_RAW_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE_P() (gdbarch_deprecated_max_register_raw_size_p (current_gdbarch))
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch, int deprecated_max_register_raw_size);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_RAW_SIZE"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_RAW_SIZE)
-#define MAX_REGISTER_RAW_SIZE (gdbarch_max_register_raw_size (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE (gdbarch_deprecated_max_register_raw_size (current_gdbarch))
 #endif
 #endif
+
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
@@ -766,15 +806,75 @@ extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-extern int gdbarch_max_register_virtual_size (struct gdbarch *gdbarch);
-extern void set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch, int max_register_virtual_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (MAX_REGISTER_VIRTUAL_SIZE)
-#error "Non multi-arch definition of MAX_REGISTER_VIRTUAL_SIZE"
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
+
+#if defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE */
+#if !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_virtual_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_max_register_virtual_size_p (current_gdbarch))
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch, int deprecated_max_register_virtual_size);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_VIRTUAL_SIZE)
-#define MAX_REGISTER_VIRTUAL_SIZE (gdbarch_max_register_virtual_size (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE (gdbarch_deprecated_max_register_virtual_size (current_gdbarch))
 #endif
+#endif
+
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE have all being replaced
+   by REGISTER_TYPE. */
+
+#if defined (REGISTER_VIRTUAL_TYPE)
+/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_TYPE */
+#if !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (0)
+#endif
+
+extern int gdbarch_register_virtual_type_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE_P)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (gdbarch_register_virtual_type_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE)
+#define REGISTER_VIRTUAL_TYPE(reg_nr) (internal_error (__FILE__, __LINE__, "REGISTER_VIRTUAL_TYPE"), 0)
 #endif
 
 typedef struct type * (gdbarch_register_virtual_type_ftype) (int reg_nr);
@@ -788,6 +888,12 @@ extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_
 #define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_register_virtual_type (current_gdbarch, reg_nr))
 #endif
 #endif
+
+extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
+
+typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
+extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
 #if defined (DEPRECATED_DO_REGISTERS_INFO)
 /* Legacy for systems yet to multi-arch DEPRECATED_DO_REGISTERS_INFO */
@@ -1526,15 +1632,41 @@ extern void set_gdbarch_push_arguments (struct gdbarch *gdbarch, gdbarch_push_ar
 #endif
 #endif
 
-typedef void (gdbarch_push_dummy_frame_ftype) (void);
-extern void gdbarch_push_dummy_frame (struct gdbarch *gdbarch);
-extern void set_gdbarch_push_dummy_frame (struct gdbarch *gdbarch, gdbarch_push_dummy_frame_ftype *push_dummy_frame);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PUSH_DUMMY_FRAME)
-#error "Non multi-arch definition of PUSH_DUMMY_FRAME"
+#if defined (DEPRECATED_PUSH_DUMMY_FRAME)
+/* Legacy for systems yet to multi-arch DEPRECATED_PUSH_DUMMY_FRAME */
+#if !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#define DEPRECATED_PUSH_DUMMY_FRAME_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#define DEPRECATED_PUSH_DUMMY_FRAME_P() (0)
+#endif
+
+extern int gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#error "Non multi-arch definition of DEPRECATED_PUSH_DUMMY_FRAME"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
+#define DEPRECATED_PUSH_DUMMY_FRAME_P() (gdbarch_deprecated_push_dummy_frame_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PUSH_DUMMY_FRAME)
+#define DEPRECATED_PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "DEPRECATED_PUSH_DUMMY_FRAME"), 0)
+#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
+#endif
+
+typedef void (gdbarch_deprecated_push_dummy_frame_ftype) (void);
+extern void gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch, gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_DUMMY_FRAME)
+#error "Non multi-arch definition of DEPRECATED_PUSH_DUMMY_FRAME"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PUSH_DUMMY_FRAME)
-#define PUSH_DUMMY_FRAME (gdbarch_push_dummy_frame (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_DUMMY_FRAME)
+#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
 #endif
 #endif
 
@@ -1774,77 +1906,77 @@ extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-#if defined (FRAME_INIT_SAVED_REGS)
-/* Legacy for systems yet to multi-arch FRAME_INIT_SAVED_REGS */
-#if !defined (FRAME_INIT_SAVED_REGS_P)
-#define FRAME_INIT_SAVED_REGS_P() (1)
+#if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_INIT_SAVED_REGS */
+#if !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS_P)
-#define FRAME_INIT_SAVED_REGS_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (0)
 #endif
 
-extern int gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_INIT_SAVED_REGS_P)
-#error "Non multi-arch definition of FRAME_INIT_SAVED_REGS"
+extern int gdbarch_deprecated_frame_init_saved_regs_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS_P)
-#define FRAME_INIT_SAVED_REGS_P() (gdbarch_frame_init_saved_regs_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (gdbarch_deprecated_frame_init_saved_regs_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS)
-#define FRAME_INIT_SAVED_REGS(frame) (internal_error (__FILE__, __LINE__, "FRAME_INIT_SAVED_REGS"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(frame) (internal_error (__FILE__, __LINE__, "DEPRECATED_FRAME_INIT_SAVED_REGS"), 0)
 #endif
 
-typedef void (gdbarch_frame_init_saved_regs_ftype) (struct frame_info *frame);
-extern void gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame);
-extern void set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_INIT_SAVED_REGS)
-#error "Non multi-arch definition of FRAME_INIT_SAVED_REGS"
+typedef void (gdbarch_deprecated_frame_init_saved_regs_ftype) (struct frame_info *frame);
+extern void gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame);
+extern void set_gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+#error "Non multi-arch definition of DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS)
-#define FRAME_INIT_SAVED_REGS(frame) (gdbarch_frame_init_saved_regs (current_gdbarch, frame))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(frame) (gdbarch_deprecated_frame_init_saved_regs (current_gdbarch, frame))
 #endif
 #endif
 
-#if defined (INIT_EXTRA_FRAME_INFO)
-/* Legacy for systems yet to multi-arch INIT_EXTRA_FRAME_INFO */
-#if !defined (INIT_EXTRA_FRAME_INFO_P)
-#define INIT_EXTRA_FRAME_INFO_P() (1)
+#if defined (DEPRECATED_INIT_EXTRA_FRAME_INFO)
+/* Legacy for systems yet to multi-arch DEPRECATED_INIT_EXTRA_FRAME_INFO */
+#if !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (INIT_EXTRA_FRAME_INFO_P)
-#define INIT_EXTRA_FRAME_INFO_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO_P() (0)
 #endif
 
-extern int gdbarch_init_extra_frame_info_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INIT_EXTRA_FRAME_INFO_P)
-#error "Non multi-arch definition of INIT_EXTRA_FRAME_INFO"
+extern int gdbarch_deprecated_init_extra_frame_info_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
+#error "Non multi-arch definition of DEPRECATED_INIT_EXTRA_FRAME_INFO"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INIT_EXTRA_FRAME_INFO_P)
-#define INIT_EXTRA_FRAME_INFO_P() (gdbarch_init_extra_frame_info_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO_P)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO_P() (gdbarch_deprecated_init_extra_frame_info_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (INIT_EXTRA_FRAME_INFO)
-#define INIT_EXTRA_FRAME_INFO(fromleaf, frame) (internal_error (__FILE__, __LINE__, "INIT_EXTRA_FRAME_INFO"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame) (internal_error (__FILE__, __LINE__, "DEPRECATED_INIT_EXTRA_FRAME_INFO"), 0)
 #endif
 
-typedef void (gdbarch_init_extra_frame_info_ftype) (int fromleaf, struct frame_info *frame);
-extern void gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame);
-extern void set_gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, gdbarch_init_extra_frame_info_ftype *init_extra_frame_info);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INIT_EXTRA_FRAME_INFO)
-#error "Non multi-arch definition of INIT_EXTRA_FRAME_INFO"
+typedef void (gdbarch_deprecated_init_extra_frame_info_ftype) (int fromleaf, struct frame_info *frame);
+extern void gdbarch_deprecated_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame);
+extern void set_gdbarch_deprecated_init_extra_frame_info (struct gdbarch *gdbarch, gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_EXTRA_FRAME_INFO)
+#error "Non multi-arch definition of DEPRECATED_INIT_EXTRA_FRAME_INFO"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INIT_EXTRA_FRAME_INFO)
-#define INIT_EXTRA_FRAME_INFO(fromleaf, frame) (gdbarch_init_extra_frame_info (current_gdbarch, fromleaf, frame))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_EXTRA_FRAME_INFO)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame) (gdbarch_deprecated_init_extra_frame_info (current_gdbarch, fromleaf, frame))
 #endif
 #endif
 

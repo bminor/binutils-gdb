@@ -814,46 +814,13 @@ gdbsim_mourn_inferior (void)
 static int
 gdbsim_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
-#ifdef SIM_HAS_BREAKPOINTS
-  SIM_RC retcode;
-
-  retcode = sim_set_breakpoint (gdbsim_desc, addr);
-
-  switch (retcode)
-    {
-    case SIM_RC_OK:
-      return 0;
-    case SIM_RC_INSUFFICIENT_RESOURCES:
-      return ENOMEM;
-    default:
-      return EIO;
-    }
-#else
   return memory_insert_breakpoint (addr, contents_cache);
-#endif
 }
 
 static int
 gdbsim_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
-#ifdef SIM_HAS_BREAKPOINTS
-  SIM_RC retcode;
-
-  retcode = sim_clear_breakpoint (gdbsim_desc, addr);
-
-  switch (retcode)
-    {
-    case SIM_RC_OK:
-    case SIM_RC_UNKNOWN_BREAKPOINT:
-      return 0;
-    case SIM_RC_INSUFFICIENT_RESOURCES:
-      return ENOMEM;
-    default:
-      return EIO;
-    }
-#else
   return memory_remove_breakpoint (addr, contents_cache);
-#endif
 }
 
 /* Pass the command argument through to the simulator verbatim.  The

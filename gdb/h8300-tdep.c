@@ -485,8 +485,8 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -1108,9 +1108,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, E_NUM_REGS * BINWORD);
   set_gdbarch_register_byte (gdbarch, h8300_register_byte);
   set_gdbarch_register_raw_size (gdbarch, h8300_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, h8300h_reg_size);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, h8300h_reg_size);
   set_gdbarch_register_virtual_size (gdbarch, h8300_register_raw_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, h8300h_reg_size);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, h8300h_reg_size);
   set_gdbarch_register_virtual_type (gdbarch, h8300_register_virtual_type);
   set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
   set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
@@ -1118,8 +1118,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /*
    * Frame Info
    */
-  set_gdbarch_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
-  set_gdbarch_frame_init_saved_regs (gdbarch, h8300_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, h8300_frame_init_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, h8300_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
@@ -1148,7 +1148,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, h8300_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, h8300_push_arguments);

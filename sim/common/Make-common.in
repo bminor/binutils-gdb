@@ -161,7 +161,6 @@ SIM_COMMON_HW_OBJS = \
 SIM_NEW_COMMON_OBJS = \
 	sim-arange.o \
 	sim-bits.o \
-	sim-break.o \
 	sim-config.o \
 	sim-core.o \
 	sim-endian.o \
@@ -335,7 +334,6 @@ sim-events_h = $(srccom)/sim-events.h
 sim-fpu_h = $(srccom)/sim-fpu.h
 sim-io_h = $(srccom)/sim-io.h
 sim-options_h = $(srccom)/sim-options.h
-sim-break_h = $(srccom)/sim-break.h
 sim-signal_h = $(srccom)/sim-signal.h
 
 hw-alloc_h = $(srccom)/hw-alloc.h
@@ -476,10 +474,6 @@ sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
 
 sim-load.o: $(srccom)/sim-load.c $(callback_h)
 	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
-
-sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
-	  $(sim_break_h)
-	$(CC) -c $(srccom)/sim-break.c $(ALL_CFLAGS)
 
 
 # FIXME This is one very simple-minded way of generating the file hw-config.h

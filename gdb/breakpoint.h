@@ -28,6 +28,7 @@
 #include "gdb-events.h"
 
 struct value;
+struct block;
 
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size
@@ -203,10 +204,10 @@ struct breakpoint
     /* Number assigned to distinguish breakpoints.  */
     int number;
 
-    /* Address to break at.
-       Note that zero is a perfectly valid code address on some
-       platforms (for example, the mn10200 and mn10300 simulators).
-       NULL is not a special value for this field.  */
+    /* Address to break at.  Note that zero is a perfectly valid code
+       address on some platforms (for example, the OBSOLETE mn10200
+       and mn10300 simulators).  NULL is not a special value for this
+       field.  */
     CORE_ADDR address;
 
     /* Line number of this address.  */

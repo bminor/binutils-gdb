@@ -753,6 +753,7 @@ init_pointers (void)
 		}
 	      p++;
 	    }
+	  wreg[i] = wreg[i + 8] = 0;
 	  while (q < u)
 	    {
 	      if (*q == 0x2233)
@@ -765,6 +766,8 @@ init_pointers (void)
 		}
 	      q++;
 	    }
+	  if (wreg[i] == 0 || wreg[i + 8] == 0)
+	    abort ();
 	  cpu.regs[i] = 0;
 	  lreg[i] = &cpu.regs[i];
 	}
@@ -1606,7 +1609,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    goto next;
 	  }
 	case O (O_EXTS, SW):
-	  rd = GET_B_REG (code->src.reg + 8) & 0xff; /* Yes, src, not dst.  */
+	  rd = GET_W_REG (code->src.reg) & 0xff; /* Yes, src, not dst.  */
 	  ea = rd & 0x80 ? -256 : 0;
 	  res = rd + ea;
 	  goto log16;
@@ -1616,7 +1619,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  res = rd + ea;
 	  goto log32;
 	case O (O_EXTU, SW):
-	  rd = GET_B_REG (code->src.reg + 8) & 0xff;
+	  rd = GET_W_REG (code->src.reg) & 0xff;
 	  ea = 0;
 	  res = rd + ea;
 	  goto log16;
@@ -2122,7 +2125,7 @@ set_h8300h (int h_flag, int s_flag)
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, 
 	  struct host_callback_struct *ptr, 
-	  struct _bfd *abfd, 
+	  struct bfd *abfd, 
 	  char **argv)
 {
   /* FIXME: Much of the code in sim_load can be moved here.  */
@@ -2225,7 +2228,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct _bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
   if (abfd != NULL)
     cpu.pc = bfd_get_start_address (abfd);

@@ -32,6 +32,7 @@
 #include "completer.h"
 #include "cp-abi.h"
 #include "parser-defs.h"
+#include "block.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
@@ -53,6 +54,18 @@ static struct symtabs_and_lines decode_compound (char **argptr,
 						 char ***canonical,
 						 char *saved_arg,
 						 char *p);
+
+static struct symbol *lookup_prefix_sym (char **argptr, char *p);
+
+static struct symtabs_and_lines find_method (int funfirstline,
+					     char ***canonical,
+					     char *saved_arg,
+					     char *copy,
+					     struct type *t,
+					     struct symbol *sym_class);
+
+static int collect_methods (char *copy, struct type *t,
+			    struct symbol **sym_arr);
 
 static NORETURN void cplusplus_error (const char *name,
 				      const char *fmt, ...)
@@ -427,7 +440,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
 	  printf_unfiltered ("[%d] %s at %s:%d\n",
 			     (i + 2),
-			     SYMBOL_SOURCE_NAME (sym_arr[i]),
+			     SYMBOL_PRINT_NAME (sym_arr[i]),
 			     values.sals[i].symtab->filename,
 			     values.sals[i].line);
 	}
@@ -436,7 +449,8 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
       i++;
     }
 
-  if ((prompt = getenv ("PS2")) == NULL)
+  prompt = getenv ("PS2");
+  if (prompt == NULL)
     {
       prompt = "> ";
     }
@@ -468,7 +482,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 		{
 		  if (canonical_arr[i] == NULL)
 		    {
-		      symname = SYMBOL_NAME (sym_arr[i]);
+		      symname = DEPRECATED_SYMBOL_NAME (sym_arr[i]);
 		      canonical_arr[i] = savestring (symname, strlen (symname));
 		    }
 		}
@@ -491,7 +505,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 	    {
 	      if (canonical_arr)
 		{
-		  symname = SYMBOL_NAME (sym_arr[num]);
+		  symname = DEPRECATED_SYMBOL_NAME (sym_arr[num]);
 		  make_cleanup (xfree, symname);
 		  canonical_arr[i] = savestring (symname, strlen (symname));
 		}
@@ -930,7 +944,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 		 char *saved_arg, char *p)
 {
   struct symtabs_and_lines values;
-  char *p1, *p2;
+  char *p2;
 #if 0
   char *q, *q1;
 #endif
@@ -941,7 +955,6 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   struct symtab *sym_symtab;
   char *copy;
   struct symbol *sym_class;
-  int i1;
   struct symbol **sym_arr;
   struct type *t;
 
@@ -975,22 +988,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   p2 = p;		/* Save for restart.  */
   while (1)
     {
-      /* Extract the class name.  */
-      p1 = p;
-      while (p != *argptr && p[-1] == ' ')
-	--p;
-      copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      copy[p - *argptr] = 0;
-
-      /* Discard the class name from the arg.  */
-      p = p1 + (p1[0] == ':' ? 2 : 1);
-      while (*p == ' ' || *p == '\t')
-	p++;
-      *argptr = p;
-
-      sym_class = lookup_symbol (copy, 0, STRUCT_NAMESPACE, 0,
-				 (struct symtab **) NULL);
+      sym_class = lookup_prefix_sym (argptr, p);
 
       if (sym_class &&
 	  (t = check_typedef (SYMBOL_TYPE (sym_class)),
@@ -1048,76 +1046,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	    p++;
 	  *argptr = p;
 
-	  sym = 0;
-	  i1 = 0;	/*  Counter for the symbol array.  */
-	  sym_arr = (struct symbol **) alloca (total_number_of_methods (t)
-					       * sizeof (struct symbol *));
-
-	  if (destructor_name_p (copy, t))
-	    {
-	      /* Destructors are a special case.  */
-	      int m_index, f_index;
-
-	      if (get_destructor_fn_field (t, &m_index, &f_index))
-		{
-		  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
-
-		  sym_arr[i1] =
-		    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
-				   NULL, VAR_NAMESPACE, (int *) NULL,
-				   (struct symtab **) NULL);
-		  if (sym_arr[i1])
-		    i1++;
-		}
-	    }
-	  else
-	    i1 = find_methods (t, copy, sym_arr);
-	  if (i1 == 1)
-	    {
-	      /* There is exactly one field with that name.  */
-	      sym = sym_arr[0];
-
-	      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
-		{
-		  values.sals = (struct symtab_and_line *)
-		    xmalloc (sizeof (struct symtab_and_line));
-		  values.nelts = 1;
-		  values.sals[0] = find_function_start_sal (sym,
-							    funfirstline);
-		}
-	      else
-		{
-		  values.nelts = 0;
-		}
-	      return values;
-	    }
-	  if (i1 > 0)
-	    {
-	      /* There is more than one field with that name
-		 (overloaded).  Ask the user which one to use.  */
-	      return decode_line_2 (sym_arr, i1, funfirstline, canonical);
-	    }
-	  else
-	    {
-	      char *tmp;
-
-	      if (is_operator_name (copy))
-		{
-		  tmp = (char *) alloca (strlen (copy + 3) + 9);
-		  strcpy (tmp, "operator ");
-		  strcat (tmp, copy + 3);
-		}
-	      else
-		tmp = copy;
-	      if (tmp[0] == '~')
-		cplusplus_error (saved_arg,
-				 "the class `%s' does not have destructor defined\n",
-				 SYMBOL_SOURCE_NAME (sym_class));
-	      else
-		cplusplus_error (saved_arg,
-				 "the class %s does not have any method named %s\n",
-				 SYMBOL_SOURCE_NAME (sym_class), tmp);
-	    }
+	  return find_method (funfirstline, canonical, saved_arg,
+			      copy, t, sym_class);
 	}
 
       /* Move pointer up to next possible class/namespace token.  */
@@ -1166,6 +1096,135 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   cplusplus_error (saved_arg,
 		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
 		   copy);
+}
+
+/* Next come some helper functions for decode_compound.  */
+
+/* Return the symbol corresponding to the substring of *ARGPTR ending
+   at P, allowing whitespace.  Also, advance *ARGPTR past the symbol
+   name in question, the compound object separator ("::" or "."), and
+   whitespace.  */
+
+static struct symbol *
+lookup_prefix_sym (char **argptr, char *p)
+{
+  char *p1;
+  char *copy;
+
+  /* Extract the class name.  */
+  p1 = p;
+  while (p != *argptr && p[-1] == ' ')
+    --p;
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  copy[p - *argptr] = 0;
+
+  /* Discard the class name from the arg.  */
+  p = p1 + (p1[0] == ':' ? 2 : 1);
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+
+  return lookup_symbol (copy, 0, STRUCT_NAMESPACE, 0,
+			(struct symtab **) NULL);
+}
+
+/* This finds the method COPY in the class whose type is T and whose
+   symbol is SYM_CLASS.  */
+
+static struct symtabs_and_lines
+find_method (int funfirstline, char ***canonical, char *saved_arg,
+	     char *copy, struct type *t, struct symbol *sym_class)
+{
+  struct symtabs_and_lines values;
+  struct symbol *sym = 0;
+  int i1;	/*  Counter for the symbol array.  */
+  struct symbol **sym_arr =  alloca (total_number_of_methods (t)
+				     * sizeof (struct symbol *));
+
+  /* Find all methods with a matching name, and put them in
+     sym_arr.  */
+
+  i1 = collect_methods (copy, t, sym_arr);
+
+  if (i1 == 1)
+    {
+      /* There is exactly one field with that name.  */
+      sym = sym_arr[0];
+
+      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	{
+	  values.sals = (struct symtab_and_line *)
+	    xmalloc (sizeof (struct symtab_and_line));
+	  values.nelts = 1;
+	  values.sals[0] = find_function_start_sal (sym,
+						    funfirstline);
+	}
+      else
+	{
+	  values.nelts = 0;
+	}
+      return values;
+    }
+  if (i1 > 0)
+    {
+      /* There is more than one field with that name
+	 (overloaded).  Ask the user which one to use.  */
+      return decode_line_2 (sym_arr, i1, funfirstline, canonical);
+    }
+  else
+    {
+      char *tmp;
+
+      if (is_operator_name (copy))
+	{
+	  tmp = (char *) alloca (strlen (copy + 3) + 9);
+	  strcpy (tmp, "operator ");
+	  strcat (tmp, copy + 3);
+	}
+      else
+	tmp = copy;
+      if (tmp[0] == '~')
+	cplusplus_error (saved_arg,
+			 "the class `%s' does not have destructor defined\n",
+			 SYMBOL_PRINT_NAME (sym_class));
+      else
+	cplusplus_error (saved_arg,
+			 "the class %s does not have any method named %s\n",
+			 SYMBOL_PRINT_NAME (sym_class), tmp);
+    }
+}
+
+/* Find all methods named COPY in the class whose type is T, and put
+   them in SYM_ARR.  Return the number of methods found.  */
+
+static int
+collect_methods (char *copy, struct type *t,
+		 struct symbol **sym_arr)
+{
+  int i1 = 0;	/*  Counter for the symbol array.  */
+
+  if (destructor_name_p (copy, t))
+    {
+      /* Destructors are a special case.  */
+      int m_index, f_index;
+
+      if (get_destructor_fn_field (t, &m_index, &f_index))
+	{
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
+
+	  sym_arr[i1] =
+	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
+			   NULL, VAR_NAMESPACE, (int *) NULL,
+			   (struct symtab **) NULL);
+	  if (sym_arr[i1])
+	    i1++;
+	}
+    }
+  else
+    i1 = find_methods (t, copy, sym_arr);
+
+  return i1;
 }
 
 

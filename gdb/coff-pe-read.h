@@ -1,5 +1,6 @@
-/* Macro definitions for Power PC running embedded ABI under the simulator.
-   Copyright 1995 Free Software Foundation, Inc.
+/* Interface to coff-pe-read.c (portable-executable-specific symbol reader).
+
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -16,11 +17,16 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Boston, MA 02111-1307, USA.
 
-#ifndef TM_PPC_SIM_H
-#define TM_PPC_SIM_H
+   Contributed by Raoul M. Gough (RaoulGough@yahoo.co.uk). */
 
-#include "powerpc/tm-ppc-eabi.h"
+#if !defined (COFF_PE_READ_H)
+#define COFF_PE_READ_H
 
-#endif /* TM_PPC_SIM_H */
+struct objfile;
+
+/* Read the export table and convert it to minimal symbol table entries */
+extern void read_pe_exported_syms (struct objfile *objfile);
+
+#endif /* !defined (COFF_PE_READ_H) */

@@ -26,6 +26,7 @@
 #include "terminal.h"		/* for job_control */
 #include "event-loop.h"
 #include "event-top.h"
+#include "interps.h"
 #include <signal.h>
 
 /* For dont_repeat() */
@@ -38,15 +39,12 @@
 /* readline defines this.  */
 #undef savestring
 
-extern void _initialize_event_loop (void);
-
 static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void command_line_handler_continuation (struct continuation_arg *arg);
 static void change_line_handler (void);
 static void change_annotation_level (void);
 static void command_handler (char *command);
-void cli_command_loop (void);
 static void async_do_nothing (gdb_client_data arg);
 static void async_disconnect (gdb_client_data arg);
 static void async_stop_sig (gdb_client_data arg);
@@ -250,9 +248,9 @@ display_gdb_prompt (char *new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
 
-  /* When an alternative interpreter has been installed, do not
-     display the comand prompt. */
-  if (interpreter_p)
+  /* Each interpreter has its own rules on displaying the command
+     prompt.  */
+  if (!current_interp_display_prompt_p ())
     return;
 
   if (target_executing && sync_execution)
@@ -1125,6 +1123,11 @@ gdb_setup_readline (void)
 
   if (event_loop_p)
     {
+      gdb_stdout = stdio_fileopen (stdout);
+      gdb_stderr = stdio_fileopen (stderr);
+      gdb_stdlog = gdb_stderr;  /* for moment */
+      gdb_stdtarg = gdb_stderr; /* for moment */
+
       /* If the input stream is connected to a terminal, turn on
          editing.  */
       if (ISATTY (instream))
@@ -1193,14 +1196,3 @@ gdb_disable_readline (void)
       delete_file_handler (input_fd);
     }
 }
-
-void
-_initialize_event_loop (void)
-{
-  gdb_setup_readline ();
-
-  /* Tell gdb to use the cli_command_loop as the main loop. */
-  if (event_loop_p && command_loop_hook == NULL)
-    command_loop_hook = cli_command_loop;
-}
-

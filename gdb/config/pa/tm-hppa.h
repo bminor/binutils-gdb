@@ -302,13 +302,13 @@ extern int hppa_register_byte (int reg_nr);
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
 #if !GDB_MULTI_ARCH
-#define MAX_REGISTER_RAW_SIZE 4
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 4
 #endif
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
 #if !GDB_MULTI_ARCH
-#define MAX_REGISTER_VIRTUAL_SIZE 8
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -383,7 +383,7 @@ extern int hppa_cannot_store_register (int regnum);
 #endif
 
 #if !GDB_MULTI_ARCH
-#define INIT_EXTRA_FRAME_INFO(fromleaf, frame) hppa_init_extra_frame_info (fromleaf, frame)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame) hppa_init_extra_frame_info (fromleaf, frame)
 extern void hppa_init_extra_frame_info (int, struct frame_info *);
 #endif
 
@@ -453,11 +453,11 @@ extern void hppa_frame_find_saved_regs (struct frame_info *,
 /* Push an empty stack frame, to record the current PC, etc. */
 
 /* FIXME: brobecker 2002-12-26.  This macro definition takes advantage
-   of the fact that PUSH_DUMMY_FRAME is called within a function where
-   a variable inf_status of type struct inferior_status * is defined.
-   Ugh!  Until this is fixed, we will not be able to move to multiarch
-   partial.  */
-#define PUSH_DUMMY_FRAME hppa_push_dummy_frame (inf_status)
+   of the fact that DEPRECATED_PUSH_DUMMY_FRAME is called within a
+   function where a variable inf_status of type struct inferior_status
+   * is defined.  Ugh!  Until this is fixed, we will not be able to
+   move to multiarch partial.  */
+#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame (inf_status)
 extern void hppa_push_dummy_frame (struct inferior_status *);
 
 /* Discard from the stack the innermost frame, 

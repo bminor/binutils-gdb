@@ -39,7 +39,6 @@ alpha*-*-netbsd*)	gdb_host=nbsd ;;
 arm*-*-linux*)		gdb_host=linux ;;
 arm*-*-netbsdelf*)	gdb_host=nbsdelf ;;
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
-arm*-*-*)		gdb_host=arm ;;
 
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
@@ -143,9 +142,6 @@ sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
 sparc64-*-linux*)	gdb_host=linux ;;
 sparc64-*-netbsd*)	gdb_host=nbsd64 ;;
 sparcv9-*-* | sparc64-*-*) gdb_host=sun4sol2 ;;
-
-strongarm-*-*)		gdb_host=arm ;;
-xscale-*-*)		gdb_host=arm ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;

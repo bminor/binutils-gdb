@@ -1,6 +1,6 @@
 /* Low level Unix child interface to ttrace, for GDB when running under HP-UX.
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001
+   1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -3951,7 +3951,7 @@ threads_continue_all_but_one (lwpid_t gdb_tid, int signal)
        * state.tts_flags & TTS_STATEMASK == TTS_WASSUSPENDED
        */
       if (debug_on)
-	if (state.tts_flags & TTS_STATEMASK != TTS_WASSUSPENDED)
+ 	if ((state.tts_flags & TTS_STATEMASK) != TTS_WASSUSPENDED)
 	  printf ("About to continue non-stopped thread %d\n", scan_tid);
 #endif
 
@@ -4085,7 +4085,7 @@ threads_continue_all_with_signals (lwpid_t gdb_tid, int signal)
 
 #ifdef THREAD_DEBUG
       if (debug_on)
-	if (state.tts_flags & TTS_STATEMASK != TTS_WASSUSPENDED)
+	if ((state.tts_flags & TTS_STATEMASK) != TTS_WASSUSPENDED)
 	  warning ("About to continue non-stopped thread %d\n", scan_tid);
 #endif
 

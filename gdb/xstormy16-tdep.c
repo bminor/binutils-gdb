@@ -1045,17 +1045,17 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_register_byte (gdbarch, xstormy16_register_byte);
   set_gdbarch_register_raw_size (gdbarch, xstormy16_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, xstormy16_pc_size);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, xstormy16_pc_size);
   set_gdbarch_register_virtual_size (gdbarch, xstormy16_register_raw_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, xstormy16_reg_virtual_type);
 
   /*
    * Frame Info
    */
-  set_gdbarch_init_extra_frame_info (gdbarch,
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
 				     xstormy16_init_extra_frame_info);
-  set_gdbarch_frame_init_saved_regs (gdbarch,
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
 				     xstormy16_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, xstormy16_frame_chain);
   set_gdbarch_get_saved_register (gdbarch, xstormy16_get_saved_register);
@@ -1086,7 +1086,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, xstormy16_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, xstormy16_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, xstormy16_push_arguments);

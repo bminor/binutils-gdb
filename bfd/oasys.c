@@ -1,6 +1,6 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001,
+   2002, 2003 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -864,7 +864,7 @@ oasys_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  oasys_per_section_type *p = (oasys_per_section_type *) section->used_by_bfd;
+  oasys_per_section_type *p = oasys_per_section (section);
   oasys_slurp_section_data (abfd);
   if (! p->initialized)
     {

@@ -28,6 +28,7 @@
 /* Opaque declarations.  */
 
 struct obstack;
+struct block;
 
 /* Partial symbols are stored in the psymbol_cache and pointers to them
    are kept in a dynamically grown array that is obtained from malloc and

@@ -160,9 +160,6 @@ typedef bfd_vma CORE_ADDR;
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
 
-/* use tui interface if non-zero */
-extern int tui_version;
-
 /* enable xdb commands if set */
 extern int xdb_commands;
 
@@ -307,6 +304,10 @@ extern void initialize_utils (void);
 extern void notice_quit (void);
 
 extern int strcmp_iw (const char *, const char *);
+
+extern int strcmp_iw_ordered (const char *, const char *);
+
+extern int streq (const char *, const char *);
 
 extern int subset_compare (char *, char *);
 
@@ -1009,6 +1010,7 @@ enum gdb_osabi
   GDB_OSABI_ARM_EABI_V1,
   GDB_OSABI_ARM_EABI_V2,
   GDB_OSABI_ARM_APCS,
+  GDB_OSABI_QNXNTO,
 
   GDB_OSABI_INVALID		/* keep this last */
 };
@@ -1080,6 +1082,29 @@ extern void *alloca ();
    multi-arch targets to continue to compile. */
 #include "arch-utils.h"
 #endif
+
+/* FIXME: cagney/2003-03-01: Hack to prop up old targets while they
+   migrate to the overhauled register cache.
+
+   The problem is that some architectures specify different sized raw
+   and cooked (nee virtual) register sizes.  They shouldn't.  Instead,
+   all architectures should just implement a gdbarch_register_type().
+   That can be used to compute all needed register attributes.  While
+   waiting for the conversion, provide compatibility macros that keep
+   old code working.  */
+
+#ifdef MAX_REGISTER_RAW_SIZE
+#error MAX_REGISTER_RAW_SIZE defined
+#endif
+extern int legacy_max_register_raw_size (void);
+#define MAX_REGISTER_RAW_SIZE legacy_max_register_raw_size ()
+
+#ifdef MAX_REGISTER_VIRTUAL_SIZE
+#error MAX_REGISTER_VIRTUAL_SIZE defined
+#endif
+extern int legacy_max_register_virtual_size (void);
+#define MAX_REGISTER_VIRTUAL_SIZE legacy_max_register_virtual_size ()
+
 
 /* Static target-system-dependent parameters for GDB. */
 

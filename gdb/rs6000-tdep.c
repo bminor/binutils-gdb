@@ -47,6 +47,8 @@
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 
+#include "gdb_assert.h"
+
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register. Usually
@@ -1442,7 +1444,7 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
 
   /* Check for bigtoc fixup code.  */
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol && rs6000_in_solib_return_trampoline (pc, SYMBOL_NAME (msymbol)))
+  if (msymbol && rs6000_in_solib_return_trampoline (pc, DEPRECATED_SYMBOL_NAME (msymbol)))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
       op = read_memory_integer (pc + 8, 4);
@@ -2271,7 +2273,7 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /*  0 */ P(r0), P(r1), P(r2), P(r3), P(r4), P(r5), P(r6), P(r7),  \
   /*  8 */ P(r8), P(r9), P(r10),P(r11),P(r12),P(r13),P(r14),P(r15), \
   /* 16 */ P(r16),P(r17),P(r18),P(r19),P(r20),P(r21),P(r22),P(r23), \
-  /* 24 */ P(r24),P(r25),P(r26),P(r27),P(r28),P(r29),P(r30),P(r31), \
+  /* 24 */ P(r24),P(r25),P(r26),P(r27),P(r28),P(r29),P(r30),P(r31)
 
 /* IBM POWER (pre-PowerPC) architecture, user-level view.  We only cover
    user-level SPR's.  */
@@ -2450,6 +2452,9 @@ static const struct reg registers_e500[] =
   PPC_UISA_NOFP_SPRS,
   /* 7...38 */
   PPC_EV_REGS,
+  R8(acc), R(spefscr),
+  /* NOTE: Add new registers here the end of the raw register
+     list and just before the first pseudo register.  */
   /* 39...70 */
   PPC_GPRS_PSEUDO_REGS
 };
@@ -2801,8 +2806,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = -1;
 	break;
       case bfd_mach_ppc_e500:
-        tdep->ppc_gp0_regnum = 39;
-        tdep->ppc_gplast_regnum = 70;
+        tdep->ppc_gp0_regnum = 41;
+        tdep->ppc_gplast_regnum = tdep->ppc_gp0_regnum + 32 - 1;
         tdep->ppc_toc_regnum = -1;
         tdep->ppc_ps_regnum = 1;
         tdep->ppc_cr_regnum = 2;
@@ -2812,8 +2817,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev0_regnum = 7;
 	tdep->ppc_ev31_regnum = 38;
         set_gdbarch_pc_regnum (gdbarch, 0);
-        set_gdbarch_sp_regnum (gdbarch, 40);
-        set_gdbarch_fp_regnum (gdbarch, 40);
+        set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
+        set_gdbarch_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
@@ -2827,6 +2832,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = -1;
 	break;
       }   
+
+  /* Sanity check on registers.  */
+  gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);
 
   /* Set lr_frame_offset.  */
   if (wordsize == 8)
@@ -2863,9 +2871,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 16);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 16);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 16);
   set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
@@ -2887,7 +2895,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
@@ -2933,8 +2940,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
-  set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
 
   if (!sysv_abi)
     {

@@ -36,6 +36,7 @@
 #include "doublest.h"
 #include "gdb_assert.h"
 #include "regcache.h"
+#include "block.h"
 
 /* Prototypes for exported functions. */
 
@@ -406,7 +407,7 @@ lookup_internalvar (char *name)
   register struct internalvar *var;
 
   for (var = internalvars; var; var = var->next)
-    if (STREQ (var->name, name))
+    if (strcmp (var->name, name) == 0)
       return var;
 
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
@@ -423,11 +424,6 @@ value_of_internalvar (struct internalvar *var)
 {
   struct value *val;
 
-#ifdef IS_TRAPPED_INTERNALVAR
-  if (IS_TRAPPED_INTERNALVAR (var->name))
-    return VALUE_OF_TRAPPED_INTERNALVAR (var);
-#endif
-
   val = value_copy (var->value);
   if (VALUE_LAZY (val))
     value_fetch_lazy (val);
@@ -442,11 +438,6 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 {
   register char *addr = VALUE_CONTENTS (var->value) + offset;
 
-#ifdef IS_TRAPPED_INTERNALVAR
-  if (IS_TRAPPED_INTERNALVAR (var->name))
-    SET_TRAPPED_INTERNALVAR (var, newval, bitpos, bitsize, offset);
-#endif
-
   if (bitsize)
     modify_field (addr, value_as_long (newval),
 		  bitpos, bitsize);
@@ -458,11 +449,6 @@ void
 set_internalvar (struct internalvar *var, struct value *val)
 {
   struct value *newval;
-
-#ifdef IS_TRAPPED_INTERNALVAR
-  if (IS_TRAPPED_INTERNALVAR (var->name))
-    SET_TRAPPED_INTERNALVAR (var, val, 0, 0, 0);
-#endif
 
   newval = value_copy (val);
   newval->modifiable = 1;
@@ -517,10 +503,6 @@ show_convenience (char *ignore, int from_tty)
 
   for (var = internalvars; var; var = var->next)
     {
-#ifdef IS_TRAPPED_INTERNALVAR
-      if (IS_TRAPPED_INTERNALVAR (var->name))
-	continue;
-#endif
       if (!varseen)
 	{
 	  varseen = 1;

@@ -44,8 +44,10 @@
 #include "gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
+#include "hashtab.h"
 #include <readline/readline.h>
 #include "gdb_assert.h"
+#include "block.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -208,55 +210,20 @@ compare_symbols (const void *s1p, const void *s2p)
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
-  return (strcmp (SYMBOL_SOURCE_NAME (*s1), SYMBOL_SOURCE_NAME (*s2)));
+  return (strcmp (SYMBOL_NATURAL_NAME (*s1), SYMBOL_NATURAL_NAME (*s2)));
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   compare_psymbols -- compare two partial symbols by name
-
-   DESCRIPTION
-
-   Given pointers to pointers to two partial symbol table entries,
-   compare them by name and return -N, 0, or +N (ala strcmp).
-   Typically used by sorting routines like qsort().
-
-   NOTES
-
-   Does direct compare of first two characters before punting
-   and passing to strcmp for longer compares.  Note that the
-   original version had a bug whereby two null strings or two
-   identically named one character strings would return the
-   comparison of memory following the null byte.
-
- */
+/* This compares two partial symbols by names, using strcmp_iw_ordered
+   for the comparison.  */
 
 static int
 compare_psymbols (const void *s1p, const void *s2p)
 {
-  register struct partial_symbol **s1, **s2;
-  register char *st1, *st2;
+  struct partial_symbol *const *s1 = s1p;
+  struct partial_symbol *const *s2 = s2p;
 
-  s1 = (struct partial_symbol **) s1p;
-  s2 = (struct partial_symbol **) s2p;
-  st1 = SYMBOL_SOURCE_NAME (*s1);
-  st2 = SYMBOL_SOURCE_NAME (*s2);
-
-
-  if ((st1[0] - st2[0]) || !st1[0])
-    {
-      return (st1[0] - st2[0]);
-    }
-  else if ((st1[1] - st2[1]) || !st1[1])
-    {
-      return (st1[1] - st2[1]);
-    }
-  else
-    {
-      return (strcmp (st1, st2));
-    }
+  return strcmp_iw_ordered (SYMBOL_NATURAL_NAME (*s1),
+			    SYMBOL_NATURAL_NAME (*s2));
 }
 
 void
@@ -1983,6 +1950,11 @@ reread_symbols (void)
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      bcache_xfree (objfile->macro_cache);
 	      objfile->macro_cache = bcache_xmalloc ();
+	      if (objfile->demangled_names_hash != NULL)
+		{
+		  htab_delete (objfile->demangled_names_hash);
+		  objfile->demangled_names_hash = NULL;
+		}
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);
@@ -2019,6 +1991,7 @@ reread_symbols (void)
 		  error ("Can't find the file sections in `%s': %s",
 			 objfile->name, bfd_errmsg (bfd_get_error ()));
 		}
+              terminate_minimal_symbol_table (objfile);
 
 	      /* We use the same section offsets as from last time.  I'm not
 	         sure whether that is always correct for shared libraries.  */
@@ -2683,7 +2656,6 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   /* Create local copy of the partial symbol */
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
   /* val and coreaddr are mutually exclusive, one of them *will* be zero */
   if (val != 0)
     {
@@ -2697,7 +2669,8 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   SYMBOL_LANGUAGE (&psymbol) = language;
   PSYMBOL_NAMESPACE (&psymbol) = namespace;
   PSYMBOL_CLASS (&psymbol) = class;
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
+
+  SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
 
   /* Stash the partial symbol away in the cache */
   psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
@@ -2735,7 +2708,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
+  DEPRECATED_SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
 
   buf = alloca (dem_namelength + 1);
   memcpy (buf, dem_name, dem_namelength);
@@ -3705,5 +3678,4 @@ Usage: set extension-language .foo bar",
         &setlist));
   add_show_from_set (c, &showlist);
   set_cmd_completer (c, filename_completer);
-
 }

@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -86,6 +86,8 @@ static void arm_add_to_rel
 #endif
 static enum elf_reloc_type_class elf32_arm_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
+static bfd_boolean elf32_arm_object_p
+  PARAMS ((bfd *));
 
 #ifndef ELFARM_NABI_C_INCLUDED
 static void record_arm_to_thumb_glue
@@ -927,13 +929,16 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 
   BFD_ASSERT (my_offset <= globals->thumb_glue_size);
 
-  /* Now go back and fix up the original BL insn to point
-     to here.  */
-  ret_offset = (s->output_offset
-		+ my_offset
-		- (input_section->output_offset
-		   + offset + addend)
-		- 8);
+  /* Now go back and fix up the original BL insn to point to here.  */
+  ret_offset =
+    /* Address of where the stub is located.  */
+    (s->output_section->vma + s->output_offset + my_offset)
+     /* Address of where the BL is located.  */
+    - (input_section->output_section->vma + input_section->output_offset + offset)
+    /* Addend in the relocation.  */
+    - addend
+    /* Biassing for PC-relative addressing.  */
+    - 8;
 
   tmp = bfd_get_32 (input_bfd, hit_data
 		    - input_section->vma);
@@ -2108,6 +2113,20 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return TRUE;
 }
 
+/* Set the right machine number.  */
+
+static bfd_boolean
+elf32_arm_object_p (abfd)
+     bfd *abfd;
+{
+  /* XXX - we ought to examine a .note section here.  */
+
+  if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
+    bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_ep9312);
+
+  return TRUE;
+}
+
 /* Function to keep ARM specific flags in the ELF header.  */
 static bfd_boolean
 elf32_arm_set_private_flags (abfd, flags)
@@ -2310,12 +2329,28 @@ ERROR: %s passes floats in integer registers, whereas %s passes them in float re
 	{
 	  if (in_flags & EF_ARM_VFP_FLOAT)
 	    _bfd_error_handler (_("\
-ERROR: %s uses VFP instructions, whereas %s uses FPA instructions"),
+ERROR: %s uses VFP instructions, whereas %s does not"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-ERROR: %s uses FPA instructions, whereas %s uses VFP instructions"),
+ERROR: %s uses FPA instructions, whereas %s does not"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
+
+	  flags_compatible = FALSE;
+	}
+
+      if ((in_flags & EF_ARM_MAVERICK_FLOAT) != (out_flags & EF_ARM_MAVERICK_FLOAT))
+	{
+	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
+	    _bfd_error_handler (_("\
+ERROR: %s uses Maverick instructions, whereas %s does not"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
+	  else
+	    _bfd_error_handler (_("\
+ERROR: %s uses Maverick instructions, whereas %s does not"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
@@ -2410,6 +2445,8 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
       if (flags & EF_ARM_VFP_FLOAT)
 	fprintf (file, _(" [VFP float format]"));
+      else if (flags & EF_ARM_MAVERICK_FLOAT)
+	fprintf (file, _(" [Maverick float format]"));
       else
 	fprintf (file, _(" [FPA float format]"));
 
@@ -2430,7 +2467,8 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
       flags &= ~(EF_ARM_INTERWORK | EF_ARM_APCS_26 | EF_ARM_APCS_FLOAT
 		 | EF_ARM_PIC | EF_ARM_NEW_ABI | EF_ARM_OLD_ABI
-		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT);
+		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT
+		 | EF_ARM_MAVERICK_FLOAT);
       break;
 
     case EF_ARM_EABI_VER1:
@@ -3622,7 +3660,6 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
-
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGESIZE			0x8000
@@ -3647,6 +3684,7 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
+#define elf_backend_object_p			elf32_arm_object_p
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1

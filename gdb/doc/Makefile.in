@@ -440,7 +440,7 @@ clean: mostlyclean
 	rm -f gdb-cfg.texi
 
 distclean: clean
-	rm -f Makefile config.status
+	rm -f Makefile config.status config.log
 
 # GDBvn.texi, the dvi files, the info files, and the postscript files, 
 # are all part of the distribution, so it should not be removed by

@@ -1,5 +1,6 @@
-/* Macro defintions for an Apollo m68k in BSD mode
-   Copyright 1992, 1993, 1995, 1998 Free Software Foundation, Inc.
+/* MI Internal Functions for GDB, the GNU debugger.
+
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,23 +19,15 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define	FETCH_INFERIOR_REGISTERS
+#ifndef MI_MAIN_H
+#define MI_MAIN_H
 
-/* Tell gdb that we can attach and detach other processes */
-#define ATTACH_DETACH
+extern void mi_setup_architecture_data (void);
 
-#define U_REGS_OFFSET 6
+extern void mi_load_progress (const char *section_name,
+			      unsigned long sent_so_far,
+			      unsigned long total_section,
+			      unsigned long total_sent,
+			      unsigned long grand_total);
+#endif
 
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-#define KERNEL_U_ADDR 0
-
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = (6 + 4 * (regno))
-
-/* Apollos don't really have a USER area,so trying to read it from the
- * process address space will fail. It does support a read from a faked
- * USER area using the "PEEKUSER" ptrace call.
- */
-#define PT_READ_U 3

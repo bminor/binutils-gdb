@@ -28,6 +28,8 @@
 
 #include "doublest.h"
 
+struct block;
+
 extern struct expression *expout;
 extern int expout_size;
 extern int expout_ptr;

@@ -35,6 +35,7 @@
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
 #include "builtin-regs.h"
+#include "block.h"
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -287,7 +288,7 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
-   determined by REGISTER_VIRTUAL_TYPE.
+   determined by register_type().
 
    NOTE: returns NULL if register value is not available.  Caller will
    check return value or die!  */
@@ -319,13 +320,13 @@ value_of_register (int regnum, struct frame_info *frame)
   if (register_cached (regnum) < 0)
     return NULL;		/* register value not available */
 
-  reg_val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
+  reg_val = allocate_value (register_type (current_gdbarch, regnum));
 
   /* Convert raw data to virtual format if necessary.  */
 
   if (REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+      REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
 				   raw_buffer, VALUE_CONTENTS_RAW (reg_val));
     }
   else if (REGISTER_RAW_SIZE (regnum) == REGISTER_VIRTUAL_SIZE (regnum))
@@ -383,6 +384,14 @@ symbol_read_needs_frame (struct symbol *sym)
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
          we failed to consider one.  */
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      {
+	struct location_funcs *symfuncs = SYMBOL_LOCATION_FUNCS (sym);
+	return (symfuncs->read_needs_frame) (sym);
+      }
+      break;
+
     case LOC_REGISTER:
     case LOC_ARG:
     case LOC_REF_ARG:
@@ -604,11 +613,23 @@ addresses have not been bound by the dynamic loader. Try again when executable i
       }
       break;
 
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      {
+	struct location_funcs *funcs = SYMBOL_LOCATION_FUNCS (var);
+
+	if (frame == 0 && (funcs->read_needs_frame) (var))
+	  return 0;
+	return (funcs->read_variable) (var, frame);
+
+      }
+      break;
+
     case LOC_UNRESOLVED:
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (SYMBOL_NAME (var), NULL, NULL);
+	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (var), NULL, NULL);
 	if (msym == NULL)
 	  return 0;
 	if (overlay_debugging)
@@ -663,8 +684,10 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 		      1);
 
   if (num_storage_locs > 1
-#ifdef GDB_TARGET_IS_H8500
-      || TYPE_CODE (type) == TYPE_CODE_PTR
+#if 0
+      // OBSOLETE #ifdef GDB_TARGET_IS_H8500
+      // OBSOLETE       || TYPE_CODE (type) == TYPE_CODE_PTR
+      // OBSOLETE #endif
 #endif
     )
     {
@@ -680,76 +703,78 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 
       /* Copy all of the data out, whereever it may be.  */
 
-#ifdef GDB_TARGET_IS_H8500
-/* This piece of hideosity is required because the H8500 treats registers
-   differently depending upon whether they are used as pointers or not.  As a
-   pointer, a register needs to have a page register tacked onto the front.
-   An alternate way to do this would be to have gcc output different register
-   numbers for the pointer & non-pointer form of the register.  But, it
-   doesn't, so we're stuck with this.  */
-
-      if (TYPE_CODE (type) == TYPE_CODE_PTR
-	  && len > 2)
-	{
-	  int page_regnum;
-
-	  switch (regnum)
-	    {
-	    case R0_REGNUM:
-	    case R1_REGNUM:
-	    case R2_REGNUM:
-	    case R3_REGNUM:
-	      page_regnum = SEG_D_REGNUM;
-	      break;
-	    case R4_REGNUM:
-	    case R5_REGNUM:
-	      page_regnum = SEG_E_REGNUM;
-	      break;
-	    case R6_REGNUM:
-	    case R7_REGNUM:
-	      page_regnum = SEG_T_REGNUM;
-	      break;
-	    }
-
-	  value_bytes[0] = 0;
-	  get_saved_register (value_bytes + 1,
-			      &optim,
-			      &addr,
-			      frame,
-			      page_regnum,
-			      &lval);
-
-	  if (register_cached (page_regnum) == -1)
-	    return NULL;	/* register value not available */
-
-	  if (lval == lval_register)
-	    reg_stor++;
-	  else
-	    mem_stor++;
-	  first_addr = addr;
-	  last_addr = addr;
-
-	  get_saved_register (value_bytes + 2,
-			      &optim,
-			      &addr,
-			      frame,
-			      regnum,
-			      &lval);
-
-	  if (register_cached (regnum) == -1)
-	    return NULL;	/* register value not available */
-
-	  if (lval == lval_register)
-	    reg_stor++;
-	  else
-	    {
-	      mem_stor++;
-	      mem_tracking = mem_tracking && (addr == last_addr);
-	    }
-	  last_addr = addr;
-	}
-      else
-#endif /* GDB_TARGET_IS_H8500 */
+#if 0
+      // OBSOLETE #ifdef GDB_TARGET_IS_H8500
+      // OBSOLETE /* This piece of hideosity is required because the H8500 treats registers
+      // OBSOLETE    differently depending upon whether they are used as pointers or not.  As a
+      // OBSOLETE    pointer, a register needs to have a page register tacked onto the front.
+      // OBSOLETE    An alternate way to do this would be to have gcc output different register
+      // OBSOLETE    numbers for the pointer & non-pointer form of the register.  But, it
+      // OBSOLETE    doesn't, so we're stuck with this.  */
+      // OBSOLETE 
+      // OBSOLETE       if (TYPE_CODE (type) == TYPE_CODE_PTR
+      // OBSOLETE 	  && len > 2)
+      // OBSOLETE 	{
+      // OBSOLETE 	  int page_regnum;
+      // OBSOLETE 
+      // OBSOLETE 	  switch (regnum)
+      // OBSOLETE 	    {
+      // OBSOLETE 	    case R0_REGNUM:
+      // OBSOLETE 	    case R1_REGNUM:
+      // OBSOLETE 	    case R2_REGNUM:
+      // OBSOLETE 	    case R3_REGNUM:
+      // OBSOLETE 	      page_regnum = SEG_D_REGNUM;
+      // OBSOLETE 	      break;
+      // OBSOLETE 	    case R4_REGNUM:
+      // OBSOLETE 	    case R5_REGNUM:
+      // OBSOLETE 	      page_regnum = SEG_E_REGNUM;
+      // OBSOLETE 	      break;
+      // OBSOLETE 	    case R6_REGNUM:
+      // OBSOLETE 	    case R7_REGNUM:
+      // OBSOLETE 	      page_regnum = SEG_T_REGNUM;
+      // OBSOLETE 	      break;
+      // OBSOLETE 	    }
+      // OBSOLETE 
+      // OBSOLETE 	  value_bytes[0] = 0;
+      // OBSOLETE 	  get_saved_register (value_bytes + 1,
+      // OBSOLETE 			      &optim,
+      // OBSOLETE 			      &addr,
+      // OBSOLETE 			      frame,
+      // OBSOLETE 			      page_regnum,
+      // OBSOLETE 			      &lval);
+      // OBSOLETE 
+      // OBSOLETE 	  if (register_cached (page_regnum) == -1)
+      // OBSOLETE 	    return NULL;	/* register value not available */
+      // OBSOLETE 
+      // OBSOLETE 	  if (lval == lval_register)
+      // OBSOLETE 	    reg_stor++;
+      // OBSOLETE 	  else
+      // OBSOLETE 	    mem_stor++;
+      // OBSOLETE 	  first_addr = addr;
+      // OBSOLETE 	  last_addr = addr;
+      // OBSOLETE 
+      // OBSOLETE 	  get_saved_register (value_bytes + 2,
+      // OBSOLETE 			      &optim,
+      // OBSOLETE 			      &addr,
+      // OBSOLETE 			      frame,
+      // OBSOLETE 			      regnum,
+      // OBSOLETE 			      &lval);
+      // OBSOLETE 
+      // OBSOLETE 	  if (register_cached (regnum) == -1)
+      // OBSOLETE 	    return NULL;	/* register value not available */
+      // OBSOLETE 
+      // OBSOLETE 	  if (lval == lval_register)
+      // OBSOLETE 	    reg_stor++;
+      // OBSOLETE 	  else
+      // OBSOLETE 	    {
+      // OBSOLETE 	      mem_stor++;
+      // OBSOLETE 	      mem_tracking = mem_tracking && (addr == last_addr);
+      // OBSOLETE 	    }
+      // OBSOLETE 	  last_addr = addr;
+      // OBSOLETE 	}
+      // OBSOLETE       else
+      // OBSOLETE #endif /* GDB_TARGET_IS_H8500 */
+#endif
 	for (local_regnum = regnum;
 	     value_bytes_copied < len;
 	     (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),
@@ -875,7 +900,7 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
 
   lazy_value = read_var_value (var, frame);
   if (lazy_value == 0)
-    error ("Address of \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
+    error ("Address of \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
 
   if (VALUE_LAZY (lazy_value)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -896,7 +921,7 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
 	            && *REGISTER_NAME (VALUE_REGNO (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in register $%s",
-            SYMBOL_SOURCE_NAME (var), 
+            SYMBOL_PRINT_NAME (var), 
 	    REGISTER_NAME (VALUE_REGNO (lazy_value)));
       break;
 
@@ -905,13 +930,13 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
 	            && *REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in frame register $%s",
-            SYMBOL_SOURCE_NAME (var), 
+            SYMBOL_PRINT_NAME (var), 
 	    REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)));
       break;
 
     default:
       error ("Can't take address of \"%s\" which isn't an lvalue.",
-	     SYMBOL_SOURCE_NAME (var));
+	     SYMBOL_PRINT_NAME (var));
       break;
     }
   return 0;			/* For lint -- never reached */

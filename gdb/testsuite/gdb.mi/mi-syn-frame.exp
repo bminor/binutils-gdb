@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,11 @@
 
 # Test MI output with synthetic frames on the stack (call dummies,
 # signal handlers).
+
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping mi-syn-frame.exp because of nosignals."
+    continue
+}
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

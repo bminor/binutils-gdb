@@ -51,7 +51,7 @@ extern int kernel_u_size (void);
 /* WATCHPOINT SPECIFIC STUFF */
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
-#define HAVE_CONTINUABLE_WATCHPOINT
+#define HAVE_CONTINUABLE_WATCHPOINT 1
 #define target_insert_watchpoint(addr, len, type)  \
   s390_insert_watchpoint (PIDGET (inferior_ptid), addr, len, type)
 

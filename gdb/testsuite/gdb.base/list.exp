@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2002
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -405,8 +405,6 @@ proc test_list_filename_and_function {} {
 	timeout { fail "list list0.c:main (timeout)" }
     }
 
-    # The i960 is a second case
-
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.
     setup_xfail "rs6000-*-aix*"
@@ -464,8 +462,6 @@ proc test_list_filename_and_function {} {
 	-re ".*$gdb_prompt $" { fail "list list1.c:bar" }
 	timeout { fail "list list1.c:bar (timeout)" }
     }
-
-    # The i960 is a second case
 
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.

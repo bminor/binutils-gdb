@@ -1,7 +1,7 @@
 /* Definitions for symbol file management in GDB.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,7 @@
 #include "symfile.h"		/* For struct psymbol_allocation_list */
 
 struct bcache;
+struct htab;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -286,6 +287,13 @@ struct objfile
     struct bcache *psymbol_cache;	/* Byte cache for partial syms */
     struct bcache *macro_cache;          /* Byte cache for macros */
 
+    /* Hash table for mapping symbol names to demangled names.  Each
+       entry in the hash table is actually two consecutive strings,
+       both null-terminated; the first one is a mangled or linkage
+       name, and the second is the demangled name or just a zero byte
+       if the name doesn't demangle.  */
+    struct htab *demangled_names_hash;
+
     /* Vectors of all partial symbols read in from file.  The actual data
        is stored in the psymbol_obstack. */
 
@@ -515,6 +523,8 @@ extern struct objfile *allocate_objfile (bfd *, int);
 
 extern int build_objfile_section_table (struct objfile *);
 
+extern void terminate_minimal_symbol_table (struct objfile *objfile);
+
 extern void put_objfile_before (struct objfile *, struct objfile *);
 
 extern void objfile_to_front (struct objfile *);
@@ -577,7 +587,7 @@ extern int is_in_import_list (char *, struct objfile *);
 /* Traverse all minimal symbols in one objfile.  */
 
 #define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
-    for ((m) = (objfile) -> msymbols; SYMBOL_NAME(m) != NULL; (m)++)
+    for ((m) = (objfile) -> msymbols; DEPRECATED_SYMBOL_NAME(m) != NULL; (m)++)
 
 /* Traverse all symtabs in all objfiles.  */
 
@@ -595,8 +605,7 @@ extern int is_in_import_list (char *, struct objfile *);
 
 #define	ALL_MSYMBOLS(objfile, m) \
   ALL_OBJFILES (objfile)	 \
-    if ((objfile)->msymbols)	 \
-      ALL_OBJFILE_MSYMBOLS (objfile, m)
+    ALL_OBJFILE_MSYMBOLS (objfile, m)
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++)

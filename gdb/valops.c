@@ -33,6 +33,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "cp-abi.h"
+#include "block.h"
 
 #include <errno.h>
 #include "gdb_string.h"
@@ -834,9 +835,9 @@ value_of_variable (struct symbol *var, struct block *b)
       if (!frame)
 	{
 	  if (BLOCK_FUNCTION (b)
-	      && SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)))
+	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)))
 	    error ("No frame is currently executing in block %s.",
-		   SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)));
+		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));
 	  else
 	    error ("No frame is currently executing in specified block");
 	}
@@ -844,7 +845,7 @@ value_of_variable (struct symbol *var, struct block *b)
 
   val = read_var_value (var, frame);
   if (!val)
-    error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
+    error ("Address of symbol \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
 
   return val;
 }
@@ -1299,10 +1300,34 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   inf_status = save_inferior_status (1);
   inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
 
-  /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
-     (and POP_FRAME for restoring them).  (At least on most machines)
-     they are saved on the stack in the inferior.  */
-  PUSH_DUMMY_FRAME;
+  if (DEPRECATED_PUSH_DUMMY_FRAME_P ())
+    {
+      /* DEPRECATED_PUSH_DUMMY_FRAME is responsible for saving the
+	 inferior registers (and POP_FRAME for restoring them).  (At
+	 least on most machines) they are saved on the stack in the
+	 inferior.  */
+      DEPRECATED_PUSH_DUMMY_FRAME;
+    }
+  else
+    {
+      /* FIXME: cagney/2003-02-26: Step zero of this little tinker is
+      to extract the generic dummy frame code from the architecture
+      vector.  Hence this direct call.
+
+      A follow-on change is to modify this interface so that it takes
+      thread OR frame OR tpid as a parameter, and returns a dummy
+      frame handle.  The handle can then be used further down as a
+      parameter SAVE_DUMMY_FRAME_TOS.  Hmm, thinking about it, since
+      everything is ment to be using generic dummy frames, why not
+      even use some of the dummy frame code to here - do a regcache
+      dup and then pass the duped regcache, along with all the other
+      stuff, at one single point.
+
+      In fact, you can even save the structure's return address in the
+      dummy frame and fix one of those nasty lost struct return edge
+      conditions.  */
+      generic_push_dummy_frame ();
+    }
 
   old_sp = read_sp ();
 
@@ -1657,7 +1682,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     symbol = find_pc_function (funaddr);
     if (symbol)
       {
-	name = SYMBOL_SOURCE_NAME (symbol);
+	name = SYMBOL_PRINT_NAME (symbol);
       }
     else
       {
@@ -1666,7 +1691,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 	if (msymbol)
 	  {
-	    name = SYMBOL_SOURCE_NAME (msymbol);
+	    name = SYMBOL_PRINT_NAME (msymbol);
 	  }
       }
     if (name == NULL)
@@ -2734,7 +2759,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       int i = -1;
-      func_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_NO_OPTS);
+      func_name = cplus_demangle (DEPRECATED_SYMBOL_NAME (fsym), DMGL_NO_OPTS);
 
       /* If the name is NULL this must be a C-style function.
          Just return the same symbol. */

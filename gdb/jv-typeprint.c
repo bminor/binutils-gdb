@@ -166,12 +166,12 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if (STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
+	      if (strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5) == 0
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
 	      /* Don't print the dummy field "class". */
-	      if (STREQN (TYPE_FIELD_NAME (type, i), "class", 5))
+	      if (strncmp (TYPE_FIELD_NAME (type, i), "class", 5) == 0)
 		continue;
 
 	      print_spaces_filtered (level + 4, stream);

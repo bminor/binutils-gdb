@@ -63,8 +63,12 @@ gdb_test "advance func" \
 # Verify that "advance <funcname>" when funcname is NOT called by the current
 # frame, stops at the end of the current frame.
 #
+# gdb can legitimately stop on either the current line or the next line,
+# depending on whether the machine instruction for 'call' on the current
+# line has more instructions after it or not.
+#
 gdb_test "advance func3" \
-	"in main.*func \\(c\\).*stop here after leaving current frame..."\
+	"(in main|).*(func \\(c\\)|marker1 \\(\\)).*stop here after leaving current frame..."\
 	"advance function not called by current frame"
 
 # break at main again

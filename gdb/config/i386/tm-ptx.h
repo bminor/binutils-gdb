@@ -136,8 +136,8 @@ extern int ptx_register_u_addr (int, int);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#undef  MAX_REGISTER_RAW_SIZE
-#define MAX_REGISTER_RAW_SIZE 10
+#undef  DEPRECATED_MAX_REGISTER_RAW_SIZE
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 10
 
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */

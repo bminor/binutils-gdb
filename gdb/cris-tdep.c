@@ -1146,9 +1146,10 @@ cris_frameless_function_invocation (struct frame_info *fi)
     return frameless_look_for_prologue (fi);
 }
 
-/* See frame.h.  Determines the address of all registers in the current stack
-   frame storing each in frame->saved_regs.  Space for frame->saved_regs shall
-   be allocated by FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
+/* See frame.h.  Determines the address of all registers in the
+   current stack frame storing each in frame->saved_regs.  Space for
+   frame->saved_regs shall be allocated by
+   DEPRECATED_FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
 
 void
 cris_frame_init_saved_regs (struct frame_info *fi)
@@ -4242,13 +4243,13 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_raw_size (gdbarch, cris_register_size);
   
   /* The largest value REGISTER_RAW_SIZE can have.  */
-  set_gdbarch_max_register_raw_size (gdbarch, 32);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
   
   /* The length of the registers in the program's representation.  */
   set_gdbarch_register_virtual_size (gdbarch, cris_register_size);
   
   /* The largest value REGISTER_VIRTUAL_SIZE can have.  */
-  set_gdbarch_max_register_virtual_size (gdbarch, 32);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
 
   set_gdbarch_register_virtual_type (gdbarch, cris_register_virtual_type);
   
@@ -4283,7 +4284,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* No register requires conversion from raw format to virtual format.  */
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
 
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, cris_push_return_address);
   set_gdbarch_pop_frame (gdbarch, cris_pop_frame);
 
@@ -4292,8 +4292,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
-  set_gdbarch_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, cris_skip_prologue);
   set_gdbarch_prologue_frameless_p (gdbarch, generic_prologue_frameless_p);
   

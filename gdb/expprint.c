@@ -30,6 +30,7 @@
 #include "frame.h"		/* For frame_map_regnum_to_name.  */
 #include "target.h"
 #include "gdb_string.h"
+#include "block.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -107,12 +108,12 @@ print_subexp (register struct expression *exp, register int *pos,
 	b = exp->elts[pc + 1].block;
 	if (b != NULL
 	    && BLOCK_FUNCTION (b) != NULL
-	    && SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)) != NULL)
+	    && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)) != NULL)
 	  {
-	    fputs_filtered (SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)), stream);
+	    fputs_filtered (SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)), stream);
 	    fputs_filtered ("::", stream);
 	  }
-	fputs_filtered (SYMBOL_SOURCE_NAME (exp->elts[pc + 2].symbol), stream);
+	fputs_filtered (SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol), stream);
       }
       return;
 
@@ -889,7 +890,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
       fprintf_filtered (stream, ", symbol @");
       gdb_print_host_address (exp->elts[elt + 1].symbol, stream);
       fprintf_filtered (stream, " (%s)",
-			SYMBOL_NAME (exp->elts[elt + 1].symbol));
+			DEPRECATED_SYMBOL_NAME (exp->elts[elt + 1].symbol));
       elt += 3;
       break;
     case OP_LAST:

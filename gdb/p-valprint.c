@@ -1,5 +1,5 @@
 /* Support for printing Pascal values for GDB, the GNU debugger.
-   Copyright 2000, 2001
+   Copyright 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -213,7 +213,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 		{
 		  fputs_filtered (" <", stream);
-		  fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
+		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);
 		  fputs_filtered (">", stream);
 		}
 	      if (vt_address && vtblprint)
@@ -226,7 +226,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  int is_this_fld;
 
 		  if (msymbol != NULL)
-		    wsym = lookup_symbol (SYMBOL_NAME (msymbol), block,
+		    wsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol), block,
 					  VAR_NAMESPACE, &is_this_fld, &s);
 
 		  if (wsym)
@@ -647,7 +647,7 @@ pascal_object_print_class_method (char *valaddr, struct type *type,
 	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
-	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+	      if (STREQ (DEPRECATED_SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
 		goto common;
 	    }
 	}

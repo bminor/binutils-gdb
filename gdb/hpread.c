@@ -3123,7 +3123,7 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
+      DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 					&objfile->symbol_obstack);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -3157,7 +3157,7 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = DEPRECATED_SYMBOL_NAME (xsym);
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
@@ -3231,7 +3231,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       (void) memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
+      DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 					&objfile->symbol_obstack);
 
       /* Figure out where it lives.  */
@@ -3318,7 +3318,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       for (j = 0; j < syms->nsyms; j++, n++)
 	{
 	  struct symbol *xsym = syms->symbol[j];
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = DEPRECATED_SYMBOL_NAME (xsym);
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
 	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
@@ -3405,7 +3405,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       (void) memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = name;
+      DEPRECATED_SYMBOL_NAME (sym) = name;
 
       /* Figure out where it lives.  */
       if (paramp->dfparam.regparam)
@@ -3492,7 +3492,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       for (j = 0; j < syms->nsyms; j++, n++)
 	{
 	  struct symbol *xsym = syms->symbol[j];
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = DEPRECATED_SYMBOL_NAME (xsym);
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
 	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
@@ -5085,7 +5085,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
   sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					 sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
-  SYMBOL_NAME (sym) = obsavestring (name, strlen (name), &objfile->symbol_obstack);
+  DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name), &objfile->symbol_obstack);
   SYMBOL_LANGUAGE (sym) = language_auto;
   SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
   SYMBOL_LINE (sym) = 0;
@@ -5255,22 +5255,22 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
 	TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
 
-      /* The "SYMBOL_NAME" field is expected to be the mangled name
+      /* The "DEPRECATED_SYMBOL_NAME" field is expected to be the mangled name
        * (if any), which we get from the "alias" field of the SOM record
        * if that exists.
        */
       if ((dn_bufp->dfunc.language == HP_LANGUAGE_CPLUSPLUS) &&
 	  dn_bufp->dfunc.alias &&	/* has an alias */
 	  *(char *) (VT (objfile) + dn_bufp->dfunc.alias))	/* not a null string */
-	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.alias;
+	DEPRECATED_SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.alias;
       else
-	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
+	DEPRECATED_SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
 
       /* Special hack to get around HP compilers' insistence on
        * reporting "main" as "_MAIN_" for C/C++ */
-      if ((strcmp (SYMBOL_NAME (sym), "_MAIN_") == 0) &&
+      if ((strcmp (DEPRECATED_SYMBOL_NAME (sym), "_MAIN_") == 0) &&
 	  (strcmp (VT (objfile) + dn_bufp->dfunc.name, "main") == 0))
-	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
+	DEPRECATED_SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
 
       /* The SYMBOL_CPLUS_DEMANGLED_NAME field is expected to
        * be the demangled name.
@@ -5289,7 +5289,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	   * working around the issue in stack.c. - RT
 	   */
 	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
-	  if ((SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->dfunc.alias) &&
+	  if ((DEPRECATED_SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->dfunc.alias) &&
 	      (!SYMBOL_CPLUS_DEMANGLED_NAME (sym)))
 	    {
 
@@ -5373,22 +5373,22 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_TYPE (sym) = hpread_read_doc_function_type (hp_type, dn_bufp, objfile, 1);
 
-      /* The "SYMBOL_NAME" field is expected to be the mangled name
+      /* The "DEPRECATED_SYMBOL_NAME" field is expected to be the mangled name
        * (if any), which we get from the "alias" field of the SOM record
        * if that exists.
        */
       if ((dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS) &&
 	  dn_bufp->ddocfunc.alias &&	/* has an alias */
 	  *(char *) (VT (objfile) + dn_bufp->ddocfunc.alias))	/* not a null string */
-	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.alias;
+	DEPRECATED_SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.alias;
       else
-	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
+	DEPRECATED_SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
 
       /* Special hack to get around HP compilers' insistence on
        * reporting "main" as "_MAIN_" for C/C++ */
-      if ((strcmp (SYMBOL_NAME (sym), "_MAIN_") == 0) &&
+      if ((strcmp (DEPRECATED_SYMBOL_NAME (sym), "_MAIN_") == 0) &&
 	  (strcmp (VT (objfile) + dn_bufp->ddocfunc.name, "main") == 0))
-	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
+	DEPRECATED_SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
 
       if (dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS)
 	{
@@ -5406,7 +5406,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	   */
 	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
 
-	  if ((SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->ddocfunc.alias) &&
+	  if ((DEPRECATED_SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->ddocfunc.alias) &&
 	      (!SYMBOL_CPLUS_DEMANGLED_NAME (sym)))
 	    {
 
@@ -5711,7 +5711,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
        * in the symbol table contains a pointer to the real "g".
        * We use the storage class LOC_INDIRECT to indicate this. RT
        */
-      if (is_in_import_list (SYMBOL_NAME (sym), objfile))
+      if (is_in_import_list (DEPRECATED_SYMBOL_NAME (sym), objfile))
 	SYMBOL_CLASS (sym) = LOC_INDIRECT;
 
       SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location + data_offset;
@@ -5826,8 +5826,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	 * record that actually defines the type.
 	 */
 	SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dtype.type, objfile);
-	TYPE_NAME (sym->type) = SYMBOL_NAME (sym);
-	TYPE_TAG_NAME (sym->type) = SYMBOL_NAME (sym);
+	TYPE_NAME (sym->type) = DEPRECATED_SYMBOL_NAME (sym);
+	TYPE_TAG_NAME (sym->type) = DEPRECATED_SYMBOL_NAME (sym);
 	if (dn_bufp->dtag.global)
 	  add_symbol_to_list (sym, &global_symbols);
 	else if (WITHIN_FUNCTION (objfile))
@@ -5873,7 +5873,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	    newsym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 						    sizeof (struct symbol));
 	    memset (newsym, 0, sizeof (struct symbol));
-	    SYMBOL_NAME (newsym) = name;
+	    DEPRECATED_SYMBOL_NAME (newsym) = name;
 	    SYMBOL_LANGUAGE (newsym) = language_auto;
 	    SYMBOL_NAMESPACE (newsym) = VAR_NAMESPACE;
 	    SYMBOL_LINE (newsym) = 0;

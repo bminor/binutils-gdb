@@ -1146,10 +1146,10 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, 
                               num_regs * gdbarch_register_size (gdbarch));
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
   set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
   set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);
@@ -1167,9 +1167,9 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Stack unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
-  set_gdbarch_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
-  set_gdbarch_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
   set_gdbarch_deprecated_extract_return_value (gdbarch, mn10300_extract_return_value);
@@ -1197,7 +1197,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
   set_gdbarch_push_return_address (gdbarch, mn10300_push_return_address);

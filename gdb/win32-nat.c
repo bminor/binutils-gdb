@@ -602,8 +602,8 @@ register_loaded_dll (const char *name, DWORD load_addr)
   so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
   so->loaded = 0;
   so->load_addr = load_addr;
-  if (!VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
-		       sizeof (m)))
+  if (VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
+		      sizeof (m)))
     so->end_addr = (DWORD) m.AllocationBase + m.RegionSize;
   else
     so->end_addr = load_addr + 0x2000;	/* completely arbitrary */
@@ -635,21 +635,16 @@ get_image_name (HANDLE h, void *address, int unicode)
   if (address == NULL)
     return NULL;
 
-  ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done);
-
   /* See if we could read the address of a string, and that the
      address isn't null. */
-
-  if (done != sizeof (address_ptr) || !address_ptr)
+  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done) 
+      || done != sizeof (address_ptr) || !address_ptr)
     return NULL;
 
   /* Find the length of the string */
-  do
-    {
-      ReadProcessMemory (h, address_ptr + len * size, &b, size, &done);
-      len++;
-    }
-  while ((b[0] != 0 || b[size - 1] != 0) && done == size);
+  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
+	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
+    continue;
 
   if (!unicode)
     ReadProcessMemory (h, address_ptr, buf, len, &done);
@@ -750,11 +745,66 @@ child_clear_solibs (void)
   max_dll_name_len = sizeof ("DLL Name") - 1;
 }
 
+/* Get the loaded address of all sections, given that .text was loaded
+   at text_load. Assumes that all sections are subject to the same
+   relocation offset. Returns NULL if problems occur or if the
+   sections were not relocated. */
+
+static struct section_addr_info *
+get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
+{
+  struct section_addr_info *result = NULL;
+  int section_count = bfd_count_sections (abfd);
+  asection *text_section = bfd_get_section_by_name (abfd, ".text");
+  CORE_ADDR text_vma;
+
+  if (!text_section)
+    {
+      /* Couldn't get the .text section. Weird. */
+    }
+
+  else if (text_load == (text_vma = bfd_get_section_vma (abfd, text_section)))
+    {
+      /* DLL wasn't relocated. */
+    }
+
+  else
+    {
+      /* Figure out all sections' loaded addresses. The offset here is
+	 such that taking a bfd_get_section_vma() result and adding
+	 offset will give the real load address of the section. */
+
+      CORE_ADDR offset = text_load - text_vma;
+
+      struct section_table *table_start = NULL;
+      struct section_table *table_end = NULL;
+      struct section_table *iter = NULL;
+
+      build_section_table (abfd, &table_start, &table_end);
+
+      for (iter = table_start; iter < table_end; ++iter)
+	{
+	  /* Relocated addresses. */
+	  iter->addr += offset;
+	  iter->endaddr += offset;
+	}
+
+      result = build_section_addr_info_from_section_table (table_start,
+							   table_end);
+
+      xfree (table_start);
+    }
+
+  return result;
+}
+
 /* Add DLL symbol information. */
 static struct objfile *
 solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 {
-  struct section_addr_info section_addrs;
+  struct section_addr_info *section_addrs_ptr = NULL;
+  static struct objfile *result = NULL;
+  bfd *abfd = NULL;
 
   /* The symbols in a dll are offset by 0x1000, which is the
      the offset from 0 of the first byte in an image - because
@@ -763,10 +813,46 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
   if (!name || !name[0])
     return NULL;
 
-  memset (&section_addrs, 0, sizeof (section_addrs));
-  section_addrs.other[0].name = ".text";
-  section_addrs.other[0].addr = load_addr;
-  return safe_symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
+  abfd = bfd_openr (name, "pei-i386");
+
+  if (!abfd)
+    {
+      /* pei failed - try pe */
+      abfd = bfd_openr (name, "pe-i386");
+    }
+
+  if (abfd)
+    {
+      if (bfd_check_format (abfd, bfd_object))
+	{
+	  section_addrs_ptr = get_relocated_section_addrs (abfd, load_addr);
+	}
+
+      bfd_close (abfd);
+    }
+
+  if (section_addrs_ptr)
+    {
+      result = safe_symbol_file_add (name, from_tty, section_addrs_ptr,
+				     0, OBJF_SHARED);
+
+      free_section_addr_info (section_addrs_ptr);
+    }
+
+  else
+    {
+      /* Fallback on handling just the .text section. */
+      struct section_addr_info section_addrs;
+
+      memset (&section_addrs, 0, sizeof (section_addrs));
+      section_addrs.other[0].name = ".text";
+      section_addrs.other[0].addr = load_addr;
+
+      result = safe_symbol_file_add (name, from_tty, &section_addrs,
+				     0, OBJF_SHARED);
+    }
+
+  return result;
 }
 
 /* Load DLL symbol info. */
@@ -858,7 +944,7 @@ display_selector (HANDLE thread, DWORD sel)
 	     + info.BaseLow;
       limit = (info.HighWord.Bits.LimitHi << 16) + info.LimitLow;
       if (info.HighWord.Bits.Granularity)
-       limit = (limit << 12) | 0xfff;
+	limit = (limit << 12) | 0xfff;
       printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
       if (info.HighWord.Bits.Default_Big)
 	puts_filtered(" 32-bit ");
@@ -1410,12 +1496,12 @@ set_process_privilege (const char *privilege, BOOL enable)
 	AdjustTokenPrivileges = GetProcAddress (advapi32,
 						"AdjustTokenPrivileges");
       if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
-        {
+	{
 	  advapi32 = NULL;
 	  goto out;
 	}
     }
-  
+
   if (!OpenProcessToken (GetCurrentProcess (),
 			 TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
 			 &token_hdl))
@@ -1429,7 +1515,7 @@ set_process_privilege (const char *privilege, BOOL enable)
   new_priv.Privileges[0].Attributes = enable ? SE_PRIVILEGE_ENABLED : 0;
 
   if (!AdjustTokenPrivileges (token_hdl, FALSE, &new_priv,
-                              sizeof orig_priv, &orig_priv, &size))
+			      sizeof orig_priv, &orig_priv, &size))
     goto out;
 #if 0
   /* Disabled, otherwise every `attach' in an unprivileged user session
@@ -1480,7 +1566,7 @@ child_attach (char *args, int from_tty)
 	ok = DebugActiveProcess (pid);
 
       if (!ok)
-    error ("Can't attach to process.");
+	error ("Can't attach to process.");
     }
 
   if (has_detach_ability ())
@@ -1772,21 +1858,23 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 		   int write, struct mem_attrib *mem,
 		   struct target_ops *target)
 {
-  DWORD done;
+  DWORD done = 0;
   if (write)
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) memaddr));
-      WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
-			  len, &done);
+      if (!WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
+			       len, &done))
+	done = 0;
       FlushInstructionCache (current_process_handle, (LPCVOID) memaddr, len);
     }
   else
     {
       DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) memaddr));
-      ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our, len,
-			 &done);
+      if (!ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our,
+			      len, &done))
+	done = 0;
     }
   return done;
 }
@@ -1873,16 +1961,16 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (th->context.ContextFlags)
 	{
-     if (debug_registers_changed)
-       {
-	  th->context.Dr0 = dr[0];
-	  th->context.Dr1 = dr[1];
-	  th->context.Dr2 = dr[2];
-	  th->context.Dr3 = dr[3];
-	  /* th->context.Dr6 = dr[6];
-	   FIXME: should we set dr6 also ?? */
-	  th->context.Dr7 = dr[7];
-       }
+	  if (debug_registers_changed)
+	    {
+	      th->context.Dr0 = dr[0];
+	      th->context.Dr1 = dr[1];
+	      th->context.Dr2 = dr[2];
+	      th->context.Dr3 = dr[3];
+	      /* th->context.Dr6 = dr[6];
+	       FIXME: should we set dr6 also ?? */
+	      th->context.Dr7 = dr[7];
+	    }
 	  CHECK (SetThreadContext (th->h, &th->context));
 	  th->context.ContextFlags = 0;
 	}

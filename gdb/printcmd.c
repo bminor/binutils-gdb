@@ -1,7 +1,7 @@
 /* Print values for GNU debugger GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -41,6 +41,7 @@
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -639,10 +640,10 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   if (symbol)
     {
       name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
-      if (do_demangle)
-	name_temp = SYMBOL_SOURCE_NAME (symbol);
+      if (do_demangle || asm_demangle)
+	name_temp = SYMBOL_PRINT_NAME (symbol);
       else
-	name_temp = SYMBOL_LINKAGE_NAME (symbol);
+	name_temp = DEPRECATED_SYMBOL_NAME (symbol);
     }
 
   if (msymbol != NULL)
@@ -654,10 +655,10 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  symbol = 0;
 	  symtab = 0;
 	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
-	  if (do_demangle)
-	    name_temp = SYMBOL_SOURCE_NAME (msymbol);
+	  if (do_demangle || asm_demangle)
+	    name_temp = SYMBOL_PRINT_NAME (msymbol);
 	  else
-	    name_temp = SYMBOL_LINKAGE_NAME (msymbol);
+	    name_temp = DEPRECATED_SYMBOL_NAME (msymbol);
 	}
     }
   if (symbol == NULL && msymbol == NULL)
@@ -1043,10 +1044,10 @@ sym_info (char *arg, int from_tty)
 	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);
 	if (offset)
 	  printf_filtered ("%s + %u in ",
-			   SYMBOL_SOURCE_NAME (msymbol), offset);
+			   SYMBOL_PRINT_NAME (msymbol), offset);
 	else
 	  printf_filtered ("%s in ",
-			   SYMBOL_SOURCE_NAME (msymbol));
+			   SYMBOL_PRINT_NAME (msymbol));
 	if (pc_in_unmapped_range (addr, sect))
 	  printf_filtered ("load address range of ");
 	if (section_is_overlay (sect))
@@ -1121,7 +1122,7 @@ address_info (char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
+  fprintf_symbol_filtered (gdb_stdout, DEPRECATED_SYMBOL_NAME (sym),
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
@@ -1146,6 +1147,11 @@ address_info (char *exp, int from_tty)
 	  print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (" in overlay section %s", section->name);
 	}
+      break;
+
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      (SYMBOL_LOCATION_FUNCS (sym)->describe_location) (sym, gdb_stdout);
       break;
 
     case LOC_REGISTER:
@@ -1234,7 +1240,7 @@ address_info (char *exp, int from_tty)
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);
+	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, NULL);
 	if (msym == NULL)
 	  printf_filtered ("unresolved");
 	else
@@ -1363,7 +1369,9 @@ display_command (char *exp, int from_tty)
   int display_it = 1;
 
 #if defined(TUI)
-  if (tui_version && *exp == '$')
+  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+     `tui_version'.  */
+  if (tui_active && *exp == '$')
     display_it = (tui_set_layout (exp) == TUI_FAILURE);
 #endif
 
@@ -1811,6 +1819,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	    case LOC_REGPARM_ADDR:
 	    case LOC_LOCAL_ARG:
 	    case LOC_BASEREG_ARG:
+	    case LOC_COMPUTED_ARG:
 	      break;
 
 	    /* Other types of symbols we just skip over.  */
@@ -1831,11 +1840,11 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	     Null parameter names occur on the RS/6000, for traceback tables.
 	     FIXME, should we even print them?  */
 
-	  if (*SYMBOL_NAME (sym))
+	  if (*DEPRECATED_SYMBOL_NAME (sym))
 	    {
 	      struct symbol *nsym;
 	      nsym = lookup_symbol
-		(SYMBOL_NAME (sym),
+		(DEPRECATED_SYMBOL_NAME (sym),
 		 b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
 		{
@@ -1879,7 +1888,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	  annotate_arg_begin ();
 
 	  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	  fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
+	  fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (sym),
 				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
 	  ui_out_field_stream (uiout, "name", stb);
 	  annotate_arg_name_end ();

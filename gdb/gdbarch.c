@@ -170,10 +170,11 @@ struct gdbarch
   int register_bytes;
   gdbarch_register_byte_ftype *register_byte;
   gdbarch_register_raw_size_ftype *register_raw_size;
-  int max_register_raw_size;
+  int deprecated_max_register_raw_size;
   gdbarch_register_virtual_size_ftype *register_virtual_size;
-  int max_register_virtual_size;
+  int deprecated_max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
+  gdbarch_register_type_ftype *register_type;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
@@ -213,7 +214,7 @@ struct gdbarch
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
   gdbarch_push_arguments_ftype *push_arguments;
-  gdbarch_push_dummy_frame_ftype *push_dummy_frame;
+  gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
   gdbarch_push_return_address_ftype *push_return_address;
   gdbarch_pop_frame_ftype *pop_frame;
   gdbarch_store_struct_return_ftype *store_struct_return;
@@ -224,8 +225,8 @@ struct gdbarch
   gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
   gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
-  gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs;
-  gdbarch_init_extra_frame_info_ftype *init_extra_frame_info;
+  gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs;
+  gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
   gdbarch_inner_than_ftype *inner_than;
@@ -336,6 +337,7 @@ struct gdbarch startup_gdbarch =
   generic_register_size,
   0,
   generic_register_size,
+  0,
   0,
   0,
   0,
@@ -517,9 +519,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_bytes = -1;
   current_gdbarch->register_byte = generic_register_byte;
   current_gdbarch->register_raw_size = generic_register_size;
-  current_gdbarch->max_register_raw_size = -1;
   current_gdbarch->register_virtual_size = generic_register_size;
-  current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->print_registers_info = default_print_registers_info;
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
@@ -659,16 +659,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tregister_bytes");
   /* Skip verify of register_byte, invalid_p == 0 */
   /* Skip verify of register_raw_size, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->max_register_raw_size == -1))
-    fprintf_unfiltered (log, "\n\tmax_register_raw_size");
+  /* Skip verify of deprecated_max_register_raw_size, has predicate */
   /* Skip verify of register_virtual_size, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->max_register_virtual_size == -1))
-    fprintf_unfiltered (log, "\n\tmax_register_virtual_size");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_virtual_type == 0))
-    fprintf_unfiltered (log, "\n\tregister_virtual_type");
+  /* Skip verify of deprecated_max_register_virtual_size, has predicate */
+  /* Skip verify of register_virtual_type, has predicate */
+  /* Skip verify of register_type, has predicate */
   /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
@@ -724,9 +719,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
   /* Skip verify of push_arguments, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->push_dummy_frame == 0))
-    fprintf_unfiltered (log, "\n\tpush_dummy_frame");
+  /* Skip verify of deprecated_push_dummy_frame, has predicate */
   /* Skip verify of push_return_address, has predicate */
   /* Skip verify of pop_frame, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -737,8 +730,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
-  /* Skip verify of frame_init_saved_regs, has predicate */
-  /* Skip verify of init_extra_frame_info, has predicate */
+  /* Skip verify of deprecated_frame_init_saved_regs, has predicate */
+  /* Skip verify of deprecated_init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
@@ -1171,6 +1164,52 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
+#ifdef DEPRECATED_FRAME_INIT_SAVED_REGS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_INIT_SAVED_REGS_P()",
+                      XSTRING (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS_P() = %d\n",
+                      DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
+#endif
+#ifdef DEPRECATED_FRAME_INIT_SAVED_REGS
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_INIT_SAVED_REGS(frame)",
+                      XSTRING (DEPRECATED_FRAME_INIT_SAVED_REGS (frame)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_frame_init_saved_regs
+                        /*DEPRECATED_FRAME_INIT_SAVED_REGS ()*/);
+#endif
+#ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_INIT_EXTRA_FRAME_INFO_P()",
+                      XSTRING (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_INIT_EXTRA_FRAME_INFO_P() = %d\n",
+                      DEPRECATED_INIT_EXTRA_FRAME_INFO_P ());
+#endif
+#ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
+                      XSTRING (DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, frame)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_INIT_EXTRA_FRAME_INFO = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_init_extra_frame_info
+                        /*DEPRECATED_INIT_EXTRA_FRAME_INFO ()*/);
+#endif
 #ifdef DEPRECATED_INIT_FRAME_PC_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1211,6 +1250,40 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_init_frame_pc_first
                         /*DEPRECATED_INIT_FRAME_PC_FIRST ()*/);
 #endif
+#ifdef DEPRECATED_MAX_REGISTER_RAW_SIZE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_MAX_REGISTER_RAW_SIZE_P()",
+                      XSTRING (DEPRECATED_MAX_REGISTER_RAW_SIZE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_RAW_SIZE_P() = %d\n",
+                      DEPRECATED_MAX_REGISTER_RAW_SIZE_P ());
+#endif
+#ifdef DEPRECATED_MAX_REGISTER_RAW_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_RAW_SIZE # %s\n",
+                      XSTRING (DEPRECATED_MAX_REGISTER_RAW_SIZE));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_RAW_SIZE = %d\n",
+                      DEPRECATED_MAX_REGISTER_RAW_SIZE);
+#endif
+#ifdef DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P()",
+                      XSTRING (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() = %d\n",
+                      DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ());
+#endif
+#ifdef DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE # %s\n",
+                      XSTRING (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE = %d\n",
+                      DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE);
+#endif
 #ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1230,6 +1303,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_PC_IN_CALL_DUMMY = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_pc_in_call_dummy
                         /*DEPRECATED_PC_IN_CALL_DUMMY ()*/);
+#endif
+#ifdef DEPRECATED_PUSH_DUMMY_FRAME_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PUSH_DUMMY_FRAME_P()",
+                      XSTRING (DEPRECATED_PUSH_DUMMY_FRAME_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_PUSH_DUMMY_FRAME_P() = %d\n",
+                      DEPRECATED_PUSH_DUMMY_FRAME_P ());
+#endif
+#ifdef DEPRECATED_PUSH_DUMMY_FRAME
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PUSH_DUMMY_FRAME(-)",
+                      XSTRING (DEPRECATED_PUSH_DUMMY_FRAME (-)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_PUSH_DUMMY_FRAME = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_push_dummy_frame
+                        /*DEPRECATED_PUSH_DUMMY_FRAME ()*/);
 #endif
 #ifdef DEPRECATED_STORE_RETURN_VALUE
 #if GDB_MULTI_ARCH
@@ -1465,29 +1561,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->frame_chain_valid
                         /*FRAME_CHAIN_VALID ()*/);
 #endif
-#ifdef FRAME_INIT_SAVED_REGS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_INIT_SAVED_REGS_P()",
-                      XSTRING (FRAME_INIT_SAVED_REGS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_INIT_SAVED_REGS_P() = %d\n",
-                      FRAME_INIT_SAVED_REGS_P ());
-#endif
-#ifdef FRAME_INIT_SAVED_REGS
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_INIT_SAVED_REGS(frame)",
-                      XSTRING (FRAME_INIT_SAVED_REGS (frame)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAME_INIT_SAVED_REGS = <0x%08lx>\n",
-                        (long) current_gdbarch->frame_init_saved_regs
-                        /*FRAME_INIT_SAVED_REGS ()*/);
-#endif
 #ifdef FRAME_LOCALS_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1589,29 +1662,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT = %d\n",
                       HAVE_NONSTEPPABLE_WATCHPOINT);
 #endif
-#ifdef INIT_EXTRA_FRAME_INFO_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_EXTRA_FRAME_INFO_P()",
-                      XSTRING (INIT_EXTRA_FRAME_INFO_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: INIT_EXTRA_FRAME_INFO_P() = %d\n",
-                      INIT_EXTRA_FRAME_INFO_P ());
-#endif
-#ifdef INIT_EXTRA_FRAME_INFO
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
-                      XSTRING (INIT_EXTRA_FRAME_INFO (fromleaf, frame)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_EXTRA_FRAME_INFO = <0x%08lx>\n",
-                        (long) current_gdbarch->init_extra_frame_info
-                        /*INIT_EXTRA_FRAME_INFO ()*/);
-#endif
 #ifdef INNER_THAN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1664,22 +1714,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: IN_SOLIB_RETURN_TRAMPOLINE = <0x%08lx>\n",
                         (long) current_gdbarch->in_solib_return_trampoline
                         /*IN_SOLIB_RETURN_TRAMPOLINE ()*/);
-#endif
-#ifdef MAX_REGISTER_RAW_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: MAX_REGISTER_RAW_SIZE # %s\n",
-                      XSTRING (MAX_REGISTER_RAW_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: MAX_REGISTER_RAW_SIZE = %d\n",
-                      MAX_REGISTER_RAW_SIZE);
-#endif
-#ifdef MAX_REGISTER_VIRTUAL_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: MAX_REGISTER_VIRTUAL_SIZE # %s\n",
-                      XSTRING (MAX_REGISTER_VIRTUAL_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: MAX_REGISTER_VIRTUAL_SIZE = %d\n",
-                      MAX_REGISTER_VIRTUAL_SIZE);
 #endif
 #ifdef MEMORY_INSERT_BREAKPOINT
   fprintf_unfiltered (file,
@@ -1857,20 +1891,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->push_arguments
                         /*PUSH_ARGUMENTS ()*/);
 #endif
-#ifdef PUSH_DUMMY_FRAME
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PUSH_DUMMY_FRAME(-)",
-                      XSTRING (PUSH_DUMMY_FRAME (-)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: PUSH_DUMMY_FRAME = <0x%08lx>\n",
-                        (long) current_gdbarch->push_dummy_frame
-                        /*PUSH_DUMMY_FRAME ()*/);
-#endif
 #ifdef PUSH_RETURN_ADDRESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2024,6 +2044,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_to_value
                         /*REGISTER_TO_VALUE ()*/);
 #endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_register_type_p() = %d\n",
+                        gdbarch_register_type_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_type = 0x%08lx\n",
+                        (long) current_gdbarch->register_type);
 #ifdef REGISTER_VIRTUAL_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2034,6 +2062,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_VIRTUAL_SIZE = <0x%08lx>\n",
                         (long) current_gdbarch->register_virtual_size
                         /*REGISTER_VIRTUAL_SIZE ()*/);
+#endif
+#ifdef REGISTER_VIRTUAL_TYPE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_VIRTUAL_TYPE_P()",
+                      XSTRING (REGISTER_VIRTUAL_TYPE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_VIRTUAL_TYPE_P() = %d\n",
+                      REGISTER_VIRTUAL_TYPE_P ());
 #endif
 #ifdef REGISTER_VIRTUAL_TYPE
   fprintf_unfiltered (file,
@@ -3281,22 +3318,26 @@ set_gdbarch_register_raw_size (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_max_register_raw_size (struct gdbarch *gdbarch)
+gdbarch_deprecated_max_register_raw_size_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->max_register_raw_size == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_max_register_raw_size invalid");
+  return gdbarch->deprecated_max_register_raw_size != 0;
+}
+
+int
+gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_max_register_raw_size called\n");
-  return gdbarch->max_register_raw_size;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_max_register_raw_size called\n");
+  return gdbarch->deprecated_max_register_raw_size;
 }
 
 void
-set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch,
-                                   int max_register_raw_size)
+set_gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch,
+                                              int deprecated_max_register_raw_size)
 {
-  gdbarch->max_register_raw_size = max_register_raw_size;
+  gdbarch->deprecated_max_register_raw_size = deprecated_max_register_raw_size;
 }
 
 int
@@ -3319,22 +3360,33 @@ set_gdbarch_register_virtual_size (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_max_register_virtual_size (struct gdbarch *gdbarch)
+gdbarch_deprecated_max_register_virtual_size_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->max_register_virtual_size == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_max_register_virtual_size invalid");
+  return gdbarch->deprecated_max_register_virtual_size != 0;
+}
+
+int
+gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_max_register_virtual_size called\n");
-  return gdbarch->max_register_virtual_size;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_max_register_virtual_size called\n");
+  return gdbarch->deprecated_max_register_virtual_size;
 }
 
 void
-set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch,
-                                       int max_register_virtual_size)
+set_gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch,
+                                                  int deprecated_max_register_virtual_size)
 {
-  gdbarch->max_register_virtual_size = max_register_virtual_size;
+  gdbarch->deprecated_max_register_virtual_size = deprecated_max_register_virtual_size;
+}
+
+int
+gdbarch_register_virtual_type_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->register_virtual_type != 0;
 }
 
 struct type *
@@ -3354,6 +3406,32 @@ set_gdbarch_register_virtual_type (struct gdbarch *gdbarch,
                                    gdbarch_register_virtual_type_ftype register_virtual_type)
 {
   gdbarch->register_virtual_type = register_virtual_type;
+}
+
+int
+gdbarch_register_type_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->register_type != 0;
+}
+
+struct type *
+gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->register_type == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_register_type invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_type called\n");
+  return gdbarch->register_type (gdbarch, reg_nr);
+}
+
+void
+set_gdbarch_register_type (struct gdbarch *gdbarch,
+                           gdbarch_register_type_ftype register_type)
+{
+  gdbarch->register_type = register_type;
 }
 
 int
@@ -4154,23 +4232,30 @@ set_gdbarch_push_arguments (struct gdbarch *gdbarch,
   gdbarch->push_arguments = push_arguments;
 }
 
-void
-gdbarch_push_dummy_frame (struct gdbarch *gdbarch)
+int
+gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->push_dummy_frame == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_push_dummy_frame invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_frame called\n");
-  gdbarch->push_dummy_frame ();
+  return gdbarch->deprecated_push_dummy_frame != 0;
 }
 
 void
-set_gdbarch_push_dummy_frame (struct gdbarch *gdbarch,
-                              gdbarch_push_dummy_frame_ftype push_dummy_frame)
+gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch)
 {
-  gdbarch->push_dummy_frame = push_dummy_frame;
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_push_dummy_frame == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_push_dummy_frame invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_dummy_frame called\n");
+  gdbarch->deprecated_push_dummy_frame ();
+}
+
+void
+set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch,
+                                         gdbarch_deprecated_push_dummy_frame_ftype deprecated_push_dummy_frame)
+{
+  gdbarch->deprecated_push_dummy_frame = deprecated_push_dummy_frame;
 }
 
 int
@@ -4392,55 +4477,55 @@ set_gdbarch_use_struct_convention (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_frame_init_saved_regs_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->frame_init_saved_regs != 0;
+  return gdbarch->deprecated_frame_init_saved_regs != 0;
 }
 
 void
-gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->frame_init_saved_regs == 0)
+  if (gdbarch->deprecated_frame_init_saved_regs == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_frame_init_saved_regs invalid");
+                    "gdbarch: gdbarch_deprecated_frame_init_saved_regs invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_init_saved_regs called\n");
-  gdbarch->frame_init_saved_regs (frame);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frame_init_saved_regs called\n");
+  gdbarch->deprecated_frame_init_saved_regs (frame);
 }
 
 void
-set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch,
-                                   gdbarch_frame_init_saved_regs_ftype frame_init_saved_regs)
+set_gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch,
+                                              gdbarch_deprecated_frame_init_saved_regs_ftype deprecated_frame_init_saved_regs)
 {
-  gdbarch->frame_init_saved_regs = frame_init_saved_regs;
+  gdbarch->deprecated_frame_init_saved_regs = deprecated_frame_init_saved_regs;
 }
 
 int
-gdbarch_init_extra_frame_info_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_init_extra_frame_info_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->init_extra_frame_info != 0;
+  return gdbarch->deprecated_init_extra_frame_info != 0;
 }
 
 void
-gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame)
+gdbarch_deprecated_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->init_extra_frame_info == 0)
+  if (gdbarch->deprecated_init_extra_frame_info == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_init_extra_frame_info invalid");
+                    "gdbarch: gdbarch_deprecated_init_extra_frame_info invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_extra_frame_info called\n");
-  gdbarch->init_extra_frame_info (fromleaf, frame);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_init_extra_frame_info called\n");
+  gdbarch->deprecated_init_extra_frame_info (fromleaf, frame);
 }
 
 void
-set_gdbarch_init_extra_frame_info (struct gdbarch *gdbarch,
-                                   gdbarch_init_extra_frame_info_ftype init_extra_frame_info)
+set_gdbarch_deprecated_init_extra_frame_info (struct gdbarch *gdbarch,
+                                              gdbarch_deprecated_init_extra_frame_info_ftype deprecated_init_extra_frame_info)
 {
-  gdbarch->init_extra_frame_info = init_extra_frame_info;
+  gdbarch->deprecated_init_extra_frame_info = deprecated_init_extra_frame_info;
 }
 
 CORE_ADDR
