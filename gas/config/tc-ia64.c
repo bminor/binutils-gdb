@@ -197,7 +197,8 @@ static struct
       explicit_mode : 1,            /* which mode we're in */
       default_explicit_mode : 1,    /* which mode is the default */
       mode_explicitly_set : 1,      /* was the current mode explicitly set? */
-      auto_align : 1;
+      auto_align : 1,
+      keep_pending_output : 1;
 
     /* Each bundle consists of up to three instructions.  We keep
        track of four most recent instructions so we can correctly set
@@ -4151,9 +4152,11 @@ dot_xdata (size)
   if (!name)
     return;
 
+  md.keep_pending_output = 1;
   set_section (name);
   cons (size);
   obj_elf_previous (0);
+  md.keep_pending_output = 0;
 }
 
 /* Why doesn't float_cons() call md_cons_align() the way cons() does?  */
@@ -4197,9 +4200,11 @@ dot_xfloat_cons (kind)
   if (!name)
     return;
 
+  md.keep_pending_output = 1;
   set_section (name);
   stmt_float_cons (kind);
   obj_elf_previous (0);
+  md.keep_pending_output = 0;
 }
 
 static void
@@ -4210,9 +4215,11 @@ dot_xstringer (zero)
   if (!name)
     return;
 
+  md.keep_pending_output = 1;
   set_section (name);
   stringer (zero);
   obj_elf_previous (0);
+  md.keep_pending_output = 0;
 }
 
 static void
@@ -4224,11 +4231,13 @@ dot_xdata_ua (size)
   if (!name)
     return;
 
+  md.keep_pending_output = 1;
   set_section (name);
   md.auto_align = 0;
   cons (size);
   md.auto_align = saved_auto_align;
   obj_elf_previous (0);
+  md.keep_pending_output = 0;
 }
 
 static void
@@ -4240,11 +4249,13 @@ dot_xfloat_cons_ua (kind)
   if (!name)
     return;
 
+  md.keep_pending_output = 1;
   set_section (name);
   md.auto_align = 0;
   stmt_float_cons (kind);
   md.auto_align = saved_auto_align;
   obj_elf_previous (0);
+  md.keep_pending_output = 0;
 }
 
 /* .reg.val <regname>,value */
@@ -6613,14 +6624,36 @@ ia64_unrecognized_line (ch)
 	char *s;
 	char c;
 	symbolS *tag;
+	int temp;
 
 	if (md.qp.X_op == O_register)
 	  {
 	    as_bad ("Tag must come before qualifying predicate.");
 	    return 0;
 	  }
-	s = input_line_pointer;
-	c = get_symbol_end ();
+
+	/* This implements just enough of read_a_source_file in read.c to
+	   recognize labels.  */
+	if (is_name_beginner (*input_line_pointer))
+	  {
+	    s = input_line_pointer;
+	    c = get_symbol_end ();
+	  }
+	else if (LOCAL_LABELS_FB
+		 && isdigit ((unsigned char) *input_line_pointer))
+	  {
+	    temp = 0;
+	    while (isdigit ((unsigned char) *input_line_pointer))
+	      temp = (temp * 10) + *input_line_pointer++ - '0';
+	    fb_label_instance_inc (temp);
+	    s = fb_label_name (temp, 0);
+	    c = *input_line_pointer;
+	  }
+	else
+	  {
+	    s = NULL;
+	    c = '\0';
+	  }
 	if (c != ':')
 	  {
 	    /* Put ':' back for error messages' sake.  */
@@ -6628,6 +6661,7 @@ ia64_unrecognized_line (ch)
 	    as_bad ("Expected ':'");
 	    return 0;
 	  }
+
 	defining_tag = 1;
 	tag = colon (s);
 	defining_tag = 0;
@@ -6695,7 +6729,8 @@ ia64_frob_label (sym)
 void
 ia64_flush_pending_output ()
 {
-  if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+  if (!md.keep_pending_output
+      && bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
     {
       /* ??? This causes many unnecessary stop bits to be emitted.
 	 Unfortunately, it isn't clear if it is safe to remove this.  */

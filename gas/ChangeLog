@@ -1,3 +1,20 @@
+2001-03-15  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (md): New member keep_pending_output.
+	(ia64_flush_pending_output): Flush only if md.keep_pending_output
+	is not set.
+	(dot_xdata): Turn on md.keep_pending_output for the duration of
+	this function.
+	(dot_xfloat_cons): Ditto.
+	(dot_xstringer): Ditto.
+	(dot_xdata_ua): Ditto.
+	(dot_xfloat_cons_ua): Ditto.
+
+2001-03-15  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (ia64_unrecognized_line, case '['): Add local
+	label support.
+
 2001-03-15  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (parse_reg): Match capital MACH and MACL.
