@@ -7,7 +7,7 @@
 	(elfcore_write_pstatus): New function.
 	(elfcore_write_prfpreg): New function.
 	(elfcore_write_prxfpreg): New function.
-	* elf-bfd.c: Add prototypes for above functions.
+	* elf-bfd.h: Add prototypes for above functions.
 
 2002-01-08  Alexandre Oliva  <aoliva@redhat.com>
 
