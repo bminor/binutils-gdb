@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Remote communication protocol.
 
@@ -130,10 +130,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					targets.
 	or...		XAA		The process terminated with signal
 					AA.
-	or...         	Otext		Send text to stdout.  This can happen
-					at any time while the program is
+        or...           OXX..XX	XX..XX  is hex encoding of ASCII data. This
+					can happen at any time while the program is
 					running and the debugger should
 					continue to wait for 'W', 'T', etc.
+
+	or...         	Otext		Send text to stdout.
 
 	thread alive	TXX		Find out if the thread XX is alive.
 	reply		OK		thread is still alive
@@ -812,7 +814,17 @@ Packet: '%s'\n",
 
 	  goto got_status;
 	case 'O':		/* Console output */
-	  fputs_filtered ((char *)(buf + 1), gdb_stdout);
+ 	  for (p = buf + 1; *p; p +=2) 
+ 	    {
+ 	      char tb[2];
+ 	      char c = fromhex (p[0]) * 16 + fromhex (p[1]);
+ 	      tb[0] = c;
+ 	      tb[1] = 0;
+ 	      if (target_output_hook)
+ 		target_output_hook (tb);
+ 	      else 
+ 		fputs_filtered (tb, gdb_stdout);
+ 	    }
 	  continue;
 	case '\0':
 	  if (last_sent_signal != TARGET_SIGNAL_0)

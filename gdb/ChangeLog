@@ -1,3 +1,10 @@
+Sat Aug  5 09:07:28 1995  steve chamberlain  <sac@slash.cygnus.com>
+ 
+ 	* remote-hms.c (hms_cmds): Get reg term right.
+	* monitor.c (monitor_fetch_register):  If we see
+	a non-hex digit, just stop reading.  
+ 	* remote.c (remote_wait): Change way $O is handled.
+ 
 Wed Aug  9 11:42:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	 * configure.in (powerpc-*-aix*): Recognize as a new gdb host

@@ -113,7 +113,7 @@ static struct monitor_ops hms_cmds =
     "\003",			/* getmem.term_cmd */
   },
   {
-    "\003r %s=%x\r",		/* setreg.cmd (name, value) */
+    "r %s=%x\r",		/* setreg.cmd (name, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL			/* setreg.term_cmd */
@@ -121,7 +121,7 @@ static struct monitor_ops hms_cmds =
   {
     "r %s\r",			/* getreg.cmd (name) */
     " (",			/* getreg.resp_delim */
-    "):",			/* getreg.term */
+    ":",			/* getreg.term */
     "\003",			/* getreg.term_cmd */
   },
   "r\r",			/* dump_registers */
