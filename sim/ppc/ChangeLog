@@ -1,3 +1,8 @@
+Tue Feb 11 13:49:10 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (callback.o): Define HAVE_CONFIG_H, so callback.c
+	includes our config.h.
+
 Tue Feb  4 13:42:59 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in: Fix typo in test for callback.c.

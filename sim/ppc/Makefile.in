@@ -403,8 +403,8 @@ targ-map.c: Makefile gentmap $(srcdir)/../../move-if-change
 	./gentmap -c > tmp-map.c
 	$(srcdir)/../../move-if-change tmp-map.c targ-map.c
 
-callback.o: ../common/callback.c targ-vals.h
-	$(CC) -c $(STD_CFLAGS) $<
+callback.o: ../common/callback.c targ-vals.h config.h
+	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $<
 
 targ-map.o: targ-map.c targ-vals.h
 
