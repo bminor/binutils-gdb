@@ -1,3 +1,8 @@
+Thu Jun  4 12:14:48 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* printcmd.c (disassemble_command): Fix off-by-one error for
+	disassembling functions in unmapped overlay sections.
+
 Thu Jun  4 10:15:03 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote.c: merged.

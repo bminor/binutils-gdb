@@ -121,6 +121,11 @@ static int display_number;
 int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info *));
 disassemble_info tm_print_insn_info;
 
+/* Functions exported for general use: */
+
+void output_command PARAMS ((char *, int));
+
+
 /* Prototypes for local functions.  */
 
 static void delete_display PARAMS ((int));
@@ -146,13 +151,11 @@ static void free_display PARAMS ((struct display *));
 
 static void display_command PARAMS ((char *, int));
 
-static void x_command PARAMS ((char *, int));
+void x_command PARAMS ((char *, int));
 
 static void address_info PARAMS ((char *, int));
 
 static void set_command PARAMS ((char *, int));
-
-static void output_command PARAMS ((char *, int));
 
 static void call_command PARAMS ((char *, int));
 
@@ -906,7 +909,7 @@ call_command (exp, from_tty)
 }
 
 /* ARGSUSED */
-static void
+void
 output_command (exp, from_tty)
      char *exp;
      int from_tty;
@@ -1194,7 +1197,7 @@ address_info (exp, from_tty)
   printf_filtered (".\n");
 }
 
-static void
+void
 x_command (exp, from_tty)
      char *exp;
      int from_tty;
@@ -1808,8 +1811,14 @@ print_frame_args (func, fi, num, stream)
       annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
 
       if (val)
+	{
+#ifdef GDB_TARGET_IS_D10V
+	  if (SYMBOL_CLASS(sym) == LOC_REGPARM && TYPE_CODE(VALUE_TYPE(val)) == TYPE_CODE_PTR)
+	    TYPE_LENGTH(VALUE_TYPE(val)) = 2;
+#endif
         val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
 		   stream, 0, 0, 2, Val_no_prettyprint);
+	}
       else
 	fputs_filtered ("???", stream);
 
@@ -2181,6 +2190,7 @@ disassemble_command (arg, from_tty)
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error ("No function contains program counter for selected frame.\n");
       low += FUNCTION_START_OFFSET;
+      high -= 1;
     }
   else if (!(space_index = (char *) strchr (arg, ' ')))
     {
@@ -2188,6 +2198,8 @@ disassemble_command (arg, from_tty)
       pc = parse_and_eval_address (arg);
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error ("No function contains specified address.\n");
+      low += FUNCTION_START_OFFSET;
+      high -= 1;
       if (overlay_debugging)
 	{
 	  section = find_pc_overlay (pc);
@@ -2196,11 +2208,11 @@ disassemble_command (arg, from_tty)
 	      /* find_pc_partial_function will have returned low and high
 		 relative to the symbolic (mapped) address range.  Need to
 		 translate them back to the unmapped range where PC is.  */
+
 	      low  = overlay_unmapped_address (low, section);
 	      high = overlay_unmapped_address (high, section);
 	    }
 	}
-      low += FUNCTION_START_OFFSET;
     }
   else
     {
@@ -2208,6 +2220,7 @@ disassemble_command (arg, from_tty)
       *space_index = '\0';
       low = parse_and_eval_address (arg);
       high = parse_and_eval_address (space_index + 1);
+      high -= 1;
     }
 
   printf_filtered ("Dump of assembler code ");
@@ -2233,7 +2246,7 @@ disassemble_command (arg, from_tty)
   pc_masked = pc;
 #endif
 
-  while (pc_masked < high)
+  while (pc_masked <= high)
     {
       QUIT;
       print_address (pc_masked, gdb_stdout);
