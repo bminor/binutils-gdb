@@ -1,3 +1,12 @@
+Sun Mar 27 16:53:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.t07/gdbme.c: More code for watchpoint testing.
+
+	* gdb.t07/watchpoint.exp: Accept both "Watchpoint" and
+	"Hardware watchpoint" throughout file.
+	(test_watchpoint_triggered_in_syscall): New test.
+	(test_complex_watchpoint): New test.
+
 Fri Mar 25 17:05:31 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdbme.c (call_with_trampolines): New function to try and step
