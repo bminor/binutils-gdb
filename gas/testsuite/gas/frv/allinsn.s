@@ -643,9 +643,9 @@ ldqi:
 ldqfi:
 	ldqfi @(sp,0),fr0
 	.text
-	.global nldqi
-nldqi:
-	nldqi @(sp,0),sp
+	.global nop
+nop:
+	nop
 	.text
 	.global nldqfi
 nldqfi:

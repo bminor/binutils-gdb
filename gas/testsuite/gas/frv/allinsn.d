@@ -486,8 +486,8 @@ Disassembly of section .text:
 0000027c <ldqfi>:
  27c:	80 f0 10 00 	ldqfi @\(sp,0\),fr0
 
-00000280 <nldqi>:
- 280:	83 18 10 00 	nldqi @\(sp,0\),sp
+00000280 <nop>:
+ 280:	80 88 00 00 	nop
 
 00000284 <nldqfi>:
  284:	81 30 10 00 	nldqfi @\(sp,0\),fr0
