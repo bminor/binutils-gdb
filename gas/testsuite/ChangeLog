@@ -1,3 +1,8 @@
+Wed Sep 13 16:35:51 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in, configure.in: Remove; the testsuite is now run
+	directly from the gas Makefile.
+
 Mon Sep 11 11:44:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/empty.s: New file.

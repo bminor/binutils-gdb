@@ -26,9 +26,7 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-Makefile.in
 config
-configure.in
 gas
 gasp
 lib
