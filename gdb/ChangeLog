@@ -1,5 +1,8 @@
 2003-01-08  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (d10v_init_extra_frame_info): Use
+	frame_relative_level.
+
 	* alpha-tdep.c: Use get_frame_extra_info.
 	* arm-tdep.c, avr-tdep.c, cris-tdep.c, d10v-tdep.c: Ditto.
 	* h8300-tdep.c, ia64-tdep.c, m68hc11-tdep.c, mcore-tdep.c: Ditto.
