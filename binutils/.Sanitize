@@ -68,87 +68,23 @@ version.c
 
 Do-last:
 
-echo Done in `pwd`.
+v9dirty="sparc-pinsn.c"
 
-#
-#
-# $Log$
-# Revision 1.13  1991/12/12 03:18:12  sac
-# Added configdos.bat, makefile.dos
-#
-# Revision 1.12  1991/12/08  01:13:54  sac
-# 	* bucomm.h: created to hold prototypes of bucomm.c
-# 	* objdump.h: created to hold prototyes of objdump.c
-# 	* am29k-pinsn.c: include objdump.h
-# 	* ar.c: include bucomm.h, get ar.h from the right place and
-# 	include libbfd.h
-# 	* bucomm.c: defunize bfd_fatal
-# 	* copy.c: include bucomm.h, lint.
-# 	* i960-pinsn.h: include bucomm.h
-# 	* m68k-pinsn.h: lint
-# 	* nm.c: include bucomm.h, lint
-# 	* objdump.c: lint
-# 	* sparc-pinsn.c: include objdump.h
-#
-# Revision 1.11  1991/11/18  08:04:14  bothner
-# 	* Makefile.in:  Bump to version 1.92.
-# 	* version.c, Makefile.in:  Get version string from Makefile.
-# 	* copy.c, is-strip.c, not-strip.c, maybe-strip.c, Makefile.in:
-# 	Make the same change that we earlier did for ar/ranlib:
-# 	Generate two different binaries for strip and copy and use
-# 	a global variable with different values to distinguish
-# 	ostrip from copy.  (-1 means to use argv[0] to decide,
-# 	so you can get the old behavior, but it is no longer the default).
-# 	* copy.c (copy_file):  Set EXEC_P of output bfd if input is so.
-# 	* copy.c (main):  If is_strip==-1, compare last 5 chars
-# 	of argv[0], not the whole path.
-# 	* copy.c (main): Return 0, not 1.
-# 	* copy.c (setup_sections):  Fix due to change in bfd_make_section
-# 	now failing if asked for a duplicate section.
-# 	* strip.c, ostrip.c:  Removed obsolete files.
-# 	* ar.c, not-ranlib.c, maybe-ranlib.c:
-# 	Change encoding of is_ranlib variable to be consistent
-# 	with is_strip for strip.copy (i.e -1 to means use argv[0]).
-#
-# Revision 1.10  1991/11/15  23:34:33  pesch
-# .Sanitize: reflect someone's apocopation of binutils.texi[nfo] name
-# Makefile.in: improve texi2roff workarounds
-#
-# Revision 1.9  1991/11/06  09:06:02  sac
-# Added nm.1, objdump.1, ranlib.1, size.1 and strip.1
-#
-# Revision 1.8  1991/11/05  20:53:19  sac
-# Added README to .Sanitize
-# Made Makefile.in install using ddestdir
-#
-# Revision 1.7  1991/10/10  11:59:09  rich
-# updating
-#
-# Revision 1.6  1991/10/08  01:50:59  gnu
-# Remove configure and config.sub from the expected list.
-#
-# Revision 1.5  1991/10/08  01:48:04  gnu
-# Add binutils.texinfo, and change *-ranlib.o to *-ranlib.c.
-#
-# Revision 1.4  1991/10/07  23:14:30  bothner
-# 	* ar.c, Makefile.in, new files {is,not,maybe}-ranlib.c:
-# 	Make two different binaries for ar and ranlib, instead of
-# 	distinguishing them at run time using argv[0].
-# 	(Old behavior is still available if you "make ar_with_ranlib",
-# 	but it is not the default.)
-# 	* ranlib.sh (new):  An alternative one-line
-# 	shell implementation of ranlib.
-#
-# Revision 1.3  1991/09/01  03:47:07  steve
-# Added config.sub
-#
-# Revision 1.2  1991/07/15  23:38:04  steve
-# *** empty log message ***
-#
-# Revision 1.1  1991/05/23  21:49:14  rich
-# Initial revision
-#
-#
-#
-
-# End of file.
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	echo Keeping v9 in ${v9dirty}
+else
+	for i in ${v9dirty} ; do
+		echo Sanitizing v9 in $i
+		rm -f new
+		sed '/^#ifndef[ 	]NO_V9/,/^#endif/d' < $i > new
+		if grep -s -i v9 new ; then
+			echo ***** SANITIZING V9 IN $i FAILED *****
+		fi
+		if [ -n "${safe}" ] ; then
+			mv $i .Recover
+		else
+			rm $i
+		fi
+		mv new $i
+	done
+fi
