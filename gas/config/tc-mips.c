@@ -3998,12 +3998,21 @@ macro (ip)
 		       (int) BFD_RELOC_HI16);
 	}
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", sreg, AT);
+	{
+	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", sreg, AT);
+	  /* We want to close the noreorder block as soon as possible, so
+	     that later insns are available for delay slot filling.  */
+	  --mips_opts.noreorder;
+	}
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", sreg, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+
+	  /* We want to close the noreorder block as soon as possible, so
+	     that later insns are available for delay slot filling.  */
+	  --mips_opts.noreorder;
 
 	  /* start-sanitize-r5900 */
 	  if (mips_5900)
@@ -4012,7 +4021,6 @@ macro (ip)
 	    /* end-sanitize-r5900 */
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
 	}
-      --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s, "d", dreg);
       break;
 
@@ -4121,12 +4129,19 @@ macro (ip)
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
 	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
+	  /* We want to close the noreorder block as soon as possible, so
+	     that later insns are available for delay slot filling.  */
+	  --mips_opts.noreorder;
 	}
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
 	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
+
+	  /* We want to close the noreorder block as soon as possible, so
+	     that later insns are available for delay slot filling.  */
+	  --mips_opts.noreorder;
 	  /* start-sanitize-r5900 */
 	  if (mips_5900)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
@@ -4134,7 +4149,6 @@ macro (ip)
 	    /* end-sanitize-r5900 */
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
-      --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s2, "d", dreg);
       return;
 

@@ -1,3 +1,8 @@
+Tue Jun  2 14:52:56 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (macro): For div and udiv, close the
+	reorder block as soon as possible.
+
 Tue Jun  2 15:36:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Matt Semersky <matts@scd.hp.com>:
