@@ -1,3 +1,7 @@
+2004-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-generic.c: Add some comments.
+
 2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* doc/c-mips.texi (-m{no-,}fix-vr4120): Renamed from
