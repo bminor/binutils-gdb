@@ -1,3 +1,20 @@
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ICACHE_CFLAGS, SEMANTICS_CFLAGS): Delete.
+	(SIM_FPU_FLAGS): Define.
+	(icache.o): Delete explicit compile command.
+	(semantics.o, idecode.o): Delete explicit compile command.
+	(NOWARN_CFLAGS, STD_CFLAGS): Append SIM_FPU_CFLAGS.
+	* gen-support.c (gen_support_c): Generate #include of
+	"sim-inline.h" and "sim-fpu.h", but conditional on
+	HAVE_COMMON_FPU.
+	* gen-idecode.c (gen_idecode_c): Ditto.
+	* igen.c (gen_icache_c, gen_semantics_c): Wrap #include of
+	"sim-inline.h" and "sim-fpu.h" in HAVE_COMMON_FPU conditional.
+	Move to before "support.h".
+	* Makefile.in, gen-support.c, gen-idecode.c, igen.c: Update
+	copyright.
+	
 2003-05-16  Ian Lance Taylor  <ian@airs.com>
 
 	* Makefile.in (various): Use $(SHELL) whenever we invoke

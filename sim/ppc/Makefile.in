@@ -1,7 +1,7 @@
 #
 #   This file is part of the program psim.
 #
-#   Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+#   Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -112,9 +112,10 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(STDIO_CFLAGS) \
   $(TERMIO_CFLAGS) \
   $(DEVZERO_CFLAGS)
+SIM_FPU_CFLAGS = @sim_fpu_cflags@
 
-STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(INTL_CFLAGS)
-NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
+STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
+NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)  $(SIM_FPU_CFLAGS)
 BUILD_CFLAGS	= -g -O $(INCLUDES) $(WARNING_CFLAGS)
 
 BUILD_LDFLAGS	=
@@ -147,6 +148,7 @@ MAKEOVERRIDES=
 LIB_INCLUDES	= -I$(srcdir)/../../include
 BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
 GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config -I$(srcdir)/../../mmalloc
+
 INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
@@ -319,9 +321,6 @@ LIB_OBJ = \
 
 GDB_OBJ = sim_calls.o @sim_callback@
 
-ICACHE_CFLAGS = @sim_fpu_cflags@
-SEMANTICS_CFLAGS = @sim_fpu_cflags@
-
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
 
@@ -367,7 +366,6 @@ interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) os_emul.h
 # Given that inlines are turned on now, rebuild idecode whenever
 # anything changes.
 idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h $(LIB_INLINE_SRC) $(BUILT_SRC)
-	$(CC) -c $(NOWARN_CFLAGS) $<
 
 # double.o: double.c dp-bit.c
 
@@ -394,10 +392,8 @@ device_table.o: device_table.c $(DEVICE_TABLE_H) events.h hw.c
 cap.o: cap.c cap.h $(BASICS_H)
 
 semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
-	$(CC) -c $(SEMANTICS_CFLAGS) $(NOWARN_CFLAGS) $<
 
 icache.o: icache.c icache.h $(IDECODE_H) $(CPU_H)
-	$(CC) -c $(ICACHE_CFLAGS) $(NOWARN_CFLAGS) $<
 
 support.o: support.c support.h $(IDECODE_H) $(CPU_H)
 

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -122,6 +122,10 @@ gen_support_c(insn_table *table,
 {
   lf_printf(file, "#include \"cpu.h\"\n");
   lf_printf(file, "#include \"idecode.h\"\n");
+  lf_printf(file, "#ifdef HAVE_COMMON_FPU\n");
+  lf_printf(file, "#include \"sim-inline.h\"\n");
+  lf_printf(file, "#include \"sim-fpu.h\"\n");
+  lf_printf(file, "#endif\n");
   lf_printf(file, "#include \"support.h\"\n");
   lf_printf(file, "\n");
 
