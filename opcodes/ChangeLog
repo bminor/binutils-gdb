@@ -1,3 +1,10 @@
+2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+
+	* i386-dis.c (PADLOCK_SPECIAL, PADLOCK_0): New defines.
+	(dis386_twobyte): Opcode 0xa7 is PADLOCK_0.
+	(padlock_table): New struct with PadLock instructions.
+	(print_insn): Handle PADLOCK_SPECIAL.
+
 2004-02-10  Petko Manolov  <petkan@nucleusys.com>
 
 	* arm-opc.h Maverick accumulator register opcode fixes.
