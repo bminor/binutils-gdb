@@ -23,7 +23,9 @@
 #if !defined (OBJFILES_H)
 #define OBJFILES_H
 
-#include "gdb_obstack.h"		/* For obstack internals.  */
+#include "gdb_obstack.h"	/* For obstack internals.  */
+#include "symfile.h"		/* For struct psymbol_allocation_list */
+
 struct bcache;
 
 /* This structure maintains information on a per-objfile basis about the
