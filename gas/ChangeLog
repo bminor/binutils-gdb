@@ -1,3 +1,7 @@
+2001-10-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c: Restore line_comment_chars.
+
 2001-10-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (comment_chars): Remove semi-colon accidentally
