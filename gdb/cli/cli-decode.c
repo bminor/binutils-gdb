@@ -437,7 +437,7 @@ add_setshow_boolean_cmd (char *name,
    command to LIST and return a pointer to the added command (not
    necessarily the head of LIST).  */
 /* NOTE: cagney/2002-03-17: The original version of add_show_from_set
-   used memcpy() to clone `set' into `show'.  This ment that in
+   used memcpy() to clone `set' into `show'.  This meant that in
    addition to all the needed fields (var, name, et.al.) some
    unnecessary fields were copied (namely the callback function).  The
    function explictly copies relevant fields.  For a `set' and `show'

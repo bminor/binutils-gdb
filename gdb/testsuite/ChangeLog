@@ -84,6 +84,97 @@
 	* gdb.base/completion.exp: Recognize the more detailed error
 	messages produced by the macro expander's lexical analyzer.
 
+2002-06-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/selftest.exp (do_stes_and_next): Skip calls to
+	setlocale, bindtextdomain and textdomain.
+
+2002-06-11  Jim Blandy  <jimb@redhat.com>
+
+	* lib/gdb.exp (get_debug_format): Tolerate message saying whether
+	preprocessor macro information is present.
+
+	* macscp.exp, macscp1.c, macscp2.h, macscp3.h, macscp4.h: New
+	tests.
+
+2002-06-06  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/overlays.exp: Record addresses of overlay
+	functions in TCL variables rather than in GDB variables,
+	to avoid having GDB convert them to pointers (with loss
+	of information).
+
+	* gdb.base/d10v.ld: Merge in several years worth of 
+	default linker script changes.
+	* gdb.base/long_long.exp: Add check for sizeof (long double).
+
+2002-06-06  Michal Ludvig  <mludvig@suse.cz>
+
+	* gdb.asm/asm-source.exp: Add x86-64 target.
+	* gdb.asm/x86_64.inc: New.
+	
+2002-05-30  Michael Chastain  <mec@shout.net>
+
+	From Benjamin Kosnik <bkoz@redhat.com>:
+	* gdb.c++/m-static.cc: New file.
+	* gdb.c++/m-static.exp: New file.
+
+2002-05-28  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/call-ar-st.exp: Allow for reduced floating point
+	precision.
+
+2002-05-27  Michael Chastain  <mec@shout.net>
+
+	From Benjamin Kosnik <bkoz@redhat.com>:
+	* gdb.c++/m-data.cc: New file.
+	* gdb.c++/m-data.exp: New file.
+
+2002-05-27  Michael Chastain  <mec@shout.net>
+
+	From Benjamin Kosnik <bkoz@redhat.com>:
+	* gdb.c++/try_catch.cc: New file.
+	* gdb.c++/try_catch.exp: New file.	
+
+2002-05-27  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/local.exp: Accept more nested types in output.
+
+2002-05-26  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/call-rt-st.exp: Fix typo in brace quoting.
+
+2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* lib/gdb.exp (gdb_wrapper_init): Just because
+	gdb_wrapper_file exists, this does not mean that the file
+	should not be rebuilt.  That is what gdb_wrapper_initialized
+	is for.
+	(default_gdb_init): Reset gdb_wrapper_initialized.
+
+2002-05-23  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/all-bin.exp: Revise previous patch by just reducing 
+	the precision of the floating point test results.
+	* gdb.base/call-rt-st.exp: Ditto.
+
+	* gdb.base/all-bin.exp: Allow for reduced floating point precision.
+	* gdb.base/call-rt-st.exp: Ditto.
+
+2002-05-19  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/inherit.exp: Accept "VTT for ..." in output strings.
+
+2002-05-19  Elena Zannoni  <ezannoni@redhat.com>
+
+        * configure.in (configdirs): Add gdb.arch.
+        * configure: Regenerate.
+
+2002-05-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/completion.exp: Recognize the more detailed error
+	messages produced by the macro expander's lexical analyzer.
+
 2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.arch/altivec-abi.c: New file.

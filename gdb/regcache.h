@@ -58,18 +58,16 @@ extern char *registers;
 
 extern signed char *register_valid;
 
-/* Save/restore the register cache using the regbuf.  The operation is
-   write through - it is strictly for code that needs to restore the
-   target's registers to a previous state.
+/* Copy/duplicate the contents of a register cache.  By default, the
+   operation is pass-through.  Writes to DST and reads from SRC will
+   go through to the target.
+
+   The ``cpy'' functions can not have overlapping SRC and DST buffers.
 
    ``no passthrough'' versions do not go through to the target.  They
-   only save values already in the cache.  */
+   only transfer values already in the cache.  */
 
-extern void regcache_save (struct regcache *regcache);
-extern void regcache_restore (struct regcache *regcache);
 extern struct regcache *regcache_dup (struct regcache *regcache);
-extern void regcache_save_no_passthrough (struct regcache *regcache);
-extern void regcache_restore_no_passthrough (struct regcache *regcache);
 extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);

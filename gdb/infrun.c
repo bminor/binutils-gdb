@@ -3501,7 +3501,9 @@ and/or watchpoints.\n");
   /* Save the function value return registers, if we care.
      We might be about to restore their previous contents.  */
   if (proceed_to_finish)
-    regcache_save (stop_registers);
+    /* NB: The copy goes through to the target picking up the value of
+       all the registers.  */
+    regcache_cpy (stop_registers, current_regcache);
 
   if (stop_stack_dummy)
     {
@@ -4018,7 +4020,8 @@ restore_inferior_status (struct inferior_status *inf_status)
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
   if (target_has_execution)
-    regcache_restore (inf_status->registers);
+    /* NB: The register write goes through to the target.  */
+    regcache_cpy (current_regcache, inf_status->registers);
   regcache_xfree (inf_status->registers);
 
   /* FIXME: If we are being called after stopping in a function which

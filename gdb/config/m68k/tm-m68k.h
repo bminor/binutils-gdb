@@ -25,6 +25,7 @@
 
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
+#if !GDB_MULTI_ARCH
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 
 #define TARGET_LONG_DOUBLE_BIT 96
@@ -40,7 +41,9 @@
 #if !defined(SKIP_PROLOGUE)
 #define SKIP_PROLOGUE(ip) (m68k_skip_prologue (ip))
 #endif
+#endif
 extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
+
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -49,18 +52,22 @@ extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
 
 struct frame_info;
 
+#if !GDB_MULTI_ARCH
 extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)
+#endif
 
 /* Stack grows downward.  */
 
+#if !GDB_MULTI_ARCH
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Stack must be kept short aligned when doing function calls.  */
 
 #define STACK_ALIGN(ADDR) (((ADDR) + 1) & ~1)
+#endif
 
 /* Sequence of bytes for breakpoint instruction.
    This is a TRAP instruction.  The last 4 bits (0xf below) is the
@@ -88,25 +95,32 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
 
+#if !GDB_MULTI_ARCH
 #if !defined (DECR_PC_AFTER_BREAK)
 #define DECR_PC_AFTER_BREAK 2
+#endif
 #endif
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_SIZE 4
+#endif
 
 #define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
+
 
 #ifndef NUM_REGS
 #define NUM_REGS 29
 #endif
 
+
 #define NUM_FREGS (NUM_REGS-24)
 
+#if !GDB_MULTI_ARCH
 #ifndef REGISTER_BYTES_OK
 #define REGISTER_BYTES_OK(b) \
    ((b) == REGISTER_BYTES_FP \
@@ -116,21 +130,24 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #ifndef REGISTER_BYTES
 #define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
 #endif
+#endif //multi-arch
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_BYTE(N)  \
  ((N) >= FPC_REGNUM ? (((N) - FPC_REGNUM) * 4) + 168	\
   : (N) >= FP0_REGNUM ? (((N) - FP0_REGNUM) * 12) + 72	\
   : (N) * 4)
+#endif
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the 68000, all regs are 4 bytes
    except the floating point regs which are 12 bytes.  */
 /* Note that the unsigned cast here forces the result of the
    subtraction to very high positive values if N < FP0_REGNUM */
-
+#if !GDB_MULTI_ARCH
 #define REGISTER_RAW_SIZE(N) (((unsigned)(N) - FP0_REGNUM) < 8 ? 12 : 4)
 
 /* Number of bytes of storage in the program's representation
@@ -146,6 +163,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 12
+#endif //multi-arch
 
 /* Return the GDB type object for the "standard" data type of data 
    in register N.  This should be int for D0-D7, long double for FP0-FP7,
@@ -153,22 +171,24 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    Note, for registers which contain addresses return pointer to void, 
    not pointer to char, because we don't want to attempt to print 
    the string after printing the address.  */
-
+#if !GDB_MULTI_ARCH
 #define REGISTER_VIRTUAL_TYPE(N) \
   ((unsigned) (N) >= FPC_REGNUM ? lookup_pointer_type (builtin_type_void) : \
    (unsigned) (N) >= FP0_REGNUM ? builtin_type_long_double :                \
    (unsigned) (N) >=  A0_REGNUM ? lookup_pointer_type (builtin_type_void) : \
    builtin_type_int)
-
+#endif
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_NAMES  \
  {"d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", \
   "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp", \
   "ps", "pc",  \
   "fp0", "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", \
   "fpcontrol", "fpstatus", "fpiaddr", "fpcode", "fpflags" }
+#endif
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -189,9 +209,10 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #define FPS_REGNUM 27		/* 68881 status register */
 #define FPI_REGNUM 28		/* 68881 iaddr register */
 
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
-
+#if !GDB_MULTI_ARCH
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { write_register (A1_REGNUM, (ADDR)); }
 
@@ -207,11 +228,13 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 	         (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	\
 	  TYPE_LENGTH(TYPE))
 #endif
+#endif //multi-arch
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  Assumes floats are passed
    in d0/d1.  */
 
+#if !GDB_MULTI_ARCH
 #if !defined (STORE_RETURN_VALUE)
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
@@ -222,6 +245,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
+#endif //multi-arch
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -234,20 +258,24 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* If we are chaining from sigtramp, then manufacture a sigtramp frame
    (which isn't really on the stack.  I'm not sure this is right for anything
    but BSD4.3 on an hp300.  */
+#if !GDB_MULTI_ARCH
 #define FRAME_CHAIN(thisframe)  \
   (thisframe->signal_handler_caller \
    ? thisframe->frame \
    : (!inside_entry_file ((thisframe)->pc) \
       ? read_memory_integer ((thisframe)->frame, 4) \
       : 0))
+#endif
 
 /* Define other aspects of the stack frame.  */
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
+#if !GDB_MULTI_ARCH
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
      (((FI)->signal_handler_caller) ? 0 : frameless_look_for_prologue(FI))
+#endif
 
 /* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
    it corresponds to some offset in /usr/include/sys/user.h or
@@ -258,6 +286,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 
 #define SIG_PC_FP_OFFSET 530
 
+#if !GDB_MULTI_ARCH
 #define FRAME_SAVED_PC(FRAME) \
   (((FRAME)->signal_handler_caller \
     ? ((FRAME)->next \
@@ -267,6 +296,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
        ) \
     : read_memory_integer ((FRAME)->frame + 4, 4)) \
    )
+#endif
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
@@ -284,6 +314,19 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 8
+
+/* Put here the code to store, into a struct frame_saved_regs,
+   the addresses of the saved registers of frame described by FRAME_INFO.
+   This includes special registers such as pc and fp saved in special
+   ways in the stack frame.  sp is even more special:
+   the address we return for it IS the sp for the next frame.  */
+
+#if !GDB_MULTI_ARCH
+#if !defined (FRAME_INIT_SAVED_REGS)
+#define FRAME_INIT_SAVED_REGS(fi) m68k_frame_init_saved_regs ((fi))
+void m68k_frame_init_saved_regs (struct frame_info *frame_info);
+#endif /* no FRAME_INIT_SAVED_REGS.  */
+#endif
 
 
 /* Things needed for making the inferior call functions.  */
@@ -317,7 +360,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* FIXME: Wrong to hardwire this as BPT_VECTOR when sometimes it
    should be REMOTE_BPT_VECTOR.  Best way to fix it would be to define
    CALL_DUMMY_BREAKPOINT_OFFSET.  */
-#if !GDB_MULTI_ARCH_PARTIAL
+#if !GDB_MULTI_ARCH
 #define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
 #define CALL_DUMMY_LENGTH 28	/* Size of CALL_DUMMY */
 #define CALL_DUMMY_START_OFFSET 12	/* Offset to jsr instruction */

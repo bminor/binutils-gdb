@@ -1245,17 +1245,6 @@ value_being_returned (struct type *valtype, struct regcache *retbuf,
   if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
     if (struct_return)
       {
-	void *regs = deprecated_grub_regcache_for_registers (retbuf);
-	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (regs);
-	if (!addr)
-	  error ("Function return value unknown.");
-	return value_at (valtype, addr, NULL);
-      }
-
-  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    if (struct_return)
-      {
 	char *registers = deprecated_grub_regcache_for_registers (retbuf);
 	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (registers);
 	if (!addr)

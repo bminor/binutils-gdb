@@ -41,6 +41,8 @@ National Semiconductor NS32000 (partial)	ns32k-*-*
 * New targets.
 
 Atmel AVR					avr*-*-*
+Fujitsu FRV architecture added by Red Hat	frv*-*-*
+
 
 * New native configurations
 

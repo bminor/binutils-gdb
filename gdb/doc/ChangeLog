@@ -1,3 +1,8 @@
+2002-06-25  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo (Memory Region Attributes): Document new behavior
+	for 'mem' command.
+
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Symbols): Update documentation for `info source'

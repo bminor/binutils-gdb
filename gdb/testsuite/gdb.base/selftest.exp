@@ -52,7 +52,7 @@ proc do_steps_and_nexts {} {
  
     gdb_reinitialize_dir $srcdir/..
 
-    for {set count 0} {$count < 22} {incr count} {
+    for {set count 0} {$count < 26} {incr count} {
 	send_gdb "list\n"
 	gdb_expect {
 	    -re ".*context = data.*$gdb_prompt $" {
@@ -141,6 +141,22 @@ proc do_steps_and_nexts {} {
 	    }
 	    -re ".*dirarg = .* xmalloc.*$gdb_prompt $" {
 		return
+	    }
+	    -re ".*setlocale .LC_MESSAGES,.*$gdb_prompt $" {
+		set description "next over setlocale LC_MESSAGES"
+		set command "next"
+	    }
+	    -re ".*setlocale .LC_CTYPE,.*$gdb_prompt $" {
+		set description "next over setlocale LC_CTYPE"
+		set command "next"
+	    }
+	    -re ".*bindtextdomain .PACKAGE, LOCALEDIR.;.*$gdb_prompt $" {
+		set description "next over bindtextdomain"
+		set command "next"
+	    }
+	    -re ".*textdomain .PACKAGE.;.*$gdb_prompt $" {
+		set description "next over textdomain PACKAGE"
+		set command "next"
 	    }
 	    -re "\[ \t\]+\{\r\n$gdb_prompt $" {
 		setup_xfail "mips-*-irix5*"

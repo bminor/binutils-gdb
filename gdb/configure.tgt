@@ -74,6 +74,7 @@ h8500-*-*)		gdb_target=h8500 ;;
 
 fr30-*-elf*)		gdb_target=fr30 ;;
 
+frv-*-*)		gdb_target=frv ;;
 
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;

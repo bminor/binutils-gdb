@@ -24,7 +24,7 @@
 #define INFERIOR_H 1
 
 struct gdbarch;
-struct regbuf;
+struct regcache;
 
 /* For bpstat.  */
 #include "breakpoint.h"

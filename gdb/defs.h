@@ -39,6 +39,8 @@
 #include <unistd.h>
 #endif
 
+#include "gdb_locale.h"
+
 /* For ``enum target_signal''.  */
 #include "gdb/signals.h"
 
