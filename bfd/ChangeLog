@@ -1,3 +1,8 @@
+Sat Jan 14 19:09:48 1995  Steve Chamberlain  <sac@jonny>
+
+	* archures.c, Makefile.in, targets.c, bfd-in2.h, coffcode.h,
+	config.bfd, configure.in, config/w65.mt: Initial support for the W65.
+
 Sun Jan 15 13:57:45 1995  Steve Chamberlain  <sac@splat>
 
 	* opncls.c (bfd_fdopenr): Configure for WIN32.
