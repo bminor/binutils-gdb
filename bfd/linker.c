@@ -1753,7 +1753,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  /* Issue a warning and cycle.  */
 	  if (h->u.i.warning != NULL)
 	    {
-	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
+	      if (! (*info->callbacks->warning) (info, h->u.i.warning, name,
 						 abfd, (asection *) NULL,
 						 (bfd_vma) 0))
 		return false;
@@ -1777,7 +1777,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 
 	case WARN:
 	  /* Issue a warning.  */
-	  if (! (*info->callbacks->warning) (info, string,
+	  if (! (*info->callbacks->warning) (info, string, name,
 					     hash_entry_bfd (h),
 					     (asection *) NULL, (bfd_vma) 0))
 	    return false;
@@ -1791,7 +1791,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	     ensure this.  */
 	  if (h->next != NULL || info->hash->undefs_tail == h)
 	    {
-	      if (! (*info->callbacks->warning) (info, string,
+	      if (! (*info->callbacks->warning) (info, string, name,
 						 hash_entry_bfd (h),
 						 (asection *) NULL,
 						 (bfd_vma) 0))

@@ -1,4 +1,4 @@
-Thu Sep  7 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
+Thu Sep 12 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* coffcode.h (coff_compute_section_file_positions): Keep the
 	raw size safe. 
@@ -9,6 +9,9 @@ Thu Sep  7 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 	if relocatable file. Swap out saved raw size.
 
 Tue Sep 12 12:14:33 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (_bfd_generic_link_add_one_symbol): Pass symbol name to
+	warning callback.
 
 	* dep-in.sed: Remove config.h from generated dependencies.
 
