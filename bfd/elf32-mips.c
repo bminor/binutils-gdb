@@ -7557,7 +7557,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	     
 	      /* Even though we don't directly need a GOT entry for
 		 this symbol, a symbol must have a dynamic symbol
-		 table index greater that DT_GOTSYM if there are
+		 table index greater that DT_MIPS_GOTSYM if there are
 		 dynamic relocations against it.  */
 	      if (h != NULL
 		  && !mips_elf_record_global_got_symbol (h, info, g))
@@ -8163,8 +8163,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
       if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_UNREFEXTNO, 0))
 	return false;
 
-      if (g != NULL && g->global_gotsym != NULL
-	  && ! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_GOTSYM, 0))
+      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_GOTSYM, 0))
 	return false;
 
       if (IRIX_COMPAT (dynobj) == ict_irix5
@@ -8559,6 +8558,23 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 	      dyn.d_un.d_val = g->local_gotno;
 	      break;
 
+	    case DT_MIPS_UNREFEXTNO:
+	      /* The index into the dynamic symbol table which is the
+		 entry of the first external symbol that is not
+		 referenced within the same object.  */
+	      dyn.d_un.d_val = bfd_count_sections (output_bfd) + 1;
+	      break;
+
+	    case DT_MIPS_GOTSYM:
+	      if (g->global_gotsym)
+		{
+		  dyn.d_un.d_val = g->global_gotsym->dynindx;
+		  break;
+		}
+	      /* In case if we don't have global got symbols we default
+		 to setting DT_MIPS_GOTSYM to the same value as
+		 DT_MIPS_SYMTABNO, so we just fall through.  */
+
 	    case DT_MIPS_SYMTABNO:
 	      name = ".dynsym";
 	      elemsize = MIPS_ELF_SYM_SIZE (output_bfd);
@@ -8569,17 +8585,6 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 		dyn.d_un.d_val = s->_cooked_size / elemsize;
 	      else
 		dyn.d_un.d_val = s->_raw_size / elemsize;
-	      break;
-
-	    case DT_MIPS_UNREFEXTNO:
-	      /* The index into the dynamic symbol table which is the
-		 entry of the first external symbol that is not
-		 referenced within the same object.  */
-	      dyn.d_un.d_val = bfd_count_sections (output_bfd) + 1;
-	      break;
-
-	    case DT_MIPS_GOTSYM:
-	      dyn.d_un.d_val = g->global_gotsym->dynindx;
 	      break;
 
 	    case DT_MIPS_HIPAGENO:

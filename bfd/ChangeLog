@@ -1,3 +1,11 @@
+Tue Aug 10 00:34:29 1999  Mark P. Mitchell  <mark@codesourcery.com>
+                          Ralf Baechle <ralf@uni-koblenz.de>
+
+	* elf32-mips.c (_bfd_mips_elf_size_dynamic_sections): Always
+	output DT_MIPS_GOTSYM.
+	(_bfd_mips_elf_finish_dynamic_sections): Use the same value as
+	DT_MIPS_SYMTABNO if there are no global GOT symbols.
+
 Tue Aug 10 00:21:08 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_create_dynamic_relocation): Change
