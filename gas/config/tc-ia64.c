@@ -6050,10 +6050,20 @@ ia64_target_format ()
 {
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-      if (md.flags & EF_IA_64_ABI64)
-	return "elf64-ia64-big";
+      if (md.flags & EF_IA_64_BE)
+	{
+	  if (md.flags & EF_IA_64_ABI64)
+	    return "elf64-ia64-big";
+	  else
+	    return "elf32-ia64-big";
+	}
       else
-	return "elf32-ia64-big";
+	{
+	  if (md.flags & EF_IA_64_ABI64)
+	    return "elf64-ia64-little";
+	  else
+	    return "elf32-ia64-little";
+	}
     }
   else
     return "unknown-format";
