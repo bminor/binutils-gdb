@@ -83,12 +83,11 @@ const struct mips_opcode mips_opcodes[] = {
 {"move",    "d,s",	0x00000021, 0xfc1f07ff,	WR_d|RD_s	}, /* addu */
 {"b",       "p",	0x10000000, 0xffff0000,	UBD		}, /* beq 0,0 */
 {"b",       "p",	0x40100000, 0xffff0000,	UBD		}, /* bgez 0 */
-{"bal",     "p",	0x04110000, 0xffff0000,	UBD		}, /* bgezal 0 */
+{"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31	}, /* bgezal 0 */
 
 {"abs",     "d,v",	0,    (int) M_ABS,	INSN_MACRO	},
 {"abs.s",   "D,V",	0x46000005, 0xffff003f,	WR_D|RD_S	},
 {"abs.d",   "D,V",	0x46200005, 0xffff003f,	WR_D|RD_S	},
-{"absu",    "d,s",	0,    (int) M_ABSU,	INSN_MACRO	},
 {"add",     "d,v,t",	0x00000020, 0xfc0007ff,	WR_d|RD_s|RD_t	},
 {"add",     "t,r,I",	0,    (int) M_ADD_I,	INSN_MACRO	},
 {"add.s",   "D,V,T",	0x46000000, 0xffe0003f,	WR_D|RD_S|RD_T	},
@@ -134,7 +133,7 @@ const struct mips_opcode mips_opcodes[] = {
 {"bgeul",   "s,I,p",	2,    (int) M_BGEUL_I,	INSN_MACRO	},
 {"bgez",    "s,p",	0x04010000, 0xfc1f0000,	CBD|RD_s	},
 {"bgezl",   "s,p",	0x04030000, 0xfc1f0000,	CBD|RD_s|I2	},
-{"bgezal",  "s,p",	0x04110000, 0xfc1f0000,	CBD|RD_s	},
+{"bgezal",  "s,p",	0x04110000, 0xfc1f0000,	CBD|RD_s|WR_31	},
 {"bgezall", "s,p",	0x04130000, 0xfc1f0000,	CBD|RD_s|I2	},
 {"bgt",     "s,t,p",	0,    (int) M_BGT,	INSN_MACRO	},
 {"bgt",     "s,I,p",	0,    (int) M_BGT_I,	INSN_MACRO	},
@@ -166,7 +165,7 @@ const struct mips_opcode mips_opcodes[] = {
 {"bltul",   "s,I,p",	2,    (int) M_BLTUL_I,	INSN_MACRO	},
 {"bltz",    "s,p",	0x04000000, 0xfc1f0000,	CBD|RD_s	},
 {"bltzl",   "s,p",	0x04020000, 0xfc1f0000,	CBD|RD_s|I2	},
-{"bltzal",  "s,p",	0x04100000, 0xfc1f0000,	CBD|RD_s	},
+{"bltzal",  "s,p",	0x04100000, 0xfc1f0000,	CBD|RD_s|WR_31	},
 {"bltzall", "s,p",	0x04120000, 0xfc1f0000,	CBD|RD_s|I2	},
 {"bnez",    "s,p",	0x14000000, 0xfc1f0000,	CBD|RD_s	},
 {"bnezl",   "s,p",	0x54000000, 0xfc1f0000,	CBD|RD_s|I2	},
@@ -233,6 +232,7 @@ const struct mips_opcode mips_opcodes[] = {
 {"cvt.s.w", "D,S",	0x46800020, 0xffff003f,	WR_D|RD_S	},
 {"cvt.w.d", "D,S",	0x46200024, 0xffff003f,	WR_D|RD_S	},
 {"cvt.w.s", "D,S",	0x46000024, 0xffff003f,	WR_D|RD_S	},
+{"dabs",    "d,v",	0,    (int) M_DABS,	INSN_MACRO	},
 {"dadd",    "d,v,t",	0x0000002c, 0xfc0007ff, WR_d|RD_s|RD_t|I3},
 {"dadd",    "t,r,I",	3,    (int) M_DADD_I,	INSN_MACRO	},
 {"daddi",   "t,r,j",	0x60000000, 0xfc000000, WR_t|RD_s|I3	},
