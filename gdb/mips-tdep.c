@@ -651,7 +651,7 @@ mips16_get_imm (prev_inst, inst, nbits, scale, is_signed)
 
   if ((prev_inst & 0xf800) == 0xf000)	/* prev instruction was EXTEND? */
     {
-      offset = ((prev_inst & 0x1f) << 11) | (prev_inst & 0x7e00);
+      offset = ((prev_inst & 0x1f) << 11) | (prev_inst & 0x7e0);
       if (offset & 0x8000)		/* check for negative extend */
 	offset = 0 - (0x10000 - (offset & 0xffff));
       return offset | (inst & 0x1f);
@@ -788,6 +788,8 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	      temp_saved_regs.regs[reg] = sp + offset;
 	    }
 	}
+      else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
+	cur_pc += MIPS16_INSTLEN;		/* 32-bit instruction */
     }
 }
 
