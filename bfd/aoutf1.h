@@ -106,6 +106,7 @@ sunos4_callback (abfd)
   struct internal_exec *execp = exec_hdr (abfd);
   enum bfd_architecture arch;
   long machine;
+
   WORK_OUT_FILE_POSITIONS(abfd, execp);  
 
   /* Determine the architecture and machine type of the object file.  */
@@ -117,11 +118,13 @@ sunos4_callback (abfd)
     break;
     
   case M_68010:
+  case M_HP200:
     arch = bfd_arch_m68k;
     machine = 68010;
     break;
     
   case M_68020:
+  case M_HP300:
     arch = bfd_arch_m68k;
     machine = 68020;
     break;
@@ -141,6 +144,11 @@ sunos4_callback (abfd)
     machine = 0;
     break;
     
+  case M_HPUX:
+    arch = bfd_arch_m68k;
+    machine = 0;
+    break;
+
   default:
     arch = bfd_arch_obscure;
     machine = 0;
@@ -148,9 +156,33 @@ sunos4_callback (abfd)
   }
   bfd_set_arch_mach(abfd, arch, machine);  
   choose_reloc_size(abfd);
+  adata(abfd)->page_size = PAGE_SIZE;
+#ifdef SEGMENT_SIZE
+  adata(abfd)->segment_size = SEGMENT_SIZE;
+#else
+  adata(abfd)->segment_size = PAGE_SIZE;
+#endif
+  adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
+
   return abfd->xvec;
 }
 
+
+static boolean
+DEFUN(sunos_mkobject,(abfd),
+      bfd *abfd)
+{
+    if (NAME(aout,mkobject)(abfd) == false)
+	return false;
+    adata(abfd)->page_size = PAGE_SIZE;
+#ifdef SEGMENT_SIZE
+  adata(abfd)->page_size = SEGMENT_SIZE;
+#else
+  adata(abfd)->segment_size = PAGE_SIZE;
+#endif
+    adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
+    return true;
+}
 
 /* Write an object file in SunOS format.
   Section contents have already been written.  We write the
@@ -495,8 +527,8 @@ DEFUN(sunos4_core_file_p,(abfd),
 
   core_stacksec (abfd)->vma = (core->c_stacktop - core->c_ssize);
   core_datasec (abfd)->vma = N_DATADDR(core->c_aouthdr);
-  core_regsec (abfd)->vma = -1;
-  core_reg2sec (abfd)->vma = -1;
+  core_regsec (abfd)->vma = 0;
+  core_reg2sec (abfd)->vma = 0;
 
   core_stacksec (abfd)->filepos = core->c_len + core->c_dsize;
   core_datasec (abfd)->filepos = core->c_len;
@@ -606,7 +638,7 @@ bfd_target VECNAME =
     
       {_bfd_dummy_target, NAME(sunos,object_p),
        bfd_generic_archive_p, sunos4_core_file_p},
-      {bfd_false, NAME(aout,mkobject),
+      {bfd_false, sunos_mkobject,
        _bfd_generic_mkarchive, bfd_false},
       {bfd_false, NAME(aout,sunos4_write_object_contents), /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},

@@ -101,7 +101,7 @@ the entry points as they accumulate.
 *; PROTO(void, bfd_constructor_entry,
            (bfd *abfd, 
 	    asymbol **symbol_ptr_ptr,
-	    CONST char*type);
+	    CONST char*type));
 
 */
 

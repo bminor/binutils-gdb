@@ -12,6 +12,31 @@ Sun Nov  3 12:07:08 1991  Per Bothner  (bothner at cygnus.com)
 	* syms.c:  New function bfd_decode_symclass, used by nm printer.
 	New function bfd_stab_name to look up string name of stab code.
 
+Sat Nov  2 14:26:03 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* Makefile.in: Added ctor.c 
+	* archures.c (bfd_default_arch_struct) added
+	bfd_default_reloc_type_lookup.
+	* coffcode.h: removed a load of #if 0ed code.
+	(coff_compute_file_section_positions): now works out the section
+	alignment and size correctly in all cases.
+	(coff_get_symtab): looks for contructor symbols and calls the
+	right function when they're found. (coff_canonicalize_reloc):
+	knows when a section is full of contructors and does the right
+	thing. 
+	* cpu-m88k.c: Added default_reloc_type lookup to the architecture
+	description.
+	* libbfd-in.h: (bfd_default_reloc_type_lookup) defun  added.
+	* libcoff.h: removed #if 0ed code
+	* reloc.c: (bfd_reloc_code_real_type) added BFD_RELOC_CTOR for
+	arch independent contructtor relocation type.
+	(bfd_reloc_type_lookup): removed the comment "this will go away"
+	since it won't. (bfd_howto_32): stolen from 88k, this is a 32bit
+	reloc which is used when BFD_RELOC_CTOR falls through to give a
+	default 32bit reloc for contructors.
+	(bfd_default_reloc_type_lookup): added.
+	* aoutf1.h: fixed SEGMENT_SIZE typo.
+
 Thu Oct 31 18:23:06 1991  John Gilmore  (gnu at cygnus.com)
 
 	* coff-rs6000.c:  Change name to "aixcoff-rs6000", to avoid
