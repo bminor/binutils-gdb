@@ -84,6 +84,7 @@ ispell
 ld
 libg++
 libgcc
+libgloss
 libiberty
 libio
 librx
