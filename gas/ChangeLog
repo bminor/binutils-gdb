@@ -1,3 +1,7 @@
+Fri Mar  1 10:20:52 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* symbols.c (resolve_symbol_value): Handle O_logical_not.
+
 Thu Feb 29 13:58:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/obj-elf.c (obj_elf_section): Allow predefined section
