@@ -704,6 +704,20 @@ unsigned64 fp_recip (SIM_STATE, unsigned64 op, FP_formats fmt);
 #define Recip(op,fmt) fp_recip(SIM_ARGS, op, fmt)
 unsigned64 fp_sqrt (SIM_STATE, unsigned64 op, FP_formats fmt);
 #define SquareRoot(op,fmt) fp_sqrt(SIM_ARGS, op, fmt)
+unsigned64 fp_rsqrt (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define RSquareRoot(op,fmt) fp_rsqrt(SIM_ARGS, op, fmt)
+unsigned64 fp_madd (SIM_STATE, unsigned64 op1, unsigned64 op2,
+		    unsigned64 op3, FP_formats fmt);
+#define MultiplyAdd(op1,op2,op3,fmt) fp_madd(SIM_ARGS, op1, op2, op3, fmt)
+unsigned64 fp_msub (SIM_STATE, unsigned64 op1, unsigned64 op2,
+		    unsigned64 op3, FP_formats fmt);
+#define MultiplySub(op1,op2,op3,fmt) fp_msub(SIM_ARGS, op1, op2, op3, fmt)
+unsigned64 fp_nmadd (SIM_STATE, unsigned64 op1, unsigned64 op2,
+		     unsigned64 op3, FP_formats fmt);
+#define NegMultiplyAdd(op1,op2,op3,fmt) fp_nmadd(SIM_ARGS, op1, op2, op3, fmt)
+unsigned64 fp_nmsub (SIM_STATE, unsigned64 op1, unsigned64 op2,
+		     unsigned64 op3, FP_formats fmt);
+#define NegMultiplySub(op1,op2,op3,fmt) fp_nmsub(SIM_ARGS, op1, op2, op3, fmt)
 unsigned64 convert (SIM_STATE, int rm, unsigned64 op, FP_formats from, FP_formats to);
 #define Convert(rm,op,from,to) convert (SIM_ARGS, rm, op, from, to)
 

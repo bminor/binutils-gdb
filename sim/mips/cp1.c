@@ -672,6 +672,206 @@ fp_binary(sim_cpu *cpu,
   return result;
 }
 
+/* Common MAC code for single operands (.s or .d), defers setting FCSR.  */
+static sim_fpu_status
+inner_mac(int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
+	  unsigned64 op1,
+	  unsigned64 op2,
+	  unsigned64 op3,
+	  int scale,
+	  int negate,
+	  FP_formats fmt,
+	  sim_fpu_round round,
+	  sim_fpu_denorm denorm,
+	  unsigned64 *result)
+{
+  sim_fpu wop1;
+  sim_fpu wop2;
+  sim_fpu ans;
+  sim_fpu_status status = 0;
+  sim_fpu_status op_status;
+  unsigned64 temp = 0;
+
+  switch (fmt)
+    {
+    case fmt_single:
+      {
+	unsigned32 res;
+	sim_fpu_32to (&wop1, op1);
+	sim_fpu_32to (&wop2, op2);
+	status |= sim_fpu_mul (&ans, &wop1, &wop2);
+	if (scale != 0 && sim_fpu_is_number (&ans))  /* number or denorm */
+	  ans.normal_exp += scale;
+	status |= sim_fpu_round_32 (&ans, round, denorm);
+	wop1 = ans;
+        op_status = 0;
+	sim_fpu_32to (&wop2, op3);
+	op_status |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+	op_status |= sim_fpu_round_32 (&ans, round, denorm);
+	status |= op_status;
+	if (negate)
+	  {
+	    wop1 = ans;
+	    op_status = sim_fpu_neg (&ans, &wop1);
+	    op_status |= sim_fpu_round_32 (&ans, round, denorm);
+	    status |= op_status;
+	  }
+	sim_fpu_to32 (&res, &ans);
+	temp = res;
+	break;
+      }
+    case fmt_double:
+      {
+	unsigned64 res;
+	sim_fpu_64to (&wop1, op1);
+	sim_fpu_64to (&wop2, op2);
+	status |= sim_fpu_mul (&ans, &wop1, &wop2);
+	if (scale != 0 && sim_fpu_is_number (&ans))  /* number or denorm */
+	  ans.normal_exp += scale;
+	status |= sim_fpu_round_64 (&ans, round, denorm);
+	wop1 = ans;
+        op_status = 0;
+	sim_fpu_64to (&wop2, op3);
+	op_status |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+	op_status |= sim_fpu_round_64 (&ans, round, denorm);
+	status |= op_status;
+	if (negate)
+	  {
+	    wop1 = ans;
+	    op_status = sim_fpu_neg (&ans, &wop1);
+	    op_status |= sim_fpu_round_64 (&ans, round, denorm);
+	    status |= op_status;
+	  }
+	sim_fpu_to64 (&res, &ans);
+	temp = res;
+	break;
+      }
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  *result = temp;
+  return status;
+}
+
+/* Common implementation of madd, nmadd, msub, nmsub that does
+   intermediate rounding per spec.  Also used for recip2 and rsqrt2,
+   which are transformed into equivalent nmsub operations.  The scale
+   argument is an adjustment to the exponent of the intermediate
+   product op1*op2.  It is currently non-zero for rsqrt2 (-1), which
+   requires an effective division by 2. */
+static unsigned64
+fp_mac(sim_cpu *cpu,
+       address_word cia,
+       int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
+       unsigned64 op1,
+       unsigned64 op2,
+       unsigned64 op3,
+       int scale,
+       int negate,
+       FP_formats fmt)
+{
+  sim_fpu_round round = rounding_mode (GETRM());
+  sim_fpu_denorm denorm = denorm_mode (cpu);
+  sim_fpu_status status = 0;
+  unsigned64 result = 0;
+
+  /* The format type has already been checked: */
+  switch (fmt)
+    {
+    case fmt_single:
+    case fmt_double:
+      status = inner_mac(sim_fpu_op, op1, op2, op3, scale,
+			 negate, fmt, round, denorm, &result);
+      break;
+    default:
+      sim_io_eprintf (SD, "Bad switch\n");
+      abort ();
+    }
+
+  update_fcsr (cpu, cia, status);
+  return result;
+}
+
+/* Common rsqrt code for single operands (.s or .d), intermediate rounding.  */
+static sim_fpu_status
+inner_rsqrt(unsigned64 op1,
+	    FP_formats fmt,
+	    sim_fpu_round round,
+	    sim_fpu_denorm denorm,
+	    unsigned64 *result)
+{
+  sim_fpu wop1;
+  sim_fpu ans;
+  sim_fpu_status status = 0;
+  sim_fpu_status op_status;
+  unsigned64 temp = 0;
+
+  switch (fmt)
+    {
+    case fmt_single:
+      {
+	unsigned32 res;
+	sim_fpu_32to (&wop1, op1);
+	status |= sim_fpu_sqrt (&ans, &wop1);
+	status |= sim_fpu_round_32 (&ans, status, round);
+	wop1 = ans;
+	op_status = sim_fpu_inv (&ans, &wop1);
+	op_status |= sim_fpu_round_32 (&ans, round, denorm);
+	sim_fpu_to32 (&res, &ans);
+	temp = res;
+	status |= op_status;
+	break;
+      }
+    case fmt_double:
+      {
+	unsigned64 res;
+	sim_fpu_64to (&wop1, op1);
+	status |= sim_fpu_sqrt (&ans, &wop1);
+	status |= sim_fpu_round_64 (&ans, round, denorm);
+	wop1 = ans;
+	op_status = sim_fpu_inv (&ans, &wop1);
+	op_status |= sim_fpu_round_64 (&ans, round, denorm);
+	sim_fpu_to64 (&res, &ans);
+	temp = res;
+	status |= op_status;
+	break;
+      }
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  *result = temp;
+  return status;
+}
+
+static unsigned64
+fp_inv_sqrt(sim_cpu *cpu,
+	    address_word cia,
+	    unsigned64 op1,
+	    FP_formats fmt)
+{
+  sim_fpu_round round = rounding_mode (GETRM());
+  sim_fpu_round denorm = denorm_mode (cpu);
+  sim_fpu_status status = 0;
+  unsigned64 result = 0;
+
+  /* The format type has already been checked: */
+  switch (fmt)
+    {
+    case fmt_single:
+    case fmt_double:
+      status = inner_rsqrt (op1, fmt, round, denorm, &result);
+      break;
+    default:
+      sim_io_eprintf (SD, "Bad switch\n");
+      abort ();
+    }
+
+  update_fcsr (cpu, cia, status);
+  return result;
+}
+
 
 unsigned64
 fp_abs(sim_cpu *cpu,
@@ -747,6 +947,59 @@ fp_sqrt(sim_cpu *cpu,
         FP_formats fmt)
 {
   return fp_unary(cpu, cia, &sim_fpu_sqrt, op, fmt);
+}
+
+unsigned64
+fp_rsqrt(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op,
+         FP_formats fmt)
+{
+  return fp_inv_sqrt(cpu, cia, op, fmt);
+}
+
+unsigned64
+fp_madd(sim_cpu *cpu,
+        address_word cia,
+        unsigned64 op1,
+        unsigned64 op2,
+        unsigned64 op3,
+        FP_formats fmt)
+{
+  return fp_mac(cpu, cia, &sim_fpu_add, op1, op2, op3, 0, 0, fmt);
+}
+
+unsigned64
+fp_msub(sim_cpu *cpu,
+        address_word cia,
+        unsigned64 op1,
+        unsigned64 op2,
+        unsigned64 op3,
+        FP_formats fmt)
+{
+  return fp_mac(cpu, cia, &sim_fpu_sub, op1, op2, op3, 0, 0, fmt);
+}
+
+unsigned64
+fp_nmadd(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op1,
+         unsigned64 op2,
+         unsigned64 op3,
+         FP_formats fmt)
+{
+  return fp_mac(cpu, cia, &sim_fpu_add, op1, op2, op3, 0, 1, fmt);
+}
+
+unsigned64
+fp_nmsub(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op1,
+         unsigned64 op2,
+         unsigned64 op3,
+         FP_formats fmt)
+{
+  return fp_mac(cpu, cia, &sim_fpu_sub, op1, op2, op3, 0, 1, fmt);
 }
 
 

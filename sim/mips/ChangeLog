@@ -1,6 +1,25 @@
 2002-06-07  Chris Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 
+	* cp1.c (inner_mac, fp_mac, inner_rsqrt, fp_inv_sqrt)
+	(fp_rsqrt, fp_madd, fp_msub, fp_nmadd, fp_nmsub): New functions.
+	* sim-main.h (fp_rsqrt, fp_madd, fp_msub, fp_nmadd)
+	(fp_nmsub): New prototypes.
+	(RSquareRoot, MultiplyAdd, MultiplySub, NegMultiplyAdd)
+	(NegMultiplySub): New defines.
+	* mips.igen (RSQRT.fmt): Use RSquareRoot().
+	(MADD.D, MADD.S): Replace with...
+	(MADD.fmt): New instruction.
+	(MSUB.D, MSUB.S): Replace with...
+	(MSUB.fmt): New instruction.
+	(NMADD.D, NMADD.S): Replace with...
+	(NMADD.fmt): New instruction.
+	(NMSUB.D, MSUB.S): Replace with...
+	(NMSUB.fmt): New instruction.
+
+2002-06-07  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
 	* cp1.c: Fix more comment spelling and formatting.
 	(value_fcr, store_fcr): Use fenr_FS rather than hard-coding value.
 	(denorm_mode): New function.

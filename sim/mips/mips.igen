@@ -4198,34 +4198,19 @@
 
 
 
-//
-// FIXME: Not correct for mips*
-//
-010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32,f::MADD.D
-"madd.d f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,100,3.FMT:COP1X:64,f::MADD.fmt
+"madd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  {
-    StoreFPR(FD,fmt_double,Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
-  }
-}
-
-
-010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32,f::MADD.S
-"madd.s f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
-*mipsV:
-*mips64:
-*vr5000:
-{
-  check_fpu (SD_);
-  {
-    StoreFPR(FD,fmt_single,Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
-  }
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0); 
+  StoreFPR (FD, fmt, MultiplyAdd (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				  ValueFPR (FR, fmt), fmt));
 }
 
 
@@ -4354,29 +4339,19 @@
 }
 
 
-// MSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,101,001:COP1X:32,f::MSUB.D
-"msub.d f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,101,3.FMT:COP1X:64,f::MSUB.fmt
+"msub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  StoreFPR(FD,fmt_double,Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
-}
-
-
-// MSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,101000:COP1X:32,f::MSUB.S
-"msub.s f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
-*mipsV:
-*mips64:
-*vr5000:
-{
-  check_fpu (SD_);
-  StoreFPR(FD,fmt_single,Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR (FD, fmt, MultiplySub (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				  ValueFPR (FR, fmt), fmt));
 }
 
 
@@ -4449,55 +4424,35 @@
 }
 
 
-// NMADD.fmt
-010011,5.FR,5.FT,5.FS,5.FD,110001:COP1X:32,f::NMADD.D
-"nmadd.d f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,110,3.FMT:COP1X:64,f::NMADD.fmt
+"nmadd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  StoreFPR(FD,fmt_double,Negate(Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR (FD, fmt, NegMultiplyAdd (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				     ValueFPR (FR, fmt), fmt));
 }
 
 
-// NMADD.fmt
-010011,5.FR,5.FT,5.FS,5.FD,110000:COP1X:32,f::NMADD.S
-"nmadd.s f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,111,3.FMT:COP1X:64,f::NMSUB.fmt
+"nmsub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  StoreFPR(FD,fmt_single,Negate(Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
-}
-
-
-// NMSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,111001:COP1X:32,f::NMSUB.D
-"nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
-*mipsV:
-*mips64:
-*vr5000:
-{
-  check_fpu (SD_);
-  StoreFPR(FD,fmt_double,Negate(Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
-}
-
-
-// NMSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,111000:COP1X:32,f::NMSUB.S
-"nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
-*mipsV:
-*mips64:
-*vr5000:
-{
-  check_fpu (SD_);
-  StoreFPR(FD,fmt_single,Negate(Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR (FD, fmt, NegMultiplySub (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				     ValueFPR (FR, fmt), fmt));
 }
 
 
@@ -4579,7 +4534,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Recip(SquareRoot(ValueFPR(FS,fmt),fmt),fmt));
+  StoreFPR (FD, fmt, RSquareRoot (ValueFPR (FS, fmt), fmt));
 }
 
 
