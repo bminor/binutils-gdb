@@ -172,19 +172,17 @@ decode (addr, data, dst)
   int abs = 0;
   int bit = 0;
   int plen = 0;
-  struct h8_opcode *q = h8_opcodes;
+  struct h8_opcode *q;
   int size = 0;
 
   dst->dst.type = -1;
   dst->src.type = -1;
 
   /* Find the exact opcode/arg combo.  */
-  while (q->name)
+  for (q = h8_opcodes; q->name; q++)
     {
-      op_type *nib;
+      op_type *nib = q->data.nib;
       unsigned int len = 0;
-
-      nib = q->data.nib;
 
       while (1)
 	{
@@ -356,8 +354,8 @@ decode (addr, data, dst)
 			  }
 			else if (x & REG)
 			  {
-			    /* Reset the size, some
-			       ops (like mul) have two sizes */
+			    /* Reset the size.
+			       Some ops (like mul) have two sizes.  */
 
 			    size = bitfrom (x);
 			    p->type = X (OP_REG, size);
@@ -456,7 +454,7 @@ decode (addr, data, dst)
 	}
 
     fail:
-      q++;
+      ;
     }
 
   /* Fell off the end.  */
