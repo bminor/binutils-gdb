@@ -51,8 +51,6 @@ CORE_ADDR mcore_frame_args_address (struct frame_info *fi);
 
 CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
 
-void mcore_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset);
-
 CORE_ADDR mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
 
 CORE_ADDR mcore_push_arguments (int nargs, struct value ** args, CORE_ADDR sp,
@@ -649,7 +647,7 @@ mcore_frame_locals_address (struct frame_info * fi)
 /* Return the frame pointer in use at address PC. */
 
 void
-mcore_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
+mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 {
   struct frame_info *dummy = analyze_dummy_frame (pc, 0);
   if (dummy->extra_info->status & MY_FRAME_IN_SP)

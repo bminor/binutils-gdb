@@ -1,3 +1,10 @@
+2001-09-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/mcore/tm-mcore.h (mcore_virtual_frame_pointer): Update
+	function signature to match recent tracepoint.c:encode_actions
+	changes.
+	* mcore-tdep.c (mcore_virtual_frame_pointer): Ditto.
+
 2001-09-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* thread.c (do_captured_thread_select): Add uiout parameter.

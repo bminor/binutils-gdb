@@ -151,7 +151,7 @@ extern use_struct_convention_fn mcore_use_struct_convention;
     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Cons up virtual frame pointer for trace */
-extern void mcore_virtual_frame_pointer (CORE_ADDR, long *, long *);
+extern void mcore_virtual_frame_pointer (CORE_ADDR, int *, LONGEST *);
 #define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
 	mcore_virtual_frame_pointer ((PC), (REGP), (OFFP))
 
