@@ -1,3 +1,8 @@
+Wed Dec  7 18:22:59 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* source.c: Various cosmetic changes.
+	(forward_search_command): Handle very long source lines correctly.
+
 Wed Dec  7 13:21:47 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* hppa-tdep.c: Use GDB_TARGET_IS_PA_ELF so SOM target support will
