@@ -1,5 +1,9 @@
 Mon Nov 18 17:45:18 1991  Fred Fish  (fnf at cygnus.com)
 
+	* procfs.c:  Move inclusion of defs.h to before param.h, as in
+	all the other source files that include both.  This is required
+	to supply some typedefs that are used in files included by param.h.
+
 	* m68k-tdep.c (m68k_skip_prologue):  Add generic m68k support for
 	skipping function prologues, ala the other cpu families (i386,
 	mips, m88k, etc).  Add the ability to skip movm and fmovm

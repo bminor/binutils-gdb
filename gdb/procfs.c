@@ -33,6 +33,7 @@ regardless of whether or not the actual target has floating point hardware.
 
 
 
+#include "defs.h"
 #include "param.h"
 
 #ifdef USE_PROC_FS	/* Entire file goes away if not using /proc */
@@ -42,7 +43,6 @@ regardless of whether or not the actual target has floating point hardware.
 #include <fcntl.h>
 #include <errno.h>
 
-#include "defs.h"
 #include "ansidecl.h"
 #include "inferior.h"
 #include "target.h"
