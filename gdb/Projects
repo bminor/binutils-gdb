@@ -85,13 +85,6 @@ symbols to be read in simply to read a source file.
 
 Allow patching of executables, a la "adb -w".
 
-Improve the target interface so that targets can be stacked; e.g. an
-exec file and a core file (memory references that the core file can't
-satisfy are directed to the exec file); those two plus a child process.
-The child doesn't let any refs through, but when the child terminates,
-you are back to debugging the core file -- you might even want to swap
-back and forth between the two, or between two core files.
-
 Add a command for searching memory, a la adb.  It specifies size,
 mask, value, start address.  ADB searches until it finds it or hits
 an error (or is interrupted).

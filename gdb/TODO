@@ -23,11 +23,15 @@ Speed up single stepping by avoiding extraneous ptrace calls.
 Speed up single stepping by not inserting and removing breakpoints
 each time the inferior starts and stops.
 
+Breakpoints should not be inserted and deleted all the time.  Only the
+one(s) there should be removed when we have to step over one.  Support
+breakpoints that don't have to be removed to step over them.
+
 Speed up watchpoints by not single-stepping them, but do something
 faster like single-line execution.  Speed them up tremendously on
 machines that have watchpoint registers.
 
-Update gdb.texinfo to include doc on the directory structure and 
+Update gdb-int.texinfo to include doc on the directory structure and 
 the various tricks of building gdb.
 
 Do a tutorial in gdb.texinfo on how to do simple things in gdb.
@@ -46,21 +50,18 @@ if you print the struct, but it gets 0 if you try to deref it.
 
 Persistent command history: A feature where you could save off a list
 of the commands you did, so you can edit it into something that will bring
-the target to the same place every time you source it.  Sun wants it.
+the target to the same place every time you source it.
 This would also be useful for automated fast watchpointing; if you go
 past the place where it watchpoints, you just start it over again and
 do it more carefully.
 
-Deal with the Sun ptrace bug that loses the registers if the stack is
-paged out.
+Deal with the SunOS 4.0 and 4.1.1 ptrace bug that loses the registers if
+the stack is paged out.
 
 Finish the C++ exception handling stub routines.  Lint points them out
 as unused statics functions.
 
-"i source" only shows you info about files that it can read.  When it
-can't read a file and complains, you can't see any info about it, like
-where it was compiled.  Perhaps "i source" should take an argument
-like that of "list".
+Perhaps "i source" should take an argument like that of "list".
 
 See if coredep.c's fetch_core_registers can be used on more machines.
 E.g. MIPS (mips-xdep.c).
@@ -73,18 +74,16 @@ is also IEEE.  Death on a vax.
 
 Test cross-debugging Unix-to-Unix.
 
-Check the RAPP remote protocol.  What is it?  It's in Makefile.dist
+Check the RAPP remote protocol.  What is it?  It's in Makefile.in
 and one ChangeLog entry.
 
 Set up interface between GDB and INFO so that you can hop into interactive
 INFO and back out again.  When running under Emacs, should use Emacs
 info, else fork the info program.  Installation of GDB should install
 its texinfo files into the info tree automagically, including the readline
-texinfo files..
+texinfo files.
 
-Improve backtrace output to avoid line wraps.  Prettify it.
-
-"help address" ought to find the "help set addressprint" entry.
+"help address" ought to find the "help set print address" entry.
 
 Remove the VTBL internal guts from printouts of C++ structs, unless
 vtblprint is set.
@@ -113,8 +112,6 @@ actually caused it to die.
 Hitting ^Z to an inferior doesn't work right, it takes several continues
 to make it actually go.
 
-"i fun" doesn't show misc function vector symbols.
-
 "x/10i" should shorten the long name, if any, on subsequent lines.
 
 Check through the code for FIXME comments and fix them.  dbxread.c,
@@ -124,7 +121,7 @@ blockframe.c, and plenty more.
 to get to that spot by accident.  E.g. "n" over execute_command which has
 an error.
 
-Watchpoints seem not entirely reliable.
+Watchpoints seem not entirely reliable, though they haven't failed me recently.
 
 "set zeroprint off", don't bother printing members of structs which are entirely
 zero.  Useful for those big structs with few useful members.
@@ -160,9 +157,6 @@ function, on 29K.
 
 wait_for_inferior loops forever if wait() gives it an error.
 
-"i frame" arg formatting sucks.  Should wrap lines.
-"bt" arg formatting needs the same treatment .
-
 "i frame" shows wrong "arglist at" location, doesn't show where the args
 should be found, only their actual values.
 
@@ -172,8 +166,6 @@ fns, e.g. enable_command in gdb.
 'ptype yylval' ==> "union YYSTYPE { ..... }".  However, it is not a
 union YYSTYPE, but is simply a YYSTYPE, which is a typedef for an
 unnamed union.
-
-"show all" should work.
 
 There should be a way for "set" commands to validate the new setting
 before it takes effect.
@@ -205,7 +197,7 @@ Eliminate separate declarations of registers[] everywhere.
 Line numbers are off in some spots.  In proceed() at 1st "oneproc = 1",
 it seems to run that statement, but it doesn't actually.
 
-Perhaps the tdep and xdep files, and the tm and xm files, into a config
+Perhaps move the tdep and xdep files, and the tm and xm files, into a config
 subdirectory.  If not, at least straighten out their names so that
 they all start with the machine name.
 
@@ -221,13 +213,6 @@ We should be able to write to executables that aren't running.
 
 We should be able to write to random files at hex offsets like adb.
 
-Tiemann:  It is very painful to look at fp registers that hold
-double precision values.  GDB is happy to show them to you as single
-precision, but you cannot look at them as doubles.  Perhaps casting
-should be changed to make this work; or maybe a new "set" option that
-sets the default fp precision to single, double, or quad.  This is not
-urgent, but would be nice to get into GDB 4.0.
-
 Make "target xxx" command interruptible.
 
 Handle add_file with separate text, data, and bss addresses.  Maybe
@@ -237,23 +222,12 @@ Handle free_named_symtab to cope with multiply-loaded object files
 in a dynamic linking environment.  Should remember the last copy loaded,
 but not get too snowed if it finds references to the older copy.
 
-Implement have_memory, have_stack, have_registers, have_execution.
-Memory:  core, exec, child, vxworks even without child.
-stack:   core, child, vxworks with child
-registers:  core, child, vxworks with child
-execution:  child, vxworks with child.
-
 The original BFD core dump reading routine would itself coredump when fed
 a garbage file as a core file.  Does the current one?
 
-Breakpoints should not be inserted and deleted all the time.  Only the
-one(s) there should be removed when we have to step over one.  Support
-breakpoints that don't have to be removed to step over them.
-
 Generalize and Standardize the RPC interface to a target program,
-improve it beyond the "ptrace" interface, and see if it can become a standard
-for remote debugging.  Is WRS interested in donating their target-end
-code?
+improve it beyond the "ptrace" interface, and see if it can become a
+standard for remote debugging.
 
 Remove all references to:
 	text_offset

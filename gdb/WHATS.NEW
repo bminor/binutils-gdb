@@ -33,7 +33,8 @@ Gdb's prompt is new-gdb=>.
 
 What follows are the NEW set commands.  The command ``help set'' will
 print a complete list of old and new set commands.  ``help set FOO''
-will give a longer description of the variable FOO.
+will give a longer description of the variable FOO.  ``show'' will show
+all of the variable descriptions and their current settings.
 
 confirm on/off:  Enables warning questions for operations that are
 		 hard to recover from, e.g. rerunning the program while
@@ -66,15 +67,15 @@ radix N:  Sets the default radix for input and output.  It can be set
 	  to 8, 10, or 16.  Note that the argument to "radix" is interpreted
 	  in the current radix, so "set radix 10" is always a no-op.
 
-screen-height N: This integer value is the number of lines on a page. Default
-                 is 24, the current `stty rows'' setting, or the ``li#''
-		 setting from the termcap entry matching the environment
-		 variable TERM.
+height N: This integer value is the number of lines on a page. Default
+          is 24, the current `stty rows'' setting, or the ``li#''
+	  setting from the termcap entry matching the environment
+	  variable TERM.
 
-screen-width N:  This integer value is the number of characters on a line.
-		 Default is 80, the current `stty cols'' setting, or the ``co#''
-		 setting from the termcap entry matching the environment
-		 variable TERM.
+width N:  This integer value is the number of characters on a line.
+	  Default is 80, the current `stty cols'' setting, or the ``co#''
+	  setting from the termcap entry matching the environment
+	  variable TERM.
 
 Note: ``set screensize'' is obsolete. Use ``set height'' and
 ``set width'' instead.
@@ -175,39 +176,15 @@ frames without printing.
 'dir' now adds directories to the FRONT of the source search path.
 The path starts off empty.  Source files that contain debug information
 about the directory in which they were compiled can be found even
-with an empty path; GCC includes this information.  If GDB can't find
-your source file in the current directory, type "dir .".
-
- *  Features removed in this release
-
-``info types'' has been removed, since it printed builtin types in a
-confusing fashion, and did not do useful things with typedefs.  ``ptype''
-or ``whatis'' are more useful commands for dealing with types..
-
+with an empty path; Sun CC and GCC include this information.  If GDB can't
+find your source file in the current directory, type "dir .".
 
  * Configuring GDB for compilation
 
-For normal use, type ``config.gdb host''.  Hosts now handled are:
-
-3b1 altos altosgas arm bigmips convex hp300bsd hp300hpux i386v i386v-g 
-i386v32 i386v32-g isi littlemips m88k merlin news news1000 none np1 pn
-pyramid sun2os3 sun2os4 sun386 sun3os3 sun3os4 sun4os3 sun4os4 symmetry
-umax vax
-
-Type config.gdb +host to get a full description of each host.
-
-You can now build gdb conveniently for several architectures from the
-same sources.  If config.gdb is run from a subdirectory, it configures
-the Makefile to use source files from '..'.  Each subdirectory can be
-indpendently configured.  An explicit source file directory can also
-be specified with the +srcdir=xxx option.  Due to obscure search rules
-in the C preprocessor, if you have previously built gdb in the main 
-directory, run 'make cleanconfig' in the top level directory before
-building it in a subdirectory.
+For normal use, type ``./configure host''.  See README or gdb.texinfo
+for more details.
 
 GDB now handles cross debugging.  If you are remotely debugging between 
-two different machines, type ``config.gdb host target''.
-Host is the machine where gdb will run; target is the machine
+two different machines, type ``./configure host -target=targ''.
+Host is the machine where gdb will run; targ is the machine
 where the program that you are debugging will run.
-
-Type config.gdb +target to get a full description of each target.

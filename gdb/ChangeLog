@@ -1,3 +1,9 @@
+Wed Jul 31 12:06:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* GDB-3.98 release.
+
+	* TODO, Projects, WHATS.NEW:  Update for gdb-3.98.
+
 Tue Jul 30 17:26:39 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* configure.in:  Remove xm.h and tm.h even if we aren't linking
