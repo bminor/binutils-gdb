@@ -228,6 +228,9 @@ simif_create_inferior (exec_file, args, env)
   strcat (arg_buf, args);
   argv = buildargv (arg_buf);
   make_cleanup (freeargv, (char *) argv);
+  /* FIXME: remote-sim.h says targets that don't support this return
+     non-zero.  Perhaps distinguish between "not supported" and other errors?
+     Or maybe that can be the only error.  */
   if (sim_set_args (argv, env) != 0)
     return;
 
