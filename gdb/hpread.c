@@ -200,6 +200,9 @@ void hpread_symfile_finish (struct objfile *);
 
 static union dnttentry *hpread_get_gntt (int, struct objfile *);
 
+static union dnttentry *hpread_get_lntt (int index, struct objfile *objfile);
+
+
 static unsigned long hpread_get_textlow (int, int, struct objfile *, int);
 
 static struct partial_symtab *hpread_start_psymtab

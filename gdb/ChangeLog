@@ -1,3 +1,8 @@
+2002-04-15  Andrew Cagney  <ac131313@redhat.com>
+ 
+ 	* hpread.c (hpread_getlntt): Add declaration.
+ 	Also fix PR gdb/391.
+ 
 2002-04-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* acinclude.m4 (AM_PROG_CC_STDC): Import from automake 1.6.
