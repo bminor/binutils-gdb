@@ -1,3 +1,7 @@
+2000-11-22  H.J. Lu  <hjl@gnu.org>
+
+	* cplus-dem.c (main): Handle gnat_demangling.
+
 2000-11-21  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* cplus-dem.c (cplus_demangle): Fix formatting.
