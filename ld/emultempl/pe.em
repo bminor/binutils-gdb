@@ -3,7 +3,7 @@
 (echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -534,7 +534,7 @@ gld_${EMULATION_NAME}_after_parse ()
      opened, so registering the symbol as undefined will make a
      difference.  */
 
-  if (entry_symbol)
+  if (! link_info.relocateable && entry_symbol != NULL)
     ldlang_add_undef (entry_symbol);
 }
 
