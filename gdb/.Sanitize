@@ -84,6 +84,7 @@ dbxread.c
 defs.h
 demangle.c
 doc
+dpx2-nat.c
 dwarfread.c
 elfread.c
 environ.c

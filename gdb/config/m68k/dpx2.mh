@@ -1,0 +1,9 @@
+# Host: Bull DPX2 (68k, System V release 3)
+XDEPFILES=
+XM_FILE= xm-dpx2.h
+NAT_FILE= nm-dpx2.h
+NATDEPFILES= infptrace.o coredep.o corelow.o inftarg.o dpx2-nat.o \
+  inftarg.o fork-child.o
+REGEX=regex.o
+REGEX1=regex.o
+TERMCAP=-lcurses

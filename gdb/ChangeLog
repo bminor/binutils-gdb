@@ -1,3 +1,9 @@
+Thu Jul  1 15:50:05 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
+
+	* configure.in (m68*-bull-sysv*): added support for Bull dpx2.
+	* config/m68k/{t,x,n}m-dpx2.h, dpx2-nat.c: New files.
+	* config/m68k/dpx2.m{h,t}: New files.
+
 Sun Jul 11 12:32:08 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/sparc/tm-sparc.h (PRINT_REGISTER_HOOK): Fix typo, add
