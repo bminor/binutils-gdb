@@ -239,7 +239,7 @@ captured_main (void *data)
      this captured main (not yet implemented), or one specified by the
      user at start up, or the console.  Make life easier by always
      initializing the interpreter to something.  */
-  interpreter_p = xstrdup (GDB_INTERPRETER_CONSOLE);
+  interpreter_p = xstrdup (INTERP_CONSOLE);
 
   /* Parse arguments and options.  */
   {
@@ -547,7 +547,7 @@ extern int gdbtk_test (char *);
      GDB retain the old MI1 interpreter startup behavior.  Output the
      copyright message before the interpreter is installed.  That way
      it isn't encapsulated in MI output.  */
-  if (!quiet && strcmp (interpreter_p, GDB_INTERPRETER_MI1) == 0)
+  if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
     {
       /* Print all the junk at the top, with trailing "..." if we are about
          to read a symbol file (possibly slowly).  */
@@ -564,7 +564,7 @@ extern int gdbtk_test (char *);
 
   {
     /* Find it.  */
-    struct gdb_interpreter *interp = gdb_interpreter_lookup (interpreter_p);
+    struct interp *interp = interp_lookup (interpreter_p);
     if (interp == NULL)
       {
         fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
@@ -572,7 +572,7 @@ extern int gdbtk_test (char *);
         exit (1);
       }
     /* Install it.  */
-    if (!gdb_interpreter_set (interp))
+    if (!interp_set (interp))
       {
         fprintf_unfiltered (gdb_stderr,
 			    "Interpreter `%s' failed to initialize.\n",
@@ -585,7 +585,7 @@ extern int gdbtk_test (char *);
      GDB retain the old MI1 interpreter startup behavior.  Output the
      copyright message after the interpreter is installed when it is
      any sane interpreter.  */
-  if (!quiet && !gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
+  if (!quiet && !current_interp_named_p (INTERP_MI1))
     {
       /* Print all the junk at the top, with trailing "..." if we are about
          to read a symbol file (possibly slowly).  */

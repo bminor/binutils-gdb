@@ -1,5 +1,7 @@
-/* Manages interpreters for gdb.
+/* Manages interpreters for GDB, the GNU debugger.
+
    Copyright 2000, 2002 Free Software Foundation, Inc.
+
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 
    This file is part of GDB.
@@ -19,16 +21,15 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA. */
 
-/* This is just a first cut at separating out the "interpreter" functions
-   of gdb into self-contained modules.  There are a couple of open areas that
-   need to be sorted out:
+/* This is just a first cut at separating out the "interpreter"
+   functions of gdb into self-contained modules.  There are a couple
+   of open areas that need to be sorted out:
 
    1) The interpreter explicitly contains a UI_OUT, and can insert itself
    into the event loop, but it doesn't explicitly contain hooks for readline.
    I did this because it seems to me many interpreters won't want to use
    the readline command interface, and it is probably simpler to just let
-   them take over the input in their resume proc.  
-*/
+   them take over the input in their resume proc.  */
 
 #include "defs.h"
 #include "gdbcmd.h"
@@ -39,14 +40,15 @@
 #include "completer.h"
 #include "gdb_string.h"
 #include "gdb-events.h"
+#include "gdb_assert.h"
 
-struct gdb_interpreter
+struct interp
 {
   /* This is the name in "-i=" and set interpreter. */
-  char *name;
+  const char *name;
 
   /* Interpreters are stored in a linked list, this is the next one... */
-  struct gdb_interpreter *next;
+  struct interp *next;
 
   /* This is a cookie that the instance of the interpreter can use, for
      instance to call itself in hook functions */
@@ -60,7 +62,7 @@ struct gdb_interpreter
      & mi outputs, or it might be a result formatter. */
   struct ui_out *interpreter_out;
 
-  struct gdb_interpreter_procs procs;
+  const struct interp_procs *procs;
   int quiet_p;
 };
 
@@ -74,56 +76,44 @@ void _initialize_interpreter (void);
 
 /* Variables local to this file: */
 
-static struct gdb_interpreter *interp_list = NULL;
-static struct gdb_interpreter *current_interpreter = NULL;
+static struct interp *interp_list = NULL;
+static struct interp *current_interpreter = NULL;
 
 static int interpreter_initialized = 0;
 
-/* gdb_interpreter_new - This allocates space for a new interpreter,
+/* interp_new - This allocates space for a new interpreter,
    fills the fields from the inputs, and returns a pointer to the
    interpreter. */
-struct gdb_interpreter *
-gdb_interpreter_new (char *name,
-		     void *data,
-		     struct ui_out *uiout,
-		     struct gdb_interpreter_procs *procs)
+struct interp *
+interp_new (const char *name, void *data, struct ui_out *uiout,
+	    const struct interp_procs *procs)
 {
-  struct gdb_interpreter *new_interp;
+  struct interp *new_interp;
 
-  new_interp =
-    (struct gdb_interpreter *) xmalloc (sizeof (struct gdb_interpreter));
+  new_interp = XMALLOC (struct interp);
 
   new_interp->name = xstrdup (name);
   new_interp->data = data;
   new_interp->interpreter_out = uiout;
   new_interp->quiet_p = 0;
-  new_interp->procs.init_proc = procs->init_proc;
-  new_interp->procs.resume_proc = procs->resume_proc;
-  new_interp->procs.suspend_proc = procs->suspend_proc;
-  new_interp->procs.exec_proc = procs->exec_proc;
-  new_interp->procs.prompt_proc_p = procs->prompt_proc_p;
+  new_interp->procs = procs;
   new_interp->inited = 0;
 
   return new_interp;
 }
 
-/* Add interpreter INTERP to the gdb interpreter list.  If an
-   interpreter of the same name is already on the list, then
-   the new one is NOT added, and the function returns 0.  Otherwise
-   it returns 1. */
-int
-gdb_interpreter_add (struct gdb_interpreter *interp)
+/* Add interpreter INTERP to the gdb interpreter list.  The
+   interpreter must not have previously been added.  */
+void
+interp_add (struct interp *interp)
 {
   if (!interpreter_initialized)
     initialize_interps ();
 
-  if (gdb_interpreter_lookup (interp->name) != NULL)
-    return 0;
+  gdb_assert (interp_lookup (interp->name) == NULL);
 
   interp->next = interp_list;
   interp_list = interp;
-
-  return 1;
 }
 
 /* This sets the current interpreter to be INTERP.  If INTERP has not
@@ -133,9 +123,9 @@ gdb_interpreter_add (struct gdb_interpreter *interp)
    old interpreter, then raise an internal error, since we are in
    pretty bad shape at this point. */
 int
-gdb_interpreter_set (struct gdb_interpreter *interp)
+interp_set (struct interp *interp)
 {
-  struct gdb_interpreter *old_interp = current_interpreter;
+  struct interp *old_interp = current_interpreter;
   int first_time = 0;
 
 
@@ -145,9 +135,9 @@ gdb_interpreter_set (struct gdb_interpreter *interp)
     {
       do_all_continuations ();
       ui_out_flush (uiout);
-      if (current_interpreter->procs.suspend_proc
-	  && !current_interpreter->procs.suspend_proc (current_interpreter->
-						       data))
+      if (current_interpreter->procs->suspend_proc
+	  && !current_interpreter->procs->suspend_proc (current_interpreter->
+							data))
 	{
 	  error ("Could not suspend interpreter \"%s\"\n",
 		 current_interpreter->name);
@@ -176,35 +166,20 @@ gdb_interpreter_set (struct gdb_interpreter *interp)
 
   if (!interp->inited)
     {
-      if (interp->procs.init_proc != NULL)
+      if (interp->procs->init_proc != NULL)
 	{
-	  if (!interp->procs.init_proc (interp->data))
-	    {
-	      if (!gdb_interpreter_set (old_interp))
-		internal_error (__FILE__, __LINE__,
-				"Failed to initialize new interp \"%s\" %s",
-				interp->name,
-				"and could not restore old interp!\n");
-	      return 0;
-	    }
-	  else
-	    {
-	      interp->inited = 1;
-	    }
+	  interp->data = interp->procs->init_proc ();
 	}
-      else
-	{
-	  interp->inited = 1;
-	}
+      interp->inited = 1;
     }
 
   /* Clear out any installed interpreter hooks/event handlers. */
   clear_interpreter_hooks ();
 
-  if (interp->procs.resume_proc != NULL
-      && (!interp->procs.resume_proc (interp->data)))
+  if (interp->procs->resume_proc != NULL
+      && (!interp->procs->resume_proc (interp->data)))
     {
-      if (!gdb_interpreter_set (old_interp))
+      if (!interp_set (old_interp))
 	internal_error (__FILE__, __LINE__,
 			"Failed to initialize new interp \"%s\" %s",
 			interp->name, "and could not restore old interp!\n");
@@ -217,7 +192,7 @@ gdb_interpreter_set (struct gdb_interpreter *interp)
 
   if (!first_time)
     {
-      if (!gdb_interpreter_is_quiet_p (interp))
+      if (!interp_quiet_p (interp))
 	{
 	  sprintf (buffer, "Switching to interpreter \"%.24s\".\n",
 		   interp->name);
@@ -229,13 +204,13 @@ gdb_interpreter_set (struct gdb_interpreter *interp)
   return 1;
 }
 
-/* gdb_interpreter_lookup - Looks up the interpreter for NAME.  If no
-   such interpreter exists, return NULL, otherwise return a pointer to
-   the interpreter.  */
-struct gdb_interpreter *
-gdb_interpreter_lookup (char *name)
+/* interp_lookup - Looks up the interpreter for NAME.  If no such
+   interpreter exists, return NULL, otherwise return a pointer to the
+   interpreter.  */
+struct interp *
+interp_lookup (const char *name)
 {
-  struct gdb_interpreter *interp;
+  struct interp *interp;
 
   if (name == NULL || strlen (name) == 0)
     return NULL;
@@ -250,14 +225,9 @@ gdb_interpreter_lookup (char *name)
 }
 
 /* Returns the current interpreter. */
-static struct gdb_interpreter *
-gdb_interpreter_current (void)
-{
-  return current_interpreter;
-}
 
 struct ui_out *
-gdb_interpreter_ui_out (struct gdb_interpreter *interp)
+interp_ui_out (struct interp *interp)
 {
   if (interp != NULL)
     return interp->interpreter_out;
@@ -267,12 +237,10 @@ gdb_interpreter_ui_out (struct gdb_interpreter *interp)
 
 /* Returns true if the current interp is the passed in name. */
 int
-gdb_interpreter_current_is_named_p (char *interp_name)
+current_interp_named_p (const char *interp_name)
 {
-  struct gdb_interpreter *current_interp = gdb_interpreter_current ();
-
-  if (current_interp)
-    return (strcmp (current_interp->name, interp_name) == 0);
+  if (current_interpreter)
+    return (strcmp (current_interpreter->name, interp_name) == 0);
 
   return 0;
 }
@@ -281,16 +249,18 @@ gdb_interpreter_current_is_named_p (char *interp_name)
    If the proc returns a zero value, display_gdb_prompt will
    return without displaying the prompt.  */
 int
-gdb_interpreter_display_prompt_p (void)
+current_interp_display_prompt_p (void)
 {
-  if (current_interpreter->procs.prompt_proc_p == NULL)
+  if (current_interpreter == NULL
+      || current_interpreter->procs->prompt_proc_p == NULL)
     return 0;
   else
-    return current_interpreter->procs.prompt_proc_p ();
+    return current_interpreter->procs->prompt_proc_p (current_interpreter->
+						      data);
 }
 
 int
-gdb_interpreter_is_quiet_p (struct gdb_interpreter *interp)
+interp_quiet_p (struct interp *interp)
 {
   if (interp != NULL)
     return interp->quiet_p;
@@ -299,44 +269,29 @@ gdb_interpreter_is_quiet_p (struct gdb_interpreter *interp)
 }
 
 int
-gdb_interpreter_set_quiet (struct gdb_interpreter *interp, int quiet)
+interp_set_quiet (struct interp *interp, int quiet)
 {
   int old_val = interp->quiet_p;
   interp->quiet_p = quiet;
   return old_val;
 }
 
-/* gdb_interpreter_exec - This executes COMMAND_STR in the current 
+/* interp_exec - This executes COMMAND_STR in the current 
    interpreter. */
 int
-gdb_interpreter_exec (char *command_str)
+interp_exec_p (struct interp *interp)
 {
-  if (current_interpreter->procs.exec_proc != NULL)
+  return interp->procs->exec_proc != NULL;
+}
+
+int
+interp_exec (struct interp *interp, const char *command_str)
+{
+  if (interp->procs->exec_proc != NULL)
     {
-      return current_interpreter->procs.exec_proc (current_interpreter->data,
-						   command_str);
+      return interp->procs->exec_proc (interp->data, command_str);
     }
   return 0;
-}
-
-/* Accessor function.  Not used at the moment.  */
-struct gdb_interpreter_procs *
-gdb_interpreter_get_procs (struct gdb_interpreter *interp)
-{
-  if (interp != NULL)
-    return &interp->procs;
-
-  return &current_interpreter->procs;
-}
-
-/* Accessor function.  Not used at the moment.  */
-void *
-gdb_interpreter_get_data (struct gdb_interpreter *interp)
-{
-  if (interp != NULL)
-    return interp->data;
-
-  return current_interpreter->data;
 }
 
 /* A convenience routine that nulls out all the
@@ -383,7 +338,7 @@ initialize_interps (void)
 void
 interpreter_exec_cmd (char *args, int from_tty)
 {
-  struct gdb_interpreter *old_interp, *interp_to_use;
+  struct interp *old_interp, *interp_to_use;
   char **prules = NULL;
   char **trule = NULL;
   unsigned int nrules;
@@ -408,33 +363,33 @@ interpreter_exec_cmd (char *args, int from_tty)
   if (nrules < 2)
     error ("usage: interpreter-exec <interpreter> [ <command> ... ]");
 
-  old_interp = gdb_interpreter_current ();
+  old_interp = current_interpreter;
 
-  interp_to_use = gdb_interpreter_lookup (prules[0]);
+  interp_to_use = interp_lookup (prules[0]);
   if (interp_to_use == NULL)
     error ("Could not find interpreter \"%s\".", prules[0]);
 
   /* Temporarily set interpreters quiet */
-  old_quiet = gdb_interpreter_set_quiet (old_interp, 1);
-  use_quiet = gdb_interpreter_set_quiet (interp_to_use, 1);
+  old_quiet = interp_set_quiet (old_interp, 1);
+  use_quiet = interp_set_quiet (interp_to_use, 1);
 
-  if (!gdb_interpreter_set (interp_to_use))
+  if (!interp_set (interp_to_use))
     error ("Could not switch to interpreter \"%s\".", prules[0]);
 
   for (i = 1; i < nrules; i++)
     {
-      if (!gdb_interpreter_exec (prules[i]))
+      if (!interp_exec (interp_to_use, prules[i]))
 	{
-	  gdb_interpreter_set (old_interp);
-	  gdb_interpreter_set_quiet (interp_to_use, old_quiet);
+	  interp_set (old_interp);
+	  interp_set_quiet (interp_to_use, old_quiet);
 	  error ("error in command: \"%s\".", prules[i]);
 	  break;
 	}
     }
 
-  gdb_interpreter_set (old_interp);
-  gdb_interpreter_set_quiet (interp_to_use, use_quiet);
-  gdb_interpreter_set_quiet (old_interp, old_quiet);
+  interp_set (old_interp);
+  interp_set_quiet (interp_to_use, use_quiet);
+  interp_set_quiet (old_interp, old_quiet);
 }
 
 /* List the possible interpreters which could complete the given text. */
@@ -445,7 +400,7 @@ interpreter_completer (char *text, char *word)
   int textlen;
   int num_matches;
   char **matches;
-  struct gdb_interpreter *interp;
+  struct interp *interp;
 
   /* We expect only a very limited number of interpreters, so just
      allocate room for all of them. */

@@ -1,3 +1,8 @@
+2003-02-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-interp.c, mi-main.c, mi.h: Update to current interp
+	interface.
+
 2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
         * mi-cmd-stack.c (mi_cmd_stack_select_frame): Remove stray statement.

@@ -253,7 +253,7 @@ display_gdb_prompt (char *new_prompt)
 
   /* Each interpreter has its own rules on wether or not display the
      command prompt. */
-  if (!gdb_interpreter_display_prompt_p ())
+  if (!current_interp_display_prompt_p ())
     return;
 
   if (target_executing && sync_execution)

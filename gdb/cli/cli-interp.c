@@ -25,17 +25,10 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "top.h"		/* for "execute_command" */
-/* Prototypes for the CLI Interpreter functions */
 
-static int cli_interpreter_init (void *data);
-static int cli_interpreter_resume (void *data);
-static int cli_interpreter_suspend (void *data);
-static int cli_interpreter_exec (void *data, char *command_str);
-static int cli_interpreter_display_prompt_p (void);
+struct ui_out *cli_uiout;
 
 /* These are the ui_out and the interpreter for the console interpreter. */
-static struct ui_out *cli_uiout;
-static struct gdb_interpreter *cli_interp;
 
 /* Longjmp-safe wrapper for "execute_command" */
 static int do_captured_execute_command (struct ui_out *uiout, void *data);
@@ -49,16 +42,16 @@ struct captured_execute_command_args
 
 /* These implement the cli out interpreter: */
 
-static int
-cli_interpreter_init (void *data)
+static void *
+cli_interpreter_init (void)
 {
-  return 1;
+  return NULL;
 }
 
 static int
 cli_interpreter_resume (void *data)
 {
-  /*sync_execution = 1;*/
+  /*sync_execution = 1; */
   gdb_setup_readline ();
   return 1;
 }
@@ -72,28 +65,33 @@ cli_interpreter_suspend (void *data)
 
 /* Don't display the prompt if we are set quiet.  */
 static int
-cli_interpreter_display_prompt_p (void)
+cli_interpreter_display_prompt_p (void *data)
 {
-  if (gdb_interpreter_is_quiet_p (NULL))
+  if (interp_quiet_p (NULL))
     return 0;
   else
     return 1;
 }
 
 static int
-cli_interpreter_exec (void *data, char *command_str)
+cli_interpreter_exec (void *data, const char *command_str)
 {
   int result;
   struct ui_file *old_stream;
 
+  /* FIXME: cagney/2003-02-01: Need to const char *propogate
+     safe_execute_command.  */
+  char *str = alloca (strlen (command_str) + 1);
+  strcpy (str, command_str);
+
   /* gdb_stdout could change between the time cli_uiout was initialized
      and now. Since we're probably using a different interpreter which has
      a new ui_file for gdb_stdout, use that one instead of the default.
-  
+
      It is important that it gets reset everytime, since the user could
      set gdb to use a different interpreter. */
   old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
-  result = safe_execute_command (cli_uiout, command_str, 1);
+  result = safe_execute_command (cli_uiout, str, 1);
   cli_out_set_stream (cli_uiout, old_stream);
   return result;
 }
@@ -117,21 +115,23 @@ safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 			   NULL, RETURN_MASK_ALL);
 }
 
+
 /* standard gdb initialization hook */
 void
 _initialize_cli_interp (void)
 {
-  struct gdb_interpreter_procs procs = {
+  static const struct interp_procs procs = {
     cli_interpreter_init,	/* init_proc */
     cli_interpreter_resume,	/* resume_proc */
     cli_interpreter_suspend,	/* suspend_proc */
     cli_interpreter_exec,	/* exec_proc */
-    cli_interpreter_display_prompt_p /* prompt_proc_p */
+    cli_interpreter_display_prompt_p	/* prompt_proc_p */
   };
+  struct interp *cli_interp;
 
   /* Create a default uiout builder for the CLI. */
   cli_uiout = cli_out_new (gdb_stdout);
-  cli_interp = gdb_interpreter_new (GDB_INTERPRETER_CONSOLE, NULL, cli_uiout,
-				    &procs);
-  gdb_interpreter_add (cli_interp);
+  cli_interp = interp_new (INTERP_CONSOLE, NULL, cli_uiout, &procs);
+
+  interp_add (cli_interp);
 }

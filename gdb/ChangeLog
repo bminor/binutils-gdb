@@ -1,5 +1,16 @@
 2003-02-03  Andrew Cagney  <ac131313@redhat.com>
 
+	* interps.c (gdb_interpreter_get_procs): Delete function.
+	(gdb_interpreter_get_data): Delete function.
+
+	* interps.h (gdb_interpreter_get_procs): Delete declaration.
+	(gdb_interpreter_get_data): Delete declaration.
+
+	* cli/cli-interp.c (cli_interpreter_display_prompt_p): 
+
+	* interps.h (interp_prompt_ftype): Add data parameter.
+	* interps.c (gdb_interpreter_display_prompt_p): Update.
+
 	* top.c (gdb_init): Move interpreter init code from here ...
 	* main.c (captured_main): ... to here.  Include "interps.h".
 	(captured_main): Set interpreter_p to a default before parsing the

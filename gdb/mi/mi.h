@@ -22,8 +22,8 @@
 #define MI_H
 /* The mi interpreters. */
 
-extern struct gdb_interpreter *mi_interp;
-extern struct gdb_interpreter *mi1_interp;
+extern struct interp *mi_interp;
+extern struct interp *mi1_interp;
 extern struct ui_file *mi_event_channel;
 
 extern void mi_setup_architecture_data (void);

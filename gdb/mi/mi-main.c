@@ -1161,9 +1161,9 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       mi_execute_cli_command ("%s", context->command);
 
       /* If we changed interpreters, DON'T print out anything. */
-      if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI)
-	  || gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2)
-	  || gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
+      if (current_interp_named_p (INTERP_MI)
+	  || current_interp_named_p (INTERP_MI2)
+	  || current_interp_named_p (INTERP_MI1))
 	{
 	  /* print the result */
 	  /* FIXME: Check for errors here. */
@@ -1411,9 +1411,9 @@ mi_load_progress (const char *section_name,
   static char *previous_sect_name = NULL;
   int new_section;
 
-  if (!gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI)
-      && !gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2)
-      && !gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
+  if (!current_interp_named_p (INTERP_MI)
+      && !current_interp_named_p (INTERP_MI2)
+      && !current_interp_named_p (INTERP_MI1))
     return;
 
   update_threshold.tv_sec = 0;

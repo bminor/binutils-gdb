@@ -32,25 +32,22 @@
 #include "mi-out.h"
 #include "mi-console.h"
 
-/* MI's output channels */
-struct ui_file *mi_stdout;
-struct ui_file *mi_stderr;
-struct ui_file *mi_stdlog;
-struct ui_file *mi_stdtarg;
-struct ui_file *mi_event_channel;
+struct mi_interp
+{
+  /* MI's output channels */
+  struct ui_file *out;
+  struct ui_file *err;
+  struct ui_file *log;
+  struct ui_file *targ;
+  struct ui_file *event_channel;
 
-/* This is the interpreter for the mi... */
-struct gdb_interpreter *mi2_interp;
-struct gdb_interpreter *mi1_interp;
-struct gdb_interpreter *mi_interp;
+  /* This is the interpreter for the mi... */
+  struct interp *mi2_interp;
+  struct interp *mi1_interp;
+  struct interp *mi_interp;
+};
 
 /* These are the interpreter setup, etc. functions for the MI interpreter */
-static int mi_interpreter_init (void *data);
-static int mi_interpreter_resume (void *data);
-static int mi_interpreter_suspend (void *data);
-static int mi_interpreter_exec (void *data, char *command);
-static int mi_interpreter_prompt_p (void);
-
 static void mi_execute_command_wrapper (char *cmd);
 static void mi_command_loop (int mi_version);
 static char *mi_input (char *);
@@ -68,10 +65,10 @@ static void mi1_command_loop (void);
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-static int
-mi_interpreter_init (void *data)
+static void *
+mi_interpreter_init (void)
 {
-  static struct gdb_events handlers;
+  struct mi_interp *mi = XMALLOC (struct mi_interp);
 
   /* Why is this a part of the mi architecture? */
 
@@ -85,18 +82,19 @@ mi_interpreter_init (void *data)
   raw_stdout = stdio_fileopen (stdout);
 
   /* Create MI channels */
-  mi_stdout = mi_console_file_new (raw_stdout, "~", '"');
-  mi_stderr = mi_console_file_new (raw_stdout, "&", '"');
-  mi_stdlog = mi_stderr;
-  mi_stdtarg = mi_console_file_new (raw_stdout, "@", '"');
-  mi_event_channel = mi_console_file_new (raw_stdout, "=", 0);
+  mi->out = mi_console_file_new (raw_stdout, "~", '"');
+  mi->err = mi_console_file_new (raw_stdout, "&", '"');
+  mi->log = mi->err;
+  mi->targ = mi_console_file_new (raw_stdout, "@", '"');
+  mi->event_channel = mi_console_file_new (raw_stdout, "=", 0);
 
-  return 1;
+  return mi;
 }
 
 static int
 mi_interpreter_resume (void *data)
 {
+  struct mi_interp *mi = data;
   /* As per hack note in mi_interpreter_init, swap in the output channels... */
 
   gdb_setup_readline ();
@@ -119,12 +117,12 @@ mi_interpreter_resume (void *data)
       sync_execution = 0;
     }
 
-  gdb_stdout = mi_stdout;
+  gdb_stdout = mi->out;
   /* Route error and log output through the MI */
-  gdb_stderr = mi_stderr;
-  gdb_stdlog = mi_stdlog;
+  gdb_stderr = mi->err;
+  gdb_stdlog = mi->log;
   /* Route target output through the MI. */
-  gdb_stdtarg = mi_stdtarg;
+  gdb_stdtarg = mi->targ;
 
   /* Replace all the hooks that we know about.  There really needs to
      be a better way of doing this... */
@@ -133,11 +131,9 @@ mi_interpreter_resume (void *data)
   show_load_progress = mi_load_progress;
 
   /* If we're _the_ interpreter, take control. */
-  if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2))
-    command_loop_hook = mi2_command_loop;
-  else if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
+  if (current_interp_named_p (INTERP_MI1))
     command_loop_hook = mi1_command_loop;
-  else if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI))
+  else if (current_interp_named_p (INTERP_MI))
     command_loop_hook = mi2_command_loop;
   else
     return 0;
@@ -153,15 +149,17 @@ mi_interpreter_suspend (void *data)
 }
 
 static int
-mi_interpreter_exec (void *data, char *command)
+mi_interpreter_exec (void *data, const char *command)
 {
-  mi_execute_command_wrapper (command);
+  char *tmp = alloca (strlen (command) + 1);
+  strcpy (tmp, command);
+  mi_execute_command_wrapper (tmp);
   return 1;
 }
 
 /* Never display the default gdb prompt in mi case.  */
 static int
-mi_interpreter_prompt_p (void)
+mi_interpreter_prompt_p (void *data)
 {
   return 0;
 }
@@ -188,10 +186,10 @@ mi_interpreter_exec_continuation (struct continuation_arg *arg)
 enum mi_cmd_result
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
-  struct gdb_interpreter *interp_to_use;
+  struct interp *interp_to_use;
   enum mi_cmd_result result = MI_CMD_DONE;
   int i;
-  struct gdb_interpreter_procs *procs;
+  struct interp_procs *procs;
 
   if (argc < 2)
     {
@@ -200,7 +198,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  interp_to_use = gdb_interpreter_lookup (argv[0]);
+  interp_to_use = interp_lookup (argv[0]);
   if (interp_to_use == NULL)
     {
       xasprintf (&mi_error_message,
@@ -209,8 +207,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  procs = gdb_interpreter_get_procs (interp_to_use);
-  if (!procs->exec_proc)
+  if (!interp_exec_p (interp_to_use))
     {
       xasprintf (&mi_error_message,
 		 "mi_cmd_interpreter_exec: interpreter \"%s\" does not support command execution",
@@ -246,7 +243,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
          since that is what the cli expects - before running the command,
          and then set it back to 0 when we are done. */
       sync_execution = 1;
-      if (procs->exec_proc (gdb_interpreter_get_data (interp_to_use), argv[i]) < 0)
+      if (interp_exec (interp_to_use, argv[i]) < 0)
 	{
 	  mi_error_last_message ();
 	  result = MI_CMD_ERROR;
@@ -399,51 +396,17 @@ mi_input (char *buf)
 void
 _initialize_mi_interp (void)
 {
-  struct gdb_interpreter_procs procs =
-    {
-      mi_interpreter_init,	/* init_proc */
-      mi_interpreter_resume,	/* resume_proc */
-      mi_interpreter_suspend,	/* suspend_proc */
-      mi_interpreter_exec,	/* exec_proc */
-      mi_interpreter_prompt_p	/* prompt_proc_p */
-    };
+  static const struct interp_procs procs =
+  {
+    mi_interpreter_init,	/* init_proc */
+    mi_interpreter_resume,	/* resume_proc */
+    mi_interpreter_suspend,	/* suspend_proc */
+    mi_interpreter_exec,	/* exec_proc */
+    mi_interpreter_prompt_p	/* prompt_proc_p */
+  };
 
   /* Create MI1 interpreter */
-  if (mi1_interp == NULL)
-    {
-      mi1_interp =
-	gdb_interpreter_new (GDB_INTERPRETER_MI1, NULL, mi_out_new (1),
-			     &procs);
-      if (mi1_interp == NULL)
-	error
-	  ("Couldn't allocate a new interpreter for the mi1 interpreter\n");
-      if (gdb_interpreter_add (mi1_interp) != 1)
-	error ("Couldn't add the mi1 interpreter to gdb.\n");
-    }
+  interp_add (interp_new (INTERP_MI1, NULL, mi_out_new (1), &procs));
 
-  /* Create MI2 interpreter */
-  if (mi2_interp == NULL)
-    {
-      mi2_interp =
-	gdb_interpreter_new (GDB_INTERPRETER_MI2, NULL, mi_out_new (2),
-			     &procs);
-      if (mi2_interp == NULL)
-	error
-	  ("Couldn't allocate a new interpreter for the mi2 interpreter\n");
-      if (gdb_interpreter_add (mi2_interp) != 1)
-	error ("Couldn't add the mi2 interpreter to gdb.\n");
-    }
-
-  /* Create MI3 interpreter */
-  if (mi_interp == NULL)
-    {
-      mi_interp =
-	gdb_interpreter_new (GDB_INTERPRETER_MI, NULL, mi_out_new (3),
-			     &procs);
-      if (mi_interp == NULL)
-	error
-	  ("Couldn't allocate a new interpreter for the mi interpreter\n");
-      if (gdb_interpreter_add (mi_interp) != 1)
-	error ("Couldn't add the mi interpreter to gdb.\n");
-    }
+  interp_add (interp_new (INTERP_MI, NULL, mi_out_new (3), &procs));
 }
