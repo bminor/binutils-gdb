@@ -605,6 +605,8 @@ catch_errors (catch_errors_ftype *func, PTR args, char *errstring,
   caught = SIGSETJMP (catch);
   if (!caught)
     val = (*func) (args);
+  else
+    val = 0;
   catch_return = saved_catch;
 
   /* FIXME: cagney/1999-11-05: A correct FUNC implementation will

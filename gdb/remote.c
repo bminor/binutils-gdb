@@ -3363,7 +3363,10 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       todo = min (len, max_buf_size / 2);
       break;
     case PACKET_SUPPORT_UNKNOWN:
-      internal_error ("remote_write_bytes: bad switch");
+      internal_error ("%s:%d: remote_write_bytes: bad internal state",
+		      __FILE__, __LINE__);
+    default:
+      internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
     }
   
   /* Append <memaddr> */
@@ -3427,7 +3430,10 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       *p = '\0';
       break;
     case PACKET_SUPPORT_UNKNOWN:
-      internal_error ("remote_write_bytes: bad switch");
+      internal_error ("%s:%d: remote_write_bytes: bad internal state",
+		      __FILE__, __LINE__);
+    default:
+      internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
     }
   
   putpkt_binary (buf, (int) (p - buf));

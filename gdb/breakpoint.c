@@ -4905,7 +4905,9 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 {
   struct frame_info *frame;
   CORE_ADDR low, high, selected_pc = 0;
-  char *extra_args, *level_arg, *addr_string;
+  char *extra_args = NULL;
+  char *level_arg;
+  char *addr_string;
   int extra_args_len = 0, if_arg = 0;
 
   if (!arg ||
@@ -4983,7 +4985,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct cleanup *old_chain;
-  char *extra_args;
+  char *extra_args = NULL;
   int extra_args_len = 0;
   int i, if_arg = 0;
 

@@ -1986,6 +1986,8 @@ count_virtual_fns (struct type *dclass)
   struct type *pbc = primary_base_class (dclass);
   if (pbc)
     vfuncs = count_virtual_fns (pbc);
+  else
+    vfuncs = 0;
 
   for (fn = 0; fn < TYPE_NFN_FIELDS (dclass); fn++)
     for (oi = 0; oi < TYPE_FN_FIELDLIST_LENGTH (dclass, fn); oi++)
