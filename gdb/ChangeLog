@@ -1,3 +1,10 @@
+Wed Oct 26 12:20:53 1994  Jim Kingdon  <kingdon@cygnus.com>
+
+	* coffread.c (coff_symtab_read): If we get the address from
+	target_lookup_symbol, set the section to -2 not SECT_OFF_BSS.
+	(coff_symtab_read): Set value and section of symbol that
+	process_coff_symbol returns.
+
 Tue Oct 25 09:53:04 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/i386/tm-nbsd.h: Enable longjmp support.

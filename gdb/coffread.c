@@ -922,7 +922,10 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		      break;
 		    }
 		  tmpaddr = reladdr;
-		  sec = SECT_OFF_BSS;
+		  /* The address has already been relocated; make sure that
+		     objfile_relocate doesn't relocate it again.  */
+		  sec = -2;
+		  ms_type = cs->c_sclass == C_STAT ? mst_file_bss : mst_bss;
 		}
 	      else
 		{
@@ -930,30 +933,47 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		  tmpaddr = cs->c_value;
 		  if (cs->c_sclass != C_STAT)
 		    tmpaddr += ANOFFSET (section_offsets, sec);
+
+		  switch (sec)
+		    {
+		    case SECT_OFF_TEXT:
+		    case SECT_OFF_RODATA:
+		      ms_type =
+			cs->c_sclass == C_STAT ? mst_file_text : mst_text;
+		      break;
+		    case SECT_OFF_DATA:
+		      ms_type =
+			cs->c_sclass == C_STAT ? mst_file_data : mst_data;
+		      break;
+		    case SECT_OFF_BSS:
+		      ms_type =
+			cs->c_sclass == C_STAT ? mst_file_bss : mst_bss;
+		      break;
+		    default:
+		      ms_type = mst_unknown;
+		      break;
+		    }
 		}
 
-	      switch (sec)
+	      if (cs->c_name[0] != '@' /* Skip tdesc symbols */)
+		prim_record_minimal_symbol_and_info
+		  (obsavestring (cs->c_name, strlen (cs->c_name),
+				 &objfile->symbol_obstack),
+		   tmpaddr,
+		   ms_type,
+		   NULL,
+		   sec,
+		   objfile);
+
+	      if (SDB_TYPE (cs->c_type))
 		{
-		case SECT_OFF_TEXT:
-		case SECT_OFF_RODATA:
-		  ms_type = cs->c_sclass == C_STAT ? mst_file_text : mst_text;
-		  break;
-		case SECT_OFF_DATA:
-		  ms_type = cs->c_sclass == C_STAT ? mst_file_data : mst_data;
-		  break;
-		case SECT_OFF_BSS:
-		  ms_type = cs->c_sclass == C_STAT ? mst_file_bss : mst_bss;
-		  break;
-		default:
-		  ms_type = mst_unknown;
-		  break;
+		  struct symbol *sym;
+		  sym = process_coff_symbol
+		    (cs, &main_aux, section_offsets, objfile);
+		  SYMBOL_VALUE (sym) = tmpaddr;
+		  SYMBOL_SECTION (sym) = sec;
 		}
-
-	      record_minimal_symbol (cs->c_name, tmpaddr, ms_type, objfile);
 	    }
-
-	    if (SDB_TYPE (cs->c_type))
-	      process_coff_symbol (cs, &main_aux, section_offsets, objfile);
 	    break;
 
 	  case C_FCN:
