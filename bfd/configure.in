@@ -4,90 +4,112 @@
 # existing configure script.
 
 srctrigger=libbfd.c
-srcname="bfd"
+srcname="BFD"
 
 # per-host:
 
-if [ "${host_os}" = "posix" ] ; then
-	bfd_host=posix
-else
-	case "${host_cpu}" in
-	rs6000)	bfd_host=aix ;;
-	mips)
-		case "${host_vendor}" in
-		dec)	bfd_host=dec3100 ;;
-		sgi)	bfd_host=irix3 ;;
-		esac
-		;;
-	m88k)
-		case "${host_vendor}" in
-		*)
-			case "${host_os}" in
-			dgux)	bfd_host=dgux ;;
-			esac
-			;;
-		esac
-		;;
-	m68k)
-		case "${host_vendor}" in
-		hp)	
-			case "${host_os}" in
-			hpux)	bfd_host=hp9000 ;;
-			bsd)	bfd_host=hp300bsd ;;
-			esac
-			;;
-		sony)	bfd_host=news ;;
-		sun)	bfd_host=sun3 ;;
-		esac
-		;;
+case "${host_cpu}" in
 
-	i386)
-		case "${host_vendor}" in
-		*)
-			case "${host_os}" in
-			sysv)	bfd_host=i386v ;;
-			esac
-			;;
-		esac
-		;;
+rs6000)	my_host=rs6000
+	;;
 
-	sparc)
-		case "${host_vendor}" in
-		sun)	bfd_host=sun4 ;;
-		esac
-		;;
+mips)
+	case "${host_vendor}" in
+	dec)	my_host=decstation ;;
+	sgi)	my_host=irix3 ;;
+	esac
+	;;
 
-	rtpc)	bfd_host=rtbsd
-		;;
-
-	a29k)	bfd_host=ultra3
-		;;
-
-	tahoe)
-		bfd_host=${host_cpu}
-		;;
-        vax)
+m88k)
+	case "${host_vendor}" in
+	*)
 		case "${host_os}" in
-		ultrix) bfd_host=vaxult ;;
-		*) bfd_host=vax ;;
+		dgux)	my_host=dgux ;;
 		esac
 		;;
 	esac
-fi
+	;;
 
-if [ ! -f config/h-${bfd_host} ] ; then
-	echo '***' BFD does not support host ${host}: no file config/h-${bfd_host}
+m68k)
+	case "${host_vendor}" in
+	cbm)
+		case ${host_os} in
+		amigados)	my_host=amigados ;;
+		svr4)		my_host=amix ;;
+		esac
+		;;
+	hp)	
+		case "${host_os}" in
+		hpux)	my_host=hp9000 ;;
+		bsd)	my_host=hp300bsd ;;
+		esac
+		;;
+	sony)	my_host=news ;;
+	sun)	my_host=sun3 ;;
+	esac
+	;;
+
+i386)
+	case "${host_vendor}" in
+	*)
+		case "${host_os}" in
+		sysv)	my_host=i386v ;;
+		mach)	my_host=i386mach ;;
+		msdos)	my_host=dose ;;
+		esac
+		;;
+	esac
+	;;
+
+sparc)
+	case "${host_os}" in
+	sunos64)	my_host=sparc-64 ;;
+	*)		my_host=sparc ;;
+	esac
+	;;
+
+romp)	my_host=rtbsd
+	;;
+
+a29k)	my_host=ultra3
+	;;
+
+tahoe)
+	my_host=tahoe
+	;;
+
+vax)
+	case "${host_os}" in
+	ultrix) my_host=vaxult ;;
+	*) my_host=vaxbsd ;;
+	esac
+	;;
+esac
+
+# Set up to make a link between the host's include file and "sysdep.h".
+files="hosts/h-${my_host}.h"
+links="sysdep.h"
+
+if [ ! -f ${files} ] ; then
+	if [ -n "${my_host}" ] ; then
+		echo '***' No file ${files}
+	fi
+	echo '***' ${srcname} does not support host ${host}
 	exit 1
 fi
 
-host_makefile_frag=config/h-${bfd_host}
+host_makefile_frag=
+if [ -f config/h-${my_host} ] ; then
+	host_makefile_frag=config/h-${my_host}
+fi
 
 # per-target:
 
 case "${target_vendor}" in
-aout | coff | bout) bfd_target=${target_cpu}-${target_vendor} ;;
+aout | coff | bout | elf) bfd_target=${target_cpu}-${target_vendor} ;;
 sony)	bfd_target=news ;;
 intel)	bfd_target=${target_cpu}-coff ;;	
+cbm)	bfd_target=${target_cpu}-elf ;;
 
 hitachi)
 	case "${target_cpu}" in
@@ -151,11 +173,14 @@ none|nyu)
 esac
 
 if [ ! -f config/t-${bfd_target} ] ; then
-	echo '***' BFD does not support target ${target}: no file config/t-${bfd_target}
+	if [ -n "${bfd_target}" ] ; then
+		echo '***' No file config/t-${bfd_target}
+	fi
+	echo '***' BFD does not support target ${target}
 	exit 1
 fi
 
 target_makefile_frag=config/t-${bfd_target}
 
-files=
-links=
+# We don't do any links based on the target system, just very minor makefile
+# config.
