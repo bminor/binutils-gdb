@@ -71,7 +71,7 @@ lexsup.c
 mac-ld.r
 mpw-config.in
 mpw-emipsidt.c
-mpw-eppcmacos.c
+mpw-eppcmac.c
 mpw-esh.c
 mpw-make.sed
 mri.c
