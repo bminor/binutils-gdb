@@ -1,5 +1,10 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* stabsread.c (update_method_name_from_physname): Call complaint()
+	instead of error.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* arm-tdep.c (arm_frame_chain_valid):  Remove unnecessary test.
 	* d10v-tdep.c (d10v_frame_chain_valid): Remove unnecessary tests.
 	* hppa-tdep.c (hppa_frame_chain_valid): Remove unnecessary test.

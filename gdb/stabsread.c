@@ -2985,7 +2985,11 @@ update_method_name_from_physname (char **old_name, char *physname)
   method_name = method_name_from_physname (physname);
 
   if (method_name == NULL)
-    error ("bad physname %s\n", physname);
+    {
+      complaint (&symfile_complaints,
+		 "Method has bad physname %s\n", physname);
+      return;
+    }
 
   if (strcmp (*old_name, method_name) != 0)
     {
