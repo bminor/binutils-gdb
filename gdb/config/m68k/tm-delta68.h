@@ -1,5 +1,5 @@
 /* Target definitions for delta68.
-   Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
