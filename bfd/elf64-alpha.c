@@ -106,12 +106,20 @@ static boolean elf64_alpha_calc_got_offsets_for_symbol
   PARAMS ((struct alpha_elf_link_hash_entry *, PTR));
 static void elf64_alpha_calc_got_offsets PARAMS ((struct bfd_link_info *));
 static boolean elf64_alpha_size_got_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  PARAMS ((struct bfd_link_info *));
+static boolean elf64_alpha_size_plt_section
+  PARAMS ((struct bfd_link_info *));
+static boolean elf64_alpha_size_plt_section_1
+  PARAMS ((struct alpha_elf_link_hash_entry *, PTR));
 static boolean elf64_alpha_always_size_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static int alpha_dynamic_entries_for_reloc
   PARAMS ((int, int, int));
 static boolean elf64_alpha_calc_dynrel_sizes
+  PARAMS ((struct alpha_elf_link_hash_entry *, struct bfd_link_info *));
+static boolean elf64_alpha_size_rela_got_section
+  PARAMS ((struct bfd_link_info *));
+static boolean elf64_alpha_size_rela_got_1
   PARAMS ((struct alpha_elf_link_hash_entry *, struct bfd_link_info *));
 static boolean elf64_alpha_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
@@ -1388,14 +1396,25 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
 	case LITUSE_ALPHA_TLSGD:
 	case LITUSE_ALPHA_TLSLDM:
 	  {
-	    /* If not zero, place to jump without needing pv.  */
-	    bfd_vma optdest = elf64_alpha_relax_opt_call (info, symval);
-	    bfd_vma org = (info->sec->output_section->vma
-			   + info->sec->output_offset
-			   + urel->r_offset + 4);
+	    bfd_vma optdest, org;
 	    bfd_signed_vma odisp;
 
+	    /* If this symbol is undefined, we can't relax it to a branch.  */
+	    if (info->h
+		&& (info->h->root.root.type == bfd_link_hash_undefweak
+		    || info->h->root.root.type == bfd_link_hash_undefined))
+	      {
+		all_optimized = false;
+		break;
+	      }
+
+	    /* If not zero, place to jump without needing pv.  */
+	    optdest = elf64_alpha_relax_opt_call (info, symval);
+	    org = (info->sec->output_section->vma
+		   + info->sec->output_offset
+		   + urel->r_offset + 4);
 	    odisp = (optdest ? optdest : symval) - org;
+
 	    if (odisp >= -0x400000 && odisp < 0x400000)
 	      {
 		Elf_Internal_Rela *xrel;
@@ -2251,7 +2270,11 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	}
     }
 
-  if (!elf64_alpha_size_got_sections (abfd, link_info))
+  if (!elf64_alpha_size_plt_section (link_info))
+    return false;
+  if (!elf64_alpha_size_got_sections (link_info))
+    return false;
+  if (!elf64_alpha_size_rela_got_section (link_info))
     return false;
 
   if (info.changed_relocs)
@@ -3650,8 +3673,7 @@ elf64_alpha_calc_got_offsets (info)
 /* Constructs the gots.  */
 
 static boolean
-elf64_alpha_size_got_sections (output_bfd, info)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
+elf64_alpha_size_got_sections (info)
      struct bfd_link_info *info;
 {
   bfd *i, *got_list, *cur_got_obj = NULL;
@@ -3725,9 +3747,80 @@ elf64_alpha_size_got_sections (output_bfd, info)
   return true;
 }
 
+/* Called from relax_section to rebuild the PLT in light of 
+   potential changes in the function's status.  */
+
+static boolean
+elf64_alpha_size_plt_section (info)
+     struct bfd_link_info *info;
+{
+  asection *splt, *spltrel;
+  unsigned long entries;
+  bfd *dynobj;
+
+  dynobj = elf_hash_table(info)->dynobj;
+  splt = bfd_get_section_by_name(dynobj, ".plt");
+  if (splt == NULL)
+    return true;
+
+  splt->_raw_size = 0;
+
+  alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
+				elf64_alpha_size_plt_section_1, splt);
+
+  splt->_cooked_size = splt->_raw_size;
+
+  /* Every plt entry requires a JMP_SLOT relocation.  */
+  spltrel = bfd_get_section_by_name (dynobj, ".rela.plt");
+  if (splt->_raw_size)
+    entries = (splt->_raw_size - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+  else
+    entries = 0;
+  spltrel->_raw_size = entries * sizeof (Elf64_External_Rela);
+  spltrel->_cooked_size = spltrel->_raw_size;
+
+  return true;
+}
+
+static boolean
+elf64_alpha_size_plt_section_1 (h, data)
+     struct alpha_elf_link_hash_entry *h;
+     PTR data;
+{
+  asection *splt = (asection *) data;
+  struct alpha_elf_got_entry *gotent;
+
+  /* If we didn't need an entry before, we still don't.  */
+  if (!(h->root.elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT))
+    return true;
+
+  /* There must still be a LITERAL got entry for the function.  */
+  for (gotent = h->got_entries; gotent ; gotent = gotent->next)
+    if (gotent->reloc_type == R_ALPHA_LITERAL
+	&& gotent->use_count > 0)
+      break;
+
+  /* If there is, reset the PLT offset.  If not, there's no longer
+     a need for the PLT entry.  */
+  if (gotent)
+    {
+      if (splt->_raw_size == 0)
+	splt->_raw_size = PLT_HEADER_SIZE;
+      h->root.plt.offset = splt->_raw_size;
+      splt->_raw_size += PLT_ENTRY_SIZE;
+    }
+  else
+    {
+      h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+      h->root.plt.offset = -1;
+    }
+
+  return true;
+}
+
 static boolean
 elf64_alpha_always_size_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *i;
@@ -3740,7 +3833,7 @@ elf64_alpha_always_size_sections (output_bfd, info)
 				elf64_alpha_merge_ind_symbols,
 				NULL);
 
-  if (!elf64_alpha_size_got_sections (output_bfd, info))
+  if (!elf64_alpha_size_got_sections (info))
     return false;
 
   /* Allocate space for all of the .got subsections.  */
@@ -3802,8 +3895,7 @@ elf64_alpha_calc_dynrel_sizes (h, info)
 {
   boolean dynamic;
   struct alpha_elf_reloc_entry *relent;
-  struct alpha_elf_got_entry *gotent;
-  int entries;
+  unsigned long entries;
 
   if (h->root.root.type == bfd_link_hash_warning)
     h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
@@ -3823,9 +3915,7 @@ elf64_alpha_calc_dynrel_sizes (h, info)
       && (h->root.root.type == bfd_link_hash_defined
 	  || h->root.root.type == bfd_link_hash_defweak)
       && !(h->root.root.u.def.section->owner->flags & DYNAMIC))
-    {
-      h->root.elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-    }
+    h->root.elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 
   /* If the symbol is dynamic, we'll need all the relocations in their
      natural form.  If this is a shared object, and it has been forced
@@ -3846,10 +3936,90 @@ elf64_alpha_calc_dynrel_sizes (h, info)
 	}
     }
 
+  return true;
+}
+
+/* Set the sizes of the dynamic relocation sections.  */
+
+static boolean
+elf64_alpha_size_rela_got_section (info)
+     struct bfd_link_info *info;
+{
+  unsigned long entries;
+  bfd *i, *dynobj;
+  asection *srel;
+
+  /* Shared libraries often require RELATIVE relocs, and some relocs
+     require attention for the main application as well.  */
+	 
+  entries = 0;
+  for (i = alpha_elf_hash_table(info)->got_list;
+       i ; i = alpha_elf_tdata(i)->got_link_next)
+    {
+      bfd *j;
+
+      for (j = i; j ; j = alpha_elf_tdata(j)->in_got_link_next)
+	{
+	  struct alpha_elf_got_entry **local_got_entries, *gotent;
+	  int k, n;
+
+	  local_got_entries = alpha_elf_tdata(j)->local_got_entries;
+	  if (!local_got_entries)
+	    continue;
+
+	  for (k = 0, n = elf_tdata(j)->symtab_hdr.sh_info; k < n; ++k)
+	    for (gotent = local_got_entries[k];
+		 gotent ; gotent = gotent->next)
+	      if (gotent->use_count > 0)
+		entries += (alpha_dynamic_entries_for_reloc
+			    (gotent->reloc_type, 0, info->shared));
+	}
+    }
+
+  dynobj = elf_hash_table(info)->dynobj;
+  srel = bfd_get_section_by_name (dynobj, ".rela.got");
+  if (!srel)
+    {
+      BFD_ASSERT (entries == 0);
+      return true;
+    }
+  srel->_raw_size = sizeof (Elf64_External_Rela) * entries;
+
+  /* Now do the non-local symbols.  */
+  alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
+				elf64_alpha_size_rela_got_1, info);
+
+  srel->_cooked_size = srel->_raw_size;
+
+  return true;
+}
+
+/* Subroutine of elf64_alpha_size_rela_got_section for doing the
+   global symbols.  */
+
+static boolean
+elf64_alpha_size_rela_got_1 (h, info)
+     struct alpha_elf_link_hash_entry *h;
+     struct bfd_link_info *info;
+{
+  boolean dynamic;
+  struct alpha_elf_got_entry *gotent;
+  unsigned long entries;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
+
+  /* If the symbol is dynamic, we'll need all the relocations in their
+     natural form.  If this is a shared object, and it has been forced
+     local, we'll need the same number of RELATIVE relocations.  */
+
+  dynamic = alpha_elf_dynamic_symbol_p (&h->root, info);
+
   entries = 0;
   for (gotent = h->got_entries; gotent ; gotent = gotent->next)
-    entries += alpha_dynamic_entries_for_reloc (gotent->reloc_type,
-						dynamic, info->shared);
+    if (gotent->use_count > 0)
+      entries += alpha_dynamic_entries_for_reloc (gotent->reloc_type,
+						  dynamic, info->shared);
 
   /* If we are using a .plt entry, subtract one, as the first
      reference uses a .rela.plt entry instead.  */
@@ -3883,9 +4053,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      int entries;
-      bfd *i;
-
       /* Set the contents of the .interp section to the interpreter.  */
       if (!info->shared)
 	{
@@ -3900,42 +4067,9 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	 collected information in check_relocs that we can now apply to
 	 size the dynamic relocation sections.  */
       alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
-				    elf64_alpha_calc_dynrel_sizes,
-				    info);
+				    elf64_alpha_calc_dynrel_sizes, info);
 
-      /* Shared libraries often require RELATIVE relocs, and some relocs
-	 require attention for the main application as well.  */
-	 
-      entries = 0;
-      for (i = alpha_elf_hash_table(info)->got_list;
-	   i ; i = alpha_elf_tdata(i)->got_link_next)
-	{
-	  bfd *j;
-
-	  for (j = i; j ; j = alpha_elf_tdata(j)->in_got_link_next)
-	    {
-	      struct alpha_elf_got_entry **local_got_entries, *gotent;
-	      int k, n;
-
-	      local_got_entries = alpha_elf_tdata(j)->local_got_entries;
-	      if (!local_got_entries)
-		continue;
-
-	      for (k = 0, n = elf_tdata(j)->symtab_hdr.sh_info; k < n; ++k)
-		for (gotent = local_got_entries[k];
-		     gotent ; gotent = gotent->next)
-		  if (gotent->use_count > 0)
-		    entries += (alpha_dynamic_entries_for_reloc
-				(gotent->reloc_type, 0, info->shared));
-	    }
-	}
-
-      if (entries > 0)
-	{
-	  s = bfd_get_section_by_name (dynobj, ".rela.got");
-	  BFD_ASSERT (s != NULL);
-	  s->_raw_size += sizeof (Elf64_External_Rela) * entries;
-	}
+      elf64_alpha_size_rela_got_section (info);
     }
   /* else we're not dynamic and by definition we don't need such things.  */
 
@@ -4827,9 +4961,13 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 	   gotent != NULL;
 	   gotent = gotent->next)
 	{
-	  asection *sgot = alpha_elf_tdata (gotent->gotobj)->got;
+	  asection *sgot;
 	  int r_type;
 
+	  if (gotent->use_count == 0)
+	    continue;
+
+	  sgot = alpha_elf_tdata (gotent->gotobj)->got;
 	  outrel.r_offset = (sgot->output_section->vma
 			     + sgot->output_offset
 			     + gotent->got_offset);

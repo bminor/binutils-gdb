@@ -1,5 +1,19 @@
 2002-06-01  Richard Henderson  <rth@redhat.com>
 
+	* elf64-alpha.c (elf64_alpha_relax_with_lituse): Reject undefined
+	symbols from JSR relaxation.
+	(elf64_alpha_size_plt_section_1): New.
+	(elf64_alpha_calc_dynrel_sizes): Split out .rela.got bits ...
+	(elf64_alpha_size_rela_got_1): ... here.
+	(elf64_alpha_size_dynamic_sections): Split out .rela.got bits ...
+	(elf64_alpha_size_rela_got_section): ... here.
+	(elf64_alpha_size_plt_section): New.
+	(elf64_alpha_relax_section): Call them.
+	(elf64_alpha_size_got_sections): Remove output_bfd arg.
+	(elf64_alpha_finish_dynamic_symbol): Check gotent use_count.
+
+2002-06-01  Richard Henderson  <rth@redhat.com>
+
 	* elf64-alpha.c (alpha_get_dtprel_base, alpha_get_tprel_base): New.
 	(elf64_alpha_relocate_section): Use them.  Reject LE TLS relocs
 	in shared libraries.  Fix DTPRELHI and TPRELHI value.
