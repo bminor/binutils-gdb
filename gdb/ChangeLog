@@ -1,5 +1,13 @@
 2004-12-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/djgpp/fnchange.lst: Resolve name clash between
+	../bfd/elf32-arm.c and ../bfd/elf32-arc.c, i386-sol2-nat.c and
+	i386-sol2-tdep.c, mips64obsd-nat.c and mips64obsd-tdep.c,
+	testsuite/gdb.base/bitfields.c and
+	testsuite/gdb.base/bitfields2.c, testsuite/gdb.base/bitfields.exp
+	and testsuite/gdb.base/bitfields2.exp.  Remove entry for
+	config/m88k/xm-delta88v4.h.
+
 	* solib-pa64.c: Only include <dlfcn.h>, <elf.h> and <elf_hp.h> if
 	PA_SOM_ONLY isn't defined.
 

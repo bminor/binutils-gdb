@@ -15,6 +15,7 @@
 @V@/bfd/cpu-m68hc12.c @V@/bfd/cm68hc12.c
 @V@/bfd/efi-app-ia32.c @V@/bfd/efi-ia32-app.c
 @V@/bfd/efi-app-ia64.c @V@/bfd/efi-ia64-app.c
+@V@/bfd/elf32-arc.c @V@/bfd/elf32arc.c
 @V@/bfd/elf32-crx.c @V@/bfd/elf32crx.c
 @V@/bfd/elf32-cris.c @V@/bfd/elf32cris.c
 @V@/bfd/elf32-cr16c.c @V@/bfd/elf32cr16c.c
@@ -132,6 +133,8 @@
 @V@/gdb/i386nbsd-tdep.c @V@/gdb/i3nbsd-tdep.c
 @V@/gdb/i386obsd-nat.c @V@/gdb/i3obsd-nat.c
 @V@/gdb/i386obsd-tdep.c @V@/gdb/i3obsd-tdep.c
+@V@/gdb/i386-sol2-nat.c @V@/gdb/i3sol2-nat.c
+@V@/gdb/i386-sol2-tdep.c @V@/gdb/i3sol2-tdep.c
 @V@/gdb/ia64-aix-nat.c @V@/gdb/ia64ax-nat.c
 @V@/gdb/ia64-aix-tdep.c @V@/gdb/ia64ax-tdep.c
 @V@/gdb/ia64-linux-nat.c @V@/gdb/ia64lx-nat.c
@@ -150,6 +153,8 @@
 @V@/gdb/mips-linux-tdep.c @V@/gdb/mipslnxtdep.c
 @V@/gdb/mipsnbsd-nat.c @V@/gdb/mipsnbnat.c
 @V@/gdb/mipsnbsd-tdep.c @V@/gdb/mipsnbtdep.c
+@V@/gdb/mips64obsd-nat.c @V@/gdb/mipsobnat.c
+@V@/gdb/mips64obsd-tdep.c @V@/gdb/mipsobtdep.c
 @V@/gdb/ns32knbsd-nat.c @V@/gdb/ns32nb-nat.c
 @V@/gdb/ns32knbsd-tdep.c @V@/gdb/ns32nb-tdep.c
 @V@/gdb/objc-exp.tab.c @V@/gdb/objc-exp_tab.c
@@ -195,6 +200,8 @@
 @V@/gdb/testsuite/gdb.arch/altivec-regs.exp @V@/gdb/testsuite/gdb.arch/av-regs.exp
 @V@/gdb/testsuite/gdb.arch/powerpc-aix-prologue.exp @V@/gdb/testsuite/gdb.arch/ppcaprol.exp
 @V@/gdb/testsuite/gdb.arch/powerpc-aix-prologue.c @V@/gdb/testsuite/gdb.arch/ppcaprol.c
+@V@/gdb/testsuite/gdb.base/bitfields2.c @V@/gdb/testsuite/gdb.base/bitfiel2.c
+@V@/gdb/testsuite/gdb.base/bitfields2.exp @V@/gdb/testsuite/gdb.base/bitfiel2.exp
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.cp/m-static1.cc @V@/gdb/testsuite/gdb.cp/m-stat1.cc
 @V@/gdb/testsuite/gdb.cp/namespace1.cc @V@/gdb/testsuite/gdb.cp/namesp1.cc
