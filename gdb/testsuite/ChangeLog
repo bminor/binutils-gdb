@@ -1,5 +1,8 @@
 Thu Aug 19 18:18:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/unix-gdb.exp (gdb_exit): Move info on this vs.
+	lib/gdb.exp (gdb_exit) from ChangeLog to comments.
+
 	* gdb.t06/signals.exp: Skip the whole file with xfail for delta68.
 
 Tue Aug 17 00:05:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

@@ -152,6 +152,10 @@ proc gdb_load { arg } {
 #
 # gdb_exit -- kills the gdb process currently running
 #
+# This overrides the generic version of gdb_exit in lib/gdb.exp, since
+# it's doing a lot of wierd stuff that lib/gdb.exp isn't.
+# FIXME, fold it in, or abandon this version.
+
 proc gdb_exit {} {
     global verbose
     global GDB
