@@ -859,7 +859,7 @@ Optional Features:
   --enable-bfd-assembler  use BFD back end for writing object files
     targets            alternative target configurations besides the primary
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
-  --enable-error-on-warning    treat compile warnings as errors
+  --enable-werror    treat compile warnings as errors
   --enable-build-warnings Enable build-time compiler warnings if gcc is used
   --disable-nls           do not use Native Language Support
   --enable-maintainer-mode  enable make rules and dependencies not useful
@@ -4090,19 +4090,19 @@ using_cgen=no
 
 build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
-# Check whether --enable-error-on-warning or --disable-error-on-warning was given.
-if test "${enable_error_on_warning+set}" = set; then
-  enableval="$enable_error_on_warning"
+# Check whether --enable-werror or --disable-werror was given.
+if test "${enable_werror+set}" = set; then
+  enableval="$enable_werror"
   case "${enableval}" in
      yes | y) ERROR_ON_WARNING="yes" ;;
      no | n)  ERROR_ON_WARNING="no" ;;
-     *) { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-error-on-warning" >&5
-echo "$as_me: error: bad value ${enableval} for --enable-error-on-warning" >&2;}
+     *) { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-werror" >&5
+echo "$as_me: error: bad value ${enableval} for --enable-werror" >&2;}
    { (exit 1); exit 1; }; } ;;
    esac
 fi;
 
-# Enable -Werror by default, suppressing it only for --disable-error-on-warning
+# Enable -Werror by default, suppressing it only for --disable-werror
 # or --disable-build-warnings.
 if test "${ERROR_ON_WARNING}" != no
 then

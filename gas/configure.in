@@ -50,15 +50,15 @@ using_cgen=no
 
 build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
-AC_ARG_ENABLE(error-on-warning,
-  [  --enable-error-on-warning    treat compile warnings as errors],
+AC_ARG_ENABLE(werror,
+  [  --enable-werror    treat compile warnings as errors],
   [case "${enableval}" in
      yes | y) ERROR_ON_WARNING="yes" ;;
      no | n)  ERROR_ON_WARNING="no" ;;
-     *) AC_MSG_ERROR(bad value ${enableval} for --enable-error-on-warning) ;;
+     *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
    esac])
 
-# Enable -Werror by default, suppressing it only for --disable-error-on-warning
+# Enable -Werror by default, suppressing it only for --disable-werror
 # or --disable-build-warnings.
 if test "${ERROR_ON_WARNING}" != no
 then

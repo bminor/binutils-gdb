@@ -32,7 +32,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-sysroot[=DIR] Search for usr/lib et al within DIR."
 ac_help="$ac_help
-  --enable-error-on-warning    treat compile warnings as errors"
+  --enable-werror    treat compile warnings as errors"
 ac_help="$ac_help
   --enable-build-warnings enable build-time compiler warnings if gcc is used"
 ac_help="$ac_help
@@ -2262,24 +2262,24 @@ fi
 
 build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
-# Check whether --enable-error-on-warning or --disable-error-on-warning was given.
-if test "${enable_error_on_warning+set}" = set; then
-  enableval="$enable_error_on_warning"
+# Check whether --enable-werror or --disable-werror was given.
+if test "${enable_werror+set}" = set; then
+  enableval="$enable_werror"
   case "${enableval}" in
      yes | y) ERROR_ON_WARNING="yes" ;;
      no | n)  ERROR_ON_WARNING="no" ;;
-     *) { echo "configure: error: bad value ${enableval} for --enable-error-on-warning" 1>&2; exit 1; } ;;
+     *) { echo "configure: error: bad value ${enableval} for --enable-werror" 1>&2; exit 1; } ;;
    esac
 fi
 
 
-# Enable -Werror by default, suppressing it only for --disable-error-on-warning
+# Enable -Werror by default, suppressing it only for --disable-werror
 # or --disable-build-warnings.
 if test "${ERROR_ON_WARNING}" != no
 then
   build_warnings="$build_warnings -Werror"
 fi
-		   
+
 # Check whether --enable-build-warnings or --disable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then
   enableval="$enable_build_warnings"
