@@ -3434,6 +3434,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	 and treat enums as if they had the width of ints.  */
 
       if (TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_INT
+	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_RANGE
 	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_BOOL
 	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_ENUM)
 	{

@@ -358,6 +358,9 @@ create_range_type (result_type, index_type, low_bound, high_bound)
   TYPE_FIELD_TYPE (result_type, 0) = builtin_type_int;		/* FIXME */
   TYPE_FIELD_TYPE (result_type, 1) = builtin_type_int;		/* FIXME */
 
+  if(low_bound >= 0)
+    TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
+
   return (result_type);
 }
 
