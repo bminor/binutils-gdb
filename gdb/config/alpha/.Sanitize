@@ -24,8 +24,10 @@ Things-to-keep:
 alpha-osf1.mh
 alpha-osf1.mt
 alpha-osf2.mh
+alpha-osf3.mh
 nm-osf.h
 nm-osf2.h
+nm-osf3.h
 tm-alpha.h
 xm-alpha.h
 
