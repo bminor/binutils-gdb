@@ -1,3 +1,16 @@
+Mon Sep 20 19:23:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (get_stab_string_offset): Make non-static.  Make
+	arguments const.  Don't align strings to 4 byte boundaries.
+	* read.h: Declare get_stab_string_offset.
+	* config/obj-elf.c (obj_elf_section): Set SEC_ALLOC as well as
+	SEC_LOAD for progbits section.
+	(obj_elf_init_stab_section): New function.
+	(adjust_stab_sections): Add casts to avoid warnings.
+	* config/obj-elf.h (INIT_STAB_SECTION): Call
+	obj_elf_init_stab_section.
+	(OBJ_PROCESS_STAB): Removed definition.
+
 Fri Sep 17 18:12:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-elf.h (S_GET_SIZE): Define.
@@ -6,7 +19,7 @@ Fri Sep 17 18:12:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Thu Sep 16 14:23:08 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* tc.h: Declare tc_gen_reloc differently depending upong
+	* tc.h: Declare tc_gen_reloc differently depending upon
 	RELOC_EXPANSION_POSSIBLE.
 	* config/obj-elf.c (obj_elf_section): Only set flags when first
 	creating the section.

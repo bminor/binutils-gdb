@@ -358,7 +358,7 @@ obj_elf_section (xxx)
       CHECK ("write", SEC_READONLY, 1);
       CHECK ("alloc", SEC_ALLOC | SEC_LOAD, 0);
       CHECK ("execinstr", SEC_CODE, 1);
-      CHECK ("progbits", SEC_LOAD, 1);
+      CHECK ("progbits", SEC_ALLOC | SEC_LOAD, 1);
 #undef CHECK
 
       p = input_line_pointer;
@@ -714,6 +714,31 @@ obj_elf_ident (ignore)
   subseg_set (old_section, old_subsection);
 }
 
+/* The first entry in a .stabs section is special.  */
+
+void
+obj_elf_init_stab_section (seg)
+     segT seg;
+{
+  extern char *logical_input_file, *physical_input_file;
+  char *p;
+  const char *file;
+  unsigned int stroff;
+
+  p = frag_more (12);
+  file = logical_input_file;
+  if (file == NULL)
+    file = physical_input_file;
+  if (file == NULL)
+    file = "UNKNOWN";
+  stroff = get_stab_string_offset (file, segment_name (seg));
+  know (stroff == 1);
+  md_number_to_chars (p, stroff, 4);
+  seg_info (seg)->stabu.p = p;
+}
+
+/* Fill in the counts in the first entry in a .stabs section.  */
+
 static void
 adjust_stab_sections (abfd, sec, xxx)
      bfd *abfd;
@@ -743,8 +768,8 @@ adjust_stab_sections (abfd, sec, xxx)
   p = seg_info (sec)->stabu.p;
   assert (p != 0);
 
-  bfd_h_put_16 (abfd, (bfd_vma) nsyms, p + 6);
-  bfd_h_put_32 (abfd, (bfd_vma) strsz, p + 8);
+  bfd_h_put_16 (abfd, (bfd_vma) nsyms, (bfd_byte *) p + 6);
+  bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
 }
 
 void 
