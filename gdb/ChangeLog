@@ -1,4 +1,9 @@
 start-sanitize-gdbtk
+Thu May 16 11:42:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (files_command): listbox command no longer accepts
+	-geometry.
+
 Wed May 15 16:04:09 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbtk.tcl (create_command_window): If command window's buffer

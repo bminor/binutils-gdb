@@ -1973,7 +1973,7 @@ proc files_command {} {
 
   wm minsize .files_window 1 1
   #	wm overrideredirect .files_window true
-  listbox .files_window.list -geometry 30x20 -setgrid true \
+  listbox .files_window.list -width 30 -height 20 -setgrid true \
     -yscrollcommand {.files_window.scroll set} -relief sunken \
     -borderwidth 2
   scrollbar .files_window.scroll -orient vertical \
