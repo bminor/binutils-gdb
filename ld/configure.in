@@ -27,14 +27,18 @@ case "${target}" in
 			;;
   sparclite*-fujitsu-*) my_target=sun4
 			;;
-  sparc*-*-aout)	my_target=sun4
-			;;
 # start-sanitize-v9
   sparc64-*-elf*)	my_target=sparc64-elf
 			;;
   sparc64*)		my_target=sun4
 			;;
 # end-sanitize-v9
+  sparc*-*-aout)	my_target=sun4
+			;;
+  sparc*-*-elf)		my_target=sun4sol2
+			;;
+  sparc*-*-solaris2*)	my_target=sun4sol2
+			;;
   i960-wrs-vxworks*)    my_target=i960
 			;;
   i960-intel-nindy)	my_target=i960
