@@ -11,6 +11,11 @@ case "${host_cpu}" in
 
 m68k)
 	case "${host_vendor}" in
+	apollo*)
+		case "${host_os}" in
+		sysv*)	gdb_host=apollo68v ;;
+		esac
+		;;
 	att)	gdb_host=3b1 ;;
 	altos)
 		case "${host_os}" in
@@ -188,6 +193,9 @@ m68k)
 	wrs)	gdb_target=vxworks68 ;;
 	isi)	gdb_target=isi ;;
 	sony)	gdb_target=news ;;
+	esac
+	case "${target_os}" in
+	os68k)	gdb_target=os68k ;;
 	esac
 	;;
 
