@@ -1,3 +1,9 @@
+2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* call-ar-st.exp: Use gdb_skip_float_test to avoid executing
+	tests that print a float.
+	* call-rt-st.exp: Likewise.
+
 2001-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/so-impl-ld.exp: Remove stray space that prevented
