@@ -96,14 +96,9 @@ all: $(TARGETLIB)
 
 check:
 
-info: force
-	@$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-
+info:
 clean-info:
-	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-	
-install-info: force
-	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+install-info:
 
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 
@@ -113,19 +108,6 @@ $(TARGETLIB): $(OFILES)
 	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
 	 $(RANLIB) $(TARGETLIB)
 
-# When compiling archures.c and targets.c, supply the default target
-# info from configure.
-
-
-subdir_do: force
-	@for i in $(DODIRS); do \
-		if [ -d ./$$i ] ; then \
-			if (cd ./$$i; \
-				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-			else exit 1 ; fi ; \
-		else true ; fi ; \
-	done
-
 tags etags: TAGS
 
 TAGS: force
@@ -133,11 +115,9 @@ TAGS: force
 
 clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
-	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 clobber realclean: clean
 	rm -f libbfd.a TAGS
-	$(MAKE) subdir_do DO=clobber "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # Mark everything as depending on config.status, since the timestamp on
 # sysdep.h might actually move backwards if we reconfig and relink it
