@@ -1,3 +1,24 @@
+Mon Dec 13 14:30:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in: Added .PHONY targets where appropriate.  Added some
+	comments.  Also:
+	(gcclibdir, version): Removed unused variables.
+	(DEP): New variable, set to mkdep.
+	(ALL_CFLAGS): New variable.  Used in .c.o target.
+	(CFILES, HFILES, GENERATED_CFILES, GENERATED_HFILES): New
+	variables.
+	(HEADERS, MANSOURCES, LDCSOURCES, GENERATED_SOURCES,
+	GENERATED_HEADERS, LDSOURCES, BFD_SOURCES, SOURCES): Removed
+	mostly obsolete variables.  Adjusted remaining uses.
+	(DEF_EMUL): Removed variable.
+	(ldmain.o): Handle undefined EMUL error correctly.
+	(ldemul-list.h): Depend on config.status rather than Makefile.
+	Create via temporary file.
+	(ver960.c, roll, make): Removed obsolete targets.
+	(.dep, .dep1, dep.sed, dep, dep-in): New targets.  Used to rebuild
+	dependencies.
+	* dep-in.sed: New file, used when rebuilding dependencies.
+
 Sat Dec 11 14:43:44 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
 
 	Made many changes to eliminate gcc warnings.  Made various
