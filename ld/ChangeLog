@@ -1,3 +1,10 @@
+2004-09-30  Filip Navara  <navaraf@reactos.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_set_symbols): Generate
+	correct base address for position independant executables.
+	* pe-dll.c (pe_dll_fill_sections): Don't mark position independant
+	executables as DLLs.
+
 2004-09-30  Paul Brook  <paul@codesourcery.com>
 
 	* ld.texinfo: Document --target2=abs.

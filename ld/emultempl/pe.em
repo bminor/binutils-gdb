@@ -665,7 +665,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
     {
       if (link_info.relocatable)
 	init[IMAGEBASEOFF].value = 0;
-      else if (init[DLLOFF].value || link_info.shared)
+      else if (init[DLLOFF].value || (link_info.shared && !link_info.pie))
 #ifdef DLL_SUPPORT
 	init[IMAGEBASEOFF].value = (pe_enable_auto_image_base) ?
 	  compute_dll_image_base (output_filename) : NT_DLL_IMAGE_BASE;

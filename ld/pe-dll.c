@@ -2665,7 +2665,7 @@ pe_dll_fill_sections (bfd *abfd, struct bfd_link_info *info)
 
   fill_edata (abfd, info);
 
-  if (info->shared)
+  if (info->shared && !info->pie)
     pe_data (abfd)->dll = 1;
 
   edata_s->contents = edata_d;
