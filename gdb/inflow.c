@@ -533,8 +533,7 @@ kill_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  /* Shouldn't this be target_has_execution?  FIXME.  */
-  if (inferior_pid == 0)
+  if (!target_has_execution)
     error ("The program is not being run.");
   if (!query ("Kill the program being debugged? "))
     error ("Not confirmed.");
