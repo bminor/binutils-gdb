@@ -1558,10 +1558,12 @@ extern Elf_Internal_Rela *_bfd_elf64_link_read_relocs
 #define bfd_elf64_link_record_dynamic_symbol \
   _bfd_elf_link_record_dynamic_symbol
 
-extern boolean _bfd_elf32_link_record_local_dynamic_symbol
+extern int elf_link_record_local_dynamic_symbol
   PARAMS ((struct bfd_link_info *, bfd *, long));
-extern boolean _bfd_elf64_link_record_local_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, bfd *, long));
+#define _bfd_elf32_link_record_local_dynamic_symbol \
+  elf_link_record_local_dynamic_symbol
+#define _bfd_elf64_link_record_local_dynamic_symbol \
+  elf_link_record_local_dynamic_symbol
 
 extern boolean _bfd_elf_close_and_cleanup
   PARAMS ((bfd *));

@@ -1,3 +1,14 @@
+2002-07-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (_bfd_elf32_link_record_local_dynamic_symbol): Define
+	as elf_link_record_local_dynamic_symbol.
+	(_bfd_elf64_link_record_local_dynamic_symbol): Likewise.
+	(elf_link_record_local_dynamic_symbol): Declare.  Now returns int.
+	* elflink.h (elf_link_record_local_dynamic_symbol): Move to..
+	* elflink.c: .. here.  Use bfd_elf_get_elf_syms.  Check whether an
+	attempt is made to record a symbol in a discarded section, and
+	return `2' in that case.
+
 2002-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
