@@ -360,10 +360,13 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
 	  va_list ap)
 {
   struct exception e;
+  char *new_message;
 
-  /* Save the message.  */
+  /* Save the message.  Create the new message before deleting the
+     old, the new message may include the old message text.  */
+  new_message = xstrvprintf (fmt, ap);
   xfree (last_message);
-  last_message = xstrvprintf (fmt, ap);
+  last_message = new_message;
 
   /* Create the exception.  */
   e.reason = reason;

@@ -1,8 +1,8 @@
 /* GDB CLI command scripting.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 
 #include "ui-out.h"
 #include "gdb_string.h"
-
+#include "exceptions.h"
 #include "top.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
@@ -1251,6 +1251,18 @@ do_fclose_cleanup (void *stream)
   fclose (stream);
 }
 
+struct wrapped_read_command_file_args
+{
+  FILE *stream;
+};
+
+static void
+wrapped_read_command_file (struct ui_out *uiout, void *data)
+{
+  struct wrapped_read_command_file_args *args = data;
+  read_command_file (args->stream);
+}
+
 /* Used to implement source_command */
 
 void
@@ -1293,7 +1305,27 @@ script_from_file (FILE *stream, char *file)
 	source_error = xrealloc (source_error, source_error_allocated);
     }
 
-  read_command_file (stream);
+  {
+    struct exception e;
+    struct wrapped_read_command_file_args args;
+    args.stream = stream;
+    e = catch_exception (uiout, wrapped_read_command_file, &args,
+			 RETURN_MASK_ERROR);
+    switch (e.reason)
+      {
+      case 0:
+	break;
+      case RETURN_ERROR:
+	/* Re-throw the error, but with the file name information
+	   prepended.  */
+	throw_error (e.error, "%s%s:%d: Error in sourced command file:\n%s",
+		     source_pre_error, source_file_name,
+		     source_line_number,
+		     e.message);
+      default:
+	internal_error (__FILE__, __LINE__, "bad reason");
+      }
+  }
 
   do_cleanups (old_cleanups);
 }

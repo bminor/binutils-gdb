@@ -1,3 +1,14 @@
+2005-01-16  Andrew Cagney  <cagney@gnu.org>
+
+	* cli/cli-script.c: Include "exceptions.h".
+	(struct wrapped_read_command_file_args): Define.
+	(wrapped_read_command_file): New function.
+	(script_from_file): Replace direct call to read_command_file by
+	one wrapped by an exception handler.
+	* exceptions.c (throw_it): Free the old message after creating the
+	new.
+	* Makefile.in: Update dependencies.
+	
 2005-01-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64fbsd-tdep.c: Update copyright year.

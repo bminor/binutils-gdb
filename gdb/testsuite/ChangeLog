@@ -1,5 +1,7 @@
 2005-01-16  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/source.exp: Delete KFAIL gdb/1846, simplify.
+
 	* gdb.base/source-error.gdb, gdb.base/source.exp: New files.
 
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
