@@ -1,3 +1,10 @@
+Sun Nov  2 14:49:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c: Move new struct and variable definitions to top of
+	file.  Remove obsolete add_strip_symbol and is_strip_symbol
+	declarations.  Add prototype declarations for add_specific_symbol
+	and is_specified_symbol.
+
 Mon Oct 20 15:31:43 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 	* configure.com (HAVE_SBRK): Undefine.

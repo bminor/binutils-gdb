@@ -33,6 +33,17 @@
 #endif /* HAVE_UTIMES */
 #endif /* ! HAVE_GOOD_UTIME_H */
 
+/* A list of symbols to explicitly strip out, or to keep.  A linked
+   list is good enough for a small number from the command line, but
+   this will slow things down a lot if many symbols are being
+   deleted. */
+
+struct symlist
+{
+  const char *name;
+  struct symlist *next;
+};
+
 static void copy_usage PARAMS ((FILE *, int));
 static void strip_usage PARAMS ((FILE *, int));
 static flagword parse_flags PARAMS ((const char *));
@@ -41,8 +52,8 @@ static void setup_section PARAMS ((bfd *, asection *, PTR));
 static void copy_section PARAMS ((bfd *, asection *, PTR));
 static void get_sections PARAMS ((bfd *, asection *, PTR));
 static int compare_section_vma PARAMS ((const PTR, const PTR));
-static void add_strip_symbol PARAMS ((const char *));
-static boolean is_strip_symbol PARAMS ((const char *));
+static void add_specific_symbol PARAMS ((const char *, struct symlist **));
+static boolean is_specified_symbol PARAMS ((const char *, struct symlist *));
 static boolean is_strip_section PARAMS ((bfd *, asection *));
 static unsigned int filter_symbols
   PARAMS ((bfd *, bfd *, asymbol **, asymbol **, long));
@@ -165,6 +176,17 @@ static boolean change_leading_char = false;
 /* Whether to remove the leading character from global symbol names.  */
 
 static boolean remove_leading_char = false;
+
+/* List of symbols to strip, keep, localize, and weaken.  */
+
+static struct symlist *strip_specific_list = NULL;
+static struct symlist *keep_specific_list = NULL;
+static struct symlist *localize_specific_list = NULL;
+static struct symlist *weaken_specific_list = NULL;
+
+/* If this is true, we weaken global symbols (set BSF_WEAK).  */
+
+static boolean weaken = false;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -378,28 +400,6 @@ find_section_list (name, add)
 
   return p;
 }
-
-/* Make a list of symbols to explicitly strip out, or to keep.  A
-   linked list is good enough for a small number from the command
-   line, but this will slow things down a lot if many symbols are
-   being deleted. */
-
-struct symlist
-{
-  const char *name;
-  struct symlist *next;
-};
-
-/* List of symbols to strip, keep, localize, and weaken.  */
-
-static struct symlist *strip_specific_list = NULL;
-static struct symlist *keep_specific_list = NULL;
-static struct symlist *localize_specific_list = NULL;
-static struct symlist *weaken_specific_list = NULL;
-
-/* If this is true, we weaken global symbols (set BSF_WEAK).  */
-
-static boolean weaken = false;
 
 /* Add a symbol to strip_specific_list.  */
 
