@@ -1,3 +1,9 @@
+Thu Sep 30 17:50:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* reloc.c (bfd_reloc_code_type): Add linkage-table relative
+	relocations of size 8, 16, 32.  Sort generic relocs by type rather
+	than size.  Added a little documentation too.
+
 Tue Sep 28 14:47:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* section.c (bfd_make_section_anyway): New function.
