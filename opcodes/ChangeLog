@@ -1,3 +1,8 @@
+2000-06-26  Scott Bambrough  <scottb@netwinder.org>
+
+	* arm-dis.c (regnames): Add an additional register set to match
+	the set used by GCC.  Make it the default.
+
 2000-06-22  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am (DEP): grep for leading `/' in DEP1, and fail if we

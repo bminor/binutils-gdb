@@ -60,6 +60,8 @@ static arm_regname regnames[] =
 {
   { "raw" , "Select raw register names",
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}},
+  { "gcc",  "Select register names used by GCC",
+    { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "sl",  "fp",  "ip",  "sp",  "lr",  "pc" }},
   { "std",  "Select register names used in ARM's ISA documentation",
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp",  "lr",  "pc" }},
   { "apcs", "Select register names used in the APCS",
@@ -70,7 +72,7 @@ static arm_regname regnames[] =
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }}
 };
 
-/* Default to standard register name set.  */
+/* Default to GCC register name set.  */
 static unsigned int regname_selected = 1;
 
 #define NUM_ARM_REGNAMES  NUM_ELEM (regnames)
