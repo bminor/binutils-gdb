@@ -59,6 +59,7 @@ ldctor.h
 ldemul.c
 ldemul.h
 lderror.c
+lderror.h
 ldexp.c
 ldexp.h
 ldfile.c
@@ -90,6 +91,7 @@ m88kbcs.sh
 mkscript.c
 news.sh
 relax.c
+relax.h
 sun3.sh
 sun4.sh
 vanilla.em
@@ -103,7 +105,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.31  1992/02/27 17:23:59  sac
+# Revision 1.32  1992/03/07 18:32:27  sac
+# *** empty log message ***
+#
+# Revision 1.31  1992/02/27  17:23:59  sac
 # Why didn't it start emacs
 #
 # Revision 1.30  1992/02/22  00:11:38  sac
