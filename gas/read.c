@@ -4921,6 +4921,17 @@ void
 s_func (end_p)
      int end_p;
 {
+  do_s_func (end_p, NULL);
+}
+
+/* Subroutine of s_func so targets can choose a different default prefix.
+   If DEFAULT_PREFIX is NULL, use the target's "leading char".  */
+
+void
+do_s_func (end_p, default_prefix)
+     int end_p;
+     const char *default_prefix;
+{
   /* Record the current function so that we can issue an error message for
      misplaced .func,.endfunc, and also so that .endfunc needs no
      arguments.  */
@@ -4960,16 +4971,21 @@ s_func (end_p)
       SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	{
-	  char leading_char = 0;
-#ifdef BFD_ASSEMBLER
-	  leading_char = bfd_get_symbol_leading_char (stdoutput);
-#endif
-	  /* Missing entry point, use function's name with the leading
-	     char prepended.  */
-	  if (leading_char)
-	    asprintf (&label, "%c%s", leading_char, name);
+	  if (default_prefix)
+	    asprintf (&label, "%s%s", default_prefix, name);
 	  else
-	    label = name;
+	    {
+	      char leading_char = 0;
+#ifdef BFD_ASSEMBLER
+	      leading_char = bfd_get_symbol_leading_char (stdoutput);
+#endif
+	      /* Missing entry point, use function's name with the leading
+		 char prepended.  */
+	      if (leading_char)
+		asprintf (&label, "%c%s", leading_char, name);
+	      else
+		label = name;
+	    }
 	}
       else
 	{

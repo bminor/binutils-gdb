@@ -1,6 +1,12 @@
 Tue Jun  2 09:25:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
-	* read.c (s_func): Prepend `leading char' by default.
+	* read.c (do_s_func): New function.
+	(s_func): Call it.
+	* read.h (do_s_func): Add prototype.
+start-sanitize-sky
+	* config/tc-dvp.c (md_pseudo_table): Add .func/.endfunc.
+	(s_dvp_func): New function.
+end-sanitize-sky
 
 start-sanitize-r5900
 Mon Jun  1 17:04:56 1998  Jeffrey A Law  (law@cygnus.com)
