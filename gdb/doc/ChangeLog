@@ -1,3 +1,7 @@
+Mon Apr 19 08:00:51 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* stabs.texinfo (Parameters): Re-do "local parameters" section.
+
 Sun Apr 18 09:47:45 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo (Symbol descriptors): Re-do using @table and @xref.

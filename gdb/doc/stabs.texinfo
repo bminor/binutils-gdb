@@ -984,52 +984,56 @@ The stab for @code{s_flap} is located just before the @code{N_LBRAC} for
 @section Parameters 
 
 The symbol descriptor @samp{p} is used to refer to parameters which are
-in the arglist.  They follow the symbol that represents the procedure
-itself.  The value of the symbol is the offset relative to the argument
-list.
+in the arglist.  Symbols have symbol type @samp{N_PSYM}.  The value of
+the symbol is the offset relative to the argument list.
 
-If the parameter is passed in a register, or is allocated as a local
-variable rather than an argument (the latter distinction is important
-for machines in which the argument list offset is relative to something
-different from a local variable offset), then the traditional way to do
+If the parameter is passed in a register, then the traditional way to do
 this is to provide two symbols for each argument:
 
 @example
-.stabs "arg:p1" . . .
-.stabs "arg:r1" . . .
+.stabs "arg:p1" . . .		; N_PSYM
+.stabs "arg:r1" . . .		; N_RSYM
 @end example
 
 Debuggers are expected to use the second one to find the value, and the
 first one to know that it is an argument.
 
-Because this is kind of ugly, some compilers use symbol descriptor @samp{P}
-or @samp{R} to indicate an argument which is in a register.  The symbol
-value is the register number.  @samp{P} and @samp{R} mean the same
-thing, the difference is that @samp{P} is a GNU invention and @samp{R}
-is an IBM (xcoff) invention.  As of version 4.9, GDB should handle
-either one.
+Because this is kind of ugly, some compilers use symbol descriptor
+@samp{P} or @samp{R} to indicate an argument which is in a register.
+The symbol value is the register number.  @samp{P} and @samp{R} mean the
+same thing, the difference is that @samp{P} is a GNU invention and
+@samp{R} is an IBM (xcoff) invention.  As of version 4.9, GDB should
+handle either one.  Symbol type @samp{C_RPSYM} is used with @samp{R} and
+@samp{N_RSYM} is used with @samp{P}.
 
-There is no symbol descriptor analogous to @samp{P} for local variables.
-Some compilers are said to use the pair of symbols approach described
-above, but I don't know which ones.  On the intel 960, the type of the
-variable indicates whether a @samp{p} symbol's value is an the argument
-list offset or a local variable offset.
+There is another case similar to an argument in a register, which is an
+argument which is actually stored as a local variable.  The only case I
+know of where this happens is when the argument was passed in a register
+and then the compiler stores it as a local variable.  In this case the
+compiler would probably be much better off claiming that it's in a
+register, but at least in one case this isn't done.  Some compilers are
+said to use the pair of symbols approach described above ("arg:p"
+followed by "arg:"), but I don't which if any.  GCC, at least on the
+960, uses a @samp{p} symbol descriptor for this case but uses
+@samp{N_LSYM} instead of @samp{N_PSYM} to distinguish it.  In this case
+the value of the symbol is an offset relative to the local variables for
+that function, not relative to the arguments.
 
 As a simple example, the code
 
 @example
-17 main (argc, argv)
-18      int argc;
-19      char **argv;
-20 @{
+main (argc, argv)
+     int argc;
+     char **argv;
+@{
 @end example
 
 produces the stabs
 
 @example
-94 .stabs "main:F1",36,0,0,_main                 ; 36 is N_FUN
-95 .stabs "argc:p1",160,0,0,68                   ; 160 is N_PSYM
-96 .stabs "argv:p20=*21=*2",160,0,0,72
+.stabs "main:F1",36,0,0,_main                 ; 36 is N_FUN
+.stabs "argc:p1",160,0,0,68                   ; 160 is N_PSYM
+.stabs "argv:p20=*21=*2",160,0,0,72
 @end example
 
 The type definition of argv is interesting because it contains several
