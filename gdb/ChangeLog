@@ -1,3 +1,8 @@
+2002-12-17  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_partial_symbol): Don't search past the end of
+	the partial symbols.
+
 2002-12-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (frame_info): Use get_frame_saved_regs.

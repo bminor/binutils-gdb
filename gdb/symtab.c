@@ -1300,7 +1300,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 {
   struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
-  struct partial_symbol **top, **bottom, **center;
+  struct partial_symbol **top, **real_top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
   
@@ -1323,6 +1323,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 
       bottom = start;
       top = start + length - 1;
+      real_top = top;
       while (top > bottom)
 	{
 	  center = bottom + (top - bottom) / 2;
@@ -1348,7 +1349,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
       /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
 	 we don't have to force a linear search on C++. Probably holds true
 	 for JAVA as well, no way to check.*/
-      while (SYMBOL_MATCHES_NAME (*top,name))
+      while (top <= real_top && SYMBOL_MATCHES_NAME (*top,name))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
