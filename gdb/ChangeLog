@@ -1,3 +1,7 @@
+2002-10-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386v-nat.c: Include "i386-tdep.h".
+
 2002-10-22  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (dwarf_tag_name): Add DWARF 3 names.
