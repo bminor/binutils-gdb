@@ -2,9 +2,7 @@ Tue Mar 19 23:49:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp: Always regenerate the core file, since
 	we always regenerate the coremaker program.  Detect special case
-	where registers cannot be read from core file.  Change setup_xfail
-	for "print func2:coremaker_local" and "backtrace in corefile.exp"
-	to fail for all i*86 targets.
+	where registers cannot be read from core file.
 	
 Tue Mar 19 16:52:49 1996  Fred Fish  <fnf@cygnus.com>
 
