@@ -1,3 +1,8 @@
+2001-02-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (md_pseudo_table): Add uaquad.  Use s_uacons for
+	2byte, 4byte and 8byte.
+
 2001-02-08  Alan Modra   <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Don't call

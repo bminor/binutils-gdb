@@ -1,5 +1,6 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation.
+   Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -92,8 +93,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"uses", s_uses, 0},
   {"uaword", s_uacons, 2},
   {"ualong", s_uacons, 4},
-  { "file", dwarf2_directive_file, 0 },
-  { "loc", dwarf2_directive_loc, 0 },
+  {"uaquad", s_uacons, 8},
+  {"2byte", s_uacons, 2},
+  {"4byte", s_uacons, 4},
+  {"8byte", s_uacons, 8},
+  {"file", dwarf2_directive_file, 0 },
+  {"loc", dwarf2_directive_loc, 0 },
   {0, 0, 0}
 };
 
