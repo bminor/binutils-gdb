@@ -56,6 +56,7 @@ PROTO(void, ranlib_only, (char *archname));
 
 /** Globals and flags */
 
+extern	       *program_version;
 char           *program_name = NULL;
 bfd            *inarch;		/* The input arch we're manipulating */
 
@@ -186,8 +187,11 @@ main(argc, argv)
   char          **files;
   char           *inarch_filename;
   char           *temp;
+  int		 show_version;
 
   bfd_init();
+  verbose = 1;
+  show_version = 0;
 #ifdef GNU960
   check_v960( argc, argv );
   default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
@@ -264,6 +268,9 @@ main(argc, argv)
      case 'o':
       preserve_dates = 1;
       break;
+     case 'V':
+      show_version = true;
+      break;
      case 's':
       write_armap = true;
       break;
@@ -290,6 +297,9 @@ main(argc, argv)
       fatal("invalid option %c", c);
     }
   }
+
+  if (show_version)
+     printf ("%s version %s\n", program_name, program_version);
 
   if (mri_mode) {
     mri_emul();
@@ -939,3 +949,6 @@ print_descr(abfd)
 {
     print_arelt_descr(stdout,abfd, verbose);
 }
+
+
+
