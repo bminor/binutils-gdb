@@ -1,5 +1,8 @@
 Wed Oct 27 12:03:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* nlmconv.c (main): Set sharedDebugRecordOffset and
+	sharedDebugRecordCount fields in extended header.
+
 	* nlmconv.c (main): Force moduleName field to upper case.
 
 Mon Oct 25 16:45:42 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
