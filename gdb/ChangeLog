@@ -1,3 +1,8 @@
+2004-07-01  Michael Snyder  <msnyder@redhat.com>
+
+	* win32-nat.c (core_dll_symbols_add): Re-indent a small section
+	that seems to have gotten whacked out of line.
+
 2004-07-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* dbxread.c (process_one_symbol) [PCC_SOL_BROKEN]: Remove dead
@@ -61,7 +66,7 @@
 2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
 
 	* win32-nat.c (child_pid_to_exec_file): New function.
-	(init_child_ops): Add child_pid_to_exec_file as to_pid_to_exec_file     
+	(init_child_ops): Add child_pid_to_exec_file as to_pid_to_exec_file
 	functionality.
 
 2004-06-28  Andrew Cagney  <cagney@gnu.org>

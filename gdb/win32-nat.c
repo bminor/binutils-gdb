@@ -2267,65 +2267,65 @@ core_dll_symbols_add (char *dll_name, DWORD base_addr)
       }
   }
 
-    register_loaded_dll (dll_name, base_addr + 0x1000);
-    solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
+  register_loaded_dll (dll_name, base_addr + 0x1000);
+  solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
 
-  out:
-    return 1;
-  }
+ out:
+  return 1;
+}
 
-  typedef struct
-  {
-    struct target_ops *target;
-    bfd_vma addr;
-  } map_code_section_args;
+typedef struct
+{
+  struct target_ops *target;
+  bfd_vma addr;
+} map_code_section_args;
 
-  static void
-  map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
-  {
-    int old;
-    int update_coreops;
-    struct section_table *new_target_sect_ptr;
+static void
+map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
+{
+  int old;
+  int update_coreops;
+  struct section_table *new_target_sect_ptr;
 
-    map_code_section_args *args = (map_code_section_args *) obj;
-    struct target_ops *target = args->target;
-    if (sect->flags & SEC_CODE)
-      {
-	update_coreops = core_ops.to_sections == target->to_sections;
+  map_code_section_args *args = (map_code_section_args *) obj;
+  struct target_ops *target = args->target;
+  if (sect->flags & SEC_CODE)
+    {
+      update_coreops = core_ops.to_sections == target->to_sections;
 
-	if (target->to_sections)
-	  {
-	    old = target->to_sections_end - target->to_sections;
-	    target->to_sections = (struct section_table *)
-	      xrealloc ((char *) target->to_sections,
-			(sizeof (struct section_table)) * (1 + old));
-	  }
-	else
-	  {
-	    old = 0;
-	    target->to_sections = (struct section_table *)
-	      xmalloc ((sizeof (struct section_table)));
-	  }
-	target->to_sections_end = target->to_sections + (1 + old);
+      if (target->to_sections)
+	{
+	  old = target->to_sections_end - target->to_sections;
+	  target->to_sections = (struct section_table *)
+	    xrealloc ((char *) target->to_sections,
+		      (sizeof (struct section_table)) * (1 + old));
+	}
+      else
+	{
+	  old = 0;
+	  target->to_sections = (struct section_table *)
+	    xmalloc ((sizeof (struct section_table)));
+	}
+      target->to_sections_end = target->to_sections + (1 + old);
 
-	/* Update the to_sections field in the core_ops structure
-	   if needed.  */
-	if (update_coreops)
-	  {
-	    core_ops.to_sections = target->to_sections;
-	    core_ops.to_sections_end = target->to_sections_end;
-	  }
-	new_target_sect_ptr = target->to_sections + old;
-	new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
-	new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
-	  bfd_section_size (abfd, sect);;
-	new_target_sect_ptr->the_bfd_section = sect;
-	new_target_sect_ptr->bfd = abfd;
-      }
-  }
+      /* Update the to_sections field in the core_ops structure
+	 if needed.  */
+      if (update_coreops)
+	{
+	  core_ops.to_sections = target->to_sections;
+	  core_ops.to_sections_end = target->to_sections_end;
+	}
+      new_target_sect_ptr = target->to_sections + old;
+      new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
+      new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
+	bfd_section_size (abfd, sect);;
+      new_target_sect_ptr->the_bfd_section = sect;
+      new_target_sect_ptr->bfd = abfd;
+    }
+}
 
-  static int
-  dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
+static int
+dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
 {
   bfd *dll_bfd;
   map_code_section_args map_args;
