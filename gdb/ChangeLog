@@ -1,3 +1,10 @@
+Wed Oct 16 17:46:03 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* breakpoint.c (must_shift_inst_regs): New global.
+	(bpstat_stop_status): Change #if uses of DECR_PC_AFTER_BREAK into
+	equivalent expression uses.
+	* infrun.c (wait_for_inferior): Ditto.
+
 start-sanitize-v850
 Wed Oct 16 01:53:43 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
