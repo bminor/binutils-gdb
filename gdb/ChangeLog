@@ -1,5 +1,12 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (insert_breakpoints): Skip disabled breakpoints
+	entirely.
+	(breakpoint_re_set_one): Don't fetch the value for a disabled
+	watchpoint.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* buildsym.h (processing_hp_compilation): Remove obsolete variable.
 	* gdbarch.sh Remove include of "value.h" in gdbarch.h.
 	(COERCE_FLOAT_TO_DOUBLE): Remove.

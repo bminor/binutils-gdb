@@ -1,7 +1,7 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -735,9 +735,11 @@ insert_breakpoints (void)
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->enable_state == bp_permanent)
-      /* Permanent breakpoints cannot be inserted or removed.  */
+    /* Permanent breakpoints cannot be inserted or removed.  Disabled
+       breakpoints should not be inserted.  */
+    if (b->enable_state != bp_enabled)
       continue;
+
     if ((b->type == bp_watchpoint
 	 || b->type == bp_hardware_watchpoint
 	 || b->type == bp_read_watchpoint
@@ -759,9 +761,6 @@ insert_breakpoints (void)
 	&& b->type != bp_catch_exec
 	&& b->type != bp_catch_throw
 	&& b->type != bp_catch_catch
-	&& b->enable_state != bp_disabled
-	&& b->enable_state != bp_shlib_disabled
-	&& b->enable_state != bp_call_disabled
 	&& !b->inserted
 	&& !b->duplicate)
       {
@@ -880,9 +879,6 @@ insert_breakpoints (void)
 	  return_val = val;	/* remember failure */
       }
     else if (ep_is_exception_catchpoint (b)
-	     && b->enable_state != bp_disabled
-	     && b->enable_state != bp_shlib_disabled
-	     && b->enable_state != bp_call_disabled
 	     && !b->inserted
 	     && !b->duplicate)
 
@@ -940,7 +936,6 @@ insert_breakpoints (void)
     else if ((b->type == bp_hardware_watchpoint ||
 	      b->type == bp_read_watchpoint ||
 	      b->type == bp_access_watchpoint)
-	     && b->enable_state == bp_enabled
 	     && b->disposition != disp_del_at_next_stop
 	     && !b->inserted
 	     && !b->duplicate)
@@ -1059,7 +1054,6 @@ insert_breakpoints (void)
     else if ((b->type == bp_catch_fork
 	      || b->type == bp_catch_vfork
 	      || b->type == bp_catch_exec)
-	     && b->enable_state == bp_enabled
 	     && !b->inserted
 	     && !b->duplicate)
       {
@@ -7049,7 +7043,7 @@ breakpoint_re_set_one (PTR bint)
 	value_free (b->val);
       b->val = evaluate_expression (b->exp);
       release_value (b->val);
-      if (VALUE_LAZY (b->val))
+      if (VALUE_LAZY (b->val) && b->enable_state == bp_enabled)
 	value_fetch_lazy (b->val);
 
       if (b->cond_string != NULL)
