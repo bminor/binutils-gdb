@@ -168,6 +168,27 @@ struct monitor_ops
 
 #define MO_REGISTER_VALUE_FIRST 0x1000
 
+/* If set, then the monitor displays registers as pairs.  */
+
+#define MO_32_REGS_PAIRED 0x2000
+
+/* If set, then register setting happens interactively.  */
+
+#define MO_SETREG_INTERACTIVE 0x4000
+
+/* If set, then memory setting happens interactively.  */
+
+#define MO_SETMEM_INTERACTIVE 0x8000
+
+/* If set, then memory dumps are always on 16-byte boundaries, even
+   when less is desired.  */
+
+#define MO_GETMEM_16_BOUNDARY 0x10000
+
+/* If set, then the monitor numbers its breakpoints starting from 1.  */
+
+#define MO_CLR_BREAK_1_BASED 0x20000
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

@@ -1,20 +1,34 @@
+Mon Aug 11 19:16:04 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* dink32-rom.c: New file, support for DINK32 monitor.
+	* Makefile.in (dink32-rom.o): Add build rule.
+	* config/powerpc/ppc-eabi.mt, config/powerpc/ppc-sim.mt
+ 	(TDEPFILES): Add dink32-rom.o.
+	* monitor.h (MO_32_REGS_PAIRED, MO_SETREG_INTERACTIVE,
+ 	MO_SETMEM_INTERACTIVE, MO_GETMEM_16_BOUNDARY,
+ 	MO_CLR_BREAK_1_BASED): New monitor interface flags.
+	* monitor.c: Use them.
+	(monitor_store_register): Use setreg.term if defined.
+	(monitor_insert_breakpoint, monitor_remove_breakpoint): Notice
+	if set_break and clr_break fields are empty.
+
 Mon Aug 11 16:22:36 1997  Geoffrey Noer  <noer@cygnus.com>
 
-	* ocd.c (ocd_insert_breakpoint, ocd_remove_breakpoint): macro
+	* ocd.c (ocd_insert_breakpoint, ocd_remove_breakpoint): Macro
 	BDM_BREAKPOINT already has braces around it, remove erroneous ones.
-	* ser-ocd.c (ocd_write): conditionalize on _WIN32 instead of
-	__CYGWIN32__
-	* config/powerpc/tm-ppc-eabi.h: remove BDM_NUM_REGS, BDM_REGMAP
+	* ser-ocd.c (ocd_write): Conditionalize on _WIN32 instead of
+	__CYGWIN32__.
+	* config/powerpc/tm-ppc-eabi.h: Remove BDM_NUM_REGS, BDM_REGMAP
 	* ppc-bdm.c: move BDM_NUM_REGS, BDM_REGMAP here from tm.h file,
 	fill in doc fields of bdm_ppc_ops.
-	(bdm_ppc_fetch_registers): don't ask for invalid registers such
-	as the MQ or floating point regs not present on ppc 8xx boards
-	(bdm_ppc_store_registers): don't write those same invalid registers
-	* config/i386/cygwin32.mh: stop including ocd.o ser-ocd.o
+	(bdm_ppc_fetch_registers): Don't ask for invalid registers such
+	as the MQ or floating point regs not present on ppc 8xx boards.
+	(bdm_ppc_store_registers): Don't write those same invalid registers.
+	* config/i386/cygwin32.mh: Stop including ocd.o ser-ocd.o.
 	* config/powerpc/ppc-eabi.mt:
 	* config/powerpc/ppcle-eabi.mt:
 	* config/powerpc/ppc-sim.mt:
-	* config/powerpc/ppcle-sim.mt: include ser-ocd.o
+	* config/powerpc/ppcle-sim.mt: Include ser-ocd.o.
 
 Mon Aug 11 16:08:52 1997  Fred Fish  <fnf@cygnus.com>
 

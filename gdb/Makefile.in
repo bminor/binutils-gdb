@@ -575,16 +575,23 @@ install-only:
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
 	# start-sanitize-gdbtk
 	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
-		  if [ ! -d $(datadir)/gdbtcl ]; then \
-		    echo "Making directory gdbtcl"; \
-		    mkdir $(datadir)/gdbtcl; \
-		    chmod 755 $(datadir)/gdbtcl; \
+		  $(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
+		  if [ x"$(ENABLE_IDE)" = x ]; then \
+		    cd $(srcdir)/gdbtcl ; \
+		    for i in asm.tcl break.xbm breakpoint.tcl command.tcl copyright.tcl expr.tcl file.tcl main.tcl register.tcl source.tcl stop2.gif tclIndex ; \
+		      do \
+			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+		      done ; \
+		  else \
+		    $(SHELL) $(srcdir)/../mkinstalldirs \
+				$(datadir)/gdbtcl/images \
+				$(datadir)/gdbtcl/images2 ; \
+		    cd $(srcdir)/gdbtcl2 ; \
+		    for i in *.tcl images/*.gif images2/*.gif; \
+		      do \
+			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+		      done ; \
 		  fi ; \
-		  cd $(srcdir)/gdbtcl ; \
-		  for i in asm.tcl break.xbm breakpoint.tcl command.tcl copyright.tcl expr.tcl file.tcl main.tcl register.tcl source.tcl stop2.gif tclIndex ; \
-		    do \
-		      $(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
-		    done ; \
 		else \
 		  true ; \
 		fi
@@ -1151,6 +1158,9 @@ dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 delta68-nat.o: delta68-nat.c $(defs_h)
 
 demangle.o: demangle.c $(defs_h) $(gdbcmd_h) gdb_string.h
+
+dink32-rom.o: dink32-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
+	$(inferior_h) target.h serial.h terminal.h
 
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) gdb_string.h
 
