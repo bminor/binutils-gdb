@@ -197,12 +197,12 @@ store_regs (int tid, int regno)
 static void *
 x86_64_fxsave_offset (elf_fpregset_t * fxsave, int regnum)
 {
-  char *reg_name;
+  const char *reg_name;
   int reg_index;
 
   gdb_assert (x86_64_num_gregs - 1 < regnum && regnum < x86_64_num_regs);
 
-  reg_name = x86_64_register_nr2name (regnum);
+  reg_name = x86_64_register_name (regnum);
 
   if (reg_name[0] == 's' && reg_name[1] == 't')
     {
@@ -231,8 +231,8 @@ supply_fpregset (elf_fpregset_t * fxsave)
 {
   int i, reg_st0, reg_mxcsr;
 
-  reg_st0 = x86_64_register_name2nr ("st0");
-  reg_mxcsr = x86_64_register_name2nr ("mxcsr");
+  reg_st0 = x86_64_register_number ("st0");
+  reg_mxcsr = x86_64_register_number ("mxcsr");
 
   gdb_assert (reg_st0 > 0 && reg_mxcsr > reg_st0);
 

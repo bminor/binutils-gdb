@@ -1366,6 +1366,23 @@ build_parse (void)
 	       NULL);
 }
 
+/* This function avoids direct calls to fprintf 
+   in the parser generated debug code.  */
+void
+parser_fprintf (FILE *x, const char *y, ...)
+{ 
+  va_list args;
+  va_start (args, y);
+  if (x == stderr)
+    vfprintf_unfiltered (gdb_stderr, y, args); 
+  else
+    {
+      fprintf_unfiltered (gdb_stderr, " Unknown FILE used.\n");
+      vfprintf_unfiltered (gdb_stderr, y, args);
+    }
+  va_end (args);
+}
+
 void
 _initialize_parse (void)
 {

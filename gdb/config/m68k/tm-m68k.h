@@ -48,11 +48,8 @@ extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
    some instructions.  */
 
 struct frame_info;
-struct frame_saved_regs;
 
 extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
-extern void m68k_find_saved_regs (struct frame_info *,
-				  struct frame_saved_regs *);
 
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)
@@ -287,16 +284,6 @@ extern void m68k_find_saved_regs (struct frame_info *,
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 8
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-#if !defined (FRAME_FIND_SAVED_REGS)
-#define FRAME_FIND_SAVED_REGS(fi,fsr) m68k_find_saved_regs ((fi), &(fsr))
-#endif /* no FIND_FRAME_SAVED_REGS.  */
 
 
 /* Things needed for making the inferior call functions.  */
@@ -330,7 +317,7 @@ extern void m68k_find_saved_regs (struct frame_info *,
 /* FIXME: Wrong to hardwire this as BPT_VECTOR when sometimes it
    should be REMOTE_BPT_VECTOR.  Best way to fix it would be to define
    CALL_DUMMY_BREAKPOINT_OFFSET.  */
-
+#if !GDB_MULTI_ARCH_PARTIAL
 #define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
 #define CALL_DUMMY_LENGTH 28	/* Size of CALL_DUMMY */
 #define CALL_DUMMY_START_OFFSET 12	/* Offset to jsr instruction */
@@ -355,7 +342,7 @@ extern void m68k_pop_frame (void);
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME		{ m68k_pop_frame (); }
-
+#endif
 /* Offset from SP to first arg on stack at first instruction of a function */
 
 #define SP_ARG0 (1 * 4)

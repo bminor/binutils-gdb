@@ -100,8 +100,10 @@ extern int hp_som_som_object_present;
 #define yycheck	 c_yycheck
 
 #ifndef YYDEBUG
-#define	YYDEBUG	0		/* Default to no yydebug support */
+#define	YYDEBUG 1		/* Default to yydebug support */
 #endif
+
+#define YYFPRINTF parser_fprintf
 
 int yyparse (void);
 
