@@ -20,6 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define GDB_TARGET_IS_MIPS64
 
+/* force LONGEST to be long long in gdb */
+#define FORCE_LONG_LONG
+
 /* Use eight byte registers.  */
 #define MIPS_REGSIZE 8
 
