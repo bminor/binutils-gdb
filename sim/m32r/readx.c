@@ -111,47 +111,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     && case_read_READ_FMT_39_MV,
     && case_read_READ_FMT_44_NOP,
     && case_read_READ_FMT_39_MV,
-    && case_read_READ_FMT_45_RAC_D,
-    && case_read_READ_FMT_46_RAC_DS,
-    && case_read_READ_FMT_47_RAC_DSI,
-    && case_read_READ_FMT_45_RAC_D,
-    && case_read_READ_FMT_46_RAC_DS,
-    && case_read_READ_FMT_47_RAC_DSI,
-    && case_read_READ_FMT_48_RTE,
-    && case_read_READ_FMT_49_SETH,
+    && case_read_READ_FMT_45_RAC_DSI,
+    && case_read_READ_FMT_45_RAC_DSI,
+    && case_read_READ_FMT_46_RTE,
+    && case_read_READ_FMT_47_SETH,
     && case_read_READ_FMT_0_ADD,
-    && case_read_READ_FMT_50_SLL3,
-    && case_read_READ_FMT_51_SLLI,
+    && case_read_READ_FMT_48_SLL3,
+    && case_read_READ_FMT_49_SLLI,
     && case_read_READ_FMT_0_ADD,
-    && case_read_READ_FMT_50_SLL3,
-    && case_read_READ_FMT_51_SLLI,
+    && case_read_READ_FMT_48_SLL3,
+    && case_read_READ_FMT_49_SLLI,
     && case_read_READ_FMT_0_ADD,
-    && case_read_READ_FMT_50_SLL3,
-    && case_read_READ_FMT_51_SLLI,
-    && case_read_READ_FMT_52_ST,
-    && case_read_READ_FMT_53_ST_D,
-    && case_read_READ_FMT_54_STB,
-    && case_read_READ_FMT_55_STB_D,
-    && case_read_READ_FMT_56_STH,
-    && case_read_READ_FMT_57_STH_D,
-    && case_read_READ_FMT_58_ST_PLUS,
-    && case_read_READ_FMT_58_ST_PLUS,
+    && case_read_READ_FMT_48_SLL3,
+    && case_read_READ_FMT_49_SLLI,
+    && case_read_READ_FMT_50_ST,
+    && case_read_READ_FMT_51_ST_D,
+    && case_read_READ_FMT_52_STB,
+    && case_read_READ_FMT_53_STB_D,
+    && case_read_READ_FMT_54_STH,
+    && case_read_READ_FMT_55_STH_D,
+    && case_read_READ_FMT_56_ST_PLUS,
+    && case_read_READ_FMT_56_ST_PLUS,
     && case_read_READ_FMT_0_ADD,
     && case_read_READ_FMT_5_ADDV,
     && case_read_READ_FMT_7_ADDX,
-    && case_read_READ_FMT_59_TRAP,
-    && case_read_READ_FMT_60_UNLOCK,
-    && case_read_READ_FMT_61_SATB,
-    && case_read_READ_FMT_61_SATB,
-    && case_read_READ_FMT_62_SAT,
+    && case_read_READ_FMT_57_TRAP,
+    && case_read_READ_FMT_58_UNLOCK,
+    && case_read_READ_FMT_59_SATB,
+    && case_read_READ_FMT_59_SATB,
+    && case_read_READ_FMT_60_SAT,
     && case_read_READ_FMT_21_CMPZ,
-    && case_read_READ_FMT_63_SADD,
-    && case_read_READ_FMT_64_MACWU1,
-    && case_read_READ_FMT_65_MSBLO,
-    && case_read_READ_FMT_66_MULWU1,
-    && case_read_READ_FMT_64_MACWU1,
-    && case_read_READ_FMT_67_SC,
-    && case_read_READ_FMT_67_SC,
+    && case_read_READ_FMT_61_SADD,
+    && case_read_READ_FMT_62_MACWU1,
+    && case_read_READ_FMT_63_MSBLO,
+    && case_read_READ_FMT_64_MULWU1,
+    && case_read_READ_FMT_62_MACWU1,
+    && case_read_READ_FMT_65_SC,
+    && case_read_READ_FMT_65_SC,
     0
   };
   extern DECODE *m32rx_decode_vars[];
@@ -650,7 +646,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_36_LOCK_CODE
 
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (dr) = CPU (h_gr[f_r1]);
+      OPRND (h_memory_sr) = GETMEMSI (current_cpu, CPU (h_gr[f_r2]));
       OPRND (sr) = CPU (h_gr[f_r2]);
 #undef OPRND
     }
@@ -755,35 +751,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_45_RAC_D) : /* e.g. rac $accd */
+    CASE (read, READ_FMT_45_RAC_DSI) : /* e.g. rac $accd,$accs,#$imm1 */
     {
-#define OPRND(f) par_exec->operands.fmt_45_rac_d.f
-  EXTRACT_FMT_45_RAC_D_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
-  EXTRACT_FMT_45_RAC_D_CODE
-
-      /* Fetch the input operands for the semantic handler.  */
-      OPRND (accum) = CPU (h_accum);
-#undef OPRND
-    }
-    BREAK (read);
-
-    CASE (read, READ_FMT_46_RAC_DS) : /* e.g. rac $accd,$accs */
-    {
-#define OPRND(f) par_exec->operands.fmt_46_rac_ds.f
-  EXTRACT_FMT_46_RAC_DS_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
-  EXTRACT_FMT_46_RAC_DS_CODE
-
-      /* Fetch the input operands for the semantic handler.  */
-      OPRND (accs) = m32rx_h_accums_get (current_cpu, f_accs);
-#undef OPRND
-    }
-    BREAK (read);
-
-    CASE (read, READ_FMT_47_RAC_DSI) : /* e.g. rac $accd,$accs,#$imm1 */
-    {
-#define OPRND(f) par_exec->operands.fmt_47_rac_dsi.f
-  EXTRACT_FMT_47_RAC_DSI_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
-  EXTRACT_FMT_47_RAC_DSI_CODE
+#define OPRND(f) par_exec->operands.fmt_45_rac_dsi.f
+  EXTRACT_FMT_45_RAC_DSI_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_45_RAC_DSI_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (accs) = m32rx_h_accums_get (current_cpu, f_accs);
@@ -792,11 +764,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_48_RTE) : /* e.g. rte */
+    CASE (read, READ_FMT_46_RTE) : /* e.g. rte */
     {
-#define OPRND(f) par_exec->operands.fmt_48_rte.f
-  EXTRACT_FMT_48_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_48_RTE_CODE
+#define OPRND(f) par_exec->operands.fmt_46_rte.f
+  EXTRACT_FMT_46_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_46_RTE_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (h_bcond_0) = CPU (h_bcond);
@@ -807,11 +779,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_49_SETH) : /* e.g. seth $dr,#$hi16 */
+    CASE (read, READ_FMT_47_SETH) : /* e.g. seth $dr,#$hi16 */
     {
-#define OPRND(f) par_exec->operands.fmt_49_seth.f
-  EXTRACT_FMT_49_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
-  EXTRACT_FMT_49_SETH_CODE
+#define OPRND(f) par_exec->operands.fmt_47_seth.f
+  EXTRACT_FMT_47_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
+  EXTRACT_FMT_47_SETH_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (hi16) = f_hi16;
@@ -819,11 +791,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_50_SLL3) : /* e.g. sll3 $dr,$sr,#$simm16 */
+    CASE (read, READ_FMT_48_SLL3) : /* e.g. sll3 $dr,$sr,#$simm16 */
     {
-#define OPRND(f) par_exec->operands.fmt_50_sll3.f
-  EXTRACT_FMT_50_SLL3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_50_SLL3_CODE
+#define OPRND(f) par_exec->operands.fmt_48_sll3.f
+  EXTRACT_FMT_48_SLL3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_48_SLL3_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (simm16) = f_simm16;
@@ -832,11 +804,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_51_SLLI) : /* e.g. slli $dr,#$uimm5 */
+    CASE (read, READ_FMT_49_SLLI) : /* e.g. slli $dr,#$uimm5 */
     {
-#define OPRND(f) par_exec->operands.fmt_51_slli.f
-  EXTRACT_FMT_51_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
-  EXTRACT_FMT_51_SLLI_CODE
+#define OPRND(f) par_exec->operands.fmt_49_slli.f
+  EXTRACT_FMT_49_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
+  EXTRACT_FMT_49_SLLI_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (dr) = CPU (h_gr[f_r1]);
@@ -845,11 +817,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_52_ST) : /* e.g. st $src1,@$src2 */
+    CASE (read, READ_FMT_50_ST) : /* e.g. st $src1,@$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_52_st.f
-  EXTRACT_FMT_52_ST_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_52_ST_CODE
+#define OPRND(f) par_exec->operands.fmt_50_st.f
+  EXTRACT_FMT_50_ST_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_50_ST_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
@@ -858,11 +830,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_53_ST_D) : /* e.g. st $src1,@($slo16,$src2) */
+    CASE (read, READ_FMT_51_ST_D) : /* e.g. st $src1,@($slo16,$src2) */
     {
-#define OPRND(f) par_exec->operands.fmt_53_st_d.f
-  EXTRACT_FMT_53_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_53_ST_D_CODE
+#define OPRND(f) par_exec->operands.fmt_51_st_d.f
+  EXTRACT_FMT_51_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_51_ST_D_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (slo16) = f_simm16;
@@ -872,11 +844,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_54_STB) : /* e.g. stb $src1,@$src2 */
+    CASE (read, READ_FMT_52_STB) : /* e.g. stb $src1,@$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_54_stb.f
-  EXTRACT_FMT_54_STB_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_54_STB_CODE
+#define OPRND(f) par_exec->operands.fmt_52_stb.f
+  EXTRACT_FMT_52_STB_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_52_STB_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
@@ -885,11 +857,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_55_STB_D) : /* e.g. stb $src1,@($slo16,$src2) */
+    CASE (read, READ_FMT_53_STB_D) : /* e.g. stb $src1,@($slo16,$src2) */
     {
-#define OPRND(f) par_exec->operands.fmt_55_stb_d.f
-  EXTRACT_FMT_55_STB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_55_STB_D_CODE
+#define OPRND(f) par_exec->operands.fmt_53_stb_d.f
+  EXTRACT_FMT_53_STB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_53_STB_D_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (slo16) = f_simm16;
@@ -899,11 +871,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_56_STH) : /* e.g. sth $src1,@$src2 */
+    CASE (read, READ_FMT_54_STH) : /* e.g. sth $src1,@$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_56_sth.f
-  EXTRACT_FMT_56_STH_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_56_STH_CODE
+#define OPRND(f) par_exec->operands.fmt_54_sth.f
+  EXTRACT_FMT_54_STH_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_54_STH_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
@@ -912,11 +884,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_57_STH_D) : /* e.g. sth $src1,@($slo16,$src2) */
+    CASE (read, READ_FMT_55_STH_D) : /* e.g. sth $src1,@($slo16,$src2) */
     {
-#define OPRND(f) par_exec->operands.fmt_57_sth_d.f
-  EXTRACT_FMT_57_STH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_57_STH_D_CODE
+#define OPRND(f) par_exec->operands.fmt_55_sth_d.f
+  EXTRACT_FMT_55_STH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_55_STH_D_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (slo16) = f_simm16;
@@ -926,11 +898,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_58_ST_PLUS) : /* e.g. st $src1,@+$src2 */
+    CASE (read, READ_FMT_56_ST_PLUS) : /* e.g. st $src1,@+$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_58_st_plus.f
-  EXTRACT_FMT_58_ST_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_58_ST_PLUS_CODE
+#define OPRND(f) par_exec->operands.fmt_56_st_plus.f
+  EXTRACT_FMT_56_ST_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_56_ST_PLUS_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
@@ -939,36 +911,39 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_59_TRAP) : /* e.g. trap #$uimm4 */
+    CASE (read, READ_FMT_57_TRAP) : /* e.g. trap #$uimm4 */
     {
-#define OPRND(f) par_exec->operands.fmt_59_trap.f
-  EXTRACT_FMT_59_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
-  EXTRACT_FMT_59_TRAP_CODE
+#define OPRND(f) par_exec->operands.fmt_57_trap.f
+  EXTRACT_FMT_57_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
+  EXTRACT_FMT_57_TRAP_CODE
 
       /* Fetch the input operands for the semantic handler.  */
+      OPRND (pc) = CPU (h_pc);
+      OPRND (h_cr_0) = m32rx_h_cr_get (current_cpu, 0);
       OPRND (uimm4) = f_uimm4;
 #undef OPRND
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_60_UNLOCK) : /* e.g. unlock $src1,@$src2 */
+    CASE (read, READ_FMT_58_UNLOCK) : /* e.g. unlock $src1,@$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_60_unlock.f
-  EXTRACT_FMT_60_UNLOCK_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_60_UNLOCK_CODE
+#define OPRND(f) par_exec->operands.fmt_58_unlock.f
+  EXTRACT_FMT_58_UNLOCK_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_58_UNLOCK_CODE
 
       /* Fetch the input operands for the semantic handler.  */
+      OPRND (h_lock_0) = CPU (h_lock);
       OPRND (src1) = CPU (h_gr[f_r1]);
       OPRND (src2) = CPU (h_gr[f_r2]);
 #undef OPRND
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_61_SATB) : /* e.g. satb $dr,$sr */
+    CASE (read, READ_FMT_59_SATB) : /* e.g. satb $dr,$sr */
     {
-#define OPRND(f) par_exec->operands.fmt_61_satb.f
-  EXTRACT_FMT_61_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
-  EXTRACT_FMT_61_SATB_CODE
+#define OPRND(f) par_exec->operands.fmt_59_satb.f
+  EXTRACT_FMT_59_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
+  EXTRACT_FMT_59_SATB_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (sr) = CPU (h_gr[f_r2]);
@@ -976,11 +951,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_62_SAT) : /* e.g. sat $dr,$sr */
+    CASE (read, READ_FMT_60_SAT) : /* e.g. sat $dr,$sr */
     {
-#define OPRND(f) par_exec->operands.fmt_62_sat.f
-  EXTRACT_FMT_62_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
-  EXTRACT_FMT_62_SAT_CODE
+#define OPRND(f) par_exec->operands.fmt_60_sat.f
+  EXTRACT_FMT_60_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
+  EXTRACT_FMT_60_SAT_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (condbit) = CPU (h_cond);
@@ -989,11 +964,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_63_SADD) : /* e.g. sadd */
+    CASE (read, READ_FMT_61_SADD) : /* e.g. sadd */
     {
-#define OPRND(f) par_exec->operands.fmt_63_sadd.f
-  EXTRACT_FMT_63_SADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_63_SADD_CODE
+#define OPRND(f) par_exec->operands.fmt_61_sadd.f
+  EXTRACT_FMT_61_SADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_61_SADD_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (h_accums_0) = m32rx_h_accums_get (current_cpu, 0);
@@ -1002,11 +977,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_64_MACWU1) : /* e.g. macwu1 $src1,$src2 */
+    CASE (read, READ_FMT_62_MACWU1) : /* e.g. macwu1 $src1,$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_64_macwu1.f
-  EXTRACT_FMT_64_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_64_MACWU1_CODE
+#define OPRND(f) par_exec->operands.fmt_62_macwu1.f
+  EXTRACT_FMT_62_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_62_MACWU1_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (h_accums_1) = m32rx_h_accums_get (current_cpu, 1);
@@ -1016,11 +991,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_65_MSBLO) : /* e.g. msblo $src1,$src2 */
+    CASE (read, READ_FMT_63_MSBLO) : /* e.g. msblo $src1,$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_65_msblo.f
-  EXTRACT_FMT_65_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_65_MSBLO_CODE
+#define OPRND(f) par_exec->operands.fmt_63_msblo.f
+  EXTRACT_FMT_63_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_63_MSBLO_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (accum) = CPU (h_accum);
@@ -1030,11 +1005,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_66_MULWU1) : /* e.g. mulwu1 $src1,$src2 */
+    CASE (read, READ_FMT_64_MULWU1) : /* e.g. mulwu1 $src1,$src2 */
     {
-#define OPRND(f) par_exec->operands.fmt_66_mulwu1.f
-  EXTRACT_FMT_66_MULWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_66_MULWU1_CODE
+#define OPRND(f) par_exec->operands.fmt_64_mulwu1.f
+  EXTRACT_FMT_64_MULWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_64_MULWU1_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
@@ -1043,11 +1018,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_67_SC) : /* e.g. sc */
+    CASE (read, READ_FMT_65_SC) : /* e.g. sc */
     {
-#define OPRND(f) par_exec->operands.fmt_67_sc.f
-  EXTRACT_FMT_67_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_67_SC_CODE
+#define OPRND(f) par_exec->operands.fmt_65_sc.f
+  EXTRACT_FMT_65_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_65_SC_CODE
 
       /* Fetch the input operands for the semantic handler.  */
       OPRND (condbit) = CPU (h_cond);

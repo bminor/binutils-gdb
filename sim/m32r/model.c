@@ -169,10 +169,9 @@ static const INSN_TIMING m32r_d_timing[] = {
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* cmpui */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* cmpui.a */
   { { (UQI) UNIT_M32R_D_U_EXEC, 37, 37 } }, /* div */
-  { { (UQI) UNIT_M32R_D_U_EXEC, 27, 27 } }, /* divu */
+  { { (UQI) UNIT_M32R_D_U_EXEC, 37, 37 } }, /* divu */
   { { (UQI) UNIT_M32R_D_U_EXEC, 37, 37 } }, /* rem */
-  { { (UQI) UNIT_M32R_D_U_EXEC, 27, 27 } }, /* remu */
-  { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* divh */
+  { { (UQI) UNIT_M32R_D_U_EXEC, 37, 37 } }, /* remu */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* jl */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* jmp */
   { { (UQI) UNIT_M32R_D_U_LOAD, 1, 1 } }, /* ld */
@@ -215,9 +214,9 @@ static const INSN_TIMING m32r_d_timing[] = {
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mulwhi */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mulwlo */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mv */
-  { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mvfachi */
-  { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mvfaclo */
-  { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mvfacmi */
+  { { (UQI) UNIT_M32R_D_U_EXEC, 2, 2 } }, /* mvfachi */
+  { { (UQI) UNIT_M32R_D_U_EXEC, 2, 2 } }, /* mvfaclo */
+  { { (UQI) UNIT_M32R_D_U_EXEC, 2, 2 } }, /* mvfacmi */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mvfc */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mvtachi */
   { { (UQI) UNIT_M32R_D_U_EXEC, 1, 1 } }, /* mvtaclo */
@@ -325,7 +324,6 @@ static const INSN_TIMING test_timing[] = {
   { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* divu */
   { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* rem */
   { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* remu */
-  { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* divh */
   { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* jl */
   { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* jmp */
   { { (UQI) UNIT_TEST_U_EXEC, 1, 1 } }, /* ld */

@@ -865,7 +865,8 @@ EX_FN_NAME (m32r,fmt_32_lock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
   /* Record the fields for profiling.  */
   if (PROFILE_MODEL_P (current_cpu))
     {
-      abuf->h_gr_get = 0 | (1 << f_r1) | (1 << f_r2);
+      abuf->h_gr_get = 0 | (1 << f_r2);
+      abuf->h_gr_set = 0 | (1 << f_r1);
     }
 #endif
 #undef FLD

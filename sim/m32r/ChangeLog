@@ -1,3 +1,41 @@
+Thu Feb 19 16:39:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r.c (do_lock,do_unlock): Delete.
+	* cpu.[ch],decode.[ch],extract.c,model.c: Regenerate.
+	* sem.c,sem-switch.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.[ch],decodex.[ch],readx.c,semx.c: Regenerate.
+end-sanitize-m32rx
+
+Tue Feb 17 18:18:10 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (M32R_OBJS): Add cpu.o.
+	(cpu.o): Add rule for.
+	(NL_TARGET): Define.
+	* configure.in: Add AC_CHECK_PROG(SCHEME).
+	* cpu.c: New file.
+	* cpuall.h,cpu.h,decode.c,decode.h,extract.c,model.c: Regenerate.
+	* sem-switch.c,sem.c: Regenerate.
+	* mloop.in (execute): Update call to semantic fn.
+start-sanitize-m32rx
+	(M32RX_OBJS): Add cpux.o.
+	(cpux.o): Add rule for.
+	cpux.c: New file.
+	* cpux.h,decodex.c,decodex.h,modelx.c,readx.c,semx.c: Regenerate.
+	* m32rx.c (m32rx_h_accums_{get,set}): Rewrite.
+	(m32rx_h_cr_{get,set}): New functions.
+	(m32rx_h_accums_{get,set}): New functions.
+	* mloopx.in: Rewrite main loop.
+end-sanitize-m32rx
+
+	* m32r.c (do_trap): Move from here.
+	* sim-if.c (do_trap): To here, and rewrite to use CB_SYSCALL support.
+	(sim_create_inferior): Use h_pc_set.
+	(h_pc_{get,set}): New functions.
+	(h_gr_{get,set}): New functions.
+	(syscall_{read,write}_mem): New functions.
+	* sim-main.h (h_{gr,pc}_{get,set}): Declare.
+
 Tue Feb 17 12:44:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-if.c (sim_store_register, sim_fetch_register): Pass in
