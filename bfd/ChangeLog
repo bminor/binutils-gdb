@@ -1,3 +1,7 @@
+Wed Jan  6 00:16:49 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* seclet.c (seclet_dump_seclet): use bfd_xmalloc instead of malloc
+
 Tue Jan  5 09:35:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in (post-target): If --with-minimal-bfd is specified,

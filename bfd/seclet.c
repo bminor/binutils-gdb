@@ -113,7 +113,7 @@ DEFUN(seclet_dump_seclet,(abfd, seclet, section, data),
    case bfd_fill_seclet:
     /* Fill in the section with us */
    {
-     char *d = malloc(seclet->size);
+     char *d = bfd_xmalloc(seclet->size);
      unsigned int i;
      for (i =0;  i < seclet->size; i+=2) {
        d[i] = seclet->u.fill.value >> 8;
