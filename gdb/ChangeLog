@@ -1,3 +1,9 @@
+Fri Mar  3 00:54:58 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-tdep.c (decode_asi): New function.
+	(sparc_print_register_hook): Pretty print more v9 registers.
+	* sparc/tm-sp64.h (REGISTER_NAMES): Fix some typos.
+
 Thu Mar  2 22:20:22 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dwarfread.c (struct dieinfo): Use CORE_ADDR for at_{low,high}_pc.
