@@ -1,6 +1,6 @@
 /* nlmconv.c -- NLM conversion program
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -431,7 +431,7 @@ main (int argc, char **argv)
     {
       bfd_size_type add;
 
-      vma = bfd_get_section_size_before_reloc (data_sec);
+      vma = bfd_get_section_size (data_sec);
       align = 1 << bss_sec->alignment_power;
       add = ((vma + align - 1) &~ (align - 1)) - vma;
       vma += add;
@@ -441,7 +441,7 @@ main (int argc, char **argv)
 	{
 	  bfd_size_type data_size;
 
-	  data_size = bfd_get_section_size_before_reloc (data_sec);
+	  data_size = bfd_get_section_size (data_sec);
 	  if (! bfd_set_section_size (outbfd, data_sec, data_size + add))
 	    bfd_fatal (_("set .data size"));
 	}
@@ -499,14 +499,14 @@ main (int argc, char **argv)
 	 symbols into the .bss section, and mark them as exported.  */
       if (bfd_is_com_section (bfd_get_section (sym)))
 	{
-	  bfd_vma size;
+	  bfd_vma size = sym->value;
 
 	  sym->section = bss_sec;
-	  size = sym->value;
-	  sym->value = bss_sec->_raw_size;
-	  bss_sec->_raw_size += size;
+	  sym->value = bfd_get_section_size (bss_sec);
+	  size += sym->value;
 	  align = 1 << bss_sec->alignment_power;
-	  bss_sec->_raw_size = (bss_sec->_raw_size + align - 1) &~ (align - 1);
+	  size = (size + align - 1) & ~(align - 1);
+	  bfd_set_section_size (outbfd, bss_sec, size);
 	  sym->flags |= BSF_EXPORT | BSF_GLOBAL;
 	}
       else if (bfd_get_section (sym)->output_section != NULL)
@@ -670,7 +670,7 @@ main (int argc, char **argv)
 
   if (endsym != NULL)
     {
-      endsym->value = bfd_get_section_size_before_reloc (bss_sec);
+      endsym->value = bfd_get_section_size (bss_sec);
 
       /* FIXME: If any relocs referring to _end use inplace addends,
 	 then I think they need to be updated.  This is handled by
@@ -1230,11 +1230,7 @@ copy_sections (bfd *inbfd, asection *insec, void *data_ptr)
   outsec = insec->output_section;
   assert (outsec != NULL);
 
-  size = bfd_get_section_size_before_reloc (insec);
-
-  /* FIXME: Why are these necessary?  */
-  insec->_cooked_size = insec->_raw_size;
-  insec->reloc_done = TRUE;
+  size = bfd_get_section_size (insec);
 
   if ((bfd_get_section_flags (inbfd, insec) & SEC_HAS_CONTENTS) == 0)
     contents = NULL;
@@ -1881,8 +1877,7 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
      going to write out whatever we return in the contents field.  */
   if (strcmp (bfd_get_section_name (insec->owner, insec), ".got") == 0)
     memset (contents + powerpc_initial_got_size, 0,
-	    (size_t) (bfd_get_section_size_after_reloc (insec)
-		      - powerpc_initial_got_size));
+	    (size_t) (bfd_get_section_size (insec) - powerpc_initial_got_size));
 
   reloc_count = *reloc_count_ptr;
   relocs = *relocs_ptr;

@@ -317,7 +317,7 @@ strings_a_section (bfd *abfd, asection *sect, void *filearg)
 
   if ((sect->flags & DATA_FLAGS) == DATA_FLAGS)
     {
-      bfd_size_type sz = bfd_get_section_size_before_reloc (sect);
+      bfd_size_type sz = bfd_get_section_size (sect);
       void *mem = xmalloc (sz);
 
       if (bfd_get_section_contents (abfd, sect, mem, (file_ptr) 0, sz))

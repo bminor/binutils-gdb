@@ -1579,7 +1579,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
   if (! process_section_p (section))
     return;
 
-  datasize = bfd_get_section_size_before_reloc (section);
+  datasize = bfd_get_section_size (section);
   if (datasize == 0)
     return;
 

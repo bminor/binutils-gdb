@@ -1206,7 +1206,7 @@ scan_drectve_symbols (bfd *abfd)
   if (s == NULL)
     return;
 
-  size = bfd_get_section_size_before_reloc (s);
+  size = bfd_get_section_size (s);
   buf  = xmalloc (size);
 
   bfd_get_section_contents (abfd, s, buf, 0, size);

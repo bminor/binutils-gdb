@@ -1,6 +1,6 @@
 /* size.c -- report size of various sections of an executable file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -429,7 +429,7 @@ berkeley_sum (bfd *abfd ATTRIBUTE_UNUSED, sec_ptr sec,
   if ((flags & SEC_ALLOC) == 0)
     return;
 
-  size = bfd_get_section_size_before_reloc (sec);
+  size = bfd_get_section_size (sec);
   if ((flags & SEC_CODE) != 0 || (flags & SEC_READONLY) != 0)
     textsize += size;
   else if ((flags & SEC_HAS_CONTENTS) != 0)

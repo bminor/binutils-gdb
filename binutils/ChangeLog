@@ -1,3 +1,20 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_section): Use bfd_get_section_size instead of
+	_raw_size or bfd_get_section_size_before_reloc.  Don't set reloc_done.
+	(compare_section_lma): Likewise.
+	* addr2line.c (find_address_in_section): Likewise.
+	* coffgrok.c (do_sections_p1): Likewise.
+	* dlltool.c (scan_drectve_symbols): Likewise.
+	* nlmconv.c (main): Likewise.
+	(copy_sections): Likewise.
+	(powerpc_mangle_relocs): Likewise.
+	* objdump.c (disassemble_section): Likewise.
+	* prdbg.c (find_address_in_section): Likewise.
+	* size.c (berkeley_sum): Likewise.
+	* srconv.c (wr_ob): Likewise.
+	* strings.c (strings_a_section): Likewise.
+
 2004-05-28  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* readelf.c (decode_ARM_machine_flags): Add EF_ARM_VFP_FLOAT.

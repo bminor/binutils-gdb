@@ -2014,7 +2014,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     return;
 
   osection = isection->output_section;
-  size = bfd_get_section_size_before_reloc (isection);
+  size = bfd_get_section_size (isection);
 
   if (size == 0 || osection == 0)
     return;
@@ -2071,7 +2071,6 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     }
 
   isection->_cooked_size = isection->_raw_size;
-  isection->reloc_done = TRUE;
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
@@ -2164,9 +2163,9 @@ compare_section_lma (const void *arg1, const void *arg2)
     return -1;
 
   /* Sort sections with the same LMA by size.  */
-  if ((*sec1)->_raw_size > (*sec2)->_raw_size)
+  if (bfd_get_section_size (*sec1) > bfd_get_section_size (*sec2))
     return 1;
-  else if ((*sec1)->_raw_size < (*sec2)->_raw_size)
+  else if (bfd_get_section_size (*sec1) < bfd_get_section_size (*sec2))
     return -1;
 
   return 0;
