@@ -1,3 +1,16 @@
+2002-06-19  Keith Seitz  <keiths@redhat.com>
+
+	* mi1-basics.exp, mi1-break,.exp mi1-console.exp, mi1-disassemble.exp,
+	mi1-eval.exp, mi1-hack-cli.exp, mi1-read-memory.exp, mi1-regs.exp,
+	mi1-return.exp, mi1-simplerun.exp, mi1-stack.exp, mi1-stepi.exp,
+	mi1-until.exp, mi1-var-block.exp, mi1-var-child.exp, mi1-var-cmd.exp,
+	mi1-var-display.exp mi1-watch.exp: New files.
+	* mi-break.exp, mi-console.exp, mi-disassemble.exp,
+	mi-eval.exp, mi-return.exp, mi-simplerun.exp, mi-stack.exp, mi-stepi.exp, 
+	mi-until.exp, mi-var-block.exp, mi-var-child.exp, mi-var-cmd.exp,
+	mi-var-display.exp mi-watch.exp: Update to conform to MI2
+	notify-async-output (events).
+
 2002-03-04  Michael Chastain  <mec@shout.net>
 
 	* mi-var-cmd.exp: In test "create local variable func",

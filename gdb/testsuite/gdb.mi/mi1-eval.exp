@@ -1,4 +1,4 @@
-#   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
+set MIFLAGS "-i=mi1"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -55,7 +55,7 @@ proc test_running_the_program {} {
     # -exec-run
 
     mi_gdb_test "300-break-insert callee4" \
-             "=breakpoint-create,number=\"1\"\r\n300\\^done" \
+             "300\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"8\",times=\"0\"\}" \
              "insert breakpoint at callee4"
 
     # mi_gdb_test cannot be used for asynchronous commands because there are

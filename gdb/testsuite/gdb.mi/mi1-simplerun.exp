@@ -1,4 +1,4 @@
-#   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
+set MIFLAGS "-i=mi1"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -62,19 +62,19 @@ proc test_breakpoints_creation_and_listing {} {
     # -break-info
 
     mi_gdb_test "200-break-insert main" \
-             "=breakpoint-create,number=\"1\"\r\n200\\^done" \
+             "200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}" \
              "break-insert operation"
 
     mi_gdb_test "201-break-insert basics.c:callee2" \
-             "=breakpoint-create,number=\"2\"\r\n201\\^done" \
+             "201\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",line=\"22\",times=\"0\"\}" \
              "insert breakpoint at basics.c:callee2"
 
     mi_gdb_test "202-break-insert basics.c:15" \
-             "=breakpoint-create,number=\"3\"\r\n202\\^done" \
+             "202\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee3\",file=\".*basics.c\",line=\"15\",times=\"0\"\}" \
              "insert breakpoint at basics.c:15 (callee3)"
 
     mi_gdb_test "203-break-insert \"\\\"${srcfile}\\\":6\"" \
-             "=breakpoint-create,number=\"4\"\r\n203\\^done" \
+             "203\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"6\",times=\"0\"\}" \
              "insert breakpoint at \"<fullfilename>\":6 (callee4)"
 
     mi_gdb_test "204-break-list" \
@@ -82,7 +82,7 @@ proc test_breakpoints_creation_and_listing {} {
                 "list of breakpoints"
 
     mi_gdb_test "205-break-disable 2 3 4" \
-                "=breakpoint-modify,number=\"2\"\r\n=breakpoint-modify,number=\"3\"\r\n=breakpoint-modify,number=\"4\"\r\n205\\^done.*" \
+                "205\\^done.*" \
                 "disabling of breakpoints"
 
     mi_gdb_test "206-break-info 2" \

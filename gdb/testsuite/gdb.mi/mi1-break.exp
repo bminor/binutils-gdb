@@ -1,4 +1,4 @@
-#   Copyright 1999, 2002 Free Software Foundation, Inc.
+# Copyright 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
+set MIFLAGS "-i=mi1"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -62,20 +62,20 @@ proc test_tbreak_creation_and_listing {} {
     # -break-list
 
     mi_gdb_test "222-break-insert -t main" \
-             "=breakpoint-create,number=\"1\"\r\n222\\^done" \
+             "222\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}" \
              "break-insert -t operation"
 
     mi_gdb_test "333-break-insert -t basics.c:callee2" \
-             "=breakpoint-create,number=\"2\"\r\n333\\^done" \
+             "333\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",line=\"22\",times=\"0\"\}" \
              "insert temp breakpoint at basics.c:callee2"
 
     mi_gdb_test "444-break-insert -t basics.c:15" \
-             "=breakpoint-create,number=\"3\"\r\n444\\^done" \
+             "444\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"callee3\",file=\".*basics.c\",line=\"15\",times=\"0\"\}" \
              "insert temp breakpoint at basics.c:15 (callee3)"
 
     # Getting the quoting right is tricky.  That is "\"<file>\":6"
     mi_gdb_test "555-break-insert -t \"\\\"${srcfile}\\\":6\"" \
-             "=breakpoint-create,number=\"4\"\r\n555\\^done" \
+             "555\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"6\",times=\"0\"\}" \
              "insert temp breakpoint at \"<fullfilename>\":6 (callee4)"
 
     mi_gdb_test "666-break-list" \

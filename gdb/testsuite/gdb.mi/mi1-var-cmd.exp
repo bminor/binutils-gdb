@@ -1,4 +1,4 @@
-#   Copyright (C) 1999, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 2002 Free Software Foundation, Inc.
 #
 # This Program Is Free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
+set MIFLAGS "-i=mi1"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -71,7 +71,7 @@ mi_gdb_test "113-var-create argc * argc" \
 	"create out of scope variable"
 
 mi_gdb_test "200-break-insert do_locals_tests" \
-	"=breakpoint-create,number=\"1\"\r\n200\\^done" \
+	"200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_locals_tests\",file=\".*var-cmd.c\",line=\"106\",times=\"0\"\}" \
 	"break-insert operation"
 
 mi_run_cmd
@@ -377,7 +377,7 @@ mi_gdb_test "-var-assign lsimple.integer 333" \
 #####
 
 mi_gdb_test "-break-insert subroutine1" \
-	"=breakpoint-create,number=\"2\"\r\n\\^done" \
+	"\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"subroutine1\",file=\".*var-cmd.c\",line=\"146\",times=\"0\"\}" \
 	"break-insert subroutine1"
 mi_continue_to "2" "subroutine1" \
 	"\{name=\"i\",value=\"4321\"\},\{name=\"l\",value=\"$hex\"\}" \

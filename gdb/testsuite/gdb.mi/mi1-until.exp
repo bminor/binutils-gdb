@@ -1,4 +1,4 @@
-#   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
+set MIFLAGS "-i=mi1"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -46,13 +46,12 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
-set timeout 5
 proc test_running_to_foo {} {
     global mi_gdb_prompt
     global hex
 
     mi_gdb_test "200-break-insert 10" \
-             "=breakpoint-create,number=\"1\"\r\n200\\^done" \
+             "200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"foo\",file=\".*until.c\",line=\"10\",times=\"0\"\}" \
              "break-insert operation"
 
     mi_run_cmd
@@ -69,7 +68,7 @@ proc test_running_to_foo {} {
 	}
     }
 
-    mi_gdb_test "100-break-delete 1" "=breakpoint-delete,number=\"1\"\r\n100\\^done" "break-delete 1"
+    mi_gdb_test "100-break-delete 1" "100\\^done" "break-delete 1"
 
 }
 
@@ -89,7 +88,7 @@ proc test_until {} {
 
     send_gdb "222-exec-until 15\n"
     gdb_expect {
-	-re "222\\^running\r\n${mi_gdb_prompt}(=breakpoint-.*\r\n)*222\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"15\"\}\r\n$mi_gdb_prompt$" {
+	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"15\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until line number"
 	}
 	timeout {
@@ -99,7 +98,7 @@ proc test_until {} {
 
     send_gdb "333-exec-until until.c:17\n"
     gdb_expect {
-	-re "333\\^running\r\n${mi_gdb_prompt}(=breakpoint-.*\r\n)*333\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"17\"\}\r\n$mi_gdb_prompt$" {
+	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"17\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until line number:file"
 	}
 	timeout {
@@ -111,7 +110,7 @@ proc test_until {} {
 
     send_gdb "444-exec-until until.c:25\n"
     gdb_expect {
-	-re "444\\^running\r\n${mi_gdb_prompt}(=breakpoint-.*\r\n)*444\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*until.c\",line=\"24\"\}\r\n$mi_gdb_prompt$" {
+	-re "444\\^running\r\n${mi_gdb_prompt}444\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*until.c\",line=\"24\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until after current function"
 	}
 	timeout {
