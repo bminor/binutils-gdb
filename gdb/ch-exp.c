@@ -1,5 +1,6 @@
 /* Parser for GNU CHILL (CCITT High-Level Language)  -*- C -*-
-   Copyright (C) 1992, 1993, 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1995, 1996, 1997, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,6 @@
 /* Print VAX instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992, 1996 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

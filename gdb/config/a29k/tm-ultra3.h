@@ -1,5 +1,5 @@
 /* Parameters for NYU Ultracomputer 29000 target, for GDB, the GNU debugger.
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1993 Free Software Foundation, Inc.
    Contributed by David Wood @ New York University (wood@nyu.edu). 
 
    This file is part of GDB.

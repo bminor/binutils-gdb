@@ -1,6 +1,6 @@
 /* Host definitions for GDB on a Motorola 680x0 running SVR4.
    (Commodore Amiga with amix or Atari TT with ASV)
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1994, 1996 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com)
 
    This file is part of GDB.

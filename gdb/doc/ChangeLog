@@ -1,3 +1,8 @@
+2001-03-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in, all-cfg.texi, annotate.texi, gdb.texinfo,
+	gdbint.texinfo, refcard.tex: Update/correct copyright notices.
+
 2001-02-21  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Signals): Document "ignore", "noignore", and "all".

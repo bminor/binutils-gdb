@@ -1,6 +1,6 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
-   Copyright 1988, 89, 90, 91, 92, 93, 94, 95, 96, 98, 1999, 2001 Free
-   Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
+   1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.

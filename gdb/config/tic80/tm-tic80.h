@@ -1,6 +1,6 @@
 /* Parameters for execution on a TI TMS320C80 (MVP) processor.
-   Copyright 1997
-   Free Software Foundation, Inc. 
+   Copyright 1997, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

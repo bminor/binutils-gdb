@@ -1,5 +1,6 @@
 /* Support for printing Fortran types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1993, 1994, 2000 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1998, 2000
+   Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C version by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 

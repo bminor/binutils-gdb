@@ -1,5 +1,6 @@
 /* C language support definitions for GDB, the GNU debugger.
-   Copyright 1992, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1992, 1994, 1995, 1996, 1997, 1998, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

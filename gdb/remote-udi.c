@@ -1,5 +1,6 @@
 /* Remote debugging interface for AMD 29k interfaced via UDI, for GDB.
-   Copyright 1990, 1992, 1995, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Written by Daniel Mann.  Contributed by AMD.
 
    This file is part of GDB.

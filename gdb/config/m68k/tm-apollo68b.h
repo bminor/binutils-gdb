@@ -1,5 +1,6 @@
 /* Parameters for execution on Apollo 68k running BSD.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1998
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.

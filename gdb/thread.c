@@ -1,8 +1,9 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1993, 1998, 1999, 2000, 2001
-
-   Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
+   Copyright 1986, 1987, 1988, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001
    Free Software Foundation, Inc.
+   Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
+   
 
    This file is part of GDB.
 

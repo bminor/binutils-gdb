@@ -1,5 +1,5 @@
 /* Macro definitions for LynxOS targets.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1995 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

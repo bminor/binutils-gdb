@@ -1,5 +1,5 @@
 /* Target-specific definition for the Mitsubishi D10V
-   Copyright (C) 1996, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

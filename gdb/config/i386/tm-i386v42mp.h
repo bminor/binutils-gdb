@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on an Intel i386 running SVR4.2MP
-   Copyright (C) 1991, 1994 Free Software Foundation, Inc.
+   Copyright 1991, 1994, 1997, 1999, 2000 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com)
 
    This file is part of GDB.

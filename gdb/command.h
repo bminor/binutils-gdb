@@ -6,7 +6,8 @@
    2000-12-01 fnasser@redhat.com    */
 
 /* Header file for command-reading library command.c.
-   Copyright (C) 1986, 1989, 1990, 2000 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

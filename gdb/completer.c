@@ -1,5 +1,5 @@
 /* Line completion stuff for GDB, the GNU debugger.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

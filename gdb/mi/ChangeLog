@@ -1,3 +1,10 @@
+2001-03-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbmi.texinfo, mi-cmd-disas.c, mi-cmd-stack.c, mi-cmd-var.c,
+	mi-cmds.c, mi-cmds.h, mi-console.c, mi-console.h, mi-getopt.c,
+	mi-getopt.h, mi-out.c, mi-out.h, mi-parse.c, mi-parse.h: 
+	Update/correct copyright notices.
+
 Wed Feb  7 19:50:37 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-getopt.c: Add __FILE__ and __LINE__ parameter to calls to

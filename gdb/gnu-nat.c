@@ -1,5 +1,6 @@
 /* Interface GDB to the GNU Hurd.
-   Copyright (C) 1992, 95, 96, 97, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1992, 1995, 1996, 1997, 1998, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

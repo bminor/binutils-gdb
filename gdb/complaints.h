@@ -1,5 +1,6 @@
 /* Definitions for complaint handling during symbol reading in GDB.
-   Copyright (C) 1990, 1991, 1992  Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1995, 1998, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright (C) 1990, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.

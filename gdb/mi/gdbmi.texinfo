@@ -8,7 +8,7 @@
 @c  @ifinfo
 @c  This file documents GDB/MI, a Machine Interface to GDB.
 
-@c  Copyright (C) 2000, Free Software Foundation, Inc.
+@c  Copyright 2000 Free Software Foundation, Inc.
 @c  Contributed by Cygnus Solutions.
 
 @c  Permission is granted to make and distribute verbatim copies of this

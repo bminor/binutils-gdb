@@ -1,5 +1,5 @@
 /* Macro definitions for running gdb on a Sun 4 running sunos 4.
-   Copyright (C) 1989, 1993, 1994, 1995, 1996
+   Copyright 1989, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
    This file is part of GDB.

@@ -1,5 +1,5 @@
 /* Macro definitions for i386, Mach 3.0, OSF 1/MK
-   Copyright (C) 1992, 2000 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

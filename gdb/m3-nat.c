@@ -1,7 +1,7 @@
 /* Interface GDB to Mach 3.0 operating systems.
    (Most) Mach 3.0 related routines live in this file.
 
-   Copyright (C) 1992, 1996, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.

@@ -1,7 +1,8 @@
 /* Remote serial interface for Macraigor Systems implementation of
    On-Chip Debugging using serial target box or serial wiggler
 
-   Copyright 1994, 1997, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

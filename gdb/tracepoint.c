@@ -1,5 +1,5 @@
 /* Tracing functionality for remote targets in custom GDB protocol
-   Copyright 1997, 1998, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

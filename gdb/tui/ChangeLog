@@ -1,3 +1,7 @@
+2001-03-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* tui-file.h: Update/correct copyright notice.
+
 Wed Feb  7 19:54:27 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* tui-file.c: Add __FILE__ and __LINE__ parameter to calls to

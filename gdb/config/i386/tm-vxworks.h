@@ -1,6 +1,6 @@
 /* Target machine description for VxWorks on the 80[3456]86,
    for GDB, the GNU debugger.
-   Copyright (C) 1999 Free Software Foundation, Inc.
+   Copyright 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

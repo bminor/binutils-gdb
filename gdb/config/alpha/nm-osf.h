@@ -1,5 +1,5 @@
 /* Native definitions for alpha running OSF/1.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,6 @@
 /* Macro definitions for GDB on an Intel i[345]86.
-   Copyright (C) 1995, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

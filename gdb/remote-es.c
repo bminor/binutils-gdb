@@ -1,5 +1,6 @@
 /* Memory-access and commands for remote es1800 processes, for GDB.
-   Copyright (C) 1988, 1992, 2001 Free Software Foundation, Inc.
+   Copyright 1988, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is added to GDB to make it possible to do debugging via an
    ES-1800 emulator. The code was originally written by Johan Holmberg

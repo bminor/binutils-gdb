@@ -1,5 +1,6 @@
 /* Sequent Symmetry host interface, for GDB when running under Unix.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 2001
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.

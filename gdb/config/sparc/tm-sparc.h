@@ -1,6 +1,7 @@
 /* Target machine sub-parameters for SPARC, for GDB, the GNU debugger.
    This is included by other tm-*.h files to define SPARC cpu-related info.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+   1998, 1999, 2000
    Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 

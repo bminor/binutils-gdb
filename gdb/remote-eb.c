@@ -1,5 +1,6 @@
 /* Remote debugging interface for AMD 29000 EBMON on IBM PC, for GDB.
-   Copyright 1990, 1991, 1992, 2001 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
    This file is part of GDB.

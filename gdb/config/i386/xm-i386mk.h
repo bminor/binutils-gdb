@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on Mach 3 OSF 1/MK on an Intel 386
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1998 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

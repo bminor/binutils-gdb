@@ -1,6 +1,6 @@
 /* Remote target glue for the Oki op50n based eval board.
 
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

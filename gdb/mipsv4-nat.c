@@ -1,5 +1,5 @@
 /* Native support for MIPS running SVR4, for GDB.
-   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

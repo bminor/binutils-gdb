@@ -1,5 +1,5 @@
 /* Macro definitions for a sun 3 running os 4.
-   Copyright (C) 1989, Free Software Foundation, Inc.
+   Copyright 1989, 1996, 1998 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

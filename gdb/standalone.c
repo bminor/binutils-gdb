@@ -1,5 +1,6 @@
 /* Interface to bare machine for GDB running as kernel debugger.
-   Copyright (C) 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1993, 1995, 1996, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 /* Kernel Object Display generic routines and callbacks
-   Copyright 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
 
    Written by Fernando Nasser <fnasser@cygnus.com> for Cygnus Solutions.
 

@@ -1,5 +1,5 @@
 /* Kernel Object Display facility for Cisco
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
    
    Written by Tom Tromey <tromey@cygnus.com>.
    

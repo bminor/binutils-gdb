@@ -1,5 +1,6 @@
 /* Fork a Unix child process, and set up to debug it, for GDB.
-   Copyright 1990, 91, 92, 93, 94, 1996, 1999 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.

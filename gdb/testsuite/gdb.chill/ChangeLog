@@ -1,3 +1,15 @@
+2001-03-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* builtins.exp, callch.exp, chexp.exp, chillvars.exp,
+	enum.exp, gch1041.exp, gch1272.exp, gch1280.exp, gch922.exp,
+	gch981.exp, misc.exp, powerset.exp, pr-4975.exp, pr-5016.exp,
+	pr-5020.exp, pr-5022.exp, pr-5646.exp, pr-5984.exp,
+	pr-6292.exp, pr-6632.exp, pr-8134.exp, pr-8136.exp,
+	pr-8405.exp, pr-8742.exp, pr-8894.exp, pr-9095.exp,
+	pr-9946.exp, result.exp, string.exp, tests1.ch, tests1.exp,
+	tests2.ch, tests2.exp, tuples.exp, xstruct.exp: Update/correct
+	copyright notices.
+
 1999-06-25  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Jimmy Guo  <guo@cup.hp.com>:

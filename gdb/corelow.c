@@ -1,5 +1,6 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+   1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.

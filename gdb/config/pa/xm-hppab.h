@@ -1,5 +1,5 @@
 /* Parameters for hosting on an HPPA PA-RISC machine, running BSD, for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc. 
+   Copyright 1991, 1992, 1993, 1996, 1998 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).

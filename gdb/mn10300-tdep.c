@@ -1,5 +1,5 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.

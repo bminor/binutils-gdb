@@ -1,6 +1,7 @@
 /* Target machine sub-parameters for SPARC64, for GDB, the GNU debugger.
    This is included by other tm-*.h files to define SPARC64 cpu-related info.
-   Copyright 1994, 1995, 1996, 1998 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    This is (obviously) based on the SPARC Vn (n<9) port.
    Contributed by Doug Evans (dje@cygnus.com).
    Further modified by Bob Manson (manson@cygnus.com).

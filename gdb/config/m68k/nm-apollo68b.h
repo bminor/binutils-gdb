@@ -1,5 +1,5 @@
 /* Macro defintions for an Apollo m68k in BSD mode
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1995, 1998 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

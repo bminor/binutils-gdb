@@ -1,5 +1,5 @@
 /* Main loop for the standalone kernel debugger, for GDB, the GNU Debugger.
-   Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

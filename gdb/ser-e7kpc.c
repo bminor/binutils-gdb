@@ -1,5 +1,6 @@
 /* Remote serial interface using Hitachi E7000 PC ISA card in a PC
-   Copyright 1994, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 1997, 1998, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,3 +1,10 @@
+2001-03-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* mi-basics.exp, mi-break.exp, mi-disassemble.exp,
+	mi-eval.exp, mi-hack-cli.exp, mi-read-memory.exp, mi-regs.exp,
+	mi-return.exp, mi-simplerun.exp, mi-stack.exp, mi-stepi.exp,
+	mi-until.exp, mi-watch.exp: Update/correct copyright notices.
+
 2001-01-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* mi-support.exp (mi_gdb_start): Skip mi tests if -i flag is

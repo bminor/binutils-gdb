@@ -1,5 +1,5 @@
 /* Native support for linux, for GDB, the GNU debugger.
-   Copyright (C) 1996,1998 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

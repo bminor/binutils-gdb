@@ -1,5 +1,6 @@
 /* Native support for HPPA-RISC machine running HPUX, for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc. 
+   Copyright 1991, 1992, 1994, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 /* Target-specific definitions for Linux running on a Hitachi Super-H.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

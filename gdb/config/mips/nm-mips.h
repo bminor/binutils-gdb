@@ -1,5 +1,6 @@
 /* Native definitions for GDB on DECstations, Sony News. and MIPS Riscos systems
-   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1995, 1996, 2000
+   Free Software Foundation, Inc.
    Contributed by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin
    and by Alessandro Forin(af@cs.cmu.edu) at CMU
 

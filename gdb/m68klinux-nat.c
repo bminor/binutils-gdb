@@ -1,5 +1,5 @@
 /* Motorola m68k native support for Linux
-   Copyright 1996, 1998, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,6 @@
 /* Remote debugging for the ARM RDP interface.
-   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

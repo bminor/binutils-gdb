@@ -1,5 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
-   Copyright 1990-1994, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.

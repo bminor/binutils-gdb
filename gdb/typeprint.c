@@ -1,5 +1,6 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991-1993, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1998, 1999,
+   2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

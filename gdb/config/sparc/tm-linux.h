@@ -1,5 +1,6 @@
 /* Macro definitions for GDB for a Sparc running Linux.
-   Copyright 1989, 1992, 1994, 1995, 1998 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 1994, 1995, 1998, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

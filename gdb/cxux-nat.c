@@ -1,6 +1,6 @@
 /* Native support for Motorola 88k running Harris CX/UX.
-   Copyright 1988, 1990, 1991, 1992, 1993, 1994, 2001 Free Software
-   Foundation, Inc.
+   Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000,
+   2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,6 +1,6 @@
 /* PPC linux native support.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2001 Free Software
-   Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

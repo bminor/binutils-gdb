@@ -1,7 +1,8 @@
 /* Remote debugging interface for Motorola's MVME187BUG monitor, an embedded
    monitor for the m88k.
 
-   Copyright 1992, 1993, 2001 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by K. Richard Pixley.
 
    This file is part of GDB.

@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on an Intel i386 running SCO Open Server 5.
-   Copyright (C) 1998 Free Software Foundation, Inc.
+   Copyright 1998 Free Software Foundation, Inc.
    Written by J. Kean Johnston (jkj@sco.com).
 
    This file is part of GDB.

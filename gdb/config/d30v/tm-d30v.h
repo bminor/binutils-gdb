@@ -1,5 +1,5 @@
 /* Target-specific definition for the Mitsubishi D30V
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

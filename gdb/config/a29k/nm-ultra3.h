@@ -1,5 +1,6 @@
 /* Host definitions for GDB running on an a29k NYU Ultracomputer
-   Copyright (C) 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993
+   Free Software Foundation, Inc.
    Contributed by David Wood (wood@lab.ultra.nyu.edu).
 
    This file is part of GDB.

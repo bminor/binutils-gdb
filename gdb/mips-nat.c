@@ -1,6 +1,6 @@
 /* Low level DECstation interface to ptrace, for GDB when running native.
-   Copyright 1988, 1989, 1991, 1992, 1995, 2001 Free Software
-   Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 

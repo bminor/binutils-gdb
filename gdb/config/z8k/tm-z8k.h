@@ -1,5 +1,6 @@
 /* Parameters for execution on a z8000 series machine.
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 /* Remote serial interface for local (hardwired) serial ports for Macintosh.
-   Copyright 1994, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1998, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Stan Shebs.
 
    This file is part of GDB.

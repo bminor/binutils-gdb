@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.

@@ -1,5 +1,6 @@
 /* Remote target glue for the Hitachi SH-3 ROM monitor.
-   Copyright 1995, 1996, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,6 +1,6 @@
 /* Definitions to make GDB run on an Alpha box under Linux.  The
    definitions here are used when the _target_ system is running Linux.
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

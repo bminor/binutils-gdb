@@ -1,5 +1,5 @@
 /* Functions specific to running gdb native on a Motorola Delta Series sysV68.
-   Copyright (C) 1993, 1997-98, Free Software Foundation, Inc.
+   Copyright 1993, 1996, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

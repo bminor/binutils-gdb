@@ -1,5 +1,6 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
-   Copyright 1993, 1994, 1995, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
 

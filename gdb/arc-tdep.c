@@ -1,5 +1,5 @@
 /* ARC target-dependent stuff.
-   Copyright (C) 1995, 1997, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

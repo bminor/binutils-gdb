@@ -1,5 +1,6 @@
 /* Remote debugging interface for Hitachi HMS Monitor Version 1.0
-   Copyright 1995, 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Steve Chamberlain
    (sac@cygnus.com).
 

@@ -1,6 +1,6 @@
 /* Native-dependent code for GDB, for NYU Ultra3 running Sym1 OS.
-   Copyright 1988, 1989, 1991, 1992, 2001 Free Software Foundation,
-   Inc.
+   Copyright 1988, 1989, 1991, 1992, 1995, 1996, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by David Wood (wood@nyu.edu) at New York University.
 
    This file is part of GDB.

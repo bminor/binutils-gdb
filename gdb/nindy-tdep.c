@@ -1,5 +1,6 @@
 /* Target-machine dependent code for the NINDY monitor running on the Intel 960
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 2000
+   Free Software Foundation, Inc.
    Contributed by Intel Corporation.
 
    This file is part of GDB.

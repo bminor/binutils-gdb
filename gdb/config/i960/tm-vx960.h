@@ -1,5 +1,6 @@
 /* Parameters for VxWorks Intel 960's, for GDB, the GNU debugger.
-   Copyright (C) 1986-1991, 1999 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1998, 1999
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.

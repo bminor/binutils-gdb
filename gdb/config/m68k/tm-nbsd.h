@@ -1,5 +1,5 @@
 /* Macro definitions for i386 running under NetBSD.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

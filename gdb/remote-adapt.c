@@ -1,5 +1,6 @@
 /* Remote debugging interface for AMD 290*0 Adapt Monitor Version 2.1d18. 
-   Copyright 1990, 1991, 1992, 2001 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001 Free Software Foundation, Inc.
    Contributed by David Wood at New York University (wood@lab.ultra.nyu.edu).
    Adapted from work done at Cygnus Support in remote-eb.c.
 

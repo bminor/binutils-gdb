@@ -1,5 +1,6 @@
 /* Remote debugging with the XLNT Designs, Inc (XDI) NetROM.
-   Copyright 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1995, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by:
    Roger Moyers 
    XLNT Designs, Inc.

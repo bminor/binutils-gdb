@@ -1,6 +1,6 @@
 /* Low level interface for debugging GNU/Linux threads for GDB,
    the GNU debugger.
-   Copyright 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

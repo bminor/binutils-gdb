@@ -1,5 +1,6 @@
 /* Support routines for manipulating internal types for GDB.
-   Copyright (C) 1992, 93, 94, 95, 96, 1998 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.

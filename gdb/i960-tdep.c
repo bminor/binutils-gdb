@@ -1,6 +1,6 @@
 /* Target-machine dependent code for the Intel 960
-   Copyright 1991, 1992, 1993, 1994, 1995, 2001 Free Software
-   Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Intel Corporation.
    examine_prologue and other parts contributed by Wind River Systems.
 

@@ -1,5 +1,5 @@
 /* Parameters for hosting on an PowerPC, for GDB, the GNU debugger.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Corporation.
 
    This file is part of GDB.

@@ -1,6 +1,7 @@
 /* Definitions to make GDB run on a Sequent Symmetry under
    dynix 3.1, with Weitek 1167 and i387 support.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1994  Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

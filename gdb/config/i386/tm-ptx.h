@@ -1,6 +1,7 @@
 /* Target machine definitions for GDB on a Sequent Symmetry under ptx
    with Weitek 1167 and i387 support.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 2000
+   Free Software Foundation, Inc.
    Symmetry version by Jay Vosburgh (fubar@sequent.com).
 
    This file is part of GDB.

@@ -1,7 +1,7 @@
 /* Remote target glue for the WinBond ROM monitor running on the "Cougar"
    W89k eval board.
 
-   Copyright 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1998, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

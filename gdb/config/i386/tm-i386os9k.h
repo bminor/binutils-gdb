@@ -1,5 +1,6 @@
 /* Macro definitions for i386 running under BSD Unix.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
+   Free Software Foundation, Inc.
 
 
    This program is free software; you can redistribute it and/or modify

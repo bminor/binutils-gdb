@@ -1,5 +1,6 @@
 /* Intel 386 native support for SYSV systems (pre-SVR4).
-   Copyright (C) 1988, 89, 91, 92, 94, 96, 1998 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
+   2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

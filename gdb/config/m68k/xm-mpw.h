@@ -1,5 +1,5 @@
 /* Macro definitions for running GDB on Apple 68k-based Macintoshes.
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

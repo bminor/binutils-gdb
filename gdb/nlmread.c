@@ -1,5 +1,6 @@
 /* Read NLM (NetWare Loadable Module) format executable files for GDB.
-   Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
    This file is part of GDB.

@@ -1,5 +1,5 @@
 /* Serial interface for a pipe to a separate program
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 

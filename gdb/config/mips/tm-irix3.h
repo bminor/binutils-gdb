@@ -1,5 +1,6 @@
 /* Target machine description for SGI Iris under Irix, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1995, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,6 @@
 /* Parameters for target machine Intel 960, for GDB, the GNU debugger.
-   Copyright (C) 1990, 1991, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1993, 1994, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by Intel Corporation.
    This file is part of GDB.
 

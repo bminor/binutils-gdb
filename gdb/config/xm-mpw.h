@@ -1,5 +1,5 @@
 /* Macro definitions for running GDB on Apple Macintoshes.
-   Copyright (C) 1994, 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

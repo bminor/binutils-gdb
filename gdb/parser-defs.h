@@ -1,5 +1,6 @@
 /* Parser definitions for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+   1998, 1999, 2000 Free Software Foundation, Inc.
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo.
 

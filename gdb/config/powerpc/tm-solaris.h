@@ -1,5 +1,5 @@
 /* Macro definitions for GDB for a PowerPC running Solaris 2
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,6 @@
 /* Definitions to make GDB run on a merlin under utek 2.1
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -6,7 +6,7 @@
    2000-12-01 fnasser@redhat.com    */
 
 /* Prototypes for GDB commands that are called internally by other functions.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2000, 2001 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 /* Include file cached obstack implementation.
    Written by Fred Fish <fnf@cygnus.com>
    Rewritten by Jim Blandy <jimb@cygnus.com>
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

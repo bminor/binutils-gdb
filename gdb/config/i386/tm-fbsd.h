@@ -1,5 +1,5 @@
 /* Target-dependent definitions for FreeBSD/i386.
-   Copyright (C) 1997, 2000 Free Software Foundation, Inc.
+   Copyright 1997, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

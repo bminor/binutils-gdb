@@ -1,5 +1,5 @@
 /* MI Command Set - MI Console.
-   Copyright (C) 2000, Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.

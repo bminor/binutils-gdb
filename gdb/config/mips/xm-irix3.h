@@ -1,4 +1,4 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright 1991, 1993, 1994, 1995 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

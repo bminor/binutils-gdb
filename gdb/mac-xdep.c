@@ -1,5 +1,5 @@
 /* Top level support for Mac interface to GDB, the GNU debugger.
-   Copyright 1994, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1998, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Stan Shebs.
 
    This file is part of GDB.

@@ -1,5 +1,6 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
-   Copyright 1990-1996, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    ## Contains temporary hacks..

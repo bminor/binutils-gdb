@@ -1,4 +1,4 @@
-/* Copyright 1990, 1992 Free Software Foundation, Inc.
+/* Copyright 1990, 1991 Free Software Foundation, Inc.
  *
  * This code was donated by Intel Corp.
  * 

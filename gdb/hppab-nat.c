@@ -1,8 +1,8 @@
 /* Machine-dependent hooks for the unix child process stratum.  This
    code is for the HP PA-RISC cpu.
 
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 2001 Free
-   Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998,
+   1999, 2000, 2001 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).

@@ -1,5 +1,5 @@
 /* Target machine parameters for MIPS r4000
-   Copyright 1994, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor (ian@cygnus.com)
 
    This file is part of GDB.

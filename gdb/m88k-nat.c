@@ -1,6 +1,6 @@
 /* Native-dependent Motorola 88xxx support for GDB, the GNU Debugger.
-   Copyright 1988, 1990, 1991, 1992, 2001 Free Software Foundation,
-   Inc.
+   Copyright 1988, 1990, 1991, 1992, 1993, 1995, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

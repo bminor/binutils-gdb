@@ -4,7 +4,7 @@
  *   hp_psymtab_read.c
  */
 
-/* Copyright 1993, 1996 Free Software Foundation, Inc.
+/* Copyright 1993, 1996, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

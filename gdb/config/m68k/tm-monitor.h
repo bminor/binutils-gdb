@@ -1,5 +1,6 @@
 /* Target machine definitions for a generic m68k monitor/emulator.
-   Copyright (C) 1986, 1987, 1989, 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1993, 1994, 1995, 1996, 1998, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

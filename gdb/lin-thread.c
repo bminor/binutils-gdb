@@ -1,6 +1,6 @@
 /* Multi-threaded debugging support for the thread_db interface,
    used on operating systems such as Solaris and Linux.
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

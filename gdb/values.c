@@ -1,5 +1,6 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
-   Copyright 1986, 87, 89, 91, 93, 94, 95, 96, 97, 1998
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.

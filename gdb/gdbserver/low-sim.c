@@ -1,5 +1,6 @@
 /* Low level interface to simulators, for the remote server for GDB.
-   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

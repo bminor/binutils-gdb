@@ -1,5 +1,5 @@
 /* Native-dependent definitions for PowerPC running NetBSD ELF, for GDB.
-   Copyright (C) 2000, Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

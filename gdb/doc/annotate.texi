@@ -12,7 +12,7 @@
 @c  This file documents GDB annotations.
 
 @c  This is Edition @value{EDITION}, @value{DATE}, of @cite{GDB
-@c  Annotations}.  Copyright 1994 Free Software Foundation
+@c  Annotations}.  Copyright 1994, 1995, 2000 Free Software Foundation, Inc.
 
 @c  Permission is granted to make and distribute verbatim copies of
 @c  this manual provided the copyright notice and this permission notice

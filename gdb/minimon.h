@@ -1,5 +1,5 @@
 /* Definitions and macros for support of AMD's remote debugger, MiniMON.
-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

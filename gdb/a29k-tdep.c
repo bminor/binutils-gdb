@@ -1,5 +1,6 @@
 /* Target-machine dependent code for the AMD 29000
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 

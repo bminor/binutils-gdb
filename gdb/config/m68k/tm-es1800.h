@@ -2,7 +2,8 @@
    The code was originally written by Johan Holmberg TT/SJ Ericsson Telecom
    AB and later modified by Johan Henriksson TT/SJ. It was adapted to GDB 4.0
    by Jan Norden TX/DK.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1996, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 /* Parameters for Intel 960 running NINDY monitor, for GDB, the GNU debugger.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1996, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Intel Corporation and Cygnus Support.
 
    This file is part of GDB.

@@ -1,5 +1,5 @@
 /* Definitions used by the GDB event loop.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.

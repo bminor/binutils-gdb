@@ -1,5 +1,5 @@
 /* HPPA PA-RISC machine native support for Lites, for GDB.
-   Copyright 1995 Free Software Foundation, Inc. 
+   Copyright 1995 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

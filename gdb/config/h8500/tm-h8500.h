@@ -1,5 +1,6 @@
 /* Parameters for execution on a H8/500 series machine.
-   Copyright (C) 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -6,7 +6,8 @@
    fnasser@redhat.com    */
 
 /* Header file for GDB-specific command-line stuff.
-   Copyright 1986, 1989, 1990, 1992, 2000 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

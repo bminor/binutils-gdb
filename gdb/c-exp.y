@@ -1,5 +1,6 @@
 /* YACC parser for C expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1996, 1997
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+   1998, 1999, 2000
    Free Software Foundation, Inc.
 
 This file is part of GDB.

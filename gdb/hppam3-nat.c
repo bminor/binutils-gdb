@@ -1,5 +1,5 @@
 /* Low level interface to HP800 running mach 4.0.
-   Copyright 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

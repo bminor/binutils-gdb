@@ -1,5 +1,5 @@
 /* S-record download support for GDB, the GNU debugger.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

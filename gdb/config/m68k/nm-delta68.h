@@ -1,5 +1,5 @@
 /* Macro definitions for a Motorola Delta Series sysV68 R3V7.1.
-   Copyright (C) 1993, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1998 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

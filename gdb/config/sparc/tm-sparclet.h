@@ -1,5 +1,5 @@
 /* Target machine definitions for GDB for an embedded SPARC.
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

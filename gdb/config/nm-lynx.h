@@ -1,5 +1,6 @@
 /* Native-dependent definitions for LynxOS.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

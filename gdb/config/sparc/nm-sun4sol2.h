@@ -1,5 +1,5 @@
 /* Native-dependent definitions for Sparc running SVR4.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

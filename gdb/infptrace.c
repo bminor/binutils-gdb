@@ -1,5 +1,6 @@
 /* Low level Unix child interface to ptrace, for GDB when running under Unix.
-   Copyright 1988, 89, 90, 91, 92, 93, 94, 95, 96, 1998, 2001 
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
+   1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.

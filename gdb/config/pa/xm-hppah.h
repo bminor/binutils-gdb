@@ -1,5 +1,6 @@
 /* Parameters for hosting on an HPPA-RISC machine running HPUX, for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc. 
+   Copyright 1991, 1992, 1993, 1995, 1996, 2000
+   Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).

@@ -1,5 +1,6 @@
 /* Parameters for target execution on an RS6000, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1997
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+   1998, 1999, 2000
    Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 

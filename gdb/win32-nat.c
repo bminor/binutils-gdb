@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001 Free Software
-   Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Solutions, A Red Hat Company.
 
    This file is part of GDB.

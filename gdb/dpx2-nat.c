@@ -1,5 +1,6 @@
 /* DPX2 host interface.
-   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1993, 1995, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

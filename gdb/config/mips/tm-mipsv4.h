@@ -1,5 +1,5 @@
 /* Target machine description for MIPS running SVR4, for GDB.
-   Copyright 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

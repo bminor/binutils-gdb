@@ -1,5 +1,5 @@
 /* Host-dependent definitions for any CPU running NetBSD.
-   Copyright 1993, 1994, 1996, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

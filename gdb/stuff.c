@@ -1,5 +1,6 @@
 /* Program to stuff files into a specially prepared space in kdb.
-   Copyright (C) 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1995, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

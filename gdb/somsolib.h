@@ -1,5 +1,6 @@
 /* HP SOM Shared library declarations for GDB, the GNU Debugger.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1994, 1995, 1998, 1999, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

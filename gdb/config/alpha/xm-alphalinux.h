@@ -1,5 +1,5 @@
 /* Host definitions for GDB running on an Alpha under Linux
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright 1996 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

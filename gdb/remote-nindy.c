@@ -1,5 +1,6 @@
 /* Memory-access and commands for remote NINDY process, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 2001 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001 Free Software Foundation, Inc.
    Contributed by Intel Corporation.  Modified from remote.c by Chris Benenati.
 
    GDB is distributed in the hope that it will be useful, but WITHOUT ANY

@@ -1,5 +1,6 @@
 /* Target dependent code for the Fujitsu SPARClite for GDB, the GNU debugger.
-   Copyright 1994, 1995, 1996, 1999, 2001  Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

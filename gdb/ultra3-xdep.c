@@ -1,5 +1,6 @@
 /* Host-dependent code for GDB, for NYU Ultra3 running Sym1 OS.
-   Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 2000
+   Free Software Foundation, Inc.
    Contributed by David Wood (wood@nyu.edu) at New York University.
 
    This file is part of GDB.

@@ -1,5 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Copyright 1987, 88, 89, 90, 91, 92, 93, 94, 96, 97, 1998
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 

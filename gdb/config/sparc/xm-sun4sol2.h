@@ -1,5 +1,6 @@
 /* Macro definitions for running gdb on a Sun 4 running Solaris 2.
-   Copyright 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 1993, 1994, 1995, 1996, 1998, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
