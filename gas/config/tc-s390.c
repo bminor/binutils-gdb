@@ -198,6 +198,16 @@ static const struct pd_reg pre_defined_registers[] =
 
 #define REG_NAME_CNT (sizeof (pre_defined_registers) / sizeof (struct pd_reg))
 
+static int reg_name_search
+  PARAMS ((const struct pd_reg *, int, const char *));
+static boolean register_name PARAMS ((expressionS *));
+static void init_default_arch PARAMS ((void));
+static void s390_insert_operand
+  PARAMS ((unsigned char *, const struct s390_operand *, offsetT, char *,
+	   unsigned int));
+static char *md_gather_operands
+  PARAMS ((char *, unsigned char *, const struct s390_opcode *));
+
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
@@ -593,6 +603,12 @@ struct map_bfd
     elf_suffix_type suffix;
   };
 
+static elf_suffix_type s390_elf_suffix PARAMS ((char **, expressionS *));
+static int s390_exp_compare PARAMS ((expressionS *exp1, expressionS *exp2));
+static elf_suffix_type s390_lit_suffix
+  PARAMS ((char **, expressionS *, elf_suffix_type));
+
+
 /* Parse @got/@plt/@gotoff. and return the desired relocation.  */
 static elf_suffix_type
 s390_elf_suffix (str_p, exp_p)
@@ -974,7 +990,7 @@ struct s390_fixup
 
 /* This routine is called for each instruction to be assembled.  */
 
-char *
+static char *
 md_gather_operands (str, insn, opcode)
      char *str;
      unsigned char *insn;

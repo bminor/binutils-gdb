@@ -1,3 +1,8 @@
+2001-08-26  Andreas Jaeger  <aj@suse.de>
+
+	* config/tc-s390.c: Add missing prototypes
+	(md_gather_operands): Make static.
+
 2001-08-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* tc_mips.h (MAX_GPREL_OFFSET): Change it to the maximum allowed
