@@ -1,3 +1,7 @@
+Fri Sep 10 11:23:52 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config.guess: add NetBSD variants (hp300, x86)
+
 Thu Sep  9 16:48:52 1993  Jason Merrill  (jason@deneb.cygnus.com)
 
 	* install.sh: Support -d option (in the manner of SunOS 4 install,
