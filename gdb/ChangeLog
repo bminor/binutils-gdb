@@ -1,3 +1,8 @@
+Fri Oct 11 12:18:32 1996  Mark Alexander  <marka@cygnus.com>
+
+	* gdbserver/{gdbreplay.c,low-linux.c,remote-utils.c,utils.c}:
+	Make it compile on Linux and eliminate some warnings.
+
 Thu Oct 10 16:32:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (init.c):  Fixup final sed script to work around

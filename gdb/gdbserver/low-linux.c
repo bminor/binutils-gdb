@@ -221,7 +221,6 @@ fetch_register (regno)
      int regno;
 {
   register unsigned int regaddr;
-  char buf[MAX_REGISTER_RAW_SIZE];
   register int i;
 
   /* Offset of registers within the u area.  */
@@ -272,10 +271,8 @@ store_inferior_registers (regno)
      int regno;
 {
   register unsigned int regaddr;
-  char buf[80];
   register int i;
   unsigned int offset = U_REGS_OFFSET;
-  int scratch;
 
   if (regno >= 0)
     {
@@ -334,6 +331,7 @@ store_inferior_registers (regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
+void
 read_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
