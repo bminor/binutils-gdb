@@ -26,3 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* 3rd argument to ptrace is supposed to be a caddr_t.  */
 
 #define	PTRACE_ARG3_TYPE caddr_t
+
+/* attach/detach works to some extent under BSD and HPUX.  So long
+   as the process you're attaching to isn't blocked waiting on io,
+   blocked waiting on a signal, or in a system call things work 
+   fine.  (The problems in those cases are related to the fact that
+   the kernel can't provide complete register information for the
+   target process...  Which really pisses off GDB.)  */
+
+#define ATTACH_DETACH

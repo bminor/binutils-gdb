@@ -1,3 +1,7 @@
+Wed Jul 21 11:37:30 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config/pa/hppa{b,h}.h: Define ATTACH_DETACH.
+
 Wed Jul 21 03:07:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/xm-makeva.h:  New file implements va_list alignment
