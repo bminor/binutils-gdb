@@ -1431,14 +1431,6 @@ SECTIONS @{
 @}
 @end example
 
-@item [ @var{section} ]
-@itemx [ @var{section}, @var{section}, @dots{} ]
-@itemx [ @var{section} @var{section} @dots{} ]
-@kindex [ @var{sections} ]
-This is an alternate notation to specify named sections from all
-unallocated input files; its effect is exactly the same as that of
-@samp{* (@var{section}@dots{})}
-
 @item @var{filename}@code{( COMMON )}
 @itemx ( COMMON )
 @kindex ( COMMON )
@@ -1453,6 +1445,11 @@ mechanisms for specifying where to place input-file sections:
 @code{ld} permits you to refer to uninitialized data as if it
 were in an input-file section named @code{COMMON}, regardless of the
 input file's format.
+
+@samp{[ @var{section} @dots{} ]} used to be accepted as an alternate way
+to specify named sections from all unallocated input files.  Because
+some operating systems (VMS) allow brackets in file names, this notation
+is no longer supported.
 @end table
 
 For example, the following command script arranges the output file into
