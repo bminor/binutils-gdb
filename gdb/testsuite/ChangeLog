@@ -1,3 +1,9 @@
+2002-04-08  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/method.exp: Require "const ... A * ..." for "ptype this"
+	in a const method.  Add some xfail and fail cases for configurations
+	that do not emit the "const ...".
+
 2002-04-07  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/method.exp: Use gdb_test instead of send_gdb/gdb_expect.

@@ -107,9 +107,29 @@ gdb_test "print x" \
 
 # Check access to this pointer       
 
-gdb_test "print this" \
-  "\\$\[0-9\]* = \\((const |)(class |)A *\\* *(const|)\\) $hex" \
-  "print this in A::bar"
+get_debug_format
+
+send_gdb "print this\n"
+gdb_expect {
+  -re "\\$\[0-9\]* = \\(const (class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+    pass "print this in A::bar"
+  }
+  -re "\\$\[0-9\]* = \\((class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+    # gcc versions up to 3.0.4 with -gstabs+ do not emit "const" indicators,
+    # so the output is "A *".  It should be "const A *" or "const A * const".
+    setup_xfail_format "stabs"
+    fail "print this in A::bar (missing const)"
+  }
+  -re "\\$\[0-9\]* = \\(const (class |)\{\\.\\.\\.\} *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+    # gcc versions gcc-3_1-branch%20020404 and HEAD%20020404 with -gstabs+
+    # produce good stabs, but gdb prints "const class {...} *" const.
+    # This is PR gdb/277.
+    # setup_kfail "gnats:gdb/277"
+    fail "print this in A::bar (gnats:gdb/277)"
+  }
+  -re ".*$gdb_prompt $" { fail "print this in A::bar" }
+  timeout { fail "(timeout) print this in A::bar" }
+}
 
 # Check again with funk::getFunky (this is the original test case
 # for CHFts23426); sometimes having a constructor with no arguments
