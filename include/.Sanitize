@@ -39,6 +39,7 @@ coff
 demangle.h
 dis-asm.h
 elf
+floatformat.h
 fopen-bin.h
 fopen-same.h
 gdbm.h
