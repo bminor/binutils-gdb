@@ -1,5 +1,7 @@
 Thu Jul 21 14:10:52 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
+	* config.sub:  Refer to NeXT's operating system as nextstep.
+
 	* config.sub (case $basic_machine):  Re-order the cases, to match
 	the order in the FSF version (which is mostly alphabethical).
 	Merge in some additions and changes from the FSF.

@@ -73,7 +73,7 @@ case $os in
 		;;
 	-dec* | -mips* | -sequent* | -encore* | -pc532* | -sgi* | -sony* | \
 	-att* | -7300* | -3300* | -delta* | -motorola* | -sun[234]* | \
-	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
+	-unicom* | -ibm* | -next | -hp | -isi* | -apollo | -altos* | \
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
@@ -464,10 +464,10 @@ case $basic_machine in
 	next)
 		basic_machine=m68k-next
 		case $os in
-		    -ns2*)
+		    -ns2* | -nextstep2*)
 			;;
 		    *)
-		      os=-ns3
+		      os=-nextstep3
 			;;
 		esac
 		;;
@@ -747,7 +747,7 @@ case $os in
 	      | -amigados* | -msdos* | -newsos* | -unicos* | -aos* \
 	      | -nindy* | -vxworks* | -ebmon* | -hms* | -mvs* | -clix* \
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
-	      | -hiux* | -386bsd* | -netbsd* | -riscix* | -lynxos* \
+	      | -hiux* | -386bsd* | -netbsd* | -nextstep | -riscix* | -lynxos*\
 	      | -go32 | -vsta | -sim | -es1800* | -udi | -hms* | -xray | -hds* \
 	      | -os68k* | -none* | -v88r* | -aout* | -coff | -elf* | -bosx* \
 	      | -abug | -ecoff* | -netware* | -os9* )
@@ -899,7 +899,7 @@ case $basic_machine in
 		os=-mvs
 		;;
 	*-next)
-		os=-bsd
+		os=-nextstep
 		;;
 	i[34]86-*)
 		os=-sco3.2v2
