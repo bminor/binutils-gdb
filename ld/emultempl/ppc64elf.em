@@ -44,6 +44,11 @@ static int dotsyms = 1;
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
 
+/* Whether to emit symbols for stubs.  */
+static int emit_stub_syms = 0;
+
+static asection *toc_section = 0;
+
 static void ppc_create_output_section_statements
   PARAMS ((void));
 static void ppc_after_open
@@ -56,6 +61,8 @@ static void ppc_layout_sections_again
   PARAMS ((void));
 static void gld${EMULATION_NAME}_after_allocation
   PARAMS ((void));
+static void build_toc_list
+  PARAMS ((lang_statement_union_type *));
 static void build_section_lists
   PARAMS ((lang_statement_union_type *));
 static struct bfd_elf_version_expr *gld${EMULATION_NAME}_new_vers_pattern
@@ -295,6 +302,19 @@ gld${EMULATION_NAME}_after_allocation ()
 
 
 static void
+build_toc_list (statement)
+     lang_statement_union_type *statement;
+{
+  if (statement->header.type == lang_input_section_enum
+      && !statement->input_section.ifile->just_syms_flag
+      && statement->input_section.section->output_section == toc_section)
+    {
+      ppc64_elf_next_toc_section (&link_info, statement->input_section.section);
+    }
+}
+
+
+static void
 build_section_lists (statement)
      lang_statement_union_type *statement;
 {
@@ -339,6 +359,12 @@ gld${EMULATION_NAME}_finish ()
 	      return;
 	    }
 
+	  toc_section = bfd_get_section_by_name (output_bfd, ".toc");
+	  if (toc_section != NULL)
+	    lang_for_each_statement (build_toc_list);
+
+	  ppc64_elf_reinit_toc (output_bfd, &link_info);
+
 	  lang_for_each_statement (build_section_lists);
 
 	  /* Call into the BFD backend to do the real work.  */
@@ -360,7 +386,7 @@ gld${EMULATION_NAME}_finish ()
 
   if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
     {
-      if (!ppc64_elf_build_stubs (&link_info))
+      if (!ppc64_elf_build_stubs (emit_stub_syms, &link_info))
 	einfo ("%X%P: can not build stubs: %E\n");
     }
 }
@@ -471,13 +497,15 @@ EOF
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE		301
-#define OPTION_DOTSYMS			(OPTION_STUBGROUP_SIZE + 1)
+#define OPTION_STUBSYMS			(OPTION_STUBGROUP_SIZE + 1)
+#define OPTION_DOTSYMS			(OPTION_STUBSYMS + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
+  { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
@@ -492,6 +520,9 @@ PARSE_AND_LIST_OPTIONS='
                           two groups of input sections, one before, and one\n\
                           after each stub section.  Values of +/-1 indicate\n\
                           the linker should choose suitable defaults.\n"
+		   ));
+  fprintf (file, _("\
+  --emit-stub-syms      Label linker stubs with a symbol.\n"
 		   ));
   fprintf (file, _("\
   --dotsyms             For every version pattern \"foo\" in a version script,\n\
@@ -515,6 +546,10 @@ PARSE_AND_LIST_ARGS_CASES='
         if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
+      break;
+
+    case OPTION_STUBSYMS:
+      emit_stub_syms = 1;
       break;
 
     case OPTION_DOTSYMS:
