@@ -49,6 +49,7 @@ ho-sysv.h
 ho-vax.h
 mh-i386
 mt-ebmon29k
+ebmon29k.mt
 mt-h8300
 mt-h8300hds
 mt-m68k
@@ -124,7 +125,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.21  1992/02/27 18:52:18  sac
+# Revision 1.22  1992/05/07 00:24:39  sac
+# Keep the 29k config file
+#
+# Revision 1.21  1992/02/27  18:52:18  sac
 # Dos File renaming
 #
 # Revision 1.20  1992/02/26  08:54:09  tiemann
