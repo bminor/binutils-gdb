@@ -56,7 +56,6 @@ responsibility among the other maintainers.
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
-  D10V		   Tom Rix <trix@redhat.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
@@ -75,7 +74,6 @@ responsibility among the other maintainers.
   MN10300	   Eric Christopher <echristo@redhat.com>
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
   PPC		   Geoff Keating <geoffk@redhat.com>
-  PPC XCOFF	   Tom Rix <trix@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   SH		   Jörn Rennecke <joern.rennecke@superh.com>
   SH		   Hans-Peter Nilsson <hp@bitrange.com>
