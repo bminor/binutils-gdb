@@ -1,3 +1,9 @@
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
+	* bfd-in.h (file_ptr, ufile_ptr): Configure type using
+	@bfd_file_ptr@.
+	* bfd-in2.h: Re-generate.
+
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.host (HDEFINES): When hppa*-*-hpux*, define
