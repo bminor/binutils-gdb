@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef ultrix /* FIXME */
 /* We have to include these files now, so that GDB will not make
    competing definitions in defs.h.  */
 #include <machine/endian.h>
 #include <machine/limits.h>
+#endif /* ultrix */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
