@@ -1339,7 +1339,7 @@ m32r_cgen_cpu_open (enum cgen_cpu_open_arg arg_type, ...)
   m32r_cgen_rebuild_tables (cd);
 
   /* Initialise flags.  */
-  cd->flags = 0;
+  cd->signed_overflow_ok_p = 0;
   
   return (CGEN_CPU_DESC) cd;
 }

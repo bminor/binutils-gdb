@@ -1,3 +1,8 @@
+2000-02-28  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r-desc.c (m32r_cgen_cpu_open): Replace 'flags' with
+	'signed_overflow_ok_p'.
+
 2000-02-27  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.am (stamp-lib): Use $(LIBTOOL) --config to get the
