@@ -1,5 +1,20 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* cli/cli-interp.c (_initialize_cli_interp): Call
+	gdb_interpreter_new and gdb_interpreter_add.
+	* top.c (gdb_init): Call gdb_interpreter_lookup.
+	(gdb_init): Call gdb_interpreter_set.
+	* interps.c (gdb_interpreter_new): Renamed from
+	gdb_new_interpreter.
+	(gdb_interpreter_add): Renamed from gdb_add_interpreter.
+	(gdb_interpreter_set): Renamed from gdb_set_interpreter.
+	(gdb_interpreter_lookup): Renamed from gdb_lookup_interpreter.
+	(gdb_interpreter_current): Renamed from gdb_current_interpreter.
+	Update all callers.
+	* interps.h: Ditto.
+	
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* interps.h (gdb_interpreter_is_quiet_p): Rename from
 	gdb_interpreter_is_quiet.
 	* cli/cli-interp.c (cli_interpreter_display_prompt_p): Call

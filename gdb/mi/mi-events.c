@@ -32,7 +32,7 @@ mi_interp_stack_changed_hook (void)
   struct ui_out *saved_ui_out = uiout;
   struct mi_out *tmp_mi_out;
 
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+  if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
     uiout = gdb_interpreter_ui_out (mi1_interp);
   else
     uiout = gdb_interpreter_ui_out (mi_interp);
@@ -48,8 +48,8 @@ event_notify (const char *string, ...)
 {
   va_list args;
 
-  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1)
-      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2))
+  if (!gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1)
+      && !gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2))
     {
       va_start (args, string);
       vfprintf_unfiltered (mi_event_channel, string, args);

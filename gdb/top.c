@@ -2130,11 +2130,15 @@ gdb_init (char *argv0)
   /* All the interpreters should have had a look at things by now.
      Initialize the selected interpreter. */
   {
+
+    /* There will always be an interpreter.  Either the one specified
+       by the user at start up or the console.  */
+
     struct gdb_interpreter *interp;
     if (interpreter_p == NULL)
       interpreter_p = xstrdup (GDB_INTERPRETER_CONSOLE);
 
-    interp = gdb_lookup_interpreter (interpreter_p);
+    interp = gdb_interpreter_lookup (interpreter_p);
 
     if (interp == NULL)
       {
@@ -2142,7 +2146,7 @@ gdb_init (char *argv0)
                             interpreter_p);
         exit (1);
       }
-    if (!gdb_set_interpreter (interp))
+    if (!gdb_interpreter_set (interp))
       {
         fprintf_unfiltered (gdb_stderr, "Interpreter `%s' failed to initialize.\n",
                             interpreter_p);

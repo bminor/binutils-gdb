@@ -139,19 +139,19 @@ mi_interpreter_resume (void *data)
   /* Route target output through the MI. */
   gdb_stdtarg = mi_stdtarg;
 
-  /* Replace all the hooks that we know about.  There really needs to be a better way
-     of doing this... */
+  /* Replace all the hooks that we know about.  There really needs to
+     be a better way of doing this... */
   clear_interpreter_hooks ();
   set_gdb_event_hooks (&mi_event_handlers);
 
   show_load_progress = mi_load_progress;
 
   /* If we're _the_ interpreter, take control. */
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2))
+  if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2))
     command_loop_hook = mi2_command_loop;
-  else if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+  else if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
     command_loop_hook = mi1_command_loop;
-  else if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI))
+  else if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI))
     command_loop_hook = mi2_command_loop;
   else
     return 0;
@@ -214,7 +214,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  interp_to_use = gdb_lookup_interpreter (argv[0]);
+  interp_to_use = gdb_interpreter_lookup (argv[0]);
   if (interp_to_use == NULL)
     {
       xasprintf (&mi_error_message,
@@ -426,12 +426,12 @@ _initialize_mi_interp (void)
   if (mi1_interp == NULL)
     {
       mi1_interp =
-	gdb_new_interpreter (GDB_INTERPRETER_MI1, NULL, mi_out_new (1),
+	gdb_interpreter_new (GDB_INTERPRETER_MI1, NULL, mi_out_new (1),
 			     &procs);
       if (mi1_interp == NULL)
 	error
 	  ("Couldn't allocate a new interpreter for the mi1 interpreter\n");
-      if (gdb_add_interpreter (mi1_interp) != 1)
+      if (gdb_interpreter_add (mi1_interp) != 1)
 	error ("Couldn't add the mi1 interpreter to gdb.\n");
     }
 
@@ -439,12 +439,12 @@ _initialize_mi_interp (void)
   if (mi2_interp == NULL)
     {
       mi2_interp =
-	gdb_new_interpreter (GDB_INTERPRETER_MI2, NULL, mi_out_new (2),
+	gdb_interpreter_new (GDB_INTERPRETER_MI2, NULL, mi_out_new (2),
 			     &procs);
       if (mi2_interp == NULL)
 	error
 	  ("Couldn't allocate a new interpreter for the mi2 interpreter\n");
-      if (gdb_add_interpreter (mi2_interp) != 1)
+      if (gdb_interpreter_add (mi2_interp) != 1)
 	error ("Couldn't add the mi2 interpreter to gdb.\n");
     }
 
@@ -452,12 +452,12 @@ _initialize_mi_interp (void)
   if (mi_interp == NULL)
     {
       mi_interp =
-	gdb_new_interpreter (GDB_INTERPRETER_MI, NULL, mi_out_new (3),
+	gdb_interpreter_new (GDB_INTERPRETER_MI, NULL, mi_out_new (3),
 			     &procs);
       if (mi_interp == NULL)
 	error
 	  ("Couldn't allocate a new interpreter for the mi interpreter\n");
-      if (gdb_add_interpreter (mi_interp) != 1)
+      if (gdb_interpreter_add (mi_interp) != 1)
 	error ("Couldn't add the mi interpreter to gdb.\n");
     }
 }

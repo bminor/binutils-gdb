@@ -41,20 +41,17 @@ struct gdb_interpreter_procs
 };
 
 extern struct gdb_interpreter
-  *gdb_new_interpreter (char *name, void *data, struct ui_out *uiout,
+  *gdb_interpreter_new (char *name, void *data, struct ui_out *uiout,
 			struct gdb_interpreter_procs *procs);
 
-extern int gdb_add_interpreter (struct gdb_interpreter *interp);
-extern int gdb_set_interpreter (struct gdb_interpreter *interp);
-extern struct gdb_interpreter *gdb_lookup_interpreter (char *name);
-extern struct gdb_interpreter *gdb_current_interpreter ();
+extern int gdb_interpreter_set (struct gdb_interpreter *interp);
+extern struct gdb_interpreter *gdb_interpreter_lookup (char *name);
 extern struct ui_out *gdb_interpreter_ui_out (struct gdb_interpreter *interp);
-extern int gdb_current_interpreter_is_named (char *interp_name);
+extern int gdb_interpreter_current_is_named_p (char *interp_name);
 extern int gdb_interpreter_exec (char *command_str);
 extern int gdb_interpreter_display_prompt_p (void);
-extern int gdb_interpreter_set_quiet (struct gdb_interpreter *interp,
-				      int quiet);
 extern int gdb_interpreter_is_quiet_p (struct gdb_interpreter *interp);
+extern int gdb_interpreter_add (struct gdb_interpreter *interp);
 extern struct gdb_interpreter_procs *gdb_interpreter_get_procs (struct
 								gdb_interpreter
 								*interp);

@@ -131,7 +131,7 @@ _initialize_cli_interp (void)
 
   /* Create a default uiout builder for the CLI. */
   cli_uiout = cli_out_new (gdb_stdout);
-  cli_interp = gdb_new_interpreter (GDB_INTERPRETER_CONSOLE, NULL, cli_uiout,
+  cli_interp = gdb_interpreter_new (GDB_INTERPRETER_CONSOLE, NULL, cli_uiout,
 				    &procs);
-  gdb_add_interpreter (cli_interp);
+  gdb_interpreter_add (cli_interp);
 }

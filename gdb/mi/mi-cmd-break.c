@@ -141,8 +141,8 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
      handlers, so we won't get any event notifications sent out to the
      client. MI3+ does NOT send breakpoint information with the -break-insert
      command for this reason. */
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2)
-      || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+  if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2)
+      || gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
     old_hooks = set_gdb_event_hooks (&breakpoint_hooks);
 
   /* Now we have what we need, let's insert the breakpoint! */
@@ -172,8 +172,8 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 		      "mi_cmd_break_insert: Bad switch.");
     }
 
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2)
-      || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+  if (gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2)
+      || gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
     set_gdb_event_hooks (old_hooks);
 
   if (rc == GDB_RC_FAIL)
@@ -256,8 +256,8 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
      cannot use the same printing mechanisms. So for MI3+, we simply
      rewind MI's uiout so that we can prevent GDB from printing
      any information about the watchpoint we just inserted. */
-  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2)
-      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+  if (!gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI2)
+      && !gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
     mi_out_rewind (uiout);
 
   return MI_CMD_DONE;

@@ -1,5 +1,20 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* mi-interp.c (mi_interpreter_resume): Ditto.
+	(mi_cmd_interpreter_exec): Use gdb_interpreter_lookup.
+	(_initialize_mi_interp): Use gdb_interpreter_new,
+	gdb_interpreter_add.
+	* mi-cmd-break.c (mi_cmd_break_insert): Use
+	gdb_interpreter_current_is_named_p.
+	(mi_cmd_break_watch): Ditto.
+	* mi-events.c (mi_interp_stack_changed_hook): Ditto.
+	(event_notify): Ditto.
+	* mi-main.c (captured_mi_execute_command): Use
+	gdb_interpreter_current_is_named_p.
+	(mi_load_progress): Ditto.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* mi-interp.c (_initialize_mi_interp): Use mi_interpreter_prompt_p
 	instead of mi_interpreter_prompt.
 	(mi_interpreter_prompt_p): Rename from mi_interpreter_prompt and

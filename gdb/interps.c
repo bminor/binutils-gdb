@@ -79,11 +79,11 @@ static struct gdb_interpreter *current_interpreter = NULL;
 
 static int interpreter_initialized = 0;
 
-/* gdb_new_interpreter - This allocates space for a new interpreter,
+/* gdb_interpreter_new - This allocates space for a new interpreter,
    fills the fields from the inputs, and returns a pointer to the
    interpreter. */
 struct gdb_interpreter *
-gdb_new_interpreter (char *name,
+gdb_interpreter_new (char *name,
 		     void *data,
 		     struct ui_out *uiout,
 		     struct gdb_interpreter_procs *procs)
@@ -112,12 +112,12 @@ gdb_new_interpreter (char *name,
    the new one is NOT added, and the function returns 0.  Otherwise
    it returns 1. */
 int
-gdb_add_interpreter (struct gdb_interpreter *interp)
+gdb_interpreter_add (struct gdb_interpreter *interp)
 {
   if (!interpreter_initialized)
     initialize_interps ();
 
-  if (gdb_lookup_interpreter (interp->name) != NULL)
+  if (gdb_interpreter_lookup (interp->name) != NULL)
     return 0;
 
   interp->next = interp_list;
@@ -133,7 +133,7 @@ gdb_add_interpreter (struct gdb_interpreter *interp)
    old interpreter, then raise an internal error, since we are in
    pretty bad shape at this point. */
 int
-gdb_set_interpreter (struct gdb_interpreter *interp)
+gdb_interpreter_set (struct gdb_interpreter *interp)
 {
   struct gdb_interpreter *old_interp = current_interpreter;
   int first_time = 0;
@@ -180,7 +180,7 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
 	{
 	  if (!interp->procs.init_proc (interp->data))
 	    {
-	      if (!gdb_set_interpreter (old_interp))
+	      if (!gdb_interpreter_set (old_interp))
 		internal_error (__FILE__, __LINE__,
 				"Failed to initialize new interp \"%s\" %s",
 				interp->name,
@@ -204,7 +204,7 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
   if (interp->procs.resume_proc != NULL
       && (!interp->procs.resume_proc (interp->data)))
     {
-      if (!gdb_set_interpreter (old_interp))
+      if (!gdb_interpreter_set (old_interp))
 	internal_error (__FILE__, __LINE__,
 			"Failed to initialize new interp \"%s\" %s",
 			interp->name, "and could not restore old interp!\n");
@@ -229,11 +229,11 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
   return 1;
 }
 
-/* gdb_lookup_interpreter - Looks up the interpreter for NAME.  If no
+/* gdb_interpreter_lookup - Looks up the interpreter for NAME.  If no
    such interpreter exists, return NULL, otherwise return a pointer to
    the interpreter.  */
 struct gdb_interpreter *
-gdb_lookup_interpreter (char *name)
+gdb_interpreter_lookup (char *name)
 {
   struct gdb_interpreter *interp;
 
@@ -250,8 +250,8 @@ gdb_lookup_interpreter (char *name)
 }
 
 /* Returns the current interpreter. */
-struct gdb_interpreter *
-gdb_current_interpreter ()
+static struct gdb_interpreter *
+gdb_interpreter_current (void)
 {
   return current_interpreter;
 }
@@ -267,9 +267,9 @@ gdb_interpreter_ui_out (struct gdb_interpreter *interp)
 
 /* Returns true if the current interp is the passed in name. */
 int
-gdb_current_interpreter_is_named (char *interp_name)
+gdb_interpreter_current_is_named_p (char *interp_name)
 {
-  struct gdb_interpreter *current_interp = gdb_current_interpreter ();
+  struct gdb_interpreter *current_interp = gdb_interpreter_current ();
 
   if (current_interp)
     return (strcmp (current_interp->name, interp_name) == 0);
@@ -408,9 +408,9 @@ interpreter_exec_cmd (char *args, int from_tty)
   if (nrules < 2)
     error ("usage: interpreter-exec <interpreter> [ <command> ... ]");
 
-  old_interp = gdb_current_interpreter ();
+  old_interp = gdb_interpreter_current ();
 
-  interp_to_use = gdb_lookup_interpreter (prules[0]);
+  interp_to_use = gdb_interpreter_lookup (prules[0]);
   if (interp_to_use == NULL)
     error ("Could not find interpreter \"%s\".", prules[0]);
 
@@ -418,21 +418,21 @@ interpreter_exec_cmd (char *args, int from_tty)
   old_quiet = gdb_interpreter_set_quiet (old_interp, 1);
   use_quiet = gdb_interpreter_set_quiet (interp_to_use, 1);
 
-  if (!gdb_set_interpreter (interp_to_use))
+  if (!gdb_interpreter_set (interp_to_use))
     error ("Could not switch to interpreter \"%s\".", prules[0]);
 
   for (i = 1; i < nrules; i++)
     {
       if (!gdb_interpreter_exec (prules[i]))
 	{
-	  gdb_set_interpreter (old_interp);
+	  gdb_interpreter_set (old_interp);
 	  gdb_interpreter_set_quiet (interp_to_use, old_quiet);
 	  error ("error in command: \"%s\".", prules[i]);
 	  break;
 	}
     }
 
-  gdb_set_interpreter (old_interp);
+  gdb_interpreter_set (old_interp);
   gdb_interpreter_set_quiet (interp_to_use, use_quiet);
   gdb_interpreter_set_quiet (old_interp, old_quiet);
 }
