@@ -145,6 +145,9 @@ print_insn_mn10300 (memaddr, info)
 
   /* These are four byte insns.  */
   else if ((insn & 0xff) == 0xfa
+	    /* start-sanitize-am33 */
+	   || (insn & 0xff) == 0xf7
+	    /* end-sanitize-am33 */
 	   || (insn & 0xff) == 0xfb)
     {
       status = (*info->read_memory_func) (memaddr, buffer, 4, info);
@@ -312,7 +315,8 @@ disassemble (memaddr, info, insn, size)
 	    }
 	  /* start-sanitize-am33 */
 	  else if (size == 4
-		   && op->format == FMT_D7)
+		   && (op->format == FMT_D7
+		       || op->format == FMT_D10))
 	    {
 	      extension = 0;
 	    }

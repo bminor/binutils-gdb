@@ -1,15 +1,19 @@
 start-sanitize-am33
 Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
 
-	* mn10300-opc.c (mn10300_opcodes): Fix typo in IMM24 versions of the
+	* m10300-dis.c (print_insn_mn10300): 0xf7 opcode prefix specifies
+	4 byte instructions.
+	(disassemble): Correctly handle FMT_D10 instructions.
+
+	* m10300-opc.c (mn10300_opcodes): Fix typo in IMM24 versions of the
 	am33 shift instructions.
 
-	* mn10300-dis.c (print_insn_mn10300): 0xf9 opcode prefix specifies
+	* m10300-dis.c (print_insn_mn10300): 0xf9 opcode prefix specifies
 	3 byte instructions.
 	(disassemble): Handle new instruction formats FMT_D6, FMT_D7, FMT_D8
 	FMT_D9 and FMT_D10.  Handle various new opcode flags for the am33.
 
-	* mn10300-opc.c (IMM32_HIGH8_MEM): New operand type.
+	* m10300-opc.c (IMM32_HIGH8_MEM): New operand type.
 	(mn10300_opcodes): Reorder so as to try and select opcodes from
 	the core chip when multiple alternatives exist.  Change several
 	am33 instructions to use IMM32_HIGH8_MEM.  Fix typos in "mac" and
