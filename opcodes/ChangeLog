@@ -1,3 +1,7 @@
+Fri Dec 12 01:32:30 1997  Richard Henderson  <rth@cygnus.com>
+
+	* alpha-opc.c (cvttq/*u*): Remove, as that suffix is invalid.
+
 Wed Dec 10 17:42:35 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_little_arm): Prevent examination of stored
