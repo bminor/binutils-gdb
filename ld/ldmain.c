@@ -260,6 +260,7 @@ main (argc, argv)
   link_info.flags = (bfd_vma) 0;
   link_info.flags_1 = (bfd_vma) 0;
   link_info.pei386_auto_import = false;
+  link_info.pei386_auto_import = -1;
   link_info.combreloc = true;
   link_info.spare_dynamic_tags = 5;
 

@@ -1,3 +1,17 @@
+2002-06-07  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld/ldmain.c (main): initialize link_info.pei386_auto_import
+	to -1 == implicit enable.
+	* ld/emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):
+	initialize link_info.pei386_auto_import to -1 == implicit
+	enable.
+	(gld_${EMULATION_NAME}_parse_args): When processing
+	--enable-auto-import and --disable-auto-import options, use
+	'1' and '0' instead of 'true' and 'false'.
+	(pe_find_data_imports): Only issue message about auto-import
+	when the feature is implicitly enabled.  Downgrade message to
+	informational instead of warning.
+
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc (.tbss): Fix mismatched parentheses/braces.
@@ -7,7 +21,7 @@
 	* configure.host (hppa*64*-*-hpux11*): Define NATIVE_LIB_DIRS,
 	HOSTING_CRT0 and HOSTING_LIBS.
 
-Wed Jun  5 20:42:31 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-06-05  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* configure.tgt (shle*-*-elf*, sh64le-*-elf*): New configurations.
 

@@ -173,7 +173,7 @@ gld_${EMULATION_NAME}_before_parse()
 #ifdef DLL_SUPPORT
   config.dynamic_link = true;
   config.has_shared = 1;
-/* link_info.pei386_auto_import = true; */
+  link_info.pei386_auto_import = -1;
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
@@ -628,10 +628,10 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       pe_dll_do_default_excludes = 0;
       break;
     case OPTION_DLL_ENABLE_AUTO_IMPORT:
-      link_info.pei386_auto_import = true;
+      link_info.pei386_auto_import = 1;
       break;
     case OPTION_DLL_DISABLE_AUTO_IMPORT:
-      link_info.pei386_auto_import = false;
+      link_info.pei386_auto_import = 0;
       break;
     case OPTION_ENABLE_EXTRA_PE_DEBUG:
       pe_dll_extra_pe_debug = 1;
@@ -912,8 +912,9 @@ pe_find_data_imports ()
           sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
           if (sym && sym->type == bfd_link_hash_defined)
             {
-              einfo (_("Warning: resolving %s by linking to %s (auto-import)\n"),
-                     undef->root.string, buf);
+             if (link_info.pei386_auto_import == -1)
+               info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
+                      undef->root.string, buf);
               {
                 bfd *b = sym->u.def.section->owner;
                 asymbol **symbols;
