@@ -1,5 +1,7 @@
 Wed Jan  5 14:22:22 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* literal.c: New file.
+
 	* config/tc-mips.h (TARGET_FORMAT) [OBJ_AOUT]: Fix for new names
 	in bfd.
 

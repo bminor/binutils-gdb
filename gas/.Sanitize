@@ -77,6 +77,7 @@ input-scrub.c
 link.cmd
 listing.c
 listing.h
+literal.c
 make-gas.com
 messages.c
 obj.h
