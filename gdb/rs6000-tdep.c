@@ -39,11 +39,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/core.h>
 #include <sys/ldr.h>
 
+
+extern struct obstack frame_cache_obstack;
+
 extern int errno;
 
 /* Nonzero if we just simulated a single step break. */
 int one_stepped;
-
 
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
@@ -399,7 +401,7 @@ FIXME:  This whole concept is broken.  You should be able to detect
 a dummy stack frame *on the user's stack itself*.  When you do,
 then you know the format of that stack frame -- including its
 saved SP register!  There should *not* be a separate stack in the
-GDB process that keeps track of these dummy frames!  -- gnu@cygnus.com Aug92 */
+GDB process that keeps track of these dummy frames!  -- gnu@cygnus.com Aug92
  */
    
 pop_dummy_frame ()
@@ -546,7 +548,7 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
  */
 void
 function_frame_info (pc, fdata)
-  int pc;
+  CORE_ADDR pc;
   struct aix_framedata *fdata;
 {
   unsigned int tmp;

@@ -98,6 +98,8 @@ struct aix_framedata {
   char	frameless;			/* true if frameless functions. */
 };
 
+void 
+function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
 
 /* Define the byte order of the machine.  */
 
@@ -491,43 +493,44 @@ extern unsigned int rs6000_struct_return_address;
 
 #define FRAME_FIND_SAVED_REGS(FRAME_INFO, FRAME_SAVED_REGS)		\
 {									\
-  int ii, frame_addr, func_start;					\
-  struct aix_framedata fdata;							\
-										\
-  /* find the start of the function and collect info about its frame. */	\
-										\
-  func_start = get_pc_function_start ((FRAME_INFO)->pc) + FUNCTION_START_OFFSET;\
-  function_frame_info (func_start, &fdata);					\
-  bzero (&(FRAME_SAVED_REGS), sizeof (FRAME_SAVED_REGS));			\
-										\
-  /* if there were any saved registers, figure out parent's stack pointer. */	\
-  frame_addr = 0;								\
-  /* the following is true only if the frame doesn't have a call to alloca(),	\
-      FIXME. */									\
-  if (fdata.saved_fpr >= 0 || fdata.saved_gpr >= 0) {				\
-    if ((FRAME_INFO)->prev && (FRAME_INFO)->prev->frame)			\
-      frame_addr = (FRAME_INFO)->prev->frame;					\
-    else									\
-      frame_addr = read_memory_integer ((FRAME_INFO)->frame, 4);		\
-  }										\
-										\
-  /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr. All fpr's	\
-     from saved_fpr to fp31 are saved right underneath caller stack pointer,	\
-     starting from fp31 first. */						\
-										\
-  if (fdata.saved_fpr >= 0) {							\
-    for (ii=31; ii >= fdata.saved_fpr; --ii) 					\
-      (FRAME_SAVED_REGS).regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8);	\
-    frame_addr -= (32 - fdata.saved_fpr) * 8;					\
-  }										\
-										\
-  /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr. All gpr's	\
-     from saved_gpr to gpr31 are saved right under saved fprs, starting		\
-     from r31 first. */								\
-										\
-  if (fdata.saved_gpr >= 0)							\
-    for (ii=31; ii >= fdata.saved_gpr; --ii)					\
-      (FRAME_SAVED_REGS).regs [ii] = frame_addr - ((32 - ii) * 4);		\
+  int ii;								\
+  CORE_ADDR frame_addr, func_start;					\
+  struct aix_framedata fdata;						\
+									\
+  /* find the start of the function and collect info about its frame. */\
+									\
+  func_start = get_pc_function_start ((FRAME_INFO)->pc) + FUNCTION_START_OFFSET; \
+  function_frame_info (func_start, &fdata);				\
+  bzero (&(FRAME_SAVED_REGS), sizeof (FRAME_SAVED_REGS));		\
+									\
+  /* if there were any saved registers, figure out parent's stack pointer. */ \
+  frame_addr = 0;							\
+  /* the following is true only if the frame doesn't have a call to alloca(), \
+      FIXME. */								\
+  if (fdata.saved_fpr >= 0 || fdata.saved_gpr >= 0) {			\
+    if ((FRAME_INFO)->prev && (FRAME_INFO)->prev->frame)		\
+      frame_addr = (FRAME_INFO)->prev->frame;				\
+    else								\
+      frame_addr = read_memory_integer ((FRAME_INFO)->frame, 4);	\
+  }									\
+									\
+  /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr. All fpr's \
+     from saved_fpr to fp31 are saved right underneath caller stack pointer, \
+     starting from fp31 first. */					\
+									\
+  if (fdata.saved_fpr >= 0) {						\
+    for (ii=31; ii >= fdata.saved_fpr; --ii) 				\
+      (FRAME_SAVED_REGS).regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8); \
+    frame_addr -= (32 - fdata.saved_fpr) * 8;				\
+  }									\
+									\
+  /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr. All gpr's \
+     from saved_gpr to gpr31 are saved right under saved fprs, starting	\
+     from r31 first. */							\
+									\
+  if (fdata.saved_gpr >= 0)						\
+    for (ii=31; ii >= fdata.saved_gpr; --ii)				\
+      (FRAME_SAVED_REGS).regs [ii] = frame_addr - ((32 - ii) * 4);	\
 }
 
 
