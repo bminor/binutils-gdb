@@ -512,8 +512,36 @@ print_insn_hppa (memaddr, info)
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_bytes_compl_names[GET_COMPL (insn)]);
 		      break;
+		    case 'c':
+		    case 'C':
+		      switch (GET_FIELD (insn, 20, 21))
+			{
+			case 1:
+			  (*info->fprintf_func) (info->stream, ",bc ");
+			  break;
+			case 2:
+			  (*info->fprintf_func) (info->stream, ",sl ");
+			  break;
+			default:
+			  (*info->fprintf_func) (info->stream, " ");
+			}
+		      break;
+		    case 'd':
+		      switch (GET_FIELD (insn, 20, 21))
+			{
+			case 1:
+			  (*info->fprintf_func) (info->stream, ",co ");
+			  break;
+			default:
+			  (*info->fprintf_func) (info->stream, " ");
+			}
+		      break;
+		    case 'o':
+		      (*info->fprintf_func) (info->stream, ",o");
+		      break;
 		    case 'g':
 		      (*info->fprintf_func) (info->stream, ",gate");
+		      break;
 		    case 'p':
 		      (*info->fprintf_func) (info->stream, ",l,push");
 		      break;
@@ -647,7 +675,7 @@ print_insn_hppa (memaddr, info)
 			break;
 		      }
 
-		    case 'c':
+		    case 'e':
 		      {
 			int opcode = GET_FIELD (insn, 0, 5);
 
@@ -693,25 +721,17 @@ print_insn_hppa (memaddr, info)
 			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)],
 					info);
 			break;
-		      case 'T':
+		      case 'n':
 			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)
-							  + 8], info);
+					+ GET_FIELD (insn, 4, 4) * 8], info);
 			break;
-		      case 'r':
-			fputs_filtered (compare_cond_64_names[GET_FIELD (insn, 16, 18)],
-					info);
-			break;
-		      case 'R':
+		      case 'N':
 			fputs_filtered (compare_cond_64_names[GET_FIELD (insn, 16, 18)
-							     + 8], info);
+					+ GET_FIELD (insn, 2, 2) * 8], info);
 			break;
 		      case 'Q':
 			fputs_filtered (cmpib_cond_64_names[GET_FIELD (insn, 16, 18)],
 					info);
-			break;
-		      case 'n':
-			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)
-					+ GET_FIELD (insn, 4, 4) * 8], info);
 			break;
 		      case '@':
 			fputs_filtered (add_cond_names[GET_FIELD (insn, 16, 18)
@@ -738,21 +758,11 @@ print_insn_hppa (memaddr, info)
 					       add_cond_names[GET_FIELD (insn, 16, 18)]);
 			break;
 
-		      case 'D':
-			(*info->fprintf_func) (info->stream, "%s",
-					       add_cond_names[GET_FIELD (insn, 16, 18)
-							     + 8]);
-			break;
-		      case 'w':
-			(*info->fprintf_func) 
-			  (info->stream, "%s",
-			   wide_add_cond_names[GET_FIELD (insn, 16, 18)]);
-			break;
-
 		      case 'W':
 			(*info->fprintf_func) 
 			  (info->stream, "%s",
-			   wide_add_cond_names[GET_FIELD (insn, 16, 18) + 8]);
+			   wide_add_cond_names[GET_FIELD (insn, 16, 18) + 
+					      GET_FIELD (insn, 4, 4) * 8]);
 			break;
 
 		      case 'l':
@@ -866,6 +876,10 @@ print_insn_hppa (memaddr, info)
 		  (*info->fprintf_func) (info->stream, "%%sr0,%%r31");
 		  break;
 		  
+		case '@':
+		  (*info->fprintf_func) (info->stream, "0");
+		  break;
+
 		case '.':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    GET_FIELD (insn, 24, 25));
