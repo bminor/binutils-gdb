@@ -1,3 +1,7 @@
+Fri Aug 27 17:09:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* paread.c: Include som.h instead of libhppa.h.  (From Utah.)
+
 Fri Aug 27 09:30:40 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* symmisc.c (dump_symtab): Use catch_errors around print_symbol.

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "bfd.h"
 #include "libbfd.h"
-#include "libhppa.h"
+#include "som.h"
 #include <syms.h>
 #include "symtab.h"
 #include "symfile.h"
