@@ -1155,7 +1155,12 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		      total_relocs++;
 		      break;
 		    case BITS_AND_SHIFT (24, 2):
-		      if (relocs[i]->howto->type == 5)
+		      /* FIXME: 0 is ARM_26D, it is defined in bfd/coff-arm.c
+			 Those ARM_xxx definitions should go in proper
+			 header someday.  */
+		      if (relocs[i]->howto->type == 0
+			  /* Older GNU linkers used 5 instead of 0 for this reloc.  */
+			  || relocs[i]->howto->type == 5)
 			/* This is an ARM_26D reloc, which is an ARM_26 reloc
 			   that has already been fully processed during a
 			   previous link stage, so ignore it here.  */

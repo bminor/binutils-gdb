@@ -252,11 +252,11 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 #undef  ARM_THUMB12
 #undef  ARM_26D
 
+#define ARM_26D      0
 #define ARM_32       1
 #define ARM_RVA32    2
 #define ARM_26	     3
 #define ARM_THUMB12  4
-#define ARM_26D      5
 #define ARM_SECTION  14
 #define ARM_SECREL   15
 #endif
@@ -264,7 +264,19 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 static reloc_howto_type aoutarm_std_reloc_howto[] =
   {
 #ifdef ARM_WINCE
-    EMPTY_HOWTO (-1),
+    HOWTO (ARM_26D,
+	   2,
+	   2,
+	   24,
+	   FALSE,
+	   0,
+	   complain_overflow_dont,
+	   aoutarm_fix_pcrel_26_done,
+	   "ARM_26D",
+	   FALSE,
+	   0x00ffffff,
+	   0x0,
+	   FALSE),
     HOWTO (ARM_32,
 	   0,
 	   2,
@@ -274,7 +286,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
 	   "ARM_32",
-	   TRUE,
+	   FALSE,
 	   0xffffffff,
 	   0xffffffff,
 	   PCRELOFFSET),
@@ -287,7 +299,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
 	   "ARM_RVA32",
-	   TRUE,
+	   FALSE,
 	   0xffffffff,
 	   0xffffffff,
 	   PCRELOFFSET),
@@ -317,19 +329,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   0x000007ff,
 	   0x000007ff,
 	   PCRELOFFSET),
-    HOWTO (ARM_26D,
-	   2,
-	   2,
-	   24,
-	   FALSE,
-	   0,
-	   complain_overflow_dont,
-	   aoutarm_fix_pcrel_26_done,
-	   "ARM_26D",
-	   TRUE,
-	   0x00ffffff,
-	   0x0,
-	   FALSE),
+    EMPTY_HOWTO (-1),
     EMPTY_HOWTO (-1),
     EMPTY_HOWTO (-1),
     EMPTY_HOWTO (-1),
@@ -346,8 +346,8 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   0,
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
-	   "ARM_16",
-	   TRUE,
+	   "ARM_SECTION",
+	   FALSE,
 	   0x0000ffff,
 	   0x0000ffff,
 	   PCRELOFFSET),
@@ -359,8 +359,8 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   0,
 	   complain_overflow_bitfield,
 	   coff_arm_reloc,
-	   "ARM_32",
-	   TRUE,
+	   "ARM_SECREL",
+	   FALSE,
 	   0xffffffff,
 	   0xffffffff,
 	   PCRELOFFSET),
