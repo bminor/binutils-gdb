@@ -1,5 +1,6 @@
 Mon Aug 31 13:47:35 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* z8k-dis.c: knows how to disassemble z8k stuff
 	* z8k-opc.h: new file full of z8000 opcodes
 
 

@@ -23,7 +23,11 @@ Do-first:
 
 Things-to-keep:
 ChangeLog
+Makefile.in
+configure.in
+z8k-dis.c
 z8k-opc.h
+
 
 Do-last:
 
