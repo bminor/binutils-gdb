@@ -1,5 +1,8 @@
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
+	* symtab.h (SIZEOF_N_SECTION_OFFSETS): New macro.
+	(SIZEOF_SECTION_OFFSETS): Use SIZEOF_N_SECTION_OFFSETS.
+
 	* symfile.c (syms_from_objfile): Adjust indentation.
 
 	* symfile.c (symbol_file_add): Flush gdb_stdout even if from_tty
