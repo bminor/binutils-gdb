@@ -168,7 +168,6 @@
 
    .idata$2 = Import Directory Table
    = array of IMAGE_IMPORT_DESCRIPTOR's.
-   There is one for each dll imported from plus a trailing null copy.
 
 	DWORD   Characteristics;      - pointer to .idata$4
 	DWORD   TimeDateStamp;        - currently always 0
@@ -176,8 +175,7 @@
 	DWORD   Name;                 - pointer to dll's name
 	PIMAGE_THUNK_DATA FirstThunk; - pointer to .idata$5
 
-   .idata$3 = ppc's way of null terminating .idata$2.  Jeepers creepers,
-   can we have some consistency here???
+   .idata$3 = null terminating entry for .idata$2.
 
    .idata$4 = Import Lookup Table
    = array of array of pointers to hint name table.
