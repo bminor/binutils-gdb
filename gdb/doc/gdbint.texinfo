@@ -4678,6 +4678,66 @@ library because it's also used in binutils, for @file{objdump}).
 @section mmalloc
 
 @section libiberty
+@cindex @code{libiberty} library
+
+The @code{libiberty} library provides a set of functions and features
+that integrate and improve on functionality found in modern operating
+systems.  Broadly speaking, such features can be divided into three
+groups: supplemental functions (functions that may be missing in some
+environments and operating systems), replacement functions (providing
+a uniform and easier to use interface for commonly used standard
+functions), and extensions (which provide additional functionality
+beyond standard functions).
+
+@value{GDBN} uses various features provided by the @code{libiberty}
+library, for instance the C@t{++} demangler, the @acronym{IEEE}
+floating format support functions, the input options parser
+@samp{getopt}, the @samp{obstack} extension, and other functions.
+
+@subsection @code{obstacks} in @value{GDBN}
+@cindex @code{obstacks}
+
+The obstack mechanism provides a convenient way to allocate and free
+chunks of memory.  Each obstack is a pool of memory that is managed
+like a stack.  Objects (of any nature, size and alignment) are
+allocated and freed in a @acronym{LIFO} fashion on an obstack (see
+@code{libiberty}'s documenatation for a more detailed explanation of
+@code{obstacks}).
+
+The most noticeable use of the @code{obstacks} in @value{GDBN} is in
+object files.  There is an obstack associated with each internal
+representation of an object file.  Lots of things get allocated on
+these @code{obstacks}: dictionary entries, blocks, blockvectors,
+symbols, minimal symbols, types, vectors of fundamental types, class
+fields of types, object files section lists, object files section
+offets lists, line tables, symbol tables, partial symbol tables,
+string tables, symbol table private data, macros tables, debug
+information sections and entries, import and export lists (som),
+unwind information (hppa), dwarf2 location expressions data.  Plus
+various strings such as directory names strings, debug format strings,
+names of types.
+
+An essential and convenient property of all data on @code{obstacks} is
+that memory for it gets allocated (with @code{obstack_alloc}) at
+various times during a debugging sesssion, but it is released all at
+once using the @code{obstack_free} function.  The @code{obstack_free}
+function takes a pointer to where in the stack it must start the
+deletion from (much like the cleanup chains have a pointer to where to
+start the cleanups).  Because of the stack like structure of the
+@code{obstacks}, this allows to free only a top portion of the
+obstack.  There are a few instances in @value{GDBN} where such thing
+happens.  Calls to @code{obstack_free} are done after some local data
+is allocated to the obstack.  Only the local data is deleted from the
+obstack.  Of course this assumes that nothing between the
+@code{obstack_alloc} and the @code{obstack_free} allocates anything
+else on the same obstack.  For this reason it is best and safest to
+use temporary @code{obstacks}.
+
+Releasing the whole obstack is also not safe per se.  It is safe only
+under the condition that we know the @code{obstacks} memory is no
+longer needed.  In @value{GDBN} we get rid of the @code{obstacks} only
+when we get rid of the whole objfile(s), for instance upon reading a
+new symbol file.
 
 @section gnu-regex
 @cindex regular expressions library
