@@ -224,13 +224,23 @@ CORE_ADDR pc;
     op = read_memory_integer (pc, 4);
   }
 
-  while ((op & 0xfc1f0000) == 0x9001 && 	/* st rx,NUM(r1), rx >= r13 */
+  while ((op & 0xfc1f0000) == 0x90010000 && 	/* st rx,NUM(r1), rx >= r13 */
 	 (op & 0x03e00000) >= 0x01a00000) {
     pc += 4;
     op = read_memory_integer (pc, 4);
   }
+
+  if (op == 0x90010008) {			/* st r0,8(r1) */
+    pc += 4;
+    op = read_memory_integer (pc, 4);
+  }
+
+  if (op == 0x91810004) {			/* st r12,4(r1) */
+    pc += 4;
+    op = read_memory_integer (pc, 4);
+  }
 	 
-  if ((op & 0xfc1f0000) == 0x94210000) {	/* stu r1,NUM(r1) */
+  if ((op & 0xffff0000) == 0x94210000) {	/* stu r1,NUM(r1) */
     pc += 4;
     op = read_memory_integer (pc, 4);
   }

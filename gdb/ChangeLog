@@ -1,3 +1,9 @@
+Wed Mar 29 00:01:07 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-tdep.c (skip_prologue):  Skip saving of LR and CR in
+	the stack frame, fix typos in `st rx,NUM(r1)' and `stu r1,NUM(r1)'
+	tests.
+
 Tue Mar 28 17:04:04 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* gdbtypes.c (create_range_type):  If indextype has TYPE_FLAG_STUB
