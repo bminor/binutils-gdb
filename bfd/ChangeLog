@@ -1,5 +1,8 @@
 2002-03-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* coffcode.h (coff_slurp_symbol_table): When adding BSF_WEAK flag,
+	OR it in rather than replacing previously selected flags.
+
 	* elfxx-target.h (TARGET_BIG_SYM): Set ar_max_namelen to 15.
 	(TARGET_LITTLE_SYM): Set ar_max_namelen to 15.
 
