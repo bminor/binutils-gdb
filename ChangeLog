@@ -3,6 +3,10 @@ Mon Mar 24 15:02:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in (install-dirs): Don't crash if prefix, and hence
 	MAKEDIRS, is empty.
 
+Mon Mar 24 12:40:55 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config.sub: Tweak mn10300 entry.
+
 Fri Mar 21 15:35:27 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (host_tools): Put sim before gdb, so gdb's
