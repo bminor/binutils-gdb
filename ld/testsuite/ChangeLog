@@ -1,3 +1,7 @@
+2002-07-09  Richard Sandiford  <rsandifo@redhat.com>
+
+        * ld-scripts/dynamic-sections*: New test.
+
 2002-07-09  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-3.d, ld-cris/dso-3.s, ld-cris/noglob1.s,
