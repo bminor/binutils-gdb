@@ -371,7 +371,7 @@ DEFUN (callj_callback, (abfd, reloc_entry,  data, srcidx,dstidx, input_section),
 #define ABS32_MAYBE_RELAXABLE 1
 #define ABS32_WAS_RELAXABLE 2
 
-#define ALIGN 10
+#define ALIGNER 10
 #define ALIGNDONE 11
 static reloc_howto_type howto_reloc_callj =
 HOWTO(CALLJ, 0, 2, 24, true, 0, true, true, 0,"callj", true, 0x00ffffff, 0x00ffffff,false);
@@ -391,10 +391,10 @@ static  reloc_howto_type howto_reloc_abs32code =
 HOWTO(ABS32CODE, 0, 2, 32, false, 0, true, true,0,"callx", true, 0xffffffff,0xffffffff,false);
 
 static reloc_howto_type howto_align_table[] = {
-  HOWTO (ALIGN, 0, 0x1, 0, false, 0, false, false, 0, "align16", false, 0, 0, false),
-  HOWTO (ALIGN, 0, 0x3, 0, false, 0, false, false, 0, "align32", false, 0, 0, false),
-  HOWTO (ALIGN, 0, 0x7, 0, false, 0, false, false, 0, "align64", false, 0, 0, false),
-  HOWTO (ALIGN, 0, 0xf, 0, false, 0, false, false, 0, "align128", false, 0, 0, false),
+  HOWTO (ALIGNER, 0, 0x1, 0, false, 0, false, false, 0, "align16", false, 0, 0, false),
+  HOWTO (ALIGNER, 0, 0x3, 0, false, 0, false, false, 0, "align32", false, 0, 0, false),
+  HOWTO (ALIGNER, 0, 0x7, 0, false, 0, false, false, 0, "align64", false, 0, 0, false),
+  HOWTO (ALIGNER, 0, 0xf, 0, false, 0, false, false, 0, "align128", false, 0, 0, false),
 };
 
 static reloc_howto_type howto_done_align_table[] = {
@@ -1061,7 +1061,7 @@ DEFUN(b_out_relax_section,(abfd, i, symbols),
     {
       arelent *r = *parent;
       switch (r->howto->type) {
-       case ALIGN:
+       case ALIGNER:
 	/* An alignment reloc */
 	shrink = aligncode(input_section, symbols, r,shrink);
 	new=true;

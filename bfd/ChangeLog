@@ -1,3 +1,8 @@
+Fri Oct  9 03:46:37 1992  John Gilmore  (gnu@cygnus.com)
+
+	* bout.c (ALIGN):  Rename to ALIGNER, since system header files
+	on BSD 4.4 define ALIGN (sigh!).
+
 Thu Oct  8 22:18:10 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
 
 	* libaout.h (aout_backend_data): added exec_header_not_counted
