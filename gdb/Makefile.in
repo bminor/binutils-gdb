@@ -268,6 +268,31 @@ CHILL_FOR_TARGET = ` \
   fi`
 CHILL_LIB = -lchill
 
+NLMCONV_FOR_TARGET = ` \
+  if [ -f $${rootme}/../binutils/nlmconv ] ; then \
+    echo $${rootme}/../binutils/nlmconv; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(NLMCONV); \
+    else \
+      t='$(program_transform_name)'; echo nlmconv | sed -e '' $$t; \
+    fi; \
+  fi`
+
+NWSOURCE = /gaunt/grossman/unsupported/Novell
+NWINCLUDES = $(NWSOURCE)/novh40
+
+LD_FOR_TARGET = ` \
+  if [ -f $${rootme}/../binutils/ld ] ; then \
+    echo $${rootme}/../binutils/ld; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(LD); \
+    else \
+      t='$(program_transform_name)'; echo ld | sed -e '' $$t; \
+    fi; \
+  fi`
+
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
 TARGET_FLAGS_TO_PASS = \
@@ -558,6 +583,20 @@ gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
 	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
+
+prelude.o: $(NWSOURCE)/prelude.c
+	rootme=`pwd`; export rootme; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(NWSOURCE)/prelude.c
+
+i386-nlmstub.o: $(srcdir)/i386-nlmstub.c
+	rootme=`pwd`; export rootme; $(CC_FOR_TARGET) -g -I $(NWINCLUDES) -c $(srcdir)/i386-nlmstub.c
+
+nlmstub.o: prelude.o i386-nlmstub.o
+	rootme=`pwd`; export rootme; $(LD_FOR_TARGET) -r -o nlmstub.o prelude.o i386-nlmstub.o
+
+nlmstub.nlm: nlmstub.o $(srcdir)/nlmstub.def
+	rootme=`pwd`; export rootme; $(NLMCONV_FOR_TARGET) -T $(srcdir)/nlmstub.def nlmstub.o nlmstub.nlm
+
+nlmstub: nlmstub.nlm
 
 # libproc is not listed here because all-libproc is a dependency of all-gui,
 # not all-gdb, and thus might be built after us.
@@ -1300,6 +1339,8 @@ top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(remote_utils_h)
 
 main.o: main.c top.h $(defs_h)
+
+annotate.o: annotate.c annotate.h $(defs_h) value.h target.h $(gdbtypes_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h)

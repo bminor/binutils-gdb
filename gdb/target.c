@@ -104,14 +104,14 @@ struct target_ops dummy_target = {"None", "None", "",
     OPS_MAGIC,
 };
 
+/* Top of target stack.  */
+
+struct target_stack_item *target_stack;
+
 /* The target structure we are currently using to talk to a process
    or file or whatever "inferior" we have.  */
 
-struct target_ops *current_target;
-
-/* The stack of target structures that have been pushed.  */
-
-struct target_ops **current_target_stack;
+struct target_ops current_target;
 
 /* Command list for target.  */
 
@@ -140,13 +140,6 @@ void
 add_target (t)
      struct target_ops *t;
 {
-  if (t->to_magic != OPS_MAGIC)
-    {
-      fprintf_unfiltered(gdb_stderr, "Magic number of %s target struct wrong\n", 
-	t->to_shortname);
-      abort();
-    }
-
   if (!target_structs)
     {
       target_struct_allocsize = DEFAULT_ALLOCSIZE;
@@ -197,7 +190,7 @@ static void
 tcomplain ()
 {
   error ("You can't do that when your target is `%s'",
-	 current_target->to_shortname);
+	 current_target.to_shortname);
 }
 
 void
@@ -223,35 +216,6 @@ default_terminal_info (args, from_tty)
 {
   printf_unfiltered("No saved terminal information.\n");
 }
-
-#if 0
-/* With strata, this function is no longer needed.  FIXME.  */
-/* This is the default target_create_inferior function.  It looks up
-   the stack for some target that cares to create inferiors, then
-   calls it -- or complains if not found.  */
-
-static void
-upstack_create_inferior (exec, args, env)
-     char *exec;
-     char *args;
-     char **env;
-{
-  struct target_ops *t;
-
-  for (t = current_target;
-       t;
-       t = t->to_next)
-    {
-      if (t->to_create_inferior != upstack_create_inferior)
-	{
-          t->to_create_inferior (exec, args, env);
-	  return;
-	}
-
-    }
-  tcomplain();
-}
-#endif
 
 /* This is the default target_create_inferior and target_attach function.
    If the current target is executing, it asks whether to kill it off.
@@ -305,15 +269,6 @@ cleanup_target (t)
      struct target_ops *t;
 {
 
-  /* Check magic number.  If wrong, it probably means someone changed
-     the struct definition, but not all the places that initialize one.  */
-  if (t->to_magic != OPS_MAGIC)
-    {
-      fprintf_unfiltered(gdb_stderr, "Magic number of %s target struct wrong\n", 
-	t->to_shortname);
-      abort();
-    }
-
 #define de_fault(field, value) \
   if (!t->field)	t->field = value
 
@@ -344,14 +299,72 @@ cleanup_target (t)
   de_fault (to_mourn_inferior,		(void (*)())noprocess);
   de_fault (to_can_run,			return_zero);
   de_fault (to_notice_signals,		(void (*)())ignore);
-  de_fault (to_next,			0);
-  de_fault (to_has_all_memory,		0);
-  de_fault (to_has_memory,		0);
-  de_fault (to_has_stack,		0);
-  de_fault (to_has_registers,		0);
-  de_fault (to_has_execution,		0);
 
 #undef de_fault
+}
+
+/* Go through the target stack from top to bottom, copying over zero entries in
+   current_target.  In effect, we are doing class inheritance through the
+   pushed target vectors.  */
+
+static void
+update_current_target ()
+{
+  struct target_stack_item *item;
+  struct target_ops *t;
+
+  /* First, reset current_target */
+  memset (&current_target, 0, sizeof current_target);
+
+  for (item = target_stack; item; item = item->next)
+    {
+      t = item->target_ops;
+
+#define INHERIT(FIELD, TARGET) \
+      if (!current_target.FIELD) \
+	current_target.FIELD = TARGET->FIELD
+
+      INHERIT (to_shortname, t);
+      INHERIT (to_longname, t);
+      INHERIT (to_doc, t);
+      INHERIT (to_open, t);
+      INHERIT (to_close, t);
+      INHERIT (to_attach, t);
+      INHERIT (to_detach, t);
+      INHERIT (to_resume, t);
+      INHERIT (to_wait, t);
+      INHERIT (to_fetch_registers, t);
+      INHERIT (to_store_registers, t);
+      INHERIT (to_prepare_to_store, t);
+      INHERIT (to_xfer_memory, t);
+      INHERIT (to_files_info, t);
+      INHERIT (to_insert_breakpoint, t);
+      INHERIT (to_remove_breakpoint, t);
+      INHERIT (to_terminal_init, t);
+      INHERIT (to_terminal_inferior, t);
+      INHERIT (to_terminal_ours_for_output, t);
+      INHERIT (to_terminal_ours, t);
+      INHERIT (to_terminal_info, t);
+      INHERIT (to_kill, t);
+      INHERIT (to_load, t);
+      INHERIT (to_lookup_symbol, t);
+      INHERIT (to_create_inferior, t);
+      INHERIT (to_mourn_inferior, t);
+      INHERIT (to_can_run, t);
+      INHERIT (to_notice_signals, t);
+      INHERIT (to_stratum, t);
+      INHERIT (DONT_USE, t);
+      INHERIT (to_has_all_memory, t);
+      INHERIT (to_has_memory, t);
+      INHERIT (to_has_stack, t);
+      INHERIT (to_has_registers, t);
+      INHERIT (to_has_execution, t);
+      INHERIT (to_sections, t);
+      INHERIT (to_sections_end, t);
+      INHERIT (to_magic, t);
+
+#undef INHERIT
+    }
 }
 
 /* Push a new target type into the stack of the existing target accessors,
@@ -368,74 +381,103 @@ int
 push_target (t)
      struct target_ops *t;
 {
-  struct target_ops *st, *prev;
+  struct target_stack_item *cur, *prev, *tmp;
 
-  for (prev = 0, st = current_target;
-       st;
-       prev = st, st = st->to_next) {
-    if ((int)(t->to_stratum) >= (int)(st->to_stratum))
-      break;
-  }
+  /* Check magic number.  If wrong, it probably means someone changed
+     the struct definition, but not all the places that initialize one.  */
+  if (t->to_magic != OPS_MAGIC)
+    {
+      fprintf_unfiltered(gdb_stderr,
+			 "Magic number of %s target struct wrong\n", 
+			 t->to_shortname);
+      abort();
+    }
 
-  while (t->to_stratum == st->to_stratum) {
-    /* There's already something on this stratum.  Close it off.  */
-    (st->to_close) (0);
-    if (prev)
-      prev->to_next = st->to_next;	/* Unchain old target_ops */
-    else
-      current_target = st->to_next;	/* Unchain first on list */
-    st = st->to_next;
-  }
+  /* Find the proper stratum to install this target in. */
 
-  /* We have removed all targets in our stratum, now add ourself.  */
-  t->to_next = st;
+  for (prev = NULL, cur = target_stack; cur; prev = cur, cur = cur->next)
+    {
+      if ((int)(t->to_stratum) >= (int)(cur->target_ops->to_stratum))
+	break;
+    }
+
+  /* If there's already targets at this stratum, remove them. */
+
+  if (cur)
+    while (t->to_stratum == cur->target_ops->to_stratum)
+      {
+	/* There's already something on this stratum.  Close it off.  */
+	(cur->target_ops->to_close) (0);
+	if (prev)
+	  prev->next = cur->next; /* Unchain old target_ops */
+	else
+	  target_stack = cur->next; /* Unchain first on list */
+	tmp = cur->next;
+	free (cur);
+	cur = tmp;
+      }
+
+  /* We have removed all targets in our stratum, now add the new one.  */
+
+  tmp = xmalloc (sizeof (struct target_stack_item));
+  tmp->next = cur;
+  tmp->target_ops = t;
+
   if (prev)
-    prev->to_next = t;
+    prev->next = tmp;
   else
-    current_target = t;
+    target_stack = tmp;
 
-  cleanup_target (current_target);
+  update_current_target ();
+
+  cleanup_target (&current_target); /* Fill in the gaps */
   return prev != 0;
 }
 
 /* Remove a target_ops vector from the stack, wherever it may be. 
-   Return how many times it was removed (0 or 1 unless bug).  */
+   Return how many times it was removed (0 or 1).  */
 
 int
 unpush_target (t)
      struct target_ops *t;
 {
-  struct target_ops *u, *v;
-  int result = 0;
+  struct target_stack_item *cur, *prev;
 
-  for (u = current_target, v = 0;
-       u;
-       v = u, u = u->to_next)
-    if (u == t)
-      {
-	if (v == 0)
-	  pop_target();			/* unchain top copy */
-	else {
-	  (t->to_close)(0);		/* Let it clean up */
-	  v->to_next = t->to_next;	/* unchain middle copy */
-	}
-	result++;
-      }
-  return result;
+  /* Look for the specified target.  Note that we assume that a target
+     can only occur once in the target stack. */
+
+  for (cur = target_stack, prev = NULL; cur; prev = cur, cur = cur->next)
+    if (cur->target_ops == t)
+      break;
+
+  if (!cur)
+    return 0;			/* Didn't find target_ops, quit now */
+
+  /* Unchain the target */
+
+  if (!prev)
+    target_stack = NULL;
+  else
+    prev->next = cur->next;
+
+  free (cur);			/* Release the target_stack_item */
+
+  (t->to_close) (0);		/* Let it clean up */
+
+  return 1;
 }
 
 void
 pop_target ()
 {
-  (current_target->to_close)(0);	/* Let it clean up */
-  current_target = current_target->to_next;
-#if 0
-  /* This will dump core if ever called--push_target expects current_target
-     to be non-NULL.  But I don't think it's needed; I don't see how the
-     dummy_target could ever be removed from the stack.  */
-  if (!current_target)		/* At bottom, push dummy.  */
-    push_target (&dummy_target);
-#endif
+  (current_target.to_close)(0);	/* Let it clean up */
+  if (unpush_target (target_stack->target_ops) == 1)
+    return;
+
+  fprintf_unfiltered(gdb_stderr,
+		     "pop_target couldn't find target %s\n", 
+		     current_target.to_shortname);
+  abort();
 }
 
 #undef	MIN
@@ -599,14 +641,15 @@ target_xfer_memory (memaddr, myaddr, len, write)
   int curlen;
   int res;
   struct target_ops *t;
+  struct target_stack_item *item;
 
   /* to_xfer_memory is not guaranteed to set errno, even when it returns
      0.  */
   errno = 0;
 
   /* The quick case is that the top target does it all.  */
-  res = current_target->to_xfer_memory
-			(memaddr, myaddr, len, write, current_target);
+  res = current_target.to_xfer_memory
+			(memaddr, myaddr, len, write, &current_target);
   if (res == len)
     return 0;
 
@@ -617,15 +660,17 @@ target_xfer_memory (memaddr, myaddr, len, write)
   for (; len > 0;)
     {
       curlen = len;		/* Want to do it all */
-      for (t = current_target;
-	   t;
-	   t = t->to_has_all_memory? 0: t->to_next)
+      for (item = target_stack; item; item = item->next)
 	{
-	  res = t->to_xfer_memory(memaddr, myaddr, curlen, write, t);
-	  if (res > 0) break;	/* Handled all or part of xfer */
-	  if (res == 0) continue;	/* Handled none */
-	  curlen = -res;	/* Could handle once we get past res bytes */
+	  t = item->target_ops;
+
+	  res = t->to_xfer_memory (memaddr, myaddr, curlen, write, t);
+	  if (res > 0)
+	    break;		/* Handled all or part of xfer */
+	  if (t->to_has_all_memory)
+	    break;
 	}
+
       if (res <= 0)
 	{
 	  /* If this address is for nonexistent memory,
@@ -653,6 +698,7 @@ target_info (args, from_tty)
      int from_tty;
 {
   struct target_ops *t;
+  struct target_stack_item *item;
   int has_all_mem = 0;
   
   if (symfile_objfile != NULL)
@@ -663,14 +709,14 @@ target_info (args, from_tty)
     return;
 #endif
 
-  for (t = current_target;
-       t;
-       t = t->to_next)
+  for (item = target_stack; item; item = item->next)
     {
+      t = item->target_ops;
+
       if ((int)(t->to_stratum) <= (int)dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf_unfiltered("\tWhile running this, gdb does not access memory from...\n");
+	printf_unfiltered("\tWhile running this, GDB does not access memory from...\n");
       printf_unfiltered("%s:\n", t->to_longname);
       (t->to_files_info)(t);
       has_all_mem = t->to_has_all_memory;
@@ -712,7 +758,7 @@ target_detach (args, from_tty)
 #ifdef DO_DEFERRED_STORES
   DO_DEFERRED_STORES;
 #endif
-  (current_target->to_detach) (args, from_tty);
+  (current_target.to_detach) (args, from_tty);
 }
 
 void
@@ -720,9 +766,9 @@ target_link (modname, t_reloc)
      char *modname;
      CORE_ADDR *t_reloc;
 {
-  if (STREQ(current_target->to_shortname, "rombug"))
+  if (STREQ(current_target.to_shortname, "rombug"))
     {
-      (current_target->to_lookup_symbol) (modname, t_reloc);
+      (current_target.to_lookup_symbol) (modname, t_reloc);
       if (*t_reloc == 0)
       error("Unable to link to %s and get relocation in rombug", modname);
     }
@@ -820,6 +866,8 @@ find_core_target ()
 void
 generic_mourn_inferior ()
 {
+  extern int show_breakpoint_hit_counts;
+
   inferior_pid = 0;
   attach_flag = 0;
   breakpoint_init_inferior ();
@@ -835,7 +883,10 @@ generic_mourn_inferior ()
 
   /* It is confusing to the user for ignore counts to stick around
      from previous runs of the inferior.  So clear them.  */
-  breakpoint_clear_ignore_counts ();
+  /* However, it is more confusing for the ignore counts to disappear when
+     using hit counts.  So don't clear them if we're counting hits.  */
+  if (!show_breakpoint_hit_counts)
+    breakpoint_clear_ignore_counts ();
 }
 
 /* This table must match in order and size the signals in enum target_signal
@@ -1270,6 +1321,10 @@ store_waitstatus (ourstatus, hoststatus)
 }
 
 
+/* Returns zero to leave the inferior alone, one to interrupt it.  */
+int (*target_activity_function) PARAMS ((void));
+int target_activity_fd;
+
 /* Convert a normal process ID to a string.  Returns the string in a static
    buffer.  */
 
@@ -1292,8 +1347,7 @@ core-file, and process, if any), as well as the symbol file name.";
 void
 _initialize_targets ()
 {
-  current_target = &dummy_target;
-  cleanup_target (current_target);
+  push_target (&dummy_target);
 
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);

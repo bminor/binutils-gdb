@@ -300,6 +300,7 @@ ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
 
 pn-*-*)			gdb_target=pn ;;
+powerpc-*-netware*)	gdb_target=ppc-nw ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;
 

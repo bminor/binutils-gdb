@@ -217,6 +217,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  SET_NAMESTRING();
 
+	  /* Null name means end of .o file.  Don't start a new one. */
+	  if (*namestring == '\000')
+	    continue;
+
 	  /* Some compilers (including gcc) emit a pair of initial N_SOs.
 	     The first one is a directory name; the second the file name.
 	     If pst exists, is empty, and has a filename ending in '/',

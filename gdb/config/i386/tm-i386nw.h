@@ -29,3 +29,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Stop backtracing when we wander into main.  */
 
 #define FRAME_CHAIN_VALID_ALTERNATE
+
+
+/* Offsets (in target ints) into jmp_buf.  Not defined in any system header
+   file, so we have to step through setjmp/longjmp with a debugger and figure
+   them out.  */
+
+#define JB_ELEMENT_SIZE 4	/* jmp_buf[] is array of ints */
+
+#define JB_PC	6		/* Setjmp()'s return PC saved here */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+extern int
+get_longjmp_target PARAMS ((CORE_ADDR *));
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

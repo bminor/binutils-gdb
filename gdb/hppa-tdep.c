@@ -1209,7 +1209,7 @@ restore_pc_queue (fsr)
         }
     }
   target_terminal_ours ();
-  (current_target->to_fetch_registers) (-1);
+  target_fetch_registers (-1);
   return 1;
 }
 

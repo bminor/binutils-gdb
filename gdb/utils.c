@@ -465,7 +465,7 @@ quit ()
   if (job_control
       /* If there is no terminal switching for this target, then we can't
 	 possibly get screwed by the lack of job control.  */
-      || current_target->to_terminal_ours == NULL)
+      || current_target.to_terminal_ours == NULL)
     fprintf_unfiltered (gdb_stderr, "Quit\n");
   else
     fprintf_unfiltered (gdb_stderr,
@@ -541,8 +541,12 @@ request_quit (signo)
      about USG defines and stuff like that.  */
   signal (signo, request_quit);
 
+#ifdef REQUEST_QUIT
+  REQUEST_QUIT;
+#else
   if (immediate_quit)
     quit ();
+#endif
 }
 
 
@@ -823,6 +827,13 @@ query (va_alist)
   /* Automatically answer "yes" if input is not from a terminal.  */
   if (!input_from_terminal_p ())
     return 1;
+/* start-sanitize-mpw */
+#ifdef MPW
+  /* Automatically answer "yes" if called from MacGDB.  */
+  if (mac_app)
+    return 1;
+#endif /* MPW */
+/* end-sanitize-mpw */
 
   while (1)
     {
@@ -841,6 +852,14 @@ query (va_alist)
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032query\n");
 
+/* start-sanitize-mpw */
+#ifdef MPW
+      /* If not in MacGDB, move to a new line so the entered line doesn't
+	 have a prompt on the front of it. */
+      if (!mac_app)
+	fputs_unfiltered ("\n", gdb_stdout);
+#endif /* MPW */
+/* end-sanitize-mpw */
       gdb_flush (gdb_stdout);
       answer = fgetc (stdin);
       clearerr (stdin);		/* in case of C-d */
@@ -1148,6 +1167,10 @@ void
 wrap_here(indent)
      char *indent;
 {
+  /* This should have been allocated, but be paranoid anyway. */
+  if (!wrap_buffer)
+    abort ();
+
   if (wrap_buffer[0])
     {
       *wrap_pointer = '\0';
@@ -1330,16 +1353,6 @@ fputs_filtered (linebuffer, stream)
 {
   fputs_maybe_filtered (linebuffer, stream, 1);
 }
-
-#ifndef FPUTS_UNFILTERED_OVERRIDE
-void
-fputs_unfiltered (linebuffer, stream)
-     const char *linebuffer;
-     FILE *stream;
-{
-  fputs (linebuffer, stream);
-}
-#endif /* FPUTS_UNFILTERED_OVERRIDE */
 
 void
 putc_unfiltered (c)

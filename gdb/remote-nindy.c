@@ -685,7 +685,8 @@ nindy_before_main_loop ()
   char ttyname[100];
   char *p, *p2;
 
-  while (current_target != &nindy_ops) { /* remote tty not specified yet */
+  while (target_stack->target_ops != &nindy_ops) /* What is this crap??? */
+    {				/* remote tty not specified yet */
 	if ( instream == stdin ){
 		printf_unfiltered("\nAttach /dev/ttyNN -- specify NN, or \"quit\" to quit:  ");
 		gdb_flush( gdb_stdout );

@@ -209,7 +209,7 @@ core_open (filename, from_tty)
   } else {
     warning (
 "you won't be able to access this core file until you terminate\n\
-your %s; do ``info files''", current_target->to_longname);
+your %s; do ``info files''", target_longname);
   }
 }
 

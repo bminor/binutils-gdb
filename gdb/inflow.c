@@ -545,7 +545,7 @@ kill_command (arg, from_tty)
   /* Killing off the inferior can leave us with a core file.  If so,
      print the state we are left in.  */
   if (target_has_stack) {
-    printf_filtered ("In %s,\n", current_target->to_longname);
+    printf_filtered ("In %s,\n", target_longname);
     if (selected_frame == NULL)
       fputs_filtered ("No selected stack frame.\n", gdb_stdout);
     else
@@ -577,6 +577,67 @@ clear_sigint_trap()
 {
   signal (SIGINT, osig);
 }
+
+#if defined (SIGIO) && defined (FASYNC) && defined (FD_SET)
+static void (*old_sigio) ();
+
+static void
+handle_sigio (signo)
+     int signo;
+{
+  int numfds;
+  fd_set readfds;
+
+  signal (SIGIO, handle_sigio);
+
+  FD_ZERO (&readfds);
+  FD_SET (target_activity_fd, &readfds);
+  numfds = select (target_activity_fd + 1, &readfds, NULL, NULL, NULL);
+  if (numfds >= 0 && FD_ISSET (target_activity_fd, &readfds))
+    {
+      if ((*target_activity_function) ())
+	kill (inferior_pid, SIGINT);
+    }
+}
+
+static int old_fcntl_flags;
+
+void
+set_sigio_trap ()
+{
+  if (target_activity_function)
+    {
+      old_sigio = (void (*) ()) signal (SIGIO, handle_sigio);
+      fcntl (target_activity_fd, F_SETOWN, getpid()); 
+      old_fcntl_flags = fcntl (target_activity_fd, F_GETFL, 0);
+      fcntl (target_activity_fd, F_SETFL, old_fcntl_flags | FASYNC);
+    }
+}
+
+void
+clear_sigio_trap ()
+{
+  if (target_activity_function)
+    {
+      signal (SIGIO, old_sigio);
+      fcntl (target_activity_fd, F_SETFL, old_fcntl_flags);
+    }
+}
+#else /* No SIGIO.  */
+void
+set_sigio_trap ()
+{
+  if (target_activity_function)
+    abort ();
+}
+
+void
+clear_sigio_trap ()
+{
+  if (target_activity_function)
+    abort ();
+}
+#endif /* No SIGIO.  */
 
 
 /* This is here because this is where we figure out whether we (probably)
