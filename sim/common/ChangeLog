@@ -1,3 +1,30 @@
+Fri Mar 21 13:36:20 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* run.c (string.h, strings.h, stdlib.h): Include.
+
+	* sim-events.c (sim_events_tick): Recent cleanup failed to return
+ 	0 when nothing pending.
+
+	* run.c (sim_size, sim_trace): Plicate GCC - these two functions
+ 	will soon be going away.
+	(getopt): Plicate GCC.
+
+	* sim-endian.c (sim-io.h): Plicate GCC.
+	* sim-bits.c (sim-io.h): Ditto.
+	* sim-n-bits.h (ROTn): Ditto.
+
+	* sim-io.c (sim_io_error): Correct check for NULL.
+
+	* sim-assert.h (SIM_FILTER_PATH): Separate out the code filtering
+ 	the __FILE__.
+	* sim-events.c: Use SIM_FILTER_PATH to filter out the filename
+ 	path.
+
+Wed Mar 19 01:12:06 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_*: Move so that they are outside of
+ 	SIM_AC_COMMON - SIM_AC_COMMON was gobling arguments.
+
 Tue Mar 18 20:48:12 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* sim-alu.h: Include sim-xcat.h.

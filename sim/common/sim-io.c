@@ -22,153 +22,153 @@
 #ifndef _SIM_IO_C_
 #define _SIM_IO_C_
 
-#include "engine.h"
+#include "sim-state.h"
 
 /* See the file include/callbacks.h for a description */
 
 
 INLINE_SIM_IO(int)
-sim_io_init(engine *system)
+sim_io_init(SIM_DESC sd)
 {
-  return system->callback->init (system->callback);
+  return sd->callback->init (sd->callback);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_shutdown(engine *system)
+sim_io_shutdown(SIM_DESC sd)
 {
-  return system->callback->shutdown (system->callback);
+  return sd->callback->shutdown (sd->callback);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_unlink(engine *system,
+sim_io_unlink(SIM_DESC sd,
 	      const char *f1)
 {
-  return system->callback->unlink (system->callback, f1);
+  return sd->callback->unlink (sd->callback, f1);
 }
 
 
 INLINE_SIM_IO(long)
-sim_io_time(engine *system,
+sim_io_time(SIM_DESC sd,
 	    long *t)
 {
-  return system->callback->time (system->callback, t);
+  return sd->callback->time (sd->callback, t);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_system(engine *system, const char *s)
+sim_io_system(SIM_DESC sd, const char *s)
 {
-  return system->callback->system (system->callback, s);
+  return sd->callback->system (sd->callback, s);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_rename(engine *system,
+sim_io_rename(SIM_DESC sd,
 	      const char *f1,
 	      const char *f2)
 {
-  return system->callback->rename (system->callback, f1, f2);
+  return sd->callback->rename (sd->callback, f1, f2);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_write_stdout(engine *system,
+sim_io_write_stdout(SIM_DESC sd,
 		    const char *buf,
 		    int len)
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    return system->callback->write_stdout (system->callback, buf, len);
+    return sd->callback->write_stdout (sd->callback, buf, len);
     break;
   case DONT_USE_STDIO:
-    return system->callback->write (system->callback, 1, buf, len);
+    return sd->callback->write (sd->callback, 1, buf, len);
     break;
   default:
-    sim_io_error (system, "sim_io_write_stdout: unaccounted switch\n");
+    sim_io_error (sd, "sim_io_write_stdout: unaccounted switch\n");
     break;
   }
   return 0;
 }
 
 
-INLINE_SIM_IO(int)
-sim_io_flush_stdout(engine *system)
+INLINE_SIM_IO(void)
+sim_io_flush_stdout(SIM_DESC sd)
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    return system->callback->flush_stdout (system->callback);
+    sd->callback->flush_stdout (sd->callback);
     break;
   case DONT_USE_STDIO:
     break;
   default:
-    sim_io_error (system, "sim_io_flush_stdout: unaccounted switch\n");
+    sim_io_error (sd, "sim_io_flush_stdout: unaccounted switch\n");
     break;
   }
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_write_stderr(engine *system,
+sim_io_write_stderr(SIM_DESC sd,
 		    const char *buf,
 		    int len)
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    return system->callback->write_stderr (system->callback, buf, len);
+    return sd->callback->write_stderr (sd->callback, buf, len);
     break;
   case DONT_USE_STDIO:
-    return system->callback->write (system->callback, 2, buf, len);
+    return sd->callback->write (sd->callback, 2, buf, len);
     break;
   default:
-    sim_io_error (system, "sim_io_write_stderr: unaccounted switch\n");
+    sim_io_error (sd, "sim_io_write_stderr: unaccounted switch\n");
     break;
   }
   return 0;
 }
 
 
-INLINE_SIM_IO(int)
-sim_io_flush_stderr(engine *system)
+INLINE_SIM_IO(void)
+sim_io_flush_stderr(SIM_DESC sd)
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    return system->callback->flush_stderr (system->callback);
+    sd->callback->flush_stderr (sd->callback);
     break;
   case DONT_USE_STDIO:
     break;
   default:
-    sim_io_error (system, "sim_io_flush_stderr: unaccounted switch\n");
+    sim_io_error (sd, "sim_io_flush_stderr: unaccounted switch\n");
     break;
   }
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_write(engine *system,
+sim_io_write(SIM_DESC sd,
 	     int fd,
 	     const char *buf,
 	     int len)
 {
-  return system->callback->write (system->callback, fd, buf, len);
+  return sd->callback->write (sd->callback, fd, buf, len);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_read_stdin(engine *system,
+sim_io_read_stdin(SIM_DESC sd,
 		  char *buf,
 		  int len)
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    return system->callback->read_stdin (system->callback, buf, len);
+    return sd->callback->read_stdin (sd->callback, buf, len);
     break;
   case DONT_USE_STDIO:
-    return system->callback->read (system->callback, 0, buf, len);
+    return sd->callback->read (sd->callback, 0, buf, len);
     break;
   default:
-    sim_io_error (system, "sim_io_read_stdin: unaccounted switch\n");
+    sim_io_error (sd, "sim_io_read_stdin: unaccounted switch\n");
     break;
   }
   return 0;
@@ -176,115 +176,117 @@ sim_io_read_stdin(engine *system,
 
 
 INLINE_SIM_IO(int)
-sim_io_read(engine *system, int fd,
+sim_io_read(SIM_DESC sd, int fd,
 	    char *buf,
 	    int len)
 {
-  return system->callback->read(system->callback, fd, buf, len);
+  return sd->callback->read (sd->callback, fd, buf, len);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_open(engine *system,
+sim_io_open(SIM_DESC sd,
 	    const char *name,
 	    int flags)
 {
-  return system->callback->open (system->callback, name, flags);
+  return sd->callback->open (sd->callback, name, flags);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_lseek(engine *system,
+sim_io_lseek(SIM_DESC sd,
 	     int fd,
 	     long off,
 	     int way)
 {
-  return system->callback->lseek (system->callback, fd, off, way);
+  return sd->callback->lseek (sd->callback, fd, off, way);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_isatty(engine *system,
+sim_io_isatty(SIM_DESC sd,
 	      int fd)
 {
-  return system->callback->isatty (system->callback, fd);
+  return sd->callback->isatty (sd->callback, fd);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_get_errno(engine *system)
+sim_io_get_errno(SIM_DESC sd)
 {
-  return system->callback->get_errno (system->callback);
+  return sd->callback->get_errno (sd->callback);
 }
 
 
 INLINE_SIM_IO(int)
-sim_io_close(engine *system,
+sim_io_close(SIM_DESC sd,
 	     int fd)
 {
-  return system->callback->close (system->callback, fd);
+  return sd->callback->close (sd->callback, fd);
 }
 
 
 INLINE_SIM_IO(void)
-sim_io_printf(engine *system,
+sim_io_printf(SIM_DESC sd,
 	      const char *fmt,
 	      ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  system->callback->vprintf_filtered (system->callback, fmt, ap);
+  sd->callback->vprintf_filtered (sd->callback, fmt, ap);
   va_end(ap);
 }
 
 
 INLINE_SIM_IO(void)
-sim_io_vprintf(engine *system,
+sim_io_vprintf(SIM_DESC sd,
 	       const char *fmt,
 	       va_list ap)
 {
-  system->callback->vprintf_filtered (system->callback, fmt, ap);
+  sd->callback->vprintf_filtered (sd->callback, fmt, ap);
 }
 
 
 INLINE_SIM_IO(void)
-sim_io_eprintf(engine *system,
+sim_io_eprintf(SIM_DESC sd,
 	      const char *fmt,
 	      ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  system->callback->evprintf_filtered (system->callback, fmt, ap);
+  sd->callback->evprintf_filtered (sd->callback, fmt, ap);
   va_end(ap);
 }
 
 
 INLINE_SIM_IO(void)
-sim_io_evprintf(engine *system,
+sim_io_evprintf(SIM_DESC sd,
 		const char *fmt,
 		va_list ap)
 {
-  system->callback->evprintf_filtered (system->callback, fmt, ap);
+  sd->callback->evprintf_filtered (sd->callback, fmt, ap);
 }
 
 
 INLINE_SIM_IO(void)
-sim_io_error(engine *system,
+sim_io_error(SIM_DESC sd,
 	     const char *fmt,
 	     ...)
 {
-  char buf[1000];
-  va_list ap;
-  va_start(ap, fmt);
-  vsprintf(buf, fmt, ap);
-  va_end(ap);
-
-  if (strlen(buf) >= sizeof(buf))
-    abort();
-
-  system->callback->error (system->callback, "%s", buf);
+  if (sd == NULL || sd->callback == NULL) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf (stderr, fmt, ap);
+    va_end(ap);
+    abort ();
+  }
+  else {
+    va_list ap;
+    va_start(ap, fmt);
+    sd->callback->evprintf_filtered (sd->callback, fmt, ap);
+    va_end(ap);
+    sd->callback->error (sd->callback, "");
+  }
 }
-
-
 
 #endif

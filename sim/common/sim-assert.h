@@ -22,48 +22,63 @@
 #ifndef _SIM_ASSERT_H_
 #define _SIM_ASSERT_H_
 
-# if defined (WITH_ASSERT)
-#define SIM_ASSERT(EXPRESSION) \
-do { \
-  if (WITH_ASSERT) { \
-    if (!(EXPRESSION)) { \
-      /* strip leading path */ \
-      const char *file = __FILE__; \
-      const char *p = file; \
-      while (*p != '\0' && *p != ':') { \
-	if (*p == '/') \
-	  file = p; \
-	p++; \
+#define SIM_FILTER_PATH(FILE, PATH) \
+do \
+  { \
+    /* strip leading path */ \
+    const char *p = (PATH); \
+    (FILE) = p; \
+    while (*p != '\0' && *p != ':') \
+      { \
+        if (*p == '/') \
+          (FILE) = p; \
+        p++; \
       } \
-      /* report the failure */ \
-      sim_io_error (sd, "%s:%d: assertion failed - %s", \
-		    file, __LINE__, #EXPRESSION); \
-    } \
   } \
-} while (0)
+while (0)
+
+/* The subtle difference between SIM_ASSERT and ASSERT is that
+   SIM_ASSERT passes `sd' to sim_io_error for the SIM_DESC,
+   ASSERT passes NULL.  */
+
+#if defined (WITH_ASSERT)
+#define SIM_ASSERT(EXPRESSION) \
+do \
+  { \
+    if (WITH_ASSERT) \
+      { \
+        if (!(EXPRESSION)) \
+          { \
+            /* report the failure */ \
+            const char *file; \
+            SIM_FILTER_PATH(file, __FILE__); \
+            sim_io_error (sd, "%s:%d: assertion failed - %s", \
+                          file, __LINE__, #EXPRESSION); \
+          } \
+      } \
+  } \
+while (0)
 #else
 #define SIM_ASSERT(EXPRESSION) do { /*nothing*/; } while (0)
 #endif
 
 #if defined (WITH_ASSERT)
 #define ASSERT(EXPRESSION) \
-do { \
-  if (WITH_ASSERT) { \
-    if (!(EXPRESSION)) { \
-      /* strip leading path */ \
-      const char *file = __FILE__; \
-      const char *p = file; \
-      while (*p != '\0' && *p != ':') { \
-	if (*p == '/') \
-	  file = p; \
-	p++; \
+do \
+  { \
+    if (WITH_ASSERT) \
+      { \
+        if (!(EXPRESSION)) \
+          { \
+            /* report the failure */ \
+            const char *file; \
+            SIM_FILTER_PATH(file, __FILE__); \
+            sim_io_error (NULL, "%s:%d: assertion failed - %s", \
+                          file, __LINE__, #EXPRESSION); \
+          } \
       } \
-      /* report the failure */ \
-      sim_io_error (NULL, "%s:%d: assertion failed - %s", \
-		    file, __LINE__, #EXPRESSION); \
-    } \
   } \
-} while (0)
+while (0)
 #else
 #define ASSERT(EXPRESSION) do { /*nothing*/; } while (0)
 #endif
