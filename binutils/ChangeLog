@@ -1,3 +1,7 @@
+2004-10-18  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* strings.c: Include <sys/stat.h>.
+
 2004-10-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* budemang.c (demangle): Fix thinko.

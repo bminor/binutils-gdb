@@ -67,6 +67,7 @@
 #include "bucomm.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
+#include <sys/stat.h>
 
 /* Some platforms need to put stdin into binary mode, to read
     binary files.  */
