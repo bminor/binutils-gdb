@@ -90,6 +90,9 @@ h8500-*-*)
 	;;
 sh-*-*)
 	multidirs="ml"
+# start-sanitize-sh3e
+	multidirs="ml m3e"
+# end-sanitize-sh3e
 	;;
 mips*-*-*)
 	# Note that not all of these will be built for a particular

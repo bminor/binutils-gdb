@@ -289,6 +289,35 @@ else
 	done
 fi
 
+sh3e_files="ChangeLog cfg-ml-com.in"
+if ( echo $* | grep keep\-sh3e > /dev/null ) ; then
+	for i in $sh3e_files ; do
+		if test ! -d $i && (grep sanitize-sh3e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping sh3e stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $sh3e_files ; do
+		if test ! -d $i && (grep sanitize-sh3e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"sh3e\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-sh3e/,/end-\sanitize\-sh3e/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	echo Catering to RMS by removing traces of \"gdbtk\"...
 	if [ -n "${verbose}" ] ; then
