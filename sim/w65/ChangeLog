@@ -1,3 +1,7 @@
+Wed May 24 16:31:38 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* configure.in: Fix typo in last change.
+
 Mon Mar 27 10:32:34 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* run.c: parse arguments with getopt().

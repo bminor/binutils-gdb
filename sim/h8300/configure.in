@@ -16,7 +16,7 @@ files="../../bfd/hosts/${my_host}.h"
 links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
-	files=../bfd/hosts/std-host.h
+	files=../../bfd/hosts/std-host.h
 	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
 fi
 
