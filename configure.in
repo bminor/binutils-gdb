@@ -113,6 +113,10 @@ esac
 
 # per-target:
 
+gasdir=gas
+use_gnu_ld=
+use_gnu_as=
+
 case "${target}" in
   hppa*-hp-hpux)	  target_makefile_frag=config/mt-hppa ;;
 esac
@@ -194,6 +198,7 @@ case "${target}" in
     ;;
   hppa*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas /pagas /;s/shellutils//'`
+    gasdir=pagas
     ;;
   i[34]86-*-go32)
     # add the go32 support tools to the list
@@ -206,10 +211,19 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
     ;;
   sh-*-*)
-    configdirs=`echo gprof ${configdirs}`
+    case "${host}" in
+      i[34]86-*-go32) ;; # don't add gprof
+      *) configdirs=`echo gprof ${configdirs}` ;;
+    esac
+    ;;
+  sparc-*-sunos4*)
+    use_gnu_ld=no
     ;;
   i[34]86-*-sco*)
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
+    ;;
+  *-*-sysv4)
+    use_gnu_ld=no
     ;;
   *-*-vms)
     configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
@@ -217,15 +231,31 @@ case "${target}" in
 esac
 
 # Set with_gnu_as and with_gnu_ld as appropriate.
-# This is commented out for now.
-#if [ x${with_gnu_as} != xyes ] && echo ${configdirs} | grep gas > /dev/null && [ -d ${srcdir}/gas ]; then
-#  with_gnu_as=yes
-#  withoptions="$withoptions -with-gnu-as"
-#fi
-#if [ x${with_gnu_ld} != xyes ] && echo ${configdirs} | grep ld > /dev/null && [ -d ${srcdir}/ld ]; then
-#  with_gnu_ld=yes
-#  withoptions="$withoptions -with-gnu-ld"
-#fi
+#
+# This is done by determining whether or not the appropriate directory
+# is available, and by checking whether or not specific configurations
+# have requested that this magic not happen.
+# 
+# The command line options always override the explicit settings in 
+# configure.in, and the settings in configure.in override this magic.
+#
+# If the default for a toolchain is to use GNU as and ld, and you don't 
+# want to do that, then you should use the --without-gnu-as and
+# --without-gnu-ld options for the configure script.
+
+if [ x${use_gnu_as} = x ] ; then
+  if [ x${with_gnu_as} != xno ] && echo ${configdirs} | grep "${gasdir} " > /dev/null 2>&1 && [ -d ${srcdir}/${gasdir} ] ; then
+    with_gnu_as=yes
+    withoptions="$withoptions --with-gnu-as"
+  fi
+fi
+
+if [ x${use_gnu_ld} = x ] ; then
+  if [ x${with_gnu_ld} != xno ] && echo ${configdirs} | grep ld > /dev/null 2>&1 && [ -d ${srcdir}/ld ] ; then
+    with_gnu_ld=yes
+    withoptions="$withoptions --with-gnu-ld"
+  fi
+fi
 
 #
 # Local Variables:
