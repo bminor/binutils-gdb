@@ -7315,7 +7315,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma relocation;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
-      long insn;
+      long insn, mask;
       struct ppc_stub_hash_entry *stub_entry;
       bfd_vma max_br_offset;
       bfd_vma from;
@@ -8406,12 +8406,23 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC64_TPREL16_LO_DS:
 	case R_PPC64_DTPREL16_DS:
 	case R_PPC64_DTPREL16_LO_DS:
-	  if (((relocation + addend) & 3) != 0)
+	  insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
+	  mask = 3;
+	  /* If this reloc is against an lq insn, then the value must be
+	     a multiple of 16.  This is somewhat of a hack, but the
+	     "correct" way to do this by defining _DQ forms of all the
+	     _DS relocs bloats all reloc switches in this file.  It
+	     doesn't seem to make much sense to use any of these relocs
+	     in data, so testing the insn should be safe.  */
+	  if ((insn & (0x3f << 26)) == (56 << 26))
+	    mask = 15;
+	  if (((relocation + addend) & mask) != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: error: relocation %s not a multiple of 4"),
+		(_("%s: error: relocation %s not a multiple of %d"),
 		 bfd_archive_filename (input_bfd),
-		 ppc64_elf_howto_table[(int) r_type]->name);
+		 ppc64_elf_howto_table[(int) r_type]->name,
+		 mask + 1);
 	      bfd_set_error (bfd_error_bad_value);
 	      ret = FALSE;
 	      continue;

@@ -10,6 +10,7 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
     run_dump_test "astest64"
     run_dump_test "astest2_64"
     run_dump_test "test1elf64"
+    run_dump_test "test2elf64"
 } elseif { [istarget powerpc*-*aix*] } then {
     run_dump_test "test1xcoff32"
 } elseif { [istarget powerpc*-*-*bsd*] \

@@ -2447,7 +2447,7 @@ md_assemble (str)
 	    }
 
 	  if (ppc_obj64
-	      && (operand->flags & PPC_OPERAND_DS) != 0)
+	      && (operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
 	    {
 	      switch (reloc)
 		{
@@ -5714,13 +5714,18 @@ md_apply_fix3 (fixP, valP, seg)
 	    abort ();
 	  {
 	    unsigned char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
-	    unsigned long val;
+	    long val, mask;
 
 	    if (target_big_endian)
-	      val = bfd_getb16 (where);
+	      val = bfd_getb32 (where - 2);
 	    else
-	      val = bfd_getl16 (where);
-	    val |= (value & 0xfffc);
+	      val = bfd_getl32 (where);
+	    mask = 0xfffc;
+	    /* lq insns reserve the four lsbs.  */
+	    if ((ppc_cpu & PPC_OPCODE_POWER4) != 0
+		&& (val & (0x3f << 26)) == (56 << 26))
+	      mask = 0xfff0;
+	    val |= value & mask;
 	    if (target_big_endian)
 	      bfd_putb16 ((bfd_vma) val, where);
 	    else

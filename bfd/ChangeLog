@@ -1,3 +1,8 @@
+2003-06-10  Alan Modra  <amodra@bigpond.net.au>
+	    Gary Hade <garyhade@us.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section <*_DS>): Special case lq.
+
 2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* archures.c (bfd_mach_h8300sxn): New architecture.
@@ -116,12 +121,12 @@
 
 	* elf32-v850.c (v850_elf_howto_t): Rename R_V850_32to
 	R_V850_ABS32.  Add entry for R_V850_REL32.
-        (v850_elf_reloc_map): Likewise.
-        (v850_elf_check_relocs): Likewise.
-        (v850_elf_perform_relocation): Likewise.
-        (v850_elf_final_link_relocate): Likewise.  Include computation
+	(v850_elf_reloc_map): Likewise.
+	(v850_elf_check_relocs): Likewise.
+	(v850_elf_perform_relocation): Likewise.
+	(v850_elf_final_link_relocate): Likewise.  Include computation
 	to make R_V850_REl32 pc-relative.
-          
+
 2003-06-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_size_dynamic_sections): Create .interp section
@@ -375,8 +380,8 @@
 	(allocate_dynrelocs):  For undef weak syms with non-default
 	visibility, a) don't allocate plt entries, b) don't allocate
 	.got relocs, c) discard dyn rel space
-        (sh_elf_relocate_section): d) don't generate .got relocs, e)
-        don't generate dynamic relocs.
+	(sh_elf_relocate_section): d) don't generate .got relocs, e)
+	don't generate dynamic relocs.
 	(sh_elf_copy_indirect_symbol): Don't copy ELF_LINK_NON_GOT_REF
 	for weakdefs when symbol already adjusted.
 

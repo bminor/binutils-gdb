@@ -1,3 +1,8 @@
+2003-06-10  Gary Hade <garyhade@us.ibm.com>
+
+	* gas/ppc/test2elf64.{s,d}: New test.
+	* gas/ppc/ppc.exp: Run new test.
+
 2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/h8300/h8sx_mov_imm.[sd]: New test.

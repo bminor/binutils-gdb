@@ -1,3 +1,9 @@
+2003-06-10  Alan Modra  <amodra@bigpond.net.au>
+	    Gary Hade <garyhade@us.ibm.com>
+
+	* config/tc-ppc.c (md_assemble): Handle PPC_OPERAND_DQ.
+	(md_apply_fix3): Special case lq insn.
+
 2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-h8300.c (get_rtsl_operands): Accept unbracketed register
@@ -126,9 +132,9 @@
 2003-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* tc-v850.c (tc-gen_reloc): Translate BFD_RELOC_32 into
-        BFD_RELOC_32_PCREL if the reloc is pc-relative.  Do this
-        before calling bfd_reloc_type_lookup.
-        
+	BFD_RELOC_32_PCREL if the reloc is pc-relative.  Do this
+	before calling bfd_reloc_type_lookup.
+
 2003-06-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (emit_expr): Set dot_value.
