@@ -6369,6 +6369,9 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
     _bfd_elf_section_offset (output_bfd, info, input_section, rel->r_offset);
   if (outrel.r_offset == (bfd_vma) -1)
     skip = true;
+  /* FIXME: For -2 runtime relocation needs to be skipped, but
+     properly resolved statically and installed.  */
+  BFD_ASSERT (outrel.r_offset != (bfd_vma) -2);
 
   /* If we've decided to skip this relocation, just output an empty
      record.  Note that R_MIPS_NONE == 0, so that this call to memset

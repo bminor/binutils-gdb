@@ -1,3 +1,35 @@
+2002-02-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Enable
+	absptr -> pcrel optimization for shared libs.
+	Only create minimal .eh_frame_hdr if absptr FDE encoding in shared
+	library cannot be converted to pcrel.
+	(_bfd_elf_eh_frame_section_offset): Return -2 if making absptr
+	relative.
+	* elf32-i386.c (elf_i386_relocate_section): If
+	_bfd_elf_section_offset returned -2, skip, but make sure the
+	relocation is installed.
+	* elf32-arm.h (elf32_arm_final_link_relocate): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elf64-sparc.c	(sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Handle
+	_bfd_elf_section_offset returning -2 the same way as -1.
+	* elfxx-ia64.c (elfNN_ia64_install_dyn_reloc): Likewise.
+	* elf32-mips.c (mips_elf_create_dynamic_relocation): Add FIXME
+	and BFD_ASSERT.
+	* elf64-mips.c (mips_elf64_create_dynamic_relocation): Likewise.
+
 2002-02-18  Tom Rix  <trix@redhat.com>
 
 	* xcofflink.c (bfd_xcoff_link_gernate_rtinit): Add -brtl support.
