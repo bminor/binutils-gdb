@@ -1,3 +1,7 @@
+2003-02-21  David Carlton  <carlton@math.stanford.edu>
+
+	* arm-tdep.c (arm_gdbarch_init): Add break after default label.
+
 2003-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	Based on a patch from Daniel Berlin (dberlin@dberlin.org).
