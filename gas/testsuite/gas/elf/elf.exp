@@ -8,7 +8,11 @@ if { [istarget "*-elf*"]
      || [istarget "sparc*-*-solaris*"]
      || [istarget "mips*-*-irix6*"] } then {
 
+    # FIXME: This doesn't work for MIPS targets because of the .reginfo
+    # and .mdebug sections.
+    setup_xfail mips*-*-*
     run_dump_test "section0" 
-    run_dump_test "section1" 
 
+    setup_xfail mips*-*-*
+    run_dump_test "section1" 
 }

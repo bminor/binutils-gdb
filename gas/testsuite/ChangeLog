@@ -1,3 +1,19 @@
+1999-06-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/mips/sync.d: Pass -mips2 to the assembler.
+
+	* gas/mips/elf_e_flags.s: Tweak code so that the tests pass for
+	mips-elf target as well as mips64-elf target.
+	* gas/mips/elf_e_flags1.d: Corresponding changes.
+	* gas/mips/elf_e_flags2.d: Likewise.
+	* gas/mips/elf_e_flags3.d: Likewise.
+	* gas/mips/elf_e_flags4.d: Likewise.
+
+	* gas/elf/elf.exp: Add setup_xfail for mips*-*-*.
+
+	* gas/all/itbl-test.c (main): Update itbl_get_reg_val call for new
+	parameter.
+
 1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* gas/sparc/synth64.s: Add checks for single register signx/clruw.
