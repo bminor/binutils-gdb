@@ -346,8 +346,13 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips-*-sysv4*MP* | mips-*-linux-gnu* | mips-*-gnu*)
+      mips-*-sysv4*MP* | mips-*-gnu*)
 			    fmt=elf em=tmips ;;
+      mips-*-linux-gnu*)
+			    fmt=elf em=tmips
+			    AC_DEFINE(MIPS_STABS_ELF, 1,
+				[Use ELF stabs for MIPS, not ECOFF stabs])
+			    ;;
       mips-*-sysv*)         fmt=ecoff ;;
       mips-*-elf* | mips-*-rtems* | mips-*-openbsd*)
 			    fmt=elf ;;
@@ -602,8 +607,8 @@ changequote([,])dnl
     case ${generic_target}-${fmt} in
       mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
       mips-*-linux-gnu*-*) case "$endian" in
-			big)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
-			*)	emulation="mipslelf mipsbelf mipself mipslecoff mipsbecoff mipsecoff" ;;
+			big)	emulation="mipsbelf mipslelf mipself" ;;
+			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
       mips-*-lnews*-ecoff) ;;
       mips-*-*-ecoff)	case "$endian" in
