@@ -103,18 +103,18 @@ struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  struct symtab **symtab);
 
 static
+struct symbol *lookup_symbol_aux_psymtabs (int block_index,
+					   const char *name,
+					   const char *mangled_name,
+					   const namespace_enum namespace,
+					   struct symtab **symtab);
+static
 struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  const char *mangled_name,
 					  const namespace_enum namespace,
 					  int *is_a_field_of_this,
 					  struct symtab **symtab);
 
-static
-struct symbol *lookup_symbol_aux_psymtabs (int block_index,
-					   const char *name,
-					   const char *mangled_name,
-					   const namespace_enum namespace,
-					   struct symtab **symtab);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -800,8 +800,8 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      way.  */
 
   sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				  namespace, is_a_field_of_this,
-				  symtab);
+				   namespace, is_a_field_of_this,
+				   symtab);
   if (sym != NULL)
     return sym;
 
@@ -843,8 +843,8 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      before the static check in this case?  */
 
   sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				  namespace, is_a_field_of_this,
-				  symtab);
+				   namespace, is_a_field_of_this,
+				   symtab);
   if (sym != NULL)
     return sym;
 
@@ -903,7 +903,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
 /* Check to see if the symbol is defined in one of the symtabs.
    BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
    depending on whether or not we want to search global symbols or
-   local symbols.  */
+   static symbols.  */
 
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index,
@@ -937,7 +937,7 @@ lookup_symbol_aux_symtabs (int block_index,
 /* Check to see if the symbol is defined in one of the partial
    symtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or
    STATIC_BLOCK, depending on whether or not we want to search global
-   symbols or local symbols.  */
+   symbols or static symbols.  */
 
 static struct symbol *
 lookup_symbol_aux_psymtabs (int block_index, const char *name,
@@ -972,7 +972,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 	    /* FIXME: carlton/2002-09-30: Should we really do that?
 	       If that happens, isn't it likely to be a GDB error, in
 	       which case we should fix the GDB error rather than
-	       silently dealing with it here.  So I'd vote for
+	       silently dealing with it here?  So I'd vote for
 	       removing the check for the symbol in the other
 	       block.  */
 	    block = BLOCKVECTOR_BLOCK (bv,

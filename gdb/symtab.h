@@ -26,6 +26,7 @@
 /* Opaque declarations.  */
 struct obstack;
 struct dictionary;
+struct using_data_node;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -398,6 +399,19 @@ struct block
 
   struct dictionary *dict;
 
+  /* Used for language-specific info.  */
+  union
+  {
+    struct
+    {
+      /* Contains information about what using directives or other
+	 similar features are added by this block.  */
+      struct using_data_node *using;
+    }
+    cplus_specific;
+  }
+  language_specific;
+
   /* Version of GCC used to compile the function corresponding
      to this block, or 0 if not compiled with GCC.  When possible,
      GCC should be compatible with the native compiler, or if that
@@ -409,39 +423,6 @@ struct block
      of this flag is undefined.  */
 
   unsigned char gcc_compile_flag;
-
-  /* The symbols for this block are either in a simple linear list or
-     in a simple hashtable.  Blocks which correspond to a function
-     (which have a list of symbols corresponding to arguments) use
-     a linear list, as do some older symbol readers (currently only
-     mdebugread and dstread).  Other blocks are hashed.
-
-     The hashtable uses the same hash function as the minsym hashtables,
-     found in minsyms.c:minsym_hash_iw.  Symbols are hashed based on
-     their demangled name if appropriate, and on their name otherwise.
-     The hash function ignores space, and stops at the beginning of the
-     argument list if any.
-
-     The table is laid out in NSYMS/5 buckets and symbols are chained via
-     their hash_next field.  */
-
-#if 0
-  /* NOTE: carlton/2002-09-24: The rest of the members have been
-     obsoleted by DICT.  */
-  
-  /* If this is really a hashtable of the symbols, this flag is 1.  */
-
-  unsigned char hashtable;
-
-  /* Number of local symbols.  */
-
-  int nsyms;
-
-  /* The symbols.  If some of them are arguments, then they must be
-     in the order in which we would like to print them.  */
-
-  struct symbol *sym[1];
-#endif /* 0 */
 };
 
 #define BLOCK_START(bl)		(bl)->startaddr
@@ -449,34 +430,8 @@ struct block
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_DICT(bl)		(bl)->dict
+#define BLOCK_USING(bl)		(bl)->language_specific.cplus_specific.using
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
-
-#if 0
-
-/* NOTE: carlton/2002-09-24: These have been obsoleted by dictionary
-   stuff.  */
-#define BLOCK_HASHTABLE(bl)	(bl)->hashtable
-
-/* For blocks without a hashtable (BLOCK_HASHTABLE (bl) == 0) only.  */
-#define BLOCK_NSYMS(bl)		(bl)->nsyms
-#define BLOCK_SYM(bl, n)	(bl)->sym[n]
-
-/* For blocks with a hashtable, but these are valid for non-hashed blocks as
-   well - each symbol will appear to be one bucket by itself.  */
-#define BLOCK_BUCKETS(bl)	(bl)->nsyms
-#define BLOCK_BUCKET(bl, n)	(bl)->sym[n]
-
-/* Macro used to set the size of a hashtable for N symbols.  */
-#define BLOCK_HASHTABLE_SIZE(n)	((n)/5 + 1)
-
-/* Macro to loop through all symbols in a block BL, in no particular order.
-   i counts which bucket we are in, and sym points to the current symbol.  */
-
-#define ALL_BLOCK_SYMBOLS(bl, i, sym)				\
-	for ((i) = 0; (i) < BLOCK_BUCKETS ((bl)); (i)++)	\
-	  for ((sym) = BLOCK_BUCKET ((bl), (i)); (sym);		\
-	       (sym) = (sym)->hash_next)
-#endif /* 0 */
 
 
 

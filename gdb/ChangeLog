@@ -1,3 +1,13 @@
+2002-10-07  David Carlton  <carlton@math.stanford.edu>
+
+	* buildsym.c (finish_block): Initialize BLOCK_USING to NULL.
+	* symtab.h (struct block): Delete last remnants of non-dictionary
+	symbol lists.
+	(struct block): Add field 'language_specific' and accessor macro
+	BLOCK_USING.
+	* cp-support.h (struct using_data): New struct.
+	(struct using_data_node): New struct.
+
 2002-09-30  David Carlton  <carlton@math.stanford.edu>
 
 	* dictionary.h: Augment comment above dict_lookup.
