@@ -304,9 +304,19 @@ static int
 pc_in_linker_stub (pc)
      CORE_ADDR pc;
 {
-
   int found_magic_instruction = 0;
   int i;
+
+  /* We are looking for something like
+
+     ; $$dyncall jams RP into this special spot in the frame (RP')
+     ; before calling the "call stub"
+     ldw     -18(sp),rp
+
+     ldsid   (rp),r1         ; Get space associated with RP into r1
+     mtsp    r1,sp           ; Move it into space register 0
+     be,n    0(sr0),rp)      ; back to your regularly scheduled program
+     */
 
   /* Maximum known linker stub size is 4 instructions.  Search forward
      from the given PC, then backward.  */
