@@ -27,9 +27,11 @@
 #include "opcode/txvu.h"
 #include "elf/txvu.h"
 
+enum cputype { CPU_VUUP, CPU_VULO, CPU_DMA, CPU_PKE, CPU_GPUIF };
+
 static TXVU_INSN txvu_insert_operand
-     PARAMS ((TXVU_INSN, const struct txvu_operand *, int, offsetT,
-	      char *, unsigned int));
+     PARAMS ((TXVU_INSN, enum cputype, const txvu_operand *,
+	      int, offsetT, char *, unsigned int));
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -120,8 +122,6 @@ md_begin ()
   dma_pack_pke_p = 0;
 }
 
-enum cputype { CPU_VUUP, CPU_VULO, CPU_DMA, CPU_PKE, CPU_GPUIF };
-
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
    that would screw up references to ``.''.  */
@@ -138,17 +138,24 @@ struct txvu_fixup
 static int fixup_count;
 static struct txvu_fixup fixups[MAX_FIXUPS];
 
+/* Given a cpu type and operand number, return a temporary reloc type
+   for use in generating the fixup that encodes the cpu type and operand.  */
+static int encode_fixup_reloc_type PARAMS ((enum cputype, int));
+/* Given an encoded fixup reloc type, decode it into cpu and operand.  */
+static void decode_fixup_reloc_type PARAMS ((int, enum cputype *,
+					     const txvu_operand **));
+
 static void assemble_dma PARAMS ((char *));
 static void assemble_gpuif PARAMS ((char *));
 static void assemble_pke PARAMS ((char *));
 static void assemble_vu PARAMS ((char *));
 static char * assemble_vu_insn PARAMS ((enum cputype,
-					const struct txvu_opcode *,
-					const struct txvu_operand *,
+					const txvu_opcode *,
+					const txvu_operand *,
 					char *, char *));
 static char * assemble_one_insn PARAMS ((enum cputype,
-					 const struct txvu_opcode *,
-					 const struct txvu_operand *,
+					 const txvu_opcode *,
+					 const txvu_operand *,
 					 char *, TXVU_INSN *));
 
 void
@@ -178,11 +185,13 @@ static void
 assemble_dma (str)
      char *str;
 {
-  TXVU_INSN buf[4];
+  TXVU_INSN insn_buf[4];
 
-  assemble_one_insn (CPU_DMA,
-		     dma_opcode_lookup_asm (str), dma_operands,
-		     str, buf);
+  str = assemble_one_insn (CPU_DMA,
+			   dma_opcode_lookup_asm (str), dma_operands,
+			   str, insn_buf);
+  if (str == NULL)
+    return;
 }
 
 /* Subroutine of md_assemble to assemble PKE instructions.  */
@@ -191,11 +200,69 @@ static void
 assemble_pke (str)
      char *str;
 {
-  TXVU_INSN buf[4];
+  /* Space for the instruction.
+     The variable length insns can require much more space than this.
+     It is allocated later, when we know we have such an insn.  */
+  TXVU_INSN insn_buf[5];
+  /* Insn's length, in 32 bit words.  */
+  int len;
+  /* Non-zero if this is a variable length insn.  */
+  int varlen_p;
+  /* Pointer to allocated frag.  */
+  char *f;
+  int i;
 
-  assemble_one_insn (CPU_PKE,
-		     pke_opcode_lookup_asm (str), pke_operands,
-		     str, buf);
+  str = assemble_one_insn (CPU_PKE,
+			   pke_opcode_lookup_asm (str), pke_operands,
+			   str, insn_buf);
+  if (str == NULL)
+    return;
+
+  /* Call back into the parser's state to get the insn's length.
+     This is just the length of the insn, not of any following data.
+     The result 0 if the length is unknown.  */
+  varlen_p = pke_varlen_p ();
+  len = pke_len ();
+
+  if (varlen_p)
+    {
+      /* FIXME: not done yet */
+    }
+  else
+    {
+      f = frag_more (len * 4);
+    }
+
+  /* Write out the instruction.
+     Reminder: it is important to fetch enough space in one call to
+     `frag_more'.  We use (f - frag_now->fr_literal) to compute where
+     we are and we don't want frag_now to change between calls.  */
+  for (i = 0; i < len; ++i)
+    md_number_to_chars (f + i * 4, insn_buf[i], 4);
+
+  /* Create any fixups.  */
+  /* FIXME: It might eventually be possible to combine all the various
+     copies of this bit of code.  */
+  for (i = 0; i < fixup_count; ++i)
+    {
+      int op_type, reloc_type;
+      const txvu_operand *operand;
+
+      /* Create a fixup for this operand.
+	 At this point we do not use a bfd_reloc_code_real_type for
+	 operands residing in the insn, but instead just use the
+	 operand index.  This lets us easily handle fixups for any
+	 operand type, although that is admittedly not a very exciting
+	 feature.  We pick a BFD reloc type in md_apply_fix.  */
+
+      op_type = fixups[i].opindex;
+      reloc_type = encode_fixup_reloc_type (CPU_PKE, op_type);
+      operand = &pke_operands[op_type];
+      fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+		   &fixups[i].exp,
+		   (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0,
+		   (bfd_reloc_code_real_type) reloc_type);
+    }
 }
 
 /* Subroutine of md_assemble to assemble GPUIF instructions.  */
@@ -204,11 +271,13 @@ static void
 assemble_gpuif (str)
      char *str;
 {
-  TXVU_INSN buf[4];
+  TXVU_INSN insn_buf[4];
 
-  assemble_one_insn (CPU_GPUIF,
-		     gpuif_opcode_lookup_asm (str), gpuif_operands,
-		     str, buf);
+  str = assemble_one_insn (CPU_GPUIF,
+			   gpuif_opcode_lookup_asm (str), gpuif_operands,
+			   str, insn_buf);
+  if (str == NULL)
+    return;
 }
 
 /* Subroutine of md_assemble to assemble VU instructions.  */
@@ -254,8 +323,8 @@ assemble_vu (str)
 static char *
 assemble_vu_insn (cpu, opcode, operand_table, str, buf)
      enum cputype cpu;
-     const struct txvu_opcode *opcode;
-     const struct txvu_operand *operand_table;
+     const txvu_opcode *opcode;
+     const txvu_operand *operand_table;
      char *str;
      char *buf;
 {
@@ -276,7 +345,7 @@ assemble_vu_insn (cpu, opcode, operand_table, str, buf)
   for (i = 0; i < fixup_count; ++i)
     {
       int op_type, reloc_type;
-      const struct txvu_operand *operand;
+      const txvu_operand *operand;
 
       /* Create a fixup for this operand.
 	 At this point we do not use a bfd_reloc_code_real_type for
@@ -286,7 +355,7 @@ assemble_vu_insn (cpu, opcode, operand_table, str, buf)
 	 feature.  We pick a BFD reloc type in md_apply_fix.  */
 
       op_type = fixups[i].opindex;
-      reloc_type = op_type + (int) BFD_RELOC_UNUSED;
+      reloc_type = encode_fixup_reloc_type (cpu, op_type);
       operand = &txvu_operands[op_type];
       fix_new_exp (frag_now, buf - frag_now->fr_literal, 4,
 		   &fixups[i].exp,
@@ -310,8 +379,8 @@ assemble_vu_insn (cpu, opcode, operand_table, str, buf)
 static char *
 assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
      enum cputype cpu;
-     const struct txvu_opcode *opcode;
-     const struct txvu_operand *operand_table;
+     const txvu_opcode *opcode;
+     const txvu_operand *operand_table;
      char *str;
      TXVU_INSN *insn_buf;
 {
@@ -346,7 +415,7 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
       for (/*str = start, */ syn = opcode->syntax; *syn != '\0'; )
 	{
 	  int mods,index;
-	  const struct txvu_operand *operand;
+	  const txvu_operand *operand;
 	  const char *errmsg;
 
 	  /* Non operand chars must match exactly.
@@ -382,7 +451,8 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	      if (operand->insert)
 		{
 		  errmsg = NULL;
-		  (*operand->insert) (insn_buf, operand, mods, 0, &errmsg);
+		  (*operand->insert) (opcode, operand, mods, insn_buf, 0,
+				      &errmsg);
 		  /* If we get an error, go on to try the next insn.  */
 		  if (errmsg)
 		    break;
@@ -421,7 +491,8 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	      c = *t;
 	      *t = '\0';
 	      errmsg = NULL;
-	      suf_value = (*operand->parse) (&s, &errmsg);
+	      suf_value = (*operand->parse) (opcode, operand, mods, &s,
+					     &errmsg);
 	      *t = c;
 	      if (errmsg)
 		{
@@ -433,8 +504,8 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 		}
 	      /* Insert the suffix's value into the insn.  */
 	      if (operand->insert)
-		(*operand->insert) (insn_buf, operand,
-				    mods, suf_value, NULL);
+		(*operand->insert) (opcode, operand, mods,
+				    insn_buf, suf_value, NULL);
 	      else
 		*insn_buf |= suf_value << operand->shift;
 
@@ -474,7 +545,8 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	      if (operand->parse)
 		{
 		  errmsg = NULL;
-		  value = (*operand->parse) (&str, &errmsg);
+		  value = (*operand->parse) (opcode, operand, mods,
+					     &str, &errmsg);
 		  if (errmsg)
 		    break;
 		}
@@ -509,8 +581,8 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	      if (operand->insert)
 		{
 		  const char *errmsg = NULL;
-		  (*operand->insert) (insn_buf, operand, mods,
-				      value, &errmsg);
+		  (*operand->insert) (opcode, operand, mods,
+				      insn_buf, value, &errmsg);
 		  if (errmsg != (const char *) NULL)
 		    break;
 		}
@@ -578,6 +650,47 @@ md_undefined_symbol (name)
 }
 
 /* Functions concerning relocs.  */
+
+/* Spacing between each cpu type's operand numbers.
+   Should be at least as bit as any operand table.  */
+#define RELOC_SPACING 256
+
+/* Given a cpu type and operand number, return a temporary reloc type
+   for use in generating the fixup that encodes the cpu type and operand
+   number.  */
+
+static int
+encode_fixup_reloc_type (cpu, opnum)
+     enum cputype cpu;
+     int opnum;
+{
+  return (int) BFD_RELOC_UNUSED + ((int) cpu * RELOC_SPACING) + opnum;
+}
+
+/* Given a fixup reloc type, decode it into cpu type and operand.  */
+
+static void
+decode_fixup_reloc_type (fixup_reloc, cpuP, operandP)
+     int fixup_reloc;
+     enum cputype *cpuP;
+     const txvu_operand **operandP;
+{
+  enum cputype cpu = (fixup_reloc - (int) BFD_RELOC_UNUSED) / RELOC_SPACING;
+  int opnum = (fixup_reloc - (int) BFD_RELOC_UNUSED) % RELOC_SPACING;
+
+  *cpuP = cpu;
+  switch (cpu)
+    {
+    case CPU_VUUP : *operandP = &txvu_operands[opnum]; break;
+    case CPU_VULO : *operandP = &txvu_operands[opnum]; break;
+    case CPU_DMA : *operandP = &dma_operands[opnum]; break;
+    case CPU_PKE : *operandP = &pke_operands[opnum]; break;
+    case CPU_GPUIF : *operandP = &gpuif_operands[opnum]; break;
+    default : as_fatal ("bad fixup encoding");
+    }
+}
+
+/* Given a fixup reloc type, return a pointer to the operand 
 
 /* The location from which a PC relative jump should be calculated,
    given a PC relative reloc.  */
@@ -651,23 +764,22 @@ md_apply_fix3 (fixP, valueP, seg)
 	}
     }
 
-  /* Check for txvu_operand's.  These are indicated with a reloc value
+  /* Check for dvp operand's.  These are indicated with a reloc value
      >= BFD_RELOC_UNUSED.  */
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
-      int opindex;
-      const struct txvu_operand *operand;
+      enum cputype cpu;
+      const txvu_operand *operand;
       TXVU_INSN insn;
 
-      opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
-
-      operand = &txvu_operands[opindex];
+      decode_fixup_reloc_type ((int) fixP->fx_r_type,
+			       & cpu, & operand);
 
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
       insn = bfd_getl32 ((unsigned char *) where);
-      insn = txvu_insert_operand (insn, operand, -1, (offsetT) value,
+      insn = txvu_insert_operand (insn, cpu, operand, -1, (offsetT) value,
 				  fixP->fx_file, fixP->fx_line);
       bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
 
@@ -833,9 +945,10 @@ md_atof (type, litP, sizeP)
 /* Insert an operand value into an instruction.  */
 
 static TXVU_INSN
-txvu_insert_operand (insn, operand, mods, val, file, line)
+txvu_insert_operand (insn, cpu, operand, mods, val, file, line)
      TXVU_INSN insn;
-     const struct txvu_operand *operand;
+     enum cputype cpu;
+     const txvu_operand *operand;
      int mods;
      offsetT val;
      char *file;
@@ -894,7 +1007,7 @@ txvu_insert_operand (insn, operand, mods, val, file, line)
   if (operand->insert)
     {
       const char *errmsg = NULL;
-      (*operand->insert) (&insn, operand, mods, (long) val, &errmsg);
+      (*operand->insert) (NULL, operand, mods, &insn, (long) val, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_warn (errmsg);
     }

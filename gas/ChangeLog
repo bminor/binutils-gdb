@@ -1,3 +1,12 @@
+start-sanitize-sky
+Tue Jan 27 14:13:37 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config/tc-txvu.c (*): Update to use handle new arguments for
+	parse/insert/extract/print handlers.
+	({encode,decode}_fixup_reloc_type): New function.
+	(assemble_pke): Write out insn after parsing it.
+
+end-sanitize-sky
 Tue Jan 27 13:32:01 1998  Robert Lipe  <robertl@dgii.com>
 
 	* configure.in (i386-*-sco3.2v5*): Defaults to ELF now.
@@ -48,7 +57,7 @@ Tue Jan 27 05:32:05 1998  Richard Henderson  <rth@cygnus.com>
 start-sanitize-sky
 Mon Jan 26 16:29:49 1998  Doug Evans  <devans@seba.cygnus.com>
 
-	* tc-txvu.c: First pass at dma/pke/gpuif support.
+	* config/tc-txvu.c: First pass at dma/pke/gpuif support.
 	(assemble_one_insn): Renamed from assemble_insn.
 	Initialize errmsg = NULL before calling parse fn.
 	Allow [] in suffix operand.
