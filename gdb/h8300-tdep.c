@@ -412,10 +412,10 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 
       if (IS_PUSH (insn_word))
 	{
+	  auto_depth += 2 + adjust;
+	  fsr[insn_word & 0x7] = after_prolog_fp - auto_depth;
 	  ip = next_ip;
 	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
-	  fsr[r] = after_prolog_fp + auto_depth;
-	  auto_depth += 2 + adjust;
 	  continue;
 	}
 
@@ -431,8 +431,8 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 
 	  for (i = start; i < start + count; i++)
 	    {
-	      fsr[i] = after_prolog_fp + auto_depth;
 	      auto_depth += 4;
+	      fsr[i] = after_prolog_fp - auto_depth;
 	    }
 	}
       break;
