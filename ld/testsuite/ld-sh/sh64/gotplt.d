@@ -7,6 +7,6 @@
 # Make sure that gotplt relocations of forced local symbols
 # use the GOT.
 
-Relocation section '\.rela\.dyn' at offset 0x29c contains 1 entries:
+Relocation section '\.rela\.dyn' at offset 0x270 contains 1 entries:
  Offset     Info    Type            Sym\.Value  Sym\. Name \+ Addend
-000003cc  000000a5 R_SH_RELATIVE                                000002a8
+0000039c  000000a5 R_SH_RELATIVE                                0000027c

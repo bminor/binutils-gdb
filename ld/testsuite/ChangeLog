@@ -1,3 +1,11 @@
+2005-01-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/shared-1.d: Update for changed dynamic syms.
+	* ld-sh/sh64/gotplt.d: Likewise.
+	* ld-sh/sh64/init-cmpct.d: Likewise.
+	* ld-sh/sh64/init-media.d: Likewise.
+	* ld-sh/sh64/init64.d: Likewise.
+
 2004-12-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* ld-crx/reloc-abs32.d: Update reference file according 
