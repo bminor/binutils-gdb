@@ -433,7 +433,7 @@ breakpoint_notify(b, action)
      struct breakpoint *b;
      const char *action;
 {
-  char buf[100];
+  char buf[256];
   int v;
   struct symtab_and_line sal;
 

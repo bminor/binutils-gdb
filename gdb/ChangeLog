@@ -1,3 +1,10 @@
+start-sanitize-gdbtk
+Fri Aug  8 00:13:32 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (breakpoint_notify): Change buffer size from 100
+	to 256 to avoid memory corruption with very long pathnames.
+
+end-sanitize-gdbtk	
 Thu Aug  7 19:40:52 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	Changes to OCD support to support wiggler box as well as
@@ -19,11 +26,13 @@ Thu Aug  7 19:40:52 1997  Geoffrey Noer  <noer@cygnus.com>
 	return buffer and initializing curr location ptr to start of
 	buffer.
 
+start-sanitize-gdbtk	
 Thu Aug  7 14:08:23 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* configure.in: Change required Tix version to 4.1.8.0 .
 	* configure: Rebuilt.
-
+end-sanitize-gdbtk
+	
 Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.h: add OCD_SET_CONNECTION
