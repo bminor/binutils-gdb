@@ -3144,7 +3144,7 @@ appear anywhere else in the directory.
 
 @menu
 * Getting Started::		Getting started working on @value{GDBN}
-* Debugging @value{GDBN}::		Debugging @value{GDBN} with itself
+* Debugging GDB::		Debugging @value{GDBN} with itself
 @end menu
 
 @node Getting Started,,, Hints
@@ -3227,7 +3227,7 @@ wondering if anyone could give me some tips about understanding
 @value{GDBN}''---if we had some magic secret we would put it in this manual.
 Suggestions for improving the manual are always welcome, of course.
 
-@node Debugging @value{GDBN},,,Hints
+@node Debugging GDB,,,Hints
 
 @section Debugging @value{GDBN} with itself
 
