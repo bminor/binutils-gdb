@@ -1,3 +1,7 @@
+2000-04-22  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/README: Explain how to unpack using djunpack.bat.
+
 Fri Apr 21 15:23:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* stabsread.c (REG_STRUCT_HAS_ADDR): Delete default.
