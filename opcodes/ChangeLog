@@ -1,3 +1,8 @@
+2001-11-14  Dave Brolley  <brolley@redhat.com>
+
+	* m32r-dis.c: Regenerated.
+	* fr30-dis.c: Regenerated.
+
 2001-11-14  Andreas Jaeger  <aj@suse.de>
 
 	* i386-dis.c (print_insn): Use x86-64 as option.
