@@ -678,6 +678,25 @@ test "$host_alias" != "$target_alias" &&
 if test -z "$target" ; then
     { echo "configure: error: Unrecognized target system type; please check config.sub." 1>&2; exit 1; }
 fi
+if test "$program_transform_name" = s,x,x,; then
+  program_transform_name=
+else
+  # Double any \ or $.  echo might interpret backslashes.
+  cat <<\EOF_SED > conftestsed
+s,\\,\\\\,g; s,\$,$$,g
+EOF_SED
+  program_transform_name="`echo $program_transform_name|sed -f conftestsed`"
+  rm -f conftestsed
+fi
+test "$program_prefix" != NONE &&
+  program_transform_name="s,^,${program_prefix},; $program_transform_name"
+# Use a double $ so make ignores it.
+test "$program_suffix" != NONE &&
+  program_transform_name="s,\$\$,${program_suffix},; $program_transform_name"
+
+# sed with no file args requires a program.
+test "$program_transform_name" = "" && program_transform_name="s,x,x,"
+
 
 # host-specific stuff:
 
@@ -696,8 +715,6 @@ if test "${shared}" = "true"; then
     SHLINK=libopcodes.so
   fi
 fi
-
-. ${srcdir}/../bfd/configure.host
 
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
@@ -774,6 +791,8 @@ else
   test "${CFLAGS+set}" = set || CFLAGS="-g"
 fi
 
+
+. ${srcdir}/../bfd/configure.host
 
 
 # Extract the first word of "ar", so it can be a program name with args.
@@ -929,7 +948,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 933 "configure"
+#line 952 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -943,7 +962,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 947 "configure"
+#line 966 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -976,7 +995,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 980 "configure"
+#line 999 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF

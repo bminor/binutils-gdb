@@ -1,5 +1,8 @@
 Thu Feb 15 14:45:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Call AC_PROG_CC before configure.host.
+	* configure: Rebuild.
+
 	* Makefile.in (SONAME): Remove leading ../bfd/ from $(SHLIB).
 
 Wed Feb 14 19:01:27 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>

@@ -48,6 +48,7 @@ AC_CANONICAL_SYSTEM
 if test -z "$target" ; then
     AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
 fi
+AC_ARG_PROGRAM
 
 # host-specific stuff:
 
@@ -71,10 +72,10 @@ changequote([,])dnl
   fi
 fi
 
+AC_PROG_CC
+
 . ${srcdir}/../bfd/configure.host
 
-AC_PROG_CC
-AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AC_CHECK_PROG(AR, ar, ar, :)
 AC_PROG_RANLIB
