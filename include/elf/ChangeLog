@@ -1,3 +1,22 @@
+Sat Mar  5 14:08:54 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* internal.h:  Remove Elf32_*, Elf64_* typedefs.  These names
+	cause conflicts with system headers, e.g. link.h in gdb/solib.c.
+	Combine 32- and 64-bit versions of *_Internal_Dyn.
+	* common.h:  Replace uses of Elf64_Word, Elf64_Xword typedefs
+	by their expansion.
+	* mips.h:  Replace uses of Elf32_Word, Elf32_Sword, Elf32_Addr
+	typedefs by their expansion. Add DT_MIPS_RLD_MAP definition.
+
+Fri Feb 18 10:39:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* common.h (EM_CYGNUS_POWERPC): Define.  This may be temporary,
+	depending upon how quickly I can find a real PowerPC ABI.
+
+Mon Feb  7 08:27:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* internal.h: Change HOST_64_BIT to BFD_HOST_64_BIT.
+
 Wed Feb  2 14:12:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* common.h: Add comments regarding value of EM_HPPA and how to
