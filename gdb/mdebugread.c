@@ -2707,8 +2707,10 @@ parse_partial_symbols (struct objfile *objfile)
 		     && stabstring != debug_info->ss + fh->issBase + sh.iss)
 		      stabstring = xrealloc (stabstring, len + len2 + 1);
 		    else
-		      stabstring = xmalloc (len + len2 + 1);
-		    strcpy (stabstring, stabstring1);
+		      {
+			stabstring = xmalloc (len + len2 + 1);
+			strcpy (stabstring, stabstring1);
+		      }
 		    strcpy (stabstring + len, stabstring2);
 		    len += len2;
 		  }

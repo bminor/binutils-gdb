@@ -1,3 +1,9 @@
+2002-01-23  Fred Fish  <fnf@redhat.com>
+
+	* mdebugread.c (parse_partial_symbols): Only copy stabstring1 to
+	stabstring on initial malloc.  Reallocing will copy it for us,
+	if necessary.
+
 2002-01-23  Elena Zannoni  <ezannoni@redhat.com>
 
         * Makefile.in (hpread_h): Delete. 
