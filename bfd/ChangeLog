@@ -1,5 +1,9 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	* section.c (SEC_HAS_GOT_REF): Define new flag for asection.
+	(bfd_get_unique_section_name): New function.
+	* bfd_in2.h: Regenerate.
+
 	* elf64-hppa.c (elf64_hppa_check_relocs): Handle R_PARISC_PCREL12F.
 	(elf64_hppa_size_dynamic_sections): Remove the FIXME at bfd_zalloc
 	comment.

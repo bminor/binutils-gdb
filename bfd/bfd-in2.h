@@ -1008,6 +1008,14 @@ typedef struct sec
      sections.  */
 #define SEC_COFF_SHARED_LIBRARY 0x800
 
+  /* The section has GOT references.  This flag is only for the
+     linker, and is currently only used by the elf32-hppa back end.
+     It will be set if global offset table references were detected
+     in this section, which indicate to the linker that the section
+     contains PIC code, and must be handled specially when doing a
+     static link.  */
+#define SEC_HAS_GOT_REF 0x4000
+
   /* The section contains common symbols (symbols may be defined
      multiple times, the value of a symbol is the amount of
      space it requires, and the largest symbol value is the one
@@ -1273,6 +1281,11 @@ extern const struct symbol_cache_entry * const bfd_ind_symbol;
                             : (abort (), (bfd_size_type) 1))
 asection *
 bfd_get_section_by_name PARAMS ((bfd *abfd, const char *name));
+
+char *
+bfd_get_unique_section_name PARAMS ((bfd *abfd,
+    const char *template,
+    int *count));
 
 asection *
 bfd_make_section_old_way PARAMS ((bfd *abfd, const char *name));
@@ -2024,11 +2037,6 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT_PAGE,
   BFD_RELOC_MIPS_GOT_OFST,
   BFD_RELOC_MIPS_GOT_DISP,
-  BFD_RELOC_SH_COPY,
-  BFD_RELOC_SH_GLOB_DAT,
-  BFD_RELOC_SH_JMP_SLOT,
-  BFD_RELOC_SH_RELATIVE,
-  BFD_RELOC_SH_GOTPC,
 
 
 /* i386/elf relocations */
@@ -2167,6 +2175,11 @@ field in the instruction. */
   BFD_RELOC_SH_LABEL,
   BFD_RELOC_SH_LOOP_START,
   BFD_RELOC_SH_LOOP_END,
+  BFD_RELOC_SH_COPY,
+  BFD_RELOC_SH_GLOB_DAT,
+  BFD_RELOC_SH_JMP_SLOT,
+  BFD_RELOC_SH_RELATIVE,
+  BFD_RELOC_SH_GOTPC,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction. */

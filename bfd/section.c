@@ -264,6 +264,14 @@ CODE_FRAGMENT
 .     sections.  *}
 .#define SEC_COFF_SHARED_LIBRARY 0x800
 .
+.  {* The section has GOT references.  This flag is only for the
+.     linker, and is currently only used by the elf32-hppa back end.
+.     It will be set if global offset table references were detected
+.     in this section, which indicate to the linker that the section
+.     contains PIC code, and must be handled specially when doing a
+.     static link.  *}
+.#define SEC_HAS_GOT_REF 0x4000
+.
 .  {* The section contains common symbols (symbols may be defined
 .     multiple times, the value of a symbol is the amount of
 .     space it requires, and the largest symbol value is the one
@@ -632,6 +640,55 @@ bfd_get_section_by_name (abfd, name)
     if (!strcmp (sect->name, name))
       return sect;
   return NULL;
+}
+
+
+/*
+FUNCTION
+	bfd_get_unique_section_name
+
+SYNOPSIS
+	char *bfd_get_unique_section_name(bfd *abfd,
+					  const char *template,
+					  int *count);
+
+DESCRIPTION
+	Invent a section name that is unique in @var{abfd} by tacking
+	a digit suffix onto the original @var{template}.  If @var{count}
+	is non-NULL, then it specifies the first number	tried as a
+	suffix to generate a unique name.  The value pointed to by
+	@var{count} will be incremented in this case.
+*/
+
+char *
+bfd_get_unique_section_name (abfd, template, count)
+     bfd *abfd;
+     const char *template;
+     int *count;
+{
+  int num;
+  unsigned int len;
+  char *sname;
+
+  len = strlen (template);
+  sname = bfd_malloc (len + 7);
+  strcpy (sname, template);
+  num = 1;
+  if (count != NULL)
+    num = *count;
+
+  do
+    {
+      /* If we have a million sections, something is badly wrong.  */
+      if (num > 999999)
+	abort ();
+      sprintf (sname + len, "%d", num++);
+    }
+  while (bfd_get_section_by_name (abfd, sname) != NULL);
+
+  if (count != NULL)
+    *count = num;
+  return sname;
 }
 
 
