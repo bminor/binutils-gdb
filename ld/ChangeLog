@@ -1,3 +1,8 @@
+2004-02-18  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldgram.y (statement_anywhere): Add assert rule.
+	* ldlang.c (exp_init_os): Add assert case.
+
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
 	* ldmain.c (remove_output): Call bfd_cache_close.

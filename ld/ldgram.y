@@ -386,6 +386,9 @@ statement_anywhere:
 		ENTRY '(' NAME ')'
 		{ lang_add_entry ($3, FALSE); }
 	|	assignment end
+	|	ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')'
+		{ ldlex_popstate ();
+		  lang_add_assignment (exp_assert ($4, $6)); }
 	;
 
 /* The '*' and '?' cases are there because the lexer returns them as

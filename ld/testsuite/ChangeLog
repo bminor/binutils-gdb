@@ -1,3 +1,7 @@
+2004-02-18  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/assert.{s,t,exp}: New.
+
 2004-02-17  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips/elf/elf-rel-xgot-{n32,n64-linux}.d: Update after 2004-02-02
