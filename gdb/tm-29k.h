@@ -603,7 +603,7 @@ extern CORE_ADDR frame_locals_address ();
  + DUMMY_SAVE_SR160 * 4	  \
  + DUMMY_SAVE_SR128 * 4	  \
  + DUMMY_ARG		  \
- )
+ + 4 /* pad to doubleword */ )
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

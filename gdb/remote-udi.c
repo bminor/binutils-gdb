@@ -48,16 +48,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "29k-share/udi/udiproc.h"
+#include "gdbcmd.h"
 
 /* access the register store directly, without going through
    the normal handler functions. This avoids an extra data copy.  */
 
+static int kiodebug;
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
 static void udi_resume();
 static void udi_fetch_registers ();
 static void udi_load();
-static int fetch_register ();
+static void fetch_register ();
 static void udi_store_registers ();
 static int store_register ();
 static int regnum_to_srnum();
@@ -433,21 +435,23 @@ static void
 udi_resume (step, sig)
      int step, sig;
 {
-  UDIError	tip_error;
-  UDIUInt32	Steps = 1;
-  UDIStepType   StepType = UDIStepNatural;
-  UDIRange      Range;
+  UDIError tip_error;
+  UDIUInt32 Steps = 1;
+  UDIStepType StepType = UDIStepNatural;
+  UDIRange Range;
 
   if (step) 			/* step 1 instruction */
-  {  tip_error = tip_error = UDIStep(Steps, StepType, Range);
-      if(tip_error)fprintf(stderr,  "UDIStep() error = %d\n", tip_error);
-      if(tip_error)error ("failed in udi_resume");
+    {
+      tip_error = UDIStep (Steps, StepType, Range);
+      if (!tip_error)
+	return;
 
-  }
-  else 
-  { if(UDIExecute())
-      error ("UDIExecute() failed in udi_resume");
-  }
+      fprintf (stderr,  "UDIStep() error = %d\n", tip_error);
+      error ("failed in udi_resume");
+    }
+
+  if (UDIExecute())
+    error ("UDIExecute() failed in udi_resume");
 }
 
 /******************************************************************** UDI_WAIT
@@ -473,113 +477,122 @@ udi_wait (status)
 */
   timeout = 0;			/* Wait indefinetly for a message */
   immediate_quit = 1;   	/* Helps ability to QUIT */
+
   while(1)
-  {
-    i = 0;
-    MaxTime = UDIWaitForever;
-    UDIWait(MaxTime, &PId, &StopReason);
-    	QUIT;			/* Let user quit if they want */
-    switch (StopReason & 0xff)
     {
-    default:
-	goto halted;
-    case UDIStdoutReady:
-	if(UDIGetStdout(sbuf, (UDISizeT)SBUF_MAX, &CountDone))
-	  error("UDIGetStdin() failed in udi_wait");
-	while(CountDone--)putc(sbuf[i++], stdout);
-	fflush(stdout);
-	break;
-    case UDIStderrReady:
-	UDIGetStderr(sbuf, (UDISizeT)SBUF_MAX, &CountDone);
-	while(CountDone--)putc(sbuf[i++], stderr);
-	fflush(stderr);
-	fflush(stderr);
-	break;
-    case UDIStdinNeeded:
-	printf("DEBUG: stdin requested ... continue\n");
-/*	UDIPutStdin(sbuf, (UDISizeT)i, &CountDone); */
-	break;
-    case UDIStdinModeX:
-	break;
+      i = 0;
+      MaxTime = UDIWaitForever;
+      UDIWait(MaxTime, &PId, &StopReason);
+      QUIT;			/* Let user quit if they want */
+
+      switch (StopReason & UDIGrossState)
+	{
+	case UDIStdoutReady:
+	  if (UDIGetStdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
+	    error ("UDIGetStdin() failed in udi_wait");
+	  fwrite (sbuf, 1, CountDone, stdout);
+	  fflush(stdout);
+	  continue;
+	case UDIStderrReady:
+	  UDIGetStderr (sbuf, (UDISizeT)SBUF_MAX, &CountDone);
+	  fwrite (sbuf, 1, CountDone, stderr);
+	  fflush(stderr);
+	  continue;
+	case UDIStdinNeeded:
+	  printf("DEBUG: stdin requested ... continue\n");
+	  /*	UDIPutStdin(sbuf, (UDISizeT)i, &CountDone); */
+	  continue;
+	case UDIStdinModeX:
+	  continue;
+	default:
+	  break;
+	}
+      break;
     }
-  continue;
-  }
-halted:
-  if (StopReason & 0xff  == UDITrapped )  /* lower 8-bits == 0 */
-  {
-    if (StopReason >> 24  == 0)
-    { printf("Am290*0 received vector number 0 (break point)\n");
-      WSETSTOP ((*status), SIGTRAP);
-    }
-    else if (StopReason >> 24 == 1)
-    { printf("Am290*0 received vector 1\n");
-      WSETSTOP ((*status), SIGBUS);
-    }
-    else if (StopReason >> 24 == 3
-          || StopReason >> 24 == 4)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGFPE);
-    }
-    else if (StopReason >> 24 == 5)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGILL);
-    }
-    else if (StopReason >> 24 >= 6
-          && StopReason >> 24 <= 11)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGSEGV);
-    }
-    else if (StopReason >> 24 == 12
-          || StopReason >> 24 == 13)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGILL);
-    }
-    else if ((StopReason & 0xff) == 14)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGALRM);
-    }
-    else if ((StopReason & 0xff) == 15)
-      WSETSTOP ((*status), SIGTRAP);
-    else if ((StopReason >> 24) >= 16
-          && (StopReason >> 24) <= 21)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGINT);
-    }
-    else if ((StopReason & 0xff) == 22)
-    { printf("Am290*0 received vector number %d\n",
-	  StopReason >> 24);
-      WSETSTOP ((*status), SIGILL);
-    }
-    else if ((StopReason & 0xff) == 77)
-      WSETSTOP ((*status), SIGTRAP);
-    else
-exit:
-    WSETEXIT ((*status), 0);
-  }
-  else if ((StopReason & 0xff)  == UDIBreak)
-      WSETSTOP ((*status), SIGTRAP);
-  else if ((StopReason & 0xff)  == UDINotExecuting)
+
+  switch (StopReason & UDIGrossState)
+    {
+    case UDITrapped:
+      printf("Am290*0 received vector number %d\n", StopReason >> 24);
+	  
+      switch (StopReason >> 8)
+	{
+	case 0:			/* Illegal opcode */
+	  printf("	(break point)\n");
+	  WSETSTOP ((*status), SIGTRAP);
+	  break;
+	case 1:			/* Unaligned Access */
+	  WSETSTOP ((*status), SIGBUS);
+	  break;
+	case 3:
+	case 4:
+	  WSETSTOP ((*status), SIGFPE);
+	  break;
+	case 5:			/* Protection Violation */
+	  WSETSTOP ((*status), SIGILL);
+	  break;
+	case 6:
+	case 7:
+	case 8:			/* User Instruction Mapping Miss */
+	case 9:			/* User Data Mapping Miss */
+	case 10:		/* Supervisor Instruction Mapping Miss */
+	case 11:		/* Supervisor Data Mapping Miss */
+	  WSETSTOP ((*status), SIGSEGV);
+	  break;
+	case 12:
+	case 13:
+	  WSETSTOP ((*status), SIGILL);
+	  break;
+	case 14:		/* Timer */
+	  WSETSTOP ((*status), SIGALRM);
+	  break;
+	case 15:		/* Trace */
+	  WSETSTOP ((*status), SIGTRAP);
+	  break;
+	case 16:		/* INTR0 */
+	case 17:		/* INTR1 */
+	case 18:		/* INTR2 */
+	case 19:		/* INTR3/Internal */
+	case 20:		/* TRAP0 */
+	case 21:		/* TRAP1 */
+	  WSETSTOP ((*status), SIGINT);
+	  break;
+	case 22:		/* Floating-Point Exception */
+	  WSETSTOP ((*status), SIGILL);
+	  break;
+	case 77:		/* assert 77 */
+	  WSETSTOP ((*status), SIGTRAP);
+	  break;
+	default:
+	  WSETEXIT ((*status), 0);
+	}
+      break;
+    case UDINotExecuting:
       WSETSTOP ((*status), SIGTERM);
-  else if ((StopReason & 0xff)  == UDIRunning)
+      break;
+    case UDIRunning:
       WSETSTOP ((*status), SIGILL);
-  else if ((StopReason & 0xff)  == UDIStopped)
+      break;
+    case UDIStopped:
       WSETSTOP ((*status), SIGTSTP);
-  else if ((StopReason & 0xff)  == UDIWarned)
+      break;
+    case UDIWarned:
       WSETSTOP ((*status), SIGLOST);
-  else if ((StopReason & 0xff)  == UDIStepped)
+      break;
+    case UDIStepped:
+    case UDIBreak:
       WSETSTOP ((*status), SIGTRAP);
-  else if ((StopReason & 0xff)  == UDIWaiting)
+      break;
+    case UDIWaiting:
       WSETSTOP ((*status), SIGSTOP);
-  else if ((StopReason & 0xff)  == UDIHalted)
+      break;
+    case UDIHalted:
       WSETSTOP ((*status), SIGKILL);
-  else
-    WSETEXIT ((*status), 0);
+      break;
+    case UDIExited:
+    default:
+      WSETEXIT ((*status), 0);
+    }
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;
@@ -688,6 +701,14 @@ int	regno;
       register_valid[i] = 1;
   }
 
+  if (kiodebug)
+    {
+      printf("Fetching all registers\n");
+      printf("Fetching PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
+	     read_register(NPC_REGNUM), read_register(PC_REGNUM),
+	     read_register(PC2_REGNUM));
+    }
+
   /* There doesn't seem to be any way to get these.  */
   {
     int val = -1;
@@ -719,6 +740,13 @@ int regno;
     {
       store_register(regno);
       return;
+    }
+
+  if (kiodebug)
+    {
+      printf("Storing all registers\n");
+      printf("PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n", read_register(NPC_REGNUM),
+	     read_register(PC_REGNUM), read_register(PC2_REGNUM));
     }
 
 /* Gr1/rsp */
@@ -1082,7 +1110,7 @@ int	num;
 /* Fetch a single register indicatated by 'regno'. 
  * Returns 0/-1 on success/failure.  
  */
-static int
+static void
 fetch_register (regno)
      int regno;
 {
@@ -1124,7 +1152,7 @@ fetch_register (regno)
     {
       int val = -1;
       supply_register(160 + (regno - FPE_REGNUM),(char *) &val);
-      return 0;		/* Pretend Success */
+      return;		/* Pretend Success */
     }
   else 
     {
@@ -1136,7 +1164,9 @@ fetch_register (regno)
     error("UDIRead() failed in udi_fetch_registers");
 
   supply_register(regno, (char *) &To);
-  return result;
+
+  if (kiodebug)
+    printf("Fetching register %s = 0x%x\n", reg_names[regno], To);
 }
 /*****************************************************************************/ 
 /* Store a single register indicated by 'regno'. 
@@ -1155,6 +1185,9 @@ store_register (regno)
   UDIBool	HostEndian = 0;
 
   From =  read_register (regno);	/* get data value */
+
+  if (kiodebug)
+    printf("Storing register %s = 0x%x\n", reg_names[regno], From);
 
   if (regno == GR1_REGNUM)
   { To.Space = UDI29KGlobalRegs;
@@ -1281,31 +1314,55 @@ int   QuietMode = 0;		/* used for debugging */
  *  Define the target subroutine names 
  */
 static struct target_ops udi_ops = {
-        "udi", "Remote UDI connected TIP",
+        "udi",
+	"Remote UDI connected TIP",
 	"Remote debug an AMD 29k using UDI socket connection to TIP process",
-        udi_open, udi_close,
-        udi_attach, udi_detach, udi_resume, udi_wait,
-        udi_fetch_registers, udi_store_registers,
+        udi_open,
+	udi_close,
+        udi_attach,
+	udi_detach,
+	udi_resume,
+	udi_wait,
+        udi_fetch_registers,
+	udi_store_registers,
         udi_prepare_to_store,
         udi_xfer_inferior_memory,
         udi_files_info,
-        udi_insert_breakpoint, udi_remove_breakpoint, /* Breakpoints */
-        0, 0, 0, 0, 0,          /* Terminal handling */
+        udi_insert_breakpoint,
+	udi_remove_breakpoint,
+        0,			/* termial_init */
+	0,			/* terminal_inferior */
+	0,			/* terminal_ours_for_output */
+	0,			/* terminal_ours */
+	0,			/* terminal_info */
         udi_kill,             	/* FIXME, kill */
         udi_load,
         0,                      /* lookup_symbol */
-        udi_create_inferior,  /* create_inferior */
-        udi_mourn,            /* mourn_inferior FIXME */
+        udi_create_inferior,
+        udi_mourn,		/* mourn_inferior FIXME */
 	0,			/* can_run */
-        process_stratum, 0, /* next */
-        1, 1, 1, 1, 1,  /* all mem, mem, stack, regs, exec */
-	0, 0,			/* Section pointers */
+        process_stratum,
+	0,			/* next */
+        1,			/* has_all_memory */
+	1,			/* has_memory */
+	1,			/* has_stack */
+	1,			/* has_registers */
+	1,			/* has_execution */
+	0,			/* sections */
+	0,			/* sections_end */
 	OPS_MAGIC,		/* Always the last thing */
 };
 
 void _initialize_remote_udi()
 {
   add_target (&udi_ops);
+  add_show_from_set (
+		     add_set_cmd ("remotedebug", no_class, var_boolean,
+				  (char *)&kiodebug,
+				  "Set debugging of UDI I/O.\n\
+When enabled, debugging info is displayed.",
+				  &setlist),
+		     &showlist);
 }
 
 #ifdef NO_HIF_SUPPORT

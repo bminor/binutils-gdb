@@ -1,3 +1,12 @@
+Mon Oct  5 16:02:04 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  Re-install 29K/UDI stuff.
+	* remote-udi.c (udi_resume):  Clean up.
+	* (udi_wait):  Rewrite, leave out bugs.
+	* Add debugging code to print out all register fetches and stores.
+	* Straighten out target_ops.
+	* tm-29k.h (DUMMY_FRAME_RSIZE):  Pad out to doubleword.
+
 Mon Oct  5 09:46:44 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* remote-udi.c (udi_create_inferior): run with no arguments should
