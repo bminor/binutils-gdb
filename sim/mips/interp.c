@@ -3375,7 +3375,9 @@ decode_coproc (SIM_DESC sd,
 	      vu0_issue(sd);
 
 	    /* write to reserved CIA register to get VU0 moving */
-	    write_vu_misc_reg(&(vu0_device.regs), VU_REG_CIA, & data);
+	    write_vu_special_reg(& vu0_device, VU_REG_CIA, & data);
+
+	    ASSERT(vu0_busy());
 	  }
 	else if(i_5_0 == 0x39) /* VCALLMSR */
 	  {
@@ -3384,9 +3386,11 @@ decode_coproc (SIM_DESC sd,
 	    while(vu0_busy())
 	      vu0_issue(sd);
 
-	    read_vu_misc_reg(&(vu0_device.regs), VU_REG_CMSAR0, & data);
+	    read_vu_special_reg(& vu0_device, VU_REG_CMSAR0, & data);
 	    /* write to reserved CIA register to get VU0 moving */
-	    write_vu_misc_reg(&(vu0_device.regs), VU_REG_CIA, & data);
+	    write_vu_special_reg(& vu0_device, VU_REG_CIA, & data);
+
+	    ASSERT(vu0_busy());
 	  }
 	/* handle all remaining UPPER VU instructions in one block */
 	else if((i_5_0 <  0x30) || /* VADDx .. VMINI */

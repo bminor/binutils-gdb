@@ -18,6 +18,7 @@ SIM_SKY_OBJS = \
 	sky-libvpe.o \
 	sky-pke.o \
 	sky-vu.o \
+	sky-vudis.o \
 	sky-gs.o \
 	sky-gdb.o
 # end-sanitize-sky

@@ -1,4 +1,15 @@
 start-sanitize-sky
+	Wed Apr  8 18:12:13 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* Makefile.in (SIM_SKY_OBJS): Added sky-vudis.o.
+
+	* interp.c (decode_coproc): Refer to VU CIA as a "special"
+	register, not as a "misc" register.  Aha.  Add activity 
+	assertions after VCALLMS* instructions.
+	
+end-sanitize-sky
+	
+start-sanitize-sky
 	Tue Apr  7 18:32:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (decode_coproc): Do not apply superfluous E (end) flag
