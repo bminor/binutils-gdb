@@ -28,7 +28,16 @@ INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
 
+# Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
+
+# Whether to get roff to put indexing entries on stdout
+#TEXI2OPT =
+# You neeed this to generate ld-index.ms
+TEXI2OPT = -i
+
+# Which roff program to use to generate index for texi2roff'd doc
+ROFF = groff
 
 BISON = bison
 BISONFLAGS = -v
@@ -187,13 +196,35 @@ ld2: ld1
 ld3: ld2
 	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
+######################################################################
+# DOCUMENTATION TARGETS
+# TeX output
 ld.dvi: ld.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex ld.texinfo
 	texindex ld.??
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex ld.texinfo
 
+# info file for online browsing
 ld.info: ld.texinfo
 	makeinfo ld.texinfo
+
+#edit instances of "ms" to "me" or "mm" to suit your preferences.
+# (we don't use a variable because we don't trust all makes to handle
+# a var in the target name right).
+# roff output (-ms)
+ld.ms: ld.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		ld.texinfo | \
+	texi2roff $(TEXI2OPT) -ms >ld.ms 
+
+# index for roff output
+ld-index.ms: ld.ms
+	$(ROFF) -ms ld.ms 2>&1 1>/dev/null | \
+		sed -e '/: warning:/d' | \
+		texi2index >ld-index.ms
+
+######################################################################
 
 mkscript: $(srcdir)/mkscript.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mkscript $(srcdir)/mkscript.c $(LOADLIBES)
