@@ -15,9 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+   */
 
-   Please email any bugs, comments, and/or additions to this file to:
-   bug-gdb@prep.ai.mit.edu  */
+
 
 // Test file for exception handling support.
 

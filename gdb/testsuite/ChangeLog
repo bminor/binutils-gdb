@@ -1,3 +1,21 @@
+2004-02-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR gdb/1543.
+	* gdb.cp/ambiguous.exp, gdb.cp/annota2.exp, gdb.cp/annota3.exp,
+	gdb.cp/anon-union.exp, gdb.cp/casts.exp, gdb.cp/classes.exp,
+	gdb.cp/cplusfuncs.exp, gdb.cp/ctti.exp, gdb.exp/demangle.exp,
+	gdb.cp/derivation.exp, gdb.cp/exception.exp, gdb.cp/hang.exp,
+	gdb.cp/inherit.exp, gdb.cp/local.exp, gdb.cp/maint.exp,
+	gdb.cp/member-ptr.exp, gdb.cp/method.exp, gdb.cp/misc.exp,
+	gdb.cp/namespace.exp, gdb.cp/overload.exp, gdb.cp/ovldbreak.exp,
+	gdb.cp/psmang.exp, gdb.cp/ref-types.exp, gdb.cp/templates.exp,
+	gdb.cp/userdef.exp, gdb.cp/virtfunc.exp: Remove reference
+	to bug-gdb@prep.ai.mit.edu .
+	* gdb.cp/bs15503.cc, gdb.cp/class2.cc, gdb.cp/cttiadd.cc,
+	gdb.cp/cttiadd1.cc, gdb.cp/cttiadd2.cc, gdb.cp/cttiadd3.cc,
+	gdb.cp/exception.cc, gdb.cp/member-ptr.cc, gdb.cp/namespace1.cc:
+	Likewise.
+
 2004-02-10  Andrew Cagney  <cagney@redhat.com>
 
 	* lib/gdb.exp (gdb_expect_list): Recover from internal-errors

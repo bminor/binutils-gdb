@@ -16,9 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # Tests for pointer-to-member support
 # Written by Satish Pai <pai@apollo.hp.com> 1997-08-19
 # Rewritten by Michael Chastain <mec.gnu@mindspring.com> 2004-01-11
