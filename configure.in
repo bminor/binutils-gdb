@@ -149,6 +149,11 @@ esac
 
 is_cross_compiler=
 
+# Remove patch suffixes from host and target names
+# Example: 'sparc-sun-sunos4.1.3_U1'
+hostnop=`echo ${host} | sed '/sun-sunos/s/_U1//'`
+targetnop=`echo ${target} | sed '/sun-sunos/s/_U1//'`
+
 if [ x"${host}" = x"${target}" ] ; then
 	# when doing a native toolchain, don't build the targets
 	# that are in the 'cross only' list

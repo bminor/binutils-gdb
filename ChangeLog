@@ -1,3 +1,9 @@
+Thu May 26 08:53:19 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* config.sub: Move deletion of patch suffix from here...
+	* configure.in: To here, at Ian's suggestion.  The top-
+	  level scripts might need to know of a patch level.
+
 Wed May 25 09:15:54 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* config.sub: Strip off patch suffix so rtl is recognized
