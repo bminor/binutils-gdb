@@ -1,5 +1,5 @@
 /* Print DEC PDP-11 instructions.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ static void print_reg PARAMS ((int reg, disassemble_info *info));
 static void print_freg PARAMS ((int freg, disassemble_info *info));
 static int print_operand PARAMS ((bfd_vma *memaddr, int code,
 				  disassemble_info *info));
+static int print_foperand PARAMS ((bfd_vma *memaddr, int code,
+                                   disassemble_info *info));
 int print_insn_pdp11 PARAMS ((bfd_vma memaddr, disassemble_info *info));
 
 static int
@@ -165,8 +167,10 @@ print_operand (memaddr, code, info)
       if (reg == 7)
 	{
 	  bfd_vma address = *memaddr + sign_extend (disp);
+	  if (mode == 7)
+	    FPRINTF (F, "*");
 	  if (!(code & JUMP))
-	    FPRINTF (F, "*$");
+	    FPRINTF (F, "$");
 	  (*info->print_address_func) (address, info);
 	}
       else
@@ -180,6 +184,23 @@ print_operand (memaddr, code, info)
 	}
       break;
     }
+
+  return 0;
+}
+
+static int
+print_foperand (memaddr, code, info)
+     bfd_vma *memaddr;
+     int code;
+     disassemble_info *info;
+{
+  int mode = (code >> 3) & 7;
+  int reg = code & 7;
+
+  if (mode == 0)
+    print_freg (reg, info);
+  else
+    return print_operand (memaddr, code, info);
 
   return 0;
 }
@@ -230,6 +251,14 @@ print_insn_pdp11 (memaddr, info)
 	    if (print_operand (&memaddr, dst, info) < 0)
 	      return -1;
 	    goto done;
+	  case PDP11_OPCODE_FOP:
+	    FPRINTF (F, OP.name);
+	    FPRINTF (F, AFTER_INSTRUCTION);
+	    if (strcmp (OP.name, "jmp") == 0)
+	      dst |= JUMP;
+	    if (print_foperand (&memaddr, dst, info) < 0)
+	      return -1;
+	    goto done;
 	  case PDP11_OPCODE_REG_OP:
 	    FPRINTF (F, OP.name);
 	    FPRINTF (F, AFTER_INSTRUCTION);
@@ -248,6 +277,28 @@ print_insn_pdp11 (memaddr, info)
 	    FPRINTF (F, OPERAND_SEPARATOR);
 	    print_reg (src, info);
 	    goto done;
+	  case PDP11_OPCODE_AC_FOP:
+	    {
+	      int ac = (opcode & 0xe0) >> 6;
+	      FPRINTF (F, OP.name);
+	      FPRINTF (F, AFTER_INSTRUCTION);
+	      print_freg (ac, info);
+	      FPRINTF (F, OPERAND_SEPARATOR);
+	      if (print_foperand (&memaddr, dst, info) < 0)
+		return -1;
+	      goto done;
+	    }
+	  case PDP11_OPCODE_FOP_AC:
+	    {
+	      int ac = (opcode & 0xe0) >> 6;
+	      FPRINTF (F, OP.name);
+	      FPRINTF (F, AFTER_INSTRUCTION);
+	      if (print_foperand (&memaddr, dst, info) < 0)
+		return -1;
+	      FPRINTF (F, OPERAND_SEPARATOR);
+	      print_freg (ac, info);
+	      goto done;
+	    }
 	  case PDP11_OPCODE_AC_OP:
 	    {
 	      int ac = (opcode & 0xe0) >> 6;
@@ -257,6 +308,17 @@ print_insn_pdp11 (memaddr, info)
 	      FPRINTF (F, OPERAND_SEPARATOR);
 	      if (print_operand (&memaddr, dst, info) < 0)
 		return -1;
+	      goto done;
+	    }
+	  case PDP11_OPCODE_OP_AC:
+	    {
+	      int ac = (opcode & 0xe0) >> 6;
+	      FPRINTF (F, OP.name);
+	      FPRINTF (F, AFTER_INSTRUCTION);
+	      if (print_operand (&memaddr, dst, info) < 0)
+		return -1;
+	      FPRINTF (F, OPERAND_SEPARATOR);
+	      print_freg (ac, info);
 	      goto done;
 	    }
 	  case PDP11_OPCODE_OP_OP:

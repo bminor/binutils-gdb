@@ -1,5 +1,5 @@
 /* Opcode table for PDP-11.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ const struct pdp11_opcode pdp11_opcodes[] =
   { "rol",	0x0c40, 0xffc0, PDP11_OPCODE_OP,	PDP11_BASIC },
   { "asr",	0x0c80, 0xffc0, PDP11_OPCODE_OP,	PDP11_BASIC },
   { "asl",	0x0cc0, 0xffc0, PDP11_OPCODE_OP,	PDP11_BASIC },
-  { "mark",	0x0d00, 0xffc0, PDP11_OPCODE_OP,	PDP11_LEIS },
+  { "mark",	0x0d00, 0xffc0, PDP11_OPCODE_IMM6,	PDP11_LEIS },
   { "mfpi",	0x0d40, 0xffc0, PDP11_OPCODE_OP,	PDP11_BASIC },
   { "mtpi",	0x0d80, 0xffc0, PDP11_OPCODE_OP,	PDP11_BASIC },
   { "sxt",	0x0dc0, 0xffc0, PDP11_OPCODE_OP,	PDP11_LEIS },
@@ -211,24 +211,28 @@ const struct pdp11_opcode pdp11_opcodes[] =
   { "ldfps",	0xf040, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
   { "stfps",	0xf080, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
   { "stst",	0xf0c0, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
-  { "clrf",	0xf100, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
-  { "tstf",	0xf140, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
-  { "absf",	0xf180, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
-  { "negf",	0xf1c0, 0xffc0, PDP11_OPCODE_OP,	PDP11_FPP },
-  { "mulf",	0xf200, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "modf",	0xf300, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "addf",	0xf400, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "ldf",	0xf500, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },/*movif*/
-  { "subf",	0xf600, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "cmpf",	0xf700, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "stf",	0xf800, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },/*movfi*/
-  { "divf",	0xf900, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
+  { "clrf",	0xf100, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "tstf",	0xf140, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "absf",	0xf180, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "negf",	0xf1c0, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "mulf",	0xf200, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "modf",	0xf300, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "addf",	0xf400, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "ldf",	0xf500, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },/*movif*/
+  { "subf",	0xf600, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "cmpf",	0xf700, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "stf",	0xf800, 0xff00, PDP11_OPCODE_AC_FOP,	PDP11_FPP },/*movfi*/
+  { "divf",	0xf900, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
   { "stexp",	0xfa00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
   { "stcfi",	0xfb00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "stcff",	0xfc00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },/* ? */
-  { "ldexp",	0xfd00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "ldcif",	0xfe00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
-  { "ldcff",	0xff00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },/* ? */
+  { "stcff",	0xfc00, 0xff00, PDP11_OPCODE_AC_FOP,	PDP11_FPP },/* ? */
+  { "ldexp",	0xfd00, 0xff00, PDP11_OPCODE_OP_AC,	PDP11_FPP },
+  { "ldcif",	0xfe00, 0xff00, PDP11_OPCODE_OP_AC,	PDP11_FPP },
+  { "ldcff",	0xff00, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },/* ? */
+/* This entry MUST be last; it is a "catch-all" entry that will match when no
+ * other opcode entry matches during disassembly.
+ */
+  { "",		0x0000, 0x0000, PDP11_OPCODE_ILLEGAL,	PDP11_NONE },
 };
 
 const struct pdp11_opcode pdp11_aliases[] =
@@ -239,6 +243,29 @@ const struct pdp11_opcode pdp11_aliases[] =
   { "bhis",	0x8600, 0xff00, PDP11_OPCODE_DISPL,	PDP11_BASIC },
   { "blo",	0x8700, 0xff00, PDP11_OPCODE_DISPL,	PDP11_BASIC },
   { "trap",	0x8900, 0xff00, PDP11_OPCODE_IMM8,	PDP11_BASIC },
+  /* fpp xxxd alternate names to xxxf opcodes */
+  { "clrd",	0xf100, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "tstd",	0xf140, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "absd",	0xf180, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "negd",	0xf1c0, 0xffc0, PDP11_OPCODE_FOP,	PDP11_FPP },
+  { "muld",	0xf200, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "modd",	0xf300, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "addd",	0xf400, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "ldd",	0xf500, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },/*movif*/
+  { "subd",	0xf600, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "cmpd",	0xf700, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "std",	0xf800, 0xff00, PDP11_OPCODE_AC_FOP,	PDP11_FPP },/*movfi*/
+  { "divd",	0xf900, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },
+  { "stcfl",	0xfb00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
+  { "stcdi",	0xfb00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
+  { "stcdl",	0xfb00, 0xff00, PDP11_OPCODE_AC_OP,	PDP11_FPP },
+  { "stcfd",	0xfc00, 0xff00, PDP11_OPCODE_AC_FOP,	PDP11_FPP },/* ? */
+  { "stcdf",	0xfc00, 0xff00, PDP11_OPCODE_AC_FOP,	PDP11_FPP },/* ? */
+  { "ldcid",	0xfe00, 0xff00, PDP11_OPCODE_OP_AC,	PDP11_FPP },
+  { "ldclf",	0xfe00, 0xff00, PDP11_OPCODE_OP_AC,	PDP11_FPP },
+  { "ldcld",	0xfe00, 0xff00, PDP11_OPCODE_OP_AC,	PDP11_FPP },
+  { "ldcfd",	0xff00, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },/* ? */
+  { "ldcdf",	0xff00, 0xff00, PDP11_OPCODE_FOP_AC,	PDP11_FPP },/* ? */
 };
 
 const int pdp11_num_opcodes = sizeof pdp11_opcodes / sizeof pdp11_opcodes[0];

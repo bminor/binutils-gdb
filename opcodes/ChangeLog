@@ -1,3 +1,12 @@
+2002-03-05  Paul Koning  <pkoning@equallogic.com>
+
+	* pdp11-opc.c: Fix "mark" operand type.  Fix operand types
+	for float opcodes that take float operands.  Add alternate
+	names (xxxD vs. xxxF) for float opcodes.
+	* pdp11-dis.c (print_operand): Clean up formatting for mode 67.
+	(print_foperand): New function to handle float opcode operands.
+	(print_insn_pdp11): Use print_foperand to disassemble float ops.
+
 2002-02-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/de.po: Updated.
