@@ -1,5 +1,10 @@
 Mon Aug 15 12:16:56 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* coffgen.c (STRING_SIZE_SIZE): Define.
+	(coff_fix_symbol_name): Use STRING_SIZE_SIZE, not 4.
+	(coff_write_symbols, build_string_table): Likewise.
+	(coff_get_normalized_symtab): Likewise.
+
 	* libcoff-in.h (obj_symbol_slew): Don't define.
 	(struct coff_tdata): Remove unused fields index_slew, raw_linenos,
 	and flags.

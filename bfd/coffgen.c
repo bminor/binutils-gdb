@@ -51,6 +51,8 @@ static boolean coff_write_native_symbol PARAMS ((bfd *, coff_symbol_type *,
 
 static asection bfd_debug_section = { "*DEBUG*" };
 
+#define STRING_SIZE_SIZE (4)
+
 /* Take a section header read from a coff file (in HOST byte order),
    and make a BFD "section" out of it.  This is used by ECOFF.  */
 static          boolean
@@ -600,7 +602,7 @@ coff_fix_symbol_name (abfd, symbol, native)
 	strncpy(auxent->x_file.x_fname, name, FILNMLEN);
       }
       else {
-	auxent->x_file.x_n.x_offset = string_size + 4;
+	auxent->x_file.x_n.x_offset = string_size + STRING_SIZE_SIZE;
 	auxent->x_file.x_n.x_zeroes = 0;
 	string_size += name_length + 1;
       }
@@ -621,7 +623,7 @@ coff_fix_symbol_name (abfd, symbol, native)
 	}
       else if (! bfd_coff_symname_in_debug (abfd, &native->u.syment))
 	{
-	  native->u.syment._n._n_n._n_offset =  string_size + 4;
+	  native->u.syment._n._n_n._n_offset =  string_size + STRING_SIZE_SIZE;
 	  native->u.syment._n._n_n._n_zeroes = 0;
 	  string_size += name_length + 1;
 	}
@@ -918,10 +920,14 @@ coff_write_symbols (abfd)
 
   if (string_size != 0)
    {
-     unsigned int size = string_size + 4;
-     bfd_byte buffer[4];
+     unsigned int size = string_size + STRING_SIZE_SIZE;
+     bfd_byte buffer[STRING_SIZE_SIZE];
 
+#if STRING_SIZE_SIZE == 4
      bfd_h_put_32 (abfd, size, buffer);
+#else
+ #error Change bfd_h_put_32
+#endif
      if (bfd_write ((PTR) buffer, 1, sizeof (buffer), abfd) != sizeof (buffer))
        return false;
      for (p = abfd->outsymbols, i = 0;
@@ -972,11 +978,16 @@ coff_write_symbols (abfd)
       /* We would normally not write anything here, but we'll write
 	 out 4 so that any stupid coff reader which tries to read the
 	 string table even when there isn't one won't croak.  */
-      unsigned int size = 4;
-      bfd_byte buffer[4];
+      unsigned int size = STRING_SIZE_SIZE;
+      bfd_byte buffer[STRING_SIZE_SIZE];
 
+#if STRING_SIZE_SIZE == 4
       bfd_h_put_32 (abfd, size, buffer);
-      if (bfd_write ((PTR) buffer, 1, 4, abfd) != 4)
+#else
+ #error Change bfd_h_put_32
+#endif
+      if (bfd_write ((PTR) buffer, 1, STRING_SIZE_SIZE, abfd)
+	  != STRING_SIZE_SIZE)
 	return false;
     }
 
@@ -1138,7 +1149,7 @@ static char *
 build_string_table (abfd)
      bfd *abfd;
 {
-  char string_table_size_buffer[4];
+  char string_table_size_buffer[STRING_SIZE_SIZE];
   unsigned int string_table_size;
   char *string_table;
 
@@ -1149,12 +1160,19 @@ build_string_table (abfd)
 	       1, abfd) != sizeof(string_table_size))
     return (NULL);
 
+#if STRING_SIZE_SIZE == 4
   string_table_size = bfd_h_get_32(abfd, (bfd_byte *) string_table_size_buffer);
+#else
+ #error Change bfd_h_get_32
+#endif
 
-  if ((string_table = (PTR) bfd_alloc(abfd, string_table_size -= 4)) == NULL) {
-    bfd_set_error (bfd_error_no_memory);
-    return (NULL);
-  }				/* on mallocation error */
+  if ((string_table = (PTR) bfd_alloc(abfd,
+				      string_table_size -= STRING_SIZE_SIZE))
+      == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return (NULL);
+    }				/* on mallocation error */
   if (bfd_read(string_table, string_table_size, 1, abfd) != string_table_size)
     return (NULL);
   return string_table;
@@ -1343,7 +1361,7 @@ coff_get_normalized_symtab (abfd)
 	      }
 
 	    internal_ptr->u.syment._n._n_n._n_offset =
-	     (long) (string_table - 4 +
+	     (long) (string_table - STRING_SIZE_SIZE +
 		    (internal_ptr+1)->u.auxent.x_file.x_n.x_offset);
 	  }
 	else {
@@ -1384,7 +1402,9 @@ coff_get_normalized_symtab (abfd)
 		string_table = build_string_table(abfd);
 	      }
 	    internal_ptr->u.syment._n._n_n._n_offset = (long int)
-	     (string_table - 4 + internal_ptr->u.syment._n._n_n._n_offset);
+	     (string_table
+	      - STRING_SIZE_SIZE
+	      + internal_ptr->u.syment._n._n_n._n_offset);
 	  }
 	else {
 	    /* Long name in debug section.  Very similar.  */
