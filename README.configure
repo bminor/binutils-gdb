@@ -2,7 +2,7 @@
 
 		   On Configuring Development Tools
 
-	 Last Mod Mon Apr 15 10:25:59 PDT 1991, by rich@sendai
+	 Last Mod Fri May 3 13:02:35 PDT 1991, by rich@sendai
 
 
 INTRO
@@ -61,7 +61,7 @@ Host Environments:
     calculator to compile on a SparcStation, we might configure for
     host sun4.  With our configuration system:
 
-	cd desk-calculator ; configure sun4
+	cd desk-calculator ; ./configure sun4
 
     does the trick.  "configure" is a shell script that sets up
     Makefiles, subdirectories, and symbolic links appropriate for
@@ -73,7 +73,7 @@ Host Environments:
     compiler on the sun4 to build a program intended to be run on a
     sun3, we would configure the source for sun3.
 
-	cd desk-calculator ; configure sun3
+	cd desk-calculator ; ./configure sun3
 
     The fact that we are actually building the program on a sun4 makes
     no difference if the sun3 cross compiler presents an environment
@@ -101,18 +101,18 @@ Configuration Time Options:
     notation or postfix as a configuration option.  For a sun3, chosing
     infix might be:
 
-	configure sun3 +notation=infix
+	./configure sun3 +notation=infix
 
     while a sun4 with postfix might be:
 
-	configure sun4 +notation=postfix
+	./configure sun4 +notation=postfix
 
     If we wanted to build both at the same time, in the same directory
     structure, the intermediate pieces used in the build process must
     be kept separate.
 
-	configure sun4 +forcesubdirs +notation=postfix
-	configure sun3 +forcesubdirs +notation=infix
+	./configure sun4 +forcesubdirs +notation=postfix
+	./configure sun3 +forcesubdirs +notation=infix
 
     will create subdirectories for the intermediate pieces of the sun4
     and sun3 configurations.  This is necessary as previous systems
@@ -139,7 +139,7 @@ Configuration Time Options:
     You can elect to change $(destdir) only as a configuration time
     option.
 
-	configure sun4 +notation=postfix +destdir=/local
+	./configure sun4 +notation=postfix +destdir=/local
 
     Will configure the source such that:
 
@@ -164,8 +164,8 @@ SPECIFICS
     The GNU Development Tools can be built on a wide variety of hosts.
     So, of course, they must be configured.  Like the last example,
 
-	configure sun4 +destdir=/local
-	configure sun3 +destdir=/local
+	./configure sun4 +destdir=/local
+	./configure sun3 +destdir=/local
 
     will configure the source to be built in subdirectories, in order
     to keep the intermediate pieces separate, and to be installed in
@@ -211,14 +211,14 @@ BUILDING DEVELOPMENT ENVIRONMENTS
     The development environment produced, is a configuration time
     option, just like $(destdir).
 
-	configure sun4 +destdir=/local +target=sun3
-	configure sun3 +destdir=/local +target=sun4
+	./configure sun4 +destdir=/local +target=sun3
+	./configure sun3 +destdir=/local +target=sun4
 
     In this example, like before, we create two configurations.  The
     first is intended to be built in a sun4 environment, in
-    subdirectories, to be installed in /local.  The second is also
-    intended to be build in a sun4 environment, in subdirectories, to
-    be installed in /local.
+    subdirectories, to be installed in /local.  The second is intended
+    to be build in a sun3 environment, in subdirectories, to be
+    installed in /local.
 
     Unlike the previous example, the first configuration will produce
     a sun3 development environment, perhaps even suitable for building
@@ -256,7 +256,7 @@ Native Development Environments:
     machine.  The process of using a native development environment to
     build native programs is called a "native" build.
 
-	configure sun4
+	./configure sun4
 
     Will configure this source such that when built in a sun4
     development environment, with a development environment that
@@ -363,7 +363,7 @@ Emulation Environments:
     The Cygnus Support Release of the GNU Development Tools can be
     configured for one such emulation at this time.
 
-	configure sun4 +ansi
+	./configure sun4 +ansi
 
     will configure the source such that when built in a sun4
     development environment the resulting development environment is
@@ -378,11 +378,11 @@ Emulation Environments:
 
 Simple Cross Environments:
 
-	configure sun4 +target=a29k
+	./configure sun4 +target=a29k
 
     will configure the tools such that when compiled in a sun4
     development environment the resulting development environment can
-    be used to create programs intended for a sun3.  Again, this does
+    be used to create programs intended for an a29k.  Again, this does
     not necessarily mean that the new development environment can be
     run on a sun4.  That would depend on the development environment
     used to build these tools.
@@ -409,7 +409,7 @@ Simple Cross Environments:
 
 Crossing Into Targets:
 
-	configure a29k +target=a29k
+	./configure a29k +target=a29k
 
     will configure the tools such that when compiled in an a29k
     development environment, the resulting development environment can
@@ -445,7 +445,7 @@ Crossing Into Targets:
     sun4 environment.
 
     If you happen to have an a29k lying around, you could now use
-    this fresh development environment on the a29k to three stage
+    this fresh development environment on the a29k to three-stage
     these tools all over again.  This process would look just like it
     did when we built the native sun4 development environment because
     we would be building another native development environment, this
@@ -481,7 +481,7 @@ The Three Party Cross:
     Most of the other permutations do exist in some form, but only one
     more is interesting to the current discussion.
 
-	configure a29k +target=sun3
+	./configure a29k +target=sun3
 
     will configure the tools such that when compiled in an a29k
     development environment, the resulting development environment can
@@ -580,6 +580,6 @@ may not exist.  If fragments
   This will configure the configure scripts themselves, recursively if
   appropriate.
 
-* "configure -srcdir=foo" is not supported yet.  At the moment, things
+* "./configure -srcdir=foo" is not supported yet.  At the moment, things
   will probably be configured correctly only for leaf directories, and
   even they will not have paths to libraries set properly.
