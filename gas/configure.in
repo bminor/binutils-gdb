@@ -1,0 +1,31 @@
+# This file is a shell script that supplies the information necessary
+# to tailor a template configure script into the configure script
+# appropriate for this directory.  For more information, check any
+# existing configure script.
+
+srctrigger=as.c
+srcname="gas"
+
+case $target in
+*-coff)
+	obj_format=coff
+	;;
+*-bout)
+	obj_format=bout
+	;;
+*)
+	obj_format=aout
+	;;
+esac
+
+case $target in
+vax)
+	atof=vax
+	;;
+*)
+	atof=ieee
+	;;
+esac
+
+files="ho-${host}.h tc-${cpu_type}.c tc-${cpu_type}.h te-generic.h obj-${obj_format}.h obj-${obj_format}.c atof-${atof}.c"
+links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-targ.c"
