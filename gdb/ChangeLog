@@ -1,5 +1,14 @@
 2002-05-09  Jim Blandy  <jimb@redhat.com>
 
+	Add commands for manually expanding macros and showing their
+	definitions.
+	* macrocmd.c, macroscope.c, macroscope.h: New files.
+	* Makefile.in (SFILES): Add macrocmd.c, macroscope.c.
+	(macroscope_h): New variable.
+	(HFILES_NO_SRCDIR): Add macroscope.h.
+	(COMMON_OBS): Add macrocmd.o, macroscope.o.
+	(macroscope.o, macrocmd.o): New rules.
+
 	Properly track the size of the current objfile's .debug_line section.
 	* dwarf2read.c (struct dwarf2_pinfo): New member: dwarf_line_size.
 	(DWARF_LINE_SIZE): New macro.
