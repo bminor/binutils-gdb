@@ -70,7 +70,8 @@ else os=; fi
 case $os in
 	-dec* | -mips* | -sequent* | -encore* | -pc532* | -sgi* | -sony* | \
 	-att* | -7300* | -3300* | -delta* | -motorola* | -sun[234]* | \
-	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
+	-unicom* | -ibm* | -next* | -hp | -hitachi | -isi* | -apollo | \
+	-altos* | \
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | \
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp)
@@ -113,7 +114,8 @@ case $basic_machine in
 	tahoe | i[34]86 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
 		| alpha | we32k | ns16k | clipper | sparclite \
-		| sparc | m680[01234]0 | m683?2 | z8k | v70 | h8500)# CYGNUS LOCAL
+		| sparc | m680[01234]0 | m683?2 | z8k | v70 | h8500 \
+		| m88110) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
@@ -123,7 +125,8 @@ case $basic_machine in
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
 	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
 	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
-	      | m680[01234]0-* | m683?2-* | z8k-* | h8500-* | sh-*)	# CYGNUS LOCAL
+	      | m680[01234]0-* | m683?2-* | z8k-* | h8500-* | sh-* \
+	      | m88110-*) # CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -180,6 +183,10 @@ case $basic_machine in
 	386bsd)						# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-bsd
+		;;
+	netbsd386)
+		basic_machine=i386-unknown		# CYGNUS LOCAL
+		os=-netbsd
 		;;
 	spur)
 		basic_machine=spur-unknown
@@ -353,6 +360,9 @@ case $basic_machine in
 	hp9k8[0-9][0-9] | hp8[0-9][0-9])
 		basic_machine=hppa1.0-hp
 		;;
+	h3050r* | hppahitachi)
+		basic_machine=hppa1.1-hitachi
+		;;
 	isi68 | isi)
 		basic_machine=m68k-isi
 		os=-sysv
@@ -381,7 +391,7 @@ case $basic_machine in
 	st2000)						# CYGNUS LOCAL
 		basic_machine=m68k-tandem
 		;;
-        *bug)                                           # CYGNUS LOCAL
+        m6*bug)                                           # CYGNUS LOCAL
                 basic_machine=m68k-bug
 		os=-coff
                 ;;
@@ -447,10 +457,6 @@ case $basic_machine in
 		basic_machine=h8300-hitachi
 		os=-hms
 		;;
-	h8300hhms)					# CYGNUS LOCAL
-		basic_machine=h8300h-hitachi
-		os=-hms
-		;;
 	sh)						# CYGNUS LOCAL
 		basic_machine=sh-hitachi
 		os=-hms
@@ -489,14 +495,6 @@ case $basic_machine in
 		os=-bsd
 		;;
 	hp300hpux)
-		basic_machine=m68k-hp
-		os=-hpux
-		;;
-	hp9k2[0-9][0-9] | hp9k31[0-9])
-		basic_machine=m68000-hp
-		os=-hpux
-		;;
-	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
 		os=-hpux
 		;;
@@ -646,14 +644,14 @@ case $os in
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
-	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[34]* | -hpux* \
+	      | -netbsd | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[34]* | -hpux* \
 	      | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigados* | -msdos* | -newsos* | -unicos* | -aos* \
 	      | -nindy* | -vxworks* | -ebmon* | -hds*  \
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
 	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -bosx* \
-	      | -ecoff* | -lynxos* )
+	      | -ecoff* | -lynxos* | -netware* )
 				# The last three lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
@@ -753,6 +751,9 @@ case $basic_machine in
 	*-hp)
 		os=-hpux
 		;;
+	*-hitachi)
+		os=-hiux
+		;;
 	i860-* | *-att | *-ncr | *-altos | *-motorola | *-convergent)
 		os=-sysv
 		;;
@@ -827,6 +828,9 @@ case $basic_machine in
 				;;
 			-hpux*)
 				vendor=hp
+				;;
+			-hiux*)
+				vendor=hitachi
 				;;
 			-unos*)
 				vendor=crds

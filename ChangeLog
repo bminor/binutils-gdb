@@ -1,3 +1,28 @@
+Tue Oct  5 11:55:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Recognize hppa*-*-hiux* (currently synonym for hpux).
+	* config.guess: Recognize Hitachi's HIUX.
+	* config.sub: Recognize h3050r* and hppahitachi.
+	Remove redundant cases for hp9k[23]*.
+
+Mon Oct  4 16:15:09 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: default to '--with-gnu-as' and '--with-gnu-ld'
+	if gas and ld are in the source tree and are in ${configdirs}.
+	If ${use_gnu_as} or ${use_gnu_ld} are 'no', then don't set the
+	the --with options (but still pass them down on the command line,
+	if they were explicitly specified).  
+
+Fri Sep 24 19:11:13 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure: substitute SHELL value in Makefile.in with
+	${CONFIG_SHELL}
+
+Thu Sep 23 18:05:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Build gas, ld, and binutils for *-*-sysv4* and
+	*-*-solaris2* targets.
+
 Sun Sep 19 17:01:41 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* Makefile.in: define M4, and pass it down to sub-makes;
