@@ -118,9 +118,11 @@ enum machine_type {
   M_68010 = 1,
   M_68020 = 2,
   M_SPARC = 3,
-  /* skip a bunch so we dont run into any of suns numbers */
+  /* skip a bunch so we don't run into any of suns numbers */
   M_386 = 100,
-  M_29K = 101,
+  M_29K = 101,          /* AMD 29000 */
+  M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
+  M_MIPS2 = 152,        /* MIPS R4000/R6000 binary */
   M_HP200 = 200,	/* HP 200 (68010) BSD binary */
   M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
   M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
@@ -187,6 +189,11 @@ struct aoutdata {
   unsigned exec_bytes_size;
   unsigned vma_adjusted : 1;
 
+  /* used when a bfd supports several highly similar formats */
+  enum {
+    default_format = 0,
+    gnu_encap_format } subformat;
+
   enum {
     undecided_magic = 0,
     z_magic,
@@ -209,6 +216,7 @@ struct  aout_data_struct {
 #define	obj_str_filepos(bfd)	(adata(bfd).str_filepos)
 #define	obj_reloc_entry_size(bfd) (adata(bfd).reloc_entry_size)
 #define	obj_symbol_entry_size(bfd) (adata(bfd).symbol_entry_size)
+#define obj_aout_subformat(bfd)	(adata(bfd).subformat)
 
 /* We take the address of the first element of an asymbol to ensure that the
    macro is only ever applied to an asymbol */
@@ -306,7 +314,7 @@ NAME(aout,swap_exec_header_out) PARAMS ((bfd *abfd,
 
 /* Prototypes for functions in stab-syms.c. */
 
-char *
+CONST char *
 aout_stab_name PARAMS ((int code));
 
 /* A.out uses the generic versions of these routines... */
