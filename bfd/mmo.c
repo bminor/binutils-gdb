@@ -405,8 +405,9 @@ static void mmo_write_octa PARAMS ((bfd *, bfd_vma));
 static void mmo_write_octa_raw PARAMS ((bfd *, bfd_vma));
 static boolean mmo_write_chunk
   PARAMS ((bfd *, CONST bfd_byte *, unsigned int));
+static boolean mmo_flush_chunk PARAMS ((bfd *));
 static boolean mmo_write_loc_chunk
-  PARAMS ((bfd *, bfd_vma, CONST bfd_byte *, unsigned int));
+  PARAMS ((bfd *, bfd_vma, CONST bfd_byte *, unsigned int, bfd_vma *));
 static boolean mmo_write_chunk_list PARAMS ((bfd *, mmo_data_list_type *));
 static boolean mmo_write_loc_chunk_list
   PARAMS ((bfd *, mmo_data_list_type *));
@@ -812,7 +813,8 @@ mmo_write_octa_raw (abfd, value)
   mmo_write_tetra_raw (abfd, (unsigned int) value);
 }
 
-/* Write quoted contents, zero filled.  */
+/* Write quoted contents.  Intended to be called multiple times in
+   sequence, followed by a call to mmo_flush_chunk.  */
 
 static INLINE boolean
 mmo_write_chunk (abfd, loc, len)
@@ -821,7 +823,23 @@ mmo_write_chunk (abfd, loc, len)
      unsigned int len;
 {
   boolean retval = true;
-  bfd_byte buf[4] = {0, 0, 0, 0};
+
+  /* Fill up a tetra from bytes remaining from a previous chunk.  */
+  if (abfd->tdata.mmo_data->byte_no != 0)
+    {
+      while (abfd->tdata.mmo_data->byte_no < 4 && len != 0)
+	{
+	  abfd->tdata.mmo_data->buf[abfd->tdata.mmo_data->byte_no++] = *loc++;
+	  len--;
+	}
+
+      if (abfd->tdata.mmo_data->byte_no == 4)
+	{
+	  mmo_write_tetra (abfd,
+			   bfd_get_32 (abfd, abfd->tdata.mmo_data->buf));
+	  abfd->tdata.mmo_data->byte_no = 0;
+	}
+    }
 
   while (len >= 4)
     {
@@ -839,17 +857,32 @@ mmo_write_chunk (abfd, loc, len)
 
   if (len)
     {
-      memcpy (buf, loc, len);
-      if (buf[0] == LOP)
-	mmo_write_tetra_raw (abfd, LOP_QUOTE_NEXT);
-
-      retval
-	= (retval == true
-	   && abfd->tdata.mmo_data->have_error == false
-	   && 4 == bfd_bwrite ((PTR) buf, 4, abfd));
+      memcpy (abfd->tdata.mmo_data->buf, loc, len);
+      abfd->tdata.mmo_data->byte_no = len;
     }
 
+  if (retval == false)
+    abfd->tdata.mmo_data->have_error = true;
   return retval;
+}
+
+/* Flush remaining bytes, from a previous mmo_write_chunk, zero-padded to
+   4 bytes.  */
+
+static INLINE boolean
+mmo_flush_chunk (abfd)
+     bfd *abfd;
+{
+  if (abfd->tdata.mmo_data->byte_no != 0)
+    {
+      memset (abfd->tdata.mmo_data->buf + abfd->tdata.mmo_data->byte_no,
+	      0, 4 - abfd->tdata.mmo_data->byte_no);
+      mmo_write_tetra (abfd,
+		       bfd_get_32 (abfd, abfd->tdata.mmo_data->buf));
+      abfd->tdata.mmo_data->byte_no = 0;
+    }
+
+  return abfd->tdata.mmo_data->have_error == false;
 }
 
 /* Same, but from a list.  */
@@ -863,24 +896,24 @@ mmo_write_chunk_list (abfd, datap)
     if (! mmo_write_chunk (abfd, datap->data, datap->size))
       return false;
 
-  return true;
+  return mmo_flush_chunk (abfd);
 }
 
-/* Write a lop_loc and some contents.  */
+/* Write a lop_loc and some contents.  A caller needs to call
+   mmo_flush_chunk after calling this function.  The location is only
+   output if different than *LAST_VMAP, which is updated after this call.  */
 
 static boolean
-mmo_write_loc_chunk (abfd, vma, loc, len)
+mmo_write_loc_chunk (abfd, vma, loc, len, last_vmap)
      bfd *abfd;
      bfd_vma vma;
      CONST bfd_byte *loc;
      unsigned int len;
+     bfd_vma *last_vmap;
 {
-  /* We always write the location as 64 bits; no use saving bytes here.  */
-  mmo_write_tetra_raw (abfd, (LOP << 24) | (LOP_LOC << 16) | 2);
-
   /* Find an initial and trailing section of zero tetras; we don't need to
      write out zeros.  FIXME: When we do this, we should emit section size
-     and address specifiers, else objcopy can't perform a unity
+     and address specifiers, else objcopy can't always perform an identity
      translation.  */
   while (len >= 4 && bfd_get_32 (abfd, loc) == 0)
     {
@@ -892,7 +925,22 @@ mmo_write_loc_chunk (abfd, vma, loc, len)
   while (len >= 4 && bfd_get_32 (abfd, loc + len - 4) == 0)
     len -= 4;
 
-  mmo_write_octa_raw (abfd, vma);
+  /* Only write out the location if it's different than the one the caller
+     (supposedly) previously handled, accounting for omitted leading zeros.  */
+  if (vma != *last_vmap)
+    {
+      /* We might be in the middle of a sequence.  */
+      mmo_flush_chunk (abfd);
+
+      /* We always write the location as 64 bits; no use saving bytes
+         here.  */
+      mmo_write_tetra_raw (abfd, (LOP << 24) | (LOP_LOC << 16) | 2);
+      mmo_write_octa_raw (abfd, vma);
+    }
+
+  /* Update to reflect end of this chunk, with trailing zeros omitted.  */
+  *last_vmap = vma + len;
+
   return
     abfd->tdata.mmo_data->have_error == false
     && mmo_write_chunk (abfd, loc, len);
@@ -905,11 +953,15 @@ mmo_write_loc_chunk_list (abfd, datap)
      bfd *abfd;
      mmo_data_list_type *datap;
 {
+  /* Get an address different than the address of the first chunk.  */
+  bfd_vma last_vma = datap ? datap->where - 1 : 0;
+
   for (; datap != NULL; datap = datap->next)
-    if (! mmo_write_loc_chunk (abfd, datap->where, datap->data, datap->size))
+    if (! mmo_write_loc_chunk (abfd, datap->where, datap->data, datap->size,
+			       &last_vma))
       return false;
 
-  return true;
+  return mmo_flush_chunk (abfd);
 }
 
 /* Make a .MMIX.spec_data.N section.  */
@@ -1425,6 +1477,8 @@ mmo_get_loc (sec, vma, size)
   struct mmo_data_list_struct *datap = sdatap->head;
   struct mmo_data_list_struct *entry;
 
+  /* First search the list to see if we have the requested chunk in one
+     piece, or perhaps if we have a suitable chunk with room to fit.  */
   for (; datap != NULL; datap = datap->next)
     {
       if (datap->where <= vma
@@ -1440,7 +1494,11 @@ mmo_get_loc (sec, vma, size)
 	     it.  Do that now.  */
 	  datap->size += (vma + size) - (datap->where + datap->size);
 
-	  /* Update the section size.  */
+	  /* Update the section size.  This happens only if we update the
+	     32-bit-aligned chunk size.  Callers that have
+	     non-32-bit-aligned sections should do all allocation and
+	     size-setting by themselves or at least set the section size
+	     after the last allocating call to this function.  */
 	  if (vma + size > sec->vma + sec->_raw_size)
 	    sec->_raw_size += (vma + size) - (sec->vma + sec->_raw_size);
 
@@ -1502,7 +1560,8 @@ mmo_get_loc (sec, vma, size)
 	}
     }
 
-  /* Update the section size.  */
+  /* Update the section size.  This happens only when we add contents and
+     re-size as we go.  The section size will then be aligned to 32 bits.  */
   if (vma + size > sec->vma + sec->_raw_size)
     sec->_raw_size += (vma + size) - (sec->vma + sec->_raw_size);
   return entry->data;
@@ -2449,8 +2508,8 @@ EXAMPLE
 | 0x00000000 - high 32 bits of section address
 | 0x00000004 - section address is 4
 | 0x98010002 - 64 bits with address of following data
-| 0x00000000 - high 64 bits of address
-| 0x00000004 - data starts at address 4
+| 0x00000000 - high 32 bits of address
+| 0x00000004 - low 32 bits: data starts at address 4
 | 0x00000001 - 1
 | 0x00000002 - 2
 | 0x00000003 - 3
@@ -2476,13 +2535,13 @@ EXAMPLE
 | 0x00000010 - flag READONLY
 | 0x00000000 - high 32 bits of section length
 | 0x0000000c - section length is 12 bytes; 2 * 4 + 2 + alignment to 32 bits
-| 0x20000000 - high 64 bits of address
-| 0x0000001c - low 64 bits of address 0x200000000000001c
+| 0x20000000 - high 32 bits of address
+| 0x0000001c - low 32 bits of address 0x200000000000001c
 | 0x00030d41 - 200001
 | 0x000186a2 - 100002
 | 0x26280000 - 38, 40 as bytes, padded with zeros
 
-	For the latter example, the section contents must not to appear
+	For the latter example, the section contents must not be
 	loaded in memory, and is therefore specified as part of the
 	special data.  The address is usually unimportant but might
 	provide information for e.g.@: the DWARF 2 debugging format.  */
@@ -2490,6 +2549,7 @@ EXAMPLE
       mmo_write_tetra_raw (abfd, LOP_SPEC_SECTION);
       mmo_write_tetra (abfd, (strlen (sec->name) + 3) / 4);
       mmo_write_chunk (abfd, sec->name, strlen (sec->name));
+      mmo_flush_chunk (abfd);
       /* FIXME: We can get debug sections (.debug_line & Co.) with a
 	 section flag still having SEC_RELOC set.  Investigate.  This
 	 might be true for all alien sections; perhaps mmo.em should clear
@@ -2785,48 +2845,95 @@ mmo_internal_3_dump (abfd, trie)
   mmo_internal_3_dump (abfd, trie->right);
 }
 
-/* Write symbols, either in mmo format or hidden in a lop_spec 80 section.
-   Write the lop_end terminator also.  */
+/* Write symbols in mmo format.  Also write the lop_end terminator.  */
 
 static boolean
 mmo_write_symbols_and_terminator (abfd)
      bfd *abfd;
 {
   int count = bfd_get_symcount (abfd);
-  asymbol *fakemain[2];
+  asymbol *maintable[2];
   asymbol **table;
-  int serno = 2;
+  asymbol **orig_table = bfd_get_outsymbols (abfd);
+  int serno;
   struct mmo_symbol_trie root;
   int trie_len;
   int i;
   bfd_byte buf[4];
 
   /* Create a symbol for "Main".  */
-  asymbol *mainsym = bfd_make_empty_symbol (abfd);
+  asymbol *fakemain = bfd_make_empty_symbol (abfd);
 
-  mainsym->flags = BSF_GLOBAL;
-  mainsym->value = bfd_get_start_address (abfd);
-  mainsym->name = MMIX_START_SYMBOL_NAME;
-  mainsym->section = bfd_abs_section_ptr;
-  fakemain[0] = mainsym;
-  fakemain[1] = NULL;
+  fakemain->flags = BSF_GLOBAL;
+  fakemain->value = bfd_get_start_address (abfd);
+  fakemain->name = MMIX_START_SYMBOL_NAME;
+  fakemain->section = bfd_abs_section_ptr;
+  maintable[0] = fakemain;
+  maintable[1] = NULL;
 
   memset (&root, 0, sizeof (root));
 
   /* Make all symbols take a left turn.  */
   root.symchar = 0xff;
 
-  /* There must always be a ":Main", so we'll add one
-     if there are no symbols.  */
-  if (count == 0)
-    {
-      table = fakemain;
-      count = 1;
-    }
-  else
-    table = bfd_get_outsymbols (abfd);
+  /* There must always be a ":Main", so we'll add one if there are no
+     symbols.  Make sure we have room for it.  */
+  table = bfd_alloc (abfd, (count + 1) * sizeof (asymbol *));
+  if (table == NULL)
+    return false;
 
-  for (i = 0; i < count && table[i] != NULL; i++)
+  memcpy (table, orig_table, count * sizeof (asymbol *));
+
+  /* Move :Main (if there is one) to the first position.  This is
+     necessary to get the same layout of the trie-tree when linking as
+     when objcopying the result as in the objcopy.exp test "simple objcopy
+     of executable".  It also automatically takes care of assigning serial
+     number 1 to :Main (as is mandatory).  */
+  for (i = 0; i < count; i++)
+    if (table[i] != NULL
+	&& strcmp (table[i]->name, MMIX_START_SYMBOL_NAME) == 0
+	&& (table[i]->flags & (BSF_DEBUGGING|BSF_GLOBAL)) == BSF_GLOBAL)
+      {
+	asymbol *mainsym = table[i];
+	memcpy (table + 1, orig_table, i * sizeof (asymbol *));
+	table[0] = mainsym;
+
+	/* Check that the value assigned to :Main is the same as the entry
+	   address.  The default linker script asserts this.  This is as
+	   good a place as any to check this consistency. */
+	if ((mainsym->value
+	     + mainsym->section->output_section->vma
+	     + mainsym->section->output_offset)
+	    != bfd_get_start_address (abfd))
+	  {
+	    /* Arbitrary buffer to hold the printable representation of a
+	       vma.  */
+	    char vmas_main[40];
+	    char vmas_start[40];
+	    bfd_vma vma_start = bfd_get_start_address (abfd);
+
+	    sprintf_vma (vmas_main, mainsym->value);
+	    sprintf_vma (vmas_start, vma_start);
+
+	    (*_bfd_error_handler)
+	      (_("%s: Bad symbol definition: `Main' set to %s rather\
+ than the start address %s\n"),
+	       bfd_get_filename (abfd), vmas_main, vmas_start);
+	    bfd_set_error (bfd_error_bad_value);
+	    return false;
+	  }
+	break;
+      }
+  if (i == count && count != 0)
+    {
+      /* When there are symbols, there must be a :Main.  There was no
+	 :Main, so we need to add it manually.  */
+      memcpy (table + 1, orig_table, count * sizeof (asymbol *));
+      table[0] = fakemain;
+      count++;
+    }
+
+  for (i = 0, serno = 1; i < count && table[i] != NULL; i++)
     {
       asymbol *s = table[i];
 
@@ -2871,37 +2978,9 @@ mmo_write_symbols_and_terminator (abfd)
 	  /* FIXME: We assume the order of the received symbols is an
 	     ordered mapping of the serial numbers.  This is not
 	     necessarily true if we e.g. objcopy a mmo file to another and
-	     there are gaps in the numbering.  Note sure if this can
+	     there are gaps in the numbering.  Not sure if this can
 	     happen.  Not sure what to do.  */
-	  /* Make sure Main has serial number 1; others start at 2.  */
-	  if (strcmp (s->name, MMIX_START_SYMBOL_NAME) == 0)
-	    {
-	      sym.serno = 1;
-
-	      /* Check that the value assigned to :Main is the same as the
-		 entry address.  The default linker script asserts this.
-		 This is as good a place as any to check this consistency. */
-	      if (sym.value != bfd_get_start_address (abfd))
-		{
-		  /* Arbitrary buffer to hold the printable representation
-		     of a vma.  */
-		  char vmas_main[40];
-		  char vmas_start[40];
-		  bfd_vma vma_start = bfd_get_start_address (abfd);
-
-		  sprintf_vma (vmas_main, s->value);
-		  sprintf_vma (vmas_start, vma_start);
-
-		  (*_bfd_error_handler)
-		    (_("%s: Bad symbol definition: `Main' set to %s rather\
- than the start address %s\n"),
-		     bfd_get_filename (abfd), vmas_main, vmas_start);
-		  bfd_set_error (bfd_error_bad_value);
-		  return false;
-		}
-	    }
-	  else
-	    sym.serno = serno++;
+	  sym.serno = serno++;
 
 	  if (! mmo_internal_add_3_sym (abfd, &root, &sym))
 	    return false;
