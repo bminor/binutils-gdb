@@ -1,3 +1,8 @@
+Mon Aug 28 17:07:26 1995  Kung Hsu  <kung@lisa.cygnus.com>
+
+	* remote.c (remote_wait): Revert 19 July my change which should be
+	customer specific.
+
 Sat Aug 26 00:26:11 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_symbol):  Handle sh.value of zero for enums.
