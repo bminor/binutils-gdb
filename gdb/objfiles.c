@@ -333,30 +333,6 @@ allocate_objfile (bfd *abfd, int flags)
   return (objfile);
 }
 
-/* Put one object file before a specified on in the global list.
-   This can be used to make sure an object file is destroyed before
-   another when using ALL_OBJFILES_SAFE to free all objfiles. */
-void
-put_objfile_before (struct objfile *objfile, struct objfile *before_this)
-{
-  struct objfile **objp;
-
-  unlink_objfile (objfile);
-  
-  for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
-    {
-      if (*objp == before_this)
-	{
-	  objfile->next = *objp;
-	  *objp = objfile;
-	  return;
-	}
-    }
-  
-  internal_error (__FILE__, __LINE__,
-		  "put_objfile_before: before objfile not in list");
-}
-
 /* Put OBJFILE at the front of the list.  */
 
 void
@@ -429,18 +405,6 @@ unlink_objfile (struct objfile *objfile)
 void
 free_objfile (struct objfile *objfile)
 {
-  if (objfile->separate_debug_objfile)
-    {
-      free_objfile (objfile->separate_debug_objfile);
-    }
-  
-  if (objfile->separate_debug_objfile_backlink)
-    {
-      /* We freed the separate debug file, make sure the base objfile
-	 doesn't reference it.  */
-      objfile->separate_debug_objfile_backlink->separate_debug_objfile = NULL;
-    }
-  
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
      is using reusable symbol information (via mmalloc) then each of

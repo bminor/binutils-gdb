@@ -176,7 +176,3 @@
 
 /* nativefile */
 #undef GDB_NM_FILE
-
-/* debugdir */
-#undef DEBUGDIR
-

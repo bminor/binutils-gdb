@@ -38,7 +38,6 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "inferior.h"		/* for write_pc */
-#include "filenames.h"		/* for DOSish file names */
 #include "gdb-stabs.h"
 #include "gdb_obstack.h"
 #include "completer.h"
@@ -105,8 +104,6 @@ static void add_symbol_file_command (char *, int);
 
 static void add_shared_symbol_files_command (char *, int);
 
-static void reread_separate_symbols (struct objfile *objfile);
-
 static void cashier_psymtab (struct partial_symtab *);
 
 bfd *symfile_bfd_open (char *);
@@ -150,8 +147,6 @@ static void add_filename_language (char *ext, enum language lang);
 static void set_ext_lang_command (char *args, int from_tty);
 
 static void info_ext_lang_command (char *args, int from_tty);
-
-static char *find_separate_debug_file (struct objfile *objfile);
 
 static void init_filename_language_table (void);
 
@@ -892,12 +887,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
-  char *debugfile;
   bfd *abfd;
-  struct section_addr_info orig_addrs;
-  
-  if (addrs)
-    orig_addrs = *addrs;
 
   /* Open a bfd for the file, and give user a chance to burp if we'd be
      interactively wiping out any existing symbols.  */
@@ -972,37 +962,6 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
 	}
     }
 
-  debugfile = find_separate_debug_file (objfile);
-  if (debugfile)
-    {
-      if (from_tty || info_verbose)
-        {
-          printf_filtered ("loading separate debug info from '%s'",
-                           debugfile);
-          wrap_here ("");
-          gdb_flush (gdb_stdout);
-        }
-
-      if (addrs != NULL)
-	{
-	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, from_tty, &orig_addrs, 0, flags);
-	}
-      else
-	{
-	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, from_tty, NULL, 0, flags);
-	}
-      objfile->separate_debug_objfile->separate_debug_objfile_backlink
-        = objfile;
-      
-      /* Put the separate debug object before the normal one, this is so that
-         usage of the ALL_OBJFILES_SAFE macro will stay safe. */
-      put_objfile_before (objfile->separate_debug_objfile, objfile);
-      
-      xfree (debugfile);
-    }
-  
   if (from_tty || info_verbose)
     {
       if (post_add_symbol_hook)
@@ -1097,135 +1056,6 @@ symbol_file_clear (int from_tty)
     RESET_HP_UX_GLOBALS ();
 #endif
 }
-
-static char *
-get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
-{
-  asection *sect;
-  bfd_size_type debuglink_size;
-  unsigned long crc32;
-  char *contents;
-  int crc_offset;
-  unsigned char *p;
-  
-  sect = bfd_get_section_by_name (objfile->obfd, ".gnu_debuglink");
-
-  if (sect == NULL)
-    return NULL;
-
-  debuglink_size = bfd_section_size (objfile->obfd, sect);
-  
-  contents = xmalloc (debuglink_size);
-  bfd_get_section_contents (objfile->obfd, sect, contents,
-			    (file_ptr)0, (bfd_size_type)debuglink_size);
-
-  /* Crc value is stored after the filename, aligned up to 4 bytes. */
-  crc_offset = strlen (contents) + 1;
-  crc_offset = (crc_offset + 3) & ~3;
-
-  crc32 = bfd_get_32 (objfile->obfd, (bfd_byte *) (contents + crc_offset));
-  
-  *crc32_out = crc32;
-  return contents;
-}
-
-static int
-separate_debug_file_exists (const char *name, unsigned long crc)
-{
-  unsigned long file_crc = 0;
-  int fd;
-  char buffer[8*1024];
-  int count;
-
-  fd = open (name, O_RDONLY | O_BINARY);
-  if (fd < 0)
-    return 0;
-
-  while ((count = read (fd, buffer, sizeof (buffer))) > 0)
-    file_crc = calc_crc32 (file_crc, buffer, count);
-
-  close (fd);
-
-  return crc == file_crc;
-}
-
-static char *debug_file_directory = NULL;
-
-static char *
-find_separate_debug_file (struct objfile *objfile)
-{
-  asection *sect;
-  char *basename;
-  char *dir;
-  char *debugfile;
-  char *name_copy;
-  bfd_size_type debuglink_size;
-  unsigned long crc32;
-  int i;
-
-  basename = get_debug_link_info (objfile, &crc32);
-
-  if (basename == NULL)
-    return NULL;
-  
-  dir = xstrdup (objfile->name);
-
-  /* Strip off filename part */
-  for (i = strlen(dir) - 1; i >= 0; i--)
-    {
-      if (IS_DIR_SEPARATOR (dir[i]))
-	break;
-    }
-  dir[i+1] = '\0';
-  
-  debugfile = alloca (strlen (debug_file_directory) + 1
-                      + strlen (dir)
-                      + strlen (".debug/")
-                      + strlen (basename) 
-                      + 1);
-
-  /* First try in the same directory as the original file: */
-  strcpy (debugfile, dir);
-  strcat (debugfile, basename);
-
-  if (separate_debug_file_exists (debugfile, crc32))
-    {
-      xfree (basename);
-      xfree (dir);
-      return xstrdup (debugfile);
-    }
-  
-  /* Then try in a subdirectory called .debug */
-  strcpy (debugfile, dir);
-  strcat (debugfile, ".debug/");
-  strcat (debugfile, basename);
-
-  if (separate_debug_file_exists (debugfile, crc32))
-    {
-      xfree (basename);
-      xfree (dir);
-      return xstrdup (debugfile);
-    }
-  
-  /* Then try in the global debugfile directory */
-  strcpy (debugfile, debug_file_directory);
-  strcat (debugfile, "/");
-  strcat (debugfile, dir);
-  strcat (debugfile, "/");
-  strcat (debugfile, basename);
-
-  if (separate_debug_file_exists (debugfile, crc32))
-    {
-      xfree (basename);
-      xfree (dir);
-      return xstrdup (debugfile);
-    }
-  
-  xfree (basename);
-  xfree (dir);
-  return NULL;
-}
-
 
 /* This is the symbol-file command.  Read the file, analyze its
    symbols, and add a struct symtab to a symtab list.  The syntax of
@@ -2072,8 +1902,6 @@ reread_symbols (void)
 	         needs to keep track of (such as _sigtramp, or whatever).  */
 
 	      TARGET_SYMFILE_POSTREAD (objfile);
-
-              reread_separate_symbols (objfile);
 	    }
 	}
     }
@@ -2081,73 +1909,6 @@ reread_symbols (void)
   if (reread_one)
     clear_symtab_users ();
 }
-
-
-/* Handle separate debug info for OBJFILE, which has just been
-   re-read:
-   - If we had separate debug info before, but now we don't, get rid
-     of the separated objfile.
-   - If we didn't have separated debug info before, but now we do,
-     read in the new separated debug info file.
-   - If the debug link points to a different file, toss the old one
-     and read the new one.
-   This function does *not* handle the case where objfile is still
-   using the same separate debug info file, but that file's timestamp
-   has changed.  That case should be handled by the loop in
-   reread_symbols already.  */
-static void
-reread_separate_symbols (struct objfile *objfile)
-{
-  char *debug_file;
-  unsigned long crc32;
-
-  /* Does the updated objfile's debug info live in a
-     separate file?  */
-  debug_file = find_separate_debug_file (objfile);
-
-  if (objfile->separate_debug_objfile)
-    {
-      /* There are two cases where we need to get rid of
-         the old separated debug info objfile:
-         - if the new primary objfile doesn't have
-         separated debug info, or
-         - if the new primary objfile has separate debug
-         info, but it's under a different filename.
- 
-         If the old and new objfiles both have separate
-         debug info, under the same filename, then we're
-         okay --- if the separated file's contents have
-         changed, we will have caught that when we
-         visited it in this function's outermost
-         loop.  */
-      if (! debug_file
-          || strcmp (debug_file, objfile->separate_debug_objfile->name) != 0)
-        free_objfile (objfile->separate_debug_objfile);
-    }
-
-  /* If the new objfile has separate debug info, and we
-     haven't loaded it already, do so now.  */
-  if (debug_file
-      && ! objfile->separate_debug_objfile)
-    {
-      /* Use the same section offset table as objfile itself.
-         Preserve the flags from objfile that make sense.  */
-      objfile->separate_debug_objfile
-        = (symbol_file_add_with_addrs_or_offsets
-           (debug_file,
-            info_verbose, /* from_tty: Don't override the default. */
-            0, /* No addr table.  */
-            objfile->section_offsets, objfile->num_sections,
-            0, /* Not mainline.  See comments about this above.  */
-            objfile->flags & (OBJF_MAPPED | OBJF_REORDERED
-                              | OBJF_SHARED | OBJF_READNOW
-                              | OBJF_USERLOADED)));
-      objfile->separate_debug_objfile->separate_debug_objfile_backlink
-        = objfile;
-    }
-}
-
-
 
 
 
@@ -3656,18 +3417,4 @@ Usage: set extension-language .foo bar",
 		  "cache.\n",
 		  &setlist),
      &showlist);
-
-  debug_file_directory = xstrdup (DEBUGDIR);
-  c = (add_set_cmd
-       ("debug-file-directory", class_support, var_string,
-        (char *) &debug_file_directory,
-        "Set the directory where separate debug symbols are searched for.\n"
-        "Separate debug symbols are first searched for in the same\n"
-        "directory as the binary, then in the .debug subdirectory,\n"
-        "and lastly at the path of the directory of the binary with\n"
-        "the global debug-file directory prepended\n",
-        &setlist));
-  add_show_from_set (c, &showlist);
-  set_cmd_completer (c, filename_completer);
-
 }
