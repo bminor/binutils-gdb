@@ -1,3 +1,10 @@
+start-sanitize-am33
+Fri Jul 24 15:22:40 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-dis.c: Do not emit a comma before a PLUS (autoincrement)
+	operand.
+
+end-sanitize-am33
 Fri Jul 24 11:41:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-asm.c,m32r-opc.c: Regenerate (-Wall cleanups).
