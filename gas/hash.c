@@ -1,5 +1,5 @@
 /* hash.c -- gas hash table code
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -222,7 +222,7 @@ hash_insert (table, key, value)
   ++table->insertions;
 #endif
 
-  p = obstack_alloc (&table->memory, sizeof *p);
+  p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof(*p));
   p->string = key;
   p->hash = hash;
   p->data = value;
@@ -262,7 +262,7 @@ hash_jam (table, key, value)
       ++table->insertions;
 #endif
 
-      p = obstack_alloc (&table->memory, sizeof *p);
+      p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof(*p));
       p->string = key;
       p->hash = hash;
       p->data = value;

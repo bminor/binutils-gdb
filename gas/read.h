@@ -122,7 +122,7 @@ extern void end_repeat PARAMS((int));
 
 extern void generate_lineno_debug PARAMS ((void));
 
-extern void s_abort PARAMS ((int));
+extern void s_abort PARAMS ((int)) ATTRIBUTE_NORETURN;
 extern void s_align_bytes PARAMS ((int arg));
 extern void s_align_ptwo PARAMS ((int));
 extern void s_app_file PARAMS ((int));

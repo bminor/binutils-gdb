@@ -4475,7 +4475,9 @@ md_apply_fix (fixP, valp)
 	  && fixP->fx_pcrel
 	  && !arg_reloc_stub_needed (symbol_arg_reloc_info (fixP->fx_addsy),
 				     hppa_fixP->fx_arg_reloc)
-	  && (*valp + 262144) < 524288
+	  && ((*valp + 8192) < 16384
+	      || (fmt == 17 && (*valp + 262144) < 524288)
+	      || (fmt == 22 && (*valp + 8388608) < 16777216))
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
