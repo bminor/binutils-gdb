@@ -497,7 +497,7 @@ XCOFF does not use stabs for line numbers.  Instead, it uses COFF line
 numbers (which are outside the scope of this document).  Standard COFF
 line numbers cannot deal with include files, but in XCOFF this is fixed
 with the C_BINCL method of marking include files (@pxref{Include
-files}).
+Files}).
 
 @node Procedures
 @section Procedures
@@ -948,16 +948,15 @@ several type definitions.  Type 21 is pointer to type 2 (char) and
 @code{argv} (type 20) is pointer to type 21.
 
 @c FIXME: figure out what these mean and describe them coherently.
-The following are also said to go with @code{N_PSYM}:
+The following symbol descriptors are also said to go with @code{N_PSYM}.
+The value of the symbol is said to be an offset from the argument
+pointer (I'm not sure whether this is true or not).
 
 @example
-"name" -> "param_name:#type"
-                       -> pP (<<??>>)
-                       -> pF Fortran function parameter
-                       -> X  (function result variable)
-                       -> b  (based variable)
-
-value -> offset from the argument pointer (positive).
+pP (<<??>>)
+pF Fortran function parameter
+X  (function result variable)
+b  (based variable)
 @end example
 
 @menu
@@ -2924,6 +2923,9 @@ Variable on the stack; see @ref{Stack Variables}.
 
 @item a
 Parameter passed by reference in register; see @ref{Reference Parameters}.
+
+@item b
+Based variable; see @ref{Parameters}.
 
 @item c
 Constant; see @ref{Constants}.
