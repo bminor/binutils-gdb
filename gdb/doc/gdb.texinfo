@@ -361,7 +361,7 @@ Reporting Bugs in _GDBN__
 
 Installing GDB
 
-* Subdirectories::              Configuration subdirectories
+* Separate Objdir::             Compiling _GDBN__ in another directory
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
 * Formatting Documentation::    How to format and print GDB documentation
@@ -7198,6 +7198,17 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @cindex configuring _GDBN__
 @cindex installation
 
+@iftex
+@c irrelevant in info file; it's as current as the code it lives with.
+@quotation
+@emph{Warning:} These installation instructions are current as of
+_GDBN__ version _GDB_VN__.  If you're installing a more recent release
+of _GDBN__, we may have improved the installation procedures since
+printing this manual; see the @file{README} file included in your
+release for the most recent instructions.
+@end quotation
+@end iftex
+
 _GDBN__ comes with a @code{configure} script that automates the process
 of preparing _GDBN__ for installation; you can then use @code{make} to
 build the @code{_GDBP__} program.
@@ -7263,7 +7274,13 @@ shell, you may need to run @code{sh} on it explicitly:
 sh configure @var{host}
 @end example
 
-You can @emph{run} the @code{configure} script from any of the
+If you run @code{configure} from a directory that contains source
+directories for multiple libraries or programs, such as the
+@file{gdb-_GDB_VN__} source directory for version _GDB_VN__, @code{configure}
+creates configuration files for every directory level underneath (unless
+you tell it not to, with th @samp{--norecursion} option).
+
+You can run the @code{configure} script from any of the
 subordinate directories in the _GDBN__ distribution, if you only want to
 configure that subdirectory; but be sure to specify a path to it.
 
@@ -7284,102 +7301,71 @@ that _GDBN__ uses the shell to start your program---some systems refuse to
 let _GDBN__ debug child processes whose programs are not readable.
 
 @menu
-* Subdirectories::              Configuration subdirectories
+* Separate Objdir::             Compiling _GDBN__ in another directory
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
 * Formatting Documentation::    How to format and print _GDBN__ documentation
 @end menu
 
-@node Subdirectories, Config Names, Installing _GDBN__, Installing _GDBN__
-@section Configuration Subdirectories
+@node Separate Objdir, Config Names, Installing _GDBN__, Installing _GDBN__
+@section Compiling _GDBN__ in Another Directory
 
 If you want to run _GDBN__ versions for several host or target machines,
 you'll need a different @code{_GDBP__} compiled for each combination of
 host and target.  @code{configure} is designed to make this easy by
-allowing you to generate each configuration in a separate
-subdirectory.  If your @code{make} program handles the @samp{VPATH}
-feature (GNU @code{make} does), running @code{make} in each of these
-directories then builds the @code{_GDBP__} program specified there.
+allowing you to generate each configuration in a separate subdirectory,
+rather than in the source directory.  If your @code{make} program
+handles the @samp{VPATH} feature (GNU @code{make} does), running
+@code{make} in each of these directories then builds the @code{_GDBP__}
+program specified there.
 
-@code{configure} creates these subdirectories for you when you
-simultaneously specify several configurations; but it is a good habit
-even for a single configuration.  You can specify the use of
-subdirectories using the @samp{+subdirs} option (abbreviated
-@samp{+sub}).
+To build @code{_GDBP__} in a separate directory, run @code{configure}
+with the @samp{--srcdir} option to specify where to find the source.
+(Remember, you'll also need to specify a path to find @code{configure}
+itself from your working directory.)
 
-For example, with version _GDB_VN__, you can build _GDBN__ on a
-Sun 4 like this:
+For example, with version _GDB_VN__, you can build _GDBN__ in a separate
+directory for a Sun 4 like this:
 
 @example
 @group
 cd gdb-_GDB_VN__
-./configure +sub sun4
-cd H-sun4/T-sun4
+mkdir ../gdb-sun4
+cd ../gdb-sun4
+../gdb-_GDB_VN__/configure --srcdir=../gdb-_GDB_VN__ sun4
 make
 @end group
 @end example
 
-When @code{configure} uses subdirectories to build programs or
-libraries, it creates nested directories
-@file{H-@var{host}/T-@var{target}}.  @code{configure} uses these two
-directory levels because _GDBN__ can be configured for cross-compiling:
-_GDBN__ can run on one machine (the host) while debugging programs that
-run on another machine (the target).  You specify cross-debugging
-targets by giving the @samp{+target=@var{target}} option to
-@code{configure}.  Specifying only hosts still gives you two levels of
-subdirectory for each host, with the same configuration suffix on both;
-that is, if you give any number of hosts but no targets, _GDBN__ will be
-configured for native debugging on each host.  On the other hand,
-whenever you specify both hosts and targets on the same command line,
-@code{configure} creates all combinations of the hosts and targets you
-list.
+When @code{configure} builds a configuration using a remote source
+directory, it creates a tree for the binaries with the same structure
+(and using the same names) as the tree under the source directory.  In
+the example, you'd find the Sun 4 library @file{libiberty.a} in the
+directory @file{gdb-sun4/libiberty}, and _GDBN__ itself in
+@file{gdb-sun4/gdb}.
 
-If you run @code{configure} from a directory that contains source
-directories for multiple libraries or programs, such as the
-@file{gdb-_GDB_VN__} source directory for version _GDB_VN__, @code{configure}
-creates the @file{H-@var{host}/T-@var{target}} subdirectories in each
-library or program's source directory.
-
-For example, with version _GDB_VN__, typing:
-
-@example
-cd gdb-_GDB_VN__
-configure sun4 +target=vxworks960
-@end example
-
-@noindent
-creates the following directories:
-
-@example
-gdb-_GDB_VN__/H-sun4/T-vxworks960
-gdb-_GDB_VN__/bfd/H-sun4/T-vxworks960
-gdb-_GDB_VN__/gdb/H-sun4/T-vxworks960
-gdb-_GDB_VN__/libiberty/H-sun4/T-vxworks960
-gdb-_GDB_VN__/readline/H-sun4/T-vxworks960
-@end example
+One popular use for building several _GDBN__ configurations in separate
+directories is to configure _GDBN__ for cross-compiling (where _GDBN__
+runs on one machine---the host---while debugging programs that run on
+another machine---the target).  You specify a cross-debugging target by
+giving the @samp{--target=@var{target}} option to @code{configure}.
 
 When you run @code{make} to build a program or library, you must run
-it in a configured directory.  If you made a single configuration,
-without subdirectories, run @code{make} in the source directory.  If
-you have @file{H-@var{host}/T-@var{target}} subdirectories, run
-@code{make} in those subdirectories.
+it in a configured directory---whatever directory you were in when you
+called @code{configure} (or one of its subdirectories).
 
 The @code{Makefile} generated by @code{configure} for each source
-directory runs recursively.  If you type @code{make} in a source
-directory such as @file{gdb-_GDB_VN__} (or in a subdirectory, such as
-@file{gdb-_GDB_VN__/H-@var{host}/T-@var{target}}), you will build all the
-required libraries, then build _GDBN__.
+directory also runs recursively.  If you type @code{make} in a source
+directory such as @file{gdb-_GDB_VN__} (or in a separate configured
+directory configured with @samp{--srcdir=@var{path}/gdb-_GDB_VN__}), you
+will build all the required libraries, then build _GDBN__.
 
-When you have multiple hosts or targets configured, you can run
-@code{make} on them in parallel (for example, if they are NFS-mounted on
-each of the hosts); they will not interfere with each other.
+When you have multiple hosts or targets configured in separate
+directories, you can run @code{make} on them in parallel (for example,
+if they are NFS-mounted on each of the hosts); they will not interfere
+with each other.
 
-You can also use the @samp{+objdir=@var{altroot}} option to have the
-configured files placed in a parallel directory structure rather than
-alongside the source files; @pxref{configure Options,
-,@code{configure} Options}.
-
-@node Config Names, configure Options, Subdirectories, Installing _GDBN__
+@node Config Names, configure Options, Separate Objdir, Installing _GDBN__
 @section Specifying Names for Hosts and Targets
 
 The specifications used for hosts and targets in the @code{configure}
@@ -7516,73 +7502,57 @@ Here is a summary of all the @code{configure} options and arguments that
 you might use for building _GDBN__:
 
 @example
-configure @r{[}+destdir=@var{dir}@r{]} @r{[}+subdirs@r{]}
-          @r{[}+objdir=@var{altroot}@r{]} @r{[}+norecursion@r{]} @r{[}+rm@r{]}
-          @r{[}+target=@var{target}@dots{}@r{]} @var{host}@dots{}
+configure @r{[}--destdir=@var{dir}@r{]} @r{[}--srcdir=@var{path}@r{]}
+          @r{[}--norecursion@r{]} @r{[}--rm@r{]}
+          @r{[}--target=@var{target}@r{]} @var{host}
 @end example
 
 @noindent
-You may introduce options with the character @samp{-} rather than
-@samp{+} if you prefer; but you may abbreviate option names if you use
-@samp{+}.
+You may introduce options with a single @samp{-} rather than
+@samp{--} if you prefer; but you may abbreviate option names if you use
+@samp{--}.
 
 @table @code
-@item +destdir=@var{dir}
+@item --destdir=@var{dir}
 @var{dir} is an installation directory @emph{path prefix}.  After you
 configure with this option, @code{make install} will install _GDBN__ as
 @file{@var{dir}/bin/_GDBP__}, and the libraries in @file{@var{dir}/lib}.
-If you specify @samp{+destdir=/usr/local}, for example, @code{make
+If you specify @samp{--destdir=/usr/local}, for example, @code{make
 install} creates @file{/usr/local/bin/gdb}.
 
-@item +subdirs
-Write configuration specific files in subdirectories of the form
+@item --srcdir=@var{path}
+Use this option to make configurations in directories separate from the
+_GDBN__ source directories.  Among other things, you can use this to
+build (or maintain) several configurations simultaneously, in separate
+directories.  @code{configure} writes configuration specific files in
+the current directory, but arranges for them to use the source in the
+directory @var{path}.  @code{configure} will create directories under
+the working directory in parallel to the source directories below
+@var{path}.
 
-@example
-H-@var{host}/T-@var{target}
-@end example
-
-@noindent
-(and configure the @code{Makefile} to generate object code in
-subdirectories of this form as well).  Without this option, if you
-specify only one configuration for _GDBN__, @code{configure} will use
-the same directory for source, configured files, and binaries.  This
-option is used automatically if you specify more than one @var{host} or
-more than one @samp{+target=@var{target}} option on the @code{configure}
-command line.
-
-@item +norecursion
-Configure only the directory where @code{configure} is executed; do not
+@item --norecursion
+Configure only the directory level where @code{configure} is executed; do not
 propagate configuration to subdirectories.
 
-@item +objdir=@var{altroot}
-@var{altroot} is an alternative directory used as the root for
-configured files.  @code{configure} will create directories under
-@var{altroot} in parallel to the source directories.  If you use
-@samp{+objdir=@var{altroot}} with @samp{+subdirs}, @code{configure} also
-builds the @samp{H-@var{host}/T-@var{target}} subdirectories in the
-directory tree rooted in @var{altroot}.
-
-@item +rm
+@item --rm
 Remove the configuration that the other arguments specify.
 
 @c This does not work (yet if ever).  FIXME.
-@c @item +parse=@var{lang} @dots{}
+@c @item --parse=@var{lang} @dots{}
 @c Configure the _GDBN__ expression parser to parse the listed languages.
 @c @samp{all} configures _GDBN__ for all supported languages.  To get a
 @c list of all supported languages, omit the argument.  Without this
 @c option, _GDBN__ is configured to parse all supported languages.
 
-@item +target=@var{target} @dots{}
-Configure _GDBN__ for cross-debugging programs running on each specified
-@var{target}.  You may specify as many @samp{+target} options as you
-wish.  Without this option, _GDBN__ is configured to debug programs that
-run on the same machine (@var{host}) as _GDBN__ itself.
+@item --target=@var{target}
+Configure _GDBN__ for cross-debugging programs running on the specified
+@var{target}.  Without this option, _GDBN__ is configured to debug
+programs that run on the same machine (@var{host}) as _GDBN__ itself.
 
 There is no convenient way to generate a list of all available targets.
 
 @item @var{host} @dots{}
-Configure _GDBN__ to run on each specified @var{host}.  You may specify as
-many host names as you wish.
+Configure _GDBN__ to run on the specified @var{host}.
 
 There is no convenient way to generate a list of all available hosts.
 @end table
