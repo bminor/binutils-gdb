@@ -11143,8 +11143,7 @@ md_estimate_size_before_relax (fragp, segtype)
       sym = fragp->fr_symbol;
 
       /* Handle the case of a symbol equated to another symbol.  */
-      while (symbol_equated_p (sym)
-	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
+      while (symbol_equated_reloc_p (sym))
 	{
 	  symbolS *n;
 

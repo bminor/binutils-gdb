@@ -185,6 +185,7 @@ extern void symbol_mark_resolved PARAMS ((symbolS *));
 extern int symbol_resolved_p PARAMS ((symbolS *));
 extern int symbol_section_p PARAMS ((symbolS *));
 extern int symbol_equated_p PARAMS ((symbolS *));
+extern int symbol_equated_reloc_p PARAMS ((symbolS *));
 extern int symbol_constant_p PARAMS ((symbolS *));
 
 #ifdef BFD_ASSEMBLER

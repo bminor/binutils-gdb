@@ -769,8 +769,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	/* If this symbol is equated to an undefined symbol, convert
            the fixup to being against that symbol.  */
-	if (sym != NULL && symbol_equated_p (sym)
-	    && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
+	if (sym != NULL && symbol_equated_reloc_p (sym))
 	  {
 	    fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
 	    sym = symbol_get_value_expression (sym)->X_add_symbol;
@@ -983,11 +982,10 @@ write_relocs (abfd, sec, xxx)
 	}
 
       /* If this is an undefined symbol which was equated to another
-         symbol, then use generate the reloc against the latter symbol
+         symbol, then generate the reloc against the latter symbol
          rather than the former.  */
       sym = fixp->fx_addsy;
-      while (symbol_equated_p (sym)
-	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
+      while (symbol_equated_reloc_p (sym))
 	{
 	  symbolS *n;
 
@@ -1059,8 +1057,7 @@ write_relocs (abfd, sec, xxx)
          symbol, then generate the reloc against the latter symbol
          rather than the former.  */
       sym = fixp->fx_addsy;
-      while (symbol_equated_p (sym)
-	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
+      while (symbol_equated_reloc_p (sym))
 	sym = symbol_get_value_expression (sym)->X_add_symbol;
       fixp->fx_addsy = sym;
 
@@ -1960,8 +1957,7 @@ write_object_file ()
 
 	  /* Skip symbols which were equated to undefined or common
              symbols.  */
-	  if (symbol_equated_p (symp)
-	      && (! S_IS_DEFINED (symp) || S_IS_COMMON (symp)))
+	  if (symbol_equated_reloc_p (symp))
 	    {
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      continue;
@@ -2264,6 +2260,12 @@ relax_segment (segment_frag_root, segment)
 	  break;
 
 	case rs_machine_dependent:
+	  /* If fr_symbol is an expression, this call to
+	     resolve_symbol_value sets up the correct segment, which will
+	     likely be needed in md_estimate_size_before_relax.  */
+	  if (fragP->fr_symbol)
+	    resolve_symbol_value (fragP->fr_symbol);
+
 	  address += md_estimate_size_before_relax (fragP, segment);
 	  break;
 

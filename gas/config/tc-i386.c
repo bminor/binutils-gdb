@@ -2741,6 +2741,9 @@ md_assemble (line)
       {
 	int code16;
 	int prefix;
+	relax_substateT subtype;
+	symbolS *sym;
+	offsetT off;
 
 	code16 = 0;
 	if (flag_code == CODE_16BIT)
@@ -2785,19 +2788,29 @@ md_assemble (line)
 	if (i.prefix[REX_PREFIX])
 	  *p++ = i.prefix[REX_PREFIX];
 	*p = i.tm.base_opcode;
-	/* 1 possible extra opcode + displacement go in var part.
+
+	if ((unsigned char) *p == JUMP_PC_RELATIVE)
+	  subtype = ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL);
+	else if ((cpu_arch_flags & Cpu386) != 0)
+	  subtype = ENCODE_RELAX_STATE (COND_JUMP, SMALL);
+	else
+	  subtype = ENCODE_RELAX_STATE (COND_JUMP86, SMALL);
+	subtype |= code16;
+
+	sym = i.op[0].disps->X_add_symbol;
+	off = i.op[0].disps->X_add_number;
+
+	if (i.op[0].disps->X_op != O_constant
+	    && i.op[0].disps->X_op != O_symbol)
+	  {
+	    /* Handle complex expressions.  */
+	    sym = make_expr_symbol (i.op[0].disps);
+	    off = 0;
+	  }
+
+	/* 1 possible extra opcode + 4 byte displacement go in var part.
 	   Pass reloc in fr_var.  */
-	frag_var (rs_machine_dependent,
-		  1 + 4,
-		  i.reloc[0],
-		  ((unsigned char) *p == JUMP_PC_RELATIVE
-		   ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
-		   : ((cpu_arch_flags & Cpu386) != 0
-		      ? ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16
-		      : ENCODE_RELAX_STATE (COND_JUMP86, SMALL) | code16)),
-		  i.op[0].disps->X_add_symbol,
-		  i.op[0].disps->X_add_number,
-		  p);
+	frag_var (rs_machine_dependent, 5, i.reloc[0], subtype, sym, off, p);
       }
     else if (i.tm.opcode_modifier & (JumpByte | JumpDword))
       {

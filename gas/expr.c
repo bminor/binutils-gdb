@@ -1699,21 +1699,6 @@ expr (rankarg, resultP)
 	    }
 	}
 
-      if (retval == undefined_section)
-	{
-	  if (SEG_NORMAL (rightseg))
-	    retval = rightseg;
-	}
-      else if (! SEG_NORMAL (retval))
-	retval = rightseg;
-      else if (SEG_NORMAL (rightseg)
-	       && retval != rightseg
-#ifdef DIFF_EXPR_OK
-	       && op_left != O_subtract
-#endif
-	       )
-	as_bad (_("operation combines symbols in different segments"));
-
       op_right = operator (&op_chars);
 
       know (op_right == O_illegal
@@ -1769,8 +1754,7 @@ expr (rankarg, resultP)
 	       && resultP->X_op == O_symbol
 	       && (symbol_get_frag (right.X_add_symbol)
 		   == symbol_get_frag (resultP->X_add_symbol))
-	       && SEG_NORMAL (S_GET_SEGMENT (right.X_add_symbol)))
-
+	       && SEG_NORMAL (rightseg))
 	{
 	  resultP->X_add_number -= right.X_add_number;
 	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
@@ -1865,7 +1849,14 @@ expr (rankarg, resultP)
 	  if (op_left == O_add)
 	    resultP->X_add_number += right.X_add_number;
 	  else if (op_left == O_subtract)
-	    resultP->X_add_number -= right.X_add_number;
+	    {
+	      resultP->X_add_number -= right.X_add_number;
+	      if (retval == rightseg && SEG_NORMAL (retval))
+		{
+		  retval = absolute_section;
+		  rightseg = absolute_section;
+		}
+	    }
 	}
       else
 	{
@@ -1875,6 +1866,21 @@ expr (rankarg, resultP)
 	  resultP->X_op = op_left;
 	  resultP->X_add_number = 0;
 	  resultP->X_unsigned = 1;
+	}
+
+      if (retval != rightseg)
+	{
+	  if (! SEG_NORMAL (retval))
+	    {
+	      if (retval != undefined_section || SEG_NORMAL (rightseg))
+		retval = rightseg;
+	    }
+	  else if (SEG_NORMAL (rightseg)
+#ifdef DIFF_EXPR_OK
+		   && op_left != O_subtract
+#endif
+		   )
+	    as_bad (_("operation combines symbols in different segments"));
 	}
 
       op_left = op_right;

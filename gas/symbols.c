@@ -914,13 +914,16 @@ resolve_symbol_value (symp)
 	case O_symbol:
 	case O_symbol_rva:
 	  left = resolve_symbol_value (add_symbol);
-	do_symbol:
+	  seg_left = S_GET_SEGMENT (add_symbol);
+	  if (finalize_syms)
+	    symp->sy_value.X_op_symbol = NULL;
 
+	do_symbol:
 	  if (symp->sy_mri_common)
 	    {
 	      /* This is a symbol inside an MRI common section.  The
-                 relocation routines are going to handle it specially.
-                 Don't change the value.  */
+		 relocation routines are going to handle it specially.
+		 Don't change the value.  */
 	      resolved = symbol_resolved_p (add_symbol);
 	      break;
 	    }
@@ -933,22 +936,42 @@ resolve_symbol_value (symp)
 	      copy_symbol_attributes (symp, add_symbol);
 	    }
 
-	  /* If we have equated this symbol to an undefined symbol, we
-             keep X_op set to O_symbol, and we don't change
-             X_add_number.  This permits the routine which writes out
-             relocation to detect this case, and convert the
-             relocation to be against the symbol to which this symbol
-             is equated.  */
+	  /* If we have equated this symbol to an undefined or common
+	     symbol, keep X_op set to O_symbol, and don't change
+	     X_add_number.  This permits the routine which writes out
+	     relocation to detect this case, and convert the
+	     relocation to be against the symbol to which this symbol
+	     is equated.  */
 	  if (! S_IS_DEFINED (add_symbol) || S_IS_COMMON (add_symbol))
 	    {
 	      if (finalize_syms)
 		{
-		  final_seg = S_GET_SEGMENT (add_symbol);
 		  symp->sy_value.X_op = O_symbol;
 		  symp->sy_value.X_add_symbol = add_symbol;
 		  symp->sy_value.X_add_number = final_val;
+		  /* Use X_op_symbol as a flag.  */
+		  symp->sy_value.X_op_symbol = add_symbol;
+		  final_seg = seg_left;
 		}
 	      final_val = 0;
+	      resolved = symbol_resolved_p (add_symbol);
+	      symp->sy_resolving = 0;
+	      goto exit_dont_set_value;
+	    }
+	  else if (finalize_syms && final_seg == expr_section
+		   && seg_left != expr_section)
+	    {
+	      /* If the symbol is an expression symbol, do similarly
+		 as for undefined and common syms above.  Handles
+		 "sym +/- expr" where "expr" cannot be evaluated
+		 immediately, and we want relocations to be against
+		 "sym", eg. because it is weak.  */
+	      symp->sy_value.X_op = O_symbol;
+	      symp->sy_value.X_add_symbol = add_symbol;
+	      symp->sy_value.X_add_number = final_val;
+	      symp->sy_value.X_op_symbol = add_symbol;
+	      final_seg = seg_left;
+	      final_val += symp->sy_frag->fr_address + left;
 	      resolved = symbol_resolved_p (add_symbol);
 	      symp->sy_resolving = 0;
 	      goto exit_dont_set_value;
@@ -957,7 +980,7 @@ resolve_symbol_value (symp)
 	    {
 	      final_val += symp->sy_frag->fr_address + left;
 	      if (final_seg == expr_section || final_seg == undefined_section)
-		final_seg = S_GET_SEGMENT (add_symbol);
+		final_seg = seg_left;
 	    }
 
 	  resolved = symbol_resolved_p (add_symbol);
@@ -1008,42 +1031,49 @@ resolve_symbol_value (symp)
 
 	  /* Simplify addition or subtraction of a constant by folding the
 	     constant into X_add_number.  */
-	  if (op == O_add || op == O_subtract)
+	  if (op == O_add)
 	    {
 	      if (seg_right == absolute_section)
 		{
-		  if (op == O_add)
-		    final_val += right;
-		  else
-		    final_val -= right;
-		  op = O_symbol;
-		  op_symbol = NULL;
+		  final_val += right;
 		  goto do_symbol;
 		}
-	      else if (seg_left == absolute_section && op == O_add)
+	      else if (seg_left == absolute_section)
 		{
-		  op = O_symbol;
 		  final_val += left;
 		  add_symbol = op_symbol;
 		  left = right;
-		  op_symbol = NULL;
+		  seg_left = seg_right;
+		  goto do_symbol;
+		}
+	    }
+	  else if (op == O_subtract)
+	    {
+	      if (seg_right == absolute_section)
+		{
+		  final_val -= right;
 		  goto do_symbol;
 		}
 	    }
 
-	  /* Subtraction is permitted if both operands are in the same
-	     section.  Otherwise, both operands must be absolute.  We
-	     already handled the case of addition or subtraction of a
-	     constant above.  This will probably need to be changed
-	     for an object file format which supports arbitrary
-	     expressions, such as IEEE-695.  */
-	  /* Don't emit messages unless we're finalizing the symbol value,
+	  /* Equality and non-equality tests are permitted on anything.
+	     Subtraction, and other comparison operators are permitted if
+	     both operands are in the same section.  Otherwise, both
+	     operands must be absolute.  We already handled the case of
+	     addition or subtraction of a constant above.  This will
+	     probably need to be changed for an object file format which
+	     supports arbitrary expressions, such as IEEE-695.
+
+	     Don't emit messages unless we're finalizing the symbol value,
 	     otherwise we may get the same message multiple times.  */
-	  if ((seg_left != absolute_section
-	       || seg_right != absolute_section)
-	      && (op != O_subtract
+	  if (op != O_eq && op != O_ne
+	      && (seg_left != absolute_section
+		  || seg_right != absolute_section)
+	      && ((op != O_subtract
+		   && op != O_lt && op != O_le && op != O_ge && op != O_gt)
 		  || seg_left != seg_right
-		  || seg_left == undefined_section)
+		  || (seg_left == undefined_section
+		      && add_symbol != op_symbol))
 	      && finalize_syms)
 	    {
 	      char *file;
@@ -1085,7 +1115,7 @@ resolve_symbol_value (symp)
 	  if ((op == O_divide || op == O_modulus) && right == 0)
 	    {
 	      /* If seg_right is not absolute_section, then we've
-                 already issued a warning about using a bad symbol.  */
+		 already issued a warning about using a bad symbol.  */
 	      if (seg_right == absolute_section && finalize_syms)
 		{
 		  char *file;
@@ -1114,8 +1144,15 @@ resolve_symbol_value (symp)
 	    case O_bit_and:		left &= right; break;
 	    case O_add:			left += right; break;
 	    case O_subtract:		left -= right; break;
-	    case O_eq:	left = left == right ? ~ (offsetT) 0 : 0; break;
-	    case O_ne:	left = left != right ? ~ (offsetT) 0 : 0; break;
+	    case O_eq:
+	    case O_ne:
+	      left = (left == right && seg_left == seg_right
+		      && (seg_left != undefined_section
+			  || add_symbol == op_symbol)
+		      ? ~ (offsetT) 0 : 0);
+	      if (symp->sy_value.X_op == O_ne)
+		left = ~left;
+	      break;
 	    case O_lt:	left = left <  right ? ~ (offsetT) 0 : 0; break;
 	    case O_le:	left = left <= right ? ~ (offsetT) 0 : 0; break;
 	    case O_ge:	left = left >= right ? ~ (offsetT) 0 : 0; break;
@@ -2144,6 +2181,24 @@ symbol_equated_p (s)
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
   return s->sy_value.X_op == O_symbol;
+}
+
+/* Return whether a symbol is equated to another symbol, and should be
+   treated specially when writing out relocs.  */
+
+int
+symbol_equated_reloc_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  /* X_op_symbol, normally not used for O_symbol, is set by
+     resolve_symbol_value to flag expression syms that have been
+     equated.  */
+  return (s->sy_value.X_op == O_symbol
+	  && ((s->sy_resolved && s->sy_value.X_op_symbol != NULL)
+	      || ! S_IS_DEFINED (s)
+	      || S_IS_COMMON (s)));
 }
 
 /* Return whether a symbol has a constant value.  */
