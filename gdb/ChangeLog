@@ -1,5 +1,14 @@
 Tue Apr 22 09:02:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* config/alpha/alpha-osf3.mh config/i386/{i386gnu linux}.mh
+	config/mips/{embed embed64 embedl embedl64 vr4300 vr4300el vr5000
+	vr5000el}.mt config/powerpc/{aix aix4}.mh config/rs6000/{aix
+	aix4}.mh config/sh/sh.mt config/sparc/sp64sim.mt:
+start-sanitize-v850
+	config/v850/v850.mt:
+end-sanitize-v850
+	Remove -lm.  That's now handled by configure.
+
 	* Makefile.in (maintainer-clean):  Add distclean to dependencies.
 	Remove duplicate rm's of files.
 

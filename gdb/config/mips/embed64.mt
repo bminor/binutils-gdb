@@ -2,4 +2,4 @@
 TDEPFILES= mips-tdep.o remote-mips.o remote-array.o
 TM_FILE= tm-embed64.h
 SIM_OBS = remote-sim.o
-SIM = ../sim/mips/libsim.a -lm
+SIM = ../sim/mips/libsim.a
