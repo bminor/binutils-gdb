@@ -32,6 +32,7 @@
 @V@/bfd/elf64-alpha-fbsd.c @V@/bfd/e64alph.c
 @V@/bfd/elf64-sh64.c @V@/bfd/e64sh64.c
 @V@/bfd/elf64-sh64-nbsd.c @V@/bfd/e64sh64n.c
+@V@/bfd/po/.cvsignore @V@/bfd/po/_cvsignore
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp
 @V@/dejagnu/baseboards/mn10200-sim.exp @V@/dejagnu/baseboards/mn10200sim.exp
 @V@/dejagnu/baseboards/mn10300-cygmon.exp @V@/dejagnu/baseboards/mn10300cygmon.exp
@@ -68,6 +69,7 @@
 @V@/gdb/ChangeLog-2001 @V@/gdb/ChangeLog.001
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
+@V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-nat.c @V@/gdb/alphnb-nat.c
@@ -106,6 +108,8 @@
 @V@/gdb/config/mips/tm-embed64.h @V@/gdb/config/mips/tm-emb64.h
 @V@/gdb/config/mips/tm-embedl.h @V@/gdb/config/mips/tm-embdl.h
 @V@/gdb/config/mips/tm-embedl64.h @V@/gdb/config/mips/tm-embl64.h
+@V@/gdb/config/mips/tm-linux.h @V@/gdb/config/mips/tm-lx.h
+@V@/gdb/config/mips/tm-linux64.h @V@/gdb/config/mips/tm-lx64.h
 @V@/gdb/config/mips/tm-vr4300el.h @V@/gdb/config/mips/tm-v43el.h
 @V@/gdb/config/mips/tm-vr4xxxel.h @V@/gdb/config/mips/tm-v4xel.h
 @V@/gdb/config/mips/tm-vr5000el.h @V@/gdb/config/mips/tm-vr5kel.h
@@ -130,6 +134,8 @@
 @V@/gdb/gdbtk/library/ChangeLog-1999 @V@/gdb/gdbtk/library/ChangeLog.99
 @V@/gdb/gdbtk/library/ChangeLog-2000 @V@/gdb/gdbtk/library/ChangeLog.000
 @V@/gdb/gdbtk/library/ChangeLog-2001 @V@/gdb/gdbtk/library/ChangeLog.001
+@V@/gdb/i386-interix-nat.c @V@/gdb/i386ix-nat.c
+@V@/gdb/i386-interix-tdep.c @V@/gdb/i386ix-tdep.c
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386linux-tdep.c
 @V@/gdb/i386bsd-nat.c @V@/gdb/i3bsd-nat.c
 @V@/gdb/i386bsd-tdep.c @V@/gdb/i3bsd-tdep.c
@@ -143,6 +149,8 @@
 @V@/gdb/ia64-linux-nat.c @V@/gdb/ia64linux-nat.c
 @V@/gdb/jv-exp.tab.c @V@/gdb/jv-exp_tab.c
 @V@/gdb/m2-exp.tab.c @V@/gdb/m2-exp_tab.c
+@V@/gdb/m68klinux-nat.c @V@/gdb/m68kl-nat.c
+@V@/gdb/m68klinux-tdep.c @V@/gdb/m68kl-tdep.c
 @V@/gdb/m68knbsd-nat.c @V@/gdb/m6nbsd-nat.c
 @V@/gdb/m68knbsd-tdep.c @V@/gdb/m6nbsd-tdep.c
 @V@/gdb/mips-linux-nat.c @V@/gdb/mipslnxnat.c
@@ -152,6 +160,7 @@
 @V@/gdb/nindy-share/b.out.h @V@/gdb/nindy-share/b_out.h
 @V@/gdb/ns32knbsd-nat.c @V@/gdb/ns32nb-nat.c
 @V@/gdb/ns32knbsd-tdep.c @V@/gdb/ns32nb-tdep.c
+@V@/gdb/objc-exp.tab.c @V@/gdb/objc-exp_tab.c
 @V@/gdb/osf-share/cma_stack_int.h @V@/gdb/osf-share/cma_stkint.h
 @V@/gdb/p-exp.tab.c @V@/gdb/p-exp_tab.c
 @V@/gdb/ppc-linux-tdep.c @V@/gdb/ppc-linx-tdep.c
@@ -264,6 +273,10 @@
 @V@/gdb/testsuite/gdb.mi/mi0-var-child.exp @V@/gdb/testsuite/gdb.mi/mi0varchild.exp
 @V@/gdb/testsuite/gdb.mi/mi0-var-cmd.exp @V@/gdb/testsuite/gdb.mi/mi0varcmd.exp
 @V@/gdb/testsuite/gdb.mi/mi0-var-display.exp @V@/gdb/testsuite/gdb.mi/mi0vardisplay.exp
+@V@/gdb/testsuite/gdb.mi/mi1-var-block.exp @V@/gdb/testsuite/gdb.mi/mi1varblock.exp
+@V@/gdb/testsuite/gdb.mi/mi1-var-child.exp @V@/gdb/testsuite/gdb.mi/mi1varchild.exp
+@V@/gdb/testsuite/gdb.mi/mi1-var-cmd.exp @V@/gdb/testsuite/gdb.mi/mi1varcmd.exp
+@V@/gdb/testsuite/gdb.mi/mi1-var-display.exp @V@/gdb/testsuite/gdb.mi/mi1vardisplay.exp
 @V@/gdb/tui/tuiSourceWin.c @V@/gdb/tui/tuiWinSource.c
 @V@/gdb/tui/tuiSourceWin.h @V@/gdb/tui/tuiWinSource.h
 @V@/gdb/x86-64-linux-tdep.c @V@/gdb/x8664-ltdep.c
@@ -380,6 +393,8 @@
 @V@/opcodes/ia64-opc-m.c @V@/opcodes/ia64opcm.c
 @V@/opcodes/ia64-opc-x.c @V@/opcodes/ia64opcx.c
 @V@/opcodes/ia64-opc.c @V@/opcodes/ia64-opc.c
+@V@/opcodes/iq2000-desc.c @V@/opcodes/iq2000desc.c
+@V@/opcodes/iq2000-dis.c @V@/opcodes/iq2000dis.c
 @V@/opcodes/m68hc11-dis.c @V@/opcodes/m68hc11dis.c
 @V@/opcodes/m68hc11-opc.c @V@/opcodes/m68hc11opc.c
 @V@/opcodes/openris-dis.c @V@/opcodes/orisc-dis.c
@@ -388,6 +403,7 @@
 @V@/opcodes/openrisc-ibld.c @V@/opcodes/orisc-ibld.c
 @V@/opcodes/openrisc-opc.c @V@/opcodes/orisc-opc.c
 @V@/opcodes/openrisc-opc.h @V@/opcodes/orisc-opc.h
+@V@/opcodes/po/.cvsignore @V@/opcodes/po/_cvsignore
 @V@/readline/config.h.bot @V@/readline/config.h-bot
 @V@/readline/config.h.in @V@/readline/config.h-in
 @V@/sim/m68hc11/dv-m68hc11eepr.c @V@/sim/m68hc11/dv-eepr.c

@@ -218,7 +218,7 @@ captured_main (void *data)
 
       if (res == 0)
 	{
-	  free (gdb_sysroot);
+	  xfree (gdb_sysroot);
 	  gdb_sysroot = TARGET_SYSTEM_ROOT;
 	}
     }
