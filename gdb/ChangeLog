@@ -1,3 +1,7 @@
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
+	* defs.h (enum language): Add language_objc.
+
 2002-10-11  Klee Dienes  <kdienes@apple.com>
 
         * findvar.c (read_memory_typed_address): New function.

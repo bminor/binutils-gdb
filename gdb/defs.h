@@ -205,6 +205,7 @@ enum language
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_cplus,		/* C++ */
+    language_objc,		/* Objective-C */
     language_java,		/* Java */
     /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
