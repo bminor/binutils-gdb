@@ -1,3 +1,7 @@
+Mon Nov  6 15:05:00 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (TAGS): New target.
+
 Wed Nov  1 12:51:21 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (DISTSTUFF):  Rename to GEN_FILES, to avoid confusion.

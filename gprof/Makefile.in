@@ -82,6 +82,10 @@ dvi: gprof.dvi
 check:
 installcheck:
 
+TAGS:
+	etags $(srcdir)/*.[ch]
+tags:	TAGS
+
 install-info: gprof.info
 	if [ -r gprof.info ]; then \
 	  dir=. ; \
