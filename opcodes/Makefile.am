@@ -124,6 +124,7 @@ disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
 libopcodes_la_SOURCES =  dis-buf.c disassemble.c
 libopcodes_la_DEPENDENCIES = $(OFILES)
 libopcodes_la_LIBADD = $(OFILES)
+libopcodes_la_LDFLAGS = -release $(VERSION)
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
 # the build directory so that we don't have to convert all the

@@ -192,6 +192,7 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFI
 libopcodes_la_SOURCES =  dis-buf.c disassemble.c
 libopcodes_la_DEPENDENCIES = $(OFILES)
 libopcodes_la_LIBADD = $(OFILES)
+libopcodes_la_LDFLAGS = -release $(VERSION)
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
 # the build directory so that we don't have to convert all the
@@ -240,7 +241,6 @@ libopcodes_a_SOURCES = libopcodes.a.c
 libopcodes_a_OBJECTS =  libopcodes.a.o
 LTLIBRARIES =  $(lib_LTLIBRARIES)
 
-libopcodes_la_LDFLAGS = 
 libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)

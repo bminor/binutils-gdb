@@ -1,3 +1,8 @@
+Fri Feb 13 13:12:14 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (libopcodes_la_LDFLAGS): Define.
+	* Makefile.in: Rebuild.
+
 Fri Feb 13 09:50:32 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c: Regenerate. 
@@ -19,7 +24,7 @@ start-sanitize-sky
 end-sanitize-sky
 Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
-Fix rac to accept only a0:
+	Fix rac to accept only a0:
 	* d10v-opc.c (d10v_predefined_registers, d10v_operands, d10v_opcodes):
 	Split OPERAND_ACC into OPERAND_ACC0 and OPERAND_ACC1.
 	Introduce OPERAND_GPR.
