@@ -1,4 +1,8 @@
 2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+        * defs.h (selected_frame_level_changed_hook): Removed.
+
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
         
         * event-top.c: Reorg some code, to minimize diffs with mainline.
 

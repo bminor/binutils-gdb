@@ -1162,8 +1162,6 @@ extern void (*error_begin_hook) (void);
 
 extern int (*ui_load_progress_hook) (const char *section, unsigned long num);
 
-extern void (*selected_frame_level_changed_hook) (int level);
-
 /* Inhibit window interface if non-zero. */
 
 extern int use_windows;
