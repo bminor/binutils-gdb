@@ -17,7 +17,7 @@ all:
 	  EXPECT=${EXPECT}
 
 clean mostlyclean:
-	-rm -f *.o $OBJS} *.exe *~ core 
+	-rm -f *.o ${OBJS} *.exe *~ core 
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status
