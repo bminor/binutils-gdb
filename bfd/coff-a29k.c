@@ -35,6 +35,8 @@ static boolean coff_a29k_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
 
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
+
 #define INSERT_HWORD(WORD,HWORD)	\
     (((WORD) & 0xff00ff00) | (((HWORD) & 0xff00) << 8) | ((HWORD)& 0xff))
 #define EXTRACT_HWORD(WORD) \

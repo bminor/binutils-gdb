@@ -1,5 +1,15 @@
 Tue Oct  4 11:23:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* coffcode.h (coff_new_section_hook): Don't use align_power_min;
+	use COFF_DEFAULT_SECTION_ALIGNMENT_POWER instead.  Force the .stab
+	and .stabstr sections to be aligned to no more than 2.  Remove
+	COFF_SPARC special cases.
+	* coff-a29k.c: Define COFF_DEFAULT_SECTION_ALIGNMENT_POWER.
+	* coff-apollo.c, coff-go32.c, coff-h8300.c: Likewise.
+	* coff-h8500.c, coff-i386.c, coff-i960.c, coff-m68k.c: Likewise.
+	* coff-m88k.c, coff-rs6000.c, coff-sh.c, coff-sparc.c: Likewise.
+	* coff-we32k.c, coff-z8k.c: Likewise.
+
 	* configure.in: Use ${config_shell} when running config.bfd.
 
 	* cofflink.c (coff_link_input_bfd): Don't try to convert a long
