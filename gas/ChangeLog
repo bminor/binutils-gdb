@@ -1,5 +1,7 @@
 2002-09-11  Nick Clifton  <nickc@redhat.com>
 
+	* NEWS: New TI port supports both C4x and C3x series of DSPs.
+
 	* po/tr.po: Updated Turkish translation.
 
 2002-09-11  Jakub Jelinek  <jakub@redhat.com>

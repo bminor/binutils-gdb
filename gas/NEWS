@@ -1,7 +1,7 @@
 -*- text -*-
 
-* Support for Texas Instruments TMS320C4x series of microcontrollers
-  contributed by Michael Hayes and Svein E. Seldal.
+* Support for Texas Instruments TMS320C4x and TMS320C3x series of
+  DSP's contributed by Michael Hayes and Svein E. Seldal.
   
 * Support for the Ubicom IP2xxx microcontroller added.
 
