@@ -1,3 +1,8 @@
+Tue Dec  8 13:56:18 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* dis-buf.c (generic_strcat_address): reformat to GNU coding
+	conventions.  change sprintf call to an sprintf_vma call.
+
 start-sanitize-fr30
 Tue Dec  8 13:12:44 1998  Dave Brolley  <brolley@cygnus.com>
 
