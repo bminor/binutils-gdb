@@ -458,9 +458,6 @@ extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
 extern int frameless_look_for_prologue (struct frame_info *);
 
-extern void print_frame_args (struct symbol *, struct frame_info *,
-			      int, struct ui_file *);
-
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
 extern void show_and_print_stack_frame (struct frame_info *fi, int level,
