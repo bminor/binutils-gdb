@@ -1,5 +1,11 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.h (MIPS_FIRST_EMBED_REGNUM)
+	(MIPS_LAST_EMBED_REGNUM): Add.
+	* config/mips/tm-mips.h (FIRST_EMBED_REGNUM)
+	(LAST_EMBED_REGNUM): Delete.
+	* mipsv4-nat.c, mips-tdep.c, mips-linux-tdep.c: Update.
+
 	* config/mips/tm-mips.h (PS_REGNUM): Delete.
 	* mips-tdep.h (MIPS_PS_REGNUM): Add.
 	* remote-vxmips.c, mipsv4-nat.c, mips-tdep.c: Update.

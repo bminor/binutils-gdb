@@ -130,7 +130,7 @@ supply_gregset (elf_gregset_t *gregsetp)
 
   /* Fill inaccessible registers with zero.  */
   regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
-  for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
+  for (regi = MIPS_FIRST_EMBED_REGNUM; regi < MIPS_LAST_EMBED_REGNUM; regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }
 
@@ -409,7 +409,7 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
 
   /* Fill inaccessible registers with zero.  */
   regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
-  for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
+  for (regi = MIPS_FIRST_EMBED_REGNUM; regi < MIPS_LAST_EMBED_REGNUM; regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }
 

@@ -718,7 +718,7 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
 	 the ABI (with a few complications).  */
       if (regnum >= (NUM_REGS
 		     + mips_regnum (current_gdbarch)->fp_control_status)
-	  && regnum <= NUM_REGS + LAST_EMBED_REGNUM)
+	  && regnum <= NUM_REGS + MIPS_LAST_EMBED_REGNUM)
 	/* The pseudo/cooked view of the embedded registers is always
 	   32-bit.  The raw view is handled below.  */
 	return builtin_type_int32;
@@ -5260,17 +5260,11 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: ECOFF_REG_TO_REGNUM # %s\n",
 		      XSTRING (ECOFF_REG_TO_REGNUM (REGNUM)));
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: FIRST_EMBED_REGNUM = %d\n",
-		      FIRST_EMBED_REGNUM);
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: DEPRECATED_IGNORE_HELPER_CALL # %s\n",
 		      XSTRING (DEPRECATED_IGNORE_HELPER_CALL (PC)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IN_SOLIB_CALL_TRAMPOLINE # %s\n",
 		      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (PC, NAME)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: LAST_EMBED_REGNUM = %d\n",
-		      LAST_EMBED_REGNUM);
 #ifdef MACHINE_CPROC_FP_OFFSET
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MACHINE_CPROC_FP_OFFSET = %d\n",
