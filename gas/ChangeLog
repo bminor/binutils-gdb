@@ -1,3 +1,22 @@
+Mon Feb  5 16:29:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Support for building bfd and opcodes as shared libraries, based on
+	patches from Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* configure.in: Set OPCODES and BFD to search directories.
+	Substitute OPCODES_DEP and BFDDEP.  On SunOS, set HLDFLAGS.
+	* configure: Rebuild.
+	* Makefile.in (LDFLAGS, HLDFLAGS): New variables.
+	(LIBDEPS): New variable.
+	(as.new0: Depend upon $(LIBDEPS) rather than $(LIBS).  Use
+	$(HLDFLAGS) in link.
+	(check): Set LD_LIBRARY_PATH in the environment.
+
+Fri Feb  2 17:41:53 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* config/tc-ppc.h (ELF_TC_SPECIAL_SECTIONS): Make .sdata2, .sbss2,
+	.PPC.EMB.sdata0, and .PPC.EMB.sbss0 sections all default to
+	read-only, not read/write.
+
 Fri Feb  2 14:09:25 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* Makefile.in (INSTALL_XFORM): Remove -e.
