@@ -436,12 +436,16 @@ AC_PATH_X
 # Enable GPU2 library for MIPS simulator
 AC_ARG_WITH(sim-gpu2,
 [  --with-sim-gpu2=path			Use GPU2 library under given directory],
-[if test -d "${withval}"
-then
-  LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11"
-else
-  AC_MSG_ERROR("Directory ${withval} does not exist.");
-fi])dnl
+[case "${target}" in
+  mips*-sky-*)
+    if test -d "${withval}"
+    then
+      LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11"
+    else
+      AC_MSG_WARN([Directory ${withval} does not exist.])
+    fi ;;
+  *)  AC_MSG_WARN([--with-sim-gpu2 option invalid for target ${target}])
+esac])dnl
 # end-sanitize-sky
 
 AC_SUBST(ENABLE_CFLAGS)
