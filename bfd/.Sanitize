@@ -84,6 +84,7 @@ coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
+coff-ppc.c
 coff-rs6000.c
 coff-sh.c
 coff-sparc.c
@@ -212,8 +213,10 @@ osf-core.c
 pc532-mach.c
 pe-arm.c
 pe-i386.c
+pe-ppc.c
 pei-arm.c
 pei-i386.c
+pei-ppc.c
 peicode.h
 ptrace-core.c
 reloc.c
