@@ -6,8 +6,6 @@
 
 MH_CFLAGS = -D__HP_CURSES -Dvfork=fork
 
-XM_FILE= xm-hppah.h
-
 NAT_FILE= nm-hppah.h
 NATDEPFILES= hppah-nat.o corelow.o core-aout.o inftarg.o fork-child.o infptrace.o somread.o hpread.o somsolib.o
 

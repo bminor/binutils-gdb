@@ -1,5 +1,17 @@
 2004-08-05  Andrew Cagney  <cagney@gnu.org>
 
+	* config/xm-sysv4.h: Delete file.
+	* config/mips/xm-irix5.h: Delete file.
+	* config/mips/irix6.mh (XM_FILE, XM_CLIBS): Delete.
+	* config/mips/irix5.mh (XM_FILE, XM_CLIBS): Delete.
+	* config/ia64/xm-aix.h: Delete file.
+	* config/ia64/aix.mh (XM_FILE): Delete.
+	* config/pa/xm-hppah.h: Delete file.
+	* config/pa/hpux11w.mh (XM_FILE): Delete.
+	* config/pa/hpux11.mh (XM_FILE): Delete.
+	* config/pa/hpux1020.mh (XM_FILE): Delete.
+	* config/pa/hppahpux.mh (XM_FILE): Delete.
+
 	* config/alpha/xm-alphalinux.h: Delete file.
 	* config/djgpp/fnchange.lst: Do not fix xm-alphalinux.h.
 	* config/alpha/alpha-linux.mh (XM_FILE, LOADLIBES): Delete.
