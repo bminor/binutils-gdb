@@ -955,8 +955,6 @@ append_insn (place, ip, address_expr, reloc_type)
 	  || (pinfo & INSN_COND_BRANCH_DELAY))
 	{
 	  if (mips_optimize < 2
-	      /* If we have seen .set nobopt, don't optimize.  */
-	      || mips_nobopt != 0
 	      /* If we have seen .set volatile or .set nomove, don't
 		 optimize.  */
 	      || mips_nomove != 0
