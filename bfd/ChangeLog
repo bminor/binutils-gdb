@@ -1,3 +1,18 @@
+Thu Nov  7 11:03:55 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* coffcode.h: Defined new macros [PUT|GET]LINENO_LNNO for
+	manipulation of lnno fields in lineno structs in a coff-<f>.h
+	independent way. Override it in coff-<f>.h to your favourite
+	number if you don't have a 16bit lnno field. (coff_swap_lineno_in)
+	(coff_swap_lineno_out): modified to use the new macros.
+
+Mon Nov  4 11:38:33 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* aoutf1.h (sunos4_callback): Now defaults to 68020 rather than
+	unknown arch when the magic number doesn't specify the
+	architecture, since some OSs (eg old sun3s) don't set the number, and
+	020 is probably the right answer anyway.
+
 Sun Nov  3 12:07:08 1991  Per Bothner  (bothner at cygnus.com)
 
 	* hosts/h-news.h, hosts/h-rtbsd.h:
