@@ -1,3 +1,8 @@
+Sat Sep 19 03:14:37 1992  John Gilmore  (gnu@cygnus.com)
+
+	* config/decstation.mh:  Add MMALLOC_LIB and MMALLOC_DISABLE
+	overrides, to avoid problem in xdr_bytes with malloc(0) => 0.
+
 Wed Sep 16 20:04:54 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* target.h (struct target_ops):  removed to_convert_to_virtual and
