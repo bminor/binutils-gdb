@@ -51,7 +51,7 @@ extern int flag_show_after_trunc;	/* -H */
 extern int flag_no_hash_mixed_case;	/* -h NUM */
 
 /* Flag that determines how we map names.  This takes several values, and
- * is set with the -h switch.  A value of zero implies names should be 
+ * is set with the -h switch.  A value of zero implies names should be
  * upper case, and the presence of the -h switch inhibits the case hack.
  * No -h switch at all sets vms_name_mapping to 0, and allows case hacking.
  * A value of 2 (set with -h2) implies names should be
@@ -192,7 +192,7 @@ static const char *symbol_name;
 static structure_count = 0;
 
 /* This variable is used to indicate that we are making the last attempt to
-   parse the stabs, and that we should define as much as we can, and ignore 
+   parse the stabs, and that we should define as much as we can, and ignore
    the rest */
 
 static int final_pass;
@@ -269,7 +269,7 @@ static int Current_Object_Record_Type;	/* Type of record in above	   */
 #define COPY_SHORT(dest,val)	md_number_to_chars ((dest), (val), 2)
 #endif
 /*
- *	Macros for placing data into the object record buffer
+ *	Macros for placing data into the object record buffer.
  */
 #define PUT_LONG(val) \
 	( COPY_LONG (&Object_Record_Buffer[Object_Record_Offset], (val)), \
@@ -416,8 +416,7 @@ static void vms_build_DST PARAMS ((unsigned));
 
 
 /* The following code defines the special types of pseudo-ops that we
- *  use with VMS.
- */
+   use with VMS.  */
 
 unsigned char const_flag = IN_DEFAULT_SECTION;
 
@@ -476,13 +475,14 @@ vms_resolve_symbol_redef (sym)
   return 0;
 }
 
+
 /* `tc_frob_label' handler for colon(symbols.c), used to examine the
    dummy label(s) gcc inserts at the beginning of each file it generates.
-   gcc 1.x put "gcc_compiled."; gcc 2.x (as of 2.6) puts "gcc2_compiled."
+   gcc 1.x put "gcc_compiled."; gcc 2.x (as of 2.7) puts "gcc2_compiled."
    and "__gnu_language_<name>" and possibly "__vax_<type>_doubles".  */
 
 void
-vms_check_for_special_label (symbolP) 
+vms_check_for_special_label (symbolP)
 symbolS *symbolP;
 {
   /* Special labels only occur prior to explicit section directives.  */
@@ -509,11 +509,13 @@ symbolS *symbolP;
   return;
 }
 
-void 
+
+void
 obj_read_begin_hook ()
 {
   return;
 }
+
 
 void
 obj_crawl_symbol_chain (headers)
@@ -569,125 +571,118 @@ obj_crawl_symbol_chain (headers)
  /****** VMS OBJECT FILE HACKING ROUTINES *******/
 
 
-/*
- *	Create the VMS object file
- */
+/* Create the VMS object file.  */
+
 static void
 Create_VMS_Object_File ()
 {
 #if	defined(eunice) || !defined(VMS)
   VMS_Object_File_FD = creat (out_file_name, 0777, "var");
 #else	/* eunice */
-  VMS_Object_File_FD = creat (out_file_name, 0, "rfm=var", 
-			     "mbc=16", "deq=64", "fop=tef", "shr=nil");
+  VMS_Object_File_FD = creat (out_file_name, 0, "rfm=var",
+			      "mbc=16", "deq=64", "fop=tef", "shr=nil");
 #endif	/* eunice */
-  /*
-   *	Deal with errors
-   */
+  /* Deal with errors.  */
   if (VMS_Object_File_FD < 0)
     as_fatal ("Couldn't create VMS object file \"%s\"", out_file_name);
-  /*
-   *	Initialize object file hacking variables
-   */
+  /* Initialize object file hacking variables.  */
   Object_Record_Offset = 0;
   Current_Object_Record_Type = -1;
 }
-
 
-/*
- *	Flush the object record buffer to the object file
- */
+
+/* Flush the object record buffer to the object file.  */
+
 static void
 Flush_VMS_Object_Record_Buffer ()
 {
-  int i;
-#ifndef VMS
-  short int zero;
-  int RecLen;
-#endif
-
-  /*
-   *	If the buffer is empty, we are done
-   */
+  /* If the buffer is empty, there's nothing to do.  */
   if (Object_Record_Offset == 0)
     return;
-  /*
-   *	Write the data to the file
-   */
+
 #ifndef VMS			/* For cross-assembly purposes. */
-  md_number_to_chars ((char *) &RecLen, Object_Record_Offset, 2);
-  i = write (VMS_Object_File_FD, &RecLen, 2);
+  {
+    char RecLen[2];
+
+    /* "Variable-length record" files have a two byte length field
+       prepended to each record.  It's normally out-of-band, and native
+       VMS output will insert it automatically for this type of file.
+       When cross-assembling, we must write it explicitly.  */
+    md_number_to_chars (RecLen, Object_Record_Offset, 2);
+    if (write (VMS_Object_File_FD, RecLen, 2) != 2)
+      error ("I/O error writing VMS object file (length prefix)");
+    /* We also need to force the actual record to be an even number of
+       bytes.  For native output, that's automatic; when cross-assembling,
+       pad with a NUL byte if length is odd.  Do so _after_ writing the
+       pre-padded length.  Since our buffer is defined with even size,
+       an odd offset implies that it has some room left.  */
+    if ((Object_Record_Offset & 1) != 0)
+      Object_Record_Buffer[Object_Record_Offset++] = '\0';
+  }
 #endif /* not VMS */
-  i = write (VMS_Object_File_FD,
-	     Object_Record_Buffer,
-	     Object_Record_Offset);
-  if (i != Object_Record_Offset)
+
+  /* Write the data to the file.  */
+  if (write (VMS_Object_File_FD, Object_Record_Buffer, Object_Record_Offset)
+      != Object_Record_Offset)
     error ("I/O error writing VMS object file");
-#ifndef VMS			/* When cross-assembling, we need to pad the record to an even
-						number of bytes. */
-  /* pad it if needed */
-  zero = 0;
-  if ((Object_Record_Offset & 1) != 0)
-    write (VMS_Object_File_FD, &zero, 1);
-#endif /* not VMS */
-  /*
-   *	The buffer is now empty
-   */
+
+  /* The buffer is now empty.  */
   Object_Record_Offset = 0;
 }
-
 
-/*
- *	Declare a particular type of object file record
- */
+
+/* Declare a particular type of object file record.  */
+
 static void
 Set_VMS_Object_File_Record (Type)
      int Type;
 {
-  /*
-   *	If the type matches, we are done
-   */
+  /* If the type matches, we are done.  */
   if (Type == Current_Object_Record_Type)
     return;
-  /*
-   *	Otherwise: flush the buffer
-   */
+  /* Otherwise: flush the buffer.  */
   Flush_VMS_Object_Record_Buffer ();
-  /*
-   *	Set the new type
-   */
+  /* Remember the new type.  */
   Current_Object_Record_Type = Type;
 }
-
 
 
-/*
- *	Close the VMS Object file
- */
+/* Close the VMS Object file.  */
+
 static void
 Close_VMS_Object_File ()
 {
-#ifndef VMS			/* For cross-assembly purposes. */
-  short int m_one = -1;
+  /* Flush (should never be necessary) and reset saved record-type context.  */
+  Set_VMS_Object_File_Record (-1);
 
-  /* Write a record-length field of 0xffff into the file, which means
-     end-of-file when read later.  It is only needed for variable-length
-     record files transferred to VMS as fixed-length record files
-     (typical for binary ftp).  */
-  write (VMS_Object_File_FD, &m_one, 2);
+#ifndef VMS			/* For cross-assembly purposes. */
+  {
+    char RecLen[2];
+    int minus_one = -1;
+
+    /* Write a 2 byte record-length field of -1 into the file, which
+       means end-of-block when read, hence end-of-file when occurring
+       in the file's last block.  It is only needed for variable-length
+       record files transferred to VMS as fixed-length record files
+       (typical for binary FTP; NFS shouldn't need it, but it won't hurt).  */
+    md_number_to_chars (RecLen, minus_one, 2);
+    write (VMS_Object_File_FD, RecLen, 2);
+  }
 #else
-  /* When written on a VMS system, the file header (cf inode) will record
-     the actual end-of-file position and no inline marker is needed.  */
+    /* When written on a VMS system, the file header (cf inode) will record
+       the actual end-of-file position and no inline marker is needed.  */
 #endif
 
   close (VMS_Object_File_FD);
 }
 
 
-/*
- *	Stack Psect base followed by signed, varying-sized offset.
- *	Common to several object records.
- */
+ /****** Text Information and Relocation routines ******/
+
+
+/* Stack Psect base followed by signed, varying-sized offset.
+   Common to several object records.  */
+
 static void
 vms_tir_stack_psect (Psect_Index, Offset, Force)
      int Psect_Index;
@@ -731,9 +726,9 @@ vms_tir_stack_psect (Psect_Index, Offset, Force)
 #undef Sta_P
 }
 
-/*
- *	Store immediate data in current Psect
- */
+
+/* Store immediate data in current Psect.  */
+
 static void
 VMS_Store_Immediate_Data (Pointer, Size, Record_Type)
      const char *Pointer;
@@ -742,51 +737,35 @@ VMS_Store_Immediate_Data (Pointer, Size, Record_Type)
 {
   register int i;
 
-  /*
-   *	We are writing a "Record_Type" record
-   */
   Set_VMS_Object_File_Record (Record_Type);
-  /*
-   *	We can only store 128 bytes at a time
-   */
+  /* We can only store as most 128 bytes at a time due to the way that
+     TIR commands are encoded.  */
   while (Size > 0)
     {
-      /*
-       *	Store a maximum of 128 bytes
-       */
       i = (Size > 128) ? 128 : Size;
       Size -= i;
-      /*
-       *	If we cannot accommodate this record, flush the
-       *	buffer.
-       */
-      if ((Object_Record_Offset + i + 1) >= sizeof (Object_Record_Buffer))
+      /* If we cannot accommodate this record, flush the buffer.  */
+      if ((Object_Record_Offset + i + 1) >= sizeof Object_Record_Buffer)
 	Flush_VMS_Object_Record_Buffer ();
-      /*
-       *	If the buffer is empty we must insert record type
-       */
+      /* If the buffer is empty we must insert record type.  */
       if (Object_Record_Offset == 0)
 	PUT_CHAR (Record_Type);
-      /*
-       *	Store the count
-       */
-      PUT_CHAR (-i & 0xff);
-      /*
-       *	Store the data
-       */
+      /* Store the count.  The Store Immediate TIR command is implied by
+         a negative command byte, and the length of the immediate data
+         is abs(command_byte).  So, we write the negated length value.  */
+      PUT_CHAR ((char) (-i & 0xff));
+      /* Now store the data.  */
       while (--i >= 0)
 	PUT_CHAR (*Pointer++);
     }
-  /*
-   *	Flush the buffer if it is more than 75% full.
-   */
+  /* Flush the buffer if it is more than 75% full.  */
   if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
-/*
- *	Make a data reference
- */
+
+/* Make a data reference.  */
+
 static void
 VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
      int Psect_Index;
@@ -794,79 +773,56 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
      int Record_Type;
      int Force;
 {
-  /*
-   *	We are writing a "Record_Type" record
-   */
   Set_VMS_Object_File_Record (Record_Type);
-  /*
-   *	If the buffer is empty we must insert the record type
-   */
+  /* If the buffer is empty we must insert the record type.  */
   if (Object_Record_Offset == 0)
     PUT_CHAR (Record_Type);
-  /*
-   *	Stack the Psect base with its offset
-   */
+  /* Stack the Psect base with its offset.  */
   vms_tir_stack_psect (Psect_Index, Offset, Force);
-  /*
-   *	Set relocation base
-   */
+  /* Set relocation base.  */
   PUT_CHAR (TIR_S_C_STO_PIDR);
-  /*
-   *	Flush the buffer if it is more than 75% full
-   */
+  /* Flush the buffer if it is more than 75% full.  */
   if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
-/*
- *	Make a debugger reference to a struct, union or enum.
- */
+
+/* Make a debugger reference to a struct, union or enum.  */
+
 static void
 VMS_Store_Struct (Struct_Index)
      int Struct_Index;
 {
-  /*
-   *	We are writing a "OBJ_S_C_DBG" record
-   */
+  /* We are writing a debug record.  */
   Set_VMS_Object_File_Record (OBJ_S_C_DBG);
-  /*
-   *	If the buffer is empty we must insert the record type
-   */
+  /* If the buffer is empty we must insert the record type.  */
   if (Object_Record_Offset == 0)
     PUT_CHAR (OBJ_S_C_DBG);
   PUT_CHAR (TIR_S_C_STA_UW);
   PUT_SHORT (Struct_Index);
   PUT_CHAR (TIR_S_C_CTL_STKDL);
   PUT_CHAR (TIR_S_C_STO_L);
-  /*
-   *	Flush the buffer if it is more than 75% full
-   */
+  /* Flush the buffer if it is more than 75% full.  */
   if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
-/*
- *	Make a debugger reference to partially define a struct, union or enum.
- */
+
+/* Make a debugger reference to partially define a struct, union or enum.  */
+
 static void
 VMS_Def_Struct (Struct_Index)
      int Struct_Index;
 {
-  /*
-   *	We are writing a "OBJ_S_C_DBG" record
-   */
+  /* We are writing a debug record.  */
   Set_VMS_Object_File_Record (OBJ_S_C_DBG);
-  /*
-   *	If the buffer is empty we must insert the record type
-   */
+  /* If the buffer is empty we must insert the record type.  */
   if (Object_Record_Offset == 0)
     PUT_CHAR (OBJ_S_C_DBG);
   PUT_CHAR (TIR_S_C_STA_UW);
   PUT_SHORT (Struct_Index);
   PUT_CHAR (TIR_S_C_CTL_DFLOC);
-  /*
-   *	Flush the buffer if it is more than 75% full
-   */
+  /* Flush the buffer if it is more than 75% full.  */
   if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }

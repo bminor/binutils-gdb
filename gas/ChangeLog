@@ -1,5 +1,15 @@
 Tue Aug  8 17:27:17 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* config/obj-vms.c: Some whitespace changes from Pat Rankin.
+
+	Wed Aug  2 18:54:37 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.c (Flush_VMS_Object_Record_Buffer,
+	Close_VMS_Object_File): Reorganize the `#if !VMS' cross-assmebler
+	support code.
+	(Close_VMS_Object_File): Call Set_VMS_Object_File_Record to flush
+	output buffer--just in case--before closing the file.
+
 	* as.h (alloca): If __STDC__, declare void* instead of char*.
 
 Tue Aug  8 13:07:05 1995  Ian Lance Taylor  <ian@cygnus.com>
