@@ -2763,12 +2763,13 @@ into @var{valbuf}.
  
 @item EXTRACT_STRUCT_VALUE_ADDRESS(@var{regbuf})
 @findex EXTRACT_STRUCT_VALUE_ADDRESS
-When @code{EXTRACT_STRUCT_VALUE_ADDRESS_P} is non-zero, this is used to extract
-from an array @var{regbuf} (containing the raw register state) the
-address in which a function should return its structure value, as a
-@code{CORE_ADDR} (or an expression that can be used as one).
+When defined, extract from the array @var{regbuf} (containing the raw
+register state) the @code{CORE_ADDR} at which a function should return
+its structure value.
 
-@item EXTRACT_STRUCT_VALUE_ADDRESS_P
+If not defined, @code{EXTRACT_RETURN_VALUE} is used.
+
+@item EXTRACT_STRUCT_VALUE_ADDRESS_P()
 @findex EXTRACT_STRUCT_VALUE_ADDRESS_P
 Predicate for @code{EXTRACT_STRUCT_VALUE_ADDRESS}.
 
