@@ -754,6 +754,8 @@ read_a_source_file (char *name)
 
 		      if (pop == NULL)
 			pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
+		      if (pop && !pop->poc_handler)
+			pop = NULL;
 
 		      /* In MRI mode, we may need to insert an
 			 automatic alignment directive.  What a hack

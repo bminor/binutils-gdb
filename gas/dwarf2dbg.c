@@ -49,7 +49,7 @@
 #endif
 
 #ifndef DWARF2_ADDR_SIZE
-# define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8);
+# define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8)
 #endif
 
 #ifdef BFD_ASSEMBLER

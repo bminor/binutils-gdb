@@ -1,3 +1,10 @@
+2004-02-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf2dbg.c (DWARF2_ADDR_SIZE): Remove trailing ';'
+	* read.h (SKIP_WHITESPACE): Turn into an expression.
+	* read.c (read_a_source_file): A pseudo is removed by having a
+	NULL handler.
+
 2004-02-05  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (output_endp): New.

@@ -1,3 +1,7 @@
+2004-02-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/macros/test2.s: Lowercase it.
+
 2004-02-02  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* gas/mips/div.d: Update to accomodate changes in macro
