@@ -38,6 +38,9 @@
 /* Define if the "%Lg" format works to print long doubles. */
 #undef PRINTF_HAS_LONG_DOUBLE
 
+/* Define if using Solaris thread debugging.  */
+#undef HAVE_THREAD_DB_LIB
+
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
@@ -88,6 +91,3 @@
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
-
-/* Define if you have the Solaris thread_db library (/usr/lib/libthread_db.so.1).  */
-#undef HAVE_THREAD_DB_LIB

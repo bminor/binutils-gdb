@@ -40,6 +40,7 @@ if test "$ac_cv_os_lynx" = "yes" ; then
   AC_MSG_RESULT(no)
 fi
 ])
+
 AC_DEFUN(CY_AC_PATH_TCLH, [
 #
 # Ok, lets find the tcl source trees so we can use the headers
@@ -77,7 +78,8 @@ if test x"${ac_cv_c_tclh}" = x ; then
     fi
     # Tcl 7.5 and greater puts headers in subdirectory.
     if test -f $i/generic/tclInt.h ; then
-       ac_cv_c_tclh=`(cd $i; pwd)`/generic
+      ac_cv_c_tclh=`(cd $i; pwd)`/generic
+      break
     fi
   done
 fi
@@ -108,7 +110,7 @@ if test x"${ac_cv_c_tclh}" = x ; then
 fi
 if test x"${ac_cv_c_tclh}" != x ; then
   no_tcl=""
-  if test x"${ac_cv_c_tkh}" = x"installed" ; then
+  if test x"${ac_cv_c_tclh}" = x"installed" ; then
     AC_MSG_RESULT([is installed])
     TCLHDIR=""
   else
@@ -125,19 +127,20 @@ if test x"${TCLHDIR}" != x ; then
   CPPFLAGS="$CPPFLAGS $TCLHDIR"
 fi
 
-# Get major and minor versions of Tcl.
+# Get major and minor versions of Tcl.  Use funny names to avoid
+# clashes with eg SunOS.
 cat > conftest.c <<'EOF'
 #include "tcl.h"
-major = TCL_MAJOR_VERSION
-minor = TCL_MINOR_VERSION
+MaJor = TCL_MAJOR_VERSION
+MiNor = TCL_MINOR_VERSION
 EOF
 
 tclmajor=
 tclminor=
 if (eval "$CPP $CPPFLAGS conftest.c") 2>/dev/null >conftest.out; then
    # Success.
-   tclmajor=`egrep '^major = ' conftest.out | sed -e 's/^major = *//' -e 's/ *$//'`
-   tclminor=`egrep '^minor = ' conftest.out | sed -e 's/^minor = *//' -e 's/ *$//'`
+   tclmajor=`egrep '^MaJor = ' conftest.out | sed -e 's/^MaJor = *//' -e 's/ *$//'`
+   tclminor=`egrep '^MiNor = ' conftest.out | sed -e 's/^MiNor = *//' -e 's/ *$//'`
 fi
 rm -f conftest.c conftest.out
 
@@ -389,19 +392,20 @@ if test x"${x_includes}" != x -a x"${x_includes}" != xNONE ; then
   CPPFLAGS="$CPPFLAGS -I$x_includes"
 fi
 
-# Get major and minor versions of Tk.
+# Get major and minor versions of Tk.  Use funny names to avoid
+# clashes with eg SunOS.
 cat > conftest.c <<'EOF'
 #include "tk.h"
-major = TK_MAJOR_VERSION
-minor = TK_MINOR_VERSION
+MaJor = TK_MAJOR_VERSION
+MiNor = TK_MINOR_VERSION
 EOF
 
 tkmajor=
 tkminor=
 if (eval "$CPP $CPPFLAGS conftest.c") 2>/dev/null >conftest.out; then
    # Success.
-   tkmajor=`egrep '^major = ' conftest.out | sed -e 's/^major = *//' -e 's/ *$//'`
-   tkminor=`egrep '^minor = ' conftest.out | sed -e 's/^minor = *//' -e 's/ *$//'`
+   tkmajor=`egrep '^MaJor = ' conftest.out | sed -e 's/^MaJor = *//' -e 's/ *$//'`
+   tkminor=`egrep '^MiNor = ' conftest.out | sed -e 's/^MiNor = *//' -e 's/ *$//'`
 fi
 rm -f conftest.c conftest.out
 
