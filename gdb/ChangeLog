@@ -1,5 +1,19 @@
 2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
+	Get rid of AIX specific PC_LOAD_SEGMENT, replace with PC_SOLIB.
+	* xcoffsolib.c (xcoff_solib_address):  Renamed from
+	pc_load_segment_name.  Return NULL if address is not in a shared
+	library.  Cleanup shared library name construction, using xasprintf.
+	Format shared library member names consistent with format in exec.c.
+	(solib_info):  Format shared library member names consistent with
+	format in exec.c.
+	* config/rs6000/nm-rs6000.h:  Replace PC_LOAD_SEGMENT with PC_SOLIB,
+	using xcoff_solib_address for PC_SOLIB definition.
+	* stack.c (print_frame):  Remove PC_LOAD_SEGMENT code, no longer
+	needed.
+
+2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
 	* mipsread.c (read_alphacoff_dynamic_symtab):  Replace alloca calls
 	with xmalloc calls and cleanups.
 

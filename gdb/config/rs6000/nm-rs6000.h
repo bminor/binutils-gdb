@@ -1,5 +1,6 @@
 /* IBM RS/6000 native-dependent macros for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,10 +58,10 @@ extern void xcoff_relocate_symtab (unsigned int);
 struct target_ops;
 extern void xcoff_relocate_core (struct target_ops *);
 
-/* Load segment of a given pc value. */
+/* If ADDR lies in a shared library, return its name.  */
 
-#define	PC_LOAD_SEGMENT(PC)	pc_load_segment_name(PC)
-extern char *pc_load_segment_name (CORE_ADDR);
+#define	PC_SOLIB(PC)	xcoff_solib_address(PC)
+extern char *xcoff_solib_address (CORE_ADDR);
 
 /* Return sizeof user struct to callers in less machine dependent routines */
 

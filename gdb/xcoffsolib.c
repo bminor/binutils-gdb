@@ -1,5 +1,5 @@
 /* Shared library support for RS/6000 (xcoff) object files, for GDB.
-   Copyright 1991, 1992 Free Software Foundation.
+   Copyright 1991, 1992, 2001 Free Software Foundation.
    Contributed by IBM Corporation.
 
    This file is part of GDB.
@@ -29,29 +29,32 @@
 #include "gdb_regex.h"
 
 
-/* Return the module name of a given text address. Note that returned buffer
-   is not persistent. */
+/* If ADDR lies in a shared library, return its name.
+   Note that returned name points to static data whose content is overwritten
+   by each call.  */
 
 char *
-pc_load_segment_name (CORE_ADDR addr)
+xcoff_solib_address (CORE_ADDR addr)
 {
-  static char buffer[BUFSIZ];
+  static char *buffer = NULL;
   struct vmap *vp = vmap;
 
-  buffer[0] = buffer[1] = '\0';
-  for (; vp; vp = vp->nxt)
+  /* The first vmap entry is for the exec file.  */
+
+  if (vp == NULL)
+    return NULL;
+  for (vp = vp->nxt; vp; vp = vp->nxt)
     if (vp->tstart <= addr && addr < vp->tend)
       {
-	if (*vp->member)
-	  {
-	    buffer[0] = '(';
-	    strcat (&buffer[1], vp->member);
-	    strcat (buffer, ")");
-	  }
-	strcat (buffer, vp->name);
+	xfree (buffer);
+	xasprintf (&buffer, "%s%s%s%s",
+			    vp->name,
+			    *vp->member ? "(" : "",
+			    vp->member,
+			    *vp->member ? ")" : "");
 	return buffer;
       }
-  return "(unknown load module)";
+  return NULL;
 }
 
 static void solib_info (char *, int);
@@ -84,10 +87,10 @@ Text Range		Data Range		Syms	Shared Object Library\n");
 			 paddr (vp->tstart),paddr (vp->tend),
 			 paddr (vp->dstart), paddr (vp->dend),
 			 vp->loaded ? "Yes" : "No ",
+			 vp->name,
 			 *vp->member ? "(" : "",
 			 vp->member,
-			 *vp->member ? ") " : "",
-			 vp->name);
+			 *vp->member ? ")" : "");
     }
 }
 

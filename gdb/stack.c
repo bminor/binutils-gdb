@@ -626,24 +626,6 @@ print_frame (struct frame_info *fi,
       annotate_frame_source_end ();
     }
 
-#ifdef PC_LOAD_SEGMENT
-  /* If we couldn't print out function name but if can figure out what
-         load segment this pc value is from, at least print out some info
-         about its load segment. */
-  if (!funname)
-    {
-      annotate_frame_where ();
-#ifdef UI_OUT
-      ui_out_wrap_hint (uiout, "  ");
-      ui_out_text (uiout, " from ");
-      ui_out_field_string (uiout, "from", PC_LOAD_SEGMENT (fi->pc));
-#else
-      wrap_here ("  ");
-      printf_filtered (" from %s", PC_LOAD_SEGMENT (fi->pc));
-#endif
-    }
-#endif /* PC_LOAD_SEGMENT */
-
 #ifdef PC_SOLIB
   if (!funname || (!sal.symtab || !sal.symtab->filename))
     {
