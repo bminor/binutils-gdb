@@ -405,6 +405,23 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 	  continue;
 	}
 
+      /* Check for an fp-relative STG or ST.  This is probably
+          spilling an argument from a register out into a stack slot.
+          This could be a user instruction, but if we haven't included
+          any other suspicious instructions in the prologue, this
+          could only be an initializing store, which isn't too bad to
+          skip.  The consequences of not including arg-to-stack spills
+          are more serious, though --- you don't see the proper values
+          of the arguments.  */
+      if ((save_link_state == 3 || save_link_state == 4)
+          && instr[0] == 0x50      /* st %rA, D(%rX,%rB) */
+          && (instr[1] & 0xf) == 0 /* %rX is zero, no index reg */
+          && ((instr[2] >> 4) & 0xf) == frame_pointer_regidx)
+        {
+          valid_prologue = 1;
+          continue;
+        }
+
       /* check for STD */
       if (instr[0] == 0x60 && (instr[2] >> 4) == 0xf)
 	{
