@@ -4329,7 +4329,7 @@ On AMD 29000 family processors, registers are saved in a separate ``register
 stack''.  There is no way for GDB to determine the extent of this stack.
 Normally, GDB just assumes that the stack is ``large enough''.
 This may result in GDB referencing memory locations that don't
-exist, you can specify the ending address of the register stack with the
+exist, so you can specify the ending address of the register stack with the
 @code{set rstack_high_address} command.  The argument should be an address,
 which you will probably want to precede with 0x and specify in hexadecimal.
 
