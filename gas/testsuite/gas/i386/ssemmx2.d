@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-0+ <.text>:
+0+ <foo>:
 [ 	]+0:	66 0f e0 c1[ 	]+pavgb[ 	]+%xmm1,%xmm0
 [ 	]+4:	66 0f e0 0a[ 	]+pavgb[ 	]+\(%edx\),%xmm1
 [ 	]+8:	66 0f e3 d3[ 	]+pavgw[ 	]+%xmm3,%xmm2

@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-0+ <.text>:
+0+ <foo>:
 [ 	]+0:	0f c3 00[ 	]+movnti %eax,\(%eax\)
 [ 	]+3:	0f ae f8[ 	]+sfence 
 [ 	]+6:	0f ae e8[ 	]+lfence 

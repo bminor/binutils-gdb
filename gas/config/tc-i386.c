@@ -4366,11 +4366,14 @@ const char *md_shortopts = "kVQ:sq";
 #else
 const char *md_shortopts = "q";
 #endif
+
 struct option md_longopts[] = {
 #define OPTION_32 (OPTION_MD_BASE + 0)
   {"32", no_argument, NULL, OPTION_32},
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 #define OPTION_64 (OPTION_MD_BASE + 1)
   {"64", no_argument, NULL, OPTION_64},
+#endif
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -4405,35 +4408,28 @@ md_parse_option (c, arg)
       /* -s: On i386 Solaris, this tells the native assembler to use
          .stab instead of .stab.excl.  We always use .stab anyhow.  */
       break;
-#endif
-#ifdef OBJ_ELF
-    case OPTION_32:
+
     case OPTION_64:
       {
 	const char **list, **l;
 
-	default_arch = c == OPTION_32 ? "i386" : "x86_64";
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
-	  {
-	    if (c == OPTION_32)
-	      {
-		if (strcmp (*l, "elf32-i386") == 0)
-		  break;
-	      }
-	    else
-	      {
-		if (strcmp (*l, "elf64-x86-64") == 0)
-		  break;
-	      }
-	  }
+	  if (strcmp (*l, "elf64-x86-64") == 0)
+	    {
+	      default_arch = "x86_64";
+	      break;
+	    }
 	if (*l == NULL)
-	  as_fatal (_("No compiled in support for %d bit object file format"),
-		    c == OPTION_32 ? 32 : 64);
+	  as_fatal (_("No compiled in support for x86_64"));
 	free (list);
       }
       break;
 #endif
+
+    case OPTION_32:
+      default_arch = "i386";
+      break;
 
     default:
       return 0;

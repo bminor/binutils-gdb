@@ -1,3 +1,8 @@
+2001-01-12  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (md_longopts): Recognize "--64" only for ELF.
+	(md_parse_option): Always accept "--32".
+
 2001-01-11  Peter Targett  <peter.targett@arccores.com>
 
 	* as.h (TC_ARC): Ensure struc-symbol.h included.
