@@ -30,12 +30,12 @@ remote-gutils.c
 remote-inflow.c
 remote-server.c
 remote-utils.c
+server.h
 
 Things-to-lose:
 
 
 remote-inflow-sparc.c
-server.h
 
 Do-last:
 
