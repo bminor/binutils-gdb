@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include "somsolib.h"
+
 #define U_REGS_OFFSET 0
 
 #define KERNEL_U_ADDR 0

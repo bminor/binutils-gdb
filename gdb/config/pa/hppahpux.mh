@@ -10,6 +10,6 @@ XM_FILE= xm-hppah.h
 XDEPFILES= ser-tcp.o
 
 NAT_FILE= nm-hppah.h
-NATDEPFILES= hppah-nat.o coredep.o corelow.o inftarg.o fork-child.o somread.o infptrace.o $(HPREAD)
+NATDEPFILES= hppah-nat.o coredep.o corelow.o inftarg.o fork-child.o somread.o infptrace.o $(HPREAD) somsolib.o
 
 HOST_IPC=-DBSD_IPC -DPOSIX_WAIT

@@ -49,7 +49,8 @@ static void
 som_symfile_finish PARAMS ((struct objfile *));
 
 static void
-som_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
+som_symtab_read PARAMS ((bfd *, struct objfile *,
+			 struct section_offsets *));
 
 static struct section_offsets *
 som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
@@ -78,8 +79,8 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	void som_symtab_read (bfd *abfd, CORE_ADDR addr,
-			      struct objfile *objfile)
+	void som_symtab_read (bfd *abfd, struct objfile *objfile,
+			      struct section_offsets *section_offsets)
 
 DESCRIPTION
 
@@ -90,10 +91,10 @@ DESCRIPTION
 */
 
 static void
-som_symtab_read (abfd, addr, objfile)
+som_symtab_read (abfd, objfile, section_offsets)
      bfd *abfd;
-     CORE_ADDR addr;
      struct objfile *objfile;
+     struct section_offsets *section_offsets;
 {
   unsigned int number_of_symbols;
   int val, dynamic;
@@ -102,6 +103,11 @@ som_symtab_read (abfd, addr, objfile)
   struct symbol_dictionary_record *buf, *bufp, *endbufp;
   char *symname;
   CONST int symsize = sizeof (struct symbol_dictionary_record);
+  CORE_ADDR text_offset;
+
+
+  /* FIXME.  Data stuff needs dynamic relocation too!  */
+  text_offset = ANOFFSET (section_offsets, 0);
 
   number_of_symbols = bfd_get_symcount (abfd);
 
@@ -152,6 +158,7 @@ som_symtab_read (abfd, addr, objfile)
 	    case ST_MILLICODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_text;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -166,6 +173,7 @@ som_symtab_read (abfd, addr, objfile)
 		ms_type = mst_solib_trampoline;
 	      else
 		ms_type = mst_text;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -174,6 +182,7 @@ som_symtab_read (abfd, addr, objfile)
 	    case ST_STUB:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -202,6 +211,7 @@ som_symtab_read (abfd, addr, objfile)
 	    case ST_CODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -227,6 +237,7 @@ som_symtab_read (abfd, addr, objfile)
 	    case ST_MILLICODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -241,6 +252,7 @@ som_symtab_read (abfd, addr, objfile)
 		ms_type = mst_solib_trampoline;
 	      else
 		ms_type = mst_file_text;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -249,6 +261,7 @@ som_symtab_read (abfd, addr, objfile)
 	    case ST_STUB:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
+	      bufp->symbol_value += text_offset;
 #ifdef SMASH_TEXT_ADDRESS
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
@@ -316,18 +329,13 @@ som_symfile_read (objfile, section_offsets, mainline)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
-  CORE_ADDR offset;
 
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
 
-  /* FIXME, should take a section_offsets param, not just an offset.  */
-
-  offset = ANOFFSET (section_offsets, 0);
-
   /* Process the normal SOM symbol table first. */
 
-  som_symtab_read (abfd, offset, objfile);
+  som_symtab_read (abfd, objfile, section_offsets);
 
   /* Now read information from the stabs debug sections.  */
   stabsect_build_psymtabs (objfile, section_offsets, mainline,

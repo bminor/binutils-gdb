@@ -1,3 +1,25 @@
+Mon Nov  7 00:27:16 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Beginnings of SOM shared library support.  Breakpoints and
+	single frame backtracing within the library only.  Only works when
+	using the HPUX 9 dynamic linker.  More functionality to be added
+	soon.
+
+	* somsolib.c, somsolib.h: New files.
+	* Makefile.in (HFILES_NO_SRCDIR): Add somsolib.h
+	(ALLDEPFILES): Add somsolib.c.
+	(somsolib.o): Add some dependencies.
+	* somread.c (som_symtab_read): Accept multiple section offsets.
+	All callers changed.  Adjust all text symbols with the first
+	section offset.
+	* symfile.c (find_lowest_section): Enable this function.  Add some
+	tie-breaking logic when sections have the same vma.
+	(syms_from_objfile): Use find_lowest_section rather than looking
+	for ".text" by name.  Relax warning to only warn if the lowest
+	section is not a code section.
+	* config/pa/{hppabsd.mh, hppahpux.mh} (NATDEPFILES): Add somsolib.o
+	* config/pa/{nm-hppab.h, nm-hppah.h}: Include somsolib.h.
+	
 Sun Nov  6 12:54:54 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* partial-stab.h (N_TEXT): Put back GDB_TARGET_IS_HPPA kludge,

@@ -1,3 +1,9 @@
+Mon Nov  7 00:46:22 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* mpw-make.in (HFILES_NO_SRCDIR): Add somsolib.h
+	(ALLDEPFILES): Add somsolib.c.
+	(somsolib.o): Add some dependencies.
+
 Mon Sep 12 17:44:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in: Use nm-empty.h if host is not target.

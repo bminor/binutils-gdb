@@ -271,6 +271,8 @@ signals.h
 solib.c
 solib.h
 somread.c
+somsolib.c
+somsolib.h
 source.c
 sp64-tdep.c
 sparc-nat.c
