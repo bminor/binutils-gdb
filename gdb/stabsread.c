@@ -3037,7 +3037,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 {
   int nfn_fields = 0;
   int length = 0;
-  int skip_method;
   /* Total number of member functions defined in this class.  If the class
      defines two `f' functions, and one `g' function, then this will have
      the value 3.  */
@@ -3076,36 +3075,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
       sublist = NULL;
       look_ahead_type = NULL;
       length = 0;
-
-      skip_method = 0;
-      if (p - *pp == strlen ("__base_ctor")
-	  && strncmp (*pp, "__base_ctor", strlen ("__base_ctor")) == 0)
-	skip_method = 1;
-      else if (p - *pp == strlen ("__base_dtor")
-	       && strncmp (*pp, "__base_dtor", strlen ("__base_dtor")) == 0)
-	skip_method = 1;
-      else if (p - *pp == strlen ("__deleting_dtor")
-	       && strncmp (*pp, "__deleting_dtor",
-			   strlen ("__deleting_dtor")) == 0)
-	skip_method = 1;
-
-      if (skip_method)
-	{
-	  /* Skip past '::'.  */
-	  *pp = p + 2;
-	  /* Read the type.  */
-	  read_type (pp, objfile);
-	  /* Skip past the colon, mangled name, semicolon, flags, and final
-	     semicolon.  */
-	  while (**pp != ';')
-	    (*pp) ++;
-	  (*pp) ++;
-	  while (**pp != ';')
-	    (*pp) ++;
-	  (*pp) ++;
-
-	  continue;
-	}
 
       new_fnlist = (struct next_fnfieldlist *)
 	xmalloc (sizeof (struct next_fnfieldlist));
@@ -3332,23 +3301,34 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
       while (**pp != ';' && **pp != '\0');
 
       (*pp)++;
-
-      new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
-	obstack_alloc (&objfile->type_obstack,
-		       sizeof (struct fn_field) * length);
-      memset (new_fnlist->fn_fieldlist.fn_fields, 0,
-	      sizeof (struct fn_field) * length);
-      for (i = length; (i--, sublist); sublist = sublist->next)
-	{
-	  new_fnlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
-	}
-
-      new_fnlist->fn_fieldlist.length = length;
-      new_fnlist->next = fip->fnlist;
-      fip->fnlist = new_fnlist;
-      nfn_fields++;
-      total_length += length;
       STABS_CONTINUE (pp, objfile);
+
+      /* Skip GCC 3.X member functions which are duplicates of the callable
+	 constructor/destructor.  */
+      if (strcmp (main_fn_name, "__base_ctor") == 0
+	  || strcmp (main_fn_name, "__base_dtor") == 0
+	  || strcmp (main_fn_name, "__deleting_dtor") == 0)
+	{
+	  xfree (main_fn_name);
+	}
+      else
+	{
+	  new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
+	    obstack_alloc (&objfile->type_obstack,
+			   sizeof (struct fn_field) * length);
+	  memset (new_fnlist->fn_fieldlist.fn_fields, 0,
+		  sizeof (struct fn_field) * length);
+	  for (i = length; (i--, sublist); sublist = sublist->next)
+	    {
+	      new_fnlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
+	    }
+
+	  new_fnlist->fn_fieldlist.length = length;
+	  new_fnlist->next = fip->fnlist;
+	  fip->fnlist = new_fnlist;
+	  nfn_fields++;
+	  total_length += length;
+	}
     }
 
   if (nfn_fields)
