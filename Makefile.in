@@ -48,8 +48,8 @@ AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
 
-BISON = `if [ -d $(unsubdir)/../byacc ] ; \
-	then echo \`pwd\`/$(unsubdir)/../byacc$(subdir)/byacc ; \
+BISON = `if [ -d $(unsubdir)/../bison ] ; \
+	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ -y ; \
 	else echo yacc ; fi`
 
 MAKEINFO = makeinfo
@@ -449,7 +449,7 @@ install-bison: force
 ### gcc
 .PHONY: all-gcc just-gcc
 all-gcc: just-gcc
-just-gcc: just-libiberty just-byacc force
+just-gcc: just-libiberty just-bison force
 	if [ -d $(unsubdir)/gcc ] ; then \
 		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
@@ -677,7 +677,7 @@ install-gas: force
 ### ld
 .PHONY: all-ld just-ld
 all-ld: just-ld
-just-ld: just-libiberty just-bfd just-byacc force
+just-ld: just-libiberty just-bfd just-bison force
 	if [ -d $(unsubdir)/ld ] ; then \
 		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
@@ -791,7 +791,7 @@ install-gnulib: force
 ### gdb
 .PHONY: all-gdb just-gdb
 all-gdb: just-gdb
-just-gdb: just-bfd just-libiberty just-readline just-glob force
+just-gdb: just-bfd just-libiberty just-readline just-glob just-bison force
 	if [ -d $(unsubdir)/gdb ] ; then \
 		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \

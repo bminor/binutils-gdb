@@ -1,3 +1,7 @@
+Tue Dec 10 00:04:35 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: BISON now bison -y again.
+
 Mon Dec  9 16:48:33 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* Makefile.in: fix for bad directory tests.
