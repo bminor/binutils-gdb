@@ -1,5 +1,12 @@
 2004-02-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-tdep.c, amd64obsd-nat.c: New files.
+	* Makefile.in (amd64obsd-nat.o, amd64obsd-tdep.o): New
+	dependencies.
+	* configure.host: Add x86_64-*-openbsd*.
+	* configure.tgt: Add x86_64-*-openbsd*.
+	* config/i386/obsd64.mt, config/i386/obsd64.mh: New files.
+
 	* tui/tui.c: Don't include <malloc.h>.
 
 	* Makefile.in (ALLDEPFILES): Add amd64-nat.c, amd64bsd-nat.c,

@@ -217,6 +217,7 @@ x86_64-*-linux*)	gdb_target=x86-64linux
 			build_gdbserver=yes
 			;;
 x86_64-*-netbsd*)	gdb_target=nbsd64 ;;
+x86_64-*-openbsd*)	gdb_target=obsd64 ;;
 
 esac
 
