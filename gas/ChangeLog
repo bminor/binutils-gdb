@@ -1,3 +1,9 @@
+Tue Jul 27 08:45:05 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-mips.c (mips_optimize): New static variable.
+	(append_insn): If ! mips_optimize, don't swap branches.
+	(md_parse_option): If -Ox, set mips_optimize accordingly.
+
 Mon Jul 26 18:02:43 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in (clean): if testsuite does not exist, then skip it.
