@@ -1,3 +1,8 @@
+Mon Sep 21 14:39:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gdb.base/default.exp: Support test for info float for all
+	varieties of arm toolchain.
+
 Fri Sep 18 14:07:44 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.trace/*.exp: remove "remote_download" command.

@@ -3,7 +3,7 @@
 gdb_exit
 gdb_start
 
-match_max 8000
+set timeout 60
 
 #
 # test default actions of gdb commands
@@ -15,7 +15,7 @@ gdb_test "add-symbol-file" "add-symbol-file takes a file name and an address" "a
 
 setup_xfail "mips-idt-*"
 send_gdb "attach\n"
-expect {
+gdb_expect {
     -re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
 			{ pass "attach" }
     -re "You can't do that when your target is `None'.*$gdb_prompt $"\
@@ -99,10 +99,10 @@ gdb_test "delete breakpoints" "" "delete breakpoints"
 #test delete display
 # FIXME -- need to dump full output to detailed log
 send_gdb "delete display\n"
-expect {
+gdb_expect {
     -re "Delete all auto-display expressions.*y or n. $" {
 	send_gdb "y\n"
-	expect {
+	gdb_expect {
 	    -re "$gdb_prompt $"     { pass "delete display prompt" }
 	    timeout		{ fail "(timeout) delete display prompt" }
 	}
@@ -128,10 +128,10 @@ if [istarget "h8300-*-hms"] then {
 # FIXME -- need to dump full output to detailed log
 
 send_gdb "directory\n"
-expect {
+gdb_expect {
     -re "Reinitialize source path to empty.*y or n. $"  {
 	send_gdb "y\n"
-	expect {
+	gdb_expect {
 	    -re "Source directories searched: .cdir:.cwd.*$gdb_prompt $"\
 		    { pass "directory prompt" }
 	    timeout		{ fail "(timeout) directory prompt" }
@@ -179,7 +179,7 @@ gdb_test "enable once" "Argument required .one or more breakpoint numbers.*" "en
 gdb_test "enable" "" "enable"
 #test exec-file
 send_gdb "exec-file\n"
-expect {
+gdb_expect {
     -re "No exec file now..*$gdb_prompt $" {
 	pass "exec-file"
     }
@@ -188,7 +188,7 @@ expect {
 	if $verbose>1 then {
 	    send_user "\tDidn't kill program being debugged\n"
 	}
-	expect -re "$gdb_prompt $" { }
+	gdb_expect -re "$gdb_prompt $" { }
 	pass "exec-file"
     }
     -re "$gdb_prompt $"	{ fail "exec-file" }
@@ -207,7 +207,7 @@ gdb_test "fg" "The program is not being run." "fg"
 # FIXME: fg kills the udi connection
 #test file
 send_gdb "file\n"
-expect {
+gdb_expect {
     -re "No exec file now..*$gdb_prompt $"\
 	    { pass "file" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
@@ -215,7 +215,7 @@ expect {
 	if $verbose>1 then {
 	    send_user "\t\tDidn't kill program being debugged\n"
 	}
-	expect -re "$gdb_prompt $" { }
+	gdb_expect -re "$gdb_prompt $" { }
 	pass "file"
     }
     -re ".*$gdb_prompt $"	{ fail "file" }
@@ -230,9 +230,9 @@ gdb_test "finish" "The program is not running." "finish"
 # vary on different systems.
 gdb_test "forward-search" "No previous regular expression.*|There is no previous regular expression.*" "forward-search"
 #test help "h" abbreviation
-gdb_test "h" "List of classes of commands:.*\[\r\n\]+running -- Running the program.*\[\r\n\]+stack -- Examining the stack.*\[\r\n\]+data -- Examining data.*\[\r\n\]+breakpoints -- Making program stop at certain points.*\[\r\n\]+files -- Specifying and examining files.*\[\r\n\]+status -- Status inquiries.*\[\r\n\]+support -- Support facilities.*\[\r\n\]+user-defined -- User-defined commands.*\[\r\n\]+aliases -- Aliases of other commands.*\[\r\n\]+obscure -- Obscure features.*\[\r\n\]+Type \"help\" followed by a class name for a list of commands in that class..*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help \"h\" abbreviation"
+gdb_test "h" "List of classes of commands:.*\[\r\n\]+aliases -- Aliases of other commands.*\[\r\n\]+breakpoints -- Making program stop at certain points.*\[\r\n\]+data -- Examining data.*\[\r\n\]+files -- Specifying and examining files.*\[\r\n\]+obscure -- Obscure features.*\[\r\n\]+running -- Running the program.*\[\r\n\]+stack -- Examining the stack.*\[\r\n\]+status -- Status inquiries.*\[\r\n\]+support -- Support facilities.*\[\r\n\]+user-defined -- User-defined commands.*\[\r\n\]+Type \"help\" followed by a class name for a list of commands in that class..*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help \"h\" abbreviation"
 #test help
-gdb_test "help" "List of classes of commands:.*\[\r\n\]+running -- Running the program.*\[\r\n\]+stack -- Examining the stack.*\[\r\n\]+data -- Examining data.*\[\r\n\]+breakpoints -- Making program stop at certain points.*\[\r\n\]+files -- Specifying and examining files.*\[\r\n\]+status -- Status inquiries.*\[\r\n\]+support -- Support facilities.*\[\r\n\]+user-defined -- User-defined commands.*\[\r\n\]+aliases -- Aliases of other commands.*\[\r\n\]+obscure -- Obscure features.*\[\r\n\]+Type \"help\" followed by a class name for a list of commands in that class..*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help"
+gdb_test "help" "List of classes of commands:.*\[\r\n\]+aliases -- Aliases of other commands.*\[\r\n\]+breakpoints -- Making program stop at certain points.*\[\r\n\]+data -- Examining data.*\[\r\n\]+files -- Specifying and examining files.*\[\r\n\]+obscure -- Obscure features.*\[\r\n\]+running -- Running the program.*\[\r\n\]+stack -- Examining the stack.*\[\r\n\]+status -- Status inquiries.*\[\r\n\]+support -- Support facilities.*\[\r\n\]+user-defined -- User-defined commands.*\[\r\n\]+Type \"help\" followed by a class name for a list of commands in that class..*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help"
 #test handle
 gdb_test "handle" "Argument required .signal to handle.*" "handle"
 #test info "i" abbreviation 
@@ -271,7 +271,13 @@ gdb_test "info frame" "No stack.|No selected frame." "info frame"
 #test info files
 gdb_test "info files" "" "info files"
 #test info float
-gdb_test "info float" "No floating point info available for this processor." "info float"
+if [istarget "arm-*-*"] then {
+    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
+else if [istarget "thumb-*-*"] then {
+    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
+} else {
+    gdb_test "info float" "No floating point info available for this processor." "info float"
+}
 #test info functions
 gdb_test "info functions" "All defined functions:" "info functions"
 #test info locals
@@ -291,6 +297,7 @@ gdb_test "info stack" "No stack." "info stack"
 #test info set
 # FIXME -- needs to match the entire output
 gdb_test "info set" "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*..*\[\r\n\]+history filename:  The filename in which to record the command history is .*\[\r\n\]+listsize:  Number of source lines gdb will list by default is 10.*" "info set"
+gdb_test "info symbol" "Argument required .address.."
 #test info source
 gdb_test  "info source" "No current source file..*" "info source"
 #test info sources
@@ -337,6 +344,21 @@ setup_xfail "a29k-*-udi"
 gdb_test "nexti" "The program is not being run." "nexti"
 #test output
 gdb_test "output" "Argument required .expression to compute.*" "output"
+
+#test overlay
+gdb_test "overlay" "\"overlay\" must be followed by the name of .*"
+#test a non-existant overlay subcommand
+gdb_test "overlay on"     "Undefined overlay command.* Try \"help overlay\"."
+gdb_test "overlay manual" "" "overlay manual #1"
+gdb_test "overlay auto"   ""
+gdb_test "overlay off"    ""
+gdb_test "overlay list"   "No sections are mapped."
+gdb_test "overlay map"    "Overlay debugging not enabled.*" "overlay map #1"
+gdb_test "overlay unmap"  "Overlay debugging not enabled.*" "overlay unmap #2"
+gdb_test "overlay manual" "" "overlay manual #2"
+gdb_test "overlay map"    "Argument required: name of an overlay section." "overlay map #2"
+gdb_test "overlay unmap"  "Argument required: name of an overlay section." "overlay unmap #2"
+
 #test print "p" abbreviation
 gdb_test "p" "The history is empty." "print \"p\" abbreviation"
 #test print
@@ -359,12 +381,12 @@ You must specify a function name to run, and arguments if any"\
 
 } else {
     send_gdb "r\n"
-    expect {
+    gdb_expect {
 	    -re "Starting program:  .*
 You can't do that when your target is `None'.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
-No executable file specified.*
+No exec file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
@@ -390,10 +412,10 @@ You must specify a function name to run, and arguments if any"
 
 } else {
     send_gdb "run\n"
-    expect {
+    gdb_expect {
 	    -re "Starting program:.*You can't do that when your target is `None'.*$gdb_prompt $" { pass "run" }
 	    -re "Starting program:  .*
-No executable file specified.*
+No exec file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
 			{ pass "run" }
 	    -re "Starting program:  .*
@@ -422,10 +444,10 @@ gdb_test "return" "No selected frame..*" "return"  "Make .* return now.*y or n. 
 gdb_test "reverse-search" "No previous regular expression.*|There is no previous regular expression.*" "reverse-search"
 #test step "s" abbreviation
 setup_xfail "a29k-*-udi"
-gdb_test "s" "The program is not being run." "step \"s\" abbreviation"
+gdb_test "s" "The program is not being run." "step \"s\" abbreviation #1"
 #test step
 setup_xfail "a29k-*-udi"
-gdb_test "step" "The program is not being run." "step"
+gdb_test "step" "The program is not being run." "step #1"
 #test search
 gdb_test "search" "No previous regular expression.*|There is no previous regular expression.*" "search"
 #test section
@@ -465,7 +487,7 @@ gdb_test "set history save" "" "set history save"
 #test set history size
 gdb_test "set history size" "Argument required .integer to set it to.*" "set history size"
 #test set history
-gdb_test "set history" "\"set history\" must be followed by the name of a history subcommand..*\[\r\n\]+List of set history subcommands:.*\[\r\n\]+set history filename -- Set the filename in which to record the command history.*\[\r\n\]+set history size -- Set the size of the command history.*\[\r\n\]+set history save -- Set saving of the history record on exit.*\[\r\n\]+set history expansion -- Set history expansion on command input.*\[\r\n\]+Type \"help set history\" followed by set history subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set history"
+gdb_test "set history" "\"set history\" must be followed by the name of a history subcommand..*\[\r\n\]+List of set history subcommands:.*\[\r\n\]+set history expansion -- Set history expansion on command input.*\[\r\n\]+set history filename -- Set the filename in which to record the command history.*\[\r\n\]+set history save -- Set saving of the history record on exit.*\[\r\n\]+set history size -- Set the size of the command history.*\[\r\n\]+Type \"help set history\" followed by set history subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set history"
 #test set language
 gdb_test "set language" "The currently understood settings are:.*\[\r\n\]+local or auto  *Automatic setting based on source file.*\[\r\n\]+c  *Use the C language.*\[\r\n\]+c\[+\]+  *Use the C\[+\]+ language.*\[\r\n\]+modula-2  *Use the Modula-2 language.*" "set language"
 #test set listsize
@@ -517,7 +539,7 @@ gdb_test "shell echo Hi dad!" "Hi dad!" "shell echo Hi dad!"
 #test show annotate
 gdb_test "show annotate" "Annotation_level is 0." 	 "show annotate"
 #test show args
-gdb_test "show args" "Arguments to give program being debugged when it is started is \"\"." "show args"
+gdb_test "show args" "Argument list to give program being debugged when it is started is \"\"." "show args"
 #test show check "c" abbreviation
 gdb_test "show c" "range:  *Range checking is \"auto; currently off\"..*\[\r\n\]+type:  *Type checking is \"auto; currently off\".*" "show check \"c\" abbreviation"
 #test show check "ch" abbreviation
@@ -551,7 +573,7 @@ gdb_test "show history save" "Saving of the history record on exit is on." "show
 #test show history size
 gdb_test "show history size" "The size of the command history is.*" "show history size"
 #test show history
-gdb_test "show history" "filename:  *The filename in which to record the command history is.*.gdb_history.*\[\r\n\]+size: * The size of the command history is.*\[\r\n\]+save: *Saving of the history record on exit is o.*\[\r\n\]+expansion:  *History expansion on command input is o.*" "show history"
+gdb_test "show history" "expansion:  *History expansion on command input is o.*\[\r\n\]+filename:  *The filename in which to record the command history is.*.gdb_history.*\[\r\n\]+save: *Saving of the history record on exit is o.*\[\r\n\]+size: * The size of the command history is.*" "show history"
 #test show language
 gdb_test "show language" "The current source language is \"auto; currently c\"." "show language"
 #test show listsize
@@ -608,7 +630,7 @@ gdb_test "show width" "Number of characters gdb thinks are in a line is.*" "show
 # This is only supported on targets which use exec.o.
 gdb_test "show write" "Writing into executable and core files is o.*" "show write"
 #test show
-gdb_test "show" "confirm:  *Whether to confirm potentially dangerous operations is on..*\[\r\n\]+history filename:  *The filename in which to record the command history is .*\[\r\n\]+history size:  *The size of the command history is.*\[\r\n\]+history save:  *Saving of the history record on exit is on..*\[\r\n\]+print elements:  *Limit on string chars or array elements to print is 200..*\[\r\n\]+listsize:  *Number of source lines gdb will list by default is 10.*" "show"
+gdb_test "show" "confirm:  *Whether to confirm potentially dangerous operations is on..*\[\r\n\]+history filename:  *The filename in which to record the command history is .*\[\r\n\]+history save:  *Saving of the history record on exit is on..*\[\r\n\]+history size:  *The size of the command history is.*\[\r\n\]+listsize:  *Number of source lines gdb will list by default is 10.*\[\r\n\]+print elements:  *Limit on string chars or array elements to print is 200..*" "show"
 #test stepi "si" abbreviation
 setup_xfail "a29k-*-udi"
 gdb_test  "si" "The program is not being run." "stepi \"si\" abbreviation"
@@ -622,10 +644,10 @@ gdb_test "signal" "The program is not being run." "signal"
 gdb_test "source" "source command requires pathname of file to source..*|No such file or directory.*" "source"
 #test step "s" abbreviation
 setup_xfail "a29k-*-udi"
-gdb_test "s" "The program is not being run." "step \"s\" abbreviation"
+gdb_test "s" "The program is not being run." "step \"s\" abbreviation #2"
 #test step
 setup_xfail "a29k-*-udi"
-gdb_test "step" "The program is not being run." "step"
+gdb_test "step" "The program is not being run." "step #2"
 #test symbol-file
 gdb_test "symbol-file" "" "symbol-file"
 
@@ -637,14 +659,14 @@ gdb_test "target procfs" "Use the \"run\" command to start a Unix child process.
 
 #test target core
 send_gdb "target core\n"
-expect {
+gdb_expect {
     -re "No core file specified..*$gdb_prompt $" { pass "target core" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
 	if $verbose>1 then {
 	    send_user "\t\tDidn't kill program being debugged\n"
 	}
-	expect -re "$gdb_prompt $" { }
+	gdb_expect -re "$gdb_prompt $" { }
 	pass "target core"
     }
     -re "Undefined target command: \"core\".  Try \"help target\"..*$gdb_prompt $" { pass "target core" }
@@ -654,7 +676,7 @@ expect {
 
 #test target exec
 send_gdb "target exec\n"
-expect {
+gdb_expect {
 	-re "No exec file now..*$gdb_prompt $"\
 			{ pass "target exec" }
 	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
@@ -662,7 +684,7 @@ expect {
 	    if $verbose>1 then {
 		send_user "\t\tDidn't kill program being debugged\n"
 	    }
-	    expect -re "$gdb_prompt $" { }
+	    gdb_expect -re "$gdb_prompt $" { }
 	    pass "target exec"
 	}
 	-re ".*$gdb_prompt $"	{ fail "target exec" }
@@ -672,7 +694,7 @@ expect {
 #test target remote
 if ![istarget "*-*-udi*"] then {
     send_gdb "target remote\n"
-    expect {
+    gdb_expect {
 	-re "To open a remote debug connection, you need to specify what serial.*
 device is attached to the remote system .e.g. /dev/ttya.*$gdb_prompt $"\
 			{ pass "target remote" }
@@ -681,7 +703,7 @@ device is attached to the remote system .e.g. /dev/ttya.*$gdb_prompt $"\
 	    if $verbose>1 then {
 		send_user "\t\tDidn't kill program being debugged\n"
 	    }
-	    expect -re "$gdb_prompt $" { }
+	    gdb_expect -re "$gdb_prompt $" { }
 	    pass "target remote"
 	}
 	-re ".*$gdb_prompt $"	{ fail "target remote" }
@@ -704,10 +726,10 @@ gdb_test "until" "The program is not running." "until"
 #test undisplay
 # FIXME -- need to dump full output to detailed log
 send_gdb "undisplay\n"
-expect {
+gdb_expect {
     -re "Delete all auto-display expressions.*y or n. $" {
 	send_gdb "y\n"
-	expect {
+	gdb_expect {
 	    -re "$gdb_prompt $" { pass "undisplay prompt" }
 	    timeout { fail "(timeout) (timeout) undisplay prompt"    }
 	}
@@ -717,10 +739,10 @@ expect {
 
 #test unset environment
 send_gdb "unset environment\n"
-expect {
+gdb_expect {
     -re "Delete all environment variables?.*y or n. $" { 
 	send_gdb "y\n"
-	expect {
+	gdb_expect {
 	    -re "$gdb_prompt $" { pass "unset environmentprompt" }
 	    timeout {
 		fail "(timeout) (timeout) unset environment prompt"
