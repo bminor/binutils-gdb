@@ -809,7 +809,8 @@ undoSStep (thread_info * th)
 }
 
 void
-wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
+wince_software_single_step (enum target_signal ignore,
+			    int insert_breakpoints_p)
 {
   unsigned long pc;
   thread_info *th = current_thread;	/* Info on currently selected thread */
@@ -949,7 +950,8 @@ undoSStep (thread_info * th)
    which would be executed.  This code hails from sh-stub.c.
  */
 void
-wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
+wince_software_single_step (enum target_signal ignore,
+			    int insert_breakpoints_p)
 {
   thread_info *th = current_thread;	/* Info on currently selected thread */
 
@@ -995,7 +997,8 @@ undoSStep (thread_info * th)
 }
 
 void
-wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
+wince_software_single_step (enum target_signal ignore,
+			    int insert_breakpoints_p)
 {
   unsigned long pc;
   thread_info *th = current_thread;	/* Info on currently selected thread */

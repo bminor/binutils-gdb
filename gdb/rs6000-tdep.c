@@ -299,7 +299,8 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 /* AIX does not support PT_STEP. Simulate it. */
 
 void
-rs6000_software_single_step (unsigned int signal, int insert_breakpoints_p)
+rs6000_software_single_step (enum target_signal signal,
+			     int insert_breakpoints_p)
 {
 #define	INSNLEN(OPCODE)	 4
 

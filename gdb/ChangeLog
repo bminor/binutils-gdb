@@ -1,5 +1,16 @@
 2001-03-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* target.h (enum target_signal): Move definition from here.
+	* defs.h (enum target_signal): To here.
+
+	* config/arc/tm-arc.h (arc_software_single_step): Change type of
+	first parameter to enum target_signal.
+	* config/rs6000/tm-rs6000.h (rs6000_software_single_step): Ditto.
+	* config/sparc/tm-sparc.h (sparc_software_single_step): Ditto.
+	* rs6000-tdep.c (rs6000_software_single_step): Update.
+	
+2001-03-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.h (SIZEOF_FRAME_SAVED_REGS): Report an error if macro
 	already defined.
 	
