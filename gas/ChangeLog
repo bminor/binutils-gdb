@@ -1,3 +1,8 @@
+Mon Nov 25 18:02:29 1996  J.T. Conklin  <jtc@beauty.cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip): Implement cases for new <, >, m, n,
+ 	o and p operand specifiers.
+
 Mon Nov 25 10:45:14 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* write.c: Delete "ifndef md_relax_frag" around is_dnrange.
