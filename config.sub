@@ -209,11 +209,9 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-v850
-# start-sanitize-d10v
 	d10v)				# CYGNUS LOCAL meissner/d10v
 		basic_machine=$basic_machine-unknown
 		;;
-# end-sanitize-d10v
 # start-sanitize-d30v
 	d30v)				# CYGNUS LOCAL hunt/d30v
 		basic_machine=$basic_machine-unknown
@@ -939,13 +937,14 @@ case $os in
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
 	      | -cygwin32* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
+	      | -beos* \						# CYGNUS LOCAL
 	      | -linux-gnu* | -uxpv*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	# CYGNUS LOCAL
 	-sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
 	      | -windows* | -osx | -abug |  -netware* | -os9* \
-	      | -macos* | -mpw* | -magic* | -mon960*)
+	      | -macos* | -mpw* | -magic* | -mon960* | -lnews* )
 		;;
 	-mac*)
 		os=`echo $os | sed -e 's|mac|macos|'`
@@ -1079,6 +1078,9 @@ case $basic_machine in
 	sparc-* | *-sun)
 		os=-sunos4.1.1
 		;;
+	*-be)						# CYGNUS LOCAL
+		os=-beos
+		;;
 	*-ibm)
 		os=-aix
 		;;
@@ -1183,6 +1185,9 @@ case $basic_machine in
 				;;
 			-aix*)
 				vendor=ibm
+				;;
+			-beos*)						# CYGNUS LOCAL
+				vendor=be
 				;;
 			-hpux*)
 				vendor=hp
