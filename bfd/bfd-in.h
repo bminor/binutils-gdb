@@ -52,9 +52,16 @@ extern "C" {
 
 #include "ansidecl.h"
 
-/* These two lines get substitutions done by commands in Makefile.in.  */
 #define BFD_VERSION  "@VERSION@"
+
+/* The word size used by BFD on the host.  This may be 64 with a 32
+   bit target if the host is 64 bit, or if other 64 bit targets have
+   been selected with --enable-targets, or if --enable-64-bit-bfd.  */
 #define BFD_ARCH_SIZE @wordsize@
+
+/* The word size of the default bfd target.  */
+#define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
+
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
 #if @BFD_HOST_64_BIT_DEFINED@
 #define BFD_HOST_64_BIT @BFD_HOST_64_BIT@

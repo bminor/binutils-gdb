@@ -1,5 +1,14 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd-in.h (BFD_VERSION): Remove wrong comment.
+	(BFD_DEFAULT_TARGET_SIZE): New.
+	(BFD_ARCH_SIZE): Comment.
+	* configure.in (target_size): New.  Set instead of target64 in
+	selvecs case statement.  Set target64 from it.
+	(bfd_default_target_size): New.  Set from taget_size. AC_SUBST.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+
 	* bfd.c (enum bfd_error): Add bfd_error_wrong_object_format.
 	(bfd_errmsgs): Add corresponding message.
 	* archive.c (bfd_generic_archive_p): Don't release bfd_ardata when
