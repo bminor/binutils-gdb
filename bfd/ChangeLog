@@ -1,5 +1,8 @@
 Thu Apr 17 11:10:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_link_add_object_symbols): Only subtract the
+	section VMA from the symbol value if this is a fully linked file.
+
 	* elf32-i386.c (struct elf_i386_pcrel_relocs_copied): Define.
 	(struct elf_i386_link_hash_entry): Define.
 	(struct elf_i386_link_hash_table): Define.

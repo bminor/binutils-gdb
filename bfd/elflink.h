@@ -732,10 +732,10 @@ elf_link_add_object_symbols (abfd, info)
       else if (sym.st_shndx > 0 && sym.st_shndx < SHN_LORESERVE)
 	{
 	  sec = section_from_elf_index (abfd, sym.st_shndx);
-	  if (sec != NULL)
-	    value -= sec->vma;
-	  else
+	  if (sec == NULL)
 	    sec = bfd_abs_section_ptr;
+	  else if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+	    value -= sec->vma;
 	}
       else if (sym.st_shndx == SHN_ABS)
 	sec = bfd_abs_section_ptr;
