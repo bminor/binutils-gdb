@@ -1,5 +1,7 @@
 Tue Aug  3 16:33:11 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* Makefile.in (install): Fix sh syntax error.
+
 	* aoutf1.h: Make bfd_error_trap extern; it's defined in bfd.c.
 
 Tue Aug  3 15:19:09 1993  Fred Fish  (fnf@deneb.cygnus.com)

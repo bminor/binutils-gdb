@@ -306,16 +306,13 @@ install:
 	$(INSTALL_DATA) $(BFD_H) $(includedir)/bfd.h
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(includedir)/ansidecl.h
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(includedir)/obstack.h
-	-if [ -z "$(oldincludedir)" ] ; then true ; \
-	 else if [ -d $(oldincludedir) ] ; then true ; \
-	      else mkdir $(oldincludedir) ; \
-	      fi ; \
-	      $(INSTALL_DATA) $(BFD_H)      $(oldincludedir)/bfd.h;\
-	      $(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h;\
-	      $(INSTALL_DATA) $(INCDIR)/obstack.h  $(oldincludedir)/obstack.h;\
-	 fi
-	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-
+	-if test -z "$(oldincludedir)"; then true; else \
+	test -d $(oldincludedir) || mkdir $(oldincludedir); \
+	$(INSTALL_DATA) $(BFD_H) $(oldincludedir)/bfd.h; \
+	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h; \
+	$(INSTALL_DATA) $(INCDIR)/obstack.h $(oldincludedir)/obstack.h; \
+	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
+	fi
 
 Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) config.status
