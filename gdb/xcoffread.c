@@ -2257,14 +2257,17 @@ xcoff_symfile_read (objfile, section_offset, mainline)
       error("\"%s\": error reading line numbers\n", name);
   }
 
-  val = init_stringtab(abfd, stringtab_offset, objfile);
-  if (val < 0) {
-    error ("\"%s\": can't get string table", name);
-  }
+  if (num_symbols > 0)
+    {
+      val = init_stringtab(abfd, stringtab_offset, objfile);
+      if (val < 0) {
+	error ("\"%s\": can't get string table", name);
+      }
 
-  if (init_debugsection(abfd) < 0) {
-    error ("Error reading .debug section of `%s'\n", name);
-  }
+      if (init_debugsection(abfd) < 0) {
+	error ("Error reading .debug section of `%s'\n", name);
+      }
+    }
 
   /* Position to read the symbol table.  Do not read it all at once. */
   val = bfd_seek(abfd, symtab_offset, L_SET);
