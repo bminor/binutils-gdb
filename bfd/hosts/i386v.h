@@ -43,6 +43,12 @@
 # endif
  */
 
+#ifndef DONTDECLARE_MALLOC
+extern PROTO(PTR,malloc,(unsigned));
+extern PROTO(PTR ,realloc, (PTR, unsigned));
+extern PROTO(void, free,(PTR));
+#endif
+
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;
