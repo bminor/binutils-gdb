@@ -19,9 +19,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-extern int HMODE;
+extern int h8300hmode;
 
-#define BINWORD (HMODE?4:2)
+#define BINWORD (h8300hmode?4:2)
 
 #define EXTRA_FRAME_INFO 	\
 	struct frame_saved_regs *fsr;	\
@@ -48,7 +48,7 @@ extern void init_extra_frame_info ();
 #undef TARGET_LONG_BIT
 #define TARGET_LONG_BIT  32
 #undef TARGET_PTR_BIT
-#define TARGET_PTR_BIT  (HMODE ? 32:16)
+#define TARGET_PTR_BIT  (h8300hmode ? 32:16)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -106,12 +106,12 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the H8/300, all regs are 2 bytes.  */
 
-#define REGISTER_RAW_SIZE(N) (HMODE ? 4 : 2)
+#define REGISTER_RAW_SIZE(N) (h8300hmode ? 4 : 2)
 
 /* Number of bytes of storage in the program's representation
    for register N.  */
 
-#define REGISTER_VIRTUAL_SIZE(N) (HMODE ? 4 : 2)
+#define REGISTER_VIRTUAL_SIZE(N) (h8300hmode ? 4 : 2)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -142,7 +142,7 @@ extern CORE_ADDR h8300_skip_prologue ();
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) \
-(HMODE ? builtin_type_unsigned_long : builtin_type_unsigned_short)
+(h8300hmode ? builtin_type_unsigned_long : builtin_type_unsigned_short)
 
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
