@@ -727,6 +727,7 @@ static void
 arm_scan_prologue (struct frame_info *fi)
 {
   int regno, sp_offset, fp_offset;
+  LONGEST return_value;
   CORE_ADDR prologue_start, prologue_end, current_pc;
 
   /* Check if this function is already in the cache of frame information. */
@@ -791,9 +792,13 @@ arm_scan_prologue (struct frame_info *fi)
     {
       /* Get address of the stmfd in the prologue of the callee; the saved
          PC is the address of the stmfd + 8.  */
-      prologue_start = ADDR_BITS_REMOVE (read_memory_integer (fi->frame, 4))
-	- 8;
-      prologue_end = prologue_start + 64;	/* See above. */
+      if (!safe_read_memory_integer (fi->frame, 4,  &return_value))
+        return;
+      else
+        {
+          prologue_start = ADDR_BITS_REMOVE (return_value) - 8;
+          prologue_end = prologue_start + 64;   /* See above. */
+        }
     }
 
   /* Now search the prologue looking for instructions that set up the

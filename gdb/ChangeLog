@@ -1,3 +1,11 @@
+2001-12-19  Elena Zannoni  <ezannoni@redhat.com>
+
+        * corefile.c (do_captured_read_memory_integer,
+        safe_read_memory_integer): New functions.
+        * gdbcore.h (safe_read_memory_integer): Export.
+        * arm-tdep.c (arm_scan_prologue): Use safe_read_memory_integer,
+        to read the frame value, to capture calls to error().
+
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_register_name): S390_LAST_REGNUM is, in fact,

@@ -262,6 +262,41 @@ dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 
 /* Read an integer from debugged memory, given address and number of bytes.  */
 
+struct captured_read_memory_integer_arguments
+{
+  CORE_ADDR memaddr;
+  int len;
+  LONGEST result;
+};
+
+static int
+do_captured_read_memory_integer (void *data)
+{
+  struct captured_read_memory_integer_arguments *args = (struct captured_read_memory_integer_arguments*) data;
+  CORE_ADDR memaddr = args->memaddr;
+  int len = args->len;
+
+  args->result = read_memory_integer (memaddr, len);
+
+  return 0;
+}
+
+int
+safe_read_memory_integer (CORE_ADDR memaddr, int len, LONGEST *return_value)
+{
+  int status;
+  struct captured_read_memory_integer_arguments args;
+  args.memaddr = memaddr;
+  args.len = len;
+
+  status = catch_errors (do_captured_read_memory_integer, &args,
+                        "", RETURN_MASK_ALL);
+  if (!status)
+    *return_value = args.result;
+
+  return status;
+}
+
 LONGEST
 read_memory_integer (CORE_ADDR memaddr, int len)
 {
