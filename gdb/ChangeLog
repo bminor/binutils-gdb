@@ -1,5 +1,10 @@
 2003-07-18  Andrew Cagney  <cagney@redhat.com>
 
+	From 2003-07-04 Kei Sakamoto <sakamoto.kei@renesas.com>:
+        * disasm.c (gdb_disassemble_info): Initilize di.arch.
+
+2003-07-18  Andrew Cagney  <cagney@redhat.com>
+
 	* ui-out.h (struct ui_file): Add opaque declaration.
 
 2003-07-17  Elena Zannoni  <ezannoni@redhat.com>
