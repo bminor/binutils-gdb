@@ -157,6 +157,8 @@ rs6000-core.c
 seclet.c
 seclet.h
 section.c
+som.c
+som.h
 srec.c
 stab-syms.c
 sunos.c
