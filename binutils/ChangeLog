@@ -1,3 +1,8 @@
+1999-06-17  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mcore_elf_gen_out_file): Link object files with the
+	.exp file, not the .lib file.
+
 Fri Jun 18 20:17:51 1999  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* deflex.l: Accept single-character symbol names.

@@ -3430,7 +3430,7 @@ mcore_elf_gen_out_file (void)
   
   run (program_name, outfile);
 
-  /* Step four. Feed the .exp and .lib files to ld -shared to create the dll.  */
+  /* Step four. Feed the .exp and object files to ld -shared to create the dll.  */
   strcpy (outfile, "-shared ");
 
   if (mcore_elf_linker_flags)
@@ -3439,17 +3439,14 @@ mcore_elf_gen_out_file (void)
   strcat (outfile, " ");
   strcat (outfile, MCORE_ELF_TMP_EXP);
   strcat (outfile, " ");
-  strcat (outfile, MCORE_ELF_TMP_LIB);
+  strcat (outfile, MCORE_ELF_TMP_OBJ);
   strcat (outfile, " -o ");
   strcat (outfile, mcore_elf_out_file);
 
   run (mcore_elf_linker, outfile);
 
   if (dontdeltemps == 0)
-    {
-      unlink (MCORE_ELF_TMP_EXP);
-      unlink (MCORE_ELF_TMP_LIB);
-    }
+    unlink (MCORE_ELF_TMP_EXP);
 
   if (dontdeltemps < 2)
     unlink (MCORE_ELF_TMP_OBJ);
