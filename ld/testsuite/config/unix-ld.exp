@@ -21,7 +21,9 @@
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 #
 
-set ld $objdir/ld.new
+if ![info exists ld] then {
+    set ld [findfile $objdir/ld.new $objdir/ld.new [transform ld]]
+}
 
 # load the utility procedures
 load_lib ld.exp

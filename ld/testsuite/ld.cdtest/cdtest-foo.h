@@ -11,8 +11,8 @@
 class Foo {
     static int foos;
     int i;
-    static const int len;
-    char message[FOO_MSG_LEN];
+    const len = FOO_MSG_LEN;
+    char message[len];
 public: 
     static void init_foo ();
     static int nb_foos() { return foos; }

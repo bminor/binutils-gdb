@@ -1,3 +1,22 @@
+Tue Sep 27 14:59:51 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/unix-ld.exp: Set ld using findfile.
+	* lib/ld.exp (default_ld_relocate): Return a value.  Change format
+	of log messages.
+	(default_ld_compile): Likewise.
+	(default_ld_link): Likewise.  Also, don't include $BFDLIB and
+	$LIBIBERTY in link.
+	* ld.bootstrap/bootstrap.exp: Rewrite.
+	* ld.cdtest/cdtest.exp: Rewrite.
+	* ld.cdtest/cdtest-foo.cc: Update from top level ld directory.
+	* ld.cdtest/cdtest-foo.h: Likewise.
+	* ld.cdtest/cdtest-main.cc: Likewise.
+
+Fri May 27 09:35:04 1994  Ken Raeburn  (raeburn@cygnus.com)
+
+	* ld.cdtest/cdtest.exp: Don't look for $result before it's
+	defined.
+
 Tue May 17 15:06:49 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* ld.bootstrap/bootstrap.exp, lib/ld.exp: Replace error proc

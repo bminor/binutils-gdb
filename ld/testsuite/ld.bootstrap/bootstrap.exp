@@ -1,6 +1,5 @@
-#
 # Expect script for LD Bootstrap Tests
-#   Copyright (C) 1993 Free Software Foundation
+#   Copyright (C) 1993,1994 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,84 +15,63 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-#	$Id$
-#
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
+# Rewritten by Ian Lance Taylor (ian@cygnus.com)
 #
 
-if $tracelevel then {
-    strace $tracelevel
+# Make sure that ld can bootstrap itself.
+
+# This test can only be run if ld generates native executables.
+if ![isnative] {return}
+
+# This test can only be run if we have the ld build directory, since
+# we need the object files.
+if {$ld != "$objdir/ld.new"} {return}
+
+if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
+
+# Bootstrap ld.  First link the object files together using -r, in
+# order to test -r.  Then link the result into an executable, ld1, to
+# really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
+# new ld, ld3.  ld2 and ld3 should be identical.
+
+foreach flags {"" "--static" "--traditional-format" "--no-keep-memory"} {
+    if {"$flags" != ""} { 
+	set testname "bootstrap with $flags"
+    } else {
+	set testname "bootstrap"
+    }
+
+    if ![ld_relocate $ld tmpdir/ld-partial.o "$flags $OFILES"] {
+	fail $testname
+	return
+    }
+
+    if ![ld_link $ld tmpdir/ld1 "$flags tmpdir/ld-partial.o $BFDLIB $LIBIBERTY"] {
+	fail $testname
+	return
+    }
+
+    if ![ld_link tmpdir/ld1 tmpdir/ld2 "$flags $OFILES $BFDLIB $LIBIBERTY"] {
+	fail $testname
+	return
+    }
+
+    if ![ld_link tmpdir/ld2 tmpdir/ld3 "$flags $OFILES $BFDLIB $LIBIBERTY"] {
+	fail $testname
+	return
+    }
+
+    send_log "cmp tmpdir/ld2 tmpdir/ld3\n"
+    verbose "cmp tmpdir/ld2 tmpdir/ld3"
+    catch "exec cmp tmpdir/ld2 tmpdir/ld3" exec_output
+
+    if [string match "" $exec_output] then {
+	pass $testname
+    } else {
+	send_log "$exec_output\n"
+	verbose "$exec_output" 1
+
+	fail $testname
+    }
 }
-
-set tmpdir /tmp
-
-set stage 0
-
-#
-# link an object using relocation
-#
-
-ld_relocate $objdir/ld.new $tmpdir/ld-partial.o $OFILES
-	
-ld_link $objdir/ld.new $tmpdir/ld.partial $tmpdir/ld-partial.o
-
-ld_link $tmpdir/ld.partial $tmpdir/ld.full $OFILES
-
-ld_link $tmpdir/ld.full $tmpdir/ld.$stage $OFILES
-
-#
-# main test loop
-#
-for { set stage 0 } { $stage < 9 } { incr stage } {
-    
-    global OFILES
-    global BFDLIB
-    global LIBIBERTY
-    global HOSTING_EMU
-    global HOSTING_CRT0
-    global HOSTING_LIBS
-    
-    set status -1
-    
-    set tmpstage $stage 
-    set ld_old $tmpdir/ld.$stage
-    set ld_new $tmpdir/ld.[incr tmpstage]
- 
-    verbose "### Running test $target\n" 1
-    verbose "### stage is now $stage\n" 1
-    
-    # link the target with itself
-    ld_link $ld_old $ld_new $OFILES
-    
-    # load (compare) the target 	
-    if ![file exists $ld_old] then {
-	unresolved "$ld_old doesn't exist." 
-    }
-    
-    if ![file exists $ld_new] then {
-	unresolved "$ld_new doesn't exist." 
-    }
-    
-    # compare the old and new targets
-    set status [ eval ld_load "$ld_old $ld_new" ]
-    case $status in {
-	"0" { 
-	    pass "$ld_old == $ld_new"
-	}
-	"1" {
-	    fail "$tmptarget aborted" 
-	}
-	"-1" { 
-	    perror "Couldn't load $tmptarget." 
-	}
-    }
-
-# remove generated targets
-verbose "### EXEC exec rm -f $ld_old"
-catch "exec rm -f $ld_old" result
-}
-
-# remove last generated targets
-verbose "### EXEC rm -f $ld_old $ld_new"
-catch "exec rm -f $ld_old $ld_new" result
-ld_exit

@@ -4,7 +4,7 @@
 #
 proc default_ld_version { ld } {
     if { [file exists $ld] == 0 } then {
- perror "$ld does not exist"
+	perror "$ld does not exist"
 	exit 1
     }
     
@@ -25,17 +25,20 @@ proc default_ld_relocate { ld target objects } {
     global HOSTING_EMU
     
     if { [file exists $ld] == 0 } then {
- perror "$ld does not exist"
-	exit 1
+	perror "$ld does not exist"
+	return 0
     }
     
-    send_log "### EXEC \"$ld $HOSTING_EMU -o $target -r $objects\"\n"
-    verbose "### EXEC \"$ld $HOSTING_EMU -o $target -r $objects\""
+    send_log "$ld $HOSTING_EMU -o $target -r $objects\n"
+    verbose "$ld $HOSTING_EMU -o $target -r $objects"
     
     catch "exec $ld $HOSTING_EMU -o $target -r $objects" exec_output
-    if ![string match "" $exec_output] then {
+    if [string match "" $exec_output] then {
+	return 1
+    } else {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
+	return 0
     }
 }
 
@@ -46,27 +49,28 @@ proc default_ld_relocate { ld target objects } {
 #
 proc default_ld_link { ld target objects } {
     
-    global BFDLIB
-    global LIBIBERTY
     global HOSTING_EMU
     global HOSTING_CRT0
     global HOSTING_LIBS
     
     set objs "$HOSTING_CRT0 $objects"
-    set libs "$BFDLIB $LIBIBERTY $HOSTING_LIBS"
+    set libs "$HOSTING_LIBS"
     
     if { [file exists $ld] == 0 } then {
- perror "$ld does not exist"
-	exit 1
+	perror "$ld does not exist"
+	return 0
     }
     
-    send_log "### EXEC \"$ld $HOSTING_EMU -o $target $objs $libs\"\n"
-    verbose "### EXEC \"$ld $HOSTING_EMU -o $target $objs $libs\""
+    send_log "$ld $HOSTING_EMU -o $target $objs $libs\n"
+    verbose "$ld $HOSTING_EMU -o $target $objs $libs"
     
     catch "exec $ld $HOSTING_EMU -o $target $objs $libs" exec_output
-    if ![string match "" $exec_output] then {
+    if [string match "" $exec_output] then {
+	return 1
+    } else {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
+	return 0
     }
 }
 
@@ -80,17 +84,21 @@ proc default_ld_compile { cc source object } {
     global subdir
     
     if {[which $cc] == 0} then {
- perror "$cc does not exist"
-	exit 1
+	perror "$cc does not exist"
+	return 0
     }
-    
-    send_log "$cc $CFLAGS -I$srcdir/$subdir -c $source -o $object\n"
-    verbose "### EXEC \"$cc $CFLAGS -I$srcdir/$subdir -c $source -o $object\""
-    
-    catch "exec $cc $CFLAGS -I$srcdir/$subdir -c $source -o $object" exec_output
-    if ![string match "" $exec_output] then {
+
+    send_log "$cc -I$srcdir$subdir -c $CFLAGS $source -o $object\n"
+    verbose "$cc -I$srcdir$subdir -c $CFLAGS $source -o $object"
+
+    catch "exec $cc -I$srcdir$subdir -c $CFLAGS $source -o $object" exec_output
+    if [string match "" $exec_output] then {
+	return 1
+    } else {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
+	perror "$source: compilation failed"
+	return 0
     }
 }
 
@@ -120,7 +128,7 @@ proc simple_diff { file_1 file_2 } {
 	return
     }
     
-    verbose "### Diff'ing: $file_1 $file_2\n" 2
+    verbose "# Diff'ing: $file_1 $file_2\n" 2
     
     while { [gets $file_a line] != $eof } {
 	if [regexp "^#.*$" $line] then {
