@@ -20,15 +20,10 @@ Tue Dec  2 06:51:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* configure (GDB_TK): add all-libide to dependency list
 
-	* Makefile.in: remove sanitization for ALL libide references
-
 Tue Dec  2 09:04:13 1997  Michael Meissner  <meissner@cygnus.com>
 
-	* configure.in (host_libs): Build libide all of the time, remove ide
-	sanitization for it.
+	* configure.in (host_libs): Build libide all of the time.
 	(noconfigdirs): Remove libide from all places that set noconfigdirs.
-
-	* Makefile.in (all-libide): Remove sanitization markers for libide.
 
 Mon Dec  1 10:53:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
@@ -81,14 +76,14 @@ Wed Nov  5 11:14:44 1997  Gavin Koch  <gavin@cygnus.com>
 	* config.sub: Move tx19 configury to reduce spurious differences
 	with gcc/config.sub.
 
-end-sanitized-tx19
+end-sanitize-tx19
 start-sanitize-tx49
 Wed Nov  5 11:14:44 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Move tx49 configury to reduce spurious differences
 	with gcc/config.sub.
 
-end-sanitized-tx49
+end-sanitize-tx49
 start-sanitize-d30v
 Thu Oct 30 11:09:29 1997  Michael Meissner  <meissner@cygnus.com>
 

@@ -719,7 +719,7 @@ register_name (expressionP)
  * start-sanitize-v850e
  *      accept_list_names is true iff the special names PS and SR may be 
  *      accepted.
- * end-sanitize-v850eq
+ * end-sanitize-v850e
  *
  * out: A expressionS structure in expressionP.
  *	The operand may have been a register: in this case, X_op == O_register,
@@ -1659,7 +1659,6 @@ md_assemble (str)
 		      extra_data_after_insn = true;
 		      extra_data_len        = 4;
 		      extra_data            = ex.X_add_number;
-		      ex.X_add_number       = 0;
 		    }
 /* end-sanitize-v850e */
 		      

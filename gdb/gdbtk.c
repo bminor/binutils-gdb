@@ -1847,6 +1847,7 @@ gdbtk_init ( argv0 )
   /* An interface to ShellExecute.  */
   if (ide_create_shell_execute_command (interp) != TCL_OK)
     error ("shell execute command initialization failed");
+  /* end-sanitize-ide */
 #endif
 
   Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);

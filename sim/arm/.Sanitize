@@ -57,6 +57,7 @@ gdbhost.h
 kid.c
 main.c
 parent.c
+thumbemu.c
 wrapper.c
 
 Things-to-lose:

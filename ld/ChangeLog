@@ -1,3 +1,12 @@
+Wed Dec 10 17:40:08 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/armcoff.sc: Add glue sections (code taken from Arm
+	branch). 
+
+	* emulparams/armcoff.sh (TEMPLATE_NAME): Set to armcoff.
+
+	* emultempl/armcoff.em: New file, imported from Arm branch.
+
 start-sanitize-d30v
 Wed Dec 10 14:10:44 1997  Michael Meissner  <meissner@cygnus.com>
 
@@ -13,7 +22,7 @@ Tue Dec  9 15:28:17 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* Makefile.{am,in}: (ALL_EMULATIONS): Add ed10velf.o.
 
-start-sanitize-d30v
+start-sanitize-tic80
 	* Makefile.{am,in}: (ALL_EMULATIONS): Add etic80coff.o.
 end-sanitize-tic80
 
