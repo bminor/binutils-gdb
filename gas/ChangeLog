@@ -1,5 +1,24 @@
 Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* Allow backends to override the value of the fake label.
+	* write.h (LOCAL_LABEL): Delete DOT_LABEL_PREFIX code.  Instead
+	assume backends will define LOCAL_LABEL if anything other than
+	'L' is used to denote a local label.
+	(FAKE_LABEL_NAME): New macro.  Defines the default name used for
+	the "fake" label.
+	* expr.c (make_expr_symbol): Delete DOT_LABEL_PREFIX code
+	and instead simply use the string defined by FAKE_LABEL_NAME.
+	(operand): Likewise.
+	* read.c (s_stab_generic): Likewise.
+	* config/tc-hppa.h (FAKE_LABEL_NAME): Define as L$0\001 so it's
+	known to be a local label.
+	* config/tc-i386.h (DOT_LABEL_PREFIX): Delete.
+	(LOCAL_LABEL, FAKE_LABEL_NAME): Define.
+	* config/tc-m68k.h (DOT_LABEL_PREFIX): Delete.
+	(LOCAL_LABEL, FAKE_LABEL_NAME): Define.
+	* config/te-sco386.h (DOT_LABEL_PREFIX): Delete.
+	(LOCAL_LABEL, FAKE_LABEL_NAME): Define.
+
 	Rework space/subspace handling in PA code to fully support
 	SOM spaces/subspaces.
 	* config/tc-hppa.c (USE_ALIASES): New object-format dependent define
