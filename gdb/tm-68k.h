@@ -35,21 +35,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)   \
-{ register int op = read_memory_integer (pc, 2);	\
-  if (op == 0047126)					\
-    pc += 4;   /* Skip link #word */			\
-  else if (op == 0044016)				\
-    pc += 6;   /* Skip link #long */			\
-  /* Not sure why branches are here.  */                \
-  /* From m-isi.h, m-altos.h */                         \
-  else if (op == 0060000)				\
-    pc += 4;   /* Skip bra #word */			\
-  else if (op == 00600377)				\
-    pc += 6;   /* skip bra #long */			\
-  else if ((op & 0177400) == 0060000)			\
-    pc += 2;   /* skip bra #char */			\
-}
+#if !defined(SKIP_PROLOGUE)
+#define SKIP_PROLOGUE(ip)   {(ip) = m68k_skip_prologue(ip);}
+extern CORE_ADDR m68k_skip_prologue ();
+#endif
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -68,7 +57,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
    vector.  Systems which don't use 0xf should define BPT_VECTOR
    themselves before including this file.  */
 
-#if !defined BPT_VECTOR
+#if !defined (BPT_VECTOR)
 #define BPT_VECTOR 0xf
 #endif
 

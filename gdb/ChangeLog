@@ -1,3 +1,17 @@
+Mon Nov 18 17:45:18 1991  Fred Fish  (fnf at cygnus.com)
+
+	* m68k-tdep.c (m68k_skip_prologue):  Add generic m68k support for
+	skipping function prologues, ala the other cpu families (i386,
+	mips, m88k, etc).  Add the ability to skip movm and fmovm
+	instructions in the prologues.  Still needs support for profile
+	(-p compiled) prologue sequences (FIXME).
+
+	* tm-68k.h:  Change SKIP_PROLOGUE macro to use the new generic
+	m68k prologue skipping function by default.
+
+	* tm-altos.h, tm-isi.h:  Continue to use the old definition of
+	SKIP_PROLOGUE.
+
 Mon Nov 18 15:12:45 1991  John Gilmore  (gnu at cygnus.com)
 
 	* blockframe.c:  Remove tdesc-related code.  Default

@@ -139,4 +139,23 @@ retry:									\
   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;		\
 }
 
+/* The only reason this is here is the tm-isi.h reference below.  It
+   was moved back here from tm-68k.h.  FIXME? */
+
+#define SKIP_PROLOGUE(pc)   \
+{ register int op = read_memory_integer (pc, 2);	\
+  if (op == 0047126)					\
+    pc += 4;   /* Skip link #word */			\
+  else if (op == 0044016)				\
+    pc += 6;   /* Skip link #long */			\
+  /* Not sure why branches are here.  */		\
+  /* From tm-isi.h, tm-altos.h */			\
+  else if (op == 0060000)				\
+    pc += 4;   /* Skip bra #word */			\
+  else if (op == 00600377)				\
+    pc += 6;   /* skip bra #long */			\
+  else if ((op & 0177400) == 0060000)			\
+    pc += 2;   /* skip bra #char */			\
+}
+
 #include "tm-68k.h"
