@@ -18,6 +18,10 @@
 
 2002-04-12  Michael Snyder  <msnyder@redhat.com>
 
+	* gcore.c (default_derive_heap_segment): Use bfd_section_name.
+	If no symbol found for "sbrk", try "_sbrk".
+	(make_output_phdrs): Use bfd_section_name.
+	(gcore_copy_callback): Use bfd_section_name.
 	* eval.c: Indentation fix-ups.
 	* d10v-tdep.c (d10v_make_iaddr): Make it idempotent,
 	in case it gets applied to an address that is already
