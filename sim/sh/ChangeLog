@@ -1,3 +1,9 @@
+2003-07-25  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (pshl): Change < to <= (shift by 16 is allowed).
+	Cast argument of >> to unsigned to prevent sign extension.
+	(psha): Change < to <= (shift by 32 is allowed).	
+
 2003-07-24  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c: Fix typo in comment.
