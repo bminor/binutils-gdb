@@ -1,8 +1,5 @@
-
-
 /* coffgrok.c
-
-   Copyright (C) 1994 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 1997 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -18,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Written by Steve Chamberlain (sac@cygnus.com)
 
@@ -29,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 */
 
 #include <bfd.h>
-#include <stdio.h>
 #include "bucomm.h"
 
 #include "coff/internal.h"
@@ -134,6 +130,8 @@ do_sections_p1 (head)
       relsize = bfd_get_reloc_upper_bound (abfd, section);
       if (relsize < 0)
 	bfd_fatal (bfd_get_filename (abfd));
+      if (relsize == 0)
+        continue;
       relpp = (arelent **) xmalloc (relsize);
       relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
       if (relcount < 0)
@@ -144,7 +142,7 @@ do_sections_p1 (head)
       head->sections[i].data = section->flags & SEC_DATA;
       if (strcmp (section->name, ".bss") == 0)
 	head->sections[i].data = 1;
-      head->sections[i].address = section->vma;
+      head->sections[i].address = section->lma;
       head->sections[i].size = section->_raw_size;
       head->sections[i].number = idx;
       head->sections[i].nrelocs = section->reloc_count;
@@ -188,8 +186,8 @@ do_where (i)
      int i;
 {
   struct internal_syment *sym = &rawsyms[i].u.syment;
-  struct coff_where *where
-  = (struct coff_where *) (malloc (sizeof (struct coff_where)));
+  struct coff_where *where =
+    (struct coff_where *) (xmalloc (sizeof (struct coff_where)));
   where->offset = sym->n_value;
 
   if (sym->n_scnum == -1)
@@ -297,9 +295,11 @@ do_type (i)
 {
   struct internal_syment *sym = &rawsyms[i].u.syment;
   union internal_auxent *aux = &rawsyms[i + 1].u.auxent;
-  struct coff_type *res = (struct coff_type *) malloc (sizeof (struct coff_type));
+  struct coff_type *res =
+    (struct coff_type *) xmalloc (sizeof (struct coff_type));
   int type = sym->n_type;
   int which_dt = 0;
+  int dimind = 0;
 
   res->type = coff_basic_type;
   res->u.basic = type & 0xf;
@@ -414,24 +414,23 @@ do_type (i)
 	  break;
 	case DT_ARY:
 	  {
-
-	    /* Look in the auxent for the dimensions and build lots of dims */
-	    int els = aux->x_sym.x_fcnary.x_ary.x_dimen[which_dt];
-	    if (els)
-	      {
-		struct coff_type *ptr = (struct coff_type *) malloc (sizeof (struct coff_type));
-		ptr->type = coff_array_type;
-		ptr->size = els * res->size;
-		ptr->u.array.dim = els;
-		ptr->u.array.array_of = res;
-		res = ptr;
-	      }
+	    struct coff_type *ptr = ((struct coff_type *)
+				     xmalloc (sizeof (struct coff_type)));
+	    int els = (dimind < DIMNUM
+		       ? aux->x_sym.x_fcnary.x_ary.x_dimen[dimind]
+		       : 0);
+	    ++dimind;
+	    ptr->type = coff_array_type;
+	    ptr->size = els * res->size;
+	    ptr->u.array.dim = els;
+	    ptr->u.array.array_of = res;
+	    res = ptr;
+	    break;
 	  }
-
-	  break;
 	case DT_PTR:
 	  {
-	    struct coff_type *ptr = (struct coff_type *) malloc (sizeof (struct coff_type));
+	    struct coff_type *ptr =
+	      (struct coff_type *) xmalloc (sizeof (struct coff_type));
 	    ptr->size = PTR_SIZE;
 	    ptr->type = coff_pointer_type;
 	    ptr->u.pointer.points_to = res;
@@ -440,7 +439,8 @@ do_type (i)
 	  }
 	case DT_FCN:
 	  {
-	    struct coff_type *ptr = (struct coff_type *) malloc (sizeof (struct coff_type));
+	    struct coff_type *ptr
+	      = (struct coff_type *) xmalloc (sizeof (struct coff_type));
 	    ptr->size = 0;
 	    ptr->type = coff_function_type;
 	    ptr->u.function.function_returns = res;
@@ -461,7 +461,8 @@ do_visible (i)
      int i;
 {
   struct internal_syment *sym = &rawsyms[i].u.syment;
-  struct coff_visible *visible = (struct coff_visible *) (malloc (sizeof (struct coff_visible)));
+  struct coff_visible *visible =
+    (struct coff_visible *) (xmalloc (sizeof (struct coff_visible)));
   enum coff_vis_type t;
   switch (sym->n_sclass)
     {
@@ -606,7 +607,8 @@ doit ()
 	case C_FILE:
 	  {
 	    /* new source file announced */
-	    struct coff_sfile *n = (struct coff_sfile *) malloc (sizeof (struct coff_sfile));
+	    struct coff_sfile *n =
+	      (struct coff_sfile *) xmalloc (sizeof (struct coff_sfile));
 	    n->section = (struct coff_isection *) xcalloc (sizeof (struct coff_isection), abfd->section_count + 1);
 	    cur_sfile = n;
 	    n->name = sym->_n._n_nptr[1];
