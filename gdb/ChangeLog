@@ -1,3 +1,8 @@
+Fri Oct  4 22:30:06 1991  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in, tm-i386v.h, xm-i386v.h: Intel 386 Mach host port.
+	* xm-i386mach.h, mach386-xdep.c, xconfig/i386mach:  New files.
+
 Fri Oct  4 17:04:31 1991  Per Bothner  (bothner at cygnus.com)
 
 	More patches from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
