@@ -20,13 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sparc/xm-sparc.h"
 #define FPU
 
-/* Large alloca's fail because the attempt to increase the stack limit in
-   main() fails because shared libraries are allocated just below the initial
-   stack limit.  The SunOS kernel will not allow the stack to grow into
-   the area occupied by the shared libraries.  Sun knows about this bug
-   but has no obvious fix for it.  */
-#define BROKEN_LARGE_ALLOCA
-
 /* SunOS 4.x has memory mapped files.  */
 
 #define HAVE_MMAP

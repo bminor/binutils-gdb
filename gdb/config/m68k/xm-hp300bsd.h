@@ -28,10 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Avoid "INT_MIN redefined" preprocessor warnings by defining them here.  */
 #include <sys/param.h>
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 

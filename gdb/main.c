@@ -56,13 +56,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <ctype.h>
 
-#ifdef SET_STACK_LIMIT_HUGE
-#include <sys/time.h>
-#include <sys/resource.h>
-
-int original_stack_limit;
-#endif
-
 /* Prototypes for local functions */
 
 static char *
@@ -525,6 +518,24 @@ read_command_file (stream)
   do_cleanups (cleanups);
 }
 
+void
+gdb_init ()
+{
+  /* Run the init function of each source file */
+
+  init_cmd_lists ();	/* This needs to be done first */
+  initialize_all_files ();
+  init_main ();		/* But that omits this file!  Do it now */
+  init_signals ();
+
+  /* We need a default language for parsing expressions, so simple things like
+     "set width 0" won't fail if no language is explicitly set in a config file
+     or implicitly set by reading an executable during startup. */
+  set_language (language_c);
+  expected_language = current_language;	/* don't warn about the change.  */
+}
+
+#ifndef MAIN_OVERRIDE
 int
 main (argc, argv)
      int argc;
@@ -602,19 +613,6 @@ main (argc, argv)
 
   getcwd (dirbuf, sizeof (dirbuf));
   current_directory = dirbuf;
-
-#ifdef SET_STACK_LIMIT_HUGE
-  {
-    struct rlimit rlim;
-
-    /* Set the stack limit huge so that alloca (particularly stringtab
-     * in dbxread.c) does not fail. */
-    getrlimit (RLIMIT_STACK, &rlim);
-    original_stack_limit = rlim.rlim_cur;
-    rlim.rlim_cur = rlim.rlim_max;
-    setrlimit (RLIMIT_STACK, &rlim);
-  }
-#endif /* SET_STACK_LIMIT_HUGE */
 
   /* Parse arguments and options.  */
   {
@@ -783,12 +781,7 @@ main (argc, argv)
       quiet = 1;
   }
 
-  /* Run the init function of each source file */
-
-  init_cmd_lists ();	/* This needs to be done first */
-  initialize_all_files ();
-  init_main ();		/* But that omits this file!  Do it now */
-  init_signals ();
+  gdb_init ();
 
   /* Do these (and anything which might call wrap_here or *_filtered)
      after initialize_all_files.  */
@@ -868,12 +861,6 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   error_pre_print = "\n\n";
   /* We may get more than one warning, don't double space all of them... */
   warning_pre_print = "\nwarning: ";
-
-  /* We need a default language for parsing expressions, so simple things like
-     "set width 0" won't fail if no language is explicitly set in a config file
-     or implicitly set by reading an executable during startup. */
-  set_language (language_c);
-  expected_language = current_language;	/* don't warn about the change.  */
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
@@ -1039,6 +1026,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
     }
   /* No exit -- exit is through quit_command.  */
 }
+#endif /* MAIN_OVERRIDE */
 
 void
 execute_user_command (c, args)

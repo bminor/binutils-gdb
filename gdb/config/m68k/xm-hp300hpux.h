@@ -52,12 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_TERMIOS
 
-/* Get rid of any system-imposed stack limit if possible.  */
-/* The hp9k320.h doesn't seem to have this feature.  */
-/* #define SET_STACK_LIMIT_HUGE */
-/* So we'll just have to avoid big alloca's.  */
-#define BROKEN_LARGE_ALLOCA
-
 #define REGISTER_ADDR(u_ar0, regno)					\
   (unsigned int)							\
   (((regno) < PS_REGNUM)						\

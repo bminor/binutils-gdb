@@ -24,16 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef	INT_MIN
 #define	INT_MIN		0x80000000
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
 #define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))
-
-#define BROKEN_LARGE_ALLOCA
 
 #define PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
 

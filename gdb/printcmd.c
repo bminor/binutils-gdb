@@ -1852,8 +1852,8 @@ printf_command (arg, from_tty)
 
   {
     /* Now scan the string for %-specs and see what kinds of args they want.
-       argclass[I] classifies the %-specs so we can give vprintf_unfiltered something
-       of the right size.  */
+       argclass[I] classifies the %-specs so we can give printf_filtered
+       something of the right size.  */
 
     enum argclass {no_arg, int_arg, string_arg, double_arg, long_long_arg};
     enum argclass *argclass;
@@ -1949,16 +1949,6 @@ printf_command (arg, from_tty)
     if (nargs != nargs_wanted)
       error ("Wrong number of arguments for specified format-string");
 
-    /* FIXME: We should be using vprintf_filtered, but as long as it
-       has an arbitrary limit that is unacceptable.  Correct fix is
-       for vprintf_filtered to scan down the format string so it knows
-       how big a buffer it needs (perhaps by putting a vasprintf (see
-       GNU C library) in libiberty).
-
-       But for now, just force out any pending output, so at least the output
-       appears in the correct order.  */
-    wrap_here ((char *)NULL);
-
     /* Now actually print them.  */
     current_substring = substrings;
     for (i = 0; i < nargs; i++)
@@ -1987,23 +1977,20 @@ printf_command (arg, from_tty)
 	      read_memory (tem, str, j);
 	      str[j] = 0;
 
-	      /* Don't use printf_filtered because of arbitrary limit.  */
-	      printf_unfiltered (current_substring, str);
+	      printf_filtered (current_substring, str);
 	    }
 	    break;
 	  case double_arg:
 	    {
 	      double val = value_as_double (val_args[i]);
-	      /* Don't use printf_filtered because of arbitrary limit.  */
-	      printf_unfiltered (current_substring, val);
+	      printf_filtered (current_substring, val);
 	      break;
 	    }
 	  case long_long_arg:
 #if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
 	    {
 	      long long val = value_as_long (val_args[i]);
-	      /* Don't use printf_filtered because of arbitrary limit.  */
-	      printf_unfiltered (current_substring, val);
+	      printf_filtered (current_substring, val);
 	      break;
 	    }
 #else
@@ -2013,8 +2000,7 @@ printf_command (arg, from_tty)
 	    {
 	      /* FIXME: there should be separate int_arg and long_arg.  */
 	      long val = value_as_long (val_args[i]);
-	      /* Don't use printf_filtered because of arbitrary limit.  */
-	      printf_unfiltered (current_substring, val);
+	      printf_filtered (current_substring, val);
 	      break;
 	    }
 	  default:
@@ -2024,8 +2010,7 @@ printf_command (arg, from_tty)
 	current_substring += strlen (current_substring) + 1;
       }
     /* Print the portion of the format string after the last argument.  */
-    /* It would be OK to use printf_filtered here.  */
-    printf (last_arg);
+    printf_filtered (last_arg);
   }
   do_cleanups (old_cleanups);
 }

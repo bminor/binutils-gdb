@@ -1148,7 +1148,7 @@ wrap_here(indent)
   if (wrap_buffer[0])
     {
       *wrap_pointer = '\0';
-      fputs  (wrap_buffer, gdb_stdout);
+      fputs_unfiltered (wrap_buffer, gdb_stdout);
     }
   wrap_pointer = wrap_buffer;
   wrap_buffer[0] = '\0';
@@ -1231,7 +1231,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
   if (stream != gdb_stdout
    || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
     {
-      fputs (linebuffer, stream);
+      fputs_unfiltered (linebuffer, stream);
       return;
     }
 
@@ -1255,7 +1255,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 	      if (wrap_column)
 		*wrap_pointer++ = '\t';
 	      else
-		putc ('\t', stream);
+		fputc_unfiltered ('\t', stream);
 	      /* Shifting right by 3 produces the number of tab stops
 	         we have already passed, and then adding one and
 		 shifting left 3 advances to the next tab stop.  */
@@ -1267,7 +1267,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 	      if (wrap_column)
 		*wrap_pointer++ = *lineptr;
 	      else
-	        putc (*lineptr, stream);
+	        fputc_unfiltered (*lineptr, stream);
 	      chars_printed++;
 	      lineptr++;
 	    }
@@ -1282,7 +1282,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 		 if chars_per_line is right, we probably just overflowed
 		 anyway; if it's wrong, let us keep going.  */
 	      if (wrap_column)
-		putc ('\n', stream);
+		fputc_unfiltered ('\n', stream);
 
 	      /* Possible new page.  */
 	      if (lines_printed >= lines_per_page - 1)
@@ -1291,9 +1291,9 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 	      /* Now output indentation and wrapped string */
 	      if (wrap_column)
 		{
-		  fputs (wrap_indent, stream);
-		  *wrap_pointer = '\0';		/* Null-terminate saved stuff */
-		  fputs (wrap_buffer, stream);	/* and eject it */
+		  fputs_unfiltered (wrap_indent, stream);
+		  *wrap_pointer = '\0';	/* Null-terminate saved stuff */
+		  fputs_unfiltered (wrap_buffer, stream); /* and eject it */
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -1314,7 +1314,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 	  chars_printed = 0;
 	  wrap_here ((char *)0);  /* Spit out chars, cancel further wraps */
 	  lines_printed++;
-	  putc ('\n', stream);
+	  fputc_unfiltered ('\n', stream);
 	  lineptr++;
 	}
     }
@@ -1328,24 +1328,15 @@ fputs_filtered (linebuffer, stream)
   fputs_maybe_filtered (linebuffer, stream, 1);
 }
 
+#ifndef FPUTS_UNFILTERED_OVERRIDE
 void
 fputs_unfiltered (linebuffer, stream)
      const char *linebuffer;
      FILE *stream;
 {
-#if 0
-
-  /* This gets the wrap_buffer buffering wrong when called from
-     gdb_readline (GDB was sometimes failing to print the prompt
-     before reading input).  Even at other times, it seems kind of
-     misguided, especially now that printf_unfiltered doesn't use
-     printf_maybe_filtered.  */
-
-  fputs_maybe_filtered (linebuffer, stream, 0);
-#else
   fputs (linebuffer, stream);
-#endif
 }
+#endif /* FPUTS_UNFILTERED_OVERRIDE */
 
 void
 putc_unfiltered (c)
@@ -1372,27 +1363,16 @@ fputc_unfiltered (c, stream)
 /* Print a variable number of ARGS using format FORMAT.  If this
    information is going to put the amount written (since the last call
    to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
-   print out a pause message and do a gdb_readline to get the users
-   permision to continue.
+   call prompt_for_continue to get the users permision to continue.
 
    Unlike fprintf, this function does not return a value.
 
    We implement three variants, vfprintf (takes a vararg list and stream),
    fprintf (takes a stream to write on), and printf (the usual).
 
-   Note that this routine has a restriction that the length of the
-   final output line must be less than 255 characters *or* it must be
-   less than twice the size of the format string.  This is a very
-   arbitrary restriction, but it is an internal restriction, so I'll
-   put it in.  This means that the %s format specifier is almost
-   useless; unless the caller can GUARANTEE that the string is short
-   enough, fputs_filtered should be used instead.
-
    Note also that a longjmp to top level may occur in this routine
    (since prompt_for_continue may do so) so this routine should not be
    called when cleanups are not in place.  */
-
-#define	MIN_LINEBUF	255
 
 static void
 vfprintf_maybe_filtered (stream, format, args, filter)
@@ -1401,23 +1381,15 @@ vfprintf_maybe_filtered (stream, format, args, filter)
      va_list args;
      int filter;
 {
-  char line_buf[MIN_LINEBUF+10];
-  char *linebuffer = line_buf;
-  int format_length;
+  char *linebuffer;
+  struct cleanup *old_cleanups;
 
-  format_length = strlen (format);
-
-  /* Reallocate buffer to a larger size if this is necessary.  */
-  if (format_length * 2 > MIN_LINEBUF)
-    {
-      linebuffer = alloca (10 + format_length * 2);
-    }
-
-  /* This won't blow up if the restrictions described above are
-     followed.   */
-  vsprintf (linebuffer, format, args);
-
+  vasprintf (&linebuffer, format, args);
+  if (linebuffer == NULL)
+    fatal ("virtual memory exhausted.");
+  old_cleanups = make_cleanup (free, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
+  do_cleanups (old_cleanups);
 }
 
 
@@ -1436,7 +1408,15 @@ vfprintf_unfiltered (stream, format, args)
      char *format;
      va_list args;
 {
-  vfprintf (stream, format, args);
+  char *linebuffer;
+  struct cleanup *old_cleanups;
+
+  vasprintf (&linebuffer, format, args);
+  if (linebuffer == NULL)
+    fatal ("virtual memory exhausted.");
+  old_cleanups = make_cleanup (free, linebuffer);
+  fputs_unfiltered (linebuffer, stream);
+  do_cleanups (old_cleanups);
 }
 
 void
@@ -1452,7 +1432,7 @@ vprintf_unfiltered (format, args)
      char *format;
      va_list args;
 {
-  vfprintf (gdb_stdout, format, args);
+  vfprintf_unfiltered (gdb_stdout, format, args);
 }
 
 /* VARARGS */
@@ -1468,8 +1448,6 @@ fprintf_filtered (va_alist)
   stream = va_arg (args, FILE *);
   format = va_arg (args, char *);
 
-  /* This won't blow up if the restrictions described above are
-     followed.   */
   vfprintf_filtered (stream, format, args);
   va_end (args);
 }
@@ -1487,13 +1465,11 @@ fprintf_unfiltered (va_alist)
   stream = va_arg (args, FILE *);
   format = va_arg (args, char *);
 
-  /* This won't blow up if the restrictions described above are
-     followed.   */
   vfprintf_unfiltered (stream, format, args);
   va_end (args);
 }
 
-/* Like fprintf_filtered, but prints it's result indent.
+/* Like fprintf_filtered, but prints its result indented.
    Called as fprintfi_filtered (spaces, stream, format, ...);  */
 
 /* VARARGS */
@@ -1512,8 +1488,6 @@ fprintfi_filtered (va_alist)
   format = va_arg (args, char *);
   print_spaces_filtered (spaces, stream);
 
-  /* This won't blow up if the restrictions described above are
-     followed.   */
   vfprintf_filtered (stream, format, args);
   va_end (args);
 }

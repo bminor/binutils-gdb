@@ -39,13 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 # define NORETURN /**/
 #endif
 
-/* Large alloca's fail because the attempt to increase the stack limit in
-   main() fails because shared libraries are allocated just below the initial
-   stack limit.  The SunOS kernel will not allow the stack to grow into
-   the area occupied by the shared libraries.  Sun knows about this bug
-   but has no obvious fix for it.  */
-#define BROKEN_LARGE_ALLOCA
-
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
    for now you have to specify some parameters that determine how gdb places
    the mappings in it's address space.  See the comments in map_to_address()

@@ -20,10 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
 /* Enable use of alternate code for Sun's format of core dump file.  */
 
 #define NEW_SUN_CORE

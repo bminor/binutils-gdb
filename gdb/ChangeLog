@@ -1,4 +1,34 @@
+Sat May 14 09:11:44 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* source.c (find_source_lines): Always use code that was #ifdef
+	BROKEN_LARGE_ALLOCA.  Do the cleanup before returning, rather than
+	leaving it on the chain.  Reindent much of this function.
+	* config/sparc/{xm-sun4sol2.h,xm-sun4os4.h},
+	config/i386/{xm-sun386.h,xm-i386m3.h,xm-i386mach.h},
+	config/m68k/{sun3os4.h,xm-news.h,xm-hp300hpux.h},
+	config/ns32k/xm-ns32km3.h: Remove all references to
+	BROKEN_LARGE_ALLOCA; with the above change it is no longer needed.
+	* main.c, fork-child.c, many config files: Remove all
+	SET_STACK_LIMIT_HUGE code; with the above changes it should no
+	longer be needed.
+
+	* symtab.c (lookup_partial_symbol): Use if and abort, not assert.
+	This avoids __eprintf troubles.
+
 Fri May 13 08:10:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c (main): Surround in #ifndef MAIN_OVERRIDE.  Move
+	initialization code which needs to be called even if we bypass the
+	command line stuff into gdb_init.
+	* utils.c (fputs_unfiltered): Surround in #ifndef
+	FPUTS_UNFILTERED_OVERRIDE.
+	* Makefile.in (libgdb.a): New target.
+
+	* utils.c: Rearrange I/O stuff a bit so that all output goes
+	through fputs_unfiltered.  Use vasprintf; removes arbitrary limit
+	which made %s not work with arbitrarily large strings.
+	* printcmd.c (printf_command): Use printf_filtered, not
+	printf_unfiltered and printf, now that arbitrary limit is gone.
 
 	gcc -Wall lint:
 	* breakpoint.c (watchpoint_check): Remove unused variable b.

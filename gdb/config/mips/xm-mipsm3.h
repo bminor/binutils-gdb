@@ -23,10 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 #endif
 
-/* Get rid of any system-imposed stack limit if possible */
-
-#define	SET_STACK_LIMIT_HUGE
-
 #define KERNEL_U_ADDR 0 /* Not needed. */
 
 /* Only used for core files on DECstations. */

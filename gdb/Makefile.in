@@ -436,16 +436,20 @@ TARFILES = $(SFILES) $(HFILES_NO_SRCDIR) $(HFILES_WITH_SRCDIR) \
 	$(ALLPARAM) $(INFOFILES) $(POSSLIBS) $(REMOTE_EXAMPLES)
 
 
-OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
+COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
-	utils.o expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
+	expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	objfiles.o minsyms.o maint.o demangle.o dbxread.o coffread.o elfread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
 	serial.o mdebugread.o os9kread.o annotate.o
+
+OBS = $(COMMON_OBS) main.o utils.o
+
+LIBGDB_OBS = $(COMMON_OBS) libmain.o libutils.o
 
 TSOBS = inflow.o
 
@@ -552,6 +556,19 @@ gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
 	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
+
+libgdb.a: $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+	rm -f libgdb.a
+	$(AR) $(AR_FLAGS) libgdb.a $(LIBGDB_OBS) $(TSOBS) $(ADD_FILES) init.o
+	$(RANLIB) libgdb.a
+
+libmain.o: main.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/main.c -DMAIN_OVERRIDE \
+	  -o libmain.o
+
+libutils.o: utils.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/utils.c  -o libutils.o \
+	  -DFPUTS_UNFILTERED_OVERRIDE
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) $(BFD_CFLAGS) -DHOST_SYS=SUN4_SYS

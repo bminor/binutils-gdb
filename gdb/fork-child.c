@@ -30,13 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <signal.h>
 
-#ifdef SET_STACK_LIMIT_HUGE
-#include <sys/time.h>
-#include <sys/resource.h>
-
-extern int original_stack_limit;
-#endif /* SET_STACK_LIMIT_HUGE */
-
 extern char **environ;
 
 #ifndef SHELL_FILE
@@ -199,17 +192,6 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
       debug_setpgrp = gdb_setpgid ();
       if (debug_setpgrp == -1)
 	 perror("setpgrp failed in child");
-
-#ifdef SET_STACK_LIMIT_HUGE
-      /* Reset the stack limit back to what it was.  */
-      {
-	struct rlimit rlim;
-
-	getrlimit (RLIMIT_STACK, &rlim);
-	rlim.rlim_cur = original_stack_limit;
-	setrlimit (RLIMIT_STACK, &rlim);
-      }
-#endif /* SET_STACK_LIMIT_HUGE */
 
       /* Ask the tty subsystem to switch to the one we specified earlier
 	 (or to share the current terminal, if none was specified).  */

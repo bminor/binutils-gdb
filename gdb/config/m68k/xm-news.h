@@ -25,10 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_WAIT_STRUCT
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
 /* We can't use "isatty" or "fileno" on this machine.  This isn't good,
    but it will have to do.  */
 #define ISATTY(FP)	((FP) == stdin || (FP) == stdout)
@@ -47,9 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	/*fp0-fp7:*/19,22,25,28,31,34,37,40, /*fpc:*/16,17,18 }; \
 	addr = blockend + 4 * offsets[regno]; \
 }
-
-/* NewsOS 3 apparently dies on large alloca's -- roland@ai.mit.edu.  */
-#define	BROKEN_LARGE_ALLOCA
 
 /* NewsOS 3.3 does not define errno in <errno.h>.  */
 extern int errno;

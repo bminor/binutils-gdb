@@ -25,10 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_WAIT_STRUCT
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
 /* We must fetch all the regs before storing, since we store all at once.  */

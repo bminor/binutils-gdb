@@ -45,10 +45,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 # define F_OK 0
 #endif
 
-/* Get rid of any system-imposed stack limit if possible */
-
-#define	SET_STACK_LIMIT_HUGE
-
 /* System doesn't provide siginterrupt().  */
 #define	NO_SIGINTERRUPT
 

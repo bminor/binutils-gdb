@@ -36,5 +36,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #  define SEEK_CUR    1		/* Set file pointer to current plus "offset" */
 #  define SEEK_END    2		/* Set file pointer to EOF plus "offset" */
 #endif /* SEEK_SET */
-
-#define SET_STACK_LIMIT_HUGE

@@ -24,12 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef	INT_MIN
 #define	INT_MIN		0x80000000
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
-#define BROKEN_LARGE_ALLOCA
-
 /* Do implement the attach and detach commands.  */
 #define ATTACH_DETACH	1
 

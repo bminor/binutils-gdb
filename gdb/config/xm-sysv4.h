@@ -31,10 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define USG
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-/* #define SET_STACK_LIMIT_HUGE */
-
 /* Use setpgid(0,0) to run inferior in a separate process group */
 
 #define NEED_POSIX_SETPGID

@@ -19,10 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
