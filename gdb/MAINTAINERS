@@ -101,7 +101,7 @@ mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 Misc:
 
 Web pages.		Jim Kingdon		kingdon@redhat.com
-			(but apparently anyone can tweek stuff?)
+			(anyone can edit; kingdon is just lead maintainer)
 Makefile.in, configure*	ALL
 
 
