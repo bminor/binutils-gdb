@@ -54,18 +54,17 @@ extern int h8300hmode, h8300smode;
 #define IS_MOVK_R5(x) (x==0x7905)
 #define IS_SUB_R5SP(x) (x==0x1957)
 
-
 /* The register names change depending on whether the h8300h processor
    type is selected. */
 
 static char *original_register_names[] = REGISTER_NAMES;
 
-static char *h8300h_register_names[] =
-{"er0", "er1", "er2", "er3", "er4", "er5", "er6",
- "sp", "ccr","pc", "cycles", "exr", "tick", "inst"};
+static char *h8300h_register_names[] = {
+  "er0", "er1", "er2", "er3", "er4", "er5", "er6",
+  "sp", "ccr", "pc", "cycles", "exr", "tick", "inst"
+};
 
 char **h8300_register_names = original_register_names;
-
 
 /* Local function declarations.  */
 
@@ -766,7 +765,6 @@ h8300s_command (char *args, int from_tty)
   set_register_names ();
 }
 
-
 static void
 set_machine (char *args, int from_tty)
 {
@@ -824,8 +822,6 @@ _initialize_h8300m (void)
   specify_exec_file_hook (set_machine_hook);
 }
 
-
-
 void
 h8300_print_register_hook (int regno)
 {
@@ -880,11 +876,11 @@ h8300_print_register_hook (int regno)
       frame_register_read (selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (EXR_REGNUM) - 1];
       printf_unfiltered ("\t");
-      printf_unfiltered ("T-%d - - - ",  (l & 0x80) != 0);
+      printf_unfiltered ("T-%d - - - ", (l & 0x80) != 0);
       printf_unfiltered ("I2-%d ", (l & 4) != 0);
       printf_unfiltered ("I1-%d ", (l & 2) != 0);
       printf_unfiltered ("I0-%d", (l & 1) != 0);
-     }
+    }
 }
 
 void

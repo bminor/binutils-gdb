@@ -1,3 +1,7 @@
+2002-05-20  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* h8300-tdep.c: Fix formatting.
+
 2002-05-20  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (rs6000_do_registers_info): Simplify code for
