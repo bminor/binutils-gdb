@@ -1,3 +1,12 @@
+2004-08-30  Nathanael Nerode  <neroden@gcc.gnu.org>
+
+	* configure.in: Autoupdate to autoconf 2.59.
+	* aclocal.m4: Rebuild with aclocal 1.4p6.
+	* configure: Rebuild with autoconf 2.59.
+	* Makefile.in: Rebuild with automake 1.4p6 (picking up
+	bfd changes for autoconf 2.59 on the way).
+	* config.in: Rebuild with autoheader 2.59.
+
 2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* frv-desc.[ch], frv-opc.[ch]: Regenerated.
