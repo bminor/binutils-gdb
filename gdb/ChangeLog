@@ -5,7 +5,7 @@
 	* gdb-events.c: Regenerated.
 	* gdb-events.h: Regenerated.
 
-2002-07-19  Keith Seitz  <keiths@redhat.com>
+2002-07-22  Keith Seitz  <keiths@redhat.com>
 
 	* valops.c (value_assign): Add register_update event notification
 	for lval_register and lval_reg_frame_relative.
