@@ -312,7 +312,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define w_mode 3  /* word operand */
 #define d_mode 4  /* double word operand  */
 #define q_mode 5  /* quad word operand */
-#define x_mode 6
+#define x_mode 6  /* 80 bit float operand */
 #define m_mode 7  /* d_mode in 32bit, q_mode in 64bit mode.  */
 #define cond_jump_mode 8
 #define loop_jcxz_mode 9
@@ -1881,6 +1881,7 @@ prefix_name (int pref, int sizeflag)
 
 static char op1out[100], op2out[100], op3out[100];
 static int op_ad, op_index[3];
+static int two_source_ops;
 static bfd_vma op_address[3];
 static bfd_vma op_riprel[3];
 static bfd_vma start_pc;
@@ -1932,7 +1933,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
 {
   const struct dis386 *dp;
   int i;
-  int two_source_ops;
   char *first, *second, *third;
   int needcomma;
   unsigned char uses_SSE_prefix;
@@ -2364,7 +2364,7 @@ static const char *float_mem[] = {
   "fdivr{l||l|}",
   /* dd */
   "fld{l||l|}",
-  "fisttpll",
+  "fisttp{ll||ll|}",
   "fst{l||l|}",
   "fstp{l||l|}",
   "frstor",
@@ -2388,7 +2388,82 @@ static const char *float_mem[] = {
   "fbld",
   "fild{ll||ll|}",
   "fbstp",
-  "fistpll",
+  "fistp{ll||ll|}",
+};
+
+static const unsigned char float_mem_mode[] = {
+  /* d8 */
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  /* d9 */
+  d_mode,
+  0,
+  d_mode,
+  d_mode,
+  0,
+  w_mode,
+  0,
+  w_mode,
+  /* da */
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  /* db */
+  d_mode,
+  d_mode,
+  d_mode,
+  d_mode,
+  0,
+  x_mode,
+  0,
+  x_mode,
+  /* dc */
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  /* dd */
+  q_mode,
+  q_mode,
+  q_mode,
+  q_mode,
+  0,
+  0,
+  0,
+  w_mode,
+  /* de */
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  /* df */
+  w_mode,
+  w_mode,
+  w_mode,
+  w_mode,
+  x_mode,
+  q_mode,
+  x_mode,
+  q_mode
 };
 
 #define ST OP_ST, 0
@@ -2567,14 +2642,11 @@ dofloat (int sizeflag)
 
   if (mod != 3)
     {
-      putop (float_mem[(floatop - 0xd8) * 8 + reg], sizeflag);
+      int fp_indx = (floatop - 0xd8) * 8 + reg;
+
+      putop (float_mem[fp_indx], sizeflag);
       obufp = op1out;
-      if (floatop == 0xdb)
-	OP_E (x_mode, sizeflag);
-      else if (floatop == 0xdd)
-	OP_E (d_mode, sizeflag);
-      else
-	OP_E (v_mode, sizeflag);
+      OP_E (float_mem_mode[fp_indx], sizeflag);
       return;
     }
   /* Skip mod/rm byte.  */
@@ -3135,9 +3207,15 @@ OP_E (int bytemode, int sizeflag)
 		  oappend ("WORD PTR ");
 		  break;
 		case v_mode:
-		  oappend ("DWORD PTR ");
+		  if (sizeflag & DFLAG)
+		    oappend ("DWORD PTR ");
+		  else
+		    oappend ("WORD PTR ");
 		  break;
 		case d_mode:
+		  oappend ("DWORD PTR ");
+		  break;
+		case q_mode:
 		  oappend ("QWORD PTR ");
 		  break;
 		case m_mode:
@@ -3776,11 +3854,8 @@ static void
 ptr_reg (int code, int sizeflag)
 {
   const char *s;
-  if (intel_syntax)
-    oappend ("[");
-  else
-    oappend ("(");
 
+  *obufp++ = open_char;
   USED_REX (REX_MODE64);
   if (rex & REX_MODE64)
     {
@@ -3794,10 +3869,8 @@ ptr_reg (int code, int sizeflag)
   else
     s = names16[code - eAX_reg];
   oappend (s);
-  if (intel_syntax)
-    oappend ("]");
-  else
-    oappend (")");
+  *obufp++ = close_char;
+  *obufp = 0;
 }
 
 static void
@@ -4162,21 +4235,29 @@ SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
 static void
 PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 {
-  if (mod == 3 && reg == 1)
+  if (mod == 3 && reg == 1 && rm <= 1)
     {
-      char *p = obuf + strlen (obuf);
-
       /* Override "sidt".  */
+      char *p = obuf + strlen (obuf) - 4;
+
+      /* We might have a suffix.  */
+      if (*p == 'i')
+	--p;
+
       if (rm)
 	{
 	  /* mwait %eax,%ecx  */
-	  strcpy (p - 4, "mwait   %eax,%ecx");
+	  strcpy (p, "mwait");
 	}
       else
 	{
 	  /* monitor %eax,%ecx,%edx"  */
-	  strcpy (p - 4, "monitor %eax,%ecx,%edx");
+	  strcpy (p, "monitor");
+	  strcpy (op3out, names32[2]);
 	}
+      strcpy (op1out, names32[0]);
+      strcpy (op2out, names32[1]);
+      two_source_ops = 1;
 
       codep++;
     }

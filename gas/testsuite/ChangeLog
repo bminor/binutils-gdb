@@ -1,3 +1,8 @@
+2004-06-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/prescott.s: Remove fisttpd and fisttpq.
+	* gas/i386/prescott.d: Update.
+
 2004-06-08  Jakub Jelinek  <jakub@redhat.com>
 
 	* gas/ia64/dv-raw-err.s: Add some new postinc tests.

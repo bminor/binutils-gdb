@@ -1,3 +1,15 @@
+2004-06-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (x_mode): Comment.
+	(two_source_ops): File scope.
+	(float_mem): Correct fisttpll and fistpll.
+	(float_mem_mode): New table.
+	(dofloat): Use it.
+	(OP_E): Correct intel mode PTR output.
+	(ptr_reg): Use open_char and close_char.
+	(PNI_Fixup): Handle possible suffix on sidt.  Use op1out etc. for
+	operands.  Set two_source_ops.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* arc-ext.c (build_ARC_extmap): Use bfd_get_section_size
