@@ -1966,32 +1966,33 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	       (because that's how they were bootstrapped originally),
 	       but they are always PowerPC architecture.  */
 	    arch = bfd_arch_powerpc;
-	    machine = 0;
+	    machine = bfd_mach_ppc;
+#else
+#ifdef XCOFF64
+	    arch = bfd_arch_powerpc;
+	    machine = bfd_mach_ppc_620;
 #else
 	    arch = bfd_arch_rs6000;
-#ifdef XCOFF64
-	    machine = 620;
-#else
-	    machine = 6000;
+	    machine = bfd_mach_rs6k;
 #endif
 #endif /* POWERMAC */
 	    break;
 
 	  case 1:
 	    arch = bfd_arch_powerpc;
-	    machine = 601;
+	    machine = bfd_mach_ppc_601;
 	    break;
 	  case 2: /* 64 bit PowerPC */
 	    arch = bfd_arch_powerpc;
-	    machine = 620;
+	    machine = bfd_mach_ppc_620;
 	    break;
 	  case 3:
 	    arch = bfd_arch_powerpc;
-	    machine = 0;
+	    machine = bfd_mach_ppc;
 	    break;
 	  case 4:
 	    arch = bfd_arch_rs6000;
-	    machine = 6000;
+	    machine = bfd_mach_rs6k;
 	    break;
 	  }
       }
@@ -2698,7 +2699,8 @@ coff_set_flags (abfd, magicp, flagsp)
     case bfd_arch_powerpc:
 #endif
 #ifdef XCOFF64
-      if (bfd_get_mach (abfd) == 620 && !strncmp (abfd->xvec->name,"aix", 3))
+      if (bfd_get_mach (abfd) == bfd_mach_ppc_620
+	  && !strncmp (abfd->xvec->name,"aix", 3))
 	*magicp = U803XTOCMAGIC; 
       else
 #else

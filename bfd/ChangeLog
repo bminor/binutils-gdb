@@ -1,3 +1,20 @@
+2000-06-16  Nicholas Duffek  <nsd@redhat.com>
+
+	* archures.c (enum bfd_architecture): #define constants for
+	PowerPc and RS6000 machine numbers.
+	* bfd-in2.h: Regenerate.
+	* coffcode.h (coff_set_arch_mach_hook): #ifdef XCOFF64, set arch
+	to bfd_arch_powerpc instead of bfd_arch_rs6000.  Refer to PowerPc
+	and RS6000 machine numbers using #defined constants from
+	archures.c.
+	* cpu-powerpc.c (arch_info_struct): Refer to PowerPc and RS6000
+	machine numbers using #defined constants from archures.c.  Add
+	entries for EC603e, 630, A35, RS64II, RS64III, 7400.  Specify
+	64-bit words in 620 entry.
+	* cpu-rs6000.c (arch_info_struct): Create with entries for RS1,
+	RSC, and RS2.
+	(bfd_rs6000_arch): Change default machine to 0 (bfd_mach_rs6k).
+
 2000-06-16  Nicholas Duffek  <nsd@cygnus.com>
 
 	* coffcode.h (coff_mkobject_hook): Set xcoff_tdata.xcoff64.
