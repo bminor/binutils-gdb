@@ -1,3 +1,10 @@
+Wed Feb  1 15:44:11 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-valprint.c (chill_val_print):  On TYPE_CODE_STRING, don't
+	print address for non-'s'-formats.
+	* ch-typeprint.c, ch-valprint.c:  Use chill_varying_type instead
+	of chill_is_varying_struct.
+
 Wed Feb  1 13:27:33 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	gcc -Wall lint.

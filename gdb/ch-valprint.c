@@ -305,11 +305,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       break;
 
     case TYPE_CODE_STRING:
-      if (format && format != 's')
-	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
-	  break;
-	}
       i = TYPE_LENGTH (type);
       LA_PRINT_STRING (stream, valaddr, i, 0);
       /* Return number of characters printed, plus one for the terminating
@@ -371,7 +366,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       break;
 
     case TYPE_CODE_STRUCT:
-      if (chill_is_varying_struct (type))
+      if (chill_varying_type (type))
 	{
 	  struct type *inner = TYPE_FIELD_TYPE (type, 1);
 	  long length = unpack_long (TYPE_FIELD_TYPE (type, 0), valaddr);

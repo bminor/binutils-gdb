@@ -175,7 +175,7 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_STRUCT:
-	if (chill_is_varying_struct (type))
+	if (chill_varying_type (type))
 	  {
 	    chill_type_print_base (TYPE_FIELD_TYPE (type, 1),
 				   stream, show, level);
