@@ -1,3 +1,12 @@
+2004-04-02  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (safe_frame_unwind_memory): New function.
+	* frame.h (safe_frame_unwind_memory): Declare.  Update description
+	of /safe_/ methods.
+	* tramp-frame.c (tramp_frame_start): Re-order parmeters, add
+	"next_frame".  Use safe_frame_unwind_memory.
+	(tramp_frame_sniffer): Update call to tramp_frame_start.
+
 2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (dwarf2_objfile_data_key): New.

@@ -2270,6 +2270,14 @@ get_frame_memory_unsigned (struct frame_info *this_frame, CORE_ADDR addr,
   return read_memory_unsigned_integer (addr, len);
 }
 
+int
+safe_frame_unwind_memory (struct frame_info *this_frame,
+			  CORE_ADDR addr, void *buf, int len)
+{
+  /* NOTE: read_memory_nobpt returns zero on success!  */
+  return !read_memory_nobpt (addr, buf, len);
+}
+
 /* Architecture method.  */
 
 struct gdbarch *

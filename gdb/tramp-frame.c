@@ -85,7 +85,8 @@ tramp_frame_prev_register (struct frame_info *next_frame,
 }
 
 static CORE_ADDR
-tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
+tramp_frame_start (const struct tramp_frame *tramp,
+		   struct frame_info *next_frame, CORE_ADDR pc)
 {
   int ti;
   /* Search through the trampoline for one that matches the
@@ -100,8 +101,9 @@ tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
 	  ULONGEST insn;
 	  if (tramp->insn[i] == TRAMP_SENTINEL_INSN)
 	    return func;
-	  if (target_read_memory (func + i * tramp->insn_size, buf,
-				  tramp->insn_size) != 0)
+	  if (!safe_frame_unwind_memory (next_frame,
+					 func + i * tramp->insn_size,
+					 buf, tramp->insn_size))
 	    break;
 	  insn = extract_unsigned_integer (buf, tramp->insn_size);
 	  if (tramp->insn[i] != insn)
@@ -133,7 +135,7 @@ tramp_frame_sniffer (const struct frame_unwind *self,
   if (find_pc_section (pc) != NULL)
     return 0;
   /* Finally, check that the trampoline matches at PC.  */
-  func = tramp_frame_start (pc, tramp);
+  func = tramp_frame_start (tramp, next_frame, pc);
   if (func == 0)
     return 0;
   tramp_cache = FRAME_OBSTACK_ZALLOC (struct tramp_frame_cache);

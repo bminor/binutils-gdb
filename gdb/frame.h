@@ -40,8 +40,8 @@
    strongly hinting at its unsafeness)
 
    safe_....(): Safer version of various functions, doesn't throw an
-   error (leave this for later?).  Returns non-zero if the fetch
-   succeeds.   Return a freshly allocated error message?
+   error (leave this for later?).  Returns non-zero / non-NULL if the
+   request succeeds, zero / NULL otherwize.
 
    Suffixes:
 
@@ -460,6 +460,11 @@ extern LONGEST get_frame_memory_signed (struct frame_info *this_frame,
 					CORE_ADDR memaddr, int len);
 extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
 					   CORE_ADDR memaddr, int len);
+
+/* Same as above, but return non-zero when the entire memory read
+   succeeds, zero otherwize.  */
+extern int safe_frame_unwind_memory (struct frame_info *this_frame,
+				     CORE_ADDR addr, void *buf, int len);
 
 /* Return this frame's architecture.  */
 
