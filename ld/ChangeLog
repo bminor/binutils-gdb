@@ -1,3 +1,15 @@
+start-sanitize-v850
+Fri Dec 13 14:08:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/v850.sc: Make sure __{e,g}p start relative to the
+	{s,t}data sections.  Do not emit any linker generated symbols if
+	-r.  Use {TEXT,{Z,S,T}DATA}_START_ADDR variables to initialize
+	where the different sections go.  Change some whitespace.
+
+	* emulparams/v850.sh ({TEXT,{Z,S,T}DATA}_START_ADDR): Define
+	appropriately.  Remove crud not used anymore.	
+
+end-sanitize-v850
 Fri Dec 13 10:19:57 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (emn10200.c): Add dependencies.
@@ -31,8 +43,14 @@ Mon Dec  2 11:43:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Nov 27 03:22:05 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
-	* scripttempl/elf.sc: Add the remaining DWARF sections.
-	* scripttempl/{elfd10v.sc,elfmips.sc,elfppc.sc,v850.sc}: Likewise.
+	* scripttempl/elf{,mips,ppc}.sc: Add the remaining DWARF sections.
+
+start-sanitize-d10v
+	* scripttempl/elfd10v.sc: Likewise.
+end-sanitize-d10v
+start-sanitize-v850
+	* scripttempl/v850.sc: Likewise.
+end-sanitize-v850
 
 Tue Nov 26 16:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
