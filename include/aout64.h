@@ -1,8 +1,9 @@
+/* `a.out' object-file definitions, including extensions to 64-bit fields */
+
 #ifndef __A_OUT_64_H__
 #define __A_OUT_64_H__
 
-
-/* This is the layout on disk of the 64 bit exec header. */
+/* This is the layout on disk of the 32-bit or 64-bit exec header. */
 
 struct external_exec 
 {
@@ -16,61 +17,7 @@ struct external_exec
   bfd_byte e_drsize[BYTES_IN_WORD]; /* length of data relocation info 	*/
 };
 
-
 #define	EXEC_BYTES_SIZE	(4 + BYTES_IN_WORD * 7)
-
-/* This is the layout in memory of a "struct exec" while we process it.  */
-struct internal_exec
-  {
-    long a_info;		/* Magic number and flags packed		*/
-    bfd_vma a_text;		/* length of text, in bytes 			*/
-    bfd_vma a_data;		/* length of data, in bytes 			*/
-    bfd_vma a_bss;		/* length of uninitialized data area for file	*/
-    bfd_vma a_syms;		/* length of symbol table data in file		*/
-    bfd_vma a_entry;		/* start address 				*/
-    bfd_vma a_trsize;		/* length of relocation info for text, in bytes */
-    bfd_vma a_drsize;		/* length of relocation info for data, in bytes */
-  };
-
-
-/* Magic number is written 
-< MSB                >
-31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
-< FLAGS             > <    MACHINE TYPE     >	<  MAGIC  				     >
-*/
-enum machine_type {
-  M_UNKNOWN = 0,
-  M_68010 = 1,
-  M_68020 = 2,
-  M_SPARC = 3,
-  /* skip a bunch so we dont run into any of suns numbers */
-  M_386 = 100,
-  M_29K = 101,
-  M_NEWONE = 200,
-  M_NEWTWO = 201,
-
-};
-
-#define N_DYNAMIC(exec) ((exec).a_info & 0x8000000)
-
-#define N_MAGIC(exec) ((exec).a_info & 0xffff)
-#define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
-#define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
-#define N_SET_INFO(exec, magic, type, flags) \
-((exec).a_info = ((magic) & 0xffff) \
- | (((int)(type) & 0xff) << 16) \
- | (((flags) & 0xff) << 24))
-
-#define N_SET_MAGIC(exec, magic) \
-((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
-
-#define N_SET_MACHTYPE(exec, machtype) \
-((exec).a_info = \
- ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
-
-#define N_SET_FLAGS(exec, flags) \
-((exec).a_info = \
- ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
 
 /* By default, segment size is constant.  But on some machines, it can
    be a function of the a.out header (e.g. machine type).  */
@@ -131,58 +78,38 @@ enum machine_type {
 
 /* Symbols */
 struct external_nlist {
-  bfd_byte e_strx[BYTES_IN_WORD]; /* index into string table of symbol name 	*/
-  bfd_byte e_type[1];	       /* type of symbol				*/
-  bfd_byte e_other[1];	       /* misc info (usually empty)			*/
-  bfd_byte e_desc[2];	       /* description field				*/
-  bfd_byte e_value[BYTES_IN_WORD];/* value of symbol				*/
+  bfd_byte e_strx[BYTES_IN_WORD];	/* index into string table of name */
+  bfd_byte e_type[1];			/* type of symbol */
+  bfd_byte e_other[1];			/* misc info (usually empty) */
+  bfd_byte e_desc[2];			/* description field */
+  bfd_byte e_value[BYTES_IN_WORD];	/* value of symbol */
 };
 
-#define EXTERNAL_LIST_SIZE (BYTES_IN_WORD+4+BYTES_IN_WORD)
+#define EXTERNAL_NLIST_SIZE (BYTES_IN_WORD+4+BYTES_IN_WORD)
+
 struct internal_nlist {
-  char *strx;				/* index into string table of symbol name 	*/
-  uint8_type n_type;			/* type of symbol				*/
-  uint8_type n_other;			/* misc info (usually empty)			*/
-  uint16_type n_desc;		       	/* description field				*/
-  bfd_vma n_value;			/* value of symbol				*/
+  unsigned long n_strx;			/* index into string table of name */
+  unsigned char n_type;			/* type of symbol */
+  unsigned char n_other;		/* misc info (usually empty) */
+  unsigned short n_desc;		/* description field */
+  bfd_vma n_value;			/* value of symbol */
 };
 
-/* The n_type field is packed : 
+/* The n_type field is the symbol type, containing:  */
 
-  7 6 5 4 3 2 1 0
-                ^-	if set the symbol is externaly visible 
-		0 	local
-		1 	N_EXT external
-	  ^ ^ ^---- 	select which section the symbol belongs to
-	0 0 0 0 x	 N_UNDF, undefined
-	0 0 0 1	x	 N_ABS,  no section, base at 0
-	0 0 1 0	x  	 N_TEXT, text section
- 	0 0 1 1	x  	 N_DATA, data section	
-	0 1 0 0	x  	 N_BSS,  bss section
-	^----------     if set the symbol is a set element
-	1 0 1 0 x	 N_SETA	absolute set element symbol
-	1 0 1 1 x	 N_SETT text set element symbol
-	1 1 0 0 x	 N_SETD data set element symbol
-	1 1 0 1 x	 N_SETB bss set element symbol
-	1 1 1 0 x	 N_SETV pointer to set vector in data area
-        1 1 1 1 0 	 N_TYPE mask for all of the above
-
-  1 1 1 0 0 0 0 0	 N_STAB type is a stab
-*/
-
-#define N_UNDF	0			
-#define N_ABS 	2
-#define N_TEXT 	4
-#define N_DATA 	6
-#define N_BSS 	8
+#define N_UNDF	0	/* Undefined symbol */
+#define N_ABS 	2	/* Absolute symbol -- defined at particular addr */
+#define N_TEXT 	4	/* Text sym -- defined at offset in text seg */
+#define N_DATA 	6	/* Data sym -- defined at offset in data seg */
+#define N_BSS 	8	/* BSS  sym -- defined at offset in zero'd seg */
 #define	N_COMM	0x12	/* Common symbol (visible after shared lib dynlink) */
 #define N_FN	0x1f	/* File name of .o file */
-/* Note: N_EXT can only usefully be OR-ed with N_UNDF, N_ABS, N_TEXT,
+/* Note: N_EXT can only be usefully OR-ed with N_UNDF, N_ABS, N_TEXT,
    N_DATA, or N_BSS.  When the low-order bit of other types is set,
    (e.g. N_WARNING versus N_FN), they are two different types.  */
-#define N_EXT 	1
+#define N_EXT 	1	/* External symbol (as opposed to local-to-this-file) */
 #define N_TYPE  0x1e
-#define N_STAB 	0xe0
+#define N_STAB 	0xe0	/* If any of these bits are on, it's a debug symbol */
 
 #define N_INDR 0x0a
 
@@ -215,9 +142,9 @@ struct internal_nlist {
 /* Relocations 
 
   There	are two types of relocation flavours for a.out systems,
-  standard and extended. The standard form is used on systems where
-  the instruction has room for all the bits of an offset to the operand, whilst the
-  extended form is used when an address operand has to be split over n
+  standard and extended. The standard form is used on systems where the
+  instruction has room for all the bits of an offset to the operand, whilst
+  the extended form is used when an address operand has to be split over n
   instructions. Eg, on the 68k, each move instruction can reference
   the target with a displacement of 16 or 32 bits. On the sparc, move
   instructions use an offset of 14 bits, so the offset is stored in
@@ -303,15 +230,11 @@ struct reloc_ext_external {
 #define	RELOC_EXT_BITS_TYPE_LITTLE	0xF8
 #define	RELOC_EXT_BITS_TYPE_SH_LITTLE	3
 
-#define	RELOC_EXT_SIZE	(BYTES_IN_WORD + 3 + 1 + BYTES_IN_WORD)	/* Bytes per relocation entry */
+/* Bytes per relocation entry */
+#define	RELOC_EXT_SIZE	(BYTES_IN_WORD + 3 + 1 + BYTES_IN_WORD)
 
 enum reloc_type
 {
-
-
-
-
-
   /* simple relocations */
   RELOC_8,			/* data[0:7] = addend + sv 		*/
   RELOC_16,			/* data[0:15] = addend + sv 		*/
@@ -387,4 +310,4 @@ struct reloc_internal {
 
  */
 
-#endif				/* __A_OUT_GNU_H__ */
+#endif				/* __A_OUT_64_H__ */
