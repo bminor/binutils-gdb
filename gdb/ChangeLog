@@ -1,5 +1,9 @@
 2001-04-27  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbtypes.c (check_stub_method): Always initialize ``p''.
+
+2001-04-27  Andrew Cagney  <ac131313@redhat.com>
+
 	* configure.host: Delete romp host.
 	* TODO: Update.
 

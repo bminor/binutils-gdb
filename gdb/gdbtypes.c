@@ -1410,6 +1410,8 @@ check_stub_method (struct type *type, int method_id, int signature_id)
   /* Make sure we got back a function string that we can use.  */
   if (demangled_name)
     p = strchr (demangled_name, '(');
+  else
+    p = NULL;
 
   if (demangled_name == NULL || p == NULL)
     error ("Internal: Cannot demangle mangled name `%s'.", mangled_name);
