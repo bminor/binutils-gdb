@@ -1,4 +1,4 @@
-/* Assembler instructions for Motorolla's Mcore processor
+/* Assembler instructions for Motorola's Mcore processor
    Copyright (C) 1999 Free Software Foundation, Inc.
 
    

@@ -1,4 +1,4 @@
-/* BFD back-end for Motorolla MCore COFF/PE
+/* BFD back-end for Motorola MCore COFF/PE
    Copyright (C) 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
