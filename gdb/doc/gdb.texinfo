@@ -1862,7 +1862,10 @@ Status inquiries.
 
 List of commands:
 
-show -- Generic command for showing things set with "set"
+@c Line break in "show" line falsifies real output, but needed
+@c to fit in smallbook page size.
+show -- Generic command for showing things set
+ with "set"
 info -- Generic command for printing status
 
 Type "help" followed by command name for full 
@@ -3597,16 +3600,16 @@ they are assigned by @value{GDBN} to give you a way of designating stack
 frames in @value{GDBN} commands.
 
 @cindex frameless execution
-Some compilers allow functions to be compiled so that they operate
+Some compilers provide a way to compile functions so that they operate
 without stack frames.  (For example, the @code{@value{GCC}} option
 @samp{-fomit-frame-pointer} will generate functions without a frame.)
 This is occasionally done with heavily used library functions to save
-the frame setup time.  @value{GDBN} has limited facilities for dealing with
-these function invocations.  If the innermost function invocation has no
-stack frame, @value{GDBN} will nevertheless regard it as though it had a
-separate frame, which is numbered zero as usual, allowing correct
-tracing of the function call chain.  However, @value{GDBN} has no provision
-for frameless functions elsewhere in the stack.
+the frame setup time.  @value{GDBN} has limited facilities for dealing
+with these function invocations.  If the innermost function invocation
+has no stack frame, @value{GDBN} will nevertheless regard it as though
+it had a separate frame, which is numbered zero as usual, allowing
+correct tracing of the function call chain.  However, @value{GDBN} has
+no provision for frameless functions elsewhere in the stack.
 
 @node Backtrace
 @section Backtraces
@@ -5263,9 +5266,10 @@ you more information about the status of the floating point hardware.
 @table @code
 @item info float
 @kindex info float
-If available, provides hardware-dependent information about the floating
+Display hardware-dependent information about the floating
 point unit.  The exact contents and layout vary depending on the
-floating point chip.
+floating point chip; on some platforms, @samp{info float} is not
+available at all.
 @end table
 @c FIXME: this is a cop-out.  Try to get examples, explanations.  Only
 @c FIXME...supported currently on arm's and 386's.  Mark properly with
@@ -7072,9 +7076,9 @@ being read.  (The @code{set verbose} command can turn these pauses
 into messages if desired.  @xref{Messages/Warnings, ,Optional warnings
 and messages}.) 
 
-When the symbol table is stored in COFF format, @code{symbol-file} does
-read the symbol table data in full right away.  We have not implemented
-the two-stage strategy for COFF yet.
+We have not implemented the two-stage strategy for COFF yet.  When the
+symbol table is stored in COFF format, @code{symbol-file} reads the
+symbol table data in full right away.
 
 @item symbol-file @var{filename} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
 @itemx file @var{filename} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
@@ -8852,7 +8856,7 @@ make
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where GDB will run.
 
-Running @samp{configure @var{host}} followed by @code{make} builds the
+Running @samp{configure @var{host}} and then running @code{make} builds the
 @file{bfd}, @file{readline}, @file{mmalloc}, and @file{libiberty}
 libraries, then @code{gdb} itself.  The configured source files, and the
 binaries, are left in the corresponding source directories.
@@ -8969,9 +8973,9 @@ of information in the following pattern:
 @var{architecture}-@var{vendor}-@var{os}
 @end example
 
-For example, you can use the alias @code{sun4} as a @var{host} argument
-or in a @code{--target=@var{target}} option.  The equivalent full name
-is @samp{sparc-sun-sunos4}.
+For example, you can use the alias @code{sun4} as a @var{host} argument,
+or as the value for @var{target} in a @code{--target=@var{target}}
+option.  The equivalent full name is @samp{sparc-sun-sunos4}.
 
 The @code{configure} script accompanying GDB does not provide
 any query facility to list all supported host and target names or

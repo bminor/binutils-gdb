@@ -91,9 +91,9 @@ subroutines:
 @item set_debug_traps
 @kindex set_debug_traps
 @cindex remote serial stub, initialization
-This routine arranges to transfer control to @code{handle_exception}
-when your program stops.  You must call this subroutine explicitly near
-the beginning of your program.
+This routine arranges for @code{handle_exception} to run when your
+program stops.  You must call this subroutine explicitly near the
+beginning of your program.
 
 @item handle_exception
 @kindex handle_exception
@@ -191,8 +191,10 @@ steps.
 @enumerate
 @item
 Make sure you have the supporting low-level routines:
-@code{getDebugChar}, @code{putDebugChar}, @code{flush_i_cache},
-@code{memset}.
+@display
+@code{getDebugChar}, @code{putDebugChar},
+@code{flush_i_cache}, @code{memset}.
+@end display
 
 @item
 Insert these lines near the top of your program:
