@@ -1469,7 +1469,7 @@ static operator_rankT op_rank[] = {
   0,	/* O_symbol */
   0,	/* O_symbol_rva */
   0,	/* O_register */
-  0,	/* O_bit */
+  0,	/* O_big */
   9,	/* O_uminus */
   9,	/* O_bit_not */
   9,	/* O_logical_not */
@@ -1517,8 +1517,8 @@ static operator_rankT op_rank[] = {
    mode.  Also, MRI uses a different bit_not operator, and this fixes
    that as well.  */
 
-#define STANDARD_MUL_PRECEDENCE (7)
-#define MRI_MUL_PRECEDENCE (5)
+#define STANDARD_MUL_PRECEDENCE 8
+#define MRI_MUL_PRECEDENCE 6
 
 void
 expr_set_precedence ()

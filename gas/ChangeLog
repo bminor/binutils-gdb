@@ -1,3 +1,9 @@
+2000-11-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* expr.c (STANDARD_MUL_PRECEDENCE): Correct value.
+	(MRI_MUL_PRECEDENCE): Likewise.
+	(op_rank): Fix a comment typo.
+
 2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (build_indexed_byte): Print the offset in
