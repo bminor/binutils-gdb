@@ -1,3 +1,12 @@
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.texinfo (C@t{++}): Recommend DWARF 2, then stabs+.
+	(Variables): Recommend stabs+ and DWARF 2.
+	(C plus plus expressions): Correct info about
+	compiler versions, debug formats.
+	(Contributors): Change 'DWARF2' to 'DWARF 2'.
+	PR symtab/874.
+
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
