@@ -1,5 +1,17 @@
 Thu Apr 25 13:25:12 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* elf32-ppc.c (ppc_elf_create_linker_section): Add PLT case.
+	(ppc_elf_additional_program_headers): If .interp section, bump #
+	of program headers by 1.
+	(ppc_elf_adjust_dynamic_symbol): Flesh out support.
+	(ppc_elf_size_dynamic_sections): Add support for .plt section.
+	(ppc_elf_check_relocs): Print out filename in debug code.  Enable
+	PLT support.
+	(ppc_elf_finish_dynamic_symbol): Add support for PLT's, beef up
+	debug output.
+	(ppc_elf_relocate_section): If the output section isn't defined,
+	don't abort, just give an error message.
+
 	* elflink.c (_bfd_elf_create_dynamic_sections): If the section
 	being created is .sdata or .sdata2, don't make the symbol dynamic.
 
