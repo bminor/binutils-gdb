@@ -383,12 +383,6 @@ AC_CHECK_HEADERS(curses.h ncurses.h term.h)
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
-# remote-fileio.c needs st_blocks
-AC_CHECK_MEMBER(struct stat.st_blocks,
-		[AC_DEFINE(HAVE_STRUCT_STAT_ST_BLOCKS, 1,
-			   [Define if struct stat has st_blocks member.])],
-		[#include <sys/stat.h>])
-
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
