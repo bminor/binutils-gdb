@@ -77,6 +77,8 @@ obj-elf.c
 obj-elf.h
 obj-generic.c
 obj-generic.h
+obj-hp300.c
+obj-hp300.h
 obj-ieee.c
 obj-ieee.h
 obj-vms.c
@@ -91,6 +93,8 @@ tc-h8300.c
 tc-h8300.h
 tc-h8500.c
 tc-h8500.h
+tc-hppa.c
+tc-hppa.h
 tc-i386.c
 tc-i386.h
 tc-i860.c
@@ -118,11 +122,15 @@ tc-vax.c
 tc-vax.h
 tc-z8k.c
 tc-z8k.h
+te-386bsd.h
 te-dpx2.h
 te-generic.h
+te-hp300.h
+te-hppa.h
 te-i386aix.h
 te-ic960.h
 te-irix.h
+te-linux.h
 te-sco386.h
 te-sun3.h
 te-sysv32.h
