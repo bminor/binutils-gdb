@@ -467,9 +467,17 @@ void i386_validate_fix PARAMS ((struct fix *));
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
-#ifndef TE_PE
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
+
+/* ELF wants external syms kept, as does PE COFF.  */
+#ifdef TE_PE
+#define EXTERN_FORCE_RELOC				\
+  (OUTPUT_FLAVOR == bfd_target_elf_flavour		\
+   || OUTPUT_FLAVOR == bfd_target_coff_flavour)
+#else
+#define EXTERN_FORCE_RELOC				\
+  (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 #endif
 
 #define TC_FORCE_RELOCATION(FIX)	i386_force_relocation (FIX)

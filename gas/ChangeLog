@@ -1,3 +1,8 @@
+2002-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.h (EXTERN_FORCE_RELOC): Define.
+	(MD_APPLY_SYM_VALUE): Define for PE too.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
