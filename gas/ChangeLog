@@ -7,6 +7,56 @@ Mon Sep 19 12:12:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* as.h: Test HAVE_REMOVE, not HAVE_DELETE; define unlink to
 	remove, not delete.
 
+	* read.c (pseudo_set, case O_symbol): If
+	OBJ_COPY_SYMBOL_ATTRIBUTES is defined, invoke it.
+	[BFD_ASSEMBLER]: Copy BSF_FUNCTION setting too.
+	* config/obj-elf.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Define.
+
+	Wed Aug 10 19:15:30 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.h (DSG_S_C_UBITU, DST_K_VFLAGS_DSC, DST_K_TS_ATOM,
+	many others): new macros; values obtained from "DSTRECRDS.SDL".
+	* config/obj-vms.h (various): use them.
+	(USE_BITSTRING_DESCRIPTOR): new macro, for selecting bitfield
+	representation (only enum bitfields can avoid being bitstrings).
+	(bitfield_suffix, setup_basic_type): new routines.
+	(VMS_typedef_parse): use them.  Now recognize bitfields of all
+	integral types, not just type `int'.  Caveat:  the representation
+	used for bitfields still does not work for objects placed in
+	registers, and gcc's optimizer sometimes puts small structs there.
+
+	Tue Jun 14 17:31:44 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* read.c (s_text) [#if OBJ_VMS]: clear the IN_DEFAULT_SECTION
+	bit from const_flag.
+	* config/obj-vms.h (IN_DEFAULT_SECTION): define this macro.
+	(tc_frob_label): define this to call vms_check_for_special_label,
+	and declare the latter.
+	* config/obj-vms.c (vax_g_doubles): declare this file-scope
+	variable.
+	(const_flag): initialize to IN_DEFAULT_SECTION instead of 0.
+	(vms_check_for_special_label): new routine (tc_frob_label).
+	(VMS_TBT_Routine_End): don't bother checking for `gcc_compiled.'
+	and `gcc2_compiled.' labels; they won't reach here any more.
+	(VMS_typedef_parse) [case 'r']: for types `double' and `complex
+	double', use `vax_g_doubles' flag to select type of double.
+	(VMS_write_object_file) [traceback setup]: don't pass symbols
+	with the IN_DEFAULT_SECTION attribute to the TBT_Routine_Begin
+	and TBT_Routine_End functions.
+
+	Mon Jun  6 20:52:20 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.c (VMS_TBT_Routine_End): cache the result of
+	S_GET_VALUE() to avoid many repeated function calls.
+	(VMS_Check_For_Main) [#if HACK_DEC_C_STARTUP]: capitalize
+	_C$MAIN_ARGS in advance, in case -h3 (leave symbol name as-is)
+	gets requested.  [All the HACK_DEC_C_STARTUP code appears to
+	be obsolete; gcc does it automatically for vms target.  It's
+	also misnamed, because it is for the "VAX C" run-time library,
+	not the newer "DEC C" one which has much different startup code.]
+	{various}: use `S_SET_xxx(symbol,new_value)' rather than
+	`S_GET_xxx(symbol) = new_value'.
+
 Mon Sep 19 12:05:03 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-coff.c (c_dot_file_symbol): Use bfd_abs_section_ptr,
@@ -39,11 +89,6 @@ Tue Sep 13 20:05:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 	rather than &bfd_XXX_section.
 
 Tue Sep 13 21:15:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
-
-	* read.c (pseudo_set, case O_symbol): If
-	OBJ_COPY_SYMBOL_ATTRIBUTES is defined, invoke it.
-	[BFD_ASSEMBLER]: Copy BSF_FUNCTION setting too.
-	* config/obj-elf.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Define.
 
 	* config/tc-i386.c (md_apply_fix_1): For GOTPC relocs, decrement
 	value by one; discard adjustments previously being made.  From
