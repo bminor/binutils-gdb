@@ -1,5 +1,5 @@
 /* atof_ieee.c - turn a Flonum into an IEEE floating point number
-   Copyright (C) 1987, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -624,11 +624,13 @@ gen_to_words (words, precision, exponent_bits)
 	 don't get a sticky sign bit after shifting right, and that
 	 permits us to propagate the carry without any masking of bits.
 	 #endif */
-      for (carry = 1, lp--; carry && (lp >= words); lp--)
+      for (carry = 1, lp--; carry; lp--)
 	{
 	  carry = *lp + carry;
 	  *lp = carry;
 	  carry >>= LITTLENUM_NUMBER_OF_BITS;
+	  if (lp == words)
+	    break;
 	}
       if (precision == X_PRECISION && exponent_bits == 15)
 	{

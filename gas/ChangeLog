@@ -1,3 +1,8 @@
+2000-05-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/atof-ieee.c (gen_to_words): When adding carry back in,
+	don't permit lp to become less than the words array.
+
 2000-05-03  David O'Brien  <obrien@NUXI.com>
 
 	* as.c (parse_args): Update copyright.
