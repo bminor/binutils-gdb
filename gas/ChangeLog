@@ -1,3 +1,20 @@
+Wed Sep 21 18:17:35 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/ho-*.h: Now-unused files deleted.
+
+	* symbols.c (copy_symbol_attributes): New function.  Copies BFD
+	symbol flags and calls OBJ_COPY_SYMBOL_ATTRIBUTES.
+	(resolve_symbol_value, case O_symbol): Call it, if X_add_number is
+	zero.  Don't call obj_frob_forward_symbol.
+	* read.c (pseudo_set): Call copy_symbol_attributes, but only if
+	X_add_number is zero.
+	* config/obj-elf.h (obj_frob_forward_symbol): Deleted.
+
+	Mon Aug 19 17:14:44 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/vms-conf.h: new file, manually derived from conf.in.
+	* config-gas.com: use it, and eliminate obsolete "host.h".
+
 Wed Sep 21 11:11:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-ppc.c (ppc_current_block): New static variable.
