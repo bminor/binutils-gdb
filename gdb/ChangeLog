@@ -1,3 +1,7 @@
+Tue Aug 20 16:01:11 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* tconfig/sun*4:  Remove warnings about system assembler.
+
 Mon Aug 19 13:44:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* mcheck.c:  Avoid warning about undeclared abort fn.
