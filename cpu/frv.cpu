@@ -1,6 +1,6 @@
 ; Fujitsu FRV opcode support, for GNU Binutils.  -*- Scheme -*-
 ;
-; Copyright 2000, 2001 Free Software Foundation, Inc.
+; Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 ;
 ; Contributed by Red Hat Inc; developed under contract from Fujitsu.
 ;
@@ -155,6 +155,22 @@
 	1 1 ; issue done
 	() ; state
 	((ICCi_3 INT -1) (FCCi_3 INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Clrgr unit
+  (unit u-clrgr "Clrgr Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRk INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Clrfr unit
+  (unit u-clrfr "Clrfr Unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRk INT -1)) ; inputs
 	() ; outputs
 	() ; profile action (default)
 	)
@@ -5734,33 +5750,44 @@
   (c-call VOID "@cpu@_clear_ne_flags" target_index is_float)
 )
 
-(define-pmacro (clear-ne-flag-r name op ope reg is_float attr comment)
+(define-pmacro (clear-ne-flag-r name op ope reg is_float attr profile comment)
   (dni name
        (comment)
        ((UNIT I01) (FR500-MAJOR I-6) (MACH simple,tomcat,fr500,frv) attr)
        (.str name "$pack $" reg "k")
        (+ pack (.sym reg k) op (rs-null) ope (GRj-null))
-       (clear-ne-flag-semantics (index-of (.sym reg k)) is_float)
-       ()
+       (sequence ()
+		 ; hack to get this referenced for profiling
+		 (c-raw-call VOID "frv_ref_SI" (.sym reg k))
+		 (clear-ne-flag-semantics (index-of (.sym reg k)) is_float))
+       profile
   )
 )
 
-(clear-ne-flag-r clrgr OP_0A OPE1_00 GR 0 NA        "Clear GR NE flag")
-(clear-ne-flag-r clrfr OP_0A OPE1_02 FR 1 FR-ACCESS "Clear FR NE flag")
+(clear-ne-flag-r clrgr OP_0A OPE1_00 GR 0 NA
+		 ((fr500 (unit u-clrgr)))
+		 "Clear GR NE flag")
+(clear-ne-flag-r clrfr OP_0A OPE1_02 FR 1 FR-ACCESS
+		 ((fr500 (unit u-clrfr)))
+		 "Clear FR NE flag")
 
-(define-pmacro (clear-ne-flag-all name op ope is_float attr comment)
+(define-pmacro (clear-ne-flag-all name op ope is_float attr profile comment)
   (dni name
        (comment)
        ((UNIT I01) (FR500-MAJOR I-6) (MACH simple,tomcat,fr500,frv) attr)
        (.str name "$pack")
        (+ pack (rd-null) op (rs-null) ope (GRj-null))
        (clear-ne-flag-semantics -1 is_float)
-       ()
+       profile
   )
 )
 
-(clear-ne-flag-all clrga OP_0A OPE1_01 0 NA        "Clear GR NE flag ALL")
-(clear-ne-flag-all clrfa OP_0A OPE1_03 1 FR-ACCESS "Clear FR NE flag ALL")
+(clear-ne-flag-all clrga OP_0A OPE1_01 0 NA
+		   ((fr500 (unit u-clrgr)))
+		   "Clear GR NE flag ALL")
+(clear-ne-flag-all clrfa OP_0A OPE1_03 1 FR-ACCESS
+		   ((fr500 (unit u-clrfr)))
+		   "Clear FR NE flag ALL")
 
 (define-pmacro (commit-semantics target_index is_float)
   (c-call VOID "@cpu@_commit" target_index is_float)
