@@ -972,6 +972,17 @@ static const struct elf_reloc_map elf64_alpha_reloc_map[] =
   {BFD_RELOC_16_PCREL,		R_ALPHA_SREL16},
   {BFD_RELOC_32_PCREL,		R_ALPHA_SREL32},
   {BFD_RELOC_64_PCREL,		R_ALPHA_SREL64},
+
+/* The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to process
+   the explicit !<reloc>!sequence relocations, and are mapped into the normal
+   relocations at the end of processing. */
+  {BFD_RELOC_ALPHA_USER_LITERAL,	R_ALPHA_LITERAL},
+  {BFD_RELOC_ALPHA_USER_LITUSE_BASE,	R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF,	R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_USER_LITUSE_JSR,	R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_USER_GPDISP,		R_ALPHA_GPDISP},
+  {BFD_RELOC_ALPHA_USER_GPRELHIGH,	R_ALPHA_GPRELHIGH},
+  {BFD_RELOC_ALPHA_USER_GPRELLOW,	R_ALPHA_GPRELLOW},
 };
 
 /* Given a BFD reloc type, return a HOWTO structure.  */

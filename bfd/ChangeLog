@@ -1,3 +1,20 @@
+1999-11-27  Michael Meissner  <meissner@cygnus.com>
+
+	* reloc.c (BFD_RELOC_ALPHA_USER_LITERAL): New relocation for
+	internal use within gas for alpha explicit relocations.
+	(BFD_RELOC_ALPHA_USER_LITUSE_BASE): Ditto.
+	(BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF): Ditto.
+	(BFD_RELOC_ALPHA_USER_LITUSE_JSR): Ditto.
+	(BFD_RELOC_ALPHA_USER_GPDISP): Ditto.
+	(BFD_RELOC_ALPHA_USER_GPRELHIGH): Ditto.
+	(BFD_RELOC_ALPHA_USER_GPRELLOW): Ditto.
+
+	* elf64-alpha.c (elf64_alpha_reloc_map): Add mappings for
+	BFD_RELOC_ALPHA_USER_*.
+
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 1999-11-26  Fred Fish  <fnf@cygnus.com>
 
 	* elf.c (elfcore_read_notes): Add prototype for static function.

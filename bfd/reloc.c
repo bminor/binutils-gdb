@@ -1961,6 +1961,25 @@ ENUMDOC
      The GNU linker currently doesn't do any of this optimizing.
 
 ENUM
+  BFD_RELOC_ALPHA_USER_LITERAL
+ENUMX
+  BFD_RELOC_ALPHA_USER_LITUSE_BASE
+ENUMX
+  BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF
+ENUMX
+  BFD_RELOC_ALPHA_USER_LITUSE_JSR
+ENUMX
+  BFD_RELOC_ALPHA_USER_GPDISP
+ENUMX
+  BFD_RELOC_ALPHA_USER_GPRELHIGH
+ENUMX
+  BFD_RELOC_ALPHA_USER_GPRELLOW
+ENUMDOC
+  The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to
+     process the explicit !<reloc>!sequence relocations, and are mapped
+     into the normal relocations at the end of processing.
+
+ENUM
   BFD_RELOC_ALPHA_HINT
 ENUMDOC
   The HINT relocation indicates a value that should be filled into the

@@ -1830,6 +1830,17 @@ The GNU linker currently doesn't do any of this optimizing. */
   BFD_RELOC_ALPHA_ELF_LITERAL,
   BFD_RELOC_ALPHA_LITUSE,
 
+/* The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to
+process the explicit !<reloc>!sequence relocations, and are mapped
+into the normal relocations at the end of processing. */
+  BFD_RELOC_ALPHA_USER_LITERAL,
+  BFD_RELOC_ALPHA_USER_LITUSE_BASE,
+  BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF,
+  BFD_RELOC_ALPHA_USER_LITUSE_JSR,
+  BFD_RELOC_ALPHA_USER_GPDISP,
+  BFD_RELOC_ALPHA_USER_GPRELHIGH,
+  BFD_RELOC_ALPHA_USER_GPRELLOW,
+
 /* The HINT relocation indicates a value that should be filled into the
 "hint" field of a jmp/jsr/ret instruction, for possible branch-
 prediction logic which may be provided on some processors. */
