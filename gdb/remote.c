@@ -414,6 +414,15 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (!catch_errors (remote_start_remote, (char *)0, 
 	"Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
+
+  /* Without this, some commands which require an active target (such as kill)
+     won't work.  This variable serves (at least) double duty as both the pid
+     of the target process (if it has such), and as a flag indicating that a
+     target is active.  These functions should be split out into seperate
+     variables, especially since GDB will someday have a notion of debugging
+     several processes.  */
+
+  inferior_pid = -1;
 }
 
 /* remote_detach()
@@ -634,7 +643,7 @@ remote_wait (pid, status)
 	  continue;
 	}
     }
-  return 0;
+  return inferior_pid;
 }
 
 /* Number of bytes of registers this stub implements.  */

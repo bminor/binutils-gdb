@@ -1,3 +1,11 @@
+Thu Aug  4 10:26:36 1994  Stu Grossman  (grossman@rtl.cygnus.com)
+
+	* remote.c (remote_open):  Set inferior_pid to make kill command
+	happy.
+	* inflow.c (kill_command):  Revert change of Aug 2.  Use
+	inferior_pid to determine whether to print out "The program is not
+	being run." message.
+
 Thu Aug  4 07:55:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/i386/i386m3.mh (NAT_CLIBS): Add -lmachid and -lnetname.
