@@ -2063,7 +2063,7 @@ sparc32_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     memcpy (valbuf,
 	    &regbuf[O0_REGNUM * regsize +
 		    (typelen >= regsize
-		     || TARGET_BYTE_ORDER == LITTLE_ENDIAN ? 0
+		     || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE ? 0
 		     : regsize - typelen)],
 	    typelen);
 }
@@ -2202,7 +2202,7 @@ sparc_target_architecture_hook (const bfd_arch_info_type *ap)
     {
       if (TARGET_BYTE_ORDER_SELECTABLE_P)
 	{
-	  target_byte_order = LITTLE_ENDIAN;
+	  target_byte_order = BFD_ENDIAN_LITTLE;
 	  bi_endian = 1;
 	}
       else

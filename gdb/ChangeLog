@@ -1,5 +1,18 @@
 2001-12-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (LITTLE_ENDIAN): Delete definition.
+	* arch-utils.c, cris-tdep.c, d10v-tdep.c, defs.h, gdbarch.c,
+	gdbarch.sh, remote-rdp.c, remote-sim.c, sh-tdep.c, sparc-tdep.c,
+	config/alpha/tm-alpha.h, config/arm/tm-arm.h,
+	config/i386/tm-i386.h, config/i960/tm-i960.h,
+	config/ia64/tm-ia64.h, config/mcore/tm-mcore.h,
+	config/mips/tm-wince.h, config/mn10200/tm-mn10200.h,
+	config/ns32k/tm-umax.h, config/powerpc/tm-ppcle-eabi.h,
+	config/sh/tm-wince.h, config/v850/tm-v850.h, config/vax/tm-vax.h,
+	doc/gdbint.texinfo: Replace LITTLE_ENDIAN with BFD_ENDIAN_LITTLE.
+
+2001-12-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* ui-out.c (struct ui_out_table): Add field entry_level.
 	(verify_field): New function.
 	(verify_field_proper_position): Delete function.

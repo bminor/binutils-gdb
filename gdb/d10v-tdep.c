@@ -1528,7 +1528,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_big);
       set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
       break;
-    case LITTLE_ENDIAN:
+    case BFD_ENDIAN_LITTLE:
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
       set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_little);
       set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_little);

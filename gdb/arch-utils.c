@@ -195,7 +195,7 @@ default_float_format (struct gdbarch *gdbarch)
     {
     case BIG_ENDIAN:
       return &floatformat_ieee_single_big;
-    case LITTLE_ENDIAN:
+    case BFD_ENDIAN_LITTLE:
       return &floatformat_ieee_single_little;
     default:
       internal_error (__FILE__, __LINE__,
@@ -216,7 +216,7 @@ default_double_format (struct gdbarch *gdbarch)
     {
     case BIG_ENDIAN:
       return &floatformat_ieee_double_big;
-    case LITTLE_ENDIAN:
+    case BFD_ENDIAN_LITTLE:
       return &floatformat_ieee_double_little;
     default:
       internal_error (__FILE__, __LINE__,
@@ -467,7 +467,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	{
 	  struct gdbarch_info info;
 	  memset (&info, 0, sizeof info);
-	  info.byte_order = LITTLE_ENDIAN;
+	  info.byte_order = BFD_ENDIAN_LITTLE;
 	  if (! gdbarch_update_p (info))
 	    {
 	      printf_unfiltered ("Little endian target not supported by GDB\n");
@@ -475,7 +475,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	}
       else
 	{
-	  target_byte_order = LITTLE_ENDIAN;
+	  target_byte_order = BFD_ENDIAN_LITTLE;
 	}
     }
   else if (set_endian_string == endian_big)
@@ -517,7 +517,7 @@ set_endian_from_file (bfd *abfd)
       if (bfd_big_endian (abfd))
 	want = BIG_ENDIAN;
       else
-	want = LITTLE_ENDIAN;
+	want = BFD_ENDIAN_LITTLE;
       if (TARGET_BYTE_ORDER_AUTO)
 	target_byte_order = want;
       else if (TARGET_BYTE_ORDER != want)
@@ -771,7 +771,7 @@ initialize_current_architecture (void)
 	  info.byte_order = BIG_ENDIAN;
 	  break;
 	case BFD_ENDIAN_LITTLE:
-	  info.byte_order = LITTLE_ENDIAN;
+	  info.byte_order = BFD_ENDIAN_LITTLE;
 	  break;
 	default:
 	  break;
@@ -785,7 +785,7 @@ initialize_current_architecture (void)
       if (chp != NULL
 	  && chp - 2 >= target_name
 	  && strncmp (chp - 2, "el", 2) == 0)
-	info.byte_order = LITTLE_ENDIAN;
+	info.byte_order = BFD_ENDIAN_LITTLE;
     }
   if (info.byte_order == 0)
     {

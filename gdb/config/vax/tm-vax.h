@@ -21,7 +21,7 @@
 
 #include "regcache.h"
 
-#define TARGET_BYTE_ORDER LITTLE_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

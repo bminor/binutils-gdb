@@ -32,7 +32,7 @@ struct value;
 /* Target byte order on ARM defaults to selectable, and defaults to
    little endian.  */
 #define TARGET_BYTE_ORDER_SELECTABLE_P	1
-#define TARGET_BYTE_ORDER_DEFAULT	LITTLE_ENDIAN
+#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_LITTLE
 
 /* IEEE format floating point.  */
 #define IEEE_FLOAT (1)

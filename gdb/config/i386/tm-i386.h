@@ -32,7 +32,7 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-#define TARGET_BYTE_ORDER LITTLE_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
 /* The format used for `long double' on almost all i386 targets is the
    i387 extended floating-point format.  In fact, of all targets in the

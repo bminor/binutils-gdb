@@ -3799,7 +3799,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* INIT shall ensure that the INFO.BYTE_ORDER is non-zero.  */
   switch (info.byte_order)
     {
-    case LITTLE_ENDIAN:
+    case BFD_ENDIAN_LITTLE:
       /* Ok.  */
       break;
 

@@ -26,7 +26,7 @@
 #include "regcache.h"
 
 /* The mn10200 is little endian.  */
-#define TARGET_BYTE_ORDER LITTLE_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
 /* ints are only 16bits on the mn10200.  */
 #undef TARGET_INT_BIT

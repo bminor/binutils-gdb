@@ -1223,7 +1223,7 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
-/* Get a definition of BIG_ENDIAN and LITTLE_ENDIAN.  */
+/* Get a definition of BIG_ENDIAN and BFD_ENDIAN_LITTLE.  */
 /* FIXME: cagney/2001-10-31: GDB should just use BFD's definitions.  */
 
 #ifdef HAVE_ENDIAN_H
@@ -1232,10 +1232,6 @@ extern void *alloca ();
 
 #if !defined (BIG_ENDIAN)
 #define BIG_ENDIAN 4321
-#endif
-
-#if !defined (LITTLE_ENDIAN)
-#define LITTLE_ENDIAN 1234
 #endif
 
 /* Dynamic target-system-dependent parameters for GDB. */

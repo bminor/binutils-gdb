@@ -341,6 +341,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -4725,7 +4726,7 @@ gdbarch_update_p (struct gdbarch_info info)
   if (info.byte_order == 0
       && info.abfd != NULL)
     info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
-		       : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
+		       : bfd_little_endian (info.abfd) ? BFD_ENDIAN_LITTLE
 		       : 0);
   /* From the current target. */
   if (info.byte_order == 0)
@@ -4745,7 +4746,7 @@ gdbarch_update_p (struct gdbarch_info info)
 			  "gdbarch_update: info.byte_order %d (%s)\n",
 			  info.byte_order,
 			  (info.byte_order == BIG_ENDIAN ? "big"
-			   : info.byte_order == LITTLE_ENDIAN ? "little"
+			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.abfd 0x%lx\n",

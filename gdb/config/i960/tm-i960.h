@@ -39,7 +39,7 @@
 #define	DBX_PARM_SYMBOL_CLASS(type) ((type == N_LSYM)? LOC_LOCAL_ARG: LOC_ARG)
 
 /* Byte order is configurable, but this machine runs little-endian.  */
-#define	TARGET_BYTE_ORDER	LITTLE_ENDIAN
+#define	TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
 /* We have IEEE floating point, if we have any float at all.  */
 

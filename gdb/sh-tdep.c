@@ -1034,7 +1034,7 @@ sh3e_sh4_extract_return_value (struct type *type, char *regbuf, char *valbuf)
   if (len == 8 && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       DOUBLEST val;
-      if (TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 	floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
 				 (char *) regbuf + REGISTER_BYTE (return_register),
 				 &val);
@@ -1536,7 +1536,7 @@ sh_default_register_virtual_type (int reg_nr)
 int
 sh_sh4_register_convertible (int nr)
 {
-  if (TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     return (gdbarch_tdep (current_gdbarch)->DR0_REGNUM <= nr
 	    && nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM);
   else 

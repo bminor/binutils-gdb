@@ -30,6 +30,6 @@
 
 void wince_software_single_step (unsigned int, int);
 #undef TARGET_BYTE_ORDER_SELECTABLE
-#define TARGET_BYTE_ORDER LITTLE_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
 #endif /* TM_WINCE_H */

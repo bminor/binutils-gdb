@@ -349,7 +349,7 @@ rdp_init (int cold, int tty)
 		  case SERIAL_TIMEOUT:
 		    break;
 		  case RDP_RES_VALUE_LITTLE_ENDIAN:
-		    target_byte_order = LITTLE_ENDIAN;
+		    target_byte_order = BFD_ENDIAN_LITTLE;
 		    sync = 1;
 		    break;
 		  case RDP_RES_VALUE_BIG_ENDIAN:

@@ -480,7 +480,7 @@ gdbsim_open (char *args, int from_tty)
 	case BIG_ENDIAN:
 	  strcat (arg_buf, " -E big");
 	  break;
-	case LITTLE_ENDIAN:
+	case BFD_ENDIAN_LITTLE:
 	  strcat (arg_buf, " -E little");
 	  break;
 	default:
