@@ -1,3 +1,8 @@
+Wed Feb 12 12:33:08 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/mips16.d: Update for yet another change in disassembly
+	output (this one is spacing only).
+
 start-sanitize-tic80
 Tue Feb 11 14:45:39 1997  Fred Fish  <fnf@cygnus.com>
 
