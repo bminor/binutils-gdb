@@ -135,9 +135,6 @@ struct unwind_table
 
 struct call_info
   {
-    /* Size of the stack frame.  */
-    int frame;
-
     /* Should sr3 be saved in the prologue?  */
     int entry_sr;
 
@@ -4338,9 +4335,6 @@ pa_build_unwind_subspace (call_info)
       }
   }
 
-  /* callinfo.frame is in bytes and unwind_desc is in 8 byte units.  */
-  call_info->ci_unwind.descriptor.frame_size = call_info->frame / 8;
-
   /* Dump it. */
   unwind = (char *) &call_info->ci_unwind;
   for (i = 8; i < sizeof (struct unwind_table); i++)
@@ -4391,7 +4385,10 @@ pa_callinfo (unused)
 	      as_bad ("FRAME parameter must be a multiple of 8: %d\n", temp);
 	      temp = 0;
 	    }
-	  last_call_info->frame = temp;
+
+  	  /* callinfo is in bytes and unwind_desc is in 8 byte units.  */
+	  last_call_info->ci_unwind.descriptor.frame_size = temp / 8;
+
 	}
       /* Entry register (GR, GR and SR) specifications.  */
       else if ((strncasecmp (name, "entry_gr", 8) == 0))

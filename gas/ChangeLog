@@ -1,5 +1,11 @@
 Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (call_info struct): Delete unused "frame" field.
+	(pa_callinfo): Insert framesize into the unwind information as 
+	soon as it's available.
+	(pa_build_unwind_subspace): Do not insert framesize into the unwind
+	information here.
+
 	* Add support for marker type relocations.  These mark areas
 	of interest to the linker.  ENTRY/EXIT relocations for SOM are
 	an example of marker relocations.
