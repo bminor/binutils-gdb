@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -26,12 +26,12 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile "printcmds"
-set srcfile $binfile.c
-
-if ![file exists $objdir/$subdir/$binfile] then {
-    perror "$objdir/$subdir/$binfile does not exist"
-    continue
+set testfile "printcmds"
+set srcfile ${srcdir}/$subdir/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+    perror "Couldn't compile ${srcfile}"
+    return -1
 }
 
 # Set the current language to C.  This counts as a test.  If it
@@ -924,25 +924,21 @@ proc test_print_char_arrays {} {
 
     gdb_test "p parrays"		" = \\(struct some_arrays \\*\\) $hex"
     gdb_test "p parrays->array1"	" = \"abc\""
-    gdb_test "p &parrays->array1"	" = \\(unsigned char \\*\\) $hex \"abc\""
+    gdb_test "p &parrays->array1"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
     gdb_test "p parrays->array2"	" = \"d\""
-    gdb_test "p &parrays->array2"	" = \\(unsigned char \\*\\) $hex \"defghij\""
+    gdb_test "p &parrays->array2"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex"
     gdb_test "p parrays->array3"	" = \"e\""
-    gdb_test "p &parrays->array3"	" = \\(unsigned char \\*\\) $hex \"efghij\""
+    gdb_test "p &parrays->array3"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex"
     gdb_test "p parrays->array4"	" = \"fg\""
-    gdb_test "p &parrays->array4"	" = \\(unsigned char \\*\\) $hex \"fghij\""
+    gdb_test "p &parrays->array4"	" = \\(unsigned char \\(\\*\\)\\\[2\\\]\\) $hex"
     gdb_test "p parrays->array5"	" = \"hij\""
-    gdb_test "p &parrays->array5"	" = \\(unsigned char \\*\\) $hex \"hij\""
+    gdb_test "p &parrays->array5"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
 
     send "set print address off\n" ; expect -re "$prompt $"
 }
 
 proc test_print_string_constants {} {
     global prompt
-    global timeout
-
-    set otimeout $timeout
-    set timeout 120
 
     send "set print elements 50\n" ; expect -re "$prompt $"
 
@@ -966,15 +962,9 @@ proc test_print_string_constants {} {
     gdb_test "ptype &*\"foo\""	"type = char \\*"
     setup_xfail "a29k-*-udi" 2416
     gdb_test "p (char *)\"foo\""	" = \"foo\""
-
-    set timeout $otimeout
 }
 
 proc test_print_array_constants {} {
-    global timeout
-
-    set otimeout $timeout
-    set timeout 120
 
     setup_xfail "a29k-*-udi" 2416
     gdb_test "print {'a','b','c'}"	" = \"abc\""
@@ -988,8 +978,6 @@ proc test_print_array_constants {} {
     gdb_test "print {4,5,6}\[2\]"	" = 6"
     setup_xfail "a29k-*-udi" 2416
     gdb_test "print *&{4,5,6}\[1\]"	" = 5"
-
-    set timeout $otimeout
 }
 
 proc test_printf {} {
@@ -1016,7 +1004,7 @@ gdb_test "print \$pc" "No registers\\."
 # FIXME: should also test "print $pc" when there is an execfile but no
 # remote debugging target, process or corefile.
 
-gdb_load $objdir/$subdir/$binfile
+gdb_load ${binfile}
 
 send "set print sevenbit-strings\n" ; expect -re "$prompt $"
 send "set print address off\n" ; expect -re "$prompt $"
@@ -1029,7 +1017,7 @@ if [set_lang_c] then {
     setup_xfail "rs6000-*-aix*"
     gdb_test "p ctable1\[120\]" "120 'x'"
 
-    if [runto main] then {
+    if [runto_main] then {
 	test_integer_literals_accepted
 	test_integer_literals_rejected
 	test_character_literals_accepted

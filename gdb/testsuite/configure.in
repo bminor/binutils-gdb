@@ -1,77 +1,44 @@
-# This file is a shell script fragment that supplies the information
-# necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
-# any existing configure script.
+dnl Process this file file with autoconf to produce a configure script.
+dnl This file is a shell script fragment that supplies the information
+dnl necessary to tailor a template configure script into the configure
+dnl script appropriate for this directory.  For more information, check
+dnl any existing configure script.
 
-srctrigger="Makefile.in"
-srcname="GDB Test Suite"
+AC_PREREQ(1.118)
+AC_INIT(gdb.base)
+
+CC=${CC-cc}
+AC_SUBST(CC)
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
+AC_CANONICAL_SYSTEM
+
+# place. This is only so testing with a freshly built expect binary 
+# in the object tree will work.
+CY_AC_PATH_TCLH
 
 # Directories to use in all configurations.
-configdirs="gdb.base gdb.c++ gdb.disasm"
-  
+configdirs="gdb.base gdb.c++ gdb.disasm gdb.chill"
+
 # Directories to use for a configuration which uses stabs.
 stabsdirs="gdb.stabs"
 
-# per-host:
-
-# per-target:
-
-# everything defaults to unix for a target
-target_abbrev=unix
-target_makefile_frag=config/mt-unix
-
-# this section is for all targets
-case "${target}" in
-	i[345]86-*-aout)	target_makefile_frag=config/mt-i386-aout ;;
-	*-*-lynx)		target_makefile_frag=config/mt-lynx ;;
-	*-*-netware)		target_makefile_frag=config/mt-netware ;;
-	*-*-vxworks*)		target_makefile_frag=config/mt-vxworks ;;
-	m68k-*-*)		target_makefile_frag=config/mt-m68k ;;
-	i960-*-nindy)		target_makefile_frag=config/mt-i960-nindy ;;
-	a29k-*-udi)		target_makefile_frag=config/mt-a29k-udi ;;
-	sparclite-*-*)		target_makefile_frag=config/mt-slite ;;
-	sparc-*-aout)		target_makefile_frag=config/mt-sparc-aout ;;
-	mips-*-ecoff)		target_makefile_frag=config/mt-mips-ecoff ;;
-esac
-
+	# this section is for targets that use stabs
 # add stabs tests for appropriate targets
 case "${target}" in
-	rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-bsd*)		configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-go32*)		configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-lynxos*)		configdirs="${configdirs} ${stabsdirs}" ;;
-	*-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
-	hppa*-*-*)		configdirs="${configdirs} ${stabsdirs}" ;;
-
-	*)			if [ x${with_stabs} = xyes ]; then
-				  configdirs="${configdirs} ${stabsdirs}"
-				fi
-				;;
+	rs6000-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-bsd*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-go32*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-linux*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-lynxos*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*-sun-*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	hppa*-*-*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*)		if test "x${with_stabs}" = x"yes" ; then
+			  configdirs="${configdirs} ${stabsdirs}"
+			fi ;;
 esac
 
-# Only test Chill debugging for particular targets.
-case "${target}" in
-	sparc-*-sunos4*)	configdirs="${configdirs} gdb.chill" ;;
-esac
+# configure the subdirectories too
+AC_CONFIG_SUBDIRS($configdirs)
 
-# link in the lib directory if needed
-#if [ ! -d lib ] ; then
-#    files="lib"
-#    links="lib"
-#fi
-
-# make list of files and links based on tool name
-tool_list="${tool_list} gdb"
-#for i in ${tool_list};
-#do
-#    if [ -f ${srcdir}/config/${target_abbrev}-$i.exp ] ; then
-#    files="$files config/${target_abbrev}-$i.exp"
-#    links="$links $i-init.exp"
-#    fi
-#done
-
-# post-target:
-
-	# make local configuration file, using MAKE if one is specified.
-#if [ ! -n "$MAKE" ]; then MAKE=make; fi
+dnl AC_SUBST(gdb_target_cpu)
+AC_OUTPUT(Makefile)

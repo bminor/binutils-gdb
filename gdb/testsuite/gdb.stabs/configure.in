@@ -1,14 +1,16 @@
-# This file is a shell script fragment that supplies the information
-# necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
-# any existing configure script.
+dnl Process this file file with autoconf to produce a configure script.
+dnl This file is a shell script fragment that supplies the information
+dnl necessary to tailor a template configure script into the configure
+dnl script appropriate for this directory.  For more information, check
+dnl any existing configure script.
 
-srctrigger="weird.exp"
-srcname="gdb.stabs"
+AC_PREREQ(1.118)
+AC_INIT(weird.exp)
 
-# per-host:
-
-# per-target:
+CC=${CC-cc}
+AC_SUBST(CC)
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
+AC_CANONICAL_SYSTEM
 
 case "${target}" in
 
@@ -35,3 +37,9 @@ mips-*-*)		if [ x${with_gnu_as} = xyes ]; then
 *-*-*)			target_makefile_frag=aout.mt ;;
 
 esac
+
+# We also need to use a makefile fragment for the embedded targets
+# to get the flags right to build the test cases
+AC_SUBST_FILE(target_makefile_frag)
+	
+AC_OUTPUT(Makefile)

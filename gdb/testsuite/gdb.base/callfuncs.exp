@@ -26,13 +26,32 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile "callfuncs"
-set srcfile $binfile.c
+set prototypes 0
+set testfile "callfuncs"
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
 
-if ![file exists $objdir/$subdir/$binfile] then {
-    perror "$objdir/$subdir/$binfile does not exist"
-    return 0
+# build the first test case
+execute_anywhere "echo set prototypes 1 > ${objdir}/${subdir}/callfuncs.tmp"
+if  { [compile "-g ${srcfile} -o ${binfile} "] != "" } {
+    execute_anywhere "rm -f ${objdir}/${subdir}/callfuncs.tmp"    
+    # built the second test case since we can't use prototypes
+    warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
+    execute_anywhere "echo set prototypes 0 > ${objdir}/${subdir}/callfuncs.tmp"
+    if  { [compile "-g -DNO_PROTOTYPES ${srcfile} -o ${binfile} "] != "" } {
+	perror "Couldn't compile ${testfile}.c"
+	return -1
+    }
 }
+
+if  { [compile "-E ${srcdir}/${subdir}/compiler.c >> ${objdir}/${subdir}/callfuncs.tmp"] != "" } {
+    perror "Couldn't make ${testfile}.tmp"
+    return -1
+}
+
+execute_anywhere "mv ${objdir}/${subdir}/callfuncs.tmp ${binfile}.ci"
+
+source ${binfile}.ci
 
 # The a29k can't call functions, so don't even bother with this test.
 if [istarget "a29k-*-udi"] then {
@@ -206,9 +225,7 @@ proc do_function_calls {} {
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $objdir/$subdir/$binfile
-
-source gdb.base/callfuncs.ci
+gdb_load ${binfile}
 
 send "set print sevenbit-strings\n" ; expect -re "$prompt $"
 send "set print address off\n" ; expect -re "$prompt $"

@@ -1,3 +1,39 @@
+Sat Nov 25 11:03:42 1995  Fred Fish  <fnf@cygnus.com>
+
+	From Rob Savoye  (rob@poseidon.cygnus.com)
+	* Makefile.in, configure.in, gdb.base/{Makefile.in, configure.in},
+	gdb.c++/{Makefile.in, configure.in}, gdb.chill/{Makefile.in, configure.in},
+	gdb.disasm/{Makefile.in, configure.in}, gdb.stabs/{Makefile.in, configure.in},
+	gdb.threads/{Makefile.in, configure.in}: Major reworking for autoconfig.
+	* aclocal.m4, configure, gdb.base/configure, gdb.c++/configure,
+	gdb.disasm/configure, gdb.stabs/configure, gdb.stabs/default.mt : New files.
+	* config/unix-gdb.exp:  Make GDB global.
+	* gdb.base/{a1-selftest.exp, a2-run.exp,bitfields.exp, break.exp, callfuncs.exp,
+	commands.exp, corefile.exp, crossload.exp, exprs.exp, funcargs.exp, interrupt.exp,
+	langs.exp, list.exp, mips_pro.exp, nodebug.exp, opaque.exp, printcmds.exp,
+	ptype.exp, recurse.exp, regs.exp, return.exp, scope.exp, setvar.exp, sigall.exp,
+	signals.exp, term.exp, twice.exp, watchpoint.exp, whatis.exp},
+ 	gdb.c++/{classes.exp, callfuncs.exp, inherit.exp, misc.exp, templates.exp,
+	virtfunc.exp}, gdb.chill/{callch.exp, chillvars.exp, misc.exp, pr-4975.exp,
+	pr-5016.exp, pr-5020.exp, pr-5022.exp, pr-5646.exp, pr-5984.exp, pr-6292.exp,
+	pr-6632.exp, pr-8134.exp, pr-8136.exp, result.exp, string.exp, tuples.exp},
+	gdb.disasm/{hppa.exp, sh3.exp}, gdb.stabs/weird.exp: Change continues
+ 	to returns as necessary, arrange for test to compile own testcase executable.
+	* lib/gdb.exp: Changes for testsuite to compile own test cases.
+	
+Tue Nov 21 16:15:45 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/classes.exp (test_pointers_to_class_members): Add
+ 	clear_xfail at end of test which might not call either pass or fail.
+	* gdb.base/a1-selftest.exp: Add i*86-*-linuxaout xfail for
+	"backtrace through signal handler".
+
+Sat Nov 18 04:09:31 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/sigall.exp:  Work around OSF/1-3.x kernel bug when
+	continuing from a job control stop signal.
+	* gdb.stabs/alpha.mt:  Use $(CFLAGS) when building weird.o.
+
 Wed Nov 15 00:28:03 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/callfuncs.exp: Remove bogus hppa xfails.

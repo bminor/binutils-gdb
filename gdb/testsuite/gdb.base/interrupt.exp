@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -31,7 +31,13 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile $objdir/$subdir/interrupt
+set testfile interrupt
+set srcfile ${srcdir}/$subdir/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+    perror "Couldn't compile ${srcfile}"
+    return -1
+}
 
 if $noinferiorio {
     verbose "Skipping interrupt.exp because of noinferiorio."
@@ -77,11 +83,12 @@ if ![file exists $binfile] then {
 	    eof { fail "send control C (eof)" }
 	}
 
+	setup_xfail "i*86-*-linux*"
 	send "p func1 ()\n"
 	expect {
 	    -re " = 4.*$prompt $" { pass "call function when asleep" }
 	    -re "$prompt $" { fail "call function when asleep (wrong output)" }
-	    timeout {
+	    default {
 
 		# This fail probably happens whenever we use /proc (we
 		# don't use PRSABORT), but apparently also happens on
@@ -96,12 +103,13 @@ if ![file exists $binfile] then {
 		setup_xfail "alpha-*-*"
 		setup_xfail "*-*-irix*"
 		setup_xfail "*-*-hpux*"
+		setup_xfail "*-*-*lynx*"
 		fail "call function when asleep (stays asleep)"
 		# Send a newline to wake it up
 		send "\n"
 		gdb_test "" " = 4" "call function after waking it"
 	    }
-	    eof { fail "call function when asleep (eof)" }
+#	    eof { fail "call function when asleep (eof)" }
 	}
 
 	# Now try calling the function again.
@@ -133,6 +141,7 @@ if ![file exists $binfile] then {
 	    eof { fail "echo data (eof)" }
 	}
 
+	setup_xfail "i*86-*-linux*"
 	send "\004"
 	expect {
 	    -re "end of file.*Program exited normally.*$prompt $" {

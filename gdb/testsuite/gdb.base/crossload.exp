@@ -32,7 +32,11 @@ set bug_id 0
 # With a minimal bfd (the default), few if any of these tests work.
 
 verbose "FIXME: all the crossload tests ignored"
-continue
+return
+
+foreach i "m68k-elf m68k-aout m68k-aout2 mips-ecoff i486-elf sparc-aout i860-elf sparc-elf" {
+    execute_anywhere "cd ${objdir}/${subdir} ; uudecode ${srcdir}/${subdir}/$i.u "
+}
 
 # FIXME: These tests don't work for the i960, because
 # bfd/config/i960-bout.mt sets SELECT_VECS.  I could use setup_xfail

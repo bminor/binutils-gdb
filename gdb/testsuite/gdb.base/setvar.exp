@@ -30,19 +30,26 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile "setvar"
+set testfile "setvar"
+set srcfile ${srcdir}/$subdir/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+    perror "Couldn't compile ${srcfile}"
+    return -1
+}
 
-if ![file exists $objdir/$subdir/$binfile] then {
-    perror "$objdir/$subdir/$binfile does not exist."
-    return 0
+execute_anywhere "rm -f ${binfile}.ci"
+if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
+    perror "Couldn't make ${testfile}.ci file"
+    return -1
 }
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $objdir/$subdir/$binfile
+gdb_load $binfile
 
-source gdb.base/setvar.ci
+source ${binfile}.ci
 
 #
 # set it up at a breakpoint so we canplay with the variable values
@@ -1844,8 +1851,14 @@ if {$gcc_compiled} then {
     gdb_test "print sef.field" "print.*.\[0-9\]* = sm1" "print sef.field (sm1)"
     gdb_test "print sef.field=s1" "print.*.\[0-9\]* = s1"
     gdb_test "print sef.field" "print.*.\[0-9\]* = s1" "print sef.field (s1)"
-    gdb_test "print uef.field=u1" "print.*.\[0-9\]* = u1"
-    gdb_test "print uef.field" "print.*.\[0-9\]* = u1" "print uef.field (u1)"
     gdb_test "print uef.field=u2" "print.*.\[0-9\]* = u2"
     gdb_test "print uef.field" "print.*.\[0-9\]* = u2" "print uef.field (u2)"
+    gdb_test "print uef.field=u1" "print.*.\[0-9\]* = u1"
+    gdb_test "print uef.field" "print.*.\[0-9\]* = u1" "print uef.field (u1)"
+
+    # Test for truncation when assigning invalid values to bitfields.
+    gdb_test "print sef.field=7" \
+	"print.*warning: Value does not fit in 2 bits.*\[0-9\]* = sm1"
+    gdb_test "print uef.field=6" \
+	"print.*warning: Value does not fit in 2 bits.*\[0-9\]* = u2"
 }

@@ -70,6 +70,7 @@ proc gdb_exit { } {
 }
 
 set binpath /s1/users/rob/vxworks/bin/somewhere-bogus-that-needs-configuring
+global GDB
 set bin $GDB
 
 gdb_start

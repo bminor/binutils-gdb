@@ -28,7 +28,7 @@ set bug_id 0
 
 # are we on a target board
 if ![isnative] then {
-    continue
+    return
 }
 if [istarget "m68k*-*-hpux*"] then {
     # The top-level makefile passes CFLAGS= (no -g) for hp300.  This probably
@@ -36,7 +36,7 @@ if [istarget "m68k*-*-hpux*"] then {
     # but until then.....
     setup_xfail "*-*-*"
     fail "cannot test self if compiled without debug info"
-    continue
+    return -1
 }
 
 proc test_with_self {} {
@@ -446,6 +446,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     }
     
     # get a stack trace
+    setup_xfail "i*86-*-linuxaout"
     set description "backtrace through signal handler"
     send "backtrace\n"
     expect {

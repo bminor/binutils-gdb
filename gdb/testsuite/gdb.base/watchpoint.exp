@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -26,14 +26,13 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile "watchpoint"
-set srcfile $binfile.c
-
-if ![file exists $objdir/$subdir/$binfile] then {
-    perror "$objdir/$subdir/$binfile does not exist."
-    return 0
+set testfile "watchpoint"
+set srcfile ${srcdir}/$subdir/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+    perror "Couldn't compile ${srcfile}"
+    return -1
 }
-
 
 # Prepare for watchpoint tests by setting up two breakpoints and one
 # watchpoint.
@@ -112,7 +111,7 @@ proc initialize {} {
 
     send "disable 3\n"
     expect {
-	-re "disable 3\r\n$prompt $" { pass "disable watchpoint" }
+	-re "disable 3\[\r\n\]+$prompt $" { pass "disable watchpoint" }
 	-re ".*$prompt $" { fail "disable watchpoint" ; return 0 }
 	timeout { fail "disable watchpoint (timeout)" ; return 0 }
     }
@@ -133,7 +132,7 @@ proc test_simple_watchpoint {} {
 
     send "disable 3\n"
     expect {
-	-re "^disable 3\r\n$prompt $" {
+	-re "^disable 3\[\r\n\]+$prompt $" {
 	    pass "disable watchpoint in test_simple_watchpoint"
 	}
 	-re ".*$prompt $" {
@@ -167,7 +166,7 @@ proc test_simple_watchpoint {} {
 
     send "enable 3\n"
     expect {
-	-re "^enable 3\r\n$prompt $" { pass "enable watchpoint" }
+	-re "^enable 3\[\r\n\]+$prompt $" { pass "enable watchpoint" }
 	-re ".*$prompt $" { fail "enable watchpoint" ; return }
 	timeout { fail "enable watchpoint (timeout)" ; return }
     }
@@ -224,7 +223,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     send "disable 3\n"
     expect {
-	-re "^disable 3\r\n$prompt $" { pass "watchpoint disabled" }
+	-re "^disable 3\[\r\n\]+$prompt $" { pass "watchpoint disabled" }
 	-re ".*$prompt $" { fail "watchpoint disabled" ; return }
 	timeout { fail "watchpoint disabled (timeout)" ; return }
     }
@@ -248,7 +247,7 @@ proc test_disabling_watchpoints {} {
 
     send "disable 3\n"
     expect {
-	-re "^disable 3\r\n$prompt $" {
+	-re "^disable 3\[\r\n\]+$prompt $" {
 	    pass "disable watchpoint in test_disabling_watchpoints"
 	}
 	-re ".*$prompt $" {
@@ -282,7 +281,7 @@ proc test_disabling_watchpoints {} {
 
     send "enable 3\n"
     expect {
-	-re "^enable 3\r\n$prompt $" { pass "watchpoint enabled" }
+	-re "^enable 3\[\r\n\]+$prompt $" { pass "watchpoint enabled" }
 	-re ".*$prompt $" { fail "watchpoint enabled" ; return }
 	timeout { fail "watchpoint enabled (timeout)" ; return }
     }
@@ -299,7 +298,7 @@ proc test_disabling_watchpoints {} {
 
     send "disable 3\n"
     expect {
-	-re "^disable 3\r\n$prompt $" {
+	-re "^disable 3\[\r\n\]+$prompt $" {
 	    pass "disable watchpoint #2 in test_disabling_watchpoints"
 	}
 	-re ".*$prompt $" {
@@ -542,7 +541,7 @@ proc test_complex_watchpoint {} {
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $objdir/$subdir/$binfile
+gdb_load $binfile
 
 if [initialize] then {
 
@@ -555,7 +554,7 @@ if [initialize] then {
 	gdb_exit
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $objdir/$subdir/$binfile
+	gdb_load $binfile
 	initialize
     }
 
@@ -566,7 +565,7 @@ if [initialize] then {
 	gdb_exit
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $objdir/$subdir/$binfile
+	gdb_load $binfile
 	initialize
     }
 
@@ -577,7 +576,7 @@ if [initialize] then {
 	gdb_exit
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $objdir/$subdir/$binfile
+	gdb_load $binfile
 	initialize
     }
 
@@ -594,7 +593,7 @@ if [initialize] then {
 	gdb_exit
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $objdir/$subdir/$binfile
+	gdb_load $binfile
 	initialize
     }
 

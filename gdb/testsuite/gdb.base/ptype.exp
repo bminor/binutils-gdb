@@ -29,17 +29,26 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile "ptype"
+set testfile "ptype"
+set srcfile ${srcdir}/$subdir/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+    perror "Couldn't compile ${srcfile}"
+    return -1
+}
 
-if ![file exists $objdir/$subdir/$binfile] then {
-    perror "$objdir/$subdir/$binfile does not exist."
-    return 0
+execute_anywhere "rm -f ${binfile}.ci"
+if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
+    perror "Couldn't make ${testfile}.ci file"
+    return -1
 }
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $objdir/$subdir/$binfile
+gdb_load ${binfile}
+
+source ${binfile}.ci
 
 # Test ptype of unnamed enumeration members before any action causes
 # the partial symbol table to be expanded to full symbols.  This fails
@@ -199,6 +208,7 @@ expect {
 # as (51) doesn't have a name.  Only 55 has a name.
 
 setup_xfail "i*86-*-sysv4*"
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
 gdb_test "whatis v_boolean" "type = boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
 
@@ -473,6 +483,7 @@ expect {
 #
 
 setup_xfail "i*86-*-sysv4*"
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
 gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 
 #

@@ -26,12 +26,18 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set binfile "funcargs"
-set srcfile $binfile.c
+set testfile "funcargs"
+set srcfile ${srcdir}/$subdir/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+    perror "Couldn't compile ${srcfile}"
+    return -1
+}
 
-if ![file exists $objdir/$subdir/$binfile] then {
-    perror "$objdir/$subdir/$binfile does not exist."
-    return 0
+execute_anywhere "rm -f ${binfile}.ci"
+if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
+    perror "Couldn't make ${testfile}.ci file"
+    return -1
 }
 
 #
@@ -1063,7 +1069,7 @@ proc funcargs_reload { } {
 	gdb_exit
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $objdir/$subdir/$binfile
+	gdb_load ${binfile}
     }
 }
 
@@ -1259,9 +1265,9 @@ proc test_stepping_over_trampolines { } {
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $objdir/$subdir/$binfile
+gdb_load ${binfile}
 
-source gdb.base/funcargs.ci
+source ${binfile}.ci
 
 integral_args
 funcargs_reload
