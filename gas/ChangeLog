@@ -1,3 +1,15 @@
+Fri Mar 22 11:13:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (change_base): Recognize \(...) construct documented to
+	pass through enclosed characters literally through to the output.
+	(process_assigns): Likewise.  Also, be more careful to avoid
+	looking past the end of the buffer.
+
+Thu Mar 21 13:18:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_parse_option): If OBJ_ELF, ignore -k for
+	FreeBSD compatibility.  From John Polstra <jdp@polstra.com>.
+
 Wed Mar 20 18:13:32 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* doc/as.texinfo, doc/c-i960.texi: Fix typos.
