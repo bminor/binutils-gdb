@@ -1,3 +1,8 @@
+2000-05-21  H.J. Lu  (hjl@gnu.org)
+
+	* ld-elfvsb/main.c (main_visibility_check): Fix the protected
+	visibility test.
+
 2000-05-13  H.J. Lu  (hjl@gnu.org)
 
 	* lib/ld-lib.exp (default_ld_link): Redirect the linker output

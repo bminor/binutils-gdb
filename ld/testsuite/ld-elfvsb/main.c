@@ -29,13 +29,19 @@ visibility ()
 {
   return 1;
 }
-#endif
 
+static int
+main_visibility_check ()
+{
+  return visibility_funptr () != visibility;
+}
+#else
 static int
 main_visibility_check ()
 {
   return visibility_funptr () == visibility;
 }
+#endif
 
 /* This function is called by the shared library.  */
 
