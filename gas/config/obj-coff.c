@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "as.h"
 #include "obstack.h"
@@ -929,6 +930,7 @@ obj_read_begin_hook ()
 
 
 symbolS *coff_last_function;
+static symbolS *coff_last_bf;
 
 void
 coff_frob_symbol (symp, punt)
@@ -1059,6 +1061,15 @@ coff_frob_symbol (symp, punt)
   if (next_set_end != NULL
       && ! *punt)
     set_end = next_set_end;
+
+  if (! *punt
+      && S_GET_STORAGE_CLASS (symp) == C_FCN
+      && strcmp (S_GET_NAME (symp), ".bf") == 0)
+    {
+      if (coff_last_bf != NULL)
+	SA_SET_SYM_ENDNDX (coff_last_bf, symp);
+      coff_last_bf = symp;
+    }
 
   if (coffsymbol (symp->bsym)->lineno)
     {
@@ -1361,6 +1372,10 @@ symbol_dump ()
 #include "libbfd.h"
 #include "libcoff.h"
 
+#ifdef TE_PE
+#include "coff/pe.h"
+#endif
+
 /* The NOP_OPCODE is for the alignment fill value.  Fill with nop so
    that we can stick sections together without causing trouble.  */
 #ifndef NOP_OPCODE
@@ -1378,16 +1393,10 @@ symbol_dump ()
 const short seg_N_TYPE[] =
 {				/* in: segT   out: N_TYPE bits */
   C_ABS_SECTION,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
+  1,    2,  3,   4,    5,   6,   7,   8,   9,  10,
+  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,
+  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,
+  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,
   C_UNDEF_SECTION,		/* SEG_UNKNOWN */
   C_UNDEF_SECTION,		/* SEG_GOOF */
   C_UNDEF_SECTION,		/* SEG_EXPR */
@@ -1447,42 +1456,39 @@ void obj_coff_section PARAMS ((int));
 /* Section stuff
 
    We allow more than just the standard 3 sections, infact, we allow
-   10 sections, (though the usual three have to be there).
+   40 sections, (though the usual three have to be there).
 
    This structure performs the mappings for us:
-
 */
 
-#define N_SEG 32
+
 typedef struct
 {
   segT seg_t;
   int i;
 } seg_info_type;
 
-static const seg_info_type seg_info_off_by_4[N_SEG] =
+static const seg_info_type seg_info_off_by_4[] =
 {
  {SEG_PTV,  },
  {SEG_NTV,  },
  {SEG_DEBUG, },
  {SEG_ABSOLUTE,  },
  {SEG_UNKNOWN,	 },
- {SEG_E0},
- {SEG_E1},
- {SEG_E2},
- {SEG_E3},
- {SEG_E4},
- {SEG_E5},
- {SEG_E6},
- {SEG_E7},
- {SEG_E8},
- {SEG_E9},
- {(segT)15},
- {(segT)16},
- {(segT)17},
- {(segT)18},
- {(segT)19},
- {(segT)20},
+ {SEG_E0}, {SEG_E1}, {SEG_E2}, {SEG_E3}, {SEG_E4},
+ {SEG_E5}, {SEG_E6}, {SEG_E7}, {SEG_E8}, {SEG_E9},
+ {SEG_E10},{SEG_E11},{SEG_E12},{SEG_E13},{SEG_E14},
+ {SEG_E15},{SEG_E16},{SEG_E17},{SEG_E18},{SEG_E19},
+ {SEG_E20},{SEG_E21},{SEG_E22},{SEG_E23},{SEG_E24},
+ {SEG_E25},{SEG_E26},{SEG_E27},{SEG_E28},{SEG_E29},
+ {SEG_E30},{SEG_E31},{SEG_E32},{SEG_E33},{SEG_E34},
+ {SEG_E35},{SEG_E36},{SEG_E37},{SEG_E38},{SEG_E39},
+ {(segT)40},
+ {(segT)41},
+ {(segT)42},
+ {(segT)43},
+ {(segT)44},
+ {(segT)45},
  {(segT)0},
  {(segT)0},
  {(segT)0},
@@ -1624,7 +1630,7 @@ do_relocs_for (abfd, h, file_cursor)
   unsigned int idx;
   unsigned long reloc_start = *file_cursor;
 
-  for (idx = SEG_E0; idx < SEG_E9; idx++)
+  for (idx = SEG_E0; idx < SEG_LAST; idx++)
     {
       if (segment_info[idx].scnhdr.s_name[0])
 	{
@@ -1912,7 +1918,7 @@ coff_header_append (abfd, h)
   bfd_write (buffer, i, 1, abfd);
   bfd_write (buffero, H_GET_SIZEOF_OPTIONAL_HEADER (h), 1, abfd);
 
-  for (i = SEG_E0; i < SEG_E9; i++)
+  for (i = SEG_E0; i < SEG_LAST; i++)
     {
       if (segment_info[i].scnhdr.s_name[0])
 	{
@@ -2142,6 +2148,8 @@ obj_coff_endef (ignore)
 	  SA_GET_SYM_LNNOPTR (last_line_symbol) = function_lineoff;
 
 	  SF_SET_PROCESS (last_line_symbol);
+	  SF_SET_ADJ_LNNOPTR (last_line_symbol);
+	  SF_SET_PROCESS (def_symbol_in_progress);
 	  function_lineoff = -1;
 	}
       /* Value is always set to . */
@@ -2498,6 +2506,24 @@ obj_coff_val (ignore)
   demand_empty_rest_of_line ();
 }
 
+#ifdef TE_PE
+
+/* Handle the .linkonce pseudo-op.  This is parsed by s_linkonce in
+   read.c, which then calls this object file format specific routine.  */
+
+void
+obj_coff_pe_handle_link_once (type)
+     enum linkonce_type type;
+{
+  seg_info (now_seg)->scnhdr.s_flags |= IMAGE_SCN_LNK_COMDAT;
+
+  /* We store the type in the seg_info structure, and use it to set up
+     the auxiliary entry for the section symbol in c_section_symbol.  */
+  seg_info (now_seg)->linkonce = type;
+}
+
+#endif /* TE_PE */
+
 void
 obj_read_begin_hook ()
 {
@@ -2522,6 +2548,7 @@ symbolS *symbol_extern_lastP;
 
 stack *block_stack;
 symbolS *last_functionP;
+static symbolS *last_bfP;
 symbolS *last_tagP;
 
 static unsigned int
@@ -2638,11 +2665,19 @@ yank_symbols ()
 			 sizeof (symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
 #endif
 		}
-	      /* The C_FCN doesn't need any additional information.  I
-		 don't even know if this is needed for sdb. But the
-		 standard assembler generates it, so...  */
-	      if (S_GET_STORAGE_CLASS (symbolP) == C_EFCN)
+	      if (S_GET_STORAGE_CLASS (symbolP) == C_FCN)
 		{
+		  if (strcmp (S_GET_NAME (symbolP), ".bf") == 0)
+		    {
+		      if (last_bfP != NULL)
+			SA_SET_SYM_ENDNDX (last_bfP, symbol_number);
+		      last_bfP = symbolP;
+		    }
+		}
+	      else if (S_GET_STORAGE_CLASS (symbolP) == C_EFCN)
+		{
+		  /* I don't even know if this is needed for sdb. But
+		     the standard assembler generates it, so...  */
 		  if (last_functionP == (symbolS *) 0)
 		    as_fatal ("C_EFCN symbol out of scope");
 		  SA_SET_SYM_FSIZE (last_functionP,
@@ -2853,7 +2888,7 @@ crawl_symbols (h, abfd)
    */
 
 
-  for (i = SEG_E0; i < SEG_E9; i++)
+  for (i = SEG_E0; i < SEG_LAST; i++)
     {
       if (segment_info[i].scnhdr.s_name[0])
 	{
@@ -2929,7 +2964,7 @@ do_linenos_for (abfd, h, file_cursor)
   unsigned int idx;
   unsigned long start = *file_cursor;
 
-  for (idx = SEG_E0; idx < SEG_E9; idx++)
+  for (idx = SEG_E0; idx < SEG_LAST; idx++)
     {
       segment_info_type *s = segment_info + idx;
 
@@ -3209,13 +3244,13 @@ obj_coff_add_segment (name)
     ++len;
   else
     len = sizeof (segment_info[i].scnhdr.s_name);
-  for (i = SEG_E0; i < SEG_E9 && segment_info[i].scnhdr.s_name[0]; i++)
+  for (i = SEG_E0; i < SEG_LAST && segment_info[i].scnhdr.s_name[0]; i++)
     if (strncmp (segment_info[i].scnhdr.s_name, name, len) == 0
 	&& (len == sizeof (segment_info[i].scnhdr.s_name)
 	    || segment_info[i].scnhdr.s_name[len] == '\0'))
       return (segT) i;
 
-  if (i == SEG_E9)
+  if (i == SEG_LAST)
     {
       as_bad ("Too many new sections; can't add \"%s\"", name);
       return now_seg;
@@ -3525,6 +3560,36 @@ c_section_symbol (name, idx)
 
   SF_SET_STATICS (symbolP);
 
+#ifdef TE_PE
+  /* If the .linkonce pseudo-op was used for this section, we must
+     store the information in the auxiliary entry for the section
+     symbol.  */
+  if (segment_info[idx].linkonce != LINKONCE_UNSET)
+    {
+      int type;
+
+      switch (segment_info[idx].linkonce)
+	{
+	default:
+	  abort ();
+	case LINKONCE_DISCARD:
+	  type = IMAGE_COMDAT_SELECT_ANY;
+	  break;
+	case LINKONCE_ONE_ONLY:
+	  type = IMAGE_COMDAT_SELECT_NODUPLICATES;
+	  break;
+	case LINKONCE_SAME_SIZE:
+	  type = IMAGE_COMDAT_SELECT_SAME_SIZE;
+	  break;
+	case LINKONCE_SAME_CONTENTS:
+	  type = IMAGE_COMDAT_SELECT_EXACT_MATCH;
+	  break;
+	}
+
+      SYM_AUXENT (symbolP)->x_scn.x_comdat = type;
+    }
+#endif /* TE_PE */
+
   return symbolP;
 }				/* c_section_symbol() */
 
@@ -3538,7 +3603,7 @@ w_symbols (abfd, where, symbol_rootP)
   unsigned int i;
 
   /* First fill in those values we have only just worked out */
-  for (i = SEG_E0; i < SEG_E9; i++)
+  for (i = SEG_E0; i < SEG_LAST; i++)
     {
       symbolP = segment_info[i].dot;
       if (symbolP)
@@ -3557,6 +3622,15 @@ w_symbols (abfd, where, symbol_rootP)
       /* Used to save the offset of the name. It is used to point
 	       to the string in memory but must be a file offset. */
       register char *temp;
+
+      /* We can't fix the lnnoptr field in yank_symbols with the other
+         adjustments, because we have to wait until we know where they
+         go in the file.  */
+      if (SF_GET_ADJ_LNNOPTR (symbolP))
+	{
+	  SA_GET_SYM_LNNOPTR (symbolP) +=
+	    segment_info[S_GET_SEGMENT (symbolP)].scnhdr.s_lnnoptr;
+	}
 
       tc_coff_symbol_emit_hook (symbolP);
 

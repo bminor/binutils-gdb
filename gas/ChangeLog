@@ -1,3 +1,13 @@
+Thu Apr 18 18:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c: BFD_ASSEMBLER:
+ 	(coff_last_bf): New static variable.
+	(coff_frob_symbol): Set endndx of a .bf symbol.
+	Non BFD_ASSEMBLER:
+	(obj_coff_endef): Call SF_SET_PROCESS on a .bf symbol.
+	(last_bfP): New static variable.
+	(yank_symbols): Set endndx of a .bf symbol.
+
 Thu Apr 18 11:53:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (md_parse_option): Add support for Solaris's -le
