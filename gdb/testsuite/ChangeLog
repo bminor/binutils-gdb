@@ -1,3 +1,8 @@
+2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/constvars.exp: Remove two extra XFAILs.  Update copyright
+	dates.
+
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.c++/printmethod.exp (print virtual method): Accept "(void)".
