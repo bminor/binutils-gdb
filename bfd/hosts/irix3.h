@@ -17,6 +17,13 @@
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 
+#ifdef SEEK_SET
+#       ifndef L_SET
+#               define L_SET SEEK_SET
+#       endif
+# endif
+
+
 #if !defined (SEEK_SET)
 #define SEEK_SET 0
 #define SEEK_CUR 1

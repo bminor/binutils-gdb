@@ -12,6 +12,8 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+void free();
+
 /* Some things that need to be defined in order to make code written for
    BSD Unix compile under System V Unix.  */
 
@@ -20,12 +22,14 @@
 #define bcopy(src,dst,len)	memcpy(dst,src,len)
 #define bzero(s,n)		memset(s,0,n)
 
+#if 0
 static int
 rename(from, to)
 {
   unlink(to);
   return(link(from, to));
 }
+#endif
 
 /*
  * Might not need these. Leave them out for now.
