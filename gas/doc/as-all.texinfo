@@ -4595,9 +4595,8 @@ $69, %eax, %eax}.
 
 @cindex Z8000 support
 @menu
-* Z8000 Options::		Options
-* Z8000 Syntax::		Syntax
-* Z8000 Directives::		Z8000 Machine Directives
+* Z8000 Options::		No special command-line options for Z8000
+* Z8000 Syntax::		Assembler Syntax for the Z8000
 * Z8000 Opcodes::		Opcodes
 @end menu
 
@@ -4629,7 +4628,7 @@ Z8000 family.
 @cindex Z8000 line separator
 @samp{;} can be used instead of a newline to separate statements.
 
-@node Z8000
+@node Z8000-Regs
 @subsubsection Register Names
 
 @cindex Z8000 registers
@@ -4637,7 +4636,7 @@ Z8000 family.
 The Z8000 has sixteen 16 bit registers, numbered 0 to 15.  You can refer to different
 sized groups of registers with the prefix @samp{r} for 16 bit registers, @samp{rr}
 for 32 bit registers and @samp{rq} for 64 bit registers.  The first eight of the sixteen
-16 bit registers may also be accessed by bytes.  They are named @samp{r@var{n}h} and @samp{r@var{n}l}}.
+16 bit registers may also be accessed by bytes.  They are named @samp{r@var{n}h} and @samp{r@var{n}l}.
 @example
 byte registers
 	r0l r0h r1h r1l r2h r2l r3h r3l r4h r4l r5h r5l r6h r6l r7h r7l
@@ -4663,7 +4662,7 @@ Register direct
 @item @@r@var{n}
 Indirect register 
 
-@item var{address}
+@item @var{address}
 Direct: the 16/24 bit address of the operand is in the instruction.
 
 @item address(r@var{n})
@@ -4712,7 +4711,7 @@ Synonym for .long
 Synonym for .byte
 @item sval
 Assemble a string.
-@code {sval} expects one string literal, delimited by single quotes.  It assembles each byte of the string into consecutive addresses.  Single quote
+@code{sval} expects one string literal, delimited by single quotes.  It assembles each byte of the string into consecutive addresses.  Single quote
 and other non-representable characters may be descrbed by escaping them
 with a percent sign and their ascii value as a two digit hex number.
 
@@ -4738,8 +4737,8 @@ synonym for @code{.align 1}
 The following table summarizes the opcodes and their arguments:
 @c kluge due to lack of group outside example
 @page
-@group
 @smallexample
+@group
 
             rs   @r{16 bit source register}     
             rd   @r{16 bit destination register}
