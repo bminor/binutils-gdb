@@ -1090,6 +1090,18 @@ s_lcomm (needs_align)
     }
 #endif
 #endif
+   if (!needs_align)
+     {
+       /* FIXME. This needs to be machine independent. */
+       if (temp >= 4)
+	 align = 2;
+       else if (temp >= 2)
+	 align = 1;
+       else
+	 align = temp;
+
+       record_alignment(bss_seg, align);
+     }
 
   if (needs_align)
     {
