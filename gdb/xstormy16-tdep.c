@@ -1,6 +1,6 @@
 /* Target-dependent code for the Sanyo Xstormy16a (LC590000) processor.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -409,10 +409,14 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
 */
 
 static CORE_ADDR
-xstormy16_extract_struct_value_address (char *regbuf)
+xstormy16_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_unsigned_integer (regbuf + xstormy16_register_byte (E_PTR_RET_REGNUM),
-				   xstormy16_reg_size);
+  /* FIXME: cagney/2004-01-17: Does the ABI guarantee that the return
+     address regster is preserved across function calls?  Probably
+     not, making this function wrong.  */
+  ULONGEST val;
+  regcache_raw_read_unsigned (regcache, E_PTR_RET_REGNUM, &val);
+  return val;
 }
 
 /* Function: xstormy16_use_struct_convention 
@@ -1082,7 +1086,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, xstormy16_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, xstormy16_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, xstormy16_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);

@@ -1342,11 +1342,14 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 }
 
 static CORE_ADDR
-sh64_extract_struct_value_address (char *regbuf)
+sh64_extract_struct_value_address (struct regcache *regcache)
 {
-  return (extract_unsigned_integer ((regbuf + DEPRECATED_REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
-				    register_size (current_gdbarch, 
-						   STRUCT_RETURN_REGNUM)));
+  /* FIXME: cagney/2004-01-17: Does the ABI guarantee that the return
+     address regster is preserved across function calls?  Probably
+     not, making this function wrong.  */
+  ULONGEST val;
+  regcache_raw_read_unsigned (regcache, STRUCT_RETURN_REGNUM, &val);
+  return val;
 }
 
 static CORE_ADDR
@@ -2884,7 +2887,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, sh64_push_return_address);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
   set_gdbarch_deprecated_store_struct_return (gdbarch, sh64_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);
   set_gdbarch_deprecated_pop_frame (gdbarch, sh64_pop_frame);
   set_gdbarch_elf_make_msymbol_special (gdbarch,

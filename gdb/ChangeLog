@@ -1,5 +1,13 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* xstormy16-tdep.c: Update copyright.
+	(xstormy16_extract_struct_value_address): Update to current
+	extract struct value address interface.
+	(xstormy16_gdbarch_init): Set extract_struct_value_address.
+	* sh64-tdep.c (sh64_extract_struct_value_address): Update to
+	current extract struct value address interface.
+	(sh64_gdbarch_init): Set extract_struct_value_address.
+
 	* cris-tdep.c: Update copyright.
 	(cris_extract_struct_value_address): Delete function.
 	(struct_return_address): Delete variable.
