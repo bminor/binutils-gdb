@@ -97,7 +97,8 @@ eh_frame_code_alignment ()
   fragS *f;
   fixS *fix;
   int offset;
-  int eh_state;
+  char augmentation[10];
+  int iaug;
 
   if (code_alignment != 0)
     return code_alignment;
@@ -150,8 +151,8 @@ eh_frame_code_alignment ()
 
   /* Skip the augmentation (a null terminated string).  */
 
+  iaug = 0;
   ++offset;
-  eh_state = 0;
   while (1)
     {
       while (f != NULL && offset >= f->fr_fix)
@@ -166,19 +167,10 @@ eh_frame_code_alignment ()
 	}
       while (offset < f->fr_fix && f->fr_literal[offset] != '\0')
 	{
-	  switch (eh_state)
+	  if (iaug < (sizeof augmentation) - 1)
 	    {
-	    case 0:
-	      if (f->fr_literal[offset] == 'e')
-		eh_state = 1;
-	      break;
-	    case 1:
-	      if (f->fr_literal[offset] == 'h')
-		eh_state = 2;
-	      break;
-	    default:
-	      eh_state = 3;
-	      break;
+	      augmentation[iaug] = f->fr_literal[offset];
+	      ++iaug;
 	    }
 	  ++offset;
 	}
@@ -197,11 +189,15 @@ eh_frame_code_alignment ()
       return -1;
     }
 
-  /* If the augmentation field is "eh", then we have to skip a
-     pointer.  Unfortunately, we don't know how large it is.  We find
-     out by looking for a matching fixup.  */
-  if (eh_state == 2)
+  augmentation[iaug] = '\0';
+  if (augmentation[0] == '\0')
     {
+      /* No augmentation.  */
+    }
+  else if (strcmp (augmentation, "eh") == 0)
+    {
+      /* We have to skip a pointer.  Unfortunately, we don't know how
+	 large it is.  We find out by looking for a matching fixup.  */
       while (fix != NULL
 	     && (fix->fx_frag != f || fix->fx_where != offset))
 	fix = fix->fx_next;
@@ -219,6 +215,11 @@ eh_frame_code_alignment ()
 	  code_alignment = -1;
 	  return -1;
 	}
+    }
+  else
+    {
+      code_alignment = -1;
+      return -1;
     }
 
   /* We're now at the code alignment factor, which is a ULEB128.  If
