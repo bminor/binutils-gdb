@@ -282,7 +282,7 @@ hppa_linux_skip_trampoline_code (CORE_ADDR pc)
    Note that with a 2.4 64-bit kernel, the signal context is not properly
    passed back to userspace so the unwind will not work correctly.  */
 static CORE_ADDR
-hppa_linux_sigtramp_find_sigcontext (CORE_ADDR sp)
+hppa_linux_sigtramp_find_sigcontext (CORE_ADDR pc)
 {
   unsigned int dummy[HPPA_MAX_INSN_PATTERN_LEN];
   int offs = 0;
@@ -291,6 +291,12 @@ hppa_linux_sigtramp_find_sigcontext (CORE_ADDR sp)
   static int pcoffs[] = { 0, 4*4, 5*4 };
   /* offsets to the rt_sigframe structure */
   static int sfoffs[] = { 4*4, 10*4, 10*4 };
+  CORE_ADDR sp;
+
+  /* Most of the time, this will be correct.  The one case when this will
+     fail is if the user defined an alternate stack, in which case the
+     beginning of the stack will not be align_down (pc, 64).  */
+  sp = align_down (pc, 64);
 
   /* rt_sigreturn trampoline:
      3419000x ldi 0, %r25 or ldi 1, %r25   (x = 0 or 2)
@@ -308,7 +314,20 @@ hppa_linux_sigtramp_find_sigcontext (CORE_ADDR sp)
     }
 
   if (offs == 0)
-    return 0;
+    {
+      if (insns_match_pattern (pc, hppa_sigtramp, dummy))
+	{
+	  /* sigaltstack case: we have no way of knowing which offset to 
+	     use in this case; default to new kernel handling. If this is
+	     wrong the unwinding will fail.  */
+	  try = 2;
+	  sp = pc - pcoffs[try];
+	}
+      else
+      {
+        return 0;
+      }
+    }
 
   /* sp + sfoffs[try] points to a struct rt_sigframe, which contains
      a struct siginfo and a struct ucontext.  struct ucontext contains
@@ -331,7 +350,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct hppa_linux_sigtramp_unwind_cache *info;
-  CORE_ADDR sp, pc, scptr;
+  CORE_ADDR pc, scptr;
   int i;
 
   if (*this_cache)
@@ -342,8 +361,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   pc = frame_pc_unwind (next_frame);
-  sp = (pc & ~63);
-  scptr = hppa_linux_sigtramp_find_sigcontext (sp);
+  scptr = hppa_linux_sigtramp_find_sigcontext (pc);
 
   /* structure of struct sigcontext:
    
@@ -393,8 +411,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].addr = scptr;
   scptr += 4;
 
-  info->base = read_memory_unsigned_integer (
-		  info->saved_regs[HPPA_SP_REGNUM].addr, 4);
+  info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
 
   return info;
 }
@@ -439,9 +456,8 @@ static const struct frame_unwind *
 hppa_linux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  CORE_ADDR sp = (pc & ~63);
 
-  if (hppa_linux_sigtramp_find_sigcontext (sp))
+  if (hppa_linux_sigtramp_find_sigcontext (pc))
     return &hppa_linux_sigtramp_frame_unwind;
 
   return NULL;

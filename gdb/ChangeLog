@@ -1,5 +1,15 @@
 2004-05-07  Randolph Chung  <tausq@debian.org>
 
+	* hppa-linux-tdep.c (hppa_linux_sigtramp_find_sigcontext): Pass in pc
+	instead of sp, handle sigaltstack case.
+	(hppa_linux_sigtramp_frame_unwind_cache): Adjust calls to 
+	hppa_linux_sigtramp_find_sigcontext, and set base to the frame of the
+	signal handler and not that of the caller.
+	(hppa_linux_sigtramp_unwind_sniffer): Adjust calls to
+	hppa_linux_sigtramp_find_sigcontext.
+
+2004-05-07  Randolph Chung  <tausq@debian.org>
+
 	* Makefile.in (ALLDEPFILES): Add hppa-linux-tdep.c and
 	hppa-linux-nat.c.
 	(hppa-linux-tdep.o, hppa-linux-nat.o): Define rules.
