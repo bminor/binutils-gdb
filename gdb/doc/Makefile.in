@@ -48,7 +48,7 @@ MAKEINFO=makeinfo
 # texi2html. -sts 2000-03-28
 
 MAKEHTML = texi2html
-MAKEHTMLFLAGS = -glossary -menu -split_chapter
+MAKEHTMLFLAGS = -menu -split_chapter
 
 # where to find texi2roff, ditto
 TEXI2ROFF=texi2roff

@@ -1,3 +1,8 @@
+2001-10-12  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (MAKEHTMLFLAGS): Remove -glossary; the most recent
+	version of texi2html (1.64) doesn't support this flag any more.
+
 2001-09-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Host Definition): Remove description of
