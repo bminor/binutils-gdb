@@ -40,3 +40,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define MMAP_BASE_ADDRESS	0xE0000000	/* First mapping here */
 #define MMAP_INCREMENT		0x01000000	/* Increment to next mapping */
+
+/* /usr/include/malloc.h defines these w/o prototypes (and uses
+   char * instead of void *).  */
+#define MALLOC_INCOMPATIBLE
+extern char* malloc PARAMS (());
+extern char* realloc PARAMS (());
+extern int free PARAMS (());
+

@@ -1,3 +1,11 @@
+Mon Jun  1 16:16:12 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* xm-sun4os4.h (MALLOC_INCOMPATIBLE): Define it.
+
+Sun May 31 06:38:27 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* configure.in: Handle -m680[01234]0-wrs.
+
 Fri May 29 22:16:02 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
 
 	* m68k-pinsn.c (print_insn_arg): Pass &EXT_FORMAT_68881 to
