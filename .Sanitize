@@ -1,6 +1,4 @@
 # .Sanitize for devo.
-# $Id$
-#
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -25,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 README
 bfd
@@ -59,6 +58,7 @@ make
 mmalloc
 move-if-change
 newlib
+patch
 rcs
 readline
 send_pr
@@ -123,3 +123,5 @@ for i in * ; do
 		echo Some mentions of Sanitize are still left in $i!
 	fi
 done
+
+# eof
