@@ -1,6 +1,6 @@
 /* Copyright (C) 1998, Cygnus Solutions */
 
-#include "pke.h"
+#include "sky-pke.h"
 #include <stdlib.h>
 
 

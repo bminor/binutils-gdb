@@ -4,8 +4,8 @@
 
 #include "sim-main.h"
 
-#include "device.h"
-#include "vu0.h"
+#include "sky-device.h"
+#include "sky-vu0.h"
 
 static char vu0_mem0_buffer[VU0_MEM0_SIZE];
 static char vu0_mem1_buffer[VU0_MEM1_SIZE];

@@ -4,10 +4,10 @@
 
 #include "sim-main.h"
 
-#include "device.h"
-#include "vu1.h"
-#include "libvpe.h"
-#include "vu.h"
+#include "sky-device.h"
+#include "sky-vu1.h"
+#include "sky-libvpe.h"
+#include "sky-vu.h"
 
 VectorUnitState vu1_state;
 

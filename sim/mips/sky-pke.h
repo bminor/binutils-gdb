@@ -4,7 +4,7 @@
 #define H_PKE_H
 
 #include "sim-main.h"
-#include "device.h"
+#include "sky-device.h"
 
 
 /* External functions */
