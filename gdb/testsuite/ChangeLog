@@ -1,5 +1,10 @@
 Thu Feb 13 16:09:36 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.stabs/*.mt; Deleted, no longer used.
+	* gdb.stabs/configure.in: Remove references to target makefile
+	frags.
+	* gdb.stabs/configure: Rebuilt.
+
 	* gdb.disasm/*.mt: Deleted, no longer used.
 	* gdb.disasm/configure.in: Remove references to target makefile
 	frags.  Use "sh3.s" as the unique filename for this directory.
