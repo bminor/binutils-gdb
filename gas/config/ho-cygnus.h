@@ -32,7 +32,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
  * $Log$
- * Revision 1.1  1991/04/04 18:15:40  rich
+ * Revision 1.1.1.1  1991/04/04 18:15:42  rich
+ * new gas main line
+ *
+ * Revision 1.1  1991/04/04  18:15:40  rich
  * Initial revision
  *
  *
