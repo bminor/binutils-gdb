@@ -58,7 +58,7 @@ ppc_register_u_addr (int ustart, int regnum)
 }
 
 void
-supply_gregset (gregset_t * gregsetp)
+supply_gregset (gdb_gregset_t *gregsetp)
 {
   int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -71,7 +71,7 @@ supply_gregset (gregset_t * gregsetp)
 }
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   int regi;
   greg_t *regp = (greg_t *) gregsetp;
@@ -93,7 +93,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 }
 
 void
-supply_fpregset (fpregset_t * fpregsetp)
+supply_fpregset (gdb_fpregset_t * fpregsetp)
 {
   int regi;
   for (regi = 0; regi < 32; regi++)
@@ -108,7 +108,7 @@ supply_fpregset (fpregset_t * fpregsetp)
    them all. */
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   int regi;
   char *to;

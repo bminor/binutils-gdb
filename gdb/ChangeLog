@@ -1,5 +1,14 @@
 2000-09-29  Kevin Buettner  <kevinb@redhat.com>
 
+	* ppc-linux-nat.c (supply_gregset, fill_gregset): Change type
+	of first argument from gregset_t to gdb_gregset_t in order
+	to match declarations in gregset.h.
+	(supply_fpregset, fill_fpregset): Change type of first argument
+	from fpregset_t to gdb_fpregset_t in order to match declarations
+	in gregset.h.
+
+2000-09-29  Kevin Buettner  <kevinb@redhat.com>
+
 	* procfs.c (proc_iterate_over_mappings, proc_iterate_over_threads,
 	procfs_xfer_memory): Protoize.
 	* ptx4-nat.c (proc_iterate_over_mappings): Protoize.
