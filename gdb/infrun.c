@@ -722,6 +722,11 @@ wait_for_inferior ()
 	{
 	  struct target_waitstatus tmpstatus;
 
+#if 0
+	  resume (1,0);
+	  continue;
+#endif
+	  registers_changed ();
 	  target_resume (pid, 1, TARGET_SIGNAL_0);
 
 	  /* We may have received a signal that we want to pass to
@@ -732,6 +737,7 @@ wait_for_inferior ()
 	    target_wait_hook (pid, &tmpstatus);
 	  else
 	    target_wait (pid, &tmpstatus);
+
 
 	  goto have_waited;
 	}
