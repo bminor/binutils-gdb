@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GLD; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef LD_H
 #define LD_H
@@ -58,6 +58,17 @@ typedef struct
 
   /* Runtime library search path from the -rpath argument.  */
   char *rpath;
+
+  /* Big or little endian as set on command line.  */
+  enum { ENDIAN_UNSET = 0, ENDIAN_BIG, ENDIAN_LITTLE } endian;
+
+  /* If true, export all symbols in the dynamic symbol table of an ELF
+     executable.  */
+  boolean export_dynamic;
+
+  /* If true, build MIPS embedded PIC relocation tables in the output
+     file.  */
+  boolean embedded_relocs;
 } args_type;
 
 extern args_type command_line;
@@ -92,6 +103,9 @@ typedef struct
   FILE *map_file;
 
   boolean stats;
+
+  int split_by_reloc;
+  boolean split_by_file;
 } ld_config_type;
 
 extern ld_config_type config;

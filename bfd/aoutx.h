@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -705,8 +705,10 @@ NAME(aout,machine_type) (arch, machine, unknown)
     case 0:
     case 2000:
     case 3000:          arch_flags = M_MIPS1; break;
-    case 4000:
+    case 4000: /* mips3 */
     case 4400:
+    case 8000: /* mips4 */
+      /* real mips2: */
     case 6000:          arch_flags = M_MIPS2; break;
     default:            arch_flags = M_UNKNOWN; break;
     }
@@ -1542,37 +1544,43 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
      struct external_nlist *sym_pointer;
 {
   bfd_vma value = cache_ptr->value;
+  asection *sec;
+  bfd_vma off;
 
   /* Mask out any existing type bits in case copying from one section
      to another.  */
   sym_pointer->e_type[0] &= ~N_TYPE;
 
-  if (bfd_is_abs_section (bfd_get_section (cache_ptr)))
-    sym_pointer->e_type[0] |= N_ABS;
-  else if (bfd_get_section (cache_ptr) == obj_textsec (abfd)
-	   || (bfd_get_section (cache_ptr)->output_section
-	       == obj_textsec (abfd)))
-    sym_pointer->e_type[0] |= N_TEXT;
-  else if (bfd_get_section (cache_ptr) == obj_datasec (abfd)
-	   || (bfd_get_section (cache_ptr)->output_section
-	       == obj_datasec (abfd)))
-    sym_pointer->e_type[0] |= N_DATA;
-  else if (bfd_get_section (cache_ptr) == obj_bsssec (abfd)
-	   || (bfd_get_section (cache_ptr)->output_section
-	       == obj_bsssec (abfd)))
-    sym_pointer->e_type[0] |= N_BSS;
-  else if (bfd_get_section (cache_ptr) == NULL)
+  sec = bfd_get_section (cache_ptr);
+  off = 0;
+
+  if (sec == NULL)
     {
-      /* Protect the bfd_is_com_section call.  This case occurs, e.g.,
-	 for the *DEBUG* section of a COFF file.  */
+      /* This case occurs, e.g., for the *DEBUG* section of a COFF
+	 file.  */
       bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
     }
-  else if (bfd_is_und_section (bfd_get_section (cache_ptr)))
+
+  if (sec->output_section != NULL)
+    {
+      off = sec->output_offset;
+      sec = sec->output_section;
+    }
+
+  if (bfd_is_abs_section (sec))
+    sym_pointer->e_type[0] |= N_ABS;
+  else if (sec == obj_textsec (abfd))
+    sym_pointer->e_type[0] |= N_TEXT;
+  else if (sec == obj_datasec (abfd))
+    sym_pointer->e_type[0] |= N_DATA;
+  else if (sec == obj_bsssec (abfd))
+    sym_pointer->e_type[0] |= N_BSS;
+  else if (bfd_is_und_section (sec))
     sym_pointer->e_type[0] = N_UNDF | N_EXT;
-  else if (bfd_is_ind_section (bfd_get_section (cache_ptr)))
+  else if (bfd_is_ind_section (sec))
     sym_pointer->e_type[0] = N_INDR;
-  else if (bfd_is_com_section (bfd_get_section (cache_ptr)))
+  else if (bfd_is_com_section (sec))
     sym_pointer->e_type[0] = N_UNDF | N_EXT;
   else
     {
@@ -1581,11 +1589,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
     }
 
   /* Turn the symbol from section relative to absolute again */
-  if (cache_ptr->section->output_section != NULL)
-    value += (cache_ptr->section->output_section->vma
-	      + cache_ptr->section->output_offset);
-  else
-    value += cache_ptr->section->vma;
+  value += sec->vma + off;
 
   if ((cache_ptr->flags & BSF_WARNING) != 0)
     sym_pointer->e_type[0] = N_WARNING;
@@ -4464,6 +4468,10 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	    relocation -= (input_section->output_section->vma
 			   + input_section->output_offset
 			   - input_section->vma);
+
+#ifdef MY_relocatable_reloc
+	  MY_relocatable_reloc (howto, output_bfd, rel, relocation, r_addr);
+#endif
 
 	  if (relocation == 0)
 	    r = bfd_reloc_ok;

@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1872,6 +1872,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
        }
        dot += size;
        output_section_statement->bfd_section->_raw_size += size;
+       output_section_statement->bfd_section->flags |= SEC_HAS_CONTENTS;
      }
       break;
 
@@ -2781,7 +2782,7 @@ lang_add_entry (name, cmdline)
       entry_symbol = name;
       from_cmdline = cmdline;
     }
-#ifdef 0 /* WINDOWS_NT */
+#if 0 
   /* don't do this yet.  It seems to work (the executables run), but the 
      image created is very different from what I was getting before indicating
      that something else is being pulled in.  When everything else is working,

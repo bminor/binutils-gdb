@@ -22,7 +22,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_${EMULATION_NAME}
 
@@ -100,6 +100,7 @@ gld${EMULATION_NAME}_find_so (inp)
   char *alc;
   int max_maj, max_min;
   char *found;
+  boolean found_static;
   struct stat st;
 
   if (! inp->search_dirs_flag
@@ -115,6 +116,7 @@ gld${EMULATION_NAME}_find_so (inp)
     len = strlen (filename);
   else
     {
+      force_maj = atoi (dot + 1);
       len = dot - filename;
       alc = (char *) alloca (len + 1);
       strncpy (alc, filename, len);
@@ -123,6 +125,7 @@ gld${EMULATION_NAME}_find_so (inp)
     }
 
   found = NULL;
+  found_static = false;
   max_maj = max_min = 0;
   for (search = search_head; search != NULL; search = search->next)
     {
@@ -138,8 +141,17 @@ gld${EMULATION_NAME}_find_so (inp)
 	  int found_maj, found_min;
 
 	  if (strncmp (entry->d_name, "lib", 3) != 0
-	      || strncmp (entry->d_name + 3, inp->filename, len) != 0
-	      || strncmp (entry->d_name + 3 + len, ".so", 3) != 0)
+	      || strncmp (entry->d_name + 3, inp->filename, len) != 0)
+	    continue;
+
+	  if (dot == NULL
+	      && strncmp (entry->d_name + 3 + len, ".a", 2) == 0)
+	    {
+	      found_static = true;
+	      continue;
+	    }
+
+	  if (strncmp (entry->d_name + 3 + len, ".so", 3) != 0)
 	    continue;
 
 	  /* We've found a .so file.  Work out the major and minor
@@ -176,7 +188,7 @@ gld${EMULATION_NAME}_find_so (inp)
 
       closedir (dir);
 
-      if (found != NULL)
+      if (found != NULL || found_static)
 	break;
     }
 
@@ -359,7 +371,7 @@ gld${EMULATION_NAME}_before_allocation ()
       if (sdyn != NULL)
 	h->u.def.section = sdyn;
       else
-	h->u.def.section = &bfd_abs_section;
+	h->u.def.section = bfd_abs_section_ptr;
     }
 }
 
@@ -555,6 +567,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   syslib_default,
   hll_default,
   after_parse_default,
+  after_open_default,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,
@@ -562,7 +575,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  0, /* finish */
-  gld${EMULATION_NAME}_create_output_section_statements
+  NULL, /* finish */
+  gld${EMULATION_NAME}_create_output_section_statements,
+  NULL /* open_dynamic_library */
 };
 EOF

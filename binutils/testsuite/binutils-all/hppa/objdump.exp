@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-dejagnu@prep.ai.mit.edu
@@ -20,7 +20,7 @@
 # This file was written by Rob Savoye <rob@cygnus.com>
 # and rewritten by Ian Lance Taylor <ian@cygnus.com>
 
-if [istarget hppa*-*-*] then {
+if ![istarget hppa*-*-*] then {
   return
 }
 
@@ -39,7 +39,12 @@ if {![binutils_assemble $AS $srcdir$subdir/addendbug.s tmpdir/addendbug.o]} then
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -r tmpdir/addendbug.o"]
 
-set want "00000000 R_DP_RELATIVE\[ 	\]+is_idchar\\+0xffffffe0.*"
+if [istarget hppa*-*-*elf*] then {
+  set want "00000000 R_PARISC_DPREL21L\[ 	\]+is_idchar\\+0xffffffe0.*"
+} else {
+  set want "00000000 R_DP_RELATIVE\[ 	\]+is_idchar\\+0xffffffe0.*"
+}
+
 
 if [regexp $want $got] then {
     pass "addendbug test"

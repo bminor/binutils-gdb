@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
  ldfile.c
@@ -33,29 +33,27 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmain.h"
 #include "ldgram.h"
 #include "ldlex.h"
+#include "ldemul.h"
 
 #include <ctype.h>
 
-char *ldfile_input_filename;
+const char *ldfile_input_filename;
+boolean ldfile_assumed_script = false;
 const char *ldfile_output_machine_name = "";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
 search_dirs_type *search_head;
 
-/* start-sanitize-mpw */
 #ifndef MPW
-/* end-sanitize-mpw */
 #ifdef VMS
 char *slash = "";
 #else
 char *slash = "/";
 #endif
-/* start-sanitize-mpw */
 #else /* MPW */
 /* The MPW path char is a colon. */
 char *slash = ":";
 #endif /* MPW */
-/* end-sanitize-mpw */
 
 /* LOCAL */
 
@@ -70,11 +68,9 @@ typedef struct search_arch
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
  
-static bfd *cached_bfd_openr PARAMS ((const char *attempt,
-				      lang_input_statement_type *entry));
-static bfd *open_a PARAMS ((char *arch, lang_input_statement_type *entry,
-			    char *lib, char *suffix));
-static FILE *try_open PARAMS ((char *name, char *exten));
+static boolean try_open_bfd PARAMS ((const char *attempt,
+				     lang_input_statement_type *entry));
+static FILE *try_open PARAMS ((const char *name, const char *exten));
 
 void
 ldfile_add_library_path (name, cmdline)
@@ -91,85 +87,93 @@ ldfile_add_library_path (name, cmdline)
   search_tail_ptr = &new->next;
 }
 
+/* Try to open a BFD for a lang_input_statement.  */
 
-static bfd *
-cached_bfd_openr(attempt,entry)
+static boolean
+try_open_bfd (attempt, entry)
      const char *attempt;
-     lang_input_statement_type  *entry;
+     lang_input_statement_type *entry;
 {
-  entry->the_bfd = bfd_openr(attempt, entry->target);
-  if (trace_file_tries == true ) {
+  entry->the_bfd = bfd_openr (attempt, entry->target);
+
+  if (trace_file_tries)
     info_msg ("attempt to open %s %s\n", attempt,
-		(entry->the_bfd == (bfd *)NULL) ? "failed" : "succeeded" );
-  }
-  return entry->the_bfd;
+	      entry->the_bfd == NULL ? "failed" : "succeeded");
+
+  if (entry->the_bfd != NULL)
+    return true;
+  else
+    return false;
 }
 
-static bfd *
-open_a(arch, entry, lib, suffix)
-     char *arch;
+/* Search for and open the file specified by ENTRY.  If it is an
+   archive, use ARCH, LIB and SUFFIX to modify the file name.  */
+
+boolean
+ldfile_open_file_search (arch, entry, lib, suffix)
+     const char *arch;
      lang_input_statement_type *entry;
-     char *lib;
-     char *suffix;
+     const char *lib;
+     const char *suffix;
 {
-  bfd*desc;
-  search_dirs_type *search ;
+  search_dirs_type *search;
 
   /* If this is not an archive, try to open it in the current
      directory first.  */
   if (! entry->is_archive)
     {
-      desc = cached_bfd_openr (entry->filename, entry);
-      if (desc != NULL)
-	return desc;
+      if (try_open_bfd (entry->filename, entry))
+	return true;
     }
 
   for (search = search_head;
        search != (search_dirs_type *)NULL;
        search = search->next) 
     {
-      char buffer[1000];
       char *string;
-      if (entry->is_archive == true) {
-	sprintf(buffer,
-		"%s%s%s%s%s%s",
-		search->name,
-		slash,
-		lib,
-		entry->filename, arch, suffix);
-      }
-      else {
-	if (entry->filename[0] == '/' || entry->filename[0] == '.') {
-	  strcpy(buffer, entry->filename);
-	} else {
-	  sprintf(buffer,"%s%s%s",search->name, slash, entry->filename);
-	} 
-      }
-      string = buystring(buffer);      
-      desc = cached_bfd_openr (string, entry);
-      if (desc)
+
+      string = (char *) xmalloc (strlen (search->name)
+				 + strlen (slash)
+				 + strlen (lib)
+				 + strlen (entry->filename)
+				 + strlen (arch)
+				 + strlen (suffix)
+				 + 1);
+
+      if (entry->is_archive)
+	sprintf (string, "%s%s%s%s%s%s", search->name, slash,
+		 lib, entry->filename, arch, suffix);
+      else if (entry->filename[0] == '/' || entry->filename[0] == '.')
+	strcpy (string, entry->filename);
+      else
+	sprintf (string, "%s%s%s", search->name, slash, entry->filename);
+
+      if (try_open_bfd (string, entry))
 	{
 	  entry->filename = string;
-	  entry->the_bfd =  desc;
-	  return desc;
+	  return true;
 	}
-      free(string);
+
+      free (string);
     }
-  return (bfd *)NULL;
+
+  return false;
 }
 
-/* Open the input file specified by 'entry', and return a descriptor.
-   The open file is remembered; if the same file is opened twice in a row,
-   a new open is not actually done.  */
+/* Open the input file specified by ENTRY.  */
 
 void
 ldfile_open_file (entry)
      lang_input_statement_type *entry;
 {
-  ASSERT (entry->the_bfd == NULL);
+  if (entry->the_bfd != NULL)
+    return;
 
   if (! entry->search_dirs_flag)
-    entry->the_bfd = cached_bfd_openr (entry->filename, entry);
+    {
+      if (try_open_bfd (entry->filename, entry))
+	return;
+    }
   else
     {
       search_arch_type *arch;
@@ -181,55 +185,58 @@ ldfile_open_file (entry)
 	{
 	  if (config.dynamic_link)
 	    {
-	      /* FIXME: Perhaps we will sometimes want something other
-		 than .so.  */
-	      if (open_a (arch->name, entry, "lib", ".so") != (bfd *) NULL)
+	      if (ldemul_open_dynamic_archive (arch->name, entry))
 		return;
 	    }
-	  if (open_a (arch->name, entry, "lib", ".a") != (bfd *) NULL)
+	  if (ldfile_open_file_search (arch->name, entry, "lib", ".a"))
 	    return;
 #ifdef VMS
-	  if (open_a (arch->name, entry, ":lib", ".a") != (bfd *) NULL)
+	  if (ldfile_open_file_search (arch->name, entry, ":lib", ".a"))
 	    return;
 #endif
 	}
     }
 
-  if (entry->the_bfd == NULL)
-    einfo("%F%P: cannot open %s: %E\n", entry->local_sym_name);
+  einfo("%F%P: cannot open %s: %E\n", entry->local_sym_name);
 }
 
 /* Try to open NAME; if that fails, try NAME with EXTEN appended to it.  */
 
 static FILE *
-try_open(name, exten)
-     char *name;
-     char *exten;
+try_open (name, exten)
+     const char *name;
+     const char *exten;
 {
   FILE *result;
   char buff[1000];
 
-  result = fopen(name, "r");
-  if (trace_file_tries == true) {
-    if (result == (FILE *)NULL) {
-      info_msg ("cannot find ");
+  result = fopen (name, "r");
+  if (trace_file_tries)
+    {
+      if (result == NULL)
+	info_msg ("cannot find script file ");
+      else
+	info_msg ("opened script file ");
+      info_msg ("%s\n",name);
     }
-    info_msg ("%s\n",name);
-  }
-  if (result != (FILE *)NULL) {
-    return result;
-  }
 
-  if (*exten) {
-    sprintf(buff, "%s%s", name, exten);
-    result = fopen(buff, "r");
-    if (trace_file_tries == true) {
-      if (result == (FILE *)NULL) {
-	info_msg ("cannot find ");
-      }
-      info_msg ("%s\n", buff);
+  if (result != NULL)
+    return result;
+
+  if (*exten)
+    {
+      sprintf (buff, "%s%s", name, exten);
+      result = fopen (buff, "r");
+      if (trace_file_tries)
+	{
+	  if (result == NULL)
+	    info_msg ("cannot find script file ");
+	  else
+	    info_msg ("opened script file ");
+	  info_msg ("%s\n", buff);
+	}
     }
-  }
+
   return result;
 }
 
@@ -237,9 +244,9 @@ try_open(name, exten)
    specified with -L, without and with EXTEND apppended.  */
 
 FILE *
-ldfile_find_command_file(name, extend)
-char *name;
-char *extend;
+ldfile_find_command_file (name, extend)
+     const char *name;
+     const char *extend;
 {
   search_dirs_type *search;
   FILE *result;
@@ -261,8 +268,8 @@ char *extend;
 }
 
 void
-ldfile_open_command_file(name)
-char *name;
+ldfile_open_command_file (name)
+     const char *name;
 {
   FILE *ldlex_input_stack;
   ldlex_input_stack = ldfile_find_command_file(name, "");
@@ -274,6 +281,7 @@ char *name;
   lex_push_file(ldlex_input_stack, name);
   
   ldfile_input_filename = name;
+  lineno = 1;
   had_script = true;
 }
 

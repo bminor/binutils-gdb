@@ -15,7 +15,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 srcdir = .
@@ -196,7 +196,7 @@ LIBIBERTY = ../libiberty/libiberty.a
 
 ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmoutb.o \
 	ecoff_sparc.o eebmon29k.o \
-	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o eelf32ppcle.o \
+	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o eelf32lppc.o \
 	eelf64_sparc.o eelf_i386.o egld960.o ego32.o eh8300.o \
 	eh8300h.o eh8500.o eh8500b.o eh8500c.o eh8500m.o eh8500s.o \
 	ehp300bsd.o ehp3hpux.o ehppaelf.o ei386aout.o ei386bsd.o \
@@ -319,6 +319,12 @@ ei386go32.c: $(srcdir)/emulparams/i386go32.sh \
 ei386mach.c: $(srcdir)/emulparams/i386mach.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386mach
+ei386moss.c: $(srcdir)/emulparams/i386moss.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386moss
+ei386msdos.c: $(srcdir)/emulparams/i386msdos.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386msdos.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386msdos
 eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k
@@ -427,9 +433,9 @@ esparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc
-eelf32ppcle.c: $(srcdir)/emulparams/elf32ppcle.sh \
+eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32ppcle
+	${GENSCRIPTS} elf32lppc
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} riscix

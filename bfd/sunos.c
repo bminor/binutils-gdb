@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGETNAME "a.out-sunos-big"
 #define MY(OP) CAT(sunos_big_,OP)
@@ -486,7 +486,8 @@ sunos_canonicalize_dynamic_reloc (abfd, storage, syms)
 	  p = (struct reloc_ext_external *) info->dynrel;
 	  pend = p + info->dynrel_count;
 	  for (; p < pend; p++, to++)
-	    NAME(aout,swap_ext_reloc_in) (abfd, p, to, syms);
+	    NAME(aout,swap_ext_reloc_in) (abfd, p, to, syms,
+					  info->dynsym_count);
 	}
       else
 	{
@@ -496,7 +497,8 @@ sunos_canonicalize_dynamic_reloc (abfd, storage, syms)
 	  p = (struct reloc_std_external *) info->dynrel;
 	  pend = p + info->dynrel_count;
 	  for (; p < pend; p++, to++)
-	    NAME(aout,swap_std_reloc_in) (abfd, p, to, syms);
+	    NAME(aout,swap_std_reloc_in) (abfd, p, to, syms,
+					  info->dynsym_count);
 	}
     }
 
@@ -876,7 +878,7 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 		&& h->root.root.u.def.section->owner != NULL
 		&& (h->root.root.u.def.section->owner->flags & DYNAMIC) != 0)
 	       || (h->root.root.type == bfd_link_hash_common
-		   && ((h->root.root.u.c.section->owner->flags & DYNAMIC)
+		   && ((h->root.root.u.c.p->section->owner->flags & DYNAMIC)
 		       != 0)))
 	{
 	  /* The existing definition is from a dynamic object.  We

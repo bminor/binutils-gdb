@@ -1,5 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    
    This file is part of GLD, the Gnu Linker.
    
@@ -15,7 +15,7 @@
    
    You should have received a copy of the GNU General Public License
    along with GLD; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef LDLANG_H
 #define LDLANG_H
@@ -68,7 +68,8 @@ typedef struct lang_statement_header_struct
       lang_target_statement_enum,
       lang_output_statement_enum,
       lang_padding_statement_enum,
-      
+      lang_group_statement_enum,
+
       lang_afile_asection_pair_statement_enum,
       lang_constructors_statement_enum
     } type;
@@ -159,7 +160,7 @@ typedef struct
   bfd_reloc_code_real_type reloc;
 
   /* Reloc howto structure.  */
-  const reloc_howto_type *howto;
+  reloc_howto_type *howto;
 
   /* Section to generate reloc against.  Exactly one of section and
      name must be NULL.  */
@@ -270,6 +271,17 @@ typedef struct
   fill_type fill;
 } lang_padding_statement_type;
 
+/* A group statement collects a set of libraries together.  The
+   libraries are searched multiple times, until no new undefined
+   symbols are found.  The effect is to search a group of libraries as
+   though they were a single library.  */
+
+typedef struct
+{
+  lang_statement_header_type header;
+  lang_statement_list_type children;
+} lang_group_statement_type;
+
 typedef union lang_statement_union 
 {
   lang_statement_header_type header;
@@ -289,6 +301,7 @@ typedef union lang_statement_union
   lang_object_symbols_statement_type object_symbols_statement;
   lang_fill_statement_type fill_statement;
   lang_padding_statement_type padding_statement;
+  lang_group_statement_type group_statement;
 } lang_statement_union_type;
 
 extern lang_output_section_statement_type *abs_output_section;
@@ -331,8 +344,15 @@ extern void lang_abs_symbol_at_beginning_of PARAMS ((const char *,
 extern void lang_statement_append PARAMS ((struct statement_list *,
 					   union lang_statement_union *,
 					   union lang_statement_union **));
+extern void lang_for_each_input_file
+  PARAMS ((void (*dothis) (lang_input_statement_type *)));
 extern void lang_for_each_file
   PARAMS ((void (*dothis) (lang_input_statement_type *)));
+extern bfd_vma lang_do_assignments
+  PARAMS ((lang_statement_union_type * s,
+	   lang_output_section_statement_type *output_section_statement,
+	   fill_type fill,
+	   bfd_vma dot));
 
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)		\
   extern lang_statement_list_type file_chain;			\
@@ -352,11 +372,12 @@ extern void lang_add_keepsyms_file PARAMS ((const char *filename));
 extern lang_output_section_statement_type *
   lang_output_section_statement_lookup PARAMS ((const char * const name));
 extern void ldlang_add_undef PARAMS ((const char *const name));
-extern void lang_add_output_format PARAMS ((const char *, int from_script));
+extern void lang_add_output_format PARAMS ((const char *, const char *,
+					    const char *, int from_script));
 extern void lang_list_init PARAMS ((lang_statement_list_type*));
 extern void lang_add_data PARAMS ((int type, union etree_union *));
 extern void lang_add_reloc
-  PARAMS ((bfd_reloc_code_real_type reloc, const reloc_howto_type *howto,
+  PARAMS ((bfd_reloc_code_real_type reloc, reloc_howto_type *howto,
 	   asection *section, const char *name, union etree_union *addend));
 extern void lang_for_each_statement
   PARAMS ((void (*func) (lang_statement_union_type *)));
@@ -366,5 +387,11 @@ extern bfd_vma lang_size_sections
 	   lang_output_section_statement_type *output_section_statement,
 	   lang_statement_union_type **prev, fill_type fill,
 	   bfd_vma dot, boolean relax));
+extern void lang_enter_group PARAMS ((void));
+extern void lang_leave_group PARAMS ((void));
+extern void wild_doit
+  PARAMS ((lang_statement_list_type *ptr, asection *section,
+	   lang_output_section_statement_type *output,
+	   lang_input_statement_type *file));
 
 #endif

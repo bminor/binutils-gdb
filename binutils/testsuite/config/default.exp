@@ -1,4 +1,4 @@
-#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+#   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-dejagnu@prep.ai.mit.edu
@@ -20,30 +20,60 @@
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
 load_lib util-defs.exp
+load_lib utils-lib.exp
 
-global NM
-if ![info exists NM] then {
-    set NM [findfile $base_dir/../nm]
+if ![info exists AS] then {
+    set AS [findfile $base_dir/../gas/as.new $base_dir/../gas/as.new [transform as]]
 }
-global NMFLAGS
+if ![info exists ASFLAGS] then {
+    set ASFLAGS ""
+}
+
+if ![info exists NM] then {
+    set NM [findfile $base_dir/nm.new $base_dir/nm.new [transform nm]]
+}
 if ![info exists NMFLAGS] then {
     set NMFLAGS ""
 }
-global SIZE
+
 if ![info exists SIZE] then {
-    set SIZE [findfile $base_dir/../size]
+    set SIZE [findfile $base_dir/size]
 }
-global SIZEFLAGS
 if ![info exists SIZEFLAGS] then {
     set SIZEFLAGS ""
 }
-global OBJDUMP
+
 if ![info exists OBJDUMP] then {
-    set OBJDUMP [findfile $base_dir/../objdump]
+    set OBJDUMP [findfile $base_dir/objdump]
 }
-global OBJDUMPFLAGS
 if ![info exists OBJDUMPFLAGS] then {
     set OBJDUMPFLAGS ""
+}
+
+if ![info exists OBJCOPY] then {
+    set OBJCOPY [findfile $base_dir/objcopy]
+}
+if ![info exists OBJCOPYFLAGS] then {
+    set OBJCOPYFLAGS ""
+}
+
+if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
+
+#
+# binutils_run
+#	run a program, returning the output
+#	sets binutils_run_failed if the program does not exist
+#
+proc binutils_run { prog progargs } {
+    default_binutils_run $prog $progargs
+}
+
+#
+# binutils_assemble
+#	assemble a file
+#
+proc binutils_assemble { as source object } {
+    default_binutils_assemble $as $source $object
 }
 
 #
@@ -54,6 +84,3 @@ expect_before {
     buffer_full		   { perror "internal buffer is full." }
     "can't open '*'" { perror "Can't open test file." }
 }
-
-
-
