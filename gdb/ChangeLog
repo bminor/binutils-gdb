@@ -1,5 +1,78 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-tdep.c (amd64_sigtramp_frame_sniffer): Rewrite to use new
+	sigtramp_p member of `struct gdbarch_tdep'.  Also check whether
+	the program counter is in the range specified by `struct
+	gdbarch_tdep'.
+	* amd64-linux-tdep.c: Include "symtab.h".
+	(amd64_linux_pc_in_sigtramp): Remove function.
+	(amd64_linux_sigtramp_p): New function.
+	(amd64_linux_init_abi): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* amd64nbsd-tdep.c: Include "symtab.h".
+	(amd64nbsd_sigtramp_p): New function.
+	(amd64nbsd_init_abi): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* amd64obsd-tdep.c: Include "symtab.h" and "objfiles.h".  Add a
+	few comments.
+	(amd64obsd_pc_in_sigtramp): Remove function.
+	(amd64obsd_sigtramp_p): New function.
+	(amd64obsd_init_abi): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* i386-tdep.h (struct gdbarch_tdep): Add sigtramp_p member.
+	(i386bsd_pc_ins_sigtramp): Remove prototype.
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): Remove prototypes.
+	* i386-tdep.c (i386_sigtramp_frame_sniffer): Rewrite to use new
+	sigtramp_p member of `struct gdbarch_tdep'.  Also check whether
+	the program counter is in the range specified by `struct
+	gdbarch_tdep'.
+	(i386_pc_in_sigtramp, i386_svr4_pc_in_sigtramp): Remove functions.
+	(i386_sigtramp_p, i386_svr4_sigtramp_p): New functions.
+	(i386_go32_pc_in_sigtramp): Remove function.
+	(i386_svr4_init_abi): Don't set deprecated_pc_in_sigtramp.
+	Initialize TDEP->sigtramp_p.
+	(i386_go32_init_abi): Initialize TDEP->sigtramp_p to NULL.
+	(i386_gdbarch_init): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* i386-linux-tdep.c: Adjust comments.
+	(i386_linux_pc_in_sigtramp): Remove function.
+	(i386_linux_sigtramp_p): New function.
+	(i386_linux_init_abi): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* i386-nto-tdep.c: Update copyright year.
+	(i386nto_pc_in_sigtramp): Remove function.
+	(i386nto_sigtramp_p): New function.
+	(i386nto_sigcontext_addr): Use I386_ESP_REGNUM instead of
+	SP_REGNUM.
+	(i386nto_init_abi): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* i386-sol2-tdep.c: Update copyright year.
+	(i386_sol2_pc_in_sigtramp): Remove function.
+	(i386_sol2_sigtramp_p): New function.
+	(i386_sol2_init_abi): Initialize TDEP->sigtramp_p.  Don't set
+	deprecated_pc_in_sigtramp.
+	* i386bsd-tdep.c (i386bsd_pc_in_sigtramp): Remove function.
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): Remove functions.
+	(i386bsd_init_abi): Don't set deprecated_pc_in_sigtramp,
+	deprecated_sigtramp_start and deprecated_sigtramp_end.
+	* i386nbsd-tdep.c: Include "frame.h" and "symtab.h".
+	(i386nbsd_pc_in_sigtramp): Remove function.
+	(i386nbsd_sigtramp_p): New function.
+	(i386nbsd_init_abi): Don't set deprecated_pc_in_sigtramp,
+	deprecated_sigtramp_start, deprecated_sigtramp_end.  Initialize
+	TDEP->sigtramp_start, TDEP->sigtramp_end and TDEP->sigtramp_p.
+	* i386obsd-tdep.c: Include "frame.h", "symtab.h" and "objfiles.h".
+	(i386obsd_pc_in_sigtramp): Remove function.
+	(i386obsd_sigtramp_p): New function.
+	(i386obsd_sigtramp_start, i386obsd_sigtramp_end): Remove
+	functions.
+	(i386bsd_init_abi): Don't set deprecated_pc_in_sigtramp,
+	deprecated_sigtramp_start, deprecated_sigtramp_end.  Initialize
+	TDEP->sigtramp_p.
+	* Makefile.in (amd64-linux-tdep.o, amd64nbsd-tdep.o,
+	amd64obsd-tdep.o, i386nbsd-tdep.o, i386obsd-tdep.o): Update
+	dependencies.
+
 	* config/i386/i386aout.mt: Remove file.
 
 	* configure.tgt: Remove i[34567]86-*-go32*,

@@ -1533,20 +1533,21 @@ amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
 	$(i386_linux_tdep_h) $(amd64_nat_h)
 amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(regcache_h) $(osabi_h) $(gdb_string_h) $(amd64_tdep_h) \
-	$(solib_svr4_h)
+	$(regcache_h) $(osabi_h) $(symtab_h) $(gdb_string_h) \
+	$(amd64_tdep_h) $(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(amd64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(amd64_nat_h)
 amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(amd64_tdep_h) \
+	$(gdbcore_h) $(osabi_h) $(symtab_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
 amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(amd64_nat_h)
 amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(amd64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+	$(symtab_h) $(objfiles_h) $(osabi_h) $(regset_h) $(target_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(amd64_tdep_h) $(i387_tdep_h) \
+	$(solib_svr4_h)
 amd64-tdep.o: amd64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
 	$(dummy_frame_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
 	$(inferior_h) $(gdbcmd_h) $(gdbcore_h) $(objfiles_h) $(regcache_h) \
@@ -1863,16 +1864,18 @@ i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(osabi_h) $(i386_tdep_h)
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
-i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
-	$(regcache_h) $(regset_h) $(osabi_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(i386_tdep_h) $(i387_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
+i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(gdbcore_h) $(regcache_h) $(regset_h) $(osabi_h) $(symtab_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h) \
+	$(nbsd_tdep_h) $(solib_svr4_h)
 i386-nto-tdep.o: i386-nto-tdep.c $(gdb_string_h) $(gdb_assert_h) $(defs_h) \
 	$(frame_h) $(target_h) $(regcache_h) $(solib_svr4_h) $(i386_tdep_h) \
 	$(nto_tdep_h) $(osabi_h) $(i387_tdep_h)
 i386obsd-nat.o: i386obsd-nat.c $(defs_h) $(i386_tdep_h)
-i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
-	$(regcache_h) $(regset_h) $(osabi_h) $(target_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(gdbcore_h) $(regcache_h) $(regset_h) $(symtab_h) $(objfiles_h) \
+	$(osabi_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 i386-sol2-tdep.o: i386-sol2-tdep.c $(defs_h) $(value_h) $(osabi_h) \
 	$(i386_tdep_h)
 i386-stub.o: i386-stub.c

@@ -24,6 +24,7 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "osabi.h"
+#include "symtab.h"
 
 #include "gdb_assert.h"
 
@@ -32,6 +33,19 @@
 #include "solib-svr4.h"
 
 /* Support for signal handlers.  */
+
+/* Return whether the frame preciding NEXT_FRAME corresponds to a
+   NetBSD sigtramp routine.  */
+
+static int
+amd64nbsd_sigtramp_p (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  return nbsd_pc_in_sigtramp (pc, name);
+}
 
 /* Assuming NEXT_FRAME is for a frame following a BSD sigtramp
    routine, return the address of the associated sigcontext structure.  */
@@ -98,7 +112,7 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc_offset = 7 * 8;
 
   /* NetBSD has its own convention for signal trampolines.  */
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
+  tdep->sigtramp_p = amd64nbsd_sigtramp_p;
   tdep->sigcontext_addr = amd64nbsd_sigcontext_addr;
 
   /* Initialize the array with register offsets in `struct

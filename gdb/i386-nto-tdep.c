@@ -1,6 +1,6 @@
-/* i386-nto-tdep.c - i386 specific functionality for QNX Neutrino.
+/* Target-dependent code for QNX Neutrino x86.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -225,9 +225,16 @@ i386nto_svr4_fetch_link_map_offsets (void)
   return lmp;
 }
 
+/* Return whether the frame preceding NEXT_FRAME corresponds to a QNX
+   Neutrino sigtramp routine.  */
+
 static int
-i386nto_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386nto_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
   return name && strcmp ("__signalstub", name) == 0;
 }
 
@@ -242,7 +249,7 @@ i386nto_sigcontext_addr (struct frame_info *next_frame)
   char buf[4];
   CORE_ADDR sp;
 
-  frame_unwind_register (next_frame, SP_REGNUM, buf);
+  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
   return sp + I386_NTO_SIGCONTEXT_OFFSET;
@@ -278,7 +285,7 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386nto_pc_in_sigtramp);
+  tdep->sigtramp_p = i386nto_sigtramp_p;
   tdep->sigcontext_addr = i386nto_sigcontext_addr;
   tdep->sc_pc_offset = 56;
   tdep->sc_sp_offset = 68;

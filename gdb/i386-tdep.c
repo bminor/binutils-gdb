@@ -1051,17 +1051,27 @@ static const struct frame_unwind i386_sigtramp_frame_unwind =
 static const struct frame_unwind *
 i386_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
 
-  /* We shouldn't even bother to try if the OSABI didn't register
-     a sigcontext_addr handler.  */
-  if (!gdbarch_tdep (current_gdbarch)->sigcontext_addr)
+  /* We shouldn't even bother if we don't have a sigcontext_addr
+     handler.  */
+  if (tdep->sigcontext_addr == NULL)
     return NULL;
 
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
-    return &i386_sigtramp_frame_unwind;
+  if (tdep->sigtramp_p != NULL)
+    {
+      if (tdep->sigtramp_p (next_frame))
+	return &i386_sigtramp_frame_unwind;
+    }
+
+  if (tdep->sigtramp_start != 0)
+    {
+      CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+      gdb_assert (tdep->sigtramp_end != 0);
+      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
+	return &i386_sigtramp_frame_unwind;
+    }
 
   return NULL;
 }
@@ -1731,12 +1741,16 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 }
 
 
-/* Return non-zero if PC and NAME show that we are in a signal
-   trampoline.  */
+/* Return whether the frame preciding NEXT_FRAME corresponds to a
+   sigtramp routine.  */
 
 static int
-i386_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && strcmp ("_sigtramp", name) == 0);
 }
 
@@ -1766,11 +1780,18 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
 
 /* System V Release 4 (SVR4).  */
 
+/* Return whether the frame preciding NEXT_FRAME corresponds to a SVR4
+   sigtramp routine.  */
+
 static int
-i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386_svr4_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
   /* UnixWare uses _sigacthandler.  The origin of the other symbols is
      currently unknown.  */
+  find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && (strcmp ("_sigreturn", name) == 0
 		   || strcmp ("_sigacthandler", name) == 0
 		   || strcmp ("sigvechandler", name) == 0));
@@ -1790,16 +1811,6 @@ i386_svr4_sigcontext_addr (struct frame_info *next_frame)
   sp = extract_unsigned_integer (buf, 4);
 
   return read_memory_unsigned_integer (sp + 8, 4);
-}
-
-
-/* DJGPP.  */
-
-static int
-i386_go32_pc_in_sigtramp (CORE_ADDR pc, char *name)
-{
-  /* DJGPP doesn't have any special frames for signal handlers.  */
-  return 0;
 }
 
 
@@ -1826,7 +1837,7 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
+  tdep->sigtramp_p = i386_svr4_sigtramp_p;
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
   tdep->sc_pc_offset = 36 + 14 * 4;
   tdep->sc_sp_offset = 36 + 17 * 4;
@@ -1841,7 +1852,8 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_go32_pc_in_sigtramp);
+  /* DJGPP doesn't have any special frames for signal handlers.  */
+  tdep->sigtramp_p = NULL;
 
   tdep->jb_pc_offset = 36;
 }
@@ -1973,6 +1985,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->struct_return = pcc_struct_return;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
+  tdep->sigtramp_p = i386_sigtramp_p;
   tdep->sigcontext_addr = NULL;
   tdep->sc_reg_offset = NULL;
   tdep->sc_pc_offset = -1;
@@ -2034,7 +2047,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */
   set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);

@@ -89,6 +89,9 @@ struct gdbarch_tdep
   CORE_ADDR sigtramp_start;
   CORE_ADDR sigtramp_end;
 
+  /* Detect sigtramp.  */
+  int (*sigtramp_p) (struct frame_info *);
+
   /* Get address of sigcontext for sigtramp.  */
   CORE_ADDR (*sigcontext_addr) (struct frame_info *);
 
@@ -217,9 +220,6 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 /* Functions and variables exported from i386bsd-tdep.c.  */
 
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
-extern int i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name);
-extern CORE_ADDR i386bsd_sigtramp_start (CORE_ADDR pc);
-extern CORE_ADDR i386bsd_sigtramp_end (CORE_ADDR pc);
 extern CORE_ADDR i386fbsd_sigtramp_start_addr;
 extern CORE_ADDR i386fbsd_sigtramp_end_addr;
 extern CORE_ADDR i386obsd_sigtramp_start_addr;

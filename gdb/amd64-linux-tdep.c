@@ -25,6 +25,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "symtab.h"
 
 #include "gdb_string.h"
 
@@ -116,11 +117,17 @@ amd64_linux_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
-/* Return whether PC is in a GNU/Linux sigtramp routine.  */
+/* Return whether the frame preciding NEXT_FRAME corresponds to a
+   GNU/Linux sigtramp routine.  */
 
 static int
-amd64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
+amd64_linux_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+
   /* If we have NAME, we can optimize the search.  The trampoline is
      named __restore_rt.  However, it isn't dynamically exported from
      the shared C library, so the trampoline may appear to be part of
@@ -203,7 +210,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   amd64_init_abi (info, gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, amd64_linux_pc_in_sigtramp);
+  tdep->sigtramp_p = amd64_linux_sigtramp_p;
   tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
   tdep->sc_reg_offset = amd64_linux_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);

@@ -967,15 +967,26 @@ static const struct frame_unwind amd64_sigtramp_frame_unwind =
 static const struct frame_unwind *
 amd64_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
 
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
+  /* We shouldn't even bother if we don't have a sigcontext_addr
+     handler.  */
+  if (tdep->sigcontext_addr == NULL)
+    return NULL;
+
+  if (tdep->sigtramp_p != NULL)
     {
-      gdb_assert (gdbarch_tdep (current_gdbarch)->sigcontext_addr);
+      if (tdep->sigtramp_p (next_frame))
+	return &amd64_sigtramp_frame_unwind;
+    }
 
-      return &amd64_sigtramp_frame_unwind;
+  if (tdep->sigtramp_start != 0)
+    {
+      CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+      gdb_assert (tdep->sigtramp_end != 0);
+      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
+	return &amd64_sigtramp_frame_unwind;
     }
 
   return NULL;

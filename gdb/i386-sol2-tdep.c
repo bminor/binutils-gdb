@@ -1,5 +1,6 @@
 /* Target-dependent code for Solaris x86.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,8 +47,10 @@ static int i386_sol2_gregset_reg_offset[] =
 };
 
 static int
-i386_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386_sol2_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+
   /* Signal handler frames under Solaris 2 are recognized by a return
      address of 0xffffffff.  */
   return (pc == 0xffffffff);
@@ -85,12 +88,11 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = 19 * 4;
   tdep->sizeof_fpregset = 380;
 
+  /* Signal trampolines are slightly different from SVR4.  */
+  tdep->sigtramp_p = i386_sol2_sigtramp_p;
   tdep->sigcontext_addr = i386_sol2_mcontext_addr;
   tdep->sc_reg_offset = tdep->gregset_reg_offset;
   tdep->sc_num_regs = tdep->gregset_num_regs;
-
-  /* Signal trampolines are slightly different from SVR4.  */
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
 }
 
 

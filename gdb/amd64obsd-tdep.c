@@ -22,6 +22,8 @@
 #include "defs.h"
 #include "frame.h"
 #include "gdbcore.h"
+#include "symtab.h"
+#include "objfiles.h"
 #include "osabi.h"
 #include "regset.h"
 #include "target.h"
@@ -75,11 +77,16 @@ amd64obsd_regset_from_core_section (struct gdbarch *gdbarch,
 
 /* Support for signal handlers.  */
 
+/* Default page size.  */
 static const int amd64obsd_page_size = 4096;
 
+/* Return whether the frame preciding NEXT_FRAME corresponds to an
+   OpenBSD sigtramp routine.  */
+
 static int
-amd64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+amd64obsd_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   CORE_ADDR start_pc = (pc & ~(amd64obsd_page_size - 1));
   const char sigreturn[] =
   {
@@ -87,9 +94,17 @@ amd64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
     0x67, 0x00, 0x00, 0x00,	/* movq $SYS_sigreturn, %rax */
     0xcd, 0x80			/* int $0x80 */
   };
-  char *buf;
+  char *name, *buf;
 
-  if (name)
+  /* If the function has a valid symbol name, it isn't a
+     trampoline.  */
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (name != NULL)
+    return 0;
+
+  /* If the function lives in a valid section (even without a starting
+     point) it isn't a trampoline.  */
+  if (find_pc_section (pc) != NULL)
     return 0;
 
   /* If we can't read the instructions at START_PC, return zero.  */
@@ -195,7 +210,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 7 * 8;
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, amd64obsd_pc_in_sigtramp);
+  tdep->sigtramp_p = amd64obsd_sigtramp_p;
   tdep->sigcontext_addr = amd64obsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64obsd_sc_reg_offset);
