@@ -30,7 +30,7 @@ except that the section entitled ``GNU General Public License'' may be
 included in a translation approved by the author instead of in the
 original English.
 @end ifinfo
-
+@c @smallbook
 @setchapternewpage odd
 @settitle Using GDB (v4.0)
 @titlepage
@@ -75,7 +75,7 @@ original English.
 @end titlepage
 @page
 
-@node Top, Top, Top, (DIR)
+@node Top, New Features, (dir), (dir)
 @unnumbered Summary of GDB
 
 The purpose of a debugger such as GDB is to allow you to see what is
@@ -106,31 +106,128 @@ is being implemented, and Fortran support will be added when a GNU
 Fortran compiler is written.
 
 @menu
-* New Features::	What's new in GDB 4.0
-* License::    The GNU General Public License gives you permission
-	       to redistribute GDB on certain terms; and also
-	       explains that there is no warranty.
-* User Interface::      GDB command syntax and input and output conventions.
-* Files::      Specifying files for GDB to operate on.
-* Options::    GDB arguments and options.
-* Compilation::Compiling your program so you can debug it.
-* Running::    Running your program under GDB.
-* Stopping::   Making your program stop.  Why it may stop.  What to do then.
-* Stack::      Examining your program's stack.
-* Source::     Examining your program's source files.
-* Data::       Examining data in your program.
-* Symbols::    Examining the debugger's symbol table.
-* Altering::   Altering things in your program.
-* Sequences::  Canned command sequences for repeated use.
-* Emacs::      Using GDB through GNU Emacs.
-* Remote::     Remote debugging across a serial line or TCP/IP.
-* GDB Bugs::   How to report bugs (if you want to get them fixed).
-* Installing GDB::	How to set up GDB for your host and target
-* Commands::   Index of GDB commands.
-* Concepts::   Index of GDB concepts.
+* New Features::		New Features in GDB version 4.0
+* User Interface::		GDB Commands and Displays
+* Files::			Specifying GDB's Files
+* Compilation::			Compiling Your Program for Debugging
+* Targets::			Specifying a Debugging Target 
+* Running::			Running Your Program Under GDB
+* Stopping::			Stopping and Continuing
+* Stack::			Examining the Stack
+* Source::			Examining Source Files
+* Data::			Examining Data
+* Symbols::			Examining the Symbol Table
+* Altering::			Altering Execution
+* Sequences::			Canned Sequences of Commands
+* Options::			Options and Arguments for GDB
+* Emacs::			Using GDB under GNU Emacs
+* Remote::			Remote Debugging
+* GDB Bugs::			Reporting Bugs in GDB
+* Installing GDB::		Installing GDB
+* License::			GNU GENERAL PUBLIC LICENSE
+* Commands::			Command Index
+* Concepts::			Index
+
+ --- The Detailed Node Listing ---
+
+Specifying GDB's Files
+
+* File Arguments::		Specifying Files with Arguments
+* File Commands::		Specifying Files with Commands
+
+Running Your Program Under GDB
+
+* Arguments::			Specifying the arguments for your program.
+* Environment::			Specifying the environment for your program.
+* Working Directory::		Specifying the working directory for giving
+                       to your program when it is run.
+* Input/Output::		Specifying the program's standard input and output.
+* Attach::			Debugging a process started outside GDB.
+* Kill Process::		Getting rid of the child process running your program.
+
+Stopping and Continuing
+
+* Signals::			Fatal signals in your program just stop it;
+                 then you can use GDB to see what is going on.
+* Breakpoints::			Breakpoints let you stop your program when it
+                 reaches a specified point in the code.
+                 an expression changes.
+* Continuing::			Resuming execution until the next signal or breakpoint.
+* Stepping::			Stepping runs the program a short distance and
+                 then stops it wherever it has come to.
+
+Breakpoints
+
+* Set Breaks::			How to establish breakpoints.
+* Exception Handling::		How GDB supports exception handling for C++.
+* Delete Breaks::		How to remove breakpoints no longer needed.
+* Disabling::			How to disable breakpoints (turn them off temporarily).
+* Conditions::			Making extra conditions on whether to stop.
+* Break Commands::		Commands to be executed at a breakpoint.
+* Error in Breakpoints::	
+
+Examining the Stack
+
+* Frames::			Explanation of stack frames and terminology.
+* Backtrace::			Summarizing many frames at once.
+* Selection::			How to select a stack frame.
+* Frame Info::			Information on a Frame
+
+Examining Source Files
+
+* List::			Using the @samp{list} command to print source files.
+* Search::			Commands for searching source files.
+* Source Path::			Specifying the directories to search for source files.
+
+Examining Data
+
+* Expressions::			Expressions that can be computed and printed.
+* Variables::			Using your program's variables in expressions.
+* Arrays::			Examining part of memory as an array.
+* Format options::		Controlling how structures and arrays are printed.
+* Output formats::		Specifying formats for printing values.
+* Auto Display::		Printing certain expressions whenever program stops.
+* Value History::		Referring to values previously printed.
+* Convenience Vars::		Giving names to values for future reference.
+* Registers::			Referring to and storing in machine registers.
+
+Output formats
+
+* Memory::			Examining Memory
+
+Altering Execution
+
+* Assignment::			Altering variable values or memory contents.
+* Jumping::			Altering control flow.
+* Signaling::			Making signals happen in the program.
+* Returning::			Making a function return prematurely.
+* Calling::			Calling functions from your program
+
+Canned Sequences of Commands
+
+* Define::			User-defined commands.
+* Command Files::		Command files.
+* Output::			Controlled output commands useful in
+                   user-defined commands and command files.
+
+Options and Arguments for GDB
+
+* Mode Options::		Options controlling modes of operation.
+* File Options::		Options to specify files (executable, coredump, commands)
+* Other Arguments::		Any other arguments without options
+			also specify files.
+
+Remote Debugging
+
+* Remote Commands::		Commands used to start and finish remote debugging.
+
+Reporting Bugs in GDB
+
+* Bug Criteria::		Have You Found a Bug?
+* Bug Reporting::		How to Report Bugs
 @end menu
 
-@node New Features, License, Top, Top    
+@node New Features, User Interface, Top, Top
 @unnumbered New Features in GDB version 4.0
 
 @itemize @bullet
@@ -196,307 +293,7 @@ HPPA architecture support.
 
 @end itemize
 
-
-
-@node License, User Interface, New Features, Top
-@unnumbered GNU GENERAL PUBLIC LICENSE
-@center Version 1, February 1989
-
-@display
-Copyright @copyright{} 1989 Free Software Foundation, Inc.
-675 Mass Ave, Cambridge, MA 02139, USA
-
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
-@end display
-
-@unnumberedsec Preamble
-
-  The license agreements of most software companies try to keep users
-at the mercy of those companies.  By contrast, our General Public
-License is intended to guarantee your freedom to share and change free
-software---to make sure the software is free for all its users.  The
-General Public License applies to the Free Software Foundation's
-software and to any other program whose authors commit to using it.
-You can use it for your programs, too.
-
-  When we speak of free software, we are referring to freedom, not
-price.  Specifically, the General Public License is designed to make
-sure that you have the freedom to give away or sell copies of free
-software, that you receive source code or can get it if you want it,
-that you can change the software or use pieces of it in new free
-programs; and that you know you can do these things.
-
-  To protect your rights, we need to make restrictions that forbid
-anyone to deny you these rights or to ask you to surrender the rights.
-These restrictions translate to certain responsibilities for you if you
-distribute copies of the software, or if you modify it.
-
-  For example, if you distribute copies of a such a program, whether
-gratis or for a fee, you must give the recipients all the rights that
-you have.  You must make sure that they, too, receive or can get the
-source code.  And you must tell them their rights.
-
-  We protect your rights with two steps: (1) copyright the software, and
-(2) offer you this license which gives you legal permission to copy,
-distribute and/or modify the software.
-
-  Also, for each author's protection and ours, we want to make certain
-that everyone understands that there is no warranty for this free
-software.  If the software is modified by someone else and passed on, we
-want its recipients to know that what they have is not the original, so
-that any problems introduced by others will not reflect on the original
-authors' reputations.
-
-  The precise terms and conditions for copying, distribution and
-modification follow.
-
-@iftex
-@unnumberedsec TERMS AND CONDITIONS
-@end iftex
-@ifinfo
-@center TERMS AND CONDITIONS
-@end ifinfo
-
-@enumerate
-@item
-This License Agreement applies to any program or other work which
-contains a notice placed by the copyright holder saying it may be
-distributed under the terms of this General Public License.  The
-``Program'', below, refers to any such program or work, and a ``work based
-on the Program'' means either the Program or any work containing the
-Program or a portion of it, either verbatim or with modifications.  Each
-licensee is addressed as ``you''.
-
-@item
-You may copy and distribute verbatim copies of the Program's source
-code as you receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy an appropriate copyright notice and
-disclaimer of warranty; keep intact all the notices that refer to this
-General Public License and to the absence of any warranty; and give any
-other recipients of the Program a copy of this General Public License
-along with the Program.  You may charge a fee for the physical act of
-transferring a copy.
-
-@item
-You may modify your copy or copies of the Program or any portion of
-it, and copy and distribute such modifications under the terms of Paragraph
-1 above, provided that you also do the following:
-
-@itemize @bullet
-@item
-cause the modified files to carry prominent notices stating that
-you changed the files and the date of any change; and
-
-@item
-cause the whole of any work that you distribute or publish, that
-in whole or in part contains the Program or any part thereof, either
-with or without modifications, to be licensed at no charge to all
-third parties under the terms of this General Public License (except
-that you may choose to grant warranty protection to some or all
-third parties, at your option).
-
-@item
-If the modified program normally reads commands interactively when
-run, you must cause it, when started running for such interactive use
-in the simplest and most usual way, to print or display an
-announcement including an appropriate copyright notice and a notice
-that there is no warranty (or else, saying that you provide a
-warranty) and that users may redistribute the program under these
-conditions, and telling the user how to view a copy of this General
-Public License.
-
-@item
-You may charge a fee for the physical act of transferring a
-copy, and you may at your option offer warranty protection in
-exchange for a fee.
-@end itemize
-
-Mere aggregation of another independent work with the Program (or its
-derivative) on a volume of a storage or distribution medium does not bring
-the other work under the scope of these terms.
-
-@item
-You may copy and distribute the Program (or a portion or derivative of
-it, under Paragraph 2) in object code or executable form under the terms of
-Paragraphs 1 and 2 above provided that you also do one of the following:
-
-@itemize @bullet
-@item
-accompany it with the complete corresponding machine-readable
-source code, which must be distributed under the terms of
-Paragraphs 1 and 2 above; or,
-
-@item
-accompany it with a written offer, valid for at least three
-years, to give any third party free (except for a nominal charge
-for the cost of distribution) a complete machine-readable copy of the
-corresponding source code, to be distributed under the terms of
-Paragraphs 1 and 2 above; or,
-
-@item
-accompany it with the information you received as to where the
-corresponding source code may be obtained.  (This alternative is
-allowed only for noncommercial distribution and only if you
-received the program in object code or executable form alone.)
-@end itemize
-
-Source code for a work means the preferred form of the work for making
-modifications to it.  For an executable file, complete source code means
-all the source code for all modules it contains; but, as a special
-exception, it need not include source code for modules which are standard
-libraries that accompany the operating system on which the executable
-file runs, or for standard header files or definitions files that
-accompany that operating system.
-
-@item
-You may not copy, modify, sublicense, distribute or transfer the
-Program except as expressly provided under this General Public License.
-Any attempt otherwise to copy, modify, sublicense, distribute or transfer
-the Program is void, and will automatically terminate your rights to use
-the Program under this License.  However, parties who have received
-copies, or rights to use copies, from you under this General Public
-License will not have their licenses terminated so long as such parties
-remain in full compliance.
-
-@item
-By copying, distributing or modifying the Program (or any work based
-on the Program) you indicate your acceptance of this license to do so,
-and all its terms and conditions.
-
-@item
-Each time you redistribute the Program (or any work based on the
-Program), the recipient automatically receives a license from the original
-licensor to copy, distribute or modify the Program subject to these
-terms and conditions.  You may not impose any further restrictions on the
-recipients' exercise of the rights granted herein.
-
-@item
-The Free Software Foundation may publish revised and/or new versions
-of the General Public License from time to time.  Such new versions will
-be similar in spirit to the present version, but may differ in detail to
-address new problems or concerns.
-
-Each version is given a distinguishing version number.  If the Program
-specifies a version number of the license which applies to it and ``any
-later version'', you have the option of following the terms and conditions
-either of that version or of any later version published by the Free
-Software Foundation.  If the Program does not specify a version number of
-the license, you may choose any version ever published by the Free Software
-Foundation.
-
-@item
-If you wish to incorporate parts of the Program into other free
-programs whose distribution conditions are different, write to the author
-to ask for permission.  For software which is copyrighted by the Free
-Software Foundation, write to the Free Software Foundation; we sometimes
-make exceptions for this.  Our decision will be guided by the two goals
-of preserving the free status of all derivatives of our free software and
-of promoting the sharing and reuse of software generally.
-
-@iftex
-@heading NO WARRANTY
-@end iftex
-@ifinfo
-@center NO WARRANTY
-@end ifinfo
-
-@item
-BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
-OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-PROVIDE THE PROGRAM ``AS IS'' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
-OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
-TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE
-PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
-REPAIR OR CORRECTION.
-
-@item
-IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL
-ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
-INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT
-LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES
-SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE
-WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-@end enumerate
-
-@iftex
-@heading END OF TERMS AND CONDITIONS
-@end iftex
-@ifinfo
-@center END OF TERMS AND CONDITIONS
-@end ifinfo
-
-@page
-@unnumberedsec Appendix: How to Apply These Terms to Your New Programs
-
-  If you develop a new program, and you want it to be of the greatest
-possible use to humanity, the best way to achieve this is to make it
-free software which everyone can redistribute and change under these
-terms.
-
-  To do so, attach the following notices to the program.  It is safest to
-attach them to the start of each source file to most effectively convey
-the exclusion of warranty; and each file should have at least the
-``copyright'' line and a pointer to where the full notice is found.
-
-@smallexample
-@var{one line to give the program's name and a brief idea of what it does.}
-Copyright (C) 19@var{yy}  @var{name of author}
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-@end smallexample
-
-Also add information on how to contact you by electronic and paper mail.
-
-If the program is interactive, make it output a short notice like this
-when it starts in an interactive mode:
-
-@smallexample
-Gnomovision version 69, Copyright (C) 19@var{yy} @var{name of author}
-Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
-This is free software, and you are welcome to redistribute it
-under certain conditions; type `show c' for details.
-@end smallexample
-
-The hypothetical commands `show w' and `show c' should show the
-appropriate parts of the General Public License.  Of course, the
-commands you use may be called something other than `show w' and `show
-c'; they could even be mouse-clicks or menu items---whatever suits your
-program.
-
-You should also get your employer (if you work as a programmer) or your
-school, if any, to sign a ``copyright disclaimer'' for the program, if
-necessary.  Here a sample; alter the names:
-
-@example
-Yoyodyne, Inc., hereby disclaims all copyright interest in the
-program `Gnomovision' (a program to direct compilers to make passes
-at assemblers) written by James Hacker.
-
-@var{signature of Ty Coon}, 1 April 1989
-Ty Coon, President of Vice
-@end example
-
-That's all there is to it!
-
-@node User Interface, Files, License, Top
+@node User Interface, Files, New Features, Top
 @chapter GDB Commands and Displays
 
 GDB is invoked with the shell command @samp{gdb}.  Once started, it reads
@@ -863,9 +660,8 @@ debug a core dump of a previous run, GDB must be told the file name of
 the core dump.
 
 @menu
-* Arguments: File Arguments.   Specifying files with arguments
-                                (when you start GDB).
-* Commands: File Commands.     Specifying files with GDB commands.
+* File Arguments::		Specifying Files with Arguments
+* File Commands::		Specifying Files with Commands
 @end menu
 
 @node File Arguments, File Commands, Files, Files
@@ -888,7 +684,7 @@ you plan to do is debug the program interactively.)
 @xref{Options}, for full information on options and arguments for
 invoking GDB.
 
-@node File Commands,, File Arguments, Files
+@node File Commands,  , File Arguments, Files
 @section Specifying Files with Commands
 
 Usually you specify the files for GDB to work with by giving arguments when
@@ -999,7 +795,7 @@ previous source line.
 Symbol number @var{n} contains a pointer into the string table which is
 larger than the size of the string table.  GDB circumvents the problem
 by considering the symbol to have the name @code{foo}, which may cause
-other problems if many symbols end up with this name.  @index{foo}
+other problems if many symbols end up with this name.  @cindex{foo}
 
 @item unknown symbol type @code{0xNN}
 
@@ -1155,7 +951,7 @@ option or use shorter file names.  Alternatively, use a version of GNU
 @code{ar} dated more recently than August 1989.
 @end ignore
 
-@node     Targets,    Running, Compilation, Top
+@node     Targets, Running, Compilation, Top
 @chapter Specifying a Debugging Target 
 @cindex debugging target
 @kindex target
@@ -1248,13 +1044,13 @@ symbols, GDB will discard its symbol table and re-read it from your
 program.  In this process, it tries to retain your current breakpoints.
 
 @menu
-* Arguments::          Specifying the arguments for your program.
-* Environment::        Specifying the environment for your program.
-* Working Directory::  Specifying the working directory for giving
+* Arguments::			Specifying the arguments for your program.
+* Environment::			Specifying the environment for your program.
+* Working Directory::		Specifying the working directory for giving
                        to your program when it is run.
-* Input/Output::       Specifying the program's standard input and output.
-* Attach::             Debugging a process started outside GDB.
-* Kill Process::       Getting rid of the child process running your program.
+* Input/Output::		Specifying the program's standard input and output.
+* Attach::			Debugging a process started outside GDB.
+* Kill Process::		Getting rid of the child process running your program.
 @end menu
 
 @node Arguments, Environment, Running, Running
@@ -1448,7 +1244,7 @@ whether or not this happens by using the @samp{set caution} command
 The @samp{attach} command is also used to debug a remote machine via a
 serial connection.  @xref{Remote}, for more info.
 
-@node Kill Process,, Attach, Running
+@node Kill Process,  , Attach, Running
 @section Killing the Child Process
 
 @table @code
@@ -1481,13 +1277,13 @@ that point; or so that if the program runs into trouble you can
 investigate and find out why.
 
 @menu
-* Signals::      Fatal signals in your program just stop it;
+* Signals::			Fatal signals in your program just stop it;
                  then you can use GDB to see what is going on.
-* Breakpoints::  Breakpoints let you stop your program when it
+* Breakpoints::			Breakpoints let you stop your program when it
                  reaches a specified point in the code.
                  an expression changes.
-* Continuing::   Resuming execution until the next signal or breakpoint.
-* Stepping::     Stepping runs the program a short distance and
+* Continuing::			Resuming execution until the next signal or breakpoint.
+* Stepping::			Stepping runs the program a short distance and
                  then stops it wherever it has come to.
 @end menu
 
@@ -1574,7 +1370,7 @@ You can also use the @samp{signal} command to prevent the program from
 seeing a signal, or cause it to see a signal it normally would not see,
 or to give it any signal at any time.  @xref{Signaling}.
 
-@node Breakpoints, Watchpoints Continuing, Signals, Stopping
+@node Breakpoints, Continuing, Signals, Stopping
 @section Breakpoints
 
 @cindex breakpoints
@@ -1625,13 +1421,13 @@ releases of GDB will use such hardware if it is available.
 @end table
 
 @menu
-* Set Breaks::     How to establish breakpoints.
-* Exception Handling:: How GDB supports exception handling for C++.
-* Delete Breaks::   How to remove breakpoints no longer needed.
-* Disabling::      How to disable breakpoints (turn them off temporarily).
-* Conditions::     Making extra conditions on whether to stop.
-* Break Commands:: Commands to be executed at a breakpoint.
-* Error in Breakpoints:: "Cannot insert breakpoints" error--why, what to do.
+* Set Breaks::			How to establish breakpoints.
+* Exception Handling::		How GDB supports exception handling for C++.
+* Delete Breaks::		How to remove breakpoints no longer needed.
+* Disabling::			How to disable breakpoints (turn them off temporarily).
+* Conditions::			Making extra conditions on whether to stop.
+* Break Commands::		Commands to be executed at a breakpoint.
+* Error in Breakpoints::	
 @end menu
 
 @node Set Breaks, Exception Handling, Breakpoints, Breakpoints
@@ -1780,7 +1576,7 @@ You cannot raise an exception interactively.
 You cannot interactively install an exception handler.
 @end itemize
 
-@node Delete Breaks, Disabling, Set Breaks, Breakpoints
+@node Delete Breaks, Disabling, Exception Handling, Breakpoints
 @subsection Deleting Breakpoints
 
 @cindex clearing breakpoints and watchpoints
@@ -2078,7 +1874,7 @@ evaluated without changing the terminal modes.  When you want to have
 nontrivial conditions for performing the side effects, the operators
 @samp{&&}, @samp{||} and @samp{?@dots{}:} may be useful.
 
-@node Error in Breakpoints,, Break Commands, Breakpoints
+@node Error in Breakpoints,  , Break Commands, Breakpoints
 @subsection ``Cannot Insert Breakpoints'' Error
 
 Under some operating systems, breakpoints cannot be used in a program if
@@ -2138,7 +1934,7 @@ you can continue with @samp{signal 0}.  @xref{Signaling}.  You can
 also act in advance to control what signals your program will see, using
 the @samp{handle} command (@pxref{Signals}). 
 
-@node Stepping,, Continuing, Stopping
+@node Stepping,  , Continuing, Stopping
 @section Stepping
 
 @cindex stepping
@@ -2281,10 +2077,10 @@ frame and describes it briefly as the @samp{frame} command does
 (@pxref{Frame Info, Info}).
 
 @menu
-* Frames::          Explanation of stack frames and terminology.
-* Backtrace::       Summarizing many frames at once.
-* Selection::       How to select a stack frame.
-* Info: Frame Info, Commands to print information on stack frames.
+* Frames::			Explanation of stack frames and terminology.
+* Backtrace::			Summarizing many frames at once.
+* Selection::			How to select a stack frame.
+* Frame Info::			Information on a Frame
 @end menu
 
 @node Frames, Backtrace, Stack, Stack
@@ -2453,7 +2249,7 @@ that source line.  For example:
 After such a printout, the @samp{list} command with no arguments will print
 ten lines centered on the point of execution in the frame.  @xref{List}.
 
-@node Frame Info, , Selection, Stack
+@node Frame Info,  , Selection, Stack
 @section Information on a Frame
 
 There are several other commands to print information about the selected
@@ -2516,9 +2312,9 @@ which execution in that frame has stopped in.  You can also
 print parts of source files by explicit command.
 
 @menu
-* List::        Using the @samp{list} command to print source files.
-* Search::      Commands for searching source files.
-* Source Path:: Specifying the directories to search for source files.
+* List::			Using the @samp{list} command to print source files.
+* Search::			Commands for searching source files.
+* Source Path::			Specifying the directories to search for source files.
 @end menu
 
 @node List, Search, Source, Source
@@ -2660,7 +2456,7 @@ with the one before the last line listed and going backward, for a match
 for @var{regexp}.  It lists the line that is found.  You can abbreviate
 this command with as little as @samp{rev}.
 
-@node Source Path,, Search, Source
+@node Source Path,  , Search, Source
 @section Specifying Source Directories
 
 @cindex source path
@@ -2746,17 +2542,15 @@ It examines data in memory at a specified address and prints it in a
 specified format.
 
 @menu
-* Expressions::      Expressions that can be computed and printed.
-* Variables::        Using your program's variables in expressions.
-* Assignment::       Setting your program's variables.
-* Arrays::           Examining part of memory as an array.
-* Format Options::   Controlling how structures and arrays are printed.
-* Output formats::   Specifying formats for printing values.
-* Memory::           Examining memory explicitly.
-* Auto Display::     Printing certain expressions whenever program stops.
-* Value History::    Referring to values previously printed.
-* Convenience Vars:: Giving names to values for future reference.
-* Registers::        Referring to and storing in machine registers.
+* Expressions::			Expressions that can be computed and printed.
+* Variables::			Using your program's variables in expressions.
+* Arrays::			Examining part of memory as an array.
+* Format options::		Controlling how structures and arrays are printed.
+* Output formats::		Specifying formats for printing values.
+* Auto Display::		Printing certain expressions whenever program stops.
+* Value History::		Referring to values previously printed.
+* Convenience Vars::		Giving names to values for future reference.
+* Registers::			Referring to and storing in machine registers.
 @end menu
 
 @node Expressions, Variables, Data, Data
@@ -2982,10 +2776,10 @@ $1 = @{
 @item set prettyprint off
 Cause GDB to print structures in a compact format, like this:
 
-@example
+@smallexample
 $1 = @{next = 0x0, flags = @{sweet = 1, sour = 1@}, meat \
 = 0x54 "Pork"@}
-@end example
+@end smallexample
 
 @noindent
 This is the default format.
@@ -3009,7 +2803,7 @@ structures.
 
 For example, given the declarations
 
-@example
+@smallexample
 typedef enum @{Tree, Bug@} Species;
 typedef enum @{Big_tree, Acorn, Seedling@} Tree_forms;
 typedef enum @{Caterpillar, Cocoon, Butterfly@} Bug_forms;
@@ -3023,14 +2817,14 @@ struct thing @{
 @};
 
 struct thing foo = @{Tree, @{Acorn@}@};
-@end example
+@end smallexample
 
 @noindent
 with @samp{set unionprint on} in effect @samp{p foo} would print
 
-@example
+@smallexample
 $1 = @{it = Tree, form = @{tree = Acorn, bug = Cocoon@}@}
-@end example
+@end smallexample
 
 @noindent
 and with @samp{set unionprint off} in effect it would print
@@ -3040,7 +2834,7 @@ $1 = @{it = Tree, form = @{...@}@}
 @end example
 @end table
 
-@node Output formats, Memory, Format options, Data
+@node Output formats, Auto Display, Format options, Data
 @section Output formats
 
 @cindex formatted output
@@ -3102,7 +2896,11 @@ To reprint the last value in the value history with a different format,
 you can use the @samp{print} command with just a format and no
 expression.  For example, @samp{p/x} reprints the last value in hex.
 
-@node Memory, Auto Display, Output formats, Data
+@menu
+* Memory::			Examining Memory
+@end menu
+
+@node Memory,  , Output formats, Output formats
 @subsection Examining Memory
 
 @cindex examining memory
@@ -3256,7 +3054,7 @@ If the @samp{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
-@node Auto Display, Value History, Memory, Data
+@node Auto Display, Value History, Output formats, Data
 @section Automatic Display
 @cindex automatic display
 @cindex display of expressions
@@ -3469,7 +3267,7 @@ The variable @code{$__} is automatically set by the @samp{x} command
 to the value found in the last address examined.
 @end table
 
-@node Registers,, Convenience Vars, Data
+@node Registers,  , Convenience Vars, Data
 @section Registers
 
 @cindex registers
@@ -3663,11 +3461,11 @@ locations, give the program a signal, restart it at a different address,
 or even return prematurely from a function to its caller.
 
 @menu
-* Assignment::    Altering variable values or memory contents.
-* Jumping::       Altering control flow.
-* Signaling::     Making signals happen in the program.
-* Returning::     Making a function return prematurely.
-* Calling::       Calling functions from your program
+* Assignment::			Altering variable values or memory contents.
+* Jumping::			Altering control flow.
+* Signaling::			Making signals happen in the program.
+* Returning::			Making a function return prematurely.
+* Calling::			Calling functions from your program
 @end menu
 
 @node Assignment, Jumping, Altering, Altering
@@ -3815,7 +3613,7 @@ returned.  Contrast this with the @samp{finish} command
 (@pxref{Stepping}), which resumes execution until the selected stack
 frame returns @emph{naturally}.
 
-@node     Calling,    ,      ,  Returning, Altering
+@node     Calling,  , Returning, Altering
 @comment  node-name,  next,  previous,  up
 @section Calling your Program's Functions
 
@@ -3840,9 +3638,9 @@ ways to store sequences of commands for execution as a unit:
 user-defined commands and command files.
 
 @menu
-* Define::         User-defined commands.
-* Command Files::  Command files.
-* Output::         Controlled output commands useful in
+* Define::			User-defined commands.
+* Command Files::		Command files.
+* Output::			Controlled output commands useful in
                    user-defined commands and command files.
 @end menu
 
@@ -3920,7 +3718,7 @@ without asking when used in a command file.  Many GDB commands that
 normally print messages to say what they are doing omit the messages
 when used in a command file.
 
-@node Output,, Command Files, Sequences
+@node Output,  , Command Files, Sequences
 @section Commands for Controlled Output
 
 During the execution of a command file or a user-defined command, the only
@@ -4001,9 +3799,9 @@ When you invoke GDB, you can specify arguments telling it what files to
 operate on and what other things to do.
 
 @menu
-* Mode Options::     Options controlling modes of operation.
-* File Options::     Options to specify files (executable, coredump, commands)
-* Other Arguments::  Any other arguments without options
+* Mode Options::		Options controlling modes of operation.
+* File Options::		Options to specify files (executable, coredump, commands)
+* Other Arguments::		Any other arguments without options
 			also specify files.
 @end menu
 
@@ -4091,7 +3889,7 @@ Execute GDB commands from file @var{file}.
 Add @var{directory} to the path to search for source files.
 @end table
 
-@node Other Arguments,, File Options, Options
+@node Other Arguments,  , File Options, Options
 @section Other Arguments
 
 If there are arguments to GDB that are not options or associated with
@@ -4197,7 +3995,7 @@ environment.  Users of this environment can use a new command,
 each value is printed in its own window.
 @end ignore
 
-@node Remote, Commands, Emacs, Top
+@node Remote, GDB Bugs, Emacs, Top
 @chapter Remote Debugging
 @cindex remote debugging
 
@@ -4216,13 +4014,13 @@ Several sample remote debugging drivers are distributed with GDB; see
 the @file{README} file in the GDB distribution for more information.
 
 @menu
-* Remote Commands::       Commands used to start and finish remote debugging.
+* Remote Commands::		Commands used to start and finish remote debugging.
 @end menu
 
 For details of the communication protocol, see the comments in the GDB
 source file @file{remote.c}.
 
-@node Remote Commands, GDB Bugs, Remote, Remote
+@node Remote Commands,  , Remote, Remote
 @section Commands for Remote Debugging
 
 To start remote debugging, first run GDB and specify as an executable file
@@ -4254,7 +4052,7 @@ has been equipped with a circuit to perform a hard reset (or some other
 interesting action) when a break is detected.
 @end table
 
-@node GDB Bugs, , Remote Commands, Top
+@node GDB Bugs, Installing GDB, Remote, Top
 @comment  node-name,  next,  previous,  up
 @chapter Reporting Bugs in GDB
 @cindex Bugs in GDB
@@ -4271,12 +4069,11 @@ In order for a bug report to serve its purpose, you must include the
 information that makes for fixing the bug.
 
 @menu
-* Criteria:  Bug Criteria.   Have you really found a bug?
-* Reporting: Bug Reporting.  How to report a bug effectively.
-* Known: Trouble.            Known problems.
+* Bug Criteria::		Have You Found a Bug?
+* Bug Reporting::		How to Report Bugs
 @end menu
 
-@node Bug Criteria, Bug Reporting, Bugs, Bugs
+@node Bug Criteria, Bug Reporting, GDB Bugs, GDB Bugs
 @section Have You Found a Bug?
 @cindex Bug Criteria
 
@@ -4305,7 +4102,7 @@ If you are an experienced user of debugging tools, your suggestions
 for improvement of GDB are welcome in any case.
 @end itemize
 
-@node Bug Reporting,, Bug Criteria, Bugs
+@node Bug Reporting,  , Bug Criteria, GDB Bugs
 @section How to Report Bugs
 @cindex Bug Reports
 @cindex Compiler Bugs, Reporting
@@ -4493,7 +4290,7 @@ things without first using the debugger to find the facts.
 @include readline/inc-history.texinfo
 @end iftex
 
-@node Installing GDB, , ,Top
+@node Installing GDB, License, GDB Bugs, Top
 @appendix Installing GDB
 @cindex configuring GDB
 @cindex installation
@@ -4539,12 +4336,310 @@ path to the GDB source.
 Display a list of supported target environments for GDB.
 @end table
 
-@node Commands, Concepts, Remote, Top
+@node License, Commands, Installing GDB, Top
+@unnumbered GNU GENERAL PUBLIC LICENSE
+@center Version 1, February 1989
+
+@display
+Copyright @copyright{} 1989 Free Software Foundation, Inc.
+675 Mass Ave, Cambridge, MA 02139, USA
+
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+@end display
+
+@unnumberedsec Preamble
+
+  The license agreements of most software companies try to keep users
+at the mercy of those companies.  By contrast, our General Public
+License is intended to guarantee your freedom to share and change free
+software---to make sure the software is free for all its users.  The
+General Public License applies to the Free Software Foundation's
+software and to any other program whose authors commit to using it.
+You can use it for your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Specifically, the General Public License is designed to make
+sure that you have the freedom to give away or sell copies of free
+software, that you receive source code or can get it if you want it,
+that you can change the software or use pieces of it in new free
+programs; and that you know you can do these things.
+
+  To protect your rights, we need to make restrictions that forbid
+anyone to deny you these rights or to ask you to surrender the rights.
+These restrictions translate to certain responsibilities for you if you
+distribute copies of the software, or if you modify it.
+
+  For example, if you distribute copies of a such a program, whether
+gratis or for a fee, you must give the recipients all the rights that
+you have.  You must make sure that they, too, receive or can get the
+source code.  And you must tell them their rights.
+
+  We protect your rights with two steps: (1) copyright the software, and
+(2) offer you this license which gives you legal permission to copy,
+distribute and/or modify the software.
+
+  Also, for each author's protection and ours, we want to make certain
+that everyone understands that there is no warranty for this free
+software.  If the software is modified by someone else and passed on, we
+want its recipients to know that what they have is not the original, so
+that any problems introduced by others will not reflect on the original
+authors' reputations.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+@iftex
+@unnumberedsec TERMS AND CONDITIONS
+@end iftex
+@ifinfo
+@center TERMS AND CONDITIONS
+@end ifinfo
+
+@enumerate
+@item
+This License Agreement applies to any program or other work which
+contains a notice placed by the copyright holder saying it may be
+distributed under the terms of this General Public License.  The
+``Program'', below, refers to any such program or work, and a ``work based
+on the Program'' means either the Program or any work containing the
+Program or a portion of it, either verbatim or with modifications.  Each
+licensee is addressed as ``you''.
+
+@item
+You may copy and distribute verbatim copies of the Program's source
+code as you receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice and
+disclaimer of warranty; keep intact all the notices that refer to this
+General Public License and to the absence of any warranty; and give any
+other recipients of the Program a copy of this General Public License
+along with the Program.  You may charge a fee for the physical act of
+transferring a copy.
+
+@item
+You may modify your copy or copies of the Program or any portion of
+it, and copy and distribute such modifications under the terms of Paragraph
+1 above, provided that you also do the following:
+
+@itemize @bullet
+@item
+cause the modified files to carry prominent notices stating that
+you changed the files and the date of any change; and
+
+@item
+cause the whole of any work that you distribute or publish, that
+in whole or in part contains the Program or any part thereof, either
+with or without modifications, to be licensed at no charge to all
+third parties under the terms of this General Public License (except
+that you may choose to grant warranty protection to some or all
+third parties, at your option).
+
+@item
+If the modified program normally reads commands interactively when
+run, you must cause it, when started running for such interactive use
+in the simplest and most usual way, to print or display an
+announcement including an appropriate copyright notice and a notice
+that there is no warranty (or else, saying that you provide a
+warranty) and that users may redistribute the program under these
+conditions, and telling the user how to view a copy of this General
+Public License.
+
+@item
+You may charge a fee for the physical act of transferring a
+copy, and you may at your option offer warranty protection in
+exchange for a fee.
+@end itemize
+
+Mere aggregation of another independent work with the Program (or its
+derivative) on a volume of a storage or distribution medium does not bring
+the other work under the scope of these terms.
+
+@item
+You may copy and distribute the Program (or a portion or derivative of
+it, under Paragraph 2) in object code or executable form under the terms of
+Paragraphs 1 and 2 above provided that you also do one of the following:
+
+@itemize @bullet
+@item
+accompany it with the complete corresponding machine-readable
+source code, which must be distributed under the terms of
+Paragraphs 1 and 2 above; or,
+
+@item
+accompany it with a written offer, valid for at least three
+years, to give any third party free (except for a nominal charge
+for the cost of distribution) a complete machine-readable copy of the
+corresponding source code, to be distributed under the terms of
+Paragraphs 1 and 2 above; or,
+
+@item
+accompany it with the information you received as to where the
+corresponding source code may be obtained.  (This alternative is
+allowed only for noncommercial distribution and only if you
+received the program in object code or executable form alone.)
+@end itemize
+
+Source code for a work means the preferred form of the work for making
+modifications to it.  For an executable file, complete source code means
+all the source code for all modules it contains; but, as a special
+exception, it need not include source code for modules which are standard
+libraries that accompany the operating system on which the executable
+file runs, or for standard header files or definitions files that
+accompany that operating system.
+
+@item
+You may not copy, modify, sublicense, distribute or transfer the
+Program except as expressly provided under this General Public License.
+Any attempt otherwise to copy, modify, sublicense, distribute or transfer
+the Program is void, and will automatically terminate your rights to use
+the Program under this License.  However, parties who have received
+copies, or rights to use copies, from you under this General Public
+License will not have their licenses terminated so long as such parties
+remain in full compliance.
+
+@item
+By copying, distributing or modifying the Program (or any work based
+on the Program) you indicate your acceptance of this license to do so,
+and all its terms and conditions.
+
+@item
+Each time you redistribute the Program (or any work based on the
+Program), the recipient automatically receives a license from the original
+licensor to copy, distribute or modify the Program subject to these
+terms and conditions.  You may not impose any further restrictions on the
+recipients' exercise of the rights granted herein.
+
+@item
+The Free Software Foundation may publish revised and/or new versions
+of the General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+Each version is given a distinguishing version number.  If the Program
+specifies a version number of the license which applies to it and ``any
+later version'', you have the option of following the terms and conditions
+either of that version or of any later version published by the Free
+Software Foundation.  If the Program does not specify a version number of
+the license, you may choose any version ever published by the Free Software
+Foundation.
+
+@item
+If you wish to incorporate parts of the Program into other free
+programs whose distribution conditions are different, write to the author
+to ask for permission.  For software which is copyrighted by the Free
+Software Foundation, write to the Free Software Foundation; we sometimes
+make exceptions for this.  Our decision will be guided by the two goals
+of preserving the free status of all derivatives of our free software and
+of promoting the sharing and reuse of software generally.
+
+@iftex
+@heading NO WARRANTY
+@end iftex
+@ifinfo
+@center NO WARRANTY
+@end ifinfo
+
+@item
+BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE PROGRAM ``AS IS'' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE
+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
+REPAIR OR CORRECTION.
+
+@item
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL
+ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT
+LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES
+SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE
+WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+@end enumerate
+
+@iftex
+@heading END OF TERMS AND CONDITIONS
+@end iftex
+@ifinfo
+@center END OF TERMS AND CONDITIONS
+@end ifinfo
+
+@page
+@unnumberedsec How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to humanity, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these
+terms.
+
+  To do so, attach the following notices to the program.  It is safest to
+attach them to the start of each source file to most effectively convey
+the exclusion of warranty; and each file should have at least the
+``copyright'' line and a pointer to where the full notice is found.
+
+@smallexample
+@var{one line to give the program's name and a brief idea of what it does.}
+Copyright (C) 19@var{yy}  @var{name of author}
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+@end smallexample
+
+Also add information on how to contact you by electronic and paper mail.
+
+If the program is interactive, make it output a short notice like this
+when it starts in an interactive mode:
+
+@smallexample
+Gnomovision version 69, Copyright (C) 19@var{yy} @var{name of author}
+Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; type `show c' for details.
+@end smallexample
+
+The hypothetical commands `show w' and `show c' should show the
+appropriate parts of the General Public License.  Of course, the
+commands you use may be called something other than `show w' and `show
+c'; they could even be mouse-clicks or menu items---whatever suits your
+program.
+
+You should also get your employer (if you work as a programmer) or your
+school, if any, to sign a ``copyright disclaimer'' for the program, if
+necessary.  Here is a sample; alter the names:
+
+@smallexample
+Yoyodyne, Inc., hereby disclaims all copyright interest in the
+program `Gnomovision' (a program to direct compilers to make passes
+at assemblers) written by James Hacker.
+
+@var{signature of Ty Coon}, 1 April 1989
+Ty Coon, President of Vice
+@end smallexample
+
+That's all there is to it!
+
+@node Commands, Concepts, License, Top
 @unnumbered Command Index
 
 @printindex ky
 
-@node Concepts, , Commands, Top
+@node Concepts,  , Commands, Top
 @unnumbered Index
 
 @printindex cp
