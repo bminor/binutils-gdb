@@ -648,7 +648,6 @@ bfd *output_bfd;
 {
   bfd_vma relocation;
   bfd_reloc_status_enum_type flag = bfd_reloc_ok;
-  bfd_vma relocation_before;
   bfd_vma addr = reloc_entry->address ;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -796,13 +795,7 @@ bfd *output_bfd;
    
   relocation <<= howto->bitpos;
 
-
   /* Wait for the day when all have the mask in them */
-
-
-
-  relocation_before = relocation;
-
 
   /* What we do:
      i instruction to be left alone

@@ -1605,7 +1605,7 @@ get_normalized_symtab(abfd)
 	return (NULL);
     }				/* on error */
     if (bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET) == -1
-	|| bfd_read(s, sizeof(SYMENT), 1, abfd) != sizeof(SYMENT)) {
+	|| bfd_read((char *)s, sizeof(SYMENT), 1, abfd) != sizeof(SYMENT)) {
 	bfd_error = system_call_error;
 	return (NULL);
     }				/* on error */
@@ -1668,7 +1668,8 @@ get_normalized_symtab(abfd)
 
 
     if (bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET) == -1
-	|| bfd_read(retval + obj_symbol_slew(abfd), size, 1, abfd) != size) {
+	|| bfd_read((char *)(retval + obj_symbol_slew(abfd)), size, 1, abfd)
+		 != size) {
 	bfd_error = system_call_error;
 	return (NULL);
     }				/* on read error */

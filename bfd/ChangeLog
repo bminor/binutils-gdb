@@ -1,3 +1,10 @@
+Sat May  4 15:49:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* archive.c, bfd.c, coff-code.h, opncls.c, sunos.c, trad-core.c:
+	Clean up types and such (saber C problems).
+	* ecoff.c:  Clean up types and such.  Remove routines that are
+	not used.  Fix up reading and swapping of shorts from files.
+
 Tue Mar  5 01:47:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* coff-code.h (bfd_coff_swap_sym, bfd_coff_swap_aux,

@@ -1,5 +1,5 @@
 /* MIPS Extended-Coff handler for Binary File Diddling.
-   Written by Per Bothner.
+   Written by Per Bothner.  */
 
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
@@ -34,118 +34,67 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "intel-coff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
-static reloc_howto_type howto_table[] = 
-{
-  {0},
-  {1},
-  {2},
-  {3},
-  {4},
-  {5},
-  {6},
-  {7},
-  {8},
-  {9},
-  {10},
-  {11},
-  {12},
-  {13},
-  {14},
-  {15},
-  {16},
-  {  R_RELLONG, 0, 2, 32, 0, 0, true, true},
-  {18},
-  {19},
-  {20},
-  {21},
-  {22},
-  {23},
-  {24},
-  {  R_IPRMED, 2, 2,22,1,0, true, true},
-  {26},
-/* FIXME: What do we do with this - ? */
-#if 1
-  {  R_OPTCALL, 0,2,32,0,0, true, true},
-#else
-  {  R_OPTCALL, 0,3,32,0,0, true, true},
-#endif
-};
-
-
-#define ALIGN(this, boundary) \
-  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
-
-
-/* Support for Motorola 88k bcs coff as well as Intel 960 coff */
-
-
-
-/* Align an address by rounding it up to a power of two.  It leaves the
-   address unchanged if align == 0 (2^0 = alignment of 1 byte) */
-#define	i960_align(addr, align)	\
-	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
-
-#define TAG_SECTION_NAME ".tagbits"
-
-/* Libraries shouldn't be doing this stuff anyway! */
-void fatal();
-/* void warning(); */
-
-
 /* initialize a section structure with information
  * peculiar to this particular implementation of coff 
  */
 
 static boolean
-ecoff_new_section_hook(abfd, section)
-bfd *abfd;
-asection *section;
+ecoff_new_section_hook(ignore_abfd, ignore)
+bfd *ignore_abfd;
+asection *ignore;
 {
     return true;
 }
-/* actually it makes itself and its children from the file headers */
-static boolean
-make_a_section_from_file (abfd, hdr)
-     bfd *abfd;
-     struct scnhdr *hdr;
+
+/* Take a section header read from a coff file (in HOST byte order),
+   and make a BFD "section" out of it.  */
+static          boolean
+DEFUN(make_a_section_from_file,(abfd, hdr),
+      bfd            *abfd AND
+      struct scnhdr  *hdr)
 {
-  asection *return_section ;
+    asection       *return_section;
 
-  { char *name = (char *)xmalloc(9); 
+    {
+	/* Assorted wastage to null-terminate the name, thanks AT&T! */
+	char *name = bfd_alloc(abfd, sizeof (hdr->s_name)+1);
+	if (name == NULL) {
+	    bfd_error = no_memory;
+	    return false;
+	}
+	strncpy(name, (char *) &hdr->s_name[0], sizeof (hdr->s_name));
+	name[sizeof (hdr->s_name)] = 0;
 
-    strncpy(name, (char *)&hdr->s_name[0], 8);
+	return_section = bfd_make_section(abfd, name);
+    }
 
-    return_section = bfd_make_section(abfd,  name);
-    (return_section->name)[8] = 0;
-  }
-
-  /* s_paddr is presumed to be = to s_vaddr */
-  /* FIXME -- needs to call swapping routines */
+    /* s_paddr is presumed to be = to s_vaddr */
 #define assign(to, from) return_section->to = hdr->from
-  assign (vma, s_vaddr);
-/*  assign (vma, s_vaddr);*/
-  assign (size, s_size);
-  assign (filepos, s_scnptr);
-  assign (rel_filepos, s_relptr);
-  assign (reloc_count, s_nreloc);
-#ifdef I960
-  assign (alignment, s_align);
-#endif
-  assign (line_filepos, s_lnnoptr);
-/*  return_section->linesize =   hdr->s_nlnno * sizeof (struct lineno);*/
+    assign(vma, s_vaddr);
+    /* assign (vma, s_vaddr); */
+    assign(size, s_size);
+    assign(filepos, s_scnptr);
+    assign(rel_filepos, s_relptr);
+    assign(reloc_count, s_nreloc);
+    assign(line_filepos, s_lnnoptr);
+    /*
+       return_section->linesize =   hdr->s_nlnno * sizeof (struct lineno);
+    */
 
 #undef assign
-  return_section->lineno_count = hdr->s_nlnno;
-  return_section->userdata = (void *)NULL;
-  return_section->next = (asection *)NULL;
-  if ((hdr->s_flags & STYP_TEXT) || (hdr->s_flags & STYP_DATA))
-    return_section->flags = (SEC_LOAD | SEC_ALLOC);
-  else if (hdr->s_flags & STYP_BSS)
-    return_section->flags = SEC_ALLOC;
+    return_section->lineno_count = hdr->s_nlnno;
+    return_section->userdata = NULL;
+    return_section->next = (asection *) NULL;
+    if ((hdr->s_flags & STYP_TEXT) || (hdr->s_flags & STYP_DATA))
+	return_section->flags = (SEC_LOAD | SEC_ALLOC);
+    else if (hdr->s_flags & STYP_BSS)
+	return_section->flags = SEC_ALLOC;
 
-  if (hdr->s_nreloc != 0) return_section->flags |= SEC_RELOC;
-
-  return true;
+    if (hdr->s_nreloc != 0)
+	return_section->flags |= SEC_RELOC;
+    if (hdr->s_scnptr != 0)
+	return_section->flags |= SEC_HAS_CONTENTS;
+    return true;
 }
 
 bfd_target *
@@ -213,28 +162,29 @@ bfd_target *
 ecoff_object_p (abfd)
      bfd *abfd;
 {
+  unsigned char short_bytes[SHORT_SIZE];
   unsigned short magic, nscns, opthdr;
 
   bfd_error = no_error;
 
   /* figure out how much to read */
-  if (bfd_read (&magic, 1, sizeof (magic), abfd) != sizeof (magic))
+  if (bfd_read (short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
     return 0;
 
-  magic = bfd_h_getshort (abfd, (unsigned char *)&magic);
+  magic = bfd_h_getshort (abfd, short_bytes);
   if (magic != (abfd->xvec->byteorder_big_p ? 0x160 :  0x162)) {
     bfd_error = wrong_format;
     return 0;
   }
-  if (bfd_read (&nscns, 1, sizeof (nscns), abfd) != sizeof (nscns))
+  if (bfd_read (short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
     return 0;
-  nscns = bfd_h_getshort (abfd, (unsigned char *)&nscns);
+  nscns = bfd_h_getshort (abfd, short_bytes);
 
   if (bfd_seek (abfd,(file_ptr) ((sizeof (long)) * 3), true) < 0) 
     return 0;
-  if (bfd_read (&opthdr, 1, sizeof (opthdr), abfd) != sizeof (opthdr))
+  if (bfd_read (short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
     return 0;
-  opthdr = bfd_h_getshort (abfd, (unsigned char *)&opthdr);
+  opthdr = bfd_h_getshort (abfd, short_bytes);
 
   return ecoff_real_object_p (abfd, nscns, opthdr);
 }
@@ -258,87 +208,39 @@ ecoff_mkobject (abfd)
   return true;
 }
 
-static void
-ecoff_count_linenumbers(abfd)
-bfd *abfd;
-{
-  unsigned int limit = bfd_get_symcount(abfd);
-  unsigned int i;
-  asymbol **p;
-  {
-    asection *s = abfd->sections->output_section;
-    while (s) {
-      BFD_ASSERT(s->lineno_count == 0);
-      s = s->next;
-    }
-  }
-
-
-  for (p = abfd->outsymbols,i = 0; i < limit; i++, p++)
-    {
-      asymbol *q_maybe = *p;
-      if (q_maybe->the_bfd->xvec->flavour == bfd_target_coff_flavour_enum) {
-	coff_symbol_type *q = coffsymbol(q_maybe);
-	if (q->lineno) 
-	  {
-	    /* This symbol has a linenumber, increment the
-	     * owning section's linenumber count */
-	    alent *l = q->lineno;
-	    q->symbol.section->output_section->lineno_count++;
-	    l++;
-	    while (l->line_number) {
-	      q->symbol.section->output_section->lineno_count++;
-	      l++;
-	    }
-	  }
-      }
-    }
-}
-
-static void
-ecoff_write_symbols(abfd)
-bfd *abfd;
-{
-}
-
-
 void
-ecoff_write_linenumbers(abfd)
-bfd *abfd;
+ecoff_write_linenumbers(ignore_abfd)
+bfd *ignore_abfd;
 {
 }
 
 
-asymbol *
-ecoff_make_empty_symbol(abfd, n)
-bfd *abfd;
-unsigned int n;
+static asymbol *
+ecoff_make_empty_symbol(abfd)
+    bfd            *abfd;
 {
-  coff_symbol_type *new = (coff_symbol_type *)xmalloc(sizeof(coff_symbol_type));
-  new->native = 0;
-  new->lineno = (alent *)NULL;
-  new->symbol.the_bfd = abfd;
-  return &new->symbol;
+    coff_symbol_type *new = (coff_symbol_type *) bfd_alloc(abfd, sizeof(coff_symbol_type));
+    if (new == NULL) {
+	bfd_error = no_memory;
+	return (NULL);
+    }				/* on error */
+    new->native = 0;
+    new->lineno = (alent *) NULL;
+    new->symbol.the_bfd = abfd;
+    return &new->symbol;
 }
 
 /*SUPPRESS 558*/
 /*SUPPRESS 529*/
 boolean
-ecoff_write_object_contents (abfd)
-     bfd *abfd;
+ecoff_write_object_contents (ignore_abfd)
+     bfd *ignore_abfd;
 {
   return false;
 }
 
 /* Calculate the file position for each section. */
-
-static void
-ecoff_compute_section_file_positions (abfd)
-     bfd *abfd;
-{
-    abort();
-}
-
+/* ARGSUSED */
 boolean
 ecoff_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
@@ -350,6 +252,7 @@ ecoff_set_section_contents (abfd, section, location, offset, count)
     return false;
 }
 
+/* ARGSUSED */
 boolean
 ecoff_set_section_linenos (abfd, section, location, offset, count)
      bfd *abfd;
@@ -362,6 +265,7 @@ ecoff_set_section_linenos (abfd, section, location, offset, count)
 }
 
 
+/* ARGSUSED */
 boolean
 ecoff_close_and_cleanup (abfd)
      bfd *abfd;
@@ -369,91 +273,7 @@ ecoff_close_and_cleanup (abfd)
   return false;
 }
 
-static
-struct sec *section_from_bfd_index(abfd, index)
-bfd *abfd;
-int index;
-{
-if (index > 0) {
-  struct sec *answer = abfd->sections;
-
-  while (--index) {
-    answer = answer->next;
-  }
-  return answer;
-}
-return 0;
-}
-
-static int
-ecoff_get_symcount_upper_bound (abfd)
-     bfd *abfd;
-{
-fatal("call to ecoff_get_symcount_upper_bound");
-return 0;
-}
-
-static symindex
-ecoff_get_first_symbol (abfd)
-     bfd * abfd;
-{
-  return 0;
-}
-
-static symindex
-ecoff_get_next_symbol (abfd, oidx)
-     bfd *abfd;
-     symindex oidx;
-{
-  if (oidx == BFD_NO_MORE_SYMBOLS) return BFD_NO_MORE_SYMBOLS;
-  return ++oidx >= bfd_get_symcount (abfd) ? BFD_NO_MORE_SYMBOLS : oidx;
-}
-
-static char *
-ecoff_symbol_name (abfd, idx)
-     bfd *abfd;
-     symindex idx;
-{
-  return (obj_symbols (abfd) + idx)->symbol.name;
-}
-
-static long
-ecoff_symbol_value (abfd, idx)
-     bfd *abfd;
-     symindex idx;
-{
-  return (obj_symbols (abfd) + idx)->symbol.value;
-}
-
-static symclass
-ecoff_classify_symbol (abfd, idx)
-     bfd *abfd;
-     symindex idx;
-{
-    abort();
-}
-
-static boolean
-ecoff_symbol_hasclass (abfd, idx, class)
-     bfd *abfd;
-     symindex idx;
-     symclass class;
-{
-    abort();
-}
-
-
-
-
-static
-boolean
-ecoff_slurp_line_table (abfd, asect)
-  bfd *abfd;
-  asection *asect;
-{
-  return true;
-}
-
+/* ARGSUSED */
 static boolean
 ecoff_slurp_symbol_table(abfd)
      bfd *abfd;
@@ -503,7 +323,7 @@ ecoff_get_reloc_upper_bound (abfd, asect)
 
 
 
-
+/* ARGSUSED */
 boolean
 ecoff_slurp_reloc_table (abfd, asect)
      bfd *abfd;
@@ -541,6 +361,7 @@ ecoff_get_section_contents (abfd, section, location, offset, count)
   else return true;
 }
 
+/* ARGSUSED */
 alent *
 ecoff_get_lineno(ignore_abfd, ignore_symbol)
 bfd *ignore_abfd;

@@ -58,15 +58,14 @@ FILE *bfd_open_file();
 
 bfd *new_bfd()
 {
-  struct obstack tmp;
   bfd *nbfd;
-  obstack_begin(&tmp,128);
+
+  nbfd = (bfd *)zalloc (sizeof (bfd));
+  if (!nbfd)
+    return 0;
+
+  obstack_begin(&nbfd->memory, 128);
   
-  nbfd = (bfd *)obstack_alloc(&tmp,sizeof(bfd));
-  memset((PTR)nbfd, 0, sizeof (bfd));		/* Clear it */
-
-  nbfd->memory = tmp;
-
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
   nbfd->where = 0;

@@ -967,7 +967,7 @@ _bfd_write_archive_contents (arch)
     hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';
     for (i = 0; i < sizeof (struct ar_hdr); i++)
       if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
-    bfd_write (&hdr, 1, sizeof (struct ar_hdr), arch);
+    bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
     bfd_write (etable, 1, elength, arch);
     if ((elength % 2) == 1) bfd_write ("\n", 1, 1, arch);
 
@@ -979,7 +979,7 @@ _bfd_write_archive_contents (arch)
     struct ar_hdr *hdr = arch_hdr(current);
     /* write ar header */
 
-    if (bfd_write (hdr, 1, sizeof(*hdr), arch) != sizeof(*hdr)) {
+    if (bfd_write ((char *)hdr, 1, sizeof(*hdr), arch) != sizeof(*hdr)) {
     syserr:
 	bfd_error = system_call_error;
 	return false;
@@ -1119,8 +1119,9 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';
   for (i = 0; i < sizeof (struct ar_hdr); i++)
     if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
-  bfd_write (&hdr, 1, sizeof (struct ar_hdr), arch);
+  bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
 
+  /* FIXME, this needs to be byte-swapped! */
   temp = orl_count /* + 4 */;
   bfd_write (&temp, 1, sizeof (temp), arch);
   
@@ -1141,6 +1142,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   }
 
   /* now write the strings themselves */
+  /* FIXME, this needs to be byte-swapped! */
   temp = stridx + 4;
   bfd_write (&temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
@@ -1209,7 +1211,8 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
 
     /* Write the ar header for this item and the number of symbols */
 
-    bfd_write (&hdr, 1, sizeof (struct ar_hdr), arch);
+    bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
+    /* FIXME, this needs to be byte-swapped */
     bfd_write (&orl_count, 1, sizeof (orl_count), arch);
 
     /* Two passes, first write the file offsets for each symbol -
@@ -1226,6 +1229,7 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
 	    current = current->next;
 	    last_eltno++;
 	}
+	/* FIXME, this needs to be byte-swapped */
 	bfd_write (&archive_member_file_ptr,
 		   1,
 		   sizeof (archive_member_file_ptr),

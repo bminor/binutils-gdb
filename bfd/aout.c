@@ -1716,9 +1716,9 @@ sunos4_get_reloc_upper_bound (abfd, asect)
 }
 
 void
-sunos4_reclaim_reloc (ignore_abfd, section)
+sunos4_reclaim_reloc (ignore_abfd, ignore)
      bfd *ignore_abfd;
-     sec_ptr section;
+     sec_ptr ignore;
 {
 
 }
@@ -1867,10 +1867,10 @@ DEFUN(sunos4_find_nearest_line,(abfd,
 }
 
 static int 
-DEFUN(sunos4_sizeof_headers,(abfd),
-      bfd *abfd)
+DEFUN(sunos4_sizeof_headers,(ignore_abfd),
+      bfd *ignore_abfd)
 {
-return 0;
+  return 0;		/* FIXME, this is the wrong value! */
 }
 
 #define sunos4_openr_next_archived_file bfd_generic_openr_next_archived_file
