@@ -4309,7 +4309,7 @@
   srcreg = translate_rreg (SD_, RM0);
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]);
-  State.regs[srcreg] += FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  State.regs[srcreg] += FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
 }
 
 // 1111 1110 0111 1010 Rm Rn IMM32; mov Rm,(d32,Rn+)
@@ -4435,16 +4435,243 @@
 }
 
 
-// ??? mac
-// ??? macu
-// ??? macb
-// ??? macbu
-// ??? mach
-// ??? machu
-// ??? dmach
-// ??? dmachu
-// ??? dmulh
-// ??? dmulhu
+// 1111 1110 0000 1011 Rn Rn IMM32; mac imm32,Rn
+8.0xfe+8.0x0b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mac
+"mac"
+*am33
+{
+  int srcreg, imm;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((signed64)(signed32)State.regs[srcreg]
+          * (signed64)(signed32)imm);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0001 1011 Rn Rn IMM32; macu imm32,Rn
+8.0xfe+8.0x1b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::macu
+"macu"
+*am33
+{
+  int srcreg, imm;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((unsigned64)State.regs[srcreg]
+          * (unsigned64)imm);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0010 1011 Rn Rn IMM32; macb imm32,Rn
+8.0xfe+8.0x2b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::macb
+"macb"
+*am33
+{
+  int srcreg, imm;
+  long temp, sum;
+  int v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((signed32)(signed8)(State.regs[srcreg] & 0xff)
+          * (signed32)(signed8)(imm & 0xff));
+  sum = State.regs[REG_MCRL] + temp;
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0011 1011 Rn Rn IMM32; macbu imm32,Rn
+8.0xfe+8.0x3b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::macbu
+"macbu"
+*am33
+{
+  int srcreg, imm;
+  long temp, sum;
+  int v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((unsigned32)(State.regs[srcreg] & 0xff)
+          * (unsigned32)(imm & 0xff));
+  sum = State.regs[REG_MCRL] + temp;
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0100 1011 Rn Rn IMM32; mach imm32,Rn
+8.0xfe+8.0x4b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mach
+"mach"
+*am33
+{
+  int srcreg, imm;
+  long temp, sum;
+  int v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((signed32)(signed16)(State.regs[srcreg] & 0xffff)
+          * (signed32)(signed16)(imm & 0xffff));
+  sum = State.regs[REG_MCRL] + temp;
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0101 1011 Rn Rn IMM32; machu imm32,Rn
+8.0xfe+8.0x5b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::machu
+"machu"
+*am33
+{
+  int srcreg, imm;
+  long temp, sum;
+  int v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((unsigned32)(State.regs[srcreg] & 0xffff)
+          * (unsigned32)(imm & 0xffff));
+  sum = State.regs[REG_MCRL] + temp;
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0110 1011 Rn Rn IMM32; dmach imm32,Rn
+8.0xfe+8.0x6b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmach
+"dmach"
+*am33
+{
+  int srcreg, imm;
+  long temp, temp2, sum;
+  int v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((signed32)(signed16)(State.regs[srcreg] & 0xffff)
+          * (signed32)(signed16)(imm & 0xffff));
+  temp2 = ((signed32)(signed16)((State.regs[srcreg] >> 16) & 0xffff)
+	   * (signed32)(signed16)((imm >> 16) & 0xffff));
+  sum = temp + temp2 + State.regs[REG_MCRL];
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 0111 1011 Rn Rn IMM32; dmachu imm32,Rn
+8.0xfe+8.0x7b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmachu
+"dmachu"
+*am33
+{
+  int srcreg, imm;
+  long temp, temp2, sum;
+  int v;
+
+  PC = cia;
+  srcreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((unsigned32)(State.regs[srcreg] & 0xffff)
+          * (unsigned32)(imm & 0xffff));
+  temp2 = ((unsigned32)((State.regs[srcreg] >> 16) & 0xffff)
+	   * (unsigned32)((imm >> 16) & 0xffff));
+  sum = temp + temp2 + State.regs[REG_MCRL];
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1110 1000 1011 Rn Rn IMM32; dmulh imm32,Rn
+8.0xfe+8.0x8b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmulh
+"dmulh"
+*am33
+{
+  int imm, dstreg;
+  long temp;
+
+  PC = cia;
+  dstreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((signed32)(signed16)(State.regs[dstreg] & 0xffff)
+          * (signed32)(signed16)(imm & 0xffff));
+  State.regs[REG_MDRQ] = temp;
+  temp = ((signed32)(signed16)((State.regs[dstreg] >> 16) & 0xffff)
+          * (signed32)(signed16)((imm>>16) & 0xffff));
+  State.regs[dstreg] = temp;
+}
+
+// 1111 1110 1001 1011 Rn Rn IMM32; dmulhu imm32,Rn
+8.0xfe+8.0x9b+4.RN2,4.RN0=RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::dmulhu
+"dmulhu"
+*am33
+{
+  int imm, dstreg;
+  long temp;
+
+  PC = cia;
+  dstreg = translate_rreg (SD_, RN0);
+  imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
+
+  temp = ((unsigned32)(State.regs[dstreg] & 0xffff)
+          * (unsigned32)(imm & 0xffff));
+  State.regs[REG_MDRQ] = temp;
+  temp = ((unsigned32)((State.regs[dstreg] >> 16) & 0xffff)
+          * (unsigned32)((imm >>16) & 0xffff));
+  State.regs[dstreg] = temp;
+}
 
 // 1111 1110 0000 1110 Rn 0000 IMM32; mov (abs32),Rn
 8.0xfe+8.0x0e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5h:::mov
