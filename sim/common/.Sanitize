@@ -65,6 +65,10 @@ hw-device.c
 hw-device.h
 hw-events.c
 hw-events.h
+hw-handles.c
+hw-handles.h
+hw-instances.c
+hw-instances.h
 hw-main.h
 hw-ports.c
 hw-ports.h
