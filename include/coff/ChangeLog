@@ -1,3 +1,26 @@
+Wed Mar 17 09:46:03 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff-ext.h (AUX_PUT_ANY): Don't use void values in branches of
+	conditional expression.
+
+Thu Mar  4 14:12:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff-ext.h (AUX_GET_*): Rewrote to use new macro AUX_GET_ANY.
+	(AUX_PUT_*): New macros corresponding to the AUX_GET macros.
+	(ecoff_swap_tir_out): Added prototype.
+
+	* mips.h (N_BTMASK, N_TMASK, N_BTSHFT, N_TSHIFT): Define; these
+	are needed to interpret gcc debugging output.
+
+Tue Feb  9 07:43:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* we32k.h (BTYPE, ISPTR, ISFCN, ISARY, DECREF): Removed
+	more definitions duplicated in internal.h.
+
+Wed Feb  3 09:18:24 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h (RELOC_BITS3_TYPE_*): Correct for big endian machines.
+
 Mon Jan 25 11:35:51 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* internal.h (internal_aouthdr): Added additional fields used only

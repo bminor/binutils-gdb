@@ -295,8 +295,8 @@ extern void _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
 
 #define AUX_PUT_ANY(bigend, val, ax, field) \
   ((bigend) \
-   ? _do_putb32 ((val), (ax)->field) \
-   : _do_putl32 ((val), (ax)->field))
+   ? (_do_putb32 ((val), (ax)->field), 0) \
+   : (_do_putl32 ((val), (ax)->field), 0))
 
 #define AUX_PUT_DNLOW(bigend, val, ax) \
   AUX_PUT_ANY ((bigend), (val), (ax), a_dnLow)
