@@ -1,7 +1,15 @@
+Mon Jan 17 15:06:56 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in: Replace all occurrances of "rootme" with "r" and
+	"$${rootme}" with "$$r", to increase the likelihood that the do-*
+	commands (plus user environment) will fit SCO limits.
+
 Thu Jan  6 11:20:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Don't issue warnings about directories which are
-	not being configued if -norecursion is set.
+	not being configured if -norecursion is set.  Correct test for
+	--with-gnu-as and --with-gnu-ld to not get confused by substring
+	matches.
 
 	* configure.in: Don't build gas for alpha-dec-osf1*.
 
