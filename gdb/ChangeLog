@@ -1,3 +1,8 @@
+2002-09-10  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* event-loop.c (gdb_do_one_event): Make public.
+	* event-loop.h (gdb_do_one_event): Declare.
+
 2002-09-10  Jeff Law  <law@redhat.com>
 
 	* infttrace.c (child_resume): Simplify and rework to avoid
