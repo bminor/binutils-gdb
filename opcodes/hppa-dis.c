@@ -328,6 +328,7 @@ print_insn_hppa (memaddr, info)
 		  break;
 		case 'E':
 		  fput_fp_reg (GET_FIELD (insn, 6, 10), info);
+		  break;
 		case 't':
 		  fput_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
