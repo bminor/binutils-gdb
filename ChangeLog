@@ -1,3 +1,8 @@
+Fri Mar 25 21:52:10 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure: Add --enable-* options.  Clean up usage message and
+	some comments.
+
 Thu Mar 24 09:12:53 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* Makefile.in (NM_FOR_TARGET): Build tree version is now nm.new.

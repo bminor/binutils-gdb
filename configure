@@ -118,7 +118,7 @@ do
 # Break out if there are no more args
 	case $# in
 	0)
-		break 2
+		break
 		;;
 	esac
 
@@ -140,7 +140,7 @@ do
 		;;
 # These options have mandatory values.  Since we didn't find an = sign,
 # the value must be in the next argument
-	--b* | --e* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm*)
+	--b* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm*)
 		optarg=$1
 		shift
 		;;
@@ -157,7 +157,17 @@ do
 		   ;;
 		esac
 		;;
-	--exec-prefix* | --e*)
+	--enable-*)
+		case "$option" in
+		*=*)	;;
+		*)	optarg=yes ;;
+		esac
+
+		enableopt=`echo ${option} | sed 's:^--::;s:=.*$::;s:-:_:g'`
+		eval $enableopt="$optarg"
+		enableoptions="$enableoptions $option"
+		;;
+	--exec-prefix* | --ex*)
 		exec_prefix=$optarg
 		exec_prefixoption="--exec-prefix=$optarg"
 		;;
@@ -165,7 +175,7 @@ do
 		gas=yes
 		;;
 	--help | --he*)
-		fatal=true
+		fatal=yes
 		;;
 	--host* | --ho*)
 		case $host_alias in
@@ -179,7 +189,7 @@ do
 		floating_point=no
 		;;
 	--norecursion | --no*)
-		norecursion=true
+		norecursion=yes
 		;;
 	--prefix* | --pre*)
 		prefix=$optarg
@@ -256,7 +266,7 @@ do
 		echo
 		echo "Unrecognized option: \"$orig_option\"".
 		echo
-		fatal=true
+		fatal=yes
 		;;
 	*)
 		case $undefs in
@@ -271,22 +281,18 @@ done
 
 # process host and target
 
-# The following section does some error checking, and then does defaulting for
-# the host and target.  The inputs are host, which comes from the --host
-# option, target, which comes from the --target options, and undefs, which is
-# an argument that isn't an option (cuz it doesn't start with --).  Ie:
-#	configure --host HOST --target TARGET --opt1 UNDEFS --opt2 --opt3 ...
+# Do some error checking and defaulting for the host and target type.
+# The inputs are:
+#    configure --host=HOST --target=TARGET UNDEFS
 #
-# The first rule is that you aren't allowed to specify --host, --target and
-# undefs at the same time.  After that, we do defaulting.  The host defaults to
-# undefs.  Ie:
-#	configure --target TARGET --opt1 HOST --opt2
-#
-# If there are no undefs, the host defaults to the current host (as determined
-# by config.guess).
-#
-# Target defaults to undefs.  If undefs wasn't specified, then it defaults to
-# host.
+# The rules are:
+# 1. You aren't allowed to specify --host, --target, and undefs at the
+#    same time.
+# 2. Host defaults to undefs.
+# 3. If undefs is not specified, then host defaults to the current host,
+#    as determined by config.guess.
+# 4. Target defaults to undefs.
+# 5. If undefs is not specified, then target defaults to host.
 
 case "${fatal}" in
 "")
@@ -346,7 +352,7 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	echo Usage: configure HOST
 	echo
 	echo Options: [defaults in brackets]
-	echo ' --prefix=MYDIR		 configure for installation of host dependent files into MYDIR. ["/usr/local"]'
+	echo ' --prefix=MYDIR		 configure for installation of host independent files into MYDIR. ["/usr/local"]'
 	echo ' --exec-prefix=MYDIR	 configure for installation of host dependent files into MYDIR. ["/usr/local"]'
 	echo ' --help			 print this message. [normal config]'
 	echo ' --build=BUILD		 configure for building on BUILD.  [BUILD=HOST]'
@@ -360,8 +366,9 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	echo ' --target=TARGET	 configure for TARGET.  [TARGET = HOST]'
 	echo ' --tmpdir=TMPDIR	 create temporary files in TMPDIR.  [ TMPDIR = "/tmp" ]'
 	echo ' --nfp			 configure the compilers default to soft floating point. [hard float]'
-	echo ' --with-FOO, --with-FOO=BAR specify that FOO is available'
-	echo ' --without-FOO		 specify that FOO is NOT available'
+	echo ' --with-FOO, --with-FOO=BAR package FOO is available (parameter BAR)'
+	echo ' --without-FOO		 package FOO is NOT available'
+	echo ' --enable-FOO, --enable-FOO=BAR include feature FOO (parameter BAR)'
 	echo
 	echo 'Where HOST and TARGET are something like "vax", "sun3", "encore", etc.'
 	echo
@@ -922,9 +929,10 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			if [ ! -z "${recprog}" ] ; then
 	                        if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
         	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
+                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${removing} ${redirect} ; then
 	                                true
         	                else
+					echo Configure in `pwd` failed, exiting. 1>&2
                 	                exit 1
                         	fi
 			fi
