@@ -1118,8 +1118,10 @@ help ()
 	}
     }
 
+  /* Note: Various tools (such as libtool) depend upon the
+     format of the listings below - do not change them.  */
   /* xgettext:c-format */
-  printf (_("%s: supported targets:\n  "), program_name);
+  printf (_("%s: supported targets:"), program_name);
   targets = bfd_target_list ();
   for (pp = targets; *pp != NULL; pp++)
     printf (" %s", *pp);
@@ -1127,7 +1129,7 @@ help ()
   printf ("\n");
 
   /* xgettext:c-format */
-  printf (_("%s: supported emulations:\n  "), program_name);
+  printf (_("%s: supported emulations: "), program_name);
   ldemul_list_emulations (stdout);
   printf ("\n");
 
