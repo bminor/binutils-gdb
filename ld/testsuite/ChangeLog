@@ -1,3 +1,15 @@
+2001-09-10  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfweak/elfweak.exp: New.
+	* ld-elfweak/bar.c: Likewise.
+	* ld-elfweak/foo.c: Likewise.
+	* ld-elfweak/main.c: Likewise.
+	* ld-elfweak/dso.dsym: Likewise.
+	* ld-elfweak/dsow.dsym: Likewise.
+	* ld-elfweak/strong.sym: Likewise.
+	* ld-elfweak/strong.dat: Likewise.
+	* ld-elfweak/weak.dat: Likewise.
+
 2001-08-27  Alan Modra  <amodra@bigpond.net.au>
 	    Linus Nordberg  <linus@swox.se>
 
