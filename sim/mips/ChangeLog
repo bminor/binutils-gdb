@@ -1,4 +1,12 @@
 start-sanitize-sky
+	Tue Apr  7 18:32:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Do not apply superfluous E (end) flag
+ 	to upper code of generated VU instruction.
+	
+end-sanitize-sky
+	
+start-sanitize-sky
 Mon Apr  6 19:55:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (cop_[ls]q): Replaced stub with proper COP2 code.

@@ -3394,7 +3394,7 @@ decode_coproc (SIM_DESC sd,
 	  {
 	    unsigned_4 vu_upper, vu_lower;
 	    vu_upper =
-	      0x40000000 | /* bits 31 .. 25 */
+	      0x00000000 | /* bits 31 .. 25 */
 	      (instruction & 0x01ffffff); /* bits 24 .. 0 */
 	    vu_lower = 0x8000033c; /* NOP */
 
@@ -3413,7 +3413,7 @@ decode_coproc (SIM_DESC sd,
 		(i_5_0 >= 0x3c && i_10_6 >= 0x0c)) /* VMOVE .. VRXOR */
 	  {                            /* N.B.: VWAITQ already covered by prior case */
 	    unsigned_4 vu_upper, vu_lower;
-	    vu_upper = 0x400002ff; /* END/NOP */
+	    vu_upper = 0x000002ff; /* NOP/NOP */
 	    vu_lower =
 	      0x10000000 | /* bits 31 .. 25 */
 	      (instruction & 0x01ffffff); /* bits 24 .. 0 */
