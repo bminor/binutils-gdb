@@ -27,13 +27,6 @@
 
 #include "alpha/tm-alpha.h"
 
-/* Get start and end address of sigtramp handler.  */
-
-extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
-#define SIGTRAMP_START(pc)	(pc - alpha_linux_sigtramp_offset (pc))
-#define SIGTRAMP_END(pc)	(SIGTRAMP_START(pc) + 3*4)
-
-
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2
    on GNU/Linux and most implementations.  */
