@@ -5068,7 +5068,6 @@ md_show_usage (stream)
   fprintf(stream, "\
 MIPS options:\n\
 -membedded-pic		generate embedded position independent code\n\
--nocpp			ignored\n\
 -EB			generate big endian output\n\
 -EL			generate little endian output\n\
 -g, -g2			do not remove uneeded NOPs or swap branches\n\

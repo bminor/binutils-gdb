@@ -1,5 +1,8 @@
 Fri Jun  3 12:50:13 1994  David J. MacKenzie  (djm@rtl.cygnus.com)
 
+	* as.c (show_usage), config/tc-alpha.c (md_show_usage),
+	config/tc-mips.c (md_show_usage): Fix up messages.
+
 	* as.h: Replace flagseen with separate variables.
 	* as.c (parse_args): Set them.  Don't accept -1 option, or -v
 	explicitly (it's a synonym for --version).

@@ -111,7 +111,7 @@ Options:\n\
   l	include assembly\n\
   n	omit forms processing\n\
   s	include symbols\n\
--D			ignored\n\
+-D			produce assembler debugging messages\n\
 -f			skip whitespace and comment preprocessing\n\
 --help			show this message and exit\n\
 -I DIR			add DIR to search list for .include directives\n\
@@ -119,13 +119,14 @@ Options:\n\
 -K			warn when differences altered for long displacements\n\
 -L			keep local symbols (starting with `L')\n");
   fprintf (stream, "\
+-nocpp			ignored\n\
 -o OBJFILE		name the object-file output OBJFILE (default a.out)\n\
 -R			fold data section into text section\n\
 --statistics		print maximum bytes and total seconds used\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
 -w			ignored\n\
--x			ignored\n\
+-X			ignored\n\
 -Z			generate object file even after errors\n");
 
   md_show_usage (stream);
@@ -298,7 +299,7 @@ parse_args (pargc, pargv)
 
 	case 'D':
 	  /* DEBUG is implemented: it debugs different */
-	  /* things to other people's assemblers. */
+	  /* things from other people's assemblers. */
 	  flag_debug = 1;
 	  break;
 
