@@ -1,3 +1,8 @@
+2004-08-27  Nick Clifton  <nickc@redhat.com>
+
+	* gas/i386/i386.exp: Allow pcrel test for COFF targets as well,
+	but not for PE targets.  Similarly for the absrel test.
+
 2004-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* gas/i386/i386.exp: Group ELF specific tests together.  Move the

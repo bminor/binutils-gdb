@@ -53,7 +53,6 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "jump"
     run_dump_test "ssemmx2"
     run_dump_test "sse2"
-    run_dump_test "absrel"
     run_dump_test "sub"
     run_dump_test "prescott"
     run_dump_test "divide"
@@ -65,6 +64,13 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "reloc"
 	run_dump_test "jump16"
 	run_list_test "white" "-al --listing-lhs-width=3"
+
+	# These tests should in theory work for PE targets as well,
+	# but the relocs we currently produce are slightly different
+	# from those produced for ELF/COFF based toolchains.
+	# So for now we ignore PE targets.
+	run_dump_test "pcrel"
+	run_dump_test "absrel"
     }
 
     # ELF specific tests
@@ -77,7 +83,6 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "tlsd"
 	run_dump_test "tlspic"
 	run_dump_test "tlsnopic"
-	run_dump_test "pcrel"
     }
 
     # This is a PE specific test.
