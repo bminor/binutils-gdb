@@ -6964,7 +6964,7 @@ names of the executable and core dump files
 name of the executable file
 @end ifset
 currently in use by @value{GDBN}, and the files from which symbols were
-loaded.  The command @code{help targets} lists all possible targets
+loaded.  The command @code{help target} lists all possible targets
 rather than current ones.
 @end table
 
@@ -7315,7 +7315,7 @@ write the remote stubs---the code that runs on the remote system to
 communicate with GDB.
 
 Other remote targets may be available in your
-configuration of GDB; use @code{help targets} to list them.
+configuration of GDB; use @code{help target} to list them.
 
 @ifset GENERIC
 @c Text on starting up GDB in various specific cases; it goes up front

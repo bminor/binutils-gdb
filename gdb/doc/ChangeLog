@@ -1,3 +1,8 @@
+Tue Jul 12 12:23:15 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.texinfo (help targets):  Changed to `help target', which
+	is the correct gdb command.
+
 Wed Jun 22 18:00:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* annotate.texi (TODO): New node, for keeping track of annotations
