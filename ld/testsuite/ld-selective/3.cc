@@ -14,7 +14,8 @@ struct B : public A
 
 void B::foo() { }			// keep
 
-void _start() __asm__("_start");	// keep
+void _start() __asm__("_start"); // keep
+void start() __asm__("start"); // some toolchains use this name.
 
 A a;					// keep
 B b;
@@ -30,6 +31,11 @@ void _start()
   b.foo();
 #endif
 #endif
+}
+
+void start ()
+{
+  _start ();
 }
 
 // In addition, keep A's virtual table.
