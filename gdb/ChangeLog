@@ -1,3 +1,9 @@
+2003-05-29  Jim Blandy  <jimb@redhat.com>
+
+	Support gdbserver on 64-bit PowerPC Linux.
+	* configure.tgt (powerpc64-*-linux*): Build gdbserver, please.
+	* regformats/reg-ppc64.dat: New file.
+
 2003-05-28  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (store_altivec_registers): Don't cast fourth
