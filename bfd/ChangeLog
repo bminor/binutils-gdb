@@ -1,3 +1,10 @@
+Tue Dec  3 14:06:15 1991  Per Bothner  (bothner at cygnus.com)
+
+	* archive.c (bsd_write_armap):  The pad byte sometimes added to
+	the string table in a __.SYMDEF member is now
+	counted as part of the size of the string table.
+	This is compatible with the old ranlib, as well as Sun's.
+
 Tue Dec  3 10:53:30 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* srec.c: Rewrote to fix many bugs; now gets the record type
