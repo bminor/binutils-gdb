@@ -1,7 +1,13 @@
+1998-12-18  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.s: Fix to match latest assembler syntax.
+	* gas/fr30/allinsn.d: Fix to match latest assembler output
+
 start-sanitize-sky
 Thu Dec 10 11:20:10 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/mips/vu0.[sd]: Update vmtir testcases.
+	* gas/dvp/lower-1.[sd]: Update mtir testcase.
 
 	* gas/dvp/lower-2.[sd]: Handle label as immediate data.
 
