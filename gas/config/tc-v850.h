@@ -1,5 +1,5 @@
 /* tc-v850.h -- Header file for tc-v850.c.
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,10 +14,13 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 #define TC_V850
+
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 #ifndef BFD_ASSEMBLER
  #error V850 support requires BFD_ASSEMBLER
@@ -34,28 +37,34 @@
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
-#define LOCAL_LABEL(name) ((name[0] == '.' \
-			    && (name[1] == 'L' || name[1] == '.')) \
-			   || (name[0] == '_' && name[1] == '.' && name[2] == 'L' \
-			       && name[3] == '_'))
-
-#define FAKE_LABEL_NAME ".L0\001"
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
 
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
 #define md_number_to_chars number_to_chars_littleendian
-
-/* In theory, we could adjust TDA relocs; it just means more hackery
-   to bfd/elf32-v850.c.  Not adjusting them is easier at the moment.  */
-#define tc_fix_adjustable(FIX) \
-  (!(FIX)->fx_pcrel && (FIX)->fx_r_type != BFD_RELOC_V850_TDA_OFFSET)
-
+     
 /* We need to handle lo(), hi(), etc etc in .hword, .word, etc
    directives, so we have to parse "cons" expressions ourselves.  */
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_cons_expression_v850 (EXP)
 #define TC_CONS_FIX_NEW cons_fix_new_v850
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
+
+
+/* This section must be in the small data area (pointed to by GP).  */
+#define SHF_V850_GPREL		0x10000000
+/* This section must be in the tiny data area (pointed to by EP).  */
+#define SHF_V850_EPREL		0x20000000
+/* This section must be in the zero data area (pointed to by R0).  */
+#define SHF_V850_R0REL		0x40000000
+
+#define ELF_TC_SPECIAL_SECTIONS \
+  { ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
+  { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
+  { ".rosdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_GPREL	}, \
+  { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
+  { ".zdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".rozdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_R0REL	}, \
+  { ".zbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	},
 

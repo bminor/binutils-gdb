@@ -1,3 +1,13 @@
+Tue Sep  2 15:58:52 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c: Add support for SDA/TDA/ZDA sections.
+	(v850_reloc_prefix): Duplicate code eliminated.  Add code to
+	recognise special instructions.
+	(md_assemble): Calculation of the size of a fixups corrected.
+
+	* config/tc-v850.h (ELF_TC_SPECIAL_SECTIONS): Add SDA/TDA/ZDA
+	sections. 	
+
 Tue Sep  2 15:40:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-v850.c (md_assemble): Use opcode->name instead of
