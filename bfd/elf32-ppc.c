@@ -1675,11 +1675,8 @@ ppc_elf_relax_section (bfd *abfd,
 
   *again = FALSE;
 
-  /* Nothing to do if there are no relocations and no need for
-     the relax finalize pass.  */
-  if ((isec->flags & SEC_RELOC) == 0
-      || isec->reloc_count == 0
-      || link_info->relax_finalizing)
+  /* Nothing to do if there are no relocations.  */
+  if ((isec->flags & SEC_RELOC) == 0 || isec->reloc_count == 0)
     return TRUE;
 
   /* If needed, initialize this section's cooked size.  */
