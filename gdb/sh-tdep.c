@@ -56,8 +56,6 @@ static gdbarch_frame_init_saved_regs_ftype sh_fp_frame_init_saved_regs;
 static gdbarch_init_extra_frame_info_ftype sh_init_extra_frame_info;
 static gdbarch_pop_frame_ftype sh_pop_frame;
 static gdbarch_saved_pc_after_call_ftype sh_saved_pc_after_call;
-static gdbarch_frame_args_address_ftype sh_frame_args_address;
-static gdbarch_frame_locals_address_ftype sh_frame_locals_address;
 
 /* Function call related functions. */
 static gdbarch_extract_return_value_ftype sh_extract_return_value;
