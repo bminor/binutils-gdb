@@ -1,3 +1,8 @@
+2004-08-02  Jakub Bogusz  <qboosh@pld-linux.org>
+
+	* dllwrap.c (deduce_name): Fix typos introduced when program_name
+	was renamed to prog_name.
+
 2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	* readelf.c (get_machine_flags <EM_SH>): Handle EF_SH2A and

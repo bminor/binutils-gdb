@@ -253,7 +253,7 @@ deduce_name (const char * name)
 
   dash = NULL;
   slash = NULL;
-  for (cp = name; *cp != '\0'; ++cp)
+  for (cp = prog_name; *cp != '\0'; ++cp)
     {
       if (*cp == '-')
 	dash = cp;
@@ -272,17 +272,17 @@ deduce_name (const char * name)
   cmd = NULL;
 
   if (dash != NULL)
-    /* First, try looking for a prefixed PROG_NAME in the
-       PROGRAM_NAME directory, with the same prefix as PROGRAM_NAME.  */
-    cmd = look_for_prog (name, name, dash - name + 1);
+    /* First, try looking for a prefixed NAME in the
+       PROG_NAME directory, with the same prefix as PROG_NAME.  */
+    cmd = look_for_prog (name, prog_name, dash - prog_name + 1);
 
   if (slash != NULL && cmd == NULL)
-    /* Next, try looking for a PROG_NAME in the same directory as
+    /* Next, try looking for a NAME in the same directory as
        that of this program.  */
-    cmd = look_for_prog (name, name, slash - name + 1);
+    cmd = look_for_prog (name, prog_name, slash - prog_name + 1);
 
   if (cmd == NULL)
-    /* Just return PROG_NAME as is.  */
+    /* Just return NAME as is.  */
     cmd = xstrdup (name);
 
   return cmd;
