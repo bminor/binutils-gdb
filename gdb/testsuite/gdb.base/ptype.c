@@ -226,6 +226,34 @@ enum misordered {two = 2, one = 1, zero = 0, three = 3};
    in the executable, at least for AIX xlc.  */
 enum misordered v_misordered = three;
 
+/**** Pointers to functions *******/
+
+typedef int (*func_type) (int (*) (int, float), float);
+double (*old_fptr) ();
+double (*new_fptr) (void);
+int (*fptr) (int, float);
+int *(*fptr2) (int (*) (int, float), float);
+int (*xptr) (int (*) (), int (*) (void), int);
+int (*(*ffptr) (char)) (short);
+int (*(*(*fffptr) (char)) (short)) (long);
+
+/* Here are the sort of stabs we expect to see for the above:
+
+   .stabs "func_type:t(0,100)=*(0,101)=g(0,1)(0,102)=*(0,103)=g(0,1)(0,1)(0,14)#(0,14)#",128,0,234,0
+   .stabs "old_fptr:G(0,110)=*(0,111)=f(0,15)",32,0,231,0
+   .stabs "new_fptr:G(0,120)=*(0,121)=g(0,15)(0,122)=(0,122)#",32,0,232,0
+   .stabs "fptr:G(0,130)=*(0,103)#",32,0,233,0
+   .stabs "fptr2:G(0,140)=*(0,141)=g(0,142)=*(0,1)(0,102)(0,14)#",32,0,235,0
+   .stabs "xptr:G(0,150)=*(0,151)=g(0,1)(0,152)=*(0,153)=f(0,1)(0,154)=*(0,155)=g(0,1)(0,122)#(0,1)#",32,0,236,0
+   .stabs "ffptr:G(0,160)=*(0,161)=g(0,162)=*(0,163)=g(0,1)(0,8)#(0,2)#",32,0,237,0\
+   .stabs "fffptr:G(0,170)=*(0,171)=g(0,172)=*(0,173)=g(0,174)=*(0,175)=g(0,1)(0,3)#(0,8)#(0,2)#",32,0,237,0
+
+   Most of these use Sun's extension for prototyped function types ---
+   the 'g' type descriptor.  As of around 9 Feb 2002, GCC didn't emit
+   those, but GDB can read them, so the related tests in ptype.exp
+   will all xfail.  */
+
+
 /***********/
 
 int main ()

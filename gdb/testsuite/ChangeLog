@@ -1,3 +1,8 @@
+2002-02-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/ptype.exp, gdb.base/ptype.c: Add tests for printing
+	types of pointers to prototyped functions.
+
 2002-02-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.base/sizeof.c (main): Call fill_structs.  Print value of
