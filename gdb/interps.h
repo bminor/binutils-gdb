@@ -39,7 +39,7 @@ typedef int (interp_resume_ftype) (void *data);
 typedef int (interp_suspend_ftype) (void *data);
 typedef int (interp_prompt_p_ftype) (void *data);
 typedef int (interp_exec_ftype) (void *data, const char *command);
-typedef int (interp_command_loop_ftype) (void *data);
+typedef void (interp_command_loop_ftype) (void *data);
 
 struct interp_procs
 {
