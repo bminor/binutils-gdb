@@ -1,5 +1,7 @@
 2001-12-12  Jim Blandy  <jimb@redhat.com>
 
+	* Makefile.in (c-exp.tab.o): Add missing dependencies.
+
 	* Makefile.in (c_lang_h): New variable.  Use it in dependency
 	lists, instead of `c-lang.h' itself.
 
