@@ -13,8 +13,12 @@ Thu May 30 19:00:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu May 30 10:36:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* config/tc-ppc.c (comment_chars): Make '!' a comment character
-	for Solaris compatibility.
+	* config/tc-ppc.c (comment_chars): Under Solaris, make '!' a
+	comment character.
+	(ppc_elf_rdata): Add support for .rdata and .rodata to go to the
+	.rodata section.
+
+	* config/ppc-sol.mt (TDEFINES): Define TARGET_SOLARIS_COMMENT.
 
 	* stabs.c (s_stab_generic): Under PowerPC Solaris, convert a
 	.stabd with 4 arguments into a .stabn.
