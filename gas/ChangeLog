@@ -1,3 +1,13 @@
+Mon Jun  8 18:32:01 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (md_assemble): Fix handling of reverse
+	sequential word multiply instructions.
+	
+	(do_assemble): Add extra command line argument, to allow mul32
+	attribute to be preserved across parallel insns.
+	(md_assemble): Insert NOPs between explicitly parallel insns which
+	contain an 32 bit multiply and a 16 multiply.
+
 start-sanitize-sky
 Mon Jun  8 15:41:43 1998  Doug Evans  <devans@canuck.cygnus.com>
 
