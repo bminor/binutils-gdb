@@ -1,5 +1,10 @@
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 
+	From Mark Dettinger <dettinge@de.ibm.com>:
+	* dwarf2cfi.c (read_2u): Increment pointer by two.
+
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
 	* signals/signals.c: Fix typos in last change.
 
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
