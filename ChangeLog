@@ -1,3 +1,7 @@
+Sat Jul 27 15:10:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Generate Mac include for elf/dwarf2.h.
+
 start-sanitize-d10v
 Tue Jul 23 10:47:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
