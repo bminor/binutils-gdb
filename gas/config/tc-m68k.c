@@ -6,7 +6,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -26,6 +26,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
  /* note that this file includes real declarations and thus can only be included by one source file per executable. */
 #include "m68k-opcode.h"
+#ifdef TE_SUN
+/* This variable contains the value to write out at the beginning of
+   the a.out file.  The 2<<16 means that this is a 68020 file instead
+   of an old-style 68000 file */
+
+long omagic = 2<<16|OMAGIC;	/* Magic byte for header file */
+#else
+long omagic = OMAGIC;
+#endif
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
@@ -74,6 +83,76 @@ static struct obstack robyn;
 #define DBCC            5
 #define PCLEA		6
 
+/* Operands we can parse:  (And associated modes)
+
+numb:	8 bit num
+numw:	16 bit num
+numl:	32 bit num
+dreg:	data reg 0-7
+reg:	address or data register
+areg:	address register
+apc:	address register, PC, ZPC or empty string
+num:	16 or 32 bit num
+num2:	like num
+sz:	w or l		if omitted, l assumed
+scale:	1 2 4 or 8	if omitted, 1 assumed
+
+7.4 IMMED #num				--> NUM
+0.? DREG  dreg				--> dreg
+1.? AREG  areg				--> areg
+2.? AINDR areg@				--> *(areg)
+3.? AINC  areg@+			--> *(areg++)
+4.? ADEC  areg@-			--> *(--areg)
+5.? AOFF  apc@(numw)			--> *(apc+numw)	-- empty string and ZPC not allowed here
+6.? AINDX apc@(num,reg:sz:scale)	--> *(apc+num+reg*scale)
+6.? AINDX apc@(reg:sz:scale)		--> same, with num=0
+6.? APODX apc@(num)@(num2,reg:sz:scale)	--> *(*(apc+num)+num2+reg*scale)
+6.? APODX apc@(num)@(reg:sz:scale)	--> same, with num2=0
+6.? AMIND apc@(num)@(num2)		--> *(*(apc+num)+num2) (previous mode without an index reg)
+6.? APRDX apc@(num,reg:sz:scale)@(num2)	--> *(*(apc+num+reg*scale)+num2)
+6.? APRDX apc@(reg:sz:scale)@(num2)	--> same, with num=0
+7.0 ABSL  num:sz			--> *(num)
+          num				--> *(num) (sz L assumed)
+*** MSCR  otherreg			--> Magic
+With -l option
+5.? AOFF  apc@(num)			--> *(apc+num) -- empty string and ZPC not allowed here still
+
+examples:
+	#foo	#0x35	#12
+	d2
+	a4
+	a3@
+	a5@+
+	a6@-
+	a2@(12)	pc@(14)
+	a1@(5,d2:w:1)	@(45,d6:l:4)
+	pc@(a2)		@(d4)
+	etc . . .
+
+
+#name@(numw)	-->turn into PC rel mode
+apc@(num8,reg:sz:scale)		--> *(apc+num8+reg*scale)
+
+*/
+
+enum operand_type {
+    IMMED = 1,
+    DREG,
+    AREG,
+    AINDR,
+    ADEC,
+    AINC,
+    AOFF,
+    AINDX,
+    APODX,
+    AMIND,
+    APRDX,
+    ABSL,
+    MSCR,
+    REGLST,
+};
+
+
 struct m68k_exp {
 	char	*e_beg;
 	char	*e_end;
@@ -84,7 +163,7 @@ struct m68k_exp {
 /* Internal form of an operand.  */
 struct m68k_op {
 	char	*error;		/* Couldn't parse it */
-	int	mode;		/* What mode this instruction is in.  */
+	enum operand_type mode;	/* What mode this instruction is in.  */
 	unsigned long	reg;		/* Base register */
 	struct m68k_exp *con1;
 	int	ireg;		/* Index register */
@@ -312,73 +391,6 @@ const pseudo_typeS md_pseudo_table[] = {
 #define islong(x)	(1)
 
 extern char *input_line_pointer;
-
-/* Operands we can parse:  (And associated modes)
-
-numb:	8 bit num
-numw:	16 bit num
-numl:	32 bit num
-dreg:	data reg 0-7
-reg:	address or data register
-areg:	address register
-apc:	address register, PC, ZPC or empty string
-num:	16 or 32 bit num
-num2:	like num
-sz:	w or l		if omitted, l assumed
-scale:	1 2 4 or 8	if omitted, 1 assumed
-
-7.4 IMMED #num				--> NUM
-0.? DREG  dreg				--> dreg
-1.? AREG  areg				--> areg
-2.? AINDR areg@				--> *(areg)
-3.? AINC  areg@+			--> *(areg++)
-4.? ADEC  areg@-			--> *(--areg)
-5.? AOFF  apc@(numw)			--> *(apc+numw)	-- empty string and ZPC not allowed here
-6.? AINDX apc@(num,reg:sz:scale)	--> *(apc+num+reg*scale)
-6.? AINDX apc@(reg:sz:scale)		--> same, with num=0
-6.? APODX apc@(num)@(num2,reg:sz:scale)	--> *(*(apc+num)+num2+reg*scale)
-6.? APODX apc@(num)@(reg:sz:scale)	--> same, with num2=0
-6.? AMIND apc@(num)@(num2)		--> *(*(apc+num)+num2) (previous mode without an index reg)
-6.? APRDX apc@(num,reg:sz:scale)@(num2)	--> *(*(apc+num+reg*scale)+num2)
-6.? APRDX apc@(reg:sz:scale)@(num2)	--> same, with num=0
-7.0 ABSL  num:sz			--> *(num)
-          num				--> *(num) (sz L assumed)
-*** MSCR  otherreg			--> Magic
-With -l option
-5.? AOFF  apc@(num)			--> *(apc+num) -- empty string and ZPC not allowed here still
-
-examples:
-	#foo	#0x35	#12
-	d2
-	a4
-	a3@
-	a5@+
-	a6@-
-	a2@(12)	pc@(14)
-	a1@(5,d2:w:1)	@(45,d6:l:4)
-	pc@(a2)		@(d4)
-	etc . . .
-
-
-#name@(numw)	-->turn into PC rel mode
-apc@(num8,reg:sz:scale)		--> *(apc+num8+reg*scale)
-
-*/
-
-#define IMMED	1
-#define DREG	2
-#define AREG	3
-#define AINDR	4
-#define ADEC	5
-#define AINC	6
-#define AOFF	7
-#define AINDX	8
-#define APODX	9
-#define AMIND	10
-#define APRDX	11
-#define ABSL	12
-#define MSCR	13
-#define REGLST	14
 
 #define FAIL	0
 #define OK	1
@@ -677,6 +689,7 @@ register struct m68k_op *opP;
 {
 	char	*strend;
 	long	i;
+	char	*parse_index();
 
 	if(*str==' ')
 		str++;
@@ -705,7 +718,7 @@ register struct m68k_op *opP;
 			opP->mode=REGLST;
 			return get_regs(i,str,opP);
 		}
-		if((stmp=strchr(str,'@')) != '\0') {
+		if ((stmp=strchr(str,'@')) != '\0') {
 			opP->con1=add_exp(str,stmp-1);
 			if(stmp==strend) {
 				opP->mode=AINDX;
@@ -1018,6 +1031,7 @@ char	*instring;
 	char	c;
 	int	losing;
 	int	opsfound;
+	char	*crack_operand();
 	LITTLENUM_TYPE words[6];
 	LITTLENUM_TYPE *wordp;
 
@@ -1033,7 +1047,7 @@ char	*instring;
 
 	if (p == instring) {
 		the_ins.error = "No operator";
-		the_ins.opcode[0] = (short) NULL;
+		the_ins.opcode[0] = NULL;
 		/* the_ins.numo=1; */
 		return;
 	}
@@ -1048,7 +1062,7 @@ char	*instring;
 
 	if (opcode == NULL) {
 		the_ins.error = "Unknown operator";
-		the_ins.opcode[0] = (short) NULL;
+		the_ins.opcode[0] = NULL;
 		/* the_ins.numo=1; */
 		return;
 	}
@@ -1385,7 +1399,7 @@ char	*instring;
 			switch(opP->mode) {
 			case IMMED:
 				tmpreg=0x3c;	/* 7.4 */
-				if(strchr("bwl",s[1])) nextword=get_num(opP->con1,80);
+				if (strchr("bwl",s[1])) nextword=get_num(opP->con1,80);
 				else nextword=nextword=get_num(opP->con1,0);
 				if(isvar(opP->con1))
 					add_fix(s[1],opP->con1,0);
@@ -1434,7 +1448,7 @@ char	*instring;
 				/* We gotta put out some float */
 				if(seg(opP->con1)!=SEG_BIG) {
 					int_to_gen(nextword);
-					gen_to_words(words,baseo,(long)outro);
+					gen_to_words(words,baseo,(long int)outro);
 					for(wordp=words;baseo--;wordp++)
 						addword(*wordp);
 					break;
@@ -1442,7 +1456,7 @@ char	*instring;
 				if(offs(opP->con1)>0) {
 					as_warn("Bignum assumed to be binary bit-pattern");
 					if(offs(opP->con1)>baseo) {
-						as_bad("Bignum too big for %c format; truncated",s[1]);
+						as_warn("Bignum too big for %c format; truncated",s[1]);
 						offs(opP->con1)=baseo;
 					}
 					baseo-=offs(opP->con1);
@@ -1453,7 +1467,7 @@ char	*instring;
 					break;
 				}
 				gen_to_words(words,baseo,(long)outro);
-				for(wordp=words;baseo--;wordp++)
+				for (wordp=words;baseo--;wordp++)
 					addword(*wordp);
 				break;
 			case DREG:
@@ -1664,16 +1678,21 @@ char	*instring;
 				nextword=get_num(opP->con1,80);
 				switch(opP->con1->e_siz) {
 				default:
-					as_bad("Unknown size for absolute reference");
+					as_warn("Unknown size for absolute reference");
 				case 0:
 					if(!isvar(opP->con1) && issword(offs(opP->con1))) {
 						tmpreg=0x38; /* 7.0 */
 						addword(nextword);
 						break;
 					}
+					/* Don't generate pc relative code
+					   on 68010 and 68000 */
 					if(isvar(opP->con1) &&
 					   !subs(opP->con1) &&
-					   !strchr("~%&$?", s[0])) {
+					   seg(opP->con1)==SEG_TEXT &&
+					   now_seg==SEG_TEXT &&
+					   flagseen['m']==0 &&
+					    !strchr("~%&$?", s[0])) {
 						tmpreg=0x3A; /* 7.2 */
 						add_frag(adds(opP->con1),
 							 offs(opP->con1),
@@ -1769,46 +1788,46 @@ char	*instring;
 		case 'B':
 			tmpreg=get_num(opP->con1,80);
 			switch(s[1]) {
+			case 'B':
+				/* Needs no offsetting */
+				add_fix('B',opP->con1,1);
+				break;
+			case 'W':
+				/* Offset the displacement to be relative to byte disp location */
+				opP->con1->e_exp.X_add_number+=2;
+				add_fix('w',opP->con1,1);
+				addword(0);
+				break;
+			case 'L':
+			long_branch:
+				if(flagseen['m']) 	/* 68000 or 010 */
+					as_warn("Can't use long branches on 68000/68010");
+				the_ins.opcode[the_ins.numo-1]|=0xff;
+				/* Offset the displacement to be relative to byte disp location */
+				opP->con1->e_exp.X_add_number+=4;
+				add_fix('l',opP->con1,1);
+				addword(0);
+				addword(0);
+				break;
 			case 'g':
-				if(opP->con1->e_siz) {	/* Deal with fixed size stuff by hand */
-					switch(opP->con1->e_siz) {
-					case 1:
-						add_fix('b',opP->con1,1);
-						break;
-					case 2:
-						add_fix('w',opP->con1,1);
-						addword(0);
-						break;
-					case 3:
-						add_fix('l',opP->con1,1);
-						addword(0);
-						addword(0);
-						break;
-					default:
-						as_bad("Bad size for expression %d", opP->con1->e_siz);
-					}
-				} else if(subs(opP->con1)) {
-						/* We can't relax it */
-					the_ins.opcode[the_ins.numo-1]|=0xff;
-					add_fix('l',opP->con1,1);
-					addword(0);
-					addword(0);
-				} else if(adds(opP->con1)) {
-					if (flagseen['m'] && 
-					    (the_ins.opcode[0] >= 0x6200) &&
-					    (the_ins.opcode[0] <= 0x6f00)) {
-					  add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
-					} else {
-						add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
-					}
+				if(subs(opP->con1))	 /* We can't relax it */
+					goto long_branch;
+
+				/* This could either be a symbol, or an
+				   absolute address.  No matter, the
+				   frag hacking will finger it out.
+				   Not quite: it can't switch from
+				   BRANCH to BCC68000 for the case
+				   where opnd is absolute (it needs
+				   to use the 68000 hack since no
+				   conditional abs jumps).  */
+				if(
+				 (flagseen['m'] || (0==adds(opP->con1)))
+				 && (the_ins.opcode[0] >= 0x6200) &&
+				    (the_ins.opcode[0] <= 0x6f00)) {
+				  add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
 				} else {
-					/* JF:  This is the WRONG thing to do
-					add_frag((symbolS *)0,offs(opP->con1),TAB(BRANCH,BYTE)); */
-					the_ins.opcode[the_ins.numo-1]|=0xff;
-					offs(opP->con1)+=4;
-					add_fix('l',opP->con1,1);
-					addword(0);
-					addword(0);
+				  add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
 				}
 				break;
 			case 'w':
@@ -1827,24 +1846,18 @@ char	*instring;
 				}
 				addword(0);
 				break;
-			case 'c':
-				if(opP->con1->e_siz) {
-					switch(opP->con1->e_siz) {
-					case 2:
-						add_fix('w',opP->con1,1)
-						addword(0);
-						break;
-					case 3:
-						the_ins.opcode[the_ins.numo-1]|=0x40;
-						add_fix('l',opP->con1,1);
-						addword(0);
-						addword(0);
-						break;
-					default:
-						as_bad("Bad size for offset, must be word or long");
-						break;
-					}
-				} else if(subs(opP->con1)) {
+			case 'C':		/* Fixed size LONG coproc branches */
+				the_ins.opcode[the_ins.numo-1]|=0x40;
+				/* Offset the displacement to be relative to byte disp location */
+				/* Coproc branches don't have a byte disp option, but they are
+				   compatible with the ordinary branches, which do... */
+				opP->con1->e_exp.X_add_number+=4;
+				add_fix('l',opP->con1,1);
+				addword(0);
+				addword(0);
+				break;
+			case 'c':		/* Var size Coprocesssor branches */
+				if(subs(opP->con1)) {
 					add_fix('l',opP->con1,1);
 					add_frag((symbolS *)0,(long)0,TAB(FBRANCH,LONG));
 				} else if(adds(opP->con1)) {
@@ -1884,7 +1897,7 @@ char	*instring;
 			}
 			tmpreg=get_num(opP->con1,80);
 			if(!issword(tmpreg)) {
-				as_bad("Expression out of range, using 0");
+				as_warn("Expression out of range, using 0");
 				tmpreg=0;
 			}
 			addword(tmpreg);
@@ -2357,7 +2370,7 @@ char *s;
 		return 0;
 	if(*s!=':') return 1;
 		/* This kludge here is for the division cmd, which is a kludge */
-	if(strchr("aAdD#",s[1])) return 0;
+	if(index("aAdD#",s[1])) return 0;
 	return 1;
 }
 #endif
@@ -2552,7 +2565,7 @@ obstack_alloc(&robyn,sizeof(struct m68_incant));
 		retval = hash_insert (op_hash, ins->name,(char *)hack);
 			/* Didn't his mommy tell him about null pointers? */
 		if(retval && *retval)
-			as_fatal("Internal Error:  Can't hash %s: %s", ins->name,retval);
+			as_fatal("Internal Error:  Can't hash %s: %s",ins->name,retval);
 	}
 
 	for (i = 0; i < sizeof(mklower_table) ; i++)
@@ -2608,6 +2621,7 @@ int *sizeP;
 	LITTLENUM_TYPE words[MAX_LITTLENUMS];
 	LITTLENUM_TYPE *wordP;
 	char	*t;
+	char	*atof_ieee();
 
 	switch(type) {
 	case 'f':
@@ -2714,21 +2728,31 @@ md_apply_fix(fixP, val)
    MAGIC here. ..
  */
 void
-md_convert_frag(fragP)
+md_convert_frag(headers, fragP)
+object_headers *headers;
 register fragS *fragP;
 {
   long disp;
   long ext;
 
-  /* Address in gas core of the place to store the displacement.  */
-  register char *buffer_address = fragP -> fr_fix + fragP -> fr_literal;
   /* Address in object code of the displacement.  */
   register int object_address = fragP -> fr_fix + fragP -> fr_address;
 
-  know(fragP->fr_symbol);
+#ifdef IBM_COMPILER_SUX
+ /* This is wrong but it convinces the native rs6000 compiler to
+    generate the code we want. */
+  register char *buffer_address = fragP -> fr_literal;
+  buffer_address += fragP -> fr_fix;
+#else /* IBM_COMPILER_SUX */
+  /* Address in gas core of the place to store the displacement.  */
+  register char *buffer_address = fragP->fr_fix + fragP->fr_literal;
+#endif /* IBM_COMPILER_SUX */
+
+  /* No longer true:   know(fragP->fr_symbol); */
 
   /* The displacement of the address, from current location.  */
-  disp = (S_GET_VALUE(fragP->fr_symbol) + fragP->fr_offset) - object_address;
+  disp = fragP->fr_symbol ? S_GET_VALUE(fragP->fr_symbol) : 0;
+  disp = (disp + fragP->fr_offset) - object_address;
 
   switch(fragP->fr_subtype) {
   case TAB(BCC68000,BYTE):
@@ -2753,7 +2777,7 @@ register fragS *fragP;
     if(flagseen['m']) {
       if(fragP->fr_opcode[0]==0x61) {
 	fragP->fr_opcode[0]= 0x4E;
-	fragP->fr_opcode[1]= 0xB9;	/* JSR with ABSL LONG offset */
+	fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
 	subseg_change(SEG_TEXT, 0);
 
 	fix_new(fragP,
@@ -2833,21 +2857,20 @@ register fragS *fragP;
     ext=2;
     break;
   case TAB(PCREL,LONG):
-    /* FIXME-SOMEDAY, this should allow pcrel-long to be generated if -pic is on.
-       Else we can't handle position independent code.  Pcrel-long costs an
-       extra index word though.  Doing it requires more relax tables and
-       stuff elsewhere in this module though. */
     /* The thing to do here is force it to ABSOLUTE LONG, since
        PCREL is really trying to shorten an ABSOLUTE address anyway */
+    /* JF FOO This code has not been tested */
     subseg_change(SEG_TEXT,0);
-    fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset, 0,
-				NO_RELOC);
+    fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
     if((fragP->fr_opcode[1] & 0x3F) != 0x3A)
   	as_bad("Internal error (long PC-relative operand) for insn 0x%04lx at 0x%lx",
 	        fragP->fr_opcode[0],fragP->fr_address);
     fragP->fr_opcode[1]&= ~0x3F;
     fragP->fr_opcode[1]|=0x39;	/* Mode 7.1 */
     fragP->fr_fix+=4;
+    /* md_number_to_chars(buffer_address,
+		       (long)(fragP->fr_symbol->sy_value + fragP->fr_offset),
+		       4); */
     ext=0;
     break;
   case TAB(PCLEA,SHORT):
@@ -2869,12 +2892,20 @@ register fragS *fragP;
     ext=4;
     break;
 
-  }
-  if(ext) {
-    md_number_to_chars(buffer_address,(long)disp,(int)ext);
-    fragP->fr_fix+=ext;
-  }
-}
+  } /* switch on subtype */
+
+  if (ext) {
+	  md_number_to_chars(buffer_address, (long) disp, (int) ext);
+	  fragP->fr_fix += ext;
+/*	  H_SET_TEXT_SIZE(headers, H_GET_TEXT_SIZE(headers) + ext); */
+  } /* if extending */
+
+  know((fragP->fr_next == NULL)
+       || ((fragP->fr_next->fr_address - fragP->fr_address)
+	   == (fragP->fr_fix)));
+
+  return;
+} /* md_convert_frag() */
 
 /* Force truly undefined symbols to their maximum size, and generally set up
    the frag list to be relaxed
@@ -2890,105 +2921,10 @@ segT segment;
 
 	/* handle SZ_UNDEF first, it can be changed to BYTE or SHORT */
 	switch(fragP->fr_subtype) {
-	case TAB(BRANCH,SZ_UNDEF):
-		if(S_GET_SEGMENT(fragP->fr_symbol) == segment) {
-			/* Symbol now defined; start at byte-size.  */
-			fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),BYTE);
-			break;
-		} else if(!flagseen['p'] || (!flagseen['l'] && flagseen['m'])) {
-			/* Symbol in another segment, or undef.
-			   If we don't care about position independent code,
-			   or if we're using long displacements on a 68000,
-			   rewrite to short or long absolute. */
-			if(fragP->fr_opcode[0]==0x61) {
-				if(flagseen['l']) {
-					fragP->fr_opcode[0]= 0x4E;
-					fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL WORD offset */
-					subseg_change(SEG_TEXT, 0);
-					fix_new(fragP, fragP->fr_fix, 2, 
-						fragP->fr_symbol, 0, fragP->fr_offset, 0,
-				NO_RELOC);
-					fragP->fr_fix+=2;
-				} else {
-					fragP->fr_opcode[0]= 0x4E;
-					fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
-					subseg_change(SEG_TEXT, 0);
-					fix_new(fragP, fragP->fr_fix, 4, 
-						fragP->fr_symbol, 0, fragP->fr_offset, 0,
-				NO_RELOC);
-					fragP->fr_fix+=4;
-				}
-				frag_wane(fragP);
-			} else if(fragP->fr_opcode[0]==0x60) {
-				if(flagseen['l']) {
-					fragP->fr_opcode[0]= 0x4E;
-					fragP->fr_opcode[1]= 0xF8;	/* JMP	with ABSL WORD offset */
-					subseg_change(SEG_TEXT, 0);
-					fix_new(fragP, fragP->fr_fix, 2, 
-						fragP->fr_symbol, 0, fragP->fr_offset, 0,
-				NO_RELOC);
-					fragP->fr_fix+=2;
-				} else {
-					fragP->fr_opcode[0]= 0x4E;
-					fragP->fr_opcode[1]= 0xF9;	/* JMP	with ABSL LONG offset */
-					subseg_change(SEG_TEXT, 0);
-					fix_new(fragP, fragP->fr_fix, 4, 
-						fragP->fr_symbol, 0, fragP->fr_offset, 0,
-				NO_RELOC);
-					fragP->fr_fix+=4;
-				}
-				frag_wane(fragP);
-			} else {
-				as_bad("Long branch offset to extern symbol not supported.");
-			}
-		} else if(flagseen['l']) {
-			/* Symbol in other seg or undefined, and user
-			   wants short pcrel offsets (-l).  Set size to 2, fix
-			   pcrel displacement after relax.  */
-			fix_new(fragP,(int)(fragP->fr_fix),2,fragP->fr_symbol,
-				(symbolS *)0,fragP->fr_offset+2,1,
-				NO_RELOC);
-			fragP->fr_fix+=2;
-			fragP->fr_opcode[1]=0x00;
-			frag_wane(fragP);
-		} else {
-			/* Symbol in other seg or undefined, and user
-			   wants long pcrel offsets.  Set size to 4, and fix
-			   pcrel displacement after relax.  */
-			fix_new(fragP,(int)(fragP->fr_fix),4,fragP->fr_symbol,
-				(symbolS *)0,fragP->fr_offset + 4,1,
-				NO_RELOC);
-			fragP->fr_fix+=4;
-			fragP->fr_opcode[1]=0xff;
-			frag_wane(fragP);
-			break;
-		}
-		break;
 
-	case TAB(FBRANCH,SZ_UNDEF):
-		if(S_GET_SEGMENT(fragP->fr_symbol) == segment
-		   || flagseen['l']) {
-			fragP->fr_subtype=TAB(FBRANCH,SHORT);
-			fragP->fr_var+=2;
-		} else {
-			fragP->fr_subtype=TAB(FBRANCH,LONG);
-			fragP->fr_var+=4;
-		}
-		break;
-
-	case TAB(PCREL,SZ_UNDEF):
-		if(S_GET_SEGMENT(fragP->fr_symbol) == segment
-		   || flagseen['l']) {
-			fragP->fr_subtype=TAB(PCREL,SHORT);
-			fragP->fr_var+=2;
-		} else {
-			fragP->fr_subtype=TAB(PCREL,LONG);
-			fragP->fr_var+=4;
-		}
-		break;
-
-	case TAB(BCC68000,SZ_UNDEF):
-		if(S_GET_SEGMENT(fragP->fr_symbol) == segment) {
+	case TAB(BCC68000,SZ_UNDEF): {
+		if((fragP->fr_symbol != NULL)
+		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
 			fragP->fr_subtype=TAB(BCC68000,BYTE);
 			break;
 		}
@@ -3003,8 +2939,7 @@ segT segment;
 			fragP->fr_fix += 2;	     /* account for jmp instruction */
 			subseg_change(SEG_TEXT,0);
 			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0, 
-							 fragP->fr_offset,0,
-				NO_RELOC);
+							 fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 2;
 		} else {
 			fragP->fr_opcode[1] = 0x06;   /* branch offset = 6 */
@@ -3014,15 +2949,15 @@ segT segment;
 			fragP->fr_fix += 2;	     /* account for jmp instruction */
 			subseg_change(SEG_TEXT,0);
 			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
-							 fragP->fr_offset,0,
-				NO_RELOC);
+							 fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 4;
 		}
 		frag_wane(fragP);
 		break;
+	} /* case TAB(BCC68000,SZ_UNDEF) */
 
-	case TAB(DBCC,SZ_UNDEF):
-		if(S_GET_SEGMENT(fragP->fr_symbol) == segment) {
+	case TAB(DBCC,SZ_UNDEF): {
+		if (fragP->fr_symbol != NULL && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
 			fragP->fr_subtype=TAB(DBCC,SHORT);
 			fragP->fr_var+=2;
 			break;
@@ -3032,7 +2967,8 @@ segT segment;
 		/* JF: these used to be fr_opcode[2-4], which is wrong. */
 		buffer_address[0] = 0x00;  /* branch offset = 4 */
 		buffer_address[1] = 0x04;  
-		buffer_address[2] = 0x60;  /* put in bra pc + ... */ 
+		buffer_address[2] = 0x60;  /* put in bra pc + ... */
+ 
 		if(flagseen['l']) {
 			/* JF: these were fr_opcode[5-7] */
 			buffer_address[3] = 0x04; /* plus 4 */
@@ -3041,9 +2977,8 @@ segT segment;
 			fragP->fr_fix += 6;	  /* account for bra/jmp instruction */
 			subseg_change(SEG_TEXT,0);
 			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0, 
-							 fragP->fr_offset,0,
-				NO_RELOC);
-			fragP->fr_fix+=2;
+							 fragP->fr_offset, 0, NO_RELOC);
+			fragP->fr_fix += 2;
 		} else {
 			/* JF: these were fr_opcode[5-7] */
 			buffer_address[3] = 0x06;  /* Plus 6 */
@@ -3052,15 +2987,53 @@ segT segment;
 			fragP->fr_fix += 6;	  /* account for bra/jmp instruction */
 			subseg_change(SEG_TEXT,0);
 			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
-							 fragP->fr_offset,0,
-				NO_RELOC);
+							 fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 4;
 		}
+
 		frag_wane(fragP);
 		break;
+	} /* case TAB(DBCC,SZ_UNDEF) */
 
-	case TAB(PCLEA,SZ_UNDEF):
-		if((S_GET_SEGMENT(fragP->fr_symbol))==segment || flagseen['l']) {
+	case TAB(BRANCH,SZ_UNDEF): {
+		if((fragP->fr_symbol != NULL) 	/* Not absolute */
+		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
+                        fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),BYTE);
+                        break;
+		} else if((fragP->fr_symbol == 0) || flagseen['m']) {
+			/* On 68000, or for absolute value, switch to abs long */
+			/* FIXME, we should check abs val, pick short or long */
+			if(fragP->fr_opcode[0]==0x61) {
+				fragP->fr_opcode[0]= 0x4E;
+				fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
+				subseg_change(SEG_TEXT, 0);
+				fix_new(fragP, fragP->fr_fix, 4, 
+					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+				fragP->fr_fix+=4;
+				frag_wane(fragP);
+			} else if(fragP->fr_opcode[0]==0x60) {
+				fragP->fr_opcode[0]= 0x4E;
+				fragP->fr_opcode[1]= 0xF9;  /* JMP  with ABSL LONG offset */
+				subseg_change(SEG_TEXT, 0);
+				fix_new(fragP, fragP->fr_fix, 4, 
+					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+				fragP->fr_fix+=4;
+				frag_wane(fragP);
+			} else {
+				as_warn("Long branch offset to extern symbol not supported.");
+			}
+		} else {	/* Symbol is still undefined.  Make it simple */
+			fix_new(fragP, (int)(fragP->fr_fix), 4, fragP->fr_symbol,
+				(symbolS *)0, fragP->fr_offset+4, 1, NO_RELOC);
+			fragP->fr_fix+=4;
+			fragP->fr_opcode[1]=0xff;
+			frag_wane(fragP);
+			break;
+		}
+	} /* case TAB(BRANCH,SZ_UNDEF) */
+
+	case TAB(PCLEA,SZ_UNDEF): {
+		if ((S_GET_SEGMENT(fragP->fr_symbol))==segment || flagseen['l']) {
 			fragP->fr_subtype=TAB(PCLEA,SHORT);
 			fragP->fr_var+=2;
 		} else {
@@ -3068,6 +3041,18 @@ segT segment;
 			fragP->fr_var+=6;
 		}
 		break;
+	} /* TAB(PCLEA,SZ_UNDEF) */
+
+	case TAB(PCREL,SZ_UNDEF): {
+		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
+			fragP->fr_subtype = TAB(PCREL,SHORT);
+			fragP->fr_var += 2;
+		} else {
+			fragP->fr_subtype = TAB(PCREL,LONG);
+			fragP->fr_var += 4;
+		}
+		break;
+	} /* TAB(PCREL,SZ_UNDEF) */
 
 	default:
 		break;
@@ -3079,7 +3064,7 @@ segT segment;
 	case TAB(BRANCH,BYTE):
 			/* We can't do a short jump to the next instruction,
 			   so we force word mode.  */
-		if(fragP->fr_symbol && S_GET_VALUE(fragP->fr_symbol)==0 &&
+		if (fragP->fr_symbol && S_GET_VALUE(fragP->fr_symbol)==0 &&
  fragP->fr_symbol->sy_frag==fragP->fr_next) {
 			fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),SHORT);
 			fragP->fr_var+=2;
@@ -3148,7 +3133,7 @@ symbolS	*to_symbol;
 {
 	long offset;
 
-	if(flagseen['m']) {
+	if (flagseen['m']) {
 		offset=to_addr-S_GET_VALUE(to_symbol);
 		md_number_to_chars(ptr  ,(long)0x4EF9,2);
 		md_number_to_chars(ptr+2,(long)offset,4);
@@ -3207,7 +3192,7 @@ int ok;
 		adds(exp)=0;
 		subs(exp)=0;
 		offs(exp)= (ok==10) ? 1 : 0;
-		as_bad("Null expression defaults to %ld", offs(exp));
+		as_warn("Null expression defaults to %ld",offs(exp));
 		return 0;
 	}
 
@@ -3229,7 +3214,7 @@ int ok;
 			exp->e_siz=3;
 			break;
 		default:
-			as_bad("Unknown size for expression \"%c\"", exp->e_end[0]);
+			as_bad("Unknown size for expression \"%c\"",exp->e_end[0]);
 		}
 		exp->e_end-=2;
 	}
@@ -3243,7 +3228,7 @@ int ok;
 		adds(exp)=0;
 		subs(exp)=0;
 		offs(exp)= (ok==10) ? 1 : 0;
-		as_bad("Unknown expression: '%s' defaulting to %d",exp->e_beg,offs(exp));
+		as_warn("Unknown expression: '%s' defaulting to %d",exp->e_beg,offs(exp));
 		break;
 
 	case SEG_ABSENT:
@@ -3253,7 +3238,7 @@ int ok;
 		subs(exp)=0;
 		offs(exp)=0;
 		if(ok==10) {
-			as_bad("expression out of range: defaulting to 1");
+			as_warn("expression out of range: defaulting to 1");
 			offs(exp)=1;
 		}
 		break;
@@ -3261,7 +3246,7 @@ int ok;
 		switch(ok) {
 		case 10:
 			if(offs(exp)<1 || offs(exp)>8) {
-				as_bad("expression out of range: defaulting to 1");
+				as_warn("expression out of range: defaulting to 1");
 				offs(exp)=1;
 			}
 			break;
@@ -3292,7 +3277,7 @@ int ok;
 		case 70:
 			if(offs(exp)<0 || offs(exp)>4095) {
 			outrange:
-				as_bad("expression out of range: defaulting to 0");
+				as_warn("expression out of range: defaulting to 0");
 				offs(exp)=0;
 			}
 			break;
@@ -3310,7 +3295,7 @@ int ok;
 			adds(exp)=0;
 			subs(exp)=0;
 			offs(exp)= (ok==10) ? 1 : 0;
-			as_bad("Can't deal with expression \"%s\": defaulting to %ld",exp->e_beg,offs(exp));
+			as_warn("Can't deal with expression \"%s\": defaulting to %ld",exp->e_beg,offs(exp));
 		}
 		break;
 	case SEG_BIG:
@@ -3327,7 +3312,7 @@ int ok;
 			adds(exp)=0;
 			subs(exp)=0;
 			offs(exp)= (ok==10) ? 1 : 0;
-			as_bad("Can't deal with expression \"%s\": defaulting to %ld",exp->e_beg,offs(exp));
+			as_warn("Can't deal with expression \"%s\": defaulting to %ld",exp->e_beg,offs(exp));
 		}
 		break;
 	default:
@@ -3341,11 +3326,11 @@ int ok;
 		switch(exp->e_siz) {
 		case 1:
 			if(!isbyte(offs(exp)))
-				as_bad("expression doesn't fit in BYTE");
+				as_warn("expression doesn't fit in BYTE");
 			break;
 		case 2:
 			if(!isword(offs(exp)))
-				as_bad("expression doesn't fit in WORD");
+				as_warn("expression doesn't fit in WORD");
 			break;
 		}
 	}
@@ -3354,6 +3339,7 @@ int ok;
 } /* get_num() */
 
 /* These are the back-ends for the various machine dependent pseudo-ops.  */
+void demand_empty_rest_of_line();	/* Hate those extra verbose names */
 
 static void s_data1() {
 	subseg_new(SEG_DATA,1);
@@ -3396,8 +3382,8 @@ int *cntP;
 char ***vecP;
 {
 	switch(**argP) {
-	case 'l':	/* -l means keep externals to 2 byte branch offsets
-			   rather than 4 byte branch offsets */
+	case 'l':	/* -l means keep external to 2 bit offset
+			   rather than 16 bit one */
 		break;
 
 	case 'm':
@@ -3409,7 +3395,7 @@ char ***vecP;
 			flagseen['m']=2;
 		else if(!strcmp(*argP,"68010")) {
 #ifdef TE_SUN
-			magic_number_for_object_file = 1<<16|OMAGIC;
+			omagic= 1<<16|OMAGIC;
 #endif
 			flagseen['m']=1;
 		} else if(!strcmp(*argP,"68020"))
@@ -3619,7 +3605,7 @@ This file is part of GDB, the GNU Debugger and GAS, the GNU Assembler.
 
 Both GDB and GAS are free software; you can redistribute and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GDB and GAS are distributed in the hope that it will be useful,

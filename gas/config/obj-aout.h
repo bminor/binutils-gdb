@@ -5,7 +5,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 1,
+published by the Free Software Foundation; either version 2,
 or (at your option) any later version.
 
 GAS is distributed in the hope that it will be useful, but
@@ -133,13 +133,15 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 
 /* File header macro and type definition */
 
-#define H_GET_FILE_SIZE(h)	(sizeof(struct exec) + \
-				 H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
-				 H_GET_SYMBOL_TABLE_SIZE(h) + \
-				 H_GET_TEXT_RELOCATION_SIZE(h) + \
-				 H_GET_DATA_RELOCATION_SIZE(h) + \
-				 (h)->string_table_size)
+#define H_GET_FILE_SIZE(h)	(H_GET_HEADER_SIZE(h) \
+				 + H_GET_TEXT_SIZE(h) \
+				 + H_GET_DATA_SIZE(h) \
+				 + H_GET_SYMBOL_TABLE_SIZE(h) \
+				 + H_GET_TEXT_RELOCATION_SIZE(h) \
+				 + H_GET_DATA_RELOCATION_SIZE(h) \
+				 + H_GET_STRING_SIZE(h))
 
+#define H_GET_HEADER_SIZE(h)		(sizeof(struct exec))
 #define H_GET_TEXT_SIZE(h)		((h)->header.a_text)
 #define H_GET_DATA_SIZE(h)		((h)->header.a_data)
 #define H_GET_BSS_SIZE(h)		((h)->header.a_bss)
@@ -149,9 +151,12 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 #define H_GET_MAGIC_NUMBER(h)		((h)->header.a_info)
 #define H_GET_ENTRY_POINT(h)		((h)->header.a_entry)
 #define H_GET_STRING_SIZE(h)		((h)->string_table_size)
+#define H_GET_LINENO_SIZE(h)		(0)
+
 #ifdef EXEC_MACHINE_TYPE
 #define H_GET_MACHINE_TYPE(h)		((h)->header.a_machtype)
 #endif /* EXEC_MACHINE_TYPE */
+
 #ifdef EXEC_VERSION
 #define H_GET_VERSION(h)		((h)->header.a_version)
 #endif /* EXEC_VERSION */

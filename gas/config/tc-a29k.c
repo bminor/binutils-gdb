@@ -927,7 +927,8 @@ md_ri_to_chars(the_bytes, ri)
 }
 
 /* should never be called for 29k */
-void md_convert_frag(fragP)
+void md_convert_frag(headers, fragP)
+object_headers *headers;
     register fragS *fragP;
 {
     fprintf(stderr, "sparc_convert_frag\n");
