@@ -1,3 +1,8 @@
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* utils.c (host_pointer_to_address, address_to_host_pointer):
+	Use gdb_assert() instead of explicit call to internal_error().
+
 2002-07-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (rs6000-nat.o): Update dependencies.
