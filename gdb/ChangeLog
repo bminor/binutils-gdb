@@ -1,5 +1,7 @@
 2003-12-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/nbsd64.mh (NATDEPFILES): Add sparc64-nat.o.
+
 	* Makefile.in (sparc64fbsd-tdep.o): Update dependencies.
 
 	* sparc64-tdep.h (sparc64nbsd_gregset): Add extern declaration.
