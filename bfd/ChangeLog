@@ -1,3 +1,8 @@
+2002-11-12  Thomas Moestl <tmm@FreeBSD.org>
+
+	* elf64-sparc.c (sparc64_elf_adjust_dynamic_symbol): Correct
+	references to large plt symbols.
+
 2002-11-12  Klee Dienes  <kdienes@apple.com>
 
 	* mach-o.c (bfd_mach_o_scan_read_thread): Don't re-use 'i' when
