@@ -75,6 +75,13 @@ hook_stop_stub PARAMS ((char *));
 #define	SKIP_TRAMPOLINE_CODE(pc)	0
 #endif
 
+/* On Irix 5, some function calls automatically skip the first few
+   instructions, so we need a more complicated test to see if we are
+   the start of a function.  */
+#ifndef AT_FUNCTION_START
+#define AT_FUNCTION_START(pc,func_name,func_addr)	0
+#endif
+
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".init" section.  IN_SOLIB_TRAMPOLINE evaluates
    to nonzero if we are current stopped in one of these. */
@@ -397,6 +404,7 @@ wait_for_inferior ()
   struct symtab_and_line sal;
   int remove_breakpoints_on_following_step = 0;
   int current_line;
+  struct symtab *current_symtab;
   int handling_longjmp = 0;	/* FIXME */
   struct breakpoint *step_resume_breakpoint = NULL;
   int pid;
@@ -405,6 +413,7 @@ wait_for_inferior ()
 			       &step_resume_breakpoint);
   sal = find_pc_line(prev_pc, 0);
   current_line = sal.line;
+  current_symtab = sal.symtab;
 
   /* Are we stepping?  */
 #define CURRENTLY_STEPPING() ((step_resume_breakpoint == NULL \
@@ -493,24 +502,39 @@ wait_for_inferior ()
 
       if (stop_signal == SIGTRAP
 	  && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
-	if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
-	  {
-	    /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
-	    if (breakpoints_inserted)
-	      {
-		remove_breakpoints ();
-		target_resume (pid, 1, 0); /* Single step */
-		/* FIXME: What if a signal arrives instead of the single-step
-		   happening?  */
-		target_wait (pid, NULL);
-		insert_breakpoints ();
-	      }
-	    target_resume (-1, 0, 0);
-	    continue;
-	  }
-	else
-	  if (pid != inferior_pid)
-	    goto switch_thread;
+	{
+	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
+	    {
+	      /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
+	      if (breakpoints_inserted)
+		{
+		  if (pid != inferior_pid)
+		    {
+		      int save_pid = inferior_pid;
+
+		      inferior_pid = pid;
+		      registers_changed ();
+		      write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+		      inferior_pid = save_pid;
+		      registers_changed ();
+		    }
+		  else
+		    write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+
+		  remove_breakpoints ();
+		  target_resume (pid, 1, 0); /* Single step */
+		  /* FIXME: What if a signal arrives instead of the single-step
+		     happening?  */
+		  target_wait (pid, &w);
+		  insert_breakpoints ();
+		}
+	      target_resume (-1, 0, 0);
+	      continue;
+	    }
+	  else
+	    if (pid != inferior_pid)
+	      goto switch_thread;
+	}
 
       if (pid != inferior_pid)
 	{
@@ -577,7 +601,7 @@ switch_thread:
 		  if (signal_program[stop_signal] == 0)
 		    stop_signal = 0;
 
-		  target_resume (-1, 0, stop_signal);
+		  target_resume (pid, 0, stop_signal);
 		  continue;
 		}
 	    }
@@ -983,6 +1007,7 @@ switch_thread:
 
 	      /* If we do a call, we will be at the start of a function.  */
 	      || stop_pc == stop_func_start
+	      || AT_FUNCTION_START (stop_pc, stop_func_name, stop_func_start)
 
 #if 0
 	      /* Not conservative enough for 4.11.  FIXME: enable this
@@ -1110,9 +1135,7 @@ step_into_function:
 	  goto keep_going;
 	}
 
-      /* We've wandered out of the step range (but haven't done a
-	 subroutine call or return).  (Is that true?  I think we get
-	 here if we did a return and maybe a longjmp).  */
+      /* We've wandered out of the step range.  */
 
       sal = find_pc_line(stop_pc, 0);
 
@@ -1134,7 +1157,8 @@ step_into_function:
 	  break;
 	}
 
-      if (stop_pc == sal.pc && current_line != sal.line)
+      if (stop_pc == sal.pc
+	  && (current_line != sal.line || current_symtab != sal.symtab))
 	{
 	  /* We are at the start of a different line.  So stop.  Note that
 	     we don't stop if we step into the middle of a different line.

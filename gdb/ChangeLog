@@ -1,3 +1,14 @@
+Sun Dec 26 16:59:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (wait_for_inferior): Remove confusing and inaccurate
+	stuff about subroutine calls, return, etc., from comment which
+	says "We've wandered out of the step range.".
+
+Sun Dec 26 09:18:10 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior): When checking whether the line has
+	changed, check the symtab as well.
+
 Sun Dec 26 09:18:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbtypes.c (force_to_range_type): Use switch statement.
