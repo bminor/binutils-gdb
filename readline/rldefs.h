@@ -37,7 +37,7 @@
 #else
 #  if defined (HAVE_TERMIO_H)
 #    define TERMIO_TTY_DRIVER
-#  else
+#  elif !defined (__MINGW32__)
 #    define NEW_TTY_DRIVER
 #  endif
 #endif

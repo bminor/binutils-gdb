@@ -1663,9 +1663,9 @@ fi
 AC_SUBST(WCWIDTH_OBJ)
 
 AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
-[AC_TRY_RUN([
-#include <wchar.h>
-int
+[AC_TRY_LINK(
+[#include <wchar.h>],
+[int
 main ()
 {
   mbstate_t ps;

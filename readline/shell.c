@@ -50,7 +50,9 @@
 #endif
 
 #include <fcntl.h>
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
 
 #include <stdio.h>
 
@@ -156,9 +158,11 @@ sh_get_home_dir ()
   struct passwd *entry;
 
   home_dir = (char *)NULL;
+#ifdef HAVE_GETPWUID
   entry = getpwuid (getuid ());
   if (entry)
     home_dir = entry->pw_dir;
+#endif
   return (home_dir);
 }
 
@@ -172,6 +176,7 @@ int
 sh_unset_nodelay_mode (fd)
      int fd;
 {
+#ifdef HAVE_FNCTL
   int flags, bflags;
 
   if ((flags = fcntl (fd, F_GETFL, 0)) < 0)
@@ -192,6 +197,7 @@ sh_unset_nodelay_mode (fd)
       flags &= ~bflags;
       return (fcntl (fd, F_SETFL, flags));
     }
+#endif
 
   return 0;
 }

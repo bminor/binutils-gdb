@@ -56,16 +56,22 @@ if test "x$cross_compiling" = "xyes"; then
     case "${host}" in
     *-cygwin*)
 	cross_cache=${srcdir}/cross-build/cygwin.cache
+	LOCAL_CFLAGS="$LOCAL_CFLAGS -I${srcdir}/../libtermcap"
+	;;
+   *-mingw32*)	
+	cross_cache=${srcdir}/cross-build/mingw.cache
+        ;;
+    *)  echo "configure: cross-compiling for a non-cygwin target is not supported" >&2
+	;;
+    esac
+
+    if test "x$cross_cache" != "x"; then
 	if test -r "${cross_cache}"; then
 	    echo "loading cross-build cache file ${cross_cache}"
 	    . ${cross_cache}
 	fi
-	LOCAL_CFLAGS="$LOCAL_CFLAGS -I${srcdir}/../libtermcap"
 	unset cross_cache
-	;;
-    *)  echo "configure: cross-compiling for a non-cygwin target is not supported" >&2
-	;;
-    esac
+    fi
 fi
  
 if test "x$cross_compiling" = "xyes"; then
@@ -112,14 +118,16 @@ AC_CHECK_TYPE(ssize_t, int)
 AC_HEADER_STAT
 AC_HEADER_DIRENT
 
-AC_CHECK_FUNCS(lstat memmove putenv select setenv setlocale \
-		strcasecmp strpbrk tcgetattr vsnprintf isascii isxdigit)
+AC_CHECK_FUNCS(fcntl lstat memmove putenv select setenv setlocale \
+	       strcasecmp strpbrk tcgetattr vsnprintf isascii isxdigit \
+               getpwname getpwent getpwuid)
 
 AC_FUNC_STRCOLL
 
 AC_CHECK_HEADERS(unistd.h stdlib.h varargs.h stdarg.h string.h strings.h \
 		limits.h sys/ptem.h sys/pte.h sys/stream.h sys/select.h \
-		termcap.h termios.h termio.h sys/file.h locale.h memory.h )
+		termcap.h termios.h termio.h sys/file.h locale.h memory.h \
+                pwd.h)
 
 BASH_SYS_SIGNAL_VINTAGE
 BASH_SYS_REINSTALL_SIGHANDLERS
@@ -235,6 +243,12 @@ AC_SUBST(host_os)
 AC_SUBST(LIBVERSION)
 
 AC_SUBST(TERMCAP_LIB)
+
+case "$host_os" in
+mingw*)		RLTTYOBJ=rlnotty.o ;;
+*)		RLTTYOBJ=rltty.o ;;
+esac
+AC_SUBST(RLTTYOBJ)
 
 AC_OUTPUT([Makefile doc/Makefile examples/Makefile shlib/Makefile],
 [

@@ -110,8 +110,9 @@ HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
 
 HISTOBJ = history.o histexpand.o histfile.o histsearch.o shell.o mbutil.o
 TILDEOBJ = tilde.o
+RLTTYOBJ = @RLTTYOBJ@
 OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
-	  rltty.o complete.o bind.o isearch.o display.o signals.o \
+	  $(RLTTYOBJ) complete.o bind.o isearch.o display.o signals.o \
 	  util.o kill.o undo.o macro.o input.o callback.o terminal.o \
 	  text.o nls.o misc.o compat.o xmalloc.o $(HISTOBJ) $(TILDEOBJ) \
 	  $(WCWIDTH_OBJ)
