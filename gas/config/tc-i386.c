@@ -104,8 +104,10 @@ static void output_insn PARAMS ((void));
 static void output_branch PARAMS ((void));
 static void output_jump PARAMS ((void));
 static void output_interseg_jump PARAMS ((void));
-static void output_imm PARAMS ((void));
-static void output_disp PARAMS ((void));
+static void output_imm PARAMS ((fragS *insn_start_frag,
+				offsetT insn_start_off));
+static void output_disp PARAMS ((fragS *insn_start_frag,
+				 offsetT insn_start_off));
 #ifndef I386COFF
 static void s_bss PARAMS ((int));
 #endif
@@ -3101,13 +3103,20 @@ output_interseg_jump ()
   md_number_to_chars (p + size, (valueT) i.op[0].imms->X_add_number, 2);
 }
 
+
 static void
 output_insn ()
 {
+  fragS *insn_start_frag;
+  offsetT insn_start_off;
+
   /* Tie dwarf2 debug info to the address at the start of the insn.
      We can't do this after the insn has been output as the current
      frag may have been closed off.  eg. by frag_var.  */
   dwarf2_emit_insn (0);
+
+  insn_start_frag = frag_now;
+  insn_start_off = frag_now_fix ();
 
   /* Output jumps.  */
   if (i.tm.opcode_modifier & Jump)
@@ -3179,10 +3188,10 @@ output_insn ()
 	}
 
       if (i.disp_operands)
-	output_disp ();
+	output_disp (insn_start_frag, insn_start_off);
 
       if (i.imm_operands)
-	output_imm ();
+	output_imm (insn_start_frag, insn_start_off);
     }
 
 #ifdef DEBUG386
@@ -3194,7 +3203,9 @@ output_insn ()
 }
 
 static void
-output_disp ()
+output_disp (insn_start_frag, insn_start_off)
+    fragS *insn_start_frag;
+    offsetT insn_start_off;
 {
   char *p;
   unsigned int n;
@@ -3224,6 +3235,7 @@ output_disp ()
 	    }
 	  else
 	    {
+	      RELOC_ENUM reloc_type;
 	      int size = 4;
 	      int sign = 0;
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
@@ -3266,16 +3278,50 @@ output_disp ()
 		}
 
 	      p = frag_more (size);
+	      reloc_type = reloc (size, pcrel, sign, i.reloc[n]);
+#ifdef BFD_ASSEMBLER
+	      if (reloc_type == BFD_RELOC_32
+		  && GOT_symbol
+		  && GOT_symbol == i.op[n].disps->X_add_symbol
+		  && (i.op[n].disps->X_op == O_symbol
+		      || (i.op[n].disps->X_op == O_add
+			  && ((symbol_get_value_expression
+			       (i.op[n].disps->X_op_symbol)->X_op)
+			      == O_subtract))))
+		{
+		  offsetT add;
+
+		  if (insn_start_frag == frag_now)
+		    add = (p - frag_now->fr_literal) - insn_start_off;
+		  else
+		    {
+		      fragS *fr;
+
+		      add = insn_start_frag->fr_fix - insn_start_off;
+		      for (fr = insn_start_frag->fr_next;
+			   fr && fr != frag_now; fr = fr->fr_next)
+			add += fr->fr_fix;
+		      add += p - frag_now->fr_literal;
+		    }
+
+		  /* We don't support dynamic linking on x86-64 yet.  */
+		  if (flag_code == CODE_64BIT)
+		    abort ();
+		  reloc_type = BFD_RELOC_386_GOTPC;
+		  i.op[n].disps->X_add_number += add;
+		}
+#endif
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-			   i.op[n].disps, pcrel,
-			   reloc (size, pcrel, sign, i.reloc[n]));
+			   i.op[n].disps, pcrel, reloc_type);
 	    }
 	}
     }
 }
 
 static void
-output_imm ()
+output_imm (insn_start_frag, insn_start_off)
+    fragS *insn_start_frag;
+    offsetT insn_start_off;
 {
   char *p;
   unsigned int n;
@@ -3328,6 +3374,48 @@ output_imm ()
 	      p = frag_more (size);
 	      reloc_type = reloc (size, 0, sign, i.reloc[n]);
 #ifdef BFD_ASSEMBLER
+	      /*   This is tough to explain.  We end up with this one if we
+	       * have operands that look like
+	       * "_GLOBAL_OFFSET_TABLE_+[.-.L284]".  The goal here is to
+	       * obtain the absolute address of the GOT, and it is strongly
+	       * preferable from a performance point of view to avoid using
+	       * a runtime relocation for this.  The actual sequence of
+	       * instructions often look something like:
+	       *
+	       *	call	.L66
+	       * .L66:
+	       *	popl	%ebx
+	       *	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L66],%ebx
+	       *
+	       *   The call and pop essentially return the absolute address
+	       * of the label .L66 and store it in %ebx.  The linker itself
+	       * will ultimately change the first operand of the addl so
+	       * that %ebx points to the GOT, but to keep things simple, the
+	       * .o file must have this operand set so that it generates not
+	       * the absolute address of .L66, but the absolute address of
+	       * itself.  This allows the linker itself simply treat a GOTPC
+	       * relocation as asking for a pcrel offset to the GOT to be
+	       * added in, and the addend of the relocation is stored in the
+	       * operand field for the instruction itself.
+	       *
+	       *   Our job here is to fix the operand so that it would add
+	       * the correct offset so that %ebx would point to itself.  The
+	       * thing that is tricky is that .-.L66 will point to the
+	       * beginning of the instruction, so we need to further modify
+	       * the operand so that it will point to itself.  There are
+	       * other cases where you have something like:
+	       *
+	       *	.long	$_GLOBAL_OFFSET_TABLE_+[.-.L66]
+	       *
+	       * and here no correction would be required.  Internally in
+	       * the assembler we treat operands of this form as not being
+	       * pcrel since the '.' is explicitly mentioned, and I wonder
+	       * whether it would simplify matters to do it this way.  Who
+	       * knows.  In earlier versions of the PIC patches, the
+	       * pcrel_adjust field was used to store the correction, but
+	       * since the expression is not pcrel, I felt it would be
+	       * confusing to do it this way.  */
+
 	      if (reloc_type == BFD_RELOC_32
 		  && GOT_symbol
 		  && GOT_symbol == i.op[n].imms->X_add_symbol
@@ -3337,11 +3425,26 @@ output_imm ()
 			       (i.op[n].imms->X_op_symbol)->X_op)
 			      == O_subtract))))
 		{
+		  offsetT add;
+
+		  if (insn_start_frag == frag_now)
+		    add = (p - frag_now->fr_literal) - insn_start_off;
+		  else
+		    {
+		      fragS *fr;
+
+		      add = insn_start_frag->fr_fix - insn_start_off;
+		      for (fr = insn_start_frag->fr_next;
+			   fr && fr != frag_now; fr = fr->fr_next)
+			add += fr->fr_fix;
+		      add += p - frag_now->fr_literal;
+		    }
+
 		  /* We don't support dynamic linking on x86-64 yet.  */
 		  if (flag_code == CODE_64BIT)
 		    abort ();
 		  reloc_type = BFD_RELOC_386_GOTPC;
-		  i.op[n].imms->X_add_number += 3;
+		  i.op[n].imms->X_add_number += add;
 		}
 #endif
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
@@ -4541,48 +4644,6 @@ md_apply_fix3 (fixP, valP, seg)
 	/* Make the jump instruction point to the address of the operand.  At
 	   runtime we merely add the offset to the actual PLT entry.  */
 	value = -4;
-	break;
-      case BFD_RELOC_386_GOTPC:
-
-/*   This is tough to explain.  We end up with this one if we have
- * operands that look like "_GLOBAL_OFFSET_TABLE_+[.-.L284]".  The goal
- * here is to obtain the absolute address of the GOT, and it is strongly
- * preferable from a performance point of view to avoid using a runtime
- * relocation for this.  The actual sequence of instructions often look
- * something like:
- *
- *	call	.L66
- * .L66:
- *	popl	%ebx
- *	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L66],%ebx
- *
- *   The call and pop essentially return the absolute address of
- * the label .L66 and store it in %ebx.  The linker itself will
- * ultimately change the first operand of the addl so that %ebx points to
- * the GOT, but to keep things simple, the .o file must have this operand
- * set so that it generates not the absolute address of .L66, but the
- * absolute address of itself.  This allows the linker itself simply
- * treat a GOTPC relocation as asking for a pcrel offset to the GOT to be
- * added in, and the addend of the relocation is stored in the operand
- * field for the instruction itself.
- *
- *   Our job here is to fix the operand so that it would add the correct
- * offset so that %ebx would point to itself.  The thing that is tricky is
- * that .-.L66 will point to the beginning of the instruction, so we need
- * to further modify the operand so that it will point to itself.
- * There are other cases where you have something like:
- *
- *	.long	$_GLOBAL_OFFSET_TABLE_+[.-.L66]
- *
- * and here no correction would be required.  Internally in the assembler
- * we treat operands of this form as not being pcrel since the '.' is
- * explicitly mentioned, and I wonder whether it would simplify matters
- * to do it this way.  Who knows.  In earlier versions of the PIC patches,
- * the pcrel_adjust field was used to store the correction, but since the
- * expression is not pcrel, I felt it would be confusing to do it this
- * way.  */
-
-	value -= 1;
 	break;
       case BFD_RELOC_386_GOT32:
       case BFD_RELOC_386_TLS_GD:
