@@ -1,3 +1,8 @@
+Tue Nov 21 18:39:01 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4 (AC_PROG_CC): Remove local definition.
+	* configure: Rebuild with autoconf 2.6.
+
 Mon Nov 20 17:26:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (ppc_debug_name_section_size): Remove.
