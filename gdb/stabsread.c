@@ -1,8 +1,7 @@
 /* Support routines for decoding "stabs" debugging information format.
-
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
-   Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -90,6 +89,8 @@ static void
 read_one_struct_field (struct field_info *, char **, char *,
 		       struct type *, struct objfile *);
 
+static char *get_substring (char **, int);
+
 static struct type *dbx_alloc_type (int[2], struct objfile *);
 
 static long read_huge_number (char **, int, int *);
@@ -157,6 +158,8 @@ static char *find_name_end (char *name);
 
 static int process_reference (char **string);
 
+static CORE_ADDR ref_search_value (int refnum);
+
 void stabsread_clear_cache (void);
 
 static const char vptr_name[] = "_vptr$";
@@ -187,6 +190,12 @@ reg_value_complaint (int arg1, int arg2, const char *arg3)
 
 static void
 stabs_general_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "%s", arg1);
+}
+
+static void
+lrs_general_complaint (const char *arg1)
 {
   complaint (&symfile_complaints, "%s", arg1);
 }
@@ -522,6 +531,16 @@ ref_search (int refnum)
   if (refnum < 0 || refnum > ref_count)
     return 0;
   return ref_map[refnum].sym;
+}
+
+/* Return value for the reference REFNUM.  */
+
+static CORE_ADDR
+ref_search_value (int refnum)
+{
+  if (refnum < 0 || refnum > ref_count)
+    return 0;
+  return ref_map[refnum].value;
 }
 
 /* Parse a reference id in STRING and return the resulting

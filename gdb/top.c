@@ -383,7 +383,6 @@ catcher (catch_exceptions_ftype *func,
 	 int *func_val,
 	 enum return_reason *func_caught,
 	 char *errstring,
-	 char **gdberrmsg,
 	 return_mask mask)
 {
   SIGJMP_BUF *saved_catch;
@@ -429,14 +428,7 @@ catcher (catch_exceptions_ftype *func,
   if (!caught)
     val = (*func) (func_uiout, func_args);
   else
-    {
-      val = 0;
-      /* If caller wants a copy of the low-level error message, make one.  
-         This is used in the case of a silent error whereby the caller
-         may optionally want to issue the message.  */
-      if (gdberrmsg)
-	*gdberrmsg = error_last_message ();
-    }
+    val = 0;
   catch_return = saved_catch;
 
   /* FIXME: cagney/1999-11-05: A correct FUNC implementation will
@@ -484,25 +476,7 @@ catch_exceptions (struct ui_out *uiout,
 {
   int val;
   enum return_reason caught;
-  catcher (func, uiout, func_args, &val, &caught, errstring, NULL, mask);
-  gdb_assert (val >= 0);
-  gdb_assert (caught <= 0);
-  if (caught < 0)
-    return caught;
-  return val;
-}
-
-int
-catch_exceptions_with_msg (struct ui_out *uiout,
-		  	   catch_exceptions_ftype *func,
-		  	   void *func_args,
-		  	   char *errstring,
-			   char **gdberrmsg,
-		  	   return_mask mask)
-{
-  int val;
-  enum return_reason caught;
-  catcher (func, uiout, func_args, &val, &caught, errstring, gdberrmsg, mask);
+  catcher (func, uiout, func_args, &val, &caught, errstring, mask);
   gdb_assert (val >= 0);
   gdb_assert (caught <= 0);
   if (caught < 0)
@@ -532,8 +506,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
   struct catch_errors_args args;
   args.func = func;
   args.func_args = func_args;
-  catcher (do_catch_errors, uiout, &args, &val, &caught, errstring, 
-	   NULL, mask);
+  catcher (do_catch_errors, uiout, &args, &val, &caught, errstring, mask);
   if (caught != 0)
     return 0;
   return val;

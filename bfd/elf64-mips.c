@@ -2015,7 +2015,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
   arelent *relent;
   bfd_vma i;
   int entsize;
-  bfd_boolean rela_p;
+  reloc_howto_type *howto_table;
 
   allocated = bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
@@ -2033,9 +2033,9 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	      || entsize == sizeof (Elf64_Mips_External_Rela));
 
   if (entsize == sizeof (Elf64_Mips_External_Rel))
-    rela_p = FALSE;
+    howto_table = mips_elf64_howto_table_rel;
   else
-    rela_p = TRUE;
+    howto_table = mips_elf64_howto_table_rela;
 
   for (i = 0, relent = relents;
        i < reloc_count;
@@ -2148,7 +2148,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 
 	  relent->addend = rela.r_addend;
 
-	  relent->howto = mips_elf64_rtype_to_howto (type, rela_p);
+	  relent->howto = &howto_table[(int) type];
 
 	  ++relent;
 	}
