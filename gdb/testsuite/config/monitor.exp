@@ -26,9 +26,6 @@ proc gdb_target_monitor { exec_file } {
     global exit_status
     global timeout
 
-    set timeout 60
-
-    verbose "Timeout is now $timeout seconds" 2
     if [target_info exists gdb_protocol] {
 	set targetname "[target_info gdb_protocol]"
     } else {
@@ -51,7 +48,7 @@ proc gdb_target_monitor { exec_file } {
 
 	for {set i 1} {$i <= 3} {incr i} {
     	    send_gdb "target $targetname $serialport\n"
-	    gdb_expect {
+	    gdb_expect 60 {
 		-re "A program is being debugged already.*ill it.*y or n. $" {
 		    send_gdb "y\n";
 		    exp_continue;
@@ -113,7 +110,7 @@ proc gdb_load { arg } {
 
     if { $arg == "" } {
 	send_gdb "info files\n";
-	gdb_expect {
+	gdb_expect 30 {
 	    -re "Symbols from \"(\[^\"\]+)\"" {
 		set arg $expect_out(1,string);
 		exp_continue;
@@ -153,7 +150,7 @@ proc gdb_load { arg } {
 	    if { $arg != "" && [target_info exists gdb_sect_offset] } {
 		set textoff [target_info gdb_sect_offset];
 		send_gdb "sect .text $textoff\n";
-		gdb_expect {
+		gdb_expect 30 {
 		    -re "(0x\[0-9a-z]+) - 0x\[0-9a-z\]+ is \\.data" {
 			set dataoff $expect_out(1,string);
 			exp_continue;
@@ -167,11 +164,11 @@ proc gdb_load { arg } {
 		set dataoff [format 0x%x [expr $dataoff + $textoff]];
 		set bssoff [format 0x%x [expr $bssoff + $textoff]];
 		send_gdb "sect .data $dataoff\n";
-		gdb_expect {
+		gdb_expect 30 {
 		    -re "$gdb_prompt" { }
 		}
 		send_gdb "sect .bss $bssoff\n";
-		gdb_expect {
+		gdb_expect 30 {
 		    -re "$gdb_prompt" { }
 		}
 	    }
@@ -183,9 +180,7 @@ proc gdb_load { arg } {
 		set command "load $farg\n";
 	    }
 	    send_gdb $command;
-	    set timeout 1200
-	    verbose "Timeout is now $timeout seconds" 2
-	    gdb_expect {
+	    gdb_expect 1600 {
 		-re "\[Ff\]ailed.*$gdb_prompt $" {
 		    verbose "load failed";
 		}
@@ -214,14 +209,4 @@ proc gdb_load { arg } {
     }
     perror "Couldn't load file into GDB.";
     return -1;
-}
-
-proc gdb_start { } {
-    global gdb_prompt;
-
-    if [board_info target exists gdb_prompt] {
-	set gdb_prompt [board_info target gdb_prompt];
-    }
-
-    catch default_gdb_start;
 }

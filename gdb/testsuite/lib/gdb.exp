@@ -601,14 +601,14 @@ proc default_gdb_exit {} {
 
     verbose "Quitting $GDB $GDBFLAGS"
 
-    if [is_remote host] {
+    if { [is_remote host] && [board_info host exists fileid] } {
 	send_gdb "quit\n";
 	gdb_expect 10 {
-	     -re "and kill it.*y or n. " {
+	    -re "and kill it.*y or n. " {
 		send_gdb "y\n";
 		exp_continue;
 	    }
-	    timeout { }
+	    default { }
 	}
     }
 
@@ -948,6 +948,12 @@ proc default_gdb_init { args } {
 	set file [lindex $args 0];
 
 	set pf_prefix "[file tail [file dirname $file]]/[file tail $file]:";
+    }
+    global gdb_prompt;
+    if [target_info exists gdb_prompt] {
+	set gdb_prompt [target_info gdb_prompt];
+    } else {
+	set gdb_prompt "\\(gdb\\)"
     }
 }
 

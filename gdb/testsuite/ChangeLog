@@ -1,3 +1,20 @@
+Wed Jun 25 09:08:51 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(default_gdb_exit): Don't give an error if the remote
+	host doesn't have a currently-open connection.
+
+	* config/sparclet.exp: Cleanups and fixes to make it generic for
+ 	any gdb stub target. Handle cases where gdb doesn't respond when
+ 	interrupted in a sane fashion.
+
+	* config/m32r.exp: Load sparclet.exp instead of trying to do the
+ 	same thing in a totally different way.
+
+	* config/monitor.exp: Pass in timeouts to gdb_expect instead of
+ 	setting "timeout".
+	(gdb_start): We set the global gdb_prompt variable in
+ 	default_gdb_init now.
+
 Sun Jun 22 09:11:02 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/printcmds.exp: Fix "check for floating addition"

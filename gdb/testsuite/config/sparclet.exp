@@ -24,82 +24,121 @@
 
 load_lib remote.exp
 load_lib gdb.exp
-set gdb_prompt "\\(gdbslet\\)"
-
 
 #
 # Sparclet remote run command.
 #
-# This requires that we beep the user and ask him to push the board reset!
-# Then we will switch to the monitor target, run the program, use 2 ^C's
-# to interrupt the monitor target, and switch back to the remote target.
-# Then we have to do a continue to get past the stub breakpoint.
-#
 
 proc gdb_start { } {
     global gdb_prompt
-    global GDB
 
-    if { [default_gdb_start] != 0 } {
-	return -1;
+    if ![file exists loader] {
+	global libdir
+	set loader loader;
+
+	if [target_info exists gdb_stub_offset] {
+	    set result [target_compile "${libdir}/sparclet-loader.c" $loader executable "libs=-Wl,-Ttext,[target_info gdb_stub_offset]"];
+	} else {
+	    set result [target_compile "${libdir}/sparclet-loader.c" $loader executable "ldscript=[target_info gdb_stub_ldscript]"];
+	}
     }
 
-    if [target_info exists baud] {
-	send_gdb "set remotebaud [target_info baud]\n"
-	gdb_expect {
-	     -re ".*$gdb_prompt" { }
-	     default { 
-		perror "Error setting baud rate."
-		return -1;
+    verbose -log "$gdb_prompt is gdb prompt"
+
+    set result 0;
+    for { set y 0; } { $y < 4 } { incr y } {
+	if { [default_gdb_start] != 0 } {
+	    return -1;
+	}
+
+	if [target_info exists baud] {
+	    send_gdb "set remotebaud [target_info baud]\n"
+	    gdb_expect {
+		-re "$gdb_prompt" { }
+		default { 
+		    perror "Error setting baud rate."
+		    return -1;
+		}
 	    }
 	}
-    }
 
-    for {set x 1;} { $x < 4 } {incr x} {
-	if { [gdb_sparclet_startup] > 0 } {
-	    break;
+	for {set x 1;} { $x < 4 } {incr x} {
+	    set result [gdb_sparclet_startup $result];
+	    if { $result > 0 } {
+		return 1;
+	    }
+	    # mmmmm, magic numbers.
+	    if { $result == -42 || $result == -43 } {
+		break;
+	    } else {
+		reboot_target;
+	    }
 	}
-	reboot_target;
+	if { $x == 4 } {
+	    return -1;
+	}
+	gdb_exit;
+	sleep 5;
     }
-    return 1;
+    return -1;
 }
 
-proc gdb_sparclet_startup { } {
+proc gdb_sparclet_startup { arg } {
     global gdb_prompt
     global GDB
 
-    set timeout 5;
     set is_running_stub 0;
 
-    send_gdb "target sparclet [target_info serial]\n";
-    gdb_expect {
-	 -re ".*already.*y or n." {
-	    gdb_send "y\n";
-	    exp_continue;
+    if [target_info exists serial] {
+	set serial [target_info serial];
+    } else {
+	set serial [target_info netport];
+    }
+    set protocol [target_info gdb_protocol];
+    set check_stub 1;
+    if { $arg != -42 } {
+	send_gdb "target $protocol $serial\n";
+	# 10 seconds may be a bit short.
+	gdb_expect 10 {
+	    -re "already.*y or n." {
+		gdb_send "y\n";
+		exp_continue;
+	    }
+	    -re "Remote target.*connected to.*$gdb_prompt" { set check_stub 0; }
+	    -re "$gdb_prompt" { }
+	    timeout { }
 	}
-	 -re "Remote target.*connected to.*$gdb_prompt" { }
-	 timeout {
+	if { $check_stub } {
 	    verbose "timed out, checking if stub is already running"
-	    set timeout 10
 	    send_gdb "\003";
-	    gdb_expect {
-		 -re ".*$gdb_prompt" {
-		}
-		 default {
-		    perror "sparclet board isn't responding";
-		    return -1;
+	    sleep 1;
+	    send_gdb "\003";
+	    gdb_expect 10 {
+		-re "$gdb_prompt" { }
+		default {
+		    remote_close host;
+		    return -42;
 		}
 	    }
-	    send_gdb "target remote [target_info gdb_serial]\n";
-	    gdb_expect {
-		 -re ".*Remote debugging.*$gdb_prompt" {
-		    verbose "stub is already running"
-		    set is_running_stub 1;
-		}
-		 default {
-		    perror "sparclet board isn't responding";
-		    return -1;
-		}
+	}
+    }
+    if [target_info exists gdb_serial] {
+	set gdb_serial [target_info gdb_serial];
+    } else {
+	set gdb_serial $serial;
+    }
+    if { $check_stub } {
+	send_gdb "target remote $gdb_serial\n";
+	gdb_expect 15 {
+	    -re "Remote debugging.*$gdb_prompt" {
+		verbose "stub is already running"
+		set is_running_stub 1;
+	    }
+	    default {
+		warning "board isn't responding";
+		remote_close host;
+		remote_reboot target;
+		return -43;
 	    }
 	}
     }
@@ -107,10 +146,11 @@ proc gdb_sparclet_startup { } {
     if { $is_running_stub == 0 } {
 	global srcdir
 
-	if ![file exists loader] {
-	    set result [target_compile "${srcdir}/config/sparclet-loader.c" "loader" executable "libs=-Wl,-Ttext,[target_info gdb_stub_offset]"];
+	if [is_remote host] {
+	    set loader [remote_download host "loader"];
+	} else {
+	    set loader "loader";
 	}
-	set loader "loader";
 	send_gdb "file $loader\n";
 	gdb_expect {
 	     -re "A program is being debug.*Kill it.*y or n. $" {
@@ -129,24 +169,20 @@ proc gdb_sparclet_startup { } {
 	    }
 	}
 
-	send_gdb "target [target_info gdb_protocol] [target_info serial]\n";
+	send_gdb "target $protocol $serial\n";
 	gdb_expect {
 	     -re "Remote target.*connected to.*$gdb_prompt" { }
 	     default {
-		perror "Error reconnecting to sparclet.";
+		perror "Error reconnecting to board.";
 		return -1;
 	    }
 	}
 
 	send_gdb "load $loader [target_info gdb_stub_offset]\n"
 	verbose "Loading $loader into $GDB" 2
-	set timeout 1200
-	verbose "Timeout is now $timeout seconds" 2
-	gdb_expect {
+	gdb_expect 1200 {
 	     -re "Loading.*$gdb_prompt $" {
 		verbose "Loaded $loader into $GDB" 1
-		set timeout 60
-		verbose "Timeout is now $timeout seconds" 2
 	    }
 	     -re "$gdb_prompt $"     {
 		if $verbose>1 then {
@@ -161,7 +197,7 @@ proc gdb_sparclet_startup { } {
 	}
 
 	send_gdb "run\n";
-	gdb_expect {
+	gdb_expect 60 {
 	     -re "A program is being debug.*Kill it.*y or n. $" {
 		send_gdb "y\n"
 		exp_continue
@@ -170,14 +206,14 @@ proc gdb_sparclet_startup { } {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	     -re ".*Starting program:.*loader.*$" { 
+	     -re "Starting program:.*loader.*$" { 
 		verbose "Starting loader succeeded" 
 	    }
-	     timeout { 
+	    timeout { 
 		perror "(timeout) starting the loader" ; 
 		return -1 
 	    }
-	     default {
+	    default {
 		perror "error starting the loader";
 	    }
 	}
@@ -186,20 +222,20 @@ proc gdb_sparclet_startup { } {
 	sleep 1;
 	send_gdb ""
 	verbose "Sent ^C^C"
-	gdb_expect {
-	     -re ".*Give up .and stop debugging it.*$" {
+	gdb_expect 10 {
+	     -re "Give up .and stop debugging it.*$" {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	     -re ".*$gdb_prompt $" { 
+	    -re "$gdb_prompt $" { 
 		verbose "Running loader succeeded" 
 	    }
-	     timeout { 
-		perror "(timeout) interrupting the loader" ;
-		return -1 
+	    timeout { 
+		warning "(timeout) interrupting the loader" ;
+		remote_close host;
 	    }
-	     default {
-		perror "error interrupting the loader";
+	    default {
+		warning "error interrupting the loader";
 	    }
 	}
 
@@ -215,18 +251,38 @@ proc gdb_run_cmd { args } {
     gdb_breakpoint exit;
     send_gdb "set \$fp=0\n";
     gdb_expect {
-	 -re ".*$gdb_prompt" { }
+	 -re "$gdb_prompt" { }
     }
-    send_gdb "jump start\n";
-    gdb_expect {
-	 -re ".*y or n. $" {
-	    send_gdb "y\n"
+    # This is needed for the SparcLite. Whee.
+    if [target_info exists gdb,start_symbol] {
+	set start_comm "jump *[target_info gdb,start_symbol]\n";
+    } else {
+	set start_comm "jump *start\n";
+    }
+    send_gdb "break copyloop\n";
+    gdb_expect 10 {
+	-re "Breakpoint.*$gdb_prompt $" {
+	    set start_comm "continue\n";
 	}
-	 -re "Continuing at.*\[\r\n\]" { }
-	 default {
-	    return "failed"
+	-re "$gdb_prompt $" { }
+	timeout { warning "break copyloop failed badly"; }
+    }
+    send_gdb $start_comm;
+    gdb_expect 10 {
+	-re "y or n. $" {
+	    remote_send host "y\n"
+	    exp_continue;
+	}
+	-re "Breakpoint.*in copyloop.*$gdb_prompt $" {
+	    remote_send host "jump relocd\n";
+	    exp_continue;
+	}
+	-re "Continuing at.*\[\r\n\]" { }
+	default {
+	    return -1;
 	}
     }
+
     return "";
 }
 
@@ -247,14 +303,13 @@ proc gdb_load { arg } {
     set loadfile [file tail $arg]
     set loadpath [file dirname $arg]
 
-    if [target_info exists gdb_protocol] {
-	set protocol [target_info gdb_protocol];
-    } else {
-	set protocol "sparclet"
-    }
+    set protocol [target_info gdb_protocol];
 
+    if [is_remote host] {
+	set arg [remote_download host $arg];
+    }
     send_gdb "file $arg\n"
-    gdb_expect {
+    gdb_expect 30 {
 	 -re "A program is being debug.*Kill it.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
@@ -272,21 +327,26 @@ proc gdb_load { arg } {
     }
 
     if [target_info exists gdb_serial] {
-	send_gdb "target remote [target_info gdb_serial]\n"
-	gdb_expect {
-	     -re ".*Kill it?.*y or n.*" {
-		send_gdb "y\n";
-		exp_continue
-	    }
-	     -re ".*$gdb_prompt $"	{
-		verbose "Set remote target to [target_info serial]" 2
-	    }
-	     timeout { 
-		set timeout 10
-		verbose "Timeout is now $timeout seconds" 2
-		perror "Couldn't set remote target."
-		return -1
-	    }
+	set gdb_serial [target_info gdb_serial];
+    } else {
+	if [target_info exists serial] {
+	    set gdb_serial [target_info serial];
+	} else {
+	    set gdb_serial [target_info netport];
+	}
+    }
+    send_gdb "target remote $gdb_serial\n"
+    gdb_expect 30 {
+	-re "Kill it?.*y or n.*" {
+	    send_gdb "y\n";
+	    exp_continue
+	}
+	-re "$gdb_prompt $"	{
+	    verbose "Set remote target to $gdb_serial" 2
+	}
+	timeout { 
+	    perror "Couldn't set remote target."
+	    return -1
 	}
     }
     if [target_info exists gdb_load_offset] {
@@ -296,13 +356,9 @@ proc gdb_load { arg } {
     }
     send_gdb "load $arg $offset\n"
     verbose "Loading $arg into $GDB" 2
-    set timeout 1200
-    verbose "Timeout is now $timeout seconds" 2
-    gdb_expect {
+    gdb_expect 1200 {
 	 -re "Loading.*$gdb_prompt $" {
 	    verbose "Loaded $arg into $GDB" 1
-	    set timeout 60
-	    verbose "Timeout is now $timeout seconds" 2
 	}
 	 -re "$gdb_prompt $"     {
 	    if $verbose>1 then {
@@ -316,8 +372,8 @@ proc gdb_load { arg } {
 	}
     }
     send_gdb "list main\n";
-    gdb_expect {
-	 -re ".*$gdb_prompt" { }
+    gdb_expect 60 {
+	 -re "$gdb_prompt" { }
 	 default {
 	    perror "command for list main never completed";
 	    return -1;
