@@ -1,3 +1,8 @@
+2002-01-17  Timothy Wall  <twall@alum.mit.edu>
+	
+	* config/tc-tic54x.c (encode_address): Add a more informative
+	warning about incorrect syntax.
+
 2002-01-17  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/gas.pot: Regenerate.

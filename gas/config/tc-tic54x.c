@@ -3654,6 +3654,9 @@ encode_address (insn, operand)
     insn->opcode[0].word |= (operand->exp.X_add_number & 0x7F);
   else
     {
+      if (operand->exp.X_op == O_register) {
+        as_bad(_("Use the .mmregs directive to use memory-mapped register names such as '%s'"), operand->buf);
+      }
       /* Do the fixup later; just store the expression.  */
       insn->opcode[0].r_nchars = 1;
       insn->opcode[0].r_type = BFD_RELOC_TIC54X_PARTLS7;
