@@ -1,3 +1,8 @@
+2005-02-10  Mark Mitchell  <mark@codesourcery.com>
+
+	* MAINTAINERS: Add Paul Brook and Mark Mitchell as ARM (Symbian)
+	maintainers.
+
 2005-02-07  Inderpreet Singh <inderpreetb@noida.hcltech.com>
 
 	 * MAINTAINERS: Add self as maintainer of MAXQ.

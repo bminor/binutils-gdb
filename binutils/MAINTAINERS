@@ -57,6 +57,8 @@ responsibility among the other maintainers.
   ALPHA            Richard Henderson <rth@redhat.com>
   ARM		   Nick Clifton <nickc@redhat.com>
   ARM		   Richard Earnshaw <rearnsha@arm.com>
+  ARM (Symbian)	   Paul Brook <paul@codesourcery.com>
+  ARM (Symbian)	   Mark Mitchell <mark@codesourcery.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BUILD SYSTEM	   Ben Elliston <bje@gnu.org>
