@@ -284,9 +284,9 @@ static unsigned int no_cond_jump_promotion = 0;
    figuring out what sort of jump to choose to reach a given label.  */
 
 /* Types.  */
-#define UNCOND_JUMP 1
-#define COND_JUMP 2
-#define COND_JUMP86 3
+#define UNCOND_JUMP 0
+#define COND_JUMP 1
+#define COND_JUMP86 2
 
 /* Sizes.  */
 #define CODE16	1
@@ -323,42 +323,38 @@ const relax_typeS md_relax_table[] =
   /* The fields are:
      1) most positive reach of this state,
      2) most negative reach of this state,
-     3) how many bytes this mode will add to the size of the current frag
+     3) how many bytes this mode will have in the variable part of the frag
      4) which index into the table to try if we can't fit into this one.  */
-  {1, 1, 0, 0},
-  {1, 1, 0, 0},
-  {1, 1, 0, 0},
-  {1, 1, 0, 0},
 
   /* UNCOND_JUMP states.  */
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG)},
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16)},
-  /* dword jmp adds 3 bytes to frag:
-     0 extra opcode bytes, 3 extra displacement bytes.  */
-  {0, 0, 3, 0},
-  /* word jmp adds 1 byte to frag:
-     0 extra opcode bytes, 1 extra displacement byte.  */
-  {0, 0, 1, 0},
-
-  /* COND_JUMP states.  */
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP, BIG)},
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP, BIG16)},
-  /* dword conditionals adds 4 bytes to frag:
-     1 extra opcode byte, 3 extra displacement bytes.  */
+  {127 + 1, -128 + 1, 1, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG)},
+  {127 + 1, -128 + 1, 1, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16)},
+  /* dword jmp adds 4 bytes to frag:
+     0 extra opcode bytes, 4 displacement bytes.  */
   {0, 0, 4, 0},
-  /* word conditionals add 2 bytes to frag:
-     1 extra opcode byte, 1 extra displacement byte.  */
+  /* word jmp adds 2 byte2 to frag:
+     0 extra opcode bytes, 2 displacement bytes.  */
   {0, 0, 2, 0},
 
-  /* COND_JUMP86 states.  */
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP86, BIG)},
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP86, BIG16)},
-  /* dword conditionals adds 4 bytes to frag:
-     1 extra opcode byte, 3 extra displacement bytes.  */
-  {0, 0, 4, 0},
+  /* COND_JUMP states.  */
+  {127 + 1, -128 + 1, 1, ENCODE_RELAX_STATE (COND_JUMP, BIG)},
+  {127 + 1, -128 + 1, 1, ENCODE_RELAX_STATE (COND_JUMP, BIG16)},
+  /* dword conditionals adds 5 bytes to frag:
+     1 extra opcode byte, 4 displacement bytes.  */
+  {0, 0, 5, 0},
   /* word conditionals add 3 bytes to frag:
-     1 extra opcode byte, 2 extra displacement bytes.  */
-  {0, 0, 3, 0}
+     1 extra opcode byte, 2 displacement bytes.  */
+  {0, 0, 3, 0},
+
+  /* COND_JUMP86 states.  */
+  {127 + 1, -128 + 1, 1, ENCODE_RELAX_STATE (COND_JUMP86, BIG)},
+  {127 + 1, -128 + 1, 1, ENCODE_RELAX_STATE (COND_JUMP86, BIG16)},
+  /* dword conditionals adds 5 bytes to frag:
+     1 extra opcode byte, 4 displacement bytes.  */
+  {0, 0, 5, 0},
+  /* word conditionals add 4 bytes to frag:
+     1 displacement byte and a 3 byte long branch insn.  */
+  {0, 0, 4, 0}
 };
 
 static const arch_entry cpu_arch[] = {
@@ -3971,7 +3967,8 @@ md_estimate_size_before_relax (fragP, segment)
 
 	case COND_JUMP86:
 	  if (no_cond_jump_promotion)
-	    return 1;
+	    goto relax_guess;
+
 	  if (size == 2)
 	    {
 	      /* Negate the condition, and branch past an
@@ -3993,7 +3990,8 @@ md_estimate_size_before_relax (fragP, segment)
 
 	case COND_JUMP:
 	  if (no_cond_jump_promotion)
-	    return 1;
+	    goto relax_guess;
+
 	  /* This changes the byte-displacement jump 0x7N
 	     to the (d)word-displacement jump 0x0f,0x8N.  */
 	  opcode[1] = opcode[0] + 0x10;
@@ -4013,8 +4011,15 @@ md_estimate_size_before_relax (fragP, segment)
       frag_wane (fragP);
       return fragP->fr_fix - old_fr_fix;
     }
-  /* Guess a short jump.  */
-  return 1;
+
+ relax_guess:
+  /* Guess size depending on current relax state.  Initially the relax
+     state will correspond to a short jump and we return 1, because
+     the variable part of the frag (the branch offset) is one byte
+     long.  However, we can relax a section more than once and in that
+     case we must either set fr_subtype back to the unrelaxed state,
+     or return the value for the appropriate branch.  */
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 /* Called after relax() is finished.

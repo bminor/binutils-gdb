@@ -1,5 +1,6 @@
 /* ns32k.c  -- Assemble on the National Semiconductor 32k series
-   Copyright 1987, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1987, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2102,9 +2103,14 @@ md_estimate_size_before_relax (fragP, segment)
 	  frag_wane (fragP);
 	  break;
 	}
+      /* Fall thru */
+
     case IND (BRANCH, BYTE):
-      fragP->fr_var += 1;
+    case IND (BRANCH, WORD):
+    case IND (BRANCH, DOUBLE):
+      fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
       break;
+
     default:
       break;
     }

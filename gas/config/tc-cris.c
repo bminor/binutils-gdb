@@ -445,6 +445,11 @@ md_estimate_size_before_relax (fragP, segment_type)
 	}
       break;
 
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD):
+      /* When relaxing a section for the second time, we don't need to
+	 do anything.  */
+      break;
+
     default:
       BAD_CASE (fragP->fr_subtype);
     }

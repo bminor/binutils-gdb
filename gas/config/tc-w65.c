@@ -1,5 +1,5 @@
 /* tc-w65.c -- Assemble code for the W65816
-   Copyright 1995, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1998, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1154,6 +1154,7 @@ md_estimate_size_before_relax (fragP, segment_type)
     {
     default:
       abort ();
+
     case C (COND_BRANCH, UNDEF_BYTE_DISP):
     case C (UNCOND_BRANCH, UNDEF_BYTE_DISP):
       /* Used to be a branch to somewhere which was unknown.  */
@@ -1170,8 +1171,16 @@ md_estimate_size_before_relax (fragP, segment_type)
              long.  */
 	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
 	  fragP->fr_var = md_relax_table[C (what, WORD_DISP)].rlx_length;
-	  return md_relax_table[C (what, WORD_DISP)].rlx_length;
 	}
+      break;
+
+    case C (COND_BRANCH, BYTE_DISP):
+    case C (COND_BRANCH, WORD_DISP):
+    case C (UNCOND_BRANCH, BYTE_DISP):
+    case C (UNCOND_BRANCH, WORD_DISP):
+      /* When relaxing a section for the second time, we don't need to
+	 do anything.  */
+      break;
     }
   return fragP->fr_var;
 }

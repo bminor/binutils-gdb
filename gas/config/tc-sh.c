@@ -3030,6 +3030,9 @@ md_estimate_size_before_relax (fragP, segment_type)
 {
   switch (fragP->fr_subtype)
     {
+    default:
+      abort ();
+
     case C (UNCOND_JUMP, UNDEF_DISP):
       /* Used to be a branch to somewhere which was unknown.  */
       if (!fragP->fr_symbol)
@@ -3046,12 +3049,9 @@ md_estimate_size_before_relax (fragP, segment_type)
 	{
 	  fragP->fr_subtype = C (UNCOND_JUMP, UNDEF_WORD_DISP);
 	  fragP->fr_var = md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length;
-	  return md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length;
 	}
       break;
 
-    default:
-      abort ();
     case C (COND_JUMP, UNDEF_DISP):
     case C (COND_JUMP_DELAY, UNDEF_DISP):
       /* Used to be a branch to somewhere which was unknown.  */
@@ -3070,7 +3070,6 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  /* Its got a segment, but its not ours, so it will always be long.  */
 	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
 	  fragP->fr_var = md_relax_table[C (what, COND32)].rlx_length;
-	  return md_relax_table[C (what, COND32)].rlx_length;
 	}
       else
 	{
@@ -3079,7 +3078,16 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  fragP->fr_subtype = C (what, COND8);
 	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
+      break;
 
+    case C (UNCOND_JUMP, UNCOND12):
+    case C (UNCOND_JUMP, UNDEF_WORD_DISP):
+    case C (COND_JUMP, COND8):
+    case C (COND_JUMP, UNDEF_WORD_DISP):
+    case C (COND_JUMP_DELAY, COND8):
+    case C (COND_JUMP_DELAY, UNDEF_WORD_DISP):
+      /* When relaxing a section for the second time, we don't need to
+	 do anything.  */
       break;
     }
   return fragP->fr_var;

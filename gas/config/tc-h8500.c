@@ -1,5 +1,6 @@
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
-   Copyright 1993, 1994, 1995, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1998, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1447,6 +1448,7 @@ md_estimate_size_before_relax (fragP, segment_type)
     {
     default:
       abort ();
+
     case C (BRANCH, UNDEF_BYTE_DISP):
     case C (SCB_F, UNDEF_BYTE_DISP):
     case C (SCB_TST, UNDEF_BYTE_DISP):
@@ -1464,8 +1466,18 @@ md_estimate_size_before_relax (fragP, segment_type)
              long.  */
 	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
 	  fragP->fr_var = md_relax_table[C (what, WORD_DISP)].rlx_length;
-	  return md_relax_table[C (what, WORD_DISP)].rlx_length;
 	}
+      break;
+
+    case C (BRANCH, BYTE_DISP):
+    case C (BRANCH, UNDEF_WORD_DISP):
+    case C (SCB_F, BYTE_DISP):
+    case C (SCB_F, UNDEF_WORD_DISP):
+    case C (SCB_TST, BYTE_DISP):
+    case C (SCB_TST, UNDEF_WORD_DISP):
+      /* When relaxing a section for the second time, we don't need to
+	 do anything.  */
+      break;
     }
   return fragP->fr_var;
 }
