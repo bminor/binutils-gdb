@@ -32,10 +32,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 
-static void dummy_frame_this_id (struct frame_info *next_frame,
-				 void **this_prologue_cache,
-				 struct frame_id *this_id);
-
 static int pc_in_dummy_frame (CORE_ADDR pc);
 
 /* Dummy frame.  This saves the processor state just prior to setting
@@ -60,38 +56,6 @@ struct dummy_frame
 };
 
 static struct dummy_frame *dummy_frame_stack = NULL;
-
-/* Function: find_dummy_frame(pc, fp, sp)
-
-   Search the stack of dummy frames for one matching the given PC and
-   FP/SP.  Unlike pc_in_dummy_frame(), this function doesn't need to
-   adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
-   to call this function after the PC has been adjusted.  */
-
-static struct dummy_frame *
-find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
-{
-  struct dummy_frame *dummyframe;
-
-  for (dummyframe = dummy_frame_stack; dummyframe != NULL;
-       dummyframe = dummyframe->next)
-    {
-      /* Does the PC fall within the dummy frame's breakpoint
-         instruction.  If not, discard this one.  */
-      if (!(pc >= dummyframe->call_lo && pc < dummyframe->call_hi))
-	continue;
-      /* Does the FP match?  */
-      /* "infcall.c" explicitly saved the top-of-stack before the
-	 inferior function call, assume unwind_dummy_id() returns that
-	 same stack value.  */
-      if (fp != dummyframe->top)
-	continue;
-      /* The FP matches this dummy frame.  */
-      return dummyframe;
-    }
-
-  return NULL;
-}
 
 /* Function: pc_in_call_dummy (pc)
 
@@ -185,6 +149,63 @@ generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
   dummy_frame_stack->call_hi = hi;
 }
 
+/* Return the dummy frame cache, it contains both the ID, and a
+   pointer to the regcache.  */
+struct dummy_frame_cache
+{
+  struct frame_id this_id;
+  struct regcache *prev_regcache;
+};
+
+int
+dummy_frame_sniffer (const struct frame_unwind *self,
+		     struct frame_info *next_frame,
+		     void **this_prologue_cache)
+{
+  struct dummy_frame *dummyframe;
+  struct frame_id this_id;
+
+  /* When unwinding a normal frame, the stack structure is determined
+     by analyzing the frame's function's code (be it using brute force
+     prologue analysis, or the dwarf2 CFI).  In the case of a dummy
+     frame, that simply isn't possible.  The PC is either the program
+     entry point, or some random address on the stack.  Trying to use
+     that PC to apply standard frame ID unwind techniques is just
+     asking for trouble.  */
+  /* Use an architecture specific method to extract the prev's dummy
+     ID from the next frame.  Note that this method uses
+     frame_register_unwind to obtain the register values needed to
+     determine the dummy frame's ID.  */
+  this_id = gdbarch_unwind_dummy_id (get_frame_arch (next_frame), next_frame);
+
+  /* Use that ID to find the corresponding cache entry.  */
+  for (dummyframe = dummy_frame_stack;
+       dummyframe != NULL;
+       dummyframe = dummyframe->next)
+    {
+      /* Does the PC fall within the dummy frame's breakpoint
+         instruction.  If not, discard this one.  */
+      if (!(this_id.code_addr >= dummyframe->call_lo
+	    && this_id.code_addr < dummyframe->call_hi))
+	continue;
+      /* Does the FP match?  "infcall.c" explicitly saved the
+	 top-of-stack before the inferior function call, assume
+	 unwind_dummy_id() returns that same stack value.  */
+      if (this_id.stack_addr != dummyframe->top)
+	continue;
+      /* The FP matches this dummy frame.  */
+      {
+	struct dummy_frame_cache *cache;
+	cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
+	cache->prev_regcache = dummyframe->regcache;
+	cache->this_id = this_id;
+	(*this_prologue_cache) = cache;
+	return 1;
+      }
+    }
+  return 0;
+}
+
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 
@@ -195,14 +216,9 @@ dummy_frame_prev_register (struct frame_info *next_frame,
 			   enum lval_type *lvalp, CORE_ADDR *addrp,
 			   int *realnum, void *bufferp)
 {
-  struct dummy_frame *dummy;
-  struct frame_id id;
-
-  /* Call the ID method which, if at all possible, will set the
-     prologue cache.  */
-  dummy_frame_this_id (next_frame, this_prologue_cache, &id);
-  dummy = (*this_prologue_cache);
-  gdb_assert (dummy != NULL);
+  /* The dummy-frame sniffer always fills in the cache.  */
+  struct dummy_frame_cache *cache = (*this_prologue_cache);
+  gdb_assert (cache != NULL);
 
   /* Describe the register's location.  Generic dummy frames always
      have the register value in an ``expression''.  */
@@ -218,7 +234,7 @@ dummy_frame_prev_register (struct frame_info *next_frame,
       /* Use the regcache_cooked_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_cooked_read (dummy->regcache, regnum, bufferp);
+      regcache_cooked_read (cache->prev_regcache, regnum, bufferp);
     }
 }
 
@@ -233,45 +249,24 @@ dummy_frame_this_id (struct frame_info *next_frame,
 		     void **this_prologue_cache,
 		     struct frame_id *this_id)
 {
-  struct dummy_frame *dummy = (*this_prologue_cache);
-  if (dummy != NULL)
-    {
-      (*this_id) = dummy->id;
-      return;
-    }
-  /* When unwinding a normal frame, the stack structure is determined
-     by analyzing the frame's function's code (be it using brute force
-     prologue analysis, or the dwarf2 CFI).  In the case of a dummy
-     frame, that simply isn't possible.  The PC is either the program
-     entry point, or some random address on the stack.  Trying to use
-     that PC to apply standard frame ID unwind techniques is just
-     asking for trouble.  */
-  /* Use an architecture specific method to extract the prev's dummy
-     ID from the next frame.  Note that this method uses
-     frame_register_unwind to obtain the register values needed to
-     determine the dummy frame's ID.  */
-  gdb_assert (gdbarch_unwind_dummy_id_p (current_gdbarch));
-  (*this_id) = gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
-  (*this_prologue_cache) = find_dummy_frame ((*this_id).code_addr,
-					     (*this_id).stack_addr);
+  /* The dummy-frame sniffer always fills in the cache.  */
+  struct dummy_frame_cache *cache = (*this_prologue_cache);
+  gdb_assert (cache != NULL);
+  (*this_id) = cache->this_id;
 }
 
-static struct frame_unwind dummy_frame_unwind =
+static const struct frame_unwind dummy_frame_unwinder =
 {
   DUMMY_FRAME,
   dummy_frame_this_id,
-  dummy_frame_prev_register
+  dummy_frame_prev_register,
+  NULL,
+  dummy_frame_sniffer,
 };
 
-const struct frame_unwind *
-dummy_frame_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  if (pc_in_dummy_frame (pc))
-    return &dummy_frame_unwind;
-  else
-    return NULL;
-}
+const struct frame_unwind *const dummy_frame_unwind = {
+  &dummy_frame_unwinder
+};
 
 static void
 fprint_dummy_frames (struct ui_file *file)

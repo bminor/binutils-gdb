@@ -1,5 +1,15 @@
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
+	* dummy-frame.h (dummy_frame_unwind): Replace dummy_frame_sniffer.
+	* frame-unwind.c (frame_unwind_init): Use dummy_frame_unwind.
+	* dummy-frame.c (find_dummy_frame): Delete.
+	(struct dummy_frame_cache, dummy_frame_sniffer)
+	(dummy_frame_prev_register, dummy_frame_this_id)
+	(dummy_frame_unwinder, dummy_frame_unwind): Re-implement dummy
+	frame unwinder using a dummy_frame_cache.
+
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
 	* frame.h (frame_save_as_regcache): Declare.
 	* frame.c (frame_save_as_regcache): New function.
 	(do_frame_read_register): Replace do_frame_unwind_register.

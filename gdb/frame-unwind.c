@@ -50,7 +50,7 @@ frame_unwind_init (struct obstack *obstack)
   /* Start the table out with a few default sniffers.  OSABI code
      can't override this.  */
   table->list = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
-  table->list->sniffer = dummy_frame_sniffer;
+  table->list->unwinder = dummy_frame_unwind;
   /* The insertion point for OSABI sniffers.  */
   table->osabi_head = &table->list->next;
   return table;
