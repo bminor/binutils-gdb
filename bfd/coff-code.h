@@ -252,7 +252,7 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
 	char           *name = bfd_alloc(abfd, 9);
 	if (name == NULL) {
 	    bfd_error = no_memory;
-	    return (BFD_FAILURE);
+	    return false;
 	}			/* on error */
 	strncpy(name, (char *) &hdr->s_name[0], 8);
 
@@ -1904,7 +1904,7 @@ coff_slurp_line_table(abfd, asect)
 	(alent *) bfd_alloc(abfd, (size_t) ((asect->lineno_count + 1) * sizeof(alent)));
     if (lineno_cache == NULL) {
 	bfd_error = no_memory;
-	return (BFD_FAILURE);
+	return false;
     } {				/* on error */
 	unsigned int    counter = 0;
 	alent          *cache_ptr = lineno_cache;
@@ -2010,7 +2010,7 @@ coff_slurp_symbol_table(abfd)
 
     if (cached_area == NULL) {
 	bfd_error = no_memory;
-	return (BFD_FAILURE);
+	return false;
     }				/* on error */
     table_ptr =
 	(unsigned int *)
@@ -2018,7 +2018,7 @@ coff_slurp_symbol_table(abfd)
 
     if (table_ptr == NULL) {
 	bfd_error = no_memory;
-	return (BFD_FAILURE);
+	return false;
     } {				/* on error */
 	coff_symbol_type *dst = cached_area;
 	unsigned int    last_native_index = bfd_get_symcount(abfd);
@@ -2247,7 +2247,7 @@ coff_slurp_reloc_table(abfd, asect, symbols)
 
   if (reloc_cache == NULL) {
     bfd_error = no_memory;
-    return (BFD_FAILURE);
+    return false;
   } {				/* on error */
     arelent        *cache_ptr;
     struct reloc   *src;
