@@ -1,5 +1,8 @@
 2004-07-20  Jim Blandy  <jimb@redhat.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): The register set used for
+	bfd_mach_ppc has no segment registers.
+
 	Include PowerPC SPR numbers for special-purpose registers.
 	* rs6000-tdep.c (struct reg): Add new member, 'spr_num'.
 	(R, R4, R8, R16, F, P, R32, R64, R0): Include value for

@@ -2935,6 +2935,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     switch (v->mach)
       {
       case bfd_mach_ppc: 
+        tdep->ppc_sr0_regnum = -1;
 	tdep->ppc_vr0_regnum = 71;
 	tdep->ppc_vrsave_regnum = 104;
 	break;
