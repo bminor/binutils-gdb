@@ -1,3 +1,8 @@
+Thu Apr  9 05:45:29 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
+
+	* Makefile.in (install): Install into $(tooldir)/bin, since that's
+	where gcc looks for it.
+
 Tue Apr  7 15:12:15 1992  Sean Eric Fagan  (sef@cygnus.com)
 
 	* Makefile.in:  Changed some lines to be less confusing for some
