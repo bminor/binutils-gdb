@@ -1,3 +1,14 @@
+2003-01-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (deprecated_update_frame_pc_hack)
+	(deprecated_update_frame_base_hack): Also update the next frame's
+	ID/PC cache.
+	(create_sentinel_frame): Link the sentinel frame to itself.
+	* frame.h: Expand comments describing update PC and FP hacks.
+	* frame.c (get_prev_frame): Add comment explaining why
+	INIT_EXTRA_FRAME_INFO call is needed.
+	(legacy_get_prev_frame): Use get_next_frame.
+	
 2003-01-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (create_sentinel_frame): Initialize sentinel frame's PC.

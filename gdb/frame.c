@@ -57,6 +57,29 @@ get_frame_id (struct frame_info *fi)
     }
 }
 
+struct frame_id
+frame_id_unwind (struct frame_info *frame)
+{
+  if (!frame->id_unwind_cache_p)
+    {
+      frame->id_unwind (frame, &frame->unwind_cache, &frame->id_unwind_cache);
+      frame->id_unwind_cache_p = 1;
+    }
+  return frame->id_unwind_cache;
+}
+
+void
+deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
+{
+  /* See comment in "frame.h".  */
+  frame->frame = base;
+  gdb_assert (frame->next != NULL);
+  gdb_assert (frame->next->id_unwind_cache_p);
+  gdb_assert (frame->next->pc_unwind_cache_p);
+  frame->next->id_unwind_cache.base = base;
+  frame->next->id_unwind_cache.pc = frame->next->pc_unwind_cache;
+}
+
 const struct frame_id null_frame_id; /* All zeros.  */
 
 struct frame_id
@@ -123,28 +146,6 @@ frame_find_by_id (struct frame_id id)
          on until we've definitly gone to far.  */
     }
   return NULL;
-}
-
-CORE_ADDR
-frame_pc_unwind (struct frame_info *frame)
-{
-  if (!frame->pc_unwind_cache_p)
-    {
-      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
-      frame->pc_unwind_cache_p = 1;
-    }
-  return frame->pc_unwind_cache;
-}
-
-struct frame_id
-frame_id_unwind (struct frame_info *frame)
-{
-  if (!frame->id_unwind_cache_p)
-    {
-      frame->id_unwind (frame, &frame->unwind_cache, &frame->id_unwind_cache);
-      frame->id_unwind_cache_p = 1;
-    }
-  return frame->id_unwind_cache;
 }
 
 
@@ -411,6 +412,10 @@ create_sentinel_frame (struct regcache *regcache)
   frame->pc_unwind = sentinel_frame_pc_unwind;
   frame->id_unwind = sentinel_frame_id_unwind;
   frame->register_unwind = sentinel_frame_register_unwind;
+  /* Link this frame back to itself.  The frame is self referential
+     (the unwound PC is the same as the pc for instance, so make it
+     so.  */
+  frame->next = frame;
   /* Always unwind the PC as part of creating this frame.  This
      ensures that the frame's PC points into something valid.  */
   /* FIXME: cagney/2003-01-10: Problem here.  Unwinding a sentinel
@@ -686,6 +691,9 @@ legacy_get_prev_frame (struct frame_info *next_frame)
   struct frame_info *prev;
   int fromleaf;
 
+  /* This code doesn't work with the sentinal frame.  */
+  gdb_assert (next_frame->level >= 0);
+
   /* On some machines it is possible to call a function without
      setting up a stack frame for it.  On these machines, we
      define this macro to take two args; a frameinfo pointer
@@ -695,7 +703,7 @@ legacy_get_prev_frame (struct frame_info *next_frame)
   /* Still don't want to worry about this except on the innermost
      frame.  This macro will set FROMLEAF if NEXT_FRAME is a frameless
      function invocation.  */
-  if (next_frame->next == NULL)
+  if (get_next_frame (next_frame) == NULL)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -906,7 +914,15 @@ get_prev_frame (struct frame_info *next_frame)
      NOTE: cagney/2003-01-10: Talk about code behaving badly.  Check
      block_innermost_frame().  It does the sequence: frame = NULL;
      while (1) { frame = get_prev_frame (frame); .... }.  Ulgh!  Why
-     it couldn't be written better, I don't know.  */
+     it couldn't be written better, I don't know.
+
+     NOTE: cagney/2003-01-11: I suspect what is happening is
+     block_innermost_frame() is, when the target has no state
+     (registers, memory, ...), still calling this function.  The
+     assumption being that this function will return NULL indicating
+     that a frame isn't possible, rather than checking that the target
+     has state and then calling get_current_frame() and
+     get_prev_frame().  This is a guess mind.  */
   if (next_frame == NULL)
     {
       /* NOTE: cagney/2002-11-09: There was a code segment here that
@@ -957,7 +973,7 @@ get_prev_frame (struct frame_info *next_frame)
   if ((DEPRECATED_INIT_FRAME_PC_P ()
        || DEPRECATED_INIT_FRAME_PC_FIRST_P ())
       && next_frame->level >= 0)
-    /* Don't try to unwind the sentinal frame using the old code.  */
+     /* Don't try to unwind the sentinal frame using the old code.  */
     return legacy_get_prev_frame (next_frame);
 
   /* Allocate the new frame but do not wire it in.  Some (bad) code in
@@ -1024,6 +1040,8 @@ get_prev_frame (struct frame_info *next_frame)
      Instead of initializing extra info, all frames will use the
      frame_cache (passed to the unwind functions) to store extra frame
      info.  */
+  /* NOTE: cagney/2003-01-11: Legacy targets, when having the sentinel
+     frame unwound, rely on this call.  */
   if (INIT_EXTRA_FRAME_INFO_P ())
     /* NOTE: This code doesn't bother trying to sort out frameless
        functions.  That is left to the target.  */
@@ -1035,7 +1053,37 @@ get_prev_frame (struct frame_info *next_frame)
 CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {
+  /* This should just call frame_pc_unwind().  */
   return frame->pc;
+}
+
+CORE_ADDR
+frame_pc_unwind (struct frame_info *frame)
+{
+  if (!frame->pc_unwind_cache_p)
+    {
+      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache_p = 1;
+    }
+  return frame->pc_unwind_cache;
+}
+
+void
+deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
+{
+  /* See comment in "frame.h".  */
+  frame->pc = pc;
+  gdb_assert (frame->next != NULL);
+  /* Got a bucket?  Legacy code that handles dummy frames directly
+     doesn't always use the unwind function to determine the dummy
+     frame's PC.  Consequently, it is possible for this function to be
+     called when the next frame's pc unwind cache isn't valid.  */
+  if (frame->next->pc_unwind_cache_p)
+    frame->next->pc_unwind_cache = pc;
+  /* Since the PC is unwound before the frame ID, only need to update
+     the frame ID's PC when it has been unwound.  */
+  if (frame->next->id_unwind_cache_p)
+    frame->next->id_unwind_cache.pc = pc;
 }
 
 static int
@@ -1138,20 +1186,6 @@ frame_extra_info_zalloc (struct frame_info *fi, long size)
 {
   fi->extra_info = frame_obstack_zalloc (size);
   return fi->extra_info;
-}
-
-void
-deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
-{
-  /* See comment in "frame.h".  */
-  frame->pc = pc;
-}
-
-void
-deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
-{
-  /* See comment in "frame.h".  */
-  frame->frame = base;
 }
 
 void

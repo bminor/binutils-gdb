@@ -663,17 +663,22 @@ extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
 extern CORE_ADDR *frame_saved_regs_zalloc (struct frame_info *);
 extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
 
-/* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
-   "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
-   the initial frame create.  This puts things back in sync.  */
+/* FIXME: cagney/2003-01-11: Fix up this frame's frame ID / PC (which
+   is cached in the next frame).  The problem here is with read_fp()/
+   FRAME_CHAIN() and read_pc() / FRAME_SAVED_PC.  Legacy code, instead
+   of returning the correct frame base from the word go, returns a
+   draft frame base and then fixes it up in INIT_FRAME_PC,
+   INIT_FRAME_PC_FIRST or INIT_EXTRA_FRAME_INFO.  Back patch the next
+   frame's frame ID so that it will now return the correct id.
+
+   For the PC, the problems are caused by DECR_PC_AFTER_BREAK and
+   DECR_PC_AFTER_HW_BREAK.
+
+   For the FP, the problems are caused by GDB requesting the FP
+   instead of the SP and, as a consequence, code trying to avoid the
+   overhead of unnecessary prologue analysis.  */
 extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 					     CORE_ADDR pc);
-
-/* FIXME: cagney/2002-12-18: Has the frame's base changed?  Or to be
-   more exact, whas that initial guess at the frame's base as returned
-   by read_fp() wrong.  If it was, fix it.  This shouldn't be
-   necessary since the code should be getting the frame's base correct
-   from the outset.  */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
 
