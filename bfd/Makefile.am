@@ -431,7 +431,6 @@ BFD64_BACKENDS_CFILES = \
 	elf64-x86-64.c \
 	elf64-alpha.c \
 	elf64-hppa.c \
-	elf64-ia64.c \
 	elf64-gen.c \
 	elf64-mips.c \
 	elf64-sparc.c \

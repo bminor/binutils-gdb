@@ -1,3 +1,11 @@
+2001-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (BFD64_BACKENDS_CFILES): Remove elf64-ia64.c, so
+	that it will not be pulled into the list of files that make up
+	po/POTFILES.in.
+	* Makefile.in: Regenerate.
+	* po/bfd.pot:  Regenerate.
+
 2001-02-06  H.J. Lu  <hjl@gnu.org>
 
 	* bfd/peicode.h (coff_swap_filehdr_in): Remove the e_magic
