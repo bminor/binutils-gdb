@@ -430,6 +430,7 @@ struct gdbarch startup_gdbarch =
   0,
   "malloc",
   0,
+  0,
   /* startup_gdbarch() */
 };
 
@@ -1385,13 +1386,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->get_saved_register
                         /*GET_SAVED_REGISTER ()*/);
 #endif
-#ifdef HAVE_STEPPABLE_WATCHPOINT
+#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
   fprintf_unfiltered (file,
-                      "gdbarch_dump: HAVE_STEPPABLE_WATCHPOINT # %s\n",
-                      XSTRING (HAVE_STEPPABLE_WATCHPOINT));
+                      "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
+                      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: HAVE_STEPPABLE_WATCHPOINT = %d\n",
-                      HAVE_STEPPABLE_WATCHPOINT);
+                      "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT = %d\n",
+                      HAVE_NONSTEPPABLE_WATCHPOINT);
 #endif
 #ifdef INIT_EXTRA_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -5074,7 +5075,7 @@ gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch,
-                                    int have_nonsteppable_watchpoint)
+                                          int have_nonsteppable_watchpoint)
 {
   gdbarch->have_nonsteppable_watchpoint = have_nonsteppable_watchpoint;
 }

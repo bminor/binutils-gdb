@@ -1,3 +1,9 @@
+2002-10-10  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C,
+	accidentially not commited 2002-10-09
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2002-10-09  Marko Mlinar  <markom@opencores.org>
 
 	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C.
