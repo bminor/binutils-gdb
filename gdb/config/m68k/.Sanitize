@@ -112,6 +112,7 @@ xm-m68k.h
 xm-m68klynx.h
 xm-m68kv4.h
 xm-mpw.h
+xm-nbsd.h
 xm-news.h
 xm-news1000.h
 xm-sun2.h
