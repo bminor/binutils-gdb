@@ -1,3 +1,9 @@
+2001-03-12  Stefan Geuken <mail@stefan-geuken.de>
+
+	* binary.c (bfd_external_binary_architecture): Declare.
+	(binary_object_p): If bfd_external_binary_architecture is defined,
+	set the architecture to this string.
+
 2001-03-11  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Don't make PLT

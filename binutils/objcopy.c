@@ -252,6 +252,7 @@ static struct option copy_options[] =
   {"adjust-vma", required_argument, 0, OPTION_CHANGE_ADDRESSES},
   {"adjust-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_ADDRESS},
   {"adjust-warnings", no_argument, 0, OPTION_CHANGE_WARNINGS},
+  {"binary-architecture", required_argument, 0, 'B'},
   {"byte", required_argument, 0, 'b'},
   {"change-addresses", required_argument, 0, OPTION_CHANGE_ADDRESSES},
   {"change-leading-char", no_argument, 0, OPTION_CHANGE_LEADING_CHAR},
@@ -314,6 +315,9 @@ extern unsigned int Chunk;
    on by the --srec-forceS3 command line switch.  */
 extern boolean S3Forced;
 
+/* Defined in bfd/binary.c.  Used to set architecture of input binary files.  */
+extern enum bfd_architecture bfd_external_binary_architecture;
+
 static void
 copy_usage (stream, exit_status)
      FILE *stream;
@@ -324,6 +328,7 @@ copy_usage (stream, exit_status)
   fprintf (stream, _("\
   -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
   -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
+  -B --binary-architecture <arch>  Set arch of output file, when input is binary\n\
   -F --target <bfdname>            Set both input and output format to <bfdname>\n\
      --debugging                   Convert debugging information, if possible\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
@@ -1813,6 +1818,7 @@ copy_main (argc, argv)
      int argc;
      char *argv[];
 {
+  char * binary_architecture = NULL;
   char *input_filename = NULL, *output_filename = NULL;
   char *input_target = NULL, *output_target = NULL;
   boolean show_version = false;
@@ -1821,7 +1827,7 @@ copy_main (argc, argv)
   struct section_list *p;
   struct stat statbuf;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:j:K:N:s:O:d:F:L:R:SpgxXVvW:",
+  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:R:SpgxXVvW:",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1831,6 +1837,10 @@ copy_main (argc, argv)
 	  if (copy_byte < 0)
 	    fatal (_("byte number must be non-negative"));
 	  break;
+
+        case 'B':
+          binary_architecture = optarg;
+          break;
 
 	case 'i':
 	  interleave = atoi (optarg);
@@ -2189,11 +2199,29 @@ copy_main (argc, argv)
   if (output_target == (char *) NULL)
     output_target = input_target;
 
-  if (preserve_dates)
+  if (binary_architecture != (char *) NULL)
     {
-      if (stat (input_filename, &statbuf) < 0)
-	fatal (_("Cannot stat: %s: %s"), input_filename, strerror (errno));
+      if (input_target && strcmp (input_target, "binary") == 0)
+        {
+          const bfd_arch_info_type * temp_arch_info;
+
+	  temp_arch_info = bfd_scan_arch (binary_architecture);
+
+          if (temp_arch_info != NULL)
+            bfd_external_binary_architecture = temp_arch_info->arch;
+          else
+            fatal (_("architecture %s unknown"), binary_architecture);
+        }
+      else
+	{
+	  non_fatal (_("Warning: input target 'binary' required for binary architecture parameter."));
+	  non_fatal (_(" Argument %s ignored"), binary_architecture);
+	}
     }
+
+  if (preserve_dates)
+    if (stat (input_filename, & statbuf) < 0)
+      fatal (_("Cannot stat: %s: %s"), input_filename, strerror (errno));
 
   /* If there is no destination file then create a temp and rename
      the result into the input.  */

@@ -55,6 +55,10 @@ static boolean binary_set_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 static int binary_sizeof_headers PARAMS ((bfd *, boolean));
 
+/* Set by external programs - specifies the BFD architecture
+   to use when creating binary BFDs.  */
+enum bfd_architecture bfd_external_binary_architecture = bfd_arch_unknown;
+
 /* Create a binary object.  Invoked via bfd_set_format.  */
 
 static boolean
@@ -101,6 +105,13 @@ binary_object_p (abfd)
 
   abfd->tdata.any = (PTR) sec;
 
+  if (bfd_get_arch_info (abfd) != NULL)
+    {
+      if ((bfd_get_arch_info (abfd)->arch == bfd_arch_unknown)
+          && (bfd_external_binary_architecture != bfd_arch_unknown))
+        bfd_set_arch_info (abfd, bfd_lookup_arch (bfd_external_binary_architecture, 0));
+    }
+  
   return abfd->xvec;
 }
 

@@ -874,6 +874,7 @@ Show a summary of the options to @code{nm} and exit.
 objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -I @var{bfdname} | --input-target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
+        [ -B @var{bfdarch} | --binary-architecture=@var{bfdarch} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
         [ -K @var{symbolname} | --keep-symbol=@var{symbolname} ]
         [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
@@ -959,6 +960,17 @@ Write the output file using the object format @var{bfdname}.
 Use @var{bfdname} as the object format for both the input and the output
 file; i.e., simply transfer data from source to destination with no
 translation.  @xref{Target Selection}, for more information.
+
+@item -B @var{bfdarch}
+@itemx --binary-architecture=@var{bfdarch}
+Useful when transforming a raw binary input file into an object file.
+In this case the output architecture can be set to @var{bfdarch}. This
+option will be ignored if the input file has a known @var{bfdarch}. You
+can access this binary data inside a program by referencing the special
+symbols that are created by the conversion process.  These symbols are
+called _binary_@var{objfile}_start, _binary_@var{objfile}_end and
+_binary_@var{objfile}_size.  e.g. you can transform a picture file into
+an object file and then access it in your code using these symbols. 
 
 @item -j @var{sectionname}
 @itemx --only-section=@var{sectionname}

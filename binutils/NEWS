@@ -1,5 +1,10 @@
 -*- text -*-
 
+* New command line switch to objcopy -B (or --binary-architecture) which sets
+  the archiceture of the output file to the given argument.  This option only
+  makes sense, if the input target is binary.  Otherwise it is ignored.
+  By Stefan Geuken.
+
 * Support for PDP-11 by Lars Brinkhoff.
 
 * Add support for ARM v5t and v5te architectures and Intel's XScale ARM
