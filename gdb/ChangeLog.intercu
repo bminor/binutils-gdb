@@ -1,3 +1,18 @@
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (read_structure_scope): Don't create a symbol
+	or call process_die.  Return immediately if die->type is set.
+	Call read_type_die before dwarf2_add_member_fn.
+	(process_structure_scope): New function.
+	(read_enumeration_type, read_enumeration_scope): New functions,
+	broken out from read_enumeration.  Don't create the enumeration
+	type if it has already been created.
+	(read_enumeration): Removed.
+	(process_die): Call process_structure_scope, read_enumeration_type,
+	and read_enumeration_scope.  Just call new_symbol for base and
+	subrange types.  Add a comment about other type dies.
+	(read_type_die): Call read_enumeration_type.
+
 2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (dwarf2_attr_with_cu): New function, renamed
