@@ -1,3 +1,8 @@
+1999-07-13  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: Do not expect arm toolchains to fail
+	the undefined line test.
+
 1999-07-10  Ian Lance Taylor  <ian@zembu.com>
 
 	* ld-elfvers/vers.exp: Use -rpath in new vers19 test.
