@@ -1,3 +1,10 @@
+Tue Feb  7 14:43:33 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* ecoff.c: Reformatted some comments and brace constructs in
+	recent changes to GNU style.
+	(cmp_fdrtab_entry, mk_fdrtab, lookup): Use old-style function
+	definitions.
+
 Tue Feb  7 14:21:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoffswap.h (ecoff_swap_pdr_in): Zero out intern before setting
