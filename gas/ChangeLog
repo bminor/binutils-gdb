@@ -1,3 +1,18 @@
+2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.in: Set em=linux for frv-*-*linux*.
+	* configure: Rebuilt.
+	* config/tc-frv.h (TARGET_FORMAT): Use elf32-frvfdpic if...
+	(frv_md_fdpic_enabled): New.
+	* config/tc-frv.c (frv_md_fdpic_enabled): New.
+	(DEFAULT_FDPIC): New.
+	(frv_flags): Use DEFAULT_FDPIC.
+	(frv_pic_flag): Likewise.
+	(OPTION_NOPIC): New.
+	(md_longopts): Add -mnopic.
+	(md_parse_option): Handle it.
+	(md_show_usage): Add -mfdpic and -mnopic.
+
 2004-04-20  Chris Demetriou  <cgd@broadcom.com>
 
 	* NEWS: Note that MIPS -membedded-pic option is deprecated.

@@ -230,6 +230,7 @@ changequote([,])dnl
       dlx-*-*)				fmt=elf ;;
 
       fr30-*-*)				fmt=elf ;;
+      frv-*-*linux*)			fmt=elf em=linux;;
       frv-*-*)				fmt=elf ;;
 
       hppa-*-linux*)	case ${cpu} in

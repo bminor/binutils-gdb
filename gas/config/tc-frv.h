@@ -30,7 +30,9 @@
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_frv
 
-#define TARGET_FORMAT "elf32-frv"
+#define TARGET_FORMAT (frv_md_fdpic_enabled () \
+		       ? "elf32-frvfdpic" : "elf32-frv")
+extern bfd_boolean frv_md_fdpic_enabled (void);
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 

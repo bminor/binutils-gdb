@@ -162,14 +162,20 @@ static FRV_VLIW vliw;
 #endif
 #endif
 
+#ifdef TE_LINUX
+# define DEFAULT_FDPIC	EF_FRV_FDPIC
+#else
+# define DEFAULT_FDPIC	0
+#endif
+
 static unsigned long frv_mach = bfd_mach_frv;
 
 /* Flags to set in the elf header */
-static flagword frv_flags = DEFAULT_FLAGS;
+static flagword frv_flags = DEFAULT_FLAGS | DEFAULT_FDPIC;
 
 static int frv_user_set_flags_p = 0;
 static int frv_pic_p = 0;
-static const char *frv_pic_flag = (const char *)0;
+static const char *frv_pic_flag = DEFAULT_FDPIC ? "-mfdpic" : (const char *)0;
 
 /* Print tomcat-specific debugging info.  */
 static int tomcat_debug = 0;
@@ -219,6 +225,7 @@ const char * md_shortopts = FRV_SHORTOPTS;
 #define OPTION_PACK	        (OPTION_MD_BASE + 19)
 #define OPTION_NO_PACK	        (OPTION_MD_BASE + 20)
 #define OPTION_FDPIC		(OPTION_MD_BASE + 21)
+#define OPTION_NOPIC		(OPTION_MD_BASE + 22)
 
 struct option md_longopts[] =
 {
@@ -245,6 +252,7 @@ struct option md_longopts[] =
   { "mpack",        	no_argument,		NULL, OPTION_PACK          },
   { "mno-pack",        	no_argument,		NULL, OPTION_NO_PACK       },
   { "mfdpic",		no_argument,		NULL, OPTION_FDPIC	   },
+  { "mnopic",		no_argument,		NULL, OPTION_NOPIC	   },
   { NULL,		no_argument,		NULL, 0                 },
 };
 
@@ -413,6 +421,12 @@ md_parse_option (c, arg)
       frv_pic_flag = "-mfdpic";
       break;
 
+    case OPTION_NOPIC:
+      frv_flags &= ~(EF_FRV_FDPIC | EF_FRV_PIC
+		     | EF_FRV_BIGPIC | EF_FRV_LIBPIC);
+      frv_pic_flag = 0;
+      break;
+
     case OPTION_TOMCAT_DEBUG:
       tomcat_debug = 1;
       break;
@@ -446,6 +460,8 @@ md_show_usage (stream)
   fprintf (stream, _("-mpic        Note small position independent code\n"));
   fprintf (stream, _("-mPIC        Note large position independent code\n"));
   fprintf (stream, _("-mlibrary-pic Compile library for large position indepedent code\n"));
+  fprintf (stream, _("-mfdpic      Assemble for the FDPIC ABI\n"));
+  fprintf (stream, _("-mnopic      Disable -mpic, -mPIC, -mlibrary-pic and -mfdpic\n"));
   fprintf (stream, _("-mcpu={fr500|fr550|fr400|fr300|frv|simple|tomcat}\n"));
   fprintf (stream, _("             Record the cpu type\n"));
   fprintf (stream, _("-mtomcat-stats Print out stats for tomcat workarounds\n"));
@@ -479,6 +495,12 @@ md_begin ()
   bfd_set_gp_size (stdoutput, g_switch_value);
 
   frv_vliw_reset (& vliw, frv_mach, frv_flags);
+}
+
+bfd_boolean
+frv_md_fdpic_enabled (void)
+{
+  return (frv_flags & EF_FRV_FDPIC) != 0;
 }
 
 int chain_num = 0;
