@@ -1,3 +1,7 @@
+Tue Dec  2 14:53:09 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c: make "tdump" command handle literal memranges.
+
 Tue Dec  2 11:34:48 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c: use "lookup_cmd" to parse actions commands

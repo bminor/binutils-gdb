@@ -2306,11 +2306,6 @@ trace_dump_command (args, from_tty)
 		  action_exp++;
 
 		next_comma = strchr (action_exp, ',');
-		if (next_comma)
-		  {
-		    make_cleanup (replace_comma, next_comma);
-		    *next_comma = '\0';
-		  }
 
 		if      (0 == strncasecmp (action_exp, "$reg", 4))
 		  registers_info (NULL, from_tty);
@@ -2318,8 +2313,30 @@ trace_dump_command (args, from_tty)
 		  locals_info (NULL, from_tty);
 		else if (0 == strncasecmp (action_exp, "$arg", 4))
 		  args_info (NULL, from_tty);
+		else if (action_exp[0] == '$' && action_exp[1] == '(')
+		  { /* memrange */
+		    long typecode, size;
+		    bfd_signed_vma offset;
+		    char fmt[40];
+
+		    action_exp = parse_and_eval_memrange (action_exp,
+							  read_pc (),
+							  &typecode, 
+							  &offset,
+							  &size);
+		    if (typecode != 0 && typecode != -1)
+		      offset += read_register (typecode);
+		    sprintf (fmt, "/%dxb 0x%x", size, offset);
+		    x_command (fmt, from_tty);
+		    next_comma = strchr (action_exp, ',');
+		  }
 		else
-		  {
+		  { /* variable */
+		    if (next_comma)
+		      {
+			make_cleanup (replace_comma, next_comma);
+			*next_comma = '\0';
+		      }
 		    printf_filtered ("%s = ", action_exp);
 		    output_command (action_exp, from_tty);
 		    printf_filtered ("\n");
