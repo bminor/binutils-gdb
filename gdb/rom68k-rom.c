@@ -154,7 +154,7 @@ rom68k_open (args, from_tty)
 void
 _initialize_rom68k ()
 {
-  init_rom_68k_cmds() ;
+  init_rom68k_cmds() ;
   init_monitor_ops (&rom68k_ops);
 
   rom68k_ops.to_shortname = "rom68k";

@@ -1,3 +1,7 @@
+Tue Apr 28 11:08:25 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* rom68k-rom.c (_initialize_rom68k): Fix unresolved init_rom_68kcmds
+	
 Mon Apr 27 14:32:21 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/sparc/tm-sparc.h (CALL_DUMMY): Shorten it drastically,
