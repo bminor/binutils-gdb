@@ -1176,9 +1176,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"invalidate", "t,o(b)",0xb8000000, 0xfc000000,	RD_t|RD_b,	I2	}, /* same */
 {"invalidate", "t,A(b)",0,    (int) M_SWR_AB,	INSN_MACRO,	I2	}, /* as swr */
 {"swxc1",   "S,t(b)",   0x4c000008, 0xfc0007ff, SM|RD_S|RD_t|RD_b,	I4	},
-{"sync",    "",		0x0000000f, 0xffffffff,	0,		I2|T3	},
-{"sync.p",  "",		0x0000040f, 0xffffffff,	0,		I2	},
-{"sync.l",  "",		0x0000000f, 0xffffffff,	0,		I2	},
+{"sync",    "",		0x0000000f, 0xffffffff,	INSN_SYNC,	I2|G1	},
+{"sync.p",  "",		0x0000040f, 0xffffffff,	INSN_SYNC,	I2	},
+{"sync.l",  "",		0x0000000f, 0xffffffff,	INSN_SYNC,	I2	},
 {"syscall", "",		0x0000000c, 0xffffffff,	TRAP,	I1		},
 {"syscall", "B",	0x0000000c, 0xfc00003f,	TRAP,	I1		},
 {"teqi",    "s,j",	0x040c0000, 0xfc1f0000, RD_s|TRAP,	I2	},

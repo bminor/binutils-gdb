@@ -5,6 +5,10 @@ Wed Dec  9 14:57:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* dvp-opc.c (vu_lower_opcodes): Update mtir entry.
 	(extract_ffstreg): Fix calculation of reg part of returned value.
 
+	Thu Nov 19 16:38:16 EST 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* mips-opc.c (sync*): Flag these instructions with INSN_SYNC.
+
 	Wed Jul 29 09:41:19 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dvp-opc.c (vu_lower_opcodes): Allow ISW, ISWR, MFIR instructions
