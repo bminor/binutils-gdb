@@ -60,9 +60,10 @@ char *current_file;
 boolean ldgram_want_filename = true;
 boolean had_script = false;
 boolean force_make_executable = false;
-boolean ldgram_in_expression = false;
+
 boolean ldgram_in_script = false;
 boolean ldgram_in_defsym = false;
+boolean ldgram_had_equals = false;
 /* LOCALS */
 
 
@@ -280,13 +281,13 @@ command_line_option:
 	|	OPTION_defsym 
 			{
 			ldgram_in_defsym = true;
-			ldgram_in_expression = true;	
-
+			ldgram_had_equals = false;
 			}
-			 assignment
+		NAME 	 '='
+		exp_head 
 			{
+			lang_add_assignment(exp_assop($4,$3,$5));
 			ldgram_in_defsym = false;
-			ldgram_in_expression = false;
 			}	
 	| '-' NAME
 		 { info("%P%F Unrecognised option -%s\n", $2);  }
@@ -654,14 +655,7 @@ opt_things:
 	;
 
 exp_head:
-		{ 
-		ldgram_in_expression = true; 
-		}
-	exp
-		{
-		ldgram_in_expression = false; 
-		$$ = $2;
-		}
+	exp { $$ = $1; }
 	;
 
 opt_exp:

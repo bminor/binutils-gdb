@@ -46,8 +46,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define unput lex_unput
 int debug;
 
-extern boolean ldgram_in_expression;
+
 extern boolean ldgram_in_defsym;
+static boolean ldgram_had_equals;
 extern boolean ldgram_in_script;
 static char *command_line;
 
@@ -61,6 +62,7 @@ int value;
 #define RTOKEN(x)  {  yylval.token = x; return x; }
 keyword_type keywords[] = 
 {
+"/", '/',
 "MEMORY",MEMORY,
 "ORIGIN",ORIGIN,
 "BLOCK",BLOCK,
@@ -101,6 +103,7 @@ unsigned int lineno;
 extern boolean hex_mode;
 FILE *ldlex_input_stack;
 static unsigned int have_pushback;
+
 #define NPUSHBACK 10
 int pushback[NPUSHBACK];
 int thischar;
@@ -215,33 +218,46 @@ char **av;
 
 }
 
-long number(text, base)
-char *text;
-int base;
+static long 
+DEFUN(number,(default_if_zero,base),
+      int default_if_zero AND
+      int base)
 {
   unsigned  long l = 0;
-  char *p;
-  for (p = text; *p != 0; p++) {
-    if (*p == 'K') {
-      l =l * 1024;
-    }
-    else if(*p== 'M') {
-      l =l * 1024 * 1024;
-    }
-    else {
-      l =l * base;
-      if (isdigit(*p))  {
-	l += *p - '0';
-      }
-      else if (islower(*p)) {
-	l += *p - 'a' + 10;
-      }
-      else {
-	l += *p - 'A' + 10;
-      }
-    }
+  int ch = yytext[0];
+  if (ch == 0) {
+    base = default_if_zero;
   }
-  return l;
+  while (1) {
+    switch (ch) {
+    case 'x':
+      base = 16;
+      break;
+    case 'k':
+    case 'K':
+      l =l * 1024;
+      break;
+    case 'm':
+    case 'M':
+      l =l * 1024 * 1024;
+      break;
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      l = l * base + ch - '0';
+      break;
+    case 'a': case 'b': case 'c' : case 'd' : case 'e': case 'f':
+      l =l *base + ch - 'a' + 10;
+      break;
+    case 'A': case 'B': case 'C' : case 'D' : case 'E': case 'F':
+      l =l *base + ch - 'A' + 10;
+      break;
+    default:
+      unput(ch);
+      yylval.integer = l;
+      return INT;
+    }
+ch = input();
+  }
 }
 %}
 
@@ -249,9 +265,7 @@ int base;
 %o 5000
 FILENAMECHAR	[a-zA-Z0-9\/\.\-\_\+\=]
 FILENAME	{FILENAMECHAR}+
-
-
-WHITE		[ \t]+
+WHITE		[ \t]+ 
 
 %%
 
@@ -320,7 +334,8 @@ WHITE		[ \t]+
                  yylval.name = buystring(yytext+3);
 		 return OPTION_Aarch;
 	       }
-" " { }
+
+" "		{ if (ldgram_had_equals == true) ldgram_in_defsym = false; }
 "<<="		{ RTOKEN(LSHIFTEQ);}
 ">>="		{ RTOKEN(RSHIFTEQ);}
 "||"		{ RTOKEN(OROR);}
@@ -384,121 +399,92 @@ WHITE		[ \t]+
   return NAME;
 }
 
-"\#"{WHITE}*{FILENAMECHAR}+ {
-  char *p = yytext+1;
-  while(*p ==' ' || *p == '\t') p++;
-  yylval.name = buystring(p);
-  return NAME;
-}
 {FILENAMECHAR} {
 
   boolean loop = false;
-  /*
-    Tokenize a name, this is really pain, since a name can be a
-    filename or a symbol name. filenames have slashes and stuff whist
-    in an expression those things are seperate tokens. We hack this by
-    setting ldlang_in_script when we are expecting a symbol, so that
-    [/+-] get taken to be seperate tokens. An extra gotcha is
-    expressions after defsyms, we only allow +s and -s in a defsym
-    expression, so -defsym foo=bar+9 /file.o is parsed ok.
-    
-    The more I think about this the more I hate it. I've got a problem
-    now with the = sign, what should I do ? imagine:
-    __start=.;
-    You'd think that was pretty unambiguous wouldn't you. Well it's
-    not since __start=. is (at the moment) a perfectly valid
-    filename. And in some cases we don't know what's going on. I'm
-    going to have to hack this. If we see a '/' before the = sign then
-    we say we've got an = in a filename, otherwise it's an operator.
-    (later)
-    That's it, I've had enough. From now on, an =s on a command line
-    will be taken to be part of a file name unless its in a defsym,
-    and an = in a file will be taken to be an operator.
-    */
   int ch;
   keyword_type *k;
 
-  if ((hex_mode && isxdigit(yytext[0]))
-      ||
-      (isdigit(yytext[0]) && (ldgram_in_expression == true || ldgram_in_script == true))) {
-    char *start = yytext;
-    unsigned int base = 10;
-    if (hex_mode == true) base = 16;
-    if (yytext[0] == '0') {
-      base = 8;
-    }
-    ch = input();
-    while (isxdigit(ch) 
-	   || ch == 'x'
-	   || ch == 'X'
-	   || ch == 'M'		
-	   )
-	{
-	  if (ch == 'x' || ch == 'X') {
-	    base = 16;
-	    start = yytext + yyleng;
-	  }
-	  else {
-	    yytext[yyleng++] = ch;
-	  }
-	  ch = input();
-	}
-    yytext[yyleng] = 0;
-    unput(ch);
-    yylval.integer = number(start, base);
-    return INT;
+  /* If we're in hex mode (only after a -T) then all we can see are numbers
+     hex digit we see will be a number. */
+
+  if (hex_mode) {	
+    return number(16, 16);
   }
 
-  if (ldfile_input_filename) {
-    /* We're inside a file */
-    if (yytext[0]== '=') {
-      RTOKEN('=');
-    }
+  /* If we're in a defsym then all things starting with a digit are in
+     hex */
+
+  if (isdigit(yytext[0]) && ldgram_in_defsym) {
+    return number(16,16);
   }
 
-    
 
-  /* Otherwise we only notice special things if were in an
-     expression */
+  /* Otherwise if we're in a script we will parse the numbers
+     normally */
 
-  if (ldgram_in_expression) {
-    if (yytext[0] != '/' ||  ldgram_in_defsym == false)  {
-      switch (yytext[0]) {
-      case '/': RTOKEN('/');
-      case '=': RTOKEN('=');
+  if (ldgram_in_script == true && isdigit(yytext[0])) {
+    return number(8,10);
+  }
+
+  /* Anywhere not in a script or defsym, an opertor is part of a
+     filename, except / and, which is an operator when on its own */
+  if (ldgram_in_script == true|| ldgram_in_defsym == true) {
+
+    switch (yytext[0]) {
+      case '*': RTOKEN('*');
+
+      case '=': {
+	ldgram_had_equals = true;
+	RTOKEN('=');
+      }
+	break;
+     case '/': {
+       if (ldgram_in_defsym) RTOKEN('/');
+     }
+	break;
       case '+': RTOKEN('+');
       case '-': RTOKEN('-');
+      case '!': RTOKEN('!');
+      case '~': RTOKEN('~');
       }
     }
-  }
 
+
+/* Otherwise this must be a file or a symbol name, and it will continue to be a
+   filename until we get to something strange. In scripts operator looking
+   things  are taken to be operators, except /, which will be left
+ */
   ch = input();
   while (true)
       {
-	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_' ) {
-	  yytext[yyleng++] = ch;
+	if (ldgram_in_defsym == true) {
+	  switch (ch) {
+	  case '*': 
+	  case '=': 
+	  case '+': 
+	  case '/': 
+	  case '-': 
+	  case '!': 
+	  case '~': 
+	    goto quit;
+	  }
+	  
 	}
-	else if (ch == '=' && ldgram_in_script) {
-	  /* An = within a script is always taken to be an operator */
-	  break;
-	}
-	else if (ch == '+' || ch == '-' || ch == '/' || ch == '=') {
-	  if (ldgram_in_expression) break;
+	
+	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_'  ||
+	    ch == '/' || ch == '.' || ch == '+' || ch == '-' || ch =='=') {
 	  yytext[yyleng++] = ch;
 	}
 	else 
 	  break;
 	ch = input();
       }
-
+ quit:;
   yytext[yyleng] = 0;
   unput(ch);
-  /* Filenames  of just =signs are tokens */
-  if (yyleng == 1 && yytext[0] == '=') {
-    RTOKEN('=');
-  }
-  for(k = keywords; k ->name != (char *)NULL; k++) {
 
+  for(k = keywords; k ->name != (char *)NULL; k++) {
     if (strcmp(k->name, yytext)==0) {
       yylval.token = k->value;
       return k->value;
