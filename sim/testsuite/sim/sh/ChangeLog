@@ -1,3 +1,12 @@
+2003-07-25  Michael Snyder  <msnyder@redhat.com>
+
+	* pshai.s, pshar.s, pshli.s, pshlr.s: New files.
+	* allinsn.exp: Add psha, pshl tests.
+	* pdec.s, pinc.s, padd.s, paddc.s: New files.
+	* allinsn.exp: Add pdec, pinc, padd, paddc tests.
+	* pand.s, pdmsb.s: New files.
+	* allinsn.exp: Add pand, pdmsb tests.
+
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
 
 	* pmuls.s: New file.

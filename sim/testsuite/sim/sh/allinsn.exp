@@ -24,7 +24,17 @@ if [istarget sh-*elf] {
     run_sim_test fsqrt.s  sh
     run_sim_test fsub.s   sh
     run_sim_test ftrc.s   sh
+    run_sim_test paddc.s  shdsp
+    run_sim_test padd.s   shdsp
+    run_sim_test pand.s   shdsp
+    run_sim_test pdec.s   shdsp
+    run_sim_test pdmsb.s  shdsp
+    run_sim_test pinc.s   shdsp
     run_sim_test pmuls.s  shdsp
+    run_sim_test pshai.s  shdsp
+    run_sim_test pshar.s  shdsp
+    run_sim_test pshli.s  shdsp
+    run_sim_test pshlr.s  shdsp
     run_sim_test shll.s   $all
     run_sim_test shll2.s  $all
     run_sim_test shll8.s  $all
