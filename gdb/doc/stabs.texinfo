@@ -3936,6 +3936,8 @@ Offset in the @code{.stabstr} section to the source filename.
 
 @item n_other
 Unused field, always zero.
+This may eventually be used to hold overflows from the count in
+the @code{n_desc} field.
 
 @item n_desc
 Count of upcoming symbols, i.e., the number of remaining stabs for this
@@ -3956,6 +3958,18 @@ section, and the @code{.stabstr} section has its ELF section
 header @code{sh_type} member set to @code{SHT_STRTAB} to mark it as a
 string table.  SOM and COFF have no way of linking the sections together
 or marking them as string tables.
+
+For COFF, the @code{.stab} and @code{.stabstr} sections are simply
+concatenated by the linker.  GDB then uses the @code{n_desc} fields to
+figure out the extent of the original sections.  Similarly, the
+@code{n_value} fields of the header symbols are added together in order
+to get the actual position of the strings in a desired @code{.stabstr}
+section.  Although this design obviates any need for the linker to relocate
+or otherwise manipulate @code{.stab} and @code{.stabstr} sections, it also
+requires some care to ensure that the offsets are calculated correctly.
+For instance, if the linker were to pad in between the @code{.stabstr}
+sections before concatenating, then the offsets to strings in the middle
+of the executable's @code{.stabstr} section would be wrong.
 
 @node ELF Linker Relocation
 @appendixsec Having the Linker Relocate Stabs in ELF 

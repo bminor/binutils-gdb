@@ -1,3 +1,8 @@
+Thu May  5 20:23:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* stabs.texinfo (Stab Section Basics): Add comment about alignment
+	of stabs-in-coff sections.
+
 Wed May  4 06:26:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* annotate.texi: Change edition to 0.5 and date to May 1994.
