@@ -1,3 +1,11 @@
+Fri Jul 24 07:41:12 1998  Mark Alexander  <marka@cygnus.com>
+
+	* mn10300-tdep.c (set_movm_offsets): New helper function
+	for mn10300_analyze_prologue.
+	(mn10300_analyze_prologue): Simplify by factoring out common code.
+	Fix bugs in setting frame address for optimized code.
+	Use read_memory_nobpt instead of target_read_memory.
+
 Thu Jul 23 17:01:17 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (collect_symbol): handle LOC_ARG case.
