@@ -1062,7 +1062,7 @@ array_insert_breakpoint (addr, shadow)
 {
   int i;
   int bp_size = 0;
-  int bp_addr = addr;
+  CORE_ADDR bp_addr = addr;
 
   debuglogs (1, "array_insert_breakpoint() addr = 0x%x", addr);
   BREAKPOINT_FROM_PC (&bp_addr, &bp_size);

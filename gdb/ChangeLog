@@ -1,3 +1,10 @@
+Thu Nov 26 11:19:15 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* rs6000-tdep.c (rs6000_breakpoint_from_pc): Change big_breakpoint
+ 	and little_breakpoint to char[] from char*.
+	* remote-array.c (array_insert_breakpoint): Change bp_addr to
+ 	CORE_ADDR type.
+
 Wed Nov 25 00:13:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* vx-share/xdr_ld.c (xdr_ldtabl): Cast second arg to char**

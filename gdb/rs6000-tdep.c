@@ -144,8 +144,8 @@ rs6000_breakpoint_from_pc (bp_addr, bp_size)
      CORE_ADDR *bp_addr;
      int *bp_size;
 {
-  static unsigned char *big_breakpoint = BIG_BREAKPOINT;
-  static unsigned char *little_breakpoint = LITTLE_BREAKPOINT;
+  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
+  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
   *bp_size = 4;
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     return big_breakpoint;
