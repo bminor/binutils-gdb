@@ -113,7 +113,7 @@ struct bcache {
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
    never seen those bytes before, add a copy of them to BCACHE.  In
    either case, return a pointer to BCACHE's copy of that string.  */
-extern void *bcache (void *addr, int length, struct bcache *bcache);
+extern void *bcache (const void *addr, int length, struct bcache *bcache);
 
 /* Free all the storage that BCACHE refers to.  The result is a valid,
    but empty, bcache.  This does not free BCACHE itself, since that
@@ -126,5 +126,5 @@ extern void free_bcache (struct bcache *bcache);
    `printf_filtered' and its ilk.  */
 extern void print_bcache_statistics (struct bcache *bcache, char *type);
 /* The hash function */
-extern unsigned long hash(void *addr, int length);
+extern unsigned long hash(const void *addr, int length);
 #endif /* BCACHE_H */

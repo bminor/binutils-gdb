@@ -33,7 +33,7 @@
  */
 
 unsigned long
-hash(void *addr, int length)
+hash(const void *addr, int length)
 {
 		const unsigned char *k, *e;
 		unsigned long h;
@@ -127,7 +127,7 @@ expand_hash_table (struct bcache *bcache)
    never seen those bytes before, add a copy of them to BCACHE.  In
    either case, return a pointer to BCACHE's copy of that string.  */
 void *
-bcache (void *addr, int length, struct bcache *bcache)
+bcache (const void *addr, int length, struct bcache *bcache)
 {
   int hash_index;
   struct bstring *s;

@@ -1,3 +1,10 @@
+2002-02-22  Jim Blandy  <jimb@redhat.com>
+
+	Indicate that the bcache functions don't change the strings
+	they're passed.
+	* bcache.h (bcache, hash): Add `const' keywords to declarations.
+	* bcache.c (bcache, hash): Add `const' keywords to definitions.
+
 2002-02-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c (child_create_inferior): Fix create flags setting bug.
