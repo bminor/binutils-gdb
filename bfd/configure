@@ -2562,7 +2562,7 @@ selarchs="$f"
 # Target backend .o files.
 tb=
 
-elf="elf.lo elflink.lo"
+elf="elflink.lo"
 
 for vec in $selvecs
 do

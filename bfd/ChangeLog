@@ -1,5 +1,11 @@
 Fri Oct  3 11:23:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Don't include elf.lo again for ELF targets; it's
+	always in the library anyhow.
+	* configure: Rebuild.
+
+	* bfd-in2.h: Rebuild.
+
 	* elf32-sparc.c (sparc_elf_wdisp16_reloc): Cast to bfd_byte *, not
 	char *, when calling bfd_get_32 and bfd_put_32.
 	* sunos.c (sunos_scan_dynamic_symbol): Cast contents to char *
