@@ -94,7 +94,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define REGISTER_TYPE long
 
 #if defined (HAVE_68881)
-#  if defined (TARGET_SUN3)
+#  if defined (GDB_TARGET_IS_SUN3)
     /* Sun3 status includes fpflags, which shows whether the FPU has been used
        by the process, and whether the FPU was done with an instruction or 
        was interrupted in the middle of a long instruction.  See

@@ -31,7 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int errno;
 
-#if defined (TARGET_SUN3)
+#if defined (GDB_TARGET_IS_SUN3)
 /* All of this stuff is only relevant if both host and target are sun3.  */
 void
 fetch_inferior_registers ()
