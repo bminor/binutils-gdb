@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* List of all modules.  */
 static MODULE_INSTALL_FN * const modules[] = {
   standard_install,
+  sim_events_install,
 #if WITH_ENGINE
   sim_engine_install,
 #endif
@@ -42,15 +43,17 @@ static MODULE_INSTALL_FN * const modules[] = {
   /* FIXME: should handle flatmem as well FLATMEM */
   sim_memopt_install,
 #endif
-  sim_events_install,
 #if WITH_WATCHPOINTS
   sim_watchpoint_install,
 #endif
 #if WITH_SCACHE
   scache_install,
 #endif
-#ifdef SIM_HAVE_MODEL /* FIXME: temporary */
+#ifdef SIM_HAVE_MODEL
   model_install,
+#endif
+#ifdef SIM_HAVE_BREAKPOINTS
+  sim_break_install,
 #endif
   /* Configured in [simulator specific] additional modules.  */
 #ifdef MODULE_LIST
@@ -96,7 +99,8 @@ sim_post_argv_init (SIM_DESC sd)
   return SIM_RC_OK;
 }
 
-/* Install all modules.  */
+/* Install all modules.
+   If this fails, no modules are left installed.  */
 
 SIM_RC
 sim_module_install (SIM_DESC sd)
@@ -107,7 +111,10 @@ sim_module_install (SIM_DESC sd)
   for (modp = modules; *modp != NULL; ++modp)
     {
       if ((*modp) (sd) != SIM_RC_OK)
-	return SIM_RC_FAIL;
+	{
+	  sim_module_uninstall (sd);
+	  return SIM_RC_FAIL;
+	}
     }
   return SIM_RC_OK;
 }
