@@ -10399,7 +10399,6 @@ md_assemble (str)
 #if 0
   arm_align (2, 0);
 #endif
-  listing_prev_line (); /* Defined in listing.h.  */
 
   /* Align the previous label if needed.  */
   if (last_label_seen != NULL)

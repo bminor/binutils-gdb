@@ -1,5 +1,8 @@
 2002-05-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/tc-arm.c (md_assemble): Remove redundant call to
+	listing_prev().
+
 	* dwarf2dbg.c (dwarf2_emit_insn): Do not reset
 	loc_directive_seen.
 
