@@ -1,3 +1,8 @@
+Thu Apr 29 09:50:07 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* config.sub: Use sysv3.2 not sysv32 for canonical OS
+	for System V release 3.2.
+
 Thu Apr 29 10:33:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config.sub: Recognize hppaosf.

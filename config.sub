@@ -147,10 +147,9 @@ case $basic_machine in
 		basic_machine=i386-mach
 		os=-mach
 		;;
-# I'm not sure what "Sysv32" means.  Should this be sysv3.2?
 	i[34]86v32)
 		basic_machine=`echo $1 | sed -e 's/86.*/86-unknown/'`
-		os=-sysv32
+		os=-sysv3.2
 		;;
 	i[34]86v4*)
 		basic_machine=`echo $1 | sed -e 's/86.*/86-unknown/'`
