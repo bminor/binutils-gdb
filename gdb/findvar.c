@@ -171,8 +171,7 @@ read_relative_register_raw_bytes (regnum, myaddr)
   int optim;
   if (regnum == FP_REGNUM && selected_frame)
     {
-      (void) memcpy (myaddr, &FRAME_FP(selected_frame),
-		     REGISTER_RAW_SIZE(FP_REGNUM));
+      memcpy (myaddr, &FRAME_FP(selected_frame), REGISTER_RAW_SIZE(FP_REGNUM));
       SWAP_TARGET_AND_HOST (myaddr, REGISTER_RAW_SIZE(FP_REGNUM)); /* in target order */
       return 0;
     }
@@ -200,10 +199,10 @@ value_of_register (regnum)
   get_saved_register (raw_buffer, &optim, &addr,
 		      selected_frame, regnum, &lval);
 
-  target_convert_to_virtual (regnum, raw_buffer, virtual_buffer);
+  REGISTER_CONVERT_TO_VIRTUAL (regnum, raw_buffer, virtual_buffer);
   val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-  (void) memcpy (VALUE_CONTENTS_RAW (val), virtual_buffer,
-		 REGISTER_VIRTUAL_SIZE (regnum));
+  memcpy (VALUE_CONTENTS_RAW (val), virtual_buffer,
+	  REGISTER_VIRTUAL_SIZE (regnum));
   VALUE_LVAL (val) = lval;
   VALUE_ADDRESS (val) = addr;
   VALUE_REGNO (val) = regnum;
@@ -263,7 +262,7 @@ read_register_bytes (regbyte, myaddr, len)
 	break;
       }
   if (myaddr != NULL)
-    (void) memcpy (myaddr, &registers[regbyte], len);
+    memcpy (myaddr, &registers[regbyte], len);
 }
 
 /* Read register REGNO into memory at MYADDR, which must be large enough
@@ -277,8 +276,8 @@ read_register_gen (regno, myaddr)
 {
   if (!register_valid[regno])
     target_fetch_registers (regno);
-  (void) memcpy (myaddr, &registers[REGISTER_BYTE (regno)],
-		 REGISTER_RAW_SIZE (regno));
+  memcpy (myaddr, &registers[REGISTER_BYTE (regno)],
+	  REGISTER_RAW_SIZE (regno));
 }
 
 /* Copy LEN bytes of consecutive data from memory at MYADDR
@@ -292,7 +291,7 @@ write_register_bytes (regbyte, myaddr, len)
 {
   /* Make sure the entire registers array is valid.  */
   read_register_bytes (0, (char *)NULL, REGISTER_BYTES);
-  (void) memcpy (&registers[regbyte], myaddr, len);
+  memcpy (&registers[regbyte], myaddr, len);
   target_store_registers (-1);
 }
 
@@ -304,13 +303,28 @@ CORE_ADDR
 read_register (regno)
      int regno;
 {
-  REGISTER_TYPE reg;
+  unsigned short sval;
+  unsigned long lval;
 
   if (!register_valid[regno])
     target_fetch_registers (regno);
-  memcpy (&reg, &registers[REGISTER_BYTE (regno)], sizeof (REGISTER_TYPE));
-  SWAP_TARGET_AND_HOST (&reg, sizeof (REGISTER_TYPE));
-  return reg;
+
+  switch (REGISTER_RAW_SIZE(regno))
+    {
+    case sizeof (unsigned char):
+      return registers[REGISTER_BYTE (regno)];
+    case sizeof (sval):
+      memcpy (&sval, &registers[REGISTER_BYTE (regno)], sizeof (sval));
+      SWAP_TARGET_AND_HOST (&sval, sizeof (sval));
+      return sval;
+    case sizeof (lval):
+      memcpy (&lval, &registers[REGISTER_BYTE (regno)], sizeof (lval));
+      SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
+      return lval;
+    default:
+      error ("Can't handle register size of %d for register %d\n",
+	     REGISTER_RAW_SIZE(regno), regno);
+    }
 }
 
 /* Registers we shouldn't try to store.  */
@@ -326,20 +340,34 @@ void
 write_register (regno, val)
      int regno, val;
 {
-  REGISTER_TYPE reg;
+  unsigned short sval;
+  unsigned long lval;
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to change
      the registers array if something writes to this register.  */
   if (CANNOT_STORE_REGISTER (regno))
     return;
 
-  reg = val;
-  SWAP_TARGET_AND_HOST (&reg, sizeof (REGISTER_TYPE));
-
   target_prepare_to_store ();
 
   register_valid [regno] = 1;
-  memcpy (&registers[REGISTER_BYTE (regno)], &reg, sizeof (REGISTER_TYPE));
+
+  switch (REGISTER_RAW_SIZE(regno))
+    {
+    case sizeof (unsigned char):
+      registers[REGISTER_BYTE (regno)] = val;
+      break;
+    case sizeof (sval):
+      sval = val;
+      SWAP_TARGET_AND_HOST (&sval, sizeof (sval));
+      memcpy (&registers[REGISTER_BYTE (regno)], &sval, sizeof (sval));
+      break;
+    case sizeof (lval):
+      lval = val;
+      SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
+      memcpy (&registers[REGISTER_BYTE (regno)], &lval, sizeof (lval));
+      break;
+    }
 
   target_store_registers (regno);
 }
@@ -354,8 +382,13 @@ supply_register (regno, val)
      char *val;
 {
   register_valid[regno] = 1;
-  (void) memcpy (&registers[REGISTER_BYTE (regno)], val,
-		 REGISTER_RAW_SIZE (regno));
+  memcpy (&registers[REGISTER_BYTE (regno)], val, REGISTER_RAW_SIZE (regno));
+
+  /* On some architectures, e.g. HPPA, there are a few stray bits in some
+     registers, that the rest of the code would like to ignore.  */
+#ifdef CLEAN_UP_REGISTER_VALUE
+  CLEAN_UP_REGISTER_VALUE(regno, &registers[REGISTER_BYTE(regno)]);
+#endif
 }
 
 /* Given a struct symbol for a variable,
@@ -384,14 +417,14 @@ read_var_value (var, frame)
   switch (SYMBOL_CLASS (var))
     {
     case LOC_CONST:
-      (void) memcpy (VALUE_CONTENTS_RAW (v), &SYMBOL_VALUE (var), len);
+      memcpy (VALUE_CONTENTS_RAW (v), &SYMBOL_VALUE (var), len);
       SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (v), len);
       VALUE_LVAL (v) = not_lval;
       return v;
 
     case LOC_LABEL:
       addr = SYMBOL_VALUE_ADDRESS (var);
-      (void) memcpy (VALUE_CONTENTS_RAW (v), &addr, len);
+      memcpy (VALUE_CONTENTS_RAW (v), &addr, len);
       SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (v), len);
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -400,7 +433,7 @@ read_var_value (var, frame)
       {
 	char *bytes_addr;
 	bytes_addr = SYMBOL_VALUE_BYTES (var);
-	(void) memcpy (VALUE_CONTENTS_RAW (v), bytes_addr, len);
+	memcpy (VALUE_CONTENTS_RAW (v), bytes_addr, len);
 	VALUE_LVAL (v) = not_lval;
 	return v;
       }
@@ -487,6 +520,9 @@ read_var_value (var, frame)
 	   really contains
 	   the address of the struct, not the struct itself.  GCC_P is nonzero
 	   if the function was compiled with GCC.  */
+	/* A cleaner way to do this would be to add LOC_REGISTER_ADDR
+	   (register contains the address of the value) and LOC_REGPARM_ADDR,
+	   and have the symbol-reading code set them -kingdon.  */
 #if !defined (REG_STRUCT_HAS_ADDR)
 #define REG_STRUCT_HAS_ADDR(gcc_p) 0
 #endif
@@ -494,7 +530,10 @@ read_var_value (var, frame)
 	if (REG_STRUCT_HAS_ADDR (BLOCK_GCC_COMPILED (b))
 	    && (   (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	        || (TYPE_CODE (type) == TYPE_CODE_UNION)))
-	  addr = *(CORE_ADDR *)VALUE_CONTENTS (v);
+	  {
+	    addr = *(CORE_ADDR *)VALUE_CONTENTS (v);
+	    VALUE_LVAL (v) = lval_memory;
+	  }
 	else
 	  return v;
       }
@@ -536,7 +575,11 @@ value_from_register (type, regnum, frame)
 		      ((len - 1) / REGISTER_RAW_SIZE (regnum)) + 1 :
 		      1);
 
-  if (num_storage_locs > 1)
+  if (num_storage_locs > 1
+#ifdef GDB_TARGET_IS_H8500
+      || TYPE_CODE (type) == TYPE_CODE_PTR
+#endif
+      )
     {
       /* Value spread across multiple storage locations.  */
       
@@ -550,33 +593,93 @@ value_from_register (type, regnum, frame)
 
       /* Copy all of the data out, whereever it may be.  */
 
-      for (local_regnum = regnum;
-	   value_bytes_copied < len;
-	   (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),
-	    ++local_regnum))
+#ifdef GDB_TARGET_IS_H8500
+/* This piece of hideosity is required because the H8500 treats registers
+   differently depending upon whether they are used as pointers or not.  As a
+   pointer, a register needs to have a page register tacked onto the front.
+   An alternate way to do this would be to have gcc output different register
+   numbers for the pointer & non-pointer form of the register.  But, it
+   doesn't, so we're stuck with this.  */
+
+      if (TYPE_CODE (type) == TYPE_CODE_PTR)
 	{
-	  get_saved_register (value_bytes + value_bytes_copied,
+	  int page_regnum;
+
+	  switch (regnum)
+	    {
+	    case R0_REGNUM: case R1_REGNUM: case R2_REGNUM: case R3_REGNUM:
+	      page_regnum = SEG_D_REGNUM;
+	      break;
+	    case R4_REGNUM: case R5_REGNUM:
+	      page_regnum = SEG_E_REGNUM;
+	      break;
+	    case R6_REGNUM: case R7_REGNUM:
+	      page_regnum = SEG_T_REGNUM;
+	      break;
+	    }
+
+	  value_bytes[0] = 0;
+	  get_saved_register (value_bytes + 1,
 			      &optim,
 			      &addr,
 			      frame,
-			      local_regnum,
+			      page_regnum,
 			      &lval);
+
 	  if (lval == lval_register)
 	    reg_stor++;
 	  else
 	    {
 	      mem_stor++;
+	      first_addr = addr;
+	    }
+	  last_addr = addr;
 
-	      if (regnum == local_regnum)
-		first_addr = addr;
-	      
-	      mem_tracking =
-		(mem_tracking
-		 && (regnum == local_regnum
-		     || addr == last_addr));
+	  get_saved_register (value_bytes + 2,
+			      &optim,
+			      &addr,
+			      frame,
+			      regnum,
+			      &lval);
+
+	  if (lval == lval_register)
+	    reg_stor++;
+	  else
+	    {
+	      mem_stor++;
+	      mem_tracking = mem_tracking && (addr == last_addr);
 	    }
 	  last_addr = addr;
 	}
+      else
+#endif				/* GDB_TARGET_IS_H8500 */
+	for (local_regnum = regnum;
+	     value_bytes_copied < len;
+	     (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),
+	      ++local_regnum))
+	  {
+	    get_saved_register (value_bytes + value_bytes_copied,
+				&optim,
+				&addr,
+				frame,
+				local_regnum,
+				&lval);
+	    if (lval == lval_register)
+	      reg_stor++;
+	    else
+	      {
+		mem_stor++;
+
+		if (regnum == local_regnum)
+		  first_addr = addr;
+	      
+		mem_tracking =
+		  (mem_tracking
+		   && (regnum == local_regnum
+		       || addr == last_addr));
+	      }
+	    last_addr = addr;
+	  }
 
       if ((reg_stor && mem_stor)
 	  || (mem_stor && !mem_tracking))
@@ -608,7 +711,7 @@ value_from_register (type, regnum, frame)
 	 endian machines.  */
 
       /* Copy into the contents section of the value.  */
-      (void) memcpy (VALUE_CONTENTS_RAW (v), value_bytes, len);
+      memcpy (VALUE_CONTENTS_RAW (v), value_bytes, len);
 
       return v;
     }
@@ -625,7 +728,7 @@ value_from_register (type, regnum, frame)
   /* Convert the raw contents to virtual contents.
      (Just copy them if the formats are the same.)  */
   
-  target_convert_to_virtual (regnum, raw_buffer, virtual_buffer);
+  REGISTER_CONVERT_TO_VIRTUAL (regnum, raw_buffer, virtual_buffer);
   
   if (REGISTER_CONVERTIBLE (regnum))
     {
@@ -640,11 +743,11 @@ value_from_register (type, regnum, frame)
 	     with raw type `extended' and virtual type `double'.
 	     Fetch it as a `double' and then convert to `float'.  */
 	  v = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-	  (void) memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
+	  memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
 	  v = value_cast (type, v);
 	}
       else
-	(void) memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
+	memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
     }
   else
     {
@@ -658,8 +761,7 @@ value_from_register (type, regnum, frame)
 	}
 #endif
 
-      (void) memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer + VALUE_OFFSET (v),
-		     len);
+      memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer + VALUE_OFFSET (v), len);
     }
   
   return v;
@@ -684,7 +786,7 @@ locate_var_value (var, frame)
 
   lazy_value = read_var_value (var, frame);
   if (lazy_value == 0)
-    error ("Address of \"%s\" is unknown.", SYMBOL_NAME (var));
+    error ("Address of \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
 
   if (VALUE_LAZY (lazy_value)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -699,12 +801,12 @@ locate_var_value (var, frame)
     case lval_register:
     case lval_reg_frame_relative:
       error ("Address requested for identifier \"%s\" which is in a register.",
-	     SYMBOL_NAME (var));
+	     SYMBOL_SOURCE_NAME (var));
       break;
 
     default:
       error ("Can't take address of \"%s\" which isn't an lvalue.",
-	     SYMBOL_NAME (var));
+	     SYMBOL_SOURCE_NAME (var));
       break;
     }
   return 0;  /* For lint -- never reached */
