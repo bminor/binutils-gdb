@@ -21,9 +21,9 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	groff include install.sh ispell ld libg++ libgcc libgloss libiberty
 	libio librx libstdc++ m4 make mmalloc move-if-change newlib opcodes
 	pagas patch prms rcs readline sed send-pr shellutils sim tcl textutils
-	tk test-build.mk texinfo tgas utils uudecode wdiff xiberty"
+	tk texinfo tgas utils uudecode wdiff xiberty"
 
-cygnus_files="release release-info build-all.mk COPYING.NEWLIB"
+cygnus_files="release release-info build-all.mk test-build.mk COPYING.NEWLIB"
 
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
 	keep_these_too="${keep_these_too} ${cygnus_files}"
