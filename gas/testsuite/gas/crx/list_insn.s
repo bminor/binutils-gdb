@@ -35,10 +35,6 @@ loadm r0, {r1, r0}
 loadma:
 loadma r13, {r12, r4, r2}
 
-	.global popa
-popa:
-popa ra, {r15}
-
 	.global storm
 storm:
 storm r15, {ra}

@@ -28,13 +28,10 @@ Disassembly of section .text:
   1a:	40 32 03 00 	loadm	r0, {r0,r1}
 
 0000001e <loadma>:
-  1e:	5d 32 14 10 	popa	r13, {r2,r4,r12}
+  1e:	5d 32 14 10 	loadma	r13, {r2,r4,r12}
 
-00000022 <popa>:
-  22:	5e 32 00 80 	popa	r14, {r15}
+00000022 <storm>:
+  22:	4f 34 00 40 	storm	r15, {r14}
 
-00000026 <storm>:
-  26:	4f 34 00 40 	storm	r15, {r14}
-
-0000002a <storma>:
-  2a:	53 34 01 00 	storma	r3, {r0}
+00000026 <storma>:
+  26:	53 34 01 00 	storma	r3, {r0}
