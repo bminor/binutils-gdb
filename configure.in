@@ -45,8 +45,8 @@ bfd_target=
 case "${target_vendor}" in
 amd)
 	case "${target_os}" in
-		ebmon) 	bfd_target="ebmon29k" 
-			;;
+		ebmon) 	bfd_target="ebmon29k" ;;
+		udi) 	bfd_target="udi29k" ;;
 		*) echo "bad target_os for amd"	;;
 	esac
 	;;
