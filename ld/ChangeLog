@@ -1,3 +1,7 @@
+2001-02-14  H.J. Lu  <hjl@gnu.org>
+
+	* configure.tgt: Remove mention of earmelf_linux26.
+
 2001-02-13  Richard Henderson  <rth@redhat.com>
 
 	* emulparams/elf64_ia64.sh (OTHER_GOT_SYMBOLS): Remove.
