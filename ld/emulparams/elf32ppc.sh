@@ -11,10 +11,8 @@ MACHINE=
 BSS_PLT=
 EXECUTABLE_SYMBOLS='PROVIDE (__stack = 0); PROVIDE (___stack = 0);'
 OTHER_BSS_END_SYMBOLS='__end = .;'
-OTHER_READONLY_SECTIONS='
-  .fixup	: { *(.fixup) }
-'
 OTHER_READWRITE_SECTIONS='
+  .fixup	: { *(.fixup) }
   .got1		: { *(.got1) }
   .got2		: { *(.got2) }
 '

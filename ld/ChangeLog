@@ -1,3 +1,11 @@
+2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
+
+	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS):
+	.fixup is actually read/write.
+	* emulparams/elf32lppc.sh (OTHER_READWRITE_SECTIONS): Likewise.
+	* emulparams/elf32ppcsim.sh (OTHER_READWRITE_SECTIONS): Likewise.
+	* emulparams/elf32lppcsim.sh (OTHER_READWRITE_SECTIONS): Likewise.
+
 Mon Dec 11 14:50:33 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 	* NEWS: Add note about x86_64 architecture.
