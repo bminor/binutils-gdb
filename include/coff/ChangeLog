@@ -1,3 +1,16 @@
+Wed Feb  2 14:31:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* internal.h (union internal_auxent): Change x_csect.x_scnlen into
+	a union of a long and a pointer to a symbol.  XCOFF sometimes uses
+	this field as a symbol index.
+
+Mon Jan 10 23:54:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (ecoff_debug_info): Remove fields line_end,
+	external_dnr_end, external_pdr_end, external_sym_end,
+	external_opt_end, external_aux_end, ss_end, external_fdr_end.
+	Replace ifdbase with ifdmap.
+
 Wed Jan  5 17:05:36 1994  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* ecoff.h (STYP_EXTENDESC, STYP_COMMENT, STYP_XDATA, STYP_PDATA):
