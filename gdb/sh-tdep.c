@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "value.h"
 #include "dis-asm.h"
 
+extern int remote_write_size;	/* in remote.c */
+
 /* Default to the original SH.  */
 
 #define DEFAULT_SH_TYPE "sh"
@@ -448,4 +450,8 @@ Set this to be able to access processor-type-specific registers.\n\
   sh_set_processor_type_command (strsave (DEFAULT_SH_TYPE), 0);
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
+
+  /* Reduce the remote write size because some CMONs can't take
+    more than 400 bytes in a packet.  300 seems like a safe bet.  */
+  remote_write_size = 300;
 }

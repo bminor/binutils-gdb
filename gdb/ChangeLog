@@ -1,3 +1,9 @@
+Mon Aug 12 19:19:00 1996  Mark Alexander  <marka@cygnus.com>
+
+	* remote.c: Make remote_write_size public.
+	* sh-tdep.c (_initialize_sh_tdep): Set remote_write_size to 300
+	to prevent packet errors with some versions of CMON.
+
 Mon Aug 12 16:20:58 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* defs.h:  Define CONST_PTR as blank if compiling with Microsoft
