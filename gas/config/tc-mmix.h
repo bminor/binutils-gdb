@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #define TC_MMIX
 
@@ -92,24 +92,25 @@ extern void mmix_fb_label PARAMS ((expressionS *));
 /* Since integer_constant is local to expr.c, we have to make this a
    macro.  FIXME: Do it cleaner.  */
 #define md_operand(exp)							\
- do {									\
-  if (input_line_pointer[0] == '#')					\
+  do									\
     {									\
-      input_line_pointer++;						\
-      integer_constant (16, (exp));					\
+      if (input_line_pointer[0] == '#')					\
+	{								\
+	  input_line_pointer++;						\
+	  integer_constant (16, (exp));					\
+	}								\
+      else if (input_line_pointer[0] == '&'				\
+	       && input_line_pointer[1] != '&')				\
+	as_bad (_("`&' serial number operator is not supported"));	\
+      else								\
+	mmix_fb_label (exp);						\
     }									\
-  else if (input_line_pointer[0] == '&'					\
-	   && input_line_pointer[1] != '&')				\
-    as_bad (_("`&' serial number operator is not supported"));	\
-  else									\
-    mmix_fb_label (exp);						\
- } while (0)
-
+  while (0)
 
 /* Gas dislikes the 2ADD, 8ADD etc. insns, so we have to assemble them in
    the error-recovery loop.  Hopefully there are no significant
    differences.  Also, space on a line isn't gracefully handled.  */
-extern int mmix_assemble_return_nonzero PARAMS ((char  *));
+extern int mmix_assemble_return_nonzero PARAMS ((char *));
 #define tc_unrecognized_line(c)						\
  ((c) == ' '								\
   || (((c) == '1' || (c) == '2' || (c) == '4' || (c) == '8')		\
@@ -146,22 +147,24 @@ extern void mmix_adjust_symtab PARAMS ((void));
    We must avoid doing that for expression symbols or section symbols,
    though.  */
 extern int mmix_globalize_symbols;
-#define tc_frob_symbol(sym, punt)			\
- do {							\
-  if (S_GET_SEGMENT (sym) == reg_section		\
-      || (symp) == section_symbol (absolute_section))	\
-    (punt) = 1;						\
-							\
-  if (mmix_globalize_symbols				\
-      && ! symbol_section_p (sym)			\
-      && symp != section_symbol (absolute_section)	\
-      && (! S_IS_LOCAL (sym)				\
-	  || S_GET_SEGMENT (sym) == reg_section)	\
-      && (S_GET_SEGMENT (sym) != reg_section		\
-	  || (S_GET_NAME (sym)[0] != '$'		\
-	      && S_GET_VALUE (sym) < 256)))		\
-    S_SET_EXTERNAL (sym);				\
- } while (0)
+#define tc_frob_symbol(sym, punt)				\
+  do								\
+    {								\
+      if (S_GET_SEGMENT (sym) == reg_section			\
+	  || (symp) == section_symbol (absolute_section))	\
+	(punt) = 1;						\
+								\
+      if (mmix_globalize_symbols				\
+	  && ! symbol_section_p (sym)				\
+	  && symp != section_symbol (absolute_section)		\
+	  && (! S_IS_LOCAL (sym)				\
+	      || S_GET_SEGMENT (sym) == reg_section)		\
+	  && (S_GET_SEGMENT (sym) != reg_section		\
+	      || (S_GET_NAME (sym)[0] != '$'			\
+		  && S_GET_VALUE (sym) < 256)))			\
+	S_SET_EXTERNAL (sym);					\
+    }								\
+  while (0)
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) mmix_force_relocation (fix)

@@ -1,3 +1,8 @@
+2002-05-08  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* config/tc-mmix.c: Fix formatting.
+	* config/tc-mmix.h: Likewise.
+
 2002-05-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure: Regenerate.

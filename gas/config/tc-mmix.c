@@ -262,28 +262,28 @@ struct obstack mmix_sym_obstack;
 #define GETA_0F (65536 * 4 - 8)
 #define GETA_0B (-65536 * 4 - 4)
 
-#define GETA_MAX_LEN 4*4
+#define GETA_MAX_LEN 4 * 4
 #define GETA_3F 0
 #define GETA_3B 0
 
 #define BCC_0F GETA_0F
 #define BCC_0B GETA_0B
 
-#define BCC_MAX_LEN 6*4
+#define BCC_MAX_LEN 6 * 4
 #define BCC_5F GETA_3F
 #define BCC_5B GETA_3B
 
 #define PUSHJ_0F GETA_0F
 #define PUSHJ_0B GETA_0B
 
-#define PUSHJ_MAX_LEN 5*4
+#define PUSHJ_MAX_LEN 5 * 4
 #define PUSHJ_4F GETA_3F
 #define PUSHJ_4B GETA_3B
 
 #define JMP_0F (65536 * 256 * 4 - 8)
 #define JMP_0B (-65536 * 256 * 4 - 4)
 
-#define JMP_MAX_LEN 5*4
+#define JMP_MAX_LEN 5 * 4
 #define JMP_4F 0
 #define JMP_4B 0
 
@@ -413,7 +413,7 @@ mmix_fill_nops (opcodep, n)
   int i;
 
   for (i = 0; i < n; i++)
-    md_number_to_chars (opcodep + i*4, SWYM_INSN_BYTE << 24, 4);
+    md_number_to_chars (opcodep + i * 4, SWYM_INSN_BYTE << 24, 4);
 }
 
 /* See macro md_parse_name in tc-mmix.h.  */
@@ -461,7 +461,7 @@ get_operands (max_operands, s, exp)
 	  return 0;
 	}
 
-      /* Begin operand parsing at the current scan point. */
+      /* Begin operand parsing at the current scan point.  */
 
       input_line_pointer = p;
       expression (&exp[numexp]);
@@ -491,7 +491,7 @@ get_operands (max_operands, s, exp)
       input_line_pointer--;
     }
 
-  /* Mark the end of the valid operands with an illegal expression. */
+  /* Mark the end of the valid operands with an illegal expression.  */
   exp[numexp].X_op = O_illegal;
 
   return (numexp);
@@ -712,7 +712,7 @@ static void
 mmix_discard_rest_of_line ()
 {
   while (*input_line_pointer
-	 && (! is_end_of_line [(unsigned char) *input_line_pointer]
+	 && (! is_end_of_line[(unsigned char) *input_line_pointer]
 	     || TC_EOL_IN_INSN (input_line_pointer)))
     input_line_pointer++;
 }
@@ -746,7 +746,7 @@ mmix_md_begin ()
 
   /* This will break the day the "lex" thingy changes.  For now, it's the
      only way to make ':' part of a name, and a name beginner.  */
-  lex_type [':'] = (LEX_NAME | LEX_BEGIN_NAME);
+  lex_type[':'] = (LEX_NAME | LEX_BEGIN_NAME);
 
   mmix_opcode_hash = hash_new ();
 
@@ -1081,7 +1081,7 @@ md_assemble (str)
 	}
 
       if (expand_op)
-	frag_var (rs_machine_dependent, 4*4, 0,
+	frag_var (rs_machine_dependent, 4 * 4, 0,
 		  ENCODE_RELAX (STATE_JMP, STATE_UNDF),
 		  exp[0].X_add_symbol,
 		  exp[0].X_add_number,
@@ -1281,7 +1281,7 @@ md_assemble (str)
       /* SYNCD: "X,$Y,$Z|Z".  */
       /* FALLTHROUGH.  */
     case mmix_operands_regs:
-      /* Three registers, $X,$Y,$Z. */
+      /* Three registers, $X,$Y,$Z.  */
       /* FALLTHROUGH.  */
     case mmix_operands_regs_z:
       /* Operands "$X,$Y,$Z|Z", number of arguments checked above.  */
@@ -1486,27 +1486,27 @@ md_assemble (str)
 
     case mmix_operands_sync:
     a_single_24_bit_number_operand:
-    if (n_operands != 1
-	|| exp[0].X_op == O_register
-	|| (exp[0].X_op == O_constant
-	    && (exp[0].X_add_number > 0xffffff || exp[0].X_add_number < 0)))
-      {
-	as_bad (_("invalid operands to opcode %s: `%s'"),
-		instruction->name, operands);
-	return;
-      }
+      if (n_operands != 1
+	  || exp[0].X_op == O_register
+	  || (exp[0].X_op == O_constant
+	      && (exp[0].X_add_number > 0xffffff || exp[0].X_add_number < 0)))
+	{
+	  as_bad (_("invalid operands to opcode %s: `%s'"),
+		  instruction->name, operands);
+	  return;
+	}
 
-    if (exp[0].X_op == O_constant)
-      {
-	opcodep[1] = (exp[0].X_add_number >> 16) & 255;
-	opcodep[2] = (exp[0].X_add_number >> 8) & 255;
-	opcodep[3] = exp[0].X_add_number & 255;
-      }
-    else
-      /* FIXME: This doesn't bring us unsignedness checking.  */
-      fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 1,
-		   3, exp + 0, 0, BFD_RELOC_24);
-    break;
+      if (exp[0].X_op == O_constant)
+	{
+	  opcodep[1] = (exp[0].X_add_number >> 16) & 255;
+	  opcodep[2] = (exp[0].X_add_number >> 8) & 255;
+	  opcodep[3] = exp[0].X_add_number & 255;
+	}
+      else
+	/* FIXME: This doesn't bring us unsignedness checking.  */
+	fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 1,
+		     3, exp + 0, 0, BFD_RELOC_24);
+      break;
 
     case mmix_operands_neg:
       /* Operands "$X,Y,$Z|Z"; NEG or NEGU.  Y is optional, 0 is default.  */
@@ -1560,7 +1560,7 @@ md_assemble (str)
       break;
 
     case mmix_operands_regaddr:
-      /* A GETA/branch-type. */
+      /* A GETA/branch-type.  */
       break;
 
     case mmix_operands_get:
@@ -1638,7 +1638,7 @@ md_assemble (str)
 	  break;
 	}
 
-      /* "0,$Z"; UNSAVE. */
+      /* "0,$Z"; UNSAVE.  */
       if (n_operands != 2
 	  || exp[0].X_op != O_constant
 	  || exp[0].X_add_number != 0
@@ -1878,7 +1878,7 @@ md_assemble (str)
 
 int
 mmix_assemble_return_nonzero (str)
-     char  *str;
+     char *str;
 {
   int last_error_count = had_errors ();
   char *s2 = str;
@@ -2025,7 +2025,7 @@ s_greg (unused)
      register.  */
   c = get_symbol_end ();
 
-  if (! is_end_of_line [(unsigned char) c])
+  if (! is_end_of_line[(unsigned char) c])
     input_line_pointer++;
 
   if (*p)
@@ -2259,7 +2259,7 @@ md_atof (type, litP, sizeP)
   for (i = 0; i < prec; i++)
     {
       md_number_to_chars (litP, (valueT) words[i], 2);
-	  litP += 2;
+      litP += 2;
     }
   return NULL;
 }
@@ -2272,7 +2272,7 @@ md_convert_frag (abfd, sec, fragP)
      segT sec ATTRIBUTE_UNUSED;
      fragS *fragP;
 {
-  /* Pointer to first byte in variable-sized part of the frag.	*/
+  /* Pointer to first byte in variable-sized part of the frag.  */
   char *var_partp;
 
   /* Pointer to first opcode byte in frag.  */
@@ -2310,48 +2310,48 @@ md_convert_frag (abfd, sec, fragP)
   opcode_address = fragP->fr_address + fragP->fr_fix - 4;
 
   switch (fragP->fr_subtype)
-  {
-  case ENCODE_RELAX (STATE_GETA, STATE_ZERO):
-  case ENCODE_RELAX (STATE_BCC, STATE_ZERO):
-  case ENCODE_RELAX (STATE_PUSHJ, STATE_ZERO):
-    mmix_set_geta_branch_offset (opcodep, target_address - opcode_address);
-    if (linkrelax)
-      {
-	tmpfixP
-	  = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal, 4,
-		     fragP->fr_symbol, fragP->fr_offset, 1,
-		     BFD_RELOC_MMIX_ADDR19);
-	COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
-      }
-    var_part_size = 0;
-    break;
-
-  case ENCODE_RELAX (STATE_JMP, STATE_ZERO):
-    mmix_set_jmp_offset (opcodep, target_address - opcode_address);
-    if (linkrelax)
-      {
-	tmpfixP
-	  = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal, 4,
-		     fragP->fr_symbol, fragP->fr_offset, 1,
-		     BFD_RELOC_MMIX_ADDR27);
-	COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
-      }
-    var_part_size = 0;
-    break;
-
-  case STATE_GREG_DEF:
-    if (fragP->tc_frag_data == NULL)
-      {
-	tmpfixP
-	  = fix_new (fragP, var_partp - fragP->fr_literal, 8,
-		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_64);
-	COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
-	mmix_gregs[n_of_cooked_gregs++] = tmpfixP;
-	var_part_size = 8;
-      }
-    else
+    {
+    case ENCODE_RELAX (STATE_GETA, STATE_ZERO):
+    case ENCODE_RELAX (STATE_BCC, STATE_ZERO):
+    case ENCODE_RELAX (STATE_PUSHJ, STATE_ZERO):
+      mmix_set_geta_branch_offset (opcodep, target_address - opcode_address);
+      if (linkrelax)
+	{
+	  tmpfixP
+	    = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal, 4,
+		       fragP->fr_symbol, fragP->fr_offset, 1,
+		       BFD_RELOC_MMIX_ADDR19);
+	  COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
+	}
       var_part_size = 0;
-    break;
+      break;
+
+    case ENCODE_RELAX (STATE_JMP, STATE_ZERO):
+      mmix_set_jmp_offset (opcodep, target_address - opcode_address);
+      if (linkrelax)
+	{
+	  tmpfixP
+	    = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal, 4,
+		       fragP->fr_symbol, fragP->fr_offset, 1,
+		       BFD_RELOC_MMIX_ADDR27);
+	  COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
+	}
+      var_part_size = 0;
+      break;
+
+    case STATE_GREG_DEF:
+      if (fragP->tc_frag_data == NULL)
+	{
+	  tmpfixP
+	    = fix_new (fragP, var_partp - fragP->fr_literal, 8,
+		       fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_64);
+	  COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
+	  mmix_gregs[n_of_cooked_gregs++] = tmpfixP;
+	  var_part_size = 8;
+	}
+      else
+	var_part_size = 0;
+      break;
 
 #define HANDLE_MAX_RELOC(state, reloc)					\
   case ENCODE_RELAX (state, STATE_MAX):					\
@@ -2366,15 +2366,15 @@ md_convert_frag (abfd, sec, fragP)
     COPY_FR_WHERE_TO_FX (fragP, tmpfixP);				\
     break
 
-  HANDLE_MAX_RELOC (STATE_GETA, BFD_RELOC_MMIX_GETA);
-  HANDLE_MAX_RELOC (STATE_BCC, BFD_RELOC_MMIX_CBRANCH);
-  HANDLE_MAX_RELOC (STATE_PUSHJ, BFD_RELOC_MMIX_PUSHJ);
-  HANDLE_MAX_RELOC (STATE_JMP, BFD_RELOC_MMIX_JMP);
+      HANDLE_MAX_RELOC (STATE_GETA, BFD_RELOC_MMIX_GETA);
+      HANDLE_MAX_RELOC (STATE_BCC, BFD_RELOC_MMIX_CBRANCH);
+      HANDLE_MAX_RELOC (STATE_PUSHJ, BFD_RELOC_MMIX_PUSHJ);
+      HANDLE_MAX_RELOC (STATE_JMP, BFD_RELOC_MMIX_JMP);
 
-  default:
-    BAD_CASE (fragP->fr_subtype);
-    break;
-  }
+    default:
+      BAD_CASE (fragP->fr_subtype);
+      break;
+    }
 
   fragP->fr_fix += var_part_size;
   fragP->fr_var = 0;
@@ -2727,7 +2727,7 @@ tc_gen_reloc (section, fixP)
 	  struct mmix_symbol_gregs *gregs;
 	  struct mmix_symbol_greg_fixes *fix;
 
-	  if (S_IS_DEFINED (addsy) 
+	  if (S_IS_DEFINED (addsy)
 	      && !bfd_is_com_section (addsec)
 	      && !S_IS_WEAK (addsy))
 	    {
@@ -2830,7 +2830,7 @@ tc_gen_reloc (section, fixP)
 	  buf[0] = val;
 	  return NULL;
 	}
-      /* FALLTHROUGH. */
+      /* FALLTHROUGH.  */
 
       /* The others are supposed to be handled by md_apply_fix3.
 	 FIXME: ... which isn't called when -linkrelax.  Move over
@@ -2904,7 +2904,7 @@ mmix_handle_mmixal ()
   /* Don't handle empty lines here.  */
   while (1)
     {
-      if (*s0 == 0 || is_end_of_line [(unsigned int) *s0])
+      if (*s0 == 0 || is_end_of_line[(unsigned int) *s0])
 	return;
 
       if (! ISSPACE (*s0))
@@ -2935,7 +2935,7 @@ mmix_handle_mmixal ()
 
       /* For errors emitted here, the book-keeping is off by one; the
 	 caller is about to bump the counters.  Adjust the error messages.  */
-      if (is_end_of_line [(unsigned int) *s])
+      if (is_end_of_line[(unsigned int) *s])
 	{
 	  char *name;
 	  unsigned int line;
@@ -2962,7 +2962,7 @@ mmix_handle_mmixal ()
     }
 
   s0 = input_line_pointer;
-  /* Skip over label. */
+  /* Skip over label.  */
   while (*s0 && is_part_of_name (*s0))
     s0++;
 
@@ -2988,10 +2988,10 @@ mmix_handle_mmixal ()
       pending_label[len_0 - 1] = 0;
     }
 
-  while (*s0 && ISSPACE (*s0) && ! is_end_of_line [(unsigned int) *s0])
+  while (*s0 && ISSPACE (*s0) && ! is_end_of_line[(unsigned int) *s0])
     s0++;
 
-  if (pending_label != NULL && is_end_of_line [(unsigned int) *s0])
+  if (pending_label != NULL && is_end_of_line[(unsigned int) *s0])
     /* Whoops, this was actually a lone label on a line.  Like :-ended
        labels, we don't attach such labels to the next instruction or
        pseudo.  */
@@ -3011,7 +3011,7 @@ mmix_handle_mmixal ()
   while (*s)
     {
       c = *s++;
-      if (is_end_of_line [(unsigned int) c])
+      if (is_end_of_line[(unsigned int) c])
 	break;
       if (c == MAGIC_FB_BACKWARD_CHAR || c == MAGIC_FB_FORWARD_CHAR)
 	as_bad (_("invalid characters in input"));
@@ -3048,7 +3048,7 @@ mmix_handle_mmixal ()
 	  /* FIXME: Test-case for semi-colon in string.  */
 	  while (*s
 		 && *s != '"'
-		 && (! is_end_of_line [(unsigned int) *s] || *s == ';'))
+		 && (! is_end_of_line[(unsigned int) *s] || *s == ';'))
 	    s++;
 
 	  if (*s == '"')
@@ -3241,7 +3241,7 @@ mmix_fb_label (expP)
 
 int
 mmix_force_relocation (fixP)
-     fixS * fixP;
+     fixS *fixP;
 {
   if (fixP->fx_r_type == BFD_RELOC_MMIX_LOCAL
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
@@ -3414,8 +3414,8 @@ mmix_md_end ()
     {
       symbolS *symbolP;
       char locsymbol[sizeof (":") - 1
-		    + sizeof (MMIX_LOC_SECTION_START_SYMBOL_PREFIX) - 1
-		    + sizeof (".data")];
+		     + sizeof (MMIX_LOC_SECTION_START_SYMBOL_PREFIX) - 1
+		     + sizeof (".data")];
 
       sprintf (locsymbol, ":%s%s", MMIX_LOC_SECTION_START_SYMBOL_PREFIX,
 	       ".data");
@@ -3758,7 +3758,7 @@ mmix_parse_predefined_name (name, expP)
 	return 0;
 
       for (i = 0;
-	   i < sizeof (predefined_abs_syms)/sizeof (predefined_abs_syms[0]);
+	   i < sizeof (predefined_abs_syms) / sizeof (predefined_abs_syms[0]);
 	   i++)
 	if (strcmp (canon_name, predefined_abs_syms[i].name) == 0)
 	  {
@@ -3855,7 +3855,7 @@ s_loc (ignore)
   symbolS *sym;
   offsetT off;
 
-  /* Must not have a BSPEC in progress. */
+  /* Must not have a BSPEC in progress.  */
   if (doing_bspec)
     {
       as_bad (_("directive LOC from within a BSPEC/ESPEC pair is not supported"));
@@ -4129,7 +4129,7 @@ mmix_cons (nbytes)
 
   SKIP_WHITESPACE ();
 
-  if (is_end_of_line [(unsigned int) *input_line_pointer])
+  if (is_end_of_line[(unsigned int) *input_line_pointer])
     {
       /* Default to zero if the expression was absent.  */
 
