@@ -87,6 +87,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <signal.h>
+#include "serial.h"
 
 /* Prototypes for local functions */
 
@@ -147,11 +148,14 @@ fromhex PARAMS ((int));
 static void
 remote_detach PARAMS ((char *, int));
 
-
 extern struct target_ops remote_ops;	/* Forward decl */
 
 static int kiodebug = 0;
-static int timeout = 5;
+/* This was 5 seconds, which is a long time to sit and wait.
+   Unless this is going though some terminal server or multiplexer or
+   other form of hairy serial connection, I would think 2 seconds would
+   be plenty.  */
+static int timeout = 2;
 
 #if 0
 int icache;
@@ -160,7 +164,7 @@ int icache;
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
    remote_open knows that we don't have a file open when the program
    starts.  */
-int remote_desc = -1;
+serial_t remote_desc = NULL;
 
 #define	PBUFSIZ	1024
 
@@ -174,19 +178,6 @@ int remote_desc = -1;
 #define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
 #endif
 
-/* Called when SIGALRM signal sent due to alarm() timeout.  */
-#ifndef HAVE_TERMIO
-void
-remote_timer (signo)
-     int signo;
-{
-  if (kiodebug)
-    printf ("remote_timer called\n");
-
-  alarm (timeout);
-}
-#endif
-
 /* Clean up connection to a remote debugger.  */
 
 /* ARGSUSED */
@@ -194,52 +185,9 @@ static void
 remote_close (quitting)
      int quitting;
 {
-  if (remote_desc >= 0)
-    close (remote_desc);
-  remote_desc = -1;
-}
-
-/* Translate baud rates from integers to damn B_codes.  Unix should
-   have outgrown this crap years ago, but even POSIX wouldn't buck it.  */
-
-#ifndef B19200
-#define B19200 EXTA
-#endif
-#ifndef B38400
-#define B38400 EXTB
-#endif
-
-
-
-static struct {int rate, damn_b;} baudtab[] = {
-	{0, B0},
-	{50, B50},
-	{75, B75},
-	{110, B110},
-	{134, B134},
-	{150, B150},
-	{200, B200},
-	{300, B300},
-	{600, B600},
-	{1200, B1200},
-	{1800, B1800},
-	{2400, B2400},
-	{4800, B4800},
-	{9600, B9600},
-	{19200, B19200},
-	{38400, B38400},
-	{-1, -1},
-};
-
-static int
-damn_b (rate)
-     int rate;
-{
-  int i;
-
-  for (i = 0; baudtab[i].rate != -1; i++)
-    if (rate == baudtab[i].rate) return baudtab[i].damn_b;
-  return B38400;	/* Random */
+  if (remote_desc)
+    SERIAL_CLOSE (remote_desc);
+  remote_desc = NULL;
 }
 
 /* Stub for catch_errors.  */
@@ -249,7 +197,7 @@ remote_start_remote (dummy)
      char *dummy;
 {
   /* Ack any packet which the remote side has already sent.  */
-  write (remote_desc, "+\r", 2);
+  SERIAL_WRITE (remote_desc, "+\r", 2);
   putpkt ("?");			/* initiate a query from remote machine */
 
   start_remote ();		/* Initialize gdb process mechanisms */
@@ -264,10 +212,6 @@ remote_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  TERMINAL sg;
-  int a_rate, b_rate = 0;
-  int baudrate_set = 0;
-
   if (name == 0)
     error (
 "To open a remote debug connection, you need to specify what serial\n\
@@ -275,44 +219,29 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   target_preopen (from_tty);
 
-  remote_close (0);
+  unpush_target (&remote_ops);
 
 #if 0
   dcache_init ();
 #endif
 
-  remote_desc = open (name, O_RDWR);
-  if (remote_desc < 0)
+  remote_desc = SERIAL_OPEN (name);
+  if (!remote_desc)
     perror_with_name (name);
 
   if (baud_rate)
     {
-      if (sscanf (baud_rate, "%d", &a_rate) == 1)
-	{
-	  b_rate = damn_b (a_rate);
-	  baudrate_set = 1;
-	}
+      int rate;
+
+      if (sscanf (baud_rate, "%d", &rate) == 1)
+	if (SERIAL_SETBAUDRATE (remote_desc, rate))
+	  {
+	    SERIAL_CLOSE (remote_desc);
+	    perror_with_name (name);
+	  }
     }
 
-  ioctl (remote_desc, TIOCGETP, &sg);
-#ifdef HAVE_TERMIO
-  sg.c_cc[VMIN] = 0;		/* read with timeout.  */
-  sg.c_cc[VTIME] = timeout * 10;
-  sg.c_lflag &= ~(ICANON | ECHO);
-  sg.c_cflag &= ~PARENB;	/* No parity */
-  sg.c_cflag |= CS8;		/* 8-bit path */
-  if (baudrate_set)
-    sg.c_cflag = (sg.c_cflag & ~CBAUD) | b_rate;
-#else
-  sg.sg_flags |= RAW | ANYP;
-  sg.sg_flags &= ~ECHO;
-  if (baudrate_set)
-    {
-      sg.sg_ispeed = b_rate;
-      sg.sg_ospeed = b_rate;
-    }
-#endif
-  ioctl (remote_desc, TIOCSETP, &sg);
+  SERIAL_RAW (remote_desc);
 
   if (from_tty)
     {
@@ -321,18 +250,6 @@ device is attached to the remote system (e.g. /dev/ttya).");
       puts_filtered ("\n");
     }
   push_target (&remote_ops);	/* Switch to using remote target now */
-
-#ifndef HAVE_TERMIO
-#ifndef NO_SIGINTERRUPT
-  /* Cause SIGALRM's to make reads fail.  */
-  if (siginterrupt (SIGALRM, 1) != 0)
-    perror ("remote_open: error in siginterrupt");
-#endif
-
-  /* Set up read timeout timer.  */
-  if ((void (*)()) signal (SIGALRM, remote_timer) == (void (*)()) -1)
-    perror ("remote_open: error in signal");
-#endif
 
   /* Start the remote connection; if error (0), discard this target. */
   immediate_quit++;		/* Allow user to interrupt it */
@@ -398,8 +315,18 @@ remote_resume (step, siggnal)
   char buf[PBUFSIZ];
 
   if (siggnal)
-    error ("Can't send signals to a remote system.  Try `handle %d ignore'.",
-	   siggnal);
+    {
+      char *name;
+      target_terminal_ours_for_output ();
+      printf_filtered ("Can't send signals to a remote system.  ");
+      name = strsigno (siggnal);
+      if (name)
+	printf_filtered (name);
+      else
+	printf_filtered ("Signal %d", siggnal);
+      printf_filtered (" not sent.\n");
+      target_terminal_inferior ();
+    }
 
 #if 0
   dcache_flush ();
@@ -409,6 +336,9 @@ remote_resume (step, siggnal)
 
   putpkt (buf);
 }
+
+static void remote_interrupt_twice PARAMS ((int));
+static void (*ofunc)();
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
@@ -416,13 +346,35 @@ remote_resume (step, siggnal)
 void remote_interrupt(signo)
      int signo;
 {
+  /* If this doesn't work, try more severe steps.  */
+  signal (signo, remote_interrupt_twice);
   
   if (kiodebug)
     printf ("remote_interrupt called\n");
 
-  write (remote_desc, "\003", 1);	/* Send a ^C */
+  SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
 }
 
+/* The user typed ^C twice.  */
+static void
+remote_interrupt_twice (signo)
+     int signo;
+{
+  signal (signo, ofunc);
+  
+  target_terminal_ours ();
+  if (query ("Interrupted while waiting for the inferior.\n\
+Give up (and stop debugging it)? "))
+    {
+      target_mourn_inferior ();
+      return_to_top_level ();
+    }
+  else
+    {
+      signal (signo, remote_interrupt);
+      target_terminal_inferior ();
+    }
+}
 
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.
@@ -434,7 +386,6 @@ remote_wait (status)
      WAITTYPE *status;
 {
   unsigned char buf[PBUFSIZ];
-  void (*ofunc)();
   unsigned char *p;
   int i;
   long regno;
@@ -723,43 +674,19 @@ Receiver responds with:
 
 */
 
-/* Read a single character from the remote end.
-   (If supported, we actually read many characters and buffer them up.)
-   Timeouts cause a zero (nul) to be returned.  */
+/* Read a single character from the remote end, masking it down to 7 bits. */
 
 static int
 readchar ()
 {
-  static int inbuf_index, inbuf_count;
-#define	INBUFSIZE	PBUFSIZ
-  static char inbuf[INBUFSIZE];
-  struct cleanup *old_chain;
+  int ch;
 
-  if (inbuf_index >= inbuf_count)
-    {
-#ifndef HAVE_TERMIO
-      extern int alarm ();
-#endif
+  ch = SERIAL_READCHAR (remote_desc, timeout);
 
-      /* Time to do another read... */
-      inbuf_index = 0;
-      inbuf_count = 0;
-      inbuf[0] = 0;		/* Just in case */
-#ifdef HAVE_TERMIO
-      /* termio does the timeout for us.  */
-      inbuf_count = read (remote_desc, inbuf, INBUFSIZE);
-#else
-      /* Cancel alarm on error.  */
-      old_chain = make_cleanup (alarm, (char *)0);
-      alarm (timeout);
-      inbuf_count = read (remote_desc, inbuf, INBUFSIZE);
-      do_cleanups (old_chain);		/* Cancel the alarm now.  */
-#endif
-    }
+  if (ch < 0)
+    return ch;
 
-  /* Just return the next character from the buffer (or a zero if we
-     got an error and no chars were stored in inbuf).  */
-  return inbuf[inbuf_index++] & 0x7f;
+  return ch & 0x7f;
 }
 
 /* Send the command in BUF to the remote machine,
@@ -789,7 +716,7 @@ putpkt (buf)
   unsigned char csum = 0;
   char buf2[PBUFSIZ];
   int cnt = strlen (buf);
-  char ch;
+  int ch;
   char *p;
 
   /* Copy the packet into buffer BUF2, encapsulating it
@@ -818,9 +745,9 @@ putpkt (buf)
 	*p = '\0';
 	printf ("Sending packet: %s...", buf2);  fflush(stdout);
       }
-    write (remote_desc, buf2, p - buf2);
+    SERIAL_WRITE (remote_desc, buf2, p - buf2);
 
-    /* read until either a timeout occurs (\0) or '+' is read */
+    /* read until either a timeout occurs (-2) or '+' is read */
     do {
       ch = readchar ();
       if (kiodebug) {
@@ -829,7 +756,7 @@ putpkt (buf)
 	else
 	  printf ("%02X%c ", ch&0xFF, ch);
       }
-    } while ((ch != '+') && (ch != '\0'));
+    } while ((ch != '+') && (ch != SERIAL_TIMEOUT));
   } while (ch != '+');
 }
 
@@ -841,6 +768,7 @@ putpkt (buf)
 static void
 getpkt (buf, forever)
      char *buf;
+     int forever;
 {
   char *bp;
   unsigned char csum;
@@ -849,28 +777,13 @@ getpkt (buf, forever)
   int retries = 0;
 #define MAX_RETRIES	10
 
-#if 0
-  /* Sorry, this will cause all hell to break loose, i.e. we'll end
-     up in the command loop with an inferior, but (at least if this
-     happens in remote_wait or some such place) without a current_frame,
-     having set up prev_* in wait_for_inferior, etc.
-
-     If it is necessary to have such an "emergency exit", seems like
-     the only plausible thing to do is to say the inferior died, and
-     make the user reattach if they want to.  Perhaps with a prompt
-     asking for confirmation.  */
-
-  /* allow immediate quit while reading from device, it could be hung */
-  immediate_quit++;
-#endif /* 0 */
-
   while (1)
     {
       /* This can loop forever if the remote side sends us characters
 	 continuously, but if it pauses, we'll get a zero from readchar
 	 because of timeout.  Then we'll count that as a retry.  */
       while (c != '$')
-        if (0 == (c  = readchar()))
+        if ((c = readchar()) == SERIAL_TIMEOUT)
 	  if (!forever) 
 	    {
 	      if (++retries >= MAX_RETRIES)
@@ -885,7 +798,7 @@ getpkt (buf, forever)
       while (1)
 	{
 	  c = readchar ();
-	  if (c == '\0')
+	  if (c == SERIAL_TIMEOUT)
 	    {
 	      if (kiodebug)
 		puts_filtered ("Timeout in mid-packet, retrying\n");
@@ -925,7 +838,7 @@ getpkt (buf, forever)
 whole:
       if (++retries < MAX_RETRIES)
 	{
-	  write (remote_desc, "-", 1);
+	  SERIAL_WRITE (remote_desc, "-", 1);
 	}
       else
 	{
@@ -936,11 +849,7 @@ whole:
 
 out:
 
-#if 0
-  immediate_quit--;
-#endif
-
-  write (remote_desc, "+", 1);
+  SERIAL_WRITE (remote_desc, "+", 1);
 
   if (kiodebug)
     fprintf (stderr,"Packet received: %s\n", buf);
@@ -1098,7 +1007,23 @@ dcache_init ()
     insque (db, &dcache_free);
 }
 #endif /* 0 */
+
+static void
+remote_kill ()
+{
+  putpkt ("k");
+  /* Don't wait for it to die.  I'm not really sure it matters whether
+     we do or not.  For the existing stubs, kill is a noop.  */
+  target_mourn_inferior ();
+}
 
+static void
+remote_mourn ()
+{
+  unpush_target (&remote_ops);
+  generic_mourn_inferior ();
+}
+
 /* Define the target subroutine names */
 
 struct target_ops remote_ops = {
@@ -1124,11 +1049,11 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* to_terminal_ours_for_output */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
-  NULL,				/* to_kill */
+  remote_kill,			/* to_kill */
   NULL,				/* to_load */
   NULL,				/* to_lookup_symbol */
   NULL,				/* to_create_inferior */
-  NULL,				/* to_mourn_inferior */
+  remote_mourn,			/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
   process_stratum,		/* to_stratum */

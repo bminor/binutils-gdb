@@ -1,3 +1,13 @@
+Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* remote.c: Change timeout to 2.
+	(remote_open): Use unpush_target not remote_close.
+	(remote_resume): If siggnal != 0, give warning not error().
+	(remote_wait, remote_interrupt, remote_interrupt_twice):
+	If we get two interrupts, let the user get out if they want.
+	(remote_{kill,mourn}): New functions.
+	i386-stub.c (handle_exception, case 'k'): Don't BREAKPOINT.
+
 Wed Apr 28 09:20:55 1993  Ian Lance Taylor  (ian@rtl.cygnus.com)
 
 	* config/sparc/sun4sol2.mh (XM_CLIBS): Define to be -lnsl.
