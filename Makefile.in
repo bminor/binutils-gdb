@@ -197,6 +197,7 @@ XTRAFLAGS = ` \
      echo ; \
   fi`
 
+GNATS = all-gnats
 
 #### host and target specific makefile fragments come in here.
 ###
@@ -228,6 +229,7 @@ $(end-sanitize-chill)\
 	"LOADLIBES=$(LOADLIBES)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
+	"GNATS=$(GNATS)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -358,7 +360,7 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	$(start-sanitize-chill) \
 	all-chillrt \
 	$(end-sanitize-chill) \
-	all-gprof all-prms all-send-pr all-libm all-deja-gnu \
+	all-gprof all-gnats all-send-pr all-libm all-deja-gnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
 	all-textutils all-time all-wdiff all-uudecode \
 	all-hello all-tar all-gzip all-indent all-recode
@@ -439,7 +441,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-newlib \
 	install-opcodes \
 	install-patch \
-	install-prms \
+	install-gnats \
 	install-rcs \
 	install-readline \
 	install-recode \
@@ -1140,20 +1142,20 @@ install-ispell: force
 		true ; \
 	fi
 
-### prms
-all-prms: force
-	@if [ -f ./prms/Makefile ] ; then \
+### gnats
+all-gnats: force
+	@if [ -f ./gnats/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./prms; \
+		(cd ./gnats; \
 		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
 
-install-prms: force
-	@if [ -f ./prms/Makefile ] ; then \
+install-gnats: force
+	@if [ -f ./gnats/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./prms; \
+		(cd ./gnats; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
