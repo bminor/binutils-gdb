@@ -1,3 +1,7 @@
+Fri Jan 14 01:04:36 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/alpha/tm-alpha.h (CALL_DUMMY):  Improve comment.
+
 Thu Jan 13 10:32:38 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-vx.c (vx_wait): Only call i960_fault_to_signal if I80960
