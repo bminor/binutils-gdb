@@ -1,3 +1,9 @@
+Fri Jul 16 14:56:31 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* Rename elf{32,64}-generic.c to *-gen.c for 14 char filenames.
+	* Makefile.in: Change accordingly.
+	(CFILES): Add elf64-gen.c.
+
 Fri Jul 16 09:53:23 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c: Use MIPS_AOUT_{OZ}MAGIC rather than {OZ}MAGIC.
