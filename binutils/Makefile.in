@@ -1,5 +1,5 @@
 # Makefile for GNU binary-file utilities
-# Copyright (C) 1989-1992 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993 Free Software Foundation, Inc.
 
 # This file is part of GNU binutils.
 
@@ -78,7 +78,7 @@ version=`./../gcc/gcc -dumpversion`
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
-MANPAGES= ar nm objdump ranlib size strip c++filt objcopy
+MANPAGES= ar nm objdump ranlib size strings strip c++filt objcopy
 
 #CC=gcc -Wall
 # these two are almost the same program
@@ -89,6 +89,8 @@ RANLIB_PROG=ranlib
 OBJCOPY_PROG=objcopy
 STRIP_PROG=strip
 
+STRINGS_PROG=strings
+
 # These should all be the same program too.
 SIZE_PROG=size
 NM_PROG=nm
@@ -97,7 +99,7 @@ OBJDUMP_PROG=objdump
 # This is the demangler, as a standalone program.
 DEMANGLER_PROG=c++filt
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG)
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 DISTSTUFF=arparse.c arlex.c
@@ -109,7 +111,7 @@ OPCODEDIR = ./../opcodes
 #### host and target dependant Makefile fragments come in here.
 ###
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I../include  -I$(BASEDIR)/include -I$(BASEDIR)/bfd
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BASEDIR)/include -I$(BASEDIR)/bfd
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $<
@@ -154,6 +156,7 @@ FLAGS_TO_PASS = \
 	NM=`if [ -f $$rootme/$(NM_PROG) ] ; then echo $$rootme/$(NM_PROG) ; else echo $(NM_PROG); fi` \
 	AR=`if [ -f $$rootme/$(AR_PROG) ] ; then echo $$rootme/$(AR_PROG) ; else echo $(AR_PROG); fi` \
 	OBJDUMP=`if [ -f $$rootme/$(OBJDUMP_PROG) ] ; then echo $$rootme/$(OBJDUMP_PROG) ; else echo $(OBJDUMP_PROG); fi` \
+	STRINGS=`if [ -f $$rootme/$(STRINGS_PROG) ] ; then echo $$rootme/$(STRINGS_PROG) ; else echo $(STRINGS_PROG); fi` \
 	STRIP=`if [ -f $$rootme/$(STRIP_PROG) ] ; then echo $$rootme/$(STRIP_PROG) ; else echo $(STRIP_PROG); fi` \
 	RANLIB=`if [ -f $$rootme/$(RANLIB_PROG) ] ; then echo $$rootme/$(RANLIB_PROG) ; else echo $(RANLIB_PROG); fi` \
 	DEMANGLE=`if [ -f $$rootme/$(DEMANGLER_PROG) ] ; then echo $$rootme/$(DEMANGLER_PROG) ; else echo $(DEMANGLER_PROG); fi`"
@@ -190,6 +193,9 @@ $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
 
 $(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+
+$(STRINGS_PROG): $(ADDL_LIBS) strings.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
@@ -376,7 +382,7 @@ install: all
 	done
 	-if [ -d $(tooldir) ]; then \
 	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	   for i in nm strip ar ranlib; do \
+	   for i in nm strings strip ar ranlib; do \
 	     rm -f $(tooldir)/bin/$$i; \
 	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` $(tooldir)/bin/$$i \
 	      || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$i; \
@@ -433,6 +439,7 @@ not-ranlib.o:not-ranlib.c
 not-strip.o:not-strip.c
 objdump.o: objdump.c
 size.o: size.c
+strings.o:strings.c
 strip.o:strip.c
 version.o: $(srcdir)/version.c
 	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c
