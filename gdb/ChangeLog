@@ -1,3 +1,31 @@
+2003-01-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-tdep.c: Include "frame-unwind.h".
+	(d10v_gdbarch_init): Append d10v_frame_p to the unwind predicate
+	list.
+	(next_addr, uses_frame): Delete.
+	(struct d10v_unwind_cache): Define.
+	(prologue_find_regs): Add struct d10v_unwind_cache info parameter.
+	Use info instead of next_addr and uses_frame globals.
+	(d10v_frame_init_saved_regs): Delete function.
+	(d10v_init_extra_frame_info): Delete function.
+	(d10v_gdbarch_init): Do not initialize init_extra_frame_info,
+	frame_init_saved_regs or pop_frame, frame_chain, frame_chain_valid,
+	init_frame_pc or frame_saved_pc.
+	(d10v_pop_frame): Delete function.
+	(do_d10v_pop_frame): Delete function.
+	(d10v_frame_chain): Delete function.
+	(d10v_frame_chain_valid): Delete function.
+	(d10v_frame_pc_unwind): New function.
+	(d10v_frame_id_unwind): New function.
+	(saved_regs_unwinder): New function.
+	(d10v_frame_register_unwind): New function.
+	(d10v_frame_pop): New function.
+	(d10v_frame_unwind): New variable.
+	(d10v_frame_p): New function.
+	(d10v_frame_saved_pc): Delete function.
+	* Makefile.in (d10v-tdep.o): Update dependencies.
+
 2003-01-30  J. Brobecker  <brobecker@gnat.com>
 
 	* config/pa/tm-hppa64.h (CALL_DUMMY_LOCATION): Remove #undef
