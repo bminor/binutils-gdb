@@ -216,12 +216,12 @@ print_insn_pdp11 (memaddr, info)
 	  {
 	  case PDP11_OPCODE_NO_OPS:
 	    FPRINTF (F, OP.name);
-	    break;
+	    goto done;
 	  case PDP11_OPCODE_REG:
 	    FPRINTF (F, OP.name);
 	    FPRINTF (F, AFTER_INSTRUCTION);
 	    print_reg (dst, info);
-	    break;
+	    goto done;
 	  case PDP11_OPCODE_OP:
 	    FPRINTF (F, OP.name);
 	    FPRINTF (F, AFTER_INSTRUCTION);
@@ -229,7 +229,7 @@ print_insn_pdp11 (memaddr, info)
 	      dst |= JUMP;
 	    if (print_operand (&memaddr, dst, info) < 0)
 	      return -1;
-	    break;
+	    goto done;
 	  case PDP11_OPCODE_REG_OP:
 	    FPRINTF (F, OP.name);
 	    FPRINTF (F, AFTER_INSTRUCTION);
@@ -239,7 +239,7 @@ print_insn_pdp11 (memaddr, info)
 	      dst |= JUMP;
 	    if (print_operand (&memaddr, dst, info) < 0)
 	      return -1;
-	    break;
+	    goto done;
 	  case PDP11_OPCODE_REG_OP_REV:
 	    FPRINTF (F, OP.name);
 	    FPRINTF (F, AFTER_INSTRUCTION);
@@ -247,7 +247,7 @@ print_insn_pdp11 (memaddr, info)
 	      return -1;
 	    FPRINTF (F, OPERAND_SEPARATOR);
 	    print_reg (src, info);
-	    break;
+	    goto done;
 	  case PDP11_OPCODE_AC_OP:
 	    {
 	      int ac = (opcode & 0xe0) >> 6;
@@ -257,7 +257,7 @@ print_insn_pdp11 (memaddr, info)
 	      FPRINTF (F, OPERAND_SEPARATOR);
 	      if (print_operand (&memaddr, dst, info) < 0)
 		return -1;
-	      break;
+	      goto done;
 	    }
 	  case PDP11_OPCODE_OP_OP:
 	    FPRINTF (F, OP.name);
@@ -267,7 +267,7 @@ print_insn_pdp11 (memaddr, info)
 	    FPRINTF (F, OPERAND_SEPARATOR);
 	    if (print_operand (&memaddr, dst, info) < 0)
 	      return -1;
-	    break;
+	    goto done;
 	  case PDP11_OPCODE_DISPL:
 	    {
 	      int displ = (opcode & 0xff) << 8;
@@ -275,7 +275,7 @@ print_insn_pdp11 (memaddr, info)
 	      FPRINTF (F, OP.name);
 	      FPRINTF (F, AFTER_INSTRUCTION);
 	      (*info->print_address_func) (address, info);
-	      break;
+	      goto done;
 	    }
 	  case PDP11_OPCODE_REG_DISPL:
 	    {
@@ -286,7 +286,7 @@ print_insn_pdp11 (memaddr, info)
 	      print_reg (src, info);
 	      FPRINTF (F, OPERAND_SEPARATOR);
 	      (*info->print_address_func) (address, info);
-	      break;
+	      goto done;
 	    }
 	  case PDP11_OPCODE_IMM8:
 	    {
@@ -294,7 +294,7 @@ print_insn_pdp11 (memaddr, info)
 	      FPRINTF (F, OP.name);
 	      FPRINTF (F, AFTER_INSTRUCTION);
 	      FPRINTF (F, "%o", code);
-	      break;
+	      goto done;
 	    }
 	  case PDP11_OPCODE_IMM6:
 	    {
@@ -302,7 +302,7 @@ print_insn_pdp11 (memaddr, info)
 	      FPRINTF (F, OP.name);
 	      FPRINTF (F, AFTER_INSTRUCTION);
 	      FPRINTF (F, "%o", code);
-	      break;
+	      goto done;
 	    }
 	  case PDP11_OPCODE_IMM3:
 	    {
@@ -310,7 +310,14 @@ print_insn_pdp11 (memaddr, info)
 	      FPRINTF (F, OP.name);
 	      FPRINTF (F, AFTER_INSTRUCTION);
 	      FPRINTF (F, "%o", code);
-	      break;
+	      goto done;
+	    }
+	  case PDP11_OPCODE_ILLEGAL:
+	    {
+	      FPRINTF (F, ".word");
+	      FPRINTF (F, AFTER_INSTRUCTION);
+	      FPRINTF (F, "%o", opcode);
+	      goto done;
 	    }
 	  default:
 	    /* TODO: is this a proper way of signalling an error? */
@@ -319,6 +326,7 @@ print_insn_pdp11 (memaddr, info)
 	  }
 #undef OP
     }
+ done:
 
   return memaddr - start_memaddr;
 }
