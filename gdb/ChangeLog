@@ -1,3 +1,7 @@
+2003-01-29  Jim Blandy  <jimb@redhat.com>
+
+	* objfiles.h (struct objfile): Doc fix.
+
 2003-01-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (frame_saved_regs_id_unwind): Assert FRAME_CHAIN_P.
