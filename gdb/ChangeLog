@@ -1,5 +1,15 @@
 2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* ada-exp.y (yyname, yyrule): Remap global variables that appear
+	when YYDEBUG is set to 1.  
+	* c-exp.y: Likewise.
+	* f-exp.y: Likewise.
+	* jv-exp.y: Likewise.
+	* m2-exp.y: Likewise.
+	* p-exp.y: Likewise.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (i386nbsd-tdep.o): Add $(solib_svr4_h) to
 	dependency list.
 	* i386nbsd-tdep.c (i386nbsdelf_init_abi): Set

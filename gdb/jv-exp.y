@@ -85,6 +85,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	yylloc	java_lloc
 #define yyreds	java_reds		/* With YYDEBUG defined */
 #define yytoks	java_toks		/* With YYDEBUG defined */
+#define yyname	java_name		/* With YYDEBUG defined */
+#define yyrule	java_rule		/* With YYDEBUG defined */
 #define yylhs	java_yylhs
 #define yylen	java_yylen
 #define yydefred java_yydefred

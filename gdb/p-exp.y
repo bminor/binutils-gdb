@@ -93,6 +93,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	yylloc	pascal_lloc
 #define yyreds	pascal_reds		/* With YYDEBUG defined */
 #define yytoks	pascal_toks		/* With YYDEBUG defined */
+#define yyname	pascal_name		/* With YYDEBUG defined */
+#define yyrule	pascal_rule		/* With YYDEBUG defined */
 #define yylhs	pascal_yylhs
 #define yylen	pascal_yylen
 #define yydefred pascal_yydefred
