@@ -1,5 +1,9 @@
 2002-03-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Use ELF section
+	types instead of section names to determine whether init/fini array
+	dynamic tags are needed.
+
 	* elflink.h: Formatting fixes.
 	(elf_link_output_extsym): Merge undefined and undef weak cases.
 

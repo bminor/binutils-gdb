@@ -3069,6 +3069,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       struct elf_info_failed eif;
       struct elf_link_hash_entry *h;
       asection *dynstr;
+      bfd *sub;
+      asection *o;
+      int dt_done;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || info->shared);
@@ -3200,51 +3203,58 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
-      if (bfd_get_section_by_name (output_bfd, ".preinit_array") != NULL)
-	{
-	  /* DT_PREINIT_ARRAY is not allowed in shared library.  */
-	  if (info->shared)
-	    {
-	      bfd *sub;
-	      asection *o;
+      dt_done = 0;
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	for (o = sub->sections; o != NULL; o = o->next)
+	  {
+	    int tag1, tag2;
 
-	      for (sub = info->input_bfds; sub != NULL;
-		   sub = sub->link_next)
-		for (o = sub->sections; o != NULL; o = o->next)
-		  if (elf_section_data (o)->this_hdr.sh_type
-		      == SHT_PREINIT_ARRAY)
-		    {
-		      (*_bfd_error_handler)
-			(_("%s: .preinit_array section is not allowed in DSO"),
-			  bfd_archive_filename (sub));
-		      break;
-		    }
+	    if (o->output_section == bfd_abs_section_ptr)
+	      continue;
 
+	    switch (elf_section_data (o)->this_hdr.sh_type)
+	      {
+	      default:
+		continue;
+
+	      case SHT_INIT_ARRAY:
+		if (dt_done & 1)
+		  continue;
+		dt_done |= 1;
+		tag1 = DT_INIT_ARRAY;
+		tag2 = DT_INIT_ARRAYSZ;
+		break;
+
+	      case SHT_FINI_ARRAY:
+		if (dt_done & 2)
+		  continue;
+		dt_done |= 2;
+		tag1 = DT_FINI_ARRAY;
+		tag2 = DT_FINI_ARRAYSZ;
+		break;
+
+	      case SHT_PREINIT_ARRAY:
+		/* DT_PREINIT_ARRAY is not allowed in a shared library.  */
+		if (info->shared)
+		  {
+		    (*_bfd_error_handler)
+		      (_("%s: .preinit_array section is not allowed in DSO"),
+		       bfd_archive_filename (sub));
+		    bfd_set_error (bfd_error_bad_value);
+		    return false;
+		  }
+		if (dt_done & 4)
+		  continue;
+		dt_done |= 4;
+		tag1 = DT_PREINIT_ARRAY;
+		tag2 = DT_PREINIT_ARRAYSZ;
+		break;
+	      }
+
+	    if (!elf_add_dynamic_entry (info, (bfd_vma) tag1, (bfd_vma) 0)
+		|| !elf_add_dynamic_entry (info, (bfd_vma) tag2, (bfd_vma) 0))
 	      return false;
-	    }
-
-	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_PREINIT_ARRAY,
-				      (bfd_vma) 0)
-	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_PREINIT_ARRAYSZ,
-					 (bfd_vma) 0))
-	    return false;
-	}
-      if (bfd_get_section_by_name (output_bfd, ".init_array") != NULL)
-	{
-	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_INIT_ARRAY,
-				      (bfd_vma) 0)
-	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_INIT_ARRAYSZ,
-					 (bfd_vma) 0))
-	    return false;
-	}
-      if (bfd_get_section_by_name (output_bfd, ".fini_array") != NULL)
-	{
-	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_FINI_ARRAY,
-				      (bfd_vma) 0)
-	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_FINI_ARRAYSZ,
-					 (bfd_vma) 0))
-	    return false;
-	}
+	  }
 
       dynstr = bfd_get_section_by_name (dynobj, ".dynstr");
       /* If .dynstr is excluded from the link, we don't want any of
