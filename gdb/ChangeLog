@@ -1,3 +1,10 @@
+2002-03-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* valprint.c (set_input_radix): Use input_radix.
+	(set_output_radix): Use output_radix.
+	(set_input_radix_1, set_output_radix_1): Add FIXME - bad radix
+	isn't reverted.
+
 2002-03-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* value.h (struct value): Delete field ``substring_addr''.  Change

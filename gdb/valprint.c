@@ -1294,7 +1294,7 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
 static void
 set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
-  set_input_radix_1 (from_tty, *(unsigned *) c->var);
+  set_input_radix_1 (from_tty, input_radix);
 }
 
 /* ARGSUSED */
@@ -1310,6 +1310,8 @@ set_input_radix_1 (int from_tty, unsigned radix)
 
   if (radix < 2)
     {
+      /* FIXME: cagney/2002-03-17: This needs to revert the bad radix
+         value.  */
       error ("Nonsense input radix ``decimal %u''; input radix unchanged.",
 	     radix);
     }
@@ -1325,7 +1327,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
 static void
 set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
-  set_output_radix_1 (from_tty, *(unsigned *) c->var);
+  set_output_radix_1 (from_tty, output_radix);
 }
 
 static void
@@ -1345,6 +1347,8 @@ set_output_radix_1 (int from_tty, unsigned radix)
       output_format = 'o';	/* octal */
       break;
     default:
+      /* FIXME: cagney/2002-03-17: This needs to revert the bad radix
+         value.  */
       error ("Unsupported output radix ``decimal %u''; output radix unchanged.",
 	     radix);
     }
