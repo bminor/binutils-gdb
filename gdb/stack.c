@@ -1861,7 +1861,7 @@ return_command (char *retval_exp, int from_tty)
 	{
 	  if (gdbarch_return_value (current_gdbarch, return_type,
 				    NULL, NULL, NULL)
-	      == RETURN_VALUE_REGISTER_CONVENTION)
+	      == RETURN_VALUE_STRUCT_CONVENTION)
 	    return_value = NULL;
 	}
       else

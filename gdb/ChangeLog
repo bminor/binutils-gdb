@@ -1,3 +1,8 @@
+2003-11-06  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (return_command): Warn when STRUCT_CONVENTION, and not
+	REGISTER_CONVENTION.
+
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
 	* breakpoint.c (insert_bp_location, allocate_bp_location): Make
