@@ -1,4 +1,10 @@
-Wed Sep  1 14:36:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+Wed Sep  1 11:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c: Add comment explaining why dcache is disabled.
+	(remote_fetch_word, remote_store_word): Make static and #if 0.
+	They are not called from anywhere.
+
+Wed Sep  1 14:41:28 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* arm-tdep.c, convex-tdep.c, convex-xdep.c, dbxread.c,
 	  h8300-tdep.c, h8500-tdep.c, i960-pinsn.c, i960-tdep.c,
@@ -15,7 +21,8 @@ Wed Sep  1 14:36:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 Wed Sep  1 11:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* symtab.h (struct linetable), xcoffread.c (arrange_linetable):
+	* symtab.c (find_pc_line, find_line_common),
+	symtab.h (struct linetable), xcoffread.c (arrange_linetable):
 	Revise comments re linetable sorting.
 	* buildsym.c (compare_line_numbers): Sort by pc, not by line.
 	* coffread.c: Tell end_symtab to sort the line table.
