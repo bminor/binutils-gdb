@@ -2315,7 +2315,7 @@ proc create_command_window {} {
         set bsBinding [bind Text <BackSpace>]
         bind .cmd.text <Delete> "delete_char %W ; $bsBinding; break"
 	bind .cmd.text <BackSpace> {
-	  if {([%W get -state] == "disabled")} { break }
+	  if {([%W cget -state] == "disabled")} { break }
 	  delete_char %W
 	}
 	bind .cmd.text <Control-u> {
@@ -2400,18 +2400,27 @@ proc create_command_window {} {
 	}
 }
 
+# Trim one character off the command line.  The argument is ignored.
+
 proc delete_char {win} {
   global command_line
   set tmp [expr [string length $command_line] - 2]
   set command_line [string range $command_line 0 $tmp]
 }
 
-proc delete_line {win} {
-  global command_line
+# FIXME: This should actually check that the first characters of the current
+# line  match the gdb prompt, since the user can move the insertion point
+# anywhere.  It should also check that the insertion point is in the last
+# line of the text widget.
 
-  $win delete {end linestart + 6 chars} end
-  $win see insert
-  set command_line {}
+proc delete_line {win} {
+    global command_line
+    global gdb_prompt
+
+    set tmp [string length $gdb_prompt]
+    $win delete "insert linestart + $tmp chars" "insert lineend"
+    $win see insert
+    set command_line {}
 }
 
 #

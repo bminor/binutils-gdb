@@ -1,3 +1,12 @@
+start-sanitize-gdbtk
+Fri May 17 13:54:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (create_command_window): Change a misspelled "get"
+	to the intended "cget".
+	(delete_line): Fix so it deletes the current line at the
+	insertion cursor.
+end-sanitize-gdbtk
+
 Fri May 17 13:31:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* sh-stub.c: New file, was config/sh/stub.c.
