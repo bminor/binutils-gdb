@@ -1,3 +1,10 @@
+Tue Jun  9 17:19:45 1992  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y, m2-exp.y:  Move remapping defines for malloc and
+	realloc.  Add remapping defines for {yyss, yyssp, yyvs, yyvsp}.
+	* config/{amix.mh, i386v4.mh, ncr3000.mh, stratus.mh,
+	sun4os5.mh}:  Add definition for INSTALL using /usr/ucb/install.
+
 Tue Jun  9 16:29:19 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* depend:  rebuild to account for remote-st2000.c.

@@ -43,14 +43,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-/* Ensure that if the generated parser contains any calls to malloc/realloc,
-   that they get mapped to xmalloc/xrealloc. */
-
-#define malloc	xmalloc
-#define realloc	xrealloc
-
-/* These MUST be included in any grammar file!!!!
-   Please choose unique names! */
+/* These MUST be included in any grammar file!!!! Please choose unique names!
+   Note that this are a combined list of variables that can be produced
+   by any one of bison, byacc, or yacc. */
 #define	yymaxdepth m2_maxdepth
 #define	yyparse	m2_parse
 #define	yylex	m2_lex
@@ -78,6 +73,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	m2_yyv
 #define	yyval	m2_val
 #define	yylloc	m2_lloc
+#define yyss	m2_yyss		/* byacc */
+#define	yyssp	m2_yysp		/* byacc */
+#define	yyvs	m2_yyvs		/* byacc */
+#define	yyvsp	m2_yyvsp	/* byacc */
 
 #if 0
 static char *
@@ -179,6 +178,18 @@ struct block *modblock=0;
 %right QID
 */
 %%
+
+%{
+/* Ensure that if the generated parser contains any calls to malloc/realloc,
+   that they get mapped to xmalloc/xrealloc.  We have to do this here
+   rather than earlier in the file because this is the first point after
+   the place where the SVR4 yacc includes <malloc.h>, and if we do it
+   before that, then the remapped declarations in <malloc.h> will collide
+   with the ones in "defs.h". */
+
+#define malloc	xmalloc
+#define realloc	xrealloc
+%}
 
 start   :	exp
 	|	type_exp

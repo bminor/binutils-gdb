@@ -20,6 +20,9 @@ REGEX1=regex.o
 # new terminfo interface and latest terminal descriptions.
 TERMCAP=-ltermlib
 
+# SVR4 puts the BSD compatible install in /usr/ucb.
+INSTALL = /usr/ucb/install -c
+
 # Sun's compilers require the -xs option to produce debug information
 # in the final linked executable.  Otherwise they leave it in the .o
 # files only, with undocumented pointers to it in the linked executable.
