@@ -573,7 +573,8 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   tp->private = xmalloc (sizeof (struct private_thread_info));
   tp->private->lwpid = ti_p->ti_lid;
 
-  if (ti_p->ti_state == TD_THR_UNKNOWN)
+  if (ti_p->ti_state == TD_THR_UNKNOWN ||
+      ti_p->ti_state == TD_THR_ZOMBIE)
     return;/* A zombie thread that's been joined -- do not attach. */
 
   /* Under Linux, we have to attach to each and every thread.  */
@@ -915,7 +916,8 @@ thread_db_thread_alive (ptid_t ptid)
       if (err != TD_OK)
 	return 0;
 
-      if (ti.ti_state == TD_THR_UNKNOWN)
+      if (ti.ti_state == TD_THR_UNKNOWN ||
+	  ti.ti_state == TD_THR_ZOMBIE)
 	return 0;	/* A zombie thread that's been joined. */
 
       return 1;
@@ -938,7 +940,9 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-  if (ti.ti_state == TD_THR_UNKNOWN)
+  if (ti.ti_state == TD_THR_UNKNOWN ||
+      ti.ti_state == TD_THR_ZOMBIE)
+
     return 0;	/* A zombie that's been reaped -- ignore. */
 
   ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));

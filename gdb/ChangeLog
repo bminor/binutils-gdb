@@ -1,3 +1,10 @@
+2001-06-29  Ken Whaley  <ken@believe.com>
+
+	* thread-db.c (attach_thread): Check for TD_THR_ZOMBIE in addition
+	to TD_THR_UNKNOWN when looking for defunct zombie threads.
+	(thread_db_thread_alive): Ditto.
+	(find_new_threads_callback): Ditto.
+
 2001-07-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* MAINTAINERS: Add myself to the write-after-approval list.
