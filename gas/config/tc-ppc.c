@@ -5522,15 +5522,26 @@ md_apply_fix3 (fixP, valP, seg)
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16
-	       && operand->shift == 0
-	       && ppc_is_toc_sym (fixP->fx_addsy))
+	       && operand->shift == 0)
 	{
-	  fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
+	  if (ppc_is_toc_sym (fixP->fx_addsy))
+	    {
+	      fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
 #ifdef OBJ_ELF
-	  if (ppc_obj64
-	      && (operand->flags & PPC_OPERAND_DS) != 0)
-	    fixP->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
+	      if (ppc_obj64
+		  && (operand->flags & PPC_OPERAND_DS) != 0)
+		fixP->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
 #endif
+	    }
+	  else
+	    {
+	      fixP->fx_r_type = BFD_RELOC_16;
+#ifdef OBJ_ELF
+	      if (ppc_obj64
+		  && (operand->flags & PPC_OPERAND_DS) != 0)
+		fixP->fx_r_type = BFD_RELOC_PPC64_ADDR16_DS;
+#endif
+	    }
 	  fixP->fx_size = 2;
 	  if (target_big_endian)
 	    fixP->fx_where += 2;

@@ -1,3 +1,7 @@
+2003-04-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_apply_fix3): Generate ADDR16 relocs.
+
 2003-04-08  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (perform_an_assembly_pass): If using cgen, call
