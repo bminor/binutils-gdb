@@ -1,5 +1,24 @@
 2001-11-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_register_offset): Renamed from
+	i386_register_byte.  Made static.
+	(i386_register_size): Renamed from i386_register_raw_size.  Made
+	static.
+	(i386_register_virtual_size): Removed.
+	(i386_register_byte, i386_register_raw_size,
+	i386_register_virtual_size): New functions.
+	(_initialize_i386_tdep): Initialize i386_register_offset instead
+	of i386_register_byte.  Remove code to initialize
+	i386_register_virtual_size.
+	* config/i386/tm-i386.h (REGISTER_BYTE): Redefine to use
+	i386_register_byte function.
+	(REGISTER_RAW_SIZE): Redefine to use i386_register_raw_size
+	function.
+	(REGISTER_VIRTUAL_SIZE): Redefine to use
+	i386_register_virtual_size function.
+	(i386_register_byte, i386_register_raw_size,
+	i386_register_virtual_size): New functions.
+
 	* Makefile.in (ALLDEPFILES): Add i387-nat.c.
 	(i387-nat.o): Add dependencies.
 

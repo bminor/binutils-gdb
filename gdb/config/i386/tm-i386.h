@@ -220,22 +220,22 @@ extern int i386_dwarf_reg_to_regnum (int reg);
 #endif
 #endif
 
-/* Index within `registers' of the first byte of the space for register N. */
-#define REGISTER_BYTE(n) (i386_register_byte[(n)])
-extern int i386_register_byte[];
+/* Return the offset into the register array of the start of register
+   number REG.  */
+#define REGISTER_BYTE(reg) i386_register_byte ((reg))
+extern int i386_register_byte (int reg);
 
-/* Number of bytes of storage in the actual machine representation for
-   register N.  */
-#define REGISTER_RAW_SIZE(n) (i386_register_raw_size[(n)])
-extern int i386_register_raw_size[];
+/* Return the number of bytes of storage in GDB's register array
+   occupied by register REG.  */
+#define REGISTER_RAW_SIZE(reg) i386_register_raw_size ((reg))
+extern int i386_register_raw_size (int reg);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 #define MAX_REGISTER_RAW_SIZE 16
 
-/* Number of bytes of storage in the program's representation
-   for register N. */
-#define REGISTER_VIRTUAL_SIZE(n) (i386_register_virtual_size[(n)])
-extern int i386_register_virtual_size[];
+/* Return the size in bytes of the virtual type of register REG.  */
+#define REGISTER_VIRTUAL_SIZE(reg) i386_register_virtual_size ((reg))
+extern int i386_register_virtual_size (int reg);
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 #define MAX_REGISTER_VIRTUAL_SIZE 16

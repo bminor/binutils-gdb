@@ -54,14 +54,14 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
-/* i386_register_byte[i] is the offset into the register file of the
+/* i386_register_offset[i] is the offset into the register file of the
    start of register number i.  We initialize this from
-   i386_register_raw_size.  */
-int i386_register_byte[MAX_NUM_REGS];
+   i386_register_size.  */
+static int i386_register_offset[MAX_NUM_REGS];
 
-/* i386_register_raw_size[i] is the number of bytes of storage in
-   GDB's register array occupied by register i.  */
-int i386_register_raw_size[MAX_NUM_REGS] = {
+/* i386_register_size[i] is the number of bytes of storage in GDB's
+   register array occupied by register i.  */
+static int i386_register_size[MAX_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
    4,  4,  4,  4,
@@ -75,10 +75,6 @@ int i386_register_raw_size[MAX_NUM_REGS] = {
    4
 };
 
-/* i386_register_virtual_size[i] is the size in bytes of the virtual
-   type of register i.  */
-int i386_register_virtual_size[MAX_NUM_REGS];
-
 /* Return the name of register REG.  */
 
 char *
@@ -90,6 +86,31 @@ i386_register_name (int reg)
     return NULL;
 
   return i386_register_names[reg];
+}
+
+/* Return the offset into the register array of the start of register
+   number REG.  */
+int
+i386_register_byte (int reg)
+{
+  return i386_register_offset[reg];
+}
+
+/* Return the number of bytes of storage in GDB's register array
+   occupied by register REG.  */
+
+int
+i386_register_raw_size (int reg)
+{
+  return i386_register_size[reg];
+}
+
+/* Return the size in bytes of the virtual type of register REG.  */
+
+int
+i386_register_virtual_size (int reg)
+{
+  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg));
 }
 
 /* Convert stabs register number REG to the appropriate register
@@ -1215,17 +1236,9 @@ _initialize_i386_tdep (void)
     offset = 0;
     for (i = 0; i < MAX_NUM_REGS; i++)
       {
-	i386_register_byte[i] = offset;
-	offset += i386_register_raw_size[i];
+	i386_register_offset[i] = offset;
+	offset += i386_register_size[i];
       }
-  }
-
-  /* Initialize the table of virtual register sizes.  */
-  {
-    int i;
-
-    for (i = 0; i < MAX_NUM_REGS; i++)
-      i386_register_virtual_size[i] = TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
   }
 
   tm_print_insn = gdb_print_insn_i386;
