@@ -4144,7 +4144,7 @@ encode_operand (insn, type, operand)
 	}
       return 1;
     case OP_RND:
-      /* Make sure this agrees with with the OP_DST operand.  */
+      /* Make sure this agrees with the OP_DST operand.  */
       if (!((TOUPPER (operand->buf[0]) == 'B') ^
 	    ((insn->opcode[0].word & (1 << 8)) != 0)))
 	{

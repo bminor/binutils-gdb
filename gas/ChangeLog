@@ -1,3 +1,8 @@
+2002-12-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/as.texinfo (Invoking): Typo fix.
+	* config/tc-tic54x.c (encode_operand): Comment typo fix.
+
 2002-12-18  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* doc/c-alpha.texi: Fix typos.
