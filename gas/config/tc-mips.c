@@ -7396,6 +7396,21 @@ mips16_ip (str, ip)
 	      }
 	    continue;
 
+	    case 'e':		/* extend code */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned long) imm_expr.X_add_number > 0x7ff)
+		{
+		  as_warn ("Invalid value for `%s' (%lu)",
+			   ip->insn_mo->name,
+			   (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= 0x7ff;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
 	    default:
 	      internalError ();
 	    }
