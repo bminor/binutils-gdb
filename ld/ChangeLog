@@ -1,3 +1,8 @@
+Wed Sep  3 15:12:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (wild_doit): Clear SEC_HAS_CONTENTS from a
+	noload_section.
+
 Fri Aug 29 00:32:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (ld_new_DEPENDENCIES): Remove @LEXLIB@.

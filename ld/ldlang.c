@@ -845,7 +845,7 @@ wild_doit (ptr, section, output, file)
 	  output->bfd_section->flags &= ~SEC_ALLOC;
 	  break;
 	case noload_section:
-	  output->bfd_section->flags &= ~SEC_LOAD;
+	  output->bfd_section->flags &= ~ (SEC_LOAD | SEC_HAS_CONTENTS);
 	  output->bfd_section->flags |= SEC_NEVER_LOAD;
 	  break;
 	}
