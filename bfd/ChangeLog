@@ -1,3 +1,8 @@
+2001-02-14  H.J. Lu  <hjl@gnu.org>
+
+	* libcoff-in.h (pe_tdata): Add members target_subsystem and
+	force_minimum_alignment.
+
 2001-02-14  Bo Thorsen  <bo@suse.de>
 
 	* elf64-x86-64.c: Small formatting fixes and rearrangements of code.
