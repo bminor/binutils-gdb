@@ -1,3 +1,7 @@
+Wed Jul 28 03:58:58 1993  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symmisc.c (dump_msymbols):  Handle new mst_file_* types.
+
 Tue Jul 27 12:07:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c: Remove old comment about download not implemented.
