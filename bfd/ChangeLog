@@ -1,3 +1,7 @@
+Wed Nov 11 23:57:55 1992  Brendan Kehoe  (brendan@cygnus.com)
+
+	* we32k.mt (TDEFAULTS): Use we32kcoff_vec, not i386coff_vec.
+
 Tue Nov 10 14:04:38 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: minor tweaks to make $(CC) command lines more consistent
