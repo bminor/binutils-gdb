@@ -39,6 +39,12 @@ complete, hitting Control-C does not have the expected effect.
 The command execution is not aborted, and the "QUIT" message confirming
 the abortion is displayed only after the command has been completed.
 
+mips-irix broken:
+
+Due to problems with both BFD (sections not being correctly
+recognized) and GDB (backtraces failing), GDB 6.2 does not work on
+MIPS IRIX.
+
 *** C++ support
 
 gdb/931: GDB could be more generous when reading types C++ templates on input
