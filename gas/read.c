@@ -214,6 +214,7 @@ static int dwarf_file_string;
 static void do_align (int, char *, int, int);
 static void s_align (int, int);
 static void s_altmacro (int);
+static void s_bad_end (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
@@ -298,7 +299,8 @@ static const pseudo_typeS potable[] = {
   {"endc", s_endif, 0},
   {"endfunc", s_func, 1},
   {"endif", s_endif, 0},
-  {"endr", s_bad_endr, 0},
+  {"endm", s_bad_end, 0},
+  {"endr", s_bad_end, 1},
 /* endef  */
   {"equ", s_set, 0},
   {"equiv", s_set, 1},
@@ -2659,12 +2661,14 @@ s_purgem (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Handle the .rept pseudo-op.  */
+/* Handle the .endm/.endr pseudo-ops.  */
 
-void
-s_bad_endr (int ignore ATTRIBUTE_UNUSED)
+static void
+s_bad_end (int endr)
 {
-  as_warn (_(".endr encountered without preceeding .rept, .irc, or .irp"));
+  as_warn (_(".end%c encountered without preceeding %s"),
+	   endr ? 'r' : 'm',
+	   endr ? ".rept, .irp, or .irpc" : ".macro");
   demand_empty_rest_of_line ();
 }
 

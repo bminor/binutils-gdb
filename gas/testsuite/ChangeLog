@@ -1,5 +1,13 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/macros/badarg.[ls]: New.
+	* gas/macros/end.[ls]: New.
+	* gas/macros/redef.[ls]: New.
+	* gas/macros/macros.exp (run_list_test): Copy from elsewhere.
+	Run new tests.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/operands.[ls]: New.
 	* gas/ia64/ia64.exp: Run new test.
 

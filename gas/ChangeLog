@@ -1,5 +1,17 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* macro.c (do_formals): Adjust to no longer accept empty parameter
+	names.
+	(define_macro): Adjust to no longer accept empty macro name, garbage
+	following the parameters, or macros that were previously defined.
+	* read.c (s_bad_end): Declare.
+	(potable): Add endm. Handler for endr and endm is s_bad_end.
+	(s_bad_end): Rename from s_bad_endr. Adjust to handle both .endm
+	and .endr.
+	* read.h (s_bad_endr): Remove.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (parse_operands): Parse all specified operands,
 	immediately discarding (but counting) those exceeding the maximum
 	possible amount. Track whether output and input operand counts ever

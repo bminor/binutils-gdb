@@ -435,9 +435,11 @@ do_formals (macro_entry *macro, int idx, sb *in)
 
   macro->formal_count = 0;
   macro->formal_hash = hash_new ();
+  idx = sb_skip_white (idx, in);
   while (idx < in->len)
     {
       formal_entry *formal;
+      int cidx;
 
       formal = (formal_entry *) xmalloc (sizeof (formal_entry));
 
@@ -445,27 +447,33 @@ do_formals (macro_entry *macro, int idx, sb *in)
       sb_new (&formal->def);
       sb_new (&formal->actual);
 
-      idx = sb_skip_white (idx, in);
       idx = get_token (idx, in, &formal->name);
       if (formal->name.len == 0)
-	break;
-      idx = sb_skip_white (idx, in);
-      if (formal->name.len)
 	{
-	  /* This is a formal.  */
-	  if (idx < in->len && in->ptr[idx] == '=')
-	    {
-	      /* Got a default.  */
-	      idx = get_any_string (idx + 1, in, &formal->def, 1, 0);
-	    }
+	  if (macro->formal_count)
+	    --idx;
+	  break;
+	}
+      idx = sb_skip_white (idx, in);
+      /* This is a formal.  */
+      if (idx < in->len && in->ptr[idx] == '=')
+	{
+	  /* Got a default.  */
+	  idx = get_any_string (idx + 1, in, &formal->def, 1, 0);
+	  idx = sb_skip_white (idx, in);
 	}
 
       /* Add to macro's hash table.  */
       hash_jam (macro->formal_hash, sb_terminate (&formal->name), formal);
 
-      formal->index = macro->formal_count;
+      formal->index = macro->formal_count++;
+      cidx = idx;
       idx = sb_skip_comma (idx, in);
-      macro->formal_count++;
+      if (idx != cidx && idx >= in->len)
+	{
+	  idx = cidx;
+	  break;
+	}
       *p = formal;
       p = &formal->next;
       *p = NULL;
@@ -533,8 +541,9 @@ define_macro (int idx, sb *in, sb *label,
 	{
 	  /* It's the label: MACRO (formals,...)  sort  */
 	  idx = do_formals (macro, idx + 1, in);
-	  if (in->ptr[idx] != ')')
+	  if (idx >= in->len || in->ptr[idx] != ')')
 	    return _("missing ) after formals");
+	  idx = sb_skip_white (idx + 1, in);
 	}
       else
 	{
@@ -544,15 +553,27 @@ define_macro (int idx, sb *in, sb *label,
     }
   else
     {
+      int cidx;
+
       idx = get_token (idx, in, &name);
-      idx = sb_skip_comma (idx, in);
-      idx = do_formals (macro, idx, in);
+      if (name.len == 0)
+	return _("Missing macro name");
+      cidx = sb_skip_white (idx, in);
+      idx = sb_skip_comma (cidx, in);
+      if (idx == cidx || idx < in->len)
+	idx = do_formals (macro, idx, in);
+      else
+	idx = cidx;
     }
+  if (idx < in->len)
+    return _("Bad macro parameter list");
 
   /* And stick it in the macro hash table.  */
   for (idx = 0; idx < name.len; idx++)
     name.ptr[idx] = TOLOWER (name.ptr[idx]);
   namestr = sb_terminate (&name);
+  if (hash_find (macro_hash, namestr))
+    return _("Macro with this name was already defined");
   hash_jam (macro_hash, namestr, (PTR) macro);
 
   macro_defined = 1;
