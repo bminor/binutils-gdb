@@ -1,3 +1,7 @@
+2001-04-06  Andreas Jaeger  <aj@suse.de>
+
+	* i386-dis.c: Add ffreep instruction.
+
 2001-03-30  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ppc-opc.c (insert_mbe): Shift mask initializer as long.
@@ -66,7 +70,7 @@
 
 	* s390-opc.c: Add new opcodes.  Smooth out formatting.
 	* s390-opc.txt: Add new opcodes.
-	
+
 2001-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn_thumb): Compute destination address
@@ -118,7 +122,7 @@
 	* ia64-opc-d.c (ia64_opcodes_d): Break the "add" pattern into two
 	separate variants: one for IMM22 and the other for IMM14.
 	* ia64-asmtab.c: Regenerate.
-	
+
 2001-02-21  Greg McGary  <greg@mcgary.org>
 
 	* cgen-opc.c (cgen_get_insn_value): Add missing `return'.
@@ -181,7 +185,7 @@ Mon Feb 12 17:41:26 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 2001-02-02  Patrick Macdonald  <patrickm@redhat.com>
 
-	* fr30-desc.h: Regenerate with CGEN_MAX_SYNTAX_ELEMENTS. 
+	* fr30-desc.h: Regenerate with CGEN_MAX_SYNTAX_ELEMENTS.
 	* m32r-desc.h: Regenerate.
 
 Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
@@ -372,7 +376,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
         Delete "sel" code operands from mfc1 and mtc1.
         Add MIPS64 opcode changes (dclo, dclz), and "sel" code variants
 	for dm[ft]c[023].
-	
+
 2000-12-03  Ed Satterthwaite  ehs@sibyte.com  and
             Chris Demetriou   cgd@sibyte.com
 
@@ -399,7 +403,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
         "mfc2," "mfc3," "mtc1," "mtc2," and "mtc3" for MIPS32.  Update
         MIPS32 "sdbbp" to use 'B' operand specifier.  Add MIPS32
         "wait" variant which uses 'J' operand specifier.
-        
+
         * mips-dis.c (set_mips_isa_type): Update to use
         CPU_UNKNOWN and ISA_* constants.  Add bfd_mach_mips32 case.
         Replace bfd_mach_mips4K with bfd_mach_mips32_4k case.
@@ -472,7 +476,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* ia64-ic.tbl: Update from Intel.
 	* ia64-asmtab.c: Regenerate.
-	
+
 2000-10-04  Kazu Hirata  <kazu@hxi.com>
 
 	* ia64-gen.c: Convert C++-style comments to C-style comments.
@@ -505,28 +509,28 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* ia64-asmtab.c: Regnerate.
 
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
-	
- 	* mips-opc.c (mips_builtin_opcodes): Support cache instruction on 4K cores.
- 	Add mfc0 and mtc0 with sub-selection values.
+
+	* mips-opc.c (mips_builtin_opcodes): Support cache instruction on 4K cores.
+	Add mfc0 and mtc0 with sub-selection values.
 	Add clo and clz opcodes.
- 	Add msub and msubu instructions for MIPS32.
- 	Add madd/maddu aliases for mad/madu for MIPS32.
- 	Support wait, deret, eret, movn, pref for MIPS32.
+	Add msub and msubu instructions for MIPS32.
+	Add madd/maddu aliases for mad/madu for MIPS32.
+	Support wait, deret, eret, movn, pref for MIPS32.
 	Support tlbp, tlbr, tlbwi, tlbwr.
- 	(P4): New define.
- 
- 	* mips-dis.c (print_insn_arg): Print sdbbp 'm' args.
- 	(print_insn_arg): Handle 'H' args.
- 	(set_mips_isa_type): Recognize 4K.
+	(P4): New define.
+
+	* mips-dis.c (print_insn_arg): Print sdbbp 'm' args.
+	(print_insn_arg): Handle 'H' args.
+	(set_mips_isa_type): Recognize 4K.
 	Use CPU_* defines instead of hardcoded numbers.
 
 2000-09-11  Catherine Moore <clm@redhat.com>
 
 	* d30v-opc.c (d30v_operand_t): New operand type Rb2.
 	(d30v_format_tab): Use Rb2 for modinc and moddec.
- 
+
 2000-09-07  Catherine Moore  <clm@redhat.com>
- 
+
         * d30v-opc.c (d30v_format_tab): Use format Ra for
         modinc and moddec.
 
@@ -538,7 +542,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* configure: Regenerate.
 	* po/opcodes.pot: Regenerate.
-	
+
 2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
 
 	* acinclude.m4: Include libtool and gettext macros from the
@@ -637,7 +641,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* cgen.sh: Likewise.
 
 2000-08-02  Jim Wilson  <wilson@redhat.com>
-	
+
 	* ia64-dis.c (print_insn_ia64): Call ia64_free_opcode at end.
 
 2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
@@ -773,13 +777,13 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
 
 	* Makefile.in, configure: regenerate
-	* disassemble.c (disassembler): Recognize ARCH_m68hc12, 
+	* disassemble.c (disassembler): Recognize ARCH_m68hc12,
 	ARCH_m68hc11.
-	* m68hc11-dis.c (read_memory, print_insn, print_insn_m68hc12): 
+	* m68hc11-dis.c (read_memory, print_insn, print_insn_m68hc12):
 	New functions.
 	* configure.in: Recognize m68hc12 and m68hc11.
 	* m68hc11-dis.c, m68hc11-opc.c: New files for support of m68hc1x
-	* Makefile.am (CFILES, ALL_MACHINES): New files for disassembly 
+	* Makefile.am (CFILES, ALL_MACHINES): New files for disassembly
 	and opcode generation for m68hc11 and m68hc12.
 
 2000-06-16  Nick Duffek  <nsd@redhat.com>

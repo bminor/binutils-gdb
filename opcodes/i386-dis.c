@@ -1927,8 +1927,8 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "femms" , XX, XX, XX},
   { "", MX, EM, OPSUF }, /* See OP_3DNowSuffix */
   /* 10 */
-  { PREGRP8 },                                              
-  { PREGRP9 },                                                               
+  { PREGRP8 },
+  { PREGRP9 },
   { "movlpX", XM, EX, SIMD_Fixup, 'h' },  /* really only 2 operands */
   { "movlpX", EX, XM, SIMD_Fixup, 'h' },
   { "unpcklpX", XM, EX, XX },
@@ -2296,7 +2296,7 @@ static const char *names8[] = {
   "%al","%cl","%dl","%bl","%ah","%ch","%dh","%bh",
 };
 static const char *names8rex[] = {
-  "%al","%cl","%dl","%bl","%spl", "%bpl", "%sil", "%dil", 
+  "%al","%cl","%dl","%bl","%spl", "%bpl", "%sil", "%dil",
   "%r8b", "%r9b", "%r10b", "%r11b", "%r12b", "%r13b", "%r14b", "%r15b"
 };
 static const char *names_seg[] = {
@@ -3170,7 +3170,7 @@ print_insn_i386 (pc, info)
 			used_prefixes |= (prefixes & PREFIX_REPNZ);
 			if (prefixes & PREFIX_REPNZ)
 			  index = 3;
-			
+
 		      }
 		  }
 		dp = &prefix_user_table[dp->bytemode1][index];
@@ -3540,7 +3540,7 @@ static const struct dis386 float_reg[][8] = {
   },
   /* df */
   {
-    { "(bad)",	XX, XX, XX },
+    { "ffreep",	STi, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
@@ -3760,7 +3760,7 @@ putop (template, sizeflag)
 	      USED_REX (REX_MODE64);
 	      if (rex & REX_MODE64)
 		*obufp++ = 'q';
-	      else 
+	      else
 		{
 		   if (sizeflag & DFLAG)
 		      *obufp++ = 'l';
