@@ -1,3 +1,17 @@
+Mon Mar  3 20:36:47 2003  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config/tc-sh.c (sh_dsp): Replace with preset_target_arch.
+	(md_begin): Use preset_target_arch.
+	(md_longopts): Make isa option unconditional.
+	(md_parse_option): Make OPTION_DSP and OPTION_ISA sh4 / any
+	set preset_target_arch.
+	(md_apply_fix3): If BFD_ASSEMBLER, adjust SWITCH_TABLE fixups
+	by -S_GET_VALUE  (fixP->fx_subsy).
+	(tc_gen_reloc): For SWITCH_TABLE fixups, the symbol is fixp->fx_subsy,
+	and the addend is 0.
+	Adjust addend of R_SH_IND12W relocations by fixp->fx_offset - 4.
+	* config/tc-sh.h (TC_FORCE_RELOCATION_SUB_LOCAL): Define.
+
 2003-03-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (append_insn): Add handling of

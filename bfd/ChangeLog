@@ -1,3 +1,16 @@
+Mon Mar  3 20:48:23 2003  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* elf32-sh.c (sh_elf_howto_tab): Make R_SH_IND12W into an ordinary
+	relocation (no special function), and make it non-partial_inplace.
+	(sh_elf_relax_section): When creating a bsr, use a consistent value
+	no matter if the symbol is extern or not;  set addend to -4.
+	Don't swap load / non-load instructions for SH4.
+	(sh_elf_relax_delete_bytes): In R_SH_IND12W case, check the offset
+	rather than if the symbol is external to determine if adjusting the
+	offset makes sense.  Adjust the addend too if appropriate.
+	(sh_elf_relocate_section): In R_SH_IND12W, don't fiddle with the
+	relocation.
+
 2003-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Installed latest translation.

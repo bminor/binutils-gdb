@@ -235,6 +235,8 @@ extern bfd_boolean sh_fix_adjustable PARAMS ((struct fix *));
    || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC		\
    || TC_FORCE_RELOCATION (FIX))
 
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX) (sh_relax && SWITCH_TABLE (FIX))
+
 /* This keeps the subtracted symbol around, for use by PLT_PCREL
    relocs.  */
 #define TC_FORCE_RELOCATION_SUB_ABS(FIX)		\

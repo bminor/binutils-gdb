@@ -163,9 +163,9 @@ int sh_relax;		/* set if -relax seen */
 
 int sh_small;
 
-/* Whether -dsp was seen.  */
+/* preset architecture set, if given; zero otherwise.  */
 
-static int sh_dsp;
+static int preset_target_arch;
 
 /* The bit mask of architectures that could
    accomodate the insns seen so far.  */
@@ -867,7 +867,8 @@ md_begin ()
   char *prev_name = "";
   int target_arch;
 
-  target_arch = arch_sh1_up & ~(sh_dsp ? arch_sh3e_up : arch_sh_dsp_up);
+  target_arch
+    = preset_target_arch ? preset_target_arch : arch_sh1_up & ~arch_sh_dsp_up;
   valid_arch = target_arch;
 
 #ifdef HAVE_SH64
@@ -2593,20 +2594,20 @@ struct option md_longopts[] =
 #define OPTION_LITTLE (OPTION_BIG + 1)
 #define OPTION_SMALL (OPTION_LITTLE + 1)
 #define OPTION_DSP (OPTION_SMALL + 1)
+#define OPTION_ISA                    (OPTION_DSP + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
   {"little", no_argument, NULL, OPTION_LITTLE},
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
+  {"isa",                    required_argument, NULL, OPTION_ISA},
 #ifdef HAVE_SH64
-#define OPTION_ISA                    (OPTION_DSP + 1)
 #define OPTION_ABI                    (OPTION_ISA + 1)
 #define OPTION_NO_MIX                 (OPTION_ABI + 1)
 #define OPTION_SHCOMPACT_CONST_CRANGE (OPTION_NO_MIX + 1)
 #define OPTION_NO_EXPAND              (OPTION_SHCOMPACT_CONST_CRANGE + 1)
 #define OPTION_PT32                   (OPTION_NO_EXPAND + 1)
-  {"isa",                    required_argument, NULL, OPTION_ISA},
   {"abi",                    required_argument, NULL, OPTION_ABI},
   {"no-mix",                 no_argument, NULL, OPTION_NO_MIX},
   {"shcompact-const-crange", no_argument, NULL, OPTION_SHCOMPACT_CONST_CRANGE},
@@ -2642,12 +2643,16 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_DSP:
-      sh_dsp = 1;
+      preset_target_arch = arch_sh1_up & ~arch_sh3e_up;
       break;
 
-#ifdef HAVE_SH64
     case OPTION_ISA:
-      if (strcasecmp (arg, "shmedia") == 0)
+      if (strcasecmp (arg, "sh4") == 0)
+	preset_target_arch = arch_sh4;
+      else if (strcasecmp (arg, "any") == 0)
+	preset_target_arch = arch_sh1_up;
+#ifdef HAVE_SH64
+      else if (strcasecmp (arg, "shmedia") == 0)
 	{
 	  if (sh64_isa_mode == sh64_isa_shcompact)
 	    as_bad (_("Invalid combination: --isa=SHcompact with --isa=SHmedia"));
@@ -2661,10 +2666,12 @@ md_parse_option (c, arg)
 	    as_bad (_("Invalid combination: --abi=64 with --isa=SHcompact"));
 	  sh64_isa_mode = sh64_isa_shcompact;
 	}
+#endif /* HAVE_SH64 */
       else
 	as_bad ("Invalid argument to --isa option: %s", arg);
       break;
 
+#ifdef HAVE_SH64
     case OPTION_ABI:
       if (strcmp (arg, "32") == 0)
 	{
@@ -3381,7 +3388,10 @@ md_apply_fix3 (fixP, valP, seg)
     val -= S_GET_VALUE  (fixP->fx_addsy);
 #endif
 
-#ifndef BFD_ASSEMBLER
+#ifdef BFD_ASSEMBLER
+  if (SWITCH_TABLE (fixP))
+    val -= S_GET_VALUE  (fixP->fx_subsy);
+#else
   if (fixP->fx_r_type == 0)
     {
       if (fixP->fx_size == 2)
@@ -3902,7 +3912,8 @@ tc_gen_reloc (section, fixp)
 
   if (SWITCH_TABLE (fixp))
     {
-      rel->addend = rel->address - S_GET_VALUE (fixp->fx_subsy);
+      *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
+      rel->addend = 0;
       if (r_type == BFD_RELOC_16)
 	r_type = BFD_RELOC_SH_SWITCH16;
       else if (r_type == BFD_RELOC_8)
@@ -3941,6 +3952,8 @@ tc_gen_reloc (section, fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
+  if (rel->howto->type == R_SH_IND12W)
+      rel->addend += fixp->fx_offset - 4;
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
