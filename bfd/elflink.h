@@ -4016,12 +4016,27 @@ elf_bfd_final_link (abfd, info)
 		= elf_section_data (o);
 	      struct bfd_elf_section_data *esdo 
 		= elf_section_data (output_section);
+	      unsigned int *rel_count;
+	      unsigned int *rel_count2;
 
-	      esdo->rel_count += (esdi->rel_hdr.sh_size 
-				  / esdi->rel_hdr.sh_entsize);
+	      /* We must be careful to add the relocation froms the
+		 input section to the right output count.  */
+	      if (esdi->rel_hdr.sh_entsize == esdo->rel_hdr.sh_entsize)
+		{
+		  rel_count = &esdo->rel_count;
+		  rel_count2 = &esdo->rel_count2;
+		}
+	      else
+		{
+		  rel_count = &esdo->rel_count2;
+		  rel_count2 = &esdo->rel_count;
+		}
+	      
+	      *rel_count += (esdi->rel_hdr.sh_size 
+			     / esdi->rel_hdr.sh_entsize);
 	      if (esdi->rel_hdr2)
-		esdo->rel_count2 += (esdi->rel_hdr2->sh_size 
-				     / esdi->rel_hdr2->sh_entsize);
+		*rel_count2 += (esdi->rel_hdr2->sh_size 
+				/ esdi->rel_hdr2->sh_entsize);
 	    }
 	}
 

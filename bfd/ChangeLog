@@ -1,3 +1,7 @@
+Tue Aug 10 00:21:08 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* elflink.h (elf_bfd_final_link): Tweak last change.
+
 1999-08-09  Mark Mitchell  <mark@codesourcery.com>
 
 	* elflink.h (elf_link_size_reloc_section): Use the counts in the
