@@ -1,3 +1,13 @@
+2004-01-06  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* disasm.c: Update copyright to include 2004.
+	(do_mixed_source_and_assembly): For uiout asm list
+	and tuple cleanups, initialize to null_cleanup instead of
+	NULL and do so prior to loop.  Only reset when we close off 
+	the tuple/list.  Move check for whether to close off the
+	asm tuple/list to after dump_insns call where it will be run 
+	on each loop iteration.
+
 2004-01-05  Andrew Cagney  <cagney@redhat.com>
 
 	* ser-unix.c (ser_unix_async): Fix tipo, "NOTHING_SECHEDULED"
