@@ -1,3 +1,8 @@
+Mon Jan 31 15:40:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/help.exp: Comment out "help support" test just like
+	(and for same reason as) "help set" test.
+
 Mon Jan 31 06:43:45 1994  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t06/break.exp:  Remove setup_xfails for
