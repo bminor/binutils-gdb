@@ -1,3 +1,15 @@
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
+        * buildsym.h (pop_context): Convert to function, defined in
+	buildsym.c.
+	* buildsym.c: Include gdb_assert.h.
+	(pop_context): Implement as C function.  Add check for stack
+	underflow.
+        * dbxread.c (process_one_symbol): Complain and stop processing
+	that symbol if we are already at the top of the context stack for
+	a function-end N_FUN (this would imply an umatched RBRAC).  Ditto
+	when processing N_RBRAC.
+
 2002-11-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/pa/nm-hppah.h (CHILD_POST_FOLLOW_INFERIOR_BY_CLONE): Don't

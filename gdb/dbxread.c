@@ -2774,6 +2774,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	{
 	  /* This N_FUN marks the end of a function.  This closes off the
 	     current block.  */
+
+ 	  if (context_stack_depth <= 0)
+ 	    {
+ 	      complain (&lbrac_mismatch_complaint, symnum);
+ 	      break;
+ 	    }
+
 	  record_line (current_subfile, 0, function_start_offset + valu);
 	  within_function = 0;
 	  new = pop_context ();
@@ -2842,6 +2849,12 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	/* On most machines, the block addresses are relative to the
 	   N_SO, the linker did not relocate them (sigh).  */
 	valu += last_source_start_addr;
+
+      if (context_stack_depth <= 0)
+	{
+	  complain (&lbrac_mismatch_complaint, symnum);
+	  break;
+	}
 
       new = pop_context ();
       if (desc != new->depth)

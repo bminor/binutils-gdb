@@ -173,12 +173,6 @@ EXTERN int context_stack_depth;
 
 EXTERN int context_stack_size;
 
-/* Macro "function" for popping contexts from the stack.  Pushing is
-   done by a real function, push_context.  This returns a pointer to a
-   struct context_stack.  */
-
-#define	pop_context() (&context_stack[--context_stack_depth]);
-
 /* Non-zero if the context stack is empty.  */
 #define outermost_context_p() (context_stack_depth == 0)
 
@@ -271,6 +265,8 @@ extern void buildsym_new_init (void);
 extern void buildsym_init (void);
 
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
+
+extern struct context_stack *pop_context (void);
 
 extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 

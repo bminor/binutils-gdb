@@ -33,6 +33,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
+#include "gdb_assert.h"
 #include "complaints.h"
 #include "gdb_string.h"
 #include "expression.h"		/* For "enum exp_opcode" used by... */
@@ -1100,6 +1101,14 @@ push_context (int desc, CORE_ADDR valu)
 
   return new;
 }
+
+struct context_stack *
+pop_context (void)
+{
+  gdb_assert (context_stack_depth > 0);
+  return (&context_stack[--context_stack_depth]);
+}
+
 
 
 /* Compute a small integer hash code for the given name. */
