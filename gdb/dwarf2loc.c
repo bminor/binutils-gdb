@@ -205,7 +205,6 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 			  unsigned char *data, unsigned short size,
 			  struct objfile *objfile)
 {
-  CORE_ADDR result;
   struct value *retval;
   struct dwarf_expr_baton baton;
   struct dwarf_expr_context *ctx;
@@ -228,21 +227,23 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   ctx->get_tls_address = dwarf_expr_tls_address;
 
   dwarf_expr_eval (ctx, data, size);
-  result = dwarf_expr_fetch (ctx, 0);
 
   if (ctx->in_reg)
     {
-      int regnum = DWARF2_REG_TO_REGNUM (result);
-      retval = value_from_register (SYMBOL_TYPE (var), regnum, frame);
+      CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
+      int gdb_regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
+      retval = value_from_register (SYMBOL_TYPE (var), gdb_regnum, frame);
     }
   else
     {
+      CORE_ADDR address = dwarf_expr_fetch (ctx, 0);
+
       retval = allocate_value (SYMBOL_TYPE (var));
       VALUE_BFD_SECTION (retval) = SYMBOL_BFD_SECTION (var);
 
       VALUE_LVAL (retval) = lval_memory;
       VALUE_LAZY (retval) = 1;
-      VALUE_ADDRESS (retval) = result;
+      VALUE_ADDRESS (retval) = address;
     }
 
   free_dwarf_expr_context (ctx);

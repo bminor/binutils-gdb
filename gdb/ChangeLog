@@ -1,3 +1,9 @@
+2004-08-24  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Wait to fetch the top of
+	the stack until we've decided what sort of result the evaluation
+	has produced.  Use separate variables, with more specific names.
+
 2004-08-23  Richard Earnshaw  <rearnsha@arm.com>
 
 	* armnbsd-tdep.c (arm_nbsd_arm_be_breakpoint): Define.
