@@ -27,10 +27,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#define USE_STDARG 1
 #else
 #include <varargs.h>
-#define USE_STDARG 0
 #endif
 
 #include "ld.h"
@@ -412,51 +410,25 @@ vfinfo (fp, fmt, arg)
    would hosed by LynxOS, which defines that name in its libc.)  */
 
 void
-#if USE_STDARG
-info_msg (const char *fmt, ...)
-#else
-info_msg (va_alist)
-     va_dcl
-#endif
+info_msg VPARAMS ((const char *fmt, ...))
 {
-  va_list arg;
-
-#if ! USE_STDARG
-  const char *fmt;
-
-  va_start (arg);
-  fmt = va_arg (arg, const char *);
-#else
-  va_start (arg, fmt);
-#endif
+  VA_OPEN (arg, fmt);
+  VA_FIXEDARG (arg, const char *, fmt);
 
   vfinfo (stdout, fmt, arg);
-  va_end (arg);
+  VA_CLOSE (arg);
 }
 
 /* ('e' for error.) Format info message and print on stderr.  */
 
 void
-#if USE_STDARG
-einfo (const char *fmt, ...)
-#else
-einfo (va_alist)
-     va_dcl
-#endif
+einfo VPARAMS ((const char *fmt, ...))
 {
-  va_list arg;
-
-#if ! USE_STDARG
-  const char *fmt;
-
-  va_start (arg);
-  fmt = va_arg (arg, const char *);
-#else
-  va_start (arg, fmt);
-#endif
+  VA_OPEN (arg, fmt);
+  VA_FIXEDARG (arg, const char *, fmt);
 
   vfinfo (stderr, fmt, arg);
-  va_end (arg);
+  VA_CLOSE (arg);
 }
 
 void
@@ -470,50 +442,24 @@ info_assert (file, line)
 /* ('m' for map) Format info message and print on map.  */
 
 void
-#if USE_STDARG
-minfo (const char *fmt, ...)
-#else
-minfo (va_alist)
-     va_dcl
-#endif
+minfo VPARAMS ((const char *fmt, ...))
 {
-  va_list arg;
-
-#if ! USE_STDARG
-  const char *fmt;
-  va_start (arg);
-  fmt = va_arg (arg, const char *);
-#else
-  va_start (arg, fmt);
-#endif
+  VA_OPEN (arg, fmt);
+  VA_FIXEDARG (arg, const char *, fmt);
 
   vfinfo (config.map_file, fmt, arg);
-  va_end (arg);
+  VA_CLOSE (arg);
 }
 
 void
-#if USE_STDARG
-lfinfo (FILE *file, const char *fmt, ...)
-#else
-lfinfo (va_alist)
-     va_dcl
-#endif
+lfinfo VPARAMS ((FILE *file, const char *fmt, ...))
 {
-  va_list arg;
-
-#if ! USE_STDARG
-  FILE *file;
-  const char *fmt;
-
-  va_start (arg);
-  file = va_arg (arg, FILE *);
-  fmt = va_arg (arg, const char *);
-#else
-  va_start (arg, fmt);
-#endif
+  VA_OPEN (arg, fmt);
+  VA_FIXEDARG (arg, FILE *, file);
+  VA_FIXEDARG (arg, const char *, fmt);
 
   vfinfo (file, fmt, arg);
-  va_end (arg);
+  VA_CLOSE (arg);
 }
 
 /* Functions to print the link map.  */

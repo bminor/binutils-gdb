@@ -1,3 +1,14 @@
+2001-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmisc.c (USE_STDARG): Remove.
+	(info_msg): Define using VPARAMS, VA_OPEN, VA_FIXEDARG, VA_CLOSE.
+	(einfo): Likewise.
+	(minfo): Likewise.
+	(lfinfo): Likewise.
+
+	* ldmisc.h: Remove #ifdef ANSI_PROTOTYPES and non-ansi
+	declarations.  Update copyright.
+
 2001-09-24  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* pe-dll.c: Remove obsoleted declaration of
