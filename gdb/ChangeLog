@@ -1,3 +1,8 @@
+2002-03-27  Andreas Jaeger  <aj@suse.de>
+
+	* dwarf2cfi.c: Give credit to Daniel Berlin, reformat copyright
+	comment.
+
 2002-03-27  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.h (X86_64_NUM_REGS, X86_64_NUM_GREGS): Delete #defines.
@@ -15,7 +20,7 @@
 	dynamicaly during initialization.
 	* regformats/reg-x86-64.dat: Synced with changes to registers above.
 	* gdbserver/linux-x86-64-low.c: Ditto.
-	
+
 2002-03-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/server.c (main): Call target_signal_to_host_p
@@ -36,7 +41,7 @@
 
 	* signals.c: Moved to...
 	* signals/signals.c: Here.
-	* Makefile (signals.o): Update.   
+	* Makefile (signals.o): Update.
 
 2002-03-26  Jeff Law (law@redhat.com)
 
@@ -67,7 +72,7 @@
 	(MALLOCED_REPLACEMENT): Delete macro.
 	* Makefile.in (cli_decode_h): Add $(command_h).
 	(top.o, completer.o, maint.o): Add dependency on $(cli_decode_h).
-	* top.c: Include "cli/cli-decode.h".  
+	* top.c: Include "cli/cli-decode.h".
 	* completer.c: Include "cli/cli-decode.h".
 	* maint.c: Include "cli/cli-decode.h".
 	* cli/cli-decode.h: Include "command.h".
@@ -110,7 +115,7 @@
 2002-03-22  Elena Zannoni  <ezannoni@redhat.com>
 
         * ppc-linux-tdep.c (ppc_sysv_abi_use_struct_convention): New
-        function.  
+        function.
 	* ppc-tdep.h (ppc_sysv_abi_use_struct_convention): Export.
         * rs6000-tdep.c (rs6000_gdbarch_init): Use different
         structure returning convention for SYSV ABI case, but not
@@ -160,10 +165,10 @@
 	* gdbserver/remote-utils.c (remote_open): Don't call
 	getprotobyname, we're all using TCP here so just use
 	IPPROTO_TCP.
-	* gdbserver/gdbreplay.c (remote_open): Ditto.	
+	* gdbserver/gdbreplay.c (remote_open): Ditto.
 
 2002-03-20  Martin M. Hunt  <hunt@redhat.com>
-	
+
 	* regcache.c (_initialize_regcache): No need to call
 	build_regcache() at this time; it gets called whenever
 	the gdbarch changes.
@@ -323,7 +328,7 @@
 
 	* gdbserver/remote-util.c (remote_open): Print remote-side's
 	IP address when remote debugging over the network.
-		 
+
 2002-03-12  David O'Brien  <obrien@FreeBSD.org>
 
 	* config/sparc/fbsd.mh: Fix copyright.
@@ -343,7 +348,7 @@
 2002-03-10  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.h (sys/reg.h, x86_64_regmap): Moved to x86-64-linux-nat.c
-	* x86-64-linux-nat.c (sys/reg.h, x86_64_regmap): Moved here 
+	* x86-64-linux-nat.c (sys/reg.h, x86_64_regmap): Moved here
 	from x86-64-tdep.h
 
 2002-03-10  Daniel Jacobowitz  <drow@mvista.com>
@@ -567,7 +572,7 @@
 	* symfile.c (symfile_bfd_open): Ditto.
 	* solib.c (solib_map_sections): Ditto.
 	Fix PR gdb/354.
-	
+
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (_initialize_remote): By default, disable ``e'' and
@@ -657,7 +662,7 @@
 	* config/sparc/nm-linux.h, config/sparc/tm-linux.h: Ditto.
 	* config/sparc/tm-sp64linux.h, config/sparc/xm-linux.h: Ditto.
 	Fix PR gdb/378.
-	
+
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* lin-thread.c: Delete file.
@@ -694,7 +699,7 @@
         * config.in, configure: Regenerated.
         * utils.c: (gdb_realpath) If HAVE_CANONICALIZE_FILE_NAME is
 	defined use canonicalize_file_name.
-        
+
 2002-02-23  Michael Chastain  <mec@shout.net>
 
 	* MAINTAINERS: Remove Michael Chastain from "paper trail" list.
