@@ -386,6 +386,9 @@ gld${EMULATION_NAME}_search_needed (path, name, force)
   const char *s;
   size_t len;
 
+  if (name[0] == '/')
+    return gld${EMULATION_NAME}_try_needed (name, force);
+
   if (path == NULL || *path == '\0')
     return false;
   len = strlen (name);

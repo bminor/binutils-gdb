@@ -1,3 +1,8 @@
+2001-03-17  Ulrich Drepper  <drepper@redhat.com>
+
+	* emultmpl/elf32.em (gld${EMULATION_NAME}_search_needed): If NAME
+	is an absolute path look only for this file and not along the path.
+
 2001-03-16  Philip Blundell  <philb@gnu.org>
 
 	* configure: Regenerate.
