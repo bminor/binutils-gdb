@@ -1,3 +1,23 @@
+Sun Sep  8 14:04:37 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* erc32.c (port_init):  Disable this for __GO32__ (got no pty's
+	there either...).
+
+Mon Aug 12 17:04:58 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* erc32.c:  Don't include sys/ioctl.h or sys/file.h.  They aren't
+	necessary.
+	* (port_init):  Don't even *try* to open pty's under _WIN32.
+	* Use SIM_ADDR, not caddr_t for declaring vars that hold addresses.
+	* float.c:  Get rid of #warning.  Makes Microsoft C barf.
+	* interf.c (sim_open):  Cast fprintf to (fprintf_ftype) to fix
+	compiler warning.
+	* (sim_load sim_create_inferior sim_read):  Use prototypes only in
+	decls, not defs.
+	* Get rid of enum sim_stop.  It's defined in remote-sim.h.
+	* (sim_stop_reason):  Define SIGTRAP if _WIN32.
+	* sis.h:  Include ansidecl.h and remote-sim.h.
+
 Wed Jul  3 16:05:23 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* erc32.c (mec_reset mec_read mec_write memory_read memory_write),
