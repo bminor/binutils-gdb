@@ -1,3 +1,12 @@
+Thu Feb 17 15:51:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c, ldmain.c: Include libiberty.h.
+
+	* ldmisc.h (concat): Don't declare.
+	* ldmisc.c (concat): Don't define; just use the one in libiberty.
+
+	* ld.h (as_output_section_statement): Removed; not used.
+
 Thu Feb 17 09:32:14 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldlang.c, ldmain.c, ldmisc.c: Use bfd_get_error and

@@ -1,3 +1,22 @@
+Thu Feb 17 15:29:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coffgen.c (coff_write_linenumbers): Always return a value.
+
+	* elfcode.h (elf_slurp_symbol_table): Handle zero symbols
+	reasonably.  Allocate x_symp using alloca.
+
+	* elfcode.h (map_program_segments): ELF program header entries
+	must be sorted by load address.  This used to generate the entries
+	in reverse order.
+
+	* section.c (SEC_IN_MEMORY): Define.
+	(asection): Rename unused field otheruserdata to contents, and
+	make it char *.
+	(bfd_make_section_anyway): Initialize contents field to NULL.
+	(bfd_get_section_contents): If SEC_IN_MEMORY is set, get section
+	contents from contents field rather than from file.
+	* bfd-in2.h: Rebuilt.
+
 Thu Feb 17 08:30:53 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* bfd.c (bfd_get_error, bfd_set_error): New functions.
